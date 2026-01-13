@@ -25,7 +25,7 @@ namespace UI
 {
 
 // TODO Read values from the device and configuration
-static constexpr float SCALING_FACTOR = 4.0f;
+static constexpr float SCALING_FACTOR = 1.0f;
 static constexpr int DPI = 160.0f;
 static constexpr int BASELINE_DPI = 160;
 static constexpr float DPI_FACTOR = DPI / BASELINE_DPI;

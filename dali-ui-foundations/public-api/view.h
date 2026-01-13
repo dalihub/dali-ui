@@ -36,6 +36,78 @@ namespace Internal
 class View;
 }
 
+#ifndef DEFINE_BASE_CHAINING_METHOD
+#define DEFINE_BASE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg, Body) \
+  /** \
+   * @brief Sets the PropertyName. \
+   * @param[in] VArg The required value. \
+   * @return A reference to the instance itself for method chaining. \
+   */ \
+  ClassType& PropertyName(TArg VArg) \
+  { \
+    Body \
+    return static_cast<ClassType&>(*this); \
+  }
+
+#define DEFINE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg) \
+  DEFINE_BASE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg, Set##PropertyName(VArg);)
+#endif
+
+#ifndef DEFINE_CHAINING_METHOD_VIEW
+#define DEFINE_CHAINING_METHOD_VIEW(ClassType) \
+  DEFINE_CHAINING_METHOD(ClassType, SizeWidth, float, width) \
+  DEFINE_CHAINING_METHOD(ClassType, SizeHeight, float, height) \
+  DEFINE_CHAINING_METHOD(ClassType, PositionX, float, x) \
+  DEFINE_CHAINING_METHOD(ClassType, PositionY, float, y) \
+  DEFINE_CHAINING_METHOD(ClassType, BackgroundColor, const Vector4&, color) \
+  DEFINE_CHAINING_METHOD(ClassType, ParentOrigin, const Vector3&, point) \
+  DEFINE_CHAINING_METHOD(ClassType, PivotPoint, const Vector3&, point) \
+  /** \
+   * @brief Adds a list of children to this View in a declarative way. \
+   * This method allows for a hierarchical UI tree construction by passing \
+   * a brace-enclosed initializer list of View objects. \
+   * @param[in] children The initializer list containing child View handles to be added. \
+   * @return A reference to the instance itself for method chaining. \
+   */ \
+  ClassType& Contents(std::initializer_list<Actor> children) \
+  { \
+    for (const auto& child : children) \
+    { \
+      Add(child); \
+    } \
+    return static_cast<ClassType&>(*this); \
+  } \
+  \
+  /** \
+   * @brief Assigns this View instance to a target variable. \
+   * This method is useful for capturing a reference to a View created within \
+   * a declarative UI tree for later use. \
+   * @param[out] self The variable where this instance will be assigned. \
+   * @return A reference to the instance itself for method chaining. \
+   */ \
+  ClassType& As(ClassType& self) \
+  { \
+    self = static_cast<ClassType&>(*this); \
+    return static_cast<ClassType&>(*this); \
+  } \
+  \
+  /** \
+   * @brief Executesa custom action on this View instance. \
+   * Use this method to perform additional initialization or logic on a View \
+   * without breaking the declarative method chaining. \
+   * @param[in] action A function or lambda to be executed with this instance. \
+   * @return A reference to the instance itself for method chaining. \
+   */ \
+  ClassType& With(std::function<void(ClassType&)> action) \
+  { \
+    if (action) \
+    { \
+      action(*this); \
+    } \
+    return static_cast<ClassType&>(*this); \
+  }
+#endif
+
 /**
  * @brief View is a base UI component class that extends Control.
  *
@@ -43,18 +115,12 @@ class View;
  * for creating custom UI components. It inherits all the capabilities
  * of Control including styling, gesture detection, and keyboard navigation.
  *
- * @see Internal::View
  */
 class DALI_UI_FOUNDATIONS_API View : public Toolkit::Control
 {
 public:
 
   // Typedefs
-
-  /**
-   * @brief View signal type.
-   */
-  typedef Signal<void(View)> ViewSignalType;
 
 public: // Creation & Destruction
 
@@ -129,6 +195,40 @@ public: // Static Methods
 
 public: // API
 
+  /**
+   * @brief Gets the width of the View.
+   *
+   * @return The width of the View
+   */
+  float GetSizeWidth() const;
+
+  /**
+   * @brief Gets the height of the View.
+   *
+   * @return The height of the View
+   */
+  float GetSizeHeight() const;
+
+  /**
+   * @brief Gets the X position of the View.
+   *
+   * @return The X position of the View
+   */
+  float GetPositionX() const;
+
+  /**
+   * @brief Gets the Y position of the View.
+   *
+   * @return The Y position of the View
+   */
+  float GetPositionY() const;
+
+  Vector3 GetParentOrigin() const;
+
+  Vector3 GetPivotPoint() const;
+
+  DEFINE_CHAINING_METHOD_VIEW(View)
+
 public: // Signals
 
 public: // Not intended for application developers
@@ -147,6 +247,39 @@ public: // Not intended for application developers
    */
   explicit DALI_INTERNAL View(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+protected:
+  /**
+   * @brief Sets the width of the View.
+   *
+   * @param[in] width The width to set
+   */
+  void SetSizeWidth(float width);
+
+  /**
+   * @brief Sets the height of the View.
+   *
+   * @param[in] height The height to set
+   */
+  void SetSizeHeight(float height);
+
+  /**
+   * @brief Sets the X position of the View.
+   *
+   * @param[in] x The X position to set
+   */
+  void SetPositionX(float x);
+
+  /**
+   * @brief Sets the Y position of the View.
+   *
+   * @param[in] y The Y position to set
+   */
+  void SetPositionY(float y);
+
+  void SetParentOrigin(const Vector3& point);
+
+  void SetPivotPoint(const Vector3& point);
 };
 
 } // namespace UI

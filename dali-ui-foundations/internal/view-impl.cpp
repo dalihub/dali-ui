@@ -39,7 +39,7 @@ UI::View View::New()
   IntrusivePtr<Internal::View> impl = new Internal::View();
 
   // Pass ownership to CustomActor handle
-  UI::View handle(*impl);
+  UI::View handle = UI::View(*impl);
 
   // Second-phase initialization
   impl->Initialize();
@@ -60,12 +60,73 @@ void View::OnInitialize()
 {
   // Call base class initialization
   Toolkit::Internal::Control::OnInitialize();
+  Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
 }
 
 bool View::OnKeyEvent(const KeyEvent& event)
 {
   // Call base class implementation
   return Toolkit::Internal::Control::OnKeyEvent(event);
+}
+
+float View::GetSizeWidth() const
+{
+  return Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
+}
+
+void View::SetSizeWidth(float width)
+{
+  Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
+}
+
+float View::GetSizeHeight() const
+{
+  return Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+}
+
+void View::SetSizeHeight(float height)
+{
+  Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
+}
+
+float View::GetPositionX() const
+{
+  return Self().GetProperty<float>(Actor::Property::POSITION_X);
+}
+
+void View::SetPositionX(float x)
+{
+  Self().SetProperty(Actor::Property::POSITION_X, x);
+}
+
+float View::GetPositionY() const
+{
+  return Self().GetProperty<float>(Actor::Property::POSITION_Y);
+}
+
+void View::SetPositionY(float y)
+{
+  Self().SetProperty(Actor::Property::POSITION_Y, y);
+}
+
+Vector3 View::GetParentOrigin() const
+{
+  return Self().GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN);
+}
+
+void View::SetParentOrigin(const Vector3& point)
+{
+  Self().SetProperty(Actor::Property::PARENT_ORIGIN, point);
+}
+
+Vector3 View::GetPivotPoint() const
+{
+  return Self().GetProperty<Vector3>(Actor::Property::ANCHOR_POINT);
+}
+
+void View::SetPivotPoint(const Vector3& point)
+{
+  Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
 }
 
 } // namespace Internal

@@ -93,6 +93,66 @@ View::View(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::View>(internal);
 }
 
+float View::GetSizeWidth() const
+{
+  return Internal::GetImpl(*this).GetSizeWidth();
+}
+
+void View::SetSizeWidth(float width)
+{
+  Internal::GetImpl(*this).SetSizeWidth(width);
+}
+
+float View::GetSizeHeight() const
+{
+  return Internal::GetImpl(*this).GetSizeHeight();
+}
+
+void View::SetSizeHeight(float height)
+{
+  Internal::GetImpl(*this).SetSizeHeight(height);
+}
+
+float View::GetPositionX() const
+{
+  return Internal::GetImpl(*this).GetPositionX();
+}
+
+void View::SetPositionX(float x)
+{
+  Internal::GetImpl(*this).SetPositionX(x);
+}
+
+float View::GetPositionY() const
+{
+  return Internal::GetImpl(*this).GetPositionY();
+}
+
+void View::SetPositionY(float y)
+{
+  Internal::GetImpl(*this).SetPositionY(y);
+}
+
+Vector3 View::GetParentOrigin() const
+{
+  return Internal::GetImpl(*this).GetParentOrigin();
+}
+
+void View::SetParentOrigin(const Vector3& point)
+{
+  Internal::GetImpl(*this).SetParentOrigin(point);
+}
+
+Vector3 View::GetPivotPoint() const
+{
+  return Internal::GetImpl(*this).GetPivotPoint();
+}
+
+void View::SetPivotPoint(const Vector3& point)
+{
+  Internal::GetImpl(*this).SetPivotPoint(point);
+}
+
 } // namespace UI
 
 } // namespace Dali

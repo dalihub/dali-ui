@@ -88,6 +88,67 @@ public:
    */
   bool OnKeyEvent(const KeyEvent& event) override;
 
+public:
+  /**
+   * @copydoc Dali::UI::View::GetSizeWidth
+   */
+  float GetSizeWidth() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetSizeWidth
+   */
+  void SetSizeWidth(float width);
+
+  /**
+   * @copydoc Dali::UI::View::GetSizeHeight
+   */
+  float GetSizeHeight() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetSizeHeight
+   */
+  void SetSizeHeight(float height);
+
+  /**
+   * @copydoc Dali::UI::View::GetPositionX
+   */
+  float GetPositionX() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetPositionX
+   */
+  void SetPositionX(float x);
+
+  /**
+   * @copydoc Dali::UI::View::GetPositionY
+   */
+  float GetPositionY() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetPositionY
+   */
+  void SetPositionY(float y);
+
+  /**
+   * @copydoc Dali::UI::View::GetParentOrigin
+   */
+  Vector3 GetParentOrigin() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetParentOrigin
+   */
+  void SetParentOrigin(const Vector3& point);
+
+  /**
+   * @copydoc Dali::UI::View::GetPivotPoint
+   */
+  Vector3 GetPivotPoint() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetPivotPoint
+   */
+  void SetPivotPoint(const Vector3& point);
+
 private:
 
   // Not copyable or movable

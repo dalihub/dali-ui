@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include <dali-toolkit/dali-toolkit.h>
-#include <dali-ui-foundations/public-api/view.h>
+#include <dali-ui-foundations/dali-ui-foundations.h>
 
 using namespace Dali;
-using Dali::Toolkit::TextLabel;
+using namespace Dali::UI;
 using Dali::UI::View;
 
 // This example shows how to create and display Hello World! using a simple TextActor
@@ -41,28 +40,38 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    View view = View::New();
-    view.SetBackgroundColor(Color::RED);
-    view.SetProperty(Actor::Property::SIZE_WIDTH, 200);
-    view.SetProperty(Actor::Property::SIZE_HEIGHT, 200);
-    window.Add(view);
-
-    TextLabel textLabel = TextLabel::New("Hello World from dali2-ui-foundations!");
-    textLabel.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
-    textLabel.SetProperty(Dali::Actor::Property::NAME, "helloWorldLabel");
-    window.Add(textLabel);
-
-    // Respond to a touch anywhere on the window
-    window.GetRootLayer().TouchedSignal().Connect(this, &HelloWorldController::OnTouch);
+    window.Add(
+      View::New() // Parent
+        .BackgroundColor(Color::YELLOW)
+        .SizeWidth(200_spx)
+        .SizeHeight(200_spx)
+        .Contents({
+          View::New() // Red child
+            .BackgroundColor(Color::RED)
+            .SizeWidth(100_spx)
+            .SizeHeight(100_spx)
+            .With([this](View& firstChild)
+            {
+              firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed);
+            }),
+          View::New() // Blue child
+            .BackgroundColor(Color::BLUE)
+            .SizeWidth(100_spx)
+            .SizeHeight(100_spx)
+            .PositionX(100_spx)
+            .PositionY(100_spx)
+            .As(mSecondChild),
+        })
+    );
 
     // Respond to key events
     window.KeyEventSignal().Connect(this, &HelloWorldController::OnKeyEvent);
   }
 
-  bool OnTouch(Actor actor, const TouchEvent& touch)
+  bool OnTouchRed(Actor actor, const TouchEvent& touch)
   {
     // quit the application
-    mApplication.Quit();
+    mSecondChild.BackgroundColor(Color::GREEN);
     return true;
   }
 
@@ -79,6 +88,7 @@ public:
 
 private:
   Application& mApplication;
+  View mSecondChild;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
