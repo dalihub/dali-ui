@@ -21,8 +21,8 @@
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/dali-ui-foundations-common.h>
-#include <dali-ui-foundations/public-api/view.h>
+#include <dali-ui-foundation/public-api/dali-ui-foundation-common.h>
+#include <dali-ui-foundation/public-api/view.h>
 // None
 
 namespace Dali
@@ -40,7 +40,7 @@ namespace UI
  * @brief Sample class to show method chaining
  *
  */
-class DALI_UI_FOUNDATIONS_API ViewDerived : public View
+class DALI_UI_FOUNDATION_API ViewDerived : public View
 {
 public: // Creation & Destruction
 

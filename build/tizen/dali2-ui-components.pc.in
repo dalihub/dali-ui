@@ -6,6 +6,6 @@ includedir=@INCLUDE_DIR@
 Name: @COMPONENTS_PKG_NAME@
 Description: DALi UI Components Library
 Version: @DALI_UI_COMPONENTS_VERSION@
-Requires: dali2-core, dali2-adaptor, dali2-toolkit, dali2-ui-foundations
+Requires: dali2-core, dali2-adaptor, dali2-toolkit, dali2-ui-foundation
 Libs: -L${libdir} -ldali2-ui-components
 Cflags: -I${includedir}/dali-ui-components

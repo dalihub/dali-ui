@@ -2,15 +2,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8.2)
 CMAKE_POLICY(SET CMP0012 NEW) # Prevent dereferencing of OFF/ON as variables
 
 # Project names for the two libraries
-SET(foundations_name "dali2-ui-foundations")
+SET(foundation_name "dali2-ui-foundation")
 SET(components_name "dali2-ui-components")
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_CXX_STANDARD 17)
 
-PROJECT(${foundations_name})
+PROJECT(${foundation_name})
 
 # Package names for pkg-config
-SET(FOUNDATIONS_PKG_NAME ${foundations_name})
+SET(FOUNDATION_PKG_NAME ${foundation_name})
 SET(COMPONENTS_PKG_NAME ${components_name})
 
 SET(GCC_COMPILER_VERSION_REQUIRED "6")
@@ -22,11 +22,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # API VERSION (Not DALi release version)
-SET(${foundations_name}_VERSION_MAJOR 2)
-SET(${foundations_name}_VERSION_MINOR 0)
-SET(${foundations_name}_VERSION_PATCH 0)
-SET(${foundations_name}_VERSION ${${foundations_name}_VERSION_MAJOR}.${${foundations_name}_VERSION_MINOR}.${${foundations_name}_VERSION_PATCH} )
-SET(DALI_UI_FOUNDATIONS_VERSION ${${foundations_name}_VERSION} )
+SET(${foundation_name}_VERSION_MAJOR 2)
+SET(${foundation_name}_VERSION_MINOR 0)
+SET(${foundation_name}_VERSION_PATCH 0)
+SET(${foundation_name}_VERSION ${${foundation_name}_VERSION_MAJOR}.${${foundation_name}_VERSION_MINOR}.${${foundation_name}_VERSION_PATCH} )
+SET(DALI_UI_FOUNDATION_VERSION ${${foundation_name}_VERSION} )
 
 SET(${components_name}_VERSION_MAJOR 2)
 SET(${components_name}_VERSION_MINOR 0)
@@ -181,7 +181,7 @@ SET( ui_src_dir     ${ROOT_SRC_DIR}/dali-ui-components/internal )
 SET( public_api_src_dir  ${ROOT_SRC_DIR}/dali-ui-components/public-api )
 SET( devel_api_src_dir   ${ROOT_SRC_DIR}/dali-ui-components/devel-api )
 SET( third_party_src_dir ${ROOT_SRC_DIR}/dali-ui-components/third-party )
-SET( foundations_src_dir ${ROOT_SRC_DIR}/dali-ui-foundations )
+SET( foundation_src_dir ${ROOT_SRC_DIR}/dali-ui-foundation )
 SET( package_doxy_dir    ${ROOT_SRC_DIR}/doc )
 
 # Set up the include dir
@@ -214,9 +214,9 @@ ENDIF()
 IF( ENABLE_PKG_CONFIGURE )
   # Configure the pkg-config files
   SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
-  SET( FOUNDATIONS_PKG_CFG_FILE dali2-ui-foundations.pc )
+  SET( FOUNDATION_PKG_CFG_FILE dali2-ui-foundation.pc )
   SET( COMPONENTS_PKG_CFG_FILE dali2-ui-components.pc )
-  CONFIGURE_FILE( ${FOUNDATIONS_PKG_CFG_FILE}.in ${FOUNDATIONS_PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${FOUNDATION_PKG_CFG_FILE}.in ${FOUNDATION_PKG_CFG_FILE} @ONLY )
   CONFIGURE_FILE( ${COMPONENTS_PKG_CFG_FILE}.in ${COMPONENTS_PKG_CFG_FILE} @ONLY )
 ENDIF()
 
@@ -254,24 +254,24 @@ SET(SOURCE_DIR "${ROOT_SRC_DIR}/dali")
 SET(PACKAGE_DOXY_SRC_DIR "${ROOT_SRC_DIR}/doc")
 
 # ============================================================================
-# DALI-UI-FOUNDATIONS LIBRARY
+# DALI-UI-FOUNDATION LIBRARY
 # ============================================================================
 
-SET(FOUNDATIONS_SOURCES "")
+SET(FOUNDATION_SOURCES "")
 
-# Add foundations source files if they exist
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundations)
-  FILE(GLOB_RECURSE UI_FOUNDATIONS_SOURCES
-    "${ROOT_SRC_DIR}/dali-ui-foundations/*.cpp"
-    "${ROOT_SRC_DIR}/dali-ui-foundations/*.c")
-  SET(FOUNDATIONS_SOURCES ${FOUNDATIONS_SOURCES} ${UI_FOUNDATIONS_SOURCES})
+# Add foundation source files if they exist
+IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
+  FILE(GLOB_RECURSE UI_FOUNDATION_SOURCES
+    "${ROOT_SRC_DIR}/dali-ui-foundation/*.cpp"
+    "${ROOT_SRC_DIR}/dali-ui-foundation/*.c")
+  SET(FOUNDATION_SOURCES ${FOUNDATION_SOURCES} ${UI_FOUNDATION_SOURCES})
 ENDIF()
 
-# Add specific View source files for foundations
+# Add specific View source files for foundation
 SET(VIEW_SOURCES
-  ${ROOT_SRC_DIR}/dali-ui-foundations/public-api/view.cpp
-  ${ROOT_SRC_DIR}/dali-ui-foundations/internal/view-impl.cpp)
-SET(FOUNDATIONS_SOURCES ${FOUNDATIONS_SOURCES} ${VIEW_SOURCES})
+  ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/view.cpp
+  ${ROOT_SRC_DIR}/dali-ui-foundation/internal/view-impl.cpp)
+SET(FOUNDATION_SOURCES ${FOUNDATION_SOURCES} ${VIEW_SOURCES})
 
 SET(LIBTYPE SHARED)
 IF(DEFINED STATIC)
@@ -284,8 +284,8 @@ IF( WIN32 OR APPLE )
   SET( DALITOOLKIT_LDFLAGS     "${DALITOOLKIT_LDFLAGS}"     dali2-toolkit::dali2-toolkit )
 ENDIF()
 
-# Create dali2-ui-foundations library
-ADD_LIBRARY( ${foundations_name} ${LIBTYPE} ${FOUNDATIONS_SOURCES} )
+# Create dali2-ui-foundation library
+ADD_LIBRARY( ${foundation_name} ${LIBTYPE} ${FOUNDATION_SOURCES} )
 
 SET(CUSTOM_COMPILE_OPTIONS "")
 
@@ -301,20 +301,20 @@ IF (HAVE_NO_CLASS_MEMACCESS)
   SET(CUSTOM_COMPILE_OPTIONS ${MY_COMPILE_OPTIONS} -Wno-class-memaccess)
 ENDIF()
 
-target_compile_options(${foundations_name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
+target_compile_options(${foundation_name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
 
-TARGET_LINK_LIBRARIES( ${foundations_name}
+TARGET_LINK_LIBRARIES( ${foundation_name}
   ${DALICORE_LDFLAGS}
   ${COVERAGE})
 
 IF( ANDROID )
-  TARGET_LINK_LIBRARIES( ${foundations_name} log GLESv3 EGL)
+  TARGET_LINK_LIBRARIES( ${foundation_name} log GLESv3 EGL)
 ENDIF()
 
-SET_TARGET_PROPERTIES( ${foundations_name}
+SET_TARGET_PROPERTIES( ${foundation_name}
   PROPERTIES
-  VERSION ${DALI_UI_FOUNDATIONS_VERSION}
-  SOVERSION ${${foundations_name}_VERSION_MAJOR}
+  VERSION ${DALI_UI_FOUNDATION_VERSION}
+  SOVERSION ${${foundation_name}_VERSION_MAJOR}
   CLEAN_DIRECT_OUPUT 1)
 
 # ============================================================================
@@ -343,8 +343,8 @@ IF(COMPONENTS_SOURCES)
     ${DALITOOLKIT_LDFLAGS}
     ${COVERAGE})
 
-  # Components library depends on foundations
-  TARGET_LINK_LIBRARIES( ${components_name} ${foundations_name} )
+  # Components library depends on foundation
+  TARGET_LINK_LIBRARIES( ${components_name} ${foundation_name} )
 
   IF( ANDROID )
     TARGET_LINK_LIBRARIES( ${components_name} log GLESv3 EGL)
@@ -372,9 +372,9 @@ IF( INSTALL_CMAKE_MODULES )
     SET( LIB_DIR "${LIB_DIR}/debug" )
   ENDIF()
 
-  # Install the foundations library files
-  INSTALL( TARGETS ${foundations_name}
-    EXPORT ${foundations_name}-targets
+  # Install the foundation library files
+  INSTALL( TARGETS ${foundation_name}
+    EXPORT ${foundation_name}-targets
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR}
     RUNTIME DESTINATION ${BIN_DIR}
@@ -390,12 +390,12 @@ IF( INSTALL_CMAKE_MODULES )
     )
   ENDIF()
 
-  # Install the cmake modules for foundations
+  # Install the cmake modules for foundation
   INSTALL(
-    EXPORT ${foundations_name}-targets
-    NAMESPACE ${foundations_name}::
-    FILE ${foundations_name}-targets.cmake
-    DESTINATION share/${foundations_name}
+    EXPORT ${foundation_name}-targets
+    NAMESPACE ${foundation_name}::
+    FILE ${foundation_name}-targets.cmake
+    DESTINATION share/${foundation_name}
   )
 
   # Install the cmake modules for components
@@ -408,32 +408,32 @@ IF( INSTALL_CMAKE_MODULES )
     )
   ENDIF()
 
-  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${foundations_name}-config.cmake "
+  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${foundation_name}-config.cmake "
     include(CMakeFindDependencyMacro)
-    include(\${CMAKE_CURRENT_LIST_DIR}/${foundations_name}-targets.cmake)
+    include(\${CMAKE_CURRENT_LIST_DIR}/${foundation_name}-targets.cmake)
   ")
 
   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${components_name}-config.cmake "
     include(CMakeFindDependencyMacro)
     include(\${CMAKE_CURRENT_LIST_DIR}/${components_name}-targets.cmake)
-    find_dependency(${foundations_name} REQUIRED)
+    find_dependency(${foundation_name} REQUIRED)
   ")
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${foundations_name}-config.cmake DESTINATION share/${foundations_name})
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${foundation_name}-config.cmake DESTINATION share/${foundation_name})
   IF(HAS_COMPONENTS_LIB)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${components_name}-config.cmake DESTINATION share/${components_name})
   ENDIF()
 
   # Install the pdb files.
   IF( ENABLE_DEBUG AND WIN32 )
-    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${foundations_name}.pdb DESTINATION ${BIN_DIR} )
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${foundation_name}.pdb DESTINATION ${BIN_DIR} )
     IF(HAS_COMPONENTS_LIB)
       install( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${components_name}.pdb DESTINATION ${BIN_DIR} )
     ENDIF()
   ENDIF()
 ELSE()
   # Install the library so files and symlinks
-  INSTALL( TARGETS ${foundations_name} DESTINATION ${LIB_DIR} )
+  INSTALL( TARGETS ${foundation_name} DESTINATION ${LIB_DIR} )
   IF(HAS_COMPONENTS_LIB)
     INSTALL( TARGETS ${components_name} DESTINATION ${LIB_DIR} )
   ENDIF()
@@ -441,7 +441,7 @@ ENDIF()
 
 # Install the pkg-config files
 IF( ENABLE_PKG_CONFIGURE )
-  INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${FOUNDATIONS_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${FOUNDATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
   IF(HAS_COMPONENTS_LIB)
     INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${COMPONENTS_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
   ENDIF()
@@ -454,15 +454,15 @@ IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-components/public-api)
           FILES_MATCHING PATTERN "*.h")
 ENDIF()
 
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundations)
-  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundations/public-api/
-          DESTINATION ${INCLUDE_DIR}/dali-ui-foundations/public-api
+IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
+  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/
+          DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/public-api
           FILES_MATCHING PATTERN "*.h")
 ENDIF()
 
-# Install main dali-ui-foundations.h if it exists
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundations/dali-ui-foundations.h)
-  INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundations/dali-ui-foundations.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundations )
+# Install main dali-ui-foundation.h if it exists
+IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h)
+  INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
 ENDIF()
 
 # Configuration Messages

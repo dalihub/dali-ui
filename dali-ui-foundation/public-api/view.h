@@ -21,7 +21,7 @@
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/dali-ui-foundations-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-foundation-common.h>
 // None
 
 namespace Dali
@@ -116,7 +116,7 @@ class View;
  * of Control including styling, gesture detection, and keyboard navigation.
  *
  */
-class DALI_UI_FOUNDATIONS_API View : public Toolkit::Control
+class DALI_UI_FOUNDATION_API View : public Toolkit::Control
 {
 public:
 

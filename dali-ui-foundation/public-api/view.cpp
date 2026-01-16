@@ -19,8 +19,8 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/view.h>
-#include <dali-ui-foundations/internal/view-impl.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/internal/view-impl.h>
 
 namespace Dali
 {

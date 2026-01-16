@@ -22,7 +22,7 @@
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/internal/view-impl.h>
+#include <dali-ui-foundation/internal/view-impl.h>
 
 namespace Dali
 {

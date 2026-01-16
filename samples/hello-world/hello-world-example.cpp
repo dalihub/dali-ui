@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundations/dali-ui-foundations.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
 using namespace Dali::UI;

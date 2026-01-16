@@ -15,15 +15,15 @@
  *
  */
 
-#ifndef DALI_UI_FOUNDATIONS_H
-#define DALI_UI_FOUNDATIONS_H
+#ifndef DALI_UI_FOUNDATION_H
+#define DALI_UI_FOUNDATION_H
 
 // EXTERNAL INCLUDES
 #include <dali/dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/view.h>
-#include <dali-ui-foundations/public-api/unit.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/unit.h>
 
-#endif // DALI_UI_FOUNDATIONS_H
+#endif // DALI_UI_FOUNDATION_H

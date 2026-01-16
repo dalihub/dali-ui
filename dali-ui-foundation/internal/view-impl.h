@@ -22,7 +22,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/view.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {

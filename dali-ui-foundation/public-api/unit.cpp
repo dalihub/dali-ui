@@ -16,7 +16,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundations/public-api/unit.h>
+#include <dali-ui-foundation/public-api/unit.h>
 
 namespace Dali
 {
