@@ -1,0 +1,94 @@
+#ifndef DALI_UI_FOUNDATION_TEST_APPLICATION_H
+#define DALI_UI_FOUNDATION_TEST_APPLICATION_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <memory>
+
+// INTERNAL INCLUDES
+#include <dali-test-suite-utils.h>
+#include <dali/devel-api/adaptor-framework/accessibility.h>
+#include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <ui-foundation-adaptor-impl.h>
+#include "test-application.h"
+
+// #undef assert
+
+namespace Dali
+{
+
+class Adaptor;
+class Window;
+
+/**
+ * Adds some functionality on top of TestApplication that is required by the Toolkit.
+ *
+ * This includes creation and destruction of the Adaptor and Window classes.
+ */
+class UIFoundationTestApplication : public TestApplication
+{
+public:
+  UIFoundationTestApplication(size_t surfaceWidth  = DEFAULT_SURFACE_WIDTH,
+                                 size_t surfaceHeight = DEFAULT_SURFACE_HEIGHT,
+                                 float  horizontalDpi = DEFAULT_HORIZONTAL_DPI,
+                                 float  verticalDpi   = DEFAULT_VERTICAL_DPI,
+                                 bool   preInitialize = false);
+
+  ~UIFoundationTestApplication() override;
+
+  /**
+   * @brief Initializes the Adaptor and Scene for emulate pre-initialize application case.
+   */
+  void InitializeAdaptor();
+  void CreateSceneFromMainWindow();
+  void EmitApplicationInitialize();
+
+  /**
+   * @brief Executes the idle callbacks.
+   *
+   * Some controls like the text-field and the text-editor connect callbacks to the
+   * idle signal.
+   */
+  void RunIdles();
+
+  Dali::Window GetWindow()
+  {
+    return mMainWindow;
+  }
+
+  Dali::Adaptor& GetAdaptor()
+  {
+    return *mAdaptor;
+  }
+
+  bool IsPreInitialized() const
+  {
+    return mPreInitialized;
+  }
+
+private:
+  Dali::Window             mMainWindow;
+  std::unique_ptr<Adaptor> mAdaptor;
+  const bool               mPreInitialized{false};
+};
+
+} // namespace Dali
+
+#endif // DALI_UI_FOUNDATION_TEST_APPLICATION_H
