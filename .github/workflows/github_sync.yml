@@ -1,0 +1,28 @@
+name: Repo Sync
+
+on:
+  schedule:
+    # 6시간마다 실행
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to sync from'
+        required: true
+        default: 'devel'
+      destination_branch:
+        description: 'Destination branch to sync to'
+        required: true
+        default: 'devel'
+
+jobs:
+  repo-sync:
+    runs-on: [ code-linux, code-large ]
+    steps:
+      - name: Sync Branches
+        uses: repo-sync/github-sync@v2
+        with:
+          source_repo: https://rabbitfor@github.com/dalihub/dali-ui.git
+          source_branch: ${{ github.event.inputs.source_branch || 'devel' }}
+          destination_branch: ${{ github.event.inputs.destination_branch || 'devel' }}
+          github_token: ${{ secrets.PAT_TOKEN }}
