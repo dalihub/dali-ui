@@ -20,7 +20,7 @@ jobs:
     runs-on: [ code-linux, code-large ]
     steps:
       - name: Sync Branches
-        uses: repo-sync/github-sync@v2
+        uses: code-actions/repo-sync-github-sync@v2
         with:
           source_repo: https://rabbitfor@github.com/dalihub/dali-ui.git
           source_branch: ${{ github.event.inputs.source_branch || 'devel' }}
