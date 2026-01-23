@@ -1,4 +1,4 @@
-name: Repo Sync
+name: Repo sync
 
 on:
   schedule:
@@ -22,7 +22,7 @@ jobs:
       - name: Sync Branches
         uses: code-actions/repo-sync-github-sync@v2
         with:
-          source_repo: https://github.com/dalihub/dali-ui.git
+          destination_repo: "https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.com/dalihub/dali-ui.git"
           source_branch: ${{ github.event.inputs.source_branch || 'devel' }}
           destination_branch: ${{ github.event.inputs.destination_branch || 'devel' }}
           github_token: ${{ secrets.PAT_TOKEN }}
