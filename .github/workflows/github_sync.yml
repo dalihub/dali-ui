@@ -19,10 +19,42 @@ jobs:
   repo-sync:
     runs-on: [ code-linux, code-large ]
     steps:
-      - name: Sync Branches
-        uses: code-actions/repo-sync-github-sync@v2
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          destination_repo: "https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.com/dalihub/dali-ui.git"
-          source_branch: ${{ github.event.inputs.source_branch || 'devel' }}
-          destination_branch: ${{ github.event.inputs.destination_branch || 'devel' }}
-          github_token: ${{ secrets.PAT_TOKEN }}
+          ref: ${{ github.event.inputs.source_branch || 'devel' }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: git config --global user.name "github-action[bot]"
+
+      - name: Force push to public github
+        env:
+          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          SRC="${{ github.event.inputs.source_branch || 'devel' }}"
+          DEST="${{ github.event.inputs.destination_branch || 'devel' }}"
+          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.com/dalihub/dali-ui.git"
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          git remote add public "$REMOTE_URL"
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if git push public "$SRC:DEST" --force; then
+              echo "Succeed"
+              SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              echo "Retry after 5 sec..."
+              sleep 5
+              fi
+            done
+
+            if [ "$SUCCESS" = false ]; then
+              echo "Failed to push dalihub repo"
+              exit 1
+            fi
