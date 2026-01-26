@@ -58,23 +58,7 @@ IF( INSTALL_DOXYGEN_DOC )
   FIND_PACKAGE( Doxygen QUIET )
 ENDIF()
 
-IF( WIN32 ) # WIN32 includes x64 as well according to the cmake doc.
-  FIND_PACKAGE( dali-windows-dependencies REQUIRED)
-  FIND_PACKAGE( dali2-core REQUIRED)
-  FIND_PACKAGE( dali2-adaptor REQUIRED)
-  FIND_PACKAGE( dali2-toolkit REQUIRED)
-ENDIF()
-
-IF ( APPLE )
-  FIND_PACKAGE( dali2-core REQUIRED)
-  FIND_PACKAGE( dali2-adaptor REQUIRED)
-  FIND_PACKAGE( dali2-toolkit REQUIRED)
-ENDIF()
-
 SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
-
-# Define non-boolean options to CMake
-SET(WITH_STYLE               "480x800" CACHE STRING "Select the style folder to use")
 
 # from root/build/tizen, get back to root
 SET(ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
@@ -85,16 +69,6 @@ SET( EXEC_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # Make sure the path is absolute
 GET_FILENAME_COMPONENT(ROOT_SRC_DIR ${ROOT_SRC_DIR} ABSOLUTE)
-
-# Set DALi style
-SET( dali_style ${WITH_STYLE} )
-
-# Style folder
-SET( STYLE_BASE_DIR ${ROOT_SRC_DIR}/dali-ui-components/styles )
-SET( STYLE_DIR ${STYLE_BASE_DIR}/${dali_style} )
-SET( ui_styles_base_dir ${STYLE_BASE_DIR} )
-SET( ui_styles_dir ${STYLE_DIR} )
-SET( ui_style_images_dir ${STYLE_DIR}/images )
 
 IF( DEFINED ENV{DALI_DATA_RW_DIR} )
   SET( dataReadWriteDir $ENV{DALI_DATA_RW_DIR} )
@@ -125,35 +99,22 @@ IF( ENABLE_I18N )
   ADD_DEFINITIONS( "-DDGETTEXT_ENABLED" )
 ENDIF( ENABLE_I18N )
 
-IF( WIN32 )
-  ADD_DEFINITIONS( "-DBUILDING_DALI_UI" )
-  IF( USE_DEFAULT_RESOURCE_DIR )
-    SET( INSTALL_SHARE_DIR "${PREFIX}/share" )
-    IF( VCPKG_TOOLKIT_BUILD )
-      SET( INSTALL_SHARE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share" )
-    ENDIF()
-    ADD_DEFINITIONS( -DDALI_IMAGE_DIR=\"${INSTALL_SHARE_DIR}/dali/ui/images/\"
-                     -DDALI_SOUND_DIR=\"${INSTALL_SHARE_DIR}/dali/ui/sounds/\"
-                     -DDALI_STYLE_DIR=\"${INSTALL_SHARE_DIR}/dali/ui/styles/\"
-                     -DDALI_STYLE_IMAGE_DIR=\"${INSTALL_SHARE_DIR}/dali/ui/styles/images/\"
-                     -DDALI_DATA_READ_ONLY_DIR=\"${INSTALL_SHARE_DIR}/\" )
-  ENDIF()
-ELSEIF( UNIX )
-  ADD_DEFINITIONS(-DPIC -DSTDC_HEADERS)
-  IF( USE_DEFAULT_RESOURCE_DIR )
-    ADD_DEFINITIONS( -DDALI_IMAGE_DIR=\"${dataReadOnlyDir}/ui/images/\"
-                     -DDALI_SOUND_DIR=\"${dataReadOnlyDir}/ui/sounds/\"
-                     -DDALI_STYLE_DIR=\"${dataReadOnlyDir}/ui/styles/\"
-                     -DDALI_STYLE_IMAGE_DIR=\"${dataReadOnlyDir}/ui/styles/images/\"
-                     -DDALI_DATA_READ_ONLY_DIR=\"${dataReadOnlyDir}\" )
-  ENDIF()
-  IF("${ARCH}" STREQUAL "arm")
-    ADD_DEFINITIONS("-DTARGET")
-  ENDIF("${ARCH}" STREQUAL "arm")
-  IF( NOT ${ENABLE_EXPORTALL} )
-    ADD_DEFINITIONS( "-DHIDE_DALI_INTERNALS" )
-  ENDIF( NOT ${ENABLE_EXPORTALL} )
+ADD_DEFINITIONS(-DPIC -DSTDC_HEADERS)
+IF( USE_DEFAULT_RESOURCE_DIR )
+  ADD_DEFINITIONS( -DDALI_IMAGE_DIR=\"${dataReadOnlyDir}/ui/images/\"
+                    -DDALI_SOUND_DIR=\"${dataReadOnlyDir}/ui/sounds/\"
+                    -DDALI_STYLE_DIR=\"${dataReadOnlyDir}/ui/styles/\"
+                    -DDALI_STYLE_IMAGE_DIR=\"${dataReadOnlyDir}/ui/styles/images/\"
+                    -DDALI_DATA_READ_ONLY_DIR=\"${dataReadOnlyDir}\" )
 ENDIF()
+
+IF("${ARCH}" STREQUAL "arm")
+  ADD_DEFINITIONS("-DTARGET")
+ENDIF("${ARCH}" STREQUAL "arm")
+
+IF( NOT ${ENABLE_EXPORTALL} )
+  ADD_DEFINITIONS( "-DHIDE_DALI_INTERNALS" )
+ENDIF( NOT ${ENABLE_EXPORTALL} )
 
 IF( NOT USE_DEFAULT_RESOURCE_DIR )
   ADD_DEFINITIONS( -DDALI_IMAGE_DIR=0
@@ -175,13 +136,6 @@ IF( ENABLE_GPU_MEMORY_PROFILE )
 ENDIF()
 
 # Set paths
-SET( ui_images_dir  ${ROOT_SRC_DIR}/dali-ui-components/styles/images-common )
-SET( ui_sounds_dir  ${ROOT_SRC_DIR}/dali-ui-components/sounds )
-SET( ui_src_dir     ${ROOT_SRC_DIR}/dali-ui-components/internal )
-SET( public_api_src_dir  ${ROOT_SRC_DIR}/dali-ui-components/public-api )
-SET( devel_api_src_dir   ${ROOT_SRC_DIR}/dali-ui-components/devel-api )
-SET( third_party_src_dir ${ROOT_SRC_DIR}/dali-ui-components/third-party )
-SET( foundation_src_dir ${ROOT_SRC_DIR}/dali-ui-foundation )
 SET( package_doxy_dir    ${ROOT_SRC_DIR}/doc )
 
 # Set up the include dir
@@ -220,28 +174,22 @@ IF( ENABLE_PKG_CONFIGURE )
   CONFIGURE_FILE( ${COMPONENTS_PKG_CFG_FILE}.in ${COMPONENTS_PKG_CFG_FILE} @ONLY )
 ENDIF()
 
-IF( WIN32 )
-  ADD_COMPILE_OPTIONS( /FIdali-windows-dependencies.h ) # Adds missing definitions.
-  ADD_COMPILE_OPTIONS( /vmg )                           # Avoids a 'reinterpret_cast' compile error while compiling signals and callbacks.
-  ADD_COMPILE_OPTIONS( /wd4251 )                        # Ignores warning C4251: "'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'"
-ELSE()
-  INCLUDE(CheckCXXCompilerFlag)
-  # Set up compiler flags and warnings
-  ADD_COMPILE_OPTIONS( -Wno-ignored-qualifiers )
-  ADD_COMPILE_OPTIONS( -Wall -Wno-unused-parameter -Wno-float-equal )
-  CHECK_CXX_COMPILER_FLAG( -Wno-dangling-reference HAVE_NO_DANGLING_REFERENCE )
-  IF (HAVE_NO_DANGLING_REFERENCE)
-    ADD_COMPILE_OPTIONS( $<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> )
-  ENDIF()
-  IF( ENABLE_COVERAGE OR "$ENV{CXXFLAGS}" MATCHES --coverage )
-    ADD_COMPILE_OPTIONS( --coverage )
-    SET(ENABLE_COVERAGE ON)
-    SET(COVERAGE --coverage)
-  ENDIF()
-  IF( NOT ${ENABLE_EXPORTALL} )
-    ADD_COMPILE_OPTIONS( "-fvisibility=hidden" )
-  ENDIF( NOT ${ENABLE_EXPORTALL} )
+INCLUDE(CheckCXXCompilerFlag)
+# Set up compiler flags and warnings
+ADD_COMPILE_OPTIONS( -Wno-ignored-qualifiers )
+ADD_COMPILE_OPTIONS( -Wall -Wno-unused-parameter -Wno-float-equal )
+CHECK_CXX_COMPILER_FLAG( -Wno-dangling-reference HAVE_NO_DANGLING_REFERENCE )
+IF (HAVE_NO_DANGLING_REFERENCE)
+  ADD_COMPILE_OPTIONS( $<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> )
 ENDIF()
+IF( ENABLE_COVERAGE OR "$ENV{CXXFLAGS}" MATCHES --coverage )
+  ADD_COMPILE_OPTIONS( --coverage )
+  SET(ENABLE_COVERAGE ON)
+  SET(COVERAGE --coverage)
+ENDIF()
+IF( NOT ${ENABLE_EXPORTALL} )
+  ADD_COMPILE_OPTIONS( "-fvisibility=hidden" )
+ENDIF( NOT ${ENABLE_EXPORTALL} )
 
 INCLUDE_DIRECTORIES(  ${ROOT_SRC_DIR}
   ${DALICORE_INCLUDE_DIRS}
@@ -250,7 +198,7 @@ INCLUDE_DIRECTORIES(  ${ROOT_SRC_DIR}
   ${VCPKG_INCLUDE_DIR}
   ${INCLUDE_DIR})
 
-SET(SOURCE_DIR "${ROOT_SRC_DIR}/dali")
+#SET(SOURCE_DIR "${ROOT_SRC_DIR}/dali")
 SET(PACKAGE_DOXY_SRC_DIR "${ROOT_SRC_DIR}/doc")
 
 # ============================================================================
@@ -262,26 +210,13 @@ SET(FOUNDATION_SOURCES "")
 # Add foundation source files if they exist
 IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
   FILE(GLOB_RECURSE UI_FOUNDATION_SOURCES
-    "${ROOT_SRC_DIR}/dali-ui-foundation/*.cpp"
-    "${ROOT_SRC_DIR}/dali-ui-foundation/*.c")
+    "${ROOT_SRC_DIR}/dali-ui-foundation/*.cpp")
   SET(FOUNDATION_SOURCES ${FOUNDATION_SOURCES} ${UI_FOUNDATION_SOURCES})
 ENDIF()
-
-# Add specific View source files for foundation
-SET(VIEW_SOURCES
-  ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/view.cpp
-  ${ROOT_SRC_DIR}/dali-ui-foundation/internal/view-impl.cpp)
-SET(FOUNDATION_SOURCES ${FOUNDATION_SOURCES} ${VIEW_SOURCES})
 
 SET(LIBTYPE SHARED)
 IF(DEFINED STATIC)
   SET(LIBTYPE STATIC)
-ENDIF()
-
-IF( WIN32 OR APPLE )
-  SET( DALICORE_LDFLAGS        "${DALICORE_LDFLAGS}"        dali2-core::dali2-core )
-  SET( DALIADAPTOR_LDFLAGS     "${DALIADAPTOR_LDFLAGS}"     dali2-adaptor::dali2-adaptor )
-  SET( DALITOOLKIT_LDFLAGS     "${DALITOOLKIT_LDFLAGS}"     dali2-toolkit::dali2-toolkit )
 ENDIF()
 
 # Create dali2-ui-foundation library
@@ -305,11 +240,9 @@ target_compile_options(${foundation_name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
 
 TARGET_LINK_LIBRARIES( ${foundation_name}
   ${DALICORE_LDFLAGS}
+  ${DALIADAPTOR_LDFLAGS}
+  ${DALITOOLKIT_LDFLAGS}
   ${COVERAGE})
-
-IF( ANDROID )
-  TARGET_LINK_LIBRARIES( ${foundation_name} log GLESv3 EGL)
-ENDIF()
 
 SET_TARGET_PROPERTIES( ${foundation_name}
   PROPERTIES
@@ -326,8 +259,7 @@ SET(COMPONENTS_SOURCES "")
 # Add components source files if they exist
 IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-components)
   FILE(GLOB_RECURSE UI_COMPONENTS_SOURCES
-    "${ROOT_SRC_DIR}/dali-ui-components/*.cpp"
-    "${ROOT_SRC_DIR}/dali-ui-components/*.c")
+    "${ROOT_SRC_DIR}/dali-ui-components/*.cpp")
   SET(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${UI_COMPONENTS_SOURCES})
 ENDIF()
 
@@ -458,11 +390,85 @@ IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
   INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/
           DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/public-api
           FILES_MATCHING PATTERN "*.h")
+  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api/
+          DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/integration-api
+          FILES_MATCHING PATTERN "*.h")
 ENDIF()
 
 # Install main dali-ui-foundation.h if it exists
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h)
-  INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
+INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
+
+# The DALI_UI_PREFIX must be set if this CMakeLists.txt is executed
+# from the top-level CMake script using ADD_SUBDIRECTORY() to avoid
+# target names duplication with other DALi modules.
+IF( ENABLE_COVERAGE )
+  FIND_PROGRAM( LCOV_BIN "lcov" )
+  IF( LCOV_BIN )
+
+    # Define custom rules for coverage
+    SET(COVERAGE_DIR .cov)
+    SET(COVERAGE_OUTPUT_DIR doc/coverage)
+
+    # lcov prior to 1.10 doesn't have -rc option; this and subsequent version don't output
+    # branch coverage. Determine the lcov version, and enable branch coverage accordingly.
+    # Additionally, lcov version 2.0 and later have different options for branch coverage, and need to ignore some errors
+    EXECUTE_PROCESS( COMMAND bash -c "${LCOV_BIN} --version | cut -d' ' -f4" OUTPUT_VARIABLE LCOV_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE )
+    IF( NOT LCOV_VERSION VERSION_LESS "2.0" )
+      SET(LCOV_OPTS --rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 --rc no_exception_branch=1 --ignore-errors unused --ignore-errors empty --ignore-errors negative --ignore-errors mismatch)
+    ELSEIF( NOT LCOV_VERSION VERSION_LESS "1.10" )
+      SET(LCOV_OPTS --rc lcov_branch_coverage=1)
+    ENDIF()
+
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}rename_cov_data ./rename-cov-data )
+
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}cov_data ${LCOV_BIN} ${LCOV_OPTS} --base-directory . --directory . -c -o dali.info
+      COMMAND ${LCOV_BIN} ${LCOV_OPTS} --remove dali.info \"*/dali-env/*\" \"/usr/include/*\" \"*/third-party/*\" -o dali.info )
+
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}coverage genhtml -p ${ROOT_SRC_DIR} ${LCOV_OPTS} -o ${COVERAGE_OUTPUT_DIR} dali.info
+      DEPENDS cov_data )
+
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}reset_coverage @${LCOV_BIN} -z --directory `pwd` )
+
+    # Define custom rule for distclean
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}distclean @echo cleaning for source distribution )
+    ADD_CUSTOM_COMMAND(
+          DEPENDS ${DALI_UI_PREFIX}clean
+          COMMENT "distribution clean"
+          COMMAND find
+          ARGS    .
+          -not -name config.cmake -and \(
+          -name tester.c -or
+          -name Testing -or
+          -name CMakeFiles -or
+          -name doc -or
+          -name cmake.depends -or
+          -name cmake.check_depends -or
+          -name CMakeCache.txt -or
+          -name cmake.check_cache -or
+          -name *.cmake -or
+          -name Makefile -or
+          -name core -or
+          -name core.* -or
+          -name gmon.out -or
+          -name install_manifest.txt -or
+          -name *.pc -or
+          -name *.gcov -or
+          -name *.gcno -or
+          -name *.gcda -or
+          -name *~ -or
+          -name libdali*.so* \)
+          | grep -v TC | xargs rm -rf
+          TARGET  ${DALI_UI_PREFIX}distclean
+          VERBATIM
+          )
+
+  ENDIF( LCOV_BIN )
+ENDIF()
+
+IF( CONFIGURE_AUTOMATED_TESTS )
+  # Configure automated tests
+  CONFIGURE_FILE( ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt.in
+                  ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt @ONLY )
 ENDIF()
 
 # Configuration Messages
@@ -477,8 +483,6 @@ MESSAGE( STATUS "Trace:                         " ${ENABLE_TRACE} )
 MESSAGE( STATUS "Doxygen:                       " ${doxygenEnabled} )
 MESSAGE( STATUS "Data Dir (Read/Write):         " ${dataReadWriteDir} )
 MESSAGE( STATUS "Data Dir (Read Only):          " ${dataReadOnlyDir} )
-MESSAGE( STATUS "Style Dir:                     " ${STYLE_DIR} )
-MESSAGE( STATUS "Style:                         " ${dali_style} )
 MESSAGE( STATUS "i18n:                          " ${ENABLE_I18N} )
 MESSAGE( STATUS "Use pkg configure:             " ${ENABLE_PKG_CONFIGURE} )
 MESSAGE( STATUS "Enable link test:              " ${ENABLE_LINK_TEST} )

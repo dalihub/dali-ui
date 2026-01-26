@@ -1,8 +1,0 @@
-# Source files for dali-ui-foundation
-SET( dali_ui_foundation_public_api_sources
-  ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/view.cpp
-)
-
-SET( dali_ui_foundation_internal_sources
-  ${ROOT_SRC_DIR}/dali-ui-foundation/internal/view-impl.cpp
-)
