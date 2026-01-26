@@ -1,0 +1,166 @@
+name: "Unittest (testhub)"
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches:
+    - devel
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: [ code-linux, code-large ]
+    steps:
+    - uses: code-actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone others
+      run: |
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
+        # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
+        # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/lottie-player.git
+        # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+
+    - name: Setup environment for DALi
+      run: |
+        sudo apt-get update
+        yes | sudo apt-get install xvfb dbus-x11
+        sudo apt-get install libfile-copy-recursive-perl
+        dali-core/build/scripts/dali_env -v -c
+        dali-env/opt/bin/dali_env -s > setenv
+        . setenv
+        sudo apt install meson ninja-build
+
+    - name: Build DALi
+      run: |
+        . setenv
+        # cd tizenvg
+        # meson --prefix=$DESKTOP_PREFIX --libdir=$DESKTOP_PREFIX/lib build
+        # ninja -C build install
+        # cd -
+        cd dali-core/build/tizen
+        export CC=gcc
+        export CXX=g++
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+        cd dali-adaptor/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+        cd dali-toolkit/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+        # cd lottie-player
+        # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DLIB_INSTALL_DIR=$DESKTOP_PREFIX/lib .
+        # make install -j8
+        # cd -
+        # cd dali-extension/build/ubuntu
+        # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
+        # make install -j8
+        # cd -
+
+    # - name: Build and run
+    #   run: |
+    #     . setenv
+    #     cd build/tizen
+    #     export CC=gcc
+    #     export CXX=g++
+    #     CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+    #     make -j8 install
+    #     cd -
+
+    - name: Run automated test
+      run: |
+        . setenv
+        cd dali-toolkit/automated-tests
+        ./build.sh
+        xvfb-run ./execute.sh
+        cd -
+
+    # - name: Run automated test
+    #   run: |
+    #     . setenv
+
+    #     ulimit -c unlimited
+
+    #     cd automated-tests
+    #     ./build.sh
+
+    #     # 스크립트가 자체적으로 dbus-launch를 호출하지 않도록 수정합니다.
+    #     sed -i 's/dbus-launch //g' ./execute.sh
+
+    #     # 진단 명령어 추가
+    #     echo "--- Environment variables ---"
+    #     printenv | sort
+    #     echo "---------------------------"
+
+    #     # 생성된 테스트 실행 파일 중 하나를 찾아 라이브러리 의존성을 확인합니다.
+    #     TEST_EXEC=$(find ./build/src -name "tct-*-core" | head -n 1)
+    #     if [ -n "$TEST_EXEC" ]; then
+    #       echo "--- Checking library dependencies for $TEST_EXEC ---"
+    #       ldd "$TEST_EXEC"
+    #       echo "----------------------------------------------------"
+    #     else
+    #       echo "--- Could not find any test executables to check ---"
+    #     fi
+
+    #     # xvfb-run을 바깥쪽 래퍼로 사용하여 테스트를 실행합니다.
+    #     # -a 옵션은 xvfb-run이 자동으로 비어있는 서버 번호를 찾게 합니다.
+    #     xvfb-run -a dbus-run-session ./execute.sh
+
+    #     cd -
+
+    # - name: Upload artifacts
+    #   if: failure()
+    #   uses: CODE-Actions/upload-artifact@v2
+    #   with:
+    #     name: core-dump-artifact
+    #     path: automated-tests/core
+    #     retention-days: 7
+
+    # - name: Collect artifacts
+    #   run: |
+    #     mkdir test_results coverage summary
+    #     echo "### Test result :rocket:" >> $GITHUB_STEP_SUMMARY
+    #     echo "" >> $GITHUB_STEP_SUMMARY
+    #     cat /tmp/test_*/summary* >> $GITHUB_STEP_SUMMARY
+    #     cp /tmp/test_*/*.xml test_results
+    #     cp test/Tizen.NUI.OneUI.Integrated.UnitTest/coverage.cobertura.xml coverage
+
+    # - name: Upload artifacts (test_results)
+    #   uses: CODE-Actions/upload-artifact@v2
+    #   with:
+    #     name: test_results     # name of stored artifact
+    #     path: test_results     # target directory or file to store
+
+    # - name: Upload artifacts (coverage)
+    #   uses: CODE-Actions/upload-artifact@v2
+    #   with:
+    #     name: coverage
+    #     path: coverage
+
+  # testhub:
+  #   runs-on: [ code-linux ]          # runner whatever you want
+  #   if: always()                     # run testhub job even if there are failed testcases
+  #   needs: [ build ]
+  #   steps:
+  #     - name: Send to TestHub
+  #       uses: CODE-Actions/testhub@v1
+  #       if: always()
+  #       with:
+  #         test-tool: nunit
+  #         test-artifact-name: test_results
+  #         coverage-tool: coverlet
+  #         coverage-artifact-name: coverage
