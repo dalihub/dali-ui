@@ -43,7 +43,7 @@ jobs:
 
           until [ $RETRY_COUNT -ge $MAX_RETRIES ]
           do
-            if git push public "$SRC:DEST" --force; then
+            if git push public "$SRC:$DEST" --force; then
               echo "Succeed"
               SUCCESS=true
               break
