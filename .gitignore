@@ -64,3 +64,4 @@ build/tizen/CMakeDoxygenDefaults.cmake
 .vscode/
 build/tizen/libdali2-ui*.so.*
 *-example
+dali.info

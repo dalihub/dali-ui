@@ -19,7 +19,6 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-toolkit/dali-toolkit.h>
-#include "../../../dali-ui-foundation/public-api/view.h"
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation-test-suite-utils.h>
 
@@ -290,5 +289,89 @@ int UtcDaliViewWithP(void)
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_CHECK(actionCalled);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetParentOriginP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+
+  Vector3 parentOrigin = view.GetParentOrigin();
+  DALI_TEST_EQUALS(parentOrigin.x, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parentOrigin.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parentOrigin.z, 0.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewSetParentOriginP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+  const Vector3 testOrigin(0.0f, 1.0f, 0.5f);
+
+  View& result = view.ParentOrigin(testOrigin);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector3 parentOrigin = view.GetParentOrigin();
+  DALI_TEST_EQUALS(parentOrigin.x, testOrigin.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(parentOrigin.y, testOrigin.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(parentOrigin.z, testOrigin.z, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewGetPivotPointP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+
+  Vector3 pivotPoint = view.GetPivotPoint();
+  DALI_TEST_EQUALS(pivotPoint.x, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivotPoint.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivotPoint.z, 0.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewSetPivotPointP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+  const Vector3 testPivot(1.0f, 0.0f, 0.5f);
+
+  View& result = view.PivotPoint(testPivot);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector3 pivotPoint = view.GetPivotPoint();
+  DALI_TEST_EQUALS(pivotPoint.x, testPivot.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivotPoint.y, testPivot.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivotPoint.z, testPivot.z, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewParentOriginChainingP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+  const Vector3 testOrigin(0.0f, 0.0f, 0.0f);
+
+  View& result = view.ParentOrigin(testOrigin);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewPivotPointChainingP(void)
+{
+  UIFoundationTestApplication application;
+  View view = View::New();
+  const Vector3 testPivot(1.0f, 1.0f, 1.0f);
+
+  View& result = view.PivotPoint(testPivot);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
   END_TEST;
 }

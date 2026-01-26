@@ -1133,6 +1133,22 @@ public:
     mCommands.back().type = CommandType::CLEAR_DEPTH_BUFFER;
   }
 
+  // Missing pure virtual functions from Graphics::CommandBuffer
+  void SetColorBlendEnable(uint32_t attachment, bool enabled) override
+  {
+    mCallStack.PushCall("SetColorBlendEnable", "");
+  }
+
+  void SetColorBlendEquation(uint32_t attachment, Graphics::BlendFactor srcColorFactor, Graphics::BlendFactor dstColorFactor, Graphics::BlendOp colorBlendOp, Graphics::BlendFactor srcAlphaFactor, Graphics::BlendFactor dstAlphaFactor, Graphics::BlendOp alphaBlendOp) override
+  {
+    mCallStack.PushCall("SetColorBlendEquation", "");
+  }
+
+  void SetColorBlendAdvanced(uint32_t attachment, bool enable, bool advanced, Graphics::BlendOp op) override
+  {
+    mCallStack.PushCall("SetColorBlendAdvanced", "");
+  }
+
   [[nodiscard]] const std::vector<Command>& GetCommands() const
   {
     return mCommands;

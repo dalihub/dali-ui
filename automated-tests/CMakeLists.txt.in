@@ -6,9 +6,6 @@ INCLUDE(FindPkgConfig)
 SET(BIN_DIR "/opt/usr/bin")
 SET(SCRIPT_DIR ${CMAKE_SOURCE_DIR}/scripts)
 
-
-ADD_DEFINITIONS(-DDALI_STYLE_DIR="@dataReadOnlyDir@/toolkit/styles/")
-
 # Macro checks if the module is available and sets user variable
 MACRO( CHECK_MODULE_AND_SET PKG_VAR PKG_LIB_REQUIREMENTS VAR_TO_SET )
   PKG_CHECK_MODULES(${PKG_VAR} "${PKG_LIB_REQUIREMENTS}")

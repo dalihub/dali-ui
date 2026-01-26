@@ -8,6 +8,7 @@ SET(CAPI_LIB "dali2-ui-foundation")
 # List of test case sources (Only these get parsed for test cases)
 SET(TC_SOURCES
   utc-Dali-View.cpp
+  utc-Dali-Unit.cpp
 )
 
 # List of test harness files (Won't get parsed for test cases)
