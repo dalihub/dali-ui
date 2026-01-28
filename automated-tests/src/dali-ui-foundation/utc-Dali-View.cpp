@@ -20,24 +20,24 @@
 #include <dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation-test-suite-utils.h>
+#include <dali-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::UI;
 
-void utc_dali_actor_startup(void)
+void utc_dali_view_startup(void)
 {
   test_return_value = TET_UNDEF;
 }
 
-void utc_dali_actor_cleanup(void)
+void utc_dali_view_cleanup(void)
 {
   test_return_value = TET_PASS;
 }
 
 int UtcDaliViewConstructorP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view;
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -45,7 +45,7 @@ int UtcDaliViewConstructorP(void)
 
 int UtcDaliViewNewP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -53,7 +53,7 @@ int UtcDaliViewNewP(void)
 
 int UtcDaliViewCopyConstructorP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   View copy(view);
   DALI_TEST_CHECK(copy);
@@ -63,7 +63,7 @@ int UtcDaliViewCopyConstructorP(void)
 
 int UtcDaliViewMoveConstructor(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -76,7 +76,7 @@ int UtcDaliViewMoveConstructor(void)
 
 int UtcDaliViewAssignmentOperatorP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   View copy;
   copy = view;
@@ -87,7 +87,7 @@ int UtcDaliViewAssignmentOperatorP(void)
 
 int UtcDaliViewMoveAssignment(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -101,7 +101,7 @@ int UtcDaliViewMoveAssignment(void)
 
 int UtcDaliViewDownCastP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   BaseHandle object(view);
   View view2 = View::DownCast(object);
@@ -113,7 +113,7 @@ int UtcDaliViewDownCastP(void)
 
 int UtcDaliViewDownCastN(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   BaseHandle unInitializedObject;
   View view1 = View::DownCast(unInitializedObject);
   View view2 = DownCast<View>(unInitializedObject);
@@ -124,7 +124,7 @@ int UtcDaliViewDownCastN(void)
 
 int UtcDaliViewGetSizeWidthP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testWidth = 100.0f;
 
@@ -135,7 +135,7 @@ int UtcDaliViewGetSizeWidthP(void)
 
 int UtcDaliViewGetSizeHeightP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testHeight = 200.0f;
 
@@ -146,7 +146,7 @@ int UtcDaliViewGetSizeHeightP(void)
 
 int UtcDaliViewGetPositionXP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testX = 50.0f;
 
@@ -157,7 +157,7 @@ int UtcDaliViewGetPositionXP(void)
 
 int UtcDaliViewGetPositionYP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testY = 75.0f;
 
@@ -168,7 +168,7 @@ int UtcDaliViewGetPositionYP(void)
 
 int UtcDaliViewSizeWidthChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testWidth = 150.0f;
 
@@ -180,7 +180,7 @@ int UtcDaliViewSizeWidthChainingP(void)
 
 int UtcDaliViewSizeHeightChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testHeight = 250.0f;
 
@@ -192,7 +192,7 @@ int UtcDaliViewSizeHeightChainingP(void)
 
 int UtcDaliViewPositionXChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testX = 125.0f;
 
@@ -204,7 +204,7 @@ int UtcDaliViewPositionXChainingP(void)
 
 int UtcDaliViewPositionYChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testY = 175.0f;
 
@@ -216,7 +216,7 @@ int UtcDaliViewPositionYChainingP(void)
 
 int UtcDaliViewBackgroundColorChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const Vector4 testColor(1.0f, 0.0f, 0.0f, 0.5f);
 
@@ -227,7 +227,7 @@ int UtcDaliViewBackgroundColorChainingP(void)
 
 int UtcDaliViewMultipleChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testWidth = 300.0f;
   const float testHeight = 200.0f;
@@ -251,7 +251,7 @@ int UtcDaliViewMultipleChainingP(void)
 
 int UtcDaliViewContentsP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View parent = View::New();
   View child1 = View::New();
   View child2 = View::New();
@@ -264,7 +264,7 @@ int UtcDaliViewContentsP(void)
 
 int UtcDaliViewAsP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   View reference;
 
@@ -276,7 +276,7 @@ int UtcDaliViewAsP(void)
 
 int UtcDaliViewWithP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const float testWidth = 400.0f;
   bool actionCalled = false;
@@ -294,7 +294,7 @@ int UtcDaliViewWithP(void)
 
 int UtcDaliViewGetParentOriginP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
 
   Vector3 parentOrigin = view.GetParentOrigin();
@@ -307,7 +307,7 @@ int UtcDaliViewGetParentOriginP(void)
 
 int UtcDaliViewSetParentOriginP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const Vector3 testOrigin(0.0f, 1.0f, 0.5f);
 
@@ -324,7 +324,7 @@ int UtcDaliViewSetParentOriginP(void)
 
 int UtcDaliViewGetPivotPointP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
 
   Vector3 pivotPoint = view.GetPivotPoint();
@@ -337,7 +337,7 @@ int UtcDaliViewGetPivotPointP(void)
 
 int UtcDaliViewSetPivotPointP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 0.0f, 0.5f);
 
@@ -354,7 +354,7 @@ int UtcDaliViewSetPivotPointP(void)
 
 int UtcDaliViewParentOriginChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const Vector3 testOrigin(0.0f, 0.0f, 0.0f);
 
@@ -366,7 +366,7 @@ int UtcDaliViewParentOriginChainingP(void)
 
 int UtcDaliViewPivotPointChainingP(void)
 {
-  UIFoundationTestApplication application;
+  TestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 1.0f, 1.0f);
 

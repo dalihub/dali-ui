@@ -27,7 +27,7 @@ jobs:
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
-        # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
+        # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/lottie-player.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
 
@@ -49,19 +49,22 @@ jobs:
         # ninja -C build install
         # cd -
         cd dali-core/build/tizen
-        export CC=gcc
-        export CXX=g++
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
         make install -j8
         cd -
         cd dali-adaptor/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
         make install -j8
         cd -
         cd dali-toolkit/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
         make install -j8
         cd -
+        cd build/tizen
+        export CC=gcc
+        export CXX=g++
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make -j8 install
         # cd lottie-player
         # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DLIB_INSTALL_DIR=$DESKTOP_PREFIX/lib .
         # make install -j8
@@ -71,23 +74,12 @@ jobs:
         # make install -j8
         # cd -
 
-    # - name: Build and run
-    #   run: |
-    #     . setenv
-    #     cd build/tizen
-    #     export CC=gcc
-    #     export CXX=g++
-    #     CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
-    #     make -j8 install
-    #     cd -
-
     - name: Run automated test
       run: |
         . setenv
-        cd dali-toolkit/automated-tests
+        cd automated-tests
         ./build.sh
         xvfb-run ./execute.sh
-        cd -
 
     # - name: Run automated test
     #   run: |

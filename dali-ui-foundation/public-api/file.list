@@ -1,0 +1,23 @@
+# Set the source directory
+SET( public_api_src_dir ${ROOT_SRC_DIR}/dali-ui-foundation/public-api )
+
+# Add local source files here
+SET( public_api_src_files
+  ${public_api_src_dir}/unit.cpp
+  ${public_api_src_dir}/view.cpp
+)
+
+# Add public header files here
+SET( public_api_header_files
+  ${public_api_src_dir}/dali-ui-foundation-common.h
+  ${public_api_src_dir}/unit.h
+  ${public_api_src_dir}/view.h
+)
+
+SET( SOURCES ${SOURCES}
+  ${public_api_src_files}
+)
+
+SET( PUBLIC_API_HEADERS ${PUBLIC_API_HEADERS}
+  ${public_api_header_files}
+)

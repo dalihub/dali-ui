@@ -3,7 +3,7 @@ Testing environment   {#auto_testing}
 
 The current test environment from Tizen is the Web-TCT test suite. This was written for testing web components, but can easily be used for testing Dali. The tests remain compatible with the previous TET test suite.
 
-Each of the DALi repositories, **dali-core**, **dali-adaptor**, **dali-toolkit** and **dali-ui**, have their own test suites under the `automated-tests` folder. Within the src folder are a number of secondary folders - these correspond to 'API' tests  and internal (for desktop testing only)
+Each of the DALi repositories, **dali-core**, **dali-adaptor** and **dali-toolkit**, have their own test suites under the `automated-tests` folder. Within the src folder are a number of secondary folders - these correspond to 'API' tests  and internal (for desktop testing only)
 
 Installation
 ------------
@@ -13,24 +13,6 @@ There are usage instructions and installation instructions on the Tizen.org webs
 These are device specific instructions, however, installing the test suite will also provide the relevant packages for running tests on Ubuntu ( follow the first block of quickstart instructions below ).
 
 If you are planning on running tests on device, then flash your handset with latest image, or turn off ssh: `set_usb_debug.sh --mtp-sdb` and plug it in, then follow the quickstart instructions repeated below.
-
-Multi-language locale environment
----------------------------------
-
-Locales for English and Arabic must be installed to pass some test cases:
-
-$ sudo locale-gen en
-$ sudo locale-gen ar
-$ sudo update-locale
-
-Installing fonts required by tests
-----------------------------------
-
-The test suite requires certain fonts in the repository to be installed:
-
-$ mkdir -p ~/.fonts
-$ cp -r resources/fonts/* ~/.fonts/
-$ fc-cache
 
 Quickstart
 ----------
@@ -57,9 +39,9 @@ Testing on desktop
 Building libraries with coverage options
 ----------------------------------------
 
-Building dali toolkit:
+Building dali core:
 
-    cd dali-toolkit  # the location of your dali-toolkit repository
+    cd dali-core  # the location of your dali-core repository
     cd build/tizen
     export CC=gcc
     export CXX=g++
@@ -79,11 +61,19 @@ Run the following commands:
     cd automated-tests
     ./build.sh
 
-This will build each of the test sets found under automated-tests/src.
+This will build dali and dali-internal test sets.
 
 Test sets can be built individually:
 
-    ./build.sh dali-ui-foundation
+    ./build.sh dali
+
+They can also be built without regenerating test case scripts (Useful for quicker rebuilds)
+
+    ./build.sh -n dali-internal
+
+Or without cleaning down the build area (Useful for fast build/run/debug cycles)
+
+    ./build.sh -n -r dali-internal
 
 
 Executing the tests
@@ -103,13 +93,13 @@ To execute a subset of tests, you can run individual test sets, e.g.
 
 To execute a specific test, just pass it on the command line:
 
-    ./execute.sh UtcDaliImageViewNewP
+    ./execute.sh UtcDaliActorNew
 
 To execute a matching subset of tests, use the prefix option:
 
-    ./execute.sh -p UtcDaliImageView
+    ./execute.sh -p UtcDaliActor
 
-will execute all tests that start with the prefix "UtcDaliImageView".
+will execute all tests that start with the prefix "UtcDaliActor".
 
 To use test kit lite, (which is very slow),
 
@@ -143,6 +133,7 @@ diff-spec is any refspec accepted by git-diff. If it's left out, it creates
 a refspec to the latest commit, or uses the index/working tree.
 
 
+
 Testing on target
 =================
 
@@ -155,25 +146,12 @@ sudo apt-get install libconfig-tiny-perl
 If you use a non-standard `GBS_ROOT` then you will need to edit the tcbuild script to match your configuration - change line 96 and add a -B option with your GBS-ROOT path (line 96 = `gbs build -A armv7l --spec core-$1-tests.spec --include-all --keep-packs` ).
 To install on device from a non-standard GBS_ROOT, also modify line 28 (`RPM_DIR="$HOME/GBS-ROOT/local/repos/$PROFILE/armv7l/RPMS"`).
 
+For Dali Core, cd into automated-tests, and use:
 
-For Dali Toolkit, cd into automated-tests, and use:
+sudo ./tcbuild build dali
 
-    sudo ./tcbuild build dali-physics
-    sudo ./tcbuild build dali-scene3d
-    sudo ./tcbuild build dali-scene3d-internal
-    sudo ./tcbuild build dali-shader-generator
-    sudo ./tcbuild build dali-toolkit
-    sudo ./tcbuild build dali-toolkit-internal
-    sudo ./tcbuild build dali-toolkit-styling
-    sudo ./tcbuild build dali-toolkit-third-party
-    ./tcbuild install dali-physics
-    ./tcbuild install dali-scene3d
-    ./tcbuild install dali-scene3d-internal
-    ./tcbuild install dali-shader-generator
-    ./tcbuild install dali-toolkit
-    ./tcbuild install dali-toolkit-internal
-    ./tcbuild install dali-toolkit-styling
-    ./tcbuild install dali-toolkit-third-party
+    sudo ./tcbuild build dali
+    ./tcbuild install dali
 
 Ensure your handset's filesystem is writable:
 
@@ -195,7 +173,7 @@ Adding tests
 For internal API
 ----------------
 
-If you are adding tests for internal API, then this will only work on desktop, and you should add your tests to the src/dali-toolkit-internal test suite.
+If you are adding tests for internal API, then this will only work on desktop, and you should add your tests to the src/dali-internal test suite.
 
 General
 -------
@@ -204,7 +182,7 @@ If you are adding test cases to existing files, then all you need to do is creat
 
     int UtcTestcase(void)
     {
-      ToolkitTestApplication application;
+      TestApplication application;
       ...
       END_TEST;
     }
@@ -264,10 +242,10 @@ On desktop, you can debug the tests by running gdb on the test program:
 
 replace `<TestCase>` with the name of the failing testcase.
 
-For example, using testcase UtcDaliControlBackgroundProperties from the dali-toolkit test suite:
+For example, using testcase UtcDaliActorAddP from the dali-core test suite:
 
-    $ ./execute.sh -d UtcDaliControlBackgroundProperties
-    gdb> r UtcDaliControlBackgroundProperties
+    $ ./execute.sh -d UtcDaliActorAddP
+    gdb> r UtcDaliActorAddP
 
 
 On target, you can re-install the test RPM and associated debug RPMs manually using
@@ -277,7 +255,7 @@ On target, you can re-install the test RPM and associated debug RPMs manually us
 After installing the rpm and it's debug RPMs, you can find the executable in /opt/usr/bin/tct-dali-core. First ensure you have smack permissions set:
 
     chsmack -e "^" /usr/bin/gdb
-    chsmack -e "^" /opt/usr/bin/tct-dali-toolkit-core/tct-dali-toolkit-core
+    chsmack -e "^" /opt/usr/bin/tct-dali-core/tct-dali-core
 
 then run it under gdb as above.
 

@@ -1,7 +1,6 @@
-# prebuild test addons
-IF(DEFINED MODULE)
+IF( DEFINED MODULE )
     MESSAGE(STATUS "Building: ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}")
     ADD_SUBDIRECTORY(${MODULE})
-ELSE()
+ELSE( DEFINED MODULE )
     MESSAGE(FATAL_ERROR "No module selected to build. Aborting...")
-ENDIF()
+ENDIF( DEFINED MODULE )

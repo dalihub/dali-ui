@@ -1,0 +1,11 @@
+# Set the source directory
+SET( ui_foundation_src_dir ${ROOT_SRC_DIR}/dali-ui-foundation/internal )
+
+# Add local source files here
+SET( ui_foundation_src_files
+   ${ui_foundation_src_dir}/view-impl.cpp
+)
+
+SET( SOURCES ${SOURCES}
+  ${ui_foundation_src_files}
+)

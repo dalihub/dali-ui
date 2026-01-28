@@ -1,4 +1,8 @@
+#include <getopt.h>
+#include <stdlib.h>
+#include <string.h>
 #include <test-harness.h>
+
 #include "tct-dali-ui-foundation-core.h"
 
 int main(int argc, char* const argv[])

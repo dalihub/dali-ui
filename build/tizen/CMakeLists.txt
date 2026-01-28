@@ -1,17 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.8.2)
 CMAKE_POLICY(SET CMP0012 NEW) # Prevent dereferencing of OFF/ON as variables
 
-# Project names for the two libraries
-SET(foundation_name "dali2-ui-foundation")
-SET(components_name "dali2-ui-components")
+SET(name "dali2-ui-foundation")
+
 SET(CMAKE_C_STANDARD 99)
 SET(CMAKE_CXX_STANDARD 17)
 
-PROJECT(${foundation_name})
+PROJECT(${name})
 
-# Package names for pkg-config
-SET(FOUNDATION_PKG_NAME ${foundation_name})
-SET(COMPONENTS_PKG_NAME ${components_name})
+SET(PKG_NAME ${name})
 
 SET(GCC_COMPILER_VERSION_REQUIRED "6")
 
@@ -22,17 +19,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # API VERSION (Not DALi release version)
-SET(${foundation_name}_VERSION_MAJOR 2)
-SET(${foundation_name}_VERSION_MINOR 0)
-SET(${foundation_name}_VERSION_PATCH 0)
-SET(${foundation_name}_VERSION ${${foundation_name}_VERSION_MAJOR}.${${foundation_name}_VERSION_MINOR}.${${foundation_name}_VERSION_PATCH} )
-SET(DALI_UI_FOUNDATION_VERSION ${${foundation_name}_VERSION} )
-
-SET(${components_name}_VERSION_MAJOR 2)
-SET(${components_name}_VERSION_MINOR 0)
-SET(${components_name}_VERSION_PATCH 0)
-SET(${components_name}_VERSION ${${components_name}_VERSION_MAJOR}.${${components_name}_VERSION_MINOR}.${${components_name}_VERSION_PATCH} )
-SET(DALI_UI_COMPONENTS_VERSION ${${components_name}_VERSION} )
+SET(${name}_VERSION_MAJOR 2)
+SET(${name}_VERSION_MINOR 0)
+SET(${name}_VERSION_PATCH 0)
+SET(${name}_VERSION ${${name}_VERSION_MAJOR}.${${name}_VERSION_MINOR}.${${name}_VERSION_PATCH} )
+SET(DALI_UI_FOUNDATION_VERSION ${${name}_VERSION} )
 
 # Define options to CMake
 OPTION(ENABLE_EXPORTALL          "Enable Export all symbols" OFF)
@@ -60,6 +51,9 @@ ENDIF()
 
 SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 
+# Define non-boolean options to CMake
+#SET(WITH_STYLE               "480x800" CACHE STRING "Select the style folder to use")
+
 # from root/build/tizen, get back to root
 SET(ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
 
@@ -69,6 +63,17 @@ SET( EXEC_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # Make sure the path is absolute
 GET_FILENAME_COMPONENT(ROOT_SRC_DIR ${ROOT_SRC_DIR} ABSOLUTE)
+
+# Set DALi style
+#SET( dali_style ${WITH_STYLE} )
+
+# Style folder
+#SET( STYLE_BASE_DIR ${ROOT_SRC_DIR}/dali-toolkit/styles )
+#SET( STYLE_DIR ${STYLE_BASE_DIR}/${dali_style} )
+
+#SET( toolkit_styles_base_dir ${STYLE_BASE_DIR} )
+#SET( toolkit_styles_dir ${STYLE_DIR} )
+#SET( toolkit_style_images_dir ${STYLE_DIR}/images )
 
 IF( DEFINED ENV{DALI_DATA_RW_DIR} )
   SET( dataReadWriteDir $ENV{DALI_DATA_RW_DIR} )
@@ -102,10 +107,10 @@ ENDIF( ENABLE_I18N )
 ADD_DEFINITIONS(-DPIC -DSTDC_HEADERS)
 IF( USE_DEFAULT_RESOURCE_DIR )
   ADD_DEFINITIONS( -DDALI_IMAGE_DIR=\"${dataReadOnlyDir}/ui/images/\"
-                    -DDALI_SOUND_DIR=\"${dataReadOnlyDir}/ui/sounds/\"
-                    -DDALI_STYLE_DIR=\"${dataReadOnlyDir}/ui/styles/\"
-                    -DDALI_STYLE_IMAGE_DIR=\"${dataReadOnlyDir}/ui/styles/images/\"
-                    -DDALI_DATA_READ_ONLY_DIR=\"${dataReadOnlyDir}\" )
+                   -DDALI_SOUND_DIR=\"${dataReadOnlyDir}/ui/sounds/\"
+                   -DDALI_STYLE_DIR=\"${dataReadOnlyDir}/ui/styles/\"
+                   -DDALI_STYLE_IMAGE_DIR=\"${dataReadOnlyDir}/ui/styles/images/\"
+                   -DDALI_DATA_READ_ONLY_DIR=\"${dataReadOnlyDir}\" )
 ENDIF()
 
 IF("${ARCH}" STREQUAL "arm")
@@ -136,6 +141,10 @@ IF( ENABLE_GPU_MEMORY_PROFILE )
 ENDIF()
 
 # Set paths
+#SET( toolkit_images_dir  ${ROOT_SRC_DIR}/dali-toolkit/styles/images-common )
+#SET( toolkit_sounds_dir  ${ROOT_SRC_DIR}/dali-toolkit/sounds )
+SET( ui_foundation_src_dir     ${ROOT_SRC_DIR}/dali-ui-foundation/internal )
+SET( public_api_src_dir  ${ROOT_SRC_DIR}/dali-ui-foundation/public-api )
 SET( package_doxy_dir    ${ROOT_SRC_DIR}/doc )
 
 # Set up the include dir
@@ -166,12 +175,12 @@ IF( NOT BIN_DIR )
 ENDIF()
 
 IF( ENABLE_PKG_CONFIGURE )
-  # Configure the pkg-config files
+  # Configure the pkg-config file
+  # Requires the following variables to be setup:
+  # @PREFIX@ @EXEC_PREFIX@ @DALI_VERSION@ @LIB_DIR@ @DEV_INCLUDE_PATH@
   SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
-  SET( FOUNDATION_PKG_CFG_FILE dali2-ui-foundation.pc )
-  SET( COMPONENTS_PKG_CFG_FILE dali2-ui-components.pc )
-  CONFIGURE_FILE( ${FOUNDATION_PKG_CFG_FILE}.in ${FOUNDATION_PKG_CFG_FILE} @ONLY )
-  CONFIGURE_FILE( ${COMPONENTS_PKG_CFG_FILE}.in ${COMPONENTS_PKG_CFG_FILE} @ONLY )
+  SET( CORE_PKG_CFG_FILE dali2-ui-foundation.pc )
+  CONFIGURE_FILE( ${CORE_PKG_CFG_FILE}.in ${CORE_PKG_CFG_FILE} @ONLY )
 ENDIF()
 
 INCLUDE(CheckCXXCompilerFlag)
@@ -191,27 +200,32 @@ IF( NOT ${ENABLE_EXPORTALL} )
   ADD_COMPILE_OPTIONS( "-fvisibility=hidden" )
 ENDIF( NOT ${ENABLE_EXPORTALL} )
 
-INCLUDE_DIRECTORIES(  ${ROOT_SRC_DIR}
+INCLUDE_DIRECTORIES(
+  ${ROOT_SRC_DIR}
   ${DALICORE_INCLUDE_DIRS}
   ${DALIADAPTOR_INCLUDE_DIRS}
   ${DALITOOLKIT_INCLUDE_DIRS}
   ${VCPKG_INCLUDE_DIR}
-  ${INCLUDE_DIR})
+  ${INCLUDE_DIR}
+)
 
-#SET(SOURCE_DIR "${ROOT_SRC_DIR}/dali")
+SET(SOURCE_DIR "${ROOT_SRC_DIR}/dali")
 SET(PACKAGE_DOXY_SRC_DIR "${ROOT_SRC_DIR}/doc")
 
-# ============================================================================
-# DALI-UI-FOUNDATION LIBRARY
-# ============================================================================
+SET(SOURCES "")
 
-SET(FOUNDATION_SOURCES "")
+# could use INCLUDE to get the source lists a different way;
+# would then need to specify a build folder somehow...
+#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/sounds/file.list )
+#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/styles/file.list )
+#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/styles/images-common/file.list )
+INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/internal/file.list )
+INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/file.list )
+INCLUDE( ${ROOT_SRC_DIR}/doc/file.list )
 
-# Add foundation source files if they exist
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
-  FILE(GLOB_RECURSE UI_FOUNDATION_SOURCES
-    "${ROOT_SRC_DIR}/dali-ui-foundation/*.cpp")
-  SET(FOUNDATION_SOURCES ${FOUNDATION_SOURCES} ${UI_FOUNDATION_SOURCES})
+# Platforms with highp shader support can use vector based text
+IF( NOT DEFINED ENABLE_VECTOR_BASED_TEXT_RENDERING )
+  SET(ENABLE_VECTOR_BASED_TEXT_RENDERING ON)
 ENDIF()
 
 SET(LIBTYPE SHARED)
@@ -219,8 +233,7 @@ IF(DEFINED STATIC)
   SET(LIBTYPE STATIC)
 ENDIF()
 
-# Create dali2-ui-foundation library
-ADD_LIBRARY( ${foundation_name} ${LIBTYPE} ${FOUNDATION_SOURCES} )
+ADD_LIBRARY( ${name} ${LIBTYPE} ${SOURCES} )
 
 SET(CUSTOM_COMPILE_OPTIONS "")
 
@@ -236,67 +249,21 @@ IF (HAVE_NO_CLASS_MEMACCESS)
   SET(CUSTOM_COMPILE_OPTIONS ${MY_COMPILE_OPTIONS} -Wno-class-memaccess)
 ENDIF()
 
-target_compile_options(${foundation_name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
+target_compile_options(${name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
 
-TARGET_LINK_LIBRARIES( ${foundation_name}
+TARGET_LINK_LIBRARIES( ${name}
   ${DALICORE_LDFLAGS}
   ${DALIADAPTOR_LDFLAGS}
   ${DALITOOLKIT_LDFLAGS}
-  ${COVERAGE})
+  ${COVERAGE}
+)
 
-SET_TARGET_PROPERTIES( ${foundation_name}
+SET_TARGET_PROPERTIES( ${name}
   PROPERTIES
   VERSION ${DALI_UI_FOUNDATION_VERSION}
-  SOVERSION ${${foundation_name}_VERSION_MAJOR}
-  CLEAN_DIRECT_OUPUT 1)
-
-# ============================================================================
-# DALI-UI-COMPONENTS LIBRARY
-# ============================================================================
-
-SET(COMPONENTS_SOURCES "")
-
-# Add components source files if they exist
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-components)
-  FILE(GLOB_RECURSE UI_COMPONENTS_SOURCES
-    "${ROOT_SRC_DIR}/dali-ui-components/*.cpp")
-  SET(COMPONENTS_SOURCES ${COMPONENTS_SOURCES} ${UI_COMPONENTS_SOURCES})
-ENDIF()
-
-# Create dali2-ui-components library only if there are source files
-IF(COMPONENTS_SOURCES)
-  ADD_LIBRARY( ${components_name} ${LIBTYPE} ${COMPONENTS_SOURCES} )
-
-  target_compile_options(${components_name} PRIVATE ${CUSTOM_COMPILE_OPTIONS})
-
-  TARGET_LINK_LIBRARIES( ${components_name}
-    ${DALICORE_LDFLAGS}
-    ${DALIADAPTOR_LDFLAGS}
-    ${DALITOOLKIT_LDFLAGS}
-    ${COVERAGE})
-
-  # Components library depends on foundation
-  TARGET_LINK_LIBRARIES( ${components_name} ${foundation_name} )
-
-  IF( ANDROID )
-    TARGET_LINK_LIBRARIES( ${components_name} log GLESv3 EGL)
-  ENDIF()
-
-  SET_TARGET_PROPERTIES( ${components_name}
-    PROPERTIES
-    VERSION ${DALI_UI_COMPONENTS_VERSION}
-    SOVERSION ${${components_name}_VERSION_MAJOR}
-    CLEAN_DIRECT_OUPUT 1)
-
-  SET(HAS_COMPONENTS_LIB TRUE)
-ELSE()
-  MESSAGE(STATUS "No source files found for dali2-ui-components, skipping library creation")
-  SET(HAS_COMPONENTS_LIB FALSE)
-ENDIF()
-
-# ============================================================================
-# INSTALLATION
-# ============================================================================
+  SOVERSION ${${name}_VERSION_MAJOR}
+  CLEAN_DIRECT_OUPUT 1
+)
 
 IF( INSTALL_CMAKE_MODULES )
   IF( ENABLE_DEBUG )
@@ -304,101 +271,101 @@ IF( INSTALL_CMAKE_MODULES )
     SET( LIB_DIR "${LIB_DIR}/debug" )
   ENDIF()
 
-  # Install the foundation library files
-  INSTALL( TARGETS ${foundation_name}
-    EXPORT ${foundation_name}-targets
+  # Install the library files
+  INSTALL( TARGETS ${name}
+    EXPORT ${name}-targets
     LIBRARY DESTINATION ${LIB_DIR}
     ARCHIVE DESTINATION ${LIB_DIR}
     RUNTIME DESTINATION ${BIN_DIR}
   )
 
-  # Install the components library files
-  IF(HAS_COMPONENTS_LIB)
-    INSTALL( TARGETS ${components_name}
-      EXPORT ${components_name}-targets
-      LIBRARY DESTINATION ${LIB_DIR}
-      ARCHIVE DESTINATION ${LIB_DIR}
-      RUNTIME DESTINATION ${BIN_DIR}
-    )
-  ENDIF()
-
-  # Install the cmake modules for foundation
+  # Install the cmake modules.
   INSTALL(
-    EXPORT ${foundation_name}-targets
-    NAMESPACE ${foundation_name}::
-    FILE ${foundation_name}-targets.cmake
-    DESTINATION share/${foundation_name}
+    EXPORT ${name}-targets
+    NAMESPACE ${name}::
+    FILE ${name}-targets.cmake
+    DESTINATION share/${name}
   )
 
-  # Install the cmake modules for components
-  IF(HAS_COMPONENTS_LIB)
-    INSTALL(
-      EXPORT ${components_name}-targets
-      NAMESPACE ${components_name}::
-      FILE ${components_name}-targets.cmake
-      DESTINATION share/${components_name}
-    )
-  ENDIF()
-
-  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${foundation_name}-config.cmake "
+  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake "
     include(CMakeFindDependencyMacro)
-    include(\${CMAKE_CURRENT_LIST_DIR}/${foundation_name}-targets.cmake)
+    include(\${CMAKE_CURRENT_LIST_DIR}/${name}-targets.cmake)
   ")
 
-  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${components_name}-config.cmake "
-    include(CMakeFindDependencyMacro)
-    include(\${CMAKE_CURRENT_LIST_DIR}/${components_name}-targets.cmake)
-    find_dependency(${foundation_name} REQUIRED)
-  ")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake DESTINATION share/${name})
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${foundation_name}-config.cmake DESTINATION share/${foundation_name})
-  IF(HAS_COMPONENTS_LIB)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${components_name}-config.cmake DESTINATION share/${components_name})
-  ENDIF()
-
-  # Install the pdb files.
-  IF( ENABLE_DEBUG AND WIN32 )
-    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${foundation_name}.pdb DESTINATION ${BIN_DIR} )
-    IF(HAS_COMPONENTS_LIB)
-      install( FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${components_name}.pdb DESTINATION ${BIN_DIR} )
-    ENDIF()
-  ENDIF()
 ELSE()
-  # Install the library so files and symlinks
-  INSTALL( TARGETS ${foundation_name} DESTINATION ${LIB_DIR} )
-  IF(HAS_COMPONENTS_LIB)
-    INSTALL( TARGETS ${components_name} DESTINATION ${LIB_DIR} )
-  ENDIF()
+  # Install the library so file and symlinks
+  INSTALL( TARGETS ${name} DESTINATION ${LIB_DIR} )
 ENDIF()
 
-# Install the pkg-config files
+# Install the pkg-config file
 IF( ENABLE_PKG_CONFIGURE )
-  INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${FOUNDATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
-  IF(HAS_COMPONENTS_LIB)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${COMPONENTS_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
-  ENDIF()
+  INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${CORE_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
 ENDIF()
 
-# Install headers if they exist
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-components/public-api)
-  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-components/public-api/
-          DESTINATION ${INCLUDE_DIR}/dali-ui-components
-          FILES_MATCHING PATTERN "*.h")
-ENDIF()
+# Glob for resources
+MACRO( COPY_RESOURCES FILE_LIST SRC_RELATIVE_DIRECTORY DESTINATION EXPLICIT_DESTINATION )
+  FOREACH( PATTERN ${FILE_LIST} )
+    FILE(GLOB FILES ${PATTERN} )
+    FOREACH( FILE ${FILES} )
+      STRING(REPLACE ${SRC_RELATIVE_DIRECTORY} ${DESTINATION} NEWFILE ${FILE} )
+      GET_FILENAME_COMPONENT(NEWDIR ${NEWFILE} DIRECTORY)
+      IF( "${EXPLICIT_DESTINATION}" STREQUAL "" )
+        STRING( REPLACE "dali-ui-foundation" "ui-foundation" NEWDIR2 ${NEWDIR} )
+        INSTALL( FILES ${FILE} DESTINATION ${NEWDIR2} )
+      ELSE()
+        INSTALL( FILES ${FILE} DESTINATION ${DESTINATION}/${EXPLICIT_DESTINATION} )
+      ENDIF()
+    ENDFOREACH()
+  ENDFOREACH()
+ENDMACRO()
 
-IF(EXISTS ${ROOT_SRC_DIR}/dali-ui-foundation)
-  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/
-          DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/public-api
-          FILES_MATCHING PATTERN "*.h")
-  INSTALL(DIRECTORY ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api/
-          DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/integration-api
-          FILES_MATCHING PATTERN "*.h")
-ENDIF()
+# macro for installing headers by replacing prefix. (TODO, investigate
+# if there is a CMAKE way of doing this automatically)
+MACRO(INSTALL_HEADERS_WITH_DIRECTORY HEADER_LIST STRIP_PREFIX REPLACE_PREFIX)
+  GET_FILENAME_COMPONENT( SPREFIX ${STRIP_PREFIX} ABSOLUTE )
+  FOREACH(HEADER ${${HEADER_LIST}})
+    STRING(REGEX MATCH "(.*)[/]" DIR ${HEADER})
+    STRING(REPLACE ${SPREFIX} ${REPLACE_PREFIX} NEWDIR ${DIR})
+    INSTALL(FILES ${HEADER} DESTINATION ${INCLUDE_DIR}/${NEWDIR})
+  ENDFOREACH(HEADER)
+ENDMACRO(INSTALL_HEADERS_WITH_DIRECTORY)
 
-# Install main dali-ui-foundation.h if it exists
+# Install headers using lists defined by ADD_SUBDIRECTORY
+INSTALL_HEADERS_WITH_DIRECTORY(PUBLIC_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
+#INSTALL_HEADERS_WITH_DIRECTORY(DEVEL_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
+INSTALL_HEADERS_WITH_DIRECTORY(INTEGRATION_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
+INSTALL_HEADERS_WITH_DIRECTORY(PACKAGE_DOXY_HEADERS ${PACKAGE_DOXY_SRC_DIR} "dali-ui-foundation/doc" )
+
+# Install dali-ui-foundation.h
 INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
 
-# The DALI_UI_PREFIX must be set if this CMakeLists.txt is executed
+# package doxygen file (contains doxygen grouping information)
+INSTALL( FILES ${package_doxy_files} DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/doc )
+
+# On some platforms we want to install the data files to different location compare to
+# the data location used runtime. For example, on Android we want the toolkit library to load
+# the files from /data/data/com.sec.dali_demo/files but to install the files into ${PREFIX}/files
+# for SDK to pick them up for the archive.
+IF( DEFINED ENV{DALI_DATA_RW_INSTALL_DIR} )
+  SET( dataReadWriteInstallDir $ENV{DALI_DATA_RW_INSTALL_DIR} )
+ELSE()
+  SET( dataReadWriteInstallDir ${dataReadWriteDir} )
+ENDIF()
+
+IF( DEFINED ENV{DALI_DATA_RO_INSTALL_DIR} )
+  SET( dataReadOnlyInstallDir $ENV{DALI_DATA_RO_INSTALL_DIR} )
+ELSE()
+  SET( dataReadOnlyInstallDir ${dataReadOnlyDir} )
+ENDIF()
+
+#COPY_RESOURCES( "${dali_toolkit_style_files}" "${ROOT_SRC_DIR}" "${dataReadOnlyInstallDir}" "./toolkit/styles" )
+#COPY_RESOURCES( "${dali_toolkit_image_files}" "${ROOT_SRC_DIR}" "${dataReadOnlyInstallDir}" "./toolkit/images" )
+#COPY_RESOURCES( "${dali_toolkit_sound_files}" "${ROOT_SRC_DIR}" "${dataReadOnlyInstallDir}" "./toolkit/sounds" )
+#COPY_RESOURCES( "${dali_toolkit_style_images}" "${ROOT_SRC_DIR}" "${dataReadOnlyInstallDir}" "./toolkit/styles/images" )
+
+# The DALI_TOOLKIT_PREFIX must be set if this CMakeLists.txt is executed
 # from the top-level CMake script using ADD_SUBDIRECTORY() to avoid
 # target names duplication with other DALi modules.
 IF( ENABLE_COVERAGE )
@@ -465,11 +432,12 @@ IF( ENABLE_COVERAGE )
   ENDIF( LCOV_BIN )
 ENDIF()
 
-IF( CONFIGURE_AUTOMATED_TESTS )
-  # Configure automated tests
-  CONFIGURE_FILE( ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt.in
-                  ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt @ONLY )
-ENDIF()
+
+#IF( CONFIGURE_AUTOMATED_TESTS )
+#  # Configure automated tests
+#  CONFIGURE_FILE( ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt.in
+#                  ${ROOT_SRC_DIR}/automated-tests/CMakeLists.txt @ONLY )
+#ENDIF()
 
 # Configuration Messages
 MESSAGE( STATUS "Configuration:\n" )
