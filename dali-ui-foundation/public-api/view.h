@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <functional>
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES

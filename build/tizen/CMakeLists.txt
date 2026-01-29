@@ -23,7 +23,7 @@ SET(${name}_VERSION_MAJOR 2)
 SET(${name}_VERSION_MINOR 0)
 SET(${name}_VERSION_PATCH 0)
 SET(${name}_VERSION ${${name}_VERSION_MAJOR}.${${name}_VERSION_MINOR}.${${name}_VERSION_PATCH} )
-SET(DALI_UI_FOUNDATION_VERSION ${${name}_VERSION} )
+SET(DALI_UI_VERSION ${${name}_VERSION} )
 
 # Define options to CMake
 OPTION(ENABLE_EXPORTALL          "Enable Export all symbols" OFF)
@@ -177,10 +177,12 @@ ENDIF()
 IF( ENABLE_PKG_CONFIGURE )
   # Configure the pkg-config file
   # Requires the following variables to be setup:
-  # @PREFIX@ @EXEC_PREFIX@ @DALI_VERSION@ @LIB_DIR@ @DEV_INCLUDE_PATH@
+  # @PREFIX@ @EXEC_PREFIX@ @DALI_UI_VERSION@ @LIB_DIR@ @DEV_INCLUDE_PATH@
   SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
-  SET( CORE_PKG_CFG_FILE dali2-ui-foundation.pc )
-  CONFIGURE_FILE( ${CORE_PKG_CFG_FILE}.in ${CORE_PKG_CFG_FILE} @ONLY )
+  SET( UI_FOUNDATION_PKG_CFG_FILE ${CMAKE_CURRENT_BINARY_DIR}/dali2-ui-foundation.pc )
+  SET( UI_FOUNDATION_INTEGRATION_PKG_CFG_FILE ${CMAKE_CURRENT_BINARY_DIR}/dali2-ui-foundation-integration.pc )
+  CONFIGURE_FILE( ${UI_FOUNDATION_PKG_CFG_FILE}.in ${UI_FOUNDATION_PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${UI_FOUNDATION_INTEGRATION_PKG_CFG_FILE}.in ${UI_FOUNDATION_INTEGRATION_PKG_CFG_FILE} @ONLY )
 ENDIF()
 
 INCLUDE(CheckCXXCompilerFlag)
@@ -261,7 +263,7 @@ TARGET_LINK_LIBRARIES( ${name}
 
 SET_TARGET_PROPERTIES( ${name}
   PROPERTIES
-  VERSION ${DALI_UI_FOUNDATION_VERSION}
+  VERSION ${DALI_UI_VERSION}
   SOVERSION ${${name}_VERSION_MAJOR}
   CLEAN_DIRECT_OUPUT 1
 )
@@ -302,7 +304,8 @@ ENDIF()
 
 # Install the pkg-config file
 IF( ENABLE_PKG_CONFIGURE )
-  INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${CORE_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  INSTALL( FILES ${UI_FOUNDATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  INSTALL( FILES ${UI_FOUNDATION_INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
 ENDIF()
 
 # Glob for resources
@@ -337,13 +340,13 @@ ENDMACRO(INSTALL_HEADERS_WITH_DIRECTORY)
 INSTALL_HEADERS_WITH_DIRECTORY(PUBLIC_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
 #INSTALL_HEADERS_WITH_DIRECTORY(DEVEL_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
 INSTALL_HEADERS_WITH_DIRECTORY(INTEGRATION_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
-INSTALL_HEADERS_WITH_DIRECTORY(PACKAGE_DOXY_HEADERS ${PACKAGE_DOXY_SRC_DIR} "dali-ui-foundation/doc" )
+#INSTALL_HEADERS_WITH_DIRECTORY(PACKAGE_DOXY_HEADERS ${PACKAGE_DOXY_SRC_DIR} "dali-ui-foundation/doc" )
 
 # Install dali-ui-foundation.h
 INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
 
 # package doxygen file (contains doxygen grouping information)
-INSTALL( FILES ${package_doxy_files} DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/doc )
+#INSTALL( FILES ${package_doxy_files} DESTINATION ${INCLUDE_DIR}/dali-ui-foundation/doc )
 
 # On some platforms we want to install the data files to different location compare to
 # the data location used runtime. For example, on Android we want the toolkit library to load
