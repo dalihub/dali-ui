@@ -221,6 +221,7 @@ SET(SOURCES "")
 #INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/styles/images-common/file.list )
 INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/internal/file.list )
 INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/file.list )
+INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api/file.list )
 INCLUDE( ${ROOT_SRC_DIR}/doc/file.list )
 
 # Platforms with highp shader support can use vector based text

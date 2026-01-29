@@ -31,9 +31,9 @@ namespace UI
 {
 
 // Forward declarations
-namespace Internal
+namespace Integration
 {
-class View;
+class ViewImpl;
 }
 
 #ifndef DEFINE_BASE_CHAINING_METHOD
@@ -238,7 +238,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Control implementation
    */
-  DALI_INTERNAL View(Internal::View& implementation);
+  DALI_INTERNAL View(Integration::ViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Internal::CustomActor pointer.

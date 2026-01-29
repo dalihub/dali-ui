@@ -1,0 +1,20 @@
+# Set the source directory
+SET( integration_api_src_dir ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api )
+
+# Add local source files here
+SET( integration_api_src_files
+  ${integration_api_src_dir}/view-impl.cpp
+)
+
+# Add public header files here
+SET( integration_api_header_files
+  ${public_api_src_dir}/view-impl.h
+)
+
+SET( SOURCES ${SOURCES}
+  ${integration_api_src_files}
+)
+
+SET( INTEGRATION_API_HEADERS_API_HEADERS ${INTEGRATION_API_HEADERS_API_HEADERS}
+  ${integration_api_header_files}
+)

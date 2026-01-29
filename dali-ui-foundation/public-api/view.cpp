@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view.h>
-#include <dali-ui-foundation/internal/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {
@@ -34,7 +34,7 @@ View::View()
 
 View View::New()
 {
-  return Internal::View::New();
+  return Integration::ViewImpl::New();
 }
 
 View::View(const View& view)
@@ -73,7 +73,7 @@ View View::DownCast(BaseHandle handle)
   if(control)
   {
     CustomActorImpl& customImpl = control.GetImplementation();
-    Internal::View* impl = dynamic_cast<Internal::View*>(&customImpl);
+    Integration::ViewImpl* impl = dynamic_cast<Integration::ViewImpl*>(&customImpl);
     if(impl)
     {
       result = View(customImpl.GetOwner());
@@ -82,7 +82,7 @@ View View::DownCast(BaseHandle handle)
   return result;
 }
 
-View::View(Internal::View& implementation)
+View::View(Integration::ViewImpl& implementation)
 : Control(implementation)
 {
 }
@@ -90,67 +90,67 @@ View::View(Internal::View& implementation)
 View::View(Dali::Internal::CustomActor* internal)
 : Control(internal)
 {
-  VerifyCustomActorPointer<Internal::View>(internal);
+  VerifyCustomActorPointer<Integration::ViewImpl>(internal);
 }
 
 float View::GetSizeWidth() const
 {
-  return Internal::GetImpl(*this).GetSizeWidth();
+  return Integration::GetImpl(*this).GetSizeWidth();
 }
 
 void View::SetSizeWidth(float width)
 {
-  Internal::GetImpl(*this).SetSizeWidth(width);
+  Integration::GetImpl(*this).SetSizeWidth(width);
 }
 
 float View::GetSizeHeight() const
 {
-  return Internal::GetImpl(*this).GetSizeHeight();
+  return Integration::GetImpl(*this).GetSizeHeight();
 }
 
 void View::SetSizeHeight(float height)
 {
-  Internal::GetImpl(*this).SetSizeHeight(height);
+  Integration::GetImpl(*this).SetSizeHeight(height);
 }
 
 float View::GetPositionX() const
 {
-  return Internal::GetImpl(*this).GetPositionX();
+  return Integration::GetImpl(*this).GetPositionX();
 }
 
 void View::SetPositionX(float x)
 {
-  Internal::GetImpl(*this).SetPositionX(x);
+  Integration::GetImpl(*this).SetPositionX(x);
 }
 
 float View::GetPositionY() const
 {
-  return Internal::GetImpl(*this).GetPositionY();
+  return Integration::GetImpl(*this).GetPositionY();
 }
 
 void View::SetPositionY(float y)
 {
-  Internal::GetImpl(*this).SetPositionY(y);
+  Integration::GetImpl(*this).SetPositionY(y);
 }
 
 Vector3 View::GetParentOrigin() const
 {
-  return Internal::GetImpl(*this).GetParentOrigin();
+  return Integration::GetImpl(*this).GetParentOrigin();
 }
 
 void View::SetParentOrigin(const Vector3& point)
 {
-  Internal::GetImpl(*this).SetParentOrigin(point);
+  Integration::GetImpl(*this).SetParentOrigin(point);
 }
 
 Vector3 View::GetPivotPoint() const
 {
-  return Internal::GetImpl(*this).GetPivotPoint();
+  return Integration::GetImpl(*this).GetPivotPoint();
 }
 
 void View::SetPivotPoint(const Vector3& point)
 {
-  Internal::GetImpl(*this).SetPivotPoint(point);
+  Integration::GetImpl(*this).SetPivotPoint(point);
 }
 
 } // namespace UI

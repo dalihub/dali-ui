@@ -22,7 +22,7 @@
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {
@@ -30,13 +30,13 @@ namespace Dali
 namespace UI
 {
 
-namespace Internal
+namespace Integration
 {
 
-UI::View View::New()
+UI::View ViewImpl::New()
 {
   // Create the implementation, temporarily owned on stack
-  IntrusivePtr<Internal::View> impl = new Internal::View();
+  IntrusivePtr<Integration::ViewImpl> impl = new Integration::ViewImpl();
 
   // Pass ownership to CustomActor handle
   UI::View handle = UI::View(*impl);
@@ -47,84 +47,84 @@ UI::View View::New()
   return handle;
 }
 
-View::View()
+ViewImpl::ViewImpl()
 : Toolkit::Internal::Control(Toolkit::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT)
 {
 }
 
-View::~View()
+ViewImpl::~ViewImpl()
 {
 }
 
-void View::OnInitialize()
+void ViewImpl::OnInitialize()
 {
   // Call base class initialization
   Toolkit::Internal::Control::OnInitialize();
   Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
 }
 
-bool View::OnKeyEvent(const KeyEvent& event)
+bool ViewImpl::OnKeyEvent(const KeyEvent& event)
 {
   // Call base class implementation
   return Toolkit::Internal::Control::OnKeyEvent(event);
 }
 
-float View::GetSizeWidth() const
+float ViewImpl::GetSizeWidth() const
 {
   return Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
 }
 
-void View::SetSizeWidth(float width)
+void ViewImpl::SetSizeWidth(float width)
 {
   Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
 }
 
-float View::GetSizeHeight() const
+float ViewImpl::GetSizeHeight() const
 {
   return Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
 }
 
-void View::SetSizeHeight(float height)
+void ViewImpl::SetSizeHeight(float height)
 {
   Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
 }
 
-float View::GetPositionX() const
+float ViewImpl::GetPositionX() const
 {
   return Self().GetProperty<float>(Actor::Property::POSITION_X);
 }
 
-void View::SetPositionX(float x)
+void ViewImpl::SetPositionX(float x)
 {
   Self().SetProperty(Actor::Property::POSITION_X, x);
 }
 
-float View::GetPositionY() const
+float ViewImpl::GetPositionY() const
 {
   return Self().GetProperty<float>(Actor::Property::POSITION_Y);
 }
 
-void View::SetPositionY(float y)
+void ViewImpl::SetPositionY(float y)
 {
   Self().SetProperty(Actor::Property::POSITION_Y, y);
 }
 
-Vector3 View::GetParentOrigin() const
+Vector3 ViewImpl::GetParentOrigin() const
 {
   return Self().GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN);
 }
 
-void View::SetParentOrigin(const Vector3& point)
+void ViewImpl::SetParentOrigin(const Vector3& point)
 {
   Self().SetProperty(Actor::Property::PARENT_ORIGIN, point);
 }
 
-Vector3 View::GetPivotPoint() const
+Vector3 ViewImpl::GetPivotPoint() const
 {
   return Self().GetProperty<Vector3>(Actor::Property::ANCHOR_POINT);
 }
 
-void View::SetPivotPoint(const Vector3& point)
+void ViewImpl::SetPivotPoint(const Vector3& point)
 {
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
 }

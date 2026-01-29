@@ -30,7 +30,7 @@ namespace Dali
 namespace UI
 {
 
-namespace Internal
+namespace Integration
 {
 
 /**
@@ -42,7 +42,7 @@ namespace Internal
  *
  * @see Dali::UI::View
  */
-class View : public Toolkit::Internal::Control
+class ViewImpl : public Toolkit::Internal::Control
 {
 public:
 
@@ -58,7 +58,7 @@ protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
-  virtual ~View();
+  virtual ~ViewImpl();
 
 public:
 
@@ -72,7 +72,7 @@ protected:
    * @brief View constructor.
    *
    */
-  View();
+  ViewImpl();
 
 public:
 
@@ -152,10 +152,10 @@ public:
 private:
 
   // Not copyable or movable
-  View(const View&) = delete;
-  View(View&&) = delete;
-  View& operator=(const View&) = delete;
-  View& operator=(View&&) = delete;
+  ViewImpl(const ViewImpl&) = delete;
+  ViewImpl(ViewImpl&&) = delete;
+  ViewImpl& operator=(const ViewImpl&) = delete;
+  ViewImpl& operator=(ViewImpl&&) = delete;
 
 private:
 
@@ -164,22 +164,22 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::View& GetImpl(UI::View& view)
+inline Integration::ViewImpl& GetImpl(UI::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<Internal::View&>(handle);
+  return static_cast<Integration::ViewImpl&>(handle);
 }
 
-inline const Internal::View& GetImpl(const UI::View& view)
+inline const Integration::ViewImpl& GetImpl(const UI::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   const Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<const Internal::View&>(handle);
+  return static_cast<const Integration::ViewImpl&>(handle);
 }
 
 } // namespace Internal
