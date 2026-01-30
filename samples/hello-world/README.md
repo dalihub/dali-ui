@@ -15,6 +15,6 @@ $./bin/hello-world.example
 ### GBS build (Tizen)
 ```
 # dali-ui root
-$gbs -c ../scripts/gbs.conf build -A armv7l --include-all --packaging-dir $samples/hello-world/packaging
+$gbs build -A armv7l --include-all --packaging-dir $samples/hello-world/packaging
 ```
 Check `com.samsung.dali.hello-world-2.0.0-1.armv7l.rpm` generated.
