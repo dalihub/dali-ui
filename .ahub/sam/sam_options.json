@@ -1,0 +1,6 @@
+{
+    "calculate":
+    {
+        "metrics": "cc,dc,gm,cbo,dep,loc,ccd"
+    }
+}
