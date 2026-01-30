@@ -110,7 +110,7 @@ jobs:
         uses: CODE-Actions/testhub@v1
         if: always()
         with:
-          test-tool: nunit
+          test-tool: gtest
           test-artifact-name: test_results
-          coverage-tool: coverlet
+          coverage-tool: lcov
           coverage-artifact-name: coverage
