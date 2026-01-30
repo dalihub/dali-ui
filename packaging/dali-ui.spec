@@ -1,6 +1,7 @@
+# Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui
 Summary:    DALi UI Toolkit
-Version:    2.5.6
+Version:    2.0.0.10023
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
