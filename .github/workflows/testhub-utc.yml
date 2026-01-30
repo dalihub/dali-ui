@@ -80,79 +80,37 @@ jobs:
         cd automated-tests
         ./build.sh
         xvfb-run ./execute.sh
+        ./coverage.sh
 
-    # - name: Run automated test
-    #   run: |
-    #     . setenv
+    - name: Collect artifacts
+      run: |
+        mkdir test_results coverage
+        cp automated-tests/tct-dali-ui-foundation-core-tests.xml test_results
+        cp -rf build/tizen/doc/coverage/* coverage/
+        cp build/tizen/dali.info coverage/
 
-    #     ulimit -c unlimited
+    - name: Upload artifacts (test_results)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: test_results     # name of stored artifact
+        path: test_results     # target directory or file to store
 
-    #     cd automated-tests
-    #     ./build.sh
+    - name: Upload artifacts (coverage)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: coverage
 
-    #     # 스크립트가 자체적으로 dbus-launch를 호출하지 않도록 수정합니다.
-    #     sed -i 's/dbus-launch //g' ./execute.sh
-
-    #     # 진단 명령어 추가
-    #     echo "--- Environment variables ---"
-    #     printenv | sort
-    #     echo "---------------------------"
-
-    #     # 생성된 테스트 실행 파일 중 하나를 찾아 라이브러리 의존성을 확인합니다.
-    #     TEST_EXEC=$(find ./build/src -name "tct-*-core" | head -n 1)
-    #     if [ -n "$TEST_EXEC" ]; then
-    #       echo "--- Checking library dependencies for $TEST_EXEC ---"
-    #       ldd "$TEST_EXEC"
-    #       echo "----------------------------------------------------"
-    #     else
-    #       echo "--- Could not find any test executables to check ---"
-    #     fi
-
-    #     # xvfb-run을 바깥쪽 래퍼로 사용하여 테스트를 실행합니다.
-    #     # -a 옵션은 xvfb-run이 자동으로 비어있는 서버 번호를 찾게 합니다.
-    #     xvfb-run -a dbus-run-session ./execute.sh
-
-    #     cd -
-
-    # - name: Upload artifacts
-    #   if: failure()
-    #   uses: CODE-Actions/upload-artifact@v2
-    #   with:
-    #     name: core-dump-artifact
-    #     path: automated-tests/core
-    #     retention-days: 7
-
-    # - name: Collect artifacts
-    #   run: |
-    #     mkdir test_results coverage summary
-    #     echo "### Test result :rocket:" >> $GITHUB_STEP_SUMMARY
-    #     echo "" >> $GITHUB_STEP_SUMMARY
-    #     cat /tmp/test_*/summary* >> $GITHUB_STEP_SUMMARY
-    #     cp /tmp/test_*/*.xml test_results
-    #     cp test/Tizen.NUI.OneUI.Integrated.UnitTest/coverage.cobertura.xml coverage
-
-    # - name: Upload artifacts (test_results)
-    #   uses: CODE-Actions/upload-artifact@v2
-    #   with:
-    #     name: test_results     # name of stored artifact
-    #     path: test_results     # target directory or file to store
-
-    # - name: Upload artifacts (coverage)
-    #   uses: CODE-Actions/upload-artifact@v2
-    #   with:
-    #     name: coverage
-    #     path: coverage
-
-  # testhub:
-  #   runs-on: [ code-linux ]          # runner whatever you want
-  #   if: always()                     # run testhub job even if there are failed testcases
-  #   needs: [ build ]
-  #   steps:
-  #     - name: Send to TestHub
-  #       uses: CODE-Actions/testhub@v1
-  #       if: always()
-  #       with:
-  #         test-tool: nunit
-  #         test-artifact-name: test_results
-  #         coverage-tool: coverlet
-  #         coverage-artifact-name: coverage
+  testhub:
+    runs-on: [ code-linux ]          # runner whatever you want
+    if: always()                     # run testhub job even if there are failed testcases
+    needs: [ build ]
+    steps:
+      - name: Send to TestHub
+        uses: CODE-Actions/testhub@v1
+        if: always()
+        with:
+          test-tool: nunit
+          test-artifact-name: test_results
+          coverage-tool: coverlet
+          coverage-artifact-name: coverage
