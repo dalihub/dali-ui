@@ -1,0 +1,90 @@
+name: "Release to tizen"
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch'
+        required: true
+        default: 'devel'
+
+jobs:
+  deploy:
+    runs-on: [ code-large ]
+    permissions:
+      contents: write
+    steps:
+
+    # - name: Setup SSH
+    #   uses: code-actions/webfactory-ssh-agent@v0.7.0
+    #   with:
+    #     ssh-private-key: ${{ secrets.JY_SSH_PRIVATE_KEY }}
+
+    - name: Git config
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -t rsa github.sec.samsung.net >> ~/.ssh/known_hosts
+        git config --global user.name "github-action[bot]"
+        git config --global user.email "github-action[bot]@users.noreply.com"
+
+    - name: Clone
+      uses: code-actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.source_branch }}
+        ssh-key: ${{ secrets.JY_SSH_PRIVATE_KEY }}
+        fetch-depth: 0
+
+    - name: Change version
+      id: version
+      shell: bash
+      run: |
+        source ./packaging/version.txt
+        VERSION=$RPM_VERSION.$((10000+$(git rev-list --count HEAD)))
+        echo VERSION=$VERSION
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        ./packaging/makespec.sh -r $VERSION
+
+    - name: Prepare GBS tool
+      run: |
+        VERSION_ID=$(lsb_release -rs)
+        echo "Current Ubuntu version is $VERSION_ID"
+        REPO_URL="http://download.tizen.org/tools/latest-release/Ubuntu_${VERSION_ID}/ /"
+        sudo echo "deb [trusted=yes] $REPO_URL" | sudo tee /etc/apt/sources.list.d/tizen.list
+        sudo apt-get update
+        sudo apt-get install -y gbs
+
+    - name: GBS build
+      run: |
+        gbs -c .github/workflows/gbs.conf build -A armv7l --include-all
+        mkdir rpms
+        cp ~/GBS_ROOT/Unified/local/repos/tizen_unified/armv7l/RPMS/*.rpm rpms
+
+    - name: Commit changes
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Push release commit
+        git add .
+        git commit -m "Release $VERSION"
+        git push
+
+        # Sync to tizen branch
+        git checkout -B tizen
+        git merge ${{ github.event.inputs.source_branch }}
+        git tag -fa "v$VERSION" -m "Release $VERSION"
+        git push origin tizen --follow-tags
+        echo v${{ steps.version.outputs.version }} >> $GITHUB_STEP_SUMMARY
+
+    - name: Create Release
+      uses: code-actions/softprops-action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: v${{ steps.version.outputs.version }}
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+        files: rpms/*
+

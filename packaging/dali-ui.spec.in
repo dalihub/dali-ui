@@ -1,0 +1,162 @@
+Name:       dali2-ui
+Summary:    DALi UI Toolkit
+Version:    @rpm_version@
+Release:    1
+Group:      System/Libraries
+License:    Apache-2.0 and BSD-3-Clause and MIT
+URL:        https://github.com/dalihub/dali-ui
+Source0:    %{name}-%{version}.tar.gz
+
+Requires(post): /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
+BuildRequires:  cmake
+BuildRequires:  pkgconfig
+BuildRequires:  gawk
+BuildRequires:  pkgconfig(dali2-core)
+BuildRequires:  pkgconfig(dali2-adaptor)
+BuildRequires:  pkgconfig(dali2-toolkit)
+
+%if 0%{?tizen_version_major} >= 3
+BuildRequires:  pkgconfig(libtzplatform-config)
+%endif
+
+# For ASAN test
+%if "%{vd_asan}" == "1" || "%{asan}" == "1"
+BuildRequires: asan-force-options
+BuildRequires: asan-build-env
+BuildRequires: libasan
+%endif
+
+%description
+DALi library providing app development tools and UI components
+
+##############################
+# devel
+##############################
+%package devel
+Summary:    Development components for DALi UI
+Group:      Development/Building
+Requires:   %{name} = %{version}-%{release}
+Requires:   %{name}-integration-devel = %{version}-%{release}
+
+%description devel
+Development components for DALi UI - public headers and package config
+
+##############################
+# integration-devel
+##############################
+%package integration-devel
+Summary:    Integration development package for DALi UI
+Group:      Development/Building
+Requires:   %{name} = %{version}-%{release}
+
+%description integration-devel
+Integration development package for DALi UI - headers for integration level.
+
+##############################
+# Preparation
+##############################
+%prep
+%setup -q
+
+%define dev_include_path %{_includedir}
+
+##############################
+# Build
+##############################
+%build
+PREFIX="/usr"
+CXXFLAGS+=" -Wall -g -Os -DNDEBUG -fPIC -fvisibility-inlines-hidden -fdata-sections -ffunction-sections "
+LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -Wl,--gc-sections -lgcc_s -lgcc -Wl,-Bsymbolic-functions "
+
+%ifarch %{arm}
+CXXFLAGS+=" -D_ARCH_ARM_ -mfpu=neon"
+%endif
+
+%if 0%{?enable_coverage}
+CXXFLAGS+=" --coverage "
+LDFLAGS+=" --coverage "
+%endif
+
+libtoolize --force
+cd %{_builddir}/%{name}-%{version}/build/tizen
+
+CFLAGS="${CFLAGS:-%optflags}" ;
+CXXFLAGS="${CXXFLAGS:-%optflags}" ;
+LDFLAGS="${LDFLAGS:-%optflags}" ;
+
+%if "%{vd_asan}" == "1" || "%{asan}" == "1"
+CFLAGS+=" -fsanitize=address"
+CXXFLAGS+=" -fsanitize=address -Wno-maybe-uninitialized"
+LDFLAGS+=" -fsanitize=address"
+%endif
+export CFLAGS;
+export CXXFLAGS;
+export LDFLAGS;
+
+cmake \
+%if 0%{?enable_debug}
+      -DCMAKE_BUILD_TYPE=Debug \
+%endif
+      -DENABLE_TRACE=ON \
+      -DENABLE_BACKTRACE=ON \
+%if 0%{?enable_low_spec_memory_management}
+      -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
+%endif
+%if 0%{?enable_gpu_memory_profile}
+      -DENABLE_GPU_MEMORY_PROFILE=ON \
+%endif
+      -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+      -DCMAKE_INSTALL_LIBDIR=%{_libdir} \
+      -DCMAKE_INSTALL_INCLUDEDIR=%{_includedir}
+
+make %{?jobs:-j%jobs}
+
+##############################
+# Installation
+##############################
+%install
+rm -rf %{buildroot}
+cd build/tizen
+
+pushd %{_builddir}/%{name}-%{version}/build/tizen
+%make_install
+
+##############################
+# Post Install
+##############################
+%post
+/sbin/ldconfig
+exit 0
+
+##############################
+# Post Uninstall
+##############################
+%postun
+/sbin/ldconfig
+exit 0
+
+##############################
+# Files in Binary Packages
+##############################
+
+%files
+%if 0%{?enable_dali_smack_rules}
+%manifest dali-ui-foundation.manifest-smack
+%else
+%manifest dali-ui-foundation.manifest
+%endif
+%defattr(-,root,root,-)
+%{_libdir}/libdali2-ui-foundation.so*
+%license LICENSE
+
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/pkgconfig/dali2-ui-foundation.pc
+%{dev_include_path}/dali-ui-foundation/*.h
+%{dev_include_path}/dali-ui-foundation/public-api/*
+
+%files integration-devel
+%defattr(-,root,root,-)
+%{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
+%{dev_include_path}/dali-ui-foundation/integration-api/*
