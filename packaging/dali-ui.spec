@@ -101,6 +101,7 @@ cmake \
 %endif
       -DENABLE_TRACE=ON \
       -DENABLE_BACKTRACE=ON \
+      -DGBS_BUILD=ON \
 %if 0%{?enable_low_spec_memory_management}
       -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
 %endif

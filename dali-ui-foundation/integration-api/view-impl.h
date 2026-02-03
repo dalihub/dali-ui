@@ -89,6 +89,7 @@ public:
   bool OnKeyEvent(const KeyEvent& event) override;
 
 public:
+
   /**
    * @copydoc Dali::UI::View::GetSizeWidth
    */
@@ -182,7 +183,7 @@ inline const Integration::ViewImpl& GetImpl(const UI::View& view)
   return static_cast<const Integration::ViewImpl&>(handle);
 }
 
-} // namespace Internal
+} // namespace Integration
 
 } // namespace UI
 

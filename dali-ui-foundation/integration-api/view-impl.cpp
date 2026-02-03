@@ -48,7 +48,7 @@ UI::View ViewImpl::New()
 }
 
 ViewImpl::ViewImpl()
-: Toolkit::Internal::Control(Toolkit::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT)
+  : Toolkit::Internal::Control(Toolkit::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT)
 {
 }
 
@@ -129,7 +129,7 @@ void ViewImpl::SetPivotPoint(const Vector3& point)
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
 }
 
-} // namespace Internal
+} // namespace Integration
 
 } // namespace UI
 

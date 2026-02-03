@@ -1,0 +1,48 @@
+---
+Language: Cpp
+BasedOnStyle: Google
+
+Standard: c++17
+ColumnLimit: 120
+IndentWidth: 2
+
+# 접근 제어자(public, protected 등) 앞의 스페이스 제거
+AccessModifierOffset: -2
+
+SortIncludes: false
+
+# 생성자 초기화 리스트 설정 (one-line 방지)
+PackConstructorInitializers: Never
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+AllowAllConstructorInitializersOnNextLine: true
+ConstructorInitializerIndentWidth: 2
+
+EmptyLineBeforeAccessModifier: Leave
+EmptyLineAfterAccessModifier: Leave
+
+# 주석 앞의 스페이스를 1칸으로 제한
+SpacesBeforeTrailingComments: 1
+
+# 중괄호 및 블록 설정
+InsertBraces: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+BreakBeforeBraces: Allman
+
+# Allman 스타일 세부 제어
+BraceWrapping:
+  AfterFunction: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterNamespace: true
+  BeforeElse: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  IndentBraces: false
+
+NamespaceIndentation: None
+PointerAlignment: Left
+AlwaysBreakTemplateDeclarations: Yes
+---

@@ -32,8 +32,7 @@ namespace UI
 {
 
 #ifndef DEFINE_CHAINING_METHOD_VIEW_DERIVED
-#define DEFINE_CHAINING_METHOD_VIEW_DERIVED(ClassType) \
-  DEFINE_CHAINING_METHOD_VIEW(ClassType)
+#define DEFINE_CHAINING_METHOD_VIEW_DERIVED(ClassType) DEFINE_CHAINING_METHOD_VIEW(ClassType)
 #endif
 
 /**
@@ -114,11 +113,13 @@ public: // Static Methods
   static ViewDerived DownCast(BaseHandle handle);
 
 public: // API
+
   DEFINE_CHAINING_METHOD_VIEW_DERIVED(ViewDerived)
 
 public: // Signals
 
 public: // Not intended for application developers
+
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.

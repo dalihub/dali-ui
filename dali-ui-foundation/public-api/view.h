@@ -39,15 +39,14 @@ class ViewImpl;
 
 #ifndef DEFINE_BASE_CHAINING_METHOD
 #define DEFINE_BASE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg, Body) \
-  /** \
-   * @brief Sets the PropertyName. \
-   * @param[in] VArg The required value. \
-   * @return A reference to the instance itself for method chaining. \
-   */ \
-  ClassType& PropertyName(TArg VArg) \
-  { \
-    Body \
-    return static_cast<ClassType&>(*this); \
+  /**                                                                          \
+   * @brief Sets the PropertyName.                                             \
+   * @param[in] VArg The required value.                                       \
+   * @return A reference to the instance itself for method chaining.           \
+   */                                                                          \
+  ClassType& PropertyName(TArg VArg)                                           \
+  {                                                                            \
+    Body return static_cast<ClassType&>(*this);                                \
   }
 
 #define DEFINE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg) \
@@ -55,57 +54,57 @@ class ViewImpl;
 #endif
 
 #ifndef DEFINE_CHAINING_METHOD_VIEW
-#define DEFINE_CHAINING_METHOD_VIEW(ClassType) \
-  DEFINE_CHAINING_METHOD(ClassType, SizeWidth, float, width) \
-  DEFINE_CHAINING_METHOD(ClassType, SizeHeight, float, height) \
-  DEFINE_CHAINING_METHOD(ClassType, PositionX, float, x) \
-  DEFINE_CHAINING_METHOD(ClassType, PositionY, float, y) \
-  DEFINE_CHAINING_METHOD(ClassType, BackgroundColor, const Vector4&, color) \
-  DEFINE_CHAINING_METHOD(ClassType, ParentOrigin, const Vector3&, point) \
-  DEFINE_CHAINING_METHOD(ClassType, PivotPoint, const Vector3&, point) \
-  /** \
-   * @brief Adds a list of children to this View in a declarative way. \
-   * This method allows for a hierarchical UI tree construction by passing \
-   * a brace-enclosed initializer list of View objects. \
+#define DEFINE_CHAINING_METHOD_VIEW(ClassType)                                           \
+  DEFINE_CHAINING_METHOD(ClassType, SizeWidth, float, width)                             \
+  DEFINE_CHAINING_METHOD(ClassType, SizeHeight, float, height)                           \
+  DEFINE_CHAINING_METHOD(ClassType, PositionX, float, x)                                 \
+  DEFINE_CHAINING_METHOD(ClassType, PositionY, float, y)                                 \
+  DEFINE_CHAINING_METHOD(ClassType, BackgroundColor, const Vector4&, color)              \
+  DEFINE_CHAINING_METHOD(ClassType, ParentOrigin, const Vector3&, point)                 \
+  DEFINE_CHAINING_METHOD(ClassType, PivotPoint, const Vector3&, point)                   \
+  /**                                                                                    \
+   * @brief Adds a list of children to this View in a declarative way.                   \
+   * This method allows for a hierarchical UI tree construction by passing               \
+   * a brace-enclosed initializer list of View objects.                                  \
    * @param[in] children The initializer list containing child View handles to be added. \
-   * @return A reference to the instance itself for method chaining. \
-   */ \
-  ClassType& Contents(std::initializer_list<Actor> children) \
-  { \
-    for (const auto& child : children) \
-    { \
-      Add(child); \
-    } \
-    return static_cast<ClassType&>(*this); \
-  } \
-  \
-  /** \
-   * @brief Assigns this View instance to a target variable. \
-   * This method is useful for capturing a reference to a View created within \
-   * a declarative UI tree for later use. \
-   * @param[out] self The variable where this instance will be assigned. \
-   * @return A reference to the instance itself for method chaining. \
-   */ \
-  ClassType& As(ClassType& self) \
-  { \
-    self = static_cast<ClassType&>(*this); \
-    return static_cast<ClassType&>(*this); \
-  } \
-  \
-  /** \
-   * @brief Executesa custom action on this View instance. \
-   * Use this method to perform additional initialization or logic on a View \
-   * without breaking the declarative method chaining. \
-   * @param[in] action A function or lambda to be executed with this instance. \
-   * @return A reference to the instance itself for method chaining. \
-   */ \
-  ClassType& With(std::function<void(ClassType&)> action) \
-  { \
-    if (action) \
-    { \
-      action(*this); \
-    } \
-    return static_cast<ClassType&>(*this); \
+   * @return A reference to the instance itself for method chaining.                     \
+   */                                                                                    \
+  ClassType& Contents(std::initializer_list<Actor> children)                             \
+  {                                                                                      \
+    for (const auto& child : children)                                                   \
+    {                                                                                    \
+      Add(child);                                                                        \
+    }                                                                                    \
+    return static_cast<ClassType&>(*this);                                               \
+  }                                                                                      \
+                                                                                         \
+  /**                                                                                    \
+   * @brief Assigns this View instance to a target variable.                             \
+   * This method is useful for capturing a reference to a View created within            \
+   * a declarative UI tree for later use.                                                \
+   * @param[out] self The variable where this instance will be assigned.                 \
+   * @return A reference to the instance itself for method chaining.                     \
+   */                                                                                    \
+  ClassType& As(ClassType& self)                                                         \
+  {                                                                                      \
+    self = static_cast<ClassType&>(*this);                                               \
+    return static_cast<ClassType&>(*this);                                               \
+  }                                                                                      \
+                                                                                         \
+  /**                                                                                    \
+   * @brief Executesa custom action on this View instance.                               \
+   * Use this method to perform additional initialization or logic on a View             \
+   * without breaking the declarative method chaining.                                   \
+   * @param[in] action A function or lambda to be executed with this instance.           \
+   * @return A reference to the instance itself for method chaining.                     \
+   */                                                                                    \
+  ClassType& With(std::function<void(ClassType&)> action)                                \
+  {                                                                                      \
+    if (action)                                                                          \
+    {                                                                                    \
+      action(*this);                                                                     \
+    }                                                                                    \
+    return static_cast<ClassType&>(*this);                                               \
   }
 #endif
 
@@ -233,6 +232,7 @@ public: // API
 public: // Signals
 
 public: // Not intended for application developers
+
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.
@@ -250,6 +250,7 @@ public: // Not intended for application developers
   /// @endcond
 
 protected:
+
   /**
    * @brief Sets the width of the View.
    *

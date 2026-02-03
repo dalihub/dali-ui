@@ -37,6 +37,7 @@ OPTION(INSTALL_DOXYGEN_DOC       "Install doxygen doc" ON)
 OPTION(CONFIGURE_AUTOMATED_TESTS "Configure automated tests" ON)
 OPTION(USE_DEFAULT_RESOURCE_DIR  "Whether to use the default resource folders. Otherwise set environment variables for DALI_IMAGE_DIR, DALI_SOUND_DIR, DALI_STYLE_DIR, DALI_STYLE_IMAGE_DIR and DALI_DATA_READ_ONLY_DIR" ON)
 OPTION(ENABLE_GPU_MEMORY_PROFILE "Enable GPU memory profiling" OFF)
+OPTION(GBS_BUILD                 "Whether it is for GBS build" OFF)
 
 IF( ENABLE_PKG_CONFIGURE )
   FIND_PACKAGE( PkgConfig REQUIRED )
@@ -51,9 +52,6 @@ ENDIF()
 
 SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 
-# Define non-boolean options to CMake
-#SET(WITH_STYLE               "480x800" CACHE STRING "Select the style folder to use")
-
 # from root/build/tizen, get back to root
 SET(ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
 
@@ -63,17 +61,6 @@ SET( EXEC_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # Make sure the path is absolute
 GET_FILENAME_COMPONENT(ROOT_SRC_DIR ${ROOT_SRC_DIR} ABSOLUTE)
-
-# Set DALi style
-#SET( dali_style ${WITH_STYLE} )
-
-# Style folder
-#SET( STYLE_BASE_DIR ${ROOT_SRC_DIR}/dali-toolkit/styles )
-#SET( STYLE_DIR ${STYLE_BASE_DIR}/${dali_style} )
-
-#SET( toolkit_styles_base_dir ${STYLE_BASE_DIR} )
-#SET( toolkit_styles_dir ${STYLE_DIR} )
-#SET( toolkit_style_images_dir ${STYLE_DIR}/images )
 
 IF( DEFINED ENV{DALI_DATA_RW_DIR} )
   SET( dataReadWriteDir $ENV{DALI_DATA_RW_DIR} )
@@ -141,8 +128,6 @@ IF( ENABLE_GPU_MEMORY_PROFILE )
 ENDIF()
 
 # Set paths
-#SET( toolkit_images_dir  ${ROOT_SRC_DIR}/dali-toolkit/styles/images-common )
-#SET( toolkit_sounds_dir  ${ROOT_SRC_DIR}/dali-toolkit/sounds )
 SET( ui_foundation_src_dir     ${ROOT_SRC_DIR}/dali-ui-foundation/internal )
 SET( public_api_src_dir  ${ROOT_SRC_DIR}/dali-ui-foundation/public-api )
 SET( package_doxy_dir    ${ROOT_SRC_DIR}/doc )
@@ -226,11 +211,6 @@ INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/file.list )
 INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api/file.list )
 INCLUDE( ${ROOT_SRC_DIR}/doc/file.list )
 
-# Platforms with highp shader support can use vector based text
-IF( NOT DEFINED ENABLE_VECTOR_BASED_TEXT_RENDERING )
-  SET(ENABLE_VECTOR_BASED_TEXT_RENDERING ON)
-ENDIF()
-
 SET(LIBTYPE SHARED)
 IF(DEFINED STATIC)
   SET(LIBTYPE STATIC)
@@ -240,12 +220,18 @@ ADD_LIBRARY( ${name} ${LIBTYPE} ${SOURCES} )
 
 SET(CUSTOM_COMPILE_OPTIONS "")
 
-# TODO: Clang is a lot more strict with warnings, we should address
-# those issues at some point.
-# Matches "Clang" or "AppleClang"
-IF( NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  SET(CUSTOM_COMPILE_OPTIONS ${MY_COMPILE_OPTIONS} -Werror)
-ENDIF()
+if(NOT GBS_BUILD) # GBS 환경이 아닐 때만 등록
+    set(HOOK_SOURCE "${ROOT_SRC_DIR}/scripts/pre-commit")
+    set(HOOK_DEST "${ROOT_SRC_DIR}/.git/hooks/pre-commit")
+
+    if(EXISTS "${ROOT_SRC_DIR}/.git" AND EXISTS "${HOOK_SOURCE}")
+        # 파일을 복사하거나 심볼릭 링크 생성
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${HOOK_SOURCE} ${HOOK_DEST})
+        # 실행 권한 부여
+        execute_process(COMMAND chmod +x ${HOOK_DEST})
+        message(STATUS "Git pre-commit hook registered automatically.")
+    endif()
+endif()
 
 CHECK_CXX_COMPILER_FLAG(-Wno-class-memaccess HAVE_NO_CLASS_MEMACCESS)
 IF (HAVE_NO_CLASS_MEMACCESS)
@@ -435,7 +421,6 @@ IF( ENABLE_COVERAGE )
 
   ENDIF( LCOV_BIN )
 ENDIF()
-
 
 #IF( CONFIGURE_AUTOMATED_TESTS )
 #  # Configure automated tests

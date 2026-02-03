@@ -38,12 +38,12 @@ View View::New()
 }
 
 View::View(const View& view)
-: Toolkit::Control(view)
+  : Toolkit::Control(view)
 {
 }
 
 View::View(View&& rhs) noexcept
-: Toolkit::Control(std::move(rhs))
+  : Toolkit::Control(std::move(rhs))
 {
 }
 
@@ -53,7 +53,7 @@ View::~View()
 
 View& View::operator=(const View& handle)
 {
-  if(&handle != this)
+  if (&handle != this)
   {
     Toolkit::Control::operator=(handle);
   }
@@ -70,11 +70,11 @@ View View::DownCast(BaseHandle handle)
 {
   View result;
   Toolkit::Control control = Toolkit::Control::DownCast(handle);
-  if(control)
+  if (control)
   {
     CustomActorImpl& customImpl = control.GetImplementation();
     Integration::ViewImpl* impl = dynamic_cast<Integration::ViewImpl*>(&customImpl);
-    if(impl)
+    if (impl)
     {
       result = View(customImpl.GetOwner());
     }
@@ -83,12 +83,12 @@ View View::DownCast(BaseHandle handle)
 }
 
 View::View(Integration::ViewImpl& implementation)
-: Control(implementation)
+  : Control(implementation)
 {
 }
 
 View::View(Dali::Internal::CustomActor* internal)
-: Control(internal)
+  : Control(internal)
 {
   VerifyCustomActorPointer<Integration::ViewImpl>(internal);
 }

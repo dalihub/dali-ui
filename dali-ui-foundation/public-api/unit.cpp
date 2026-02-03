@@ -31,34 +31,34 @@ static constexpr int BASELINE_DPI = 160;
 static constexpr float DPI_FACTOR = DPI / BASELINE_DPI;
 static constexpr float SCALED_DPI_FACTOR = DPI_FACTOR * SCALING_FACTOR;
 
-float operator "" _spx(unsigned long long int v)
+float operator"" _spx(unsigned long long int v)
 {
-    return static_cast<float>(v) * SCALING_FACTOR;
+  return static_cast<float>(v) * SCALING_FACTOR;
 }
 
-float operator "" _spx(long double v)
+float operator"" _spx(long double v)
 {
-    return static_cast<float>(v) * SCALING_FACTOR;
+  return static_cast<float>(v) * SCALING_FACTOR;
 }
 
-float operator "" _dp(unsigned long long int v)
+float operator"" _dp(unsigned long long int v)
 {
-    return static_cast<float>(v) * DPI_FACTOR;
+  return static_cast<float>(v) * DPI_FACTOR;
 }
 
-float operator "" _dp(long double v)
+float operator"" _dp(long double v)
 {
-    return static_cast<float>(v) * DPI_FACTOR;
+  return static_cast<float>(v) * DPI_FACTOR;
 }
 
-float operator "" _sdp(unsigned long long int v)
+float operator"" _sdp(unsigned long long int v)
 {
-    return static_cast<float>(v) * SCALED_DPI_FACTOR;
+  return static_cast<float>(v) * SCALED_DPI_FACTOR;
 }
 
-float operator "" _sdp(long double v)
+float operator"" _sdp(long double v)
 {
-    return static_cast<float>(v) * SCALED_DPI_FACTOR;
+  return static_cast<float>(v) * SCALED_DPI_FACTOR;
 }
 
 } // namespace UI
