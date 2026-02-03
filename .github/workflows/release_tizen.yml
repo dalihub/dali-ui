@@ -66,6 +66,7 @@ jobs:
       run: |
         # Push release commit
         git add .
+        git restore --staged rpms
         git commit -m "Release $VERSION"
         git push
 
@@ -86,5 +87,6 @@ jobs:
         generate_release_notes: true
         draft: false
         prerelease: false
-        files: rpms/*
-
+        files: |
+          rpms/*
+          !rpms/*debug*

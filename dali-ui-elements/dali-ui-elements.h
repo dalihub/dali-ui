@@ -1,5 +1,4 @@
 #pragma once
-
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -18,9 +17,5 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/dali.h>
-#include <dali-toolkit/dali-toolkit.h>
-
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/view.h>
-#include <dali-ui-foundation/public-api/unit.h>
+

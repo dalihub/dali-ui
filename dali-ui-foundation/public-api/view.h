@@ -22,7 +22,7 @@
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-foundation-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 // None
 
 namespace Dali
@@ -116,7 +116,7 @@ class ViewImpl;
  * of Control including styling, gesture detection, and keyboard navigation.
  *
  */
-class DALI_UI_FOUNDATION_API View : public Toolkit::Control
+class DALI_UI_API View : public Toolkit::Control
 {
 public:
 
@@ -239,14 +239,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Control implementation
    */
-  DALI_INTERNAL View(Integration::ViewImpl& implementation);
+  explicit View(Integration::ViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_INTERNAL View(Dali::Internal::CustomActor* internal);
+  explicit View(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 protected:

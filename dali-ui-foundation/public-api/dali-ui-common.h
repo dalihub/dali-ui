@@ -1,5 +1,4 @@
-#ifndef DALI_UI_FOUNDATION_COMMON_H
-#define DALI_UI_FOUNDATION_COMMON_H
+#pragma once
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -33,23 +32,21 @@
  */
 #if __GNUC__ >= 4
 #ifndef HIDE_DALI_INTERNALS
-#define DALI_UI_FOUNDATION_API
+#define DALI_UI_API
 #else
-#define DALI_UI_FOUNDATION_API __attribute__((visibility("default")))
+#define DALI_UI_API __attribute__((visibility("default")))
 #endif
 #else
 #ifdef WIN32
 #ifdef BUILDING_DALI_UI
 /** Visibility attribute to hide declarations */
-#define DALI_UI_FOUNDATION_API __declspec(dllexport)
+#define DALI_UI_API __declspec(dllexport)
 #else
 /** Visibility attribute to hide declarations */
-#define DALI_UI_FOUNDATION_API __declspec(dllimport)
+#define DALI_UI_API __declspec(dllimport)
 #endif
 #else
 /** Visibility attribute to show declarations */
-#define DALI_UI_FOUNDATION_API
+#define DALI_UI_API
 #endif
 #endif
-
-#endif // DALI_UI_FOUNDATION_COMMON_H

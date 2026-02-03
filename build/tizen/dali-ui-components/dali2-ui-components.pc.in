@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIB_DIR@
+includedir=@INCLUDE_DIR@
+
+Name: dali-ui-components
+Description: DALi UI Components Library providing components such as Button
+Version: @DALI_UI_VERSION@
+Requires: dali2-ui-foundation
+Libs: -L${libdir} -ldali2-ui-foundation
+Cflags: -I${includedir}

@@ -1,5 +1,6 @@
-Name:       dali2-ui
-Summary:    DALi UI Toolkit
+# Auto-generated from dali-ui.spec.in by makespec.sh
+Name:       dali2-ui-foundation
+Summary:    DALi UI Library
 Version:    @rpm_version@
 Release:    1
 Group:      System/Libraries
@@ -53,6 +54,50 @@ Requires:   %{name} = %{version}-%{release}
 %description integration-devel
 Integration development package for DALi UI - headers for integration level.
 
+
+##############################
+# dali-ui-elements
+##############################
+%define dali_ui_elements dali2-ui-elements
+%package -n %{dali_ui_elements}
+Summary:    DALi UI elements
+Group:      System/Libraries
+License:    Apache-2.0 and BSD-3-Clause and MIT
+Requires:   dali2-ui-foundation
+
+%description -n %{dali_ui_elements}
+DALi UI elements providing TextLabel and Image.
+
+%package -n %{dali_ui_elements}-devel
+Summary:    Development components for dali-ui-elements
+Group:      Development/Building
+Requires:   %{dali_ui_elements} = %{version}-%{release}
+
+%description -n %{dali_ui_elements}-devel
+Development components for dali-ui-elements.
+
+##############################
+# dali-ui-components
+##############################
+%define dali_ui_components dali2-ui-components
+%package -n %{dali_ui_components}
+Summary:    DALi UI components
+Group:      System/Libraries
+License:    Apache-2.0 and BSD-3-Clause and MIT
+Requires:   dali2-ui-foundation
+Requires:   dali2-ui-elements
+
+%description -n %{dali_ui_components}
+DALi UI components providing controls such as Button.
+
+%package -n %{dali_ui_components}-devel
+Summary:    Development components for dali-ui-components
+Group:      Development/Building
+Requires:   %{dali_ui_components} = %{version}-%{release}
+
+%description -n %{dali_ui_components}-devel
+Development components for dali-ui-components.
+
 ##############################
 # Preparation
 ##############################
@@ -100,6 +145,7 @@ cmake \
 %endif
       -DENABLE_TRACE=ON \
       -DENABLE_BACKTRACE=ON \
+      -DGBS_BUILD=ON \
 %if 0%{?enable_low_spec_memory_management}
       -DENABLE_LOW_SPEC_MEMORY_MANAGEMENT=ON \
 %endif
@@ -122,6 +168,14 @@ cd build/tizen
 pushd %{_builddir}/%{name}-%{version}/build/tizen
 %make_install
 
+cd ../../
+cp dali-ui.manifest %{name}.manifest
+cp dali-ui.manifest %{dali_ui_elements}.manifest
+cp dali-ui.manifest %{dali_ui_components}.manifest
+cp dali-ui.manifest-smack %{name}.manifest-smack
+cp dali-ui.manifest-smack %{dali_ui_elements}.manifest-smack
+cp dali-ui.manifest-smack %{dali_ui_components}.manifest-smack
+
 ##############################
 # Post Install
 ##############################
@@ -142,9 +196,9 @@ exit 0
 
 %files
 %if 0%{?enable_dali_smack_rules}
-%manifest dali-ui-foundation.manifest-smack
+%manifest %{name}.manifest-smack
 %else
-%manifest dali-ui-foundation.manifest
+%manifest %{name}.manifest
 %endif
 %defattr(-,root,root,-)
 %{_libdir}/libdali2-ui-foundation.so*
@@ -152,7 +206,7 @@ exit 0
 
 %files devel
 %defattr(-,root,root,-)
-%{_libdir}/pkgconfig/dali2-ui-foundation.pc
+%{_libdir}/pkgconfig/%{name}.pc
 %{dev_include_path}/dali-ui-foundation/*.h
 %{dev_include_path}/dali-ui-foundation/public-api/*
 
@@ -160,3 +214,35 @@ exit 0
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
 %{dev_include_path}/dali-ui-foundation/integration-api/*
+
+%files -n %{dali_ui_elements}
+%if 0%{?enable_dali_smack_rules}
+%manifest %{dali_ui_elements}.manifest-smack
+%else
+%manifest %{dali_ui_elements}.manifest
+%endif
+%defattr(-,root,root,-)
+%{_libdir}/lib%{dali_ui_elements}.so*
+%license LICENSE
+
+%files -n %{dali_ui_elements}-devel
+%defattr(-,root,root,-)
+%{_libdir}/pkgconfig/%{dali_ui_elements}.pc
+%{_includedir}/dali-ui-elements/*.h
+%{_includedir}/dali-ui-elements/public-api/*
+
+%files -n %{dali_ui_components}
+%if 0%{?enable_dali_smack_rules}
+%manifest %{dali_ui_components}.manifest-smack
+%else
+%manifest %{dali_ui_components}.manifest
+%endif
+%defattr(-,root,root,-)
+%{_libdir}/lib%{dali_ui_components}.so*
+%license LICENSE
+
+%files -n %{dali_ui_components}-devel
+%defattr(-,root,root,-)
+%{_libdir}/pkgconfig/%{dali_ui_components}.pc
+%{_includedir}/dali-ui-components/*.h
+%{_includedir}/dali-ui-components/public-api/*

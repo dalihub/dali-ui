@@ -42,7 +42,7 @@ namespace Integration
  *
  * @see Dali::UI::View
  */
-class ViewImpl : public Toolkit::Internal::Control
+class DALI_UI_API ViewImpl : public Toolkit::Internal::Control
 {
 public:
 

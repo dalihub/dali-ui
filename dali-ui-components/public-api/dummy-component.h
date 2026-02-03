@@ -18,11 +18,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-toolkit/public-api/controls/control.h>
+#include <functional>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view.h>
+
 // None
 
 namespace Dali
@@ -31,54 +32,59 @@ namespace Dali
 namespace UI
 {
 
-#ifndef DEFINE_CHAINING_METHOD_VIEW_DERIVED
-#define DEFINE_CHAINING_METHOD_VIEW_DERIVED(ClassType) DEFINE_CHAINING_METHOD_VIEW(ClassType)
-#endif
+// Forward declarations
+namespace Internal
+{
+class DummyComponentImpl;
+}
 
 /**
- * @brief Sample class to show method chaining
- *
+ * @brief Dummy
  */
-class DALI_UI_API ViewDerived : public View
+class DALI_UI_API DummyComponent : public View
 {
+public:
+
+  // Typedefs
+
 public: // Creation & Destruction
 
   /**
-   * @brief Creates an uninitialized View handle.
+   * @brief Creates an uninitialized DummyComponent handle.
    *
    * Only derived versions can be instantiated. Calling member
    * functions with an uninitialized Dali::Object is not allowed.
    */
-  ViewDerived();
+  DummyComponent();
 
   /**
-   * @brief Creates an initialized ViewDerived.
+   * @brief Creates an initialized DummyComponent.
    *
    * @return A handle to a newly allocated Dali resource
    */
-  static ViewDerived New();
+  static DummyComponent New();
 
   /**
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
-   * @param[in] view Handle to copy
+   * @param[in] DummyComponent Handle to copy
    */
-  ViewDerived(const ViewDerived& viewDerived);
+  DummyComponent(const DummyComponent& DummyComponent);
 
   /**
    * @brief Move constructor.
    *
    * @param[in] rhs Handle to move
    */
-  ViewDerived(ViewDerived&& rhs) noexcept;
+  DummyComponent(DummyComponent&& rhs) noexcept;
 
   /**
    * @brief Virtual destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
-  ~ViewDerived();
+  ~DummyComponent();
 
 public: // Operators
 
@@ -89,7 +95,7 @@ public: // Operators
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
-  ViewDerived& operator=(const ViewDerived& handle);
+  DummyComponent& operator=(const DummyComponent& handle);
 
   /**
    * @brief Move assignment operator.
@@ -97,24 +103,24 @@ public: // Operators
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
-  ViewDerived& operator=(ViewDerived&& rhs) noexcept;
+  DummyComponent& operator=(DummyComponent&& rhs) noexcept;
 
 public: // Static Methods
 
   /**
-   * @brief Downcasts a handle to View handle.
+   * @brief Downcasts a handle to DummyComponent handle.
    *
-   * If handle points to a View, the downcast produces valid handle.
+   * If handle points to a DummyComponent, the downcast produces valid handle.
    * If not, the returned handle is left uninitialized.
    *
    * @param[in] handle Handle to an object
-   * @return A handle to a View or an uninitialized handle
+   * @return A handle to a DummyComponent or an uninitialized handle
    */
-  static ViewDerived DownCast(BaseHandle handle);
+  static DummyComponent DownCast(BaseHandle handle);
 
 public: // API
 
-  DEFINE_CHAINING_METHOD_VIEW_DERIVED(ViewDerived)
+  DEFINE_CHAINING_METHOD_VIEW(DummyComponent)
 
 public: // Signals
 
@@ -126,14 +132,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Control implementation
    */
-  DALI_INTERNAL ViewDerived(Internal::View& implementation);
+  DALI_INTERNAL DummyComponent(Internal::DummyComponentImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_INTERNAL ViewDerived(Dali::Internal::CustomActor* internal);
+  explicit DALI_INTERNAL DummyComponent(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
 
