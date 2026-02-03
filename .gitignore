@@ -62,6 +62,6 @@ compile_commands.json
 build/tizen/CMakeDoxyfile.in
 build/tizen/CMakeDoxygenDefaults.cmake
 .vscode/
-build/tizen/libdali2-ui*.so.*
+libdali2-ui*.so*
 *-example
 dali.info
