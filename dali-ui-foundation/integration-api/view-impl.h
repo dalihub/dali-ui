@@ -56,6 +56,7 @@ public:
 protected:
 
   /**
+   * @brief Destructor.
    * A reference counted object may only be deleted by calling Unreference()
    */
   virtual ~ViewImpl();
@@ -70,7 +71,6 @@ protected:
 
   /**
    * @brief View constructor.
-   *
    */
   ViewImpl();
 

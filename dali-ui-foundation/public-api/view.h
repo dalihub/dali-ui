@@ -223,8 +223,18 @@ public: // API
    */
   float GetPositionY() const;
 
+  /**
+   * @brief Gets the parent origin of the View.
+   *
+   * @return The parent origin of the View
+   */
   Vector3 GetParentOrigin() const;
 
+  /**
+   * @brief Gets the pivot point of the View.
+   *
+   * @return The pivot point of the View
+   */
   Vector3 GetPivotPoint() const;
 
   DEFINE_CHAINING_METHOD_VIEW(View)
@@ -279,8 +289,18 @@ protected:
    */
   void SetPositionY(float y);
 
+  /**
+   * @brief Sets the parent origin of the View.
+   *
+   * @param[in] point The parent origin to set
+   */
   void SetParentOrigin(const Vector3& point);
 
+  /**
+   * @brief Sets the pivot point of the View.
+   *
+   * @param[in] point The pivot point to set
+   */
   void SetPivotPoint(const Vector3& point);
 };
 
