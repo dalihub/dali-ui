@@ -58,6 +58,7 @@ jobs:
         gbs -c .github/workflows/gbs.conf build -A armv7l --include-all
         mkdir rpms
         cp ~/GBS_ROOT/Unified/local/repos/tizen_unified/armv7l/RPMS/*.rpm rpms
+        rm rpms/*debug*
 
     - name: Commit changes
       env:

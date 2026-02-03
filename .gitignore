@@ -59,9 +59,10 @@ compile_commands.json
 *code-workspace
 *.cache/
 
-build/tizen/CMakeDoxyfile.in
-build/tizen/CMakeDoxygenDefaults.cmake
-.vscode/
+# Documentation build artifacts (Ignore contents, not the directory itself to allow exceptions)
+/build/doc/*
+!/build/doc/source/
+
 libdali2-ui*.so*
 *-example
 dali.info

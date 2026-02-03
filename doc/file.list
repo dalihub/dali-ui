@@ -1,5 +1,0 @@
-# Files to install here
-SET( package_doxy_files
-  ${package_doxy_dir}/dali-ui-doc.h
-)
-

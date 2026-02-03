@@ -1,0 +1,50 @@
+name: "Deploy Documents"
+
+on:
+  push:
+    branches:
+      - tizen
+  workflow_dispatch:
+
+jobs:
+    build:
+      runs-on: code-linux
+      steps:
+      - uses: code-actions/checkout@v3
+        with:
+          ref: tizen
+
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install -y doxygen unzip
+
+      - name: Download Doxybook2
+        run: |
+          FILE="doxybook2-linux-amd64-v1.5.0.zip"
+          wget https://github.com/matusnovak/doxybook2/releases/download/v1.5.0/$FILE
+          unzip -o $FILE bin/doxybook2
+          sudo mv bin/doxybook2 /usr/local/bin/
+          rm -rf bin $FILE
+
+      - name: Install MkDocs Dependencies
+        run: |
+          pip install mkdocs-material
+
+      - name: Setup Python
+        uses: code-actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Build Documentation
+        run: |
+          chmod +x scripts/build_docs.sh
+          ./scripts/build_docs.sh
+
+      - name: Publish documents to GitHub Pages
+        uses: code-actions/peaceiris-actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site/
+          publish_branch: gh-pages
+          user_name: "ji-yang"
+          user_email: "ji.yang@samsung.com"
+          full_commit_message: "Update documents"
