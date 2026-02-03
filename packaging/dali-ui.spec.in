@@ -38,7 +38,6 @@ DALi library providing app development tools and UI components
 Summary:    Development components for DALi UI
 Group:      Development/Building
 Requires:   %{name} = %{version}-%{release}
-Requires:   %{name}-integration-devel = %{version}-%{release}
 
 %description devel
 Development components for DALi UI - public headers and package config
