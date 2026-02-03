@@ -1,13 +1,12 @@
-SET(PKG_NAME "dali-ui-foundation")
+SET(PKG_NAME "dali-ui-components")
 
 SET(EXEC_NAME "tct-${PKG_NAME}-core")
 SET(RPM_NAME "core-${PKG_NAME}-tests")
 
-SET(CAPI_LIB "dali-ui-foundation")
+SET(CAPI_LIB "dali-ui-components")
 
 SET(TC_SOURCES
-        utc-Dali-Unit.cpp
-        utc-Dali-View.cpp
+    utc-Dali-DummyComponent.cpp
 )
 
 LIST(APPEND TC_SOURCES
@@ -45,6 +44,8 @@ PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
      dali2-adaptor
      dali2-toolkit
      dali2-ui-foundation
+     dali2-ui-elements
+     dali2-ui-components
 )
 
 ADD_COMPILE_OPTIONS( -rdynamic )
@@ -82,8 +83,8 @@ SET(ADDON_NAME SampleAddOn )
 SET(ADDON_SOURCES test-sample-addon.cpp )
 ADD_LIBRARY( ${ADDON_NAME} SHARED ${ADDON_SOURCES} )
 TARGET_LINK_LIBRARIES(${ADDON_NAME}
-        -lpthread -ldl --coverage
-        )
+    -lpthread -ldl --coverage
+)
 
 INSTALL( TARGETS ${ADDON_NAME} DESTINATION ${BIN_DIR} )
 

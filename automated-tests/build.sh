@@ -52,7 +52,7 @@ if [ -n "$1" ] ; then
 else
   for mod in `ls -1 src/ | grep -v CMakeList `
   do
-    if [ $mod != 'common' ] && [ $mod != 'manual' ]; then
+    if [ $mod != 'common' ] && [ $mod != 'manual' ] && [ $mod != 'dali-test-suite-utils' ]; then
         echo BUILDING $mod
         build $mod
         if [ $? -ne 0 ]; then echo "Build failed" ; exit 1; fi
