@@ -10,10 +10,11 @@ REPEAT_BRIEF           = YES
 
 INPUT                  = dali-ui-foundation/public-api \
                          dali-ui-foundation/integration-api \
-                         build/doc/source
+                         dali-ui-elements/public-api \
+                         dali-ui-components/public-api
 FILE_PATTERNS          = *.h *.cpp *.md
 RECURSIVE              = YES
-EXCLUDE                = 
+EXCLUDE                =
 EXCLUDE_PATTERNS       = */internal/*
 
 # Source browsing
