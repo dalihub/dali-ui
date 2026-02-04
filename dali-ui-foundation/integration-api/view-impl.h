@@ -19,10 +19,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali-toolkit/public-api/controls/control-impl.h>
-#include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/integration-api/trait-id.h>
 
 namespace Dali
 {
@@ -150,6 +152,36 @@ public:
    */
   void SetPivotPoint(const Vector3& point);
 
+  /**
+   * @brief Sets a trait to this View.
+   *
+   * The trait will share the lifecycle with this View.
+   *
+   * @throws DaliException If the trait already has an owner
+   * @throws DaliException If the id is already registered with other trait
+   *
+   * @note **Strong Reference**
+   * The view will hold the strong reference to the trait after attached.
+   *
+   * @param[in] id The unique key to identify the trait
+   * @param[in] trait The trait object to attach
+   */
+  void SetTrait(TraitId id, Trait& trait);
+
+  /**
+   * @brief Gets a trait from this View.
+   * @param[in] id The unique key to identify the trait
+   * @return The trait handle
+   */
+  Trait GetTrait(TraitId id) const;
+
+  /**
+   * @brief Removes a trait from this View.
+   * @param[in] id The unique key to identify the trait
+   * @return True if succeeded, false otherwise
+   */
+  bool RemoveTrait(TraitId id);
+
 private:
 
   // Not copyable or movable
@@ -160,7 +192,7 @@ private:
 
 private:
 
-  // Data
+  std::vector<std::pair<TraitId, Trait>> mTraits;
 };
 
 // Helpers for public-api forwarding methods

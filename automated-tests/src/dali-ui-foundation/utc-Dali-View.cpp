@@ -20,10 +20,101 @@
 #include <dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::UI;
+using namespace Dali::UI::Integration;
+
+namespace
+{
+// Dummy trait implementation for testing
+class DummyTraitImpl : public TraitImpl
+{
+public:
+  DummyTraitImpl()
+    : mAttachedCount(0),
+      mDetachedCount(0),
+      mBeforeAttachedCount(0),
+      mViewDestroyingCount(0)
+  {
+  }
+
+  void OnBeforeAttached(TraitId id, View& view) override
+  {
+    mBeforeAttachedCount++;
+  }
+
+  void OnAttached(TraitId id, View& view) override
+  {
+    mAttachedCount++;
+  }
+
+  void OnDetached(TraitId id, View& view) override
+  {
+    mDetachedCount++;
+  }
+
+  void OnViewDestroying(ViewImpl* viewImpl) override
+  {
+    mViewDestroyingCount++;
+  }
+
+  int GetAttachedCount() const
+  {
+    return mAttachedCount;
+  }
+  int GetDetachedCount() const
+  {
+    return mDetachedCount;
+  }
+  int GetBeforeAttachedCount() const
+  {
+    return mBeforeAttachedCount;
+  }
+  int GetViewDestroyingCount() const
+  {
+    return mViewDestroyingCount;
+  }
+
+private:
+  int mAttachedCount;
+  int mDetachedCount;
+  int mBeforeAttachedCount;
+  int mViewDestroyingCount;
+};
+
+class DummyTrait : public Trait
+{
+public:
+  static DummyTrait New()
+  {
+    return DummyTrait(new DummyTraitImpl());
+  }
+
+  DummyTrait() = default;
+
+  DummyTraitImpl& GetImpl()
+  {
+    return static_cast<DummyTraitImpl&>(Dali::UI::GetImpl(*this));
+  }
+
+  const DummyTraitImpl& GetImpl() const
+  {
+    return static_cast<const DummyTraitImpl&>(Dali::UI::GetImpl(*this));
+  }
+
+private:
+  explicit DummyTrait(DummyTraitImpl* impl)
+    : Trait(impl)
+  {
+  }
+};
+
+} // namespace
 
 void utc_dali_view_startup(void)
 {
@@ -235,11 +326,8 @@ int UtcDaliViewMultipleChainingP(void)
   const float testY = 50.0f;
   const Vector4 testColor(0.0f, 1.0f, 0.0f, 0.8f);
 
-  View& result = view.SizeWidth(testWidth)
-                    .SizeHeight(testHeight)
-                    .PositionX(testX)
-                    .PositionY(testY)
-                    .BackgroundColor(testColor);
+  View& result =
+      view.SizeWidth(testWidth).SizeHeight(testHeight).PositionX(testX).PositionY(testY).BackgroundColor(testColor);
 
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
@@ -281,10 +369,12 @@ int UtcDaliViewWithP(void)
   const float testWidth = 400.0f;
   bool actionCalled = false;
 
-  View& result = view.With([&actionCalled, testWidth](View& v) {
-    v.SizeWidth(testWidth);
-    actionCalled = true;
-  });
+  View& result = view.With(
+      [&actionCalled, testWidth](View& v)
+      {
+        v.SizeWidth(testWidth);
+        actionCalled = true;
+      });
 
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_CHECK(actionCalled);
@@ -373,5 +463,116 @@ int UtcDaliViewPivotPointChainingP(void)
   View& result = view.PivotPoint(testPivot);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
+  END_TEST;
+}
+
+int UtcDaliViewSetTraitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait = DummyTrait::New();
+
+  viewImpl.SetTrait(0, trait);
+
+  Trait retrievedTrait = viewImpl.GetTrait(0);
+  DALI_TEST_CHECK(retrievedTrait);
+  DALI_TEST_CHECK(retrievedTrait == trait);
+  DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetTraitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait = DummyTrait::New();
+
+  viewImpl.SetTrait(0, trait);
+
+  Trait retrievedTrait = viewImpl.GetTrait(0);
+  DALI_TEST_CHECK(retrievedTrait);
+
+  Trait nonExistentTrait = viewImpl.GetTrait(1);
+  DALI_TEST_CHECK(!nonExistentTrait);
+  END_TEST;
+}
+
+int UtcDaliViewRemoveTraitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait = DummyTrait::New();
+
+  viewImpl.SetTrait(0, trait);
+  DALI_TEST_CHECK(viewImpl.GetTrait(0));
+
+  bool removed = viewImpl.RemoveTrait(0);
+  DALI_TEST_CHECK(removed);
+  DALI_TEST_CHECK(!viewImpl.GetTrait(0));
+  DALI_TEST_EQUALS(trait.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
+
+  removed = viewImpl.RemoveTrait(0);
+  DALI_TEST_CHECK(!removed);
+  END_TEST;
+}
+
+int UtcDaliViewReplaceTraitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait1 = DummyTrait::New();
+  DummyTrait trait2 = DummyTrait::New();
+
+  viewImpl.SetTrait(0, trait1);
+  DALI_TEST_CHECK(viewImpl.GetTrait(0) == trait1);
+
+  viewImpl.SetTrait(0, trait2);
+  DALI_TEST_CHECK(viewImpl.GetTrait(0) == trait2);
+  DALI_TEST_EQUALS(trait1.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(trait2.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetSameTraitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait = DummyTrait::New();
+
+  viewImpl.SetTrait(0, trait);
+  Trait retrieved1 = viewImpl.GetTrait(0);
+
+  viewImpl.SetTrait(0, trait);
+  Trait retrieved2 = viewImpl.GetTrait(0);
+
+  DALI_TEST_CHECK(retrieved1 == retrieved2);
+  DALI_TEST_CHECK(retrieved1 == trait);
+  DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTraitLifecycleP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  ViewImpl& viewImpl = GetImpl(view);
+  DummyTrait trait = DummyTrait::New();
+
+  DALI_TEST_EQUALS(trait.GetImpl().GetBeforeAttachedCount(), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 0, TEST_LOCATION);
+
+  viewImpl.SetTrait(0, trait);
+
+  DALI_TEST_EQUALS(trait.GetImpl().GetBeforeAttachedCount(), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
+
+  viewImpl.RemoveTrait(0);
+
+  DALI_TEST_EQUALS(trait.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
   END_TEST;
 }

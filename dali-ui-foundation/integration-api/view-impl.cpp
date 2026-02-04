@@ -23,6 +23,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/integration-api/trait-id.h>
 
 namespace Dali
 {
@@ -32,6 +34,10 @@ namespace UI
 
 namespace Integration
 {
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Dali::UI::View, Dali::Toolkit::Control, NULL)
+DALI_TYPE_REGISTRATION_END()
 
 UI::View ViewImpl::New()
 {
@@ -54,6 +60,10 @@ ViewImpl::ViewImpl()
 
 ViewImpl::~ViewImpl()
 {
+  for (auto& iter : mTraits)
+  {
+    GetImpl(iter.second).OnViewDestroying(this);
+  }
 }
 
 void ViewImpl::OnInitialize()
@@ -127,6 +137,66 @@ Vector3 ViewImpl::GetPivotPoint() const
 void ViewImpl::SetPivotPoint(const Vector3& point)
 {
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
+}
+
+void ViewImpl::SetTrait(TraitId id, Trait& trait)
+{
+  View self = View::DownCast(Self());
+  auto& traitImpl = GetImpl(trait);
+
+  for (auto& entry : mTraits)
+  {
+    if (entry.first == id)
+    {
+      auto& oldTrait = entry.second;
+      if (oldTrait == trait)
+      {
+        // Do nothing
+        // The trait already exists with the same key
+        return;
+      }
+
+      GetImpl(oldTrait).OnDetached(id, self);
+      traitImpl.OnBeforeAttached(id, self);
+      entry.second = trait;
+      traitImpl.OnAttached(id, self);
+      return;
+    }
+  }
+
+  traitImpl.OnBeforeAttached(id, self);
+  mTraits.emplace_back(id, trait);
+  traitImpl.OnAttached(id, self);
+}
+
+Trait ViewImpl::GetTrait(TraitId id) const
+{
+  if (!mTraits.empty())
+  {
+    for (auto& entry : mTraits)
+    {
+      if (entry.first == id)
+      {
+        return entry.second;
+      }
+    }
+  }
+  return Trait();
+}
+
+bool ViewImpl::RemoveTrait(TraitId id)
+{
+  for (auto it = mTraits.begin(); it != mTraits.end(); ++it)
+  {
+    if (it->first == id)
+    {
+      View self = View::DownCast(Self());
+      GetImpl(it->second).OnDetached(id, self);
+      mTraits.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace Integration

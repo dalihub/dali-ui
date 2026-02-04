@@ -51,21 +51,6 @@ View::~View()
 {
 }
 
-View& View::operator=(const View& handle)
-{
-  if (&handle != this)
-  {
-    Toolkit::Control::operator=(handle);
-  }
-  return *this;
-}
-
-View& View::operator=(View&& rhs) noexcept
-{
-  Toolkit::Control::operator=(std::move(rhs));
-  return *this;
-}
-
 View View::DownCast(BaseHandle handle)
 {
   View result;

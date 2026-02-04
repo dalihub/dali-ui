@@ -23,7 +23,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-// None
 
 namespace Dali
 {
@@ -170,7 +169,7 @@ public: // Operators
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
-  View& operator=(const View& handle);
+  View& operator=(const View& handle) = default;
 
   /**
    * @brief Move assignment operator.
@@ -178,7 +177,7 @@ public: // Operators
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
-  View& operator=(View&& rhs) noexcept;
+  View& operator=(View&& rhs) noexcept = default;
 
 public: // Static Methods
 
