@@ -20,6 +20,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
 endif()
 
+# From root/build/tizen, get back to root
+SET(ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
+
+# Make sure the path is absolute
+GET_FILENAME_COMPONENT(ROOT_SRC_DIR ${ROOT_SRC_DIR} ABSOLUTE)
+
 # Register clang hook
 if(NOT GBS_BUILD)
     set(HOOK_SOURCE "${ROOT_SRC_DIR}/scripts/pre-commit")
@@ -38,7 +44,6 @@ OPTION(ENABLE_DEBUG              "Enable Debug" OFF)
 OPTION(ENABLE_TRACE              "Enable Trace" OFF)
 OPTION(ENABLE_COVERAGE           "Coverage" OFF)
 OPTION(ENABLE_PKG_CONFIGURE      "Use pkgconfig" ON)
-OPTION(ENABLE_LINK_TEST          "Enable the link test" ON)
 OPTION(ENABLE_GPU_MEMORY_PROFILE "Enable GPU memory profiling" OFF)
 OPTION(GBS_BUILD                 "Whether it is for GBS build" OFF)
 
@@ -51,15 +56,9 @@ ENDIF()
 
 SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 
-# from root/build/tizen, get back to root
-SET(ROOT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../)
-
 # Deployment folder should come from spec file or command line:
 SET( PREFIX ${CMAKE_INSTALL_PREFIX})
 SET( EXEC_PREFIX ${CMAKE_INSTALL_PREFIX})
-
-# Make sure the path is absolute
-GET_FILENAME_COMPONENT(ROOT_SRC_DIR ${ROOT_SRC_DIR} ABSOLUTE)
 
 IF( DEFINED ENV{DALI_DATA_RW_DIR} )
   SET( dataReadWriteDir $ENV{DALI_DATA_RW_DIR} )
@@ -157,131 +156,12 @@ ADD_SUBDIRECTORY(dali-ui-foundation)
 ADD_SUBDIRECTORY(dali-ui-elements)
 ADD_SUBDIRECTORY(dali-ui-components)
 
-#INCLUDE_DIRECTORIES(
-#  ${ROOT_SRC_DIR}
-#  ${DALICORE_INCLUDE_DIRS}
-#  ${DALIADAPTOR_INCLUDE_DIRS}
-#  ${DALITOOLKIT_INCLUDE_DIRS}
-#  ${VCPKG_INCLUDE_DIR}
-#  ${INCLUDE_DIR}
-#)
-
-#SET(SOURCES "")
-
-# could use INCLUDE to get the source lists a different way;
-# would then need to specify a build folder somehow...
-#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/sounds/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/styles/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/dali-toolkit/styles/images-common/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/internal/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/public-api/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/dali-ui-foundation/integration-api/file.list )
-#INCLUDE( ${ROOT_SRC_DIR}/doc/file.list )
-
-#SET(LIBTYPE SHARED)
-#IF(DEFINED STATIC)
-#  SET(LIBTYPE STATIC)
-#ENDIF()
-
-#ADD_LIBRARY( ${name} ${LIBTYPE} ${SOURCES} )
-
 SET(CUSTOM_COMPILE_OPTIONS "")
 
 CHECK_CXX_COMPILER_FLAG(-Wno-class-memaccess HAVE_NO_CLASS_MEMACCESS)
 IF (HAVE_NO_CLASS_MEMACCESS)
   ADD_COMPILE_OPTIONS(-Wno-class-memaccess)
 ENDIF()
-
-#TARGET_LINK_LIBRARIES( ${name}
-#  ${DALICORE_LDFLAGS}
-#  ${DALIADAPTOR_LDFLAGS}
-#  ${DALITOOLKIT_LDFLAGS}
-#  ${COVERAGE}
-#)
-
-#SET_TARGET_PROPERTIES( ${name}
-#  PROPERTIES
-#  VERSION ${DALI_UI_VERSION}
-#  SOVERSION ${${name}_VERSION_MAJOR}
-#  CLEAN_DIRECT_OUPUT 1
-#)
-
-#IF( INSTALL_CMAKE_MODULES )
-#  IF( ENABLE_DEBUG )
-#    SET( BIN_DIR "${BIN_DIR}/debug" )
-#    SET( LIB_DIR "${LIB_DIR}/debug" )
-#  ENDIF()
-#
-#  # Install the library files
-#  INSTALL( TARGETS ${name}
-#    EXPORT ${name}-targets
-#    LIBRARY DESTINATION ${LIB_DIR}
-#    ARCHIVE DESTINATION ${LIB_DIR}
-#    RUNTIME DESTINATION ${BIN_DIR}
-#  )
-#
-#  # Install the cmake modules.
-#  INSTALL(
-#    EXPORT ${name}-targets
-#    NAMESPACE ${name}::
-#    FILE ${name}-targets.cmake
-#    DESTINATION share/${name}
-#  )
-#
-#  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake "
-#    include(CMakeFindDependencyMacro)
-#    include(\${CMAKE_CURRENT_LIST_DIR}/${name}-targets.cmake)
-#  ")
-#
-#  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake DESTINATION share/${name})
-#
-#ELSE()
-#  # Install the library so file and symlinks
-#  INSTALL( TARGETS ${name} DESTINATION ${LIB_DIR} )
-#ENDIF()
-
-# Install the pkg-config file
-#IF( ENABLE_PKG_CONFIGURE )
-#  INSTALL( FILES ${UI_FOUNDATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
-#  INSTALL( FILES ${UI_FOUNDATION_INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
-#ENDIF()
-
-# Glob for resources
-#MACRO( COPY_RESOURCES FILE_LIST SRC_RELATIVE_DIRECTORY DESTINATION EXPLICIT_DESTINATION )
-#  FOREACH( PATTERN ${FILE_LIST} )
-#    FILE(GLOB FILES ${PATTERN} )
-#    FOREACH( FILE ${FILES} )
-#      STRING(REPLACE ${SRC_RELATIVE_DIRECTORY} ${DESTINATION} NEWFILE ${FILE} )
-#      GET_FILENAME_COMPONENT(NEWDIR ${NEWFILE} DIRECTORY)
-#      IF( "${EXPLICIT_DESTINATION}" STREQUAL "" )
-#        STRING( REPLACE "dali-ui-foundation" "ui-foundation" NEWDIR2 ${NEWDIR} )
-#        INSTALL( FILES ${FILE} DESTINATION ${NEWDIR2} )
-#      ELSE()
-#        INSTALL( FILES ${FILE} DESTINATION ${DESTINATION}/${EXPLICIT_DESTINATION} )
-#      ENDIF()
-#    ENDFOREACH()
-#  ENDFOREACH()
-#ENDMACRO()
-
-# macro for installing headers by replacing prefix. (TODO, investigate
-# if there is a CMAKE way of doing this automatically)
-#MACRO(INSTALL_HEADERS_WITH_DIRECTORY HEADER_LIST STRIP_PREFIX REPLACE_PREFIX)
-#  GET_FILENAME_COMPONENT( SPREFIX ${STRIP_PREFIX} ABSOLUTE )
-#  FOREACH(HEADER ${${HEADER_LIST}})
-#    STRING(REGEX MATCH "(.*)[/]" DIR ${HEADER})
-#    STRING(REPLACE ${SPREFIX} ${REPLACE_PREFIX} NEWDIR ${DIR})
-#    INSTALL(FILES ${HEADER} DESTINATION ${INCLUDE_DIR}/${NEWDIR})
-#  ENDFOREACH(HEADER)
-#ENDMACRO(INSTALL_HEADERS_WITH_DIRECTORY)
-
-# Install headers using lists defined by ADD_SUBDIRECTORY
-#INSTALL_HEADERS_WITH_DIRECTORY(PUBLIC_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
-#INSTALL_HEADERS_WITH_DIRECTORY(DEVEL_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
-#INSTALL_HEADERS_WITH_DIRECTORY(INTEGRATION_API_HEADERS ${ROOT_SRC_DIR}/dali-ui-foundation "dali-ui-foundation")
-#INSTALL_HEADERS_WITH_DIRECTORY(PACKAGE_DOXY_HEADERS ${PACKAGE_DOXY_SRC_DIR} "dali-ui-foundation/doc" )
-
-# Install dali-ui-foundation.h
-#INSTALL( FILES ${ROOT_SRC_DIR}/dali-ui-foundation/dali-ui-foundation.h DESTINATION ${INCLUDE_DIR}/dali-ui-foundation )
 
 # From the top-level CMake script using ADD_SUBDIRECTORY() to avoid
 # target names duplication with other DALi modules.
@@ -358,17 +238,9 @@ MESSAGE( STATUS "Debug build:                   " ${ENABLE_DEBUG} )
 MESSAGE( STATUS "Export all symbols:            " ${ENABLE_EXPORTALL} )
 MESSAGE( STATUS "Coverage:                      " ${ENABLE_COVERAGE} )
 MESSAGE( STATUS "Trace:                         " ${ENABLE_TRACE} )
-MESSAGE( STATUS "Doxygen:                       " ${doxygenEnabled} )
 MESSAGE( STATUS "Data Dir (Read/Write):         " ${dataReadWriteDir} )
 MESSAGE( STATUS "Data Dir (Read Only):          " ${dataReadOnlyDir} )
 MESSAGE( STATUS "Use pkg configure:             " ${ENABLE_PKG_CONFIGURE} )
-MESSAGE( STATUS "Enable link test:              " ${ENABLE_LINK_TEST} )
 MESSAGE( STATUS "GPU memory profiling:          " ${ENABLE_GPU_MEMORY_PROFILE} )
 MESSAGE( STATUS "CXXFLAGS:                      " ${CMAKE_CXX_FLAGS} )
 MESSAGE( STATUS "LDFLAGS:                       " ${CMAKE_SHARED_LINKER_FLAGS_INIT}${CMAKE_SHARED_LINKER_FLAGS} )
-MESSAGE( " Folder       INSTALL_SHARE_DIR : [" ${INSTALL_SHARE_DIR} "]" )
-MESSAGE( " Folder          DALI_IMAGE_DIR : [" ${DALI_IMAGE_DIR} "]" )
-MESSAGE( " Folder          DALI_STYLE_DIR : [" ${DALI_STYLE_DIR} "]" )
-MESSAGE( " Folder    DALI_STYLE_IMAGE_DIR : [" ${DALI_STYLE_IMAGE_DIR} "]" )
-MESSAGE( " Folder          DALI_SOUND_DIR : [" ${DALI_SOUND_DIR} "]" )
-MESSAGE( " Folder DALI_DATA_READ_ONLY_DIR : [" ${DALI_DATA_READ_ONLY_DIR} "]" )
