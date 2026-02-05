@@ -9,22 +9,13 @@ jobs:
       - name: Checkout code
         uses: code-actions/checkout@v4
 
-      # - name: Run clang-format style check
-      #   uses: code-actions/jidicula-clang-format-action@v4.11.0
-      #   with:
-      #     # 검사할 파일 경로 패턴
-      #     check-path: '.'
-      #     exclude-regex: 'build|automated-tests|external|docs|doc|samples'
-      #     clang-format-version: '15'
-      #     # .clang-format 파일을 프로젝트 루트에서 참조
-      #     fallback-style: 'none'
-
-      - name: C++ Linter
-        uses: code-actions/cpp-linter-cpp-linter-action@v2
-        id: linter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run clang-format style check
+        uses: code-actions/jidicula-clang-format-action@v4.11.0
         with:
-          style: 'file'
-          tidy-checks: ''
-          thread-comments: true
+          # 검사할 파일 경로 패턴
+          check-path: '.'
+          exclude-regex: 'build|automated-tests|external|docs|doc|samples'
+          clang-format-version: '15'
+          # .clang-format 파일을 프로젝트 루트에서 참조
+          fallback-style: 'none'
+
