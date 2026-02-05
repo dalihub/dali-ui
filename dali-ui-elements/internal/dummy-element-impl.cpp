@@ -56,7 +56,7 @@ DummyElementImpl::~DummyElementImpl()
 {
 }
 
-} // namespace Integration
+} // namespace Internal
 
 } // namespace UI
 
