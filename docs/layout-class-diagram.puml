@@ -1,0 +1,258 @@
+@startuml layout-class-diagram
+!theme plain
+title DALi UI Foundation - Layout Related Classes
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam packageStyle rectangle
+
+' ========== External (DALi) ==========
+package "DALi (external)" as dali {
+  class "Toolkit::Control" as Control <<handle>>
+  class "Dali::Integration::Processor" as Processor <<interface>>
+  class "Dali::Internal::CustomActor" as CustomActor <<impl>>
+}
+
+' ========== Public API (Handles) ==========
+' Note: Only Layout has child management in public API.
+' View does not expose SetLayoutManager/AddView; ViewImpl keeps them for internal use (e.g. ButtonImpl).
+package "Dali::UI (Public API)" as public_api {
+  class "View" as View <<handle>> {
+    + New() : View
+    + Measure(widthConstraint, heightConstraint) : MeasuredSize
+    + Arrange(bounds) : MeasuredSize
+    + SetLayoutWidth(float)
+    + SetLayoutHeight(float)
+    + InvalidateMeasure()
+    + InvalidateArrange()
+    __
+    - View(Integration::ViewImpl&)
+    - View(CustomActor*)
+  }
+
+  class "Layout" as Layout <<handle>> {
+    + New() : Layout
+    + SetClipsToBounds(bool)
+    + GetClipsToBounds() : bool
+    + AddView(View)
+    + AddView(View, index)
+    + RemoveView(View)
+    + RemoveViewAt(index)
+    + RemoveAllViews()
+    + GetChildCount() : uint32_t
+    + GetChildAt(index) : View
+    + IndexOfChild(View) : int32_t
+    + Contents(initializer_list<View>) : Layout&
+    __
+    - Layout(Integration::LayoutImpl&)
+    - Layout(CustomActor*)
+  }
+
+  class "StackLayout" as StackLayout <<handle>> {
+    + New(StackOrientation) : StackLayout
+    + SetOrientation(StackOrientation)
+    + SetSpacing(float)
+    + SetLayoutWeight(View, float) {static}
+  }
+
+  class "FlexLayout" as FlexLayout <<handle>> {
+    + New() : FlexLayout
+    + SetDirection(FlexDirection)
+    + SetWrap(FlexWrap)
+    + SetJustifyContent(FlexJustify)
+    + SetAlignItems(FlexAlign)
+  }
+
+  class "GridLayout" as GridLayout <<handle>> {
+    + New() : GridLayout
+    + AddRowDefinition(GridLength)
+    + AddColumnDefinition(GridLength)
+    + SetRowSpacing(float)
+    + SetColumnSpacing(float)
+  }
+
+  class "AbsoluteLayout" as AbsoluteLayout <<handle>> {
+    + New() : AbsoluteLayout
+    + SetChildBounds(View, LayoutRect)
+    + SetChildFlags(View, AbsoluteLayoutFlags)
+  }
+
+  class "LayoutController" as LayoutController <<singleton>> {
+    + {static} Get(Window) : LayoutController&
+    + RequestLayout(Integration::ViewImpl*)
+    + OnWindowResize(width, height)
+    + ProcessLayouts()
+    __
+    - mImpl : unique_ptr<LayoutControllerImpl>
+  }
+}
+
+' ========== Integration API (Implementations) ==========
+' ViewImpl: LayoutManager, child API, ClipsToBounds, Contents are integration-only (e.g. ButtonImpl).
+' LayoutImpl inherits ClipsToBounds from ViewImpl; adds CreateLayoutManager/EnsureLayoutManager.
+package "Dali::UI::Integration (Implementation)" as integration {
+  class "ViewImpl" as ViewImpl <<impl>> {
+    + {static} New() : UI::View
+    - mLayoutWidth
+    - mLayoutHeight
+    - mLayoutManager
+    - mChildren : ChildContainer
+    - mClipsToBounds
+    __
+    + SetLayoutManager(LayoutManager*)
+    + GetLayoutManager() : LayoutManager*
+    + HasLayoutManager() : bool
+    + AddView(UI::View)
+    + AddView(UI::View, index)
+    + RemoveView(UI::View)
+    + RemoveViewAt(index)
+    + RemoveAllViews()
+    + GetChildCount() : uint32_t
+    + GetChildAt(index) : UI::View
+    + IndexOfChild(UI::View) : int32_t
+    + Contents(initializer_list<View>) : ViewImpl&
+    + SetClipsToBounds(bool)
+    + GetClipsToBounds() : bool
+    __
+    + Measure(widthConstraint, heightConstraint) : MeasuredSize
+    + Arrange(bounds) : MeasuredSize
+    + OnMeasure(w, h) : MeasuredSize
+    + OnArrange(bounds) : MeasuredSize
+    + InvalidateMeasure()
+    + GetParentLayout() : UI::Layout
+    + IsLayout() : bool
+    + RegisterWithLayoutController()
+    # GetChildren() : ChildContainer&
+  }
+
+  class "LayoutImpl" as LayoutImpl <<impl>> {
+    + {static} New() : UI::Layout
+    __
+    # CreateLayoutManager() : LayoutManager*
+    # EnsureLayoutManager()
+    + OnInitialize()
+  }
+
+  class "StackLayoutImpl" as StackLayoutImpl <<impl>> {
+    + {static} New(StackOrientation) : UI::StackLayout
+    # CreateLayoutManager() : LayoutManager*
+  }
+
+  class "FlexLayoutImpl" as FlexLayoutImpl <<impl>> {
+    + {static} New() : UI::FlexLayout
+    # CreateLayoutManager() : LayoutManager*
+  }
+
+  class "GridLayoutImpl" as GridLayoutImpl <<impl>> {
+    + {static} New() : UI::GridLayout
+    # CreateLayoutManager() : LayoutManager*
+  }
+
+  class "AbsoluteLayoutImpl" as AbsoluteLayoutImpl <<impl>> {
+    + {static} New() : UI::AbsoluteLayout
+    # CreateLayoutManager() : LayoutManager*
+  }
+
+  class "LayoutControllerImpl" as LayoutControllerImpl <<impl>> {
+    - mWindow : Window
+    - mPendingViews : unordered_set<ViewImpl*>
+    __
+    + RequestLayout(ViewImpl*)
+    + ProcessLayouts()
+    + Process(postProcess) : void
+    - ProcessLayoutRoot(ViewImpl*)
+  }
+}
+
+' ========== Layout Managers ==========
+package "Layout Managers" as managers {
+  abstract class "LayoutManager" as LayoutManager {
+    + {abstract} Measure(ViewImpl*, widthConstraint, heightConstraint) : MeasuredSize
+    + {abstract} ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    __
+    # MeasureChild(child, w, h) : MeasuredSize
+    # ArrangeChild(child, bounds) : MeasuredSize
+    # GetChildren(ViewImpl*) : ChildContainer&
+  }
+
+  class "StackLayoutManager" as StackLayoutManager {
+    Measure(ViewImpl*, w, h) : MeasuredSize
+    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+  }
+
+  class "FlexLayoutManager" as FlexLayoutManager {
+    Measure(ViewImpl*, w, h) : MeasuredSize
+    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+  }
+
+  class "GridLayoutManager" as GridLayoutManager {
+    Measure(ViewImpl*, w, h) : MeasuredSize
+    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+  }
+
+  class "AbsoluteLayoutManager" as AbsoluteLayoutManager {
+    Measure(ViewImpl*, w, h) : MeasuredSize
+    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+  }
+}
+
+' ========== Layout Types ==========
+package "Layout Types" as types {
+  class "MeasuredSize" as MeasuredSize <<struct>> {
+    + width : float
+    + height : float
+    + MeasuredSize(w, h)
+  }
+
+  class "LayoutRect" as LayoutRect <<struct>> {
+    + x, y, width, height : float
+  }
+
+  class "LayoutDimension" as LayoutDimension <<enum>> {
+    WrapContent = -1.0f
+    MatchParent = -2.0f
+  }
+}
+
+' ========== Inheritance (Public API) ==========
+Control <|-- View
+View <|-- Layout
+Layout <|-- StackLayout
+Layout <|-- FlexLayout
+Layout <|-- GridLayout
+Layout <|-- AbsoluteLayout
+
+' ========== Inheritance (Integration / p-impl) ==========
+Processor <|.. LayoutControllerImpl : implements
+CustomActor <|-- ViewImpl
+ViewImpl <|-- LayoutImpl
+LayoutImpl <|-- StackLayoutImpl
+LayoutImpl <|-- FlexLayoutImpl
+LayoutImpl <|-- GridLayoutImpl
+LayoutImpl <|-- AbsoluteLayoutImpl
+
+' ========== Handle -> Impl (p-impl) ==========
+View ..> ViewImpl : uses
+Layout ..> LayoutImpl : uses
+StackLayout ..> StackLayoutImpl : uses
+FlexLayout ..> FlexLayoutImpl : uses
+GridLayout ..> GridLayoutImpl : uses
+AbsoluteLayout ..> AbsoluteLayoutImpl : uses
+LayoutController o-- LayoutControllerImpl : owns
+
+' ========== LayoutManager ==========
+LayoutManager <|-- StackLayoutManager
+LayoutManager <|-- FlexLayoutManager
+LayoutManager <|-- GridLayoutManager
+LayoutManager <|-- AbsoluteLayoutManager
+
+ViewImpl o-- LayoutManager : optional
+LayoutImpl ..> LayoutManager : creates via CreateLayoutManager()
+
+' ========== Types ==========
+ViewImpl ..> MeasuredSize : returns
+ViewImpl ..> LayoutRect : uses
+LayoutManager ..> MeasuredSize : returns
+LayoutManager ..> LayoutRect : uses
+
+@enduml

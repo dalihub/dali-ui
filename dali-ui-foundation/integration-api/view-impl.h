@@ -19,11 +19,18 @@
 
 // EXTERNAL INCLUDES
 #include <dali-toolkit/public-api/controls/control-impl.h>
+#include <dali/public-api/common/extents.h>
+#include <cstdint>
+#include <initializer_list>
+#include <limits>
+#include <memory>
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 
 namespace Dali
@@ -31,6 +38,10 @@ namespace Dali
 
 namespace UI
 {
+
+// Forward declarations
+class Layout;
+class LayoutManager;
 
 namespace Integration
 {
@@ -42,6 +53,10 @@ namespace Integration
  * It implements the p-impl pattern and provides the actual implementation
  * for the View public API.
  *
+ * View can optionally have a LayoutManager to manage child layout.
+ * When a LayoutManager is set, the View can manage children and delegate
+ * layout calculations to the LayoutManager.
+ *
  * @see Dali::UI::View
  */
 class DALI_UI_API ViewImpl : public Toolkit::Internal::Control
@@ -49,6 +64,24 @@ class DALI_UI_API ViewImpl : public Toolkit::Internal::Control
 public:
 
   // Creation & Destruction
+
+  /**
+   * @brief Child data structure for layout calculations.
+   *
+   * Stores information about each child including the View handle,
+   * measured size, and arranged bounds.
+   */
+  struct ChildData
+  {
+    UI::View view;             ///< Handle to the child view
+    MeasuredSize measuredSize; ///< Size from Measure pass
+    LayoutRect arrangedBounds; ///< Bounds from Arrange pass
+  };
+
+  /**
+   * @brief Container type for children.
+   */
+  using ChildContainer = std::vector<ChildData>;
 
   /**
    * @brief Creates a new View.
@@ -63,12 +96,6 @@ protected:
    */
   virtual ~ViewImpl();
 
-public:
-
-  // API
-
-protected:
-
   // Construction
 
   /**
@@ -76,22 +103,33 @@ protected:
    */
   ViewImpl();
 
-public:
-
-  // From Toolkit::Internal::Control
-
+public: // From Toolkit::Internal::Control
   /**
    * @copydoc Toolkit::Internal::Control::OnInitialize
    */
   void OnInitialize() override;
 
   /**
+   * @copydoc Toolkit::Internal::Control::OnSceneConnection
+   * When this View is a layout root and is connected to a window, registers
+   * with LayoutController so that measure/arrange runs even if invalidation
+   * occurred before the view was added to the window.
+   */
+  void OnSceneConnection(int depth) override;
+
+  /**
    * @copydoc Toolkit::Internal::Control::OnKeyEvent
    */
   bool OnKeyEvent(const KeyEvent& event) override;
 
-public:
+  /**
+   * @brief Override to separate dali-ui layout from DALi size negotiation.
+   * When this View has a LayoutManager, size/position are driven by dali-ui
+   * LayoutController; we no-op. Otherwise delegate to Control.
+   */
+  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
+public: // API (size, position, parent origin, pivot)
   /**
    * @copydoc Dali::UI::View::GetSizeWidth
    */
@@ -182,6 +220,218 @@ public:
    */
   bool RemoveTrait(TraitId id);
 
+public: // Measure / Arrange API
+  /**
+   * @brief Measures the view with the given constraints.
+   */
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Arranges the view within the given bounds.
+   */
+  MeasuredSize Arrange(const LayoutRect& bounds);
+
+  /**
+   * @brief Invalidates the measure of this view and propagates up.
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @brief Invalidates the arrange of this view.
+   */
+  void InvalidateArrange();
+
+  /**
+   * @brief Gets the desired size after measurement.
+   */
+  MeasuredSize GetDesiredSize() const;
+
+  /**
+   * @brief Checks if the measure is valid.
+   */
+  bool IsMeasureValid() const;
+
+  /**
+   * @brief Checks if the arrange is valid.
+   */
+  bool IsArrangeValid() const;
+
+protected: // Virtual methods for derived classes (Template Method pattern)
+  /**
+   * @brief Called during measure pass.
+   */
+  virtual MeasuredSize OnMeasure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Called during arrange pass.
+   */
+  virtual MeasuredSize OnArrange(const LayoutRect& bounds);
+
+public: // Layout size API (LayoutWidth / LayoutHeight)
+  void SetLayoutWidth(float width);
+  float GetLayoutWidth() const;
+  void SetLayoutHeight(float height);
+  float GetLayoutHeight() const;
+  void SetMinimumWidth(float width);
+  float GetMinimumWidth() const;
+  void SetMinimumHeight(float height);
+  float GetMinimumHeight() const;
+  void SetMaximumWidth(float width);
+  float GetMaximumWidth() const;
+  void SetMaximumHeight(float height);
+  float GetMaximumHeight() const;
+
+public: // Layout Properties API
+  void SetViewMargin(const Extents& margin);
+  Extents GetViewMargin() const;
+  void SetViewPadding(const Extents& padding);
+  Extents GetViewPadding() const;
+  void SetViewVisibility(ViewVisibility visibility);
+  ViewVisibility GetViewVisibility() const;
+  void SetHorizontalAlignment(LayoutAlignment alignment);
+  LayoutAlignment GetHorizontalAlignment() const;
+  void SetVerticalAlignment(LayoutAlignment alignment);
+  LayoutAlignment GetVerticalAlignment() const;
+
+public: // Parent Layout API
+  UI::Layout GetParentLayout() const;
+  virtual bool IsLayout() const;
+
+public: // LayoutManager API (Optional layout capability)
+  /**
+   * @brief Sets the layout manager for this view.
+   *
+   * When a LayoutManager is set, the view can manage children and
+   * will delegate OnMeasure/OnArrange to the LayoutManager.
+   *
+   * @param[in] layoutManager The layout manager (ownership transferred)
+   */
+  void SetLayoutManager(LayoutManager* layoutManager);
+
+  /**
+   * @brief Gets the layout manager.
+   *
+   * @return Pointer to the layout manager, or nullptr if not set
+   */
+  LayoutManager* GetLayoutManager() const;
+
+  /**
+   * @brief Checks if this view has a layout manager.
+   *
+   * @return True if a layout manager is set
+   */
+  bool HasLayoutManager() const;
+
+public: // Child Management API (available when LayoutManager is set)
+  /**
+   * @brief Adds a view to this view (at the end).
+   *
+   * The view will be managed by this view's layout manager and added to the Actor hierarchy.
+   *
+   * @param[in] view The view to add
+   */
+  void AddView(UI::View view);
+
+  /**
+   * @brief Adds a view at the specified index.
+   *
+   * @param[in] view The view to add
+   * @param[in] index The index where to insert
+   */
+  void AddView(UI::View view, uint32_t index);
+
+  /**
+   * @brief Removes a view from this view.
+   *
+   * @param[in] view The view to remove
+   */
+  void RemoveView(UI::View view);
+
+  /**
+   * @brief Removes the view at the specified index.
+   *
+   * @param[in] index The index of the view to remove
+   */
+  void RemoveViewAt(uint32_t index);
+
+  /**
+   * @brief Removes all child views from this view.
+   */
+  void RemoveAllViews();
+
+  /**
+   * @brief Gets the number of child views.
+   *
+   * @return The child count
+   */
+  uint32_t GetChildCount() const;
+
+  /**
+   * @brief Gets the child view at the specified index.
+   *
+   * @param[in] index The child index
+   * @return The child view at the index
+   */
+  UI::View GetChildAt(uint32_t index) const;
+
+  /**
+   * @brief Returns the index of the given child view, or -1 if not found.
+   *
+   * @param[in] view The child view to find
+   * @return Index of the view, or -1 if not a child
+   */
+  int32_t IndexOfChild(UI::View view) const;
+
+  /**
+   * @brief Adds a list of children (method chaining).
+   *
+   * @param[in] children The initializer list of View handles to add
+   * @return Reference to this for method chaining
+   */
+  ViewImpl& Contents(std::initializer_list<UI::View> children);
+
+  /**
+   * @brief Gets the children container for layout manager access.
+   *
+   * @return Reference to the children container
+   */
+  ChildContainer& GetChildren();
+
+  /**
+   * @brief Gets the children container (const version).
+   *
+   * @return Const reference to the children container
+   */
+  const ChildContainer& GetChildren() const;
+
+public: // ClipsToBounds API
+  /**
+   * @brief Sets whether this view clips its children to its bounds.
+   *
+   * @param[in] clips True to clip children to bounds
+   */
+  void SetClipsToBounds(bool clips);
+
+  /**
+   * @brief Gets whether this view clips its children to its bounds.
+   *
+   * @return True if children are clipped to bounds
+   */
+  bool GetClipsToBounds() const;
+
+protected:
+  /**
+   * @brief Applies min/max constraints to the size.
+   */
+  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
+
+  /**
+   * @brief Registers this layout with the LayoutController for processing.
+   *
+   * Called when this view is a Layout Root (top of layout hierarchy).
+   */
+  void RegisterWithLayoutController();
+
 private:
 
   // Not copyable or movable
@@ -193,6 +443,35 @@ private:
 private:
 
   std::vector<std::pair<TraitId, Trait>> mTraits;
+
+  // Layout size (LayoutWidth / LayoutHeight)
+  float mLayoutWidth;
+  float mLayoutHeight;
+  float mMinimumWidth;
+  float mMinimumHeight;
+  float mMaximumWidth;
+  float mMaximumHeight;
+
+  // Layout Properties Data
+  Extents mMargin;
+  Extents mPadding;
+  LayoutAlignment mHorizontalAlignment;
+  LayoutAlignment mVerticalAlignment;
+  ViewVisibility mVisibility;
+
+  // Measure/Arrange State (cache-based)
+  // mLastMeasuredConstraint.width < 0 means no valid measure cache
+  MeasuredSize mDesiredSize;
+  MeasuredSize mLastMeasuredConstraint;
+  LayoutRect mArrangedBounds;
+  bool mArrangeValid;
+
+  // Optional LayoutManager and Children (for layout capability)
+  std::unique_ptr<LayoutManager> mLayoutManager;
+  ChildContainer mChildren;
+
+  // ClipsToBounds (layout-style behaviour when view has children)
+  bool mClipsToBounds;
 };
 
 // Helpers for public-api forwarding methods

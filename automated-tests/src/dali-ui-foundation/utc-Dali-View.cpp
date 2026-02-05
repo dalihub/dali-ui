@@ -17,9 +17,13 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <limits>
 #include <dali.h>
 #include <dali-toolkit/dali-toolkit.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layout.h>
+#include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
@@ -340,12 +344,12 @@ int UtcDaliViewMultipleChainingP(void)
 int UtcDaliViewContentsP(void)
 {
   TestApplication application;
-  View parent = View::New();
+  StackLayout parent = StackLayout::New(StackOrientation::Vertical);
   View child1 = View::New();
   View child2 = View::New();
 
-  View& result = parent.Contents({child1, child2});
-  DALI_TEST_EQUALS(&result, &parent, TEST_LOCATION);
+  Layout& result = parent.Contents({child1, child2});
+  DALI_TEST_CHECK(result == parent);
   DALI_TEST_EQUALS(parent.GetChildCount(), 2u, TEST_LOCATION);
   END_TEST;
 }
@@ -574,5 +578,713 @@ int UtcDaliTraitLifecycleP(void)
   viewImpl.RemoveTrait(0);
 
   DALI_TEST_EQUALS(trait.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetLayoutWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float width = 200.0f;
+  view.SetLayoutWidth(width);
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), width, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetLayoutWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), LayoutDimension::WrapContent, TEST_LOCATION);
+  view.SetLayoutWidth(LayoutDimension::MatchParent);
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), LayoutDimension::MatchParent, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetLayoutHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float height = 100.0f;
+  view.SetLayoutHeight(height);
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), height, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetLayoutHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), LayoutDimension::WrapContent, TEST_LOCATION);
+  view.SetLayoutHeight(LayoutDimension::MatchParent);
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), LayoutDimension::MatchParent, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetViewMarginP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents margin(10, 20, 30, 40);
+  view.SetViewMargin(margin);
+  Extents got = view.GetViewMargin();
+  DALI_TEST_EQUALS(got.start, 10u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 20u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.top, 30u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.bottom, 40u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetViewMarginP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents got = view.GetViewMargin();
+  DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetViewPaddingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents padding(5, 15, 25, 35);
+  view.SetViewPadding(padding);
+  Extents got = view.GetViewPadding();
+  DALI_TEST_EQUALS(got.start, 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 15u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.top, 25u, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.bottom, 35u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetViewPaddingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents got = view.GetViewPadding();
+  DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetViewVisibilityP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Hidden);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Hidden),
+                   TEST_LOCATION);
+  view.SetViewVisibility(ViewVisibility::Collapsed);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Collapsed),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetViewVisibilityP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Visible),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetHorizontalAlignmentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetHorizontalAlignment(LayoutAlignment::Center);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::Center),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetHorizontalAlignmentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::Start),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetVerticalAlignmentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetVerticalAlignment(LayoutAlignment::End);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::End),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetVerticalAlignmentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::Start),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutWidthChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.LayoutWidth(150.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), 150.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutHeightChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.LayoutHeight(80.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewVisibilityChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.Visibility(ViewVisibility::Hidden);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Hidden),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(100.0f);
+  view.SetLayoutHeight(50.0f);
+  MeasuredSize size = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  LayoutRect bounds(10.0f, 20.0f, 100.0f, 80.0f);
+  MeasuredSize size = view.Arrange(bounds);
+  DALI_TEST_EQUALS(size.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInvalidateMeasureP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.Measure(100.0f, 100.0f);
+  DALI_TEST_CHECK(view.IsMeasureValid());
+  view.InvalidateMeasure();
+  DALI_TEST_CHECK(!view.IsMeasureValid());
+  END_TEST;
+}
+
+int UtcDaliViewInvalidateArrangeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0, 0, 100, 100));
+  DALI_TEST_CHECK(view.IsArrangeValid());
+  view.InvalidateArrange();
+  DALI_TEST_CHECK(!view.IsArrangeValid());
+  END_TEST;
+}
+
+int UtcDaliViewGetDesiredSizeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  MeasuredSize desired = view.GetDesiredSize();
+  DALI_TEST_EQUALS(desired.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(desired.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewIsMeasureValidP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.Measure(100.0f, 100.0f);
+  DALI_TEST_CHECK(view.IsMeasureValid());
+  view.InvalidateMeasure();
+  DALI_TEST_CHECK(!view.IsMeasureValid());
+  END_TEST;
+}
+
+int UtcDaliViewIsArrangeValidP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0, 0, 100, 100));
+  DALI_TEST_CHECK(view.IsArrangeValid());
+  view.InvalidateArrange();
+  DALI_TEST_CHECK(!view.IsArrangeValid());
+  END_TEST;
+}
+
+int UtcDaliViewSetMinimumWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetMinimumWidth(50.0f);
+  DALI_TEST_EQUALS(view.GetMinimumWidth(), 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetMinimumWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetMinimumWidth(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetMinimumHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetMinimumHeight(30.0f);
+  DALI_TEST_EQUALS(view.GetMinimumHeight(), 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetMinimumHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetMinimumHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetMaximumWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetMaximumWidth(500.0f);
+  DALI_TEST_EQUALS(view.GetMaximumWidth(), 500.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetMaximumWidthP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetMaximumWidth(), std::numeric_limits<float>::max(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetMaximumHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetMaximumHeight(400.0f);
+  DALI_TEST_EQUALS(view.GetMaximumHeight(), 400.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetMaximumHeightP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(view.GetMaximumHeight(), std::numeric_limits<float>::max(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundColorP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  DALI_TEST_CHECK(view);
+  Vector4 color(0.2f, 0.4f, 0.6f, 1.0f);
+  view.SetBackgroundColor(color);
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliViewViewMarginChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents margin(1, 2, 3, 4);
+  View& result = view.ViewMargin(margin);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetViewMargin().start, 1u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewViewPaddingChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Extents padding(5, 10, 15, 20);
+  View& result = view.ViewPadding(padding);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetViewPadding().start, 5u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewHorizontalAlignmentChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.HorizontalAlignment(LayoutAlignment::End);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::End),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewVerticalAlignmentChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.VerticalAlignment(LayoutAlignment::Center);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::Center),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMinimumWidthChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.MinimumWidth(25.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMinimumWidth(), 25.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMinimumHeightChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.MinimumHeight(35.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMinimumHeight(), 35.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMaximumWidthChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.MaximumWidth(300.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMaximumWidth(), 300.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMaximumHeightChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  View& result = view.MaximumHeight(400.0f);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMaximumHeight(), 400.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureCollapsedP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Collapsed);
+  MeasuredSize size = view.Measure(100.0f, 100.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureCacheHitP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  MeasuredSize s1 = view.Measure(200.0f, 200.0f);
+  MeasuredSize s2 = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(s1.GetWidth(), s2.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(s1.GetHeight(), s2.GetHeight(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureWithMarginP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewMargin(Extents(10, 10, 10, 10));
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  MeasuredSize size = view.Measure(100.0f, 100.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureMatchParentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(LayoutDimension::MatchParent);
+  view.SetLayoutHeight(LayoutDimension::MatchParent);
+  MeasuredSize size = view.Measure(200.0f, 150.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeCollapsedP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Collapsed);
+  MeasuredSize size = view.Arrange(LayoutRect(0, 0, 100, 100));
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInvalidateMeasureWithParentP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  View child = View::New();
+  layout.AddView(child);
+  child.InvalidateMeasure();
+  DALI_TEST_CHECK(!child.IsMeasureValid());
+  END_TEST;
+}
+
+int UtcDaliViewVisibilityCollapsedToVisibleP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Collapsed);
+  view.SetViewVisibility(ViewVisibility::Visible);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Visible),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewApplyConstraintsMinMaxP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetMinimumWidth(80.0f);
+  view.SetMaximumWidth(50.0f);
+  view.SetMinimumHeight(60.0f);
+  view.SetMaximumHeight(40.0f);
+  MeasuredSize size = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutWidthFixedNoManagerP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(120.0f);
+  view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), 120.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutHeightFixedNoManagerP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutHeight(80.0f);
+  view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeWithLayoutP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  View c1 = View::New();
+  c1.SetLayoutWidth(100.0f);
+  c1.SetLayoutHeight(50.0f);
+  layout.AddView(c1);
+  View c2 = View::New();
+  c2.SetLayoutWidth(100.0f);
+  c2.SetLayoutHeight(50.0f);
+  layout.AddView(c2);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(200.0f);
+  MeasuredSize measured = layout.Measure(200.0f, 200.0f);
+  MeasuredSize arranged = layout.Arrange(LayoutRect(0, 0, 200, 200));
+  DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(measured.GetHeight(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(arranged.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(arranged.GetHeight(), 200.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureWithPaddingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewPadding(Extents(5, 5, 5, 5));
+  view.SetLayoutWidth(40.0f);
+  view.SetLayoutHeight(30.0f);
+  MeasuredSize size = view.Measure(100.0f, 100.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureWrapContentP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(LayoutDimension::WrapContent);
+  view.SetLayoutHeight(LayoutDimension::WrapContent);
+  MeasuredSize size = view.Measure(300.0f, 300.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutMatchParentWithManagerP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  layout.SetLayoutWidth(LayoutDimension::MatchParent);
+  layout.SetLayoutHeight(LayoutDimension::MatchParent);
+  layout.AddView(View::New().SizeWidth(50.0f).SizeHeight(50.0f));
+  MeasuredSize size = layout.Measure(200.0f, 150.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewVisibilityHiddenToVisibleP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Hidden);
+  view.SetViewVisibility(ViewVisibility::Visible);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Visible),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewInvalidateArrangeWithParentP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  View child = View::New();
+  layout.AddView(child);
+  child.Measure(100.0f, 100.0f);
+  child.Arrange(LayoutRect(0, 0, 100, 100));
+  child.InvalidateArrange();
+  DALI_TEST_CHECK(!child.IsArrangeValid());
+  END_TEST;
+}
+
+int UtcDaliViewOnArrangeVisibleHiddenP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Hidden);
+  view.SetLayoutWidth(60.0f);
+  view.SetLayoutHeight(40.0f);
+  view.Measure(100.0f, 100.0f);
+  MeasuredSize arranged = view.Arrange(LayoutRect(0, 0, 100, 100));
+  DALI_TEST_EQUALS(arranged.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(arranged.GetHeight(), 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeAlignmentCenterP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  view.SetHorizontalAlignment(LayoutAlignment::Center);
+  view.SetVerticalAlignment(LayoutAlignment::Center);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(10.0f, 20.0f, 100.0f, 100.0f));
+  DALI_TEST_EQUALS(view.GetPositionX(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPositionY(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSizeWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSizeHeight(), 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeAlignmentEndP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(40.0f);
+  view.SetLayoutHeight(30.0f);
+  view.SetHorizontalAlignment(LayoutAlignment::End);
+  view.SetVerticalAlignment(LayoutAlignment::End);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0, 0, 100.0f, 100.0f));
+  DALI_TEST_EQUALS(view.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSizeWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSizeHeight(), 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeAlignmentFillP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  view.SetHorizontalAlignment(LayoutAlignment::Fill);
+  view.SetVerticalAlignment(LayoutAlignment::Fill);
+  view.Measure(100.0f, 100.0f);
+  view.Arrange(LayoutRect(0, 0, 120.0f, 80.0f));
+  DALI_TEST_EQUALS(view.GetSizeWidth(), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSizeHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetLayoutWidthNoChangeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  view.SetLayoutWidth(50.0f);
+  view.SetLayoutHeight(50.0f);
+  DALI_TEST_EQUALS(view.GetLayoutWidth(), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLayoutHeight(), 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetViewVisibilityHiddenInvalidateArrangeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  view.SetViewVisibility(ViewVisibility::Visible);
+  view.SetViewVisibility(ViewVisibility::Hidden);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetViewVisibility()), static_cast<uint8_t>(ViewVisibility::Hidden),
+                   TEST_LOCATION);
   END_TEST;
 }

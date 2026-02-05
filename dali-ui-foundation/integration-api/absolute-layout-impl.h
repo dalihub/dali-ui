@@ -1,0 +1,73 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/absolute-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layout-impl.h>
+#include <dali-ui-foundation/public-api/absolute-layout.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Integration
+{
+
+/**
+ * @brief This is the internal implementation class for AbsoluteLayout.
+ */
+class AbsoluteLayoutImpl : public LayoutImpl
+{
+public:
+  static UI::AbsoluteLayout New();
+
+protected:
+  virtual ~AbsoluteLayoutImpl();
+  AbsoluteLayoutImpl();
+
+protected: // From Layout
+  LayoutManager* CreateLayoutManager() override;
+
+private:
+  AbsoluteLayoutImpl(const AbsoluteLayoutImpl&) = delete;
+  AbsoluteLayoutImpl(AbsoluteLayoutImpl&&) = delete;
+  AbsoluteLayoutImpl& operator=(const AbsoluteLayoutImpl&) = delete;
+  AbsoluteLayoutImpl& operator=(AbsoluteLayoutImpl&&) = delete;
+};
+
+inline Integration::AbsoluteLayoutImpl& GetImpl(UI::AbsoluteLayout& layout)
+{
+  DALI_ASSERT_ALWAYS(layout);
+  Dali::RefObject& handle = layout.GetImplementation();
+  return static_cast<Integration::AbsoluteLayoutImpl&>(handle);
+}
+
+inline const Integration::AbsoluteLayoutImpl& GetImpl(const UI::AbsoluteLayout& layout)
+{
+  DALI_ASSERT_ALWAYS(layout);
+  const Dali::RefObject& handle = layout.GetImplementation();
+  return static_cast<const Integration::AbsoluteLayoutImpl&>(handle);
+}
+
+} // namespace Integration
+} // namespace UI
+} // namespace Dali

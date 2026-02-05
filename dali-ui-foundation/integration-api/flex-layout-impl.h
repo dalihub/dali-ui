@@ -1,0 +1,101 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/flex-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layout-impl.h>
+#include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Integration
+{
+
+/**
+ * @brief This is the internal implementation class for FlexLayout.
+ */
+class FlexLayoutImpl : public LayoutImpl
+{
+public:
+  /**
+   * @brief Creates a new FlexLayout.
+   *
+   * @return A handle to a newly allocated FlexLayout
+   */
+  static UI::FlexLayout New();
+
+protected:
+  virtual ~FlexLayoutImpl();
+  FlexLayoutImpl();
+
+public: // API
+  void SetDirection(FlexDirection direction);
+  FlexDirection GetDirection() const;
+
+  void SetWrap(FlexWrap wrap);
+  FlexWrap GetWrap() const;
+
+  void SetJustifyContent(FlexJustify justify);
+  FlexJustify GetJustifyContent() const;
+
+  void SetAlignItems(FlexAlign align);
+  FlexAlign GetAlignItems() const;
+
+  void SetAlignContent(FlexAlign align);
+  FlexAlign GetAlignContent() const;
+
+protected: // From Layout
+  LayoutManager* CreateLayoutManager() override;
+
+private:
+  FlexLayoutImpl(const FlexLayoutImpl&) = delete;
+  FlexLayoutImpl(FlexLayoutImpl&&) = delete;
+  FlexLayoutImpl& operator=(const FlexLayoutImpl&) = delete;
+  FlexLayoutImpl& operator=(FlexLayoutImpl&&) = delete;
+
+private:
+  FlexDirection mDirection;
+  FlexWrap mWrap;
+  FlexJustify mJustifyContent;
+  FlexAlign mAlignItems;
+  FlexAlign mAlignContent;
+};
+
+inline Integration::FlexLayoutImpl& GetImpl(UI::FlexLayout& layout)
+{
+  DALI_ASSERT_ALWAYS(layout);
+  Dali::RefObject& handle = layout.GetImplementation();
+  return static_cast<Integration::FlexLayoutImpl&>(handle);
+}
+
+inline const Integration::FlexLayoutImpl& GetImpl(const UI::FlexLayout& layout)
+{
+  DALI_ASSERT_ALWAYS(layout);
+  const Dali::RefObject& handle = layout.GetImplementation();
+  return static_cast<const Integration::FlexLayoutImpl&>(handle);
+}
+
+} // namespace Integration
+} // namespace UI
+} // namespace Dali

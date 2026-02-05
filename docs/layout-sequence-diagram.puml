@@ -1,0 +1,116 @@
+@startuml layout-calculation-sequence
+!theme plain
+title DALi UI - Layout Calculation Process (Measure & Arrange)
+
+' Public API: only Layout has AddView/Contents; Measure/Arrange are invoked by the layout system.
+' This sequence shows the internal flow (ViewImpl, LayoutManager).
+
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Application\n(Window)" as App
+participant "Adaptor\n(DALi Core)" as Adaptor
+participant "LayoutControllerImpl" as LC
+participant "ViewImpl\n(layout root)" as Root
+participant "LayoutManager" as LM
+participant "ViewImpl\n(child)" as Child
+
+== Per-frame: Process layout roots ==
+App -> App : InvalidateMeasure() or\nRegisterWithLayoutController()
+note right: Layout roots are registered\nwhen they need a layout pass.
+
+Adaptor -> LC : Process(postProcess=false)\n(called once per frame)
+activate LC
+
+LC -> LC : ProcessLayouts()
+note right: Iterate over mPendingViews\n(layout roots for this window)
+
+loop for each layout root
+  LC -> Root : ProcessLayoutRoot(view)
+  activate Root
+
+  == Resolve constraints ==
+  LC -> Root : GetLayoutWidth()\nGetLayoutHeight()
+  Root --> LC : layoutWidth, layoutHeight
+  LC -> LC : Resolve constraints\n(window size or parent Actor size;\nfixed spec overrides)
+
+  == Measure pass ==
+  LC -> Root : Measure(widthConstraint, heightConstraint)
+  activate Root #LightBlue
+
+  alt view is collapsed
+    Root --> LC : MeasuredSize(0, 0)
+  else cache hit (same constraints)
+    Root --> LC : mDesiredSize (cached)
+  else measure
+    Root -> Root : Subtract margin from constraints
+    Root -> Root : OnMeasure(innerW, innerH)
+    activate Root #LightGreen
+
+    alt has LayoutManager
+      Root -> LM : Measure(this, widthConstraint, heightConstraint)
+      activate LM
+      LM -> LM : GetChildren(view)
+      loop for each child
+        LM -> Child : MeasureChild(child, childW, childH)
+        activate Child
+        Child -> Child : Measure() [recursive]
+        Child --> LM : MeasuredSize
+        deactivate Child
+      end
+      LM --> Root : content MeasuredSize
+      deactivate LM
+      Root -> Root : Add padding; apply MatchParent if needed
+    else no LayoutManager
+      Root -> Root : Compute size from spec\n(fixed / MatchParent / natural size)
+    end
+    Root -> Root : ApplyConstraints(measured)\nStore mDesiredSize, update cache
+    deactivate Root
+    Root --> LC : mDesiredSize
+    deactivate Root
+  end
+  deactivate Root
+
+  == Arrange pass ==
+  LC -> LC : Build LayoutRect(0, 0, measuredSize)
+  LC -> Root : Arrange(bounds)
+  activate Root
+
+  Root -> Root : OnArrange(bounds)
+  activate Root #LightYellow
+  Root -> Root : Apply alignment, margin;\nset Actor position/size/visibility
+
+  alt has LayoutManager
+    Root -> Root : Compute contentBounds\n(inside padding)
+    Root -> LM : ArrangeChildren(this, contentBounds)
+    activate LM
+    loop for each child
+      LM -> LM : Compute child bounds\n(per layout algorithm)
+      LM -> Child : ArrangeChild(child, childBounds)
+      activate Child
+      Child -> Child : Arrange() [recursive]
+      Child --> LM : arranged size
+      deactivate Child
+    end
+    LM --> Root : arranged size
+    deactivate LM
+  end
+  deactivate Root
+  Root --> LC : arranged size
+  deactivate Root
+
+end
+deactivate LC
+Adaptor <-- LC : return
+
+== Invalidation flow (when layout must be recomputed) ==
+note over Root, Child
+  When a view's size/layout properties change:
+  1) ViewImpl::InvalidateMeasure() or InvalidateArrange()
+  2) Propagate to parent layout (GetParentLayout().InvalidateMeasure())
+  3) At layout root: RegisterWithLayoutController()
+  4) LayoutControllerImpl::RequestLayout(ViewImpl*) adds root to mPendingViews
+  5) Next frame: Adaptor calls Process() -> ProcessLayouts() as above
+end note
+
+@enduml
