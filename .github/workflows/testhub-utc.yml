@@ -82,6 +82,13 @@ jobs:
         xvfb-run ./execute.sh
         ./coverage.sh
 
+    - name: LCOV Report
+      uses: CODE-Actions/romeovs-lcov-reporter-action@v0.3.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        lcov-file: ./build/tizen/dali.info
+        filter-changed-files: true
+
     - name: Collect artifacts
       run: |
         mkdir test_results coverage
