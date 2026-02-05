@@ -24,15 +24,21 @@ dali-ui-foundation을 기반으로 구축되며, 프레임워크의 기본 빌�
 
 </br>
 
+## API Reference
+
+https://pages.github.sec.samsung.net/NUI/dali-ui/api/index_classes.html
+
+</br>
+
 ## How to build
 
 ### Ubuntu
 
-:warning: DALi env set up required. [→Link](https://github.com/dalihub/dali-core/blob/master/README.md)
+:warning: DALi env set up required. ([→Link](https://github.com/dalihub/dali-core/blob/master/README.md#1-building-for-ubuntu-desktop))
 
 :warning: [dali-core](https://github.com/dalihub/dali-core/blob/master/README.md#1-building-for-ubuntu-desktop), [dali-adpator](https://github.com/dalihub/dali-adaptor/blob/master/README.md#1-building-for-ubuntu-desktop) and [dali-toolkit](https://github.com/dalihub/dali-toolkit/blob/master/README.md#1-building-for-ubuntu-desktop) should be installed.
 ```
-# . setenv
+. setenv
 ```
 ```
 cd build/tizen
@@ -41,10 +47,18 @@ make install -j
 ```
 
 ### GBS build (Tizen)
+
+To build dali-ui libraries:
+
 ```
 gbs build -A armv7l --include-all
 ```
-Check `com.samsung.dali.hello-world-2.0.0-1.armv7l.rpm` generated.
+
+To build a sample, specify sample app directory:
+
+```
+gbs build -A armv7l --include-all --packaging-dir samples/hello-world/packaging
+```
 
 ## How to run automated test
 
