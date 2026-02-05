@@ -15,6 +15,7 @@ jobs:
     - uses: code-actions/checkout@v3
       with:
         ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
 
     - name: Setup SSH
       uses: code-actions/webfactory-ssh-agent@v0.7.0
@@ -88,6 +89,9 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         lcov-file: ./build/tizen/dali.info
         filter-changed-files: true
+        base: ${{ github.event.pull_request.base.sha }}
+        head: ${{ github.event.pull_request.head.sha }}
+
 
     - name: Collect artifacts
       run: |
