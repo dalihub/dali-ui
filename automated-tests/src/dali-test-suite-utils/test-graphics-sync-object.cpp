@@ -18,10 +18,11 @@
 
 namespace Dali
 {
-TestGraphicsSyncObject::TestGraphicsSyncObject(TestGraphicsSyncImplementation& syncImpl, const Graphics::SyncObjectCreateInfo& createInfo)
-: mSyncImplementation(syncImpl),
-  mSyncObject(nullptr),
-  mCreateInfo(createInfo)
+TestGraphicsSyncObject::TestGraphicsSyncObject(TestGraphicsSyncImplementation& syncImpl,
+                                               const Graphics::SyncObjectCreateInfo& createInfo)
+  : mSyncImplementation(syncImpl),
+    mSyncObject(nullptr),
+    mCreateInfo(createInfo)
 {
 }
 
@@ -32,13 +33,14 @@ TestGraphicsSyncObject::~TestGraphicsSyncObject()
 
 void TestGraphicsSyncObject::InitializeResource()
 {
-  mSyncObject = static_cast<TestSyncObject*>(mSyncImplementation.CreateSyncObject());
+  mSyncObject = static_cast<TestSyncObject*>(
+      mSyncImplementation.CreateSyncObject(Integration::GraphicsSyncAbstraction::SyncObject::SyncType::FENCE_SYNC));
 }
 
 bool TestGraphicsSyncObject::IsSynced()
 {
   bool synced = false;
-  if(mSyncObject)
+  if (mSyncObject)
   {
     synced = mSyncObject->IsSynced();
   }

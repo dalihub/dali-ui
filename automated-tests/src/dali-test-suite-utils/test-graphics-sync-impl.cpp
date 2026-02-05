@@ -21,8 +21,8 @@ namespace Dali
 {
 TestSyncObject::TestSyncObject(Dali::TraceCallStack& trace)
 
-: synced(false),
-  mTrace(trace)
+  : synced(false),
+    mTrace(trace)
 {
   mTrace.PushCall("TestSyncObject cons", ""); // Trace the method
 }
@@ -58,7 +58,7 @@ TestGraphicsSyncImplementation::TestGraphicsSyncImplementation()
  */
 TestGraphicsSyncImplementation::~TestGraphicsSyncImplementation()
 {
-  for(SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
+  for (SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
   {
     delete *iter;
   }
@@ -72,7 +72,8 @@ void TestGraphicsSyncImplementation::Initialize()
   mSyncObjects.clear();
 }
 
-Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::CreateSyncObject()
+Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::CreateSyncObject(
+    SyncObject::SyncType type)
 {
   mTrace.PushCall("CreateSyncObject", ""); // Trace the method
 
@@ -91,9 +92,9 @@ void TestGraphicsSyncImplementation::DestroySyncObject(Integration::GraphicsSync
   out << syncObject;
   mTrace.PushCall("DestroySyncObject", out.str()); // Trace the method
 
-  for(SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
+  for (SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
   {
-    if(*iter == syncObject)
+    if (*iter == syncObject)
     {
       delete *iter;
       mSyncObjects.erase(iter);
@@ -104,7 +105,7 @@ void TestGraphicsSyncImplementation::DestroySyncObject(Integration::GraphicsSync
 
 Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::GetLastSyncObject()
 {
-  if(!mSyncObjects.empty())
+  if (!mSyncObjects.empty())
   {
     return mSyncObjects.back();
   }
@@ -116,10 +117,11 @@ Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation
  * @param[in]
  * @param[in] sync The sync value to set
  */
-void TestGraphicsSyncImplementation::SetObjectSynced(Integration::GraphicsSyncAbstraction::SyncObject* syncObject, bool sync)
+void TestGraphicsSyncImplementation::SetObjectSynced(Integration::GraphicsSyncAbstraction::SyncObject* syncObject,
+                                                     bool sync)
 {
   TestSyncObject* testSyncObject = static_cast<TestSyncObject*>(syncObject);
-  testSyncObject->synced         = sync;
+  testSyncObject->synced = sync;
 }
 
 /**

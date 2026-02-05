@@ -44,7 +44,7 @@ public:
   void Wait() override;
   void ClientWait() override;
 
-  bool            synced;
+  bool synced;
   TraceCallStack& mTrace;
 };
 
@@ -72,7 +72,7 @@ public:
   /**
    * Create a sync object that can be polled
    */
-  GraphicsSyncAbstraction::SyncObject* CreateSyncObject() override;
+  GraphicsSyncAbstraction::SyncObject* CreateSyncObject(SyncObject::SyncType type) override;
 
   /**
    * Destroy a sync object
@@ -111,14 +111,14 @@ public: // TEST FUNCTIONS
    */
   int32_t GetNumberOfSyncObjects();
 
-  TestGraphicsSyncImplementation(const TestGraphicsSyncImplementation&)            = delete;
+  TestGraphicsSyncImplementation(const TestGraphicsSyncImplementation&) = delete;
   TestGraphicsSyncImplementation& operator=(const TestGraphicsSyncImplementation&) = delete;
 
 private:
   typedef std::vector<TestSyncObject*> SyncContainer;
-  typedef SyncContainer::iterator      SyncIter;
-  SyncContainer                        mSyncObjects;       ///< The sync objects
-  TraceCallStack                       mTrace{true, "gl"}; ///< the trace call stack for testing
+  typedef SyncContainer::iterator SyncIter;
+  SyncContainer mSyncObjects;        ///< The sync objects
+  TraceCallStack mTrace{true, "gl"}; ///< the trace call stack for testing
 };
 
 } // namespace Dali
