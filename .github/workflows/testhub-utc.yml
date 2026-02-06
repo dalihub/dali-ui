@@ -92,11 +92,17 @@ jobs:
     #     base: ${{ github.event.pull_request.base.sha }}
     #     head: ${{ github.event.pull_request.head.sha }}
 
+    - name: Setup Python
+      uses: code-actions/setup-python@v5
+      with:
+        python-version: '3.x'
 
     - name: Collect artifacts
       run: |
         mkdir test_results coverage
-        cp automated-tests/tct-dali-ui-foundation-core-tests.xml test_results
+        chmod +x automated-tests/scripts/convert-to-gtest.py
+        python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
+        cp test-results.xml test_results
         cp -rf build/tizen/doc/coverage/* coverage/
         cp build/tizen/dali.info coverage/
 
