@@ -35,9 +35,19 @@ namespace UI
 namespace Integration
 {
 
+namespace
+{
+
+BaseHandle Create()
+{
+  return ViewImpl::New();
+}
+
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(Dali::UI::View, Dali::Toolkit::Control, NULL)
+DALI_TYPE_REGISTRATION_BEGIN(UI::Integration::ViewImpl, Toolkit::Control, Create)
 DALI_TYPE_REGISTRATION_END()
+
+} // namespace
 
 UI::View ViewImpl::New()
 {
