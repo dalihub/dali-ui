@@ -42,33 +42,32 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     window.Add(Layout::New() // Parent
-                   .BackgroundColor(Color::YELLOW)
-                   .SetSizeWidth(200_spx)
-                   .SetSizeHeight(200_spx)
-                   .Contents({
-                       View::New() // Red child
-                           .BackgroundColor(Color::RED)
-                           .SetSizeWidth(100_spx)
-                           .SetSizeHeight(100_spx)
-                           .With([this](View& firstChild)
-                                 { firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed); }),
-                       View::New() // Blue child
-                           .BackgroundColor(Color::BLUE)
-                           .SetSizeWidth(100_spx)
-                           .SetSizeHeight(100_spx)
-                           .SetPositionX(100_spx)
-                           .SetPositionY(100_spx)
-                           .As(mSecondChild),
-                   }));
-
-    // Respond to key events
-    window.KeyEventSignal().Connect(this, &HelloWorldController::OnKeyEvent);
+      .BackgroundColor(Color::YELLOW)
+      .SetSizeWidth(200_spx)
+      .SetSizeHeight(200_spx)
+      .Contents({
+        View::New() // Red child
+          .BackgroundColor(Color::RED)
+          .SetSizeWidth(100_spx)
+          .SetSizeHeight(100_spx)
+          .AsClickable(this, [this](View view, const InputEvent& event)
+          {
+            mSecondChild.SetBackgroundColor(Color::GREEN);
+            return true;
+          }),
+        View::New() // Blue child
+          .BackgroundColor(Color::BLUE)
+          .SetSizeWidth(100_spx)
+          .SetSizeHeight(100_spx)
+          .SetPositionX(100_spx)
+          .SetPositionY(100_spx)
+          .As(mSecondChild),
+      }));
   }
 
-  bool OnTouchRed(Actor actor, const TouchEvent& touch)
+  bool OnViewKeyEvent(Actor actor, const KeyEvent& event)
   {
-    // quit the application
-    mSecondChild.SetBackgroundColor(Color::GREEN);
+    mSecondChild.BackgroundColor(Color::GREEN);
     return true;
   }
 

@@ -30,14 +30,28 @@ namespace Integration
 
 /**
  * @brief Reserved identifiers used internally by the framework.
- * These IDs are allocated 0 to 1000 to ensure that system-level
- * traits or elements do not conflict with user-defined ones.
+ *
+ * These IDs are allocated in the range [0, MAX_RESERVED] to ensure that
+ * system-level traits or elements do not conflict with user-defined ones.
+ * Application code should always use @c TraitId with raw integers; an offset
+ * is automatically applied so that user-defined IDs never overlap with the
+ * reserved range.
  */
 enum class ReservedTraitId : uint32_t
 {
+  /**
+   * @brief Interaction trait attached to a View.
+   *
+   * This is used for "interaction traits" such as clickable, selectable,
+   * or group-selectable behavior that define how a View reacts to input.
+   * A View may have at most one interaction trait, which is attached via
+   * ViewImpl::SetTrait(ReservedTraitId::INTERACTION_TRAIT, ...).
+   */
+  INTERACTION_TRAIT = 0,
+
   // Layout params
-  ABSOLUTE_LAYOUT_PARAMS = 1,
-  STACK_LAYOUT_PARAMS = 0,
+  ABSOLUTE_LAYOUT_PARAMS = 10,
+  STACK_LAYOUT_PARAMS = 11,
 
   // Effects
   INTERACTION_EFFECT = 50,

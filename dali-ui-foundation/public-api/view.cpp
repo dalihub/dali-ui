@@ -22,7 +22,9 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/layout.h>
 
 namespace Dali
@@ -291,6 +293,58 @@ View& View::SetVerticalAlignment(LayoutAlignment alignment)
 LayoutAlignment View::GetVerticalAlignment() const
 {
   return Integration::GetImpl(*this).GetVerticalAlignment();
+}
+
+bool View::IsFocusable() const
+{
+  return Integration::GetImpl(*this).IsFocusable();
+}
+
+View& View::SetFocusable(bool focusable)
+{
+  Integration::GetImpl(*this).SetFocusable(focusable);
+  return *this;
+}
+
+bool View::IsTouchFocusable() const
+{
+  return Integration::GetImpl(*this).IsTouchFocusable();
+}
+
+View& View::SetTouchFocusable(bool touchFocusable)
+{
+  Integration::GetImpl(*this).SetTouchFocusable(touchFocusable);
+  return *this;
+}
+
+ClickableTrait View::GetOrAttachClickableTrait()
+{
+  auto& impl = Integration::GetImpl(*this);
+  const Integration::TraitId interactionTraitId(Integration::ReservedTraitId::INTERACTION_TRAIT);
+  Trait existing = impl.GetTrait(interactionTraitId);
+
+  if (!existing)
+  {
+    ClickableTrait clickable = ClickableTrait::New();
+    impl.SetTrait(interactionTraitId, clickable);
+    return clickable;
+  }
+
+  ClickableTrait clickable = ClickableTrait::DownCast(existing);
+  if (!clickable)
+  {
+    DALI_ASSERT_ALWAYS(false && "View already has a different interaction trait; cannot attach ClickableTrait");
+    return ClickableTrait();
+  }
+
+  return clickable;
+}
+
+ClickableTrait View::GetClickableTrait() const
+{
+  const auto& impl = Integration::GetImpl(*this);
+  Trait trait = impl.GetTrait(Integration::TraitId(Integration::ReservedTraitId::INTERACTION_TRAIT));
+  return ClickableTrait::DownCast(trait);
 }
 
 } // namespace UI

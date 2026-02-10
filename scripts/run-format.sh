@@ -49,7 +49,7 @@ case "$1" in
         echo "> Fixing staged files with $CF..."
         # --cached: staged 상태인 파일 목록
         # --diff-filter=ACMR: Added, Copied, Modified, Renamed 파일만 (Deleted 제외)
-        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h|hpp)$' | grep -v 'automated-tests/\|third-party/\|build/\|\.autogen\.h$')
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h|hpp)$' | grep -v 'automated-tests/\|samples/\|build/\|\.autogen\.h$')
 
         if [ -z "$STAGED_FILES" ]; then
             echo "ℹ> No staged C++ files to process."

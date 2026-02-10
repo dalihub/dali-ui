@@ -22,6 +22,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali-toolkit/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/layout-controller.h>
@@ -85,6 +86,7 @@ ViewImpl::ViewImpl()
   : Toolkit::Internal::Control(Toolkit::Internal::Control::ControlBehaviour(
         static_cast<int>(Toolkit::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT) |
         static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
+    mInteractionTrait(nullptr),
     mLayoutWidth(LayoutDimension::WrapContent),
     mLayoutHeight(LayoutDimension::WrapContent),
     mMinimumWidth(0.0f),
@@ -140,10 +142,29 @@ void ViewImpl::OnSceneConnection(int depth)
   }
 }
 
-bool ViewImpl::OnKeyEvent(const KeyEvent& event)
+bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
-  // Call base class implementation
-  return Toolkit::Internal::Control::OnKeyEvent(event);
+  if (mInteractionTrait)
+  {
+    return mInteractionTrait->OnKeyEvent(View::DownCast(Self()), event);
+  }
+  return false;
+}
+
+void ViewImpl::OnKeyInputFocusGained()
+{
+  if (mInteractionTrait)
+  {
+    mInteractionTrait->OnFocusedChanged(View::DownCast(Self()), true);
+  }
+}
+
+void ViewImpl::OnKeyInputFocusLost()
+{
+  if (mInteractionTrait)
+  {
+    mInteractionTrait->OnFocusedChanged(View::DownCast(Self()), false);
+  }
 }
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -221,10 +242,45 @@ void ViewImpl::SetPivotPoint(const Vector3& point)
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
 }
 
+bool ViewImpl::IsFocusable() const
+{
+  return Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
+}
+
+void ViewImpl::SetFocusable(bool focusable)
+{
+  Self().SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, focusable);
+}
+
+bool ViewImpl::IsTouchFocusable() const
+{
+  return Self().GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE);
+}
+
+void ViewImpl::SetTouchFocusable(bool touchFocusable)
+{
+  Self().SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, touchFocusable);
+}
+
 void ViewImpl::SetTrait(TraitId id, Trait& trait)
 {
   View self = View::DownCast(Self());
   auto& traitImpl = GetImpl(trait);
+
+  if (id == ReservedTraitId::INTERACTION_TRAIT)
+  {
+    // NOTE Interaction trait는 한 번 설정되면 View 수명 동안 교체할 수 없음
+    if (mInteractionTrait)
+    {
+      DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
+      return;
+    }
+
+    IInteractionTrait* interactionTrait = dynamic_cast<IInteractionTrait*>(&traitImpl);
+    DALI_ASSERT_ALWAYS(interactionTrait &&
+                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement IInteractionTrait");
+    mInteractionTrait = interactionTrait;
+  }
 
   for (auto& entry : mTraits)
   {
@@ -268,6 +324,13 @@ Trait ViewImpl::GetTrait(TraitId id) const
 
 bool ViewImpl::RemoveTrait(TraitId id)
 {
+  if (id == ReservedTraitId::INTERACTION_TRAIT)
+  {
+    // Interaction trait는 View 수명 동안 제거할 수 없다.
+    DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be removed once set");
+    return false;
+  }
+
   for (auto it = mTraits.begin(); it != mTraits.end(); ++it)
   {
     if (it->first == id)

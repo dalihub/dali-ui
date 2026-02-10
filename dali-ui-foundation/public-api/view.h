@@ -19,12 +19,13 @@
 
 // EXTERNAL INCLUDES
 #include <functional>
-#include <initializer_list>
 #include <dali-toolkit/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/clickable-trait.h>
 
 namespace Dali
 {
@@ -412,6 +413,101 @@ public: // Properties
    */
   LayoutAlignment GetVerticalAlignment() const;
 
+  /**
+   * @brief Gets whether the actor should be focusable by keyboard navigation.
+   *
+   * @return True if it is focusable
+   */
+  bool IsFocusable() const;
+
+  /**
+   * @brief Sets whether the actor should be focusable by keyboard navigation.
+   *
+   * @param[in] focusable True if it is focusable
+   */
+  View& SetFocusable(bool focusable);
+
+  /**
+   * @brief Gets whether the actor should be focused when touched.
+   *
+   * @return True if it is focused when touched
+   */
+  bool IsTouchFocusable() const;
+
+  /**
+   * @brief Sets whether the actor should be focused when touched.
+   *
+   * @param[in] touchFocusable True if it gets focused when touched
+   */
+  View& SetTouchFocusable(bool touchFocusable);
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the clickable interaction role to this View and optionally configures it.
+   *
+   * A View can have at most one interaction trait for its lifetime; attaching clickable
+   * succeeds only if no other interaction trait is set. If the View already has a
+   * ClickableTrait (e.g. from a previous AsClickable call), the existing trait is
+   * used and the configure callback is invoked with it.
+   *
+   * The callback is invoked in the caller's translation unit, so no std::function
+   * crosses the library ABI boundary; this preserves ABI stability across toolchains.
+   *
+   * @param[in] configure Optional callback to configure the ClickableTrait (e.g. connect signals).
+   *                     Can be null or omitted to only attach the trait.
+   * @return Reference to this View for fluent chaining
+   */
+  View& AsClickable(std::function<void(ClickableTrait&)> configure = nullptr)
+  {
+    ClickableTrait trait = GetOrAttachClickableTrait();
+    if (configure && trait)
+    {
+      configure(trait);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the clickable trait and connects a member function to the Clicked signal.
+   *
+   * Equivalent to AsClickable() then GetClickedSignal().Connect(obj, func).
+   * @param[in] obj Object that implements ConnectionTrackerInterface (e.g. ConnectionTracker subclass); used for
+   * automatic disconnection
+   * @param[in] func Member function with signature bool (View, const InputEvent&)
+   * @return Reference to this View for fluent chaining
+   */
+  template <class X>
+  View& AsClickable(X* obj, bool (X::*func)(View, const InputEvent&))
+  {
+    ClickableTrait trait = GetOrAttachClickableTrait();
+    if (trait && obj && func)
+    {
+      trait.GetClickedSignal().Connect(obj, func);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Attaches the clickable trait and connects a callable to the Clicked signal.
+   *
+   * Equivalent to AsClickable() then GetClickedSignal().Connect(connectionTracker, func).
+   * @param[in] connectionTracker Used for automatic disconnection when the tracker is destroyed
+   * @param[in] func Callable with signature bool (View, const InputEvent&) (e.g. lambda)
+   * @return Reference to this View for fluent chaining
+   */
+  template <typename F>
+  View& AsClickable(Dali::ConnectionTrackerInterface* connectionTracker, F&& func)
+  {
+    ClickableTrait trait = GetOrAttachClickableTrait();
+    if (trait && connectionTracker)
+    {
+      trait.GetClickedSignal().Connect(connectionTracker, std::forward<F>(func));
+    }
+    return *this;
+  }
+
   // @CHAIN_MANUAL
   /**
    * @brief Assigns this View instance to a target variable.
@@ -453,6 +549,29 @@ public: // Properties
   }
 
   // @CHAIN_END
+
+public: // Clickable role accessors (non-chaining)
+
+  /**
+   * @brief Ensures this View has a clickable interaction trait and returns it.
+   *
+   * If no interaction trait is set, a ClickableTrait is attached and returned.
+   * If a ClickableTrait is already attached, it is returned. If a different
+   * interaction trait is set, an assertion may fire and an empty handle is returned.
+   *
+   * @return ClickableTrait handle, or an uninitialized handle on error
+   */
+  ClickableTrait GetOrAttachClickableTrait();
+
+  /**
+   * @brief Returns the clickable interaction trait if this View has one.
+   *
+   * Use this in non-fluent code paths to obtain the trait after AsClickable(), or when
+   * the View was made clickable by other means (e.g. a control that attaches the trait).
+   *
+   * @return ClickableTrait handle if this View has a clickable trait; otherwise an uninitialized handle
+   */
+  ClickableTrait GetClickableTrait() const;
 
 public: // Not intended for application developers
 

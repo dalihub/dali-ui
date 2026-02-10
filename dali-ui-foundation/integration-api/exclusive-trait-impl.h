@@ -39,7 +39,7 @@ class DALI_UI_API ExclusiveTraitImpl : public TraitImpl
 {
 protected:
   /**
-   * @brief Creates an uninitialized ExclusiveTrait handle.
+   * @brief Creates an uninitialized ExclusiveTrait.
    */
   ExclusiveTraitImpl();
 

@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali-toolkit/public-api/controls/control-impl.h>
 #include <dali/public-api/common/extents.h>
+#include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
 #include <initializer_list>
 #include <limits>
@@ -32,6 +33,7 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/interaction-trait-interface.h>
 
 namespace Dali
 {
@@ -104,6 +106,7 @@ protected:
   ViewImpl();
 
 public: // From Toolkit::Internal::Control
+
   /**
    * @copydoc Toolkit::Internal::Control::OnInitialize
    */
@@ -118,16 +121,26 @@ public: // From Toolkit::Internal::Control
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc Toolkit::Internal::Control::OnKeyEvent
-   */
-  bool OnKeyEvent(const KeyEvent& event) override;
-
-  /**
    * @brief Override to separate dali-ui layout from DALi size negotiation.
    * When this View has a LayoutManager, size/position are driven by dali-ui
    * LayoutController; we no-op. Otherwise delegate to Control.
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
+
+  /**
+   * @copydoc Toolkit::Internal::Control::OnKeyInputFocusGained
+   */
+  void OnKeyInputFocusGained() override;
+
+  /**
+   * @copydoc Toolkit::Internal::Control::OnKeyInputFocusLost
+   */
+  void OnKeyInputFocusLost() override;
+
+  /**
+   * @copydoc Toolkit::Internal::Control::OnKeyEvent
+   */
+  bool OnKeyEvent(const Dali::KeyEvent& event) override;
 
 public: // API (size, position, parent origin, pivot)
   /**
@@ -191,9 +204,37 @@ public: // API (size, position, parent origin, pivot)
   void SetPivotPoint(const Vector3& point);
 
   /**
+   * @copydoc Dali::UI::View::IsFocusable
+   */
+  bool IsFocusable() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetFocusable
+   */
+  void SetFocusable(bool focusable);
+
+  /**
+   * @copydoc Dali::UI::View::IsTouchFocusable
+   */
+  bool IsTouchFocusable() const;
+
+  /**
+   * @copydoc Dali::UI::View::SetTouchFocusable
+   */
+  void SetTouchFocusable(bool touchFocusable);
+
+  /**
    * @brief Sets a trait to this View.
    *
    * The trait will share the lifecycle with this View.
+   *
+   * For traits identified by a user-defined @p TraitId, calling this method with the
+   * same id will replace the existing trait after calling OnDetached() on the old one.
+   *
+   * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT:
+   * - The trait must implement @c IInteractionTrait.
+   * - It can be set only once for the lifetime of the View; attempting to replace or
+   *   remove it is considered a programming error and will trigger an assertion.
    *
    * @throws DaliException If the trait already has an owner
    * @throws DaliException If the id is already registered with other trait
@@ -215,6 +256,13 @@ public: // API (size, position, parent origin, pivot)
 
   /**
    * @brief Removes a trait from this View.
+   *
+   * For traits identified by a user-defined @p TraitId, this detaches the trait,
+   * calls its OnDetached(), and returns true on success.
+   *
+   * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT, removal is not allowed; an assertion
+   * will be triggered and the method will always return false.
+   *
    * @param[in] id The unique key to identify the trait
    * @return True if succeeded, false otherwise
    */
@@ -452,6 +500,7 @@ private:
 private:
 
   std::vector<std::pair<TraitId, Trait>> mTraits;
+  IInteractionTrait* mInteractionTrait;
 
   // Layout size (LayoutWidth / LayoutHeight)
   float mLayoutWidth;

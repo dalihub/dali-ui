@@ -28,6 +28,7 @@
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-test-suite-utils.h>
+#include <dali/integration-api/events/key-event-integ.h>
 
 using namespace Dali;
 using namespace Dali::UI;
@@ -116,6 +117,34 @@ private:
     : Trait(impl)
   {
   }
+};
+
+class KeyEventCallback : public Dali::ConnectionTracker
+{
+public:
+  /**
+   * Constructor
+   * @param[in]  returnValue  Set return value of KeyEvent callback.
+   * */
+  KeyEventCallback(bool consumed)
+    : mConsumed(consumed),
+      mIsCalled(false)
+  {
+  }
+
+  bool Callback(Toolkit::Control control, const KeyEvent& keyEvent)
+  {
+    mIsCalled = true;
+    return mConsumed;
+  }
+
+  void Callback(const KeyEvent& keyEvent)
+  {
+    mIsCalled = true;
+  }
+
+  bool mConsumed;
+  bool mIsCalled;
 };
 
 } // namespace
