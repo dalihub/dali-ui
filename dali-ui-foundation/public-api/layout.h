@@ -205,6 +205,8 @@ public: // Chaining Methods
     return *this;
   }
 
+  DEFINE_CHAINING_METHOD_VIEW(Layout)
+
 public: // Not intended for application developers
   /// @cond internal
   /**

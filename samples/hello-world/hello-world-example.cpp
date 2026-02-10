@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/layout.h>
 
 using namespace Dali;
 using namespace Dali::UI;
@@ -25,7 +26,7 @@ class HelloWorldController : public ConnectionTracker
 public:
 
   HelloWorldController(Application& application)
-  : mApplication(application)
+    : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &HelloWorldController::Create);
@@ -40,29 +41,25 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    window.Add(
-      View::New() // Parent
-        .BackgroundColor(Color::YELLOW)
-        .SizeWidth(200_spx)
-        .SizeHeight(200_spx)
-        .Contents({
-          View::New() // Red child
-            .BackgroundColor(Color::RED)
-            .SizeWidth(100_spx)
-            .SizeHeight(100_spx)
-            .With([this](View& firstChild)
-            {
-              firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed);
-            }),
-          View::New() // Blue child
-            .BackgroundColor(Color::BLUE)
-            .SizeWidth(100_spx)
-            .SizeHeight(100_spx)
-            .PositionX(100_spx)
-            .PositionY(100_spx)
-            .As(mSecondChild),
-        })
-    );
+    window.Add(Layout::New() // Parent
+                   .BackgroundColor(Color::YELLOW)
+                   .SizeWidth(200_spx)
+                   .SizeHeight(200_spx)
+                   .Contents({
+                       View::New() // Red child
+                           .BackgroundColor(Color::RED)
+                           .SizeWidth(100_spx)
+                           .SizeHeight(100_spx)
+                           .With([this](View& firstChild)
+                                 { firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed); }),
+                       View::New() // Blue child
+                           .BackgroundColor(Color::BLUE)
+                           .SizeWidth(100_spx)
+                           .SizeHeight(100_spx)
+                           .PositionX(100_spx)
+                           .PositionY(100_spx)
+                           .As(mSecondChild),
+                   }));
 
     // Respond to key events
     window.KeyEventSignal().Connect(this, &HelloWorldController::OnKeyEvent);
@@ -77,9 +74,9 @@ public:
 
   void OnKeyEvent(const KeyEvent& event)
   {
-    if(event.GetState() == KeyEvent::DOWN)
+    if (event.GetState() == KeyEvent::DOWN)
     {
-      if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
         mApplication.Quit();
       }
@@ -93,7 +90,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  Application          application = Application::New(&argc, &argv);
+  Application application = Application::New(&argc, &argv);
   HelloWorldController test(application);
   application.MainLoop();
   return 0;
