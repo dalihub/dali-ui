@@ -38,71 +38,7 @@ namespace Integration
 class ViewImpl;
 }
 
-/**
- * @brief Macro to define chaining methods for View properties.
- */
-#define DEFINE_BASE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg, Body) \
-  /**                                                                          \
-   * @brief Sets the PropertyName.                                             \
-   * @param[in] VArg The required value.                                       \
-   * @return A reference to the instance itself for method chaining.           \
-   */                                                                          \
-  ClassType& PropertyName(TArg VArg)                                           \
-  {                                                                            \
-    Body return static_cast<ClassType&>(*this);                                \
-  }
-
-#define DEFINE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg) \
-  DEFINE_BASE_CHAINING_METHOD(ClassType, PropertyName, TArg, VArg, Set##PropertyName(VArg);)
-
-#define DEFINE_CHAINING_METHOD_VIEW(ClassType)                                                                   \
-  DEFINE_CHAINING_METHOD(ClassType, SizeWidth, float, width)                                                     \
-  DEFINE_CHAINING_METHOD(ClassType, SizeHeight, float, height)                                                   \
-  DEFINE_CHAINING_METHOD(ClassType, PositionX, float, x)                                                         \
-  DEFINE_CHAINING_METHOD(ClassType, PositionY, float, y)                                                         \
-  DEFINE_CHAINING_METHOD(ClassType, BackgroundColor, const Vector4&, color)                                      \
-  DEFINE_CHAINING_METHOD(ClassType, ParentOrigin, const Vector3&, point)                                         \
-  DEFINE_CHAINING_METHOD(ClassType, PivotPoint, const Vector3&, point)                                           \
-  DEFINE_CHAINING_METHOD(ClassType, LayoutWidth, float, width)                                                   \
-  DEFINE_CHAINING_METHOD(ClassType, LayoutHeight, float, height)                                                 \
-  DEFINE_CHAINING_METHOD(ClassType, MinimumWidth, float, width)                                                  \
-  DEFINE_CHAINING_METHOD(ClassType, MinimumHeight, float, height)                                                \
-  DEFINE_CHAINING_METHOD(ClassType, MaximumWidth, float, width)                                                  \
-  DEFINE_CHAINING_METHOD(ClassType, MaximumHeight, float, height)                                                \
-  DEFINE_CHAINING_METHOD(ClassType, ViewMargin, const Extents&, margin)                                          \
-  DEFINE_CHAINING_METHOD(ClassType, ViewPadding, const Extents&, padding)                                        \
-  DEFINE_CHAINING_METHOD(ClassType, HorizontalAlignment, LayoutAlignment, alignment)                             \
-  DEFINE_CHAINING_METHOD(ClassType, VerticalAlignment, LayoutAlignment, alignment)                               \
-  DEFINE_BASE_CHAINING_METHOD(ClassType, Visibility, ViewVisibility, visibility, SetViewVisibility(visibility);) \
-  /**                                                                                                            \
-   * @brief Assigns this View instance to a target variable.                                                     \
-   * This method is useful for capturing a reference to a View created within                                    \
-   * a declarative UI tree for later use.                                                                        \
-   * @param[out] self The variable where this instance will be assigned.                                         \
-   * @return A reference to the instance itself for method chaining.                                             \
-   */                                                                                                            \
-  ClassType& As(ClassType& self)                                                                                 \
-  {                                                                                                              \
-    self = static_cast<ClassType&>(*this);                                                                       \
-    return static_cast<ClassType&>(*this);                                                                       \
-  }                                                                                                              \
-                                                                                                                 \
-  /**                                                                                                            \
-   * @brief Executes a custom action on this View instance.                                                      \
-   * Use this method to perform additional initialization or logic on a View                                     \
-   * without breaking the declarative method chaining.                                                           \
-   * @param[in] action A function or lambda to be executed with this instance.                                   \
-   * @return A reference to the instance itself for method chaining.                                             \
-   */                                                                                                            \
-  ClassType& With(std::function<void(ClassType&)> action)                                                        \
-  {                                                                                                              \
-    if (action)                                                                                                  \
-    {                                                                                                            \
-      action(static_cast<ClassType&>(*this));                                                                    \
-    }                                                                                                            \
-    return static_cast<ClassType&>(*this);                                                                       \
-  }
-
+#include "view.autogen.h"
 /**
  * @brief View is a base UI component class that extends Control.
  *
@@ -116,7 +52,9 @@ class DALI_UI_API View : public Toolkit::Control
 {
 public:
 
-  // Creation & Destruction
+  // Typedefs
+
+public: // Creation & Destruction
 
   /**
    * @brief Creates an uninitialized View handle.
@@ -149,7 +87,7 @@ public:
   View(View&& rhs) noexcept;
 
   /**
-   * @brief Virtual destructor.
+   * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
@@ -187,52 +125,7 @@ public: // Static Methods
    */
   static View DownCast(BaseHandle handle);
 
-public: // API (size, position, parent origin, pivot)
-
-  /**
-   * @brief Gets the width of the View.
-   *
-   * @return The width of the View
-   */
-  float GetSizeWidth() const;
-
-  /**
-   * @brief Gets the height of the View.
-   *
-   * @return The height of the View
-   */
-  float GetSizeHeight() const;
-
-  /**
-   * @brief Gets the X position of the View.
-   *
-   * @return The X position of the View
-   */
-  float GetPositionX() const;
-
-  /**
-   * @brief Gets the Y position of the View.
-   *
-   * @return The Y position of the View
-   */
-  float GetPositionY() const;
-
-  /**
-   * @brief Gets the parent origin of the View.
-   *
-   * @return The parent origin of the View
-   */
-  Vector3 GetParentOrigin() const;
-
-  /**
-   * @brief Gets the pivot point of the View.
-   *
-   * @return The pivot point of the View
-   */
-  Vector3 GetPivotPoint() const;
-
 public: // Measure / Arrange API
-
   /**
    * @brief Measures the view with the given constraints.
    *
@@ -289,7 +182,92 @@ public: // Measure / Arrange API
    */
   bool IsArrangeValid() const;
 
-public: // Layout size API (LayoutWidth / LayoutHeight)
+public: // Properties
+
+  // @CHAIN_START(View)
+  /**
+   * @brief Sets the width of the View.
+   *
+   * @param[in] width The width to set
+   */
+  void SetSizeWidth(float width);
+
+  /**
+   * @brief Gets the width of the View.
+   *
+   * @return The width of the View
+   */
+  float GetSizeWidth() const;
+
+  /**
+   * @brief Sets the height of the View.
+   *
+   * @param[in] height The height to set
+   */
+  void SetSizeHeight(float height);
+
+  /**
+   * @brief Gets the height of the View.
+   *
+   * @return The height of the View
+   */
+  float GetSizeHeight() const;
+
+  /**
+   * @brief Sets the X position of the View.
+   *
+   * @param[in] x The X position to set
+   */
+  void SetPositionX(float x);
+
+  /**
+   * @brief Gets the X position of the View.
+   *
+   * @return The X position of the View
+   */
+  float GetPositionX() const;
+
+  /**
+   * @brief Sets the Y position of the View.
+   *
+   * @param[in] y The Y position to set
+   */
+  void SetPositionY(float y);
+
+  /**
+   * @brief Gets the Y position of the View.
+   *
+   * @return The Y position of the View
+   */
+  float GetPositionY() const;
+
+  /**
+   * @brief Sets the parent origin of the View.
+   *
+   * @param[in] point The parent origin to set
+   */
+  void SetParentOrigin(const Vector3& point);
+
+  /**
+   * @brief Gets the parent origin of the View.
+   *
+   * @return The parent origin of the View
+   */
+  Vector3 GetParentOrigin() const;
+
+  /**
+   * @brief Sets the pivot point of the View.
+   *
+   * @param[in] point The pivot point to set
+   */
+  void SetPivotPoint(const Vector3& point);
+
+  /**
+   * @brief Gets the pivot point of the View.
+   *
+   * @return The pivot point of the View
+   */
+  Vector3 GetPivotPoint() const;
 
   /**
    * @brief Sets the layout width.
@@ -378,8 +356,6 @@ public: // Layout size API (LayoutWidth / LayoutHeight)
    */
   float GetMaximumHeight() const;
 
-public: // Layout Properties API
-
   /**
    * @brief Sets the view margin.
    *
@@ -409,20 +385,6 @@ public: // Layout Properties API
   Extents GetViewPadding() const;
 
   /**
-   * @brief Sets the view visibility for layout purposes.
-   *
-   * @param[in] visibility The visibility to set
-   */
-  void SetViewVisibility(ViewVisibility visibility);
-
-  /**
-   * @brief Gets the view visibility.
-   *
-   * @return The view visibility
-   */
-  ViewVisibility GetViewVisibility() const;
-
-  /**
    * @brief Sets the horizontal alignment within parent layout.
    *
    * @param[in] alignment The horizontal alignment
@@ -450,17 +412,48 @@ public: // Layout Properties API
    */
   LayoutAlignment GetVerticalAlignment() const;
 
-public: // Chaining methods
-  DEFINE_CHAINING_METHOD_VIEW(View)
+  /**
+   * @brief Assigns this View instance to a target variable.
+   * This method is useful for capturing a reference to a View created within
+   * a declarative UI tree for later use.
+   */
+  void SetAs(View& self)
+  {
+    self = static_cast<View&>(*this);
+  }
+
+  /**
+   * @brief Executesa custom action on this View instance.
+   * Use this method to perform additional initialization or logic on a View
+   * without breaking the declarative method chaining.
+   * @param[in] action A function or lambda to be executed with this instance.
+   */
+  void SetWith(std::function<void(View&)> action)
+  {
+    if (action)
+    {
+      action(*this);
+    }
+  }
+
+  // @CHAIN_MANUAL(BackgroundColor, SetBackgroundColor, const Vector4& color)
+  /**
+   * @brief Sets the background color.
+   *
+   * @param[in] color The required background color value
+   */
+
+  // @CHAIN_END
 
 public: // Not intended for application developers
+
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.
    *
    * @param[in] implementation The Control implementation
    */
-  DALI_UI_API View(Integration::ViewImpl& implementation);
+  explicit DALI_UI_API View(Integration::ViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
@@ -470,56 +463,8 @@ public: // Not intended for application developers
   explicit DALI_UI_API View(Dali::Internal::CustomActor* internal);
   /// @endcond
 
-  /**
-   * @brief Sets the background color.
-   *
-   * @param[in] color The background color to set
-   */
-  void SetBackgroundColor(const Vector4& color);
-
-protected:
-
-  /**
-   * @brief Sets the width of the View.
-   *
-   * @param[in] width The width to set
-   */
-  void SetSizeWidth(float width);
-
-  /**
-   * @brief Sets the height of the View.
-   *
-   * @param[in] height The height to set
-   */
-  void SetSizeHeight(float height);
-
-  /**
-   * @brief Sets the X position of the View.
-   *
-   * @param[in] x The X position to set
-   */
-  void SetPositionX(float x);
-
-  /**
-   * @brief Sets the Y position of the View.
-   *
-   * @param[in] y The Y position to set
-   */
-  void SetPositionY(float y);
-
-  /**
-   * @brief Sets the parent origin of the View.
-   *
-   * @param[in] point The parent origin to set
-   */
-  void SetParentOrigin(const Vector3& point);
-
-  /**
-   * @brief Sets the pivot point of the View.
-   *
-   * @param[in] point The pivot point to set
-   */
-  void SetPivotPoint(const Vector3& point);
+public:
+  SHADOW_VIEW_METHODS(View)
 };
 
 } // namespace UI

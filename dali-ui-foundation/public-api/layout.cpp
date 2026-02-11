@@ -139,14 +139,5 @@ int32_t Layout::IndexOfChild(View view) const
   return Integration::GetImpl(*this).IndexOfChild(view);
 }
 
-Layout& Layout::Contents(std::initializer_list<View> children)
-{
-  for (const auto& child : children)
-  {
-    AddView(child);
-  }
-  return *this;
-}
-
 } // namespace UI
 } // namespace Dali

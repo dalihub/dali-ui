@@ -38,6 +38,7 @@ namespace Internal
 class DummyElementImpl;
 }
 
+#include "dummy-element.autogen.h"
 /**
  * @brief Dummy
  */
@@ -118,9 +119,10 @@ public: // Static Methods
    */
   static DummyElement DownCast(BaseHandle handle);
 
-public: // API
+public: // Setters for chaining
 
-  DEFINE_CHAINING_METHOD_VIEW(DummyElement)
+  // @CHAIN_START(DummyElement, View)
+  // @CHAIN_END
 
 public: // Signals
 
@@ -141,6 +143,9 @@ public: // Not intended for application developers
    */
   explicit DALI_INTERNAL DummyElement(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+public:
+  SHADOW_DUMMYELEMENT_METHODS(DummyElement)
 };
 
 } // namespace UI

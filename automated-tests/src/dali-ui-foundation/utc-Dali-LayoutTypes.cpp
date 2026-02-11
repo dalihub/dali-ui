@@ -171,14 +171,6 @@ int UtcDaliLayoutAlignmentValuesP(void)
   END_TEST;
 }
 
-int UtcDaliViewVisibilityValuesP(void)
-{
-  DALI_TEST_EQUALS(static_cast<uint8_t>(ViewVisibility::Visible), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(ViewVisibility::Hidden), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(ViewVisibility::Collapsed), 2u, TEST_LOCATION);
-  END_TEST;
-}
-
 int UtcDaliStackOrientationValuesP(void)
 {
   DALI_TEST_EQUALS(static_cast<uint8_t>(StackOrientation::Vertical), 0u, TEST_LOCATION);

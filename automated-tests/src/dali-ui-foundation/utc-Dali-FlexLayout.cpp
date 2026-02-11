@@ -533,7 +533,6 @@ int UtcDaliFlexLayoutCollapsedChildP(void)
   v1.SetLayoutHeight(40.0f);
   layout.AddView(v1);
   View collapsed = View::New();
-  collapsed.SetViewVisibility(ViewVisibility::Collapsed);
   collapsed.SetLayoutWidth(40.0f);
   collapsed.SetLayoutHeight(40.0f);
   layout.AddView(collapsed);

@@ -35,6 +35,7 @@ namespace Integration
 class LayoutImpl;
 }
 
+#include "layout.autogen.h"
 /**
  * @brief Layout is a View that arranges child views using a layout algorithm.
  *
@@ -107,8 +108,9 @@ public:
    */
   static Layout DownCast(BaseHandle handle);
 
-public: // Layout Properties API
+public:
 
+  // @CHAIN_START(Layout, View)
   /**
    * @brief Sets whether this layout clips its children to its bounds.
    *
@@ -123,7 +125,20 @@ public: // Layout Properties API
    */
   bool GetClipsToBounds() const;
 
-public: // Child Management API
+  /**
+   * @brief Adds a list of children to this View in a declarative way.
+   * This method allows for a hierarchical UI tree construction by passing
+   * a brace-enclosed initializer list of View objects.
+   * @param[in] children The initializer list containing child View handles to be added.
+   */
+  void SetContents(std::initializer_list<View> children)
+  {
+    for (const auto& child : children)
+    {
+      AddView(child);
+    }
+  }
+  // @CHAIN_END
 
   /**
    * @brief Adds a view to this layout (at the end).
@@ -184,29 +199,6 @@ public: // Child Management API
    */
   int32_t IndexOfChild(View view) const;
 
-  /**
-   * @brief Adds a list of children in a declarative way (method chaining).
-   *
-   * @param[in] children The initializer list of View handles to add
-   * @return Reference to this for method chaining
-   */
-  Layout& Contents(std::initializer_list<View> children);
-
-public: // Chaining Methods
-  /**
-   * @brief Sets clips to bounds with method chaining.
-   *
-   * @param[in] clips True to clip children to bounds
-   * @return Reference to this for method chaining
-   */
-  Layout& ClipsToBounds(bool clips)
-  {
-    SetClipsToBounds(clips);
-    return *this;
-  }
-
-  DEFINE_CHAINING_METHOD_VIEW(Layout)
-
 public: // Not intended for application developers
   /// @cond internal
   /**
@@ -214,7 +206,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Control implementation
    */
-  DALI_INTERNAL Layout(Integration::LayoutImpl& implementation);
+  explicit DALI_INTERNAL Layout(Integration::LayoutImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Integration::CustomActor pointer.
@@ -223,6 +215,9 @@ public: // Not intended for application developers
    */
   explicit DALI_INTERNAL Layout(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+public:
+  SHADOW_LAYOUT_METHODS(Layout)
 };
 
 } // namespace UI

@@ -286,8 +286,6 @@ public: // Layout Properties API
   Extents GetViewMargin() const;
   void SetViewPadding(const Extents& padding);
   Extents GetViewPadding() const;
-  void SetViewVisibility(ViewVisibility visibility);
-  ViewVisibility GetViewVisibility() const;
   void SetHorizontalAlignment(LayoutAlignment alignment);
   LayoutAlignment GetHorizontalAlignment() const;
   void SetVerticalAlignment(LayoutAlignment alignment);
@@ -457,7 +455,6 @@ private:
   Extents mPadding;
   LayoutAlignment mHorizontalAlignment;
   LayoutAlignment mVerticalAlignment;
-  ViewVisibility mVisibility;
 
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache

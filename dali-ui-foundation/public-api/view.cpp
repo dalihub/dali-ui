@@ -71,70 +71,6 @@ View::View(Dali::Internal::CustomActor* internal)
 }
 
 // =============================================================================
-// API (size, position, parent origin, pivot)
-// =============================================================================
-
-float View::GetSizeWidth() const
-{
-  return Integration::GetImpl(*this).GetSizeWidth();
-}
-
-void View::SetSizeWidth(float width)
-{
-  Integration::GetImpl(*this).SetSizeWidth(width);
-}
-
-float View::GetSizeHeight() const
-{
-  return Integration::GetImpl(*this).GetSizeHeight();
-}
-
-void View::SetSizeHeight(float height)
-{
-  Integration::GetImpl(*this).SetSizeHeight(height);
-}
-
-float View::GetPositionX() const
-{
-  return Integration::GetImpl(*this).GetPositionX();
-}
-
-void View::SetPositionX(float x)
-{
-  Integration::GetImpl(*this).SetPositionX(x);
-}
-
-float View::GetPositionY() const
-{
-  return Integration::GetImpl(*this).GetPositionY();
-}
-
-void View::SetPositionY(float y)
-{
-  Integration::GetImpl(*this).SetPositionY(y);
-}
-
-Vector3 View::GetParentOrigin() const
-{
-  return Integration::GetImpl(*this).GetParentOrigin();
-}
-
-void View::SetParentOrigin(const Vector3& point)
-{
-  Integration::GetImpl(*this).SetParentOrigin(point);
-}
-
-Vector3 View::GetPivotPoint() const
-{
-  return Integration::GetImpl(*this).GetPivotPoint();
-}
-
-void View::SetPivotPoint(const Vector3& point)
-{
-  Integration::GetImpl(*this).SetPivotPoint(point);
-}
-
-// =============================================================================
 // Measure / Arrange API
 // =============================================================================
 
@@ -174,8 +110,68 @@ bool View::IsArrangeValid() const
 }
 
 // =============================================================================
-// Layout size API (LayoutWidth / LayoutHeight)
+// Properties
 // =============================================================================
+
+void View::SetSizeWidth(float width)
+{
+  Integration::GetImpl(*this).SetSizeWidth(width);
+}
+
+float View::GetSizeWidth() const
+{
+  return Integration::GetImpl(*this).GetSizeWidth();
+}
+
+void View::SetSizeHeight(float height)
+{
+  Integration::GetImpl(*this).SetSizeHeight(height);
+}
+
+float View::GetSizeHeight() const
+{
+  return Integration::GetImpl(*this).GetSizeHeight();
+}
+
+void View::SetPositionX(float x)
+{
+  Integration::GetImpl(*this).SetPositionX(x);
+}
+
+float View::GetPositionX() const
+{
+  return Integration::GetImpl(*this).GetPositionX();
+}
+
+void View::SetPositionY(float y)
+{
+  Integration::GetImpl(*this).SetPositionY(y);
+}
+
+float View::GetPositionY() const
+{
+  return Integration::GetImpl(*this).GetPositionY();
+}
+
+void View::SetParentOrigin(const Vector3& point)
+{
+  Integration::GetImpl(*this).SetParentOrigin(point);
+}
+
+Vector3 View::GetParentOrigin() const
+{
+  return Integration::GetImpl(*this).GetParentOrigin();
+}
+
+void View::SetPivotPoint(const Vector3& point)
+{
+  Integration::GetImpl(*this).SetPivotPoint(point);
+}
+
+Vector3 View::GetPivotPoint() const
+{
+  return Integration::GetImpl(*this).GetPivotPoint();
+}
 
 void View::SetLayoutWidth(float width)
 {
@@ -261,16 +257,6 @@ Extents View::GetViewPadding() const
   return Integration::GetImpl(*this).GetViewPadding();
 }
 
-void View::SetViewVisibility(ViewVisibility visibility)
-{
-  Integration::GetImpl(*this).SetViewVisibility(visibility);
-}
-
-ViewVisibility View::GetViewVisibility() const
-{
-  return Integration::GetImpl(*this).GetViewVisibility();
-}
-
 void View::SetHorizontalAlignment(LayoutAlignment alignment)
 {
   Integration::GetImpl(*this).SetHorizontalAlignment(alignment);
@@ -291,10 +277,6 @@ LayoutAlignment View::GetVerticalAlignment() const
   return Integration::GetImpl(*this).GetVerticalAlignment();
 }
 
-void View::SetBackgroundColor(const Vector4& color)
-{
-  Toolkit::Control::SetBackgroundColor(color);
-}
-
 } // namespace UI
+
 } // namespace Dali

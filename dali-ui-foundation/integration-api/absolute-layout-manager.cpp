@@ -105,12 +105,6 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   for (auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
-
     LayoutRect bounds = GetChildBounds(childData.view);
     AbsoluteLayoutFlags flags = GetChildFlags(childData.view);
 
@@ -179,12 +173,6 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
   for (auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
-
     LayoutRect childBoundsSpec = GetChildBounds(childData.view);
     AbsoluteLayoutFlags flags = GetChildFlags(childData.view);
 

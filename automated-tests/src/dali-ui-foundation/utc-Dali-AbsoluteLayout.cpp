@@ -252,25 +252,3 @@ int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
   DALI_TEST_EQUALS(m.GetHeight(), 150.0f, TEST_LOCATION);
   END_TEST;
 }
-
-int UtcDaliAbsoluteLayoutCollapsedChildP(void)
-{
-  TestApplication application;
-  AbsoluteLayout layout = AbsoluteLayout::New();
-  View collapsed = View::New();
-  collapsed.SetViewVisibility(ViewVisibility::Collapsed);
-  layout.AddView(collapsed);
-  AbsoluteLayout::SetLayoutBounds(collapsed, LayoutRect(0, 0, 100, 50));
-  View visible = View::New();
-  visible.SetLayoutWidth(50.0f);
-  visible.SetLayoutHeight(50.0f);
-  layout.AddView(visible);
-  AbsoluteLayout::SetLayoutBounds(visible, LayoutRect(50, 50, 50, 50));
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(150.0f);
-  MeasuredSize m = layout.Measure(200.0f, 150.0f);
-  layout.Arrange(LayoutRect(0, 0, 200, 150));
-  DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(m.GetHeight(), 150.0f, TEST_LOCATION);
-  END_TEST;
-}

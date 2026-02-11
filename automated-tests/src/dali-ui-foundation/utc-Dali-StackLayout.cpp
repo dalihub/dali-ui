@@ -301,32 +301,6 @@ int UtcDaliStackLayoutChildMatchParentP(void)
   END_TEST;
 }
 
-int UtcDaliStackLayoutCollapsedChildP(void)
-{
-  TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
-  View v1 = View::New();
-  v1.SetLayoutWidth(50.0f);
-  v1.SetLayoutHeight(50.0f);
-  layout.AddView(v1);
-  View collapsed = View::New();
-  collapsed.SetViewVisibility(ViewVisibility::Collapsed);
-  collapsed.SetLayoutWidth(50.0f);
-  collapsed.SetLayoutHeight(50.0f);
-  layout.AddView(collapsed);
-  View v2 = View::New();
-  v2.SetLayoutWidth(50.0f);
-  v2.SetLayoutHeight(50.0f);
-  layout.AddView(v2);
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(200.0f);
-  MeasuredSize m = layout.Measure(200.0f, 200.0f);
-  layout.Arrange(LayoutRect(0, 0, 200, 200));
-  DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(m.GetHeight(), 200.0f, TEST_LOCATION);
-  END_TEST;
-}
-
 int UtcDaliStackLayoutArrangeHorizontalP(void)
 {
   TestApplication application;

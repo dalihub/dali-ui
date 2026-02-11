@@ -58,6 +58,7 @@ compile_commands.json
 *.vscode/
 *code-workspace
 *.cache/
+*.stamp
 
 # Documentation build artifacts (Ignore contents, not the directory itself to allow exceptions)
 /build/doc/*

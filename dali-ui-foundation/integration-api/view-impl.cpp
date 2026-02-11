@@ -95,7 +95,6 @@ ViewImpl::ViewImpl()
     mPadding(),
     mHorizontalAlignment(LayoutAlignment::Start),
     mVerticalAlignment(LayoutAlignment::Start),
-    mVisibility(ViewVisibility::Visible),
     mDesiredSize{0.0f, 0.0f},
     mLastMeasuredConstraint{-1.0f, -1.0f},
     mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
@@ -281,15 +280,6 @@ bool ViewImpl::RemoveTrait(TraitId id)
 
 MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
 {
-  // Skip measurement for collapsed views
-  if (mVisibility == ViewVisibility::Collapsed)
-  {
-    mDesiredSize = {0.0f, 0.0f};
-    mLastMeasuredConstraint.width = widthConstraint;
-    mLastMeasuredConstraint.height = heightConstraint;
-    return mDesiredSize;
-  }
-
   // Cache hit: already measured with same constraints
   if (mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, widthConstraint) &&
       FloatEqual(mLastMeasuredConstraint.height, heightConstraint))
@@ -410,12 +400,6 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 
 MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 {
-  // Skip arrangement for collapsed views
-  if (mVisibility == ViewVisibility::Collapsed)
-  {
-    return {0.0f, 0.0f};
-  }
-
   // Call virtual OnArrange (Template Method pattern)
   MeasuredSize arrangedSize = OnArrange(bounds);
 
@@ -488,18 +472,6 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::POSITION_Y, y);
   self.SetProperty(Actor::Property::SIZE_WIDTH, width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
-
-  // Update visibility
-  switch (mVisibility)
-  {
-    case ViewVisibility::Visible:
-      self.SetProperty(Actor::Property::VISIBLE, true);
-      break;
-    case ViewVisibility::Hidden:
-    case ViewVisibility::Collapsed:
-      self.SetProperty(Actor::Property::VISIBLE, false);
-      break;
-  }
 
   // If LayoutManager is set, arrange children
   if (mLayoutManager)
@@ -734,30 +706,6 @@ void ViewImpl::SetViewPadding(const Extents& padding)
 Extents ViewImpl::GetViewPadding() const
 {
   return mPadding;
-}
-
-void ViewImpl::SetViewVisibility(ViewVisibility visibility)
-{
-  if (mVisibility != visibility)
-  {
-    ViewVisibility oldVisibility = mVisibility;
-    mVisibility = visibility;
-
-    // If changing to/from Collapsed, invalidate measure
-    if (oldVisibility == ViewVisibility::Collapsed || visibility == ViewVisibility::Collapsed)
-    {
-      InvalidateMeasure();
-    }
-    else
-    {
-      InvalidateArrange();
-    }
-  }
-}
-
-ViewVisibility ViewImpl::GetViewVisibility() const
-{
-  return mVisibility;
 }
 
 void ViewImpl::SetHorizontalAlignment(LayoutAlignment alignment)

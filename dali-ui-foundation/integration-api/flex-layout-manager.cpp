@@ -55,10 +55,6 @@ std::vector<FlexLine> BuildFlexLinesForArrange(const ViewImpl::ChildContainer& c
   {
     const auto& childData = children[i];
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     Extents margin = childImpl.GetViewMargin();
     float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width + margin.start + margin.end
                                                : childData.measuredSize.height + margin.top + margin.bottom;
@@ -275,12 +271,6 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   {
     auto& childData = children[i];
     ViewImpl& childImpl = GetImpl(childData.view);
-
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
-
     float childWidthConstraint = IsMainAxisHorizontal() ? availableMain : availableCross;
     float childHeightConstraint = IsMainAxisHorizontal() ? availableCross : availableMain;
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);

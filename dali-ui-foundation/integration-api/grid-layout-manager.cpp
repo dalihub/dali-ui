@@ -99,10 +99,6 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     uint32_t row = GetChildRow(childData.view);
     uint32_t col = GetChildColumn(childData.view);
     uint32_t rowSpan = GetChildRowSpan(childData.view);
@@ -135,10 +131,6 @@ void FillGridAutoFromMeasured(const ViewImpl::ChildContainer& children, uint32_t
   for (const auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     uint32_t row = std::min(GetChildRow(childData.view), rowCount - 1);
     uint32_t col = std::min(GetChildColumn(childData.view), colCount - 1);
     uint32_t rowSpan = std::min(GetChildRowSpan(childData.view), rowCount - row);
@@ -257,10 +249,6 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     uint32_t row = std::min(GetChildRow(childData.view), rowCount - 1);
     uint32_t col = std::min(GetChildColumn(childData.view), colCount - 1);
     uint32_t rowSpan = std::min(GetChildRowSpan(childData.view), rowCount - row);

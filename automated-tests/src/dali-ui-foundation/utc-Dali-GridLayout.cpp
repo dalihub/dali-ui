@@ -514,28 +514,3 @@ int UtcDaliGridLayoutRowColumnSpanP(void)
   DALI_TEST_EQUALS(GridLayout::GetColumnSpan(c1), 1u, TEST_LOCATION);
   END_TEST;
 }
-
-int UtcDaliGridLayoutCollapsedChildP(void)
-{
-  TestApplication application;
-  GridLayout layout = GridLayout::New();
-  layout.AddRowDefinition(GridLength::Absolute(50.0f));
-  layout.AddColumnDefinition(GridLength::Absolute(80.0f));
-  layout.AddColumnDefinition(GridLength::Absolute(80.0f));
-  View collapsed = View::New();
-  collapsed.SetViewVisibility(ViewVisibility::Collapsed);
-  layout.AddView(collapsed);
-  GridLayout::SetRow(collapsed, 0);
-  GridLayout::SetColumn(collapsed, 0);
-  View visible = View::New().SizeWidth(40.0f).SizeHeight(40.0f);
-  layout.AddView(visible);
-  GridLayout::SetRow(visible, 0);
-  GridLayout::SetColumn(visible, 1);
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(80.0f);
-  MeasuredSize m = layout.Measure(200.0f, 80.0f);
-  layout.Arrange(LayoutRect(0, 0, 200, 80));
-  DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(m.GetHeight(), 80.0f, TEST_LOCATION);
-  END_TEST;
-}

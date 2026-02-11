@@ -42,16 +42,6 @@ enum class LayoutAlignment : uint8_t
 };
 
 /**
- * @brief Enumeration for view visibility states.
- */
-enum class ViewVisibility : uint8_t
-{
-  Visible = 0,  ///< The view is visible and takes up space in layout
-  Hidden = 1,   ///< The view is hidden but still takes up space in layout
-  Collapsed = 2 ///< The view is hidden and does not take up space in layout
-};
-
-/**
  * @brief Namespace containing LayoutDimension constants.
  *
  * Use these constants for LayoutWidth and LayoutHeight.

@@ -67,10 +67,6 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     result.visibleChildCount++;
     float weight = GetChildWeight(childData.view);
     if (weight > 0.0f)
@@ -110,10 +106,6 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
     float weight = GetChildWeight(childData.view);
     if (weight <= 0.0f)
     {
@@ -246,12 +238,6 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   for (auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-
-    if (childImpl.GetViewVisibility() == ViewVisibility::Collapsed)
-    {
-      continue;
-    }
-
     Extents margin = childImpl.GetViewMargin();
     float marginW = static_cast<float>(margin.start + margin.end);
     float marginH = static_cast<float>(margin.top + margin.bottom);

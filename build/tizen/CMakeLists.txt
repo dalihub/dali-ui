@@ -151,6 +151,11 @@ IF( NOT ${ENABLE_EXPORTALL} )
   ADD_COMPILE_OPTIONS( "-fvisibility=hidden" )
 ENDIF( NOT ${ENABLE_EXPORTALL} )
 
+# Include method chaining script
+IF (NOT GBS_BUILD)
+  INCLUDE(autogen.cmake)
+ENDIF()
+
 # Add libraries
 ADD_SUBDIRECTORY(dali-ui-foundation)
 ADD_SUBDIRECTORY(dali-ui-elements)
