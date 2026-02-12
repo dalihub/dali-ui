@@ -190,6 +190,10 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
       childBounds.width = allocCross;
       childBounds.height = allocMain;
     }
+    childBounds.x += static_cast<float>(margin.start);
+    childBounds.y += static_cast<float>(margin.top);
+    childBounds.width = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
+    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
   }
@@ -271,12 +275,17 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   {
     auto& childData = children[i];
     ViewImpl& childImpl = GetImpl(childData.view);
-    float childWidthConstraint = IsMainAxisHorizontal() ? availableMain : availableCross;
-    float childHeightConstraint = IsMainAxisHorizontal() ? availableCross : availableMain;
+    Extents margin = childImpl.GetViewMargin();
+    float marginMain = IsMainAxisHorizontal() ? static_cast<float>(margin.start + margin.end)
+                                              : static_cast<float>(margin.top + margin.bottom);
+    float marginCross = IsMainAxisHorizontal() ? static_cast<float>(margin.top + margin.bottom)
+                                               : static_cast<float>(margin.start + margin.end);
+    float childWidthConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableMain - marginMain)
+                                                        : std::max(0.0f, availableCross - marginCross);
+    float childHeightConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableCross - marginCross)
+                                                         : std::max(0.0f, availableMain - marginMain);
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize = childSize;
-
-    Extents margin = childImpl.GetViewMargin();
     float childMainSize = IsMainAxisHorizontal() ? childSize.width + margin.start + margin.end
                                                  : childSize.height + margin.top + margin.bottom;
     float childCrossSize = IsMainAxisHorizontal() ? childSize.height + margin.top + margin.bottom

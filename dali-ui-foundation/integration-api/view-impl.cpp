@@ -462,10 +462,6 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
     }
   }
 
-  // Apply margin offset
-  x += static_cast<float>(mMargin.start);
-  y += static_cast<float>(mMargin.top);
-
   // Set actor position and size
   Actor self = Self();
   self.SetProperty(Actor::Property::POSITION_X, x);

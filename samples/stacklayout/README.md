@@ -36,6 +36,16 @@ Run:
 
 - 세로 스택에서 좁은 박스 4개: Start(왼쪽), Center(가운데), End(오른쪽), MatchParent(전체 너비).
 
+**Margin, padding, nested StackLayout sample** (사용성: margin / padding / StackLayout in StackLayout):
+
+```bash
+./bin/stacklayout-margin-padding-nested.example
+```
+
+- **Padding**: 루트 스택에 `SetViewPadding`으로 창 가장자리와의 여백.
+- **Margin**: 자식 View에 `SetViewMargin`으로 서로 다른 여백(좌우/하단) 적용.
+- **Nested**: 세로 스택 안에 가로 `StackLayout` 한 행(여러 박스)을 자식으로 추가.
+
 ### GBS build (Tizen)
 
 ```bash

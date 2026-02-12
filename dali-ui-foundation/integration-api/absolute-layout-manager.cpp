@@ -98,6 +98,11 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   }
 
   auto& children = GetChildren(view);
+  Extents padding = view->GetViewPadding();
+  float contentWidth = widthConstraint - static_cast<float>(padding.start + padding.end);
+  float contentHeight = heightConstraint - static_cast<float>(padding.top + padding.bottom);
+  contentWidth = std::max(0.0f, contentWidth);
+  contentHeight = std::max(0.0f, contentHeight);
 
   float maxRight = 0.0f;
   float maxBottom = 0.0f;
@@ -132,7 +137,12 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
 
     if (w < 0 || h < 0)
     {
-      MeasuredSize childSize = childImpl.Measure(w >= 0 ? w : widthConstraint, h >= 0 ? h : heightConstraint);
+      Extents margin = childImpl.GetViewMargin();
+      float marginW = static_cast<float>(margin.start + margin.end);
+      float marginH = static_cast<float>(margin.top + margin.bottom);
+      float measureW = w >= 0.0f ? w : std::max(0.0f, contentWidth - marginW);
+      float measureH = h >= 0.0f ? h : std::max(0.0f, contentHeight - marginH);
+      MeasuredSize childSize = childImpl.Measure(measureW, measureH);
 
       if (w < 0)
       {
@@ -208,14 +218,12 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     }
 
     Extents margin = childImpl.GetViewMargin();
-    float marginW = static_cast<float>(margin.start + margin.end);
-    float marginH = static_cast<float>(margin.top + margin.bottom);
 
     LayoutRect childBounds;
-    childBounds.x = bounds.x + x;
-    childBounds.y = bounds.y + y;
-    childBounds.width = w + marginW;
-    childBounds.height = h + marginH;
+    childBounds.x = bounds.x + x + static_cast<float>(margin.start);
+    childBounds.y = bounds.y + y + static_cast<float>(margin.top);
+    childBounds.width = w;
+    childBounds.height = h;
 
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;

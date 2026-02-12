@@ -108,9 +108,13 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
     rowSpan = std::min(rowSpan, rowCount - row);
     colSpan = std::min(colSpan, colCount - col);
 
-    MeasuredSize childSize = childImpl.Measure(availableWidth, availableHeight);
-    childData.measuredSize = childSize;
     Extents margin = childImpl.GetViewMargin();
+    float marginW = static_cast<float>(margin.start + margin.end);
+    float marginH = static_cast<float>(margin.top + margin.bottom);
+    float childWidthConstraint = std::max(0.0f, availableWidth - marginW);
+    float childHeightConstraint = std::max(0.0f, availableHeight - marginH);
+    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childData.measuredSize = childSize;
 
     if (rowSpan == 1 && row < rowDefs.size() && rowDefs[row].GetType() == GridLengthType::Auto)
     {
@@ -261,6 +265,12 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
     childBounds.y = cellY;
     childBounds.width = colPositions[col + colSpan] - cellX;
     childBounds.height = rowPositions[row + rowSpan] - cellY;
+
+    Extents margin = childImpl.GetViewMargin();
+    childBounds.x += static_cast<float>(margin.start);
+    childBounds.y += static_cast<float>(margin.top);
+    childBounds.width = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
+    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
 
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;

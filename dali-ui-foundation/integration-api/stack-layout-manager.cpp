@@ -75,13 +75,13 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
       result.totalWeight += weight;
       continue;
     }
-    float childWidthConstraint = contentWidth;
-    float childHeightConstraint = contentHeight;
-    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    childData.measuredSize = childSize;
     Extents margin = childImpl.GetViewMargin();
     float marginW = static_cast<float>(margin.start + margin.end);
     float marginH = static_cast<float>(margin.top + margin.bottom);
+    float childWidthConstraint = std::max(0.0f, contentWidth - marginW);
+    float childHeightConstraint = std::max(0.0f, contentHeight - marginH);
+    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childData.measuredSize = childSize;
     if (orientation == StackOrientation::Vertical)
     {
       result.mainAxisNonWeight += childSize.height + marginH;
@@ -117,16 +117,10 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
     float marginH = static_cast<float>(margin.top + margin.bottom);
     float marginW = static_cast<float>(margin.start + margin.end);
     float mainAxisConstraint = std::max(0.0f, share - (orientation == StackOrientation::Vertical ? marginH : marginW));
-    float childWidthConstraint = contentWidth;
-    float childHeightConstraint = contentHeight;
-    if (orientation == StackOrientation::Vertical)
-    {
-      childHeightConstraint = mainAxisConstraint;
-    }
-    else
-    {
-      childWidthConstraint = mainAxisConstraint;
-    }
+    float childWidthConstraint =
+        (orientation == StackOrientation::Vertical) ? std::max(0.0f, contentWidth - marginW) : mainAxisConstraint;
+    float childHeightConstraint =
+        (orientation == StackOrientation::Vertical) ? mainAxisConstraint : std::max(0.0f, contentHeight - marginH);
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     if (orientation == StackOrientation::Vertical)
     {
@@ -265,49 +259,55 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
     if (mOrientation == StackOrientation::Vertical)
     {
-      // Cross axis = horizontal: apply HorizontalAlignment.
-      // Fill is treated as Start: cross-axis size comes from layout dimension (MatchParent to fill).
       const float childWidth = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
-                                   ? availableWidth
-                                   : (childData.measuredSize.width + marginW);
+                                   ? std::max(0.0f, availableWidth - marginW)
+                                   : childData.measuredSize.width;
+      const float slotWidth = childWidth + marginW;
+      const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
+                                    ? std::max(0.0f, remainingHeight - marginH)
+                                    : childData.measuredSize.height;
+      const float slotHeight = childHeight + marginH;
+
       const LayoutAlignment crossAlign = childImpl.GetHorizontalAlignment();
       const LayoutAlignment effectiveAlign =
           (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
       childBounds.width = childWidth;
-      childBounds.x = currentX + GetCrossAxisOffset(availableWidth, childWidth, effectiveAlign);
-      childBounds.y = currentY;
-      childBounds.height = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
-                               ? remainingHeight
-                               : (childData.measuredSize.height + marginH);
+      childBounds.height = childHeight;
+      childBounds.x =
+          currentX + static_cast<float>(margin.start) + GetCrossAxisOffset(availableWidth, slotWidth, effectiveAlign);
+      childBounds.y = currentY + static_cast<float>(margin.top);
 
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
 
-      currentY += childBounds.height + mSpacing;
-      remainingHeight -= childBounds.height + mSpacing;
+      currentY += slotHeight + mSpacing;
+      remainingHeight -= slotHeight + mSpacing;
     }
     else
     {
-      // Cross axis = vertical: apply VerticalAlignment.
-      // Fill is treated as Start: cross-axis size comes from layout dimension (MatchParent to fill).
-      childBounds.x = currentX;
       const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
-                                    ? availableHeight
-                                    : (childData.measuredSize.height + marginH);
+                                    ? std::max(0.0f, availableHeight - marginH)
+                                    : childData.measuredSize.height;
+      const float slotHeight = childHeight + marginH;
+      const float childWidth = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
+                                   ? std::max(0.0f, remainingWidth - marginW)
+                                   : childData.measuredSize.width;
+      const float slotWidth = childWidth + marginW;
+
       const LayoutAlignment crossAlign = childImpl.GetVerticalAlignment();
       const LayoutAlignment effectiveAlign =
           (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
+      childBounds.width = childWidth;
       childBounds.height = childHeight;
-      childBounds.y = currentY + GetCrossAxisOffset(availableHeight, childHeight, effectiveAlign);
-      childBounds.width = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
-                              ? remainingWidth
-                              : (childData.measuredSize.width + marginW);
+      childBounds.x = currentX + static_cast<float>(margin.start);
+      childBounds.y =
+          currentY + static_cast<float>(margin.top) + GetCrossAxisOffset(availableHeight, slotHeight, effectiveAlign);
 
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
 
-      currentX += childBounds.width + mSpacing;
-      remainingWidth -= childBounds.width + mSpacing;
+      currentX += slotWidth + mSpacing;
+      remainingWidth -= slotWidth + mSpacing;
     }
   }
 
