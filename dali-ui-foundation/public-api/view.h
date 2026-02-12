@@ -446,7 +446,7 @@ public: // Properties
    *
    * @param[in] color The required background color value
    */
-  View& SetBackgroundColor(const Vector4& color)
+  View& BackgroundColor(const Vector4& color)
   {
     SetBackgroundColor(color);
     return *this;

@@ -119,4 +119,4 @@
   * \
   * @param[in] color The required background color value \
   */ \
-  ChildClass& SetBackgroundColor(const Vector4& color) { View::SetBackgroundColor(color); return *this; }
+  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; }

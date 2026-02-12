@@ -42,18 +42,18 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     window.Add(Layout::New() // Parent
-                   .SetBackgroundColor(Color::YELLOW)
+                   .BackgroundColor(Color::YELLOW)
                    .SetSizeWidth(200_spx)
                    .SetSizeHeight(200_spx)
                    .Contents({
                        View::New() // Red child
-                           .SetBackgroundColor(Color::RED)
+                           .BackgroundColor(Color::RED)
                            .SetSizeWidth(100_spx)
                            .SetSizeHeight(100_spx)
                            .With([this](View& firstChild)
                                  { firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed); }),
                        View::New() // Blue child
-                           .SetBackgroundColor(Color::BLUE)
+                           .BackgroundColor(Color::BLUE)
                            .SetSizeWidth(100_spx)
                            .SetSizeHeight(100_spx)
                            .SetPositionX(100_spx)
