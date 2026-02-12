@@ -190,7 +190,7 @@ public: // Properties
    *
    * @param[in] width The width to set
    */
-  void SetSizeWidth(float width);
+  View& SetSizeWidth(float width);
 
   /**
    * @brief Gets the width of the View.
@@ -204,7 +204,7 @@ public: // Properties
    *
    * @param[in] height The height to set
    */
-  void SetSizeHeight(float height);
+  View& SetSizeHeight(float height);
 
   /**
    * @brief Gets the height of the View.
@@ -218,7 +218,7 @@ public: // Properties
    *
    * @param[in] x The X position to set
    */
-  void SetPositionX(float x);
+  View& SetPositionX(float x);
 
   /**
    * @brief Gets the X position of the View.
@@ -232,7 +232,7 @@ public: // Properties
    *
    * @param[in] y The Y position to set
    */
-  void SetPositionY(float y);
+  View& SetPositionY(float y);
 
   /**
    * @brief Gets the Y position of the View.
@@ -246,7 +246,7 @@ public: // Properties
    *
    * @param[in] point The parent origin to set
    */
-  void SetParentOrigin(const Vector3& point);
+  View& SetParentOrigin(const Vector3& point);
 
   /**
    * @brief Gets the parent origin of the View.
@@ -260,7 +260,7 @@ public: // Properties
    *
    * @param[in] point The pivot point to set
    */
-  void SetPivotPoint(const Vector3& point);
+  View& SetPivotPoint(const Vector3& point);
 
   /**
    * @brief Gets the pivot point of the View.
@@ -277,7 +277,7 @@ public: // Properties
    *
    * @param[in] width The layout width
    */
-  void SetLayoutWidth(float width);
+  View& SetLayoutWidth(float width);
 
   /**
    * @brief Gets the layout width.
@@ -291,7 +291,7 @@ public: // Properties
    *
    * @param[in] height The layout height
    */
-  void SetLayoutHeight(float height);
+  View& SetLayoutHeight(float height);
 
   /**
    * @brief Gets the layout height.
@@ -305,7 +305,7 @@ public: // Properties
    *
    * @param[in] width The minimum width
    */
-  void SetMinimumWidth(float width);
+  View& SetMinimumWidth(float width);
 
   /**
    * @brief Gets the minimum width.
@@ -319,7 +319,7 @@ public: // Properties
    *
    * @param[in] height The minimum height
    */
-  void SetMinimumHeight(float height);
+  View& SetMinimumHeight(float height);
 
   /**
    * @brief Gets the minimum height.
@@ -333,7 +333,7 @@ public: // Properties
    *
    * @param[in] width The maximum width
    */
-  void SetMaximumWidth(float width);
+  View& SetMaximumWidth(float width);
 
   /**
    * @brief Gets the maximum width.
@@ -347,7 +347,7 @@ public: // Properties
    *
    * @param[in] height The maximum height
    */
-  void SetMaximumHeight(float height);
+  View& SetMaximumHeight(float height);
 
   /**
    * @brief Gets the maximum height.
@@ -361,7 +361,7 @@ public: // Properties
    *
    * @param[in] margin The margin to set
    */
-  void SetViewMargin(const Extents& margin);
+  View& SetViewMargin(const Extents& margin);
 
   /**
    * @brief Gets the view margin.
@@ -375,7 +375,7 @@ public: // Properties
    *
    * @param[in] padding The padding to set
    */
-  void SetViewPadding(const Extents& padding);
+  View& SetViewPadding(const Extents& padding);
 
   /**
    * @brief Gets the view padding.
@@ -389,7 +389,7 @@ public: // Properties
    *
    * @param[in] alignment The horizontal alignment
    */
-  void SetHorizontalAlignment(LayoutAlignment alignment);
+  View& SetHorizontalAlignment(LayoutAlignment alignment);
 
   /**
    * @brief Gets the horizontal alignment.
@@ -403,7 +403,7 @@ public: // Properties
    *
    * @param[in] alignment The vertical alignment
    */
-  void SetVerticalAlignment(LayoutAlignment alignment);
+  View& SetVerticalAlignment(LayoutAlignment alignment);
 
   /**
    * @brief Gets the vertical alignment.
@@ -446,7 +446,7 @@ public: // Properties
    *
    * @param[in] color The required background color value
    */
-  View& BackgroundColor(const Vector4& color)
+  View& SetBackgroundColor(const Vector4& color)
   {
     SetBackgroundColor(color);
     return *this;
@@ -471,9 +471,6 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API View(Dali::Internal::CustomActor* internal);
   /// @endcond
-
-public:
-  DALI_UI_SELF_VIEW_METHODS(View)
 };
 
 } // namespace UI

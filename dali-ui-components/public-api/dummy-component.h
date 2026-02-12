@@ -145,7 +145,7 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_SELF_DUMMYCOMPONENT_METHODS(DummyComponent)
+  DALI_UI_CHAIN_VIEW_METHODS(DummyComponent)
 };
 
 } // namespace UI

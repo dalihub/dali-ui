@@ -116,7 +116,7 @@ public:
    *
    * @param[in] clips True to clip children to bounds
    */
-  void SetClipsToBounds(bool clips);
+  Layout& SetClipsToBounds(bool clips);
 
   /**
    * @brief Gets whether this layout clips its children to its bounds.
@@ -125,18 +125,20 @@ public:
    */
   bool GetClipsToBounds() const;
 
+  // @CHAIN_MANUAL
   /**
    * @brief Adds a list of children to this View in a declarative way.
    * This method allows for a hierarchical UI tree construction by passing
    * a brace-enclosed initializer list of View objects.
    * @param[in] children The initializer list containing child View handles to be added.
    */
-  void SetContents(std::initializer_list<View> children)
+  Layout& Contents(std::initializer_list<View> children)
   {
     for (const auto& child : children)
     {
       AddView(child);
     }
+    return *this;
   }
   // @CHAIN_END
 
@@ -217,7 +219,7 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_SELF_LAYOUT_METHODS(Layout)
+  DALI_UI_CHAIN_VIEW_METHODS(Layout)
 };
 
 } // namespace UI

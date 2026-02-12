@@ -42,22 +42,22 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     window.Add(Layout::New() // Parent
-                   .BackgroundColor(Color::YELLOW)
-                   .SizeWidth(200_spx)
-                   .SizeHeight(200_spx)
+                   .SetBackgroundColor(Color::YELLOW)
+                   .SetSizeWidth(200_spx)
+                   .SetSizeHeight(200_spx)
                    .Contents({
                        View::New() // Red child
-                           .BackgroundColor(Color::RED)
-                           .SizeWidth(100_spx)
-                           .SizeHeight(100_spx)
+                           .SetBackgroundColor(Color::RED)
+                           .SetSizeWidth(100_spx)
+                           .SetSizeHeight(100_spx)
                            .With([this](View& firstChild)
                                  { firstChild.TouchedSignal().Connect(this, &HelloWorldController::OnTouchRed); }),
                        View::New() // Blue child
-                           .BackgroundColor(Color::BLUE)
-                           .SizeWidth(100_spx)
-                           .SizeHeight(100_spx)
-                           .PositionX(100_spx)
-                           .PositionY(100_spx)
+                           .SetBackgroundColor(Color::BLUE)
+                           .SetSizeWidth(100_spx)
+                           .SetSizeHeight(100_spx)
+                           .SetPositionX(100_spx)
+                           .SetPositionY(100_spx)
                            .As(mSecondChild),
                    }));
 
@@ -68,7 +68,7 @@ public:
   bool OnTouchRed(Actor actor, const TouchEvent& touch)
   {
     // quit the application
-    mSecondChild.BackgroundColor(Color::GREEN);
+    mSecondChild.SetBackgroundColor(Color::GREEN);
     return true;
   }
 

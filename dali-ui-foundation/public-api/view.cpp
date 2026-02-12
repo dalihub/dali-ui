@@ -113,9 +113,10 @@ bool View::IsArrangeValid() const
 // Properties
 // =============================================================================
 
-void View::SetSizeWidth(float width)
+View& View::SetSizeWidth(float width)
 {
   Integration::GetImpl(*this).SetSizeWidth(width);
+  return *this;
 }
 
 float View::GetSizeWidth() const
@@ -123,9 +124,10 @@ float View::GetSizeWidth() const
   return Integration::GetImpl(*this).GetSizeWidth();
 }
 
-void View::SetSizeHeight(float height)
+View& View::SetSizeHeight(float height)
 {
   Integration::GetImpl(*this).SetSizeHeight(height);
+  return *this;
 }
 
 float View::GetSizeHeight() const
@@ -133,9 +135,10 @@ float View::GetSizeHeight() const
   return Integration::GetImpl(*this).GetSizeHeight();
 }
 
-void View::SetPositionX(float x)
+View& View::SetPositionX(float x)
 {
   Integration::GetImpl(*this).SetPositionX(x);
+  return *this;
 }
 
 float View::GetPositionX() const
@@ -143,9 +146,10 @@ float View::GetPositionX() const
   return Integration::GetImpl(*this).GetPositionX();
 }
 
-void View::SetPositionY(float y)
+View& View::SetPositionY(float y)
 {
   Integration::GetImpl(*this).SetPositionY(y);
+  return *this;
 }
 
 float View::GetPositionY() const
@@ -153,9 +157,10 @@ float View::GetPositionY() const
   return Integration::GetImpl(*this).GetPositionY();
 }
 
-void View::SetParentOrigin(const Vector3& point)
+View& View::SetParentOrigin(const Vector3& point)
 {
   Integration::GetImpl(*this).SetParentOrigin(point);
+  return *this;
 }
 
 Vector3 View::GetParentOrigin() const
@@ -163,9 +168,10 @@ Vector3 View::GetParentOrigin() const
   return Integration::GetImpl(*this).GetParentOrigin();
 }
 
-void View::SetPivotPoint(const Vector3& point)
+View& View::SetPivotPoint(const Vector3& point)
 {
   Integration::GetImpl(*this).SetPivotPoint(point);
+  return *this;
 }
 
 Vector3 View::GetPivotPoint() const
@@ -173,9 +179,10 @@ Vector3 View::GetPivotPoint() const
   return Integration::GetImpl(*this).GetPivotPoint();
 }
 
-void View::SetLayoutWidth(float width)
+View& View::SetLayoutWidth(float width)
 {
   Integration::GetImpl(*this).SetLayoutWidth(width);
+  return *this;
 }
 
 float View::GetLayoutWidth() const
@@ -183,9 +190,10 @@ float View::GetLayoutWidth() const
   return Integration::GetImpl(*this).GetLayoutWidth();
 }
 
-void View::SetLayoutHeight(float height)
+View& View::SetLayoutHeight(float height)
 {
   Integration::GetImpl(*this).SetLayoutHeight(height);
+  return *this;
 }
 
 float View::GetLayoutHeight() const
@@ -193,9 +201,10 @@ float View::GetLayoutHeight() const
   return Integration::GetImpl(*this).GetLayoutHeight();
 }
 
-void View::SetMinimumWidth(float width)
+View& View::SetMinimumWidth(float width)
 {
   Integration::GetImpl(*this).SetMinimumWidth(width);
+  return *this;
 }
 
 float View::GetMinimumWidth() const
@@ -203,9 +212,10 @@ float View::GetMinimumWidth() const
   return Integration::GetImpl(*this).GetMinimumWidth();
 }
 
-void View::SetMinimumHeight(float height)
+View& View::SetMinimumHeight(float height)
 {
   Integration::GetImpl(*this).SetMinimumHeight(height);
+  return *this;
 }
 
 float View::GetMinimumHeight() const
@@ -213,9 +223,10 @@ float View::GetMinimumHeight() const
   return Integration::GetImpl(*this).GetMinimumHeight();
 }
 
-void View::SetMaximumWidth(float width)
+View& View::SetMaximumWidth(float width)
 {
   Integration::GetImpl(*this).SetMaximumWidth(width);
+  return *this;
 }
 
 float View::GetMaximumWidth() const
@@ -223,9 +234,10 @@ float View::GetMaximumWidth() const
   return Integration::GetImpl(*this).GetMaximumWidth();
 }
 
-void View::SetMaximumHeight(float height)
+View& View::SetMaximumHeight(float height)
 {
   Integration::GetImpl(*this).SetMaximumHeight(height);
+  return *this;
 }
 
 float View::GetMaximumHeight() const
@@ -237,9 +249,10 @@ float View::GetMaximumHeight() const
 // Layout Properties API
 // =============================================================================
 
-void View::SetViewMargin(const Extents& margin)
+View& View::SetViewMargin(const Extents& margin)
 {
   Integration::GetImpl(*this).SetViewMargin(margin);
+  return *this;
 }
 
 Extents View::GetViewMargin() const
@@ -247,9 +260,10 @@ Extents View::GetViewMargin() const
   return Integration::GetImpl(*this).GetViewMargin();
 }
 
-void View::SetViewPadding(const Extents& padding)
+View& View::SetViewPadding(const Extents& padding)
 {
   Integration::GetImpl(*this).SetViewPadding(padding);
+  return *this;
 }
 
 Extents View::GetViewPadding() const
@@ -257,9 +271,10 @@ Extents View::GetViewPadding() const
   return Integration::GetImpl(*this).GetViewPadding();
 }
 
-void View::SetHorizontalAlignment(LayoutAlignment alignment)
+View& View::SetHorizontalAlignment(LayoutAlignment alignment)
 {
   Integration::GetImpl(*this).SetHorizontalAlignment(alignment);
+  return *this;
 }
 
 LayoutAlignment View::GetHorizontalAlignment() const
@@ -267,9 +282,10 @@ LayoutAlignment View::GetHorizontalAlignment() const
   return Integration::GetImpl(*this).GetHorizontalAlignment();
 }
 
-void View::SetVerticalAlignment(LayoutAlignment alignment)
+View& View::SetVerticalAlignment(LayoutAlignment alignment)
 {
   Integration::GetImpl(*this).SetVerticalAlignment(alignment);
+  return *this;
 }
 
 LayoutAlignment View::GetVerticalAlignment() const

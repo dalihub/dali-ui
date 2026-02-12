@@ -85,9 +85,10 @@ Layout::Layout(Dali::Internal::CustomActor* internal)
 // Layout Properties API
 // =============================================================================
 
-void Layout::SetClipsToBounds(bool clips)
+Layout& Layout::SetClipsToBounds(bool clips)
 {
   Integration::GetImpl(*this).SetClipsToBounds(clips);
+  return *this;
 }
 
 bool Layout::GetClipsToBounds() const
