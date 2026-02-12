@@ -28,6 +28,14 @@ Run:
 ./bin/stacklayout.example
 ```
 
+**Cross-axis alignment sample** (StackLayout 자식의 HorizontalAlignment 테스트):
+
+```bash
+./bin/stacklayout-alignment.example
+```
+
+- 세로 스택에서 좁은 박스 4개: Start(왼쪽), Center(가운데), End(오른쪽), MatchParent(전체 너비).
+
 ### GBS build (Tizen)
 
 ```bash

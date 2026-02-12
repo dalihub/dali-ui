@@ -349,3 +349,161 @@ int UtcDaliStackLayoutChildWithWeightP(void)
   DALI_TEST_CHECK(weightChild.GetSizeHeight() >= 50.0f);
   END_TEST;
 }
+
+// Cross-axis alignment (HorizontalAlignment in vertical stack)
+int UtcDaliStackLayoutCrossAxisHorizontalStartP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(80.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetHorizontalAlignment(LayoutAlignment::Start);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeWidth(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisHorizontalCenterP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(80.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetHorizontalAlignment(LayoutAlignment::Center);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  const float expectedX = (200.0f - 80.0f) * 0.5f;
+  DALI_TEST_EQUALS(child.GetPositionX(), expectedX, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeWidth(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(80.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetHorizontalAlignment(LayoutAlignment::End);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionX(), 120.0f, TEST_LOCATION); // 200 - 80
+  DALI_TEST_EQUALS(child.GetSizeWidth(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
+{
+  // Fill on cross axis is treated as Start: size from layout dimension, position at start.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(80.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetHorizontalAlignment(LayoutAlignment::Fill);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeWidth(), 80.0f, TEST_LOCATION); // Fill = Start, use measured size
+  END_TEST;
+}
+
+// Cross-axis alignment (VerticalAlignment in horizontal stack)
+int UtcDaliStackLayoutCrossAxisVerticalStartP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(60.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetVerticalAlignment(LayoutAlignment::Start);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisVerticalCenterP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(60.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetVerticalAlignment(LayoutAlignment::Center);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  const float expectedY = (100.0f - 40.0f) * 0.5f;
+  DALI_TEST_EQUALS(child.GetPositionY(), expectedY, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
+{
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(60.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetVerticalAlignment(LayoutAlignment::End);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionY(), 60.0f, TEST_LOCATION); // 100 - 40
+  DALI_TEST_EQUALS(child.GetSizeHeight(), 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
+{
+  // Fill on cross axis is treated as Start: size from layout dimension, position at start.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetLayoutWidth(60.0f);
+  child.SetLayoutHeight(40.0f);
+  child.SetVerticalAlignment(LayoutAlignment::Fill);
+  layout.AddView(child);
+  layout.SetLayoutWidth(200.0f);
+  layout.SetLayoutHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSizeHeight(), 40.0f, TEST_LOCATION); // Fill = Start, use measured size
+  END_TEST;
+}

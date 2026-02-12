@@ -26,6 +26,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
 
 namespace Dali
 {
@@ -144,6 +145,25 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   }
 }
 
+/**
+ * @brief Returns the cross-axis offset for alignment (Start/Center/End).
+ * Fill uses Start behavior on cross axis (size from layout dimension).
+ */
+float GetCrossAxisOffset(float available, float childSize, LayoutAlignment alignment)
+{
+  switch (alignment)
+  {
+    case LayoutAlignment::Center:
+      return std::max(0.0f, (available - childSize) * 0.5f);
+    case LayoutAlignment::End:
+      return std::max(0.0f, available - childSize);
+    case LayoutAlignment::Start:
+    case LayoutAlignment::Fill:
+    default:
+      return 0.0f;
+  }
+}
+
 } // namespace
 
 StackLayoutManager::StackLayoutManager(StackOrientation orientation, float spacing)
@@ -245,11 +265,17 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
     if (mOrientation == StackOrientation::Vertical)
     {
-      childBounds.x = currentX;
+      // Cross axis = horizontal: apply HorizontalAlignment.
+      // Fill is treated as Start: cross-axis size comes from layout dimension (MatchParent to fill).
+      const float childWidth = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
+                                   ? availableWidth
+                                   : (childData.measuredSize.width + marginW);
+      const LayoutAlignment crossAlign = childImpl.GetHorizontalAlignment();
+      const LayoutAlignment effectiveAlign =
+          (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
+      childBounds.width = childWidth;
+      childBounds.x = currentX + GetCrossAxisOffset(availableWidth, childWidth, effectiveAlign);
       childBounds.y = currentY;
-      childBounds.width = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
-                              ? availableWidth
-                              : (childData.measuredSize.width + marginW);
       childBounds.height = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
                                ? remainingHeight
                                : (childData.measuredSize.height + marginH);
@@ -262,14 +288,20 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     }
     else
     {
+      // Cross axis = vertical: apply VerticalAlignment.
+      // Fill is treated as Start: cross-axis size comes from layout dimension (MatchParent to fill).
       childBounds.x = currentX;
-      childBounds.y = currentY;
+      const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
+                                    ? availableHeight
+                                    : (childData.measuredSize.height + marginH);
+      const LayoutAlignment crossAlign = childImpl.GetVerticalAlignment();
+      const LayoutAlignment effectiveAlign =
+          (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
+      childBounds.height = childHeight;
+      childBounds.y = currentY + GetCrossAxisOffset(availableHeight, childHeight, effectiveAlign);
       childBounds.width = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
                               ? remainingWidth
                               : (childData.measuredSize.width + marginW);
-      childBounds.height = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
-                               ? availableHeight
-                               : (childData.measuredSize.height + marginH);
 
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
