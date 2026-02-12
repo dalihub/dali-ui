@@ -223,7 +223,7 @@ int UtcDaliViewGetSizeWidthP(void)
   View view = View::New();
   const float testWidth = 100.0f;
 
-  view.SizeWidth(testWidth);
+  view.SetSizeWidth(testWidth);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
   END_TEST;
 }
@@ -234,7 +234,7 @@ int UtcDaliViewGetSizeHeightP(void)
   View view = View::New();
   const float testHeight = 200.0f;
 
-  view.SizeHeight(testHeight);
+  view.SetSizeHeight(testHeight);
   DALI_TEST_EQUALS(view.GetSizeHeight(), testHeight, TEST_LOCATION);
   END_TEST;
 }
@@ -245,7 +245,7 @@ int UtcDaliViewGetPositionXP(void)
   View view = View::New();
   const float testX = 50.0f;
 
-  view.PositionX(testX);
+  view.SetPositionX(testX);
   DALI_TEST_EQUALS(view.GetPositionX(), testX, TEST_LOCATION);
   END_TEST;
 }
@@ -256,7 +256,7 @@ int UtcDaliViewGetPositionYP(void)
   View view = View::New();
   const float testY = 75.0f;
 
-  view.PositionY(testY);
+  view.SetPositionY(testY);
   DALI_TEST_EQUALS(view.GetPositionY(), testY, TEST_LOCATION);
   END_TEST;
 }
@@ -267,7 +267,7 @@ int UtcDaliViewSizeWidthChainingP(void)
   View view = View::New();
   const float testWidth = 150.0f;
 
-  View& result = view.SizeWidth(testWidth);
+  View& result = view.SetSizeWidth(testWidth);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
   END_TEST;
@@ -279,7 +279,7 @@ int UtcDaliViewSizeHeightChainingP(void)
   View view = View::New();
   const float testHeight = 250.0f;
 
-  View& result = view.SizeHeight(testHeight);
+  View& result = view.SetSizeHeight(testHeight);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetSizeHeight(), testHeight, TEST_LOCATION);
   END_TEST;
@@ -291,7 +291,7 @@ int UtcDaliViewPositionXChainingP(void)
   View view = View::New();
   const float testX = 125.0f;
 
-  View& result = view.PositionX(testX);
+  View& result = view.SetPositionX(testX);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPositionX(), testX, TEST_LOCATION);
   END_TEST;
@@ -303,7 +303,7 @@ int UtcDaliViewPositionYChainingP(void)
   View view = View::New();
   const float testY = 175.0f;
 
-  View& result = view.PositionY(testY);
+  View& result = view.SetPositionY(testY);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetPositionY(), testY, TEST_LOCATION);
   END_TEST;
@@ -330,8 +330,11 @@ int UtcDaliViewMultipleChainingP(void)
   const float testY = 50.0f;
   const Vector4 testColor(0.0f, 1.0f, 0.0f, 0.8f);
 
-  View& result =
-      view.SizeWidth(testWidth).SizeHeight(testHeight).PositionX(testX).PositionY(testY).BackgroundColor(testColor);
+  View& result = view.SetSizeWidth(testWidth)
+                     .SetSizeHeight(testHeight)
+                     .SetPositionX(testX)
+                     .SetPositionY(testY)
+                     .BackgroundColor(testColor);
 
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
@@ -363,7 +366,7 @@ int UtcDaliViewWithP(void)
   View& result = view.With(
       [&actionCalled, testWidth](View& v)
       {
-        v.SizeWidth(testWidth);
+        v.SetSizeWidth(testWidth);
         actionCalled = true;
       });
 
@@ -392,7 +395,7 @@ int UtcDaliViewSetParentOriginP(void)
   View view = View::New();
   const Vector3 testOrigin(0.0f, 1.0f, 0.5f);
 
-  View& result = view.ParentOrigin(testOrigin);
+  View& result = view.SetParentOrigin(testOrigin);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   Vector3 parentOrigin = view.GetParentOrigin();
@@ -422,7 +425,7 @@ int UtcDaliViewSetPivotPointP(void)
   View view = View::New();
   const Vector3 testPivot(1.0f, 0.0f, 0.5f);
 
-  View& result = view.PivotPoint(testPivot);
+  View& result = view.SetPivotPoint(testPivot);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   Vector3 pivotPoint = view.GetPivotPoint();
@@ -439,7 +442,7 @@ int UtcDaliViewParentOriginChainingP(void)
   View view = View::New();
   const Vector3 testOrigin(0.0f, 0.0f, 0.0f);
 
-  View& result = view.ParentOrigin(testOrigin);
+  View& result = view.SetParentOrigin(testOrigin);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   END_TEST;
@@ -451,7 +454,7 @@ int UtcDaliViewPivotPointChainingP(void)
   View view = View::New();
   const Vector3 testPivot(1.0f, 1.0f, 1.0f);
 
-  View& result = view.PivotPoint(testPivot);
+  View& result = view.SetPivotPoint(testPivot);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   END_TEST;
@@ -697,7 +700,7 @@ int UtcDaliViewLayoutWidthChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.LayoutWidth(150.0f);
+  View& result = view.SetLayoutWidth(150.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetLayoutWidth(), 150.0f, TEST_LOCATION);
   END_TEST;
@@ -707,7 +710,7 @@ int UtcDaliViewLayoutHeightChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.LayoutHeight(80.0f);
+  View& result = view.SetLayoutHeight(80.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetLayoutHeight(), 80.0f, TEST_LOCATION);
   END_TEST;
@@ -876,7 +879,7 @@ int UtcDaliViewViewMarginChainingP(void)
   TestApplication application;
   View view = View::New();
   Extents margin(1, 2, 3, 4);
-  View& result = view.ViewMargin(margin);
+  View& result = view.SetViewMargin(margin);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetViewMargin().start, 1u, TEST_LOCATION);
   END_TEST;
@@ -887,7 +890,7 @@ int UtcDaliViewViewPaddingChainingP(void)
   TestApplication application;
   View view = View::New();
   Extents padding(5, 10, 15, 20);
-  View& result = view.ViewPadding(padding);
+  View& result = view.SetViewPadding(padding);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetViewPadding().start, 5u, TEST_LOCATION);
   END_TEST;
@@ -897,7 +900,7 @@ int UtcDaliViewHorizontalAlignmentChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.HorizontalAlignment(LayoutAlignment::End);
+  View& result = view.SetHorizontalAlignment(LayoutAlignment::End);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::End),
                    TEST_LOCATION);
@@ -908,7 +911,7 @@ int UtcDaliViewVerticalAlignmentChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.VerticalAlignment(LayoutAlignment::Center);
+  View& result = view.SetVerticalAlignment(LayoutAlignment::Center);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::Center),
                    TEST_LOCATION);
@@ -919,7 +922,7 @@ int UtcDaliViewMinimumWidthChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.MinimumWidth(25.0f);
+  View& result = view.SetMinimumWidth(25.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetMinimumWidth(), 25.0f, TEST_LOCATION);
   END_TEST;
@@ -929,7 +932,7 @@ int UtcDaliViewMinimumHeightChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.MinimumHeight(35.0f);
+  View& result = view.SetMinimumHeight(35.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetMinimumHeight(), 35.0f, TEST_LOCATION);
   END_TEST;
@@ -939,7 +942,7 @@ int UtcDaliViewMaximumWidthChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.MaximumWidth(300.0f);
+  View& result = view.SetMaximumWidth(300.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetMaximumWidth(), 300.0f, TEST_LOCATION);
   END_TEST;
@@ -949,7 +952,7 @@ int UtcDaliViewMaximumHeightChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.MaximumHeight(400.0f);
+  View& result = view.SetMaximumHeight(400.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetMaximumHeight(), 400.0f, TEST_LOCATION);
   END_TEST;
@@ -1092,7 +1095,7 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
   StackLayout layout = StackLayout::New(StackOrientation::Vertical);
   layout.SetLayoutWidth(LayoutDimension::MatchParent);
   layout.SetLayoutHeight(LayoutDimension::MatchParent);
-  layout.AddView(View::New().SizeWidth(50.0f).SizeHeight(50.0f));
+  layout.AddView(View::New().SetSizeWidth(50.0f).SetSizeHeight(50.0f));
   MeasuredSize size = layout.Measure(200.0f, 150.0f);
   DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);

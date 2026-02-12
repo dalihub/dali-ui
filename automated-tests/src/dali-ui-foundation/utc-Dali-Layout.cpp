@@ -229,7 +229,7 @@ int UtcDaliLayoutClipsToBoundsChainingP(void)
 {
   TestApplication application;
   Layout layout = Layout::New();
-  Layout& result = layout.ClipsToBounds(true);
+  Layout& result = layout.SetClipsToBounds(true);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
   DALI_TEST_CHECK(layout.GetClipsToBounds() == true);
   END_TEST;
