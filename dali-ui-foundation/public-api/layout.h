@@ -217,7 +217,7 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  SHADOW_LAYOUT_METHODS(Layout)
+  DALI_UI_SELF_LAYOUT_METHODS(Layout)
 };
 
 } // namespace UI

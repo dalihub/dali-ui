@@ -412,36 +412,45 @@ public: // Properties
    */
   LayoutAlignment GetVerticalAlignment() const;
 
+  // @CHAIN_MANUAL
   /**
    * @brief Assigns this View instance to a target variable.
    * This method is useful for capturing a reference to a View created within
    * a declarative UI tree for later use.
    */
-  void SetAs(View& self)
+  View& As(View& self)
   {
     self = static_cast<View&>(*this);
+    return *this;
   }
 
+  // @CHAIN_MANUAL
   /**
    * @brief Executesa custom action on this View instance.
    * Use this method to perform additional initialization or logic on a View
    * without breaking the declarative method chaining.
    * @param[in] action A function or lambda to be executed with this instance.
    */
-  void SetWith(std::function<void(View&)> action)
+  View& With(std::function<void(View&)> action)
   {
     if (action)
     {
       action(*this);
     }
+    return *this;
   }
 
-  // @CHAIN_MANUAL(BackgroundColor, SetBackgroundColor, const Vector4& color)
+  // @CHAIN_MANUAL
   /**
    * @brief Sets the background color.
    *
    * @param[in] color The required background color value
    */
+  View& BackgroundColor(const Vector4& color)
+  {
+    SetBackgroundColor(color);
+    return *this;
+  }
 
   // @CHAIN_END
 
@@ -464,7 +473,7 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  SHADOW_VIEW_METHODS(View)
+  DALI_UI_SELF_VIEW_METHODS(View)
 };
 
 } // namespace UI

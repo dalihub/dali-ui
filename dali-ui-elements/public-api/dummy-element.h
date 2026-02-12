@@ -145,7 +145,7 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  SHADOW_DUMMYELEMENT_METHODS(DummyElement)
+  DALI_UI_SELF_DUMMYELEMENT_METHODS(DummyElement)
 };
 
 } // namespace UI
