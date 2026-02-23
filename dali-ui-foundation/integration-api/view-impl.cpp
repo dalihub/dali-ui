@@ -415,10 +415,10 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   // Calculate actual position considering alignment
   float x = bounds.x;
   float y = bounds.y;
-  // Use the allocation (bounds) from parent: fill the assigned space (e.g. weight in StackLayout).
-  // Parent decides our size; we do not clamp to mDesiredSize so weighted/fill allocations work.
-  float width = bounds.width;
-  float height = bounds.height;
+  // Start with the desired (measured) size. Alignment positions the view within the
+  // allocated bounds; Fill expands to the full allocation.
+  float width = mDesiredSize.width;
+  float height = mDesiredSize.height;
 
   // Apply horizontal alignment
   float horizontalSpace = bounds.width - width;
@@ -440,6 +440,11 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
         break;
     }
   }
+  else
+  {
+    // Desired size exceeds or equals allocation; clamp to bounds
+    width = bounds.width;
+  }
 
   // Apply vertical alignment
   float verticalSpace = bounds.height - height;
@@ -460,6 +465,11 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
       default:
         break;
     }
+  }
+  else
+  {
+    // Desired size exceeds or equals allocation; clamp to bounds
+    height = bounds.height;
   }
 
   // Set actor position and size
