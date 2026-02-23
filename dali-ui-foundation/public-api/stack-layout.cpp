@@ -106,7 +106,15 @@ void StackLayout::SetLayoutWeight(View view, float weight)
 {
   if (view)
   {
-    view.RegisterProperty("stackLayoutWeight", weight);
+    Dali::Property::Index index = view.GetPropertyIndex("stackLayoutWeight");
+    if (index == Dali::Property::INVALID_INDEX)
+    {
+      view.RegisterProperty("stackLayoutWeight", weight);
+    }
+    else
+    {
+      view.SetProperty(index, weight);
+    }
     view.InvalidateMeasure();
   }
 }

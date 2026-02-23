@@ -154,11 +154,30 @@ float GridLayout::GetColumnSpacing() const
 }
 
 // Static attached property methods
+namespace
+{
+/**
+ * @brief Helper to register or update an integer attached property.
+ */
+void SetIntProperty(View view, const std::string& name, int value)
+{
+  Property::Index index = view.GetPropertyIndex(name);
+  if (index == Dali::Property::INVALID_INDEX)
+  {
+    view.RegisterProperty(name, value);
+  }
+  else
+  {
+    view.SetProperty(index, value);
+  }
+}
+} // namespace
+
 void GridLayout::SetRow(View view, uint32_t row)
 {
   if (view)
   {
-    view.RegisterProperty("gridRow", static_cast<int>(row));
+    SetIntProperty(view, "gridRow", static_cast<int>(row));
     view.InvalidateMeasure();
   }
 }
@@ -180,7 +199,7 @@ void GridLayout::SetColumn(View view, uint32_t column)
 {
   if (view)
   {
-    view.RegisterProperty("gridColumn", static_cast<int>(column));
+    SetIntProperty(view, "gridColumn", static_cast<int>(column));
     view.InvalidateMeasure();
   }
 }
@@ -202,7 +221,7 @@ void GridLayout::SetRowSpan(View view, uint32_t span)
 {
   if (view)
   {
-    view.RegisterProperty("gridRowSpan", static_cast<int>(span));
+    SetIntProperty(view, "gridRowSpan", static_cast<int>(span));
     view.InvalidateMeasure();
   }
 }
@@ -224,7 +243,7 @@ void GridLayout::SetColumnSpan(View view, uint32_t span)
 {
   if (view)
   {
-    view.RegisterProperty("gridColumnSpan", static_cast<int>(span));
+    SetIntProperty(view, "gridColumnSpan", static_cast<int>(span));
     view.InvalidateMeasure();
   }
 }

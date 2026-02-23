@@ -143,12 +143,47 @@ FlexAlign FlexLayout::GetAlignContent() const
   return Integration::GetImpl(*this).GetAlignContent();
 }
 
+namespace
+{
+/**
+ * @brief Helper to register or update a float attached property.
+ */
+void SetFloatProperty(View view, const std::string& name, float value)
+{
+  Property::Index index = view.GetPropertyIndex(name);
+  if (index == Dali::Property::INVALID_INDEX)
+  {
+    view.RegisterProperty(name, value);
+  }
+  else
+  {
+    view.SetProperty(index, value);
+  }
+}
+
+/**
+ * @brief Helper to register or update an int attached property.
+ */
+void SetIntProperty(View view, const std::string& name, int value)
+{
+  Property::Index index = view.GetPropertyIndex(name);
+  if (index == Dali::Property::INVALID_INDEX)
+  {
+    view.RegisterProperty(name, value);
+  }
+  else
+  {
+    view.SetProperty(index, value);
+  }
+}
+} // namespace
+
 // Static attached property methods
 void FlexLayout::SetFlexGrow(View view, float grow)
 {
   if (view)
   {
-    view.RegisterProperty("flexGrow", grow);
+    SetFloatProperty(view, "flexGrow", grow);
     view.InvalidateMeasure();
   }
 }
@@ -170,7 +205,7 @@ void FlexLayout::SetFlexShrink(View view, float shrink)
 {
   if (view)
   {
-    view.RegisterProperty("flexShrink", shrink);
+    SetFloatProperty(view, "flexShrink", shrink);
     view.InvalidateMeasure();
   }
 }
@@ -192,7 +227,8 @@ void FlexLayout::SetFlexBasis(View view, float basis)
 {
   if (view)
   {
-    view.RegisterProperty("flexBasis", basis);
+    SetFloatProperty(view, "flexBasis", basis);
+    view.InvalidateMeasure();
   }
 }
 
@@ -213,7 +249,8 @@ void FlexLayout::SetAlignSelf(View view, FlexAlign align)
 {
   if (view)
   {
-    view.RegisterProperty("alignSelf", static_cast<int>(align));
+    SetIntProperty(view, "alignSelf", static_cast<int>(align));
+    view.InvalidateMeasure();
   }
 }
 

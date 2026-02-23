@@ -83,15 +83,50 @@ AbsoluteLayout::AbsoluteLayout(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::AbsoluteLayoutImpl>(internal);
 }
 
+namespace
+{
+/**
+ * @brief Helper to register or update a float attached property.
+ */
+void SetFloatProperty(View view, const std::string& name, float value)
+{
+  Property::Index index = view.GetPropertyIndex(name);
+  if (index == Dali::Property::INVALID_INDEX)
+  {
+    view.RegisterProperty(name, value);
+  }
+  else
+  {
+    view.SetProperty(index, value);
+  }
+}
+
+/**
+ * @brief Helper to register or update an int attached property.
+ */
+void SetIntProperty(View view, const std::string& name, int value)
+{
+  Property::Index index = view.GetPropertyIndex(name);
+  if (index == Dali::Property::INVALID_INDEX)
+  {
+    view.RegisterProperty(name, value);
+  }
+  else
+  {
+    view.SetProperty(index, value);
+  }
+}
+} // namespace
+
 // Static attached property methods
 void AbsoluteLayout::SetLayoutBounds(View view, const LayoutRect& bounds)
 {
   if (view)
   {
-    view.RegisterProperty("absoluteLayoutX", bounds.x);
-    view.RegisterProperty("absoluteLayoutY", bounds.y);
-    view.RegisterProperty("absoluteLayoutWidth", bounds.width);
-    view.RegisterProperty("absoluteLayoutHeight", bounds.height);
+    SetFloatProperty(view, "absoluteLayoutX", bounds.x);
+    SetFloatProperty(view, "absoluteLayoutY", bounds.y);
+    SetFloatProperty(view, "absoluteLayoutWidth", bounds.width);
+    SetFloatProperty(view, "absoluteLayoutHeight", bounds.height);
   }
 }
 
@@ -128,7 +163,7 @@ void AbsoluteLayout::SetLayoutFlags(View view, AbsoluteLayoutFlags flags)
 {
   if (view)
   {
-    view.RegisterProperty("absoluteLayoutFlags", static_cast<int>(flags));
+    SetIntProperty(view, "absoluteLayoutFlags", static_cast<int>(flags));
   }
 }
 
