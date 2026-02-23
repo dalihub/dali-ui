@@ -127,6 +127,7 @@ void AbsoluteLayout::SetLayoutBounds(View view, const LayoutRect& bounds)
     SetFloatProperty(view, "absoluteLayoutY", bounds.y);
     SetFloatProperty(view, "absoluteLayoutWidth", bounds.width);
     SetFloatProperty(view, "absoluteLayoutHeight", bounds.height);
+    view.InvalidateMeasure();
   }
 }
 
@@ -164,6 +165,7 @@ void AbsoluteLayout::SetLayoutFlags(View view, AbsoluteLayoutFlags flags)
   if (view)
   {
     SetIntProperty(view, "absoluteLayoutFlags", static_cast<int>(flags));
+    view.InvalidateMeasure();
   }
 }
 
