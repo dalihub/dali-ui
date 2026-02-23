@@ -340,7 +340,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else if (mLayoutWidth > 0)
     {
-      resultWidth = mLayoutWidth + pw;
+      // Fixed width: treat as total size (padding is inside, not added on top)
+      resultWidth = mLayoutWidth;
     }
     else
     {
@@ -352,7 +353,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else if (mLayoutHeight > 0)
     {
-      resultHeight = mLayoutHeight + ph;
+      // Fixed height: treat as total size (padding is inside, not added on top)
+      resultHeight = mLayoutHeight;
     }
     else
     {
@@ -364,10 +366,13 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   // Default implementation for views without LayoutManager
   MeasuredSize size;
 
+  float paddingWidth = static_cast<float>(mPadding.start + mPadding.end);
+  float paddingHeight = static_cast<float>(mPadding.top + mPadding.bottom);
+
   // Determine width
   if (mLayoutWidth > 0)
   {
-    // Fixed width
+    // Fixed width: treat as total size (padding is inside, not added on top)
     size.width = mLayoutWidth;
   }
   else if (mLayoutWidth == LayoutDimension::MatchParent)
@@ -377,15 +382,15 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else
   {
-    // Auto or Unset - use natural size or constraint
+    // Auto or Unset - use natural size + padding
     Vector3 naturalSize = Self().GetNaturalSize();
-    size.width = (naturalSize.width > 0) ? naturalSize.width : 0.0f;
+    size.width = ((naturalSize.width > 0) ? naturalSize.width : 0.0f) + paddingWidth;
   }
 
   // Determine height
   if (mLayoutHeight > 0)
   {
-    // Fixed height
+    // Fixed height: treat as total size (padding is inside, not added on top)
     size.height = mLayoutHeight;
   }
   else if (mLayoutHeight == LayoutDimension::MatchParent)
@@ -395,17 +400,10 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else
   {
-    // Auto or Unset - use natural size or constraint
+    // Auto or Unset - use natural size + padding
     Vector3 naturalSize = Self().GetNaturalSize();
-    size.height = (naturalSize.height > 0) ? naturalSize.height : 0.0f;
+    size.height = ((naturalSize.height > 0) ? naturalSize.height : 0.0f) + paddingHeight;
   }
-
-  // Account for padding in measured size
-  float paddingWidth = static_cast<float>(mPadding.start + mPadding.end);
-  float paddingHeight = static_cast<float>(mPadding.top + mPadding.bottom);
-
-  size.width += paddingWidth;
-  size.height += paddingHeight;
 
   return size;
 }
