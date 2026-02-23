@@ -124,37 +124,16 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     if (orientation == StackOrientation::Vertical)
     {
-      float crossSize = std::max(childSize.width, std::max(0.0f, contentWidth - marginW));
-      childData.measuredSize.width = crossSize;
+      childData.measuredSize.width = childSize.width;
       childData.measuredSize.height = std::max(0.0f, share - marginH);
-      maxCrossAxisInOut = std::max(maxCrossAxisInOut, crossSize + marginW);
+      maxCrossAxisInOut = std::max(maxCrossAxisInOut, childSize.width + marginW);
     }
     else
     {
-      float crossSize = std::max(childSize.height, std::max(0.0f, contentHeight - marginH));
       childData.measuredSize.width = std::max(0.0f, share - marginW);
-      childData.measuredSize.height = crossSize;
-      maxCrossAxisInOut = std::max(maxCrossAxisInOut, crossSize + marginH);
+      childData.measuredSize.height = childSize.height;
+      maxCrossAxisInOut = std::max(maxCrossAxisInOut, childSize.height + marginH);
     }
-  }
-}
-
-/**
- * @brief Returns the cross-axis offset for alignment (Start/Center/End).
- * Fill uses Start behavior on cross axis (size from layout dimension).
- */
-float GetCrossAxisOffset(float available, float childSize, LayoutAlignment alignment)
-{
-  switch (alignment)
-  {
-    case LayoutAlignment::Center:
-      return std::max(0.0f, (available - childSize) * 0.5f);
-    case LayoutAlignment::End:
-      return std::max(0.0f, available - childSize);
-    case LayoutAlignment::Start:
-    case LayoutAlignment::Fill:
-    default:
-      return 0.0f;
   }
 }
 
@@ -259,22 +238,15 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
     if (mOrientation == StackOrientation::Vertical)
     {
-      const float childWidth = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
-                                   ? std::max(0.0f, availableWidth - marginW)
-                                   : childData.measuredSize.width;
-      const float slotWidth = childWidth + marginW;
+      const float crossAvailable = std::max(0.0f, availableWidth - marginW);
       const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
                                     ? std::max(0.0f, remainingHeight - marginH)
                                     : childData.measuredSize.height;
       const float slotHeight = childHeight + marginH;
 
-      const LayoutAlignment crossAlign = childImpl.GetHorizontalAlignment();
-      const LayoutAlignment effectiveAlign =
-          (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
-      childBounds.width = childWidth;
+      childBounds.width = crossAvailable;
       childBounds.height = childHeight;
-      childBounds.x =
-          currentX + static_cast<float>(margin.start) + GetCrossAxisOffset(availableWidth, slotWidth, effectiveAlign);
+      childBounds.x = currentX + static_cast<float>(margin.start);
       childBounds.y = currentY + static_cast<float>(margin.top);
 
       childImpl.Arrange(childBounds);
@@ -285,23 +257,16 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     }
     else
     {
-      const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
-                                    ? std::max(0.0f, availableHeight - marginH)
-                                    : childData.measuredSize.height;
-      const float slotHeight = childHeight + marginH;
+      const float crossAvailable = std::max(0.0f, availableHeight - marginH);
       const float childWidth = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
                                    ? std::max(0.0f, remainingWidth - marginW)
                                    : childData.measuredSize.width;
       const float slotWidth = childWidth + marginW;
 
-      const LayoutAlignment crossAlign = childImpl.GetVerticalAlignment();
-      const LayoutAlignment effectiveAlign =
-          (crossAlign == LayoutAlignment::Fill) ? LayoutAlignment::Start : crossAlign;
       childBounds.width = childWidth;
-      childBounds.height = childHeight;
+      childBounds.height = crossAvailable;
       childBounds.x = currentX + static_cast<float>(margin.start);
-      childBounds.y =
-          currentY + static_cast<float>(margin.top) + GetCrossAxisOffset(availableHeight, slotHeight, effectiveAlign);
+      childBounds.y = currentY + static_cast<float>(margin.top);
 
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
