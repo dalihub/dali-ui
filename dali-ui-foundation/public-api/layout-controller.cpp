@@ -49,6 +49,18 @@ class LayoutControllerImpl : public Dali::Integration::Processor, public Connect
 {
 public:
   /**
+   * @brief Data for a tracked layout root.
+   *
+   * Stores both a ref-counted handle (to prevent dangling) and the raw
+   * implementation pointer (for fast access during layout passes).
+   */
+  struct LayoutRootEntry
+  {
+    BaseHandle handle;             ///< Ref-counted handle keeps the actor alive
+    Integration::ViewImpl* view;   ///< Raw pointer for direct access
+  };
+
+  /**
    * @brief Constructor.
    */
   explicit LayoutControllerImpl(Window window)
@@ -94,7 +106,11 @@ public:
       return;
     }
 
-    // Add to pending set (avoids duplicates)
+    // Track this layout root (ref-counted handle prevents dangling pointer)
+    BaseHandle handle(view->Self());
+    mAllLayoutRoots[view] = LayoutRootEntry{handle, view};
+
+    // Add to pending (dirty) set
     mPendingViews.insert(view);
 
     // Schedule processing if not already scheduled
@@ -105,6 +121,15 @@ public:
   }
 
   /**
+   * @brief Removes a view from tracking (called when view is destroyed).
+   */
+  void UnregisterView(Integration::ViewImpl* view)
+  {
+    mAllLayoutRoots.erase(view);
+    mPendingViews.erase(view);
+  }
+
+  /**
    * @brief Called when window is resized.
    */
   void OnWindowResize(int32_t width, int32_t height)
@@ -112,12 +137,12 @@ public:
     mWindowWidth = width;
     mWindowHeight = height;
 
-    // Invalidate all registered views with layout capability
-    for (auto* view : mPendingViews)
+    // Invalidate ALL known layout roots (not just pending ones)
+    for (auto& pair : mAllLayoutRoots)
     {
-      if (view)
+      if (pair.second.view)
       {
-        view->InvalidateMeasure();
+        pair.second.view->InvalidateMeasure();
       }
     }
   }
@@ -140,7 +165,8 @@ public:
     // Process each layout root
     for (auto* view : viewsToProcess)
     {
-      if (view)
+      // Verify the view is still tracked (not destroyed)
+      if (view && mAllLayoutRoots.count(view) > 0)
       {
         ProcessLayoutRoot(view);
       }
@@ -241,7 +267,8 @@ private:
 
 private:
   Window mWindow;
-  std::unordered_set<Integration::ViewImpl*> mPendingViews;
+  std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (ref-counted)
+  std::unordered_set<Integration::ViewImpl*> mPendingViews;                    ///< Dirty layout roots needing processing
   int32_t mWindowWidth;
   int32_t mWindowHeight;
   bool mProcessingScheduled;
@@ -285,6 +312,11 @@ LayoutController::~LayoutController()
 void LayoutController::RequestLayout(Integration::ViewImpl* view)
 {
   mImpl->RequestLayout(view);
+}
+
+void LayoutController::UnregisterView(Integration::ViewImpl* view)
+{
+  mImpl->UnregisterView(view);
 }
 
 void LayoutController::OnWindowResize(int32_t width, int32_t height)

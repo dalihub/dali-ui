@@ -79,6 +79,16 @@ public:
   void RequestLayout(Integration::ViewImpl* view);
 
   /**
+   * @brief Unregisters a view from the layout controller.
+   *
+   * Should be called when a layout root is being destroyed to prevent
+   * dangling pointer access.
+   *
+   * @param[in] view The view to unregister
+   */
+  void UnregisterView(Integration::ViewImpl* view);
+
+  /**
    * @brief Called when the window is resized.
    *
    * This invalidates all layout roots and triggers a layout pass.

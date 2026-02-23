@@ -109,6 +109,18 @@ ViewImpl::~ViewImpl()
   {
     GetImpl(iter.second).OnViewDestroying(this);
   }
+
+  // Unregister from LayoutController to prevent dangling pointer access
+  if (HasLayoutManager())
+  {
+    Actor self = Self();
+    Window window = DevelWindow::Get(self);
+    if (window)
+    {
+      LayoutController& controller = LayoutController::Get(window);
+      controller.UnregisterView(this);
+    }
+  }
 }
 
 void ViewImpl::OnInitialize()
