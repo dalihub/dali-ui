@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/flex-layout-manager.h>
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/object/property.h>
 #include <algorithm>
 #include <functional>
 #include <vector>
@@ -35,6 +36,45 @@ namespace Integration
 
 namespace
 {
+
+float GetFlexGrow(UI::View view)
+{
+  if (view)
+  {
+    Property::Index index = view.GetPropertyIndex("flexGrow");
+    if (index != Property::INVALID_INDEX)
+    {
+      return view.GetProperty<float>(index);
+    }
+  }
+  return 0.0f;
+}
+
+float GetFlexShrink(UI::View view)
+{
+  if (view)
+  {
+    Property::Index index = view.GetPropertyIndex("flexShrink");
+    if (index != Property::INVALID_INDEX)
+    {
+      return view.GetProperty<float>(index);
+    }
+  }
+  return 1.0f;
+}
+
+FlexAlign GetAlignSelf(UI::View view)
+{
+  if (view)
+  {
+    Property::Index index = view.GetPropertyIndex("alignSelf");
+    if (index != Property::INVALID_INDEX)
+    {
+      return static_cast<FlexAlign>(view.GetProperty<int>(index));
+    }
+  }
+  return FlexAlign::Auto;
+}
 
 struct FlexLine
 {
@@ -67,6 +107,8 @@ std::vector<FlexLine> BuildFlexLinesForArrange(const ViewImpl::ChildContainer& c
     }
     currentLine.childIndices.push_back(i);
     currentLine.mainSize += childMainSize;
+    currentLine.totalFlexGrow += GetFlexGrow(childData.view);
+    currentLine.totalFlexShrink += GetFlexShrink(childData.view);
     float childCrossSize = isMainAxisHorizontal ? childData.measuredSize.height + margin.top + margin.bottom
                                                 : childData.measuredSize.width + margin.start + margin.end;
     currentLine.crossSize = std::max(currentLine.crossSize, childCrossSize);
@@ -76,6 +118,77 @@ std::vector<FlexLine> BuildFlexLinesForArrange(const ViewImpl::ChildContainer& c
     lines.push_back(currentLine);
   }
   return lines;
+}
+
+/**
+ * @brief Applies flex-grow/flex-shrink to adjust child main-axis sizes within a line.
+ *
+ * When there is free space and totalFlexGrow > 0, distribute extra space.
+ * When there is overflow and totalFlexShrink > 0, shrink children proportionally.
+ */
+void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, float availableMain,
+                          bool isMainAxisHorizontal, const std::function<ViewImpl&(UI::View)>& getImpl)
+{
+  float freeSpace = availableMain - line.mainSize;
+
+  if (freeSpace > 0.0f && line.totalFlexGrow > 0.0f)
+  {
+    // Distribute extra space proportional to flex-grow
+    for (uint32_t idx : line.childIndices)
+    {
+      auto& childData = children[idx];
+      float grow = GetFlexGrow(childData.view);
+      if (grow > 0.0f)
+      {
+        float extra = (grow / line.totalFlexGrow) * freeSpace;
+        if (isMainAxisHorizontal)
+        {
+          childData.measuredSize.width += extra;
+        }
+        else
+        {
+          childData.measuredSize.height += extra;
+        }
+      }
+    }
+    line.mainSize = availableMain;
+  }
+  else if (freeSpace < 0.0f && line.totalFlexShrink > 0.0f)
+  {
+    // Shrink proportional to flex-shrink * child base size
+    float totalWeightedShrink = 0.0f;
+    for (uint32_t idx : line.childIndices)
+    {
+      auto& childData = children[idx];
+      ViewImpl& childImpl = getImpl(childData.view);
+      Extents margin = childImpl.GetViewMargin();
+      float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width
+                                                 : childData.measuredSize.height;
+      float shrink = GetFlexShrink(childData.view);
+      totalWeightedShrink += shrink * childMainSize;
+    }
+    if (totalWeightedShrink > 0.0f)
+    {
+      float overflow = -freeSpace;
+      for (uint32_t idx : line.childIndices)
+      {
+        auto& childData = children[idx];
+        float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width
+                                                   : childData.measuredSize.height;
+        float shrink = GetFlexShrink(childData.view);
+        float reduction = (shrink * childMainSize / totalWeightedShrink) * overflow;
+        if (isMainAxisHorizontal)
+        {
+          childData.measuredSize.width = std::max(0.0f, childData.measuredSize.width - reduction);
+        }
+        else
+        {
+          childData.measuredSize.height = std::max(0.0f, childData.measuredSize.height - reduction);
+        }
+      }
+      line.mainSize = availableMain;
+    }
+  }
 }
 
 struct FlexJustifyOffsets
@@ -133,9 +246,16 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
     float marginCross = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom)
                                              : static_cast<float>(margin.start + margin.end);
 
+    // Use align-self if set, otherwise fall back to align-items
+    FlexAlign effectiveAlign = GetAlignSelf(childData.view);
+    if (effectiveAlign == FlexAlign::Auto)
+    {
+      effectiveAlign = alignItems;
+    }
+
     float childCrossOffset = crossOffsetInOut;
     float crossSpace = line.crossSize - childCrossSize - marginCross;
-    switch (alignItems)
+    switch (effectiveAlign)
     {
       case FlexAlign::FlexStart:
       case FlexAlign::Auto:
@@ -349,6 +469,12 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   std::vector<FlexLine> lines =
       BuildFlexLinesForArrange(children, availableMain, IsMainAxisHorizontal(), mWrap, getImpl);
+
+  // Apply flex-grow/flex-shrink to adjust child sizes within each line
+  for (auto& line : lines)
+  {
+    ApplyFlexGrowShrink(line, children, availableMain, IsMainAxisHorizontal(), getImpl);
+  }
 
   if (mWrap == FlexWrap::WrapReverse)
   {
