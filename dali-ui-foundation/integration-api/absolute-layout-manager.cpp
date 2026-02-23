@@ -123,16 +123,10 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     bool sizeProportional =
         (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional)) != 0;
 
-    if (positionProportional)
-    {
-      x *= widthConstraint;
-      y *= heightConstraint;
-    }
-
     if (sizeProportional)
     {
-      w *= widthConstraint;
-      h *= heightConstraint;
+      w *= contentWidth;
+      h *= contentHeight;
     }
 
     if (w < 0 || h < 0)
@@ -158,6 +152,13 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     else
     {
       childData.measuredSize = MeasuredSize(w, h);
+    }
+
+    // Proportional position: x = (available - childWidth) * proportion
+    if (positionProportional)
+    {
+      x = (contentWidth - w) * bounds.x;
+      y = (contentHeight - h) * bounds.y;
     }
 
     Extents margin = childImpl.GetViewMargin();
