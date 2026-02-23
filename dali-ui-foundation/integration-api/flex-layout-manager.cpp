@@ -127,7 +127,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(const ViewImpl::ChildContainer& c
  * When there is overflow and totalFlexShrink > 0, shrink children proportionally.
  */
 void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, float availableMain,
-                          bool isMainAxisHorizontal, const std::function<ViewImpl&(UI::View)>& getImpl)
+                         bool isMainAxisHorizontal, const std::function<ViewImpl&(UI::View)>& getImpl)
 {
   float freeSpace = availableMain - line.mainSize;
 
@@ -160,10 +160,7 @@ void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, flo
     for (uint32_t idx : line.childIndices)
     {
       auto& childData = children[idx];
-      ViewImpl& childImpl = getImpl(childData.view);
-      Extents margin = childImpl.GetViewMargin();
-      float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width
-                                                 : childData.measuredSize.height;
+      float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
       float shrink = GetFlexShrink(childData.view);
       totalWeightedShrink += shrink * childMainSize;
     }
@@ -173,8 +170,7 @@ void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, flo
       for (uint32_t idx : line.childIndices)
       {
         auto& childData = children[idx];
-        float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width
-                                                   : childData.measuredSize.height;
+        float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
         float shrink = GetFlexShrink(childData.view);
         float reduction = (shrink * childMainSize / totalWeightedShrink) * overflow;
         if (isMainAxisHorizontal)
