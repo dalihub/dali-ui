@@ -197,12 +197,6 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     bool sizeProportional =
         (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional)) != 0;
 
-    if (positionProportional)
-    {
-      x *= availableWidth;
-      y *= availableHeight;
-    }
-
     if (sizeProportional)
     {
       w *= availableWidth;
@@ -216,6 +210,13 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     if (h < 0)
     {
       h = childData.measuredSize.height;
+    }
+
+    // Proportional position: x = (available - childWidth) * proportion
+    if (positionProportional)
+    {
+      x = (availableWidth - w) * childBoundsSpec.x;
+      y = (availableHeight - h) * childBoundsSpec.y;
     }
 
     Extents margin = childImpl.GetViewMargin();
