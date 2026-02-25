@@ -56,8 +56,8 @@ public:
    */
   struct LayoutRootEntry
   {
-    BaseHandle handle;             ///< Ref-counted handle keeps the actor alive
-    Integration::ViewImpl* view;   ///< Raw pointer for direct access
+    BaseHandle handle;           ///< Ref-counted handle keeps the actor alive
+    Integration::ViewImpl* view; ///< Raw pointer for direct access
   };
 
   /**
@@ -268,7 +268,7 @@ private:
 private:
   Window mWindow;
   std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (ref-counted)
-  std::unordered_set<Integration::ViewImpl*> mPendingViews;                    ///< Dirty layout roots needing processing
+  std::unordered_set<Integration::ViewImpl*> mPendingViews; ///< Dirty layout roots needing processing
   int32_t mWindowWidth;
   int32_t mWindowHeight;
   bool mProcessingScheduled;
@@ -298,6 +298,22 @@ LayoutController& LayoutController::Get(Window window)
   gLayoutControllers[key] = std::move(controller);
 
   return ref;
+}
+
+void LayoutController::Remove(Window window)
+{
+  if (window)
+  {
+    gLayoutControllers.erase(window.GetObjectPtr());
+  }
+}
+
+void LayoutController::UnregisterFromAll(Integration::ViewImpl* view)
+{
+  for (auto& pair : gLayoutControllers)
+  {
+    pair.second->UnregisterView(view);
+  }
 }
 
 LayoutController::LayoutController(Window window)

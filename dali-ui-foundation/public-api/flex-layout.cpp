@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/public-api/flex-layout.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/property.h>
 
 // INTERNAL INCLUDES
@@ -29,15 +28,6 @@ namespace Dali
 {
 namespace UI
 {
-
-namespace
-{
-// Property indices for attached properties
-const Property::Index FLEX_GROW_INDEX = 10000;
-const Property::Index FLEX_SHRINK_INDEX = 10001;
-const Property::Index FLEX_BASIS_INDEX = 10002;
-const Property::Index ALIGN_SELF_INDEX = 10003;
-} // namespace
 
 FlexLayout::FlexLayout()
 {

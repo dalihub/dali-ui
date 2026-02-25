@@ -146,13 +146,15 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       {
         h = childSize.height;
       }
-
-      childData.measuredSize = MeasuredSize(w, h);
     }
-    else
+    else if (childImpl.HasLayoutManager())
     {
-      childData.measuredSize = MeasuredSize(w, h);
+      // Nested layout containers need Measure even with explicit size,
+      // so their own children get measured.
+      childImpl.Measure(w, h);
     }
+
+    childData.measuredSize = MeasuredSize(w, h);
 
     // Proportional position: x = (available - childWidth) * proportion
     if (positionProportional)
@@ -226,6 +228,13 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     childBounds.y = bounds.y + y + static_cast<float>(margin.top);
     childBounds.width = w;
     childBounds.height = h;
+
+    // Sync desired size so OnArrange uses allocated bounds when the
+    // child has no measured content (WrapContent with zero natural size).
+    MeasuredSize desiredSize;
+    desiredSize.width = (childData.measuredSize.width > 0.0f) ? childData.measuredSize.width : childBounds.width;
+    desiredSize.height = (childData.measuredSize.height > 0.0f) ? childData.measuredSize.height : childBounds.height;
+    childImpl.SetDesiredSize(desiredSize);
 
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;

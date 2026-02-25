@@ -247,9 +247,28 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
                                     : childData.measuredSize.height;
       const float slotHeight = childHeight + marginH;
 
-      childBounds.width = crossAvailable;
+      // Cross-axis (horizontal) alignment
+      float childWidth =
+          (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent) ? crossAvailable : childData.measuredSize.width;
+      float crossX = currentX + static_cast<float>(margin.start);
+      LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
+      switch (hAlign)
+      {
+        case LayoutAlignment::Center:
+          crossX += (crossAvailable - childWidth) * 0.5f;
+          break;
+        case LayoutAlignment::End:
+          crossX += crossAvailable - childWidth;
+          break;
+        case LayoutAlignment::Start:
+        case LayoutAlignment::Fill:
+        default:
+          break;
+      }
+
+      childBounds.width = childWidth;
       childBounds.height = childHeight;
-      childBounds.x = currentX + static_cast<float>(margin.start);
+      childBounds.x = crossX;
       childBounds.y = currentY + static_cast<float>(margin.top);
 
       childImpl.Arrange(childBounds);
@@ -266,10 +285,29 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
                                    : childData.measuredSize.width;
       const float slotWidth = childWidth + marginW;
 
+      // Cross-axis (vertical) alignment
+      float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent) ? crossAvailable
+                                                                                        : childData.measuredSize.height;
+      float crossY = currentY + static_cast<float>(margin.top);
+      LayoutAlignment vAlign = childImpl.GetVerticalAlignment();
+      switch (vAlign)
+      {
+        case LayoutAlignment::Center:
+          crossY += (crossAvailable - childHeight) * 0.5f;
+          break;
+        case LayoutAlignment::End:
+          crossY += crossAvailable - childHeight;
+          break;
+        case LayoutAlignment::Start:
+        case LayoutAlignment::Fill:
+        default:
+          break;
+      }
+
       childBounds.width = childWidth;
-      childBounds.height = crossAvailable;
+      childBounds.height = childHeight;
       childBounds.x = currentX + static_cast<float>(margin.start);
-      childBounds.y = currentY + static_cast<float>(margin.top);
+      childBounds.y = crossY;
 
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;

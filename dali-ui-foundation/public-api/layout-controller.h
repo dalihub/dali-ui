@@ -79,6 +79,16 @@ public:
   void RequestLayout(Integration::ViewImpl* view);
 
   /**
+   * @brief Removes the layout controller for the given window.
+   *
+   * Should be called when a window is being closed to release the
+   * associated LayoutController and prevent stale entries.
+   *
+   * @param[in] window The window whose controller should be removed
+   */
+  static void Remove(Window window);
+
+  /**
    * @brief Unregisters a view from the layout controller.
    *
    * Should be called when a layout root is being destroyed to prevent
@@ -87,6 +97,16 @@ public:
    * @param[in] view The view to unregister
    */
   void UnregisterView(Integration::ViewImpl* view);
+
+  /**
+   * @brief Unregisters a view from all known layout controllers.
+   *
+   * Used when a view is being destroyed but its window cannot be
+   * determined (e.g. the view is already off-scene).
+   *
+   * @param[in] view The view to unregister
+   */
+  static void UnregisterFromAll(Integration::ViewImpl* view);
 
   /**
    * @brief Called when the window is resized.

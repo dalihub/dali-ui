@@ -127,30 +127,6 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
   }
 }
 
-void FillGridAutoFromMeasured(const ViewImpl::ChildContainer& children, uint32_t rowCount, uint32_t colCount,
-                              const std::vector<GridLength>& rowDefs, const std::vector<GridLength>& colDefs,
-                              const std::function<ViewImpl&(UI::View)>& getImpl, std::vector<float>& rowHeights,
-                              std::vector<float>& colWidths)
-{
-  for (const auto& childData : children)
-  {
-    ViewImpl& childImpl = getImpl(childData.view);
-    uint32_t row = std::min(GetChildRow(childData.view), rowCount - 1);
-    uint32_t col = std::min(GetChildColumn(childData.view), colCount - 1);
-    uint32_t rowSpan = std::min(GetChildRowSpan(childData.view), rowCount - row);
-    uint32_t colSpan = std::min(GetChildColumnSpan(childData.view), colCount - col);
-    Extents margin = childImpl.GetViewMargin();
-    if (rowSpan == 1 && row < rowDefs.size() && rowDefs[row].GetType() == GridLengthType::Auto)
-    {
-      rowHeights[row] = std::max(rowHeights[row], childData.measuredSize.height + margin.top + margin.bottom);
-    }
-    if (colSpan == 1 && col < colDefs.size() && colDefs[col].GetType() == GridLengthType::Auto)
-    {
-      colWidths[col] = std::max(colWidths[col], childData.measuredSize.width + margin.start + margin.end);
-    }
-  }
-}
-
 void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& colWidths,
                           const std::vector<GridLength>& rowDefs, const std::vector<GridLength>& colDefs,
                           float availableWidth, float availableHeight, float rowSpacing, float colSpacing,
@@ -248,7 +224,7 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
 
 void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
-                                const std::function<ViewImpl&(UI::View)>& getImpl)
+                                float rowSpacing, float colSpacing, const std::function<ViewImpl&(UI::View)>& getImpl)
 {
   for (auto& childData : children)
   {
@@ -266,11 +242,70 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
     childBounds.width = colPositions[col + colSpan] - cellX;
     childBounds.height = rowPositions[row + rowSpan] - cellY;
 
+    if (col + colSpan < colCount)
+    {
+      childBounds.width -= colSpacing;
+    }
+    if (row + rowSpan < rowCount)
+    {
+      childBounds.height -= rowSpacing;
+    }
+
     Extents margin = childImpl.GetViewMargin();
     childBounds.x += static_cast<float>(margin.start);
     childBounds.y += static_cast<float>(margin.top);
     childBounds.width = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
+
+    // Apply child alignment within the cell
+    float cellWidth = childBounds.width;
+    float cellHeight = childBounds.height;
+    float childWidth = childData.measuredSize.width;
+    float childHeight = childData.measuredSize.height;
+
+    LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
+    if (childWidth > 0.0f && childWidth < cellWidth)
+    {
+      switch (hAlign)
+      {
+        case LayoutAlignment::Center:
+          childBounds.x += (cellWidth - childWidth) * 0.5f;
+          childBounds.width = childWidth;
+          break;
+        case LayoutAlignment::End:
+          childBounds.x += cellWidth - childWidth;
+          childBounds.width = childWidth;
+          break;
+        case LayoutAlignment::Start:
+          childBounds.width = childWidth;
+          break;
+        case LayoutAlignment::Fill:
+        default:
+          break;
+      }
+    }
+
+    LayoutAlignment vAlign = childImpl.GetVerticalAlignment();
+    if (childHeight > 0.0f && childHeight < cellHeight)
+    {
+      switch (vAlign)
+      {
+        case LayoutAlignment::Center:
+          childBounds.y += (cellHeight - childHeight) * 0.5f;
+          childBounds.height = childHeight;
+          break;
+        case LayoutAlignment::End:
+          childBounds.y += cellHeight - childHeight;
+          childBounds.height = childHeight;
+          break;
+        case LayoutAlignment::Start:
+          childBounds.height = childHeight;
+          break;
+        case LayoutAlignment::Fill:
+        default:
+          break;
+      }
+    }
 
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
@@ -360,8 +395,9 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   std::vector<float> colWidths(colCount, 0.0f);
 
   auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
-  FillGridAutoFromMeasured(children, rowCount, colCount, mRowDefinitions, mColumnDefinitions, getImpl, rowHeights,
-                           colWidths);
+  // Re-measure children to get fresh auto row/column sizes using actual arrange bounds
+  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount, colCount, mRowDefinitions,
+                                 mColumnDefinitions, getImpl, rowHeights, colWidths);
 
   float totalWidth = 0.0f;
   float totalHeight = 0.0f;
@@ -373,7 +409,8 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   ComputeGridPositions(rowHeights, colWidths, bounds, mRowSpacing, mColumnSpacing, rowCount, colCount, rowPositions,
                        colPositions);
 
-  ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, getImpl);
+  ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, mRowSpacing, mColumnSpacing,
+                             getImpl);
 
   return MeasuredSize(bounds.width, bounds.height);
 }

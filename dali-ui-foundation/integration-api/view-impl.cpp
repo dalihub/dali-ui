@@ -110,16 +110,11 @@ ViewImpl::~ViewImpl()
     GetImpl(iter.second).OnViewDestroying(this);
   }
 
-  // Unregister from LayoutController to prevent dangling pointer access
+  // Unregister from LayoutController to prevent dangling pointer access.
+  // Cannot call Self() here — DALi forbids it inside destructors (reference count == 1).
   if (HasLayoutManager())
   {
-    Actor self = Self();
-    Window window = DevelWindow::Get(self);
-    if (window)
-    {
-      LayoutController& controller = LayoutController::Get(window);
-      controller.UnregisterView(this);
-    }
+    LayoutController::UnregisterFromAll(this);
   }
 }
 
@@ -372,7 +367,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   // Determine width
   if (mLayoutWidth > 0)
   {
-    // Fixed width: treat as total size (padding is inside, not added on top)
+    // Fixed width: total size (padding is inside, not added on top)
     size.width = mLayoutWidth;
   }
   else if (mLayoutWidth == LayoutDimension::MatchParent)
@@ -390,7 +385,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   // Determine height
   if (mLayoutHeight > 0)
   {
-    // Fixed height: treat as total size (padding is inside, not added on top)
+    // Fixed height: total size (padding is inside, not added on top)
     size.height = mLayoutHeight;
   }
   else if (mLayoutHeight == LayoutDimension::MatchParent)
@@ -422,65 +417,12 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 
 MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  // Calculate actual position considering alignment
+  // Use the bounds directly. The parent layout manager is responsible for
+  // computing position and size based on the child's alignment properties.
   float x = bounds.x;
   float y = bounds.y;
-  // Start with the desired (measured) size. Alignment positions the view within the
-  // allocated bounds; Fill expands to the full allocation.
-  float width = mDesiredSize.width;
-  float height = mDesiredSize.height;
-
-  // Apply horizontal alignment
-  float horizontalSpace = bounds.width - width;
-  if (horizontalSpace > 0)
-  {
-    switch (mHorizontalAlignment)
-    {
-      case LayoutAlignment::Center:
-        x += horizontalSpace * 0.5f;
-        break;
-      case LayoutAlignment::End:
-        x += horizontalSpace;
-        break;
-      case LayoutAlignment::Fill:
-        width = bounds.width;
-        break;
-      case LayoutAlignment::Start:
-      default:
-        break;
-    }
-  }
-  else
-  {
-    // Desired size exceeds or equals allocation; clamp to bounds
-    width = bounds.width;
-  }
-
-  // Apply vertical alignment
-  float verticalSpace = bounds.height - height;
-  if (verticalSpace > 0)
-  {
-    switch (mVerticalAlignment)
-    {
-      case LayoutAlignment::Center:
-        y += verticalSpace * 0.5f;
-        break;
-      case LayoutAlignment::End:
-        y += verticalSpace;
-        break;
-      case LayoutAlignment::Fill:
-        height = bounds.height;
-        break;
-      case LayoutAlignment::Start:
-      default:
-        break;
-    }
-  }
-  else
-  {
-    // Desired size exceeds or equals allocation; clamp to bounds
-    height = bounds.height;
-  }
+  float width = bounds.width;
+  float height = bounds.height;
 
   // Set actor position and size
   Actor self = Self();
