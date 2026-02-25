@@ -565,6 +565,11 @@ MeasuredSize ViewImpl::GetDesiredSize() const
   return mDesiredSize;
 }
 
+void ViewImpl::SetDesiredSize(const MeasuredSize& size)
+{
+  mDesiredSize = size;
+}
+
 bool ViewImpl::IsMeasureValid() const
 {
   return mLastMeasuredConstraint.width >= 0.0f;

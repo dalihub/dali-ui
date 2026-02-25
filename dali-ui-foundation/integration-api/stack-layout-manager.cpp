@@ -134,6 +134,9 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
       childData.measuredSize.height = childSize.height;
       maxCrossAxisInOut = std::max(maxCrossAxisInOut, childSize.height + marginH);
     }
+    // Sync the child's internal desired size so that OnArrange uses the
+    // weighted share rather than the child's natural (possibly zero) size.
+    childImpl.SetDesiredSize(childData.measuredSize);
   }
 }
 

@@ -247,6 +247,17 @@ public: // Measure / Arrange API
   MeasuredSize GetDesiredSize() const;
 
   /**
+   * @brief Sets the desired size directly.
+   *
+   * Used by LayoutManagers to override the desired size for children
+   * whose final size is determined by the parent (e.g., weighted children
+   * in StackLayout). This ensures that OnArrange uses the correct size.
+   *
+   * @param[in] size The desired size to set
+   */
+  void SetDesiredSize(const MeasuredSize& size);
+
+  /**
    * @brief Checks if the measure is valid.
    */
   bool IsMeasureValid() const;
