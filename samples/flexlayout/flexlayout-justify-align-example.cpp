@@ -1,0 +1,112 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/flex-layout.h>
+
+using namespace Dali;
+using namespace Dali::UI;
+
+/**
+ * FlexLayout justify content and align items sample.
+ *
+ * Demonstrates SpaceBetween justify and Center cross-axis alignment
+ * in a horizontal flex row.
+ *
+ * - Three fixed-size boxes with different heights
+ * - JustifyContent: SpaceBetween (even spacing between items)
+ * - AlignItems: Center (vertically centered on the cross axis)
+ * - One child uses AlignSelf to override to FlexEnd
+ *
+ * Press Escape or Back to quit.
+ */
+class FlexLayoutJustifyAlignController : public ConnectionTracker
+{
+public:
+  FlexLayoutJustifyAlignController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &FlexLayoutJustifyAlignController::Create);
+  }
+
+  void Create(Application& application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    FlexLayout root = FlexLayout::New();
+    root.SetLayoutWidth(LayoutDimension::MatchParent);
+    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetDirection(FlexDirection::Row);
+    root.SetJustifyContent(FlexJustify::SpaceBetween);
+    root.SetAlignItems(FlexAlign::Center);
+    root.SetViewPadding(Extents(20, 20, 20, 20));
+
+    // Red box: tall
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    redBox.SetLayoutWidth(80.0f);
+    redBox.SetLayoutHeight(200.0f);
+    root.AddView(redBox);
+
+    // Green box: medium height
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetLayoutWidth(80.0f);
+    greenBox.SetLayoutHeight(120.0f);
+    root.AddView(greenBox);
+
+    // Blue box: short, with AlignSelf override to FlexEnd
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetLayoutWidth(80.0f);
+    blueBox.SetLayoutHeight(60.0f);
+    FlexLayout::SetAlignSelf(blueBox, FlexAlign::FlexEnd);
+    root.AddView(blueBox);
+
+    // Yellow box: medium
+    View yellowBox = View::New();
+    yellowBox.SetBackgroundColor(Color::YELLOW);
+    yellowBox.SetLayoutWidth(80.0f);
+    yellowBox.SetLayoutHeight(140.0f);
+    root.AddView(yellowBox);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &FlexLayoutJustifyAlignController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  FlexLayoutJustifyAlignController controller(application);
+  application.MainLoop();
+  return 0;
+}
