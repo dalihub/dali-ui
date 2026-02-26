@@ -7,6 +7,7 @@ This sample demonstrates the use of **AbsoluteLayout** to position child views a
 - **Absolute positioning**: Children placed at pixel coordinates with explicit sizes.
 - **Proportional positioning**: Position and/or size specified as 0.0-1.0 proportion of the parent.
 - **Overlapping**: Children can freely overlap; later children are drawn on top.
+- **Margin and padding**: Padding on the layout container, margin on individual children.
 
 ## Build
 
@@ -45,6 +46,16 @@ Run:
 
 - 자식 뷰가 자유롭게 겹칠 수 있으며, 나중에 추가된 자식이 위에 그려짐.
 - 비례 위치와 절대 위치 혼합 사용.
+
+**Margin and padding sample** (Padding, Margin, 중첩 AbsoluteLayout 시연):
+
+```bash
+./bin/absolutelayout-margin-padding.example
+```
+
+- SetViewPadding: 레이아웃 컨테이너 안쪽 여백 (자식이 가장자리로부터 밀림).
+- SetViewMargin: 자식 뷰 바깥 간격 (없음, 균등, 비대칭 비교).
+- 중첩 AbsoluteLayout에 별도 padding 적용.
 
 ### GBS build (Tizen)
 

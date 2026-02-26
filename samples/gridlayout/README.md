@@ -7,6 +7,7 @@ This sample demonstrates the use of **GridLayout** to arrange child views in row
 - **Fixed grid**: Rows and columns with absolute pixel sizes.
 - **Star sizing**: Proportional distribution of remaining space using `GridLength::Star()`.
 - **Row/column span**: Children that span multiple rows or columns.
+- **Margin and padding**: Padding on the grid container, margin on individual cells.
 
 ## Build
 
@@ -46,6 +47,17 @@ Run:
 - 3x3 그리드에서 셀이 여러 행/열에 걸쳐 확장.
 - ColumnSpan(2): 한 셀이 2열을 차지.
 - RowSpan(2) + ColumnSpan(2): 한 셀이 2행×2열 영역을 차지.
+
+**Margin and padding sample** (Padding, Margin, ColumnSpan과 함께 시연):
+
+```bash
+./bin/gridlayout-margin-padding.example
+```
+
+- SetViewPadding: 그리드 컨테이너 안쪽 여백.
+- SetViewMargin: 셀별 바깥 간격 (없음, 10px, 20px, 비대칭 비교).
+- ColumnSpan 셀에도 margin 적용.
+- Spacing을 0으로 설정하여 margin 효과만 확인.
 
 ### GBS build (Tizen)
 

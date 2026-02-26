@@ -69,7 +69,7 @@ public:
     marginB.SetBackgroundColor(Color::BLUE);
     marginB.SetLayoutWidth(LayoutDimension::MatchParent);
     marginB.SetLayoutHeight(50.0f);
-    marginB.SetViewMargin(Extents(0, 0, 25, 25)); // larger horizontal margin
+    marginB.SetViewMargin(Extents(0, 0, 25, 25)); // top and bottom margin only
     root.AddView(marginB);
 
     View marginC = View::New();

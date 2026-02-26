@@ -1,0 +1,136 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/absolute-layout.h>
+
+using namespace Dali;
+using namespace Dali::UI;
+
+/**
+ * AbsoluteLayout sample: margin and padding.
+ *
+ * All margin and padding values use a uniform 25px for easy visual verification.
+ *
+ * 1. Padding: root AbsoluteLayout has 25px padding (children inset from window edges).
+ * 2. Margin: children alternate between no margin and 25px uniform margin.
+ *    - Red box: no margin (flush with padding edge).
+ *    - Green box: 25px margin all sides.
+ *    - Blue box: 25px margin all sides.
+ * 3. Nested: a child AbsoluteLayout with 25px padding, containing inner boxes
+ *    with no margin and 25px margin respectively.
+ *
+ * Press Escape or Back to quit.
+ */
+class AbsoluteLayoutMarginPaddingController : public ConnectionTracker
+{
+public:
+  AbsoluteLayoutMarginPaddingController(Application& application)
+    : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::Create);
+  }
+
+  void Create(Application& application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(Color::WHITE);
+
+    // Root: AbsoluteLayout with padding (content inset from window edges)
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetLayoutWidth(LayoutDimension::MatchParent);
+    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
+
+    // --- Red box: no margin (positioned at padding edge) ---
+    View redBox = View::New();
+    redBox.SetBackgroundColor(Color::RED);
+    AbsoluteLayout::SetLayoutBounds(redBox, LayoutRect(0.0f, 0.0f, 150.0f, 80.0f));
+    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::None);
+    root.AddView(redBox);
+
+    // --- Green box: 25px margin all sides ---
+    View greenBox = View::New();
+    greenBox.SetBackgroundColor(Color::GREEN);
+    greenBox.SetViewMargin(Extents(25, 25, 25, 25));
+    AbsoluteLayout::SetLayoutBounds(greenBox, LayoutRect(0.0f, 100.0f, 150.0f, 80.0f));
+    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::None);
+    root.AddView(greenBox);
+
+    // --- Blue box: 25px margin all sides ---
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetViewMargin(Extents(25, 25, 25, 25));
+    AbsoluteLayout::SetLayoutBounds(blueBox, LayoutRect(0.0f, 210.0f, 150.0f, 80.0f));
+    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::None);
+    root.AddView(blueBox);
+
+    // --- Nested AbsoluteLayout with its own padding ---
+    AbsoluteLayout nested = AbsoluteLayout::New();
+    nested.SetBackgroundColor(Color::GRAY);
+    nested.SetViewPadding(Extents(25, 25, 25, 25));
+    nested.SetViewMargin(Extents(25, 25, 25, 25));
+    AbsoluteLayout::SetLayoutBounds(nested, LayoutRect(0.0f, 320.0f, 350.0f, 200.0f));
+    AbsoluteLayout::SetLayoutFlags(nested, AbsoluteLayoutFlags::None);
+
+    View innerA = View::New();
+    innerA.SetBackgroundColor(Color::MAGENTA);
+    AbsoluteLayout::SetLayoutBounds(innerA, LayoutRect(0.0f, 0.0f, 100.0f, 60.0f));
+    AbsoluteLayout::SetLayoutFlags(innerA, AbsoluteLayoutFlags::None);
+    nested.AddView(innerA);
+
+    View innerB = View::New();
+    innerB.SetBackgroundColor(Color::YELLOW);
+    innerB.SetViewMargin(Extents(25, 25, 25, 25));
+    AbsoluteLayout::SetLayoutBounds(innerB, LayoutRect(120.0f, 0.0f, 100.0f, 60.0f));
+    AbsoluteLayout::SetLayoutFlags(innerB, AbsoluteLayoutFlags::None);
+    nested.AddView(innerB);
+
+    View innerC = View::New();
+    innerC.SetBackgroundColor(Color::CYAN);
+    innerC.SetViewMargin(Extents(25, 25, 25, 25));
+    AbsoluteLayout::SetLayoutBounds(innerC, LayoutRect(0.0f, 80.0f, 220.0f, 60.0f));
+    AbsoluteLayout::SetLayoutFlags(innerC, AbsoluteLayoutFlags::None);
+    nested.AddView(innerC);
+
+    root.AddView(nested);
+
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::OnKeyEvent);
+  }
+
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
+  }
+
+private:
+  Application& mApplication;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  AbsoluteLayoutMarginPaddingController controller(application);
+  application.MainLoop();
+  return 0;
+}

@@ -7,6 +7,7 @@ This sample demonstrates the use of **FlexLayout** (CSS Flexbox model) to arrang
 - **Flex direction**: Row-based layout with flex-grow for distributing space.
 - **Justify and align**: SpaceBetween, Center alignment, and per-item AlignSelf override.
 - **Wrap and grow**: Wrapping items to new lines with different flex-grow values.
+- **Margin and padding**: Padding on the flex container, margin on individual children.
 
 ## Build
 
@@ -46,6 +47,16 @@ Run:
 - FlexWrap::Wrap: 공간 부족 시 다음 줄로 넘김.
 - FlexBasis: 각 아이템의 기본 크기 지정.
 - FlexGrow: 남은 공간을 비율에 따라 분배 (grow 2는 grow 1의 2배).
+
+**Margin and padding sample** (Padding, Margin, 중첩 FlexLayout 시연):
+
+```bash
+./bin/flexlayout-margin-padding.example
+```
+
+- SetViewPadding: 플렉스 컨테이너 안쪽 여백 (자식이 가장자리로부터 밀림).
+- SetViewMargin: 자식 뷰 바깥 간격 (없음, 균등 15px, 비대칭 비교).
+- 중첩 FlexLayout(Row)에 별도 padding 적용, 내부 자식에 개별 margin.
 
 ### GBS build (Tizen)
 
