@@ -1072,8 +1072,9 @@ int UtcDaliViewMeasureWithPaddingP(void)
   view.SetLayoutWidth(40.0f);
   view.SetLayoutHeight(30.0f);
   MeasuredSize size = view.Measure(100.0f, 100.0f);
-  DALI_TEST_EQUALS(size.GetWidth(), 50.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(size.GetHeight(), 40.0f, TEST_LOCATION);
+  // Fixed size is total size; padding is inside, not added on top
+  DALI_TEST_EQUALS(size.GetWidth(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 30.0f, TEST_LOCATION);
   END_TEST;
 }
 
