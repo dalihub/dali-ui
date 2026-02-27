@@ -387,7 +387,12 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   // For MatchParent dimensions, use the constraint so the view sizes to the parent (e.g. window).
   if (mLayoutManager)
   {
-    MeasuredSize content = mLayoutManager->Measure(this, widthConstraint, heightConstraint);
+    // When this view has a fixed size, use it as the constraint for children
+    // instead of the parent's constraint. A fixed-size container measures
+    // children against its own size, not the space allocated by the parent.
+    float managerWidthConstraint = (mLayoutWidth > 0) ? mLayoutWidth : widthConstraint;
+    float managerHeightConstraint = (mLayoutHeight > 0) ? mLayoutHeight : heightConstraint;
+    MeasuredSize content = mLayoutManager->Measure(this, managerWidthConstraint, managerHeightConstraint);
     float pw = static_cast<float>(mPadding.start + mPadding.end);
     float ph = static_cast<float>(mPadding.top + mPadding.bottom);
     float resultWidth;
