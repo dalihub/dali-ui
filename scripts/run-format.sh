@@ -18,7 +18,7 @@ case "$1" in
         echo "> Fixing all src files with $CF..."
         # 2. 대상 파일 수집
         TARGETS="dali-ui-foundation dali-ui-elements dali-ui-components"
-        FILES=$(find $TARGETS -path "./build" -prune -o -path "./third-party" -prune -o -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \) ! -name "*.autogen.h" -print)
+        FILES=$(find $TARGETS -path "./build" -prune -o -path "./automated-tests" -prune -o -path "./samples" -prune -o -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \) ! -name "*.autogen.h" -print)
         FIXED_COUNT=0
 
         for file in $FILES; do
@@ -49,7 +49,7 @@ case "$1" in
         echo "> Fixing staged files with $CF..."
         # --cached: staged 상태인 파일 목록
         # --diff-filter=ACMR: Added, Copied, Modified, Renamed 파일만 (Deleted 제외)
-        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h|hpp)$' | grep -v 'third-party/\|build/\|\.autogen\.h$')
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h|hpp)$' | grep -v 'automated-tests/\|third-party/\|build/\|\.autogen\.h$')
 
         if [ -z "$STAGED_FILES" ]; then
             echo "ℹ> No staged C++ files to process."

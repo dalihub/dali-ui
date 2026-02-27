@@ -25,9 +25,9 @@ jobs:
     - name: Clone others
       run: |
         echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
-        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
-        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/lottie-player.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git

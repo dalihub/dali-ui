@@ -2,7 +2,7 @@
 #define TEST_SYNC_IMPLEMENTATION_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ namespace Dali
 {
 class TestGraphicsSyncImplementation;
 
-class TestSyncObject : public Integration::GraphicsSyncAbstraction::SyncObject
+class TestSyncObject : public Dali::Integration::GraphicsSyncAbstraction::SyncObject
 {
 public:
   TestSyncObject(TraceCallStack& trace);
@@ -44,14 +44,14 @@ public:
   void Wait() override;
   void ClientWait() override;
 
-  bool synced;
+  bool            synced;
   TraceCallStack& mTrace;
 };
 
 /**
  * Class to emulate the gpu sync functions with tracing
  */
-class TestGraphicsSyncImplementation : public Integration::GraphicsSyncAbstraction
+class TestGraphicsSyncImplementation : public Dali::Integration::GraphicsSyncAbstraction
 {
 public:
   /**
@@ -111,14 +111,14 @@ public: // TEST FUNCTIONS
    */
   int32_t GetNumberOfSyncObjects();
 
-  TestGraphicsSyncImplementation(const TestGraphicsSyncImplementation&) = delete;
+  TestGraphicsSyncImplementation(const TestGraphicsSyncImplementation&)            = delete;
   TestGraphicsSyncImplementation& operator=(const TestGraphicsSyncImplementation&) = delete;
 
 private:
   typedef std::vector<TestSyncObject*> SyncContainer;
-  typedef SyncContainer::iterator SyncIter;
-  SyncContainer mSyncObjects;        ///< The sync objects
-  TraceCallStack mTrace{true, "gl"}; ///< the trace call stack for testing
+  typedef SyncContainer::iterator      SyncIter;
+  SyncContainer                        mSyncObjects;       ///< The sync objects
+  TraceCallStack                       mTrace{true, "gl"}; ///< the trace call stack for testing
 };
 
 } // namespace Dali

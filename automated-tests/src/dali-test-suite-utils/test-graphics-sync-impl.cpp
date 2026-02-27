@@ -21,8 +21,8 @@ namespace Dali
 {
 TestSyncObject::TestSyncObject(Dali::TraceCallStack& trace)
 
-  : synced(false),
-    mTrace(trace)
+: synced(false),
+  mTrace(trace)
 {
   mTrace.PushCall("TestSyncObject cons", ""); // Trace the method
 }
@@ -58,7 +58,7 @@ TestGraphicsSyncImplementation::TestGraphicsSyncImplementation()
  */
 TestGraphicsSyncImplementation::~TestGraphicsSyncImplementation()
 {
-  for (SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
+  for(SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
   {
     delete *iter;
   }
@@ -72,8 +72,7 @@ void TestGraphicsSyncImplementation::Initialize()
   mSyncObjects.clear();
 }
 
-Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::CreateSyncObject(
-    SyncObject::SyncType type)
+Dali::Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::CreateSyncObject(SyncObject::SyncType type)
 {
   mTrace.PushCall("CreateSyncObject", ""); // Trace the method
 
@@ -86,15 +85,15 @@ Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation
  * Destroy a sync object
  * @param[in] syncObject The object to destroy
  */
-void TestGraphicsSyncImplementation::DestroySyncObject(Integration::GraphicsSyncAbstraction::SyncObject* syncObject)
+void TestGraphicsSyncImplementation::DestroySyncObject(Dali::Integration::GraphicsSyncAbstraction::SyncObject* syncObject)
 {
   std::stringstream out;
   out << syncObject;
   mTrace.PushCall("DestroySyncObject", out.str()); // Trace the method
 
-  for (SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
+  for(SyncIter iter = mSyncObjects.begin(), end = mSyncObjects.end(); iter != end; ++iter)
   {
-    if (*iter == syncObject)
+    if(*iter == syncObject)
     {
       delete *iter;
       mSyncObjects.erase(iter);
@@ -103,9 +102,9 @@ void TestGraphicsSyncImplementation::DestroySyncObject(Integration::GraphicsSync
   }
 }
 
-Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::GetLastSyncObject()
+Dali::Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation::GetLastSyncObject()
 {
-  if (!mSyncObjects.empty())
+  if(!mSyncObjects.empty())
   {
     return mSyncObjects.back();
   }
@@ -117,11 +116,10 @@ Integration::GraphicsSyncAbstraction::SyncObject* TestGraphicsSyncImplementation
  * @param[in]
  * @param[in] sync The sync value to set
  */
-void TestGraphicsSyncImplementation::SetObjectSynced(Integration::GraphicsSyncAbstraction::SyncObject* syncObject,
-                                                     bool sync)
+void TestGraphicsSyncImplementation::SetObjectSynced(Dali::Integration::GraphicsSyncAbstraction::SyncObject* syncObject, bool sync)
 {
   TestSyncObject* testSyncObject = static_cast<TestSyncObject*>(syncObject);
-  testSyncObject->synced = sync;
+  testSyncObject->synced         = sync;
 }
 
 /**
