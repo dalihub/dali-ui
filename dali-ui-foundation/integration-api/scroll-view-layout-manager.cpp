@@ -1,0 +1,146 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/integration-api/scroll-view-layout-manager.h>
+
+// EXTERNAL INCLUDES
+#include <algorithm>
+#include <limits>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali/integration-api/debug.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration
+{
+
+ScrollViewLayoutManager::ScrollViewLayoutManager()
+: LayoutManager()
+{
+}
+
+ScrollViewLayoutManager::~ScrollViewLayoutManager()
+{
+}
+
+MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)
+{
+  if(!view)
+  {
+    return MeasuredSize(0.0f, 0.0f);
+  }
+
+  auto& children = GetChildren(view);
+
+  // For ScrollView, we want to allow content to have its natural size
+  // without being constrained by the parent size
+  float maxWidth  = 0.0f;
+  float maxHeight = 0.0f;
+
+  auto getImpl = [this](Ui::View v) -> ViewImpl&
+  {
+    return GetImpl(v);
+  };
+
+  for(auto& childData : children)
+  {
+    if(!childData.view)
+    {
+      continue;
+    }
+
+    // Check if the view handle is valid
+    if(!childData.view.GetObjectPtr())
+    {
+      continue;
+    }
+
+    ViewImpl& childImpl = getImpl(childData.view);
+
+    // Check if child is using MatchParent for width or height
+    bool widthIsMatchParent  = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent);
+    bool heightIsMatchParent = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent);
+
+    // For ScrollView, we allow children to have their natural size
+    // unless they explicitly use MatchParent
+    float childWidthConstraint  = widthIsMatchParent ? widthConstraint : std::numeric_limits<float>::max();
+    float childHeightConstraint = heightIsMatchParent ? heightConstraint : std::numeric_limits<float>::max();
+
+    // Measure the child with appropriate constraints
+    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childData.measuredSize = childSize;
+
+    // For ScrollView, the measured size represents the content size which can be larger than viewport
+    maxWidth  = std::max(maxWidth, childSize.width);
+    maxHeight = std::max(maxHeight, childSize.height);
+  }
+
+  return MeasuredSize(maxWidth, maxHeight);
+}
+
+MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
+{
+  if(!view)
+  {
+    return MeasuredSize(0.0f, 0.0f);
+  }
+
+  ScrollViewImpl* scrollImpl = dynamic_cast<ScrollViewImpl*>(view);
+  auto&           children   = GetChildren(view);
+
+  // In ScrollView, children are arranged at position (0,0) with their measured size
+  // The ScrollView will handle the scrolling/positioning of the content
+  for(auto& childData : children)
+  {
+    if(!childData.view)
+    {
+      continue;
+    }
+    ViewImpl& childImpl = GetImpl(childData.view);
+
+    LayoutRect childBounds;
+
+    // content인 경우만
+    childBounds.x      = childData.view.GetPositionX();
+    childBounds.y      = childData.view.GetPositionY();
+    childBounds.width  = childData.measuredSize.width;
+    childBounds.height = childData.measuredSize.height;
+
+    // Arrange the child
+    childImpl.Arrange(childBounds);
+    childData.arrangedBounds = childBounds;
+
+    if(scrollImpl != nullptr)
+    {
+      scrollImpl->SetScrollableWidth(childBounds.width);
+      scrollImpl->SetScrollableHeight(childBounds.height);
+    }
+  }
+
+  // Return the bounds size, which represents the viewport size
+  return MeasuredSize(bounds.width, bounds.height);
+}
+
+} // namespace Integration
+} // namespace Ui
+} // namespace Dali
