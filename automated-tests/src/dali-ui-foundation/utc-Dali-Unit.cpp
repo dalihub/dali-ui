@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-test-suite-utils.h>
+#include "dali-ui-foundation/public-api/ui-config.h"
 
 using namespace Dali;
 using namespace Dali::UI;
@@ -28,6 +29,7 @@ using namespace Dali::UI;
 void utc_dali_unit_startup(void)
 {
   test_return_value = TET_UNDEF;
+  UIConfig::New().Apply();
 }
 
 void utc_dali_unit_cleanup(void)

@@ -19,6 +19,7 @@
 #include <dali/integration-api/input-options.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/integration-api/input-event-impl.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
@@ -32,7 +33,7 @@ ClickableTraitImpl::ClickableTraitImpl()
     mLongPressGestureDetector(LongPressGestureDetector::New()),
     mPressedChangedSignal(),
     mPseudoDisabledChangedSignal(),
-    mKeyClickPolicy(KeyClickPolicy::ON_RELEASE), // TODO Read initial value from config
+    mKeyClickPolicy(UIConfigManager::Get().GetKeyClickPolicy()),
     mPressedExecutionKey(),
     mPressedExecutionKeyCount(0),
     mPseudoDisabled(false),
@@ -41,8 +42,7 @@ ClickableTraitImpl::ClickableTraitImpl()
     mClickBlockedByTouch(false),
     mClickBlockedByKey(false)
 {
-  // NOTE Move tap settings to the config
-  Dali::Integration::SetTapRecognizerTime(UINT32_MAX);
+  Dali::Integration::SetTapRecognizerTime(UIConfigManager::Get().GetTapRecognizerTime());
 
   mTapGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnTapInternal);
   mLongPressGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnLongPressedInternal);
@@ -283,8 +283,7 @@ bool ClickableTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent)
 
 bool ClickableTraitImpl::IsExecutionKey(const std::string& keyName) const
 {
-  // TODO Read from config
-  return keyName == "Return";
+  return UIConfigManager::Get().GetExecutionKeyPredicate()(keyName);
 }
 
 bool ClickableTraitImpl::OnTouchInternal(Actor actor, const TouchEvent& touchEvent)
@@ -351,9 +350,8 @@ bool ClickableTraitImpl::ShouldKeyPressTriggerClicked() const
 
 bool ClickableTraitImpl::ShouldKeyPressTriggerLongPressed() const
 {
-  const uint32_t cMinLongPressKeyCount = 3; // TODO read from the config
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
-         (mPressedExecutionKeyCount >= cMinLongPressKeyCount);
+         (mPressedExecutionKeyCount >= UIConfigManager::Get().GetMinLongPressKeyCount());
 }
 
 } // namespace Dali::UI::Integration

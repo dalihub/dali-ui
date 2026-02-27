@@ -90,6 +90,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
+  UIConfig::New().Apply();
   HelloWorldController test(application);
   application.MainLoop();
   return 0;
