@@ -137,12 +137,12 @@ int UtcDaliAbsoluteLayoutSetLayoutFlagsP(void)
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.AddView(child);
-  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::PositionProportional);
+  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayout::GetLayoutFlags(child)),
-                   static_cast<uint8_t>(AbsoluteLayoutFlags::PositionProportional), TEST_LOCATION);
-  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::All);
+                   static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
+  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::ALL);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayout::GetLayoutFlags(child)),
-                   static_cast<uint8_t>(AbsoluteLayoutFlags::All), TEST_LOCATION);
+                   static_cast<uint8_t>(AbsoluteLayoutFlags::ALL), TEST_LOCATION);
   END_TEST;
 }
 
@@ -153,7 +153,7 @@ int UtcDaliAbsoluteLayoutGetLayoutFlagsP(void)
   View child = View::New();
   layout.AddView(child);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayout::GetLayoutFlags(child)),
-                   static_cast<uint8_t>(AbsoluteLayoutFlags::None), TEST_LOCATION);
+                   static_cast<uint8_t>(AbsoluteLayoutFlags::NONE), TEST_LOCATION);
   END_TEST;
 }
 
@@ -178,9 +178,9 @@ int UtcDaliAbsoluteLayoutSizeProportionalFlagP(void)
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.AddView(child);
-  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::SizeProportional);
+  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::SIZE_PROPORTIONAL);
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayout::GetLayoutFlags(child)),
-                   static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional), TEST_LOCATION);
+                   static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), TEST_LOCATION);
   END_TEST;
 }
 
@@ -209,7 +209,7 @@ int UtcDaliAbsoluteLayoutPositionProportionalP(void)
   View child = View::New();
   layout.AddView(child);
   AbsoluteLayout::SetLayoutBounds(child, LayoutRect(0.1f, 0.2f, 0.3f, 0.4f));
-  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::PositionProportional);
+  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
@@ -225,7 +225,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalP(void)
   View child = View::New();
   layout.AddView(child);
   AbsoluteLayout::SetLayoutBounds(child, LayoutRect(0, 0, 0.5f, 0.5f));
-  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::SizeProportional);
+  AbsoluteLayout::SetLayoutFlags(child, AbsoluteLayoutFlags::SIZE_PROPORTIONAL);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);

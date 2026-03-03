@@ -128,7 +128,7 @@ int UtcDaliLayoutRectSettersGettersP(void)
 int UtcDaliGridLengthDefaultP(void)
 {
   GridLength length;
-  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::Absolute),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::ABSOLUTE),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(length.GetValue(), 0.0f, TEST_LOCATION);
   END_TEST;
@@ -138,7 +138,7 @@ int UtcDaliGridLengthAbsoluteP(void)
 {
   const float pixels = 42.0f;
   GridLength length = GridLength::Absolute(pixels);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::Absolute),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::ABSOLUTE),
                    TEST_LOCATION);
   DALI_TEST_EQUALS(length.GetValue(), pixels, TEST_LOCATION);
   END_TEST;
@@ -147,7 +147,7 @@ int UtcDaliGridLengthAbsoluteP(void)
 int UtcDaliGridLengthStarP(void)
 {
   GridLength length = GridLength::Star();
-  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::Star), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::STAR), TEST_LOCATION);
   DALI_TEST_EQUALS(length.GetValue(), 1.0f, TEST_LOCATION);
   GridLength length2 = GridLength::Star(2.5f);
   DALI_TEST_EQUALS(length2.GetValue(), 2.5f, TEST_LOCATION);
@@ -157,74 +157,74 @@ int UtcDaliGridLengthStarP(void)
 int UtcDaliGridLengthAutoP(void)
 {
   GridLength length = GridLength::Auto();
-  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::Auto), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(length.GetType()), static_cast<uint8_t>(GridLengthType::AUTO), TEST_LOCATION);
   DALI_TEST_EQUALS(length.GetValue(), 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliLayoutAlignmentValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::Fill), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::Start), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::Center), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::End), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::FILL), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::START), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::CENTER), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(LayoutAlignment::END), 3u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliStackOrientationValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(StackOrientation::Vertical), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(StackOrientation::Horizontal), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(StackOrientation::VERTICAL), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(StackOrientation::HORIZONTAL), 1u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliAbsoluteLayoutFlagsValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::None), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::PositionProportional), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional), 2u, TEST_LOCATION);
-  AbsoluteLayoutFlags all = AbsoluteLayoutFlags::PositionProportional | AbsoluteLayoutFlags::SizeProportional;
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::NONE), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), 2u, TEST_LOCATION);
+  AbsoluteLayoutFlags all = AbsoluteLayoutFlags::POSITION_PROPORTIONAL | AbsoluteLayoutFlags::SIZE_PROPORTIONAL;
   DALI_TEST_EQUALS(static_cast<uint8_t>(all), 3u, TEST_LOCATION);
-  DALI_TEST_CHECK((all & AbsoluteLayoutFlags::PositionProportional) == AbsoluteLayoutFlags::PositionProportional);
+  DALI_TEST_CHECK((all & AbsoluteLayoutFlags::POSITION_PROPORTIONAL) == AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
   END_TEST;
 }
 
 int UtcDaliFlexDirectionValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::Row), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::RowReverse), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::Column), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::ColumnReverse), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::ROW), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::ROW_REVERSE), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::COLUMN), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexDirection::COLUMN_REVERSE), 3u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliFlexWrapValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::NoWrap), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::Wrap), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::WrapReverse), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::NO_WRAP), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::WRAP), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexWrap::WRAP_REVERSE), 2u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliFlexJustifyValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::FlexStart), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::SpaceBetween), 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::SpaceEvenly), 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::FLEX_START), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::SPACE_BETWEEN), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexJustify::SPACE_EVENLY), 5u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliFlexAlignValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexAlign::Auto), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexAlign::Stretch), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexAlign::AUTO), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(FlexAlign::STRETCH), 4u, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliGridLengthTypeValuesP(void)
 {
-  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::Absolute), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::Star), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::Auto), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::ABSOLUTE), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::STAR), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GridLengthType::AUTO), 2u, TEST_LOCATION);
   END_TEST;
 }

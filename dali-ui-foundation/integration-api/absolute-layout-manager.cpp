@@ -77,7 +77,7 @@ AbsoluteLayoutFlags GetChildFlags(UI::View view)
       return static_cast<AbsoluteLayoutFlags>(view.GetProperty<int>(index));
     }
   }
-  return AbsoluteLayoutFlags::None;
+  return AbsoluteLayoutFlags::NONE;
 }
 
 } // namespace
@@ -119,9 +119,9 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     float h = bounds.height;
 
     bool positionProportional =
-        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::PositionProportional)) != 0;
+        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)) != 0;
     bool sizeProportional =
-        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional)) != 0;
+        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL)) != 0;
 
     if (sizeProportional)
     {
@@ -195,9 +195,9 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     float h = childBoundsSpec.height;
 
     bool positionProportional =
-        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::PositionProportional)) != 0;
+        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)) != 0;
     bool sizeProportional =
-        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SizeProportional)) != 0;
+        (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL)) != 0;
 
     if (sizeProportional)
     {

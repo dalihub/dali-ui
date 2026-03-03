@@ -48,32 +48,32 @@ int UtcDaliStackLayoutNewDefaultP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New();
   DALI_TEST_CHECK(layout);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Vertical, TEST_LOCATION);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::VERTICAL, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliStackLayoutNewVerticalP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   DALI_TEST_CHECK(layout);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Vertical, TEST_LOCATION);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::VERTICAL, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliStackLayoutNewHorizontalP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   DALI_TEST_CHECK(layout);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Horizontal, TEST_LOCATION);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliStackLayoutCopyConstructorP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   StackLayout copy(layout);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(layout == copy);
@@ -123,17 +123,17 @@ int UtcDaliStackLayoutDownCastN(void)
 int UtcDaliStackLayoutSetOrientationP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
-  layout.SetOrientation(StackOrientation::Horizontal);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Horizontal, TEST_LOCATION);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetOrientation(StackOrientation::HORIZONTAL);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliStackLayoutGetOrientationP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Horizontal, TEST_LOCATION);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
 }
 
@@ -182,9 +182,9 @@ int UtcDaliStackLayoutOrientationChainingP(void)
 {
   TestApplication application;
   StackLayout layout = StackLayout::New();
-  StackLayout& result = layout.Orientation(StackOrientation::Horizontal);
+  StackLayout& result = layout.Orientation(StackOrientation::HORIZONTAL);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
-  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::Horizontal, TEST_LOCATION);
+  DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
 }
 
@@ -202,7 +202,7 @@ int UtcDaliStackLayoutSpacingChainingP(void)
 int UtcDaliStackLayoutContentsP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   View a = View::New();
   layout.Contents({a});
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
@@ -228,7 +228,7 @@ int UtcDaliStackLayoutWeightMultipleP(void)
 int UtcDaliStackLayoutMeasureArrangeP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(5.0f);
   View v1 = View::New();
   v1.SetLayoutWidth(100.0f);
@@ -252,7 +252,7 @@ int UtcDaliStackLayoutMeasureArrangeP(void)
 int UtcDaliStackLayoutMeasureHorizontalP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   View v1 = View::New();
   v1.SetLayoutWidth(50.0f);
   v1.SetLayoutHeight(50.0f);
@@ -270,7 +270,7 @@ int UtcDaliStackLayoutMeasureHorizontalP(void)
 int UtcDaliStackLayoutChildNoWeightP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View noWeight = View::New();
   layout.AddView(noWeight);
   noWeight.SetLayoutWidth(80.0f);
@@ -287,7 +287,7 @@ int UtcDaliStackLayoutChildNoWeightP(void)
 int UtcDaliStackLayoutChildMatchParentP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
   layout.AddView(child);
   child.SetLayoutWidth(LayoutDimension::MatchParent);
@@ -304,7 +304,7 @@ int UtcDaliStackLayoutChildMatchParentP(void)
 int UtcDaliStackLayoutArrangeHorizontalP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(10.0f);
   View v1 = View::New();
   v1.SetLayoutWidth(60.0f);
@@ -328,7 +328,7 @@ int UtcDaliStackLayoutArrangeHorizontalP(void)
 int UtcDaliStackLayoutChildWithWeightP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(5.0f);
   View fixedChild = View::New();
   fixedChild.SetLayoutWidth(100.0f);
@@ -354,12 +354,12 @@ int UtcDaliStackLayoutChildWithWeightP(void)
 int UtcDaliStackLayoutCrossAxisHorizontalStartP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(80.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::Start);
+  child.SetHorizontalAlignment(LayoutAlignment::START);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -373,12 +373,12 @@ int UtcDaliStackLayoutCrossAxisHorizontalStartP(void)
 int UtcDaliStackLayoutCrossAxisHorizontalCenterP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(80.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::Center);
+  child.SetHorizontalAlignment(LayoutAlignment::CENTER);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -393,12 +393,12 @@ int UtcDaliStackLayoutCrossAxisHorizontalCenterP(void)
 int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(80.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::End);
+  child.SetHorizontalAlignment(LayoutAlignment::END);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -413,12 +413,12 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
 {
   // Fill on cross axis is treated as Start: size from layout dimension, position at start.
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(80.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::Fill);
+  child.SetHorizontalAlignment(LayoutAlignment::FILL);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -433,12 +433,12 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
 int UtcDaliStackLayoutCrossAxisVerticalStartP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(60.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::Start);
+  child.SetVerticalAlignment(LayoutAlignment::START);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -452,12 +452,12 @@ int UtcDaliStackLayoutCrossAxisVerticalStartP(void)
 int UtcDaliStackLayoutCrossAxisVerticalCenterP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(60.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::Center);
+  child.SetVerticalAlignment(LayoutAlignment::CENTER);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -472,12 +472,12 @@ int UtcDaliStackLayoutCrossAxisVerticalCenterP(void)
 int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(60.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::End);
+  child.SetVerticalAlignment(LayoutAlignment::END);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
@@ -492,12 +492,12 @@ int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
 {
   // Fill on cross axis is treated as Start: size from layout dimension, position at start.
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Horizontal);
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetLayoutWidth(60.0f);
   child.SetLayoutHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::Fill);
+  child.SetVerticalAlignment(LayoutAlignment::FILL);
   layout.AddView(child);
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);

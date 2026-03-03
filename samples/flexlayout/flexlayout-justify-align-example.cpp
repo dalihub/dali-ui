@@ -50,9 +50,9 @@ public:
     FlexLayout root = FlexLayout::New();
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
-    root.SetDirection(FlexDirection::Row);
-    root.SetJustifyContent(FlexJustify::SpaceBetween);
-    root.SetAlignItems(FlexAlign::Center);
+    root.SetDirection(FlexDirection::ROW);
+    root.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
+    root.SetAlignItems(FlexAlign::CENTER);
     root.SetViewPadding(Extents(20, 20, 20, 20));
 
     // Red box: tall
@@ -74,7 +74,7 @@ public:
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutWidth(80.0f);
     blueBox.SetLayoutHeight(60.0f);
-    FlexLayout::SetAlignSelf(blueBox, FlexAlign::FlexEnd);
+    FlexLayout::SetAlignSelf(blueBox, FlexAlign::FLEX_END);
     root.AddView(blueBox);
 
     // Yellow box: medium

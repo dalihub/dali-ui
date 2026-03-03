@@ -44,7 +44,7 @@ Run:
 ./bin/flexlayout-wrap-grow.example
 ```
 
-- FlexWrap::Wrap: 공간 부족 시 다음 줄로 넘김.
+- FlexWrap::WRAP: 공간 부족 시 다음 줄로 넘김.
 - FlexBasis: 각 아이템의 기본 크기 지정.
 - FlexGrow: 남은 공간을 비율에 따라 분배 (grow 2는 grow 1의 2배).
 

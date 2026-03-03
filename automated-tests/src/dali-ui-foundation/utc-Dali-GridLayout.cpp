@@ -111,9 +111,9 @@ int UtcDaliGridLayoutAddRowDefinitionP(void)
   DALI_TEST_EQUALS(layout.GetRowCount(), 2u, TEST_LOCATION);
   std::vector<GridLength> rows = layout.GetRowDefinitions();
   DALI_TEST_EQUALS(rows.size(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(rows[0].GetType(), GridLengthType::Absolute, TEST_LOCATION);
+  DALI_TEST_EQUALS(rows[0].GetType(), GridLengthType::ABSOLUTE, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[0].GetValue(), 50.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(rows[1].GetType(), GridLengthType::Star, TEST_LOCATION);
+  DALI_TEST_EQUALS(rows[1].GetType(), GridLengthType::STAR, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[1].GetValue(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -127,8 +127,8 @@ int UtcDaliGridLayoutAddColumnDefinitionP(void)
   DALI_TEST_EQUALS(layout.GetColumnCount(), 2u, TEST_LOCATION);
   std::vector<GridLength> cols = layout.GetColumnDefinitions();
   DALI_TEST_EQUALS(cols.size(), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(cols[0].GetType(), GridLengthType::Auto, TEST_LOCATION);
-  DALI_TEST_EQUALS(cols[1].GetType(), GridLengthType::Star, TEST_LOCATION);
+  DALI_TEST_EQUALS(cols[0].GetType(), GridLengthType::AUTO, TEST_LOCATION);
+  DALI_TEST_EQUALS(cols[1].GetType(), GridLengthType::STAR, TEST_LOCATION);
   END_TEST;
 }
 

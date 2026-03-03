@@ -49,7 +49,7 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    StackLayout outer = StackLayout::New(StackOrientation::Vertical);
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetLayoutWidth(LayoutDimension::MatchParent);
     outer.SetLayoutHeight(LayoutDimension::MatchParent);
     outer.SetSpacing(12.0f);
@@ -60,9 +60,9 @@ public:
     rowEnd.SetLayoutWidth(LayoutDimension::MatchParent);
     rowEnd.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(rowEnd, 1.0f);
-    rowEnd.SetDirection(FlexDirection::Row);
-    rowEnd.SetJustifyContent(FlexJustify::FlexEnd);
-    rowEnd.SetAlignItems(FlexAlign::Center);
+    rowEnd.SetDirection(FlexDirection::ROW);
+    rowEnd.SetJustifyContent(FlexJustify::FLEX_END);
+    rowEnd.SetAlignItems(FlexAlign::CENTER);
     rowEnd.SetViewPadding(Extents(8, 8, 8, 8));
     rowEnd.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -74,9 +74,9 @@ public:
     rowCenter.SetLayoutWidth(LayoutDimension::MatchParent);
     rowCenter.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(rowCenter, 1.0f);
-    rowCenter.SetDirection(FlexDirection::Row);
-    rowCenter.SetJustifyContent(FlexJustify::Center);
-    rowCenter.SetAlignItems(FlexAlign::Center);
+    rowCenter.SetDirection(FlexDirection::ROW);
+    rowCenter.SetJustifyContent(FlexJustify::CENTER);
+    rowCenter.SetAlignItems(FlexAlign::CENTER);
     rowCenter.SetViewPadding(Extents(8, 8, 8, 8));
     rowCenter.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
@@ -88,9 +88,9 @@ public:
     rowAround.SetLayoutWidth(LayoutDimension::MatchParent);
     rowAround.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(rowAround, 1.0f);
-    rowAround.SetDirection(FlexDirection::Row);
-    rowAround.SetJustifyContent(FlexJustify::SpaceAround);
-    rowAround.SetAlignItems(FlexAlign::Center);
+    rowAround.SetDirection(FlexDirection::ROW);
+    rowAround.SetJustifyContent(FlexJustify::SPACE_AROUND);
+    rowAround.SetAlignItems(FlexAlign::CENTER);
     rowAround.SetViewPadding(Extents(8, 8, 8, 8));
     rowAround.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -102,9 +102,9 @@ public:
     rowEvenly.SetLayoutWidth(LayoutDimension::MatchParent);
     rowEvenly.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(rowEvenly, 1.0f);
-    rowEvenly.SetDirection(FlexDirection::Row);
-    rowEvenly.SetJustifyContent(FlexJustify::SpaceEvenly);
-    rowEvenly.SetAlignItems(FlexAlign::Center);
+    rowEvenly.SetDirection(FlexDirection::ROW);
+    rowEvenly.SetJustifyContent(FlexJustify::SPACE_EVENLY);
+    rowEvenly.SetAlignItems(FlexAlign::CENTER);
     rowEvenly.SetViewPadding(Extents(8, 8, 8, 8));
     rowEvenly.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 

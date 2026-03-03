@@ -38,11 +38,11 @@ UI::FlexLayout FlexLayoutImpl::New()
 
 FlexLayoutImpl::FlexLayoutImpl()
   : LayoutImpl(),
-    mDirection(FlexDirection::Row),
-    mWrap(FlexWrap::NoWrap),
-    mJustifyContent(FlexJustify::FlexStart),
-    mAlignItems(FlexAlign::Stretch),
-    mAlignContent(FlexAlign::Stretch)
+    mDirection(FlexDirection::ROW),
+    mWrap(FlexWrap::NO_WRAP),
+    mJustifyContent(FlexJustify::FLEX_START),
+    mAlignItems(FlexAlign::STRETCH),
+    mAlignContent(FlexAlign::STRETCH)
 {
 }
 

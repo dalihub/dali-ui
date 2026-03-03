@@ -40,7 +40,7 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical StackLayout filling the window
-    StackLayout root = StackLayout::New(StackOrientation::Vertical);
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
     root.SetSpacing(10.0f);

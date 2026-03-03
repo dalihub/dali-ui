@@ -116,11 +116,11 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize = childSize;
 
-    if (rowSpan == 1 && row < rowDefs.size() && rowDefs[row].GetType() == GridLengthType::Auto)
+    if (rowSpan == 1 && row < rowDefs.size() && rowDefs[row].GetType() == GridLengthType::AUTO)
     {
       rowHeights[row] = std::max(rowHeights[row], childSize.height + margin.top + margin.bottom);
     }
-    if (colSpan == 1 && col < colDefs.size() && colDefs[col].GetType() == GridLengthType::Auto)
+    if (colSpan == 1 && col < colDefs.size() && colDefs[col].GetType() == GridLengthType::AUTO)
     {
       colWidths[col] = std::max(colWidths[col], childSize.width + margin.start + margin.end);
     }
@@ -142,12 +142,12 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
     if (i < colDefs.size())
     {
       const auto& def = colDefs[i];
-      if (def.GetType() == GridLengthType::Absolute)
+      if (def.GetType() == GridLengthType::ABSOLUTE)
       {
         colWidths[i] = def.GetValue();
         totalAbsoluteWidth += colWidths[i];
       }
-      else if (def.GetType() == GridLengthType::Star)
+      else if (def.GetType() == GridLengthType::STAR)
       {
         totalStarWidth += def.GetValue();
       }
@@ -162,12 +162,12 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
     if (i < rowDefs.size())
     {
       const auto& def = rowDefs[i];
-      if (def.GetType() == GridLengthType::Absolute)
+      if (def.GetType() == GridLengthType::ABSOLUTE)
       {
         rowHeights[i] = def.GetValue();
         totalAbsoluteHeight += rowHeights[i];
       }
-      else if (def.GetType() == GridLengthType::Star)
+      else if (def.GetType() == GridLengthType::STAR)
       {
         totalStarHeight += def.GetValue();
       }
@@ -185,7 +185,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
 
   for (uint32_t i = 0; i < colCount; ++i)
   {
-    if (i < colDefs.size() && colDefs[i].GetType() == GridLengthType::Star)
+    if (i < colDefs.size() && colDefs[i].GetType() == GridLengthType::STAR)
     {
       float starValue = colDefs[i].GetValue();
       colWidths[i] = (totalStarWidth > 0) ? (starValue / totalStarWidth) * remainingWidth : 0.0f;
@@ -193,7 +193,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
   }
   for (uint32_t i = 0; i < rowCount; ++i)
   {
-    if (i < rowDefs.size() && rowDefs[i].GetType() == GridLengthType::Star)
+    if (i < rowDefs.size() && rowDefs[i].GetType() == GridLengthType::STAR)
     {
       float starValue = rowDefs[i].GetValue();
       rowHeights[i] = (totalStarHeight > 0) ? (starValue / totalStarHeight) * remainingHeight : 0.0f;
@@ -268,18 +268,18 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
     {
       switch (hAlign)
       {
-        case LayoutAlignment::Center:
+        case LayoutAlignment::CENTER:
           childBounds.x += (cellWidth - childWidth) * 0.5f;
           childBounds.width = childWidth;
           break;
-        case LayoutAlignment::End:
+        case LayoutAlignment::END:
           childBounds.x += cellWidth - childWidth;
           childBounds.width = childWidth;
           break;
-        case LayoutAlignment::Start:
+        case LayoutAlignment::START:
           childBounds.width = childWidth;
           break;
-        case LayoutAlignment::Fill:
+        case LayoutAlignment::FILL:
         default:
           break;
       }
@@ -290,18 +290,18 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
     {
       switch (vAlign)
       {
-        case LayoutAlignment::Center:
+        case LayoutAlignment::CENTER:
           childBounds.y += (cellHeight - childHeight) * 0.5f;
           childBounds.height = childHeight;
           break;
-        case LayoutAlignment::End:
+        case LayoutAlignment::END:
           childBounds.y += cellHeight - childHeight;
           childBounds.height = childHeight;
           break;
-        case LayoutAlignment::Start:
+        case LayoutAlignment::START:
           childBounds.height = childHeight;
           break;
-        case LayoutAlignment::Fill:
+        case LayoutAlignment::FILL:
         default:
           break;
       }

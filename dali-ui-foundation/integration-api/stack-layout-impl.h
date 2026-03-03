@@ -44,7 +44,7 @@ public:
    * @param[in] orientation The orientation of the stack
    * @return A handle to a newly allocated StackLayout
    */
-  static UI::StackLayout New(StackOrientation orientation = StackOrientation::Vertical);
+  static UI::StackLayout New(StackOrientation orientation = StackOrientation::VERTICAL);
 
 protected:
   /**

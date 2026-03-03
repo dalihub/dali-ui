@@ -691,8 +691,8 @@ int UtcDaliViewSetHorizontalAlignmentP(void)
 {
   TestApplication application;
   View view = View::New();
-  view.SetHorizontalAlignment(LayoutAlignment::Center);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::Center),
+  view.SetHorizontalAlignment(LayoutAlignment::CENTER);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::CENTER),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -701,7 +701,7 @@ int UtcDaliViewGetHorizontalAlignmentP(void)
 {
   TestApplication application;
   View view = View::New();
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::Start),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::START),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -710,8 +710,8 @@ int UtcDaliViewSetVerticalAlignmentP(void)
 {
   TestApplication application;
   View view = View::New();
-  view.SetVerticalAlignment(LayoutAlignment::End);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::End),
+  view.SetVerticalAlignment(LayoutAlignment::END);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::END),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -720,7 +720,7 @@ int UtcDaliViewGetVerticalAlignmentP(void)
 {
   TestApplication application;
   View view = View::New();
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::Start),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::START),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -929,9 +929,9 @@ int UtcDaliViewHorizontalAlignmentChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.SetHorizontalAlignment(LayoutAlignment::End);
+  View& result = view.SetHorizontalAlignment(LayoutAlignment::END);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::End),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetHorizontalAlignment()), static_cast<uint8_t>(LayoutAlignment::END),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -940,9 +940,9 @@ int UtcDaliViewVerticalAlignmentChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  View& result = view.SetVerticalAlignment(LayoutAlignment::Center);
+  View& result = view.SetVerticalAlignment(LayoutAlignment::CENTER);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::Center),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(view.GetVerticalAlignment()), static_cast<uint8_t>(LayoutAlignment::CENTER),
                    TEST_LOCATION);
   END_TEST;
 }
@@ -1028,7 +1028,7 @@ int UtcDaliViewMeasureMatchParentP(void)
 int UtcDaliViewInvalidateMeasureWithParentP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
   layout.AddView(child);
   child.InvalidateMeasure();
@@ -1073,7 +1073,7 @@ int UtcDaliViewLayoutHeightFixedNoManagerP(void)
 int UtcDaliViewArrangeWithLayoutP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View c1 = View::New();
   c1.SetLayoutWidth(100.0f);
   c1.SetLayoutHeight(50.0f);
@@ -1122,7 +1122,7 @@ int UtcDaliViewMeasureWrapContentP(void)
 int UtcDaliViewLayoutMatchParentWithManagerP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetLayoutWidth(LayoutDimension::MatchParent);
   layout.SetLayoutHeight(LayoutDimension::MatchParent);
   layout.AddView(View::New().SetSizeWidth(50.0f).SetSizeHeight(50.0f));
@@ -1135,7 +1135,7 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
 int UtcDaliViewInvalidateArrangeWithParentP(void)
 {
   TestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::Vertical);
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
   layout.AddView(child);
   child.Measure(100.0f, 100.0f);
@@ -1151,8 +1151,8 @@ int UtcDaliViewArrangeAlignmentCenterP(void)
   View view = View::New();
   view.SetLayoutWidth(50.0f);
   view.SetLayoutHeight(50.0f);
-  view.SetHorizontalAlignment(LayoutAlignment::Center);
-  view.SetVerticalAlignment(LayoutAlignment::Center);
+  view.SetHorizontalAlignment(LayoutAlignment::CENTER);
+  view.SetVerticalAlignment(LayoutAlignment::CENTER);
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(10.0f, 20.0f, 100.0f, 100.0f));
   DALI_TEST_EQUALS(view.GetPositionX(), 10.0f, TEST_LOCATION);
@@ -1168,8 +1168,8 @@ int UtcDaliViewArrangeAlignmentEndP(void)
   View view = View::New();
   view.SetLayoutWidth(40.0f);
   view.SetLayoutHeight(30.0f);
-  view.SetHorizontalAlignment(LayoutAlignment::End);
-  view.SetVerticalAlignment(LayoutAlignment::End);
+  view.SetHorizontalAlignment(LayoutAlignment::END);
+  view.SetVerticalAlignment(LayoutAlignment::END);
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(0, 0, 100.0f, 100.0f));
   DALI_TEST_EQUALS(view.GetPositionX(), 0.0f, TEST_LOCATION);
@@ -1185,8 +1185,8 @@ int UtcDaliViewArrangeAlignmentFillP(void)
   View view = View::New();
   view.SetLayoutWidth(50.0f);
   view.SetLayoutHeight(50.0f);
-  view.SetHorizontalAlignment(LayoutAlignment::Fill);
-  view.SetVerticalAlignment(LayoutAlignment::Fill);
+  view.SetHorizontalAlignment(LayoutAlignment::FILL);
+  view.SetVerticalAlignment(LayoutAlignment::FILL);
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(0, 0, 120.0f, 80.0f));
   DALI_TEST_EQUALS(view.GetSizeWidth(), 120.0f, TEST_LOCATION);

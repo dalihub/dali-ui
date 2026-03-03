@@ -55,7 +55,7 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    StackLayout outer = StackLayout::New(StackOrientation::Vertical);
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetLayoutWidth(LayoutDimension::MatchParent);
     outer.SetLayoutHeight(LayoutDimension::MatchParent);
     outer.SetSpacing(16.0f);
@@ -66,9 +66,9 @@ public:
     row1.SetLayoutWidth(LayoutDimension::MatchParent);
     row1.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row1, 1.0f);
-    row1.SetDirection(FlexDirection::Row);
-    row1.SetWrap(FlexWrap::NoWrap);
-    row1.SetAlignItems(FlexAlign::Stretch);
+    row1.SetDirection(FlexDirection::ROW);
+    row1.SetWrap(FlexWrap::NO_WRAP);
+    row1.SetAlignItems(FlexAlign::STRETCH);
     row1.SetViewPadding(Extents(8, 8, 8, 8));
     row1.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -101,9 +101,9 @@ public:
     row2.SetLayoutWidth(LayoutDimension::MatchParent);
     row2.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row2, 1.0f);
-    row2.SetDirection(FlexDirection::Row);
-    row2.SetWrap(FlexWrap::NoWrap);
-    row2.SetAlignItems(FlexAlign::Stretch);
+    row2.SetDirection(FlexDirection::ROW);
+    row2.SetWrap(FlexWrap::NO_WRAP);
+    row2.SetAlignItems(FlexAlign::STRETCH);
     row2.SetViewPadding(Extents(8, 8, 8, 8));
     row2.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 

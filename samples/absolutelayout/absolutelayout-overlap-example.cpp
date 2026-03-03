@@ -56,28 +56,28 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     AbsoluteLayout::SetLayoutBounds(redBox, LayoutRect(30.0f, 30.0f, 300.0f, 200.0f));
-    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::NONE);
     root.AddView(redBox);
 
     // Medium green box overlapping the red box
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     AbsoluteLayout::SetLayoutBounds(greenBox, LayoutRect(100.0f, 80.0f, 200.0f, 200.0f));
-    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::NONE);
     root.AddView(greenBox);
 
     // Small blue box overlapping both
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     AbsoluteLayout::SetLayoutBounds(blueBox, LayoutRect(160.0f, 130.0f, 100.0f, 100.0f));
-    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::NONE);
     root.AddView(blueBox);
 
     // Cyan box: proportional position centered, absolute size
     View cyanBox = View::New();
     cyanBox.SetBackgroundColor(Color::CYAN);
     AbsoluteLayout::SetLayoutBounds(cyanBox, LayoutRect(0.5f, 0.7f, 140.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(cyanBox, AbsoluteLayoutFlags::PositionProportional);
+    AbsoluteLayout::SetLayoutFlags(cyanBox, AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
     root.AddView(cyanBox);
 
     window.Add(root);

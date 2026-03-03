@@ -53,7 +53,7 @@ public:
     FlexLayout root = FlexLayout::New();
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
-    root.SetDirection(FlexDirection::Column);
+    root.SetDirection(FlexDirection::COLUMN);
     root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
 
     // --- Red box: no margin (flush with padding edge) ---
@@ -83,8 +83,8 @@ public:
     nestedRow.SetBackgroundColor(Color::GRAY);
     nestedRow.SetLayoutWidth(LayoutDimension::MatchParent);
     nestedRow.SetLayoutHeight(150.0f);
-    nestedRow.SetDirection(FlexDirection::Row);
-    nestedRow.SetAlignItems(FlexAlign::Stretch);
+    nestedRow.SetDirection(FlexDirection::ROW);
+    nestedRow.SetAlignItems(FlexAlign::STRETCH);
     nestedRow.SetViewPadding(Extents(25, 25, 25, 25));
     nestedRow.SetViewMargin(Extents(25, 25, 25, 25));
 

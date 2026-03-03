@@ -44,7 +44,7 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical stack with padding (content inset from window edges)
-    StackLayout root = StackLayout::New(StackOrientation::Vertical);
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
     root.SetSpacing(0.0f);
@@ -80,7 +80,7 @@ public:
     root.AddView(marginC);
 
     // --- Section 3: Nested StackLayout (horizontal stack inside vertical) ---
-    StackLayout horizontalRow = StackLayout::New(StackOrientation::Horizontal);
+    StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
     horizontalRow.SetBackgroundColor(Color::GRAY);
     horizontalRow.SetLayoutWidth(LayoutDimension::MatchParent);
     horizontalRow.SetLayoutHeight(LayoutDimension::WrapContent);

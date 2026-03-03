@@ -23,7 +23,7 @@ using namespace Dali::UI;
 /**
  * FlexLayout wrap and flex-grow sample.
  *
- * Demonstrates FlexWrap::Wrap so items flow to the next line when
+ * Demonstrates FlexWrap::WRAP so items flow to the next line when
  * there is not enough room, combined with flex-grow to distribute
  * remaining space on each line.
  *
@@ -51,10 +51,10 @@ public:
     FlexLayout root = FlexLayout::New();
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
-    root.SetDirection(FlexDirection::Row);
-    root.SetWrap(FlexWrap::Wrap);
-    root.SetJustifyContent(FlexJustify::FlexStart);
-    root.SetAlignContent(FlexAlign::Center);
+    root.SetDirection(FlexDirection::ROW);
+    root.SetWrap(FlexWrap::WRAP);
+    root.SetJustifyContent(FlexJustify::FLEX_START);
+    root.SetAlignContent(FlexAlign::CENTER);
     root.SetViewPadding(Extents(15, 15, 15, 15));
 
     // Box 1: Red, basis 150, grow 1

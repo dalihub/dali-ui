@@ -82,7 +82,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
     float childHeightConstraint = std::max(0.0f, contentHeight - marginH);
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize = childSize;
-    if (orientation == StackOrientation::Vertical)
+    if (orientation == StackOrientation::VERTICAL)
     {
       result.mainAxisNonWeight += childSize.height + marginH;
       result.maxCrossAxis = std::max(result.maxCrossAxis, childSize.width + marginW);
@@ -116,13 +116,13 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
     Extents margin = childImpl.GetViewMargin();
     float marginH = static_cast<float>(margin.top + margin.bottom);
     float marginW = static_cast<float>(margin.start + margin.end);
-    float mainAxisConstraint = std::max(0.0f, share - (orientation == StackOrientation::Vertical ? marginH : marginW));
+    float mainAxisConstraint = std::max(0.0f, share - (orientation == StackOrientation::VERTICAL ? marginH : marginW));
     float childWidthConstraint =
-        (orientation == StackOrientation::Vertical) ? std::max(0.0f, contentWidth - marginW) : mainAxisConstraint;
+        (orientation == StackOrientation::VERTICAL) ? std::max(0.0f, contentWidth - marginW) : mainAxisConstraint;
     float childHeightConstraint =
-        (orientation == StackOrientation::Vertical) ? mainAxisConstraint : std::max(0.0f, contentHeight - marginH);
+        (orientation == StackOrientation::VERTICAL) ? mainAxisConstraint : std::max(0.0f, contentHeight - marginH);
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    if (orientation == StackOrientation::Vertical)
+    if (orientation == StackOrientation::VERTICAL)
     {
       childData.measuredSize.width = childSize.width;
       childData.measuredSize.height = std::max(0.0f, share - marginH);
@@ -176,7 +176,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   float contentHeight = heightConstraint - static_cast<float>(parentPadding.top + parentPadding.bottom);
   contentWidth = std::max(0.0f, contentWidth);
   contentHeight = std::max(0.0f, contentHeight);
-  float contentMain = (mOrientation == StackOrientation::Vertical) ? contentHeight : contentWidth;
+  float contentMain = (mOrientation == StackOrientation::VERTICAL) ? contentHeight : contentWidth;
 
   auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
   StackMeasureFirstPassResult first =
@@ -202,7 +202,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   }
 
   MeasuredSize totalSize(0.0f, 0.0f);
-  if (mOrientation == StackOrientation::Vertical)
+  if (mOrientation == StackOrientation::VERTICAL)
   {
     totalSize.width = maxCrossAxis;
     totalSize.height = mainAxisTotal;
@@ -239,7 +239,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     float marginH = static_cast<float>(margin.top + margin.bottom);
     LayoutRect childBounds;
 
-    if (mOrientation == StackOrientation::Vertical)
+    if (mOrientation == StackOrientation::VERTICAL)
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
       const float childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
@@ -254,14 +254,14 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
       switch (hAlign)
       {
-        case LayoutAlignment::Center:
+        case LayoutAlignment::CENTER:
           crossX += (crossAvailable - childWidth) * 0.5f;
           break;
-        case LayoutAlignment::End:
+        case LayoutAlignment::END:
           crossX += crossAvailable - childWidth;
           break;
-        case LayoutAlignment::Start:
-        case LayoutAlignment::Fill:
+        case LayoutAlignment::START:
+        case LayoutAlignment::FILL:
         default:
           break;
       }
@@ -292,14 +292,14 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       LayoutAlignment vAlign = childImpl.GetVerticalAlignment();
       switch (vAlign)
       {
-        case LayoutAlignment::Center:
+        case LayoutAlignment::CENTER:
           crossY += (crossAvailable - childHeight) * 0.5f;
           break;
-        case LayoutAlignment::End:
+        case LayoutAlignment::END:
           crossY += crossAvailable - childHeight;
           break;
-        case LayoutAlignment::Start:
-        case LayoutAlignment::Fill:
+        case LayoutAlignment::START:
+        case LayoutAlignment::FILL:
         default:
           break;
       }

@@ -254,7 +254,7 @@ FlexAlign FlexLayout::GetAlignSelf(View view)
       return static_cast<FlexAlign>(view.GetProperty<int>(index));
     }
   }
-  return FlexAlign::Auto; // Default
+  return FlexAlign::AUTO; // Default
 }
 
 } // namespace UI

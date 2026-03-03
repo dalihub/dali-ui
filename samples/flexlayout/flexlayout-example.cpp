@@ -47,8 +47,8 @@ public:
     FlexLayout root = FlexLayout::New();
     root.SetLayoutWidth(LayoutDimension::MatchParent);
     root.SetLayoutHeight(LayoutDimension::MatchParent);
-    root.SetDirection(FlexDirection::Row);
-    root.SetAlignItems(FlexAlign::Stretch);
+    root.SetDirection(FlexDirection::ROW);
+    root.SetAlignItems(FlexAlign::STRETCH);
     root.SetViewPadding(Extents(20, 20, 20, 20));
 
     // Red box: fixed width

@@ -35,10 +35,10 @@ namespace UI
  */
 enum class LayoutAlignment : uint8_t
 {
-  Fill = 0,   ///< Fill the available space
-  Start = 1,  ///< Align to the start (left/top)
-  Center = 2, ///< Align to the center
-  End = 3     ///< Align to the end (right/bottom)
+  FILL = 0,   ///< Fill the available space
+  START = 1,  ///< Align to the start (left/top)
+  CENTER = 2, ///< Align to the center
+  END = 3     ///< Align to the end (right/bottom)
 };
 
 /**
@@ -254,8 +254,8 @@ public:
  */
 enum class StackOrientation : uint8_t
 {
-  Vertical = 0,  ///< Vertical stacking (top to bottom)
-  Horizontal = 1 ///< Horizontal stacking (left to right)
+  VERTICAL = 0,  ///< Vertical stacking (top to bottom)
+  HORIZONTAL = 1 ///< Horizontal stacking (left to right)
 };
 
 /**
@@ -263,10 +263,10 @@ enum class StackOrientation : uint8_t
  */
 enum class FlexDirection : uint8_t
 {
-  Row = 0,          ///< Left to right
-  RowReverse = 1,   ///< Right to left
-  Column = 2,       ///< Top to bottom
-  ColumnReverse = 3 ///< Bottom to top
+  ROW = 0,           ///< Left to right
+  ROW_REVERSE = 1,   ///< Right to left
+  COLUMN = 2,        ///< Top to bottom
+  COLUMN_REVERSE = 3 ///< Bottom to top
 };
 
 /**
@@ -274,9 +274,9 @@ enum class FlexDirection : uint8_t
  */
 enum class FlexWrap : uint8_t
 {
-  NoWrap = 0,     ///< No wrapping
-  Wrap = 1,       ///< Normal wrapping
-  WrapReverse = 2 ///< Reverse wrapping
+  NO_WRAP = 0,     ///< No wrapping
+  WRAP = 1,        ///< Normal wrapping
+  WRAP_REVERSE = 2 ///< Reverse wrapping
 };
 
 /**
@@ -284,12 +284,12 @@ enum class FlexWrap : uint8_t
  */
 enum class FlexJustify : uint8_t
 {
-  FlexStart = 0,    ///< Align to start
-  FlexEnd = 1,      ///< Align to end
-  Center = 2,       ///< Center alignment
-  SpaceBetween = 3, ///< Space between items
-  SpaceAround = 4,  ///< Space around items
-  SpaceEvenly = 5   ///< Even spacing
+  FLEX_START = 0,    ///< Align to start
+  FLEX_END = 1,      ///< Align to end
+  CENTER = 2,        ///< Center alignment
+  SPACE_BETWEEN = 3, ///< Space between items
+  SPACE_AROUND = 4,  ///< Space around items
+  SPACE_EVENLY = 5   ///< Even spacing
 };
 
 /**
@@ -297,12 +297,12 @@ enum class FlexJustify : uint8_t
  */
 enum class FlexAlign : uint8_t
 {
-  Auto = 0,      ///< Auto alignment
-  FlexStart = 1, ///< Align to start
-  FlexEnd = 2,   ///< Align to end
-  Center = 3,    ///< Center alignment
-  Stretch = 4,   ///< Stretch to fill
-  Baseline = 5   ///< Baseline alignment
+  AUTO = 0,       ///< Auto alignment
+  FLEX_START = 1, ///< Align to start
+  FLEX_END = 2,   ///< Align to end
+  CENTER = 3,     ///< Center alignment
+  STRETCH = 4,    ///< Stretch to fill
+  BASELINE = 5    ///< Baseline alignment
 };
 
 /**
@@ -310,9 +310,9 @@ enum class FlexAlign : uint8_t
  */
 enum class GridLengthType : uint8_t
 {
-  Absolute = 0, ///< Absolute pixel value
-  Star = 1,     ///< Proportional (star) value
-  Auto = 2      ///< Auto sizing
+  ABSOLUTE = 0, ///< Absolute pixel value
+  STAR = 1,     ///< Proportional (star) value
+  AUTO = 2      ///< Auto sizing
 };
 
 /**
@@ -325,7 +325,7 @@ public:
    * @brief Default constructor (creates absolute 0).
    */
   GridLength()
-    : mType(GridLengthType::Absolute),
+    : mType(GridLengthType::ABSOLUTE),
       mValue(0.0f)
   {
   }
@@ -339,7 +339,7 @@ public:
   static GridLength Absolute(float pixels)
   {
     GridLength length;
-    length.mType = GridLengthType::Absolute;
+    length.mType = GridLengthType::ABSOLUTE;
     length.mValue = pixels;
     return length;
   }
@@ -353,7 +353,7 @@ public:
   static GridLength Star(float factor = 1.0f)
   {
     GridLength length;
-    length.mType = GridLengthType::Star;
+    length.mType = GridLengthType::STAR;
     length.mValue = factor;
     return length;
   }
@@ -366,7 +366,7 @@ public:
   static GridLength Auto()
   {
     GridLength length;
-    length.mType = GridLengthType::Auto;
+    length.mType = GridLengthType::AUTO;
     length.mValue = 0.0f;
     return length;
   }
@@ -397,10 +397,10 @@ private:
  */
 enum class AbsoluteLayoutFlags : uint8_t
 {
-  None = 0x0,
-  PositionProportional = 0x1,
-  SizeProportional = 0x2,
-  All = PositionProportional | SizeProportional
+  NONE = 0x0,
+  POSITION_PROPORTIONAL = 0x1,
+  SIZE_PROPORTIONAL = 0x2,
+  ALL = POSITION_PROPORTIONAL | SIZE_PROPORTIONAL
 };
 
 /**

@@ -59,7 +59,7 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     AbsoluteLayout::SetLayoutBounds(redBox, LayoutRect(0.0f, 0.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::NONE);
     root.AddView(redBox);
 
     // --- Green box: 25px margin all sides ---
@@ -67,7 +67,7 @@ public:
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetViewMargin(Extents(25, 25, 25, 25));
     AbsoluteLayout::SetLayoutBounds(greenBox, LayoutRect(0.0f, 100.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::NONE);
     root.AddView(greenBox);
 
     // --- Blue box: 25px margin all sides ---
@@ -75,7 +75,7 @@ public:
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetViewMargin(Extents(25, 25, 25, 25));
     AbsoluteLayout::SetLayoutBounds(blueBox, LayoutRect(0.0f, 210.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::NONE);
     root.AddView(blueBox);
 
     // --- Nested AbsoluteLayout with its own padding ---
@@ -84,26 +84,26 @@ public:
     nested.SetViewPadding(Extents(25, 25, 25, 25));
     nested.SetViewMargin(Extents(25, 25, 25, 25));
     AbsoluteLayout::SetLayoutBounds(nested, LayoutRect(0.0f, 320.0f, 350.0f, 200.0f));
-    AbsoluteLayout::SetLayoutFlags(nested, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(nested, AbsoluteLayoutFlags::NONE);
 
     View innerA = View::New();
     innerA.SetBackgroundColor(Color::MAGENTA);
     AbsoluteLayout::SetLayoutBounds(innerA, LayoutRect(0.0f, 0.0f, 100.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerA, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(innerA, AbsoluteLayoutFlags::NONE);
     nested.AddView(innerA);
 
     View innerB = View::New();
     innerB.SetBackgroundColor(Color::YELLOW);
     innerB.SetViewMargin(Extents(25, 25, 25, 25));
     AbsoluteLayout::SetLayoutBounds(innerB, LayoutRect(120.0f, 0.0f, 100.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerB, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(innerB, AbsoluteLayoutFlags::NONE);
     nested.AddView(innerB);
 
     View innerC = View::New();
     innerC.SetBackgroundColor(Color::CYAN);
     innerC.SetViewMargin(Extents(25, 25, 25, 25));
     AbsoluteLayout::SetLayoutBounds(innerC, LayoutRect(0.0f, 80.0f, 220.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerC, AbsoluteLayoutFlags::None);
+    AbsoluteLayout::SetLayoutFlags(innerC, AbsoluteLayoutFlags::NONE);
     nested.AddView(innerC);
 
     root.AddView(nested);

@@ -54,7 +54,7 @@ public:
    * @param[in] orientation The orientation of the stack (default: Vertical)
    * @return A handle to a newly allocated StackLayout
    */
-  static StackLayout New(StackOrientation orientation = StackOrientation::Vertical);
+  static StackLayout New(StackOrientation orientation = StackOrientation::VERTICAL);
 
   /**
    * @brief Copy constructor.

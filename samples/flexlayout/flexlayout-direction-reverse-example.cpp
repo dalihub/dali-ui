@@ -28,11 +28,11 @@ using namespace Dali::UI;
  *
  * Layout: a vertical StackLayout holding two FlexLayout sections:
  *
- *   Section 1: FlexDirection::RowReverse
+ *   Section 1: FlexDirection::ROW_REVERSE
  *     - Items laid out right-to-left (1, 2, 3 appear as 3, 2, 1)
  *     - JustifyContent: FlexStart (items pack to the right/start of reverse)
  *
- *   Section 2: FlexDirection::ColumnReverse
+ *   Section 2: FlexDirection::COLUMN_REVERSE
  *     - Items laid out bottom-to-top (1, 2, 3 appear as 3, 2, 1)
  *     - JustifyContent: FlexStart (items pack to the bottom/start of reverse)
  *
@@ -53,7 +53,7 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Outer vertical StackLayout to hold two sections
-    StackLayout outer = StackLayout::New(StackOrientation::Vertical);
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetLayoutWidth(LayoutDimension::MatchParent);
     outer.SetLayoutHeight(LayoutDimension::MatchParent);
     outer.SetSpacing(16.0f);
@@ -64,9 +64,9 @@ public:
     rowReverse.SetLayoutWidth(LayoutDimension::MatchParent);
     rowReverse.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(rowReverse, 1.0f);
-    rowReverse.SetDirection(FlexDirection::RowReverse);
-    rowReverse.SetJustifyContent(FlexJustify::FlexStart);
-    rowReverse.SetAlignItems(FlexAlign::Center);
+    rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
+    rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
+    rowReverse.SetAlignItems(FlexAlign::CENTER);
     rowReverse.SetViewPadding(Extents(8, 8, 8, 8));
     rowReverse.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -95,9 +95,9 @@ public:
     columnReverse.SetLayoutWidth(LayoutDimension::MatchParent);
     columnReverse.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(columnReverse, 2.0f);
-    columnReverse.SetDirection(FlexDirection::ColumnReverse);
-    columnReverse.SetJustifyContent(FlexJustify::FlexStart);
-    columnReverse.SetAlignItems(FlexAlign::Center);
+    columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
+    columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
+    columnReverse.SetAlignItems(FlexAlign::CENTER);
     columnReverse.SetViewPadding(Extents(8, 8, 8, 8));
     columnReverse.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 

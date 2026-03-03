@@ -73,7 +73,7 @@ FlexAlign GetAlignSelf(UI::View view)
       return static_cast<FlexAlign>(view.GetProperty<int>(index));
     }
   }
-  return FlexAlign::Auto;
+  return FlexAlign::AUTO;
 }
 
 float GetFlexBasis(UI::View view)
@@ -126,7 +126,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
 
     float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width + margin.start + margin.end
                                                : childData.measuredSize.height + margin.top + margin.bottom;
-    bool shouldWrap = (wrap != FlexWrap::NoWrap) && !currentLine.childIndices.empty() &&
+    bool shouldWrap = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
     if (shouldWrap)
     {
@@ -226,25 +226,25 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
   FlexJustifyOffsets out;
   switch (justify)
   {
-    case FlexJustify::FlexStart:
+    case FlexJustify::FLEX_START:
       break;
-    case FlexJustify::FlexEnd:
+    case FlexJustify::FLEX_END:
       out.mainOffset = freeSpace;
       break;
-    case FlexJustify::Center:
+    case FlexJustify::CENTER:
       out.mainOffset = freeSpace / 2.0f;
       break;
-    case FlexJustify::SpaceBetween:
+    case FlexJustify::SPACE_BETWEEN:
       if (lineChildCount > 1)
       {
         out.spacing = freeSpace / (lineChildCount - 1);
       }
       break;
-    case FlexJustify::SpaceAround:
+    case FlexJustify::SPACE_AROUND:
       out.spacing = freeSpace / lineChildCount;
       out.mainOffset = out.spacing / 2.0f;
       break;
-    case FlexJustify::SpaceEvenly:
+    case FlexJustify::SPACE_EVENLY:
       out.spacing = freeSpace / (lineChildCount + 1);
       out.mainOffset = out.spacing;
       break;
@@ -272,7 +272,7 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
 
     // Use align-self if set, otherwise fall back to align-items
     FlexAlign effectiveAlign = GetAlignSelf(childData.view);
-    if (effectiveAlign == FlexAlign::Auto)
+    if (effectiveAlign == FlexAlign::AUTO)
     {
       effectiveAlign = alignItems;
     }
@@ -281,19 +281,19 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
     float crossSpace = line.crossSize - childCrossSize - marginCross;
     switch (effectiveAlign)
     {
-      case FlexAlign::FlexStart:
-      case FlexAlign::Auto:
+      case FlexAlign::FLEX_START:
+      case FlexAlign::AUTO:
         break;
-      case FlexAlign::FlexEnd:
+      case FlexAlign::FLEX_END:
         childCrossOffset += crossSpace;
         break;
-      case FlexAlign::Center:
+      case FlexAlign::CENTER:
         childCrossOffset += crossSpace / 2.0f;
         break;
-      case FlexAlign::Stretch:
+      case FlexAlign::STRETCH:
         childCrossSize = line.crossSize - marginCross;
         break;
-      case FlexAlign::Baseline:
+      case FlexAlign::BASELINE:
         break;
     }
 
@@ -395,12 +395,12 @@ void FlexLayoutManager::SetAlignContent(FlexAlign align)
 
 bool FlexLayoutManager::IsMainAxisHorizontal() const
 {
-  return mDirection == FlexDirection::Row || mDirection == FlexDirection::RowReverse;
+  return mDirection == FlexDirection::ROW || mDirection == FlexDirection::ROW_REVERSE;
 }
 
 bool FlexLayoutManager::IsMainAxisReversed() const
 {
-  return mDirection == FlexDirection::RowReverse || mDirection == FlexDirection::ColumnReverse;
+  return mDirection == FlexDirection::ROW_REVERSE || mDirection == FlexDirection::COLUMN_REVERSE;
 }
 
 MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)
@@ -458,7 +458,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     float childCrossSize = IsMainAxisHorizontal() ? childData.measuredSize.height + margin.top + margin.bottom
                                                   : childData.measuredSize.width + margin.start + margin.end;
 
-    bool shouldWrap = (mWrap != FlexWrap::NoWrap) && !currentLine.childIndices.empty() &&
+    bool shouldWrap = (mWrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
 
     if (shouldWrap)
@@ -532,7 +532,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     ApplyFlexGrowShrink(line, children, availableMain, IsMainAxisHorizontal(), getImpl);
   }
 
-  if (mWrap == FlexWrap::WrapReverse)
+  if (mWrap == FlexWrap::WRAP_REVERSE)
   {
     std::reverse(lines.begin(), lines.end());
   }
@@ -549,17 +549,17 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   float crossOffset = 0.0f;
 
   // Apply align-content when wrapping is enabled, even for a single line
-  if (mWrap != FlexWrap::NoWrap && !lines.empty())
+  if (mWrap != FlexWrap::NO_WRAP && !lines.empty())
   {
     switch (mAlignContent)
     {
-      case FlexAlign::FlexEnd:
+      case FlexAlign::FLEX_END:
         crossOffset = freeCross;
         break;
-      case FlexAlign::Center:
+      case FlexAlign::CENTER:
         crossOffset = freeCross / 2.0f;
         break;
-      case FlexAlign::Stretch:
+      case FlexAlign::STRETCH:
       {
         float extraPerLine = freeCross / static_cast<float>(lines.size());
         for (auto& line : lines)
@@ -568,9 +568,9 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
         }
         break;
       }
-      case FlexAlign::FlexStart:
-      case FlexAlign::Auto:
-      case FlexAlign::Baseline:
+      case FlexAlign::FLEX_START:
+      case FlexAlign::AUTO:
+      case FlexAlign::BASELINE:
       default:
         break;
     }

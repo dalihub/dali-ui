@@ -179,7 +179,7 @@ AbsoluteLayoutFlags AbsoluteLayout::GetLayoutFlags(View view)
       return static_cast<AbsoluteLayoutFlags>(view.GetProperty<int>(index));
     }
   }
-  return AbsoluteLayoutFlags::None;
+  return AbsoluteLayoutFlags::NONE;
 }
 
 } // namespace UI

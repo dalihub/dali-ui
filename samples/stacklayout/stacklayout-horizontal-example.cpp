@@ -52,14 +52,14 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Outer vertical stack to hold multiple horizontal rows
-    StackLayout outer = StackLayout::New(StackOrientation::Vertical);
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetLayoutWidth(LayoutDimension::MatchParent);
     outer.SetLayoutHeight(LayoutDimension::MatchParent);
     outer.SetSpacing(10.0f);
     outer.SetViewPadding(Extents(16, 16, 16, 16));
 
     // Row 1: Horizontal stack, children aligned to Start (top)
-    StackLayout row1 = StackLayout::New(StackOrientation::Horizontal);
+    StackLayout row1 = StackLayout::New(StackOrientation::HORIZONTAL);
     row1.SetLayoutWidth(LayoutDimension::MatchParent);
     row1.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row1, 1.0f);
@@ -70,28 +70,28 @@ public:
     box1a.SetBackgroundColor(Color::RED);
     box1a.SetLayoutWidth(60.0f);
     box1a.SetLayoutHeight(40.0f);
-    box1a.SetVerticalAlignment(LayoutAlignment::Start);
+    box1a.SetVerticalAlignment(LayoutAlignment::START);
     row1.AddView(box1a);
 
     View box1b = View::New();
     box1b.SetBackgroundColor(Color::GREEN);
     box1b.SetLayoutWidth(60.0f);
     box1b.SetLayoutHeight(60.0f);
-    box1b.SetVerticalAlignment(LayoutAlignment::Start);
+    box1b.SetVerticalAlignment(LayoutAlignment::START);
     row1.AddView(box1b);
 
     View box1c = View::New();
     box1c.SetBackgroundColor(Color::BLUE);
     box1c.SetLayoutWidth(LayoutDimension::WrapContent);
     box1c.SetLayoutHeight(30.0f);
-    box1c.SetVerticalAlignment(LayoutAlignment::Start);
+    box1c.SetVerticalAlignment(LayoutAlignment::START);
     StackLayout::SetLayoutWeight(box1c, 1.0f);
     row1.AddView(box1c);
 
     outer.AddView(row1);
 
     // Row 2: Horizontal stack, children aligned to Center
-    StackLayout row2 = StackLayout::New(StackOrientation::Horizontal);
+    StackLayout row2 = StackLayout::New(StackOrientation::HORIZONTAL);
     row2.SetLayoutWidth(LayoutDimension::MatchParent);
     row2.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row2, 1.0f);
@@ -102,28 +102,28 @@ public:
     box2a.SetBackgroundColor(Color::RED);
     box2a.SetLayoutWidth(60.0f);
     box2a.SetLayoutHeight(40.0f);
-    box2a.SetVerticalAlignment(LayoutAlignment::Center);
+    box2a.SetVerticalAlignment(LayoutAlignment::CENTER);
     row2.AddView(box2a);
 
     View box2b = View::New();
     box2b.SetBackgroundColor(Color::GREEN);
     box2b.SetLayoutWidth(60.0f);
     box2b.SetLayoutHeight(60.0f);
-    box2b.SetVerticalAlignment(LayoutAlignment::Center);
+    box2b.SetVerticalAlignment(LayoutAlignment::CENTER);
     row2.AddView(box2b);
 
     View box2c = View::New();
     box2c.SetBackgroundColor(Color::BLUE);
     box2c.SetLayoutWidth(LayoutDimension::WrapContent);
     box2c.SetLayoutHeight(30.0f);
-    box2c.SetVerticalAlignment(LayoutAlignment::Center);
+    box2c.SetVerticalAlignment(LayoutAlignment::CENTER);
     StackLayout::SetLayoutWeight(box2c, 1.0f);
     row2.AddView(box2c);
 
     outer.AddView(row2);
 
     // Row 3: Horizontal stack, children aligned to End (bottom)
-    StackLayout row3 = StackLayout::New(StackOrientation::Horizontal);
+    StackLayout row3 = StackLayout::New(StackOrientation::HORIZONTAL);
     row3.SetLayoutWidth(LayoutDimension::MatchParent);
     row3.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row3, 1.0f);
@@ -134,28 +134,28 @@ public:
     box3a.SetBackgroundColor(Color::RED);
     box3a.SetLayoutWidth(60.0f);
     box3a.SetLayoutHeight(40.0f);
-    box3a.SetVerticalAlignment(LayoutAlignment::End);
+    box3a.SetVerticalAlignment(LayoutAlignment::END);
     row3.AddView(box3a);
 
     View box3b = View::New();
     box3b.SetBackgroundColor(Color::GREEN);
     box3b.SetLayoutWidth(60.0f);
     box3b.SetLayoutHeight(60.0f);
-    box3b.SetVerticalAlignment(LayoutAlignment::End);
+    box3b.SetVerticalAlignment(LayoutAlignment::END);
     row3.AddView(box3b);
 
     View box3c = View::New();
     box3c.SetBackgroundColor(Color::BLUE);
     box3c.SetLayoutWidth(LayoutDimension::WrapContent);
     box3c.SetLayoutHeight(30.0f);
-    box3c.SetVerticalAlignment(LayoutAlignment::End);
+    box3c.SetVerticalAlignment(LayoutAlignment::END);
     StackLayout::SetLayoutWeight(box3c, 1.0f);
     row3.AddView(box3c);
 
     outer.AddView(row3);
 
     // Row 4: Horizontal stack, children aligned to Fill (stretch height)
-    StackLayout row4 = StackLayout::New(StackOrientation::Horizontal);
+    StackLayout row4 = StackLayout::New(StackOrientation::HORIZONTAL);
     row4.SetLayoutWidth(LayoutDimension::MatchParent);
     row4.SetLayoutHeight(LayoutDimension::WrapContent);
     StackLayout::SetLayoutWeight(row4, 1.0f);
@@ -166,21 +166,21 @@ public:
     box4a.SetBackgroundColor(Color::RED);
     box4a.SetLayoutWidth(60.0f);
     box4a.SetLayoutHeight(LayoutDimension::WrapContent);
-    box4a.SetVerticalAlignment(LayoutAlignment::Fill);
+    box4a.SetVerticalAlignment(LayoutAlignment::FILL);
     row4.AddView(box4a);
 
     View box4b = View::New();
     box4b.SetBackgroundColor(Color::GREEN);
     box4b.SetLayoutWidth(60.0f);
     box4b.SetLayoutHeight(LayoutDimension::WrapContent);
-    box4b.SetVerticalAlignment(LayoutAlignment::Fill);
+    box4b.SetVerticalAlignment(LayoutAlignment::FILL);
     row4.AddView(box4b);
 
     View box4c = View::New();
     box4c.SetBackgroundColor(Color::BLUE);
     box4c.SetLayoutWidth(LayoutDimension::WrapContent);
     box4c.SetLayoutHeight(LayoutDimension::WrapContent);
-    box4c.SetVerticalAlignment(LayoutAlignment::Fill);
+    box4c.SetVerticalAlignment(LayoutAlignment::FILL);
     StackLayout::SetLayoutWeight(box4c, 1.0f);
     row4.AddView(box4c);
 
