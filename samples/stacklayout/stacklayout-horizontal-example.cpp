@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 
 using namespace Dali;
@@ -62,7 +63,7 @@ public:
     StackLayout row1 = StackLayout::New(StackOrientation::HORIZONTAL);
     row1.SetLayoutWidth(LayoutDimension::MatchParent);
     row1.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row1, 1.0f);
+    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row1.SetSpacing(8.0f);
     row1.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -85,7 +86,7 @@ public:
     box1c.SetLayoutWidth(LayoutDimension::WrapContent);
     box1c.SetLayoutHeight(30.0f);
     box1c.SetVerticalAlignment(LayoutAlignment::START);
-    StackLayout::SetLayoutWeight(box1c, 1.0f);
+    box1c.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row1.AddView(box1c);
 
     outer.AddView(row1);
@@ -94,7 +95,7 @@ public:
     StackLayout row2 = StackLayout::New(StackOrientation::HORIZONTAL);
     row2.SetLayoutWidth(LayoutDimension::MatchParent);
     row2.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row2, 1.0f);
+    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row2.SetSpacing(8.0f);
     row2.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
@@ -117,7 +118,7 @@ public:
     box2c.SetLayoutWidth(LayoutDimension::WrapContent);
     box2c.SetLayoutHeight(30.0f);
     box2c.SetVerticalAlignment(LayoutAlignment::CENTER);
-    StackLayout::SetLayoutWeight(box2c, 1.0f);
+    box2c.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row2.AddView(box2c);
 
     outer.AddView(row2);
@@ -126,7 +127,7 @@ public:
     StackLayout row3 = StackLayout::New(StackOrientation::HORIZONTAL);
     row3.SetLayoutWidth(LayoutDimension::MatchParent);
     row3.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row3, 1.0f);
+    row3.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row3.SetSpacing(8.0f);
     row3.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
@@ -149,7 +150,7 @@ public:
     box3c.SetLayoutWidth(LayoutDimension::WrapContent);
     box3c.SetLayoutHeight(30.0f);
     box3c.SetVerticalAlignment(LayoutAlignment::END);
-    StackLayout::SetLayoutWeight(box3c, 1.0f);
+    box3c.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row3.AddView(box3c);
 
     outer.AddView(row3);
@@ -158,7 +159,7 @@ public:
     StackLayout row4 = StackLayout::New(StackOrientation::HORIZONTAL);
     row4.SetLayoutWidth(LayoutDimension::MatchParent);
     row4.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row4, 1.0f);
+    row4.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row4.SetSpacing(8.0f);
     row4.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
@@ -181,7 +182,7 @@ public:
     box4c.SetLayoutWidth(LayoutDimension::WrapContent);
     box4c.SetLayoutHeight(LayoutDimension::WrapContent);
     box4c.SetVerticalAlignment(LayoutAlignment::FILL);
-    StackLayout::SetLayoutWeight(box4c, 1.0f);
+    box4c.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row4.AddView(box4c);
 
     outer.AddView(row4);

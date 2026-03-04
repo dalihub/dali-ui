@@ -129,28 +129,6 @@ public: // API
    */
   float GetSpacing() const;
 
-public: // Static methods for attached properties (StackLayout children only)
-
-  /**
-   * @brief Sets the layout weight for a child view.
-   *
-   * Remaining space on the main axis is distributed among children with
-   * weight > 0 in proportion to their weight. Only valid when the view is
-   * a child of a StackLayout; ignored otherwise.
-   *
-   * @param[in] view The child view
-   * @param[in] weight The weight (default 0; use 0 to not participate in weight distribution)
-   */
-  static void SetLayoutWeight(View view, float weight);
-
-  /**
-   * @brief Gets the layout weight for a child view.
-   *
-   * @param[in] view The child view
-   * @return The weight (0 if not set)
-   */
-  static float GetLayoutWeight(View view);
-
 public: // Chaining methods
   DALI_UI_CHAIN_LAYOUT_METHODS(StackLayout)
 

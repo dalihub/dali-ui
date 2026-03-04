@@ -17,6 +17,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -63,7 +64,7 @@ public:
     FlexLayout rowReverse = FlexLayout::New();
     rowReverse.SetLayoutWidth(LayoutDimension::MatchParent);
     rowReverse.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(rowReverse, 1.0f);
+    rowReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
     rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
     rowReverse.SetAlignItems(FlexAlign::CENTER);
@@ -94,7 +95,7 @@ public:
     FlexLayout columnReverse = FlexLayout::New();
     columnReverse.SetLayoutWidth(LayoutDimension::MatchParent);
     columnReverse.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(columnReverse, 2.0f);
+    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
     columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
     columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
     columnReverse.SetAlignItems(FlexAlign::CENTER);

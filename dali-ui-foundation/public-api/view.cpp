@@ -19,11 +19,9 @@
 #include <dali-ui-foundation/public-api/view.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/layout.h>
@@ -354,6 +352,17 @@ ClickableTrait View::GetClickableTrait() const
   const auto& impl = Integration::GetImpl(*this);
   Trait trait = impl.GetTrait(Integration::TraitId(Integration::ReservedTraitId::INTERACTION_TRAIT));
   return ClickableTrait::DownCast(trait);
+}
+
+BaseHandle View::GetLayoutParamsTrait(LayoutParamsType type) const
+{
+  return Integration::GetImpl(*this).GetLayoutParamsTrait(type);
+}
+
+View& View::SetLayoutParams(LayoutParams params)
+{
+  Integration::GetImpl(*this).SetLayoutParams(params);
+  return *this;
 }
 
 } // namespace Ui

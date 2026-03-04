@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/absolute-layout.h>
+#include <dali-ui-foundation/public-api/absolute-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -51,22 +52,22 @@ public:
     // Red box: top-left corner, absolute position and size
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    AbsoluteLayout::SetLayoutBounds(redBox, LayoutRect(20.0f, 20.0f, 120.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::NONE);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(20.0f, 20.0f, 120.0f, 80.0f)));
     root.AddView(redBox);
 
     // Green box: center area
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
-    AbsoluteLayout::SetLayoutBounds(greenBox, LayoutRect(150.0f, 200.0f, 160.0f, 100.0f));
-    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::NONE);
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(150.0f, 200.0f, 160.0f, 100.0f)));
     root.AddView(greenBox);
 
     // Blue box: lower-right area
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    AbsoluteLayout::SetLayoutBounds(blueBox, LayoutRect(280.0f, 400.0f, 100.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::NONE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(280.0f, 400.0f, 100.0f, 60.0f)));
     root.AddView(blueBox);
 
     window.Add(root);

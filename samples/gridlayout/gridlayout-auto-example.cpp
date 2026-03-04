@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/grid-layout.h>
+#include <dali-ui-foundation/public-api/grid-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -68,8 +69,7 @@ public:
     label00.SetBackgroundColor(Color::RED);
     label00.SetLayoutWidth(80.0f);
     label00.SetLayoutHeight(40.0f);
-    GridLayout::SetRow(label00, 0);
-    GridLayout::SetColumn(label00, 0);
+    label00.SetLayoutParams(GridLayoutParams::New());
     root.AddView(label00);
 
     // (0,1): Header area in Auto row, Star column
@@ -77,8 +77,7 @@ public:
     header.SetBackgroundColor(Vector4(1.0f, 0.6f, 0.6f, 1.0f));
     header.SetLayoutWidth(LayoutDimension::MatchParent);
     header.SetLayoutHeight(40.0f);
-    GridLayout::SetRow(header, 0);
-    GridLayout::SetColumn(header, 1);
+    header.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
     root.AddView(header);
 
     // (1,0): Sidebar in Auto column, Star row
@@ -86,8 +85,7 @@ public:
     sidebar.SetBackgroundColor(Color::GREEN);
     sidebar.SetLayoutWidth(80.0f);
     sidebar.SetLayoutHeight(LayoutDimension::MatchParent);
-    GridLayout::SetRow(sidebar, 1);
-    GridLayout::SetColumn(sidebar, 0);
+    sidebar.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.AddView(sidebar);
 
     // (1,1): Main content area (Star row x Star column)
@@ -95,8 +93,7 @@ public:
     content.SetBackgroundColor(Color::BLUE);
     content.SetLayoutWidth(LayoutDimension::MatchParent);
     content.SetLayoutHeight(LayoutDimension::MatchParent);
-    GridLayout::SetRow(content, 1);
-    GridLayout::SetColumn(content, 1);
+    content.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
     root.AddView(content);
 
     // (2,0): Footer label in Auto row, Auto column
@@ -104,8 +101,7 @@ public:
     label20.SetBackgroundColor(Color::YELLOW);
     label20.SetLayoutWidth(80.0f);
     label20.SetLayoutHeight(30.0f);
-    GridLayout::SetRow(label20, 2);
-    GridLayout::SetColumn(label20, 0);
+    label20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
     root.AddView(label20);
 
     // (2,1): Footer content spanning the Star column
@@ -113,8 +109,7 @@ public:
     footer.SetBackgroundColor(Color::CYAN);
     footer.SetLayoutWidth(LayoutDimension::MatchParent);
     footer.SetLayoutHeight(30.0f);
-    GridLayout::SetRow(footer, 2);
-    GridLayout::SetColumn(footer, 1);
+    footer.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
     root.AddView(footer);
 
     window.Add(root);

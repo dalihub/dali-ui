@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/flex-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -63,7 +64,7 @@ public:
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutWidth(LayoutDimension::WrapContent);
     greenBox.SetLayoutHeight(LayoutDimension::MatchParent);
-    FlexLayout::SetFlexGrow(greenBox, 1.0f);
+    greenBox.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     root.AddView(greenBox);
 
     // Blue box: fixed width

@@ -18,9 +18,6 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/grid-layout.h>
 
-// EXTERNAL INCLUDES
-#include <dali/public-api/object/property.h>
-
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/grid-layout-impl.h>
 
@@ -159,114 +156,6 @@ void GridLayout::SetColumnSpacing(float spacing)
 float GridLayout::GetColumnSpacing() const
 {
   return Integration::GetImpl(*this).GetColumnSpacing();
-}
-
-// Static attached property methods
-namespace
-{
-/**
- * @brief Helper to register or update an integer attached property.
- */
-void SetIntProperty(View view, const std::string& name, int value)
-{
-  Property::Index index = view.GetPropertyIndex(name);
-  if (index == Dali::Property::INVALID_INDEX)
-  {
-    view.RegisterProperty(name, value);
-  }
-  else
-  {
-    view.SetProperty(index, value);
-  }
-}
-} // namespace
-
-void GridLayout::SetRow(View view, uint32_t row)
-{
-  if (view)
-  {
-    SetIntProperty(view, "gridRow", static_cast<int>(row));
-    view.InvalidateMeasure();
-  }
-}
-
-uint32_t GridLayout::GetRow(View view)
-{
-  if (view)
-  {
-    auto index = view.GetPropertyIndex("gridRow");
-    if (index != Dali::Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 0;
-}
-
-void GridLayout::SetColumn(View view, uint32_t column)
-{
-  if (view)
-  {
-    SetIntProperty(view, "gridColumn", static_cast<int>(column));
-    view.InvalidateMeasure();
-  }
-}
-
-uint32_t GridLayout::GetColumn(View view)
-{
-  if (view)
-  {
-    auto index = view.GetPropertyIndex("gridColumn");
-    if (index != Dali::Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 0;
-}
-
-void GridLayout::SetRowSpan(View view, uint32_t span)
-{
-  if (view)
-  {
-    SetIntProperty(view, "gridRowSpan", static_cast<int>(span));
-    view.InvalidateMeasure();
-  }
-}
-
-uint32_t GridLayout::GetRowSpan(View view)
-{
-  if (view)
-  {
-    auto index = view.GetPropertyIndex("gridRowSpan");
-    if (index != Dali::Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 1;
-}
-
-void GridLayout::SetColumnSpan(View view, uint32_t span)
-{
-  if (view)
-  {
-    SetIntProperty(view, "gridColumnSpan", static_cast<int>(span));
-    view.InvalidateMeasure();
-  }
-}
-
-uint32_t GridLayout::GetColumnSpan(View view)
-{
-  if (view)
-  {
-    auto index = view.GetPropertyIndex("gridColumnSpan");
-    if (index != Dali::Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 1;
 }
 
 } // namespace Ui

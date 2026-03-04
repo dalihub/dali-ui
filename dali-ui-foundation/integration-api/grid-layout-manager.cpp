@@ -19,13 +19,13 @@
 #include <dali-ui-foundation/integration-api/grid-layout-manager.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/property.h>
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <numeric>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layout/grid-layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
@@ -38,56 +38,28 @@ namespace Integration
 namespace
 {
 
-uint32_t GetChildRow(Ui::View view)
+uint32_t GetChildRow(ViewImpl& childImpl)
 {
-  if (view)
-  {
-    Property::Index index = view.GetPropertyIndex("gridRow");
-    if (index != Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 0;
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetRow() : 0;
 }
 
-uint32_t GetChildColumn(Ui::View view)
+uint32_t GetChildColumn(ViewImpl& childImpl)
 {
-  if (view)
-  {
-    Property::Index index = view.GetPropertyIndex("gridColumn");
-    if (index != Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 0;
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetColumn() : 0;
 }
 
-uint32_t GetChildRowSpan(Ui::View view)
+uint32_t GetChildRowSpan(ViewImpl& childImpl)
 {
-  if (view)
-  {
-    Property::Index index = view.GetPropertyIndex("gridRowSpan");
-    if (index != Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 1;
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetRowSpan() : 1;
 }
 
-uint32_t GetChildColumnSpan(Ui::View view)
+uint32_t GetChildColumnSpan(ViewImpl& childImpl)
 {
-  if (view)
-  {
-    Property::Index index = view.GetPropertyIndex("gridColumnSpan");
-    if (index != Property::INVALID_INDEX)
-    {
-      return static_cast<uint32_t>(view.GetProperty<int>(index));
-    }
-  }
-  return 1;
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetColumnSpan() : 1;
 }
 
 void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
@@ -99,10 +71,10 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    uint32_t row = GetChildRow(childData.view);
-    uint32_t col = GetChildColumn(childData.view);
-    uint32_t rowSpan = GetChildRowSpan(childData.view);
-    uint32_t colSpan = GetChildColumnSpan(childData.view);
+    uint32_t row = GetChildRow(childImpl);
+    uint32_t col = GetChildColumn(childImpl);
+    uint32_t rowSpan = GetChildRowSpan(childImpl);
+    uint32_t colSpan = GetChildColumnSpan(childImpl);
     row = std::min(row, rowCount - 1);
     col = std::min(col, colCount - 1);
     rowSpan = std::min(rowSpan, rowCount - row);
@@ -229,10 +201,10 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    uint32_t row = std::min(GetChildRow(childData.view), rowCount - 1);
-    uint32_t col = std::min(GetChildColumn(childData.view), colCount - 1);
-    uint32_t rowSpan = std::min(GetChildRowSpan(childData.view), rowCount - row);
-    uint32_t colSpan = std::min(GetChildColumnSpan(childData.view), colCount - col);
+    uint32_t row = std::min(GetChildRow(childImpl), rowCount - 1);
+    uint32_t col = std::min(GetChildColumn(childImpl), colCount - 1);
+    uint32_t rowSpan = std::min(GetChildRowSpan(childImpl), rowCount - row);
+    uint32_t colSpan = std::min(GetChildColumnSpan(childImpl), colCount - col);
 
     float cellX = colPositions[col];
     float cellY = rowPositions[row];

@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 
 using namespace Dali;
@@ -161,8 +162,8 @@ int UtcDaliStackLayoutSetLayoutWeightP(void)
   StackLayout layout = StackLayout::New();
   View child = View::New();
   layout.AddView(child);
-  StackLayout::SetLayoutWeight(child, 1.0f);
-  DALI_TEST_EQUALS(StackLayout::GetLayoutWeight(child), 1.0f, TEST_LOCATION);
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -172,9 +173,10 @@ int UtcDaliStackLayoutGetLayoutWeightP(void)
   StackLayout layout = StackLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(StackLayout::GetLayoutWeight(child), 0.0f, TEST_LOCATION);
-  StackLayout::SetLayoutWeight(child, 0.5f);
-  DALI_TEST_EQUALS(StackLayout::GetLayoutWeight(child), 0.5f, TEST_LOCATION);
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.0f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 0.0f, TEST_LOCATION);
+  child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 0.5f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -218,10 +220,10 @@ int UtcDaliStackLayoutWeightMultipleP(void)
   View c2 = View::New();
   layout.AddView(c1);
   layout.AddView(c2);
-  StackLayout::SetLayoutWeight(c1, 1.0f);
-  StackLayout::SetLayoutWeight(c2, 2.0f);
-  DALI_TEST_EQUALS(StackLayout::GetLayoutWeight(c1), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(StackLayout::GetLayoutWeight(c2), 2.0f, TEST_LOCATION);
+  c1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+  c2.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
+  DALI_TEST_EQUALS(c1.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c2.GetLayoutParams<StackLayoutParams>().GetWeight(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -338,7 +340,7 @@ int UtcDaliStackLayoutChildWithWeightP(void)
   weightChild.SetLayoutWidth(LayoutDimension::MatchParent);
   weightChild.SetLayoutHeight(50.0f);
   layout.AddView(weightChild);
-  StackLayout::SetLayoutWeight(weightChild, 1.0f);
+  weightChild.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(120.0f);
   MeasuredSize m = layout.Measure(200.0f, 120.0f);

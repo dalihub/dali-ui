@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/absolute-layout.h>
+#include <dali-ui-foundation/public-api/absolute-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -58,24 +59,24 @@ public:
     // --- Red box: no margin (positioned at padding edge) ---
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    AbsoluteLayout::SetLayoutBounds(redBox, LayoutRect(0.0f, 0.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(redBox, AbsoluteLayoutFlags::NONE);
+    redBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetWidth(150.0f).SetHeight(80.0f));
     root.AddView(redBox);
 
     // --- Green box: 25px margin all sides ---
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetViewMargin(Extents(25, 25, 25, 25));
-    AbsoluteLayout::SetLayoutBounds(greenBox, LayoutRect(0.0f, 100.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(greenBox, AbsoluteLayoutFlags::NONE);
+    greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(100.0f).SetWidth(150.0f).SetHeight(80.0f));
     root.AddView(greenBox);
 
     // --- Blue box: 25px margin all sides ---
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetViewMargin(Extents(25, 25, 25, 25));
-    AbsoluteLayout::SetLayoutBounds(blueBox, LayoutRect(0.0f, 210.0f, 150.0f, 80.0f));
-    AbsoluteLayout::SetLayoutFlags(blueBox, AbsoluteLayoutFlags::NONE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(210.0f).SetWidth(150.0f).SetHeight(80.0f));
     root.AddView(blueBox);
 
     // --- Nested AbsoluteLayout with its own padding ---
@@ -83,27 +84,27 @@ public:
     nested.SetBackgroundColor(Color::GRAY);
     nested.SetViewPadding(Extents(25, 25, 25, 25));
     nested.SetViewMargin(Extents(25, 25, 25, 25));
-    AbsoluteLayout::SetLayoutBounds(nested, LayoutRect(0.0f, 320.0f, 350.0f, 200.0f));
-    AbsoluteLayout::SetLayoutFlags(nested, AbsoluteLayoutFlags::NONE);
+    nested.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(320.0f).SetWidth(350.0f).SetHeight(200.0f));
 
     View innerA = View::New();
     innerA.SetBackgroundColor(Color::MAGENTA);
-    AbsoluteLayout::SetLayoutBounds(innerA, LayoutRect(0.0f, 0.0f, 100.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerA, AbsoluteLayoutFlags::NONE);
+    innerA.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetWidth(100.0f).SetHeight(60.0f));
     nested.AddView(innerA);
 
     View innerB = View::New();
     innerB.SetBackgroundColor(Color::YELLOW);
     innerB.SetViewMargin(Extents(25, 25, 25, 25));
-    AbsoluteLayout::SetLayoutBounds(innerB, LayoutRect(120.0f, 0.0f, 100.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerB, AbsoluteLayoutFlags::NONE);
+    innerB.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetX(120.0f).SetWidth(100.0f).SetHeight(60.0f));
     nested.AddView(innerB);
 
     View innerC = View::New();
     innerC.SetBackgroundColor(Color::CYAN);
     innerC.SetViewMargin(Extents(25, 25, 25, 25));
-    AbsoluteLayout::SetLayoutBounds(innerC, LayoutRect(0.0f, 80.0f, 220.0f, 60.0f));
-    AbsoluteLayout::SetLayoutFlags(innerC, AbsoluteLayoutFlags::NONE);
+    innerC.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(80.0f).SetWidth(220.0f).SetHeight(60.0f));
     nested.AddView(innerC);
 
     root.AddView(nested);

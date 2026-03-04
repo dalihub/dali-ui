@@ -342,6 +342,17 @@ public: // Layout size API (LayoutWidth / LayoutHeight)
   void SetMaximumHeight(float height);
   float GetMaximumHeight() const;
 
+public: // Layout Params API
+  /**
+   * @copydoc Dali::Ui::View::SetLayoutParams
+   */
+  void SetLayoutParams(Ui::LayoutParams params);
+
+  /**
+   * @brief Retrieves a layout params trait by LayoutParamsType.
+   */
+  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
+
 public: // Layout Properties API
   void SetViewMargin(const Extents& margin);
   Extents GetViewMargin() const;

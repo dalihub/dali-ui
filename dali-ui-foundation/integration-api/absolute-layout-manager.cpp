@@ -19,10 +19,10 @@
 #include <dali-ui-foundation/integration-api/absolute-layout-manager.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/property.h>
 #include <algorithm>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layout/absolute-layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
@@ -35,47 +35,22 @@ namespace Integration
 namespace
 {
 
-LayoutRect GetChildBounds(Ui::View view)
+LayoutRect GetChildBounds(ViewImpl& childImpl)
 {
-  LayoutRect bounds(0.0f, 0.0f, -1.0f, -1.0f);
-
-  if (view)
+  auto* params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
+  if (params)
   {
-    Property::Index xIdx = view.GetPropertyIndex("absoluteLayoutX");
-    Property::Index yIdx = view.GetPropertyIndex("absoluteLayoutY");
-    Property::Index wIdx = view.GetPropertyIndex("absoluteLayoutWidth");
-    Property::Index hIdx = view.GetPropertyIndex("absoluteLayoutHeight");
-
-    if (xIdx != Property::INVALID_INDEX)
-    {
-      bounds.x = view.GetProperty<float>(xIdx);
-    }
-    if (yIdx != Property::INVALID_INDEX)
-    {
-      bounds.y = view.GetProperty<float>(yIdx);
-    }
-    if (wIdx != Property::INVALID_INDEX)
-    {
-      bounds.width = view.GetProperty<float>(wIdx);
-    }
-    if (hIdx != Property::INVALID_INDEX)
-    {
-      bounds.height = view.GetProperty<float>(hIdx);
-    }
+    return params->GetBounds();
   }
-
-  return bounds;
+  return LayoutRect(0.0f, 0.0f, -1.0f, -1.0f);
 }
 
-AbsoluteLayoutFlags GetChildFlags(Ui::View view)
+AbsoluteLayoutFlags GetChildFlags(ViewImpl& childImpl)
 {
-  if (view)
+  auto* params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
+  if (params)
   {
-    Property::Index index = view.GetPropertyIndex("absoluteLayoutFlags");
-    if (index != Property::INVALID_INDEX)
-    {
-      return static_cast<AbsoluteLayoutFlags>(view.GetProperty<int>(index));
-    }
+    return params->GetFlags();
   }
   return AbsoluteLayoutFlags::NONE;
 }
@@ -110,8 +85,8 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   for (auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-    LayoutRect bounds = GetChildBounds(childData.view);
-    AbsoluteLayoutFlags flags = GetChildFlags(childData.view);
+    LayoutRect bounds = GetChildBounds(childImpl);
+    AbsoluteLayoutFlags flags = GetChildFlags(childImpl);
 
     float x = bounds.x;
     float y = bounds.y;
@@ -186,8 +161,8 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
   for (auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-    LayoutRect childBoundsSpec = GetChildBounds(childData.view);
-    AbsoluteLayoutFlags flags = GetChildFlags(childData.view);
+    LayoutRect childBoundsSpec = GetChildBounds(childImpl);
+    AbsoluteLayoutFlags flags = GetChildFlags(childImpl);
 
     float x = childBoundsSpec.x;
     float y = childBoundsSpec.y;

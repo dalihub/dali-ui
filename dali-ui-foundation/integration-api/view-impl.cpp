@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/layout-manager.h>
 #include <dali-ui-foundation/integration-api/layout-impl.h>
+#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 
 namespace Dali
 {
@@ -947,6 +948,42 @@ ViewImpl::ChildContainer& ViewImpl::GetChildren()
 const ViewImpl::ChildContainer& ViewImpl::GetChildren() const
 {
   return mChildren;
+}
+
+namespace
+{
+
+TraitId ToTraitId(LayoutParamsType type)
+{
+  switch (type)
+  {
+    case LayoutParamsType::ABSOLUTE:
+      return TraitId(ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
+    case LayoutParamsType::STACK:
+      return TraitId(ReservedTraitId::STACK_LAYOUT_PARAMS);
+    case LayoutParamsType::GRID:
+      return TraitId(ReservedTraitId::GRID_LAYOUT_PARAMS);
+    case LayoutParamsType::FLEX:
+      return TraitId(ReservedTraitId::FLEX_LAYOUT_PARAMS);
+  }
+  DALI_ASSERT_ALWAYS(false && "Unknown LayoutParamsType");
+  return TraitId(ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS); // unreachable
+}
+
+} // unnamed namespace
+
+BaseHandle ViewImpl::GetLayoutParamsTrait(LayoutParamsType type) const
+{
+  return GetTrait(ToTraitId(type));
+}
+
+void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
+{
+  auto& paramsImpl = static_cast<Internal::LayoutParamsImpl&>(Ui::GetImpl(params));
+
+  SetTrait(paramsImpl.GetTraitId(), params);
+
+  InvalidateMeasure();
 }
 
 } // namespace Integration

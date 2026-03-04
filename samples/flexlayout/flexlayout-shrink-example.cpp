@@ -16,7 +16,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/flex-layout-params.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -65,7 +67,7 @@ public:
     FlexLayout row1 = FlexLayout::New();
     row1.SetLayoutWidth(LayoutDimension::MatchParent);
     row1.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row1, 1.0f);
+    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row1.SetDirection(FlexDirection::ROW);
     row1.SetWrap(FlexWrap::NO_WRAP);
     row1.SetAlignItems(FlexAlign::STRETCH);
@@ -76,22 +78,19 @@ public:
     View r1box1 = View::New();
     r1box1.SetBackgroundColor(Color::RED);
     r1box1.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r1box1, 250.0f);
-    FlexLayout::SetFlexShrink(r1box1, 1.0f);
+    r1box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box1);
 
     View r1box2 = View::New();
     r1box2.SetBackgroundColor(Color::GREEN);
     r1box2.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r1box2, 250.0f);
-    FlexLayout::SetFlexShrink(r1box2, 1.0f);
+    r1box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box2);
 
     View r1box3 = View::New();
     r1box3.SetBackgroundColor(Color::BLUE);
     r1box3.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r1box3, 250.0f);
-    FlexLayout::SetFlexShrink(r1box3, 1.0f);
+    r1box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box3);
 
     outer.AddView(row1);
@@ -100,7 +99,7 @@ public:
     FlexLayout row2 = FlexLayout::New();
     row2.SetLayoutWidth(LayoutDimension::MatchParent);
     row2.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(row2, 1.0f);
+    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row2.SetDirection(FlexDirection::ROW);
     row2.SetWrap(FlexWrap::NO_WRAP);
     row2.SetAlignItems(FlexAlign::STRETCH);
@@ -111,24 +110,21 @@ public:
     View r2box1 = View::New();
     r2box1.SetBackgroundColor(Color::YELLOW);
     r2box1.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r2box1, 250.0f);
-    FlexLayout::SetFlexShrink(r2box1, 0.0f);
+    r2box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(0.0f));
     row2.AddView(r2box1);
 
     // Item 2: shrink 1 (normal shrink)
     View r2box2 = View::New();
     r2box2.SetBackgroundColor(Color::CYAN);
     r2box2.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r2box2, 250.0f);
-    FlexLayout::SetFlexShrink(r2box2, 1.0f);
+    r2box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row2.AddView(r2box2);
 
     // Item 3: shrink 3 (shrinks 3x more)
     View r2box3 = View::New();
     r2box3.SetBackgroundColor(Color::MAGENTA);
     r2box3.SetLayoutHeight(80.0f);
-    FlexLayout::SetFlexBasis(r2box3, 250.0f);
-    FlexLayout::SetFlexShrink(r2box3, 3.0f);
+    r2box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(3.0f));
     row2.AddView(r2box3);
 
     outer.AddView(row2);

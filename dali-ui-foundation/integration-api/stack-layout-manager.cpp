@@ -19,12 +19,12 @@
 #include <dali-ui-foundation/integration-api/stack-layout-manager.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/property.h>
 #include <algorithm>
 #include <functional>
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layout/stack-layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 
@@ -38,18 +38,10 @@ namespace Integration
 namespace
 {
 
-float GetChildWeight(Ui::View view)
+float GetChildWeight(ViewImpl& childImpl)
 {
-  if (!view)
-  {
-    return 0.0f;
-  }
-  Property::Index index = view.GetPropertyIndex("stackLayoutWeight");
-  if (index == Property::INVALID_INDEX)
-  {
-    return 0.0f;
-  }
-  return view.GetProperty<float>(index);
+  auto* params = Internal::StackLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetWeight() : 0.0f;
 }
 
 struct StackMeasureFirstPassResult
@@ -69,7 +61,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
   {
     ViewImpl& childImpl = getImpl(childData.view);
     result.visibleChildCount++;
-    float weight = GetChildWeight(childData.view);
+    float weight = GetChildWeight(childImpl);
     if (weight > 0.0f)
     {
       result.totalWeight += weight;
@@ -107,7 +99,7 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   for (auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    float weight = GetChildWeight(childData.view);
+    float weight = GetChildWeight(childImpl);
     if (weight <= 0.0f)
     {
       continue;

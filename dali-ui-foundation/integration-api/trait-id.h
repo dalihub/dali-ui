@@ -49,9 +49,18 @@ enum class ReservedTraitId : uint32_t
    */
   INTERACTION_TRAIT = 0,
 
-  // Layout params
+  /**
+   * @brief Layout parameter traits for each layout type.
+   *
+   * These are attached to child views to store per-child layout properties
+   * (e.g., position, weight, row/column) used by the corresponding layout manager.
+   * @{
+   */
   ABSOLUTE_LAYOUT_PARAMS = 10,
   STACK_LAYOUT_PARAMS = 11,
+  GRID_LAYOUT_PARAMS = 12,
+  FLEX_LAYOUT_PARAMS = 13,
+  /** @} */
 
   // Effects
   INTERACTION_EFFECT = 50,

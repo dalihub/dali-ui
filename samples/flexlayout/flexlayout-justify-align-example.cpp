@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/flex-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -74,7 +75,7 @@ public:
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutWidth(80.0f);
     blueBox.SetLayoutHeight(60.0f);
-    FlexLayout::SetAlignSelf(blueBox, FlexAlign::FLEX_END);
+    blueBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_END));
     root.AddView(blueBox);
 
     // Yellow box: medium

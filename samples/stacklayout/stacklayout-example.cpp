@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -58,7 +59,7 @@ public:
     middle.SetBackgroundColor(Color::GREEN);
     middle.SetLayoutWidth(LayoutDimension::MatchParent);
     middle.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(middle, 1.0f);
+    middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     root.AddView(middle);
 
     // Bottom bar: fixed height

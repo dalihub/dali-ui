@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/grid-layout.h>
+#include <dali-ui-foundation/public-api/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <vector>
 
@@ -261,8 +262,8 @@ int UtcDaliGridLayoutSetRowP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  GridLayout::SetRow(child, 2);
-  DALI_TEST_EQUALS(GridLayout::GetRow(child), 2u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New().SetRow(2));
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRow(), 2u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -272,9 +273,10 @@ int UtcDaliGridLayoutGetRowP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(GridLayout::GetRow(child), 0u, TEST_LOCATION);
-  GridLayout::SetRow(child, 1);
-  DALI_TEST_EQUALS(GridLayout::GetRow(child), 1u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRow(), 0u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New().SetRow(1));
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRow(), 1u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -284,8 +286,8 @@ int UtcDaliGridLayoutSetColumnP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  GridLayout::SetColumn(child, 3);
-  DALI_TEST_EQUALS(GridLayout::GetColumn(child), 3u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New().SetColumn(3));
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetColumn(), 3u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -295,7 +297,8 @@ int UtcDaliGridLayoutGetColumnP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(GridLayout::GetColumn(child), 0u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetColumn(), 0u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -305,8 +308,8 @@ int UtcDaliGridLayoutSetRowSpanP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  GridLayout::SetRowSpan(child, 2);
-  DALI_TEST_EQUALS(GridLayout::GetRowSpan(child), 2u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New().SetRowSpan(2));
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRowSpan(), 2u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -316,7 +319,8 @@ int UtcDaliGridLayoutGetRowSpanP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(GridLayout::GetRowSpan(child), 1u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRowSpan(), 1u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -326,8 +330,8 @@ int UtcDaliGridLayoutSetColumnSpanP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  GridLayout::SetColumnSpan(child, 3);
-  DALI_TEST_EQUALS(GridLayout::GetColumnSpan(child), 3u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New().SetColumnSpan(3));
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetColumnSpan(), 3u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -337,7 +341,8 @@ int UtcDaliGridLayoutGetColumnSpanP(void)
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(GridLayout::GetColumnSpan(child), 1u, TEST_LOCATION);
+  child.SetLayoutParams(GridLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetColumnSpan(), 1u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -433,12 +438,10 @@ int UtcDaliGridLayoutMeasureArrangeP(void)
   layout.AddColumnDefinition(GridLength::Absolute(80.0f));
   View c1 = View::New();
   layout.AddView(c1);
-  GridLayout::SetRow(c1, 0);
-  GridLayout::SetColumn(c1, 0);
+  c1.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
   View c2 = View::New();
   layout.AddView(c2);
-  GridLayout::SetRow(c2, 0);
-  GridLayout::SetColumn(c2, 1);
+  c2.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(120.0f);
   MeasuredSize m = layout.Measure(200.0f, 120.0f);
@@ -460,8 +463,7 @@ int UtcDaliGridLayoutStarDefinitionsP(void)
   layout.AddColumnDefinition(GridLength::Star(1.0f));
   View c1 = View::New();
   layout.AddView(c1);
-  GridLayout::SetRow(c1, 0);
-  GridLayout::SetColumn(c1, 0);
+  c1.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
   MeasuredSize m = layout.Measure(200.0f, 100.0f);
@@ -481,8 +483,7 @@ int UtcDaliGridLayoutAutoDefinitionsP(void)
   c1.SetLayoutWidth(60.0f);
   c1.SetLayoutHeight(40.0f);
   layout.AddView(c1);
-  GridLayout::SetRow(c1, 0);
-  GridLayout::SetColumn(c1, 0);
+  c1.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(120.0f);
   MeasuredSize m = layout.Measure(200.0f, 120.0f);
@@ -502,15 +503,12 @@ int UtcDaliGridLayoutRowColumnSpanP(void)
   layout.AddColumnDefinition(GridLength::Absolute(60.0f));
   View c1 = View::New();
   layout.AddView(c1);
-  GridLayout::SetRow(c1, 0);
-  GridLayout::SetColumn(c1, 0);
-  GridLayout::SetRowSpan(c1, 2);
-  GridLayout::SetColumnSpan(c1, 1);
+  c1.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0).SetRowSpan(2).SetColumnSpan(1));
   layout.SetLayoutWidth(200.0f);
   layout.SetLayoutHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 100));
-  DALI_TEST_EQUALS(GridLayout::GetRowSpan(c1), 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(GridLayout::GetColumnSpan(c1), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(c1.GetLayoutParams<GridLayoutParams>().GetRowSpan(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(c1.GetLayoutParams<GridLayoutParams>().GetColumnSpan(), 1u, TEST_LOCATION);
   END_TEST;
 }

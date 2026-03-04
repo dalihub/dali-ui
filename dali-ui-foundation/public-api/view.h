@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/layout-params.h>
 #include <dali-ui-foundation/public-api/clickable-trait.h>
 
 namespace Dali
@@ -550,6 +551,51 @@ public: // Properties
 
   // @CHAIN_END
 
+  // @CHAIN_MANUAL
+  /**
+   * @brief Sets layout parameters on this View.
+   *
+   * The params handle is stored on the View as-is, and the View's
+   * measure cache is invalidated.
+   *
+   * @param[in] params The layout parameters to attach to this View
+   * @return Reference to this View for fluent chaining
+   *
+   * @code
+   * child.SetLayoutParams(
+   *   AbsoluteLayoutParams::New()
+   *     .SetBounds(LayoutRect(10, 20, 100, 200))
+   *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+   * @endcode
+   */
+  View& SetLayoutParams(LayoutParams params);
+
+  /**
+   * @brief Retrieves the layout parameters of a specific type attached to this View.
+   *
+   * Returns the stored handle. Modifying the returned handle directly
+   * changes the internal data. Call InvalidateMeasure() afterwards if
+   * the layout needs to be recalculated.
+   *
+   * @tparam T The concrete LayoutParams type (e.g. AbsoluteLayoutParams, FlexLayoutParams).
+   *           T must provide static GetLayoutParamsType() and static DownCast(BaseHandle).
+   * @return A valid handle if the params are attached, or an uninitialized handle
+   *
+   * @code
+   * auto params = view.GetLayoutParams<AbsoluteLayoutParams>();
+   * if (params)
+   * {
+   *   params.SetWidth(200.0f);
+   *   view.InvalidateMeasure();
+   * }
+   * @endcode
+   */
+  template <typename T>
+  T GetLayoutParams() const
+  {
+    return T::DownCast(GetLayoutParamsTrait(T::GetLayoutParamsType()));
+  }
+
 public: // Clickable role accessors (non-chaining)
 
   /**
@@ -590,6 +636,15 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API View(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+private:
+  /**
+   * @brief Retrieves a layout params trait by LayoutParamsType.
+   *
+   * @param[in] type The layout params type identifier
+   * @return The trait as a BaseHandle, or an empty handle if not found
+   */
+  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
 };
 
 } // namespace Ui

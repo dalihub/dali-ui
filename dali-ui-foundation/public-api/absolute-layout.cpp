@@ -18,9 +18,6 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/absolute-layout.h>
 
-// EXTERNAL INCLUDES
-#include <dali/public-api/object/property.h>
-
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/absolute-layout-impl.h>
 
@@ -89,105 +86,6 @@ AbsoluteLayout::AbsoluteLayout(Dali::Internal::CustomActor* internal)
   : Layout(internal)
 {
   VerifyCustomActorPointer<Integration::AbsoluteLayoutImpl>(internal);
-}
-
-namespace
-{
-/**
- * @brief Helper to register or update a float attached property.
- */
-void SetFloatProperty(View view, const std::string& name, float value)
-{
-  Property::Index index = view.GetPropertyIndex(name);
-  if (index == Dali::Property::INVALID_INDEX)
-  {
-    view.RegisterProperty(name, value);
-  }
-  else
-  {
-    view.SetProperty(index, value);
-  }
-}
-
-/**
- * @brief Helper to register or update an int attached property.
- */
-void SetIntProperty(View view, const std::string& name, int value)
-{
-  Property::Index index = view.GetPropertyIndex(name);
-  if (index == Dali::Property::INVALID_INDEX)
-  {
-    view.RegisterProperty(name, value);
-  }
-  else
-  {
-    view.SetProperty(index, value);
-  }
-}
-} // namespace
-
-// Static attached property methods
-void AbsoluteLayout::SetLayoutBounds(View view, const LayoutRect& bounds)
-{
-  if (view)
-  {
-    SetFloatProperty(view, "absoluteLayoutX", bounds.x);
-    SetFloatProperty(view, "absoluteLayoutY", bounds.y);
-    SetFloatProperty(view, "absoluteLayoutWidth", bounds.width);
-    SetFloatProperty(view, "absoluteLayoutHeight", bounds.height);
-    view.InvalidateMeasure();
-  }
-}
-
-LayoutRect AbsoluteLayout::GetLayoutBounds(View view)
-{
-  LayoutRect bounds(0.0f, 0.0f, -1.0f, -1.0f);
-  if (view)
-  {
-    auto xIdx = view.GetPropertyIndex("absoluteLayoutX");
-    auto yIdx = view.GetPropertyIndex("absoluteLayoutY");
-    auto wIdx = view.GetPropertyIndex("absoluteLayoutWidth");
-    auto hIdx = view.GetPropertyIndex("absoluteLayoutHeight");
-    if (xIdx != Dali::Property::INVALID_INDEX)
-    {
-      bounds.x = view.GetProperty<float>(xIdx);
-    }
-    if (yIdx != Dali::Property::INVALID_INDEX)
-    {
-      bounds.y = view.GetProperty<float>(yIdx);
-    }
-    if (wIdx != Dali::Property::INVALID_INDEX)
-    {
-      bounds.width = view.GetProperty<float>(wIdx);
-    }
-    if (hIdx != Dali::Property::INVALID_INDEX)
-    {
-      bounds.height = view.GetProperty<float>(hIdx);
-    }
-  }
-  return bounds;
-}
-
-void AbsoluteLayout::SetLayoutFlags(View view, AbsoluteLayoutFlags flags)
-{
-  if (view)
-  {
-    SetIntProperty(view, "absoluteLayoutFlags", static_cast<int>(flags));
-    view.InvalidateMeasure();
-  }
-}
-
-AbsoluteLayoutFlags AbsoluteLayout::GetLayoutFlags(View view)
-{
-  if (view)
-  {
-    auto index = view.GetPropertyIndex("absoluteLayoutFlags");
-    if (index != Dali::Property::INVALID_INDEX)
-    {
-      return static_cast<AbsoluteLayoutFlags>(view.GetProperty<int>(index));
-    }
-  }
-  return AbsoluteLayoutFlags::NONE;
 }
 
 } // namespace Ui

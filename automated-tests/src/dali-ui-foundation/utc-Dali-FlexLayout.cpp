@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/flex-layout-params.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -195,8 +196,8 @@ int UtcDaliFlexLayoutSetFlexGrowP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  FlexLayout::SetFlexGrow(child, 1.0f);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexGrow(child), 1.0f, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexGrow(), 1.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -206,7 +207,8 @@ int UtcDaliFlexLayoutGetFlexGrowP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexGrow(child), 0.0f, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexGrow(), 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -216,8 +218,8 @@ int UtcDaliFlexLayoutSetFlexShrinkP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  FlexLayout::SetFlexShrink(child, 0.5f);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexShrink(child), 0.5f, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexShrink(0.5f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexShrink(), 0.5f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -227,7 +229,8 @@ int UtcDaliFlexLayoutGetFlexShrinkP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexShrink(child), 1.0f, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexShrink(), 1.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -237,8 +240,8 @@ int UtcDaliFlexLayoutSetFlexBasisP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  FlexLayout::SetFlexBasis(child, 100.0f);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexBasis(child), 100.0f, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexBasis(), 100.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -248,7 +251,8 @@ int UtcDaliFlexLayoutGetFlexBasisP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(FlexLayout::GetFlexBasis(child), LayoutDimension::WrapContent, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexBasis(), LayoutDimension::WrapContent, TEST_LOCATION);
   END_TEST;
 }
 
@@ -258,8 +262,8 @@ int UtcDaliFlexLayoutSetAlignSelfP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  FlexLayout::SetAlignSelf(child, FlexAlign::BASELINE);
-  DALI_TEST_EQUALS(FlexLayout::GetAlignSelf(child), FlexAlign::BASELINE, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::BASELINE));
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetAlignSelf(), FlexAlign::BASELINE, TEST_LOCATION);
   END_TEST;
 }
 
@@ -269,7 +273,8 @@ int UtcDaliFlexLayoutGetAlignSelfP(void)
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.AddView(child);
-  DALI_TEST_EQUALS(FlexLayout::GetAlignSelf(child), FlexAlign::AUTO, TEST_LOCATION);
+  child.SetLayoutParams(FlexLayoutParams::New());
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetAlignSelf(), FlexAlign::AUTO, TEST_LOCATION);
   END_TEST;
 }
 

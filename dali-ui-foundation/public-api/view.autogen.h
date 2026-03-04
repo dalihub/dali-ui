@@ -168,4 +168,10 @@
   * \
   * @param[in] color The required background color value \
   */ \
-  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; }
+  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; } \
+  /** \
+  * @brief Sets layout parameters on this View (deep copy). \
+  * \
+  * @param[in] params The layout parameters to copy onto this View \
+  */ \
+  ChildClass& SetLayoutParams(LayoutParams params) { View::SetLayoutParams(params); return *this; }

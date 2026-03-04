@@ -17,6 +17,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -59,7 +60,7 @@ public:
     FlexLayout rowEnd = FlexLayout::New();
     rowEnd.SetLayoutWidth(LayoutDimension::MatchParent);
     rowEnd.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(rowEnd, 1.0f);
+    rowEnd.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowEnd.SetDirection(FlexDirection::ROW);
     rowEnd.SetJustifyContent(FlexJustify::FLEX_END);
     rowEnd.SetAlignItems(FlexAlign::CENTER);
@@ -73,7 +74,7 @@ public:
     FlexLayout rowCenter = FlexLayout::New();
     rowCenter.SetLayoutWidth(LayoutDimension::MatchParent);
     rowCenter.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(rowCenter, 1.0f);
+    rowCenter.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowCenter.SetDirection(FlexDirection::ROW);
     rowCenter.SetJustifyContent(FlexJustify::CENTER);
     rowCenter.SetAlignItems(FlexAlign::CENTER);
@@ -87,7 +88,7 @@ public:
     FlexLayout rowAround = FlexLayout::New();
     rowAround.SetLayoutWidth(LayoutDimension::MatchParent);
     rowAround.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(rowAround, 1.0f);
+    rowAround.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowAround.SetDirection(FlexDirection::ROW);
     rowAround.SetJustifyContent(FlexJustify::SPACE_AROUND);
     rowAround.SetAlignItems(FlexAlign::CENTER);
@@ -101,7 +102,7 @@ public:
     FlexLayout rowEvenly = FlexLayout::New();
     rowEvenly.SetLayoutWidth(LayoutDimension::MatchParent);
     rowEvenly.SetLayoutHeight(LayoutDimension::WrapContent);
-    StackLayout::SetLayoutWeight(rowEvenly, 1.0f);
+    rowEvenly.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowEvenly.SetDirection(FlexDirection::ROW);
     rowEvenly.SetJustifyContent(FlexJustify::SPACE_EVENLY);
     rowEvenly.SetAlignItems(FlexAlign::CENTER);

@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/grid-layout.h>
+#include <dali-ui-foundation/public-api/grid-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -70,39 +71,31 @@ public:
     // Red: row 0, column 0, spans 2 columns
     View red = View::New();
     red.SetBackgroundColor(Color::RED);
-    GridLayout::SetRow(red, 0);
-    GridLayout::SetColumn(red, 0);
-    GridLayout::SetColumnSpan(red, 2);
+    red.SetLayoutParams(GridLayoutParams::New().SetColumnSpan(2));
     root.AddView(red);
 
     // Green: row 0, column 2
     View green = View::New();
     green.SetBackgroundColor(Color::GREEN);
-    GridLayout::SetRow(green, 0);
-    GridLayout::SetColumn(green, 2);
+    green.SetLayoutParams(GridLayoutParams::New().SetColumn(2));
     root.AddView(green);
 
     // Blue: row 1, column 0
     View blue = View::New();
     blue.SetBackgroundColor(Color::BLUE);
-    GridLayout::SetRow(blue, 1);
-    GridLayout::SetColumn(blue, 0);
+    blue.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.AddView(blue);
 
     // Yellow: row 1, column 1, spans 2 columns and 2 rows
     View yellow = View::New();
     yellow.SetBackgroundColor(Color::YELLOW);
-    GridLayout::SetRow(yellow, 1);
-    GridLayout::SetColumn(yellow, 1);
-    GridLayout::SetColumnSpan(yellow, 2);
-    GridLayout::SetRowSpan(yellow, 2);
+    yellow.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1).SetColumnSpan(2).SetRowSpan(2));
     root.AddView(yellow);
 
     // Cyan: row 2, column 0
     View cyan = View::New();
     cyan.SetBackgroundColor(Color::CYAN);
-    GridLayout::SetRow(cyan, 2);
-    GridLayout::SetColumn(cyan, 0);
+    cyan.SetLayoutParams(GridLayoutParams::New().SetRow(2));
     root.AddView(cyan);
 
     window.Add(root);

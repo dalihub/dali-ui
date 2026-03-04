@@ -21,7 +21,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layout.h>
-#include <dali-ui-foundation/public-api/layout-types.h>
 
 namespace Dali
 {
@@ -89,49 +88,6 @@ public:
    * @brief Downcasts a handle to AbsoluteLayout handle.
    */
   static AbsoluteLayout DownCast(BaseHandle handle);
-
-public: // Static methods for attached properties
-
-  /**
-   * @brief Sets the layout bounds for a child view.
-   *
-   * The bounds specify the position and size of the child.
-   * Use flags to determine if values are absolute or proportional.
-   *
-   * @param[in] view The child view
-   * @param[in] bounds The layout bounds (x, y, width, height)
-   */
-  static void SetLayoutBounds(View view, const LayoutRect& bounds);
-
-  /**
-   * @brief Gets the layout bounds for a child view.
-   *
-   * @param[in] view The child view
-   * @return The layout bounds
-   */
-  static LayoutRect GetLayoutBounds(View view);
-
-  /**
-   * @brief Sets the layout flags for a child view.
-   *
-   * Flags determine how bounds values are interpreted:
-   * - None: All values are absolute pixels
-   * - PositionProportional: x, y are proportional (0.0-1.0)
-   * - SizeProportional: width, height are proportional (0.0-1.0)
-   * - All: All values are proportional
-   *
-   * @param[in] view The child view
-   * @param[in] flags The layout flags
-   */
-  static void SetLayoutFlags(View view, AbsoluteLayoutFlags flags);
-
-  /**
-   * @brief Gets the layout flags for a child view.
-   *
-   * @param[in] view The child view
-   * @return The layout flags
-   */
-  static AbsoluteLayoutFlags GetLayoutFlags(View view);
 
 public: // Chaining methods
   DALI_UI_CHAIN_LAYOUT_METHODS(AbsoluteLayout)

@@ -50,7 +50,9 @@ package "Dali::Ui (Public API)" as public_api {
     + New(StackOrientation) : StackLayout
     + SetOrientation(StackOrientation)
     + SetSpacing(float)
-    + SetLayoutWeight(View, float) {static}
+    + {static} GetParams(View) : StackLayoutParams
+    + {static} GetOrCreateParams(View) : StackLayoutParams
+    + {static} SetLayoutWeight(View, float)
   }
 
   class "FlexLayout" as FlexLayout <<handle>> {
@@ -59,6 +61,13 @@ package "Dali::Ui (Public API)" as public_api {
     + SetWrap(FlexWrap)
     + SetJustifyContent(FlexJustify)
     + SetAlignItems(FlexAlign)
+    + SetAlignContent(FlexAlign)
+    + {static} GetParams(View) : FlexLayoutParams
+    + {static} GetOrCreateParams(View) : FlexLayoutParams
+    + {static} SetFlexGrow(View, float)
+    + {static} SetFlexShrink(View, float)
+    + {static} SetFlexBasis(View, float)
+    + {static} SetAlignSelf(View, FlexAlign)
   }
 
   class "GridLayout" as GridLayout <<handle>> {
@@ -67,12 +76,48 @@ package "Dali::Ui (Public API)" as public_api {
     + AddColumnDefinition(GridLength)
     + SetRowSpacing(float)
     + SetColumnSpacing(float)
+    + {static} GetParams(View) : GridLayoutParams
+    + {static} GetOrCreateParams(View) : GridLayoutParams
+    + {static} SetRow(View, uint32_t)
+    + {static} SetColumn(View, uint32_t)
+    + {static} SetRowSpan(View, uint32_t)
+    + {static} SetColumnSpan(View, uint32_t)
   }
 
   class "AbsoluteLayout" as AbsoluteLayout <<handle>> {
     + New() : AbsoluteLayout
-    + SetChildBounds(View, LayoutRect)
-    + SetChildFlags(View, AbsoluteLayoutFlags)
+    + {static} GetParams(View) : AbsoluteLayoutParams
+    + {static} GetOrCreateParams(View) : AbsoluteLayoutParams
+    + {static} SetLayoutBounds(View, LayoutRect)
+    + {static} GetLayoutBounds(View) : LayoutRect
+    + {static} SetLayoutFlags(View, AbsoluteLayoutFlags)
+    + {static} GetLayoutFlags(View) : AbsoluteLayoutFlags
+  }
+
+  class "AbsoluteLayoutParams" as AbsoluteLayoutParams <<handle>> {
+    + SetBounds(LayoutRect) : AbsoluteLayoutParams&
+    + GetBounds() : LayoutRect
+    + SetFlags(AbsoluteLayoutFlags) : AbsoluteLayoutParams&
+    + GetFlags() : AbsoluteLayoutFlags
+  }
+
+  class "FlexLayoutParams" as FlexLayoutParams <<handle>> {
+    + SetFlexGrow(float) : FlexLayoutParams&
+    + SetFlexShrink(float) : FlexLayoutParams&
+    + SetFlexBasis(float) : FlexLayoutParams&
+    + SetAlignSelf(FlexAlign) : FlexLayoutParams&
+  }
+
+  class "GridLayoutParams" as GridLayoutParams <<handle>> {
+    + SetRow(uint32_t) : GridLayoutParams&
+    + SetColumn(uint32_t) : GridLayoutParams&
+    + SetRowSpan(uint32_t) : GridLayoutParams&
+    + SetColumnSpan(uint32_t) : GridLayoutParams&
+  }
+
+  class "StackLayoutParams" as StackLayoutParams <<handle>> {
+    + SetWeight(float) : StackLayoutParams&
+    + GetWeight() : float
   }
 
   class "LayoutController" as LayoutController <<singleton>> {
@@ -156,6 +201,40 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     + ProcessLayouts()
     + Process(postProcess) : void
     - ProcessLayoutRoot(ViewImpl*)
+  }
+
+  class "AbsoluteLayoutParamsImpl" as AbsoluteLayoutParamsImpl <<trait>> {
+    + SetBounds(LayoutRect)
+    + GetBounds() : LayoutRect
+    + SetFlags(AbsoluteLayoutFlags)
+    + GetFlags() : AbsoluteLayoutFlags
+    + {static} Get(ViewImpl&) : AbsoluteLayoutParamsImpl*
+    + {static} GetOrCreate(ViewImpl&) : AbsoluteLayoutParamsImpl&
+  }
+
+  class "FlexLayoutParamsImpl" as FlexLayoutParamsImpl <<trait>> {
+    + SetFlexGrow(float)
+    + SetFlexShrink(float)
+    + SetFlexBasis(float)
+    + SetAlignSelf(FlexAlign)
+    + {static} Get(ViewImpl&) : FlexLayoutParamsImpl*
+    + {static} GetOrCreate(ViewImpl&) : FlexLayoutParamsImpl&
+  }
+
+  class "GridLayoutParamsImpl" as GridLayoutParamsImpl <<trait>> {
+    + SetRow(uint32_t)
+    + SetColumn(uint32_t)
+    + SetRowSpan(uint32_t)
+    + SetColumnSpan(uint32_t)
+    + {static} Get(ViewImpl&) : GridLayoutParamsImpl*
+    + {static} GetOrCreate(ViewImpl&) : GridLayoutParamsImpl&
+  }
+
+  class "StackLayoutParamsImpl" as StackLayoutParamsImpl <<trait>> {
+    + SetWeight(float)
+    + GetWeight() : float
+    + {static} Get(ViewImpl&) : StackLayoutParamsImpl*
+    + {static} GetOrCreate(ViewImpl&) : StackLayoutParamsImpl&
   }
 }
 
@@ -243,6 +322,23 @@ LayoutManager <|-- AbsoluteLayoutManager
 
 ViewImpl o-- LayoutManager : optional
 LayoutImpl ..> LayoutManager : creates via CreateLayoutManager()
+
+' ========== Layout Params (Handle -> Impl) ==========
+AbsoluteLayoutParams ..> AbsoluteLayoutParamsImpl : uses
+FlexLayoutParams ..> FlexLayoutParamsImpl : uses
+GridLayoutParams ..> GridLayoutParamsImpl : uses
+StackLayoutParams ..> StackLayoutParamsImpl : uses
+
+AbsoluteLayout ..> AbsoluteLayoutParams : creates
+FlexLayout ..> FlexLayoutParams : creates
+GridLayout ..> GridLayoutParams : creates
+StackLayout ..> StackLayoutParams : creates
+
+' ========== Layout Params Traits ==========
+AbsoluteLayoutManager ..> AbsoluteLayoutParamsImpl : reads
+FlexLayoutManager ..> FlexLayoutParamsImpl : reads
+GridLayoutManager ..> GridLayoutParamsImpl : reads
+StackLayoutManager ..> StackLayoutParamsImpl : reads
 
 ' ========== Types ==========
 ViewImpl ..> MeasuredSize : returns

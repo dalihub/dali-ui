@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/flex-layout.h>
+#include <dali-ui-foundation/public-api/flex-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -92,7 +93,7 @@ public:
     childA.SetBackgroundColor(Color::MAGENTA);
     childA.SetLayoutWidth(LayoutDimension::WrapContent);
     childA.SetLayoutHeight(LayoutDimension::MatchParent);
-    FlexLayout::SetFlexGrow(childA, 1.0f);
+    childA.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childA);
 
     View childB = View::New();
@@ -100,7 +101,7 @@ public:
     childB.SetLayoutWidth(LayoutDimension::WrapContent);
     childB.SetLayoutHeight(LayoutDimension::MatchParent);
     childB.SetViewMargin(Extents(25, 25, 25, 25));
-    FlexLayout::SetFlexGrow(childB, 1.0f);
+    childB.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childB);
 
     View childC = View::New();
@@ -108,7 +109,7 @@ public:
     childC.SetLayoutWidth(LayoutDimension::WrapContent);
     childC.SetLayoutHeight(LayoutDimension::MatchParent);
     childC.SetViewMargin(Extents(25, 25, 25, 25));
-    FlexLayout::SetFlexGrow(childC, 1.0f);
+    childC.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childC);
 
     root.AddView(nestedRow);

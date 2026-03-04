@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/grid-layout.h>
+#include <dali-ui-foundation/public-api/grid-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -61,43 +62,37 @@ public:
     // Cell (0,0): Red
     View cell00 = View::New();
     cell00.SetBackgroundColor(Color::RED);
-    GridLayout::SetRow(cell00, 0);
-    GridLayout::SetColumn(cell00, 0);
+    cell00.SetLayoutParams(GridLayoutParams::New());
     root.AddView(cell00);
 
     // Cell (0,1): Green
     View cell01 = View::New();
     cell01.SetBackgroundColor(Color::GREEN);
-    GridLayout::SetRow(cell01, 0);
-    GridLayout::SetColumn(cell01, 1);
+    cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
     root.AddView(cell01);
 
     // Cell (1,0): Blue
     View cell10 = View::New();
     cell10.SetBackgroundColor(Color::BLUE);
-    GridLayout::SetRow(cell10, 1);
-    GridLayout::SetColumn(cell10, 0);
+    cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.AddView(cell10);
 
     // Cell (1,1): Yellow
     View cell11 = View::New();
     cell11.SetBackgroundColor(Color::YELLOW);
-    GridLayout::SetRow(cell11, 1);
-    GridLayout::SetColumn(cell11, 1);
+    cell11.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
     root.AddView(cell11);
 
     // Cell (2,0): Cyan
     View cell20 = View::New();
     cell20.SetBackgroundColor(Color::CYAN);
-    GridLayout::SetRow(cell20, 2);
-    GridLayout::SetColumn(cell20, 0);
+    cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
     root.AddView(cell20);
 
     // Cell (2,1): Magenta
     View cell21 = View::New();
     cell21.SetBackgroundColor(Color::MAGENTA);
-    GridLayout::SetRow(cell21, 2);
-    GridLayout::SetColumn(cell21, 1);
+    cell21.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
     root.AddView(cell21);
 
     window.Add(root);
