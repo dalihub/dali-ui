@@ -35,10 +35,22 @@ namespace UI
  */
 enum class LayoutAlignment : uint8_t
 {
-  FILL = 0,   ///< Fill the available space
-  START = 1,  ///< Align to the start (left/top)
-  CENTER = 2, ///< Align to the center
-  END = 3     ///< Align to the end (right/bottom)
+  /**
+   * @brief Fill the available space
+   */
+  FILL = 0,
+  /**
+   * @brief Align to the start (left/top)
+   */
+  START = 1,
+  /**
+   * @brief Align to the center
+   */
+  CENTER = 2,
+  /**
+   * @brief Align to the end (right/bottom)
+   */
+  END = 3
 };
 
 /**
@@ -254,8 +266,14 @@ public:
  */
 enum class StackOrientation : uint8_t
 {
-  VERTICAL = 0,  ///< Vertical stacking (top to bottom)
-  HORIZONTAL = 1 ///< Horizontal stacking (left to right)
+  /**
+   * @brief Vertical stacking (top to bottom)
+   */
+  VERTICAL = 0,
+  /**
+   * @brief Horizontal stacking (left to right)
+   */
+  HORIZONTAL = 1
 };
 
 /**
@@ -263,10 +281,22 @@ enum class StackOrientation : uint8_t
  */
 enum class FlexDirection : uint8_t
 {
-  ROW = 0,           ///< Left to right
-  ROW_REVERSE = 1,   ///< Right to left
-  COLUMN = 2,        ///< Top to bottom
-  COLUMN_REVERSE = 3 ///< Bottom to top
+  /**
+   * @brief Left to right
+   */
+  ROW = 0,
+  /**
+   * @brief Right to left
+   */
+  ROW_REVERSE = 1,
+  /**
+   * @brief Top to bottom
+   */
+  COLUMN = 2,
+  /**
+   * @brief Bottom to top
+   */
+  COLUMN_REVERSE = 3
 };
 
 /**
@@ -274,9 +304,18 @@ enum class FlexDirection : uint8_t
  */
 enum class FlexWrap : uint8_t
 {
-  NO_WRAP = 0,     ///< No wrapping
-  WRAP = 1,        ///< Normal wrapping
-  WRAP_REVERSE = 2 ///< Reverse wrapping
+  /**
+   * @brief No wrapping
+   */
+  NO_WRAP = 0,
+  /**
+   * @brief Normal wrapping
+   */
+  WRAP = 1,
+  /**
+   * @brief Reverse wrapping
+   */
+  WRAP_REVERSE = 2
 };
 
 /**
@@ -284,12 +323,30 @@ enum class FlexWrap : uint8_t
  */
 enum class FlexJustify : uint8_t
 {
-  FLEX_START = 0,    ///< Align to start
-  FLEX_END = 1,      ///< Align to end
-  CENTER = 2,        ///< Center alignment
-  SPACE_BETWEEN = 3, ///< Space between items
-  SPACE_AROUND = 4,  ///< Space around items
-  SPACE_EVENLY = 5   ///< Even spacing
+  /**
+   * @brief Align to start
+   */
+  FLEX_START = 0,
+  /**
+   * @brief Align to end
+   */
+  FLEX_END = 1,
+  /**
+   * @brief Center alignment
+   */
+  CENTER = 2,
+  /**
+   * @brief Space between items
+   */
+  SPACE_BETWEEN = 3,
+  /**
+   * @brief Space around items
+   */
+  SPACE_AROUND = 4,
+  /**
+   * @brief Even spacing
+   */
+  SPACE_EVENLY = 5
 };
 
 /**
@@ -297,12 +354,30 @@ enum class FlexJustify : uint8_t
  */
 enum class FlexAlign : uint8_t
 {
-  AUTO = 0,       ///< Auto alignment
-  FLEX_START = 1, ///< Align to start
-  FLEX_END = 2,   ///< Align to end
-  CENTER = 3,     ///< Center alignment
-  STRETCH = 4,    ///< Stretch to fill
-  BASELINE = 5    ///< Baseline alignment
+  /**
+   * @brief Auto alignment
+   */
+  AUTO = 0,
+  /**
+   * @brief Align to start
+   */
+  FLEX_START = 1,
+  /**
+   * @brief Align to end
+   */
+  FLEX_END = 2,
+  /**
+   * @brief Center alignment
+   */
+  CENTER = 3,
+  /**
+   * @brief Stretch to fill
+   */
+  STRETCH = 4,
+  /**
+   * @brief Baseline alignment
+   */
+  BASELINE = 5
 };
 
 /**
@@ -310,9 +385,18 @@ enum class FlexAlign : uint8_t
  */
 enum class GridLengthType : uint8_t
 {
-  ABSOLUTE = 0, ///< Absolute pixel value
-  STAR = 1,     ///< Proportional (star) value
-  AUTO = 2      ///< Auto sizing
+  /**
+   * @brief Absolute pixel value
+   */
+  ABSOLUTE = 0,
+  /**
+   * @brief Proportional (star) value
+   */
+  STAR = 1,
+  /**
+   * @brief Auto sizing
+   */
+  AUTO = 2
 };
 
 /**
@@ -397,9 +481,21 @@ private:
  */
 enum class AbsoluteLayoutFlags : uint8_t
 {
+  /**
+   * @brief No flags set
+   */
   NONE = 0x0,
+  /**
+   * @brief Position is proportional to parent size
+   */
   POSITION_PROPORTIONAL = 0x1,
+  /**
+   * @brief Size is proportional to parent size
+   */
   SIZE_PROPORTIONAL = 0x2,
+  /**
+   * @brief All flags set
+   */
   ALL = POSITION_PROPORTIONAL | SIZE_PROPORTIONAL
 };
 
