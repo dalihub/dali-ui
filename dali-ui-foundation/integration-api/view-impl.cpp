@@ -100,8 +100,7 @@ ViewImpl::ViewImpl()
     mDesiredSize{0.0f, 0.0f},
     mLastMeasuredConstraint{-1.0f, -1.0f},
     mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-    mArrangeValid(false),
-    mClipsToBounds(false)
+    mArrangeValid(false)
 {
 }
 
@@ -957,21 +956,6 @@ ViewImpl::ChildContainer& ViewImpl::GetChildren()
 const ViewImpl::ChildContainer& ViewImpl::GetChildren() const
 {
   return mChildren;
-}
-
-void ViewImpl::SetClipsToBounds(bool clips)
-{
-  if (mClipsToBounds != clips)
-  {
-    mClipsToBounds = clips;
-    Actor self = Self();
-    self.SetProperty(Actor::Property::CLIPPING_MODE, clips ? ClippingMode::CLIP_CHILDREN : ClippingMode::DISABLED);
-  }
-}
-
-bool ViewImpl::GetClipsToBounds() const
-{
-  return mClipsToBounds;
 }
 
 } // namespace Integration

@@ -44,7 +44,6 @@ class LayoutImpl;
  * children; the public API for adding/removing children is on Layout.
  *
  * - Always has a LayoutManager (from derived classes like StackLayout, GridLayout)
- * - Supports ClipsToBounds functionality
  * - Child Management API: AddView, RemoveView, RemoveAllViews, RemoveViewAt, GetChildCount, GetChildAt, IndexOfChild,
  * Contents(...)
  */
@@ -109,21 +108,6 @@ public:
   static Layout DownCast(BaseHandle handle);
 
 public:
-
-  // @CHAIN_START(Layout, View)
-  /**
-   * @brief Sets whether this layout clips its children to its bounds.
-   *
-   * @param[in] clips True to clip children to bounds
-   */
-  Layout& SetClipsToBounds(bool clips);
-
-  /**
-   * @brief Gets whether this layout clips its children to its bounds.
-   *
-   * @return True if children are clipped to bounds
-   */
-  bool GetClipsToBounds() const;
 
   // @CHAIN_MANUAL
   /**

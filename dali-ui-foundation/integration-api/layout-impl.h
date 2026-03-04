@@ -33,8 +33,7 @@ namespace Integration
  * @brief This is the internal implementation class for Layout.
  *
  * Layout is a convenience class that extends View with a pre-configured
- * LayoutManager. It provides additional layout-specific features like
- * ClipsToBounds.
+ * LayoutManager.
  *
  * Since View now supports optional LayoutManager and child management,
  * Layout simply ensures a LayoutManager is always set up and provides

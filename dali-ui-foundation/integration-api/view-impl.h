@@ -460,21 +460,6 @@ public: // Child Management API (available when LayoutManager is set)
    */
   const ChildContainer& GetChildren() const;
 
-public: // ClipsToBounds API
-  /**
-   * @brief Sets whether this view clips its children to its bounds.
-   *
-   * @param[in] clips True to clip children to bounds
-   */
-  void SetClipsToBounds(bool clips);
-
-  /**
-   * @brief Gets whether this view clips its children to its bounds.
-   *
-   * @return True if children are clipped to bounds
-   */
-  bool GetClipsToBounds() const;
-
 protected:
   /**
    * @brief Applies min/max constraints to the size.
@@ -525,9 +510,6 @@ private:
   // Optional LayoutManager and Children (for layout capability)
   std::unique_ptr<LayoutManager> mLayoutManager;
   ChildContainer mChildren;
-
-  // ClipsToBounds (layout-style behaviour when view has children)
-  bool mClipsToBounds;
 };
 
 // Helpers for public-api forwarding methods

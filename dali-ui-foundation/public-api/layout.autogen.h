@@ -4,12 +4,6 @@
 #define DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
   DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
   /** \
-  * @brief Sets whether this layout clips its children to its bounds. \
-  * \
-  * @param[in] clips True to clip children to bounds \
-  */ \
-  ChildClass& SetClipsToBounds(bool clips) { Layout::SetClipsToBounds(clips); return *this; } \
-  /** \
   * @brief Adds a list of children to this View in a declarative way. \
   * This method allows for a hierarchical UI tree construction by passing \
   * a brace-enclosed initializer list of View objects. \

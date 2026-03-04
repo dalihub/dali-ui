@@ -100,25 +100,6 @@ int UtcDaliLayoutDownCastN(void)
   END_TEST;
 }
 
-int UtcDaliLayoutSetClipsToBoundsP(void)
-{
-  TestApplication application;
-  Layout layout = Layout::New();
-  layout.SetClipsToBounds(true);
-  DALI_TEST_CHECK(layout.GetClipsToBounds() == true);
-  layout.SetClipsToBounds(false);
-  DALI_TEST_CHECK(layout.GetClipsToBounds() == false);
-  END_TEST;
-}
-
-int UtcDaliLayoutGetClipsToBoundsP(void)
-{
-  TestApplication application;
-  Layout layout = Layout::New();
-  DALI_TEST_CHECK(layout.GetClipsToBounds() == false);
-  END_TEST;
-}
-
 int UtcDaliLayoutAddViewP(void)
 {
   TestApplication application;
@@ -225,16 +206,6 @@ int UtcDaliLayoutContentsP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutClipsToBoundsChainingP(void)
-{
-  TestApplication application;
-  Layout layout = Layout::New();
-  Layout& result = layout.SetClipsToBounds(true);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetClipsToBounds() == true);
-  END_TEST;
-}
-
 int UtcDaliLayoutContentsEmptyP(void)
 {
   TestApplication application;
@@ -322,15 +293,6 @@ int UtcDaliLayoutIndexOfChildEmptyHandleP(void)
   Layout layout = Layout::New();
   layout.AddView(View::New());
   DALI_TEST_EQUALS(layout.IndexOfChild(View()), -1, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliLayoutSetClipsToBoundsTrueP(void)
-{
-  TestApplication application;
-  Layout layout = Layout::New();
-  layout.SetClipsToBounds(true);
-  DALI_TEST_CHECK(layout.GetClipsToBounds());
   END_TEST;
 }
 

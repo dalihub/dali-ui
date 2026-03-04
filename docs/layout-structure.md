@@ -19,7 +19,6 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **Layout** (inherits View)  
   - Child management: `AddView(View)`, `AddView(View, index)`, `RemoveView(View)`, `RemoveViewAt(index)`, `RemoveAllViews()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Contents(initializer_list<View>)`.  
-  - Clipping: `SetClipsToBounds(bool)` / `GetClipsToBounds()`.  
   - Always has a LayoutManager; derived classes attach Stack/Flex/Grid/Absolute algorithms.
 
 - **StackLayout, FlexLayout, GridLayout, AbsoluteLayout**  
@@ -33,12 +32,12 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **ViewImpl** (DALi ControlImpl-derived)  
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and **optional** LayoutManager and child container.  
-  - When a LayoutManager is set: provides `SetLayoutManager`, `AddView`, `RemoveView`, `RemoveAllViews`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, `SetClipsToBounds`, etc.  
+  - When a LayoutManager is set: provides `SetLayoutManager`, `AddView`, `RemoveView`, `RemoveAllViews`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc.
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)  
   - On construction, creates a derived LayoutManager via `CreateLayoutManager()` and sets it with `SetLayoutManager`.  
-  - ClipsToBounds and child APIs are inherited from ViewImpl.
+  - Child APIs are inherited from ViewImpl.
 
 - **StackLayoutImpl, FlexLayoutImpl, GridLayoutImpl, AbsoluteLayoutImpl**  
   - Each overrides `CreateLayoutManager()` to return the corresponding Stack, Flex, Grid, or Absolute LayoutManager.
