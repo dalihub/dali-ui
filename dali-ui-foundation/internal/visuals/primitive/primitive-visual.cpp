@@ -383,7 +383,6 @@ void PrimitiveVisual::OnInitialize()
   }
 
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
-  mImpl->mRenderer.RegisterVisualTransformUniform();
   mImpl->mRenderer.SetProperty(Renderer::Property::FACE_CULLING_MODE, FaceCullingMode::BACK);
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
 }

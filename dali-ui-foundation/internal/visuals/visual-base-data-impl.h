@@ -403,7 +403,6 @@ struct Base::Impl
   {
     if (!mTransformMapUsingDefault || direction != UI::Direction::LEFT_TO_RIGHT)
     {
-      renderer.RegisterVisualTransformUniform();
       GetOrCreateTransform().SetUniforms(renderer, direction);
     }
   }

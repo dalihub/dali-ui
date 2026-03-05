@@ -305,7 +305,6 @@ void MeshVisual::OnInitialize()
   }
 
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
-  mImpl->mRenderer.RegisterVisualTransformUniform();
   mImpl->mRenderer.SetTextures(mTextureSet);
   mImpl->mRenderer.SetProperty(Renderer::Property::DEPTH_WRITE_MODE, DepthWriteMode::ON);
   mImpl->mRenderer.SetProperty(Renderer::Property::DEPTH_TEST_MODE, DepthTestMode::ON);
