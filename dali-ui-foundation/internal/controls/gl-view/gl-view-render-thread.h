@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/native-image-source-queue.h>
+#include <dali/devel-api/adaptor-framework/native-image-queue.h>
 #include <dali/devel-api/threading/conditional-wait.h>
 #include <dali/devel-api/threading/semaphore.h>
 #include <dali/devel-api/threading/thread.h>
@@ -45,9 +45,9 @@ public:
   /**
    * Constructor
    *
-   * @param[in] queue The NativeImageSourceQueue that GL renders onto
+   * @param[in] queue The NativeImageQueuethat GL renders onto
    */
-  GlViewRenderThread(Dali::NativeImageSourceQueuePtr queue);
+  GlViewRenderThread(Dali::NativeImageQueuePtr queue);
 
   /**
    * destructor.
@@ -152,7 +152,7 @@ private:
 
   Dali::Vector2 mSurfaceSize; ///< The size of mNativeImageQueue
   Dali::NativeImageSurfacePtr mNativeImageSurface;
-  Dali::NativeImageSourceQueuePtr mNativeImageQueue;
+  Dali::NativeImageQueuePtr mNativeImageQueue;
   Semaphore<> mSurfaceSemaphore; ///< The semaphore to avoid race condition to the render target
 
   std::unique_ptr<CallbackBase> mGlInitCallback;

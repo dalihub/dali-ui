@@ -1099,12 +1099,12 @@ void WebView::OnFrameRendered()
   // Reset flag
   mVisualChangeRequired = false;
 
-  auto nativeImageSourcePtr = mWebEngine.GetNativeImageSource();
+  auto nativeImagePtr = mWebEngine.GetNativeImage();
 
-  mLastRenderedNativeImageWidth = nativeImageSourcePtr->GetWidth();
-  mLastRenderedNativeImageHeight = nativeImageSourcePtr->GetHeight();
+  mLastRenderedNativeImageWidth = nativeImagePtr->GetWidth();
+  mLastRenderedNativeImageHeight = nativeImagePtr->GetHeight();
 
-  Dali::UI::ImageUrl nativeImageUrl = Dali::UI::Image::GenerateUrl(nativeImageSourcePtr, true);
+  Dali::UI::ImageUrl nativeImageUrl = Dali::UI::Image::GenerateUrl(nativeImagePtr, true);
 
   newWebMap[UI::ImageVisual::Property::URL] = nativeImageUrl.GetUrl();
 

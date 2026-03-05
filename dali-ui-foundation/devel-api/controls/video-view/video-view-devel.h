@@ -20,7 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/video-sync-mode.h>
-#include <dali/public-api/adaptor-framework/native-image-source.h>
+#include <dali/public-api/adaptor-framework/native-image.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/video-view/video-view.h>
@@ -130,14 +130,14 @@ DALI_UI_API void EnableOffscreenFrameRendering(VideoView videoView, bool useCove
 /**
  * @brief Sets the video frame buffer for rendering.
  *
- * This method sets the native image source that will be used as the frame buffer
+ * This method sets the native image that will be used as the frame buffer
  * for video rendering. The frame buffer contains the surface data for video playback.
  *
  * @param[in] videoView The current VideoView
- * @param[in] source The native image source for video frame buffer
+ * @param[in] source The native image for video frame buffer
  * @SINCE_2_4.41
  */
-DALI_UI_API void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImageSourcePtr source);
+DALI_UI_API void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImagePtr source);
 
 } // namespace DevelVideoView
 

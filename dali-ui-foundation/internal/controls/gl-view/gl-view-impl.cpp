@@ -151,12 +151,12 @@ void GlView::Terminate()
 
 void GlView::OnInitialize()
 {
-  // Create NativeImageSourceQueue with the size of 1,1
-  mNativeImageQueue = Dali::NativeImageSourceQueue::New(1, 1, GetColorFormat(mColorFormat));
+  // Create NativeImageQueuewith the size of 1,1
+  mNativeImageQueue = Dali::NativeImageQueue::New(1, 1, GetColorFormat(mColorFormat));
 
   if (!mNativeImageQueue)
   {
-    DALI_LOG_ERROR("NativeImageSourceQueue is NULL");
+    DALI_LOG_ERROR("NativeImageQueueis NULL");
     return;
   }
 
@@ -285,21 +285,21 @@ void GlView::AddRenderer()
   self.AddRenderer(renderer);
 }
 
-Dali::NativeImageSourceQueue::ColorFormat GlView::GetColorFormat(Dali::UI::GlView::ColorFormat format)
+Dali::NativeImageQueue::ColorFormat GlView::GetColorFormat(Dali::UI::GlView::ColorFormat format)
 {
   switch (format)
   {
     case UI::GlView::ColorFormat::RGBA8888:
     {
       // TODO : Shouldn't it be RGBA8888?
-      return Dali::NativeImageSourceQueue::ColorFormat::BGRA8888;
+      return Dali::NativeImageQueue::ColorFormat::BGRA8888;
     }
 
     case UI::GlView::ColorFormat::RGB888:
     default:
     {
       // TODO : Shouldn't it be RGBX8888?
-      return Dali::NativeImageSourceQueue::ColorFormat::BGRX8888;
+      return Dali::NativeImageQueue::ColorFormat::BGRX8888;
     }
   }
 }

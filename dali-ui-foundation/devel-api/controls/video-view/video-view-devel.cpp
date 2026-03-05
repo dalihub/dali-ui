@@ -76,7 +76,7 @@ void EnableOffscreenFrameRendering(VideoView videoView, bool useCoverFrame)
   Dali::UI::GetImpl(videoView).EnableOffscreenFrameRendering(useCoverFrame);
 }
 
-void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImageSourcePtr source)
+void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImagePtr source)
 {
   Dali::UI::GetImpl(videoView).SetVideoFrameBuffer(source);
 }

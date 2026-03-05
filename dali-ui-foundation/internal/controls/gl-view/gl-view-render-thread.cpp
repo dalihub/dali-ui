@@ -41,7 +41,7 @@ constexpr uint64_t DEFAULT_FRAME_DURATION_IN_NANOSECONDS(DEFAULT_FRAME_DURATION_
 
 } // namespace
 
-GlViewRenderThread::GlViewRenderThread(Dali::NativeImageSourceQueuePtr queue)
+GlViewRenderThread::GlViewRenderThread(Dali::NativeImageQueuePtr queue)
   : mLogFactory(Dali::Adaptor::Get().GetLogFactory()),
     mTraceFactory(Dali::Adaptor::Get().GetTraceFactory()),
     mSurfaceSize(1, 1),

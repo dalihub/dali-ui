@@ -20,7 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/native-image-source-queue.h>
+#include <dali/devel-api/adaptor-framework/native-image-queue.h>
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/rendering/geometry.h>
@@ -150,15 +150,15 @@ private:
   Dali::Shader CreateShader();
 
   /**
-   * @brief Gets the NativeImageSourceQueue's ColorFormat with the GlView's ColorFormat.
+   * @brief Gets the NativeImageQueues ColorFormat with the GlView's ColorFormat.
    * @param[in] colorFormat the color format of the GlView.
    * @return The color format of NativeImageSourceQueue
    */
-  Dali::NativeImageSourceQueue::ColorFormat GetColorFormat(Dali::UI::GlView::ColorFormat format);
+  Dali::NativeImageQueue::ColorFormat GetColorFormat(Dali::UI::GlView::ColorFormat format);
 
 private:
   std::unique_ptr<GlViewRenderThread> mRenderThread;
-  Dali::NativeImageSourceQueuePtr mNativeImageQueue;
+  Dali::NativeImageQueuePtr mNativeImageQueue;
   Dali::UI::GlView::RenderingMode mRenderingMode{UI::GlView::RenderingMode::CONTINUOUS};
   Dali::UI::GlView::ColorFormat mColorFormat{UI::GlView::ColorFormat::RGB888};
   bool mDepth{false};

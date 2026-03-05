@@ -334,12 +334,12 @@ public:
   /**
    * @brief Sets the video frame buffer for rendering.
    *
-   * This method sets the native image source that will be used as the frame buffer
+   * This method sets the native image that will be used as the frame buffer
    * for video rendering. The frame buffer contains the surface data for video playback.
    *
-   * @param[in] source The native image source for video frame buffer
+   * @param[in] source The native image for video frame buffer
    */
-  void SetVideoFrameBuffer(Dali::NativeImageSourcePtr source);
+  void SetVideoFrameBuffer(Dali::NativeImagePtr source);
 
 private: // From Control
   /**

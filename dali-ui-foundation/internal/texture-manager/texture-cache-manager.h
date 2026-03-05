@@ -47,7 +47,7 @@ namespace Internal
  *                            This container will use TEXTURE_CACHE_INDEX_TYPE_LOCAL
  *
  *  - mExternalTextures : External appended TextureSet cache container.
- *                        External TextureSet can be Something like NativeImageSource, FrameBuffer and PixelData.
+ *                        External TextureSet can be Something like NativeImage FrameBuffer and PixelData.
  *                        This container will use TEXTURE_CACHE_INDEX_TYPE_TEXTURE
  *                        The textureId will be used for VisualUrl. ex) dali://1
  *
