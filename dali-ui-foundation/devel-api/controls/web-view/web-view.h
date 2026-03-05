@@ -872,6 +872,13 @@ public:
   void RegisterFileChooserRequestedCallback(Dali::WebEnginePlugin::WebEngineFileChooserRequestedCallback callback);
 
   /**
+   * @brief Register a callback for monitoring web process crash events in Web Engine.
+   *
+   * @param[in] callback The callback function called when web process crashes.
+   */
+  void RegisterWebProcessCrashedCallback(Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback callback);
+
+  /**
    * @brief Register UserMediaPermissionRequest callback.
    *
    * @param[in] callback The callback to be called for handling user media permission.

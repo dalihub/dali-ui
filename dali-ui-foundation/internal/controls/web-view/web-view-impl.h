@@ -495,6 +495,11 @@ public:
   void RegisterFileChooserRequestedCallback(Dali::WebEnginePlugin::WebEngineFileChooserRequestedCallback callback);
 
   /**
+   * @copydoc Dali::UI::WebView::RegisterWebProcessCrashedCallback()
+   */
+  void RegisterWebProcessCrashedCallback(Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback callback);
+
+  /**
    * @copydoc Dali::UI::WebView::RegisterUserMediaPermissionRequestCallback()
    */
   void RegisterUserMediaPermissionRequestCallback(

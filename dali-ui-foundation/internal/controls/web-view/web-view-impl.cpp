@@ -1026,6 +1026,14 @@ void WebView::RegisterFileChooserRequestedCallback(
   }
 }
 
+void WebView::RegisterWebProcessCrashedCallback(Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback callback)
+{
+  if (mWebEngine)
+  {
+    mWebEngine.RegisterWebProcessCrashedCallback(std::move(callback));
+  }
+}
+
 void WebView::RegisterUserMediaPermissionRequestCallback(
     Dali::WebEnginePlugin::WebEngineUserMediaPermissionRequestCallback callback)
 {

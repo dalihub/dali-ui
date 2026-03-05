@@ -502,6 +502,11 @@ void WebView::RegisterFileChooserRequestedCallback(
   Dali::UI::GetImpl(*this).RegisterFileChooserRequestedCallback(callback);
 }
 
+void WebView::RegisterWebProcessCrashedCallback(Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback callback)
+{
+  Dali::UI::GetImpl(*this).RegisterWebProcessCrashedCallback(callback);
+}
+
 void WebView::RegisterUserMediaPermissionRequestCallback(
     Dali::WebEnginePlugin::WebEngineUserMediaPermissionRequestCallback callback)
 {
