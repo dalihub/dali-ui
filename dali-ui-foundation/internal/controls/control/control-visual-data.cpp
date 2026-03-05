@@ -258,7 +258,6 @@ void SetVisualOnScene(Internal::Visual::Base& visualImpl, Internal::Control& con
 void SetVisualOffScene(Internal::Visual::Base& visualImpl, Internal::Control& controlImpl)
 {
   Actor self = controlImpl.Self();
-  visualImpl.SetOffScene(self);
 
   UI::Control handle = UI::Control(controlImpl.GetOwner());
   DevelControl::OffScreenRenderingType offscreenRenderingType =
@@ -267,10 +266,13 @@ void SetVisualOffScene(Internal::Visual::Base& visualImpl, Internal::Control& co
   {
     if (!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {
-      Renderer renderer = visualImpl.GetRenderer();
+      VisualRenderer renderer = visualImpl.GetRenderer();
       self.RemoveCacheRenderer(renderer);
+
+      // Don't need to call self.AddRenderer(renderer) again, because SetOffScene() will remove renderer automatically.
     }
   }
+  visualImpl.SetOffScene(self);
 }
 
 /**
