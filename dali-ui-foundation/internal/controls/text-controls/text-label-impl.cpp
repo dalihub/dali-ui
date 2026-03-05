@@ -862,7 +862,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
       }
       case UI::TextLabel::Property::ENABLE_AUTO_SCROLL:
       {
-        value = impl.mController->IsAutoScrollEnabled();
+        value = impl.IsVisible() ? impl.mController->IsAutoScrollEnabled() : impl.mLastAutoScrollEnabled;
         break;
       }
       case UI::TextLabel::Property::AUTO_SCROLL_STOP_MODE:
@@ -1261,6 +1261,16 @@ void TextLabel::OnInitialize()
 DevelControl::ControlAccessible* TextLabel::CreateAccessibleObject()
 {
   return new TextLabelAccessible(Self());
+}
+
+bool TextLabel::IsVisible()
+{
+  if (!mIsVisibleInitialized)
+  {
+    mIsVisible = DevelActor::IsEffectivelyVisible(Self());
+    mIsVisibleInitialized = true;
+  }
+  return mIsVisible;
 }
 
 bool TextLabel::OnInterceptTouched(Actor actor, const TouchEvent& touch)
@@ -2190,6 +2200,9 @@ void TextLabel::AsyncLoadComplete(Text::AsyncTextRenderInfo renderInfo)
 
 void TextLabel::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
 {
+  mIsVisible = visible;
+  mIsVisibleInitialized = true;
+
   if (visible)
   {
     mIsAsyncRenderNeeded = true;
@@ -2277,7 +2290,9 @@ TextLabel::TextLabel(ControlBehaviour additionalBehaviour)
     mIsManualRendered(false),
     mManualRendered(false),
     mIsIntercepted(false),
-    mIsHasAnchors(false)
+    mIsHasAnchors(false),
+    mIsVisible(false),
+    mIsVisibleInitialized(false)
 {
   mLocale = TextAbstraction::GetLocaleFull();
 }
