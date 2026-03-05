@@ -1,0 +1,124 @@
+#ifndef DALI_UI_IMAGE_VISUAL_SHADER_FACTORY_H
+#define DALI_UI_IMAGE_VISUAL_SHADER_FACTORY_H
+
+/*
+ * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/integration-api/adaptor-framework/shader-precompiler.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/internal/visuals/visual-shader-factory-interface.h>
+#include <string_view>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+/**
+ * ImageVisualShaderFactory is an object that provides and shares shaders between image visuals
+ */
+class ImageVisualShaderFactory : public VisualShaderFactoryInterface
+{
+public:
+  /**
+   * @brief Constructor
+   */
+  ImageVisualShaderFactory();
+
+  /**
+   * @brief Destructor
+   */
+  ~ImageVisualShaderFactory();
+
+  /**
+   * @brief Get the standard image rendering shader.
+   * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
+   * @param[in] featureBuilder Collection of current image shader's features
+   * @return The standard image rendering shader with features.
+   */
+  Shader GetShader(VisualFactoryCache& factoryCache, const ImageVisualShaderFeature::FeatureBuilder& featureBuilder);
+
+  /**
+   * @brief Request the default vertex shader source.
+   * @return The default vertex shader source.
+   */
+  std::string_view GetVertexShaderSource();
+
+  /**
+   * @brief Request the default fragment shader source.
+   * @return The default fragment shader source.
+   */
+  std::string_view GetFragmentShaderSource();
+
+public: // Implementation of VisualShaderFactoryInterface
+  /**
+   * @copydoc Dali::UI::VisualShaderFactoryInterface::AddPrecompiledShader
+   */
+  bool AddPrecompiledShader(PrecompileShaderOption& option) override;
+  /**
+   * @copydoc Dali::UI::VisualShaderFactoryInterface::GetPreCompiledShader
+   */
+  void GetPreCompiledShader(ShaderPreCompiler::RawShaderData& shaders) override;
+
+private:
+  /**
+   * @brief Create pre-compiled shader for image with builder and option.
+   */
+  void CreatePrecompileShader(ImageVisualShaderFeature::FeatureBuilder& builder, const ShaderFlagList& option);
+  /**
+   * @brief Check if cached hash value is valid or not.
+   */
+  bool SavePrecompileShader(VisualFactoryCache::ShaderType shader, std::string&& vertexPrefix,
+                            std::string&& fragmentPrefix);
+
+protected:
+  /**
+   * Undefined copy constructor.
+   */
+  ImageVisualShaderFactory(const ImageVisualShaderFactory&);
+
+  /**
+   * Undefined assignment operator.
+   */
+  ImageVisualShaderFactory& operator=(const ImageVisualShaderFactory& rhs);
+
+private:
+  /**
+   * @brief Cached information whether native image should change fragment shader.
+   * Default it is ChangeFragmentShader::UNDECIDED.
+   * If we have any chance to check native image source apply fragment shader,
+   * this vaule will be changed one of these : ChangeFragmentShader::DONT_CHANGE or ChangeFragmentShader::NEED_CHANGE
+   *
+   * After result cached, this value will not be changed.
+   *
+   * If value is DONT_CHANGE, ImageVisualShaderFactory::GetShader never call ApplyNativeFragmentShader.
+   * Else, ImageVisualShaderFactory::GetShader will call ApplyNativeFragmentShader if native image source texture come.
+   */
+  ImageVisualShaderFeature::ChangeFragmentShader::Type mFragmentShaderNeedChange : 3;
+};
+
+} // namespace Internal
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_IMAGE_VISUAL_SHADER_FACTORY_H

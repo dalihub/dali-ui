@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-toolkit/public-api/controls/control-impl.h>
+#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
@@ -61,7 +61,7 @@ namespace Integration
  *
  * @see Dali::UI::View
  */
-class DALI_UI_API ViewImpl : public Toolkit::Internal::Control
+class DALI_UI_API ViewImpl : public UI::Internal::Control
 {
 public:
 
@@ -105,15 +105,14 @@ protected:
    */
   ViewImpl();
 
-public: // From Toolkit::Internal::Control
-
+public: // From UI::Internal::Control
   /**
-   * @copydoc Toolkit::Internal::Control::OnInitialize
+   * @copydoc UI::Internal::Control::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc Toolkit::Internal::Control::OnSceneConnection
+   * @copydoc UI::Internal::Control::OnSceneConnection
    * When this View is a layout root and is connected to a window, registers
    * with LayoutController so that measure/arrange runs even if invalidation
    * occurred before the view was added to the window.

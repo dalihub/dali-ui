@@ -1,7 +1,7 @@
 site_name: DALi UI Reference
 site_url: https://dalihub.github.io/dali-ui/
 use_directory_urls: false
-site_description: High-performance C++ UI Toolkit documentation.
+site_description: High-performance C++ UI UI documentation.
 repo_name: dalihub/dali-ui
 repo_url: https://github.com/dalihub/dali-ui
 docs_dir: build/doc/staging

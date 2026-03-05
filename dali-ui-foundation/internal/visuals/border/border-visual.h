@@ -1,0 +1,145 @@
+#ifndef DALI_UI_INTERNAL_BORDER_VISUAL_H
+#define DALI_UI_INTERNAL_BORDER_VISUAL_H
+
+/*
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/rendering/geometry.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+class BorderVisual;
+typedef IntrusivePtr<BorderVisual> BorderVisualPtr;
+
+/**
+ * The visual which renders a solid color to the control's quad border fixed to a specified size.
+ *
+ * The following properties are required for create a BorderRender
+ *
+ * | %Property Name  | Type        |
+ * |-----------------|-------------|
+ * | borderColor     | VECTOR4     |
+ * | borderSize      | FLOAT       |
+ * | antiAliasing    | BOOLEAN     |
+ */
+class BorderVisual : public Visual::Base
+{
+public:
+  /**
+   * @brief Create a new border visual.
+   *
+   * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
+   * @param[in] properties A Property::Map containing settings for this visual
+   * @return A smart-pointer to the newly allocated visual.
+   */
+  static BorderVisualPtr New(VisualFactoryCache& factoryCache, const Property::Map& properties);
+
+protected:
+  /**
+   * @brief Constructor.
+   *
+   * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
+   */
+  BorderVisual(VisualFactoryCache& factoryCache);
+
+  /**
+   * @brief A reference counted object may only be deleted by calling Unreference().
+   */
+  virtual ~BorderVisual();
+
+  /**
+   * @copydoc Visual::Base::OnInitialize
+   */
+  void OnInitialize() override;
+
+  /**
+   * @copydoc Visual::Base::DoSetProperties
+   */
+  void DoSetProperties(const Property::Map& propertyMap) override;
+
+  /**
+   * @copydoc Visual::Base::DoSetOnScene
+   */
+  void DoSetOnScene(Actor& actor) override;
+
+  /**
+   * @copydoc Visual::Base::CreatePropertyMap
+   */
+  void DoCreatePropertyMap(Property::Map& map) const override;
+
+  /**
+   * @copydoc Visual::Base::CreateInstancePropertyMap
+   */
+  void DoCreateInstancePropertyMap(Property::Map& map) const override;
+
+  /**
+   * @copydoc Visual::Base::OnSetTransform
+   */
+  void OnSetTransform() override;
+
+private:
+  /**
+   * Request the border shader from the factory cache. If fail, create tha shader and add it to cache.
+   * @return The border shader.
+   */
+  Shader GetBorderShader();
+
+  /**
+   * Create the geometry which presents the border.
+   * @return The border geometry
+   */
+  Geometry CreateBorderGeometry();
+
+  /**
+   * Helper method to set individual values by index key.
+   * @param[in] index The index key of the value
+   * @param[in] value The value
+   */
+  void DoSetProperty(Property::Index index, const Property::Value& value);
+
+  // Undefined
+  BorderVisual(const BorderVisual& borderRenderer);
+
+  // Undefined
+  BorderVisual& operator=(const BorderVisual& borderRenderer);
+
+private:
+  Vector4 mBorderColor;
+  float mBorderSize;
+
+  Property::Index mBorderColorIndex;
+  Property::Index mBorderSizeIndex;
+
+  bool mAntiAliasing;
+};
+
+} // namespace Internal
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_INTERNAL_BORDER_VISUAL_H

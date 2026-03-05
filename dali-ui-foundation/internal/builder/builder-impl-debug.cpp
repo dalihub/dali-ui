@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifdef DEBUG_ENABLED
+#include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
+#include <dali-ui-foundation/internal/builder/builder-impl-debug.h>
+#include <dali-ui-foundation/internal/builder/builder-impl.h>
+#include <cstring>
+#include <iostream>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+void LogTree(const UI::JsonParser& parser)
+{
+  if (OptionalChild constants = IsChild(parser.GetRoot(), "constants"))
+  {
+    for (TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
+    {
+      if (((*iter).first && strcmp((*iter).first, "DUMP_TREE") == 0) ||
+          ((*iter).second.GetType() == TreeNode::STRING && strcmp((*iter).second.GetString(), "DUMP_TREE") == 0))
+      {
+        std::ostringstream oss;
+        parser.Write(oss, 2);
+        std::cout << oss.str() << std::endl;
+      }
+    }
+  }
+}
+
+std::string PropertyValueToString(const Property::Value& value)
+{
+  std::ostringstream oss;
+  oss << value;
+
+  return oss.str();
+}
+
+} // namespace Internal
+} // namespace UI
+} // namespace Dali
+
+#endif // DEBUG_ENABLED

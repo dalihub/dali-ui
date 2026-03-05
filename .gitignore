@@ -60,6 +60,9 @@ compile_commands.json
 *.cache/
 *.stamp
 
+/dali-ui-foundation/internal/graphics/generated
+/build/tizen/dali-ui-foundation/dali-shader-generator
+
 # Documentation build artifacts (Ignore contents, not the directory itself to allow exceptions)
 /build/doc/*
 !/build/doc/source/

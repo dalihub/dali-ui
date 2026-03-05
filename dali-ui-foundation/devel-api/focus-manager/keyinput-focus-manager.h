@@ -1,0 +1,120 @@
+#ifndef DALI_UI_KEYINPUT_FOCUS_MANAGER_H
+#define DALI_UI_KEYINPUT_FOCUS_MANAGER_H
+
+/*
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/controls/control.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal DALI_INTERNAL
+{
+class KeyInputFocusManager;
+}
+
+/**
+ * KeyInputFocusManager
+ * This class provides the functionality of registering for keyboard events for controls.
+ * The keyinput focus manager maintains a stack of controls, With the last added control receiving
+ * all the keyboard events first. And if the conrol doesn't consume the event it is passed to
+ * the next control in the stack. If none of the controls in the stack consume the key event then
+ * UnhandledKeyEventSignal() is emitted.
+ *
+ * Signals
+ * | %Signal Name         | Method                            |
+ * |----------------------|-----------------------------------|
+ * | keyInputFocusChanged | @ref KeyInputFocusChangedSignal() |
+ */
+class DALI_UI_API KeyInputFocusManager : public BaseHandle
+{
+public:
+  // KeyInputFocusChanged
+  typedef Signal<void(Control, Control)> KeyInputFocusChangedSignalType;
+
+public:
+  /**
+   * Create a KeyInputFocusManager handle; this can be initialised with KeyInputFocusManager::Get()
+   * Calling member functions with an uninitialised handle is not allowed.
+   */
+  KeyInputFocusManager();
+
+  /**
+   * @brief Destructor
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~KeyInputFocusManager();
+
+  /**
+   * Get the singleton of KeyInputFocusManager object.
+   * @return A handle to the KeyInputFocusManager control.
+   */
+  static KeyInputFocusManager Get();
+
+  /**
+   * Sets keyboard focus for a control.
+   * Note: A control can be set to be in focus and still not receive all the key events if another control has over
+   * ridden it. As the key input focus mechanism works like a stack, the top most control receives all the key events,
+   * and passes on the unhandled events to the controls below in the stack. A control in the stack will regain key input
+   * focus when there are no more controls above it in the focus stack.
+   *
+   * @pre The Control is not in the focus stack. If it is allready present in the top of the stack it results in a
+   * no-op, If it is present in the stack but not on the top of the stack, then the control is moved to the top of the
+   * focus stack.
+   * @param[in] control The Control to receive keyboard input
+   */
+  void SetFocus(Control control);
+
+  /**
+   * Query for the control that is currently set to be on top of the fcous stack and receives all
+   * keyboard input events first.
+   * @return Pointer to the control set to receive keyboard inputs.
+   */
+  Control GetCurrentFocusControl() const;
+
+  /**
+   * Removes focus for the given control, The control will no longer receive events from keyboard.
+   * @param [in] control which should be removed from focus.
+   */
+  void RemoveFocus(Control control);
+
+public: // Signals
+  /**
+   * This signal is emitted when the key input focus control changes.
+   * Two control parameters are sent as part of this signal, the first being the signal that now has the focus, the
+   * second being the one that has lost focus. A callback of the following type may be connected:
+   * @code
+   *   void YourCallback(Control focusGainedControl, Control focusLostActor);
+   * @endcode
+   * @return The signal to connect to.
+   */
+  KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
+
+private:
+  explicit DALI_INTERNAL KeyInputFocusManager(Internal::KeyInputFocusManager* impl);
+
+}; // class KeyInputFocusManager
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_KEYINPUT_FOCUS_MANAGER_H

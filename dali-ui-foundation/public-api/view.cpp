@@ -43,12 +43,12 @@ View View::New()
 }
 
 View::View(const View& view)
-  : Toolkit::Control(view)
+  : UI::Control(view)
 {
 }
 
 View::View(View&& rhs) noexcept
-  : Toolkit::Control(std::move(rhs))
+  : UI::Control(std::move(rhs))
 {
 }
 
@@ -58,7 +58,7 @@ View::~View()
 
 View View::DownCast(BaseHandle handle)
 {
-  return Toolkit::Control::DownCast<View, Integration::ViewImpl>(handle);
+  return UI::Control::DownCast<View, Integration::ViewImpl>(handle);
 }
 
 View::View(Integration::ViewImpl& implementation)

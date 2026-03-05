@@ -69,7 +69,7 @@ GridLayout GridLayout::New()
 
 GridLayout GridLayout::DownCast(BaseHandle handle)
 {
-  return Toolkit::Control::DownCast<GridLayout, Integration::GridLayoutImpl>(handle);
+  return UI::Control::DownCast<GridLayout, Integration::GridLayoutImpl>(handle);
 }
 
 GridLayout::GridLayout(Integration::GridLayoutImpl& implementation)

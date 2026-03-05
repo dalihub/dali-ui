@@ -1,0 +1,8 @@
+#define TEXTURE_EMIT
+
+UNIFORM sampler2D uEmissiveSampler;
+UNIFORM_BLOCK FragBlockEmissive
+{
+  UNIFORM highp int  uEmissiveTexCoordIndex;
+  UNIFORM highp vec3 uEmissiveFactor;
+};

@@ -1,0 +1,257 @@
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+namespace
+{
+// enum of required list when we select shader
+enum class ImageVisualRequireFlag : uint32_t
+{
+  DEFAULT = 0,
+  ROUNDED_CORNER = 1,
+  SQUIRCLE_CORNER = 2,
+
+  BORDERLINE = (1 << 0) * 3,
+  ALPHA_MASKING = (1 << 1) * 3,
+  COLOR_CONVERSION = (1 << 2) * 3,
+
+  YUVA_SAMPLING = (1 << 1) * 3,
+  UNIFIED_YUV_AND_RGB = (1 << 2) * 3, // Special enum to trick unified YUV and RGB.
+};
+
+VisualFactoryCache::ShaderType SHADER_TYPE_TABLE[] = {
+    VisualFactoryCache::IMAGE_SHADER,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_CORNER,
+    VisualFactoryCache::IMAGE_SHADER_BORDERLINE,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE,
+    VisualFactoryCache::IMAGE_SHADER_MASKING,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_MASKING,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_CORNER_MASKING,
+    VisualFactoryCache::IMAGE_SHADER_BORDERLINE_MASKING,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE_MASKING,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE_MASKING,
+
+    // [12 ~ 17] YUV_TO_RGB (Base: 12)
+    VisualFactoryCache::IMAGE_SHADER_YUV_TO_RGB,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_CORNER_YUV_TO_RGB,
+    VisualFactoryCache::IMAGE_SHADER_BORDERLINE_YUV_TO_RGB,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE_YUV_TO_RGB,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE_YUV_TO_RGB,
+
+    // [18 ~ 23] YUVA_TO_RGBA (Base: 12 + 6 = 18)
+    VisualFactoryCache::IMAGE_SHADER_YUVA_TO_RGBA,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUVA_TO_RGBA,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_CORNER_YUVA_TO_RGBA,
+    VisualFactoryCache::IMAGE_SHADER_BORDERLINE_YUVA_TO_RGBA,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE_YUVA_TO_RGBA,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE_YUVA_TO_RGBA,
+
+    // [24 ~ 29] UNIFIED_YUV_AND_RGB (Base: 12 + 12 = 24)
+    VisualFactoryCache::IMAGE_SHADER_YUV_AND_RGB,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_CORNER_YUV_AND_RGB,
+    VisualFactoryCache::IMAGE_SHADER_BORDERLINE_YUV_AND_RGB,
+    VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE_YUV_AND_RGB,
+    VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE_YUV_AND_RGB,
+};
+constexpr uint32_t SHADER_TYPE_TABLE_COUNT = sizeof(SHADER_TYPE_TABLE) / sizeof(SHADER_TYPE_TABLE[0]);
+} // unnamed namespace
+
+namespace ImageVisualShaderFeature
+{
+FeatureBuilder::FeatureBuilder()
+  : mDefaultTextureWrapMode(DefaultTextureWrapMode::APPLY),
+    mRoundedCorner(RoundedCorner::DISABLED),
+    mBorderline(Borderline::DISABLED),
+    mAlphaMaskingOnRendering(AlphaMaskingOnRendering::DISABLED),
+    mColorConversion(ColorConversion::DONT_NEED),
+    mTexture()
+{
+}
+
+FeatureBuilder& FeatureBuilder::ApplyDefaultTextureWrapMode(bool applyDefaultTextureWrapMode)
+{
+  mDefaultTextureWrapMode =
+      (applyDefaultTextureWrapMode ? DefaultTextureWrapMode::APPLY : DefaultTextureWrapMode::DO_NOT_APPLY);
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::EnableRoundedCorner(bool enableRoundedCorner, bool enableSquircleCorner)
+{
+  mRoundedCorner =
+      (enableRoundedCorner ? (enableSquircleCorner ? RoundedCorner::SQUIRCLE_CORNER : RoundedCorner::ROUNDED_CORNER)
+                           : RoundedCorner::DISABLED);
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::EnableBorderline(bool enableBorderline)
+{
+  mBorderline = (enableBorderline ? Borderline::ENABLED : Borderline::DISABLED);
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::SetTextureForFragmentShaderCheck(const Dali::Texture& texture)
+{
+  mTexture = texture;
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::EnableAlphaMaskingOnRendering(bool enableAlphaMaskingOnRendering)
+{
+  mAlphaMaskingOnRendering =
+      (enableAlphaMaskingOnRendering ? AlphaMaskingOnRendering::ENABLED : AlphaMaskingOnRendering::DISABLED);
+  return *this;
+}
+
+FeatureBuilder& FeatureBuilder::EnableYuvToRgb(bool enableYuvToRgb, bool enableYuva, bool enableUnifiedYuvAndRgb)
+{
+  mColorConversion = (enableUnifiedYuvAndRgb
+                          ? ColorConversion::UNIFIED_YUV_AND_RGB
+                          : (enableYuvToRgb ? (enableYuva ? ColorConversion::YUVA_TO_RGBA : ColorConversion::YUV_TO_RGB)
+                                            : ColorConversion::DONT_NEED));
+  return *this;
+}
+
+VisualFactoryCache::ShaderType FeatureBuilder::GetShaderType() const
+{
+  VisualFactoryCache::ShaderType shaderType = VisualFactoryCache::IMAGE_SHADER;
+  uint32_t shaderTypeFlag = static_cast<uint32_t>(ImageVisualRequireFlag::DEFAULT);
+  if (mRoundedCorner == RoundedCorner::SQUIRCLE_CORNER)
+  {
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::SQUIRCLE_CORNER);
+  }
+  else if (mRoundedCorner == RoundedCorner::ROUNDED_CORNER)
+  {
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::ROUNDED_CORNER);
+  }
+
+  if (mBorderline == Borderline::ENABLED)
+  {
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::BORDERLINE);
+  }
+
+  if (mAlphaMaskingOnRendering == AlphaMaskingOnRendering::ENABLED)
+  {
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::ALPHA_MASKING);
+  }
+  else if (mColorConversion == ColorConversion::YUV_TO_RGB)
+  {
+    // Index: 12
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::COLOR_CONVERSION);
+  }
+  else if (mColorConversion == ColorConversion::YUVA_TO_RGBA)
+  {
+    // Index: 18 (12 + 6)
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::COLOR_CONVERSION);
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::YUVA_SAMPLING);
+  }
+  else if (mColorConversion == ColorConversion::UNIFIED_YUV_AND_RGB)
+  {
+    // Index: 24 (12 + 12)
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::COLOR_CONVERSION);
+    shaderTypeFlag += static_cast<uint32_t>(ImageVisualRequireFlag::UNIFIED_YUV_AND_RGB);
+  }
+
+  DALI_ASSERT_DEBUG(shaderTypeFlag < SHADER_TYPE_TABLE_COUNT && "Invalid image shader type generated!");
+
+  shaderType = SHADER_TYPE_TABLE[shaderTypeFlag];
+
+  return shaderType;
+}
+
+ChangeFragmentShader::Type FeatureBuilder::NeedToChangeFragmentShader() const
+{
+  return (mTexture && DevelTexture::IsNative(mTexture)) ? ChangeFragmentShader::NEED_CHANGE
+                                                        : ChangeFragmentShader::DONT_CHANGE;
+}
+
+void FeatureBuilder::GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const
+{
+  if (mRoundedCorner != RoundedCorner::DISABLED)
+  {
+    vertexShaderPrefixList += "#define IS_REQUIRED_ROUNDED_CORNER\n";
+  }
+  if (mBorderline == Borderline::ENABLED)
+  {
+    vertexShaderPrefixList += "#define IS_REQUIRED_BORDERLINE\n";
+  }
+  if (mAlphaMaskingOnRendering == AlphaMaskingOnRendering::ENABLED)
+  {
+    vertexShaderPrefixList += "#define IS_REQUIRED_ALPHA_MASKING\n";
+  }
+}
+
+void FeatureBuilder::GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const
+{
+  if (mRoundedCorner != RoundedCorner::DISABLED)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_ROUNDED_CORNER\n";
+    if (mRoundedCorner == RoundedCorner::SQUIRCLE_CORNER)
+    {
+      fragmentShaderPrefixList += "#define IS_REQUIRED_SQUIRCLE_CORNER\n";
+    }
+  }
+  if (mBorderline == Borderline::ENABLED)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_BORDERLINE\n";
+  }
+  if (mAlphaMaskingOnRendering == AlphaMaskingOnRendering::ENABLED)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_ALPHA_MASKING\n";
+  }
+  else if (mColorConversion == ColorConversion::YUV_TO_RGB)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_YUV_TO_RGB\n";
+  }
+  else if (mColorConversion == ColorConversion::YUVA_TO_RGBA)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_YUV_TO_RGB\n";
+    fragmentShaderPrefixList += "#define IS_REQUIRED_YUV_ALPHA\n";
+  }
+  else if (mColorConversion == ColorConversion::UNIFIED_YUV_AND_RGB)
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_UNIFIED_YUV_AND_RGB\n";
+  }
+}
+
+Dali::Texture FeatureBuilder::GetTexture() const
+{
+  return mTexture;
+}
+
+bool FeatureBuilder::IsEnabledAlphaMaskingOnRendering() const
+{
+  return mAlphaMaskingOnRendering == AlphaMaskingOnRendering::ENABLED;
+}
+
+} // namespace ImageVisualShaderFeature
+
+} // namespace Internal
+
+} // namespace UI
+
+} // namespace Dali

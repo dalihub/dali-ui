@@ -19,7 +19,7 @@
 #include <iostream>
 #include <limits>
 #include <dali.h>
-#include <dali-toolkit/dali-toolkit.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
@@ -132,7 +132,7 @@ public:
   {
   }
 
-  bool Callback(Toolkit::Control control, const KeyEvent& keyEvent)
+  bool Callback(Control control, const KeyEvent& keyEvent)
   {
     mIsCalled = true;
     return mConsumed;

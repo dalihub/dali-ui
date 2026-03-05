@@ -55,21 +55,21 @@ DummyComponent& DummyComponent::operator=(const DummyComponent& handle)
 {
   if (&handle != this)
   {
-    Toolkit::Control::operator=(handle);
+    UI::Control::operator=(handle);
   }
   return *this;
 }
 
 DummyComponent& DummyComponent::operator=(DummyComponent&& rhs) noexcept
 {
-  Toolkit::Control::operator=(std::move(rhs));
+  UI::Control::operator=(std::move(rhs));
   return *this;
 }
 
 DummyComponent DummyComponent::DownCast(BaseHandle handle)
 {
   DummyComponent result;
-  Toolkit::Control control = Toolkit::Control::DownCast(handle);
+  UI::Control control = UI::Control::DownCast(handle);
   if (control)
   {
     CustomActorImpl& customImpl = control.GetImplementation();

@@ -1,0 +1,213 @@
+#ifndef DALI_UI_INTERNAL_ROLLING_ANIMATED_IMAGE_CACHE_H
+#define DALI_UI_INTERNAL_ROLLING_ANIMATED_IMAGE_CACHE_H
+
+/*
+ * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// EXTERNAL INCLUDES
+#include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
+#include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
+#include <dali/devel-api/adaptor-framework/animated-image-loading.h>
+#include <dali/devel-api/common/circular-queue.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+/**
+ * Class to manage a rolling cache of Animated images, where the cache size
+ * is smaller than the total number of images.
+ *
+ * Frames are always ready, so the observer.FrameReady callback is never triggered;
+ * the FirstFrame and NextFrame APIs will always return a texture.
+ */
+class RollingAnimatedImageCache : public ImageCache, public TextureUploadObserver
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param[in] textureManager       The texture manager
+   * @param[in] size                 The width and height to fit the loaded image to.
+   * @param[in] fittingMode          The FittingMode of the resource to load
+   * @param[in] samplingMode         The SamplingMode of the resource to load
+   * @param[in] animatedImageLoading The loaded animated image
+   * @param[in] maskingData          Masking data to be applied.
+   * @param[in] observer             FrameReady observer
+   * @param[in] cacheSize            The size of the cache
+   * @param[in] batchSize            The size of a batch to load
+   * @param[in] wrapModeU            Horizontal Wrap mode
+   * @param[in] wrapModeV            Vertical Wrap mode
+   * @param[in] isSynchronousLoading The flag to define whether to load first frame synchronously
+   * @param[in] preMultiplyOnLoad    The flag if image's color should be multiplied by it's alpha
+   *
+   * This will start loading textures immediately, according to the
+   * batch and cache sizes.
+   */
+  RollingAnimatedImageCache(TextureManager& textureManager, ImageDimensions size, Dali::FittingMode::Type fittingMode,
+                            Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
+                            TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
+                            uint16_t cacheSize, uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU,
+                            const Dali::WrapMode::Type& wrapModeV, bool isSynchronousLoading, bool preMultiplyOnLoad);
+
+  /**
+   * @brief Destructor
+   */
+  ~RollingAnimatedImageCache() override;
+
+  /**
+   * @copydoc Internal::ImageCache::Frame()
+   */
+  TextureSet Frame(uint32_t frameIndex) override;
+
+  /**
+   * @copydoc Internal::ImageCache::FirstFrame()
+   */
+  TextureSet FirstFrame() override;
+
+  /**
+   * @copydoc Internal::ImageCache::GetFrameInterval()
+   */
+  uint32_t GetFrameInterval(uint32_t frameIndex) const override;
+
+  /**
+   * @copydoc Internal::ImageCache::GetCurrentFrameIndex()
+   */
+  int32_t GetCurrentFrameIndex() const override;
+
+  /**
+   * @copydoc Internal::ImageCache::GetTotalFrameCount()
+   */
+  int32_t GetTotalFrameCount() const override;
+
+  /**
+   * @copydoc Internal::ImageCache::ClearCache()
+   */
+  void ClearCache() override;
+
+private:
+  /**
+   * @brief Check whether the front frame is ready or not.
+   *
+   * @return true if the front frame is ready
+   */
+  bool IsFrontReady() const;
+
+  /**
+   * @brief Request to Load a frame asynchronously
+   *
+   * @param[in] frameIndex index of frame to be loaded.
+   *
+   * @return the texture set currently loaded.
+   */
+  TextureSet RequestFrameLoading(uint32_t frameIndex);
+
+  /**
+   * @brief Request to Load a frame
+   *
+   * @param[in] frameIndex             Index of frame to be loaded.
+   * @param[in] synchronousLoading     True if the frame should be loaded synchronously
+   * @param[in,out] preMultiplyOnLoad  True if the image color should be multiplied by it's alpha. Set to false if the
+   *                                   image has no alpha channel
+   *
+   * @return the texture set currently loaded.
+   */
+  TextureSet RequestFrameLoading(uint32_t frameIndex, bool synchronousLoading,
+                                 TextureManager::MultiplyOnLoad& preMultiplyOnLoading);
+
+  /**
+   * @brief Load the next batch of images
+   *
+   * @param[in] frameIndex starting frame index of batch to be loaded.
+   */
+  void LoadBatch(uint32_t frameIndex);
+
+  /**
+   * @brief Find the matching image frame, and set it to ready
+   *
+   * @param[in] textureId texture id to be marked as ready.
+   */
+  void SetImageFrameReady(TextureManager::TextureId textureId);
+
+  /**
+   * @brief Get the texture set of the front frame.
+   *
+   * @return the texture set of the front of Cache.
+   */
+  TextureSet GetFrontTextureSet() const;
+
+  /**
+   * @brief Get the texture id of the given index
+   *
+   * @param[in] index index of the queue.
+   */
+  TextureManager::TextureId GetCachedTextureId(int index) const;
+
+  /**
+   * @brief Make the loaded frame ready and notify it to the texture upload observer
+   *
+   * @param[in] loadSuccess whether the loading is succeded or not.
+   * @param[in] textureSet textureSet for this frame.
+   * @param[in] frameCount Total frame count for this image.
+   * @param[in] interval interval between this frame and next frame.
+   * @param[in] preMultiplied whether the texture is premultied alpha or not.
+   */
+  void MakeFrameReady(bool loadSuccess, TextureSet textureSet, uint32_t frameCount, uint32_t interval,
+                      bool preMultiplied);
+
+  /**
+   * @brief Pop front entity of Cache.
+   */
+  void PopFrontCache();
+
+protected:
+  /**
+   * @copydoc UI::TextureUploadObserver::LoadComplete()
+   */
+  void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
+
+private:
+  /**
+   * Secondary class to hold readiness and index into url
+   */
+  struct ImageFrame
+  {
+    uint32_t mFrameNumber = 0u;
+    bool mReady = false;
+  };
+  std::vector<TextureManager::TextureId> mTextureIds;
+
+  VisualUrl mImageUrl;
+  Dali::AnimatedImageLoading mAnimatedImageLoading;
+  uint32_t mFrameCount;
+  uint32_t mFrameIndex;
+  uint32_t mCacheSize;
+  std::vector<int32_t> mIntervals;
+  std::vector<uint32_t> mLoadWaitingQueue;
+  CircularQueue<ImageFrame> mQueue;
+  Dali::WrapMode::Type mWrapModeU : 3;
+  Dali::WrapMode::Type mWrapModeV : 3;
+  bool mIsSynchronousLoading;
+};
+
+} // namespace Internal
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_INTERNAL_ROLLING_ANIMATED_IMAGE_CACHE_H

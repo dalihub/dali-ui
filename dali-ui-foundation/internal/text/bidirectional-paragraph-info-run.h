@@ -1,0 +1,51 @@
+#ifndef DALI_UI_TEXT_BIDIRECTIONAL_PARAGRAPH_INFO_RUN_H
+#define DALI_UI_TEXT_BIDIRECTIONAL_PARAGRAPH_INFO_RUN_H
+
+/*
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/character-run.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Text
+{
+/**
+ * @brief BidirectionalParagraphInfoRun
+ *
+ * In terms of the bidirectional algorithm, a 'paragraph' is understood as a run of characters between Paragraph
+ * Separators or appropriate Newline Functions. A 'paragraph' may also be determined by higher-level protocols like a
+ * mark-up tag.
+ */
+struct BidirectionalParagraphInfoRun
+{
+  CharacterRun
+      characterRun; ///< The initial character index within the whole text and the number of characters of the run.
+  BidiInfoIndex bidirectionalInfoIndex; ///< Index to the table with the bidirectional info per paragraph.
+  CharacterDirection direction;         ///< The paragraph's direction.
+};
+
+} // namespace Text
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_TEXT_BIDIRECTIONAL_PARAGRAPH_INFO_RUN_H

@@ -8,7 +8,7 @@ skinparam packageStyle rectangle
 
 ' ========== External (DALi) ==========
 package "DALi (external)" as dali {
-  class "Toolkit::Control" as Control <<handle>>
+  class "UI::Control" as Control <<handle>>
   class "Dali::Integration::Processor" as Processor <<interface>>
   class "Dali::Internal::CustomActor" as CustomActor <<impl>>
 }

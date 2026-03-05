@@ -17,7 +17,7 @@
 
 #include <dali-test-suite-utils.h>
 #include <dali.h>
-#include <dali-toolkit/dali-toolkit.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 

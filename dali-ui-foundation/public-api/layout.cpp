@@ -67,7 +67,7 @@ Layout& Layout::operator=(Layout&& rhs) noexcept
 
 Layout Layout::DownCast(BaseHandle handle)
 {
-  return Toolkit::Control::DownCast<Layout, Integration::LayoutImpl>(handle);
+  return UI::Control::DownCast<Layout, Integration::LayoutImpl>(handle);
 }
 
 Layout::Layout(Integration::LayoutImpl& implementation)

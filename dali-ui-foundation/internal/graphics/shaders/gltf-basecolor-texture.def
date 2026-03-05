@@ -1,0 +1,8 @@
+#define TEXTURE_BASECOLOR
+
+UNIFORM sampler2D uBaseColorSampler;
+
+UNIFORM_BLOCK FragBlockBaseColor
+{
+  UNIFORM highp int uBaseColorTexCoordIndex;
+};

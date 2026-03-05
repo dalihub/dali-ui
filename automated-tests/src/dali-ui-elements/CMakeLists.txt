@@ -42,7 +42,6 @@ LIST(APPEND TC_SOURCES
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
      dali2-core
      dali2-adaptor
-     dali2-toolkit
      dali2-ui-foundation
      dali2-ui-elements
 )

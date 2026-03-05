@@ -15,7 +15,6 @@ BuildRequires:  pkgconfig
 BuildRequires:  gawk
 BuildRequires:  pkgconfig(dali2-core)
 BuildRequires:  pkgconfig(dali2-adaptor)
-BuildRequires:  pkgconfig(dali2-toolkit)
 
 %if 0%{?tizen_version_major} >= 3
 BuildRequires:  pkgconfig(libtzplatform-config)

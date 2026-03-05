@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2022 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// CLASS HEADER
+#include "async-image-loader.h"
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/image-loader/async-image-loader-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-url.h>
+
+namespace Dali
+{
+namespace UI
+{
+AsyncImageLoader::AsyncImageLoader()
+{
+}
+
+AsyncImageLoader::~AsyncImageLoader()
+{
+}
+
+AsyncImageLoader::AsyncImageLoader(Internal::AsyncImageLoader* impl)
+  : BaseHandle(impl)
+{
+}
+
+AsyncImageLoader::AsyncImageLoader(const AsyncImageLoader& handle) = default;
+
+AsyncImageLoader::AsyncImageLoader(AsyncImageLoader&& rhs) noexcept = default;
+
+AsyncImageLoader& AsyncImageLoader::operator=(const AsyncImageLoader& handle) = default;
+
+AsyncImageLoader& AsyncImageLoader::operator=(AsyncImageLoader&& rhs) noexcept = default;
+
+AsyncImageLoader AsyncImageLoader::DownCast(BaseHandle handle)
+{
+  return AsyncImageLoader(dynamic_cast<Dali::UI::Internal::AsyncImageLoader*>(handle.GetObjectPtr()));
+}
+
+AsyncImageLoader AsyncImageLoader::New()
+{
+  IntrusivePtr<Internal::AsyncImageLoader> internal = Internal::AsyncImageLoader::New();
+  return AsyncImageLoader(internal.Get());
+}
+
+uint32_t AsyncImageLoader::Load(const std::string& url)
+{
+  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), ImageDimensions(), FittingMode::DEFAULT,
+                                       SamplingMode::BOX_THEN_LINEAR, true,
+                                       DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
+}
+
+uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions)
+{
+  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), dimensions, FittingMode::DEFAULT,
+                                       SamplingMode::BOX_THEN_LINEAR, true,
+                                       DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
+}
+
+uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+                                SamplingMode::Type samplingMode, bool orientationCorrection)
+{
+  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode,
+                                       orientationCorrection, DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
+}
+
+bool AsyncImageLoader::Cancel(uint32_t loadingTaskId)
+{
+  return GetImplementation(*this).Cancel(loadingTaskId);
+}
+
+void AsyncImageLoader::CancelAll()
+{
+  GetImplementation(*this).CancelAll();
+}
+
+AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal()
+{
+  return GetImplementation(*this).ImageLoadedSignal();
+}
+} // namespace UI
+
+} // namespace Dali

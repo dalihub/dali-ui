@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <functional>
-#include <dali-toolkit/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -49,7 +49,7 @@ class ViewImpl;
  *
  * View implements the layout system with Measure/Arrange passes.
  */
-class DALI_UI_API View : public Toolkit::Control
+class DALI_UI_API View : public UI::Control
 {
 public:
 

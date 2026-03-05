@@ -1,0 +1,272 @@
+#ifndef DALI_UI_INTERNAL_SCROLLABLE_H
+#define DALI_UI_INTERNAL_SCROLLABLE_H
+
+/*
+ * Copyright (c) 2021 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/animation/alpha-function.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/controls/control-devel.h>
+#include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
+#include <dali-ui-foundation/public-api/controls/control-impl.h>
+#include <dali-ui-foundation/public-api/controls/scrollable/scrollable.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+class Scrollable;
+typedef IntrusivePtr<Scrollable> ScrollablePtr;
+
+/**
+ * @copydoc UI::Scrollable
+ */
+class Scrollable : public Control
+{
+public:
+  /**
+   * @copydoc Dali::UI::Scrollable::IsOvershootEnabled
+   */
+  bool IsOvershootEnabled() const;
+
+  /**
+   * @copydoc Dali::UI::Scrollable::SetOvershootEnabled
+   */
+  void SetOvershootEnabled(bool enable);
+
+  /**
+   * Adds actor as an Overlay to Scrollable
+   * This method is called by Add-on UI components
+   * such as scroll bars, page indicators.
+   * @param[in] actor Actor to add as an overlay.
+   */
+  virtual void AddOverlay(Actor actor) = 0;
+
+  /**
+   * Removes overlay actor from Scrollable
+   * This method is called by Add-on UI components
+   * such as scroll bars, page indicators.
+   * @param[in] actor Actor overlay to remove.
+   */
+  virtual void RemoveOverlay(Actor actor) = 0;
+
+  /**
+   * Retrieves current scroll position.
+   * @returns The current scroll position.
+   */
+  virtual Vector2 GetCurrentScrollPosition() const = 0;
+
+  /**
+   * Scrolls Scrollable to position specified (contents will scroll to this position)
+   * Position 0,0 is the origin. Increasing X scrolls contents left, while
+   * increasing Y scrolls contents up.
+   * @param[in] position The position to scroll to.
+   * @param[in] duration The duration of the animation in seconds
+   */
+  virtual void ScrollTo(const Vector2& position, float duration) = 0;
+
+  /**
+   * Set the color of the overshoot effect.
+   * @parm[in] color The color of the overshoot effect
+   */
+  virtual void SetOvershootEffectColor(const Vector4& color) = 0;
+
+  /**
+   * Retrieve the color of the overshoot effect.
+   * @return The color of the overshoot effect.
+   */
+  Vector4 GetOvershootEffectColor() const;
+
+  /**
+   * @copydoc Dali::UI::Scrollable::SetOvershootAnimationSpeed(float pixelsPerSecond)
+   */
+  void SetOvershootAnimationSpeed(float pixelsPerSecond);
+
+  /**
+   * @copydoc Dali::UI::Scrollable::GetOvershootAnimationSpeed()
+   */
+  float GetOvershootAnimationSpeed() const;
+
+  /**
+   * @copydoc Dali::UI::Scrollable::GetOvershootSize()
+   */
+  const Vector2& GetOvershootSize() const;
+
+  /**
+   * Set the size of the overshoot effect.
+   * @parm[in] size The size of the overshoot effect
+   */
+  virtual void SetOvershootSize(const Vector2& size) = 0;
+
+protected: // From Control
+  class ScrollableAccessible : public DevelControl::ControlAccessible
+  {
+  public:
+    using DevelControl::ControlAccessible::ControlAccessible;
+
+    /**
+     * @copydoc Dali::Accessibility::Component::IsScrollable()
+     */
+    bool IsScrollable() const override;
+  };
+
+  /**
+   * @copydoc Control::OnInitialize
+   */
+  virtual void OnInitialize() override;
+
+  /**
+   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   */
+  DevelControl::ControlAccessible* CreateAccessibleObject() override;
+
+private:
+  /**
+   * Temporary function to override EnableScrollOvershoot functionality for overshoot
+   * Only ScrollView needs to override this as HQ has not requested disable functionality in ItemView
+   * @param[in] enable true to enable, false to disable overshoot indicator
+   */
+  virtual void EnableScrollOvershoot(bool enable)
+  {
+  }
+
+public: // Signals
+  /**
+   * @copydoc Dali::UI::Scrollable::ScrollStartedSignal()
+   */
+  UI::Scrollable::ScrollStartedSignalType& ScrollStartedSignal();
+
+  /**
+   * @copydoc Dali::UI::Scrollable::ScrollUpdatedSignal()
+   */
+  UI::Scrollable::ScrollUpdatedSignalType& ScrollUpdatedSignal();
+
+  /**
+   * @copydoc Dali::UI::Scrollable::ScrollCompletedSignal()
+   */
+  UI::Scrollable::ScrollCompletedSignalType& ScrollCompletedSignal();
+
+  /**
+   * Connects a callback function with the object's signals.
+   * @param[in] object The object providing the signal.
+   * @param[in] tracker Used to disconnect the signal.
+   * @param[in] signalName The signal to connect to.
+   * @param[in] functor A newly allocated FunctorDelegate.
+   * @return True if the signal was connected.
+   * @post If a signal was connected, ownership of functor was passed to CallbackBase. Otherwise the caller is
+   * responsible for deleting the unused functor.
+   */
+  static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName,
+                              FunctorDelegate* functor);
+
+  // properties
+
+  /**
+   * Called when a property of an object of this type is set.
+   * @param[in] object The object whose property is set.
+   * @param[in] index The property index.
+   * @param[in] value The new property value.
+   */
+  static void SetProperty(BaseObject* object, Property::Index index, const Property::Value& value);
+
+  /**
+   * Called to retrieve a property of an object of this type.
+   * @param[in] object The object whose property is to be retrieved.
+   * @param[in] index The property index.
+   * @return The current value of the property.
+   */
+  static Property::Value GetProperty(BaseObject* object, Property::Index index);
+
+protected:
+  /**
+   * Removed default constructor.
+   */
+  Scrollable() = delete;
+
+  /**
+   * @brief Construct a new Scrollable.
+   *
+   * @param[in] behaviourFlags Flags to enable
+   */
+  Scrollable(ControlBehaviour behaviourFlags);
+
+  /**
+   * A reference counted object may only be deleted by calling Unreference()
+   */
+  virtual ~Scrollable();
+
+private:
+  /**
+   * Gets position property.
+   *
+   * @return The current position
+   */
+  Vector2 GetPropertyPosition() const;
+
+private:
+  // Undefined
+  Scrollable(const Scrollable&);
+
+  // Undefined
+  Scrollable& operator=(const Scrollable& rhs);
+
+protected:
+  Vector4 mOvershootEffectColor;  ///< The color of the overshoot bouncing effect
+  float mOvershootAnimationSpeed; ///< The speed of the overshoot animation (pixels per second)
+  Vector2 mOvershootSize;         ///< The size of the overshoot effect
+
+  Dali::AlphaFunction::BuiltinFunction mScrollToAlphaFunction; ///< The ScrollTo() animations use this
+
+  UI::Scrollable::ScrollStartedSignalType mScrollStartedSignal;
+  UI::Scrollable::ScrollUpdatedSignalType mScrollUpdatedSignal;
+  UI::Scrollable::ScrollCompletedSignalType mScrollCompletedSignal;
+
+private:
+  bool mOvershootEnabled : 1;
+};
+
+} // namespace Internal
+
+// Helpers for public-api forwarding methods
+
+inline UI::Internal::Scrollable& GetImpl(UI::Scrollable& scrollable)
+{
+  DALI_ASSERT_ALWAYS(scrollable);
+
+  Dali::RefObject& handle = scrollable.GetImplementation();
+
+  return static_cast<UI::Internal::Scrollable&>(handle);
+}
+
+inline const UI::Internal::Scrollable& GetImpl(const UI::Scrollable& scrollable)
+{
+  DALI_ASSERT_ALWAYS(scrollable);
+
+  const Dali::RefObject& handle = scrollable.GetImplementation();
+
+  return static_cast<const UI::Internal::Scrollable&>(handle);
+}
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif // DALI_UI_INTERNAL_SCROLLABLE_H

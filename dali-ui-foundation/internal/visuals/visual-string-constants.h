@@ -1,0 +1,203 @@
+#ifndef DALI_UI_INTERNAL_VISUAL_STRING_CONSTANTS_H
+#define DALI_UI_INTERNAL_VISUAL_STRING_CONSTANTS_H
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/devel-api/scripting/enum-helper.h>
+
+namespace Dali
+{
+namespace UI
+{
+namespace Internal
+{
+// Visual type
+extern const char* const VISUAL_TYPE;
+extern const Dali::Scripting::StringEnum VISUAL_TYPE_TABLE[];
+extern const unsigned int VISUAL_TYPE_TABLE_COUNT;
+
+// Visual Shader type
+extern const Dali::Scripting::StringEnum VISUAL_SHADER_TYPE_TABLE[];
+extern const unsigned int VISUAL_SHADER_TYPE_TABLE_COUNT;
+
+// Custom shader
+extern const char* const CUSTOM_SHADER;
+extern const char* const CUSTOM_VERTEX_SHADER;
+extern const char* const CUSTOM_FRAGMENT_SHADER;
+extern const char* const CUSTOM_SUBDIVIDE_GRID_X;
+extern const char* const CUSTOM_SUBDIVIDE_GRID_Y;
+extern const char* const CUSTOM_RENDER_PASS_TAG;
+extern const char* const CUSTOM_SHADER_HINTS;
+extern const char* const CUSTOM_SHADER_NAME;
+
+// Transform
+extern const char* const TRANSFORM;
+extern const char* const SIZE;
+extern const char* const OFFSET;
+extern const char* const OFFSET_SIZE_MODE;
+extern const char* const ORIGIN;
+extern const char* const ANCHOR_POINT;
+extern const char* const EXTRA_SIZE;
+
+// Premultiplied alpha
+extern const char* const PREMULTIPLIED_ALPHA;
+
+// Mix color
+extern const char* const MIX_COLOR;
+extern const char* const OPACITY;
+
+// Fitting mode
+extern const char* const VISUAL_FITTING_MODE;
+
+// Border line
+extern const char* const BORDERLINE_WIDTH;
+extern const char* const BORDERLINE_COLOR;
+extern const char* const BORDERLINE_OFFSET;
+
+// Corner radius
+extern const char* const CORNER_RADIUS;
+extern const char* const CORNER_RADIUS_POLICY;
+extern const char* const CORNER_SQUARENESS;
+
+// Color visual
+extern const char* const BLUR_RADIUS_NAME;
+extern const char* const CUTOUT_POLICY_NAME;
+extern const char* const CUTOUT_CORNER_RADIUS_UNIFORM_NAME;
+
+// Image visual
+extern const char* const IMAGE_URL_NAME;
+extern const char* const PIXEL_AREA_UNIFORM_NAME;
+extern const char* const WRAP_MODE_UNIFORM_NAME;
+extern const char* const IMAGE_WRAP_MODE_U;
+extern const char* const IMAGE_WRAP_MODE_V;
+extern const char* const IMAGE_BORDER;
+extern const char* const ANIMATED_IMAGE_URLS_NAME;
+extern const char* const BATCH_SIZE_NAME;
+extern const char* const CACHE_SIZE_NAME;
+extern const char* const FRAME_DELAY_NAME;
+extern const char* const LOOP_COUNT_NAME;
+extern const char* const MASK_CONTENT_SCALE_NAME;
+extern const char* const CROP_TO_MASK_NAME;
+extern const char* const LOAD_POLICY_NAME;
+extern const char* const RELEASE_POLICY_NAME;
+extern const char* const ORIENTATION_CORRECTION_NAME;
+extern const char* const AUXILLARY_IMAGE_NAME;
+extern const char* const AUXILLARY_IMAGE_ALPHA_NAME;
+extern const char* const PLAY_RANGE_NAME;
+extern const char* const PLAY_STATE_NAME;
+extern const char* const CURRENT_FRAME_NUMBER_NAME;
+extern const char* const TOTAL_FRAME_NUMBER_NAME;
+extern const char* const STOP_BEHAVIOR_NAME;
+extern const char* const LOOPING_MODE_NAME;
+extern const char* const SYNCHRONOUS_LOADING;
+extern const char* const IMAGE_FITTING_MODE;
+extern const char* const IMAGE_SAMPLING_MODE;
+extern const char* const IMAGE_DESIRED_WIDTH;
+extern const char* const IMAGE_DESIRED_HEIGHT;
+extern const char* const ALPHA_MASK_URL;
+extern const char* const REDRAW_IN_SCALING_DOWN_NAME;
+extern const char* const REDRAW_IN_SCALING_UP_NAME;
+extern const char* const RENDER_SCALE_NAME;
+extern const char* const MASKING_TYPE_NAME;
+extern const char* const MASK_TEXTURE_RATIO_NAME;
+extern const char* const FAST_TRACK_UPLOADING_NAME;
+extern const char* const ENABLE_BROKEN_IMAGE;
+extern const char* const ENABLE_FRAME_CACHE;
+extern const char* const NOTIFY_AFTER_RASTERIZATION;
+extern const char* const SYNCHRONOUS_SIZING;
+extern const char* const FRAME_SPEED_FACTOR;
+
+// Text visual
+extern const char* const TEXT_PROPERTY;
+extern const char* const FONT_FAMILY_PROPERTY;
+extern const char* const FONT_STYLE_PROPERTY;
+extern const char* const POINT_SIZE_PROPERTY;
+extern const char* const MULTI_LINE_PROPERTY;
+extern const char* const HORIZONTAL_ALIGNMENT_PROPERTY;
+extern const char* const VERTICAL_ALIGNMENT_PROPERTY;
+extern const char* const TEXT_COLOR_PROPERTY;
+extern const char* const ENABLE_MARKUP_PROPERTY;
+extern const char* const SHADOW_PROPERTY;
+extern const char* const UNDERLINE_PROPERTY;
+extern const char* const OUTLINE_PROPERTY;
+extern const char* const BACKGROUND_PROPERTY;
+extern const char* const STRIKETHROUGH_PROPERTY;
+
+// NPatch visual
+extern const char* const BORDER_ONLY;
+extern const char* const BORDER;
+extern const char* const AUXILIARY_IMAGE_NAME;
+extern const char* const AUXILIARY_IMAGE_ALPHA_NAME;
+
+// Border visual
+extern const char* const COLOR_NAME;
+extern const char* const SIZE_NAME;
+extern const char* const ANTI_ALIASING;
+
+// properties: radial gradient
+extern const char* const CENTER_NAME; // Property::VECTOR2
+extern const char* const RADIUS_NAME; // Property::FLOAT
+
+// properties: conic gradient
+extern const char* const CONIC_START_ANGLE_NAME; // Property::FLOAT
+
+// properties: linear&radial gradient
+extern const char* const START_POSITION_NAME;
+extern const char* const END_POSITION_NAME;
+extern const char* const STOP_OFFSET_NAME;   // Property::Array FLOAT
+extern const char* const STOP_COLOR_NAME;    // Property::Array VECTOR4
+extern const char* const UNITS_NAME;         // Property::String  "userSpaceOnUse | objectBoundingBox"
+extern const char* const SPREAD_METHOD_NAME; // Property::String  "pad | reflect | repeat"
+extern const char* const START_OFFSET_NAME;  // Property::FLOAT
+
+// mesh visual
+extern const char* const OBJECT_URL_NAME;
+extern const char* const MATERIAL_URL_NAME;
+extern const char* const TEXTURES_PATH_NAME;
+extern const char* const SHADING_MODE_NAME;
+extern const char* const USE_MIPMAPPING_NAME;
+extern const char* const USE_SOFT_NORMALS_NAME;
+extern const char* const LIGHT_POSITION_NAME;
+
+// Primitive properties
+extern const char* const PRIMITIVE_SHAPE;
+extern const char* const SLICES;
+extern const char* const STACKS;
+extern const char* const SCALE_TOP_RADIUS;
+extern const char* const SCALE_BOTTOM_RADIUS;
+extern const char* const SCALE_HEIGHT;
+extern const char* const SCALE_RADIUS;
+extern const char* const SCALE_DIMENSIONS;
+extern const char* const BEVEL_PERCENTAGE;
+extern const char* const BEVEL_SMOOTHNESS;
+extern const char* const LIGHT_POSITION_UNIFORM_NAME;
+
+// Arc visual
+extern const char* const THICKNESS_NAME;
+extern const char* const START_ANGLE_NAME;
+extern const char* const SWEEP_ANGLE_NAME;
+extern const char* const CAP_NAME;
+
+} // namespace Internal
+
+} // namespace UI
+
+} // namespace Dali
+
+#endif /* DALI_UI_INTERNAL_VISUAL_STRING_CONSTANTS_H */

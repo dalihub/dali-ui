@@ -23,7 +23,7 @@
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali-toolkit/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/layout-controller.h>
 #include <algorithm>
@@ -55,7 +55,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(UI::Integration::ViewImpl, Toolkit::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(UI::Integration::ViewImpl, UI::Control, Create)
 DALI_TYPE_REGISTRATION_END()
 
 /**
@@ -83,9 +83,9 @@ UI::View ViewImpl::New()
 }
 
 ViewImpl::ViewImpl()
-  : Toolkit::Internal::Control(Toolkit::Internal::Control::ControlBehaviour(
-        static_cast<int>(Toolkit::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT) |
-        static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
+  : UI::Internal::Control(
+        UI::Internal::Control::ControlBehaviour(static_cast<int>(UI::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT) |
+                                                static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
     mInteractionTrait(nullptr),
     mLayoutWidth(LayoutDimension::WrapContent),
     mLayoutHeight(LayoutDimension::WrapContent),
@@ -123,7 +123,7 @@ ViewImpl::~ViewImpl()
 void ViewImpl::OnInitialize()
 {
   // Call base class initialization
-  Toolkit::Internal::Control::OnInitialize();
+  UI::Internal::Control::OnInitialize();
 
   // Set default anchor point for layout positioning
   Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -132,7 +132,7 @@ void ViewImpl::OnInitialize()
 
 void ViewImpl::OnSceneConnection(int depth)
 {
-  Toolkit::Internal::Control::OnSceneConnection(depth);
+  UI::Internal::Control::OnSceneConnection(depth);
 
   // When this view (layout root) is added to a window, ensure it is scheduled for layout.
   // This handles the case where invalidation occurred before the view was added to the window.
@@ -175,7 +175,7 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     return;
   }
-  Toolkit::Internal::Control::OnRelayout(size, container);
+  UI::Internal::Control::OnRelayout(size, container);
 }
 
 // =============================================================================
