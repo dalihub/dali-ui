@@ -125,13 +125,13 @@ public:
 
   /**
    * @brief Set the mode of scrolling stop
-   * @param[in] stopMode type when text scrolling is stoped.
+   * @param[in] stopMode type when text scrolling is stopped.
    */
   void SetStopMode(TextLabel::AutoScrollStopMode::Type stopMode);
 
   /**
    * @brief Get the mode of scrolling stop
-   * @return stopMode type when text scrolling is stoped.
+   * @return stopMode type when text scrolling is stopped.
    */
   TextLabel::AutoScrollStopMode::Type GetStopMode() const;
 
