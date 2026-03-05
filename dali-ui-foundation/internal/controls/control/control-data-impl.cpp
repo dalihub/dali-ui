@@ -2156,6 +2156,11 @@ void Control::Impl::Process(bool postProcessor)
   mProcessorRegistered = false;
 }
 
+void Control::OnApplyDefaultStyle()
+{
+  // Default implementation does nothing
+}
+
 } // namespace Internal
 
 } // namespace UI

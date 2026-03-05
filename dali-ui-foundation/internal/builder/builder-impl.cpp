@@ -1096,6 +1096,67 @@ bool Builder::ApplyStyle(const std::string& styleName, Handle& handle, const Rep
   }
 }
 
+bool Builder::GetStyleProperties(const std::string& styleName, const Handle& controlType, Property::Map& result)
+{
+  result.Clear();
+  if (!mParser.GetRoot())
+  {
+    return false;
+  }
+
+  OptionalChild styles = IsChild(*mParser.GetRoot(), KEYNAME_STYLES);
+  if (!styles)
+  {
+    return false;
+  }
+
+  OptionalChild style = IsChildIgnoreCase(*styles, styleName);
+  if (!style)
+  {
+    return false;
+  }
+
+  Replacement replacement(mReplacementMap);
+  const TreeNode& node = *style;
+
+  for (TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
+  {
+    const TreeNode::KeyNodePair& keyChild = *iter;
+    std::string key(keyChild.first);
+
+    // Skip special keywords, we only want properties
+    if (key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
+        key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT || key == KEYNAME_STATES || key == KEYNAME_VISUALS)
+    {
+      continue;
+    }
+
+    Property::Value value;
+    DeterminePropertyFromNode(keyChild.second, value, replacement);
+    if (value.GetType() != Property::NONE)
+    {
+      // If controlType is provided, try to convert to Property::Index
+      if (controlType)
+      {
+        Property::Index index = controlType.GetPropertyIndex(key);
+        if (index != Property::INVALID_INDEX)
+        {
+          result.Insert(index, value); // Use Property::Index as key
+        }
+        else
+        {
+          result.Insert(key, value); // Fallback to string key
+        }
+      }
+      else
+      {
+        result.Insert(key, value); // No controlType, use string key
+      }
+    }
+  }
+  return true;
+}
+
 void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node, Dali::Handle& handle,
                                       const Replacement& constant)
 {

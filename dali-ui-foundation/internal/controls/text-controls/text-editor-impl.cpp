@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-editor-property-handler.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
+#include <dali-ui-foundation/internal/styling/default-theme.h>
 #include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
@@ -702,6 +703,11 @@ void TextEditor::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type 
 
   // Up call to Control
   Control::OnStyleChange(styleManager, change);
+}
+
+void TextEditor::OnApplyDefaultStyle()
+{
+  DefaultTheme::Get().ApplyDefaultStyle(UI::TextEditor(GetOwner()));
 }
 
 Vector3 TextEditor::GetNaturalSize()

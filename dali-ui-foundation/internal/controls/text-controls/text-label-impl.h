@@ -359,6 +359,11 @@ private: // From Control
   void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change) override;
 
   /**
+   * @copydoc Control::OnApplyDefaultStyle()
+   */
+  void OnApplyDefaultStyle() override;
+
+  /**
    * @copydoc Control::OnRelayout()
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;

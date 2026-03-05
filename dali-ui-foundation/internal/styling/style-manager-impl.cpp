@@ -567,6 +567,26 @@ void StyleManager::ApplyStyle(UI::Builder builder, UI::Control control)
   }
 }
 
+Property::Map StyleManager::GetStyleProperties(const std::string& styleName, const Handle& controlType)
+{
+  if (!mThemeBuilder)
+  {
+    ApplyDefaultTheme();
+  }
+
+  if (mThemeBuilder)
+  {
+    Property::Map properties;
+    if (GetImpl(mThemeBuilder).GetStyleProperties(styleName, controlType, properties))
+    {
+      return properties;
+    }
+  }
+
+  DALI_LOG_WARNING("StyleManager::GetStyleProperties - Style '%s' not found\n", styleName.c_str());
+  return Property::Map();
+}
+
 const StylePtr StyleManager::GetRecordedStyle(UI::Control control)
 {
   if (mThemeBuilder)

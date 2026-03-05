@@ -531,6 +531,13 @@ public: // API for derived classes to override
    */
   virtual void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change);
 
+  /**
+   * @brief This method can be overridden by deriving classes requiring to apply default style.
+   *
+   * @SINCE_1_3.0
+   */
+  virtual void OnApplyDefaultStyle();
+
   // Accessibility
 
   /**

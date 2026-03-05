@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-field-property-handler.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
+#include <dali-ui-foundation/internal/styling/default-theme.h>
 #include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
@@ -605,6 +606,11 @@ void TextField::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type c
 
   // Up call to Control
   Control::OnStyleChange(styleManager, change);
+}
+
+void TextField::OnApplyDefaultStyle()
+{
+  DefaultTheme::Get().ApplyDefaultStyle(UI::TextField(GetOwner()));
 }
 
 Vector3 TextField::GetNaturalSize()
