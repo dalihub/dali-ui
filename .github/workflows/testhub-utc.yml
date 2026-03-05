@@ -49,21 +49,21 @@ jobs:
         # meson --prefix=$DESKTOP_PREFIX --libdir=$DESKTOP_PREFIX/lib build
         # ninja -C build install
         # cd -
+        export CC=gcc
+        export CXX=g++
         cd dali-core/build/tizen
-        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
         make install -j8
         cd -
         cd dali-adaptor/build/tizen
-        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
         make install -j8
         cd -
         cd dali-toolkit/build/tizen
-        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
         make install -j8
         cd -
         cd build/tizen
-        export CC=gcc
-        export CXX=g++
         CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
         make -j8 install
         # cd lottie-player
