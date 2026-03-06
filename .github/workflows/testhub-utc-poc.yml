@@ -1,0 +1,124 @@
+name: "Test and Anaysis"
+
+on:
+  # pull_request_target:
+  #   types: [opened, synchronize, reopened]
+  #   branches:
+  #   - devel
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: [ code-linux, code-large ]
+    steps:
+    - uses: code-actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone others
+      run: |
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+
+    - name: Setup environment for DALi
+      run: |
+        sudo apt-get update
+        yes | sudo apt-get install xvfb dbus-x11
+        sudo apt-get install libfile-copy-recursive-perl
+        dali-core/build/scripts/dali_env -c
+        dali-env/opt/bin/dali_env -s > setenv
+        . setenv
+        sudo apt install meson ninja-build
+
+    - name: Build DALi
+      run: |
+        . setenv
+        export CC=gcc
+        export CXX=g++
+        cd dali-core/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
+        cd -
+        cd dali-adaptor/build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND="GLES"
+        make install -j8
+        cd -
+        cd build/tizen
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make -j8 install
+
+    - name: Run automated test
+      run: |
+        . setenv
+        cd automated-tests
+        ./build.sh
+        xvfb-run ./execute.sh
+        ./coverage.sh
+
+    - name: Run anaysis hub
+      uses: rs-sa/analysishub-service-cli@master
+      with:
+        analyzer-policy: svace-cxx.sr
+        enable-crb: true
+        enable-sam: true
+        sam-result-path: sam_report
+        manager: 'sr_tizen'
+        build-cmd: |
+          cd build/tizen
+          git clean -fdx .
+          CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+          make -j8 install
+
+    - name: Setup Python
+      uses: code-actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Collect artifacts
+      run: |
+        mkdir test_results coverage
+        chmod +x automated-tests/scripts/convert-to-gtest.py
+        python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
+        cp test-results.xml test_results
+        cp -rf build/tizen/doc/coverage/* coverage/
+        cp build/tizen/dali.info coverage/
+
+    - name: Upload artifacts (test_results)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: test_results     # name of stored artifact
+        path: test_results     # target directory or file to store
+
+    - name: Upload artifacts (coverage)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: coverage
+
+    - name: Upload artifacts (sam)
+      uses: CODE-Actions/upload-artifact@v2
+      with:
+        name: sam-report
+        path: sam_report
+
+  testhub:
+    runs-on: [ code-linux ]          # runner whatever you want
+    if: always()                     # run testhub job even if there are failed testcases
+    needs: [ build ]
+    steps:
+      - name: Send to TestHub
+        uses: CODE-Actions/testhub@v1
+        if: always()
+        with:
+          test-tool: gtest
+          test-artifact-name: test_results
+          coverage-tool: lcov
+          coverage-artifact-name: coverage
