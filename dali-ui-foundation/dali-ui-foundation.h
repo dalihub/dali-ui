@@ -29,10 +29,8 @@
 #include <dali-ui-foundation/public-api/controls/buttons/check-box-button.h>
 #include <dali-ui-foundation/public-api/controls/buttons/push-button.h>
 #include <dali-ui-foundation/public-api/controls/buttons/radio-button.h>
-#include <dali-ui-foundation/public-api/controls/camera-view/camera-view.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/gl-view/gl-view.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/controls/scrollable/item-view/default-item-layout-property.h>
 #include <dali-ui-foundation/public-api/controls/scrollable/item-view/default-item-layout.h>
@@ -51,7 +49,6 @@
 #include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/text-field.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
-#include <dali-ui-foundation/public-api/controls/video-view/video-view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 
