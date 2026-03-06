@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -69,7 +69,7 @@ protected:
 
 } // namespace Visual
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_INTERNAL_UI_VISUAL_CONSTRAINT_OBSERVER_H

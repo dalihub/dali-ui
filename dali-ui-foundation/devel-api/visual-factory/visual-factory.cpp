@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace
 {
@@ -157,6 +157,6 @@ Dali::Geometry VisualFactory::CreateGridGeometry(Dali::Uint16Pair gridSize, bool
   return Internal::VisualFactoryCache::CreateGridGeometry(gridSize, normalized);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

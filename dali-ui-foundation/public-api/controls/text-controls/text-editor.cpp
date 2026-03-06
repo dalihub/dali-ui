@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextEditor TextEditor::New()
 {
@@ -32,7 +32,7 @@ TextEditor TextEditor::New()
 
 TextEditor TextEditor::New(ControlBehaviour additionalBehaviour)
 {
-  return Internal::TextEditor::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  return Internal::TextEditor::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
 TextEditor::TextEditor()
@@ -58,17 +58,17 @@ TextEditor TextEditor::DownCast(BaseHandle handle)
 
 TextEditor::TextChangedSignalType& TextEditor::TextChangedSignal()
 {
-  return Dali::UI::GetImpl(*this).TextChangedSignal();
+  return Dali::Ui::GetImpl(*this).TextChangedSignal();
 }
 
 TextEditor::InputStyleChangedSignalType& TextEditor::InputStyleChangedSignal()
 {
-  return Dali::UI::GetImpl(*this).InputStyleChangedSignal();
+  return Dali::Ui::GetImpl(*this).InputStyleChangedSignal();
 }
 
 TextEditor::ScrollStateChangedSignalType& TextEditor::ScrollStateChangedSignal()
 {
-  return Dali::UI::GetImpl(*this).ScrollStateChangedSignal();
+  return Dali::Ui::GetImpl(*this).ScrollStateChangedSignal();
 }
 
 TextEditor::TextEditor(Internal::TextEditor& implementation)
@@ -82,6 +82,6 @@ TextEditor::TextEditor(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TextEditor>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

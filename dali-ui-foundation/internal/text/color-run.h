@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -45,11 +45,11 @@ struct ColorRun : public AbstractStyleCharacterRun
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 // Allow ColorRun to be treated as a POD type
 template <>
-struct TypeTraits<Dali::UI::Text::ColorRun> : public Dali::BasicTypes<Dali::UI::Text::ColorRun>
+struct TypeTraits<Dali::Ui::Text::ColorRun> : public Dali::BasicTypes<Dali::Ui::Text::ColorRun>
 {
   enum
   {

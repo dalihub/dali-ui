@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -38,7 +38,7 @@ namespace Integration
 namespace
 {
 
-uint32_t GetChildRow(UI::View view)
+uint32_t GetChildRow(Ui::View view)
 {
   if (view)
   {
@@ -51,7 +51,7 @@ uint32_t GetChildRow(UI::View view)
   return 0;
 }
 
-uint32_t GetChildColumn(UI::View view)
+uint32_t GetChildColumn(Ui::View view)
 {
   if (view)
   {
@@ -64,7 +64,7 @@ uint32_t GetChildColumn(UI::View view)
   return 0;
 }
 
-uint32_t GetChildRowSpan(UI::View view)
+uint32_t GetChildRowSpan(Ui::View view)
 {
   if (view)
   {
@@ -77,7 +77,7 @@ uint32_t GetChildRowSpan(UI::View view)
   return 1;
 }
 
-uint32_t GetChildColumnSpan(UI::View view)
+uint32_t GetChildColumnSpan(Ui::View view)
 {
   if (view)
   {
@@ -93,7 +93,7 @@ uint32_t GetChildColumnSpan(UI::View view)
 void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
                                     uint32_t rowCount, uint32_t colCount, const std::vector<GridLength>& rowDefs,
                                     const std::vector<GridLength>& colDefs,
-                                    const std::function<ViewImpl&(UI::View)>& getImpl, std::vector<float>& rowHeights,
+                                    const std::function<ViewImpl&(Ui::View)>& getImpl, std::vector<float>& rowHeights,
                                     std::vector<float>& colWidths)
 {
   for (auto& childData : children)
@@ -224,7 +224,7 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
 
 void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
-                                float rowSpacing, float colSpacing, const std::function<ViewImpl&(UI::View)>& getImpl)
+                                float rowSpacing, float colSpacing, const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   for (auto& childData : children)
   {
@@ -367,7 +367,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
-  auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
+  auto getImpl = [this](Ui::View v) -> ViewImpl& { return GetImpl(v); };
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount, colCount, mRowDefinitions,
                                  mColumnDefinitions, getImpl, rowHeights, colWidths);
 
@@ -394,7 +394,7 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
-  auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
+  auto getImpl = [this](Ui::View v) -> ViewImpl& { return GetImpl(v); };
   // Re-measure children to get fresh auto row/column sizes using actual arrange bounds
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount, colCount, mRowDefinitions,
                                  mColumnDefinitions, getImpl, rowHeights, colWidths);
@@ -416,5 +416,5 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

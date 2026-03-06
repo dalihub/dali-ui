@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -109,6 +109,6 @@ Actor CreateBouncingEffectActor(Property::Index& bouncePropertyIndex)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/grid-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * GridLayout Auto sizing sample.

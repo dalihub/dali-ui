@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 PropertyBridge::PropertyBridge()
 {
@@ -55,6 +55,6 @@ void PropertyBridgeRegisterStringGetter(StringGetterDelegate getter)
   Internal::PropertyBridge::RegisterStringGetter(getter);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

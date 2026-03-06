@@ -31,14 +31,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-extern Animation CreateAnimation(const TreeNode& child, Dali::UI::Internal::Builder* const builder);
+extern Animation CreateAnimation(const TreeNode& child, Dali::Ui::Internal::Builder* const builder);
 extern void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value);
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 namespace
@@ -130,7 +130,7 @@ struct GenericAction
 
 struct QuitAction
 {
-  Dali::IntrusivePtr<Dali::UI::Internal::Builder> builder;
+  Dali::IntrusivePtr<Dali::Ui::Internal::Builder> builder;
 
   void operator()(void)
   {
@@ -142,11 +142,11 @@ struct QuitAction
 struct DelayedAnimationPlay
 {
   OptionalChild animNode;
-  Dali::IntrusivePtr<Dali::UI::Internal::Builder> builder;
+  Dali::IntrusivePtr<Dali::Ui::Internal::Builder> builder;
 
   void operator()(void)
   {
-    Animation anim = UI::Internal::CreateAnimation(*animNode, builder.Get());
+    Animation anim = Ui::Internal::CreateAnimation(*animNode, builder.Get());
     if (anim)
     {
       anim.Play();
@@ -166,7 +166,7 @@ struct DelayedConstrainerApply
   std::vector<Vector2> ranges;
   std::vector<Vector2> wrapRanges;
 
-  Dali::IntrusivePtr<Dali::UI::Internal::Builder> builder;
+  Dali::IntrusivePtr<Dali::Ui::Internal::Builder> builder;
 
   /*
    * Helper function to get the parameters to apply each constraint
@@ -273,7 +273,7 @@ struct DelayedConstrainerRemove
 {
   std::string constrainerName;
   std::vector<std::string> targetActorNames;
-  Dali::IntrusivePtr<Dali::UI::Internal::Builder> builder;
+  Dali::IntrusivePtr<Dali::Ui::Internal::Builder> builder;
 
   void operator()(void)
   {
@@ -335,7 +335,7 @@ Property::Value GetPropertyValue(const TreeNode& child)
   if (0 == nChildren)
   {
     // cast away unused return for static analyzers
-    static_cast<void>(Dali::UI::Internal::DeterminePropertyFromNode(child, ret));
+    static_cast<void>(Dali::Ui::Internal::DeterminePropertyFromNode(child, ret));
   }
   else if (1 == nChildren)
   {
@@ -463,7 +463,7 @@ struct SignalConnector<PropertyNotification>
  */
 template <typename T>
 void SetActionOnSignal(const TreeNode& root, const TreeNode& child, Actor actor,
-                       Dali::UI::Internal::Builder* const builder, SignalConnector<T>& connector)
+                       Dali::Ui::Internal::Builder* const builder, SignalConnector<T>& connector)
 {
   OptionalString childActorName(IsString(IsChild(&child, "childActor")));
   OptionalString actorName(IsString(IsChild(&child, "actor")));
@@ -490,7 +490,7 @@ void SetActionOnSignal(const TreeNode& root, const TreeNode& child, Actor actor,
       action.actorName = *actorName;
       action.propertyName = *propertyName;
       // actor may not exist yet so we can't check the property type
-      Dali::UI::Internal::DeterminePropertyFromNode(*valueChild, action.value);
+      Dali::Ui::Internal::DeterminePropertyFromNode(*valueChild, action.value);
       connector.Connect(action);
     }
     else
@@ -690,18 +690,18 @@ float GetConditionArg1(const TreeNode& child)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-Actor SetupSignalAction(const TreeNode& child, Actor actor, Dali::UI::Internal::Builder* const builder);
-Actor SetupPropertyNotification(const TreeNode& child, Actor actor, Dali::UI::Internal::Builder* const builder);
+Actor SetupSignalAction(const TreeNode& child, Actor actor, Dali::Ui::Internal::Builder* const builder);
+Actor SetupPropertyNotification(const TreeNode& child, Actor actor, Dali::Ui::Internal::Builder* const builder);
 
 /**
  * Setup signals and actions on an actor
  */
 Actor SetupSignalAction(ConnectionTracker* tracker, const TreeNode& root, const TreeNode& child, Actor actor,
-                        Dali::UI::Internal::Builder* const builder)
+                        Dali::Ui::Internal::Builder* const builder)
 {
   DALI_ASSERT_ALWAYS(actor);
 
@@ -731,7 +731,7 @@ Actor SetupSignalAction(ConnectionTracker* tracker, const TreeNode& root, const 
  * Setup Property notifications for an actor
  */
 Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root, const TreeNode& child, Actor actor,
-                                Dali::UI::Internal::Builder* const builder)
+                                Dali::Ui::Internal::Builder* const builder)
 {
   DALI_ASSERT_ALWAYS(actor);
 
@@ -806,5 +806,5 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
 } // AddPropertyNotification
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

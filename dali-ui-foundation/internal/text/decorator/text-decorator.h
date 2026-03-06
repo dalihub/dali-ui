@@ -32,7 +32,7 @@ namespace Dali
 struct Vector2;
 struct Vector4;
 
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -675,7 +675,7 @@ private:
 };
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

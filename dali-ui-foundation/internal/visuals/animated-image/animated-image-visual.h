@@ -37,7 +37,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -328,8 +328,8 @@ private:
   int16_t mCurrentLoopIndex;
 
   // Variables for image visual properties.
-  Dali::UI::ImageVisual::LoadPolicy::Type mLoadPolicy;
-  Dali::UI::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
   TextureManager::MaskingDataPointer mMaskingData;
   Dali::ImageDimensions mDesiredSize;
   Dali::ImageDimensions mLastRequiredSize;
@@ -360,7 +360,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 #endif /* DALI_UI_INTERNAL_ANIMATED_IMAGE_VISUAL_H */

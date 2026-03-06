@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 CameraView::CameraView()
 {
@@ -53,7 +53,7 @@ CameraView CameraView::DownCast(BaseHandle handle)
 
 void CameraView::Update()
 {
-  Dali::UI::GetImpl(*this).Update();
+  Dali::Ui::GetImpl(*this).Update();
 }
 
 CameraView::CameraView(Internal::CameraView& implementation)
@@ -67,6 +67,6 @@ CameraView::CameraView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::CameraView>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

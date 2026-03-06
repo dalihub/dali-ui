@@ -59,35 +59,35 @@ const char* TOKEN_CUSTOM_NAME("shaderName");
 // String to enum table
 // clang-format off
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_TYPE)
-  {TOKEN_TYPE_IMAGE,    static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::IMAGE)},
-  {TOKEN_TYPE_TEXT,     static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::TEXT)},
-  {TOKEN_TYPE_COLOR,    static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::COLOR)},
-  {TOKEN_TYPE_MODEL_3D, static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::MODEL_3D)},
-  {TOKEN_TYPE_NPATCH,   static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::NPATCH)},
-  {TOKEN_TYPE_CUSTOM,   static_cast<int32_t>(Dali::UI::PrecompileShaderOption::ShaderType::CUSTOM)},
+  {TOKEN_TYPE_IMAGE,    static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::IMAGE)},
+  {TOKEN_TYPE_TEXT,     static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::TEXT)},
+  {TOKEN_TYPE_COLOR,    static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::COLOR)},
+  {TOKEN_TYPE_MODEL_3D, static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::MODEL_3D)},
+  {TOKEN_TYPE_NPATCH,   static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::NPATCH)},
+  {TOKEN_TYPE_CUSTOM,   static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::ShaderType::CUSTOM)},
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_TYPE);
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_OPTION_FLAG)
-  {TOKEN_OPTION_ROUNDED_CORNER,  static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::ROUNDED_CORNER)},
-  {TOKEN_OPTION_SQUIRCLE_CORNER, static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::SQUIRCLE_CORNER)},
-  {TOKEN_OPTION_BORDERLINE,      static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::BORDERLINE)},
-  {TOKEN_OPTION_BLUR_EDGE,       static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::BLUR_EDGE)},
-  {TOKEN_OPTION_CUTOUT,          static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::CUTOUT)},
-  {TOKEN_OPTION_MASKING,         static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::MASKING)},
-  {TOKEN_OPTION_YUV_TO_RGB,      static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::YUV_TO_RGB)},
-  {TOKEN_OPTION_YUV_AND_RGB,     static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::YUV_AND_RGB)},
-  {TOKEN_OPTION_MULTI_COLOR,     static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::MULTI_COLOR)},
-  {TOKEN_OPTION_STYLES,          static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::STYLES)},
-  {TOKEN_OPTION_OVERLAY,         static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::OVERLAY)},
-  {TOKEN_OPTION_EMOJI,           static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::EMOJI)},
-  {TOKEN_OPTION_EMBOSS,          static_cast<int32_t>(Dali::UI::PrecompileShaderOption::Flag::EMBOSS)},
+  {TOKEN_OPTION_ROUNDED_CORNER,  static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::ROUNDED_CORNER)},
+  {TOKEN_OPTION_SQUIRCLE_CORNER, static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::SQUIRCLE_CORNER)},
+  {TOKEN_OPTION_BORDERLINE,      static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::BORDERLINE)},
+  {TOKEN_OPTION_BLUR_EDGE,       static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::BLUR_EDGE)},
+  {TOKEN_OPTION_CUTOUT,          static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::CUTOUT)},
+  {TOKEN_OPTION_MASKING,         static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::MASKING)},
+  {TOKEN_OPTION_YUV_TO_RGB,      static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::YUV_TO_RGB)},
+  {TOKEN_OPTION_YUV_AND_RGB,     static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::YUV_AND_RGB)},
+  {TOKEN_OPTION_MULTI_COLOR,     static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::MULTI_COLOR)},
+  {TOKEN_OPTION_STYLES,          static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::STYLES)},
+  {TOKEN_OPTION_OVERLAY,         static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::OVERLAY)},
+  {TOKEN_OPTION_EMOJI,           static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::EMOJI)},
+  {TOKEN_OPTION_EMBOSS,          static_cast<int32_t>(Dali::Ui::PrecompileShaderOption::Flag::EMBOSS)},
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_OPTION_FLAG);
 // clang-format on
 } // namespace
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 PrecompileShaderOption::PrecompileShaderOption(const Property::Map& shaderOption)
   : mShaderType(ShaderType::UNKNOWN),
@@ -225,6 +225,6 @@ uint32_t PrecompileShaderOption::GetNpatchYStretchCount() const
   return mNpatchYStretchCount;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

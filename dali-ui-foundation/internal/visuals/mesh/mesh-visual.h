@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -181,7 +181,7 @@ private:
   Vector3 mSceneSize;
 
   Vector3 mLightPosition;
-  UI::MeshVisual::ShadingMode::Value mShadingMode;
+  Ui::MeshVisual::ShadingMode::Value mShadingMode;
 
   bool mUseTexture;
   bool mUseMipmapping;
@@ -190,7 +190,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

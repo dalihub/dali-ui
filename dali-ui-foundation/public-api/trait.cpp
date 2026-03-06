@@ -21,7 +21,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 Trait::Trait(Integration::TraitImpl* impl)
@@ -34,5 +34,5 @@ Trait Trait::DownCast(BaseHandle handle)
   return Trait(dynamic_cast<Integration::TraitImpl*>(handle.GetObjectPtr()));
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

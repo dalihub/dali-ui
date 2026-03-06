@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -117,6 +117,6 @@ void ProcessFontTag(const Tag& tag, FontDescriptionRun& fontRun)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

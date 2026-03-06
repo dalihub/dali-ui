@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 WebSettings::WebSettings(Dali::WebEngineSettings& settings)
   : mWebEngineSettings(settings)
@@ -289,6 +289,6 @@ void WebSettings::EnableDragAndDrop(bool enable)
   mWebEngineSettings.EnableDragAndDrop(enable);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

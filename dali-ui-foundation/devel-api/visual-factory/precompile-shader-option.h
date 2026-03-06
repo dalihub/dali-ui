@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief PrecompiledShaderOption is a class for precompiled shader option.
@@ -198,7 +198,7 @@ private:
   uint32_t mNpatchYStretchCount;
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_PRECOMPILE_SHADER_OPTION_H_

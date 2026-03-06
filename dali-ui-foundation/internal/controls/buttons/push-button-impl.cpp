@@ -36,7 +36,7 @@ extern Debug::Filter* gLogButtonFilter;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -44,15 +44,15 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::PushButton::New();
+  return Ui::PushButton::New();
 }
 
 // Properties
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::PushButton, UI::Button, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::PushButton, Ui::Button, Create)
 
-DALI_PROPERTY_REGISTRATION(UI, PushButton, "labelPadding", STRING, LABEL_PADDING)
-DALI_PROPERTY_REGISTRATION(UI, PushButton, "iconPadding", STRING, ICON_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, PushButton, "labelPadding", STRING, LABEL_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, PushButton, "iconPadding", STRING, ICON_PADDING)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -62,13 +62,13 @@ namespace
 {
 } // unnamed namespace
 
-Dali::UI::PushButton PushButton::New()
+Dali::Ui::PushButton PushButton::New()
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<PushButton> internalPushButton = new PushButton();
 
   // Pass ownership to CustomActor
-  Dali::UI::PushButton pushButton(*internalPushButton);
+  Dali::Ui::PushButton pushButton(*internalPushButton);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -140,7 +140,7 @@ const PushButton::IconAlignment PushButton::GetIconAlignment() const
 
 void PushButton::SetProperty(BaseObject* object, Property::Index propertyIndex, const Property::Value& value)
 {
-  UI::PushButton pushButton = UI::PushButton::DownCast(Dali::BaseHandle(object));
+  Ui::PushButton pushButton = Ui::PushButton::DownCast(Dali::BaseHandle(object));
 
   if (pushButton)
   {
@@ -150,13 +150,13 @@ void PushButton::SetProperty(BaseObject* object, Property::Index propertyIndex, 
 
     switch (propertyIndex)
     {
-      case UI::PushButton::Property::LABEL_PADDING:
+      case Ui::PushButton::Property::LABEL_PADDING:
       {
         Vector4 padding(value.Get<Vector4>());
         pushButtonImpl.Button::SetLabelPadding(Padding(padding.x, padding.y, padding.z, padding.w));
         break;
       }
-      case UI::PushButton::Property::ICON_PADDING:
+      case Ui::PushButton::Property::ICON_PADDING:
       {
         Vector4 padding(value.Get<Vector4>());
         pushButtonImpl.Button::SetForegroundPadding(Padding(padding.x, padding.y, padding.z, padding.w));
@@ -170,7 +170,7 @@ Property::Value PushButton::GetProperty(BaseObject* object, Property::Index prop
 {
   Property::Value value;
 
-  UI::PushButton pushButton = UI::PushButton::DownCast(Dali::BaseHandle(object));
+  Ui::PushButton pushButton = Ui::PushButton::DownCast(Dali::BaseHandle(object));
 
   if (pushButton)
   {
@@ -178,13 +178,13 @@ Property::Value PushButton::GetProperty(BaseObject* object, Property::Index prop
 
     switch (propertyIndex)
     {
-      case UI::PushButton::Property::LABEL_PADDING:
+      case Ui::PushButton::Property::LABEL_PADDING:
       {
         Padding padding = pushButtonImpl.Button::GetLabelPadding();
         value = Vector4(padding.x, padding.y, padding.top, padding.bottom);
         break;
       }
-      case UI::PushButton::Property::ICON_PADDING:
+      case Ui::PushButton::Property::ICON_PADDING:
       {
         Padding padding = pushButtonImpl.Button::GetForegroundPadding();
         value = Vector4(padding.x, padding.y, padding.top, padding.bottom);
@@ -199,8 +199,8 @@ Property::Value PushButton::GetProperty(BaseObject* object, Property::Index prop
 Dali::Accessibility::States PushButton::PushButtonAccessible::CalculateStates()
 {
   auto state = Button::ButtonAccessible::CalculateStates();
-  auto self = UI::Button::DownCast(Self());
-  state[Dali::Accessibility::State::PRESSED] = self.GetProperty<bool>(UI::Button::Property::SELECTED);
+  auto self = Ui::Button::DownCast(Self());
+  state[Dali::Accessibility::State::PRESSED] = self.GetProperty<bool>(Ui::Button::Property::SELECTED);
   return state;
 }
 
@@ -214,7 +214,7 @@ void PushButton::OnStateChange(State newState)
     {
       accessible->EmitStateChanged(Dali::Accessibility::State::PRESSED, newState == SELECTED_STATE ? 1 : 0, 0);
 
-      if (Self().GetProperty<bool>(UI::Button::Property::TOGGLABLE))
+      if (Self().GetProperty<bool>(Ui::Button::Property::TOGGLABLE))
       {
         accessible->EmitStateChanged(Dali::Accessibility::State::CHECKED, newState == SELECTED_STATE ? 1 : 0, 0);
       }
@@ -224,6 +224,6 @@ void PushButton::OnStateChange(State newState)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

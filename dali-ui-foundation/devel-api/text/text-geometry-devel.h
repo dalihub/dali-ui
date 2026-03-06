@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -129,7 +129,7 @@ DALI_UI_API int GetCharacterIndexAtPosition(TextEditor editor, float visualX, fl
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

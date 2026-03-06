@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -61,7 +61,7 @@ public: // Intended for internal use
    * @param[in] source The original text.
    * @return @e true if the source is contained in regex, otherwise returns @e false.
    */
-  bool Contains(UI::InputFilter::Property::Type type, std::string source);
+  bool Contains(Ui::InputFilter::Property::Type type, std::string source);
 
   /**
    * @brief Filtering the text using regex.
@@ -69,7 +69,7 @@ public: // Intended for internal use
    * @param[in,out] text The string value to filter and write back.
    * @return @e true if the text is filtered by the regex, otherwise returns @e false.
    */
-  bool Filter(UI::InputFilter::Property::Type type, std::string& text);
+  bool Filter(Ui::InputFilter::Property::Type type, std::string& text);
 
 private:
   std::string mAccepted;
@@ -78,7 +78,7 @@ private:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -27,7 +27,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -42,12 +42,12 @@ public:
 
 protected:
   /**
-   * @copydoc Dali::UI::Trait::Trait
+   * @copydoc Dali::Ui::Trait::Trait
    */
   TraitImpl();
 
   /**
-   * @copydoc Dali::UI::Trait::~Trait
+   * @copydoc Dali::Ui::Trait::~Trait
    */
   virtual ~TraitImpl() override;
 
@@ -119,6 +119,6 @@ inline const Integration::TraitImpl& GetImpl(const Trait& obj)
   return static_cast<const Integration::TraitImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -27,7 +27,7 @@ namespace Dali
  * @brief DALi UI namespace.
  * @SINCE_1_0.0
  */
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls
@@ -74,7 +74,7 @@ DALI_UI_API bool IsHorizontal(ControlOrientation::Type orientation);
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -23,7 +23,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -36,7 +36,7 @@ ScrollViewEffect::~ScrollViewEffect()
 {
 }
 
-void ScrollViewEffect::Attach(UI::ScrollView& scrollView)
+void ScrollViewEffect::Attach(Ui::ScrollView& scrollView)
 {
   DALI_ASSERT_ALWAYS((!mScrollViewImpl) && "Already attached to a ScrollView");
 
@@ -45,7 +45,7 @@ void ScrollViewEffect::Attach(UI::ScrollView& scrollView)
   OnAttach(scrollView);
 }
 
-void ScrollViewEffect::Detach(UI::ScrollView& scrollView)
+void ScrollViewEffect::Detach(Ui::ScrollView& scrollView)
 {
   DALI_ASSERT_ALWAYS((mScrollViewImpl) && "Already detached from ScrollView");
   DALI_ASSERT_ALWAYS((&GetImpl(scrollView) == mScrollViewImpl) && "Effect attached to a different ScrollView");
@@ -55,15 +55,15 @@ void ScrollViewEffect::Detach(UI::ScrollView& scrollView)
   mScrollViewImpl = NULL;
 }
 
-UI::ScrollView ScrollViewEffect::GetScrollView()
+Ui::ScrollView ScrollViewEffect::GetScrollView()
 {
   DALI_ASSERT_ALWAYS(mScrollViewImpl);
 
-  return DownCast<UI::ScrollView>(mScrollViewImpl->Self());
+  return DownCast<Ui::ScrollView>(mScrollViewImpl->Self());
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

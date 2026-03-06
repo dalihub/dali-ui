@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 /**
@@ -515,5 +515,5 @@ inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlag
   return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -109,7 +109,7 @@ public: // Not intended for application developers
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

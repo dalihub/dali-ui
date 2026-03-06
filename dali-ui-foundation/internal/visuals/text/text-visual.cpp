@@ -47,7 +47,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -58,8 +58,8 @@ DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
 const int CUSTOM_PROPERTY_COUNT(3); // uTextColorAnimatable, uHasMultipleTextColors, requireRender
 
-static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::UI::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
-static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::UI::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
+static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
 
 const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
@@ -91,59 +91,59 @@ Dali::Property::Index StringKeyToIndexKey(const std::string& stringKey)
 
   if (stringKey == VISUAL_TYPE)
   {
-    result = UI::Visual::Property::TYPE;
+    result = Ui::Visual::Property::TYPE;
   }
   else if (stringKey == TEXT_PROPERTY)
   {
-    result = UI::TextVisual::Property::TEXT;
+    result = Ui::TextVisual::Property::TEXT;
   }
   else if (stringKey == FONT_FAMILY_PROPERTY)
   {
-    result = UI::TextVisual::Property::FONT_FAMILY;
+    result = Ui::TextVisual::Property::FONT_FAMILY;
   }
   else if (stringKey == FONT_STYLE_PROPERTY)
   {
-    result = UI::TextVisual::Property::FONT_STYLE;
+    result = Ui::TextVisual::Property::FONT_STYLE;
   }
   else if (stringKey == POINT_SIZE_PROPERTY)
   {
-    result = UI::TextVisual::Property::POINT_SIZE;
+    result = Ui::TextVisual::Property::POINT_SIZE;
   }
   else if (stringKey == MULTI_LINE_PROPERTY)
   {
-    result = UI::TextVisual::Property::MULTI_LINE;
+    result = Ui::TextVisual::Property::MULTI_LINE;
   }
   else if (stringKey == HORIZONTAL_ALIGNMENT_PROPERTY)
   {
-    result = UI::TextVisual::Property::HORIZONTAL_ALIGNMENT;
+    result = Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT;
   }
   else if (stringKey == VERTICAL_ALIGNMENT_PROPERTY)
   {
-    result = UI::TextVisual::Property::VERTICAL_ALIGNMENT;
+    result = Ui::TextVisual::Property::VERTICAL_ALIGNMENT;
   }
   else if (stringKey == TEXT_COLOR_PROPERTY)
   {
-    result = UI::TextVisual::Property::TEXT_COLOR;
+    result = Ui::TextVisual::Property::TEXT_COLOR;
   }
   else if (stringKey == ENABLE_MARKUP_PROPERTY)
   {
-    result = UI::TextVisual::Property::ENABLE_MARKUP;
+    result = Ui::TextVisual::Property::ENABLE_MARKUP;
   }
   else if (stringKey == SHADOW_PROPERTY)
   {
-    result = UI::TextVisual::Property::SHADOW;
+    result = Ui::TextVisual::Property::SHADOW;
   }
   else if (stringKey == UNDERLINE_PROPERTY)
   {
-    result = UI::TextVisual::Property::UNDERLINE;
+    result = Ui::TextVisual::Property::UNDERLINE;
   }
   else if (stringKey == OUTLINE_PROPERTY)
   {
-    result = UI::DevelTextVisual::Property::OUTLINE;
+    result = Ui::DevelTextVisual::Property::OUTLINE;
   }
   else if (stringKey == BACKGROUND_PROPERTY)
   {
-    result = UI::DevelTextVisual::Property::BACKGROUND;
+    result = Ui::DevelTextVisual::Property::BACKGROUND;
   }
 
   return result;
@@ -218,52 +218,52 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::TEXT);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
 
   std::string text;
   mController->GetText(text);
-  map.Insert(UI::TextVisual::Property::TEXT, text);
+  map.Insert(Ui::TextVisual::Property::TEXT, text);
 
-  map.Insert(UI::TextVisual::Property::FONT_FAMILY, mController->GetDefaultFontFamily());
+  map.Insert(Ui::TextVisual::Property::FONT_FAMILY, mController->GetDefaultFontFamily());
 
   GetFontStyleProperty(mController, value, Text::FontStyle::DEFAULT);
-  map.Insert(UI::TextVisual::Property::FONT_STYLE, value);
+  map.Insert(Ui::TextVisual::Property::FONT_STYLE, value);
 
-  map.Insert(UI::TextVisual::Property::POINT_SIZE, mController->GetDefaultFontSize(Text::Controller::POINT_SIZE));
+  map.Insert(Ui::TextVisual::Property::POINT_SIZE, mController->GetDefaultFontSize(Text::Controller::POINT_SIZE));
 
-  map.Insert(UI::TextVisual::Property::MULTI_LINE, mController->IsMultiLineEnabled());
+  map.Insert(Ui::TextVisual::Property::MULTI_LINE, mController->IsMultiLineEnabled());
 
-  map.Insert(UI::TextVisual::Property::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
+  map.Insert(Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
 
-  map.Insert(UI::TextVisual::Property::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
+  map.Insert(Ui::TextVisual::Property::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
 
-  map.Insert(UI::TextVisual::Property::TEXT_COLOR, mController->GetDefaultColor());
+  map.Insert(Ui::TextVisual::Property::TEXT_COLOR, mController->GetDefaultColor());
 
-  map.Insert(UI::TextVisual::Property::ENABLE_MARKUP, mController->IsMarkupProcessorEnabled());
+  map.Insert(Ui::TextVisual::Property::ENABLE_MARKUP, mController->IsMarkupProcessorEnabled());
 
   GetShadowProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(UI::TextVisual::Property::SHADOW, value);
+  map.Insert(Ui::TextVisual::Property::SHADOW, value);
 
   GetUnderlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(UI::TextVisual::Property::UNDERLINE, value);
+  map.Insert(Ui::TextVisual::Property::UNDERLINE, value);
 
   GetOutlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(UI::DevelTextVisual::Property::OUTLINE, value);
+  map.Insert(Ui::DevelTextVisual::Property::OUTLINE, value);
 
   GetBackgroundProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(UI::DevelTextVisual::Property::BACKGROUND, value);
+  map.Insert(Ui::DevelTextVisual::Property::BACKGROUND, value);
 
   GetStrikethroughProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(UI::DevelTextVisual::Property::STRIKETHROUGH, value);
+  map.Insert(Ui::DevelTextVisual::Property::STRIKETHROUGH, value);
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::TEXT);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
   std::string text;
   mController->GetText(text);
-  map.Insert(UI::TextVisual::Property::TEXT, text);
+  map.Insert(Ui::TextVisual::Property::TEXT, text);
 }
 
 void TextVisual::EnablePreMultipliedAlpha(bool preMultiplied)
@@ -276,7 +276,7 @@ void TextVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, UI::Visual::TEXT),
+  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::TEXT),
     mController(Text::Controller::New()),
     mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
     mAsyncTextInterface(nullptr),
@@ -347,7 +347,7 @@ void TextVisual::DoSetOnScene(Actor& actor)
 {
   mControl = actor;
 
-  mImpl->mRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, UI::DepthIndex::CONTENT);
+  mImpl->mRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
 
   const Vector4& defaultColor = mController->GetTextModel()->GetDefaultColor();
   if (mTextColorAnimatableIndex == Property::INVALID_INDEX)
@@ -477,28 +477,28 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 {
   switch (index)
   {
-    case UI::TextVisual::Property::ENABLE_MARKUP:
+    case Ui::TextVisual::Property::ENABLE_MARKUP:
     {
       const bool enableMarkup = propertyValue.Get<bool>();
       mController->SetMarkupProcessorEnabled(enableMarkup);
       break;
     }
-    case UI::TextVisual::Property::TEXT:
+    case Ui::TextVisual::Property::TEXT:
     {
       mController->SetText(propertyValue.Get<std::string>());
       break;
     }
-    case UI::TextVisual::Property::FONT_FAMILY:
+    case Ui::TextVisual::Property::FONT_FAMILY:
     {
       SetFontFamilyProperty(mController, propertyValue);
       break;
     }
-    case UI::TextVisual::Property::FONT_STYLE:
+    case Ui::TextVisual::Property::FONT_STYLE:
     {
       SetFontStyleProperty(mController, propertyValue, Text::FontStyle::DEFAULT);
       break;
     }
-    case UI::TextVisual::Property::POINT_SIZE:
+    case Ui::TextVisual::Property::POINT_SIZE:
     {
       const float pointSize = propertyValue.Get<float>();
       if (!Equals(mController->GetDefaultFontSize(Text::Controller::POINT_SIZE), pointSize))
@@ -507,38 +507,38 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case UI::TextVisual::Property::MULTI_LINE:
+    case Ui::TextVisual::Property::MULTI_LINE:
     {
       mController->SetMultiLineEnabled(propertyValue.Get<bool>());
       break;
     }
-    case UI::TextVisual::Property::HORIZONTAL_ALIGNMENT:
+    case Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT:
     {
       if (mController)
       {
         Text::HorizontalAlignment::Type alignment(static_cast<Text::HorizontalAlignment::Type>(
             -1)); // Set to invalid value to ensure a valid mode does get set
-        if (UI::Text::GetHorizontalAlignmentEnumeration(propertyValue, alignment))
+        if (Ui::Text::GetHorizontalAlignmentEnumeration(propertyValue, alignment))
         {
           mController->SetHorizontalAlignment(alignment);
         }
       }
       break;
     }
-    case UI::TextVisual::Property::VERTICAL_ALIGNMENT:
+    case Ui::TextVisual::Property::VERTICAL_ALIGNMENT:
     {
       if (mController)
       {
-        UI::Text::VerticalAlignment::Type alignment(
+        Ui::Text::VerticalAlignment::Type alignment(
             static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
-        if (UI::Text::GetVerticalAlignmentEnumeration(propertyValue, alignment))
+        if (Ui::Text::GetVerticalAlignmentEnumeration(propertyValue, alignment))
         {
           mController->SetVerticalAlignment(alignment);
         }
       }
       break;
     }
-    case UI::TextVisual::Property::TEXT_COLOR:
+    case Ui::TextVisual::Property::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if (mController->GetDefaultColor() != textColor)
@@ -547,27 +547,27 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case UI::TextVisual::Property::SHADOW:
+    case Ui::TextVisual::Property::SHADOW:
     {
       SetShadowProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case UI::TextVisual::Property::UNDERLINE:
+    case Ui::TextVisual::Property::UNDERLINE:
     {
       SetUnderlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case UI::DevelTextVisual::Property::OUTLINE:
+    case Ui::DevelTextVisual::Property::OUTLINE:
     {
       SetOutlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case UI::DevelTextVisual::Property::BACKGROUND:
+    case Ui::DevelTextVisual::Property::BACKGROUND:
     {
       SetBackgroundProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case UI::DevelTextVisual::Property::STRIKETHROUGH:
+    case Ui::DevelTextVisual::Property::STRIKETHROUGH:
     {
       SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
@@ -615,7 +615,7 @@ void TextVisual::UpdateRenderer()
     RemoveRenderer(control, true);
 
     // Nothing else to do if the relayout size is zero.
-    ResourceReady(UI::Visual::ResourceStatus::READY);
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
     return;
   }
 
@@ -709,7 +709,7 @@ void TextVisual::UpdateRenderer()
                   embossEnabled);
 
       // Text rendered and ready to display
-      ResourceReady(UI::Visual::ResourceStatus::READY);
+      ResourceReady(Ui::Visual::ResourceStatus::READY);
     }
   }
 }
@@ -831,11 +831,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     }
   }
 
-  UI::Visual::ResourceStatus resourceStatus;
+  Ui::Visual::ResourceStatus resourceStatus;
 
   if (loadingSuccess)
   {
-    resourceStatus = UI::Visual::ResourceStatus::READY;
+    resourceStatus = Ui::Visual::ResourceStatus::READY;
 
     Text::AsyncTextRenderInfo renderInfo = textInformation.renderInfo;
 
@@ -853,7 +853,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     if (!control)
     {
       // Nothing to do.
-      ResourceReady(UI::Visual::ResourceStatus::READY);
+      ResourceReady(Ui::Visual::ResourceStatus::READY);
       return;
     }
 
@@ -924,14 +924,14 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
     Property::Map visualTransform;
-    visualTransform.Add(UI::Visual::Transform::Property::SIZE, layoutSize)
-        .Add(UI::Visual::Transform::Property::SIZE_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::OFFSET, visualTransformOffset)
-        .Add(UI::Visual::Transform::Property::OFFSET_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::ORIGIN, UI::Align::TOP_BEGIN)
-        .Add(UI::Visual::Transform::Property::ANCHOR_POINT, UI::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, layoutSize)
+        .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
+        .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+        .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
     SetTransformAndSize(visualTransform, textControlSize);
 
     Shader shader = GetTextShader(mFactoryCache, TextVisualShaderFeature::FeatureBuilder()
@@ -1024,7 +1024,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if (mImpl->mTransform)
       {
         mImpl->mTransform->GetPropertyMap(retMap);
-        Property::Value* offsetValue = retMap.Find(Dali::UI::Visual::Transform::Property::OFFSET);
+        Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
         if (offsetValue)
         {
           offsetValue->Get(info.transformOffset);
@@ -1042,7 +1042,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       while (verifiedHeight > 0)
       {
         VisualRenderer tilingRenderer = VisualRenderer::New(geometry, shader);
-        tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, UI::DepthIndex::CONTENT);
+        tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
         // New offset position of buffer for tiling.
         info.offsetHeight += static_cast<uint32_t>(maxTextureSize);
         // New height for tiling.
@@ -1151,7 +1151,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   }
   else
   {
-    resourceStatus = UI::Visual::ResourceStatus::FAILED;
+    resourceStatus = Ui::Visual::ResourceStatus::FAILED;
   }
 
   // Signal to observers ( control ) that resources are ready. Must be all resources.
@@ -1241,7 +1241,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
   if (!control)
   {
     // Nothing to do.
-    ResourceReady(UI::Visual::ResourceStatus::READY);
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
     return false;
   }
 
@@ -1258,7 +1258,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
     RemoveRenderer(control, true);
 
     // Nothing else to do if the relayout size is zero.
-    ResourceReady(UI::Visual::ResourceStatus::READY);
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
 
     if (mAsyncTextInterface)
     {
@@ -1360,7 +1360,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     Pixel::Format textPixelFormat = (containsColorGlyph || hasMultipleTextColors) ? Pixel::RGBA8888 : Pixel::L8;
 
     // Check the text direction
-    UI::DevelText::TextDirection::Type textDirection = mController->GetTextDirection();
+    Ui::DevelText::TextDirection::Type textDirection = mController->GetTextDirection();
 
     // Create a texture for the text without any styles
     PixelData data =
@@ -1400,7 +1400,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if (mImpl->mTransform)
     {
       mImpl->mTransform->GetPropertyMap(retMap);
-      Property::Value* offsetValue = retMap.Find(Dali::UI::Visual::Transform::Property::OFFSET);
+      Property::Value* offsetValue = retMap.Find(Dali::Ui::Visual::Transform::Property::OFFSET);
       if (offsetValue)
       {
         offsetValue->Get(info.transformOffset);
@@ -1418,7 +1418,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     while (verifiedHeight > 0)
     {
       VisualRenderer tilingRenderer = VisualRenderer::New(geometry, shader);
-      tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, UI::DepthIndex::CONTENT);
+      tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
       // New offset position of buffer for tiling.
       info.offsetHeight += maxTextureSize;
       // New height for tiling.
@@ -1515,7 +1515,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
           : Pixel::L8;
 
   // Check the text direction
-  UI::DevelText::TextDirection::Type textDirection = mController->GetTextDirection();
+  Ui::DevelText::TextDirection::Type textDirection = mController->GetTextDirection();
   uint32_t textureSetIndex = 0u;
   // Create a texture for the text without any styles
 
@@ -1618,6 +1618,6 @@ void TextVisual::SetRequireRender(bool requireRender)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

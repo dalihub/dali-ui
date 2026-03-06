@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -82,7 +82,7 @@ void CalcualteUnderlineHeight(const FontMetrics& fontMetrics, float& currentUnde
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

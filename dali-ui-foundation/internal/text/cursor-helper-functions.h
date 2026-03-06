@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -164,7 +164,7 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -50,7 +50,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -60,10 +60,10 @@ extern Animation CreateAnimation(const TreeNode& child, const Replacement& repla
                                  Builder* const builder);
 
 extern Actor SetupSignalAction(ConnectionTracker* tracker, const TreeNode& root, const TreeNode& child, Actor actor,
-                               Dali::UI::Internal::Builder* const builder);
+                               Dali::Ui::Internal::Builder* const builder);
 
 extern Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root, const TreeNode& child,
-                                       Actor actor, Dali::UI::Internal::Builder* const builder);
+                                       Actor actor, Dali::Ui::Internal::Builder* const builder);
 
 #if defined(DEBUG_ENABLED)
 Dali::Integration::Log::Filter* gFilterScript =
@@ -148,7 +148,7 @@ void CollectAllStyles(const TreeNode& stylesCollection, const TreeNode& style, T
 Builder::Builder()
   : mSlotDelegate(this)
 {
-  mParser = Dali::UI::JsonParser::New();
+  mParser = Dali::Ui::JsonParser::New();
 
   Property::Map defaultConstants;
   defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)] = AssetManager::GetDaliImagePath();
@@ -159,10 +159,10 @@ Builder::Builder()
   AddConstants(defaultConstants);
 }
 
-void Builder::LoadFromString(std::string const& data, Dali::UI::Builder::UIFormat format)
+void Builder::LoadFromString(std::string const& data, Dali::Ui::Builder::UiFormat format)
 {
   // parser to get constants and includes only
-  Dali::UI::JsonParser parser = Dali::UI::JsonParser::New();
+  Dali::Ui::JsonParser parser = Dali::Ui::JsonParser::New();
 
   if (!parser.Parse(data))
   {
@@ -713,7 +713,7 @@ bool Builder::IsLinearConstrainer(const std::string& name)
   return false;
 }
 
-UI::Builder::BuilderSignalType& Builder::QuitSignal()
+Ui::Builder::BuilderSignalType& Builder::QuitSignal()
 {
   return mQuitSignal;
 }
@@ -857,7 +857,7 @@ Animation Builder::CreateAnimation(const std::string& animationName, const Repla
   {
     if (OptionalChild animation = IsChild(*animations, animationName))
     {
-      anim = Dali::UI::Internal::CreateAnimation(*animation, replacement, sourceActor, this);
+      anim = Dali::Ui::Internal::CreateAnimation(*animation, replacement, sourceActor, this);
     }
     else
     {
@@ -971,7 +971,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
         DALI_SCRIPT_VERBOSE("  Is Actor id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
       }
 
-      UI::Control control = UI::Control::DownCast(handle);
+      Ui::Control control = Ui::Control::DownCast(handle);
       if (control)
       {
         DALI_SCRIPT_VERBOSE("  Is Control id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
@@ -1595,6 +1595,6 @@ void Builder::SetCustomProperties(const TreeNode& node, Handle& handle, const Re
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

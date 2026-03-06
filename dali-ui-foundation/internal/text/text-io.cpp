@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -115,6 +115,6 @@ std::ostream& operator<<(std::ostream& o, const Vector<LineRun>& lineRuns)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

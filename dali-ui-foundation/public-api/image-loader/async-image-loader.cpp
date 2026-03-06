@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 AsyncImageLoader::AsyncImageLoader()
 {
@@ -48,7 +48,7 @@ AsyncImageLoader& AsyncImageLoader::operator=(AsyncImageLoader&& rhs) noexcept =
 
 AsyncImageLoader AsyncImageLoader::DownCast(BaseHandle handle)
 {
-  return AsyncImageLoader(dynamic_cast<Dali::UI::Internal::AsyncImageLoader*>(handle.GetObjectPtr()));
+  return AsyncImageLoader(dynamic_cast<Dali::Ui::Internal::AsyncImageLoader*>(handle.GetObjectPtr()));
 }
 
 AsyncImageLoader AsyncImageLoader::New()
@@ -59,14 +59,14 @@ AsyncImageLoader AsyncImageLoader::New()
 
 uint32_t AsyncImageLoader::Load(const std::string& url)
 {
-  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), ImageDimensions(), FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), ImageDimensions(), FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
 uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions)
 {
-  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), dimensions, FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
@@ -74,7 +74,7 @@ uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensio
 uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
                                 SamplingMode::Type samplingMode, bool orientationCorrection)
 {
-  return GetImplementation(*this).Load(UI::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode,
                                        orientationCorrection, DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
@@ -92,6 +92,6 @@ AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal()
 {
   return GetImplementation(*this).ImageLoadedSignal();
 }
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -26,7 +26,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 void MoveActorConstraint(Vector3& current, const PropertyInputContainer& inputs)
 {
@@ -62,6 +62,6 @@ void WrapActorConstraint(Vector3& position, const PropertyInputContainer& inputs
   }
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

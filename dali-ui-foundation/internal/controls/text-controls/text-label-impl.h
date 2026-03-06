@@ -40,7 +40,7 @@
 #include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -58,7 +58,7 @@ public:
    * @copydoc Dali::Toollkit::TextLabel::New()
    * @param[in] additionalBehaviour custom behavior flags for this TextLabel. Default is CONTROL_BEHAVIOUR_DEFAULT
    */
-  static UI::TextLabel New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
+  static Ui::TextLabel New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
 
   // Properties
 
@@ -201,14 +201,14 @@ public:
    * @param[in] enable Whether the text fit array is enabled or not.
    * @param[in] fitOptions list of the fit options.
    */
-  void SetTextFitArray(const bool enable, std::vector<UI::DevelTextLabel::FitOption>& fitOptions);
+  void SetTextFitArray(const bool enable, std::vector<Ui::DevelTextLabel::FitOption>& fitOptions);
 
   /**
    * @brief Get the text fit array of text label.
    *
    * @return list of the fit options.
    */
-  std::vector<UI::DevelTextLabel::FitOption>& GetTextFitArray();
+  std::vector<Ui::DevelTextLabel::FitOption>& GetTextFitArray();
 
   /**
    * @brief Whether the text fit array is enabled or not.
@@ -330,7 +330,7 @@ public:
    *
    * @param[in] control The control to apply mask.
    */
-  void SetMaskEffect(UI::Control control);
+  void SetMaskEffect(Ui::Control control);
 
   /**
    * @brief Remove the applied mask effect of the label.
@@ -349,14 +349,14 @@ private: // From Control
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
    * @copydoc Control::OnStyleChange()
    */
-  void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change) override;
+  void OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change) override;
 
   /**
    * @copydoc Control::OnApplyDefaultStyle()
@@ -572,28 +572,28 @@ private: // Data
   Text::ControllerPtr mController;
   Text::TextScrollerPtr mTextScroller;
 
-  UI::Visual::Base mVisual;
+  Ui::Visual::Base mVisual;
 
-  std::vector<UI::TextAnchor> mAnchorActors;
+  std::vector<Ui::TextAnchor> mAnchorActors;
 
   // Signals
-  UI::DevelTextLabel::AnchorClickedSignalType mAnchorClickedSignal;
-  UI::DevelTextLabel::TextFitChangedSignalType mTextFitChangedSignal;
-  UI::DevelTextLabel::AsyncTextRenderedSignalType mAsyncTextRenderedSignal;
-  UI::DevelTextLabel::AsyncNaturalSizeComputedSignalType mAsyncNaturalSizeComputedSignal;
-  UI::DevelTextLabel::AsyncHeightForWidthComputedSignalType mAsyncHeightForWidthComputedSignal;
+  Ui::DevelTextLabel::AnchorClickedSignalType mAnchorClickedSignal;
+  Ui::DevelTextLabel::TextFitChangedSignalType mTextFitChangedSignal;
+  Ui::DevelTextLabel::AsyncTextRenderedSignalType mAsyncTextRenderedSignal;
+  Ui::DevelTextLabel::AsyncNaturalSizeComputedSignalType mAsyncNaturalSizeComputedSignal;
+  Ui::DevelTextLabel::AsyncHeightForWidthComputedSignalType mAsyncHeightForWidthComputedSignal;
 
   // for Font Variations
   std::map<Dali::Property::Index, std::string> mVariationIndexMap; // Stores [CustomPropertyIndex, tag].
 
   // for masking
-  WeakHandle<UI::Control> mMaskControl;
+  WeakHandle<Ui::Control> mMaskControl;
 
   std::string mLocale;
   Vector2 mSize;
   Vector2 mTouchPosition; ///< The initial touch down position.
 
-  UI::DevelText::Ellipsize::Mode mLastEllipsisMode;
+  Ui::DevelText::Ellipsize::Mode mLastEllipsisMode;
 
   int mRenderingBackend;
   int mAsyncLineCount;
@@ -633,14 +633,14 @@ protected:
 
   protected:
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextAnchors()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextAnchors()
      */
-    const std::vector<UI::TextAnchor>& GetTextAnchors() const override;
+    const std::vector<Ui::TextAnchor>& GetTextAnchors() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextController()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextController()
      */
-    UI::Text::ControllerPtr GetTextController() const override;
+    Ui::Text::ControllerPtr GetTextController() const override;
   };
 };
 
@@ -648,25 +648,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TextLabel& GetImpl(UI::TextLabel& textLabel)
+inline Ui::Internal::TextLabel& GetImpl(Ui::TextLabel& textLabel)
 {
   DALI_ASSERT_ALWAYS(textLabel);
 
   Dali::RefObject& handle = textLabel.GetImplementation();
 
-  return static_cast<UI::Internal::TextLabel&>(handle);
+  return static_cast<Ui::Internal::TextLabel&>(handle);
 }
 
-inline const UI::Internal::TextLabel& GetImpl(const UI::TextLabel& textLabel)
+inline const Ui::Internal::TextLabel& GetImpl(const Ui::TextLabel& textLabel)
 {
   DALI_ASSERT_ALWAYS(textLabel);
 
   const Dali::RefObject& handle = textLabel.GetImplementation();
 
-  return static_cast<const UI::Internal::TextLabel&>(handle);
+  return static_cast<const Ui::Internal::TextLabel&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

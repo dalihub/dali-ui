@@ -30,13 +30,13 @@
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/gl-view/gl-view.h>
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 class GlView;
 
 namespace Internal
 {
-class GlViewImpl : public Dali::UI::Internal::Control
+class GlViewImpl : public Dali::Ui::Internal::Control
 {
 protected:
   virtual ~GlViewImpl() = default;
@@ -52,67 +52,67 @@ public:
   }
 
   /**
-   * @copydoc Dali::UI::GlView::RegisterGlCallbacks()
+   * @copydoc Dali::Ui::GlView::RegisterGlCallbacks()
    */
   virtual void RegisterGlCallbacks(CallbackBase* initCallback, CallbackBase* renderFrameCallback,
                                    CallbackBase* terminateCallback) = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::SetResizeCallback()
+   * @copydoc Dali::Ui::GlView::SetResizeCallback()
    */
   virtual void SetResizeCallback(CallbackBase* resizeCallback) = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::SetGraphisConfig()
+   * @copydoc Dali::Ui::GlView::SetGraphisConfig()
    */
-  virtual bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlView::GraphicsApiVersion version) = 0;
+  virtual bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::Ui::GlView::GraphicsApiVersion version) = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::SetRenderingMode()
+   * @copydoc Dali::Ui::GlView::SetRenderingMode()
    */
-  virtual void SetRenderingMode(Dali::UI::GlView::RenderingMode mode) = 0;
+  virtual void SetRenderingMode(Dali::Ui::GlView::RenderingMode mode) = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::GetRenderingMode()
+   * @copydoc Dali::Ui::GlView::GetRenderingMode()
    */
-  virtual Dali::UI::GlView::RenderingMode GetRenderingMode() const = 0;
+  virtual Dali::Ui::GlView::RenderingMode GetRenderingMode() const = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::GetBackendMode()
+   * @copydoc Dali::Ui::GlView::GetBackendMode()
    */
-  [[nodiscard]] Dali::UI::GlView::BackendMode GetBackendMode() const
+  [[nodiscard]] Dali::Ui::GlView::BackendMode GetBackendMode() const
   {
     return mBackendMode;
   }
 
   /**
-   * @copydoc Dali::UI::GlView::RenderOnce()
+   * @copydoc Dali::Ui::GlView::RenderOnce()
    */
   virtual void RenderOnce() = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::BindTextureResources()
+   * @copydoc Dali::Ui::GlView::BindTextureResources()
    */
   virtual void BindTextureResources(Dali::Vector<Dali::Texture> textures) = 0;
 
   /**
-   * @copydoc Dali::UI::GlView::Terminate()
+   * @copydoc Dali::Ui::GlView::Terminate()
    */
   virtual void Terminate() = 0;
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   virtual void OnInitialize() override = 0;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   virtual void OnSceneConnection(int depth) override = 0;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   virtual void OnSceneDisconnection() override = 0;
 
@@ -123,20 +123,20 @@ protected:
 
 } // namespace Internal
 
-inline Dali::UI::Internal::GlViewImpl& GetImpl(Dali::UI::GlView& handle)
+inline Dali::Ui::Internal::GlViewImpl& GetImpl(Dali::Ui::GlView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<Dali::UI::Internal::GlViewImpl&>(impl);
+  return static_cast<Dali::Ui::Internal::GlViewImpl&>(impl);
 }
 
-inline const Dali::UI::Internal::GlViewImpl& GetImpl(const Dali::UI::GlView& handle)
+inline const Dali::Ui::Internal::GlViewImpl& GetImpl(const Dali::Ui::GlView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   const Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<const Dali::UI::Internal::GlViewImpl&>(impl);
+  return static_cast<const Dali::Ui::Internal::GlViewImpl&>(impl);
 }
 
-} // namespace Dali::UI
+} // namespace Dali::Ui
 
 #endif // DALI_UI_INTERNAL_GL_VIEW_IMPL_H

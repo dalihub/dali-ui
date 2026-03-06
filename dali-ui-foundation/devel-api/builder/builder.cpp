@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Builder::Builder()
 {
@@ -47,7 +47,7 @@ Builder::Builder(Internal::Builder* impl)
 {
 }
 
-void Builder::LoadFromString(const std::string& data, UIFormat rep)
+void Builder::LoadFromString(const std::string& data, UiFormat rep)
 {
   GetImpl(*this).LoadFromString(data);
 }
@@ -157,6 +157,6 @@ Builder::BuilderSignalType& Builder::QuitSignal()
   return GetImpl(*this).QuitSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

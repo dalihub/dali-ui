@@ -23,7 +23,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 class View;
@@ -57,6 +57,6 @@ public:
   virtual void OnFocusedChanged(View view, bool focused) = 0;
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

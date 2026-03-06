@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -441,7 +441,7 @@ void VisualModel::SetTextElideEnabled(bool enabled)
   mTextElideEnabled = enabled;
 }
 
-void VisualModel::SetEllipsisPosition(UI::DevelText::EllipsisPosition::Type ellipsisPosition)
+void VisualModel::SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition)
 {
   mEllipsisPosition = ellipsisPosition;
 }
@@ -582,7 +582,7 @@ bool VisualModel::IsTextElideEnabled() const
   return mTextElideEnabled;
 }
 
-UI::DevelText::EllipsisPosition::Type VisualModel::GetEllipsisPosition() const
+Ui::DevelText::EllipsisPosition::Type VisualModel::GetEllipsisPosition() const
 {
   return mEllipsisPosition;
 }
@@ -795,6 +795,6 @@ VisualModel::VisualModel()
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

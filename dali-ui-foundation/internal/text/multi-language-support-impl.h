@@ -34,7 +34,7 @@ namespace TextAbstraction
 class FontClient;
 } // namespace TextAbstraction
 
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -256,7 +256,7 @@ inline static const Internal::MultilanguageSupport& GetImplementation(const Mult
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

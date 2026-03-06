@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/devel-api/controls/accessibility-highlight-overlay.h>
 #include <dali-ui-foundation/public-api/dali-toolkit-common.h>
 
-namespace Dali::UI::DevelControl
+namespace Dali::Ui::DevelControl
 {
 /**
  * @brief Represents current state of a control.
@@ -86,7 +86,7 @@ enum class AccessibilityRole : uint32_t
 };
 
 /**
- * @brief Represents the Accessible object for Dali::UI::Control and derived classes
+ * @brief Represents the Accessible object for Dali::Ui::Control and derived classes
  *
  * You can create a derived class (and override Control::CreateAccessibleObject)
  * in order to customize Accessibility for a given control.
@@ -343,6 +343,6 @@ private:
   AccessibilityHighlightOverlay mHighlightOverlay;
 };
 
-} // namespace Dali::UI::DevelControl
+} // namespace Dali::Ui::DevelControl
 
 #endif // DALI_UI_CONTROL_ACCESSIBLE_H

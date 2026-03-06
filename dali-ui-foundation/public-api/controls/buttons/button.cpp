@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Button::Button()
 {
@@ -54,22 +54,22 @@ Button Button::DownCast(BaseHandle handle)
 
 Button::ButtonSignalType& Button::PressedSignal()
 {
-  return Dali::UI::GetImplementation(*this).PressedSignal();
+  return Dali::Ui::GetImplementation(*this).PressedSignal();
 }
 
 Button::ButtonSignalType& Button::ReleasedSignal()
 {
-  return Dali::UI::GetImplementation(*this).ReleasedSignal();
+  return Dali::Ui::GetImplementation(*this).ReleasedSignal();
 }
 
 Button::ButtonSignalType& Button::ClickedSignal()
 {
-  return Dali::UI::GetImplementation(*this).ClickedSignal();
+  return Dali::Ui::GetImplementation(*this).ClickedSignal();
 }
 
 Button::ButtonSignalType& Button::StateChangedSignal()
 {
-  return Dali::UI::GetImplementation(*this).StateChangedSignal();
+  return Dali::Ui::GetImplementation(*this).StateChangedSignal();
 }
 
 Button::Button(Internal::Button& implementation)
@@ -83,6 +83,6 @@ Button::Button(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::Button>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

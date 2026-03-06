@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls
@@ -55,7 +55,7 @@ enum Type
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

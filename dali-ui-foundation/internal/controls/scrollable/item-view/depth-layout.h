@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -158,7 +158,7 @@ public:
   /**
    * @copydoc ItemLayout::GetNextFocusItemID()
    */
-  int GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::KeyboardFocus::Direction direction,
+  int GetNextFocusItemID(int itemID, int maxItems, Dali::Ui::Control::KeyboardFocus::Direction direction,
                          bool loopEnabled) override;
 
 private:
@@ -227,7 +227,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -352,6 +352,6 @@ bool TextVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderTyp
 }
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

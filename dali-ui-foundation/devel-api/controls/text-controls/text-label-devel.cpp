@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextLabel
 {
@@ -140,7 +140,7 @@ Dali::Property::Index RegisterFontVariationProperty(TextLabel textLabel, std::st
   return GetImpl(textLabel).RegisterFontVariationProperty(tag);
 }
 
-void SetMaskEffect(TextLabel textLabel, UI::Control control)
+void SetMaskEffect(TextLabel textLabel, Ui::Control control)
 {
   GetImpl(textLabel).SetMaskEffect(control);
 }
@@ -157,6 +157,6 @@ void RequestUpdateManually(TextLabel textLabel)
 
 } // namespace DevelTextLabel
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

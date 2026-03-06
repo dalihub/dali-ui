@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType, const int32_t textureId,
                                                               TextureSet textureSet, const bool preMultiplied)
@@ -91,6 +91,6 @@ TextureUploadObserver::DestructionSignalType& TextureUploadObserver::Destruction
   return mDestructionSignal;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -48,12 +48,12 @@ namespace Internal
     DALI_LOG_INFO(gFilterScript, Debug::Verbose, oss.str().c_str());                              \
   }
 
-void LogTree(const UI::JsonParser& mParser);
+void LogTree(const Ui::JsonParser& mParser);
 
 std::string PropertyValueToString(const Property::Value& value);
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #else

@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextEditor
 {
@@ -142,6 +142,6 @@ Dali::Property::Index RegisterFontVariationProperty(TextEditor textEditor, std::
 
 } // namespace DevelTextEditor
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

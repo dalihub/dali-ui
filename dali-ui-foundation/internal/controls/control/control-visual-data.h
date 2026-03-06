@@ -36,7 +36,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -51,14 +51,14 @@ class Base;
 struct RegisteredVisual
 {
   Property::Index index;
-  UI::Visual::Base visual;
+  Ui::Visual::Base visual;
 
   bool enabled : 1;
   bool pending : 1;
   bool overideReadyTransition : 1;
   bool overrideCornerProperties : 1;
 
-  RegisteredVisual(Property::Index aIndex, UI::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
+  RegisteredVisual(Property::Index aIndex, Ui::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
     : index(aIndex),
       visual(aVisual),
       enabled(aEnabled),
@@ -105,30 +105,30 @@ public: // Visual::EventObserver
 
 public: // Visual::ConstraintObserver
   /**
-   * @copydoc Dali::UI::Internal::Visual::ConstraintObserver::IsAnyPropertyAnimate
+   * @copydoc Dali::Ui::Internal::Visual::ConstraintObserver::IsAnyPropertyAnimate
    */
   bool IsAnyPropertyAnimate(const std::unordered_set<Property::Index>& properties) const override;
 
 public:
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::IsResourceReady()
+   * @copydoc Dali::Ui::Internal::Control::Impl::IsResourceReady()
    */
   bool IsResourceReady() const;
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::EnableReadyTransitionOverridden()
+   * @copydoc Dali::Ui::Internal::Control::Impl::EnableReadyTransitionOverridden()
    */
-  void EnableReadyTransitionOverridden(UI::Visual::Base& visual, bool enable);
+  void EnableReadyTransitionOverridden(Ui::Visual::Base& visual, bool enable);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::EnableCornerPropertiesOverridden()
+   * @copydoc Dali::Ui::Internal::Control::Impl::EnableCornerPropertiesOverridden()
    */
-  void EnableCornerPropertiesOverridden(UI::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
+  void EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetVisualResourceStatus()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualResourceStatus()
    */
-  UI::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
+  Ui::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
 
   /**
    * @brief Copies the visual properties that are specific to the control instance into the instancedProperties
@@ -139,58 +139,58 @@ public:
   void CopyInstancedProperties(RegisteredVisualContainer& visuals, Dictionary<Property::Map>& instancedProperties);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::UnregisterVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisual()
    */
-  UI::Visual::Base GetVisual(Property::Index index) const;
+  Ui::Visual::Base GetVisual(Property::Index index) const;
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetVisualImplPtr()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualImplPtr()
    */
-  UI::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
+  Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
   /**
    * @brief Get visual by its name
    * @param[in] name Name of visual
    */
-  UI::Visual::Base GetVisual(const std::string& name) const;
+  Ui::Visual::Base GetVisual(const std::string& name) const;
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetVisualProperty()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualProperty()
    */
   Dali::Property GetVisualProperty(Dali::Property::Index index, Dali::Property::Key visualPropertyKey);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::EnableVisual()
+   * @copydoc Dali::Ui::Internal::Control::Impl::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::IsVisualEnabled()
+   * @copydoc Dali::Ui::Internal::Control::Impl::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
@@ -230,19 +230,19 @@ public:
   void ReplaceStateVisualsAndProperties(const StylePtr oldState, const StylePtr newState, const std::string& subState);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::DoAction()
+   * @copydoc Dali::Ui::Internal::Control::Impl::DoAction()
    */
   void DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                 const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::DoActionExtension()
+   * @copydoc Dali::Ui::Internal::Control::Impl::DoActionExtension()
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::VisualEventSignal()
+   * @copydoc Dali::Ui::Internal::Control::Impl::VisualEventSignal()
    */
   DevelControl::VisualEventSignalType& VisualEventSignal();
 
@@ -272,7 +272,7 @@ public:
   void ClearVisuals();
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::ApplyFittingMode()
+   * @copydoc Dali::Ui::Internal::Control::Impl::ApplyFittingMode()
    */
   void ApplyFittingMode(const Vector2& size);
 
@@ -280,26 +280,26 @@ public:
    * @brief Stops observing the given visual.
    * @param[in] visual The visual to stop observing
    */
-  void StopObservingVisual(UI::Visual::Base& visual);
+  void StopObservingVisual(Ui::Visual::Base& visual);
 
   /**
    * @brief Starts observing the given visual.
    * @param[in] visual The visual to start observing
    */
-  void StartObservingVisual(UI::Visual::Base& visual);
+  void StartObservingVisual(Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::UpdateVisualProperties()
+   * @copydoc Dali::Ui::Internal::Control::Impl::UpdateVisualProperties()
    */
   void UpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::CreateAnimationConstraints()
+   * @copydoc Dali::Ui::Internal::Control::Impl::CreateAnimationConstraints()
    */
   void CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::ClearAnimationConstraints()
+   * @copydoc Dali::Ui::Internal::Control::Impl::ClearAnimationConstraints()
    */
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
@@ -355,9 +355,9 @@ private:
    * @note Registering a visual with an index that already has a registered visual will replace it. The replacement will
    *       occur once the replacement visual is ready (loaded).
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, VisualState::Type enabled,
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, VisualState::Type enabled,
                       DepthIndexValue::Type depthIndexValueSet,
-                      int depthIndex = static_cast<int>(UI::DepthIndex::AUTO_INDEX));
+                      int depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
 
 public:
   RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the control, non trivial type so std::vector used.
@@ -380,6 +380,6 @@ private:
                                         ///< to false.
 };
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 #endif // DALI_UI_CONTROL_DATA_VISUAL_DATA_H

@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -32,11 +32,11 @@ struct Range::Impl
   u_int32_t mEndIndex;   /// The end index of range
 };
 
-Dali::UI::Text::Range Range::New(u_int32_t startIndex, u_int32_t endIndex)
+Dali::Ui::Text::Range Range::New(u_int32_t startIndex, u_int32_t endIndex)
 {
   RangePtr object = new Range(startIndex, endIndex);
 
-  Dali::UI::Text::Range handle = Dali::UI::Text::Range(object.Get());
+  Dali::Ui::Text::Range handle = Dali::Ui::Text::Range(object.Get());
 
   return handle;
 }
@@ -73,6 +73,6 @@ u_int32_t Range::GetNumberOfIndices() const
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

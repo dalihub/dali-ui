@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -36,7 +36,7 @@ struct StrikethroughSpan::Impl
 };
 
 StrikethroughSpan::StrikethroughSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::STRIKETHROUGH)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::STRIKETHROUGH)
 {
   mImpl = std::make_unique<Impl>();
 }
@@ -45,19 +45,19 @@ StrikethroughSpan ::~StrikethroughSpan()
 {
 }
 
-Dali::UI::Text::StrikethroughSpan StrikethroughSpan::New()
+Dali::Ui::Text::StrikethroughSpan StrikethroughSpan::New()
 {
   StrikethroughSpanPtr object = new StrikethroughSpan();
-  Dali::UI::Text::StrikethroughSpan handle = Dali::UI::Text::StrikethroughSpan(object.Get());
+  Dali::Ui::Text::StrikethroughSpan handle = Dali::Ui::Text::StrikethroughSpan(object.Get());
   return handle;
 }
 
-Dali::UI::Text::StrikethroughSpan StrikethroughSpan::New(Vector4 color, float height)
+Dali::Ui::Text::StrikethroughSpan StrikethroughSpan::New(Vector4 color, float height)
 {
   StrikethroughSpanPtr object = new StrikethroughSpan();
   object->SetColor(color);
   object->SetHeight(height);
-  Dali::UI::Text::StrikethroughSpan handle = Dali::UI::Text::StrikethroughSpan(object.Get());
+  Dali::Ui::Text::StrikethroughSpan handle = Dali::Ui::Text::StrikethroughSpan(object.Get());
 
   return handle;
 }
@@ -96,7 +96,7 @@ void StrikethroughSpan::SetHeight(const float& height)
 }
 
 void StrikethroughSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                                const Dali::UI::Text::Range& range) const
+                                                const Dali::Ui::Text::Range& range) const
 
 {
   StrikethroughCharacterRun strikethroughCharacterRun;
@@ -111,6 +111,6 @@ void StrikethroughSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logi
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -423,6 +423,6 @@ std::string VisualUrl::GetLocationWithoutExtension(const std::string& url)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

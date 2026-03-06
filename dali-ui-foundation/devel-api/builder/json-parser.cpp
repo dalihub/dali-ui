@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 JsonParser JsonParser::New()
 {
@@ -107,6 +107,6 @@ JsonParser::JsonParser(Internal::JsonParser* internal)
 {
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

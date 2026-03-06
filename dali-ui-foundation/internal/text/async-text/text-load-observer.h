@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Base class used to observe the load status of a async text.
@@ -93,7 +93,7 @@ private:
   int mDestructionSignalConnect;            ///< The number of times DestructionSignal is connected.
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

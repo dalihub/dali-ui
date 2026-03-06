@@ -19,7 +19,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_scroll_view
@@ -95,7 +95,7 @@ enum Type
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

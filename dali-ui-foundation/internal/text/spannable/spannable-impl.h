@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -38,7 +38,7 @@ typedef IntrusivePtr<Spannable> SpannablePtr;
 typedef const Spannable* SpannableConstPtr;
 
 /**
- * @copydoc Dali::UI::Text::Spannable
+ * @copydoc Dali::Ui::Text::Spannable
  */
 class Spannable : public Spanned
 {
@@ -64,14 +64,14 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::Spannable::AttachSpan()
+   * @copydoc Dali::Ui::Text::Spannable::AttachSpan()
    */
-  virtual bool AttachSpan(const Dali::UI::Text::BaseSpan& styleSpan, const Dali::UI::Text::Range& range) = 0;
+  virtual bool AttachSpan(const Dali::Ui::Text::BaseSpan& styleSpan, const Dali::Ui::Text::Range& range) = 0;
 
   /**
-   * @copydoc Dali::UI::Text::Spannable::DetachSpan()
+   * @copydoc Dali::Ui::Text::Spannable::DetachSpan()
    */
-  virtual bool DetachSpan(const Dali::UI::Text::BaseSpan& styleSpan) = 0;
+  virtual bool DetachSpan(const Dali::Ui::Text::BaseSpan& styleSpan) = 0;
 
 }; // class Spannable
 
@@ -80,7 +80,7 @@ public: // Methods
 /**
  * Helper methods for public API.
  */
-inline Internal::Spannable& GetImplementation(Dali::UI::Text::Spannable& spannable)
+inline Internal::Spannable& GetImplementation(Dali::Ui::Text::Spannable& spannable)
 {
   DALI_ASSERT_ALWAYS(spannable && "spannable handle is empty");
 
@@ -89,7 +89,7 @@ inline Internal::Spannable& GetImplementation(Dali::UI::Text::Spannable& spannab
   return static_cast<Internal::Spannable&>(handle);
 }
 
-inline const Internal::Spannable& GetImplementation(const Dali::UI::Text::Spannable& spannable)
+inline const Internal::Spannable& GetImplementation(const Dali::Ui::Text::Spannable& spannable)
 {
   DALI_ASSERT_ALWAYS(spannable && "spannable handle is empty");
 
@@ -100,7 +100,7 @@ inline const Internal::Spannable& GetImplementation(const Dali::UI::Text::Spanna
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

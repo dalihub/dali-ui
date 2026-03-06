@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ScrollBar::ScrollBar()
 {
@@ -167,6 +167,6 @@ ScrollBar::ScrollPositionIntervalReachedSignalType& ScrollBar::ScrollPositionInt
   return GetImpl(*this).ScrollPositionIntervalReachedSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

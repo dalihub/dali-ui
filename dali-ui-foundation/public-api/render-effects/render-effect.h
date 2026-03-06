@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class Control;
 namespace Internal DALI_INTERNAL
@@ -43,8 +43,8 @@ class RenderEffectImpl;
  * Each effect has a single owner Control.
  *
  * Used internal at:
- * UI::Control::SetRenderEffect(UI::RenderEffect effect);
- * UI::Control::ClearRenderEffect();
+ * Ui::Control::SetRenderEffect(Ui::RenderEffect effect);
+ * Ui::Control::ClearRenderEffect();
  * @note RenderEffect is interface class without constructor. Create resource by subclass.
  * @SINCE_2_3.28
  */
@@ -98,7 +98,7 @@ public:
 public: // Not intended for Application developers
   ///@cond internal
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    * @SINCE_2_3.28
    * @param[in]  renderEffectImpl The UI Control implementation.
    */
@@ -106,7 +106,7 @@ public: // Not intended for Application developers
   ///@endcond
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_RENDER_EFFECT_H

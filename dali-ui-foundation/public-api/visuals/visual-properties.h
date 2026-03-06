@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_visuals
@@ -69,7 +69,7 @@ enum
 {
   /**
    * @brief The index for the visual type.
-   * @details Name "visualType", type [Type](Dali::UI::Visual::Type) (Property::INTEGER) or Property::STRING.
+   * @details Name "visualType", type [Type](Dali::Ui::Visual::Type) (Property::INTEGER) or Property::STRING.
    * @SINCE_1_1.45
    * @note Mandatory.
    * @see Type
@@ -91,7 +91,7 @@ enum
    * @details Name "transform", type Property::MAP.
    * @SINCE_1_2.60
    * @note Optional.
-   * @see UI::Visual::Transform::Property
+   * @see Ui::Visual::Transform::Property
    */
   TRANSFORM,
 
@@ -182,7 +182,7 @@ enum Type
   /**
    * @brief The origin of the visual within its control area.
    * @details Name "origin", type Align::Type (Property::INTEGER) or Property::STRING.
-   * @see UI::Align
+   * @see Ui::Align
    * @SINCE_1_2.60
    * @note The default is Align::TOP_BEGIN.
    */
@@ -191,7 +191,7 @@ enum Type
   /**
    * @brief The anchor-point of the visual
    * @details Name "anchorPoint", type Align::Type (Property::INTEGER) or Property::STRING.
-   * @see UI::Align
+   * @see Ui::Align
    * @SINCE_1_2.60
    * @note The default is Align::TOP_BEGIN.
    */
@@ -209,8 +209,8 @@ enum Type
    *                      Property::Map().Add( ... ) // Properties to set up visual
    *                                     .Add( Visual::Property::TRANSFORM,
    *                                           Property::Array().Add(
-   * UI::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
-   * UI::Visual::Transform::Property::OFFSET, Vector2( 10, 1.0f ) ) );
+   * Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
+   * Ui::Visual::Transform::Property::OFFSET, Vector2( 10, 1.0f ) ) );
    * @endcode
    *
    * JSON:
@@ -359,7 +359,7 @@ enum class ResourceStatus
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

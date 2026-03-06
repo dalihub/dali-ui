@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 StackLayout::StackLayout()
@@ -68,7 +68,7 @@ StackLayout StackLayout::New(StackOrientation orientation)
 
 StackLayout StackLayout::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<StackLayout, Integration::StackLayoutImpl>(handle);
+  return Ui::Control::DownCast<StackLayout, Integration::StackLayoutImpl>(handle);
 }
 
 StackLayout::StackLayout(Integration::StackLayoutImpl& implementation)
@@ -132,5 +132,5 @@ float StackLayout::GetLayoutWeight(View view)
   return 0.0f;
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

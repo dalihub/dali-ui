@@ -21,13 +21,13 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelVideoView
 {
 Any GetMediaPlayer(VideoView videoView)
 {
-  return Dali::UI::GetImpl(videoView).GetMediaPlayer();
+  return Dali::Ui::GetImpl(videoView).GetMediaPlayer();
 }
 
 VideoView New(VideoSyncMode syncMode)
@@ -38,51 +38,51 @@ VideoView New(VideoSyncMode syncMode)
 
 void PlayAnimation(VideoView videoView, Animation animation)
 {
-  Dali::UI::GetImpl(videoView).PlayAnimation(animation);
+  Dali::Ui::GetImpl(videoView).PlayAnimation(animation);
 }
 
 void SetAutoRotationEnabled(VideoView videoView, bool enable)
 {
-  Dali::UI::GetImpl(videoView).SetAutoRotationEnabled(enable);
+  Dali::Ui::GetImpl(videoView).SetAutoRotationEnabled(enable);
 }
 
 bool IsAutoRotationEnabled(VideoView videoView)
 {
-  return Dali::UI::GetImpl(videoView).IsAutoRotationEnabled();
+  return Dali::Ui::GetImpl(videoView).IsAutoRotationEnabled();
 }
 
 void SetLetterBoxEnabled(VideoView videoView, bool enable)
 {
-  Dali::UI::GetImpl(videoView).SetLetterBoxEnabled(enable);
+  Dali::Ui::GetImpl(videoView).SetLetterBoxEnabled(enable);
 }
 
 bool IsLetterBoxEnabled(VideoView videoView)
 {
-  return Dali::UI::GetImpl(videoView).IsLetterBoxEnabled();
+  return Dali::Ui::GetImpl(videoView).IsLetterBoxEnabled();
 }
 
 void SetFrameInterpolationInterval(VideoView videoView, float intervalSeconds)
 {
-  Dali::UI::GetImpl(videoView).SetFrameInterpolationInterval(intervalSeconds);
+  Dali::Ui::GetImpl(videoView).SetFrameInterpolationInterval(intervalSeconds);
 }
 
 float GetFrameInterpolationInterval(VideoView videoView)
 {
-  return Dali::UI::GetImpl(videoView).GetFrameInterpolationInterval();
+  return Dali::Ui::GetImpl(videoView).GetFrameInterpolationInterval();
 }
 
 void EnableOffscreenFrameRendering(VideoView videoView, bool useCoverFrame)
 {
-  Dali::UI::GetImpl(videoView).EnableOffscreenFrameRendering(useCoverFrame);
+  Dali::Ui::GetImpl(videoView).EnableOffscreenFrameRendering(useCoverFrame);
 }
 
 void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImagePtr source)
 {
-  Dali::UI::GetImpl(videoView).SetVideoFrameBuffer(source);
+  Dali::Ui::GetImpl(videoView).SetVideoFrameBuffer(source);
 }
 
 } // namespace DevelVideoView
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -133,7 +133,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @param[in] implementation The Control implementation.
    */
@@ -148,7 +148,7 @@ public: // Not intended for application developers
 
 }; // Class TextAnchor
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

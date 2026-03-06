@@ -29,7 +29,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 /**
@@ -42,14 +42,14 @@ using ExecutionKeyPredicate = bool (*)(const std::string& keyName);
 
 namespace Integration
 {
-class UIConfigImpl;
+class UiConfigImpl;
 }
 
 #include "ui-config.autogen.h"
 /**
  * @brief An immutable-after-init configuration object for dali-ui global settings.
  *
- * UIConfig holds display and scaling parameters that affect unit calculations
+ * UiConfig holds display and scaling parameters that affect unit calculations
  * (spx, dp, sdp) across the entire dali-ui framework.
  *
  * Setter methods may only be called before the config is applied via Init().
@@ -61,7 +61,7 @@ class UIConfigImpl;
  *  {
  *    Application application = Application::New(&argc, &argv);
  *
- *    UIConfig::New()
+ *    UiConfig::New()
  *       .SetScalingFactor(1.5f)
  *       .SetDpi(320)
  *       .Apply();
@@ -73,32 +73,32 @@ class UIConfigImpl;
  *  }
  * @endcode
  */
-class DALI_UI_API UIConfig : public BaseHandle
+class DALI_UI_API UiConfig : public BaseHandle
 {
 public:
   /**
-   * @brief Creates an uninitialized UIConfig handle.
+   * @brief Creates an uninitialized UiConfig handle.
    */
-  UIConfig() = default;
+  UiConfig() = default;
 
   /**
    * @brief Destructor.
    */
-  ~UIConfig() = default;
+  ~UiConfig() = default;
 
   /**
    * @brief Copy constructor.
    *
    * @param[in] handle Handle to copy
    */
-  UIConfig(const UIConfig& handle) = default;
+  UiConfig(const UiConfig& handle) = default;
 
   /**
    * @brief Move constructor.
    *
    * @param[in] rhs Handle to move
    */
-  UIConfig(UIConfig&& rhs) noexcept = default;
+  UiConfig(UiConfig&& rhs) noexcept = default;
 
   /**
    * @brief Copy assignment operator.
@@ -106,7 +106,7 @@ public:
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
-  UIConfig& operator=(const UIConfig& handle) = default;
+  UiConfig& operator=(const UiConfig& handle) = default;
 
   /**
    * @brief Move assignment operator.
@@ -114,32 +114,32 @@ public:
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
-  UIConfig& operator=(UIConfig&& rhs) noexcept = default;
+  UiConfig& operator=(UiConfig&& rhs) noexcept = default;
 
   /**
-   * @brief Creates a new UIConfig with default values.
+   * @brief Creates a new UiConfig with default values.
    *
    * Default: scalingFactor=1.0f, dpi=160, baselineDpi=160.
    *
-   * @return An initialized UIConfig handle
+   * @return An initialized UiConfig handle
    */
-  static UIConfig New();
+  static UiConfig New();
 
   /**
-   * @brief Downcasts a handle to a UIConfig handle.
+   * @brief Downcasts a handle to a UiConfig handle.
    *
-   * If handle points to a UIConfig, the downcast produces a valid handle.
+   * If handle points to a UiConfig, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
    * @param[in] handle Handle to an object
-   * @return A handle to a UIConfig or an uninitialized handle
+   * @return A handle to a UiConfig or an uninitialized handle
    */
-  static UIConfig DownCast(BaseHandle handle);
+  static UiConfig DownCast(BaseHandle handle);
 
 public: // Properties
 
   /**
-   * @brief Applies the UIConfig as the global configuration for given application.
+   * @brief Applies the UiConfig as the global configuration for given application.
    *
    * This must be called exactly once, typically in main() before the application
    * main loop starts. After this call, the config is frozen and its setter methods
@@ -150,14 +150,14 @@ public: // Properties
    */
   void Apply();
 
-  // @CHAIN_START(UIConfig)
+  // @CHAIN_START(UiConfig)
   /**
    * @brief Sets the scaling factor applied to spx and sdp units.
    *
-   * @pre The config must not be frozen (i.e. not yet call UIConfig::Apply()).
+   * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
    * @param[in] scalingFactor The scaling factor value
    */
-  UIConfig& SetScalingFactor(float scalingFactor);
+  UiConfig& SetScalingFactor(float scalingFactor);
 
   /**
    * @brief Retrieves the scaling factor.
@@ -172,7 +172,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] dpi The dots-per-inch value of the target display
    */
-  UIConfig& SetDpi(int dpi);
+  UiConfig& SetDpi(int dpi);
 
   /**
    * @brief Retrieves the screen DPI.
@@ -187,7 +187,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] baselineDpi The baseline dots-per-inch value
    */
-  UIConfig& SetBaselineDpi(int baselineDpi);
+  UiConfig& SetBaselineDpi(int baselineDpi);
 
   /**
    * @brief Retrieves the baseline DPI.
@@ -202,7 +202,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] policy The key click policy
    */
-  UIConfig& SetKeyClickPolicy(KeyClickPolicy policy);
+  UiConfig& SetKeyClickPolicy(KeyClickPolicy policy);
 
   /**
    * @brief Retrieves the default key click policy.
@@ -220,7 +220,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] predicate A function pointer with signature bool(const std::string&)
    */
-  UIConfig& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
+  UiConfig& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
 
   /**
    * @brief Retrieves the execution key predicate.
@@ -235,7 +235,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] count The minimum repeat count
    */
-  UIConfig& SetMinLongPressKeyCount(uint32_t count);
+  UiConfig& SetMinLongPressKeyCount(uint32_t count);
 
   /**
    * @brief Retrieves the minimum key repeat count for long-press.
@@ -250,7 +250,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] timeMs The time limit in milliseconds
    */
-  UIConfig& SetTapRecognizerTime(uint32_t timeMs);
+  UiConfig& SetTapRecognizerTime(uint32_t timeMs);
 
   /**
    * @brief Retrieves the tap recognizer time limit.
@@ -266,10 +266,10 @@ public: // Not intended for Application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *
-   * @param[in] impl A pointer to the internal UIConfig implementation
+   * @param[in] impl A pointer to the internal UiConfig implementation
    */
-  explicit UIConfig(Integration::UIConfigImpl* impl);
+  explicit UiConfig(Integration::UiConfigImpl* impl);
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

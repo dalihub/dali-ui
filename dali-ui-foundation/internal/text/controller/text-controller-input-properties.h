@@ -25,7 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 struct Controller::InputProperties
 {
@@ -58,6 +58,6 @@ struct Controller::InputProperties
   static bool IsInputModePassword(Controller& controller);
 };
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_INPUT_PROPERTIES_H

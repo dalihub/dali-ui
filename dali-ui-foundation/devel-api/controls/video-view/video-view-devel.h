@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelVideoView
 {
@@ -141,7 +141,7 @@ DALI_UI_API void SetVideoFrameBuffer(VideoView videoView, Dali::NativeImagePtr s
 
 } // namespace DevelVideoView
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

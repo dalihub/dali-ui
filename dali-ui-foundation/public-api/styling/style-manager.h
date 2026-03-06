@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -155,7 +155,7 @@ public:
    * returned by Application::GetResourcePath()
    * @param[in] styleName The name of the style within the JSON file to apply
    */
-  void ApplyStyle(UI::Control control, const std::string& jsonFileName, const std::string& styleName);
+  void ApplyStyle(Ui::Control control, const std::string& jsonFileName, const std::string& styleName);
 
 public: // Signals
   /**
@@ -189,7 +189,7 @@ public:
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

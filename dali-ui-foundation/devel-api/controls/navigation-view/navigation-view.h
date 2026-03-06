@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -119,7 +119,7 @@ public:
 public: // Not intended for application developers
         /// @cond internal
   /**
-   * Creates a handle using the UI::Internal implementation.
+   * Creates a handle using the Ui::Internal implementation.
    * @param[in]  implementation  The Control implementation.
    */
   DALI_INTERNAL NavigationView(Internal::NavigationView& implementation);
@@ -132,7 +132,7 @@ public: // Not intended for application developers
   /// @endcond
 }; // class NavigationView
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

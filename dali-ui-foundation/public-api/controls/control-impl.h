@@ -35,7 +35,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls
@@ -73,7 +73,7 @@ public:
    * @SINCE_1_0.0
    * @return A handle to the ControlImpl instance
    */
-  static UI::Control New();
+  static Ui::Control New();
 
 protected:
   /**
@@ -86,19 +86,19 @@ public:
   // Styling
 
   /**
-   * @copydoc Dali::UI::Control::SetStyleName
+   * @copydoc Dali::Ui::Control::SetStyleName
    */
   void SetStyleName(const std::string& styleName);
 
   /**
-   * @copydoc Dali::UI::Control::GetStyleName
+   * @copydoc Dali::Ui::Control::GetStyleName
    */
   const std::string& GetStyleName() const;
 
   // Background
 
   /**
-   * @copydoc Dali::UI::Control::SetBackgroundColor
+   * @copydoc Dali::Ui::Control::SetBackgroundColor
    */
   void SetBackgroundColor(const Vector4& color);
 
@@ -111,22 +111,22 @@ public:
   void SetBackground(const Property::Map& map);
 
   /**
-   * @copydoc Dali::UI::Control::ClearBackground
+   * @copydoc Dali::Ui::Control::ClearBackground
    */
   void ClearBackground();
 
   /**
-   * @copydoc Dali::UI::Control::SetRenderEffect
+   * @copydoc Dali::Ui::Control::SetRenderEffect
    */
-  void SetRenderEffect(UI::RenderEffect effect);
+  void SetRenderEffect(Ui::RenderEffect effect);
 
   /**
-   * @copydoc Dali::UI::Control::GetRenderEffect
+   * @copydoc Dali::Ui::Control::GetRenderEffect
    */
   RenderEffect GetRenderEffect() const;
 
   /**
-   * @copydoc Dali::UI::Control::ClearRenderEffect
+   * @copydoc Dali::Ui::Control::ClearRenderEffect
    */
   void ClearRenderEffect();
 
@@ -164,7 +164,7 @@ public:
    *
    * @see CreateAccessibleObject()
    */
-  std::shared_ptr<UI::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
 
   // Gesture Detection
 
@@ -262,17 +262,17 @@ public:
   // Key Input
 
   /**
-   * @copydoc UI::Control::SetKeyInputFocus()
+   * @copydoc Ui::Control::SetKeyInputFocus()
    */
   void SetKeyInputFocus();
 
   /**
-   * @copydoc UI::Control::HasKeyInputFocus()
+   * @copydoc Ui::Control::HasKeyInputFocus()
    */
   bool HasKeyInputFocus();
 
   /**
-   * @copydoc UI::Control::ClearKeyInputFocus()
+   * @copydoc Ui::Control::ClearKeyInputFocus()
    */
   void ClearKeyInputFocus();
 
@@ -313,19 +313,19 @@ public:
   // Signals
 
   /**
-   * @copydoc Dali::UI::Control::KeyEventSignal()
+   * @copydoc Dali::Ui::Control::KeyEventSignal()
    */
-  UI::Control::KeyEventSignalType& KeyEventSignal();
+  Ui::Control::KeyEventSignalType& KeyEventSignal();
 
   /**
-   * @copydoc Dali::UI::Control::KeyInputFocusGainedSignal()
+   * @copydoc Dali::Ui::Control::KeyInputFocusGainedSignal()
    */
-  UI::Control::KeyInputFocusSignalType& KeyInputFocusGainedSignal();
+  Ui::Control::KeyInputFocusSignalType& KeyInputFocusGainedSignal();
 
   /**
-   * @copydoc Dali::UI::Control::KeyInputFocusLostSignal()
+   * @copydoc Dali::Ui::Control::KeyInputFocusLostSignal()
    */
-  UI::Control::KeyInputFocusSignalType& KeyInputFocusLostSignal();
+  Ui::Control::KeyInputFocusSignalType& KeyInputFocusLostSignal();
 
   /// @cond internal
   /**
@@ -485,7 +485,7 @@ public: // Helpers for deriving classes
    * @param[in] additionalBehaviour Additional control behaviour.
    * @return A handle to the ControlImpl instance
    */
-  static UI::Control New(ControlBehaviour additionalBehaviour);
+  static Ui::Control New(ControlBehaviour additionalBehaviour);
 
 protected:
   // Construction
@@ -516,7 +516,7 @@ public: // API for derived classes to override
   virtual void OnInitialize();
 
   /**
-   * @copydoc Dali::UI::Control::IsResourceReady
+   * @copydoc Dali::Ui::Control::IsResourceReady
    */
   virtual bool IsResourceReady() const;
 
@@ -529,7 +529,7 @@ public: // API for derived classes to override
    * @param[in] styleManager The StyleManager object
    * @param[in] change Information denoting what has changed
    */
-  virtual void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change);
+  virtual void OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change);
 
   /**
    * @brief This method can be overridden by deriving classes requiring to apply default style.
@@ -625,7 +625,7 @@ public: // API for derived classes to override
    * @return The next keyboard focusable actor in this control or an empty handle if no actor can be focused
    */
   virtual Actor GetNextKeyboardFocusableActor(Actor currentFocusedActor,
-                                              UI::Control::KeyboardFocus::Direction direction, bool loopEnabled);
+                                              Ui::Control::KeyboardFocus::Direction direction, bool loopEnabled);
 
   /**
    * @brief Informs this control that its chosen focusable actor will be focused.
@@ -772,7 +772,7 @@ private:
  * @return Implementation
  * @pre handle is initialized and points to a control
  */
-DALI_UI_API Internal::Control& GetImplementation(Dali::UI::Control& handle);
+DALI_UI_API Internal::Control& GetImplementation(Dali::Ui::Control& handle);
 
 /**
  * @brief Gets implementation from the handle.
@@ -782,14 +782,14 @@ DALI_UI_API Internal::Control& GetImplementation(Dali::UI::Control& handle);
  * @return Implementation
  * @pre Handle is initialized and points to a control.
  */
-DALI_UI_API const Internal::Control& GetImplementation(const Dali::UI::Control& handle);
+DALI_UI_API const Internal::Control& GetImplementation(const Dali::Ui::Control& handle);
 
 } // namespace Internal
 
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

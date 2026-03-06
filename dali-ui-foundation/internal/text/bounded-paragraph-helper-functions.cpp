@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -208,6 +208,6 @@ void MergeBoundedParagraphRunsWhenRemoveCharacters(const Vector<Character>& text
 }
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

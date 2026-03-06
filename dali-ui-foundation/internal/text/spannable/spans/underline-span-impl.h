@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ class UnderlineSpan;
 using UnderlineSpanPtr = IntrusivePtr<UnderlineSpan>;
 
 /**
- * @copydoc Dali::UI::Text::UnderlineSpan
+ * @copydoc Dali::Ui::Text::UnderlineSpan
  */
 class UnderlineSpan : public BaseSpan
 {
@@ -49,7 +49,7 @@ public:
    *
    * @return A new UnderlineSpan object.
    */
-  static Dali::UI::Text::UnderlineSpan New();
+  static Dali::Ui::Text::UnderlineSpan New();
 
   /**
    * @brief Creates a new UnderlineSpan object.
@@ -59,7 +59,7 @@ public:
    *
    * @return A new UnderlineSpan object.
    */
-  static Dali::UI::Text::UnderlineSpan NewSolid(Vector4 color, float height);
+  static Dali::Ui::Text::UnderlineSpan NewSolid(Vector4 color, float height);
 
   /**
    *
@@ -70,7 +70,7 @@ public:
    *
    * @return A new UnderlineSpan object.
    */
-  static Dali::UI::Text::UnderlineSpan NewDashed(Vector4 color, float height, float dashGap, float dashWidth);
+  static Dali::Ui::Text::UnderlineSpan NewDashed(Vector4 color, float height, float dashGap, float dashWidth);
 
   /**
    * @brief Creates a new UnderlineSpan object.
@@ -80,7 +80,7 @@ public:
    *
    * @return A new UnderlineSpan object.
    */
-  static Dali::UI::Text::UnderlineSpan NewDouble(Vector4 color, float height);
+  static Dali::Ui::Text::UnderlineSpan NewDouble(Vector4 color, float height);
 
   /**
    * Default Constructor
@@ -101,52 +101,52 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::GetType()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::GetType()
    */
   Text::Underline::Type GetType() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::IsTypeDefined()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::IsTypeDefined()
    */
   bool IsTypeDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::GetColor()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::GetColor()
    */
   Vector4 GetColor() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::IsColorDefined()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::IsColorDefined()
    */
   bool IsColorDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::GetHeight()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::GetHeight()
    */
   float GetHeight() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::IsHeightDefined()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::IsHeightDefined()
    */
   bool IsHeightDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::GetDashGap()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::GetDashGap()
    */
   float GetDashGap() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::IsDashGapDefined()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::IsDashGapDefined()
    */
   bool IsDashGapDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::GetDashWidth()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::GetDashWidth()
    */
   float GetDashWidth() const;
 
   /**
-   * @copydoc Dali::UI::Text::UnderlineSpan::IsDashWidthDefined()
+   * @copydoc Dali::Ui::Text::UnderlineSpan::IsDashWidthDefined()
    */
   bool IsDashWidthDefined() const;
 
@@ -188,10 +188,10 @@ public: // Methods. Not intended for application developers
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -203,7 +203,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::UnderlineSpan& GetImplementation(Dali::UI::Text::UnderlineSpan& underlineSpan)
+inline Internal::UnderlineSpan& GetImplementation(Dali::Ui::Text::UnderlineSpan& underlineSpan)
 {
   DALI_ASSERT_ALWAYS(underlineSpan && "underlineSpan handle is empty");
 
@@ -212,7 +212,7 @@ inline Internal::UnderlineSpan& GetImplementation(Dali::UI::Text::UnderlineSpan&
   return static_cast<Internal::UnderlineSpan&>(object);
 }
 
-inline const Internal::UnderlineSpan& GetImplementation(const Dali::UI::Text::UnderlineSpan& underlineSpan)
+inline const Internal::UnderlineSpan& GetImplementation(const Dali::Ui::Text::UnderlineSpan& underlineSpan)
 {
   DALI_ASSERT_ALWAYS(underlineSpan && "underlineSpan handle is empty");
 
@@ -223,7 +223,7 @@ inline const Internal::UnderlineSpan& GetImplementation(const Dali::UI::Text::Un
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

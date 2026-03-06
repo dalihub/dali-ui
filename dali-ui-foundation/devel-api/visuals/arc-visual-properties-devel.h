@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelArcVisual
 {
@@ -85,7 +85,7 @@ enum Type
 
 } // namespace DevelArcVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

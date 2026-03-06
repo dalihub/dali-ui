@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Dali::Property::Map CreateDistanceFieldEffect()
 {
@@ -47,10 +47,10 @@ Dali::Property::Map CreateDistanceFieldEffect()
   customShader[Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShaderString;
   customShader[Visual::Shader::Property::HINTS] = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
-  map[UI::Visual::Property::SHADER] = customShader;
+  map[Ui::Visual::Property::SHADER] = customShader;
   return map;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

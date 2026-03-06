@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -51,11 +51,11 @@ BoldSpan::BoldSpan(Internal::BoldSpan* internal)
 
 BoldSpan BoldSpan::DownCast(BaseHandle handle)
 {
-  return BoldSpan(dynamic_cast<Dali::UI::Text::Internal::BoldSpan*>(handle.GetObjectPtr()));
+  return BoldSpan(dynamic_cast<Dali::Ui::Text::Internal::BoldSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

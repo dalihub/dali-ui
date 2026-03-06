@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 void SetMotionBlurProperties(Actor& actor, unsigned int numBlurSamples)
 {
@@ -60,9 +60,9 @@ Property::Map CreateMotionBlurEffect()
 
   customShader[Visual::Shader::Property::HINTS] = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
-  map[UI::Visual::Property::SHADER] = customShader;
+  map[Ui::Visual::Property::SHADER] = customShader;
   return map;
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

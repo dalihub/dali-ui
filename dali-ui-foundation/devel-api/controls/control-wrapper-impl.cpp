@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -47,7 +47,7 @@ BaseHandle Create()
 }
 
 // Setup type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::ControlWrapper, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::ControlWrapper, Ui::Control, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
@@ -56,12 +56,12 @@ DALI_TYPE_REGISTRATION_END()
  * Implementation.
  */
 
-Dali::UI::ControlWrapper ControlWrapper::New(const std::string& typeName, ControlWrapper* controlWrapper)
+Dali::Ui::ControlWrapper ControlWrapper::New(const std::string& typeName, ControlWrapper* controlWrapper)
 {
   ControlWrapperPtr wrapper(controlWrapper);
 
   // Pass ownership to CustomActor via derived handle.
-  Dali::UI::ControlWrapper handle(*wrapper);
+  Dali::Ui::ControlWrapper handle(*wrapper);
 
   // Second-phase initialisation of the implementation.
   // This can only be done after the CustomActor connection has been made.
@@ -117,22 +117,22 @@ bool ControlWrapper::RelayoutDependentOnChildrenBase(Dimension::Type dimension)
   return CustomActorImpl::RelayoutDependentOnChildrenBase(dimension);
 }
 
-void ControlWrapper::RegisterVisual(Property::Index index, UI::Visual::Base& visual)
+void ControlWrapper::RegisterVisual(Property::Index index, Ui::Visual::Base& visual)
 {
   DevelControl::RegisterVisual(*this, index, visual);
 }
 
-void ControlWrapper::RegisterVisual(Property::Index index, UI::Visual::Base& visual, int depthIndex)
+void ControlWrapper::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex)
 {
   DevelControl::RegisterVisual(*this, index, visual, depthIndex);
 }
 
-void ControlWrapper::RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled)
+void ControlWrapper::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled)
 {
   DevelControl::RegisterVisual(*this, index, visual, enabled);
 }
 
-void ControlWrapper::RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled, int depthIndex)
+void ControlWrapper::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex)
 {
   DevelControl::RegisterVisual(*this, index, visual, enabled, depthIndex);
 }
@@ -142,7 +142,7 @@ void ControlWrapper::UnregisterVisual(Property::Index index)
   DevelControl::UnregisterVisual(*this, index);
 }
 
-UI::Visual::Base ControlWrapper::GetVisual(Property::Index index) const
+Ui::Visual::Base ControlWrapper::GetVisual(Property::Index index) const
 {
   return DevelControl::GetVisual(*this, index);
 }
@@ -159,7 +159,7 @@ bool ControlWrapper::IsVisualEnabled(Property::Index index) const
 
 void ControlWrapper::ApplyThemeStyle()
 {
-  UI::StyleManager styleManager = StyleManager::Get();
+  Ui::StyleManager styleManager = StyleManager::Get();
 
   // if style manager is available
   if (styleManager)
@@ -167,7 +167,7 @@ void ControlWrapper::ApplyThemeStyle()
     StyleManager& styleManagerImpl = GetImpl(styleManager);
 
     // Apply the current style
-    styleManagerImpl.ApplyThemeStyle(UI::Control(GetOwner()));
+    styleManagerImpl.ApplyThemeStyle(Ui::Control(GetOwner()));
   }
 }
 
@@ -183,6 +183,6 @@ void ControlWrapper::EmitKeyInputFocusSignal(bool focusGained)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

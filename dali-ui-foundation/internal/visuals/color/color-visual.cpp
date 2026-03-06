@@ -40,7 +40,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -52,14 +52,14 @@ const int CUSTOM_PROPERTY_COUNT(
 
 // cutout policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(CUTOUT_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::DevelColorVisual::CutoutPolicy, NONE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW_WITH_CORNER_RADIUS)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE_WITH_CORNER_RADIUS)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, NONE)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW_WITH_CORNER_RADIUS)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE_WITH_CORNER_RADIUS)
 DALI_ENUM_TO_STRING_TABLE_END(CUTOUT_POLICY)
 
-static constexpr uint32_t CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::UI::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
+static constexpr uint32_t CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                               20);
 
 } // unnamed namespace
@@ -74,7 +74,7 @@ ColorVisualPtr ColorVisual::New(VisualFactoryCache& factoryCache, ColorVisualSha
 }
 
 ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFactory& shaderFactory)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, UI::Visual::COLOR),
+  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::COLOR),
     mBlurRadius(0.0f),
     mCuroutCornerRadiusIndex(Property::INVALID_INDEX),
     mCutoutPolicy(DevelColorVisual::CutoutPolicy::NONE),
@@ -92,8 +92,8 @@ ColorVisual::~ColorVisual()
 void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // By virtue of DoSetProperties being called last, this will override
-  // anything set by UI::Visual::Property::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(UI::ColorVisual::Property::MIX_COLOR, MIX_COLOR);
+  // anything set by Ui::Visual::Property::MIX_COLOR
+  Property::Value* colorValue = propertyMap.Find(Ui::ColorVisual::Property::MIX_COLOR, MIX_COLOR);
   if (colorValue)
   {
     Vector4 color;
@@ -116,7 +116,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* blurRadiusValue = propertyMap.Find(UI::DevelColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
+  Property::Value* blurRadiusValue = propertyMap.Find(Ui::DevelColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
   if (blurRadiusValue)
   {
     if (!blurRadiusValue->Get(mBlurRadius))
@@ -154,7 +154,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   Property::Value* cutoutPolicyValue =
-      propertyMap.Find(UI::DevelColorVisual::Property::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
+      propertyMap.Find(Ui::DevelColorVisual::Property::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
   if (cutoutPolicyValue)
   {
     int cutoutPolicy = static_cast<int>(DevelColorVisual::CutoutPolicy::NONE) - 1; ///< Make always invalid
@@ -181,23 +181,23 @@ void ColorVisual::DoSetOnScene(Actor& actor)
   {
     // If cutout policy is CUTOUT_VIEW_WITH_CORNER_RADIUS or CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, we need to apply equal
     // constraint to it with control's corner radius.
-    UI::Control control = UI::Control::DownCast(actor);
+    Ui::Control control = Ui::Control::DownCast(actor);
     DALI_ASSERT_ALWAYS(control && "ColorVisual must be used with Control");
 
     // Get the corner radius from control
     mCutoutCornerRadiusConstraint =
         Constraint::New<Vector4>(mImpl->mRenderer, mCuroutCornerRadiusIndex, Dali::EqualToConstraint());
-    mCutoutCornerRadiusConstraint.AddSource(Source(control, UI::DevelControl::Property::CORNER_RADIUS));
+    mCutoutCornerRadiusConstraint.AddSource(Source(control, Ui::DevelControl::Property::CORNER_RADIUS));
     Dali::Integration::ConstraintSetInternalTag(mCutoutCornerRadiusConstraint, CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG);
 
-    AddConstraintFeature(mCutoutCornerRadiusConstraint, {UI::DevelControl::Property::CORNER_RADIUS});
+    AddConstraintFeature(mCutoutCornerRadiusConstraint, {Ui::DevelControl::Property::CORNER_RADIUS});
 
     // Apply the constraint to renderer
     mCutoutCornerRadiusConstraint.Apply();
   }
 
   // Color Visual generated and ready to display
-  ResourceReady(UI::Visual::ResourceStatus::READY);
+  ResourceReady(Ui::Visual::ResourceStatus::READY);
 }
 
 void ColorVisual::DoSetOffScene(Actor& actor)
@@ -216,19 +216,19 @@ void ColorVisual::DoSetOffScene(Actor& actor)
 void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::COLOR);
-  map.Insert(UI::ColorVisual::Property::MIX_COLOR, mImpl->mMixColor);
-  map.Insert(UI::DevelColorVisual::Property::CUTOUT_POLICY, mCutoutPolicy);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
+  map.Insert(Ui::ColorVisual::Property::MIX_COLOR, mImpl->mMixColor);
+  map.Insert(Ui::DevelColorVisual::Property::CUTOUT_POLICY, mCutoutPolicy);
 
   if (mImpl->mRenderer)
   {
     // Update values from Renderer
     float blurRadius = mImpl->mRenderer.GetProperty<float>(DecoratedVisualRenderer::Property::BLUR_RADIUS);
-    map.Insert(UI::DevelColorVisual::Property::BLUR_RADIUS, blurRadius);
+    map.Insert(Ui::DevelColorVisual::Property::BLUR_RADIUS, blurRadius);
   }
   else
   {
-    map.Insert(UI::DevelColorVisual::Property::BLUR_RADIUS, mBlurRadius);
+    map.Insert(Ui::DevelColorVisual::Property::BLUR_RADIUS, mBlurRadius);
   }
 }
 
@@ -426,6 +426,6 @@ bool ColorVisual::IsCutoutRequired() const
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

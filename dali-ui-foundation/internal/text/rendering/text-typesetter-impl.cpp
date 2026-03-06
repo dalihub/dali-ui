@@ -43,7 +43,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -1177,7 +1177,7 @@ Devel::PixelBuffer Typesetter::Impl::CreateTransparentImageBuffer(const uint32_t
                                                                   const uint32_t bufferHeight,
                                                                   const Pixel::Format pixelFormat)
 {
-  return Dali::UI::Text::CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
+  return Dali::Ui::Text::CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
 }
 
 void Typesetter::Impl::DrawGlyphsBackground(Devel::PixelBuffer& buffer, const uint32_t bufferWidth,
@@ -1472,6 +1472,6 @@ Typesetter::Impl::~Impl() = default;
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

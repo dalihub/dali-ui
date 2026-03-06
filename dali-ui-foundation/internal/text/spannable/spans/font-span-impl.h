@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ class FontSpan;
 using FontSpanPtr = IntrusivePtr<FontSpan>;
 
 /**
- * @copydoc Dali::UI::Text::FontSpan
+ * @copydoc Dali::Ui::Text::FontSpan
  */
 class FontSpan : public BaseSpan
 {
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Creates a new FontSpan object.
    */
-  static Dali::UI::Text::FontSpan New(const std::string& familyName, const float& sizeInPoints,
+  static Dali::Ui::Text::FontSpan New(const std::string& familyName, const float& sizeInPoints,
                                       const Dali::TextAbstraction::FontWeight::Type& weight,
                                       const Dali::TextAbstraction::FontWidth::Type& width,
                                       const Dali::TextAbstraction::FontSlant::Type& slant);
@@ -72,52 +72,52 @@ public:
 public: // Methods
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::FontSpan::GetFamilyName()
+   * @copydoc Dali::Ui::Text::FontSpan::GetFamilyName()
    */
   const std::string GetFamilyName() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::IsFamilyNameDefined()
+   * @copydoc Dali::Ui::Text::FontSpan::IsFamilyNameDefined()
    */
   bool IsFamilyNameDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::GetWeight()
+   * @copydoc Dali::Ui::Text::FontSpan::GetWeight()
    */
   Dali::TextAbstraction::FontWeight::Type GetWeight() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::IsWeightDefined()
+   * @copydoc Dali::Ui::Text::FontSpan::IsWeightDefined()
    */
   bool IsWeightDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::GetWidth()
+   * @copydoc Dali::Ui::Text::FontSpan::GetWidth()
    */
   Dali::TextAbstraction::FontWidth::Type GetWidth() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::IsWidthDefined()
+   * @copydoc Dali::Ui::Text::FontSpan::IsWidthDefined()
    */
   bool IsWidthDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::GetSlant()
+   * @copydoc Dali::Ui::Text::FontSpan::GetSlant()
    */
   Dali::TextAbstraction::FontSlant::Type GetSlant() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::IsSlantDefined()
+   * @copydoc Dali::Ui::Text::FontSpan::IsSlantDefined()
    */
   bool IsSlantDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::GetSize()
+   * @copydoc Dali::Ui::Text::FontSpan::GetSize()
    */
   float GetSize() const;
 
   /**
-   * @copydoc Dali::UI::Text::FontSpan::IsSizeDefined()
+   * @copydoc Dali::Ui::Text::FontSpan::IsSizeDefined()
    */
   bool IsSizeDefined() const;
 
@@ -167,10 +167,10 @@ private: // Methods
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -182,7 +182,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::FontSpan& GetImplementation(Dali::UI::Text::FontSpan& fontSpan)
+inline Internal::FontSpan& GetImplementation(Dali::Ui::Text::FontSpan& fontSpan)
 {
   DALI_ASSERT_ALWAYS(fontSpan && "fontSpan handle is empty");
 
@@ -191,7 +191,7 @@ inline Internal::FontSpan& GetImplementation(Dali::UI::Text::FontSpan& fontSpan)
   return static_cast<Internal::FontSpan&>(object);
 }
 
-inline const Internal::FontSpan& GetImplementation(const Dali::UI::Text::FontSpan& fontSpan)
+inline const Internal::FontSpan& GetImplementation(const Dali::Ui::Text::FontSpan& fontSpan)
 {
   DALI_ASSERT_ALWAYS(fontSpan && "fontSpan handle is empty");
 
@@ -202,7 +202,7 @@ inline const Internal::FontSpan& GetImplementation(const Dali::UI::Text::FontSpa
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

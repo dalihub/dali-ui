@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -40,7 +40,7 @@ constexpr uint32_t SINGLE_PIXEL_PADDING(1u);
 constexpr uint32_t DOUBLE_PIXEL_PADDING(SINGLE_PIXEL_PADDING << 1);
 constexpr uint32_t TRIPLE_PIXEL_PADDING(DOUBLE_PIXEL_PADDING + SINGLE_PIXEL_PADDING);
 
-UI::AtlasManager::AtlasSize EMPTY_SIZE;
+Ui::AtlasManager::AtlasSize EMPTY_SIZE;
 
 bool IsBlockSizeSufficient(uint32_t width, uint32_t height, uint32_t requiredBlockWidth, uint32_t requiredBlockHeight)
 {
@@ -49,7 +49,7 @@ bool IsBlockSizeSufficient(uint32_t width, uint32_t height, uint32_t requiredBlo
 } // namespace
 
 AtlasManager::AtlasManager()
-  : mAddFailPolicy(UI::AtlasManager::FAIL_ON_ADD_CREATES)
+  : mAddFailPolicy(Ui::AtlasManager::FAIL_ON_ADD_CREATES)
 {
   mNewAtlasSize.mWidth = DEFAULT_ATLAS_WIDTH;
   mNewAtlasSize.mHeight = DEFAULT_ATLAS_HEIGHT;
@@ -67,7 +67,7 @@ AtlasManager::~AtlasManager()
 {
 }
 
-UI::AtlasManager::AtlasId AtlasManager::CreateAtlas(const UI::AtlasManager::AtlasSize& size, Pixel::Format pixelformat)
+Ui::AtlasManager::AtlasId AtlasManager::CreateAtlas(const Ui::AtlasManager::AtlasSize& size, Pixel::Format pixelformat)
 {
   SizeType width = size.mWidth;
   SizeType height = size.mHeight;
@@ -121,12 +121,12 @@ UI::AtlasManager::AtlasId AtlasManager::CreateAtlas(const UI::AtlasManager::Atla
   return mAtlasList.size();
 }
 
-void AtlasManager::SetAddPolicy(UI::AtlasManager::AddFailPolicy policy)
+void AtlasManager::SetAddPolicy(Ui::AtlasManager::AddFailPolicy policy)
 {
   mAddFailPolicy = policy;
 }
 
-bool AtlasManager::Add(const PixelData& image, UI::AtlasManager::AtlasSlot& slot, UI::AtlasManager::AtlasId atlas)
+bool AtlasManager::Add(const PixelData& image, Ui::AtlasManager::AtlasSlot& slot, Ui::AtlasManager::AtlasId atlas)
 {
   bool created = false;
   Pixel::Format pixelFormat = image.GetPixelFormat();
@@ -154,7 +154,7 @@ bool AtlasManager::Add(const PixelData& image, UI::AtlasManager::AtlasSlot& slot
   // If we can't find a suitable atlas then check the policy to determine action
   if (0u == foundAtlas)
   {
-    if (UI::AtlasManager::FAIL_ON_ADD_CREATES == mAddFailPolicy)
+    if (Ui::AtlasManager::FAIL_ON_ADD_CREATES == mAddFailPolicy)
     {
       if (IsBlockSizeSufficient(width, height, mNewAtlasSize.mBlockWidth,
                                 mNewAtlasSize.mBlockHeight)) // Checks if image fits within the atlas blocks
@@ -174,7 +174,7 @@ bool AtlasManager::Add(const PixelData& image, UI::AtlasManager::AtlasSlot& slot
       }
     }
 
-    if ((0u == foundAtlas) || UI::AtlasManager::FAIL_ON_ADD_FAILS == mAddFailPolicy)
+    if ((0u == foundAtlas) || Ui::AtlasManager::FAIL_ON_ADD_FAILS == mAddFailPolicy)
     {
       // Haven't found an atlas for this image ( may have failed to add image to atlas )
       DALI_LOG_ERROR("Failed to create an atlas under current policy.\n");
@@ -379,7 +379,7 @@ void AtlasManager::UploadImage(const PixelData& image, const AtlasSlotDescriptor
   }
 }
 
-void AtlasManager::GenerateMeshData(ImageId id, const Vector2& position, UI::AtlasManager::Mesh2D& meshData,
+void AtlasManager::GenerateMeshData(ImageId id, const Vector2& position, Ui::AtlasManager::Mesh2D& meshData,
                                     bool addReference)
 {
   if (id)
@@ -457,7 +457,7 @@ AtlasManager::AtlasId AtlasManager::GetAtlas(ImageId id) const
   return atlasId;
 }
 
-void AtlasManager::SetNewAtlasSize(const UI::AtlasManager::AtlasSize& size)
+void AtlasManager::SetNewAtlasSize(const Ui::AtlasManager::AtlasSize& size)
 {
   mNewAtlasSize = size;
 
@@ -466,7 +466,7 @@ void AtlasManager::SetNewAtlasSize(const UI::AtlasManager::AtlasSize& size)
   mNewAtlasSize.mBlockHeight += DOUBLE_PIXEL_PADDING;
 }
 
-const UI::AtlasManager::AtlasSize& AtlasManager::GetAtlasSize(AtlasId atlas)
+const Ui::AtlasManager::AtlasSize& AtlasManager::GetAtlasSize(AtlasId atlas)
 {
   DALI_ASSERT_DEBUG(atlas && atlas <= mAtlasList.size());
   if (atlas && atlas-- <= mAtlasList.size())
@@ -503,9 +503,9 @@ Pixel::Format AtlasManager::GetPixelFormat(AtlasId atlas) const
   return pixelFormat;
 }
 
-void AtlasManager::GetMetrics(UI::AtlasManager::Metrics& metrics)
+void AtlasManager::GetMetrics(Ui::AtlasManager::Metrics& metrics)
 {
-  UI::AtlasManager::AtlasMetricsEntry entry;
+  Ui::AtlasManager::AtlasMetricsEntry entry;
   uint32_t textureMemoryUsed = 0;
   uint32_t atlasCount = mAtlasList.size();
   metrics.mAtlasCount = atlasCount;
@@ -554,6 +554,6 @@ void AtlasManager::SetTextures(AtlasId atlas, TextureSet& textureSet)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

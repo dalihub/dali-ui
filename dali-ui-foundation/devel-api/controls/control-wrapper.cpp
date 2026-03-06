@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // ControlWrapper
@@ -72,6 +72,6 @@ ControlWrapper ControlWrapper::DownCast(BaseHandle handle)
   return Control::DownCast<ControlWrapper, Internal::ControlWrapper>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

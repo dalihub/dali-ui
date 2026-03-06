@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -504,6 +504,6 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

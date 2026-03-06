@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -328,7 +328,7 @@ void ClearGlyphRuns(GlyphIndex startIndex, GlyphIndex endIndex, Vector<T>& runs)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

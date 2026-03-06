@@ -24,30 +24,30 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
-UIConfigManager& UIConfigManager::Get()
+UiConfigManager& UiConfigManager::Get()
 {
-  static UIConfigManager instance;
+  static UiConfigManager instance;
   return instance;
 }
 
 namespace
 {
 const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
-    "UIConfig has not been initialized. "
-    "Call UIConfig::New().Apply() in main() before the application main loop starts. "
-    "UIConfig provides global settings for the entire dali-ui framework. "
-    "Do NOT access UIConfig-dependent features in static/global variable initializers.";
+    "UiConfig has not been initialized. "
+    "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+    "UiConfig provides global settings for the entire dali-ui framework. "
+    "Do NOT access UiConfig-dependent features in static/global variable initializers.";
 } // unnamed namespace
 
-void UIConfigManager::Initialize(UIConfig config)
+void UiConfigManager::Initialize(UiConfig config)
 {
-  DALI_ASSERT_ALWAYS(!mInitialized && "UIConfigManager::Init() must be called only once");
+  DALI_ASSERT_ALWAYS(!mInitialized && "UiConfigManager::Init() must be called only once");
   mConfig = std::move(config);
   GetImpl(mConfig).Freeze();
 
@@ -66,60 +66,60 @@ void UIConfigManager::Initialize(UIConfig config)
   GetImpl(mConfig).OnInitialized();
 }
 
-bool UIConfigManager::IsInitialized() const
+bool UiConfigManager::IsInitialized() const
 {
   return mInitialized;
 }
 
-float UIConfigManager::GetScalingFactor() const
+float UiConfigManager::GetScalingFactor() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedScalingFactor;
 }
 
-float UIConfigManager::GetDpiFactor() const
+float UiConfigManager::GetDpiFactor() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedDpiFactor;
 }
 
-float UIConfigManager::GetScaledDpiFactor() const
+float UiConfigManager::GetScaledDpiFactor() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedScaledDpiFactor;
 }
 
-int UIConfigManager::GetDpi() const
+int UiConfigManager::GetDpi() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedDpi;
 }
 
-int UIConfigManager::GetBaselineDpi() const
+int UiConfigManager::GetBaselineDpi() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedBaselineDpi;
 }
 
-KeyClickPolicy UIConfigManager::GetKeyClickPolicy() const
+KeyClickPolicy UiConfigManager::GetKeyClickPolicy() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedKeyClickPolicy;
 }
 
-ExecutionKeyPredicate UIConfigManager::GetExecutionKeyPredicate() const
+ExecutionKeyPredicate UiConfigManager::GetExecutionKeyPredicate() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedExecutionKeyPredicate;
 }
 
-uint32_t UIConfigManager::GetMinLongPressKeyCount() const
+uint32_t UiConfigManager::GetMinLongPressKeyCount() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedMinLongPressKeyCount;
 }
 
-uint32_t UIConfigManager::GetTapRecognizerTime() const
+uint32_t UiConfigManager::GetTapRecognizerTime() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedTapRecognizerTime;
@@ -127,6 +127,6 @@ uint32_t UIConfigManager::GetTapRecognizerTime() const
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

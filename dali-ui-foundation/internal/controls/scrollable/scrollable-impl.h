@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -37,18 +37,18 @@ class Scrollable;
 typedef IntrusivePtr<Scrollable> ScrollablePtr;
 
 /**
- * @copydoc UI::Scrollable
+ * @copydoc Ui::Scrollable
  */
 class Scrollable : public Control
 {
 public:
   /**
-   * @copydoc Dali::UI::Scrollable::IsOvershootEnabled
+   * @copydoc Dali::Ui::Scrollable::IsOvershootEnabled
    */
   bool IsOvershootEnabled() const;
 
   /**
-   * @copydoc Dali::UI::Scrollable::SetOvershootEnabled
+   * @copydoc Dali::Ui::Scrollable::SetOvershootEnabled
    */
   void SetOvershootEnabled(bool enable);
 
@@ -96,17 +96,17 @@ public:
   Vector4 GetOvershootEffectColor() const;
 
   /**
-   * @copydoc Dali::UI::Scrollable::SetOvershootAnimationSpeed(float pixelsPerSecond)
+   * @copydoc Dali::Ui::Scrollable::SetOvershootAnimationSpeed(float pixelsPerSecond)
    */
   void SetOvershootAnimationSpeed(float pixelsPerSecond);
 
   /**
-   * @copydoc Dali::UI::Scrollable::GetOvershootAnimationSpeed()
+   * @copydoc Dali::Ui::Scrollable::GetOvershootAnimationSpeed()
    */
   float GetOvershootAnimationSpeed() const;
 
   /**
-   * @copydoc Dali::UI::Scrollable::GetOvershootSize()
+   * @copydoc Dali::Ui::Scrollable::GetOvershootSize()
    */
   const Vector2& GetOvershootSize() const;
 
@@ -134,7 +134,7 @@ protected: // From Control
   virtual void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -150,19 +150,19 @@ private:
 
 public: // Signals
   /**
-   * @copydoc Dali::UI::Scrollable::ScrollStartedSignal()
+   * @copydoc Dali::Ui::Scrollable::ScrollStartedSignal()
    */
-  UI::Scrollable::ScrollStartedSignalType& ScrollStartedSignal();
+  Ui::Scrollable::ScrollStartedSignalType& ScrollStartedSignal();
 
   /**
-   * @copydoc Dali::UI::Scrollable::ScrollUpdatedSignal()
+   * @copydoc Dali::Ui::Scrollable::ScrollUpdatedSignal()
    */
-  UI::Scrollable::ScrollUpdatedSignalType& ScrollUpdatedSignal();
+  Ui::Scrollable::ScrollUpdatedSignalType& ScrollUpdatedSignal();
 
   /**
-   * @copydoc Dali::UI::Scrollable::ScrollCompletedSignal()
+   * @copydoc Dali::Ui::Scrollable::ScrollCompletedSignal()
    */
-  UI::Scrollable::ScrollCompletedSignalType& ScrollCompletedSignal();
+  Ui::Scrollable::ScrollCompletedSignalType& ScrollCompletedSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -235,9 +235,9 @@ protected:
 
   Dali::AlphaFunction::BuiltinFunction mScrollToAlphaFunction; ///< The ScrollTo() animations use this
 
-  UI::Scrollable::ScrollStartedSignalType mScrollStartedSignal;
-  UI::Scrollable::ScrollUpdatedSignalType mScrollUpdatedSignal;
-  UI::Scrollable::ScrollCompletedSignalType mScrollCompletedSignal;
+  Ui::Scrollable::ScrollStartedSignalType mScrollStartedSignal;
+  Ui::Scrollable::ScrollUpdatedSignalType mScrollUpdatedSignal;
+  Ui::Scrollable::ScrollCompletedSignalType mScrollCompletedSignal;
 
 private:
   bool mOvershootEnabled : 1;
@@ -247,25 +247,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::Scrollable& GetImpl(UI::Scrollable& scrollable)
+inline Ui::Internal::Scrollable& GetImpl(Ui::Scrollable& scrollable)
 {
   DALI_ASSERT_ALWAYS(scrollable);
 
   Dali::RefObject& handle = scrollable.GetImplementation();
 
-  return static_cast<UI::Internal::Scrollable&>(handle);
+  return static_cast<Ui::Internal::Scrollable&>(handle);
 }
 
-inline const UI::Internal::Scrollable& GetImpl(const UI::Scrollable& scrollable)
+inline const Ui::Internal::Scrollable& GetImpl(const Ui::Scrollable& scrollable)
 {
   DALI_ASSERT_ALWAYS(scrollable);
 
   const Dali::RefObject& handle = scrollable.GetImplementation();
 
-  return static_cast<const UI::Internal::Scrollable&>(handle);
+  return static_cast<const Ui::Internal::Scrollable&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

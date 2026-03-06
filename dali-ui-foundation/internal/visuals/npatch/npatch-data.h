@@ -30,14 +30,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 class NPatchData;
 typedef IntrusivePtr<NPatchData> NPatchDataPtr;
 
-class NPatchData : public ConnectionTracker, public Dali::UI::TextureUploadObserver, public Dali::RefObject
+class NPatchData : public ConnectionTracker, public Dali::Ui::TextureUploadObserver, public Dali::RefObject
 {
 public:
   typedef int32_t
@@ -305,7 +305,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

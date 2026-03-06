@@ -58,35 +58,35 @@ static Dali::Property::Index GetIntKey(const Dali::Property::Key& key)
 
   if (key.stringKey == PLACEHOLDER_TEXT)
   {
-    return Dali::UI::Text::PlaceHolder::Property::TEXT;
+    return Dali::Ui::Text::PlaceHolder::Property::TEXT;
   }
   else if (key.stringKey == PLACEHOLDER_TEXT_FOCUSED)
   {
-    return Dali::UI::Text::PlaceHolder::Property::TEXT_FOCUSED;
+    return Dali::Ui::Text::PlaceHolder::Property::TEXT_FOCUSED;
   }
   else if (key.stringKey == PLACEHOLDER_COLOR)
   {
-    return Dali::UI::Text::PlaceHolder::Property::COLOR;
+    return Dali::Ui::Text::PlaceHolder::Property::COLOR;
   }
   else if (key.stringKey == PLACEHOLDER_FONT_FAMILY)
   {
-    return Dali::UI::Text::PlaceHolder::Property::FONT_FAMILY;
+    return Dali::Ui::Text::PlaceHolder::Property::FONT_FAMILY;
   }
   else if (key.stringKey == PLACEHOLDER_FONT_STYLE)
   {
-    return Dali::UI::Text::PlaceHolder::Property::FONT_STYLE;
+    return Dali::Ui::Text::PlaceHolder::Property::FONT_STYLE;
   }
   else if (key.stringKey == PLACEHOLDER_POINT_SIZE)
   {
-    return Dali::UI::Text::PlaceHolder::Property::POINT_SIZE;
+    return Dali::Ui::Text::PlaceHolder::Property::POINT_SIZE;
   }
   else if (key.stringKey == PLACEHOLDER_PIXEL_SIZE)
   {
-    return Dali::UI::Text::PlaceHolder::Property::PIXEL_SIZE;
+    return Dali::Ui::Text::PlaceHolder::Property::PIXEL_SIZE;
   }
   else if (key.stringKey == PLACEHOLDER_ELLIPSIS)
   {
-    return Dali::UI::Text::PlaceHolder::Property::ELLIPSIS;
+    return Dali::Ui::Text::PlaceHolder::Property::ELLIPSIS;
   }
 
   return Dali::Property::INVALID_INDEX;
@@ -96,7 +96,7 @@ static Dali::Property::Index GetIntKey(const Dali::Property::Key& key)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -405,8 +405,8 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
 
     switch (indexKey)
     {
-      case UI::Text::PlaceHolder::Property::TEXT:
-      case UI::Text::PlaceHolder::Property::TEXT_FOCUSED:
+      case Ui::Text::PlaceHolder::Property::TEXT:
+      case Ui::Text::PlaceHolder::Property::TEXT_FOCUSED:
       {
         PlaceholderType placeHolderType = (indexKey == PlaceHolder::Property::TEXT)
                                               ? Controller::PLACEHOLDER_TYPE_INACTIVE
@@ -419,7 +419,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
         }
         break;
       }
-      case UI::Text::PlaceHolder::Property::COLOR:
+      case Ui::Text::PlaceHolder::Property::COLOR:
       {
         Vector4 textColor;
         if (value.Get(textColor))
@@ -431,7 +431,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
         }
         break;
       }
-      case UI::Text::PlaceHolder::Property::FONT_FAMILY:
+      case Ui::Text::PlaceHolder::Property::FONT_FAMILY:
       {
         std::string fontFamily = "";
         if (value.Get(fontFamily))
@@ -440,13 +440,13 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
         }
         break;
       }
-      case UI::Text::PlaceHolder::Property::FONT_STYLE:
+      case Ui::Text::PlaceHolder::Property::FONT_STYLE:
       {
         SetFontStyleProperty(&controller, value, Text::FontStyle::PLACEHOLDER);
         break;
       }
-      case UI::Text::PlaceHolder::Property::POINT_SIZE:
-      case UI::Text::PlaceHolder::Property::PIXEL_SIZE:
+      case Ui::Text::PlaceHolder::Property::POINT_SIZE:
+      case Ui::Text::PlaceHolder::Property::PIXEL_SIZE:
       {
         FontSizeType fontSizeType = (indexKey == PlaceHolder::Property::POINT_SIZE) ? Text::Controller::POINT_SIZE
                                                                                     : Text::Controller::PIXEL_SIZE;
@@ -461,7 +461,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
         }
         break;
       }
-      case UI::Text::PlaceHolder::Property::ELLIPSIS:
+      case Ui::Text::PlaceHolder::Property::ELLIPSIS:
       {
         bool ellipsis = false;
         if (value.Get(ellipsis))
@@ -603,6 +603,6 @@ void Controller::PlaceholderHandler::CreatePlaceholderFont(Controller& controlle
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

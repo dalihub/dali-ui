@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Base class used to observe the upload status of a texture.
@@ -105,7 +105,7 @@ private:
   DestructionSignalType mDestructionSignal; ///< The destruction signal emitted when the observer is destroyed.
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

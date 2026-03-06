@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -412,6 +412,6 @@ bool ColorVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderTy
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

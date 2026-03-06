@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -56,7 +56,7 @@ ArcVisualPtr ArcVisual::New(VisualFactoryCache& factoryCache, const Property::Ma
 }
 
 ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, static_cast<UI::Visual::Type>(UI::DevelVisual::ARC)),
+  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, static_cast<Ui::Visual::Type>(Ui::DevelVisual::ARC)),
     mThickness(0.0f),
     mRadius(0.0f),
     mStartAngle(0.0f),
@@ -75,7 +75,7 @@ ArcVisual::~ArcVisual()
 
 void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* thicknessValue = propertyMap.Find(UI::DevelArcVisual::Property::THICKNESS, THICKNESS_NAME);
+  Property::Value* thicknessValue = propertyMap.Find(Ui::DevelArcVisual::Property::THICKNESS, THICKNESS_NAME);
   if (thicknessValue)
   {
     if (!thicknessValue->Get(mThickness))
@@ -95,7 +95,7 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* startAngleValue = propertyMap.Find(UI::DevelArcVisual::Property::START_ANGLE, START_ANGLE_NAME);
+  Property::Value* startAngleValue = propertyMap.Find(Ui::DevelArcVisual::Property::START_ANGLE, START_ANGLE_NAME);
   if (startAngleValue)
   {
     if (!startAngleValue->Get(mStartAngle))
@@ -112,7 +112,7 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* sweepAngleValue = propertyMap.Find(UI::DevelArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME);
+  Property::Value* sweepAngleValue = propertyMap.Find(Ui::DevelArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME);
   if (sweepAngleValue)
   {
     if (!sweepAngleValue->Get(mSweepAngle))
@@ -129,12 +129,12 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* capValue = propertyMap.Find(UI::DevelArcVisual::Property::CAP, CAP_NAME);
+  Property::Value* capValue = propertyMap.Find(Ui::DevelArcVisual::Property::CAP, CAP_NAME);
   if (capValue)
   {
     int capType = 0;
     Scripting::GetEnumerationProperty(*capValue, CAP_TABLE, CAP_TABLE_COUNT, capType);
-    mCapType = UI::DevelArcVisual::Cap::Type(capType);
+    mCapType = Ui::DevelArcVisual::Cap::Type(capType);
   }
 }
 
@@ -143,7 +143,7 @@ void ArcVisual::DoSetOnScene(Actor& actor)
   actor.AddRenderer(mImpl->mRenderer);
 
   // Arc Visual generated and ready to display
-  ResourceReady(UI::Visual::ResourceStatus::READY);
+  ResourceReady(Ui::Visual::ResourceStatus::READY);
 }
 
 void ArcVisual::DoSetOffScene(Actor& actor)
@@ -169,11 +169,11 @@ void ArcVisual::DoCreatePropertyMap(Property::Map& map) const
   }
 
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::DevelVisual::ARC);
-  map.Insert(UI::DevelArcVisual::Property::THICKNESS, thickness);
-  map.Insert(UI::DevelArcVisual::Property::START_ANGLE, startAngle);
-  map.Insert(UI::DevelArcVisual::Property::SWEEP_ANGLE, sweepAngle);
-  map.Insert(UI::DevelArcVisual::Property::CAP, mCapType);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::DevelVisual::ARC);
+  map.Insert(Ui::DevelArcVisual::Property::THICKNESS, thickness);
+  map.Insert(Ui::DevelArcVisual::Property::START_ANGLE, startAngle);
+  map.Insert(Ui::DevelArcVisual::Property::SWEEP_ANGLE, sweepAngle);
+  map.Insert(Ui::DevelArcVisual::Property::CAP, mCapType);
 }
 
 void ArcVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -243,6 +243,6 @@ void ArcVisual::OnInitialize()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

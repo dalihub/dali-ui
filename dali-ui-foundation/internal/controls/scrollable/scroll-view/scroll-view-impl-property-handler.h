@@ -22,7 +22,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/property.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 class ScrollView;
 
@@ -64,6 +64,6 @@ struct ScrollViewPropertyHandler
   static void UpdatePropertyDomain(ScrollView& scrollView);
 };
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_SCROLL_VIEW_IMPL_PROPERTY_HANDLER_H

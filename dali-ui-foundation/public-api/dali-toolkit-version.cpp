@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 const unsigned int UI_MAJOR_VERSION = 2;
 const unsigned int UI_MINOR_VERSION = 5;
@@ -48,6 +48,6 @@ PrintVersion UI_VERSION;
 } // unnamed namespace
 #endif
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

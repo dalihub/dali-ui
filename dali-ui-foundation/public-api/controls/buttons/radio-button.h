@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 // Forward declarations
 
@@ -75,7 +75,7 @@ class RadioButton;
  *
  * // Make more RadioButtons and add them to their parent
  * RadioButton button2 = RadioButton::New();
- * button2.SetProperty( UI::Button::Property::LABEL, "button2" );
+ * button2.SetProperty( Ui::Button::Property::LABEL, "button2" );
  * button2.SetBackgroundColor( Color::WHITE );
  * button2.SetProperty( Actor::Property::POSITION, Vector2( 0, 40 ) );
  * radioGroup.Add( button2 );
@@ -166,7 +166,7 @@ public:
 public: // Not intended for application developers
   /// @cond internal
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @SINCE_1_0.0
    * @param[in] implementation The Control implementation
@@ -186,7 +186,7 @@ public: // Not intended for application developers
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

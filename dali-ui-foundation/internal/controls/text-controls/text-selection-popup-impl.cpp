@@ -48,7 +48,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -99,46 +99,46 @@ const char* RTL_DIRECTION("RTL");
 
 BaseHandle Create()
 {
-  return UI::TextSelectionPopup::New(NULL);
+  return Ui::TextSelectionPopup::New(NULL);
 }
 
 // Setup properties, signals and actions using the type-registry.
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::TextSelectionPopup, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::TextSelectionPopup, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupMaxSize", VECTOR2, POPUP_MAX_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupMinSize", VECTOR2, POPUP_MIN_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "optionMaxSize", VECTOR2, OPTION_MAX_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "optionMinSize", VECTOR2, OPTION_MIN_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "optionDividerSize", VECTOR2, OPTION_DIVIDER_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "optionDividerPadding", VECTOR4, OPTION_DIVIDER_PADDING)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupClipboardButtonImage", STRING,
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupMaxSize", VECTOR2, POPUP_MAX_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupMinSize", VECTOR2, POPUP_MIN_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "optionMaxSize", VECTOR2, OPTION_MAX_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "optionMinSize", VECTOR2, OPTION_MIN_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "optionDividerSize", VECTOR2, OPTION_DIVIDER_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "optionDividerPadding", VECTOR4, OPTION_DIVIDER_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupClipboardButtonImage", STRING,
                            POPUP_CLIPBOARD_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupCutButtonImage", STRING, POPUP_CUT_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupCopyButtonImage", STRING, POPUP_COPY_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupPasteButtonImage", STRING, POPUP_PASTE_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupSelectButtonImage", STRING, POPUP_SELECT_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupSelectAllButtonImage", STRING,
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupCutButtonImage", STRING, POPUP_CUT_BUTTON_ICON_IMAGE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupCopyButtonImage", STRING, POPUP_COPY_BUTTON_ICON_IMAGE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupPasteButtonImage", STRING, POPUP_PASTE_BUTTON_ICON_IMAGE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupSelectButtonImage", STRING, POPUP_SELECT_BUTTON_ICON_IMAGE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupSelectAllButtonImage", STRING,
                            POPUP_SELECT_ALL_BUTTON_ICON_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupDividerColor", VECTOR4, POPUP_DIVIDER_COLOR)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupIconColor", VECTOR4, POPUP_ICON_COLOR)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupPressedColor", VECTOR4, POPUP_PRESSED_COLOR)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupPressedCornerRadius", FLOAT, POPUP_PRESSED_CORNER_RADIUS)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupPressedImage", STRING, POPUP_PRESSED_IMAGE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupFadeInDuration", FLOAT, POPUP_FADE_IN_DURATION)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "popupFadeOutDuration", FLOAT, POPUP_FADE_OUT_DURATION)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "backgroundBorder", MAP, BACKGROUND_BORDER)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "background", MAP, BACKGROUND)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "labelMinimumSize", VECTOR2, LABEL_MINIMUM_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "labelPadding", VECTOR4, LABEL_PADDING)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "labelTextVisual", MAP, LABEL_TEXT_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionPopup, "enableScrollBar", BOOLEAN, ENABLE_SCROLL_BAR)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupDividerColor", VECTOR4, POPUP_DIVIDER_COLOR)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupIconColor", VECTOR4, POPUP_ICON_COLOR)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupPressedColor", VECTOR4, POPUP_PRESSED_COLOR)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupPressedCornerRadius", FLOAT, POPUP_PRESSED_CORNER_RADIUS)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupPressedImage", STRING, POPUP_PRESSED_IMAGE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupFadeInDuration", FLOAT, POPUP_FADE_IN_DURATION)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "popupFadeOutDuration", FLOAT, POPUP_FADE_OUT_DURATION)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "backgroundBorder", MAP, BACKGROUND_BORDER)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "background", MAP, BACKGROUND)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "labelMinimumSize", VECTOR2, LABEL_MINIMUM_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "labelPadding", VECTOR4, LABEL_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "labelTextVisual", MAP, LABEL_TEXT_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionPopup, "enableScrollBar", BOOLEAN, ENABLE_SCROLL_BAR)
 
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
 
-Dali::UI::TextSelectionPopup TextSelectionPopup::New(TextSelectionPopupCallbackInterface* callbackInterface)
+Dali::Ui::TextSelectionPopup TextSelectionPopup::New(TextSelectionPopupCallbackInterface* callbackInterface)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextSelectionPopup::New\n");
 
@@ -146,7 +146,7 @@ Dali::UI::TextSelectionPopup TextSelectionPopup::New(TextSelectionPopupCallbackI
   IntrusivePtr<TextSelectionPopup> impl = new TextSelectionPopup(callbackInterface);
 
   // Pass ownership to CustomActor handle
-  Dali::UI::TextSelectionPopup handle(*impl);
+  Dali::Ui::TextSelectionPopup handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -157,7 +157,7 @@ Dali::UI::TextSelectionPopup TextSelectionPopup::New(TextSelectionPopupCallbackI
 
 void TextSelectionPopup::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextSelectionPopup selectionPopup = UI::TextSelectionPopup::DownCast(Dali::BaseHandle(object));
+  Ui::TextSelectionPopup selectionPopup = Ui::TextSelectionPopup::DownCast(Dali::BaseHandle(object));
 
   if (selectionPopup)
   {
@@ -168,7 +168,7 @@ void TextSelectionPopup::SetProperty(BaseObject* object, Property::Index index, 
 Property::Value TextSelectionPopup::GetProperty(BaseObject* object, Property::Index index)
 {
   Property::Value value;
-  UI::TextSelectionPopup selectionPopup = UI::TextSelectionPopup::DownCast(Dali::BaseHandle(object));
+  Ui::TextSelectionPopup selectionPopup = Ui::TextSelectionPopup::DownCast(Dali::BaseHandle(object));
 
   if (selectionPopup)
   {
@@ -179,7 +179,7 @@ Property::Value TextSelectionPopup::GetProperty(BaseObject* object, Property::In
 
 void TextSelectionPopup::SetProperties(const Property::Map& properties)
 {
-  UI::TextSelectionPopup selectionPopup = UI::TextSelectionPopup::DownCast(Self());
+  Ui::TextSelectionPopup selectionPopup = Ui::TextSelectionPopup::DownCast(Self());
 
   if (selectionPopup)
   {
@@ -198,42 +198,42 @@ void TextSelectionPopup::GetProperties(Property::Map& properties)
 {
   Property::Map map;
 
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_MAX_SIZE, GetDimensionToCustomise(POPUP_MAXIMUM_SIZE));
-  map.Insert(UI::TextSelectionPopup::Property::OPTION_DIVIDER_SIZE, GetDimensionToCustomise(OPTION_DIVIDER_SIZE));
-  map.Insert(UI::TextSelectionPopup::Property::OPTION_DIVIDER_PADDING,
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_MAX_SIZE, GetDimensionToCustomise(POPUP_MAXIMUM_SIZE));
+  map.Insert(Ui::TextSelectionPopup::Property::OPTION_DIVIDER_SIZE, GetDimensionToCustomise(OPTION_DIVIDER_SIZE));
+  map.Insert(Ui::TextSelectionPopup::Property::OPTION_DIVIDER_PADDING,
              Vector4(mOptionDividerPadding.left, mOptionDividerPadding.right, mOptionDividerPadding.top,
                      mOptionDividerPadding.bottom));
-  map.Insert(UI::TextSelectionPopup::Property::LABEL_MINIMUM_SIZE, mLabelMinimumSize);
-  map.Insert(UI::TextSelectionPopup::Property::LABEL_PADDING,
+  map.Insert(Ui::TextSelectionPopup::Property::LABEL_MINIMUM_SIZE, mLabelMinimumSize);
+  map.Insert(Ui::TextSelectionPopup::Property::LABEL_PADDING,
              Vector4(mLabelPadding.left, mLabelPadding.right, mLabelPadding.top, mLabelPadding.bottom));
-  map.Insert(UI::TextSelectionPopup::Property::LABEL_TEXT_VISUAL, mLabelTextVisual);
-  map.Insert(UI::TextSelectionPopup::Property::ENABLE_SCROLL_BAR, mEnableScrollBar);
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_DIVIDER_COLOR, mDividerColor);
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_FADE_IN_DURATION, mFadeInDuration);
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_FADE_OUT_DURATION, mFadeOutDuration);
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_PRESSED_COLOR, mPressedColor);
-  map.Insert(UI::TextSelectionPopup::Property::POPUP_PRESSED_CORNER_RADIUS, mPressedCornerRadius);
+  map.Insert(Ui::TextSelectionPopup::Property::LABEL_TEXT_VISUAL, mLabelTextVisual);
+  map.Insert(Ui::TextSelectionPopup::Property::ENABLE_SCROLL_BAR, mEnableScrollBar);
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_DIVIDER_COLOR, mDividerColor);
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_FADE_IN_DURATION, mFadeInDuration);
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_FADE_OUT_DURATION, mFadeOutDuration);
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_PRESSED_COLOR, mPressedColor);
+  map.Insert(Ui::TextSelectionPopup::Property::POPUP_PRESSED_CORNER_RADIUS, mPressedCornerRadius);
 
   Property::Map backgroundMap;
-  UI::Visual::Base backgroundVisual = DevelControl::GetVisual(*this, UI::Control::Property::BACKGROUND);
+  Ui::Visual::Base backgroundVisual = DevelControl::GetVisual(*this, Ui::Control::Property::BACKGROUND);
   if (backgroundVisual)
   {
     backgroundVisual.CreatePropertyMap(backgroundMap);
   }
-  map.Insert(UI::TextSelectionPopup::Property::BACKGROUND, backgroundMap);
+  map.Insert(Ui::TextSelectionPopup::Property::BACKGROUND, backgroundMap);
 
   Property::Map borderMap;
-  UI::Visual::Base borderVisual = DevelControl::GetVisual(*this, UI::TextSelectionPopup::Property::BACKGROUND_BORDER);
+  Ui::Visual::Base borderVisual = DevelControl::GetVisual(*this, Ui::TextSelectionPopup::Property::BACKGROUND_BORDER);
   if (borderVisual)
   {
     borderVisual.CreatePropertyMap(borderMap);
   }
-  map.Insert(UI::TextSelectionPopup::Property::BACKGROUND_BORDER, borderMap);
+  map.Insert(Ui::TextSelectionPopup::Property::BACKGROUND_BORDER, borderMap);
 
   properties = map;
 }
 
-void TextSelectionPopup::EnableButtons(UI::TextSelectionPopup::Buttons buttonsToEnable)
+void TextSelectionPopup::EnableButtons(Ui::TextSelectionPopup::Buttons buttonsToEnable)
 {
   mEnabledButtons = buttonsToEnable;
   mButtonsChanged = true;
@@ -249,7 +249,7 @@ void TextSelectionPopup::RaiseAbove(Actor target)
 
 void TextSelectionPopup::ShowPopup()
 {
-  if ((!mPopupShowing || mButtonsChanged) && (UI::TextSelectionPopup::NONE != mEnabledButtons))
+  if ((!mPopupShowing || mButtonsChanged) && (Ui::TextSelectionPopup::NONE != mEnabledButtons))
   {
     Actor self = Self();
     AddPopupOptionsToToolbar(mShowIcons, mShowCaptions);
@@ -282,8 +282,8 @@ void TextSelectionPopup::OnInitialize()
   self.SetProperty(Actor::Property::COLOR_ALPHA, 0.0f);
 
   // Accessibility
-  self.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
-  self.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::DIALOG);
+  self.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
+  self.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::DIALOG);
 }
 
 void TextSelectionPopup::HideAnimationFinished(Animation& animation)
@@ -297,61 +297,61 @@ void TextSelectionPopup::HideAnimationFinished(Animation& animation)
   }
 }
 
-bool TextSelectionPopup::OnCutButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnCutButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(UI::TextSelectionPopup::CUT);
+    mCallbackInterface->TextPopupButtonTouched(Ui::TextSelectionPopup::CUT);
   }
 
   return true;
 }
 
-bool TextSelectionPopup::OnCopyButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnCopyButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(Dali::UI::TextSelectionPopup::COPY);
+    mCallbackInterface->TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::COPY);
   }
 
   return true;
 }
 
-bool TextSelectionPopup::OnPasteButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnPasteButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(Dali::UI::TextSelectionPopup::PASTE);
+    mCallbackInterface->TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::PASTE);
   }
 
   return true;
 }
 
-bool TextSelectionPopup::OnSelectButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnSelectButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(Dali::UI::TextSelectionPopup::SELECT);
+    mCallbackInterface->TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::SELECT);
   }
 
   return true;
 }
 
-bool TextSelectionPopup::OnSelectAllButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnSelectAllButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(Dali::UI::TextSelectionPopup::SELECT_ALL);
+    mCallbackInterface->TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::SELECT_ALL);
   }
 
   return true;
 }
 
-bool TextSelectionPopup::OnClipboardButtonPressed(UI::Button button)
+bool TextSelectionPopup::OnClipboardButtonPressed(Ui::Button button)
 {
   if (mCallbackInterface)
   {
-    mCallbackInterface->TextPopupButtonTouched(Dali::UI::TextSelectionPopup::CLIPBOARD);
+    mCallbackInterface->TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::CLIPBOARD);
   }
 
   return true;
@@ -366,7 +366,7 @@ void TextSelectionPopup::SetDimensionToCustomise(const PopupCustomisations& sett
       mPopupMaxSize = dimension;
       if (mToolbar)
       {
-        mToolbar.SetProperty(UI::TextSelectionToolbar::Property::MAX_SIZE, dimension);
+        mToolbar.SetProperty(Ui::TextSelectionToolbar::Property::MAX_SIZE, dimension);
       }
       break;
     }
@@ -402,7 +402,7 @@ Size TextSelectionPopup::GetDimensionToCustomise(const PopupCustomisations& sett
     {
       if (mToolbar)
       {
-        return mToolbar.GetProperty(UI::TextSelectionToolbar::Property::MAX_SIZE).Get<Vector2>();
+        return mToolbar.GetProperty(Ui::TextSelectionToolbar::Property::MAX_SIZE).Get<Vector2>();
       }
       else
       {
@@ -426,36 +426,36 @@ Size TextSelectionPopup::GetDimensionToCustomise(const PopupCustomisations& sett
   return Size::ZERO;
 }
 
-void TextSelectionPopup::SetButtonImage(UI::TextSelectionPopup::Buttons button, const std::string& image)
+void TextSelectionPopup::SetButtonImage(Ui::TextSelectionPopup::Buttons button, const std::string& image)
 {
   switch (button)
   {
-    case UI::TextSelectionPopup::CLIPBOARD:
+    case Ui::TextSelectionPopup::CLIPBOARD:
     {
       mClipboardIconImage = image;
       break;
     }
-    case UI::TextSelectionPopup::CUT:
+    case Ui::TextSelectionPopup::CUT:
     {
       mCutIconImage = image;
       break;
     }
-    case UI::TextSelectionPopup::COPY:
+    case Ui::TextSelectionPopup::COPY:
     {
       mCopyIconImage = image;
       break;
     }
-    case UI::TextSelectionPopup::PASTE:
+    case Ui::TextSelectionPopup::PASTE:
     {
       mPasteIconImage = image;
       break;
     }
-    case UI::TextSelectionPopup::SELECT:
+    case Ui::TextSelectionPopup::SELECT:
     {
       mSelectIconImage = image;
       break;
     }
-    case UI::TextSelectionPopup::SELECT_ALL:
+    case Ui::TextSelectionPopup::SELECT_ALL:
     {
       mSelectAllIconImage = image;
       break;
@@ -467,41 +467,41 @@ void TextSelectionPopup::SetButtonImage(UI::TextSelectionPopup::Buttons button, 
   } // switch
 }
 
-const std::string& TextSelectionPopup::GetButtonImage(UI::TextSelectionPopup::Buttons button) const
+const std::string& TextSelectionPopup::GetButtonImage(Ui::TextSelectionPopup::Buttons button) const
 {
   switch (button)
   {
-    case UI::TextSelectionPopup::CLIPBOARD:
+    case Ui::TextSelectionPopup::CLIPBOARD:
     {
       return mClipboardIconImage;
       break;
     }
-    case UI::TextSelectionPopup::CUT:
+    case Ui::TextSelectionPopup::CUT:
     {
       return mCutIconImage;
       break;
     }
-    case UI::TextSelectionPopup::COPY:
+    case Ui::TextSelectionPopup::COPY:
     {
       return mCopyIconImage;
       break;
     }
-    case UI::TextSelectionPopup::PASTE:
+    case Ui::TextSelectionPopup::PASTE:
     {
       return mPasteIconImage;
       break;
     }
-    case UI::TextSelectionPopup::SELECT:
+    case Ui::TextSelectionPopup::SELECT:
     {
       return mSelectIconImage;
       break;
     }
-    case UI::TextSelectionPopup::SELECT_ALL:
+    case Ui::TextSelectionPopup::SELECT_ALL:
     {
       return mSelectAllIconImage;
       break;
     }
-    case UI::TextSelectionPopup::NONE:
+    case Ui::TextSelectionPopup::NONE:
     {
       break;
     }
@@ -552,24 +552,24 @@ void TextSelectionPopup::CreateOrderedListOfPopupOptions()
   mOrderListOfButtons.reserve(8u);
 
   // Create button for each possible option using Option priority
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::CUT, mCutOptionPriority, OPTION_CUT,
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::CUT, mCutOptionPriority, OPTION_CUT,
                                                   POPUP_CUT_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::CUT)));
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::COPY, mCopyOptionPriority, OPTION_COPY,
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::CUT)));
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::COPY, mCopyOptionPriority, OPTION_COPY,
                                                   POPUP_COPY_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::COPY)));
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::PASTE, mPasteOptionPriority, OPTION_PASTE,
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::COPY)));
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::PASTE, mPasteOptionPriority, OPTION_PASTE,
                                                   POPUP_PASTE_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::PASTE)));
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::SELECT, mSelectOptionPriority,
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::PASTE)));
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::SELECT, mSelectOptionPriority,
                                                   OPTION_SELECT_WORD, POPUP_SELECT_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::SELECT)));
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::SELECT_ALL, mSelectAllOptionPriority,
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::SELECT)));
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::SELECT_ALL, mSelectAllOptionPriority,
                                                   OPTION_SELECT_ALL, POPUP_SELECT_ALL_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::SELECT_ALL)));
-  mOrderListOfButtons.push_back(ButtonRequirement(UI::TextSelectionPopup::CLIPBOARD, mClipboardOptionPriority,
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::SELECT_ALL)));
+  mOrderListOfButtons.push_back(ButtonRequirement(Ui::TextSelectionPopup::CLIPBOARD, mClipboardOptionPriority,
                                                   OPTION_CLIPBOARD, POPUP_CLIPBOARD_STRING,
-                                                  0 != (mEnabledButtons & UI::TextSelectionPopup::CLIPBOARD)));
+                                                  0 != (mEnabledButtons & Ui::TextSelectionPopup::CLIPBOARD)));
 
   // Sort the buttons according their priorities.
   std::sort(mOrderListOfButtons.begin(), mOrderListOfButtons.end(), TextSelectionPopup::ButtonPriorityCompare());
@@ -580,44 +580,44 @@ void TextSelectionPopup::AddOption(const ButtonRequirement& button, bool showDiv
   // 1. Create a option.
   DALI_LOG_INFO(gLogFilter, Debug::General, "TextSelectionPopup::AddOption\n");
 
-  UI::PushButton option = UI::PushButton::New();
+  Ui::PushButton option = Ui::PushButton::New();
   option.SetProperty(Dali::Actor::Property::NAME, button.name);
   option.SetResizePolicy(ResizePolicy::USE_NATURAL_SIZE, Dimension::ALL_DIMENSIONS);
   option.SetProperty(Actor::Property::MINIMUM_SIZE, mLabelMinimumSize);
 
   switch (button.id)
   {
-    case UI::TextSelectionPopup::CUT:
+    case Ui::TextSelectionPopup::CUT:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnCutButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::COPY:
+    case Ui::TextSelectionPopup::COPY:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnCopyButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::PASTE:
+    case Ui::TextSelectionPopup::PASTE:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnPasteButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::SELECT:
+    case Ui::TextSelectionPopup::SELECT:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnSelectButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::SELECT_ALL:
+    case Ui::TextSelectionPopup::SELECT_ALL:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnSelectAllButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::CLIPBOARD:
+    case Ui::TextSelectionPopup::CLIPBOARD:
     {
       option.ClickedSignal().Connect(this, &TextSelectionPopup::OnClipboardButtonPressed);
       break;
     }
-    case UI::TextSelectionPopup::NONE:
+    case Ui::TextSelectionPopup::NONE:
     {
       // Nothing to do:
       break;
@@ -629,27 +629,27 @@ void TextSelectionPopup::AddOption(const ButtonRequirement& button, bool showDiv
   {
     // PushButton layout properties.
     const Padding padding(mLabelPadding);
-    option.SetProperty(UI::PushButton::Property::LABEL_PADDING, padding);
+    option.SetProperty(Ui::PushButton::Property::LABEL_PADDING, padding);
 
     // Label properties.
     Property::Map buttonLabelProperties;
-    buttonLabelProperties.Insert(UI::TextVisual::Property::TEXT, button.caption);
+    buttonLabelProperties.Insert(Ui::TextVisual::Property::TEXT, button.caption);
     buttonLabelProperties.Merge(mLabelTextVisual);
 
-    option.SetProperty(UI::Button::Property::LABEL, buttonLabelProperties);
+    option.SetProperty(Ui::Button::Property::LABEL, buttonLabelProperties);
   }
   if (showIcons)
   {
-    option.SetProperty(UI::PushButton::Property::ICON_PADDING, Vector4(10.0f, 10.0f, 10.0f, 10.0f));
-    option.SetProperty(UI::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT, "BOTTOM");
+    option.SetProperty(Ui::PushButton::Property::ICON_PADDING, Vector4(10.0f, 10.0f, 10.0f, 10.0f));
+    option.SetProperty(Ui::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT, "BOTTOM");
 
     // TODO: This is temporarily disabled until the text-selection-popup image API is changed to strings.
-    // option.SetProperty(  UI::Button::Property::SELECTED_VISUAL, button.icon );
-    // option.SetProperty(  UI::Button::Property::UNSELECTED_VISUAL, button.icon );
+    // option.SetProperty(  Ui::Button::Property::SELECTED_VISUAL, button.icon );
+    // option.SetProperty(  Ui::Button::Property::UNSELECTED_VISUAL, button.icon );
   }
 
   // 3. Set the normal option image (blank / Transparent).
-  option.SetProperty(UI::Button::Property::UNSELECTED_BACKGROUND_VISUAL, "");
+  option.SetProperty(Ui::Button::Property::UNSELECTED_BACKGROUND_VISUAL, "");
 
   // 4. Set the pressed option image.
   Property::Value selectedBackgroundValue(mPressedImage);
@@ -657,16 +657,16 @@ void TextSelectionPopup::AddOption(const ButtonRequirement& button, bool showDiv
   {
     // The image can be blank, the color can be used in that case.
     selectedBackgroundValue =
-        Property::Value{{UI::Visual::Property::TYPE, UI::Visual::COLOR},
-                        {UI::ColorVisual::Property::MIX_COLOR, mPressedColor},
-                        {UI::DevelVisual::Property::CORNER_RADIUS, mPressedCornerRadius},
-                        {UI::DevelVisual::Property::CORNER_RADIUS_POLICY, UI::Visual::Transform::Policy::RELATIVE}};
+        Property::Value{{Ui::Visual::Property::TYPE, Ui::Visual::COLOR},
+                        {Ui::ColorVisual::Property::MIX_COLOR, mPressedColor},
+                        {Ui::DevelVisual::Property::CORNER_RADIUS, mPressedCornerRadius},
+                        {Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, Ui::Visual::Transform::Policy::RELATIVE}};
   }
-  option.SetProperty(UI::Button::Property::SELECTED_BACKGROUND_VISUAL, selectedBackgroundValue);
+  option.SetProperty(Ui::Button::Property::SELECTED_BACKGROUND_VISUAL, selectedBackgroundValue);
   // The value set by user takes precedence over the theme value.
   if (mLabelTextVisual.Count() == 0)
   {
-    option.SetProperty(UI::Control::Property::STYLE_NAME, TEXT_SELECTION_POPUP_BUTTON_STYLE_NAME);
+    option.SetProperty(Ui::Control::Property::STYLE_NAME, TEXT_SELECTION_POPUP_BUTTON_STYLE_NAME);
   }
 
   // 5 Add option to tool bar
@@ -678,7 +678,7 @@ void TextSelectionPopup::AddOption(const ButtonRequirement& button, bool showDiv
     const Size size(mOptionDividerSize.width, 0.0f); // Height FILL_TO_PARENT
     const Padding padding(mOptionDividerPadding);
 
-    UI::Control divider = UI::Control::New();
+    Ui::Control divider = Ui::Control::New();
 #ifdef DECORATOR_DEBUG
     divider.SetProperty(Dali::Actor::Property::NAME, "Text's popup divider");
 #endif
@@ -719,17 +719,17 @@ void TextSelectionPopup::AddPopupOptionsToToolbar(bool showIcons, bool showCapti
   if (!mToolbar)
   {
     Actor self = Self();
-    mToolbar = UI::TextSelectionToolbar::New();
+    mToolbar = Ui::TextSelectionToolbar::New();
     if (mPopupMaxSize != Vector2::ZERO) // If PopupMaxSize property set then apply to Toolbar. Toolbar currently is not
                                         // retriving this from json
     {
-      mToolbar.SetProperty(UI::TextSelectionToolbar::Property::MAX_SIZE, mPopupMaxSize);
+      mToolbar.SetProperty(Ui::TextSelectionToolbar::Property::MAX_SIZE, mPopupMaxSize);
     }
     mToolbar.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
 #ifdef DECORATOR_DEBUG
     mToolbar.SetProperty(Dali::Actor::Property::NAME, "TextSelectionToolbar");
 #endif
-    mToolbar.SetProperty(UI::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR, mEnableScrollBar);
+    mToolbar.SetProperty(Ui::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR, mEnableScrollBar);
     self.Add(mToolbar);
   }
 
@@ -772,15 +772,15 @@ void TextSelectionPopup::AddPopupOptionsToToolbar(bool showIcons, bool showCapti
 void TextSelectionPopup::CreateBackgroundBorder(Property::Map& propertyMap)
 {
   // Removes previous image if necessary
-  DevelControl::UnregisterVisual(*this, UI::TextSelectionPopup::Property::BACKGROUND_BORDER);
+  DevelControl::UnregisterVisual(*this, Ui::TextSelectionPopup::Property::BACKGROUND_BORDER);
 
   if (!propertyMap.Empty())
   {
-    UI::Visual::Base visual = UI::VisualFactory::Get().CreateVisual(propertyMap);
+    Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
 
     if (visual)
     {
-      DevelControl::RegisterVisual(*this, UI::TextSelectionPopup::Property::BACKGROUND_BORDER, visual,
+      DevelControl::RegisterVisual(*this, Ui::TextSelectionPopup::Property::BACKGROUND_BORDER, visual,
                                    DepthIndex::CONTENT);
     }
   }
@@ -789,15 +789,15 @@ void TextSelectionPopup::CreateBackgroundBorder(Property::Map& propertyMap)
 void TextSelectionPopup::CreateBackground(Property::Map& propertyMap)
 {
   // Removes previous image if necessary
-  DevelControl::UnregisterVisual(*this, UI::Control::Property::BACKGROUND);
+  DevelControl::UnregisterVisual(*this, Ui::Control::Property::BACKGROUND);
 
   if (!propertyMap.Empty())
   {
-    UI::Visual::Base visual = UI::VisualFactory::Get().CreateVisual(propertyMap);
+    Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
 
     if (visual)
     {
-      DevelControl::RegisterVisual(*this, UI::Control::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
+      DevelControl::RegisterVisual(*this, Ui::Control::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
     }
   }
 }
@@ -814,7 +814,7 @@ TextSelectionPopup::TextSelectionPopup(TextSelectionPopupCallbackInterface* call
     mLabelPadding(DEFAULT_LABEL_PADDING),
     mLabelTextVisual(),
     mEnableScrollBar(true),
-    mEnabledButtons(UI::TextSelectionPopup::NONE),
+    mEnabledButtons(Ui::TextSelectionPopup::NONE),
     mCallbackInterface(callbackInterface),
     mPressedColor(DEFAULT_OPTION_PRESSED_COLOR),
     mPressedCornerRadius(DEFAULT_OPTION_PRESSED_CORNER_RADIUS),
@@ -841,6 +841,6 @@ TextSelectionPopup::~TextSelectionPopup()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -38,16 +38,16 @@ namespace Internal
 /**
  * ConfirmationPopup implementation class.
  *
- * \sa Dali::UI::ConfirmationPopup
+ * \sa Dali::Ui::ConfirmationPopup
  */
-class ConfirmationPopup : public Dali::UI::Internal::Popup
+class ConfirmationPopup : public Dali::Ui::Internal::Popup
 {
 public:
   /**
    * Create a new ConfirmationPopup.
    * @return A smart-pointer to the newly allocated ConfirmationPopup.
    */
-  static Dali::UI::ConfirmationPopup New();
+  static Dali::Ui::ConfirmationPopup New();
 
 protected:
   /**
@@ -140,25 +140,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ConfirmationPopup& GetDerivedImplementation(UI::ConfirmationPopup& popup)
+inline Ui::Internal::ConfirmationPopup& GetDerivedImplementation(Ui::ConfirmationPopup& popup)
 {
   DALI_ASSERT_ALWAYS(popup);
 
   Dali::RefObject& handle = popup.GetImplementation();
 
-  return static_cast<UI::Internal::ConfirmationPopup&>(handle);
+  return static_cast<Ui::Internal::ConfirmationPopup&>(handle);
 }
 
-inline const UI::Internal::ConfirmationPopup& GetDerivedImplementation(const UI::ConfirmationPopup& popup)
+inline const Ui::Internal::ConfirmationPopup& GetDerivedImplementation(const Ui::ConfirmationPopup& popup)
 {
   DALI_ASSERT_ALWAYS(popup);
 
   const Dali::RefObject& handle = popup.GetImplementation();
 
-  return static_cast<const UI::Internal::ConfirmationPopup&>(handle);
+  return static_cast<const Ui::Internal::ConfirmationPopup&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

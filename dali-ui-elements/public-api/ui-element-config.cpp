@@ -22,45 +22,45 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
-UIElementConfig::UIElementConfig(Integration::UIElementConfigImpl* impl)
-  : UIConfig(impl)
+UiElementConfig::UiElementConfig(Integration::UiElementConfigImpl* impl)
+  : UiConfig(impl)
 {
 }
 
-UIElementConfig UIElementConfig::New()
+UiElementConfig UiElementConfig::New()
 {
-  return Integration::UIElementConfigImpl::New();
+  return Integration::UiElementConfigImpl::New();
 }
 
-UIElementConfig UIElementConfig::DownCast(BaseHandle handle)
+UiElementConfig UiElementConfig::DownCast(BaseHandle handle)
 {
-  return UIElementConfig(dynamic_cast<Integration::UIElementConfigImpl*>(handle.GetObjectPtr()));
+  return UiElementConfig(dynamic_cast<Integration::UiElementConfigImpl*>(handle.GetObjectPtr()));
 }
 
-UIElementConfig& UIElementConfig::SetDefaultFontSize(float fontSize)
+UiElementConfig& UiElementConfig::SetDefaultFontSize(float fontSize)
 {
   GetImpl(*this).SetDefaultFontSize(fontSize);
   return *this;
 }
 
-float UIElementConfig::GetDefaultFontSize() const
+float UiElementConfig::GetDefaultFontSize() const
 {
   return GetImpl(*this).GetDefaultFontSize();
 }
 
-UIElementConfig& UIElementConfig::SetDefaultTextColor(const Vector4& color)
+UiElementConfig& UiElementConfig::SetDefaultTextColor(const Vector4& color)
 {
   GetImpl(*this).SetDefaultTextColor(color);
   return *this;
 }
 
-Vector4 UIElementConfig::GetDefaultTextColor() const
+Vector4 UiElementConfig::GetDefaultTextColor() const
 {
   return GetImpl(*this).GetDefaultTextColor();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

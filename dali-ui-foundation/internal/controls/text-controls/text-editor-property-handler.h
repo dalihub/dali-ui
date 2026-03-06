@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/text-editor-impl.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 /**
  * Class to manage properties for the TextEditor
@@ -35,7 +35,7 @@ struct TextEditor::PropertyHandler
    * @param[in] index The property index of the property to set
    * @param[in] value The value to set
    */
-  static void SetProperty(UI::TextEditor textEditor, Property::Index index, const Property::Value& value);
+  static void SetProperty(Ui::TextEditor textEditor, Property::Index index, const Property::Value& value);
 
   /**
    * Get properties from the text editor / controller / decorator
@@ -44,7 +44,7 @@ struct TextEditor::PropertyHandler
    * @param[in] index The property index of the property to set
    * @return the value
    */
-  static Property::Value GetProperty(UI::TextEditor textEditor, Property::Index index);
+  static Property::Value GetProperty(Ui::TextEditor textEditor, Property::Index index);
 
 private:
   /**
@@ -56,6 +56,6 @@ private:
   static std::string GetImageFileNameFromPropertyValue(const Property::Value& value);
 };
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_EDITOR_PROPERTY_HANDLER_H

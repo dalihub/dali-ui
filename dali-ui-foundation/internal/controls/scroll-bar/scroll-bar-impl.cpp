@@ -141,7 +141,7 @@ struct IndicatorPositionConstraint
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -151,30 +151,30 @@ using namespace Dali;
 
 BaseHandle Create()
 {
-  return UI::ScrollBar::New();
+  return Ui::ScrollBar::New();
 }
 
 // clang-format off
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN( UI::ScrollBar, UI::Control, Create );
+DALI_TYPE_REGISTRATION_BEGIN( Ui::ScrollBar, Ui::Control, Create );
 
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "scrollDirection",            STRING, SCROLL_DIRECTION            )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorHeightPolicy",      STRING, INDICATOR_HEIGHT_POLICY     )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorFixedHeight",       FLOAT,  INDICATOR_FIXED_HEIGHT      )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorShowDuration",      FLOAT,  INDICATOR_SHOW_DURATION     )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorHideDuration",      FLOAT,  INDICATOR_HIDE_DURATION     )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "scrollPositionIntervals",    ARRAY,  SCROLL_POSITION_INTERVALS   )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorMinimumHeight",     FLOAT,  INDICATOR_MINIMUM_HEIGHT    )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorStartPadding",      FLOAT,  INDICATOR_START_PADDING     )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorEndPadding",        FLOAT,  INDICATOR_END_PADDING       )
-DALI_PROPERTY_REGISTRATION(UI, ScrollBar, "indicatorTransientDuration", FLOAT,  INDICATOR_TRANSIENT_DURATION)
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "scrollDirection",            STRING, SCROLL_DIRECTION            )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorHeightPolicy",      STRING, INDICATOR_HEIGHT_POLICY     )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorFixedHeight",       FLOAT,  INDICATOR_FIXED_HEIGHT      )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorShowDuration",      FLOAT,  INDICATOR_SHOW_DURATION     )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorHideDuration",      FLOAT,  INDICATOR_HIDE_DURATION     )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "scrollPositionIntervals",    ARRAY,  SCROLL_POSITION_INTERVALS   )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorMinimumHeight",     FLOAT,  INDICATOR_MINIMUM_HEIGHT    )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorStartPadding",      FLOAT,  INDICATOR_START_PADDING     )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorEndPadding",        FLOAT,  INDICATOR_END_PADDING       )
+DALI_PROPERTY_REGISTRATION(Ui, ScrollBar, "indicatorTransientDuration", FLOAT,  INDICATOR_TRANSIENT_DURATION)
 
-DALI_SIGNAL_REGISTRATION(UI, ScrollBar, "panFinished",                   PAN_FINISHED_SIGNAL                    )
-DALI_SIGNAL_REGISTRATION(UI, ScrollBar, "scrollPositionIntervalReached", SCROLL_POSITION_INTERVAL_REACHED_SIGNAL)
+DALI_SIGNAL_REGISTRATION(Ui, ScrollBar, "panFinished",                   PAN_FINISHED_SIGNAL                    )
+DALI_SIGNAL_REGISTRATION(Ui, ScrollBar, "scrollPositionIntervalReached", SCROLL_POSITION_INTERVAL_REACHED_SIGNAL)
 
-DALI_ACTION_REGISTRATION(UI, ScrollBar, "ShowIndicator",          ACTION_SHOW_INDICATOR          )
-DALI_ACTION_REGISTRATION(UI, ScrollBar, "HideIndicator",          ACTION_HIDE_INDICATOR          )
-DALI_ACTION_REGISTRATION(UI, ScrollBar, "ShowTransientIndicator", ACTION_SHOW_TRANSIENT_INDICATOR)
+DALI_ACTION_REGISTRATION(Ui, ScrollBar, "ShowIndicator",          ACTION_SHOW_INDICATOR          )
+DALI_ACTION_REGISTRATION(Ui, ScrollBar, "HideIndicator",          ACTION_HIDE_INDICATOR          )
+DALI_ACTION_REGISTRATION(Ui, ScrollBar, "ShowTransientIndicator", ACTION_SHOW_TRANSIENT_INDICATOR)
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -184,7 +184,7 @@ const char* INDICATOR_HEIGHT_POLICY_NAME[] = {"VARIABLE", "FIXED"};
 
 } // namespace
 
-ScrollBar::ScrollBar(UI::ScrollBar::Direction direction)
+ScrollBar::ScrollBar(Ui::ScrollBar::Direction direction)
   : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
     mIndicatorShowAlpha(1.0f),
     mDirection(direction),
@@ -199,7 +199,7 @@ ScrollBar::ScrollBar(UI::ScrollBar::Direction direction)
     mScrollStart(0.0f),
     mGestureDisplacement(Vector2::ZERO),
     mCurrentScrollPosition(0.0f),
-    mIndicatorHeightPolicy(UI::ScrollBar::VARIABLE),
+    mIndicatorHeightPolicy(Ui::ScrollBar::VARIABLE),
     mIndicatorFixedHeight(DEFAULT_INDICATOR_FIXED_HEIGHT),
     mIndicatorMinimumHeight(DEFAULT_INDICATOR_MINIMUM_HEIGHT),
     mIndicatorStartPadding(DEFAULT_INDICATOR_START_PADDING),
@@ -254,7 +254,7 @@ void ScrollBar::SetScrollPropertySource(Handle handle, Property::Index propertyS
 void ScrollBar::CreateDefaultIndicatorActor()
 {
   const std::string imageDirPath = AssetManager::GetDaliImagePath();
-  UI::ImageView indicator = UI::ImageView::New(imageDirPath + DEFAULT_INDICATOR_IMAGE_FILE_NAME);
+  Ui::ImageView indicator = Ui::ImageView::New(imageDirPath + DEFAULT_INDICATOR_IMAGE_FILE_NAME);
   indicator.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   indicator.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
   indicator.SetStyleName("ScrollBarIndicator");
@@ -316,7 +316,7 @@ void ScrollBar::ApplyConstraints()
     }
 
     // Set indicator height according to the indicator's height policy
-    if (mIndicatorHeightPolicy == UI::ScrollBar::FIXED)
+    if (mIndicatorHeightPolicy == Ui::ScrollBar::FIXED)
     {
       mIndicator.SetProperty(
           Actor::Property::SIZE,
@@ -481,7 +481,7 @@ void ScrollBar::OnPan(const PanGesture& gesture)
 
   if (scrollableHandle)
   {
-    Dali::UI::ItemView itemView = Dali::UI::ItemView::DownCast(scrollableHandle);
+    Dali::Ui::ItemView itemView = Dali::Ui::ItemView::DownCast(scrollableHandle);
 
     switch (gesture.GetState())
     {
@@ -554,7 +554,7 @@ void ScrollBar::OnPan(const PanGesture& gesture)
 
 void ScrollBar::OnSizeSet(const Vector3& size)
 {
-  if (mIndicatorHeightPolicy == UI::ScrollBar::FIXED)
+  if (mIndicatorHeightPolicy == Ui::ScrollBar::FIXED)
   {
     mIndicator.SetProperty(Actor::Property::SIZE, Vector2(size.width, mIndicatorFixedHeight));
   }
@@ -562,17 +562,17 @@ void ScrollBar::OnSizeSet(const Vector3& size)
   Control::OnSizeSet(size);
 }
 
-void ScrollBar::SetScrollDirection(UI::ScrollBar::Direction direction)
+void ScrollBar::SetScrollDirection(Ui::ScrollBar::Direction direction)
 {
   mDirection = direction;
 }
 
-UI::ScrollBar::Direction ScrollBar::GetScrollDirection() const
+Ui::ScrollBar::Direction ScrollBar::GetScrollDirection() const
 {
   return mDirection;
 }
 
-void ScrollBar::SetIndicatorHeightPolicy(UI::ScrollBar::IndicatorHeightPolicy policy)
+void ScrollBar::SetIndicatorHeightPolicy(Ui::ScrollBar::IndicatorHeightPolicy policy)
 {
   if (policy != mIndicatorHeightPolicy)
   {
@@ -581,7 +581,7 @@ void ScrollBar::SetIndicatorHeightPolicy(UI::ScrollBar::IndicatorHeightPolicy po
   }
 }
 
-UI::ScrollBar::IndicatorHeightPolicy ScrollBar::GetIndicatorHeightPolicy() const
+Ui::ScrollBar::IndicatorHeightPolicy ScrollBar::GetIndicatorHeightPolicy() const
 {
   return mIndicatorHeightPolicy;
 }
@@ -590,7 +590,7 @@ void ScrollBar::SetIndicatorFixedHeight(float height)
 {
   mIndicatorFixedHeight = height;
 
-  if (mIndicatorHeightPolicy == UI::ScrollBar::FIXED)
+  if (mIndicatorHeightPolicy == Ui::ScrollBar::FIXED)
   {
     mIndicator.SetProperty(
         Actor::Property::SIZE,
@@ -628,11 +628,11 @@ void ScrollBar::OnScrollDirectionPropertySet(Property::Value propertyValue)
   std::string directionName(propertyValue.Get<std::string>());
   if (directionName == "VERTICAL")
   {
-    SetScrollDirection(UI::ScrollBar::VERTICAL);
+    SetScrollDirection(Ui::ScrollBar::VERTICAL);
   }
   else if (directionName == "HORIZONTAL")
   {
-    SetScrollDirection(UI::ScrollBar::HORIZONTAL);
+    SetScrollDirection(Ui::ScrollBar::HORIZONTAL);
   }
   else
   {
@@ -645,11 +645,11 @@ void ScrollBar::OnIndicatorHeightPolicyPropertySet(Property::Value propertyValue
   std::string policyName(propertyValue.Get<std::string>());
   if (policyName == "VARIABLE")
   {
-    SetIndicatorHeightPolicy(UI::ScrollBar::VARIABLE);
+    SetIndicatorHeightPolicy(Ui::ScrollBar::VARIABLE);
   }
   else if (policyName == "FIXED")
   {
-    SetIndicatorHeightPolicy(UI::ScrollBar::FIXED);
+    SetIndicatorHeightPolicy(Ui::ScrollBar::FIXED);
   }
   else
   {
@@ -663,7 +663,7 @@ bool ScrollBar::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::ScrollBar scrollBar = UI::ScrollBar::DownCast(handle);
+  Ui::ScrollBar scrollBar = Ui::ScrollBar::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), PAN_FINISHED_SIGNAL))
   {
@@ -684,39 +684,39 @@ bool ScrollBar::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
 
 void ScrollBar::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::ScrollBar scrollBar = UI::ScrollBar::DownCast(Dali::BaseHandle(object));
+  Ui::ScrollBar scrollBar = Ui::ScrollBar::DownCast(Dali::BaseHandle(object));
 
   if (scrollBar)
   {
     ScrollBar& scrollBarImpl(GetImpl(scrollBar));
     switch (index)
     {
-      case UI::ScrollBar::Property::SCROLL_DIRECTION:
+      case Ui::ScrollBar::Property::SCROLL_DIRECTION:
       {
         scrollBarImpl.OnScrollDirectionPropertySet(value);
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
+      case Ui::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
       {
         scrollBarImpl.OnIndicatorHeightPolicyPropertySet(value);
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
+      case Ui::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
       {
         scrollBarImpl.SetIndicatorFixedHeight(value.Get<float>());
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_SHOW_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_SHOW_DURATION:
       {
         scrollBarImpl.SetIndicatorShowDuration(value.Get<float>());
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_HIDE_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_HIDE_DURATION:
       {
         scrollBarImpl.SetIndicatorHideDuration(value.Get<float>());
         break;
       }
-      case UI::ScrollBar::Property::SCROLL_POSITION_INTERVALS:
+      case Ui::ScrollBar::Property::SCROLL_POSITION_INTERVALS:
       {
         const Property::Array* array = value.GetArray();
         if (array)
@@ -743,25 +743,25 @@ void ScrollBar::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT:
+      case Ui::ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT:
       {
         scrollBarImpl.mIndicatorMinimumHeight = value.Get<float>();
         scrollBarImpl.ApplyConstraints();
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_START_PADDING:
+      case Ui::ScrollBar::Property::INDICATOR_START_PADDING:
       {
         scrollBarImpl.mIndicatorStartPadding = value.Get<float>();
         scrollBarImpl.ApplyConstraints();
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_END_PADDING:
+      case Ui::ScrollBar::Property::INDICATOR_END_PADDING:
       {
         scrollBarImpl.mIndicatorEndPadding = value.Get<float>();
         scrollBarImpl.ApplyConstraints();
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_TRANSIENT_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_TRANSIENT_DURATION:
       {
         scrollBarImpl.mTransientIndicatorDuration = value.Get<float>();
         break;
@@ -774,39 +774,39 @@ Property::Value ScrollBar::GetProperty(BaseObject* object, Property::Index index
 {
   Property::Value value;
 
-  UI::ScrollBar scrollBar = UI::ScrollBar::DownCast(Dali::BaseHandle(object));
+  Ui::ScrollBar scrollBar = Ui::ScrollBar::DownCast(Dali::BaseHandle(object));
 
   if (scrollBar)
   {
     ScrollBar& scrollBarImpl(GetImpl(scrollBar));
     switch (index)
     {
-      case UI::ScrollBar::Property::SCROLL_DIRECTION:
+      case Ui::ScrollBar::Property::SCROLL_DIRECTION:
       {
         value = SCROLL_DIRECTION_NAME[scrollBarImpl.GetScrollDirection()];
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
+      case Ui::ScrollBar::Property::INDICATOR_HEIGHT_POLICY:
       {
         value = INDICATOR_HEIGHT_POLICY_NAME[scrollBarImpl.GetIndicatorHeightPolicy()];
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
+      case Ui::ScrollBar::Property::INDICATOR_FIXED_HEIGHT:
       {
         value = scrollBarImpl.GetIndicatorFixedHeight();
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_SHOW_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_SHOW_DURATION:
       {
         value = scrollBarImpl.GetIndicatorShowDuration();
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_HIDE_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_HIDE_DURATION:
       {
         value = scrollBarImpl.GetIndicatorHideDuration();
         break;
       }
-      case UI::ScrollBar::Property::SCROLL_POSITION_INTERVALS:
+      case Ui::ScrollBar::Property::SCROLL_POSITION_INTERVALS:
       {
         Property::Value tempValue(Property::ARRAY);
         Property::Array* array = tempValue.GetArray();
@@ -825,22 +825,22 @@ Property::Value ScrollBar::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT:
+      case Ui::ScrollBar::Property::INDICATOR_MINIMUM_HEIGHT:
       {
         value = scrollBarImpl.mIndicatorMinimumHeight;
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_START_PADDING:
+      case Ui::ScrollBar::Property::INDICATOR_START_PADDING:
       {
         value = scrollBarImpl.mIndicatorStartPadding;
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_END_PADDING:
+      case Ui::ScrollBar::Property::INDICATOR_END_PADDING:
       {
         value = scrollBarImpl.mIndicatorEndPadding;
         break;
       }
-      case UI::ScrollBar::Property::INDICATOR_TRANSIENT_DURATION:
+      case Ui::ScrollBar::Property::INDICATOR_TRANSIENT_DURATION:
       {
         value = scrollBarImpl.mTransientIndicatorDuration;
         break;
@@ -856,7 +856,7 @@ bool ScrollBar::DoAction(BaseObject* object, const std::string& actionName, cons
 
   Dali::BaseHandle handle(object);
 
-  UI::ScrollBar scrollBar = UI::ScrollBar::DownCast(handle);
+  Ui::ScrollBar scrollBar = Ui::ScrollBar::DownCast(handle);
 
   DALI_ASSERT_DEBUG(scrollBar);
 
@@ -882,13 +882,13 @@ bool ScrollBar::DoAction(BaseObject* object, const std::string& actionName, cons
   return ret;
 }
 
-UI::ScrollBar ScrollBar::New(UI::ScrollBar::Direction direction)
+Ui::ScrollBar ScrollBar::New(Ui::ScrollBar::Direction direction)
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<ScrollBar> impl = new ScrollBar(direction);
 
   // Pass ownership to CustomActor handle
-  UI::ScrollBar handle(*impl);
+  Ui::ScrollBar handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -905,14 +905,14 @@ void ScrollBar::ScrollBarAccessible::InitDefaultFeatures()
 
 double ScrollBar::ScrollBarAccessible::GetMinimum() const
 {
-  auto self = UI::ScrollBar::DownCast(Self());
+  auto self = Ui::ScrollBar::DownCast(Self());
   Handle scrollableHandle = GetImpl(self).mScrollableObject.GetHandle();
   return scrollableHandle ? scrollableHandle.GetCurrentProperty<float>(GetImpl(self).mPropertyMinScrollPosition) : 0.0f;
 }
 
 double ScrollBar::ScrollBarAccessible::GetCurrent() const
 {
-  auto self = UI::ScrollBar::DownCast(Self());
+  auto self = Ui::ScrollBar::DownCast(Self());
   Handle scrollableHandle = GetImpl(self).mScrollableObject.GetHandle();
   return scrollableHandle ? scrollableHandle.GetCurrentProperty<float>(GetImpl(self).mPropertyScrollPosition) : 0.0f;
 }
@@ -924,7 +924,7 @@ std::string ScrollBar::ScrollBarAccessible::GetValueText() const
 
 double ScrollBar::ScrollBarAccessible::GetMaximum() const
 {
-  auto self = UI::ScrollBar::DownCast(Self());
+  auto self = Ui::ScrollBar::DownCast(Self());
   Handle scrollableHandle = GetImpl(self).mScrollableObject.GetHandle();
   return scrollableHandle ? scrollableHandle.GetCurrentProperty<float>(GetImpl(self).mPropertyMaxScrollPosition) : 1.0f;
 }
@@ -938,7 +938,7 @@ bool ScrollBar::ScrollBarAccessible::SetCurrent(double current)
 
   auto valueBefore = GetCurrent();
 
-  auto self = UI::ScrollBar::DownCast(Self());
+  auto self = Ui::ScrollBar::DownCast(Self());
   Handle scrollableHandle = GetImpl(self).mScrollableObject.GetHandle();
   if (!scrollableHandle)
   {
@@ -964,6 +964,6 @@ double ScrollBar::ScrollBarAccessible::GetMinimumIncrement() const
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

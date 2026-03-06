@@ -32,7 +32,7 @@ namespace TextAbstraction
 struct BitmapFont;
 } // namespace TextAbstraction
 
-namespace UI
+namespace Ui
 {
 namespace DevelText
 {
@@ -112,7 +112,7 @@ DALI_UI_API void CreateBitmapFont(const BitmapFontDescription& description, Text
 
 } // namespace DevelText
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

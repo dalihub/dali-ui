@@ -32,7 +32,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -43,12 +43,12 @@ class JsonParser : public BaseObject
 {
 public:
   /*
-   * @copydoc UI::JsonParser::JsonParser()
+   * @copydoc Ui::JsonParser::JsonParser()
    */
   JsonParser();
 
   /*
-   * @copydoc UI::JsonParser::JsonParser(const TreeNode& tree)
+   * @copydoc Ui::JsonParser::JsonParser(const TreeNode& tree)
    */
   explicit JsonParser(const TreeNode& tree);
 
@@ -57,47 +57,47 @@ public:
   ~JsonParser() override;
 
   /*
-   * @copydoc UI::JsonParser::Parse()
+   * @copydoc Ui::JsonParser::Parse()
    */
   bool Parse(const std::string& source);
 
   /*
-   * @copydoc UI::JsonParser::Pack()
+   * @copydoc Ui::JsonParser::Pack()
    */
   void Pack(void);
 
   /*
-   * @copydoc UI::JsonParser::GetRoot()
+   * @copydoc Ui::JsonParser::GetRoot()
    */
   const TreeNode* GetRoot() const;
 
   /*
-   * @copydoc UI::JsonParser::ParseError()
+   * @copydoc Ui::JsonParser::ParseError()
    */
   bool ParseError() const;
 
   /*
-   * @copydoc UI::JsonParser::GetErrorPosition()
+   * @copydoc Ui::JsonParser::GetErrorPosition()
    */
   int GetErrorPosition() const;
 
   /*
-   * @copydoc UI::JsonParser::GetErrorDescription()
+   * @copydoc Ui::JsonParser::GetErrorDescription()
    */
   std::string GetErrorDescription() const;
 
   /*
-   * @copydoc UI::JsonParser::GetErrorLineNumber()
+   * @copydoc Ui::JsonParser::GetErrorLineNumber()
    */
   int GetErrorLineNumber() const;
 
   /*
-   * @copydoc UI::JsonParser::GetErrorColumn()
+   * @copydoc Ui::JsonParser::GetErrorColumn()
    */
   int GetErrorColumn() const;
 
   /*
-   * @copydoc UI::JsonParser::Write()
+   * @copydoc Ui::JsonParser::Write()
    */
   void Write(std::ostream& output, int indent) const;
 
@@ -132,7 +132,7 @@ private:
 
 } // namespace Internal
 
-inline const Internal::JsonParser& GetImplementation(const UI::JsonParser& parser)
+inline const Internal::JsonParser& GetImplementation(const Ui::JsonParser& parser)
 {
   DALI_ASSERT_ALWAYS(parser && "JsonParser handle is empty");
 
@@ -141,7 +141,7 @@ inline const Internal::JsonParser& GetImplementation(const UI::JsonParser& parse
   return static_cast<const Internal::JsonParser&>(handle);
 }
 
-inline Internal::JsonParser& GetImplementation(UI::JsonParser& parser)
+inline Internal::JsonParser& GetImplementation(Ui::JsonParser& parser)
 {
   DALI_ASSERT_ALWAYS(parser && "JsonParser handle is empty");
 
@@ -150,7 +150,7 @@ inline Internal::JsonParser& GetImplementation(UI::JsonParser& parser)
   return static_cast<Internal::JsonParser&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

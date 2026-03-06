@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -62,11 +62,11 @@ bool BackgroundColorSpan::IsBackgroundColorDefined() const
 
 BackgroundColorSpan BackgroundColorSpan::DownCast(BaseHandle handle)
 {
-  return BackgroundColorSpan(dynamic_cast<Dali::UI::Text::Internal::BackgroundColorSpan*>(handle.GetObjectPtr()));
+  return BackgroundColorSpan(dynamic_cast<Dali::Ui::Text::Internal::BackgroundColorSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

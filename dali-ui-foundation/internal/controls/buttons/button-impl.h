@@ -30,14 +30,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class Button;
 
 namespace Internal
 {
 /**
- * @copydoc UI::Button
+ * @copydoc Ui::Button
  *
  * Button is the base class implementation for all buttons.
  *
@@ -262,24 +262,24 @@ private:
 
 public:
   /**
-   * @copydoc Dali::UI::PushButton::PressedSignal()
+   * @copydoc Dali::Ui::PushButton::PressedSignal()
    */
-  UI::Button::ButtonSignalType& PressedSignal();
+  Ui::Button::ButtonSignalType& PressedSignal();
 
   /**
-   * @copydoc Dali::UI::PushButton::ReleasedSignal()
+   * @copydoc Dali::Ui::PushButton::ReleasedSignal()
    */
-  UI::Button::ButtonSignalType& ReleasedSignal();
+  Ui::Button::ButtonSignalType& ReleasedSignal();
 
   /**
-   * @copydoc Dali::UI::Button::ClickedSignal()
+   * @copydoc Dali::Ui::Button::ClickedSignal()
    */
-  UI::Button::ButtonSignalType& ClickedSignal();
+  Ui::Button::ButtonSignalType& ClickedSignal();
 
   /**
-   * @copydoc Dali::UI::Button::StateChangedSignal()
+   * @copydoc Dali::Ui::Button::StateChangedSignal()
    */
-  UI::Button::ButtonSignalType& StateChangedSignal();
+  Ui::Button::ButtonSignalType& StateChangedSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -314,50 +314,50 @@ public:
 
 protected: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    * @note If overridden by deriving button classes, then an up-call to Button::OnInitialize MUST be made at the start.
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Control::OnAccessibilityActivated()
+   * @copydoc Ui::Control::OnAccessibilityActivated()
    */
   bool OnAccessibilityActivated() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc UI::Control::OnKeyboardEnter()
+   * @copydoc Ui::Control::OnKeyboardEnter()
    */
   bool OnKeyboardEnter() override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    * @note If overridden by deriving button classes, then an up-call to Button::OnSceneDisconnection MUST be made at the
    * end.
    */
   void OnSceneDisconnection() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::GetNaturalSize
+   * @copydoc Ui::Control::GetNaturalSize
    */
   Vector3 GetNaturalSize() override;
 
   /**
-   * @copydoc UI::Control::OnSetResizePolicy
+   * @copydoc Ui::Control::OnSetResizePolicy
    */
   void OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension) override;
 
   /**
-   * @copydoc UI::Control::OnRelayout
+   * @copydoc Ui::Control::OnRelayout
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
@@ -517,10 +517,10 @@ private:
 
 private:
   // Signals
-  UI::Button::ButtonSignalType mPressedSignal;      ///< Signal emitted when the button is pressed.
-  UI::Button::ButtonSignalType mReleasedSignal;     ///< Signal emitted when the button is released.
-  UI::Button::ButtonSignalType mClickedSignal;      ///< Signal emitted when the button is clicked.
-  UI::Button::ButtonSignalType mStateChangedSignal; ///< Signal emitted when the button's state is changed.
+  Ui::Button::ButtonSignalType mPressedSignal;      ///< Signal emitted when the button is pressed.
+  Ui::Button::ButtonSignalType mReleasedSignal;     ///< Signal emitted when the button is released.
+  Ui::Button::ButtonSignalType mClickedSignal;      ///< Signal emitted when the button is clicked.
+  Ui::Button::ButtonSignalType mStateChangedSignal; ///< Signal emitted when the button's state is changed.
 
   Timer mAutoRepeatingTimer;
 
@@ -556,17 +556,17 @@ protected:
     using DevelControl::ControlAccessible::ControlAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
      */
     Dali::Accessibility::States CalculateStates() override;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::GetNameRaw()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNameRaw()
      */
     std::pair<std::string, bool> GetNameRaw() const override;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::GetNamePropertyIndex()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNamePropertyIndex()
      */
     Property::Index GetNamePropertyIndex() override;
   };
@@ -576,25 +576,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::Button& GetImplementation(UI::Button& button)
+inline Ui::Internal::Button& GetImplementation(Ui::Button& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<UI::Internal::Button&>(handle);
+  return static_cast<Ui::Internal::Button&>(handle);
 }
 
-inline const UI::Internal::Button& GetImplementation(const UI::Button& button)
+inline const Ui::Internal::Button& GetImplementation(const Ui::Button& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   const Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<const UI::Internal::Button&>(handle);
+  return static_cast<const Ui::Internal::Button&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/devel-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/builder/optional-value.h>
 
-typedef Dali::UI::TreeNode TreeNode;
+typedef Dali::Ui::TreeNode TreeNode;
 typedef TreeNode::ConstIterator TreeConstIter;
 
 typedef OptionalValue<const TreeNode&> OptionalChild;

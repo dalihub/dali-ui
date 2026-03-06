@@ -35,7 +35,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -52,7 +52,7 @@ class ItemView : public Scrollable
 {
 public:
   // Signals
-  typedef UI::ItemView::LayoutActivatedSignalType LayoutActivatedSignalType;
+  typedef Ui::ItemView::LayoutActivatedSignalType LayoutActivatedSignalType;
 
 public:
   /**
@@ -60,185 +60,185 @@ public:
    * @param[in] factory The factory which provides ItemView with items.
    * @return A public handle to the newly allocated ItemView.
    */
-  static Dali::UI::ItemView New(ItemFactory& factory);
+  static Dali::Ui::ItemView New(ItemFactory& factory);
 
   /**
-   * @copydoc UI::ItemView::GetLayoutCount
+   * @copydoc Ui::ItemView::GetLayoutCount
    */
   unsigned int GetLayoutCount() const;
 
   /**
-   * @copydoc UI::ItemView::AddLayout
+   * @copydoc Ui::ItemView::AddLayout
    */
   void AddLayout(ItemLayout& layout);
 
   /**
-   * @copydoc UI::ItemView::RemoveLayout
+   * @copydoc Ui::ItemView::RemoveLayout
    */
   void RemoveLayout(unsigned int layoutIndex);
 
   /**
-   * @copydoc UI::ItemView::GetLayout
+   * @copydoc Ui::ItemView::GetLayout
    */
   ItemLayoutPtr GetLayout(unsigned int layoutIndex) const;
 
   /**
-   * @copydoc UI::ItemView::GetActiveLayout
+   * @copydoc Ui::ItemView::GetActiveLayout
    */
   ItemLayoutPtr GetActiveLayout() const;
 
   /**
-   * @copydoc UI::ItemView::GetCurrentLayoutPosition
+   * @copydoc Ui::ItemView::GetCurrentLayoutPosition
    */
   float GetCurrentLayoutPosition(unsigned int itemId) const;
 
   /**
-   * @copydoc UI::ItemView::ActivateLayout
+   * @copydoc Ui::ItemView::ActivateLayout
    */
   void ActivateLayout(unsigned int layoutIndex, const Vector3& targetSize, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::DeactivateCurrentLayout
+   * @copydoc Ui::ItemView::DeactivateCurrentLayout
    */
   void DeactivateCurrentLayout();
 
   /**
-   * @copydoc UI::ItemView::SetMinimumSwipeSpeed
+   * @copydoc Ui::ItemView::SetMinimumSwipeSpeed
    */
   void SetMinimumSwipeSpeed(float speed);
 
   /**
-   * @copydoc UI::ItemView::GetMinimumSwipeSpeed
+   * @copydoc Ui::ItemView::GetMinimumSwipeSpeed
    */
   float GetMinimumSwipeSpeed() const;
 
   /**
-   * @copydoc UI::ItemView::SetMinimumSwipeDistance
+   * @copydoc Ui::ItemView::SetMinimumSwipeDistance
    */
   void SetMinimumSwipeDistance(float distance);
 
   /**
-   * @copydoc UI::ItemView::GetMinimumSwipeDistance
+   * @copydoc Ui::ItemView::GetMinimumSwipeDistance
    */
   float GetMinimumSwipeDistance() const;
 
   /**
-   * @copydoc UI::ItemView::SetWheelScrollDistanceStep
+   * @copydoc Ui::ItemView::SetWheelScrollDistanceStep
    */
   void SetWheelScrollDistanceStep(float step);
 
   /**
-   * @copydoc UI::ItemView::GetWheelScrollDistanceStep
+   * @copydoc Ui::ItemView::GetWheelScrollDistanceStep
    */
   float GetWheelScrollDistanceStep() const;
 
   /**
-   * @copydoc UI::ItemView::SetAnchoring
+   * @copydoc Ui::ItemView::SetAnchoring
    */
   void SetAnchoring(bool enabled);
 
   /**
-   * @copydoc UI::ItemView::GetAnchoring
+   * @copydoc Ui::ItemView::GetAnchoring
    */
   bool GetAnchoring() const;
 
   /**
-   * @copydoc UI::ItemView::SetAnchoringDuration
+   * @copydoc Ui::ItemView::SetAnchoringDuration
    */
   void SetAnchoringDuration(float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::GetAnchoringDuration
+   * @copydoc Ui::ItemView::GetAnchoringDuration
    */
   float GetAnchoringDuration() const;
 
   /**
-   * @copydoc UI::ItemView::ScrollToItem
+   * @copydoc Ui::ItemView::ScrollToItem
    */
   void ScrollToItem(unsigned int itemId, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::SetRefreshInterval
+   * @copydoc Ui::ItemView::SetRefreshInterval
    */
   void SetRefreshInterval(float intervalLayoutPositions);
 
   /**
-   * @copydoc UI::ItemView::GetRefreshInterval
+   * @copydoc Ui::ItemView::GetRefreshInterval
    */
   float GetRefreshInterval() const;
 
   /**
-   * @copydoc UI::ItemView::Refresh
+   * @copydoc Ui::ItemView::Refresh
    */
   void Refresh();
 
   /**
-   * @copydoc UI::ItemView::GetItem
+   * @copydoc Ui::ItemView::GetItem
    */
   Actor GetItem(unsigned int itemId) const;
 
   /**
-   * @copydoc UI::ItemView::GetItemId
+   * @copydoc Ui::ItemView::GetItemId
    */
   unsigned int GetItemId(Actor actor) const;
 
   /**
-   * @copydoc UI::ItemView::InsertItem
+   * @copydoc Ui::ItemView::InsertItem
    */
   void InsertItem(Item newItem, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::InsertItem
+   * @copydoc Ui::ItemView::InsertItem
    */
   void InsertItems(const ItemContainer& newItems, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::RemoveItem
+   * @copydoc Ui::ItemView::RemoveItem
    */
   void RemoveItem(ItemId itemId, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::InsertItem
+   * @copydoc Ui::ItemView::InsertItem
    */
   void RemoveItems(const ItemIdContainer& itemIds, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::InsertItem
+   * @copydoc Ui::ItemView::InsertItem
    */
   void ReplaceItem(Item replacementItem, float durationSeconds);
 
   /**
-   * @copydoc UI::ItemView::InsertItem
+   * @copydoc Ui::ItemView::InsertItem
    */
   void ReplaceItems(const ItemContainer& replacementItems, float durationSeconds);
 
   /**
-   * @copydoc UI::Scrollable::GetCurrentScrollPosition
+   * @copydoc Ui::Scrollable::GetCurrentScrollPosition
    */
   Vector2 GetCurrentScrollPosition() const;
 
   /**
-   * @copydoc UI::Scrollable::AddOverlay()
+   * @copydoc Ui::Scrollable::AddOverlay()
    */
   void AddOverlay(Actor actor);
 
   /**
-   * @copydoc UI::Scrollable::RemoveOverlay()
+   * @copydoc Ui::Scrollable::RemoveOverlay()
    */
   void RemoveOverlay(Actor actor);
 
   /**
-   * @copydoc UI::Scrollable::ScrollTo(const Vector2& position, float duration)
+   * @copydoc Ui::Scrollable::ScrollTo(const Vector2& position, float duration)
    */
   void ScrollTo(const Vector2& position, float duration);
 
   /**
-   * @copydoc UI::Internal::Scrollable::SetOvershootSize
+   * @copydoc Ui::Internal::Scrollable::SetOvershootSize
    */
   void SetOvershootSize(const Vector2& size);
 
   /**
-   * @copydoc UI::Internal::Scrollable::SetOvershootEffectColor
+   * @copydoc Ui::Internal::Scrollable::SetOvershootEffectColor
    */
   void SetOvershootEffectColor(const Vector4& color);
 
@@ -262,32 +262,32 @@ public:
   void DoRefresh(float currentLayoutPosition, bool cacheExtra);
 
   /**
-   * @copydoc UI::ItemView::SetItemsParentOrigin
+   * @copydoc Ui::ItemView::SetItemsParentOrigin
    */
   void SetItemsParentOrigin(const Vector3& parentOrigin);
 
   /**
-   * @copydoc UI::ItemView::GetItemsParentOrigin
+   * @copydoc Ui::ItemView::GetItemsParentOrigin
    */
   Vector3 GetItemsParentOrigin() const;
 
   /**
-   * @copydoc UI::ItemView::SetItemsAnchorPoint
+   * @copydoc Ui::ItemView::SetItemsAnchorPoint
    */
   void SetItemsAnchorPoint(const Vector3& anchorPoint);
 
   /**
-   * @copydoc UI::ItemView::GetItemsAnchorPoint
+   * @copydoc Ui::ItemView::GetItemsAnchorPoint
    */
   Vector3 GetItemsAnchorPoint() const;
 
   /**
-   * @copydoc UI::ItemView::GetItemsRange
+   * @copydoc Ui::ItemView::GetItemsRange
    */
   void GetItemsRange(ItemRange& range);
 
   /**
-   * @copydoc UI::ItemView::LayoutActivatedSignal()
+   * @copydoc Ui::ItemView::LayoutActivatedSignal()
    */
   LayoutActivatedSignalType& LayoutActivatedSignal()
   {
@@ -416,28 +416,28 @@ private: // From CustomActorImpl
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc UI::Control::OnAccessibilityPan()
+   * @copydoc Ui::Control::OnAccessibilityPan()
    */
   bool OnAccessibilityPan(PanGesture gesture) override;
 
   /**
-   * @copydoc UI::Control::GetNextKeyboardFocusableActor()
+   * @copydoc Ui::Control::GetNextKeyboardFocusableActor()
    */
-  Actor GetNextKeyboardFocusableActor(Actor actor, UI::Control::KeyboardFocus::Direction direction,
+  Actor GetNextKeyboardFocusableActor(Actor actor, Ui::Control::KeyboardFocus::Direction direction,
                                       bool loopEnabled) override;
 
   /**
-   * @copydoc UI::Control::OnKeyboardFocusChangeCommitted()
+   * @copydoc Ui::Control::OnKeyboardFocusChangeCommitted()
    */
   void OnKeyboardFocusChangeCommitted(Actor commitedFocusableActor) override;
 
@@ -448,7 +448,7 @@ protected:
     using Scrollable::ScrollableAccessible::ScrollableAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::ScrollToChild()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::ScrollToChild()
      */
     bool ScrollToChild(Actor child) override;
   };
@@ -570,7 +570,7 @@ private:
   void RemoveAnimation(Animation& animation);
 
   /**
-   * @copydoc UI::Internal::Scrollable::EnableScrollOvershoot
+   * @copydoc Ui::Internal::Scrollable::EnableScrollOvershoot
    */
   void EnableScrollOvershoot(bool enable) override;
 
@@ -621,7 +621,7 @@ private:
 
   ItemContainer mItemPool;
   ItemFactory& mItemFactory;
-  std::vector<ItemLayoutPtr> mLayouts; ///< Container of Dali::UI::ItemLayout objects
+  std::vector<ItemLayoutPtr> mLayouts; ///< Container of Dali::Ui::ItemLayout objects
   Actor mOvershootOverlay;             ///< The overlay actor for overshoot effect
   Animation mResizeAnimation;
   Animation mScrollAnimation;
@@ -662,25 +662,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ItemView& GetImpl(UI::ItemView& itemView)
+inline Ui::Internal::ItemView& GetImpl(Ui::ItemView& itemView)
 {
   DALI_ASSERT_ALWAYS(itemView);
 
   Dali::RefObject& handle = itemView.GetImplementation();
 
-  return static_cast<UI::Internal::ItemView&>(handle);
+  return static_cast<Ui::Internal::ItemView&>(handle);
 }
 
-inline const UI::Internal::ItemView& GetImpl(const UI::ItemView& itemView)
+inline const Ui::Internal::ItemView& GetImpl(const Ui::ItemView& itemView)
 {
   DALI_ASSERT_ALWAYS(itemView);
 
   const Dali::RefObject& handle = itemView.GetImplementation();
 
-  return static_cast<const UI::Internal::ItemView&>(handle);
+  return static_cast<const Ui::Internal::ItemView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 GridLayout::GridLayout()
@@ -69,7 +69,7 @@ GridLayout GridLayout::New()
 
 GridLayout GridLayout::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<GridLayout, Integration::GridLayoutImpl>(handle);
+  return Ui::Control::DownCast<GridLayout, Integration::GridLayoutImpl>(handle);
 }
 
 GridLayout::GridLayout(Integration::GridLayoutImpl& implementation)
@@ -261,5 +261,5 @@ uint32_t GridLayout::GetColumnSpan(View view)
   return 1;
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

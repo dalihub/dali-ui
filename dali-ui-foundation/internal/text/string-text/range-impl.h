@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -38,7 +38,7 @@ class Range;
 typedef IntrusivePtr<Range> RangePtr;
 
 /**
- * @copydoc Dali::UI::Text::Range
+ * @copydoc Dali::Ui::Text::Range
  */
 class Range : public BaseObject
 {
@@ -51,7 +51,7 @@ public:
    *
    * @return A public handle to the newly allocated Range.
    */
-  static Dali::UI::Text::Range New(u_int32_t startIndex, u_int32_t endIndex);
+  static Dali::Ui::Text::Range New(u_int32_t startIndex, u_int32_t endIndex);
 
   /**
    * @brief Destructor
@@ -72,17 +72,17 @@ protected:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::Range::GetStartIndex()
+   * @copydoc Dali::Ui::Text::Range::GetStartIndex()
    */
   u_int32_t GetStartIndex() const;
 
   /**
-   * @copydoc Dali::UI::Text::Range::GetEndIndex()
+   * @copydoc Dali::Ui::Text::Range::GetEndIndex()
    */
   u_int32_t GetEndIndex() const;
 
   /**
-   * @copydoc Dali::UI::Text::Range::GetNumberOfIndices()
+   * @copydoc Dali::Ui::Text::Range::GetNumberOfIndices()
    */
   u_int32_t GetNumberOfIndices() const;
 
@@ -104,7 +104,7 @@ private:
 /**
  * Helper methods for public API.
  */
-inline Internal::Range& GetImplementation(Dali::UI::Text::Range& range)
+inline Internal::Range& GetImplementation(Dali::Ui::Text::Range& range)
 {
   DALI_ASSERT_ALWAYS(range && "range handle is empty");
 
@@ -113,7 +113,7 @@ inline Internal::Range& GetImplementation(Dali::UI::Text::Range& range)
   return static_cast<Internal::Range&>(handle);
 }
 
-inline const Internal::Range& GetImplementation(const Dali::UI::Text::Range& range)
+inline const Internal::Range& GetImplementation(const Dali::Ui::Text::Range& range)
 {
   DALI_ASSERT_ALWAYS(range && "range handle is empty");
 
@@ -124,7 +124,7 @@ inline const Internal::Range& GetImplementation(const Dali::UI::Text::Range& ran
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

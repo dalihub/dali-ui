@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_image_loader
@@ -43,7 +43,7 @@ namespace SyncImageLoader
  * Example:
  *
  * @code
- * PixelData pixelData = UI::SyncImageLoader::Load( "image_url.jpg" );
+ * PixelData pixelData = Ui::SyncImageLoader::Load( "image_url.jpg" );
  *
  * // Check the image was loaded without error.
  * if( pixelData )
@@ -107,7 +107,7 @@ DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions, F
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

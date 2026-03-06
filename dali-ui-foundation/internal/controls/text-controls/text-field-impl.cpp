@@ -49,7 +49,7 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 
-using namespace Dali::UI::Text;
+using namespace Dali::Ui::Text;
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gTextFieldLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_CONTROLS");
@@ -57,13 +57,13 @@ Debug::Filter* gTextFieldLogFilter = Debug::Filter::New(Debug::Concise, true, "L
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 namespace // unnamed namespace
 {
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::UI::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
 const char* KEY_RETURN_NAME = "Return";
 } // unnamed namespace
 
@@ -72,167 +72,167 @@ namespace
 // Type registration
 BaseHandle Create()
 {
-  return UI::TextField::New();
+  return Ui::TextField::New();
 }
 
 // clang-format off
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN( UI::TextField, UI::Control, Create );
+DALI_TYPE_REGISTRATION_BEGIN( Ui::TextField, Ui::Control, Create );
 
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "text",                             STRING,    TEXT                                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "placeholderText",                  STRING,    PLACEHOLDER_TEXT                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "placeholderTextFocused",           STRING,    PLACEHOLDER_TEXT_FOCUSED            )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "fontFamily",                       STRING,    FONT_FAMILY                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "fontStyle",                        MAP,       FONT_STYLE                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "pointSize",                        FLOAT,     POINT_SIZE                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "maxLength",                        INTEGER,   MAX_LENGTH                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "exceedPolicy",                     INTEGER,   EXCEED_POLICY                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "horizontalAlignment",              STRING,    HORIZONTAL_ALIGNMENT                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "verticalAlignment",                STRING,    VERTICAL_ALIGNMENT                  )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "textColor",                        VECTOR4,   TEXT_COLOR                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "placeholderTextColor",             VECTOR4,   PLACEHOLDER_TEXT_COLOR              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "primaryCursorColor",               VECTOR4,   PRIMARY_CURSOR_COLOR                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "secondaryCursorColor",             VECTOR4,   SECONDARY_CURSOR_COLOR              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "enableCursorBlink",                BOOLEAN,   ENABLE_CURSOR_BLINK                 )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "cursorBlinkInterval",              FLOAT,     CURSOR_BLINK_INTERVAL               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "cursorBlinkDuration",              FLOAT,     CURSOR_BLINK_DURATION               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "cursorWidth",                      INTEGER,   CURSOR_WIDTH                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "grabHandleImage",                  STRING,    GRAB_HANDLE_IMAGE                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "grabHandlePressedImage",           STRING,    GRAB_HANDLE_PRESSED_IMAGE           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "scrollThreshold",                  FLOAT,     SCROLL_THRESHOLD                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "scrollSpeed",                      FLOAT,     SCROLL_SPEED                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandleImageLeft",         MAP,       SELECTION_HANDLE_IMAGE_LEFT         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandleImageRight",        MAP,       SELECTION_HANDLE_IMAGE_RIGHT        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandlePressedImageLeft",  MAP,       SELECTION_HANDLE_PRESSED_IMAGE_LEFT )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandlePressedImageRight", MAP,       SELECTION_HANDLE_PRESSED_IMAGE_RIGHT)
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandleMarkerImageLeft",   MAP,       SELECTION_HANDLE_MARKER_IMAGE_LEFT  )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHandleMarkerImageRight",  MAP,       SELECTION_HANDLE_MARKER_IMAGE_RIGHT )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "selectionHighlightColor",          VECTOR4,   SELECTION_HIGHLIGHT_COLOR           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "decorationBoundingBox",            RECTANGLE, DECORATION_BOUNDING_BOX             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputMethodSettings",              MAP,       INPUT_METHOD_SETTINGS               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputColor",                       VECTOR4,   INPUT_COLOR                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "enableMarkup",                     BOOLEAN,   ENABLE_MARKUP                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputFontFamily",                  STRING,    INPUT_FONT_FAMILY                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputFontStyle",                   MAP,       INPUT_FONT_STYLE                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputPointSize",                   FLOAT,     INPUT_POINT_SIZE                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "underline",                        MAP,       UNDERLINE                           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputUnderline",                   MAP,       INPUT_UNDERLINE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "shadow",                           MAP,       SHADOW                              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputShadow",                      MAP,       INPUT_SHADOW                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "emboss",                           MAP,       EMBOSS                              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputEmboss",                      MAP,       INPUT_EMBOSS                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "outline",                          MAP,       OUTLINE                             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "inputOutline",                     MAP,       INPUT_OUTLINE                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "hiddenInputSettings",              MAP,       HIDDEN_INPUT_SETTINGS               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "pixelSize",                        FLOAT,     PIXEL_SIZE                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "enableSelection",                  BOOLEAN,   ENABLE_SELECTION                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "placeholder",                      MAP,       PLACEHOLDER                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextField, "ellipsis",                         BOOLEAN,   ELLIPSIS                            )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableShiftSelection",             BOOLEAN,   ENABLE_SHIFT_SELECTION              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableGrabHandle",                 BOOLEAN,   ENABLE_GRAB_HANDLE                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "matchSystemLanguageDirection",     BOOLEAN,   MATCH_SYSTEM_LANGUAGE_DIRECTION     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableGrabHandlePopup",            BOOLEAN,   ENABLE_GRAB_HANDLE_POPUP            )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "textBackground",                   VECTOR4,   BACKGROUND                          )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextField, "selectedText",                     STRING,    SELECTED_TEXT                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "renderingBackend",                 INTEGER,   RENDERING_BACKEND                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "selectedTextStart",                INTEGER,   SELECTED_TEXT_START                 )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "selectedTextEnd",                  INTEGER,   SELECTED_TEXT_END                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableEditing",                    BOOLEAN,   ENABLE_EDITING                      )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "fontSizeScale",                    FLOAT,     FONT_SIZE_SCALE                     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableFontSizeScale",              BOOLEAN,   ENABLE_FONT_SIZE_SCALE              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "primaryCursorPosition",            INTEGER,   PRIMARY_CURSOR_POSITION             )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "grabHandleColor",                  VECTOR4,   GRAB_HANDLE_COLOR                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "inputFilter",                      MAP,       INPUT_FILTER                        )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "ellipsisPosition",                 INTEGER,   ELLIPSIS_POSITION                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "strikethrough",                    MAP,       STRIKETHROUGH                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "inputStrikethrough",               MAP,       INPUT_STRIKETHROUGH                 )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "characterSpacing",                 FLOAT,     CHARACTER_SPACING                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "selectionPopupStyle",              MAP,       SELECTION_POPUP_STYLE               )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "removeFrontInset",                 BOOLEAN,   REMOVE_FRONT_INSET                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "removeBackInset",                  BOOLEAN,   REMOVE_BACK_INSET                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "fontVariations",                   MAP,       FONT_VARIATIONS                     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextField, "enableCursorInset",                BOOLEAN,   ENABLE_CURSOR_INSET                 )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "text",                             STRING,    TEXT                                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "placeholderText",                  STRING,    PLACEHOLDER_TEXT                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "placeholderTextFocused",           STRING,    PLACEHOLDER_TEXT_FOCUSED            )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "fontFamily",                       STRING,    FONT_FAMILY                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "fontStyle",                        MAP,       FONT_STYLE                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "pointSize",                        FLOAT,     POINT_SIZE                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "maxLength",                        INTEGER,   MAX_LENGTH                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "exceedPolicy",                     INTEGER,   EXCEED_POLICY                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "horizontalAlignment",              STRING,    HORIZONTAL_ALIGNMENT                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "verticalAlignment",                STRING,    VERTICAL_ALIGNMENT                  )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "textColor",                        VECTOR4,   TEXT_COLOR                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "placeholderTextColor",             VECTOR4,   PLACEHOLDER_TEXT_COLOR              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "primaryCursorColor",               VECTOR4,   PRIMARY_CURSOR_COLOR                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "secondaryCursorColor",             VECTOR4,   SECONDARY_CURSOR_COLOR              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "enableCursorBlink",                BOOLEAN,   ENABLE_CURSOR_BLINK                 )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "cursorBlinkInterval",              FLOAT,     CURSOR_BLINK_INTERVAL               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "cursorBlinkDuration",              FLOAT,     CURSOR_BLINK_DURATION               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "cursorWidth",                      INTEGER,   CURSOR_WIDTH                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "grabHandleImage",                  STRING,    GRAB_HANDLE_IMAGE                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "grabHandlePressedImage",           STRING,    GRAB_HANDLE_PRESSED_IMAGE           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "scrollThreshold",                  FLOAT,     SCROLL_THRESHOLD                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "scrollSpeed",                      FLOAT,     SCROLL_SPEED                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandleImageLeft",         MAP,       SELECTION_HANDLE_IMAGE_LEFT         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandleImageRight",        MAP,       SELECTION_HANDLE_IMAGE_RIGHT        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandlePressedImageLeft",  MAP,       SELECTION_HANDLE_PRESSED_IMAGE_LEFT )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandlePressedImageRight", MAP,       SELECTION_HANDLE_PRESSED_IMAGE_RIGHT)
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandleMarkerImageLeft",   MAP,       SELECTION_HANDLE_MARKER_IMAGE_LEFT  )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHandleMarkerImageRight",  MAP,       SELECTION_HANDLE_MARKER_IMAGE_RIGHT )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "selectionHighlightColor",          VECTOR4,   SELECTION_HIGHLIGHT_COLOR           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "decorationBoundingBox",            RECTANGLE, DECORATION_BOUNDING_BOX             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputMethodSettings",              MAP,       INPUT_METHOD_SETTINGS               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputColor",                       VECTOR4,   INPUT_COLOR                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "enableMarkup",                     BOOLEAN,   ENABLE_MARKUP                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputFontFamily",                  STRING,    INPUT_FONT_FAMILY                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputFontStyle",                   MAP,       INPUT_FONT_STYLE                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputPointSize",                   FLOAT,     INPUT_POINT_SIZE                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "underline",                        MAP,       UNDERLINE                           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputUnderline",                   MAP,       INPUT_UNDERLINE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "shadow",                           MAP,       SHADOW                              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputShadow",                      MAP,       INPUT_SHADOW                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "emboss",                           MAP,       EMBOSS                              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputEmboss",                      MAP,       INPUT_EMBOSS                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "outline",                          MAP,       OUTLINE                             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "inputOutline",                     MAP,       INPUT_OUTLINE                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "hiddenInputSettings",              MAP,       HIDDEN_INPUT_SETTINGS               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "pixelSize",                        FLOAT,     PIXEL_SIZE                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "enableSelection",                  BOOLEAN,   ENABLE_SELECTION                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "placeholder",                      MAP,       PLACEHOLDER                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextField, "ellipsis",                         BOOLEAN,   ELLIPSIS                            )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableShiftSelection",             BOOLEAN,   ENABLE_SHIFT_SELECTION              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableGrabHandle",                 BOOLEAN,   ENABLE_GRAB_HANDLE                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "matchSystemLanguageDirection",     BOOLEAN,   MATCH_SYSTEM_LANGUAGE_DIRECTION     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableGrabHandlePopup",            BOOLEAN,   ENABLE_GRAB_HANDLE_POPUP            )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "textBackground",                   VECTOR4,   BACKGROUND                          )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextField, "selectedText",                     STRING,    SELECTED_TEXT                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "renderingBackend",                 INTEGER,   RENDERING_BACKEND                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "selectedTextStart",                INTEGER,   SELECTED_TEXT_START                 )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "selectedTextEnd",                  INTEGER,   SELECTED_TEXT_END                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableEditing",                    BOOLEAN,   ENABLE_EDITING                      )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "fontSizeScale",                    FLOAT,     FONT_SIZE_SCALE                     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableFontSizeScale",              BOOLEAN,   ENABLE_FONT_SIZE_SCALE              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "primaryCursorPosition",            INTEGER,   PRIMARY_CURSOR_POSITION             )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "grabHandleColor",                  VECTOR4,   GRAB_HANDLE_COLOR                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "inputFilter",                      MAP,       INPUT_FILTER                        )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "ellipsisPosition",                 INTEGER,   ELLIPSIS_POSITION                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "strikethrough",                    MAP,       STRIKETHROUGH                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "inputStrikethrough",               MAP,       INPUT_STRIKETHROUGH                 )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "characterSpacing",                 FLOAT,     CHARACTER_SPACING                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "selectionPopupStyle",              MAP,       SELECTION_POPUP_STYLE               )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "removeFrontInset",                 BOOLEAN,   REMOVE_FRONT_INSET                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "removeBackInset",                  BOOLEAN,   REMOVE_BACK_INSET                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "fontVariations",                   MAP,       FONT_VARIATIONS                     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextField, "enableCursorInset",                BOOLEAN,   ENABLE_CURSOR_INSET                 )
 
 
-DALI_SIGNAL_REGISTRATION(UI, TextField, "textChanged",           SIGNAL_TEXT_CHANGED           )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "maxLengthReached",      SIGNAL_MAX_LENGTH_REACHED     )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "inputStyleChanged",     SIGNAL_INPUT_STYLE_CHANGED    )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "anchorClicked",         SIGNAL_ANCHOR_CLICKED         )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "inputFiltered",         SIGNAL_INPUT_FILTERED         )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "cursorPositionChanged", SIGNAL_CURSOR_POSITION_CHANGED)
-DALI_SIGNAL_REGISTRATION(UI, TextField, "selectionChanged",      SIGNAL_SELECTION_CHANGED      )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "selectionCleared",      SIGNAL_SELECTION_CLEARED      )
-DALI_SIGNAL_REGISTRATION(UI, TextField, "selectionStarted",      SIGNAL_SELECTION_STARTED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "textChanged",           SIGNAL_TEXT_CHANGED           )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "maxLengthReached",      SIGNAL_MAX_LENGTH_REACHED     )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "inputStyleChanged",     SIGNAL_INPUT_STYLE_CHANGED    )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "anchorClicked",         SIGNAL_ANCHOR_CLICKED         )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "inputFiltered",         SIGNAL_INPUT_FILTERED         )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "cursorPositionChanged", SIGNAL_CURSOR_POSITION_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "selectionChanged",      SIGNAL_SELECTION_CHANGED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "selectionCleared",      SIGNAL_SELECTION_CLEARED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextField, "selectionStarted",      SIGNAL_SELECTION_STARTED      )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
-UI::TextField::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputStyleMask)
+Ui::TextField::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputStyleMask)
 {
-  UI::TextField::InputStyle::Mask fieldInputStyleMask = UI::TextField::InputStyle::NONE;
+  Ui::TextField::InputStyle::Mask fieldInputStyleMask = Ui::TextField::InputStyle::NONE;
 
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_COLOR))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::COLOR);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::COLOR);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_FAMILY))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::FONT_FAMILY);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_FAMILY);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_POINT_SIZE))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::POINT_SIZE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::POINT_SIZE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WEIGHT))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WIDTH))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_SLANT))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_UNDERLINE))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::UNDERLINE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::UNDERLINE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_SHADOW))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::SHADOW);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::SHADOW);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_EMBOSS))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::EMBOSS);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::EMBOSS);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_OUTLINE))
   {
     fieldInputStyleMask =
-        static_cast<UI::TextField::InputStyle::Mask>(fieldInputStyleMask | UI::TextField::InputStyle::OUTLINE);
+        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::OUTLINE);
   }
   return fieldInputStyleMask;
 }
 
 } // namespace
 
-UI::TextField TextField::New(ControlBehaviour additionalBehaviour)
+Ui::TextField TextField::New(ControlBehaviour additionalBehaviour)
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<TextField> impl = new TextField(additionalBehaviour);
 
   // Pass ownership to CustomActor handle
-  UI::TextField handle(*impl);
+  Ui::TextField handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -243,7 +243,7 @@ UI::TextField TextField::New(ControlBehaviour additionalBehaviour)
 
 void TextField::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextField textField = UI::TextField::DownCast(Dali::BaseHandle(object));
+  Ui::TextField textField = Ui::TextField::DownCast(Dali::BaseHandle(object));
 
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField SetProperty\n");
 
@@ -257,7 +257,7 @@ Property::Value TextField::GetProperty(BaseObject* object, Property::Index index
 {
   Property::Value value;
 
-  UI::TextField textField = UI::TextField::DownCast(Dali::BaseHandle(object));
+  Ui::TextField textField = Ui::TextField::DownCast(Dali::BaseHandle(object));
 
   if (textField)
   {
@@ -363,7 +363,7 @@ bool TextField::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::TextField field = UI::TextField::DownCast(handle);
+  Ui::TextField field = Ui::TextField::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), SIGNAL_TEXT_CHANGED))
   {
@@ -434,17 +434,17 @@ bool TextField::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   return connected;
 }
 
-UI::TextField::TextChangedSignalType& TextField::TextChangedSignal()
+Ui::TextField::TextChangedSignalType& TextField::TextChangedSignal()
 {
   return mTextChangedSignal;
 }
 
-UI::TextField::MaxLengthReachedSignalType& TextField::MaxLengthReachedSignal()
+Ui::TextField::MaxLengthReachedSignalType& TextField::MaxLengthReachedSignal()
 {
   return mMaxLengthReachedSignal;
 }
 
-UI::TextField::InputStyleChangedSignalType& TextField::InputStyleChangedSignal()
+Ui::TextField::InputStyleChangedSignalType& TextField::InputStyleChangedSignal()
 {
   return mInputStyleChangedSignal;
 }
@@ -558,7 +558,7 @@ void TextField::OnInitialize()
 
   DevelControl::SetInputMethodContext(*this, mInputMethodContext);
 
-  if (Dali::UI::TextField::EXCEED_POLICY_CLIP == mExceedPolicy)
+  if (Dali::Ui::TextField::EXCEED_POLICY_CLIP == mExceedPolicy)
   {
     EnableClipping();
   }
@@ -575,7 +575,7 @@ DevelControl::ControlAccessible* TextField::CreateAccessibleObject()
   return new TextFieldAccessible(Self());
 }
 
-void TextField::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change)
+void TextField::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnStyleChange\n");
 
@@ -593,7 +593,7 @@ void TextField::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type c
 
     case StyleChange::DEFAULT_FONT_SIZE_CHANGE:
     {
-      GetImpl(styleManager).ApplyThemeStyle(UI::Control(GetOwner()));
+      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
       RelayoutRequest();
       break;
     }
@@ -610,13 +610,13 @@ void TextField::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type c
 
 void TextField::OnApplyDefaultStyle()
 {
-  DefaultTheme::Get().ApplyDefaultStyle(UI::TextField(GetOwner()));
+  DefaultTheme::Get().ApplyDefaultStyle(Ui::TextField(GetOwner()));
 }
 
 Vector3 TextField::GetNaturalSize()
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += (padding.start + padding.end);
@@ -628,7 +628,7 @@ Vector3 TextField::GetNaturalSize()
 float TextField::GetHeightForWidth(float width)
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   return mController->GetHeightForWidth(width) + padding.top + padding.bottom;
 }
 
@@ -686,7 +686,7 @@ void TextField::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Actor self = Self();
 
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   Vector2 contentSize(size.x - (padding.start + padding.end), size.y - (padding.top + padding.bottom));
 
@@ -853,12 +853,12 @@ void TextField::OnTap(const TapGesture& gesture)
   // Deliver the tap before the focus event to controller; this allows us to detect when focus is gained due to
   // tap-gestures
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - padding.start, localPoint.y - padding.top);
   mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
 
-  Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
   if (keyboardFocusManager)
   {
     keyboardFocusManager.SetCurrentFocusActor(Self());
@@ -886,7 +886,7 @@ void TextField::OnLongPress(const LongPressGesture& gesture)
     mInputMethodContext.Activate();
   }
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
 
@@ -903,7 +903,7 @@ bool TextField::OnKeyEvent(const KeyEvent& event)
     // Make sure ClearKeyInputFocus when only key is up
     if (event.GetState() == KeyEvent::UP)
     {
-      Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+      Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
       if (keyboardFocusManager)
       {
         keyboardFocusManager.ClearFocus();
@@ -983,20 +983,20 @@ void TextField::TextChanged(bool immediate)
 
 void TextField::EmitTextChangedSignal()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
 }
 
 void TextField::MaxLengthReached()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mMaxLengthReachedSignal.Emit(handle);
 }
 
 void TextField::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mInputStyleChangedSignal.Emit(handle, ConvertInputStyle(inputStyleMask));
 }
 
@@ -1007,40 +1007,40 @@ bool TextField::AnchorClicked(uint32_t cursorPosition, std::string& href)
 
 void TextField::EmitAnchorClickedSignal(const std::string& href)
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mAnchorClickedSignal.Emit(handle, href.c_str(), href.length());
 }
 
 void TextField::EmitCursorPositionChangedSignal()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mCursorPositionChangedSignal.Emit(handle, mOldPosition);
   mCursorPositionChanged = false;
 }
 
-void TextField::InputFiltered(UI::InputFilter::Property::Type type)
+void TextField::InputFiltered(Ui::InputFilter::Property::Type type)
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mInputFilteredSignal.Emit(handle, type);
 }
 
 void TextField::EmitSelectionChangedSignal()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mSelectionChangedSignal.Emit(handle, mOldSelectionStart, mOldSelectionEnd);
   mSelectionChanged = false;
 }
 
 void TextField::EmitSelectionClearedSignal()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mSelectionClearedSignal.Emit(handle);
   mSelectionCleared = false;
 }
 
 void TextField::EmitSelectionStartedSignal()
 {
-  Dali::UI::TextField handle(GetOwner());
+  Dali::Ui::TextField handle(GetOwner());
   mSelectionStartedSignal.Emit(handle);
   mSelectionStarted = false;
 }
@@ -1106,7 +1106,7 @@ void TextField::AddLayer(Actor& layer, Actor& actor)
 
 void TextField::GetControlBackgroundColor(Vector4& color) const
 {
-  Property::Value propValue = Self().GetProperty(UI::Control::Property::BACKGROUND);
+  Property::Value propValue = Self().GetProperty(Ui::Control::Property::BACKGROUND);
   Property::Map* resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
@@ -1154,15 +1154,15 @@ void TextField::EnableClipping()
   if (!mStencil)
   {
     // Creates an extra control to be used as stencil buffer.
-    mStencil = Control::New(ControlBehaviour(Dali::UI::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
+    mStencil = Control::New(ControlBehaviour(Dali::Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
     mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
     mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mStencil.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+    mStencil.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
 
     // Creates a background visual. Even if the color is transparent it updates the stencil.
-    mStencil.SetProperty(UI::Control::Property::BACKGROUND,
+    mStencil.SetProperty(Ui::Control::Property::BACKGROUND,
                          Property::Map()
-                             .Add(UI::Visual::Property::TYPE, UI::Visual::COLOR)
+                             .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
                              .Add(ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT));
 
     // Enable the clipping property.
@@ -1184,7 +1184,7 @@ void TextField::KeyboardStatusChanged(bool keyboardShown)
 
   bool isFocused = false;
 
-  Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
   if (keyboardFocusManager)
   {
     isFocused = keyboardFocusManager.GetCurrentFocusActor() == Self();
@@ -1234,7 +1234,7 @@ TextField::TextField(ControlBehaviour additionalBehaviour)
   : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT | additionalBehaviour)),
     mAlignmentOffset(0.f),
     mRenderingBackend(DEFAULT_RENDERING_BACKEND),
-    mExceedPolicy(Dali::UI::TextField::EXCEED_POLICY_CLIP),
+    mExceedPolicy(Dali::Ui::TextField::EXCEED_POLICY_CLIP),
     mHasBeenStaged(false),
     mTextChanged(false),
     mCursorPositionChanged(false),
@@ -1375,25 +1375,25 @@ std::pair<std::string, bool> TextField::TextFieldAccessible::GetNameRaw() const
   return {GetWholeText(), true};
 }
 
-const std::vector<UI::TextAnchor>& TextField::TextFieldAccessible::GetTextAnchors() const
+const std::vector<Ui::TextAnchor>& TextField::TextFieldAccessible::GetTextAnchors() const
 {
-  auto self = UI::TextField::DownCast(Self());
+  auto self = Ui::TextField::DownCast(Self());
 
-  return UI::GetImpl(self).mAnchorActors;
+  return Ui::GetImpl(self).mAnchorActors;
 }
 
-UI::Text::ControllerPtr TextField::TextFieldAccessible::GetTextController() const
+Ui::Text::ControllerPtr TextField::TextFieldAccessible::GetTextController() const
 {
-  auto self = UI::TextField::DownCast(Self());
+  auto self = Ui::TextField::DownCast(Self());
 
-  return UI::GetImpl(self).GetTextController();
+  return Ui::GetImpl(self).GetTextController();
 }
 
 std::uint32_t TextField::TextFieldAccessible::GetSubstituteCharacter() const
 {
-  auto self = UI::TextField::DownCast(Self());
-  auto hiddenInputSettings = self.GetProperty<Property::Map>(UI::TextField::Property::HIDDEN_INPUT_SETTINGS);
-  auto substChar = hiddenInputSettings.Find(UI::HiddenInput::Property::SUBSTITUTE_CHARACTER);
+  auto self = Ui::TextField::DownCast(Self());
+  auto hiddenInputSettings = self.GetProperty<Property::Map>(Ui::TextField::Property::HIDDEN_INPUT_SETTINGS);
+  auto substChar = hiddenInputSettings.Find(Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER);
 
   if (substChar)
   {
@@ -1405,23 +1405,23 @@ std::uint32_t TextField::TextFieldAccessible::GetSubstituteCharacter() const
 
 bool TextField::TextFieldAccessible::IsHiddenInput() const
 {
-  auto self = UI::TextField::DownCast(Self());
-  auto hiddenInputSettings = self.GetProperty<Property::Map>(UI::TextField::Property::HIDDEN_INPUT_SETTINGS);
-  auto mode = hiddenInputSettings.Find(UI::HiddenInput::Property::MODE);
+  auto self = Ui::TextField::DownCast(Self());
+  auto hiddenInputSettings = self.GetProperty<Property::Map>(Ui::TextField::Property::HIDDEN_INPUT_SETTINGS);
+  auto mode = hiddenInputSettings.Find(Ui::HiddenInput::Property::MODE);
 
-  return (mode && (mode->Get<int>() != UI::HiddenInput::Mode::HIDE_NONE));
+  return (mode && (mode->Get<int>() != Ui::HiddenInput::Mode::HIDE_NONE));
 }
 
 void TextField::TextFieldAccessible::RequestTextRelayout()
 {
-  auto self = UI::TextField::DownCast(Self());
-  auto& selfImpl = UI::GetImpl(self);
+  auto self = Ui::TextField::DownCast(Self());
+  auto& selfImpl = Ui::GetImpl(self);
 
   selfImpl.RequestTextRelayout();
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

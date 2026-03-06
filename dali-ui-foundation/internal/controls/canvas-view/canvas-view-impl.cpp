@@ -40,7 +40,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -53,10 +53,10 @@ BaseHandle Create()
   return BaseHandle();
 }
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::CanvasView, UI::Control, Create);
-DALI_PROPERTY_REGISTRATION(UI, CanvasView, "viewBox", VECTOR2, VIEW_BOX)
-DALI_PROPERTY_REGISTRATION(UI, CanvasView, "synchronousLoading", BOOLEAN, SYNCHRONOUS_LOADING)
-DALI_PROPERTY_REGISTRATION(UI, CanvasView, "rasterizationRequestManually", BOOLEAN, RASTERIZATION_REQUEST_MANUALLY)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::CanvasView, Ui::Control, Create);
+DALI_PROPERTY_REGISTRATION(Ui, CanvasView, "viewBox", VECTOR2, VIEW_BOX)
+DALI_PROPERTY_REGISTRATION(Ui, CanvasView, "synchronousLoading", BOOLEAN, SYNCHRONOUS_LOADING)
+DALI_PROPERTY_REGISTRATION(Ui, CanvasView, "rasterizationRequestManually", BOOLEAN, RASTERIZATION_REQUEST_MANUALLY)
 DALI_TYPE_REGISTRATION_END()
 
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_VECTOR_ANIMATION_PERFORMANCE_MARKER, false);
@@ -96,11 +96,11 @@ CanvasView::~CanvasView()
   }
 }
 
-UI::CanvasView CanvasView::New(const Vector2& viewBox)
+Ui::CanvasView CanvasView::New(const Vector2& viewBox)
 {
   CanvasView* impl = new CanvasView(viewBox);
 
-  UI::CanvasView handle = UI::CanvasView(*impl);
+  Ui::CanvasView handle = Ui::CanvasView(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -115,7 +115,7 @@ void CanvasView::OnInitialize()
 {
   // CanvasView can relayout in the OnImageReady, alternative to a signal would be to have a upcall from the Control to
   // CanvasView
-  Dali::UI::Control handle(GetOwner());
+  Dali::Ui::Control handle(GetOwner());
 
   Self().SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::IMAGE);
 
@@ -164,14 +164,14 @@ void CanvasView::OnSceneDisconnection()
 
 void CanvasView::SetProperty(BaseObject* object, Property::Index propertyIndex, const Property::Value& value)
 {
-  UI::CanvasView canvasView = UI::CanvasView::DownCast(Dali::BaseHandle(object));
+  Ui::CanvasView canvasView = Ui::CanvasView::DownCast(Dali::BaseHandle(object));
   if (canvasView)
   {
     CanvasView& canvasViewImpl(GetImpl(canvasView));
 
     switch (propertyIndex)
     {
-      case UI::CanvasView::Property::VIEW_BOX:
+      case Ui::CanvasView::Property::VIEW_BOX:
       {
         Vector2 valueVector2;
         if (value.Get(valueVector2))
@@ -180,7 +180,7 @@ void CanvasView::SetProperty(BaseObject* object, Property::Index propertyIndex, 
         }
         break;
       }
-      case UI::CanvasView::Property::SYNCHRONOUS_LOADING:
+      case Ui::CanvasView::Property::SYNCHRONOUS_LOADING:
       {
         bool isSynchronous;
         if (value.Get(isSynchronous))
@@ -189,7 +189,7 @@ void CanvasView::SetProperty(BaseObject* object, Property::Index propertyIndex, 
         }
         break;
       }
-      case UI::CanvasView::Property::RASTERIZATION_REQUEST_MANUALLY:
+      case Ui::CanvasView::Property::RASTERIZATION_REQUEST_MANUALLY:
       {
         bool isRasterizationManually;
         if (value.Get(isRasterizationManually))
@@ -206,7 +206,7 @@ Property::Value CanvasView::GetProperty(BaseObject* object, Property::Index prop
 {
   Property::Value value;
 
-  UI::CanvasView canvasView = UI::CanvasView::DownCast(Dali::BaseHandle(object));
+  Ui::CanvasView canvasView = Ui::CanvasView::DownCast(Dali::BaseHandle(object));
 
   if (canvasView)
   {
@@ -214,17 +214,17 @@ Property::Value CanvasView::GetProperty(BaseObject* object, Property::Index prop
 
     switch (propertyIndex)
     {
-      case UI::CanvasView::Property::VIEW_BOX:
+      case Ui::CanvasView::Property::VIEW_BOX:
       {
         value = canvasViewImpl.GetViewBox();
         break;
       }
-      case UI::CanvasView::Property::SYNCHRONOUS_LOADING:
+      case Ui::CanvasView::Property::SYNCHRONOUS_LOADING:
       {
         value = canvasViewImpl.IsSynchronous();
         break;
       }
-      case UI::CanvasView::Property::RASTERIZATION_REQUEST_MANUALLY:
+      case Ui::CanvasView::Property::RASTERIZATION_REQUEST_MANUALLY:
       {
         value = canvasViewImpl.IsRasterizationRequestManually();
         break;
@@ -322,8 +322,8 @@ void CanvasView::ApplyRasterizedImage(CanvasRendererRasterizingTaskPtr task)
       {
         mTexture = rasterizedTexture;
 
-        UI::ImageUrl imageUrl = UI::ImageUrl::New(rasterizedTexture, true);
-        UI::Visual::Base visual = UI::VisualFactory::Get().CreateVisual(imageUrl.GetUrl(), ImageDimensions());
+        Ui::ImageUrl imageUrl = Ui::ImageUrl::New(rasterizedTexture, true);
+        Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(imageUrl.GetUrl(), ImageDimensions());
         if (visual)
         {
           if (mCanvasVisualIndex == Property::INVALID_INDEX)
@@ -332,7 +332,7 @@ void CanvasView::ApplyRasterizedImage(CanvasRendererRasterizingTaskPtr task)
                 CANVAS_VISUAL_INDEX_PROPERTY_NAME, Property::Value(std::string(CANVAS_VISUAL_INDEX_PROPERTY_NAME)),
                 Property::AccessMode::READ_WRITE);
           }
-          DevelControl::RegisterVisual(*this, mCanvasVisualIndex, visual, UI::DepthIndex::CONTENT);
+          DevelControl::RegisterVisual(*this, mCanvasVisualIndex, visual, Ui::DepthIndex::CONTENT);
 
           Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(*this);
           controlDataImpl.EnableCornerPropertiesOverridden(visual, true);
@@ -452,5 +452,5 @@ const bool CanvasView::IsRasterizationRequestManually() const
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

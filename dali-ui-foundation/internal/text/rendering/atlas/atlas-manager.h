@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -275,7 +275,7 @@ private:
   explicit DALI_INTERNAL AtlasManager(Internal::AtlasManager* impl);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

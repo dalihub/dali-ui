@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -98,7 +98,7 @@ private:
   const FeedbackStyleInfo& GetStyleInfo(const std::string& type) const;
 
   /**
-   * Callback function for Dali::UI::PushButton::SignalPressed signal
+   * Callback function for Dali::Ui::PushButton::SignalPressed signal
    * Plays feedback effect.
    * @param [in] effect The feedback effect to play
    */
@@ -149,7 +149,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

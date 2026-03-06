@@ -38,7 +38,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -485,14 +485,14 @@ public:
    * @brief Sets ellipsis position
    * @param[in] ellipsisPosition The ellipsis position for the text
    */
-  void SetEllipsisPosition(UI::DevelText::EllipsisPosition::Type ellipsisPosition);
+  void SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition);
 
   /**
    * @brief Retrieves ellipsis position for text.
    *
    * @return The ellipsis position.
    */
-  UI::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
+  Ui::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
 
   /**
    * @brief Enable or disable the text elide.
@@ -880,7 +880,7 @@ public:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

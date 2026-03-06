@@ -22,7 +22,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Scrollable::Scrollable()
 {
@@ -101,6 +101,6 @@ float Scrollable::GetOvershootAnimationSpeed() const
   return GetImpl(*this).GetOvershootAnimationSpeed();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

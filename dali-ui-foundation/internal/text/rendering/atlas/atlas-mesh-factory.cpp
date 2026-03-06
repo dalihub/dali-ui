@@ -19,16 +19,16 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 namespace AtlasMeshFactory
 {
-void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const UI::AtlasManager::AtlasSize& atlasSize,
-                const Vector2& position, UI::AtlasManager::Mesh2D& mesh)
+void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const Ui::AtlasManager::AtlasSize& atlasSize,
+                const Vector2& position, Ui::AtlasManager::Mesh2D& mesh)
 {
-  UI::AtlasManager::Vertex2D vertex;
+  Ui::AtlasManager::Vertex2D vertex;
 
   SizeType blockWidth = atlasSize.mBlockWidth;
   SizeType blockHeight = atlasSize.mBlockHeight;
@@ -130,7 +130,7 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
   mesh.mIndices.PushBack(1u);
 }
 
-void AppendMesh(UI::AtlasManager::Mesh2D& first, const UI::AtlasManager::Mesh2D& second)
+void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D& second)
 {
   const uint32_t verticesCount = first.mVertices.Size();
   first.mVertices.Insert(first.mVertices.End(), second.mVertices.Begin(), second.mVertices.End());
@@ -149,6 +149,6 @@ void AppendMesh(UI::AtlasManager::Mesh2D& first, const UI::AtlasManager::Mesh2D&
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

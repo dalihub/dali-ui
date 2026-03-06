@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 /**
  * @brief Defines the type of input events.
@@ -56,4 +56,4 @@ enum class InputEventType : uint32_t
    */
   RESERVED = 99
 };
-} // namespace Dali::UI
+} // namespace Dali::Ui

@@ -53,7 +53,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -345,12 +345,12 @@ private:
   int mSlices;              ///< Number of slices to use when creating certain objects.
   int mStacks;              ///< Number of stacks to use when creating certain objects.
 
-  UI::PrimitiveVisual::Shape::Type mPrimitiveType; // Shape to render, as enum.
+  Ui::PrimitiveVisual::Shape::Type mPrimitiveType; // Shape to render, as enum.
 };
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

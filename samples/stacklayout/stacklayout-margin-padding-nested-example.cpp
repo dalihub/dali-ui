@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/stack-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * StackLayout sample: margin, padding, and nested StackLayout.

@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class CameraView;
 
@@ -43,7 +43,7 @@ protected:
    * @brief Constructor.
    * @param[in] type Where it is an overlay type or a native image type
    */
-  CameraView(Dali::UI::CameraView::DisplayType type);
+  CameraView(Dali::Ui::CameraView::DisplayType type);
 
   /**
    * @brief Destructor
@@ -56,7 +56,7 @@ public:
    * @param[in] handle Multimedia camera player handle
    * @param[in] type Where it is an overlay type or a native image type
    */
-  static UI::CameraView New(Any handle, Dali::UI::CameraView::DisplayType type);
+  static Ui::CameraView New(Any handle, Dali::Ui::CameraView::DisplayType type);
 
   /**
    * @brief Update camera player.
@@ -65,12 +65,12 @@ public:
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
@@ -118,26 +118,26 @@ private:
   Dali::PropertyNotification mSizeUpdateNotification;
   Dali::PropertyNotification mScaleUpdateNotification;
 
-  Dali::UI::CameraView::DisplayType mDisplayType;
+  Dali::Ui::CameraView::DisplayType mDisplayType;
 };
 
 } // namespace Internal
 
-inline UI::Internal::CameraView& GetImpl(UI::CameraView& handle)
+inline Ui::Internal::CameraView& GetImpl(Ui::CameraView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<UI::Internal::CameraView&>(impl);
+  return static_cast<Ui::Internal::CameraView&>(impl);
 }
 
-inline const UI::Internal::CameraView& GetImpl(const UI::CameraView& handle)
+inline const Ui::Internal::CameraView& GetImpl(const Ui::CameraView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   const Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<const UI::Internal::CameraView&>(impl);
+  return static_cast<const Ui::Internal::CameraView&>(impl);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

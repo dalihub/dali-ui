@@ -35,14 +35,14 @@ class SceneHolder;
 
 } // namespace Integration
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 class KeyInputFocusManager;
 
 /**
- * @copydoc UI::KeyInputFocusManager
+ * @copydoc Ui::KeyInputFocusManager
  */
 class KeyInputFocusManager : public Dali::BaseObject, public Dali::ConnectionTracker
 {
@@ -53,25 +53,25 @@ public:
   KeyInputFocusManager();
 
   /**
-   * @copydoc UI::SetFocus
+   * @copydoc Ui::SetFocus
    */
-  void SetFocus(UI::Control control);
+  void SetFocus(Ui::Control control);
 
   /**
-   * @copydoc UI::RemoveFocus
+   * @copydoc Ui::RemoveFocus
    */
-  void RemoveFocus(UI::Control control);
+  void RemoveFocus(Ui::Control control);
 
   /**
-   * @copydoc UI::GetCurrentFocusControl
+   * @copydoc Ui::GetCurrentFocusControl
    */
-  UI::Control GetCurrentFocusControl() const;
+  Ui::Control GetCurrentFocusControl() const;
 
 public:
   /**
-   * @copydoc UI::KeyInputFocusManager::KeyInputFocusChangedSignal()
+   * @copydoc Ui::KeyInputFocusManager::KeyInputFocusChangedSignal()
    */
-  UI::KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
+  Ui::KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -117,7 +117,7 @@ private:
    * @param[in]  event    The KeyEvent.
    * @return True if KeyEvent is consumed.
    */
-  bool EmitKeyEventSignal(UI::Control control, const KeyEvent& event);
+  bool EmitKeyEventSignal(Ui::Control control, const KeyEvent& event);
 
   /**
    * Gets the current native window id
@@ -132,17 +132,17 @@ private:
 
 private:
   // The key input focus change signal
-  UI::KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
+  Ui::KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
 
   SlotDelegate<KeyInputFocusManager> mSlotDelegate;
 
-  UI::Control mCurrentFocusControl; ///< The current focused control
+  Ui::Control mCurrentFocusControl; ///< The current focused control
   uint32_t mCurrentWindowId;        ///< The native window id of current focused control
 };
 
 } // namespace Internal
 
-inline Internal::KeyInputFocusManager& GetImpl(Dali::UI::KeyInputFocusManager& obj)
+inline Internal::KeyInputFocusManager& GetImpl(Dali::Ui::KeyInputFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -151,7 +151,7 @@ inline Internal::KeyInputFocusManager& GetImpl(Dali::UI::KeyInputFocusManager& o
   return static_cast<Internal::KeyInputFocusManager&>(handle);
 }
 
-inline const Internal::KeyInputFocusManager& GetImpl(const Dali::UI::KeyInputFocusManager& obj)
+inline const Internal::KeyInputFocusManager& GetImpl(const Dali::Ui::KeyInputFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -160,7 +160,7 @@ inline const Internal::KeyInputFocusManager& GetImpl(const Dali::UI::KeyInputFoc
   return static_cast<const Internal::KeyInputFocusManager&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

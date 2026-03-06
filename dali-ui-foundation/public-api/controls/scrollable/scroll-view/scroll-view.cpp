@@ -29,7 +29,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // RulerDomain
@@ -606,6 +606,6 @@ void ScrollView::RemoveScrollingDirection(Radian direction)
   GetImpl(*this).RemoveScrollingDirection(direction);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

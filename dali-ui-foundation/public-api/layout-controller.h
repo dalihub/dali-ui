@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -146,5 +146,5 @@ private:
   std::unique_ptr<Integration::LayoutControllerImpl> mImpl;
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

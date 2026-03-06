@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -35,7 +35,7 @@ namespace Integration
 namespace
 {
 
-LayoutRect GetChildBounds(UI::View view)
+LayoutRect GetChildBounds(Ui::View view)
 {
   LayoutRect bounds(0.0f, 0.0f, -1.0f, -1.0f);
 
@@ -67,7 +67,7 @@ LayoutRect GetChildBounds(UI::View view)
   return bounds;
 }
 
-AbsoluteLayoutFlags GetChildFlags(UI::View view)
+AbsoluteLayoutFlags GetChildFlags(Ui::View view)
 {
   if (view)
   {
@@ -244,5 +244,5 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

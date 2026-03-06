@@ -39,7 +39,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_S
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -163,6 +163,6 @@ void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -36,13 +36,13 @@
 #include <dali-ui-foundation/public-api/controls/gl-view/gl-view.h>
 #include "gl-view-interface-impl.h"
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 class GlView;
 
 namespace Internal
 {
-class DrawableView : public Dali::UI::Internal::GlViewImpl
+class DrawableView : public Dali::Ui::Internal::GlViewImpl
 {
 protected:
   virtual ~DrawableView();
@@ -55,7 +55,7 @@ public:
    *                        are accepted.
    * @return Valid GlView object or nullptr on error
    */
-  static Dali::UI::GlView New(GlView::BackendMode backendMode);
+  static Dali::Ui::GlView New(GlView::BackendMode backendMode);
 
   /**
    * @brief Constructor creates GlView interface object using DrawableView implementation
@@ -66,64 +66,64 @@ public:
   explicit DrawableView(GlView::BackendMode backendMode);
 
   /**
-   * @copydoc Dali::UI::GlView::RegisterGlCallbacks()
+   * @copydoc Dali::Ui::GlView::RegisterGlCallbacks()
    */
   void RegisterGlCallbacks(CallbackBase* initCallback, CallbackBase* renderFrameCallback,
                            CallbackBase* terminateCallback) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetResizeCallback()
+   * @copydoc Dali::Ui::GlView::SetResizeCallback()
    */
   void SetResizeCallback(CallbackBase* resizeCallback) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetGraphicsConfig()
+   * @copydoc Dali::Ui::GlView::SetGraphicsConfig()
    */
-  bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlView::GraphicsApiVersion version) override;
+  bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::Ui::GlView::GraphicsApiVersion version) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetRenderingMode()
+   * @copydoc Dali::Ui::GlView::SetRenderingMode()
    */
-  void SetRenderingMode(Dali::UI::GlView::RenderingMode mode) override;
+  void SetRenderingMode(Dali::Ui::GlView::RenderingMode mode) override;
 
   /**
-   * @copydoc Dali::UI::GlView::GetRenderingMode()
+   * @copydoc Dali::Ui::GlView::GetRenderingMode()
    */
-  Dali::UI::GlView::RenderingMode GetRenderingMode() const override;
+  Dali::Ui::GlView::RenderingMode GetRenderingMode() const override;
 
   /**
-   * @copydoc Dali::UI::GlView::RenderOnce()
+   * @copydoc Dali::Ui::GlView::RenderOnce()
    */
   void RenderOnce() override;
 
   /**
-   * @copydoc Dali::UI::GlView::BindTextureResources()
+   * @copydoc Dali::Ui::GlView::BindTextureResources()
    */
   void BindTextureResources(Dali::Vector<Dali::Texture> textures) override;
 
   /**
-   * @copydoc Dali::UI::GlView::Terminate()
+   * @copydoc Dali::Ui::GlView::Terminate()
    */
   void Terminate() override;
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   virtual void OnInitialize() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
   /**
-   * @copydoc UI::Control::OnSizeSet()
+   * @copydoc Ui::Control::OnSizeSet()
    */
   void OnSizeSet(const Vector3& targetSize) override;
 
@@ -152,7 +152,7 @@ private:
 
 private:
   WeakHandle<Window> mPlacementWindow;
-  Dali::UI::GlView::RenderingMode mRenderingMode;
+  Dali::Ui::GlView::RenderingMode mRenderingMode;
 
   bool mDepth;
   bool mStencil;
@@ -191,6 +191,6 @@ private:
 
 } // namespace Internal
 
-} // namespace Dali::UI
+} // namespace Dali::Ui
 
 #endif // DALI_UI_INTERNAL_DRAWABLE_VIEW_H

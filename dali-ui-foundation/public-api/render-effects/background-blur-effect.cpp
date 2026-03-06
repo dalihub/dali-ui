@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/internal/render-effects/background-blur-effect-impl.h>
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 BackgroundBlurEffect::BackgroundBlurEffect() = default;
 BackgroundBlurEffect::BackgroundBlurEffect(const BackgroundBlurEffect& handle)
@@ -104,5 +104,5 @@ BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffect::FinishedSignal()
   return GetImplementation(*this).FinishedSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

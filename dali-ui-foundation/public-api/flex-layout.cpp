@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 FlexLayout::FlexLayout()
@@ -69,7 +69,7 @@ FlexLayout FlexLayout::New()
 
 FlexLayout FlexLayout::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<FlexLayout, Integration::FlexLayoutImpl>(handle);
+  return Ui::Control::DownCast<FlexLayout, Integration::FlexLayoutImpl>(handle);
 }
 
 FlexLayout::FlexLayout(Integration::FlexLayoutImpl& implementation)
@@ -257,5 +257,5 @@ FlexAlign FlexLayout::GetAlignSelf(View view)
   return FlexAlign::AUTO; // Default
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

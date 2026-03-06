@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -49,6 +49,6 @@ void SetSpannedText(TextEditor textEditor, const Spanned& spannedText)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

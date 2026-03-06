@@ -37,7 +37,7 @@ const int VECTOR_BLOB_ATLAS_HEIGHT_QUANTUM = 8;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -140,6 +140,6 @@ VectorBlobAtlas* VectorBlobAtlasShare::GetNewAtlas()
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -84,6 +84,6 @@ Text::MultilanguageSupport& AsyncTextModule::GetMultilanguageSupport()
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

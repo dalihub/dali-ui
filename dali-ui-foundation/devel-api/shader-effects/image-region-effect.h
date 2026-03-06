@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Creates a new ImageRegionEffect
@@ -43,7 +43,7 @@ namespace UI
  */
 DALI_UI_API Property::Map CreateImageRegionEffect();
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

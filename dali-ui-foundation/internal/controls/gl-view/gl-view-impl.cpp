@@ -34,20 +34,20 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-Dali::UI::GlView GlView::New(Dali::UI::GlView::ColorFormat colorFormat)
+Dali::Ui::GlView GlView::New(Dali::Ui::GlView::ColorFormat colorFormat)
 {
-  auto* impl = new Dali::UI::Internal::GlView(colorFormat);
-  Dali::UI::GlView handle = Dali::UI::GlView(*impl);
+  auto* impl = new Dali::Ui::Internal::GlView(colorFormat);
+  Dali::Ui::GlView handle = Dali::Ui::GlView(*impl);
   impl->Initialize();
   return handle;
 }
 
-GlView::GlView(Dali::UI::GlView::ColorFormat colorFormat)
-  : Dali::UI::Internal::GlViewImpl(UI::GlView::BackendMode::EGL_IMAGE_OFFSCREEN_RENDERING),
+GlView::GlView(Dali::Ui::GlView::ColorFormat colorFormat)
+  : Dali::Ui::Internal::GlViewImpl(Ui::GlView::BackendMode::EGL_IMAGE_OFFSCREEN_RENDERING),
     mColorFormat(colorFormat)
 {
 }
@@ -74,7 +74,7 @@ void GlView::SetResizeCallback(CallbackBase* resizeCallback)
   }
 }
 
-bool GlView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlView::GraphicsApiVersion version)
+bool GlView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::Ui::GlView::GraphicsApiVersion version)
 {
   // Init Graphics
   mDepth = depth;
@@ -83,7 +83,7 @@ bool GlView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlV
 
   int rVersion;
 
-  if (version == Dali::UI::GlView::GraphicsApiVersion::GLES_VERSION_2_0)
+  if (version == Dali::Ui::GlView::GraphicsApiVersion::GLES_VERSION_2_0)
   {
     rVersion = 20;
   }
@@ -100,12 +100,12 @@ bool GlView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlV
   return false;
 }
 
-void GlView::SetRenderingMode(Dali::UI::GlView::RenderingMode mode)
+void GlView::SetRenderingMode(Dali::Ui::GlView::RenderingMode mode)
 {
   mRenderingMode = mode;
   Renderer renderer = Self().GetRendererAt(0);
 
-  if (mRenderingMode == Dali::UI::GlView::RenderingMode::ON_DEMAND)
+  if (mRenderingMode == Dali::Ui::GlView::RenderingMode::ON_DEMAND)
   {
     renderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::IF_REQUIRED);
 
@@ -285,17 +285,17 @@ void GlView::AddRenderer()
   self.AddRenderer(renderer);
 }
 
-Dali::NativeImageQueue::ColorFormat GlView::GetColorFormat(Dali::UI::GlView::ColorFormat format)
+Dali::NativeImageQueue::ColorFormat GlView::GetColorFormat(Dali::Ui::GlView::ColorFormat format)
 {
   switch (format)
   {
-    case UI::GlView::ColorFormat::RGBA8888:
+    case Ui::GlView::ColorFormat::RGBA8888:
     {
       // TODO : Shouldn't it be RGBA8888?
       return Dali::NativeImageQueue::ColorFormat::BGRA8888;
     }
 
-    case UI::GlView::ColorFormat::RGB888:
+    case Ui::GlView::ColorFormat::RGB888:
     default:
     {
       // TODO : Shouldn't it be RGBX8888?
@@ -306,6 +306,6 @@ Dali::NativeImageQueue::ColorFormat GlView::GetColorFormat(Dali::UI::GlView::Col
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

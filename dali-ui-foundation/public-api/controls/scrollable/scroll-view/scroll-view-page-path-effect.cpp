@@ -25,7 +25,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ScrollViewPagePathEffect ScrollViewPagePathEffect::New(Path path, const Vector3& forward,
                                                        Dali::Property::Index inputPropertyIndex,
@@ -54,6 +54,6 @@ void ScrollViewPagePathEffect::ApplyToPage(Actor page, unsigned int pageOrder)
   GetImpl(*this).ApplyToPage(page, pageOrder);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

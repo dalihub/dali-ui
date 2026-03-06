@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -104,12 +104,12 @@ uint32_t AsyncImageLoader::ApplyMask(Devel::PixelBuffer pixelBuffer, Devel::Pixe
   return mLoadTaskId;
 }
 
-UI::AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal()
+Ui::AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal()
 {
   return mLoadedSignal;
 }
 
-UI::DevelAsyncImageLoader::PixelBufferLoadedSignalType& AsyncImageLoader::PixelBufferLoadedSignal()
+Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType& AsyncImageLoader::PixelBufferLoadedSignal()
 {
   return mPixelBufferLoadedSignal;
 }
@@ -173,6 +173,6 @@ void AsyncImageLoader::ProcessLoadedImage(LoadingTaskPtr task)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

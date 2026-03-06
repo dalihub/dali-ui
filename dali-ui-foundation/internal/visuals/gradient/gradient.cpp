@@ -28,13 +28,13 @@ const uint32_t MAXIMUM_TEXTURE_RESOLUTION(512u);
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 Gradient::Gradient()
-  : mGradientUnits(UI::GradientVisual::Units::OBJECT_BOUNDING_BOX),
-    mSpreadMethod(UI::GradientVisual::SpreadMethod::PAD),
+  : mGradientUnits(Ui::GradientVisual::Units::OBJECT_BOUNDING_BOX),
+    mSpreadMethod(Ui::GradientVisual::SpreadMethod::PAD),
     mStartOffset(0.f)
 {
 }
@@ -54,22 +54,22 @@ const Vector<Gradient::GradientStop>& Gradient::GetStops()
   return mGradientStops;
 }
 
-void Gradient::SetGradientUnits(UI::GradientVisual::Units::Type gradientUnits)
+void Gradient::SetGradientUnits(Ui::GradientVisual::Units::Type gradientUnits)
 {
   mGradientUnits = gradientUnits;
 }
 
-UI::GradientVisual::Units::Type Gradient::GetGradientUnits() const
+Ui::GradientVisual::Units::Type Gradient::GetGradientUnits() const
 {
   return mGradientUnits;
 }
 
-void Gradient::SetSpreadMethod(UI::GradientVisual::SpreadMethod::Type spread)
+void Gradient::SetSpreadMethod(Ui::GradientVisual::SpreadMethod::Type spread)
 {
   mSpreadMethod = spread;
 }
 
-UI::GradientVisual::SpreadMethod::Type Gradient::GetSpreadMethod() const
+Ui::GradientVisual::SpreadMethod::Type Gradient::GetSpreadMethod() const
 {
   return mSpreadMethod;
 }
@@ -106,7 +106,7 @@ Dali::Texture Gradient::GenerateLookupTexture()
   {
     tempFirstStop = true;
     Vector4 firstStopColor(mGradientStops[0].mStopColor); // If spread method is PAD or REFLECT
-    if (mSpreadMethod == UI::GradientVisual::SpreadMethod::REPEAT)
+    if (mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
     {
       firstStopColor = (mGradientStops[0].mStopColor * (1.f - mGradientStops[numStops - 1].mOffset) +
                         mGradientStops[numStops - 1].mStopColor * mGradientStops[0].mOffset) /
@@ -122,7 +122,7 @@ Dali::Texture Gradient::GenerateLookupTexture()
   {
     tempLastStop = true;
     Vector4 lastStopColor(mGradientStops[numStops - 1].mStopColor); // If spread method is PAD or REFLECT
-    if (mSpreadMethod == UI::GradientVisual::SpreadMethod::REPEAT)
+    if (mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
     {
       lastStopColor = mGradientStops[0].mStopColor;
     }
@@ -202,6 +202,6 @@ float Gradient::GetStartOffset() const
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

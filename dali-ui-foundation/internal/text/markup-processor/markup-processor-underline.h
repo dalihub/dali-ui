@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -90,7 +90,7 @@ void OverrideNestedUnderlinedCharacterRuns(Vector<UnderlinedCharacterRun>& under
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

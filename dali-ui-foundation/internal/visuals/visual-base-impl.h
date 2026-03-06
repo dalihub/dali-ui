@@ -38,7 +38,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -79,68 +79,68 @@ public:
   void SetProperties(const Property::Map& propertyMap);
 
   /**
-   * @copydoc UI::Visual::Base::SetName
+   * @copydoc Ui::Visual::Base::SetName
    */
   void SetName(const std::string& name);
 
   /**
-   * @copydoc UI::Visual::Base::GetName
+   * @copydoc Ui::Visual::Base::GetName
    */
   const std::string& GetName() const;
 
   /**
-   * @copydoc UI::Visual::Base::SetSize
+   * @copydoc Ui::Visual::Base::SetSize
    */
   void SetTransformAndSize(const Property::Map& transform, Size controlSize);
 
   /**
-   * @copydoc UI::Visual::Base::GetHeightForWidth
+   * @copydoc Ui::Visual::Base::GetHeightForWidth
    */
   virtual float GetHeightForWidth(float width);
 
   /**
-   * @copydoc UI::Visual::Base::GetWidthForHeight
+   * @copydoc Ui::Visual::Base::GetWidthForHeight
    */
   virtual float GetWidthForHeight(float height);
 
   /**
-   * @copydoc UI::Visual::Base::GetNaturalSize
+   * @copydoc Ui::Visual::Base::GetNaturalSize
    */
   virtual void GetNaturalSize(Vector2& naturalSize);
 
   /**
-   * @copydoc UI::Visual::Base::SetDepthIndex
+   * @copydoc Ui::Visual::Base::SetDepthIndex
    */
   void SetDepthIndex(int index);
 
   /**
-   * @copydoc UI::Visual::Base::GetDepthIndex
+   * @copydoc Ui::Visual::Base::GetDepthIndex
    */
   int GetDepthIndex() const;
 
   /**
-   * @copydoc UI::Visual::Base::SetOnScene
+   * @copydoc Ui::Visual::Base::SetOnScene
    * @pre Impl->mGeometry must be created before this method is called
    */
   void SetOnScene(Actor& actor);
 
   /**
-   * @copydoc UI::Visual::Base::SetOffScene
+   * @copydoc Ui::Visual::Base::SetOffScene
    */
   void SetOffScene(Actor& actor);
 
   /**
-   * @copydoc UI::Visual::Base::CreatePropertyMap
+   * @copydoc Ui::Visual::Base::CreatePropertyMap
    */
   void CreatePropertyMap(Property::Map& map) const;
 
   /**
-   * @copydoc UI::Visual::Base::DoAction
+   * @copydoc Ui::Visual::Base::DoAction
    */
   void DoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc UI::Visual::Base::DoActionExtension
+   * @copydoc Ui::Visual::Base::DoActionExtension
    */
   void DoActionExtension(const Dali::Property::Index actionId, const Dali::Any& attributes);
 
@@ -194,12 +194,12 @@ public:
   bool IsUsingCustomShader() const;
 
   /**
-   * @copydoc UI::Visual::Base::SetProperty
+   * @copydoc Ui::Visual::Base::SetProperty
    */
   void SetProperty(Dali::Property::Index index, const Dali::Property::Value& propertyValue);
 
   /**
-   * @copydoc UI::Visual::Base::GetProperty
+   * @copydoc Ui::Visual::Base::GetProperty
    */
   Dali::Property::Value GetProperty(Dali::Property::Index index);
 
@@ -241,7 +241,7 @@ public:
   /**
    * @brief Called when the visuals resources are loaded / ready
    */
-  void ResourceReady(UI::Visual::ResourceStatus resourceStatus);
+  void ResourceReady(Ui::Visual::ResourceStatus resourceStatus);
 
   /**
    * @brief Called when the visuals resources are loaded / ready or failed (mean, broken image ready)
@@ -253,7 +253,7 @@ public:
    * @brief Get the loading state of the visual resource
    * @return Return the loading status (PREPARING, READY and FAILED) of visual resource
    */
-  UI::Visual::ResourceStatus GetResourceStatus() const;
+  Ui::Visual::ResourceStatus GetResourceStatus() const;
 
   /**
    * @brief Get the fitting mode for the visual
@@ -322,7 +322,7 @@ public:
    *
    * @return The the type of this visual.
    */
-  UI::Visual::Type GetType() const;
+  Ui::Visual::Type GetType() const;
 
   /**
    * @brief Retrieve the property object associated with the property key.
@@ -389,7 +389,7 @@ protected:
    * @param[in] fittingMode The value that determines how the visual should be fit to the view
    * @param[in] type The type of the this visual
    */
-  Base(VisualFactoryCache& factoryCache, FittingMode fittingMode, UI::Visual::Type type);
+  Base(VisualFactoryCache& factoryCache, FittingMode fittingMode, Ui::Visual::Type type);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -560,7 +560,7 @@ typedef IntrusivePtr<Base> BasePtr;
 
 } // namespace Internal
 
-inline const Internal::Visual::Base& GetImplementation(const UI::Visual::Base& visualBase)
+inline const Internal::Visual::Base& GetImplementation(const Ui::Visual::Base& visualBase)
 {
   DALI_ASSERT_ALWAYS(visualBase && "visual base handle is empty");
 
@@ -569,7 +569,7 @@ inline const Internal::Visual::Base& GetImplementation(const UI::Visual::Base& v
   return static_cast<const Internal::Visual::Base&>(handle);
 }
 
-inline Internal::Visual::Base& GetImplementation(UI::Visual::Base& visualBase)
+inline Internal::Visual::Base& GetImplementation(Ui::Visual::Base& visualBase)
 {
   DALI_ASSERT_ALWAYS(visualBase && "visual base handle is empty");
 
@@ -578,7 +578,7 @@ inline Internal::Visual::Base& GetImplementation(UI::Visual::Base& visualBase)
   return static_cast<Internal::Visual::Base&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

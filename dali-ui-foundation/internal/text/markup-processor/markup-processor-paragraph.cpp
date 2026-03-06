@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -65,6 +65,6 @@ void ProcessAttributesOfParagraphTag(const Tag& tag, BoundedParagraphRun& bounde
 }
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

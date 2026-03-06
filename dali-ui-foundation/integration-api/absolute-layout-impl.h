@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -38,7 +38,7 @@ namespace Integration
 class AbsoluteLayoutImpl : public LayoutImpl
 {
 public:
-  static UI::AbsoluteLayout New();
+  static Ui::AbsoluteLayout New();
 
 protected:
   virtual ~AbsoluteLayoutImpl();
@@ -54,14 +54,14 @@ private:
   AbsoluteLayoutImpl& operator=(AbsoluteLayoutImpl&&) = delete;
 };
 
-inline Integration::AbsoluteLayoutImpl& GetImpl(UI::AbsoluteLayout& layout)
+inline Integration::AbsoluteLayoutImpl& GetImpl(Ui::AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::AbsoluteLayoutImpl&>(handle);
 }
 
-inline const Integration::AbsoluteLayoutImpl& GetImpl(const UI::AbsoluteLayout& layout)
+inline const Integration::AbsoluteLayoutImpl& GetImpl(const Ui::AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
@@ -69,5 +69,5 @@ inline const Integration::AbsoluteLayoutImpl& GetImpl(const UI::AbsoluteLayout& 
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

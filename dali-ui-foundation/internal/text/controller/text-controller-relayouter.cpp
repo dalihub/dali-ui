@@ -72,7 +72,7 @@ float ConvertPointToPixel(float point)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -275,7 +275,7 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
   if (NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_ARRAY_LAYOUT", "[%p]", static_cast<void*>(&controller));
-    std::vector<UI::DevelTextLabel::FitOption> fitOptions = impl.mTextFitArray;
+    std::vector<Ui::DevelTextLabel::FitOption> fitOptions = impl.mTextFitArray;
     int numberOfFitOptions = static_cast<int>(fitOptions.size());
     if (numberOfFitOptions == 0)
     {
@@ -295,7 +295,7 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
     // binary search cannot guarantee that it will always find the best value.
     bool binarySearch = true;
     float prevMinLineSize = 0.0f;
-    for (UI::DevelTextLabel::FitOption& option : fitOptions)
+    for (Ui::DevelTextLabel::FitOption& option : fitOptions)
     {
       float optionMinLineSize = option.GetMinLineSize();
       if (prevMinLineSize > optionMinLineSize)
@@ -308,7 +308,7 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
 
     // Set the first FitOption(Minimum PointSize) to the best value.
     // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    UI::DevelTextLabel::FitOption firstOption = fitOptions.front();
+    Ui::DevelTextLabel::FitOption firstOption = fitOptions.front();
     bool bestSizeUpdatedLatest = false;
     float bestPointSize = firstOption.GetPointSize();
     float bestMinLineSize = firstOption.GetMinLineSize();
@@ -321,7 +321,7 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
       while (left <= right)
       {
         int mid = left + (right - left) / 2;
-        UI::DevelTextLabel::FitOption option = fitOptions[mid];
+        Ui::DevelTextLabel::FitOption option = fitOptions[mid];
         float testPointSize = option.GetPointSize();
         float testMinLineSize = option.GetMinLineSize();
         impl.SetDefaultLineSize(testMinLineSize);
@@ -345,7 +345,7 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
       // If binary search is not possible, search sequentially starting from the largest PointSize.
       for (auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
       {
-        UI::DevelTextLabel::FitOption option = *it;
+        Ui::DevelTextLabel::FitOption option = *it;
         float testPointSize = option.GetPointSize();
         float testMinLineSize = option.GetMinLineSize();
         impl.SetDefaultLineSize(testMinLineSize);
@@ -935,7 +935,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     bool isAutoScrollMaxTextureExceeded = impl.mIsAutoScrollMaxTextureExceeded;
     bool isHiddenInputEnabled = false;
     if (impl.mHiddenInput && impl.mEventData != nullptr &&
-        impl.mHiddenInput->GetHideMode() != UI::HiddenInput::Mode::HIDE_NONE)
+        impl.mHiddenInput->GetHideMode() != Ui::HiddenInput::Mode::HIDE_NONE)
     {
       isHiddenInputEnabled = true;
     }
@@ -1181,6 +1181,6 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

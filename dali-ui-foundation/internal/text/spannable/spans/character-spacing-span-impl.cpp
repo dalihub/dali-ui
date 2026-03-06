@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -37,7 +37,7 @@ struct CharacterSpacingSpan::Impl
 };
 
 CharacterSpacingSpan::CharacterSpacingSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::CHARACTER_SPACING)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::CHARACTER_SPACING)
 {
   mImpl = std::make_unique<Impl>();
 }
@@ -46,12 +46,12 @@ CharacterSpacingSpan ::~CharacterSpacingSpan()
 {
 }
 
-Dali::UI::Text::CharacterSpacingSpan CharacterSpacingSpan::New(const float& value)
+Dali::Ui::Text::CharacterSpacingSpan CharacterSpacingSpan::New(const float& value)
 {
   CharacterSpacingSpanPtr object = new CharacterSpacingSpan();
   object->SetCharacterSpacing(value);
 
-  Dali::UI::Text::CharacterSpacingSpan handle = Dali::UI::Text::CharacterSpacingSpan(object.Get());
+  Dali::Ui::Text::CharacterSpacingSpan handle = Dali::Ui::Text::CharacterSpacingSpan(object.Get());
 
   return handle;
 }
@@ -74,7 +74,7 @@ void CharacterSpacingSpan::SetCharacterSpacing(const float& value)
 }
 
 void CharacterSpacingSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                                   const Dali::UI::Text::Range& range) const
+                                                   const Dali::Ui::Text::Range& range) const
 {
   CharacterSpacingCharacterRun characterSpacingCharacterRun;
   characterSpacingCharacterRun.characterRun.characterIndex = range.GetStartIndex();
@@ -88,6 +88,6 @@ void CharacterSpacingSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& l
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

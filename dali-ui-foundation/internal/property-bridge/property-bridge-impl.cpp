@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/devel-api/controls/control-devel.h>
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -47,24 +47,24 @@ PropertyBridge::~PropertyBridge()
 {
 }
 
-Dali::UI::PropertyBridge PropertyBridge::Get()
+Dali::Ui::PropertyBridge PropertyBridge::Get()
 {
-  Dali::UI::PropertyBridge bridgeHandle;
+  Dali::Ui::PropertyBridge bridgeHandle;
 
   Dali::SingletonService service(SingletonService::Get());
   if (service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::UI::PropertyBridge));
+    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::PropertyBridge));
     if (handle)
     {
       // If so, downcast the handle
-      PropertyBridge* impl = dynamic_cast<Dali::UI::Internal::PropertyBridge*>(handle.GetObjectPtr());
-      bridgeHandle = Dali::UI::PropertyBridge(impl);
+      PropertyBridge* impl = dynamic_cast<Dali::Ui::Internal::PropertyBridge*>(handle.GetObjectPtr());
+      bridgeHandle = Dali::Ui::PropertyBridge(impl);
     }
     else // create and register the object
     {
-      bridgeHandle = Dali::UI::PropertyBridge(new PropertyBridge);
+      bridgeHandle = Dali::Ui::PropertyBridge(new PropertyBridge);
       service.Register(typeid(bridgeHandle), bridgeHandle);
     }
   }
@@ -109,6 +109,6 @@ void PropertyBridge::RegisterStringGetter(StringGetterDelegate getter)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -22,39 +22,39 @@
 #include <dali-ui-foundation/internal/controls/scrollable/scroll-view/scroll-view-impl.h>
 #include <dali-ui-foundation/public-api/controls/scrollable/scroll-view/scroll-mode.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 
 void ScrollViewPropertyHandler::Set(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::ScrollView scrollView = UI::ScrollView::DownCast(Dali::BaseHandle(object));
+  Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Dali::BaseHandle(object));
 
   if (scrollView)
   {
     ScrollView& scrollViewImpl(GetImpl(scrollView));
     switch (index)
     {
-      case UI::ScrollView::Property::WRAP_ENABLED:
+      case Ui::ScrollView::Property::WRAP_ENABLED:
       {
         scrollViewImpl.SetWrapMode(value.Get<bool>());
         break;
       }
-      case UI::ScrollView::Property::PANNING_ENABLED:
+      case Ui::ScrollView::Property::PANNING_ENABLED:
       {
         scrollViewImpl.SetScrollSensitive(value.Get<bool>());
         break;
       }
-      case UI::ScrollView::Property::AXIS_AUTO_LOCK_ENABLED:
+      case Ui::ScrollView::Property::AXIS_AUTO_LOCK_ENABLED:
       {
         scrollViewImpl.SetAxisAutoLock(value.Get<bool>());
         break;
       }
-      case UI::ScrollView::Property::WHEEL_SCROLL_DISTANCE_STEP:
+      case Ui::ScrollView::Property::WHEEL_SCROLL_DISTANCE_STEP:
       {
         scrollViewImpl.SetWheelScrollDistanceStep(value.Get<Vector2>());
         break;
       }
-      case UI::ScrollView::Property::SCROLL_MODE:
+      case Ui::ScrollView::Property::SCROLL_MODE:
       {
         const Property::Map* map = value.GetMap();
         if (map)
@@ -70,29 +70,29 @@ Property::Value ScrollViewPropertyHandler::Get(BaseObject* object, Property::Ind
 {
   Property::Value value;
 
-  UI::ScrollView scrollView = UI::ScrollView::DownCast(Dali::BaseHandle(object));
+  Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Dali::BaseHandle(object));
 
   if (scrollView)
   {
     ScrollView& scrollViewImpl(GetImpl(scrollView));
     switch (index)
     {
-      case UI::ScrollView::Property::WRAP_ENABLED:
+      case Ui::ScrollView::Property::WRAP_ENABLED:
       {
         value = scrollViewImpl.GetWrapMode();
         break;
       }
-      case UI::ScrollView::Property::PANNING_ENABLED:
+      case Ui::ScrollView::Property::PANNING_ENABLED:
       {
         value = scrollViewImpl.GetScrollSensitive();
         break;
       }
-      case UI::ScrollView::Property::AXIS_AUTO_LOCK_ENABLED:
+      case Ui::ScrollView::Property::AXIS_AUTO_LOCK_ENABLED:
       {
         value = scrollViewImpl.GetAxisAutoLock();
         break;
       }
-      case UI::ScrollView::Property::WHEEL_SCROLL_DISTANCE_STEP:
+      case Ui::ScrollView::Property::WHEEL_SCROLL_DISTANCE_STEP:
       {
         value = scrollViewImpl.GetWheelScrollDistanceStep();
         break;
@@ -105,11 +105,11 @@ Property::Value ScrollViewPropertyHandler::Get(BaseObject* object, Property::Ind
 
 void ScrollViewPropertyHandler::SetScrollMode(ScrollView& scrollView, const Property::Map& scrollModeMap)
 {
-  UI::RulerPtr rulerX, rulerY;
+  Ui::RulerPtr rulerX, rulerY;
 
   // Check the scroll mode in the X axis
   bool xAxisScrollEnabled = true;
-  Property::Value* valuePtr = scrollModeMap.Find(UI::ScrollMode::X_AXIS_SCROLL_ENABLED, "xAxisScrollEnabled");
+  Property::Value* valuePtr = scrollModeMap.Find(Ui::ScrollMode::X_AXIS_SCROLL_ENABLED, "xAxisScrollEnabled");
   if (valuePtr && valuePtr->GetType() == Property::BOOLEAN)
   {
     valuePtr->Get(xAxisScrollEnabled);
@@ -118,36 +118,36 @@ void ScrollViewPropertyHandler::SetScrollMode(ScrollView& scrollView, const Prop
   if (!xAxisScrollEnabled)
   {
     // Default ruler and disabled
-    rulerX = new UI::DefaultRuler();
+    rulerX = new Ui::DefaultRuler();
     rulerX->Disable();
   }
   else
   {
-    valuePtr = scrollModeMap.Find(UI::ScrollMode::X_AXIS_SNAP_TO_INTERVAL, "xAxisSnapToInterval");
+    valuePtr = scrollModeMap.Find(Ui::ScrollMode::X_AXIS_SNAP_TO_INTERVAL, "xAxisSnapToInterval");
     float xAxisSnapToInterval = 0.0f;
     if (valuePtr && valuePtr->Get(xAxisSnapToInterval))
     {
       // Fixed ruler and enabled
-      rulerX = new UI::FixedRuler(xAxisSnapToInterval);
+      rulerX = new Ui::FixedRuler(xAxisSnapToInterval);
     }
     else
     {
       // Default ruler and enabled
-      rulerX = new UI::DefaultRuler();
+      rulerX = new Ui::DefaultRuler();
     }
 
-    valuePtr = scrollModeMap.Find(UI::ScrollMode::X_AXIS_SCROLL_BOUNDARY, "xAxisScrollBoundary");
+    valuePtr = scrollModeMap.Find(Ui::ScrollMode::X_AXIS_SCROLL_BOUNDARY, "xAxisScrollBoundary");
     float xAxisScrollBoundary = 0.0f;
     if (valuePtr && valuePtr->Get(xAxisScrollBoundary))
     {
       // By default ruler domain is disabled unless set
-      rulerX->SetDomain(UI::RulerDomain(0, xAxisScrollBoundary, true));
+      rulerX->SetDomain(Ui::RulerDomain(0, xAxisScrollBoundary, true));
     }
   }
 
   // Check the scroll mode in the Y axis
   bool yAxisScrollEnabled = true;
-  valuePtr = scrollModeMap.Find(UI::ScrollMode::Y_AXIS_SCROLL_ENABLED, "yAxisScrollEnabled");
+  valuePtr = scrollModeMap.Find(Ui::ScrollMode::Y_AXIS_SCROLL_ENABLED, "yAxisScrollEnabled");
   if (valuePtr && valuePtr->GetType() == Property::BOOLEAN)
   {
     valuePtr->Get(yAxisScrollEnabled);
@@ -156,30 +156,30 @@ void ScrollViewPropertyHandler::SetScrollMode(ScrollView& scrollView, const Prop
   if (!yAxisScrollEnabled)
   {
     // Default ruler and disabled
-    rulerY = new UI::DefaultRuler();
+    rulerY = new Ui::DefaultRuler();
     rulerY->Disable();
   }
   else
   {
-    valuePtr = scrollModeMap.Find(UI::ScrollMode::Y_AXIS_SNAP_TO_INTERVAL, "yAxisSnapToInterval");
+    valuePtr = scrollModeMap.Find(Ui::ScrollMode::Y_AXIS_SNAP_TO_INTERVAL, "yAxisSnapToInterval");
     float yAxisSnapToInterval = 0.0f;
     if (valuePtr && valuePtr->Get(yAxisSnapToInterval))
     {
       // Fixed ruler and enabled
-      rulerY = new UI::FixedRuler(yAxisSnapToInterval);
+      rulerY = new Ui::FixedRuler(yAxisSnapToInterval);
     }
     else
     {
       // Default ruler and enabled
-      rulerY = new UI::DefaultRuler();
+      rulerY = new Ui::DefaultRuler();
     }
 
-    valuePtr = scrollModeMap.Find(UI::ScrollMode::Y_AXIS_SCROLL_BOUNDARY, "yAxisScrollBoundary");
+    valuePtr = scrollModeMap.Find(Ui::ScrollMode::Y_AXIS_SCROLL_BOUNDARY, "yAxisScrollBoundary");
     float yAxisScrollBoundary = 0.0f;
     if (valuePtr && valuePtr->Get(yAxisScrollBoundary))
     {
       // By default ruler domain is disabled unless set
-      rulerY->SetDomain(UI::RulerDomain(0, yAxisScrollBoundary, true));
+      rulerY->SetDomain(Ui::RulerDomain(0, yAxisScrollBoundary, true));
     }
   }
 
@@ -201,7 +201,7 @@ void ScrollViewPropertyHandler::UpdatePropertyDomain(ScrollView& scrollView)
   scrollView.UpdateLocalScrollProperties();
   if (scrollView.mRulerX->IsEnabled())
   {
-    const UI::RulerDomain& rulerDomain = scrollView.mRulerX->GetDomain();
+    const Ui::RulerDomain& rulerDomain = scrollView.mRulerX->GetDomain();
     if (fabsf(min.x - rulerDomain.min) > Math::MACHINE_EPSILON_100 ||
         fabsf(max.x - rulerDomain.max) > Math::MACHINE_EPSILON_100)
     {
@@ -232,7 +232,7 @@ void ScrollViewPropertyHandler::UpdatePropertyDomain(ScrollView& scrollView)
 
   if (scrollView.mRulerY->IsEnabled())
   {
-    const UI::RulerDomain& rulerDomain = scrollView.mRulerY->GetDomain();
+    const Ui::RulerDomain& rulerDomain = scrollView.mRulerY->GetDomain();
     if (fabsf(min.y - rulerDomain.min) > Math::MACHINE_EPSILON_100 ||
         fabsf(max.y - rulerDomain.max) > Math::MACHINE_EPSILON_100)
     {
@@ -266,24 +266,24 @@ void ScrollViewPropertyHandler::UpdatePropertyDomain(ScrollView& scrollView)
   if (scrollView.mCanScrollVertical != canScrollVertical)
   {
     scrollView.mCanScrollVertical = canScrollVertical;
-    self.SetProperty(UI::Scrollable::Property::CAN_SCROLL_VERTICAL, canScrollVertical);
+    self.SetProperty(Ui::Scrollable::Property::CAN_SCROLL_VERTICAL, canScrollVertical);
   }
   if (scrollView.mCanScrollHorizontal != canScrollHorizontal)
   {
     scrollView.mCanScrollHorizontal = canScrollHorizontal;
-    self.SetProperty(UI::Scrollable::Property::CAN_SCROLL_HORIZONTAL, canScrollHorizontal);
+    self.SetProperty(Ui::Scrollable::Property::CAN_SCROLL_HORIZONTAL, canScrollHorizontal);
   }
   if (scrollPositionChanged)
   {
-    self.SetProperty(UI::ScrollView::Property::SCROLL_PRE_POSITION, scrollView.mScrollPrePosition);
+    self.SetProperty(Ui::ScrollView::Property::SCROLL_PRE_POSITION, scrollView.mScrollPrePosition);
   }
   if (domainChanged)
   {
     scrollView.mMinScroll = min;
     scrollView.mMaxScroll = max;
-    self.SetProperty(UI::Scrollable::Property::SCROLL_POSITION_MIN, scrollView.mMinScroll);
-    self.SetProperty(UI::Scrollable::Property::SCROLL_POSITION_MAX, scrollView.mMaxScroll);
+    self.SetProperty(Ui::Scrollable::Property::SCROLL_POSITION_MIN, scrollView.mMinScroll);
+    self.SetProperty(Ui::Scrollable::Property::SCROLL_POSITION_MAX, scrollView.mMaxScroll);
   }
 }
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal

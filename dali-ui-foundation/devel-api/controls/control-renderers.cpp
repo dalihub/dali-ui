@@ -18,7 +18,7 @@
 #include "control-renderers.h"
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 
-namespace Dali::UI::DevelControl
+namespace Dali::Ui::DevelControl
 {
 
 Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc)
@@ -42,4 +42,4 @@ void SetRendererTexture(Renderer renderer, FrameBuffer frameBuffer)
   Internal::SetRendererTexture(renderer, frameBuffer);
 }
 
-} // namespace Dali::UI::DevelControl
+} // namespace Dali::Ui::DevelControl

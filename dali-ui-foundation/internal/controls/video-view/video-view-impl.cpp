@@ -46,7 +46,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -54,28 +54,28 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::VideoView::New();
+  return Ui::VideoView::New();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::VideoView, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::VideoView, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "video", MAP, VIDEO)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "looping", BOOLEAN, LOOPING)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "muted", BOOLEAN, MUTED)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "volume", MAP, VOLUME)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "underlay", BOOLEAN, UNDERLAY)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "playPosition", INTEGER, PLAY_POSITION)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "displayMode", INTEGER, DISPLAY_MODE)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "texture", MAP, TEXTURE)
-DALI_PROPERTY_REGISTRATION(UI, VideoView, "overlay", MAP, OVERLAY)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "video", MAP, VIDEO)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "looping", BOOLEAN, LOOPING)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "muted", BOOLEAN, MUTED)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "volume", MAP, VOLUME)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "underlay", BOOLEAN, UNDERLAY)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "playPosition", INTEGER, PLAY_POSITION)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "displayMode", INTEGER, DISPLAY_MODE)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "texture", MAP, TEXTURE)
+DALI_PROPERTY_REGISTRATION(Ui, VideoView, "overlay", MAP, OVERLAY)
 
-DALI_SIGNAL_REGISTRATION(UI, VideoView, "finished", FINISHED_SIGNAL)
+DALI_SIGNAL_REGISTRATION(Ui, VideoView, "finished", FINISHED_SIGNAL)
 
-DALI_ACTION_REGISTRATION(UI, VideoView, "play", ACTION_VIDEOVIEW_PLAY)
-DALI_ACTION_REGISTRATION(UI, VideoView, "pause", ACTION_VIDEOVIEW_PAUSE)
-DALI_ACTION_REGISTRATION(UI, VideoView, "stop", ACTION_VIDEOVIEW_STOP)
-DALI_ACTION_REGISTRATION(UI, VideoView, "forward", ACTION_VIDEOVIEW_FORWARD)
-DALI_ACTION_REGISTRATION(UI, VideoView, "backward", ACTION_VIDEOVIEW_BACKWARD)
+DALI_ACTION_REGISTRATION(Ui, VideoView, "play", ACTION_VIDEOVIEW_PLAY)
+DALI_ACTION_REGISTRATION(Ui, VideoView, "pause", ACTION_VIDEOVIEW_PAUSE)
+DALI_ACTION_REGISTRATION(Ui, VideoView, "stop", ACTION_VIDEOVIEW_STOP)
+DALI_ACTION_REGISTRATION(Ui, VideoView, "forward", ACTION_VIDEOVIEW_FORWARD)
+DALI_ACTION_REGISTRATION(Ui, VideoView, "backward", ACTION_VIDEOVIEW_BACKWARD)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -112,10 +112,10 @@ VideoView::~VideoView()
 {
 }
 
-UI::VideoView VideoView::New(VideoSyncMode syncMode)
+Ui::VideoView VideoView::New(VideoSyncMode syncMode)
 {
   VideoView* impl = new VideoView(syncMode);
-  UI::VideoView handle = UI::VideoView(*impl);
+  Ui::VideoView handle = Ui::VideoView(*impl);
 
   impl->mVideoPlayer = Dali::VideoPlayer::New(impl->Self(), syncMode);
   impl->Initialize();
@@ -179,25 +179,25 @@ void VideoView::SetPropertyMap(Property::Map map)
 
   if (mTextureVisual && !mEffectPropertyMap.Empty())
   {
-    UI::Control control = UI::Control(GetOwner());
+    Ui::Control control = Ui::Control(GetOwner());
     Control& controlImpl = GetImplementation(control);
 
     Property::Map properties;
-    properties[UI::Visual::Property::TYPE] = UI::Visual::Type::COLOR;
-    properties[UI::Visual::Property::SHADER] = CreateShader();
+    properties[Ui::Visual::Property::TYPE] = Ui::Visual::Type::COLOR;
+    properties[Ui::Visual::Property::SHADER] = CreateShader();
 
     // Regenerate mTextureVisual
     if (Dali::Adaptor::IsAvailable() && mTextureVisual)
     {
-      UI::VisualFactory::Get().DiscardVisual(mTextureVisual);
+      Ui::VisualFactory::Get().DiscardVisual(mTextureVisual);
     }
     mTextureVisual.Reset();
 
-    mTextureVisual = UI::VisualFactory::Get().CreateVisual(properties);
+    mTextureVisual = Ui::VisualFactory::Get().CreateVisual(properties);
     if (mTextureVisual)
     {
-      UI::DevelControl::RegisterVisual(controlImpl, UI::VideoView::Property::TEXTURE, mTextureVisual);
-      UI::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mTextureVisual, true);
+      Ui::DevelControl::RegisterVisual(controlImpl, Ui::VideoView::Property::TEXTURE, mTextureVisual);
+      Ui::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mTextureVisual, true);
     }
   }
 
@@ -226,7 +226,7 @@ void VideoView::Play()
 
   if (mOverlayTextureVisual)
   {
-    Internal::Visual::Base& visualImpl = UI::GetImplementation(mOverlayTextureVisual);
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation(mOverlayTextureVisual);
     Renderer renderer = visualImpl.GetRenderer();
 
     renderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::CONTINUOUSLY);
@@ -240,7 +240,7 @@ void VideoView::Pause()
 
   if (mOverlayTextureVisual)
   {
-    Internal::Visual::Base& visualImpl = UI::GetImplementation(mOverlayTextureVisual);
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation(mOverlayTextureVisual);
     Renderer renderer = visualImpl.GetRenderer();
 
     renderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::IF_REQUIRED);
@@ -254,7 +254,7 @@ void VideoView::Stop()
 
   if (mOverlayTextureVisual)
   {
-    Internal::Visual::Base& visualImpl = UI::GetImplementation(mOverlayTextureVisual);
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation(mOverlayTextureVisual);
     Renderer renderer = visualImpl.GetRenderer();
 
     renderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::IF_REQUIRED);
@@ -300,7 +300,7 @@ void VideoView::GetVolume(float& left, float& right)
   mVideoPlayer.GetVolume(left, right);
 }
 
-Dali::UI::VideoView::VideoViewSignalType& VideoView::FinishedSignal()
+Dali::Ui::VideoView::VideoViewSignalType& VideoView::FinishedSignal()
 {
   return mFinishedSignal;
 }
@@ -309,7 +309,7 @@ void VideoView::EmitSignalFinish()
 {
   if (!mFinishedSignal.Empty())
   {
-    Dali::UI::VideoView handle(GetOwner());
+    Dali::Ui::VideoView handle(GetOwner());
     mFinishedSignal.Emit(handle);
   }
 }
@@ -319,7 +319,7 @@ bool VideoView::DoAction(BaseObject* object, const std::string& actionName, cons
   bool ret = false;
 
   Dali::BaseHandle handle(object);
-  UI::VideoView videoView = UI::VideoView::DownCast(handle);
+  Ui::VideoView videoView = Ui::VideoView::DownCast(handle);
 
   if (!videoView)
   {
@@ -371,7 +371,7 @@ bool VideoView::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::VideoView videoView = UI::VideoView::DownCast(handle);
+  Ui::VideoView videoView = Ui::VideoView::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), FINISHED_SIGNAL))
   {
@@ -390,7 +390,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
 {
   switch (index)
   {
-    case UI::VideoView::Property::VIDEO:
+    case Ui::VideoView::Property::VIDEO:
     {
       std::string videoUrl;
       Property::Map map;
@@ -405,7 +405,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::LOOPING:
+    case Ui::VideoView::Property::LOOPING:
     {
       bool looping;
       if (value.Get(looping))
@@ -414,7 +414,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::MUTED:
+    case Ui::VideoView::Property::MUTED:
     {
       bool mute;
       if (value.Get(mute))
@@ -423,7 +423,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::VOLUME:
+    case Ui::VideoView::Property::VOLUME:
     {
       Property::Map map;
       float left, right;
@@ -438,7 +438,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::UNDERLAY:
+    case Ui::VideoView::Property::UNDERLAY:
     {
       bool underlay;
       if (value.Get(underlay))
@@ -447,7 +447,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::PLAY_POSITION:
+    case Ui::VideoView::Property::PLAY_POSITION:
     {
       int pos;
       if (value.Get(pos))
@@ -456,7 +456,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
       }
       break;
     }
-    case UI::VideoView::Property::DISPLAY_MODE:
+    case Ui::VideoView::Property::DISPLAY_MODE:
     {
       int mode;
       if (value.Get(mode))
@@ -470,7 +470,7 @@ void VideoView::SetPropertyInternal(Property::Index index, const Property::Value
 
 void VideoView::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::VideoView videoView = UI::VideoView::DownCast(Dali::BaseHandle(object));
+  Ui::VideoView videoView = Ui::VideoView::DownCast(Dali::BaseHandle(object));
 
   if (videoView)
   {
@@ -478,7 +478,7 @@ void VideoView::SetProperty(BaseObject* object, Property::Index index, const Pro
 
     impl.SetPropertyInternal(index, value);
 
-    if (index != UI::VideoView::Property::UNDERLAY)
+    if (index != Ui::VideoView::Property::UNDERLAY)
     {
       // Backup values.
       // These values will be used when underlay mode is changed.
@@ -490,7 +490,7 @@ void VideoView::SetProperty(BaseObject* object, Property::Index index, const Pro
 Property::Value VideoView::GetProperty(BaseObject* object, Property::Index propertyIndex)
 {
   Property::Value value;
-  UI::VideoView videoView = UI::VideoView::DownCast(Dali::BaseHandle(object));
+  Ui::VideoView videoView = Ui::VideoView::DownCast(Dali::BaseHandle(object));
 
   if (videoView)
   {
@@ -498,7 +498,7 @@ Property::Value VideoView::GetProperty(BaseObject* object, Property::Index prope
 
     switch (propertyIndex)
     {
-      case UI::VideoView::Property::VIDEO:
+      case Ui::VideoView::Property::VIDEO:
       {
         if (!impl.mUrl.empty())
         {
@@ -510,17 +510,17 @@ Property::Value VideoView::GetProperty(BaseObject* object, Property::Index prope
         }
         break;
       }
-      case UI::VideoView::Property::LOOPING:
+      case Ui::VideoView::Property::LOOPING:
       {
         value = impl.IsLooping();
         break;
       }
-      case UI::VideoView::Property::MUTED:
+      case Ui::VideoView::Property::MUTED:
       {
         value = impl.IsMuted();
         break;
       }
-      case UI::VideoView::Property::VOLUME:
+      case Ui::VideoView::Property::VOLUME:
       {
         Property::Map map;
         float left, right;
@@ -531,17 +531,17 @@ Property::Value VideoView::GetProperty(BaseObject* object, Property::Index prope
         value = map;
         break;
       }
-      case UI::VideoView::Property::UNDERLAY:
+      case Ui::VideoView::Property::UNDERLAY:
       {
         value = impl.IsUnderlay();
         break;
       }
-      case UI::VideoView::Property::PLAY_POSITION:
+      case Ui::VideoView::Property::PLAY_POSITION:
       {
         value = impl.GetPlayPosition();
         break;
       }
-      case UI::VideoView::Property::DISPLAY_MODE:
+      case Ui::VideoView::Property::DISPLAY_MODE:
       {
         value = impl.GetDisplayMode();
         break;
@@ -634,13 +634,13 @@ void VideoView::OnChildOrderChanged(Actor actor)
 
     if (lower)
     {
-      UI::VideoView lowerView = UI::VideoView::DownCast(lower);
+      Ui::VideoView lowerView = Ui::VideoView::DownCast(lower);
       mVideoPlayer.RaiseAbove(GetImpl(lowerView).GetVideoPlayer());
     }
 
     if (upper)
     {
-      UI::VideoView upperView = UI::VideoView::DownCast(upper);
+      Ui::VideoView upperView = Ui::VideoView::DownCast(upper);
       mVideoPlayer.LowerBelow(GetImpl(upperView).GetVideoPlayer());
     }
     mSiblingOrder = currentSiblingOrder;
@@ -692,16 +692,16 @@ void VideoView::SetWindowSurfaceTarget()
   mSizeUpdateNotification.NotifySignal().Connect(this, &VideoView::UpdateDisplayArea);
   mScaleUpdateNotification.NotifySignal().Connect(this, &VideoView::UpdateDisplayArea);
 
-  UI::Control control = UI::Control(GetOwner());
-  UI::Internal::Control& controlImpl = GetImplementation(control);
+  Ui::Control control = Ui::Control(GetOwner());
+  Ui::Internal::Control& controlImpl = GetImplementation(control);
 
   if (mTextureVisual)
   {
-    UI::DevelControl::UnregisterVisual(controlImpl, UI::VideoView::Property::TEXTURE);
+    Ui::DevelControl::UnregisterVisual(controlImpl, Ui::VideoView::Property::TEXTURE);
 
     if (Dali::Adaptor::IsAvailable() && mTextureVisual)
     {
-      UI::VisualFactory::Get().DiscardVisual(mTextureVisual);
+      Ui::VisualFactory::Get().DiscardVisual(mTextureVisual);
     }
     mTextureVisual.Reset();
   }
@@ -709,13 +709,13 @@ void VideoView::SetWindowSurfaceTarget()
   if (!mOverlayVisual)
   {
     Property::Map properties;
-    properties[UI::Visual::Property::TYPE] = UI::Visual::Type::COLOR;
-    properties[UI::Visual::Property::MIX_COLOR] = Color::BLACK;
+    properties[Ui::Visual::Property::TYPE] = Ui::Visual::Type::COLOR;
+    properties[Ui::Visual::Property::MIX_COLOR] = Color::BLACK;
 
-    mOverlayVisual = UI::VisualFactory::Get().CreateVisual(properties);
+    mOverlayVisual = Ui::VisualFactory::Get().CreateVisual(properties);
     if (mOverlayVisual)
     {
-      Internal::Visual::Base& visualImpl = UI::GetImplementation(mOverlayVisual);
+      Internal::Visual::Base& visualImpl = Ui::GetImplementation(mOverlayVisual);
 
       Renderer renderer = visualImpl.GetRenderer();
 
@@ -736,10 +736,10 @@ void VideoView::SetWindowSurfaceTarget()
       renderer.SetProperty(Renderer::Property::BLEND_EQUATION_RGB, BlendEquation::ADD);
       renderer.SetProperty(Renderer::Property::BLEND_EQUATION_ALPHA, BlendEquation::REVERSE_SUBTRACT);
 
-      UI::DevelControl::RegisterVisual(controlImpl, UI::VideoView::Property::OVERLAY, mOverlayVisual);
+      Ui::DevelControl::RegisterVisual(controlImpl, Ui::VideoView::Property::OVERLAY, mOverlayVisual);
 
       // Sync corner values to Control
-      UI::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mOverlayVisual, true);
+      Ui::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mOverlayVisual, true);
     }
 
     // Note VideoPlayer::SetRenderingTarget resets all the options. (e.g. url, mute, looping)
@@ -780,16 +780,16 @@ void VideoView::SetNativeImageTarget()
 
   Actor self(Self());
 
-  UI::Control control = UI::Control(GetOwner());
-  UI::Internal::Control& controlImpl = GetImplementation(control);
+  Ui::Control control = Ui::Control(GetOwner());
+  Ui::Internal::Control& controlImpl = GetImplementation(control);
 
   if (mOverlayVisual)
   {
-    UI::DevelControl::UnregisterVisual(controlImpl, UI::VideoView::Property::OVERLAY);
+    Ui::DevelControl::UnregisterVisual(controlImpl, Ui::VideoView::Property::OVERLAY);
 
     if (Dali::Adaptor::IsAvailable() && mOverlayVisual)
     {
-      UI::VisualFactory::Get().DiscardVisual(mOverlayVisual);
+      Ui::VisualFactory::Get().DiscardVisual(mOverlayVisual);
     }
     mOverlayVisual.Reset();
   }
@@ -808,20 +808,20 @@ void VideoView::SetNativeImageTarget()
 
   if (!mTextureVisual)
   {
-    UI::ImageUrl imageUrl = UI::ImageUrl::New(mNativeTexture);
+    Ui::ImageUrl imageUrl = Ui::ImageUrl::New(mNativeTexture);
 
     Property::Map shaderSource = CreateShader();
 
     Property::Map properties;
-    properties[UI::Visual::Property::TYPE] = UI::Visual::Type::IMAGE;
-    properties[UI::ImageVisual::Property::URL] = imageUrl.GetUrl();
-    properties[UI::Visual::Property::SHADER] = shaderSource;
+    properties[Ui::Visual::Property::TYPE] = Ui::Visual::Type::IMAGE;
+    properties[Ui::ImageVisual::Property::URL] = imageUrl.GetUrl();
+    properties[Ui::Visual::Property::SHADER] = shaderSource;
 
-    mTextureVisual = UI::VisualFactory::Get().CreateVisual(properties);
+    mTextureVisual = Ui::VisualFactory::Get().CreateVisual(properties);
     if (mTextureVisual)
     {
-      UI::DevelControl::RegisterVisual(controlImpl, UI::VideoView::Property::TEXTURE, mTextureVisual);
-      UI::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mTextureVisual, true);
+      Ui::DevelControl::RegisterVisual(controlImpl, Ui::VideoView::Property::TEXTURE, mTextureVisual);
+      Ui::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mTextureVisual, true);
     }
 
     // Note VideoPlayer::SetRenderingTarget resets all the options. (e.g. url, mute, looping)
@@ -1012,10 +1012,10 @@ Property::Map VideoView::CreateShader()
   }
 
   Property::Map shader;
-  shader[UI::Visual::Shader::Property::VERTEX_SHADER] = vertexShader;
-  shader[UI::Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShader;
-  shader[UI::Visual::Shader::Property::HINTS] = Shader::Hint::NONE;
-  shader[UI::Visual::Shader::Property::NAME] = "VIDEO_VIEW";
+  shader[Ui::Visual::Shader::Property::VERTEX_SHADER] = vertexShader;
+  shader[Ui::Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShader;
+  shader[Ui::Visual::Shader::Property::HINTS] = Shader::Hint::NONE;
+  shader[Ui::Visual::Shader::Property::NAME] = "VIDEO_VIEW";
 
   return shader;
 }
@@ -1074,21 +1074,21 @@ void VideoView::CreateOverlayTextureVisual()
 
   //// For underlay rendering mode, video display area have to be transparent.
   Property::Map shaderMap;
-  shaderMap[UI::Visual::Shader::Property::VERTEX_SHADER] = SHADER_VIDEO_VIEW_SOURCE_VERT.data();
-  shaderMap[UI::Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShaderString;
-  shaderMap[UI::Visual::Shader::Property::RENDER_PASS_TAG] = 11;
-  shaderMap[UI::Visual::Shader::Property::HINTS] =
+  shaderMap[Ui::Visual::Shader::Property::VERTEX_SHADER] = SHADER_VIDEO_VIEW_SOURCE_VERT.data();
+  shaderMap[Ui::Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShaderString;
+  shaderMap[Ui::Visual::Shader::Property::RENDER_PASS_TAG] = 11;
+  shaderMap[Ui::Visual::Shader::Property::HINTS] =
       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL);
-  shaderMap[UI::Visual::Shader::Property::NAME] = "VIDEO_VIEW_OVERLAY_SOURCE_TEXTURE";
+  shaderMap[Ui::Visual::Shader::Property::NAME] = "VIDEO_VIEW_OVERLAY_SOURCE_TEXTURE";
 
   Property::Map properties;
-  properties[UI::Visual::Property::TYPE] = UI::Visual::Type::COLOR;
-  properties[UI::Visual::Property::SHADER] = shaderMap;
-  mOverlayTextureVisual = UI::VisualFactory::Get().CreateVisual(properties);
+  properties[Ui::Visual::Property::TYPE] = Ui::Visual::Type::COLOR;
+  properties[Ui::Visual::Property::SHADER] = shaderMap;
+  mOverlayTextureVisual = Ui::VisualFactory::Get().CreateVisual(properties);
 
   if (mOverlayTextureVisual)
   {
-    Internal::Visual::Base& visualImpl = UI::GetImplementation(mOverlayTextureVisual);
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation(mOverlayTextureVisual);
     Renderer renderer = visualImpl.GetRenderer();
 
     if (mIsPlay)
@@ -1099,26 +1099,26 @@ void VideoView::CreateOverlayTextureVisual()
     // Set default(prevent trash values)
     Shader shader = renderer.GetShader();
     shader.RegisterProperty("cornerRadius", Vector4::ZERO);
-    shader.RegisterProperty("cornerRadiusPolicy", UI::Visual::Transform::Policy::ABSOLUTE);
+    shader.RegisterProperty("cornerRadiusPolicy", Ui::Visual::Transform::Policy::ABSOLUTE);
     shader.RegisterProperty("cornerSquareness", Vector4::ZERO);
 
     auto self = Self();
-    Dali::UI::VideoView handle(Dali::UI::VideoView::DownCast(self));
+    Dali::Ui::VideoView handle(Dali::Ui::VideoView::DownCast(self));
     if (mOverlayTextureVisualIndex == Property::INVALID_INDEX)
     {
       mOverlayTextureVisualIndex =
           handle.RegisterProperty("videoViewTextureVisual", "videoViewTextureVisual", Property::AccessMode::READ_WRITE);
     }
-    UI::Control control = UI::Control(GetOwner());
+    Ui::Control control = Ui::Control(GetOwner());
     Control& controlImpl = GetImplementation(control);
-    UI::DevelControl::RegisterVisual(controlImpl, mOverlayTextureVisualIndex, mOverlayTextureVisual);
+    Ui::DevelControl::RegisterVisual(controlImpl, mOverlayTextureVisualIndex, mOverlayTextureVisual);
 
     Dali::TextureSet textures = Dali::TextureSet::New();
     textures.SetTexture(0, mPreviousFrameTexture);
     textures.SetTexture(1, mCurrentFrameTexture);
     renderer.SetTextures(textures);
     // Sync corner values to Control
-    UI::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mOverlayTextureVisual, true);
+    Ui::DevelControl::EnableCornerPropertiesOverridden(controlImpl, mOverlayTextureVisual, true);
   }
 }
 
@@ -1126,13 +1126,13 @@ void VideoView::ResetOverlayTextureVisual()
 {
   if (mOverlayTextureVisual && mOverlayTextureVisualIndex != Property::INVALID_INDEX)
   {
-    UI::Control control = UI::Control(GetOwner());
+    Ui::Control control = Ui::Control(GetOwner());
     Control& controlImpl = GetImplementation(control);
-    UI::DevelControl::UnregisterVisual(controlImpl, mOverlayTextureVisualIndex);
+    Ui::DevelControl::UnregisterVisual(controlImpl, mOverlayTextureVisualIndex);
 
     if (Dali::Adaptor::IsAvailable() && mOverlayTextureVisual)
     {
-      UI::VisualFactory::Get().DiscardVisual(mOverlayTextureVisual);
+      Ui::VisualFactory::Get().DiscardVisual(mOverlayTextureVisual);
     }
     mOverlayTextureVisual.Reset();
   }
@@ -1226,6 +1226,6 @@ void VideoView::SetVideoFrameBuffer(Dali::NativeImagePtr source)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

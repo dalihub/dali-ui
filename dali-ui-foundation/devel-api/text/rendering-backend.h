@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_text_controls
@@ -46,7 +46,7 @@ const unsigned int DEFAULT_RENDERING_BACKEND = RENDERING_SHARED_ATLAS;
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

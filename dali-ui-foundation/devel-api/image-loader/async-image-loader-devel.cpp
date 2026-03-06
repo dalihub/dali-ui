@@ -19,7 +19,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelAsyncImageLoader
 {
@@ -34,7 +34,7 @@ uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDi
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   return GetImplementation(asyncImageLoader)
-      .Load(UI::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode, orientationCorrection,
+      .Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode, orientationCorrection,
             preMultiplyOnLoad, false);
 }
 
@@ -52,5 +52,5 @@ PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImage
 }
 
 } // namespace DevelAsyncImageLoader
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

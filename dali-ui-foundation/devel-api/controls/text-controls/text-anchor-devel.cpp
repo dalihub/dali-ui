@@ -25,7 +25,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextAnchor TextAnchor::New()
 {
@@ -64,6 +64,6 @@ TextAnchor::TextAnchor(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TextAnchor>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

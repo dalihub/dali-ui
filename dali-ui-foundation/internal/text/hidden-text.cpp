@@ -21,13 +21,13 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 const int DEFAULT_SHOW_DURATION = 1000;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -38,7 +38,7 @@ const char* const PROPERTY_SHOW_DURATION = "showDuration";
 
 HiddenText::HiddenText(Observer* observer)
   : mObserver(observer),
-    mHideMode(static_cast<int>(UI::HiddenInput::Mode::HIDE_NONE)),
+    mHideMode(static_cast<int>(Ui::HiddenInput::Mode::HIDE_NONE)),
     mSubstituteText(STAR),
     mDisplayDuration(DEFAULT_SHOW_DURATION),
     mSubstituteCount(0),
@@ -59,19 +59,19 @@ void HiddenText::SetProperties(const Property::Map& map)
     Property::Key& key = keyValue.first;
     Property::Value& value = keyValue.second;
 
-    if (key == UI::HiddenInput::Property::MODE || key == PROPERTY_MODE)
+    if (key == Ui::HiddenInput::Property::MODE || key == PROPERTY_MODE)
     {
       value.Get(mHideMode);
     }
-    else if (key == UI::HiddenInput::Property::SUBSTITUTE_CHARACTER || key == PROPERTY_SUBSTITUTE_CHARACTER)
+    else if (key == Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER || key == PROPERTY_SUBSTITUTE_CHARACTER)
     {
       value.Get(mSubstituteText);
     }
-    else if (key == UI::HiddenInput::Property::SUBSTITUTE_COUNT || key == PROPERTY_SUBSTITUTE_COUNT)
+    else if (key == Ui::HiddenInput::Property::SUBSTITUTE_COUNT || key == PROPERTY_SUBSTITUTE_COUNT)
     {
       value.Get(mSubstituteCount);
     }
-    else if (key == UI::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION || key == PROPERTY_SHOW_DURATION)
+    else if (key == Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION || key == PROPERTY_SHOW_DURATION)
     {
       value.Get(mDisplayDuration);
     }
@@ -80,10 +80,10 @@ void HiddenText::SetProperties(const Property::Map& map)
 
 void HiddenText::GetProperties(Property::Map& map)
 {
-  map[UI::HiddenInput::Property::MODE] = mHideMode;
-  map[UI::HiddenInput::Property::SUBSTITUTE_CHARACTER] = mSubstituteText;
-  map[UI::HiddenInput::Property::SUBSTITUTE_COUNT] = mSubstituteCount;
-  map[UI::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION] = mDisplayDuration;
+  map[Ui::HiddenInput::Property::MODE] = mHideMode;
+  map[Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER] = mSubstituteText;
+  map[Ui::HiddenInput::Property::SUBSTITUTE_COUNT] = mSubstituteCount;
+  map[Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION] = mDisplayDuration;
 }
 
 void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& destination, Length cursorPos)
@@ -100,31 +100,31 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
 
   switch (mHideMode)
   {
-    case UI::HiddenInput::Mode::HIDE_NONE:
+    case Ui::HiddenInput::Mode::HIDE_NONE:
     {
       hideStart = NULL;
       hideEnd = NULL;
       break;
     }
-    case UI::HiddenInput::Mode::HIDE_ALL:
+    case Ui::HiddenInput::Mode::HIDE_ALL:
     {
       hideStart = begin;
       hideEnd = end;
       break;
     }
-    case UI::HiddenInput::Mode::HIDE_COUNT:
+    case Ui::HiddenInput::Mode::HIDE_COUNT:
     {
       hideStart = begin;
       hideEnd = begin + mSubstituteCount;
       break;
     }
-    case UI::HiddenInput::Mode::SHOW_COUNT:
+    case Ui::HiddenInput::Mode::SHOW_COUNT:
     {
       hideStart = begin + mSubstituteCount;
       hideEnd = end;
       break;
     }
-    case UI::HiddenInput::Mode::SHOW_LAST_CHARACTER:
+    case Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER:
     {
       hideStart = begin;
       hideEnd = end;
@@ -149,7 +149,7 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
     }
   }
 
-  if (mHideMode == UI::HiddenInput::Mode::SHOW_LAST_CHARACTER)
+  if (mHideMode == Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER)
   {
     Length currentPos = 0u;
     for (; begin < end; ++begin)
@@ -206,6 +206,6 @@ bool HiddenText::OnTick()
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

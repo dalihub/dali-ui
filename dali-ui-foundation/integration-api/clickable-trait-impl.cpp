@@ -24,7 +24,7 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
 
-namespace Dali::UI::Integration
+namespace Dali::Ui::Integration
 {
 
 ClickableTraitImpl::ClickableTraitImpl()
@@ -33,7 +33,7 @@ ClickableTraitImpl::ClickableTraitImpl()
     mLongPressGestureDetector(LongPressGestureDetector::New()),
     mPressedChangedSignal(),
     mPseudoDisabledChangedSignal(),
-    mKeyClickPolicy(UIConfigManager::Get().GetKeyClickPolicy()),
+    mKeyClickPolicy(UiConfigManager::Get().GetKeyClickPolicy()),
     mPressedExecutionKey(),
     mPressedExecutionKeyCount(0),
     mPseudoDisabled(false),
@@ -42,7 +42,7 @@ ClickableTraitImpl::ClickableTraitImpl()
     mClickBlockedByTouch(false),
     mClickBlockedByKey(false)
 {
-  Dali::Integration::SetTapRecognizerTime(UIConfigManager::Get().GetTapRecognizerTime());
+  Dali::Integration::SetTapRecognizerTime(UiConfigManager::Get().GetTapRecognizerTime());
 
   mTapGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnTapInternal);
   mLongPressGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnLongPressedInternal);
@@ -283,7 +283,7 @@ bool ClickableTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent)
 
 bool ClickableTraitImpl::IsExecutionKey(const std::string& keyName) const
 {
-  return UIConfigManager::Get().GetExecutionKeyPredicate()(keyName);
+  return UiConfigManager::Get().GetExecutionKeyPredicate()(keyName);
 }
 
 bool ClickableTraitImpl::OnTouchInternal(Actor actor, const TouchEvent& touchEvent)
@@ -351,7 +351,7 @@ bool ClickableTraitImpl::ShouldKeyPressTriggerClicked() const
 bool ClickableTraitImpl::ShouldKeyPressTriggerLongPressed() const
 {
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
-         (mPressedExecutionKeyCount >= UIConfigManager::Get().GetMinLongPressKeyCount());
+         (mPressedExecutionKeyCount >= UiConfigManager::Get().GetMinLongPressKeyCount());
 }
 
-} // namespace Dali::UI::Integration
+} // namespace Dali::Ui::Integration

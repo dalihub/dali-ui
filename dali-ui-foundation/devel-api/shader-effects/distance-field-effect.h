@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * Creates a new DistanceFieldEffect
@@ -54,7 +54,7 @@ namespace UI
  */
 DALI_UI_API Dali::Property::Map CreateDistanceFieldEffect();
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

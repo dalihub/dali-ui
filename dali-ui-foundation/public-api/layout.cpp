@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 Layout::Layout()
@@ -67,7 +67,7 @@ Layout& Layout::operator=(Layout&& rhs) noexcept
 
 Layout Layout::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<Layout, Integration::LayoutImpl>(handle);
+  return Ui::Control::DownCast<Layout, Integration::LayoutImpl>(handle);
 }
 
 Layout::Layout(Integration::LayoutImpl& implementation)
@@ -129,5 +129,5 @@ int32_t Layout::IndexOfChild(View view) const
   return Integration::GetImpl(*this).IndexOfChild(view);
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

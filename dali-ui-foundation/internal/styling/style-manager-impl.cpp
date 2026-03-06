@@ -57,7 +57,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_STY
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -72,7 +72,7 @@ BaseHandle Create()
     SingletonService singletonService(SingletonService::Get());
     if (singletonService)
     {
-      UI::StyleManager manager = UI::StyleManager(new Internal::StyleManager());
+      Ui::StyleManager manager = Ui::StyleManager(new Internal::StyleManager());
       singletonService.Register(typeid(manager), manager);
       handle = manager;
     }
@@ -81,24 +81,24 @@ BaseHandle Create()
   return handle;
 }
 
-DALI_TYPE_REGISTRATION_BEGIN_CREATE(UI::StyleManager, Dali::BaseHandle, Create, true)
+DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::StyleManager, Dali::BaseHandle, Create, true)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
 
-UI::StyleManager StyleManager::Get()
+Ui::StyleManager StyleManager::Get()
 {
-  UI::StyleManager manager;
+  Ui::StyleManager manager;
 
   SingletonService singletonService(SingletonService::Get());
   if (singletonService)
   {
     // Check whether the style manager is already created
-    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(UI::StyleManager));
+    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(Ui::StyleManager));
     if (handle)
     {
       // If so, downcast the handle of singleton
-      manager = UI::StyleManager(dynamic_cast<StyleManager*>(handle.GetObjectPtr()));
+      manager = Ui::StyleManager(dynamic_cast<StyleManager*>(handle.GetObjectPtr()));
     }
   }
 
@@ -158,7 +158,7 @@ void StyleManager::OnAdaptorInit()
                           mInitializedControlsBeforeAdaptorInit.size(), mThemeAppliedControlsBeforeAdaptorInit.size());
       for (auto& weakControl : mInitializedControlsBeforeAdaptorInit)
       {
-        UI::Control controlHandle = weakControl.GetHandle();
+        Ui::Control controlHandle = weakControl.GetHandle();
         if (controlHandle)
         {
           ++actualAlivedControls;
@@ -167,7 +167,7 @@ void StyleManager::OnAdaptorInit()
       }
       for (auto& weakControl : mThemeAppliedControlsBeforeAdaptorInit)
       {
-        UI::Control controlHandle = weakControl.GetHandle();
+        Ui::Control controlHandle = weakControl.GetHandle();
         if (controlHandle)
         {
           ++actualAlivedControls;
@@ -223,7 +223,7 @@ bool StyleManager::GetStyleConstant(const std::string& key, Property::Value& val
   return false;
 }
 
-void StyleManager::ApplyThemeStyle(UI::Control control)
+void StyleManager::ApplyThemeStyle(Ui::Control control)
 {
   // If the adaptor is not initialized yet, we will style the control later
   if (!mAdaptorInitialized)
@@ -243,7 +243,7 @@ void StyleManager::ApplyThemeStyle(UI::Control control)
   }
 }
 
-void StyleManager::ApplyThemeStyleAtInit(UI::Control control)
+void StyleManager::ApplyThemeStyleAtInit(Ui::Control control)
 {
   // If the adaptor is not initialized yet, we will style the control later
   if (!mAdaptorInitialized)
@@ -260,12 +260,12 @@ void StyleManager::ApplyThemeStyleAtInit(UI::Control control)
   }
 }
 
-void StyleManager::ApplyStyle(UI::Control control, const std::string& jsonFileName, const std::string& styleName)
+void StyleManager::ApplyStyle(Ui::Control control, const std::string& jsonFileName, const std::string& styleName)
 {
   bool builderReady = false;
 
   // First look in the cache
-  UI::Builder builder = FindCachedBuilder(jsonFileName);
+  Ui::Builder builder = FindCachedBuilder(jsonFileName);
   if (builder)
   {
     builderReady = true;
@@ -293,17 +293,17 @@ void StyleManager::ApplyStyle(UI::Control control, const std::string& jsonFileNa
   }
 }
 
-UI::StyleManager::StyleChangedSignalType& StyleManager::StyleChangedSignal()
+Ui::StyleManager::StyleChangedSignalType& StyleManager::StyleChangedSignal()
 {
   return mStyleChangedSignal;
 }
 
-UI::StyleManager::StyleChangedSignalType& StyleManager::ControlStyleChangeSignal()
+Ui::StyleManager::StyleChangedSignalType& StyleManager::ControlStyleChangeSignal()
 {
   return mControlStyleChangeSignal;
 }
 
-UI::DevelStyleManager::BrokenImageChangedSignalType& StyleManager::BrokenImageChangedSignal()
+Ui::DevelStyleManager::BrokenImageChangedSignalType& StyleManager::BrokenImageChangedSignal()
 {
   return mBrokenImageChangedSignal;
 }
@@ -398,7 +398,7 @@ void StyleManager::SetBrokenImageUrl(DevelStyleManager::BrokenImageType brokenIm
 {
   int brokenType = static_cast<int>(brokenImageType);
   mBrokenImageUrls[brokenType] = brokenImageUrl;
-  UI::StyleManager styleManager = StyleManager::Get();
+  Ui::StyleManager styleManager = StyleManager::Get();
   mBrokenImageChangedSignal.Emit(styleManager);
 }
 
@@ -436,15 +436,15 @@ bool StyleManager::LoadFile(const std::string& filename, std::string& stringOut)
   return false;
 }
 
-UI::Builder StyleManager::CreateBuilder(const Property::Map& constants)
+Ui::Builder StyleManager::CreateBuilder(const Property::Map& constants)
 {
-  UI::Builder builder = UI::Builder::New();
+  Ui::Builder builder = Ui::Builder::New();
   builder.AddConstants(constants);
 
   return builder;
 }
 
-bool StyleManager::LoadJSON(UI::Builder builder, const std::string& jsonFilePath)
+bool StyleManager::LoadJSON(Ui::Builder builder, const std::string& jsonFilePath)
 {
   std::string fileString;
   if (LoadFile(jsonFilePath, fileString))
@@ -504,7 +504,7 @@ static void BuildQualifiedStyleName(const std::string& styleName, const std::vec
   }
 }
 
-static bool GetStyleNameForControl(UI::Builder builder, UI::Control control, std::string& styleName)
+static bool GetStyleNameForControl(Ui::Builder builder, Ui::Control control, std::string& styleName)
 {
   styleName = control.GetStyleName();
 
@@ -545,7 +545,7 @@ static bool GetStyleNameForControl(UI::Builder builder, UI::Control control, std
   return found;
 }
 
-void StyleManager::ApplyStyle(UI::Builder builder, UI::Control control)
+void StyleManager::ApplyStyle(Ui::Builder builder, Ui::Control control)
 {
   std::string styleName = control.GetStyleName();
   if (GetStyleNameForControl(builder, control, styleName))
@@ -587,7 +587,7 @@ Property::Map StyleManager::GetStyleProperties(const std::string& styleName, con
   return Property::Map();
 }
 
-const StylePtr StyleManager::GetRecordedStyle(UI::Control control)
+const StylePtr StyleManager::GetRecordedStyle(Ui::Control control)
 {
   if (mThemeBuilder)
   {
@@ -602,7 +602,7 @@ const StylePtr StyleManager::GetRecordedStyle(UI::Control control)
   return StylePtr(NULL);
 }
 
-UI::Builder StyleManager::FindCachedBuilder(const std::string& key)
+Ui::Builder StyleManager::FindCachedBuilder(const std::string& key)
 {
   BuilderMap::iterator builderIt = mBuilderCache.find(key);
   if (builderIt != mBuilderCache.end())
@@ -610,10 +610,10 @@ UI::Builder StyleManager::FindCachedBuilder(const std::string& key)
     return builderIt->second;
   }
 
-  return UI::Builder();
+  return Ui::Builder();
 }
 
-void StyleManager::CacheBuilder(UI::Builder builder, const std::string& key)
+void StyleManager::CacheBuilder(Ui::Builder builder, const std::string& key)
 {
   mBuilderCache[key] = builder;
 }
@@ -645,7 +645,7 @@ void StyleManager::StyleMonitorChange(StyleMonitor styleMonitor, StyleChange::Ty
 
 void StyleManager::EmitStyleChangeSignals(StyleChange::Type styleChange)
 {
-  UI::StyleManager styleManager = StyleManager::Get();
+  Ui::StyleManager styleManager = StyleManager::Get();
 
   // Update Controls first
   mControlStyleChangeSignal.Emit(styleManager, styleChange);
@@ -656,6 +656,6 @@ void StyleManager::EmitStyleChangeSignals(StyleChange::Type styleChange)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

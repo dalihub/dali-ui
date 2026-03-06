@@ -29,7 +29,7 @@ namespace Dali
 class Actor;
 class Path;
 
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -81,7 +81,7 @@ public:
 
   /**
    * @brief Creates an uninitialized ScrollViewPagePathEffect; this can be initialized with
-   * ScrollViewPagePathEffect::New(). Calling member functions with an uninitialized UI::ScrollViewPagePathEffect
+   * ScrollViewPagePathEffect::New(). Calling member functions with an uninitialized Ui::ScrollViewPagePathEffect
    * is not allowed.
    * @SINCE_1_0.0
    */
@@ -120,7 +120,7 @@ protected:
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

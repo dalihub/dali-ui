@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/layout-types.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_stacklayout_startup(void)
 {

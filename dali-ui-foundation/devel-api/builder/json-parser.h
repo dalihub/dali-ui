@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -137,7 +137,7 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL JsonParser(Internal::JsonParser* parser);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

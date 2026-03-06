@@ -42,7 +42,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -246,18 +246,18 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
       bool accepted = false;
       bool rejected = false;
 
-      accepted = impl.mInputFilter->Filter(UI::InputFilter::Property::ACCEPTED, redefinedText);
-      rejected = impl.mInputFilter->Filter(UI::InputFilter::Property::REJECTED, redefinedText);
+      accepted = impl.mInputFilter->Filter(Ui::InputFilter::Property::ACCEPTED, redefinedText);
+      rejected = impl.mInputFilter->Filter(Ui::InputFilter::Property::REJECTED, redefinedText);
 
       if (accepted)
       {
         // Signal emits when the string to be inserted is filtered by the accepted filter.
-        controller.mImpl->mEditableControlInterface->InputFiltered(UI::InputFilter::Property::ACCEPTED);
+        controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
       }
       if (rejected)
       {
         // Signal emits when the string to be inserted is filtered by the rejected filter.
-        controller.mImpl->mEditableControlInterface->InputFiltered(UI::InputFilter::Property::REJECTED);
+        controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::REJECTED);
       }
     }
 
@@ -895,6 +895,6 @@ void Controller::TextUpdater::RemoveTextAnchor(Controller& controller, int curso
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

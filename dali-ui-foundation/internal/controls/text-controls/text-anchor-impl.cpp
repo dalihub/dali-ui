@@ -31,11 +31,11 @@
 // DEVEL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-devel.h>
 
-using namespace Dali::UI::Text;
+using namespace Dali::Ui::Text;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -48,29 +48,29 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 // Type registration
 BaseHandle Create()
 {
-  return UI::TextAnchor::New();
+  return Ui::TextAnchor::New();
 }
 
 // clang-format off
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::TextAnchor, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::TextAnchor, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI, TextAnchor, "startCharacterIndex", INTEGER, START_CHARACTER_INDEX)
-DALI_PROPERTY_REGISTRATION(UI, TextAnchor, "endCharacterIndex",   INTEGER, END_CHARACTER_INDEX  )
-DALI_PROPERTY_REGISTRATION(UI, TextAnchor, "uri",                 STRING,  URI        )
+DALI_PROPERTY_REGISTRATION(Ui, TextAnchor, "startCharacterIndex", INTEGER, START_CHARACTER_INDEX)
+DALI_PROPERTY_REGISTRATION(Ui, TextAnchor, "endCharacterIndex",   INTEGER, END_CHARACTER_INDEX  )
+DALI_PROPERTY_REGISTRATION(Ui, TextAnchor, "uri",                 STRING,  URI        )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
 } // namespace
 
-UI::TextAnchor TextAnchor::New()
+Ui::TextAnchor TextAnchor::New()
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<TextAnchor> impl = new TextAnchor();
 
   // Pass ownership to CustomActor handle
-  UI::TextAnchor handle(*impl);
+  Ui::TextAnchor handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -83,7 +83,7 @@ Property::Value TextAnchor::GetProperty(BaseObject* object, Property::Index inde
 {
   Property::Value value;
 
-  UI::TextAnchor anchor = UI::TextAnchor::DownCast(Dali::BaseHandle(object));
+  Ui::TextAnchor anchor = Ui::TextAnchor::DownCast(Dali::BaseHandle(object));
 
   if (anchor)
   {
@@ -91,17 +91,17 @@ Property::Value TextAnchor::GetProperty(BaseObject* object, Property::Index inde
 
     switch (index)
     {
-      case UI::TextAnchor::Property::START_CHARACTER_INDEX:
+      case Ui::TextAnchor::Property::START_CHARACTER_INDEX:
       {
         value = impl.mStartCharacterIndex;
         break;
       }
-      case UI::TextAnchor::Property::END_CHARACTER_INDEX:
+      case Ui::TextAnchor::Property::END_CHARACTER_INDEX:
       {
         value = impl.mEndCharacterIndex;
         break;
       }
-      case UI::TextAnchor::Property::URI:
+      case Ui::TextAnchor::Property::URI:
       {
         value = impl.mUri;
         break;
@@ -114,26 +114,26 @@ Property::Value TextAnchor::GetProperty(BaseObject* object, Property::Index inde
 
 void TextAnchor::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextAnchor anchor = UI::TextAnchor::DownCast(Dali::BaseHandle(object));
+  Ui::TextAnchor anchor = Ui::TextAnchor::DownCast(Dali::BaseHandle(object));
 
   if (anchor)
   {
     TextAnchor& impl(GetImpl(anchor));
     switch (index)
     {
-      case UI::TextAnchor::Property::START_CHARACTER_INDEX:
+      case Ui::TextAnchor::Property::START_CHARACTER_INDEX:
       {
         value.Get(impl.mStartCharacterIndex);
         break;
       }
 
-      case UI::TextAnchor::Property::END_CHARACTER_INDEX:
+      case Ui::TextAnchor::Property::END_CHARACTER_INDEX:
       {
         value.Get(impl.mEndCharacterIndex);
         break;
       }
 
-      case UI::TextAnchor::Property::URI:
+      case Ui::TextAnchor::Property::URI:
       {
         value.Get(impl.mUri);
         break;
@@ -175,14 +175,14 @@ void TextAnchor::TextAnchorAccessible::InitDefaultFeatures()
 
 int32_t TextAnchor::TextAnchorAccessible::GetEndIndex() const
 {
-  auto self = UI::TextAnchor::DownCast(Self());
-  return self.GetProperty(UI::TextAnchor::Property::END_CHARACTER_INDEX).Get<int>();
+  auto self = Ui::TextAnchor::DownCast(Self());
+  return self.GetProperty(Ui::TextAnchor::Property::END_CHARACTER_INDEX).Get<int>();
 }
 
 int32_t TextAnchor::TextAnchorAccessible::GetStartIndex() const
 {
-  auto self = UI::TextAnchor::DownCast(Self());
-  return self.GetProperty(UI::TextAnchor::Property::START_CHARACTER_INDEX).Get<int>();
+  auto self = Ui::TextAnchor::DownCast(Self());
+  return self.GetProperty(Ui::TextAnchor::Property::START_CHARACTER_INDEX).Get<int>();
 }
 
 int32_t TextAnchor::TextAnchorAccessible::GetAnchorCount() const
@@ -197,8 +197,8 @@ Dali::Accessibility::Accessible* TextAnchor::TextAnchorAccessible::GetAnchorAcce
 
 std::string TextAnchor::TextAnchorAccessible::GetAnchorUri(int32_t anchorIndex) const
 {
-  auto self = UI::TextAnchor::DownCast(Self());
-  return self.GetProperty(UI::TextAnchor::Property::URI).Get<std::string>();
+  auto self = Ui::TextAnchor::DownCast(Self());
+  return self.GetProperty(Ui::TextAnchor::Property::URI).Get<std::string>();
 }
 
 bool TextAnchor::TextAnchorAccessible::IsValid() const
@@ -209,20 +209,20 @@ bool TextAnchor::TextAnchorAccessible::IsValid() const
 bool TextAnchor::OnAccessibilityActivated()
 {
   Dali::Actor current = Self();
-  Dali::UI::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;
+  Dali::Ui::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;
   while (!current.GetProperty<bool>(Actor::Property::IS_ROOT) && !parentImplementationAnchorInterface)
   {
     Dali::Actor parentAsActor = current.GetParent();
     Dali::CustomActor parentAsCustomActor = Dali::CustomActor::DownCast(parentAsActor);
     Dali::CustomActorImpl& parentImplementation = parentAsCustomActor.GetImplementation();
-    parentImplementationAnchorInterface = dynamic_cast<Dali::UI::Text::AnchorControlInterface*>(&parentImplementation);
+    parentImplementationAnchorInterface = dynamic_cast<Dali::Ui::Text::AnchorControlInterface*>(&parentImplementation);
     current = parentAsActor;
   }
 
   if (parentImplementationAnchorInterface)
   {
     std::string href;
-    std::string uri = Self().GetProperty(UI::TextAnchor::Property::URI).Get<std::string>();
+    std::string uri = Self().GetProperty(Ui::TextAnchor::Property::URI).Get<std::string>();
     parentImplementationAnchorInterface->AnchorClicked(mStartCharacterIndex, href);
     parentImplementationAnchorInterface->EmitAnchorClickedSignal(uri);
     return true;
@@ -230,12 +230,12 @@ bool TextAnchor::OnAccessibilityActivated()
 
   DALI_LOG_ERROR(
       "TextAnchor::OnAccessibilityActivate cannot find ancestor actor implementing "
-      "Dali::UI::Text::AnchorControlInterface.\n");
+      "Dali::Ui::Text::AnchorControlInterface.\n");
   return false;
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

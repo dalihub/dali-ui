@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Enumeration for the start and end property ranges.
@@ -52,7 +52,7 @@ enum DevelPropertyRanges
       ABSOLUTE_LAYOUT_CHILD_PROPERTY_START_INDEX + 999, ///< Absolute Layout Property End Index.
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

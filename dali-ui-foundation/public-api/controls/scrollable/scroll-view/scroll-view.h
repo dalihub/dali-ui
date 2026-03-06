@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -359,7 +359,7 @@ protected:
   RulerDomain mDomain; ///< The domain of the ruler.
 };
 
-typedef IntrusivePtr<Ruler> RulerPtr; ///< Pointer to Dali::UI::Ruler object @SINCE_1_0.0
+typedef IntrusivePtr<Ruler> RulerPtr; ///< Pointer to Dali::Ui::Ruler object @SINCE_1_0.0
 
 /**
  * @brief Concrete implementation of Ruler that has no snapping and has one single page.
@@ -375,22 +375,22 @@ public:
   DefaultRuler();
 
   /**
-   * @copydoc UI::Ruler::Snap
+   * @copydoc Ui::Ruler::Snap
    */
   float Snap(float x, float bias) const override;
 
   /**
-   * @copydoc UI::Ruler::GetPositionFromPage
+   * @copydoc Ui::Ruler::GetPositionFromPage
    */
   float GetPositionFromPage(unsigned int page, unsigned int& volume, bool wrap) const override;
 
   /**
-   * @copydoc UI::Ruler::GetPageFromPosition
+   * @copydoc Ui::Ruler::GetPageFromPosition
    */
   unsigned int GetPageFromPosition(float position, bool wrap) const override;
 
   /**
-   * @copydoc UI::Ruler::GetTotalPages
+   * @copydoc Ui::Ruler::GetTotalPages
    */
   unsigned int GetTotalPages() const override;
 };
@@ -411,22 +411,22 @@ public:
   FixedRuler(float spacing = 1.0f);
 
   /**
-   * @copydoc UI::Ruler::Snap
+   * @copydoc Ui::Ruler::Snap
    */
   float Snap(float x, float bias) const override;
 
   /**
-   * @copydoc UI::Ruler::GetPositionFromPage
+   * @copydoc Ui::Ruler::GetPositionFromPage
    */
   float GetPositionFromPage(unsigned int page, unsigned int& volume, bool wrap) const override;
 
   /**
-   * @copydoc UI::Ruler::GetPageFromPosition
+   * @copydoc Ui::Ruler::GetPageFromPosition
    */
   unsigned int GetPageFromPosition(float position, bool wrap) const override;
 
   /**
-   * @copydoc UI::Ruler::GetTotalPages
+   * @copydoc Ui::Ruler::GetTotalPages
    */
   unsigned int GetTotalPages() const override;
 
@@ -478,10 +478,10 @@ public:
    */
   enum PropertyRange
   {
-    PROPERTY_START_INDEX = UI::Scrollable::PROPERTY_END_INDEX + 1, ///< @SINCE_1_1.18
+    PROPERTY_START_INDEX = Ui::Scrollable::PROPERTY_END_INDEX + 1, ///< @SINCE_1_1.18
     PROPERTY_END_INDEX = PROPERTY_START_INDEX + 1000,              ///< Reserve property indices, @SINCE_1_1.18
 
-    ANIMATABLE_PROPERTY_START_INDEX = UI::Scrollable::ANIMATABLE_PROPERTY_END_INDEX + 1,
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::Scrollable::ANIMATABLE_PROPERTY_END_INDEX + 1,
     ANIMATABLE_PROPERTY_END_INDEX =
         ANIMATABLE_PROPERTY_START_INDEX + 1000 ///< Reserve animatable property indices @SINCE_1_0.0
   };
@@ -552,7 +552,7 @@ public:
        * When set, causes scroll view unable to scroll beyond the value of the boundary in the Y axis (by default no
        * boundary)                 |
        *
-       * Alternatively, one can use the keys defined in the Dali::UI::ScrollMode::Type enumeration.
+       * Alternatively, one can use the keys defined in the Dali::Ui::ScrollMode::Type enumeration.
        * @SINCE_1_2.60
        */
       SCROLL_MODE,
@@ -1432,7 +1432,7 @@ public: // Signals
 public: // Not intended for application developers
   /// @cond internal
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @SINCE_1_0.0
    * @param[in] implementation The Control implementation
@@ -1452,7 +1452,7 @@ public: // Not intended for application developers
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

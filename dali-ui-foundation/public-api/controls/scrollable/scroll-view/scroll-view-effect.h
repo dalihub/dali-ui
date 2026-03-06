@@ -31,7 +31,7 @@ struct Vector3;
 struct Vector4;
 class PropertyInput;
 
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -62,7 +62,7 @@ public:
   /**
    * @brief Creates an uninitialized ScrollViewEffect; this can only be initialized with derived classes.
    *
-   * Calling member functions with an uninitialized UI::BaseObject is not allowed.
+   * Calling member functions with an uninitialized Ui::BaseObject is not allowed.
    * @SINCE_1_0.0
    */
   ScrollViewEffect();
@@ -82,7 +82,7 @@ public: // Not intended for application developers
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

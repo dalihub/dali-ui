@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -46,7 +46,7 @@ ItalicSpan::~ItalicSpan() = default;
 
 ItalicSpan ItalicSpan::DownCast(BaseHandle handle)
 {
-  return ItalicSpan(dynamic_cast<Dali::UI::Text::Internal::ItalicSpan*>(handle.GetObjectPtr()));
+  return ItalicSpan(dynamic_cast<Dali::Ui::Text::Internal::ItalicSpan*>(handle.GetObjectPtr()));
 }
 
 ItalicSpan::ItalicSpan(Internal::ItalicSpan* internal)
@@ -56,6 +56,6 @@ ItalicSpan::ItalicSpan(Internal::ItalicSpan* internal)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

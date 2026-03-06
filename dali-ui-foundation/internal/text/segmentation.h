@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -68,7 +68,7 @@ void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -29,7 +29,7 @@ namespace // unnamed namespace
 {
 using namespace Dali;
 
-TimePeriod GetTimePeriod(const TreeNode& child, const UI::Internal::Replacement& constant)
+TimePeriod GetTimePeriod(const TreeNode& child, const Ui::Internal::Replacement& constant)
 {
   OptionalFloat delay = constant.IsFloat(IsChild(child, "delay"));
   OptionalFloat duration = constant.IsFloat(IsChild(child, "duration"));
@@ -140,7 +140,7 @@ AlphaFunction GetAlphaFunction(const std::string& alphaFunction)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -381,6 +381,6 @@ Animation CreateAnimation(const TreeNode& child, Builder* const builder)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -31,7 +31,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_R
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -203,6 +203,6 @@ void VectorBlobAtlas::TexSubImage(unsigned int offsetX, unsigned int offsetY, un
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -32,7 +32,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -540,6 +540,6 @@ int GetCharIndexAtPosition(ModelPtr textModel, float visualX, float visualY)
 }
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -45,7 +45,7 @@ CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr& v
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

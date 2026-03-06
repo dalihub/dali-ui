@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelColorVisual
 {
@@ -37,7 +37,7 @@ namespace Property
  */
 enum
 {
-  MIX_COLOR = UI::ColorVisual::Property::MIX_COLOR,
+  MIX_COLOR = Ui::ColorVisual::Property::MIX_COLOR,
 
   /**
    * @brief The blur radius of the visual.
@@ -78,7 +78,7 @@ enum Type
 
 } // namespace DevelColorVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

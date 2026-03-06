@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 StyleManager::StyleManager()
 {
@@ -61,7 +61,7 @@ bool StyleManager::GetStyleConstant(const std::string& key, Property::Value& val
   return GetImpl(*this).GetStyleConstant(key, valueOut);
 }
 
-void StyleManager::ApplyStyle(UI::Control control, const std::string& jsonFileName, const std::string& styleName)
+void StyleManager::ApplyStyle(Ui::Control control, const std::string& jsonFileName, const std::string& styleName)
 {
   GetImpl(*this).ApplyStyle(control, jsonFileName, styleName);
 }
@@ -76,6 +76,6 @@ StyleManager::StyleManager(Internal::StyleManager* impl)
 {
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

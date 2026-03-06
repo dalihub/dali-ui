@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -125,7 +125,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  PixelData Render(const Vector2& size, UI::DevelText::TextDirection::Type textDirection,
+  PixelData Render(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
                    RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES, bool ignoreHorizontalAlignment = false,
                    Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO);
 
@@ -148,7 +148,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  PixelData RenderWithCutout(const Vector2& size, UI::DevelText::TextDirection::Type textDirection,
+  PixelData RenderWithCutout(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
                              Devel::PixelBuffer cutoutBuffer, RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
                              bool ignoreHorizontalAlignment = false, Pixel::Format pixelFormat = Pixel::RGBA8888,
                              float originAlpha = 1.f, const Vector2& originSize = Size::ZERO);
@@ -172,7 +172,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, UI::DevelText::TextDirection::Type textDirection,
+  Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
                                            RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
                                            bool ignoreHorizontalAlignment = false,
                                            Pixel::Format pixelFormat = Pixel::RGBA8888,
@@ -285,7 +285,7 @@ private:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

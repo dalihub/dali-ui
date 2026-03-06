@@ -25,7 +25,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextSelectionPopup TextSelectionPopup::New(TextSelectionPopupCallbackInterface* callbackInterface)
 {
@@ -53,7 +53,7 @@ TextSelectionPopup TextSelectionPopup::DownCast(BaseHandle handle)
   return Control::DownCast<TextSelectionPopup, Internal::TextSelectionPopup>(handle);
 }
 
-void TextSelectionPopup::EnableButtons(UI::TextSelectionPopup::Buttons buttonsToEnable)
+void TextSelectionPopup::EnableButtons(Ui::TextSelectionPopup::Buttons buttonsToEnable)
 {
   GetImpl(*this).EnableButtons(buttonsToEnable);
 }
@@ -94,6 +94,6 @@ TextSelectionPopup::TextSelectionPopup(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TextSelectionPopup>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

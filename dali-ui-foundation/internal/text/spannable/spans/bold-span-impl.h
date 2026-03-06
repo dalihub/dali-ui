@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -37,7 +37,7 @@ class BoldSpan;
 using BoldSpanPtr = IntrusivePtr<BoldSpan>;
 
 /**
- * @copydoc Dali::UI::Text::BoldSpan
+ * @copydoc Dali::Ui::Text::BoldSpan
  */
 class BoldSpan : public BaseSpan
 {
@@ -45,9 +45,9 @@ public:
   /**
    * @brief Creates a new BoldSpan object.
    *
-   * @return Dali::UI::Text::BoldSpan
+   * @return Dali::Ui::Text::BoldSpan
    */
-  static Dali::UI::Text::BoldSpan New();
+  static Dali::Ui::Text::BoldSpan New();
 
   /**
    * @brief Construct a new Bold Span object
@@ -74,10 +74,10 @@ public:
   ~BoldSpan() override;
 
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 }; // class BoldSpan
 
@@ -85,7 +85,7 @@ public:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::BoldSpan& GetImplementation(Dali::UI::Text::BoldSpan& boldSpan)
+inline Internal::BoldSpan& GetImplementation(Dali::Ui::Text::BoldSpan& boldSpan)
 {
   DALI_ASSERT_ALWAYS(boldSpan && "boldSpan handle is empty");
 
@@ -94,7 +94,7 @@ inline Internal::BoldSpan& GetImplementation(Dali::UI::Text::BoldSpan& boldSpan)
   return static_cast<Internal::BoldSpan&>(object);
 }
 
-inline const Internal::BoldSpan& GetImplementation(const Dali::UI::Text::BoldSpan& boldSpan)
+inline const Internal::BoldSpan& GetImplementation(const Dali::Ui::Text::BoldSpan& boldSpan)
 {
   DALI_ASSERT_ALWAYS(boldSpan && "boldSpan handle is empty");
 
@@ -105,7 +105,7 @@ inline const Internal::BoldSpan& GetImplementation(const Dali::UI::Text::BoldSpa
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

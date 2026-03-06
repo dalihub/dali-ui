@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/public-api/grid-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * GridLayout sample: basic 2-column, 3-row grid with fixed sizes.

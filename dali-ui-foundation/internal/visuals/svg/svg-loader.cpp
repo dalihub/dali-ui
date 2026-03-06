@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -1292,6 +1292,6 @@ void SvgLoader::RasterizeObserverDestroyed(SvgLoaderObserver* observer)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

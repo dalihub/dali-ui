@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -47,7 +47,7 @@ float GetGlyphCharacterSpacing(const GlyphIndex& index,
                                const float modelCharacterSpacing);
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

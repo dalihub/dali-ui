@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class NavigationView;
 
@@ -49,15 +49,15 @@ public:
    * Create an initialized NavigationView.
    * @return A handle to a newly allocated Dali resource
    */
-  static UI::NavigationView New();
+  static Ui::NavigationView New();
 
   /**
-   * @copydoc Dali::UI::NavigationView::Push()
+   * @copydoc Dali::Ui::NavigationView::Push()
    */
   void Push(Actor& actor);
 
   /**
-   * @copydoc Dali::UI::NavigationView::Pop()
+   * @copydoc Dali::Ui::NavigationView::Pop()
    */
   Actor Pop();
 
@@ -113,25 +113,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::NavigationView& GetImpl(UI::NavigationView& navigationView)
+inline Ui::Internal::NavigationView& GetImpl(Ui::NavigationView& navigationView)
 {
   DALI_ASSERT_ALWAYS(navigationView);
 
   Dali::RefObject& handle = navigationView.GetImplementation();
 
-  return static_cast<UI::Internal::NavigationView&>(handle);
+  return static_cast<Ui::Internal::NavigationView&>(handle);
 }
 
-inline const UI::Internal::NavigationView& GetImpl(const UI::NavigationView& navigationView)
+inline const Ui::Internal::NavigationView& GetImpl(const Ui::NavigationView& navigationView)
 {
   DALI_ASSERT_ALWAYS(navigationView);
 
   const Dali::RefObject& handle = navigationView.GetImplementation();
 
-  return static_cast<const UI::Internal::NavigationView&>(handle);
+  return static_cast<const Ui::Internal::NavigationView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

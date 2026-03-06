@@ -27,7 +27,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -105,27 +105,27 @@ public:
   static InputEvent New(const LongPressGesture& originEvent);
 
   /**
-   * @copydoc Dali::UI::InputEvent::GetInputEventType
+   * @copydoc Dali::Ui::InputEvent::GetInputEventType
    */
   InputEventType GetInputEventType() const;
 
   /**
-   * @copydoc Dali::UI::InputEvent::GetTouchEvent
+   * @copydoc Dali::Ui::InputEvent::GetTouchEvent
    */
   const TouchEvent& GetTouchEvent() const;
 
   /**
-   * @copydoc Dali::UI::InputEvent::GetKeyEvent
+   * @copydoc Dali::Ui::InputEvent::GetKeyEvent
    */
   const KeyEvent& GetKeyEvent() const;
 
   /**
-   * @copydoc Dali::UI::InputEvent::GetTapGesture
+   * @copydoc Dali::Ui::InputEvent::GetTapGesture
    */
   const TapGesture& GetTapGesture() const;
 
   /**
-   * @copydoc Dali::UI::InputEvent::GetLongPressedGesture
+   * @copydoc Dali::Ui::InputEvent::GetLongPressedGesture
    */
   const LongPressGesture& GetLongPressGesture() const;
 
@@ -161,6 +161,6 @@ inline const Integration::InputEventImpl& GetImpl(const InputEvent& obj)
   return static_cast<const Integration::InputEventImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

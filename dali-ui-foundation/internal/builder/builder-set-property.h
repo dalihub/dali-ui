@@ -19,7 +19,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -63,7 +63,7 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
                                const Replacement& replacement);
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_BUILDER_SET_PROPERTY_H

@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -62,7 +62,7 @@ void SetRendererTexture(Dali::Renderer renderer, Dali::Texture texture);
 void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer);
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_CONTROL_RENDERERS_H

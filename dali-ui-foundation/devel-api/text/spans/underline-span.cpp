@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -118,11 +118,11 @@ bool UnderlineSpan::IsDashWidthDefined() const
 
 UnderlineSpan UnderlineSpan::DownCast(BaseHandle handle)
 {
-  return UnderlineSpan(dynamic_cast<Dali::UI::Text::Internal::UnderlineSpan*>(handle.GetObjectPtr()));
+  return UnderlineSpan(dynamic_cast<Dali::Ui::Text::Internal::UnderlineSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

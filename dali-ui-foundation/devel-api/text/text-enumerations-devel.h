@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelText
 {
@@ -181,7 +181,7 @@ enum Direction
 
 } // namespace DevelText
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

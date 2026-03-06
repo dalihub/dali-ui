@@ -22,6 +22,7 @@
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-back-forward-list-item.h>
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-toolkit-common.h>
@@ -30,7 +31,7 @@ namespace Dali
 {
 class WebEngineBackForwardList;
 
-namespace UI
+namespace Ui
 {
 class WebBackForwardListItem;
 
@@ -130,7 +131,7 @@ private:
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

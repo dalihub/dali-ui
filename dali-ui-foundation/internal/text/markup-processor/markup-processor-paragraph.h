@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -54,7 +54,7 @@ void ProcessRelativeLineHeight(const Attribute& attribute, BoundedParagraphRun& 
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

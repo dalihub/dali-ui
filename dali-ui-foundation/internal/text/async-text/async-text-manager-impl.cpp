@@ -32,7 +32,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace
 {
@@ -52,7 +52,7 @@ namespace Internal
 namespace
 {
 std::mutex gStaticAsyncTextManagerMutex; ///< Mutex for AsyncTextManager
-Dali::UI::Text::Internal::AsyncTextManager* gAsyncTextManager =
+Dali::Ui::Text::Internal::AsyncTextManager* gAsyncTextManager =
     nullptr; ///< Must be used under gStaticAsyncTextManagerMutex
 } // namespace
 AsyncTextManager::AsyncTextManager()
@@ -246,7 +246,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
   mTaskId++;
 
   auto task =
-      new Dali::UI::Internal::TextLoadingTask(mTaskId, parameters, MakeCallback(this, &AsyncTextManager::LoadComplete));
+      new Dali::Ui::Internal::TextLoadingTask(mTaskId, parameters, MakeCallback(this, &AsyncTextManager::LoadComplete));
 
   LoadElement element(task, observer, parameters);
 
@@ -304,7 +304,7 @@ uint32_t AsyncTextManager::RequestLoad(AsyncTextParameters& parameters, TextLoad
 void AsyncTextManager::RequestCancel(uint32_t taskId)
 {
   TextLoadObserver* cancelledObserver = nullptr;
-  UI::Internal::TextLoadingTaskPtr cancelledTask;
+  Ui::Internal::TextLoadingTaskPtr cancelledTask;
 
   {
     Mutex::ScopedLock lock(mTasksMutex);
@@ -364,7 +364,7 @@ void AsyncTextManager::RequestCancel(uint32_t taskId)
   }
 }
 
-void AsyncTextManager::LoadComplete(UI::Internal::TextLoadingTaskPtr task)
+void AsyncTextManager::LoadComplete(Ui::Internal::TextLoadingTaskPtr task)
 {
   uint32_t taskId = task->GetId();
 
@@ -427,7 +427,7 @@ void AsyncTextManager::LoadComplete(UI::Internal::TextLoadingTaskPtr task)
 }
 
 /// Worker thread called
-void AsyncTextManager::ReleaseLoaderToManager(UI::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader)
+void AsyncTextManager::ReleaseLoaderToManager(Ui::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader)
 {
   std::unique_lock<std::mutex> lock(gStaticAsyncTextManagerMutex);
   if (gAsyncTextManager)
@@ -441,7 +441,7 @@ void AsyncTextManager::ReleaseLoaderToManager(UI::Internal::TextLoadingTaskPtr t
 }
 
 /// Worker thread called
-void AsyncTextManager::ReleaseLoader(UI::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader)
+void AsyncTextManager::ReleaseLoader(Ui::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader)
 {
 #ifdef TRACE_ENABLED
   if (gTraceFilter && gTraceFilter->IsTraceEnabled())
@@ -544,7 +544,7 @@ void AsyncTextManager::ObserverDestroyed(TextLoadObserver* observer)
 #endif
 
   // TODO : Optimize here if possible.
-  static std::vector<UI::Internal::TextLoadingTaskPtr> cancelledTasks;
+  static std::vector<Ui::Internal::TextLoadingTaskPtr> cancelledTasks;
   {
     Mutex::ScopedLock lock(mTasksMutex);
     for (auto it = mRunningTasks.begin(); it != mRunningTasks.end();)
@@ -584,6 +584,6 @@ void AsyncTextManager::ObserverDestroyed(TextLoadObserver* observer)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

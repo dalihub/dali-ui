@@ -27,19 +27,19 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Internal
 {
 
-UI::DummyComponent DummyComponentImpl::New()
+Ui::DummyComponent DummyComponentImpl::New()
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<Internal::DummyComponentImpl> impl = new Internal::DummyComponentImpl();
 
   // Pass ownership to CustomActor handle
-  UI::DummyComponent handle = UI::DummyComponent(*impl);
+  Ui::DummyComponent handle = Ui::DummyComponent(*impl);
 
   // Second-phase initialization
   impl->Initialize();
@@ -58,6 +58,6 @@ DummyComponentImpl::~DummyComponentImpl()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

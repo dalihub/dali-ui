@@ -35,7 +35,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -51,99 +51,99 @@ class ScrollBar : public Control
 {
 public:
   // Signals
-  typedef UI::ScrollBar::PanFinishedSignalType PanFinishedSignalType;
-  typedef UI::ScrollBar::ScrollPositionIntervalReachedSignalType ScrollPositionIntervalReachedSignalType;
+  typedef Ui::ScrollBar::PanFinishedSignalType PanFinishedSignalType;
+  typedef Ui::ScrollBar::ScrollPositionIntervalReachedSignalType ScrollPositionIntervalReachedSignalType;
 
 public:
   /**
-   * @copydoc UI::ScrollBar::New()
+   * @copydoc Ui::ScrollBar::New()
    */
-  static UI::ScrollBar New(UI::ScrollBar::Direction direction);
+  static Ui::ScrollBar New(Ui::ScrollBar::Direction direction);
 
   /**
-   * @copydoc UI::ScrollBar::SetScrollPropertySource()
+   * @copydoc Ui::ScrollBar::SetScrollPropertySource()
    */
   void SetScrollPropertySource(Handle handle, Property::Index propertyScrollPosition,
                                Property::Index propertyMinScrollPosition, Property::Index propertyMaxScrollPosition,
                                Property::Index propertyScrollContentSize);
 
   /**
-   * @copydoc UI::ScrollBar::SetScrollIndicator()
+   * @copydoc Ui::ScrollBar::SetScrollIndicator()
    */
   void SetScrollIndicator(Actor indicator);
 
   /**
-   * @copydoc UI::ScrollBar::GetScrollIndicator()
+   * @copydoc Ui::ScrollBar::GetScrollIndicator()
    */
   Actor GetScrollIndicator();
 
   /**
-   * @copydoc UI::ScrollBar::SetScrollPositionIntervals()
+   * @copydoc Ui::ScrollBar::SetScrollPositionIntervals()
    */
   void SetScrollPositionIntervals(const Dali::Vector<float>& positions);
 
   /**
-   * @copydoc UI::ScrollBar::GetScrollPositionIntervals()
+   * @copydoc Ui::ScrollBar::GetScrollPositionIntervals()
    */
   Dali::Vector<float> GetScrollPositionIntervals() const;
 
   /**
-   * @copydoc UI::ScrollBar::SetScrollDirection()
+   * @copydoc Ui::ScrollBar::SetScrollDirection()
    */
-  void SetScrollDirection(UI::ScrollBar::Direction direction);
+  void SetScrollDirection(Ui::ScrollBar::Direction direction);
 
   /**
-   * @copydoc UI::ScrollBar::GetScrollDirection()
+   * @copydoc Ui::ScrollBar::GetScrollDirection()
    */
-  UI::ScrollBar::Direction GetScrollDirection() const;
+  Ui::ScrollBar::Direction GetScrollDirection() const;
 
   /**
-   * @copydoc UI::ScrollBar::SetIndicatorHeightPolicy()
+   * @copydoc Ui::ScrollBar::SetIndicatorHeightPolicy()
    */
-  void SetIndicatorHeightPolicy(UI::ScrollBar::IndicatorHeightPolicy policy);
+  void SetIndicatorHeightPolicy(Ui::ScrollBar::IndicatorHeightPolicy policy);
 
   /**
-   * @copydoc UI::ScrollBar::GetIndicatorHeightPolicy()
+   * @copydoc Ui::ScrollBar::GetIndicatorHeightPolicy()
    */
-  UI::ScrollBar::IndicatorHeightPolicy GetIndicatorHeightPolicy() const;
+  Ui::ScrollBar::IndicatorHeightPolicy GetIndicatorHeightPolicy() const;
 
   /**
-   * @copydoc UI::ScrollBar::SetIndicatorFixedHeight()
+   * @copydoc Ui::ScrollBar::SetIndicatorFixedHeight()
    */
   void SetIndicatorFixedHeight(float height);
 
   /**
-   * @copydoc UI::ScrollBar::GetIndicatorFixedHeight()
+   * @copydoc Ui::ScrollBar::GetIndicatorFixedHeight()
    */
   float GetIndicatorFixedHeight() const;
 
   /**
-   * @copydoc UI::ScrollBar::SetIndicatorShowDuration()
+   * @copydoc Ui::ScrollBar::SetIndicatorShowDuration()
    */
   void SetIndicatorShowDuration(float durationSeconds);
 
   /**
-   * @copydoc UI::ScrollBar::GetIndicatorShowDuration()
+   * @copydoc Ui::ScrollBar::GetIndicatorShowDuration()
    */
   float GetIndicatorShowDuration() const;
 
   /**
-   * @copydoc UI::ScrollBar::SetIndicatorHideDuration()
+   * @copydoc Ui::ScrollBar::SetIndicatorHideDuration()
    */
   void SetIndicatorHideDuration(float durationSeconds);
 
   /**
-   * @copydoc UI::ScrollBar::GetIndicatorHideDuration()
+   * @copydoc Ui::ScrollBar::GetIndicatorHideDuration()
    */
   float GetIndicatorHideDuration() const;
 
   /**
-   * @copydoc UI::ScrollBar::ShowIndicator()
+   * @copydoc Ui::ScrollBar::ShowIndicator()
    */
   void ShowIndicator();
 
   /**
-   * @copydoc UI::ScrollBar::HideIndicator()
+   * @copydoc Ui::ScrollBar::HideIndicator()
    */
   void HideIndicator();
 
@@ -153,7 +153,7 @@ public:
   void ShowTransientIndicator();
 
   /**
-   * @copydoc UI::ScrollBar::PanFinishedSignal()
+   * @copydoc Ui::ScrollBar::PanFinishedSignal()
    */
   PanFinishedSignalType& PanFinishedSignal()
   {
@@ -161,7 +161,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollBar::ScrollPositionIntervalReachedSignal()
+   * @copydoc Ui::ScrollBar::ScrollPositionIntervalReachedSignal()
    */
   ScrollPositionIntervalReachedSignalType& ScrollPositionIntervalReachedSignal()
   {
@@ -210,17 +210,17 @@ public:
 
 private: // from Control
   /**
-   * @copydoc UI::Control::OnInitialize
+   * @copydoc Ui::Control::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc UI::Control::OnPan
+   * @copydoc Ui::Control::OnPan
    */
   void OnPan(const PanGesture& gesture) override;
 
@@ -271,7 +271,7 @@ private:
    * Constructor.
    * It initializes ScrollBar members.
    */
-  ScrollBar(UI::ScrollBar::Direction direction);
+  ScrollBar(Ui::ScrollBar::Direction direction);
 
   /**
    * A reference counted object may only be deleted by calling Unreference()
@@ -283,7 +283,7 @@ private:
   float mIndicatorShowAlpha; ///< The alpha value when the indicator is fully shown
   Animation mAnimation;      ///< Scroll indicator Show/Hide Animation.
 
-  UI::ScrollBar::Direction mDirection; ///< The direction of scroll bar (vertical or horizontal)
+  Ui::ScrollBar::Direction mDirection; ///< The direction of scroll bar (vertical or horizontal)
 
   WeakHandle<Handle> mScrollableObject; ///< Object to be scrolled
 
@@ -304,7 +304,7 @@ private:
 
   float mCurrentScrollPosition; ///< The current scroll position updated by the pan gesture
 
-  UI::ScrollBar::IndicatorHeightPolicy
+  Ui::ScrollBar::IndicatorHeightPolicy
       mIndicatorHeightPolicy;    ///< The height policy of scroll indicator (variable or fixed)
   float mIndicatorFixedHeight;   ///< The fixed height of scroll indicator
   float mIndicatorMinimumHeight; ///< The minimum height for a variable size indicator
@@ -375,25 +375,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ScrollBar& GetImpl(UI::ScrollBar& scrollBar)
+inline Ui::Internal::ScrollBar& GetImpl(Ui::ScrollBar& scrollBar)
 {
   DALI_ASSERT_ALWAYS(scrollBar);
 
   Dali::RefObject& handle = scrollBar.GetImplementation();
 
-  return static_cast<UI::Internal::ScrollBar&>(handle);
+  return static_cast<Ui::Internal::ScrollBar&>(handle);
 }
 
-inline const UI::Internal::ScrollBar& GetImpl(const UI::ScrollBar& scrollBar)
+inline const Ui::Internal::ScrollBar& GetImpl(const Ui::ScrollBar& scrollBar)
 {
   DALI_ASSERT_ALWAYS(scrollBar);
 
   const Dali::RefObject& handle = scrollBar.GetImplementation();
 
-  return static_cast<const UI::Internal::ScrollBar&>(handle);
+  return static_cast<const Ui::Internal::ScrollBar&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

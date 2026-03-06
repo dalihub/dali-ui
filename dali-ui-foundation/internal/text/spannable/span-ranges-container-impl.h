@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -67,7 +67,7 @@ public:
    * @param[in] range The range.
    *
    */
-  void AddSpan(const Dali::UI::Text::BaseSpan& span, const Dali::UI::Text::Range& range);
+  void AddSpan(const Dali::Ui::Text::BaseSpan& span, const Dali::Ui::Text::Range& range);
 
   /**
    * @brief Remove the span from the list.
@@ -75,7 +75,7 @@ public:
    * @param[in] span The span of style.
    *
    */
-  void RemoveSpan(const Dali::UI::Text::BaseSpan& span);
+  void RemoveSpan(const Dali::Ui::Text::BaseSpan& span);
 
   /**
    * @brief Check if a given @p span is in list
@@ -84,14 +84,14 @@ public:
    *
    * @return true if the @p span exists. Otherwise false.
    */
-  bool Contains(const Dali::UI::Text::BaseSpan& span) const;
+  bool Contains(const Dali::Ui::Text::BaseSpan& span) const;
 
   /**
    * @brief Retrieve all spans.
    *
    * @param[out] listOfSpans container to clone spans
    */
-  void GetSpans(std::vector<Dali::UI::Text::BaseSpan>& listOfSpans) const;
+  void GetSpans(std::vector<Dali::Ui::Text::BaseSpan>& listOfSpans) const;
 
   /**
    * @brief Retrieve all spans and ranges.
@@ -99,8 +99,8 @@ public:
    * @param[out] spans container to clone spans
    * @param[out] ranges container to clone ranges
    */
-  void GetSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan>& spans,
-                         std::vector<Dali::UI::Text::Range>& ranges) const;
+  void GetSpansAndRanges(std::vector<Dali::Ui::Text::BaseSpan>& spans,
+                         std::vector<Dali::Ui::Text::Range>& ranges) const;
 
   // Removed constructors and assignment operators
 public:                                                                // Constructors
@@ -120,7 +120,7 @@ private:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

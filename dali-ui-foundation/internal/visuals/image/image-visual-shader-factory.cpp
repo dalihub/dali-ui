@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -110,7 +110,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
   featureBuilder.GetVertexShaderPrefixList(vertexShaderPrefixList);
   featureBuilder.GetFragmentShaderPrefixList(fragmentShaderPrefixList);
 
-  if (Dali::UI::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
+  if (Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
   {
     vertexShaderPrefixList += "#define IS_REQUIRED_DEBUG_VISUAL_SHADER\n";
     fragmentShaderPrefixList += "#define IS_REQUIRED_DEBUG_VISUAL_SHADER\n";
@@ -119,9 +119,9 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
   std::string vertexShader = std::string(vertexShaderPrefixList + SHADER_IMAGE_VISUAL_SHADER_VERT.data());
   std::string fragmentShader = std::string(fragmentShaderPrefixList + SHADER_IMAGE_VISUAL_SHADER_FRAG.data());
 
-  if (Dali::UI::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
+  if (Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
   {
-    Dali::UI::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertexShader, fragmentShader);
+    Dali::Ui::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertexShader, fragmentShader);
   }
 
   if (featureBuilder.NeedToChangeFragmentShader() == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE)
@@ -334,6 +334,6 @@ bool ImageVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderTy
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

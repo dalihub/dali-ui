@@ -8,7 +8,7 @@ skinparam packageStyle rectangle
 
 ' ========== External (DALi) ==========
 package "DALi (external)" as dali {
-  class "UI::Control" as Control <<handle>>
+  class "Ui::Control" as Control <<handle>>
   class "Dali::Integration::Processor" as Processor <<interface>>
   class "Dali::Internal::CustomActor" as CustomActor <<impl>>
 }
@@ -16,7 +16,7 @@ package "DALi (external)" as dali {
 ' ========== Public API (Handles) ==========
 ' Note: Only Layout has child management in public API.
 ' View does not expose SetLayoutManager/AddView; ViewImpl keeps them for internal use (e.g. ButtonImpl).
-package "Dali::UI (Public API)" as public_api {
+package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
     + New() : View
     + Measure(widthConstraint, heightConstraint) : MeasuredSize
@@ -88,9 +88,9 @@ package "Dali::UI (Public API)" as public_api {
 ' ========== Integration API (Implementations) ==========
 ' ViewImpl: LayoutManager, child API, Contents are integration-only (e.g. ButtonImpl).
 ' LayoutImpl inherits child APIs from ViewImpl; adds CreateLayoutManager/EnsureLayoutManager.
-package "Dali::UI::Integration (Implementation)" as integration {
+package "Dali::Ui::Integration (Implementation)" as integration {
   class "ViewImpl" as ViewImpl <<impl>> {
-    + {static} New() : UI::View
+    + {static} New() : Ui::View
     - mLayoutWidth
     - mLayoutHeight
     - mLayoutManager
@@ -99,14 +99,14 @@ package "Dali::UI::Integration (Implementation)" as integration {
     + SetLayoutManager(LayoutManager*)
     + GetLayoutManager() : LayoutManager*
     + HasLayoutManager() : bool
-    + AddView(UI::View)
-    + AddView(UI::View, index)
-    + RemoveView(UI::View)
+    + AddView(Ui::View)
+    + AddView(Ui::View, index)
+    + RemoveView(Ui::View)
     + RemoveViewAt(index)
     + RemoveAllViews()
     + GetChildCount() : uint32_t
-    + GetChildAt(index) : UI::View
-    + IndexOfChild(UI::View) : int32_t
+    + GetChildAt(index) : Ui::View
+    + IndexOfChild(Ui::View) : int32_t
     + Contents(initializer_list<View>) : ViewImpl&
     __
     + Measure(widthConstraint, heightConstraint) : MeasuredSize
@@ -114,14 +114,14 @@ package "Dali::UI::Integration (Implementation)" as integration {
     + OnMeasure(w, h) : MeasuredSize
     + OnArrange(bounds) : MeasuredSize
     + InvalidateMeasure()
-    + GetParentLayout() : UI::Layout
+    + GetParentLayout() : Ui::Layout
     + IsLayout() : bool
     + RegisterWithLayoutController()
     # GetChildren() : ChildContainer&
   }
 
   class "LayoutImpl" as LayoutImpl <<impl>> {
-    + {static} New() : UI::Layout
+    + {static} New() : Ui::Layout
     __
     # CreateLayoutManager() : LayoutManager*
     # EnsureLayoutManager()
@@ -129,22 +129,22 @@ package "Dali::UI::Integration (Implementation)" as integration {
   }
 
   class "StackLayoutImpl" as StackLayoutImpl <<impl>> {
-    + {static} New(StackOrientation) : UI::StackLayout
+    + {static} New(StackOrientation) : Ui::StackLayout
     # CreateLayoutManager() : LayoutManager*
   }
 
   class "FlexLayoutImpl" as FlexLayoutImpl <<impl>> {
-    + {static} New() : UI::FlexLayout
+    + {static} New() : Ui::FlexLayout
     # CreateLayoutManager() : LayoutManager*
   }
 
   class "GridLayoutImpl" as GridLayoutImpl <<impl>> {
-    + {static} New() : UI::GridLayout
+    + {static} New() : Ui::GridLayout
     # CreateLayoutManager() : LayoutManager*
   }
 
   class "AbsoluteLayoutImpl" as AbsoluteLayoutImpl <<impl>> {
-    + {static} New() : UI::AbsoluteLayout
+    + {static} New() : Ui::AbsoluteLayout
     # CreateLayoutManager() : LayoutManager*
   }
 

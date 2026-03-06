@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -163,7 +163,7 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
     return false;
   }
 
-  UI::JsonParser parser = UI::JsonParser::New();
+  Ui::JsonParser parser = Ui::JsonParser::New();
 
   if (!parser.Parse(stringOut))
   {
@@ -389,6 +389,6 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelImageVisual
 {
@@ -45,7 +45,7 @@ enum Type
 
 } // namespace DevelImageVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

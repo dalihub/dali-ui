@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -176,7 +176,7 @@ private:
 
 protected:
   /**
-   * @copydoc UI::TextureUploadObserver::LoadComplete()
+   * @copydoc Ui::TextureUploadObserver::LoadComplete()
    */
   void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
 
@@ -206,7 +206,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

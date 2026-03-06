@@ -23,11 +23,11 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-void LogTree(const UI::JsonParser& parser)
+void LogTree(const Ui::JsonParser& parser)
 {
   if (OptionalChild constants = IsChild(parser.GetRoot(), "constants"))
   {
@@ -53,7 +53,7 @@ std::string PropertyValueToString(const Property::Value& value)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DEBUG_ENABLED

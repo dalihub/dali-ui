@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -34,10 +34,10 @@ namespace // to register type
 {
 BaseHandle Create()
 {
-  return UI::NavigationView::New();
+  return Ui::NavigationView::New();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::NavigationView, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::NavigationView, Ui::Control, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
@@ -53,13 +53,13 @@ NavigationView::~NavigationView()
   mContentStack.clear();
 }
 
-UI::NavigationView NavigationView::New()
+Ui::NavigationView NavigationView::New()
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<NavigationView> internalNavigationView = new NavigationView();
 
   // Pass ownership to CustomActor handle
-  UI::NavigationView navigationView(*internalNavigationView);
+  Ui::NavigationView navigationView(*internalNavigationView);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -117,6 +117,6 @@ Actor NavigationView::Pop()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

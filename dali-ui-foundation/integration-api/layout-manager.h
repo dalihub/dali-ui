@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -129,5 +129,5 @@ private:
   LayoutManager& operator=(LayoutManager&&) = delete;
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

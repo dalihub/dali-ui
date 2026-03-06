@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -96,7 +96,7 @@ public:
    *
    * @return A span type value.
    */
-  Dali::UI::Text::SpanType::Value GetSpanType() const;
+  Dali::Ui::Text::SpanType::Value GetSpanType() const;
 
   /**
    * @brief Downcasts to a BaseSpan handle.
@@ -120,7 +120,7 @@ public: // Not intended for application developers
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

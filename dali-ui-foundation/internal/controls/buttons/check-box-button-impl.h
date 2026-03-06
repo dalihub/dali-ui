@@ -28,14 +28,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
  * CheckBoxButton implementation class.
  *
- * \sa Dali::UI::CheckBoxButton
+ * \sa Dali::Ui::CheckBoxButton
  */
 class CheckBoxButton : public Button
 {
@@ -44,7 +44,7 @@ public:
    * Create a new CheckBoxButton.
    * @return A smart-pointer to the newly allocated CheckBoxButton.
    */
-  static Dali::UI::CheckBoxButton New();
+  static Dali::Ui::CheckBoxButton New();
 
 private:
   /**
@@ -59,12 +59,12 @@ private:
 
 private: // From Button
   /**
-   * @copydoc UI::Internal::Button::OnInitialize
+   * @copydoc Ui::Internal::Button::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -82,7 +82,7 @@ protected:
     using Button::ButtonAccessible::ButtonAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
      */
     Dali::Accessibility::States CalculateStates() override;
   };
@@ -94,25 +94,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::CheckBoxButton& GetImplementation(UI::CheckBoxButton& button)
+inline Ui::Internal::CheckBoxButton& GetImplementation(Ui::CheckBoxButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<UI::Internal::CheckBoxButton&>(handle);
+  return static_cast<Ui::Internal::CheckBoxButton&>(handle);
 }
 
-inline const UI::Internal::CheckBoxButton& GetImplementation(const UI::CheckBoxButton& button)
+inline const Ui::Internal::CheckBoxButton& GetImplementation(const Ui::CheckBoxButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   const Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<const UI::Internal::CheckBoxButton&>(handle);
+  return static_cast<const Ui::Internal::CheckBoxButton&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

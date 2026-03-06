@@ -56,11 +56,11 @@
 // DEVEL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 
-using namespace Dali::UI::Text;
+using namespace Dali::Ui::Text;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -68,7 +68,7 @@ namespace
 {
 static constexpr uint32_t NUMBER_OF_RENDER_MODE = 3;
 
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::UI::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
 
 /**
  * @brief How the text visual should be aligned vertically inside the control.
@@ -94,8 +94,8 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 #endif
 
 const Scripting::StringEnum AUTO_SCROLL_STOP_MODE_TABLE[] = {
-    {"IMMEDIATE", UI::TextLabel::AutoScrollStopMode::IMMEDIATE},
-    {"FINISH_LOOP", UI::TextLabel::AutoScrollStopMode::FINISH_LOOP},
+    {"IMMEDIATE", Ui::TextLabel::AutoScrollStopMode::IMMEDIATE},
+    {"FINISH_LOOP", Ui::TextLabel::AutoScrollStopMode::FINISH_LOOP},
 };
 const unsigned int AUTO_SCROLL_STOP_MODE_TABLE_COUNT =
     sizeof(AUTO_SCROLL_STOP_MODE_TABLE) / sizeof(AUTO_SCROLL_STOP_MODE_TABLE[0]);
@@ -103,78 +103,78 @@ const unsigned int AUTO_SCROLL_STOP_MODE_TABLE_COUNT =
 // Type registration
 BaseHandle Create()
 {
-  return UI::TextLabel::New();
+  return Ui::TextLabel::New();
 }
 
 // clang-format off
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::TextLabel, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::TextLabel, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "text",                         STRING,  TEXT                           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "fontFamily",                   STRING,  FONT_FAMILY                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "fontStyle",                    MAP,     FONT_STYLE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "pointSize",                    FLOAT,   POINT_SIZE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "multiLine",                    BOOLEAN, MULTI_LINE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "horizontalAlignment",          STRING,  HORIZONTAL_ALIGNMENT           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "verticalAlignment",            STRING,  VERTICAL_ALIGNMENT             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "enableMarkup",                 BOOLEAN, ENABLE_MARKUP                  )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "enableAutoScroll",             BOOLEAN, ENABLE_AUTO_SCROLL             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "autoScrollSpeed",              INTEGER, AUTO_SCROLL_SPEED              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "autoScrollLoopCount",          INTEGER, AUTO_SCROLL_LOOP_COUNT         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "autoScrollGap",                FLOAT,   AUTO_SCROLL_GAP                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "lineSpacing",                  FLOAT,   LINE_SPACING                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "underline",                    MAP,     UNDERLINE                      )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "shadow",                       MAP,     SHADOW                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "emboss",                       MAP,     EMBOSS                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "outline",                      MAP,     OUTLINE                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "pixelSize",                    FLOAT,   PIXEL_SIZE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "ellipsis",                     BOOLEAN, ELLIPSIS                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "autoScrollLoopDelay",          FLOAT,   AUTO_SCROLL_LOOP_DELAY         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "autoScrollStopMode",           STRING,  AUTO_SCROLL_STOP_MODE          )
-DALI_PROPERTY_REGISTRATION_READ_ONLY(UI,       TextLabel, "lineCount",                    INTEGER, LINE_COUNT                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextLabel, "lineWrapMode",                 INTEGER, LINE_WRAP_MODE                 )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextLabel, "textDirection",                INTEGER, TEXT_DIRECTION                 )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "verticalLineAlignment",        INTEGER, VERTICAL_LINE_ALIGNMENT        )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "textBackground",               MAP,     BACKGROUND                     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "ignoreSpacesAfterText",        BOOLEAN, IGNORE_SPACES_AFTER_TEXT       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "matchSystemLanguageDirection", BOOLEAN, MATCH_SYSTEM_LANGUAGE_DIRECTION)
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "textFit",                      MAP,     TEXT_FIT                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "minLineSize",                  FLOAT,   MIN_LINE_SIZE                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "renderingBackend",             INTEGER, RENDERING_BACKEND              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "fontSizeScale",                FLOAT,   FONT_SIZE_SCALE                )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "enableFontSizeScale",          BOOLEAN, ENABLE_FONT_SIZE_SCALE         )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "ellipsisPosition",             INTEGER, ELLIPSIS_POSITION              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "strikethrough",                MAP,     STRIKETHROUGH                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "characterSpacing",             FLOAT,   CHARACTER_SPACING              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "relativeLineSize",             FLOAT,   RELATIVE_LINE_SIZE             )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "anchorColor",                  VECTOR4, ANCHOR_COLOR                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "anchorClickedColor",           VECTOR4, ANCHOR_CLICKED_COLOR           )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "removeFrontInset",             BOOLEAN, REMOVE_FRONT_INSET             )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "removeBackInset",              BOOLEAN, REMOVE_BACK_INSET              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "cutout",                       BOOLEAN, CUTOUT                         )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "renderMode",                   INTEGER, RENDER_MODE                    )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextLabel, "manualRendered",               BOOLEAN, MANUAL_RENDERED                )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextLabel, "asyncLineCount",               INTEGER, ASYNC_LINE_COUNT               )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "ellipsisMode",                 INTEGER, ELLIPSIS_MODE                  )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextLabel, "isScrolling",                  BOOLEAN, IS_SCROLLING                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "fontVariations",               MAP,     FONT_VARIATIONS                )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "renderScale",                  FLOAT,   RENDER_SCALE                   )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextLabel, "needRequestAsyncRender",       BOOLEAN, NEED_REQUEST_ASYNC_RENDER      )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "layoutDirectionPolicy",        INTEGER, LAYOUT_DIRECTION_POLICY        )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextLabel, "autoScrollDirection",          INTEGER, AUTO_SCROLL_DIRECTION          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "text",                         STRING,  TEXT                           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "fontFamily",                   STRING,  FONT_FAMILY                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "fontStyle",                    MAP,     FONT_STYLE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "pointSize",                    FLOAT,   POINT_SIZE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "multiLine",                    BOOLEAN, MULTI_LINE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "horizontalAlignment",          STRING,  HORIZONTAL_ALIGNMENT           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "verticalAlignment",            STRING,  VERTICAL_ALIGNMENT             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "enableMarkup",                 BOOLEAN, ENABLE_MARKUP                  )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "enableAutoScroll",             BOOLEAN, ENABLE_AUTO_SCROLL             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "autoScrollSpeed",              INTEGER, AUTO_SCROLL_SPEED              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "autoScrollLoopCount",          INTEGER, AUTO_SCROLL_LOOP_COUNT         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "autoScrollGap",                FLOAT,   AUTO_SCROLL_GAP                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "lineSpacing",                  FLOAT,   LINE_SPACING                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "underline",                    MAP,     UNDERLINE                      )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "shadow",                       MAP,     SHADOW                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "emboss",                       MAP,     EMBOSS                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "outline",                      MAP,     OUTLINE                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "pixelSize",                    FLOAT,   PIXEL_SIZE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "ellipsis",                     BOOLEAN, ELLIPSIS                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "autoScrollLoopDelay",          FLOAT,   AUTO_SCROLL_LOOP_DELAY         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "autoScrollStopMode",           STRING,  AUTO_SCROLL_STOP_MODE          )
+DALI_PROPERTY_REGISTRATION_READ_ONLY(Ui,       TextLabel, "lineCount",                    INTEGER, LINE_COUNT                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextLabel, "lineWrapMode",                 INTEGER, LINE_WRAP_MODE                 )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextLabel, "textDirection",                INTEGER, TEXT_DIRECTION                 )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "verticalLineAlignment",        INTEGER, VERTICAL_LINE_ALIGNMENT        )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "textBackground",               MAP,     BACKGROUND                     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "ignoreSpacesAfterText",        BOOLEAN, IGNORE_SPACES_AFTER_TEXT       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "matchSystemLanguageDirection", BOOLEAN, MATCH_SYSTEM_LANGUAGE_DIRECTION)
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "textFit",                      MAP,     TEXT_FIT                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "minLineSize",                  FLOAT,   MIN_LINE_SIZE                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "renderingBackend",             INTEGER, RENDERING_BACKEND              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "fontSizeScale",                FLOAT,   FONT_SIZE_SCALE                )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "enableFontSizeScale",          BOOLEAN, ENABLE_FONT_SIZE_SCALE         )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "ellipsisPosition",             INTEGER, ELLIPSIS_POSITION              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "strikethrough",                MAP,     STRIKETHROUGH                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "characterSpacing",             FLOAT,   CHARACTER_SPACING              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "relativeLineSize",             FLOAT,   RELATIVE_LINE_SIZE             )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "anchorColor",                  VECTOR4, ANCHOR_COLOR                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "anchorClickedColor",           VECTOR4, ANCHOR_CLICKED_COLOR           )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "removeFrontInset",             BOOLEAN, REMOVE_FRONT_INSET             )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "removeBackInset",              BOOLEAN, REMOVE_BACK_INSET              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "cutout",                       BOOLEAN, CUTOUT                         )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "renderMode",                   INTEGER, RENDER_MODE                    )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextLabel, "manualRendered",               BOOLEAN, MANUAL_RENDERED                )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextLabel, "asyncLineCount",               INTEGER, ASYNC_LINE_COUNT               )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "ellipsisMode",                 INTEGER, ELLIPSIS_MODE                  )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextLabel, "isScrolling",                  BOOLEAN, IS_SCROLLING                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "fontVariations",               MAP,     FONT_VARIATIONS                )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "renderScale",                  FLOAT,   RENDER_SCALE                   )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextLabel, "needRequestAsyncRender",       BOOLEAN, NEED_REQUEST_ASYNC_RENDER      )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "layoutDirectionPolicy",        INTEGER, LAYOUT_DIRECTION_POLICY        )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextLabel, "autoScrollDirection",          INTEGER, AUTO_SCROLL_DIRECTION          )
 
-DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT(UI, TextLabel, "textColor",       Color::BLACK,     TEXT_COLOR       )
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI,    TextLabel, "textColorRed",    TEXT_COLOR_RED,   TEXT_COLOR,     0)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI,    TextLabel, "textColorGreen",  TEXT_COLOR_GREEN, TEXT_COLOR,     1)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI,    TextLabel, "textColorBlue",   TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI,    TextLabel, "textColorAlpha",  TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI,              TextLabel, "pixelSnapFactor", FLOAT,            PIXEL_SNAP_FACTOR)
+DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT(Ui, TextLabel, "textColor",       Color::BLACK,     TEXT_COLOR       )
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui,    TextLabel, "textColorRed",    TEXT_COLOR_RED,   TEXT_COLOR,     0)
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui,    TextLabel, "textColorGreen",  TEXT_COLOR_GREEN, TEXT_COLOR,     1)
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui,    TextLabel, "textColorBlue",   TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui,    TextLabel, "textColorAlpha",  TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui,              TextLabel, "pixelSnapFactor", FLOAT,            PIXEL_SNAP_FACTOR)
 
-DALI_SIGNAL_REGISTRATION(UI, TextLabel, "anchorClicked",               SIGNAL_ANCHOR_CLICKED                 )
-DALI_SIGNAL_REGISTRATION(UI, TextLabel, "textFitChanged",              SIGNAL_TEXT_FIT_CHANGED               )
-DALI_SIGNAL_REGISTRATION(UI, TextLabel, "asyncTextRendered",           SIGNAL_ASYNC_TEXT_RENDERED            )
-DALI_SIGNAL_REGISTRATION(UI, TextLabel, "asyncNaturalSizeComputed",    SIGNAL_ASYNC_NATURAL_SIZE_COMPUTED    )
-DALI_SIGNAL_REGISTRATION(UI, TextLabel, "asyncHeightForWidthComputed", SIGNAL_ASYNC_HEIGHT_FOR_WIDTH_COMPUTED)
+DALI_SIGNAL_REGISTRATION(Ui, TextLabel, "anchorClicked",               SIGNAL_ANCHOR_CLICKED                 )
+DALI_SIGNAL_REGISTRATION(Ui, TextLabel, "textFitChanged",              SIGNAL_TEXT_FIT_CHANGED               )
+DALI_SIGNAL_REGISTRATION(Ui, TextLabel, "asyncTextRendered",           SIGNAL_ASYNC_TEXT_RENDERED            )
+DALI_SIGNAL_REGISTRATION(Ui, TextLabel, "asyncNaturalSizeComputed",    SIGNAL_ASYNC_NATURAL_SIZE_COMPUTED    )
+DALI_SIGNAL_REGISTRATION(Ui, TextLabel, "asyncHeightForWidthComputed", SIGNAL_ASYNC_HEIGHT_FOR_WIDTH_COMPUTED)
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -260,24 +260,24 @@ void ParseTextFitProperty(Text::ControllerPtr& controller, const Property::Map* 
  *
  * @param[in,out] visual Visual to be discarded. It will be reset to an empty handle.
  */
-void DiscardTextLabelVisual(Dali::UI::Visual::Base& visual)
+void DiscardTextLabelVisual(Dali::Ui::Visual::Base& visual)
 {
   if (DALI_LIKELY(Dali::Adaptor::IsAvailable() && visual))
   {
-    Dali::UI::VisualFactory::Get().DiscardVisual(visual);
+    Dali::Ui::VisualFactory::Get().DiscardVisual(visual);
   }
   visual.Reset();
 }
 
 } // namespace
 
-UI::TextLabel TextLabel::New(ControlBehaviour additionalBehaviour)
+Ui::TextLabel TextLabel::New(ControlBehaviour additionalBehaviour)
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<TextLabel> impl = new TextLabel(additionalBehaviour);
 
   // Pass ownership to CustomActor handle
-  UI::TextLabel handle(*impl);
+  Ui::TextLabel handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -288,7 +288,7 @@ UI::TextLabel TextLabel::New(ControlBehaviour additionalBehaviour)
 
 void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextLabel label = UI::TextLabel::DownCast(Dali::BaseHandle(object));
+  Ui::TextLabel label = Ui::TextLabel::DownCast(Dali::BaseHandle(object));
 
   if (label)
   {
@@ -297,7 +297,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
 
     switch (index)
     {
-      case UI::DevelTextLabel::Property::RENDERING_BACKEND:
+      case Ui::DevelTextLabel::Property::RENDERING_BACKEND:
       {
         int backend = value.Get<int>();
 
@@ -320,12 +320,12 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::TEXT:
+      case Ui::TextLabel::Property::TEXT:
       {
         impl.UpdateText(value.Get<std::string>());
         break;
       }
-      case UI::TextLabel::Property::FONT_FAMILY:
+      case Ui::TextLabel::Property::FONT_FAMILY:
       {
         const std::string& fontFamily = value.Get<std::string>();
 
@@ -335,13 +335,13 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::TextLabel::Property::FONT_STYLE:
+      case Ui::TextLabel::Property::FONT_STYLE:
       {
         SetFontStyleProperty(impl.mController, value, Text::FontStyle::DEFAULT);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::TextLabel::Property::POINT_SIZE:
+      case Ui::TextLabel::Property::POINT_SIZE:
       {
         const float pointSize = value.Get<float>();
 
@@ -352,14 +352,14 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::MULTI_LINE:
+      case Ui::TextLabel::Property::MULTI_LINE:
       {
         impl.mController->SetMultiLineEnabled(value.Get<bool>());
         impl.mIsAsyncRenderNeeded = true;
         impl.UpdateAutoScrollState();
         break;
       }
-      case UI::TextLabel::Property::HORIZONTAL_ALIGNMENT:
+      case Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT:
       {
         Text::HorizontalAlignment::Type alignment(static_cast<Text::HorizontalAlignment::Type>(
             -1)); // Set to invalid value to ensure a valid mode does get set
@@ -370,9 +370,9 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::VERTICAL_ALIGNMENT:
+      case Ui::TextLabel::Property::VERTICAL_ALIGNMENT:
       {
-        UI::Text::VerticalAlignment::Type alignment(
+        Ui::Text::VerticalAlignment::Type alignment(
             static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
         if (Text::GetVerticalAlignmentEnumeration(value, alignment))
         {
@@ -381,7 +381,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::ENABLE_MARKUP:
+      case Ui::TextLabel::Property::ENABLE_MARKUP:
       {
         const bool enableMarkup = value.Get<bool>();
         impl.mController->SetMarkupProcessorEnabled(enableMarkup);
@@ -398,7 +398,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::ENABLE_AUTO_SCROLL:
+      case Ui::TextLabel::Property::ENABLE_AUTO_SCROLL:
       {
         if (impl.mController->IsTextElideEnabled() &&
             impl.mController->GetEllipsisMode() == DevelText::Ellipsize::AUTO_SCROLL)
@@ -430,38 +430,38 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_STOP_MODE:
+      case Ui::TextLabel::Property::AUTO_SCROLL_STOP_MODE:
       {
         Text::TextScrollerPtr textScroller = impl.GetTextScroller();
-        UI::TextLabel::AutoScrollStopMode::Type stopMode = textScroller->GetStopMode();
-        if (Scripting::GetEnumerationProperty<UI::TextLabel::AutoScrollStopMode::Type>(
+        Ui::TextLabel::AutoScrollStopMode::Type stopMode = textScroller->GetStopMode();
+        if (Scripting::GetEnumerationProperty<Ui::TextLabel::AutoScrollStopMode::Type>(
                 value, AUTO_SCROLL_STOP_MODE_TABLE, AUTO_SCROLL_STOP_MODE_TABLE_COUNT, stopMode))
         {
           textScroller->SetStopMode(stopMode);
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_SPEED:
+      case Ui::TextLabel::Property::AUTO_SCROLL_SPEED:
       {
         impl.GetTextScroller()->SetSpeed(value.Get<int>());
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT:
+      case Ui::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT:
       {
         impl.GetTextScroller()->SetLoopCount(value.Get<int>());
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY:
+      case Ui::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY:
       {
         impl.GetTextScroller()->SetLoopDelay(value.Get<float>());
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_GAP:
+      case Ui::TextLabel::Property::AUTO_SCROLL_GAP:
       {
         impl.GetTextScroller()->SetGap(value.Get<float>());
         break;
       }
-      case UI::DevelTextLabel::Property::AUTO_SCROLL_DIRECTION:
+      case Ui::DevelTextLabel::Property::AUTO_SCROLL_DIRECTION:
       {
         DevelText::AutoScroll::Direction direction = static_cast<DevelText::AutoScroll::Direction>(value.Get<int>());
         impl.GetTextScroller()->SetDirection(direction);
@@ -469,37 +469,37 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mTextUpdateNeeded = true;
         break;
       }
-      case UI::TextLabel::Property::LINE_SPACING:
+      case Ui::TextLabel::Property::LINE_SPACING:
       {
         const float lineSpacing = value.Get<float>();
         impl.mTextUpdateNeeded = impl.mController->SetDefaultLineSpacing(lineSpacing) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::TextLabel::Property::UNDERLINE:
+      case Ui::TextLabel::Property::UNDERLINE:
       {
         impl.mTextUpdateNeeded =
             SetUnderlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::TextLabel::Property::SHADOW:
+      case Ui::TextLabel::Property::SHADOW:
       {
         impl.mTextUpdateNeeded =
             SetShadowProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::TextLabel::Property::EMBOSS:
+      case Ui::TextLabel::Property::EMBOSS:
       {
         impl.mTextUpdateNeeded =
             SetEmbossProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::TextLabel::Property::OUTLINE:
+      case Ui::TextLabel::Property::OUTLINE:
       {
         impl.mTextUpdateNeeded =
             SetOutlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::TextLabel::Property::PIXEL_SIZE:
+      case Ui::TextLabel::Property::PIXEL_SIZE:
       {
         const float pixelSize = value.Get<float>();
         DALI_LOG_INFO(gLogFilter, Debug::General, "TextLabel %p PIXEL_SIZE %f\n", impl.mController.Get(), pixelSize);
@@ -511,7 +511,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::TextLabel::Property::ELLIPSIS:
+      case Ui::TextLabel::Property::ELLIPSIS:
       {
         const bool ellipsis = value.Get<bool>();
         DALI_LOG_INFO(gLogFilter, Debug::General, "TextLabel %p ELLIPSIS %d\n", impl.mController.Get(), ellipsis);
@@ -521,7 +521,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.RequestTextRelayout();
         break;
       }
-      case UI::TextLabel::Property::LINE_WRAP_MODE:
+      case Ui::TextLabel::Property::LINE_WRAP_MODE:
       {
         Text::LineWrap::Mode lineWrapMode(
             static_cast<Text::LineWrap::Mode>(-1)); // Set to invalid value to ensure a valid mode does get set
@@ -534,7 +534,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::VERTICAL_LINE_ALIGNMENT:
+      case Ui::DevelTextLabel::Property::VERTICAL_LINE_ALIGNMENT:
       {
         if (impl.mController->GetTextModel())
         {
@@ -552,26 +552,26 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::BACKGROUND:
+      case Ui::DevelTextLabel::Property::BACKGROUND:
       {
         impl.mTextUpdateNeeded =
             SetBackgroundProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::DevelTextLabel::Property::IGNORE_SPACES_AFTER_TEXT:
+      case Ui::DevelTextLabel::Property::IGNORE_SPACES_AFTER_TEXT:
       {
         impl.mController->SetIgnoreSpacesAfterText(value.Get<bool>());
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
+      case Ui::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
       {
         impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? DevelText::MatchLayoutDirection::LOCALE
                                                                     : DevelText::MatchLayoutDirection::CONTENTS);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::TEXT_FIT:
+      case Ui::DevelTextLabel::Property::TEXT_FIT:
       {
         // If TextFitArray is enabled, this should be disabled.
         if (impl.mController->IsTextFitArrayEnabled())
@@ -585,7 +585,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::MIN_LINE_SIZE:
+      case Ui::DevelTextLabel::Property::MIN_LINE_SIZE:
       {
         const float lineSize = value.Get<float>();
         // If TextFitArray is enabled, do not update the default line size.
@@ -597,7 +597,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::FONT_SIZE_SCALE:
+      case Ui::DevelTextLabel::Property::FONT_SIZE_SCALE:
       {
         const float scale = value.Get<float>();
         DALI_LOG_INFO(gLogFilter, Debug::General, "TextLabel %p FONT_SIZE_SCALE %f\n", impl.mController.Get(), scale);
@@ -609,7 +609,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::ENABLE_FONT_SIZE_SCALE:
+      case Ui::DevelTextLabel::Property::ENABLE_FONT_SIZE_SCALE:
       {
         const bool enableFontSizeScale = value.Get<bool>();
         if (!Equals(impl.mController->IsFontSizeScaleEnabled(), enableFontSizeScale))
@@ -619,7 +619,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::ELLIPSIS_POSITION:
+      case Ui::DevelTextLabel::Property::ELLIPSIS_POSITION:
       {
         DevelText::EllipsisPosition::Type ellipsisPositionType(static_cast<DevelText::EllipsisPosition::Type>(
             -1)); // Set to invalid value to ensure a valid mode does get set
@@ -633,20 +633,20 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::STRIKETHROUGH:
+      case Ui::DevelTextLabel::Property::STRIKETHROUGH:
       {
         impl.mTextUpdateNeeded =
             SetStrikethroughProperties(impl.mController, value, Text::EffectStyle::DEFAULT) || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::DevelTextLabel::Property::CHARACTER_SPACING:
+      case Ui::DevelTextLabel::Property::CHARACTER_SPACING:
       {
         const float characterSpacing = value.Get<float>();
         impl.mController->SetCharacterSpacing(characterSpacing);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::RELATIVE_LINE_SIZE:
+      case Ui::DevelTextLabel::Property::RELATIVE_LINE_SIZE:
       {
         const float relativeLineSize = value.Get<float>();
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextLabel %p RELATIVE_LINE_SIZE %f\n", impl.mController.Get(),
@@ -656,7 +656,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::ANCHOR_COLOR:
+      case Ui::DevelTextLabel::Property::ANCHOR_COLOR:
       {
         const Vector4& anchorColor = value.Get<Vector4>();
         if (impl.mController->GetAnchorColor() != anchorColor)
@@ -666,7 +666,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::ANCHOR_CLICKED_COLOR:
+      case Ui::DevelTextLabel::Property::ANCHOR_CLICKED_COLOR:
       {
         const Vector4& anchorClickedColor = value.Get<Vector4>();
         if (impl.mController->GetAnchorClickedColor() != anchorClickedColor)
@@ -676,21 +676,21 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::REMOVE_FRONT_INSET:
+      case Ui::DevelTextLabel::Property::REMOVE_FRONT_INSET:
       {
         const bool remove = value.Get<bool>();
         impl.mController->SetRemoveFrontInset(remove);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::REMOVE_BACK_INSET:
+      case Ui::DevelTextLabel::Property::REMOVE_BACK_INSET:
       {
         const bool remove = value.Get<bool>();
         impl.mController->SetRemoveBackInset(remove);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::CUTOUT:
+      case Ui::DevelTextLabel::Property::CUTOUT:
       {
         const bool cutout = value.Get<bool>();
 
@@ -698,7 +698,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::RENDER_MODE:
+      case Ui::DevelTextLabel::Property::RENDER_MODE:
       {
         DevelTextLabel::Render::Mode renderMode = static_cast<DevelTextLabel::Render::Mode>(value.Get<int>());
         if (renderMode < 0 || renderMode >= NUMBER_OF_RENDER_MODE)
@@ -716,7 +716,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::ELLIPSIS_MODE:
+      case Ui::DevelTextLabel::Property::ELLIPSIS_MODE:
       {
         DevelText::Ellipsize::Mode ellipsisMode = static_cast<DevelText::Ellipsize::Mode>(value.Get<int>());
         if (impl.mController->GetEllipsisMode() != ellipsisMode)
@@ -725,7 +725,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
           Text::TextScrollerPtr textScroller = impl.GetTextScroller();
           if (textScroller)
           {
-            textScroller->SetStopMode(UI::TextLabel::AutoScrollStopMode::IMMEDIATE);
+            textScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
             textScroller->StopScrolling();
           }
           impl.mLastEllipsisMode = ellipsisMode;
@@ -734,7 +734,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::FONT_VARIATIONS:
+      case Ui::DevelTextLabel::Property::FONT_VARIATIONS:
       {
         const Property::Map variationsMap = value.Get<Property::Map>();
         impl.mController->SetVariationsMap(variationsMap);
@@ -743,7 +743,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
-      case UI::DevelTextLabel::Property::RENDER_SCALE:
+      case Ui::DevelTextLabel::Property::RENDER_SCALE:
       {
         float renderScale = value.Get<float>();
         if (renderScale < 1.0f)
@@ -761,7 +761,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
         }
         break;
       }
-      case UI::DevelTextLabel::Property::LAYOUT_DIRECTION_POLICY:
+      case Ui::DevelTextLabel::Property::LAYOUT_DIRECTION_POLICY:
       {
         DevelText::MatchLayoutDirection layoutDirectionPolicy =
             static_cast<DevelText::MatchLayoutDirection>(value.Get<int>());
@@ -795,7 +795,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
 {
   Property::Value value;
 
-  UI::TextLabel label = UI::TextLabel::DownCast(Dali::BaseHandle(object));
+  Ui::TextLabel label = Ui::TextLabel::DownCast(Dali::BaseHandle(object));
 
   if (label)
   {
@@ -804,39 +804,39 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
 
     switch (index)
     {
-      case UI::DevelTextLabel::Property::RENDERING_BACKEND:
+      case Ui::DevelTextLabel::Property::RENDERING_BACKEND:
       {
         value = impl.mRenderingBackend;
         break;
       }
-      case UI::TextLabel::Property::TEXT:
+      case Ui::TextLabel::Property::TEXT:
       {
         std::string text;
         impl.mController->GetText(text);
         value = text;
         break;
       }
-      case UI::TextLabel::Property::FONT_FAMILY:
+      case Ui::TextLabel::Property::FONT_FAMILY:
       {
         value = impl.mController->GetDefaultFontFamily();
         break;
       }
-      case UI::TextLabel::Property::FONT_STYLE:
+      case Ui::TextLabel::Property::FONT_STYLE:
       {
         GetFontStyleProperty(impl.mController, value, Text::FontStyle::DEFAULT);
         break;
       }
-      case UI::TextLabel::Property::POINT_SIZE:
+      case Ui::TextLabel::Property::POINT_SIZE:
       {
         value = impl.mController->GetDefaultFontSize(Text::Controller::POINT_SIZE);
         break;
       }
-      case UI::TextLabel::Property::MULTI_LINE:
+      case Ui::TextLabel::Property::MULTI_LINE:
       {
         value = impl.mController->IsMultiLineEnabled();
         break;
       }
-      case UI::TextLabel::Property::HORIZONTAL_ALIGNMENT:
+      case Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT:
       {
         const char* name = Text::GetHorizontalAlignmentString(impl.mController->GetHorizontalAlignment());
 
@@ -846,7 +846,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::VERTICAL_ALIGNMENT:
+      case Ui::TextLabel::Property::VERTICAL_ALIGNMENT:
       {
         const char* name = Text::GetVerticalAlignmentString(impl.mController->GetVerticalAlignment());
         if (name)
@@ -855,21 +855,21 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::ENABLE_MARKUP:
+      case Ui::TextLabel::Property::ENABLE_MARKUP:
       {
         value = impl.mController->IsMarkupProcessorEnabled();
         break;
       }
-      case UI::TextLabel::Property::ENABLE_AUTO_SCROLL:
+      case Ui::TextLabel::Property::ENABLE_AUTO_SCROLL:
       {
         value = impl.IsVisible() ? impl.mController->IsAutoScrollEnabled() : impl.mLastAutoScrollEnabled;
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_STOP_MODE:
+      case Ui::TextLabel::Property::AUTO_SCROLL_STOP_MODE:
       {
         if (impl.mTextScroller)
         {
-          const char* mode = Scripting::GetEnumerationName<UI::TextLabel::AutoScrollStopMode::Type>(
+          const char* mode = Scripting::GetEnumerationName<Ui::TextLabel::AutoScrollStopMode::Type>(
               impl.mTextScroller->GetStopMode(), AUTO_SCROLL_STOP_MODE_TABLE, AUTO_SCROLL_STOP_MODE_TABLE_COUNT);
           if (mode)
           {
@@ -878,7 +878,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_SPEED:
+      case Ui::TextLabel::Property::AUTO_SCROLL_SPEED:
       {
         if (impl.mTextScroller)
         {
@@ -886,7 +886,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT:
+      case Ui::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT:
       {
         if (impl.mTextScroller)
         {
@@ -894,7 +894,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY:
+      case Ui::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY:
       {
         if (impl.mTextScroller)
         {
@@ -902,7 +902,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::AUTO_SCROLL_GAP:
+      case Ui::TextLabel::Property::AUTO_SCROLL_GAP:
       {
         if (impl.mTextScroller)
         {
@@ -910,7 +910,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::DevelTextLabel::Property::AUTO_SCROLL_DIRECTION:
+      case Ui::DevelTextLabel::Property::AUTO_SCROLL_DIRECTION:
       {
         if (impl.mTextScroller)
         {
@@ -918,78 +918,78 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         }
         break;
       }
-      case UI::TextLabel::Property::LINE_SPACING:
+      case Ui::TextLabel::Property::LINE_SPACING:
       {
         value = impl.mController->GetDefaultLineSpacing();
         break;
       }
-      case UI::TextLabel::Property::UNDERLINE:
+      case Ui::TextLabel::Property::UNDERLINE:
       {
         GetUnderlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::TextLabel::Property::SHADOW:
+      case Ui::TextLabel::Property::SHADOW:
       {
         GetShadowProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::TextLabel::Property::EMBOSS:
+      case Ui::TextLabel::Property::EMBOSS:
       {
         GetEmbossProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::TextLabel::Property::OUTLINE:
+      case Ui::TextLabel::Property::OUTLINE:
       {
         GetOutlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::TextLabel::Property::PIXEL_SIZE:
+      case Ui::TextLabel::Property::PIXEL_SIZE:
       {
         value = impl.mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE);
         break;
       }
-      case UI::TextLabel::Property::ELLIPSIS:
+      case Ui::TextLabel::Property::ELLIPSIS:
       {
         value = impl.mController->IsTextElideEnabled();
         break;
       }
-      case UI::TextLabel::Property::LINE_WRAP_MODE:
+      case Ui::TextLabel::Property::LINE_WRAP_MODE:
       {
         value = impl.mController->GetLineWrapMode();
         break;
       }
-      case UI::TextLabel::Property::LINE_COUNT:
+      case Ui::TextLabel::Property::LINE_COUNT:
       {
         float width = label.GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
         value = impl.mController->GetLineCount(width);
         break;
       }
-      case UI::DevelTextLabel::Property::TEXT_DIRECTION:
+      case Ui::DevelTextLabel::Property::TEXT_DIRECTION:
       {
         value = impl.mController->GetTextDirection();
         break;
       }
-      case UI::DevelTextLabel::Property::VERTICAL_LINE_ALIGNMENT:
+      case Ui::DevelTextLabel::Property::VERTICAL_LINE_ALIGNMENT:
       {
         value = impl.mController->GetVerticalLineAlignment();
         break;
       }
-      case UI::DevelTextLabel::Property::BACKGROUND:
+      case Ui::DevelTextLabel::Property::BACKGROUND:
       {
         GetBackgroundProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::DevelTextLabel::Property::IGNORE_SPACES_AFTER_TEXT:
+      case Ui::DevelTextLabel::Property::IGNORE_SPACES_AFTER_TEXT:
       {
         value = impl.mController->IsIgnoreSpacesAfterText();
         break;
       }
-      case UI::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
+      case Ui::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
       {
         value = impl.mController->GetMatchLayoutDirection() != DevelText::MatchLayoutDirection::CONTENTS;
         break;
       }
-      case UI::DevelTextLabel::Property::TEXT_FIT:
+      case Ui::DevelTextLabel::Property::TEXT_FIT:
       {
         const bool enabled = impl.mController->IsTextFitEnabled();
         const float minSize = impl.mController->GetTextFitMinSize();
@@ -1008,94 +1008,94 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         value = map;
         break;
       }
-      case UI::DevelTextLabel::Property::MIN_LINE_SIZE:
+      case Ui::DevelTextLabel::Property::MIN_LINE_SIZE:
       {
         // If TextFitArray is enabled, the stored value (MIN_LINE_SIZE set by the user) is retrun.
         value = impl.mController->IsTextFitArrayEnabled() ? impl.mController->GetCurrentLineSize()
                                                           : impl.mController->GetDefaultLineSize();
         break;
       }
-      case UI::DevelTextLabel::Property::FONT_SIZE_SCALE:
+      case Ui::DevelTextLabel::Property::FONT_SIZE_SCALE:
       {
         value = impl.mController->GetFontSizeScale();
         break;
       }
-      case UI::DevelTextLabel::Property::ENABLE_FONT_SIZE_SCALE:
+      case Ui::DevelTextLabel::Property::ENABLE_FONT_SIZE_SCALE:
       {
         value = impl.mController->IsFontSizeScaleEnabled();
         break;
       }
-      case UI::DevelTextLabel::Property::ELLIPSIS_POSITION:
+      case Ui::DevelTextLabel::Property::ELLIPSIS_POSITION:
       {
         value = impl.mController->GetEllipsisPosition();
         break;
       }
-      case UI::DevelTextLabel::Property::STRIKETHROUGH:
+      case Ui::DevelTextLabel::Property::STRIKETHROUGH:
       {
         GetStrikethroughProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
         break;
       }
-      case UI::DevelTextLabel::Property::CHARACTER_SPACING:
+      case Ui::DevelTextLabel::Property::CHARACTER_SPACING:
       {
         value = impl.mController->GetCharacterSpacing();
         break;
       }
-      case UI::DevelTextLabel::Property::RELATIVE_LINE_SIZE:
+      case Ui::DevelTextLabel::Property::RELATIVE_LINE_SIZE:
       {
         value = impl.mController->GetRelativeLineSize();
         break;
       }
-      case UI::DevelTextLabel::Property::ANCHOR_COLOR:
+      case Ui::DevelTextLabel::Property::ANCHOR_COLOR:
       {
         value = impl.mController->GetAnchorColor();
         break;
       }
-      case UI::DevelTextLabel::Property::ANCHOR_CLICKED_COLOR:
+      case Ui::DevelTextLabel::Property::ANCHOR_CLICKED_COLOR:
       {
         value = impl.mController->GetAnchorClickedColor();
         break;
       }
-      case UI::DevelTextLabel::Property::REMOVE_FRONT_INSET:
+      case Ui::DevelTextLabel::Property::REMOVE_FRONT_INSET:
       {
         value = impl.mController->IsRemoveFrontInset();
         break;
       }
-      case UI::DevelTextLabel::Property::REMOVE_BACK_INSET:
+      case Ui::DevelTextLabel::Property::REMOVE_BACK_INSET:
       {
         value = impl.mController->IsRemoveBackInset();
         break;
       }
-      case UI::DevelTextLabel::Property::CUTOUT:
+      case Ui::DevelTextLabel::Property::CUTOUT:
       {
         value = impl.mController->IsTextCutout();
         break;
       }
-      case UI::DevelTextLabel::Property::RENDER_MODE:
+      case Ui::DevelTextLabel::Property::RENDER_MODE:
       {
         value = impl.mController->GetRenderMode();
         break;
       }
-      case UI::DevelTextLabel::Property::MANUAL_RENDERED:
+      case Ui::DevelTextLabel::Property::MANUAL_RENDERED:
       {
         value = impl.mManualRendered;
         break;
       }
-      case UI::DevelTextLabel::Property::ASYNC_LINE_COUNT:
+      case Ui::DevelTextLabel::Property::ASYNC_LINE_COUNT:
       {
         value = impl.mAsyncLineCount;
         break;
       }
-      case UI::DevelTextLabel::Property::ELLIPSIS_MODE:
+      case Ui::DevelTextLabel::Property::ELLIPSIS_MODE:
       {
         value = impl.mController->GetEllipsisMode();
         break;
       }
-      case UI::DevelTextLabel::Property::IS_SCROLLING:
+      case Ui::DevelTextLabel::Property::IS_SCROLLING:
       {
         value = impl.mTextScroller && impl.mTextScroller->IsScrolling() ? true : false;
         break;
       }
-      case UI::DevelTextLabel::Property::FONT_VARIATIONS:
+      case Ui::DevelTextLabel::Property::FONT_VARIATIONS:
       {
         Property::Map variationsMap;
         impl.mController->GetVariationsMap(variationsMap);
@@ -1103,17 +1103,17 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         value = variationsMap;
         break;
       }
-      case UI::DevelTextLabel::Property::RENDER_SCALE:
+      case Ui::DevelTextLabel::Property::RENDER_SCALE:
       {
         value = impl.mController->GetRenderScale();
         break;
       }
-      case UI::DevelTextLabel::Property::NEED_REQUEST_ASYNC_RENDER:
+      case Ui::DevelTextLabel::Property::NEED_REQUEST_ASYNC_RENDER:
       {
         value = impl.mIsAsyncRenderNeeded || impl.mTextUpdateNeeded;
         break;
       }
-      case UI::DevelTextLabel::Property::LAYOUT_DIRECTION_POLICY:
+      case Ui::DevelTextLabel::Property::LAYOUT_DIRECTION_POLICY:
       {
         value = impl.mController->GetMatchLayoutDirection();
         break;
@@ -1130,7 +1130,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::TextLabel label = UI::TextLabel::DownCast(handle);
+  Ui::TextLabel label = Ui::TextLabel::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), SIGNAL_ANCHOR_CLICKED))
   {
@@ -1211,15 +1211,15 @@ void TextLabel::OnInitialize()
   Actor self = Self();
 
   Property::Map propertyMap;
-  propertyMap.Add(UI::Visual::Property::TYPE, UI::Visual::TEXT);
+  propertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
 
-  mVisual = UI::VisualFactory::Get().CreateVisual(propertyMap);
-  DevelControl::RegisterVisual(*this, UI::TextLabel::Property::TEXT, mVisual, DepthIndex::CONTENT);
+  mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
+  DevelControl::RegisterVisual(*this, Ui::TextLabel::Property::TEXT, mVisual, DepthIndex::CONTENT);
 
   TextVisual::SetAsyncTextInterface(mVisual, this);
-  TextVisual::SetAnimatableTextColorProperty(mVisual, UI::TextLabel::Property::TEXT_COLOR);
+  TextVisual::SetAnimatableTextColorProperty(mVisual, Ui::TextLabel::Property::TEXT_COLOR);
   TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
-  self.SetProperty(UI::TextLabel::Property::PIXEL_SNAP_FACTOR, 0.0f);
+  self.SetProperty(Ui::TextLabel::Property::PIXEL_SNAP_FACTOR, 0.0f);
 
   mController = TextVisual::GetController(mVisual);
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
@@ -1289,7 +1289,7 @@ bool TextLabel::OnInterceptTouched(Actor actor, const TouchEvent& touch)
       if (distanceDelta.x < 20 && distanceDelta.y < 20)
       {
         Extents padding;
-        padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+        padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
         const Vector2& localPoint = touch.GetLocalPosition(0);
         mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
       }
@@ -1299,7 +1299,7 @@ bool TextLabel::OnInterceptTouched(Actor actor, const TouchEvent& touch)
   return false;
 }
 
-void TextLabel::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change)
+void TextLabel::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextLabel::OnStyleChange\n");
 
@@ -1317,7 +1317,7 @@ void TextLabel::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type c
     }
     case StyleChange::DEFAULT_FONT_SIZE_CHANGE:
     {
-      GetImpl(styleManager).ApplyThemeStyle(UI::Control(GetOwner()));
+      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
       RelayoutRequest();
       break;
     }
@@ -1334,7 +1334,7 @@ void TextLabel::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type c
 
 void TextLabel::OnApplyDefaultStyle()
 {
-  DefaultTheme::Get().ApplyDefaultStyle(UI::TextLabel(GetOwner()));
+  DefaultTheme::Get().ApplyDefaultStyle(Ui::TextLabel(GetOwner()));
 }
 
 bool TextLabel::AnchorClicked(uint32_t cursorPosition, std::string& href)
@@ -1344,14 +1344,14 @@ bool TextLabel::AnchorClicked(uint32_t cursorPosition, std::string& href)
 
 void TextLabel::EmitAnchorClickedSignal(const std::string& href)
 {
-  Dali::UI::TextLabel handle(GetOwner());
+  Dali::Ui::TextLabel handle(GetOwner());
   mAnchorClickedSignal.Emit(handle, href.c_str(), href.length());
 }
 
 Vector3 TextLabel::GetNaturalSize()
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += (padding.start + padding.end);
@@ -1363,7 +1363,7 @@ Vector3 TextLabel::GetNaturalSize()
 float TextLabel::GetHeightForWidth(float width)
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   return mController->GetHeightForWidth(width) + padding.top + padding.bottom;
 }
@@ -1404,7 +1404,7 @@ void TextLabel::OnPropertySet(Property::Index index, const Property::Value& prop
       }
       break;
     }
-    case UI::Control::Property::PADDING:
+    case Ui::Control::Property::PADDING:
     {
       // Unlike Size, Padding doesn't change unless the app intends to, so we don't check for actual changes.
       // If Padding is set multiple times, causing async render computation overhead, need to check for changes in
@@ -1412,7 +1412,7 @@ void TextLabel::OnPropertySet(Property::Index index, const Property::Value& prop
       mIsSizeChanged = true;
       break;
     }
-    case UI::TextLabel::Property::TEXT_COLOR:
+    case Ui::TextLabel::Property::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if (mController->GetDefaultColor() != textColor)
@@ -1432,7 +1432,7 @@ void TextLabel::OnPropertySet(Property::Index index, const Property::Value& prop
       }
       break;
     }
-    case UI::Control::Property::BACKGROUND:
+    case Ui::Control::Property::BACKGROUND:
     {
       if (mController->IsTextCutout())
       {
@@ -1448,13 +1448,13 @@ void TextLabel::OnPropertySet(Property::Index index, const Property::Value& prop
       }
       break;
     }
-    case UI::DevelTextLabel::Property::CUTOUT:
+    case Ui::DevelTextLabel::Property::CUTOUT:
     {
       const bool cutoutEnabled = propertyValue.Get<bool>();
       mController->SetBackgroundWithCutoutEnabled(cutoutEnabled);
       if (cutoutEnabled)
       {
-        const Property::Map backgroundMap = Self().GetProperty(UI::Control::Property::BACKGROUND).Get<Property::Map>();
+        const Property::Map backgroundMap = Self().GetProperty(Ui::Control::Property::BACKGROUND).Get<Property::Map>();
         Property::Value* backgroundValue = backgroundMap.Find(ColorVisual::Property::MIX_COLOR);
         if (backgroundValue)
         {
@@ -1495,7 +1495,7 @@ void TextLabel::OnPropertySet(Property::Index index, const Property::Value& prop
 
 void TextLabel::OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state)
 {
-  if (DALI_LIKELY(mVisual) && index == UI::TextLabel::Property::TEXT_COLOR)
+  if (DALI_LIKELY(mVisual) && index == Ui::TextLabel::Property::TEXT_COLOR)
   {
     if (state == Animation::State::PLAYING)
     {
@@ -1516,7 +1516,7 @@ void TextLabel::OnAnimateAnimatableProperty(Animation& animation, Property::Inde
 
 void TextLabel::OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied)
 {
-  if (DALI_LIKELY(mVisual) && index == UI::TextLabel::Property::TEXT_COLOR)
+  if (DALI_LIKELY(mVisual) && index == Ui::TextLabel::Property::TEXT_COLOR)
   {
     if (applied)
     {
@@ -1557,7 +1557,7 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Actor self = Self();
 
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   float width = std::max(size.x - (padding.start + padding.end), 0.0f);
   float height = std::max(size.y - (padding.top + padding.bottom), 0.0f);
@@ -1721,14 +1721,14 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
     Vector2 visualTransformSize = isVerticalScroll ? contentSize : layoutSize;
 
     Property::Map visualTransform;
-    visualTransform.Add(UI::Visual::Transform::Property::SIZE, visualTransformSize)
-        .Add(UI::Visual::Transform::Property::SIZE_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::OFFSET, visualTransformOffset)
-        .Add(UI::Visual::Transform::Property::OFFSET_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::ORIGIN, UI::Align::TOP_BEGIN)
-        .Add(UI::Visual::Transform::Property::ANCHOR_POINT, UI::Align::TOP_BEGIN);
+    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
+        .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
+        .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+        .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
     mVisual.SetTransformAndSize(visualTransform, size);
 
     if (mController->IsAutoScrollEnabled())
@@ -1867,8 +1867,8 @@ void TextLabel::UpdateAutoScrollState()
 {
   if (mController->IsAutoScrollEnabled())
   {
-    const UI::TextLabel::AutoScrollStopMode::Type stopMode = GetTextScroller()->GetStopMode();
-    mTextScroller->SetStopMode(UI::TextLabel::AutoScrollStopMode::IMMEDIATE);
+    const Ui::TextLabel::AutoScrollStopMode::Type stopMode = GetTextScroller()->GetStopMode();
+    mTextScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
     mTextScroller->StopScrolling();
     mTextScroller->SetStopMode(stopMode);
     mController->SetAutoScrollEnabled(true, true, mTextScroller->GetDirection());
@@ -1886,7 +1886,7 @@ void TextLabel::SetAutoScrollVisible(bool visible)
         mController->SetEllipsisMode(mLastEllipsisMode);
         if (mTextScroller)
         {
-          mTextScroller->SetStopMode(UI::TextLabel::AutoScrollStopMode::IMMEDIATE);
+          mTextScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
           mTextScroller->StopScrolling();
         }
       }
@@ -1906,7 +1906,7 @@ void TextLabel::SetAutoScrollVisible(bool visible)
         mController->SetEllipsisMode(DevelText::Ellipsize::TRUNCATE);
         if (mTextScroller)
         {
-          mTextScroller->SetStopMode(UI::TextLabel::AutoScrollStopMode::IMMEDIATE);
+          mTextScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
           mTextScroller->StopScrolling();
         }
       }
@@ -1918,8 +1918,8 @@ void TextLabel::SetAutoScrollVisible(bool visible)
         }
         if (mTextScroller->IsScrolling())
         {
-          const UI::TextLabel::AutoScrollStopMode::Type stopMode = mTextScroller->GetStopMode();
-          mTextScroller->SetStopMode(UI::TextLabel::AutoScrollStopMode::IMMEDIATE);
+          const Ui::TextLabel::AutoScrollStopMode::Type stopMode = mTextScroller->GetStopMode();
+          mTextScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
           mTextScroller->StopScrolling();
           mTextScroller->SetStopMode(stopMode);
         }
@@ -2176,7 +2176,7 @@ void TextLabel::AsyncLoadComplete(Text::AsyncTextRenderInfo renderInfo)
   Actor self = Self();
 
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   if (mIsManualRender)
   {
@@ -2240,30 +2240,30 @@ std::string TextLabel::GetLocale()
 
 void TextLabel::EmitTextFitChangedSignal()
 {
-  Dali::UI::TextLabel handle(GetOwner());
+  Dali::Ui::TextLabel handle(GetOwner());
   mTextFitChangedSignal.Emit(handle);
 }
 
 void TextLabel::EmitAsyncTextRenderedSignal(float width, float height)
 {
-  Dali::UI::TextLabel handle(GetOwner());
+  Dali::Ui::TextLabel handle(GetOwner());
   mAsyncTextRenderedSignal.Emit(handle, width, height);
 }
 
 void TextLabel::EmitAsyncNaturalSizeComputedSignal(float width, float height)
 {
-  Dali::UI::TextLabel handle(GetOwner());
+  Dali::Ui::TextLabel handle(GetOwner());
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   mAsyncNaturalSizeComputedSignal.Emit(handle, width + (padding.start + padding.end),
                                        height + (padding.top + padding.bottom));
 }
 
 void TextLabel::EmitAsyncHeightForWidthComputedSignal(float width, float height)
 {
-  Dali::UI::TextLabel handle(GetOwner());
+  Dali::Ui::TextLabel handle(GetOwner());
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   mAsyncHeightForWidthComputedSignal.Emit(handle, width, height + (padding.top + padding.bottom));
 }
 
@@ -2339,7 +2339,7 @@ void TextLabel::SetSpannedText(const Text::Spanned& spannedText)
   mController->SetSpannedText(spannedText);
 }
 
-void TextLabel::SetTextFitArray(const bool enable, std::vector<UI::DevelTextLabel::FitOption>& fitOptions)
+void TextLabel::SetTextFitArray(const bool enable, std::vector<Ui::DevelTextLabel::FitOption>& fitOptions)
 {
   if (!enable)
   {
@@ -2353,7 +2353,7 @@ void TextLabel::SetTextFitArray(const bool enable, std::vector<UI::DevelTextLabe
   mIsAsyncRenderNeeded = true;
 }
 
-std::vector<UI::DevelTextLabel::FitOption>& TextLabel::GetTextFitArray()
+std::vector<Ui::DevelTextLabel::FitOption>& TextLabel::GetTextFitArray()
 {
   return mController->GetTextFitArray();
 }
@@ -2386,7 +2386,7 @@ bool TextLabel::IsRemoveBackInset() const
 void TextLabel::EnableControlBackground(const bool enable)
 {
   // Avoid function calls if there is no change.
-  if (!DevelControl::GetVisual(*this, UI::Control::Property::BACKGROUND))
+  if (!DevelControl::GetVisual(*this, Ui::Control::Property::BACKGROUND))
   {
     return;
   }
@@ -2394,7 +2394,7 @@ void TextLabel::EnableControlBackground(const bool enable)
   if (mControlBackgroundEnabled != enable)
   {
     mControlBackgroundEnabled = enable;
-    DevelControl::EnableVisual(*this, UI::Control::Property::BACKGROUND, enable);
+    DevelControl::EnableVisual(*this, Ui::Control::Property::BACKGROUND, enable);
   }
 }
 
@@ -2439,7 +2439,7 @@ void TextLabel::RequestAsyncRenderWithFixedSize(float width, float height)
 
   Actor self = Self();
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   float contentWidth = std::max(width - (padding.start + padding.end), 0.0f);
   float contentHeight = std::max(height - (padding.top + padding.bottom), 0.0f);
@@ -2473,7 +2473,7 @@ void TextLabel::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
 
   Actor self = Self();
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   float contentWidth = std::max(width - (padding.start + padding.end), 0.0f);
   float contentHeightConstraint = std::max(heightConstraint - (padding.top + padding.bottom), 0.0f);
@@ -2507,7 +2507,7 @@ void TextLabel::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
 
   Actor self = Self();
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   float contentWidthConstraint = std::max(widthConstraint - (padding.start + padding.end), 0.0f);
   float contentHeight = std::max(height - (padding.top + padding.bottom), 0.0f);
@@ -2541,7 +2541,7 @@ void TextLabel::RequestAsyncRenderWithConstraint(float widthConstraint, float he
 
   Actor self = Self();
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   float contentWidthConstraint = std::max(widthConstraint - (padding.start + padding.end), 0.0f);
   float contentHeightConstraint = std::max(heightConstraint - (padding.top + padding.bottom), 0.0f);
@@ -2616,12 +2616,12 @@ void TextLabel::OnVariationPropertyNotify(PropertyNotification& source)
   mIsAsyncRenderNeeded = true;
 }
 
-void TextLabel::SetMaskEffect(UI::Control control)
+void TextLabel::SetMaskEffect(Ui::Control control)
 {
   RemoveMaskEffect();
 
   Actor self = Self();
-  UI::Control selfControl = UI::Control::DownCast(self);
+  Ui::Control selfControl = Ui::Control::DownCast(self);
 
   // Add control to this component
   self.Add(control);
@@ -2635,9 +2635,9 @@ void TextLabel::SetMaskEffect(UI::Control control)
 void TextLabel::RemoveMaskEffect()
 {
   Actor self = Self();
-  UI::Control selfControl = UI::Control::DownCast(self);
+  Ui::Control selfControl = Ui::Control::DownCast(self);
 
-  UI::Control control = mMaskControl.GetHandle();
+  Ui::Control control = mMaskControl.GetHandle();
   if (control)
   {
     self.Remove(control);
@@ -2664,25 +2664,25 @@ std::pair<std::string, bool> TextLabel::TextLabelAccessible::GetNameRaw() const
 
 Property::Index TextLabel::TextLabelAccessible::GetNamePropertyIndex()
 {
-  return UI::TextLabel::Property::TEXT;
+  return Ui::TextLabel::Property::TEXT;
 }
 
-const std::vector<UI::TextAnchor>& TextLabel::TextLabelAccessible::GetTextAnchors() const
+const std::vector<Ui::TextAnchor>& TextLabel::TextLabelAccessible::GetTextAnchors() const
 {
-  auto self = UI::TextLabel::DownCast(Self());
+  auto self = Ui::TextLabel::DownCast(Self());
 
-  return UI::GetImpl(self).mAnchorActors;
+  return Ui::GetImpl(self).mAnchorActors;
 }
 
-UI::Text::ControllerPtr TextLabel::TextLabelAccessible::GetTextController() const
+Ui::Text::ControllerPtr TextLabel::TextLabelAccessible::GetTextController() const
 {
-  auto self = UI::TextLabel::DownCast(Self());
+  auto self = Ui::TextLabel::DownCast(Self());
 
-  return UI::GetImpl(self).GetTextController();
+  return Ui::GetImpl(self).GetTextController();
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

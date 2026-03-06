@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class RenderEffect;
 // Forward declarations.
@@ -100,7 +100,7 @@ public:
       /**
        * @brief The name of the style to be applied to the control.
        * @details Name "styleName", type Property::STRING.
-       * @see UI::Control::SetStyleName()
+       * @see Ui::Control::SetStyleName()
        * @SINCE_1_0.0
        */
       STYLE_NAME = PROPERTY_START_INDEX,
@@ -108,7 +108,7 @@ public:
       /**
        * @brief Receives key events to the control.
        * @details Name "keyInputFocus", type Property::BOOLEAN.
-       * @see UI::Control::SetKeyInputFocus()
+       * @see Ui::Control::SetKeyInputFocus()
        * @SINCE_1_0.0
        */
       KEY_INPUT_FOCUS,
@@ -320,7 +320,7 @@ public:
    * ridden it. As the key input focus mechanism works like a stack, the top most control receives all the key events,
    * and passes on the unhandled events to the controls below in the stack. A control in the stack will regain key input
    * focus when there are no more controls above it in the focus stack. To query for the control which is on top of the
-   * focus stack use Dali::UI::KeyInputFocusManager::GetCurrentKeyboardFocusActor().
+   * focus stack use Dali::Ui::KeyInputFocusManager::GetCurrentKeyboardFocusActor().
    */
   bool HasKeyInputFocus();
 
@@ -416,14 +416,14 @@ public:
    *
    * @note Every effect inherits RenderEffect.
    */
-  void SetRenderEffect(UI::RenderEffect effect);
+  void SetRenderEffect(Ui::RenderEffect effect);
 
   /*
    * @brief Retrieves control's render effect
    * @SINCE_2_4.1
    * @return RenderEffect set on this control
    */
-  UI::RenderEffect GetRenderEffect() const;
+  Ui::RenderEffect GetRenderEffect() const;
 
   /**
    * @brief Clears RenderEffect of this control, if exists.
@@ -625,7 +625,7 @@ public: // Templates for Deriving Classes
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

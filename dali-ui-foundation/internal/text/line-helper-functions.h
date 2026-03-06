@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ namespace Text
  * @return The vertical offset before text.
  */
 float GetPreOffsetVerticalLineAlignment(const LineRun& line,
-                                        const Dali::UI::DevelText::VerticalLineAlignment::Type& verLineAlign);
+                                        const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
 
 /**
  * @brief Retrieves the vertical offset to shift the next line to up by negative value and to down by positive value.
@@ -51,10 +51,10 @@ float GetPreOffsetVerticalLineAlignment(const LineRun& line,
  * @return The vertical offset after text.
  */
 float GetPostOffsetVerticalLineAlignment(const LineRun& line,
-                                         const Dali::UI::DevelText::VerticalLineAlignment::Type& verLineAlign);
+                                         const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

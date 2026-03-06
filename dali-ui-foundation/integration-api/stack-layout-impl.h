@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -44,7 +44,7 @@ public:
    * @param[in] orientation The orientation of the stack
    * @return A handle to a newly allocated StackLayout
    */
-  static UI::StackLayout New(StackOrientation orientation = StackOrientation::VERTICAL);
+  static Ui::StackLayout New(StackOrientation orientation = StackOrientation::VERTICAL);
 
 protected:
   /**
@@ -108,14 +108,14 @@ private:
 };
 
 // Helpers for public-api forwarding methods
-inline Integration::StackLayoutImpl& GetImpl(UI::StackLayout& layout)
+inline Integration::StackLayoutImpl& GetImpl(Ui::StackLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::StackLayoutImpl&>(handle);
 }
 
-inline const Integration::StackLayoutImpl& GetImpl(const UI::StackLayout& layout)
+inline const Integration::StackLayoutImpl& GetImpl(const Ui::StackLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
@@ -123,5 +123,5 @@ inline const Integration::StackLayoutImpl& GetImpl(const UI::StackLayout& layout
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

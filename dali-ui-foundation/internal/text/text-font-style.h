@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -137,7 +137,7 @@ FontWidth StringToWidth(const char* const widthStr);
 FontSlant StringToSlant(const char* const slantStr);
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

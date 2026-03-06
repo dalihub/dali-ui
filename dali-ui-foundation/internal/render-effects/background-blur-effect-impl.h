@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -59,69 +59,69 @@ public:
   static BackgroundBlurEffectImplPtr New(uint32_t blurRadius);
 
   /**
-   * @copydoc UI::Internal::RenderEffectImpl::GetOffScreenRenderableType
+   * @copydoc Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType
    */
   OffScreenRenderable::Type GetOffScreenRenderableType() const override;
 
   /**
-   * @copydoc UI::Internal::RenderEffectImpl::GetOffScreenRenderTasks
+   * @copydoc Ui::Internal::RenderEffectImpl::GetOffScreenRenderTasks
    */
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::SetBlurOnce
+   * @copydoc Ui::BackgroundBlurEffect::SetBlurOnce
    */
   void SetBlurOnce(bool blurOnce);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::GetBlurOnce
+   * @copydoc Ui::BackgroundBlurEffect::GetBlurOnce
    */
   bool GetBlurOnce() const;
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::SetBlurRadius
+   * @copydoc Ui::BackgroundBlurEffect::SetBlurRadius
    */
   void SetBlurRadius(uint32_t blurRadius);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::GetBlurRadius
+   * @copydoc Ui::BackgroundBlurEffect::GetBlurRadius
    */
   uint32_t GetBlurRadius() const;
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::SetBlurDownscaleFactor
+   * @copydoc Ui::BackgroundBlurEffect::SetBlurDownscaleFactor
    */
   void SetBlurDownscaleFactor(float downscaleFactor);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::GetBlurDownscaleFactor
+   * @copydoc Ui::BackgroundBlurEffect::GetBlurDownscaleFactor
    */
   float GetBlurDownscaleFactor() const;
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::AddBlurStrengthAnimation
+   * @copydoc Ui::BackgroundBlurEffect::AddBlurStrengthAnimation
    */
   void AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
                                 float fromValue, float toValue);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::AddBlurOpacityAnimation
+   * @copydoc Ui::BackgroundBlurEffect::AddBlurOpacityAnimation
    */
   void AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
                                float fromValue, float toValue);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::FinishedSignal
+   * @copydoc Ui::BackgroundBlurEffect::FinishedSignal
    */
-  Dali::UI::BackgroundBlurEffect::FinishedSignalType& FinishedSignal();
+  Dali::Ui::BackgroundBlurEffect::FinishedSignalType& FinishedSignal();
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::SetSourceActor
+   * @copydoc Ui::BackgroundBlurEffect::SetSourceActor
    */
   void SetSourceActor(Dali::Actor sourceActor);
 
   /**
-   * @copydoc UI::BackgroundBlurEffect::SetStopperActor
+   * @copydoc Ui::BackgroundBlurEffect::SetStopperActor
    */
   void SetStopperActor(Dali::Actor stopperActor);
 
@@ -181,7 +181,7 @@ private:
    * @param[in] sceneHolder SceneHolder of source control
    * @param[in] sourceControl Input source control
    */
-  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const UI::Control sourceControl);
+  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::Control sourceControl);
 
   /**
    * @brief Removes and destroys local render tasks.
@@ -193,7 +193,7 @@ private:
    * @param[in] renderTask Target render task to change source actor and exclusiveness
    * @param[in] sourceControl Input source control
    */
-  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const UI::Control sourceControl);
+  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl);
 
   /**
    * @brief Emits render finished signal of the effect,
@@ -214,7 +214,7 @@ private:
   BackgroundBlurEffectImpl& operator=(const BackgroundBlurEffectImpl&) = delete; // no copy()
 
 public:
-  Dali::UI::BackgroundBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
+  Dali::Ui::BackgroundBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
 
 private:
   // Camera actors
@@ -251,19 +251,19 @@ private:
 };
 } // namespace Internal
 
-inline UI::Internal::BackgroundBlurEffectImpl& GetImplementation(UI::BackgroundBlurEffect& obj)
+inline Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(Ui::BackgroundBlurEffect& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<UI::Internal::BackgroundBlurEffectImpl&>(handle);
+  return static_cast<Ui::Internal::BackgroundBlurEffectImpl&>(handle);
 }
 
-inline const UI::Internal::BackgroundBlurEffectImpl& GetImplementation(const UI::BackgroundBlurEffect& obj)
+inline const Ui::Internal::BackgroundBlurEffectImpl& GetImplementation(const Ui::BackgroundBlurEffect& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const UI::Internal::BackgroundBlurEffectImpl&>(handle);
+  return static_cast<const Ui::Internal::BackgroundBlurEffectImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_BACKGROUND_BLUR_EFFECT_H

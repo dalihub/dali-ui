@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/controls/scrollable/item-view/item-view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 namespace // unnamed namespace
 {
@@ -253,7 +253,7 @@ struct SpiralVisibilityConstraint
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -428,7 +428,7 @@ void SpiralLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector
 {
   // This just implements the default behaviour of constraint application.
   // Custom layouts can override this function to apply their custom constraints.
-  Dali::UI::ItemView itemView = Dali::UI::ItemView::DownCast(itemViewActor);
+  Dali::Ui::ItemView itemView = Dali::Ui::ItemView::DownCast(itemViewActor);
   if (itemView)
   {
     const ControlOrientation::Type orientation = GetOrientation();
@@ -458,7 +458,7 @@ void SpiralLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector
       constraint = Constraint::New<Vector3>(actor, Actor::Property::POSITION, positionConstraint,
                                             &SpiralPositionConstraint::OrientationRight);
     }
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.AddSource(ParentSource(Actor::Property::SIZE));
     constraint.Apply();
 
@@ -484,13 +484,13 @@ void SpiralLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector
       constraint = Constraint::New<Quaternion>(actor, Actor::Property::ORIENTATION, rotationConstraint,
                                                &SpiralRotationConstraint::OrientationRight);
     }
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.Apply();
 
     // Color constraint
     constraint = Constraint::New<Vector4>(actor, Actor::Property::COLOR,
                                           SpiralColorConstraint(itemId, mImpl->mItemSpacingRadians));
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.SetRemoveAction(Dali::Constraint::DISCARD);
     constraint.Apply();
 
@@ -507,7 +507,7 @@ void SpiralLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector
       constraint = Constraint::New<bool>(actor, Actor::Property::VISIBLE, visibilityConstraint,
                                          &SpiralVisibilityConstraint::Landscape);
     }
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.AddSource(ParentSource(Actor::Property::SIZE));
     constraint.SetRemoveAction(Dali::Constraint::DISCARD);
     constraint.Apply();
@@ -602,6 +602,6 @@ float SpiralLayout::GetClosestOnScreenLayoutPosition(int itemID, float currentLa
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

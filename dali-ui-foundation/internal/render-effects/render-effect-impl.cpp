@@ -32,7 +32,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -42,7 +42,7 @@ static constexpr uint32_t RENDER_EFFECT_RENDER_PASS_TAG = 11;
 } // namespace
 
 #if defined(DEBUG_ENABLED)
-// Keep this log filter inside of Dali::UI::Internal, so subclass of RenderEffect can also use this.
+// Keep this log filter inside of Dali::Ui::Internal, so subclass of RenderEffect can also use this.
 Debug::Filter* gRenderEffectLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_RENDER_EFFECT");
 #endif
 
@@ -72,9 +72,9 @@ RenderEffectImpl::~RenderEffectImpl()
   // Deactivate already be called at Control's destructor, and InheritVisibilityChanged signal.
 }
 
-void RenderEffectImpl::SetOwnerControl(Dali::UI::Control control)
+void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
 {
-  Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   if (ownerControl != control)
   {
     // Clear previous owner control
@@ -130,7 +130,7 @@ void RenderEffectImpl::ClearOwnerControl()
   }
   mAnimationConstraints.clear();
 
-  Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] ClearOwnerControl [ID:%d]\n", this,
                 ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
   if (ownerControl)
@@ -173,7 +173,7 @@ void RenderEffectImpl::Initialize()
   OnInitialize();
 }
 
-UI::Control RenderEffectImpl::GetOwnerControl() const
+Ui::Control RenderEffectImpl::GetOwnerControl() const
 {
   return mOwnerControl.GetHandle();
 }
@@ -197,7 +197,7 @@ void RenderEffectImpl::Activate()
 {
   if (!IsActivated() && IsActivateValid())
   {
-    Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Activated! [ID:%d]\n", this,
                   ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
 
@@ -216,17 +216,17 @@ void RenderEffectImpl::Activate()
     OnActivate();
 
     // Set round corner. Default is to sync to owner control's BACKGROUND.
-    Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(UI::DevelControl::Property::CORNER_RADIUS);
+    Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS);
     if (cornerRadius != Vector4::ZERO)
     {
-      int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(UI::DevelControl::Property::CORNER_RADIUS_POLICY);
-      Vector4 cornerSquareness = ownerControl.GetProperty<Vector4>(UI::DevelControl::Property::CORNER_SQUARENESS);
+      int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY);
+      Vector4 cornerSquareness = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS);
 
       Property::Map map;
-      map.Insert(UI::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
-      map.Insert(UI::DevelVisual::Property::CORNER_RADIUS_POLICY,
-                 static_cast<UI::Visual::Transform::Policy::Type>(cornerRadiusPolicy));
-      map.Insert(UI::DevelVisual::Property::CORNER_SQUARENESS, cornerSquareness);
+      map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
+      map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+                 static_cast<Ui::Visual::Transform::Policy::Type>(cornerRadiusPolicy));
+      map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS, cornerSquareness);
 
       SetCornerConstants(map);
     }
@@ -239,7 +239,7 @@ void RenderEffectImpl::Deactivate()
   {
     mIsActivated = false;
 
-    Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Deactivated! [ID:%d]\n", this,
                   ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
 
@@ -250,7 +250,7 @@ void RenderEffectImpl::Deactivate()
 
 void RenderEffectImpl::Refresh()
 {
-  Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   if (ownerControl)
   {
     UpdateTargetSize();
@@ -280,7 +280,7 @@ bool RenderEffectImpl::IsActivateValid() const
   Vector2 size = GetTargetSize();
   if (size.x > Math::MACHINE_EPSILON_1000 && size.y > Math::MACHINE_EPSILON_1000)
   {
-    Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
     if (ownerControl && DevelActor::IsEffectivelyVisible(ownerControl))
     {
       ret = true;
@@ -323,7 +323,7 @@ void RenderEffectImpl::UpdateTargetSize()
 
 void RenderEffectImpl::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
 {
-  Dali::UI::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise, "[RenderEffect:%p] visibility changed [ID:%d][visible:%d]\n",
                 this, ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, visible);
   if (visible)
@@ -342,13 +342,13 @@ void RenderEffectImpl::SetCornerConstants(const Property::Map& map)
                 this);
 
   Vector4 radius = Vector4::ZERO;
-  map[UI::DevelVisual::Property::CORNER_RADIUS].Get(radius);
+  map[Ui::DevelVisual::Property::CORNER_RADIUS].Get(radius);
 
   Vector4 squareness = Vector4::ZERO;
-  map[UI::DevelVisual::Property::CORNER_SQUARENESS].Get(squareness);
+  map[Ui::DevelVisual::Property::CORNER_SQUARENESS].Get(squareness);
 
-  UI::Visual::Transform::Policy::Type policy = UI::Visual::Transform::Policy::Type::ABSOLUTE;
-  map[UI::DevelVisual::Property::CORNER_RADIUS_POLICY].Get(policy);
+  Ui::Visual::Transform::Policy::Type policy = Ui::Visual::Transform::Policy::Type::ABSOLUTE;
+  map[Ui::DevelVisual::Property::CORNER_RADIUS_POLICY].Get(policy);
 
   Renderer renderer = GetTargetRenderer();
   renderer.RegisterProperty("uCornerRadius", radius);
@@ -357,5 +357,5 @@ void RenderEffectImpl::SetCornerConstants(const Property::Map& map)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

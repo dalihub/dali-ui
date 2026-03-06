@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -165,14 +165,14 @@ private:
                                             const Length requestedNumberOfCharacters);
 };
 
-inline bool compareByPointSize(UI::DevelTextLabel::FitOption& lhs, UI::DevelTextLabel::FitOption& rhs)
+inline bool compareByPointSize(Ui::DevelTextLabel::FitOption& lhs, Ui::DevelTextLabel::FitOption& rhs)
 {
   return lhs.GetPointSize() < rhs.GetPointSize();
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

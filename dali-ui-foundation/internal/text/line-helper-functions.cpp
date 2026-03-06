@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -84,6 +84,6 @@ float GetPostOffsetVerticalLineAlignment(const LineRun& line,
 }
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

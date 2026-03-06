@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -65,7 +65,7 @@ Script GetScript(Length index, Vector<ScriptRun>::ConstIterator& scriptRunIt,
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

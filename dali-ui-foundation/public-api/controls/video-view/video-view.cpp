@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 VideoView::VideoView()
 {
@@ -53,22 +53,22 @@ VideoView VideoView::New()
 VideoView VideoView::New(const std::string& url)
 {
   VideoView videoView = Internal::VideoView::New(Dali::VideoSyncMode::DISABLED);
-  Dali::UI::GetImpl(videoView).SetUrl(url);
+  Dali::Ui::GetImpl(videoView).SetUrl(url);
   return videoView;
 }
 
 VideoView VideoView::New(bool swCodec)
 {
   VideoView videoView = Internal::VideoView::New(Dali::VideoSyncMode::DISABLED);
-  Dali::UI::GetImpl(videoView).SetSWCodec(swCodec);
+  Dali::Ui::GetImpl(videoView).SetSWCodec(swCodec);
   return videoView;
 }
 
 VideoView VideoView::New(const std::string& url, bool swCodec)
 {
   VideoView videoView = Internal::VideoView::New(Dali::VideoSyncMode::DISABLED);
-  Dali::UI::GetImpl(videoView).SetUrl(url);
-  Dali::UI::GetImpl(videoView).SetSWCodec(swCodec);
+  Dali::Ui::GetImpl(videoView).SetUrl(url);
+  Dali::Ui::GetImpl(videoView).SetSWCodec(swCodec);
   return videoView;
 }
 
@@ -79,32 +79,32 @@ VideoView VideoView::DownCast(BaseHandle handle)
 
 void VideoView::Play()
 {
-  Dali::UI::GetImpl(*this).Play();
+  Dali::Ui::GetImpl(*this).Play();
 }
 
 void VideoView::Pause()
 {
-  Dali::UI::GetImpl(*this).Pause();
+  Dali::Ui::GetImpl(*this).Pause();
 }
 
 void VideoView::Stop()
 {
-  Dali::UI::GetImpl(*this).Stop();
+  Dali::Ui::GetImpl(*this).Stop();
 }
 
 void VideoView::Forward(int millisecond)
 {
-  Dali::UI::GetImpl(*this).Forward(millisecond);
+  Dali::Ui::GetImpl(*this).Forward(millisecond);
 }
 
 void VideoView::Backward(int millisecond)
 {
-  Dali::UI::GetImpl(*this).Backward(millisecond);
+  Dali::Ui::GetImpl(*this).Backward(millisecond);
 }
 
 VideoView::VideoViewSignalType& VideoView::FinishedSignal()
 {
-  return Dali::UI::GetImpl(*this).FinishedSignal();
+  return Dali::Ui::GetImpl(*this).FinishedSignal();
 }
 
 VideoView::VideoView(Internal::VideoView& implementation)
@@ -118,6 +118,6 @@ VideoView::VideoView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::VideoView>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

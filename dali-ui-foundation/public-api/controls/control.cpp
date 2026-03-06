@@ -27,16 +27,16 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Control Control::New()
 {
-  return UI::Internal::Control::New();
+  return Ui::Internal::Control::New();
 }
 
 Control Control::New(ControlBehaviour additionalBehaviour)
 {
-  return UI::Internal::Control::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  return Ui::Internal::Control::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
 Control::Control()
@@ -115,12 +115,12 @@ void Control::ClearBackground()
   Internal::GetImplementation(*this).ClearBackground();
 }
 
-void Control::SetRenderEffect(UI::RenderEffect effect)
+void Control::SetRenderEffect(Ui::RenderEffect effect)
 {
   Internal::GetImplementation(*this).SetRenderEffect(effect);
 }
 
-UI::RenderEffect Control::GetRenderEffect() const
+Ui::RenderEffect Control::GetRenderEffect() const
 {
   return Internal::GetImplementation(*this).GetRenderEffect();
 }
@@ -135,9 +135,9 @@ bool Control::IsResourceReady() const
   return Internal::GetImplementation(*this).IsResourceReady();
 }
 
-UI::Visual::ResourceStatus Control::GetVisualResourceStatus(Dali::Property::Index index)
+Ui::Visual::ResourceStatus Control::GetVisualResourceStatus(Dali::Property::Index index)
 {
-  const Internal::Control& internalControl = UI::Internal::GetImplementation(*this);
+  const Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
   const Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
   return controlDataImpl.GetVisualResourceStatus(index);
 }
@@ -159,7 +159,7 @@ Control::KeyInputFocusSignalType& Control::KeyInputFocusLostSignal()
 
 Control::ResourceReadySignalType& Control::ResourceReadySignal()
 {
-  Internal::Control& internalControl = UI::Internal::GetImplementation(*this);
+  Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
   Internal::Control::Impl& controlImpl = Internal::Control::Impl::Get(internalControl);
 
   return controlImpl.mResourceReadySignal;
@@ -167,7 +167,7 @@ Control::ResourceReadySignalType& Control::ResourceReadySignal()
 
 Control::OffScreenRenderingFinishedSignalType& Control::OffScreenRenderingFinishedSignal()
 {
-  Internal::Control& internalControl = UI::Internal::GetImplementation(*this);
+  Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
   Internal::Control::Impl& controlImpl = Internal::Control::Impl::Get(internalControl);
 
   return controlImpl.mOffScreenRenderingFinishedSignal;
@@ -184,6 +184,6 @@ Control::Control(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::Control>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

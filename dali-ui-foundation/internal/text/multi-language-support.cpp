@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -99,6 +99,6 @@ void MultilanguageSupport::UpdateICULineBreak(const std::string& text, TextAbstr
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -23,7 +23,7 @@
 #include <dali-test-suite-utils.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_dummy_elements_startup(void)
 {

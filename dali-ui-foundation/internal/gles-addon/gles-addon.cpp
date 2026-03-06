@@ -25,13 +25,13 @@
 #include <dali-ui-foundation/public-api/controls/gl-view/gl-view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 using BackendMode = GlView::BackendMode;
-using GlViewImpl = Dali::UI::Internal::GlViewImpl;
+using GlViewImpl = Dali::Ui::Internal::GlViewImpl;
 
 namespace
 {
-const char* const DALI_UI_GLES_ADDON_NAME("UIGlesAddOn");
+const char* const DALI_UI_GLES_ADDON_NAME("UiGlesAddOn");
 
 GlView GlViewNew(BackendMode backendMode, GlView::ColorFormat colorFormat)
 {
@@ -41,11 +41,11 @@ GlView GlViewNew(BackendMode backendMode, GlView::ColorFormat colorFormat)
     case BackendMode::DIRECT_RENDERING_THREADED:
     case BackendMode::UNSAFE_DIRECT_RENDERING:
     {
-      return UI::Internal::DrawableView::New(backendMode);
+      return Ui::Internal::DrawableView::New(backendMode);
     }
     case BackendMode::EGL_IMAGE_OFFSCREEN_RENDERING:
     {
-      return UI::Internal::GlView::New(colorFormat);
+      return Ui::Internal::GlView::New(colorFormat);
     }
     default:
     {
@@ -102,7 +102,7 @@ void GlViewTerminate(GlViewImpl&& glViewImpl)
 }
 } // unnamed namespace
 
-class UIGlesAddOn : public Dali::AddOns::AddOnBase
+class UiGlesAddOn : public Dali::AddOns::AddOnBase
 {
 public:
   void GetAddOnInfo(Dali::AddOnInfo& info) override
@@ -146,4 +146,4 @@ public:
   }
 };
 
-// REGISTER_ADDON_CLASS(UIGlesAddOn);
+// REGISTER_ADDON_CLASS(UiGlesAddOn);

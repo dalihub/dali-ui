@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -63,7 +63,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

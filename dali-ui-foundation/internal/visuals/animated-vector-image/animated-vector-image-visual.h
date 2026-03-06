@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -246,7 +246,7 @@ private:
   float mFrameSpeedFactor;
   float mRenderScale;
 
-  Dali::UI::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
 
   uint32_t mLastSentPlayStateId;
 
@@ -262,7 +262,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

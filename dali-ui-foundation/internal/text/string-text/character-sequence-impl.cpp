@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -37,5 +37,5 @@ CharacterSequence::~CharacterSequence()
 
 } // namespace Internal
 } // namespace Text
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

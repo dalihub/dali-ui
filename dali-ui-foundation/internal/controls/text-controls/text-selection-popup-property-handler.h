@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-impl.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 /**
  * Class to manage properties for the TextSelectionPopup
@@ -33,7 +33,7 @@ struct TextSelectionPopup::PropertyHandler
    * @param[in] index The property index of the property to set
    * @param[in] value The value to set
    */
-  static void SetProperty(UI::TextSelectionPopup selectionPopup, Property::Index index, const Property::Value& value);
+  static void SetProperty(Ui::TextSelectionPopup selectionPopup, Property::Index index, const Property::Value& value);
 
   /**
    * Get properties from the text selection popup
@@ -42,9 +42,9 @@ struct TextSelectionPopup::PropertyHandler
    * @param[in] index The property index of the property to set
    * @return the value
    */
-  static Property::Value GetProperty(UI::TextSelectionPopup selectionPopup, Property::Index index);
+  static Property::Value GetProperty(Ui::TextSelectionPopup selectionPopup, Property::Index index);
 };
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_SELECTION_POPUP_PROPERTY_HANDLER_H

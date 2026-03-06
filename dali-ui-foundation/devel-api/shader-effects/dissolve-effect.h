@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Set the dissolve central line.
@@ -62,7 +62,7 @@ DALI_UI_API void DissolveEffectSetCentralLine(Actor& actor, const Vector2& posit
 
 DALI_UI_API Property::Map CreateDissolveEffect(bool useHighPrecision = true);
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

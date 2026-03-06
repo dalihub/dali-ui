@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -94,7 +94,7 @@ public:
    * @param[in] visual The text visual.
    * @return The text controller
    */
-  static Text::ControllerPtr GetController(UI::Visual::Base visual)
+  static Text::ControllerPtr GetController(Ui::Visual::Base visual)
   {
     return GetVisualObject(visual).mController;
   };
@@ -104,7 +104,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] animatablePropertyIndex The index of the animatable property
    */
-  static void SetAnimatableTextColorProperty(UI::Visual::Base visual, Property::Index animatablePropertyIndex)
+  static void SetAnimatableTextColorProperty(Ui::Visual::Base visual, Property::Index animatablePropertyIndex)
   {
     GetVisualObject(visual).mAnimatableTextColorPropertyIndex = animatablePropertyIndex;
   };
@@ -113,7 +113,7 @@ public:
    * @brief Set the flag to trigger the textures to be initialized and renderer to be added to the control.
    * @param[in] visual The text visual.
    */
-  static void EnableRendererUpdate(UI::Visual::Base visual)
+  static void EnableRendererUpdate(Ui::Visual::Base visual)
   {
     GetVisualObject(visual).mRendererUpdateNeeded = true;
   };
@@ -123,7 +123,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] requireRender Whether to text always rendered.
    */
-  static void SetRequireRender(UI::Visual::Base visual, bool requireRender)
+  static void SetRequireRender(Ui::Visual::Base visual, bool requireRender)
   {
     GetVisualObject(visual).SetRequireRender(requireRender);
   };
@@ -132,7 +132,7 @@ public:
    * @brief Instantly updates the renderer
    * @param[in] visual The text visual.
    */
-  static void UpdateRenderer(UI::Visual::Base visual)
+  static void UpdateRenderer(Ui::Visual::Base visual)
   {
     GetVisualObject(visual).UpdateRenderer();
   };
@@ -143,7 +143,7 @@ public:
    * @param[in] parameters The async text parameters.
    * @return true if the async text render request was successful, false otherwise.
    */
-  static bool UpdateAsyncRenderer(UI::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static bool UpdateAsyncRenderer(Ui::Visual::Base visual, Text::AsyncTextParameters& parameters)
   {
     return GetVisualObject(visual).UpdateAsyncRenderer(parameters);
   };
@@ -153,7 +153,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] parameters The async text parameters.
    */
-  static void RequestAsyncSizeComputation(UI::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static void RequestAsyncSizeComputation(Ui::Visual::Base visual, Text::AsyncTextParameters& parameters)
   {
     GetVisualObject(visual).RequestAsyncSizeComputation(parameters);
   };
@@ -163,7 +163,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] asyncTextInterface The async text interface.
    */
-  static void SetAsyncTextInterface(UI::Visual::Base visual, Text::AsyncTextInterface* asyncTextInterface)
+  static void SetAsyncTextInterface(Ui::Visual::Base visual, Text::AsyncTextInterface* asyncTextInterface)
   {
     GetVisualObject(visual).SetAsyncTextInterface(asyncTextInterface);
   };
@@ -174,7 +174,7 @@ public:
    * @param[in] applyAlways True if constraint need to be applied always. False if we need once only.
    * @param[in] notifyToConstraint True if we need to notify changeness to constraints.
    */
-  static void SetConstraintApplyAlways(UI::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
+  static void SetConstraintApplyAlways(Ui::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
   {
     GetVisualObject(visual).SetConstraintApplyAlways(applyAlways, notifyToConstraint);
   };
@@ -385,9 +385,9 @@ private:
    * @param[in] visual A handle to the TextVisual
    * @return The TextVisual object
    */
-  static TextVisual& GetVisualObject(UI::Visual::Base visual)
+  static TextVisual& GetVisualObject(Ui::Visual::Base visual)
   {
-    return static_cast<TextVisual&>(UI::GetImplementation(visual).GetVisualObject());
+    return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
   };
 
   /**
@@ -437,7 +437,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

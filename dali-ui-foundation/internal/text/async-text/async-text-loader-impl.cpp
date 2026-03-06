@@ -36,7 +36,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace
 {
@@ -95,7 +95,7 @@ AsyncTextLoader::AsyncTextLoader()
     mLocaleUpdateNeeded(false),
     mMutex()
 {
-  mModule = Dali::UI::Text::AsyncTextModule::New();
+  mModule = Dali::Ui::Text::AsyncTextModule::New();
 
   mTextModel = Model::New();
 
@@ -945,8 +945,8 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 #endif
 
   // Check the text direction
-  UI::DevelText::TextDirection::Type textDirection =
-      mIsTextDirectionRTL ? UI::DevelText::TextDirection::RIGHT_TO_LEFT : UI::DevelText::TextDirection::LEFT_TO_RIGHT;
+  Ui::DevelText::TextDirection::Type textDirection =
+      mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
 
   // Set information for creating pixel datas.
   AsyncTextRenderInfo renderInfo;
@@ -1725,6 +1725,6 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

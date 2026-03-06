@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ class ForegroundColorSpan;
 using ForegroundColorSpanPtr = IntrusivePtr<ForegroundColorSpan>;
 
 /**
- * @copydoc Dali::UI::Text::ForegroundColorSpan
+ * @copydoc Dali::Ui::Text::ForegroundColorSpan
  */
 class ForegroundColorSpan : public BaseSpan
 {
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Creates a new ForegroundColorSpan object.
    */
-  static Dali::UI::Text::ForegroundColorSpan New(Vector4 color);
+  static Dali::Ui::Text::ForegroundColorSpan New(Vector4 color);
 
   /**
    * Default Constructor
@@ -68,12 +68,12 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::ForegroundColorSpan::GetForegroundColor()
+   * @copydoc Dali::Ui::Text::ForegroundColorSpan::GetForegroundColor()
    */
   Vector4 GetForegroundColor() const;
 
   /**
-   * @copydoc Dali::UI::Text::ForegroundColorSpan::IsForegroundColorDefined()
+   * @copydoc Dali::Ui::Text::ForegroundColorSpan::IsForegroundColorDefined()
    */
   bool IsForegroundColorDefined() const;
 
@@ -87,10 +87,10 @@ public: // Methods. Not intended for application developers
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -102,7 +102,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::ForegroundColorSpan& GetImplementation(Dali::UI::Text::ForegroundColorSpan& foregroundColorSpan)
+inline Internal::ForegroundColorSpan& GetImplementation(Dali::Ui::Text::ForegroundColorSpan& foregroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(foregroundColorSpan && "foregroundColorSpan handle is empty");
 
@@ -112,7 +112,7 @@ inline Internal::ForegroundColorSpan& GetImplementation(Dali::UI::Text::Foregrou
 }
 
 inline const Internal::ForegroundColorSpan& GetImplementation(
-    const Dali::UI::Text::ForegroundColorSpan& foregroundColorSpan)
+    const Dali::Ui::Text::ForegroundColorSpan& foregroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(foregroundColorSpan && "foregroundColorSpan handle is empty");
 
@@ -123,7 +123,7 @@ inline const Internal::ForegroundColorSpan& GetImplementation(
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

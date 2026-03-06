@@ -28,7 +28,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 #ifndef DEFINE_CHAINING_METHOD_VIEW_DERIVED
@@ -137,6 +137,6 @@ public: // Not intended for application developers
   /// @endcond
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

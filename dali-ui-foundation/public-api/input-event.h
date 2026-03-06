@@ -34,7 +34,7 @@ namespace Dali
 struct TouchEvent;
 struct KeyEvent;
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -125,5 +125,5 @@ public: // Not intended for Application developers
   explicit InputEvent(Integration::InputEventImpl* impl);
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

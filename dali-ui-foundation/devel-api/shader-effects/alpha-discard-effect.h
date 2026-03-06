@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Creates a new Alpha discard effect
@@ -44,7 +44,7 @@ namespace UI
  */
 DALI_UI_API Property::Map CreateAlphaDiscardEffect();
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

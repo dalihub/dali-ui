@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelButton
 {
@@ -35,7 +35,7 @@ enum Type
    * @brief name "labelRelativeAlignment", type STRING
    * @details Sets the position of the the label in relation to the foreground/icon if both present
    */
-  LABEL_RELATIVE_ALIGNMENT = Dali::UI::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL + 1,
+  LABEL_RELATIVE_ALIGNMENT = Dali::Ui::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL + 1,
 
   /**
    * @brief name "labelPadding", type Vector4
@@ -53,7 +53,7 @@ enum Type
 
 } // namespace DevelButton
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

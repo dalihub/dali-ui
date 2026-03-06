@@ -38,7 +38,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -54,17 +54,17 @@ void Controller::SpannableHandler::SetSpannedText(Controller& controller, const 
   // Set spanned-text
   logicalModel->mSpannedTextPlaced = true;
 
-  std::vector<Dali::UI::Text::BaseSpan> spans;
-  std::vector<Dali::UI::Text::Range> ranges;
+  std::vector<Dali::Ui::Text::BaseSpan> spans;
+  std::vector<Dali::Ui::Text::Range> ranges;
   spannedText.RetrieveAllSpansAndRanges(spans, ranges);
 
-  for (std::vector<Dali::UI::Text::BaseSpan>::size_type i = 0; i < spans.size(); i++)
+  for (std::vector<Dali::Ui::Text::BaseSpan>::size_type i = 0; i < spans.size(); i++)
   {
     GetImplementation(spans[i]).CreateStyleCharacterRun(logicalModel, ranges[i]);
   }
 }
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

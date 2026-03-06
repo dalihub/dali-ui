@@ -45,7 +45,7 @@ static constexpr std::string_view UNIFORM_BLUR_OFFSET_DIRECTION_NAME("uOffsetDir
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -317,7 +317,7 @@ void BackgroundBlurEffectImpl::OnActivate()
     return;
   }
 
-  UI::Control ownerControl = GetOwnerControl();
+  Ui::Control ownerControl = GetOwnerControl();
   DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
 
   // Reset animation properties
@@ -380,7 +380,7 @@ void BackgroundBlurEffectImpl::OnActivate()
 
   // Inject blurred output to control
   Renderer renderer = GetTargetRenderer();
-  renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::UI::DepthIndex::BACKGROUND_EFFECT);
+  renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::DepthIndex::BACKGROUND_EFFECT);
   ownerControl.AddRenderer(renderer);
   ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(renderer, mBlurredOutputFrameBuffer);
@@ -445,7 +445,7 @@ void BackgroundBlurEffectImpl::OnRefresh()
 
   if (!mSourceRenderTask)
   {
-    UI::Control ownerControl = GetOwnerControl();
+    Ui::Control ownerControl = GetOwnerControl();
     ownerControl.Add(mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerControl);
     GetImplementation(ownerControl).RequestRenderTaskReorder();
@@ -503,7 +503,7 @@ void BackgroundBlurEffectImpl::DestroyFrameBuffers()
 }
 
 void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
-                                                 const UI::Control sourceControl)
+                                                 const Ui::Control sourceControl)
 {
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
 
@@ -616,7 +616,7 @@ void BackgroundBlurEffectImpl::UpdateDownscaledBlurRadius()
   }
 }
 
-void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const UI::Control sourceControl)
+void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl)
 {
   if (DALI_UNLIKELY(!sourceRenderTask || !sourceControl))
   {
@@ -639,7 +639,7 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
       useUserSourceActor = true;
     }
 
-    UI::Control control = UI::Control::DownCast(sourceActor);
+    Ui::Control control = Ui::Control::DownCast(sourceActor);
     if (control && (((GetImplementation(control).GetOffScreenRenderableType() & OffScreenRenderable::Type::FORWARD)) ==
                     OffScreenRenderable::Type::FORWARD))
     {
@@ -660,7 +660,7 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
   sourceRenderTask.RenderUntil(stopperActor);
 }
 
-Dali::UI::BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffectImpl::FinishedSignal()
+Dali::Ui::BackgroundBlurEffect::FinishedSignalType& BackgroundBlurEffectImpl::FinishedSignal()
 {
   return mFinishedSignal;
 }
@@ -672,7 +672,7 @@ void BackgroundBlurEffectImpl::SetSourceActor(Dali::Actor sourceActor)
   if (mSourceRenderTask)
   {
     // Re-initialize source actor of rendertask
-    UI::Control ownerControl = GetOwnerControl();
+    Ui::Control ownerControl = GetOwnerControl();
     ApplyRenderTaskSourceActor(mSourceRenderTask, ownerControl);
   }
 }
@@ -684,11 +684,11 @@ void BackgroundBlurEffectImpl::SetStopperActor(Dali::Actor stopperActor)
   if (mSourceRenderTask)
   {
     // Re-initialize stopper actor of rendertask
-    UI::Control ownerControl = GetOwnerControl();
+    Ui::Control ownerControl = GetOwnerControl();
     ApplyRenderTaskSourceActor(mSourceRenderTask, ownerControl);
   }
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

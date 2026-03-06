@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ class BackgroundColorSpan;
 using BackgroundColorSpanPtr = IntrusivePtr<BackgroundColorSpan>;
 
 /**
- * @copydoc Dali::UI::Text::BackgroundColorSpan
+ * @copydoc Dali::Ui::Text::BackgroundColorSpan
  */
 class BackgroundColorSpan : public BaseSpan
 {
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Creates a new BackgroundColorSpan object.
    */
-  static Dali::UI::Text::BackgroundColorSpan New(const Vector4& color);
+  static Dali::Ui::Text::BackgroundColorSpan New(const Vector4& color);
 
   /**
    * Default Constructor
@@ -75,12 +75,12 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::BackgroundColorSpan::GetBackgroundColor()
+   * @copydoc Dali::Ui::Text::BackgroundColorSpan::GetBackgroundColor()
    */
   Vector4 GetBackgroundColor() const;
 
   /**
-   * @copydoc Dali::UI::Text::BackgroundColorSpan::IsBackgroundColorDefined()
+   * @copydoc Dali::Ui::Text::BackgroundColorSpan::IsBackgroundColorDefined()
    */
   bool IsBackgroundColorDefined() const;
 
@@ -94,10 +94,10 @@ public: // Methods. Not intended for application developers
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -109,7 +109,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::BackgroundColorSpan& GetImplementation(Dali::UI::Text::BackgroundColorSpan& BackgroundColorSpan)
+inline Internal::BackgroundColorSpan& GetImplementation(Dali::Ui::Text::BackgroundColorSpan& BackgroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(BackgroundColorSpan && "BackgroundColorSpan handle is empty");
 
@@ -119,7 +119,7 @@ inline Internal::BackgroundColorSpan& GetImplementation(Dali::UI::Text::Backgrou
 }
 
 inline const Internal::BackgroundColorSpan& GetImplementation(
-    const Dali::UI::Text::BackgroundColorSpan& BackgroundColorSpan)
+    const Dali::Ui::Text::BackgroundColorSpan& BackgroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(BackgroundColorSpan && "BackgroundColorSpan handle is empty");
 
@@ -130,7 +130,7 @@ inline const Internal::BackgroundColorSpan& GetImplementation(
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

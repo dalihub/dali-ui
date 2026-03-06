@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -40,7 +40,7 @@ public:
   /**
    * @copydoc Dali::Toollkit::TextSelectionToolbar::New()
    */
-  static UI::TextSelectionToolbar New();
+  static Ui::TextSelectionToolbar New();
 
   // Properties
 
@@ -62,22 +62,22 @@ public:
   static Property::Value GetProperty(BaseObject* object, Property::Index index);
 
   /**
-   *  @copydoc UI::TextSelectionToolbar::AddOption()
+   *  @copydoc Ui::TextSelectionToolbar::AddOption()
    */
   void AddOption(Actor& option);
 
   /**
-   *  @copydoc UI::TextSelectionToolbar::AddDivider()
+   *  @copydoc Ui::TextSelectionToolbar::AddDivider()
    */
   void AddDivider(Actor& divider);
 
   /**
-   * @copydoc UI::TextSelectionToolbar::ResizeDividers()
+   * @copydoc Ui::TextSelectionToolbar::ResizeDividers()
    */
   void ResizeDividers(Size& size);
 
   /**
-   * @copydoc UI::TextSelectionToolbar::RaiseAbove()
+   * @copydoc Ui::TextSelectionToolbar::RaiseAbove()
    */
   void RaiseAbove(Actor target);
 
@@ -94,7 +94,7 @@ public:
   const Vector2& GetScrollBarPadding() const;
 
   /**
-   * @copydoc UI::TextSelectionToolbar::ScrollTo()
+   * @copydoc Ui::TextSelectionToolbar::ScrollTo()
    */
   void ScrollTo(const Vector2& position);
 
@@ -123,7 +123,7 @@ private: // From Control
 
 private: // Implementation
   /**
-   * @copydoc UI::TextSelectionToolbar::ConfigureScrollview()
+   * @copydoc Ui::TextSelectionToolbar::ConfigureScrollview()
    */
   void ConfigureScrollview(const Property::Map& properties);
 
@@ -173,10 +173,10 @@ private:
 
 private:               // Data
   Actor mToolbarActor; ///< The actor used to house the toolbar.
-  UI::TableView
+  Ui::TableView
       mTableOfButtons;        ///< Actor which holds all the buttons, sensitivity can be set on buttons via this actor
-  UI::ScrollView mScrollView; ///< Provides scrolling of Toolbar when content does not fit.
-  UI::ScrollBar mScrollBar;   ///< An horizontal scroll bar for the text's popup options.
+  Ui::ScrollView mScrollView; ///< Provides scrolling of Toolbar when content does not fit.
+  Ui::ScrollBar mScrollBar;   ///< An horizontal scroll bar for the text's popup options.
   RulerPtr mRulerX;           ///< Ruler to clamp horizontal scrolling. Updates on Relayout
   Size mMaxSize;              ///< Max size of the Toolbar
   Vector2 mScrollBarPadding;  ///< The padding used to position the scroll indicator.
@@ -189,25 +189,25 @@ private:               // Data
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TextSelectionToolbar& GetImpl(UI::TextSelectionToolbar& textSelectionToolbar)
+inline Ui::Internal::TextSelectionToolbar& GetImpl(Ui::TextSelectionToolbar& textSelectionToolbar)
 {
   DALI_ASSERT_ALWAYS(textSelectionToolbar);
 
   Dali::RefObject& handle = textSelectionToolbar.GetImplementation();
 
-  return static_cast<UI::Internal::TextSelectionToolbar&>(handle);
+  return static_cast<Ui::Internal::TextSelectionToolbar&>(handle);
 }
 
-inline const UI::Internal::TextSelectionToolbar& GetImpl(const UI::TextSelectionToolbar& textSelectionToolbar)
+inline const Ui::Internal::TextSelectionToolbar& GetImpl(const Ui::TextSelectionToolbar& textSelectionToolbar)
 {
   DALI_ASSERT_ALWAYS(textSelectionToolbar);
 
   const Dali::RefObject& handle = textSelectionToolbar.GetImplementation();
 
-  return static_cast<const UI::Internal::TextSelectionToolbar&>(handle);
+  return static_cast<const Ui::Internal::TextSelectionToolbar&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

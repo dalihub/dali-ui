@@ -28,7 +28,7 @@ extern Debug::Filter* gLogButtonFilter;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -36,20 +36,20 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::RadioButton::New();
+  return Ui::RadioButton::New();
 }
 
-TypeRegistration typeRegistration(typeid(UI::RadioButton), typeid(UI::Button), Create);
+TypeRegistration typeRegistration(typeid(Ui::RadioButton), typeid(Ui::Button), Create);
 
 } // namespace
 
-Dali::UI::RadioButton RadioButton::New()
+Dali::Ui::RadioButton RadioButton::New()
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<RadioButton> internalRadioButton = new RadioButton();
 
   // Pass ownership to CustomActor
-  Dali::UI::RadioButton radioButton(*internalRadioButton);
+  Dali::Ui::RadioButton radioButton(*internalRadioButton);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -97,10 +97,10 @@ void RadioButton::OnStateChange(State newState)
     {
       for (unsigned int i = 0; i < parent.GetChildCount(); ++i)
       {
-        Dali::UI::RadioButton radioButtonChild = Dali::UI::RadioButton::DownCast(parent.GetChildAt(i));
+        Dali::Ui::RadioButton radioButtonChild = Dali::Ui::RadioButton::DownCast(parent.GetChildAt(i));
         if (radioButtonChild && radioButtonChild != Self())
         {
-          radioButtonChild.SetProperty(UI::Button::Property::SELECTED, false);
+          radioButtonChild.SetProperty(Ui::Button::Property::SELECTED, false);
         }
       }
     }
@@ -120,9 +120,9 @@ void RadioButton::OnStateChange(State newState)
 Dali::Accessibility::States RadioButton::RadioButtonAccessible::CalculateStates()
 {
   auto state = Button::ButtonAccessible::CalculateStates();
-  auto self = UI::Button::DownCast(Self());
+  auto self = Ui::Button::DownCast(Self());
 
-  if (self.GetProperty<bool>(UI::Button::Property::SELECTED))
+  if (self.GetProperty<bool>(Ui::Button::Property::SELECTED))
   {
     state[Dali::Accessibility::State::CHECKED] = true;
   }
@@ -133,6 +133,6 @@ Dali::Accessibility::States RadioButton::RadioButtonAccessible::CalculateStates(
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

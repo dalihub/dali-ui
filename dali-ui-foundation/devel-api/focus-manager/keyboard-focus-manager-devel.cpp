@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelKeyboardFocusManager
 {
@@ -68,6 +68,6 @@ void ResetFocusFinderRootActor(KeyboardFocusManager keyboardFocusManager)
 
 } // namespace DevelKeyboardFocusManager
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

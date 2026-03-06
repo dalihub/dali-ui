@@ -28,7 +28,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -77,6 +77,6 @@ GlyphyShader GlyphyShader::New(const Dali::Vector4& atlasInfo)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

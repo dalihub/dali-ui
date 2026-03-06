@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelAnimatedVectorImageVisual
 {
@@ -86,7 +86,7 @@ struct DynamicPropertyInfo
 
 } // namespace DevelAnimatedVectorImageVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -30,7 +30,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 View::View()
@@ -43,12 +43,12 @@ View View::New()
 }
 
 View::View(const View& view)
-  : UI::Control(view)
+  : Ui::Control(view)
 {
 }
 
 View::View(View&& rhs) noexcept
-  : UI::Control(std::move(rhs))
+  : Ui::Control(std::move(rhs))
 {
 }
 
@@ -58,7 +58,7 @@ View::~View()
 
 View View::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<View, Integration::ViewImpl>(handle);
+  return Ui::Control::DownCast<View, Integration::ViewImpl>(handle);
 }
 
 View::View(Integration::ViewImpl& implementation)
@@ -347,6 +347,6 @@ ClickableTrait View::GetClickableTrait() const
   return ClickableTrait::DownCast(trait);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

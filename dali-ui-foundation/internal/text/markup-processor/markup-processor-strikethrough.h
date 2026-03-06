@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -67,7 +67,7 @@ void OverrideNestedStrikethroughCharacterRuns(Vector<StrikethroughCharacterRun>&
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

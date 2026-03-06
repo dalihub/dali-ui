@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -36,7 +36,7 @@ struct SpanRangesContainer::Impl
   using SpanId = uint32_t;
 
   // Key : BaseSpan, Value : <Range, Added order>
-  using SpanRangeContainer = std::map<Dali::UI::Text::BaseSpan, std::pair<Dali::UI::Text::Range, SpanId>>;
+  using SpanRangeContainer = std::map<Dali::Ui::Text::BaseSpan, std::pair<Dali::Ui::Text::Range, SpanId>>;
 
   SpanRangeContainer mSpanWithRanges{}; ///< The list of style-span
   SpanId mSpanId{0}; ///< The global id for each added Span. It will be used when we determine order of span.
@@ -51,26 +51,26 @@ SpanRangesContainer::~SpanRangesContainer()
 {
 }
 
-void SpanRangesContainer::AddSpan(const Dali::UI::Text::BaseSpan& span, const Dali::UI::Text::Range& range)
+void SpanRangesContainer::AddSpan(const Dali::Ui::Text::BaseSpan& span, const Dali::Ui::Text::Range& range)
 {
   mImpl->mSpanWithRanges.insert(std::make_pair(span, std::make_pair(range, mImpl->mSpanId++)));
 }
 
-void SpanRangesContainer::RemoveSpan(const Dali::UI::Text::BaseSpan& span)
+void SpanRangesContainer::RemoveSpan(const Dali::Ui::Text::BaseSpan& span)
 {
   mImpl->mSpanWithRanges.erase(span);
 }
 
-bool SpanRangesContainer::Contains(const Dali::UI::Text::BaseSpan& span) const
+bool SpanRangesContainer::Contains(const Dali::Ui::Text::BaseSpan& span) const
 {
   const auto it = mImpl->mSpanWithRanges.find(span);
 
   return it != mImpl->mSpanWithRanges.end();
 }
 
-void SpanRangesContainer::GetSpans(std::vector<Dali::UI::Text::BaseSpan>& listOfSpans) const
+void SpanRangesContainer::GetSpans(std::vector<Dali::Ui::Text::BaseSpan>& listOfSpans) const
 {
-  std::map<Impl::SpanId, Dali::UI::Text::BaseSpan> reorderedListOfSpans;
+  std::map<Impl::SpanId, Dali::Ui::Text::BaseSpan> reorderedListOfSpans;
 
   listOfSpans.reserve(listOfSpans.size() + mImpl->mSpanWithRanges.size());
 
@@ -87,10 +87,10 @@ void SpanRangesContainer::GetSpans(std::vector<Dali::UI::Text::BaseSpan>& listOf
   }
 }
 
-void SpanRangesContainer::GetSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan>& spans,
-                                            std::vector<Dali::UI::Text::Range>& ranges) const
+void SpanRangesContainer::GetSpansAndRanges(std::vector<Dali::Ui::Text::BaseSpan>& spans,
+                                            std::vector<Dali::Ui::Text::Range>& ranges) const
 {
-  std::map<Impl::SpanId, std::pair<Dali::UI::Text::BaseSpan, Dali::UI::Text::Range>> reorderedListOfSpansWithRanges;
+  std::map<Impl::SpanId, std::pair<Dali::Ui::Text::BaseSpan, Dali::Ui::Text::Range>> reorderedListOfSpansWithRanges;
 
   spans.reserve(spans.size() + mImpl->mSpanWithRanges.size());
   ranges.reserve(ranges.size() + mImpl->mSpanWithRanges.size());
@@ -114,6 +114,6 @@ void SpanRangesContainer::GetSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

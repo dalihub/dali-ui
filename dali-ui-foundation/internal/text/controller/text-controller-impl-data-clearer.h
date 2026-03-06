@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 
 /// Provides methods to clear some of the model data in the Text::Controller::Impl
@@ -81,6 +81,6 @@ struct ControllerImplDataClearer
                              Controller::OperationsMask operations);
 };
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_IMPL_DATA_CLEARER_H

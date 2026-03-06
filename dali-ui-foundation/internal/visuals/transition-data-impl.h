@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -152,7 +152,7 @@ private:                   // Data members
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_TRANSITION_DATA_H

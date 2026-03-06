@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -71,7 +71,7 @@ void ScrollViewPagePathEffect::ApplyToPage(Actor page, unsigned int pageOrder)
   Vector2 range = Vector2(pageHalfSize - (pageHalfSize * pageOrder), -pageHalfSize - (pageHalfSize * pageOrder));
   Vector2 wrap = Vector2(range.x, -pageHalfSize * (mPageCount - 2) + range.y);
 
-  UI::ScrollView scrollView = GetScrollView();
+  Ui::ScrollView scrollView = GetScrollView();
 
   // Position
   mPathConstrainer.Apply(Dali::Property(page, Dali::Actor::Property::POSITION),
@@ -86,16 +86,16 @@ void ScrollViewPagePathEffect::ApplyToPage(Actor page, unsigned int pageOrder)
                            Dali::Property(scrollView, mInputPropertyIndex), range, wrap);
 }
 
-void ScrollViewPagePathEffect::OnAttach(UI::ScrollView& scrollView)
+void ScrollViewPagePathEffect::OnAttach(Ui::ScrollView& scrollView)
 {
 }
 
-void ScrollViewPagePathEffect::OnDetach(UI::ScrollView& scrollView)
+void ScrollViewPagePathEffect::OnDetach(Ui::ScrollView& scrollView)
 {
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

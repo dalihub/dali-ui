@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 struct ItemLayout::Impl
 {
@@ -94,7 +94,7 @@ float ItemLayout::GetClosestOnScreenLayoutPosition(int itemID, float currentLayo
   return currentLayoutPosition;
 }
 
-int ItemLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::KeyboardFocus::Direction direction,
+int ItemLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::Ui::Control::KeyboardFocus::Direction direction,
                                    bool loopEnabled)
 {
   switch (direction)
@@ -161,6 +161,6 @@ Property::Map ItemLayout::GetLayoutProperties()
   return mImpl->mProperties;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

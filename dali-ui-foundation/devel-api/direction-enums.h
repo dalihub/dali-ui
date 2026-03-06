@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Direction
 {
@@ -31,7 +31,7 @@ enum Type
 };
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

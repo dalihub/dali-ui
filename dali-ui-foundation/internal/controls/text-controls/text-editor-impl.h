@@ -45,7 +45,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -63,7 +63,7 @@ public:
    * @copydoc Dali::Toollkit::TextEditor::New()
    * @param[in] additionalBehaviour custom behavior flags for this TextEditor. Default is CONTROL_BEHAVIOUR_DEFAULT
    */
-  static UI::TextEditor New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
+  static Ui::TextEditor New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
 
   // Properties
 
@@ -148,17 +148,17 @@ public:
   /**
    * @copydoc TextEditor::TextChangedSignal()
    */
-  UI::TextEditor::TextChangedSignalType& TextChangedSignal();
+  Ui::TextEditor::TextChangedSignalType& TextChangedSignal();
 
   /**
    * @copydoc TextEditor::TextChangedSignal()
    */
-  UI::TextEditor::InputStyleChangedSignalType& InputStyleChangedSignal();
+  Ui::TextEditor::InputStyleChangedSignalType& InputStyleChangedSignal();
 
   /**
    * @copydoc TextEditor::ScrollStateChangedSignal()
    */
-  UI::TextEditor::ScrollStateChangedSignalType& ScrollStateChangedSignal();
+  Ui::TextEditor::ScrollStateChangedSignalType& ScrollStateChangedSignal();
 
 private: // From Control
   /**
@@ -167,14 +167,14 @@ private: // From Control
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
    * @copydoc Control::OnStyleChange()
    */
-  void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change) override;
+  void OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change) override;
 
   /**
    * @copydoc Control::OnApplyDefaultStyle()
@@ -288,12 +288,12 @@ private: // From Control
   /**
    * @copydoc Text::EditableControlInterface::AddDecoration()
    */
-  void AddDecoration(Actor& actor, UI::Text::DecorationType type, bool needsClipping) override;
+  void AddDecoration(Actor& actor, Ui::Text::DecorationType type, bool needsClipping) override;
 
   /**
    * @copydoc Text::EditableControlInterface::InputFiltered()
    */
-  void InputFiltered(UI::InputFilter::Property::Type type) override;
+  void InputFiltered(Ui::InputFilter::Property::Type type) override;
 
   /**
    * @copydoc Text::EditableControlInterface::GetControlBackgroundColor()
@@ -328,7 +328,7 @@ public:
   void SelectText(const uint32_t start, const uint32_t end) override;
 
   /**
-   * @copydoc Dali::UI::DevelTextEditor::ScrollBy()
+   * @copydoc Dali::Ui::DevelTextEditor::ScrollBy()
    */
   void ScrollBy(Vector2 Scroll);
 
@@ -496,7 +496,7 @@ public:
 
 private: // Implementation
   /**
-   * @copydoc Dali::UI::Text::Controller::(InputMethodContext& inputMethodContext, const
+   * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const
    * InputMethodContext::EventData& inputMethodContextEvent)
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(
@@ -536,7 +536,7 @@ private: // Implementation
   /**
    * @brief Callbacks called on idle.
    *
-   * If there are notifications of change of input style on the queue, UI::TextEditor::InputStyleChangedSignal()
+   * If there are notifications of change of input style on the queue, Ui::TextEditor::InputStyleChangedSignal()
    * are emitted.
    */
   void OnIdleSignal();
@@ -642,16 +642,16 @@ private: // Implementation
 
 private: // Data
   // Signals
-  UI::TextEditor::TextChangedSignalType mTextChangedSignal;
-  UI::TextEditor::InputStyleChangedSignalType mInputStyleChangedSignal;
-  UI::TextEditor::ScrollStateChangedSignalType mScrollStateChangedSignal;
-  UI::DevelTextEditor::MaxLengthReachedSignalType mMaxLengthReachedSignal;
-  UI::DevelTextEditor::AnchorClickedSignalType mAnchorClickedSignal;
-  UI::DevelTextEditor::InputFilteredSignalType mInputFilteredSignal;
-  UI::DevelTextEditor::CursorPositionChangedSignalType mCursorPositionChangedSignal;
-  UI::DevelTextEditor::SelectionChangedSignalType mSelectionChangedSignal;
-  UI::DevelTextEditor::SelectionClearedSignalType mSelectionClearedSignal;
-  UI::DevelTextEditor::SelectionStartedSignalType mSelectionStartedSignal;
+  Ui::TextEditor::TextChangedSignalType mTextChangedSignal;
+  Ui::TextEditor::InputStyleChangedSignalType mInputStyleChangedSignal;
+  Ui::TextEditor::ScrollStateChangedSignalType mScrollStateChangedSignal;
+  Ui::DevelTextEditor::MaxLengthReachedSignalType mMaxLengthReachedSignal;
+  Ui::DevelTextEditor::AnchorClickedSignalType mAnchorClickedSignal;
+  Ui::DevelTextEditor::InputFilteredSignalType mInputFilteredSignal;
+  Ui::DevelTextEditor::CursorPositionChangedSignalType mCursorPositionChangedSignal;
+  Ui::DevelTextEditor::SelectionChangedSignalType mSelectionChangedSignal;
+  Ui::DevelTextEditor::SelectionClearedSignalType mSelectionClearedSignal;
+  Ui::DevelTextEditor::SelectionStartedSignalType mSelectionStartedSignal;
 
   // for Font Variations
   std::map<Dali::Property::Index, std::string> mVariationIndexMap; // Stores [CustomPropertyIndex, tag].
@@ -661,12 +661,12 @@ private: // Data
   Text::RendererPtr mRenderer;
   Text::DecoratorPtr mDecorator;
   Text::TextVerticalScrollerPtr mTextVerticalScroller;
-  UI::Control mStencil;
-  UI::ScrollBar mScrollBar;
+  Ui::Control mStencil;
+  Ui::ScrollBar mScrollBar;
   Dali::Animation mAnimation; ///< Scroll indicator Show/Hide Animation.
   Dali::TimePeriod mAnimationPeriod;
   std::vector<Actor> mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<UI::TextAnchor> mAnchorActors;
+  std::vector<Ui::TextAnchor> mAnchorActors;
   Dali::InputMethodOptions mInputMethodOptions;
 
   Actor mRenderableActor;
@@ -707,23 +707,23 @@ private: // Data
     using EditableTextControlAccessible::EditableTextControlAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::GetNameRaw()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNameRaw()
      */
     std::pair<std::string, bool> GetNameRaw() const override;
 
   protected:
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextAnchors()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextAnchors()
      */
-    const std::vector<UI::TextAnchor>& GetTextAnchors() const override;
+    const std::vector<Ui::TextAnchor>& GetTextAnchors() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextController()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextController()
      */
-    UI::Text::ControllerPtr GetTextController() const override;
+    Ui::Text::ControllerPtr GetTextController() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::EditableTextControlAccessible::RequestTextRelayout()
+     * @copydoc Dali::Ui::Internal::EditableTextControlAccessible::RequestTextRelayout()
      */
     void RequestTextRelayout() override;
   };
@@ -733,25 +733,25 @@ private: // Data
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TextEditor& GetImpl(UI::TextEditor& textEditor)
+inline Ui::Internal::TextEditor& GetImpl(Ui::TextEditor& textEditor)
 {
   DALI_ASSERT_ALWAYS(textEditor);
 
   Dali::RefObject& handle = textEditor.GetImplementation();
 
-  return static_cast<UI::Internal::TextEditor&>(handle);
+  return static_cast<Ui::Internal::TextEditor&>(handle);
 }
 
-inline const UI::Internal::TextEditor& GetImpl(const UI::TextEditor& textEditor)
+inline const Ui::Internal::TextEditor& GetImpl(const Ui::TextEditor& textEditor)
 {
   DALI_ASSERT_ALWAYS(textEditor);
 
   const Dali::RefObject& handle = textEditor.GetImplementation();
 
-  return static_cast<const UI::Internal::TextEditor&>(handle);
+  return static_cast<const Ui::Internal::TextEditor&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 GaussianBlurEffect::GaussianBlurEffect() = default;
 
@@ -97,5 +97,5 @@ GaussianBlurEffect::FinishedSignalType& GaussianBlurEffect::FinishedSignal()
   return GetImplementation(*this).FinishedSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

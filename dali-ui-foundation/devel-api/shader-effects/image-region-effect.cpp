@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Property::Map CreateImageRegionEffect()
 {
@@ -32,10 +32,10 @@ Property::Map CreateImageRegionEffect()
   Property::Map customShader;
   customShader[Visual::Shader::Property::VERTEX_SHADER] = SHADER_IMAGE_REGION_EFFECT_VERT.data();
 
-  map[UI::Visual::Property::SHADER] = customShader;
+  map[Ui::Visual::Property::SHADER] = customShader;
   return map;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

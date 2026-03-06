@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DepthIndex
 {
@@ -69,7 +69,7 @@ static_assert(!(MINIMUM_DEPTH_INDEX <= AUTO_INDEX && AUTO_INDEX <= MAXIMUM_DEPTH
 
 } // namespace DepthIndex
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

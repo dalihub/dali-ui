@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 WebBackForwardList::WebBackForwardList(Dali::WebEngineBackForwardList& list)
   : mWebEngineBackForwardList(list)
@@ -69,6 +69,6 @@ std::vector<std::unique_ptr<Dali::WebEngineBackForwardListItem>> WebBackForwardL
   return mWebEngineBackForwardList.GetForwardItems(limit);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -37,7 +37,7 @@ namespace Integration
 namespace
 {
 
-float GetFlexGrow(UI::View view)
+float GetFlexGrow(Ui::View view)
 {
   if (view)
   {
@@ -50,7 +50,7 @@ float GetFlexGrow(UI::View view)
   return 0.0f;
 }
 
-float GetFlexShrink(UI::View view)
+float GetFlexShrink(Ui::View view)
 {
   if (view)
   {
@@ -63,7 +63,7 @@ float GetFlexShrink(UI::View view)
   return 1.0f;
 }
 
-FlexAlign GetAlignSelf(UI::View view)
+FlexAlign GetAlignSelf(Ui::View view)
 {
   if (view)
   {
@@ -76,7 +76,7 @@ FlexAlign GetAlignSelf(UI::View view)
   return FlexAlign::AUTO;
 }
 
-float GetFlexBasis(UI::View view)
+float GetFlexBasis(Ui::View view)
 {
   if (view)
   {
@@ -100,7 +100,7 @@ struct FlexLine
 
 std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& children, float availableMain,
                                                bool isMainAxisHorizontal, FlexWrap wrap,
-                                               const std::function<ViewImpl&(UI::View)>& getImpl)
+                                               const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   std::vector<FlexLine> lines;
   FlexLine currentLine;
@@ -155,7 +155,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
  * When there is overflow and totalFlexShrink > 0, shrink children proportionally.
  */
 void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, float availableMain,
-                         bool isMainAxisHorizontal, const std::function<ViewImpl&(UI::View)>& getImpl)
+                         bool isMainAxisHorizontal, const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   float freeSpace = availableMain - line.mainSize;
 
@@ -255,7 +255,7 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
 void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, const LayoutRect& bounds,
                         float contentWidth, float contentHeight, float& crossOffsetInOut, float& mainOffsetInOut,
                         float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed,
-                        const std::function<ViewImpl&(UI::View)>& getImpl)
+                        const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   for (uint32_t idx : line.childIndices)
   {
@@ -512,7 +512,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   float contentWidth = bounds.width;
   float contentHeight = bounds.height;
   float availableMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
-  auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
+  auto getImpl = [this](Ui::View v) -> ViewImpl& { return GetImpl(v); };
 
   // Save original measured sizes: BuildFlexLinesForArrange and ApplyFlexGrowShrink
   // modify childData.measuredSize in-place (flex-basis, grow, shrink). Without
@@ -600,5 +600,5 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -49,12 +49,12 @@ public:
   ~Backend();
 
   /**
-   * @copydoc Dali::UI::Text::Backend::Get()
+   * @copydoc Dali::Ui::Text::Backend::Get()
    */
-  static Dali::UI::Text::Backend Get();
+  static Dali::Ui::Text::Backend Get();
 
   /**
-   * @copydoc Dali::UI::Text::Backend::NewRenderer()
+   * @copydoc Dali::Ui::Text::Backend::NewRenderer()
    */
   RendererPtr NewRenderer(unsigned int renderingType);
 
@@ -89,7 +89,7 @@ inline static const Internal::Backend& GetImplementation(const Backend& backend)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

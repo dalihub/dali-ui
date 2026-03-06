@@ -28,13 +28,13 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
  * TableView is a custom control for laying out actors in a table layout
- * @see Dali::UI:TableView for more details
+ * @see Dali::Ui:TableView for more details
  */
 class TableView : public Control
 {
@@ -43,152 +43,152 @@ public:
    * Create a new TableView.
    * @return A smart-pointer to the newly allocated TableView.
    */
-  static UI::TableView New(unsigned int initialRows, unsigned int initialColumns);
+  static Ui::TableView New(unsigned int initialRows, unsigned int initialColumns);
 
   /**
-   * @copydoc UI::TableView::AddChild
+   * @copydoc Ui::TableView::AddChild
    */
-  bool AddChild(Actor& child, const UI::TableView::CellPosition& position);
+  bool AddChild(Actor& child, const Ui::TableView::CellPosition& position);
 
   /**
-   * @copydoc UI::TableView::GetChildAt
+   * @copydoc Ui::TableView::GetChildAt
    */
-  Actor GetChildAt(const UI::TableView::CellPosition& position);
+  Actor GetChildAt(const Ui::TableView::CellPosition& position);
 
   /**
-   * @copydoc UI::TableView::RemoveChildAt
+   * @copydoc Ui::TableView::RemoveChildAt
    */
-  Actor RemoveChildAt(const UI::TableView::CellPosition& position);
+  Actor RemoveChildAt(const Ui::TableView::CellPosition& position);
 
   /**
-   * @copydoc UI::TableView::FindChildPosition
+   * @copydoc Ui::TableView::FindChildPosition
    */
-  bool FindChildPosition(const Actor& child, UI::TableView::CellPosition& positionOut);
+  bool FindChildPosition(const Actor& child, Ui::TableView::CellPosition& positionOut);
 
   /**
-   * @copydoc UI::TableView::InsertRow
+   * @copydoc Ui::TableView::InsertRow
    */
   void InsertRow(unsigned int rowIndex);
 
   /**
-   * @copydoc UI::TableView::DeleteRow( unsigned int rowIndex )
+   * @copydoc Ui::TableView::DeleteRow( unsigned int rowIndex )
    */
   void DeleteRow(unsigned int rowIndex);
 
   /**
-   * @copydoc UI::TableView::DeleteRow( unsigned int rowIndex, std::vector<Actor>& removed )
+   * @copydoc Ui::TableView::DeleteRow( unsigned int rowIndex, std::vector<Actor>& removed )
    */
   void DeleteRow(unsigned int rowIndex, std::vector<Actor>& removed);
 
   /**
-   * @copydoc UI::TableView::InsertColumn
+   * @copydoc Ui::TableView::InsertColumn
    */
   void InsertColumn(unsigned int columnIndex);
 
   /**
-   * @copydoc UI::TableView::DeleteColumn( unsigned int columnIndex )
+   * @copydoc Ui::TableView::DeleteColumn( unsigned int columnIndex )
    */
   void DeleteColumn(unsigned int columnIndex);
 
   /**
-   * @copydoc UI::TableView::DeleteColumn( unsigned int columnIndex, std::vector<Actor>& removed )
+   * @copydoc Ui::TableView::DeleteColumn( unsigned int columnIndex, std::vector<Actor>& removed )
    */
   void DeleteColumn(unsigned int columnIndex, std::vector<Actor>& removed);
 
   /**
-   * @copydoc UI::TableView::Resize( unsigned int rows, unsigned int columns )
+   * @copydoc Ui::TableView::Resize( unsigned int rows, unsigned int columns )
    */
   void Resize(unsigned int rows, unsigned int columns);
 
   /**
-   * @copydoc UI::TableView::Resize( unsigned int rows, unsigned int columns, std::vector<Actor>& removed )
+   * @copydoc Ui::TableView::Resize( unsigned int rows, unsigned int columns, std::vector<Actor>& removed )
    */
   void Resize(unsigned int rows, unsigned int columns, std::vector<Actor>& removed);
 
   /**
-   * @copydoc UI::TableView::SetCellPadding
+   * @copydoc Ui::TableView::SetCellPadding
    */
   void SetCellPadding(Size padding);
 
   /**
-   * @copydoc UI::TableView::GetCellPadding
+   * @copydoc Ui::TableView::GetCellPadding
    */
   Size GetCellPadding();
 
   /**
-   * @copydoc UI::TableView::SetFitHeight
+   * @copydoc Ui::TableView::SetFitHeight
    */
   void SetFitHeight(unsigned int rowIndex);
 
   /**
-   * @copydoc UI::TableView::IsFitHeight
+   * @copydoc Ui::TableView::IsFitHeight
    */
   bool IsFitHeight(unsigned int rowIndex) const;
 
   /**
-   * @copydoc UI::TableView::SetFitWidth
+   * @copydoc Ui::TableView::SetFitWidth
    */
   void SetFitWidth(unsigned int columnIndex);
 
   /**
-   * @copydoc UI::TableView::IsFitWidth
+   * @copydoc Ui::TableView::IsFitWidth
    */
   bool IsFitWidth(unsigned int columnIndex) const;
 
   /**
-   * @copydoc UI::TableView::SetFixedWidth
+   * @copydoc Ui::TableView::SetFixedWidth
    */
   void SetFixedWidth(unsigned int columnIndex, float width);
 
   /**
-   * @copydoc UI::TableView::GetFixedWidth
+   * @copydoc Ui::TableView::GetFixedWidth
    */
   float GetFixedWidth(unsigned int columnIndex) const;
 
   /**
-   * @copydoc UI::TableView::SetFixedHeight
+   * @copydoc Ui::TableView::SetFixedHeight
    */
   void SetFixedHeight(unsigned int rowIndex, float height);
 
   /**
-   * @copydoc UI::TableView::GetFixedHeight
+   * @copydoc Ui::TableView::GetFixedHeight
    */
   float GetFixedHeight(unsigned int rowIndex) const;
 
   /**
-   * @copydoc UI::TableView::SetRelativeHeight
+   * @copydoc Ui::TableView::SetRelativeHeight
    */
   void SetRelativeHeight(unsigned int rowIndex, float heightPercentage);
 
   /**
-   * @copydoc UI::TableView::GetRelativeHeight
+   * @copydoc Ui::TableView::GetRelativeHeight
    */
   float GetRelativeHeight(unsigned int rowIndex) const;
 
   /**
-   * @copydoc UI::TableView::SetRelativeWidth
+   * @copydoc Ui::TableView::SetRelativeWidth
    */
   void SetRelativeWidth(unsigned int columnIndex, float widthPercentage);
 
   /**
-   * @copydoc UI::TableView::GetRelativeWidth
+   * @copydoc Ui::TableView::GetRelativeWidth
    */
   float GetRelativeWidth(unsigned int columnIndex) const;
 
   /**
-   * @copydoc UI::TableView::GetRows
+   * @copydoc Ui::TableView::GetRows
    */
   unsigned int GetRows();
 
   /**
-   * @copydoc UI::TableView::GetColumns
+   * @copydoc Ui::TableView::GetColumns
    */
   unsigned int GetColumns();
 
   /**
-   * @copydoc UI::TableView::SetCellAlignment
+   * @copydoc Ui::TableView::SetCellAlignment
    */
-  void SetCellAlignment(UI::TableView::CellPosition position, HorizontalAlignment::Type horizontal,
+  void SetCellAlignment(Ui::TableView::CellPosition position, HorizontalAlignment::Type horizontal,
                         VerticalAlignment::Type vertical);
 
   // Properties
@@ -238,7 +238,7 @@ private: // From Control
   /**
    * @copydoc Control::GetNextKeyboardFocusableActor
    */
-  Actor GetNextKeyboardFocusableActor(Actor currentFocusedActor, UI::Control::KeyboardFocus::Direction direction,
+  Actor GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Control::KeyboardFocus::Direction direction,
                                       bool loopEnabled) override;
 
   /**
@@ -282,7 +282,7 @@ private: // Implementation
       : size(0.0f),
         fillRatio(0.0f),
         position(0.0f),
-        sizePolicy(UI::TableView::FILL)
+        sizePolicy(Ui::TableView::FILL)
     {
     }
 
@@ -292,7 +292,7 @@ private: // Implementation
      * @param[in] newSize The size to set for this data
      * @param[in] newSizePolicy The policy used to interpret the size value
      */
-    RowColumnData(float newSize, float newFillRatio, UI::TableView::LayoutPolicy newSizePolicy)
+    RowColumnData(float newSize, float newFillRatio, Ui::TableView::LayoutPolicy newSizePolicy)
       : size(newSize),
         fillRatio(newFillRatio),
         position(0.0f),
@@ -303,7 +303,7 @@ private: // Implementation
     float size;      ///< Set or calculated size
     float fillRatio; ///< Ratio to fill remaining space, only valid with RELATIVE or FILL policy
     float position;  ///< Position of the row/column, this value is updated during every Relayout round
-    UI::TableView::LayoutPolicy sizePolicy; ///< The size policy used to interpret the size value
+    Ui::TableView::LayoutPolicy sizePolicy; ///< The size policy used to interpret the size value
   };
 
   typedef Dali::Vector<RowColumnData> RowColumnArray;
@@ -322,7 +322,7 @@ public:
 
     // data members
     Dali::Actor actor;
-    UI::TableView::CellPosition position;
+    Ui::TableView::CellPosition position;
     HorizontalAlignment::Type horizontalAlignment;
     VerticalAlignment::Type verticalAlignment;
   };
@@ -498,25 +498,25 @@ private:                       // Data
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TableView& GetImpl(UI::TableView& tableView)
+inline Ui::Internal::TableView& GetImpl(Ui::TableView& tableView)
 {
   DALI_ASSERT_ALWAYS(tableView);
 
   Dali::RefObject& handle = tableView.GetImplementation();
 
-  return static_cast<UI::Internal::TableView&>(handle);
+  return static_cast<Ui::Internal::TableView&>(handle);
 }
 
-inline const UI::Internal::TableView& GetImpl(const UI::TableView& tableView)
+inline const Ui::Internal::TableView& GetImpl(const Ui::TableView& tableView)
 {
   DALI_ASSERT_ALWAYS(tableView);
 
   const Dali::RefObject& handle = tableView.GetImplementation();
 
-  return static_cast<const UI::Internal::TableView&>(handle);
+  return static_cast<const Ui::Internal::TableView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -39,7 +39,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -204,7 +204,7 @@ void Typesetter::SetFontClient(TextAbstraction::FontClient& fontClient)
   mImpl->SetFontClient(fontClient);
 }
 
-PixelData Typesetter::Render(const Vector2& size, UI::DevelText::TextDirection::Type textDirection,
+PixelData Typesetter::Render(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
                              RenderBehaviour behaviour, bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
                              const Vector2& originSize)
 {
@@ -215,7 +215,7 @@ PixelData Typesetter::Render(const Vector2& size, UI::DevelText::TextDirection::
   return pixelData;
 }
 
-PixelData Typesetter::RenderWithCutout(const Vector2& size, UI::DevelText::TextDirection::Type textDirection,
+PixelData Typesetter::RenderWithCutout(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
                                        Devel::PixelBuffer mask, RenderBehaviour behaviour,
                                        bool ignoreHorizontalAlignment, Pixel::Format pixelFormat, float originAlpha,
                                        const Vector2& originSize)
@@ -230,7 +230,7 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, UI::DevelText::TextD
 }
 
 Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
-                                                     UI::DevelText::TextDirection::Type textDirection,
+                                                     Ui::DevelText::TextDirection::Type textDirection,
                                                      RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
                                                      Pixel::Format pixelFormat, const Vector2& originSize)
 {
@@ -258,12 +258,12 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
     }
     case HorizontalAlignment::CENTER:
     {
-      penX += (textDirection == UI::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
+      penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
       break;
     }
     case HorizontalAlignment::END:
     {
-      penX += (textDirection == UI::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
+      penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
       break;
     }
   }
@@ -635,6 +635,6 @@ Typesetter::~Typesetter() = default;
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

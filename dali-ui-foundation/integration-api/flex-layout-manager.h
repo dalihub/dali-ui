@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -62,5 +62,5 @@ protected:
 };
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

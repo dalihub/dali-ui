@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 using HashType = uint64_t;
 using ShaderFlagList = std::vector<PrecompileShaderOption::Flag>;
@@ -72,7 +72,7 @@ protected:
 };
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_VISUAL_SHADER_FACTORY_INTERFACE_H

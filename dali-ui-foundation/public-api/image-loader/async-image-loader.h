@@ -31,7 +31,7 @@ namespace Dali
 {
 class PixelData;
 
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -262,7 +262,7 @@ public: // Not intended for developer use
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

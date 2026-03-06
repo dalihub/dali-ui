@@ -49,7 +49,7 @@ Debug::Filter* gLogButtonFilter = Debug::Filter::New(Debug::NoLogging, false, "L
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -62,43 +62,43 @@ BaseHandle Create()
 }
 
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::Button, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Button, Ui::Control, Create)
 
-DALI_PROPERTY_REGISTRATION(UI, Button, "disabled", BOOLEAN, DISABLED)
-DALI_PROPERTY_REGISTRATION(UI, Button, "autoRepeating", BOOLEAN, AUTO_REPEATING)
-DALI_PROPERTY_REGISTRATION(UI, Button, "initialAutoRepeatingDelay", FLOAT, INITIAL_AUTO_REPEATING_DELAY)
-DALI_PROPERTY_REGISTRATION(UI, Button, "nextAutoRepeatingDelay", FLOAT, NEXT_AUTO_REPEATING_DELAY)
-DALI_PROPERTY_REGISTRATION(UI, Button, "togglable", BOOLEAN, TOGGLABLE)
-DALI_PROPERTY_REGISTRATION(UI, Button, "selected", BOOLEAN, SELECTED)
-DALI_PROPERTY_REGISTRATION(UI, Button, "unselectedVisual", MAP, UNSELECTED_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "selectedVisual", MAP, SELECTED_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "disabledSelectedVisual", MAP, DISABLED_SELECTED_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "disabledUnselectedVisual", MAP, DISABLED_UNSELECTED_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "unselectedBackgroundVisual", MAP, UNSELECTED_BACKGROUND_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "label", MAP, LABEL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "selectedBackgroundVisual", MAP, SELECTED_BACKGROUND_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "disabledUnselectedBackgroundVisual", MAP, DISABLED_UNSELECTED_BACKGROUND_VISUAL)
-DALI_PROPERTY_REGISTRATION(UI, Button, "disabledSelectedBackgroundVisual", MAP, DISABLED_SELECTED_BACKGROUND_VISUAL)
-DALI_DEVEL_PROPERTY_REGISTRATION(UI, Button, "labelRelativeAlignment", STRING, LABEL_RELATIVE_ALIGNMENT)
-DALI_DEVEL_PROPERTY_REGISTRATION(UI, Button, "labelPadding", VECTOR4, LABEL_PADDING)
-DALI_DEVEL_PROPERTY_REGISTRATION(UI, Button, "visualPadding", VECTOR4, VISUAL_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "disabled", BOOLEAN, DISABLED)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "autoRepeating", BOOLEAN, AUTO_REPEATING)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "initialAutoRepeatingDelay", FLOAT, INITIAL_AUTO_REPEATING_DELAY)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "nextAutoRepeatingDelay", FLOAT, NEXT_AUTO_REPEATING_DELAY)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "togglable", BOOLEAN, TOGGLABLE)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "selected", BOOLEAN, SELECTED)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "unselectedVisual", MAP, UNSELECTED_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "selectedVisual", MAP, SELECTED_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "disabledSelectedVisual", MAP, DISABLED_SELECTED_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "disabledUnselectedVisual", MAP, DISABLED_UNSELECTED_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "unselectedBackgroundVisual", MAP, UNSELECTED_BACKGROUND_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "label", MAP, LABEL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "selectedBackgroundVisual", MAP, SELECTED_BACKGROUND_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "disabledUnselectedBackgroundVisual", MAP, DISABLED_UNSELECTED_BACKGROUND_VISUAL)
+DALI_PROPERTY_REGISTRATION(Ui, Button, "disabledSelectedBackgroundVisual", MAP, DISABLED_SELECTED_BACKGROUND_VISUAL)
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui, Button, "labelRelativeAlignment", STRING, LABEL_RELATIVE_ALIGNMENT)
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui, Button, "labelPadding", VECTOR4, LABEL_PADDING)
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui, Button, "visualPadding", VECTOR4, VISUAL_PADDING)
 
 // Signals:
-DALI_SIGNAL_REGISTRATION(UI, Button, "pressed", SIGNAL_PRESSED)
-DALI_SIGNAL_REGISTRATION(UI, Button, "released", SIGNAL_RELEASED)
-DALI_SIGNAL_REGISTRATION(UI, Button, "clicked", SIGNAL_CLICKED)
-DALI_SIGNAL_REGISTRATION(UI, Button, "stateChanged", SIGNAL_STATE_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, Button, "pressed", SIGNAL_PRESSED)
+DALI_SIGNAL_REGISTRATION(Ui, Button, "released", SIGNAL_RELEASED)
+DALI_SIGNAL_REGISTRATION(Ui, Button, "clicked", SIGNAL_CLICKED)
+DALI_SIGNAL_REGISTRATION(Ui, Button, "stateChanged", SIGNAL_STATE_CHANGED)
 
 // Actions:
-DALI_ACTION_REGISTRATION(UI, Button, "buttonClick", ACTION_BUTTON_CLICK)
+DALI_ACTION_REGISTRATION(Ui, Button, "buttonClick", ACTION_BUTTON_CLICK)
 
 DALI_TYPE_REGISTRATION_END()
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ALIGNMENT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Internal::Button, BEGIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Internal::Button, END)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Internal::Button, TOP)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Internal::Button, BOTTOM)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Internal::Button, BEGIN)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Internal::Button, END)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Internal::Button, TOP)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Internal::Button, BOTTOM)
 DALI_ENUM_TO_STRING_TABLE_END(ALIGNMENT)
 
 const Scripting::StringEnum ALIGNMENT_STRING_TABLE[] = {
@@ -111,10 +111,10 @@ const Scripting::StringEnum ALIGNMENT_STRING_TABLE[] = {
 const unsigned int ALIGNMENT_STRING_TABLE_COUNT = sizeof(ALIGNMENT_STRING_TABLE) / sizeof(ALIGNMENT_STRING_TABLE[0]);
 
 const Property::Index VISUAL_INDEX_FOR_STATE[Button::STATE_COUNT][Button::VISUAL_STATE_COUNT] = {
-    {UI::Button::Property::UNSELECTED_BACKGROUND_VISUAL, UI::Button::Property::UNSELECTED_VISUAL},
-    {UI::Button::Property::SELECTED_BACKGROUND_VISUAL, UI::Button::Property::SELECTED_VISUAL},
-    {UI::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL, UI::Button::Property::DISABLED_UNSELECTED_VISUAL},
-    {UI::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL, UI::Button::Property::DISABLED_SELECTED_VISUAL}};
+    {Ui::Button::Property::UNSELECTED_BACKGROUND_VISUAL, Ui::Button::Property::UNSELECTED_VISUAL},
+    {Ui::Button::Property::SELECTED_BACKGROUND_VISUAL, Ui::Button::Property::SELECTED_VISUAL},
+    {Ui::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL, Ui::Button::Property::DISABLED_UNSELECTED_VISUAL},
+    {Ui::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL, Ui::Button::Property::DISABLED_SELECTED_VISUAL}};
 
 /**
  * Checks if given map contains a text string
@@ -122,7 +122,7 @@ const Property::Index VISUAL_INDEX_FOR_STATE[Button::STATE_COUNT][Button::VISUAL
 bool MapContainsTextString(Property::Map& map)
 {
   bool result = false;
-  Property::Value* value = map.Find(UI::TextVisual::Property::TEXT);
+  Property::Value* value = map.Find(Ui::TextVisual::Property::TEXT);
   if (value)
   {
     std::string textString;
@@ -297,7 +297,7 @@ void Button::ChangeState(State requestedState)
     RelayoutRequest();
   }
 
-  UI::Button handle(GetOwner());
+  Ui::Button handle(GetOwner());
   // Emit signal.
   mStateChangedSignal.Emit(handle);
 }
@@ -321,7 +321,7 @@ void Button::MergeWithExistingLabelProperties(const Property::Map& inMap, Proper
    * 3) Merge with new properties ( settings )
    * 4) Return new merged map
    */
-  UI::Visual::Base visual = DevelControl::GetVisual(*this, UI::Button::Property::LABEL);
+  Ui::Visual::Base visual = DevelControl::GetVisual(*this, Ui::Button::Property::LABEL);
   if (visual)
   {
     DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose,
@@ -360,8 +360,8 @@ Button::Align Button::GetLabelAlignment()
 void Button::CreateVisualsForComponent(Property::Index index, const Property::Value& value, const int visualDepth)
 {
   DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose, "CreateVisualsForComponent index(%d)\n", index);
-  UI::VisualFactory visualFactory = UI::VisualFactory::Get();
-  UI::Visual::Base buttonVisual;
+  Ui::VisualFactory visualFactory = Ui::VisualFactory::Get();
+  Ui::Visual::Base buttonVisual;
 
   std::string imageUrl;
   if (value.Get(imageUrl))
@@ -369,7 +369,7 @@ void Button::CreateVisualsForComponent(Property::Index index, const Property::Va
     DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose, "CreateVisualsForComponent Using image URL(%d)\n", index);
     if (!imageUrl.empty())
     {
-      DALI_ASSERT_DEBUG(index != UI::Button::Property::LABEL && "Creating a Image Visual instead of Text Visual ");
+      DALI_ASSERT_DEBUG(index != Ui::Button::Property::LABEL && "Creating a Image Visual instead of Text Visual ");
       buttonVisual = visualFactory.CreateVisual(imageUrl, ImageDimensions());
     }
   }
@@ -391,7 +391,7 @@ void Button::CreateVisualsForComponent(Property::Index index, const Property::Va
     // enable the visual if needed for current state
     const bool enabled =
         ((index == VISUAL_INDEX_FOR_STATE[mButtonState][BACKGROUND]) ||
-         (index == VISUAL_INDEX_FOR_STATE[mButtonState][FOREGROUND]) || (index == UI::Button::Property::LABEL));
+         (index == VISUAL_INDEX_FOR_STATE[mButtonState][FOREGROUND]) || (index == Ui::Button::Property::LABEL));
     DevelControl::RegisterVisual(*this, index, buttonVisual, enabled, visualDepth);
   }
   else
@@ -407,7 +407,7 @@ bool Button::GetPropertyMapForVisual(Property::Index visualIndex, Property::Map&
 {
   DALI_LOG_INFO(gLogButtonFilter, Debug::General, "GetPropertyMapForVisual visual(%d)\n", visualIndex);
   bool success = false;
-  UI::Visual::Base visual = DevelControl::GetVisual(*this, visualIndex);
+  Ui::Visual::Base visual = DevelControl::GetVisual(*this, visualIndex);
   if (visual)
   {
     visual.CreatePropertyMap(retreivedMap);
@@ -423,7 +423,7 @@ bool Button::DoAction(BaseObject* object, const std::string& actionName, const P
 
   Dali::BaseHandle handle(object);
 
-  UI::Button button = UI::Button::DownCast(handle);
+  Ui::Button button = Ui::Button::DownCast(handle);
 
   DALI_ASSERT_DEBUG(button);
 
@@ -481,7 +481,7 @@ void Button::ButtonDown()
   }
 
   // The pressed signal should be emitted regardless of toggle mode.
-  UI::Button handle(GetOwner());
+  Ui::Button handle(GetOwner());
   mPressedSignal.Emit(handle);
 }
 
@@ -514,7 +514,7 @@ void Button::ButtonUp()
   if (emitSignalsForPressAndReleaseAction)
   {
     // The clicked and released signals should be emitted regardless of toggle mode.
-    UI::Button handle(GetOwner());
+    Ui::Button handle(GetOwner());
     mReleasedSignal.Emit(handle);
     mClickedSignal.Emit(handle);
   }
@@ -544,7 +544,7 @@ void Button::OnTouchPointLeave()
     mButtonPressedState = UNPRESSED;
 
     // The released signal should be emitted regardless of toggle mode.
-    UI::Button handle(GetOwner());
+    Ui::Button handle(GetOwner());
     mReleasedSignal.Emit(handle);
   }
 }
@@ -554,22 +554,22 @@ void Button::OnTouchPointInterrupted()
   OnTouchPointLeave();
 }
 
-UI::Button::ButtonSignalType& Button::PressedSignal()
+Ui::Button::ButtonSignalType& Button::PressedSignal()
 {
   return mPressedSignal;
 }
 
-UI::Button::ButtonSignalType& Button::ReleasedSignal()
+Ui::Button::ButtonSignalType& Button::ReleasedSignal()
 {
   return mReleasedSignal;
 }
 
-UI::Button::ButtonSignalType& Button::ClickedSignal()
+Ui::Button::ButtonSignalType& Button::ClickedSignal()
 {
   return mClickedSignal;
 }
 
-UI::Button::ButtonSignalType& Button::StateChangedSignal()
+Ui::Button::ButtonSignalType& Button::StateChangedSignal()
 {
   return mStateChangedSignal;
 }
@@ -580,7 +580,7 @@ bool Button::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tra
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::Button button = UI::Button::DownCast(handle);
+  Ui::Button button = Ui::Button::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), SIGNAL_PRESSED))
   {
@@ -618,7 +618,7 @@ void Button::OnInitialize()
   mTapDetector.DetectedSignal().Connect(this, &Button::OnTap);
 
   self.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
-  self.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
+  self.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
 
   self.TouchedSignal().Connect(this, &Button::OnTouch);
 }
@@ -714,7 +714,7 @@ void Button::OnSceneConnection(int depth)
   DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose, "Button::OnSceneConnection ptr(%p) \n", this);
   OnButtonVisualRemoval(VISUAL_INDEX_FOR_STATE[mPreviousButtonState][BACKGROUND]);
   OnButtonVisualRemoval(VISUAL_INDEX_FOR_STATE[mPreviousButtonState][FOREGROUND]);
-  SelectRequiredVisual(UI::Button::Property::LABEL);
+  SelectRequiredVisual(Ui::Button::Property::LABEL);
   SelectRequiredVisual(VISUAL_INDEX_FOR_STATE[mButtonState][BACKGROUND]);
   SelectRequiredVisual(VISUAL_INDEX_FOR_STATE[mButtonState][FOREGROUND]);
   Control::OnSceneConnection(depth); // Enabled visuals will be put on stage
@@ -736,7 +736,7 @@ Vector3 Button::GetNaturalSize()
 
   for (int state = Button::UNSELECTED_STATE; state < Button::STATE_COUNT; state++)
   {
-    UI::Visual::Base visual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[state][FOREGROUND]);
+    Ui::Visual::Base visual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[state][FOREGROUND]);
     Size visualSize;
     if (visual)
     {
@@ -752,7 +752,7 @@ Vector3 Button::GetNaturalSize()
   {
     for (int state = Button::UNSELECTED_STATE; state < Button::STATE_COUNT; state++)
     {
-      UI::Visual::Base visual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[state][BACKGROUND]);
+      Ui::Visual::Base visual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[state][BACKGROUND]);
       Size visualSize;
       if (visual)
       {
@@ -780,7 +780,7 @@ Vector3 Button::GetNaturalSize()
   // Get natural size of label if text has been set
   if (mTextStringSetFlag)
   {
-    UI::Visual::Base visual = DevelControl::GetVisual(*this, UI::Button::Property::LABEL);
+    Ui::Visual::Base visual = DevelControl::GetVisual(*this, Ui::Button::Property::LABEL);
 
     if (visual)
     {
@@ -835,8 +835,8 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
   DALI_LOG_INFO(gLogButtonFilter, Debug::General, "OnRelayout targetSize(%f,%f) ptr(%p) state[%d]\n", size.width,
                 size.height, this, mButtonState);
 
-  UI::Visual::Base currentVisual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[mButtonState][FOREGROUND]);
-  UI::Visual::Base currentBackGroundVisual =
+  Ui::Visual::Base currentVisual = DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[mButtonState][FOREGROUND]);
+  Ui::Visual::Base currentBackGroundVisual =
       DevelControl::GetVisual(*this, VISUAL_INDEX_FOR_STATE[mButtonState][BACKGROUND]);
 
   // Sizes and padding set to zero, if not present then values will no effect calculations.
@@ -861,7 +861,7 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
     foregroundVisualPadding = mForegroundPadding;
   }
 
-  UI::Align::Type visualAnchorPoint = UI::Align::TOP_BEGIN;
+  Ui::Align::Type visualAnchorPoint = Ui::Align::TOP_BEGIN;
 
   Vector2 visualAndPaddingSize =
       Vector2((foregroundVisualPadding.x + visualSize.width + foregroundVisualPadding.y),
@@ -878,7 +878,7 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     case BEGIN:
     {
-      visualAnchorPoint = UI::Align::TOP_END;
+      visualAnchorPoint = Ui::Align::TOP_END;
       visualPosition.x = foregroundVisualPadding.right;
       visualPosition.y = foregroundVisualPadding.top;
 
@@ -892,7 +892,7 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
     case END:
     {
-      visualAnchorPoint = UI::Align::TOP_BEGIN;
+      visualAnchorPoint = Ui::Align::TOP_BEGIN;
       visualPosition.x = foregroundVisualPadding.left;
       visualPosition.y = foregroundVisualPadding.top;
 
@@ -906,7 +906,7 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
     case TOP:
     {
-      visualAnchorPoint = UI::Align::BOTTOM_END;
+      visualAnchorPoint = Ui::Align::BOTTOM_END;
       visualPosition.x = foregroundVisualPadding.left;
       visualPosition.y = foregroundVisualPadding.bottom;
 
@@ -921,7 +921,7 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
     case BOTTOM:
     {
-      visualAnchorPoint = UI::Align::TOP_END;
+      visualAnchorPoint = Ui::Align::TOP_END;
       visualPosition.x = foregroundVisualPadding.left;
       visualPosition.y = foregroundVisualPadding.top;
 
@@ -943,9 +943,9 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     Property::Map visualTransform;
 
-    visualTransform.Add(UI::Visual::Transform::Property::SIZE, size)
-        .Add(UI::Visual::Transform::Property::SIZE_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE));
+    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, size)
+        .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE));
 
     currentBackGroundVisual.SetTransformAndSize(visualTransform, size);
   }
@@ -957,22 +957,22 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     Property::Map visualTransform;
 
-    visualTransform.Add(UI::Visual::Transform::Property::SIZE, visualSize)
-        .Add(UI::Visual::Transform::Property::OFFSET, visualPosition)
-        .Add(UI::Visual::Transform::Property::OFFSET_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::SIZE_POLICY,
-             Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-        .Add(UI::Visual::Transform::Property::ORIGIN, UI::Align::TOP_BEGIN)
-        .Add(UI::Visual::Transform::Property::ANCHOR_POINT, visualAnchorPoint);
+    visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualSize)
+        .Add(Ui::Visual::Transform::Property::OFFSET, visualPosition)
+        .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+        .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+        .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, visualAnchorPoint);
 
     currentVisual.SetTransformAndSize(visualTransform, size);
   }
 
   if (mTextStringSetFlag)
   {
-    UI::Visual::Base textVisual = DevelControl::GetVisual(
-        *this, UI::Button::Property::LABEL); // No need to search for Label visual if no text set.
+    Ui::Visual::Base textVisual = DevelControl::GetVisual(
+        *this, Ui::Button::Property::LABEL); // No need to search for Label visual if no text set.
 
     if (textVisual)
     {
@@ -992,14 +992,14 @@ void Button::OnRelayout(const Vector2& size, RelayoutContainer& container)
                     preSize.width, preSize.height, labelPosition.x, labelPosition.y);
 
       Property::Map textVisualTransform;
-      textVisualTransform.Add(UI::Visual::Transform::Property::SIZE, preSize)
-          .Add(UI::Visual::Transform::Property::OFFSET, labelPosition)
-          .Add(UI::Visual::Transform::Property::OFFSET_POLICY,
-               Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-          .Add(UI::Visual::Transform::Property::SIZE_POLICY,
-               Vector2(UI::Visual::Transform::Policy::ABSOLUTE, UI::Visual::Transform::Policy::ABSOLUTE))
-          .Add(UI::Visual::Transform::Property::ORIGIN, UI::Align::TOP_BEGIN)
-          .Add(UI::Visual::Transform::Property::ANCHOR_POINT, visualAnchorPoint);
+      textVisualTransform.Add(Ui::Visual::Transform::Property::SIZE, preSize)
+          .Add(Ui::Visual::Transform::Property::OFFSET, labelPosition)
+          .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+               Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+          .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+               Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+          .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+          .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, visualAnchorPoint);
 
       textVisual.SetTransformAndSize(textVisualTransform, size);
     }
@@ -1032,7 +1032,7 @@ bool Button::AutoRepeatingSlot()
 
     Pressed();
 
-    UI::Button handle(GetOwner());
+    Ui::Button handle(GetOwner());
 
     // Emit signal.
     consumed = mReleasedSignal.Emit(handle);
@@ -1083,7 +1083,7 @@ void Button::RemoveVisual(Property::Index visualIndex)
   DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose, "Button::RemoveVisual index(%d) state(%d)\n", visualIndex,
                 mButtonState);
 
-  UI::Visual::Base visual = DevelControl::GetVisual(*this, visualIndex);
+  Ui::Visual::Base visual = DevelControl::GetVisual(*this, visualIndex);
 
   if (visual)
   {
@@ -1100,7 +1100,7 @@ void Button::OnButtonVisualRemoval(Property::Index visualIndex)
 
 void Button::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::Button button = UI::Button::DownCast(Dali::BaseHandle(object));
+  Ui::Button button = Ui::Button::DownCast(Dali::BaseHandle(object));
 
   DALI_LOG_INFO(gLogButtonFilter, Debug::Verbose, "Button::SetProperty index[%d]\n", index);
 
@@ -1108,61 +1108,61 @@ void Button::SetProperty(BaseObject* object, Property::Index index, const Proper
   {
     switch (index)
     {
-      case UI::Button::Property::DISABLED:
+      case Ui::Button::Property::DISABLED:
       {
         GetImplementation(button).SetDisabled(value.Get<bool>());
         break;
       }
 
-      case UI::Button::Property::AUTO_REPEATING:
+      case Ui::Button::Property::AUTO_REPEATING:
       {
         GetImplementation(button).SetAutoRepeating(value.Get<bool>());
         break;
       }
 
-      case UI::Button::Property::INITIAL_AUTO_REPEATING_DELAY:
+      case Ui::Button::Property::INITIAL_AUTO_REPEATING_DELAY:
       {
         GetImplementation(button).SetInitialAutoRepeatingDelay(value.Get<float>());
         break;
       }
 
-      case UI::Button::Property::NEXT_AUTO_REPEATING_DELAY:
+      case Ui::Button::Property::NEXT_AUTO_REPEATING_DELAY:
       {
         GetImplementation(button).SetNextAutoRepeatingDelay(value.Get<float>());
         break;
       }
 
-      case UI::Button::Property::TOGGLABLE:
+      case Ui::Button::Property::TOGGLABLE:
       {
         GetImplementation(button).SetTogglableButton(value.Get<bool>());
         break;
       }
 
-      case UI::Button::Property::SELECTED:
+      case Ui::Button::Property::SELECTED:
       {
         GetImplementation(button).SetSelected(value.Get<bool>());
         break;
       }
 
-      case UI::Button::Property::UNSELECTED_VISUAL:
-      case UI::Button::Property::SELECTED_VISUAL:
-      case UI::Button::Property::DISABLED_SELECTED_VISUAL:
-      case UI::Button::Property::DISABLED_UNSELECTED_VISUAL:
+      case Ui::Button::Property::UNSELECTED_VISUAL:
+      case Ui::Button::Property::SELECTED_VISUAL:
+      case Ui::Button::Property::DISABLED_SELECTED_VISUAL:
+      case Ui::Button::Property::DISABLED_UNSELECTED_VISUAL:
       {
         GetImplementation(button).CreateVisualsForComponent(index, value, DepthIndex::CONTENT);
         break;
       }
 
-      case UI::Button::Property::UNSELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::SELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::UNSELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::SELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL:
       {
         GetImplementation(button).CreateVisualsForComponent(index, value, DepthIndex::BACKGROUND);
         break;
       }
 
-      case UI::Button::Property::LABEL:
+      case Ui::Button::Property::LABEL:
       {
         Property::Map outTextVisualProperties;
         std::string textString;
@@ -1173,8 +1173,8 @@ void Button::SetProperty(BaseObject* object, Property::Index index, const Proper
                         textString.c_str());
 
           Property::Map setPropertyMap;
-          setPropertyMap.Add(UI::Visual::Property::TYPE, UI::Visual::TEXT)
-              .Add(UI::TextVisual::Property::TEXT, textString);
+          setPropertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT)
+              .Add(Ui::TextVisual::Property::TEXT, textString);
 
           GetImplementation(button).MergeWithExistingLabelProperties(setPropertyMap, outTextVisualProperties);
         }
@@ -1196,7 +1196,7 @@ void Button::SetProperty(BaseObject* object, Property::Index index, const Proper
         break;
       }
 
-      case UI::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT:
+      case Ui::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT:
       {
         Button::Align labelAlignment(END);
         Scripting::GetEnumeration<Button::Align>(value.Get<std::string>().c_str(), ALIGNMENT_TABLE,
@@ -1206,14 +1206,14 @@ void Button::SetProperty(BaseObject* object, Property::Index index, const Proper
         break;
       }
 
-      case UI::DevelButton::Property::LABEL_PADDING:
+      case Ui::DevelButton::Property::LABEL_PADDING:
       {
         Vector4 padding(value.Get<Vector4>());
         GetImplementation(button).SetLabelPadding(Padding(padding.x, padding.y, padding.z, padding.w));
         break;
       }
 
-      case UI::DevelButton::Property::VISUAL_PADDING:
+      case Ui::DevelButton::Property::VISUAL_PADDING:
       {
         Vector4 padding(value.Get<Vector4>());
         GetImplementation(button).SetForegroundPadding(Padding(padding.x, padding.y, padding.z, padding.w));
@@ -1227,57 +1227,57 @@ Property::Value Button::GetProperty(BaseObject* object, Property::Index property
 {
   Property::Value value;
 
-  UI::Button button = UI::Button::DownCast(Dali::BaseHandle(object));
+  Ui::Button button = Ui::Button::DownCast(Dali::BaseHandle(object));
 
   if (button)
   {
     switch (propertyIndex)
     {
-      case UI::Button::Property::DISABLED:
+      case Ui::Button::Property::DISABLED:
       {
         value = GetImplementation(button).IsDisabled();
         break;
       }
 
-      case UI::Button::Property::AUTO_REPEATING:
+      case Ui::Button::Property::AUTO_REPEATING:
       {
         value = GetImplementation(button).mAutoRepeating;
         break;
       }
 
-      case UI::Button::Property::INITIAL_AUTO_REPEATING_DELAY:
+      case Ui::Button::Property::INITIAL_AUTO_REPEATING_DELAY:
       {
         value = GetImplementation(button).mInitialAutoRepeatingDelay;
         break;
       }
 
-      case UI::Button::Property::NEXT_AUTO_REPEATING_DELAY:
+      case Ui::Button::Property::NEXT_AUTO_REPEATING_DELAY:
       {
         value = GetImplementation(button).mNextAutoRepeatingDelay;
         break;
       }
 
-      case UI::Button::Property::TOGGLABLE:
+      case Ui::Button::Property::TOGGLABLE:
       {
         value = GetImplementation(button).mTogglableButton;
         break;
       }
 
-      case UI::Button::Property::SELECTED:
+      case Ui::Button::Property::SELECTED:
       {
         value = GetImplementation(button).IsSelected();
         break;
       }
 
-      case UI::Button::Property::UNSELECTED_VISUAL:
-      case UI::Button::Property::SELECTED_VISUAL:
-      case UI::Button::Property::DISABLED_SELECTED_VISUAL:
-      case UI::Button::Property::DISABLED_UNSELECTED_VISUAL:
-      case UI::Button::Property::UNSELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::SELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL:
-      case UI::Button::Property::LABEL:
+      case Ui::Button::Property::UNSELECTED_VISUAL:
+      case Ui::Button::Property::SELECTED_VISUAL:
+      case Ui::Button::Property::DISABLED_SELECTED_VISUAL:
+      case Ui::Button::Property::DISABLED_UNSELECTED_VISUAL:
+      case Ui::Button::Property::UNSELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::SELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::DISABLED_SELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::DISABLED_UNSELECTED_BACKGROUND_VISUAL:
+      case Ui::Button::Property::LABEL:
       {
         Property::Map visualProperty;
         if (GetImplementation(button).GetPropertyMapForVisual(propertyIndex, visualProperty))
@@ -1287,7 +1287,7 @@ Property::Value Button::GetProperty(BaseObject* object, Property::Index property
         break;
       }
 
-      case UI::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT:
+      case Ui::DevelButton::Property::LABEL_RELATIVE_ALIGNMENT:
       {
         const char* alignment = Scripting::GetEnumerationName<Button::Align>(
             GetImplementation(button).GetLabelAlignment(), ALIGNMENT_STRING_TABLE, ALIGNMENT_STRING_TABLE_COUNT);
@@ -1299,14 +1299,14 @@ Property::Value Button::GetProperty(BaseObject* object, Property::Index property
         break;
       }
 
-      case UI::DevelButton::Property::LABEL_PADDING:
+      case Ui::DevelButton::Property::LABEL_PADDING:
       {
         Padding padding = GetImplementation(button).GetLabelPadding();
         value = Vector4(padding.x, padding.y, padding.top, padding.bottom);
         break;
       }
 
-      case UI::DevelButton::Property::VISUAL_PADDING:
+      case Ui::DevelButton::Property::VISUAL_PADDING:
       {
         Padding padding = GetImplementation(button).GetForegroundPadding();
         value = Vector4(padding.x, padding.y, padding.top, padding.bottom);
@@ -1346,10 +1346,10 @@ Padding Button::GetForegroundPadding()
 std::pair<std::string, bool> Button::ButtonAccessible::GetNameRaw() const
 {
   std::string labelText;
-  auto slf = UI::Button::DownCast(Self());
-  Property::Map labelMap = slf.GetProperty<Property::Map>(UI::Button::Property::LABEL);
+  auto slf = Ui::Button::DownCast(Self());
+  Property::Map labelMap = slf.GetProperty<Property::Map>(Ui::Button::Property::LABEL);
 
-  Property::Value* textPropertyPtr = labelMap.Find(UI::TextVisual::Property::TEXT);
+  Property::Value* textPropertyPtr = labelMap.Find(Ui::TextVisual::Property::TEXT);
   if (textPropertyPtr)
   {
     textPropertyPtr->Get(labelText);
@@ -1360,7 +1360,7 @@ std::pair<std::string, bool> Button::ButtonAccessible::GetNameRaw() const
 
 Property::Index Button::ButtonAccessible::GetNamePropertyIndex()
 {
-  Property::Index label = UI::Button::Property::LABEL;
+  Property::Index label = Ui::Button::Property::LABEL;
   Property::Map labelMap = Self().GetProperty<Property::Map>(label);
 
   if (MapContainsTextString(labelMap))
@@ -1377,14 +1377,14 @@ Dali::Accessibility::States Button::ButtonAccessible::CalculateStates()
 {
   auto tmp = DevelControl::ControlAccessible::CalculateStates();
   tmp[Dali::Accessibility::State::SELECTABLE] = true;
-  auto slf = UI::Button::DownCast(Self());
-  tmp[Dali::Accessibility::State::ENABLED] = !slf.GetProperty<bool>(UI::Button::Property::DISABLED);
-  tmp[Dali::Accessibility::State::CHECKED] = slf.GetProperty<bool>(UI::Button::Property::SELECTED);
+  auto slf = Ui::Button::DownCast(Self());
+  tmp[Dali::Accessibility::State::ENABLED] = !slf.GetProperty<bool>(Ui::Button::Property::DISABLED);
+  tmp[Dali::Accessibility::State::CHECKED] = slf.GetProperty<bool>(Ui::Button::Property::SELECTED);
   return tmp;
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

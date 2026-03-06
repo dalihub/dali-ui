@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * API to interface with the toolkit texture manager
@@ -65,7 +65,7 @@ DALI_UI_API TextureSet RemoveTexture(const std::string& textureUrl);
 
 } // namespace TextureManager
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

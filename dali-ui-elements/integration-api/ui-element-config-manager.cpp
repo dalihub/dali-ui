@@ -25,7 +25,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -34,35 +34,35 @@ namespace Integration
 namespace
 {
 const char* const UIELEMENT_CONFIG_NOT_INITIALIZED_MESSAGE =
-    "UIElementConfigManager has not been initialized. "
-    "Call UIConfig.Apply() to enable element defaults.";
+    "UiElementConfigManager has not been initialized. "
+    "Call UiConfig.Apply() to enable element defaults.";
 } // unnamed namespace
 
-UIElementConfigManager& UIElementConfigManager::Get()
+UiElementConfigManager& UiElementConfigManager::Get()
 {
-  static UIElementConfigManager instance;
+  static UiElementConfigManager instance;
   return instance;
 }
 
-void UIElementConfigManager::Init(const UIElementConfigImpl& impl)
+void UiElementConfigManager::Init(const UiElementConfigImpl& impl)
 {
   mDefaultFontSize = impl.GetDefaultFontSize();
   mDefaultTextColor = impl.GetDefaultTextColor();
   mInitialized = true;
 }
 
-bool UIElementConfigManager::IsInitialized() const
+bool UiElementConfigManager::IsInitialized() const
 {
   return mInitialized;
 }
 
-float UIElementConfigManager::GetDefaultFontSize() const
+float UiElementConfigManager::GetDefaultFontSize() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UIELEMENT_CONFIG_NOT_INITIALIZED_MESSAGE);
   return mDefaultFontSize;
 }
 
-Vector4 UIElementConfigManager::GetDefaultTextColor() const
+Vector4 UiElementConfigManager::GetDefaultTextColor() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UIELEMENT_CONFIG_NOT_INITIALIZED_MESSAGE);
   return mDefaultTextColor;
@@ -70,6 +70,6 @@ Vector4 UIElementConfigManager::GetDefaultTextColor() const
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

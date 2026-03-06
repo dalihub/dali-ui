@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextField
 {
@@ -132,6 +132,6 @@ Dali::Property::Index RegisterFontVariationProperty(TextField textField, std::st
 
 } // namespace DevelTextField
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

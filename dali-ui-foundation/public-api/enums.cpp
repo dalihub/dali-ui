@@ -19,7 +19,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 bool IsVertical(ControlOrientation::Type orientation)
 {
@@ -31,6 +31,6 @@ bool IsHorizontal(ControlOrientation::Type orientation)
   return (orientation == ControlOrientation::Left || orientation == ControlOrientation::Right);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

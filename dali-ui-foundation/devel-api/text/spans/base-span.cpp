@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -46,16 +46,16 @@ BaseSpan::~BaseSpan() = default;
 
 BaseSpan BaseSpan::DownCast(BaseHandle handle)
 {
-  return BaseSpan(dynamic_cast<Dali::UI::Text::Internal::BaseSpan*>(handle.GetObjectPtr()));
+  return BaseSpan(dynamic_cast<Dali::Ui::Text::Internal::BaseSpan*>(handle.GetObjectPtr()));
 }
 
-Dali::UI::Text::SpanType::Value BaseSpan::GetSpanType() const
+Dali::Ui::Text::SpanType::Value BaseSpan::GetSpanType() const
 {
   return GetImplementation(*this).GetSpanType();
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

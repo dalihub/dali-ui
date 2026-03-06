@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -64,229 +64,229 @@ public:
   void SetLogicalModel(LogicalModelPtr logicalModel);
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetControlSize()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetControlSize()
    */
   const Vector2& GetControlSize() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetLayoutSize()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetLayoutSize()
    */
   const Vector2& GetLayoutSize() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetNumberOfGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfGlyphs()
    */
   Length GetNumberOfGlyphs() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetGlyphs()
    */
   virtual Length GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
                            Length numberOfGlyphs) const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetColors()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetColors()
    */
   const Vector4* GetColors() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetColorIndices()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetColorIndices()
    */
   const ColorIndex* GetColorIndices() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetBackgroundColors()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetBackgroundColors()
    */
   const Vector4* GetBackgroundColors() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetBackgroundColorIndices()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetBackgroundColorIndices()
    */
   const ColorIndex* GetBackgroundColorIndices() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsMarkupBackgroundColorSet()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupBackgroundColorSet()
    */
   bool IsMarkupBackgroundColorSet() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetTextColor()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetTextColor()
    */
   const Vector4& GetTextColor() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetShadowOffset()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetShadowOffset()
    */
   const Vector2& GetShadowOffset() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetShadowColor()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetShadowColor()
    */
   const Vector4& GetShadowColor() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetUnderlineColor()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetUnderlineColor()
    */
   const Vector4& GetUnderlineColor() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsUnderlineEnabled()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsUnderlineEnabled()
    */
   bool IsUnderlineEnabled() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsMarkupUnderlineSet()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupUnderlineSet()
    */
   bool IsMarkupUnderlineSet() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetHyphens()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetHyphens()
    */
   const GlyphInfo* GetHyphens() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetHyphens()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetHyphens()
    */
   const Length* GetHyphenIndices() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetHyphens()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetHyphens()
    */
   Length GetHyphensCount() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetUnderlineHeight()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetUnderlineHeight()
    */
   float GetUnderlineHeight() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetUnderlineType()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetUnderlineType()
    */
   Text::Underline::Type GetUnderlineType() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetDashedUnderlineWidth()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetDashedUnderlineWidth()
    */
   float GetDashedUnderlineWidth() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetDashedUnderlineGap()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetDashedUnderlineGap()
    */
   float GetDashedUnderlineGap() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetNumberOfUnderlineRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfUnderlineRuns()
    */
   Length GetNumberOfUnderlineRuns() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetUnderlineRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetUnderlineRuns()
    */
   virtual void GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index, Length numberOfRuns) const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetOutlineOffset()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetOutlineOffset()
    */
   const Vector2& GetOutlineOffset() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetOutlineColor()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetOutlineColor()
    */
   const Vector4& GetOutlineColor() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetOutlineWidth()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetOutlineWidth()
    */
   uint16_t GetOutlineWidth() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetEllipsisPosition()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetEllipsisPosition()
    */
   DevelText::EllipsisPosition::Type GetEllipsisPosition() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsTextElideEnabled()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsTextElideEnabled()
    */
   bool IsTextElideEnabled() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetStartIndexOfElidedGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetStartIndexOfElidedGlyphs()
    */
   GlyphIndex GetStartIndexOfElidedGlyphs() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetEndIndexOfElidedGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetEndIndexOfElidedGlyphs()
    */
   GlyphIndex GetEndIndexOfElidedGlyphs() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetFirstMiddleIndexOfElidedGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetFirstMiddleIndexOfElidedGlyphs()
    */
   GlyphIndex GetFirstMiddleIndexOfElidedGlyphs() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetSecondMiddleIndexOfElidedGlyphs()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetSecondMiddleIndexOfElidedGlyphs()
    */
   GlyphIndex GetSecondMiddleIndexOfElidedGlyphs() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetStrikethroughColor()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughColor()
    */
   const Vector4& GetStrikethroughColor() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsStrikethroughEnabled()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsStrikethroughEnabled()
    */
   bool IsStrikethroughEnabled() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsMarkupStrikethroughSet()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupStrikethroughSet()
    */
   bool IsMarkupStrikethroughSet() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetStrikethroughHeight()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughHeight()
    */
   float GetStrikethroughHeight() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetNumberOfStrikethroughRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfStrikethroughRuns()
    */
   Length GetNumberOfStrikethroughRuns() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetStrikethroughRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughRuns()
    */
   void GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, StrikethroughRunIndex index,
                             Length numberOfRuns) const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetNumberOfBoundedParagraphRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfBoundedParagraphRuns()
    */
   virtual Length GetNumberOfBoundedParagraphRuns() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetBoundedParagraphRuns()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetBoundedParagraphRuns()
    */
   virtual const Vector<BoundedParagraphRun>& GetBoundedParagraphRuns() const;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetCharacterSpacing()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetCharacterSpacing()
    */
   float GetCharacterSpacing() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetTextBuffer()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetTextBuffer()
    */
   const Character* GetTextBuffer() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::GetGlyphsToCharacters()
+   * @copydoc Dali::Ui::Text::ViewInterface::GetGlyphsToCharacters()
    */
   const Vector<CharacterIndex>& GetGlyphsToCharacters() const override;
 
   /**
-   * @copydoc Dali::UI::Text::ViewInterface::IsCutoutEnabled()
+   * @copydoc Dali::Ui::Text::ViewInterface::IsCutoutEnabled()
    */
   bool IsCutoutEnabled() const override;
 
@@ -303,7 +303,7 @@ private:
 };
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -62,11 +62,11 @@ SpannableString::~SpannableString()
 {
 }
 
-Dali::UI::Text::SpannableString SpannableString::New(const std::string& text)
+Dali::Ui::Text::SpannableString SpannableString::New(const std::string& text)
 {
   SpannableStringPtr object = new SpannableString(text);
 
-  Dali::UI::Text::SpannableString handle = Dali::UI::Text::SpannableString(object.Get());
+  Dali::Ui::Text::SpannableString handle = Dali::Ui::Text::SpannableString(object.Get());
 
   return handle;
 }
@@ -89,7 +89,7 @@ std::string SpannableString::ToString() const
 }
 
 // Methods from Spannable
-bool SpannableString::AttachSpan(const Dali::UI::Text::BaseSpan& styleSpan, const Dali::UI::Text::Range& range)
+bool SpannableString::AttachSpan(const Dali::Ui::Text::BaseSpan& styleSpan, const Dali::Ui::Text::Range& range)
 {
   if (range.GetStartIndex() < GetNumberOfCharacters() && range.GetEndIndex() < GetNumberOfCharacters())
   {
@@ -100,7 +100,7 @@ bool SpannableString::AttachSpan(const Dali::UI::Text::BaseSpan& styleSpan, cons
   return false;
 }
 
-bool SpannableString::DetachSpan(const Dali::UI::Text::BaseSpan& styleSpan)
+bool SpannableString::DetachSpan(const Dali::Ui::Text::BaseSpan& styleSpan)
 {
   if (mImpl->mSpansContainer.Contains(styleSpan))
   {
@@ -114,15 +114,15 @@ bool SpannableString::DetachSpan(const Dali::UI::Text::BaseSpan& styleSpan)
 
 // Methods from Spanned
 
-std::vector<Dali::UI::Text::BaseSpan> SpannableString::GetAllSpans() const
+std::vector<Dali::Ui::Text::BaseSpan> SpannableString::GetAllSpans() const
 {
-  std::vector<Dali::UI::Text::BaseSpan> listOfSpans;
+  std::vector<Dali::Ui::Text::BaseSpan> listOfSpans;
   mImpl->mSpansContainer.GetSpans(listOfSpans);
   return listOfSpans;
 }
 
-void SpannableString::RetrieveAllSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan>& spans,
-                                                std::vector<Dali::UI::Text::Range>& ranges) const
+void SpannableString::RetrieveAllSpansAndRanges(std::vector<Dali::Ui::Text::BaseSpan>& spans,
+                                                std::vector<Dali::Ui::Text::Range>& ranges) const
 {
   mImpl->mSpansContainer.GetSpansAndRanges(spans, ranges);
 }
@@ -131,6 +131,6 @@ void SpannableString::RetrieveAllSpansAndRanges(std::vector<Dali::UI::Text::Base
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

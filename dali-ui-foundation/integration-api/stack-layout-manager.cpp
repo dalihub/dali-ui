@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -38,7 +38,7 @@ namespace Integration
 namespace
 {
 
-float GetChildWeight(UI::View view)
+float GetChildWeight(Ui::View view)
 {
   if (!view)
   {
@@ -62,7 +62,7 @@ struct StackMeasureFirstPassResult
 
 StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContainer& children, float contentWidth,
                                                           float contentHeight, StackOrientation orientation,
-                                                          const std::function<ViewImpl&(UI::View)>& getImpl)
+                                                          const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   StackMeasureFirstPassResult result;
   for (auto& childData : children)
@@ -99,7 +99,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
 void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float contentMain, float contentWidth,
                                 float contentHeight, float mainAxisNonWeight, float totalWeight,
                                 uint32_t visibleChildCount, float spacing, StackOrientation orientation,
-                                float& maxCrossAxisInOut, const std::function<ViewImpl&(UI::View)>& getImpl)
+                                float& maxCrossAxisInOut, const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   float spacingTotal = (visibleChildCount > 1) ? spacing * (visibleChildCount - 1) : 0.0f;
   float remainingMain = contentMain - mainAxisNonWeight - spacingTotal;
@@ -178,7 +178,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   contentHeight = std::max(0.0f, contentHeight);
   float contentMain = (mOrientation == StackOrientation::VERTICAL) ? contentHeight : contentWidth;
 
-  auto getImpl = [this](UI::View v) -> ViewImpl& { return GetImpl(v); };
+  auto getImpl = [this](Ui::View v) -> ViewImpl& { return GetImpl(v); };
   StackMeasureFirstPassResult first =
       MeasureStackNonWeightChildren(children, contentWidth, contentHeight, mOrientation, getImpl);
 
@@ -321,5 +321,5 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

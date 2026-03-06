@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class ImageView;
 
@@ -56,7 +56,7 @@ public:
    * @param[in] additionalBehaviour custom behavior flags for this ImageView. Default is CONTROL_BEHAVIOUR_DEFAULT
    * @return A smart-pointer to the newly allocated ImageView.
    */
-  static UI::ImageView New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
+  static Ui::ImageView New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
 
   /**
    * @brief Sets this ImageView from an Dali::Property::Map
@@ -67,7 +67,7 @@ public:
   void SetImage(const Dali::Property::Map& map);
 
   /**
-   * @copydoc Dali::UI::SetImage
+   * @copydoc Dali::Ui::SetImage
    */
   void SetImage(const std::string& imageUrl, ImageDimensions size);
 
@@ -130,27 +130,27 @@ public:
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize
+   * @copydoc Ui::Control::OnInitialize
    */
   void OnInitialize();
 
   /**
-   * @copydoc UI::Control::GetNaturalSize
+   * @copydoc Ui::Control::GetNaturalSize
    */
   Vector3 GetNaturalSize() override;
 
   /**
-   * @copydoc UI::Control::GetHeightForWidth()
+   * @copydoc Ui::Control::GetHeightForWidth()
    */
   float GetHeightForWidth(float width) override;
 
   /**
-   * @copydoc UI::Control::GetWidthForHeight()
+   * @copydoc Ui::Control::GetWidthForHeight()
    */
   float GetWidthForHeight(float height) override;
 
   /**
-   * @copydoc UI::Control::OnUpdateVisualProperties()
+   * @copydoc Ui::Control::OnUpdateVisualProperties()
    */
   virtual void OnUpdateVisualProperties(
       const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties) override;
@@ -160,7 +160,7 @@ private:
    * @brief Callback for ResourceReadySignal
    * param[in] control signal prototype
    */
-  void OnResourceReady(UI::Control control);
+  void OnResourceReady(Ui::Control control);
 
   /**
    * @brief Create placeholder image if it set. placeholder image is shown when image view is waiting for the image to
@@ -185,9 +185,9 @@ private:
   ImageView& operator=(const ImageView&);
 
 private:
-  UI::Visual::Base mVisual;
-  UI::Visual::Base mPreviousVisual;
-  UI::Visual::Base mPlaceholderVisual;
+  Ui::Visual::Base mVisual;
+  Ui::Visual::Base mPreviousVisual;
+  Ui::Visual::Base mPlaceholderVisual;
 
   std::string mUrl;            ///< the url for the image if the image came from a URL, empty otherwise
   std::string mPlaceholderUrl; ///< the url for the placeholder image if the image came from a PLACEHOLDER_IMAGE, empty
@@ -202,21 +202,21 @@ private:
 } // namespace Internal
 
 // Helpers for public-api forwarding methods
-inline UI::Internal::ImageView& GetImpl(UI::ImageView& obj)
+inline Ui::Internal::ImageView& GetImpl(Ui::ImageView& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
   Dali::RefObject& handle = obj.GetImplementation();
-  return static_cast<UI::Internal::ImageView&>(handle);
+  return static_cast<Ui::Internal::ImageView&>(handle);
 }
 
-inline const UI::Internal::ImageView& GetImpl(const UI::ImageView& obj)
+inline const Ui::Internal::ImageView& GetImpl(const Ui::ImageView& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
   const Dali::RefObject& handle = obj.GetImplementation();
-  return static_cast<const UI::Internal::ImageView&>(handle);
+  return static_cast<const Ui::Internal::ImageView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

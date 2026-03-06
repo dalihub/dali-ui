@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 MaskEffect::MaskEffect() = default;
 MaskEffect::MaskEffect(const MaskEffect& handle)
@@ -37,7 +37,7 @@ MaskEffect::MaskEffect(Internal::MaskEffectImpl* maskEffectImpl)
 
 MaskEffect::~MaskEffect() = default;
 
-MaskEffect MaskEffect::New(UI::Control maskControl)
+MaskEffect MaskEffect::New(Ui::Control maskControl)
 {
   Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskControl);
   return MaskEffect(internal.Get());
@@ -63,10 +63,10 @@ bool MaskEffect::GetSourceMaskOnce() const
   return GetImplementation(*this).GetSourceMaskOnce();
 }
 
-MaskEffect MaskEffect::New(UI::Control maskControl, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
+MaskEffect MaskEffect::New(Ui::Control maskControl, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
 {
   Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskControl, maskMode, maskPosition, maskScale);
   return MaskEffect(internal.Get());
 }
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

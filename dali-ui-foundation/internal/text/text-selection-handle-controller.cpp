@@ -48,13 +48,13 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 const float MAX_FLOAT = std::numeric_limits<float>::max();
 const float MIN_FLOAT = std::numeric_limits<float>::min();
-const Dali::UI::Text::CharacterDirection LTR = false; ///< Left To Right direction
+const Dali::Ui::Text::CharacterDirection LTR = false; ///< Left To Right direction
 
 } // namespace
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -590,6 +590,6 @@ void SelectionHandleController::Update(Controller::Impl& impl, HandleType handle
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

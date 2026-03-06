@@ -38,7 +38,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -59,9 +59,9 @@ namespace Integration
  * When a LayoutManager is set, the View can manage children and delegate
  * layout calculations to the LayoutManager.
  *
- * @see Dali::UI::View
+ * @see Dali::Ui::View
  */
-class DALI_UI_API ViewImpl : public UI::Internal::Control
+class DALI_UI_API ViewImpl : public Ui::Internal::Control
 {
 public:
 
@@ -75,7 +75,7 @@ public:
    */
   struct ChildData
   {
-    UI::View view;             ///< Handle to the child view
+    Ui::View view;             ///< Handle to the child view
     MeasuredSize measuredSize; ///< Size from Measure pass
     LayoutRect arrangedBounds; ///< Bounds from Arrange pass
   };
@@ -88,7 +88,7 @@ public:
   /**
    * @brief Creates a new View.
    */
-  static UI::View New();
+  static Ui::View New();
 
 protected:
 
@@ -105,14 +105,14 @@ protected:
    */
   ViewImpl();
 
-public: // From UI::Internal::Control
+public: // From Ui::Internal::Control
   /**
-   * @copydoc UI::Internal::Control::OnInitialize
+   * @copydoc Ui::Internal::Control::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::OnSceneConnection
+   * @copydoc Ui::Internal::Control::OnSceneConnection
    * When this View is a layout root and is connected to a window, registers
    * with LayoutController so that measure/arrange runs even if invalidation
    * occurred before the view was added to the window.
@@ -143,82 +143,82 @@ public: // From UI::Internal::Control
 
 public: // API (size, position, parent origin, pivot)
   /**
-   * @copydoc Dali::UI::View::GetSizeWidth
+   * @copydoc Dali::Ui::View::GetSizeWidth
    */
   float GetSizeWidth() const;
 
   /**
-   * @copydoc Dali::UI::View::SetSizeWidth
+   * @copydoc Dali::Ui::View::SetSizeWidth
    */
   void SetSizeWidth(float width);
 
   /**
-   * @copydoc Dali::UI::View::GetSizeHeight
+   * @copydoc Dali::Ui::View::GetSizeHeight
    */
   float GetSizeHeight() const;
 
   /**
-   * @copydoc Dali::UI::View::SetSizeHeight
+   * @copydoc Dali::Ui::View::SetSizeHeight
    */
   void SetSizeHeight(float height);
 
   /**
-   * @copydoc Dali::UI::View::GetPositionX
+   * @copydoc Dali::Ui::View::GetPositionX
    */
   float GetPositionX() const;
 
   /**
-   * @copydoc Dali::UI::View::SetPositionX
+   * @copydoc Dali::Ui::View::SetPositionX
    */
   void SetPositionX(float x);
 
   /**
-   * @copydoc Dali::UI::View::GetPositionY
+   * @copydoc Dali::Ui::View::GetPositionY
    */
   float GetPositionY() const;
 
   /**
-   * @copydoc Dali::UI::View::SetPositionY
+   * @copydoc Dali::Ui::View::SetPositionY
    */
   void SetPositionY(float y);
 
   /**
-   * @copydoc Dali::UI::View::GetParentOrigin
+   * @copydoc Dali::Ui::View::GetParentOrigin
    */
   Vector3 GetParentOrigin() const;
 
   /**
-   * @copydoc Dali::UI::View::SetParentOrigin
+   * @copydoc Dali::Ui::View::SetParentOrigin
    */
   void SetParentOrigin(const Vector3& point);
 
   /**
-   * @copydoc Dali::UI::View::GetPivotPoint
+   * @copydoc Dali::Ui::View::GetPivotPoint
    */
   Vector3 GetPivotPoint() const;
 
   /**
-   * @copydoc Dali::UI::View::SetPivotPoint
+   * @copydoc Dali::Ui::View::SetPivotPoint
    */
   void SetPivotPoint(const Vector3& point);
 
   /**
-   * @copydoc Dali::UI::View::IsFocusable
+   * @copydoc Dali::Ui::View::IsFocusable
    */
   bool IsFocusable() const;
 
   /**
-   * @copydoc Dali::UI::View::SetFocusable
+   * @copydoc Dali::Ui::View::SetFocusable
    */
   void SetFocusable(bool focusable);
 
   /**
-   * @copydoc Dali::UI::View::IsTouchFocusable
+   * @copydoc Dali::Ui::View::IsTouchFocusable
    */
   bool IsTouchFocusable() const;
 
   /**
-   * @copydoc Dali::UI::View::SetTouchFocusable
+   * @copydoc Dali::Ui::View::SetTouchFocusable
    */
   void SetTouchFocusable(bool touchFocusable);
 
@@ -350,7 +350,7 @@ public: // Layout Properties API
   LayoutAlignment GetVerticalAlignment() const;
 
 public: // Parent Layout API
-  UI::Layout GetParentLayout() const;
+  Ui::Layout GetParentLayout() const;
   virtual bool IsLayout() const;
 
 public: // LayoutManager API (Optional layout capability)
@@ -386,7 +386,7 @@ public: // Child Management API (available when LayoutManager is set)
    *
    * @param[in] view The view to add
    */
-  void AddView(UI::View view);
+  void AddView(Ui::View view);
 
   /**
    * @brief Adds a view at the specified index.
@@ -394,14 +394,14 @@ public: // Child Management API (available when LayoutManager is set)
    * @param[in] view The view to add
    * @param[in] index The index where to insert
    */
-  void AddView(UI::View view, uint32_t index);
+  void AddView(Ui::View view, uint32_t index);
 
   /**
    * @brief Removes a view from this view.
    *
    * @param[in] view The view to remove
    */
-  void RemoveView(UI::View view);
+  void RemoveView(Ui::View view);
 
   /**
    * @brief Removes the view at the specified index.
@@ -428,7 +428,7 @@ public: // Child Management API (available when LayoutManager is set)
    * @param[in] index The child index
    * @return The child view at the index
    */
-  UI::View GetChildAt(uint32_t index) const;
+  Ui::View GetChildAt(uint32_t index) const;
 
   /**
    * @brief Returns the index of the given child view, or -1 if not found.
@@ -436,7 +436,7 @@ public: // Child Management API (available when LayoutManager is set)
    * @param[in] view The child view to find
    * @return Index of the view, or -1 if not a child
    */
-  int32_t IndexOfChild(UI::View view) const;
+  int32_t IndexOfChild(Ui::View view) const;
 
   /**
    * @brief Adds a list of children (method chaining).
@@ -444,7 +444,7 @@ public: // Child Management API (available when LayoutManager is set)
    * @param[in] children The initializer list of View handles to add
    * @return Reference to this for method chaining
    */
-  ViewImpl& Contents(std::initializer_list<UI::View> children);
+  ViewImpl& Contents(std::initializer_list<Ui::View> children);
 
   /**
    * @brief Gets the children container for layout manager access.
@@ -514,7 +514,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Integration::ViewImpl& GetImpl(UI::View& view)
+inline Integration::ViewImpl& GetImpl(Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
@@ -523,7 +523,7 @@ inline Integration::ViewImpl& GetImpl(UI::View& view)
   return static_cast<Integration::ViewImpl&>(handle);
 }
 
-inline const Integration::ViewImpl& GetImpl(const UI::View& view)
+inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
@@ -534,6 +534,6 @@ inline const Integration::ViewImpl& GetImpl(const UI::View& view)
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

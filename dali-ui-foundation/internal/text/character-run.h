@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -56,7 +56,7 @@ struct CharacterRun
   CharacterIndex GetEndCharacterIndex() const
   {
     DALI_ASSERT_DEBUG(!((0u == numberOfCharacters) && (characterIndex > 0u)) &&
-                      "UI::Text::CharacterRun. NumberOfCharacters should be greater than zero");
+                      "Ui::Text::CharacterRun. NumberOfCharacters should be greater than zero");
 
     // Note: Length is uint32. Extra validation to avoid a potential defects.
     return (numberOfCharacters == 0u ? 0u : (characterIndex + numberOfCharacters - 1u));
@@ -65,7 +65,7 @@ struct CharacterRun
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Set the properties for the motion stretch
@@ -60,7 +60,7 @@ DALI_UI_API void SetMotionStretchProperties(Actor& actor);
  */
 DALI_UI_API Property::Map CreateMotionStretchEffect();
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

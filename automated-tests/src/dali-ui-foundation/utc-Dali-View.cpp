@@ -31,8 +31,8 @@
 #include <dali/integration-api/events/key-event-integ.h>
 
 using namespace Dali;
-using namespace Dali::UI;
-using namespace Dali::UI::Integration;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
 
 namespace
 {
@@ -104,12 +104,12 @@ public:
 
   DummyTraitImpl& GetImpl()
   {
-    return static_cast<DummyTraitImpl&>(Dali::UI::GetImpl(*this));
+    return static_cast<DummyTraitImpl&>(Dali::Ui::GetImpl(*this));
   }
 
   const DummyTraitImpl& GetImpl() const
   {
-    return static_cast<const DummyTraitImpl&>(Dali::UI::GetImpl(*this));
+    return static_cast<const DummyTraitImpl&>(Dali::Ui::GetImpl(*this));
   }
 
 private:

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace FocusFinder
 {
@@ -36,11 +36,11 @@ namespace FocusFinder
  * @return The nearest focusable actor, or an empty handle if none exists.
  */
 DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
-                                           UI::Control::KeyboardFocus::Direction direction);
+                                           Ui::Control::KeyboardFocus::Direction direction);
 
 } // namespace FocusFinder
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

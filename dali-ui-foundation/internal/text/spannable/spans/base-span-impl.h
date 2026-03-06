@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -44,7 +44,7 @@ using BaseSpanPtr = IntrusivePtr<BaseSpan>;
 using BaseSpanConstPtr = const BaseSpan*;
 
 /**
- * @copydoc Dali::UI::Text::BaseSpan
+ * @copydoc Dali::Ui::Text::BaseSpan
  */
 class BaseSpan : public BaseObject
 {
@@ -58,7 +58,7 @@ protected:
   /**
    * @brief Default Constructor
    */
-  BaseSpan(Dali::UI::Text::SpanType::Value spanType);
+  BaseSpan(Dali::Ui::Text::SpanType::Value spanType);
 
   /**
    * @brief Virtual destructor.
@@ -69,10 +69,10 @@ protected:
 
 public:
   /**
-   * @copydoc Dali::UI::Text::SpanType::Value GetSpanType
+   * @copydoc Dali::Ui::Text::SpanType::Value GetSpanType
    */
 
-  Dali::UI::Text::SpanType::Value GetSpanType() const;
+  Dali::Ui::Text::SpanType::Value GetSpanType() const;
 
 public: // Methods for internal only
   /**
@@ -82,7 +82,7 @@ public: // Methods for internal only
    * @param[in] range The range.
    */
   virtual void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                       const Dali::UI::Text::Range& range) const = 0;
+                                       const Dali::Ui::Text::Range& range) const = 0;
 
 private:
   struct Impl;
@@ -95,7 +95,7 @@ private:
 /**
  * Helper methods for public API.
  */
-inline Internal::BaseSpan& GetImplementation(Dali::UI::Text::BaseSpan& baseSpan)
+inline Internal::BaseSpan& GetImplementation(Dali::Ui::Text::BaseSpan& baseSpan)
 {
   DALI_ASSERT_ALWAYS(baseSpan && "baseSpan handle is empty");
 
@@ -104,7 +104,7 @@ inline Internal::BaseSpan& GetImplementation(Dali::UI::Text::BaseSpan& baseSpan)
   return static_cast<Internal::BaseSpan&>(handle);
 }
 
-inline const Internal::BaseSpan& GetImplementation(const Dali::UI::Text::BaseSpan& baseSpan)
+inline const Internal::BaseSpan& GetImplementation(const Dali::Ui::Text::BaseSpan& baseSpan)
 {
   DALI_ASSERT_ALWAYS(baseSpan && "baseSpan handle is empty");
 
@@ -115,7 +115,7 @@ inline const Internal::BaseSpan& GetImplementation(const Dali::UI::Text::BaseSpa
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

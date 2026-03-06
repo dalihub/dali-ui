@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -140,5 +140,5 @@ public: // Not intended for application developers
   /// @endcond
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

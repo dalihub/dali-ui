@@ -22,7 +22,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ScrollViewEffect::ScrollViewEffect()
 {
@@ -33,6 +33,6 @@ ScrollViewEffect::ScrollViewEffect(Internal::ScrollViewEffect* impl)
 {
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

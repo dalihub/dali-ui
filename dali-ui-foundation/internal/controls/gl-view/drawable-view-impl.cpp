@@ -30,7 +30,7 @@
 #include <dali/public-api/rendering/renderer.h>
 #include <dali/public-api/signals/render-callback.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 /**
  * FrameCallback implementation. Will run the OnUpdate method.
@@ -72,17 +72,17 @@ private:
   uint32_t mUpdateCount{0u};
 };
 
-Dali::UI::GlView DrawableView::New(GlView::BackendMode backendMode)
+Dali::Ui::GlView DrawableView::New(GlView::BackendMode backendMode)
 {
   auto* impl = new DrawableView(backendMode);
-  Dali::UI::GlView handle = Dali::UI::GlView(*impl);
+  Dali::Ui::GlView handle = Dali::Ui::GlView(*impl);
   impl->Initialize();
   return handle;
 }
 
 DrawableView::DrawableView(GlView::BackendMode backendMode)
-  : Dali::UI::Internal::GlViewImpl(backendMode),
-    mRenderingMode(UI::GlView::RenderingMode::CONTINUOUS),
+  : Dali::Ui::Internal::GlViewImpl(backendMode),
+    mRenderingMode(Ui::GlView::RenderingMode::CONTINUOUS),
     mDepth(false),
     mStencil(false),
     mMSAA(0)
@@ -124,19 +124,19 @@ void DrawableView::SetResizeCallback(CallbackBase* resizeCallback)
   }
 }
 
-bool DrawableView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlView::GraphicsApiVersion version)
+bool DrawableView::SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::Ui::GlView::GraphicsApiVersion version)
 {
   // Currently, the settings are not relevant for the DirectRendering feature as all the
   // setup is inherited from DALi graphics backend.
   return true;
 }
 
-void DrawableView::SetRenderingMode(Dali::UI::GlView::RenderingMode mode)
+void DrawableView::SetRenderingMode(Dali::Ui::GlView::RenderingMode mode)
 {
   mRenderingMode = mode;
   Renderer renderer = Self().GetRendererAt(0);
 
-  if (mRenderingMode == Dali::UI::GlView::RenderingMode::ON_DEMAND)
+  if (mRenderingMode == Dali::Ui::GlView::RenderingMode::ON_DEMAND)
   {
     renderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::IF_REQUIRED);
   }
@@ -146,7 +146,7 @@ void DrawableView::SetRenderingMode(Dali::UI::GlView::RenderingMode mode)
   }
 }
 
-Dali::UI::GlView::RenderingMode DrawableView::GetRenderingMode() const
+Dali::Ui::GlView::RenderingMode DrawableView::GetRenderingMode() const
 {
   return mRenderingMode;
 }
@@ -335,4 +335,4 @@ bool DrawableView::OnRenderCallback(const RenderCallbackInput& renderCallbackInp
   return true;
 }
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal

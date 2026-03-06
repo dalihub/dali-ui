@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/absolute-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * AbsoluteLayout sample: margin and padding.

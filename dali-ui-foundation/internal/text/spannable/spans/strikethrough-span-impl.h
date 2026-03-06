@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -40,7 +40,7 @@ class StrikethroughSpan;
 using StrikethroughSpanPtr = IntrusivePtr<StrikethroughSpan>;
 
 /**
- * @copydoc Dali::UI::Text::StrikethroughSpan
+ * @copydoc Dali::Ui::Text::StrikethroughSpan
  */
 
 class StrikethroughSpan : public BaseSpan
@@ -51,7 +51,7 @@ public:
    *
    * @return A new StrikethroughSpan object.
    */
-  static Dali::UI::Text::StrikethroughSpan New();
+  static Dali::Ui::Text::StrikethroughSpan New();
 
   /**
    * @brief Creates a new StrikethroughSpan object.
@@ -61,7 +61,7 @@ public:
    *
    * @return A new StrikethroughSpan object.
    */
-  static Dali::UI::Text::StrikethroughSpan New(Vector4 color, float height);
+  static Dali::Ui::Text::StrikethroughSpan New(Vector4 color, float height);
 
   /**
    * Default Constructor
@@ -81,22 +81,22 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::StrikethroughSpan::GetColor()
+   * @copydoc Dali::Ui::Text::StrikethroughSpan::GetColor()
    */
   Vector4 GetColor() const;
 
   /**
-   * @copydoc Dali::UI::Text::StrikethroughSpan::IsColorDefined()
+   * @copydoc Dali::Ui::Text::StrikethroughSpan::IsColorDefined()
    */
   bool IsColorDefined() const;
 
   /**
-   * @copydoc Dali::UI::Text::StrikethroughSpan::GetHeight()
+   * @copydoc Dali::Ui::Text::StrikethroughSpan::GetHeight()
    */
   float GetHeight() const;
 
   /**
-   * @copydoc Dali::UI::Text::StrikethroughSpan::IsHeightDefined()
+   * @copydoc Dali::Ui::Text::StrikethroughSpan::IsHeightDefined()
    */
   bool IsHeightDefined() const;
 
@@ -117,10 +117,10 @@ public: // Methods. Not intended for application developers
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -133,7 +133,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::StrikethroughSpan& GetImplementation(Dali::UI::Text::StrikethroughSpan& foregroundColorSpan)
+inline Internal::StrikethroughSpan& GetImplementation(Dali::Ui::Text::StrikethroughSpan& foregroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(foregroundColorSpan && "foregroundColorSpan handle is empty");
   BaseObject& object = foregroundColorSpan.GetBaseObject();
@@ -141,7 +141,7 @@ inline Internal::StrikethroughSpan& GetImplementation(Dali::UI::Text::Strikethro
 }
 
 inline const Internal::StrikethroughSpan& GetImplementation(
-    const Dali::UI::Text::StrikethroughSpan& foregroundColorSpan)
+    const Dali::Ui::Text::StrikethroughSpan& foregroundColorSpan)
 {
   DALI_ASSERT_ALWAYS(foregroundColorSpan && "foregroundColorSpan handle is empty");
   const BaseObject& object = foregroundColorSpan.GetBaseObject();
@@ -150,7 +150,7 @@ inline const Internal::StrikethroughSpan& GetImplementation(
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

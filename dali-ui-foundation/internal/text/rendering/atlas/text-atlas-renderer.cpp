@@ -39,8 +39,8 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
-using namespace Dali::UI::Text;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Text;
 
 namespace
 {
@@ -741,7 +741,7 @@ struct AtlasRenderer::Impl
     }
 
 #if defined(DEBUG_ENABLED)
-    UI::AtlasGlyphManager::Metrics metrics = mGlyphManager.GetMetrics();
+    Ui::AtlasGlyphManager::Metrics metrics = mGlyphManager.GetMetrics();
     DALI_LOG_INFO(gLogFilter, Debug::General,
                   "TextAtlasRenderer::GlyphManager::GlyphCount: %i, AtlasCount: %i, TextureMemoryUse: %iK\n",
                   metrics.mGlyphCount, metrics.mAtlasMetrics.mAtlasCount,
@@ -881,7 +881,7 @@ struct AtlasRenderer::Impl
         if (slot.mAtlasId == mIt->mAtlasId)
         {
           // Append the mesh to the existing mesh and adjust any extents
-          UI::Internal::AtlasMeshFactory::AppendMesh(mIt->mMesh, newMesh);
+          Ui::Internal::AtlasMeshFactory::AppendMesh(mIt->mMesh, newMesh);
 
           if (underlineEnabled)
           {
@@ -1175,7 +1175,7 @@ struct AtlasRenderer::Impl
           faceIndex += 4;
         }
       }
-      UI::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
+      Ui::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
     }
   }
 
@@ -1246,7 +1246,7 @@ struct AtlasRenderer::Impl
       newMesh.mIndices.PushBack(faceIndex + 1u);
       faceIndex += 4;
 
-      UI::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
+      Ui::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
     }
   }
 

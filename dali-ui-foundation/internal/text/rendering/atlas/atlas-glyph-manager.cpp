@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 AtlasGlyphManager::AtlasGlyphManager()
 {
@@ -72,7 +72,7 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const GlyphStyle& styl
   GetImplementation(*this).Add(glyph, style, bitmap, slot);
 }
 
-void AtlasGlyphManager::GenerateMeshData(uint32_t imageId, const Vector2& position, UI::AtlasManager::Mesh2D& mesh)
+void AtlasGlyphManager::GenerateMeshData(uint32_t imageId, const Vector2& position, Ui::AtlasManager::Mesh2D& mesh)
 {
   GetImplementation(*this).GenerateMeshData(imageId, position, mesh);
 }
@@ -103,7 +103,7 @@ TextureSet AtlasGlyphManager::GetTextures(uint32_t atlasId) const
   return GetImplementation(*this).GetTextures(atlasId);
 }
 
-const UI::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
+const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
 {
   return GetImplementation(*this).GetMetrics();
 }
@@ -114,6 +114,6 @@ void AtlasGlyphManager::AdjustReferenceCount(Text::FontId fontId, Text::GlyphInd
   GetImplementation(*this).AdjustReferenceCount(fontId, index, style, delta);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

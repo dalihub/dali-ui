@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Visual::Base::Base()
 {
@@ -129,6 +129,6 @@ Dali::VisualRenderer Visual::Base::GetRenderer() const
   return GetImplementation(*this).GetRenderer();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

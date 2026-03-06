@@ -46,7 +46,7 @@ const float OVERSHOOT_NOTIFY_STEP = 0.01f; // amount to set notifications beyond
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -139,7 +139,7 @@ ScrollOvershootEffectRipple::ScrollOvershootEffectRipple(bool vertical, Scrollab
 void ScrollOvershootEffectRipple::Apply()
 {
   Actor self = mAttachedScrollView.Self();
-  mOvershootProperty = IsVertical() ? UI::ScrollView::Property::OVERSHOOT_Y : UI::ScrollView::Property::OVERSHOOT_X;
+  mOvershootProperty = IsVertical() ? Ui::ScrollView::Property::OVERSHOOT_Y : Ui::ScrollView::Property::OVERSHOOT_X;
 
   // make sure height is set, since we only create a constraint for image width
   mOvershootSize = mAttachedScrollView.GetOvershootSize();
@@ -326,7 +326,7 @@ void ScrollOvershootEffectRipple::SetOvershoot(float amount, bool animate)
   }
 
   float overshootAnimationSpeed =
-      mAttachedScrollView.Self().GetProperty<float>(UI::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED);
+      mAttachedScrollView.Self().GetProperty<float>(Ui::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED);
 
   if (animate && overshootAnimationSpeed > Math::MACHINE_EPSILON_0)
   {
@@ -386,6 +386,6 @@ ScrollOvershootEffectRipplePtr ScrollOvershootEffectRipple::New(bool vertical, S
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

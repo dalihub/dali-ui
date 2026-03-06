@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -55,12 +55,12 @@ public:
   AsyncImageLoader();
 
   /**
-   * @copydoc UI::AsyncImageLoader::New()
+   * @copydoc Ui::AsyncImageLoader::New()
    */
   static IntrusivePtr<AsyncImageLoader> New();
 
   /**
-   * @copydoc UI::AsyncImageLoader::LoadAnimatedImage( Dali::AnimatedImageLoading animatedImageLoading, uint32_t
+   * @copydoc Ui::AsyncImageLoader::LoadAnimatedImage( Dali::AnimatedImageLoading animatedImageLoading, uint32_t
    * frameIndex, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
    */
   uint32_t LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
@@ -136,22 +136,22 @@ public:
                      bool cropToMask, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**
-   * @copydoc UI::AsyncImageLoader::ImageLoadedSignal
+   * @copydoc Ui::AsyncImageLoader::ImageLoadedSignal
    */
-  UI::AsyncImageLoader::ImageLoadedSignalType& ImageLoadedSignal();
+  Ui::AsyncImageLoader::ImageLoadedSignalType& ImageLoadedSignal();
 
   /**
-   * @copydoc UI::AsyncImageLoader::PixelBufferLoadedSignal
+   * @copydoc Ui::AsyncImageLoader::PixelBufferLoadedSignal
    */
-  UI::DevelAsyncImageLoader::PixelBufferLoadedSignalType& PixelBufferLoadedSignal();
+  Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType& PixelBufferLoadedSignal();
 
   /**
-   * @copydoc UI::AsyncImageLoader::Cancel
+   * @copydoc Ui::AsyncImageLoader::Cancel
    */
   bool Cancel(uint32_t loadingTaskId);
 
   /**
-   * @copydoc UI::AsyncImageLoader::CancelAll
+   * @copydoc Ui::AsyncImageLoader::CancelAll
    */
   void CancelAll();
 
@@ -167,15 +167,15 @@ protected:
   ~AsyncImageLoader() override;
 
 private:
-  UI::AsyncImageLoader::ImageLoadedSignalType mLoadedSignal;
-  UI::DevelAsyncImageLoader::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
+  Ui::AsyncImageLoader::ImageLoadedSignalType mLoadedSignal;
+  Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
   std::vector<AsyncImageLoadingInfo> mLoadingTasks;
   uint32_t mLoadTaskId;
 };
 
 } // namespace Internal
 
-inline const Internal::AsyncImageLoader& GetImplementation(const UI::AsyncImageLoader& handle)
+inline const Internal::AsyncImageLoader& GetImplementation(const Ui::AsyncImageLoader& handle)
 {
   DALI_ASSERT_ALWAYS(handle && "AsyncImageLoader handle is empty");
 
@@ -184,7 +184,7 @@ inline const Internal::AsyncImageLoader& GetImplementation(const UI::AsyncImageL
   return static_cast<const Internal::AsyncImageLoader&>(object);
 }
 
-inline Internal::AsyncImageLoader& GetImplementation(UI::AsyncImageLoader& handle)
+inline Internal::AsyncImageLoader& GetImplementation(Ui::AsyncImageLoader& handle)
 {
   DALI_ASSERT_ALWAYS(handle && "AsyncImageLoader handle is empty");
 
@@ -193,7 +193,7 @@ inline Internal::AsyncImageLoader& GetImplementation(UI::AsyncImageLoader& handl
   return static_cast<Internal::AsyncImageLoader&>(object);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

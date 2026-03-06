@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -94,6 +94,6 @@ void CalcualteStrikethroughHeight(float& currentStrikethroughHeight, float& maxS
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

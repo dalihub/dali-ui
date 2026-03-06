@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -205,18 +205,18 @@ private:
   NPatchData::NPatchDataId mId;                  ///< id of the N patch (from loader/cache)
   TextureSet mAuxiliaryTextureSet;               ///< TextureSet of the auxiliary mask image
   TextureManager::TextureId mAuxiliaryTextureId; ///< id of the auxiliary mask image (from TextureManager)
-  UI::Visual::ResourceStatus mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
+  Ui::Visual::ResourceStatus mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
   Property::Index mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
   bool mBorderOnly;                         ///< if only border is desired
   Rect<int> mBorder;                        ///< The size of the border
   float mAuxiliaryImageAlpha;               ///< The alpha value for the auxiliary image only
-  UI::ImageVisual::ReleasePolicy::Type
+  Ui::ImageVisual::ReleasePolicy::Type
       mReleasePolicy; ///< The release policy to determine when an image should no longer be cached.
 };
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

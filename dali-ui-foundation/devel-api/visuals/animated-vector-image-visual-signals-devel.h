@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelAnimatedVectorImageVisual
 {
@@ -43,7 +43,7 @@ enum Type
 
 } // namespace DevelAnimatedVectorImageVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

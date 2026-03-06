@@ -32,90 +32,90 @@
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/gl-view/gl-view.h>
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 class GlView;
 
 namespace Internal
 {
-class GlView : public Dali::UI::Internal::GlViewImpl
+class GlView : public Dali::Ui::Internal::GlViewImpl
 {
 protected:
   virtual ~GlView();
 
 public:
   /**
-   * @copydoc Dali::UI::GlView::New()
+   * @copydoc Dali::Ui::GlView::New()
    */
-  static Dali::UI::GlView New(Dali::UI::GlView::ColorFormat colorFormat);
+  static Dali::Ui::GlView New(Dali::Ui::GlView::ColorFormat colorFormat);
 
   /**
    * Construct a new GlView.
    */
-  GlView(Dali::UI::GlView::ColorFormat colorFormat);
+  GlView(Dali::Ui::GlView::ColorFormat colorFormat);
 
   /**
-   * @copydoc Dali::UI::GlView::RegisterGlCallbacks()
+   * @copydoc Dali::Ui::GlView::RegisterGlCallbacks()
    */
   void RegisterGlCallbacks(CallbackBase* initCallback, CallbackBase* renderFrameCallback,
                            CallbackBase* terminateCallback) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetResizeCallback()
+   * @copydoc Dali::Ui::GlView::SetResizeCallback()
    */
   void SetResizeCallback(CallbackBase* resizeCallback) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetGraphicsConfig()
+   * @copydoc Dali::Ui::GlView::SetGraphicsConfig()
    */
-  bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::UI::GlView::GraphicsApiVersion version) override;
+  bool SetGraphicsConfig(bool depth, bool stencil, int msaa, Dali::Ui::GlView::GraphicsApiVersion version) override;
 
   /**
-   * @copydoc Dali::UI::GlView::SetRenderingMode()
+   * @copydoc Dali::Ui::GlView::SetRenderingMode()
    */
-  void SetRenderingMode(Dali::UI::GlView::RenderingMode mode) override;
+  void SetRenderingMode(Dali::Ui::GlView::RenderingMode mode) override;
 
   /**
-   * @copydoc Dali::UI::GlView::GetRenderingMode()
+   * @copydoc Dali::Ui::GlView::GetRenderingMode()
    */
-  Dali::UI::GlView::RenderingMode GetRenderingMode() const override
+  Dali::Ui::GlView::RenderingMode GetRenderingMode() const override
   {
     return mRenderingMode;
   }
 
   /**
-   * @copydoc Dali::UI::GlView::RenderOnce()
+   * @copydoc Dali::Ui::GlView::RenderOnce()
    */
   void RenderOnce() override;
 
   /**
-   * @copydoc Dali::UI::GlView::BindTextureResources()
+   * @copydoc Dali::Ui::GlView::BindTextureResources()
    */
   void BindTextureResources(Dali::Vector<Dali::Texture> textures) override;
 
   /**
-   * @copydoc Dali::UI::GlView::Terminate()
+   * @copydoc Dali::Ui::GlView::Terminate()
    */
   void Terminate() override;
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   virtual void OnInitialize() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
   /**
-   * @copydoc UI::Control::OnSizeSet()
+   * @copydoc Ui::Control::OnSizeSet()
    */
   void OnSizeSet(const Vector3& targetSize) override;
 
@@ -154,13 +154,13 @@ private:
    * @param[in] colorFormat the color format of the GlView.
    * @return The color format of NativeImageSourceQueue
    */
-  Dali::NativeImageQueue::ColorFormat GetColorFormat(Dali::UI::GlView::ColorFormat format);
+  Dali::NativeImageQueue::ColorFormat GetColorFormat(Dali::Ui::GlView::ColorFormat format);
 
 private:
   std::unique_ptr<GlViewRenderThread> mRenderThread;
   Dali::NativeImageQueuePtr mNativeImageQueue;
-  Dali::UI::GlView::RenderingMode mRenderingMode{UI::GlView::RenderingMode::CONTINUOUS};
-  Dali::UI::GlView::ColorFormat mColorFormat{UI::GlView::ColorFormat::RGB888};
+  Dali::Ui::GlView::RenderingMode mRenderingMode{Ui::GlView::RenderingMode::CONTINUOUS};
+  Dali::Ui::GlView::ColorFormat mColorFormat{Ui::GlView::ColorFormat::RGB888};
   bool mDepth{false};
   bool mStencil{false};
   int mMSAA{0};
@@ -168,6 +168,6 @@ private:
 
 } // namespace Internal
 
-} // namespace Dali::UI
+} // namespace Dali::Ui
 
 #endif // DALI_UI_INTERNAL_GL_VIEW_H

@@ -32,8 +32,8 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
-using namespace Dali::UI::Text;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Text;
 
 namespace
 {

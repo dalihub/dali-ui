@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace
 {
@@ -342,6 +342,6 @@ void TextScroller::StartScrolling(Actor scrollingTextActor, float scrollAmount, 
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

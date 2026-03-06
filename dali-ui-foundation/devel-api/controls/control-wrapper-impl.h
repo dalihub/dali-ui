@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 namespace Visual
@@ -39,7 +39,7 @@ class ControlWrapper;
 typedef IntrusivePtr<ControlWrapper> ControlWrapperPtr;
 
 /**
- * @copydoc UI::ControlWrapper
+ * @copydoc Ui::ControlWrapper
  */
 class DALI_UI_API ControlWrapper : public Control
 {
@@ -74,7 +74,7 @@ public:
    *
    * @return A public handle to the newly allocated ControlWrapper.
    */
-  static Dali::UI::ControlWrapper New(const std::string& typeName, ControlWrapper* controlWrapper);
+  static Dali::Ui::ControlWrapper New(const std::string& typeName, ControlWrapper* controlWrapper);
 
 public: // From CustomActorImpl
   // Size negotiation helpers
@@ -106,47 +106,47 @@ public: // From CustomActorImpl
 
 public: // From Control
   /**
-   * @ref Dali::UI::DevelControl::RegisterVisual()
+   * @ref Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
 
   /**
-   * @ref Dali::UI::DevelControl::RegisterVisual()
+   * @ref Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
 
   /**
-   * @ref Dali::UI::DevelControl::RegisterVisual()
+   * @ref Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
 
   /**
-   * @ref Dali::UI::DevelControl::RegisterVisual()
+   * @ref Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @ref Dali::UI::DevelControl::UnregisterVisual()
+   * @ref Dali::Ui::DevelControl::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @ref Dali::UI::DevelControl::GetVisual()
+   * @ref Dali::Ui::DevelControl::GetVisual()
    */
-  UI::Visual::Base GetVisual(Property::Index index) const;
+  Ui::Visual::Base GetVisual(Property::Index index) const;
 
   /**
-   * @ref Dali::UI::DevelControl::EnableVisual()
+   * @ref Dali::Ui::DevelControl::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @ref Dali::UI::DevelControl::IsVisualEnabled()
+   * @ref Dali::Ui::DevelControl::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
   /**
-   * @copydoc Dali::UI::Internal::Control::EmitKeyInputFocusSignal()
+   * @copydoc Dali::Ui::Internal::Control::EmitKeyInputFocusSignal()
    */
   void EmitKeyInputFocusSignal(bool focusGained);
 
@@ -186,25 +186,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ControlWrapper& GetControlWrapperImpl(UI::ControlWrapper& publicObject)
+inline Ui::Internal::ControlWrapper& GetControlWrapperImpl(Ui::ControlWrapper& publicObject)
 {
   DALI_ASSERT_ALWAYS(publicObject);
 
   Dali::RefObject& handle = publicObject.GetImplementation();
 
-  return static_cast<UI::Internal::ControlWrapper&>(handle);
+  return static_cast<Ui::Internal::ControlWrapper&>(handle);
 }
 
-inline const UI::Internal::ControlWrapper& GetControlWrapperImpl(const UI::ControlWrapper& publicObject)
+inline const Ui::Internal::ControlWrapper& GetControlWrapperImpl(const Ui::ControlWrapper& publicObject)
 {
   DALI_ASSERT_ALWAYS(publicObject);
 
   const Dali::RefObject& handle = publicObject.GetImplementation();
 
-  return static_cast<const UI::Internal::ControlWrapper&>(handle);
+  return static_cast<const Ui::Internal::ControlWrapper&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

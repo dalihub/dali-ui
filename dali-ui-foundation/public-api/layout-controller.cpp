@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -191,7 +191,7 @@ public:
    */
   std::string_view GetProcessorName() const override
   {
-    return "UI::LayoutController";
+    return "Ui::LayoutController";
   }
 
 
@@ -345,5 +345,5 @@ void LayoutController::ProcessLayouts()
   mImpl->ProcessLayouts();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

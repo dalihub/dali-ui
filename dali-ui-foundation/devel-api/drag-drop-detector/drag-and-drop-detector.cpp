@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 DragAndDropDetector::DragAndDropDetector()
 {
@@ -108,6 +108,6 @@ DragAndDropDetector::DragAndDropDetector(Internal::DragAndDropDetector* detector
 {
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -27,28 +27,28 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
 /**
- * @brief Internal implementation of UIElementConfig.
+ * @brief Internal implementation of UiElementConfig.
  *
- * Extends UIConfigImpl with element-specific defaults such as font size
- * and text color. Registers itself with UIElementConfigManager via
+ * Extends UiConfigImpl with element-specific defaults such as font size
+ * and text color. Registers itself with UiElementConfigManager via
  * the OnInitialized() hook.
  */
-class UIElementConfigImpl : public UIConfigImpl
+class UiElementConfigImpl : public UiConfigImpl
 {
 public:
   /**
-   * @brief Creates a new UIElementConfig handle with default values.
+   * @brief Creates a new UiElementConfig handle with default values.
    *
-   * @return A fully initialized UIElementConfig handle
+   * @return A fully initialized UiElementConfig handle
    */
-  static UIElementConfig New();
+  static UiElementConfig New();
 
   /**
    * @brief Sets the default font size.
@@ -84,23 +84,23 @@ protected:
   /**
    * @brief Constructor with default configuration values.
    */
-  UIElementConfigImpl();
+  UiElementConfigImpl();
 
   /**
    * @brief Destructor.
    */
-  ~UIElementConfigImpl() override;
+  ~UiElementConfigImpl() override;
 
   /**
-   * @brief Registers this config with UIElementConfigManager.
+   * @brief Registers this config with UiElementConfigManager.
    */
   void OnInitialized() override;
 
 private:
-  UIElementConfigImpl(const UIElementConfigImpl&) = delete;
-  UIElementConfigImpl(UIElementConfigImpl&&) = delete;
-  UIElementConfigImpl& operator=(const UIElementConfigImpl&) = delete;
-  UIElementConfigImpl& operator=(UIElementConfigImpl&&) = delete;
+  UiElementConfigImpl(const UiElementConfigImpl&) = delete;
+  UiElementConfigImpl(UiElementConfigImpl&&) = delete;
+  UiElementConfigImpl& operator=(const UiElementConfigImpl&) = delete;
+  UiElementConfigImpl& operator=(UiElementConfigImpl&&) = delete;
 
 private:
   float mDefaultFontSize;
@@ -110,29 +110,29 @@ private:
 } // namespace Integration
 
 /**
- * @brief Retrieves the UIElementConfigImpl from a UIElementConfig handle.
+ * @brief Retrieves the UiElementConfigImpl from a UiElementConfig handle.
  *
- * @param[in] obj The UIElementConfig handle
+ * @param[in] obj The UiElementConfig handle
  * @return A reference to the internal implementation
  */
-inline Integration::UIElementConfigImpl& GetImpl(UIElementConfig& obj)
+inline Integration::UiElementConfigImpl& GetImpl(UiElementConfig& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::UIElementConfigImpl&>(handle);
+  return static_cast<Integration::UiElementConfigImpl&>(handle);
 }
 
 /**
- * @brief Retrieves the UIElementConfigImpl from a const UIElementConfig handle.
+ * @brief Retrieves the UiElementConfigImpl from a const UiElementConfig handle.
  *
- * @param[in] obj The UIElementConfig handle
+ * @param[in] obj The UiElementConfig handle
  * @return A const reference to the internal implementation
  */
-inline const Integration::UIElementConfigImpl& GetImpl(const UIElementConfig& obj)
+inline const Integration::UiElementConfigImpl& GetImpl(const UiElementConfig& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::UIElementConfigImpl&>(handle);
+  return static_cast<const Integration::UiElementConfigImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -32,7 +32,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_item_view
@@ -41,7 +41,7 @@ namespace UI
 
 class ItemLayout;
 
-typedef IntrusivePtr<ItemLayout> ItemLayoutPtr; ///< Pointer to a Dali::UI::ItemLayout object @SINCE_1_0.0
+typedef IntrusivePtr<ItemLayout> ItemLayoutPtr; ///< Pointer to a Dali::Ui::ItemLayout object @SINCE_1_0.0
 
 /**
  * @brief A support class for managing ranges of items.
@@ -339,7 +339,7 @@ public:
    * @param[in] loopEnabled Whether the KeyboardFocusManager is set to wrap around between first and last item
    * @return The next item ID.
    */
-  virtual int GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::KeyboardFocus::Direction direction,
+  virtual int GetNextFocusItemID(int itemID, int maxItems, Dali::Ui::Control::KeyboardFocus::Direction direction,
                                  bool loopEnabled);
 
   /**
@@ -418,7 +418,7 @@ protected:
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

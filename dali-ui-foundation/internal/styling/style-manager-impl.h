@@ -35,14 +35,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 class FeedbackStyle;
 
 /**
- * @copydoc UI::StyleManager
+ * @copydoc Ui::StyleManager
  */
 class StyleManager : public Dali::BaseObject, public ConnectionTracker
 {
@@ -52,7 +52,7 @@ public:
    *
    * @return The StyleManager object
    */
-  static UI::StyleManager Get();
+  static Ui::StyleManager Get();
 
   /**
    * Construct a new StyleManager.
@@ -67,47 +67,47 @@ protected:
 
 public: // Public API
   /**
-   * @copydoc UI::StyleManager::ApplyTheme
+   * @copydoc Ui::StyleManager::ApplyTheme
    */
   void ApplyTheme(const std::string& themeFile);
 
   /**
-   * @copydoc UI::StyleManager::ApplyDefaultTheme
+   * @copydoc Ui::StyleManager::ApplyDefaultTheme
    */
   void ApplyDefaultTheme();
 
   /**
-   * @copydoc UI::StyleManager::GetDefaultFontFamily
+   * @copydoc Ui::StyleManager::GetDefaultFontFamily
    */
   const std::string& GetDefaultFontFamily() const;
 
   /**
-   * @copydoc UI::StyleManager::SetStyleConstant
+   * @copydoc Ui::StyleManager::SetStyleConstant
    */
   void SetStyleConstant(const std::string& key, const Property::Value& value);
 
   /**
-   * @copydoc UI::StyleManager::GetStyleConstant
+   * @copydoc Ui::StyleManager::GetStyleConstant
    */
   bool GetStyleConstant(const std::string& key, Property::Value& valueOut);
 
   /**
-   * @copydoc UI::StyleManager::GetConfigurations
+   * @copydoc Ui::StyleManager::GetConfigurations
    */
   const Property::Map& GetConfigurations();
 
   /**
-   * @copydoc UI::DevelStyleManager::SetBrokenImageUrl
+   * @copydoc Ui::DevelStyleManager::SetBrokenImageUrl
    */
   void SetBrokenImageUrl(DevelStyleManager::BrokenImageType brokenImageType, const std::string& brokenImageUrl);
 
   /**
-   * @copydoc UI::DevelStyleManager::GetBrokenImageUrl
+   * @copydoc Ui::DevelStyleManager::GetBrokenImageUrl
    */
   std::string GetBrokenImageUrl(DevelStyleManager::BrokenImageType brokenImageType);
 
   /**
-   * @copydoc UI::DevelStyleManager::GetBrokenImageUrlList
+   * @copydoc Ui::DevelStyleManager::GetBrokenImageUrlList
    */
   std::vector<std::string> GetBrokenImageUrlList();
 
@@ -116,19 +116,19 @@ public: // Public API
    *
    * @param[in] control The control to apply style.
    */
-  void ApplyThemeStyle(UI::Control control);
+  void ApplyThemeStyle(Ui::Control control);
 
   /**
    * @brief Apply the theme style to a control at initialization.
    *
    * @param[in] control The control to apply style.
    */
-  void ApplyThemeStyleAtInit(UI::Control control);
+  void ApplyThemeStyleAtInit(Ui::Control control);
 
   /**
-   * @copydoc UI::StyleManager::ApplyStyle
+   * @copydoc Ui::StyleManager::ApplyStyle
    */
-  void ApplyStyle(UI::Control control, const std::string& jsonFileName, const std::string& styleName);
+  void ApplyStyle(Ui::Control control, const std::string& jsonFileName, const std::string& styleName);
 
   /**
    * @brief Get the properties for a specific style with Property::Index keys.
@@ -143,29 +143,29 @@ public: // Public API
    * @param[in] control The control to get state information for
    * @return The style information (or empty ptr if not found)
    */
-  const StylePtr GetRecordedStyle(UI::Control control);
+  const StylePtr GetRecordedStyle(Ui::Control control);
 
 public:
   // SIGNALS
 
   /**
-   * @copydoc UI::StyleManager::StyleChangeSignal
+   * @copydoc Ui::StyleManager::StyleChangeSignal
    * This signal is sent after all the controls have been updated
    * due to style change
    */
-  UI::StyleManager::StyleChangedSignalType& StyleChangedSignal();
+  Ui::StyleManager::StyleChangedSignalType& StyleChangedSignal();
 
   /**
    * This signal is sent to the controls following a style change.
    * It should not be exposed in the public API
    */
-  UI::StyleManager::StyleChangedSignalType& ControlStyleChangeSignal();
+  Ui::StyleManager::StyleChangedSignalType& ControlStyleChangeSignal();
 
   /**
    * This signal is sent to the visual factory following a broken image change.
    * It should not be exposed in the public API
    */
-  UI::DevelStyleManager::BrokenImageChangedSignalType& BrokenImageChangedSignal();
+  Ui::DevelStyleManager::BrokenImageChangedSignalType& BrokenImageChangedSignal();
 
 private:
   typedef std::vector<std::string> StringList;
@@ -197,7 +197,7 @@ private:
    *
    * @return Return the newly created builder
    */
-  UI::Builder CreateBuilder(const Property::Map& constants);
+  Ui::Builder CreateBuilder(const Property::Map& constants);
 
   /**
    * @brief Load a JSON file into given builder
@@ -206,7 +206,7 @@ private:
    * @param[in] jsonFileName The name of the JSON file to load
    * @return Return true if file was loaded
    */
-  bool LoadJSON(UI::Builder builder, const std::string& jsonFileName);
+  bool LoadJSON(Ui::Builder builder, const std::string& jsonFileName);
 
   /**
    * @brief Apply a style to the control using the given builder
@@ -214,7 +214,7 @@ private:
    * @param[in] builder The builder to apply the style from
    * @param[in] control The control to apply the style to
    */
-  void ApplyStyle(UI::Builder builder, UI::Control control);
+  void ApplyStyle(Ui::Builder builder, Ui::Control control);
 
   /**
    * Search for a builder in the cache
@@ -222,7 +222,7 @@ private:
    * @param[in] key The key the builder was cached under
    * @return Return the cached builder if found or an empty builder object if not found
    */
-  UI::Builder FindCachedBuilder(const std::string& key);
+  Ui::Builder FindCachedBuilder(const std::string& key);
 
   /**
    * Store a given builder in the cache keyed to the given key
@@ -230,7 +230,7 @@ private:
    * @param[in] builder The builder object to store
    * @param[in] key The key to store the builder under
    */
-  void CacheBuilder(UI::Builder builder, const std::string& key);
+  void CacheBuilder(Ui::Builder builder, const std::string& key);
 
   /**
    * Callback for when style monitor raises a signal
@@ -252,9 +252,9 @@ private:
 
 private:
   // Map to store builders keyed by JSON file name
-  typedef std::map<std::string, UI::Builder> BuilderMap;
+  typedef std::map<std::string, Ui::Builder> BuilderMap;
 
-  UI::Builder mThemeBuilder;  ///< Builder for all default theme properties
+  Ui::Builder mThemeBuilder;  ///< Builder for all default theme properties
   StyleMonitor mStyleMonitor; ///< Style monitor handle
 
   int mDefaultFontSize; ///< Logical size, not a point-size
@@ -267,28 +267,28 @@ private:
 
   BuilderMap mBuilderCache; ///< Cache of builders keyed by JSON file name
 
-  UI::Internal::FeedbackStyle* mFeedbackStyle; ///< Feedback style
+  Ui::Internal::FeedbackStyle* mFeedbackStyle; ///< Feedback style
 
   std::vector<std::string> mBrokenImageUrls; ///< Broken Image Urls received from user
 
-  std::vector<Dali::WeakHandle<UI::Control>>
+  std::vector<Dali::WeakHandle<Ui::Control>>
       mInitializedControlsBeforeAdaptorInit{}; ///< Controls to initialized before the adaptor is initialized
-  std::vector<Dali::WeakHandle<UI::Control>>
+  std::vector<Dali::WeakHandle<Ui::Control>>
       mThemeAppliedControlsBeforeAdaptorInit{}; ///< Controls to theme applied before the adaptor is initialized
 
   bool mAdaptorInitialized : 1; ///< Whether the adaptor has been initialized
 
   // Signals
-  UI::StyleManager::StyleChangedSignalType
+  Ui::StyleManager::StyleChangedSignalType
       mControlStyleChangeSignal; ///< Emitted when the style( theme/font ) changes for the controls to style themselves
-  UI::StyleManager::StyleChangedSignalType mStyleChangedSignal; ///< Emitted after the controls have been styled
-  UI::DevelStyleManager::BrokenImageChangedSignalType
+  Ui::StyleManager::StyleChangedSignalType mStyleChangedSignal; ///< Emitted after the controls have been styled
+  Ui::DevelStyleManager::BrokenImageChangedSignalType
       mBrokenImageChangedSignal; ///< Emitted after brokenImageChangedSignal
 };
 
 } // namespace Internal
 
-inline Internal::StyleManager& GetImpl(Dali::UI::StyleManager& obj)
+inline Internal::StyleManager& GetImpl(Dali::Ui::StyleManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -297,7 +297,7 @@ inline Internal::StyleManager& GetImpl(Dali::UI::StyleManager& obj)
   return static_cast<Internal::StyleManager&>(handle);
 }
 
-inline const Internal::StyleManager& GetImpl(const Dali::UI::StyleManager& obj)
+inline const Internal::StyleManager& GetImpl(const Dali::Ui::StyleManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -306,7 +306,7 @@ inline const Internal::StyleManager& GetImpl(const Dali::UI::StyleManager& obj)
   return static_cast<const Internal::StyleManager&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

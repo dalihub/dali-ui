@@ -26,19 +26,19 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 ImageUrl::ImageUrl(Texture& texture, bool preMultiplied)
 {
-  mUrl = Dali::UI::TextureManager::AddTexture(texture, preMultiplied);
+  mUrl = Dali::Ui::TextureManager::AddTexture(texture, preMultiplied);
 }
 
 ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
   : mUrl("")
 {
-  auto visualFactory = Dali::UI::VisualFactory::Get();
+  auto visualFactory = Dali::Ui::VisualFactory::Get();
   if (visualFactory)
   {
     auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
@@ -50,7 +50,7 @@ ImageUrl::~ImageUrl()
 {
   if (mUrl.size() > 0)
   {
-    auto visualFactory = Dali::UI::VisualFactory::Get();
+    auto visualFactory = Dali::Ui::VisualFactory::Get();
     if (visualFactory)
     {
       auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
@@ -78,6 +78,6 @@ const std::string& ImageUrl::GetUrl() const
 
 } // End of namespace Internal
 
-} // End of namespace UI
+} // End of namespace Ui
 
 } // End of namespace Dali

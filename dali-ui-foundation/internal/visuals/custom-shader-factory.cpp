@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -91,6 +91,6 @@ bool CustomShaderFactory::SavePrecompileShader(std::string&& shaderName, std::st
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

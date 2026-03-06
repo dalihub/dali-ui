@@ -23,7 +23,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_layoutcontroller_startup(void)
 {

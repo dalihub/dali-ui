@@ -21,11 +21,11 @@
 
 // INTERNAL INCLUDES
 
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -48,11 +48,11 @@ void InputFilter::SetProperties(const Property::Map& map)
     Property::Key& key = keyValue.first;
     Property::Value& value = keyValue.second;
 
-    if (key == UI::InputFilter::Property::ACCEPTED || key == PROPERTY_ACCEPTED)
+    if (key == Ui::InputFilter::Property::ACCEPTED || key == PROPERTY_ACCEPTED)
     {
       value.Get(mAccepted);
     }
-    else if (key == UI::InputFilter::Property::REJECTED || key == PROPERTY_REJECTED)
+    else if (key == Ui::InputFilter::Property::REJECTED || key == PROPERTY_REJECTED)
     {
       value.Get(mRejected);
     }
@@ -61,16 +61,16 @@ void InputFilter::SetProperties(const Property::Map& map)
 
 void InputFilter::GetProperties(Property::Map& map)
 {
-  map[UI::InputFilter::Property::ACCEPTED] = mAccepted.c_str();
-  map[UI::InputFilter::Property::REJECTED] = mRejected.c_str();
+  map[Ui::InputFilter::Property::ACCEPTED] = mAccepted.c_str();
+  map[Ui::InputFilter::Property::REJECTED] = mRejected.c_str();
 }
 
-bool InputFilter::Contains(UI::InputFilter::Property::Type type, std::string source)
+bool InputFilter::Contains(Ui::InputFilter::Property::Type type, std::string source)
 {
   bool match = false;
   std::regex pattern;
 
-  if (type == UI::InputFilter::Property::ACCEPTED)
+  if (type == Ui::InputFilter::Property::ACCEPTED)
   {
     if (mAccepted.empty())
     {
@@ -78,7 +78,7 @@ bool InputFilter::Contains(UI::InputFilter::Property::Type type, std::string sou
     }
     pattern = mAccepted;
   }
-  else if (type == UI::InputFilter::Property::REJECTED)
+  else if (type == Ui::InputFilter::Property::REJECTED)
   {
     if (mRejected.empty())
     {
@@ -92,12 +92,12 @@ bool InputFilter::Contains(UI::InputFilter::Property::Type type, std::string sou
   return match;
 }
 
-bool InputFilter::Filter(UI::InputFilter::Property::Type type, std::string& text)
+bool InputFilter::Filter(Ui::InputFilter::Property::Type type, std::string& text)
 {
   std::regex pattern;
   std::string result;
 
-  if (type == UI::InputFilter::Property::ACCEPTED)
+  if (type == Ui::InputFilter::Property::ACCEPTED)
   {
     if (mAccepted.empty())
     {
@@ -114,7 +114,7 @@ bool InputFilter::Filter(UI::InputFilter::Property::Type type, std::string& text
       ++start;
     }
   }
-  else if (type == UI::InputFilter::Property::REJECTED)
+  else if (type == Ui::InputFilter::Property::REJECTED)
   {
     if (mRejected.empty())
     {
@@ -136,6 +136,6 @@ bool InputFilter::Filter(UI::InputFilter::Property::Type type, std::string& text
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

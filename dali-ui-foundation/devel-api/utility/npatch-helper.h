@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -90,7 +90,7 @@ void ApplyTextureAndUniforms(Renderer& renderer, const Internal::NPatchData* dat
 
 } // namespace NPatchHelper
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

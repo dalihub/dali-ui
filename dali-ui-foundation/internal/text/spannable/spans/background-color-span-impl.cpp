@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -37,7 +37,7 @@ struct BackgroundColorSpan::Impl
 };
 
 BackgroundColorSpan::BackgroundColorSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::BACKGROUND_COLOR)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::BACKGROUND_COLOR)
 {
   mImpl = std::make_unique<Impl>();
 }
@@ -46,11 +46,11 @@ BackgroundColorSpan ::~BackgroundColorSpan()
 {
 }
 
-Dali::UI::Text::BackgroundColorSpan BackgroundColorSpan::New(const Vector4& color)
+Dali::Ui::Text::BackgroundColorSpan BackgroundColorSpan::New(const Vector4& color)
 {
   BackgroundColorSpanPtr object = new BackgroundColorSpan();
   object->SetBackgroundColor(color);
-  Dali::UI::Text::BackgroundColorSpan handle = Dali::UI::Text::BackgroundColorSpan(object.Get());
+  Dali::Ui::Text::BackgroundColorSpan handle = Dali::Ui::Text::BackgroundColorSpan(object.Get());
 
   return handle;
 }
@@ -73,7 +73,7 @@ void BackgroundColorSpan::SetBackgroundColor(const Vector4& color)
 }
 
 void BackgroundColorSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                                  const Dali::UI::Text::Range& range) const
+                                                  const Dali::Ui::Text::Range& range) const
 {
   ColorRun backgroundColorRun;
   backgroundColorRun.characterRun.characterIndex = range.GetStartIndex();
@@ -86,6 +86,6 @@ void BackgroundColorSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& lo
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

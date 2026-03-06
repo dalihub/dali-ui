@@ -26,55 +26,55 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
-class UIElementConfigImpl;
+class UiElementConfigImpl;
 }
 
 #include "ui-element-config.autogen.h"
 /**
  * @brief Configuration for dali-ui-elements default values.
  *
- * UIElementConfig extends UIConfig with element-specific defaults
+ * UiElementConfig extends UiConfig with element-specific defaults
  * such as font size and text color that are applied when creating
  * primitive UI elements like TextLabel or ImageView.
  *
  * @code
- *  UIElementConfig::New()
+ *  UiElementConfig::New()
  *       .SetScalingFactor(1.5f)
  *       .SetDefaultFontSize(24.0f)
  *       .SetDefaultTextColor(Color::BLACK);
  *       .Apply();
  * @endcode
  */
-class DALI_UI_API UIElementConfig : public UIConfig
+class DALI_UI_API UiElementConfig : public UiConfig
 {
 public:
   /**
-   * @brief Creates an uninitialized UIElementConfig handle.
+   * @brief Creates an uninitialized UiElementConfig handle.
    */
-  UIElementConfig() = default;
+  UiElementConfig() = default;
 
   /**
    * @brief Destructor.
    */
-  ~UIElementConfig() = default;
+  ~UiElementConfig() = default;
 
   /**
    * @brief Copy constructor.
    *
    * @param[in] handle Handle to copy
    */
-  UIElementConfig(const UIElementConfig& handle) = default;
+  UiElementConfig(const UiElementConfig& handle) = default;
 
   /**
    * @brief Move constructor.
    *
    * @param[in] rhs Handle to move
    */
-  UIElementConfig(UIElementConfig&& rhs) noexcept = default;
+  UiElementConfig(UiElementConfig&& rhs) noexcept = default;
 
   /**
    * @brief Copy assignment operator.
@@ -82,7 +82,7 @@ public:
    * @param[in] handle Object to assign this to
    * @return Reference to this
    */
-  UIElementConfig& operator=(const UIElementConfig& handle) = default;
+  UiElementConfig& operator=(const UiElementConfig& handle) = default;
 
   /**
    * @brief Move assignment operator.
@@ -90,39 +90,39 @@ public:
    * @param[in] rhs Object to assign this to
    * @return Reference to this
    */
-  UIElementConfig& operator=(UIElementConfig&& rhs) noexcept = default;
+  UiElementConfig& operator=(UiElementConfig&& rhs) noexcept = default;
 
   /**
-   * @brief Creates a new UIElementConfig with default values.
+   * @brief Creates a new UiElementConfig with default values.
    *
-   * Inherits UIConfig defaults and adds: defaultFontSize=16.0f,
+   * Inherits UiConfig defaults and adds: defaultFontSize=16.0f,
    * defaultTextColor=Color::BLACK.
    *
-   * @return An initialized UIElementConfig handle
+   * @return An initialized UiElementConfig handle
    */
-  static UIElementConfig New();
+  static UiElementConfig New();
 
   /**
-   * @brief Downcasts a handle to a UIElementConfig handle.
+   * @brief Downcasts a handle to a UiElementConfig handle.
    *
-   * If handle points to a UIElementConfig, the downcast produces a valid handle.
+   * If handle points to a UiElementConfig, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
    * @param[in] handle Handle to an object
-   * @return A handle to a UIElementConfig or an uninitialized handle
+   * @return A handle to a UiElementConfig or an uninitialized handle
    */
-  static UIElementConfig DownCast(BaseHandle handle);
+  static UiElementConfig DownCast(BaseHandle handle);
 
 public: // Properties
 
-  // @CHAIN_START(UIElementConfig, UIConfig)
+  // @CHAIN_START(UiElementConfig, UiConfig)
   /**
    * @brief Sets the default font point-size for text elements.
    *
    * @pre The config must not be frozen.
    * @param[in] fontSize The default font size in points
    */
-  UIElementConfig& SetDefaultFontSize(float fontSize);
+  UiElementConfig& SetDefaultFontSize(float fontSize);
 
   /**
    * @brief Retrieves the default font point-size.
@@ -137,7 +137,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] color The default text color
    */
-  UIElementConfig& SetDefaultTextColor(const Vector4& color);
+  UiElementConfig& SetDefaultTextColor(const Vector4& color);
 
   /**
    * @brief Retrieves the default text color.
@@ -153,13 +153,13 @@ public: // Not intended for Application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *
-   * @param[in] impl A pointer to the internal UIElementConfig implementation
+   * @param[in] impl A pointer to the internal UiElementConfig implementation
    */
-  explicit UIElementConfig(Integration::UIElementConfigImpl* impl);
+  explicit UiElementConfig(Integration::UiElementConfigImpl* impl);
 
 public:
-  DALI_UI_CHAIN_UICONFIG_METHODS(UIElementConfig)
+  DALI_UI_CHAIN_UICONFIG_METHODS(UiElementConfig)
 };
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

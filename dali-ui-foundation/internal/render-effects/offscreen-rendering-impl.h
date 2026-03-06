@@ -36,7 +36,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -60,10 +60,10 @@ public:
    */
   void SetType(DevelControl::OffScreenRenderingType type);
 
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::GetOffScreenRenderableType
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType
   OffScreenRenderable::Type GetOffScreenRenderableType() const override;
 
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::GetOffScreenRenderTasks
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderTasks
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
   /**
@@ -73,16 +73,16 @@ public:
   Dali::Texture GetTexture() const;
 
 protected:
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::OnInitialize
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::OnInitialize
   void OnInitialize() override;
 
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::OnActivate
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::OnActivate
   void OnActivate() override;
 
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::OnDeactivate
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::OnDeactivate
   void OnDeactivate() override;
 
-  // @copydoc Dali::UI::Internal::RenderEffectImpl::OnRefresh
+  // @copydoc Dali::Ui::Internal::RenderEffectImpl::OnRefresh
   void OnRefresh() override;
 
 private:
@@ -119,6 +119,6 @@ private:
   DevelControl::OffScreenRenderingType mType;
 };
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 #endif // DALI_UI_INTERNAL_OFFSCREEN_RENDERING_IMPL

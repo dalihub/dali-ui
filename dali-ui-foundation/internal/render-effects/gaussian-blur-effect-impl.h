@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -60,61 +60,61 @@ public:
   static GaussianBlurEffectImplPtr New(uint32_t blurRadius);
 
   /**
-   * @copydoc UI::Internal::RenderEffectImpl::GetOffScreenRenderableType
+   * @copydoc Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType
    */
   OffScreenRenderable::Type GetOffScreenRenderableType() const override;
 
   /**
-   * @copydoc UI::Internal::RenderEffectImpl::GetOffScreenRenderTasks
+   * @copydoc Ui::Internal::RenderEffectImpl::GetOffScreenRenderTasks
    */
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
 
   /**
-   * @copydoc UI::GaussianBlurEffect::SetBlurOnce
+   * @copydoc Ui::GaussianBlurEffect::SetBlurOnce
    */
   void SetBlurOnce(bool blurOnce);
 
   /**
-   * @copydoc UI::GaussianBlurEffect::GetBlurOnce
+   * @copydoc Ui::GaussianBlurEffect::GetBlurOnce
    */
   bool GetBlurOnce() const;
 
   /**
-   * @copydoc UI::GaussianBlurEffect::SetBlurRadius
+   * @copydoc Ui::GaussianBlurEffect::SetBlurRadius
    */
   void SetBlurRadius(uint32_t blurRadius);
 
   /**
-   * @copydoc UI::GaussianBlurEffect::GetBlurRadius
+   * @copydoc Ui::GaussianBlurEffect::GetBlurRadius
    */
   uint32_t GetBlurRadius() const;
 
   /**
-   * @copydoc UI::GaussianBlurEffect::SetBlurDownscaleFactor
+   * @copydoc Ui::GaussianBlurEffect::SetBlurDownscaleFactor
    */
   void SetBlurDownscaleFactor(float downscaleFactor);
 
   /**
-   * @copydoc UI::GaussianBlurEffect::GetBlurDownscaleFactor
+   * @copydoc Ui::GaussianBlurEffect::GetBlurDownscaleFactor
    */
   float GetBlurDownscaleFactor() const;
 
   /**
-   * @copydoc UI::GaussianBlurEffect::AddBlurStrengthAnimation
+   * @copydoc Ui::GaussianBlurEffect::AddBlurStrengthAnimation
    */
   void AddBlurStrengthAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
                                 float fromValue, float toValue);
 
   /**
-   * @copydoc UI::GaussianBlurEffect::AddBlurOpacityAnimation
+   * @copydoc Ui::GaussianBlurEffect::AddBlurOpacityAnimation
    */
   void AddBlurOpacityAnimation(Animation& animation, AlphaFunction alphaFunction, TimePeriod timePeriod,
                                float fromValue, float toValue);
 
   /**
-   * @copydoc UI::GaussianBlurEffect::FinishedSignal
+   * @copydoc Ui::GaussianBlurEffect::FinishedSignal
    */
-  Dali::UI::GaussianBlurEffect::FinishedSignalType& FinishedSignal();
+  Dali::Ui::GaussianBlurEffect::FinishedSignalType& FinishedSignal();
 
 protected:
   /**
@@ -172,7 +172,7 @@ private:
    * @param[in] sceneHolder SceneHolder of source control
    * @param[in] sourceControl Input source control
    */
-  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const UI::Control sourceControl);
+  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::Control sourceControl);
 
   /**
    * @brief Removes and destroys local render tasks.
@@ -184,7 +184,7 @@ private:
    * @param[in] renderTask Target render task to change source actor and exclusiveness
    * @param[in] sourceControl Input source control
    */
-  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const UI::Control sourceControl);
+  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl);
 
   /**
    * @brief Emits render finished signal of the effect,
@@ -205,7 +205,7 @@ private:
   GaussianBlurEffectImpl& operator=(const GaussianBlurEffectImpl&) = delete; // no copy()
 
 public:
-  Dali::UI::GaussianBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
+  Dali::Ui::GaussianBlurEffect::FinishedSignalType mFinishedSignal; // Emits when blur once is enabled
 
 private:
   // Camera actors
@@ -239,19 +239,19 @@ private:
 };
 } // namespace Internal
 
-inline UI::Internal::GaussianBlurEffectImpl& GetImplementation(UI::GaussianBlurEffect& obj)
+inline Ui::Internal::GaussianBlurEffectImpl& GetImplementation(Ui::GaussianBlurEffect& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<UI::Internal::GaussianBlurEffectImpl&>(handle);
+  return static_cast<Ui::Internal::GaussianBlurEffectImpl&>(handle);
 }
 
-inline const UI::Internal::GaussianBlurEffectImpl& GetImplementation(const UI::GaussianBlurEffect& obj)
+inline const Ui::Internal::GaussianBlurEffectImpl& GetImplementation(const Ui::GaussianBlurEffect& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const UI::Internal::GaussianBlurEffectImpl&>(handle);
+  return static_cast<const Ui::Internal::GaussianBlurEffectImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_BLUR_EFFECT_H

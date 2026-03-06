@@ -25,8 +25,8 @@
 #include <typeinfo>
 
 using namespace Dali;
-using namespace Dali::UI;
-using namespace Dali::UI::Integration;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
 
 namespace
 {
@@ -107,12 +107,12 @@ public:
 
   TestTraitImpl& GetImpl()
   {
-    return static_cast<TestTraitImpl&>(Dali::UI::GetImpl(*this));
+    return static_cast<TestTraitImpl&>(Dali::Ui::GetImpl(*this));
   }
 
   const TestTraitImpl& GetImpl() const
   {
-    return static_cast<const TestTraitImpl&>(Dali::UI::GetImpl(*this));
+    return static_cast<const TestTraitImpl&>(Dali::Ui::GetImpl(*this));
   }
 
 private:

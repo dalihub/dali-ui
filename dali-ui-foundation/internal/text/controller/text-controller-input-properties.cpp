@@ -41,7 +41,7 @@ namespace
 const char* EMPTY_STRING = "";
 }
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 
 void Controller::InputProperties::SetInputColor(Controller& controller, const Vector4& color)
@@ -187,4 +187,4 @@ bool Controller::InputProperties::IsInputModePassword(Controller& controller)
   return controller.mImpl->mEventData && controller.mImpl->mEventData->mPasswordInput;
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

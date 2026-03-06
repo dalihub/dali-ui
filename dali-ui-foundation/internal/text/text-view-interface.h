@@ -34,7 +34,7 @@ namespace Dali
 struct Vector2;
 struct Vector4;
 
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -400,7 +400,7 @@ public:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

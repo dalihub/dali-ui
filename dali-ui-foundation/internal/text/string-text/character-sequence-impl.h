@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -40,7 +40,7 @@ typedef IntrusivePtr<CharacterSequence> CharacterSequencePtr;
 typedef const CharacterSequence* CharacterSequenceConstPtr;
 
 /**
- * @copydoc Dali::UI::Text::CharacterSequence
+ * @copydoc Dali::Ui::Text::CharacterSequence
  */
 class CharacterSequence : public BaseObject
 {
@@ -66,17 +66,17 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::GetCharacters()
+   * @copydoc Dali::Ui::Text::CharacterSequence::GetCharacters()
    */
   virtual Vector<uint32_t> GetCharacters() const = 0;
 
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::GetNumberOfCharacters()
+   * @copydoc Dali::Ui::Text::CharacterSequence::GetNumberOfCharacters()
    */
   virtual uint32_t GetNumberOfCharacters() const = 0;
 
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::ToString()
+   * @copydoc Dali::Ui::Text::CharacterSequence::ToString()
    */
   virtual std::string ToString() const = 0;
 
@@ -87,7 +87,7 @@ public: // Methods
 /**
  * Helper methods for public API.
  */
-inline Internal::CharacterSequence& GetImplementation(Dali::UI::Text::CharacterSequence& characterSequence)
+inline Internal::CharacterSequence& GetImplementation(Dali::Ui::Text::CharacterSequence& characterSequence)
 {
   DALI_ASSERT_ALWAYS(characterSequence && "characterSequence handle is empty");
 
@@ -96,7 +96,7 @@ inline Internal::CharacterSequence& GetImplementation(Dali::UI::Text::CharacterS
   return static_cast<Internal::CharacterSequence&>(handle);
 }
 
-inline const Internal::CharacterSequence& GetImplementation(const Dali::UI::Text::CharacterSequence& characterSequence)
+inline const Internal::CharacterSequence& GetImplementation(const Dali::Ui::Text::CharacterSequence& characterSequence)
 {
   DALI_ASSERT_ALWAYS(characterSequence && "characterSequence handle is empty");
 
@@ -107,7 +107,7 @@ inline const Internal::CharacterSequence& GetImplementation(const Dali::UI::Text
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -48,7 +48,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -91,15 +91,15 @@ DALI_ENUM_TO_STRING_TABLE_END(WRAP_MODE)
 
 // load policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOAD_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::ImageVisual::LoadPolicy, IMMEDIATE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::ImageVisual::LoadPolicy, ATTACHED)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
 DALI_ENUM_TO_STRING_TABLE_END(LOAD_POLICY)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::ImageVisual::ReleasePolicy, DETACHED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::ImageVisual::ReleasePolicy, DESTROYED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::UI::ImageVisual::ReleasePolicy, NEVER)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
@@ -116,24 +116,24 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-    {IMAGE_FITTING_MODE, UI::ImageVisual::Property::FITTING_MODE},
-    {IMAGE_SAMPLING_MODE, UI::ImageVisual::Property::SAMPLING_MODE},
-    {IMAGE_DESIRED_WIDTH, UI::ImageVisual::Property::DESIRED_WIDTH},
-    {IMAGE_DESIRED_HEIGHT, UI::ImageVisual::Property::DESIRED_HEIGHT},
-    {PIXEL_AREA_UNIFORM_NAME, UI::ImageVisual::Property::PIXEL_AREA},
-    {IMAGE_WRAP_MODE_U, UI::ImageVisual::Property::WRAP_MODE_U},
-    {IMAGE_WRAP_MODE_V, UI::ImageVisual::Property::WRAP_MODE_V},
-    {SYNCHRONOUS_LOADING, UI::ImageVisual::Property::SYNCHRONOUS_LOADING},
-    {ALPHA_MASK_URL, UI::ImageVisual::Property::ALPHA_MASK_URL},
-    {MASK_CONTENT_SCALE_NAME, UI::ImageVisual::Property::MASK_CONTENT_SCALE},
-    {CROP_TO_MASK_NAME, UI::ImageVisual::Property::CROP_TO_MASK},
-    {MASKING_TYPE_NAME, UI::DevelImageVisual::Property::MASKING_TYPE},
-    {ENABLE_BROKEN_IMAGE, UI::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE},
-    {LOAD_POLICY_NAME, UI::ImageVisual::Property::LOAD_POLICY},
-    {RELEASE_POLICY_NAME, UI::ImageVisual::Property::RELEASE_POLICY},
-    {ORIENTATION_CORRECTION_NAME, UI::ImageVisual::Property::ORIENTATION_CORRECTION},
-    {FAST_TRACK_UPLOADING_NAME, UI::DevelImageVisual::Property::FAST_TRACK_UPLOADING},
-    {SYNCHRONOUS_SIZING, UI::DevelImageVisual::Property::SYNCHRONOUS_SIZING},
+    {IMAGE_FITTING_MODE, Ui::ImageVisual::Property::FITTING_MODE},
+    {IMAGE_SAMPLING_MODE, Ui::ImageVisual::Property::SAMPLING_MODE},
+    {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
+    {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
+    {PIXEL_AREA_UNIFORM_NAME, Ui::ImageVisual::Property::PIXEL_AREA},
+    {IMAGE_WRAP_MODE_U, Ui::ImageVisual::Property::WRAP_MODE_U},
+    {IMAGE_WRAP_MODE_V, Ui::ImageVisual::Property::WRAP_MODE_V},
+    {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
+    {ALPHA_MASK_URL, Ui::ImageVisual::Property::ALPHA_MASK_URL},
+    {MASK_CONTENT_SCALE_NAME, Ui::ImageVisual::Property::MASK_CONTENT_SCALE},
+    {CROP_TO_MASK_NAME, Ui::ImageVisual::Property::CROP_TO_MASK},
+    {MASKING_TYPE_NAME, Ui::DevelImageVisual::Property::MASKING_TYPE},
+    {ENABLE_BROKEN_IMAGE, Ui::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE},
+    {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
+    {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
+    {ORIENTATION_CORRECTION_NAME, Ui::ImageVisual::Property::ORIENTATION_CORRECTION},
+    {FAST_TRACK_UPLOADING_NAME, Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING},
+    {SYNCHRONOUS_SIZING, Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -179,7 +179,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                          const VisualUrl& imageUrl, ImageDimensions size, FittingMode::Type fittingMode,
                          Dali::SamplingMode::Type samplingMode)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, UI::Visual::IMAGE),
+  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::IMAGE),
     mPixelArea(FULL_TEXTURE_RECT),
     mPixelAreaIndex(Property::INVALID_INDEX),
     mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
@@ -196,8 +196,8 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
     mSamplingMode(samplingMode),
     mWrapModeU(WrapMode::DEFAULT),
     mWrapModeV(WrapMode::DEFAULT),
-    mLoadPolicy(UI::ImageVisual::LoadPolicy::ATTACHED),
-    mReleasePolicy(UI::ImageVisual::ReleasePolicy::DETACHED),
+    mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
+    mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
     mLoadState(TextureManager::LoadState::NOT_STARTED),
     mOrientationCorrection(true),
     mNeedYuvToRgb(false),
@@ -227,7 +227,7 @@ ImageVisual::~ImageVisual()
     }
 
     // ImageVisual destroyed so remove texture unless ReleasePolicy is set to never release
-    if ((mTextureId != TextureManager::INVALID_TEXTURE_ID) && (mReleasePolicy != UI::ImageVisual::ReleasePolicy::NEVER))
+    if ((mTextureId != TextureManager::INVALID_TEXTURE_ID) && (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER))
     {
       RemoveTexture();
     }
@@ -259,7 +259,7 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
   // Load image immediately if LOAD_POLICY requires it
-  if (mLoadPolicy == UI::ImageVisual::LoadPolicy::IMMEDIATE)
+  if (mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
   {
     LoadTexture(mTextures, mDesiredSize, TextureManager::ReloadPolicy::CACHED);
   }
@@ -269,7 +269,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
 {
   switch (index)
   {
-    case UI::ImageVisual::Property::SYNCHRONOUS_LOADING:
+    case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
       if (value.Get(sync))
@@ -290,7 +290,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::DESIRED_WIDTH:
+    case Ui::ImageVisual::Property::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
       if (value.Get(desiredWidth))
@@ -304,7 +304,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::DESIRED_HEIGHT:
+    case Ui::ImageVisual::Property::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
       if (value.Get(desiredHeight))
@@ -318,7 +318,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::FITTING_MODE:
+    case Ui::ImageVisual::Property::FITTING_MODE:
     {
       int fittingMode = 0;
       Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode);
@@ -326,7 +326,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::SAMPLING_MODE:
+    case Ui::ImageVisual::Property::SAMPLING_MODE:
     {
       int samplingMode = 0;
       Scripting::GetEnumerationProperty(value, SAMPLING_MODE_TABLE, SAMPLING_MODE_TABLE_COUNT, samplingMode);
@@ -334,7 +334,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::PIXEL_AREA:
+    case Ui::ImageVisual::Property::PIXEL_AREA:
     {
       value.Get(mPixelArea);
 
@@ -348,14 +348,14 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
         }
         else if (mPixelArea != FULL_TEXTURE_RECT)
         {
-          mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(UI::ImageVisual::Property::PIXEL_AREA,
+          mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                               PIXEL_AREA_UNIFORM_NAME, mPixelArea);
         }
       }
       break;
     }
 
-    case UI::ImageVisual::Property::WRAP_MODE_U:
+    case Ui::ImageVisual::Property::WRAP_MODE_U:
     {
       int wrapMode = 0;
       Scripting::GetEnumerationProperty(value, WRAP_MODE_TABLE, WRAP_MODE_TABLE_COUNT, wrapMode);
@@ -363,7 +363,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::WRAP_MODE_V:
+    case Ui::ImageVisual::Property::WRAP_MODE_V:
     {
       int wrapMode = 0;
       Scripting::GetEnumerationProperty(value, WRAP_MODE_TABLE, WRAP_MODE_TABLE_COUNT, wrapMode);
@@ -371,7 +371,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::ALPHA_MASK_URL:
+    case Ui::ImageVisual::Property::ALPHA_MASK_URL:
     {
       std::string alphaUrl = "";
       if (value.Get(alphaUrl))
@@ -396,7 +396,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::MASK_CONTENT_SCALE:
+    case Ui::ImageVisual::Property::MASK_CONTENT_SCALE:
     {
       float scale = 1.0f;
       if (value.Get(scale))
@@ -407,7 +407,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::CROP_TO_MASK:
+    case Ui::ImageVisual::Property::CROP_TO_MASK:
     {
       bool crop = false;
       if (value.Get(crop))
@@ -418,7 +418,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::DevelImageVisual::Property::MASKING_TYPE:
+    case Ui::DevelImageVisual::Property::MASKING_TYPE:
     {
       int maskingType = 0;
       if (value.Get(maskingType))
@@ -444,14 +444,14 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
         }
         else
         {
-          mMaskingData->mPreappliedMasking = (UI::DevelImageVisual::MaskingType::Type(maskingType) ==
-                                              UI::DevelImageVisual::MaskingType::MASKING_ON_LOADING);
+          mMaskingData->mPreappliedMasking = (Ui::DevelImageVisual::MaskingType::Type(maskingType) ==
+                                              Ui::DevelImageVisual::MaskingType::MASKING_ON_LOADING);
         }
       }
       break;
     }
 
-    case UI::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE:
+    case Ui::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE:
     {
       bool enableBrokenImage = true;
       if (value.Get(enableBrokenImage))
@@ -461,22 +461,22 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::ImageVisual::Property::RELEASE_POLICY:
+    case Ui::ImageVisual::Property::RELEASE_POLICY:
     {
       int releasePolicy = 0;
       Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT, releasePolicy);
-      mReleasePolicy = UI::ImageVisual::ReleasePolicy::Type(releasePolicy);
+      mReleasePolicy = Ui::ImageVisual::ReleasePolicy::Type(releasePolicy);
       break;
     }
 
-    case UI::ImageVisual::Property::LOAD_POLICY:
+    case Ui::ImageVisual::Property::LOAD_POLICY:
     {
       int loadPolicy = 0;
       Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy);
-      mLoadPolicy = UI::ImageVisual::LoadPolicy::Type(loadPolicy);
+      mLoadPolicy = Ui::ImageVisual::LoadPolicy::Type(loadPolicy);
       break;
     }
-    case UI::ImageVisual::Property::ORIENTATION_CORRECTION:
+    case Ui::ImageVisual::Property::ORIENTATION_CORRECTION:
     {
       bool orientationCorrection = true;
       if (value.Get(orientationCorrection))
@@ -486,7 +486,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::DevelImageVisual::Property::FAST_TRACK_UPLOADING:
+    case Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING:
     {
       bool useFastTrackUploading = false;
       if (value.Get(useFastTrackUploading))
@@ -496,7 +496,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       break;
     }
 
-    case UI::DevelImageVisual::Property::SYNCHRONOUS_SIZING:
+    case Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING:
     {
       bool useSynchronousSizing = false;
       if (value.Get(useSynchronousSizing))
@@ -651,7 +651,7 @@ void ImageVisual::OnInitialize()
 
   if (mPixelArea != FULL_TEXTURE_RECT)
   {
-    mPixelAreaIndex = mImpl->mRenderer.RegisterUniqueProperty(UI::ImageVisual::Property::PIXEL_AREA,
+    mPixelAreaIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                               PIXEL_AREA_UNIFORM_NAME, mPixelArea);
   }
 
@@ -662,7 +662,7 @@ void ImageVisual::OnInitialize()
 
   if (mMaskingData)
   {
-    mImpl->mRenderer.RegisterUniqueProperty(UI::ImageVisual::Property::CROP_TO_MASK, CROP_TO_MASK_NAME,
+    mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisual::Property::CROP_TO_MASK, CROP_TO_MASK_NAME,
                                             static_cast<float>(mMaskingData->mCropToMask));
   }
 }
@@ -711,8 +711,8 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
    */
   auto IsFastTrackUploadingAvailable = [&]()
   {
-    if (mUseFastTrackUploading && mLoadPolicy == UI::ImageVisual::LoadPolicy::ATTACHED &&
-        mReleasePolicy == UI::ImageVisual::ReleasePolicy::DETACHED &&
+    if (mUseFastTrackUploading && mLoadPolicy == Ui::ImageVisual::LoadPolicy::ATTACHED &&
+        mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
         forceReload == TextureManager::ReloadPolicy::CACHED &&
         (mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE) &&
         !synchronousLoading && !mUseSynchronousSizing && !IsUsingCustomShader() &&
@@ -724,8 +724,8 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
     {
       DALI_LOG_DEBUG_INFO(
           "FastTrack : Fail to load fast track. mUrl : [%s]%s%s%s%s%s%s%s%s\n", mImageUrl.GetEllipsedUrl().c_str(),
-          (mLoadPolicy != UI::ImageVisual::LoadPolicy::ATTACHED) ? "/ mLoadPolicy != ATTACHED" : "",
-          (mReleasePolicy != UI::ImageVisual::ReleasePolicy::DETACHED) ? "/ mReleasePolicy != DETACHED" : "",
+          (mLoadPolicy != Ui::ImageVisual::LoadPolicy::ATTACHED) ? "/ mLoadPolicy != ATTACHED" : "",
+          (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED) ? "/ mReleasePolicy != DETACHED" : "",
           (forceReload != TextureManager::ReloadPolicy::CACHED) ? "/ forceReload != CACHED" : "",
           (!(mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE))
               ? "/ url is not image"
@@ -903,12 +903,12 @@ void ImageVisual::DoSetOnScene(Actor& actor)
     mPlacementActor.Reset();
 
     // Image loaded and ready to display
-    ResourceReady(UI::Visual::ResourceStatus::READY);
+    ResourceReady(Ui::Visual::ResourceStatus::READY);
   }
   else if (mLoadState == TextureManager::LoadState::LOAD_FAILED)
   {
     ShowBrokenImage();
-    ResourceReady(UI::Visual::ResourceStatus::FAILED);
+    ResourceReady(Ui::Visual::ResourceStatus::FAILED);
   }
   else
   {
@@ -928,7 +928,7 @@ void ImageVisual::DoSetOffScene(Actor& actor)
   actor.RemoveRenderer(mImpl->mRenderer);
   mRendererAdded = false;
 
-  if (mReleasePolicy == UI::ImageVisual::ReleasePolicy::DETACHED)
+  if (mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
   {
     ResetRenderer();
   }
@@ -939,63 +939,63 @@ void ImageVisual::DoSetOffScene(Actor& actor)
 void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::IMAGE);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
 
   bool sync = IsSynchronousLoadingRequired();
-  map.Insert(UI::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
+  map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
   if (mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
-    map.Insert(UI::ImageVisual::Property::URL, mImageUrl.GetUrl());
-    map.Insert(UI::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
-    map.Insert(UI::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
+    map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
+    map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
 
-  map.Insert(UI::ImageVisual::Property::FITTING_MODE, mFittingMode);
-  map.Insert(UI::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
+  map.Insert(Ui::ImageVisual::Property::FITTING_MODE, mFittingMode);
+  map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
 
   if (mImpl->mRenderer && mPixelAreaIndex != Property::INVALID_INDEX)
   {
     // Update values from Renderer
     Vector4 pixelArea = mImpl->mRenderer.GetProperty<Vector4>(mPixelAreaIndex);
-    map.Insert(UI::ImageVisual::Property::PIXEL_AREA, pixelArea);
+    map.Insert(Ui::ImageVisual::Property::PIXEL_AREA, pixelArea);
   }
   else
   {
-    map.Insert(UI::ImageVisual::Property::PIXEL_AREA, mPixelArea);
+    map.Insert(Ui::ImageVisual::Property::PIXEL_AREA, mPixelArea);
   }
 
-  map.Insert(UI::ImageVisual::Property::WRAP_MODE_U, mWrapModeU);
-  map.Insert(UI::ImageVisual::Property::WRAP_MODE_V, mWrapModeV);
+  map.Insert(Ui::ImageVisual::Property::WRAP_MODE_U, mWrapModeU);
+  map.Insert(Ui::ImageVisual::Property::WRAP_MODE_V, mWrapModeV);
 
   if (mMaskingData != NULL)
   {
-    map.Insert(UI::ImageVisual::Property::ALPHA_MASK_URL, mMaskingData->mAlphaMaskUrl.GetUrl());
-    map.Insert(UI::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
-    map.Insert(UI::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
-    map.Insert(UI::DevelImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
+    map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, mMaskingData->mAlphaMaskUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
+    map.Insert(Ui::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
+    map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
                                                                  ? DevelImageVisual::MaskingType::MASKING_ON_LOADING
                                                                  : DevelImageVisual::MaskingType::MASKING_ON_RENDERING);
   }
 
-  map.Insert(UI::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
-  map.Insert(UI::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
-  map.Insert(UI::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
+  map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
+  map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
 
-  map.Insert(UI::DevelImageVisual::Property::FAST_TRACK_UPLOADING, mUseFastTrackUploading);
-  map.Insert(UI::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mUseSynchronousSizing);
+  map.Insert(Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING, mUseFastTrackUploading);
+  map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mUseSynchronousSizing);
 }
 
 void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::IMAGE);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
   if (mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
-    map.Insert(UI::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
-    map.Insert(UI::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
+    map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
+    map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
 }
 
@@ -1012,7 +1012,7 @@ void ImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
       // Register PREMULTIPLIED_ALPHA only if it become false.
       // Default PREMULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
       mPreMultipliedAlphaIndex =
-          mImpl->mRenderer.RegisterProperty(UI::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, 0.0f);
+          mImpl->mRenderer.RegisterProperty(Ui::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, 0.0f);
     }
   }
 
@@ -1028,7 +1028,7 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
     case DevelImageVisual::Action::RELOAD:
     {
       // Reset resource ready status when we call reload.
-      ResourceReady(UI::Visual::ResourceStatus::PREPARING);
+      ResourceReady(Ui::Visual::ResourceStatus::PREPARING);
       mLoadState = TextureManager::LoadState::NOT_STARTED;
 
       // Need to reset textureset after change load state.
@@ -1087,7 +1087,7 @@ void ImageVisual::UpdateShader()
 // From FastTrackLoadingTask
 void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
 {
-  UI::Visual::ResourceStatus resourceStatus;
+  Ui::Visual::ResourceStatus resourceStatus;
 
   DALI_ASSERT_ALWAYS(mFastTrackLoadingTask == task && "Task was not canceled successfully!");
   DALI_ASSERT_ALWAYS(mRendererAdded && "Some FastTrack logic missed!");
@@ -1096,7 +1096,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
 
   if (mFastTrackLoadingTask && mFastTrackLoadingTask->mLoadSuccess)
   {
-    resourceStatus = UI::Visual::ResourceStatus::READY;
+    resourceStatus = Ui::Visual::ResourceStatus::READY;
     mLoadState = TextureManager::LoadState::LOAD_FINISHED;
 
     // Change premultiplied alpha flag after change renderer.
@@ -1139,7 +1139,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
   }
   else
   {
-    resourceStatus = UI::Visual::ResourceStatus::FAILED;
+    resourceStatus = Ui::Visual::ResourceStatus::FAILED;
     mLoadState = TextureManager::LoadState::LOAD_FAILED;
 
     // Change renderer as broken.
@@ -1155,7 +1155,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
 // From Texture Manager
 void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureInformation)
 {
-  UI::Visual::ResourceStatus resourceStatus;
+  Ui::Visual::ResourceStatus resourceStatus;
 
   if (mImpl->mRenderer)
   {
@@ -1233,12 +1233,12 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
   // Image loaded, set status regardless of staged status.
   if (loadingSuccess)
   {
-    resourceStatus = UI::Visual::ResourceStatus::READY;
+    resourceStatus = Ui::Visual::ResourceStatus::READY;
     mLoadState = TextureManager::LoadState::LOAD_FINISHED;
   }
   else
   {
-    resourceStatus = UI::Visual::ResourceStatus::FAILED;
+    resourceStatus = Ui::Visual::ResourceStatus::FAILED;
     mLoadState = TextureManager::LoadState::LOAD_FAILED;
   }
 
@@ -1405,14 +1405,14 @@ Shader ImageVisual::GenerateShader() const
 
 Dali::Property ImageVisual::OnGetPropertyObject(Dali::Property::Key key, bool changeProperties)
 {
-  if ((key.type == Property::Key::INDEX && key.indexKey == UI::ImageVisual::Property::PIXEL_AREA) ||
+  if ((key.type == Property::Key::INDEX && key.indexKey == Ui::ImageVisual::Property::PIXEL_AREA) ||
       (key.type == Property::Key::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
   {
     if (DALI_LIKELY(mImpl->mRenderer))
     {
       if (mPixelAreaIndex == Property::INVALID_INDEX)
       {
-        mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(UI::ImageVisual::Property::PIXEL_AREA,
+        mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                             PIXEL_AREA_UNIFORM_NAME, mPixelArea);
       }
       return Dali::Property(mImpl->mRenderer, mPixelAreaIndex);
@@ -1453,7 +1453,7 @@ void ImageVisual::CheckMaskTexture()
 void ImageVisual::ResetRenderer()
 {
   RemoveTexture();
-  mImpl->mResourceStatus = UI::Visual::ResourceStatus::PREPARING;
+  mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
   // Remove textureset now.
   mImpl->mRenderer.RemoveTextures();
@@ -1590,6 +1590,6 @@ void ImageVisual::UpdateNativeTextureInfomation(TextureSet textureSet)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

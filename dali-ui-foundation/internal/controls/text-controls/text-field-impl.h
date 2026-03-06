@@ -41,7 +41,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -59,7 +59,7 @@ public:
    * @copydoc Dali::Toollkit::TextField::New()
    * @param[in] additionalBehaviour custom behavior flags for this TextField. Default is CONTROL_BEHAVIOUR_DEFAULT
    */
-  static UI::TextField New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
+  static Ui::TextField New(ControlBehaviour additionalBehaviour = ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
 
   // Properties
 
@@ -109,17 +109,17 @@ public:
   /**
    * @copydoc TextField::TextChangedSignal()
    */
-  UI::TextField::TextChangedSignalType& TextChangedSignal();
+  Ui::TextField::TextChangedSignalType& TextChangedSignal();
 
   /**
    * @copydoc TextField::MaxLengthReachedSignal()
    */
-  UI::TextField::MaxLengthReachedSignalType& MaxLengthReachedSignal();
+  Ui::TextField::MaxLengthReachedSignalType& MaxLengthReachedSignal();
 
   /**
    * @copydoc TextField::TextChangedSignal()
    */
-  UI::TextField::InputStyleChangedSignalType& InputStyleChangedSignal();
+  Ui::TextField::InputStyleChangedSignalType& InputStyleChangedSignal();
 
   /**
    * @copydoc TextField::AnchorClickedSignal()
@@ -166,14 +166,14 @@ private: // From Control
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
    * @copydoc Control::OnStyleChange()
    */
-  void OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change) override;
+  void OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change) override;
 
   /**
    * @copydoc Control::OnApplyDefaultStyle()
@@ -287,12 +287,12 @@ private: // From Control
   /**
    * @copydoc Text::EditableControlInterface::AddDecoration()
    */
-  void AddDecoration(Actor& actor, UI::Text::DecorationType type, bool needsClipping) override;
+  void AddDecoration(Actor& actor, Ui::Text::DecorationType type, bool needsClipping) override;
 
   /**
    * @copydoc Text::EditableControlInterface::InputFiltered()
    */
-  void InputFiltered(UI::InputFilter::Property::Type type) override;
+  void InputFiltered(Ui::InputFilter::Property::Type type) override;
 
   /**
    * @copydoc Text::EditableControlInterface::GetControlBackgroundColor()
@@ -468,7 +468,7 @@ public:
 
 private: // Implementation
   /**
-   * @copydoc Dali::UI::Text::Controller::(InputMethodContext& inputMethodContext, const
+   * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const
    * InputMethodContext::EventData& inputMethodContextEvent)
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(
@@ -590,15 +590,15 @@ private: // Implementation
 
 private: // Data
   // Signals
-  UI::TextField::TextChangedSignalType mTextChangedSignal;
-  UI::TextField::MaxLengthReachedSignalType mMaxLengthReachedSignal;
-  UI::TextField::InputStyleChangedSignalType mInputStyleChangedSignal;
-  UI::DevelTextField::AnchorClickedSignalType mAnchorClickedSignal;
-  UI::DevelTextField::InputFilteredSignalType mInputFilteredSignal;
-  UI::DevelTextField::CursorPositionChangedSignalType mCursorPositionChangedSignal;
-  UI::DevelTextField::SelectionChangedSignalType mSelectionChangedSignal;
-  UI::DevelTextField::SelectionClearedSignalType mSelectionClearedSignal;
-  UI::DevelTextField::SelectionStartedSignalType mSelectionStartedSignal;
+  Ui::TextField::TextChangedSignalType mTextChangedSignal;
+  Ui::TextField::MaxLengthReachedSignalType mMaxLengthReachedSignal;
+  Ui::TextField::InputStyleChangedSignalType mInputStyleChangedSignal;
+  Ui::DevelTextField::AnchorClickedSignalType mAnchorClickedSignal;
+  Ui::DevelTextField::InputFilteredSignalType mInputFilteredSignal;
+  Ui::DevelTextField::CursorPositionChangedSignalType mCursorPositionChangedSignal;
+  Ui::DevelTextField::SelectionChangedSignalType mSelectionChangedSignal;
+  Ui::DevelTextField::SelectionClearedSignalType mSelectionClearedSignal;
+  Ui::DevelTextField::SelectionStartedSignalType mSelectionStartedSignal;
 
   // for Font Variations
   std::map<Dali::Property::Index, std::string> mVariationIndexMap; // Stores [CustomPropertyIndex, tag].
@@ -607,9 +607,9 @@ private: // Data
   Text::ControllerPtr mController;
   Text::RendererPtr mRenderer;
   Text::DecoratorPtr mDecorator;
-  UI::Control mStencil;                         ///< For EXCEED_POLICY_CLIP
+  Ui::Control mStencil;                         ///< For EXCEED_POLICY_CLIP
   std::vector<Actor> mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<UI::TextAnchor> mAnchorActors;
+  std::vector<Ui::TextAnchor> mAnchorActors;
   Dali::InputMethodOptions mInputMethodOptions;
 
   Actor mRenderableActor;
@@ -647,33 +647,33 @@ protected:
     using EditableTextControlAccessible::EditableTextControlAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::GetNameRaw()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNameRaw()
      */
     std::pair<std::string, bool> GetNameRaw() const override;
 
   protected:
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextAnchors()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextAnchors()
      */
-    const std::vector<UI::TextAnchor>& GetTextAnchors() const override;
+    const std::vector<Ui::TextAnchor>& GetTextAnchors() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetTextController()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetTextController()
      */
-    UI::Text::ControllerPtr GetTextController() const override;
+    Ui::Text::ControllerPtr GetTextController() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::GetSubstituteCharacter()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::GetSubstituteCharacter()
      */
     std::uint32_t GetSubstituteCharacter() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::TextControlAccessible::IsHiddenInput()
+     * @copydoc Dali::Ui::Internal::TextControlAccessible::IsHiddenInput()
      */
     bool IsHiddenInput() const override;
 
     /**
-     * @copydoc Dali::UI::Internal::EditableTextControlAccessible::RequestTextRelayout()
+     * @copydoc Dali::Ui::Internal::EditableTextControlAccessible::RequestTextRelayout()
      */
     void RequestTextRelayout() override;
   };
@@ -683,25 +683,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TextField& GetImpl(UI::TextField& textField)
+inline Ui::Internal::TextField& GetImpl(Ui::TextField& textField)
 {
   DALI_ASSERT_ALWAYS(textField);
 
   Dali::RefObject& handle = textField.GetImplementation();
 
-  return static_cast<UI::Internal::TextField&>(handle);
+  return static_cast<Ui::Internal::TextField&>(handle);
 }
 
-inline const UI::Internal::TextField& GetImpl(const UI::TextField& textField)
+inline const Ui::Internal::TextField& GetImpl(const Ui::TextField& textField)
 {
   DALI_ASSERT_ALWAYS(textField);
 
   const Dali::RefObject& handle = textField.GetImplementation();
 
-  return static_cast<const UI::Internal::TextField&>(handle);
+  return static_cast<const Ui::Internal::TextField&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

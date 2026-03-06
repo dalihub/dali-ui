@@ -29,7 +29,7 @@ namespace
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 const std::string AssetManager::GetDaliImagePath()
 {
@@ -88,6 +88,6 @@ const std::string AssetManager::GetDaliDataReadOnlyPath()
              : DALI_DATA_READ_ONLY_DIR;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

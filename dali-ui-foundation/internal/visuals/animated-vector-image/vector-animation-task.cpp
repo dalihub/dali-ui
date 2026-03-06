@@ -39,7 +39,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -985,6 +985,6 @@ void VectorAnimationTask::OnLoadCompleted(uint32_t /* not used */)
 }
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -38,21 +38,21 @@ class SceneHolder;
 
 } // namespace Integration
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
- * @copydoc UI::KeyboardFocusManager
+ * @copydoc Ui::KeyboardFocusManager
  */
 class KeyboardFocusManager : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  typedef UI::DevelKeyboardFocusManager::CustomAlgorithmInterface CustomAlgorithmInterface;
+  typedef Ui::DevelKeyboardFocusManager::CustomAlgorithmInterface CustomAlgorithmInterface;
 
   struct FocusChangeContext
   {
-    UI::Control::KeyboardFocus::Device device = UI::Control::KeyboardFocus::Device::UNKNOWN;
+    Ui::Control::KeyboardFocus::Device device = Ui::Control::KeyboardFocus::Device::UNKNOWN;
     std::string deviceName;
   };
 
@@ -76,9 +76,9 @@ public:
   };
 
   /**
-   * @copydoc UI::KeyboardFocusManager::Get
+   * @copydoc Ui::KeyboardFocusManager::Get
    */
-  static UI::KeyboardFocusManager Get();
+  static Ui::KeyboardFocusManager Get();
 
   /**
    * Construct a new KeyboardFocusManager.
@@ -86,62 +86,62 @@ public:
   KeyboardFocusManager();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::SetCurrentFocusActor
+   * @copydoc Ui::KeyboardFocusManager::SetCurrentFocusActor
    */
   bool SetCurrentFocusActor(Actor actor);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::GetCurrentFocusActor
+   * @copydoc Ui::KeyboardFocusManager::GetCurrentFocusActor
    */
   Actor GetCurrentFocusActor();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::MoveFocus
+   * @copydoc Ui::KeyboardFocusManager::MoveFocus
    */
-  bool MoveFocus(UI::Control::KeyboardFocus::Direction direction, const std::string& deviceName = "");
+  bool MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const std::string& deviceName = "");
 
   /**
    * @brief Move the focus with device information
    */
-  bool MoveFocus(UI::Control::KeyboardFocus::Direction direction, const FocusChangeContext& context);
+  bool MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const FocusChangeContext& context);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::ClearFocus
+   * @copydoc Ui::KeyboardFocusManager::ClearFocus
    */
   void ClearFocus();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::SetAsFocusGroup
+   * @copydoc Ui::KeyboardFocusManager::SetAsFocusGroup
    */
   void SetAsFocusGroup(Actor actor, bool isFocusGroup);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::IsFocusGroup
+   * @copydoc Ui::KeyboardFocusManager::IsFocusGroup
    */
   bool IsFocusGroup(Actor actor) const;
 
   /**
-   * @copydoc UI::KeyboardFocusManager::GetFocusGroup
+   * @copydoc Ui::KeyboardFocusManager::GetFocusGroup
    */
   Actor GetFocusGroup(Actor actor);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::SetFocusGroupLoop
+   * @copydoc Ui::KeyboardFocusManager::SetFocusGroupLoop
    */
   void SetFocusGroupLoop(bool enabled);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::GetFocusGroupLoop
+   * @copydoc Ui::KeyboardFocusManager::GetFocusGroupLoop
    */
   bool GetFocusGroupLoop() const;
 
   /**
-   * @copydoc UI::KeyboardFocusManager::SetFocusIndicatorActor
+   * @copydoc Ui::KeyboardFocusManager::SetFocusIndicatorActor
    */
   void SetFocusIndicatorActor(Actor indicator);
 
   /**
-   * @copydoc UI::KeyboardFocusManager::GetFocusIndicatorActor
+   * @copydoc Ui::KeyboardFocusManager::GetFocusIndicatorActor
    */
   Actor GetFocusIndicatorActor();
 
@@ -151,37 +151,37 @@ public:
   void MoveFocusBackward();
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::SetCustomAlgorithm
+   * @copydoc Ui::DevelKeyboardFocusManager::SetCustomAlgorithm
    */
   void SetCustomAlgorithm(CustomAlgorithmInterface& interface);
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::UseFocusIndicator
+   * @copydoc Ui::DevelKeyboardFocusManager::UseFocusIndicator
    */
   void EnableFocusIndicator(bool enable);
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::UseFocusIndicator
+   * @copydoc Ui::DevelKeyboardFocusManager::UseFocusIndicator
    */
   bool IsFocusIndicatorEnabled() const;
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::EnableDefaultAlgorithm
+   * @copydoc Ui::DevelKeyboardFocusManager::EnableDefaultAlgorithm
    */
   void EnableDefaultAlgorithm(bool enable);
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::IsDefaultAlgorithmEnabled
+   * @copydoc Ui::DevelKeyboardFocusManager::IsDefaultAlgorithmEnabled
    */
   bool IsDefaultAlgorithmEnabled() const;
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::SetFocusFinderRootActor
+   * @copydoc Ui::DevelKeyboardFocusManager::SetFocusFinderRootActor
    */
   void SetFocusFinderRootActor(Actor actor);
 
   /**
-   * @copydoc UI::DevelKeyboardFocusManager::ResetFocusFinderRootActor
+   * @copydoc Ui::DevelKeyboardFocusManager::ResetFocusFinderRootActor
    */
   void ResetFocusFinderRootActor();
 
@@ -204,24 +204,24 @@ public:
 
 public:
   /**
-   * @copydoc UI::KeyboardFocusManager::PreFocusChangeSignal()
+   * @copydoc Ui::KeyboardFocusManager::PreFocusChangeSignal()
    */
-  UI::KeyboardFocusManager::PreFocusChangeSignalType& PreFocusChangeSignal();
+  Ui::KeyboardFocusManager::PreFocusChangeSignalType& PreFocusChangeSignal();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::FocusChangedSignal()
+   * @copydoc Ui::KeyboardFocusManager::FocusChangedSignal()
    */
-  UI::KeyboardFocusManager::FocusChangedSignalType& FocusChangedSignal();
+  Ui::KeyboardFocusManager::FocusChangedSignalType& FocusChangedSignal();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::FocusGroupChangedSignal()
+   * @copydoc Ui::KeyboardFocusManager::FocusGroupChangedSignal()
    */
-  UI::KeyboardFocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
+  Ui::KeyboardFocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   /**
-   * @copydoc UI::KeyboardFocusManager::FocusedActorEnterKeySignal()
+   * @copydoc Ui::KeyboardFocusManager::FocusedActorEnterKeySignal()
    */
-  UI::KeyboardFocusManager::FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
+  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -288,7 +288,7 @@ private:
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus is successful or not
    */
-  bool DoMoveFocusWithinLayoutControl(UI::Control control, Actor actor, UI::Control::KeyboardFocus::Direction direction,
+  bool DoMoveFocusWithinLayoutControl(Ui::Control control, Actor actor, Ui::Control::KeyboardFocus::Direction direction,
                                       const FocusChangeContext& context);
 
   /**
@@ -325,7 +325,7 @@ private:
    * @return The parent layout control the given actor belongs to or an empty handle if the given actor doesn't belong
    * to a layout control
    */
-  UI::Control GetParentLayoutControl(Actor actor) const;
+  Ui::Control GetParentLayoutControl(Actor actor) const;
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus
@@ -376,7 +376,7 @@ private:
    * @param deviceClass The device class from the touch event
    * @return The corresponding KeyboardFocus::Device
    */
-  UI::Control::KeyboardFocus::Device ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const;
+  Ui::Control::KeyboardFocus::Device ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const;
 
   /**
    * Recursively deliver events to the control and its parents, until the event is consumed or the stage is reached.
@@ -416,12 +416,12 @@ private:
   KeyboardFocusManager& operator=(const KeyboardFocusManager& rhs);
 
 private:
-  UI::KeyboardFocusManager::PreFocusChangeSignalType
+  Ui::KeyboardFocusManager::PreFocusChangeSignalType
       mPreFocusChangeSignal; ///< The signal to notify the focus will be changed
-  UI::KeyboardFocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
-  UI::KeyboardFocusManager::FocusGroupChangedSignalType
+  Ui::KeyboardFocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
+  Ui::KeyboardFocusManager::FocusGroupChangedSignalType
       mFocusGroupChangedSignal; ///< The signal to notify the focus group change
-  UI::KeyboardFocusManager::FocusedActorEnterKeySignalType
+  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType
       mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
 
   WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
@@ -470,7 +470,7 @@ private:
 
 } // namespace Internal
 
-inline Internal::KeyboardFocusManager& GetImpl(Dali::UI::KeyboardFocusManager& obj)
+inline Internal::KeyboardFocusManager& GetImpl(Dali::Ui::KeyboardFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -479,7 +479,7 @@ inline Internal::KeyboardFocusManager& GetImpl(Dali::UI::KeyboardFocusManager& o
   return static_cast<Internal::KeyboardFocusManager&>(handle);
 }
 
-inline const Internal::KeyboardFocusManager& GetImpl(const Dali::UI::KeyboardFocusManager& obj)
+inline const Internal::KeyboardFocusManager& GetImpl(const Dali::Ui::KeyboardFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -488,7 +488,7 @@ inline const Internal::KeyboardFocusManager& GetImpl(const Dali::UI::KeyboardFoc
   return static_cast<const Internal::KeyboardFocusManager&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -35,7 +35,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class RenderEffectImpl;
 
@@ -57,7 +57,7 @@ public:
    * @note Activates render effect on default.
    * @param[in] control The owner control to apply RenderEffect.
    */
-  void SetOwnerControl(UI::Control control);
+  void SetOwnerControl(Ui::Control control);
 
   /**
    * @brief Clears owner Control.
@@ -95,17 +95,17 @@ public:
   virtual void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) = 0;
 
   /**
-   * @copydoc Dali::UI::RenderEffect::Activate
+   * @copydoc Dali::Ui::RenderEffect::Activate
    */
   void Activate();
 
   /**
-   * @copydoc Dali::UI::RenderEffect::Deactivate
+   * @copydoc Dali::Ui::RenderEffect::Deactivate
    */
   void Deactivate();
 
   /**
-   * @copydoc Dali::UI::RenderEffect::Refresh
+   * @copydoc Dali::Ui::RenderEffect::Refresh
    */
   void Refresh();
 
@@ -117,12 +117,12 @@ public:
 
 protected:
   /**
-   * @copydoc Dali::UI::RenderEffect::RenderEffect
+   * @copydoc Dali::Ui::RenderEffect::RenderEffect
    */
   RenderEffectImpl();
 
   /**
-   * @copydoc Dali::UI::RenderEffect::~RenderEffect
+   * @copydoc Dali::Ui::RenderEffect::~RenderEffect
    */
   virtual ~RenderEffectImpl() override;
 
@@ -153,7 +153,7 @@ protected:
    * @brief Get Owner control. It could be return empty handle if owner control is not set, or destroyed.
    * @return mOwnerControl
    */
-  UI::Control GetOwnerControl() const;
+  Ui::Control GetOwnerControl() const;
 
   /**
    * @brief Get scene holder of owner control.
@@ -211,7 +211,7 @@ private:
 
   std::vector<Constraint> mAnimationConstraints; // For corner animation on owner control.
 
-  Dali::WeakHandle<Dali::UI::Control> mOwnerControl;                ///< Weakhandle of owner control.
+  Dali::WeakHandle<Dali::Ui::Control> mOwnerControl;                ///< Weakhandle of owner control.
   WeakHandle<Dali::Integration::SceneHolder> mPlacementSceneHolder; ///< Weakhandle of scene
 
   Vector2 mTargetSize; // The final size of mOwnerControl
@@ -220,18 +220,18 @@ private:
 };
 } // namespace Internal
 
-inline UI::Internal::RenderEffectImpl& GetImplementation(UI::RenderEffect& obj)
+inline Ui::Internal::RenderEffectImpl& GetImplementation(Ui::RenderEffect& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<UI::Internal::RenderEffectImpl&>(handle);
+  return static_cast<Ui::Internal::RenderEffectImpl&>(handle);
 }
 
-inline const UI::Internal::RenderEffectImpl& GetImplementation(const UI::RenderEffect& obj)
+inline const Ui::Internal::RenderEffectImpl& GetImplementation(const Ui::RenderEffect& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const UI::Internal::RenderEffectImpl&>(handle);
+  return static_cast<const Ui::Internal::RenderEffectImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 #endif // DALI_UI_INTERNAL_RENDER_EFFECT_H

@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -64,7 +64,7 @@ void CreatePropertyMap(const TreeNode* const node, Property::Map& map)
 
 void ParsePropertyString(const std::string& property, Property::Map& map)
 {
-  UI::JsonParser parser = UI::JsonParser::New();
+  Ui::JsonParser parser = Ui::JsonParser::New();
 
   if (parser.Parse(property))
   {
@@ -78,6 +78,6 @@ void ParsePropertyString(const std::string& property, Property::Map& map)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

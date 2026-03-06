@@ -25,7 +25,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 ClickableTrait::ClickableTrait()
@@ -112,6 +112,6 @@ void ClickableTrait::SetKeyClickPolicy(KeyClickPolicy policy)
   GetImpl(*this).SetKeyClickPolicy(policy);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

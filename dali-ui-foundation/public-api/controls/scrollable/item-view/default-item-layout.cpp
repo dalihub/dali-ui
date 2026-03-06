@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DefaultItemLayout
 {
@@ -67,6 +67,6 @@ ItemLayoutPtr New(Type type)
 
 } // namespace DefaultItemLayout
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

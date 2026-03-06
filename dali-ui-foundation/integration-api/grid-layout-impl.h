@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -39,7 +39,7 @@ namespace Integration
 class GridLayoutImpl : public LayoutImpl
 {
 public:
-  static UI::GridLayout New();
+  static Ui::GridLayout New();
 
 protected:
   virtual ~GridLayoutImpl();
@@ -79,14 +79,14 @@ private:
   float mColumnSpacing;
 };
 
-inline Integration::GridLayoutImpl& GetImpl(UI::GridLayout& layout)
+inline Integration::GridLayoutImpl& GetImpl(Ui::GridLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::GridLayoutImpl&>(handle);
 }
 
-inline const Integration::GridLayoutImpl& GetImpl(const UI::GridLayout& layout)
+inline const Integration::GridLayoutImpl& GetImpl(const Ui::GridLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
@@ -94,5 +94,5 @@ inline const Integration::GridLayoutImpl& GetImpl(const UI::GridLayout& layout)
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

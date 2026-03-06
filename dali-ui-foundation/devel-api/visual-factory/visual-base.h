@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -49,7 +49,7 @@ namespace Visual
  * level. Note: The visual responds to the the Actor::COLOR by blending it with the 'Multiply' operator.
  *
  * The following properties are optional, but can be supplied in the property map to
- * Dali::UI::VisualFactory::CreateVisual().
+ * Dali::Ui::VisualFactory::CreateVisual().
  *
  * | %Property Name          | Type             |
  * |-------------------------|------------------|
@@ -70,11 +70,11 @@ namespace Visual
  * |-------------------------|-------------------|----------|------------------------|-----------------------------------------------------|
  * | offset                  | VECTOR2           | No       | (0,0)                  | Offset of visual from origin | |
  * size                    | VECTOR2           | No       | (1,1)                  | size of visual | | origin | INTEGER
- * or STRING | No       | CENTER                 | origin of the visual @sa Dali::UI::Align       | | anchorPoint
- * | INTEGER or STRING | No       | CENTER                 | anchor point of the visual @sa Dali::UI::Align | |
+ * or STRING | No       | CENTER                 | origin of the visual @sa Dali::Ui::Align       | | anchorPoint
+ * | INTEGER or STRING | No       | CENTER                 | anchor point of the visual @sa Dali::Ui::Align | |
  * offsetPolicy            | VECTOR2           | No       | ( RELATIVE, RELATIVE ) | @sa
- * Dali::UI::Visual::Transform::Policy   | | sizePolicy              | VECTOR2           | No       | ( RELATIVE,
- * RELATIVE ) | @sa Dali::UI::Visual::Transform::Policy   |
+ * Dali::Ui::Visual::Transform::Policy   | | sizePolicy              | VECTOR2           | No       | ( RELATIVE,
+ * RELATIVE ) | @sa Dali::Ui::Visual::Transform::Policy   |
  *
  * Relative means that the component describes a factor of the parent control size;
  * size.x = 1 means full width; size.y = 0.5 means half height.
@@ -254,7 +254,7 @@ public: // Not intended for application developers
 
 } // namespace Visual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

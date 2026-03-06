@@ -40,20 +40,20 @@
 
 // Info messages are usually debug build
 #define DALI_SCRIPT_INFO(format, ...) \
-  DALI_LOG_INFO(Dali::UI::Internal::gFilterScript, Debug::General, "Script:" format, ##__VA_ARGS__)
+  DALI_LOG_INFO(Dali::Ui::Internal::gFilterScript, Debug::General, "Script:" format, ##__VA_ARGS__)
 
 // Info Verbose need to be swiched on in gFilterScript filter constructor (by default set to General)
 #define DALI_SCRIPT_VERBOSE(format, ...) \
-  DALI_LOG_INFO(Dali::UI::Internal::gFilterScript, Debug::Verbose, "Script:" format, ##__VA_ARGS__)
+  DALI_LOG_INFO(Dali::Ui::Internal::gFilterScript, Debug::Verbose, "Script:" format, ##__VA_ARGS__)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class TreeNode;
 }
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -65,7 +65,7 @@ class Builder;
 class Replacement;
 
 /**
- * @copydoc UI::Builder
+ * @copydoc Ui::Builder
  */
 class Builder : public Dali::BaseObject
 {
@@ -73,77 +73,77 @@ public:
   Builder();
 
   /**
-   * @copydoc UI::Builder::LoadFromString
+   * @copydoc Ui::Builder::LoadFromString
    */
-  void LoadFromString(const std::string& data, Dali::UI::Builder::UIFormat rep = Dali::UI::Builder::JSON);
+  void LoadFromString(const std::string& data, Dali::Ui::Builder::UiFormat rep = Dali::Ui::Builder::JSON);
 
   /**
-   * @copydoc UI::Builder::AddConstants
+   * @copydoc Ui::Builder::AddConstants
    */
   void AddConstants(const Property::Map& map);
 
   /**
-   * @copydoc UI::Builder::AddConstant
+   * @copydoc Ui::Builder::AddConstant
    */
   void AddConstant(const std::string& key, const Property::Value& value);
 
   /**
-   * @copydoc UI::Builder::GetConfigurations
+   * @copydoc Ui::Builder::GetConfigurations
    */
   const Property::Map& GetConfigurations() const;
 
   /**
-   * @copydoc UI::Builder::GetConstants
+   * @copydoc Ui::Builder::GetConstants
    */
   const Property::Map& GetConstants() const;
 
   /**
-   * @copydoc UI::Builder::GetConstant
+   * @copydoc Ui::Builder::GetConstant
    */
   const Property::Value& GetConstant(const std::string& key) const;
 
   /**
-   * @copydoc UI::Builder::CreateAnimation( const std::string& animationName );
+   * @copydoc Ui::Builder::CreateAnimation( const std::string& animationName );
    */
   Animation CreateAnimation(const std::string& animationName);
 
   /**
-   * @copydoc UI::Builder::CreateAnimation( const std::string& animationName, const Property::Map& map );
+   * @copydoc Ui::Builder::CreateAnimation( const std::string& animationName, const Property::Map& map );
    */
   Animation CreateAnimation(const std::string& animationName, const Property::Map& map);
 
   /**
-   * @copydoc UI::Builder::CreateAnimation( const std::string&,Dali::Actor);
+   * @copydoc Ui::Builder::CreateAnimation( const std::string&,Dali::Actor);
    */
   Animation CreateAnimation(const std::string& animationName, Dali::Actor sourceActor);
 
   /**
-   * @copydoc UI::Builder::CreateAnimation( const std::string&,const Property::Map&, Dali::Actor);
+   * @copydoc Ui::Builder::CreateAnimation( const std::string&,const Property::Map&, Dali::Actor);
    */
   Animation CreateAnimation(const std::string& animationName, const Property::Map& map, Dali::Actor sourceActor);
 
   /**
-   * @copydoc UI::Builder::Create( const std::string& templateName );
+   * @copydoc Ui::Builder::Create( const std::string& templateName );
    */
   BaseHandle Create(const std::string& templateName);
 
   /**
-   * @copydoc UI::Builder::Create( const std::string& templateName, const Property::Map& map );
+   * @copydoc Ui::Builder::Create( const std::string& templateName, const Property::Map& map );
    */
   BaseHandle Create(const std::string& templateName, const Property::Map& map);
 
   /**
-   * @copydoc UI::Builder::CreateFromJson( const std::string& json );
+   * @copydoc Ui::Builder::CreateFromJson( const std::string& json );
    */
   BaseHandle CreateFromJson(const std::string& json);
 
   /**
-   * @copydoc UI::Builder::ApplyFromJson( Handle& handle, const std::string& json );
+   * @copydoc Ui::Builder::ApplyFromJson( Handle& handle, const std::string& json );
    */
   bool ApplyFromJson(Handle& handle, const std::string& json);
 
   /**
-   * @copydoc UI::Builder::ApplyStyle
+   * @copydoc Ui::Builder::ApplyStyle
    */
   bool ApplyStyle(const std::string& styleName, Handle& handle);
 
@@ -175,27 +175,27 @@ public:
   bool GetStyleProperties(const std::string& styleName, const Handle& controlType, Property::Map& result);
 
   /**
-   * @copydoc UI::Builder::AddActors
+   * @copydoc Ui::Builder::AddActors
    */
   void AddActors(Actor toActor);
 
   /**
-   * @copydoc UI::Builder::AddActors
+   * @copydoc Ui::Builder::AddActors
    */
   void AddActors(const std::string& sectionName, Actor toActor);
 
   /**
-   * @copydoc UI::Builder::CreateRenderTask
+   * @copydoc Ui::Builder::CreateRenderTask
    */
   void CreateRenderTask(const std::string& name);
 
   /**
-   * @copydoc UI::Builder::GetPath
+   * @copydoc Ui::Builder::GetPath
    */
   Path GetPath(const std::string& name);
 
   /**
-   * @copydoc UI::Builder::GetPathConstrainer
+   * @copydoc Ui::Builder::GetPathConstrainer
    */
   Dali::PathConstrainer GetPathConstrainer(const std::string& name);
 
@@ -208,7 +208,7 @@ public:
   bool IsPathConstrainer(const std::string& name);
 
   /**
-   * @copydoc UI::Builder::GetLinearConstrainer
+   * @copydoc Ui::Builder::GetLinearConstrainer
    */
   Dali::LinearConstrainer GetLinearConstrainer(const std::string& name);
 
@@ -221,9 +221,9 @@ public:
   bool IsLinearConstrainer(const std::string& name);
 
   /**
-   * @copydoc UI::Builder::QuitSignal
+   * @copydoc Ui::Builder::QuitSignal
    */
-  UI::Builder::BuilderSignalType& QuitSignal();
+  Ui::Builder::BuilderSignalType& QuitSignal();
 
   /**
    * Emits the quit signal
@@ -267,7 +267,7 @@ private:
 
   BaseHandle DoCreate(const TreeNode& root, const TreeNode& node, Actor parent, const Replacement& replacements);
 
-  void SetupTask(RenderTask& task, const UI::TreeNode& node, const Replacement& replacement);
+  void SetupTask(RenderTask& task, const Ui::TreeNode& node, const Replacement& replacement);
 
   bool ApplyStyle(const std::string& styleName, Handle& handle, const Replacement& replacement);
 
@@ -331,7 +331,7 @@ private:
   bool ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack, Property::Value& value);
 
 private:
-  UI::JsonParser mParser;
+  Ui::JsonParser mParser;
   PathLut mPathLut;
   PathConstrainerLut mPathConstrainerLut;
   LinearConstrainerLut mLinearConstrainerLut;
@@ -340,12 +340,12 @@ private:
   Property::Map mConfigurationMap;
   MappingsLut mCompleteMappings;
   Dictionary<StylePtr> mStyles; // State based styles
-  UI::Builder::BuilderSignalType mQuitSignal;
+  Ui::Builder::BuilderSignalType mQuitSignal;
 };
 
 } // namespace Internal
 
-inline Internal::Builder& GetImpl(Dali::UI::Builder& obj)
+inline Internal::Builder& GetImpl(Dali::Ui::Builder& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -354,7 +354,7 @@ inline Internal::Builder& GetImpl(Dali::UI::Builder& obj)
   return static_cast<Internal::Builder&>(handle);
 }
 
-inline const Internal::Builder& GetImpl(const Dali::UI::Builder& obj)
+inline const Internal::Builder& GetImpl(const Dali::Ui::Builder& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -363,7 +363,7 @@ inline const Internal::Builder& GetImpl(const Dali::UI::Builder& obj)
   return static_cast<const Internal::Builder&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

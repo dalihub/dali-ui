@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace NPatchUtility
 {
@@ -78,7 +78,7 @@ DALI_UI_API Uint16Pair GetValidStrechPointFromBorder(uint32_t maxRangeSize, uint
 
 } // namespace NPatchUtility
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

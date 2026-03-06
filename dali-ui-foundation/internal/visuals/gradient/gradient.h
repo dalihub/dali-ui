@@ -31,7 +31,7 @@ namespace Dali
 {
 class Vector4;
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -82,13 +82,13 @@ public:
    * @param[in] gradientUnits The the attributes are defined using the current user coordinate system or the bounding
    * box of the shape.
    */
-  void SetGradientUnits(UI::GradientVisual::Units::Type gradientUnits);
+  void SetGradientUnits(Ui::GradientVisual::Units::Type gradientUnits);
 
   /**
    * Get the coordinate system used by the gradient attributes.
    * @return USER_SPACE_ON_USE or OBJECT_BOUNDING_BOX
    */
-  UI::GradientVisual::Units::Type GetGradientUnits() const;
+  Ui::GradientVisual::Units::Type GetGradientUnits() const;
 
   /**
    * Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
@@ -96,13 +96,13 @@ public:
    *
    * @param[in] spread The method to fill the remainder of target region which is outside the gradient bounds
    */
-  void SetSpreadMethod(UI::GradientVisual::SpreadMethod::Type spread);
+  void SetSpreadMethod(Ui::GradientVisual::SpreadMethod::Type spread);
 
   /**
    * Get the filling method for the the remainder of target region which is outside the gradient boun.
    * @return PAD, REFLECT or REPEAT
    */
-  UI::GradientVisual::SpreadMethod::Type GetSpreadMethod() const;
+  Ui::GradientVisual::SpreadMethod::Type GetSpreadMethod() const;
 
   /**
    * Get the transformation matrix to align the vertices with the gradient line/circle
@@ -159,14 +159,14 @@ protected:
 protected:
   Vector<GradientStop> mGradientStops;
   Matrix3 mAlignmentTransform;
-  UI::GradientVisual::Units::Type mGradientUnits;
-  UI::GradientVisual::SpreadMethod::Type mSpreadMethod;
+  Ui::GradientVisual::Units::Type mGradientUnits;
+  Ui::GradientVisual::SpreadMethod::Type mSpreadMethod;
   float mStartOffset;
 };
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

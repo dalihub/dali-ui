@@ -38,7 +38,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -51,7 +51,7 @@ struct Base::Impl
    * @param [in] fittingMode that the derived class prefers
    * @param [in] type The type of the this visual
    */
-  Impl(FittingMode fittingMode, UI::Visual::Type type);
+  Impl(FittingMode fittingMode, Ui::Visual::Type type);
 
   /**
    * Destructor
@@ -106,7 +106,7 @@ struct Base::Impl
     /**
      * Set the uniform properties onto the renderer
      */
-    void SetUniforms(VisualRenderer renderer, UI::Direction::Type direction);
+    void SetUniforms(VisualRenderer renderer, Ui::Direction::Type direction);
 
     /**
      * Convert the control size and the transform attributes into the actual
@@ -123,8 +123,8 @@ struct Base::Impl
     Vector2 mSize;
     Vector2 mExtraSize;
     Vector4 mOffsetSizeMode;
-    UI::Align::Type mOrigin;
-    UI::Align::Type mAnchorPoint;
+    Ui::Align::Type mOrigin;
+    Ui::Align::Type mAnchorPoint;
   };
 
   struct ConstraintFeature
@@ -370,7 +370,7 @@ struct Base::Impl
 
     if (mCustomShaders.size() == 1)
     {
-      map.Insert(UI::Visual::Property::SHADER, mCustomShaders[0]->CreatePropertyMap());
+      map.Insert(Ui::Visual::Property::SHADER, mCustomShaders[0]->CreatePropertyMap());
     }
     else
     {
@@ -379,7 +379,7 @@ struct Base::Impl
       {
         shaderArray.PushBack(customShader->CreatePropertyMap());
       }
-      map.Insert(UI::Visual::Property::SHADER, shaderArray);
+      map.Insert(Ui::Visual::Property::SHADER, shaderArray);
     }
   }
 
@@ -399,9 +399,9 @@ struct Base::Impl
    * @brief Set the uniform properties onto the renderer.
    * And Register visual transform uniforms if neccessary.
    */
-  void SetTransformUniforms(VisualRenderer renderer, UI::Direction::Type direction)
+  void SetTransformUniforms(VisualRenderer renderer, Ui::Direction::Type direction)
   {
-    if (!mTransformMapUsingDefault || direction != UI::Direction::LEFT_TO_RIGHT)
+    if (!mTransformMapUsingDefault || direction != Ui::Direction::LEFT_TO_RIGHT)
     {
       GetOrCreateTransform().SetUniforms(renderer, direction);
     }
@@ -552,8 +552,8 @@ struct Base::Impl
   int mDepthIndex;
   FittingMode mFittingMode; ///< How the contents should fit the view
   int mFlags;
-  UI::Visual::ResourceStatus mResourceStatus;
-  const UI::Visual::Type mType;
+  Ui::Visual::ResourceStatus mResourceStatus;
+  const Ui::Visual::Type mType;
 
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.
@@ -572,7 +572,7 @@ struct Base::Impl
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

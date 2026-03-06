@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -71,10 +71,10 @@ public:
    */
   enum PropertyRange
   {
-    PROPERTY_START_INDEX = UI::Scrollable::PROPERTY_END_INDEX + 1, ///< @SINCE_1_1.18
+    PROPERTY_START_INDEX = Ui::Scrollable::PROPERTY_END_INDEX + 1, ///< @SINCE_1_1.18
     PROPERTY_END_INDEX = PROPERTY_START_INDEX + 1000,              ///< Reserve property indices, @SINCE_1_1.18
 
-    ANIMATABLE_PROPERTY_START_INDEX = UI::Scrollable::ANIMATABLE_PROPERTY_END_INDEX + 1,
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::Scrollable::ANIMATABLE_PROPERTY_END_INDEX + 1,
     ANIMATABLE_PROPERTY_END_INDEX =
         ANIMATABLE_PROPERTY_START_INDEX + 1000 ///< Reserve animatable property indices @SINCE_1_0.0
   };
@@ -140,7 +140,7 @@ public:
        * @brief The layout used.
        * @details Name "layout", type Property::ARRAY.
        * @SINCE_1_2.60
-       * @see Dali::UI::DefaultItemLayoutProperty
+       * @see Dali::Ui::DefaultItemLayoutProperty
        */
       LAYOUT,
 
@@ -624,7 +624,7 @@ public: // Signals
 public: // Not intended for application developers
   /// @cond internal
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @SINCE_1_0.0
    * @param[in]  implementation  The Control implementation.
@@ -644,7 +644,7 @@ public: // Not intended for application developers
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

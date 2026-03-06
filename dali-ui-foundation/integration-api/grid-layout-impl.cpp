@@ -23,15 +23,15 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
 
-UI::GridLayout GridLayoutImpl::New()
+Ui::GridLayout GridLayoutImpl::New()
 {
   IntrusivePtr<Integration::GridLayoutImpl> impl = new Integration::GridLayoutImpl();
-  UI::GridLayout handle = UI::GridLayout(*impl);
+  Ui::GridLayout handle = Ui::GridLayout(*impl);
   impl->Initialize();
   return handle;
 }
@@ -179,5 +179,5 @@ LayoutManager* GridLayoutImpl::CreateLayoutManager()
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

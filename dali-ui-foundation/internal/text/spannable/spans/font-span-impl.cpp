@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -56,7 +56,7 @@ struct FontSpan::Impl
 };
 
 FontSpan::FontSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::FONT)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::FONT)
 {
   mImpl = std::make_unique<Impl>();
 }
@@ -65,7 +65,7 @@ FontSpan ::~FontSpan()
 {
 }
 
-Dali::UI::Text::FontSpan FontSpan::New(const std::string& familyName, const float& sizeInPoints,
+Dali::Ui::Text::FontSpan FontSpan::New(const std::string& familyName, const float& sizeInPoints,
                                        const Dali::TextAbstraction::FontWeight::Type& weight,
                                        const Dali::TextAbstraction::FontWidth::Type& width,
                                        const Dali::TextAbstraction::FontSlant::Type& slant)
@@ -77,7 +77,7 @@ Dali::UI::Text::FontSpan FontSpan::New(const std::string& familyName, const floa
   object->SetWidth(width);
   object->SetSlant(slant);
 
-  Dali::UI::Text::FontSpan handle = Dali::UI::Text::FontSpan(object.Get());
+  Dali::Ui::Text::FontSpan handle = Dali::Ui::Text::FontSpan(object.Get());
 
   return handle;
 }
@@ -164,7 +164,7 @@ void FontSpan::SetSize(const float& size)
 }
 
 void FontSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                       const Dali::UI::Text::Range& range) const
+                                       const Dali::Ui::Text::Range& range) const
 {
   FontDescriptionRun fontRun;
   fontRun.characterRun.characterIndex = range.GetStartIndex();
@@ -250,6 +250,6 @@ void FontSpan::ProcessFontSlant(FontDescriptionRun& fontRun) const
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

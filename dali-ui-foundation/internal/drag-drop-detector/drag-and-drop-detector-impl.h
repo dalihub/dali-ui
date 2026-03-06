@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -45,14 +45,14 @@ using DragAndDropDetectorPtr = IntrusivePtr<DragAndDropDetector>;
 class DragAndDropDetector : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  using DragAndDropSignal = Dali::UI::DragAndDropDetector::DragAndDropSignal;
+  using DragAndDropSignal = Dali::Ui::DragAndDropDetector::DragAndDropSignal;
 
   // Creation
 
   /**
-   * @copydoc UI::DragAndDropDetector::New()
+   * @copydoc Ui::DragAndDropDetector::New()
    */
-  static Dali::UI::DragAndDropDetector New();
+  static Dali::Ui::DragAndDropDetector New();
 
   // Public API
 
@@ -70,13 +70,13 @@ public:
    * Attaches control to DragAndDropDetector.
    * @param[in] control  control that will be attached to DragAndDropDetector.
    */
-  void Attach(Dali::UI::Control& control);
+  void Attach(Dali::Ui::Control& control);
 
   /**
    * Detaches control to DragAndDropDetector.
    * @param[in] control  control that will be Detached from DragAndDropDetector.
    */
-  void Detach(Dali::UI::Control& control);
+  void Detach(Dali::Ui::Control& control);
 
   /**
    * Detaches all control attached to DragAndDropDetector.
@@ -91,7 +91,7 @@ public:
   /**
    * Returns a control by index. An empty handle if the index is not valid.
    */
-  Dali::UI::Control GetAttachedControl(uint32_t index) const;
+  Dali::Ui::Control GetAttachedControl(uint32_t index) const;
 
   /**
    * Sets the dragged content.
@@ -112,36 +112,36 @@ public:
   /**
    * Called when a draggable object start drag.
    */
-  void EmitStartedSignal(Dali::UI::Control& control);
+  void EmitStartedSignal(Dali::Ui::Control& control);
 
   /**
    * Called when a draggable object enters other object.
    */
-  void EmitEnteredSignal(Dali::UI::Control& control);
+  void EmitEnteredSignal(Dali::Ui::Control& control);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitExitedSignal(Dali::UI::Control& control);
+  void EmitExitedSignal(Dali::Ui::Control& control);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitMovedSignal(Dali::UI::Control& control);
+  void EmitMovedSignal(Dali::Ui::Control& control);
 
   /**
    * Is called when a drop actually occurs.
    */
-  void EmitDroppedSignal(Dali::UI::Control& control);
+  void EmitDroppedSignal(Dali::Ui::Control& control);
 
   /**
    * Called when a draggable object drag ended.
    */
-  void EmitEndedSignal(Dali::UI::Control& control);
+  void EmitEndedSignal(Dali::Ui::Control& control);
 
 public: // Signals
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::StartedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::StartedSignal
    */
   DragAndDropSignal& StartedSignal()
   {
@@ -149,7 +149,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::EnteredSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::EnteredSignal
    */
   DragAndDropSignal& EnteredSignal()
   {
@@ -157,7 +157,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::ExitedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::ExitedSignal
    */
   DragAndDropSignal& ExitedSignal()
   {
@@ -165,7 +165,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::MovedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::MovedSignal
    */
   DragAndDropSignal& MovedSignal()
   {
@@ -173,7 +173,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::DroppedSignal
    */
   DragAndDropSignal& DroppedSignal()
   {
@@ -181,7 +181,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::UI::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::DroppedSignal
    */
   DragAndDropSignal& EndedSignal()
   {
@@ -219,9 +219,9 @@ private:
   DragAndDropSignal mDroppedSignal;
   DragAndDropSignal mEndedSignal;
 
-  std::vector<Dali::UI::Control> mControls; // controls attached by Attach interface for drag&drop
-  Dali::UI::Control mDragControl;           // the current drag control
-  Dali::UI::Control
+  std::vector<Dali::Ui::Control> mControls; // controls attached by Attach interface for drag&drop
+  Dali::Ui::Control mDragControl;           // the current drag control
+  Dali::Ui::Control
       mShadowControl; // a shadow control for indicating where the control is, same size as the dragged control
   std::vector<uint32_t> mFirstEnter;            // control id indicating if the cursor is enter
   Dali::PanGestureDetector mPanGestureDetector; // pangesture for calculating the shadow actor position
@@ -237,7 +237,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::DragAndDropDetector& GetImplementation(Dali::UI::DragAndDropDetector& detector)
+inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 
@@ -246,7 +246,7 @@ inline Internal::DragAndDropDetector& GetImplementation(Dali::UI::DragAndDropDet
   return static_cast<Internal::DragAndDropDetector&>(handle);
 }
 
-inline const Internal::DragAndDropDetector& GetImplementation(const Dali::UI::DragAndDropDetector& detector)
+inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 
@@ -255,7 +255,7 @@ inline const Internal::DragAndDropDetector& GetImplementation(const Dali::UI::Dr
   return static_cast<const Internal::DragAndDropDetector&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

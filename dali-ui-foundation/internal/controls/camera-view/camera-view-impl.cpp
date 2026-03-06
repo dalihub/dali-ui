@@ -36,7 +36,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -44,14 +44,14 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::CameraView::New(NULL);
+  return Ui::CameraView::New(NULL);
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::CameraView, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::CameraView, Ui::Control, Create)
 DALI_TYPE_REGISTRATION_END()
 } // namespace
 
-CameraView::CameraView(Dali::UI::CameraView::DisplayType displayType)
+CameraView::CameraView(Dali::Ui::CameraView::DisplayType displayType)
   : Control(ControlBehaviour(ACTOR_BEHAVIOUR_DEFAULT | DISABLE_STYLE_CHANGE_SIGNALS)),
     mDisplayType(displayType)
 {
@@ -61,10 +61,10 @@ CameraView::~CameraView()
 {
 }
 
-UI::CameraView CameraView::New(Any cameraHandle, Dali::UI::CameraView::DisplayType type)
+Ui::CameraView CameraView::New(Any cameraHandle, Dali::Ui::CameraView::DisplayType type)
 {
   CameraView* impl = new CameraView(type);
-  UI::CameraView handle = UI::CameraView(*impl);
+  Ui::CameraView handle = Ui::CameraView(*impl);
   impl->mCameraPlayer = Dali::CameraPlayer::New();
   impl->Initialize();
   if (impl->mCameraPlayer)
@@ -82,11 +82,11 @@ void CameraView::Update()
 void CameraView::OnSceneConnection(int depth)
 {
   Control::OnSceneConnection(depth);
-  if (mDisplayType == Dali::UI::CameraView::DisplayType::WINDOW)
+  if (mDisplayType == Dali::Ui::CameraView::DisplayType::WINDOW)
   {
     SetWindowSurfaceTarget();
   }
-  else if (mDisplayType == Dali::UI::CameraView::DisplayType::IMAGE)
+  else if (mDisplayType == Dali::Ui::CameraView::DisplayType::IMAGE)
   {
     SetNativeImageTarget();
   }
@@ -163,7 +163,7 @@ void CameraView::SetNativeImageTarget()
 
 void CameraView::UpdateDisplayArea(Dali::PropertyNotification& source)
 {
-  if (mDisplayType != Dali::UI::CameraView::DisplayType::WINDOW)
+  if (mDisplayType != Dali::Ui::CameraView::DisplayType::WINDOW)
   {
     return;
   }
@@ -202,6 +202,6 @@ Dali::Shader CameraView::CreateShader(Dali::NativeImagePtr nativeImagePtr)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

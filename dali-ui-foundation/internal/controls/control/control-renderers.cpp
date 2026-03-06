@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -37,7 +37,7 @@ Shader CreateShader(std::string_view vertexSrc, std::string_view fragmentSrc, Da
 {
   if (Dali::Adaptor::IsAvailable() && !shaderName.empty())
   {
-    auto factory = Dali::UI::VisualFactory::Get();
+    auto factory = Dali::Ui::VisualFactory::Get();
     if (DALI_LIKELY(factory))
     {
       thread_local static std::unordered_map<std::string, VisualFactoryCache::ExternalShaderId> gShaderIdMap;
@@ -98,5 +98,5 @@ void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

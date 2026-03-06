@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextVisual
 {
@@ -34,17 +34,17 @@ namespace Property
  */
 enum
 {
-  TEXT = Dali::UI::TextVisual::Property::TEXT,
-  FONT_FAMILY = Dali::UI::TextVisual::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::UI::TextVisual::Property::FONT_STYLE,
-  POINT_SIZE = Dali::UI::TextVisual::Property::POINT_SIZE,
-  MULTI_LINE = Dali::UI::TextVisual::Property::MULTI_LINE,
-  HORIZONTAL_ALIGNMENT = Dali::UI::TextVisual::Property::HORIZONTAL_ALIGNMENT,
-  VERTICAL_ALIGNMENT = Dali::UI::TextVisual::Property::VERTICAL_ALIGNMENT,
-  TEXT_COLOR = Dali::UI::TextVisual::Property::TEXT_COLOR,
-  ENABLE_MARKUP = Dali::UI::TextVisual::Property::ENABLE_MARKUP,
-  SHADOW = Dali::UI::TextVisual::Property::SHADOW,
-  UNDERLINE = Dali::UI::TextVisual::Property::UNDERLINE,
+  TEXT = Dali::Ui::TextVisual::Property::TEXT,
+  FONT_FAMILY = Dali::Ui::TextVisual::Property::FONT_FAMILY,
+  FONT_STYLE = Dali::Ui::TextVisual::Property::FONT_STYLE,
+  POINT_SIZE = Dali::Ui::TextVisual::Property::POINT_SIZE,
+  MULTI_LINE = Dali::Ui::TextVisual::Property::MULTI_LINE,
+  HORIZONTAL_ALIGNMENT = Dali::Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT,
+  VERTICAL_ALIGNMENT = Dali::Ui::TextVisual::Property::VERTICAL_ALIGNMENT,
+  TEXT_COLOR = Dali::Ui::TextVisual::Property::TEXT_COLOR,
+  ENABLE_MARKUP = Dali::Ui::TextVisual::Property::ENABLE_MARKUP,
+  SHADOW = Dali::Ui::TextVisual::Property::SHADOW,
+  UNDERLINE = Dali::Ui::TextVisual::Property::UNDERLINE,
 
   /**
    * @brief The default outline parameters.
@@ -53,17 +53,17 @@ enum
   OUTLINE = UNDERLINE + 1,
 
   /**
-   * @copydoc Dali::UI::DevelTextLabel::Property::BACKGROUND
+   * @copydoc Dali::Ui::DevelTextLabel::Property::BACKGROUND
    */
   BACKGROUND = UNDERLINE + 2,
 
   /**
-   * @copydoc Dali::UI::DevelTextLabel::Property::STRIKETHROUGH
+   * @copydoc Dali::Ui::DevelTextLabel::Property::STRIKETHROUGH
    */
   STRIKETHROUGH = UNDERLINE + 3,
 
   /**
-   * @copydoc Dali::UI::DevelTextLabel::Property::CHARACTER_SPACING
+   * @copydoc Dali::Ui::DevelTextLabel::Property::CHARACTER_SPACING
    */
   CHARACTER_SPACING = UNDERLINE + 4,
 };
@@ -72,7 +72,7 @@ enum
 
 } // namespace DevelTextVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

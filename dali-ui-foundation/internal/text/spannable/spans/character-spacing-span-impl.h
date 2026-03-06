@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ class CharacterSpacingSpan;
 using CharacterSpacingSpanPtr = IntrusivePtr<CharacterSpacingSpan>;
 
 /**
- * @copydoc Dali::UI::Text::CharacterSpacingSpan
+ * @copydoc Dali::Ui::Text::CharacterSpacingSpan
  */
 class CharacterSpacingSpan : public BaseSpan
 {
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Creates a new CharacterSpacingSpan object.
    */
-  static Dali::UI::Text::CharacterSpacingSpan New(const float& value);
+  static Dali::Ui::Text::CharacterSpacingSpan New(const float& value);
 
   /**
    * Default Constructor
@@ -68,12 +68,12 @@ public:
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::CharacterSpacingSpan::GetCharacterSpacing()
+   * @copydoc Dali::Ui::Text::CharacterSpacingSpan::GetCharacterSpacing()
    */
   float GetCharacterSpacing() const;
 
   /**
-   * @copydoc Dali::UI::Text::CharacterSpacingSpan::IsCharacterSpacingDefined()
+   * @copydoc Dali::Ui::Text::CharacterSpacingSpan::IsCharacterSpacingDefined()
    */
   bool IsCharacterSpacingDefined() const;
 
@@ -87,10 +87,10 @@ public: // Methods. Not intended for application developers
 
 public: // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 private:
   struct Impl;
@@ -102,7 +102,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::CharacterSpacingSpan& GetImplementation(Dali::UI::Text::CharacterSpacingSpan& characterSpacingSpan)
+inline Internal::CharacterSpacingSpan& GetImplementation(Dali::Ui::Text::CharacterSpacingSpan& characterSpacingSpan)
 {
   DALI_ASSERT_ALWAYS(characterSpacingSpan && "CharacterSpacingSpan handle is empty");
 
@@ -112,7 +112,7 @@ inline Internal::CharacterSpacingSpan& GetImplementation(Dali::UI::Text::Charact
 }
 
 inline const Internal::CharacterSpacingSpan& GetImplementation(
-    const Dali::UI::Text::CharacterSpacingSpan& CharacterSpacingSpan)
+    const Dali::Ui::Text::CharacterSpacingSpan& CharacterSpacingSpan)
 {
   DALI_ASSERT_ALWAYS(CharacterSpacingSpan && "CharacterSpacingSpan handle is empty");
 
@@ -123,7 +123,7 @@ inline const Internal::CharacterSpacingSpan& GetImplementation(
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

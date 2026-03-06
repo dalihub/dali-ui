@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -105,11 +105,11 @@ bool FontSpan::IsSizeDefined() const
 
 FontSpan FontSpan::DownCast(BaseHandle handle)
 {
-  return FontSpan(dynamic_cast<Dali::UI::Text::Internal::FontSpan*>(handle.GetObjectPtr()));
+  return FontSpan(dynamic_cast<Dali::Ui::Text::Internal::FontSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

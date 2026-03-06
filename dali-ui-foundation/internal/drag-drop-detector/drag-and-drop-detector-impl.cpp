@@ -24,18 +24,18 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-Dali::UI::DragAndDropDetector DragAndDropDetector::New()
+Dali::Ui::DragAndDropDetector DragAndDropDetector::New()
 {
-  Dali::UI::DragAndDropDetector detector = Dali::UI::DragAndDropDetector(new DragAndDropDetector());
+  Dali::Ui::DragAndDropDetector detector = Dali::Ui::DragAndDropDetector(new DragAndDropDetector());
 
   return detector;
 }
 
-void DragAndDropDetector::Attach(Dali::UI::Control& control)
+void DragAndDropDetector::Attach(Dali::Ui::Control& control)
 {
   if (control)
   {
@@ -55,7 +55,7 @@ void DragAndDropDetector::Attach(Dali::UI::Control& control)
   }
 }
 
-void DragAndDropDetector::Detach(Dali::UI::Control& control)
+void DragAndDropDetector::Detach(Dali::Ui::Control& control)
 {
   if (!mControls.empty())
   {
@@ -105,9 +105,9 @@ uint32_t DragAndDropDetector::GetAttachedControlCount() const
   return mControls.size();
 }
 
-Dali::UI::Control DragAndDropDetector::GetAttachedControl(uint32_t index) const
+Dali::Ui::Control DragAndDropDetector::GetAttachedControl(uint32_t index) const
 {
-  Dali::UI::Control control;
+  Dali::Ui::Control control;
 
   if (index < mControls.size())
   {
@@ -119,7 +119,7 @@ Dali::UI::Control DragAndDropDetector::GetAttachedControl(uint32_t index) const
 
 void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
 {
-  Dali::UI::Control control = Dali::UI::Control::DownCast(actor);
+  Dali::Ui::Control control = Dali::Ui::Control::DownCast(actor);
 
   GestureState state = gesture.GetState();
 
@@ -137,7 +137,7 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
     float height = control.GetProperty<float>(Dali::Actor::Property::SIZE_HEIGHT);
     Vector3 actorPos = control.GetProperty<Vector3>(Dali::Actor::Property::POSITION);
 
-    mShadowControl = Dali::UI::Control::New();
+    mShadowControl = Dali::Ui::Control::New();
     mShadowControl.SetProperty(Actor::Property::POSITION, actorPos);
     mShadowControl.SetProperty(Actor::Property::SIZE, Vector2(width, height));
     mShadowControl.SetBackgroundColor(Vector4(0.3f, 0.3f, 0.3f, 0.7f));
@@ -165,7 +165,7 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
 
 bool DragAndDropDetector::OnDrag(Dali::Actor actor, const Dali::TouchEvent& data)
 {
-  Dali::UI::Control control = Dali::UI::Control::DownCast(actor);
+  Dali::Ui::Control control = Dali::Ui::Control::DownCast(actor);
   PointState::Type type = data.GetState(0);
 
   if (type == PointState::MOTION)
@@ -240,55 +240,55 @@ void DragAndDropDetector::SetPosition(const Vector2& screenPosition)
   mScreenPosition = screenPosition;
 }
 
-void DragAndDropDetector::EmitStartedSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitStartedSignal(Dali::Ui::Control& control)
 {
   if (!mStartedSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mStartedSignal.Emit(control, handle);
   }
 }
-void DragAndDropDetector::EmitEnteredSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitEnteredSignal(Dali::Ui::Control& control)
 {
   if (!mEnteredSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mEnteredSignal.Emit(control, handle);
   }
 }
 
-void DragAndDropDetector::EmitExitedSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitExitedSignal(Dali::Ui::Control& control)
 {
   if (!mExitedSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mExitedSignal.Emit(control, handle);
   }
 }
 
-void DragAndDropDetector::EmitMovedSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitMovedSignal(Dali::Ui::Control& control)
 {
   if (!mMovedSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mMovedSignal.Emit(control, handle);
   }
 }
 
-void DragAndDropDetector::EmitDroppedSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitDroppedSignal(Dali::Ui::Control& control)
 {
   if (!mDroppedSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mDroppedSignal.Emit(control, handle);
   }
 }
 
-void DragAndDropDetector::EmitEndedSignal(Dali::UI::Control& control)
+void DragAndDropDetector::EmitEndedSignal(Dali::Ui::Control& control)
 {
   if (!mEndedSignal.Empty())
   {
-    Dali::UI::DragAndDropDetector handle(this);
+    Dali::Ui::DragAndDropDetector handle(this);
     mEndedSignal.Emit(control, handle);
   }
 }
@@ -307,6 +307,6 @@ DragAndDropDetector::~DragAndDropDetector()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

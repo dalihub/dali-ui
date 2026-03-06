@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -44,7 +44,7 @@ class GlViewImpl;
  *
  * @SINCE_2_0.45
  */
-class DALI_UI_API GlView : public Dali::UI::Control
+class DALI_UI_API GlView : public Dali::Ui::Control
 {
 public:
   /**
@@ -374,7 +374,7 @@ public:
 public: // Not intended for application developers
   /// @cond internal
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    * @param[in] implementation The GlView implementation
    *
    * @SINCE_2_0.45
@@ -391,7 +391,7 @@ public: // Not intended for application developers
   /// @endcond
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

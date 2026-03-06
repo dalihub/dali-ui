@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelVisual
 {
@@ -32,17 +32,17 @@ namespace DevelVisual
  */
 enum Type
 {
-  BORDER = Dali::UI::Visual::BORDER,
-  COLOR = Dali::UI::Visual::COLOR,
-  GRADIENT = Dali::UI::Visual::GRADIENT,
-  IMAGE = Dali::UI::Visual::IMAGE,
-  MESH = Dali::UI::Visual::MESH,
-  PRIMITIVE = Dali::UI::Visual::PRIMITIVE,
-  WIREFRAME = Dali::UI::Visual::WIREFRAME,
-  TEXT = Dali::UI::Visual::TEXT,
-  N_PATCH = Dali::UI::Visual::N_PATCH,
-  SVG = Dali::UI::Visual::SVG,
-  ANIMATED_IMAGE = Dali::UI::Visual::ANIMATED_IMAGE,
+  BORDER = Dali::Ui::Visual::BORDER,
+  COLOR = Dali::Ui::Visual::COLOR,
+  GRADIENT = Dali::Ui::Visual::GRADIENT,
+  IMAGE = Dali::Ui::Visual::IMAGE,
+  MESH = Dali::Ui::Visual::MESH,
+  PRIMITIVE = Dali::Ui::Visual::PRIMITIVE,
+  WIREFRAME = Dali::Ui::Visual::WIREFRAME,
+  TEXT = Dali::Ui::Visual::TEXT,
+  N_PATCH = Dali::Ui::Visual::N_PATCH,
+  SVG = Dali::Ui::Visual::SVG,
+  ANIMATED_IMAGE = Dali::Ui::Visual::ANIMATED_IMAGE,
 
   NOT_IN_USE_1 = ANIMATED_IMAGE + 1,
   ANIMATED_VECTOR_IMAGE = ANIMATED_IMAGE + 2, ///< Renders an animated vector image.
@@ -56,12 +56,12 @@ namespace Property
 {
 enum Type
 {
-  TYPE = Dali::UI::Visual::Property::TYPE,
-  SHADER = Dali::UI::Visual::Property::SHADER,
-  TRANSFORM = Dali::UI::Visual::Property::TRANSFORM,
-  PREMULTIPLIED_ALPHA = Dali::UI::Visual::Property::PREMULTIPLIED_ALPHA,
-  MIX_COLOR = Dali::UI::Visual::Property::MIX_COLOR,
-  OPACITY = Dali::UI::Visual::Property::OPACITY,
+  TYPE = Dali::Ui::Visual::Property::TYPE,
+  SHADER = Dali::Ui::Visual::Property::SHADER,
+  TRANSFORM = Dali::Ui::Visual::Property::TRANSFORM,
+  PREMULTIPLIED_ALPHA = Dali::Ui::Visual::Property::PREMULTIPLIED_ALPHA,
+  MIX_COLOR = Dali::Ui::Visual::Property::MIX_COLOR,
+  OPACITY = Dali::Ui::Visual::Property::OPACITY,
 
   /**
    * @brief The fitting mode of the visual.
@@ -170,7 +170,7 @@ namespace Property
  */
 enum Type
 {
-  SIZE_POLICY = Dali::UI::Visual::Transform::Property::SIZE_POLICY,
+  SIZE_POLICY = Dali::Ui::Visual::Transform::Property::SIZE_POLICY,
 
   /**
    * @brief Extra size value that will be added to the computed visual size.
@@ -192,7 +192,7 @@ enum Type
 
 } // namespace DevelVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -49,12 +49,12 @@ public:
 
 public: // Implementation of VisualShaderFactoryInterface
   /**
-   * @copydoc Dali::UI::VisualShaderFactoryInterface::AddPrecompiledShader
+   * @copydoc Dali::Ui::VisualShaderFactoryInterface::AddPrecompiledShader
    */
   bool AddPrecompiledShader(PrecompileShaderOption& option) override;
 
   /**
-   * @copydoc Dali::UI::VisualShaderFactoryInterface::GetPreCompiledShader
+   * @copydoc Dali::Ui::VisualShaderFactoryInterface::GetPreCompiledShader
    */
   void GetPreCompiledShader(ShaderPreCompiler::RawShaderData& shaders) override;
 
@@ -78,7 +78,7 @@ protected:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

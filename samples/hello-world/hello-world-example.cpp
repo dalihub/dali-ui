@@ -17,8 +17,8 @@
 #include <dali-ui-foundation/public-api/layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
-using Dali::UI::View;
+using namespace Dali::Ui;
+using Dali::Ui::View;
 
 // This example shows how to create and display Hello World! using a simple TextActor
 class HelloWorldController : public ConnectionTracker
@@ -90,7 +90,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UIConfig::New().Apply();
+  UiConfig::New().Apply();
   HelloWorldController test(application);
   application.MainLoop();
   return 0;

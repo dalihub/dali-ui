@@ -25,7 +25,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Popup
@@ -100,12 +100,12 @@ Actor Popup::GetFooter() const
   return GetImpl(*this).GetFooter();
 }
 
-void Popup::SetDisplayState(UI::Popup::DisplayState displayState)
+void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
 {
   GetImpl(*this).SetDisplayState(displayState);
 }
 
-UI::Popup::DisplayState Popup::GetDisplayState() const
+Ui::Popup::DisplayState Popup::GetDisplayState() const
 {
   return GetImpl(*this).GetDisplayState();
 }
@@ -137,6 +137,6 @@ Popup::DisplayStateChangeSignalType& Popup::HiddenSignal()
   return GetImpl(*this).HiddenSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

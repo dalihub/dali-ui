@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -36,7 +36,7 @@ struct UnderlineSpan::Impl
 };
 
 UnderlineSpan::UnderlineSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::UNDERLINE)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::UNDERLINE)
 {
   mImpl = std::make_unique<Impl>();
 }
@@ -45,28 +45,28 @@ UnderlineSpan ::~UnderlineSpan()
 {
 }
 
-Dali::UI::Text::UnderlineSpan UnderlineSpan::New()
+Dali::Ui::Text::UnderlineSpan UnderlineSpan::New()
 {
   UnderlineSpanPtr object = new UnderlineSpan();
 
-  Dali::UI::Text::UnderlineSpan handle = Dali::UI::Text::UnderlineSpan(object.Get());
+  Dali::Ui::Text::UnderlineSpan handle = Dali::Ui::Text::UnderlineSpan(object.Get());
 
   return handle;
 }
 
-Dali::UI::Text::UnderlineSpan UnderlineSpan::NewSolid(Vector4 color, float height)
+Dali::Ui::Text::UnderlineSpan UnderlineSpan::NewSolid(Vector4 color, float height)
 {
   UnderlineSpanPtr object = new UnderlineSpan();
   object->SetType(Text::Underline::SOLID);
   object->SetColor(color);
   object->SetHeight(height);
 
-  Dali::UI::Text::UnderlineSpan handle = Dali::UI::Text::UnderlineSpan(object.Get());
+  Dali::Ui::Text::UnderlineSpan handle = Dali::Ui::Text::UnderlineSpan(object.Get());
 
   return handle;
 }
 
-Dali::UI::Text::UnderlineSpan UnderlineSpan::NewDashed(Vector4 color, float height, float dashGap, float dashWidth)
+Dali::Ui::Text::UnderlineSpan UnderlineSpan::NewDashed(Vector4 color, float height, float dashGap, float dashWidth)
 {
   UnderlineSpanPtr object = new UnderlineSpan();
   object->SetType(Text::Underline::DASHED);
@@ -75,19 +75,19 @@ Dali::UI::Text::UnderlineSpan UnderlineSpan::NewDashed(Vector4 color, float heig
   object->SetDashGap(dashGap);
   object->SetDashWidth(dashWidth);
 
-  Dali::UI::Text::UnderlineSpan handle = Dali::UI::Text::UnderlineSpan(object.Get());
+  Dali::Ui::Text::UnderlineSpan handle = Dali::Ui::Text::UnderlineSpan(object.Get());
 
   return handle;
 }
 
-Dali::UI::Text::UnderlineSpan UnderlineSpan::NewDouble(Vector4 color, float height)
+Dali::Ui::Text::UnderlineSpan UnderlineSpan::NewDouble(Vector4 color, float height)
 {
   UnderlineSpanPtr object = new UnderlineSpan();
   object->SetType(Text::Underline::DOUBLE);
   object->SetColor(color);
   object->SetHeight(height);
 
-  Dali::UI::Text::UnderlineSpan handle = Dali::UI::Text::UnderlineSpan(object.Get());
+  Dali::Ui::Text::UnderlineSpan handle = Dali::Ui::Text::UnderlineSpan(object.Get());
 
   return handle;
 }
@@ -175,7 +175,7 @@ void UnderlineSpan::SetDashWidth(const float& dashWidth)
 }
 
 void UnderlineSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                            const Dali::UI::Text::Range& range) const
+                                            const Dali::Ui::Text::Range& range) const
 {
   UnderlinedCharacterRun underlinedCharacterRun;
   underlinedCharacterRun.characterRun.characterIndex = range.GetStartIndex();
@@ -191,6 +191,6 @@ void UnderlineSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalM
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

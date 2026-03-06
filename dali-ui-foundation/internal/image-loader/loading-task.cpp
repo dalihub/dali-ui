@@ -35,7 +35,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -308,6 +308,6 @@ void LoadingTask::SetTextureId(TextureManagerType::TextureId id)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

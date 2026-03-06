@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelImageVisual
 {
@@ -31,27 +31,27 @@ namespace Property
 {
 enum Type
 {
-  URL = Dali::UI::ImageVisual::Property::URL,
-  FITTING_MODE = Dali::UI::ImageVisual::Property::FITTING_MODE,
-  SAMPLING_MODE = Dali::UI::ImageVisual::Property::SAMPLING_MODE,
-  DESIRED_WIDTH = Dali::UI::ImageVisual::Property::DESIRED_WIDTH,
-  DESIRED_HEIGHT = Dali::UI::ImageVisual::Property::DESIRED_HEIGHT,
-  SYNCHRONOUS_LOADING = Dali::UI::ImageVisual::Property::SYNCHRONOUS_LOADING,
-  BORDER_ONLY = Dali::UI::ImageVisual::Property::BORDER_ONLY,
-  PIXEL_AREA = Dali::UI::ImageVisual::Property::PIXEL_AREA,
-  WRAP_MODE_U = Dali::UI::ImageVisual::Property::WRAP_MODE_U,
-  WRAP_MODE_V = Dali::UI::ImageVisual::Property::WRAP_MODE_V,
-  BORDER = Dali::UI::ImageVisual::Property::BORDER,
-  REMOVED_PROPERTY_01 = Dali::UI::ImageVisual::Property::REMOVED_PROPERTY_01,
-  ALPHA_MASK_URL = Dali::UI::ImageVisual::Property::ALPHA_MASK_URL,
-  BATCH_SIZE = Dali::UI::ImageVisual::Property::BATCH_SIZE,
-  CACHE_SIZE = Dali::UI::ImageVisual::Property::CACHE_SIZE,
-  FRAME_DELAY = Dali::UI::ImageVisual::Property::FRAME_DELAY,
-  MASK_CONTENT_SCALE = Dali::UI::ImageVisual::Property::MASK_CONTENT_SCALE,
-  CROP_TO_MASK = Dali::UI::ImageVisual::Property::CROP_TO_MASK,
-  LOAD_POLICY = Dali::UI::ImageVisual::Property::LOAD_POLICY,
-  RELEASE_POLICY = Dali::UI::ImageVisual::Property::RELEASE_POLICY,
-  ORIENTATION_CORRECTION = Dali::UI::ImageVisual::Property::ORIENTATION_CORRECTION,
+  URL = Dali::Ui::ImageVisual::Property::URL,
+  FITTING_MODE = Dali::Ui::ImageVisual::Property::FITTING_MODE,
+  SAMPLING_MODE = Dali::Ui::ImageVisual::Property::SAMPLING_MODE,
+  DESIRED_WIDTH = Dali::Ui::ImageVisual::Property::DESIRED_WIDTH,
+  DESIRED_HEIGHT = Dali::Ui::ImageVisual::Property::DESIRED_HEIGHT,
+  SYNCHRONOUS_LOADING = Dali::Ui::ImageVisual::Property::SYNCHRONOUS_LOADING,
+  BORDER_ONLY = Dali::Ui::ImageVisual::Property::BORDER_ONLY,
+  PIXEL_AREA = Dali::Ui::ImageVisual::Property::PIXEL_AREA,
+  WRAP_MODE_U = Dali::Ui::ImageVisual::Property::WRAP_MODE_U,
+  WRAP_MODE_V = Dali::Ui::ImageVisual::Property::WRAP_MODE_V,
+  BORDER = Dali::Ui::ImageVisual::Property::BORDER,
+  REMOVED_PROPERTY_01 = Dali::Ui::ImageVisual::Property::REMOVED_PROPERTY_01,
+  ALPHA_MASK_URL = Dali::Ui::ImageVisual::Property::ALPHA_MASK_URL,
+  BATCH_SIZE = Dali::Ui::ImageVisual::Property::BATCH_SIZE,
+  CACHE_SIZE = Dali::Ui::ImageVisual::Property::CACHE_SIZE,
+  FRAME_DELAY = Dali::Ui::ImageVisual::Property::FRAME_DELAY,
+  MASK_CONTENT_SCALE = Dali::Ui::ImageVisual::Property::MASK_CONTENT_SCALE,
+  CROP_TO_MASK = Dali::Ui::ImageVisual::Property::CROP_TO_MASK,
+  LOAD_POLICY = Dali::Ui::ImageVisual::Property::LOAD_POLICY,
+  RELEASE_POLICY = Dali::Ui::ImageVisual::Property::RELEASE_POLICY,
+  ORIENTATION_CORRECTION = Dali::Ui::ImageVisual::Property::ORIENTATION_CORRECTION,
 
   /**
    * @brief Overlays the auxiliary image on top of an NPatch image.
@@ -316,7 +316,7 @@ enum Type
 
 } // namespace DevelImageVisual
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

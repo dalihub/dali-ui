@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -69,6 +69,6 @@ void ProcessAnchorTag(const Tag& tag, Anchor& anchor, ColorRun& colorRun,
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

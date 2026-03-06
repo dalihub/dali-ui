@@ -35,13 +35,13 @@ bool DefaultExecutionKeyPredicate(const std::string& keyName)
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
-UIConfigImpl::UIConfigImpl()
+UiConfigImpl::UiConfigImpl()
   : mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
     mScalingFactor(1.0f),
     mDpi(160),
@@ -53,120 +53,120 @@ UIConfigImpl::UIConfigImpl()
 {
 }
 
-UIConfigImpl::~UIConfigImpl() = default;
+UiConfigImpl::~UiConfigImpl() = default;
 
-UIConfig UIConfigImpl::New()
+UiConfig UiConfigImpl::New()
 {
-  IntrusivePtr<UIConfigImpl> impl = new UIConfigImpl();
-  UIConfig handle(impl.Get());
+  IntrusivePtr<UiConfigImpl> impl = new UiConfigImpl();
+  UiConfig handle(impl.Get());
   return handle;
 }
 
-void UIConfigImpl::Freeze()
+void UiConfigImpl::Freeze()
 {
   mFrozen = true;
 }
 
-bool UIConfigImpl::IsFrozen() const
+bool UiConfigImpl::IsFrozen() const
 {
   return mFrozen;
 }
 
-void UIConfigImpl::SetScalingFactor(float scalingFactor)
+void UiConfigImpl::SetScalingFactor(float scalingFactor)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   mScalingFactor = scalingFactor;
 }
 
-float UIConfigImpl::GetScalingFactor() const
+float UiConfigImpl::GetScalingFactor() const
 {
   return mScalingFactor;
 }
 
-void UIConfigImpl::SetDpi(int dpi)
+void UiConfigImpl::SetDpi(int dpi)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   mDpi = dpi;
 }
 
-int UIConfigImpl::GetDpi() const
+int UiConfigImpl::GetDpi() const
 {
   return mDpi;
 }
 
-void UIConfigImpl::SetBaselineDpi(int baselineDpi)
+void UiConfigImpl::SetBaselineDpi(int baselineDpi)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   DALI_ASSERT_ALWAYS(mBaselineDpi != 0 && "Baseline dpi could not be 0");
   mBaselineDpi = baselineDpi;
 }
 
-int UIConfigImpl::GetBaselineDpi() const
+int UiConfigImpl::GetBaselineDpi() const
 {
   return mBaselineDpi;
 }
 
-float UIConfigImpl::GetDpiFactor() const
+float UiConfigImpl::GetDpiFactor() const
 {
   return static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
 }
 
-float UIConfigImpl::GetScaledDpiFactor() const
+float UiConfigImpl::GetScaledDpiFactor() const
 {
   return GetDpiFactor() * mScalingFactor;
 }
 
-void UIConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+void UiConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   mKeyClickPolicy = policy;
 }
 
-KeyClickPolicy UIConfigImpl::GetKeyClickPolicy() const
+KeyClickPolicy UiConfigImpl::GetKeyClickPolicy() const
 {
   return mKeyClickPolicy;
 }
 
-void UIConfigImpl::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+void UiConfigImpl::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   DALI_ASSERT_ALWAYS(predicate && "ExecutionKeyPredicate must not be null");
   mExecutionKeyPredicate = predicate;
 }
 
-ExecutionKeyPredicate UIConfigImpl::GetExecutionKeyPredicate() const
+ExecutionKeyPredicate UiConfigImpl::GetExecutionKeyPredicate() const
 {
   return mExecutionKeyPredicate;
 }
 
-void UIConfigImpl::SetMinLongPressKeyCount(uint32_t count)
+void UiConfigImpl::SetMinLongPressKeyCount(uint32_t count)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   mMinLongPressKeyCount = count;
 }
 
-uint32_t UIConfigImpl::GetMinLongPressKeyCount() const
+uint32_t UiConfigImpl::GetMinLongPressKeyCount() const
 {
   return mMinLongPressKeyCount;
 }
 
-void UIConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
+void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
 {
-  DALI_ASSERT_ALWAYS(!mFrozen && "UIConfig is frozen after  UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
   mTapRecognizerTime = timeMs;
 }
 
-uint32_t UIConfigImpl::GetTapRecognizerTime() const
+uint32_t UiConfigImpl::GetTapRecognizerTime() const
 {
   return mTapRecognizerTime;
 }
 
-void UIConfigImpl::OnInitialized()
+void UiConfigImpl::OnInitialized()
 {
 }
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

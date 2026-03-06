@@ -23,14 +23,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
 namespace Internal
 {
 BoldSpan::BoldSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::BOLD)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::BOLD)
 {
 }
 
@@ -38,15 +38,15 @@ BoldSpan::~BoldSpan()
 {
 }
 
-Dali::UI::Text::BoldSpan BoldSpan::New()
+Dali::Ui::Text::BoldSpan BoldSpan::New()
 {
   BoldSpanPtr object = new BoldSpan();
-  Dali::UI::Text::BoldSpan handle = Dali::UI::Text::BoldSpan(object.Get());
+  Dali::Ui::Text::BoldSpan handle = Dali::Ui::Text::BoldSpan(object.Get());
   return handle;
 }
 
 void BoldSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                       const Dali::UI::Text::Range& range) const
+                                       const Dali::Ui::Text::Range& range) const
 {
   FontDescriptionRun fontRun;
   fontRun.weight = TextAbstraction::FontWeight::BOLD;
@@ -60,6 +60,6 @@ void BoldSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

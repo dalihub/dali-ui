@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelAsyncImageLoader
 {
@@ -101,7 +101,7 @@ DALI_UI_API uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, Devel::PixelBu
 DALI_UI_API PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImageLoader);
 
 } // namespace DevelAsyncImageLoader
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif

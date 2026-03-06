@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -40,8 +40,8 @@ typedef uint32_t SizeType;
  * @param[in]  position Position to place area in space.
  * @param[out] mesh Mesh object to hold created quad.
  */
-void CreateQuad(SizeType width, SizeType height, SizeType block, const UI::AtlasManager::AtlasSize& atlasSize,
-                const Vector2& position, UI::AtlasManager::Mesh2D& mesh);
+void CreateQuad(SizeType width, SizeType height, SizeType block, const Ui::AtlasManager::AtlasSize& atlasSize,
+                const Vector2& position, Ui::AtlasManager::Mesh2D& mesh);
 
 /**
  * @brief Append one mesh to another.
@@ -49,13 +49,13 @@ void CreateQuad(SizeType width, SizeType height, SizeType block, const UI::Atlas
  * @param[in,out] first Mesh to append to.
  * @param[in]     second Mesh to append.
  */
-void AppendMesh(UI::AtlasManager::Mesh2D& first, const UI::AtlasManager::Mesh2D& second);
+void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D& second);
 
 } // namespace AtlasMeshFactory
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

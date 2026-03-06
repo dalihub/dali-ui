@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -61,34 +61,34 @@ const char* const DEFAULT_CONNECT_SIGNAL_NAME = "clicked";
 
 BaseHandle Create()
 {
-  return UI::ConfirmationPopup::New();
+  return Ui::ConfirmationPopup::New();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::ConfirmationPopup, UI::Popup, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::ConfirmationPopup, Ui::Popup, Create)
 
-DALI_PROPERTY_REGISTRATION(UI, ConfirmationPopup, ControlDetails[0].connectSignalPropertyName, STRING,
+DALI_PROPERTY_REGISTRATION(Ui, ConfirmationPopup, ControlDetails[0].connectSignalPropertyName, STRING,
                            CONNECT_SIGNAL_OK_SELECTED)
-DALI_PROPERTY_REGISTRATION(UI, ConfirmationPopup, ControlDetails[1].connectSignalPropertyName, STRING,
+DALI_PROPERTY_REGISTRATION(Ui, ConfirmationPopup, ControlDetails[1].connectSignalPropertyName, STRING,
                            CONNECT_SIGNAL_CANCEL_SELECTED)
 
 // Note: We do not use the macros for signal registration as we do not want to redefine the signal name strings.
 // We have predefined them for optimal signal name to control name lookup.
 SignalConnectorType signalConnector1(typeRegistration, ControlDetails[0].signalName,
-                                     &UI::Internal::ConfirmationPopup::DoConnectSignal);
+                                     &Ui::Internal::ConfirmationPopup::DoConnectSignal);
 SignalConnectorType signalConnector2(typeRegistration, ControlDetails[1].signalName,
-                                     &UI::Internal::ConfirmationPopup::DoConnectSignal);
+                                     &Ui::Internal::ConfirmationPopup::DoConnectSignal);
 
 DALI_TYPE_REGISTRATION_END()
 
 } // Unnamed namespace
 
-Dali::UI::ConfirmationPopup ConfirmationPopup::New()
+Dali::Ui::ConfirmationPopup ConfirmationPopup::New()
 {
   // Create the implementation, temporarily owned on stack.
   IntrusivePtr<ConfirmationPopup> internalConfirmationPopup = new ConfirmationPopup();
 
   // Pass ownership to CustomActor
-  Dali::UI::ConfirmationPopup confirmationPopup(*internalConfirmationPopup);
+  Dali::Ui::ConfirmationPopup confirmationPopup(*internalConfirmationPopup);
 
   // Second-phase initialisation of the implementation.
   // This can only be done after the CustomActor connection has been made...
@@ -98,11 +98,11 @@ Dali::UI::ConfirmationPopup ConfirmationPopup::New()
 }
 
 ConfirmationPopup::ConfirmationPopup()
-  : UI::Internal::Popup()
+  : Ui::Internal::Popup()
 {
   mControlSignals.reserve(MAXIMUM_NUMBER_OF_CONTROLS);
-  mControlSignalNames[UI::ConfirmationPopup::CONTROL_OK] = DEFAULT_CONNECT_SIGNAL_NAME;
-  mControlSignalNames[UI::ConfirmationPopup::CONTROL_CANCEL] = DEFAULT_CONNECT_SIGNAL_NAME;
+  mControlSignalNames[Ui::ConfirmationPopup::CONTROL_OK] = DEFAULT_CONNECT_SIGNAL_NAME;
+  mControlSignalNames[Ui::ConfirmationPopup::CONTROL_CANCEL] = DEFAULT_CONNECT_SIGNAL_NAME;
 }
 
 ConfirmationPopup::~ConfirmationPopup()
@@ -116,7 +116,7 @@ ConfirmationPopup::~ConfirmationPopup()
 
 void ConfirmationPopup::SetProperty(BaseObject* object, Property::Index propertyIndex, const Property::Value& value)
 {
-  UI::ConfirmationPopup popup = UI::ConfirmationPopup::DownCast(Dali::BaseHandle(object));
+  Ui::ConfirmationPopup popup = Ui::ConfirmationPopup::DownCast(Dali::BaseHandle(object));
 
   if (popup)
   {
@@ -124,14 +124,14 @@ void ConfirmationPopup::SetProperty(BaseObject* object, Property::Index property
 
     switch (propertyIndex)
     {
-      case UI::ConfirmationPopup::Property::CONNECT_SIGNAL_OK_SELECTED:
+      case Ui::ConfirmationPopup::Property::CONNECT_SIGNAL_OK_SELECTED:
       {
-        popupImpl.SetControlSignalName(UI::ConfirmationPopup::CONTROL_OK, value.Get<std::string>());
+        popupImpl.SetControlSignalName(Ui::ConfirmationPopup::CONTROL_OK, value.Get<std::string>());
         break;
       }
-      case UI::ConfirmationPopup::Property::CONNECT_SIGNAL_CANCEL_SELECTED:
+      case Ui::ConfirmationPopup::Property::CONNECT_SIGNAL_CANCEL_SELECTED:
       {
-        popupImpl.SetControlSignalName(UI::ConfirmationPopup::CONTROL_CANCEL, value.Get<std::string>());
+        popupImpl.SetControlSignalName(Ui::ConfirmationPopup::CONTROL_CANCEL, value.Get<std::string>());
         break;
       }
     }
@@ -142,7 +142,7 @@ Property::Value ConfirmationPopup::GetProperty(BaseObject* object, Property::Ind
 {
   Property::Value value;
 
-  UI::ConfirmationPopup popup = UI::ConfirmationPopup::DownCast(Dali::BaseHandle(object));
+  Ui::ConfirmationPopup popup = Ui::ConfirmationPopup::DownCast(Dali::BaseHandle(object));
 
   if (popup)
   {
@@ -150,14 +150,14 @@ Property::Value ConfirmationPopup::GetProperty(BaseObject* object, Property::Ind
 
     switch (propertyIndex)
     {
-      case UI::ConfirmationPopup::Property::CONNECT_SIGNAL_OK_SELECTED:
+      case Ui::ConfirmationPopup::Property::CONNECT_SIGNAL_OK_SELECTED:
       {
-        value = popupImpl.GetControlSignalName(UI::ConfirmationPopup::CONTROL_OK);
+        value = popupImpl.GetControlSignalName(Ui::ConfirmationPopup::CONTROL_OK);
         break;
       }
-      case UI::ConfirmationPopup::Property::CONNECT_SIGNAL_CANCEL_SELECTED:
+      case Ui::ConfirmationPopup::Property::CONNECT_SIGNAL_CANCEL_SELECTED:
       {
-        value = popupImpl.GetControlSignalName(UI::ConfirmationPopup::CONTROL_CANCEL);
+        value = popupImpl.GetControlSignalName(Ui::ConfirmationPopup::CONTROL_CANCEL);
         break;
       }
     }
@@ -188,10 +188,10 @@ bool ConfirmationPopup::DoConnectSignal(BaseObject* object, ConnectionTrackerInt
                                         const std::string& signalName, FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
-  UI::ConfirmationPopup popup = UI::ConfirmationPopup::DownCast(handle);
+  Ui::ConfirmationPopup popup = Ui::ConfirmationPopup::DownCast(handle);
 
   // Look up the requested signal, attempting to create it dynamically if it doesn't exist.
-  SignalDelegate* signalDelegate = Dali::UI::GetDerivedImplementation(popup).GetControlSignal(signalName);
+  SignalDelegate* signalDelegate = Dali::Ui::GetDerivedImplementation(popup).GetControlSignal(signalName);
   if (signalDelegate)
   {
     // The signal delegate was created successfully, attempt to connect it to a callback if specified.
@@ -256,6 +256,6 @@ SignalDelegate* ConfirmationPopup::GetControlSignal(const std::string& signalNam
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

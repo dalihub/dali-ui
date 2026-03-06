@@ -17,7 +17,7 @@
 #include <dali-ui-foundation/public-api/flex-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * FlexLayout sample: basic row direction with flex grow.

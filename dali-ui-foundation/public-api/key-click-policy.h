@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 /**
  * @brief Defines the policy for when a click event is triggered via key input.
@@ -47,4 +47,4 @@ enum class KeyClickPolicy : uint32_t
    */
   RESERVED = 99
 };
-} // namespace Dali::UI
+} // namespace Dali::Ui

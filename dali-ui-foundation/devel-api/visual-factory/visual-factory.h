@@ -32,7 +32,7 @@ namespace Dali
 class Image;
 struct Vector4;
 
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -265,7 +265,7 @@ private:
   explicit DALI_INTERNAL VisualFactory(Internal::VisualFactory* impl);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

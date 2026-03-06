@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 CheckBoxButton::CheckBoxButton()
   : Button()
@@ -65,6 +65,6 @@ CheckBoxButton::CheckBoxButton(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::CheckBoxButton>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

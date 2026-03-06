@@ -26,88 +26,88 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
 namespace
 {
 DALI_ENUM_TO_STRING_TABLE_BEGIN(HORIZONTAL_ALIGNMENT_TYPE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::HorizontalAlignment, BEGIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::HorizontalAlignment, CENTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::HorizontalAlignment, END)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, BEGIN)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, CENTER)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, END)
 DALI_ENUM_TO_STRING_TABLE_END(HORIZONTAL_ALIGNMENT_TYPE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(VERTICAL_ALIGNMENT_TYPE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::VerticalAlignment, TOP)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::VerticalAlignment, CENTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::VerticalAlignment, BOTTOM)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, TOP)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, CENTER)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, BOTTOM)
 DALI_ENUM_TO_STRING_TABLE_END(VERTICAL_ALIGNMENT_TYPE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LINE_WRAP_MODE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::LineWrap, WORD)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::LineWrap, CHARACTER)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::LineWrap, WORD)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::LineWrap, CHARACTER)
 DALI_ENUM_TO_STRING_TABLE_END(LINE_WRAP_MODE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::DevelText::EllipsisPosition, END)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::DevelText::EllipsisPosition, START)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::DevelText::EllipsisPosition, MIDDLE)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, END)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, START)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, MIDDLE)
 DALI_ENUM_TO_STRING_TABLE_END(ELLIPSIS_POSITION_TYPE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(UNDERLINE_TYPE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::Underline::Type, SOLID)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::Underline::Type, DASHED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(UI::Text::Underline::Type, DOUBLE)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, SOLID)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, DASHED)
+DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, DOUBLE)
 DALI_ENUM_TO_STRING_TABLE_END(UNDERLINE_TYPE)
 } // namespace
 
 bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue,
-                                       UI::Text::HorizontalAlignment::Type& alignment)
+                                       Ui::Text::HorizontalAlignment::Type& alignment)
 {
   return Scripting::GetEnumerationProperty(propertyValue, HORIZONTAL_ALIGNMENT_TYPE_TABLE,
                                            HORIZONTAL_ALIGNMENT_TYPE_TABLE_COUNT, alignment);
 }
 
-bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, UI::Text::VerticalAlignment::Type& alignment)
+bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, Ui::Text::VerticalAlignment::Type& alignment)
 {
   return Scripting::GetEnumerationProperty(propertyValue, VERTICAL_ALIGNMENT_TYPE_TABLE,
                                            VERTICAL_ALIGNMENT_TYPE_TABLE_COUNT, alignment);
 }
 
-bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, UI::Text::LineWrap::Mode& lineWrapMode)
+bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::LineWrap::Mode& lineWrapMode)
 {
   return Scripting::GetEnumerationProperty(propertyValue, LINE_WRAP_MODE_TABLE, LINE_WRAP_MODE_TABLE_COUNT,
                                            lineWrapMode);
 }
 
-const char* GetHorizontalAlignmentString(const UI::Text::HorizontalAlignment::Type& alignment)
+const char* GetHorizontalAlignmentString(const Ui::Text::HorizontalAlignment::Type& alignment)
 {
-  return Scripting::GetLinearEnumerationName<UI::Text::HorizontalAlignment::Type>(
+  return Scripting::GetLinearEnumerationName<Ui::Text::HorizontalAlignment::Type>(
       alignment, HORIZONTAL_ALIGNMENT_TYPE_TABLE, HORIZONTAL_ALIGNMENT_TYPE_TABLE_COUNT);
 }
 
-const char* GetVerticalAlignmentString(const UI::Text::VerticalAlignment::Type& alignment)
+const char* GetVerticalAlignmentString(const Ui::Text::VerticalAlignment::Type& alignment)
 {
-  return Scripting::GetLinearEnumerationName<UI::Text::VerticalAlignment::Type>(
+  return Scripting::GetLinearEnumerationName<Ui::Text::VerticalAlignment::Type>(
       alignment, VERTICAL_ALIGNMENT_TYPE_TABLE, VERTICAL_ALIGNMENT_TYPE_TABLE_COUNT);
 }
 
 bool GetEllipsisPositionTypeEnumeration(const Property::Value& propertyValue,
-                                        UI::DevelText::EllipsisPosition::Type& ellipsisPositionType)
+                                        Ui::DevelText::EllipsisPosition::Type& ellipsisPositionType)
 {
   return Scripting::GetEnumerationProperty(propertyValue, ELLIPSIS_POSITION_TYPE_TABLE,
                                            ELLIPSIS_POSITION_TYPE_TABLE_COUNT, ellipsisPositionType);
 }
 
-const char* GetUnderlineTypeToString(const UI::Text::Underline::Type& type)
+const char* GetUnderlineTypeToString(const Ui::Text::Underline::Type& type)
 {
-  return Scripting::GetLinearEnumerationName<UI::Text::Underline::Type>(type, UNDERLINE_TYPE_TABLE,
+  return Scripting::GetLinearEnumerationName<Ui::Text::Underline::Type>(type, UNDERLINE_TYPE_TABLE,
                                                                         UNDERLINE_TYPE_TABLE_COUNT);
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

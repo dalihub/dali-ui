@@ -36,7 +36,7 @@ namespace Dali
 {
 class Texture;
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -300,12 +300,12 @@ public:
   static Geometry CreateBorderGeometry(Uint16Pair gridSize);
 
   /**
-   * @copydoc UI::VisualFactory::SetPreMultiplyOnLoad()
+   * @copydoc Ui::VisualFactory::SetPreMultiplyOnLoad()
    */
   void SetPreMultiplyOnLoad(bool preMultiply);
 
   /**
-   * @copydoc UI::VisualFactory::GetPreMultiplyOnLoad()
+   * @copydoc Ui::VisualFactory::GetPreMultiplyOnLoad()
    */
   bool GetPreMultiplyOnLoad() const;
 
@@ -477,7 +477,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

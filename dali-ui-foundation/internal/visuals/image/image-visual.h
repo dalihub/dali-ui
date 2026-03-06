@@ -37,7 +37,7 @@ namespace Dali
 {
 class NativeImage;
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -369,8 +369,8 @@ private:
   Dali::SamplingMode::Type mSamplingMode : 5;
   Dali::WrapMode::Type mWrapModeU : 3;
   Dali::WrapMode::Type mWrapModeV : 3;
-  Dali::UI::ImageVisual::LoadPolicy::Type mLoadPolicy;
-  Dali::UI::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
   TextureManager::LoadState mLoadState; ///< The texture loading state
 
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
@@ -387,7 +387,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

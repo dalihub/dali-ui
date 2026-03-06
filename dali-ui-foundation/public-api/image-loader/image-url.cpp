@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ImageUrl::ImageUrl()
 {
@@ -34,19 +34,19 @@ ImageUrl::~ImageUrl()
 
 ImageUrl ImageUrl::New(Texture& texture, bool preMultiplied)
 {
-  UI::Internal::ImageUrlPtr internal = UI::Internal::ImageUrl::New(texture, preMultiplied);
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(texture, preMultiplied);
   return ImageUrl(internal.Get());
 }
 
 ImageUrl ImageUrl::New(const EncodedImageBuffer& encodedImageBuffer)
 {
-  UI::Internal::ImageUrlPtr internal = UI::Internal::ImageUrl::New(encodedImageBuffer);
+  Ui::Internal::ImageUrlPtr internal = Ui::Internal::ImageUrl::New(encodedImageBuffer);
   return ImageUrl(internal.Get());
 }
 
 ImageUrl ImageUrl::DownCast(BaseHandle handle)
 {
-  return ImageUrl(dynamic_cast<UI::Internal::ImageUrl*>(handle.GetObjectPtr()));
+  return ImageUrl(dynamic_cast<Ui::Internal::ImageUrl*>(handle.GetObjectPtr()));
 }
 
 ImageUrl::ImageUrl(const ImageUrl& rhs) = default;
@@ -62,11 +62,11 @@ const std::string& ImageUrl::GetUrl() const
   return GetImpl(*this).GetUrl();
 }
 
-ImageUrl::ImageUrl(UI::Internal::ImageUrl* internal)
+ImageUrl::ImageUrl(Ui::Internal::ImageUrl* internal)
   : BaseHandle(internal)
 {
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 class CommonTextUtils
 {
@@ -56,8 +56,8 @@ public:
    */
   static void RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                          Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
-                         Actor& backgroundActor, Actor& cursorLayerActor, UI::Control& stencil,
-                         std::vector<Actor>& clippingDecorationActors, std::vector<UI::TextAnchor>& anchorActors,
+                         Actor& backgroundActor, Actor& cursorLayerActor, Ui::Control& stencil,
+                         std::vector<Actor>& clippingDecorationActors, std::vector<Ui::TextAnchor>& anchorActors,
                          Text::Controller::UpdateTextType updateTextType);
 
   /**
@@ -67,7 +67,7 @@ public:
    * @param[in,out] anchorActors Anchor actors
    */
   static void SynchronizeTextAnchorsInParent(Actor parent, Text::ControllerPtr controller,
-                                             std::vector<UI::TextAnchor>& anchorActors);
+                                             std::vector<Ui::TextAnchor>& anchorActors);
 
   /**
    * @brief Gets the bounding box of a specific text range.
@@ -179,14 +179,14 @@ protected:
    *
    * @return Text anchors
    */
-  virtual const std::vector<UI::TextAnchor>& GetTextAnchors() const = 0;
+  virtual const std::vector<Ui::TextAnchor>& GetTextAnchors() const = 0;
 
   /**
    * @brief Gets text controller.
    *
    * @return The text controller
    */
-  virtual UI::Text::ControllerPtr GetTextController() const = 0;
+  virtual Ui::Text::ControllerPtr GetTextController() const = 0;
 
   /**
    * @brief Get substitute character for hidden text.
@@ -209,7 +209,7 @@ public:
   using TextControlAccessible::TextControlAccessible;
 
   /**
-   * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+   * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
    */
   Accessibility::States CalculateStates() override;
 
@@ -265,6 +265,6 @@ protected:
   virtual void RequestTextRelayout() = 0;
 };
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal
 
 #endif // DALI_UI_INTERNAL_TEXT_CONTROLS_COMMON_TEXT_UTILS_H

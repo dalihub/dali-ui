@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -144,7 +144,7 @@ public:
   /**
    * UI string data format
    */
-  enum UIFormat
+  enum UiFormat
   {
     JSON, ///< String is JSON
   };
@@ -158,7 +158,7 @@ public:
    * @param data A string represenation of an Actor tree
    * @param format The string representation format ie JSON
    */
-  void LoadFromString(const std::string& data, UIFormat format = JSON);
+  void LoadFromString(const std::string& data, UiFormat format = JSON);
 
   /**
    * @brief Adds user defined constants to all future style template or animation expansions
@@ -453,7 +453,7 @@ private:
 
 }; // class Builder
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

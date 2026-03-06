@@ -23,105 +23,105 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
-UIConfig::UIConfig(Integration::UIConfigImpl* impl)
+UiConfig::UiConfig(Integration::UiConfigImpl* impl)
   : BaseHandle(impl)
 {
 }
 
-UIConfig UIConfig::New()
+UiConfig UiConfig::New()
 {
-  return Integration::UIConfigImpl::New();
+  return Integration::UiConfigImpl::New();
 }
 
-UIConfig UIConfig::DownCast(BaseHandle handle)
+UiConfig UiConfig::DownCast(BaseHandle handle)
 {
-  return UIConfig(dynamic_cast<Integration::UIConfigImpl*>(handle.GetObjectPtr()));
+  return UiConfig(dynamic_cast<Integration::UiConfigImpl*>(handle.GetObjectPtr()));
 }
 
-void UIConfig::Apply()
+void UiConfig::Apply()
 {
-  Integration::UIConfigManager::Get().Initialize(std::move(*this));
+  Integration::UiConfigManager::Get().Initialize(std::move(*this));
 }
 
-UIConfig& UIConfig::SetScalingFactor(float scalingFactor)
+UiConfig& UiConfig::SetScalingFactor(float scalingFactor)
 {
   GetImpl(*this).SetScalingFactor(scalingFactor);
   return *this;
 }
 
-float UIConfig::GetScalingFactor() const
+float UiConfig::GetScalingFactor() const
 {
   return GetImpl(*this).GetScalingFactor();
 }
 
-UIConfig& UIConfig::SetDpi(int dpi)
+UiConfig& UiConfig::SetDpi(int dpi)
 {
   GetImpl(*this).SetDpi(dpi);
   return *this;
 }
 
-int UIConfig::GetDpi() const
+int UiConfig::GetDpi() const
 {
   return GetImpl(*this).GetDpi();
 }
 
-UIConfig& UIConfig::SetBaselineDpi(int baselineDpi)
+UiConfig& UiConfig::SetBaselineDpi(int baselineDpi)
 {
   GetImpl(*this).SetBaselineDpi(baselineDpi);
   return *this;
 }
 
-int UIConfig::GetBaselineDpi() const
+int UiConfig::GetBaselineDpi() const
 {
   return GetImpl(*this).GetBaselineDpi();
 }
 
-UIConfig& UIConfig::SetKeyClickPolicy(KeyClickPolicy policy)
+UiConfig& UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   GetImpl(*this).SetKeyClickPolicy(policy);
   return *this;
 }
 
-KeyClickPolicy UIConfig::GetKeyClickPolicy() const
+KeyClickPolicy UiConfig::GetKeyClickPolicy() const
 {
   return GetImpl(*this).GetKeyClickPolicy();
 }
 
-UIConfig& UIConfig::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+UiConfig& UiConfig::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
 {
   GetImpl(*this).SetExecutionKeyPredicate(predicate);
   return *this;
 }
 
-ExecutionKeyPredicate UIConfig::GetExecutionKeyPredicate() const
+ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
 {
   return GetImpl(*this).GetExecutionKeyPredicate();
 }
 
-UIConfig& UIConfig::SetMinLongPressKeyCount(uint32_t count)
+UiConfig& UiConfig::SetMinLongPressKeyCount(uint32_t count)
 {
   GetImpl(*this).SetMinLongPressKeyCount(count);
   return *this;
 }
 
-uint32_t UIConfig::GetMinLongPressKeyCount() const
+uint32_t UiConfig::GetMinLongPressKeyCount() const
 {
   return GetImpl(*this).GetMinLongPressKeyCount();
 }
 
-UIConfig& UIConfig::SetTapRecognizerTime(uint32_t timeMs)
+UiConfig& UiConfig::SetTapRecognizerTime(uint32_t timeMs)
 {
   GetImpl(*this).SetTapRecognizerTime(timeMs);
   return *this;
 }
 
-uint32_t UIConfig::GetTapRecognizerTime() const
+uint32_t UiConfig::GetTapRecognizerTime() const
 {
   return GetImpl(*this).GetTapRecognizerTime();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

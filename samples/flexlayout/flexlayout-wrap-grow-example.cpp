@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/flex-layout.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 /**
  * FlexLayout wrap and flex-grow sample.

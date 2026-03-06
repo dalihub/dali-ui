@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ItemView::ItemView()
 {
@@ -240,6 +240,6 @@ ItemView::LayoutActivatedSignalType& ItemView::LayoutActivatedSignal()
   return GetImpl(*this).LayoutActivatedSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

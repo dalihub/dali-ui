@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 class View;
 
@@ -43,6 +43,6 @@ class View;
 Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr& textVisualModel,
                                       const LogicalModelPtr& textLogicalModel, Shader& textShaderBackground);
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_BACKGROUND_ACTOR_H

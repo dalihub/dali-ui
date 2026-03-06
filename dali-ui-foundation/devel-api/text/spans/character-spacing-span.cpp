@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -62,11 +62,11 @@ bool CharacterSpacingSpan::IsCharacterSpacingDefined() const
 
 CharacterSpacingSpan CharacterSpacingSpan::DownCast(BaseHandle handle)
 {
-  return CharacterSpacingSpan(dynamic_cast<Dali::UI::Text::Internal::CharacterSpacingSpan*>(handle.GetObjectPtr()));
+  return CharacterSpacingSpan(dynamic_cast<Dali::Ui::Text::Internal::CharacterSpacingSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

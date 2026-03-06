@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -43,30 +43,30 @@ const Dali::Vector2 DEFAULT_SCROLL_BAR_PADDING(8.0f, 6.0f);
 
 BaseHandle Create()
 {
-  return UI::TextSelectionToolbar::New();
+  return Ui::TextSelectionToolbar::New();
 }
 
 // Setup properties, signals and actions using the type-registry.
 
-DALI_TYPE_REGISTRATION_BEGIN(UI::TextSelectionToolbar, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::TextSelectionToolbar, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionToolbar, "maxSize", VECTOR2, MAX_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionToolbar, "enableOvershoot", BOOLEAN, ENABLE_OVERSHOOT)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionToolbar, "enableScrollBar", BOOLEAN, ENABLE_SCROLL_BAR)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionToolbar, "scrollBarPadding", VECTOR2, SCROLL_BAR_PADDING)
-DALI_PROPERTY_REGISTRATION(UI, TextSelectionToolbar, "scrollView", MAP, SCROLL_VIEW)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionToolbar, "maxSize", VECTOR2, MAX_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionToolbar, "enableOvershoot", BOOLEAN, ENABLE_OVERSHOOT)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionToolbar, "enableScrollBar", BOOLEAN, ENABLE_SCROLL_BAR)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionToolbar, "scrollBarPadding", VECTOR2, SCROLL_BAR_PADDING)
+DALI_PROPERTY_REGISTRATION(Ui, TextSelectionToolbar, "scrollView", MAP, SCROLL_VIEW)
 
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
 
-Dali::UI::TextSelectionToolbar TextSelectionToolbar::New()
+Dali::Ui::TextSelectionToolbar TextSelectionToolbar::New()
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<TextSelectionToolbar> impl = new TextSelectionToolbar();
 
   // Pass ownership to CustomActor handle
-  Dali::UI::TextSelectionToolbar handle(*impl);
+  Dali::Ui::TextSelectionToolbar handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -77,7 +77,7 @@ Dali::UI::TextSelectionToolbar TextSelectionToolbar::New()
 
 void TextSelectionToolbar::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextSelectionToolbar selectionPopup = UI::TextSelectionToolbar::DownCast(Dali::BaseHandle(object));
+  Ui::TextSelectionToolbar selectionPopup = Ui::TextSelectionToolbar::DownCast(Dali::BaseHandle(object));
 
   if (selectionPopup)
   {
@@ -85,31 +85,31 @@ void TextSelectionToolbar::SetProperty(BaseObject* object, Property::Index index
 
     switch (index)
     {
-      case UI::TextSelectionToolbar::Property::MAX_SIZE:
+      case Ui::TextSelectionToolbar::Property::MAX_SIZE:
       {
         impl.SetPopupMaxSize(value.Get<Vector2>());
         break;
       }
-      case UI::TextSelectionToolbar::Property::ENABLE_OVERSHOOT:
+      case Ui::TextSelectionToolbar::Property::ENABLE_OVERSHOOT:
       {
         if (!impl.mScrollView)
         {
-          impl.mScrollView = UI::ScrollView::New();
+          impl.mScrollView = Ui::ScrollView::New();
         }
         impl.mScrollView.SetOvershootEnabled(value.Get<bool>());
         break;
       }
-      case UI::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR:
+      case Ui::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR:
       {
         impl.SetUpScrollBar(value.Get<bool>());
         break;
       }
-      case UI::TextSelectionToolbar::Property::SCROLL_BAR_PADDING:
+      case Ui::TextSelectionToolbar::Property::SCROLL_BAR_PADDING:
       {
         impl.SetScrollBarPadding(value.Get<Vector2>());
         break;
       }
-      case UI::TextSelectionToolbar::Property::SCROLL_VIEW:
+      case Ui::TextSelectionToolbar::Property::SCROLL_VIEW:
       {
         // Get a Property::Map from the property if possible.
         Property::Map setPropertyMap;
@@ -127,7 +127,7 @@ Property::Value TextSelectionToolbar::GetProperty(BaseObject* object, Property::
 {
   Property::Value value;
 
-  UI::TextSelectionToolbar selectionPopup = UI::TextSelectionToolbar::DownCast(Dali::BaseHandle(object));
+  Ui::TextSelectionToolbar selectionPopup = Ui::TextSelectionToolbar::DownCast(Dali::BaseHandle(object));
 
   if (selectionPopup)
   {
@@ -135,22 +135,22 @@ Property::Value TextSelectionToolbar::GetProperty(BaseObject* object, Property::
 
     switch (index)
     {
-      case UI::TextSelectionToolbar::Property::MAX_SIZE:
+      case Ui::TextSelectionToolbar::Property::MAX_SIZE:
       {
         value = impl.GetPopupMaxSize();
         break;
       }
-      case UI::TextSelectionToolbar::Property::ENABLE_OVERSHOOT:
+      case Ui::TextSelectionToolbar::Property::ENABLE_OVERSHOOT:
       {
         value = impl.mScrollView.IsOvershootEnabled();
         break;
       }
-      case UI::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR:
+      case Ui::TextSelectionToolbar::Property::ENABLE_SCROLL_BAR:
       {
         value = impl.mScrollBar ? true : false;
         break;
       }
-      case UI::TextSelectionToolbar::Property::SCROLL_BAR_PADDING:
+      case Ui::TextSelectionToolbar::Property::SCROLL_BAR_PADDING:
       {
         value = impl.GetScrollBarPadding();
         break;
@@ -232,12 +232,12 @@ void TextSelectionToolbar::SetUp()
 
   if (!mScrollView)
   {
-    mScrollView = UI::ScrollView::New();
+    mScrollView = Ui::ScrollView::New();
   }
   SetUpScrollView();
 
   // Toolbar must start with at least one option, adding further options with increase it's size
-  mTableOfButtons = Dali::UI::TableView::New(1, 1);
+  mTableOfButtons = Dali::Ui::TableView::New(1, 1);
   mTableOfButtons.SetFitHeight(0);
   mTableOfButtons.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER_LEFT);
   mTableOfButtons.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER_LEFT);
@@ -254,12 +254,12 @@ void TextSelectionToolbar::SetUpScrollBar(bool enable)
   {
     if (!mScrollBar)
     {
-      UI::ImageView indicator = UI::ImageView::New();
+      Ui::ImageView indicator = Ui::ImageView::New();
       indicator.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
       indicator.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
       indicator.SetStyleName("TextSelectionScrollIndicator");
 
-      mScrollBar = UI::ScrollBar::New(UI::ScrollBar::HORIZONTAL);
+      mScrollBar = Ui::ScrollBar::New(Ui::ScrollBar::HORIZONTAL);
       mScrollBar.SetProperty(Dali::Actor::Property::NAME, "Text popup scroll bar");
       mScrollBar.SetStyleName("TextSelectionScrollBar");
       mScrollBar.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::BOTTOM_LEFT);
@@ -296,7 +296,7 @@ void TextSelectionToolbar::OnScrollCompleted(const Vector2& position)
 
 void TextSelectionToolbar::AddOption(Actor& option)
 {
-  mTableOfButtons.AddChild(option, UI::TableView::CellPosition(0, mIndexInTable));
+  mTableOfButtons.AddChild(option, Ui::TableView::CellPosition(0, mIndexInTable));
   mTableOfButtons.SetFitWidth(mIndexInTable);
   mIndexInTable++;
 }
@@ -311,7 +311,7 @@ void TextSelectionToolbar::ResizeDividers(Size& size)
 {
   for (unsigned int i = 0; i < mDividerIndexes.Count(); ++i)
   {
-    Actor divider = mTableOfButtons.GetChildAt(UI::TableView::CellPosition(0, mDividerIndexes[i]));
+    Actor divider = mTableOfButtons.GetChildAt(Ui::TableView::CellPosition(0, mDividerIndexes[i]));
     divider.SetProperty(Actor::Property::SIZE, size);
   }
   RelayoutRequest();
@@ -352,7 +352,7 @@ void TextSelectionToolbar::ConfigureScrollview(const Property::Map& properties)
     if (setPropertyIndex != Property::INVALID_INDEX)
     {
       // Convert the string representation of a color into a Vector4
-      if (setPropertyIndex == UI::Scrollable::Property::OVERSHOOT_EFFECT_COLOR)
+      if (setPropertyIndex == Ui::Scrollable::Property::OVERSHOOT_EFFECT_COLOR)
       {
         Vector4 color;
         if (ConvertPropertyToColor(propertyPair.second, color))
@@ -394,6 +394,6 @@ TextSelectionToolbar::~TextSelectionToolbar()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

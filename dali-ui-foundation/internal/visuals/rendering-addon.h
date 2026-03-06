@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -32,7 +32,7 @@ namespace Internal
  */
 class RenderingAddOn : public Dali::AddOn::AddOnBinder
 {
-  using TextureManager = Dali::UI::Internal::TextureManager;
+  using TextureManager = Dali::Ui::Internal::TextureManager;
 
 public:
   RenderingAddOn()
@@ -76,7 +76,7 @@ public:
 };
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_CMAKE_RENDERING_ADDON_H

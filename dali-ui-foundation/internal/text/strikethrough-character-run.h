@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -50,12 +50,12 @@ struct StrikethroughCharacterRun : public AbstractStyleCharacterRun
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 // Allow StrikethroughCharacterRun to be treated as a POD type
 template <>
-struct TypeTraits<Dali::UI::Text::StrikethroughCharacterRun>
-  : public Dali::BasicTypes<Dali::UI::Text::StrikethroughCharacterRun>
+struct TypeTraits<Dali::Ui::Text::StrikethroughCharacterRun>
+  : public Dali::BasicTypes<Dali::Ui::Text::StrikethroughCharacterRun>
 {
   enum
   {

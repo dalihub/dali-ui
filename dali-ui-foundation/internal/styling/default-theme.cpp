@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -47,9 +47,9 @@ void DefaultTheme::Reset()
   mTextEditorStyle.Clear();
 }
 
-void DefaultTheme::ApplyDefaultStyle(UI::TextLabel textLabel)
+void DefaultTheme::ApplyDefaultStyle(Ui::TextLabel textLabel)
 {
-  UI::StyleManager styleManager = UI::StyleManager::Get();
+  Ui::StyleManager styleManager = Ui::StyleManager::Get();
   if (!styleManager)
   {
     return;
@@ -71,9 +71,9 @@ void DefaultTheme::ApplyDefaultStyle(UI::TextLabel textLabel)
   }
 }
 
-void DefaultTheme::ApplyDefaultStyle(UI::TextField textField)
+void DefaultTheme::ApplyDefaultStyle(Ui::TextField textField)
 {
-  UI::StyleManager styleManager = UI::StyleManager::Get();
+  Ui::StyleManager styleManager = Ui::StyleManager::Get();
   if (!styleManager)
   {
     return;
@@ -94,9 +94,9 @@ void DefaultTheme::ApplyDefaultStyle(UI::TextField textField)
   }
 }
 
-void DefaultTheme::ApplyDefaultStyle(UI::TextEditor textEditor)
+void DefaultTheme::ApplyDefaultStyle(Ui::TextEditor textEditor)
 {
-  UI::StyleManager styleManager = UI::StyleManager::Get();
+  Ui::StyleManager styleManager = Ui::StyleManager::Get();
   if (!styleManager)
   {
     return;
@@ -118,5 +118,5 @@ void DefaultTheme::ApplyDefaultStyle(UI::TextEditor textEditor)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace SyncImageLoader
 {
@@ -49,6 +49,6 @@ PixelData Load(const std::string& url, ImageDimensions dimensions, FittingMode::
 
 } // namespace SyncImageLoader
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

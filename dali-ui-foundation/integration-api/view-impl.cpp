@@ -40,7 +40,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -55,7 +55,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(UI::Integration::ViewImpl, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::ViewImpl, Ui::Control, Create)
 DALI_TYPE_REGISTRATION_END()
 
 /**
@@ -68,13 +68,13 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 
 } // namespace
 
-UI::View ViewImpl::New()
+Ui::View ViewImpl::New()
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<Integration::ViewImpl> impl = new Integration::ViewImpl();
 
   // Pass ownership to CustomActor handle
-  UI::View handle = UI::View(*impl);
+  Ui::View handle = Ui::View(*impl);
 
   // Second-phase initialization
   impl->Initialize();
@@ -83,8 +83,8 @@ UI::View ViewImpl::New()
 }
 
 ViewImpl::ViewImpl()
-  : UI::Internal::Control(
-        UI::Internal::Control::ControlBehaviour(static_cast<int>(UI::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT) |
+  : Ui::Internal::Control(
+        Ui::Internal::Control::ControlBehaviour(static_cast<int>(Ui::Internal::Control::CONTROL_BEHAVIOUR_DEFAULT) |
                                                 static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
     mInteractionTrait(nullptr),
     mLayoutWidth(LayoutDimension::WrapContent),
@@ -122,7 +122,7 @@ ViewImpl::~ViewImpl()
 void ViewImpl::OnInitialize()
 {
   // Call base class initialization
-  UI::Internal::Control::OnInitialize();
+  Ui::Internal::Control::OnInitialize();
 
   // Set default anchor point for layout positioning
   Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -131,7 +131,7 @@ void ViewImpl::OnInitialize()
 
 void ViewImpl::OnSceneConnection(int depth)
 {
-  UI::Internal::Control::OnSceneConnection(depth);
+  Ui::Internal::Control::OnSceneConnection(depth);
 
   // When this view (layout root) is added to a window, ensure it is scheduled for layout.
   // This handles the case where invalidation occurred before the view was added to the window.
@@ -174,7 +174,7 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     return;
   }
-  UI::Internal::Control::OnRelayout(size, container);
+  Ui::Internal::Control::OnRelayout(size, container);
 }
 
 // =============================================================================
@@ -523,7 +523,7 @@ void ViewImpl::InvalidateMeasure()
 
   // Propagate to parent when present so its cache is cleared too.
   // Always propagate when parent exists: a child's size change affects parent measure/arrange.
-  UI::Layout parentLayout = GetParentLayout();
+  Ui::Layout parentLayout = GetParentLayout();
   if (parentLayout)
   {
     Integration::GetImpl(parentLayout).InvalidateMeasure();
@@ -543,7 +543,7 @@ void ViewImpl::InvalidateArrange()
 
   // Propagate to layout root so ProcessLayouts runs (Arrange-only changes still need a pass).
   // Always propagate when parent exists: a child's change may require parent re-arrange.
-  UI::Layout parentLayout = GetParentLayout();
+  Ui::Layout parentLayout = GetParentLayout();
   if (parentLayout)
   {
     Integration::GetImpl(parentLayout).InvalidateArrange();
@@ -770,14 +770,14 @@ LayoutAlignment ViewImpl::GetVerticalAlignment() const
 // Parent Layout API
 // =============================================================================
 
-UI::Layout ViewImpl::GetParentLayout() const
+Ui::Layout ViewImpl::GetParentLayout() const
 {
   Actor parent = Self().GetParent();
   if (parent)
   {
-    return UI::Layout::DownCast(parent);
+    return Ui::Layout::DownCast(parent);
   }
-  return UI::Layout();
+  return Ui::Layout();
 }
 
 bool ViewImpl::IsLayout() const
@@ -810,7 +810,7 @@ bool ViewImpl::HasLayoutManager() const
 // Child Management API
 // =============================================================================
 
-void ViewImpl::AddView(UI::View view)
+void ViewImpl::AddView(Ui::View view)
 {
   if (!view)
   {
@@ -831,7 +831,7 @@ void ViewImpl::AddView(UI::View view)
   InvalidateMeasure();
 }
 
-void ViewImpl::AddView(UI::View view, uint32_t index)
+void ViewImpl::AddView(Ui::View view, uint32_t index)
 {
   if (!view)
   {
@@ -858,7 +858,7 @@ void ViewImpl::AddView(UI::View view, uint32_t index)
   InvalidateMeasure();
 }
 
-void ViewImpl::RemoveView(UI::View view)
+void ViewImpl::RemoveView(Ui::View view)
 {
   if (!view)
   {
@@ -888,7 +888,7 @@ void ViewImpl::RemoveViewAt(uint32_t index)
     return;
   }
 
-  UI::View view = mChildren[index].view;
+  Ui::View view = mChildren[index].view;
   mChildren.erase(mChildren.begin() + index);
   Self().Remove(view);
   InvalidateMeasure();
@@ -914,16 +914,16 @@ uint32_t ViewImpl::GetChildCount() const
   return static_cast<uint32_t>(mChildren.size());
 }
 
-UI::View ViewImpl::GetChildAt(uint32_t index) const
+Ui::View ViewImpl::GetChildAt(uint32_t index) const
 {
   if (index < mChildren.size())
   {
     return mChildren[index].view;
   }
-  return UI::View();
+  return Ui::View();
 }
 
-int32_t ViewImpl::IndexOfChild(UI::View view) const
+int32_t ViewImpl::IndexOfChild(Ui::View view) const
 {
   if (!view)
   {
@@ -939,7 +939,7 @@ int32_t ViewImpl::IndexOfChild(UI::View view) const
   return -1;
 }
 
-Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<UI::View> children)
+Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<Ui::View> children)
 {
   for (const auto& child : children)
   {
@@ -959,5 +959,5 @@ const ViewImpl::ChildContainer& ViewImpl::GetChildren() const
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

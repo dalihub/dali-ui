@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -64,6 +64,6 @@ public:
   static uint32_t GetDownscaledBlurRadius(float& downscaleFactor, uint32_t& blurRadius);
 };
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 #endif // DALI_UI_INTERNAL_BLUR_ALGORITHM_H

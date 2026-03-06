@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 Property::Map CreateAlphaDiscardEffect()
 {
@@ -32,9 +32,9 @@ Property::Map CreateAlphaDiscardEffect()
   Property::Map customShader;
   customShader[Visual::Shader::Property::FRAGMENT_SHADER] = SHADER_ALPHA_DISCARD_EFFECT_FRAG.data();
 
-  map[UI::Visual::Property::SHADER] = customShader;
+  map[Ui::Visual::Property::SHADER] = customShader;
   return map;
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

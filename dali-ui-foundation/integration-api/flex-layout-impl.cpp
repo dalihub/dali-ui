@@ -23,15 +23,15 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
 
-UI::FlexLayout FlexLayoutImpl::New()
+Ui::FlexLayout FlexLayoutImpl::New()
 {
   IntrusivePtr<Integration::FlexLayoutImpl> impl = new Integration::FlexLayoutImpl();
-  UI::FlexLayout handle = UI::FlexLayout(*impl);
+  Ui::FlexLayout handle = Ui::FlexLayout(*impl);
   impl->Initialize();
   return handle;
 }
@@ -151,5 +151,5 @@ LayoutManager* FlexLayoutImpl::CreateLayoutManager()
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

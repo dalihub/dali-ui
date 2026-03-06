@@ -32,7 +32,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -86,7 +86,7 @@ public:
   /**
    * @copydoc Dali::AsyncTextManager::LoadComplete()
    */
-  void LoadComplete(UI::Internal::TextLoadingTaskPtr task);
+  void LoadComplete(Ui::Internal::TextLoadingTaskPtr task);
 
 public: ///< Called from worker thread
   /**
@@ -94,12 +94,12 @@ public: ///< Called from worker thread
    * @param[in] task The task which loader used. Could be nullptr for error case.
    * @param[in] loader The loader used by task.
    */
-  static void ReleaseLoaderToManager(UI::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader);
+  static void ReleaseLoaderToManager(Ui::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader);
 
   /**
-   * @copydoc Dali::UI::Text::Internal::AsyncTextManager::ReleaseLoaderToManager()
+   * @copydoc Dali::Ui::Text::Internal::AsyncTextManager::ReleaseLoaderToManager()
    */
-  void ReleaseLoader(UI::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader);
+  void ReleaseLoader(Ui::Internal::TextLoadingTaskPtr task, Text::AsyncTextLoader loader);
 
 private:
   /**
@@ -114,7 +114,7 @@ private:
     {
     }
 
-    LoadElement(UI::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer,
+    LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer,
                 const AsyncTextParameters& parameters)
       : mTask(task),
         mObserver(observer),
@@ -122,7 +122,7 @@ private:
     {
     }
 
-    UI::Internal::TextLoadingTaskPtr mTask; ///< Task.
+    Ui::Internal::TextLoadingTaskPtr mTask; ///< Task.
     TextLoadObserver* mObserver;            ///< Observer of text load.
     AsyncTextParameters mParameters;        ///< Text parameters to load.
   };
@@ -186,7 +186,7 @@ inline static const Internal::AsyncTextManager& GetImplementation(const AsyncTex
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

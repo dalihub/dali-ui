@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -85,7 +85,7 @@ void OffScreenRenderingImpl::OnActivate()
   {
     return;
   }
-  UI::Control ownerControl = GetOwnerControl();
+  Ui::Control ownerControl = GetOwnerControl();
   DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
 
   if (!mCamera)
@@ -117,7 +117,7 @@ void OffScreenRenderingImpl::OnActivate()
 
 void OffScreenRenderingImpl::OnDeactivate()
 {
-  UI::Control control = GetOwnerControl();
+  Ui::Control control = GetOwnerControl();
   if (DALI_LIKELY(control))
   {
     Renderer renderer = GetTargetRenderer();
@@ -158,7 +158,7 @@ void OffScreenRenderingImpl::DestroyFrameBuffer()
 
 void OffScreenRenderingImpl::CreateRenderTask()
 {
-  UI::Control control = GetOwnerControl();
+  Ui::Control control = GetOwnerControl();
   Dali::Integration::SceneHolder sceneHolder = GetSceneHolder();
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
 
@@ -194,5 +194,5 @@ void OffScreenRenderingImpl::OnRenderFinished(Dali::RenderTask& task)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

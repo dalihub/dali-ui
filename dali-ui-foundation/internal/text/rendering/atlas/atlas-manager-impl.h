@@ -26,17 +26,17 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class AtlasManager;
 
-} // namespace UI
+} // namespace Ui
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
-typedef Dali::Vector<UI::AtlasManager::AtlasSlot> slotContainer;
+typedef Dali::Vector<Ui::AtlasManager::AtlasSlot> slotContainer;
 
 class AtlasManager;
 typedef IntrusivePtr<AtlasManager> AtlasManagerPtr;
@@ -54,7 +54,7 @@ public:
   struct AtlasDescriptor
   {
     Dali::Texture mAtlas;                   // atlas image
-    UI::AtlasManager::AtlasSize mSize;      // size of atlas
+    Ui::AtlasManager::AtlasSize mSize;      // size of atlas
     Pixel::Format mPixelFormat;             // pixel format used by atlas
     PixelData mHorizontalStrip;             // Image used to pad upload
     PixelData mVerticalStrip;               // Image used to pad upload
@@ -83,90 +83,90 @@ public:
   virtual ~AtlasManager();
 
   /**
-   * @copydoc: UI::AtlasManager::CreateAtlas
+   * @copydoc: Ui::AtlasManager::CreateAtlas
    */
-  AtlasId CreateAtlas(const UI::AtlasManager::AtlasSize& size, Pixel::Format pixelformat);
+  AtlasId CreateAtlas(const Ui::AtlasManager::AtlasSize& size, Pixel::Format pixelformat);
 
   /**
-   * @copydoc UI::AtlasManager::SetAddPolicy
+   * @copydoc Ui::AtlasManager::SetAddPolicy
    */
-  void SetAddPolicy(UI::AtlasManager::AddFailPolicy policy);
+  void SetAddPolicy(Ui::AtlasManager::AddFailPolicy policy);
 
   /**
-   * @copydoc UI::AtlasManager::Add
+   * @copydoc Ui::AtlasManager::Add
    */
-  bool Add(const PixelData& image, UI::AtlasManager::AtlasSlot& slot, UI::AtlasManager::AtlasId atlas);
+  bool Add(const PixelData& image, Ui::AtlasManager::AtlasSlot& slot, Ui::AtlasManager::AtlasId atlas);
 
   /**
-   * @copydoc UI::AtlasManager::GenerateMeshData
+   * @copydoc Ui::AtlasManager::GenerateMeshData
    */
-  void GenerateMeshData(ImageId id, const Vector2& position, UI::AtlasManager::Mesh2D& mesh, bool addReference);
+  void GenerateMeshData(ImageId id, const Vector2& position, Ui::AtlasManager::Mesh2D& mesh, bool addReference);
 
   /**
-   * @copydoc UI::AtlasManager::Remove
+   * @copydoc Ui::AtlasManager::Remove
    */
   bool Remove(ImageId id);
 
   /**
-   * @copydoc UI::AtlasManager::GetAtlasContainer
+   * @copydoc Ui::AtlasManager::GetAtlasContainer
    */
   Dali::Texture GetAtlasContainer(AtlasId atlas) const;
 
   /**
-   * @copydoc UI::AtlasManager::GetAtlas
+   * @copydoc Ui::AtlasManager::GetAtlas
    */
   AtlasId GetAtlas(ImageId id) const;
 
   /**
-   * @copydoc UI::AtlasManager::SetNewAtlasSize
+   * @copydoc Ui::AtlasManager::SetNewAtlasSize
    */
-  void SetNewAtlasSize(const UI::AtlasManager::AtlasSize& size);
+  void SetNewAtlasSize(const Ui::AtlasManager::AtlasSize& size);
 
   /**
-   * @copydoc UI::AtlasManager::GetAtlasSize
+   * @copydoc Ui::AtlasManager::GetAtlasSize
    */
-  const UI::AtlasManager::AtlasSize& GetAtlasSize(AtlasId atlas);
+  const Ui::AtlasManager::AtlasSize& GetAtlasSize(AtlasId atlas);
 
   /**
-   * @copydoc UI::AtlasManager::GetBlockSize
+   * @copydoc Ui::AtlasManager::GetBlockSize
    */
   Vector2 GetBlockSize(AtlasId atlas);
 
   /**
-   * @copydoc UI::AtlasManager::GetFreeBlocks
+   * @copydoc Ui::AtlasManager::GetFreeBlocks
    */
   SizeType GetFreeBlocks(AtlasId atlas) const;
 
   /*
-   * @copydoc UI::AtlasManager::GetAtlasCount
+   * @copydoc Ui::AtlasManager::GetAtlasCount
    */
   SizeType GetAtlasCount() const;
 
   /**
-   * @copydoc UI::AtlasManager::GetPixelFormat
+   * @copydoc Ui::AtlasManager::GetPixelFormat
    */
   Pixel::Format GetPixelFormat(AtlasId atlas) const;
 
   /**
-   * @copydoc UI::AtlasManager::GetMetrics
+   * @copydoc Ui::AtlasManager::GetMetrics
    */
-  void GetMetrics(UI::AtlasManager::Metrics& metrics);
+  void GetMetrics(Ui::AtlasManager::Metrics& metrics);
 
   /**
-   * @copydoc UI::AtlasManager::GetTextures
+   * @copydoc Ui::AtlasManager::GetTextures
    */
   TextureSet GetTextures(AtlasId atlas) const;
 
   /**
-   * @copydoc UI::AtlasManager::SetTextures
+   * @copydoc Ui::AtlasManager::SetTextures
    */
   void SetTextures(AtlasId atlas, TextureSet& textureSet);
 
 private:
   std::vector<AtlasDescriptor> mAtlasList;        // List of atlases created
   Vector<AtlasSlotDescriptor> mImageList;         // List of bitmaps stored in atlases
-  UI::AtlasManager::AtlasSize mNewAtlasSize;      // Atlas size to use in next creation
-  UI::AtlasManager::AddFailPolicy mAddFailPolicy; // Policy for failing to add an Image
+  Ui::AtlasManager::AtlasSize mNewAtlasSize;      // Atlas size to use in next creation
+  Ui::AtlasManager::AddFailPolicy mAddFailPolicy; // Policy for failing to add an Image
 
   SizeType CheckAtlas(SizeType atlas, SizeType width, SizeType height, Pixel::Format pixelFormat);
 
@@ -175,7 +175,7 @@ private:
 
 } // namespace Internal
 
-inline const Internal::AtlasManager& GetImplementation(const UI::AtlasManager& manager)
+inline const Internal::AtlasManager& GetImplementation(const Ui::AtlasManager& manager)
 {
   DALI_ASSERT_ALWAYS(manager && "AtlasManager handle is empty");
 
@@ -184,7 +184,7 @@ inline const Internal::AtlasManager& GetImplementation(const UI::AtlasManager& m
   return static_cast<const Internal::AtlasManager&>(handle);
 }
 
-inline Internal::AtlasManager& GetImplementation(UI::AtlasManager& manager)
+inline Internal::AtlasManager& GetImplementation(Ui::AtlasManager& manager)
 {
   DALI_ASSERT_ALWAYS(manager && "AtlasManager handle is empty");
 
@@ -193,7 +193,7 @@ inline Internal::AtlasManager& GetImplementation(UI::AtlasManager& manager)
   return static_cast<Internal::AtlasManager&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

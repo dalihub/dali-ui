@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -50,7 +50,7 @@ typedef IntrusivePtr<ScrollOvershootIndicator> ScrollOvershootIndicatorPtr;
 class ScrollViewPropertyHandler;
 
 /**
- * @copydoc UI::ScrollView
+ * @copydoc Ui::ScrollView
  */
 class ScrollView : public ScrollBase
 {
@@ -96,21 +96,21 @@ public:
   static const unsigned int SNAP_ANIMATION_FLAGS = SnappingInternalX | SnappingInternalY;
 
 private:
-  typedef std::vector<Dali::UI::ScrollViewEffect>
-      ScrollViewEffectContainer; ///< Container of Dali::UI::ScrollViewEffect
+  typedef std::vector<Dali::Ui::ScrollViewEffect>
+      ScrollViewEffectContainer; ///< Container of Dali::Ui::ScrollViewEffect
   typedef ScrollViewEffectContainer::iterator
-      ScrollViewEffectIter; ///< Iterator for Dali::UI::ScrollViewEffectContainer
+      ScrollViewEffectIter; ///< Iterator for Dali::Ui::ScrollViewEffectContainer
 
 public:
   /**
    * Create a new ScrollView.
    * @return A public handle to the newly allocated ScrollView.
    */
-  static Dali::UI::ScrollView New();
+  static Dali::Ui::ScrollView New();
 
 public:
   /**
-   * @copydoc UI::ScrollView::GetScrollSnapAlphaFunction
+   * @copydoc Ui::ScrollView::GetScrollSnapAlphaFunction
    */
   AlphaFunction GetScrollSnapAlphaFunction() const
   {
@@ -118,7 +118,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollSnapAlphaFunction
+   * @copydoc Ui::ScrollView::SetScrollSnapAlphaFunction
    */
   void SetScrollSnapAlphaFunction(AlphaFunction alpha)
   {
@@ -126,7 +126,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetScrollFlickAlphaFunction
+   * @copydoc Ui::ScrollView::GetScrollFlickAlphaFunction
    */
   AlphaFunction GetScrollFlickAlphaFunction() const
   {
@@ -134,7 +134,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollFlickAlphaFunction
+   * @copydoc Ui::ScrollView::SetScrollFlickAlphaFunction
    */
   void SetScrollFlickAlphaFunction(AlphaFunction alpha)
   {
@@ -142,7 +142,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetScrollSnapDuration
+   * @copydoc Ui::ScrollView::GetScrollSnapDuration
    */
   float GetScrollSnapDuration() const
   {
@@ -150,7 +150,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollSnapDuration
+   * @copydoc Ui::ScrollView::SetScrollSnapDuration
    */
   void SetScrollSnapDuration(float time)
   {
@@ -158,7 +158,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetScrollFlickDuration
+   * @copydoc Ui::ScrollView::GetScrollFlickDuration
    */
   float GetScrollFlickDuration() const
   {
@@ -166,7 +166,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollFlickDuration
+   * @copydoc Ui::ScrollView::SetScrollFlickDuration
    */
   void SetScrollFlickDuration(float time)
   {
@@ -174,32 +174,32 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::ApplyEffect
+   * @copydoc Ui::ScrollView::ApplyEffect
    */
-  void ApplyEffect(UI::ScrollViewEffect effect);
+  void ApplyEffect(Ui::ScrollViewEffect effect);
 
   /**
-   * @copydoc UI::ScrollView::RemoveEffect
+   * @copydoc Ui::ScrollView::RemoveEffect
    */
-  void RemoveEffect(UI::ScrollViewEffect effect);
+  void RemoveEffect(Ui::ScrollViewEffect effect);
 
   /**
-   * @copydoc UI::ScrollView::RemoveAllEffects
+   * @copydoc Ui::ScrollView::RemoveAllEffects
    */
   void RemoveAllEffects();
 
   /**
-   * @copydoc UI::ScrollView::ApplyConstraintToChildren
+   * @copydoc Ui::ScrollView::ApplyConstraintToChildren
    */
   void ApplyConstraintToChildren(Constraint constraint);
 
   /**
-   * @copydoc UI::ScrollView::RemoveConstraintsFromChildren
+   * @copydoc Ui::ScrollView::RemoveConstraintsFromChildren
    */
   void RemoveConstraintsFromChildren();
 
   /**
-   * @copydoc UI::ScrollView::GetRulerX
+   * @copydoc Ui::ScrollView::GetRulerX
    */
   const RulerPtr GetRulerX() const
   {
@@ -207,7 +207,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetRulerY
+   * @copydoc Ui::ScrollView::GetRulerY
    */
   const RulerPtr GetRulerY() const
   {
@@ -215,12 +215,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetRulerX
+   * @copydoc Ui::ScrollView::SetRulerX
    */
   void SetRulerX(RulerPtr ruler);
 
   /**
-   * @copydoc UI::ScrollView::SetRulerY
+   * @copydoc Ui::ScrollView::SetRulerY
    */
   void SetRulerY(RulerPtr ruler);
 
@@ -235,17 +235,17 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollSensitive
+   * @copydoc Ui::ScrollView::SetScrollSensitive
    */
   void SetScrollSensitive(bool sensitive);
 
   /**
-   * @copydoc UI::ScrollView::SetMaxOvershoot
+   * @copydoc Ui::ScrollView::SetMaxOvershoot
    */
   void SetMaxOvershoot(float overshootX, float overshootY);
 
   /**
-   * @copydoc UI::ScrollView::SetSnapOvershootAlphaFunction
+   * @copydoc Ui::ScrollView::SetSnapOvershootAlphaFunction
    */
   void SetSnapOvershootAlphaFunction(AlphaFunction alpha)
   {
@@ -263,7 +263,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetSnapOvershootDuration
+   * @copydoc Ui::ScrollView::SetSnapOvershootDuration
    */
   void SetSnapOvershootDuration(float duration)
   {
@@ -278,7 +278,7 @@ public:
   bool GetActorAutoSnap();
 
   /**
-   * @copydoc UI::ScrollView::SetActorAutoSnap
+   * @copydoc Ui::ScrollView::SetActorAutoSnap
    */
   void SetActorAutoSnap(bool enable)
   {
@@ -311,12 +311,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetWrapMode
+   * @copydoc Ui::ScrollView::SetWrapMode
    */
   void SetWrapMode(bool enable);
 
   /**
-   * @copydoc UI::ScrollView::GetScrollupdateDistance
+   * @copydoc Ui::ScrollView::GetScrollupdateDistance
    */
   int GetScrollUpdateDistance() const
   {
@@ -324,7 +324,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetScrollUpdateDistance
+   * @copydoc Ui::ScrollView::SetScrollUpdateDistance
    */
   void SetScrollUpdateDistance(int distance)
   {
@@ -332,7 +332,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetAxisAutoLock
+   * @copydoc Ui::ScrollView::GetAxisAutoLock
    */
   bool GetAxisAutoLock() const
   {
@@ -340,12 +340,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetAxisAutoLock
+   * @copydoc Ui::ScrollView::SetAxisAutoLock
    */
   void SetAxisAutoLock(bool enable);
 
   /**
-   * @copydoc UI::ScrollView::GetAxisAutoLockGradient
+   * @copydoc Ui::ScrollView::GetAxisAutoLockGradient
    */
   float GetAxisAutoLockGradient() const
   {
@@ -353,12 +353,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetAxisAutoLockGradient
+   * @copydoc Ui::ScrollView::SetAxisAutoLockGradient
    */
   void SetAxisAutoLockGradient(float gradient);
 
   /**
-   * @copydoc UI::ScrollView::GetFrictionCoefficient
+   * @copydoc Ui::ScrollView::GetFrictionCoefficient
    */
   float GetFrictionCoefficient() const
   {
@@ -366,12 +366,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetFrictionCoefficient
+   * @copydoc Ui::ScrollView::SetFrictionCoefficient
    */
   void SetFrictionCoefficient(float friction);
 
   /**
-   * @copydoc UI::ScrollView::GetFlickSpeedCoefficient
+   * @copydoc Ui::ScrollView::GetFlickSpeedCoefficient
    */
   float GetFlickSpeedCoefficient() const
   {
@@ -379,7 +379,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetFlickSpeedCoefficient
+   * @copydoc Ui::ScrollView::SetFlickSpeedCoefficient
    */
   void SetFlickSpeedCoefficient(float speed)
   {
@@ -387,7 +387,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetMinimumDistanceForFlick
+   * @copydoc Ui::ScrollView::GetMinimumDistanceForFlick
    */
   Vector2 GetMinimumDistanceForFlick() const
   {
@@ -395,7 +395,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetMinimumDistanceForFlick
+   * @copydoc Ui::ScrollView::SetMinimumDistanceForFlick
    */
   void SetMinimumDistanceForFlick(const Vector2& distance)
   {
@@ -403,7 +403,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetMinimumSpeedForFlick
+   * @copydoc Ui::ScrollView::GetMinimumSpeedForFlick
    */
   float GetMinimumSpeedForFlick() const
   {
@@ -411,7 +411,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetMinimumSpeedForFlick
+   * @copydoc Ui::ScrollView::SetMinimumSpeedForFlick
    */
   void SetMinimumSpeedForFlick(float speed)
   {
@@ -419,7 +419,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetMaxFlickSpeed
+   * @copydoc Ui::ScrollView::GetMaxFlickSpeed
    */
   float GetMaxFlickSpeed() const
   {
@@ -427,7 +427,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetMaxFlickSpeed
+   * @copydoc Ui::ScrollView::SetMaxFlickSpeed
    */
   void SetMaxFlickSpeed(float speed)
   {
@@ -435,7 +435,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetWheelScrollDistanceStep
+   * @copydoc Ui::ScrollView::GetWheelScrollDistanceStep
    */
   Vector2 GetWheelScrollDistanceStep() const
   {
@@ -443,7 +443,7 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::SetWheelScrollDistanceStep
+   * @copydoc Ui::ScrollView::SetWheelScrollDistanceStep
    */
   void SetWheelScrollDistanceStep(Vector2 step)
   {
@@ -451,12 +451,12 @@ public:
   }
 
   /**
-   * @copydoc UI::ScrollView::GetCurrentPage
+   * @copydoc Ui::ScrollView::GetCurrentPage
    */
   unsigned int GetCurrentPage() const;
 
   /**
-   * @copydoc UI::ScrollView::GetCurrentScrollPosition
+   * @copydoc Ui::ScrollView::GetCurrentScrollPosition
    */
   Vector2 GetCurrentScrollPosition() const;
 
@@ -474,60 +474,60 @@ public:
                    DirectionBias verticalBias = DIRECTION_BIAS_NONE);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(const Vector2 &position)
+   * @copydoc Ui::ScrollView::ScrollTo(const Vector2 &position)
    */
   void ScrollTo(const Vector2& position);
 
   /**
-   * @copydoc UI::Scrollable::ScrollTo(const Vector2& position, float duration)
+   * @copydoc Ui::Scrollable::ScrollTo(const Vector2& position, float duration)
    */
   void ScrollTo(const Vector2& position, float duration);
 
   /**
-   * @copydoc UI::Scrollable::ScrollTo(const Vector2& position, float duration, AlphaFunction alpha)
+   * @copydoc Ui::Scrollable::ScrollTo(const Vector2& position, float duration, AlphaFunction alpha)
    */
   void ScrollTo(const Vector2& position, float duration, AlphaFunction alpha);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(const Vector2 &position, float duration, DirectionBias horizontalBias,
+   * @copydoc Ui::ScrollView::ScrollTo(const Vector2 &position, float duration, DirectionBias horizontalBias,
    * DirectionBias verticalBias)
    */
   void ScrollTo(const Vector2& position, float duration, DirectionBias horizontalBias, DirectionBias verticalBias);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(const Vector2 &position, float duration, AlphaFunction alpha, DirectionBias
+   * @copydoc Ui::ScrollView::ScrollTo(const Vector2 &position, float duration, AlphaFunction alpha, DirectionBias
    * horizontalBias, DirectionBias verticalBias)
    */
   void ScrollTo(const Vector2& position, float duration, AlphaFunction alpha, DirectionBias horizontalBias,
                 DirectionBias verticalBias);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(unsigned int page)
+   * @copydoc Ui::ScrollView::ScrollTo(unsigned int page)
    */
   void ScrollTo(unsigned int page);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(unsigned int page, float duration, DirectionBias bias)
+   * @copydoc Ui::ScrollView::ScrollTo(unsigned int page, float duration, DirectionBias bias)
    */
   void ScrollTo(unsigned int page, float duration, DirectionBias bias = DIRECTION_BIAS_NONE);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(Actor& actor)
+   * @copydoc Ui::ScrollView::ScrollTo(Actor& actor)
    */
   void ScrollTo(Actor& actor);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(Actor& actor, float duration)
+   * @copydoc Ui::ScrollView::ScrollTo(Actor& actor, float duration)
    */
   void ScrollTo(Actor& actor, float duration);
 
   /**
-   * @copydoc UI::ScrollView::SetScrollingDirection()
+   * @copydoc Ui::ScrollView::SetScrollingDirection()
    */
   void SetScrollingDirection(Radian direction, Radian threshold);
 
   /**
-   * @copydoc UI::ScrollView::RemoveScrollingDirection()
+   * @copydoc Ui::ScrollView::RemoveScrollingDirection()
    */
   void RemoveScrollingDirection(Radian angle);
 
@@ -551,7 +551,7 @@ public:
                                    FindDirection dirZ = All);
 
   /**
-   * @copydoc UI::ScrollView::ScrollToSnapPoint
+   * @copydoc Ui::ScrollView::ScrollToSnapPoint
    */
   bool ScrollToSnapPoint();
 
@@ -583,22 +583,22 @@ public:
                  DirectionBias verticalBias = DIRECTION_BIAS_NONE, SnapType snapType = SNAP);
 
   /**
-   * @copydoc UI::Scrollable::AddOverlay()
+   * @copydoc Ui::Scrollable::AddOverlay()
    */
   void AddOverlay(Actor actor);
 
   /**
-   * @copydoc UI::Scrollable::RemoveOverlay()
+   * @copydoc Ui::Scrollable::RemoveOverlay()
    */
   void RemoveOverlay(Actor actor);
 
   /**
-   * @copydoc UI::Internal::Scrollable::SetOvershootSize
+   * @copydoc Ui::Internal::Scrollable::SetOvershootSize
    */
   void SetOvershootSize(const Vector2& size);
 
   /**
-   * @copydoc UI::Internal::Scrollable::SetOvershootEffectColor
+   * @copydoc Ui::Internal::Scrollable::SetOvershootEffectColor
    */
   void SetOvershootEffectColor(const Vector4& color);
 
@@ -622,9 +622,9 @@ public:
 
 public: // Signals
   /**
-   * @copydoc Dali::UI::ScrollView::SnapStartedSignal()
+   * @copydoc Dali::Ui::ScrollView::SnapStartedSignal()
    */
-  UI::ScrollView::SnapStartedSignalType& SnapStartedSignal();
+  Ui::ScrollView::SnapStartedSignalType& SnapStartedSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -671,12 +671,12 @@ private: // private overridden functions from CustomActorImpl and Controls
   bool OnWheelEvent(Actor actor, const WheelEvent& event);
 
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -691,12 +691,12 @@ private: // private overridden functions from CustomActorImpl and Controls
   void OnSceneDisconnection() override;
 
   /**
-   * @copydoc UI::Control::OnAccessibilityPan()
+   * @copydoc Ui::Control::OnAccessibilityPan()
    */
   bool OnAccessibilityPan(PanGesture gesture) override;
 
   /**
-   * @copydoc UI::Scrollable::EnableScrollOvershoot()
+   * @copydoc Ui::Scrollable::EnableScrollOvershoot()
    */
   void EnableScrollOvershoot(bool enable) override;
 
@@ -867,7 +867,7 @@ protected:
     using Scrollable::ScrollableAccessible::ScrollableAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::ScrollToChild()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::ScrollToChild()
      */
     bool ScrollToChild(Actor child) override;
   };
@@ -1002,9 +1002,9 @@ private:
                                     ///< event received.
 
   ScrollOvershootIndicatorPtr mOvershootIndicator;
-  WeakHandle<UI::ScrollBar> mScrollBar;
+  WeakHandle<Ui::ScrollBar> mScrollBar;
 
-  UI::ScrollView::SnapStartedSignalType mSnapStartedSignal;
+  Ui::ScrollView::SnapStartedSignalType mSnapStartedSignal;
 
   bool mInAccessibilityPan : 1; ///< With AccessibilityPan its easier to move between snap positions
   bool mScrolling : 1;          ///< Flag indicating whether the scroll view is being scrolled (by user or animation)
@@ -1043,25 +1043,25 @@ ScrollView::LockAxis GetLockAxis(const Vector2& panDelta, ScrollView::LockAxis c
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ScrollView& GetImpl(UI::ScrollView& scrollView)
+inline Ui::Internal::ScrollView& GetImpl(Ui::ScrollView& scrollView)
 {
   DALI_ASSERT_ALWAYS(scrollView);
 
   Dali::RefObject& handle = scrollView.GetImplementation();
 
-  return static_cast<UI::Internal::ScrollView&>(handle);
+  return static_cast<Ui::Internal::ScrollView&>(handle);
 }
 
-inline const UI::Internal::ScrollView& GetImpl(const UI::ScrollView& scrollView)
+inline const Ui::Internal::ScrollView& GetImpl(const Ui::ScrollView& scrollView)
 {
   DALI_ASSERT_ALWAYS(scrollView);
 
   const Dali::RefObject& handle = scrollView.GetImplementation();
 
-  return static_cast<const UI::Internal::ScrollView&>(handle);
+  return static_cast<const Ui::Internal::ScrollView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

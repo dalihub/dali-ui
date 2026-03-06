@@ -5,31 +5,31 @@
   /** \
   * @brief Sets the scaling factor applied to spx and sdp units. \
   * \
-  * @pre The config must not be frozen (i.e. not yet call UIConfig::Apply()). \
+  * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()). \
   * @param[in] scalingFactor The scaling factor value \
   */ \
-  ChildClass& SetScalingFactor(float scalingFactor) { UIConfig::SetScalingFactor(scalingFactor); return *this; } \
+  ChildClass& SetScalingFactor(float scalingFactor) { UiConfig::SetScalingFactor(scalingFactor); return *this; } \
   /** \
   * @brief Sets the screen DPI used for dp and sdp unit calculations. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] dpi The dots-per-inch value of the target display \
   */ \
-  ChildClass& SetDpi(int dpi) { UIConfig::SetDpi(dpi); return *this; } \
+  ChildClass& SetDpi(int dpi) { UiConfig::SetDpi(dpi); return *this; } \
   /** \
   * @brief Sets the baseline DPI used as the reference for dp calculations. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] baselineDpi The baseline dots-per-inch value \
   */ \
-  ChildClass& SetBaselineDpi(int baselineDpi) { UIConfig::SetBaselineDpi(baselineDpi); return *this; } \
+  ChildClass& SetBaselineDpi(int baselineDpi) { UiConfig::SetBaselineDpi(baselineDpi); return *this; } \
   /** \
   * @brief Sets the default key click policy for clickable views. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] policy The key click policy \
   */ \
-  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UIConfig::SetKeyClickPolicy(policy); return *this; } \
+  ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UiConfig::SetKeyClickPolicy(policy); return *this; } \
   /** \
   * @brief Sets the predicate function that determines which keys trigger click execution. \
   * \
@@ -39,18 +39,18 @@
   * @pre The config must not be frozen. \
   * @param[in] predicate A function pointer with signature bool(const std::string&) \
   */ \
-  ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UIConfig::SetExecutionKeyPredicate(predicate); return *this; } \
+  ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UiConfig::SetExecutionKeyPredicate(predicate); return *this; } \
   /** \
   * @brief Sets the minimum key repeat count to trigger a long-press via key input. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] count The minimum repeat count \
   */ \
-  ChildClass& SetMinLongPressKeyCount(uint32_t count) { UIConfig::SetMinLongPressKeyCount(count); return *this; } \
+  ChildClass& SetMinLongPressKeyCount(uint32_t count) { UiConfig::SetMinLongPressKeyCount(count); return *this; } \
   /** \
   * @brief Sets the tap recognizer time limit in milliseconds. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] timeMs The time limit in milliseconds \
   */ \
-  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UIConfig::SetTapRecognizerTime(timeMs); return *this; }
+  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UiConfig::SetTapRecognizerTime(timeMs); return *this; }

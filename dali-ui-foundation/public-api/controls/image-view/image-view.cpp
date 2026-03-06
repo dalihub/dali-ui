@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ImageView::ImageView()
 {
@@ -47,7 +47,7 @@ ImageView::~ImageView()
 
 ImageView ImageView::New()
 {
-  return UI::Internal::ImageView::New();
+  return Ui::Internal::ImageView::New();
 }
 
 ImageView ImageView::New(const std::string& url)
@@ -66,13 +66,13 @@ ImageView ImageView::New(const std::string& url, ImageDimensions size)
 
 ImageView ImageView::New(ControlBehaviour additionalBehaviour)
 {
-  return UI::Internal::ImageView::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  return Ui::Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
 ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string& url)
 {
   ImageView imageView =
-      Internal::ImageView::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+      Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   imageView.SetImage(url, ImageDimensions());
   return imageView;
 }
@@ -80,7 +80,7 @@ ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string
 ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string& url, ImageDimensions size)
 {
   ImageView imageView =
-      Internal::ImageView::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+      Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   imageView.SetImage(url, size);
   return imageView;
 }
@@ -92,12 +92,12 @@ ImageView ImageView::DownCast(BaseHandle handle)
 
 void ImageView::SetImage(const std::string& url)
 {
-  Dali::UI::GetImpl(*this).SetImage(url, ImageDimensions());
+  Dali::Ui::GetImpl(*this).SetImage(url, ImageDimensions());
 }
 
 void ImageView::SetImage(const std::string& url, ImageDimensions size)
 {
-  Dali::UI::GetImpl(*this).SetImage(url, size);
+  Dali::Ui::GetImpl(*this).SetImage(url, size);
 }
 
 ImageView::ImageView(Internal::ImageView& implementation)
@@ -111,6 +111,6 @@ ImageView::ImageView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::ImageView>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

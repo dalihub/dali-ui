@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -230,7 +230,7 @@ private:
   bool mSubstituion; ///< String substitution flag
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

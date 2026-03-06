@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -36,13 +36,13 @@ namespace
 
 } // namespace
 
-UI::Layout LayoutImpl::New()
+Ui::Layout LayoutImpl::New()
 {
   // Create the implementation
   IntrusivePtr<Integration::LayoutImpl> impl = new Integration::LayoutImpl();
 
   // Pass ownership to handle
-  UI::Layout handle = UI::Layout(*impl);
+  Ui::Layout handle = Ui::Layout(*impl);
 
   // Second-phase initialization
   impl->Initialize();
@@ -92,5 +92,5 @@ void LayoutImpl::EnsureLayoutManager()
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

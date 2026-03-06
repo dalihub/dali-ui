@@ -29,14 +29,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 class PropertyBridge;
 
 /**
- * @copydoc UI::PropertyBridge
+ * @copydoc Ui::PropertyBridge
  */
 class PropertyBridge : public Dali::BaseObject
 {
@@ -52,9 +52,9 @@ public:
   ~PropertyBridge();
 
   /**
-   * @copydoc Dali::UI::PropertyBridge::Get()
+   * @copydoc Dali::Ui::PropertyBridge::Get()
    */
-  static Dali::UI::PropertyBridge Get();
+  static Dali::Ui::PropertyBridge Get();
 
   /**
    * Get the string property.
@@ -84,7 +84,7 @@ private:
 
 } // namespace Internal
 
-inline Internal::PropertyBridge& GetImplementation(Dali::UI::PropertyBridge& obj)
+inline Internal::PropertyBridge& GetImplementation(Dali::Ui::PropertyBridge& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -93,7 +93,7 @@ inline Internal::PropertyBridge& GetImplementation(Dali::UI::PropertyBridge& obj
   return static_cast<Internal::PropertyBridge&>(handle);
 }
 
-inline const Internal::PropertyBridge& GetImplementation(const Dali::UI::PropertyBridge& obj)
+inline const Internal::PropertyBridge& GetImplementation(const Dali::Ui::PropertyBridge& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -102,7 +102,7 @@ inline const Internal::PropertyBridge& GetImplementation(const Dali::UI::Propert
   return static_cast<const Internal::PropertyBridge&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

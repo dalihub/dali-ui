@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class KeyEvent;
 class TouchEvent;
@@ -57,62 +57,62 @@ protected:
 
 public:
   /**
-   * @copydoc Dali::UI::WebView::New()
+   * @copydoc Dali::Ui::WebView::New()
    */
-  static UI::WebView New();
+  static Ui::WebView New();
 
   /**
-   * @copydoc Dali::UI::WebView::New( const std::string&, const std::string& )
+   * @copydoc Dali::Ui::WebView::New( const std::string&, const std::string& )
    */
-  static UI::WebView New(const std::string& locale, const std::string& timezoneId);
+  static Ui::WebView New(const std::string& locale, const std::string& timezoneId);
 
   /**
-   * @copydoc Dali::UI::WebView::New( uint32_t, char**, int32_t )
+   * @copydoc Dali::Ui::WebView::New( uint32_t, char**, int32_t )
    */
-  static UI::WebView New(uint32_t argc, char** argv, int32_t type);
+  static Ui::WebView New(uint32_t argc, char** argv, int32_t type);
 
   /**
-   * @copydoc Dali::UI::WebView::FindWebView()
+   * @copydoc Dali::Ui::WebView::FindWebView()
    */
-  static UI::WebView FindWebView(Dali::WebEnginePlugin* plugin);
+  static Ui::WebView FindWebView(Dali::WebEnginePlugin* plugin);
 
   /**
-   * @copydoc Dali::UI::WebView::GetContext()
+   * @copydoc Dali::Ui::WebView::GetContext()
    */
   static Dali::WebEngineContext* GetContext();
 
   /**
-   * @copydoc Dali::UI::WebView::GetCookieManager()
+   * @copydoc Dali::Ui::WebView::GetCookieManager()
    */
   static Dali::WebEngineCookieManager* GetCookieManager();
 
   /**
-   * @copydoc Dali::UI::WebView::ChangeOrientation()
+   * @copydoc Dali::Ui::WebView::ChangeOrientation()
    */
   void ChangeOrientation(int orientation);
 
   /**
-   * @copydoc Dali::UI::WebView::GetSettings()
+   * @copydoc Dali::Ui::WebView::GetSettings()
    */
-  Dali::UI::WebSettings* GetSettings() const;
+  Dali::Ui::WebSettings* GetSettings() const;
 
   /**
-   * @copydoc Dali::UI::WebView::GetBackForwardList()
+   * @copydoc Dali::Ui::WebView::GetBackForwardList()
    */
-  Dali::UI::WebBackForwardList* GetBackForwardList() const;
+  Dali::Ui::WebBackForwardList* GetBackForwardList() const;
 
   /**
-   * @copydoc Dali::UI::WebView::GetPlugin()
+   * @copydoc Dali::Ui::WebView::GetPlugin()
    */
   Dali::WebEnginePlugin* GetPlugin() const;
 
   /**
-   * @copydoc Dali::UI::WebView::GetFavicon()
+   * @copydoc Dali::Ui::WebView::GetFavicon()
    */
-  Dali::UI::ImageView GetFavicon() const;
+  Dali::Ui::ImageView GetFavicon() const;
 
   /**
-   * @copydoc Dali::UI::WebView::LoadUrl()
+   * @copydoc Dali::Ui::WebView::LoadUrl()
    */
   void LoadUrl(const std::string& url);
 
@@ -134,7 +134,7 @@ public:
                     const std::string& encoding, const std::string& baseUri);
 
   /**
-   * @copydoc Dali::UI::WebView::Reload()
+   * @copydoc Dali::Ui::WebView::Reload()
    */
   void Reload();
 
@@ -144,17 +144,17 @@ public:
   bool ReloadWithoutCache();
 
   /**
-   * @copydoc Dali::UI::WebView::StopLoading()
+   * @copydoc Dali::Ui::WebView::StopLoading()
    */
   void StopLoading();
 
   /**
-   * @copydoc Dali::UI::WebView::StopLoading()
+   * @copydoc Dali::Ui::WebView::StopLoading()
    */
   void Suspend();
 
   /**
-   * @copydoc Dali::UI::WebView::Resume()
+   * @copydoc Dali::Ui::WebView::Resume()
    */
   void Resume();
 
@@ -204,7 +204,7 @@ public:
   void SetCursorThemeName(const std::string themeName);
 
   /**
-   * @copydoc Dali::UI::WebView::ScrollBy()
+   * @copydoc Dali::Ui::WebView::ScrollBy()
    */
   void ScrollBy(int32_t deltaX, int32_t deltaY);
 
@@ -214,315 +214,315 @@ public:
   bool ScrollEdgeBy(int32_t deltaX, int32_t deltaY);
 
   /**
-   * @copydoc Dali::UI::WebView::CanGoForward()
+   * @copydoc Dali::Ui::WebView::CanGoForward()
    */
   bool CanGoForward();
 
   /**
-   * @copydoc Dali::UI::WebView::GoForward()
+   * @copydoc Dali::Ui::WebView::GoForward()
    */
   void GoForward();
 
   /**
-   * @copydoc Dali::UI::WebView::CanGoBack()
+   * @copydoc Dali::Ui::WebView::CanGoBack()
    */
   bool CanGoBack();
 
   /**
-   * @copydoc Dali::UI::WebView::GoBack()
+   * @copydoc Dali::Ui::WebView::GoBack()
    */
   void GoBack();
 
   /**
-   * @copydoc Dali::UI::WebView::EvaluateJavaScript()
+   * @copydoc Dali::Ui::WebView::EvaluateJavaScript()
    */
   void EvaluateJavaScript(const std::string& script,
                           Dali::WebEnginePlugin::JavaScriptMessageHandlerCallback resultHandler);
 
   /**
-   * @copydoc Dali::UI::WebView::AddJavaScriptMessageHandler()
+   * @copydoc Dali::Ui::WebView::AddJavaScriptMessageHandler()
    */
   void AddJavaScriptMessageHandler(const std::string& exposedObjectName,
                                    Dali::WebEnginePlugin::JavaScriptMessageHandlerCallback handler);
 
   /**
-   * @copydoc Dali::UI::WebView::AddJavaScriptEntireMessageHandler()
+   * @copydoc Dali::Ui::WebView::AddJavaScriptEntireMessageHandler()
    */
   void AddJavaScriptEntireMessageHandler(const std::string& exposedObjectName,
                                          Dali::WebEnginePlugin::JavaScriptEntireMessageHandlerCallback handler);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterJavaScriptAlertCallback()
+   * @copydoc Dali::Ui::WebView::RegisterJavaScriptAlertCallback()
    */
   void RegisterJavaScriptAlertCallback(Dali::WebEnginePlugin::JavaScriptAlertCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::JavaScriptAlertReply()
+   * @copydoc Dali::Ui::WebView::JavaScriptAlertReply()
    */
   void JavaScriptAlertReply();
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterJavaScriptConfirmCallback()
+   * @copydoc Dali::Ui::WebView::RegisterJavaScriptConfirmCallback()
    */
   void RegisterJavaScriptConfirmCallback(Dali::WebEnginePlugin::JavaScriptConfirmCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::JavaScriptConfirmReply()
+   * @copydoc Dali::Ui::WebView::JavaScriptConfirmReply()
    */
   void JavaScriptConfirmReply(bool confirmed);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterJavaScriptPromptCallback()
+   * @copydoc Dali::Ui::WebView::RegisterJavaScriptPromptCallback()
    */
   void RegisterJavaScriptPromptCallback(Dali::WebEnginePlugin::JavaScriptPromptCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::JavaScriptPromptReply()
+   * @copydoc Dali::Ui::WebView::JavaScriptPromptReply()
    */
   void JavaScriptPromptReply(const std::string& result);
 
   /**
-   * @copydoc Dali::UI::WebView::CreateHitTest()
+   * @copydoc Dali::Ui::WebView::CreateHitTest()
    */
   std::unique_ptr<Dali::WebEngineHitTest> CreateHitTest(int32_t x, int32_t y, Dali::WebEngineHitTest::HitTestMode mode);
 
   /**
-   * @copydoc Dali::UI::WebView::CreateHitTestAsynchronously()
+   * @copydoc Dali::Ui::WebView::CreateHitTestAsynchronously()
    */
   bool CreateHitTestAsynchronously(int32_t x, int32_t y, Dali::WebEngineHitTest::HitTestMode mode,
                                    Dali::WebEnginePlugin::WebEngineHitTestCreatedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::ClearHistory()
+   * @copydoc Dali::Ui::WebView::ClearHistory()
    */
   void ClearHistory();
 
   /**
-   * @copydoc Dali::UI::WebView::ClearAllTilesResources()
+   * @copydoc Dali::Ui::WebView::ClearAllTilesResources()
    */
   void ClearAllTilesResources();
 
   /**
-   * @copydoc Dali::UI::WebView::SetScaleFactor()
+   * @copydoc Dali::Ui::WebView::SetScaleFactor()
    */
   void SetScaleFactor(float scaleFactor, Dali::Vector2 point);
 
   /**
-   * @copydoc Dali::UI::WebView::GetScaleFactor()
+   * @copydoc Dali::Ui::WebView::GetScaleFactor()
    */
   float GetScaleFactor() const;
 
   /**
-   * @copydoc Dali::UI::WebView::ActivateAccessibility()
+   * @copydoc Dali::Ui::WebView::ActivateAccessibility()
    */
   void ActivateAccessibility(bool activated);
 
   /**
-   * @copydoc Dali::UI::WebView::HighlightText()
+   * @copydoc Dali::Ui::WebView::HighlightText()
    */
   bool HighlightText(const std::string& text, Dali::WebEnginePlugin::FindOption options, uint32_t maxMatchCount);
 
   /**
-   * @copydoc Dali::UI::WebView::AddDynamicCertificatePath()
+   * @copydoc Dali::Ui::WebView::AddDynamicCertificatePath()
    */
   void AddDynamicCertificatePath(const std::string& host, const std::string& certPath);
 
   /**
-   * @copydoc Dali::UI::WebView::GetScreenshot()
+   * @copydoc Dali::Ui::WebView::GetScreenshot()
    */
-  Dali::UI::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
+  Dali::Ui::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
 
   /**
-   * @copydoc Dali::UI::WebView::GetScreenshotAsynchronously()
+   * @copydoc Dali::Ui::WebView::GetScreenshotAsynchronously()
    */
   bool GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor,
-                                   Dali::UI::WebView::WebViewScreenshotCapturedCallback callback);
+                                   Dali::Ui::WebView::WebViewScreenshotCapturedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::CheckVideoPlayingAsynchronously()
+   * @copydoc Dali::Ui::WebView::CheckVideoPlayingAsynchronously()
    */
   bool CheckVideoPlayingAsynchronously(Dali::WebEnginePlugin::VideoPlayingCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::ExitFullscreen()
+   * @copydoc Dali::Ui::WebView::ExitFullscreen()
    */
   void ExitFullscreen();
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterGeolocationPermissionCallback()
+   * @copydoc Dali::Ui::WebView::RegisterGeolocationPermissionCallback()
    */
   void RegisterGeolocationPermissionCallback(Dali::WebEnginePlugin::GeolocationPermissionCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::SetTtsFocus()
+   * @copydoc Dali::Ui::WebView::SetTtsFocus()
    */
   void SetTtsFocus(bool focused);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterPageLoadStartedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterPageLoadStartedCallback()
    */
   void RegisterPageLoadStartedCallback(Dali::WebEnginePlugin::WebEnginePageLoadCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterPageLoadInProgressCallback()
+   * @copydoc Dali::Ui::WebView::RegisterPageLoadInProgressCallback()
    */
   void RegisterPageLoadInProgressCallback(Dali::WebEnginePlugin::WebEnginePageLoadCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterPageLoadFinishedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterPageLoadFinishedCallback()
    */
   void RegisterPageLoadFinishedCallback(Dali::WebEnginePlugin::WebEnginePageLoadCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterPageLoadErrorCallback()
+   * @copydoc Dali::Ui::WebView::RegisterPageLoadErrorCallback()
    */
   void RegisterPageLoadErrorCallback(Dali::WebEnginePlugin::WebEnginePageLoadErrorCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterScrollEdgeReachedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterScrollEdgeReachedCallback()
    */
   void RegisterScrollEdgeReachedCallback(Dali::WebEnginePlugin::WebEngineScrollEdgeReachedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterOverScrolledCallback()
+   * @copydoc Dali::Ui::WebView::RegisterOverScrolledCallback()
    */
   void RegisterOverScrolledCallback(Dali::WebEnginePlugin::WebEngineOverScrolledCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterUrlChangedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterUrlChangedCallback()
    */
   void RegisterUrlChangedCallback(Dali::WebEnginePlugin::WebEngineUrlChangedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterFormRepostDecidedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterFormRepostDecidedCallback()
    */
   void RegisterFormRepostDecidedCallback(Dali::WebEnginePlugin::WebEngineFormRepostDecidedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterFrameRenderedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterFrameRenderedCallback()
    */
   void RegisterFrameRenderedCallback(Dali::WebEnginePlugin::WebEngineFrameRenderedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterConsoleMessageReceivedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterConsoleMessageReceivedCallback()
    */
   void RegisterConsoleMessageReceivedCallback(Dali::WebEnginePlugin::WebEngineConsoleMessageReceivedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterResponsePolicyDecidedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterResponsePolicyDecidedCallback()
    */
   void RegisterResponsePolicyDecidedCallback(Dali::WebEnginePlugin::WebEngineResponsePolicyDecidedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterNavigationPolicyDecidedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterNavigationPolicyDecidedCallback()
    */
   void RegisterNavigationPolicyDecidedCallback(
       Dali::WebEnginePlugin::WebEngineNavigationPolicyDecidedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterNewWindowPolicyDecidedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterNewWindowPolicyDecidedCallback()
    */
   void RegisterNewWindowPolicyDecidedCallback(Dali::WebEnginePlugin::WebEngineNewWindowPolicyDecidedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterNewWindowCreatedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterNewWindowCreatedCallback()
    */
   void RegisterNewWindowCreatedCallback(Dali::WebEnginePlugin::WebEngineNewWindowCreatedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterCertificateConfirmedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterCertificateConfirmedCallback()
    */
   void RegisterCertificateConfirmedCallback(Dali::WebEnginePlugin::WebEngineCertificateCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterSslCertificateChangedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterSslCertificateChangedCallback()
    */
   void RegisterSslCertificateChangedCallback(Dali::WebEnginePlugin::WebEngineCertificateCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterHttpAuthHandlerCallback()
+   * @copydoc Dali::Ui::WebView::RegisterHttpAuthHandlerCallback()
    */
   void RegisterHttpAuthHandlerCallback(Dali::WebEnginePlugin::WebEngineHttpAuthHandlerCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterContextMenuShownCallback()
+   * @copydoc Dali::Ui::WebView::RegisterContextMenuShownCallback()
    */
   void RegisterContextMenuShownCallback(Dali::WebEnginePlugin::WebEngineContextMenuShownCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterContextMenuHiddenCallback()
+   * @copydoc Dali::Ui::WebView::RegisterContextMenuHiddenCallback()
    */
   void RegisterContextMenuHiddenCallback(Dali::WebEnginePlugin::WebEngineContextMenuHiddenCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterFullscreenEnteredCallback()
+   * @copydoc Dali::Ui::WebView::RegisterFullscreenEnteredCallback()
    */
   void RegisterFullscreenEnteredCallback(Dali::WebEnginePlugin::WebEngineFullscreenEnteredCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterFullscreenExitedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterFullscreenExitedCallback()
    */
   void RegisterFullscreenExitedCallback(Dali::WebEnginePlugin::WebEngineFullscreenExitedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterTextFoundCallback()
+   * @copydoc Dali::Ui::WebView::RegisterTextFoundCallback()
    */
   void RegisterTextFoundCallback(Dali::WebEnginePlugin::WebEngineTextFoundCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::GetPlainTextAsynchronously()
+   * @copydoc Dali::Ui::WebView::GetPlainTextAsynchronously()
    */
   void GetPlainTextAsynchronously(Dali::WebEnginePlugin::PlainTextReceivedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::WebAuthenticationCancel()
+   * @copydoc Dali::Ui::WebView::WebAuthenticationCancel()
    */
   void WebAuthenticationCancel();
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterWebAuthDisplayQRCallback()
+   * @copydoc Dali::Ui::WebView::RegisterWebAuthDisplayQRCallback()
    */
   void RegisterWebAuthDisplayQRCallback(Dali::WebEnginePlugin::WebEngineWebAuthDisplayQRCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterWebAuthResponseCallback()
+   * @copydoc Dali::Ui::WebView::RegisterWebAuthResponseCallback()
    */
   void RegisterWebAuthResponseCallback(Dali::WebEnginePlugin::WebEngineWebAuthResponseCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterFileChooserRequestCallback()
+   * @copydoc Dali::Ui::WebView::RegisterFileChooserRequestCallback()
    */
   void RegisterFileChooserRequestedCallback(Dali::WebEnginePlugin::WebEngineFileChooserRequestedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterWebProcessCrashedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterWebProcessCrashedCallback()
    */
   void RegisterWebProcessCrashedCallback(Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterUserMediaPermissionRequestCallback()
+   * @copydoc Dali::Ui::WebView::RegisterUserMediaPermissionRequestCallback()
    */
   void RegisterUserMediaPermissionRequestCallback(
       Dali::WebEnginePlugin::WebEngineUserMediaPermissionRequestCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterDeviceConnectionChangedCallback()
+   * @copydoc Dali::Ui::WebView::RegisterDeviceConnectionChangedCallback()
    */
   void RegisterDeviceConnectionChangedCallback(
       Dali::WebEnginePlugin::WebEngineDeviceConnectionChangedCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::RegisterDeviceListGetCallback()
+   * @copydoc Dali::Ui::WebView::RegisterDeviceListGetCallback()
    */
   void RegisterDeviceListGetCallback(Dali::WebEnginePlugin::WebEngineDeviceListGetCallback callback);
 
   /**
-   * @copydoc Dali::UI::WebView::FeedMouseWheel()
+   * @copydoc Dali::Ui::WebView::FeedMouseWheel()
    */
   void FeedMouseWheel(bool yDirection, int step, int x, int y);
 
   /**
-   * @copydoc Dali::UI::WebView::SetVideoHole()
+   * @copydoc Dali::Ui::WebView::SetVideoHole()
    */
   void SetVideoHole(bool enabled, bool isWaylandWindow);
 
@@ -547,47 +547,47 @@ public: // Properties
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc UI::Internal::Control::OnRelayout()
+   * @copydoc Ui::Internal::Control::OnRelayout()
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc UI::Control::GetNaturalSize
+   * @copydoc Ui::Control::GetNaturalSize
    */
   Vector3 GetNaturalSize() override;
 
   /**
-   * @copydoc UI::Control::OnKeyEvent()
+   * @copydoc Ui::Control::OnKeyEvent()
    */
   bool OnKeyEvent(const Dali::KeyEvent& event) override;
 
   /**
-   * @copydoc UI::Control::OnKeyInputFocusGained()
+   * @copydoc Ui::Control::OnKeyInputFocusGained()
    */
   void OnKeyInputFocusGained() override;
 
   /**
-   * @copydoc UI::Control::OnKeyInputFocusLost()
+   * @copydoc Ui::Control::OnKeyInputFocusLost()
    */
   void OnKeyInputFocusLost() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
@@ -751,7 +751,7 @@ private:
    * @param[in] pixel Pixel data
    * @return The new image view
    */
-  Dali::UI::ImageView CreateImageView(Dali::PixelData pixel) const;
+  Dali::Ui::ImageView CreateImageView(Dali::PixelData pixel) const;
 
   /**
    * @brief Signal occurs when the Web View has been touched.
@@ -838,15 +838,15 @@ protected:
   };
 
 private:
-  Dali::UI::Visual::Base mVisual;
+  Dali::Ui::Visual::Base mVisual;
   Dali::Size mWebViewSize;
   Dali::WebEngine mWebEngine;
 
   uint32_t mLastRenderedNativeImageWidth;
   uint32_t mLastRenderedNativeImageHeight;
 
-  std::unique_ptr<Dali::UI::WebSettings> mWebSettings;
-  std::unique_ptr<Dali::UI::WebBackForwardList> mWebBackForwardList;
+  std::unique_ptr<Dali::Ui::WebSettings> mWebSettings;
+  std::unique_ptr<Dali::Ui::WebBackForwardList> mWebBackForwardList;
 
   Dali::PropertyNotification mPositionUpdateNotification;
   Dali::PropertyNotification mSizeUpdateNotification;
@@ -858,29 +858,29 @@ private:
 
   bool mVisualChangeRequired;
 
-  Dali::UI::WebView::WebViewScreenshotCapturedCallback mScreenshotCapturedCallback;
+  Dali::Ui::WebView::WebViewScreenshotCapturedCallback mScreenshotCapturedCallback;
   Dali::WebEnginePlugin::WebEngineFrameRenderedCallback mFrameRenderedCallback;
 
-  static std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<UI::WebView>> mPluginWebViewMap;
+  static std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<Ui::WebView>> mPluginWebViewMap;
 };
 
 } // namespace Internal
 
-inline UI::Internal::WebView& GetImpl(UI::WebView& handle)
+inline Ui::Internal::WebView& GetImpl(Ui::WebView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<UI::Internal::WebView&>(impl);
+  return static_cast<Ui::Internal::WebView&>(impl);
 }
 
-inline const UI::Internal::WebView& GetImpl(const UI::WebView& handle)
+inline const Ui::Internal::WebView& GetImpl(const Ui::WebView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   const Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<const UI::Internal::WebView&>(impl);
+  return static_cast<const Ui::Internal::WebView&>(impl);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

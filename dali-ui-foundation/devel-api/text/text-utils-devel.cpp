@@ -48,7 +48,7 @@ namespace Dali
 {
 using namespace TextAbstraction;
 
-namespace UI
+namespace Ui
 {
 using namespace Text;
 
@@ -488,8 +488,8 @@ void Align(const RendererParameters& textParameters, TextAbstraction::TextRender
   // Align the text.
   ////////////////////////////////////////////////////////////////////////////////
 
-  HorizontalAlignment::Type horizontalAlignment = UI::HorizontalAlignment::CENTER;
-  HorizontalAlignment::Type horizontalCircularAlignment = UI::HorizontalAlignment::CENTER;
+  HorizontalAlignment::Type horizontalAlignment = Ui::HorizontalAlignment::CENTER;
+  HorizontalAlignment::Type horizontalCircularAlignment = Ui::HorizontalAlignment::CENTER;
   VerticalAlignment::Type verticalAlignment = VerticalAlignment::CENTER;
   CircularAlignment::Type circularAlignment = CircularAlignment::BEGIN;
 
@@ -520,17 +520,17 @@ void Align(const RendererParameters& textParameters, TextAbstraction::TextRender
     {
       case CircularAlignment::BEGIN:
       {
-        horizontalCircularAlignment = UI::HorizontalAlignment::BEGIN;
+        horizontalCircularAlignment = Ui::HorizontalAlignment::BEGIN;
         break;
       }
       case CircularAlignment::CENTER:
       {
-        horizontalCircularAlignment = UI::HorizontalAlignment::CENTER;
+        horizontalCircularAlignment = Ui::HorizontalAlignment::CENTER;
         break;
       }
       case CircularAlignment::END:
       {
-        horizontalCircularAlignment = UI::HorizontalAlignment::END;
+        horizontalCircularAlignment = Ui::HorizontalAlignment::END;
         break;
       }
     }
@@ -1506,7 +1506,7 @@ Dali::Property::Array RenderForLastIndex(RendererParameters& textParameters)
   ////////////////////////////////////////////////////////////////////////////////
   // Retrieve the glyphs. Text shaping
   ////////////////////////////////////////////////////////////////////////////////
-  Dali::Vector<Dali::UI::DevelText::EmbeddedItemInfo> embeddedItemLayout;
+  Dali::Vector<Dali::Ui::DevelText::EmbeddedItemInfo> embeddedItemLayout;
   ShapeText(rendererParameters, embeddedItemLayout, internalData);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -1556,12 +1556,12 @@ Dali::Property::Array RenderForLastIndex(RendererParameters& textParameters)
 
 Dali::Property::Array GetLastCharacterIndex(RendererParameters& textParameters)
 {
-  Dali::Property::Array offsetValues = UI::DevelText::RenderForLastIndex(textParameters);
+  Dali::Property::Array offsetValues = Ui::DevelText::RenderForLastIndex(textParameters);
   return offsetValues;
 }
 
 } // namespace DevelText
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -21,7 +21,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -37,6 +37,6 @@ TraitImpl::~TraitImpl()
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

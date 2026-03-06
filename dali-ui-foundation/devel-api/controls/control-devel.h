@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Visual
 {
@@ -275,7 +275,7 @@ enum
    * @note By default, it is Vector::ZERO.
    * @note Applies to specific visuals inside the control.
    * @note Only Property::Vector4 can be animated.
-   * @see Dali::UI::DevelVisual::Property::Type::CORNER_RADIUS
+   * @see Dali::Ui::DevelVisual::Property::Type::CORNER_RADIUS
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX,
@@ -285,7 +285,7 @@ enum
    * world units).
    * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
    * @see Policy::Type
-   * @see Dali::UI::DevelVisual::Property::Type::CORNER_RADIUS_POLICY
+   * @see Dali::Ui::DevelVisual::Property::Type::CORNER_RADIUS_POLICY
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   CORNER_RADIUS_POLICY,
@@ -296,7 +296,7 @@ enum
    * @note By default, it is Vector::ZERO.
    * @note Applies to specific visuals inside the control.
    * @note Only Property::Vector4 can be animated.
-   * @see Dali::UI::DevelVisual::Property::Type::CORNER_SQUARENESS
+   * @see Dali::Ui::DevelVisual::Property::Type::CORNER_SQUARENESS
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   CORNER_SQUARENESS,
@@ -304,7 +304,7 @@ enum
   /**
    * @brief The width for the borderline of the control. It will update borderline visual
    * @details Name "viewBorderlineWidth", type Property::FLOAT.
-   * @see Dali::UI::DevelVisual::Property::Type::BORDERLINE_WIDTH
+   * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_WIDTH
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   BORDERLINE_WIDTH,
@@ -312,7 +312,7 @@ enum
   /**
    * @brief The color for the borderline of the control. It will update borderline visual
    * @details Name "viewBorderlineColor", type Property::VECTOR4
-   * @see Dali::UI::DevelVisual::Property::Type::BORDERLINE_COLOR
+   * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_COLOR
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   BORDERLINE_COLOR,
@@ -320,7 +320,7 @@ enum
   /**
    * @brief The offset for the borderline of the control. It will update borderline visual
    * @details Name "viewBorderlineOffset", type Property::FLOAT.
-   * @see Dali::UI::DevelVisual::Property::Type::BORDERLINE_OFFSET
+   * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_OFFSET
    * @note It will not create UniformMap internally. So this property don't be used at Render phase.
    */
   BORDERLINE_OFFSET,
@@ -338,9 +338,9 @@ enum
  * @note Derived class should not call visual.SetOnScene(actor). It is the responsibility of the base class to
  * connect/disconnect registered visual to stage. Use below API with enabled set to false if derived class wishes to
  * control when visual is staged.
- * @note depth-index be used to Dali::UI::DepthIndex::Ranges::AUTO_INDEX.
+ * @note depth-index be used to Dali::Ui::DepthIndex::Ranges::AUTO_INDEX.
  */
-DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, UI::Visual::Base& visual);
+DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, Ui::Visual::Base& visual);
 
 /**
  * @brief Register a visual by Property Index with a depth index.
@@ -360,7 +360,7 @@ DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Inde
  * @see Visual::Base::GetDepthIndex()
  * @see Visual::Base::SetDepthIndex()
  */
-DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, UI::Visual::Base& visual,
+DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, Ui::Visual::Base& visual,
                                 int depthIndex);
 
 /**
@@ -371,11 +371,11 @@ DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Inde
  * @param[in] visual The visual to register
  * @param[in] enabled false if derived class wants to control when visual is set on stage.
  *
- * @note depth-index be used to Dali::UI::DepthIndex::Ranges::AUTO_INDEX.
+ * @note depth-index be used to Dali::Ui::DepthIndex::Ranges::AUTO_INDEX.
  *
  * @see EnableVisual()
  */
-DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, UI::Visual::Base& visual,
+DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, Ui::Visual::Base& visual,
                                 bool enabled);
 
 /**
@@ -394,7 +394,7 @@ DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Inde
  * @see Visual::Base::GetDepthIndex()
  * @see Visual::Base::SetDepthIndex()
  */
-DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, UI::Visual::Base& visual,
+DALI_UI_API void RegisterVisual(Internal::Control& control, Dali::Property::Index index, Ui::Visual::Base& visual,
                                 bool enabled, int depthIndex);
 
 /**
@@ -414,7 +414,7 @@ DALI_UI_API void UnregisterVisual(Internal::Control& control, Dali::Property::In
  * @note For managing object life-cycle, do not store the returned visual as a member which increments its reference
  * count.
  */
-DALI_UI_API UI::Visual::Base GetVisual(const Internal::Control& control, Dali::Property::Index index);
+DALI_UI_API Ui::Visual::Base GetVisual(const Internal::Control& control, Dali::Property::Index index);
 
 /**
  * @brief Sets the given visual to be displayed or not when parent staged.
@@ -483,7 +483,7 @@ DALI_UI_API void DoActionExtension(Control& control, Dali::Property::Index visua
  * @param[in] visual The registered visual (e.g., shadow, borderline) that will receive the corner properties.
  * @param[in] enable True to apply the corner property override, false to disable it.
  * @param[in] cornerRadiusConstraint An optional Dali::Constraint that defines how the control's
- *                            corner properties (e.g., UI::DevelControl::Property::CORNER_RADIUS)
+ *                            corner properties (e.g., Ui::DevelControl::Property::CORNER_RADIUS)
  *                            are mapped to the visual's corner radius property.
  *                            If empty, a default equality constraint might be used if applicable.
  */
@@ -529,7 +529,7 @@ DALI_UI_API Dali::Property GetVisualProperty(Control control, Dali::Property::In
  * @brief The signal is emmited as a succession of "activate" signal send by accessibility client.
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityActivateSignalType& AccessibilityActivateSignal(UI::Control control);
+DALI_UI_API AccessibilityActivateSignalType& AccessibilityActivateSignal(Ui::Control control);
 
 /**
  * @brief The signal is emmited when text send via Dali::Accessibility::Bridge::Say
@@ -537,21 +537,21 @@ DALI_UI_API AccessibilityActivateSignalType& AccessibilityActivateSignal(UI::Con
  *
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityReadingSkippedSignalType& AccessibilityReadingSkippedSignal(UI::Control control);
+DALI_UI_API AccessibilityReadingSkippedSignalType& AccessibilityReadingSkippedSignal(Ui::Control control);
 
 /**
  * @brief
  *
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityReadingPausedSignalType& AccessibilityReadingPausedSignal(UI::Control control);
+DALI_UI_API AccessibilityReadingPausedSignalType& AccessibilityReadingPausedSignal(Ui::Control control);
 
 /**
  * @brief
  *
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityReadingResumedSignalType& AccessibilityReadingResumedSignal(UI::Control control);
+DALI_UI_API AccessibilityReadingResumedSignalType& AccessibilityReadingResumedSignal(Ui::Control control);
 
 /**
  * @brief The signal is emmited when text send via Dali::Accessibility::Bridge::Say
@@ -559,7 +559,7 @@ DALI_UI_API AccessibilityReadingResumedSignalType& AccessibilityReadingResumedSi
  *
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityReadingCancelledSignalType& AccessibilityReadingCancelledSignal(UI::Control control);
+DALI_UI_API AccessibilityReadingCancelledSignalType& AccessibilityReadingCancelledSignal(Ui::Control control);
 
 /**
  * @brief The signal is emmited when text send via Dali::Accessibility::Bridge::Say
@@ -567,7 +567,7 @@ DALI_UI_API AccessibilityReadingCancelledSignalType& AccessibilityReadingCancell
  *
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityReadingStoppedSignalType& AccessibilityReadingStoppedSignal(UI::Control control);
+DALI_UI_API AccessibilityReadingStoppedSignalType& AccessibilityReadingStoppedSignal(Ui::Control control);
 
 /**
  * @brief The signal is emmited when accessibility client asks for object's name.
@@ -579,7 +579,7 @@ DALI_UI_API AccessibilityReadingStoppedSignalType& AccessibilityReadingStoppedSi
  * Priority is as above. If none is used, default implementation is provided.
  * @return [description]
  */
-DALI_UI_API AccessibilityGetNameSignalType& AccessibilityGetNameSignal(UI::Control control);
+DALI_UI_API AccessibilityGetNameSignalType& AccessibilityGetNameSignal(Ui::Control control);
 
 /**
  * @brief The signal is emmited when accessibility client asks for object's description.
@@ -591,7 +591,7 @@ DALI_UI_API AccessibilityGetNameSignalType& AccessibilityGetNameSignal(UI::Contr
  * Priority is as above. If none is used, default implementation is provided.
  * @return signal handler
  */
-DALI_UI_API AccessibilityGetDescriptionSignalType& AccessibilityGetDescriptionSignal(UI::Control control);
+DALI_UI_API AccessibilityGetDescriptionSignalType& AccessibilityGetDescriptionSignal(Ui::Control control);
 
 /**
  * @brief The signal is emitted when accessibility client call "DoGesture" method via IPC mechanism.
@@ -599,19 +599,19 @@ DALI_UI_API AccessibilityGetDescriptionSignalType& AccessibilityGetDescriptionSi
  * This signal allows developers to serve incoming gesture in specific way.
  * @return signal handler
  */
-DALI_UI_API AccessibilityDoGestureSignalType& AccessibilityDoGestureSignal(UI::Control control);
+DALI_UI_API AccessibilityDoGestureSignalType& AccessibilityDoGestureSignal(Ui::Control control);
 
 /**
  * @brief The signal is emitted when accessibility client call "DoAction" or "DoActionName" method via IPC mechanism.
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityActionSignalType& AccessibilityActionSignal(UI::Control control);
+DALI_UI_API AccessibilityActionSignalType& AccessibilityActionSignal(Ui::Control control);
 
 /**
  * @brief The signal is emitted when accessibility highlight is added or removed from control.
  * @return The signal to connect to
  */
-DALI_UI_API AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal(UI::Control control);
+DALI_UI_API AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal(Ui::Control control);
 
 /**
  * @brief The method allows connection with other actor with usage of concrete accessibility relation type.
@@ -620,7 +620,7 @@ DALI_UI_API AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal(U
  * @param destination Actor object
  * @param relation    enumerated value describing relation
  */
-DALI_UI_API void AppendAccessibilityRelation(UI::Control control, Dali::Actor destination,
+DALI_UI_API void AppendAccessibilityRelation(Ui::Control control, Dali::Actor destination,
                                              Dali::Accessibility::RelationType relation);
 
 /**
@@ -630,7 +630,7 @@ DALI_UI_API void AppendAccessibilityRelation(UI::Control control, Dali::Actor de
  * @param destination Actor object
  * @param relation    enumerated value describing relation
  */
-DALI_UI_API void RemoveAccessibilityRelation(UI::Control control, Dali::Actor destination,
+DALI_UI_API void RemoveAccessibilityRelation(Ui::Control control, Dali::Actor destination,
                                              Dali::Accessibility::RelationType relation);
 
 /**
@@ -641,14 +641,14 @@ DALI_UI_API void RemoveAccessibilityRelation(UI::Control control, Dali::Actor de
  *
  * @see Dali::Accessibility::Accessible::GetRelationSet()
  */
-DALI_UI_API std::vector<Accessibility::Relation> GetAccessibilityRelations(UI::Control control);
+DALI_UI_API std::vector<Accessibility::Relation> GetAccessibilityRelations(Ui::Control control);
 
 /**
  * @brief The method removes all previously appended relations
  *
  * @param control object to append attribute to
  */
-DALI_UI_API void ClearAccessibilityRelations(UI::Control control);
+DALI_UI_API void ClearAccessibilityRelations(Ui::Control control);
 
 /**
  * @brief The method allows to add or modify value matched with given key.
@@ -658,21 +658,21 @@ DALI_UI_API void ClearAccessibilityRelations(UI::Control control);
  * @param key   std::string value
  * @param value std::string value
  */
-DALI_UI_API void AppendAccessibilityAttribute(UI::Control control, const std::string& key, const std::string& value);
+DALI_UI_API void AppendAccessibilityAttribute(Ui::Control control, const std::string& key, const std::string& value);
 
 /**
  * @brief The method erases key with its value from accessibility attributes
  * @param control object to append attribute to
  * @param key std::string value
  */
-DALI_UI_API void RemoveAccessibilityAttribute(UI::Control control, const std::string& key);
+DALI_UI_API void RemoveAccessibilityAttribute(Ui::Control control, const std::string& key);
 
 /**
  * @brief The method clears accessibility attributes
  *
  * @param control object to append attribute to
  */
-DALI_UI_API void ClearAccessibilityAttributes(UI::Control control);
+DALI_UI_API void ClearAccessibilityAttributes(Ui::Control control);
 
 /**
  * @brief The method inserts reading information of an accessible object into attributes
@@ -680,7 +680,7 @@ DALI_UI_API void ClearAccessibilityAttributes(UI::Control control);
  * @param control object to append attribute to
  * @param types Reading information types
  */
-DALI_UI_API void SetAccessibilityReadingInfoType(UI::Control control,
+DALI_UI_API void SetAccessibilityReadingInfoType(Ui::Control control,
                                                  const Dali::Accessibility::ReadingInfoTypes types);
 
 /**
@@ -689,7 +689,7 @@ DALI_UI_API void SetAccessibilityReadingInfoType(UI::Control control,
  * @param control object to append attribute to
  * @return Reading information types
  */
-DALI_UI_API Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType(UI::Control control);
+DALI_UI_API Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType(Ui::Control control);
 
 /**
  * @brief The method erases highlight.
@@ -697,7 +697,7 @@ DALI_UI_API Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoTyp
  * @param control object to append attribute to
  * @return bool value, false when it is not possible or something went wrong, at the other way true.
  */
-DALI_UI_API bool ClearAccessibilityHighlight(UI::Control control);
+DALI_UI_API bool ClearAccessibilityHighlight(Ui::Control control);
 
 /**
  * @brief The method grabs highlight.
@@ -705,7 +705,7 @@ DALI_UI_API bool ClearAccessibilityHighlight(UI::Control control);
  * @param control object to append attribute to
  * @return bool value, false when it is not possible or something went wrong, at the other way true.
  */
-DALI_UI_API bool GrabAccessibilityHighlight(UI::Control control);
+DALI_UI_API bool GrabAccessibilityHighlight(Ui::Control control);
 
 /**
  * @brief The metod presents bitset of control's states.
@@ -713,7 +713,7 @@ DALI_UI_API bool GrabAccessibilityHighlight(UI::Control control);
  * @param control object to append attribute to
  * @return Dali::Accessibility::States is vector of enumerated State.
  */
-DALI_UI_API Dali::Accessibility::States GetAccessibilityStates(UI::Control control);
+DALI_UI_API Dali::Accessibility::States GetAccessibilityStates(Ui::Control control);
 
 /**
  * @brief The method force sending notifications about current states to accessibility clients
@@ -722,7 +722,7 @@ DALI_UI_API Dali::Accessibility::States GetAccessibilityStates(UI::Control contr
  * @param states  mask with states expected to broadcast
  * @param recurse flag pointing if notifications of children's state would be sent
  */
-DALI_UI_API void NotifyAccessibilityStateChange(UI::Control control, Dali::Accessibility::States states, bool recurse);
+DALI_UI_API void NotifyAccessibilityStateChange(Ui::Control control, Dali::Accessibility::States states, bool recurse);
 
 /**
  * @brief The method to get the control's accessibility created or not.
@@ -730,7 +730,7 @@ DALI_UI_API void NotifyAccessibilityStateChange(UI::Control control, Dali::Acces
  * @param[in] control object to append attribute to
  * @return True if accessible were created. False otherwise.
  */
-DALI_UI_API bool IsAccessibleCreated(UI::Control control);
+DALI_UI_API bool IsAccessibleCreated(Ui::Control control);
 
 /**
  * @brief The method to set creatable of control's accessibility.
@@ -739,7 +739,7 @@ DALI_UI_API bool IsAccessibleCreated(UI::Control control);
  * @param[in] control object to append attribute to
  * @param[in] enable True if we allow to create accessible. False otherwise.
  */
-DALI_UI_API void EnableCreateAccessible(UI::Control control, bool enable);
+DALI_UI_API void EnableCreateAccessible(Ui::Control control, bool enable);
 
 /**
  * @brief The method to get creatable of control's accessibility.
@@ -747,7 +747,7 @@ DALI_UI_API void EnableCreateAccessible(UI::Control control, bool enable);
  * @param[in] control object to append attribute to
  * @return True if we allow to create accessible. False otherwise.
  */
-DALI_UI_API bool IsCreateAccessibleEnabled(UI::Control control);
+DALI_UI_API bool IsCreateAccessibleEnabled(Ui::Control control);
 
 /**
  * @brief The method to emit accessibility state-changed event to accessibility clients
@@ -760,7 +760,7 @@ DALI_UI_API void EmitAccessibilityStateChanged(Dali::Actor actor, Dali::Accessib
 
 } // namespace DevelControl
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -31,7 +31,7 @@ struct Vector3;
 struct Vector4;
 class PropertyInput;
 
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_scroll_view
@@ -65,7 +65,7 @@ DALI_UI_API void WrapActorConstraint(Vector3& position, const PropertyInputConta
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

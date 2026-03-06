@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 namespace
 {
@@ -693,4 +693,4 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   return updated;
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

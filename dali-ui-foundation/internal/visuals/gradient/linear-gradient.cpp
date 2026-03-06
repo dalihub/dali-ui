@@ -19,7 +19,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -59,6 +59,6 @@ const Vector2& LinearGradient::GetEndPosition() const
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

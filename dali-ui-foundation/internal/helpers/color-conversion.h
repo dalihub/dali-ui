@@ -25,7 +25,7 @@ namespace Dali
 {
 struct Vector4;
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -52,7 +52,7 @@ bool ConvertStringToColor(const std::string& colorString, Vector4& outColor);
 bool ConvertPropertyToColor(const Property::Value& colorValue, Vector4& outColor);
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_COLOR_CONVERSION_H

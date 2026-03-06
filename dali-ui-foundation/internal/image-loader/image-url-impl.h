@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -49,17 +49,17 @@ public:
   ImageUrl(const EncodedImageBuffer& encodedImageBuffer);
 
   /**
-   * @copydoc Dali::UI::ImageUrl::New
+   * @copydoc Dali::Ui::ImageUrl::New
    */
   static ImageUrlPtr New(Texture& texture, bool preMultiplied);
 
   /**
-   * @copydoc Dali::UI::ImageUrl::New
+   * @copydoc Dali::Ui::ImageUrl::New
    */
   static ImageUrlPtr New(const EncodedImageBuffer& encodedImageBuffer);
 
   /**
-   * @copydoc Dali::UI::ImageUrl::GetUrl
+   * @copydoc Dali::Ui::ImageUrl::GetUrl
    */
   const std::string& GetUrl() const;
 
@@ -81,26 +81,26 @@ private:
 };
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::ImageUrl& GetImpl(Dali::UI::ImageUrl& imageUrl)
+inline Ui::Internal::ImageUrl& GetImpl(Dali::Ui::ImageUrl& imageUrl)
 {
   DALI_ASSERT_ALWAYS(imageUrl && "ImageUrl handle is empty");
 
   BaseObject& handle = imageUrl.GetBaseObject();
 
-  return static_cast<UI::Internal::ImageUrl&>(handle);
+  return static_cast<Ui::Internal::ImageUrl&>(handle);
 }
 
-inline const UI::Internal::ImageUrl& GetImpl(const Dali::UI::ImageUrl& imageUrl)
+inline const Ui::Internal::ImageUrl& GetImpl(const Dali::Ui::ImageUrl& imageUrl)
 {
   DALI_ASSERT_ALWAYS(imageUrl && "ImageUrl handle is empty");
 
   const BaseObject& handle = imageUrl.GetBaseObject();
 
-  return static_cast<const UI::Internal::ImageUrl&>(handle);
+  return static_cast<const Ui::Internal::ImageUrl&>(handle);
 }
 
 } // End of namespace Dali

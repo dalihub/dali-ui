@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -114,7 +114,7 @@ void GetGlyphMetricsFromCharacterIndex(CharacterIndex index, const VisualModelPt
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

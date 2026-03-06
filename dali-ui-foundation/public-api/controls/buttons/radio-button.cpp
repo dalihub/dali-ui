@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 RadioButton::RadioButton()
   : Button()
@@ -63,7 +63,7 @@ RadioButton RadioButton::New()
 RadioButton RadioButton::New(const std::string& label)
 {
   RadioButton radioButton = Internal::RadioButton::New();
-  radioButton.SetProperty(UI::Button::Property::LABEL, label);
+  radioButton.SetProperty(Ui::Button::Property::LABEL, label);
   return radioButton;
 }
 
@@ -72,6 +72,6 @@ RadioButton RadioButton::DownCast(BaseHandle handle)
   return Control::DownCast<RadioButton, Internal::RadioButton>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

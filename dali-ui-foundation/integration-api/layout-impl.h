@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Creates a new Layout.
    */
-  static UI::Layout New();
+  static Ui::Layout New();
 
 protected:
   /**
@@ -93,14 +93,14 @@ private:
 };
 
 // Helpers for public-api forwarding methods
-inline Integration::LayoutImpl& GetImpl(UI::Layout& layout)
+inline Integration::LayoutImpl& GetImpl(Ui::Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::LayoutImpl&>(handle);
 }
 
-inline const Integration::LayoutImpl& GetImpl(const UI::Layout& layout)
+inline const Integration::LayoutImpl& GetImpl(const Ui::Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
@@ -108,5 +108,5 @@ inline const Integration::LayoutImpl& GetImpl(const UI::Layout& layout)
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

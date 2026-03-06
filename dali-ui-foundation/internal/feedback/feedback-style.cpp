@@ -38,10 +38,10 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::General, false, "LOG_FEEDB
 const char* DEFAULT_FEEDBACK_THEME_FILE_NAME = "default-feedback-theme.json";
 
 // Sets bool and string if the node has a child "name"
-void GetIfString(const Dali::UI::TreeNode& node, const std::string& name, bool& exists, std::string& str)
+void GetIfString(const Dali::Ui::TreeNode& node, const std::string& name, bool& exists, std::string& str)
 {
-  const Dali::UI::TreeNode* child = node.GetChild(name);
-  if (child && Dali::UI::TreeNode::STRING == child->GetType())
+  const Dali::Ui::TreeNode* child = node.GetChild(name);
+  if (child && Dali::Ui::TreeNode::STRING == child->GetType())
   {
     exists = true;
     str = child->GetString();
@@ -52,7 +52,7 @@ void GetIfString(const Dali::UI::TreeNode& node, const std::string& name, bool& 
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -240,8 +240,8 @@ bool FeedbackStyle::LoadTheme(const std::string& data)
 
 void FeedbackStyle::LoadFromString(const std::string& data)
 {
-  UI::JsonParser parser = UI::JsonParser::New();
-  const UI::TreeNode* root = NULL;
+  Ui::JsonParser parser = Ui::JsonParser::New();
+  const Ui::TreeNode* root = NULL;
 
   if (!parser.Parse(data))
   {
@@ -261,8 +261,8 @@ void FeedbackStyle::LoadFromString(const std::string& data)
     // Parse style
     if (const TreeNode* node = root->GetChild("style"))
     {
-      UI::TreeNode::ConstIterator iter = node->CBegin();
-      UI::TreeNode::ConstIterator end = node->CEnd();
+      Ui::TreeNode::ConstIterator iter = node->CBegin();
+      Ui::TreeNode::ConstIterator end = node->CEnd();
       for (; iter != end; ++iter)
       {
         const char* key = (*iter).first;
@@ -457,6 +457,6 @@ FeedbackPattern FeedbackStyle::GetFeedbackPattern(const std::string& pattern)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -53,24 +53,24 @@ Backend::~Backend()
   delete mImpl;
 }
 
-Dali::UI::Text::Backend Backend::Get()
+Dali::Ui::Text::Backend Backend::Get()
 {
-  Dali::UI::Text::Backend backendHandle;
+  Dali::Ui::Text::Backend backendHandle;
 
   Dali::SingletonService service(SingletonService::Get());
   if (service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::UI::Text::Backend));
+    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::Text::Backend));
     if (handle)
     {
       // If so, downcast the handle
-      Backend* impl = dynamic_cast<Dali::UI::Text::Internal::Backend*>(handle.GetObjectPtr());
-      backendHandle = Dali::UI::Text::Backend(impl);
+      Backend* impl = dynamic_cast<Dali::Ui::Text::Internal::Backend*>(handle.GetObjectPtr());
+      backendHandle = Dali::Ui::Text::Backend(impl);
     }
     else // create and register the object
     {
-      backendHandle = Dali::UI::Text::Backend(new Backend);
+      backendHandle = Dali::Ui::Text::Backend(new Backend);
       service.Register(typeid(backendHandle), backendHandle);
     }
   }
@@ -84,18 +84,18 @@ RendererPtr Backend::NewRenderer(unsigned int renderingType)
 
   switch (renderingType)
   {
-    case Dali::UI::DevelText::RENDERING_SHARED_ATLAS:
+    case Dali::Ui::DevelText::RENDERING_SHARED_ATLAS:
     {
-      renderer = Dali::UI::Text::AtlasRenderer::New();
+      renderer = Dali::Ui::Text::AtlasRenderer::New();
     }
     break;
 
-    case Dali::UI::DevelText::RENDERING_VECTOR_BASED:
+    case Dali::Ui::DevelText::RENDERING_VECTOR_BASED:
     {
 #ifdef ENABLE_VECTOR_BASED_TEXT_RENDERING
-      renderer = Dali::UI::Text::VectorBasedRenderer::New();
+      renderer = Dali::Ui::Text::VectorBasedRenderer::New();
 #else
-      renderer = Dali::UI::Text::AtlasRenderer::New(); // Fallback to bitmap-based rendering
+      renderer = Dali::Ui::Text::AtlasRenderer::New(); // Fallback to bitmap-based rendering
 #endif
     }
     break;
@@ -114,6 +114,6 @@ RendererPtr Backend::NewRenderer(unsigned int renderingType)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

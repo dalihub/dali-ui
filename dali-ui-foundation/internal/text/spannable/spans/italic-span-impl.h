@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -38,7 +38,7 @@ class ItalicSpan;
 using ItalicSpanPtr = IntrusivePtr<ItalicSpan>;
 
 /**
- * @copydoc Dali::UI::Text::ItalicSpan
+ * @copydoc Dali::Ui::Text::ItalicSpan
  */
 class ItalicSpan : public BaseSpan
 {
@@ -46,7 +46,7 @@ public:
   /**
    * @brief Creates a new ItalicSpan object.
    */
-  static Dali::UI::Text::ItalicSpan New();
+  static Dali::Ui::Text::ItalicSpan New();
 
   /**
    * Default Constructor
@@ -74,10 +74,10 @@ public:
 
   // Methods for internal only
   /**
-   * @copydoc Dali::UI::Text::BaseSpan::CreateStyleCharacterRun
+   * @copydoc Dali::Ui::Text::BaseSpan::CreateStyleCharacterRun
    */
   void CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                               const Dali::UI::Text::Range& range) const override;
+                               const Dali::Ui::Text::Range& range) const override;
 
 }; // class ItalicSpan
 
@@ -85,7 +85,7 @@ public:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::ItalicSpan& GetImplementation(Dali::UI::Text::ItalicSpan& italicSpan)
+inline Internal::ItalicSpan& GetImplementation(Dali::Ui::Text::ItalicSpan& italicSpan)
 {
   DALI_ASSERT_ALWAYS(italicSpan && "italicSpan handle is empty");
 
@@ -94,7 +94,7 @@ inline Internal::ItalicSpan& GetImplementation(Dali::UI::Text::ItalicSpan& itali
   return static_cast<Internal::ItalicSpan&>(object);
 }
 
-inline const Internal::ItalicSpan& GetImplementation(const Dali::UI::Text::ItalicSpan& italicSpan)
+inline const Internal::ItalicSpan& GetImplementation(const Dali::Ui::Text::ItalicSpan& italicSpan)
 {
   DALI_ASSERT_ALWAYS(italicSpan && "italicSpan handle is empty");
 
@@ -105,7 +105,7 @@ inline const Internal::ItalicSpan& GetImplementation(const Dali::UI::Text::Itali
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

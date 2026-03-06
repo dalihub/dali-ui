@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -308,6 +308,6 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Rect<int>&
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

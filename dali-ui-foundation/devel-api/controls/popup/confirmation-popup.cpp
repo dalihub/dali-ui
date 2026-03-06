@@ -27,7 +27,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 ConfirmationPopup::ConfirmationPopup()
   : Popup()
@@ -67,6 +67,6 @@ ConfirmationPopup ConfirmationPopup::DownCast(BaseHandle handle)
   return Control::DownCast<ConfirmationPopup, Internal::ConfirmationPopup>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

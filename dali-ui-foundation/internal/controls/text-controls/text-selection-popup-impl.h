@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -52,7 +52,7 @@ public:
   struct ButtonRequirement
   {
     ButtonRequirement()
-      : id(UI::TextSelectionPopup::NONE),
+      : id(Ui::TextSelectionPopup::NONE),
         priority(0u),
         name(),
         caption(),
@@ -60,7 +60,7 @@ public:
     {
     }
 
-    ButtonRequirement(UI::TextSelectionPopup::Buttons buttonId, std::size_t buttonPriority,
+    ButtonRequirement(Ui::TextSelectionPopup::Buttons buttonId, std::size_t buttonPriority,
                       const std::string& buttonName, const std::string& buttonCaption, bool buttonEnabled)
       : id(buttonId),
         priority(buttonPriority),
@@ -70,7 +70,7 @@ public:
     {
     }
 
-    UI::TextSelectionPopup::Buttons id;
+    Ui::TextSelectionPopup::Buttons id;
     std::size_t priority;
     std::string name;
     std::string caption;
@@ -90,7 +90,7 @@ public:
    * @param[in] callbackInterface The text popup callback interface which receives the button click callbacks.
    * @return A handle to the TextSelectionPopup control.
    */
-  static UI::TextSelectionPopup New(TextSelectionPopupCallbackInterface* callbackInterface);
+  static Ui::TextSelectionPopup New(TextSelectionPopupCallbackInterface* callbackInterface);
 
   // Properties
 
@@ -112,27 +112,27 @@ public:
   static Property::Value GetProperty(BaseObject* object, Property::Index index);
 
   /**
-   * @brief UI::TextSelectionPopup::SetProperties()
+   * @brief Ui::TextSelectionPopup::SetProperties()
    */
   void SetProperties(const Property::Map& properties);
 
   /**
-   * @brief UI::TextSelectionPopup::GetProperties()
+   * @brief Ui::TextSelectionPopup::GetProperties()
    */
   void GetProperties(Property::Map& properties);
 
   /**
-   * @copydoc UI::EnableButtons
+   * @copydoc Ui::EnableButtons
    */
-  void EnableButtons(UI::TextSelectionPopup::Buttons buttonsToEnable);
+  void EnableButtons(Ui::TextSelectionPopup::Buttons buttonsToEnable);
 
   /**
-   * @copydoc UI::TextSelectionPopup::RaiseAbove()
+   * @copydoc Ui::TextSelectionPopup::RaiseAbove()
    */
   void RaiseAbove(Actor target);
 
   /**
-   * @copydoc UI::TextSelectionPopup::ShowPopup()
+   * @copydoc Ui::TextSelectionPopup::ShowPopup()
    */
   void ShowPopup();
 
@@ -155,42 +155,42 @@ private: // Implementation
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnCutButtonPressed(UI::Button button);
+  bool OnCutButtonPressed(Ui::Button button);
 
   /**
    * @brief When the copy button is pressed.
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnCopyButtonPressed(UI::Button button);
+  bool OnCopyButtonPressed(Ui::Button button);
 
   /**
    * @brief When the paste button is pressed.
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnPasteButtonPressed(UI::Button button);
+  bool OnPasteButtonPressed(Ui::Button button);
 
   /**
    * @brief When the select button is pressed.
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnSelectButtonPressed(UI::Button button);
+  bool OnSelectButtonPressed(Ui::Button button);
 
   /**
    * @brief When the select all button is pressed.
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnSelectAllButtonPressed(UI::Button button);
+  bool OnSelectAllButtonPressed(Ui::Button button);
 
   /**
    * @brief When the clipboard button is pressed.
    * @param[in] button the button pressed
    * @return @e true to consume the event.
    */
-  bool OnClipboardButtonPressed(UI::Button button);
+  bool OnClipboardButtonPressed(Ui::Button button);
 
   /**
    * @brief Method to set the dimension or dimension constraint on certain aspects of the Popup.
@@ -214,7 +214,7 @@ private: // Implementation
    * @param[in] button  The button the image should be used for from the Buttons Enum.
    * @param[in] image The image to use.
    */
-  void SetButtonImage(UI::TextSelectionPopup::Buttons button, const std::string& image);
+  void SetButtonImage(Ui::TextSelectionPopup::Buttons button, const std::string& image);
 
   /**
    * @brief Retrieves the image of the given button used by the popup
@@ -222,7 +222,7 @@ private: // Implementation
    * @param[in] button The button to get the image from
    * @return The image used for that button.
    */
-  const std::string& GetButtonImage(UI::TextSelectionPopup::Buttons button) const;
+  const std::string& GetButtonImage(Ui::TextSelectionPopup::Buttons button) const;
 
   /**
    * @brief Sets the image for the pressed state of a popup option.
@@ -303,9 +303,9 @@ private:
   TextSelectionPopup& operator=(const TextSelectionPopup& rhs);
 
 private: // Data
-  Dali::UI::TextSelectionToolbar mToolbar;
+  Dali::Ui::TextSelectionToolbar mToolbar;
 
-  Dali::UI::TableView
+  Dali::Ui::TableView
       mTableOfButtons; // Actor which holds all the buttons, sensitivity can be set on buttons via this actor
 
   // Images paths to be used by the Popup buttons
@@ -330,8 +330,8 @@ private: // Data
   std::vector<ButtonRequirement>
       mOrderListOfButtons; // List of buttons in the order to be displayed and a flag to indicate if needed.
 
-  UI::TextSelectionPopup::Buttons mEnabledButtons; // stores enabled buttons
-  UI::TextSelectionPopupCallbackInterface* mCallbackInterface;
+  Ui::TextSelectionPopup::Buttons mEnabledButtons; // stores enabled buttons
+  Ui::TextSelectionPopupCallbackInterface* mCallbackInterface;
 
   std::string mPressedImage;  // Image used for the popup option when pressed.
   Vector4 mPressedColor;      // Color of the popup option when pressed.
@@ -360,25 +360,25 @@ private: // Data
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::TextSelectionPopup& GetImpl(UI::TextSelectionPopup& textSelectionPopup)
+inline Ui::Internal::TextSelectionPopup& GetImpl(Ui::TextSelectionPopup& textSelectionPopup)
 {
   DALI_ASSERT_ALWAYS(textSelectionPopup);
 
   Dali::RefObject& handle = textSelectionPopup.GetImplementation();
 
-  return static_cast<UI::Internal::TextSelectionPopup&>(handle);
+  return static_cast<Ui::Internal::TextSelectionPopup&>(handle);
 }
 
-inline const UI::Internal::TextSelectionPopup& GetImpl(const UI::TextSelectionPopup& textSelectionPopup)
+inline const Ui::Internal::TextSelectionPopup& GetImpl(const Ui::TextSelectionPopup& textSelectionPopup)
 {
   DALI_ASSERT_ALWAYS(textSelectionPopup);
 
   const Dali::RefObject& handle = textSelectionPopup.GetImplementation();
 
-  return static_cast<const UI::Internal::TextSelectionPopup&>(handle);
+  return static_cast<const Ui::Internal::TextSelectionPopup&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

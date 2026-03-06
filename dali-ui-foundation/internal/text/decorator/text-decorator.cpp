@@ -120,7 +120,7 @@ void WorldToLocalCoordinatesBoundingBox(const Dali::Vector4& boundingBox, Dali::
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -665,7 +665,7 @@ struct Decorator::Impl : public ConnectionTracker
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
-    cursor.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+    cursor.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
   }
 
   // Add or Remove cursor(s) from parent
@@ -823,7 +823,7 @@ struct Decorator::Impl : public ConnectionTracker
         if (Dali::Internal::gLogFilter->IsEnabledFor(Debug::Verbose))
         {
           grabHandle.grabArea = Control::New();
-          UI::Control control = UI::Control::DownCast(grabHandle.grabArea);
+          Ui::Control control = Ui::Control::DownCast(grabHandle.grabArea);
           control.SetBackgroundColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f));
           grabHandle.grabArea.SetProperty(Dali::Actor::Property::NAME, "GrabArea");
         }
@@ -2525,6 +2525,6 @@ Decorator::Decorator(ControllerInterface& controller, TextSelectionPopupCallback
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

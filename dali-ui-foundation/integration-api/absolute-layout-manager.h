@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -45,5 +45,5 @@ public:
 };
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

@@ -45,7 +45,7 @@ static constexpr std::string_view UNIFORM_BLUR_OFFSET_DIRECTION_NAME("uOffsetDir
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -314,7 +314,7 @@ void GaussianBlurEffectImpl::OnActivate()
     return;
   }
 
-  UI::Control ownerControl = GetOwnerControl();
+  Ui::Control ownerControl = GetOwnerControl();
   DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
 
   // Reset animation properties
@@ -378,7 +378,7 @@ void GaussianBlurEffectImpl::OnActivate()
 
   // Inject blurred output to control
   Renderer targetRenderer = GetTargetRenderer();
-  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::UI::DepthIndex::FOREGROUND_EFFECT);
+  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::DepthIndex::FOREGROUND_EFFECT);
   ownerControl.AddCacheRenderer(targetRenderer);
   ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(targetRenderer, mBlurredOutputFrameBuffer);
@@ -443,7 +443,7 @@ void GaussianBlurEffectImpl::OnRefresh()
 
   if (!mSourceRenderTask)
   {
-    UI::Control ownerControl = GetOwnerControl();
+    Ui::Control ownerControl = GetOwnerControl();
     ownerControl.Add(mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerControl);
     GetImplementation(ownerControl).RequestRenderTaskReorder();
@@ -500,7 +500,7 @@ void GaussianBlurEffectImpl::DestroyFrameBuffers()
 }
 
 void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
-                                               const UI::Control sourceControl)
+                                               const Ui::Control sourceControl)
 {
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
 
@@ -614,11 +614,11 @@ void GaussianBlurEffectImpl::UpdateDownscaledBlurRadius()
   }
 }
 
-Dali::UI::GaussianBlurEffect::FinishedSignalType& GaussianBlurEffectImpl::FinishedSignal()
+Dali::Ui::GaussianBlurEffect::FinishedSignalType& GaussianBlurEffectImpl::FinishedSignal()
 {
   return mFinishedSignal;
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

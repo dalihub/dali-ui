@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -51,7 +51,7 @@ void SetColorSegmentationInfo(const Vector<ColorRun>& colorRuns, const Vector<Gl
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

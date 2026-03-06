@@ -50,7 +50,7 @@
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-using namespace Dali::UI::Text;
+using namespace Dali::Ui::Text;
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gTextEditorLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_CONTROLS");
@@ -58,13 +58,13 @@ Debug::Filter* gTextEditorLogFilter = Debug::Filter::New(Debug::Concise, true, "
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 namespace // unnamed namespace
 {
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::UI::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
 const float DEFAULT_SCROLL_SPEED = 1200.f; ///< The default scroll speed for the text editor in pixels/second.
 } // unnamed namespace
 
@@ -78,172 +78,172 @@ const char* const SCROLL_BAR_CONTENT_SIZE("sourceContentSize");
 // Type registration
 BaseHandle Create()
 {
-  return UI::TextEditor::New();
+  return Ui::TextEditor::New();
 }
 
 // clang-format off
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::TextEditor, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::TextEditor, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "text",                                 STRING,    TEXT                                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "textColor",                            VECTOR4,   TEXT_COLOR                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "fontFamily",                           STRING,    FONT_FAMILY                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "fontStyle",                            MAP,       FONT_STYLE                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "pointSize",                            FLOAT,     POINT_SIZE                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "horizontalAlignment",                  STRING,    HORIZONTAL_ALIGNMENT                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "scrollThreshold",                      FLOAT,     SCROLL_THRESHOLD                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "scrollSpeed",                          FLOAT,     SCROLL_SPEED                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "primaryCursorColor",                   VECTOR4,   PRIMARY_CURSOR_COLOR                )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "secondaryCursorColor",                 VECTOR4,   SECONDARY_CURSOR_COLOR              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "enableCursorBlink",                    BOOLEAN,   ENABLE_CURSOR_BLINK                 )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "cursorBlinkInterval",                  FLOAT,     CURSOR_BLINK_INTERVAL               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "cursorBlinkDuration",                  FLOAT,     CURSOR_BLINK_DURATION               )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "cursorWidth",                          INTEGER,   CURSOR_WIDTH                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "grabHandleImage",                      STRING,    GRAB_HANDLE_IMAGE                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "grabHandlePressedImage",               STRING,    GRAB_HANDLE_PRESSED_IMAGE           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandleImageLeft",             MAP,       SELECTION_HANDLE_IMAGE_LEFT         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandleImageRight",            MAP,       SELECTION_HANDLE_IMAGE_RIGHT        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandlePressedImageLeft",      MAP,       SELECTION_HANDLE_PRESSED_IMAGE_LEFT )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandlePressedImageRight",     MAP,       SELECTION_HANDLE_PRESSED_IMAGE_RIGHT)
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandleMarkerImageLeft",       MAP,       SELECTION_HANDLE_MARKER_IMAGE_LEFT  )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHandleMarkerImageRight",      MAP,       SELECTION_HANDLE_MARKER_IMAGE_RIGHT )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "selectionHighlightColor",              VECTOR4,   SELECTION_HIGHLIGHT_COLOR           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "decorationBoundingBox",                RECTANGLE, DECORATION_BOUNDING_BOX             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "enableMarkup",                         BOOLEAN,   ENABLE_MARKUP                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputColor",                           VECTOR4,   INPUT_COLOR                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputFontFamily",                      STRING,    INPUT_FONT_FAMILY                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputFontStyle",                       MAP,       INPUT_FONT_STYLE                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputPointSize",                       FLOAT,     INPUT_POINT_SIZE                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "lineSpacing",                          FLOAT,     LINE_SPACING                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputLineSpacing",                     FLOAT,     INPUT_LINE_SPACING                  )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "underline",                            MAP,       UNDERLINE                           )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputUnderline",                       MAP,       INPUT_UNDERLINE                     )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "shadow",                               MAP,       SHADOW                              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputShadow",                          MAP,       INPUT_SHADOW                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "emboss",                               MAP,       EMBOSS                              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputEmboss",                          MAP,       INPUT_EMBOSS                        )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "outline",                              MAP,       OUTLINE                             )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "inputOutline",                         MAP,       INPUT_OUTLINE                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "smoothScroll",                         BOOLEAN,   SMOOTH_SCROLL                       )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "smoothScrollDuration",                 FLOAT,     SMOOTH_SCROLL_DURATION              )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "enableScrollBar",                      BOOLEAN,   ENABLE_SCROLL_BAR                   )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "scrollBarShowDuration",                FLOAT,     SCROLL_BAR_SHOW_DURATION            )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "scrollBarFadeDuration",                FLOAT,     SCROLL_BAR_FADE_DURATION            )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "pixelSize",                            FLOAT,     PIXEL_SIZE                          )
-DALI_PROPERTY_REGISTRATION_READ_ONLY(UI,       TextEditor, "lineCount",                            INTEGER,   LINE_COUNT                          )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "enableSelection",                      BOOLEAN,   ENABLE_SELECTION                    )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "placeholder",                          MAP,       PLACEHOLDER                         )
-DALI_PROPERTY_REGISTRATION(UI,                 TextEditor, "lineWrapMode",                         INTEGER,   LINE_WRAP_MODE                      )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "placeholderText",                      STRING,    PLACEHOLDER_TEXT                    )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "placeholderTextColor",                 VECTOR4,   PLACEHOLDER_TEXT_COLOR              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableShiftSelection",                 BOOLEAN,   ENABLE_SHIFT_SELECTION              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableGrabHandle",                     BOOLEAN,   ENABLE_GRAB_HANDLE                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "matchSystemLanguageDirection",         BOOLEAN,   MATCH_SYSTEM_LANGUAGE_DIRECTION     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "renderingBackend",                     INTEGER,   RENDERING_BACKEND                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "maxLength",                            INTEGER,   MAX_LENGTH                          )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "selectedTextStart",                    INTEGER,   SELECTED_TEXT_START                 )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "selectedTextEnd",                      INTEGER,   SELECTED_TEXT_END                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "horizontalScrollPosition",             FLOAT,     HORIZONTAL_SCROLL_POSITION          )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "verticalScrollPosition",               INTEGER,   VERTICAL_SCROLL_POSITION            )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableEditing",                        BOOLEAN,   ENABLE_EDITING                      )
-DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(UI, TextEditor, "selectedText",                         STRING,    SELECTED_TEXT                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "fontSizeScale",                        FLOAT,     FONT_SIZE_SCALE                     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableFontSizeScale",                  BOOLEAN,   ENABLE_FONT_SIZE_SCALE              )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "primaryCursorPosition",                INTEGER,   PRIMARY_CURSOR_POSITION             )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "grabHandleColor",                      VECTOR4,   GRAB_HANDLE_COLOR                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableGrabHandlePopup",                BOOLEAN,   ENABLE_GRAB_HANDLE_POPUP            )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "inputMethodSettings",                  MAP,       INPUT_METHOD_SETTINGS               )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "inputFilter",                          MAP,       INPUT_FILTER                        )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "ellipsis",                             BOOLEAN,   ELLIPSIS                            )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "ellipsisPosition",                     INTEGER,   ELLIPSIS_POSITION                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "minLineSize",                          FLOAT,     MIN_LINE_SIZE                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "strikethrough",                        MAP,       STRIKETHROUGH                       )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "inputStrikethrough",                   MAP,       INPUT_STRIKETHROUGH                 )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "characterSpacing",                     FLOAT,     CHARACTER_SPACING                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "relativeLineSize",                     FLOAT,     RELATIVE_LINE_SIZE                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "verticalAlignment",                    STRING,    VERTICAL_ALIGNMENT                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "selectionPopupStyle",                  MAP,       SELECTION_POPUP_STYLE               )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "removeFrontInset",                     BOOLEAN,   REMOVE_FRONT_INSET                  )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "removeBackInset",                      BOOLEAN,   REMOVE_BACK_INSET                   )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "fontVariations",                       MAP,       FONT_VARIATIONS                     )
-DALI_DEVEL_PROPERTY_REGISTRATION(UI,           TextEditor, "enableCursorInset",                    BOOLEAN,   ENABLE_CURSOR_INSET                 )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "text",                                 STRING,    TEXT                                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "textColor",                            VECTOR4,   TEXT_COLOR                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "fontFamily",                           STRING,    FONT_FAMILY                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "fontStyle",                            MAP,       FONT_STYLE                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "pointSize",                            FLOAT,     POINT_SIZE                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "horizontalAlignment",                  STRING,    HORIZONTAL_ALIGNMENT                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "scrollThreshold",                      FLOAT,     SCROLL_THRESHOLD                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "scrollSpeed",                          FLOAT,     SCROLL_SPEED                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "primaryCursorColor",                   VECTOR4,   PRIMARY_CURSOR_COLOR                )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "secondaryCursorColor",                 VECTOR4,   SECONDARY_CURSOR_COLOR              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "enableCursorBlink",                    BOOLEAN,   ENABLE_CURSOR_BLINK                 )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "cursorBlinkInterval",                  FLOAT,     CURSOR_BLINK_INTERVAL               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "cursorBlinkDuration",                  FLOAT,     CURSOR_BLINK_DURATION               )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "cursorWidth",                          INTEGER,   CURSOR_WIDTH                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "grabHandleImage",                      STRING,    GRAB_HANDLE_IMAGE                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "grabHandlePressedImage",               STRING,    GRAB_HANDLE_PRESSED_IMAGE           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandleImageLeft",             MAP,       SELECTION_HANDLE_IMAGE_LEFT         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandleImageRight",            MAP,       SELECTION_HANDLE_IMAGE_RIGHT        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandlePressedImageLeft",      MAP,       SELECTION_HANDLE_PRESSED_IMAGE_LEFT )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandlePressedImageRight",     MAP,       SELECTION_HANDLE_PRESSED_IMAGE_RIGHT)
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandleMarkerImageLeft",       MAP,       SELECTION_HANDLE_MARKER_IMAGE_LEFT  )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHandleMarkerImageRight",      MAP,       SELECTION_HANDLE_MARKER_IMAGE_RIGHT )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "selectionHighlightColor",              VECTOR4,   SELECTION_HIGHLIGHT_COLOR           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "decorationBoundingBox",                RECTANGLE, DECORATION_BOUNDING_BOX             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "enableMarkup",                         BOOLEAN,   ENABLE_MARKUP                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputColor",                           VECTOR4,   INPUT_COLOR                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputFontFamily",                      STRING,    INPUT_FONT_FAMILY                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputFontStyle",                       MAP,       INPUT_FONT_STYLE                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputPointSize",                       FLOAT,     INPUT_POINT_SIZE                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "lineSpacing",                          FLOAT,     LINE_SPACING                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputLineSpacing",                     FLOAT,     INPUT_LINE_SPACING                  )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "underline",                            MAP,       UNDERLINE                           )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputUnderline",                       MAP,       INPUT_UNDERLINE                     )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "shadow",                               MAP,       SHADOW                              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputShadow",                          MAP,       INPUT_SHADOW                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "emboss",                               MAP,       EMBOSS                              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputEmboss",                          MAP,       INPUT_EMBOSS                        )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "outline",                              MAP,       OUTLINE                             )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "inputOutline",                         MAP,       INPUT_OUTLINE                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "smoothScroll",                         BOOLEAN,   SMOOTH_SCROLL                       )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "smoothScrollDuration",                 FLOAT,     SMOOTH_SCROLL_DURATION              )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "enableScrollBar",                      BOOLEAN,   ENABLE_SCROLL_BAR                   )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "scrollBarShowDuration",                FLOAT,     SCROLL_BAR_SHOW_DURATION            )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "scrollBarFadeDuration",                FLOAT,     SCROLL_BAR_FADE_DURATION            )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "pixelSize",                            FLOAT,     PIXEL_SIZE                          )
+DALI_PROPERTY_REGISTRATION_READ_ONLY(Ui,       TextEditor, "lineCount",                            INTEGER,   LINE_COUNT                          )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "enableSelection",                      BOOLEAN,   ENABLE_SELECTION                    )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "placeholder",                          MAP,       PLACEHOLDER                         )
+DALI_PROPERTY_REGISTRATION(Ui,                 TextEditor, "lineWrapMode",                         INTEGER,   LINE_WRAP_MODE                      )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "placeholderText",                      STRING,    PLACEHOLDER_TEXT                    )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "placeholderTextColor",                 VECTOR4,   PLACEHOLDER_TEXT_COLOR              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableShiftSelection",                 BOOLEAN,   ENABLE_SHIFT_SELECTION              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableGrabHandle",                     BOOLEAN,   ENABLE_GRAB_HANDLE                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "matchSystemLanguageDirection",         BOOLEAN,   MATCH_SYSTEM_LANGUAGE_DIRECTION     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "renderingBackend",                     INTEGER,   RENDERING_BACKEND                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "maxLength",                            INTEGER,   MAX_LENGTH                          )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "selectedTextStart",                    INTEGER,   SELECTED_TEXT_START                 )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "selectedTextEnd",                      INTEGER,   SELECTED_TEXT_END                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "horizontalScrollPosition",             FLOAT,     HORIZONTAL_SCROLL_POSITION          )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "verticalScrollPosition",               INTEGER,   VERTICAL_SCROLL_POSITION            )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableEditing",                        BOOLEAN,   ENABLE_EDITING                      )
+DALI_DEVEL_PROPERTY_REGISTRATION_READ_ONLY(Ui, TextEditor, "selectedText",                         STRING,    SELECTED_TEXT                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "fontSizeScale",                        FLOAT,     FONT_SIZE_SCALE                     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableFontSizeScale",                  BOOLEAN,   ENABLE_FONT_SIZE_SCALE              )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "primaryCursorPosition",                INTEGER,   PRIMARY_CURSOR_POSITION             )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "grabHandleColor",                      VECTOR4,   GRAB_HANDLE_COLOR                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableGrabHandlePopup",                BOOLEAN,   ENABLE_GRAB_HANDLE_POPUP            )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "inputMethodSettings",                  MAP,       INPUT_METHOD_SETTINGS               )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "inputFilter",                          MAP,       INPUT_FILTER                        )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "ellipsis",                             BOOLEAN,   ELLIPSIS                            )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "ellipsisPosition",                     INTEGER,   ELLIPSIS_POSITION                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "minLineSize",                          FLOAT,     MIN_LINE_SIZE                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "strikethrough",                        MAP,       STRIKETHROUGH                       )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "inputStrikethrough",                   MAP,       INPUT_STRIKETHROUGH                 )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "characterSpacing",                     FLOAT,     CHARACTER_SPACING                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "relativeLineSize",                     FLOAT,     RELATIVE_LINE_SIZE                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "verticalAlignment",                    STRING,    VERTICAL_ALIGNMENT                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "selectionPopupStyle",                  MAP,       SELECTION_POPUP_STYLE               )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "removeFrontInset",                     BOOLEAN,   REMOVE_FRONT_INSET                  )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "removeBackInset",                      BOOLEAN,   REMOVE_BACK_INSET                   )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "fontVariations",                       MAP,       FONT_VARIATIONS                     )
+DALI_DEVEL_PROPERTY_REGISTRATION(Ui,           TextEditor, "enableCursorInset",                    BOOLEAN,   ENABLE_CURSOR_INSET                 )
 
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "textChanged",           SIGNAL_TEXT_CHANGED           )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "inputStyleChanged",     SIGNAL_INPUT_STYLE_CHANGED    )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "maxLengthReached",      SIGNAL_MAX_LENGTH_REACHED     )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "anchorClicked",         SIGNAL_ANCHOR_CLICKED         )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "inputFiltered",         SIGNAL_INPUT_FILTERED         )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "cursorPositionChanged", SIGNAL_CURSOR_POSITION_CHANGED)
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "selectionChanged",      SIGNAL_SELECTION_CHANGED      )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "selectionCleared",      SIGNAL_SELECTION_CLEARED      )
-DALI_SIGNAL_REGISTRATION(UI, TextEditor, "selectionStarted",      SIGNAL_SELECTION_STARTED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "textChanged",           SIGNAL_TEXT_CHANGED           )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "inputStyleChanged",     SIGNAL_INPUT_STYLE_CHANGED    )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "maxLengthReached",      SIGNAL_MAX_LENGTH_REACHED     )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "anchorClicked",         SIGNAL_ANCHOR_CLICKED         )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "inputFiltered",         SIGNAL_INPUT_FILTERED         )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "cursorPositionChanged", SIGNAL_CURSOR_POSITION_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "selectionChanged",      SIGNAL_SELECTION_CHANGED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "selectionCleared",      SIGNAL_SELECTION_CLEARED      )
+DALI_SIGNAL_REGISTRATION(Ui, TextEditor, "selectionStarted",      SIGNAL_SELECTION_STARTED      )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
-UI::TextEditor::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputStyleMask)
+Ui::TextEditor::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputStyleMask)
 {
-  UI::TextEditor::InputStyle::Mask editorInputStyleMask = UI::TextEditor::InputStyle::NONE;
+  Ui::TextEditor::InputStyle::Mask editorInputStyleMask = Ui::TextEditor::InputStyle::NONE;
 
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_COLOR))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::COLOR);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::COLOR);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_FAMILY))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::FONT_FAMILY);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::FONT_FAMILY);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_POINT_SIZE))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::POINT_SIZE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::POINT_SIZE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WEIGHT))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WIDTH))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_SLANT))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::FONT_STYLE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::FONT_STYLE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_LINE_SPACING))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::LINE_SPACING);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::LINE_SPACING);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_UNDERLINE))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::UNDERLINE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::UNDERLINE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_SHADOW))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::SHADOW);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::SHADOW);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_EMBOSS))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::EMBOSS);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::EMBOSS);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_OUTLINE))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::OUTLINE);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::OUTLINE);
   }
   if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_STRIKETHROUGH))
   {
     editorInputStyleMask =
-        static_cast<UI::TextEditor::InputStyle::Mask>(editorInputStyleMask | UI::TextEditor::InputStyle::STRIKETHROUGH);
+        static_cast<Ui::TextEditor::InputStyle::Mask>(editorInputStyleMask | Ui::TextEditor::InputStyle::STRIKETHROUGH);
   }
 
   return editorInputStyleMask;
@@ -251,13 +251,13 @@ UI::TextEditor::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputS
 
 } // namespace
 
-UI::TextEditor TextEditor::New(ControlBehaviour additionalBehaviour)
+Ui::TextEditor TextEditor::New(ControlBehaviour additionalBehaviour)
 {
   // Create the implementation, temporarily owned by this handle on stack
   IntrusivePtr<TextEditor> impl = new TextEditor(additionalBehaviour);
 
   // Pass ownership to CustomActor handle
-  UI::TextEditor handle(*impl);
+  Ui::TextEditor handle(*impl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -268,7 +268,7 @@ UI::TextEditor TextEditor::New(ControlBehaviour additionalBehaviour)
 
 void TextEditor::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::TextEditor textEditor = UI::TextEditor::DownCast(Dali::BaseHandle(object));
+  Ui::TextEditor textEditor = Ui::TextEditor::DownCast(Dali::BaseHandle(object));
 
   DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor SetProperty\n");
 
@@ -282,7 +282,7 @@ Property::Value TextEditor::GetProperty(BaseObject* object, Property::Index inde
 {
   Property::Value value;
 
-  UI::TextEditor textEditor = UI::TextEditor::DownCast(Dali::BaseHandle(object));
+  Ui::TextEditor textEditor = Ui::TextEditor::DownCast(Dali::BaseHandle(object));
 
   if (textEditor)
   {
@@ -469,7 +469,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::TextEditor editor = UI::TextEditor::DownCast(handle);
+  Ui::TextEditor editor = Ui::TextEditor::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), SIGNAL_TEXT_CHANGED))
   {
@@ -544,17 +544,17 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
   return connected;
 }
 
-UI::TextEditor::TextChangedSignalType& TextEditor::TextChangedSignal()
+Ui::TextEditor::TextChangedSignalType& TextEditor::TextChangedSignal()
 {
   return mTextChangedSignal;
 }
 
-UI::TextEditor::InputStyleChangedSignalType& TextEditor::InputStyleChangedSignal()
+Ui::TextEditor::InputStyleChangedSignalType& TextEditor::InputStyleChangedSignal()
 {
   return mInputStyleChangedSignal;
 }
 
-UI::TextEditor::ScrollStateChangedSignalType& TextEditor::ScrollStateChangedSignal()
+Ui::TextEditor::ScrollStateChangedSignalType& TextEditor::ScrollStateChangedSignal()
 {
   return mScrollStateChangedSignal;
 }
@@ -639,15 +639,15 @@ void TextEditor::OnInitialize()
   DevelControl::SetInputMethodContext(*this, mInputMethodContext);
 
   // Creates an extra control to be used as stencil buffer.
-  mStencil = Control::New(ControlBehaviour(Dali::UI::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
+  mStencil = Control::New(ControlBehaviour(Dali::Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
   mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
   mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  mStencil.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+  mStencil.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
 
   // Creates a background visual. Even if the color is transparent it updates the stencil.
-  mStencil.SetProperty(UI::Control::Property::BACKGROUND,
+  mStencil.SetProperty(Ui::Control::Property::BACKGROUND,
                        Property::Map()
-                           .Add(UI::Visual::Property::TYPE, UI::Visual::COLOR)
+                           .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
                            .Add(ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT));
 
   // Enable the clipping property.
@@ -672,7 +672,7 @@ DevelControl::ControlAccessible* TextEditor::CreateAccessibleObject()
   return new TextEditorAccessible(Self());
 }
 
-void TextEditor::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change)
+void TextEditor::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
 {
   DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor::OnStyleChange\n");
 
@@ -690,7 +690,7 @@ void TextEditor::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type 
 
     case StyleChange::DEFAULT_FONT_SIZE_CHANGE:
     {
-      GetImpl(styleManager).ApplyThemeStyle(UI::Control(GetOwner()));
+      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
       RelayoutRequest();
       break;
     }
@@ -707,13 +707,13 @@ void TextEditor::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type 
 
 void TextEditor::OnApplyDefaultStyle()
 {
-  DefaultTheme::Get().ApplyDefaultStyle(UI::TextEditor(GetOwner()));
+  DefaultTheme::Get().ApplyDefaultStyle(Ui::TextEditor(GetOwner()));
 }
 
 Vector3 TextEditor::GetNaturalSize()
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += (padding.start + padding.end);
@@ -725,7 +725,7 @@ Vector3 TextEditor::GetNaturalSize()
 float TextEditor::GetHeightForWidth(float width)
 {
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   return mController->GetHeightForWidth(width) + padding.top + padding.bottom;
 }
 
@@ -783,7 +783,7 @@ void TextEditor::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Actor self = Self();
 
   Extents padding;
-  padding = self.GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = self.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
   Vector2 contentSize(size.x - (padding.start + padding.end), size.y - (padding.top + padding.bottom));
 
@@ -951,12 +951,12 @@ void TextEditor::OnTap(const TapGesture& gesture)
   // Deliver the tap before the focus event to controller; this allows us to detect when focus is gained due to
   // tap-gestures
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - padding.start, localPoint.y - padding.top);
   mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
 
-  Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
   if (keyboardFocusManager)
   {
     keyboardFocusManager.SetCurrentFocusActor(Self());
@@ -984,7 +984,7 @@ void TextEditor::OnLongPress(const LongPressGesture& gesture)
     mInputMethodContext.Activate();
   }
   Extents padding;
-  padding = Self().GetProperty<Extents>(UI::Control::Property::PADDING);
+  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
 
@@ -1001,7 +1001,7 @@ bool TextEditor::OnKeyEvent(const KeyEvent& event)
     // Make sure ClearKeyInputFocus when only key is up
     if (event.GetState() == KeyEvent::UP)
     {
-      Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+      Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
       if (keyboardFocusManager)
       {
         keyboardFocusManager.ClearFocus();
@@ -1061,20 +1061,20 @@ void TextEditor::TextChanged(bool immediate)
 
 void TextEditor::EmitTextChangedSignal()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
 }
 
 void TextEditor::MaxLengthReached()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mMaxLengthReachedSignal.Emit(handle);
 }
 
 void TextEditor::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mInputStyleChangedSignal.Emit(handle, ConvertInputStyle(inputStyleMask));
 }
 
@@ -1085,40 +1085,40 @@ bool TextEditor::AnchorClicked(uint32_t cursorPosition, std::string& href)
 
 void TextEditor::EmitAnchorClickedSignal(const std::string& href)
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mAnchorClickedSignal.Emit(handle, href.c_str(), href.length());
 }
 
 void TextEditor::EmitCursorPositionChangedSignal()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mCursorPositionChanged = false;
   mCursorPositionChangedSignal.Emit(handle, mOldPosition);
 }
 
-void TextEditor::InputFiltered(UI::InputFilter::Property::Type type)
+void TextEditor::InputFiltered(Ui::InputFilter::Property::Type type)
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mInputFilteredSignal.Emit(handle, type);
 }
 
 void TextEditor::EmitSelectionChangedSignal()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mSelectionChangedSignal.Emit(handle, mOldSelectionStart, mOldSelectionEnd);
   mSelectionChanged = false;
 }
 
 void TextEditor::EmitSelectionClearedSignal()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mSelectionClearedSignal.Emit(handle);
   mSelectionCleared = false;
 }
 
 void TextEditor::EmitSelectionStartedSignal()
 {
-  Dali::UI::TextEditor handle(GetOwner());
+  Dali::Ui::TextEditor handle(GetOwner());
   mSelectionStartedSignal.Emit(handle);
   mSelectionStarted = false;
 }
@@ -1203,7 +1203,7 @@ Uint32Pair TextEditor::GetTextSelectionRange() const
 
 void TextEditor::GetControlBackgroundColor(Vector4& color) const
 {
-  Property::Value propValue = Self().GetProperty(UI::Control::Property::BACKGROUND);
+  Property::Value propValue = Self().GetProperty(Ui::Control::Property::BACKGROUND);
   Property::Map* resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
@@ -1235,8 +1235,8 @@ void TextEditor::UpdateScrollBar()
   CustomActor self = Self();
   if (!mScrollBar)
   {
-    mScrollBar = UI::ScrollBar::New(UI::ScrollBar::VERTICAL);
-    mScrollBar.SetIndicatorHeightPolicy(UI::ScrollBar::VARIABLE);
+    mScrollBar = Ui::ScrollBar::New(Ui::ScrollBar::VERTICAL);
+    mScrollBar.SetIndicatorHeightPolicy(Ui::ScrollBar::VARIABLE);
     mScrollBar.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_RIGHT);
     mScrollBar.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_RIGHT);
     mScrollBar.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
@@ -1257,7 +1257,7 @@ void TextEditor::UpdateScrollBar()
 
     // Set style name of ScrollBar for styling
     mScrollBar.SetStyleName("TextEditorScrollBar");
-    UI::Control scrollIndicator = UI::Control::DownCast(mScrollBar.GetScrollIndicator());
+    Ui::Control scrollIndicator = Ui::Control::DownCast(mScrollBar.GetScrollIndicator());
     if (scrollIndicator)
     {
       // Set style name of ScrollBarIndicator for styling
@@ -1281,8 +1281,8 @@ void TextEditor::UpdateScrollBar()
   if (!mScrollStarted)
   {
     mScrollStarted = true;
-    Dali::UI::TextEditor handle(GetOwner());
-    mScrollStateChangedSignal.Emit(handle, UI::TextEditor::Scroll::STARTED);
+    Dali::Ui::TextEditor handle(GetOwner());
+    mScrollStateChangedSignal.Emit(handle, Ui::TextEditor::Scroll::STARTED);
   }
 
   Actor indicator = mScrollBar.GetScrollIndicator();
@@ -1307,8 +1307,8 @@ void TextEditor::OnScrollIndicatorAnimationFinished(Animation& animation)
   if (Dali::EqualsZero(animation.GetCurrentProgress()))
   {
     mScrollStarted = false;
-    Dali::UI::TextEditor handle(GetOwner());
-    mScrollStateChangedSignal.Emit(handle, UI::TextEditor::Scroll::FINISHED);
+    Dali::Ui::TextEditor handle(GetOwner());
+    mScrollStateChangedSignal.Emit(handle, Ui::TextEditor::Scroll::FINISHED);
   }
 }
 
@@ -1353,7 +1353,7 @@ void TextEditor::KeyboardStatusChanged(bool keyboardShown)
 
   bool isFocused = false;
 
-  Dali::UI::KeyboardFocusManager keyboardFocusManager = Dali::UI::KeyboardFocusManager::Get();
+  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
   if (keyboardFocusManager)
   {
     isFocused = keyboardFocusManager.GetCurrentFocusActor() == Self();
@@ -1554,30 +1554,30 @@ std::pair<std::string, bool> TextEditor::TextEditorAccessible::GetNameRaw() cons
   return {GetWholeText(), true};
 }
 
-const std::vector<UI::TextAnchor>& TextEditor::TextEditorAccessible::GetTextAnchors() const
+const std::vector<Ui::TextAnchor>& TextEditor::TextEditorAccessible::GetTextAnchors() const
 {
-  auto self = UI::TextEditor::DownCast(Self());
+  auto self = Ui::TextEditor::DownCast(Self());
 
-  return UI::GetImpl(self).mAnchorActors;
+  return Ui::GetImpl(self).mAnchorActors;
 }
 
-UI::Text::ControllerPtr TextEditor::TextEditorAccessible::GetTextController() const
+Ui::Text::ControllerPtr TextEditor::TextEditorAccessible::GetTextController() const
 {
-  auto self = UI::TextEditor::DownCast(Self());
+  auto self = Ui::TextEditor::DownCast(Self());
 
-  return UI::GetImpl(self).GetTextController();
+  return Ui::GetImpl(self).GetTextController();
 }
 
 void TextEditor::TextEditorAccessible::RequestTextRelayout()
 {
-  auto self = UI::TextEditor::DownCast(Self());
-  auto& selfImpl = UI::GetImpl(self);
+  auto self = Ui::TextEditor::DownCast(Self());
+  auto& selfImpl = Ui::GetImpl(self);
 
   selfImpl.RequestTextRelayout();
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

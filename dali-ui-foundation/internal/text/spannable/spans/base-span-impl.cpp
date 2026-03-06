@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -28,10 +28,10 @@ namespace Internal
 {
 struct BaseSpan::Impl
 {
-  Dali::UI::Text::SpanType::Value mSpanTypeValue; ///< The span type value.
+  Dali::Ui::Text::SpanType::Value mSpanTypeValue; ///< The span type value.
 };
 
-BaseSpan::BaseSpan(Dali::UI::Text::SpanType::Value spanType)
+BaseSpan::BaseSpan(Dali::Ui::Text::SpanType::Value spanType)
 {
   mImpl = std::make_unique<Impl>();
   mImpl->mSpanTypeValue = spanType;
@@ -41,7 +41,7 @@ BaseSpan::~BaseSpan()
 {
 }
 
-Dali::UI::Text::SpanType::Value BaseSpan::GetSpanType() const
+Dali::Ui::Text::SpanType::Value BaseSpan::GetSpanType() const
 {
   return mImpl->mSpanTypeValue;
 }
@@ -50,6 +50,6 @@ Dali::UI::Text::SpanType::Value BaseSpan::GetSpanType() const
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

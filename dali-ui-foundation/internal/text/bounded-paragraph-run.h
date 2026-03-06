@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -64,11 +64,11 @@ struct BoundedParagraphRun : public AbstractStyleCharacterRun
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 // Allow BoundedParagraphRun to be treated as a POD type
 template <>
-struct TypeTraits<Dali::UI::Text::BoundedParagraphRun> : public Dali::BasicTypes<Dali::UI::Text::BoundedParagraphRun>
+struct TypeTraits<Dali::Ui::Text::BoundedParagraphRun> : public Dali::BasicTypes<Dali::Ui::Text::BoundedParagraphRun>
 {
   enum
   {

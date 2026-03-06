@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -43,14 +43,14 @@ void Style::ApplyVisualsAndPropertiesRecursively(Handle handle,
   ApplyVisuals(handle, instancedProperties);
   ApplyProperties(handle);
 
-  UI::Control control = UI::Control::DownCast(handle);
+  Ui::Control control = Ui::Control::DownCast(handle);
   if (control)
   {
     std::string stateName;
     Property::Value value = control.GetProperty(DevelControl::Property::STATE);
-    Dali::UI::DevelControl::State state = static_cast<Dali::UI::DevelControl::State>(value.Get<int>());
+    Dali::Ui::DevelControl::State state = static_cast<Dali::Ui::DevelControl::State>(value.Get<int>());
     stateName =
-        Scripting::GetEnumerationName<UI::DevelControl::State>(state, ControlStateTable, ControlStateTableCount);
+        Scripting::GetEnumerationName<Ui::DevelControl::State>(state, ControlStateTable, ControlStateTableCount);
 
     if (!stateName.empty())
     {
@@ -114,8 +114,8 @@ void Style::ApplyVisual(Handle handle, const std::string& visualName, const Prop
     // merge them into the visual map
     if (instancedProperties)
     {
-      Property::Value* instanceTypeValue = instancedProperties->Find(UI::Visual::Property::TYPE);
-      Property::Value* newTypeValue = visualMap.Find(UI::Visual::Property::TYPE, VISUAL_TYPE);
+      Property::Value* instanceTypeValue = instancedProperties->Find(Ui::Visual::Property::TYPE);
+      Property::Value* newTypeValue = visualMap.Find(Ui::Visual::Property::TYPE, VISUAL_TYPE);
       if (instanceTypeValue && newTypeValue)
       {
         int instanceVisualType = -1;
@@ -160,5 +160,5 @@ Style::~Style()
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

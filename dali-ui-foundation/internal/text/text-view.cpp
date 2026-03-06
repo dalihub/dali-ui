@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 namespace
 {
@@ -1060,4 +1060,4 @@ bool View::IsCutoutEnabled() const
   return false;
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

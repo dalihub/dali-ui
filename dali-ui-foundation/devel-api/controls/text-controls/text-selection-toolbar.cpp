@@ -25,7 +25,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextSelectionToolbar TextSelectionToolbar::New()
 {
@@ -89,6 +89,6 @@ TextSelectionToolbar::TextSelectionToolbar(Dali::Internal::CustomActor* internal
   VerifyCustomActorPointer<Internal::TextSelectionToolbar>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

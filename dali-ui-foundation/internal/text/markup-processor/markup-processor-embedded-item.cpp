@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -77,6 +77,6 @@ void ProcessEmbeddedItem(const Tag& tag, EmbeddedItem& embeddedItem)
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

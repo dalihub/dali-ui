@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 using Uint32Pair = std::pair<uint32_t, uint32_t>;
 using string = std::string;
@@ -86,7 +86,7 @@ public:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

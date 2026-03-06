@@ -26,7 +26,7 @@ namespace Dali
 {
 class Actor;
 
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -84,7 +84,7 @@ public:
    *
    * @param[in] type The filter type is ACCEPTED or REJECTED.
    */
-  virtual void InputFiltered(UI::InputFilter::Property::Type type) = 0;
+  virtual void InputFiltered(Ui::InputFilter::Property::Type type) = 0;
 
   /**
    * @brief Add a decoration.
@@ -136,7 +136,7 @@ public:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

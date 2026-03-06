@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 RenderEffect::RenderEffect(const RenderEffect& handle)
   : BaseHandle(handle)
@@ -55,5 +55,5 @@ bool RenderEffect::IsActivated()
   return GetImplementation(*this).IsActivated();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

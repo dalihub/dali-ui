@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -106,7 +106,7 @@ public:
    * @param[in] position top left of image
    * @param[out] meshData generated MeshData
    */
-  void GenerateMeshData(uint32_t imageId, const Vector2& position, UI::AtlasManager::Mesh2D& mesh);
+  void GenerateMeshData(uint32_t imageId, const Vector2& position, Ui::AtlasManager::Mesh2D& mesh);
 
   /**
    * @brief Check to see if a glyph is being cached
@@ -185,7 +185,7 @@ private:
   explicit DALI_INTERNAL AtlasGlyphManager(Internal::AtlasGlyphManager* impl);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

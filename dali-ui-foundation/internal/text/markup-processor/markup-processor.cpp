@@ -41,7 +41,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -1274,6 +1274,6 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

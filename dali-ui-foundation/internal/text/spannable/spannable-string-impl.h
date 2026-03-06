@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -40,7 +40,7 @@ typedef IntrusivePtr<SpannableString> SpannableStringPtr;
 typedef const SpannableString* SpannableStringConstPtr;
 
 /**
- * @copydoc Dali::UI::Text::SpannableString
+ * @copydoc Dali::Ui::Text::SpannableString
  */
 class SpannableString : public Spannable
 {
@@ -50,7 +50,7 @@ public:
    *
    * @return A public handle to the newly allocated SpannableString.
    */
-  static Dali::UI::Text::SpannableString New(const std::string& text);
+  static Dali::Ui::Text::SpannableString New(const std::string& text);
 
   /**
    * @brief Destructor
@@ -75,42 +75,42 @@ public:
 public:
   // Methods from CharacterSequence
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::GetCharacters()
+   * @copydoc Dali::Ui::Text::CharacterSequence::GetCharacters()
    */
   Vector<uint32_t> GetCharacters() const override;
 
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::GetNumberOfCharacters()
+   * @copydoc Dali::Ui::Text::CharacterSequence::GetNumberOfCharacters()
    */
   uint32_t GetNumberOfCharacters() const override;
 
   /**
-   * @copydoc Dali::UI::Text::CharacterSequence::ToString()
+   * @copydoc Dali::Ui::Text::CharacterSequence::ToString()
    */
   std::string ToString() const override;
 
   // Methods from Spannable
   /**
-   * @copydoc Dali::UI::Text::Spannable::AttachSpan()
+   * @copydoc Dali::Ui::Text::Spannable::AttachSpan()
    */
-  bool AttachSpan(const Dali::UI::Text::BaseSpan& styleSpan, const Dali::UI::Text::Range& range);
+  bool AttachSpan(const Dali::Ui::Text::BaseSpan& styleSpan, const Dali::Ui::Text::Range& range);
 
   /**
-   * @copydoc Dali::UI::Text::Spannable::DetachSpan()
+   * @copydoc Dali::Ui::Text::Spannable::DetachSpan()
    */
-  bool DetachSpan(const Dali::UI::Text::BaseSpan& styleSpan);
+  bool DetachSpan(const Dali::Ui::Text::BaseSpan& styleSpan);
 
   // Methods from Spanned
   /**
-   * @copydoc Dali::UI::Text::Spanned::GetAllSpans()
+   * @copydoc Dali::Ui::Text::Spanned::GetAllSpans()
    */
-  std::vector<Dali::UI::Text::BaseSpan> GetAllSpans() const;
+  std::vector<Dali::Ui::Text::BaseSpan> GetAllSpans() const;
 
   /**
-   * @copydoc Dali::UI::Text::Spanned::RetrieveAllSpansAndRanges()
+   * @copydoc Dali::Ui::Text::Spanned::RetrieveAllSpansAndRanges()
    */
-  void RetrieveAllSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan>& spans,
-                                 std::vector<Dali::UI::Text::Range>& ranges) const;
+  void RetrieveAllSpansAndRanges(std::vector<Dali::Ui::Text::BaseSpan>& spans,
+                                 std::vector<Dali::Ui::Text::Range>& ranges) const;
 
 private:
   struct Impl;
@@ -123,7 +123,7 @@ private:
 /**
  * Helper methods for public API.
  */
-inline Internal::SpannableString& GetImplementation(Dali::UI::Text::SpannableString& spannableString)
+inline Internal::SpannableString& GetImplementation(Dali::Ui::Text::SpannableString& spannableString)
 {
   DALI_ASSERT_ALWAYS(spannableString && "spannableString handle is empty");
 
@@ -132,7 +132,7 @@ inline Internal::SpannableString& GetImplementation(Dali::UI::Text::SpannableStr
   return static_cast<Internal::SpannableString&>(handle);
 }
 
-inline const Internal::SpannableString& GetImplementation(const Dali::UI::Text::SpannableString& spannableString)
+inline const Internal::SpannableString& GetImplementation(const Dali::Ui::Text::SpannableString& spannableString)
 {
   DALI_ASSERT_ALWAYS(spannableString && "spannableString handle is empty");
 
@@ -143,7 +143,7 @@ inline const Internal::SpannableString& GetImplementation(const Dali::UI::Text::
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

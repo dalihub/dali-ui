@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 AbsoluteLayout::AbsoluteLayout()
@@ -69,7 +69,7 @@ AbsoluteLayout AbsoluteLayout::New()
 
 AbsoluteLayout AbsoluteLayout::DownCast(BaseHandle handle)
 {
-  return UI::Control::DownCast<AbsoluteLayout, Integration::AbsoluteLayoutImpl>(handle);
+  return Ui::Control::DownCast<AbsoluteLayout, Integration::AbsoluteLayoutImpl>(handle);
 }
 
 AbsoluteLayout::AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation)
@@ -182,5 +182,5 @@ AbsoluteLayoutFlags AbsoluteLayout::GetLayoutFlags(View view)
   return AbsoluteLayoutFlags::NONE;
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

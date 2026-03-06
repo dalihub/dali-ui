@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_item_view
@@ -41,7 +41,7 @@ enum Property
 {
   /**
    * @brief The type of the Layout.
-   * @details Name "type", type Dali::UI::DefaultItemLayout::Type (Property::INTEGER).
+   * @details Name "type", type Dali::Ui::DefaultItemLayout::Type (Property::INTEGER).
    * @SINCE_1_2.60
    * @note Mandatory.
    */
@@ -58,7 +58,7 @@ enum Property
 
   /**
    * @brief The internal orientation of the Layout.
-   * @details Name "orientation", type Dali::UI::ControlOrientation::Type (Property::INTEGER).
+   * @details Name "orientation", type Dali::Ui::ControlOrientation::Type (Property::INTEGER).
    * @SINCE_1_2.60
    * @note Optional.
    * @note If not supplied, the default is ControlOrientation::Up, The contents of control are in a vertical layout,
@@ -289,7 +289,7 @@ enum Property
  */
 } // namespace DefaultItemLayoutProperty
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

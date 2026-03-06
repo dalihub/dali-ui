@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 PushButton::PushButton()
   : Button()
@@ -66,6 +66,6 @@ PushButton PushButton::DownCast(BaseHandle handle)
   return Control::DownCast<PushButton, Internal::PushButton>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -261,7 +261,7 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL DragAndDropDetector(Internal::DragAndDropDetector* detector);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

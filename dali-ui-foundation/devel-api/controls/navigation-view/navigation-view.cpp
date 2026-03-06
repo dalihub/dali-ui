@@ -25,7 +25,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 NavigationView::NavigationView()
 {
@@ -74,6 +74,6 @@ Actor NavigationView::Pop()
   return GetImpl(*this).Pop();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextLabel
 {
@@ -49,33 +49,33 @@ namespace Property
 {
 enum Type
 {
-  TEXT = Dali::UI::TextLabel::Property::TEXT,
-  FONT_FAMILY = Dali::UI::TextLabel::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::UI::TextLabel::Property::FONT_STYLE,
-  POINT_SIZE = Dali::UI::TextLabel::Property::POINT_SIZE,
-  MULTI_LINE = Dali::UI::TextLabel::Property::MULTI_LINE,
-  HORIZONTAL_ALIGNMENT = Dali::UI::TextLabel::Property::HORIZONTAL_ALIGNMENT,
-  VERTICAL_ALIGNMENT = Dali::UI::TextLabel::Property::VERTICAL_ALIGNMENT,
-  ENABLE_MARKUP = Dali::UI::TextLabel::Property::ENABLE_MARKUP,
-  ENABLE_AUTO_SCROLL = Dali::UI::TextLabel::Property::ENABLE_AUTO_SCROLL,
-  AUTO_SCROLL_SPEED = Dali::UI::TextLabel::Property::AUTO_SCROLL_SPEED,
-  AUTO_SCROLL_LOOP_COUNT = Dali::UI::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT,
-  AUTO_SCROLL_GAP = Dali::UI::TextLabel::Property::AUTO_SCROLL_GAP,
-  LINE_SPACING = Dali::UI::TextLabel::Property::LINE_SPACING,
-  UNDERLINE = Dali::UI::TextLabel::Property::UNDERLINE,
-  SHADOW = Dali::UI::TextLabel::Property::SHADOW,
-  EMBOSS = Dali::UI::TextLabel::Property::EMBOSS,
-  OUTLINE = Dali::UI::TextLabel::Property::OUTLINE,
-  PIXEL_SIZE = Dali::UI::TextLabel::Property::PIXEL_SIZE,
-  ELLIPSIS = Dali::UI::TextLabel::Property::ELLIPSIS,
-  AUTO_SCROLL_LOOP_DELAY = Dali::UI::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY,
-  AUTO_SCROLL_STOP_MODE = Dali::UI::TextLabel::Property::AUTO_SCROLL_STOP_MODE,
-  LINE_COUNT = Dali::UI::TextLabel::Property::LINE_COUNT,
-  LINE_WRAP_MODE = Dali::UI::TextLabel::Property::LINE_WRAP_MODE,
+  TEXT = Dali::Ui::TextLabel::Property::TEXT,
+  FONT_FAMILY = Dali::Ui::TextLabel::Property::FONT_FAMILY,
+  FONT_STYLE = Dali::Ui::TextLabel::Property::FONT_STYLE,
+  POINT_SIZE = Dali::Ui::TextLabel::Property::POINT_SIZE,
+  MULTI_LINE = Dali::Ui::TextLabel::Property::MULTI_LINE,
+  HORIZONTAL_ALIGNMENT = Dali::Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT,
+  VERTICAL_ALIGNMENT = Dali::Ui::TextLabel::Property::VERTICAL_ALIGNMENT,
+  ENABLE_MARKUP = Dali::Ui::TextLabel::Property::ENABLE_MARKUP,
+  ENABLE_AUTO_SCROLL = Dali::Ui::TextLabel::Property::ENABLE_AUTO_SCROLL,
+  AUTO_SCROLL_SPEED = Dali::Ui::TextLabel::Property::AUTO_SCROLL_SPEED,
+  AUTO_SCROLL_LOOP_COUNT = Dali::Ui::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT,
+  AUTO_SCROLL_GAP = Dali::Ui::TextLabel::Property::AUTO_SCROLL_GAP,
+  LINE_SPACING = Dali::Ui::TextLabel::Property::LINE_SPACING,
+  UNDERLINE = Dali::Ui::TextLabel::Property::UNDERLINE,
+  SHADOW = Dali::Ui::TextLabel::Property::SHADOW,
+  EMBOSS = Dali::Ui::TextLabel::Property::EMBOSS,
+  OUTLINE = Dali::Ui::TextLabel::Property::OUTLINE,
+  PIXEL_SIZE = Dali::Ui::TextLabel::Property::PIXEL_SIZE,
+  ELLIPSIS = Dali::Ui::TextLabel::Property::ELLIPSIS,
+  AUTO_SCROLL_LOOP_DELAY = Dali::Ui::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY,
+  AUTO_SCROLL_STOP_MODE = Dali::Ui::TextLabel::Property::AUTO_SCROLL_STOP_MODE,
+  LINE_COUNT = Dali::Ui::TextLabel::Property::LINE_COUNT,
+  LINE_WRAP_MODE = Dali::Ui::TextLabel::Property::LINE_WRAP_MODE,
 
   /**
    * @brief The direction of the layout.
-   * @details Name "textDirection", type [Type](@ref Dali::UI::DevelText::TextDirection::Type) (Property::INTEGER),
+   * @details Name "textDirection", type [Type](@ref Dali::Ui::DevelText::TextDirection::Type) (Property::INTEGER),
    * Read/Write
    * @note The text direction can be changed only by replacing the text itself.
    * @see TextDirection::Type for supported values.
@@ -84,7 +84,7 @@ enum Type
 
   /**
    * @brief Alignment of text within area of single line
-   * @details Name "verticalLineAlignment", type [Type](@ref Dali::UI::DevelText::VerticalLineAlignment::Type)
+   * @details Name "verticalLineAlignment", type [Type](@ref Dali::Ui::DevelText::VerticalLineAlignment::Type)
    * (Property::INTEGER), Read/Write
    * @note The default value is TOP
    * @see VerticalLineAlignment::Type for supported values
@@ -188,7 +188,7 @@ enum Type
 
   /**
    * @brief The enumerations used to specify whether to position the ellipsis at the END, START or MIDDLE of the text.
-   * @details Name "EllipsisPosition", type [Type](@ref Dali::UI::DevelText::EllipsisPosition::Type)
+   * @details Name "EllipsisPosition", type [Type](@ref Dali::Ui::DevelText::EllipsisPosition::Type)
    * (Property::INTEGER), or Property::STRING. Read/Write
    * @note Default is EllipsisPosition::END.
    * @see DevelText::EllipsisPosition
@@ -551,7 +551,7 @@ DALI_UI_API Dali::Property::Index RegisterFontVariationProperty(TextLabel textLa
  * @param[in] textLabel The instance of TextLabel.
  * @param[in] control The control to apply mask.
  */
-DALI_UI_API void SetMaskEffect(TextLabel textLabel, UI::Control control);
+DALI_UI_API void SetMaskEffect(TextLabel textLabel, Ui::Control control);
 
 /**
  * @brief Remove the applied mask effect of the label.
@@ -670,7 +670,7 @@ DALI_UI_API AsyncHeightForWidthComputedSignalType& AsyncHeightForWidthComputedSi
 
 } // namespace DevelTextLabel
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

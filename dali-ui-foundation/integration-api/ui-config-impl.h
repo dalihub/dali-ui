@@ -28,27 +28,27 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
 /**
- * @brief Internal implementation of UIConfig.
+ * @brief Internal implementation of UiConfig.
  *
- * Supports a "freeze" mechanism: once Freeze() is called (by UIConfigManager::Init()),
+ * Supports a "freeze" mechanism: once Freeze() is called (by UiConfigManager::Init()),
  * all subsequent setter calls will trigger DALI_ASSERT_ALWAYS.
  */
-class DALI_UI_API UIConfigImpl : public BaseObject
+class DALI_UI_API UiConfigImpl : public BaseObject
 {
 public:
   /**
-   * @brief Creates a new UIConfig handle with default values.
+   * @brief Creates a new UiConfig handle with default values.
    *
-   * @return A fully initialized UIConfig handle
+   * @return A fully initialized UiConfig handle
    */
-  static UIConfig New();
+  static UiConfig New();
 
   /**
    * @brief Marks this config as frozen.
@@ -184,7 +184,7 @@ public:
   uint32_t GetTapRecognizerTime() const;
 
   /**
-   * @brief Called after this config is applied via UIConfig::Apply().
+   * @brief Called after this config is applied via UiConfig::Apply().
    *
    * Derived config implementations override this to register themselves
    * with their own layer-specific config manager.
@@ -196,18 +196,18 @@ protected:
   /**
    * @brief Constructor with default configuration values.
    */
-  UIConfigImpl();
+  UiConfigImpl();
 
   /**
    * @brief Destructor.
    */
-  ~UIConfigImpl() override;
+  ~UiConfigImpl() override;
 
 private:
-  UIConfigImpl(const UIConfigImpl&) = delete;
-  UIConfigImpl(UIConfigImpl&&) = delete;
-  UIConfigImpl& operator=(const UIConfigImpl&) = delete;
-  UIConfigImpl& operator=(UIConfigImpl&&) = delete;
+  UiConfigImpl(const UiConfigImpl&) = delete;
+  UiConfigImpl(UiConfigImpl&&) = delete;
+  UiConfigImpl& operator=(const UiConfigImpl&) = delete;
+  UiConfigImpl& operator=(UiConfigImpl&&) = delete;
 
 private:
   ExecutionKeyPredicate mExecutionKeyPredicate;
@@ -223,29 +223,29 @@ private:
 } // namespace Integration
 
 /**
- * @brief Retrieves the UIConfigImpl from a UIConfig handle.
+ * @brief Retrieves the UiConfigImpl from a UiConfig handle.
  *
- * @param[in] obj The UIConfig handle
+ * @param[in] obj The UiConfig handle
  * @return A reference to the internal implementation
  */
-inline Integration::UIConfigImpl& GetImpl(UIConfig& obj)
+inline Integration::UiConfigImpl& GetImpl(UiConfig& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::UIConfigImpl&>(handle);
+  return static_cast<Integration::UiConfigImpl&>(handle);
 }
 
 /**
- * @brief Retrieves the UIConfigImpl from a const UIConfig handle.
+ * @brief Retrieves the UiConfigImpl from a const UiConfig handle.
  *
- * @param[in] obj The UIConfig handle
+ * @param[in] obj The UiConfig handle
  * @return A const reference to the internal implementation
  */
-inline const Integration::UIConfigImpl& GetImpl(const UIConfig& obj)
+inline const Integration::UiConfigImpl& GetImpl(const UiConfig& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::UIConfigImpl&>(handle);
+  return static_cast<const Integration::UiConfigImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

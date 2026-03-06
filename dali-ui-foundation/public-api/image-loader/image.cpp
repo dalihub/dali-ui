@@ -26,58 +26,58 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Image
 {
-Dali::UI::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat, uint32_t width,
+Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat, uint32_t width,
                                uint32_t height)
 {
   Texture texture = Texture::New(Dali::TextureType::TEXTURE_2D, pixelFormat, width, height);
   frameBuffer.AttachColorTexture(texture, 0u, 0u);
   // TODO : Need to check frameBuffer result use preMultiplied color or not. By default, we use premultiplied
-  Dali::UI::ImageUrl imageUrl = Dali::UI::ImageUrl::New(texture, true);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, true);
   return imageUrl;
 }
 
-Dali::UI::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t index)
+Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t index)
 {
   Texture texture = Dali::DevelFrameBuffer::GetColorTexture(frameBuffer, index);
   // TODO : Need to check frameBuffer result use preMultiplied color or not. By default, we use premultiplied
-  Dali::UI::ImageUrl imageUrl = Dali::UI::ImageUrl::New(texture, true);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, true);
   return imageUrl;
 }
 
-Dali::UI::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied)
+Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied)
 {
   Texture texture =
       Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
   texture.Upload(pixelData);
-  Dali::UI::ImageUrl imageUrl = Dali::UI::ImageUrl::New(texture, preMultiplied);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
   return imageUrl;
 }
 
-Dali::UI::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
+Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
 {
   Texture texture = Dali::Texture::New(*nativeImageInterface);
-  Dali::UI::ImageUrl imageUrl = Dali::UI::ImageUrl::New(texture, preMultiplied);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
   return imageUrl;
 }
 
-Dali::UI::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer)
+Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer)
 {
-  return Dali::UI::ImageUrl::New(encodedImageBuffer);
+  return Dali::Ui::ImageUrl::New(encodedImageBuffer);
 }
 
-Dali::UI::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
+Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
 {
   Texture texture = Dali::DevelFrameBuffer::GetDepthTexture(frameBuffer);
-  Dali::UI::ImageUrl imageUrl = Dali::UI::ImageUrl::New(texture, false);
+  Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, false);
   return imageUrl;
 }
 
 } // namespace Image
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

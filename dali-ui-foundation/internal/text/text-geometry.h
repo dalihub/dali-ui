@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/text/text-model.h>
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -131,7 +131,7 @@ float GetCharacterWidth(const GlyphInfo& glyph);
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace
 {
@@ -41,9 +41,9 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_MULT
 
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_FONT_PERFORMANCE_MARKER, false);
 
-const Dali::UI::Text::Character UTF32_A = 0x0041;
-const Dali::UI::Text::Character UTF32_COLON = 0x3A;
-const Dali::UI::Text::Character UTF32_EMOJI = 0x1F600; // Grinning Face
+const Dali::Ui::Text::Character UTF32_A = 0x0041;
+const Dali::Ui::Text::Character UTF32_COLON = 0x3A;
+const Dali::Ui::Text::Character UTF32_EMOJI = 0x1F600; // Grinning Face
 
 const char* DALI_TEXT_ENABLE_ICU("DALI_TEXT_ENABLE_ICU");
 const int DEFAULT_ENABLE_ICU = 0;
@@ -987,6 +987,6 @@ bool MultilanguageSupport::IsICULineBreakNeededForLocale()
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

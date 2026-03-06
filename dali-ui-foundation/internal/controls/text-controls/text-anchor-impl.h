@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -42,7 +42,7 @@ public:
   /**
    * @copydoc Dali::Toollkit::TextAnchor::New()
    */
-  static UI::TextAnchor New();
+  static Ui::TextAnchor New();
 
   // Properties
 
@@ -71,7 +71,7 @@ private: // From Control
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -153,27 +153,27 @@ protected:
   };
 };
 
-inline UI::Internal::TextAnchor& GetImpl(UI::TextAnchor& textAnchor)
+inline Ui::Internal::TextAnchor& GetImpl(Ui::TextAnchor& textAnchor)
 {
   DALI_ASSERT_ALWAYS(textAnchor);
 
   Dali::RefObject& handle = textAnchor.GetImplementation();
 
-  return static_cast<UI::Internal::TextAnchor&>(handle);
+  return static_cast<Ui::Internal::TextAnchor&>(handle);
 }
 
-inline const UI::Internal::TextAnchor& GetImpl(const UI::TextAnchor& textAnchor)
+inline const Ui::Internal::TextAnchor& GetImpl(const Ui::TextAnchor& textAnchor)
 {
   DALI_ASSERT_ALWAYS(textAnchor);
 
   const Dali::RefObject& handle = textAnchor.GetImplementation();
 
-  return static_cast<const UI::Internal::TextAnchor&>(handle);
+  return static_cast<const Ui::Internal::TextAnchor&>(handle);
 }
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

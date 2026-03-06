@@ -40,7 +40,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -295,7 +295,7 @@ Geometry VisualFactoryCache::CreateGridGeometry(Uint16Pair gridSize, bool normal
 {
   if (Dali::Adaptor::IsAvailable())
   {
-    auto factory = Dali::UI::VisualFactory::Get();
+    auto factory = Dali::Ui::VisualFactory::Get();
     if (factory)
     {
       if (gridSize.GetWidth() == 1 && gridSize.GetHeight() == 1 && normalized)
@@ -316,20 +316,20 @@ Geometry VisualFactoryCache::CreateGridGeometry(Uint16Pair gridSize, bool normal
           return iter->second;
         }
         // Create and cache new geometry.
-        Geometry geometry = Dali::UI::Internal::CreateGridGeometry(gridSize, normalized);
+        Geometry geometry = Dali::Ui::Internal::CreateGridGeometry(gridSize, normalized);
         cacheMap.insert(iter, {gridSize, geometry});
         return geometry;
       }
     }
   }
-  return Dali::UI::Internal::CreateGridGeometry(gridSize, normalized);
+  return Dali::Ui::Internal::CreateGridGeometry(gridSize, normalized);
 }
 
 Geometry VisualFactoryCache::CreateBorderGeometry(Uint16Pair gridSize)
 {
   if (Dali::Adaptor::IsAvailable())
   {
-    auto factory = Dali::UI::VisualFactory::Get();
+    auto factory = Dali::Ui::VisualFactory::Get();
     if (factory)
     {
       if (gridSize.GetWidth() <= GRID_GEOMETRY_CACHE_THRESHOLD && gridSize.GetHeight() <= GRID_GEOMETRY_CACHE_THRESHOLD)
@@ -346,13 +346,13 @@ Geometry VisualFactoryCache::CreateBorderGeometry(Uint16Pair gridSize)
         }
 
         // Create and cache new geometry.
-        Geometry geometry = Dali::UI::Internal::CreateBorderGeometry(gridSize);
+        Geometry geometry = Dali::Ui::Internal::CreateBorderGeometry(gridSize);
         cacheMap.insert(iter, {gridSize, geometry});
         return geometry;
       }
     }
   }
-  return Dali::UI::Internal::CreateBorderGeometry(gridSize);
+  return Dali::Ui::Internal::CreateBorderGeometry(gridSize);
 }
 
 Texture VisualFactoryCache::GetBrokenVisualImage(uint32_t brokenIndex)
@@ -635,6 +635,6 @@ int32_t VisualFactoryCache::GetProperBrokenImageIndex(const Vector2& size)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Set the properties for the motion blur
@@ -77,7 +77,7 @@ DALI_UI_API void SetMotionBlurProperties(Actor& actor, unsigned int numBlurSampl
  */
 DALI_UI_API Property::Map CreateMotionBlurEffect();
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

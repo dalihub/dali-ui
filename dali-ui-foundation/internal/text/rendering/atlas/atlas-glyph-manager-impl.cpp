@@ -30,19 +30,19 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_R
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 AtlasGlyphManager::AtlasGlyphManager()
 {
-  mAtlasManager = Dali::UI::AtlasManager::New();
+  mAtlasManager = Dali::Ui::AtlasManager::New();
   mSampler = Sampler::New();
   mSampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
 }
 
-void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const UI::AtlasGlyphManager::GlyphStyle& style,
-                            const PixelData& bitmap, Dali::UI::AtlasManager::AtlasSlot& slot)
+void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphManager::GlyphStyle& style,
+                            const PixelData& bitmap, Dali::Ui::AtlasManager::AtlasSlot& slot)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "Added glyph, font: %d index: %d\n", glyph.fontId, glyph.index);
 
@@ -89,15 +89,15 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const UI::AtlasGlyphMa
   }
 }
 
-void AtlasGlyphManager::GenerateMeshData(uint32_t imageId, const Vector2& position, UI::AtlasManager::Mesh2D& mesh)
+void AtlasGlyphManager::GenerateMeshData(uint32_t imageId, const Vector2& position, Ui::AtlasManager::Mesh2D& mesh)
 {
   // Generate mesh data and tell Atlas Manager not to handle reference counting ( we'll do it )
   mAtlasManager.GenerateMeshData(imageId, position, mesh, false);
 }
 
 bool AtlasGlyphManager::IsCached(Text::FontId fontId, Text::GlyphIndex index,
-                                 const UI::AtlasGlyphManager::GlyphStyle& style,
-                                 Dali::UI::AtlasManager::AtlasSlot& slot)
+                                 const Ui::AtlasGlyphManager::GlyphStyle& style,
+                                 Dali::Ui::AtlasManager::AtlasSlot& slot)
 {
   for (std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
        fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
@@ -123,13 +123,13 @@ bool AtlasGlyphManager::IsCached(Text::FontId fontId, Text::GlyphIndex index,
 
 Vector2 AtlasGlyphManager::GetAtlasSize(uint32_t atlasId)
 {
-  UI::AtlasManager::AtlasSize size = mAtlasManager.GetAtlasSize(atlasId);
+  Ui::AtlasManager::AtlasSize size = mAtlasManager.GetAtlasSize(atlasId);
   return Vector2(static_cast<float>(size.mWidth), static_cast<float>(size.mHeight));
 }
 
 void AtlasGlyphManager::SetNewAtlasSize(uint32_t width, uint32_t height, uint32_t blockWidth, uint32_t blockHeight)
 {
-  UI::AtlasManager::AtlasSize size;
+  Ui::AtlasManager::AtlasSize size;
   size.mWidth = width;
   size.mHeight = height;
   size.mBlockWidth = blockWidth;
@@ -142,7 +142,7 @@ Pixel::Format AtlasGlyphManager::GetPixelFormat(uint32_t atlasId)
   return mAtlasManager.GetPixelFormat(atlasId);
 }
 
-const UI::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
+const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
 {
   std::ostringstream verboseMetrics;
 
@@ -168,7 +168,7 @@ const UI::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
 }
 
 void AtlasGlyphManager::AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index,
-                                             const UI::AtlasGlyphManager::GlyphStyle& style, int32_t delta)
+                                             const Ui::AtlasGlyphManager::GlyphStyle& style, int32_t delta)
 {
   if (0 != delta)
   {
@@ -216,6 +216,6 @@ AtlasGlyphManager::~AtlasGlyphManager()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

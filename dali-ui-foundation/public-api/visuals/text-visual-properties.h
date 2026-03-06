@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_visuals
@@ -144,7 +144,7 @@ enum
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -33,12 +33,12 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
 #endif
 
-const Dali::UI::Text::CharacterDirection LTR = false; ///< Left To Right direction.
+const Dali::Ui::Text::CharacterDirection LTR = false; ///< Left To Right direction.
 
 struct FindWordData
 {
-  FindWordData(const Dali::UI::Text::Character* const textBuffer, Dali::UI::Text::Length totalNumberOfCharacters,
-               Dali::UI::Text::CharacterIndex hitCharacter, bool isWhiteSpace, bool isNewParagraph)
+  FindWordData(const Dali::Ui::Text::Character* const textBuffer, Dali::Ui::Text::Length totalNumberOfCharacters,
+               Dali::Ui::Text::CharacterIndex hitCharacter, bool isWhiteSpace, bool isNewParagraph)
     : textBuffer(textBuffer),
       totalNumberOfCharacters(totalNumberOfCharacters),
       hitCharacter(hitCharacter),
@@ -52,15 +52,15 @@ struct FindWordData
   {
   }
 
-  const Dali::UI::Text::Character* const textBuffer;
-  Dali::UI::Text::Length totalNumberOfCharacters;
-  Dali::UI::Text::CharacterIndex hitCharacter;
-  Dali::UI::Text::CharacterIndex foundIndex;
+  const Dali::Ui::Text::Character* const textBuffer;
+  Dali::Ui::Text::Length totalNumberOfCharacters;
+  Dali::Ui::Text::CharacterIndex hitCharacter;
+  Dali::Ui::Text::CharacterIndex foundIndex;
   bool isWhiteSpace : 1u;
   bool isNewParagraph : 1u;
 };
 
-bool IsWhiteSpaceOrNewParagraph(Dali::UI::Text::Character character, bool isHitWhiteSpace,
+bool IsWhiteSpaceOrNewParagraph(Dali::Ui::Text::Character character, bool isHitWhiteSpace,
                                 bool isHitWhiteSpaceOrNewParagraph)
 {
   bool isWhiteSpaceOrNewParagraph = false;
@@ -95,7 +95,7 @@ void FindStartOfWord(FindWordData& data)
 
   for (data.foundIndex = data.hitCharacter; data.foundIndex > 0; --data.foundIndex)
   {
-    const Dali::UI::Text::Character character = *(data.textBuffer + data.foundIndex - 1u);
+    const Dali::Ui::Text::Character character = *(data.textBuffer + data.foundIndex - 1u);
 
     const bool isWhiteSpaceOrNewParagraph =
         IsWhiteSpaceOrNewParagraph(character, data.isWhiteSpace, isHitWhiteSpaceOrNewParagraph);
@@ -113,7 +113,7 @@ void FindEndOfWord(FindWordData& data)
 
   for (data.foundIndex = data.hitCharacter + 1u; data.foundIndex < data.totalNumberOfCharacters; ++data.foundIndex)
   {
-    const Dali::UI::Text::Character character = *(data.textBuffer + data.foundIndex);
+    const Dali::Ui::Text::Character character = *(data.textBuffer + data.foundIndex);
 
     const bool isWhiteSpaceOrNewParagraph =
         IsWhiteSpaceOrNewParagraph(character, data.isWhiteSpace, isHitWhiteSpaceOrNewParagraph);
@@ -129,7 +129,7 @@ void FindEndOfWord(FindWordData& data)
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -846,7 +846,7 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
       endIndex = hitCharacter - 1u;
       for (; endIndex > 0; --endIndex)
       {
-        const Dali::UI::Text::Character character = *(data.textBuffer + endIndex);
+        const Dali::Ui::Text::Character character = *(data.textBuffer + endIndex);
 
         if (!Dali::TextAbstraction::IsNewParagraph(character))
         {
@@ -898,6 +898,6 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

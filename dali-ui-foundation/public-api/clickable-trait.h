@@ -30,7 +30,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 // Forward declaration (view.h provides full definition when needed)
@@ -209,6 +209,6 @@ public: // Not intended for application developers
   explicit ClickableTrait(Integration::ClickableTraitImpl* implementation);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

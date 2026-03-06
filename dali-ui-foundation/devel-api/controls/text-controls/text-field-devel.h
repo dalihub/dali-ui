@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextField
 {
@@ -35,55 +35,55 @@ namespace Property
 {
 enum
 {
-  TEXT = Dali::UI::TextField::Property::TEXT,
-  PLACEHOLDER_TEXT = Dali::UI::TextField::Property::PLACEHOLDER_TEXT,
-  PLACEHOLDER_TEXT_FOCUSED = Dali::UI::TextField::Property::PLACEHOLDER_TEXT_FOCUSED,
-  FONT_FAMILY = Dali::UI::TextField::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::UI::TextField::Property::FONT_STYLE,
-  POINT_SIZE = Dali::UI::TextField::Property::POINT_SIZE,
-  MAX_LENGTH = Dali::UI::TextField::Property::MAX_LENGTH,
-  EXCEED_POLICY = Dali::UI::TextField::Property::EXCEED_POLICY,
-  HORIZONTAL_ALIGNMENT = Dali::UI::TextField::Property::HORIZONTAL_ALIGNMENT,
-  VERTICAL_ALIGNMENT = Dali::UI::TextField::Property::VERTICAL_ALIGNMENT,
-  TEXT_COLOR = Dali::UI::TextField::Property::TEXT_COLOR,
-  PLACEHOLDER_TEXT_COLOR = Dali::UI::TextField::Property::PLACEHOLDER_TEXT_COLOR,
-  PRIMARY_CURSOR_COLOR = Dali::UI::TextField::Property::PRIMARY_CURSOR_COLOR,
-  SECONDARY_CURSOR_COLOR = Dali::UI::TextField::Property::SECONDARY_CURSOR_COLOR,
-  ENABLE_CURSOR_BLINK = Dali::UI::TextField::Property::ENABLE_CURSOR_BLINK,
-  CURSOR_BLINK_INTERVAL = Dali::UI::TextField::Property::CURSOR_BLINK_INTERVAL,
-  CURSOR_BLINK_DURATION = Dali::UI::TextField::Property::CURSOR_BLINK_DURATION,
-  CURSOR_WIDTH = Dali::UI::TextField::Property::CURSOR_WIDTH,
-  GRAB_HANDLE_IMAGE = Dali::UI::TextField::Property::GRAB_HANDLE_IMAGE,
-  GRAB_HANDLE_PRESSED_IMAGE = Dali::UI::TextField::Property::GRAB_HANDLE_PRESSED_IMAGE,
-  SCROLL_THRESHOLD = Dali::UI::TextField::Property::SCROLL_THRESHOLD,
-  SCROLL_SPEED = Dali::UI::TextField::Property::SCROLL_SPEED,
-  SELECTION_HANDLE_IMAGE_LEFT = Dali::UI::TextField::Property::SELECTION_HANDLE_IMAGE_LEFT,
-  SELECTION_HANDLE_IMAGE_RIGHT = Dali::UI::TextField::Property::SELECTION_HANDLE_IMAGE_RIGHT,
-  SELECTION_HANDLE_PRESSED_IMAGE_LEFT = Dali::UI::TextField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
-  SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Dali::UI::TextField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
-  SELECTION_HANDLE_MARKER_IMAGE_LEFT = Dali::UI::TextField::Property::SELECTION_HANDLE_MARKER_IMAGE_LEFT,
-  SELECTION_HANDLE_MARKER_IMAGE_RIGHT = Dali::UI::TextField::Property::SELECTION_HANDLE_MARKER_IMAGE_RIGHT,
-  SELECTION_HIGHLIGHT_COLOR = Dali::UI::TextField::Property::SELECTION_HIGHLIGHT_COLOR,
-  DECORATION_BOUNDING_BOX = Dali::UI::TextField::Property::DECORATION_BOUNDING_BOX,
-  INPUT_METHOD_SETTINGS = Dali::UI::TextField::Property::INPUT_METHOD_SETTINGS,
-  INPUT_COLOR = Dali::UI::TextField::Property::INPUT_COLOR,
-  ENABLE_MARKUP = Dali::UI::TextField::Property::ENABLE_MARKUP,
-  INPUT_FONT_FAMILY = Dali::UI::TextField::Property::INPUT_FONT_FAMILY,
-  INPUT_FONT_STYLE = Dali::UI::TextField::Property::INPUT_FONT_STYLE,
-  INPUT_POINT_SIZE = Dali::UI::TextField::Property::INPUT_POINT_SIZE,
-  UNDERLINE = Dali::UI::TextField::Property::UNDERLINE,
-  INPUT_UNDERLINE = Dali::UI::TextField::Property::INPUT_UNDERLINE,
-  SHADOW = Dali::UI::TextField::Property::SHADOW,
-  INPUT_SHADOW = Dali::UI::TextField::Property::INPUT_SHADOW,
-  EMBOSS = Dali::UI::TextField::Property::EMBOSS,
-  INPUT_EMBOSS = Dali::UI::TextField::Property::INPUT_EMBOSS,
-  OUTLINE = Dali::UI::TextField::Property::OUTLINE,
-  INPUT_OUTLINE = Dali::UI::TextField::Property::INPUT_OUTLINE,
-  HIDDEN_INPUT_SETTINGS = Dali::UI::TextField::Property::HIDDEN_INPUT_SETTINGS,
-  PIXEL_SIZE = Dali::UI::TextField::Property::PIXEL_SIZE,
-  ENABLE_SELECTION = Dali::UI::TextField::Property::ENABLE_SELECTION,
-  PLACEHOLDER = Dali::UI::TextField::Property::PLACEHOLDER,
-  ELLIPSIS = Dali::UI::TextField::Property::ELLIPSIS,
+  TEXT = Dali::Ui::TextField::Property::TEXT,
+  PLACEHOLDER_TEXT = Dali::Ui::TextField::Property::PLACEHOLDER_TEXT,
+  PLACEHOLDER_TEXT_FOCUSED = Dali::Ui::TextField::Property::PLACEHOLDER_TEXT_FOCUSED,
+  FONT_FAMILY = Dali::Ui::TextField::Property::FONT_FAMILY,
+  FONT_STYLE = Dali::Ui::TextField::Property::FONT_STYLE,
+  POINT_SIZE = Dali::Ui::TextField::Property::POINT_SIZE,
+  MAX_LENGTH = Dali::Ui::TextField::Property::MAX_LENGTH,
+  EXCEED_POLICY = Dali::Ui::TextField::Property::EXCEED_POLICY,
+  HORIZONTAL_ALIGNMENT = Dali::Ui::TextField::Property::HORIZONTAL_ALIGNMENT,
+  VERTICAL_ALIGNMENT = Dali::Ui::TextField::Property::VERTICAL_ALIGNMENT,
+  TEXT_COLOR = Dali::Ui::TextField::Property::TEXT_COLOR,
+  PLACEHOLDER_TEXT_COLOR = Dali::Ui::TextField::Property::PLACEHOLDER_TEXT_COLOR,
+  PRIMARY_CURSOR_COLOR = Dali::Ui::TextField::Property::PRIMARY_CURSOR_COLOR,
+  SECONDARY_CURSOR_COLOR = Dali::Ui::TextField::Property::SECONDARY_CURSOR_COLOR,
+  ENABLE_CURSOR_BLINK = Dali::Ui::TextField::Property::ENABLE_CURSOR_BLINK,
+  CURSOR_BLINK_INTERVAL = Dali::Ui::TextField::Property::CURSOR_BLINK_INTERVAL,
+  CURSOR_BLINK_DURATION = Dali::Ui::TextField::Property::CURSOR_BLINK_DURATION,
+  CURSOR_WIDTH = Dali::Ui::TextField::Property::CURSOR_WIDTH,
+  GRAB_HANDLE_IMAGE = Dali::Ui::TextField::Property::GRAB_HANDLE_IMAGE,
+  GRAB_HANDLE_PRESSED_IMAGE = Dali::Ui::TextField::Property::GRAB_HANDLE_PRESSED_IMAGE,
+  SCROLL_THRESHOLD = Dali::Ui::TextField::Property::SCROLL_THRESHOLD,
+  SCROLL_SPEED = Dali::Ui::TextField::Property::SCROLL_SPEED,
+  SELECTION_HANDLE_IMAGE_LEFT = Dali::Ui::TextField::Property::SELECTION_HANDLE_IMAGE_LEFT,
+  SELECTION_HANDLE_IMAGE_RIGHT = Dali::Ui::TextField::Property::SELECTION_HANDLE_IMAGE_RIGHT,
+  SELECTION_HANDLE_PRESSED_IMAGE_LEFT = Dali::Ui::TextField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
+  SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Dali::Ui::TextField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
+  SELECTION_HANDLE_MARKER_IMAGE_LEFT = Dali::Ui::TextField::Property::SELECTION_HANDLE_MARKER_IMAGE_LEFT,
+  SELECTION_HANDLE_MARKER_IMAGE_RIGHT = Dali::Ui::TextField::Property::SELECTION_HANDLE_MARKER_IMAGE_RIGHT,
+  SELECTION_HIGHLIGHT_COLOR = Dali::Ui::TextField::Property::SELECTION_HIGHLIGHT_COLOR,
+  DECORATION_BOUNDING_BOX = Dali::Ui::TextField::Property::DECORATION_BOUNDING_BOX,
+  INPUT_METHOD_SETTINGS = Dali::Ui::TextField::Property::INPUT_METHOD_SETTINGS,
+  INPUT_COLOR = Dali::Ui::TextField::Property::INPUT_COLOR,
+  ENABLE_MARKUP = Dali::Ui::TextField::Property::ENABLE_MARKUP,
+  INPUT_FONT_FAMILY = Dali::Ui::TextField::Property::INPUT_FONT_FAMILY,
+  INPUT_FONT_STYLE = Dali::Ui::TextField::Property::INPUT_FONT_STYLE,
+  INPUT_POINT_SIZE = Dali::Ui::TextField::Property::INPUT_POINT_SIZE,
+  UNDERLINE = Dali::Ui::TextField::Property::UNDERLINE,
+  INPUT_UNDERLINE = Dali::Ui::TextField::Property::INPUT_UNDERLINE,
+  SHADOW = Dali::Ui::TextField::Property::SHADOW,
+  INPUT_SHADOW = Dali::Ui::TextField::Property::INPUT_SHADOW,
+  EMBOSS = Dali::Ui::TextField::Property::EMBOSS,
+  INPUT_EMBOSS = Dali::Ui::TextField::Property::INPUT_EMBOSS,
+  OUTLINE = Dali::Ui::TextField::Property::OUTLINE,
+  INPUT_OUTLINE = Dali::Ui::TextField::Property::INPUT_OUTLINE,
+  HIDDEN_INPUT_SETTINGS = Dali::Ui::TextField::Property::HIDDEN_INPUT_SETTINGS,
+  PIXEL_SIZE = Dali::Ui::TextField::Property::PIXEL_SIZE,
+  ENABLE_SELECTION = Dali::Ui::TextField::Property::ENABLE_SELECTION,
+  PLACEHOLDER = Dali::Ui::TextField::Property::PLACEHOLDER,
+  ELLIPSIS = Dali::Ui::TextField::Property::ELLIPSIS,
 
   /**
    * @brief Enables Text selection using Shift key.
@@ -203,7 +203,7 @@ enum
    * http://cplusplus.com/reference/regex/ECMAScript/
    *
    * You can use enums instead of "accepted" and "rejected" strings.
-   * @see Dali::UI::InputFilter::Property::Type
+   * @see Dali::Ui::InputFilter::Property::Type
    *
    * Example Usage:
    * @code
@@ -218,7 +218,7 @@ enum
 
   /**
    * @brief The enumerations used to specify whether to position the ellipsis at the END, START or MIDDLE of the text.
-   * @details Name "EllipsisPosition", type [Type](@ref Dali::UI::DevelText::EllipsisPosition::Type)
+   * @details Name "EllipsisPosition", type [Type](@ref Dali::Ui::DevelText::EllipsisPosition::Type)
    * (Property::INTEGER), or Property::STRING. Read/Write
    * @note Default is EllipsisPosition::END.
    * @see DevelText::EllipsisPosition
@@ -249,7 +249,7 @@ enum
   /**
    * @brief Sets the selection popup style
    * @details Name "selectionPopupStyle", type Property::MAP.
-   * @see Dali::UI::TextSelectionPopup::Property
+   * @see Dali::Ui::TextSelectionPopup::Property
    */
   SELECTION_POPUP_STYLE,
 
@@ -333,14 +333,14 @@ DALI_UI_API CursorPositionChangedSignalType& CursorPositionChangedSignal(TextFie
 /**
  * @brief Input filtered signal type.
  */
-using InputFilteredSignalType = Signal<void(TextField, UI::InputFilter::Property::Type)>;
+using InputFilteredSignalType = Signal<void(TextField, Ui::InputFilter::Property::Type)>;
 
 /**
  * @brief This signal is emitted when the character to be inserted is filtered by the input filter.
  *
  * A callback of the following type may be connected:
  * @code
- *   void YourCallbackName(TextField textField, UI::InputFilter::Property::Type type);
+ *   void YourCallbackName(TextField textField, Ui::InputFilter::Property::Type type);
  *
  *   DevelTextField::InputFilteredSignal(textField).Connect(this, &OnInputFiltered);
  *
@@ -548,7 +548,7 @@ DALI_UI_API Dali::Property::Index RegisterFontVariationProperty(TextField textFi
 
 } // namespace DevelTextField
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

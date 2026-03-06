@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Interface used to receive the TextSelectionPopup's button callbacks.
@@ -46,7 +46,7 @@ public:
   virtual void TextPopupButtonTouched(TextSelectionPopup::Buttons button) = 0;
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

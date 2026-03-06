@@ -22,7 +22,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -110,6 +110,6 @@ void ScrollBase::RemoveConstraintsFromBoundActors()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

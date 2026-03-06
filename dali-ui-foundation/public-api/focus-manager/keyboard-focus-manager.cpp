@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 KeyboardFocusManager::KeyboardFocusManager()
 {
@@ -152,6 +152,6 @@ bool KeyboardFocusManager::GetClearFocusOnWindowFocusLost() const
   return GetImpl(*this).GetClearFocusOnWindowFocusLost();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

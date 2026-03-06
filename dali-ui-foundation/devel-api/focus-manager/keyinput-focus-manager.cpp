@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 KeyInputFocusManager::KeyInputFocusManager()
 {
@@ -87,6 +87,6 @@ KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManager::KeyI
   return GetImpl(*this).KeyInputFocusChangedSignal();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

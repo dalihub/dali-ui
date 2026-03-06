@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextLoadObserver::TextInformation::TextInformation(const Text::AsyncTextRenderInfo& renderInfo,
                                                    const Text::AsyncTextParameters& parameters)
@@ -64,6 +64,6 @@ bool TextLoadObserver::DisconnectDestructionSignal()
   return !mDestructionSignalConnect;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -55,18 +55,18 @@ public:
   virtual ~GlViewRenderThread();
 
   /**
-   * @copydoc Dali::UI::GlView::RegisterGlCallbacks()
+   * @copydoc Dali::Ui::GlView::RegisterGlCallbacks()
    */
   void RegisterGlCallbacks(CallbackBase* initCallback, CallbackBase* renderFrameCallback,
                            CallbackBase* terminateCallback);
 
   /**
-   * @copydoc Dali::UI::GlView::SetResizeCallback()
+   * @copydoc Dali::Ui::GlView::SetResizeCallback()
    */
   void SetResizeCallback(CallbackBase* resizeCallback);
 
   /**
-   * @copydoc Dali::UI::GlView::SetGraphicsConfig()
+   * @copydoc Dali::Ui::GlView::SetGraphicsConfig()
    */
   bool SetGraphicsConfig(bool depth, bool stencil, int msaa, int version);
 
@@ -86,7 +86,7 @@ public:
   void SetSurfaceSize(Dali::Vector2 size);
 
   /**
-   * @copydoc Dali::UI::RenderOnce()
+   * @copydoc Dali::Ui::RenderOnce()
    */
   void RenderOnce();
 
@@ -179,7 +179,7 @@ private:
 };
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_GL_SURFACE_VIEW_THREAD_H

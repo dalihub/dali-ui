@@ -28,14 +28,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
  * RadioButton implementation class.
  *
- * \sa Dali::UI::RadioButton
+ * \sa Dali::Ui::RadioButton
  */
 class RadioButton : public Button
 {
@@ -45,7 +45,7 @@ public:
    *
    * @return A smart-pointer to the newly allocated RadioButton.
    */
-  static Dali::UI::RadioButton New();
+  static Dali::Ui::RadioButton New();
 
 private:
   /**
@@ -60,22 +60,22 @@ private:
 
 private: // From Button
   /**
-   * @copydoc UI::Internal::Button::OnInitialize
+   * @copydoc Ui::Internal::Button::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc UI::Internal::Button::OnStateChange
+   * @copydoc Ui::Internal::Button::OnStateChange
    */
   void OnStateChange(State newState) override;
 
   /**
-   * @copydoc UI::Internal::Button::OnToggleReleased
+   * @copydoc Ui::Internal::Button::OnToggleReleased
    */
   bool OnToggleReleased() override;
 
@@ -93,7 +93,7 @@ protected:
     using Button::ButtonAccessible::ButtonAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
      */
     Dali::Accessibility::States CalculateStates() override;
   };
@@ -103,25 +103,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::RadioButton& GetImplementation(UI::RadioButton& button)
+inline Ui::Internal::RadioButton& GetImplementation(Ui::RadioButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<UI::Internal::RadioButton&>(handle);
+  return static_cast<Ui::Internal::RadioButton&>(handle);
 }
 
-inline const UI::Internal::RadioButton& GetImplementation(const UI::RadioButton& button)
+inline const Ui::Internal::RadioButton& GetImplementation(const Ui::RadioButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   const Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<const UI::Internal::RadioButton&>(handle);
+  return static_cast<const Ui::Internal::RadioButton&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_RADIO_BUTTON_H

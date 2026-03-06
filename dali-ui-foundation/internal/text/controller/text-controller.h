@@ -39,7 +39,7 @@
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 class Controller;
 class ControlInterface;
@@ -568,14 +568,14 @@ public: // Configure the text controller.
    *
    * @param[in] fitOptions The list of text fit options.
    */
-  void SetTextFitArray(std::vector<UI::DevelTextLabel::FitOption>& fitOptions);
+  void SetTextFitArray(std::vector<Ui::DevelTextLabel::FitOption>& fitOptions);
 
   /**
    * @brief Retrieve the text fit array.
    *
    * @return The list of text fit options.
    */
-  std::vector<UI::DevelTextLabel::FitOption>& GetTextFitArray();
+  std::vector<Ui::DevelTextLabel::FitOption>& GetTextFitArray();
 
   /**
    * @brief Sets disabled color opacity.
@@ -1933,43 +1933,43 @@ public: // Queries & retrieves.
    * @brief Checks text direction.
    * @return The text direction.
    */
-  UI::DevelText::TextDirection::Type GetTextDirection();
+  Ui::DevelText::TextDirection::Type GetTextDirection();
 
   /**
    * @brief Retrieves vertical line alignment
    * @return The vertical line alignment
    */
-  UI::DevelText::VerticalLineAlignment::Type GetVerticalLineAlignment() const;
+  Ui::DevelText::VerticalLineAlignment::Type GetVerticalLineAlignment() const;
 
   /**
    * @brief Sets vertical line alignment
    * @param[in] alignment The vertical line alignment for the text
    */
-  void SetVerticalLineAlignment(UI::DevelText::VerticalLineAlignment::Type alignment);
+  void SetVerticalLineAlignment(Ui::DevelText::VerticalLineAlignment::Type alignment);
 
   /**
    * @brief Retrieves ellipsis position
    * @return The ellipsis position
    */
-  UI::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
+  Ui::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
 
   /**
    * @brief Sets ellipsis position
    * @param[in] ellipsisPosition The ellipsis position for the text
    */
-  void SetEllipsisPosition(UI::DevelText::EllipsisPosition::Type ellipsisPosition);
+  void SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition);
 
   /**
    * @brief Retrieves ellipsis mode
    * @return The ellipsis mode
    */
-  UI::DevelText::Ellipsize::Mode GetEllipsisMode() const;
+  Ui::DevelText::Ellipsize::Mode GetEllipsisMode() const;
 
   /**
    * @brief Sets ellipsis mode
    * @param[in] ellipsisMode The ellipsis mode for the text
    */
-  void SetEllipsisMode(UI::DevelText::Ellipsize::Mode ellipsisMode);
+  void SetEllipsisMode(Ui::DevelText::Ellipsize::Mode ellipsisMode);
 
   /**
    * @brief Sets the render scale
@@ -2216,7 +2216,7 @@ private:
   /**
    * @brief Callbacks called on idle.
    *
-   * If there are notifications of change of input style on the queue, UI::TextField::InputStyleChangedSignal() are
+   * If there are notifications of change of input style on the queue, Ui::TextField::InputStyleChangedSignal() are
    * emitted.
    */
   void OnIdleSignal();
@@ -2363,7 +2363,7 @@ public: // Text-input Event Queuing.
   virtual void SetEditable(bool editable);
 
   /**
-   * @copydoc Dali::UI::Internal::TextEditor::ScrollBy()
+   * @copydoc Dali::Ui::Internal::TextEditor::ScrollBy()
    */
   virtual void ScrollBy(Vector2 scroll);
 
@@ -2374,12 +2374,12 @@ public: // Text-input Event Queuing.
   bool IsScrollable(const Vector2& displacement);
 
   /**
-   * @copydoc Dali::UI::Internal::TextEditor::GetHorizontalScrollPosition()
+   * @copydoc Dali::Ui::Internal::TextEditor::GetHorizontalScrollPosition()
    */
   float GetHorizontalScrollPosition();
 
   /**
-   * @copydoc Dali::UI::Internal::TextEditor::GetVerticalScrollPosition()
+   * @copydoc Dali::Ui::Internal::TextEditor::GetVerticalScrollPosition()
    */
   float GetVerticalScrollPosition();
 
@@ -2436,7 +2436,7 @@ public: // Text-input Event Queuing.
    *
    * @param[out] anchorActors the vector of actor (empty collection if no anchors available).
    */
-  void GetAnchorActors(std::vector<UI::TextAnchor>& anchorActors);
+  void GetAnchorActors(std::vector<Ui::TextAnchor>& anchorActors);
 
   /**
    * @brief Return an index of first anchor in the anchor vector whose boundaries includes given character offset
@@ -2449,25 +2449,25 @@ public: // Text-input Event Queuing.
 
 protected: // Inherit from Text::Decorator::ControllerInterface.
   /**
-   * @copydoc Dali::UI::Text::Decorator::ControllerInterface::GetTargetSize()
+   * @copydoc Dali::Ui::Text::Decorator::ControllerInterface::GetTargetSize()
    */
   void GetTargetSize(Vector2& targetSize) override;
 
   /**
-   * @copydoc Dali::UI::Text::Decorator::ControllerInterface::AddDecoration()
+   * @copydoc Dali::Ui::Text::Decorator::ControllerInterface::AddDecoration()
    */
   void AddDecoration(Actor& actor, DecorationType type, bool needsClipping) override;
 
   /**
-   * @copydoc Dali::UI::Text::Decorator::ControllerInterface::DecorationEvent()
+   * @copydoc Dali::Ui::Text::Decorator::ControllerInterface::DecorationEvent()
    */
   void DecorationEvent(HandleType handle, HandleState state, float x, float y) override;
 
 protected: // Inherit from TextSelectionPopup::TextPopupButtonCallbackInterface.
   /**
-   * @copydoc Dali::UI::TextSelectionPopup::TextPopupButtonCallbackInterface::TextPopupButtonTouched()
+   * @copydoc Dali::Ui::TextSelectionPopup::TextPopupButtonCallbackInterface::TextPopupButtonTouched()
    */
-  void TextPopupButtonTouched(Dali::UI::TextSelectionPopup::Buttons button) override;
+  void TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::Buttons button) override;
 
 protected: // Inherit from HiddenText.
   /**
@@ -2536,6 +2536,6 @@ private:
   std::unique_ptr<Impl> mImpl{nullptr};
 };
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_H

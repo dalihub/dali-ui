@@ -23,38 +23,38 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
-class UIElementConfigImpl;
+class UiElementConfigImpl;
 
 /**
- * @brief Singleton manager that caches UIElementConfig values for
+ * @brief Singleton manager that caches UiElementConfig values for
  *        efficient access by element classes (TextLabel, ImageView, etc.).
  *
  * Populated automatically when Apply() is called for a
- * UIElementConfig instance. Element classes should NOT call Initialize() directly;
- * it is invoked by UIElementConfigImpl::OnInitialized().
+ * UiElementConfig instance. Element classes should NOT call Initialize() directly;
+ * it is invoked by UiElementConfigImpl::OnInitialized().
  */
-class UIElementConfigManager
+class UiElementConfigManager
 {
 public:
   /**
-   * @brief Returns the singleton UIElementConfigManager instance.
+   * @brief Returns the singleton UiElementConfigManager instance.
    *
    * @return The singleton instance
    */
-  static UIElementConfigManager& Get();
+  static UiElementConfigManager& Get();
 
   /**
-   * @brief Called by UIElementConfigImpl::OnInitialized() to cache values.
+   * @brief Called by UiElementConfigImpl::OnInitialized() to cache values.
    *
-   * @param[in] impl The initialized UIElementConfigImpl
+   * @param[in] impl The initialized UiElementConfigImpl
    */
-  void Init(const UIElementConfigImpl& impl);
+  void Init(const UiElementConfigImpl& impl);
 
   /**
    * @brief Returns whether Init() has been called.
@@ -80,10 +80,10 @@ public:
   Vector4 GetDefaultTextColor() const;
 
 private:
-  UIElementConfigManager() = default;
-  ~UIElementConfigManager() = default;
-  UIElementConfigManager(const UIElementConfigManager&) = delete;
-  UIElementConfigManager& operator=(const UIElementConfigManager&) = delete;
+  UiElementConfigManager() = default;
+  ~UiElementConfigManager() = default;
+  UiElementConfigManager(const UiElementConfigManager&) = delete;
+  UiElementConfigManager& operator=(const UiElementConfigManager&) = delete;
 
 private:
   float mDefaultFontSize;
@@ -93,6 +93,6 @@ private:
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -62,7 +62,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -70,36 +70,36 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::WebView::New();
+  return Ui::WebView::New();
 }
 
 // clang-format off
-DALI_TYPE_REGISTRATION_BEGIN(UI::WebView, UI::Control, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::WebView, Ui::Control, Create)
 
-DALI_PROPERTY_REGISTRATION(UI, WebView, "url",                     STRING,  URL                       )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "userAgent",               STRING,  USER_AGENT                )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "scrollPosition",          VECTOR2, SCROLL_POSITION           )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "scrollSize",              VECTOR2, SCROLL_SIZE               )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "contentSize",             VECTOR2, CONTENT_SIZE              )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "title",                   STRING,  TITLE                     )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "videoHoleEnabled",        BOOLEAN, VIDEO_HOLE_ENABLED        )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "mouseEventsEnabled",      BOOLEAN, MOUSE_EVENTS_ENABLED      )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "keyEventsEnabled",        BOOLEAN, KEY_EVENTS_ENABLED        )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "documentBackgroundColor", VECTOR4, DOCUMENT_BACKGROUND_COLOR )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "tilesClearedWhenHidden",  BOOLEAN, TILES_CLEARED_WHEN_HIDDEN )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "tileCoverAreaMultiplier", FLOAT,   TILE_COVER_AREA_MULTIPLIER)
-DALI_PROPERTY_REGISTRATION(UI, WebView, "cursorEnabledByClient",   BOOLEAN, CURSOR_ENABLED_BY_CLIENT  )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "selectedText",            STRING,  SELECTED_TEXT             )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "pageZoomFactor",          FLOAT,   PAGE_ZOOM_FACTOR          )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "textZoomFactor",          FLOAT,   TEXT_ZOOM_FACTOR          )
-DALI_PROPERTY_REGISTRATION(UI, WebView, "loadProgressPercentage",  FLOAT,   LOAD_PROGRESS_PERCENTAGE  )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "url",                     STRING,  URL                       )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "userAgent",               STRING,  USER_AGENT                )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "scrollPosition",          VECTOR2, SCROLL_POSITION           )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "scrollSize",              VECTOR2, SCROLL_SIZE               )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "contentSize",             VECTOR2, CONTENT_SIZE              )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "title",                   STRING,  TITLE                     )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "videoHoleEnabled",        BOOLEAN, VIDEO_HOLE_ENABLED        )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "mouseEventsEnabled",      BOOLEAN, MOUSE_EVENTS_ENABLED      )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "keyEventsEnabled",        BOOLEAN, KEY_EVENTS_ENABLED        )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "documentBackgroundColor", VECTOR4, DOCUMENT_BACKGROUND_COLOR )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "tilesClearedWhenHidden",  BOOLEAN, TILES_CLEARED_WHEN_HIDDEN )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "tileCoverAreaMultiplier", FLOAT,   TILE_COVER_AREA_MULTIPLIER)
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "cursorEnabledByClient",   BOOLEAN, CURSOR_ENABLED_BY_CLIENT  )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "selectedText",            STRING,  SELECTED_TEXT             )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "pageZoomFactor",          FLOAT,   PAGE_ZOOM_FACTOR          )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "textZoomFactor",          FLOAT,   TEXT_ZOOM_FACTOR          )
+DALI_PROPERTY_REGISTRATION(Ui, WebView, "loadProgressPercentage",  FLOAT,   LOAD_PROGRESS_PERCENTAGE  )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
-std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<UI::WebView>>& GetPluginWebViewTable()
+std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<Ui::WebView>>& GetPluginWebViewTable()
 {
-  static std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<UI::WebView>> pluginWebViewMap;
+  static std::unordered_map<Dali::WebEnginePlugin*, Dali::WeakHandle<Ui::WebView>> pluginWebViewMap;
   return pluginWebViewMap;
 }
 
@@ -144,17 +144,17 @@ Rect<int32_t> CalculateDisplayArea(Dali::Actor self, DisplayAreaCalculateOption 
 constexpr Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
 
 const Property::Map EMPTY_VISUAL_PROPERTIES{
-    {Dali::UI::Visual::Property::TYPE, Dali::UI::Visual::COLOR},
-    {Dali::UI::Visual::Property::MIX_COLOR, Color::TRANSPARENT},
+    {Dali::Ui::Visual::Property::TYPE, Dali::Ui::Visual::COLOR},
+    {Dali::Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT},
 };
 
 const Property::Map DEFAULT_WEB_IMAGE_VISUAL_PROPERTIES{
-    {Dali::UI::Visual::Property::TYPE, Dali::UI::Visual::IMAGE},
-    {Dali::UI::ImageVisual::Property::URL, ""},
-    {Dali::UI::ImageVisual::Property::PIXEL_AREA, FULL_TEXTURE_RECT},
-    {Dali::UI::ImageVisual::Property::WRAP_MODE_U, Dali::WrapMode::CLAMP_TO_EDGE},
-    {Dali::UI::ImageVisual::Property::WRAP_MODE_V, Dali::WrapMode::CLAMP_TO_EDGE},
-    {Dali::UI::Visual::Property::TRANSFORM, {{Dali::UI::Visual::Transform::Property::SIZE, Vector2::ONE}}},
+    {Dali::Ui::Visual::Property::TYPE, Dali::Ui::Visual::IMAGE},
+    {Dali::Ui::ImageVisual::Property::URL, ""},
+    {Dali::Ui::ImageVisual::Property::PIXEL_AREA, FULL_TEXTURE_RECT},
+    {Dali::Ui::ImageVisual::Property::WRAP_MODE_U, Dali::WrapMode::CLAMP_TO_EDGE},
+    {Dali::Ui::ImageVisual::Property::WRAP_MODE_V, Dali::WrapMode::CLAMP_TO_EDGE},
+    {Dali::Ui::Visual::Property::TRANSFORM, {{Dali::Ui::Visual::Transform::Property::SIZE, Vector2::ONE}}},
 };
 
 /**
@@ -241,10 +241,10 @@ WebView::~WebView()
   }
 }
 
-UI::WebView WebView::New()
+Ui::WebView WebView::New()
 {
   WebView* impl = new WebView();
-  UI::WebView handle = UI::WebView(*impl);
+  Ui::WebView handle = Ui::WebView(*impl);
   if (impl->GetPlugin())
   {
     GetPluginWebViewTable()[impl->GetPlugin()] = handle;
@@ -253,10 +253,10 @@ UI::WebView WebView::New()
   return handle;
 }
 
-UI::WebView WebView::New(const std::string& locale, const std::string& timezoneId)
+Ui::WebView WebView::New(const std::string& locale, const std::string& timezoneId)
 {
   WebView* impl = new WebView(locale, timezoneId);
-  UI::WebView handle = UI::WebView(*impl);
+  Ui::WebView handle = Ui::WebView(*impl);
   if (impl->GetPlugin())
   {
     GetPluginWebViewTable()[impl->GetPlugin()] = handle;
@@ -265,10 +265,10 @@ UI::WebView WebView::New(const std::string& locale, const std::string& timezoneI
   return handle;
 }
 
-UI::WebView WebView::New(uint32_t argc, char** argv, int32_t type)
+Ui::WebView WebView::New(uint32_t argc, char** argv, int32_t type)
 {
   WebView* impl = new WebView(argc, argv, type);
-  UI::WebView handle = UI::WebView(*impl);
+  Ui::WebView handle = Ui::WebView(*impl);
   if (impl->GetPlugin())
   {
     GetPluginWebViewTable()[impl->GetPlugin()] = handle;
@@ -277,14 +277,14 @@ UI::WebView WebView::New(uint32_t argc, char** argv, int32_t type)
   return handle;
 }
 
-UI::WebView WebView::FindWebView(Dali::WebEnginePlugin* plugin)
+Ui::WebView WebView::FindWebView(Dali::WebEnginePlugin* plugin)
 {
   auto iter = GetPluginWebViewTable().find(plugin);
   if (iter != GetPluginWebViewTable().end())
   {
     return iter->second.GetHandle();
   }
-  return UI::WebView();
+  return Ui::WebView();
 }
 
 Dali::WebEngineContext* WebView::GetContext()
@@ -319,24 +319,24 @@ void WebView::OnInitialize()
   mScaleUpdateNotification.NotifySignal().Connect(this, &WebView::OnDisplayAreaUpdated);
 
   // Create WebVisual for WebView
-  UI::Visual::Base webVisual = UI::VisualFactory::Get().CreateVisual(EMPTY_VISUAL_PROPERTIES);
+  Ui::Visual::Base webVisual = Ui::VisualFactory::Get().CreateVisual(EMPTY_VISUAL_PROPERTIES);
   if (webVisual)
   {
-    Dali::UI::DevelControl::RegisterVisual(*this, UI::WebView::Property::URL, webVisual);
-    Dali::UI::DevelControl::EnableCornerPropertiesOverridden(*this, webVisual, true);
+    Dali::Ui::DevelControl::RegisterVisual(*this, Ui::WebView::Property::URL, webVisual);
+    Dali::Ui::DevelControl::EnableCornerPropertiesOverridden(*this, webVisual, true);
   }
   else
   {
     DALI_LOG_ERROR("fail to create webVisual for CornerRadius");
-    Dali::UI::DevelControl::UnregisterVisual(*this, UI::WebView::Property::URL);
+    Dali::Ui::DevelControl::UnregisterVisual(*this, Ui::WebView::Property::URL);
   }
 
   if (mWebEngine)
   {
     mWebEngine.RegisterFrameRenderedCallback(std::bind(&WebView::OnFrameRendered, this));
-    mWebSettings = std::unique_ptr<Dali::UI::WebSettings>(new WebSettings(mWebEngine.GetSettings()));
+    mWebSettings = std::unique_ptr<Dali::Ui::WebSettings>(new WebSettings(mWebEngine.GetSettings()));
     mWebBackForwardList =
-        std::unique_ptr<Dali::UI::WebBackForwardList>(new WebBackForwardList(mWebEngine.GetBackForwardList()));
+        std::unique_ptr<Dali::Ui::WebBackForwardList>(new WebBackForwardList(mWebEngine.GetBackForwardList()));
   }
 
   self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::FILLER);
@@ -368,12 +368,12 @@ void WebView::ChangeOrientation(int orientation)
   }
 }
 
-Dali::UI::WebSettings* WebView::GetSettings() const
+Dali::Ui::WebSettings* WebView::GetSettings() const
 {
   return mWebSettings.get();
 }
 
-Dali::UI::WebBackForwardList* WebView::GetBackForwardList() const
+Dali::Ui::WebBackForwardList* WebView::GetBackForwardList() const
 {
   return mWebBackForwardList.get();
 }
@@ -383,9 +383,9 @@ Dali::WebEnginePlugin* WebView::GetPlugin() const
   return mWebEngine ? mWebEngine.GetPlugin() : nullptr;
 }
 
-Dali::UI::ImageView WebView::GetFavicon() const
+Dali::Ui::ImageView WebView::GetFavicon() const
 {
-  Dali::UI::ImageView faviconView;
+  Dali::Ui::ImageView faviconView;
   if (mWebEngine)
   {
     Dali::PixelData pixelData = mWebEngine.GetFavicon();
@@ -722,9 +722,9 @@ void WebView::AddDynamicCertificatePath(const std::string& host, const std::stri
   }
 }
 
-Dali::UI::ImageView WebView::GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor)
+Dali::Ui::ImageView WebView::GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor)
 {
-  Dali::UI::ImageView imageView;
+  Dali::Ui::ImageView imageView;
   if (mWebEngine)
   {
     Dali::PixelData pixelData = mWebEngine.GetScreenshot(viewArea, scaleFactor);
@@ -734,7 +734,7 @@ Dali::UI::ImageView WebView::GetScreenshot(Dali::Rect<int32_t> viewArea, float s
 }
 
 bool WebView::GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor,
-                                          Dali::UI::WebView::WebViewScreenshotCapturedCallback callback)
+                                          Dali::Ui::WebView::WebViewScreenshotCapturedCallback callback)
 {
   mScreenshotCapturedCallback = std::move(callback);
   return mWebEngine ? mWebEngine.GetScreenshotAsynchronously(
@@ -795,15 +795,15 @@ void WebView::EnableBlendMode(bool blendEnabled)
   }
 }
 
-Dali::UI::ImageView WebView::CreateImageView(Dali::PixelData pixel) const
+Dali::Ui::ImageView WebView::CreateImageView(Dali::PixelData pixel) const
 {
   if (!pixel)
   {
-    return Dali::UI::ImageView();
+    return Dali::Ui::ImageView();
   }
 
-  Dali::UI::ImageUrl url = Dali::UI::Image::GenerateUrl(pixel);
-  Dali::UI::ImageView imageView = Dali::UI::ImageView::New(url.GetUrl());
+  Dali::Ui::ImageUrl url = Dali::Ui::Image::GenerateUrl(pixel);
+  Dali::Ui::ImageView imageView = Dali::Ui::ImageView::New(url.GetUrl());
   imageView.SetProperty(Dali::Actor::Property::SIZE, Vector2(pixel.GetWidth(), pixel.GetHeight()));
   return imageView;
 }
@@ -1104,15 +1104,15 @@ void WebView::OnFrameRendered()
   mLastRenderedNativeImageWidth = nativeImagePtr->GetWidth();
   mLastRenderedNativeImageHeight = nativeImagePtr->GetHeight();
 
-  Dali::UI::ImageUrl nativeImageUrl = Dali::UI::Image::GenerateUrl(nativeImagePtr, true);
+  Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::Image::GenerateUrl(nativeImagePtr, true);
 
-  newWebMap[UI::ImageVisual::Property::URL] = nativeImageUrl.GetUrl();
+  newWebMap[Ui::ImageVisual::Property::URL] = nativeImageUrl.GetUrl();
 
-  mVisual = UI::VisualFactory::Get().CreateVisual(newWebMap);
+  mVisual = Ui::VisualFactory::Get().CreateVisual(newWebMap);
 
   if (mVisual)
   {
-    DevelControl::RegisterVisual(*this, UI::WebView::Property::URL, mVisual, DepthIndex::CONTENT);
+    DevelControl::RegisterVisual(*this, Ui::WebView::Property::URL, mVisual, DepthIndex::CONTENT);
     DevelControl::EnableCornerPropertiesOverridden(*this, mVisual, true);
     EnableBlendMode(!mVideoHoleEnabled);
   }
@@ -1139,7 +1139,7 @@ void WebView::OnScreenshotCaptured(Dali::PixelData pixel)
 {
   if (mScreenshotCapturedCallback)
   {
-    Dali::UI::ImageView imageView = CreateImageView(pixel);
+    Dali::Ui::ImageView imageView = CreateImageView(pixel);
     mScreenshotCapturedCallback(imageView);
   }
 }
@@ -1172,10 +1172,10 @@ void WebView::SetDisplayArea(const Dali::Rect<int32_t>& displayArea)
           DALI_UNLIKELY(Dali::EqualsZero(textureRatio.x)) ? 1.0f : std::min(1.0f, 1.0f / textureRatio.x),
           DALI_UNLIKELY(Dali::EqualsZero(textureRatio.y)) ? 1.0f : std::min(1.0f, 1.0f / textureRatio.y));
 
-      UI::GetImplementation(mVisual).DoAction(
-          UI::DevelVisual::Action::UPDATE_PROPERTY,
-          {{UI::ImageVisual::Property::PIXEL_AREA, pixelArea},
-           {UI::Visual::Property::TRANSFORM, {{Dali::UI::Visual::Transform::Property::SIZE, transformSize}}}});
+      Ui::GetImplementation(mVisual).DoAction(
+          Ui::DevelVisual::Action::UPDATE_PROPERTY,
+          {{Ui::ImageVisual::Property::PIXEL_AREA, pixelArea},
+           {Ui::Visual::Property::TRANSFORM, {{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}}}});
     }
 
     mWebViewArea = displayArea;
@@ -1270,14 +1270,14 @@ Vector3 WebView::GetNaturalSize()
 
 void WebView::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::WebView webView = UI::WebView::DownCast(Dali::BaseHandle(object));
+  Ui::WebView webView = Ui::WebView::DownCast(Dali::BaseHandle(object));
 
   if (webView)
   {
     WebView& impl = GetImpl(webView);
     switch (index)
     {
-      case UI::WebView::Property::URL:
+      case Ui::WebView::Property::URL:
       {
         std::string url;
         if (value.Get(url))
@@ -1286,7 +1286,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::USER_AGENT:
+      case Ui::WebView::Property::USER_AGENT:
       {
         std::string input;
         if (value.Get(input))
@@ -1295,7 +1295,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::SCROLL_POSITION:
+      case Ui::WebView::Property::SCROLL_POSITION:
       {
         Vector2 input;
         if (value.Get(input))
@@ -1304,7 +1304,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::VIDEO_HOLE_ENABLED:
+      case Ui::WebView::Property::VIDEO_HOLE_ENABLED:
       {
         bool input;
         if (value.Get(input))
@@ -1313,7 +1313,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::MOUSE_EVENTS_ENABLED:
+      case Ui::WebView::Property::MOUSE_EVENTS_ENABLED:
       {
         bool input;
         if (value.Get(input))
@@ -1322,7 +1322,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::KEY_EVENTS_ENABLED:
+      case Ui::WebView::Property::KEY_EVENTS_ENABLED:
       {
         bool input;
         if (value.Get(input))
@@ -1331,7 +1331,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::DOCUMENT_BACKGROUND_COLOR:
+      case Ui::WebView::Property::DOCUMENT_BACKGROUND_COLOR:
       {
         Vector4 input;
         if (value.Get(input))
@@ -1340,7 +1340,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::TILES_CLEARED_WHEN_HIDDEN:
+      case Ui::WebView::Property::TILES_CLEARED_WHEN_HIDDEN:
       {
         bool input;
         if (value.Get(input))
@@ -1349,7 +1349,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::TILE_COVER_AREA_MULTIPLIER:
+      case Ui::WebView::Property::TILE_COVER_AREA_MULTIPLIER:
       {
         float input;
         if (value.Get(input))
@@ -1358,7 +1358,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::CURSOR_ENABLED_BY_CLIENT:
+      case Ui::WebView::Property::CURSOR_ENABLED_BY_CLIENT:
       {
         bool input;
         if (value.Get(input))
@@ -1367,7 +1367,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::PAGE_ZOOM_FACTOR:
+      case Ui::WebView::Property::PAGE_ZOOM_FACTOR:
       {
         float input;
         if (value.Get(input))
@@ -1376,7 +1376,7 @@ void WebView::SetProperty(BaseObject* object, Property::Index index, const Prope
         }
         break;
       }
-      case UI::WebView::Property::TEXT_ZOOM_FACTOR:
+      case Ui::WebView::Property::TEXT_ZOOM_FACTOR:
       {
         float input;
         if (value.Get(input))
@@ -1395,74 +1395,74 @@ Property::Value WebView::GetProperty(BaseObject* object, Property::Index propert
 {
   Property::Value value;
 
-  UI::WebView webView = UI::WebView::DownCast(Dali::BaseHandle(object));
+  Ui::WebView webView = Ui::WebView::DownCast(Dali::BaseHandle(object));
 
   if (webView)
   {
     WebView& impl = GetImpl(webView);
     switch (propertyIndex)
     {
-      case UI::WebView::Property::URL:
+      case Ui::WebView::Property::URL:
       {
         value = impl.GetUrl();
         break;
       }
-      case UI::WebView::Property::USER_AGENT:
+      case Ui::WebView::Property::USER_AGENT:
       {
         value = impl.GetUserAgent();
         break;
       }
-      case UI::WebView::Property::SCROLL_POSITION:
+      case Ui::WebView::Property::SCROLL_POSITION:
       {
         value = impl.GetScrollPosition();
         break;
       }
-      case UI::WebView::Property::SCROLL_SIZE:
+      case Ui::WebView::Property::SCROLL_SIZE:
       {
         value = impl.GetScrollSize();
         break;
       }
-      case UI::WebView::Property::CONTENT_SIZE:
+      case Ui::WebView::Property::CONTENT_SIZE:
       {
         value = impl.GetContentSize();
         break;
       }
-      case UI::WebView::Property::TITLE:
+      case Ui::WebView::Property::TITLE:
       {
         value = impl.GetTitle();
         break;
       }
-      case UI::WebView::Property::VIDEO_HOLE_ENABLED:
+      case Ui::WebView::Property::VIDEO_HOLE_ENABLED:
       {
         value = impl.mVideoHoleEnabled;
         break;
       }
-      case UI::WebView::Property::MOUSE_EVENTS_ENABLED:
+      case Ui::WebView::Property::MOUSE_EVENTS_ENABLED:
       {
         value = impl.mMouseEventsEnabled;
         break;
       }
-      case UI::WebView::Property::KEY_EVENTS_ENABLED:
+      case Ui::WebView::Property::KEY_EVENTS_ENABLED:
       {
         value = impl.mKeyEventsEnabled;
         break;
       }
-      case UI::WebView::Property::SELECTED_TEXT:
+      case Ui::WebView::Property::SELECTED_TEXT:
       {
         value = impl.GetSelectedText();
         break;
       }
-      case UI::WebView::Property::PAGE_ZOOM_FACTOR:
+      case Ui::WebView::Property::PAGE_ZOOM_FACTOR:
       {
         value = impl.GetPageZoomFactor();
         break;
       }
-      case UI::WebView::Property::TEXT_ZOOM_FACTOR:
+      case Ui::WebView::Property::TEXT_ZOOM_FACTOR:
       {
         value = impl.GetTextZoomFactor();
         break;
       }
-      case UI::WebView::Property::LOAD_PROGRESS_PERCENTAGE:
+      case Ui::WebView::Property::LOAD_PROGRESS_PERCENTAGE:
       {
         value = impl.GetLoadProgressPercentage();
         break;
@@ -1656,7 +1656,7 @@ void WebView::WebViewAccessible::DoGetChildren(std::vector<Dali::Accessibility::
   if (mRemoteChild.GetAddress())
   {
     auto actor = GetInternalActor();
-    auto control = UI::Control::DownCast(actor);
+    auto control = Ui::Control::DownCast(actor);
     if (DALI_LIKELY(control))
     {
       control.SetKeyInputFocus();
@@ -1702,6 +1702,6 @@ void WebView::WebViewAccessible::SetRemoteChildAddress(Dali::Accessibility::Addr
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

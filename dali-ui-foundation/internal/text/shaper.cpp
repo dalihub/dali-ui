@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -80,12 +80,12 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   DALI_ASSERT_DEBUG((0u != numberOfFontRuns) &&
                     (totalNumberOfCharacters == fonts[numberOfFontRuns - 1u].characterRun.characterIndex +
                                                     fonts[numberOfFontRuns - 1u].characterRun.numberOfCharacters) &&
-                    "UI::Text::ShapeText. All characters must have a font set.");
+                    "Ui::Text::ShapeText. All characters must have a font set.");
 
   DALI_ASSERT_DEBUG((0u != numberOfScriptRuns) &&
                     (totalNumberOfCharacters == scripts[numberOfScriptRuns - 1u].characterRun.characterIndex +
                                                     scripts[numberOfScriptRuns - 1u].characterRun.numberOfCharacters) &&
-                    "UI::Text::ShapeText. All characters must have a script set.");
+                    "Ui::Text::ShapeText. All characters must have a script set.");
 
   // The text needs to be split in chunks of consecutive characters.
   // Each chunk must contain characters with the same font id and script set.
@@ -323,6 +323,6 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

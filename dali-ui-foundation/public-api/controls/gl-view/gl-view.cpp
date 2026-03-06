@@ -28,20 +28,20 @@
 #include <dali/public-api/common/unique-ptr.h>
 #include <dlfcn.h>
 
-namespace Dali::UI
+namespace Dali::Ui
 {
 namespace
 {
 const char* const DALI_UI_GLES_SO("libdali2-ui-foundation-gles.so");
-const char* const DALI_UI_GLES_ADDON_NAME("UIGlesAddOn");
+const char* const DALI_UI_GLES_ADDON_NAME("UiGlesAddOn");
 
-struct UIGlesAddOn : public Dali::AddOn::AddOnBinder
+struct UiGlesAddOn : public Dali::AddOn::AddOnBinder
 {
-  UIGlesAddOn()
+  UiGlesAddOn()
     : Dali::AddOn::AddOnBinder(DALI_UI_GLES_ADDON_NAME, DALI_UI_GLES_SO)
   {
   }
-  ~UIGlesAddOn() = default;
+  ~UiGlesAddOn() = default;
 
   ADDON_BIND_FUNCTION(GlViewNew, GlView(GlView::BackendMode, GlView::ColorFormat));
   ADDON_BIND_FUNCTION(GlViewRegisterGlCallbacks,
@@ -57,7 +57,7 @@ struct UIGlesAddOn : public Dali::AddOn::AddOnBinder
   ADDON_BIND_FUNCTION(GlViewTerminate, void(Internal::GlViewImpl&));
 };
 
-UniquePtr<UIGlesAddOn> gUIGlesAddon;
+UniquePtr<UiGlesAddOn> gUIGlesAddon;
 } // namespace
 
 GlView::GlView() = default;
@@ -83,7 +83,7 @@ GlView GlView::New(BackendMode backendMode, ColorFormat colorFormat)
   {
     if (!gUIGlesAddon)
     {
-      gUIGlesAddon.Reset(new UIGlesAddOn);
+      gUIGlesAddon.Reset(new UiGlesAddOn);
     }
     DALI_ASSERT_ALWAYS(gUIGlesAddon && "Cannot load the GlView Addon\n");
     return gUIGlesAddon->GlViewNew(backendMode, colorFormat);
@@ -130,13 +130,13 @@ void GlView::SetRenderingMode(RenderingMode mode)
   }
 }
 
-Dali::UI::GlView::RenderingMode GlView::GetRenderingMode() const
+Dali::Ui::GlView::RenderingMode GlView::GetRenderingMode() const
 {
   const Internal::GlViewImpl& impl = GetImpl(*this); // Get Impl here to catch uninitialized usage
   return gUIGlesAddon ? gUIGlesAddon->GlViewGetRenderingMode(impl) : RenderingMode::CONTINUOUS;
 }
 
-Dali::UI::GlView::BackendMode GlView::GetBackendMode() const
+Dali::Ui::GlView::BackendMode GlView::GetBackendMode() const
 {
   const Internal::GlViewImpl& impl = GetImpl(*this); // Get Impl here to catch uninitialized usage
   return gUIGlesAddon ? gUIGlesAddon->GlViewGetBackendMode(impl) : BackendMode::DEFAULT;
@@ -180,4 +180,4 @@ GlView::GlView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::GlViewImpl>(internal);
 }
 
-} // namespace Dali::UI
+} // namespace Dali::Ui

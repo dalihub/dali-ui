@@ -24,7 +24,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -137,6 +137,6 @@ const LongPressGesture& InputEventImpl::GetLongPressGesture() const
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

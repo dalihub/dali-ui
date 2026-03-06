@@ -21,7 +21,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelStyleManager
 {
@@ -53,6 +53,6 @@ BrokenImageChangedSignalType& BrokenImageChangedSignal(StyleManager styleManager
 
 } // namespace DevelStyleManager
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -38,7 +38,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -126,34 +126,34 @@ public:
   void ResourceReady();
 
   /**
-   * @copydoc Dali::UI::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::UI::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
 
   /**
-   * @copydoc Dali::UI::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
 
   /**
-   * @copydoc Dali::UI::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, UI::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @copydoc Dali::UI::DevelControl::UnregisterVisual()
+   * @copydoc Dali::Ui::DevelControl::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @copydoc Dali::UI::DevelControl::GetVisual()
+   * @copydoc Dali::Ui::DevelControl::GetVisual()
    */
-  UI::Visual::Base GetVisual(Property::Index index) const;
+  Ui::Visual::Base GetVisual(Property::Index index) const;
 
   /**
    * @brief Get the raw pointer of visual impl.
@@ -163,7 +163,7 @@ public:
    * @param[in] index Index of parameter
    * @return Raw pointer of visual base implements. nullptr if not exist.
    */
-  UI::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
+  Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
   /**
    * @brief Enables or disables overriding the given visual's corner properties to its control's
@@ -171,32 +171,32 @@ public:
    * @param[in] enable flat to set enabled or disabled.
    * @param[in] cornerRadiusConstraint Optional constraint to link the control's corner properties to the visual's.
    */
-  void EnableCornerPropertiesOverridden(UI::Visual::Base& visual, bool enable,
+  void EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable,
                                         Dali::Constraint cornerRadiusConstraint = Dali::Constraint());
 
   /**
-   * @copydoc Dali::UI::DevelControl::EnableVisual()
+   * @copydoc Dali::Ui::DevelControl::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @copydoc Dali::UI::DevelControl::IsVisualEnabled()
+   * @copydoc Dali::Ui::DevelControl::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
   /**
-   * @copydoc Dali::UI::DevelControl::GetVisualResourceStatus()
+   * @copydoc Dali::Ui::DevelControl::GetVisualResourceStatus()
    */
-  UI::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
+  Ui::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
 
   /**
-   * @copydoc Dali::UI::DevelControl::DoAction()
+   * @copydoc Dali::Ui::DevelControl::DoAction()
    */
   void DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                 const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Dali::UI::DevelControl::DoActionExtension()
+   * @copydoc Dali::Ui::DevelControl::DoActionExtension()
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
@@ -398,22 +398,22 @@ public:
   void UpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::GetAccessibleObject()
+   * @copydoc Dali::Ui::Internal::Control::GetAccessibleObject()
    */
-  std::shared_ptr<UI::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
 
   /**
-   * @copydoc Dali::UI::DevelControl::IsAccessibleCreated()
+   * @copydoc Dali::Ui::DevelControl::IsAccessibleCreated()
    */
   bool IsAccessibleCreated() const;
 
   /**
-   * @copydoc Dali::UI::DevelControl::EnableCreateAccessible()
+   * @copydoc Dali::Ui::DevelControl::EnableCreateAccessible()
    */
   void EnableCreateAccessible(bool enable);
 
   /**
-   * @copydoc Dali::UI::DevelControl::IsCreateAccessibleEnabled()
+   * @copydoc Dali::Ui::DevelControl::IsCreateAccessibleEnabled()
    */
   bool IsCreateAccessibleEnabled() const;
 
@@ -495,10 +495,10 @@ public:
   Extents mMargin;                   ///< The margin values
   Extents mPadding;                  ///< The padding values
   Vector2 mSize;                     ///< The size of the control
-  UI::Control::KeyEventSignalType mKeyEventSignal;
-  UI::Control::KeyInputFocusSignalType mKeyInputFocusGainedSignal;
-  UI::Control::KeyInputFocusSignalType mKeyInputFocusLostSignal;
-  UI::Control::ResourceReadySignalType mResourceReadySignal;
+  Ui::Control::KeyEventSignalType mKeyEventSignal;
+  Ui::Control::KeyInputFocusSignalType mKeyInputFocusGainedSignal;
+  Ui::Control::KeyInputFocusSignalType mKeyInputFocusLostSignal;
+  Ui::Control::ResourceReadySignalType mResourceReadySignal;
 
   // Gesture Detection
   PinchGestureDetector mPinchGestureDetector;
@@ -509,7 +509,7 @@ public:
   // Off screen rendering context
   std::unique_ptr<OffScreenRenderingImpl> mOffScreenRenderingImpl;
   DevelControl::OffScreenRenderingType mOffScreenRenderingType;
-  UI::Control::OffScreenRenderingFinishedSignalType
+  Ui::Control::OffScreenRenderingFinishedSignalType
       mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
 
   InputMethodContext mInputMethodContext;
@@ -575,7 +575,7 @@ public:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

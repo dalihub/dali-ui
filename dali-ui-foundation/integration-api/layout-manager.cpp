@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 
 LayoutManager::LayoutManager()
@@ -58,5 +58,5 @@ Integration::ViewImpl::ChildContainer& LayoutManager::GetChildren(Integration::V
   return view->GetChildren();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

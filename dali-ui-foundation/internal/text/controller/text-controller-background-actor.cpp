@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 namespace
 {
@@ -256,4 +256,4 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
   return actor;
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

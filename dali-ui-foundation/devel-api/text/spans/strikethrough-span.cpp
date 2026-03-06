@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -72,11 +72,11 @@ bool StrikethroughSpan::IsHeightDefined() const
 
 StrikethroughSpan StrikethroughSpan::DownCast(BaseHandle handle)
 {
-  return StrikethroughSpan(dynamic_cast<Dali::UI::Text::Internal::StrikethroughSpan*>(handle.GetObjectPtr()));
+  return StrikethroughSpan(dynamic_cast<Dali::Ui::Text::Internal::StrikethroughSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

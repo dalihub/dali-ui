@@ -30,7 +30,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -321,18 +321,18 @@ std::string DumpActor(Actor actor)
   oss << "\"id\":\"" << actor.GetProperty<int>(Actor::Property::ID) << "\",\n";
   oss << "\"rendererCount\":" << actor.GetRendererCount() << ",\n";
   oss << "\"properties\":\n{\n";
-  UI::Internal::DumpProperties(oss, actor) << "}\n";
+  Ui::Internal::DumpProperties(oss, actor) << "}\n";
   oss << "}\n";
   return oss.str();
 }
 
 void DumpControlHierarchy(std::ostream& o, Actor actor)
 {
-  auto control = UI::Control::DownCast(actor);
+  auto control = Ui::Control::DownCast(actor);
   o << "{\n";
   if (control)
   {
-    o << "\"Control\":" << DumpControl(UI::Internal::GetImplementation(control));
+    o << "\"Control\":" << DumpControl(Ui::Internal::GetImplementation(control));
   }
   else
   {
@@ -354,7 +354,7 @@ void DumpControlHierarchy(std::ostream& o, Actor actor)
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif

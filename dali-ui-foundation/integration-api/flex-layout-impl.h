@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
@@ -43,7 +43,7 @@ public:
    *
    * @return A handle to a newly allocated FlexLayout
    */
-  static UI::FlexLayout New();
+  static Ui::FlexLayout New();
 
 protected:
   virtual ~FlexLayoutImpl();
@@ -82,14 +82,14 @@ private:
   FlexAlign mAlignContent;
 };
 
-inline Integration::FlexLayoutImpl& GetImpl(UI::FlexLayout& layout)
+inline Integration::FlexLayoutImpl& GetImpl(Ui::FlexLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::FlexLayoutImpl&>(handle);
 }
 
-inline const Integration::FlexLayoutImpl& GetImpl(const UI::FlexLayout& layout)
+inline const Integration::FlexLayoutImpl& GetImpl(const Ui::FlexLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
@@ -97,5 +97,5 @@ inline const Integration::FlexLayoutImpl& GetImpl(const UI::FlexLayout& layout)
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

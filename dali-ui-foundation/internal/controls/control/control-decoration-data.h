@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 struct DecorationData
 {
@@ -35,7 +35,7 @@ struct DecorationData
       mCornerSquareness(Vector4::ZERO),
       mBorderlineWidth(0.0f),
       mBorderlineOffset(0.0f),
-      mCornerRadiusPolicy(static_cast<int>(UI::Visual::Transform::Policy::ABSOLUTE))
+      mCornerRadiusPolicy(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
   {
   }
   Vector4 mBorderlineColor;
@@ -97,7 +97,7 @@ struct DecorationData
 
   static int GetCornerRadiusPolicy(const DecorationData* const data)
   {
-    return data ? data->mCornerRadiusPolicy : static_cast<int>(UI::Visual::Transform::Policy::ABSOLUTE);
+    return data ? data->mCornerRadiusPolicy : static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE);
   }
   static void SetCornerRadiusPolicy(DecorationData*& data, int value)
   {
@@ -114,6 +114,6 @@ struct DecorationData
   }
 };
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal
 
 #endif // DALI_UI_CONTROL_DECORATION_DATA_H

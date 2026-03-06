@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -47,7 +47,7 @@ void ApplyImageVisualShaderDebugScriptCode(std::string& vertexShader, std::strin
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

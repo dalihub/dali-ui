@@ -28,7 +28,7 @@ namespace Dali
 // Forward declaration
 struct Vector2;
 
-namespace UI
+namespace Ui
 {
 // Forward declaration
 class TreeNode;
@@ -55,7 +55,7 @@ void ParsePropertyString(const std::string& property, Property::Map& map);
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

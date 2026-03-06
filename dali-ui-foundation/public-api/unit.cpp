@@ -22,39 +22,39 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 float operator"" _spx(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetScalingFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScalingFactor();
 }
 
 float operator"" _spx(long double v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetScalingFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScalingFactor();
 }
 
 float operator"" _dp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetDpiFactor();
 }
 
 float operator"" _dp(long double v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetDpiFactor();
 }
 
 float operator"" _sdp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetScaledDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScaledDpiFactor();
 }
 
 float operator"" _sdp(long double v)
 {
-  return static_cast<float>(v) * Integration::UIConfigManager::Get().GetScaledDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScaledDpiFactor();
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

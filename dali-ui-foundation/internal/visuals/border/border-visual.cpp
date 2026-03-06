@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -55,7 +55,7 @@ BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Proper
 }
 
 BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, UI::Visual::BORDER),
+  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::BORDER),
     mBorderColor(Color::TRANSPARENT),
     mBorderSize(0.f),
     mBorderColorIndex(Property::INVALID_INDEX),
@@ -81,15 +81,15 @@ void BorderVisual::DoSetProperties(const Property::Map& propertyMap)
     {
       if (keyValue.first == COLOR_NAME)
       {
-        DoSetProperty(UI::BorderVisual::Property::COLOR, keyValue.second);
+        DoSetProperty(Ui::BorderVisual::Property::COLOR, keyValue.second);
       }
       else if (keyValue.first == SIZE_NAME)
       {
-        DoSetProperty(UI::BorderVisual::Property::SIZE, keyValue.second);
+        DoSetProperty(Ui::BorderVisual::Property::SIZE, keyValue.second);
       }
       else if (keyValue.first == ANTI_ALIASING)
       {
-        DoSetProperty(UI::BorderVisual::Property::ANTI_ALIASING, keyValue.second);
+        DoSetProperty(Ui::BorderVisual::Property::ANTI_ALIASING, keyValue.second);
       }
     }
   }
@@ -99,7 +99,7 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
 {
   switch (index)
   {
-    case UI::BorderVisual::Property::COLOR:
+    case Ui::BorderVisual::Property::COLOR:
     {
       if (!value.Get(mBorderColor))
       {
@@ -107,7 +107,7 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
       }
       break;
     }
-    case UI::BorderVisual::Property::SIZE:
+    case Ui::BorderVisual::Property::SIZE:
     {
       if (!value.Get(mBorderSize))
       {
@@ -115,7 +115,7 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
       }
       break;
     }
-    case UI::BorderVisual::Property::ANTI_ALIASING:
+    case Ui::BorderVisual::Property::ANTI_ALIASING:
     {
       if (!value.Get(mAntiAliasing))
       {
@@ -131,7 +131,7 @@ void BorderVisual::DoSetOnScene(Actor& actor)
   if (mBorderColorIndex == Property::INVALID_INDEX)
   {
     mBorderColorIndex =
-        mImpl->mRenderer.RegisterUniqueProperty(UI::BorderVisual::Property::COLOR, COLOR_NAME, mBorderColor);
+        mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisual::Property::COLOR, COLOR_NAME, mBorderColor);
   }
   if (mBorderColor.a < 1.f || mAntiAliasing)
   {
@@ -140,22 +140,22 @@ void BorderVisual::DoSetOnScene(Actor& actor)
   if (mBorderSizeIndex == Property::INVALID_INDEX)
   {
     mBorderSizeIndex =
-        mImpl->mRenderer.RegisterUniqueProperty(UI::BorderVisual::Property::SIZE, SIZE_NAME, mBorderSize);
+        mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisual::Property::SIZE, SIZE_NAME, mBorderSize);
   }
 
   actor.AddRenderer(mImpl->mRenderer);
 
   // Border Visual Generated and ready to display
-  ResourceReady(UI::Visual::ResourceStatus::READY);
+  ResourceReady(Ui::Visual::ResourceStatus::READY);
 }
 
 void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::BORDER);
-  map.Insert(UI::BorderVisual::Property::COLOR, mBorderColor);
-  map.Insert(UI::BorderVisual::Property::SIZE, mBorderSize);
-  map.Insert(UI::BorderVisual::Property::ANTI_ALIASING, mAntiAliasing);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::BORDER);
+  map.Insert(Ui::BorderVisual::Property::COLOR, mBorderColor);
+  map.Insert(Ui::BorderVisual::Property::SIZE, mBorderSize);
+  map.Insert(Ui::BorderVisual::Property::ANTI_ALIASING, mAntiAliasing);
 }
 
 void BorderVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -274,6 +274,6 @@ Geometry BorderVisual::CreateBorderGeometry()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

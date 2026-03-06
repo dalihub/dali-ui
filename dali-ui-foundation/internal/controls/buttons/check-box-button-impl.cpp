@@ -33,7 +33,7 @@ extern Debug::Filter* gLogButtonFilter;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -41,20 +41,20 @@ namespace
 {
 BaseHandle Create()
 {
-  return UI::CheckBoxButton::New();
+  return Ui::CheckBoxButton::New();
 }
 
-TypeRegistration mType(typeid(UI::CheckBoxButton), typeid(UI::Button), Create);
+TypeRegistration mType(typeid(Ui::CheckBoxButton), typeid(Ui::Button), Create);
 
 } // namespace
 
-Dali::UI::CheckBoxButton CheckBoxButton::New()
+Dali::Ui::CheckBoxButton CheckBoxButton::New()
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<CheckBoxButton> internalCheckBoxButton = new CheckBoxButton();
 
   // Pass ownership to CustomActor
-  Dali::UI::CheckBoxButton checkBoxButton(*internalCheckBoxButton);
+  Dali::Ui::CheckBoxButton checkBoxButton(*internalCheckBoxButton);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -88,8 +88,8 @@ DevelControl::ControlAccessible* CheckBoxButton::CreateAccessibleObject()
 Dali::Accessibility::States CheckBoxButton::CheckBoxButtonAccessible::CalculateStates()
 {
   auto state = Button::ButtonAccessible::CalculateStates();
-  auto self = UI::Button::DownCast(Self());
-  if (self.GetProperty<bool>(UI::Button::Property::SELECTED))
+  auto self = Ui::Button::DownCast(Self());
+  if (self.GetProperty<bool>(Ui::Button::Property::SELECTED))
   {
     state[Dali::Accessibility::State::CHECKED] = true;
   }
@@ -111,6 +111,6 @@ void CheckBoxButton::OnStateChange(State newState)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

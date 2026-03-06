@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -259,7 +259,7 @@ public:
    *
    * @param[in] displayState The desired display state to change to.
    */
-  void SetDisplayState(UI::Popup::DisplayState displayState);
+  void SetDisplayState(Ui::Popup::DisplayState displayState);
 
   /**
    * @brief Gets the current state of the popup.
@@ -268,7 +268,7 @@ public:
    *
    * @return The current state of the popup.
    */
-  UI::Popup::DisplayState GetDisplayState() const;
+  Ui::Popup::DisplayState GetDisplayState() const;
 
 public:
   typedef Signal<void()> TouchedOutsideSignalType;     ///< Touched outside signal type.
@@ -301,7 +301,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @param[in]  implementation  The Control implementation.
    */
@@ -315,7 +315,7 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL Popup(Dali::Internal::CustomActor* internal);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -28,12 +28,12 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
- * @copydoc UI::ScrollViewPagePathEffect
+ * @copydoc Ui::ScrollViewPagePathEffect
  */
 class ScrollViewPagePathEffect : public ScrollViewEffect
 {
@@ -59,12 +59,12 @@ public:
   /**
    * @copydoc ScrollViewEffect::OnAttach
    */
-  void OnAttach(UI::ScrollView& scrollView) override;
+  void OnAttach(Ui::ScrollView& scrollView) override;
 
   /**
    * @copydoc ScrollViewEffect::OnDetach
    */
-  void OnDetach(UI::ScrollView& scrollView) override;
+  void OnDetach(Ui::ScrollView& scrollView) override;
 
 protected:
   /**
@@ -85,7 +85,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::ScrollViewPagePathEffect& GetImpl(Dali::UI::ScrollViewPagePathEffect& obj)
+inline Internal::ScrollViewPagePathEffect& GetImpl(Dali::Ui::ScrollViewPagePathEffect& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -94,7 +94,7 @@ inline Internal::ScrollViewPagePathEffect& GetImpl(Dali::UI::ScrollViewPagePathE
   return static_cast<Internal::ScrollViewPagePathEffect&>(handle);
 }
 
-inline const Internal::ScrollViewPagePathEffect& GetImpl(const Dali::UI::ScrollViewPagePathEffect& obj)
+inline const Internal::ScrollViewPagePathEffect& GetImpl(const Dali::Ui::ScrollViewPagePathEffect& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -103,7 +103,7 @@ inline const Internal::ScrollViewPagePathEffect& GetImpl(const Dali::UI::ScrollV
   return static_cast<const Internal::ScrollViewPagePathEffect&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

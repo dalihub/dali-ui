@@ -31,7 +31,7 @@ namespace Dali
 class WebEngineContext;
 class WebEngineCookieManager;
 
-namespace UI
+namespace Ui
 {
 class ImageView;
 class WebBackForwardList;
@@ -189,7 +189,7 @@ public:
   /**
    * @brief WebView callback related with screen-shot captured.
    */
-  using WebViewScreenshotCapturedCallback = std::function<void(Dali::UI::ImageView)>;
+  using WebViewScreenshotCapturedCallback = std::function<void(Dali::Ui::ImageView)>;
 
 public:
   /**
@@ -228,7 +228,7 @@ public:
   /**
    * @brief Find web view by web engine plugin.
    */
-  static UI::WebView FindWebView(Dali::WebEnginePlugin* plugin);
+  static Ui::WebView FindWebView(Dali::WebEnginePlugin* plugin);
 
   /**
    * @brief Get context of web engine.
@@ -286,12 +286,12 @@ public:
   /**
    * @brief Get WebSettings of WebEngine.
    */
-  Dali::UI::WebSettings* GetSettings() const;
+  Dali::Ui::WebSettings* GetSettings() const;
 
   /**
    * @brief Get WebBackForwardList of WebEngine.
    */
-  Dali::UI::WebBackForwardList* GetBackForwardList() const;
+  Dali::Ui::WebBackForwardList* GetBackForwardList() const;
 
   /**
    * @brief Gets web engine plugin.
@@ -303,7 +303,7 @@ public:
    *
    * @return Handle to a favicon
    */
-  Dali::UI::ImageView GetFavicon() const;
+  Dali::Ui::ImageView GetFavicon() const;
 
   /**
    * @brief Load a web page based on a given URL.
@@ -644,7 +644,7 @@ public:
    *
    * @return image view of screen shot
    */
-  Dali::UI::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
+  Dali::Ui::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
 
   /**
    * @brief Request to get snapshot of the specified viewArea of page asynchronously.
@@ -921,7 +921,7 @@ public:
 public: // Not intended for application developers
   /// @cond internal
   /**
-   * @brief Create a handle using the UI::Internal implementation.
+   * @brief Create a handle using the Ui::Internal implementation.
    *
    * @param[in] implementation The WebView implementation
    */
@@ -940,7 +940,7 @@ public: // Not intended for application developers
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

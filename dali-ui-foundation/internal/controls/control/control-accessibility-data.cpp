@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -37,11 +37,11 @@ static constexpr const char* READING_INFO_TYPE_DESCRIPTION = "description";
 static constexpr const char* READING_INFO_TYPE_STATE = "state";
 static constexpr const char* READING_INFO_TYPE_SEPARATOR = "|";
 
-Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::UI::DevelControl::ControlAccessible* accessible)
+Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::Ui::DevelControl::ControlAccessible* accessible)
 {
   Rect<float> parentRect;
   Vector2 currentPosition;
-  auto parent = dynamic_cast<UI::DevelControl::ControlAccessible*>(accessible->GetParent());
+  auto parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(accessible->GetParent());
 
   while (parent)
   {
@@ -64,7 +64,7 @@ Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::UI::DevelCont
       return rect;
     }
 
-    parent = dynamic_cast<UI::DevelControl::ControlAccessible*>(parent->GetParent());
+    parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(parent->GetParent());
   }
 
   return rect;
@@ -350,7 +350,7 @@ void Control::Impl::AccessibilityData::SetAccessibilityReadingInfoType(
   AppendAccessibilityAttribute(READING_INFO_TYPE_ATTRIBUTE_NAME, value);
 }
 
-std::shared_ptr<UI::DevelControl::ControlAccessible> Control::Impl::AccessibilityData::GetAccessibleObject()
+std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::Impl::AccessibilityData::GetAccessibleObject()
 {
   return std::dynamic_pointer_cast<DevelControl::ControlAccessible>(
       Accessibility::Accessible::GetOwningPtr(mControlImpl.Self()));
@@ -361,11 +361,11 @@ Dali::Accessibility::ReadingInfoTypes Control::Impl::AccessibilityData::GetDefau
   return Dali::Accessibility::ReadingInfoTypes{DEFAULT_READING_INFO_TYPES_RAW_DATA};
 }
 
-UI::DevelControl::AccessibilityStates Control::Impl::AccessibilityData::GetDefaultControlAccessibilityStates()
+Ui::DevelControl::AccessibilityStates Control::Impl::AccessibilityData::GetDefaultControlAccessibilityStates()
 {
-  return UI::DevelControl::AccessibilityStates{DEFAULT_DEVEL_CONTROL_ACCESSIBILITY_STATES_RAW_DATA};
+  return Ui::DevelControl::AccessibilityStates{DEFAULT_DEVEL_CONTROL_ACCESSIBILITY_STATES_RAW_DATA};
 }
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

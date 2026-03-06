@@ -23,15 +23,15 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
 
-UI::AbsoluteLayout AbsoluteLayoutImpl::New()
+Ui::AbsoluteLayout AbsoluteLayoutImpl::New()
 {
   IntrusivePtr<Integration::AbsoluteLayoutImpl> impl = new Integration::AbsoluteLayoutImpl();
-  UI::AbsoluteLayout handle = UI::AbsoluteLayout(*impl);
+  Ui::AbsoluteLayout handle = Ui::AbsoluteLayout(*impl);
   impl->Initialize();
   return handle;
 }
@@ -51,5 +51,5 @@ LayoutManager* AbsoluteLayoutImpl::CreateLayoutManager()
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

@@ -58,7 +58,7 @@ const char* MIME_TYPE_HTML = "application/xhtml+xml";
 
 } // namespace
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 namespace
 {
@@ -634,7 +634,7 @@ Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& ac
   }
 }
 
-UI::DevelText::TextDirection::Type Controller::Impl::GetTextDirection()
+Ui::DevelText::TextDirection::Type Controller::Impl::GetTextDirection()
 {
   if (mUpdateTextDirection)
   {
@@ -666,8 +666,8 @@ UI::DevelText::TextDirection::Type Controller::Impl::GetTextDirection()
     mUpdateTextDirection = false;
   }
 
-  return mIsTextDirectionRTL ? UI::DevelText::TextDirection::RIGHT_TO_LEFT
-                             : UI::DevelText::TextDirection::LEFT_TO_RIGHT;
+  return mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT
+                             : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
 }
 
 void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
@@ -1747,13 +1747,13 @@ float Controller::Impl::GetVerticalScrollPosition()
   return mEventData ? -mModel->mScrollPosition.y : 0.0f;
 }
 
-UI::TextAnchor Controller::Impl::CreateAnchorActor(Anchor anchor)
+Ui::TextAnchor Controller::Impl::CreateAnchorActor(Anchor anchor)
 {
-  auto actor = UI::TextAnchor::New();
+  auto actor = Ui::TextAnchor::New();
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
 
-  auto rect = UI::Internal::CommonTextUtils::GetTextBoundingRectangle(mModel, anchor.startIndex, anchor.endIndex - 1);
+  auto rect = Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(mModel, anchor.startIndex, anchor.endIndex - 1);
   Vector2 offset = mModel->mLayoutOffsetWithPadding;
   actor.SetProperty(Actor::Property::POSITION, Vector2(rect.x + offset.x, rect.y + offset.y));
   actor.SetProperty(Actor::Property::SIZE, Vector2(rect.width, rect.height));
@@ -1769,13 +1769,13 @@ UI::TextAnchor Controller::Impl::CreateAnchorActor(Anchor anchor)
                 anchorHref.c_str());
 
   actor.SetProperty(Actor::Property::NAME, anchorText);
-  actor.SetProperty(UI::TextAnchor::Property::URI, anchorHref);
-  actor.SetProperty(UI::TextAnchor::Property::START_CHARACTER_INDEX, static_cast<int>(anchor.startIndex));
-  actor.SetProperty(UI::TextAnchor::Property::END_CHARACTER_INDEX, static_cast<int>(anchor.endIndex));
+  actor.SetProperty(Ui::TextAnchor::Property::URI, anchorHref);
+  actor.SetProperty(Ui::TextAnchor::Property::START_CHARACTER_INDEX, static_cast<int>(anchor.startIndex));
+  actor.SetProperty(Ui::TextAnchor::Property::END_CHARACTER_INDEX, static_cast<int>(anchor.endIndex));
   return actor;
 }
 
-void Controller::Impl::GetAnchorActors(std::vector<UI::TextAnchor>& anchorActors)
+void Controller::Impl::GetAnchorActors(std::vector<Ui::TextAnchor>& anchorActors)
 {
   /* TODO: Now actors are created/destroyed in every "RenderText" function call. Even when we add just 1 character,
            we need to create and destroy potentially many actors. Some optimization can be considered here.
@@ -1807,11 +1807,11 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
   {
     mShouldClearFocusOnEscape = ClearFocusOnEscapeState::ENABLE;
 
-    UI::StyleManager styleManager = UI::StyleManager::Get();
+    Ui::StyleManager styleManager = Ui::StyleManager::Get();
     if (styleManager)
     {
       const auto clearFocusOnEscapeValue =
-          UI::DevelStyleManager::GetConfigurations(styleManager).Find("clearFocusOnEscape", Property::Type::BOOLEAN);
+          Ui::DevelStyleManager::GetConfigurations(styleManager).Find("clearFocusOnEscape", Property::Type::BOOLEAN);
 
       // Default is ENABLE. If config don't have "clearFocusOnEscape" property, make it ENABLE.
       mShouldClearFocusOnEscape = (!clearFocusOnEscapeValue || clearFocusOnEscapeValue->Get<bool>())
@@ -2131,4 +2131,4 @@ void Controller::Impl::ResetScrollPosition()
   }
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

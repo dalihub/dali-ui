@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -62,11 +62,11 @@ bool ForegroundColorSpan::IsForegroundColorDefined() const
 
 ForegroundColorSpan ForegroundColorSpan::DownCast(BaseHandle handle)
 {
-  return ForegroundColorSpan(dynamic_cast<Dali::UI::Text::Internal::ForegroundColorSpan*>(handle.GetObjectPtr()));
+  return ForegroundColorSpan(dynamic_cast<Dali::Ui::Text::Internal::ForegroundColorSpan*>(handle.GetObjectPtr()));
 }
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

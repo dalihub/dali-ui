@@ -22,7 +22,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 AtlasManager::AtlasManager()
 {
@@ -118,6 +118,6 @@ void AtlasManager::SetTextures(AtlasId atlas, TextureSet& textureSet)
   GetImplementation(*this).SetTextures(atlas, textureSet);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

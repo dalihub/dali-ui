@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class TextSelectionPopupCallbackInterface;
 
@@ -295,7 +295,7 @@ public:
    * @brief Specify which buttons to show in Popup
    * @param[in] buttonsToEnable Buttons to enable
    */
-  void EnableButtons(UI::TextSelectionPopup::Buttons buttonsToEnable);
+  void EnableButtons(Ui::TextSelectionPopup::Buttons buttonsToEnable);
 
   /**
    * @brief Raises the toolbar's actor above the given @e target actor.
@@ -330,7 +330,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @param[in] implementation The Control implementation.
    */
@@ -345,7 +345,7 @@ public: // Not intended for application developers
 
 }; // Class TextSelectionPopup
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

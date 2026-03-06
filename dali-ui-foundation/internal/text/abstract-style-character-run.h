@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -100,12 +100,12 @@ public:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 // Allow AbstractStyleCharacterRun to be treated as a POD type
 template <>
-struct TypeTraits<Dali::UI::Text::AbstractStyleCharacterRun>
-  : public Dali::BasicTypes<Dali::UI::Text::AbstractStyleCharacterRun>
+struct TypeTraits<Dali::Ui::Text::AbstractStyleCharacterRun>
+  : public Dali::BasicTypes<Dali::Ui::Text::AbstractStyleCharacterRun>
 {
   enum
   {

@@ -24,12 +24,12 @@
 #include "dali-ui-foundation/public-api/ui-config.h"
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_unit_startup(void)
 {
   test_return_value = TET_UNDEF;
-  UIConfig::New().Apply();
+  UiConfig::New().Apply();
 }
 
 void utc_dali_unit_cleanup(void)

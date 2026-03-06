@@ -26,7 +26,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Internal
@@ -39,7 +39,7 @@ namespace Internal
  * It implements the p-impl pattern and provides the actual implementation
  * for the DummyImpl public API.
  *
- * @see Dali::UI::DummyImpl
+ * @see Dali::Ui::DummyImpl
  */
 class DummyElementImpl : public Integration::ViewImpl
 {
@@ -50,7 +50,7 @@ public:
   /**
    * @brief Creates a new DummyImpl.
    */
-  static UI::DummyElement New();
+  static Ui::DummyElement New();
 
 protected:
 
@@ -88,7 +88,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::DummyElementImpl& GetImpl(UI::DummyElement& dummyElement)
+inline Internal::DummyElementImpl& GetImpl(Ui::DummyElement& dummyElement)
 {
   DALI_ASSERT_ALWAYS(dummyElement);
 
@@ -97,7 +97,7 @@ inline Internal::DummyElementImpl& GetImpl(UI::DummyElement& dummyElement)
   return static_cast<Internal::DummyElementImpl&>(handle);
 }
 
-inline const Internal::DummyElementImpl& GetImpl(const UI::DummyElement& dummyElement)
+inline const Internal::DummyElementImpl& GetImpl(const Ui::DummyElement& dummyElement)
 {
   DALI_ASSERT_ALWAYS(dummyElement);
 
@@ -108,6 +108,6 @@ inline const Internal::DummyElementImpl& GetImpl(const UI::DummyElement& dummyEl
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

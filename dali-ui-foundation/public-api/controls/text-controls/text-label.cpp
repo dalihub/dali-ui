@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextLabel TextLabel::New()
 {
@@ -40,12 +40,12 @@ TextLabel TextLabel::New(const std::string& text)
 
 TextLabel TextLabel::New(ControlBehaviour additionalBehaviour)
 {
-  return Internal::TextLabel::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  return Internal::TextLabel::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
 TextLabel TextLabel::New(ControlBehaviour additionalBehaviour, const std::string& text)
 {
-  TextLabel label = Internal::TextLabel::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  TextLabel label = Internal::TextLabel::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   label.SetProperty(TextLabel::Property::TEXT, text);
 
   return label;
@@ -83,6 +83,6 @@ TextLabel::TextLabel(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TextLabel>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

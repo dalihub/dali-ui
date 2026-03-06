@@ -24,40 +24,40 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
 /**
- * @brief Singleton manager that holds the global UIConfig instance.
+ * @brief Singleton manager that holds the global UiConfig instance.
  *
- * UIConfigManager provides process-wide access to the UIConfig values
+ * UiConfigManager provides process-wide access to the UiConfig values
  * used by the unit system (spx, dp, sdp) and other dali-ui internals.
  *
  * Must be initialized exactly once before the application main loop starts.
  */
-class DALI_UI_API UIConfigManager
+class DALI_UI_API UiConfigManager
 {
 public:
   /**
-   * @brief Returns the singleton UIConfigManager instance.
+   * @brief Returns the singleton UiConfigManager instance.
    *
    * @return The singleton instance
    */
-  static UIConfigManager& Get();
+  static UiConfigManager& Get();
 
   /**
-   * @brief Initializes the manager with the given UIConfig.
+   * @brief Initializes the manager with the given UiConfig.
    *
    * This method must be called exactly once before the application main loop starts.
-   * After this call, the UIConfig is frozen and its setter methods can no longer be used.
+   * After this call, the UiConfig is frozen and its setter methods can no longer be used.
    * Calling Initialize() more than once triggers an assertion failure.
    *
-   * @param[in] config The UIConfig to use globally
+   * @param[in] config The UiConfig to use globally
    */
-  void Initialize(UIConfig config);
+  void Initialize(UiConfig config);
 
   /**
    * @brief Returns whether Init() has been called.
@@ -139,14 +139,14 @@ public:
   uint32_t GetTapRecognizerTime() const;
 
 private:
-  UIConfigManager() = default;
-  ~UIConfigManager() = default;
+  UiConfigManager() = default;
+  ~UiConfigManager() = default;
 
-  UIConfigManager(const UIConfigManager&) = delete;
-  UIConfigManager& operator=(const UIConfigManager&) = delete;
+  UiConfigManager(const UiConfigManager&) = delete;
+  UiConfigManager& operator=(const UiConfigManager&) = delete;
 
 private:
-  UIConfig mConfig;
+  UiConfig mConfig;
   ExecutionKeyPredicate mCachedExecutionKeyPredicate;
   float mCachedScalingFactor;
   float mCachedDpiFactor;
@@ -161,6 +161,6 @@ private:
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 // Forward declarations
 namespace Internal DALI_INTERNAL
@@ -139,7 +139,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @param[in]  implementation  The Control implementation.
    */
@@ -153,7 +153,7 @@ public: // Not intended for application developers
   DALI_INTERNAL ConfirmationPopup(Dali::Internal::CustomActor* internal);
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

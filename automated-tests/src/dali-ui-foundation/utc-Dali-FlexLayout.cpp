@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_flexlayout_startup(void)
 {

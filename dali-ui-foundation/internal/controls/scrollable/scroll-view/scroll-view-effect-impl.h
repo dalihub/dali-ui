@@ -30,7 +30,7 @@ namespace Dali
 {
 class Animation;
 
-namespace UI
+namespace Ui
 {
 class ScrollView;
 
@@ -39,7 +39,7 @@ namespace Internal
 class ScrollViewEffect;
 
 /**
- * @copydoc UI::ScrollViewEffect
+ * @copydoc Ui::ScrollViewEffect
  */
 class ScrollViewEffect : public Dali::BaseObject, public ConnectionTracker
 {
@@ -53,14 +53,14 @@ public:
    * to scrollView.
    * @param[in] scrollView The scrollView instance to attach to.
    */
-  void Attach(UI::ScrollView& scrollView);
+  void Attach(Ui::ScrollView& scrollView);
 
   /**
    * Attaches this effect to scrollView.
    * @pre must not be already attached to a scrollView
    * @param[in] scrollView The scrollView instance to attach to.
    */
-  void Detach(UI::ScrollView& scrollView);
+  void Detach(Ui::ScrollView& scrollView);
 
 public:
   /**
@@ -70,7 +70,7 @@ public:
    *
    * @param[in] scrollView The attached scrollView instance.
    */
-  virtual void OnAttach(UI::ScrollView& scrollView) = 0;
+  virtual void OnAttach(Ui::ScrollView& scrollView) = 0;
 
   /**
    * Called upon Detaching of effect from a scrollView instance.
@@ -79,7 +79,7 @@ public:
    *
    * @param[in] scrollView The attached scrollView instance.
    */
-  virtual void OnDetach(UI::ScrollView& scrollView) = 0;
+  virtual void OnDetach(Ui::ScrollView& scrollView) = 0;
 
 protected:
   /**
@@ -89,7 +89,7 @@ protected:
    * will return an uninitialized handle.
    * @return The scrollView handle is returned.
    */
-  UI::ScrollView GetScrollView();
+  Ui::ScrollView GetScrollView();
 
 protected:
   /**
@@ -98,14 +98,14 @@ protected:
   virtual ~ScrollViewEffect();
 
 private:
-  UI::Internal::ScrollView* mScrollViewImpl; ///< Attached ScrollView instance (pointer to implementation)
+  Ui::Internal::ScrollView* mScrollViewImpl; ///< Attached ScrollView instance (pointer to implementation)
 };
 
 } // namespace Internal
 
 // Helpers for public-api forwarding methods
 
-inline Internal::ScrollViewEffect& GetImpl(Dali::UI::ScrollViewEffect& obj)
+inline Internal::ScrollViewEffect& GetImpl(Dali::Ui::ScrollViewEffect& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -114,7 +114,7 @@ inline Internal::ScrollViewEffect& GetImpl(Dali::UI::ScrollViewEffect& obj)
   return static_cast<Internal::ScrollViewEffect&>(handle);
 }
 
-inline const Internal::ScrollViewEffect& GetImpl(const Dali::UI::ScrollViewEffect& obj)
+inline const Internal::ScrollViewEffect& GetImpl(const Dali::Ui::ScrollViewEffect& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -123,7 +123,7 @@ inline const Internal::ScrollViewEffect& GetImpl(const Dali::UI::ScrollViewEffec
   return static_cast<const Internal::ScrollViewEffect&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -25,7 +25,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 DummyComponent::DummyComponent()
@@ -55,21 +55,21 @@ DummyComponent& DummyComponent::operator=(const DummyComponent& handle)
 {
   if (&handle != this)
   {
-    UI::Control::operator=(handle);
+    Ui::Control::operator=(handle);
   }
   return *this;
 }
 
 DummyComponent& DummyComponent::operator=(DummyComponent&& rhs) noexcept
 {
-  UI::Control::operator=(std::move(rhs));
+  Ui::Control::operator=(std::move(rhs));
   return *this;
 }
 
 DummyComponent DummyComponent::DownCast(BaseHandle handle)
 {
   DummyComponent result;
-  UI::Control control = UI::Control::DownCast(handle);
+  Ui::Control control = Ui::Control::DownCast(handle);
   if (control)
   {
     CustomActorImpl& customImpl = control.GetImplementation();
@@ -93,6 +93,6 @@ DummyComponent::DummyComponent(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::DummyComponentImpl>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

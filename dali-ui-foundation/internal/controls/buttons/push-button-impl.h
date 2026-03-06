@@ -27,14 +27,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 /**
  * PushButton implementation class.
  *
- * \sa Dali::UI::PushButton
+ * \sa Dali::Ui::PushButton
  */
 class PushButton : public Button
 {
@@ -43,7 +43,7 @@ public:
    * Create a new PushButton.
    * @return A smart-pointer to the newly allocated PushButton.
    */
-  static Dali::UI::PushButton New();
+  static Dali::Ui::PushButton New();
 
 protected:
   /**
@@ -89,12 +89,12 @@ public:
 
 private: // From Button
   /**
-   * @copydoc UI::Internal::Button::OnInitialize
+   * @copydoc Ui::Internal::Button::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -130,7 +130,7 @@ protected:
     using Button::ButtonAccessible::ButtonAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
      */
     Dali::Accessibility::States CalculateStates() override;
   };
@@ -142,25 +142,25 @@ protected:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::PushButton& GetImplementation(UI::PushButton& button)
+inline Ui::Internal::PushButton& GetImplementation(Ui::PushButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<UI::Internal::PushButton&>(handle);
+  return static_cast<Ui::Internal::PushButton&>(handle);
 }
 
-inline const UI::Internal::PushButton& GetImplementation(const UI::PushButton& button)
+inline const Ui::Internal::PushButton& GetImplementation(const Ui::PushButton& button)
 {
   DALI_ASSERT_ALWAYS(button);
 
   const Dali::RefObject& handle = button.GetImplementation();
 
-  return static_cast<const UI::Internal::PushButton&>(handle);
+  return static_cast<const Ui::Internal::PushButton&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

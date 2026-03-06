@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TextField TextField::New()
 {
@@ -32,7 +32,7 @@ TextField TextField::New()
 
 TextField TextField::New(ControlBehaviour additionalBehaviour)
 {
-  return Internal::TextField::New(static_cast<UI::Internal::Control::ControlBehaviour>(additionalBehaviour));
+  return Internal::TextField::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
 TextField::TextField()
@@ -58,17 +58,17 @@ TextField TextField::DownCast(BaseHandle handle)
 
 TextField::TextChangedSignalType& TextField::TextChangedSignal()
 {
-  return Dali::UI::GetImpl(*this).TextChangedSignal();
+  return Dali::Ui::GetImpl(*this).TextChangedSignal();
 }
 
 TextField::MaxLengthReachedSignalType& TextField::MaxLengthReachedSignal()
 {
-  return Dali::UI::GetImpl(*this).MaxLengthReachedSignal();
+  return Dali::Ui::GetImpl(*this).MaxLengthReachedSignal();
 }
 
 TextField::InputStyleChangedSignalType& TextField::InputStyleChangedSignal()
 {
-  return Dali::UI::GetImpl(*this).InputStyleChangedSignal();
+  return Dali::Ui::GetImpl(*this).InputStyleChangedSignal();
 }
 
 TextField::TextField(Internal::TextField& implementation)
@@ -82,6 +82,6 @@ TextField::TextField(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TextField>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

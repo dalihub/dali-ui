@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 
 /**
@@ -42,6 +42,6 @@ struct ControllerImplModelUpdater
   static bool Update(Controller::Impl& impl, OperationsMask operationsRequired);
 };
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text
 
 #endif // DALI_UI_TEXT_CONTROLLER_IMPL_MODEL_UPDATER_H

@@ -30,7 +30,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -49,7 +49,7 @@ class ViewImpl;
  *
  * View implements the layout system with Measure/Arrange passes.
  */
-class DALI_UI_API View : public UI::Control
+class DALI_UI_API View : public Ui::Control
 {
 public:
 
@@ -592,6 +592,6 @@ public: // Not intended for application developers
   /// @endcond
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

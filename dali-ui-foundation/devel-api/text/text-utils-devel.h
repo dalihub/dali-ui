@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelText
 {
@@ -218,7 +218,7 @@ DALI_UI_API Dali::Property::Array GetLastCharacterIndex(RendererParameters& text
 
 } // namespace DevelText
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

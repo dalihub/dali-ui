@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * @brief Retrieves the file system path of the assets.
@@ -60,7 +60,7 @@ public:
   static const std::string GetDaliDataReadOnlyPath();
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

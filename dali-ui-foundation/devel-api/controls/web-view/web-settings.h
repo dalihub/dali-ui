@@ -28,7 +28,7 @@ namespace Dali
 {
 class WebEngineSettings;
 
-namespace UI
+namespace Ui
 {
 /**
  * @addtogroup dali_toolkit_controls_web_view
@@ -449,7 +449,7 @@ private:
  * @}
  */
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

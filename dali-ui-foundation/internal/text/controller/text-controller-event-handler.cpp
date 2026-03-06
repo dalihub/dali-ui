@@ -48,7 +48,7 @@ const char* KEY_INSERT_NAME = "Insert";
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -230,26 +230,26 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
         if (!keyEvent.IsRepeat())
         {
           // Ctrl-C or Ctrl+Insert to copy the selected text
-          controller.TextPopupButtonTouched(UI::TextSelectionPopup::COPY);
+          controller.TextPopupButtonTouched(Ui::TextSelectionPopup::COPY);
         }
         consumed = true;
       }
       else if (keyName == KEY_V_NAME || logicalKey == KEY_V_NAME)
       {
         // Ctrl-V to paste the copied text
-        controller.TextPopupButtonTouched(UI::TextSelectionPopup::PASTE);
+        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::PASTE);
         consumed = true;
       }
       else if (keyName == KEY_X_NAME || logicalKey == KEY_X_NAME)
       {
         // Ctrl-X to cut the selected text
-        controller.TextPopupButtonTouched(UI::TextSelectionPopup::CUT);
+        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::CUT);
         consumed = true;
       }
       else if (keyName == KEY_A_NAME || logicalKey == KEY_A_NAME)
       {
         // Ctrl-A to select All the text
-        controller.TextPopupButtonTouched(UI::TextSelectionPopup::SELECT_ALL);
+        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::SELECT_ALL);
         consumed = true;
       }
       return consumed;
@@ -300,22 +300,22 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       {
         bool accepted = false;
         bool rejected = false;
-        accepted = controller.mImpl->mInputFilter->Contains(UI::InputFilter::Property::ACCEPTED, keyString);
-        rejected = controller.mImpl->mInputFilter->Contains(UI::InputFilter::Property::REJECTED, keyString);
+        accepted = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::ACCEPTED, keyString);
+        rejected = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::REJECTED, keyString);
 
         if (!accepted)
         {
           // The filtered key is set to empty.
           refinedKey = "";
           // Signal emits when the character to be inserted is filtered by the accepted filter.
-          controller.mImpl->mEditableControlInterface->InputFiltered(UI::InputFilter::Property::ACCEPTED);
+          controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
         }
         if (rejected)
         {
           // The filtered key is set to empty.
           refinedKey = "";
           // Signal emits when the character to be inserted is filtered by the rejected filter.
-          controller.mImpl->mEditableControlInterface->InputFiltered(UI::InputFilter::Property::REJECTED);
+          controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::REJECTED);
         }
       }
 
@@ -1017,7 +1017,7 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
 }
 
 void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
-                                                      Dali::UI::TextSelectionPopup::Buttons button)
+                                                      Dali::Ui::TextSelectionPopup::Buttons button)
 {
   if (NULL == controller.mImpl->mEventData)
   {
@@ -1026,22 +1026,22 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
 
   switch (button)
   {
-    case UI::TextSelectionPopup::CUT:
+    case Ui::TextSelectionPopup::CUT:
     {
       controller.CutText();
       break;
     }
-    case UI::TextSelectionPopup::COPY:
+    case Ui::TextSelectionPopup::COPY:
     {
       controller.CopyText();
       break;
     }
-    case UI::TextSelectionPopup::PASTE:
+    case Ui::TextSelectionPopup::PASTE:
     {
       controller.PasteText();
       break;
     }
-    case UI::TextSelectionPopup::SELECT:
+    case Ui::TextSelectionPopup::SELECT:
     {
       const Vector2& currentCursorPosition = controller.mImpl->mEventData->mDecorator->GetPosition(PRIMARY_CURSOR);
 
@@ -1052,18 +1052,18 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
       }
       break;
     }
-    case UI::TextSelectionPopup::SELECT_ALL:
+    case Ui::TextSelectionPopup::SELECT_ALL:
     {
       // Creates a SELECT_ALL event
       SelectEvent(controller, 0.f, 0.f, SelectionType::ALL);
       break;
     }
-    case UI::TextSelectionPopup::CLIPBOARD:
+    case Ui::TextSelectionPopup::CLIPBOARD:
     {
       controller.mImpl->ShowClipboard();
       break;
     }
-    case UI::TextSelectionPopup::NONE:
+    case Ui::TextSelectionPopup::NONE:
     {
       // Nothing to do.
       break;
@@ -1073,6 +1073,6 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

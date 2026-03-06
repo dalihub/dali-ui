@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -159,12 +159,12 @@ protected:
 
 protected: // Implementation of  SvgLoaderObserver
   /**
-   * @copydoc Dali::UI::Internal::SvgLoaderObserver::LoadComplete
+   * @copydoc Dali::Ui::Internal::SvgLoaderObserver::LoadComplete
    */
   void LoadComplete(int32_t loadId, Dali::VectorImageRenderer vectorImageRenderer) override;
 
   /**
-   * @copydoc Dali::UI::Internal::SvgLoaderObserver::RasterizeComplete
+   * @copydoc Dali::Ui::Internal::SvgLoaderObserver::RasterizeComplete
    */
   void RasterizeComplete(int32_t rasterizeId, Dali::TextureSet textureSet) override;
 
@@ -187,7 +187,7 @@ private:
    * @brief Emit ResourceReady signal.
    * @note MUST call this API end of function.
    */
-  void EmitResourceReady(UI::Visual::ResourceStatus resourceStatus);
+  void EmitResourceReady(Ui::Visual::ResourceStatus resourceStatus);
 
   // Undefined
   SvgVisual(const SvgVisual& svgRenderer);
@@ -209,8 +209,8 @@ private:
   Dali::ImageDimensions mDesiredSize{};
   Dali::ImageDimensions mLastRequiredSize{};
 
-  Dali::UI::ImageVisual::LoadPolicy::Type mLoadPolicy;
-  Dali::UI::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
 
   bool mLoadCompleted : 1;
   bool mRasterizeCompleted : 1;
@@ -220,7 +220,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

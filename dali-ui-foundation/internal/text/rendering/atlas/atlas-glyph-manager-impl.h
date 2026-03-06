@@ -26,13 +26,13 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class AtlasGlyphManager;
 
-} // namespace UI
+} // namespace Ui
 
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -64,52 +64,52 @@ public:
   AtlasGlyphManager();
 
   /**
-   * @copydoc UI::AtlasGlyphManager::Add
+   * @copydoc Ui::AtlasGlyphManager::Add
    */
-  void Add(const Text::GlyphInfo& glyph, const UI::AtlasGlyphManager::GlyphStyle& style, const PixelData& bitmap,
-           Dali::UI::AtlasManager::AtlasSlot& slot);
+  void Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphManager::GlyphStyle& style, const PixelData& bitmap,
+           Dali::Ui::AtlasManager::AtlasSlot& slot);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::GenerateMeshData
+   * @copydoc Ui::AtlasGlyphManager::GenerateMeshData
    */
-  void GenerateMeshData(uint32_t imageId, const Vector2& position, UI::AtlasManager::Mesh2D& mesh);
+  void GenerateMeshData(uint32_t imageId, const Vector2& position, Ui::AtlasManager::Mesh2D& mesh);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::IsCached
+   * @copydoc Ui::AtlasGlyphManager::IsCached
    */
-  bool IsCached(Text::FontId fontId, Text::GlyphIndex index, const UI::AtlasGlyphManager::GlyphStyle& style,
-                Dali::UI::AtlasManager::AtlasSlot& slot);
+  bool IsCached(Text::FontId fontId, Text::GlyphIndex index, const Ui::AtlasGlyphManager::GlyphStyle& style,
+                Dali::Ui::AtlasManager::AtlasSlot& slot);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::GetAtlasSize
+   * @copydoc Ui::AtlasGlyphManager::GetAtlasSize
    */
   Vector2 GetAtlasSize(uint32_t atlasId);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::SetNewAtlasSize
+   * @copydoc Ui::AtlasGlyphManager::SetNewAtlasSize
    */
   void SetNewAtlasSize(uint32_t width, uint32_t height, uint32_t blockWidth, uint32_t blockHeight);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::GetPixelFormat
+   * @copydoc Ui::AtlasGlyphManager::GetPixelFormat
    */
   Pixel::Format GetPixelFormat(uint32_t atlasId);
 
   /**
    * @copydoc toolkit::AtlasGlyphManager::AdjustReferenceCount
    */
-  void AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index, const UI::AtlasGlyphManager::GlyphStyle& style,
+  void AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index, const Ui::AtlasGlyphManager::GlyphStyle& style,
                             int32_t delta);
 
   /**
-   * @copydoc UI::AtlasGlyphManager::GetTextures
+   * @copydoc Ui::AtlasGlyphManager::GetTextures
    */
   TextureSet GetTextures(uint32_t atlasId) const;
 
   /**
-   * @copydoc UI::AtlasGlyphManager::GetMetrics
+   * @copydoc Ui::AtlasGlyphManager::GetMetrics
    */
-  const UI::AtlasGlyphManager::Metrics& GetMetrics();
+  const Ui::AtlasGlyphManager::Metrics& GetMetrics();
 
 protected:
   /**
@@ -118,15 +118,15 @@ protected:
   virtual ~AtlasGlyphManager();
 
 private:
-  Dali::UI::AtlasManager mAtlasManager; ///> Atlas Manager created by GlyphManager
+  Dali::Ui::AtlasManager mAtlasManager; ///> Atlas Manager created by GlyphManager
   std::vector<FontGlyphRecord> mFontGlyphRecords;
-  UI::AtlasGlyphManager::Metrics mMetrics; ///> Metrics to pass back on GlyphManager status
+  Ui::AtlasGlyphManager::Metrics mMetrics; ///> Metrics to pass back on GlyphManager status
   Sampler mSampler;
 };
 
 } // namespace Internal
 
-inline const Internal::AtlasGlyphManager& GetImplementation(const UI::AtlasGlyphManager& manager)
+inline const Internal::AtlasGlyphManager& GetImplementation(const Ui::AtlasGlyphManager& manager)
 {
   DALI_ASSERT_ALWAYS(manager && "AtlasGlyphManager handle is empty");
 
@@ -135,7 +135,7 @@ inline const Internal::AtlasGlyphManager& GetImplementation(const UI::AtlasGlyph
   return static_cast<const Internal::AtlasGlyphManager&>(handle);
 }
 
-inline Internal::AtlasGlyphManager& GetImplementation(UI::AtlasGlyphManager& manager)
+inline Internal::AtlasGlyphManager& GetImplementation(Ui::AtlasGlyphManager& manager)
 {
   DALI_ASSERT_ALWAYS(manager && "AtlasGlyphManager handle is empty");
 
@@ -144,7 +144,7 @@ inline Internal::AtlasGlyphManager& GetImplementation(UI::AtlasGlyphManager& man
   return static_cast<Internal::AtlasGlyphManager&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

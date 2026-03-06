@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -53,6 +53,6 @@ void ProcessCharacterSpacingTag(const Tag& tag, CharacterSpacingCharacterRun& ch
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

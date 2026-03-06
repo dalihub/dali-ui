@@ -26,7 +26,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -39,7 +39,7 @@ typedef IntrusivePtr<Spanned> SpannedPtr;
 typedef const Spanned* SpannedConstPtr;
 
 /**
- * @copydoc Dali::UI::Text::Spanned
+ * @copydoc Dali::Ui::Text::Spanned
  */
 class Spanned : public CharacterSequence
 {
@@ -65,15 +65,15 @@ public:                                        // Constructors
 
 public: // Methods
   /**
-   * @copydoc Dali::UI::Text::Spanned::GetAllSpans()
+   * @copydoc Dali::Ui::Text::Spanned::GetAllSpans()
    */
-  virtual std::vector<Dali::UI::Text::BaseSpan> GetAllSpans() const = 0;
+  virtual std::vector<Dali::Ui::Text::BaseSpan> GetAllSpans() const = 0;
 
   /**
-   * @copydoc Dali::UI::Text::Spanned::RetrieveAllSpansAndRanges()
+   * @copydoc Dali::Ui::Text::Spanned::RetrieveAllSpansAndRanges()
    */
-  virtual void RetrieveAllSpansAndRanges(std::vector<Dali::UI::Text::BaseSpan>& spans,
-                                         std::vector<Dali::UI::Text::Range>& ranges) const = 0;
+  virtual void RetrieveAllSpansAndRanges(std::vector<Dali::Ui::Text::BaseSpan>& spans,
+                                         std::vector<Dali::Ui::Text::Range>& ranges) const = 0;
 
 }; // class Spanned
 
@@ -82,7 +82,7 @@ public: // Methods
 /**
  * Helper methods for public API.
  */
-inline Internal::Spanned& GetImplementation(Dali::UI::Text::Spanned& spanned)
+inline Internal::Spanned& GetImplementation(Dali::Ui::Text::Spanned& spanned)
 {
   DALI_ASSERT_ALWAYS(spanned && "spanned handle is empty");
 
@@ -91,7 +91,7 @@ inline Internal::Spanned& GetImplementation(Dali::UI::Text::Spanned& spanned)
   return static_cast<Internal::Spanned&>(handle);
 }
 
-inline const Internal::Spanned& GetImplementation(const Dali::UI::Text::Spanned& spanned)
+inline const Internal::Spanned& GetImplementation(const Dali::Ui::Text::Spanned& spanned)
 {
   DALI_ASSERT_ALWAYS(spanned && "spanned handle is empty");
 
@@ -102,7 +102,7 @@ inline const Internal::Spanned& GetImplementation(const Dali::UI::Text::Spanned&
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

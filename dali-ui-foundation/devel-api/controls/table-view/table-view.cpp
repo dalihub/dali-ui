@@ -25,7 +25,7 @@ using std::vector;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 TableView::TableView()
 {
@@ -216,6 +216,6 @@ TableView::TableView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::TableView>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

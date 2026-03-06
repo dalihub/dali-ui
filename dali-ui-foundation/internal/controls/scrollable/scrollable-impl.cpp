@@ -28,7 +28,7 @@ using namespace Dali;
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -41,31 +41,31 @@ BaseHandle Create()
 }
 
 // Setup properties, signals and actions using the type-registry.
-DALI_TYPE_REGISTRATION_BEGIN(UI::Scrollable, UI::Control, Create);
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Scrollable, Ui::Control, Create);
 
-DALI_PROPERTY_REGISTRATION(UI, Scrollable, "overshootEffectColor", VECTOR4, OVERSHOOT_EFFECT_COLOR)
-DALI_PROPERTY_REGISTRATION(UI, Scrollable, "overshootAnimationSpeed", FLOAT, OVERSHOOT_ANIMATION_SPEED)
-DALI_PROPERTY_REGISTRATION(UI, Scrollable, "overshootEnabled", BOOLEAN, OVERSHOOT_ENABLED)
-DALI_PROPERTY_REGISTRATION(UI, Scrollable, "overshootSize", VECTOR2, OVERSHOOT_SIZE)
-DALI_PROPERTY_REGISTRATION(UI, Scrollable, "scrollToAlphaFunction", INTEGER, SCROLL_TO_ALPHA_FUNCTION)
+DALI_PROPERTY_REGISTRATION(Ui, Scrollable, "overshootEffectColor", VECTOR4, OVERSHOOT_EFFECT_COLOR)
+DALI_PROPERTY_REGISTRATION(Ui, Scrollable, "overshootAnimationSpeed", FLOAT, OVERSHOOT_ANIMATION_SPEED)
+DALI_PROPERTY_REGISTRATION(Ui, Scrollable, "overshootEnabled", BOOLEAN, OVERSHOOT_ENABLED)
+DALI_PROPERTY_REGISTRATION(Ui, Scrollable, "overshootSize", VECTOR2, OVERSHOOT_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui, Scrollable, "scrollToAlphaFunction", INTEGER, SCROLL_TO_ALPHA_FUNCTION)
 
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI, Scrollable, "scrollRelativePosition", VECTOR2, SCROLL_RELATIVE_POSITION)
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI, Scrollable, "scrollPositionMin", VECTOR2, SCROLL_POSITION_MIN)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI, Scrollable, "scrollPositionMinX", SCROLL_POSITION_MIN_X,
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui, Scrollable, "scrollRelativePosition", VECTOR2, SCROLL_RELATIVE_POSITION)
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui, Scrollable, "scrollPositionMin", VECTOR2, SCROLL_POSITION_MIN)
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui, Scrollable, "scrollPositionMinX", SCROLL_POSITION_MIN_X,
                                                 SCROLL_POSITION_MIN, 0)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI, Scrollable, "scrollPositionMinY", SCROLL_POSITION_MIN_Y,
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui, Scrollable, "scrollPositionMinY", SCROLL_POSITION_MIN_Y,
                                                 SCROLL_POSITION_MIN, 1)
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI, Scrollable, "scrollPositionMax", VECTOR2, SCROLL_POSITION_MAX)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI, Scrollable, "scrollPositionMaxX", SCROLL_POSITION_MAX_X,
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui, Scrollable, "scrollPositionMax", VECTOR2, SCROLL_POSITION_MAX)
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui, Scrollable, "scrollPositionMaxX", SCROLL_POSITION_MAX_X,
                                                 SCROLL_POSITION_MAX, 0)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(UI, Scrollable, "scrollPositionMaxY", SCROLL_POSITION_MAX_Y,
+DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui, Scrollable, "scrollPositionMaxY", SCROLL_POSITION_MAX_Y,
                                                 SCROLL_POSITION_MAX, 1)
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI, Scrollable, "canScrollVertical", BOOLEAN, CAN_SCROLL_VERTICAL)
-DALI_ANIMATABLE_PROPERTY_REGISTRATION(UI, Scrollable, "canScrollHorizontal", BOOLEAN, CAN_SCROLL_HORIZONTAL)
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui, Scrollable, "canScrollVertical", BOOLEAN, CAN_SCROLL_VERTICAL)
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui, Scrollable, "canScrollHorizontal", BOOLEAN, CAN_SCROLL_HORIZONTAL)
 
-DALI_SIGNAL_REGISTRATION(UI, Scrollable, "scrollStarted", SIGNAL_SCROLL_STARTED)
-DALI_SIGNAL_REGISTRATION(UI, Scrollable, "scrollCompleted", SIGNAL_SCROLL_COMPLETED)
-DALI_SIGNAL_REGISTRATION(UI, Scrollable, "scrollUpdated", SIGNAL_SCROLL_UPDATED)
+DALI_SIGNAL_REGISTRATION(Ui, Scrollable, "scrollStarted", SIGNAL_SCROLL_STARTED)
+DALI_SIGNAL_REGISTRATION(Ui, Scrollable, "scrollCompleted", SIGNAL_SCROLL_COMPLETED)
+DALI_SIGNAL_REGISTRATION(Ui, Scrollable, "scrollUpdated", SIGNAL_SCROLL_UPDATED)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -142,17 +142,17 @@ const Vector2& Scrollable::GetOvershootSize() const
   return mOvershootSize;
 }
 
-UI::Scrollable::ScrollStartedSignalType& Scrollable::ScrollStartedSignal()
+Ui::Scrollable::ScrollStartedSignalType& Scrollable::ScrollStartedSignal()
 {
   return mScrollStartedSignal;
 }
 
-UI::Scrollable::ScrollUpdatedSignalType& Scrollable::ScrollUpdatedSignal()
+Ui::Scrollable::ScrollUpdatedSignalType& Scrollable::ScrollUpdatedSignal()
 {
   return mScrollUpdatedSignal;
 }
 
-UI::Scrollable::ScrollCompletedSignalType& Scrollable::ScrollCompletedSignal()
+Ui::Scrollable::ScrollCompletedSignalType& Scrollable::ScrollCompletedSignal()
 {
   return mScrollCompletedSignal;
 }
@@ -163,7 +163,7 @@ bool Scrollable::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
   Dali::BaseHandle handle(object);
 
   bool connected(true);
-  UI::Scrollable scrollable = UI::Scrollable::DownCast(handle);
+  Ui::Scrollable scrollable = Ui::Scrollable::DownCast(handle);
 
   if (0 == strcmp(signalName.c_str(), SIGNAL_SCROLL_STARTED))
   {
@@ -188,34 +188,34 @@ bool Scrollable::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
 
 void Scrollable::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  UI::Scrollable scrollable = UI::Scrollable::DownCast(Dali::BaseHandle(object));
+  Ui::Scrollable scrollable = Ui::Scrollable::DownCast(Dali::BaseHandle(object));
 
   if (scrollable)
   {
     Scrollable& scrollableImpl(GetImpl(scrollable));
     switch (index)
     {
-      case UI::Scrollable::Property::OVERSHOOT_EFFECT_COLOR:
+      case Ui::Scrollable::Property::OVERSHOOT_EFFECT_COLOR:
       {
         scrollableImpl.SetOvershootEffectColor(value.Get<Vector4>());
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED:
+      case Ui::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED:
       {
         scrollableImpl.SetOvershootAnimationSpeed(value.Get<float>());
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_ENABLED:
+      case Ui::Scrollable::Property::OVERSHOOT_ENABLED:
       {
         scrollableImpl.SetOvershootEnabled(value.Get<bool>());
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_SIZE:
+      case Ui::Scrollable::Property::OVERSHOOT_SIZE:
       {
         scrollableImpl.SetOvershootSize(value.Get<Vector2>());
         break;
       }
-      case UI::Scrollable::Property::SCROLL_TO_ALPHA_FUNCTION:
+      case Ui::Scrollable::Property::SCROLL_TO_ALPHA_FUNCTION:
       {
         int alphaFunction = value.Get<int>();
 
@@ -233,34 +233,34 @@ Property::Value Scrollable::GetProperty(BaseObject* object, Property::Index inde
 {
   Property::Value value;
 
-  UI::Scrollable scrollable = UI::Scrollable::DownCast(Dali::BaseHandle(object));
+  Ui::Scrollable scrollable = Ui::Scrollable::DownCast(Dali::BaseHandle(object));
 
   if (scrollable)
   {
     Scrollable& scrollableImpl(GetImpl(scrollable));
     switch (index)
     {
-      case UI::Scrollable::Property::OVERSHOOT_EFFECT_COLOR:
+      case Ui::Scrollable::Property::OVERSHOOT_EFFECT_COLOR:
       {
         value = scrollableImpl.GetOvershootEffectColor();
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED:
+      case Ui::Scrollable::Property::OVERSHOOT_ANIMATION_SPEED:
       {
         value = scrollableImpl.GetOvershootAnimationSpeed();
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_ENABLED:
+      case Ui::Scrollable::Property::OVERSHOOT_ENABLED:
       {
         value = scrollableImpl.IsOvershootEnabled();
         break;
       }
-      case UI::Scrollable::Property::OVERSHOOT_SIZE:
+      case Ui::Scrollable::Property::OVERSHOOT_SIZE:
       {
         value = scrollableImpl.mOvershootSize;
         break;
       }
-      case UI::Scrollable::Property::SCROLL_TO_ALPHA_FUNCTION:
+      case Ui::Scrollable::Property::SCROLL_TO_ALPHA_FUNCTION:
       {
         value = static_cast<int>(scrollableImpl.mScrollToAlphaFunction);
         break;
@@ -273,6 +273,6 @@ Property::Value Scrollable::GetProperty(BaseObject* object, Property::Index inde
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

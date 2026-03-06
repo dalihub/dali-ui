@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelText
 {
@@ -91,6 +91,6 @@ void CreateBitmapFont(const BitmapFontDescription& description, TextAbstraction:
 
 } // namespace DevelText
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

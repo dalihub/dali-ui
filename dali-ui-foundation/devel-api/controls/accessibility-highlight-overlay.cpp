@@ -37,7 +37,7 @@
 
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 
-namespace Dali::UI::DevelControl
+namespace Dali::Ui::DevelControl
 {
 namespace
 {
@@ -51,7 +51,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_CON
 
 Dali::Actor CreateOverlayActor()
 {
-  auto actor = Control::New(UI::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS);
+  auto actor = Control::New(Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS);
   actor.SetResizePolicy(ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
 
   actor.SetProperty(Actor::Property::NAME, OVERLAY_NAME);
@@ -59,7 +59,7 @@ Dali::Actor CreateOverlayActor()
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::POSITION, Vector3(0.0f, 0.0f, 0.0f));
 
-  actor.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
   return actor;
 }
 
@@ -68,10 +68,10 @@ Dali::Actor CreateOverlayHighlightActor()
   std::string focusBorderImagePath(AssetManager::GetDaliImagePath());
   focusBorderImagePath += FOCUS_IMAGE;
 
-  auto actor = UI::ImageView::New(focusBorderImagePath);
+  auto actor = Ui::ImageView::New(focusBorderImagePath);
   actor.SetProperty(Actor::Property::NAME, HIGHLIGHT_NAME);
   actor.SetResizePolicy(ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
-  actor.SetProperty(UI::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
   return actor;
 }
 } // unnamed namespace
@@ -234,4 +234,4 @@ Rect<float> AccessibilityHighlightOverlay::GetOverlayExtents(Dali::Actor& sceneV
   return Rect<float>(x, y, actualExtent.width, actualExtent.height);
 }
 
-} // namespace Dali::UI::DevelControl
+} // namespace Dali::Ui::DevelControl

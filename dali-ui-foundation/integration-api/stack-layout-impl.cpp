@@ -23,18 +23,18 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Integration
 {
 
-UI::StackLayout StackLayoutImpl::New(StackOrientation orientation)
+Ui::StackLayout StackLayoutImpl::New(StackOrientation orientation)
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<Integration::StackLayoutImpl> impl = new Integration::StackLayoutImpl(orientation);
 
   // Pass ownership to CustomActor handle
-  UI::StackLayout handle = UI::StackLayout(*impl);
+  Ui::StackLayout handle = Ui::StackLayout(*impl);
 
   // Second-phase initialization
   impl->Initialize();
@@ -103,5 +103,5 @@ LayoutManager* StackLayoutImpl::CreateLayoutManager()
 }
 
 } // namespace Integration
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

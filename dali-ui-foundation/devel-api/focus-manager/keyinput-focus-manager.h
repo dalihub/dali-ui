@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -113,7 +113,7 @@ private:
 
 }; // class KeyInputFocusManager
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

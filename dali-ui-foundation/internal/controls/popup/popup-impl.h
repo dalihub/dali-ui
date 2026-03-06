@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -42,7 +42,7 @@ class Popup;
 typedef IntrusivePtr<Popup> PopupPtr;
 
 /**
- * @copydoc UI::Popup
+ * @copydoc Ui::Popup
  */
 class Popup : public Control
 {
@@ -51,176 +51,176 @@ public:
    * Create a new Popup.
    * @return A public handle to the newly allocated Popup.
    */
-  static Dali::UI::Popup New();
+  static Dali::Ui::Popup New();
 
 public:
   /**
-   * @copydoc UI::Popup::SetPopupBackgroundImage
+   * @copydoc Ui::Popup::SetPopupBackgroundImage
    */
   void SetPopupBackgroundImage(Actor image);
 
   /**
-   * @copydoc UI::Popup::GetPopupBackgroundImage
+   * @copydoc Ui::Popup::GetPopupBackgroundImage
    */
   Actor GetPopupBackgroundImage() const;
 
   /**
-   * @copydoc UI::Popup::SetTitle( Actor titleActor )
+   * @copydoc Ui::Popup::SetTitle( Actor titleActor )
    */
   void SetTitle(Actor titleActor);
 
   /**
-   * @copydoc UI::Popup::GetTitle
+   * @copydoc Ui::Popup::GetTitle
    */
   Actor GetTitle() const;
 
   /**
-   * @copydoc UI::Popup::SetContent
+   * @copydoc Ui::Popup::SetContent
    */
   void SetContent(Actor content);
 
   /**
-   * @copydoc UI::Popup::GetContent
+   * @copydoc Ui::Popup::GetContent
    */
   Actor GetContent() const;
 
   /**
-   * @copydoc UI::Popup::SetFooter
+   * @copydoc Ui::Popup::SetFooter
    */
   void SetFooter(Actor control);
 
   /**
-   * @copydoc UI::Popup::GetFooter
+   * @copydoc Ui::Popup::GetFooter
    */
   Actor GetFooter() const;
 
   /**
-   * @copydoc UI::Popup::SetDisplayState
+   * @copydoc Ui::Popup::SetDisplayState
    */
-  void SetDisplayState(UI::Popup::DisplayState displayState);
+  void SetDisplayState(Ui::Popup::DisplayState displayState);
 
   /**
-   * @copydoc UI::Popup::GetDisplayState
+   * @copydoc Ui::Popup::GetDisplayState
    */
-  UI::Popup::DisplayState GetDisplayState() const;
+  Ui::Popup::DisplayState GetDisplayState() const;
 
   /**
-   * @copydoc UI::Popup::SetTailVisibility
+   * @copydoc Ui::Popup::SetTailVisibility
    */
   void SetTailVisibility(bool visible);
 
   /**
-   * @copydoc UI::Popup::IsTailVisible
+   * @copydoc Ui::Popup::IsTailVisible
    */
   bool IsTailVisible() const;
 
   /**
-   * @copydoc UI::Popup::SetTailPosition
+   * @copydoc Ui::Popup::SetTailPosition
    */
   void SetTailPosition(Vector3 position);
 
   /**
-   * @copydoc UI::Popup::GetTailPosition
+   * @copydoc Ui::Popup::GetTailPosition
    */
   const Vector3& GetTailPosition() const;
 
   /**
-   * @copydoc UI::Popup::SetContextualMode
+   * @copydoc Ui::Popup::SetContextualMode
    */
-  void SetContextualMode(UI::Popup::ContextualMode mode);
+  void SetContextualMode(Ui::Popup::ContextualMode mode);
 
   /**
-   * @copydoc UI::Popup::GetContextualMode
+   * @copydoc Ui::Popup::GetContextualMode
    */
-  UI::Popup::ContextualMode GetContextualMode() const;
+  Ui::Popup::ContextualMode GetContextualMode() const;
 
   /**
-   * @copydoc UI::Popup::SetAnimationDuration
+   * @copydoc Ui::Popup::SetAnimationDuration
    */
   void SetAnimationDuration(float duration);
 
   /**
-   * @copydoc UI::Popup::GetAnimationDuration
+   * @copydoc Ui::Popup::GetAnimationDuration
    */
   float GetAnimationDuration() const;
 
   /**
-   * @copydoc UI::Popup::SetAnimationMode
+   * @copydoc Ui::Popup::SetAnimationMode
    */
-  void SetAnimationMode(UI::Popup::AnimationMode animationMode);
+  void SetAnimationMode(Ui::Popup::AnimationMode animationMode);
 
   /**
-   * @copydoc UI::Popup::GetAnimationMode
+   * @copydoc Ui::Popup::GetAnimationMode
    */
-  UI::Popup::AnimationMode GetAnimationMode() const;
+  Ui::Popup::AnimationMode GetAnimationMode() const;
 
   /**
-   * @copydoc UI::Popup::SetAutoHideDelay
+   * @copydoc Ui::Popup::SetAutoHideDelay
    */
   void SetAutoHideDelay(int delay);
 
   /**
-   * @copydoc UI::Popup::GetAutoHideDelay
+   * @copydoc Ui::Popup::GetAutoHideDelay
    */
   int GetAutoHideDelay() const;
 
   /**
-   * @copydoc UI::Popup::SetBackingEnabled
+   * @copydoc Ui::Popup::SetBackingEnabled
    */
   void SetBackingEnabled(bool enabled);
 
   /**
-   * @copydoc UI::Popup::IsBackingEnabled
+   * @copydoc Ui::Popup::IsBackingEnabled
    */
   bool IsBackingEnabled() const;
 
   /**
-   * @copydoc UI::Popup::SetBackingColor
+   * @copydoc Ui::Popup::SetBackingColor
    */
   void SetBackingColor(Vector4 color);
 
   /**
-   * @copydoc UI::Popup::GetBackingColor
+   * @copydoc Ui::Popup::GetBackingColor
    */
   const Vector4& GetBackingColor() const;
 
   /**
-   * @copydoc UI::Popup::SetTailUpImage
+   * @copydoc Ui::Popup::SetTailUpImage
    */
   void SetTailUpImage(std::string image);
 
   /**
-   * @copydoc UI::Popup::GetTailUpImage
+   * @copydoc Ui::Popup::GetTailUpImage
    */
   const std::string& GetTailUpImage() const;
 
   /**
-   * @copydoc UI::Popup::SetTailDownImage
+   * @copydoc Ui::Popup::SetTailDownImage
    */
   void SetTailDownImage(std::string image);
 
   /**
-   * @copydoc UI::Popup::GetTailDownImage
+   * @copydoc Ui::Popup::GetTailDownImage
    */
   const std::string& GetTailDownImage() const;
 
   /**
-   * @copydoc UI::Popup::SetTailLeftImage
+   * @copydoc Ui::Popup::SetTailLeftImage
    */
   void SetTailLeftImage(std::string image);
 
   /**
-   * @copydoc UI::Popup::GetTailLeftImage
+   * @copydoc Ui::Popup::GetTailLeftImage
    */
   const std::string& GetTailLeftImage() const;
 
   /**
-   * @copydoc UI::Popup::SetTailRightImage
+   * @copydoc Ui::Popup::SetTailRightImage
    */
   void SetTailRightImage(std::string image);
 
   /**
-   * @copydoc UI::Popup::GetTailRightImage
+   * @copydoc Ui::Popup::GetTailRightImage
    */
   const std::string& GetTailRightImage() const;
 
@@ -247,12 +247,12 @@ protected:
     using DevelControl::ControlAccessible::ControlAccessible;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::GetNameRaw()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNameRaw()
      */
     std::pair<std::string, bool> GetNameRaw() const override;
 
     /**
-     * @copydoc Dali::UI::DevelControl::ControlAccessible::CalculateStates()
+     * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
      */
     Dali::Accessibility::States CalculateStates() override;
   };
@@ -321,7 +321,7 @@ private:
    *
    * @return The backing control.
    */
-  UI::Control CreateBacking();
+  Ui::Control CreateBacking();
 
   /**
    * @brief Creates the lower area within the popup.
@@ -365,29 +365,29 @@ private:
 
 public: // Signals
   /**
-   * @copydoc Dali::UI::Popup::OutsideTouchedSignal()
+   * @copydoc Dali::Ui::Popup::OutsideTouchedSignal()
    */
-  UI::Popup::TouchedOutsideSignalType& OutsideTouchedSignal();
+  Ui::Popup::TouchedOutsideSignalType& OutsideTouchedSignal();
 
   /**
-   * @copydoc Dali::UI::Popup::ShowingSignal()
+   * @copydoc Dali::Ui::Popup::ShowingSignal()
    */
-  UI::Popup::DisplayStateChangeSignalType& ShowingSignal();
+  Ui::Popup::DisplayStateChangeSignalType& ShowingSignal();
 
   /**
-   * @copydoc Dali::UI::Popup::ShownSignal()
+   * @copydoc Dali::Ui::Popup::ShownSignal()
    */
-  UI::Popup::DisplayStateChangeSignalType& ShownSignal();
+  Ui::Popup::DisplayStateChangeSignalType& ShownSignal();
 
   /**
-   * @copydoc Dali::UI::Popup::HidingSignal()
+   * @copydoc Dali::Ui::Popup::HidingSignal()
    */
-  UI::Popup::DisplayStateChangeSignalType& HidingSignal();
+  Ui::Popup::DisplayStateChangeSignalType& HidingSignal();
 
   /**
-   * @copydoc Dali::UI::Popup::HiddenSignal()
+   * @copydoc Dali::Ui::Popup::HiddenSignal()
    */
-  UI::Popup::DisplayStateChangeSignalType& HiddenSignal();
+  Ui::Popup::DisplayStateChangeSignalType& HiddenSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -434,12 +434,12 @@ private:
   bool OnDialogTouched(Actor actor, const TouchEvent& touch);
 
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
   DevelControl::ControlAccessible* CreateAccessibleObject() override;
 
@@ -496,7 +496,7 @@ private:
   /**
    * @copydoc Control::GetNextKeyboardFocusableActor()
    */
-  Actor GetNextKeyboardFocusableActor(Actor currentFocusedActor, UI::Control::KeyboardFocus::Direction direction,
+  Actor GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Control::KeyboardFocus::Direction direction,
                                       bool loopEnabled);
 
 private:
@@ -531,15 +531,15 @@ private:
   Popup& operator=(const Popup& rhs);
 
 private:
-  UI::Popup::TouchedOutsideSignalType mTouchedOutsideSignal;
-  UI::Popup::DisplayStateChangeSignalType mShowingSignal;
-  UI::Popup::DisplayStateChangeSignalType mShownSignal;
-  UI::Popup::DisplayStateChangeSignalType mHidingSignal;
-  UI::Popup::DisplayStateChangeSignalType mHiddenSignal;
+  Ui::Popup::TouchedOutsideSignalType mTouchedOutsideSignal;
+  Ui::Popup::DisplayStateChangeSignalType mShowingSignal;
+  Ui::Popup::DisplayStateChangeSignalType mShownSignal;
+  Ui::Popup::DisplayStateChangeSignalType mHidingSignal;
+  Ui::Popup::DisplayStateChangeSignalType mHiddenSignal;
 
   Layer mLayer;                ///< Popup Layer (i.e. Dim backing and PopupBg reside in this).
-  UI::TableView mPopupLayout;  ///< Popup Background (i.e. dialog reside in this).
-  UI::Control mBacking;        ///< Backing actor (dim effect).
+  Ui::TableView mPopupLayout;  ///< Popup Background (i.e. dialog reside in this).
+  Ui::Control mBacking;        ///< Backing actor (dim effect).
   Actor mPreviousFocusedActor; ///< Store the previous focused actor to restore the focus when popup hide.
   Actor mTailImage;            ///< Stores the tail image.
   Actor mPopupContainer;       ///< This actor is used to house the background image and the main popup layout.
@@ -555,13 +555,13 @@ private:
   Actor mFooter;  ///< Stores the footer content (typically controls).
 
   // Display related properties.
-  UI::Popup::DisplayState mDisplayState; ///< The current display state of the popup.
+  Ui::Popup::DisplayState mDisplayState; ///< The current display state of the popup.
   bool mTailVisible;                     ///< True if the popup tail should be visible.
   Vector3 mTailPosition;                 ///< The position of the tail.
-  UI::Popup::ContextualMode
+  Ui::Popup::ContextualMode
       mContextualMode;      ///< Allows the popup to be layed out adjacent to its parent in different directions.
   float mAnimationDuration; ///< The duration of the transition in and out animations.
-  UI::Popup::AnimationMode mAnimationMode; ///< The animation to use to transition in and out.
+  Ui::Popup::AnimationMode mAnimationMode; ///< The animation to use to transition in and out.
   Dali::AnimationData
       mEntryAnimationData; ///< Stores description data that can be used for generating a custom entry animation.
   Dali::AnimationData
@@ -584,25 +584,25 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline UI::Internal::Popup& GetImpl(UI::Popup& publicObject)
+inline Ui::Internal::Popup& GetImpl(Ui::Popup& publicObject)
 {
   DALI_ASSERT_ALWAYS(publicObject);
 
   Dali::RefObject& handle = publicObject.GetImplementation();
 
-  return static_cast<UI::Internal::Popup&>(handle);
+  return static_cast<Ui::Internal::Popup&>(handle);
 }
 
-inline const UI::Internal::Popup& GetImpl(const UI::Popup& publicObject)
+inline const Ui::Internal::Popup& GetImpl(const Ui::Popup& publicObject)
 {
   DALI_ASSERT_ALWAYS(publicObject);
 
   const Dali::RefObject& handle = publicObject.GetImplementation();
 
-  return static_cast<const UI::Internal::Popup&>(handle);
+  return static_cast<const Ui::Internal::Popup&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

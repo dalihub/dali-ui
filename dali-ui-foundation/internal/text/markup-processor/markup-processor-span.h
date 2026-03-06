@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -53,7 +53,7 @@ void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& font
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

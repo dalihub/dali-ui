@@ -33,7 +33,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -616,7 +616,7 @@ public:
    * @param[in] index The character index from where to retrieve the text.
    * @param[out] text A string of UTF-8 characters.
    *
-   * @see Dali::UI::Text::Controller::GetText()
+   * @see Dali::Ui::Text::Controller::GetText()
    */
   void GetText(CharacterIndex index, std::string& text) const;
 
@@ -625,7 +625,7 @@ public:
    *
    * @return A length of UTF-32 characters.
    *
-   * @see Dali::UI::Text::Controller::GetNumberOfCharacters()
+   * @see Dali::Ui::Text::Controller::GetNumberOfCharacters()
    */
   Length GetNumberOfCharacters() const;
 
@@ -662,7 +662,7 @@ public:
    * @brief Checks text direction.
    * @return The text direction.
    */
-  UI::DevelText::TextDirection::Type GetTextDirection();
+  Ui::DevelText::TextDirection::Type GetTextDirection();
 
   /**
    * @brief Calculates the start character index of the first paragraph to be updated and
@@ -998,7 +998,7 @@ public:
    *
    * @param[out] anchorActors the vector of actor (empty collection if no anchors available).
    */
-  void GetAnchorActors(std::vector<UI::TextAnchor>& anchorActors);
+  void GetAnchorActors(std::vector<Ui::TextAnchor>& anchorActors);
 
   /**
    * @brief Return an index of first anchor in the anchor vector whose boundaries includes given character offset
@@ -1016,7 +1016,7 @@ public:
    *
    * @return The actor representing an anchor.
    */
-  UI::TextAnchor CreateAnchorActor(Anchor anchor);
+  Ui::TextAnchor CreateAnchorActor(Anchor anchor);
 
   /**
    * @brief Return true when text control should clear key input focus when escape key is pressed.
@@ -1096,7 +1096,7 @@ public:
   Vector2 mTextFitContentSize; ///< Size of Text fit content
   std::string mRawText;        ///< Raw text including markup tag.
 
-  std::vector<UI::DevelTextLabel::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
+  std::vector<Ui::DevelTextLabel::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
 
   bool mRecalculateNaturalSize : 1;         ///< Whether the natural size needs to be recalculated.
   bool mRecalculateLayoutSize : 1;          ///< Whether the layout size needs to be recalculated.
@@ -1151,7 +1151,7 @@ private:
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

@@ -9,11 +9,11 @@
   * @pre The config must not be frozen. \
   * @param[in] fontSize The default font size in points \
   */ \
-  ChildClass& SetDefaultFontSize(float fontSize) { UIElementConfig::SetDefaultFontSize(fontSize); return *this; } \
+  ChildClass& SetDefaultFontSize(float fontSize) { UiElementConfig::SetDefaultFontSize(fontSize); return *this; } \
   /** \
   * @brief Sets the default text color for text elements. \
   * \
   * @pre The config must not be frozen. \
   * @param[in] color The default text color \
   */ \
-  ChildClass& SetDefaultTextColor(const Vector4& color) { UIElementConfig::SetDefaultTextColor(color); return *this; }
+  ChildClass& SetDefaultTextColor(const Vector4& color) { UiElementConfig::SetDefaultTextColor(color); return *this; }

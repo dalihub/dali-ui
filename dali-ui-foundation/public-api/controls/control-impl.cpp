@@ -54,7 +54,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -100,15 +100,15 @@ void RegisterControlAccessibleGetter()
     Accessibility::Accessible::RegisterExternalAccessibleGetter(
         [](Dali::Actor actor) -> std::pair<std::shared_ptr<Accessibility::Accessible>, bool>
         {
-          auto control = UI::Control::DownCast(actor);
+          auto control = Ui::Control::DownCast(actor);
           if (!control)
           {
             return {nullptr, true};
           }
 
-          if (UI::DevelControl::IsCreateAccessibleEnabled(control))
+          if (Ui::DevelControl::IsCreateAccessibleEnabled(control))
           {
-            auto& controlImpl = UI::Internal::GetImplementation(control);
+            auto& controlImpl = Ui::Internal::GetImplementation(control);
             return {std::shared_ptr<DevelControl::ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
           }
 
@@ -118,18 +118,18 @@ void RegisterControlAccessibleGetter()
 }
 } // unnamed namespace
 
-UI::Control Control::New()
+Ui::Control Control::New()
 {
   return New(ControlBehaviour::CONTROL_BEHAVIOUR_DEFAULT);
 }
 
-UI::Control Control::New(ControlBehaviour additionalBehaviour)
+Ui::Control Control::New(ControlBehaviour additionalBehaviour)
 {
   // Create the implementation, temporarily owned on stack
   IntrusivePtr<Control> controlImpl = new Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT | additionalBehaviour));
 
   // Pass ownership to handle
-  UI::Control handle(*controlImpl);
+  Ui::Control handle(*controlImpl);
 
   // Second-phase init of the implementation
   // This can only be done after the CustomActor connection has been made...
@@ -145,10 +145,10 @@ void Control::SetStyleName(const std::string& styleName)
     mImpl->mStyleName = styleName;
 
     // Apply new style, if stylemanager is available
-    UI::StyleManager styleManager = UI::StyleManager::Get();
+    Ui::StyleManager styleManager = Ui::StyleManager::Get();
     if (styleManager)
     {
-      GetImpl(styleManager).ApplyThemeStyle(UI::Control(GetOwner()));
+      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
     }
   }
 }
@@ -163,11 +163,11 @@ void Control::SetBackgroundColor(const Vector4& color)
   mImpl->mBackgroundColor = color;
 
   Property::Map map;
-  map.Insert(UI::Visual::Property::TYPE, UI::Visual::COLOR);
-  map.Insert(UI::ColorVisual::Property::MIX_COLOR, color);
+  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
+  map.Insert(Ui::ColorVisual::Property::MIX_COLOR, color);
 
-  UI::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(UI::Control::Property::BACKGROUND);
-  if (visualImplPtr && visualImplPtr->GetType() == UI::Visual::COLOR)
+  Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
+  if (visualImplPtr && visualImplPtr->GetType() == Ui::Visual::COLOR)
   {
     // Update background color only
     visualImplPtr->DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
@@ -179,11 +179,11 @@ void Control::SetBackgroundColor(const Vector4& color)
 
 void Control::SetBackground(const Property::Map& map)
 {
-  UI::Visual::Base visual = UI::VisualFactory::Get().CreateVisual(map);
+  Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
   visual.SetName("background");
   if (visual)
   {
-    mImpl->RegisterVisual(UI::Control::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
+    mImpl->RegisterVisual(Ui::Control::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
     mImpl->EnableCornerPropertiesOverridden(visual, true);
 
     // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
@@ -193,14 +193,14 @@ void Control::SetBackground(const Property::Map& map)
 
 void Control::ClearBackground()
 {
-  mImpl->UnregisterVisual(UI::Control::Property::BACKGROUND);
+  mImpl->UnregisterVisual(Ui::Control::Property::BACKGROUND);
   mImpl->mBackgroundColor = Color::TRANSPARENT;
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();
 }
 
-void Control::SetRenderEffect(UI::RenderEffect effect)
+void Control::SetRenderEffect(Ui::RenderEffect effect)
 {
   ClearRenderEffect();
 
@@ -209,7 +209,7 @@ void Control::SetRenderEffect(UI::RenderEffect effect)
     Internal::RenderEffectImpl* object = dynamic_cast<Internal::RenderEffectImpl*>(effect.GetObjectPtr());
     DALI_ASSERT_ALWAYS(object && "Given render effect is not valid.");
 
-    Dali::UI::Control ownerControl(GetOwner());
+    Dali::Ui::Control ownerControl(GetOwner());
     object->SetOwnerControl(ownerControl);
 
     mImpl->mRenderEffect = object;
@@ -255,7 +255,7 @@ bool Control::IsOffScreenRenderTaskExclusive()
   return false;
 }
 
-std::shared_ptr<UI::DevelControl::ControlAccessible> Control::GetAccessibleObject()
+std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::GetAccessibleObject()
 {
   return mImpl->GetAccessibleObject();
 }
@@ -353,7 +353,7 @@ void Control::SetKeyInputFocus()
 {
   if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    UI::KeyInputFocusManager::Get().SetFocus(UI::Control::DownCast(Self()));
+    Ui::KeyInputFocusManager::Get().SetFocus(Ui::Control::DownCast(Self()));
   }
 }
 
@@ -362,7 +362,7 @@ bool Control::HasKeyInputFocus()
   bool result = false;
   if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    UI::Control control = UI::KeyInputFocusManager::Get().GetCurrentFocusControl();
+    Ui::Control control = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
     if (Self() == control)
     {
       result = true;
@@ -375,7 +375,7 @@ void Control::ClearKeyInputFocus()
 {
   if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    UI::KeyInputFocusManager::Get().RemoveFocus(UI::Control::DownCast(Self()));
+    Ui::KeyInputFocusManager::Get().RemoveFocus(Ui::Control::DownCast(Self()));
   }
 }
 
@@ -384,12 +384,12 @@ void Control::SetAsKeyboardFocusGroup(bool isFocusGroup)
   mImpl->mIsKeyboardFocusGroup = isFocusGroup;
 
   // The following line will be removed when the deprecated API in KeyboardFocusManager is deleted
-  UI::KeyboardFocusManager::Get().SetAsFocusGroup(Self(), isFocusGroup);
+  Ui::KeyboardFocusManager::Get().SetAsFocusGroup(Self(), isFocusGroup);
 }
 
 bool Control::IsKeyboardFocusGroup()
 {
-  return UI::KeyboardFocusManager::Get().IsFocusGroup(Self());
+  return Ui::KeyboardFocusManager::Get().IsFocusGroup(Self());
 }
 
 void Control::KeyboardEnter()
@@ -400,7 +400,7 @@ void Control::KeyboardEnter()
 
 bool Control::OnAccessibilityActivated()
 {
-  if (UI::KeyboardFocusManager::Get().SetCurrentFocusActor(Self()))
+  if (Ui::KeyboardFocusManager::Get().SetCurrentFocusActor(Self()))
   {
     return OnKeyboardEnter();
   }
@@ -432,7 +432,7 @@ DevelControl::ControlAccessible* Control::CreateAccessibleObject()
   return new DevelControl::ControlAccessible(Self());
 }
 
-Actor Control::GetNextKeyboardFocusableActor(Actor currentFocusedActor, UI::Control::KeyboardFocus::Direction direction,
+Actor Control::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Control::KeyboardFocus::Direction direction,
                                              bool loopEnabled)
 {
   return Actor();
@@ -442,17 +442,17 @@ void Control::OnKeyboardFocusChangeCommitted(Actor commitedFocusableActor)
 {
 }
 
-UI::Control::KeyEventSignalType& Control::KeyEventSignal()
+Ui::Control::KeyEventSignalType& Control::KeyEventSignal()
 {
   return mImpl->mKeyEventSignal;
 }
 
-UI::Control::KeyInputFocusSignalType& Control::KeyInputFocusGainedSignal()
+Ui::Control::KeyInputFocusSignalType& Control::KeyInputFocusGainedSignal()
 {
   return mImpl->mKeyInputFocusGainedSignal;
 }
 
-UI::Control::KeyInputFocusSignalType& Control::KeyInputFocusLostSignal()
+Ui::Control::KeyInputFocusSignalType& Control::KeyInputFocusLostSignal()
 {
   return mImpl->mKeyInputFocusLostSignal;
 }
@@ -460,7 +460,7 @@ UI::Control::KeyInputFocusSignalType& Control::KeyInputFocusLostSignal()
 bool Control::EmitKeyEventSignal(const KeyEvent& event)
 {
   // Guard against destruction during signal emission
-  Dali::UI::Control handle(GetOwner());
+  Dali::Ui::Control handle(GetOwner());
 
   bool consumed = false;
 
@@ -521,7 +521,7 @@ void Control::Initialize()
 
   if (!(mImpl->mFlags & DISABLE_STYLE_CHANGE_SIGNALS))
   {
-    UI::StyleManager styleManager = StyleManager::Get();
+    Ui::StyleManager styleManager = StyleManager::Get();
 
     // if stylemanager is available
     if (styleManager)
@@ -532,7 +532,7 @@ void Control::Initialize()
       styleManagerImpl.ControlStyleChangeSignal().Connect(this, &Control::OnStyleChange);
 
       // Apply the current style
-      styleManagerImpl.ApplyThemeStyleAtInit(UI::Control(GetOwner()));
+      styleManagerImpl.ApplyThemeStyleAtInit(Ui::Control(GetOwner()));
     }
   }
 
@@ -552,12 +552,12 @@ bool Control::IsResourceReady() const
   return controlDataImpl.IsResourceReady();
 }
 
-void Control::OnStyleChange(UI::StyleManager styleManager, StyleChange::Type change)
+void Control::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
 {
   // By default the control is only interested in theme (not font) changes
   if (styleManager && change == StyleChange::THEME_CHANGE)
   {
-    GetImpl(styleManager).ApplyThemeStyle(UI::Control(GetOwner()));
+    GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
     RelayoutRequest();
   }
 }
@@ -592,7 +592,7 @@ void Control::OnLongPress(const LongPressGesture& longPress)
 
 void Control::EmitKeyInputFocusSignal(bool focusGained)
 {
-  Dali::UI::Control handle(GetOwner());
+  Dali::Ui::Control handle(GetOwner());
 
   if (Accessibility::IsUp())
   {
@@ -675,9 +675,9 @@ void Control::OnPropertySet(Property::Index index, const Property::Value& proper
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
-      if (!enabled && Self() == Dali::UI::KeyboardFocusManager::Get().GetCurrentFocusActor())
+      if (!enabled && Self() == Dali::Ui::KeyboardFocusManager::Get().GetCurrentFocusActor())
       {
-        Dali::UI::KeyboardFocusManager::Get().ClearFocus();
+        Dali::Ui::KeyboardFocusManager::Get().ClearFocus();
       }
       break;
     }
@@ -688,7 +688,7 @@ void Control::OnSizeSet(const Vector3& targetSize)
 {
   Vector2 size(targetSize);
 
-  UI::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(UI::Control::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
   if (visualImplPtr)
   {
     visualImplPtr->SetControlSize(size); // Send an empty map as we do not want to modify the visual's set transform
@@ -825,7 +825,7 @@ Vector3 Control::GetNaturalSize()
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Control::GetNaturalSize for %s\n",
                 Self().GetProperty<std::string>(Dali::Actor::Property::NAME).c_str());
-  UI::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(UI::Control::Property::BACKGROUND);
+  Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
   if (visualImplPtr)
   {
     Vector2 naturalSize;
@@ -875,7 +875,7 @@ void Control::SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callb
   mImpl->SignalDisconnected(slotObserver, callback);
 }
 
-Control& GetImplementation(Dali::UI::Control& handle)
+Control& GetImplementation(Dali::Ui::Control& handle)
 {
   CustomActorImpl& customInterface = handle.GetImplementation();
   // downcast to control
@@ -883,7 +883,7 @@ Control& GetImplementation(Dali::UI::Control& handle)
   return impl;
 }
 
-const Control& GetImplementation(const Dali::UI::Control& handle)
+const Control& GetImplementation(const Dali::Ui::Control& handle)
 {
   const CustomActorImpl& customInterface = handle.GetImplementation();
   // downcast to control
@@ -893,6 +893,6 @@ const Control& GetImplementation(const Dali::UI::Control& handle)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

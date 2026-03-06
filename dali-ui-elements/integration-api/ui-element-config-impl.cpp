@@ -25,57 +25,57 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
 {
 
-UIElementConfigImpl::UIElementConfigImpl()
-  : UIConfigImpl(),
+UiElementConfigImpl::UiElementConfigImpl()
+  : UiConfigImpl(),
     mDefaultFontSize(16.0f),
     mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 }
 
-UIElementConfigImpl::~UIElementConfigImpl() = default;
+UiElementConfigImpl::~UiElementConfigImpl() = default;
 
-UIElementConfig UIElementConfigImpl::New()
+UiElementConfig UiElementConfigImpl::New()
 {
-  IntrusivePtr<UIElementConfigImpl> impl = new UIElementConfigImpl();
-  UIElementConfig handle(impl.Get());
+  IntrusivePtr<UiElementConfigImpl> impl = new UiElementConfigImpl();
+  UiElementConfig handle(impl.Get());
   return handle;
 }
 
-void UIElementConfigImpl::SetDefaultFontSize(float fontSize)
+void UiElementConfigImpl::SetDefaultFontSize(float fontSize)
 {
-  DALI_ASSERT_ALWAYS(!IsFrozen() && "UIElementConfig is frozen after UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!IsFrozen() && "UiElementConfig is frozen after UiConfig::Apply()");
   mDefaultFontSize = fontSize;
 }
 
-float UIElementConfigImpl::GetDefaultFontSize() const
+float UiElementConfigImpl::GetDefaultFontSize() const
 {
   return mDefaultFontSize;
 }
 
-void UIElementConfigImpl::SetDefaultTextColor(const Vector4& color)
+void UiElementConfigImpl::SetDefaultTextColor(const Vector4& color)
 {
-  DALI_ASSERT_ALWAYS(!IsFrozen() && "UIElementConfig is frozen after UIConfig::Apply()");
+  DALI_ASSERT_ALWAYS(!IsFrozen() && "UiElementConfig is frozen after UiConfig::Apply()");
   mDefaultTextColor = color;
 }
 
-Vector4 UIElementConfigImpl::GetDefaultTextColor() const
+Vector4 UiElementConfigImpl::GetDefaultTextColor() const
 {
   return mDefaultTextColor;
 }
 
-void UIElementConfigImpl::OnInitialized()
+void UiElementConfigImpl::OnInitialized()
 {
-  UIElementConfigManager::Get().Init(*this);
+  UiElementConfigManager::Get().Init(*this);
 }
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

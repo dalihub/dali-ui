@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -73,7 +73,7 @@ public:
  */
 DALI_UI_API void PropertyBridgeRegisterStringGetter(StringGetterDelegate getter);
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

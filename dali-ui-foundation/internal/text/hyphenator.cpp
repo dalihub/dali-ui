@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -61,6 +61,6 @@ Vector<bool> GetWordHyphens(TextAbstraction::Hyphenation& hyphenation, const Cha
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

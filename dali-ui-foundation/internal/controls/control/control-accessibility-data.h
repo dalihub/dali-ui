@@ -24,41 +24,41 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 // private inner class
 class Control::Impl::AccessibilityData : public ConnectionTracker
 {
-  friend class UI::DevelControl::ControlAccessible;
+  friend class Ui::DevelControl::ControlAccessible;
 
 public:
   // Constructor
   AccessibilityData(Control& controlImpl);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::AppendAccessibilityAttribute()
+   * @copydoc Dali::Ui::Internal::Control::Impl::AppendAccessibilityAttribute()
    */
   void AppendAccessibilityAttribute(const std::string& key, const std::string value);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::RemoveAccessibilityAttribute()
+   * @copydoc Dali::Ui::Internal::Control::Impl::RemoveAccessibilityAttribute()
    */
   void RemoveAccessibilityAttribute(const std::string& key);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::ClearAccessibilityAttributes()
+   * @copydoc Dali::Ui::Internal::Control::Impl::ClearAccessibilityAttributes()
    */
   void ClearAccessibilityAttributes();
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::SetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::Internal::Control::Impl::SetAccessibilityReadingInfoType()
    */
   void SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetAccessibilityReadingInfoType()
    */
   Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const;
 
@@ -99,9 +99,9 @@ public:
                                   const Dali::Property::Value& value);
 
   /**
-   * @copydoc Dali::UI::Internal::Control::Impl::GetAccessibleObject()
+   * @copydoc Dali::Ui::Internal::Control::Impl::GetAccessibleObject()
    */
-  std::shared_ptr<UI::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
 
 public:
   /**
@@ -112,22 +112,22 @@ public:
   /**
    * @brief Helper function to get control's default state attributes
    */
-  static UI::DevelControl::AccessibilityStates GetDefaultControlAccessibilityStates();
+  static Ui::DevelControl::AccessibilityStates GetDefaultControlAccessibilityStates();
 
 public:
-  UI::DevelControl::AccessibilityActivateSignalType mAccessibilityActivateSignal;
-  UI::DevelControl::AccessibilityReadingSkippedSignalType mAccessibilityReadingSkippedSignal;
-  UI::DevelControl::AccessibilityReadingPausedSignalType mAccessibilityReadingPausedSignal;
-  UI::DevelControl::AccessibilityReadingResumedSignalType mAccessibilityReadingResumedSignal;
-  UI::DevelControl::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
-  UI::DevelControl::AccessibilityReadingStoppedSignalType mAccessibilityReadingStoppedSignal;
+  Ui::DevelControl::AccessibilityActivateSignalType mAccessibilityActivateSignal;
+  Ui::DevelControl::AccessibilityReadingSkippedSignalType mAccessibilityReadingSkippedSignal;
+  Ui::DevelControl::AccessibilityReadingPausedSignalType mAccessibilityReadingPausedSignal;
+  Ui::DevelControl::AccessibilityReadingResumedSignalType mAccessibilityReadingResumedSignal;
+  Ui::DevelControl::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
+  Ui::DevelControl::AccessibilityReadingStoppedSignalType mAccessibilityReadingStoppedSignal;
 
-  UI::DevelControl::AccessibilityGetNameSignalType mAccessibilityGetNameSignal;
-  UI::DevelControl::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
-  UI::DevelControl::AccessibilityDoGestureSignalType mAccessibilityDoGestureSignal;
+  Ui::DevelControl::AccessibilityGetNameSignalType mAccessibilityGetNameSignal;
+  Ui::DevelControl::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
+  Ui::DevelControl::AccessibilityDoGestureSignalType mAccessibilityDoGestureSignal;
 
-  UI::DevelControl::AccessibilityActionSignalType mAccessibilityActionSignal;
-  UI::DevelControl::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
+  Ui::DevelControl::AccessibilityActionSignalType mAccessibilityActionSignal;
+  Ui::DevelControl::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
 
   struct AccessibilityProps
   {
@@ -169,6 +169,6 @@ private:
   bool mIsAccessibilityPropertySetSignalRegistered : 1;
 };
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 #endif // DALI_UI_CONTROL_ACCESSIBILITY_DATA_H

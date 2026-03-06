@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -99,7 +99,7 @@ void Utf32ToUtf8(const uint32_t* const utf32, uint32_t numberOfCharacters, std::
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

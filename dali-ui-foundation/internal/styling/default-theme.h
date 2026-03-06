@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -36,9 +36,9 @@ class DefaultTheme
 {
 public:
   static DefaultTheme& Get();
-  void ApplyDefaultStyle(UI::TextLabel textLabel);
-  void ApplyDefaultStyle(UI::TextField textField);
-  void ApplyDefaultStyle(UI::TextEditor textEditor);
+  void ApplyDefaultStyle(Ui::TextLabel textLabel);
+  void ApplyDefaultStyle(Ui::TextField textField);
+  void ApplyDefaultStyle(Ui::TextEditor textEditor);
   void Reset(); // Reload theme from StyleManager
 
 private:
@@ -54,7 +54,7 @@ private:
 };
 
 } // namespace Internal
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_DEFAULT_THEME_H

@@ -36,7 +36,7 @@ bool CaseInsensitiveStringCompare(std::string_view a, std::string_view b)
          std::equal(a.begin(), a.end(), b.begin(), [](auto x, auto y) { return std::tolower(x) == std::tolower(y); });
 }
 
-namespace UI
+namespace Ui
 {
 TreeNode::TreeNode()
   : mName(NULL),
@@ -207,6 +207,6 @@ bool TreeNode::ConstIterator::operator!=(const TreeNode::ConstIterator& rhs) con
   return mNode != rhs.mNode;
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

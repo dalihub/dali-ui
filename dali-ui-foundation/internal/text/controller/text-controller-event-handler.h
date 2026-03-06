@@ -31,7 +31,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -139,12 +139,12 @@ struct Controller::EventHandler
 
   /// @copydoc Text::Controller::TextPopupButtonTouched
   /// @param[in] controller A reference to the controller class
-  static void TextPopupButtonTouched(Controller& controller, Dali::UI::TextSelectionPopup::Buttons button);
+  static void TextPopupButtonTouched(Controller& controller, Dali::Ui::TextSelectionPopup::Buttons button);
 };
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

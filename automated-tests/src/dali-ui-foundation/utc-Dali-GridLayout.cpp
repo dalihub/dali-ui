@@ -24,7 +24,7 @@
 #include <vector>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 void utc_dali_gridlayout_startup(void)
 {

@@ -37,7 +37,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 class VideoView;
 
@@ -52,9 +52,9 @@ protected:
 
 public:
   /**
-   * @copydoc UI::DevelVideoView::New()
+   * @copydoc Ui::DevelVideoView::New()
    */
-  static UI::VideoView New(VideoSyncMode syncMode);
+  static Ui::VideoView New(VideoSyncMode syncMode);
 
   /**
    * @brief Sets a video url to play.
@@ -88,27 +88,27 @@ public:
   bool IsLooping();
 
   /**
-   * @copydoc UI::VideoView::Play()
+   * @copydoc Ui::VideoView::Play()
    */
   void Play();
 
   /**
-   * @copydoc UI::VideoView::Pause()
+   * @copydoc Ui::VideoView::Pause()
    */
   void Pause();
 
   /**
-   * @copydoc UI::VideoView::Stop()
+   * @copydoc Ui::VideoView::Stop()
    */
   void Stop();
 
   /**
-   * @copydoc UI::VideoView::Forward()
+   * @copydoc Ui::VideoView::Forward()
    */
   void Forward(int millisecond);
 
   /**
-   * @copydoc UI::VideoView::Backward()
+   * @copydoc Ui::VideoView::Backward()
    */
   void Backward(int millisecond);
 
@@ -143,9 +143,9 @@ public:
   void GetVolume(float& left, float& right);
 
   /**
-   * @copydoc Dali::UI::VideoView::FinishedSignal()
+   * @copydoc Dali::Ui::VideoView::FinishedSignal()
    */
-  Dali::UI::VideoView::VideoViewSignalType& FinishedSignal();
+  Dali::Ui::VideoView::VideoViewSignalType& FinishedSignal();
 
   /**
    * @brief Emit the finished signal
@@ -343,27 +343,27 @@ public:
 
 private: // From Control
   /**
-   * @copydoc UI::Control::OnInitialize()
+   * @copydoc Ui::Control::OnInitialize()
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
   /**
-   * @copydoc UI::Control::OnSizeSet()
+   * @copydoc Ui::Control::OnSizeSet()
    */
   void OnSizeSet(const Vector3& targetSize) override;
 
   /**
-   * @copydoc UI::Control::GetNaturalSize
+   * @copydoc Ui::Control::GetNaturalSize
    */
   Vector3 GetNaturalSize() override;
 
@@ -465,16 +465,16 @@ private:
   Dali::Property::Map mEffectPropertyMap;
   Dali::Texture mNativeTexture;
 
-  Dali::UI::VideoView::VideoViewSignalType mFinishedSignal;
+  Dali::Ui::VideoView::VideoViewSignalType mFinishedSignal;
 
   std::string mUrl;
   Dali::DisplayArea mDisplayArea;
 
   bool mIsUsingOverlayTexture{false};
   Property::Index mOverlayTextureVisualIndex{Property::INVALID_INDEX};
-  Dali::UI::Visual::Base mOverlayVisual;
-  Dali::UI::Visual::Base mOverlayTextureVisual;
-  Dali::UI::Visual::Base mTextureVisual;
+  Dali::Ui::Visual::Base mOverlayVisual;
+  Dali::Ui::Visual::Base mOverlayTextureVisual;
+  Dali::Ui::Visual::Base mTextureVisual;
 
   Dali::PropertyNotification mPositionUpdateNotification;
   Dali::PropertyNotification mSizeUpdateNotification;
@@ -500,21 +500,21 @@ private:
 
 } // namespace Internal
 
-inline UI::Internal::VideoView& GetImpl(UI::VideoView& handle)
+inline Ui::Internal::VideoView& GetImpl(Ui::VideoView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<UI::Internal::VideoView&>(impl);
+  return static_cast<Ui::Internal::VideoView&>(impl);
 }
 
-inline const UI::Internal::VideoView& GetImpl(const UI::VideoView& handle)
+inline const Ui::Internal::VideoView& GetImpl(const Ui::VideoView& handle)
 {
   DALI_ASSERT_ALWAYS(handle);
   const Dali::RefObject& impl = handle.GetImplementation();
-  return static_cast<const UI::Internal::VideoView&>(impl);
+  return static_cast<const Ui::Internal::VideoView&>(impl);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

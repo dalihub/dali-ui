@@ -22,7 +22,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 InputEvent::InputEvent(Integration::InputEventImpl* impl)
@@ -55,5 +55,5 @@ const LongPressGesture& InputEvent::GetLongPressGesture() const
   return GetImpl(*this).GetLongPressGesture();
 }
 
-} // namespace UI
+} // namespace Ui
 } // namespace Dali

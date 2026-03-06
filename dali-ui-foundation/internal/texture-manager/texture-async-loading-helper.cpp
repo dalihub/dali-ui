@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -104,6 +104,6 @@ void TextureAsyncLoadingHelper::AsyncLoadComplete(LoadingTaskPtr task)
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

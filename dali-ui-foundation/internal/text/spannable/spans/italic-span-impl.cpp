@@ -23,14 +23,14 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
 namespace Internal
 {
 ItalicSpan::ItalicSpan()
-  : BaseSpan(Dali::UI::Text::SpanType::Value::ITALIC)
+  : BaseSpan(Dali::Ui::Text::SpanType::Value::ITALIC)
 {
 }
 
@@ -38,14 +38,14 @@ ItalicSpan::~ItalicSpan()
 {
 }
 
-Dali::UI::Text::ItalicSpan ItalicSpan::New()
+Dali::Ui::Text::ItalicSpan ItalicSpan::New()
 {
   ItalicSpanPtr object = new ItalicSpan();
-  Dali::UI::Text::ItalicSpan handle = Dali::UI::Text::ItalicSpan(object.Get());
+  Dali::Ui::Text::ItalicSpan handle = Dali::Ui::Text::ItalicSpan(object.Get());
   return handle;
 }
 void ItalicSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalModel,
-                                         const Dali::UI::Text::Range& range) const
+                                         const Dali::Ui::Text::Range& range) const
 {
   FontDescriptionRun fontRun;
   fontRun.slant = TextAbstraction::FontSlant::ITALIC;
@@ -59,6 +59,6 @@ void ItalicSpan::CreateStyleCharacterRun(IntrusivePtr<LogicalModel>& logicalMode
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -347,7 +347,7 @@ public:
       INPUT_POINT_SIZE,
 
       /**
-       * @copydoc Dali::UI::TextLabel::Property::UNDERLINE
+       * @copydoc Dali::Ui::TextLabel::Property::UNDERLINE
        */
       UNDERLINE,
 
@@ -359,7 +359,7 @@ public:
       INPUT_UNDERLINE,
 
       /**
-       * @copydoc Dali::UI::TextLabel::Property::SHADOW
+       * @copydoc Dali::Ui::TextLabel::Property::SHADOW
        */
       SHADOW,
 
@@ -385,7 +385,7 @@ public:
       INPUT_EMBOSS,
 
       /**
-       * @copydoc Dali::UI::TextLabel::Property::OUTLINE
+       * @copydoc Dali::Ui::TextLabel::Property::OUTLINE
        */
       OUTLINE,
 
@@ -636,7 +636,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @SINCE_1_0.0
    * @param[in] implementation The Control implementation
@@ -655,7 +655,7 @@ public: // Not intended for application developers
 /**
  * @}
  */
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

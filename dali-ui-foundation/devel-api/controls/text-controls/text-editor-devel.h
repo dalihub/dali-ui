@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace DevelTextEditor
 {
@@ -35,55 +35,55 @@ namespace Property
 {
 enum Type
 {
-  TEXT = Dali::UI::TextEditor::Property::TEXT,
-  TEXT_COLOR = Dali::UI::TextEditor::Property::TEXT_COLOR,
-  FONT_FAMILY = Dali::UI::TextEditor::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::UI::TextEditor::Property::FONT_STYLE,
-  POINT_SIZE = Dali::UI::TextEditor::Property::POINT_SIZE,
-  HORIZONTAL_ALIGNMENT = Dali::UI::TextEditor::Property::HORIZONTAL_ALIGNMENT,
-  SCROLL_THRESHOLD = Dali::UI::TextEditor::Property::SCROLL_THRESHOLD,
-  SCROLL_SPEED = Dali::UI::TextEditor::Property::SCROLL_SPEED,
-  PRIMARY_CURSOR_COLOR = Dali::UI::TextEditor::Property::PRIMARY_CURSOR_COLOR,
-  SECONDARY_CURSOR_COLOR = Dali::UI::TextEditor::Property::SECONDARY_CURSOR_COLOR,
-  ENABLE_CURSOR_BLINK = Dali::UI::TextEditor::Property::ENABLE_CURSOR_BLINK,
-  CURSOR_BLINK_INTERVAL = Dali::UI::TextEditor::Property::CURSOR_BLINK_INTERVAL,
-  CURSOR_BLINK_DURATION = Dali::UI::TextEditor::Property::CURSOR_BLINK_DURATION,
-  CURSOR_WIDTH = Dali::UI::TextEditor::Property::CURSOR_WIDTH,
-  GRAB_HANDLE_IMAGE = Dali::UI::TextEditor::Property::GRAB_HANDLE_IMAGE,
-  GRAB_HANDLE_PRESSED_IMAGE = Dali::UI::TextEditor::Property::GRAB_HANDLE_PRESSED_IMAGE,
-  SELECTION_HANDLE_IMAGE_LEFT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_IMAGE_LEFT,
-  SELECTION_HANDLE_IMAGE_RIGHT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_IMAGE_RIGHT,
-  SELECTION_HANDLE_PRESSED_IMAGE_LEFT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
-  SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
-  SELECTION_HANDLE_MARKER_IMAGE_LEFT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_MARKER_IMAGE_LEFT,
-  SELECTION_HANDLE_MARKER_IMAGE_RIGHT = Dali::UI::TextEditor::Property::SELECTION_HANDLE_MARKER_IMAGE_RIGHT,
-  SELECTION_HIGHLIGHT_COLOR = Dali::UI::TextEditor::Property::SELECTION_HIGHLIGHT_COLOR,
-  DECORATION_BOUNDING_BOX = Dali::UI::TextEditor::Property::DECORATION_BOUNDING_BOX,
-  ENABLE_MARKUP = Dali::UI::TextEditor::Property::ENABLE_MARKUP,
-  INPUT_COLOR = Dali::UI::TextEditor::Property::INPUT_COLOR,
-  INPUT_FONT_FAMILY = Dali::UI::TextEditor::Property::INPUT_FONT_FAMILY,
-  INPUT_FONT_STYLE = Dali::UI::TextEditor::Property::INPUT_FONT_STYLE,
-  INPUT_POINT_SIZE = Dali::UI::TextEditor::Property::INPUT_POINT_SIZE,
-  LINE_SPACING = Dali::UI::TextEditor::Property::LINE_SPACING,
-  INPUT_LINE_SPACING = Dali::UI::TextEditor::Property::INPUT_LINE_SPACING,
-  UNDERLINE = Dali::UI::TextEditor::Property::UNDERLINE,
-  INPUT_UNDERLINE = Dali::UI::TextEditor::Property::INPUT_UNDERLINE,
-  SHADOW = Dali::UI::TextEditor::Property::SHADOW,
-  INPUT_SHADOW = Dali::UI::TextEditor::Property::INPUT_SHADOW,
-  EMBOSS = Dali::UI::TextEditor::Property::EMBOSS,
-  INPUT_EMBOSS = Dali::UI::TextEditor::Property::INPUT_EMBOSS,
-  OUTLINE = Dali::UI::TextEditor::Property::OUTLINE,
-  INPUT_OUTLINE = Dali::UI::TextEditor::Property::INPUT_OUTLINE,
-  SMOOTH_SCROLL = Dali::UI::TextEditor::Property::SMOOTH_SCROLL,
-  SMOOTH_SCROLL_DURATION = Dali::UI::TextEditor::Property::SMOOTH_SCROLL_DURATION,
-  ENABLE_SCROLL_BAR = Dali::UI::TextEditor::Property::ENABLE_SCROLL_BAR,
-  SCROLL_BAR_SHOW_DURATION = Dali::UI::TextEditor::Property::SCROLL_BAR_SHOW_DURATION,
-  SCROLL_BAR_FADE_DURATION = Dali::UI::TextEditor::Property::SCROLL_BAR_FADE_DURATION,
-  PIXEL_SIZE = Dali::UI::TextEditor::Property::PIXEL_SIZE,
-  LINE_COUNT = Dali::UI::TextEditor::Property::LINE_COUNT,
-  ENABLE_SELECTION = Dali::UI::TextEditor::Property::ENABLE_SELECTION,
-  PLACEHOLDER = Dali::UI::TextEditor::Property::PLACEHOLDER,
-  LINE_WRAP_MODE = Dali::UI::TextEditor::Property::LINE_WRAP_MODE,
+  TEXT = Dali::Ui::TextEditor::Property::TEXT,
+  TEXT_COLOR = Dali::Ui::TextEditor::Property::TEXT_COLOR,
+  FONT_FAMILY = Dali::Ui::TextEditor::Property::FONT_FAMILY,
+  FONT_STYLE = Dali::Ui::TextEditor::Property::FONT_STYLE,
+  POINT_SIZE = Dali::Ui::TextEditor::Property::POINT_SIZE,
+  HORIZONTAL_ALIGNMENT = Dali::Ui::TextEditor::Property::HORIZONTAL_ALIGNMENT,
+  SCROLL_THRESHOLD = Dali::Ui::TextEditor::Property::SCROLL_THRESHOLD,
+  SCROLL_SPEED = Dali::Ui::TextEditor::Property::SCROLL_SPEED,
+  PRIMARY_CURSOR_COLOR = Dali::Ui::TextEditor::Property::PRIMARY_CURSOR_COLOR,
+  SECONDARY_CURSOR_COLOR = Dali::Ui::TextEditor::Property::SECONDARY_CURSOR_COLOR,
+  ENABLE_CURSOR_BLINK = Dali::Ui::TextEditor::Property::ENABLE_CURSOR_BLINK,
+  CURSOR_BLINK_INTERVAL = Dali::Ui::TextEditor::Property::CURSOR_BLINK_INTERVAL,
+  CURSOR_BLINK_DURATION = Dali::Ui::TextEditor::Property::CURSOR_BLINK_DURATION,
+  CURSOR_WIDTH = Dali::Ui::TextEditor::Property::CURSOR_WIDTH,
+  GRAB_HANDLE_IMAGE = Dali::Ui::TextEditor::Property::GRAB_HANDLE_IMAGE,
+  GRAB_HANDLE_PRESSED_IMAGE = Dali::Ui::TextEditor::Property::GRAB_HANDLE_PRESSED_IMAGE,
+  SELECTION_HANDLE_IMAGE_LEFT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_IMAGE_LEFT,
+  SELECTION_HANDLE_IMAGE_RIGHT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_IMAGE_RIGHT,
+  SELECTION_HANDLE_PRESSED_IMAGE_LEFT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
+  SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
+  SELECTION_HANDLE_MARKER_IMAGE_LEFT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_MARKER_IMAGE_LEFT,
+  SELECTION_HANDLE_MARKER_IMAGE_RIGHT = Dali::Ui::TextEditor::Property::SELECTION_HANDLE_MARKER_IMAGE_RIGHT,
+  SELECTION_HIGHLIGHT_COLOR = Dali::Ui::TextEditor::Property::SELECTION_HIGHLIGHT_COLOR,
+  DECORATION_BOUNDING_BOX = Dali::Ui::TextEditor::Property::DECORATION_BOUNDING_BOX,
+  ENABLE_MARKUP = Dali::Ui::TextEditor::Property::ENABLE_MARKUP,
+  INPUT_COLOR = Dali::Ui::TextEditor::Property::INPUT_COLOR,
+  INPUT_FONT_FAMILY = Dali::Ui::TextEditor::Property::INPUT_FONT_FAMILY,
+  INPUT_FONT_STYLE = Dali::Ui::TextEditor::Property::INPUT_FONT_STYLE,
+  INPUT_POINT_SIZE = Dali::Ui::TextEditor::Property::INPUT_POINT_SIZE,
+  LINE_SPACING = Dali::Ui::TextEditor::Property::LINE_SPACING,
+  INPUT_LINE_SPACING = Dali::Ui::TextEditor::Property::INPUT_LINE_SPACING,
+  UNDERLINE = Dali::Ui::TextEditor::Property::UNDERLINE,
+  INPUT_UNDERLINE = Dali::Ui::TextEditor::Property::INPUT_UNDERLINE,
+  SHADOW = Dali::Ui::TextEditor::Property::SHADOW,
+  INPUT_SHADOW = Dali::Ui::TextEditor::Property::INPUT_SHADOW,
+  EMBOSS = Dali::Ui::TextEditor::Property::EMBOSS,
+  INPUT_EMBOSS = Dali::Ui::TextEditor::Property::INPUT_EMBOSS,
+  OUTLINE = Dali::Ui::TextEditor::Property::OUTLINE,
+  INPUT_OUTLINE = Dali::Ui::TextEditor::Property::INPUT_OUTLINE,
+  SMOOTH_SCROLL = Dali::Ui::TextEditor::Property::SMOOTH_SCROLL,
+  SMOOTH_SCROLL_DURATION = Dali::Ui::TextEditor::Property::SMOOTH_SCROLL_DURATION,
+  ENABLE_SCROLL_BAR = Dali::Ui::TextEditor::Property::ENABLE_SCROLL_BAR,
+  SCROLL_BAR_SHOW_DURATION = Dali::Ui::TextEditor::Property::SCROLL_BAR_SHOW_DURATION,
+  SCROLL_BAR_FADE_DURATION = Dali::Ui::TextEditor::Property::SCROLL_BAR_FADE_DURATION,
+  PIXEL_SIZE = Dali::Ui::TextEditor::Property::PIXEL_SIZE,
+  LINE_COUNT = Dali::Ui::TextEditor::Property::LINE_COUNT,
+  ENABLE_SELECTION = Dali::Ui::TextEditor::Property::ENABLE_SELECTION,
+  PLACEHOLDER = Dali::Ui::TextEditor::Property::PLACEHOLDER,
+  LINE_WRAP_MODE = Dali::Ui::TextEditor::Property::LINE_WRAP_MODE,
 
   /**
    * @brief The text to display when the TextEditor is empty and inactive.
@@ -251,7 +251,7 @@ enum Type
    * http://cplusplus.com/reference/regex/ECMAScript/
    *
    * You can use enums instead of "accepted" and "rejected" strings.
-   * @see Dali::UI::InputFilter::Property::Type
+   * @see Dali::Ui::InputFilter::Property::Type
    *
    * Example Usage:
    * @code
@@ -272,7 +272,7 @@ enum Type
 
   /**
    * @brief The enumerations used to specify whether to position the ellipsis at the END, START or MIDDLE of the text.
-   * @details Name "EllipsisPosition", type [Type](@ref Dali::UI::DevelText::EllipsisPosition::Type)
+   * @details Name "EllipsisPosition", type [Type](@ref Dali::Ui::DevelText::EllipsisPosition::Type)
    * (Property::INTEGER), or Property::STRING. Read/Write
    * @note Default is EllipsisPosition::END.
    * @see DevelText::EllipsisPosition
@@ -325,7 +325,7 @@ enum Type
   /**
    * @brief Sets the selection popup style
    * @details Name "selectionPopupStyle", type Property::MAP.
-   * @see Dali::UI::TextSelectionPopup::Property
+   * @see Dali::Ui::TextSelectionPopup::Property
    */
   SELECTION_POPUP_STYLE,
 
@@ -426,14 +426,14 @@ DALI_UI_API CursorPositionChangedSignalType& CursorPositionChangedSignal(TextEdi
 /**
  * @brief Input filtered signal type.
  */
-using InputFilteredSignalType = Signal<void(TextEditor, UI::InputFilter::Property::Type)>;
+using InputFilteredSignalType = Signal<void(TextEditor, Ui::InputFilter::Property::Type)>;
 
 /**
  * @brief This signal is emitted when the character to be inserted is filtered by the input filter.
  *
  * A callback of the following type may be connected:
  * @code
- *   void YourCallbackName(TextEditor textEditor, UI::InputFilter::Property::Type type);
+ *   void YourCallbackName(TextEditor textEditor, Ui::InputFilter::Property::Type type);
  *
  *   DevelTextEditor::InputFilteredSignal(textEditor).Connect(this, &OnInputFiltered);
  *
@@ -649,7 +649,7 @@ DALI_UI_API Dali::Property::Index RegisterFontVariationProperty(TextEditor textE
 
 } // namespace DevelTextEditor
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

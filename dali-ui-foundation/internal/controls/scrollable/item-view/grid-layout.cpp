@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/public-api/controls/scrollable/item-view/item-view.h>
 
 using namespace Dali;
-using namespace Dali::UI;
+using namespace Dali::Ui;
 
 namespace // unnamed namespace
 {
@@ -211,7 +211,7 @@ public:
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -529,7 +529,7 @@ void GridLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector3&
 {
   // This just implements the default behaviour of constraint application.
   // Custom layouts can override this function to apply their custom constraints.
-  Dali::UI::ItemView itemView = Dali::UI::ItemView::DownCast(itemViewActor);
+  Dali::Ui::ItemView itemView = Dali::Ui::ItemView::DownCast(itemViewActor);
   if (itemView)
   {
     Vector3 itemSize;
@@ -562,7 +562,7 @@ void GridLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector3&
       constraint = Constraint::New<Vector3>(actor, Actor::Property::POSITION, positionConstraint,
                                             &GridPositionConstraint::Orientation270);
     }
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.AddSource(ParentSource(Actor::Property::SIZE));
     constraint.Apply();
 
@@ -603,7 +603,7 @@ void GridLayout::ApplyConstraints(Actor& actor, const int itemId, const Vector3&
       constraint = Constraint::New<bool>(actor, Actor::Property::VISIBLE, visibilityConstraint,
                                          &GridVisibilityConstraint::Landscape);
     }
-    constraint.AddSource(ParentSource(UI::ItemView::Property::LAYOUT_POSITION));
+    constraint.AddSource(ParentSource(Ui::ItemView::Property::LAYOUT_POSITION));
     constraint.AddSource(ParentSource(Actor::Property::SIZE));
     constraint.SetRemoveAction(Dali::Constraint::DISCARD);
     constraint.Apply();
@@ -703,12 +703,12 @@ Vector3 GridLayout::GetItemPosition(int itemID, float currentLayoutPosition, con
   return itemPosition;
 }
 
-int GridLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::KeyboardFocus::Direction direction,
+int GridLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::Ui::Control::KeyboardFocus::Direction direction,
                                    bool loopEnabled)
 {
   switch (direction)
   {
-    case UI::Control::KeyboardFocus::LEFT:
+    case Ui::Control::KeyboardFocus::LEFT:
     {
       itemID--;
       if (itemID < 0)
@@ -717,7 +717,7 @@ int GridLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::
       }
       break;
     }
-    case UI::Control::KeyboardFocus::UP:
+    case Ui::Control::KeyboardFocus::UP:
     {
       itemID -= mImpl->mNumberOfColumns;
       if (itemID < 0)
@@ -726,7 +726,7 @@ int GridLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::
       }
       break;
     }
-    case UI::Control::KeyboardFocus::RIGHT:
+    case Ui::Control::KeyboardFocus::RIGHT:
     {
       itemID++;
       if (itemID >= maxItems)
@@ -735,7 +735,7 @@ int GridLayout::GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::
       }
       break;
     }
-    case UI::Control::KeyboardFocus::DOWN:
+    case Ui::Control::KeyboardFocus::DOWN:
     {
       itemID += mImpl->mNumberOfColumns;
       if (itemID >= maxItems)
@@ -760,6 +760,6 @@ GridLayout::GridLayout()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

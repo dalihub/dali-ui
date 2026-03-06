@@ -36,7 +36,7 @@ namespace Toolkit
 class Control;
 }
 
-namespace UI
+namespace Ui
 {
 
 class InputEvent;
@@ -50,84 +50,84 @@ class DALI_UI_API ClickableTraitImpl : public TraitImpl, public ConnectionTracke
 {
 public:
   /**
-   * @copydoc Dali::UI::ClickableTrait::ClickableTrait
+   * @copydoc Dali::Ui::ClickableTrait::ClickableTrait
    */
   ClickableTraitImpl();
 
 public: // Signals
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::GetPressedChangedSignal
+   * @copydoc Dali::Ui::ClickableTrait::GetPressedChangedSignal
    */
   Signal<bool(View, const InputEvent&)>& GetPressedChangedSignal();
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::GetPseudoDisabledChangedSignal
+   * @copydoc Dali::Ui::ClickableTrait::GetPseudoDisabledChangedSignal
    */
   Signal<void(View)>& GetPseudoDisabledChangedSignal();
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::GetClickedSignal
+   * @copydoc Dali::Ui::ClickableTrait::GetClickedSignal
    */
   Signal<bool(View, const InputEvent&)>& GetClickedSignal();
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::GetLongPressedSignal
+   * @copydoc Dali::Ui::ClickableTrait::GetLongPressedSignal
    */
   Signal<bool(View, const InputEvent&)>& GetLongPressedSignal();
 
 public: // API
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::IsPressed
+   * @copydoc Dali::Ui::ClickableTrait::IsPressed
    */
   bool IsPressed() const;
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::IsPseudoDisabled
+   * @copydoc Dali::Ui::ClickableTrait::IsPseudoDisabled
    */
   bool IsPseudoDisabled() const;
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::SetPseudoDisabled
+   * @copydoc Dali::Ui::ClickableTrait::SetPseudoDisabled
    */
   void SetPseudoDisabled(bool pseudoDisabled);
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::IsClickable
+   * @copydoc Dali::Ui::ClickableTrait::IsClickable
    */
   bool IsClickable() const;
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::SetClickable
+   * @copydoc Dali::Ui::ClickableTrait::SetClickable
    */
   void SetClickable(bool clickable);
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::GetKeyClickPolicy
+   * @copydoc Dali::Ui::ClickableTrait::GetKeyClickPolicy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
 
   /**
-   * @copydoc Dali::UI::ClickableTrait::SetKeyClickPolicy
+   * @copydoc Dali::Ui::ClickableTrait::SetKeyClickPolicy
    */
   void SetKeyClickPolicy(KeyClickPolicy policy);
 
 public: // InteractionTrait
 
   /**
-   * @copydoc Dali::UI::Integration::IInteractionTrait::OnFocusedChanged
+   * @copydoc Dali::Ui::Integration::IInteractionTrait::OnFocusedChanged
    */
   void OnFocusedChanged(View view, bool focused) override;
 
   /**
-   * @copydoc Dali::UI::Integration::IInteractionTrait::OnKeyEvent
+   * @copydoc Dali::Ui::Integration::IInteractionTrait::OnKeyEvent
    */
   bool OnKeyEvent(View view, const KeyEvent& event) override;
 
 protected:
   /**
-   * @copydoc Dali::UI::ClickableTrait::~ClickableTrait
+   * @copydoc Dali::Ui::ClickableTrait::~ClickableTrait
    */
   virtual ~ClickableTraitImpl() override;
 
@@ -137,22 +137,22 @@ protected:
   View GetOwner() const;
 
   /**
-   * @copydoc Dali::UI::TraitImpl::OnBeforeAttached
+   * @copydoc Dali::Ui::TraitImpl::OnBeforeAttached
    */
   void OnBeforeAttached(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::UI::TraitImpl::OnAttached
+   * @copydoc Dali::Ui::TraitImpl::OnAttached
    */
   void OnAttached(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::UI::TraitImpl::OnDetached
+   * @copydoc Dali::Ui::TraitImpl::OnDetached
    */
   void OnDetached(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::UI::TraitImpl::OnViewDestroying
+   * @copydoc Dali::Ui::TraitImpl::OnViewDestroying
    */
   void OnViewDestroying(ViewImpl* viewImpl) override;
 
@@ -236,6 +236,6 @@ inline const Integration::ClickableTraitImpl& GetImpl(const ClickableTrait& obj)
   return static_cast<const Integration::ClickableTraitImpl&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

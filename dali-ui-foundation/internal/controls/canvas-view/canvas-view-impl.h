@@ -34,7 +34,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -59,10 +59,10 @@ public:
    * Create a new CanvasView.
    * @return A smart-pointer to the newly allocated CanvasView.
    */
-  static UI::CanvasView New(const Vector2& viewBox);
+  static Ui::CanvasView New(const Vector2& viewBox);
 
   /**
-   * @copydoc UI::Control::CanvasView::AddDrawable
+   * @copydoc Ui::Control::CanvasView::AddDrawable
    */
   bool AddDrawable(Dali::CanvasRenderer::Drawable& drawable);
 
@@ -83,17 +83,17 @@ public:
   static Property::Value GetProperty(BaseObject* object, Property::Index propertyIndex);
 
   /**
-   * @copydoc UI::Control::CanvasView::RemoveDrawable
+   * @copydoc Ui::Control::CanvasView::RemoveDrawable
    */
   bool RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable);
 
   /**
-   * @copydoc UI::Control::CanvasView::RemoveAllDrawables
+   * @copydoc Ui::Control::CanvasView::RemoveAllDrawables
    */
   bool RemoveAllDrawables();
 
   /**
-   * @copydoc UI::Control::CanvasView::RequestRasterization
+   * @copydoc Ui::Control::CanvasView::RequestRasterization
    */
   void RequestRasterization();
 
@@ -104,22 +104,22 @@ private: // From Control
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc UI::Control::OnSizeSet()
+   * @copydoc Ui::Control::OnSizeSet()
    */
   void OnSizeSet(const Vector3& targetSize) override;
 
   /**
-   * @copydoc UI::Control::OnInitialize
+   * @copydoc Ui::Control::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc UI::Control::OnSceneConnection()
+   * @copydoc Ui::Control::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc UI::Control::OnSceneDisconnection()
+   * @copydoc Ui::Control::OnSceneDisconnection()
    */
   void OnSceneDisconnection() override;
 
@@ -215,21 +215,21 @@ private:
 } // namespace Internal
 
 // Helpers for public-api forwarding methods
-inline UI::Internal::CanvasView& GetImpl(UI::CanvasView& obj)
+inline Ui::Internal::CanvasView& GetImpl(Ui::CanvasView& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
   Dali::RefObject& handle = obj.GetImplementation();
-  return static_cast<UI::Internal::CanvasView&>(handle);
+  return static_cast<Ui::Internal::CanvasView&>(handle);
 }
 
-inline const UI::Internal::CanvasView& GetImpl(const UI::CanvasView& obj)
+inline const Ui::Internal::CanvasView& GetImpl(const Ui::CanvasView& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
   const Dali::RefObject& handle = obj.GetImplementation();
-  return static_cast<const UI::Internal::CanvasView&>(handle);
+  return static_cast<const Ui::Internal::CanvasView&>(handle);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

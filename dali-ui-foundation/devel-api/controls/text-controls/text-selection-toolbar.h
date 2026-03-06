@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -146,7 +146,7 @@ public:
   void RaiseAbove(Actor target);
 
   /**
-   * @copydoc UI::ScrollView::ScrollTo(const Vector2&)
+   * @copydoc Ui::ScrollView::ScrollTo(const Vector2&)
    */
   void ScrollTo(const Vector2& position);
 
@@ -163,7 +163,7 @@ public:
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the UI::Internal implementation.
+   * @brief Creates a handle using the Ui::Internal implementation.
    *
    * @param[in] implementation The Control implementation.
    */
@@ -178,7 +178,7 @@ public: // Not intended for application developers
 
 }; // Class TextSelectionToolbar
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

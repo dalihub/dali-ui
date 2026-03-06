@@ -27,7 +27,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
@@ -122,11 +122,11 @@ public: // Not intended for application developers
    *
    * @param[in] internal A pointer to a newly allocated Dali resource.
    */
-  explicit DALI_INTERNAL ImageUrl(UI::Internal::ImageUrl* internal);
+  explicit DALI_INTERNAL ImageUrl(Ui::Internal::ImageUrl* internal);
   /// @endcond
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

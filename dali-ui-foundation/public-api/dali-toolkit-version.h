@@ -23,13 +23,13 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 DALI_UI_API extern const unsigned int UI_MAJOR_VERSION; ///< The major version number of the UI.
 DALI_UI_API extern const unsigned int UI_MINOR_VERSION; ///< The minor version number of the UI.
 DALI_UI_API extern const unsigned int UI_MICRO_VERSION; ///< The micro version number of the UI.
 DALI_UI_API extern const char* const UI_BUILD_DATE;     ///< The date/time the UI library was built.
-} // namespace UI
+} // namespace Ui
 } // namespace Dali
 
 #endif // DALI_UI_VERSION_H

@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
-namespace Dali::UI::Internal
+namespace Dali::Ui::Internal
 {
 namespace
 {
@@ -97,7 +97,7 @@ Rect<float> CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, Text
 }
 
 void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::ControllerPtr controller,
-                                                     std::vector<UI::TextAnchor>& anchorActors)
+                                                     std::vector<Ui::TextAnchor>& anchorActors)
 {
   for (auto& anchorActor : anchorActors)
   {
@@ -115,9 +115,9 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
 
 void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                                  Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
-                                 Actor& backgroundActor, Actor& cursorLayerActor, UI::Control& stencil,
+                                 Actor& backgroundActor, Actor& cursorLayerActor, Ui::Control& stencil,
                                  std::vector<Actor>& clippingDecorationActors,
-                                 std::vector<UI::TextAnchor>& anchorActors,
+                                 std::vector<Ui::TextAnchor>& anchorActors,
                                  Text::Controller::UpdateTextType updateTextType)
 {
   Actor newRenderableActor;
@@ -158,7 +158,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
     else
     {
       Extents padding;
-      padding = textActor.GetProperty<Extents>(UI::Control::Property::PADDING);
+      padding = textActor.GetProperty<Extents>(Ui::Control::Property::PADDING);
 
       // Support Right-To-Left of padding
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
@@ -286,7 +286,7 @@ std::string TextControlAccessible::GetText(std::size_t startOffset, std::size_t 
     std::string substituteCharacterUtf8;
     std::string substituteText;
 
-    UI::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1, substituteCharacterUtf8);
+    Ui::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1, substituteCharacterUtf8);
 
     while (substituteText.length() < endOffset - startOffset)
     {
@@ -462,11 +462,11 @@ std::string TextControlAccessible::GetWholeText() const
 
 std::string TextControlAccessible::GetCurrentPlaceholderText() const
 {
-  auto focusControl = UI::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
   bool hasFocus = Self() == focusControl;
 
-  UI::Text::Controller::PlaceholderType placeholderType =
-      hasFocus ? UI::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : UI::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
+  Ui::Text::Controller::PlaceholderType placeholderType =
+      hasFocus ? Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
 
   std::string placeholderText;
 
@@ -477,7 +477,7 @@ std::string TextControlAccessible::GetCurrentPlaceholderText() const
 
 std::uint32_t TextControlAccessible::GetSubstituteCharacter() const
 {
-  return UI::Text::STAR;
+  return Ui::Text::STAR;
 }
 
 bool TextControlAccessible::IsHiddenInput() const
@@ -496,7 +496,7 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
   using Dali::Accessibility::State;
 
   auto states = DevelControl::ControlAccessible::CalculateStates();
-  auto focusControl = UI::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
 
   states[State::EDITABLE] = true;
   states[State::FOCUSABLE] = true;
@@ -578,4 +578,4 @@ bool EditableTextControlAccessible::SetTextContents(std::string newContents)
   return true;
 }
 
-} // namespace Dali::UI::Internal
+} // namespace Dali::Ui::Internal

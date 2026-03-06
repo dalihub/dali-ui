@@ -23,7 +23,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 CanvasView::CanvasView()
 {
@@ -70,22 +70,22 @@ CanvasView CanvasView::DownCast(BaseHandle handle)
 
 void CanvasView::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
 {
-  Dali::UI::GetImpl(*this).AddDrawable(drawable);
+  Dali::Ui::GetImpl(*this).AddDrawable(drawable);
 }
 
 bool CanvasView::RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable)
 {
-  return Dali::UI::GetImpl(*this).RemoveDrawable(drawable);
+  return Dali::Ui::GetImpl(*this).RemoveDrawable(drawable);
 }
 
 void CanvasView::RemoveAllDrawables()
 {
-  Dali::UI::GetImpl(*this).RemoveAllDrawables();
+  Dali::Ui::GetImpl(*this).RemoveAllDrawables();
 }
 
 void CanvasView::RequestRasterization()
 {
-  Dali::UI::GetImpl(*this).RequestRasterization();
+  Dali::Ui::GetImpl(*this).RequestRasterization();
 }
 
 CanvasView::CanvasView(Internal::CanvasView& implementation)
@@ -99,6 +99,6 @@ CanvasView::CanvasView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Internal::CanvasView>(internal);
 }
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

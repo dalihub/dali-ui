@@ -27,7 +27,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -49,7 +49,7 @@ protected:
   virtual ~ExclusiveTraitImpl() override;
 
   /**
-   * @copydoc Dali::UI::Integration::TraitImpl::OnBeforeAttached
+   * @copydoc Dali::Ui::Integration::TraitImpl::OnBeforeAttached
    */
   void OnBeforeAttached(TraitId id, View& view) override;
 
@@ -60,6 +60,6 @@ private:
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

@@ -113,9 +113,9 @@ float ConvertPointToPixel(float point)
   return point * GetDpi() / 72.0f;
 }
 
-void UpdateCursorPosition(Dali::UI::Text::EventData* eventData)
+void UpdateCursorPosition(Dali::Ui::Text::EventData* eventData)
 {
-  if (eventData && Dali::UI::Text::EventData::IsEditingState(eventData->mState))
+  if (eventData && Dali::Ui::Text::EventData::IsEditingState(eventData->mState))
   {
     // Update the cursor position if it's in editing mode
     eventData->mDecoratorUpdated = true;
@@ -125,7 +125,7 @@ void UpdateCursorPosition(Dali::UI::Text::EventData* eventData)
 
 } // namespace
 
-namespace Dali::UI::Text
+namespace Dali::Ui::Text
 {
 void Controller::EnableTextInput(DecoratorPtr decorator, InputMethodContext& inputMethodContext)
 {
@@ -561,12 +561,12 @@ bool Controller::IsTextFitArrayEnabled() const
   return mImpl->mTextFitArrayEnabled;
 }
 
-void Controller::SetTextFitArray(std::vector<UI::DevelTextLabel::FitOption>& fitOptions)
+void Controller::SetTextFitArray(std::vector<Ui::DevelTextLabel::FitOption>& fitOptions)
 {
   mImpl->mTextFitArray = fitOptions;
 }
 
-std::vector<UI::DevelTextLabel::FitOption>& Controller::GetTextFitArray()
+std::vector<Ui::DevelTextLabel::FitOption>& Controller::GetTextFitArray()
 {
   return mImpl->mTextFitArray;
 }
@@ -1636,7 +1636,7 @@ void Controller::GetPlaceholderProperty(Property::Map& map)
   PlaceholderHandler::GetPlaceholderProperty(*this, map);
 }
 
-UI::DevelText::TextDirection::Type Controller::GetTextDirection()
+Ui::DevelText::TextDirection::Type Controller::GetTextDirection()
 {
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(*this);
@@ -1644,33 +1644,33 @@ UI::DevelText::TextDirection::Type Controller::GetTextDirection()
   return mImpl->GetTextDirection();
 }
 
-UI::DevelText::VerticalLineAlignment::Type Controller::GetVerticalLineAlignment() const
+Ui::DevelText::VerticalLineAlignment::Type Controller::GetVerticalLineAlignment() const
 {
   return mImpl->mModel->GetVerticalLineAlignment();
 }
 
-void Controller::SetVerticalLineAlignment(UI::DevelText::VerticalLineAlignment::Type alignment)
+void Controller::SetVerticalLineAlignment(Ui::DevelText::VerticalLineAlignment::Type alignment)
 {
   mImpl->mModel->mVerticalLineAlignment = alignment;
 }
 
-UI::DevelText::EllipsisPosition::Type Controller::GetEllipsisPosition() const
+Ui::DevelText::EllipsisPosition::Type Controller::GetEllipsisPosition() const
 {
   return mImpl->mModel->GetEllipsisPosition();
 }
 
-void Controller::SetEllipsisPosition(UI::DevelText::EllipsisPosition::Type ellipsisPosition)
+void Controller::SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition)
 {
   mImpl->mModel->mEllipsisPosition = ellipsisPosition;
   mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 }
 
-UI::DevelText::Ellipsize::Mode Controller::GetEllipsisMode() const
+Ui::DevelText::Ellipsize::Mode Controller::GetEllipsisMode() const
 {
   return mImpl->mEllipsisMode;
 }
 
-void Controller::SetEllipsisMode(UI::DevelText::Ellipsize::Mode ellipsisMode)
+void Controller::SetEllipsisMode(Ui::DevelText::Ellipsize::Mode ellipsisMode)
 {
   mImpl->mEllipsisMode = ellipsisMode;
 }
@@ -1780,7 +1780,7 @@ int Controller::GetCharacterIndexAtPosition(float visualX, float visualY)
 
 Rect<float> Controller::GetTextBoundingRectangle(CharacterIndex startIndex, CharacterIndex endIndex)
 {
-  return UI::Internal::CommonTextUtils::GetTextBoundingRectangle(mImpl->mModel, startIndex, endIndex);
+  return Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(mImpl->mModel, startIndex, endIndex);
 }
 
 bool Controller::IsInputStyleChangedSignalsQueueEmpty()
@@ -2027,7 +2027,7 @@ void Controller::DecorationEvent(HandleType handleType, HandleState state, float
   EventHandler::DecorationEvent(*this, handleType, state, x, y);
 }
 
-void Controller::TextPopupButtonTouched(Dali::UI::TextSelectionPopup::Buttons button)
+void Controller::TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::Buttons button)
 {
   EventHandler::TextPopupButtonTouched(*this, button);
 }
@@ -2082,7 +2082,7 @@ Actor Controller::CreateBackgroundActor()
                                          mImpl->mShaderBackground);
 }
 
-void Controller::GetAnchorActors(std::vector<UI::TextAnchor>& anchorActors)
+void Controller::GetAnchorActors(std::vector<Ui::TextAnchor>& anchorActors)
 {
   mImpl->GetAnchorActors(anchorActors);
 }
@@ -2145,4 +2145,4 @@ Controller::~Controller()
   }
 }
 
-} // namespace Dali::UI::Text
+} // namespace Dali::Ui::Text

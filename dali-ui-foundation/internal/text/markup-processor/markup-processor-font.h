@@ -20,7 +20,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Text
 {
@@ -78,7 +78,7 @@ void ProcessFontFamily(const Attribute& attribute, FontDescriptionRun& fontRun);
 
 } // namespace Text
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

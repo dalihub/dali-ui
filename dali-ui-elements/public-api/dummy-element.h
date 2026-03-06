@@ -29,7 +29,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 // Forward declarations
@@ -148,6 +148,6 @@ public:
   DALI_UI_CHAIN_VIEW_METHODS(DummyElement)
 };
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

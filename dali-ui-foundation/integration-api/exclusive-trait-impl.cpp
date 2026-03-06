@@ -21,7 +21,7 @@
 namespace Dali
 {
 
-namespace UI
+namespace Ui
 {
 
 namespace Integration
@@ -50,6 +50,6 @@ void ExclusiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
 
 } // namespace Integration
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

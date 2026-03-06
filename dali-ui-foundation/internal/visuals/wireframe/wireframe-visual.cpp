@@ -28,7 +28,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
@@ -58,7 +58,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   WireframeVisualPtr wireframeVisual(new WireframeVisual(factoryCache, actualVisual));
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
-  Property::Value* transformValue = properties.Find(UI::Visual::Property::TRANSFORM, TRANSFORM);
+  Property::Value* transformValue = properties.Find(Ui::Visual::Property::TRANSFORM, TRANSFORM);
   Property::Map transformMap;
   if (transformValue && transformValue->Get(transformMap))
   {
@@ -70,7 +70,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 
 WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BasePtr actualVisual)
   : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
-                 actualVisual ? actualVisual->GetType() : UI::Visual::WIREFRAME),
+                 actualVisual ? actualVisual->GetType() : Ui::Visual::WIREFRAME),
     mActualVisual(actualVisual)
 {
 }
@@ -112,7 +112,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(UI::Visual::Property::TYPE, UI::Visual::WIREFRAME);
+    map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::WIREFRAME);
   }
 }
 
@@ -123,7 +123,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* mixValue = propertyMap.Find(UI::Visual::Property::MIX_COLOR, MIX_COLOR);
+  Property::Value* mixValue = propertyMap.Find(Ui::Visual::Property::MIX_COLOR, MIX_COLOR);
   if (mixValue)
   {
     Vector4 mixColor;
@@ -137,7 +137,7 @@ void WireframeVisual::DoSetOnScene(Actor& actor)
   actor.AddRenderer(mImpl->mRenderer);
 
   // Wireframe generated and ready to display
-  ResourceReady(UI::Visual::ResourceStatus::READY);
+  ResourceReady(Ui::Visual::ResourceStatus::READY);
 }
 
 void WireframeVisual::OnInitialize()
@@ -214,6 +214,6 @@ Visual::Base& WireframeVisual::GetVisualObject()
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali

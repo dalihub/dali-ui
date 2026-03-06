@@ -26,13 +26,13 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 namespace Internal
 {
 class GridLayout;
 
-typedef IntrusivePtr<GridLayout> GridLayoutPtr; ///< Pointer to a Dali::UI::GridLayout object
+typedef IntrusivePtr<GridLayout> GridLayoutPtr; ///< Pointer to a Dali::Ui::GridLayout object
 
 /**
  * @brief An ItemView layout which arranges items in a grid.
@@ -203,7 +203,7 @@ public:
   /**
    * @copydoc ItemLayout::GetNextFocusItemID()
    */
-  int GetNextFocusItemID(int itemID, int maxItems, Dali::UI::Control::KeyboardFocus::Direction direction,
+  int GetNextFocusItemID(int itemID, int maxItems, Dali::Ui::Control::KeyboardFocus::Direction direction,
                          bool loopEnabled) override;
 
 private:
@@ -272,7 +272,7 @@ private:
 
 } // namespace Internal
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 

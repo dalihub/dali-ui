@@ -29,7 +29,7 @@
 
 namespace Dali
 {
-namespace UI
+namespace Ui
 {
 /**
  * API to interface with the toolkit image
@@ -50,7 +50,7 @@ namespace Image
  * @param[in] height the height for this frame buffer
  * @return the ImageUrl representing this frame buffer
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat,
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat,
                                            uint32_t width, uint32_t height);
 
 /**
@@ -63,7 +63,7 @@ DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, 
  * @param[in] index the index of the attached color texture.
  * @return the ImageUrl representing this frame buffer
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t index);
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t index);
 
 /**
  * @brief Generate a Url from Pixel data.
@@ -74,7 +74,7 @@ DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, 
  * @param[in] preMultiplied Whether this pixel data preMultiplied or not. Default as false.
  * @return the ImageUrl representing this pixel data
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied = false);
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied = false);
 
 /**
  * @brief Generate a Url from native image interface.
@@ -85,7 +85,7 @@ DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool
  * @param[in] preMultiplied Whether this native image interface preMultiplied or not. Default as false.
  * @return the ImageUrl representing this native image interface
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface,
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface,
                                            bool preMultiplied = false);
 
 /**
@@ -96,7 +96,7 @@ DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr n
  * @param[in] encodedImageBuffer the encoded image buffer to converted to Url
  * @return the ImageUrl representing this encoded image buffer
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer);
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer);
 
 /**
  * @brief Generate a Url of depth texture from frame buffer.
@@ -106,11 +106,11 @@ DALI_UI_API Dali::UI::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encode
  * @param[in] frameBuffer the frame buffer to converted to Url
  * @return the ImageUrl representing this frame buffer
  */
-DALI_UI_API Dali::UI::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer);
+DALI_UI_API Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer);
 
 } // namespace Image
 
-} // namespace UI
+} // namespace Ui
 
 } // namespace Dali
 
