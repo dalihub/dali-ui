@@ -37,7 +37,7 @@ jobs:
         sudo apt-get update
         yes | sudo apt-get install xvfb dbus-x11
         sudo apt-get install libfile-copy-recursive-perl
-        dali-core/build/scripts/dali_env -v -c
+        dali-core/build/scripts/dali_env -c
         dali-env/opt/bin/dali_env -s > setenv
         . setenv
         sudo apt install meson ninja-build
@@ -56,12 +56,12 @@ jobs:
         make install -j8
         cd -
         cd dali-adaptor/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND="GLES"
         make install -j8
-        cd -
-        cd dali-toolkit/build/tizen
-        CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
-        make install -j8
+        # cd -
+        # cd dali-toolkit/build/tizen
+        # CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        # make install -j8
         cd -
         cd build/tizen
         CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
