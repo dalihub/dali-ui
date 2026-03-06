@@ -17,7 +17,6 @@
 
 #include <cstdint>
 #include <dali/integration-api/input-options.h>
-#include <dali-toolkit/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/integration-api/input-event-impl.h>
 

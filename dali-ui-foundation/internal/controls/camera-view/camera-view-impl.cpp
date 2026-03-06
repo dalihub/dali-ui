@@ -22,7 +22,7 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/adaptor-framework/native-image-source.h>
+#include <dali/public-api/adaptor-framework/native-image.h>
 #include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/object/type-registry.h>
 #include <cstring>

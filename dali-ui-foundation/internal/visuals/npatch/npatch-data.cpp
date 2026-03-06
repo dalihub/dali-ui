@@ -23,6 +23,7 @@
 
 // EXTERNAL HEADERS
 #include <dali/integration-api/debug.h>
+#include <algorithm>
 
 namespace Dali
 {

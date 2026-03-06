@@ -20,7 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/native-image-source-devel.h>
+#include <dali/devel-api/adaptor-framework/native-image-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/rendering/texture-devel.h>
 #include <dali/devel-api/scripting/scripting.h>

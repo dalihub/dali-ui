@@ -1,5 +1,4 @@
 # Auto-generated from dali-ui.spec.in by makespec.sh
-# Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui-foundation
 Summary:    DALi UI Library
 Version:    2.0.10078
@@ -16,6 +15,8 @@ BuildRequires:  pkgconfig
 BuildRequires:  gawk
 BuildRequires:  pkgconfig(dali2-core)
 BuildRequires:  pkgconfig(dali2-adaptor)
+BuildRequires:  dali2-integration-devel
+BuildRequires:  dali2-adaptor-integration-devel
 BuildRequires:  pkgconfig(gles20)
 BuildRequires:  pkgconfig(glesv2)
 BuildRequires:  pkgconfig(egl)
@@ -188,25 +189,25 @@ for language in *.mo
 do
   language=${language%.mo}
   mkdir -p %{buildroot}/%{_datadir}/locale/${language}/LC_MESSAGES/
-  cp ${language}.mo %{buildroot}/%{_datadir}/locale/${language}/LC_MESSAGES/dali-toolkit.mo
+  cp ${language}.mo %{buildroot}/%{_datadir}/locale/${language}/LC_MESSAGES/dali-ui-foundation.mo
 done
 ) &> /dev/null
 
 # Create directory and copy (style, images, sounds etc)
-%define dali_data_ro_dir %TZ_SYS_RO_SHARE/dali/
-%define dali_toolkit_style_files %{dali_data_ro_dir}/toolkit/styles/
-%define dali_toolkit_image_files %{dali_data_ro_dir}/toolkit/images/
-%define dali_toolkit_sound_files %{dali_data_ro_dir}/toolkit/sounds/
+# TODO : Open it if required
+# %define dali_data_ro_dir %TZ_SYS_RO_SHARE/dali/
+# %define dali_ui_foundation_style_files %{dali_data_ro_dir}/ui-foundation/styles/
+# %define dali_ui_foundation_image_files %{dali_data_ro_dir}/ui-foundation/images/
+# %define dali_ui_foundation_sound_files %{dali_data_ro_dir}/ui-foundation/sounds/
 
-mkdir -p %{buildroot}%{dali_toolkit_style_files}/360x360
-cp -r ../../dali-ui-foundation/styles/360x360/* %{buildroot}%{dali_toolkit_style_files}/360x360/
+# mkdir -p %{buildroot}%{dali_ui_foundation_style_files}/360x360
+# cp -r ../../dali-ui-foundation/styles/360x360/* %{buildroot}%{dali_ui_foundation_style_files}/360x360/
 
-# 이미지와 사운드도 복사해야 %files 패키징 시 에러가 나지 않습니다.
-mkdir -p %{buildroot}%{dali_toolkit_image_files}
-cp -r ../../dali-ui-foundation/images-common/* %{buildroot}%{dali_toolkit_image_files}/ || true
+# mkdir -p %{buildroot}%{dali_ui_foundation_image_files}
+# cp -r ../../dali-ui-foundation/images-common/* %{buildroot}%{dali_ui_foundation_image_files}/ || true
 
-mkdir -p %{buildroot}%{dali_toolkit_sound_files}
-cp -r ../../dali-ui-foundation/sounds/* %{buildroot}%{dali_toolkit_sound_files}/ || true
+# mkdir -p %{buildroot}%{dali_ui_foundation_sound_files}
+# cp -r ../../dali-ui-foundation/sounds/* %{buildroot}%{dali_ui_foundation_sound_files}/ || true
 
 cd ../../
 cp dali-ui.manifest %{name}.manifest
@@ -245,9 +246,6 @@ exit 0
 %license LICENSE
 
 %{_datadir}/locale/*/LC_MESSAGES/*
-%{_datadir}/dali/toolkit/styles/*
-%{_datadir}/dali/toolkit/images/*
-%{_datadir}/dali/toolkit/sounds/*
 
 
 %files devel
@@ -260,6 +258,7 @@ exit 0
 %files integration-devel
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
+%{dev_include_path}/dali-ui-foundation/devel-api/*
 %{dev_include_path}/dali-ui-foundation/integration-api/*
 
 %files -n %{dali_ui_elements}

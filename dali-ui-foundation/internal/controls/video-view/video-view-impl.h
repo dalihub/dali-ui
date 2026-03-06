@@ -23,7 +23,7 @@
 #include <dali/devel-api/adaptor-framework/video-sync-mode.h>
 #include <dali/integration-api/adaptor-framework/trigger-event-factory.h>
 #include <dali/public-api/adaptor-framework/image-options.h>
-#include <dali/public-api/adaptor-framework/native-image-source.h>
+#include <dali/public-api/adaptor-framework/native-image.h>
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/object/property-conditions.h>
 #include <dali/public-api/object/property-map.h>
