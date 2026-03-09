@@ -31,13 +31,36 @@
   */ \
   ChildClass& SetKeyClickPolicy(KeyClickPolicy policy) { UiConfig::SetKeyClickPolicy(policy); return *this; } \
   /** \
-  * @brief Sets the predicate function that determines which keys trigger click execution. \
+  * @brief Sets the predicate used to determine whether a key event triggers \
+  * click execution (e.g. "Return", "KP_Enter"). \
   * \
-  * The predicate receives a key name and returns true if the key should act as an \
-  * execution key (e.g. "Return", "KP_Enter"). The default predicate matches "Return". \
+  * When a key event is received by a clickable View, this predicate is called \
+  * with the key name. If it returns @c true, the View treats the key as a \
+  * click execution key and fires the click action. The default predicate \
+  * matches "Return" only. \
   * \
-  * @pre The config must not be frozen. \
-  * @param[in] predicate A function pointer with signature bool(const std::string&) \
+  * @note This parameter is a plain function pointer (ExecutionKeyPredicate). \
+  * Lambdas with captures and member function pointers are not accepted. \
+  * Only free functions or stateless lambdas may be used. \
+  * \
+  * @note Passing @c nullptr restores the default predicate that matches "Return". \
+  * \
+  * @pre The config must not be frozen (i.e. Apply() must not have been called). \
+  * Calling this method after Apply() triggers an assert in debug builds and \
+  * is ignored in release builds. \
+  * \
+  * @param[in] predicate A function pointer matching the ExecutionKeyPredicate \
+  *                      signature, or @c nullptr to restore the default \
+  * @return Reference to this UiConfig for method chaining \
+  * \
+  * @code \
+  *   bool MyKeyPredicate(const std::string& keyName) { \
+  *     return keyName == "Return" || keyName == "KP_Enter"; \
+  *   } \
+  *   UiConfig::New() \
+  *     .SetExecutionKeyPredicate(MyKeyPredicate) \
+  *     .Apply(); \
+  * @endcode \
   */ \
   ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UiConfig::SetExecutionKeyPredicate(predicate); return *this; } \
   /** \

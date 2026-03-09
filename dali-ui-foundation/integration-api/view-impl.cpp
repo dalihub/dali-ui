@@ -37,6 +37,8 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/layout/layout-params-impl.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 
 namespace Dali
 {
@@ -49,6 +51,11 @@ namespace Integration
 
 namespace
 {
+
+void ApplyBackgroundColor(Ui::View view, const Vector4& color)
+{
+  view.Ui::Control::SetBackgroundColor(color);
+}
 
 BaseHandle Create()
 {
@@ -231,6 +238,11 @@ Vector3 ViewImpl::GetPivotPoint() const
 void ViewImpl::SetPivotPoint(const Vector3& point)
 {
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
+}
+
+void ViewImpl::SetBackgroundColor(const UiColor& color)
+{
+  UiColorManager::Get().ApplyColor(color, View::DownCast(Self()), ApplyBackgroundColor);
 }
 
 bool ViewImpl::IsFocusable() const

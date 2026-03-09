@@ -35,6 +35,8 @@ namespace Ui
 {
 
 // Forward declarations
+class UiColor;
+
 namespace Integration
 {
 class ViewImpl;
@@ -518,7 +520,7 @@ public: // Properties
 
   // @CHAIN_MANUAL
   /**
-   * @brief Executesa custom action on this View instance.
+   * @brief Executes a custom action on this View instance.
    * Use this method to perform additional initialization or logic on a View
    * without breaking the declarative method chaining.
    * @param[in] action A function or lambda to be executed with this instance.
@@ -532,17 +534,19 @@ public: // Properties
     return *this;
   }
 
-  // @CHAIN_MANUAL
   /**
    * @brief Sets the background color.
    *
-   * @param[in] color The required background color value
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * If the UiColor has direct RGBA values, it is applied immediately
+   * and any previous ID-based binding for this property is removed.
+   *
+   * @param[in] color The UiColor to apply
    */
-  View& BackgroundColor(const Vector4& color)
-  {
-    SetBackgroundColor(color);
-    return *this;
-  }
+  View& SetBackgroundColor(const UiColor& color);
 
   /**
    * @brief Sets layout parameters on this View.

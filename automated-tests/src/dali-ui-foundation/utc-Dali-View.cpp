@@ -342,9 +342,9 @@ int UtcDaliViewBackgroundColorChainingP(void)
 {
   TestApplication application;
   View view = View::New();
-  const Vector4 testColor(1.0f, 0.0f, 0.0f, 0.5f);
+  const UiColor testColor(1.0f, 0.0f, 0.0f, 0.5f);
 
-  View& result = view.BackgroundColor(testColor);
+  View& result = view.SetBackgroundColor(testColor);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   END_TEST;
 }
@@ -357,13 +357,13 @@ int UtcDaliViewMultipleChainingP(void)
   const float testHeight = 200.0f;
   const float testX = 100.0f;
   const float testY = 50.0f;
-  const Vector4 testColor(0.0f, 1.0f, 0.0f, 0.8f);
+  const UiColor testColor(0.0f, 1.0f, 0.0f, 0.8f);
 
   View& result = view.SetSizeWidth(testWidth)
                      .SetSizeHeight(testHeight)
                      .SetPositionX(testX)
                      .SetPositionY(testY)
-                     .BackgroundColor(testColor);
+                     .SetBackgroundColor(testColor);
 
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetSizeWidth(), testWidth, TEST_LOCATION);
@@ -897,7 +897,7 @@ int UtcDaliViewSetBackgroundColorP(void)
   TestApplication application;
   View view = View::New();
   DALI_TEST_CHECK(view);
-  Vector4 color(0.2f, 0.4f, 0.6f, 1.0f);
+  UiColor color(0.2f, 0.4f, 0.6f, 1.0f);
   view.SetBackgroundColor(color);
   DALI_TEST_CHECK(view);
   END_TEST;

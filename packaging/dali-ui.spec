@@ -251,13 +251,14 @@ exit 0
 %files devel
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/%{name}.pc
-%{dev_include_path}/dali-ui-foundation/*.h
+%{dev_include_path}/dali-ui-foundation/dali-ui-foundation.h
 %{dev_include_path}/dali-ui-foundation/public-api/*
 %{_bindir}/dali-shader-generator
 
 %files integration-devel
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
+%{dev_include_path}/dali-ui-foundation/dali-ui-foundation-integ.h
 %{dev_include_path}/dali-ui-foundation/devel-api/*
 %{dev_include_path}/dali-ui-foundation/integration-api/*
 

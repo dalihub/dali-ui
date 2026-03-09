@@ -23,11 +23,11 @@ using namespace Dali::UI;
 void Create(Application& application) {
   application.GetWindow().Add(
     View::New()
-      .BackgroundColor(Color::YELLOW)
+      .SetBackgroundColor(Color::YELLOW)
       .Size(200_spx, 200_spx)
       .Contents({
         View::New()
-          .BackgroundColor(Color::RED)
+          .SetBackgroundColor(Color::RED)
           .Size(100_spx, 100_spx)
           .With([](View& v) {
             v.TouchedSignal().Connect([](Actor a, const TouchEvent& t) {
@@ -35,7 +35,7 @@ void Create(Application& application) {
             });
           }),
         View::New()
-          .BackgroundColor(Color::BLUE)
+          .SetBackgroundColor(Color::BLUE)
           .Position(100_spx, 100_spx)
       })
   );

@@ -44,6 +44,7 @@ namespace Ui
 // Forward declarations
 class Layout;
 class LayoutManager;
+class UiColor;
 
 namespace Integration
 {
@@ -202,6 +203,11 @@ public: // API (size, position, parent origin, pivot)
    * @copydoc Dali::Ui::View::SetPivotPoint
    */
   void SetPivotPoint(const Vector3& point);
+
+  /**
+   * @copydoc Dali::Ui::View::SetBackgroundColor(const UiColor&)
+   */
+  void SetBackgroundColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::View::IsFocusable

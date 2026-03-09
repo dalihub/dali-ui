@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/layout.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 
 namespace Dali
 {
@@ -321,6 +322,12 @@ bool View::IsTouchFocusable() const
 View& View::SetTouchFocusable(bool touchFocusable)
 {
   Integration::GetImpl(*this).SetTouchFocusable(touchFocusable);
+  return *this;
+}
+
+View& View::SetBackgroundColor(const UiColor& color)
+{
+  Integration::GetImpl(*this).SetBackgroundColor(color);
   return *this;
 }
 

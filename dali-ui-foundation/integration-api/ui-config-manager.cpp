@@ -15,11 +15,15 @@
  *
  */
 
+// CLASS HEADER
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
 
-// CLASS HEADER
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
 
 namespace Dali
 {
@@ -47,7 +51,7 @@ const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
 
 void UiConfigManager::Initialize(UiConfig config)
 {
-  DALI_ASSERT_ALWAYS(!mInitialized && "UiConfigManager::Init() must be called only once");
+  DALI_ASSERT_ALWAYS(!mInitialized && "UiConfigManager::Initialize() must be called only once");
   mConfig = std::move(config);
   GetImpl(mConfig).Freeze();
 
@@ -62,6 +66,9 @@ void UiConfigManager::Initialize(UiConfig config)
   mCachedMinLongPressKeyCount  = impl.GetMinLongPressKeyCount();
   mCachedTapRecognizerTime     = impl.GetTapRecognizerTime();
   mInitialized                 = true;
+
+  UiThemeManager themeManager = UiThemeManager::Get();
+  GetImpl(themeManager).EnsureThemeLoader();
 
   GetImpl(mConfig).OnInitialized();
 }
@@ -141,6 +148,12 @@ bool UiConfigManager::IsFocusIndicatorAlwaysShown() const
 {
   DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).IsFocusIndicatorAlwaysShown();
+}
+
+ThemeLoaderInterface* UiConfigManager::CreateThemeLoader()
+{
+  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  return GetImpl(mConfig).CreateThemeLoader();
 }
 
 } // namespace Integration

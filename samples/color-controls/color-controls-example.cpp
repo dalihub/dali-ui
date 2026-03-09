@@ -16,23 +16,25 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layout.h>
 
+#include "test-config.h"
+#include "test-theme-loader.h"
+
 using namespace Dali;
 using namespace Dali::Ui;
 using Dali::Ui::View;
 
-// This example shows how to create and display Hello World! using a simple TextActor
-class HelloWorldController : public ConnectionTracker
+class ColorControlsExample : public ConnectionTracker
 {
 public:
 
-  HelloWorldController(Application& application)
+  ColorControlsExample(Application& application)
     : mApplication(application)
   {
     // Connect to the Application's Init signal
-    mApplication.InitSignal().Connect(this, &HelloWorldController::Create);
+    mApplication.InitSignal().Connect(this, &ColorControlsExample::Create);
   }
 
-  ~HelloWorldController() = default; // Nothing to do in destructor
+  ~ColorControlsExample() = default; // Nothing to do in destructor
 
   // The Init signal is received once (only) during the Application lifetime
   void Create(Application& application)
@@ -40,29 +42,50 @@ public:
     // Get a handle to the window
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
+    window.KeyEventSignal().Connect(this, &ColorControlsExample::OnKeyEvent);
 
     window.Add(Layout::New() // Parent
-      .SetBackgroundColor(UiColor(0xFFFF00))
+      .SetBackgroundColor(UiColor::BACKGROUND)
       .SetSizeWidth(200_spx)
       .SetSizeHeight(200_spx)
       .Contents({
         View::New() // Red child
-          .SetBackgroundColor(UiColor(0xFF0000))
+          .SetBackgroundColor(UiColor::PRIMARY)
           .SetSizeWidth(100_spx)
           .SetSizeHeight(100_spx)
           .AsClickable(this, [this](View view, const InputEvent& event)
           {
-            mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
+            mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
             return true;
           }),
         View::New() // Blue child
-          .SetBackgroundColor(UiColor(0x0000FF))
+          .SetBackgroundColor(UiColor("ThemeColor2"))
           .SetSizeWidth(100_spx)
           .SetSizeHeight(100_spx)
           .SetPositionX(100_spx)
           .SetPositionY(100_spx)
           .As(mSecondChild),
       }));
+  }
+
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if (event.GetState() == KeyEvent::DOWN)
+    {
+      if(event.GetKeyName() == "1")
+      {
+        if(auto* loader = GetTestThemeLoader())
+        {
+          loader->ToggleTheme();
+        }
+        return;
+      }
+
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        mApplication.Quit();
+      }
+    }
   }
 
 private:
@@ -73,8 +96,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
-  HelloWorldController test(application);
+  TestConfig::New().Apply();
+  ColorControlsExample test(application);
   application.MainLoop();
   return 0;
 }

@@ -173,6 +173,17 @@ public:
    */
   bool IsFocusIndicatorAlwaysShown() const;
 
+  /*
+   * @brief Creates a ThemeLoaderInterface instance from the current config.
+   *
+   * Forwards to UiConfigImpl::CreateThemeLoader(). Called internally by
+   * UiThemeManagerImpl during on-demand loader creation.
+   *
+   * @pre Init() must have been called.
+   * @return A new ThemeLoaderInterface instance. Caller takes ownership.
+   */
+  ThemeLoaderInterface* CreateThemeLoader();
+
 private:
   UiConfigManager()  = default;
   ~UiConfigManager() = default;

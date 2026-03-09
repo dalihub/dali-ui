@@ -1,0 +1,499 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+
+Vector4 gLastAppliedColor;
+int     gApplyCallCount = 0;
+
+void TestApplyFunc(View view, const Vector4& color)
+{
+  gLastAppliedColor = color;
+  gApplyCallCount++;
+}
+
+void TestApplyFunc2(View view, const Vector4& color)
+{
+  // Second apply function for testing multiple bindings
+}
+
+bool OverridePrimary(const std::string& colorId, Vector4& outColor)
+{
+  if(colorId == "Primary")
+  {
+    outColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+    return true;
+  }
+  return false;
+}
+
+bool OverrideAll(const std::string& colorId, Vector4& outColor)
+{
+  outColor = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+  return true;
+}
+
+} // namespace
+
+void utc_dali_uicolormanager_startup(void)
+{
+  test_return_value = TET_UNDEF;
+  gLastAppliedColor = Vector4::ZERO;
+  gApplyCallCount   = 0;
+  UiConfig::New().Apply();
+}
+
+void utc_dali_uicolormanager_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// === Constructor ===
+
+int UtcDaliUiColorManagerConstructorP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager;
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+// === Get Singleton ===
+
+int UtcDaliUiColorManagerGetP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  DALI_TEST_CHECK(manager);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerGetSingletonP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager1 = UiColorManager::Get();
+  UiColorManager manager2 = UiColorManager::Get();
+
+  DALI_TEST_CHECK(manager1);
+  DALI_TEST_CHECK(manager2);
+  DALI_TEST_CHECK(manager1 == manager2);
+
+  END_TEST;
+}
+
+// === Copy / Move ===
+
+int UtcDaliUiColorManagerCopyConstructorP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  UiColorManager copy(manager);
+
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(manager == copy);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerMoveConstructorP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  DALI_TEST_EQUALS(2, manager.GetBaseObject().ReferenceCount(), TEST_LOCATION);
+
+  UiColorManager moved(std::move(manager));
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerCopyAssignmentP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  UiColorManager copy;
+  copy = manager;
+
+  DALI_TEST_CHECK(copy);
+  DALI_TEST_CHECK(manager == copy);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerMoveAssignmentP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  UiColorManager moved;
+  moved = std::move(manager);
+
+  DALI_TEST_CHECK(moved);
+  DALI_TEST_CHECK(!manager);
+
+  END_TEST;
+}
+
+// === DownCast ===
+
+int UtcDaliUiColorManagerDownCastP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  BaseHandle     handle(manager);
+
+  UiColorManager downCasted = UiColorManager::DownCast(handle);
+  DALI_TEST_CHECK(downCasted);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerDownCastN(void)
+{
+  TestApplication application;
+
+  BaseHandle handle;
+  UiColorManager downCasted = UiColorManager::DownCast(handle);
+  DALI_TEST_CHECK(!downCasted);
+
+  END_TEST;
+}
+
+// === GetColor (by ID) ===
+
+int UtcDaliUiColorManagerGetColorP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // "Primary" is provided by DefaultThemeLoader
+  Vector4 color = manager.GetColor("Primary");
+  DALI_TEST_CHECK(color != Vector4::ZERO);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerGetColorNotFoundN(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  Vector4 color = manager.GetColor("ThisColorDoesNotExist");
+  DALI_TEST_EQUALS(color, Vector4::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerGetColorWithOutParamP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  Vector4 outColor;
+  bool found = manager.GetColor("Primary", outColor);
+
+  DALI_TEST_CHECK(found);
+  DALI_TEST_CHECK(outColor != Vector4::ZERO);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerGetColorWithOutParamN(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  Vector4 outColor(1.0f, 1.0f, 1.0f, 1.0f);
+  bool found = manager.GetColor("NonExistentColor", outColor);
+
+  DALI_TEST_CHECK(!found);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerGetColorDefaultColorsP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // Verify all default theme colors are available
+  Vector4 primary;
+  bool foundPrimary = manager.GetColor("Primary", primary);
+  DALI_TEST_CHECK(foundPrimary);
+
+  Vector4 background;
+  bool foundBackground = manager.GetColor("Background", background);
+  DALI_TEST_CHECK(foundBackground);
+
+  Vector4 outline;
+  bool foundOutline = manager.GetColor("Outline", outline);
+  DALI_TEST_CHECK(foundOutline);
+
+  END_TEST;
+}
+
+// === ApplyColor ===
+
+int UtcDaliUiColorManagerApplyColorRgbaP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
+  gApplyCallCount = 0;
+  manager.ApplyColor(color, view, TestApplyFunc);
+
+  DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gLastAppliedColor, Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerApplyColorTokenP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  UiColor color(std::string("Primary"));
+  gApplyCallCount = 0;
+  manager.ApplyColor(color, view, TestApplyFunc);
+
+  DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(gLastAppliedColor != Vector4::ZERO);
+
+  END_TEST;
+}
+
+// === UnregisterBinding ===
+
+int UtcDaliUiColorManagerUnregisterBindingP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  UiColor color(std::string("Primary"));
+  manager.ApplyColor(color, view, TestApplyFunc);
+
+  manager.UnregisterBinding(view, TestApplyFunc);
+
+  // Should not throw
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+// === UnregisterBindings ===
+
+int UtcDaliUiColorManagerUnregisterBindingsP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  UiColor color1(std::string("Primary"));
+  UiColor color2(std::string("Background"));
+
+  manager.ApplyColor(color1, view, TestApplyFunc);
+  manager.ApplyColor(color2, view, TestApplyFunc2);
+
+  // Remove all bindings for this view
+  manager.UnregisterBindings(view);
+
+  // Should not throw
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerUnregisterBindingsNoBindingsN(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  // Should not throw even when no bindings exist
+  manager.UnregisterBindings(view);
+
+  // Should not throw
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+// === SetColorOverride ===
+
+int UtcDaliUiColorManagerSetColorOverrideP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // Override "Primary" to red
+  manager.SetColorOverride(OverridePrimary);
+
+  Vector4 color = manager.GetColor("Primary");
+  DALI_TEST_EQUALS(color, Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  // Cleanup
+  manager.ClearColorOverride();
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerSetColorOverrideFallbackP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // OverridePrimary only overrides "Primary", not "Background"
+  manager.SetColorOverride(OverridePrimary);
+
+  // "Background" should fall through to theme loader
+  Vector4 background;
+  bool found = manager.GetColor("Background", background);
+  DALI_TEST_CHECK(found);
+  DALI_TEST_CHECK(background != Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+
+  // Cleanup
+  manager.ClearColorOverride();
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerClearColorOverrideP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // Get original theme color
+  Vector4 originalPrimary = manager.GetColor("Primary");
+
+  // Override to red
+  manager.SetColorOverride(OverridePrimary);
+  DALI_TEST_EQUALS(manager.GetColor("Primary"), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  // Clear override → should revert to theme value
+  manager.ClearColorOverride();
+  DALI_TEST_EQUALS(manager.GetColor("Primary"), originalPrimary, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  // Bind view to "Primary" token color
+  UiColor color(std::string("Primary"));
+  gApplyCallCount = 0;
+  manager.ApplyColor(color, view, TestApplyFunc);
+  DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);
+
+  // Set override → should immediately refresh and call apply func again
+  gApplyCallCount = 0;
+  manager.SetColorOverride(OverridePrimary);
+  DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(gLastAppliedColor, Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  // Clear override → should refresh again with theme value
+  gApplyCallCount = 0;
+  manager.ClearColorOverride();
+  DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(gLastAppliedColor != Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerSetColorOverrideReplaceP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // Set first override
+  manager.SetColorOverride(OverridePrimary);
+  DALI_TEST_EQUALS(manager.GetColor("Primary"), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  // Replace with override that returns black for everything
+  manager.SetColorOverride(OverrideAll);
+  DALI_TEST_EQUALS(manager.GetColor("Primary"), Vector4(0.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("Background"), Vector4(0.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
+
+  // Cleanup
+  manager.ClearColorOverride();
+
+  END_TEST;
+}
+
+int UtcDaliUiColorManagerSetColorOverrideNullP(void)
+{
+  TestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+
+  // Setting nullptr should act like ClearColorOverride
+  manager.SetColorOverride(OverridePrimary);
+  manager.SetColorOverride(nullptr);
+
+  // Should use theme value
+  Vector4 color = manager.GetColor("Primary");
+  DALI_TEST_CHECK(color != Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+
+  END_TEST;
+}

@@ -45,7 +45,7 @@ class UiElementConfigImpl;
  *  UiElementConfig::New()
  *       .SetScalingFactor(1.5f)
  *       .SetDefaultFontSize(24.0f)
- *       .SetDefaultTextColor(Color::BLACK);
+ *       .SetDefaultTextColor(Color::BLACK)
  *       .Apply();
  * @endcode
  */

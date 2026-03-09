@@ -22,6 +22,9 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/default-theme-loader.h>
+
 namespace
 {
 
@@ -216,6 +219,11 @@ void UiConfigImpl::SetAlwaysShowFocus(bool alwaysShow)
 bool UiConfigImpl::IsFocusIndicatorAlwaysShown() const
 {
   return mAlwaysShowFocus;
+}
+
+ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()
+{
+  return new DefaultThemeLoader();
 }
 
 void UiConfigImpl::OnInitialized()

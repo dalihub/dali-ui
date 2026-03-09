@@ -53,7 +53,7 @@ public:
           .SetLayoutWidth(LayoutDimension::WrapContent)
           .SetLayoutHeight(100.0f)
           .SetViewPadding(Extents(10, 10, 10, 10))
-          .BackgroundColor(Color::RED)
+          .SetBackgroundColor(Color::RED)
           .SetTextColor(Color::ORANGE)
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetVerticalTextAlignment(Text::Alignment::CENTER)
@@ -65,7 +65,7 @@ public:
           .SetMaximumWidth(600)
           .SetMaximumHeight(300)
           .SetViewPadding(Extents(20, 20, 20, 20))
-          .BackgroundColor(Color::DARK_GRAY)
+          .SetBackgroundColor(Color::DARK_GRAY)
           .SetTextColor(Color::RED)
           .SetMultiLine(true)
           .As(mLabel2),
@@ -74,18 +74,18 @@ public:
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(150.0f)
           .SetViewPadding(Extents(20, 20, 20, 20))
-          .BackgroundColor(Color::BLACK)
+          .SetBackgroundColor(Color::BLACK)
           .SetTextColor(Color::WHITE)
           .SetMultiLine(true)
           .As(mLabel3),
 
          View::New()
-          .BackgroundColor(Color::BLUE)
+          .SetBackgroundColor(Color::BLUE)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f),
 
         Label::New("Label Alignment")
-          .BackgroundColor(Color::GRAY)
+          .SetBackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
@@ -93,7 +93,7 @@ public:
           .SetVerticalTextAlignment(Text::Alignment::START),
 
         Label::New("Label Alignment")
-          .BackgroundColor(Color::GRAY)
+          .SetBackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
@@ -101,7 +101,7 @@ public:
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
 
         Label::New("Label Alignment")
-          .BackgroundColor(Color::GRAY)
+          .SetBackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
@@ -159,20 +159,20 @@ public:
       {
         if (mLabel.GetTextColor() == Color::ORANGE)
         {
-          mLabel.BackgroundColor(Color::ORANGE);
+          mLabel.SetBackgroundColor(Color::ORANGE);
           mLabel.SetTextColor(Color::RED);
-          mLabel2.BackgroundColor(Color::RED);
-          mLabel2.SetTextColor(Color::DARK_GRAY);          
-          mLabel3.BackgroundColor(Color::WHITE);
+          mLabel2.SetBackgroundColor(Color::RED);
+          mLabel2.SetTextColor(Color::DARK_GRAY);
+          mLabel3.SetBackgroundColor(Color::WHITE);
           mLabel3.SetTextColor(Color::BLACK);
         }
         else
         {
-          mLabel.BackgroundColor(Color::RED);
+          mLabel.SetBackgroundColor(Color::RED);
           mLabel.SetTextColor(Color::ORANGE);
-          mLabel2.BackgroundColor(Color::DARK_GRAY);
-          mLabel2.SetTextColor(Color::RED);          
-          mLabel3.BackgroundColor(Color::BLACK);
+          mLabel2.SetBackgroundColor(Color::DARK_GRAY);
+          mLabel2.SetTextColor(Color::RED);
+          mLabel3.SetBackgroundColor(Color::BLACK);
           mLabel3.SetTextColor(Color::WHITE);
         }
       }

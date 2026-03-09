@@ -25,6 +25,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/theme-loader-interface.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
@@ -232,6 +233,17 @@ public:
    * @return True if focus indicator is always shown
    */
   bool IsFocusIndicatorAlwaysShown() const;
+
+  /**
+   * @brief Creates a ThemeLoaderInterface instance.
+   *
+   * Called internally by UiConfigManager during initialization. Derived
+   * implementations override this to provide a custom theme loader.
+   * The framework takes ownership of the returned pointer.
+   *
+   * @return A ThemeLoaderInterface instance, or nullptr to use the default loader
+   */
+  virtual ThemeLoaderInterface* CreateThemeLoader();
 
   /**
    * @brief Called after this config is applied via UiConfig::Apply().

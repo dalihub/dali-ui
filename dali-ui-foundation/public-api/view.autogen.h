@@ -157,7 +157,7 @@
   */ \
   ChildClass& As(View& self) { View::As(self); return *this; } \
   /** \
-  * @brief Executesa custom action on this View instance. \
+  * @brief Executes a custom action on this View instance. \
   * Use this method to perform additional initialization or logic on a View \
   * without breaking the declarative method chaining. \
   * @param[in] action A function or lambda to be executed with this instance. \
@@ -166,9 +166,16 @@
   /** \
   * @brief Sets the background color. \
   * \
-  * @param[in] color The required background color value \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * If the UiColor has direct RGBA values, it is applied immediately \
+  * and any previous ID-based binding for this property is removed. \
+  * \
+  * @param[in] color The UiColor to apply \
   */ \
-  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; } \
+  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
   /** \
   * @brief Sets layout parameters on this View. \
   * \
