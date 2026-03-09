@@ -1,0 +1,99 @@
+name: PR Description Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  pr-description:
+    runs-on: code-linux
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate PR Description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const templatePath = path.join(
+              process.env.GITHUB_WORKSPACE || '.',
+              '.github/pull_request_template.md'
+            );
+            const template = fs.readFileSync(templatePath, 'utf8');
+            const body = context.payload.pull_request.body || '';
+
+            // Parse template: extract sections with (optional) = optional, else required
+            function parseTemplate(template) {
+              const sections = [];
+              const lines = template.split('\n');
+              let current = null;
+
+              for (const line of lines) {
+                const headerMatch = line.match(/^(#{2,3})\s+(.+)$/);
+                if (headerMatch) {
+                  if (current) sections.push(current);
+                  const title = headerMatch[2].trim();
+                  current = {
+                    header: line.trim(),
+                    isOptional: /\(optional\)/i.test(title),
+                    placeholder: null
+                  };
+                } else if (current && /^\s*<!--/.test(line)) {
+                  const m = line.match(/<!--\s*(.+?)\s*-->/s);
+                  if (m) current.placeholder = m[1].trim();
+                }
+              }
+              if (current) sections.push(current);
+              return sections;
+            }
+
+            function extractSectionContent(body, section) {
+              const escapedHeader = section.header.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(
+                `${escapedHeader}\\s*\\n([\\s\\S]*?)(?=\\n#{2,3}\\s|$)`,
+                'i'
+              );
+              const m = body.match(regex);
+              if (!m) return null;
+              return m[1].replace(/<!--[\s\S]*?-->/g, '').trim();
+            }
+
+            const sections = parseTemplate(template);
+            const required = sections.filter(s => !s.isOptional);
+
+            if (required.length === 0) {
+              core.setFailed('템플릿에 필수 섹션이 없습니다. (optional)이 없는 섹션이 필요합니다.');
+              return;
+            }
+
+            // PR body 전체가 비어있는지 확인
+            const trimmedBody = body.replace(/<!--[\s\S]*?-->/g, '').trim();
+            if (!trimmedBody || trimmedBody.length < 10) {
+              core.setFailed('PR description이 비어있습니다. 템플릿을 작성해 주세요.');
+              return;
+            }
+
+            for (const section of required) {
+              const content = extractSectionContent(body, section);
+              if (content === null) {
+                core.setFailed(`필수 섹션 "${section.header}"이(가) 없습니다.`);
+                return;
+              }
+              if (!content || content.length < 10) {
+                core.setFailed(`필수 섹션 "${section.header}"에 구체적인 내용을 작성해 주세요. (최소 10자 이상)`);
+                return;
+              }
+
+              // 플레이스홀더만 있는지 확인
+              if (section.placeholder && content.length < 100) {
+                const isPlaceholder = content === section.placeholder ||
+                  (content.includes(section.placeholder) && content.length < section.placeholder.length + 30);
+                if (isPlaceholder) {
+                  core.setFailed(`필수 섹션 "${section.header}"에 플레이스홀더만 있으면 안 됩니다. 실제 내용을 작성해 주세요.`);
+                  return;
+                }
+              }
+            }

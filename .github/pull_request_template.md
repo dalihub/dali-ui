@@ -1,13 +1,5 @@
-### Description of Change
-<!-- Describe this pull request's purpose here. -->
+## Description of Change
+<!-- 이 PR의 목적과 변경 사항을 설명해 주세요. -->
 
-<!-- Describe the API changes, if there are any changes to the public API in this PR.
-### API Changes
-
-- Added
-  - class NewClass
-- Changed
-  - bool View.Before → bool View.After
-- Removed
-  - int View.ToBeRemoved
--->
+## Example of Use (optional)
+<!-- 사용 예시가 있다면 작성해 주세요. -->
