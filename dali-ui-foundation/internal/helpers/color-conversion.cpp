@@ -18,8 +18,8 @@
 #include <dali-ui-foundation/internal/helpers/color-conversion.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/color-controller.h>
 #include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/property-value.h>
 #include <sstream>
 
 using Dali::Vector4;
@@ -57,15 +57,6 @@ bool ConvertStringToColor(const std::string& colorString, Vector4& outColor)
     outColor = HexStringToVector4(&cString[1]);
     success = true;
   }
-  else
-  {
-    Dali::ColorController controller = Dali::ColorController::Get();
-
-    if (controller)
-    {
-      success = controller.RetrieveColor(colorString, outColor);
-    }
-  }
 
   return success;
 }
@@ -77,14 +68,6 @@ bool ConvertPropertyToColor(const Property::Value& colorValue, Vector4& outColor
   if (Property::VECTOR4 == colorValue.GetType())
   {
     success = colorValue.Get(outColor);
-  }
-  else if (Property::STRING == colorValue.GetType())
-  {
-    std::string colorString;
-    if (colorValue.Get(colorString))
-    {
-      success = ConvertStringToColor(colorString, outColor);
-    }
   }
 
   return success;
