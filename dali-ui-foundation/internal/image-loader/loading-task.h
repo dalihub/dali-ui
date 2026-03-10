@@ -27,7 +27,7 @@
 #include <dali/devel-api/threading/mutex.h>
 #include <dali/devel-api/threading/thread.h>
 #include <dali/integration-api/adaptor-framework/log-factory-interface.h>
-#include <dali/public-api/adaptor-framework/async-task-manager.h>
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/ref-object.h>

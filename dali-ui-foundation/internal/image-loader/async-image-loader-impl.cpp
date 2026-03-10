@@ -20,7 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/adaptor.h>
-#include <dali/public-api/adaptor-framework/async-task-manager.h>
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 
 namespace Dali
 {

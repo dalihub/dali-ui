@@ -28,7 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
-#include <dali/public-api/adaptor-framework/async-task-manager.h>
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 
 namespace Dali
 {

@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
 #include <dali/devel-api/threading/mutex.h>
-#include <dali/public-api/adaptor-framework/async-task-manager.h>
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <memory> ///< for std::unique_ptr
 
 // INTERNAL INCLUDES
