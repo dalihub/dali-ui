@@ -96,6 +96,7 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   float spacingTotal  = (visibleChildCount > 1) ? spacing * (visibleChildCount - 1) : 0.0f;
   float remainingMain = contentMain - mainAxisNonWeight - spacingTotal;
   remainingMain       = std::max(0.0f, remainingMain);
+
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
@@ -104,6 +105,7 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
     {
       continue;
     }
+
     float   share              = (weight / totalWeight) * remainingMain;
     Extents margin             = childImpl.GetViewMargin();
     float   marginH            = static_cast<float>(margin.top + margin.bottom);
@@ -221,8 +223,6 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   float availableHeight = bounds.height;
   float currentX        = bounds.x;
   float currentY        = bounds.y;
-  float remainingHeight = availableHeight;
-  float remainingWidth  = availableWidth;
 
   for(auto& childData : children)
   {
@@ -235,16 +235,21 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     if(mOrientation == StackOrientation::VERTICAL)
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
-      const float childHeight    = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent)
-                                     ? std::max(0.0f, remainingHeight - marginH)
-                                     : childData.measuredSize.height;
+      const float childHeight = childData.measuredSize.height;
       const float slotHeight     = childHeight + marginH;
 
       // Cross-axis (horizontal) alignment
-      float childWidth =
-        (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent) ? crossAvailable : childData.measuredSize.width;
-      float           crossX = currentX + static_cast<float>(margin.start);
       LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
+      float childWidth;
+      if (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent || hAlign == LayoutAlignment::FILL)
+      {
+        childWidth = crossAvailable;
+      }
+      else
+      {
+        childWidth = childData.measuredSize.width;
+      }
+      float crossX = currentX + static_cast<float>(margin.start);
       switch(hAlign)
       {
         case LayoutAlignment::CENTER:
@@ -268,21 +273,25 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childData.arrangedBounds = childBounds;
 
       currentY += slotHeight + mSpacing;
-      remainingHeight -= slotHeight + mSpacing;
     }
     else
     {
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
-      const float childWidth     = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent)
-                                     ? std::max(0.0f, remainingWidth - marginW)
-                                     : childData.measuredSize.width;
+      const float childWidth = childData.measuredSize.width;
       const float slotWidth      = childWidth + marginW;
 
       // Cross-axis (vertical) alignment
-      float           childHeight = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent) ? crossAvailable
-                                                                                                  : childData.measuredSize.height;
-      float           crossY      = currentY + static_cast<float>(margin.top);
       LayoutAlignment vAlign      = childImpl.GetVerticalAlignment();
+      float childHeight;
+      if (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent || vAlign == LayoutAlignment::FILL)
+      {
+        childHeight = crossAvailable;
+      }
+      else
+      {
+        childHeight = childData.measuredSize.height;
+      }
+      float crossY = currentY + static_cast<float>(margin.top);
       switch(vAlign)
       {
         case LayoutAlignment::CENTER:
@@ -306,7 +315,6 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childData.arrangedBounds = childBounds;
 
       currentX += slotWidth + mSpacing;
-      remainingWidth -= slotWidth + mSpacing;
     }
   }
 

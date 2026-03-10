@@ -39,6 +39,29 @@ class StackLayoutImpl;
  *
  * StackLayout is a simple layout container that stacks its children either
  * horizontally or vertically with optional spacing between them.
+ *
+ * @section stack_common_props Common Property Behavior
+ *
+ * For a vertical StackLayout (horizontal is analogous with axes swapped):
+ *
+ * - @b LayoutHeight (main-axis): A positive value sets a fixed height.
+ *   WrapContent uses the child's natural size. MatchParent sizes the child
+ *   to the parent's full main-axis content height (the constraint given to
+ *   the StackLayout). Use weight for proportional space distribution instead.
+ * - @b LayoutWidth (cross-axis): A positive value sets a fixed width.
+ *   WrapContent uses the child's natural size. MatchParent fills the
+ *   cross-axis.
+ * - @b VerticalAlignment (main-axis): Not used. Children are stacked
+ *   sequentially; main-axis position is determined by the stacking order.
+ * - @b HorizontalAlignment (cross-axis): START, CENTER, and END position
+ *   the child within the cross-axis. FILL stretches the child to fill the
+ *   cross-axis (same effect as MatchParent on the cross-axis dimension).
+ * - @b Margin: Applied on all sides, reducing the space available for the child.
+ * - @b Weight (via StackLayoutParams): Children with weight > 0 share the
+ *   remaining main-axis space proportionally. The child's main-axis
+ *   LayoutWidth/LayoutHeight is ignored — the size is determined entirely
+ *   by the weight ratio. Only children with weight 0 are measured normally
+ *   using their LayoutWidth/LayoutHeight.
  */
 class DALI_UI_API StackLayout : public Layout
 {

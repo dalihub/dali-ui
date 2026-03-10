@@ -96,7 +96,12 @@ public:
   /**
    * @brief Sets the weight for proportional space distribution along the stack axis.
    *
-   * @param[in] weight The layout weight (0 means no extra space)
+   * When 0, the child is measured normally using its LayoutWidth/LayoutHeight.
+   * When > 0, the child's main-axis size is determined entirely by its weight
+   * proportion of the remaining space (the main-axis LayoutWidth/LayoutHeight
+   * is ignored).
+   *
+   * @param[in] weight The layout weight
    * @return Reference to this for chaining
    */
   StackLayoutParams& SetWeight(float weight);

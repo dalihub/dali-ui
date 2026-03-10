@@ -413,7 +413,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
 
 int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
 {
-  // Fill on cross axis is treated as Start: size from layout dimension, position at start.
+  // Fill on cross axis: child expands to fill the available cross-axis space.
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
@@ -427,7 +427,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
   layout.Measure(200.0f, 100.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 100));
   DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child.GetSizeWidth(), 80.0f, TEST_LOCATION); // Fill = Start, use measured size
+  DALI_TEST_EQUALS(child.GetSizeWidth(), 200.0f, TEST_LOCATION); // Fill expands to parent width
   END_TEST;
 }
 
@@ -492,7 +492,7 @@ int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
 
 int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
 {
-  // Fill on cross axis is treated as Start: size from layout dimension, position at start.
+  // Fill on cross axis: child expands to fill the available cross-axis space.
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
@@ -506,6 +506,6 @@ int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
   layout.Measure(200.0f, 100.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 100));
   DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child.GetSizeHeight(), 40.0f, TEST_LOCATION); // Fill = Start, use measured size
+  DALI_TEST_EQUALS(child.GetSizeHeight(), 100.0f, TEST_LOCATION); // Fill expands to parent height
   END_TEST;
 }
