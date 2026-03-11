@@ -27,8 +27,29 @@ namespace Ui
  * @{
  */
 
+/**
+ * @brief Enumeration for text alignment options.
+ */
+
+enum class TextAlignment : uint8_t
+{
+  /**
+   * @brief Align to the start (left/top)
+   */
+  START = 0,
+  /**
+   * @brief Align to the center
+   */
+  CENTER = 1,
+  /**
+   * @brief Align to the end (right/bottom)
+   */
+  END = 2
+};
+
 namespace Text
 {
+
 /**
  * @brief The available Horizontal alignments for text.
  *
