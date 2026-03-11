@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 namespace Dali
 {
@@ -28,18 +29,23 @@ namespace Ui
 namespace Integration
 {
 
-Ui::StackLayout StackLayoutImpl::New(StackOrientation orientation)
+namespace
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<Integration::StackLayoutImpl> impl = new Integration::StackLayoutImpl(orientation);
 
-  // Pass ownership to CustomActor handle
-  Ui::StackLayout handle = Ui::StackLayout(*impl);
+BaseHandle Create()
+{
+  return StackLayout::New();
+}
 
-  // Second-phase initialization
-  impl->Initialize();
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::StackLayoutImpl, Ui::Integration::LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_END()
 
-  return handle;
+} // namespace
+
+StackLayoutImplPtr StackLayoutImpl::New(StackOrientation orientation)
+{
+  return StackLayoutImplPtr(new StackLayoutImpl(orientation));
 }
 
 StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)

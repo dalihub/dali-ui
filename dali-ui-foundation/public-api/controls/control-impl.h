@@ -498,14 +498,14 @@ protected:
    */
   Control(ControlBehaviour behaviourFlags);
 
+public: // API for derived classes to override
+  // Lifecycle
+
   /**
    * @brief Second phase initialization.
    * @SINCE_1_0.0
    */
   void Initialize();
-
-public: // API for derived classes to override
-  // Lifecycle
 
   /**
    * @brief This method is called after the Control has been initialized.

@@ -29,6 +29,9 @@ namespace Ui
 namespace Integration
 {
 
+class LayoutImpl;
+using LayoutImplPtr = IntrusivePtr<LayoutImpl>;
+
 /**
  * @brief This is the internal implementation class for Layout.
  *
@@ -45,9 +48,11 @@ class LayoutImpl : public ViewImpl
 {
 public:
   /**
-   * @brief Creates a new Layout.
+   * @brief Creates a new Layout implementation.
+   *
+   * @return An IntrusivePtr to the new LayoutImpl
    */
-  static Ui::Layout New();
+  static LayoutImplPtr New();
 
 protected:
   /**

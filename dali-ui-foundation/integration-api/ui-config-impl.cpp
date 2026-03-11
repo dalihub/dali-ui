@@ -55,11 +55,9 @@ UiConfigImpl::UiConfigImpl()
 
 UiConfigImpl::~UiConfigImpl() = default;
 
-UiConfig UiConfigImpl::New()
+UiConfigImplPtr UiConfigImpl::New()
 {
-  IntrusivePtr<UiConfigImpl> impl = new UiConfigImpl();
-  UiConfig handle(impl.Get());
-  return handle;
+  return UiConfigImplPtr(new UiConfigImpl());
 }
 
 void UiConfigImpl::Freeze()

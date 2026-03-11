@@ -34,7 +34,16 @@ DummyElement::DummyElement()
 
 DummyElement DummyElement::New()
 {
-  return Internal::DummyElementImpl::New();
+  // Create the implementation, temporarily owned on stack
+  Internal::DummyElementImplPtr impl = Internal::DummyElementImpl::New();
+
+  // Pass ownership to handle
+  DummyElement handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 DummyElement::DummyElement(const DummyElement& DummyElement)

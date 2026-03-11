@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/flex-layout-manager.h>
@@ -32,6 +33,9 @@ namespace Ui
 namespace Integration
 {
 
+class FlexLayoutImpl;
+using FlexLayoutImplPtr = IntrusivePtr<FlexLayoutImpl>;
+
 /**
  * @brief This is the internal implementation class for FlexLayout.
  */
@@ -39,11 +43,11 @@ class FlexLayoutImpl : public LayoutImpl
 {
 public:
   /**
-   * @brief Creates a new FlexLayout.
+   * @brief Creates a new FlexLayout implementation.
    *
-   * @return A handle to a newly allocated FlexLayout
+   * @return An IntrusivePtr to the new FlexLayoutImpl
    */
-  static Ui::FlexLayout New();
+  static FlexLayoutImplPtr New();
 
 protected:
   virtual ~FlexLayoutImpl();

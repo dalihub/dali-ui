@@ -32,6 +32,9 @@ namespace Ui
 namespace Internal
 {
 
+class DummyElementImpl;
+using DummyElementImplPtr = IntrusivePtr<DummyElementImpl>;
+
 /**
  * @brief This is the internal implementation class for DummyImpl.
  *
@@ -50,7 +53,7 @@ public:
   /**
    * @brief Creates a new DummyImpl.
    */
-  static Ui::DummyElement New();
+  static DummyElementImplPtr New();
 
 protected:
 

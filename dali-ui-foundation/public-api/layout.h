@@ -109,6 +109,7 @@ public:
 
 public:
 
+  // @CHAIN_START(Layout, View)
   // @CHAIN_MANUAL
   /**
    * @brief Adds a list of children to this View in a declarative way.

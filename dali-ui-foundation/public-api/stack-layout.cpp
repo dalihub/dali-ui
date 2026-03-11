@@ -63,7 +63,15 @@ StackLayout& StackLayout::operator=(StackLayout&& rhs) noexcept
 
 StackLayout StackLayout::New(StackOrientation orientation)
 {
-  return Integration::StackLayoutImpl::New(orientation);
+  Integration::StackLayoutImplPtr impl = Integration::StackLayoutImpl::New(orientation);
+
+  // Pass ownership to handle
+  StackLayout handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 StackLayout StackLayout::DownCast(BaseHandle handle)

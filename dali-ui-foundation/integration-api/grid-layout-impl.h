@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <vector>
+#include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/grid-layout-manager.h>
@@ -33,13 +34,21 @@ namespace Ui
 namespace Integration
 {
 
+class GridLayoutImpl;
+using GridLayoutImplPtr = IntrusivePtr<GridLayoutImpl>;
+
 /**
  * @brief This is the internal implementation class for GridLayout.
  */
 class GridLayoutImpl : public LayoutImpl
 {
 public:
-  static Ui::GridLayout New();
+  /**
+   * @brief Creates a new GridLayout implementation.
+   *
+   * @return An IntrusivePtr to the new GridLayoutImpl
+   */
+  static GridLayoutImplPtr New();
 
 protected:
   virtual ~GridLayoutImpl();

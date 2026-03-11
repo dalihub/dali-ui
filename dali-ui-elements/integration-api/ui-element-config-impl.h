@@ -33,6 +33,9 @@ namespace Ui
 namespace Integration
 {
 
+class UiElementConfigImpl;
+using UiElementConfigImplPtr = IntrusivePtr<UiElementConfigImpl>;
+
 /**
  * @brief Internal implementation of UiElementConfig.
  *
@@ -48,7 +51,7 @@ public:
    *
    * @return A fully initialized UiElementConfig handle
    */
-  static UiElementConfig New();
+  static UiElementConfigImplPtr New();
 
   /**
    * @brief Sets the default font size.

@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <cstdint>
 #include <string>
+#include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
@@ -34,6 +35,9 @@ namespace Ui
 namespace Integration
 {
 
+class UiConfigImpl;
+using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
+
 /**
  * @brief Internal implementation of UiConfig.
  *
@@ -44,11 +48,11 @@ class DALI_UI_API UiConfigImpl : public BaseObject
 {
 public:
   /**
-   * @brief Creates a new UiConfig handle with default values.
+   * @brief Creates a new UiConfig implementation.
    *
-   * @return A fully initialized UiConfig handle
+   * @return An IntrusivePtr to the new UiConfigImpl
    */
-  static UiConfig New();
+  static UiConfigImplPtr New();
 
   /**
    * @brief Marks this config as frozen.

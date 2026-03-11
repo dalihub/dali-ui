@@ -57,24 +57,24 @@ ClickableTrait ClickableTrait::DownCast(BaseHandle handle)
   return ClickableTrait(dynamic_cast<Integration::ClickableTraitImpl*>(handle.GetObjectPtr()));
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::GetPressedChangedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTrait::PressedChangedSignal()
 {
-  return GetImpl(*this).GetPressedChangedSignal();
+  return GetImpl(*this).PressedChangedSignal();
 }
 
-Signal<void(View)>& ClickableTrait::GetPseudoDisabledChangedSignal()
+Signal<void(View)>& ClickableTrait::PseudoDisabledChangedSignal()
 {
-  return GetImpl(*this).GetPseudoDisabledChangedSignal();
+  return GetImpl(*this).PseudoDisabledChangedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::GetClickedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTrait::ClickedSignal()
 {
-  return GetImpl(*this).GetClickedSignal();
+  return GetImpl(*this).ClickedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::GetLongPressedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTrait::LongPressedSignal()
 {
-  return GetImpl(*this).GetLongPressedSignal();
+  return GetImpl(*this).LongPressedSignal();
 }
 
 bool ClickableTrait::IsPressed() const

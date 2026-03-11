@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <variant>
+#include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
@@ -32,6 +33,9 @@ namespace Ui
 
 namespace Integration
 {
+
+class InputEventImpl;
+using InputEventImplPtr = IntrusivePtr<InputEventImpl>;
 
 /**
  * @brief Internal implementation of InputEvent.
@@ -73,36 +77,36 @@ public:
   InputEventImpl(const LongPressGesture& originEvent);
 
   /**
-   * @brief Create a new InputEvent.
+   * @brief Create a new InputEvent implementation.
    *
    * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
+   * @return An IntrusivePtr to the new InputEventImpl
    */
-  static InputEvent New(const TouchEvent& originEvent);
+  static InputEventImplPtr New(const TouchEvent& originEvent);
 
   /**
-   * @brief Create a new InputEvent.
+   * @brief Create a new InputEvent implementation.
    *
    * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
+   * @return An IntrusivePtr to the new InputEventImpl
    */
-  static InputEvent New(const KeyEvent& originEvent);
+  static InputEventImplPtr New(const KeyEvent& originEvent);
 
   /**
-   * @brief Create a new InputEvent.
+   * @brief Create a new InputEvent implementation.
    *
    * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
+   * @return An IntrusivePtr to the new InputEventImpl
    */
-  static InputEvent New(const TapGesture& originEvent);
+  static InputEventImplPtr New(const TapGesture& originEvent);
 
   /**
-   * @brief Create a new InputEvent.
+   * @brief Create a new InputEvent implementation.
    *
    * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
+   * @return An IntrusivePtr to the new InputEventImpl
    */
-  static InputEvent New(const LongPressGesture& originEvent);
+  static InputEventImplPtr New(const LongPressGesture& originEvent);
 
   /**
    * @copydoc Dali::Ui::InputEvent::GetInputEventType

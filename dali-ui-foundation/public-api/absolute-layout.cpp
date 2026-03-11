@@ -64,7 +64,15 @@ AbsoluteLayout& AbsoluteLayout::operator=(AbsoluteLayout&& rhs) noexcept
 
 AbsoluteLayout AbsoluteLayout::New()
 {
-  return Integration::AbsoluteLayoutImpl::New();
+  Integration::AbsoluteLayoutImplPtr impl = Integration::AbsoluteLayoutImpl::New();
+
+  // Pass ownership to handle
+  AbsoluteLayout handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 AbsoluteLayout AbsoluteLayout::DownCast(BaseHandle handle)

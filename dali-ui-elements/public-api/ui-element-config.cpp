@@ -32,7 +32,10 @@ UiElementConfig::UiElementConfig(Integration::UiElementConfigImpl* impl)
 
 UiElementConfig UiElementConfig::New()
 {
-  return Integration::UiElementConfigImpl::New();
+  Integration::UiElementConfigImplPtr impl = Integration::UiElementConfigImpl::New();
+
+  // Pass ownership to handle
+  return UiElementConfig(impl.Get());
 }
 
 UiElementConfig UiElementConfig::DownCast(BaseHandle handle)

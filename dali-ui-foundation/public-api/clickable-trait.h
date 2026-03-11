@@ -106,7 +106,7 @@ public: // Signals
    *
    * @return The pressed changed signal
    */
-  Signal<bool(View, const InputEvent&)>& GetPressedChangedSignal();
+  Signal<bool(View, const InputEvent&)>& PressedChangedSignal();
 
   /**
    * @brief Emitted when the pseudo disabled state changes.
@@ -117,7 +117,7 @@ public: // Signals
    *
    * @return The pseudo disabled changed signal
    */
-  Signal<void(View)>& GetPseudoDisabledChangedSignal();
+  Signal<void(View)>& PseudoDisabledChangedSignal();
 
   /**
    * @brief Emitted when the view is clicked.
@@ -129,7 +129,7 @@ public: // Signals
    *
    * @return The clicked signal
    */
-  Signal<bool(View, const InputEvent&)>& GetClickedSignal();
+  Signal<bool(View, const InputEvent&)>& ClickedSignal();
 
   /**
    * @brief Emitted when the view receives a long press gesture.
@@ -142,7 +142,7 @@ public: // Signals
    *
    * @return The long pressed signal
    */
-  Signal<bool(View, const InputEvent&)>& GetLongPressedSignal();
+  Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
 

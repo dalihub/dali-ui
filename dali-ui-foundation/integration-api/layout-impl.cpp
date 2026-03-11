@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layout-manager.h>
@@ -34,20 +35,20 @@ namespace Integration
 namespace
 {
 
+BaseHandle Create()
+{
+  return Layout::New();
+}
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::LayoutImpl, Ui::Integration::ViewImpl, Create)
+DALI_TYPE_REGISTRATION_END()
+
 } // namespace
 
-Ui::Layout LayoutImpl::New()
+LayoutImplPtr LayoutImpl::New()
 {
-  // Create the implementation
-  IntrusivePtr<Integration::LayoutImpl> impl = new Integration::LayoutImpl();
-
-  // Pass ownership to handle
-  Ui::Layout handle = Ui::Layout(*impl);
-
-  // Second-phase initialization
-  impl->Initialize();
-
-  return handle;
+  return LayoutImplPtr(new LayoutImpl());
 }
 
 LayoutImpl::LayoutImpl()

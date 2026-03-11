@@ -40,11 +40,9 @@ UiElementConfigImpl::UiElementConfigImpl()
 
 UiElementConfigImpl::~UiElementConfigImpl() = default;
 
-UiElementConfig UiElementConfigImpl::New()
+UiElementConfigImplPtr UiElementConfigImpl::New()
 {
-  IntrusivePtr<UiElementConfigImpl> impl = new UiElementConfigImpl();
-  UiElementConfig handle(impl.Get());
-  return handle;
+  return UiElementConfigImplPtr(new UiElementConfigImpl());
 }
 
 void UiElementConfigImpl::SetDefaultFontSize(float fontSize)

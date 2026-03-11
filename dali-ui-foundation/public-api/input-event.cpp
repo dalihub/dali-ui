@@ -25,6 +25,38 @@ namespace Dali
 namespace Ui
 {
 
+InputEvent InputEvent::New(const TouchEvent& originEvent)
+{
+  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
+InputEvent InputEvent::New(const KeyEvent& originEvent)
+{
+  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
+InputEvent InputEvent::New(const TapGesture& originEvent)
+{
+  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
+InputEvent InputEvent::New(const LongPressGesture& originEvent)
+{
+  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
 InputEvent::InputEvent(Integration::InputEventImpl* impl)
   : BaseHandle(impl)
 {

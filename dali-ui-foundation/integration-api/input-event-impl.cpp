@@ -62,48 +62,24 @@ InputEventImpl::~InputEventImpl()
 {
 }
 
-InputEvent InputEventImpl::New(const TouchEvent& originEvent)
+InputEventImplPtr InputEventImpl::New(const TouchEvent& originEvent)
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<InputEventImpl> impl = new InputEventImpl(originEvent);
-
-  // Pass ownership to CustomActor handle
-  InputEvent handle = InputEvent(impl.Get());
-
-  return handle;
+  return InputEventImplPtr(new InputEventImpl(originEvent));
 }
 
-InputEvent InputEventImpl::New(const KeyEvent& originEvent)
+InputEventImplPtr InputEventImpl::New(const KeyEvent& originEvent)
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<InputEventImpl> impl = new InputEventImpl(originEvent);
-
-  // Pass ownership to CustomActor handle
-  InputEvent handle = InputEvent(impl.Get());
-
-  return handle;
+  return InputEventImplPtr(new InputEventImpl(originEvent));
 }
 
-InputEvent InputEventImpl::New(const TapGesture& originEvent)
+InputEventImplPtr InputEventImpl::New(const TapGesture& originEvent)
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<InputEventImpl> impl = new InputEventImpl(originEvent);
-
-  // Pass ownership to CustomActor handle
-  InputEvent handle = InputEvent(impl.Get());
-
-  return handle;
+  return InputEventImplPtr(new InputEventImpl(originEvent));
 }
 
-InputEvent InputEventImpl::New(const LongPressGesture& originEvent)
+InputEventImplPtr InputEventImpl::New(const LongPressGesture& originEvent)
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<InputEventImpl> impl = new InputEventImpl(originEvent);
-
-  // Pass ownership to CustomActor handle
-  InputEvent handle = InputEvent(impl.Get());
-
-  return handle;
+  return InputEventImplPtr(new InputEventImpl(originEvent));
 }
 
 InputEventType InputEventImpl::GetInputEventType() const

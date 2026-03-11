@@ -132,7 +132,7 @@
   /** \
   * @brief Attaches the clickable trait and connects a member function to the Clicked signal. \
   * \
-  * Equivalent to AsClickable() then GetClickedSignal().Connect(obj, func). \
+  * Equivalent to AsClickable() then ClickedSignal().Connect(obj, func). \
   * @param[in] obj Object that implements ConnectionTrackerInterface (e.g. ConnectionTracker subclass); used for \
   * automatic disconnection \
   * @param[in] func Member function with signature bool (View, const InputEvent&) \
@@ -143,7 +143,7 @@
   /** \
   * @brief Attaches the clickable trait and connects a callable to the Clicked signal. \
   * \
-  * Equivalent to AsClickable() then GetClickedSignal().Connect(connectionTracker, func). \
+  * Equivalent to AsClickable() then ClickedSignal().Connect(connectionTracker, func). \
   * @param[in] connectionTracker Used for automatic disconnection when the tracker is destroyed \
   * @param[in] func Callable with signature bool (View, const InputEvent&) (e.g. lambda) \
   * @return Reference to this View for fluent chaining \

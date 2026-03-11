@@ -89,6 +89,38 @@ public:
   InputEvent& operator=(InputEvent&& rhs) noexcept = default;
 
   /**
+   * @brief Creates a new InputEvent from a touch event.
+   *
+   * @param[in] originEvent The originating touch event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TouchEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a key event.
+   *
+   * @param[in] originEvent The originating key event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const KeyEvent& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a tap gesture.
+   *
+   * @param[in] originEvent The originating tap gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const TapGesture& originEvent);
+
+  /**
+   * @brief Creates a new InputEvent from a long-press gesture.
+   *
+   * @param[in] originEvent The originating long-press gesture
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const LongPressGesture& originEvent);
+
+  /**
    * @brief Get the type of this event.
    *
    * @return The type of the input event

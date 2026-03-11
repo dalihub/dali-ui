@@ -52,22 +52,22 @@ ClickableTraitImpl::~ClickableTraitImpl()
 {
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::GetPressedChangedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::PressedChangedSignal()
 {
   return mPressedChangedSignal;
 }
 
-Signal<void(View)>& ClickableTraitImpl::GetPseudoDisabledChangedSignal()
+Signal<void(View)>& ClickableTraitImpl::PseudoDisabledChangedSignal()
 {
   return mPseudoDisabledChangedSignal;
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::GetClickedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::ClickedSignal()
 {
   return mClickedSignal;
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::GetLongPressedSignal()
+Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::LongPressedSignal()
 {
   return mLongPressedSignal;
 }
@@ -134,7 +134,7 @@ void ClickableTraitImpl::OnFocusedChanged(View view, bool focused)
 
 bool ClickableTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 {
-  InputEvent inputEvent = InputEventImpl::New(event);
+  InputEvent inputEvent = InputEvent::New(event);
 
   switch (event.GetState())
   {
@@ -238,12 +238,12 @@ bool ClickableTraitImpl::OnTouch(View view, const TouchEvent& touchEvent)
   {
     case PointState::STARTED:
     {
-      return SetPressedInternal(true, InputEventImpl::New(touchEvent));
+      return SetPressedInternal(true, InputEvent::New(touchEvent));
     }
     case PointState::FINISHED:
     case PointState::INTERRUPTED:
     {
-      return SetPressedInternal(false, InputEventImpl::New(touchEvent));
+      return SetPressedInternal(false, InputEvent::New(touchEvent));
     }
     default:
     {
@@ -260,7 +260,7 @@ void ClickableTraitImpl::OnTap(View view, const TapGesture& tap)
   // So, we need to detect tap gesture without using OnTouch + HandleEvent.
   if (ShouldTapTriggerClicked())
   {
-    InputEvent inputEvent = InputEventImpl::New(tap);
+    InputEvent inputEvent = InputEvent::New(tap);
     OnClicked(view, inputEvent);
   }
   mClickBlockedByTouch = false;
@@ -301,7 +301,7 @@ void ClickableTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGestu
   // NOTE OnLongPressedInternal will invoke this method twice: once for Start and once for Finished.
   if (event.GetState() == GestureState::STARTED)
   {
-    InputEvent inputEvent = InputEventImpl::New(event);
+    InputEvent inputEvent = InputEvent::New(event);
     mClickBlockedByTouch = OnLongPressed(View::DownCast(actor), inputEvent);
   }
 }

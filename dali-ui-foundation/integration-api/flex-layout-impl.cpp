@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 namespace Dali
 {
@@ -28,12 +29,23 @@ namespace Ui
 namespace Integration
 {
 
-Ui::FlexLayout FlexLayoutImpl::New()
+namespace
 {
-  IntrusivePtr<Integration::FlexLayoutImpl> impl = new Integration::FlexLayoutImpl();
-  Ui::FlexLayout handle = Ui::FlexLayout(*impl);
-  impl->Initialize();
-  return handle;
+
+BaseHandle Create()
+{
+  return FlexLayout::New();
+}
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::FlexLayoutImpl, Ui::Integration::LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_END()
+
+} // namespace
+
+FlexLayoutImplPtr FlexLayoutImpl::New()
+{
+  return FlexLayoutImplPtr(new FlexLayoutImpl());
 }
 
 FlexLayoutImpl::FlexLayoutImpl()

@@ -65,23 +65,6 @@ public:
       }));
   }
 
-  bool OnViewKeyEvent(Actor actor, const KeyEvent& event)
-  {
-    mSecondChild.BackgroundColor(Color::GREEN);
-    return true;
-  }
-
-  void OnKeyEvent(const KeyEvent& event)
-  {
-    if (event.GetState() == KeyEvent::DOWN)
-    {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
-      {
-        mApplication.Quit();
-      }
-    }
-  }
-
 private:
   Application& mApplication;
   View mSecondChild;

@@ -51,7 +51,7 @@ namespace
 
 BaseHandle Create()
 {
-  return ViewImpl::New();
+  return View::New();
 }
 
 // Type Registration
@@ -68,18 +68,9 @@ inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 
 } // namespace
 
-Ui::View ViewImpl::New()
+ViewImplPtr ViewImpl::New()
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<Integration::ViewImpl> impl = new Integration::ViewImpl();
-
-  // Pass ownership to CustomActor handle
-  Ui::View handle = Ui::View(*impl);
-
-  // Second-phase initialization
-  impl->Initialize();
-
-  return handle;
+  return ViewImplPtr(new ViewImpl());
 }
 
 ViewImpl::ViewImpl()

@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/view.h>
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
@@ -39,7 +40,15 @@ View::View()
 
 View View::New()
 {
-  return Integration::ViewImpl::New();
+  Integration::ViewImplPtr impl = Integration::ViewImpl::New();
+
+  // Pass ownership to handle
+  View handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 View::View(const View& view)

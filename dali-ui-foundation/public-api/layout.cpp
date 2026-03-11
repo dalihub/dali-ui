@@ -33,7 +33,15 @@ Layout::Layout()
 
 Layout Layout::New()
 {
-  return Integration::LayoutImpl::New();
+  Integration::LayoutImplPtr impl = Integration::LayoutImpl::New();
+
+  // Pass ownership to handle
+  Layout handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 Layout::Layout(const Layout& layout)

@@ -33,7 +33,12 @@ UiConfig::UiConfig(Integration::UiConfigImpl* impl)
 
 UiConfig UiConfig::New()
 {
-  return Integration::UiConfigImpl::New();
+  Integration::UiConfigImplPtr impl = Integration::UiConfigImpl::New();
+
+  // Pass ownership to handle
+  UiConfig handle(impl.Get());
+
+  return handle;
 }
 
 UiConfig UiConfig::DownCast(BaseHandle handle)

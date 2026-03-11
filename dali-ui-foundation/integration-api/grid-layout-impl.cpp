@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 namespace Dali
 {
@@ -28,12 +29,23 @@ namespace Ui
 namespace Integration
 {
 
-Ui::GridLayout GridLayoutImpl::New()
+namespace
 {
-  IntrusivePtr<Integration::GridLayoutImpl> impl = new Integration::GridLayoutImpl();
-  Ui::GridLayout handle = Ui::GridLayout(*impl);
-  impl->Initialize();
-  return handle;
+
+BaseHandle Create()
+{
+  return GridLayout::New();
+}
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::GridLayoutImpl, Ui::Integration::LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_END()
+
+} // namespace
+
+GridLayoutImplPtr GridLayoutImpl::New()
+{
+  return GridLayoutImplPtr(new GridLayoutImpl());
 }
 
 GridLayoutImpl::GridLayoutImpl()

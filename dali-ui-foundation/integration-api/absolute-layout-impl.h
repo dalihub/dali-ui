@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/absolute-layout-manager.h>
@@ -32,13 +33,21 @@ namespace Ui
 namespace Integration
 {
 
+class AbsoluteLayoutImpl;
+using AbsoluteLayoutImplPtr = IntrusivePtr<AbsoluteLayoutImpl>;
+
 /**
  * @brief This is the internal implementation class for AbsoluteLayout.
  */
 class AbsoluteLayoutImpl : public LayoutImpl
 {
 public:
-  static Ui::AbsoluteLayout New();
+  /**
+   * @brief Creates a new AbsoluteLayout implementation.
+   *
+   * @return An IntrusivePtr to the new AbsoluteLayoutImpl
+   */
+  static AbsoluteLayoutImplPtr New();
 
 protected:
   virtual ~AbsoluteLayoutImpl();

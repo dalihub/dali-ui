@@ -48,6 +48,9 @@ class LayoutManager;
 namespace Integration
 {
 
+class ViewImpl;
+using ViewImplPtr = IntrusivePtr<ViewImpl>;
+
 /**
  * @brief This is the internal implementation class for View.
  *
@@ -88,7 +91,7 @@ public:
   /**
    * @brief Creates a new View.
    */
-  static Ui::View New();
+  static ViewImplPtr New();
 
 protected:
 

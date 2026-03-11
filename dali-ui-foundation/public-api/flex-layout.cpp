@@ -64,7 +64,15 @@ FlexLayout& FlexLayout::operator=(FlexLayout&& rhs) noexcept
 
 FlexLayout FlexLayout::New()
 {
-  return Integration::FlexLayoutImpl::New();
+  Integration::FlexLayoutImplPtr impl = Integration::FlexLayoutImpl::New();
+
+  // Pass ownership to handle
+  FlexLayout handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 FlexLayout FlexLayout::DownCast(BaseHandle handle)

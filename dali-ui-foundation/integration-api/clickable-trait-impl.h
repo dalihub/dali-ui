@@ -57,24 +57,24 @@ public:
 public: // Signals
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::GetPressedChangedSignal
+   * @copydoc Dali::Ui::ClickableTrait::PressedChangedSignal
    */
-  Signal<bool(View, const InputEvent&)>& GetPressedChangedSignal();
+  Signal<bool(View, const InputEvent&)>& PressedChangedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::GetPseudoDisabledChangedSignal
+   * @copydoc Dali::Ui::ClickableTrait::PseudoDisabledChangedSignal
    */
-  Signal<void(View)>& GetPseudoDisabledChangedSignal();
+  Signal<void(View)>& PseudoDisabledChangedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::GetClickedSignal
+   * @copydoc Dali::Ui::ClickableTrait::ClickedSignal
    */
-  Signal<bool(View, const InputEvent&)>& GetClickedSignal();
+  Signal<bool(View, const InputEvent&)>& ClickedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::GetLongPressedSignal
+   * @copydoc Dali::Ui::ClickableTrait::LongPressedSignal
    */
-  Signal<bool(View, const InputEvent&)>& GetLongPressedSignal();
+  Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
 

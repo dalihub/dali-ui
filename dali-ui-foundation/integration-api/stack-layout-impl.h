@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layout-impl.h>
@@ -32,6 +33,9 @@ namespace Ui
 namespace Integration
 {
 
+class StackLayoutImpl;
+using StackLayoutImplPtr = IntrusivePtr<StackLayoutImpl>;
+
 /**
  * @brief This is the internal implementation class for StackLayout.
  */
@@ -39,12 +43,12 @@ class StackLayoutImpl : public LayoutImpl
 {
 public:
   /**
-   * @brief Creates a new StackLayout.
+   * @brief Creates a new StackLayout implementation.
    *
    * @param[in] orientation The orientation of the stack
-   * @return A handle to a newly allocated StackLayout
+   * @return An IntrusivePtr to the new StackLayoutImpl
    */
-  static Ui::StackLayout New(StackOrientation orientation = StackOrientation::VERTICAL);
+  static StackLayoutImplPtr New(StackOrientation orientation = StackOrientation::VERTICAL);
 
 protected:
   /**

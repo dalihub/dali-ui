@@ -64,7 +64,15 @@ GridLayout& GridLayout::operator=(GridLayout&& rhs) noexcept
 
 GridLayout GridLayout::New()
 {
-  return Integration::GridLayoutImpl::New();
+  Integration::GridLayoutImplPtr impl = Integration::GridLayoutImpl::New();
+
+  // Pass ownership to handle
+  GridLayout handle(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+
+  return handle;
 }
 
 GridLayout GridLayout::DownCast(BaseHandle handle)

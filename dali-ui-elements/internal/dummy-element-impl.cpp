@@ -33,18 +33,9 @@ namespace Ui
 namespace Internal
 {
 
-Ui::DummyElement DummyElementImpl::New()
+DummyElementImplPtr DummyElementImpl::New()
 {
-  // Create the implementation, temporarily owned on stack
-  IntrusivePtr<Internal::DummyElementImpl> impl = new Internal::DummyElementImpl();
-
-  // Pass ownership to CustomActor handle
-  Ui::DummyElement handle = Ui::DummyElement(*impl);
-
-  // Second-phase initialization
-  impl->Initialize();
-
-  return handle;
+  return DummyElementImplPtr(new DummyElementImpl());
 }
 
 DummyElementImpl::DummyElementImpl()

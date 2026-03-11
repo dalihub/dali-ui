@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/type-registry.h>
+#include <dali/public-api/object/type-registry-helper.h>
 
 namespace Dali
 {
@@ -28,12 +29,23 @@ namespace Ui
 namespace Integration
 {
 
-Ui::AbsoluteLayout AbsoluteLayoutImpl::New()
+namespace
 {
-  IntrusivePtr<Integration::AbsoluteLayoutImpl> impl = new Integration::AbsoluteLayoutImpl();
-  Ui::AbsoluteLayout handle = Ui::AbsoluteLayout(*impl);
-  impl->Initialize();
-  return handle;
+
+BaseHandle Create()
+{
+  return AbsoluteLayout::New();
+}
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::AbsoluteLayoutImpl, Ui::Integration::LayoutImpl, Create)
+DALI_TYPE_REGISTRATION_END()
+
+} // namespace
+
+AbsoluteLayoutImplPtr AbsoluteLayoutImpl::New()
+{
+  return AbsoluteLayoutImplPtr(new AbsoluteLayoutImpl());
 }
 
 AbsoluteLayoutImpl::AbsoluteLayoutImpl()
