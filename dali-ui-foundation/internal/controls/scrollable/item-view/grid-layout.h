@@ -22,7 +22,7 @@
 
 #include <dali-ui-foundation/public-api/controls/scrollable/item-view/item-layout.h>
 
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali
 {

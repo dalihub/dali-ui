@@ -20,7 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/text/spans/span-enumerations.h>
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/object/base-handle.h>
 
 namespace Dali

@@ -314,14 +314,12 @@ bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChange
     if (currentlyFocusedControl)
     {
       // Do we need it to remember if it was previously DISABLED?
-      currentlyFocusedControl.SetProperty(DevelControl::Property::STATE, DevelControl::NORMAL);
       currentlyFocusedControl.ClearKeyInputFocus();
     }
 
     Ui::Control newlyFocusedControl = Ui::Control::DownCast(actor);
     if (newlyFocusedControl)
     {
-      newlyFocusedControl.SetProperty(DevelControl::Property::STATE, DevelControl::FOCUSED);
       newlyFocusedControl.SetKeyInputFocus();
     }
 
@@ -777,7 +775,6 @@ void KeyboardFocusManager::ClearFocus(Actor actor)
     Ui::Control currentlyFocusedControl = Ui::Control::DownCast(actor);
     if (currentlyFocusedControl)
     {
-      currentlyFocusedControl.SetProperty(DevelControl::Property::STATE, DevelControl::NORMAL);
       currentlyFocusedControl.ClearKeyInputFocus();
     }
   }

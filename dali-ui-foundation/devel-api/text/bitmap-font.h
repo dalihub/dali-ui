@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <cstdint>
 #include <string>

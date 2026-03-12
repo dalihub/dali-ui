@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>

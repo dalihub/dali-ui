@@ -23,7 +23,7 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 #include <dali/devel-api/common/stage.h>
@@ -45,7 +45,6 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/controls/control-devel.h>
-#include <dali-ui-foundation/devel-api/controls/control-wrapper-impl.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/styling/style-manager-impl.h>
@@ -63,17 +62,6 @@ namespace Ui
 {
 namespace Internal
 {
-extern const Dali::Scripting::StringEnum ControlStateTable[];
-extern const unsigned int ControlStateTableCount;
-
-// Not static or anonymous - shared with other translation units
-const Scripting::StringEnum ControlStateTable[] = {
-    {"NORMAL", Ui::DevelControl::NORMAL},
-    {"FOCUSED", Ui::DevelControl::FOCUSED},
-    {"DISABLED", Ui::DevelControl::DISABLED},
-};
-const unsigned int ControlStateTableCount = sizeof(ControlStateTable) / sizeof(ControlStateTable[0]);
-
 namespace
 {
 #if defined(DEBUG_ENABLED)
@@ -471,8 +459,6 @@ const PropertyRegistration Control::Impl::PROPERTY_4(typeRegistration,  "keyInpu
 const PropertyRegistration Control::Impl::PROPERTY_5(typeRegistration,  "background",                     Ui::Control::Property::BACKGROUND,                            Property::MAP,     &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_6(typeRegistration,  "margin",                         Ui::Control::Property::MARGIN,                                Property::EXTENTS, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_7(typeRegistration,  "padding",                        Ui::Control::Property::PADDING,                               Property::EXTENTS, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
-const PropertyRegistration Control::Impl::PROPERTY_9(typeRegistration,  "state",                          Ui::DevelControl::Property::STATE,                            Property::STRING,  &Control::Impl::SetProperty, &Control::Impl::GetProperty);
-const PropertyRegistration Control::Impl::PROPERTY_10(typeRegistration, "subState",                       Ui::DevelControl::Property::SUB_STATE,                        Property::STRING,  &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_11(typeRegistration, "leftFocusableActorId",           Ui::DevelControl::Property::LEFT_FOCUSABLE_ACTOR_ID,          Property::INTEGER, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_12(typeRegistration, "rightFocusableActorId",          Ui::DevelControl::Property::RIGHT_FOCUSABLE_ACTOR_ID,         Property::INTEGER, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_13(typeRegistration, "upFocusableActorId",             Ui::DevelControl::Property::UP_FOCUSABLE_ACTOR_ID,            Property::INTEGER, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
@@ -508,8 +494,6 @@ const AnimatablePropertyRegistration Control::Impl::ANIMATABLE_PROPERTY_6(typeRe
 
 Control::Impl::Impl(Control& controlImpl)
   : mControlImpl(controlImpl),
-    mState(Ui::DevelControl::NORMAL),
-    mSubStateName(""),
     mAccessibilityData(nullptr),
     mVisualData(nullptr),
     mLeftFocusableActorId(-1),
@@ -790,37 +774,6 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
         controlImpl.SetStyleName(value.Get<std::string>());
         break;
       }
-
-      case Ui::DevelControl::Property::STATE:
-      {
-        const Property::Value* valuePtr = &value;
-        const Property::Map* map = value.GetMap();
-        if (map)
-        {
-          valuePtr = map->Find("state");
-        }
-
-        if (valuePtr)
-        {
-          Ui::DevelControl::State state(controlImpl.mImpl->mState);
-          if (Scripting::GetEnumerationProperty<Ui::DevelControl::State>(*valuePtr, ControlStateTable,
-                                                                         ControlStateTableCount, state))
-          {
-            controlImpl.mImpl->SetState(state);
-          }
-        }
-      }
-      break;
-
-      case Ui::DevelControl::Property::SUB_STATE:
-      {
-        std::string subState;
-        if (value.Get(subState))
-        {
-          controlImpl.mImpl->SetSubState(subState);
-        }
-      }
-      break;
 
       case Ui::DevelControl::Property::LEFT_FOCUSABLE_ACTOR_ID:
       {
@@ -1281,18 +1234,6 @@ Property::Value Control::Impl::GetProperty(BaseObject* object, Property::Index i
         break;
       }
 
-      case Ui::DevelControl::Property::STATE:
-      {
-        value = controlImpl.mImpl->mState;
-        break;
-      }
-
-      case Ui::DevelControl::Property::SUB_STATE:
-      {
-        value = controlImpl.mImpl->mSubStateName;
-        break;
-      }
-
       case Ui::DevelControl::Property::LEFT_FOCUSABLE_ACTOR_ID:
       {
         value = controlImpl.mImpl->mLeftFocusableActorId;
@@ -1526,90 +1467,6 @@ Property::Value Control::Impl::GetProperty(BaseObject* object, Property::Index i
   }
 
   return value;
-}
-
-void Control::Impl::SetState(DevelControl::State newState)
-{
-  DevelControl::State oldState = mState;
-  Dali::CustomActor handle(mControlImpl.GetOwner());
-  DALI_LOG_INFO(
-      gLogFilter, Debug::Concise, "Control::Impl::SetState: %s\n",
-      (mState == DevelControl::NORMAL
-           ? "NORMAL"
-           : (mState == DevelControl::FOCUSED ? "FOCUSED" : (mState == DevelControl::DISABLED ? "DISABLED" : "NONE"))));
-
-  if (mState != newState)
-  {
-    // If mState was Disabled, and new state is Focused, should probably
-    // store that fact, e.g. in another property that FocusManager can access.
-    mState = newState;
-
-    if (DALI_LIKELY(mVisualData))
-    {
-      // Apply new style, if stylemanager is available
-      Ui::StyleManager styleManager = Ui::StyleManager::Get();
-      if (styleManager)
-      {
-        const StylePtr stylePtr = GetImpl(styleManager).GetRecordedStyle(Ui::Control(mControlImpl.GetOwner()));
-
-        if (stylePtr)
-        {
-          std::string oldStateName = Scripting::GetEnumerationName<Ui::DevelControl::State>(oldState, ControlStateTable,
-                                                                                            ControlStateTableCount);
-          std::string newStateName = Scripting::GetEnumerationName<Ui::DevelControl::State>(newState, ControlStateTable,
-                                                                                            ControlStateTableCount);
-
-          const StylePtr* newStateStyle = stylePtr->subStates.Find(newStateName);
-          const StylePtr* oldStateStyle = stylePtr->subStates.Find(oldStateName);
-          if (oldStateStyle && newStateStyle)
-          {
-            // Only change if both state styles exist
-            mVisualData->ReplaceStateVisualsAndProperties(*oldStateStyle, *newStateStyle, mSubStateName);
-          }
-        }
-      }
-    }
-  }
-}
-
-void Control::Impl::SetSubState(const std::string& subStateName)
-{
-  if (mSubStateName != subStateName)
-  {
-    if (DALI_LIKELY(mVisualData))
-    {
-      // Get existing sub-state visuals, and unregister them
-      Dali::CustomActor handle(mControlImpl.GetOwner());
-
-      Ui::StyleManager styleManager = Ui::StyleManager::Get();
-      if (styleManager)
-      {
-        const StylePtr stylePtr = GetImpl(styleManager).GetRecordedStyle(Ui::Control(mControlImpl.GetOwner()));
-        if (stylePtr)
-        {
-          // Stringify state
-          std::string stateName =
-              Scripting::GetEnumerationName<Ui::DevelControl::State>(mState, ControlStateTable, ControlStateTableCount);
-
-          const StylePtr* state = stylePtr->subStates.Find(stateName);
-          if (state)
-          {
-            StylePtr stateStyle(*state);
-
-            const StylePtr* newStateStyle = stateStyle->subStates.Find(subStateName);
-            const StylePtr* oldStateStyle = stateStyle->subStates.Find(mSubStateName);
-            if (oldStateStyle && newStateStyle)
-            {
-              std::string empty;
-              mVisualData->ReplaceStateVisualsAndProperties(*oldStateStyle, *newStateStyle, empty);
-            }
-          }
-        }
-      }
-    }
-
-    mSubStateName = subStateName;
-  }
 }
 
 void Control::Impl::SetMargin(Extents margin)

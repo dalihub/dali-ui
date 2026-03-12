@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 #include <dali/public-api/object/property-array.h>

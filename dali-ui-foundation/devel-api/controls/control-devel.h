@@ -100,23 +100,6 @@ enum
   PADDING = Control::Property::PADDING,
 
   /**
-   * @brief The current state of the control.
-   * @details Name "state", type DevelControl::State ( Property::INTEGER ) or Property::STRING
-   *
-   * @see DevelControl::State
-   */
-  STATE = PADDING + 1,
-
-  /**
-   * @brief The current sub state of the control.
-   * @details Name "subState", type Property::INTEGER or Property::STRING. The enumeration used is dependent on the
-   * derived control.
-   *
-   * @see DevelControl::State
-   */
-  SUB_STATE = PADDING + 2,
-
-  /**
    * @brief The actor ID of the left focusable control.
    * @details Name "leftFocusableActorId", type Property::INTEGER.
    *

@@ -24,7 +24,7 @@
 #include <dali/public-api/rendering/frame-buffer.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 
 namespace Dali

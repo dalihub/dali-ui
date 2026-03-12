@@ -76,6 +76,5 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/dali-toolkit-version.h>
 #include <dali-ui-foundation/public-api/enums.h>
 #include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>

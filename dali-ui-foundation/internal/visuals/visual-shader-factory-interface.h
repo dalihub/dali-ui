@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/precompile-shader-option.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali
 {

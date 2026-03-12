@@ -218,18 +218,6 @@ public:
   static Property::Value GetProperty(BaseObject* object, Property::Index index);
 
   /**
-   * @brief Sets the state of the control.
-   * @param[in] newState The state to set
-   */
-  void SetState(DevelControl::State newState);
-
-  /**
-   * @brief Sets the sub-state of the control.
-   * @param[in] newState The sub-state to set
-   */
-  void SetSubState(const std::string& subStateName);
-
-  /**
    * @brief Whether the resource is ready
    * @return True if the resource is read.
    */
@@ -475,8 +463,6 @@ private:
 
 public:
   Control& mControlImpl;
-  DevelControl::State mState;
-  std::string mSubStateName;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData> mVisualData;

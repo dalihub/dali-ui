@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <string>
 
 // INTERNAL INCLUDES

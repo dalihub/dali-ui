@@ -42,45 +42,6 @@ void Style::ApplyVisualsAndPropertiesRecursively(Handle handle,
 {
   ApplyVisuals(handle, instancedProperties);
   ApplyProperties(handle);
-
-  Ui::Control control = Ui::Control::DownCast(handle);
-  if (control)
-  {
-    std::string stateName;
-    Property::Value value = control.GetProperty(DevelControl::Property::STATE);
-    Dali::Ui::DevelControl::State state = static_cast<Dali::Ui::DevelControl::State>(value.Get<int>());
-    stateName =
-        Scripting::GetEnumerationName<Ui::DevelControl::State>(state, ControlStateTable, ControlStateTableCount);
-
-    if (!stateName.empty())
-    {
-      // Look up state in states table:
-      const StylePtr* stylePtr = subStates.FindConst(stateName);
-      if (stylePtr)
-      {
-        const StylePtr statePtr(*stylePtr);
-
-        // We have a state match.
-        statePtr->ApplyVisuals(handle, instancedProperties);
-        statePtr->ApplyProperties(handle);
-
-        // Apply substate visuals
-        Property::Value value = control.GetProperty(DevelControl::Property::SUB_STATE);
-        std::string subStateName;
-        if (value.Get(subStateName) && !subStateName.empty())
-        {
-          const StylePtr* stylePtr = statePtr->subStates.FindConst(subStateName);
-          if (stylePtr)
-          {
-            const StylePtr subStatePtr(*stylePtr);
-            // We have a sub-state match.
-            subStatePtr->ApplyVisuals(handle, instancedProperties);
-            subStatePtr->ApplyProperties(handle);
-          }
-        }
-      }
-    }
-  }
 }
 
 void Style::ApplyVisuals(Handle handle, const Dictionary<Property::Map>& instancedProperties) const

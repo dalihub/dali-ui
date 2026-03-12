@@ -22,7 +22,7 @@
 #include <dali/public-api/dali-core.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali::Ui::DevelControl
 {

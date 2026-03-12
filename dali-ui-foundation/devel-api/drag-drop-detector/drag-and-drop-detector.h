@@ -23,7 +23,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 #include <dali-ui-foundation/public-api/controls/control.h>
 

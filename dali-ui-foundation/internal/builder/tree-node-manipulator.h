@@ -23,7 +23,7 @@
 #include <iterator>
 #include <utility> // pair
 
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES

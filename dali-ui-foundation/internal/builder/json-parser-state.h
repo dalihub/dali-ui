@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-toolkit-common.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/builder/tree-node.h>
