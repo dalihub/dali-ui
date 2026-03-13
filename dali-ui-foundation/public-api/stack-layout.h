@@ -152,6 +152,8 @@ public: // Static methods for attached properties (StackLayout children only)
   static float GetLayoutWeight(View view);
 
 public: // Chaining methods
+  DALI_UI_CHAIN_LAYOUT_METHODS(StackLayout)
+
   /**
    * @brief Sets the orientation (chaining).
    */

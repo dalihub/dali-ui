@@ -253,6 +253,8 @@ public: // Static methods for attached properties
   static uint32_t GetColumnSpan(View view);
 
 public: // Chaining methods
+  DALI_UI_CHAIN_LAYOUT_METHODS(GridLayout)
+
   GridLayout& RowSpacing(float spacing)
   {
     SetRowSpacing(spacing);

@@ -243,6 +243,8 @@ public: // Static methods for attached properties
   static FlexAlign GetAlignSelf(View view);
 
 public: // Chaining methods
+  DALI_UI_CHAIN_LAYOUT_METHODS(FlexLayout)
+
   FlexLayout& Direction(FlexDirection direction)
   {
     SetDirection(direction);

@@ -133,6 +133,9 @@ public: // Static methods for attached properties
    */
   static AbsoluteLayoutFlags GetLayoutFlags(View view);
 
+public: // Chaining methods
+  DALI_UI_CHAIN_LAYOUT_METHODS(AbsoluteLayout)
+
 public: // Not intended for application developers
   /// @cond internal
   DALI_INTERNAL AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
