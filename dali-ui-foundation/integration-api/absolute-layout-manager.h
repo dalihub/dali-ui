@@ -34,7 +34,7 @@ namespace Integration
  * Can be returned from AbsoluteLayoutImpl::CreateLayoutManager().
  * Subclass to customize absolute layout behaviour.
  */
-class AbsoluteLayoutManager : public LayoutManager
+class DALI_UI_API AbsoluteLayoutManager : public LayoutManager
 {
 public:
   AbsoluteLayoutManager();

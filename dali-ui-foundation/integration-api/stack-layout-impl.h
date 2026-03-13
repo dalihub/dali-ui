@@ -39,7 +39,7 @@ using StackLayoutImplPtr = IntrusivePtr<StackLayoutImpl>;
 /**
  * @brief This is the internal implementation class for StackLayout.
  */
-class StackLayoutImpl : public LayoutImpl
+class DALI_UI_API StackLayoutImpl : public LayoutImpl
 {
 public:
   /**

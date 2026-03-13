@@ -39,7 +39,7 @@ using FlexLayoutImplPtr = IntrusivePtr<FlexLayoutImpl>;
 /**
  * @brief This is the internal implementation class for FlexLayout.
  */
-class FlexLayoutImpl : public LayoutImpl
+class DALI_UI_API FlexLayoutImpl : public LayoutImpl
 {
 public:
   /**

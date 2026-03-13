@@ -544,9 +544,6 @@ public: // Properties
     return *this;
   }
 
-  // @CHAIN_END
-
-  // @CHAIN_MANUAL
   /**
    * @brief Sets layout parameters on this View.
    *
@@ -564,6 +561,8 @@ public: // Properties
    * @endcode
    */
   View& SetLayoutParams(LayoutParams params);
+
+  // @CHAIN_END
 
   /**
    * @brief Retrieves the layout parameters of a specific type attached to this View.

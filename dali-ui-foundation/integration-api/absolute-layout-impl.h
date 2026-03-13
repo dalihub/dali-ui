@@ -39,7 +39,7 @@ using AbsoluteLayoutImplPtr = IntrusivePtr<AbsoluteLayoutImpl>;
 /**
  * @brief This is the internal implementation class for AbsoluteLayout.
  */
-class AbsoluteLayoutImpl : public LayoutImpl
+class DALI_UI_API AbsoluteLayoutImpl : public LayoutImpl
 {
 public:
   /**

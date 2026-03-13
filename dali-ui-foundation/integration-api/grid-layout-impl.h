@@ -40,7 +40,7 @@ using GridLayoutImplPtr = IntrusivePtr<GridLayoutImpl>;
 /**
  * @brief This is the internal implementation class for GridLayout.
  */
-class GridLayoutImpl : public LayoutImpl
+class DALI_UI_API GridLayoutImpl : public LayoutImpl
 {
 public:
   /**

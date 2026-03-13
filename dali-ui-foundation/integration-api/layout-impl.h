@@ -44,7 +44,7 @@ using LayoutImplPtr = IntrusivePtr<LayoutImpl>;
  *
  * @see Integration::ViewImpl for LayoutManager and child management functionality
  */
-class LayoutImpl : public ViewImpl
+class DALI_UI_API LayoutImpl : public ViewImpl
 {
 public:
   /**

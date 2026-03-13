@@ -49,7 +49,7 @@ class ViewImpl;
  * @note This is an internal class. It is not intended to be used directly
  * by applications.
  */
-class LayoutManager
+class DALI_UI_API LayoutManager
 {
 public:
   /**

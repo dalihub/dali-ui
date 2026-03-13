@@ -17,6 +17,7 @@
  *
  */
 
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <cstdint>
 
 namespace Dali
@@ -76,7 +77,7 @@ enum class ReservedTraitId : uint32_t
  * the application developer, an offset (1000) is automatically added to
  * prevent collisions with the framework's reserved IDs.
  */
-struct TraitId
+struct DALI_UI_API TraitId
 {
   /**
    * @constant OFFSET

@@ -34,7 +34,7 @@ namespace Integration
  * Can be returned from FlexLayoutImpl::CreateLayoutManager().
  * Subclass to customize flex layout behaviour.
  */
-class FlexLayoutManager : public LayoutManager
+class DALI_UI_API FlexLayoutManager : public LayoutManager
 {
 public:
   FlexLayoutManager(FlexDirection direction, FlexWrap wrap, FlexJustify justify, FlexAlign alignItems,
