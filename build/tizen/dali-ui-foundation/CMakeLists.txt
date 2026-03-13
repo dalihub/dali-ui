@@ -16,12 +16,18 @@ SET(SHADER_SOURCE_DIR "${FOUNDATION_ROOT_SRC_DIR}/internal/graphics/shaders")
 SET(SHADER_GENERATED_DIR "${FOUNDATION_ROOT_SRC_DIR}/internal/graphics/generated")
 SET(BUILT_IN_SHADER_GEN_CPP "${SHADER_GENERATED_DIR}/builtin-shader-gen.cpp")
 
+# Clean-up generated directory when 'make clean'
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${SHADER_GENERATED_DIR}")
+
 FILE(GLOB SHADERS_SRC "${SHADER_SOURCE_DIR}/*.vert" "${SHADER_SOURCE_DIR}/*.frag" )
 
 # Custom command: Automatically generate builtin-shader-gen.cpp at build time
 ADD_CUSTOM_COMMAND(OUTPUT ${BUILT_IN_SHADER_GEN_CPP}
                    DEPENDS ${SHADER_GENERATOR_NAME} ${SHADERS_SRC}
                    COMMAND ${SHADER_GENERATOR_NAME} ${SHADER_SOURCE_DIR} ${SHADER_GENERATED_DIR})
+
+# Custom target to ensure dependency in parallel builds
+ADD_CUSTOM_TARGET(generate_builtin_shaders DEPENDS ${BUILT_IN_SHADER_GEN_CPP})
 
 
 # ---------------------------------------------------------
@@ -31,8 +37,8 @@ FILE(GLOB_RECURSE ALL_SOURCES "${FOUNDATION_ROOT_SRC_DIR}/*.cpp")
 
 SET(SOURCES "")
 FOREACH(SRC ${ALL_SOURCES})
-  # Exclude shader-generator.cpp from library sources as it's for the executable
-  IF(NOT SRC MATCHES "shader-generator.cpp")
+  # Exclude shader-generator.cpp and the generated cpp from initial glob to avoid duplication
+  IF(NOT SRC MATCHES "shader-generator.cpp" AND NOT SRC MATCHES "builtin-shader-gen.cpp")
     LIST(APPEND SOURCES ${SRC})
   ENDIF()
 ENDFOREACH()
@@ -45,6 +51,9 @@ LIST(APPEND SOURCES ${BUILT_IN_SHADER_GEN_CPP})
 # 3. Create shared library
 # ---------------------------------------------------------
 ADD_LIBRARY(${PROJECT_LIB_NAME} SHARED ${SOURCES})
+
+# Ensure shaders are generated before the library starts compiling its sources
+ADD_DEPENDENCIES(${PROJECT_LIB_NAME} generate_builtin_shaders)
 
 # Run method chaining script
 IF (NOT GBS_BUILD)
