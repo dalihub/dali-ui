@@ -2642,6 +2642,7 @@ void TextLabel::RemoveMaskEffect()
   {
     self.Remove(control);
   }
+  mMaskControl.Reset();
   selfControl.ClearRenderEffect();
 }
 
