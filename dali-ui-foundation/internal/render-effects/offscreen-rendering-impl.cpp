@@ -31,23 +31,23 @@ namespace Ui
 {
 namespace Internal
 {
-OffScreenRenderingImpl::OffScreenRenderingImpl(DevelControl::OffScreenRenderingType type)
+OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::Control::OffScreenRenderingType type)
 : mType(type)
 {
   Initialize();
 }
 
-void OffScreenRenderingImpl::SetType(DevelControl::OffScreenRenderingType type)
+void OffScreenRenderingImpl::SetType(Ui::Control::OffScreenRenderingType type)
 {
   mType = type;
 
   if(mRenderTask)
   {
-    if(mType == DevelControl::OffScreenRenderingType::REFRESH_ALWAYS)
+    if(mType == Ui::Control::OffScreenRenderingType::REFRESH_ALWAYS)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
     }
-    else if(mType == DevelControl::OffScreenRenderingType::REFRESH_ONCE)
+    else if(mType == Ui::Control::OffScreenRenderingType::REFRESH_ONCE)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ONCE);
     }
@@ -81,7 +81,7 @@ void OffScreenRenderingImpl::OnInitialize()
 
 void OffScreenRenderingImpl::OnActivate()
 {
-  if(mType == DevelControl::OffScreenRenderingType::NONE)
+  if(mType == Ui::Control::OffScreenRenderingType::NONE)
   {
     return;
   }

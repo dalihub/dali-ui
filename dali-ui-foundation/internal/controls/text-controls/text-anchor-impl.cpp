@@ -29,7 +29,6 @@
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 
 // DEVEL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 
 using namespace Dali::Ui::Text;
 
@@ -147,7 +146,7 @@ void TextAnchor::OnInitialize()
   Actor self = Self();
 
   // Accessibility
-  self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::LINK);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::LINK);
 }
 
 DevelControl::ControlAccessible* TextAnchor::CreateAccessibleObject()

@@ -541,12 +541,12 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
         auto mode = map->Find(Ui::HiddenInput::Property::MODE);
         if(mode && (mode->Get<int>() != Ui::HiddenInput::Mode::HIDE_NONE))
         {
-          textField.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE,
+          textField.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE,
                                 DevelControl::AccessibilityRole::PASSWORD_TEXT);
         }
         else
         {
-          textField.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
+          textField.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
         }
       }
       break;

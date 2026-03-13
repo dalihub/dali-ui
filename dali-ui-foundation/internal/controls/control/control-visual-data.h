@@ -23,7 +23,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/internal/builder/dictionary.h>
 #include <dali-ui-foundation/internal/builder/style.h>
@@ -244,7 +243,7 @@ public:
   /**
    * @copydoc Dali::Ui::Internal::Control::Impl::VisualEventSignal()
    */
-  DevelControl::VisualEventSignalType& VisualEventSignal();
+  Ui::Control::VisualEventSignalType& VisualEventSignal();
 
   /**
    * @brief Notify to all registered visuals to be scene on.
@@ -361,9 +360,10 @@ private:
                       int                   depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
 
 public:
-  RegisteredVisualContainer           mVisuals; ///< Stores visuals needed by the control, non trivial type so std::vector used.
-  DevelControl::VisualEventSignalType mVisualEventSignal;
-  RegisteredVisualContainer           mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
+  RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the control, non trivial type so
+                                      ///< std::vectoDevelControlvelControlvelControl::VisualEventSignalType mVisualEventSignal;
+  Ui::Control::VisualEventSignalType mVisualEventSignal;
+  RegisteredVisualContainer          mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
 private:
   Control::Impl& mOuter;

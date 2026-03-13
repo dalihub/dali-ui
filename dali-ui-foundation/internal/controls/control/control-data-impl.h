@@ -27,7 +27,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
+#include <dali-ui-foundation/devel-api/controls/control-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
@@ -126,32 +126,32 @@ public:
   void ResourceReady();
 
   /**
-   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::Control::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::Control::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::Control::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::RegisterVisual()
+   * @copydoc Dali::Ui::Control::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::UnregisterVisual()
+   * @copydoc Dali::Ui::Control::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::GetVisual()
+   * @copydoc Dali::Ui::Control::GetVisual()
    */
   Ui::Visual::Base GetVisual(Property::Index index) const;
 
@@ -175,28 +175,28 @@ public:
                                         Dali::Constraint cornerRadiusConstraint = Dali::Constraint());
 
   /**
-   * @copydoc Dali::Ui::DevelControl::EnableVisual()
+   * @copydoc Dali::Ui::Control::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::IsVisualEnabled()
+   * @copydoc Dali::Ui::Control::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
   /**
-   * @copydoc Dali::Ui::DevelControl::GetVisualResourceStatus()
+   * @copydoc Dali::Ui::Control::GetVisualResourceStatus()
    */
   Ui::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
 
   /**
-   * @copydoc Dali::Ui::DevelControl::DoAction()
+   * @copydoc Dali::Ui::Control::DoAction()
    */
   void DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                 const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::DoActionExtension()
+   * @copydoc Dali::Ui::Control::DoActionExtension()
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
@@ -320,9 +320,9 @@ public:
   Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const;
 
   /**
-   * @copydoc DevelControl::VisualEventSignal()
+   * @copydoc Control::VisualEventSignal()
    */
-  DevelControl::VisualEventSignalType& VisualEventSignal();
+  Ui::Control::VisualEventSignalType& VisualEventSignal();
 
   /**
    * @brief Sets the shadow with a property map.
@@ -359,7 +359,7 @@ public:
   void ClearBorderline();
 
   /**
-   * @copydoc DevelControl::GetVisualProperty()
+   * @copydoc Control::GetVisualProperty()
    */
   Dali::Property GetVisualProperty(Dali::Property::Index index, Dali::Property::Key visualPropertyKey);
 
@@ -391,19 +391,24 @@ public:
   std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
 
   /**
-   * @copydoc Dali::Ui::DevelControl::IsAccessibleCreated()
+   * @copydoc Dali::Ui::Control::IsAccessibleCreated()
    */
   bool IsAccessibleCreated() const;
 
   /**
-   * @copydoc Dali::Ui::DevelControl::EnableCreateAccessible()
+   * @copydoc Dali::Ui::Control::EnableCreateAccessible()
    */
   void EnableCreateAccessible(bool enable);
 
   /**
-   * @copydoc Dali::Ui::DevelControl::IsCreateAccessibleEnabled()
+   * @copydoc Dali::Ui::Control::IsCreateAccessibleEnabled()
    */
   bool IsCreateAccessibleEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::Control::EmitAccessibilityStateChanged()
+   */
+  void EmitAccessibilityStateChanged(Accessibility::State state, int newValue);
 
   /**
    * @brief Apply fittingMode
@@ -494,7 +499,7 @@ public:
 
   // Off screen rendering context
   std::unique_ptr<OffScreenRenderingImpl> mOffScreenRenderingImpl;
-  DevelControl::OffScreenRenderingType    mOffScreenRenderingType;
+  Ui::Control::OffScreenRenderingType     mOffScreenRenderingType;
   Ui::Control::OffScreenRenderingFinishedSignalType
     mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
 

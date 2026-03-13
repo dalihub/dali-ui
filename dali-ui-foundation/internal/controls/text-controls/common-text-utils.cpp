@@ -20,7 +20,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>

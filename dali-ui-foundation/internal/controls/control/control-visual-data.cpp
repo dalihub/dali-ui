@@ -236,10 +236,10 @@ void SetVisualOnScene(Internal::Visual::Base& visualImpl, Internal::Control& con
   Actor self = controlImpl.Self();
   visualImpl.SetOnScene(self);
 
-  Ui::Control                          handle = Ui::Control(controlImpl.GetOwner());
-  DevelControl::OffScreenRenderingType offscreenRenderingType =
-    DevelControl::OffScreenRenderingType(handle.GetProperty<int32_t>(DevelControl::Property::OFFSCREEN_RENDERING));
-  if(offscreenRenderingType != DevelControl::OffScreenRenderingType::NONE)
+  Ui::Control                         handle = Ui::Control(controlImpl.GetOwner());
+  Ui::Control::OffScreenRenderingType offscreenRenderingType =
+    Ui::Control::OffScreenRenderingType(handle.GetProperty<int32_t>(Ui::Control::Property::OFFSCREEN_RENDERING));
+  if(offscreenRenderingType != Ui::Control::OffScreenRenderingType::NONE)
   {
     if(!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {
@@ -259,10 +259,10 @@ void SetVisualOffScene(Internal::Visual::Base& visualImpl, Internal::Control& co
 {
   Actor self = controlImpl.Self();
 
-  Ui::Control                          handle = Ui::Control(controlImpl.GetOwner());
-  DevelControl::OffScreenRenderingType offscreenRenderingType =
-    DevelControl::OffScreenRenderingType(handle.GetProperty<int32_t>(DevelControl::Property::OFFSCREEN_RENDERING));
-  if(offscreenRenderingType != DevelControl::OffScreenRenderingType::NONE)
+  Ui::Control                         handle = Ui::Control(controlImpl.GetOwner());
+  Ui::Control::OffScreenRenderingType offscreenRenderingType =
+    Ui::Control::OffScreenRenderingType(handle.GetProperty<int32_t>(Ui::Control::Property::OFFSCREEN_RENDERING));
+  if(offscreenRenderingType != Ui::Control::OffScreenRenderingType::NONE)
   {
     if(!visualImpl.IsOffscreenRenderingCaptureEnabled())
     {
@@ -788,7 +788,7 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
         // TODO This condition is to cover utc failtures. Remove this after updating them.
         // e.g Setting control's corner radius and then setting background visual: Changing visual's corner radius
         // crashes utc.
-        const Vector4 cornerRadius = self.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS);
+        const Vector4 cornerRadius = self.GetProperty<Vector4>(Ui::Control::Property::CORNER_RADIUS);
 
         Property::Map map;
         // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.
@@ -797,9 +797,9 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
                      ? Vector4::ZERO
                      : cornerRadius);
         map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
-                   self.GetProperty<int>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY));
+                   self.GetProperty<int>(Ui::Control::Property::CORNER_RADIUS_POLICY));
         map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS,
-                   self.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS));
+                   self.GetProperty<Vector4>(Ui::Control::Property::CORNER_SQUARENESS));
 
         visual.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY, map);
       }
@@ -845,9 +845,9 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
             (*iter)->visual.GetName().c_str(), &visual);
           cornerRadiusConstraint = Constraint::New<Vector4>(
             visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, EqualToConstraint());
-          cornerRadiusConstraint.AddSource(Source(self, Ui::DevelControl::Property::CORNER_RADIUS));
+          cornerRadiusConstraint.AddSource(Source(self, Ui::Control::Property::CORNER_RADIUS));
           Dali::Integration::ConstraintSetInternalTag(cornerRadiusConstraint, DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG);
-          visualImpl.AddConstraintFeature(cornerRadiusConstraint, {Ui::DevelControl::Property::CORNER_RADIUS});
+          visualImpl.AddConstraintFeature(cornerRadiusConstraint, {Ui::Control::Property::CORNER_RADIUS});
         }
         if(mCornerRadiusValueAdded &&
            !(mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering()))
@@ -857,11 +857,10 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
 
         auto cornerSquarenessEqualConstraint = Constraint::New<Vector4>(
           visualCornerSquarenessProperty.object, visualCornerSquarenessProperty.propertyIndex, EqualToConstraint());
-        cornerSquarenessEqualConstraint.AddSource(Source(self, Ui::DevelControl::Property::CORNER_SQUARENESS));
+        cornerSquarenessEqualConstraint.AddSource(Source(self, Ui::Control::Property::CORNER_SQUARENESS));
         Dali::Integration::ConstraintSetInternalTag(cornerSquarenessEqualConstraint,
                                                     DEFAULT_CORNER_SQUARENESS_CONSTRAINT_TAG);
-        visualImpl.AddConstraintFeature(cornerSquarenessEqualConstraint,
-                                        {Ui::DevelControl::Property::CORNER_SQUARENESS});
+        visualImpl.AddConstraintFeature(cornerSquarenessEqualConstraint, {Ui::Control::Property::CORNER_SQUARENESS});
         if(mCornerSquarenessValueAdded)
         {
           cornerSquarenessEqualConstraint.Apply();
@@ -871,8 +870,8 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
     else
     {
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
-      visualImpl.RemoveConstraintFeatureByIndex(Ui::DevelControl::Property::CORNER_RADIUS);
-      visualImpl.RemoveConstraintFeatureByIndex(Ui::DevelControl::Property::CORNER_SQUARENESS);
+      visualImpl.RemoveConstraintFeatureByIndex(Ui::Control::Property::CORNER_RADIUS);
+      visualImpl.RemoveConstraintFeatureByIndex(Ui::Control::Property::CORNER_SQUARENESS);
     }
   }
 }
@@ -1028,7 +1027,7 @@ void Control::Impl::VisualData::ReplaceStateVisualsAndProperties(const StylePtr 
   RecreateChangedVisuals(stateVisualsToChange, instancedProperties);
 }
 
-DevelControl::VisualEventSignalType& Control::Impl::VisualData::VisualEventSignal()
+Ui::Control::VisualEventSignalType& Control::Impl::VisualData::VisualEventSignal()
 {
   return mVisualEventSignal;
 }
@@ -1114,9 +1113,9 @@ void Control::Impl::VisualData::UpdateVisualProperties(
     {
       DoAction(Ui::Control::Property::BACKGROUND, DevelVisual::Action::UPDATE_PROPERTY, data.second);
     }
-    else if(data.first == Ui::DevelControl::Property::SHADOW)
+    else if(data.first == Ui::Control::Property::SHADOW)
     {
-      DoAction(Ui::DevelControl::Property::SHADOW, DevelVisual::Action::UPDATE_PROPERTY, data.second);
+      DoAction(Ui::Control::Property::SHADOW, DevelVisual::Action::UPDATE_PROPERTY, data.second);
     }
   }
   mOuter.mControlImpl.OnUpdateVisualProperties(properties);
@@ -1125,9 +1124,9 @@ void Control::Impl::VisualData::UpdateVisualProperties(
 void Control::Impl::VisualData::CreateAnimationConstraints(const Dali::BaseObject& animationObject,
                                                            Property::Index         index)
 {
-  if(index == DevelControl::Property::CORNER_RADIUS || index == DevelControl::Property::CORNER_SQUARENESS ||
-     index == DevelControl::Property::BORDERLINE_WIDTH || index == DevelControl::Property::BORDERLINE_COLOR ||
-     index == DevelControl::Property::BORDERLINE_OFFSET || index == Actor::Property::SIZE ||
+  if(index == Ui::Control::Property::CORNER_RADIUS || index == Ui::Control::Property::CORNER_SQUARENESS ||
+     index == Ui::Control::Property::BORDERLINE_WIDTH || index == Ui::Control::Property::BORDERLINE_COLOR ||
+     index == Ui::Control::Property::BORDERLINE_OFFSET || index == Actor::Property::SIZE ||
      index == Actor::Property::SIZE_WIDTH || index == Actor::Property::SIZE_HEIGHT)
   {
     bool notifyConstraints = false;
@@ -1207,10 +1206,10 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
 
   switch(index)
   {
-    case DevelControl::Property::CORNER_RADIUS:
+    case Ui::Control::Property::CORNER_RADIUS:
     {
       const Vector4 cornerRadius =
-        mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS);
+        mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::Control::Property::CORNER_RADIUS);
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                     "Control::NotifyConstraintPropertyChanged(%d) set CornerRadius Value: %f, %f, %f, %f\n",
@@ -1245,11 +1244,10 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
               Ui::DevelVisual::Action::UPDATE_PROPERTY,
               Property::Map()
                 .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
-                     mOuter.mControlImpl.Self().GetProperty<int>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY))
+                     mOuter.mControlImpl.Self().GetProperty<int>(Ui::Control::Property::CORNER_RADIUS_POLICY))
                 .Add(Ui::DevelVisual::Property::CORNER_SQUARENESS,
-                     mOuter.mControlImpl.Self().GetProperty<Vector4>(
-                       Ui::DevelControl::Property::CORNER_SQUARENESS)));
-            visualImpl.StartConstraintFeature(DevelControl::Property::CORNER_RADIUS);
+                     mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::Control::Property::CORNER_SQUARENESS)));
+            visualImpl.StartConstraintFeature(Ui::Control::Property::CORNER_RADIUS);
           }
         }
       }
@@ -1261,10 +1259,10 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
       }
       break;
     }
-    case DevelControl::Property::CORNER_RADIUS_POLICY:
+    case Ui::Control::Property::CORNER_RADIUS_POLICY:
     {
       const int cornerRadiusPolicy =
-        mOuter.mControlImpl.Self().GetProperty<int>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY);
+        mOuter.mControlImpl.Self().GetProperty<int>(Ui::Control::Property::CORNER_RADIUS_POLICY);
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                     "Control::NotifyConstraintPropertyChanged(%d) set CornerRadiusPolicy Value: %d\n",
@@ -1282,10 +1280,10 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
       }
       break;
     }
-    case DevelControl::Property::CORNER_SQUARENESS:
+    case Ui::Control::Property::CORNER_SQUARENESS:
     {
       Vector4 cornerSquareness =
-        mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS);
+        mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::Control::Property::CORNER_SQUARENESS);
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                     "Control::NotifyConstraintPropertyChanged(%d) set CornerSquareness Value: %f, %f, %f, %f\n",
@@ -1316,11 +1314,10 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
               Ui::DevelVisual::Action::UPDATE_PROPERTY,
               Property::Map()
                 .Add(Ui::DevelVisual::Property::CORNER_RADIUS,
-                     mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS))
-                .Add(
-                  Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
-                  mOuter.mControlImpl.Self().GetProperty<int>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY)));
-            visualImpl.StartConstraintFeature(DevelControl::Property::CORNER_SQUARENESS);
+                     mOuter.mControlImpl.Self().GetProperty<Vector4>(Ui::Control::Property::CORNER_RADIUS))
+                .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+                     mOuter.mControlImpl.Self().GetProperty<int>(Ui::Control::Property::CORNER_RADIUS_POLICY)));
+            visualImpl.StartConstraintFeature(Ui::Control::Property::CORNER_SQUARENESS);
           }
         }
       }
@@ -1362,7 +1359,7 @@ void Control::Impl::VisualData::OffscreenRenderingEnabled(bool enabled)
         {
           // Stop corner radius constraint if offscreen rendering is enabled
           // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.
-          visualImpl.StopConstraintFeature(DevelControl::Property::CORNER_RADIUS);
+          visualImpl.StopConstraintFeature(Ui::Control::Property::CORNER_RADIUS);
           visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
                               Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS, Vector4::ZERO));
         }
@@ -1372,8 +1369,8 @@ void Control::Impl::VisualData::OffscreenRenderingEnabled(bool enabled)
           visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
                               Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
                                                   mOuter.mControlImpl.Self().GetProperty<Vector4>(
-                                                    Ui::DevelControl::Property::CORNER_RADIUS)));
-          visualImpl.StartConstraintFeature(DevelControl::Property::CORNER_RADIUS);
+                                                    Ui::Control::Property::CORNER_RADIUS)));
+          visualImpl.StartConstraintFeature(Ui::Control::Property::CORNER_RADIUS);
         }
       }
       else
@@ -1400,8 +1397,8 @@ void Control::Impl::VisualData::OffscreenRenderingEnabled(bool enabled)
           visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
                               Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
                                                   mOuter.mControlImpl.Self().GetProperty<Vector4>(
-                                                    Ui::DevelControl::Property::CORNER_RADIUS)));
-          visualImpl.StartConstraintFeature(DevelControl::Property::CORNER_RADIUS);
+                                                    Ui::Control::Property::CORNER_RADIUS)));
+          visualImpl.StartConstraintFeature(Ui::Control::Property::CORNER_RADIUS);
         }
       }
     }

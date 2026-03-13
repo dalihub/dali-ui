@@ -230,7 +230,7 @@ void Control::Impl::AccessibilityData::OnAccessibilityPropertySet(Dali::Handle& 
   {
     if(mAccessibilityGetNameSignal.Empty())
     {
-      if(index == DevelControl::Property::ACCESSIBILITY_NAME ||
+      if(index == Ui::Control::Property::ACCESSIBILITY_NAME ||
          (mAccessibilityProps.name.empty() && index == accessible->GetNamePropertyIndex()))
       {
         accessible->Emit(Dali::Accessibility::ObjectPropertyChangeEvent::NAME);
@@ -240,7 +240,7 @@ void Control::Impl::AccessibilityData::OnAccessibilityPropertySet(Dali::Handle& 
 
     if(mAccessibilityGetDescriptionSignal.Empty())
     {
-      if(index == DevelControl::Property::ACCESSIBILITY_DESCRIPTION ||
+      if(index == Ui::Control::Property::ACCESSIBILITY_DESCRIPTION ||
          (mAccessibilityProps.description.empty() && index == accessible->GetDescriptionPropertyIndex()))
       {
         accessible->Emit(Dali::Accessibility::ObjectPropertyChangeEvent::DESCRIPTION);
@@ -248,13 +248,13 @@ void Control::Impl::AccessibilityData::OnAccessibilityPropertySet(Dali::Handle& 
       }
     }
 
-    if(index == DevelControl::Property::ACCESSIBILITY_VALUE)
+    if(index == Ui::Control::Property::ACCESSIBILITY_VALUE)
     {
       accessible->Emit(Dali::Accessibility::ObjectPropertyChangeEvent::VALUE);
       return;
     }
 
-    if(index == DevelControl::Property::ACCESSIBILITY_STATES)
+    if(index == Ui::Control::Property::ACCESSIBILITY_STATES)
     {
       accessible->OnStatePropertySet(mAccessibilityProps.states);
       return;

@@ -27,7 +27,6 @@
 #include <dali-ui-elements/integration-api/label-impl.h>
 
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 
 namespace Dali
@@ -305,7 +304,7 @@ void LabelImpl::OnInitialize()
   mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
 
   // TODO: Since the TEXT property is not available yet, this is a temporary index.
-  DevelControl::RegisterVisual(*this, PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
+  Ui::Control::DownCast(self).RegisterVisual(PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, LabelImpl::Property::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 

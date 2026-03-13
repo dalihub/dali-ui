@@ -33,7 +33,6 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
@@ -631,13 +630,13 @@ void TextEditor::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.OnSceneSignal().Connect(this, &TextEditor::OnSceneConnect);
 
-  DevelControl::SetInputMethodContext(*this, mInputMethodContext);
+  Dali::Ui::Control::DownCast(self).SetInputMethodContext(mInputMethodContext);
 
   // Creates an extra control to be used as stencil buffer.
   mStencil = Control::New(ControlBehaviour(Dali::Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
   mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
   mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  mStencil.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+  mStencil.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIDDEN, true);
 
   // Creates a background visual. Even if the color is transparent it updates the stencil.
   mStencil.SetProperty(Ui::Control::Property::BACKGROUND,
@@ -656,7 +655,7 @@ void TextEditor::OnInitialize()
   }
 
   // Accessibility
-  self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextEditor::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextEditor::OnAccessibilityStatusChanged);

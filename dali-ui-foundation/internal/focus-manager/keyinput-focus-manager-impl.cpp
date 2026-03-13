@@ -28,7 +28,6 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 namespace Dali
 {
 namespace Ui
@@ -157,7 +156,7 @@ bool KeyInputFocusManager::OnKeyEvent(const KeyEvent& event)
     {
       // If the DISPATCH_KEY_EVENTS is false, it cannot emit key event.
       Ui::Control dispatchControl = Ui::Control::DownCast(dispatch);
-      if(dispatchControl && !dispatchControl.GetProperty<bool>(Ui::DevelControl::Property::DISPATCH_KEY_EVENTS))
+      if(dispatchControl && !dispatchControl.GetProperty<bool>(Ui::Control::Property::DISPATCH_KEY_EVENTS))
       {
         return true;
       }

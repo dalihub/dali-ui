@@ -43,7 +43,6 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
@@ -1214,7 +1213,7 @@ void TextLabel::OnInitialize()
   propertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
 
   mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
-  DevelControl::RegisterVisual(*this, Ui::TextLabel::Property::TEXT, mVisual, DepthIndex::CONTENT);
+  Dali::Ui::Control::DownCast(self).RegisterVisual(Ui::TextLabel::Property::TEXT, mVisual, DepthIndex::CONTENT);
 
   TextVisual::SetAsyncTextInterface(mVisual, this);
   TextVisual::SetAnimatableTextColorProperty(mVisual, Ui::TextLabel::Property::TEXT_COLOR);
@@ -1252,7 +1251,7 @@ void TextLabel::OnInitialize()
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 
   // Accessibility
-  self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::TEXT);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::TEXT);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextLabel::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextLabel::OnAccessibilityStatusChanged);
@@ -2380,8 +2379,9 @@ bool TextLabel::IsRemoveBackInset() const
 
 void TextLabel::EnableControlBackground(const bool enable)
 {
+  Actor self = Self();
   // Avoid function calls if there is no change.
-  if(!DevelControl::GetVisual(*this, Ui::Control::Property::BACKGROUND))
+  if(!Dali::Ui::Control::DownCast(self).GetVisual(Ui::Control::Property::BACKGROUND))
   {
     return;
   }
@@ -2389,7 +2389,8 @@ void TextLabel::EnableControlBackground(const bool enable)
   if(mControlBackgroundEnabled != enable)
   {
     mControlBackgroundEnabled = enable;
-    DevelControl::EnableVisual(*this, Ui::Control::Property::BACKGROUND, enable);
+
+    Dali::Ui::Control::DownCast(self).EnableVisual(Ui::Control::Property::BACKGROUND, enable);
   }
 }
 

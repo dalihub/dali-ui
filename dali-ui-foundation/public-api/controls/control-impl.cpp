@@ -33,7 +33,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
@@ -106,7 +105,7 @@ void RegisterControlAccessibleGetter()
         return {nullptr, true};
       }
 
-      if(Ui::DevelControl::IsCreateAccessibleEnabled(control))
+      if(control.IsCreateAccessibleEnabled())
       {
         auto& controlImpl = Ui::Internal::GetImplementation(control);
         return {std::shared_ptr<DevelControl::ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
@@ -485,7 +484,7 @@ bool Control::EmitKeyEventSignal(const KeyEvent& event)
 
 Dali::Texture Control::GetOffScreenRenderingOutput() const
 {
-  if(mImpl->mOffScreenRenderingType != DevelControl::OffScreenRenderingType::REFRESH_ONCE)
+  if(mImpl->mOffScreenRenderingType != Ui::Control::OffScreenRenderingType::REFRESH_ONCE)
   {
     DALI_LOG_ERROR(
       "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");

@@ -20,10 +20,24 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/controls/control-accessible.h>
+#include <dali-ui-foundation/internal/controls/control/control-accessibility-data.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
+
+namespace
+{
+Dali::Ui::Internal::Control::Impl& GetControlImplementation(Dali::Ui::Control control)
+{
+  auto& internalControl = Dali::Ui::Internal::GetImplementation(control);
+
+  return Dali::Ui::Internal::Control::Impl::Get(internalControl);
+}
+
+} // unnamed namespace
 
 namespace Dali
 {
@@ -135,7 +149,7 @@ bool Control::IsResourceReady() const
   return Internal::GetImplementation(*this).IsResourceReady();
 }
 
-Ui::Visual::ResourceStatus Control::GetVisualResourceStatus(Dali::Property::Index index)
+Visual::ResourceStatus Control::GetVisualResourceStatus(const Dali::Property::Index index)
 {
   const Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
   const Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
@@ -171,6 +185,304 @@ Control::OffScreenRenderingFinishedSignalType& Control::OffScreenRenderingFinish
   Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
 
   return controlImpl.mOffScreenRenderingFinishedSignal;
+}
+
+// Visual Management
+
+void Control::RegisterVisual(Dali::Property::Index index, Ui::Visual::Base& visual)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).RegisterVisual(index, visual);
+}
+
+void Control::RegisterVisual(Dali::Property::Index index, Ui::Visual::Base& visual, int depthIndex)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).RegisterVisual(index, visual, depthIndex);
+}
+
+void Control::RegisterVisual(Dali::Property::Index index, Ui::Visual::Base& visual, bool enabled)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).RegisterVisual(index, visual, enabled);
+}
+
+void Control::RegisterVisual(Dali::Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).RegisterVisual(index, visual, enabled, depthIndex);
+}
+
+void Control::UnregisterVisual(Dali::Property::Index index)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).UnregisterVisual(index);
+}
+
+Ui::Visual::Base Control::GetVisual(Dali::Property::Index index)
+{
+  const Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  return Internal::Control::Impl::Get(controlInternal).GetVisual(index);
+}
+
+void Control::EnableVisual(Dali::Property::Index index, bool enable)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).EnableVisual(index, enable);
+}
+
+bool Control::IsVisualEnabled(Dali::Property::Index index)
+{
+  const Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  return Internal::Control::Impl::Get(controlInternal).IsVisualEnabled(index);
+}
+
+void Control::DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
+                       const Dali::Property::Value& attributes)
+{
+  Internal::Control&       controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(controlInternal);
+  controlDataImpl.DoAction(visualIndex, actionId, attributes);
+}
+
+void Control::DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
+                                const Dali::Any& attributes)
+{
+  Internal::Control&       controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(controlInternal);
+  controlDataImpl.DoActionExtension(visualIndex, actionId, attributes);
+}
+
+void Control::EnableCornerPropertiesOverridden(Visual::Base& visual, bool enable,
+                                               Dali::Constraint cornerRadiusConstraint)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal)
+    .EnableCornerPropertiesOverridden(visual, enable, cornerRadiusConstraint);
+}
+
+void Control::SetInputMethodContext(InputMethodContext& inputMethodContext)
+{
+  Internal::Control& controlInternal = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl::Get(controlInternal).SetInputMethodContext(inputMethodContext);
+}
+
+Ui::Control::VisualEventSignalType& Control::VisualEventSignal()
+{
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
+  return controlDataImpl.VisualEventSignal();
+}
+
+Dali::Property Control::GetVisualProperty(Dali::Property::Index index, Dali::Property::Key visualPropertyKey)
+{
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
+  return controlDataImpl.GetVisualProperty(index, visualPropertyKey);
+}
+
+// Accessibility
+
+Control::AccessibilityActivateSignalType& Control::AccessibilityActivateSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityActivateSignal;
+}
+
+Control::AccessibilityReadingSkippedSignalType& Control::AccessibilityReadingSkippedSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityReadingSkippedSignal;
+}
+
+Control::AccessibilityReadingPausedSignalType& Control::AccessibilityReadingPausedSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityReadingPausedSignal;
+}
+
+Control::AccessibilityReadingResumedSignalType& Control::AccessibilityReadingResumedSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityReadingResumedSignal;
+}
+
+Control::AccessibilityReadingCancelledSignalType& Control::AccessibilityReadingCancelledSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityReadingCancelledSignal;
+}
+
+Control::AccessibilityReadingStoppedSignalType& Control::AccessibilityReadingStoppedSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityReadingStoppedSignal;
+}
+
+Control::AccessibilityGetNameSignalType& Control::AccessibilityGetNameSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityGetNameSignal;
+}
+
+Control::AccessibilityGetDescriptionSignalType& Control::AccessibilityGetDescriptionSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityGetDescriptionSignal;
+}
+
+Control::AccessibilityDoGestureSignalType& Control::AccessibilityDoGestureSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityDoGestureSignal;
+}
+
+Control::AccessibilityActionSignalType& Control::AccessibilityActionSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityActionSignal;
+}
+
+Control::AccessibilityHighlightedSignalType& Control::AccessibilityHighlightedSignal()
+{
+  return GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal;
+}
+
+void Control::AppendAccessibilityRelation(Dali::Actor destination, Dali::Accessibility::RelationType relation)
+{
+  if(auto destinationAccessible = Accessibility::Accessible::Get(destination))
+  {
+    GetControlImplementation(*this).GetOrCreateAccessibilityData().mAccessibilityProps.relations[relation].insert(
+      destinationAccessible);
+  }
+}
+
+void Control::RemoveAccessibilityRelation(Dali::Actor destination, Dali::Accessibility::RelationType relation)
+{
+  auto& controlImpl = GetControlImplementation(*this);
+
+  auto* accessibilityData = controlImpl.GetAccessibilityData();
+  if(DALI_LIKELY(accessibilityData))
+  {
+    if(auto destinationAccessible = Accessibility::Accessible::Get(destination))
+    {
+      auto& relations = accessibilityData->mAccessibilityProps.relations;
+
+      relations[relation].erase(destinationAccessible);
+
+      if(relations[relation].empty())
+      {
+        relations.erase(relation);
+      }
+    }
+  }
+}
+
+std::vector<Accessibility::Relation> Control::GetAccessibilityRelations()
+{
+  std::vector<Accessibility::Relation> result;
+
+  auto& controlImpl = GetControlImplementation(*this);
+
+  const auto* accessibilityData = controlImpl.GetAccessibilityData();
+  if(DALI_LIKELY(accessibilityData))
+  {
+    const auto& relations = accessibilityData->mAccessibilityProps.relations;
+    for(const auto& relation : relations)
+    {
+      const auto& targets = relation.second;
+
+      result.emplace_back(Accessibility::Relation{relation.first, {}});
+      std::copy(targets.begin(), targets.end(), std::back_inserter(result.back().mTargets));
+    }
+  }
+
+  return result;
+}
+
+void Control::ClearAccessibilityRelations()
+{
+  auto& controlImpl = GetControlImplementation(*this);
+
+  auto* accessibilityData = controlImpl.GetAccessibilityData();
+  if(DALI_LIKELY(accessibilityData))
+  {
+    accessibilityData->mAccessibilityProps.relations.clear();
+  }
+}
+
+void Control::AppendAccessibilityAttribute(const std::string& key, const std::string& value)
+{
+  GetControlImplementation(*this).AppendAccessibilityAttribute(key, value);
+}
+
+void Control::RemoveAccessibilityAttribute(const std::string& key)
+{
+  GetControlImplementation(*this).RemoveAccessibilityAttribute(key);
+}
+
+void Control::ClearAccessibilityAttributes()
+{
+  GetControlImplementation(*this).ClearAccessibilityAttributes();
+}
+
+void Control::SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types)
+{
+  GetControlImplementation(*this).SetAccessibilityReadingInfoType(types);
+}
+
+Dali::Accessibility::ReadingInfoTypes Control::GetAccessibilityReadingInfoType()
+{
+  return GetControlImplementation(*this).GetAccessibilityReadingInfoType();
+}
+
+bool Control::ClearAccessibilityHighlight()
+{
+  auto controlAccessible = GetControlImplementation(*this).GetAccessibleObject();
+  if(DALI_LIKELY(controlAccessible))
+  {
+    return controlAccessible->ClearHighlight();
+  }
+  return false;
+}
+
+bool Control::GrabAccessibilityHighlight()
+{
+  auto controlAccessible = GetControlImplementation(*this).GetAccessibleObject();
+  if(DALI_LIKELY(controlAccessible))
+  {
+    return controlAccessible->GrabHighlight();
+  }
+  return false;
+}
+
+Dali::Accessibility::States Control::GetAccessibilityStates()
+{
+  auto controlAccessible = GetControlImplementation(*this).GetAccessibleObject();
+  if(DALI_LIKELY(controlAccessible))
+  {
+    return controlAccessible->GetStates();
+  }
+  return Dali::Accessibility::States{};
+}
+
+void Control::NotifyAccessibilityStateChange(Dali::Accessibility::States states, bool recurse)
+{
+  auto controlAccessible = GetControlImplementation(*this).GetAccessibleObject();
+  if(DALI_LIKELY(controlAccessible))
+  {
+    controlAccessible->NotifyAccessibilityStateChange(std::move(states), recurse);
+  }
+}
+
+bool Control::IsAccessibleCreated()
+{
+  return GetControlImplementation(*this).IsAccessibleCreated();
+}
+
+void Control::EnableCreateAccessible(bool enable)
+{
+  GetControlImplementation(*this).EnableCreateAccessible(enable);
+}
+
+bool Control::IsCreateAccessibleEnabled()
+{
+  return GetControlImplementation(*this).IsCreateAccessibleEnabled();
+}
+
+void Control::EmitAccessibilityStateChanged(Accessibility::State state, int newValue)
+{
+  GetControlImplementation(*this).EmitAccessibilityStateChanged(state, newValue);
 }
 
 Control::Control(Internal::Control& implementation)

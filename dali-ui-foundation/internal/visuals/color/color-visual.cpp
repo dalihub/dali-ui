@@ -27,7 +27,6 @@
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
@@ -187,10 +186,10 @@ void ColorVisual::DoSetOnScene(Actor& actor)
     // Get the corner radius from control
     mCutoutCornerRadiusConstraint =
       Constraint::New<Vector4>(mImpl->mRenderer, mCuroutCornerRadiusIndex, Dali::EqualToConstraint());
-    mCutoutCornerRadiusConstraint.AddSource(Source(control, Ui::DevelControl::Property::CORNER_RADIUS));
+    mCutoutCornerRadiusConstraint.AddSource(Source(control, Ui::Control::Property::CORNER_RADIUS));
     Dali::Integration::ConstraintSetInternalTag(mCutoutCornerRadiusConstraint, CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG);
 
-    AddConstraintFeature(mCutoutCornerRadiusConstraint, {Ui::DevelControl::Property::CORNER_RADIUS});
+    AddConstraintFeature(mCutoutCornerRadiusConstraint, {Ui::Control::Property::CORNER_RADIUS});
 
     // Apply the constraint to renderer
     mCutoutCornerRadiusConstraint.Apply();

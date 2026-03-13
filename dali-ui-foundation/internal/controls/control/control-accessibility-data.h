@@ -19,7 +19,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 
 namespace Dali
@@ -115,19 +114,19 @@ public:
   static Ui::DevelControl::AccessibilityStates GetDefaultControlAccessibilityStates();
 
 public:
-  Ui::DevelControl::AccessibilityActivateSignalType         mAccessibilityActivateSignal;
-  Ui::DevelControl::AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
-  Ui::DevelControl::AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
-  Ui::DevelControl::AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
-  Ui::DevelControl::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
-  Ui::DevelControl::AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
+  Ui::Control::AccessibilityActivateSignalType         mAccessibilityActivateSignal;
+  Ui::Control::AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
+  Ui::Control::AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
+  Ui::Control::AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
+  Ui::Control::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
+  Ui::Control::AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
 
-  Ui::DevelControl::AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
-  Ui::DevelControl::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
-  Ui::DevelControl::AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
+  Ui::Control::AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
+  Ui::Control::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
+  Ui::Control::AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
 
-  Ui::DevelControl::AccessibilityActionSignalType      mAccessibilityActionSignal;
-  Ui::DevelControl::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
+  Ui::Control::AccessibilityActionSignalType      mAccessibilityActionSignal;
+  Ui::Control::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
 
   struct AccessibilityProps
   {

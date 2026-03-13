@@ -28,7 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
@@ -120,7 +119,7 @@ void ImageView::OnInitialize()
   Dali::Ui::Control handle(GetOwner());
   handle.ResourceReadySignal().Connect(this, &ImageView::OnResourceReady);
 
-  Self().SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::IMAGE);
+  Self().SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, Dali::Accessibility::Role::IMAGE);
 }
 
 void ImageView::SetImage(const Property::Map& map)
@@ -162,7 +161,8 @@ void ImageView::SetImage(const Property::Map& map)
       visualImpl.SetCustomShader(mShaderMap);
     }
 
-    DevelControl::RegisterVisual(*this, Ui::ImageView::Property::IMAGE, visual, DepthIndex::CONTENT);
+    Dali::Ui::Control handle(GetOwner());
+    handle.RegisterVisual(Ui::ImageView::Property::IMAGE, visual, DepthIndex::CONTENT);
 
     Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(*this);
     controlDataImpl.EnableCornerPropertiesOverridden(visual, true);
@@ -170,7 +170,8 @@ void ImageView::SetImage(const Property::Map& map)
   else
   {
     // Unregister the exsiting visual
-    DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::IMAGE);
+    Dali::Ui::Control handle(GetOwner());
+    handle.UnregisterVisual(Ui::ImageView::Property::IMAGE);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
     RelayoutRequest();
@@ -219,7 +220,8 @@ void ImageView::SetImage(const std::string& url, ImageDimensions size)
       visualImpl.SetCustomShader(mShaderMap);
     }
 
-    DevelControl::RegisterVisual(*this, Ui::ImageView::Property::IMAGE, visual, DepthIndex::CONTENT);
+    Dali::Ui::Control handle(GetOwner());
+    handle.RegisterVisual(Ui::ImageView::Property::IMAGE, visual, DepthIndex::CONTENT);
 
     Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(*this);
     controlDataImpl.EnableCornerPropertiesOverridden(visual, true);
@@ -227,7 +229,8 @@ void ImageView::SetImage(const std::string& url, ImageDimensions size)
   else
   {
     // Unregister the exsiting visual
-    DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::IMAGE);
+    Dali::Ui::Control handle(GetOwner());
+    handle.UnregisterVisual(Ui::ImageView::Property::IMAGE);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
     RelayoutRequest();
@@ -244,7 +247,8 @@ void ImageView::ClearImageVisual()
   DiscardImageViewVisual(mVisual);
 
   // Unregister the exsiting visual
-  DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::IMAGE);
+  Dali::Ui::Control handle(GetOwner());
+  handle.UnregisterVisual(Ui::ImageView::Property::IMAGE);
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();
@@ -285,11 +289,12 @@ void ImageView::SetPlaceholderUrl(const std::string& url)
   }
   else
   {
+    Dali::Ui::Control handle(GetOwner());
     // Clear current placeholder image
-    Ui::Visual::Base visual = DevelControl::GetVisual(*this, Ui::ImageView::Property::PLACEHOLDER_IMAGE);
+    Ui::Visual::Base visual = handle.GetVisual(Ui::ImageView::Property::PLACEHOLDER_IMAGE);
     if(visual)
     {
-      DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::PLACEHOLDER_IMAGE);
+      handle.UnregisterVisual(Ui::ImageView::Property::PLACEHOLDER_IMAGE);
     }
 
     DiscardImageViewVisual(mPlaceholderVisual);
@@ -354,17 +359,15 @@ float ImageView::GetWidthForHeight(float height)
 void ImageView::OnUpdateVisualProperties(
   const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
 {
-  Ui::Visual::Base visual = DevelControl::GetVisual(*this, Ui::ImageView::Property::IMAGE);
+  Dali::Ui::Control handle(GetOwner());
+  Ui::Visual::Base  visual = handle.GetVisual(Ui::ImageView::Property::IMAGE);
   if(visual)
   {
-    Dali::Ui::Control handle(GetOwner());
-
     for(auto&& data : properties)
     {
       if(data.first == Ui::ImageView::Property::IMAGE)
       {
-        DevelControl::DoAction(handle, Ui::ImageView::Property::IMAGE, DevelVisual::Action::UPDATE_PROPERTY,
-                               data.second);
+        handle.DoAction(Ui::ImageView::Property::IMAGE, DevelVisual::Action::UPDATE_PROPERTY, data.second);
         break;
       }
     }
@@ -381,7 +384,7 @@ void ImageView::OnResourceReady(Ui::Control control)
   }
 
   // Visual ready so update visual attached to this ImageView, following call to RelayoutRequest will use this visual.
-  auto currentVisual = DevelControl::GetVisual(*this, Ui::ImageView::Property::IMAGE);
+  auto currentVisual = control.GetVisual(Ui::ImageView::Property::IMAGE);
   if(mVisual != currentVisual)
   {
     // If the current visual is not the same as the previous holded visual, then we need to discard old one.
@@ -409,7 +412,8 @@ void ImageView::CreatePlaceholderImage()
   }
   else
   {
-    DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::PLACEHOLDER_IMAGE);
+    Dali::Ui::Control handle(GetOwner());
+    handle.UnregisterVisual(Ui::ImageView::Property::PLACEHOLDER_IMAGE);
     DiscardImageViewVisual(mPlaceholderVisual);
   }
 }
@@ -418,7 +422,8 @@ void ImageView::ShowPlaceholderImage()
 {
   if(mPlaceholderVisual)
   {
-    DevelControl::RegisterVisual(*this, Ui::ImageView::Property::PLACEHOLDER_IMAGE, mPlaceholderVisual, false);
+    Dali::Ui::Control handle(GetOwner());
+    handle.RegisterVisual(Ui::ImageView::Property::PLACEHOLDER_IMAGE, mPlaceholderVisual, false);
 
     Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(*this);
     controlDataImpl.EnableCornerPropertiesOverridden(mPlaceholderVisual, true);
@@ -432,7 +437,8 @@ void ImageView::HidePlaceholderImage()
 {
   if(mPlaceholderVisual)
   {
-    DevelControl::UnregisterVisual(*this, Ui::ImageView::Property::PLACEHOLDER_IMAGE);
+    Dali::Ui::Control handle(GetOwner());
+    handle.UnregisterVisual(Ui::ImageView::Property::PLACEHOLDER_IMAGE);
 
     // Hide placeholder
     Actor self = Self();
@@ -553,7 +559,7 @@ Property::Value ImageView::GetProperty(BaseObject* object, Property::Index prope
         else
         {
           Property::Map    map;
-          Ui::Visual::Base visual = DevelControl::GetVisual(impl, Ui::ImageView::Property::IMAGE);
+          Ui::Visual::Base visual = imageview.GetVisual(Ui::ImageView::Property::IMAGE);
           if(visual)
           {
             visual.CreatePropertyMap(map);

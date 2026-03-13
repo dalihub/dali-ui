@@ -33,7 +33,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/internal/controls/image-view/image-view-impl.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
@@ -666,7 +665,7 @@ struct Decorator::Impl : public ConnectionTracker
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
-    cursor.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+    cursor.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIDDEN, true);
   }
 
   // Add or Remove cursor(s) from parent

@@ -20,6 +20,7 @@
 #include <dali/public-api/common/vector-wrapper.h>
 
 #include <algorithm>
+#include <string>
 #include <string_view>
 
 namespace Dali
@@ -74,7 +75,8 @@ private:
 
   auto FindElementCaseInsensitive(std::string_view key) const
   {
-    return std::find_if(Begin(), End(), [key](auto& e)
+    return std::find_if(
+      Begin(), End(), [key](auto& e)
     { return Dali::CaseInsensitiveStringCompare(e.key, key); });
   }
 

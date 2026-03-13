@@ -31,6 +31,7 @@
 #include <dali/public-api/signals/connection-tracker.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
 namespace Dali

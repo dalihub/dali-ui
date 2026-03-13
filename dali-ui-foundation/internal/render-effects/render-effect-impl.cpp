@@ -25,7 +25,6 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -96,7 +95,7 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
         if(radiusIndex != Property::INVALID_INDEX)
         {
           Constraint cornerRadiusConstraint = Constraint::New<Vector4>(renderer, radiusIndex, EqualToConstraint());
-          cornerRadiusConstraint.AddSource(Source(ownerControl, DevelControl::Property::CORNER_RADIUS));
+          cornerRadiusConstraint.AddSource(Source(ownerControl, Ui::Control::Property::CORNER_RADIUS));
           cornerRadiusConstraint.Apply();
           mAnimationConstraints.push_back(cornerRadiusConstraint);
         }
@@ -106,7 +105,7 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
         {
           Constraint cornerSquarenessConstraint =
             Constraint::New<Vector4>(renderer, squarenessIndex, EqualToConstraint());
-          cornerSquarenessConstraint.AddSource(Source(ownerControl, DevelControl::Property::CORNER_SQUARENESS));
+          cornerSquarenessConstraint.AddSource(Source(ownerControl, Ui::Control::Property::CORNER_SQUARENESS));
           cornerSquarenessConstraint.Apply();
           mAnimationConstraints.push_back(cornerSquarenessConstraint);
         }
@@ -216,11 +215,11 @@ void RenderEffectImpl::Activate()
     OnActivate();
 
     // Set round corner. Default is to sync to owner control's BACKGROUND.
-    Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS);
+    Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(Ui::Control::Property::CORNER_RADIUS);
     if(cornerRadius != Vector4::ZERO)
     {
-      int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY);
-      Vector4 cornerSquareness   = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS);
+      int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(Ui::Control::Property::CORNER_RADIUS_POLICY);
+      Vector4 cornerSquareness   = ownerControl.GetProperty<Vector4>(Ui::Control::Property::CORNER_SQUARENESS);
 
       Property::Map map;
       map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);

@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <sstream>
 
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>

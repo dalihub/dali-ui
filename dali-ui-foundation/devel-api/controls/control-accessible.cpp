@@ -68,13 +68,13 @@ Dali::Actor CreateHighlightIndicatorActor()
 
   // Create the default if it hasn't been set and one that's shared by all the
   // keyboard focusable actors
-  auto actor = Ui::ImageView::New(focusBorderImagePath);
-  actor.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+  auto imageView = Ui::ImageView::New(focusBorderImagePath);
+  imageView.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-  DevelControl::AppendAccessibilityAttribute(actor, "highlight", std::string());
-  actor.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  imageView.AppendAccessibilityAttribute("highlight", std::string());
+  imageView.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
 
-  return actor;
+  return imageView;
 }
 
 std::string FetchImageSrcFromMap(const Dali::Property::Map& imageMap)
@@ -307,12 +307,12 @@ std::string ControlAccessible::GetDescriptionRaw() const
 
 std::string ControlAccessible::GetValue() const
 {
-  return Self().GetProperty<std::string>(Ui::DevelControl::Property::ACCESSIBILITY_VALUE);
+  return Self().GetProperty<std::string>(Ui::Control::Property::ACCESSIBILITY_VALUE);
 }
 
 Dali::Accessibility::Role ControlAccessible::GetRole() const
 {
-  int32_t rawRole = Self().GetProperty<int32_t>(Ui::DevelControl::Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = Self().GetProperty<int32_t>(Ui::Control::Property::ACCESSIBILITY_ROLE);
   return ConvertRawRoleToAtspiRole(rawRole);
 }
 
@@ -343,7 +343,7 @@ void ControlAccessible::ApplyAccessibilityProps(Dali::Accessibility::States& sta
 
   DevelControl::AccessibilityStates controlStates;
 
-  int32_t rawRole = control.GetProperty<int32_t>(Ui::DevelControl::Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = control.GetProperty<int32_t>(Ui::Control::Property::ACCESSIBILITY_ROLE);
 
   bool             isModal       = false;
   TriStateProperty highlightable = TriStateProperty::AUTO;
@@ -409,7 +409,7 @@ Dali::Accessibility::Attributes ControlAccessible::GetAttributes() const
 
   Accessibility::Attributes result;
   Ui::Control               control        = Ui::Control::DownCast(Self());
-  Dali::Property::Value     property       = control.GetProperty(DevelControl::Property::ACCESSIBILITY_ATTRIBUTES);
+  Dali::Property::Value     property       = control.GetProperty(Control::Property::ACCESSIBILITY_ATTRIBUTES);
   Dali::Property::Map*      attributeMap   = property.GetMap();
   std::size_t               attributeCount = attributeMap ? attributeMap->Count() : 0U;
 
@@ -424,7 +424,7 @@ Dali::Accessibility::Attributes ControlAccessible::GetAttributes() const
     }
   }
 
-  auto automationId = control.GetProperty<std::string>(DevelControl::Property::AUTOMATION_ID);
+  auto automationId = control.GetProperty<std::string>(Control::Property::AUTOMATION_ID);
   if(!automationId.empty())
   {
     result.emplace(automationIdKey, std::move(automationId));
@@ -451,7 +451,7 @@ Dali::Accessibility::Attributes ControlAccessible::GetAttributes() const
       result.emplace(classKey, typeName);
 
       // Save the 'typeName' so we don't have to calculate it again
-      DevelControl::AppendAccessibilityAttribute(control, classKey, typeName);
+      control.AppendAccessibilityAttribute(classKey, typeName);
     }
   }
 
@@ -589,9 +589,9 @@ bool ControlAccessible::GrabHighlight()
   RegisterPropertySetSignal();
 
   auto control = Dali::Ui::Control::DownCast(self);
-  if(!DevelControl::AccessibilityHighlightedSignal(control).Empty())
+  if(!control.AccessibilityHighlightedSignal().Empty())
   {
-    DevelControl::AccessibilityHighlightedSignal(control).Emit(true);
+    control.AccessibilityHighlightedSignal().Emit(true);
   }
 
   mHighlightOverlay.UpdateOverlay(highlight);
@@ -616,9 +616,9 @@ bool ControlAccessible::ClearHighlight()
     SetCurrentlyHighlightedActor({});
     EmitHighlighted(false);
     auto control = Dali::Ui::Control::DownCast(self);
-    if(!DevelControl::AccessibilityHighlightedSignal(control).Empty())
+    if(!control.AccessibilityHighlightedSignal().Empty())
     {
-      DevelControl::AccessibilityHighlightedSignal(control).Emit(false);
+      control.AccessibilityHighlightedSignal().Emit(false);
     }
     mHighlightOverlay.HideOverlay();
     return true;
@@ -695,7 +695,7 @@ std::vector<Dali::Accessibility::Relation> ControlAccessible::GetRelationSet()
 {
   auto control = Dali::Ui::Control::DownCast(Self());
 
-  return DevelControl::GetAccessibilityRelations(control);
+  return control.GetAccessibilityRelations();
 }
 
 std::string ControlAccessible::GetStringProperty(std::string propertyName) const
@@ -705,7 +705,7 @@ std::string ControlAccessible::GetStringProperty(std::string propertyName) const
 
 bool ControlAccessible::IsScrollable() const
 {
-  return Self().GetProperty<bool>(Ui::DevelControl::Property::ACCESSIBILITY_SCROLLABLE);
+  return Self().GetProperty<bool>(Ui::Control::Property::ACCESSIBILITY_SCROLLABLE);
 }
 
 bool ControlAccessible::ScrollToChild(Actor child)
@@ -713,10 +713,9 @@ bool ControlAccessible::ScrollToChild(Actor child)
   auto control = Dali::Ui::Control::DownCast(Self());
   bool success = false;
 
-  if(!DevelControl::AccessibilityActionSignal(control).Empty())
+  if(!control.AccessibilityActionSignal().Empty())
   {
-    success =
-      DevelControl::AccessibilityActionSignal(control).Emit({Accessibility::ActionType::SCROLL_TO_CHILD, child});
+    success = control.AccessibilityActionSignal().Emit({Accessibility::ActionType::SCROLL_TO_CHILD, child});
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: scrollToChild, success : %d\n", success);
   }
 
@@ -745,7 +744,7 @@ Vector2 ControlAccessible::GetLastPosition() const
 
 void ControlAccessible::OnStatePropertySet(AccessibilityStates newStates)
 {
-  int32_t rawRole = Self().GetProperty<int32_t>(Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = Self().GetProperty<int32_t>(Ui::Control::Property::ACCESSIBILITY_ROLE);
   if(IsRoleV2(rawRole))
   {
     AccessibilityRole role = static_cast<AccessibilityRole>(rawRole);
@@ -776,20 +775,20 @@ void ControlAccessible::OnStatePropertySet(AccessibilityStates newStates)
 
 bool ControlAccessible::IsModal(Actor actor)
 {
-  bool isModalPropertySet = actor.GetProperty<bool>(Property::ACCESSIBILITY_IS_MODAL);
+  bool isModalPropertySet = actor.GetProperty<bool>(Ui::Control::Property::ACCESSIBILITY_IS_MODAL);
   if(isModalPropertySet)
   {
     return true;
   }
 
-  int32_t rawRole = actor.GetProperty<int32_t>(Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = actor.GetProperty<int32_t>(Ui::Control::Property::ACCESSIBILITY_ROLE);
   return IsModalRole(rawRole);
 }
 
 bool ControlAccessible::IsScene3D(Actor actor)
 {
   int32_t rawRole = static_cast<uint32_t>(DevelControl::AccessibilityRole::MAX_COUNT);
-  if(actor.GetProperty(Property::ACCESSIBILITY_ROLE).Get(rawRole))
+  if(actor.GetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE).Get(rawRole))
   {
     return IsScene3DRole(rawRole);
   }

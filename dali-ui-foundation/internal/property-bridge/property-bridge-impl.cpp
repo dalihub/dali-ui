@@ -24,7 +24,6 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 namespace Dali
 {
 namespace Ui

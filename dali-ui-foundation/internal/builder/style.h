@@ -18,6 +18,8 @@
  */
 
 #include <dali-ui-foundation/internal/builder/dictionary.h>
+#include <dali/public-api/object/handle.h>
+#include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
 
 namespace Dali

@@ -25,7 +25,6 @@
 #include <dali/public-api/animation/animation.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/controls/popup/popup.h>
 #include <dali-ui-foundation/devel-api/controls/table-view/table-view.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>

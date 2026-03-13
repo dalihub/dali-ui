@@ -31,7 +31,6 @@
 #include <cstring>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-field-devel.h>
 #include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
@@ -556,7 +555,7 @@ void TextField::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.OnSceneSignal().Connect(this, &TextField::OnSceneConnect);
 
-  DevelControl::SetInputMethodContext(*this, mInputMethodContext);
+  Dali::Ui::Control::DownCast(self).SetInputMethodContext(mInputMethodContext);
 
   if(Dali::Ui::TextField::EXCEED_POLICY_CLIP == mExceedPolicy)
   {
@@ -564,7 +563,7 @@ void TextField::OnInitialize()
   }
 
   // Accessibility
-  self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextField::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextField::OnAccessibilityStatusChanged);
@@ -1157,7 +1156,7 @@ void TextField::EnableClipping()
     mStencil = Control::New(ControlBehaviour(Dali::Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
     mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
     mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mStencil.SetProperty(Ui::DevelControl::Property::ACCESSIBILITY_HIDDEN, true);
+    mStencil.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIDDEN, true);
 
     // Creates a background visual. Even if the color is transparent it updates the stencil.
     mStencil.SetProperty(Ui::Control::Property::BACKGROUND,

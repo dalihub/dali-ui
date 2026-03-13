@@ -37,7 +37,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/devel-api/styling/style-manager-devel.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
@@ -513,32 +512,32 @@ bool KeyboardFocusManager::MoveFocus(Ui::Control::KeyboardFocus::Direction direc
       {
         case Ui::Control::KeyboardFocus::LEFT:
         {
-          index = Ui::DevelControl::Property::LEFT_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::LEFT_FOCUSABLE_ACTOR_ID;
           break;
         }
         case Ui::Control::KeyboardFocus::RIGHT:
         {
-          index = Ui::DevelControl::Property::RIGHT_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::RIGHT_FOCUSABLE_ACTOR_ID;
           break;
         }
         case Ui::Control::KeyboardFocus::UP:
         {
-          index = Ui::DevelControl::Property::UP_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::UP_FOCUSABLE_ACTOR_ID;
           break;
         }
         case Ui::Control::KeyboardFocus::DOWN:
         {
-          index = Ui::DevelControl::Property::DOWN_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::DOWN_FOCUSABLE_ACTOR_ID;
           break;
         }
         case Ui::Control::KeyboardFocus::CLOCKWISE:
         {
-          index = Ui::DevelControl::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID;
           break;
         }
         case Ui::Control::KeyboardFocus::COUNTER_CLOCKWISE:
         {
-          index = Ui::DevelControl::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID;
+          index = Ui::Control::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID;
           break;
         }
         default:

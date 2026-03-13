@@ -36,7 +36,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/controls/control-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
@@ -353,7 +352,7 @@ void Popup::OnInitialize()
 
   SetupTouch();
 
-  self.SetProperty(DevelControl::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::DIALOG);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::DIALOG);
 }
 
 DevelControl::ControlAccessible* Popup::CreateAccessibleObject()
@@ -752,7 +751,8 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
   {
     // Update the state to indicate the current intent.
     mDisplayState = Ui::Popup::SHOWING;
-    DevelControl::EmitAccessibilityStateChanged(Self(), Accessibility::State::SHOWING, 1);
+    Ui::Popup handle(GetOwner());
+    handle.EmitAccessibilityStateChanged(Accessibility::State::SHOWING, 1);
 
     // We want the popup to have key input focus when it is displayed
     SetKeyInputFocus();
@@ -807,7 +807,8 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
   {
     mDisplayState = Ui::Popup::HIDING;
     ClearKeyInputFocus();
-    DevelControl::EmitAccessibilityStateChanged(Self(), Accessibility::State::SHOWING, 0);
+    Ui::Popup handle(GetOwner());
+    handle.EmitAccessibilityStateChanged(Accessibility::State::SHOWING, 0);
     // Restore the keyboard focus when popup is hidden.
     if(mPreviousFocusedActor && mPreviousFocusedActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
     {
