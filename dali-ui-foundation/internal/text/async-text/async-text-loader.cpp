@@ -36,7 +36,7 @@ AsyncTextLoader::~AsyncTextLoader()
 }
 
 AsyncTextLoader::AsyncTextLoader(Internal::AsyncTextLoader* implementation)
-  : BaseHandle(implementation)
+: BaseHandle(implementation)
 {
 }
 

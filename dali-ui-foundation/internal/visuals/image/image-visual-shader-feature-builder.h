@@ -143,10 +143,10 @@ public:
   bool IsEnabledAlphaMaskingOnRendering() const;
 
 private:
-  DefaultTextureWrapMode::Type mDefaultTextureWrapMode : 2; ///< Whether apply to texture wraping in default, or not.
-                                                            ///< default as DefaultTextureWrapMode::APPLY
-  RoundedCorner::Type mRoundedCorner : 2; ///< Whether use rounded corner, or not. default as RoundedCorner::DISABLED
-  Borderline::Type mBorderline : 2;       ///< Whether use borderline, or not. default as Borderline::DISABLED
+  DefaultTextureWrapMode::Type mDefaultTextureWrapMode : 2;   ///< Whether apply to texture wraping in default, or not.
+                                                              ///< default as DefaultTextureWrapMode::APPLY
+  RoundedCorner::Type           mRoundedCorner : 2;           ///< Whether use rounded corner, or not. default as RoundedCorner::DISABLED
+  Borderline::Type              mBorderline : 2;              ///< Whether use borderline, or not. default as Borderline::DISABLED
   AlphaMaskingOnRendering::Type mAlphaMaskingOnRendering : 2; ///< Whether use runtime alpha masking, or not. default as
                                                               ///< AlphaMaskingOnRendering::DISABLED
   ColorConversion::Type mColorConversion : 2;                 ///< Whether the color format conversion is needed or not

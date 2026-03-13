@@ -38,10 +38,10 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 
-const char* KEY_C_NAME = "c";
-const char* KEY_V_NAME = "v";
-const char* KEY_X_NAME = "x";
-const char* KEY_A_NAME = "a";
+const char* KEY_C_NAME      = "c";
+const char* KEY_V_NAME      = "v";
+const char* KEY_X_NAME      = "x";
+const char* KEY_A_NAME      = "a";
 const char* KEY_INSERT_NAME = "Insert";
 
 } // namespace
@@ -56,19 +56,19 @@ void Controller::EventHandler::KeyboardFocusGainEvent(Controller& controller)
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected KeyboardFocusGainEvent");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if ((EventData::INACTIVE == controller.mImpl->mEventData->mState) ||
-        (EventData::INTERRUPTED == controller.mImpl->mEventData->mState))
+    if((EventData::INACTIVE == controller.mImpl->mEventData->mState) ||
+       (EventData::INTERRUPTED == controller.mImpl->mEventData->mState))
     {
       controller.mImpl->ChangeState(EventData::EDITING);
       controller.mImpl->mEventData->mUpdateCursorPosition =
-          true; // If editing started without tap event, cursor update must be triggered.
-      controller.mImpl->mEventData->mUpdateInputStyle = true;
+        true; // If editing started without tap event, cursor update must be triggered.
+      controller.mImpl->mEventData->mUpdateInputStyle          = true;
       controller.mImpl->mEventData->mScrollAfterUpdatePosition = true;
     }
     controller.mImpl->NotifyInputMethodContextMultiLineStatus();
-    if (controller.mImpl->IsShowingPlaceholderText())
+    if(controller.mImpl->IsShowingPlaceholderText())
     {
       // Show alternative placeholder-text when editing
       PlaceholderHandler::ShowPlaceholderText(*controller.mImpl);
@@ -82,31 +82,31 @@ void Controller::EventHandler::KeyboardFocusLostEvent(Controller& controller)
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected KeyboardFocusLostEvent");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (EventData::INTERRUPTED != controller.mImpl->mEventData->mState)
+    if(EventData::INTERRUPTED != controller.mImpl->mEventData->mState)
     {
       // Init selection position
-      if (controller.mImpl->mEventData->mState == EventData::SELECTING)
+      if(controller.mImpl->mEventData->mState == EventData::SELECTING)
       {
         uint32_t oldStart, oldEnd;
         oldStart = controller.mImpl->mEventData->mLeftSelectionPosition;
-        oldEnd = controller.mImpl->mEventData->mRightSelectionPosition;
+        oldEnd   = controller.mImpl->mEventData->mRightSelectionPosition;
 
-        controller.mImpl->mEventData->mLeftSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
+        controller.mImpl->mEventData->mLeftSelectionPosition  = controller.mImpl->mEventData->mPrimaryCursorPosition;
         controller.mImpl->mEventData->mRightSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
 
-        if (controller.mImpl->mSelectableControlInterface != nullptr)
+        if(controller.mImpl->mSelectableControlInterface != nullptr)
         {
           controller.mImpl->mSelectableControlInterface->SelectionChanged(
-              oldStart, oldEnd, controller.mImpl->mEventData->mPrimaryCursorPosition,
-              controller.mImpl->mEventData->mPrimaryCursorPosition);
+            oldStart, oldEnd, controller.mImpl->mEventData->mPrimaryCursorPosition,
+            controller.mImpl->mEventData->mPrimaryCursorPosition);
         }
       }
 
       controller.mImpl->ChangeState(EventData::INACTIVE);
 
-      if (!controller.mImpl->IsShowingRealText())
+      if(!controller.mImpl->IsShowingRealText())
       {
         // Revert to regular placeholder-text when not editing
         PlaceholderHandler::ShowPlaceholderText(*controller.mImpl);
@@ -121,15 +121,15 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected KeyEvent");
   DALI_LOG_RELEASE_INFO("EventHandler KeyEvent: [%d] [%s]\n", keyEvent.GetKeyCode(), keyEvent.GetKeyString().c_str());
 
-  bool textChanged = false;
+  bool textChanged    = false;
   bool relayoutNeeded = false;
-  bool isEditable = controller.IsEditable() && controller.IsUserInteractionEnabled();
+  bool isEditable     = controller.IsEditable() && controller.IsUserInteractionEnabled();
 
-  if ((NULL != controller.mImpl->mEventData) && (keyEvent.GetState() == KeyEvent::DOWN))
+  if((NULL != controller.mImpl->mEventData) && (keyEvent.GetState() == KeyEvent::DOWN))
   {
-    int keyCode = keyEvent.GetKeyCode();
+    int                keyCode   = keyEvent.GetKeyCode();
     const std::string& keyString = keyEvent.GetKeyString();
-    const std::string keyName = keyEvent.GetKeyName();
+    const std::string  keyName   = keyEvent.GetKeyName();
     // Key will produce same logical-key value when ctrl
     // is down, regardless of language layout
     const std::string logicalKey = keyEvent.GetLogicalKey();
@@ -137,60 +137,60 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
     const bool isNullKey = (0 == keyCode) && (keyString.empty());
 
     // Pre-process to separate modifying events from non-modifying input events.
-    if (isNullKey)
+    if(isNullKey)
     {
       // In some platforms arrive key events with no key code.
       // Do nothing.
       return false;
     }
-    else if (Dali::DALI_KEY_ESCAPE == keyCode || Dali::DALI_KEY_BACK == keyCode || Dali::DALI_KEY_SEARCH == keyCode)
+    else if(Dali::DALI_KEY_ESCAPE == keyCode || Dali::DALI_KEY_BACK == keyCode || Dali::DALI_KEY_SEARCH == keyCode)
     {
       // Do nothing
       return false;
     }
-    else if ((Dali::DALI_KEY_CURSOR_LEFT == keyCode) || (Dali::DALI_KEY_CURSOR_RIGHT == keyCode) ||
-             (Dali::DALI_KEY_CURSOR_UP == keyCode) || (Dali::DALI_KEY_CURSOR_DOWN == keyCode))
+    else if((Dali::DALI_KEY_CURSOR_LEFT == keyCode) || (Dali::DALI_KEY_CURSOR_RIGHT == keyCode) ||
+            (Dali::DALI_KEY_CURSOR_UP == keyCode) || (Dali::DALI_KEY_CURSOR_DOWN == keyCode))
     {
       // If don't have any text, do nothing.
-      if (!controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters || !isEditable)
+      if(!controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters || !isEditable)
       {
         return false;
       }
 
-      uint32_t cursorPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
+      uint32_t cursorPosition     = controller.mImpl->mEventData->mPrimaryCursorPosition;
       uint32_t numberOfCharacters = controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
-      uint32_t cursorLine = controller.mImpl->mModel->mVisualModel->GetLineOfCharacter(cursorPosition);
-      uint32_t numberOfLines = controller.mImpl->mModel->GetNumberOfLines();
+      uint32_t cursorLine         = controller.mImpl->mModel->mVisualModel->GetLineOfCharacter(cursorPosition);
+      uint32_t numberOfLines      = controller.mImpl->mModel->GetNumberOfLines();
 
       // Logic to determine whether this text control will lose focus or not.
-      if ((Dali::DALI_KEY_CURSOR_LEFT == keyCode && 0 == cursorPosition && !keyEvent.IsShiftModifier()) ||
-          (Dali::DALI_KEY_CURSOR_RIGHT == keyCode && numberOfCharacters == cursorPosition &&
-           !keyEvent.IsShiftModifier()) ||
-          (Dali::DALI_KEY_CURSOR_DOWN == keyCode && cursorLine == numberOfLines - 1) ||
-          (Dali::DALI_KEY_CURSOR_DOWN == keyCode && numberOfCharacters == cursorPosition &&
-           cursorLine - 1 == numberOfLines - 1) ||
-          (Dali::DALI_KEY_CURSOR_UP == keyCode && cursorLine == 0) ||
-          (Dali::DALI_KEY_CURSOR_UP == keyCode && numberOfCharacters == cursorPosition && cursorLine == 1))
+      if((Dali::DALI_KEY_CURSOR_LEFT == keyCode && 0 == cursorPosition && !keyEvent.IsShiftModifier()) ||
+         (Dali::DALI_KEY_CURSOR_RIGHT == keyCode && numberOfCharacters == cursorPosition &&
+          !keyEvent.IsShiftModifier()) ||
+         (Dali::DALI_KEY_CURSOR_DOWN == keyCode && cursorLine == numberOfLines - 1) ||
+         (Dali::DALI_KEY_CURSOR_DOWN == keyCode && numberOfCharacters == cursorPosition &&
+          cursorLine - 1 == numberOfLines - 1) ||
+         (Dali::DALI_KEY_CURSOR_UP == keyCode && cursorLine == 0) ||
+         (Dali::DALI_KEY_CURSOR_UP == keyCode && numberOfCharacters == cursorPosition && cursorLine == 1))
       {
         // Release the active highlight.
-        if (controller.mImpl->mEventData->mState == EventData::SELECTING)
+        if(controller.mImpl->mEventData->mState == EventData::SELECTING)
         {
           uint32_t oldStart, oldEnd;
           oldStart = controller.mImpl->mEventData->mLeftSelectionPosition;
-          oldEnd = controller.mImpl->mEventData->mRightSelectionPosition;
+          oldEnd   = controller.mImpl->mEventData->mRightSelectionPosition;
 
           controller.mImpl->ChangeState(EventData::EDITING);
 
           // Update selection position.
-          controller.mImpl->mEventData->mLeftSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
+          controller.mImpl->mEventData->mLeftSelectionPosition  = controller.mImpl->mEventData->mPrimaryCursorPosition;
           controller.mImpl->mEventData->mRightSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
-          controller.mImpl->mEventData->mUpdateCursorPosition = true;
+          controller.mImpl->mEventData->mUpdateCursorPosition   = true;
 
-          if (controller.mImpl->mSelectableControlInterface != nullptr)
+          if(controller.mImpl->mSelectableControlInterface != nullptr)
           {
             controller.mImpl->mSelectableControlInterface->SelectionChanged(
-                oldStart, oldEnd, controller.mImpl->mEventData->mLeftSelectionPosition,
-                controller.mImpl->mEventData->mRightSelectionPosition);
+              oldStart, oldEnd, controller.mImpl->mEventData->mLeftSelectionPosition,
+              controller.mImpl->mEventData->mRightSelectionPosition);
           }
 
           controller.mImpl->RequestRelayout();
@@ -198,7 +198,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
         return false;
       }
 
-      if (controller.mImpl->mEventData->mState == EventData::INACTIVE)
+      if(controller.mImpl->mEventData->mState == EventData::INACTIVE)
       {
         // Cursor position will be updated
         controller.mImpl->ChangeState(EventData::EDITING);
@@ -206,14 +206,14 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
 
       controller.mImpl->mEventData->mCheckScrollAmount = true;
       Event event(Event::CURSOR_KEY_EVENT);
-      event.p1.mInt = keyCode;
+      event.p1.mInt  = keyCode;
       event.p2.mBool = keyEvent.IsShiftModifier();
       controller.mImpl->mEventData->mEventQueue.push_back(event);
 
       // Will request for relayout.
       relayoutNeeded = true;
     }
-    else if (Dali::DevelKey::DALI_KEY_CONTROL_LEFT == keyCode || Dali::DevelKey::DALI_KEY_CONTROL_RIGHT == keyCode)
+    else if(Dali::DevelKey::DALI_KEY_CONTROL_LEFT == keyCode || Dali::DevelKey::DALI_KEY_CONTROL_RIGHT == keyCode)
     {
       // Left or Right Control key event is received before Ctrl-C/V/X key event is received
       // If not handle it here, any selected text will be deleted
@@ -221,32 +221,32 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       // Do nothing
       return false;
     }
-    else if (keyEvent.IsCtrlModifier() && !keyEvent.IsShiftModifier() && isEditable)
+    else if(keyEvent.IsCtrlModifier() && !keyEvent.IsShiftModifier() && isEditable)
     {
       bool consumed = false;
-      if (keyName == KEY_C_NAME || keyName == KEY_INSERT_NAME || logicalKey == KEY_C_NAME ||
-          logicalKey == KEY_INSERT_NAME)
+      if(keyName == KEY_C_NAME || keyName == KEY_INSERT_NAME || logicalKey == KEY_C_NAME ||
+         logicalKey == KEY_INSERT_NAME)
       {
-        if (!keyEvent.IsRepeat())
+        if(!keyEvent.IsRepeat())
         {
           // Ctrl-C or Ctrl+Insert to copy the selected text
           controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::COPY);
         }
         consumed = true;
       }
-      else if (keyName == KEY_V_NAME || logicalKey == KEY_V_NAME)
+      else if(keyName == KEY_V_NAME || logicalKey == KEY_V_NAME)
       {
         // Ctrl-V to paste the copied text
         controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::PASTE);
         consumed = true;
       }
-      else if (keyName == KEY_X_NAME || logicalKey == KEY_X_NAME)
+      else if(keyName == KEY_X_NAME || logicalKey == KEY_X_NAME)
       {
         // Ctrl-X to cut the selected text
         controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::CUT);
         consumed = true;
       }
-      else if (keyName == KEY_A_NAME || logicalKey == KEY_A_NAME)
+      else if(keyName == KEY_A_NAME || logicalKey == KEY_A_NAME)
       {
         // Ctrl-A to select All the text
         controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::SELECT_ALL);
@@ -254,15 +254,15 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       }
       return consumed;
     }
-    else if ((Dali::DALI_KEY_BACKSPACE == keyCode) || (Dali::DevelKey::DALI_KEY_DELETE == keyCode))
+    else if((Dali::DALI_KEY_BACKSPACE == keyCode) || (Dali::DevelKey::DALI_KEY_DELETE == keyCode))
     {
       textChanged = DeleteEvent(controller, keyCode);
 
       // Will request for relayout.
       relayoutNeeded = true;
     }
-    else if (IsKey(keyEvent, Dali::DALI_KEY_POWER) || IsKey(keyEvent, Dali::DALI_KEY_MENU) ||
-             IsKey(keyEvent, Dali::DALI_KEY_HOME))
+    else if(IsKey(keyEvent, Dali::DALI_KEY_POWER) || IsKey(keyEvent, Dali::DALI_KEY_MENU) ||
+            IsKey(keyEvent, Dali::DALI_KEY_HOME))
     {
       // Power key/Menu/Home key behaviour does not allow edit mode to resume.
       controller.mImpl->ChangeState(EventData::INACTIVE);
@@ -272,7 +272,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
 
       // This branch avoids calling the InsertText() method of the 'else' branch which can delete selected text.
     }
-    else if ((Dali::DALI_KEY_SHIFT_LEFT == keyCode) || (Dali::DALI_KEY_SHIFT_RIGHT == keyCode))
+    else if((Dali::DALI_KEY_SHIFT_LEFT == keyCode) || (Dali::DALI_KEY_SHIFT_RIGHT == keyCode))
     {
       // DALI_KEY_SHIFT_LEFT or DALI_KEY_SHIFT_RIGHT is the key code for Shift. It's sent (by the InputMethodContext?)
       // when the predictive text is enabled and a character is typed after the type of a upper case latin character.
@@ -280,7 +280,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       // Do nothing.
       return false;
     }
-    else if ((Dali::DALI_KEY_VOLUME_UP == keyCode) || (Dali::DALI_KEY_VOLUME_DOWN == keyCode))
+    else if((Dali::DALI_KEY_VOLUME_UP == keyCode) || (Dali::DALI_KEY_VOLUME_DOWN == keyCode))
     {
       // This branch avoids calling the InsertText() method of the 'else' branch which can delete selected text.
       // Do nothing.
@@ -290,27 +290,27 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
     {
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::KeyEvent %p keyString %s\n", &controller,
                     keyString.c_str());
-      if (!isEditable)
+      if(!isEditable)
       {
         return false;
       }
 
       std::string refinedKey = keyString;
-      if (controller.mImpl->mInputFilter != NULL && !refinedKey.empty())
+      if(controller.mImpl->mInputFilter != NULL && !refinedKey.empty())
       {
         bool accepted = false;
         bool rejected = false;
-        accepted = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::ACCEPTED, keyString);
-        rejected = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::REJECTED, keyString);
+        accepted      = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::ACCEPTED, keyString);
+        rejected      = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::REJECTED, keyString);
 
-        if (!accepted)
+        if(!accepted)
         {
           // The filtered key is set to empty.
           refinedKey = "";
           // Signal emits when the character to be inserted is filtered by the accepted filter.
           controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
         }
-        if (rejected)
+        if(rejected)
         {
           // The filtered key is set to empty.
           refinedKey = "";
@@ -319,7 +319,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
         }
       }
 
-      if (!refinedKey.empty())
+      if(!refinedKey.empty())
       {
         // InputMethodContext is no longer handling key-events
         controller.mImpl->ClearPreEditFlag();
@@ -333,10 +333,10 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       }
     }
 
-    if ((controller.mImpl->mEventData->mState != EventData::INTERRUPTED) &&
-        (controller.mImpl->mEventData->mState != EventData::INACTIVE) && (!isNullKey) &&
-        (Dali::DALI_KEY_SHIFT_LEFT != keyCode) && (Dali::DALI_KEY_SHIFT_RIGHT != keyCode) &&
-        (Dali::DALI_KEY_VOLUME_UP != keyCode) && (Dali::DALI_KEY_VOLUME_DOWN != keyCode))
+    if((controller.mImpl->mEventData->mState != EventData::INTERRUPTED) &&
+       (controller.mImpl->mEventData->mState != EventData::INACTIVE) && (!isNullKey) &&
+       (Dali::DALI_KEY_SHIFT_LEFT != keyCode) && (Dali::DALI_KEY_SHIFT_RIGHT != keyCode) &&
+       (Dali::DALI_KEY_VOLUME_UP != keyCode) && (Dali::DALI_KEY_VOLUME_DOWN != keyCode))
     {
       // Should not change the state if the key is the shift send by the InputMethodContext.
       // Otherwise, when the state is SELECTING the text controller can't send the right
@@ -347,22 +347,22 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       relayoutNeeded = true;
     }
 
-    if (relayoutNeeded)
+    if(relayoutNeeded)
     {
       controller.mImpl->RequestRelayout();
     }
   }
-  else if ((NULL != controller.mImpl->mEventData) && (keyEvent.GetState() == KeyEvent::UP))
+  else if((NULL != controller.mImpl->mEventData) && (keyEvent.GetState() == KeyEvent::UP))
   {
     // Handles specific keys that require event propagation.
-    if (Dali::DALI_KEY_BACK == keyEvent.GetKeyCode())
+    if(Dali::DALI_KEY_BACK == keyEvent.GetKeyCode())
     {
       // Do nothing
       return false;
     }
   }
 
-  if (textChanged && (NULL != controller.mImpl->mEditableControlInterface))
+  if(textChanged && (NULL != controller.mImpl->mEditableControlInterface))
   {
     // Do this last since it provides callbacks into application code
     controller.mImpl->mEditableControlInterface->TextChanged(false);
@@ -373,8 +373,8 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
 
 void Controller::EventHandler::AnchorEvent(Controller& controller, float x, float y)
 {
-  if (!controller.mImpl->mMarkupProcessorEnabled || !controller.mImpl->mModel->mLogicalModel->mAnchors.Count() ||
-      !controller.mImpl->IsShowingRealText())
+  if(!controller.mImpl->mMarkupProcessorEnabled || !controller.mImpl->mModel->mLogicalModel->mAnchors.Count() ||
+     !controller.mImpl->IsShowingRealText())
   {
     return;
   }
@@ -390,12 +390,12 @@ void Controller::EventHandler::AnchorEvent(Controller& controller, float x, floa
 
   // Whether to touch point hits on a glyph.
   bool matchedCharacter = false;
-  cursorPosition = Text::GetClosestCursorIndex(
-      controller.mImpl->mModel->mVisualModel, controller.mImpl->mModel->mLogicalModel, controller.mImpl->mMetrics,
-      xPosition, yPosition - alignmentOffset.y, CharacterHitTest::TAP, matchedCharacter);
+  cursorPosition        = Text::GetClosestCursorIndex(
+    controller.mImpl->mModel->mVisualModel, controller.mImpl->mModel->mLogicalModel, controller.mImpl->mMetrics,
+    xPosition, yPosition - alignmentOffset.y, CharacterHitTest::TAP, matchedCharacter);
 
   std::string href;
-  if (AnchorClickEvent(controller, cursorPosition, href))
+  if(AnchorClickEvent(controller, cursorPosition, href))
   {
     controller.mImpl->mAnchorControlInterface->EmitAnchorClickedSignal(href);
   }
@@ -403,40 +403,40 @@ void Controller::EventHandler::AnchorEvent(Controller& controller, float x, floa
 
 bool Controller::EventHandler::AnchorClickEvent(Controller& controller, uint32_t cursorPosition, std::string& href)
 {
-  for (auto& anchor : controller.mImpl->mModel->mLogicalModel->mAnchors)
+  for(auto& anchor : controller.mImpl->mModel->mLogicalModel->mAnchors)
   {
     // Anchor clicked if the calculated cursor position is within the range of anchor.
-    if (cursorPosition >= anchor.startIndex && cursorPosition < anchor.endIndex)
+    if(cursorPosition >= anchor.startIndex && cursorPosition < anchor.endIndex)
     {
-      if (controller.mImpl->mAnchorControlInterface)
+      if(controller.mImpl->mAnchorControlInterface)
       {
-        if (!anchor.isClicked)
+        if(!anchor.isClicked)
         {
           anchor.isClicked = true;
           // TODO: in mutable text, the anchor color and underline run index should be able to be updated.
-          if (!controller.IsEditable())
+          if(!controller.IsEditable())
           {
             // If there is a markup clicked color attribute, use it. Otherwise, use the property color.
-            if (controller.mImpl->mModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
+            if(controller.mImpl->mModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
             {
               ColorRun& colorRun =
-                  *(controller.mImpl->mModel->mLogicalModel->mColorRuns.Begin() + anchor.colorRunIndex);
+                *(controller.mImpl->mModel->mLogicalModel->mColorRuns.Begin() + anchor.colorRunIndex);
               colorRun.color =
-                  anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
+                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
             }
-            if (controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Count() >
-                anchor.underlinedCharacterRunIndex)
+            if(controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Count() >
+               anchor.underlinedCharacterRunIndex)
             {
               UnderlinedCharacterRun& underlineRun =
-                  *(controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Begin() +
-                    anchor.underlinedCharacterRunIndex);
+                *(controller.mImpl->mModel->mLogicalModel->mUnderlinedCharacterRuns.Begin() +
+                  anchor.underlinedCharacterRunIndex);
               underlineRun.properties.color =
-                  anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
+                anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : controller.mImpl->mAnchorClickedColor;
             }
 
             controller.mImpl->ClearFontData();
             controller.mImpl->mOperationsPending =
-                static_cast<OperationsMask>(controller.mImpl->mOperationsPending | COLOR);
+              static_cast<OperationsMask>(controller.mImpl->mOperationsPending | COLOR);
             controller.mImpl->RequestRelayout();
           }
         }
@@ -452,67 +452,67 @@ void Controller::EventHandler::TapEvent(Controller& controller, unsigned int tap
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected TapEvent");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Concise, "TapEvent state:%d \n", controller.mImpl->mEventData->mState);
     EventData::State state(controller.mImpl->mEventData->mState);
-    bool relayoutNeeded(false); // to avoid unnecessary relayouts when tapping an empty text-field
+    bool             relayoutNeeded(false); // to avoid unnecessary relayouts when tapping an empty text-field
 
-    if (controller.mImpl->IsClipboardVisible())
+    if(controller.mImpl->IsClipboardVisible())
     {
-      if (EventData::INACTIVE == state || EventData::EDITING == state)
+      if(EventData::INACTIVE == state || EventData::EDITING == state)
       {
         controller.mImpl->ChangeState(EventData::EDITING_WITH_GRAB_HANDLE);
       }
       relayoutNeeded = true;
     }
-    else if (1u == tapCount)
+    else if(1u == tapCount)
     {
-      if (EventData::EDITING_WITH_POPUP == state || EventData::EDITING_WITH_PASTE_POPUP == state)
+      if(EventData::EDITING_WITH_POPUP == state || EventData::EDITING_WITH_PASTE_POPUP == state)
       {
         controller.mImpl->ChangeState(
-            EventData::EDITING_WITH_GRAB_HANDLE); // If Popup shown hide it here so can be shown again if required.
+          EventData::EDITING_WITH_GRAB_HANDLE); // If Popup shown hide it here so can be shown again if required.
       }
 
-      if (controller.mImpl->IsShowingRealText() && (EventData::INACTIVE != state))
+      if(controller.mImpl->IsShowingRealText() && (EventData::INACTIVE != state))
       {
         controller.mImpl->ChangeState(EventData::EDITING_WITH_GRAB_HANDLE);
         relayoutNeeded = true;
       }
       else
       {
-        if (controller.mImpl->IsShowingPlaceholderText() && !controller.mImpl->IsFocusedPlaceholderAvailable())
+        if(controller.mImpl->IsShowingPlaceholderText() && !controller.mImpl->IsFocusedPlaceholderAvailable())
         {
           // Hide placeholder text
           TextUpdater::ResetText(controller);
         }
 
-        if (EventData::INACTIVE == state)
+        if(EventData::INACTIVE == state)
         {
           controller.mImpl->ChangeState(EventData::EDITING);
         }
-        else if (!controller.mImpl->IsClipboardEmpty())
+        else if(!controller.mImpl->IsClipboardEmpty())
         {
           controller.mImpl->ChangeState(EventData::EDITING_WITH_POPUP);
         }
         relayoutNeeded = true;
       }
     }
-    else if (2u == tapCount)
+    else if(2u == tapCount)
     {
-      if (controller.mImpl->mEventData->mSelectionEnabled && controller.mImpl->IsShowingRealText())
+      if(controller.mImpl->mEventData->mSelectionEnabled && controller.mImpl->IsShowingRealText())
       {
-        relayoutNeeded = true;
-        controller.mImpl->mEventData->mIsLeftHandleSelected = true;
+        relayoutNeeded                                       = true;
+        controller.mImpl->mEventData->mIsLeftHandleSelected  = true;
         controller.mImpl->mEventData->mIsRightHandleSelected = true;
       }
     }
 
     // Handles & cursors must be repositioned after Relayout() i.e. after the Model has been updated
-    if (relayoutNeeded)
+    if(relayoutNeeded)
     {
       Event event(Event::TAP_EVENT);
-      event.p1.mUint = tapCount;
+      event.p1.mUint  = tapCount;
       event.p2.mFloat = x;
       event.p3.mFloat = y;
       controller.mImpl->mEventData->mEventQueue.push_back(event);
@@ -529,10 +529,10 @@ void Controller::EventHandler::PanEvent(Controller& controller, GestureState sta
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected PanEvent");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     Event event(Event::PAN_EVENT);
-    event.p1.mInt = static_cast<int>(state);
+    event.p1.mInt   = static_cast<int>(state);
     event.p2.mFloat = displacement.x;
     event.p3.mFloat = displacement.y;
     controller.mImpl->mEventData->mEventQueue.push_back(event);
@@ -545,43 +545,43 @@ void Controller::EventHandler::LongPressEvent(Controller& controller, GestureSta
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected LongPressEvent");
 
-  if ((state == GestureState::STARTED) && (NULL != controller.mImpl->mEventData))
+  if((state == GestureState::STARTED) && (NULL != controller.mImpl->mEventData))
   {
     // The 1st long-press on inactive text-field is treated as tap
-    if (EventData::INACTIVE == controller.mImpl->mEventData->mState)
+    if(EventData::INACTIVE == controller.mImpl->mEventData->mState)
     {
       controller.mImpl->ChangeState(EventData::EDITING);
 
       Event event(Event::TAP_EVENT);
-      event.p1.mUint = 1;
+      event.p1.mUint  = 1;
       event.p2.mFloat = x;
       event.p3.mFloat = y;
       controller.mImpl->mEventData->mEventQueue.push_back(event);
 
       controller.mImpl->RequestRelayout();
     }
-    else if (!controller.mImpl->IsShowingRealText())
+    else if(!controller.mImpl->IsShowingRealText())
     {
       Event event(Event::LONG_PRESS_EVENT);
-      event.p1.mInt = static_cast<int>(state);
+      event.p1.mInt   = static_cast<int>(state);
       event.p2.mFloat = x;
       event.p3.mFloat = y;
       controller.mImpl->mEventData->mEventQueue.push_back(event);
       controller.mImpl->RequestRelayout();
     }
-    else if (!controller.mImpl->IsClipboardVisible())
+    else if(!controller.mImpl->IsClipboardVisible())
     {
       // Reset the InputMethodContext to commit the pre-edit before selecting the text.
       controller.mImpl->ResetInputMethodContext();
 
       Event event(Event::LONG_PRESS_EVENT);
-      event.p1.mInt = static_cast<int>(state);
+      event.p1.mInt   = static_cast<int>(state);
       event.p2.mFloat = x;
       event.p3.mFloat = y;
       controller.mImpl->mEventData->mEventQueue.push_back(event);
       controller.mImpl->RequestRelayout();
 
-      controller.mImpl->mEventData->mIsLeftHandleSelected = true;
+      controller.mImpl->mEventData->mIsLeftHandleSelected  = true;
       controller.mImpl->mEventData->mIsRightHandleSelected = true;
     }
   }
@@ -591,14 +591,14 @@ void Controller::EventHandler::SelectEvent(Controller& controller, float x, floa
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::SelectEvent\n");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (selectType == SelectionType::ALL)
+    if(selectType == SelectionType::ALL)
     {
       Event event(Event::SELECT_ALL);
       controller.mImpl->mEventData->mEventQueue.push_back(event);
     }
-    else if (selectType == SelectionType::NONE)
+    else if(selectType == SelectionType::NONE)
     {
       Event event(Event::SELECT_NONE);
       controller.mImpl->mEventData->mEventQueue.push_back(event);
@@ -611,8 +611,8 @@ void Controller::EventHandler::SelectEvent(Controller& controller, float x, floa
       controller.mImpl->mEventData->mEventQueue.push_back(event);
     }
 
-    controller.mImpl->mEventData->mCheckScrollAmount = true;
-    controller.mImpl->mEventData->mIsLeftHandleSelected = true;
+    controller.mImpl->mEventData->mCheckScrollAmount     = true;
+    controller.mImpl->mEventData->mIsLeftHandleSelected  = true;
     controller.mImpl->mEventData->mIsRightHandleSelected = true;
     controller.mImpl->RequestRelayout();
   }
@@ -623,9 +623,9 @@ void Controller::EventHandler::SelectEvent(Controller& controller, const uint32_
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::SelectEvent\n");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (selectType == SelectionType::RANGE)
+    if(selectType == SelectionType::RANGE)
     {
       Event event(Event::SELECT_RANGE);
       event.p2.mUint = start;
@@ -633,8 +633,8 @@ void Controller::EventHandler::SelectEvent(Controller& controller, const uint32_
       controller.mImpl->mEventData->mEventQueue.push_back(event);
     }
 
-    controller.mImpl->mEventData->mCheckScrollAmount = true;
-    controller.mImpl->mEventData->mIsLeftHandleSelected = true;
+    controller.mImpl->mEventData->mCheckScrollAmount     = true;
+    controller.mImpl->mEventData->mIsLeftHandleSelected  = true;
     controller.mImpl->mEventData->mIsRightHandleSelected = true;
     controller.mImpl->RequestRelayout();
   }
@@ -644,7 +644,7 @@ void Controller::EventHandler::ProcessModifyEvents(Controller& controller)
 {
   Vector<ModifyEvent>& events = controller.mImpl->mModifyEvents;
 
-  if (0u == events.Count())
+  if(0u == events.Count())
   {
     // Nothing to do.
     return;
@@ -652,50 +652,50 @@ void Controller::EventHandler::ProcessModifyEvents(Controller& controller)
 
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_MODIFY_EVENTS");
 
-  for (Vector<ModifyEvent>::ConstIterator it = events.Begin(), endIt = events.End(); it != endIt; ++it)
+  for(Vector<ModifyEvent>::ConstIterator it = events.Begin(), endIt = events.End(); it != endIt; ++it)
   {
     const ModifyEvent& event = *it;
 
-    if (ModifyEvent::TEXT_REPLACED == event.type)
+    if(ModifyEvent::TEXT_REPLACED == event.type)
     {
       // A (single) replace event should come first, otherwise we wasted time processing NOOP events
       DALI_ASSERT_DEBUG(it == events.Begin() && "Unexpected TEXT_REPLACED event");
 
       TextReplacedEvent(controller);
     }
-    else if (ModifyEvent::TEXT_INSERTED == event.type)
+    else if(ModifyEvent::TEXT_INSERTED == event.type)
     {
       TextInsertedEvent(controller);
     }
-    else if (ModifyEvent::TEXT_DELETED == event.type)
+    else if(ModifyEvent::TEXT_DELETED == event.type)
     {
       // Placeholder-text cannot be deleted
-      if (!controller.mImpl->IsShowingPlaceholderText())
+      if(!controller.mImpl->IsShowingPlaceholderText())
       {
         TextDeletedEvent(controller);
       }
     }
   }
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     uint32_t oldStart, oldEnd;
     oldStart = controller.mImpl->mEventData->mLeftSelectionPosition;
-    oldEnd = controller.mImpl->mEventData->mRightSelectionPosition;
+    oldEnd   = controller.mImpl->mEventData->mRightSelectionPosition;
 
     // When the text is being modified, delay cursor blinking
     controller.mImpl->mEventData->mDecorator->DelayCursorBlink();
 
     // Update selection position after modifying the text
-    controller.mImpl->mEventData->mLeftSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
+    controller.mImpl->mEventData->mLeftSelectionPosition  = controller.mImpl->mEventData->mPrimaryCursorPosition;
     controller.mImpl->mEventData->mRightSelectionPosition = controller.mImpl->mEventData->mPrimaryCursorPosition;
 
-    if (controller.mImpl->mSelectableControlInterface != nullptr &&
-        controller.mImpl->mEventData->mState == EventData::SELECTING)
+    if(controller.mImpl->mSelectableControlInterface != nullptr &&
+       controller.mImpl->mEventData->mState == EventData::SELECTING)
     {
       controller.mImpl->mSelectableControlInterface->SelectionChanged(
-          oldStart, oldEnd, controller.mImpl->mEventData->mLeftSelectionPosition,
-          controller.mImpl->mEventData->mRightSelectionPosition);
+        oldStart, oldEnd, controller.mImpl->mEventData->mLeftSelectionPosition,
+        controller.mImpl->mEventData->mRightSelectionPosition);
     }
   }
 
@@ -707,7 +707,7 @@ void Controller::EventHandler::TextReplacedEvent(Controller& controller)
 {
   // The natural size needs to be re-calculated.
   controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize = true;
+  controller.mImpl->mRecalculateLayoutSize  = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;
@@ -720,7 +720,7 @@ void Controller::EventHandler::TextInsertedEvent(Controller& controller)
 {
   DALI_ASSERT_DEBUG(NULL != controller.mImpl->mEventData && "Unexpected TextInsertedEvent");
 
-  if (NULL == controller.mImpl->mEventData)
+  if(NULL == controller.mImpl->mEventData)
   {
     return;
   }
@@ -729,7 +729,7 @@ void Controller::EventHandler::TextInsertedEvent(Controller& controller)
 
   // The natural size needs to be re-calculated.
   controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize = true;
+  controller.mImpl->mRecalculateLayoutSize  = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;
@@ -742,12 +742,12 @@ void Controller::EventHandler::TextDeletedEvent(Controller& controller)
 {
   DALI_ASSERT_DEBUG(NULL != controller.mImpl->mEventData && "Unexpected TextDeletedEvent");
 
-  if (NULL == controller.mImpl->mEventData)
+  if(NULL == controller.mImpl->mEventData)
   {
     return;
   }
 
-  if (!controller.IsEditable())
+  if(!controller.IsEditable())
   {
     return;
   }
@@ -756,7 +756,7 @@ void Controller::EventHandler::TextDeletedEvent(Controller& controller)
 
   // The natural size needs to be re-calculated.
   controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize = true;
+  controller.mImpl->mRecalculateLayoutSize  = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;
@@ -771,12 +771,12 @@ bool Controller::EventHandler::DeleteEvent(Controller& controller, int keyCode)
 
   bool removed = false;
 
-  if (NULL == controller.mImpl->mEventData)
+  if(NULL == controller.mImpl->mEventData)
   {
     return removed;
   }
 
-  if (!controller.IsEditable())
+  if(!controller.IsEditable())
   {
     return false;
   }
@@ -784,26 +784,26 @@ bool Controller::EventHandler::DeleteEvent(Controller& controller, int keyCode)
   // InputMethodContext is no longer handling key-events
   controller.mImpl->ClearPreEditFlag();
 
-  if (EventData::SELECTING == controller.mImpl->mEventData->mState)
+  if(EventData::SELECTING == controller.mImpl->mEventData->mState)
   {
     removed = TextUpdater::RemoveSelectedText(controller);
   }
-  else if ((controller.mImpl->mEventData->mPrimaryCursorPosition > 0) && (keyCode == Dali::DALI_KEY_BACKSPACE))
+  else if((controller.mImpl->mEventData->mPrimaryCursorPosition > 0) && (keyCode == Dali::DALI_KEY_BACKSPACE))
   {
     // Remove the character before the current cursor position
     removed = TextUpdater::RemoveText(controller, -1, 1, UPDATE_INPUT_STYLE, false);
   }
-  else if ((controller.mImpl->mEventData->mPrimaryCursorPosition <
-            controller.mImpl->mModel->mLogicalModel->mText.Count()) &&
-           (keyCode == Dali::DevelKey::DALI_KEY_DELETE))
+  else if((controller.mImpl->mEventData->mPrimaryCursorPosition <
+           controller.mImpl->mModel->mLogicalModel->mText.Count()) &&
+          (keyCode == Dali::DevelKey::DALI_KEY_DELETE))
   {
     // Remove the character after the current cursor position
     removed = TextUpdater::RemoveText(controller, 0, 1, UPDATE_INPUT_STYLE, false);
   }
 
-  if (removed)
+  if(removed)
   {
-    if ((0u != controller.mImpl->mModel->mLogicalModel->mText.Count()) || !controller.mImpl->IsPlaceholderAvailable())
+    if((0u != controller.mImpl->mModel->mLogicalModel->mText.Count()) || !controller.mImpl->IsPlaceholderAvailable())
     {
       controller.mImpl->QueueModifyEvent(ModifyEvent::TEXT_DELETED);
     }
@@ -812,15 +812,15 @@ bool Controller::EventHandler::DeleteEvent(Controller& controller, int keyCode)
       PlaceholderHandler::ShowPlaceholderText(*controller.mImpl);
     }
     controller.mImpl->mEventData->mUpdateCursorPosition = true;
-    controller.mImpl->mEventData->mScrollAfterDelete = true;
+    controller.mImpl->mEventData->mScrollAfterDelete    = true;
   }
 
   return removed;
 }
 
 InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextEvent(
-    Controller& controller, InputMethodContext& inputMethodContext,
-    const InputMethodContext::EventData& inputMethodContextEvent)
+  Controller& controller, InputMethodContext& inputMethodContext,
+  const InputMethodContext::EventData& inputMethodContextEvent)
 {
   DALI_LOG_RELEASE_INFO("EventHandler eventName: [%d] predictveString: [%s]\n", inputMethodContextEvent.eventName,
                         inputMethodContextEvent.predictiveString.c_str());
@@ -829,35 +829,35 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
   bool requestRelayout = false;
 
   // Whether to retrieve the text and cursor position to be sent to the InputMethodContext.
-  bool retrieveText = false;
+  bool retrieveText   = false;
   bool retrieveCursor = false;
 
-  switch (inputMethodContextEvent.eventName)
+  switch(inputMethodContextEvent.eventName)
   {
     case InputMethodContext::COMMIT:
     {
       TextUpdater::InsertText(controller, inputMethodContextEvent.predictiveString, Text::Controller::COMMIT);
       requestRelayout = true;
-      retrieveCursor = true;
+      retrieveCursor  = true;
       break;
     }
     case InputMethodContext::PRE_EDIT:
     {
       TextUpdater::InsertText(controller, inputMethodContextEvent.predictiveString, Text::Controller::PRE_EDIT);
       requestRelayout = true;
-      retrieveCursor = true;
+      retrieveCursor  = true;
       break;
     }
     case InputMethodContext::DELETE_SURROUNDING:
     {
       const bool textDeleted =
-          TextUpdater::RemoveText(controller, inputMethodContextEvent.cursorOffset,
-                                  inputMethodContextEvent.numberOfChars, DONT_UPDATE_INPUT_STYLE, false);
+        TextUpdater::RemoveText(controller, inputMethodContextEvent.cursorOffset,
+                                inputMethodContextEvent.numberOfChars, DONT_UPDATE_INPUT_STYLE, false);
 
-      if (textDeleted)
+      if(textDeleted)
       {
-        if ((0u != controller.mImpl->mModel->mLogicalModel->mText.Count()) ||
-            !controller.mImpl->IsPlaceholderAvailable())
+        if((0u != controller.mImpl->mModel->mLogicalModel->mText.Count()) ||
+           !controller.mImpl->IsPlaceholderAvailable())
         {
           controller.mImpl->QueueModifyEvent(ModifyEvent::TEXT_DELETED);
         }
@@ -866,7 +866,7 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
           PlaceholderHandler::ShowPlaceholderText(*controller.mImpl);
         }
         controller.mImpl->mEventData->mUpdateCursorPosition = true;
-        controller.mImpl->mEventData->mScrollAfterDelete = true;
+        controller.mImpl->mEventData->mScrollAfterDelete    = true;
 
         requestRelayout = true;
       }
@@ -874,22 +874,22 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
     }
     case InputMethodContext::GET_SURROUNDING:
     {
-      retrieveText = true;
+      retrieveText   = true;
       retrieveCursor = true;
       break;
     }
     case InputMethodContext::PRIVATE_COMMAND:
     {
       // PRIVATECOMMAND event is just for getting the private command message
-      retrieveText = true;
+      retrieveText   = true;
       retrieveCursor = true;
       break;
     }
     case InputMethodContext::SELECTION_SET:
     {
       uint32_t start = static_cast<uint32_t>(inputMethodContextEvent.startIndex);
-      uint32_t end = static_cast<uint32_t>(inputMethodContextEvent.endIndex);
-      if (start == end)
+      uint32_t end   = static_cast<uint32_t>(inputMethodContextEvent.endIndex);
+      if(start == end)
       {
         controller.SetPrimaryCursorPosition(start, true);
       }
@@ -907,23 +907,23 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
     }
   } // end switch
 
-  if (requestRelayout)
+  if(requestRelayout)
   {
     controller.mImpl->mOperationsPending = ALL_OPERATIONS;
     controller.mImpl->RequestRelayout();
   }
 
-  std::string text;
+  std::string    text;
   CharacterIndex cursorPosition = 0u;
 
-  if (retrieveCursor)
+  if(retrieveCursor)
   {
     cursorPosition = controller.mImpl->GetLogicalCursorPosition();
   }
 
-  if (retrieveText)
+  if(retrieveText)
   {
-    if (!controller.mImpl->IsShowingPlaceholderText())
+    if(!controller.mImpl->IsShowingPlaceholderText())
     {
       // Retrieves the normal text string.
       controller.mImpl->GetText(0u, text);
@@ -938,7 +938,7 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
 
   InputMethodContext::CallbackData callbackData((retrieveText || retrieveCursor), cursorPosition, text, false);
 
-  if (requestRelayout && (NULL != controller.mImpl->mEditableControlInterface))
+  if(requestRelayout && (NULL != controller.mImpl->mEditableControlInterface))
   {
     // Do this last since it provides callbacks into application code
     controller.mImpl->mEditableControlInterface->TextChanged(false);
@@ -966,14 +966,14 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected DecorationEvent");
 
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    switch (handleType)
+    switch(handleType)
     {
       case GRAB_HANDLE:
       {
         Event event(Event::GRAB_HANDLE_EVENT);
-        event.p1.mUint = state;
+        event.p1.mUint  = state;
         event.p2.mFloat = x;
         event.p3.mFloat = y;
 
@@ -983,7 +983,7 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
       case LEFT_SELECTION_HANDLE:
       {
         Event event(Event::LEFT_SELECTION_HANDLE_EVENT);
-        event.p1.mUint = state;
+        event.p1.mUint  = state;
         event.p2.mFloat = x;
         event.p3.mFloat = y;
 
@@ -993,7 +993,7 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
       case RIGHT_SELECTION_HANDLE:
       {
         Event event(Event::RIGHT_SELECTION_HANDLE_EVENT);
-        event.p1.mUint = state;
+        event.p1.mUint  = state;
         event.p2.mFloat = x;
         event.p3.mFloat = y;
 
@@ -1016,15 +1016,15 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
   }
 }
 
-void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
+void Controller::EventHandler::TextPopupButtonTouched(Controller&                      controller,
                                                       Dali::Ui::Text::InputCommandType button)
 {
-  if (NULL == controller.mImpl->mEventData)
+  if(NULL == controller.mImpl->mEventData)
   {
     return;
   }
 
-  switch (button)
+  switch(button)
   {
     case Dali::Ui::Text::InputCommandType::CUT:
     {
@@ -1045,7 +1045,7 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
     {
       const Vector2& currentCursorPosition = controller.mImpl->mEventData->mDecorator->GetPosition(PRIMARY_CURSOR);
 
-      if (controller.mImpl->mEventData->mSelectionEnabled)
+      if(controller.mImpl->mEventData->mSelectionEnabled)
       {
         // Creates a SELECT event.
         SelectEvent(controller, currentCursorPosition.x, currentCursorPosition.y, SelectionType::INTERACTIVE);

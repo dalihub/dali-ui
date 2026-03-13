@@ -55,10 +55,10 @@ public:
 
 protected:
   FlexDirection mDirection;
-  FlexWrap mWrap;
-  FlexJustify mJustifyContent;
-  FlexAlign mAlignItems;
-  FlexAlign mAlignContent;
+  FlexWrap      mWrap;
+  FlexJustify   mJustifyContent;
+  FlexAlign     mAlignItems;
+  FlexAlign     mAlignContent;
 };
 
 } // namespace Integration

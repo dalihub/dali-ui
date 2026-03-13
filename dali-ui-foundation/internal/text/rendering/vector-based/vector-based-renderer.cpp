@@ -45,20 +45,20 @@ const float DEFAULT_POINT_SIZE = 13.f;
 
 struct Vertex2D
 {
-  float x;
-  float y;
-  float u;
-  float v;
+  float   x;
+  float   y;
+  float   u;
+  float   v;
   Vector4 color;
 };
 
 void AddVertex(Vector<Vertex2D>& vertices, float x, float y, float u, float v, const Vector4& color)
 {
   Vertex2D meshVertex;
-  meshVertex.x = x;
-  meshVertex.y = y;
-  meshVertex.u = u;
-  meshVertex.v = v;
+  meshVertex.x     = x;
+  meshVertex.y     = y;
+  meshVertex.u     = u;
+  meshVertex.v     = v;
   meshVertex.color = color;
   vertices.PushBack(meshVertex);
 }
@@ -80,24 +80,24 @@ bool CreateGeometry(const Vector<GlyphInfo>& glyphs, unsigned int numberOfGlyphs
 
   bool atlasFull(false);
 
-  for (uint32_t i = 0u, idx = 0u; i < numberOfGlyphs && !atlasFull; ++i)
+  for(uint32_t i = 0u, idx = 0u; i < numberOfGlyphs && !atlasFull; ++i)
   {
-    if (glyphs[i].width > 0 && glyphs[i].height > 0)
+    if(glyphs[i].width > 0 && glyphs[i].height > 0)
     {
       bool foundBlob(true);
 
       BlobCoordinate blobCoords[4];
 
-      if (!atlas.FindGlyph(glyphs[i].fontId, glyphs[i].index, blobCoords))
+      if(!atlas.FindGlyph(glyphs[i].fontId, glyphs[i].index, blobCoords))
       {
         // Add blob to atlas
-        VectorBlob* blob(NULL);
+        VectorBlob*  blob(NULL);
         unsigned int blobLength(0);
         unsigned int nominalWidth(0);
         unsigned int nominalHeight(0);
         fontClient.CreateVectorBlob(glyphs[i].fontId, glyphs[i].index, blob, blobLength, nominalWidth, nominalHeight);
 
-        if (0 != blobLength)
+        if(0 != blobLength)
         {
           bool glyphAdded = atlas.AddGlyph(glyphs[i].fontId, glyphs[i].index, blob, blobLength, nominalWidth,
                                            nominalHeight, blobCoords);
@@ -111,12 +111,12 @@ bool CreateGeometry(const Vector<GlyphInfo>& glyphs, unsigned int numberOfGlyphs
         }
       }
 
-      if (foundBlob)
+      if(foundBlob)
       {
         // Get the color of the character.
         const ColorIndex colorIndex = useDefaultColor ? 0u : *(colorIndicesBuffer + i);
-        const Vector4& color =
-            (useDefaultColor || (0u == colorIndex)) ? defaultColor : *(colorsBuffer + colorIndex - 1u);
+        const Vector4&   color =
+          (useDefaultColor || (0u == colorIndex)) ? defaultColor : *(colorsBuffer + colorIndex - 1u);
 
         const float x1(xOffset + positions[i].x);
         const float x2(xOffset + positions[i].x + glyphs[i].width);
@@ -152,7 +152,7 @@ struct VectorBasedRenderer::Impl
 
     mQuadVertexFormat["aPosition"] = Property::VECTOR2;
     mQuadVertexFormat["aTexCoord"] = Property::VECTOR2;
-    mQuadVertexFormat["aColor"] = Property::VECTOR4;
+    mQuadVertexFormat["aColor"]    = Property::VECTOR4;
   }
 
   Actor mActor; ///< The actor parent which renders the text
@@ -188,7 +188,7 @@ Actor VectorBasedRenderer::Render(Text::ViewInterface& view, Actor textControl, 
 
   Length numberOfGlyphs = view.GetNumberOfGlyphs();
 
-  if (numberOfGlyphs > 0u)
+  if(numberOfGlyphs > 0u)
   {
     Vector<GlyphInfo> glyphs;
     glyphs.Resize(numberOfGlyphs);
@@ -201,29 +201,29 @@ Actor VectorBasedRenderer::Render(Text::ViewInterface& view, Actor textControl, 
     glyphs.Resize(numberOfGlyphs);
     positions.Resize(numberOfGlyphs);
 
-    const Vector4* const colorsBuffer = view.GetColors();
+    const Vector4* const    colorsBuffer       = view.GetColors();
     const ColorIndex* const colorIndicesBuffer = view.GetColorIndices();
-    const Vector4& defaultColor = view.GetTextColor();
+    const Vector4&          defaultColor       = view.GetTextColor();
 
     Vector<Vertex2D> vertices;
     Vector<uint32_t> indices;
 
     const Vector2& controlSize = view.GetControlSize();
-    float xOffset = -alignmentOffset + controlSize.width * -0.5f;
-    float yOffset = controlSize.height * -0.5f;
+    float          xOffset     = -alignmentOffset + controlSize.width * -0.5f;
+    float          yOffset     = controlSize.height * -0.5f;
 
-    if (!mImpl->mAtlas || mImpl->mAtlas->IsFull())
+    if(!mImpl->mAtlas || mImpl->mAtlas->IsFull())
     {
       VectorBlobAtlasShare atlasShare = VectorBlobAtlasShare::Get();
-      mImpl->mAtlas = atlasShare.GetCurrentAtlas();
+      mImpl->mAtlas                   = atlasShare.GetCurrentAtlas();
     }
 
     // First try adding the glyphs to the previous shared atlas
     bool allGlyphsAdded =
-        CreateGeometry(glyphs, numberOfGlyphs, positions, xOffset, yOffset, *mImpl->mAtlas, mImpl->mFontClient,
-                       vertices, indices, colorsBuffer, colorIndicesBuffer, defaultColor);
+      CreateGeometry(glyphs, numberOfGlyphs, positions, xOffset, yOffset, *mImpl->mAtlas, mImpl->mFontClient,
+                     vertices, indices, colorsBuffer, colorIndicesBuffer, defaultColor);
 
-    if (!allGlyphsAdded)
+    if(!allGlyphsAdded)
     {
       // The current atlas is full, abandon it and use a new one
       mImpl->mAtlas.Reset();
@@ -231,14 +231,14 @@ Actor VectorBasedRenderer::Render(Text::ViewInterface& view, Actor textControl, 
       indices.Clear();
 
       VectorBlobAtlasShare atlasShare = VectorBlobAtlasShare::Get();
-      mImpl->mAtlas = atlasShare.GetNewAtlas();
+      mImpl->mAtlas                   = atlasShare.GetNewAtlas();
 
       CreateGeometry(glyphs, numberOfGlyphs, positions, xOffset, yOffset, *mImpl->mAtlas, mImpl->mFontClient, vertices,
                      indices, colorsBuffer, colorIndicesBuffer, defaultColor);
       // Return value ignored; using more than an entire new atlas is not supported
     }
 
-    if (0 != vertices.Count())
+    if(0 != vertices.Count())
     {
       VertexBuffer quadVertices = VertexBuffer::New(mImpl->mQuadVertexFormat);
 
@@ -251,7 +251,7 @@ Actor VectorBasedRenderer::Render(Text::ViewInterface& view, Actor textControl, 
       TextureSet texture = mImpl->mAtlas->GetTextureSet();
 
       const Vector4 atlasInfo = mImpl->mAtlas->GetInfo();
-      mImpl->mShaderEffect = GlyphyShader::New(atlasInfo);
+      mImpl->mShaderEffect    = GlyphyShader::New(atlasInfo);
 
       Dali::Renderer renderer = Dali::Renderer::New(quadGeometry, mImpl->mShaderEffect);
       renderer.SetTextures(texture);

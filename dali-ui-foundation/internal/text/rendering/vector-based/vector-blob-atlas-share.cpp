@@ -24,13 +24,13 @@
 
 namespace
 {
-const int INITIAL_VECTOR_BLOB_ATLAS_WIDTH = 512;
+const int INITIAL_VECTOR_BLOB_ATLAS_WIDTH  = 512;
 const int INITIAL_VECTOR_BLOB_ATLAS_HEIGHT = 512;
 
-const int NEW_VECTOR_BLOB_ATLAS_WIDTH = 1024;
+const int NEW_VECTOR_BLOB_ATLAS_WIDTH  = 1024;
 const int NEW_VECTOR_BLOB_ATLAS_HEIGHT = 1024;
 
-const int VECTOR_BLOB_ATLAS_ITEM_WIDTH = 64;
+const int VECTOR_BLOB_ATLAS_ITEM_WIDTH     = 64;
 const int VECTOR_BLOB_ATLAS_HEIGHT_QUANTUM = 8;
 
 } // unnamed namespace
@@ -53,7 +53,7 @@ public:
 
   VectorBlobAtlas* GetCurrentAtlas()
   {
-    if (!mCurrentAtlas)
+    if(!mCurrentAtlas)
     {
       mCurrentAtlas = new VectorBlobAtlas(INITIAL_VECTOR_BLOB_ATLAS_WIDTH, INITIAL_VECTOR_BLOB_ATLAS_HEIGHT,
                                           VECTOR_BLOB_ATLAS_ITEM_WIDTH, VECTOR_BLOB_ATLAS_HEIGHT_QUANTUM);
@@ -99,16 +99,16 @@ VectorBlobAtlasShare VectorBlobAtlasShare::Get()
 
   // Check whether the VectorBlobAtlasShare is already created
   SingletonService singletonService(SingletonService::Get());
-  if (singletonService)
+  if(singletonService)
   {
     Dali::BaseHandle handle = singletonService.GetSingleton(typeid(VectorBlobAtlasShare));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle of singleton to VectorBlobAtlasShare
       manager = VectorBlobAtlasShare(dynamic_cast<VectorBlobAtlasShare::Impl*>(handle.GetObjectPtr()));
     }
 
-    if (!manager)
+    if(!manager)
     {
       // If not, create the VectorBlobAtlasShare and register it as a singleton
       manager = VectorBlobAtlasShare(new VectorBlobAtlasShare::Impl());
@@ -120,7 +120,7 @@ VectorBlobAtlasShare VectorBlobAtlasShare::Get()
 }
 
 VectorBlobAtlasShare::VectorBlobAtlasShare(VectorBlobAtlasShare::Impl* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

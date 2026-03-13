@@ -49,29 +49,29 @@ namespace Property
 {
 enum Type
 {
-  TEXT = Dali::Ui::TextLabel::Property::TEXT,
-  FONT_FAMILY = Dali::Ui::TextLabel::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::Ui::TextLabel::Property::FONT_STYLE,
-  POINT_SIZE = Dali::Ui::TextLabel::Property::POINT_SIZE,
-  MULTI_LINE = Dali::Ui::TextLabel::Property::MULTI_LINE,
-  HORIZONTAL_ALIGNMENT = Dali::Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT,
-  VERTICAL_ALIGNMENT = Dali::Ui::TextLabel::Property::VERTICAL_ALIGNMENT,
-  ENABLE_MARKUP = Dali::Ui::TextLabel::Property::ENABLE_MARKUP,
-  ENABLE_AUTO_SCROLL = Dali::Ui::TextLabel::Property::ENABLE_AUTO_SCROLL,
-  AUTO_SCROLL_SPEED = Dali::Ui::TextLabel::Property::AUTO_SCROLL_SPEED,
+  TEXT                   = Dali::Ui::TextLabel::Property::TEXT,
+  FONT_FAMILY            = Dali::Ui::TextLabel::Property::FONT_FAMILY,
+  FONT_STYLE             = Dali::Ui::TextLabel::Property::FONT_STYLE,
+  POINT_SIZE             = Dali::Ui::TextLabel::Property::POINT_SIZE,
+  MULTI_LINE             = Dali::Ui::TextLabel::Property::MULTI_LINE,
+  HORIZONTAL_ALIGNMENT   = Dali::Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT,
+  VERTICAL_ALIGNMENT     = Dali::Ui::TextLabel::Property::VERTICAL_ALIGNMENT,
+  ENABLE_MARKUP          = Dali::Ui::TextLabel::Property::ENABLE_MARKUP,
+  ENABLE_AUTO_SCROLL     = Dali::Ui::TextLabel::Property::ENABLE_AUTO_SCROLL,
+  AUTO_SCROLL_SPEED      = Dali::Ui::TextLabel::Property::AUTO_SCROLL_SPEED,
   AUTO_SCROLL_LOOP_COUNT = Dali::Ui::TextLabel::Property::AUTO_SCROLL_LOOP_COUNT,
-  AUTO_SCROLL_GAP = Dali::Ui::TextLabel::Property::AUTO_SCROLL_GAP,
-  LINE_SPACING = Dali::Ui::TextLabel::Property::LINE_SPACING,
-  UNDERLINE = Dali::Ui::TextLabel::Property::UNDERLINE,
-  SHADOW = Dali::Ui::TextLabel::Property::SHADOW,
-  EMBOSS = Dali::Ui::TextLabel::Property::EMBOSS,
-  OUTLINE = Dali::Ui::TextLabel::Property::OUTLINE,
-  PIXEL_SIZE = Dali::Ui::TextLabel::Property::PIXEL_SIZE,
-  ELLIPSIS = Dali::Ui::TextLabel::Property::ELLIPSIS,
+  AUTO_SCROLL_GAP        = Dali::Ui::TextLabel::Property::AUTO_SCROLL_GAP,
+  LINE_SPACING           = Dali::Ui::TextLabel::Property::LINE_SPACING,
+  UNDERLINE              = Dali::Ui::TextLabel::Property::UNDERLINE,
+  SHADOW                 = Dali::Ui::TextLabel::Property::SHADOW,
+  EMBOSS                 = Dali::Ui::TextLabel::Property::EMBOSS,
+  OUTLINE                = Dali::Ui::TextLabel::Property::OUTLINE,
+  PIXEL_SIZE             = Dali::Ui::TextLabel::Property::PIXEL_SIZE,
+  ELLIPSIS               = Dali::Ui::TextLabel::Property::ELLIPSIS,
   AUTO_SCROLL_LOOP_DELAY = Dali::Ui::TextLabel::Property::AUTO_SCROLL_LOOP_DELAY,
-  AUTO_SCROLL_STOP_MODE = Dali::Ui::TextLabel::Property::AUTO_SCROLL_STOP_MODE,
-  LINE_COUNT = Dali::Ui::TextLabel::Property::LINE_COUNT,
-  LINE_WRAP_MODE = Dali::Ui::TextLabel::Property::LINE_WRAP_MODE,
+  AUTO_SCROLL_STOP_MODE  = Dali::Ui::TextLabel::Property::AUTO_SCROLL_STOP_MODE,
+  LINE_COUNT             = Dali::Ui::TextLabel::Property::LINE_COUNT,
+  LINE_WRAP_MODE         = Dali::Ui::TextLabel::Property::LINE_WRAP_MODE,
 
   /**
    * @brief The direction of the layout.
@@ -347,8 +347,8 @@ enum Type
 struct FitOption
 {
   FitOption(float pointSize = 0.0f, float minLineSize = 0.0f)
-    : mPointSize(pointSize),
-      mMinLineSize(minLineSize)
+  : mPointSize(pointSize),
+    mMinLineSize(minLineSize)
   {
   }
 
@@ -370,7 +370,7 @@ struct FitOption
   }
 
 private:
-  float mPointSize = 0.0f;
+  float mPointSize   = 0.0f;
   float mMinLineSize = 0.0f;
 };
 

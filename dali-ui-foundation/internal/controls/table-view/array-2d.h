@@ -33,7 +33,7 @@ namespace Dali
  *   intArray.Resize( 4, 4 );
  * </code>
  */
-template <typename T>
+template<typename T>
 class Array2d
 {
 public:
@@ -41,7 +41,7 @@ public:
    * Default constructor. Creates a 0x0 array
    */
   Array2d()
-    : mArray(0, std::vector<T>(0))
+  : mArray(0, std::vector<T>(0))
   {
   }
 
@@ -51,7 +51,7 @@ public:
    * @param [in] columns for array
    */
   Array2d(unsigned int rows, unsigned int columns)
-    : mArray(rows, std::vector<T>(columns))
+  : mArray(rows, std::vector<T>(columns))
   {
   }
 
@@ -68,7 +68,7 @@ public:
    */
   Array2d(const Array2d& array)
   {
-    if (this != &array)
+    if(this != &array)
     {
       mArray = array.mArray;
     }
@@ -81,7 +81,7 @@ public:
    */
   Array2d& operator=(const Array2d& array)
   {
-    if (this != &array)
+    if(this != &array)
     {
       mArray = array.mArray;
     }
@@ -101,7 +101,7 @@ public:
    */
   unsigned int GetColumns()
   {
-    if (mArray.size() > 0)
+    if(mArray.size() > 0)
     {
       // all columns are equal length
       return mArray[0].size();
@@ -169,7 +169,7 @@ public:
   {
     // go through all rows
     const unsigned int rows = GetRows();
-    for (unsigned int i = 0; i < rows; ++i)
+    for(unsigned int i = 0; i < rows; ++i)
     {
       // insert default initialized element
       mArray[i].insert(mArray[i].begin() + columnIndex, T());
@@ -185,7 +185,7 @@ public:
   {
     // go through all rows
     const unsigned int rows = GetRows();
-    for (unsigned int i = 0; i < rows; ++i)
+    for(unsigned int i = 0; i < rows; ++i)
     {
       // erase the column
       mArray[i].erase(mArray[i].begin() + columnIndex);
@@ -201,7 +201,7 @@ public:
   {
     // go through all rows
     const unsigned int rows = GetRows();
-    for (unsigned int i = 0; i < rows; ++i)
+    for(unsigned int i = 0; i < rows; ++i)
     {
       // copy the column element of this row
       removed.push_back(mArray[i][columnIndex]);
@@ -220,7 +220,7 @@ public:
   {
     // resize rows first, may increase or decrease size
     mArray.resize(rows);
-    for (unsigned int i = 0; i < rows; ++i)
+    for(unsigned int i = 0; i < rows; ++i)
     {
       // resize each column, may increase or decrease size
       mArray[i].resize(columns);
@@ -237,13 +237,13 @@ public:
   void Resize(unsigned int rows, unsigned int columns, std::vector<T>& removed)
   {
     // remember old counts
-    const unsigned int oldRows = GetRows();
+    const unsigned int oldRows    = GetRows();
     const unsigned int oldColumns = GetColumns();
     // are rows being removed ?
-    if (rows < oldRows)
+    if(rows < oldRows)
     {
       // gather the elements of removed rows
-      for (unsigned int i = rows; i < oldRows; ++i)
+      for(unsigned int i = rows; i < oldRows; ++i)
       {
         // copy the row elements, the whole row is gone
         removed.insert(removed.end(), mArray[i].begin(), mArray[i].end());
@@ -252,10 +252,10 @@ public:
     // resize the rows, may increase or decrease size
     mArray.resize(rows);
     // process columns, need to do all rows as also columns for new row need resizing
-    for (unsigned int i = 0; i < rows; ++i)
+    for(unsigned int i = 0; i < rows; ++i)
     {
       // if this is an old row and columns are being removed
-      if ((i < oldRows) && (columns < oldColumns))
+      if((i < oldRows) && (columns < oldColumns))
       {
         // copy the columns, the end of row from columns is gone
         removed.insert(removed.end(), mArray[i].begin() + columns, mArray[i].end());

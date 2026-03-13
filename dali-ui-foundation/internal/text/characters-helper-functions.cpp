@@ -10,43 +10,43 @@ namespace Ui
 {
 namespace Text
 {
-CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr& visualModel,
+CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr&  visualModel,
                                                          const LogicalModelPtr& logicalModel,
-                                                         const CharacterIndex& characterIndex)
+                                                         const CharacterIndex&  characterIndex)
 {
   // Initialization
   CharacterRun clusteredCharacters;
-  clusteredCharacters.characterIndex = characterIndex;
+  clusteredCharacters.characterIndex     = characterIndex;
   clusteredCharacters.numberOfCharacters = 1u;
 
-  const GlyphIndex* const charactersToGlyphBuffer = visualModel->mCharactersToGlyph.Begin();
-  const Length* const charactersPerGlyphBuffer = visualModel->mCharactersPerGlyph.Begin();
-  const CharacterIndex* const glyphsToCharacters = visualModel->mGlyphsToCharacters.Begin();
+  const GlyphIndex* const     charactersToGlyphBuffer  = visualModel->mCharactersToGlyph.Begin();
+  const Length* const         charactersPerGlyphBuffer = visualModel->mCharactersPerGlyph.Begin();
+  const CharacterIndex* const glyphsToCharacters       = visualModel->mGlyphsToCharacters.Begin();
 
-  GlyphIndex glyphIndex = *(charactersToGlyphBuffer + characterIndex);
-  Length actualNumberOfCharacters = *(charactersPerGlyphBuffer + glyphIndex);
+  GlyphIndex glyphIndex               = *(charactersToGlyphBuffer + characterIndex);
+  Length     actualNumberOfCharacters = *(charactersPerGlyphBuffer + glyphIndex);
 
-  if (actualNumberOfCharacters > 1u)
+  if(actualNumberOfCharacters > 1u)
   {
     const Script script = logicalModel->GetScript(characterIndex);
     // Prevents to break the Latin ligatures like fi, ff, or Arabic ﻻ, ...
     // Keep actual index of character as is. Because these characters cannot be clustered.
 
-    if (!HasLigatureMustBreak(script))
+    if(!HasLigatureMustBreak(script))
     {
       clusteredCharacters.numberOfCharacters = actualNumberOfCharacters;
-      clusteredCharacters.characterIndex = *(glyphsToCharacters + glyphIndex); // firstCharacterIndex
+      clusteredCharacters.characterIndex     = *(glyphsToCharacters + glyphIndex); // firstCharacterIndex
     }
   }
   else
   {
-    while (0u == actualNumberOfCharacters)
+    while(0u == actualNumberOfCharacters)
     {
       ++glyphIndex;
       actualNumberOfCharacters = *(charactersPerGlyphBuffer + glyphIndex);
     }
 
-    clusteredCharacters.characterIndex = *(glyphsToCharacters + glyphIndex); // firstCharacterIndex
+    clusteredCharacters.characterIndex     = *(glyphsToCharacters + glyphIndex); // firstCharacterIndex
     clusteredCharacters.numberOfCharacters = actualNumberOfCharacters;
   }
 

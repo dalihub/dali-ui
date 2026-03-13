@@ -57,9 +57,9 @@ bool IsGlyphUnderlined(GlyphIndex index, const Vector<UnderlinedGlyphRun>& under
  * @return the determined underline properties
  */
 UnderlineStyleProperties GetCurrentUnderlineProperties(
-    GlyphIndex index, const bool& isGlyphUnderlined, const Vector<UnderlinedGlyphRun>& underlineRuns,
-    Vector<UnderlinedGlyphRun>::ConstIterator& currentUnderlinedGlyphRunIt,
-    const UnderlineStyleProperties& commonUnderlineProperties);
+  GlyphIndex index, const bool& isGlyphUnderlined, const Vector<UnderlinedGlyphRun>& underlineRuns,
+  Vector<UnderlinedGlyphRun>::ConstIterator& currentUnderlinedGlyphRunIt,
+  const UnderlineStyleProperties&            commonUnderlineProperties);
 
 /**
  * @brief Fetch and calculate underline Position using font-metrics

@@ -490,7 +490,7 @@ private: // Implementation
    * InputMethodContext::EventData& inputMethodContextEvent)
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(
-      InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
+    InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
 
   /**
    * @brief Get a Property Map for the image used for the required Handle Image
@@ -632,32 +632,32 @@ private: // Implementation
 
 private: // Data
   // Signals
-  Ui::TextEditor::TextChangedSignalType mTextChangedSignal;
-  Ui::TextEditor::InputStyleChangedSignalType mInputStyleChangedSignal;
-  Ui::TextEditor::ScrollStateChangedSignalType mScrollStateChangedSignal;
-  Ui::DevelTextEditor::MaxLengthReachedSignalType mMaxLengthReachedSignal;
-  Ui::DevelTextEditor::AnchorClickedSignalType mAnchorClickedSignal;
-  Ui::DevelTextEditor::InputFilteredSignalType mInputFilteredSignal;
+  Ui::TextEditor::TextChangedSignalType                mTextChangedSignal;
+  Ui::TextEditor::InputStyleChangedSignalType          mInputStyleChangedSignal;
+  Ui::TextEditor::ScrollStateChangedSignalType         mScrollStateChangedSignal;
+  Ui::DevelTextEditor::MaxLengthReachedSignalType      mMaxLengthReachedSignal;
+  Ui::DevelTextEditor::AnchorClickedSignalType         mAnchorClickedSignal;
+  Ui::DevelTextEditor::InputFilteredSignalType         mInputFilteredSignal;
   Ui::DevelTextEditor::CursorPositionChangedSignalType mCursorPositionChangedSignal;
-  Ui::DevelTextEditor::SelectionChangedSignalType mSelectionChangedSignal;
-  Ui::DevelTextEditor::SelectionClearedSignalType mSelectionClearedSignal;
-  Ui::DevelTextEditor::SelectionStartedSignalType mSelectionStartedSignal;
+  Ui::DevelTextEditor::SelectionChangedSignalType      mSelectionChangedSignal;
+  Ui::DevelTextEditor::SelectionClearedSignalType      mSelectionClearedSignal;
+  Ui::DevelTextEditor::SelectionStartedSignalType      mSelectionStartedSignal;
 
   // for Font Variations
   std::map<Dali::Property::Index, std::string> mVariationIndexMap; // Stores [CustomPropertyIndex, tag].
 
-  InputMethodContext mInputMethodContext;
-  Text::ControllerPtr mController;
-  Text::RendererPtr mRenderer;
-  Text::DecoratorPtr mDecorator;
+  InputMethodContext            mInputMethodContext;
+  Text::ControllerPtr           mController;
+  Text::RendererPtr             mRenderer;
+  Text::DecoratorPtr            mDecorator;
   Text::TextVerticalScrollerPtr mTextVerticalScroller;
-  Ui::Control mStencil;
+  Ui::Control                   mStencil;
   // Ui::ScrollBar mScrollBar;
-  Dali::Animation mAnimation; ///< Scroll indicator Show/Hide Animation.
-  Dali::TimePeriod mAnimationPeriod;
-  std::vector<Actor> mClippingDecorationActors; ///< Decoration actors which need clipping.
+  Dali::Animation             mAnimation; ///< Scroll indicator Show/Hide Animation.
+  Dali::TimePeriod            mAnimationPeriod;
+  std::vector<Actor>          mClippingDecorationActors; ///< Decoration actors which need clipping.
   std::vector<Ui::TextAnchor> mAnchorActors;
-  Dali::InputMethodOptions mInputMethodOptions;
+  Dali::InputMethodOptions    mInputMethodOptions;
 
   Actor mRenderableActor;
   Actor mActiveLayer;
@@ -667,15 +667,15 @@ private: // Data
   float mAlignmentOffset;
   float mScrollAnimationDuration;
   float mLineSpacing;
-  int mRenderingBackend;
-  bool mHasBeenStaged : 1;
-  bool mScrollAnimationEnabled : 1;
-  bool mScrollBarEnabled : 1;
-  bool mScrollStarted : 1;
-  bool mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  int   mRenderingBackend;
+  bool  mHasBeenStaged : 1;
+  bool  mScrollAnimationEnabled : 1;
+  bool  mScrollBarEnabled : 1;
+  bool  mScrollStarted : 1;
+  bool  mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool  mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool  mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool  mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
 
   // args for cursor PositionChanged event
   unsigned int mOldPosition;

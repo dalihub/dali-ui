@@ -24,9 +24,9 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/clickable-trait.h>
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/interaction-trait-interface.h>
+#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/public-api/clickable-trait.h>
 
 namespace Dali
 {
@@ -55,7 +55,6 @@ public:
   ClickableTraitImpl();
 
 public: // Signals
-
   /**
    * @copydoc Dali::Ui::ClickableTrait::PressedChangedSignal
    */
@@ -77,7 +76,6 @@ public: // Signals
   Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
-
   /**
    * @copydoc Dali::Ui::ClickableTrait::IsPressed
    */
@@ -114,7 +112,6 @@ public: // API
   void SetKeyClickPolicy(KeyClickPolicy policy);
 
 public: // InteractionTrait
-
   /**
    * @copydoc Dali::Ui::Integration::IInteractionTrait::OnFocusedChanged
    */
@@ -187,7 +184,6 @@ protected:
   virtual bool IsExecutionKey(const std::string& keyName) const;
 
 private:
-
   bool OnTouchInternal(Actor actor, const TouchEvent& touchEvent);
   void OnTapInternal(Actor actor, const TapGesture& event);
   void OnLongPressedInternal(Actor actor, const LongPressGesture& event);
@@ -204,22 +200,21 @@ private:
   bool HandleKeyReleasedForClick(View view, const InputEvent& event);
 
 private:
-
-  WeakHandle<View> mOwner;
-  TapGestureDetector mTapGestureDetector;
-  LongPressGestureDetector mLongPressGestureDetector;
+  WeakHandle<View>                      mOwner;
+  TapGestureDetector                    mTapGestureDetector;
+  LongPressGestureDetector              mLongPressGestureDetector;
   Signal<bool(View, const InputEvent&)> mPressedChangedSignal;
-  Signal<void(View)> mPseudoDisabledChangedSignal;
+  Signal<void(View)>                    mPseudoDisabledChangedSignal;
   Signal<bool(View, const InputEvent&)> mClickedSignal;
   Signal<bool(View, const InputEvent&)> mLongPressedSignal;
-  KeyClickPolicy mKeyClickPolicy;
-  std::string mPressedExecutionKey;
-  uint32_t mPressedExecutionKeyCount;
-  bool mPseudoDisabled : 1;
-  bool mPressed : 1;
-  bool mClickable : 1;
-  bool mClickBlockedByTouch : 1;
-  bool mClickBlockedByKey : 1;
+  KeyClickPolicy                        mKeyClickPolicy;
+  std::string                           mPressedExecutionKey;
+  uint32_t                              mPressedExecutionKeyCount;
+  bool                                  mPseudoDisabled : 1;
+  bool                                  mPressed : 1;
+  bool                                  mClickable : 1;
+  bool                                  mClickBlockedByTouch : 1;
+  bool                                  mClickBlockedByKey : 1;
 };
 
 } // namespace Integration

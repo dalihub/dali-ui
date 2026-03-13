@@ -34,7 +34,7 @@ AbsoluteLayoutParams::AbsoluteLayoutParams()
 }
 
 AbsoluteLayoutParams::AbsoluteLayoutParams(const AbsoluteLayoutParams& handle)
-  : LayoutParams(handle)
+: LayoutParams(handle)
 {
 }
 
@@ -43,7 +43,7 @@ AbsoluteLayoutParams::~AbsoluteLayoutParams()
 }
 
 AbsoluteLayoutParams::AbsoluteLayoutParams(Internal::AbsoluteLayoutParamsImpl* implementation)
-  : LayoutParams(implementation)
+: LayoutParams(implementation)
 {
 }
 

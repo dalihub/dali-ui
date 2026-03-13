@@ -42,9 +42,9 @@ namespace Text
  *
  * @return the determined character-spacing value
  */
-float GetGlyphCharacterSpacing(const GlyphIndex& index,
+float GetGlyphCharacterSpacing(const GlyphIndex&                       index,
                                const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns,
-                               const float modelCharacterSpacing);
+                               const float                             modelCharacterSpacing);
 } // namespace Text
 
 } // namespace Ui

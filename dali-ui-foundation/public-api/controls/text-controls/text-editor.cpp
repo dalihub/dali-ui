@@ -72,12 +72,12 @@ TextEditor::ScrollStateChangedSignalType& TextEditor::ScrollStateChangedSignal()
 }
 
 TextEditor::TextEditor(Internal::TextEditor& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 TextEditor::TextEditor(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::TextEditor>(internal);
 }

@@ -26,8 +26,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyboard-focus-manager-devel.h>
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 
 namespace Dali
@@ -53,25 +53,25 @@ public:
   struct FocusChangeContext
   {
     Ui::Control::KeyboardFocus::Device device = Ui::Control::KeyboardFocus::Device::UNKNOWN;
-    std::string deviceName;
+    std::string                        deviceName;
   };
 
   enum FocusIndicatorState
   {
     UNKNOWN = -1, ///< Unknown state
-    HIDE = 0,     ///< FocusIndicator is hidden
-    SHOW = 1,     ///< FocusIndicator is shown
+    HIDE    = 0,  ///< FocusIndicator is hidden
+    SHOW    = 1,  ///< FocusIndicator is shown
   };
 
   enum EnableFocusedIndicatorState
   {
     DISABLE = 0, ///< FocusIndicator is disable
-    ENABLE = 1,  ///< FocusIndicator is enable
+    ENABLE  = 1, ///< FocusIndicator is enable
   };
 
   enum FocusedIndicatorModeState
   {
-    NONE = 0,        ///< Set nothing
+    NONE        = 0, ///< Set nothing
     ALWAYS_SHOW = 1, ///< FocusIndicator is always shown
   };
 
@@ -244,9 +244,9 @@ protected:
 
 private:
   typedef std::vector<WeakHandle<Actor>>
-      FocusStack; ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
+    FocusStack; ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
   typedef FocusStack::iterator
-      FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
+    FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
   /**
    * This will be called when the adaptor is initialized
@@ -417,12 +417,12 @@ private:
 
 private:
   Ui::KeyboardFocusManager::PreFocusChangeSignalType
-      mPreFocusChangeSignal; ///< The signal to notify the focus will be changed
-  Ui::KeyboardFocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
+                                                   mPreFocusChangeSignal; ///< The signal to notify the focus will be changed
+  Ui::KeyboardFocusManager::FocusChangedSignalType mFocusChangedSignal;   ///< The signal to notify the focus change
   Ui::KeyboardFocusManager::FocusGroupChangedSignalType
-      mFocusGroupChangedSignal; ///< The signal to notify the focus group change
+    mFocusGroupChangedSignal; ///< The signal to notify the focus group change
   Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType
-      mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
+    mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
 
   WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
 
@@ -435,7 +435,7 @@ private:
   SlotDelegate<KeyboardFocusManager> mSlotDelegate;
 
   CustomAlgorithmInterface*
-      mCustomAlgorithmInterface; ///< The user's (application / toolkit) implementation of CustomAlgorithmInterface
+    mCustomAlgorithmInterface; ///< The user's (application / toolkit) implementation of CustomAlgorithmInterface
 
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<Actor>>> FocusActorContainer;
 
@@ -444,8 +444,8 @@ private:
   WeakHandle<Layer> mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
 
   FocusIndicatorState
-      mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
-                              ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
+    mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
+                            ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
 
   EnableFocusedIndicatorState mEnableFocusIndicator; ///< Whether use focus indicator
 

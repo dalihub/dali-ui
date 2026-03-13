@@ -48,7 +48,7 @@ public:
   struct UrlStore
   {
     TextureManager::TextureId mTextureId = TextureManager::INVALID_TEXTURE_ID;
-    VisualUrl mUrl;
+    VisualUrl                 mUrl;
   };
 
   /**
@@ -141,17 +141,17 @@ private:
   void AllocateMaskData();
 
 protected:
-  TextureManager& mTextureManager;
-  FrameReadyObserver& mObserver;
+  TextureManager&                     mTextureManager;
+  FrameReadyObserver&                 mObserver;
   TextureManager::MaskingDataPointer& mMaskingData;
-  Dali::ImageDimensions mDesiredSize;
-  uint32_t mBatchSize;
-  uint32_t mInterval;
-  TextureManager::LoadState mLoadState;
-  Dali::FittingMode::Type mFittingMode : 4;
-  Dali::SamplingMode::Type mSamplingMode : 5;
-  bool mRequestingLoad : 1;
-  bool mPreMultiplyOnLoad : 1;
+  Dali::ImageDimensions               mDesiredSize;
+  uint32_t                            mBatchSize;
+  uint32_t                            mInterval;
+  TextureManager::LoadState           mLoadState;
+  Dali::FittingMode::Type             mFittingMode : 4;
+  Dali::SamplingMode::Type            mSamplingMode : 5;
+  bool                                mRequestingLoad : 1;
+  bool                                mPreMultiplyOnLoad : 1;
 };
 
 } // namespace Internal

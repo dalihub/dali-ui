@@ -36,12 +36,12 @@ namespace Text
 struct GlyphMetrics
 {
   GlyphMetrics()
-    : fontId(0u),
-      fontHeight(0.f),
-      width(0.f),
-      advance(0.f),
-      ascender(0.f),
-      xBearing(0.f)
+  : fontId(0u),
+    fontHeight(0.f),
+    width(0.f),
+    advance(0.f),
+    ascender(0.f),
+    xBearing(0.f)
   {
   }
 
@@ -49,12 +49,12 @@ struct GlyphMetrics
   {
   }
 
-  FontId fontId;    ///< The font id of the glyphs.
-  float fontHeight; ///< The font's height of those glyphs.
-  float width;      ///< The width of the group.
-  float advance;    ///< The sum of all the advances of all the glyphs.
-  float ascender;   ///< The font's ascender.
-  float xBearing;   ///< The x bearing of the group.
+  FontId fontId;     ///< The font id of the glyphs.
+  float  fontHeight; ///< The font's height of those glyphs.
+  float  width;      ///< The width of the group.
+  float  advance;    ///< The sum of all the advances of all the glyphs.
+  float  ascender;   ///< The font's ascender.
+  float  xBearing;   ///< The x bearing of the group.
 };
 
 /**

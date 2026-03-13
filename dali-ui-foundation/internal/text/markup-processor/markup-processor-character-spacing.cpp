@@ -40,11 +40,11 @@ void ProcessValueAttribute(const Attribute& attribute, CharacterSpacingCharacter
 
 void ProcessCharacterSpacingTag(const Tag& tag, CharacterSpacingCharacterRun& characterSpacingCharacterRun)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
 
-    if (TokenComparison(MARKUP::CHARACTER_SPACING_ATTRIBUTES::VALUE, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::CHARACTER_SPACING_ATTRIBUTES::VALUE, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessValueAttribute(attribute, characterSpacingCharacterRun);
     }

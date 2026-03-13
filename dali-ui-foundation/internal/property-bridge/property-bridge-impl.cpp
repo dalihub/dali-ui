@@ -39,7 +39,7 @@ namespace
 } // namespace
 
 PropertyBridge::PropertyBridge()
-  : mStringGetter(nullptr)
+: mStringGetter(nullptr)
 {
 }
 
@@ -52,15 +52,15 @@ Dali::Ui::PropertyBridge PropertyBridge::Get()
   Dali::Ui::PropertyBridge bridgeHandle;
 
   Dali::SingletonService service(SingletonService::Get());
-  if (service)
+  if(service)
   {
     // Check whether the singleton is already created
     Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::PropertyBridge));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle
       PropertyBridge* impl = dynamic_cast<Dali::Ui::Internal::PropertyBridge*>(handle.GetObjectPtr());
-      bridgeHandle = Dali::Ui::PropertyBridge(impl);
+      bridgeHandle         = Dali::Ui::PropertyBridge(impl);
     }
     else // create and register the object
     {
@@ -75,7 +75,7 @@ Dali::Ui::PropertyBridge PropertyBridge::Get()
 std::string PropertyBridge::GetStringProperty(Dali::Actor actor, const std::string& propertyName)
 {
   std::string result;
-  if (EnsureStringGetter())
+  if(EnsureStringGetter())
   {
     void* refObject = actor ? actor.GetObjectPtr() : nullptr;
     mStringGetter(refObject, propertyName.c_str(), &result);
@@ -85,13 +85,13 @@ std::string PropertyBridge::GetStringProperty(Dali::Actor actor, const std::stri
 
 bool PropertyBridge::EnsureStringGetter()
 {
-  if (!gStringGetter)
+  if(!gStringGetter)
   {
     DALI_LOG_ERROR("StringGetter not registered!\n");
     return false;
   }
 
-  if (!mStringGetter)
+  if(!mStringGetter)
   {
     mStringGetter = gStringGetter;
   }
@@ -101,7 +101,7 @@ bool PropertyBridge::EnsureStringGetter()
 // static
 void PropertyBridge::RegisterStringGetter(StringGetterDelegate getter)
 {
-  if (getter)
+  if(getter)
   {
     gStringGetter = getter;
   }

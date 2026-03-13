@@ -44,7 +44,7 @@ KeyboardFocusManager KeyboardFocusManager::Get()
 }
 
 KeyboardFocusManager::KeyboardFocusManager(Internal::KeyboardFocusManager* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

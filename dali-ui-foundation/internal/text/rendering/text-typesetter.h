@@ -53,11 +53,11 @@ public:
   enum RenderBehaviour
   {
     RENDER_TEXT_AND_STYLES, ///< Render both the text and its styles
-    RENDER_NO_TEXT, ///< Do not render the text itself but render the background styles such as outline and background.
-    RENDER_NO_STYLES,    ///< Do not render any styles
-    RENDER_MASK,         ///< Render an alpha mask (for color glyphs with no color animation, e.g. emoji)
-    RENDER_OVERLAY_STYLE ///< Do not render the text itself but render the style but overlay the style on the text
-                         ///< (foreground styles such as strikethrough and underline)
+    RENDER_NO_TEXT,         ///< Do not render the text itself but render the background styles such as outline and background.
+    RENDER_NO_STYLES,       ///< Do not render any styles
+    RENDER_MASK,            ///< Render an alpha mask (for color glyphs with no color animation, e.g. emoji)
+    RENDER_OVERLAY_STYLE    ///< Do not render the text itself but render the style but overlay the style on the text
+                            ///< (foreground styles such as strikethrough and underline)
   };
 
   /**
@@ -173,10 +173,10 @@ public:
    * @return A pixel data with the text rendered.
    */
   Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
-                                           RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
-                                           bool ignoreHorizontalAlignment = false,
-                                           Pixel::Format pixelFormat = Pixel::RGBA8888,
-                                           const Vector2& originSize = Size::ZERO);
+                                           RenderBehaviour behaviour                 = RENDER_TEXT_AND_STYLES,
+                                           bool            ignoreHorizontalAlignment = false,
+                                           Pixel::Format   pixelFormat               = Pixel::RGBA8888,
+                                           const Vector2&  originSize                = Size::ZERO);
 
   /**
    * @brief Create & draw the image buffer of single background color.
@@ -265,8 +265,8 @@ private:
    * @return The image buffer with the markup.
    */
   Devel::PixelBuffer ApplyStrikethroughMarkupImageBuffer(Devel::PixelBuffer topPixelBuffer, const uint32_t bufferWidth,
-                                                         const uint32_t bufferHeight,
-                                                         const bool ignoreHorizontalAlignment,
+                                                         const uint32_t      bufferHeight,
+                                                         const bool          ignoreHorizontalAlignment,
                                                          const Pixel::Format pixelFormat,
                                                          const int32_t horizontalOffset, const int32_t verticalOffset);
 

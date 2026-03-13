@@ -28,7 +28,7 @@ namespace Integration
 {
 
 ExclusiveTraitImpl::ExclusiveTraitImpl()
-  : TraitImpl()
+: TraitImpl()
 {
 }
 
@@ -41,7 +41,7 @@ void ExclusiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
   auto oldOwner = mOwner.GetHandle();
   DALI_ASSERT_DEBUG(oldOwner != view);
 
-  if (oldOwner)
+  if(oldOwner)
   {
     GetImpl(oldOwner).RemoveTrait(id);
   }

@@ -20,8 +20,8 @@
 // EXTERNAL INCLUDES
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layout.h>
 
 namespace Dali
 {
@@ -105,7 +105,6 @@ public:
   static FlexLayout DownCast(BaseHandle handle);
 
 public: // API
-
   /**
    * @brief Sets the flex direction.
    *
@@ -211,7 +210,7 @@ public: // Chaining methods
 
 public: // Not intended for application developers
   /// @cond internal
-  DALI_INTERNAL FlexLayout(Integration::FlexLayoutImpl& implementation);
+  DALI_INTERNAL          FlexLayout(Integration::FlexLayoutImpl& implementation);
   explicit DALI_INTERNAL FlexLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };

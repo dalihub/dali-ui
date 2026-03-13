@@ -34,7 +34,7 @@ Visual::Base::~Base()
 }
 
 Visual::Base::Base(const Visual::Base& handle)
-  : BaseHandle(handle)
+: BaseHandle(handle)
 {
 }
 
@@ -45,7 +45,7 @@ Visual::Base& Visual::Base::operator=(const Visual::Base& handle)
 }
 
 Visual::Base::Base(Internal::Visual::Base* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

@@ -27,12 +27,12 @@ namespace Ui
 GaussianBlurEffect::GaussianBlurEffect() = default;
 
 GaussianBlurEffect::GaussianBlurEffect(const GaussianBlurEffect& handle)
-  : RenderEffect(handle)
+: RenderEffect(handle)
 {
 }
 
 GaussianBlurEffect::GaussianBlurEffect(Internal::GaussianBlurEffectImpl* GaussianBlurEffectImpl)
-  : RenderEffect(GaussianBlurEffectImpl)
+: RenderEffect(GaussianBlurEffectImpl)
 {
 }
 

@@ -45,31 +45,31 @@ struct MarkupProcessData
 {
   MarkupProcessData(Vector<ColorRun>& colorRuns, Vector<FontDescriptionRun>& fontRuns, Vector<EmbeddedItem>& items,
                     Vector<Anchor>& anchors, Vector<UnderlinedCharacterRun>& underlinedCharacterRuns,
-                    Vector<ColorRun>& backgroundColorRuns,
-                    Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns,
-                    Vector<BoundedParagraphRun>& boundedParagraphRuns,
+                    Vector<ColorRun>&                     backgroundColorRuns,
+                    Vector<StrikethroughCharacterRun>&    strikethroughCharacterRuns,
+                    Vector<BoundedParagraphRun>&          boundedParagraphRuns,
                     Vector<CharacterSpacingCharacterRun>& characterSpacingCharacterRuns)
-    : colorRuns(colorRuns),
-      fontRuns(fontRuns),
-      items(items),
-      anchors(anchors),
-      underlinedCharacterRuns(underlinedCharacterRuns),
-      backgroundColorRuns(backgroundColorRuns),
-      strikethroughCharacterRuns(strikethroughCharacterRuns),
-      boundedParagraphRuns(boundedParagraphRuns),
-      characterSpacingCharacterRuns(characterSpacingCharacterRuns),
-      markupProcessedText()
+  : colorRuns(colorRuns),
+    fontRuns(fontRuns),
+    items(items),
+    anchors(anchors),
+    underlinedCharacterRuns(underlinedCharacterRuns),
+    backgroundColorRuns(backgroundColorRuns),
+    strikethroughCharacterRuns(strikethroughCharacterRuns),
+    boundedParagraphRuns(boundedParagraphRuns),
+    characterSpacingCharacterRuns(characterSpacingCharacterRuns),
+    markupProcessedText()
   {
   }
 
-  Vector<ColorRun>& colorRuns;                                         ///< The color runs.
-  Vector<FontDescriptionRun>& fontRuns;                                ///< The font description runs.
-  Vector<EmbeddedItem>& items;                                         ///< The embedded items.
-  Vector<Anchor>& anchors;                                             ///< The anchors.
-  Vector<UnderlinedCharacterRun>& underlinedCharacterRuns;             ///< The underlined character runs.
-  Vector<ColorRun>& backgroundColorRuns;                               ///< The background color runs.
-  Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns;       ///< The strikethrough character runs.
-  Vector<BoundedParagraphRun>& boundedParagraphRuns;                   ///< The bounded paragraph runs
+  Vector<ColorRun>&                     colorRuns;                     ///< The color runs.
+  Vector<FontDescriptionRun>&           fontRuns;                      ///< The font description runs.
+  Vector<EmbeddedItem>&                 items;                         ///< The embedded items.
+  Vector<Anchor>&                       anchors;                       ///< The anchors.
+  Vector<UnderlinedCharacterRun>&       underlinedCharacterRuns;       ///< The underlined character runs.
+  Vector<ColorRun>&                     backgroundColorRuns;           ///< The background color runs.
+  Vector<StrikethroughCharacterRun>&    strikethroughCharacterRuns;    ///< The strikethrough character runs.
+  Vector<BoundedParagraphRun>&          boundedParagraphRuns;          ///< The bounded paragraph runs
   Vector<CharacterSpacingCharacterRun>& characterSpacingCharacterRuns; ///< The character-spacing runs
 
   std::string markupProcessedText; ///< The mark-up string.
@@ -78,8 +78,8 @@ struct MarkupProcessData
 struct MarkupPropertyData
 {
   MarkupPropertyData(Vector4 anchorColor, Vector4 anchorClickedColor)
-    : anchorColor(anchorColor),
-      anchorClickedColor(anchorClickedColor)
+  : anchorColor(anchorColor),
+    anchorClickedColor(anchorClickedColor)
   {
   }
 

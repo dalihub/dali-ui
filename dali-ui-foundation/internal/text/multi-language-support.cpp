@@ -36,7 +36,7 @@ MultilanguageSupport::~MultilanguageSupport()
 }
 
 MultilanguageSupport::MultilanguageSupport(Internal::MultilanguageSupport* implementation)
-  : BaseHandle(implementation)
+: BaseHandle(implementation)
 {
 }
 
@@ -59,8 +59,8 @@ void MultilanguageSupport::SetScripts(const Vector<Character>& text, CharacterIn
 }
 
 void MultilanguageSupport::ValidateFonts(TextAbstraction::FontClient& fontClient, const Vector<Character>& text,
-                                         const Vector<ScriptRun>& scripts,
-                                         const Vector<FontDescriptionRun>& fontDescriptions,
+                                         const Vector<ScriptRun>&                scripts,
+                                         const Vector<FontDescriptionRun>&       fontDescriptions,
                                          const TextAbstraction::FontDescription& defaultFontDescription,
                                          TextAbstraction::PointSize26Dot6 defaultFontPointSize, float fontSizeScale,
                                          CharacterIndex startIndex, Length numberOfCharacters, Vector<FontRun>& fonts,

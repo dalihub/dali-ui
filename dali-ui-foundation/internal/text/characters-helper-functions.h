@@ -39,9 +39,9 @@ namespace Text
  *
  * @return CharacterRun for the clustered characters contains character Index
  */
-CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr& visualModel,
+CharacterRun RetrieveClusteredCharactersOfCharacterIndex(const VisualModelPtr&  visualModel,
                                                          const LogicalModelPtr& logicalModel,
-                                                         const CharacterIndex& characterIndex);
+                                                         const CharacterIndex&  characterIndex);
 
 } // namespace Text
 

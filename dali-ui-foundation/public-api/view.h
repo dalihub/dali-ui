@@ -18,15 +18,15 @@
  */
 
 // EXTERNAL INCLUDES
-#include <functional>
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layout-params.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/layout-params.h>
-#include <dali-ui-foundation/public-api/clickable-trait.h>
 
 namespace Dali
 {
@@ -53,11 +53,9 @@ class ViewImpl;
 class DALI_UI_API View : public Ui::Control
 {
 public:
-
   // Typedefs
 
 public: // Creation & Destruction
-
   /**
    * @brief Creates an uninitialized View handle.
    *
@@ -96,7 +94,6 @@ public: // Creation & Destruction
   ~View();
 
 public: // Operators
-
   /**
    * @brief Copy assignment operator.
    *
@@ -115,7 +112,6 @@ public: // Operators
   View& operator=(View&& rhs) noexcept = default;
 
 public: // Static Methods
-
   /**
    * @brief Downcasts a handle to View handle.
    *
@@ -185,7 +181,6 @@ public: // Measure / Arrange API
   bool IsArrangeValid() const;
 
 public: // Properties
-
   // @CHAIN_START(View)
   /**
    * @brief Sets the width of the View.
@@ -461,7 +456,7 @@ public: // Properties
   View& AsClickable(std::function<void(ClickableTrait&)> configure = nullptr)
   {
     ClickableTrait trait = GetOrAttachClickableTrait();
-    if (configure && trait)
+    if(configure && trait)
     {
       configure(trait);
     }
@@ -478,11 +473,11 @@ public: // Properties
    * @param[in] func Member function with signature bool (View, const InputEvent&)
    * @return Reference to this View for fluent chaining
    */
-  template <class X>
+  template<class X>
   View& AsClickable(X* obj, bool (X::*func)(View, const InputEvent&))
   {
     ClickableTrait trait = GetOrAttachClickableTrait();
-    if (trait && obj && func)
+    if(trait && obj && func)
     {
       trait.ClickedSignal().Connect(obj, func);
     }
@@ -498,11 +493,11 @@ public: // Properties
    * @param[in] func Callable with signature bool (View, const InputEvent&) (e.g. lambda)
    * @return Reference to this View for fluent chaining
    */
-  template <typename F>
+  template<typename F>
   View& AsClickable(Dali::ConnectionTrackerInterface* connectionTracker, F&& func)
   {
     ClickableTrait trait = GetOrAttachClickableTrait();
-    if (trait && connectionTracker)
+    if(trait && connectionTracker)
     {
       trait.ClickedSignal().Connect(connectionTracker, std::forward<F>(func));
     }
@@ -530,7 +525,7 @@ public: // Properties
    */
   View& With(std::function<void(View&)> action)
   {
-    if (action)
+    if(action)
     {
       action(*this);
     }
@@ -590,14 +585,13 @@ public: // Properties
    * }
    * @endcode
    */
-  template <typename T>
+  template<typename T>
   T GetLayoutParams() const
   {
     return T::DownCast(GetLayoutParamsTrait(T::GetLayoutParamsType()));
   }
 
 public: // Clickable role accessors (non-chaining)
-
   /**
    * @brief Ensures this View has a clickable interaction trait and returns it.
    *
@@ -620,7 +614,6 @@ public: // Clickable role accessors (non-chaining)
   ClickableTrait GetClickableTrait() const;
 
 public: // Not intended for application developers
-
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.

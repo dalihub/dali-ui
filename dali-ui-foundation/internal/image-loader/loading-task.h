@@ -21,13 +21,13 @@
 #include <dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-type.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/threading/conditional-wait.h>
 #include <dali/devel-api/threading/mutex.h>
 #include <dali/devel-api/threading/thread.h>
 #include <dali/integration-api/adaptor-framework/log-factory-interface.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/ref-object.h>
@@ -177,22 +177,22 @@ private:
   void MultiplyAlpha();
 
 public:
-  std::vector<Devel::PixelBuffer> pixelBuffers{}; ///< pixelBuffer handle after successful load
-                                                  ///< or pixelBuffer to be masked image in the mask task
-  VisualUrl url;                                  ///< url of the image to load
-  EncodedImageBuffer encodedImageBuffer;          ///< encoded buffer of the image to load
-  uint32_t id;                                    ///< The unique id associated with this task.
-  TextureManagerType::TextureId textureId;        ///< textureId for loading
-  ImageDimensions dimensions;                     ///< dimensions to load
-  FittingMode::Type fittingMode;                  ///< fitting options
-  SamplingMode::Type samplingMode;                ///< sampling options
+  std::vector<Devel::PixelBuffer> pixelBuffers{};   ///< pixelBuffer handle after successful load
+                                                    ///< or pixelBuffer to be masked image in the mask task
+  VisualUrl                     url;                ///< url of the image to load
+  EncodedImageBuffer            encodedImageBuffer; ///< encoded buffer of the image to load
+  uint32_t                      id;                 ///< The unique id associated with this task.
+  TextureManagerType::TextureId textureId;          ///< textureId for loading
+  ImageDimensions               dimensions;         ///< dimensions to load
+  FittingMode::Type             fittingMode;        ///< fitting options
+  SamplingMode::Type            samplingMode;       ///< sampling options
   DevelAsyncImageLoader::PreMultiplyOnLoad
-      preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha
+    preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha
 
-  Devel::PixelBuffer maskPixelBuffer; ///< pixelBuffer of mask image
-  float contentScale;                 ///< The factor to scale the content
+  Devel::PixelBuffer         maskPixelBuffer; ///< pixelBuffer of mask image
+  float                      contentScale;    ///< The factor to scale the content
   Dali::AnimatedImageLoading animatedImageLoading;
-  uint32_t frameIndex;
+  uint32_t                   frameIndex;
 
   bool orientationCorrection : 1; ///< if orientation correction is needed
   bool isMaskTask : 1;            ///< whether this task is for mask or not

@@ -19,8 +19,8 @@
 #include "async-image-loader-impl.h"
 
 // EXTERNAL INCLUDES
-#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/devel-api/adaptor-framework/async-task-manager.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 
 namespace Dali
 {
@@ -29,8 +29,8 @@ namespace Ui
 namespace Internal
 {
 AsyncImageLoader::AsyncImageLoader()
-  : mLoadedSignal(),
-    mLoadTaskId(0u)
+: mLoadedSignal(),
+  mLoadTaskId(0u)
 {
 }
 
@@ -56,13 +56,13 @@ uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animated
 
 uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                                              Dali::ImageDimensions desiredSize, Dali::FittingMode::Type fittingMode,
-                                             Dali::SamplingMode::Type samplingMode,
+                                             Dali::SamplingMode::Type                 samplingMode,
                                              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
-                                             bool loadPlanes)
+                                             bool                                     loadPlanes)
 {
   LoadingTaskPtr loadingTask =
-      new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize, fittingMode, samplingMode,
-                      preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
+    new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize, fittingMode, samplingMode,
+                    preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
   return mLoadTaskId;
 }
@@ -72,8 +72,8 @@ uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions
                                 DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes)
 {
   LoadingTaskPtr loadingTask =
-      new LoadingTask(++mLoadTaskId, url, dimensions, fittingMode, samplingMode, orientationCorrection,
-                      preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
+    new LoadingTask(++mLoadTaskId, url, dimensions, fittingMode, samplingMode, orientationCorrection,
+                    preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   AsyncTaskManager::Get().AddTask(loadingTask);
   mLoadingTasks.push_back(AsyncImageLoadingInfo(loadingTask, mLoadTaskId));
   return mLoadTaskId;
@@ -85,8 +85,8 @@ uint32_t AsyncImageLoader::LoadEncodedImageBuffer(const EncodedImageBuffer& enco
                                                   DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
-      new LoadingTask(++mLoadTaskId, encodedImageBuffer, dimensions, fittingMode, samplingMode, orientationCorrection,
-                      preMultiplyOnLoad, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
+    new LoadingTask(++mLoadTaskId, encodedImageBuffer, dimensions, fittingMode, samplingMode, orientationCorrection,
+                    preMultiplyOnLoad, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
   mLoadingTasks.push_back(AsyncImageLoadingInfo(loadingTask, mLoadTaskId));
   return mLoadTaskId;
@@ -97,8 +97,8 @@ uint32_t AsyncImageLoader::ApplyMask(Devel::PixelBuffer pixelBuffer, Devel::Pixe
                                      DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
-      new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
-                      MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
+    new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
+                    MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
   mLoadingTasks.push_back(AsyncImageLoadingInfo(loadingTask, mLoadTaskId));
   return mLoadTaskId;
@@ -117,9 +117,9 @@ Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType& AsyncImageLoader::PixelB
 bool AsyncImageLoader::Cancel(uint32_t loadingTaskId)
 {
   auto end = mLoadingTasks.end();
-  for (std::vector<AsyncImageLoadingInfo>::iterator iter = mLoadingTasks.begin(); iter != end; ++iter)
+  for(std::vector<AsyncImageLoadingInfo>::iterator iter = mLoadingTasks.begin(); iter != end; ++iter)
   {
-    if ((*iter).loadId == loadingTaskId)
+    if((*iter).loadId == loadingTaskId)
     {
       Dali::AsyncTaskManager::Get().RemoveTask((*iter).loadingTask);
       mLoadingTasks.erase(iter);
@@ -133,9 +133,9 @@ bool AsyncImageLoader::Cancel(uint32_t loadingTaskId)
 void AsyncImageLoader::CancelAll()
 {
   auto end = mLoadingTasks.end();
-  for (std::vector<AsyncImageLoadingInfo>::iterator iter = mLoadingTasks.begin(); iter != end; ++iter)
+  for(std::vector<AsyncImageLoadingInfo>::iterator iter = mLoadingTasks.begin(); iter != end; ++iter)
   {
-    if ((*iter).loadingTask && Dali::AsyncTaskManager::Get())
+    if((*iter).loadingTask && Dali::AsyncTaskManager::Get())
     {
       Dali::AsyncTaskManager::Get().RemoveTask(((*iter).loadingTask));
     }
@@ -147,23 +147,23 @@ void AsyncImageLoader::ProcessLoadedImage(LoadingTaskPtr task)
 {
   // Remove tasks before signal emit
   auto end = mLoadingTasks.end();
-  for (auto iter = mLoadingTasks.begin(); iter != end; ++iter)
+  for(auto iter = mLoadingTasks.begin(); iter != end; ++iter)
   {
-    if ((*iter).loadId == task->id)
+    if((*iter).loadId == task->id)
     {
       mLoadingTasks.erase(iter);
       break;
     }
   }
 
-  if (mPixelBufferLoadedSignal.GetConnectionCount() > 0)
+  if(mPixelBufferLoadedSignal.GetConnectionCount() > 0)
   {
     mPixelBufferLoadedSignal.Emit(task->id, task->pixelBuffers);
   }
-  else if (mLoadedSignal.GetConnectionCount() > 0)
+  else if(mLoadedSignal.GetConnectionCount() > 0)
   {
     PixelData pixelData;
-    if (!task->pixelBuffers.empty())
+    if(!task->pixelBuffers.empty())
     {
       pixelData = Devel::PixelBuffer::Convert(task->pixelBuffers[0]);
     }

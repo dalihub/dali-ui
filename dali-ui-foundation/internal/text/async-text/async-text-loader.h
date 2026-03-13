@@ -54,88 +54,88 @@ enum RequestType
   COMPUTE_NATURAL_SIZE,
   COMPUTE_HEIGHT_FOR_WIDTH,
 };
-const char* const RequestTypeName[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH",   "RENDER_FIXED_HEIGHT",
+const char* const RequestTypeName[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
                                        "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
 } // namespace Async
 
 struct AsyncTextParameters
 {
   AsyncTextParameters()
-    : text{},
-      fontFamily{},
-      textColor{Color::BLACK},
-      underlineColor{Color::BLACK},
-      strikethroughColor{Color::BLACK},
-      shadowColor{Color::BLACK},
-      outlineColor{Color::WHITE},
-      backgroundColorWithCutout{Color::TRANSPARENT},
-      shadowOffset{},
-      outlineOffset{},
-      padding{0u, 0u, 0u, 0u},
-      variationsMap{},
-      textFitArray{},
-      embossDirection{},
-      embossStrength{0.f},
-      embossLightColor{Color::TRANSPARENT},
-      embossShadowColor{Color::TRANSPARENT},
-      fontSize{0.f},
-      minLineSize{0.f},
-      lineSpacing{0.f},
-      relativeLineSize{1.f},
-      characterSpacing{0.f},
-      fontSizeScale{1.f},
-      textWidth{0.f},
-      textHeight{0.f},
-      originWidth{0.f},
-      originHeight{0.f},
-      underlineHeight{0.f},
-      dashedUnderlineWidth{2.f},
-      dashedUnderlineGap{1.f},
-      strikethroughHeight{0.f},
-      shadowBlurRadius{0.f},
-      outlineBlurRadius{0.f},
-      textFitMinSize{10.f},
-      textFitMaxSize{100.f},
-      textFitStepSize{1.f},
-      autoScrollLoopDelay{0.0f},
-      renderScale{1.0f},
-      renderScaleWidth{0.f},
-      renderScaleHeight{0.f},
-      maxTextureSize{0},
-      autoScrollSpeed{1},
-      autoScrollLoopCount{1},
-      autoScrollGap{0},
-      outlineWidth{0u},
-      requestType{Async::RENDER_FIXED_SIZE},
-      horizontalAlignment{Text::HorizontalAlignment::BEGIN},
-      verticalAlignment{Text::VerticalAlignment::TOP},
-      lineWrapMode{Text::LineWrap::WORD},
-      underlineType{Text::Underline::SOLID},
-      layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
-      verticalLineAlignment{DevelText::VerticalLineAlignment::TOP},
-      layoutDirectionPolicy{DevelText::MatchLayoutDirection::INHERIT},
-      ellipsisPosition{DevelText::EllipsisPosition::END},
-      ellipsisMode{DevelText::Ellipsize::TRUNCATE},
-      autoScrollDirection{DevelText::AutoScroll::HORIZONTAL},
-      autoScrollStopMode{TextLabel::AutoScrollStopMode::FINISH_LOOP},
-      fontWeight{FontWeight::NONE},
-      fontWidth{FontWidth::NONE},
-      fontSlant{FontSlant::NONE},
-      manualRender{false},
-      isMultiLine{false},
-      ellipsis{true},
-      enableMarkup{false},
-      removeFrontInset{true},
-      removeBackInset{true},
-      isUnderlineEnabled{false},
-      isStrikethroughEnabled{false},
-      isTextFitEnabled{false},
-      isTextFitArrayEnabled{false},
-      isAutoScrollEnabled{false},
-      isAutoScrollMaxTextureExceeded{false},
-      cutout{false},
-      backgroundWithCutoutEnabled{false},
-      embossEnabled{false}
+  : text{},
+    fontFamily{},
+    textColor{Color::BLACK},
+    underlineColor{Color::BLACK},
+    strikethroughColor{Color::BLACK},
+    shadowColor{Color::BLACK},
+    outlineColor{Color::WHITE},
+    backgroundColorWithCutout{Color::TRANSPARENT},
+    shadowOffset{},
+    outlineOffset{},
+    padding{0u, 0u, 0u, 0u},
+    variationsMap{},
+    textFitArray{},
+    embossDirection{},
+    embossStrength{0.f},
+    embossLightColor{Color::TRANSPARENT},
+    embossShadowColor{Color::TRANSPARENT},
+    fontSize{0.f},
+    minLineSize{0.f},
+    lineSpacing{0.f},
+    relativeLineSize{1.f},
+    characterSpacing{0.f},
+    fontSizeScale{1.f},
+    textWidth{0.f},
+    textHeight{0.f},
+    originWidth{0.f},
+    originHeight{0.f},
+    underlineHeight{0.f},
+    dashedUnderlineWidth{2.f},
+    dashedUnderlineGap{1.f},
+    strikethroughHeight{0.f},
+    shadowBlurRadius{0.f},
+    outlineBlurRadius{0.f},
+    textFitMinSize{10.f},
+    textFitMaxSize{100.f},
+    textFitStepSize{1.f},
+    autoScrollLoopDelay{0.0f},
+    renderScale{1.0f},
+    renderScaleWidth{0.f},
+    renderScaleHeight{0.f},
+    maxTextureSize{0},
+    autoScrollSpeed{1},
+    autoScrollLoopCount{1},
+    autoScrollGap{0},
+    outlineWidth{0u},
+    requestType{Async::RENDER_FIXED_SIZE},
+    horizontalAlignment{Text::HorizontalAlignment::BEGIN},
+    verticalAlignment{Text::VerticalAlignment::TOP},
+    lineWrapMode{Text::LineWrap::WORD},
+    underlineType{Text::Underline::SOLID},
+    layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
+    verticalLineAlignment{DevelText::VerticalLineAlignment::TOP},
+    layoutDirectionPolicy{DevelText::MatchLayoutDirection::INHERIT},
+    ellipsisPosition{DevelText::EllipsisPosition::END},
+    ellipsisMode{DevelText::Ellipsize::TRUNCATE},
+    autoScrollDirection{DevelText::AutoScroll::HORIZONTAL},
+    autoScrollStopMode{TextLabel::AutoScrollStopMode::FINISH_LOOP},
+    fontWeight{FontWeight::NONE},
+    fontWidth{FontWidth::NONE},
+    fontSlant{FontSlant::NONE},
+    manualRender{false},
+    isMultiLine{false},
+    ellipsis{true},
+    enableMarkup{false},
+    removeFrontInset{true},
+    removeBackInset{true},
+    isUnderlineEnabled{false},
+    isStrikethroughEnabled{false},
+    isTextFitEnabled{false},
+    isTextFitArrayEnabled{false},
+    isAutoScrollEnabled{false},
+    isAutoScrollMaxTextureExceeded{false},
+    cutout{false},
+    backgroundWithCutoutEnabled{false},
+    embossEnabled{false}
   {
   }
 
@@ -158,11 +158,11 @@ struct AsyncTextParameters
 
   Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
-  Property::Map variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  Property::Map                          variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   std::vector<DevelTextLabel::FitOption> textFitArray;
 
   Vector2 embossDirection;
-  float embossStrength;
+  float   embossStrength;
   Vector4 embossLightColor;
   Vector4 embossShadowColor;
 
@@ -197,25 +197,25 @@ struct AsyncTextParameters
 
   uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
 
-  Async::RequestType requestType;
+  Async::RequestType              requestType;
   Text::HorizontalAlignment::Type horizontalAlignment; ///< The horizontal alignment: one of {BEGIN, CENTER, END}.
-  Text::VerticalAlignment::Type verticalAlignment;     ///< The vertical alignment: one of {TOP, CENTER, BOTTOM}.
-  Text::LineWrap::Mode lineWrapMode;           ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
-  Text::Underline::Type underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
-  Dali::LayoutDirection::Type layoutDirection; ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
+  Text::VerticalAlignment::Type   verticalAlignment;   ///< The vertical alignment: one of {TOP, CENTER, BOTTOM}.
+  Text::LineWrap::Mode            lineWrapMode;        ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  Text::Underline::Type           underlineType;       ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
+  Dali::LayoutDirection::Type     layoutDirection;     ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   DevelText::VerticalLineAlignment::Type
-      verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
+    verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
   DevelText::MatchLayoutDirection
-      layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
+    layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   DevelText::EllipsisPosition::Type
-      ellipsisPosition;                    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  DevelText::Ellipsize::Mode ellipsisMode; ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
+                                   ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  DevelText::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
   DevelText::AutoScroll::Direction autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
   TextLabel::AutoScrollStopMode::Type
-      autoScrollStopMode; ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight fontWeight;  ///< The font's weight.
-  FontWidth fontWidth;    ///< The font's width.
-  FontSlant fontSlant;    ///< The font's slant.
+             autoScrollStopMode; ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeight fontWeight;         ///< The font's weight.
+  FontWidth  fontWidth;          ///< The font's width.
+  FontSlant  fontSlant;          ///< The font's slant.
 
   bool manualRender : 1;                   ///< Whether the manual rendered or not.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
@@ -237,25 +237,25 @@ struct AsyncTextParameters
 struct AsyncTextRenderInfo
 {
   AsyncTextRenderInfo()
-    : requestType(Async::RENDER_FIXED_SIZE),
-      textPixelData(),
-      stylePixelData(),
-      overlayStylePixelData(),
-      maskPixelData(),
-      autoScrollPixelData(),
-      size(),
-      controlSize(),
-      renderedSize(),
-      lineCount(0),
-      autoScrollWrapGap(0.f),
-      hasMultipleTextColors(false),
-      containsColorGlyph(false),
-      styleEnabled(false),
-      isOverlayStyle(false),
-      isTextDirectionRTL(false),
-      isCutout(false),
-      manualRendered(false),
-      embossEnabled(false)
+  : requestType(Async::RENDER_FIXED_SIZE),
+    textPixelData(),
+    stylePixelData(),
+    overlayStylePixelData(),
+    maskPixelData(),
+    autoScrollPixelData(),
+    size(),
+    controlSize(),
+    renderedSize(),
+    lineCount(0),
+    autoScrollWrapGap(0.f),
+    hasMultipleTextColors(false),
+    containsColorGlyph(false),
+    styleEnabled(false),
+    isOverlayStyle(false),
+    isTextDirectionRTL(false),
+    isCutout(false),
+    manualRendered(false),
+    embossEnabled(false)
   {
   }
 
@@ -263,24 +263,24 @@ struct AsyncTextRenderInfo
   {
   }
   Async::RequestType requestType;
-  PixelData textPixelData;
-  PixelData stylePixelData;
-  PixelData overlayStylePixelData;
-  PixelData maskPixelData;
-  PixelData autoScrollPixelData;
-  Size size;
-  Size controlSize;
-  Size renderedSize;
-  int lineCount;
-  float autoScrollWrapGap;
-  bool hasMultipleTextColors : 1;
-  bool containsColorGlyph : 1;
-  bool styleEnabled : 1;
-  bool isOverlayStyle : 1;
-  bool isTextDirectionRTL : 1;
-  bool isCutout : 1;
-  bool manualRendered : 1;
-  bool embossEnabled : 1;
+  PixelData          textPixelData;
+  PixelData          stylePixelData;
+  PixelData          overlayStylePixelData;
+  PixelData          maskPixelData;
+  PixelData          autoScrollPixelData;
+  Size               size;
+  Size               controlSize;
+  Size               renderedSize;
+  int                lineCount;
+  float              autoScrollWrapGap;
+  bool               hasMultipleTextColors : 1;
+  bool               containsColorGlyph : 1;
+  bool               styleEnabled : 1;
+  bool               isOverlayStyle : 1;
+  bool               isTextDirectionRTL : 1;
+  bool               isCutout : 1;
+  bool               manualRendered : 1;
+  bool               embossEnabled : 1;
 };
 
 /**
@@ -469,10 +469,10 @@ public:
 
 public:
   // Default copy and move operator
-  AsyncTextLoader(const AsyncTextLoader& rhs) = default;
-  AsyncTextLoader(AsyncTextLoader&& rhs) = default;
+  AsyncTextLoader(const AsyncTextLoader& rhs)            = default;
+  AsyncTextLoader(AsyncTextLoader&& rhs)                 = default;
   AsyncTextLoader& operator=(const AsyncTextLoader& rhs) = default;
-  AsyncTextLoader& operator=(AsyncTextLoader&& rhs) = default;
+  AsyncTextLoader& operator=(AsyncTextLoader&& rhs)      = default;
 };
 
 } // namespace Text

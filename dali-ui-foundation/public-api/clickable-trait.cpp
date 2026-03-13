@@ -19,8 +19,8 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
+#include <dali-ui-foundation/public-api/clickable-trait.h>
 
 namespace Dali
 {
@@ -39,7 +39,7 @@ ClickableTrait ClickableTrait::New()
 }
 
 ClickableTrait::ClickableTrait(const ClickableTrait& trait)
-  : Trait(trait)
+: Trait(trait)
 {
 }
 
@@ -48,7 +48,7 @@ ClickableTrait::~ClickableTrait()
 }
 
 ClickableTrait::ClickableTrait(Integration::ClickableTraitImpl* implementation)
-  : Trait(implementation)
+: Trait(implementation)
 {
 }
 

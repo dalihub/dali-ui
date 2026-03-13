@@ -54,12 +54,12 @@ TextAnchor TextAnchor::DownCast(BaseHandle handle)
 }
 
 TextAnchor::TextAnchor(Internal::TextAnchor& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 TextAnchor::TextAnchor(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::TextAnchor>(internal);
 }

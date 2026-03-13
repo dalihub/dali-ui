@@ -45,8 +45,8 @@ public:
     }
 
     Vertex(const Vector3& position, const Vector3& normal, const Vector2& textureCoord)
-      : position(position),
-        normal(normal)
+    : position(position),
+      normal(normal)
     {
     }
 
@@ -61,8 +61,8 @@ public:
     }
 
     VertexExt(const Vector3& tangent, const Vector3& binormal)
-      : tangent(tangent),
-        bitangent(binormal)
+    : tangent(tangent),
+      bitangent(binormal)
     {
     }
 
@@ -99,8 +99,8 @@ public:
   enum ObjectProperties
   {
     TEXTURE_COORDINATES = 1 << 0,
-    TANGENTS = 1 << 1,
-    BINORMALS = 1 << 2
+    TANGENTS            = 1 << 1,
+    BINORMALS           = 1 << 2
   };
 
   ObjLoader();
@@ -138,12 +138,12 @@ private:
   bool mHasNormalMap;
   bool mHasSpecularMap;
 
-  Dali::Vector<Vector3> mPoints;
-  Dali::Vector<Vector2> mTextures;
-  Dali::Vector<Vector2> mTextures2;
-  Dali::Vector<Vector3> mNormals;
-  Dali::Vector<Vector3> mTangents;
-  Dali::Vector<Vector3> mBiTangents;
+  Dali::Vector<Vector3>  mPoints;
+  Dali::Vector<Vector2>  mTextures;
+  Dali::Vector<Vector2>  mTextures2;
+  Dali::Vector<Vector3>  mNormals;
+  Dali::Vector<Vector3>  mTangents;
+  Dali::Vector<Vector3>  mBiTangents;
   Dali::Vector<TriIndex> mTriangles;
 
   /**

@@ -35,20 +35,20 @@ namespace Internal
 {
 
 AsyncTextModule::AsyncTextModule()
-  : mBidirectionalSupport(),
-    mFontClient(),
-    mShaping(),
-    mSegmentation(),
-    mHyphenation(),
-    mMultilanguageSupport()
+: mBidirectionalSupport(),
+  mFontClient(),
+  mShaping(),
+  mSegmentation(),
+  mHyphenation(),
+  mMultilanguageSupport()
 {
   bool connnectLocaleChangedSignal = false;
 
   mBidirectionalSupport = TextAbstraction::BidirectionalSupport::New();
-  mFontClient = TextAbstraction::FontClient::New();
-  mShaping = TextAbstraction::Shaping::New();
-  mSegmentation = TextAbstraction::Segmentation::New();
-  mHyphenation = TextAbstraction::Hyphenation::New();
+  mFontClient           = TextAbstraction::FontClient::New();
+  mShaping              = TextAbstraction::Shaping::New();
+  mSegmentation         = TextAbstraction::Segmentation::New();
+  mHyphenation          = TextAbstraction::Hyphenation::New();
   mMultilanguageSupport = Text::MultilanguageSupport::New(connnectLocaleChangedSignal);
 }
 

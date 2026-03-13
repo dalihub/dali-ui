@@ -64,12 +64,12 @@ BaseHandle Create()
 }
 
 // Toast style defaults.
-const int DEFAULT_TOAST_AUTO_HIDE_DELAY = 3000;    ///< Toast will auto-hide after 3000ms (3 seconds)
-const float DEFAULT_TOAST_TRANSITION_TIME = 0.65f; ///< Default time the toast Popup will take to show and hide.
+const int     DEFAULT_TOAST_AUTO_HIDE_DELAY = 3000;  ///< Toast will auto-hide after 3000ms (3 seconds)
+const float   DEFAULT_TOAST_TRANSITION_TIME = 0.65f; ///< Default time the toast Popup will take to show and hide.
 const Vector3 DEFAULT_TOAST_BOTTOM_PARENT_ORIGIN(
-    0.5f, 0.94f, 0.5f); ///< This is similar to BOTTOM_CENTER, but vertically higher up, as a ratio of parent height.
+  0.5f, 0.94f, 0.5f); ///< This is similar to BOTTOM_CENTER, but vertically higher up, as a ratio of parent height.
 const Vector3 DEFAULT_TOAST_WIDTH_OF_STAGE_RATIO(
-    0.75f, 0.75f, 0.75f); ///< Amount of the stage's width that the toast popup will take up.
+  0.75f, 0.75f, 0.75f); ///< Amount of the stage's width that the toast popup will take up.
 
 /**
  * Creation function for named type "popupToast".
@@ -186,13 +186,13 @@ const unsigned int ContextualModeTableCount = sizeof(ContextualModeTable) / size
 
 // Popup defaults.
 const Vector3 DEFAULT_POPUP_PARENT_RELATIVE_SIZE(0.75f, 1.0f, 1.0f); ///< Default size percentage of parent.
-const float DEFAULT_POPUP_ANIMATION_DURATION = 0.6f;                 ///< Duration of hide/show animations.
-const float POPUP_OUT_MARGIN_WIDTH =
-    16.f; ///< Space between the screen edge and the popup edge in the horizontal dimension.
+const float   DEFAULT_POPUP_ANIMATION_DURATION = 0.6f;               ///< Duration of hide/show animations.
+const float   POPUP_OUT_MARGIN_WIDTH =
+  16.f; ///< Space between the screen edge and the popup edge in the horizontal dimension.
 const float POPUP_OUT_MARGIN_HEIGHT =
-    36.f; ///< Space between the screen edge and the popup edge in the vertical dimension.
+  36.f; ///< Space between the screen edge and the popup edge in the vertical dimension.
 const Vector3 DEFAULT_TAIL_POSITION(
-    0.5f, 1.0f, 0.0f); ///< Position the tail will be displayed when enabled without setting the position.
+  0.5f, 1.0f, 0.0f); ///< Position the tail will be displayed when enabled without setting the position.
 
 // Contextual defaults.
 const Vector2 DEFAULT_CONTEXTUAL_ADJACENCY_MARGIN(10.0f,
@@ -201,20 +201,20 @@ const Vector2 DEFAULT_CONTEXTUAL_STAGE_BORDER(15.0f, 15.0f); ///< How close the 
 
 // Popup style defaults.
 const char* DEFAULT_BACKGROUND_IMAGE_FILE_NAME = "00_popup_bg.9.png";    ///< Background image.
-const char* DEFAULT_TAIL_UP_IMAGE_FILE_NAME = "popup_tail_up.png";       ///< Tail up image.
-const char* DEFAULT_TAIL_DOWN_IMAGE_FILE_NAME = "popup_tail_down.png";   ///< Tail down image.
-const char* DEFAULT_TAIL_LEFT_IMAGE_FILE_NAME = "popup_tail_left.png";   ///< Tail left image.
+const char* DEFAULT_TAIL_UP_IMAGE_FILE_NAME    = "popup_tail_up.png";    ///< Tail up image.
+const char* DEFAULT_TAIL_DOWN_IMAGE_FILE_NAME  = "popup_tail_down.png";  ///< Tail down image.
+const char* DEFAULT_TAIL_LEFT_IMAGE_FILE_NAME  = "popup_tail_left.png";  ///< Tail left image.
 const char* DEFAULT_TAIL_RIGHT_IMAGE_FILE_NAME = "popup_tail_right.png"; ///< Tail right image.
 
-const Vector4 DEFAULT_BACKING_COLOR(0.0f, 0.0f, 0.0f, 0.5f); ///< Color of the dimmed backing.
-const Rect<int> DEFAULT_BACKGROUND_BORDER(17, 17, 13, 13);   ///< Default border of the background.
+const Vector4     DEFAULT_BACKING_COLOR(0.0f, 0.0f, 0.0f, 0.5f); ///< Color of the dimmed backing.
+const Rect<int>   DEFAULT_BACKGROUND_BORDER(17, 17, 13, 13);     ///< Default border of the background.
 const Rect<float> DEFAULT_TITLE_PADDING(
-    20.0f, 20.0f, 20.0f, 20.0f); ///< Title padding used on popups with content and/or controls (from Tizen GUI UX).
+  20.0f, 20.0f, 20.0f, 20.0f); ///< Title padding used on popups with content and/or controls (from Tizen GUI UX).
 const Rect<float> DEFAULT_TITLE_ONLY_PADDING(
-    8.0f, 8.0f, 8.0f, 8.0f);                    ///< Title padding used on popups with a title only (like toast popups).
+  8.0f, 8.0f, 8.0f, 8.0f);                      ///< Title padding used on popups with a title only (like toast popups).
 const Vector3 FOOTER_SIZE(620.0f, 96.0f, 0.0f); ///< Default size of the bottom control area.
-const float DEFAULT_RELATIVE_PARENT_WIDTH =
-    0.75f; ///< If width is not fixed, relative size to parent is used by default.
+const float   DEFAULT_RELATIVE_PARENT_WIDTH =
+  0.75f; ///< If width is not fixed, relative size to parent is used by default.
 
 } // Unnamed namespace
 
@@ -238,52 +238,52 @@ Dali::Ui::Popup Popup::New()
 }
 
 Popup::Popup()
-  : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
-    mTouchedOutsideSignal(),
-    mShowingSignal(),
-    mShownSignal(),
-    mHidingSignal(),
-    mHiddenSignal(),
-    mLayer(),
-    mPopupLayout(),
-    mBacking(),
-    mPreviousFocusedActor(),
-    mTailImage(),
-    mPopupContainer(),
-    mAnimation(),
-    mAlterAddedChild(false),
-    mLayoutDirty(true),
-    mAutoHideTimer(),
-    mTouchTransparent(false),
-    mTitle(),
-    mContent(),
-    mFooter(),
-    mDisplayState(Ui::Popup::HIDDEN), // Hidden until shown with SetDisplayState()
-    mTailVisible(false),
-    mTailPosition(DEFAULT_TAIL_POSITION),
-    mContextualMode(Ui::Popup::NON_CONTEXTUAL),
-    mAnimationDuration(DEFAULT_POPUP_ANIMATION_DURATION),
-    mAnimationMode(Ui::Popup::FADE),
-    mEntryAnimationData(),
-    mExitAnimationData(),
-    mAutoHideDelay(0),
-    mBackingEnabled(true),
-    mBackingColor(DEFAULT_BACKING_COLOR),
-    mPopupBackgroundImage(),
-    mBackgroundBorder(DEFAULT_BACKGROUND_BORDER),
-    mMargin(),
-    mTailUpImage(),
-    mTailDownImage(),
-    mTailLeftImage(),
-    mTailRightImage()
+: Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
+  mTouchedOutsideSignal(),
+  mShowingSignal(),
+  mShownSignal(),
+  mHidingSignal(),
+  mHiddenSignal(),
+  mLayer(),
+  mPopupLayout(),
+  mBacking(),
+  mPreviousFocusedActor(),
+  mTailImage(),
+  mPopupContainer(),
+  mAnimation(),
+  mAlterAddedChild(false),
+  mLayoutDirty(true),
+  mAutoHideTimer(),
+  mTouchTransparent(false),
+  mTitle(),
+  mContent(),
+  mFooter(),
+  mDisplayState(Ui::Popup::HIDDEN), // Hidden until shown with SetDisplayState()
+  mTailVisible(false),
+  mTailPosition(DEFAULT_TAIL_POSITION),
+  mContextualMode(Ui::Popup::NON_CONTEXTUAL),
+  mAnimationDuration(DEFAULT_POPUP_ANIMATION_DURATION),
+  mAnimationMode(Ui::Popup::FADE),
+  mEntryAnimationData(),
+  mExitAnimationData(),
+  mAutoHideDelay(0),
+  mBackingEnabled(true),
+  mBackingColor(DEFAULT_BACKING_COLOR),
+  mPopupBackgroundImage(),
+  mBackgroundBorder(DEFAULT_BACKGROUND_BORDER),
+  mMargin(),
+  mTailUpImage(),
+  mTailDownImage(),
+  mTailLeftImage(),
+  mTailRightImage()
 {
   SetKeyboardNavigationSupport(true);
 
   const std::string imageDirPath = AssetManager::GetDaliImagePath();
-  mTailUpImage = imageDirPath + DEFAULT_TAIL_UP_IMAGE_FILE_NAME;
-  mTailDownImage = imageDirPath + DEFAULT_TAIL_DOWN_IMAGE_FILE_NAME;
-  mTailLeftImage = imageDirPath + DEFAULT_TAIL_LEFT_IMAGE_FILE_NAME;
-  mTailRightImage = imageDirPath + DEFAULT_TAIL_RIGHT_IMAGE_FILE_NAME;
+  mTailUpImage                   = imageDirPath + DEFAULT_TAIL_UP_IMAGE_FILE_NAME;
+  mTailDownImage                 = imageDirPath + DEFAULT_TAIL_DOWN_IMAGE_FILE_NAME;
+  mTailLeftImage                 = imageDirPath + DEFAULT_TAIL_LEFT_IMAGE_FILE_NAME;
+  mTailRightImage                = imageDirPath + DEFAULT_TAIL_RIGHT_IMAGE_FILE_NAME;
 }
 
 void Popup::OnInitialize()
@@ -370,7 +370,7 @@ Popup::~Popup()
 void Popup::LayoutAnimation()
 {
   // Perform setup based on the currently selected animation.
-  switch (mAnimationMode)
+  switch(mAnimationMode)
   {
     case Ui::Popup::ZOOM:
     {
@@ -404,7 +404,7 @@ void Popup::LayoutAnimation()
 void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* false */)
 {
   // Stop and recreate animation.
-  if (mAnimation)
+  if(mAnimation)
   {
     mAnimation.Stop();
     mAnimation.Clear();
@@ -414,9 +414,9 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
 
   // Setup variables ready to start the animations.
   // If we are performing the animation instantaneously, we do not want to emit a signal.
-  if (!instantaneous)
+  if(!instantaneous)
   {
-    if (transitionIn)
+    if(transitionIn)
     {
       // Setup variables and signal that we are starting the transition.
       // Note: We signal even if the transition is instant so signal order is consistent.
@@ -429,7 +429,7 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
   }
 
   // Perform chosen animation for the Popup.
-  switch (mAnimationMode)
+  switch(mAnimationMode)
   {
     case Ui::Popup::NONE:
     {
@@ -440,9 +440,9 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
     case Ui::Popup::ZOOM:
     {
       mAnimation = Animation::New(duration);
-      if (duration > Math::MACHINE_EPSILON_0)
+      if(duration > Math::MACHINE_EPSILON_0)
       {
-        if (transitionIn)
+        if(transitionIn)
         {
           mAnimation.AnimateTo(Property(mPopupContainer, Actor::Property::SCALE), Vector3::ONE,
                                AlphaFunction::EASE_IN_OUT, TimePeriod(duration * 0.25f, duration * 0.75f));
@@ -467,9 +467,9 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
     case Ui::Popup::FADE:
     {
       mAnimation = Animation::New(duration);
-      if (duration > Math::MACHINE_EPSILON_0)
+      if(duration > Math::MACHINE_EPSILON_0)
       {
-        if (transitionIn)
+        if(transitionIn)
         {
           mAnimation.AnimateTo(Property(mPopupContainer, Actor::Property::COLOR_ALPHA), 1.0f,
                                AlphaFunction::EASE_IN_OUT, TimePeriod(0.30f, duration * 0.70f));
@@ -499,7 +499,7 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
       mAnimation = animationData->CreateAnimation(mPopupContainer, duration);
 
       // If we don't have a valid animation, provide a blank one so play() can still function generically.
-      if (!mAnimation)
+      if(!mAnimation)
       {
         // No animation was configured (even though custom mode was specified). Create a dummy animation to avoid an
         // exception.
@@ -512,13 +512,13 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
 
   // Animate the backing, if enabled.
   // This is set up last so that different animation modes can have an effect on the backing animation speed.
-  if (mBackingEnabled)
+  if(mBackingEnabled)
   {
     // Use the alpha from the user-specified color.
     float targetAlpha = mBackingColor.a;
-    if (duration > Math::MACHINE_EPSILON_0)
+    if(duration > Math::MACHINE_EPSILON_0)
     {
-      if (transitionIn)
+      if(transitionIn)
       {
         mAnimation.AnimateTo(Property(mBacking, Actor::Property::COLOR_ALPHA), targetAlpha, AlphaFunction::EASE_IN_OUT,
                              TimePeriod(0.0f, duration * 0.70f));
@@ -536,12 +536,12 @@ void Popup::StartTransitionAnimation(bool transitionIn, bool instantaneous /* fa
   }
 
   // If we are performing the animation instantaneously, jump to the position directly and do not signal.
-  if (instantaneous)
+  if(instantaneous)
   {
     mAnimation.SetCurrentProgress(1.0f);
     mAnimation.Play();
   }
-  else if (duration > Math::MACHINE_EPSILON_0)
+  else if(duration > Math::MACHINE_EPSILON_0)
   {
     // Run the animation.
     mAnimation.FinishedSignal().Connect(this, &Popup::OnDisplayChangeAnimationFinished);
@@ -563,7 +563,7 @@ void Popup::OnDisplayChangeAnimationFinished(Animation& source)
 void Popup::DisplayStateChangeComplete()
 {
   // Remove contents from stage if completely hidden.
-  if (mDisplayState == Ui::Popup::HIDING)
+  if(mDisplayState == Ui::Popup::HIDING)
   {
     mDisplayState = Ui::Popup::HIDDEN;
 
@@ -574,14 +574,14 @@ void Popup::DisplayStateChangeComplete()
     Ui::Popup handle(GetOwner());
     mHiddenSignal.Emit();
   }
-  else if (mDisplayState == Ui::Popup::SHOWING)
+  else if(mDisplayState == Ui::Popup::SHOWING)
   {
     mDisplayState = Ui::Popup::SHOWN;
     Ui::Popup handle(GetOwner());
     mShownSignal.Emit();
 
     // Start a timer to auto-hide if enabled.
-    if (mAutoHideDelay > 0u)
+    if(mAutoHideDelay > 0u)
     {
       mAutoHideTimer = Timer::New(mAutoHideDelay);
       mAutoHideTimer.TickSignal().Connect(this, &Popup::OnAutoHideTimeReached);
@@ -592,13 +592,13 @@ void Popup::DisplayStateChangeComplete()
 
 bool Popup::OnAutoHideTimeReached()
 {
-  if (!Dali::Accessibility::IsUp() || true) // TODO: remove 'true' in sync with EFL (UX change)
+  if(!Dali::Accessibility::IsUp() || true) // TODO: remove 'true' in sync with EFL (UX change)
   {
     // Display timer has expired, auto hide the popup exactly as if the user had clicked outside.
     SetDisplayState(Ui::Popup::HIDDEN);
   }
 
-  if (mAutoHideTimer)
+  if(mAutoHideTimer)
   {
     mAutoHideTimer.Stop();
     mAutoHideTimer.TickSignal().Disconnect(this, &Popup::OnAutoHideTimeReached);
@@ -610,10 +610,10 @@ bool Popup::OnAutoHideTimeReached()
 void Popup::SetPopupBackgroundImage(Actor image)
 {
   // Removes any previous background.
-  if (mPopupBackgroundImage)
+  if(mPopupBackgroundImage)
   {
     mPopupBackgroundImage.Unparent();
-    if (mTailImage)
+    if(mTailImage)
     {
       mTailImage.Unparent();
     }
@@ -629,12 +629,12 @@ void Popup::SetPopupBackgroundImage(Actor image)
   UpdateBackgroundPositionAndSize();
 
   const bool prevAlter = mAlterAddedChild;
-  mAlterAddedChild = false;
+  mAlterAddedChild     = false;
   mPopupContainer.Add(mPopupBackgroundImage);
   mPopupBackgroundImage.LowerToBottom();
   mAlterAddedChild = prevAlter;
 
-  if (mTailImage)
+  if(mTailImage)
   {
     mPopupBackgroundImage.Add(mTailImage);
   }
@@ -650,18 +650,18 @@ Actor Popup::GetPopupBackgroundImage() const
 void Popup::SetTitle(Actor titleActor)
 {
   // Replaces the current title actor.
-  if (!mPopupLayout)
+  if(!mPopupLayout)
   {
     return;
   }
 
-  if (mTitle)
+  if(mTitle)
   {
     mPopupLayout.RemoveChildAt(Ui::TableView::CellPosition(0, 0));
   }
   mTitle = titleActor;
 
-  if (mTitle)
+  if(mTitle)
   {
     // Set up padding to give sensible default behaviour
     // (an application developer can later override this if they wish).
@@ -682,14 +682,14 @@ Actor Popup::GetTitle() const
 void Popup::SetContent(Actor content)
 {
   // Remove previous content actor.
-  if (mPopupLayout)
+  if(mPopupLayout)
   {
     mPopupLayout.RemoveChildAt(Ui::TableView::CellPosition(1, 0));
   }
   // Keep a handle to the new content.
   mContent = content;
 
-  if (mContent)
+  if(mContent)
   {
     mContent.SetProperty(Dali::Actor::Property::NAME, "popupContent");
 
@@ -708,7 +708,7 @@ Actor Popup::GetContent() const
 void Popup::SetFooter(Actor footer)
 {
   // Remove previous content actor.
-  if (mPopupLayout)
+  if(mPopupLayout)
   {
     mPopupLayout.RemoveChildAt(Ui::TableView::CellPosition(2, 0));
   }
@@ -716,7 +716,7 @@ void Popup::SetFooter(Actor footer)
   // Keep a handle to the new content.
   mFooter = footer;
 
-  if (mFooter)
+  if(mFooter)
   {
     mFooter.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
 
@@ -740,7 +740,7 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
   bool display = (displayState == Ui::Popup::SHOWING) || (displayState == Ui::Popup::SHOWN);
 
   // Ignore if we are already at the target display state.
-  if (display == ((mDisplayState == Ui::Popup::SHOWING) || (mDisplayState == Ui::Popup::SHOWN)))
+  if(display == ((mDisplayState == Ui::Popup::SHOWING) || (mDisplayState == Ui::Popup::SHOWN)))
   {
     return;
   }
@@ -748,7 +748,7 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
   // Convert the bool state to the actual display state to use.
   mDisplayState = display ? Ui::Popup::SHOWING : Ui::Popup::HIDING;
 
-  if (display)
+  if(display)
   {
     // Update the state to indicate the current intent.
     mDisplayState = Ui::Popup::SHOWING;
@@ -762,7 +762,7 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
     mLayer.SetProperty(Actor::Property::VISIBLE, true);
 
     // Set up the layout if this is the first display or the layout has become dirty.
-    if (mLayoutDirty)
+    if(mLayoutDirty)
     {
       // Bake-in any style and layout options to create the Popup layout.
       LayoutPopup();
@@ -773,20 +773,20 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
 
     // Handle the keyboard focus when popup is shown.
     Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-    if (keyboardFocusManager)
+    if(keyboardFocusManager)
     {
       mPreviousFocusedActor = keyboardFocusManager.GetCurrentFocusActor();
 
-      if (Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+      if(Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
       {
         // Setup the actgor to start focus from.
         Actor focusActor;
-        if (mContent && mContent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+        if(mContent && mContent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
         {
           // If the content is focusable, move the focus to the content.
           focusActor = mContent;
         }
-        else if (mFooter && mFooter.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+        else if(mFooter && mFooter.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
         {
           // If the footer is focusable, move the focus to the footer.
           focusActor = mFooter;
@@ -796,7 +796,7 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
           DALI_LOG_DEBUG_INFO("There is no focusable in popup\n");
         }
 
-        if (focusActor)
+        if(focusActor)
         {
           keyboardFocusManager.SetCurrentFocusActor(focusActor);
         }
@@ -809,10 +809,10 @@ void Popup::SetDisplayState(Ui::Popup::DisplayState displayState)
     ClearKeyInputFocus();
     DevelControl::EmitAccessibilityStateChanged(Self(), Accessibility::State::SHOWING, 0);
     // Restore the keyboard focus when popup is hidden.
-    if (mPreviousFocusedActor && mPreviousFocusedActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    if(mPreviousFocusedActor && mPreviousFocusedActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
     {
       Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-      if (keyboardFocusManager)
+      if(keyboardFocusManager)
       {
         keyboardFocusManager.SetCurrentFocusActor(mPreviousFocusedActor);
       }
@@ -851,9 +851,9 @@ void Popup::LayoutPopup()
                               Self().GetCurrentProperty<Vector3>(Actor::Property::ANCHOR_POINT));
 
   // If there is only a title, use less padding.
-  if (mTitle)
+  if(mTitle)
   {
-    if (!mContent && !mFooter)
+    if(!mContent && !mFooter)
     {
       mTitle.SetProperty(Actor::Property::PADDING, DEFAULT_TITLE_ONLY_PADDING);
     }
@@ -881,49 +881,49 @@ void Popup::LayoutPopup()
 void Popup::LayoutTail()
 {
   // Removes the tail actor.
-  if (mTailImage && mTailImage.GetParent())
+  if(mTailImage && mTailImage.GetParent())
   {
     mTailImage.GetParent().Remove(mTailImage);
     mTailImage.Reset();
   }
 
-  if (!mTailVisible)
+  if(!mTailVisible)
   {
     return;
   }
 
   const Vector3& parentOrigin = GetTailPosition();
-  Vector3 position;
-  std::string image;
-  Vector3 anchorPoint;
+  Vector3        position;
+  std::string    image;
+  Vector3        anchorPoint;
 
   // depending on position of tail around ParentOrigin, a different tail image is used...
-  if (parentOrigin.y < Math::MACHINE_EPSILON_1)
+  if(parentOrigin.y < Math::MACHINE_EPSILON_1)
   {
-    image = mTailUpImage;
+    image       = mTailUpImage;
     anchorPoint = AnchorPoint::BOTTOM_CENTER;
-    position.y = mBackgroundBorder.top;
+    position.y  = mBackgroundBorder.top;
   }
-  else if (parentOrigin.y > (1.0f - Math::MACHINE_EPSILON_1))
+  else if(parentOrigin.y > (1.0f - Math::MACHINE_EPSILON_1))
   {
-    image = mTailDownImage;
+    image       = mTailDownImage;
     anchorPoint = AnchorPoint::TOP_CENTER;
-    position.y = -mBackgroundBorder.bottom;
+    position.y  = -mBackgroundBorder.bottom;
   }
-  else if (parentOrigin.x < Math::MACHINE_EPSILON_1)
+  else if(parentOrigin.x < Math::MACHINE_EPSILON_1)
   {
-    image = mTailLeftImage;
+    image       = mTailLeftImage;
     anchorPoint = AnchorPoint::CENTER_RIGHT;
-    position.x = mBackgroundBorder.left;
+    position.x  = mBackgroundBorder.left;
   }
-  else if (parentOrigin.x > (1.0f - Math::MACHINE_EPSILON_1))
+  else if(parentOrigin.x > (1.0f - Math::MACHINE_EPSILON_1))
   {
-    image = mTailRightImage;
+    image       = mTailRightImage;
     anchorPoint = AnchorPoint::CENTER_LEFT;
-    position.x = -mBackgroundBorder.right;
+    position.x  = -mBackgroundBorder.right;
   }
 
-  if (!image.empty())
+  if(!image.empty())
   {
     // Adds the tail actor.
     mTailImage = Ui::ImageView::New(image);
@@ -932,7 +932,7 @@ void Popup::LayoutTail()
     mTailImage.SetProperty(Actor::Property::ANCHOR_POINT, anchorPoint);
     mTailImage.SetProperty(Actor::Property::POSITION, position);
 
-    if (mPopupBackgroundImage)
+    if(mPopupBackgroundImage)
     {
       mPopupBackgroundImage.Add(mTailImage);
     }
@@ -942,7 +942,7 @@ void Popup::LayoutTail()
 void Popup::SetContextualMode(Ui::Popup::ContextualMode mode)
 {
   mContextualMode = mode;
-  mLayoutDirty = true;
+  mLayoutDirty    = true;
 }
 
 Ui::Popup::ContextualMode Popup::GetContextualMode() const
@@ -954,10 +954,10 @@ Ui::Control Popup::CreateBacking()
 {
   Ui::Control backing = Control::New();
   backing.SetProperty(
-      Ui::Control::Property::BACKGROUND,
-      Property::Map()
-          .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
-          .Add(Ui::ColorVisual::Property::MIX_COLOR, Vector4(mBackingColor.r, mBackingColor.g, mBackingColor.b, 1.0f)));
+    Ui::Control::Property::BACKGROUND,
+    Property::Map()
+      .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
+      .Add(Ui::ColorVisual::Property::MIX_COLOR, Vector4(mBackingColor.r, mBackingColor.g, mBackingColor.b, 1.0f)));
   backing.SetProperty(Dali::Actor::Property::NAME, "popupBacking");
 
   // Must always be positioned top-left of stage, regardless of parent.
@@ -1015,7 +1015,7 @@ bool Popup::IsTailVisible() const
 void Popup::SetTailPosition(Vector3 position)
 {
   mTailPosition = position;
-  mLayoutDirty = true;
+  mLayoutDirty  = true;
 }
 
 const Vector3& Popup::GetTailPosition() const
@@ -1026,7 +1026,7 @@ const Vector3& Popup::GetTailPosition() const
 void Popup::SetAnimationDuration(float duration)
 {
   mAnimationDuration = duration;
-  mLayoutDirty = true;
+  mLayoutDirty       = true;
 }
 
 float Popup::GetAnimationDuration() const
@@ -1037,7 +1037,7 @@ float Popup::GetAnimationDuration() const
 void Popup::SetAnimationMode(Ui::Popup::AnimationMode animationMode)
 {
   mAnimationMode = animationMode;
-  mLayoutDirty = true;
+  mLayoutDirty   = true;
 }
 
 Ui::Popup::AnimationMode Popup::GetAnimationMode() const
@@ -1059,7 +1059,7 @@ void Popup::SetExitAnimationData(const Property::Map& map)
 
 void Popup::UpdateBackgroundPositionAndSize()
 {
-  if (mPopupBackgroundImage)
+  if(mPopupBackgroundImage)
   {
     mPopupBackgroundImage.SetResizePolicy(ResizePolicy::SIZE_FIXED_OFFSET_FROM_PARENT, Dimension::ALL_DIMENSIONS);
     mPopupBackgroundImage.SetProperty(Actor::Property::SIZE_MODE_FACTOR,
@@ -1086,7 +1086,7 @@ int Popup::GetAutoHideDelay() const
 void Popup::SetBackingEnabled(bool enabled)
 {
   mBackingEnabled = enabled;
-  mLayoutDirty = true;
+  mLayoutDirty    = true;
 }
 
 bool Popup::IsBackingEnabled() const
@@ -1121,7 +1121,7 @@ const std::string& Popup::GetTailUpImage() const
 void Popup::SetTailDownImage(std::string image)
 {
   mTailDownImage = std::move(image);
-  mLayoutDirty = true;
+  mLayoutDirty   = true;
   LayoutTail();
 }
 
@@ -1133,7 +1133,7 @@ const std::string& Popup::GetTailDownImage() const
 void Popup::SetTailLeftImage(std::string image)
 {
   mTailLeftImage = std::move(image);
-  mLayoutDirty = true;
+  mLayoutDirty   = true;
   LayoutTail();
 }
 
@@ -1145,7 +1145,7 @@ const std::string& Popup::GetTailLeftImage() const
 void Popup::SetTailRightImage(std::string image)
 {
   mTailRightImage = std::move(image);
-  mLayoutDirty = true;
+  mLayoutDirty    = true;
   LayoutTail();
 }
 
@@ -1156,7 +1156,7 @@ const std::string& Popup::GetTailRightImage() const
 
 void Popup::SetTouchTransparent(bool enabled)
 {
-  if (mTouchTransparent != enabled)
+  if(mTouchTransparent != enabled)
   {
     mTouchTransparent = enabled;
     SetupTouch();
@@ -1172,16 +1172,16 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
 {
   Ui::Popup popup = Ui::Popup::DownCast(Dali::BaseHandle(object));
 
-  if (popup)
+  if(popup)
   {
     Popup& popupImpl(GetImpl(popup));
 
-    switch (propertyIndex)
+    switch(propertyIndex)
     {
       case Ui::Popup::Property::TITLE:
       {
         Property::Map valueMap;
-        if (value.Get(valueMap))
+        if(value.Get(valueMap))
         {
           popupImpl.SetTitle(Scripting::NewActor(valueMap));
         }
@@ -1190,7 +1190,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::CONTENT:
       {
         Property::Map valueMap;
-        if (value.Get(valueMap))
+        if(value.Get(valueMap))
         {
           popupImpl.SetContent(Scripting::NewActor(valueMap));
         }
@@ -1199,7 +1199,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::FOOTER:
       {
         Property::Map valueMap;
-        if (value.Get(valueMap))
+        if(value.Get(valueMap))
         {
           popupImpl.SetFooter(Scripting::NewActor(valueMap));
         }
@@ -1208,11 +1208,11 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::DISPLAY_STATE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           Ui::Popup::DisplayState displayState(Ui::Popup::HIDDEN);
-          if (Scripting::GetEnumeration<Ui::Popup::DisplayState>(valueString.c_str(), DisplayStateTable,
-                                                                 DisplayStateTableCount, displayState))
+          if(Scripting::GetEnumeration<Ui::Popup::DisplayState>(valueString.c_str(), DisplayStateTable,
+                                                                DisplayStateTableCount, displayState))
           {
             popupImpl.SetDisplayState(displayState);
           }
@@ -1222,7 +1222,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TOUCH_TRANSPARENT:
       {
         bool valueBool;
-        if (value.Get(valueBool))
+        if(value.Get(valueBool))
         {
           popupImpl.SetTouchTransparent(valueBool);
         }
@@ -1231,7 +1231,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_VISIBILITY:
       {
         bool valueBool;
-        if (value.Get(valueBool))
+        if(value.Get(valueBool))
         {
           popupImpl.SetTailVisibility(valueBool);
         }
@@ -1240,7 +1240,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_POSITION:
       {
         Vector3 valueVector3;
-        if (value.Get(valueVector3))
+        if(value.Get(valueVector3))
         {
           popupImpl.SetTailPosition(valueVector3);
         }
@@ -1249,11 +1249,11 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::CONTEXTUAL_MODE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           Ui::Popup::ContextualMode contextualMode(Ui::Popup::BELOW);
-          if (Scripting::GetEnumeration<Ui::Popup::ContextualMode>(valueString.c_str(), ContextualModeTable,
-                                                                   ContextualModeTableCount, contextualMode))
+          if(Scripting::GetEnumeration<Ui::Popup::ContextualMode>(valueString.c_str(), ContextualModeTable,
+                                                                  ContextualModeTableCount, contextualMode))
           {
             popupImpl.SetContextualMode(contextualMode);
           }
@@ -1263,7 +1263,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::ANIMATION_DURATION:
       {
         float valueFloat;
-        if (value.Get(valueFloat))
+        if(value.Get(valueFloat))
         {
           popupImpl.SetAnimationDuration(valueFloat);
         }
@@ -1272,11 +1272,11 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::ANIMATION_MODE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           Ui::Popup::AnimationMode animationMode(Ui::Popup::FADE);
-          if (Scripting::GetEnumeration<Ui::Popup::AnimationMode>(valueString.c_str(), AnimationModeTable,
-                                                                  AnimationModeTableCount, animationMode))
+          if(Scripting::GetEnumeration<Ui::Popup::AnimationMode>(valueString.c_str(), AnimationModeTable,
+                                                                 AnimationModeTableCount, animationMode))
           {
             popupImpl.SetAnimationMode(animationMode);
           }
@@ -1286,7 +1286,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::ENTRY_ANIMATION:
       {
         Property::Map valueMap;
-        if (value.Get(valueMap))
+        if(value.Get(valueMap))
         {
           popupImpl.SetEntryAnimationData(valueMap);
         }
@@ -1295,7 +1295,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::EXIT_ANIMATION:
       {
         Property::Map valueMap;
-        if (value.Get(valueMap))
+        if(value.Get(valueMap))
         {
           popupImpl.SetExitAnimationData(valueMap);
         }
@@ -1304,7 +1304,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::AUTO_HIDE_DELAY:
       {
         int valueInt;
-        if (value.Get(valueInt))
+        if(value.Get(valueInt))
         {
           popupImpl.SetAutoHideDelay(valueInt);
         }
@@ -1313,7 +1313,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::BACKING_ENABLED:
       {
         bool valueBool;
-        if (value.Get(valueBool))
+        if(value.Get(valueBool))
         {
           popupImpl.SetBackingEnabled(valueBool);
         }
@@ -1322,7 +1322,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::BACKING_COLOR:
       {
         Vector4 valueVector4;
-        if (value.Get(valueVector4))
+        if(value.Get(valueVector4))
         {
           popupImpl.SetBackingColor(valueVector4);
         }
@@ -1331,7 +1331,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::POPUP_BACKGROUND_IMAGE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           Ui::ImageView actor = Ui::ImageView::New(std::move(valueString));
           popupImpl.SetPopupBackgroundImage(actor);
@@ -1343,20 +1343,20 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
         bool valueUpdated = false;
 
         Vector4 valueVector4;
-        if (value.Get(popupImpl.mBackgroundBorder))
+        if(value.Get(popupImpl.mBackgroundBorder))
         {
           valueUpdated = true;
         }
-        else if (value.Get(valueVector4))
+        else if(value.Get(valueVector4))
         {
-          popupImpl.mBackgroundBorder.left = valueVector4.x;
-          popupImpl.mBackgroundBorder.right = valueVector4.y;
+          popupImpl.mBackgroundBorder.left   = valueVector4.x;
+          popupImpl.mBackgroundBorder.right  = valueVector4.y;
           popupImpl.mBackgroundBorder.bottom = valueVector4.z;
-          popupImpl.mBackgroundBorder.top = valueVector4.w;
-          valueUpdated = true;
+          popupImpl.mBackgroundBorder.top    = valueVector4.w;
+          valueUpdated                       = true;
         }
 
-        if (valueUpdated)
+        if(valueUpdated)
         {
           popupImpl.LayoutTail();                      // Update the tail if required
           popupImpl.UpdateBackgroundPositionAndSize(); // Update the background's size and position
@@ -1366,7 +1366,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_UP_IMAGE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           popupImpl.SetTailUpImage(std::move(valueString));
         }
@@ -1375,7 +1375,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_DOWN_IMAGE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           popupImpl.SetTailDownImage(std::move(valueString));
         }
@@ -1384,7 +1384,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_LEFT_IMAGE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           popupImpl.SetTailLeftImage(std::move(valueString));
         }
@@ -1393,7 +1393,7 @@ void Popup::SetProperty(BaseObject* object, Property::Index propertyIndex, const
       case Ui::Popup::Property::TAIL_RIGHT_IMAGE:
       {
         std::string valueString;
-        if (value.Get(valueString))
+        if(value.Get(valueString))
         {
           popupImpl.SetTailRightImage(std::move(valueString));
         }
@@ -1409,11 +1409,11 @@ Property::Value Popup::GetProperty(BaseObject* object, Property::Index propertyI
 
   Ui::Popup popup = Ui::Popup::DownCast(Dali::BaseHandle(object));
 
-  if (popup)
+  if(popup)
   {
     Popup& popupImpl(GetImpl(popup));
 
-    switch (propertyIndex)
+    switch(propertyIndex)
     {
       case Ui::Popup::Property::TITLE:
       {
@@ -1460,7 +1460,7 @@ Property::Value Popup::GetProperty(BaseObject* object, Property::Index propertyI
       case Ui::Popup::Property::CONTEXTUAL_MODE:
       {
         value = Scripting::GetLinearEnumerationName<Ui::Popup::ContextualMode>(
-            popupImpl.GetContextualMode(), ContextualModeTable, ContextualModeTableCount);
+          popupImpl.GetContextualMode(), ContextualModeTable, ContextualModeTableCount);
         break;
       }
       case Ui::Popup::Property::ANIMATION_DURATION:
@@ -1471,7 +1471,7 @@ Property::Value Popup::GetProperty(BaseObject* object, Property::Index propertyI
       case Ui::Popup::Property::ANIMATION_MODE:
       {
         value = Scripting::GetLinearEnumerationName<Ui::Popup::AnimationMode>(
-            popupImpl.GetAnimationMode(), AnimationModeTable, AnimationModeTableCount);
+          popupImpl.GetAnimationMode(), AnimationModeTable, AnimationModeTableCount);
         break;
       }
       case Ui::Popup::Property::ENTRY_ANIMATION:
@@ -1506,7 +1506,7 @@ Property::Value Popup::GetProperty(BaseObject* object, Property::Index propertyI
       case Ui::Popup::Property::POPUP_BACKGROUND_IMAGE:
       {
         Ui::ImageView imageView = Ui::ImageView::DownCast(popupImpl.GetPopupBackgroundImage());
-        if (imageView)
+        if(imageView)
         {
           value = imageView.GetProperty(Ui::ImageView::Property::IMAGE);
         }
@@ -1548,26 +1548,26 @@ bool Popup::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
 {
   Dali::BaseHandle handle(object);
 
-  bool connected(true);
+  bool      connected(true);
   Ui::Popup popup = Ui::Popup::DownCast(handle);
 
-  if (0 == strcmp(signalName.c_str(), SIGNAL_TOUCHED_OUTSIDE))
+  if(0 == strcmp(signalName.c_str(), SIGNAL_TOUCHED_OUTSIDE))
   {
     popup.OutsideTouchedSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_SHOWING))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_SHOWING))
   {
     popup.ShowingSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_SHOWN))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_SHOWN))
   {
     popup.ShownSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_HIDING))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_HIDING))
   {
     popup.HidingSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_HIDDEN))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_HIDDEN))
   {
     popup.HiddenSignal().Connect(tracker, functor);
   }
@@ -1583,7 +1583,7 @@ bool Popup::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
 bool Popup::OnBackingTouched(Actor actor, const TouchEvent& touch)
 {
   // Allow events to pass through if the backing isn't the hit-actor
-  if ((touch.GetHitActor(0) == actor) && (touch.GetPointCount() > 0) && (touch.GetState(0) == PointState::DOWN))
+  if((touch.GetHitActor(0) == actor) && (touch.GetPointCount() > 0) && (touch.GetState(0) == PointState::DOWN))
   {
     // Guard against destruction during signal emission.
     Ui::Popup handle(GetOwner());
@@ -1597,7 +1597,7 @@ bool Popup::OnBackingTouched(Actor actor, const TouchEvent& touch)
 bool Popup::OnBackingWheelEvent(Actor actor, const WheelEvent& event)
 {
   // Allow events to pass through if touch transparency is enabled.
-  if (mTouchTransparent)
+  if(mTouchTransparent)
   {
     return false;
   }
@@ -1622,7 +1622,7 @@ void Popup::OnSceneConnection(int depth)
 void Popup::OnChildAdd(Actor& child)
 {
   // Re-parent any children added by user to the body layer.
-  if (mAlterAddedChild)
+  if(mAlterAddedChild)
   {
     SetContent(child);
   }
@@ -1638,9 +1638,9 @@ void Popup::OnChildAdd(Actor& child)
 void Popup::LayoutContext(const Vector2& size)
 {
   // Do nothing if not in a contextual mode (or there is no parent context).
-  Actor self = Self();
+  Actor self   = Self();
   Actor parent = self.GetParent();
-  if ((mContextualMode == Ui::Popup::NON_CONTEXTUAL) || !parent)
+  if((mContextualMode == Ui::Popup::NON_CONTEXTUAL) || !parent)
   {
     return;
   }
@@ -1659,7 +1659,7 @@ void Popup::LayoutContext(const Vector2& size)
   Vector3 newPosition(Vector3::ZERO);
 
   // Perform different positioning based on the specified contextual layout mode.
-  switch (mContextualMode)
+  switch(mContextualMode)
   {
     case Ui::Popup::BELOW:
     {
@@ -1696,23 +1696,23 @@ void Popup::LayoutContext(const Vector2& size)
   // Check new position is not too far right. If so, correct it.
   // Note: Check for right rather than left first, so if popup is too wide, the left check overrides
   // the right check and we at least see the left portion of the popup (as this is more useful).
-  if (newPosition.x >= (halfStageSize.x - parentPosition.x - halfSize.x - DEFAULT_CONTEXTUAL_STAGE_BORDER.x))
+  if(newPosition.x >= (halfStageSize.x - parentPosition.x - halfSize.x - DEFAULT_CONTEXTUAL_STAGE_BORDER.x))
   {
     newPosition.x = halfStageSize.x - parentPosition.x - halfSize.x - DEFAULT_CONTEXTUAL_STAGE_BORDER.x;
   }
   // Check new position is not too far left. If so, correct it.
-  if (newPosition.x < halfSize.x - (parentPosition.x + halfStageSize.x) + DEFAULT_CONTEXTUAL_STAGE_BORDER.x)
+  if(newPosition.x < halfSize.x - (parentPosition.x + halfStageSize.x) + DEFAULT_CONTEXTUAL_STAGE_BORDER.x)
   {
     newPosition.x =
-        halfSize.x - (parentPosition.x + halfStageSize.x) + DEFAULT_CONTEXTUAL_STAGE_BORDER.x; // - parentSize.x;
+      halfSize.x - (parentPosition.x + halfStageSize.x) + DEFAULT_CONTEXTUAL_STAGE_BORDER.x; // - parentSize.x;
   }
   // Check new position is not too far down. If so, correct it.
-  if (newPosition.y >= (halfStageSize.y - parentPosition.y - halfSize.y - DEFAULT_CONTEXTUAL_STAGE_BORDER.y))
+  if(newPosition.y >= (halfStageSize.y - parentPosition.y - halfSize.y - DEFAULT_CONTEXTUAL_STAGE_BORDER.y))
   {
     newPosition.y = halfStageSize.y - parentPosition.y - halfSize.y - DEFAULT_CONTEXTUAL_STAGE_BORDER.y;
   }
   // Check new position is not too far up. If so, correct it.
-  if (newPosition.y < halfSize.y - (parentPosition.y + halfStageSize.y) + DEFAULT_CONTEXTUAL_STAGE_BORDER.y)
+  if(newPosition.y < halfSize.y - (parentPosition.y + halfStageSize.y) + DEFAULT_CONTEXTUAL_STAGE_BORDER.y)
   {
     newPosition.y = halfSize.y - (parentPosition.y + halfStageSize.y) + DEFAULT_CONTEXTUAL_STAGE_BORDER.y;
   }
@@ -1727,11 +1727,11 @@ void Popup::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   // Use the Popup layouts size, unless requested to use a fixed size.
   // In which case take the size set for the Popup itself.
-  ResizePolicy::Type widthPolicy = Self().GetResizePolicy(Dimension::WIDTH);
+  ResizePolicy::Type widthPolicy  = Self().GetResizePolicy(Dimension::WIDTH);
   ResizePolicy::Type heightPolicy = Self().GetResizePolicy(Dimension::HEIGHT);
 
   // Width calculations:
-  if (widthPolicy == ResizePolicy::USE_NATURAL_SIZE || widthPolicy == ResizePolicy::FIT_TO_CHILDREN)
+  if(widthPolicy == ResizePolicy::USE_NATURAL_SIZE || widthPolicy == ResizePolicy::FIT_TO_CHILDREN)
   {
     // If we using a child-based policy, take the size from the popup layout.
     mPopupLayout.SetResizePolicy(ResizePolicy::USE_NATURAL_SIZE, Dimension::WIDTH);
@@ -1752,14 +1752,14 @@ void Popup::OnRelayout(const Vector2& size, RelayoutContainer& container)
   mPopupLayout.SetFitHeight(0u);
 
   // Footer: Convert the footer's resize policy to a TableView row policy.
-  if (mFooter)
+  if(mFooter)
   {
     ResizePolicy::Type footerHeightPolicy = mFooter.GetResizePolicy(Dimension::HEIGHT);
-    if ((footerHeightPolicy == ResizePolicy::USE_NATURAL_SIZE) || (footerHeightPolicy == ResizePolicy::FIT_TO_CHILDREN))
+    if((footerHeightPolicy == ResizePolicy::USE_NATURAL_SIZE) || (footerHeightPolicy == ResizePolicy::FIT_TO_CHILDREN))
     {
       mPopupLayout.SetFitHeight(2u);
     }
-    else if (footerHeightPolicy == ResizePolicy::FIXED)
+    else if(footerHeightPolicy == ResizePolicy::FIXED)
     {
       mPopupLayout.SetFixedHeight(2u, mFooter.GetRelayoutSize(Dimension::HEIGHT));
     }
@@ -1774,7 +1774,7 @@ void Popup::OnRelayout(const Vector2& size, RelayoutContainer& container)
   }
 
   // Popup contents: Adjust the tableview's policies based on the popup's policies.
-  if (heightPolicy == ResizePolicy::USE_NATURAL_SIZE || heightPolicy == ResizePolicy::FIT_TO_CHILDREN)
+  if(heightPolicy == ResizePolicy::USE_NATURAL_SIZE || heightPolicy == ResizePolicy::FIT_TO_CHILDREN)
   {
     mPopupLayout.SetResizePolicy(ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT);
 
@@ -1794,7 +1794,7 @@ void Popup::OnRelayout(const Vector2& size, RelayoutContainer& container)
   // Relayout the popup-layout to give it it's new size this frame.
   container.Add(mPopupLayout, useSize);
 
-  if (mContent)
+  if(mContent)
   {
     container.Add(mContent,
                   Vector2(mContent.GetRelayoutSize(Dimension::WIDTH), mContent.GetRelayoutSize(Dimension::HEIGHT)));
@@ -1809,7 +1809,7 @@ void Popup::OnRelayout(const Vector2& size, RelayoutContainer& container)
 void Popup::OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension)
 {
   // To get the popup to emulate fit-to-children, we need to actually set use-natural-size.
-  if ((dimension & Dimension::HEIGHT) && (policy == ResizePolicy::FIT_TO_CHILDREN))
+  if((dimension & Dimension::HEIGHT) && (policy == ResizePolicy::FIT_TO_CHILDREN))
   {
     Self().SetResizePolicy(ResizePolicy::USE_NATURAL_SIZE, Dimension::HEIGHT);
   }
@@ -1836,16 +1836,16 @@ float Popup::GetWidthForHeight(float height)
 bool Popup::OnKeyEvent(const KeyEvent& event)
 {
   // Allow events to pass through if touch transparency is enabled.
-  if (mTouchTransparent)
+  if(mTouchTransparent)
   {
     return false;
   }
 
   bool consumed = false;
 
-  if (event.GetState() == KeyEvent::DOWN)
+  if(event.GetState() == KeyEvent::DOWN)
   {
-    if (event.GetKeyCode() == Dali::DALI_KEY_ESCAPE || event.GetKeyCode() == Dali::DALI_KEY_BACK)
+    if(event.GetKeyCode() == Dali::DALI_KEY_ESCAPE || event.GetKeyCode() == Dali::DALI_KEY_BACK)
     {
       SetDisplayState(Ui::Popup::HIDDEN);
       consumed = true;
@@ -1857,18 +1857,18 @@ bool Popup::OnKeyEvent(const KeyEvent& event)
 
 void Popup::AddFocusableChildrenRecursive(Actor parent, std::vector<Actor>& focusableActors)
 {
-  if (parent)
+  if(parent)
   {
-    Ui::Control control = Ui::Control::DownCast(parent);
-    bool layoutControl = control && GetImplementation(control).IsKeyboardNavigationSupported();
+    Ui::Control control       = Ui::Control::DownCast(parent);
+    bool        layoutControl = control && GetImplementation(control).IsKeyboardNavigationSupported();
 
-    if (parent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) || layoutControl)
+    if(parent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) || layoutControl)
     {
       focusableActors.push_back(parent);
 
-      if (!layoutControl)
+      if(!layoutControl)
       {
-        for (unsigned int i = 0, numberChildren = parent.GetChildCount(); i < numberChildren; ++i)
+        for(unsigned int i = 0, numberChildren = parent.GetChildCount(); i < numberChildren; ++i)
         {
           Actor child(parent.GetChildAt(i));
           AddFocusableChildrenRecursive(child, focusableActors);
@@ -1880,12 +1880,12 @@ void Popup::AddFocusableChildrenRecursive(Actor parent, std::vector<Actor>& focu
 
 void Popup::AddFocusableChildren(Actor parent, std::vector<Actor>& focusableActors)
 {
-  if (parent)
+  if(parent)
   {
     Ui::Control control = Ui::Control::DownCast(parent);
-    if (!GetImplementation(control).IsKeyboardNavigationSupported())
+    if(!GetImplementation(control).IsKeyboardNavigationSupported())
     {
-      for (unsigned int i = 0, numberChildren = parent.GetChildCount(); i < numberChildren; ++i)
+      for(unsigned int i = 0, numberChildren = parent.GetChildCount(); i < numberChildren; ++i)
       {
         Actor child(parent.GetChildAt(i));
         AddFocusableChildrenRecursive(child, focusableActors);
@@ -1902,14 +1902,14 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
                                            bool loopEnabled)
 {
   std::string currentStr;
-  if (currentFocusedActor)
+  if(currentFocusedActor)
   {
     currentStr = currentFocusedActor.GetProperty<std::string>(Dali::Actor::Property::NAME);
   }
 
   Actor nextFocusableActor(currentFocusedActor);
   Actor currentFocusGroup;
-  if (currentFocusedActor)
+  if(currentFocusedActor)
   {
     currentFocusGroup = KeyboardFocusManager::Get().GetFocusGroup(currentFocusedActor);
   }
@@ -1917,16 +1917,16 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
   // TODO: Needs to be optimised
   // The following statement checks that if we have a current focused actor, then the current focus group is not the
   // popup content or footer. This is to detect if the focus is currently outside the popup, and if so, move it inside.
-  if (!currentFocusedActor || (currentFocusedActor && ((!mContent || (currentFocusGroup != mContent)) &&
-                                                       (!mFooter || (currentFocusGroup != mFooter)))))
+  if(!currentFocusedActor || (currentFocusedActor && ((!mContent || (currentFocusGroup != mContent)) &&
+                                                      (!mFooter || (currentFocusGroup != mFooter)))))
   {
     // The current focused actor is not within popup.
-    if (mContent && mContent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    if(mContent && mContent.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
     {
       // If the content is focusable, move the focus to the content.
       nextFocusableActor = mContent;
     }
-    else if (mFooter && mFooter.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    else if(mFooter && mFooter.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
     {
       // If the footer is focusable, move the focus to the footer.
       nextFocusableActor = mFooter;
@@ -1940,23 +1940,23 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
     AddFocusableChildren(mContent, focusableActors);
     AddFocusableChildren(mFooter, focusableActors);
 
-    std::vector<Actor>::iterator endIterator = focusableActors.end();
+    std::vector<Actor>::iterator endIterator     = focusableActors.end();
     std::vector<Actor>::iterator currentIterator = focusableActors.begin();
-    for (std::vector<Actor>::iterator iterator = focusableActors.begin(); iterator != endIterator; ++iterator)
+    for(std::vector<Actor>::iterator iterator = focusableActors.begin(); iterator != endIterator; ++iterator)
     {
-      if (currentFocusedActor == *iterator)
+      if(currentFocusedActor == *iterator)
       {
         currentIterator = iterator;
       }
     }
 
-    if (currentIterator != endIterator)
+    if(currentIterator != endIterator)
     {
-      switch (direction)
+      switch(direction)
       {
         case Ui::Control::KeyboardFocus::LEFT:
         {
-          if (currentIterator == focusableActors.begin())
+          if(currentIterator == focusableActors.begin())
           {
             nextFocusableActor = *(endIterator - 1);
           }
@@ -1968,7 +1968,7 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
         }
         case Ui::Control::KeyboardFocus::RIGHT:
         {
-          if (currentIterator == endIterator - 1)
+          if(currentIterator == endIterator - 1)
           {
             nextFocusableActor = *(focusableActors.begin());
           }
@@ -1997,7 +1997,7 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
         }
       }
 
-      if (!nextFocusableActor)
+      if(!nextFocusableActor)
       {
         DALI_LOG_DEBUG_INFO("Can not decide next focusable actor\n");
       }
@@ -2009,7 +2009,7 @@ Actor Popup::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Contro
 
 void Popup::SetupTouch()
 {
-  if (!mTouchTransparent)
+  if(!mTouchTransparent)
   {
     // Connect all the signals and set us up to consume all touch events
     mBacking.TouchedSignal().Connect(this, &Popup::OnBackingTouched);
@@ -2029,21 +2029,21 @@ void Popup::SetupTouch()
 
 std::pair<std::string, bool> Popup::PopupAccessible::GetNameRaw() const
 {
-  auto popup = Ui::Popup::DownCast(Self());
+  auto        popup = Ui::Popup::DownCast(Self());
   std::string title;
-  Actor popupTitle = popup.GetTitle();
-  if (popupTitle)
+  Actor       popupTitle = popup.GetTitle();
+  if(popupTitle)
   {
     std::string titleText = popupTitle.GetProperty<std::string>(Ui::TextLabel::Property::TEXT);
-    title = std::move(titleText);
+    title                 = std::move(titleText);
   }
   else
   {
     Actor popupContent = popup.GetContent();
-    if (popupContent)
+    if(popupContent)
     {
       std::string contentText = popupContent.GetProperty<std::string>(Ui::TextLabel::Property::TEXT);
-      title = std::move(contentText);
+      title                   = std::move(contentText);
     }
   }
   return {title, false};
@@ -2051,8 +2051,8 @@ std::pair<std::string, bool> Popup::PopupAccessible::GetNameRaw() const
 
 Dali::Accessibility::States Popup::PopupAccessible::CalculateStates()
 {
-  auto states = DevelControl::ControlAccessible::CalculateStates();
-  auto popup = Ui::Popup::DownCast(Self());
+  auto states       = DevelControl::ControlAccessible::CalculateStates();
+  auto popup        = Ui::Popup::DownCast(Self());
   auto displayState = popup.GetProperty<std::string>(Ui::Popup::Property::DISPLAY_STATE);
 
   states[Dali::Accessibility::State::SHOWING] = (displayState == "SHOWN" || displayState == "SHOWING");

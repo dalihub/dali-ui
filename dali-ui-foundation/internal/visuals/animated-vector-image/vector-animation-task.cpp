@@ -58,7 +58,7 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_VECTOR_ANIMATION_PERFORMANCE_MAR
 uint64_t GetNanoseconds()
 {
   // Get the time of a monotonic clock since its epoch.
-  auto epoch = std::chrono::steady_clock::now().time_since_epoch();
+  auto epoch    = std::chrono::steady_clock::now().time_since_epoch();
   auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch);
   return static_cast<uint64_t>(duration.count());
 }
@@ -72,51 +72,51 @@ int64_t CalculateFrameDurationMicroSeconds(const float frameRate, const float fr
 } // unnamed namespace
 
 VectorAnimationTask::VectorAnimationTask(VisualFactoryCache& factoryCache)
-  : AsyncTask(MakeCallback(this, &VectorAnimationTask::TaskCompleted), AsyncTask::PriorityType::HIGH,
-              AsyncTask::ThreadType::WORKER_THREAD),
-    mImageUrl(),
-    mEncodedImageBuffer(),
-    mVectorRenderer(VectorAnimationRenderer::New()),
-    mAnimationData(),
-    mVectorAnimationThread(factoryCache.GetVectorAnimationManager().GetVectorAnimationThread()),
-    mMutex(),
-    mResourceReadySignal(),
-    mLoadCompletedCallback(MakeCallback(this, &VectorAnimationTask::OnLoadCompleted)),
-    mCachedLayerInfo(),
-    mCachedMarkerInfo(),
-    mPlayState(PlayState::STOPPED),
-    mStopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-    mLoopingMode(DevelImageVisual::LoopingMode::RESTART),
-    mNextFrameStartTime(),
-    mFrameDurationMicroSeconds(MICROSECONDS_PER_SECOND / 60.0f),
-    mFrameRate(60.0f),
-    mFrameSpeedFactor(1.0f),
-    mCurrentFrame(0),
-    mTotalFrame(0),
-    mStartFrame(0),
-    mEndFrame(0),
-    mDroppedFrames(0),
-    mWidth(0),
-    mHeight(0),
-    mAnimationDataIndex(0),
-    mAppliedPlayStateId(0u),
-    mLoopCount(LOOP_FOREVER),
-    mCurrentLoop(0),
-    mForward(true),
-    mUpdateFrameNumber(false),
-    mNeedAnimationFinishedTrigger(true),
-    mNeedForceRenderOnceTrigger(false),
-    mAnimationDataUpdated(false),
-    mDestroyTask(false),
-    mLoadRequest(false),
-    mLoadFailed(false),
-    mRasterized(false),
-    mKeepAnimation(false),
-    mLayerInfoCached(false),
-    mMarkerInfoCached(false),
-    mEnableFrameCache(false),
-    mNotifyAfterRasterization(false),
-    mSizeUpdated(false)
+: AsyncTask(MakeCallback(this, &VectorAnimationTask::TaskCompleted), AsyncTask::PriorityType::HIGH,
+            AsyncTask::ThreadType::WORKER_THREAD),
+  mImageUrl(),
+  mEncodedImageBuffer(),
+  mVectorRenderer(VectorAnimationRenderer::New()),
+  mAnimationData(),
+  mVectorAnimationThread(factoryCache.GetVectorAnimationManager().GetVectorAnimationThread()),
+  mMutex(),
+  mResourceReadySignal(),
+  mLoadCompletedCallback(MakeCallback(this, &VectorAnimationTask::OnLoadCompleted)),
+  mCachedLayerInfo(),
+  mCachedMarkerInfo(),
+  mPlayState(PlayState::STOPPED),
+  mStopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
+  mLoopingMode(DevelImageVisual::LoopingMode::RESTART),
+  mNextFrameStartTime(),
+  mFrameDurationMicroSeconds(MICROSECONDS_PER_SECOND / 60.0f),
+  mFrameRate(60.0f),
+  mFrameSpeedFactor(1.0f),
+  mCurrentFrame(0),
+  mTotalFrame(0),
+  mStartFrame(0),
+  mEndFrame(0),
+  mDroppedFrames(0),
+  mWidth(0),
+  mHeight(0),
+  mAnimationDataIndex(0),
+  mAppliedPlayStateId(0u),
+  mLoopCount(LOOP_FOREVER),
+  mCurrentLoop(0),
+  mForward(true),
+  mUpdateFrameNumber(false),
+  mNeedAnimationFinishedTrigger(true),
+  mNeedForceRenderOnceTrigger(false),
+  mAnimationDataUpdated(false),
+  mDestroyTask(false),
+  mLoadRequest(false),
+  mLoadFailed(false),
+  mRasterized(false),
+  mKeepAnimation(false),
+  mLayerInfoCached(false),
+  mMarkerInfoCached(false),
+  mEnableFrameCache(false),
+  mNotifyAfterRasterization(false),
+  mSizeUpdated(false)
 {
   mVectorRenderer.UploadCompletedSignal().Connect(this, &VectorAnimationTask::OnUploadCompleted);
 }
@@ -140,12 +140,12 @@ void VectorAnimationTask::Finalize()
     Mutex::ScopedLock lock(mMutex);
 
     // Release some objects in the main thread
-    if (mAnimationFinishedCallback)
+    if(mAnimationFinishedCallback)
     {
       mVectorAnimationThread.RemoveEventTriggerCallbacks(mAnimationFinishedCallback.get());
       mAnimationFinishedCallback.reset();
     }
-    if (mLoadCompletedCallback)
+    if(mLoadCompletedCallback)
     {
       mVectorAnimationThread.RemoveEventTriggerCallbacks(mLoadCompletedCallback.get());
       mLoadCompletedCallback.reset();
@@ -176,19 +176,19 @@ bool VectorAnimationTask::Load(bool synchronousLoading)
 {
 #ifdef TRACE_ENABLED
   uint64_t mStartTimeNanoSceonds = 0;
-  uint64_t mEndTimeNanoSceonds = 0;
+  uint64_t mEndTimeNanoSceonds   = 0;
 #endif
 
   DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "DALI_LOTTIE_LOADING_TASK",
                                           [&](std::ostringstream& oss)
-                                          {
-                                            mStartTimeNanoSceonds = GetNanoseconds();
-                                            oss << "[u:" << mImageUrl.GetEllipsedUrl() << "]";
-                                          });
-
-  if (mEncodedImageBuffer)
   {
-    if (!mVectorRenderer.Load(mEncodedImageBuffer.GetRawBuffer()))
+    mStartTimeNanoSceonds = GetNanoseconds();
+    oss << "[u:" << mImageUrl.GetEllipsedUrl() << "]";
+  });
+
+  if(mEncodedImageBuffer)
+  {
+    if(!mVectorRenderer.Load(mEncodedImageBuffer.GetRawBuffer()))
     {
       mLoadFailed = true;
     }
@@ -196,9 +196,9 @@ bool VectorAnimationTask::Load(bool synchronousLoading)
     // We don't need to hold image buffer anymore.
     mEncodedImageBuffer.Reset();
   }
-  else if (mImageUrl.IsLocalResource())
+  else if(mImageUrl.IsLocalResource())
   {
-    if (!mVectorRenderer.Load(mImageUrl.GetUrl()))
+    if(!mVectorRenderer.Load(mImageUrl.GetUrl()))
     {
       mLoadFailed = true;
     }
@@ -206,36 +206,36 @@ bool VectorAnimationTask::Load(bool synchronousLoading)
   else
   {
     Dali::Vector<uint8_t> remoteData;
-    if (!Dali::FileLoader::DownloadFileSynchronously(mImageUrl.GetUrl(),
-                                                     remoteData) || // Failed if we fail to download json file,
-        !mVectorRenderer.Load(remoteData)) // or download data is not valid vector animation file.
+    if(!Dali::FileLoader::DownloadFileSynchronously(mImageUrl.GetUrl(),
+                                                    remoteData) || // Failed if we fail to download json file,
+       !mVectorRenderer.Load(remoteData))                          // or download data is not valid vector animation file.
     {
       mLoadFailed = true;
     }
   }
 
-  if (mLoadFailed)
+  if(mLoadFailed)
   {
     DALI_LOG_ERROR("VectorAnimationTask::Load: Load failed [%s]\n", mImageUrl.GetUrl().c_str());
     mLoadRequest = false;
     {
       Mutex::ScopedLock lock(mMutex);
-      if (!synchronousLoading && mLoadCompletedCallback)
+      if(!synchronousLoading && mLoadCompletedCallback)
       {
         mVectorAnimationThread.AddEventTriggerCallback(mLoadCompletedCallback.get(), 0u);
       }
     }
 
     DALI_TRACE_END_WITH_MESSAGE_GENERATOR(
-        gTraceFilter, "DALI_LOTTIE_LOADING_TASK",
-        [&](std::ostringstream& oss)
-        {
-          mEndTimeNanoSceonds = GetNanoseconds();
-          oss << std::fixed << std::setprecision(3);
-          oss << "[";
-          oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
-          oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
-        });
+      gTraceFilter, "DALI_LOTTIE_LOADING_TASK",
+      [&](std::ostringstream& oss)
+    {
+      mEndTimeNanoSceonds = GetNanoseconds();
+      oss << std::fixed << std::setprecision(3);
+      oss << "[";
+      oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
+      oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
+    });
     return false;
   }
 
@@ -250,7 +250,7 @@ bool VectorAnimationTask::Load(bool synchronousLoading)
   mLoadRequest = false;
   {
     Mutex::ScopedLock lock(mMutex);
-    if (!synchronousLoading && mLoadCompletedCallback)
+    if(!synchronousLoading && mLoadCompletedCallback)
     {
       mVectorAnimationThread.AddEventTriggerCallback(mLoadCompletedCallback.get(), 0u);
     }
@@ -261,15 +261,15 @@ bool VectorAnimationTask::Load(bool synchronousLoading)
                 mTotalFrame, mFrameRate, this);
 
   DALI_TRACE_END_WITH_MESSAGE_GENERATOR(
-      gTraceFilter, "DALI_LOTTIE_LOADING_TASK",
-      [&](std::ostringstream& oss)
-      {
-        mEndTimeNanoSceonds = GetNanoseconds();
-        oss << std::fixed << std::setprecision(3);
-        oss << "[";
-        oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
-        oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
-      });
+    gTraceFilter, "DALI_LOTTIE_LOADING_TASK",
+    [&](std::ostringstream& oss)
+  {
+    mEndTimeNanoSceonds = GetNanoseconds();
+    oss << std::fixed << std::setprecision(3);
+    oss << "[";
+    oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
+    oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
+  });
 
   return true;
 }
@@ -284,10 +284,10 @@ void VectorAnimationTask::SetRenderer(Renderer renderer)
 void VectorAnimationTask::RequestLoad(const VisualUrl& url, EncodedImageBuffer encodedImageBuffer,
                                       bool synchronousLoading)
 {
-  mImageUrl = url;
+  mImageUrl           = url;
   mEncodedImageBuffer = encodedImageBuffer;
 
-  if (!synchronousLoading)
+  if(!synchronousLoading)
   {
     mLoadRequest = true;
 
@@ -317,7 +317,7 @@ void VectorAnimationTask::SetAnimationData(const AnimationData& data)
   mAnimationData[index].push_back(data);
   mAnimationDataUpdated = true;
 
-  if (data.resendFlag & VectorAnimationTask::RESEND_SIZE)
+  if(data.resendFlag & VectorAnimationTask::RESEND_SIZE)
   {
     // The size should be changed in the main thread.
     SetSize(data.width, data.height);
@@ -328,17 +328,17 @@ void VectorAnimationTask::SetAnimationData(const AnimationData& data)
 
 void VectorAnimationTask::SetSize(uint32_t width, uint32_t height)
 {
-  if (mWidth != width || mHeight != height)
+  if(mWidth != width || mHeight != height)
   {
     mVectorRenderer.SetSize(width, height);
 
-    mWidth = width;
+    mWidth  = width;
     mHeight = height;
 
     // If fixedCache is enabled, Call KeepRasterizedBuffer()
-    if (mEnableFrameCache)
+    if(mEnableFrameCache)
     {
-      if (mTotalFrame > 0 && !mLoadFailed)
+      if(mTotalFrame > 0 && !mLoadFailed)
       {
         mVectorRenderer.KeepRasterizedBuffer();
       }
@@ -356,11 +356,11 @@ void VectorAnimationTask::SetSize(uint32_t width, uint32_t height)
 
 void VectorAnimationTask::PlayAnimation()
 {
-  if (mPlayState != PlayState::PLAYING)
+  if(mPlayState != PlayState::PLAYING)
   {
     mNeedAnimationFinishedTrigger = true;
-    mUpdateFrameNumber = false;
-    mPlayState = PlayState::PLAYING;
+    mUpdateFrameNumber            = false;
+    mPlayState                    = PlayState::PLAYING;
 
     DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "VectorAnimationTask::PlayAnimation: Play [%p]\n", this);
   }
@@ -368,10 +368,10 @@ void VectorAnimationTask::PlayAnimation()
 
 void VectorAnimationTask::StopAnimation()
 {
-  if (mPlayState != PlayState::STOPPING)
+  if(mPlayState != PlayState::STOPPING)
   {
     mNeedAnimationFinishedTrigger = false;
-    mPlayState = PlayState::STOPPING;
+    mPlayState                    = PlayState::STOPPING;
 
     DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "VectorAnimationTask::StopAnimation: Stop [%p]\n", this);
   }
@@ -379,7 +379,7 @@ void VectorAnimationTask::StopAnimation()
 
 void VectorAnimationTask::PauseAnimation()
 {
-  if (mPlayState == PlayState::PLAYING)
+  if(mPlayState == PlayState::PLAYING)
   {
     mPlayState = PlayState::PAUSED;
 
@@ -398,9 +398,9 @@ void VectorAnimationTask::SetAnimationFinishedCallback(CallbackBase* callback)
 
 void VectorAnimationTask::SetLoopCount(int32_t count)
 {
-  if (mLoopCount != count)
+  if(mLoopCount != count)
   {
-    mLoopCount = count;
+    mLoopCount   = count;
     mCurrentLoop = 0;
 
     DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "VectorAnimationTask::SetLoopCount: [%d] [%p]\n", count,
@@ -410,29 +410,29 @@ void VectorAnimationTask::SetLoopCount(int32_t count)
 
 void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
 {
-  bool valid = false;
+  bool     valid      = false;
   uint32_t startFrame = 0, endFrame = 0;
-  size_t count = playRange.Count();
+  size_t   count = playRange.Count();
 
-  if (count >= 2)
+  if(count >= 2)
   {
     int32_t start = 0, end = 0;
-    if (playRange.GetElementAt(0).Get(start) && playRange.GetElementAt(1).Get(end))
+    if(playRange.GetElementAt(0).Get(start) && playRange.GetElementAt(1).Get(end))
     {
       startFrame = static_cast<uint32_t>(start);
-      endFrame = static_cast<uint32_t>(end);
-      valid = true;
+      endFrame   = static_cast<uint32_t>(end);
+      valid      = true;
     }
     else
     {
       std::string startMarker, endMarker;
-      if (playRange.GetElementAt(0).Get(startMarker) && playRange.GetElementAt(1).Get(endMarker))
+      if(playRange.GetElementAt(0).Get(startMarker) && playRange.GetElementAt(1).Get(endMarker))
       {
-        if (mVectorRenderer)
+        if(mVectorRenderer)
         {
           uint32_t frame; // We don't use this later
-          if (mVectorRenderer.GetMarkerInfo(startMarker, startFrame, frame) &&
-              mVectorRenderer.GetMarkerInfo(endMarker, frame, endFrame))
+          if(mVectorRenderer.GetMarkerInfo(startMarker, startFrame, frame) &&
+             mVectorRenderer.GetMarkerInfo(endMarker, frame, endFrame))
           {
             valid = true;
           }
@@ -440,19 +440,19 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
       }
     }
   }
-  else if (count == 1)
+  else if(count == 1)
   {
     std::string marker;
-    if (playRange.GetElementAt(0).Get(marker))
+    if(playRange.GetElementAt(0).Get(marker))
     {
-      if (mVectorRenderer && mVectorRenderer.GetMarkerInfo(marker, startFrame, endFrame))
+      if(mVectorRenderer && mVectorRenderer.GetMarkerInfo(marker, startFrame, endFrame))
       {
         valid = true;
       }
     }
   }
 
-  if (!valid)
+  if(!valid)
   {
     DALI_LOG_ERROR("VectorAnimationTask::SetPlayRange: Invalid range [%p]\n", this);
     return;
@@ -460,37 +460,37 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
 
   // Make sure the range specified is between 0 and the total frame number
   startFrame = std::min(startFrame, mTotalFrame - 1);
-  endFrame = std::min(endFrame, mTotalFrame - 1);
+  endFrame   = std::min(endFrame, mTotalFrame - 1);
 
   // If the range is not in order swap values
-  if (startFrame > endFrame)
+  if(startFrame > endFrame)
   {
     uint32_t temp = startFrame;
-    startFrame = endFrame;
-    endFrame = temp;
+    startFrame    = endFrame;
+    endFrame      = temp;
   }
 
-  if (startFrame != mStartFrame || endFrame != mEndFrame)
+  if(startFrame != mStartFrame || endFrame != mEndFrame)
   {
     mStartFrame = startFrame;
-    mEndFrame = endFrame;
+    mEndFrame   = endFrame;
 
     // If the current frame is out of the range, change the current frame also.
-    if (mStartFrame > mCurrentFrame)
+    if(mStartFrame > mCurrentFrame)
     {
       mCurrentFrame = mStartFrame;
 
-      if (mPlayState != PlayState::PLAYING)
+      if(mPlayState != PlayState::PLAYING)
       {
         // Ensure to render current frame.
         mNeedForceRenderOnceTrigger = true;
       }
     }
-    else if (mEndFrame < mCurrentFrame)
+    else if(mEndFrame < mCurrentFrame)
     {
       mCurrentFrame = mEndFrame;
 
-      if (mPlayState != PlayState::PLAYING)
+      if(mPlayState != PlayState::PLAYING)
       {
         // Ensure to render current frame.
         mNeedForceRenderOnceTrigger = true;
@@ -505,24 +505,24 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
 void VectorAnimationTask::GetPlayRange(uint32_t& startFrame, uint32_t& endFrame)
 {
   startFrame = mStartFrame;
-  endFrame = mEndFrame;
+  endFrame   = mEndFrame;
 }
 
 void VectorAnimationTask::SetCurrentFrameNumber(uint32_t frameNumber)
 {
-  if (mCurrentFrame == frameNumber)
+  if(mCurrentFrame == frameNumber)
   {
     DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                   "VectorAnimationTask::SetCurrentFrameNumber: Set same frame [%d] [%p]\n", frameNumber, this);
     return;
   }
 
-  if (frameNumber >= mStartFrame && frameNumber <= mEndFrame)
+  if(frameNumber >= mStartFrame && frameNumber <= mEndFrame)
   {
-    mCurrentFrame = frameNumber;
+    mCurrentFrame      = frameNumber;
     mUpdateFrameNumber = false;
 
-    if (mPlayState != PlayState::PLAYING)
+    if(mPlayState != PlayState::PLAYING)
     {
       // Ensure to render current frame.
       mNeedForceRenderOnceTrigger = true;
@@ -571,12 +571,12 @@ void VectorAnimationTask::SetLoopingMode(DevelImageVisual::LoopingMode::Type loo
 void VectorAnimationTask::GetLayerInfo(Property::Map& map) const
 {
   // Fast-out if file is loading, or load failed.
-  if (mLoadFailed || IsLoadRequested())
+  if(mLoadFailed || IsLoadRequested())
   {
     return;
   }
 
-  if (DALI_UNLIKELY(!mLayerInfoCached))
+  if(DALI_UNLIKELY(!mLayerInfoCached))
   {
     // Update only 1 time.
     mLayerInfoCached = true;
@@ -589,12 +589,12 @@ void VectorAnimationTask::GetLayerInfo(Property::Map& map) const
 void VectorAnimationTask::GetMarkerInfo(Property::Map& map) const
 {
   // Fast-out if file is loading, or load failed.
-  if (mLoadFailed || IsLoadRequested())
+  if(mLoadFailed || IsLoadRequested())
   {
     return;
   }
 
-  if (DALI_UNLIKELY(!mMarkerInfoCached))
+  if(DALI_UNLIKELY(!mMarkerInfoCached))
   {
     // Update only 1 time.
     mMarkerInfoCached = true;
@@ -611,44 +611,44 @@ VectorAnimationTask::ResourceReadySignalType& VectorAnimationTask::ResourceReady
 
 bool VectorAnimationTask::Rasterize()
 {
-  bool stopped = false;
+  bool     stopped = false;
   uint32_t currentFrame;
   mKeepAnimation = false;
 
   {
     Mutex::ScopedLock lock(mMutex);
-    if (mDestroyTask)
+    if(mDestroyTask)
     {
       // The task will be destroyed. We don't need rasterization.
       return false;
     }
   }
 
-  if (mLoadRequest)
+  if(mLoadRequest)
   {
     return Load(false);
   }
 
-  if (mLoadFailed)
+  if(mLoadFailed)
   {
     return false;
   }
 
 #ifdef TRACE_ENABLED
   uint64_t mStartTimeNanoSceonds = 0;
-  uint64_t mEndTimeNanoSceonds = 0;
+  uint64_t mEndTimeNanoSceonds   = 0;
 #endif
   DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "DALI_LOTTIE_RASTERIZE_TASK",
                                           [&](std::ostringstream& oss)
-                                          {
-                                            mStartTimeNanoSceonds = GetNanoseconds();
-                                            oss << "[s:" << mWidth << "x" << mHeight << " ";
-                                            oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
-                                          });
+  {
+    mStartTimeNanoSceonds = GetNanoseconds();
+    oss << "[s:" << mWidth << "x" << mHeight << " ";
+    oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
+  });
 
   ApplyAnimationData();
 
-  if (mPlayState == PlayState::PLAYING && mUpdateFrameNumber)
+  if(mPlayState == PlayState::PLAYING && mUpdateFrameNumber)
   {
     mCurrentFrame = mForward ? mCurrentFrame + mDroppedFrames + 1
                              : (mCurrentFrame > mDroppedFrames ? mCurrentFrame - mDroppedFrames - 1 : 0);
@@ -659,27 +659,27 @@ bool VectorAnimationTask::Rasterize()
 
   mUpdateFrameNumber = true;
 
-  if (mPlayState == PlayState::STOPPING)
+  if(mPlayState == PlayState::STOPPING)
   {
     mCurrentFrame = GetStoppedFrame(mStartFrame, mEndFrame, mCurrentFrame);
-    currentFrame = mCurrentFrame;
-    stopped = true;
+    currentFrame  = mCurrentFrame;
+    stopped       = true;
   }
-  else if (mPlayState == PlayState::PLAYING)
+  else if(mPlayState == PlayState::PLAYING)
   {
     bool animationFinished = false;
 
-    if (currentFrame >= mEndFrame) // last frame
+    if(currentFrame >= mEndFrame) // last frame
     {
-      if (mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
+      if(mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
       {
         mForward = false;
       }
       else
       {
-        if (mLoopCount < 0 || ++mCurrentLoop < mLoopCount) // repeat forever or before the last loop
+        if(mLoopCount < 0 || ++mCurrentLoop < mLoopCount) // repeat forever or before the last loop
         {
-          mCurrentFrame = mStartFrame;
+          mCurrentFrame      = mStartFrame;
           mUpdateFrameNumber = false;
         }
         else
@@ -688,9 +688,9 @@ bool VectorAnimationTask::Rasterize()
         }
       }
     }
-    else if (currentFrame == mStartFrame && !mForward) // first frame
+    else if(currentFrame == mStartFrame && !mForward) // first frame
     {
-      if (mLoopCount < 0 || ++mCurrentLoop < mLoopCount) // repeat forever or before the last loop
+      if(mLoopCount < 0 || ++mCurrentLoop < mLoopCount) // repeat forever or before the last loop
       {
         mForward = true;
       }
@@ -700,9 +700,9 @@ bool VectorAnimationTask::Rasterize()
       }
     }
 
-    if (animationFinished)
+    if(animationFinished)
     {
-      if (mStopBehavior == DevelImageVisual::StopBehavior::CURRENT_FRAME)
+      if(mStopBehavior == DevelImageVisual::StopBehavior::CURRENT_FRAME)
       {
         stopped = true;
       }
@@ -715,10 +715,10 @@ bool VectorAnimationTask::Rasterize()
 
   // Rasterize
   bool renderSuccess = false;
-  if (mVectorRenderer)
+  if(mVectorRenderer)
   {
     renderSuccess = mVectorRenderer.Render(currentFrame);
-    if (!renderSuccess)
+    if(!renderSuccess)
     {
       DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                     "VectorAnimationTask::Rasterize: Rendering failed. Try again later.[%d] [%p]\n", currentFrame,
@@ -727,15 +727,15 @@ bool VectorAnimationTask::Rasterize()
     }
   }
 
-  if (stopped && renderSuccess)
+  if(stopped && renderSuccess)
   {
-    mPlayState = PlayState::STOPPED;
-    mForward = true;
+    mPlayState   = PlayState::STOPPED;
+    mForward     = true;
     mCurrentLoop = 0;
 
     mNeedForceRenderOnceTrigger = true;
 
-    if (mVectorRenderer)
+    if(mVectorRenderer)
     {
       // Notify the Renderer that rendering is stopped.
       mVectorRenderer.RenderStopped();
@@ -744,7 +744,7 @@ bool VectorAnimationTask::Rasterize()
     // Animation is finished
     {
       Mutex::ScopedLock lock(mMutex);
-      if (mNeedAnimationFinishedTrigger && mAnimationFinishedCallback)
+      if(mNeedAnimationFinishedTrigger && mAnimationFinishedCallback)
       {
         mVectorAnimationThread.AddEventTriggerCallback(mAnimationFinishedCallback.get(), mAppliedPlayStateId);
       }
@@ -755,39 +755,39 @@ bool VectorAnimationTask::Rasterize()
   }
 
   // Forcely trigger render once if need.
-  if (renderSuccess && (mNotifyAfterRasterization || mNeedForceRenderOnceTrigger))
+  if(renderSuccess && (mNotifyAfterRasterization || mNeedForceRenderOnceTrigger))
   {
     mVectorAnimationThread.RequestForceRenderOnce();
     mNeedForceRenderOnceTrigger = false;
   }
 
-  if (mPlayState != PlayState::PAUSED && mPlayState != PlayState::STOPPED)
+  if(mPlayState != PlayState::PAUSED && mPlayState != PlayState::STOPPED)
   {
     mKeepAnimation = true;
   }
 
   DALI_TRACE_END_WITH_MESSAGE_GENERATOR(
-      gTraceFilter, "DALI_LOTTIE_RASTERIZE_TASK",
-      [&](std::ostringstream& oss)
-      {
-        mEndTimeNanoSceonds = GetNanoseconds();
-        oss << std::fixed << std::setprecision(3);
-        oss << "[";
-        oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
-        oss << "s:" << mWidth << "x" << mHeight << " ";
-        oss << "f:" << mCurrentFrame;
-        if (mDroppedFrames > 0)
-        {
-          oss << "(+" << mDroppedFrames << ")";
-        }
-        oss << " ";
-        oss << "l:" << mCurrentLoop << " ";
-        oss << "p:" << mPlayState << " ";
-        oss << "r:" << renderSuccess << " ";
-        oss << "s:" << stopped << " ";
-        oss << "k:" << mKeepAnimation << " ";
-        oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
-      });
+    gTraceFilter, "DALI_LOTTIE_RASTERIZE_TASK",
+    [&](std::ostringstream& oss)
+  {
+    mEndTimeNanoSceonds = GetNanoseconds();
+    oss << std::fixed << std::setprecision(3);
+    oss << "[";
+    oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
+    oss << "s:" << mWidth << "x" << mHeight << " ";
+    oss << "f:" << mCurrentFrame;
+    if(mDroppedFrames > 0)
+    {
+      oss << "(+" << mDroppedFrames << ")";
+    }
+    oss << " ";
+    oss << "l:" << mCurrentLoop << " ";
+    oss << "p:" << mPlayState << " ";
+    oss << "r:" << renderSuccess << " ";
+    oss << "s:" << stopped << " ";
+    oss << "k:" << mKeepAnimation << " ";
+    oss << "u:" << mImageUrl.GetEllipsedUrl() << "]";
+  });
 
   return true;
 }
@@ -796,7 +796,7 @@ uint32_t VectorAnimationTask::GetStoppedFrame(uint32_t startFrame, uint32_t endF
 {
   uint32_t frame = currentFrame;
 
-  switch (mStopBehavior)
+  switch(mStopBehavior)
   {
     case DevelImageVisual::StopBehavior::FIRST_FRAME:
     {
@@ -805,7 +805,7 @@ uint32_t VectorAnimationTask::GetStoppedFrame(uint32_t startFrame, uint32_t endF
     }
     case DevelImageVisual::StopBehavior::LAST_FRAME:
     {
-      if (mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
+      if(mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
       {
         frame = startFrame;
       }
@@ -833,25 +833,25 @@ VectorAnimationTask::TimePoint VectorAnimationTask::CalculateNextFrameTime(bool 
   // mNextFrameStartTime is casted to use the default duration.
   auto current = std::chrono::steady_clock::now();
 
-  if (renderNow)
+  if(renderNow)
   {
     mNextFrameStartTime = current;
-    mDroppedFrames = 0;
+    mDroppedFrames      = 0;
   }
   else
   {
-    uint32_t droppedFrames = 0;
+    uint32_t   droppedFrames        = 0;
     const auto durationMicroSeconds = std::chrono::microseconds(mFrameDurationMicroSeconds);
 
     mNextFrameStartTime = std::chrono::time_point_cast<TimePoint::duration>(mNextFrameStartTime + durationMicroSeconds);
-    if (mNextFrameStartTime < current)
+    if(mNextFrameStartTime < current)
     {
-      while (current > std::chrono::time_point_cast<TimePoint::duration>(mNextFrameStartTime + durationMicroSeconds) &&
-             droppedFrames < mTotalFrame)
+      while(current > std::chrono::time_point_cast<TimePoint::duration>(mNextFrameStartTime + durationMicroSeconds) &&
+            droppedFrames < mTotalFrame)
       {
         droppedFrames++;
         mNextFrameStartTime =
-            std::chrono::time_point_cast<TimePoint::duration>(mNextFrameStartTime + durationMicroSeconds);
+          std::chrono::time_point_cast<TimePoint::duration>(mNextFrameStartTime + durationMicroSeconds);
       }
 
       mNextFrameStartTime = current;
@@ -874,51 +874,51 @@ void VectorAnimationTask::ApplyAnimationData()
   {
     Mutex::ScopedLock lock(mMutex);
 
-    if (!mAnimationDataUpdated || mAnimationData[mAnimationDataIndex].size() != 0)
+    if(!mAnimationDataUpdated || mAnimationData[mAnimationDataIndex].size() != 0)
     {
       // Data is not updated or the previous data is not applied yet.
       return;
     }
 
-    mAnimationDataIndex = mAnimationDataIndex == 0 ? 1 : 0; // Swap index
+    mAnimationDataIndex   = mAnimationDataIndex == 0 ? 1 : 0; // Swap index
     mAnimationDataUpdated = false;
 
     index = mAnimationDataIndex;
   }
 
-  for (const auto& animationData : mAnimationData[index])
+  for(const auto& animationData : mAnimationData[index])
   {
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_LOOP_COUNT)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_LOOP_COUNT)
     {
       SetLoopCount(animationData.loopCount);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_RANGE)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_RANGE)
     {
       SetPlayRange(animationData.playRange);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_STOP_BEHAVIOR)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_STOP_BEHAVIOR)
     {
       SetStopBehavior(animationData.stopBehavior);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_LOOPING_MODE)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_LOOPING_MODE)
     {
       SetLoopingMode(animationData.loopingMode);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_CURRENT_FRAME)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_CURRENT_FRAME)
     {
       SetCurrentFrameNumber(animationData.currentFrame);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_NOTIFY_AFTER_RASTERIZATION)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_NOTIFY_AFTER_RASTERIZATION)
     {
       mNotifyAfterRasterization = animationData.notifyAfterRasterization;
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_FRAME_SPEED_FACTOR)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_FRAME_SPEED_FACTOR)
     {
       mFrameSpeedFactor = animationData.frameSpeedFactor;
 
@@ -926,32 +926,32 @@ void VectorAnimationTask::ApplyAnimationData()
       mFrameDurationMicroSeconds = CalculateFrameDurationMicroSeconds(mFrameRate, mFrameSpeedFactor);
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_NEED_RESOURCE_READY)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_NEED_RESOURCE_READY)
     {
       mVectorRenderer.InvalidateBuffer();
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_DYNAMIC_PROPERTY)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_DYNAMIC_PROPERTY)
     {
-      for (auto&& iter : animationData.dynamicProperties)
+      for(auto&& iter : animationData.dynamicProperties)
       {
         mVectorRenderer.AddPropertyValueCallback(
-            iter.keyPath, static_cast<VectorAnimationRenderer::VectorProperty>(iter.property), iter.callback, iter.id);
+          iter.keyPath, static_cast<VectorAnimationRenderer::VectorProperty>(iter.property), iter.callback, iter.id);
       }
     }
 
-    if (animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
+    if(animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
     {
       mAppliedPlayStateId = animationData.playStateId;
-      if (animationData.playState == DevelImageVisual::PlayState::PLAYING)
+      if(animationData.playState == DevelImageVisual::PlayState::PLAYING)
       {
         PlayAnimation();
       }
-      else if (animationData.playState == DevelImageVisual::PlayState::PAUSED)
+      else if(animationData.playState == DevelImageVisual::PlayState::PAUSED)
       {
         PauseAnimation();
       }
-      else if (animationData.playState == DevelImageVisual::PlayState::STOPPED)
+      else if(animationData.playState == DevelImageVisual::PlayState::STOPPED)
       {
         StopAnimation();
       }
@@ -969,9 +969,9 @@ void VectorAnimationTask::OnUploadCompleted()
 
 void VectorAnimationTask::OnLoadCompleted(uint32_t /* not used */)
 {
-  if (!mLoadFailed)
+  if(!mLoadFailed)
   {
-    if (mEnableFrameCache && mSizeUpdated)
+    if(mEnableFrameCache && mSizeUpdated)
     {
       mVectorRenderer.KeepRasterizedBuffer();
       mSizeUpdated = false;

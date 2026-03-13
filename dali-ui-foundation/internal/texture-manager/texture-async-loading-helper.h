@@ -94,7 +94,7 @@ public:
                  const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 
 public:
-  TextureAsyncLoadingHelper(const TextureAsyncLoadingHelper&) = delete;
+  TextureAsyncLoadingHelper(const TextureAsyncLoadingHelper&)            = delete;
   TextureAsyncLoadingHelper& operator=(const TextureAsyncLoadingHelper&) = delete;
 
 private:
@@ -107,7 +107,7 @@ private:
 
 private: // Member Variables:
   TextureManager& mTextureManager;
-  uint32_t mLoadTaskId;
+  uint32_t        mLoadTaskId;
 };
 
 } // namespace Internal

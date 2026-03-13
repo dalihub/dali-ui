@@ -23,8 +23,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layout-impl.h>
 #include <dali-ui-foundation/integration-api/stack-layout-manager.h>
-#include <dali-ui-foundation/public-api/stack-layout.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/stack-layout.h>
 
 namespace Dali
 {
@@ -64,7 +64,6 @@ protected:
   explicit StackLayoutImpl(StackOrientation orientation);
 
 public: // API
-
   /**
    * @brief Sets the orientation of the stack layout.
    *
@@ -101,14 +100,14 @@ protected: // From Layout
 
 private:
   // Not copyable or movable
-  StackLayoutImpl(const StackLayoutImpl&) = delete;
-  StackLayoutImpl(StackLayoutImpl&&) = delete;
+  StackLayoutImpl(const StackLayoutImpl&)            = delete;
+  StackLayoutImpl(StackLayoutImpl&&)                 = delete;
   StackLayoutImpl& operator=(const StackLayoutImpl&) = delete;
-  StackLayoutImpl& operator=(StackLayoutImpl&&) = delete;
+  StackLayoutImpl& operator=(StackLayoutImpl&&)      = delete;
 
 private:
   StackOrientation mOrientation;
-  float mSpacing;
+  float            mSpacing;
 };
 
 // Helpers for public-api forwarding methods

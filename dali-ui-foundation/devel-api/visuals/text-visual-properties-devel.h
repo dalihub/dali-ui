@@ -34,17 +34,17 @@ namespace Property
  */
 enum
 {
-  TEXT = Dali::Ui::TextVisual::Property::TEXT,
-  FONT_FAMILY = Dali::Ui::TextVisual::Property::FONT_FAMILY,
-  FONT_STYLE = Dali::Ui::TextVisual::Property::FONT_STYLE,
-  POINT_SIZE = Dali::Ui::TextVisual::Property::POINT_SIZE,
-  MULTI_LINE = Dali::Ui::TextVisual::Property::MULTI_LINE,
+  TEXT                 = Dali::Ui::TextVisual::Property::TEXT,
+  FONT_FAMILY          = Dali::Ui::TextVisual::Property::FONT_FAMILY,
+  FONT_STYLE           = Dali::Ui::TextVisual::Property::FONT_STYLE,
+  POINT_SIZE           = Dali::Ui::TextVisual::Property::POINT_SIZE,
+  MULTI_LINE           = Dali::Ui::TextVisual::Property::MULTI_LINE,
   HORIZONTAL_ALIGNMENT = Dali::Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT,
-  VERTICAL_ALIGNMENT = Dali::Ui::TextVisual::Property::VERTICAL_ALIGNMENT,
-  TEXT_COLOR = Dali::Ui::TextVisual::Property::TEXT_COLOR,
-  ENABLE_MARKUP = Dali::Ui::TextVisual::Property::ENABLE_MARKUP,
-  SHADOW = Dali::Ui::TextVisual::Property::SHADOW,
-  UNDERLINE = Dali::Ui::TextVisual::Property::UNDERLINE,
+  VERTICAL_ALIGNMENT   = Dali::Ui::TextVisual::Property::VERTICAL_ALIGNMENT,
+  TEXT_COLOR           = Dali::Ui::TextVisual::Property::TEXT_COLOR,
+  ENABLE_MARKUP        = Dali::Ui::TextVisual::Property::ENABLE_MARKUP,
+  SHADOW               = Dali::Ui::TextVisual::Property::SHADOW,
+  UNDERLINE            = Dali::Ui::TextVisual::Property::UNDERLINE,
 
   /**
    * @brief The default outline parameters.

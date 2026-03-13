@@ -197,19 +197,19 @@ private:
 
 private:
   ImageVisualShaderFactory& mImageVisualShaderFactory;
-  SvgLoader& mSvgLoader; ///< reference to Svg loader for fast access
+  SvgLoader&                mSvgLoader; ///< reference to Svg loader for fast access
 
-  SvgLoader::SvgLoadId mSvgLoadId;
+  SvgLoader::SvgLoadId      mSvgLoadId;
   SvgLoader::SvgRasterizeId mSvgRasterizeId;
 
-  VisualUrl mImageUrl;
-  uint32_t mDefaultWidth;
-  uint32_t mDefaultHeight;
-  WeakHandle<Actor> mPlacementActor;
+  VisualUrl             mImageUrl;
+  uint32_t              mDefaultWidth;
+  uint32_t              mDefaultHeight;
+  WeakHandle<Actor>     mPlacementActor;
   Dali::ImageDimensions mDesiredSize{};
   Dali::ImageDimensions mLastRequiredSize{};
 
-  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
   Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
 
   bool mLoadCompleted : 1;

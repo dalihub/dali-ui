@@ -21,8 +21,8 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
@@ -43,14 +43,14 @@ public:
    * @brief Constructs with default weight (0, meaning no extra space allocation).
    */
   StackLayoutParamsImpl()
-    : LayoutParamsImpl(),
-      mWeight(0.0f)
+  : LayoutParamsImpl(),
+    mWeight(0.0f)
   {
   }
 
   StackLayoutParamsImpl(const StackLayoutParamsImpl& other)
-    : LayoutParamsImpl(),
-      mWeight(other.mWeight)
+  : LayoutParamsImpl(),
+    mWeight(other.mWeight)
   {
   }
 
@@ -85,7 +85,7 @@ public:
   static StackLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
-    if (trait)
+    if(trait)
     {
       return static_cast<StackLayoutParamsImpl*>(&Ui::GetImpl(trait));
     }
@@ -100,12 +100,12 @@ public:
   static StackLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
   {
     StackLayoutParamsImpl* existing = Get(viewImpl);
-    if (existing)
+    if(existing)
     {
       return *existing;
     }
     IntrusivePtr<StackLayoutParamsImpl> impl(new StackLayoutParamsImpl());
-    Trait trait = Trait::DownCast(BaseHandle(impl.Get()));
+    Trait                               trait = Trait::DownCast(BaseHandle(impl.Get()));
     viewImpl.SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, trait);
     return *impl;
   }

@@ -39,10 +39,10 @@ UiConfigManager& UiConfigManager::Get()
 namespace
 {
 const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
-    "UiConfig has not been initialized. "
-    "Call UiConfig::New().Apply() in main() before the application main loop starts. "
-    "UiConfig provides global settings for the entire dali-ui framework. "
-    "Do NOT access UiConfig-dependent features in static/global variable initializers.";
+  "UiConfig has not been initialized. "
+  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+  "UiConfig provides global settings for the entire dali-ui framework. "
+  "Do NOT access UiConfig-dependent features in static/global variable initializers.";
 } // unnamed namespace
 
 void UiConfigManager::Initialize(UiConfig config)
@@ -51,17 +51,17 @@ void UiConfigManager::Initialize(UiConfig config)
   mConfig = std::move(config);
   GetImpl(mConfig).Freeze();
 
-  const auto& impl = GetImpl(mConfig);
-  mCachedScalingFactor = impl.GetScalingFactor();
-  mCachedDpiFactor = impl.GetDpiFactor();
-  mCachedScaledDpiFactor = impl.GetScaledDpiFactor();
-  mCachedDpi = impl.GetDpi();
-  mCachedBaselineDpi = impl.GetBaselineDpi();
-  mCachedKeyClickPolicy = impl.GetKeyClickPolicy();
+  const auto& impl             = GetImpl(mConfig);
+  mCachedScalingFactor         = impl.GetScalingFactor();
+  mCachedDpiFactor             = impl.GetDpiFactor();
+  mCachedScaledDpiFactor       = impl.GetScaledDpiFactor();
+  mCachedDpi                   = impl.GetDpi();
+  mCachedBaselineDpi           = impl.GetBaselineDpi();
+  mCachedKeyClickPolicy        = impl.GetKeyClickPolicy();
   mCachedExecutionKeyPredicate = impl.GetExecutionKeyPredicate();
-  mCachedMinLongPressKeyCount = impl.GetMinLongPressKeyCount();
-  mCachedTapRecognizerTime = impl.GetTapRecognizerTime();
-  mInitialized = true;
+  mCachedMinLongPressKeyCount  = impl.GetMinLongPressKeyCount();
+  mCachedTapRecognizerTime     = impl.GetTapRecognizerTime();
+  mInitialized                 = true;
 
   GetImpl(mConfig).OnInitialized();
 }

@@ -96,7 +96,7 @@ bool IsVisualEnabled(const Internal::Control& control, Dali::Property::Index ind
 void DoAction(Control& control, Dali::Property::Index visualIndex, Dali::Property::Index actionId,
               const Dali::Property::Value& attributes)
 {
-  Internal::Control& controlInternal = Ui::Internal::GetImplementation(control);
+  Internal::Control&       controlInternal = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(controlInternal);
   controlDataImpl.DoAction(visualIndex, actionId, attributes);
 }
@@ -104,7 +104,7 @@ void DoAction(Control& control, Dali::Property::Index visualIndex, Dali::Propert
 void DoActionExtension(Control& control, Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                        const Dali::Any& attributes)
 {
-  Internal::Control& controlInternal = Ui::Internal::GetImplementation(control);
+  Internal::Control&       controlInternal = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(controlInternal);
   controlDataImpl.DoActionExtension(visualIndex, actionId, attributes);
 }
@@ -122,14 +122,14 @@ void SetInputMethodContext(Internal::Control& control, InputMethodContext& input
 
 VisualEventSignalType& VisualEventSignal(Control control)
 {
-  Internal::Control& internalControl = Ui::Internal::GetImplementation(control);
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
   return controlDataImpl.VisualEventSignal();
 }
 
 Dali::Property GetVisualProperty(Control control, Dali::Property::Index index, Dali::Property::Key visualPropertyKey)
 {
-  Internal::Control& internalControl = Ui::Internal::GetImplementation(control);
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
   return controlDataImpl.GetVisualProperty(index, visualPropertyKey);
 }
@@ -192,10 +192,10 @@ Ui::DevelControl::AccessibilityHighlightedSignalType& AccessibilityHighlightedSi
 void AppendAccessibilityRelation(Ui::Control control, Dali::Actor destination,
                                  Dali::Accessibility::RelationType relation)
 {
-  if (auto destinationAccessible = Accessibility::Accessible::Get(destination))
+  if(auto destinationAccessible = Accessibility::Accessible::Get(destination))
   {
     GetControlImplementation(control).GetOrCreateAccessibilityData().mAccessibilityProps.relations[relation].insert(
-        destinationAccessible);
+      destinationAccessible);
   }
 }
 
@@ -205,15 +205,15 @@ void RemoveAccessibilityRelation(Ui::Control control, Dali::Actor destination,
   auto& controlImpl = GetControlImplementation(control);
 
   auto* accessibilityData = controlImpl.GetAccessibilityData();
-  if (DALI_LIKELY(accessibilityData))
+  if(DALI_LIKELY(accessibilityData))
   {
-    if (auto destinationAccessible = Accessibility::Accessible::Get(destination))
+    if(auto destinationAccessible = Accessibility::Accessible::Get(destination))
     {
       auto& relations = accessibilityData->mAccessibilityProps.relations;
 
       relations[relation].erase(destinationAccessible);
 
-      if (relations[relation].empty())
+      if(relations[relation].empty())
       {
         relations.erase(relation);
       }
@@ -228,10 +228,10 @@ std::vector<Accessibility::Relation> GetAccessibilityRelations(Ui::Control contr
   auto& controlImpl = GetControlImplementation(control);
 
   const auto* accessibilityData = controlImpl.GetAccessibilityData();
-  if (DALI_LIKELY(accessibilityData))
+  if(DALI_LIKELY(accessibilityData))
   {
     const auto& relations = accessibilityData->mAccessibilityProps.relations;
-    for (const auto& relation : relations)
+    for(const auto& relation : relations)
     {
       const auto& targets = relation.second;
 
@@ -248,7 +248,7 @@ void ClearAccessibilityRelations(Ui::Control control)
   auto& controlImpl = GetControlImplementation(control);
 
   auto* accessibilityData = controlImpl.GetAccessibilityData();
-  if (DALI_LIKELY(accessibilityData))
+  if(DALI_LIKELY(accessibilityData))
   {
     accessibilityData->mAccessibilityProps.relations.clear();
   }
@@ -282,7 +282,7 @@ Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType(Ui::Contro
 bool ClearAccessibilityHighlight(Ui::Control control)
 {
   auto controlAccessible = GetControlImplementation(control).GetAccessibleObject();
-  if (DALI_LIKELY(controlAccessible))
+  if(DALI_LIKELY(controlAccessible))
   {
     return controlAccessible->ClearHighlight();
   }
@@ -292,7 +292,7 @@ bool ClearAccessibilityHighlight(Ui::Control control)
 bool GrabAccessibilityHighlight(Ui::Control control)
 {
   auto controlAccessible = GetControlImplementation(control).GetAccessibleObject();
-  if (DALI_LIKELY(controlAccessible))
+  if(DALI_LIKELY(controlAccessible))
   {
     return controlAccessible->GrabHighlight();
   }
@@ -302,7 +302,7 @@ bool GrabAccessibilityHighlight(Ui::Control control)
 Dali::Accessibility::States GetAccessibilityStates(Ui::Control control)
 {
   auto controlAccessible = GetControlImplementation(control).GetAccessibleObject();
-  if (DALI_LIKELY(controlAccessible))
+  if(DALI_LIKELY(controlAccessible))
   {
     return controlAccessible->GetStates();
   }
@@ -312,7 +312,7 @@ Dali::Accessibility::States GetAccessibilityStates(Ui::Control control)
 void NotifyAccessibilityStateChange(Ui::Control control, Dali::Accessibility::States states, bool recurse)
 {
   auto controlAccessible = GetControlImplementation(control).GetAccessibleObject();
-  if (DALI_LIKELY(controlAccessible))
+  if(DALI_LIKELY(controlAccessible))
   {
     controlAccessible->NotifyAccessibilityStateChange(std::move(states), recurse);
   }
@@ -335,16 +335,16 @@ bool IsCreateAccessibleEnabled(Ui::Control control)
 
 void EmitAccessibilityStateChanged(Dali::Actor actor, Accessibility::State state, int newValue)
 {
-  auto bridge = Accessibility::Bridge::GetCurrentBridge();
+  auto bridge  = Accessibility::Bridge::GetCurrentBridge();
   auto control = Ui::Control::DownCast(actor);
-  if (DALI_LIKELY(control && bridge))
+  if(DALI_LIKELY(control && bridge))
   {
-    if (state == Accessibility::State::SHOWING)
+    if(state == Accessibility::State::SHOWING)
     {
       bool isModal = ControlAccessible::IsModal(control);
-      if (isModal)
+      if(isModal)
       {
-        if (newValue == 1)
+        if(newValue == 1)
         {
           bridge->RegisterDefaultLabel(actor);
         }
@@ -356,10 +356,10 @@ void EmitAccessibilityStateChanged(Dali::Actor actor, Accessibility::State state
     }
   }
 
-  if (bridge && bridge->IsUp())
+  if(bridge && bridge->IsUp())
   {
     auto accessible = dynamic_cast<Accessibility::ActorAccessible*>(Accessibility::Accessible::Get(actor));
-    if (DALI_LIKELY(accessible))
+    if(DALI_LIKELY(accessible))
     {
       accessible->EmitStateChanged(state, newValue, 0);
     }

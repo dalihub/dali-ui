@@ -114,7 +114,6 @@ public:
   static UiElementConfig DownCast(BaseHandle handle);
 
 public: // Properties
-
   // @CHAIN_START(UiElementConfig, UiConfig)
   /**
    * @brief Sets the default font point-size for text elements.
@@ -149,7 +148,6 @@ public: // Properties
   // @CHAIN_END
 
 public: // Not intended for Application developers
-
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *

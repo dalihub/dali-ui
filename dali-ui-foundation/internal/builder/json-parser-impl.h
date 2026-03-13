@@ -108,10 +108,10 @@ private:
   void DeleteRootNode() noexcept;
 
 private:
-  typedef std::vector<char> VectorChar;
+  typedef std::vector<char>    VectorChar;
   typedef VectorChar::iterator VectorCharIter;
 
-  typedef std::list<VectorChar> SourceContainer;
+  typedef std::list<VectorChar>           SourceContainer;
   typedef std::list<VectorChar>::iterator SourceContainerIter;
 
   JsonParser(JsonParser&);
@@ -122,9 +122,9 @@ private:
   TreeNode* mRoot; ///< Tree root
 
   const char* mErrorDescription; ///< Last parse error description
-  int mErrorPosition;            ///< Last parse error position
-  int mErrorLine;                ///< Last parse error line
-  int mErrorColumn;              ///< Last parse error column
+  int         mErrorPosition;    ///< Last parse error position
+  int         mErrorLine;        ///< Last parse error line
+  int         mErrorColumn;      ///< Last parse error column
 
   int mNumberOfChars; ///< The size of string data for all nodes
   int mNumberOfNodes; ///< Node count

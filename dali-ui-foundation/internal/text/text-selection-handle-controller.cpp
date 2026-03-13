@@ -46,9 +46,9 @@ struct SelectionBoxInfo
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
 #endif
 
-const float MAX_FLOAT = std::numeric_limits<float>::max();
-const float MIN_FLOAT = std::numeric_limits<float>::min();
-const Dali::Ui::Text::CharacterDirection LTR = false; ///< Left To Right direction
+const float                              MAX_FLOAT = std::numeric_limits<float>::max();
+const float                              MIN_FLOAT = std::numeric_limits<float>::min();
+const Dali::Ui::Text::CharacterDirection LTR       = false; ///< Left To Right direction
 
 } // namespace
 
@@ -63,11 +63,11 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   EventData*& eventData = impl.mEventData;
 
   CharacterIndex selectionStart = eventData->mLeftSelectionPosition;
-  CharacterIndex selectionEnd = eventData->mRightSelectionPosition;
+  CharacterIndex selectionEnd   = eventData->mRightSelectionPosition;
 
   DecoratorPtr& decorator = eventData->mDecorator;
 
-  if (selectionStart == selectionEnd)
+  if(selectionStart == selectionEnd)
   {
     // Nothing to select if handles are in the same place.
     // So, deactive Highlight box.
@@ -77,26 +77,26 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   decorator->ClearHighlights();
 
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
+  ModelPtr&        model        = impl.mModel;
+  VisualModelPtr&  visualModel  = model->mVisualModel;
   LogicalModelPtr& logicalModel = model->mLogicalModel;
 
-  const GlyphIndex* const charactersToGlyphBuffer = visualModel->mCharactersToGlyph.Begin();
-  const Length* const glyphsPerCharacterBuffer = visualModel->mGlyphsPerCharacter.Begin();
-  const GlyphInfo* const glyphsBuffer = visualModel->mGlyphs.Begin();
-  const Vector2* const positionsBuffer = visualModel->mGlyphPositions.Begin();
-  const Length* const charactersPerGlyphBuffer = visualModel->mCharactersPerGlyph.Begin();
-  const CharacterIndex* const glyphToCharacterBuffer = visualModel->mGlyphsToCharacters.Begin();
+  const GlyphIndex* const         charactersToGlyphBuffer  = visualModel->mCharactersToGlyph.Begin();
+  const Length* const             glyphsPerCharacterBuffer = visualModel->mGlyphsPerCharacter.Begin();
+  const GlyphInfo* const          glyphsBuffer             = visualModel->mGlyphs.Begin();
+  const Vector2* const            positionsBuffer          = visualModel->mGlyphPositions.Begin();
+  const Length* const             charactersPerGlyphBuffer = visualModel->mCharactersPerGlyph.Begin();
+  const CharacterIndex* const     glyphToCharacterBuffer   = visualModel->mGlyphsToCharacters.Begin();
   const CharacterDirection* const modelCharacterDirectionsBuffer =
-      (0u != logicalModel->mCharacterDirections.Count()) ? logicalModel->mCharacterDirections.Begin() : NULL;
+    (0u != logicalModel->mCharacterDirections.Count()) ? logicalModel->mCharacterDirections.Begin() : NULL;
 
-  const bool isLastCharacter = selectionEnd >= logicalModel->mText.Count();
+  const bool               isLastCharacter = selectionEnd >= logicalModel->mText.Count();
   const CharacterDirection startDirection =
-      ((NULL == modelCharacterDirectionsBuffer) ? false : *(modelCharacterDirectionsBuffer + selectionStart));
+    ((NULL == modelCharacterDirectionsBuffer) ? false : *(modelCharacterDirectionsBuffer + selectionStart));
   const CharacterDirection endDirection =
-      ((NULL == modelCharacterDirectionsBuffer)
-           ? false
-           : *(modelCharacterDirectionsBuffer + (selectionEnd - (isLastCharacter ? 1u : 0u))));
+    ((NULL == modelCharacterDirectionsBuffer)
+       ? false
+       : *(modelCharacterDirectionsBuffer + (selectionEnd - (isLastCharacter ? 1u : 0u))));
 
   // Swap the indices if the start is greater than the end.
   const bool indicesSwapped = selectionStart > selectionEnd;
@@ -104,20 +104,20 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   // Tell the decorator to flip the selection handles if needed.
   decorator->SetSelectionHandleFlipState(indicesSwapped, startDirection, endDirection);
 
-  if (indicesSwapped)
+  if(indicesSwapped)
   {
     std::swap(selectionStart, selectionEnd);
   }
 
   // Get the indices to the first and last selected glyphs.
   const CharacterIndex selectionEndMinusOne = selectionEnd - 1u;
-  const GlyphIndex glyphStart = *(charactersToGlyphBuffer + selectionStart);
-  const Length numberOfGlyphs = *(glyphsPerCharacterBuffer + selectionEndMinusOne);
-  const GlyphIndex glyphEnd =
-      *(charactersToGlyphBuffer + selectionEndMinusOne) + ((numberOfGlyphs > 0) ? numberOfGlyphs - 1u : 0u);
-  const float modelCharacterSpacing = visualModel->GetCharacterSpacing();
-  Vector<CharacterIndex>& glyphToCharacterMap = visualModel->mGlyphsToCharacters;
-  const CharacterIndex* glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
+  const GlyphIndex     glyphStart           = *(charactersToGlyphBuffer + selectionStart);
+  const Length         numberOfGlyphs       = *(glyphsPerCharacterBuffer + selectionEndMinusOne);
+  const GlyphIndex     glyphEnd =
+    *(charactersToGlyphBuffer + selectionEndMinusOne) + ((numberOfGlyphs > 0) ? numberOfGlyphs - 1u : 0u);
+  const float             modelCharacterSpacing     = visualModel->GetCharacterSpacing();
+  Vector<CharacterIndex>& glyphToCharacterMap       = visualModel->mGlyphsToCharacters;
+  const CharacterIndex*   glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
 
   // Get the character-spacing runs.
   const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns = visualModel->GetCharacterSpacingGlyphRuns();
@@ -125,8 +125,8 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   // Get the lines where the glyphs are laid-out.
   const LineRun* lineRun = visualModel->mLines.Begin();
 
-  LineIndex lineIndex = 0u;
-  Length numberOfLines = 0u;
+  LineIndex lineIndex     = 0u;
+  Length    numberOfLines = 0u;
   visualModel->GetNumberOfLines(glyphStart, 1u + glyphEnd - glyphStart, lineIndex, numberOfLines);
   const LineIndex firstLineIndex = lineIndex;
 
@@ -135,13 +135,13 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   selectionBoxLinesInfo.Resize(numberOfLines);
 
   SelectionBoxInfo* selectionBoxInfo = selectionBoxLinesInfo.Begin();
-  selectionBoxInfo->minX = MAX_FLOAT;
-  selectionBoxInfo->maxX = MIN_FLOAT;
+  selectionBoxInfo->minX             = MAX_FLOAT;
+  selectionBoxInfo->maxX             = MIN_FLOAT;
 
   // Keep the min and max 'x' position to calculate the size and position of the highlighed text.
-  float minHighlightX = std::numeric_limits<float>::max();
-  float maxHighlightX = std::numeric_limits<float>::min();
-  Size highLightSize;
+  float   minHighlightX = std::numeric_limits<float>::max();
+  float   maxHighlightX = std::numeric_limits<float>::min();
+  Size    highLightSize;
   Vector2 highLightPosition; // The highlight position in decorator's coords.
 
   // Retrieve the first line and get the line's vertical offset, the line's height and the index to the last glyph.
@@ -164,13 +164,13 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   // Check if the first glyph is a ligature that must be broken like Latin ff, fi, or Arabic ﻻ, etc which needs special
   // code.
   const Length numberOfCharactersStart = *(charactersPerGlyphBuffer + glyphStart);
-  bool splitStartGlyph =
-      (numberOfCharactersStart > 1u) && HasLigatureMustBreak(logicalModel->GetScript(selectionStart));
+  bool         splitStartGlyph =
+    (numberOfCharactersStart > 1u) && HasLigatureMustBreak(logicalModel->GetScript(selectionStart));
 
   // Check if the last glyph is a ligature that must be broken like Latin ff, fi, or Arabic ﻻ, etc which needs special
   // code.
   const Length numberOfCharactersEnd = *(charactersPerGlyphBuffer + glyphEnd);
-  bool splitEndGlyph = (glyphStart != glyphEnd) && (numberOfCharactersEnd > 1u) &&
+  bool         splitEndGlyph         = (glyphStart != glyphEnd) && (numberOfCharactersEnd > 1u) &&
                        HasLigatureMustBreak(logicalModel->GetScript(selectionEndMinusOne));
 
   // The number of quads of the selection box.
@@ -179,29 +179,29 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   // Count the actual number of quads.
   unsigned int actualNumberOfQuads = 0u;
-  Vector4 quad;
-  float calculatedAdvance = 0.f;
+  Vector4      quad;
+  float        calculatedAdvance = 0.f;
 
   // Traverse the glyphs.
-  for (GlyphIndex index = glyphStart; index <= glyphEnd; ++index)
+  for(GlyphIndex index = glyphStart; index <= glyphEnd; ++index)
   {
-    const float characterSpacing = GetGlyphCharacterSpacing(index, characterSpacingGlyphRuns, modelCharacterSpacing);
-    const GlyphInfo& glyph = *(glyphsBuffer + index);
-    const Vector2& position = *(positionsBuffer + index);
-    calculatedAdvance = GetCalculatedAdvance(*(logicalModel->mText.Begin() + (*(glyphToCharacterMapBuffer + index))),
-                                             characterSpacing, glyph.advance);
+    const float      characterSpacing = GetGlyphCharacterSpacing(index, characterSpacingGlyphRuns, modelCharacterSpacing);
+    const GlyphInfo& glyph            = *(glyphsBuffer + index);
+    const Vector2&   position         = *(positionsBuffer + index);
+    calculatedAdvance                 = GetCalculatedAdvance(*(logicalModel->mText.Begin() + (*(glyphToCharacterMapBuffer + index))),
+                                                             characterSpacing, glyph.advance);
 
-    if (splitStartGlyph)
+    if(splitStartGlyph)
     {
       // If the first glyph is a ligature that must be broken it may be needed to add only part of the glyph to the
       // highlight box.
 
-      const float glyphAdvance = calculatedAdvance / static_cast<float>(numberOfCharactersStart);
+      const float          glyphAdvance    = calculatedAdvance / static_cast<float>(numberOfCharactersStart);
       const CharacterIndex interGlyphIndex = selectionStart - *(glyphToCharacterBuffer + glyphStart);
       // Get the direction of the character.
       CharacterDirection isCurrentRightToLeft = false;
-      if (nullptr != modelCharacterDirectionsBuffer) // If modelCharacterDirectionsBuffer is NULL, it means the whole
-                                                     // text is left to right.
+      if(nullptr != modelCharacterDirectionsBuffer) // If modelCharacterDirectionsBuffer is NULL, it means the whole
+                                                    // text is left to right.
       {
         isCurrentRightToLeft = *(modelCharacterDirectionsBuffer + selectionStart);
       }
@@ -209,12 +209,12 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
       // The end point could be in the middle of the ligature.
       // Calculate the number of characters selected.
       const Length numberOfCharacters =
-          (glyphStart == glyphEnd) ? (selectionEnd - selectionStart) : (numberOfCharactersStart - interGlyphIndex);
+        (glyphStart == glyphEnd) ? (selectionEnd - selectionStart) : (numberOfCharactersStart - interGlyphIndex);
 
       quad.x = lineRun->alignmentOffset + position.x - glyph.xBearing + model->mScrollPosition.x +
                glyphAdvance * static_cast<float>(isCurrentRightToLeft
-                                                     ? (numberOfCharactersStart - interGlyphIndex - numberOfCharacters)
-                                                     : interGlyphIndex);
+                                                   ? (numberOfCharactersStart - interGlyphIndex - numberOfCharacters)
+                                                   : interGlyphIndex);
       quad.y = selectionBoxInfo->lineOffset;
       quad.z = quad.x + static_cast<float>(numberOfCharacters) * glyphAdvance;
       quad.w = selectionBoxInfo->lineOffset + selectionBoxInfo->lineHeight;
@@ -230,17 +230,17 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
       continue;
     }
 
-    if (splitEndGlyph && (index == glyphEnd))
+    if(splitEndGlyph && (index == glyphEnd))
     {
       // Equally, if the last glyph is a ligature that must be broken it may be needed to add only part of the glyph to
       // the highlight box.
 
-      const float glyphAdvance = calculatedAdvance / static_cast<float>(numberOfCharactersEnd);
+      const float          glyphAdvance    = calculatedAdvance / static_cast<float>(numberOfCharactersEnd);
       const CharacterIndex interGlyphIndex = selectionEnd - *(glyphToCharacterBuffer + glyphEnd);
       // Get the direction of the character.
       CharacterDirection isCurrentRightToLeft = false;
-      if (nullptr != modelCharacterDirectionsBuffer) // If modelCharacterDirectionsBuffer is NULL, it means the whole
-                                                     // text is left to right.
+      if(nullptr != modelCharacterDirectionsBuffer) // If modelCharacterDirectionsBuffer is NULL, it means the whole
+                                                    // text is left to right.
       {
         isCurrentRightToLeft = *(modelCharacterDirectionsBuffer + selectionEnd);
       }
@@ -277,10 +277,10 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
     ++actualNumberOfQuads;
 
     // Whether to retrieve the next line.
-    if (index == lastGlyphOfLine)
+    if(index == lastGlyphOfLine)
     {
       ++lineIndex;
-      if (lineIndex < firstLineIndex + numberOfLines)
+      if(lineIndex < firstLineIndex + numberOfLines)
       {
         float currentLineSpacing = lineRun->lineSpacing;
 
@@ -308,7 +308,7 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
         // included in selection height.
         selectionBoxInfo->lineHeight = lineRun->ascender - lineRun->descender;
 
-        if (lineRun->lineSpacing > 0)
+        if(lineRun->lineSpacing > 0)
         {
           selectionBoxInfo->lineHeight += lineRun->lineSpacing;
         }
@@ -318,8 +318,8 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   // Traverses all the lines and updates the min and max 'x' positions and the total height.
   // The final width is calculated after 'boxifying' the selection.
-  for (Vector<SelectionBoxInfo>::ConstIterator it = selectionBoxLinesInfo.Begin(), endIt = selectionBoxLinesInfo.End();
-       it != endIt; ++it)
+  for(Vector<SelectionBoxInfo>::ConstIterator it = selectionBoxLinesInfo.Begin(), endIt = selectionBoxLinesInfo.End();
+      it != endIt; ++it)
   {
     const SelectionBoxInfo& info = *it;
 
@@ -331,16 +331,16 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   // Add extra geometry to 'boxify' the selection.
 
-  if (1u < numberOfLines)
+  if(1u < numberOfLines)
   {
     // Boxify the first line.
-    lineRun = visualModel->mLines.Begin() + firstLineIndex;
+    lineRun                                           = visualModel->mLines.Begin() + firstLineIndex;
     const SelectionBoxInfo& firstSelectionBoxLineInfo = *(selectionBoxLinesInfo.Begin());
 
     bool boxifyBegin = (LTR != lineRun->direction) && (LTR != startDirection);
-    bool boxifyEnd = (LTR == lineRun->direction) && (LTR == startDirection);
+    bool boxifyEnd   = (LTR == lineRun->direction) && (LTR == startDirection);
 
-    if (boxifyBegin)
+    if(boxifyBegin)
     {
       quad.x = 0.f;
       quad.y = firstSelectionBoxLineInfo.lineOffset;
@@ -355,7 +355,7 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
       minHighlightX = 0.f;
     }
 
-    if (boxifyEnd)
+    if(boxifyEnd)
     {
       quad.x = firstSelectionBoxLineInfo.maxX;
       quad.y = firstSelectionBoxLineInfo.lineOffset;
@@ -371,11 +371,11 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
     }
 
     // Boxify the central lines.
-    if (2u < numberOfLines)
+    if(2u < numberOfLines)
     {
-      for (Vector<SelectionBoxInfo>::ConstIterator it = selectionBoxLinesInfo.Begin() + 1u,
-                                                   endIt = selectionBoxLinesInfo.End() - 1u;
-           it != endIt; ++it)
+      for(Vector<SelectionBoxInfo>::ConstIterator it    = selectionBoxLinesInfo.Begin() + 1u,
+                                                  endIt = selectionBoxLinesInfo.End() - 1u;
+          it != endIt; ++it)
       {
         const SelectionBoxInfo& info = *it;
 
@@ -402,13 +402,13 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
     }
 
     // Boxify the last line.
-    lineRun = visualModel->mLines.Begin() + firstLineIndex + numberOfLines - 1u;
+    lineRun                                          = visualModel->mLines.Begin() + firstLineIndex + numberOfLines - 1u;
     const SelectionBoxInfo& lastSelectionBoxLineInfo = *(selectionBoxLinesInfo.End() - 1u);
 
     boxifyBegin = (LTR == lineRun->direction) && (LTR == endDirection);
-    boxifyEnd = (LTR != lineRun->direction) && (LTR != endDirection);
+    boxifyEnd   = (LTR != lineRun->direction) && (LTR != endDirection);
 
-    if (boxifyBegin)
+    if(boxifyBegin)
     {
       quad.x = 0.f;
       quad.y = lastSelectionBoxLineInfo.lineOffset;
@@ -423,7 +423,7 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
       minHighlightX = 0.f;
     }
 
-    if (boxifyEnd)
+    if(boxifyEnd)
     {
       quad.x = lastSelectionBoxLineInfo.maxX;
       quad.y = lastSelectionBoxLineInfo.lineOffset;
@@ -446,13 +446,13 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   // The highlight's height has been calculated above (before 'boxifying' the highlight).
   highLightSize.width = maxHighlightX - minHighlightX;
 
-  highLightPosition.x = minHighlightX;
+  highLightPosition.x                               = minHighlightX;
   const SelectionBoxInfo& firstSelectionBoxLineInfo = *(selectionBoxLinesInfo.Begin());
-  highLightPosition.y = firstSelectionBoxLineInfo.lineOffset;
+  highLightPosition.y                               = firstSelectionBoxLineInfo.lineOffset;
 
   decorator->SetHighLightBox(highLightPosition, highLightSize, static_cast<float>(model->GetOutlineWidth()));
 
-  if (!decorator->IsSmoothHandlePanEnabled())
+  if(!decorator->IsSmoothHandlePanEnabled())
   {
     CursorInfo primaryCursorInfo;
     impl.GetCursorPosition(eventData->mLeftSelectionPosition, primaryCursorInfo);
@@ -479,23 +479,23 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
                                            Controller::NoTextTap::Action action)
 {
   EventData*& eventData = impl.mEventData;
-  if (nullptr == eventData)
+  if(nullptr == eventData)
   {
     // Nothing to do if there is no text input.
     return;
   }
 
-  if (impl.IsShowingPlaceholderText())
+  if(impl.IsShowingPlaceholderText())
   {
     // Nothing to do if there is the place-holder text.
     return;
   }
 
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
-  const Length numberOfGlyphs = visualModel->mGlyphs.Count();
-  const Length numberOfLines = visualModel->mLines.Count();
-  if ((0 == numberOfGlyphs) || (0 == numberOfLines))
+  ModelPtr&       model          = impl.mModel;
+  VisualModelPtr& visualModel    = model->mVisualModel;
+  const Length    numberOfGlyphs = visualModel->mGlyphs.Count();
+  const Length    numberOfLines  = visualModel->mLines.Count();
+  if((0 == numberOfGlyphs) || (0 == numberOfLines))
   {
     // Nothing to do if there is no text.
     return;
@@ -505,24 +505,24 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
   CharacterIndex selectionStart(0);
   CharacterIndex selectionEnd(0);
   CharacterIndex noTextHitIndex(0);
-  const bool characterHit = FindSelectionIndices(visualModel, model->mLogicalModel, impl.mMetrics, visualX, visualY,
-                                                 selectionStart, selectionEnd, noTextHitIndex);
+  const bool     characterHit = FindSelectionIndices(visualModel, model->mLogicalModel, impl.mMetrics, visualX, visualY,
+                                                     selectionStart, selectionEnd, noTextHitIndex);
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "%p selectionStart %d selectionEnd %d\n", &impl, selectionStart,
                 selectionEnd);
 
-  if (characterHit || (Controller::NoTextTap::HIGHLIGHT == action))
+  if(characterHit || (Controller::NoTextTap::HIGHLIGHT == action))
   {
     uint32_t oldStart = eventData->mLeftSelectionPosition;
-    uint32_t oldEnd = eventData->mRightSelectionPosition;
+    uint32_t oldEnd   = eventData->mRightSelectionPosition;
 
     impl.ChangeState(EventData::SELECTING);
 
-    eventData->mLeftSelectionPosition = selectionStart;
+    eventData->mLeftSelectionPosition  = selectionStart;
     eventData->mRightSelectionPosition = selectionEnd;
 
-    eventData->mUpdateLeftSelectionPosition = true;
+    eventData->mUpdateLeftSelectionPosition  = true;
     eventData->mUpdateRightSelectionPosition = true;
-    eventData->mUpdateHighlightBox = true;
+    eventData->mUpdateHighlightBox           = true;
 
     // It may happen an InputMethodContext commit event arrives before the selection event
     // if the InputMethodContext is in pre-edit state. The commit event will set the
@@ -536,44 +536,44 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
     // be at end of selection
     eventData->mPrimaryCursorPosition = std::max(eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition);
 
-    if (impl.mSelectableControlInterface != nullptr)
+    if(impl.mSelectableControlInterface != nullptr)
     {
       impl.mSelectableControlInterface->SelectionChanged(oldStart, oldEnd, eventData->mLeftSelectionPosition,
                                                          eventData->mRightSelectionPosition);
     }
   }
-  else if (Controller::NoTextTap::SHOW_SELECTION_POPUP == action)
+  else if(Controller::NoTextTap::SHOW_SELECTION_POPUP == action)
   {
     // Nothing to select. i.e. a white space, out of bounds
     impl.ChangeState(EventData::EDITING_WITH_POPUP);
 
     eventData->mPrimaryCursorPosition = noTextHitIndex;
 
-    eventData->mUpdateCursorPosition = true;
-    eventData->mUpdateGrabHandlePosition = true;
+    eventData->mUpdateCursorPosition      = true;
+    eventData->mUpdateGrabHandlePosition  = true;
     eventData->mScrollAfterUpdatePosition = true;
-    eventData->mUpdateInputStyle = true;
+    eventData->mUpdateInputStyle          = true;
   }
-  else if (Controller::NoTextTap::NO_ACTION == action)
+  else if(Controller::NoTextTap::NO_ACTION == action)
   {
     // Nothing to select. i.e. a white space, out of bounds
     eventData->mPrimaryCursorPosition = noTextHitIndex;
 
-    eventData->mUpdateCursorPosition = true;
-    eventData->mUpdateGrabHandlePosition = true;
+    eventData->mUpdateCursorPosition      = true;
+    eventData->mUpdateGrabHandlePosition  = true;
     eventData->mScrollAfterUpdatePosition = true;
-    eventData->mUpdateInputStyle = true;
+    eventData->mUpdateInputStyle          = true;
   }
 }
 
 void SelectionHandleController::Update(Controller::Impl& impl, HandleType handleType, const CursorInfo& cursorInfo)
 {
-  if ((LEFT_SELECTION_HANDLE != handleType) && (RIGHT_SELECTION_HANDLE != handleType))
+  if((LEFT_SELECTION_HANDLE != handleType) && (RIGHT_SELECTION_HANDLE != handleType))
   {
     return;
   }
 
-  ModelPtr& model = impl.mModel;
+  ModelPtr&     model          = impl.mModel;
   const Vector2 cursorPosition = cursorInfo.primaryPosition + model->mScrollPosition;
 
   // Sets the handle's position.
@@ -583,9 +583,9 @@ void SelectionHandleController::Update(Controller::Impl& impl, HandleType handle
 
   // If selection handle at start of the text and other at end of the text then all text is selected.
   const CharacterIndex startOfSelection =
-      std::min(eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition);
+    std::min(eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition);
   const CharacterIndex endOfSelection = std::max(eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition);
-  eventData->mAllTextSelected = (startOfSelection == 0) && (endOfSelection == model->mLogicalModel->mText.Count());
+  eventData->mAllTextSelected         = (startOfSelection == 0) && (endOfSelection == model->mLogicalModel->mText.Count());
 }
 
 } // namespace Text

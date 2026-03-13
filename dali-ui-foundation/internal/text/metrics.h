@@ -117,8 +117,8 @@ private:
    * Constructor.
    */
   Metrics(TextAbstraction::FontClient& fontClient)
-    : mFontClient(fontClient),
-      mGlyphType(TextAbstraction::BITMAP_GLYPH)
+  : mFontClient(fontClient),
+    mGlyphType(TextAbstraction::BITMAP_GLYPH)
   {
   }
 
@@ -126,7 +126,7 @@ private:
    * Constructor.
    */
   Metrics()
-    : mGlyphType(TextAbstraction::BITMAP_GLYPH)
+  : mGlyphType(TextAbstraction::BITMAP_GLYPH)
   {
   }
 
@@ -137,7 +137,7 @@ private:
    */
   TextAbstraction::FontClient& GetFontClient()
   {
-    if (!mFontClient)
+    if(!mFontClient)
     {
       mFontClient = TextAbstraction::FontClient::Get();
     }
@@ -152,7 +152,7 @@ private:
 
 private:
   TextAbstraction::FontClient mFontClient;
-  TextAbstraction::GlyphType mGlyphType;
+  TextAbstraction::GlyphType  mGlyphType;
 };
 
 } // namespace Text

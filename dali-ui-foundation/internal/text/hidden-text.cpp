@@ -31,19 +31,19 @@ namespace Ui
 {
 namespace Text
 {
-const char* const PROPERTY_MODE = "mode";
+const char* const PROPERTY_MODE                 = "mode";
 const char* const PROPERTY_SUBSTITUTE_CHARACTER = "substituteCharacter";
-const char* const PROPERTY_SUBSTITUTE_COUNT = "substituteCount";
-const char* const PROPERTY_SHOW_DURATION = "showDuration";
+const char* const PROPERTY_SUBSTITUTE_COUNT     = "substituteCount";
+const char* const PROPERTY_SHOW_DURATION        = "showDuration";
 
 HiddenText::HiddenText(Observer* observer)
-  : mObserver(observer),
-    mHideMode(static_cast<int>(Ui::HiddenInput::Mode::HIDE_NONE)),
-    mSubstituteText(STAR),
-    mDisplayDuration(DEFAULT_SHOW_DURATION),
-    mSubstituteCount(0),
-    mPreviousTextCount(0u),
-    mIsLastCharacterShow(false)
+: mObserver(observer),
+  mHideMode(static_cast<int>(Ui::HiddenInput::Mode::HIDE_NONE)),
+  mSubstituteText(STAR),
+  mDisplayDuration(DEFAULT_SHOW_DURATION),
+  mSubstituteCount(0),
+  mPreviousTextCount(0u),
+  mIsLastCharacterShow(false)
 {
   mTimer = Timer::New(mDisplayDuration);
   mTimer.TickSignal().Connect(this, &HiddenText::OnTick);
@@ -53,25 +53,25 @@ void HiddenText::SetProperties(const Property::Map& map)
 {
   const Property::Map::SizeType count = map.Count();
 
-  for (Property::Map::SizeType position = 0; position < count; ++position)
+  for(Property::Map::SizeType position = 0; position < count; ++position)
   {
-    KeyValuePair keyValue = map.GetKeyValue(position);
-    Property::Key& key = keyValue.first;
-    Property::Value& value = keyValue.second;
+    KeyValuePair     keyValue = map.GetKeyValue(position);
+    Property::Key&   key      = keyValue.first;
+    Property::Value& value    = keyValue.second;
 
-    if (key == Ui::HiddenInput::Property::MODE || key == PROPERTY_MODE)
+    if(key == Ui::HiddenInput::Property::MODE || key == PROPERTY_MODE)
     {
       value.Get(mHideMode);
     }
-    else if (key == Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER || key == PROPERTY_SUBSTITUTE_CHARACTER)
+    else if(key == Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER || key == PROPERTY_SUBSTITUTE_CHARACTER)
     {
       value.Get(mSubstituteText);
     }
-    else if (key == Ui::HiddenInput::Property::SUBSTITUTE_COUNT || key == PROPERTY_SUBSTITUTE_COUNT)
+    else if(key == Ui::HiddenInput::Property::SUBSTITUTE_COUNT || key == PROPERTY_SUBSTITUTE_COUNT)
     {
       value.Get(mSubstituteCount);
     }
-    else if (key == Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION || key == PROPERTY_SHOW_DURATION)
+    else if(key == Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION || key == PROPERTY_SHOW_DURATION)
     {
       value.Get(mDisplayDuration);
     }
@@ -80,9 +80,9 @@ void HiddenText::SetProperties(const Property::Map& map)
 
 void HiddenText::GetProperties(Property::Map& map)
 {
-  map[Ui::HiddenInput::Property::MODE] = mHideMode;
-  map[Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER] = mSubstituteText;
-  map[Ui::HiddenInput::Property::SUBSTITUTE_COUNT] = mSubstituteCount;
+  map[Ui::HiddenInput::Property::MODE]                         = mHideMode;
+  map[Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER]         = mSubstituteText;
+  map[Ui::HiddenInput::Property::SUBSTITUTE_COUNT]             = mSubstituteCount;
   map[Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION] = mDisplayDuration;
 }
 
@@ -92,45 +92,45 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
 
   destination.Resize(characterCount);
 
-  uint32_t* begin = destination.Begin();
-  uint32_t* end = begin + characterCount;
+  uint32_t* begin     = destination.Begin();
+  uint32_t* end       = begin + characterCount;
   uint32_t* hideStart = NULL;
-  uint32_t* hideEnd = NULL;
+  uint32_t* hideEnd   = NULL;
   uint32_t* sourcePos = source.Begin();
 
-  switch (mHideMode)
+  switch(mHideMode)
   {
     case Ui::HiddenInput::Mode::HIDE_NONE:
     {
       hideStart = NULL;
-      hideEnd = NULL;
+      hideEnd   = NULL;
       break;
     }
     case Ui::HiddenInput::Mode::HIDE_ALL:
     {
       hideStart = begin;
-      hideEnd = end;
+      hideEnd   = end;
       break;
     }
     case Ui::HiddenInput::Mode::HIDE_COUNT:
     {
       hideStart = begin;
-      hideEnd = begin + mSubstituteCount;
+      hideEnd   = begin + mSubstituteCount;
       break;
     }
     case Ui::HiddenInput::Mode::SHOW_COUNT:
     {
       hideStart = begin + mSubstituteCount;
-      hideEnd = end;
+      hideEnd   = end;
       break;
     }
     case Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER:
     {
       hideStart = begin;
-      hideEnd = end;
-      if (mPreviousTextCount < characterCount)
+      hideEnd   = end;
+      if(mPreviousTextCount < characterCount)
       {
-        if (mDisplayDuration > 0)
+        if(mDisplayDuration > 0)
         {
           mTimer.SetInterval(mDisplayDuration);
           mTimer.Start();
@@ -149,12 +149,12 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
     }
   }
 
-  if (mHideMode == Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER)
+  if(mHideMode == Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER)
   {
     Length currentPos = 0u;
-    for (; begin < end; ++begin)
+    for(; begin < end; ++begin)
     {
-      if (begin >= hideStart && begin < hideEnd && cursorPos > 0u && currentPos != cursorPos - 1u)
+      if(begin >= hideStart && begin < hideEnd && cursorPos > 0u && currentPos != cursorPos - 1u)
       {
         *begin = static_cast<uint32_t>(mSubstituteText);
       }
@@ -168,9 +168,9 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
   }
   else
   {
-    for (; begin < end; ++begin)
+    for(; begin < end; ++begin)
     {
-      if (begin >= hideStart && begin < hideEnd)
+      if(begin >= hideStart && begin < hideEnd)
       {
         *begin = static_cast<uint32_t>(mSubstituteText);
         sourcePos++;
@@ -196,7 +196,7 @@ int HiddenText::GetHideMode()
 
 bool HiddenText::OnTick()
 {
-  if (mObserver != NULL)
+  if(mObserver != NULL)
   {
     mObserver->DisplayTimeExpired();
   }

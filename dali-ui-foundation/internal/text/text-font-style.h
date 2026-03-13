@@ -48,27 +48,27 @@ const Scripting::StringEnum FONT_WEIGHT_STRING_TABLE[] = {{"thin", TextAbstracti
                                                           {"black", TextAbstraction::FontWeight::BLACK},
                                                           {"heavy", TextAbstraction::FontWeight::HEAVY},
                                                           {"extraBlack", TextAbstraction::FontWeight::EXTRA_BLACK}};
-const unsigned int FONT_WEIGHT_STRING_TABLE_COUNT =
-    sizeof(FONT_WEIGHT_STRING_TABLE) / sizeof(FONT_WEIGHT_STRING_TABLE[0]);
+const unsigned int          FONT_WEIGHT_STRING_TABLE_COUNT =
+  sizeof(FONT_WEIGHT_STRING_TABLE) / sizeof(FONT_WEIGHT_STRING_TABLE[0]);
 
 const Scripting::StringEnum FONT_WIDTH_STRING_TABLE[] = {
-    {"ultraCondensed", TextAbstraction::FontWidth::ULTRA_CONDENSED},
-    {"extraCondensed", TextAbstraction::FontWidth::EXTRA_CONDENSED},
-    {"condensed", TextAbstraction::FontWidth::CONDENSED},
-    {"semiCondensed", TextAbstraction::FontWidth::SEMI_CONDENSED},
-    {"normal", TextAbstraction::FontWidth::NORMAL},
-    {"semiExpanded", TextAbstraction::FontWidth::SEMI_EXPANDED},
-    {"expanded", TextAbstraction::FontWidth::EXPANDED},
-    {"extraExpanded", TextAbstraction::FontWidth::EXTRA_EXPANDED},
-    {"ultraExpanded", TextAbstraction::FontWidth::ULTRA_EXPANDED},
+  {"ultraCondensed", TextAbstraction::FontWidth::ULTRA_CONDENSED},
+  {"extraCondensed", TextAbstraction::FontWidth::EXTRA_CONDENSED},
+  {"condensed", TextAbstraction::FontWidth::CONDENSED},
+  {"semiCondensed", TextAbstraction::FontWidth::SEMI_CONDENSED},
+  {"normal", TextAbstraction::FontWidth::NORMAL},
+  {"semiExpanded", TextAbstraction::FontWidth::SEMI_EXPANDED},
+  {"expanded", TextAbstraction::FontWidth::EXPANDED},
+  {"extraExpanded", TextAbstraction::FontWidth::EXTRA_EXPANDED},
+  {"ultraExpanded", TextAbstraction::FontWidth::ULTRA_EXPANDED},
 };
 const unsigned int FONT_WIDTH_STRING_TABLE_COUNT = sizeof(FONT_WIDTH_STRING_TABLE) / sizeof(FONT_WIDTH_STRING_TABLE[0]);
 
-const Scripting::StringEnum FONT_SLANT_STRING_TABLE[] = {{"normal", TextAbstraction::FontSlant::NORMAL},
-                                                         {"roman", TextAbstraction::FontSlant::ROMAN},
-                                                         {"italic", TextAbstraction::FontSlant::ITALIC},
-                                                         {"oblique", TextAbstraction::FontSlant::OBLIQUE}};
-const unsigned int FONT_SLANT_STRING_TABLE_COUNT = sizeof(FONT_SLANT_STRING_TABLE) / sizeof(FONT_SLANT_STRING_TABLE[0]);
+const Scripting::StringEnum FONT_SLANT_STRING_TABLE[]     = {{"normal", TextAbstraction::FontSlant::NORMAL},
+                                                             {"roman", TextAbstraction::FontSlant::ROMAN},
+                                                             {"italic", TextAbstraction::FontSlant::ITALIC},
+                                                             {"oblique", TextAbstraction::FontSlant::OBLIQUE}};
+const unsigned int          FONT_SLANT_STRING_TABLE_COUNT = sizeof(FONT_SLANT_STRING_TABLE) / sizeof(FONT_SLANT_STRING_TABLE[0]);
 
 namespace FontStyle
 {

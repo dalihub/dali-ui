@@ -38,7 +38,7 @@ namespace Text
  *
  * @return The vertical offset before text.
  */
-float GetPreOffsetVerticalLineAlignment(const LineRun& line,
+float GetPreOffsetVerticalLineAlignment(const LineRun&                                          line,
                                         const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
 
 /**
@@ -50,7 +50,7 @@ float GetPreOffsetVerticalLineAlignment(const LineRun& line,
  *
  * @return The vertical offset after text.
  */
-float GetPostOffsetVerticalLineAlignment(const LineRun& line,
+float GetPostOffsetVerticalLineAlignment(const LineRun&                                          line,
                                          const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
 } // namespace Text
 

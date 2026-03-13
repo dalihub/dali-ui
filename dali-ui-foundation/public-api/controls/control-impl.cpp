@@ -73,14 +73,14 @@ void CreateClippingRenderer(Control& controlImpl)
 {
   // We want to add a transparent background if we do not have one for clipping.
   Actor self(controlImpl.Self());
-  int clippingMode = ClippingMode::DISABLED;
-  if (self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode))
+  int   clippingMode = ClippingMode::DISABLED;
+  if(self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode))
   {
     Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(controlImpl);
 
-    if (clippingMode == ClippingMode::CLIP_CHILDREN &&
-        (DALI_UNLIKELY(!controlDataImpl.mVisualData) || controlDataImpl.mVisualData->mVisuals.Empty()) &&
-        self.GetRendererCount() == 0u)
+    if(clippingMode == ClippingMode::CLIP_CHILDREN &&
+       (DALI_UNLIKELY(!controlDataImpl.mVisualData) || controlDataImpl.mVisualData->mVisuals.Empty()) &&
+       self.GetRendererCount() == 0u)
     {
       controlImpl.SetBackgroundColor(Color::TRANSPARENT);
     }
@@ -94,26 +94,26 @@ void CreateClippingRenderer(Control& controlImpl)
 void RegisterControlAccessibleGetter()
 {
   static bool onceFlag = false;
-  if (DALI_UNLIKELY(!onceFlag))
+  if(DALI_UNLIKELY(!onceFlag))
   {
     onceFlag = true;
     Accessibility::Accessible::RegisterExternalAccessibleGetter(
-        [](Dali::Actor actor) -> std::pair<std::shared_ptr<Accessibility::Accessible>, bool>
-        {
-          auto control = Ui::Control::DownCast(actor);
-          if (!control)
-          {
-            return {nullptr, true};
-          }
+      [](Dali::Actor actor) -> std::pair<std::shared_ptr<Accessibility::Accessible>, bool>
+    {
+      auto control = Ui::Control::DownCast(actor);
+      if(!control)
+      {
+        return {nullptr, true};
+      }
 
-          if (Ui::DevelControl::IsCreateAccessibleEnabled(control))
-          {
-            auto& controlImpl = Ui::Internal::GetImplementation(control);
-            return {std::shared_ptr<DevelControl::ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
-          }
+      if(Ui::DevelControl::IsCreateAccessibleEnabled(control))
+      {
+        auto& controlImpl = Ui::Internal::GetImplementation(control);
+        return {std::shared_ptr<DevelControl::ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
+      }
 
-          return {nullptr, false};
-        });
+      return {nullptr, false};
+    });
   }
 }
 } // unnamed namespace
@@ -140,13 +140,13 @@ Ui::Control Control::New(ControlBehaviour additionalBehaviour)
 
 void Control::SetStyleName(const std::string& styleName)
 {
-  if (styleName != mImpl->mStyleName)
+  if(styleName != mImpl->mStyleName)
   {
     mImpl->mStyleName = styleName;
 
     // Apply new style, if stylemanager is available
     Ui::StyleManager styleManager = Ui::StyleManager::Get();
-    if (styleManager)
+    if(styleManager)
     {
       GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
     }
@@ -167,7 +167,7 @@ void Control::SetBackgroundColor(const Vector4& color)
   map.Insert(Ui::ColorVisual::Property::MIX_COLOR, color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
-  if (visualImplPtr && visualImplPtr->GetType() == Ui::Visual::COLOR)
+  if(visualImplPtr && visualImplPtr->GetType() == Ui::Visual::COLOR)
   {
     // Update background color only
     visualImplPtr->DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
@@ -181,7 +181,7 @@ void Control::SetBackground(const Property::Map& map)
 {
   Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
   visual.SetName("background");
-  if (visual)
+  if(visual)
   {
     // Ignore corner radius for offscreen case.
     Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
@@ -206,7 +206,7 @@ void Control::SetRenderEffect(Ui::RenderEffect effect)
 {
   ClearRenderEffect();
 
-  if (effect)
+  if(effect)
   {
     Internal::RenderEffectImpl* object = dynamic_cast<Internal::RenderEffectImpl*>(effect.GetObjectPtr());
     DALI_ASSERT_ALWAYS(object && "Given render effect is not valid.");
@@ -229,7 +229,7 @@ RenderEffect Control::GetRenderEffect() const
 
 void Control::ClearRenderEffect()
 {
-  if (mImpl->mRenderEffect)
+  if(mImpl->mRenderEffect)
   {
     RenderEffectImplPtr effectImpl = std::move(mImpl->mRenderEffect);
 
@@ -264,14 +264,14 @@ std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::GetAccessibleObjec
 
 void Control::EnableGestureDetection(GestureType::Value type)
 {
-  if ((type & GestureType::PINCH) && !mImpl->mPinchGestureDetector)
+  if((type & GestureType::PINCH) && !mImpl->mPinchGestureDetector)
   {
     mImpl->mPinchGestureDetector = PinchGestureDetector::New();
     mImpl->mPinchGestureDetector.DetectedSignal().Connect(mImpl, &Impl::PinchDetected);
     mImpl->mPinchGestureDetector.Attach(Self());
   }
 
-  if ((type & GestureType::PAN) && !mImpl->mPanGestureDetector)
+  if((type & GestureType::PAN) && !mImpl->mPanGestureDetector)
   {
     mImpl->mPanGestureDetector = PanGestureDetector::New();
     mImpl->mPanGestureDetector.SetMaximumTouchesRequired(2);
@@ -279,14 +279,14 @@ void Control::EnableGestureDetection(GestureType::Value type)
     mImpl->mPanGestureDetector.Attach(Self());
   }
 
-  if ((type & GestureType::TAP) && !mImpl->mTapGestureDetector)
+  if((type & GestureType::TAP) && !mImpl->mTapGestureDetector)
   {
     mImpl->mTapGestureDetector = TapGestureDetector::New();
     mImpl->mTapGestureDetector.DetectedSignal().Connect(mImpl, &Impl::TapDetected);
     mImpl->mTapGestureDetector.Attach(Self());
   }
 
-  if ((type & GestureType::LONG_PRESS) && !mImpl->mLongPressGestureDetector)
+  if((type & GestureType::LONG_PRESS) && !mImpl->mLongPressGestureDetector)
   {
     mImpl->mLongPressGestureDetector = LongPressGestureDetector::New();
     mImpl->mLongPressGestureDetector.DetectedSignal().Connect(mImpl, &Impl::LongPressDetected);
@@ -296,25 +296,25 @@ void Control::EnableGestureDetection(GestureType::Value type)
 
 void Control::DisableGestureDetection(GestureType::Value type)
 {
-  if ((type & GestureType::PINCH) && mImpl->mPinchGestureDetector)
+  if((type & GestureType::PINCH) && mImpl->mPinchGestureDetector)
   {
     mImpl->mPinchGestureDetector.Detach(Self());
     mImpl->mPinchGestureDetector.Reset();
   }
 
-  if ((type & GestureType::PAN) && mImpl->mPanGestureDetector)
+  if((type & GestureType::PAN) && mImpl->mPanGestureDetector)
   {
     mImpl->mPanGestureDetector.Detach(Self());
     mImpl->mPanGestureDetector.Reset();
   }
 
-  if ((type & GestureType::TAP) && mImpl->mTapGestureDetector)
+  if((type & GestureType::TAP) && mImpl->mTapGestureDetector)
   {
     mImpl->mTapGestureDetector.Detach(Self());
     mImpl->mTapGestureDetector.Reset();
   }
 
-  if ((type & GestureType::LONG_PRESS) && mImpl->mLongPressGestureDetector)
+  if((type & GestureType::LONG_PRESS) && mImpl->mLongPressGestureDetector)
   {
     mImpl->mLongPressGestureDetector.Detach(Self());
     mImpl->mLongPressGestureDetector.Reset();
@@ -353,7 +353,7 @@ bool Control::IsKeyboardNavigationSupported()
 
 void Control::SetKeyInputFocus()
 {
-  if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     Ui::KeyInputFocusManager::Get().SetFocus(Ui::Control::DownCast(Self()));
   }
@@ -362,10 +362,10 @@ void Control::SetKeyInputFocus()
 bool Control::HasKeyInputFocus()
 {
   bool result = false;
-  if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     Ui::Control control = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
-    if (Self() == control)
+    if(Self() == control)
     {
       result = true;
     }
@@ -375,7 +375,7 @@ bool Control::HasKeyInputFocus()
 
 void Control::ClearKeyInputFocus()
 {
-  if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     Ui::KeyInputFocusManager::Get().RemoveFocus(Ui::Control::DownCast(Self()));
   }
@@ -402,7 +402,7 @@ void Control::KeyboardEnter()
 
 bool Control::OnAccessibilityActivated()
 {
-  if (Ui::KeyboardFocusManager::Get().SetCurrentFocusActor(Self()))
+  if(Ui::KeyboardFocusManager::Get().SetCurrentFocusActor(Self()))
   {
     return OnKeyboardEnter();
   }
@@ -469,12 +469,12 @@ bool Control::EmitKeyEventSignal(const KeyEvent& event)
   consumed = mImpl->FilterKeyEvent(event);
 
   // signals are allocated dynamically when someone connects
-  if (!consumed && !mImpl->mKeyEventSignal.Empty())
+  if(!consumed && !mImpl->mKeyEventSignal.Empty())
   {
     consumed = mImpl->mKeyEventSignal.Emit(handle, event);
   }
 
-  if (!consumed)
+  if(!consumed)
   {
     // Notification for derived classes
     consumed = OnKeyEvent(event);
@@ -485,18 +485,18 @@ bool Control::EmitKeyEventSignal(const KeyEvent& event)
 
 Dali::Texture Control::GetOffScreenRenderingOutput() const
 {
-  if (mImpl->mOffScreenRenderingType != DevelControl::OffScreenRenderingType::REFRESH_ONCE)
+  if(mImpl->mOffScreenRenderingType != DevelControl::OffScreenRenderingType::REFRESH_ONCE)
   {
     DALI_LOG_ERROR(
-        "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");
+      "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");
     return Dali::Texture();
   }
   return mImpl->mOffScreenRenderingImpl->GetTexture();
 }
 
 Control::Control(ControlBehaviour behaviourFlags)
-  : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
-    mImpl(new Impl(*this))
+: CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
+  mImpl(new Impl(*this))
 {
   mImpl->mFlags = behaviourFlags;
 }
@@ -511,7 +511,7 @@ Control::~Control()
 
 void Control::Initialize()
 {
-  if (!(mImpl->mFlags & DISABLE_VISUALS))
+  if(!(mImpl->mFlags & DISABLE_VISUALS))
   {
     mImpl->InitializeVisualData();
   }
@@ -521,12 +521,12 @@ void Control::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  if (!(mImpl->mFlags & DISABLE_STYLE_CHANGE_SIGNALS))
+  if(!(mImpl->mFlags & DISABLE_STYLE_CHANGE_SIGNALS))
   {
     Ui::StyleManager styleManager = StyleManager::Get();
 
     // if stylemanager is available
-    if (styleManager)
+    if(styleManager)
     {
       StyleManager& styleManagerImpl = GetImpl(styleManager);
 
@@ -538,7 +538,7 @@ void Control::Initialize()
     }
   }
 
-  if (mImpl->mFlags & REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
+  if(mImpl->mFlags & REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
   {
     SetKeyboardNavigationSupport(true);
   }
@@ -557,7 +557,7 @@ bool Control::IsResourceReady() const
 void Control::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
 {
   // By default the control is only interested in theme (not font) changes
-  if (styleManager && change == StyleChange::THEME_CHANGE)
+  if(styleManager && change == StyleChange::THEME_CHANGE)
   {
     GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
     RelayoutRequest();
@@ -566,13 +566,13 @@ void Control::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type cha
 
 void Control::OnPinch(const PinchGesture& pinch)
 {
-  if (!(mImpl->mStartingPinchScale))
+  if(!(mImpl->mStartingPinchScale))
   {
     // lazy allocate
     mImpl->mStartingPinchScale = new Vector3;
   }
 
-  if (pinch.GetState() == GestureState::STARTED)
+  if(pinch.GetState() == GestureState::STARTED)
   {
     *(mImpl->mStartingPinchScale) = Self().GetCurrentProperty<Vector3>(Actor::Property::SCALE);
   }
@@ -596,24 +596,24 @@ void Control::EmitKeyInputFocusSignal(bool focusGained)
 {
   Dali::Ui::Control handle(GetOwner());
 
-  if (Accessibility::IsUp())
+  if(Accessibility::IsUp())
   {
     auto accessible = GetAccessibleObject();
-    if (DALI_LIKELY(accessible))
+    if(DALI_LIKELY(accessible))
     {
       accessible->EmitFocused(focusGained);
       auto parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
-      if (parent && !accessible->GetStates()[Dali::Accessibility::State::MANAGES_DESCENDANTS])
+      if(parent && !accessible->GetStates()[Dali::Accessibility::State::MANAGES_DESCENDANTS])
       {
         parent->EmitActiveDescendantChanged(accessible.get());
       }
     }
   }
 
-  if (focusGained)
+  if(focusGained)
   {
     // signals are allocated dynamically when someone connects
-    if (!mImpl->mKeyInputFocusGainedSignal.Empty())
+    if(!mImpl->mKeyInputFocusGainedSignal.Empty())
     {
       mImpl->mKeyInputFocusGainedSignal.Emit(handle);
     }
@@ -621,7 +621,7 @@ void Control::EmitKeyInputFocusSignal(bool focusGained)
   else
   {
     // signals are allocated dynamically when someone connects
-    if (!mImpl->mKeyInputFocusLostSignal.Empty())
+    if(!mImpl->mKeyInputFocusLostSignal.Empty())
     {
       mImpl->mKeyInputFocusLostSignal.Emit(handle);
     }
@@ -663,11 +663,11 @@ void Control::OnPropertySet(Property::Index index, const Property::Value& proper
 {
   // If the clipping mode has been set, we may need to create a renderer.
   // Only do this if we are already on-stage as the OnSceneConnection will handle the off-stage clipping controls.
-  switch (index)
+  switch(index)
   {
     case Actor::Property::CLIPPING_MODE:
     {
-      if (Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+      if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
       {
         // Note: This method will handle whether creation of the renderer is required.
         CreateClippingRenderer(*this);
@@ -677,7 +677,7 @@ void Control::OnPropertySet(Property::Index index, const Property::Value& proper
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
-      if (!enabled && Self() == Dali::Ui::KeyboardFocusManager::Get().GetCurrentFocusActor())
+      if(!enabled && Self() == Dali::Ui::KeyboardFocusManager::Get().GetCurrentFocusActor())
       {
         Dali::Ui::KeyboardFocusManager::Get().ClearFocus();
       }
@@ -691,7 +691,7 @@ void Control::OnSizeSet(const Vector3& targetSize)
   Vector2 size(targetSize);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
-  if (visualImplPtr)
+  if(visualImplPtr)
   {
     visualImplPtr->SetControlSize(size); // Send an empty map as we do not want to modify the visual's set transform
   }
@@ -701,12 +701,12 @@ void Control::OnSizeSet(const Vector3& targetSize)
   mImpl->RegisterProcessorOnce();
 
   // Refresh render effects
-  if (mImpl->mRenderEffect)
+  if(mImpl->mRenderEffect)
   {
     mImpl->mRenderEffect->Refresh();
   }
 
-  if (mImpl->mOffScreenRenderingImpl)
+  if(mImpl->mOffScreenRenderingImpl)
   {
     mImpl->mOffScreenRenderingImpl->Refresh();
   }
@@ -722,11 +722,11 @@ void Control::OnSizeAnimation(Animation& animation, const Vector3& targetSize)
 
 void Control::OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state)
 {
-  if (state == Animation::State::PLAYING)
+  if(state == Animation::State::PLAYING)
   {
     mImpl->CreateAnimationConstraints(animation.GetBaseObject(), index);
   }
-  else if (state == Animation::State::STOPPED)
+  else if(state == Animation::State::STOPPED)
   {
     mImpl->ClearAnimationConstraints(animation.GetBaseObject(), index);
   }
@@ -734,7 +734,7 @@ void Control::OnAnimateAnimatableProperty(Animation& animation, Property::Index 
 
 void Control::OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied)
 {
-  if (applied)
+  if(applied)
   {
     mImpl->CreateAnimationConstraints(constraint.GetBaseObject(), index);
   }
@@ -746,11 +746,11 @@ void Control::OnConstraintAnimatableProperty(Constraint& constraint, Property::I
 
 void Control::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward)
 {
-  if (mImpl->mRenderEffect)
+  if(mImpl->mRenderEffect)
   {
     mImpl->mRenderEffect->GetOffScreenRenderTasks(tasks, isForward);
   }
-  if (mImpl->mOffScreenRenderingImpl)
+  if(mImpl->mOffScreenRenderingImpl)
   {
     mImpl->mOffScreenRenderingImpl->GetOffScreenRenderTasks(tasks, isForward);
   }
@@ -764,27 +764,27 @@ bool Control::OnKeyEvent(const KeyEvent& event)
 void Control::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
   // When set the padding or margin on the control, child should be resized and repositioned.
-  if ((mImpl->mPadding.start != 0) || (mImpl->mPadding.end != 0) || (mImpl->mPadding.top != 0) ||
-      (mImpl->mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
-      (mImpl->mMargin.top != 0) || (mImpl->mMargin.bottom != 0))
+  if((mImpl->mPadding.start != 0) || (mImpl->mPadding.end != 0) || (mImpl->mPadding.top != 0) ||
+     (mImpl->mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
+     (mImpl->mMargin.top != 0) || (mImpl->mMargin.bottom != 0))
   {
-    for (unsigned int i = 0, numChildren = Self().GetChildCount(); i < numChildren; ++i)
+    for(unsigned int i = 0, numChildren = Self().GetChildCount(); i < numChildren; ++i)
     {
-      Actor child = Self().GetChildAt(i);
+      Actor   child = Self().GetChildAt(i);
       Vector2 newChildSize(size);
 
       Extents padding = mImpl->mPadding;
 
-      Dali::CustomActor ownerActor(GetOwner());
+      Dali::CustomActor           ownerActor(GetOwner());
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-          ownerActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+        ownerActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
 
-      if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
       {
         std::swap(padding.start, padding.end);
       }
 
-      newChildSize.width = size.width - (padding.start + padding.end);
+      newChildSize.width  = size.width - (padding.start + padding.end);
       newChildSize.height = size.height - (padding.top + padding.bottom);
 
       // Cannot use childs Position property as it can already have padding and margin applied on it,
@@ -799,14 +799,14 @@ void Control::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
   }
 
-  if (Accessibility::IsUp())
+  if(Accessibility::IsUp())
   {
     auto accessible = GetAccessibleObject();
-    if (DALI_LIKELY(accessible))
+    if(DALI_LIKELY(accessible))
     {
       auto highlightFrame = accessible->GetHighlightActor();
-      if (accessible->GetCurrentlyHighlightedActor() == this->Self() &&
-          highlightFrame.GetProperty<Vector3>(Dali::Actor::Property::SIZE).GetVectorXY() != size)
+      if(accessible->GetCurrentlyHighlightedActor() == this->Self() &&
+         highlightFrame.GetProperty<Vector3>(Dali::Actor::Property::SIZE).GetVectorXY() != size)
       {
         // TODO : Need to consider how we can reduce this cost
         highlightFrame.SetProperty(Actor::Property::SIZE, size);
@@ -828,7 +828,7 @@ Vector3 Control::GetNaturalSize()
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Control::GetNaturalSize for %s\n",
                 Self().GetProperty<std::string>(Dali::Actor::Property::NAME).c_str());
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
-  if (visualImplPtr)
+  if(visualImplPtr)
   {
     Vector2 naturalSize;
     visualImplPtr->GetNaturalSize(naturalSize);

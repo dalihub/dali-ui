@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <functional>
-#include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <functional>
 
 // INTERNAL INCLUDES
 
@@ -45,11 +45,9 @@ class DummyComponentImpl;
 class DALI_UI_API DummyComponent : public View
 {
 public:
-
   // Typedefs
 
 public: // Creation & Destruction
-
   /**
    * @brief Creates an uninitialized DummyComponent handle.
    *
@@ -88,7 +86,6 @@ public: // Creation & Destruction
   ~DummyComponent();
 
 public: // Operators
-
   /**
    * @brief Copy assignment operator.
    *
@@ -107,7 +104,6 @@ public: // Operators
   DummyComponent& operator=(DummyComponent&& rhs) noexcept;
 
 public: // Static Methods
-
   /**
    * @brief Downcasts a handle to DummyComponent handle.
    *
@@ -120,14 +116,11 @@ public: // Static Methods
   static DummyComponent DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-
   // @CHAIN_START(DummyComponent, View)
   // @CHAIN_END
 
 public: // Signals
-
 public: // Not intended for application developers
-
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.

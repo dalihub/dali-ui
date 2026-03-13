@@ -54,7 +54,7 @@ Backend::Backend(Backend&& handle) = default;
 Backend& Backend::operator=(Backend&& handle) = default;
 
 Backend::Backend(Internal::Backend* internal)
-  : BaseHandle(internal)
+: BaseHandle(internal)
 {
 }
 

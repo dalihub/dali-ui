@@ -35,14 +35,14 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 const char* EMPTY_STRING = "";
 
-const char* const PLACEHOLDER_TEXT = "text";
+const char* const PLACEHOLDER_TEXT         = "text";
 const char* const PLACEHOLDER_TEXT_FOCUSED = "textFocused";
-const char* const PLACEHOLDER_COLOR = "color";
-const char* const PLACEHOLDER_FONT_FAMILY = "fontFamily";
-const char* const PLACEHOLDER_FONT_STYLE = "fontStyle";
-const char* const PLACEHOLDER_POINT_SIZE = "pointSize";
-const char* const PLACEHOLDER_PIXEL_SIZE = "pixelSize";
-const char* const PLACEHOLDER_ELLIPSIS = "ellipsis";
+const char* const PLACEHOLDER_COLOR        = "color";
+const char* const PLACEHOLDER_FONT_FAMILY  = "fontFamily";
+const char* const PLACEHOLDER_FONT_STYLE   = "fontStyle";
+const char* const PLACEHOLDER_POINT_SIZE   = "pointSize";
+const char* const PLACEHOLDER_PIXEL_SIZE   = "pixelSize";
+const char* const PLACEHOLDER_ELLIPSIS     = "ellipsis";
 
 /**
  * Convert all string keys to int keys
@@ -51,40 +51,40 @@ const char* const PLACEHOLDER_ELLIPSIS = "ellipsis";
  */
 static Dali::Property::Index GetIntKey(const Dali::Property::Key& key)
 {
-  if (key.type == Dali::Property::Key::INDEX)
+  if(key.type == Dali::Property::Key::INDEX)
   {
     return key.indexKey;
   }
 
-  if (key.stringKey == PLACEHOLDER_TEXT)
+  if(key.stringKey == PLACEHOLDER_TEXT)
   {
     return Dali::Ui::Text::PlaceHolder::Property::TEXT;
   }
-  else if (key.stringKey == PLACEHOLDER_TEXT_FOCUSED)
+  else if(key.stringKey == PLACEHOLDER_TEXT_FOCUSED)
   {
     return Dali::Ui::Text::PlaceHolder::Property::TEXT_FOCUSED;
   }
-  else if (key.stringKey == PLACEHOLDER_COLOR)
+  else if(key.stringKey == PLACEHOLDER_COLOR)
   {
     return Dali::Ui::Text::PlaceHolder::Property::COLOR;
   }
-  else if (key.stringKey == PLACEHOLDER_FONT_FAMILY)
+  else if(key.stringKey == PLACEHOLDER_FONT_FAMILY)
   {
     return Dali::Ui::Text::PlaceHolder::Property::FONT_FAMILY;
   }
-  else if (key.stringKey == PLACEHOLDER_FONT_STYLE)
+  else if(key.stringKey == PLACEHOLDER_FONT_STYLE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::FONT_STYLE;
   }
-  else if (key.stringKey == PLACEHOLDER_POINT_SIZE)
+  else if(key.stringKey == PLACEHOLDER_POINT_SIZE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::POINT_SIZE;
   }
-  else if (key.stringKey == PLACEHOLDER_PIXEL_SIZE)
+  else if(key.stringKey == PLACEHOLDER_PIXEL_SIZE)
   {
     return Dali::Ui::Text::PlaceHolder::Property::PIXEL_SIZE;
   }
-  else if (key.stringKey == PLACEHOLDER_ELLIPSIS)
+  else if(key.stringKey == PLACEHOLDER_ELLIPSIS)
   {
     return Dali::Ui::Text::PlaceHolder::Property::ELLIPSIS;
   }
@@ -103,10 +103,10 @@ namespace Text
 void Controller::PlaceholderHandler::SetPlaceholderTextElideEnabled(Controller& controller, bool enabled)
 {
   controller.mImpl->mEventData->mIsPlaceholderElideEnabled = enabled;
-  controller.mImpl->mEventData->mPlaceholderEllipsisFlag = true;
+  controller.mImpl->mEventData->mPlaceholderEllipsisFlag   = true;
 
   // Update placeholder if there is no text
-  if (controller.mImpl->IsShowingPlaceholderText() || (0u == controller.mImpl->mModel->mLogicalModel->mText.Count()))
+  if(controller.mImpl->IsShowingPlaceholderText() || (0u == controller.mImpl->mModel->mLogicalModel->mText.Count()))
   {
     ShowPlaceholderText(*controller.mImpl);
   }
@@ -120,9 +120,9 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextElideEnabled(const Control
 void Controller::PlaceholderHandler::SetPlaceholderText(Controller& controller, PlaceholderType type,
                                                         const std::string& text)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (PLACEHOLDER_TYPE_INACTIVE == type)
+    if(PLACEHOLDER_TYPE_INACTIVE == type)
     {
       controller.mImpl->mEventData->mPlaceholderTextInactive = text;
     }
@@ -132,7 +132,7 @@ void Controller::PlaceholderHandler::SetPlaceholderText(Controller& controller, 
     }
 
     // Update placeholder if there is no text
-    if (controller.mImpl->IsShowingPlaceholderText() || (0u == controller.mImpl->mModel->mLogicalModel->mText.Count()))
+    if(controller.mImpl->IsShowingPlaceholderText() || (0u == controller.mImpl->mModel->mLogicalModel->mText.Count()))
     {
       ShowPlaceholderText(*controller.mImpl);
     }
@@ -142,9 +142,9 @@ void Controller::PlaceholderHandler::SetPlaceholderText(Controller& controller, 
 void Controller::PlaceholderHandler::GetPlaceholderText(const Controller& controller, PlaceholderType type,
                                                         std::string& text)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (PLACEHOLDER_TYPE_INACTIVE == type)
+    if(PLACEHOLDER_TYPE_INACTIVE == type)
     {
       text = controller.mImpl->mEventData->mPlaceholderTextInactive;
     }
@@ -155,10 +155,10 @@ void Controller::PlaceholderHandler::GetPlaceholderText(const Controller& contro
   }
 }
 
-void Controller::PlaceholderHandler::SetPlaceholderFontFamily(Controller& controller,
+void Controller::PlaceholderHandler::SetPlaceholderFontFamily(Controller&        controller,
                                                               const std::string& placeholderTextFontFamily)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     // if mPlaceholderFont is null, create an instance.
     CreatePlaceholderFont(controller);
@@ -174,7 +174,7 @@ void Controller::PlaceholderHandler::SetPlaceholderFontFamily(Controller& contro
 
 std::string Controller::PlaceholderHandler::GetPlaceholderFontFamily(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.family;
   }
@@ -184,13 +184,13 @@ std::string Controller::PlaceholderHandler::GetPlaceholderFontFamily(const Contr
 
 void Controller::PlaceholderHandler::SetPlaceholderTextFontWeight(Controller& controller, FontWeight weight)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     // if mPlaceholderFont is null, create an instance.
     CreatePlaceholderFont(controller);
 
     controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.weight = weight;
-    controller.mImpl->mEventData->mPlaceholderFont->weightDefined = true;
+    controller.mImpl->mEventData->mPlaceholderFont->weightDefined           = true;
 
     controller.mImpl->RequestRelayout();
   }
@@ -198,7 +198,7 @@ void Controller::PlaceholderHandler::SetPlaceholderTextFontWeight(Controller& co
 
 bool Controller::PlaceholderHandler::IsPlaceholderTextFontWeightDefined(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->weightDefined;
   }
@@ -207,7 +207,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontWeightDefined(const Co
 
 FontWeight Controller::PlaceholderHandler::GetPlaceholderTextFontWeight(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.weight;
   }
@@ -217,13 +217,13 @@ FontWeight Controller::PlaceholderHandler::GetPlaceholderTextFontWeight(const Co
 
 void Controller::PlaceholderHandler::SetPlaceholderTextFontWidth(Controller& controller, FontWidth width)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     // if mPlaceholderFont is null, create an instance.
     CreatePlaceholderFont(controller);
 
     controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.width = width;
-    controller.mImpl->mEventData->mPlaceholderFont->widthDefined = true;
+    controller.mImpl->mEventData->mPlaceholderFont->widthDefined           = true;
 
     controller.mImpl->RequestRelayout();
   }
@@ -231,7 +231,7 @@ void Controller::PlaceholderHandler::SetPlaceholderTextFontWidth(Controller& con
 
 bool Controller::PlaceholderHandler::IsPlaceholderTextFontWidthDefined(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->widthDefined;
   }
@@ -240,7 +240,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontWidthDefined(const Con
 
 FontWidth Controller::PlaceholderHandler::GetPlaceholderTextFontWidth(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.width;
   }
@@ -250,13 +250,13 @@ FontWidth Controller::PlaceholderHandler::GetPlaceholderTextFontWidth(const Cont
 
 void Controller::PlaceholderHandler::SetPlaceholderTextFontSlant(Controller& controller, FontSlant slant)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     // if mPlaceholderFont is null, create an instance.
     CreatePlaceholderFont(controller);
 
     controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.slant = slant;
-    controller.mImpl->mEventData->mPlaceholderFont->slantDefined = true;
+    controller.mImpl->mEventData->mPlaceholderFont->slantDefined           = true;
 
     controller.mImpl->RequestRelayout();
   }
@@ -264,7 +264,7 @@ void Controller::PlaceholderHandler::SetPlaceholderTextFontSlant(Controller& con
 
 bool Controller::PlaceholderHandler::IsPlaceholderTextFontSlantDefined(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->slantDefined;
   }
@@ -273,7 +273,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontSlantDefined(const Con
 
 FontSlant Controller::PlaceholderHandler::GetPlaceholderTextFontSlant(const Controller& controller)
 {
-  if ((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
+  if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
     return controller.mImpl->mEventData->mPlaceholderFont->mFontDescription.slant;
   }
@@ -284,32 +284,32 @@ FontSlant Controller::PlaceholderHandler::GetPlaceholderTextFontSlant(const Cont
 void Controller::PlaceholderHandler::SetPlaceholderTextFontSize(Controller& controller, float fontSize,
                                                                 FontSizeType type)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     // if mPlaceholderFont is null, create an instance.
     CreatePlaceholderFont(controller);
 
-    switch (type)
+    switch(type)
     {
       case POINT_SIZE:
       {
         controller.mImpl->mEventData->mPlaceholderFont->mDefaultPointSize = fontSize;
-        controller.mImpl->mEventData->mPlaceholderFont->sizeDefined = true;
-        controller.mImpl->mEventData->mIsPlaceholderPixelSize = false; // Font size flag
+        controller.mImpl->mEventData->mPlaceholderFont->sizeDefined       = true;
+        controller.mImpl->mEventData->mIsPlaceholderPixelSize             = false; // Font size flag
         break;
       }
       case PIXEL_SIZE:
       {
         // Point size = Pixel size * 72.f / DPI
-        unsigned int horizontalDpi = 0u;
-        unsigned int verticalDpi = 0u;
-        TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+        unsigned int                horizontalDpi = 0u;
+        unsigned int                verticalDpi   = 0u;
+        TextAbstraction::FontClient fontClient    = TextAbstraction::FontClient::Get();
         fontClient.GetDpi(horizontalDpi, verticalDpi);
 
         controller.mImpl->mEventData->mPlaceholderFont->mDefaultPointSize =
-            (fontSize * 72.f) / static_cast<float>(horizontalDpi);
+          (fontSize * 72.f) / static_cast<float>(horizontalDpi);
         controller.mImpl->mEventData->mPlaceholderFont->sizeDefined = true;
-        controller.mImpl->mEventData->mIsPlaceholderPixelSize = true; // Font size flag
+        controller.mImpl->mEventData->mIsPlaceholderPixelSize       = true; // Font size flag
         break;
       }
     }
@@ -321,13 +321,13 @@ void Controller::PlaceholderHandler::SetPlaceholderTextFontSize(Controller& cont
 float Controller::PlaceholderHandler::GetPlaceholderTextFontSize(const Controller& controller, FontSizeType type)
 {
   float value = 0.0f;
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    switch (type)
+    switch(type)
     {
       case POINT_SIZE:
       {
-        if (NULL != controller.mImpl->mEventData->mPlaceholderFont)
+        if(NULL != controller.mImpl->mEventData->mPlaceholderFont)
         {
           value = controller.mImpl->mEventData->mPlaceholderFont->mDefaultPointSize;
         }
@@ -340,12 +340,12 @@ float Controller::PlaceholderHandler::GetPlaceholderTextFontSize(const Controlle
       }
       case PIXEL_SIZE:
       {
-        if (NULL != controller.mImpl->mEventData->mPlaceholderFont)
+        if(NULL != controller.mImpl->mEventData->mPlaceholderFont)
         {
           // Pixel size = Point size * DPI / 72.f
-          unsigned int horizontalDpi = 0u;
-          unsigned int verticalDpi = 0u;
-          TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
+          unsigned int                horizontalDpi = 0u;
+          unsigned int                verticalDpi   = 0u;
+          TextAbstraction::FontClient fontClient    = TextAbstraction::FontClient::Get();
           fontClient.GetDpi(horizontalDpi, verticalDpi);
 
           value = controller.mImpl->mEventData->mPlaceholderFont->mDefaultPointSize *
@@ -367,12 +367,12 @@ float Controller::PlaceholderHandler::GetPlaceholderTextFontSize(const Controlle
 
 void Controller::PlaceholderHandler::SetPlaceholderTextColor(Controller& controller, const Vector4& textColor)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mPlaceholderTextColor = textColor;
   }
 
-  if (controller.mImpl->IsShowingPlaceholderText())
+  if(controller.mImpl->IsShowingPlaceholderText())
   {
     controller.mImpl->mModel->mVisualModel->SetTextColor(textColor);
     controller.mImpl->mModel->mLogicalModel->mColorRuns.Clear();
@@ -383,7 +383,7 @@ void Controller::PlaceholderHandler::SetPlaceholderTextColor(Controller& control
 
 const Vector4& Controller::PlaceholderHandler::GetPlaceholderTextColor(const Controller& controller)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
     return controller.mImpl->mEventData->mPlaceholderTextColor;
   }
@@ -395,25 +395,25 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
 {
   const Property::Map::SizeType count = map.Count();
 
-  for (Property::Map::SizeType position = 0; position < count; ++position)
+  for(Property::Map::SizeType position = 0; position < count; ++position)
   {
-    const KeyValuePair& keyValue = map.GetKeyValue(position);
-    const Property::Key& key = keyValue.first;
-    const Property::Value& value = keyValue.second;
+    const KeyValuePair&    keyValue = map.GetKeyValue(position);
+    const Property::Key&   key      = keyValue.first;
+    const Property::Value& value    = keyValue.second;
 
     Property::Index indexKey = GetIntKey(key);
 
-    switch (indexKey)
+    switch(indexKey)
     {
       case Ui::Text::PlaceHolder::Property::TEXT:
       case Ui::Text::PlaceHolder::Property::TEXT_FOCUSED:
       {
         PlaceholderType placeHolderType = (indexKey == PlaceHolder::Property::TEXT)
-                                              ? Controller::PLACEHOLDER_TYPE_INACTIVE
-                                              : Controller::PLACEHOLDER_TYPE_ACTIVE;
+                                            ? Controller::PLACEHOLDER_TYPE_INACTIVE
+                                            : Controller::PLACEHOLDER_TYPE_ACTIVE;
 
         std::string text = "";
-        if (value.Get(text))
+        if(value.Get(text))
         {
           SetPlaceholderText(controller, placeHolderType, text);
         }
@@ -422,9 +422,9 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
       case Ui::Text::PlaceHolder::Property::COLOR:
       {
         Vector4 textColor;
-        if (value.Get(textColor))
+        if(value.Get(textColor))
         {
-          if (GetPlaceholderTextColor(controller) != textColor)
+          if(GetPlaceholderTextColor(controller) != textColor)
           {
             SetPlaceholderTextColor(controller, textColor);
           }
@@ -434,7 +434,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
       case Ui::Text::PlaceHolder::Property::FONT_FAMILY:
       {
         std::string fontFamily = "";
-        if (value.Get(fontFamily))
+        if(value.Get(fontFamily))
         {
           SetPlaceholderFontFamily(controller, fontFamily);
         }
@@ -452,9 +452,9 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
                                                                                     : Text::Controller::PIXEL_SIZE;
 
         float fontSizeValue = 0.0f;
-        if (value.Get(fontSizeValue))
+        if(value.Get(fontSizeValue))
         {
-          if (!Equals(GetPlaceholderTextFontSize(controller, fontSizeType), fontSizeValue))
+          if(!Equals(GetPlaceholderTextFontSize(controller, fontSizeType), fontSizeValue))
           {
             SetPlaceholderTextFontSize(controller, fontSizeValue, fontSizeType);
           }
@@ -464,7 +464,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
       case Ui::Text::PlaceHolder::Property::ELLIPSIS:
       {
         bool ellipsis = false;
-        if (value.Get(ellipsis))
+        if(value.Get(ellipsis))
         {
           SetPlaceholderTextElideEnabled(controller, ellipsis);
         }
@@ -476,18 +476,18 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
 
 void Controller::PlaceholderHandler::GetPlaceholderProperty(Controller& controller, Property::Map& map)
 {
-  if (NULL != controller.mImpl->mEventData)
+  if(NULL != controller.mImpl->mEventData)
   {
-    if (!controller.mImpl->mEventData->mPlaceholderTextActive.empty())
+    if(!controller.mImpl->mEventData->mPlaceholderTextActive.empty())
     {
       map[Text::PlaceHolder::Property::TEXT_FOCUSED] = controller.mImpl->mEventData->mPlaceholderTextActive;
     }
-    if (!controller.mImpl->mEventData->mPlaceholderTextInactive.empty())
+    if(!controller.mImpl->mEventData->mPlaceholderTextInactive.empty())
     {
       map[Text::PlaceHolder::Property::TEXT] = controller.mImpl->mEventData->mPlaceholderTextInactive;
     }
 
-    map[Text::PlaceHolder::Property::COLOR] = controller.mImpl->mEventData->mPlaceholderTextColor;
+    map[Text::PlaceHolder::Property::COLOR]       = controller.mImpl->mEventData->mPlaceholderTextColor;
     map[Text::PlaceHolder::Property::FONT_FAMILY] = GetPlaceholderFontFamily(controller);
 
     Property::Value fontStyleMapGet;
@@ -495,18 +495,18 @@ void Controller::PlaceholderHandler::GetPlaceholderProperty(Controller& controll
     map[Text::PlaceHolder::Property::FONT_STYLE] = fontStyleMapGet;
 
     // Choose font size : POINT_SIZE or PIXEL_SIZE
-    if (!controller.mImpl->mEventData->mIsPlaceholderPixelSize)
+    if(!controller.mImpl->mEventData->mIsPlaceholderPixelSize)
     {
       map[Text::PlaceHolder::Property::POINT_SIZE] =
-          GetPlaceholderTextFontSize(controller, Text::Controller::POINT_SIZE);
+        GetPlaceholderTextFontSize(controller, Text::Controller::POINT_SIZE);
     }
     else
     {
       map[Text::PlaceHolder::Property::PIXEL_SIZE] =
-          GetPlaceholderTextFontSize(controller, Text::Controller::PIXEL_SIZE);
+        GetPlaceholderTextFontSize(controller, Text::Controller::PIXEL_SIZE);
     }
 
-    if (controller.mImpl->mEventData->mPlaceholderEllipsisFlag)
+    if(controller.mImpl->mEventData->mPlaceholderEllipsisFlag)
     {
       map[Text::PlaceHolder::Property::ELLIPSIS] = IsPlaceholderTextElideEnabled(controller);
     }
@@ -515,12 +515,12 @@ void Controller::PlaceholderHandler::GetPlaceholderProperty(Controller& controll
 
 void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
 {
-  if (impl.IsPlaceholderAvailable())
+  if(impl.IsPlaceholderAvailable())
   {
     EventData*& eventData = impl.mEventData;
     DALI_ASSERT_DEBUG(eventData && "No placeholder text available");
 
-    if (NULL == eventData)
+    if(NULL == eventData)
     {
       return;
     }
@@ -534,11 +534,11 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
     decorator->SetHandleActive(RIGHT_SELECTION_HANDLE, false);
 
     const char* text(NULL);
-    size_t size(0);
+    size_t      size(0);
 
     // TODO - Switch Placeholder text when changing state
     std::string& placeholderTextActive = eventData->mPlaceholderTextActive;
-    if ((EventData::INACTIVE != eventData->mState) && (0u != placeholderTextActive.c_str()))
+    if((EventData::INACTIVE != eventData->mState) && (0u != placeholderTextActive.c_str()))
     {
       text = placeholderTextActive.c_str();
       size = placeholderTextActive.size();
@@ -546,16 +546,16 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
     else
     {
       std::string& placeholderTextInactive = eventData->mPlaceholderTextInactive;
-      text = placeholderTextInactive.c_str();
-      size = placeholderTextInactive.size();
+      text                                 = placeholderTextInactive.c_str();
+      size                                 = placeholderTextInactive.size();
     }
 
-    TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
-    textUpdateInfo.mCharacterIndex = 0u;
+    TextUpdateInfo& textUpdateInfo             = impl.mTextUpdateInfo;
+    textUpdateInfo.mCharacterIndex             = 0u;
     textUpdateInfo.mNumberOfCharactersToRemove = textUpdateInfo.mPreviousNumberOfCharacters;
 
     // Reset model for showing placeholder.
-    ModelPtr& model = impl.mModel;
+    ModelPtr&        model        = impl.mModel;
     LogicalModelPtr& logicalModel = model->mLogicalModel;
     logicalModel->mText.Clear();
     model->mVisualModel->SetTextColor(eventData->mPlaceholderTextColor);
@@ -580,7 +580,7 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
 
     // The natural size needs to be re-calculated.
     impl.mRecalculateNaturalSize = true;
-    impl.mRecalculateLayoutSize = true;
+    impl.mRecalculateLayoutSize  = true;
 
     // The text direction needs to be updated.
     impl.mUpdateTextDirection = true;
@@ -595,7 +595,7 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
 
 void Controller::PlaceholderHandler::CreatePlaceholderFont(Controller& controller)
 {
-  if (nullptr == controller.mImpl->mEventData->mPlaceholderFont)
+  if(nullptr == controller.mImpl->mEventData->mPlaceholderFont)
   {
     controller.mImpl->mEventData->mPlaceholderFont = std::unique_ptr<FontDefaults>(new FontDefaults());
   }

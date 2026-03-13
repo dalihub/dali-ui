@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/vector-image-renderer.h>
 #include <dali/integration-api/processor-interface.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/rendering/texture-set.h>
 #include <string>
@@ -50,9 +50,9 @@ class SvgLoader : public ConnectionTracker, public Dali::Integration::Processor
 public:
   typedef int32_t SvgLoadId; ///< The SvgLoadId type. This is used as a handle to refer to a particular SvgLoader Data.
   typedef int32_t
-      SvgRasterizeId; ///< The SvgRasterizeId type. This is used as a handle to refer to a particular SvgLoader Data.
+    SvgRasterizeId; ///< The SvgRasterizeId type. This is used as a handle to refer to a particular SvgLoader Data.
 
-  static constexpr SvgLoadId INVALID_SVG_LOAD_ID = -1;           ///< Used to represent a null SvgLoadId or error
+  static constexpr SvgLoadId      INVALID_SVG_LOAD_ID      = -1; ///< Used to represent a null SvgLoadId or error
   static constexpr SvgRasterizeId INVALID_SVG_RASTERIZE_ID = -1; ///< Used to represent a null SvgRasterizeId or error
 
   /**
@@ -79,9 +79,9 @@ public:
   };
 
 private:
-  typedef uint32_t SvgCacheIndex; ///< The Cache index type. Only be used internally
+  typedef uint32_t               SvgCacheIndex; ///< The Cache index type. Only be used internally
   static constexpr SvgCacheIndex INVALID_SVG_CACHE_INDEX =
-      static_cast<SvgCacheIndex>(std::numeric_limits<SvgCacheIndex>::max());
+    static_cast<SvgCacheIndex>(std::numeric_limits<SvgCacheIndex>::max());
 
   using ObserverContainer = Dali::Vector<SvgLoaderObserver*>;
 
@@ -210,14 +210,14 @@ public:
   struct SvgLoadInfo
   {
     SvgLoadInfo(SvgLoadId loadId, const VisualUrl& url, float dpi)
-      : mId(loadId),
-        mTask(),
-        mImageUrl(url),
-        mDpi(dpi),
-        mLoadState(LoadState::NOT_STARTED),
-        mVectorImageRenderer(Dali::VectorImageRenderer::New()),
-        mObservers(),
-        mReferenceCount(1u)
+    : mId(loadId),
+      mTask(),
+      mImageUrl(url),
+      mDpi(dpi),
+      mLoadState(LoadState::NOT_STARTED),
+      mVectorImageRenderer(Dali::VectorImageRenderer::New()),
+      mObservers(),
+      mReferenceCount(1u)
     {
     }
     ~SvgLoadInfo()
@@ -225,14 +225,14 @@ public:
     }
 
     SvgLoadInfo(SvgLoadInfo&& info) noexcept // move constructor
-      : mId(info.mId),
-        mTask(std::move(info.mTask)),
-        mImageUrl(std::move(info.mImageUrl)),
-        mDpi(info.mDpi),
-        mLoadState(info.mLoadState),
-        mVectorImageRenderer(std::move(info.mVectorImageRenderer)),
-        mObservers(std::move(info.mObservers)),
-        mReferenceCount(info.mReferenceCount)
+    : mId(info.mId),
+      mTask(std::move(info.mTask)),
+      mImageUrl(std::move(info.mImageUrl)),
+      mDpi(info.mDpi),
+      mLoadState(info.mLoadState),
+      mVectorImageRenderer(std::move(info.mVectorImageRenderer)),
+      mObservers(std::move(info.mObservers)),
+      mReferenceCount(info.mReferenceCount)
     {
       info.mTask.Reset();
       info.mVectorImageRenderer.Reset();
@@ -240,16 +240,16 @@ public:
     }
     SvgLoadInfo& operator=(SvgLoadInfo&& info) noexcept // move operator
     {
-      if (this != &info)
+      if(this != &info)
       {
-        mId = info.mId;
+        mId   = info.mId;
         mTask = std::move(info.mTask);
 
         mImageUrl = std::move(info.mImageUrl);
 
         mDpi = info.mDpi;
 
-        mLoadState = info.mLoadState;
+        mLoadState           = info.mLoadState;
         mVectorImageRenderer = std::move(info.mVectorImageRenderer);
 
         mObservers = std::move(info.mObservers);
@@ -264,18 +264,18 @@ public:
     }
 
   private:
-    SvgLoadInfo() = delete;                                   // Do not use empty constructor
-    SvgLoadInfo(const SvgLoadInfo& info) = delete;            // Do not use copy constructor
+    SvgLoadInfo()                                   = delete; // Do not use empty constructor
+    SvgLoadInfo(const SvgLoadInfo& info)            = delete; // Do not use copy constructor
     SvgLoadInfo& operator=(const SvgLoadInfo& info) = delete; // Do not use copy assign
 
   public:
-    SvgLoadId mId;
+    SvgLoadId         mId;
     SvgLoadingTaskPtr mTask; ///< Async task. It would be deleted when loading completed.
 
     VisualUrl mImageUrl;
-    float mDpi;
+    float     mDpi;
 
-    LoadState mLoadState;
+    LoadState           mLoadState;
     VectorImageRenderer mVectorImageRenderer;
 
     ObserverContainer mObservers;
@@ -293,36 +293,36 @@ public:
 #else
     SvgRasterizeInfo(SvgRasterizeId rasterizeId, SvgLoadId loadId, uint32_t width, uint32_t height)
 #endif
-      : mId(rasterizeId),
-        mTask(),
-        mLoadId(loadId),
-        mWidth(width),
-        mHeight(height),
+    : mId(rasterizeId),
+      mTask(),
+      mLoadId(loadId),
+      mWidth(width),
+      mHeight(height),
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
-        mImageUrl(std::move(imageUrl)),
+      mImageUrl(std::move(imageUrl)),
 #endif
-        mRasterizeState(RasterizeState::NOT_STARTED),
-        mTextureSet(),
-        mObservers(),
-        mReferenceCount(1u)
+      mRasterizeState(RasterizeState::NOT_STARTED),
+      mTextureSet(),
+      mObservers(),
+      mReferenceCount(1u)
     {
     }
     ~SvgRasterizeInfo()
     {
     }
     SvgRasterizeInfo(SvgRasterizeInfo&& info) noexcept // move constructor
-      : mId(info.mId),
-        mTask(std::move(info.mTask)),
-        mLoadId(info.mLoadId),
-        mWidth(info.mWidth),
-        mHeight(info.mHeight),
+    : mId(info.mId),
+      mTask(std::move(info.mTask)),
+      mLoadId(info.mLoadId),
+      mWidth(info.mWidth),
+      mHeight(info.mHeight),
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
-        mImageUrl(std::move(info.mImageUrl)),
+      mImageUrl(std::move(info.mImageUrl)),
 #endif
-        mRasterizeState(info.mRasterizeState),
-        mTextureSet(std::move(info.mTextureSet)),
-        mObservers(std::move(info.mObservers)),
-        mReferenceCount(info.mReferenceCount)
+      mRasterizeState(info.mRasterizeState),
+      mTextureSet(std::move(info.mTextureSet)),
+      mObservers(std::move(info.mObservers)),
+      mReferenceCount(info.mReferenceCount)
     {
       info.mTask.Reset();
       info.mTextureSet.Reset();
@@ -330,13 +330,13 @@ public:
     }
     SvgRasterizeInfo& operator=(SvgRasterizeInfo&& info) noexcept // move operator
     {
-      if (this != &info)
+      if(this != &info)
       {
-        mId = info.mId;
+        mId   = info.mId;
         mTask = std::move(info.mTask);
 
         mLoadId = info.mLoadId;
-        mWidth = info.mWidth;
+        mWidth  = info.mWidth;
         mHeight = info.mHeight;
 
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
@@ -344,8 +344,8 @@ public:
 #endif
 
         mRasterizeState = info.mRasterizeState;
-        mTextureSet = std::move(info.mTextureSet);
-        mObservers = std::move(info.mObservers);
+        mTextureSet     = std::move(info.mTextureSet);
+        mObservers      = std::move(info.mObservers);
 
         mReferenceCount = info.mReferenceCount;
 
@@ -357,24 +357,24 @@ public:
     }
 
   private:
-    SvgRasterizeInfo() = delete;                                        // Do not use empty constructor
-    SvgRasterizeInfo(const SvgRasterizeInfo& info) = delete;            // Do not use copy constructor
+    SvgRasterizeInfo()                                        = delete; // Do not use empty constructor
+    SvgRasterizeInfo(const SvgRasterizeInfo& info)            = delete; // Do not use copy constructor
     SvgRasterizeInfo& operator=(const SvgRasterizeInfo& info) = delete; // Do not use copy assign
 
   public:
-    SvgRasterizeId mId;
+    SvgRasterizeId        mId;
     SvgRasterizingTaskPtr mTask; ///< Async task. It would be deleted when rasterizing completed.
 
     SvgLoadId mLoadId;
-    uint32_t mWidth;
-    uint32_t mHeight;
+    uint32_t  mWidth;
+    uint32_t  mHeight;
 
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
     VisualUrl mImageUrl;
 #endif
 
-    RasterizeState mRasterizeState;
-    Dali::TextureSet mTextureSet; ///< rasterized result at index 0.
+    RasterizeState    mRasterizeState;
+    Dali::TextureSet  mTextureSet; ///< rasterized result at index 0.
     ObserverContainer mObservers;
 
     int32_t mReferenceCount; ///< The number of Svg visuals that use this data.
@@ -457,23 +457,23 @@ protected:
 private:
   VisualFactoryCache* mFactoryCache; ///< The holder of visual factory cache.
 
-  SvgLoadId mCurrentSvgLoadId;
+  SvgLoadId      mCurrentSvgLoadId;
   SvgRasterizeId mCurrentSvgRasterizeId;
 
-  std::vector<SvgLoader::SvgLoadInfo> mLoadCache{};
+  std::vector<SvgLoader::SvgLoadInfo>      mLoadCache{};
   std::vector<SvgLoader::SvgRasterizeInfo> mRasterizeCache{};
 
   using LoadQueueElement = std::pair<SvgLoadId, SvgLoaderObserver*>;
-  Dali::Vector<LoadQueueElement> mLoadQueue{}; ///< Queue of svg load after NotifyLoadObservers
-  SvgLoadId mLoadingQueueLoadId;               ///< SvgLoadId when it is loading. it causes Load SVG to be queued.
+  Dali::Vector<LoadQueueElement> mLoadQueue{};        ///< Queue of svg load after NotifyLoadObservers
+  SvgLoadId                      mLoadingQueueLoadId; ///< SvgLoadId when it is loading. it causes Load SVG to be queued.
 
   using RasterizeQueueElement = std::pair<SvgRasterizeId, SvgLoaderObserver*>;
   Dali::Vector<RasterizeQueueElement> mRasterizeQueue{}; ///< Queue of svg rasterze after NotifyRasterizeObservers
   SvgRasterizeId
-      mRasterizingQueueRasterizeId; ///< SvgRasterizeId when it is rasterizing. it causes Rasterize SVG to be queued.
+    mRasterizingQueueRasterizeId; ///< SvgRasterizeId when it is rasterizing. it causes Rasterize SVG to be queued.
 
-  std::vector<SvgLoadId> mLoadRemoveQueue{}; ///< Queue of SvgLoader::SvgLoadInfo to remove at PostProcess. It will be
-                                             ///< cleared after PostProcess.
+  std::vector<SvgLoadId> mLoadRemoveQueue{};           ///< Queue of SvgLoader::SvgLoadInfo to remove at PostProcess. It will be
+                                                       ///< cleared after PostProcess.
   std::vector<SvgRasterizeId> mRasterizeRemoveQueue{}; ///< Queue of SvgLoader::SvgRasterizeInfo to remove at
                                                        ///< PostProcess. It will be cleared after PostProcess.
 

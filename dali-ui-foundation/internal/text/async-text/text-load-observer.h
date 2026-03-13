@@ -89,8 +89,8 @@ public:
 
 public:
 private:
-  DestructionSignalType mDestructionSignal; ///< The destruction signal emitted when the observer is destroyed.
-  int mDestructionSignalConnect;            ///< The number of times DestructionSignal is connected.
+  DestructionSignalType mDestructionSignal;        ///< The destruction signal emitted when the observer is destroyed.
+  int                   mDestructionSignalConnect; ///< The number of times DestructionSignal is connected.
 };
 
 } // namespace Ui

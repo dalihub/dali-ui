@@ -37,10 +37,10 @@ namespace Ui
 {
 namespace Text
 {
-const float DEFAULT_TEXTFIT_MIN = 10.f;
-const float DEFAULT_TEXTFIT_MAX = 100.f;
-const float DEFAULT_TEXTFIT_STEP = 1.f;
-const float DEFAULT_FONT_SIZE_SCALE = 1.f;
+const float DEFAULT_TEXTFIT_MIN            = 10.f;
+const float DEFAULT_TEXTFIT_MAX            = 100.f;
+const float DEFAULT_TEXTFIT_STEP           = 1.f;
+const float DEFAULT_FONT_SIZE_SCALE        = 1.f;
 const float DEFAULT_DISABLED_COLOR_OPACITY = 0.3f;
 
 // Forward declarations
@@ -73,21 +73,21 @@ struct Event
 
   union Param
   {
-    int mInt;
+    int          mInt;
     unsigned int mUint;
-    float mFloat;
-    bool mBool;
+    float        mFloat;
+    bool         mBool;
   };
 
   Event(Type eventType)
-    : type(eventType)
+  : type(eventType)
   {
     p1.mInt = 0;
     p2.mInt = 0;
     p3.mInt = 0;
   }
 
-  Type type;
+  Type  type;
   Param p1;
   Param p2;
   Param p3;
@@ -119,12 +119,12 @@ struct EventData
             stateToCheck == EDITING_WITH_PASTE_POPUP);
   }
 
-  DecoratorPtr mDecorator;                        ///< Pointer to the decorator.
-  InputMethodContext mInputMethodContext;         ///< The Input Method Framework Manager.
-  std::unique_ptr<FontDefaults> mPlaceholderFont; ///< The placeholder default font.
-  std::string mPlaceholderTextActive;   ///< The text to display when the TextField is empty with key-input focus.
-  std::string mPlaceholderTextInactive; ///< The text to display when the TextField is empty and inactive.
-  Vector4 mPlaceholderTextColor;        ///< The in/active placeholder text color.
+  DecoratorPtr                  mDecorator;               ///< Pointer to the decorator.
+  InputMethodContext            mInputMethodContext;      ///< The Input Method Framework Manager.
+  std::unique_ptr<FontDefaults> mPlaceholderFont;         ///< The placeholder default font.
+  std::string                   mPlaceholderTextActive;   ///< The text to display when the TextField is empty with key-input focus.
+  std::string                   mPlaceholderTextInactive; ///< The text to display when the TextField is empty and inactive.
+  Vector4                       mPlaceholderTextColor;    ///< The in/active placeholder text color.
 
   /**
    * This is used to delay handling events until after the model has been updated.
@@ -133,7 +133,7 @@ struct EventData
   std::vector<Event> mEventQueue; ///< The queue of touch events etc.
 
   Vector<InputStyle::Mask>
-      mInputStyleChangedQueue; ///< Queue of changes in the input style. Used to emit the signal in the iddle callback.
+    mInputStyleChangedQueue; ///< Queue of changes in the input style. Used to emit the signal in the iddle callback.
 
   InputStyle mInputStyle; ///< The style to be set to the new inputed text.
 
@@ -145,7 +145,7 @@ struct EventData
   CharacterIndex mRightSelectionPosition; ///< Index into logical model for right selection handle.
 
   CharacterIndex mPreEditStartPosition; ///< Used to remove the pre-edit text if necessary.
-  Length mPreEditLength;                ///< Used to remove the pre-edit text if necessary.
+  Length         mPreEditLength;        ///< Used to remove the pre-edit text if necessary.
 
   float mCursorHookPositionX; ///< Used to move the cursor with the keys or when scrolling the text vertically with the
                               ///< handles.
@@ -200,15 +200,15 @@ struct ModifyEvent
 struct FontDefaults
 {
   FontDefaults()
-    : mFontDescription(),
-      mDefaultPointSize(0.f),
-      mFitPointSize(0.f),
-      mFontId(0u),
-      familyDefined(false),
-      weightDefined(false),
-      widthDefined(false),
-      slantDefined(false),
-      sizeDefined(false)
+  : mFontDescription(),
+    mDefaultPointSize(0.f),
+    mFitPointSize(0.f),
+    mFontId(0u),
+    familyDefined(false),
+    weightDefined(false),
+    widthDefined(false),
+    slantDefined(false),
+    sizeDefined(false)
   {
     // Initially use the default platform font
     TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
@@ -217,24 +217,24 @@ struct FontDefaults
 
   FontId GetFontId(TextAbstraction::FontClient& fontClient, float fontPointSize)
   {
-    if (!mFontId)
+    if(!mFontId)
     {
       const PointSize26Dot6 pointSize = static_cast<PointSize26Dot6>(fontPointSize * 64.f);
-      mFontId = fontClient.GetFontId(mFontDescription, pointSize);
+      mFontId                         = fontClient.GetFontId(mFontDescription, pointSize);
     }
 
     return mFontId;
   }
 
-  TextAbstraction::FontDescription mFontDescription; ///< The default font's description.
-  float mDefaultPointSize;                           ///< The default font's point size.
-  float mFitPointSize;                               ///< The fit font's point size.
-  FontId mFontId;                                    ///< The font's id of the default font.
-  bool familyDefined : 1;                            ///< Whether the default font's family name is defined.
-  bool weightDefined : 1;                            ///< Whether the default font's weight is defined.
-  bool widthDefined : 1;                             ///< Whether the default font's width is defined.
-  bool slantDefined : 1;                             ///< Whether the default font's slant is defined.
-  bool sizeDefined : 1;                              ///< Whether the default font's point size is defined.
+  TextAbstraction::FontDescription mFontDescription;  ///< The default font's description.
+  float                            mDefaultPointSize; ///< The default font's point size.
+  float                            mFitPointSize;     ///< The fit font's point size.
+  FontId                           mFontId;           ///< The font's id of the default font.
+  bool                             familyDefined : 1; ///< Whether the default font's family name is defined.
+  bool                             weightDefined : 1; ///< Whether the default font's weight is defined.
+  bool                             widthDefined : 1;  ///< Whether the default font's width is defined.
+  bool                             slantDefined : 1;  ///< Whether the default font's slant is defined.
+  bool                             sizeDefined : 1;   ///< Whether the default font's point size is defined.
 };
 
 /**
@@ -245,18 +245,18 @@ struct FontDefaults
 struct TextUpdateInfo
 {
   TextUpdateInfo()
-    : mCharacterIndex(0u),
-      mNumberOfCharactersToRemove(0u),
-      mNumberOfCharactersToAdd(0u),
-      mPreviousNumberOfCharacters(0u),
-      mParagraphCharacterIndex(0u),
-      mRequestedNumberOfCharacters(0u),
-      mStartGlyphIndex(0u),
-      mStartLineIndex(0u),
-      mEstimatedNumberOfLines(0u),
-      mClearAll(true),
-      mFullRelayoutNeeded(true),
-      mIsLastCharacterNewParagraph(false)
+  : mCharacterIndex(0u),
+    mNumberOfCharactersToRemove(0u),
+    mNumberOfCharactersToAdd(0u),
+    mPreviousNumberOfCharacters(0u),
+    mParagraphCharacterIndex(0u),
+    mRequestedNumberOfCharacters(0u),
+    mStartGlyphIndex(0u),
+    mStartLineIndex(0u),
+    mEstimatedNumberOfLines(0u),
+    mClearAll(true),
+    mFullRelayoutNeeded(true),
+    mIsLastCharacterNewParagraph(false)
   {
   }
 
@@ -264,35 +264,35 @@ struct TextUpdateInfo
   {
   }
 
-  CharacterIndex mCharacterIndex;     ///< Index to the first character to be updated.
-  Length mNumberOfCharactersToRemove; ///< The number of characters to be removed.
-  Length mNumberOfCharactersToAdd;    ///< The number of characters to be added.
-  Length mPreviousNumberOfCharacters; ///< The number of characters before the text update.
+  CharacterIndex mCharacterIndex;             ///< Index to the first character to be updated.
+  Length         mNumberOfCharactersToRemove; ///< The number of characters to be removed.
+  Length         mNumberOfCharactersToAdd;    ///< The number of characters to be added.
+  Length         mPreviousNumberOfCharacters; ///< The number of characters before the text update.
 
-  CharacterIndex mParagraphCharacterIndex; ///< Index of the first character of the first paragraph to be updated.
-  Length mRequestedNumberOfCharacters;     ///< The requested number of characters.
-  GlyphIndex mStartGlyphIndex;
-  LineIndex mStartLineIndex;
-  Length mEstimatedNumberOfLines; ///< The estimated number of lines. Used to avoid reallocations when layouting.
+  CharacterIndex mParagraphCharacterIndex;     ///< Index of the first character of the first paragraph to be updated.
+  Length         mRequestedNumberOfCharacters; ///< The requested number of characters.
+  GlyphIndex     mStartGlyphIndex;
+  LineIndex      mStartLineIndex;
+  Length         mEstimatedNumberOfLines; ///< The estimated number of lines. Used to avoid reallocations when layouting.
 
   bool mClearAll : 1; ///< Whether the whole text is cleared. i.e. when the text is reset.
   bool
-      mFullRelayoutNeeded : 1; ///< Whether a full re-layout is needed. i.e. when a new size is set to the text control.
+       mFullRelayoutNeeded : 1;          ///< Whether a full re-layout is needed. i.e. when a new size is set to the text control.
   bool mIsLastCharacterNewParagraph : 1; ///< Whether the last character is a new paragraph character.
 
   void Clear()
   {
     // Clear all info except the mPreviousNumberOfCharacters member.
-    mCharacterIndex = static_cast<CharacterIndex>(-1);
-    mNumberOfCharactersToRemove = 0u;
-    mNumberOfCharactersToAdd = 0u;
-    mParagraphCharacterIndex = 0u;
+    mCharacterIndex              = static_cast<CharacterIndex>(-1);
+    mNumberOfCharactersToRemove  = 0u;
+    mNumberOfCharactersToAdd     = 0u;
+    mParagraphCharacterIndex     = 0u;
     mRequestedNumberOfCharacters = 0u;
-    mStartGlyphIndex = 0u;
-    mStartLineIndex = 0u;
-    mEstimatedNumberOfLines = 0u;
-    mClearAll = false;
-    mFullRelayoutNeeded = false;
+    mStartGlyphIndex             = 0u;
+    mStartLineIndex              = 0u;
+    mEstimatedNumberOfLines      = 0u;
+    mClearAll                    = false;
+    mFullRelayoutNeeded          = false;
     mIsLastCharacterNewParagraph = false;
   }
 };
@@ -326,7 +326,7 @@ struct Controller::Impl
 public:
   enum class ClearFocusOnEscapeState
   {
-    ENABLE = 0,
+    ENABLE  = 0,
     DISABLE = 1,
     UNKNOWN = 2, ///< Unknown state
   };
@@ -334,72 +334,72 @@ public:
 public:
   Impl(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
        SelectableControlInterface* selectableControlInterface, AnchorControlInterface* anchorControlInterface)
-    : mControlInterface(controlInterface),
-      mEditableControlInterface(editableControlInterface),
-      mSelectableControlInterface(selectableControlInterface),
-      mAnchorControlInterface(anchorControlInterface),
-      mModel(),
-      mFontDefaults(NULL),
-      mUnderlineDefaults(NULL),
-      mShadowDefaults(NULL),
-      mEmbossDefaults(NULL),
-      mOutlineDefaults(NULL),
-      mEventData(NULL),
-      mIdleCallback(NULL),
-      mFontClient(),
-      mClipboard(),
-      mView(),
-      mMetrics(),
-      mModifyEvents(),
-      mTextColor(Color::BLACK),
-      mAnchorColor(Color::MEDIUM_BLUE),
-      mAnchorClickedColor(Color::DARK_MAGENTA),
-      mTextUpdateInfo(),
-      mOperationsPending(NO_OPERATION),
-      mMaximumNumberOfCharacters(50u),
-      mHiddenInput(NULL),
-      mInputFilter(nullptr),
-      mTextFitContentSize(),
-      mRawText(),
-      mTextFitArray(),
-      mRecalculateNaturalSize(true),
-      mRecalculateLayoutSize(true),
-      mMarkupProcessorEnabled(false),
-      mClipboardHideEnabled(true),
-      mIsAutoScrollEnabled(false),
-      mIsAutoScrollMaxTextureExceeded(false),
-      mUpdateTextDirection(true),
-      mIsTextDirectionRTL(false),
-      mUnderlineSetByString(false),
-      mShadowSetByString(false),
-      mOutlineSetByString(false),
-      mFontStyleSetByString(false),
-      mStrikethroughSetByString(false),
-      mShouldClearFocusOnEscape(ClearFocusOnEscapeState::UNKNOWN),
-      mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
-      mCurrentLineSize(0.f),
-      mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
-      mTextFitMaxSize(DEFAULT_TEXTFIT_MAX),
-      mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
-      mTextFitLineSize(0.f),
-      mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
-      mDisabledColorOpacity(DEFAULT_DISABLED_COLOR_OPACITY),
-      mRenderScale(1.0f),
-      mFontSizeScaleEnabled(true),
-      mTextFitEnabled(false),
-      mTextFitChanged(false),
-      mTextFitArrayEnabled(false),
-      mIsLayoutDirectionChanged(false),
-      mIsUserInteractionEnabled(true),
-      mProcessorRegistered(false),
-      mTextCutout(false),
-      mIsCursorInsetEnabled(true),
-      mRenderMode(DevelTextLabel::Render::SYNC),
-      mEllipsisMode(DevelText::Ellipsize::TRUNCATE)
+  : mControlInterface(controlInterface),
+    mEditableControlInterface(editableControlInterface),
+    mSelectableControlInterface(selectableControlInterface),
+    mAnchorControlInterface(anchorControlInterface),
+    mModel(),
+    mFontDefaults(NULL),
+    mUnderlineDefaults(NULL),
+    mShadowDefaults(NULL),
+    mEmbossDefaults(NULL),
+    mOutlineDefaults(NULL),
+    mEventData(NULL),
+    mIdleCallback(NULL),
+    mFontClient(),
+    mClipboard(),
+    mView(),
+    mMetrics(),
+    mModifyEvents(),
+    mTextColor(Color::BLACK),
+    mAnchorColor(Color::MEDIUM_BLUE),
+    mAnchorClickedColor(Color::DARK_MAGENTA),
+    mTextUpdateInfo(),
+    mOperationsPending(NO_OPERATION),
+    mMaximumNumberOfCharacters(50u),
+    mHiddenInput(NULL),
+    mInputFilter(nullptr),
+    mTextFitContentSize(),
+    mRawText(),
+    mTextFitArray(),
+    mRecalculateNaturalSize(true),
+    mRecalculateLayoutSize(true),
+    mMarkupProcessorEnabled(false),
+    mClipboardHideEnabled(true),
+    mIsAutoScrollEnabled(false),
+    mIsAutoScrollMaxTextureExceeded(false),
+    mUpdateTextDirection(true),
+    mIsTextDirectionRTL(false),
+    mUnderlineSetByString(false),
+    mShadowSetByString(false),
+    mOutlineSetByString(false),
+    mFontStyleSetByString(false),
+    mStrikethroughSetByString(false),
+    mShouldClearFocusOnEscape(ClearFocusOnEscapeState::UNKNOWN),
+    mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
+    mCurrentLineSize(0.f),
+    mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
+    mTextFitMaxSize(DEFAULT_TEXTFIT_MAX),
+    mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
+    mTextFitLineSize(0.f),
+    mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
+    mDisabledColorOpacity(DEFAULT_DISABLED_COLOR_OPACITY),
+    mRenderScale(1.0f),
+    mFontSizeScaleEnabled(true),
+    mTextFitEnabled(false),
+    mTextFitChanged(false),
+    mTextFitArrayEnabled(false),
+    mIsLayoutDirectionChanged(false),
+    mIsUserInteractionEnabled(true),
+    mProcessorRegistered(false),
+    mTextCutout(false),
+    mIsCursorInsetEnabled(true),
+    mRenderMode(DevelTextLabel::Render::SYNC),
+    mEllipsisMode(DevelText::Ellipsize::TRUNCATE)
   {
     mModel = Model::New();
 
-    if (mEditableControlInterface != nullptr && Clipboard::IsAvailable())
+    if(mEditableControlInterface != nullptr && Clipboard::IsAvailable())
     {
       mClipboard = Clipboard::Get();
     }
@@ -433,7 +433,7 @@ public:
    */
   TextAbstraction::FontClient& GetFontClient()
   {
-    if (!mFontClient)
+    if(!mFontClient)
     {
       mFontClient = TextAbstraction::FontClient::Get();
     }
@@ -452,7 +452,7 @@ public:
    */
   void QueueModifyEvent(ModifyEvent::Type type)
   {
-    if (ModifyEvent::TEXT_REPLACED == type)
+    if(ModifyEvent::TEXT_REPLACED == type)
     {
       // Cancel previously queued inserts etc.
       mModifyEvents.Clear();
@@ -514,7 +514,7 @@ public:
    */
   void PlaceholderCleared()
   {
-    if (mEventData)
+    if(mEventData)
     {
       mEventData->mIsShowingPlaceholderText = false;
 
@@ -525,20 +525,20 @@ public:
 
   void ClearPreEditFlag()
   {
-    if (mEventData)
+    if(mEventData)
     {
-      mEventData->mPreEditFlag = false;
+      mEventData->mPreEditFlag          = false;
       mEventData->mPreEditStartPosition = 0;
-      mEventData->mPreEditLength = 0;
+      mEventData->mPreEditLength        = 0;
     }
   }
 
   void ResetInputMethodContext()
   {
-    if (mEventData)
+    if(mEventData)
     {
       // Reset incase we are in a pre-edit state.
-      if (mEventData->mInputMethodContext)
+      if(mEventData->mInputMethodContext)
       {
         mEventData->mInputMethodContext.Reset(); // Will trigger a message ( commit, get surrounding )
       }
@@ -631,7 +631,7 @@ public:
 
   bool EnsureClipboardCreated()
   {
-    if (!mClipboard)
+    if(!mClipboard)
     {
       mClipboard = Clipboard::Get();
     }
@@ -1066,35 +1066,35 @@ private:
   void CopyCharacterSpacingFromLogicalToVisualModels();
 
 public:
-  ControlInterface* mControlInterface;                     ///< Reference to the text controller.
-  EditableControlInterface* mEditableControlInterface;     ///< Reference to the editable text controller.
+  ControlInterface*           mControlInterface;           ///< Reference to the text controller.
+  EditableControlInterface*   mEditableControlInterface;   ///< Reference to the editable text controller.
   SelectableControlInterface* mSelectableControlInterface; ///< Reference to the selectable text controller.
-  AnchorControlInterface* mAnchorControlInterface;         ///< Reference to the anchor controller.
-  ModelPtr mModel;                                         ///< Pointer to the text's model.
-  FontDefaults* mFontDefaults;           ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults* mUnderlineDefaults; ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults* mShadowDefaults;       ///< Avoid allocating this when the user does not specify shadow parameters.
-  EmbossDefaults* mEmbossDefaults;       ///< Avoid allocating this when the user does not specify emboss parameters.
-  OutlineDefaults* mOutlineDefaults;     ///< Avoid allocating this when the user does not specify outline parameters.
-  EventData* mEventData;                 ///< Avoid allocating everything for text input until EnableTextInput().
-  CallbackBase* mIdleCallback;           ///< Callback what would be called at idler
-  TextAbstraction::FontClient mFontClient; ///< Handle to the font client.
-  Clipboard mClipboard;                    ///< Handle to the system clipboard
-  View mView;                              ///< The view interface to the rendering back-end.
-  MetricsPtr mMetrics; ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
-  Layout::Engine mLayoutEngine;      ///< The layout engine.
-  Vector<ModifyEvent> mModifyEvents; ///< Temporary stores the text set until the next relayout.
-  Vector4 mTextColor;                ///< The regular text color
-  Vector4 mAnchorColor;              ///< The anchor color
-  Vector4 mAnchorClickedColor;       ///< The anchor clicked color
-  TextUpdateInfo mTextUpdateInfo;    ///< Info of the characters updated.
-  OperationsMask mOperationsPending; ///< Operations pending to be done to layout the text.
-  Length mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
-  HiddenText* mHiddenInput;          ///< Avoid allocating this when the user does not specify hidden input mode.
+  AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
+  ModelPtr                    mModel;                      ///< Pointer to the text's model.
+  FontDefaults*               mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
+  UnderlineDefaults*          mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
+  ShadowDefaults*             mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
+  EmbossDefaults*             mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  OutlineDefaults*            mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
+  EventData*                  mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
+  CallbackBase*               mIdleCallback;               ///< Callback what would be called at idler
+  TextAbstraction::FontClient mFontClient;                 ///< Handle to the font client.
+  Clipboard                   mClipboard;                  ///< Handle to the system clipboard
+  View                        mView;                       ///< The view interface to the rendering back-end.
+  MetricsPtr                  mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
+  Layout::Engine              mLayoutEngine;               ///< The layout engine.
+  Vector<ModifyEvent>         mModifyEvents;               ///< Temporary stores the text set until the next relayout.
+  Vector4                     mTextColor;                  ///< The regular text color
+  Vector4                     mAnchorColor;                ///< The anchor color
+  Vector4                     mAnchorClickedColor;         ///< The anchor clicked color
+  TextUpdateInfo              mTextUpdateInfo;             ///< Info of the characters updated.
+  OperationsMask              mOperationsPending;          ///< Operations pending to be done to layout the text.
+  Length                      mMaximumNumberOfCharacters;  ///< Maximum number of characters that can be inserted.
+  HiddenText*                 mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
   std::unique_ptr<InputFilter>
-      mInputFilter;            ///< Avoid allocating this when the user does not specify input filter mode.
-  Vector2 mTextFitContentSize; ///< Size of Text fit content
-  std::string mRawText;        ///< Raw text including markup tag.
+              mInputFilter;        ///< Avoid allocating this when the user does not specify input filter mode.
+  Vector2     mTextFitContentSize; ///< Size of Text fit content
+  std::string mRawText;            ///< Raw text including markup tag.
 
   std::vector<Ui::DevelTextLabel::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
 
@@ -1115,33 +1115,33 @@ public:
   bool mStrikethroughSetByString : 1; ///< Set when strikethrough is set by string (legacy) instead of map
 
   mutable ClearFocusOnEscapeState
-      mShouldClearFocusOnEscape : 3; ///< Whether text control should clear key input focus.
-                                     ///< Make it mutable so we can update it at const method.
+    mShouldClearFocusOnEscape : 3; ///< Whether text control should clear key input focus.
+                                   ///< Make it mutable so we can update it at const method.
 
   LayoutDirection::Type mLayoutDirection; ///< Current system language direction
 
   Shader mShaderBackground; ///< The shader for text background.
 
-  float mCurrentLineSize;             ///< Used to store the MinLineSize set by user when TextFitArray is enabled.
-  float mTextFitMinSize;              ///< Minimum Font Size for text fit. Default 10
-  float mTextFitMaxSize;              ///< Maximum Font Size for text fit. Default 100
-  float mTextFitStepSize;             ///< Step Size for font intervalse. Default 1
-  float mTextFitLineSize;             ///< This is the LineSize that is the standard when performing TextFit.
-  float mFontSizeScale;               ///< Scale value for Font Size. Default 1.0
-  float mDisabledColorOpacity;        ///< Color opacity when disabled.
-  float mRenderScale;                 ///< The render scale. Default 1.0
-  bool mFontSizeScaleEnabled : 1;     ///< Whether the font size scale is enabled.
-  bool mTextFitEnabled : 1;           ///< Whether the text's fit is enabled.
-  bool mTextFitChanged : 1;           ///< Whether the text fit property has changed.
-  bool mTextFitArrayEnabled : 1;      ///< Whether the text's fit array is enabled.
-  bool mIsLayoutDirectionChanged : 1; ///< Whether the layout has changed.
-  bool mIsUserInteractionEnabled : 1; ///< Whether the user interaction is enabled.
-  bool mProcessorRegistered : 1;      ///< Whether the text controller registered into processor or not.
-  bool mTextCutout : 1;               ///< Whether the text cutout enabled.
-  bool mIsCursorInsetEnabled : 1;     ///< Whether the cursor inset is enabled.
+  float mCurrentLineSize;              ///< Used to store the MinLineSize set by user when TextFitArray is enabled.
+  float mTextFitMinSize;               ///< Minimum Font Size for text fit. Default 10
+  float mTextFitMaxSize;               ///< Maximum Font Size for text fit. Default 100
+  float mTextFitStepSize;              ///< Step Size for font intervalse. Default 1
+  float mTextFitLineSize;              ///< This is the LineSize that is the standard when performing TextFit.
+  float mFontSizeScale;                ///< Scale value for Font Size. Default 1.0
+  float mDisabledColorOpacity;         ///< Color opacity when disabled.
+  float mRenderScale;                  ///< The render scale. Default 1.0
+  bool  mFontSizeScaleEnabled : 1;     ///< Whether the font size scale is enabled.
+  bool  mTextFitEnabled : 1;           ///< Whether the text's fit is enabled.
+  bool  mTextFitChanged : 1;           ///< Whether the text fit property has changed.
+  bool  mTextFitArrayEnabled : 1;      ///< Whether the text's fit array is enabled.
+  bool  mIsLayoutDirectionChanged : 1; ///< Whether the layout has changed.
+  bool  mIsUserInteractionEnabled : 1; ///< Whether the user interaction is enabled.
+  bool  mProcessorRegistered : 1;      ///< Whether the text controller registered into processor or not.
+  bool  mTextCutout : 1;               ///< Whether the text cutout enabled.
+  bool  mIsCursorInsetEnabled : 1;     ///< Whether the cursor inset is enabled.
 
-  DevelTextLabel::Render::Mode mRenderMode; ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
-  DevelText::Ellipsize::Mode mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
+  DevelTextLabel::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
+  DevelText::Ellipsize::Mode   mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
 
 private:
   friend ControllerImplEventHandler;

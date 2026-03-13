@@ -36,7 +36,7 @@ AsyncTextModule::~AsyncTextModule()
 }
 
 AsyncTextModule::AsyncTextModule(Internal::AsyncTextModule* implementation)
-  : BaseHandle(implementation)
+: BaseHandle(implementation)
 {
 }
 

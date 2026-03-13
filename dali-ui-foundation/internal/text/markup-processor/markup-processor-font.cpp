@@ -38,7 +38,7 @@ namespace Text
 namespace
 {
 const unsigned int MAX_FONT_ATTRIBUTE_SIZE =
-    15u; ///< The maximum length of any of the possible 'weight', 'width' or 'slant' values.
+  15u;                                     ///< The maximum length of any of the possible 'weight', 'width' or 'slant' values.
 const float PIXEL_FORMAT_64_FACTOR = 64.f; ///< 64.f is used to convert from point size to 26.6 pixel format.
 } // namespace
 
@@ -47,7 +47,7 @@ void processFontAttributeValue(char value[], const Attribute& attribute)
   // The StringToWeight() uses the Scripting::GetEnumeration() function which requires the input string to end with a
   // '\0' char.
   const Length length =
-      attribute.valueLength > MAX_FONT_ATTRIBUTE_SIZE ? MAX_FONT_ATTRIBUTE_SIZE : attribute.valueLength;
+    attribute.valueLength > MAX_FONT_ATTRIBUTE_SIZE ? MAX_FONT_ATTRIBUTE_SIZE : attribute.valueLength;
   memcpy(value, attribute.valueBuffer, length);
   value[length] = 0;
 }
@@ -55,8 +55,8 @@ void processFontAttributeValue(char value[], const Attribute& attribute)
 void ProcessFontFamily(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.familyDefined = true;
-  fontRun.familyLength = attribute.valueLength;
-  fontRun.familyName = new char[fontRun.familyLength];
+  fontRun.familyLength  = attribute.valueLength;
+  fontRun.familyName    = new char[fontRun.familyLength];
   memcpy(fontRun.familyName, attribute.valueBuffer, fontRun.familyLength);
   // The memory is freed when the font run is removed from the logical model.
 }
@@ -64,51 +64,51 @@ void ProcessFontFamily(const Attribute& attribute, FontDescriptionRun& fontRun)
 void ProcessFontSize(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   // 64.f is used to convert from point size to 26.6 pixel format.
-  fontRun.size = static_cast<PointSize26Dot6>(ProcessFloatAttribute(attribute) * PIXEL_FORMAT_64_FACTOR);
+  fontRun.size        = static_cast<PointSize26Dot6>(ProcessFloatAttribute(attribute) * PIXEL_FORMAT_64_FACTOR);
   fontRun.sizeDefined = true;
 }
 
 void ProcessFontWeight(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.weightDefined =
-      ProcessEnumerationAttribute<FontWeight>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWeight, fontRun.weight);
+    ProcessEnumerationAttribute<FontWeight>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWeight, fontRun.weight);
 }
 
 void ProcessFontWidth(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.widthDefined =
-      ProcessEnumerationAttribute<FontWidth>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWidth, fontRun.width);
+    ProcessEnumerationAttribute<FontWidth>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWidth, fontRun.width);
 }
 
 void ProcessFontSlant(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.slantDefined =
-      ProcessEnumerationAttribute<FontSlant>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToSlant, fontRun.slant);
+    ProcessEnumerationAttribute<FontSlant>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToSlant, fontRun.slant);
 }
 
 void ProcessFontTag(const Tag& tag, FontDescriptionRun& fontRun)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
 
-    if (TokenComparison(MARKUP::FONT_ATTRIBUTES::FAMILY, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::FONT_ATTRIBUTES::FAMILY, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessFontFamily(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::FONT_ATTRIBUTES::SIZE, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::SIZE, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessFontSize(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::FONT_ATTRIBUTES::WEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::WEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessFontWeight(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::FONT_ATTRIBUTES::WIDTH, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::WIDTH, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessFontWidth(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::FONT_ATTRIBUTES::SLANT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::SLANT, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessFontSlant(attribute, fontRun);
     }

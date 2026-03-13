@@ -56,13 +56,13 @@ static void EncodeBlobCoordinate(unsigned int cornerX, unsigned int cornerY, uns
 
 VectorBlobAtlas::VectorBlobAtlas(unsigned int textureWidth, unsigned int textureHeight, unsigned int itemWidth,
                                  unsigned int itemHeightQuantum)
-  : mTextureWidth(textureWidth),
-    mTextureHeight(textureHeight),
-    mItemWidth(itemWidth),
-    mItemHeightQuantum(itemHeightQuantum),
-    mCursorX(0),
-    mCursorY(0),
-    mIsFull(false)
+: mTextureWidth(textureWidth),
+  mTextureHeight(textureHeight),
+  mItemWidth(itemWidth),
+  mItemHeightQuantum(itemHeightQuantum),
+  mCursorX(0),
+  mCursorY(0),
+  mIsFull(false)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "Blob atlas %p size %dx%d, item width %d, height quantum %d\n", this,
                 textureWidth, textureHeight, itemWidth, itemHeightQuantum);
@@ -82,9 +82,9 @@ bool VectorBlobAtlas::FindGlyph(FontId fontId, GlyphIndex glyphIndex, BlobCoordi
 {
   const unsigned int size(mItemLookup.size());
 
-  for (unsigned int i = 0; i < size; ++i)
+  for(unsigned int i = 0; i < size; ++i)
   {
-    if (mItemLookup[i].fontId == fontId && mItemLookup[i].glyphIndex == glyphIndex)
+    if(mItemLookup[i].fontId == fontId && mItemLookup[i].glyphIndex == glyphIndex)
     {
       const Item& item = mItemCache[mItemLookup[i].cacheIndex];
 
@@ -103,7 +103,7 @@ bool VectorBlobAtlas::FindGlyph(FontId fontId, GlyphIndex glyphIndex, BlobCoordi
 bool VectorBlobAtlas::AddGlyph(unsigned int fontId, unsigned int glyphIndex, VectorBlob* blob, unsigned int length,
                                unsigned int nominalWidth, unsigned int nominalHeight, BlobCoordinate* coords)
 {
-  if (mIsFull)
+  if(mIsFull)
   {
     return false;
   }
@@ -113,14 +113,14 @@ bool VectorBlobAtlas::AddGlyph(unsigned int fontId, unsigned int glyphIndex, Vec
   w = mItemWidth;
   h = (length + w - 1) / w;
 
-  if (mCursorY + h > mTextureHeight)
+  if(mCursorY + h > mTextureHeight)
   {
     // Go to next column
     mCursorX += mItemWidth;
     mCursorY = 0;
   }
 
-  if (mCursorX + w <= mTextureWidth && mCursorY + h <= mTextureHeight)
+  if(mCursorX + w <= mTextureWidth && mCursorY + h <= mTextureHeight)
   {
     x = mCursorX;
     y = mCursorY;
@@ -135,7 +135,7 @@ bool VectorBlobAtlas::AddGlyph(unsigned int fontId, unsigned int glyphIndex, Vec
     return false;
   }
 
-  if (w * h == length)
+  if(w * h == length)
   {
     TexSubImage(x, y, w, h, blob);
   }
@@ -148,12 +148,12 @@ bool VectorBlobAtlas::AddGlyph(unsigned int fontId, unsigned int glyphIndex, Vec
   }
 
   DALI_LOG_INFO(
-      gLogFilter, Debug::General, "Blob atlas %p capacity %d filled %d %f\%\n", this, mTextureWidth * mTextureHeight,
-      mCursorY * mItemWidth + mCursorX * mTextureHeight,
-      100.0f * (float)(mCursorY * mItemWidth + mCursorX * mTextureHeight) / (float)(mTextureWidth * mTextureHeight));
+    gLogFilter, Debug::General, "Blob atlas %p capacity %d filled %d %f\%\n", this, mTextureWidth * mTextureHeight,
+    mCursorY * mItemWidth + mCursorX * mTextureHeight,
+    100.0f * (float)(mCursorY * mItemWidth + mCursorX * mTextureHeight) / (float)(mTextureWidth * mTextureHeight));
 
   Key key;
-  key.fontId = fontId;
+  key.fontId     = fontId;
   key.glyphIndex = glyphIndex;
   key.cacheIndex = mItemCache.size();
   mItemLookup.push_back(key);
@@ -179,17 +179,17 @@ bool VectorBlobAtlas::AddGlyph(unsigned int fontId, unsigned int glyphIndex, Vec
 void VectorBlobAtlas::TexSubImage(unsigned int offsetX, unsigned int offsetY, unsigned int width, unsigned int height,
                                   VectorBlob* blob)
 {
-  const size_t size = static_cast<size_t>(width) * static_cast<size_t>(height) * 4;
-  uint8_t* pixbuf = new uint8_t[size];
+  const size_t size   = static_cast<size_t>(width) * static_cast<size_t>(height) * 4;
+  uint8_t*     pixbuf = new uint8_t[size];
 
   size_t pos;
   size_t dataIndex = 0;
-  for (size_t y = 0; y < height; y++)
+  for(size_t y = 0; y < height; y++)
   {
     pos = y * width * 4;
-    for (size_t x = 0; x < width; x++)
+    for(size_t x = 0; x < width; x++)
     {
-      pixbuf[pos + x * 4] = 0xFF & blob[dataIndex].r;
+      pixbuf[pos + x * 4]     = 0xFF & blob[dataIndex].r;
       pixbuf[pos + x * 4 + 1] = 0xFF & blob[dataIndex].g;
       pixbuf[pos + x * 4 + 2] = 0xFF & blob[dataIndex].b;
       pixbuf[pos + x * 4 + 3] = 0xFF & blob[dataIndex].a;

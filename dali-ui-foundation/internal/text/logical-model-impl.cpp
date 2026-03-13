@@ -31,10 +31,10 @@ namespace Text
 {
 void FreeFontFamilyNames(Vector<FontDescriptionRun>& fontDescriptionRuns)
 {
-  for (Vector<FontDescriptionRun>::Iterator it = fontDescriptionRuns.Begin(), endIt = fontDescriptionRuns.End();
-       it != endIt; ++it)
+  for(Vector<FontDescriptionRun>::Iterator it = fontDescriptionRuns.Begin(), endIt = fontDescriptionRuns.End();
+      it != endIt; ++it)
   {
-    delete[] (*it).familyName;
+    delete[](*it).familyName;
   }
 
   fontDescriptionRuns.Clear();
@@ -42,7 +42,7 @@ void FreeFontFamilyNames(Vector<FontDescriptionRun>& fontDescriptionRuns)
 
 void FreeEmbeddedItems(Vector<EmbeddedItem>& embeddedItem)
 {
-  for (Vector<EmbeddedItem>::Iterator it = embeddedItem.Begin(), endIt = embeddedItem.End(); it != endIt; ++it)
+  for(Vector<EmbeddedItem>::Iterator it = embeddedItem.Begin(), endIt = embeddedItem.End(); it != endIt; ++it)
   {
     EmbeddedItem& item = *it;
     delete[] item.url;
@@ -53,7 +53,7 @@ void FreeEmbeddedItems(Vector<EmbeddedItem>& embeddedItem)
 
 void FreeAnchors(Vector<Anchor>& anchors)
 {
-  for (auto&& anchor : anchors)
+  for(auto&& anchor : anchors)
   {
     delete[] anchor.href;
   }
@@ -71,12 +71,12 @@ Script LogicalModel::GetScript(CharacterIndex characterIndex) const
   // If this operation is too slow, consider a binary search.
 
   const ScriptRun* const scriptRunBuffer = mScriptRuns.Begin();
-  for (Length index = 0u, length = mScriptRuns.Count(); index < length; ++index)
+  for(Length index = 0u, length = mScriptRuns.Count(); index < length; ++index)
   {
     const ScriptRun* const scriptRun = scriptRunBuffer + index;
 
-    if ((scriptRun->characterRun.characterIndex <= characterIndex) &&
-        (characterIndex < scriptRun->characterRun.characterIndex + scriptRun->characterRun.numberOfCharacters))
+    if((scriptRun->characterRun.characterIndex <= characterIndex) &&
+       (characterIndex < scriptRun->characterRun.characterIndex + scriptRun->characterRun.numberOfCharacters))
     {
       return scriptRun->script;
     }
@@ -87,7 +87,7 @@ Script LogicalModel::GetScript(CharacterIndex characterIndex) const
 
 CharacterDirection LogicalModel::GetCharacterDirection(CharacterIndex characterIndex) const
 {
-  if (characterIndex >= mCharacterDirections.Count())
+  if(characterIndex >= mCharacterDirections.Count())
   {
     // The model has no right to left characters, so the vector of directions is void.
     return false;
@@ -103,20 +103,20 @@ CharacterIndex LogicalModel::GetLogicalCursorIndex(CharacterIndex visualCursorIn
 
   // The bidirectional line info.
   const BidirectionalLineInfoRun* const bidirectionalLineInfo =
-      mBidirectionalLineInfo.Begin() + mBidirectionalLineIndex;
+    mBidirectionalLineInfo.Begin() + mBidirectionalLineIndex;
 
   // Whether the paragraph starts with a right to left character.
   const bool isRightToLeftParagraph = bidirectionalLineInfo->direction;
 
   // The total number of characters of the line.
   const Length lastCharacterIndex =
-      bidirectionalLineInfo->characterRun.characterIndex + bidirectionalLineInfo->characterRun.numberOfCharacters;
+    bidirectionalLineInfo->characterRun.characterIndex + bidirectionalLineInfo->characterRun.numberOfCharacters;
 
   CharacterIndex logicalCursorIndex = 0u;
 
-  if (bidirectionalLineInfo->characterRun.characterIndex == visualCursorIndex)
+  if(bidirectionalLineInfo->characterRun.characterIndex == visualCursorIndex)
   {
-    if (isRightToLeftParagraph)
+    if(isRightToLeftParagraph)
     {
       logicalCursorIndex = lastCharacterIndex;
     }
@@ -125,9 +125,9 @@ CharacterIndex LogicalModel::GetLogicalCursorIndex(CharacterIndex visualCursorIn
       logicalCursorIndex = bidirectionalLineInfo->characterRun.characterIndex;
     }
   }
-  else if (lastCharacterIndex == visualCursorIndex)
+  else if(lastCharacterIndex == visualCursorIndex)
   {
-    if (isRightToLeftParagraph)
+    if(isRightToLeftParagraph)
     {
       logicalCursorIndex = bidirectionalLineInfo->characterRun.characterIndex;
     }
@@ -144,26 +144,26 @@ CharacterIndex LogicalModel::GetLogicalCursorIndex(CharacterIndex visualCursorIn
 
     const CharacterIndex previousVisualCursorIndex = visualCursorIndex - 1u;
     const CharacterIndex previousLogicalCursorIndex =
-        bidirectionalLineInfo->characterRun.characterIndex +
-        (bidirectionalLineInfo->visualToLogicalMap
-             ? *(bidirectionalLineInfo->visualToLogicalMap +
-                 static_cast<std::size_t>(previousVisualCursorIndex -
-                                          bidirectionalLineInfo->characterRun.characterIndex))
-             : 0u);
+      bidirectionalLineInfo->characterRun.characterIndex +
+      (bidirectionalLineInfo->visualToLogicalMap
+         ? *(bidirectionalLineInfo->visualToLogicalMap +
+             static_cast<std::size_t>(previousVisualCursorIndex -
+                                      bidirectionalLineInfo->characterRun.characterIndex))
+         : 0u);
     const CharacterIndex currentLogicalCursorIndex =
-        bidirectionalLineInfo->characterRun.characterIndex +
-        (bidirectionalLineInfo->visualToLogicalMap
-             ? *(bidirectionalLineInfo->visualToLogicalMap +
-                 static_cast<std::size_t>(visualCursorIndex - bidirectionalLineInfo->characterRun.characterIndex))
-             : 0u);
+      bidirectionalLineInfo->characterRun.characterIndex +
+      (bidirectionalLineInfo->visualToLogicalMap
+         ? *(bidirectionalLineInfo->visualToLogicalMap +
+             static_cast<std::size_t>(visualCursorIndex - bidirectionalLineInfo->characterRun.characterIndex))
+         : 0u);
 
     const CharacterDirection previousCharacterDirection = *(modelCharacterDirections + previousLogicalCursorIndex);
-    const CharacterDirection currentCharacterDirection = *(modelCharacterDirections + currentLogicalCursorIndex);
+    const CharacterDirection currentCharacterDirection  = *(modelCharacterDirections + currentLogicalCursorIndex);
 
-    if (previousCharacterDirection == currentCharacterDirection)
+    if(previousCharacterDirection == currentCharacterDirection)
     {
       // Both glyphs have the same direction.
-      if (previousCharacterDirection)
+      if(previousCharacterDirection)
       {
         logicalCursorIndex = previousLogicalCursorIndex;
       }
@@ -174,9 +174,9 @@ CharacterIndex LogicalModel::GetLogicalCursorIndex(CharacterIndex visualCursorIn
     }
     else
     {
-      if (isRightToLeftParagraph)
+      if(isRightToLeftParagraph)
       {
-        if (currentCharacterDirection)
+        if(currentCharacterDirection)
         {
           logicalCursorIndex = currentLogicalCursorIndex + 1u;
         }
@@ -187,7 +187,7 @@ CharacterIndex LogicalModel::GetLogicalCursorIndex(CharacterIndex visualCursorIn
       }
       else
       {
-        if (previousCharacterDirection)
+        if(previousCharacterDirection)
         {
           logicalCursorIndex = currentLogicalCursorIndex;
         }
@@ -206,13 +206,13 @@ CharacterIndex LogicalModel::GetLogicalCharacterIndex(CharacterIndex visualChara
 {
   // The bidirectional line info.
   const BidirectionalLineInfoRun* const bidirectionalLineInfo =
-      mBidirectionalLineInfo.Begin() + mBidirectionalLineIndex;
+    mBidirectionalLineInfo.Begin() + mBidirectionalLineIndex;
 
   return bidirectionalLineInfo->characterRun.characterIndex +
          (bidirectionalLineInfo->visualToLogicalMap
-              ? *(bidirectionalLineInfo->visualToLogicalMap +
-                  static_cast<std::size_t>(visualCharacterIndex - bidirectionalLineInfo->characterRun.characterIndex))
-              : 0u);
+            ? *(bidirectionalLineInfo->visualToLogicalMap +
+                static_cast<std::size_t>(visualCharacterIndex - bidirectionalLineInfo->characterRun.characterIndex))
+            : 0u);
 }
 
 bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
@@ -220,7 +220,7 @@ bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
   // The number of bidirectional lines.
   const Length numberOfBidirectionalLines = mBidirectionalLineInfo.Count();
 
-  if (0u == numberOfBidirectionalLines)
+  if(0u == numberOfBidirectionalLines)
   {
     // If there is no bidirectional info.
     return false;
@@ -232,15 +232,15 @@ bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
 
   // Check first if the character is in the previously fetched line.
 
-  BidirectionalLineRunIndex bidiLineIndex = 0u;
-  CharacterIndex lastCharacterOfRightToLeftRun = 0u;
-  if (mBidirectionalLineIndex < numberOfBidirectionalLines)
+  BidirectionalLineRunIndex bidiLineIndex                 = 0u;
+  CharacterIndex            lastCharacterOfRightToLeftRun = 0u;
+  if(mBidirectionalLineIndex < numberOfBidirectionalLines)
   {
     const BidirectionalLineInfoRun& bidiLineRun = *(bidirectionalLineInfoBuffer + mBidirectionalLineIndex);
 
     const CharacterIndex lastCharacterOfRunPlusOne =
-        bidiLineRun.characterRun.characterIndex + bidiLineRun.characterRun.numberOfCharacters;
-    if ((bidiLineRun.characterRun.characterIndex <= characterIndex) && (characterIndex < lastCharacterOfRunPlusOne))
+      bidiLineRun.characterRun.characterIndex + bidiLineRun.characterRun.numberOfCharacters;
+    if((bidiLineRun.characterRun.characterIndex <= characterIndex) && (characterIndex < lastCharacterOfRunPlusOne))
     {
       // The character is in the previously fetched bidi line.
       return true;
@@ -250,7 +250,7 @@ bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
       // The character is not in the previously fetched line.
       // Set the bidi line index from where to start the fetch.
 
-      if (characterIndex < bidiLineRun.characterRun.characterIndex)
+      if(characterIndex < bidiLineRun.characterRun.characterIndex)
       {
         // Start the fetch from the beginning.
         bidiLineIndex = 0u;
@@ -258,29 +258,29 @@ bool LogicalModel::FetchBidirectionalLineInfo(CharacterIndex characterIndex)
       else
       {
         // Start the fetch from the next line.
-        bidiLineIndex = mBidirectionalLineIndex + 1u;
+        bidiLineIndex                 = mBidirectionalLineIndex + 1u;
         lastCharacterOfRightToLeftRun = lastCharacterOfRunPlusOne - 1u;
       }
     }
   }
 
   // The character has not been found in the previously fetched bidi line.
-  for (Vector<BidirectionalLineInfoRun>::ConstIterator it = bidirectionalLineInfoBuffer + bidiLineIndex,
-                                                       endIt = mBidirectionalLineInfo.End();
-       it != endIt; ++it, ++bidiLineIndex)
+  for(Vector<BidirectionalLineInfoRun>::ConstIterator it    = bidirectionalLineInfoBuffer + bidiLineIndex,
+                                                      endIt = mBidirectionalLineInfo.End();
+      it != endIt; ++it, ++bidiLineIndex)
   {
     const BidirectionalLineInfoRun& bidiLineRun = *it;
 
-    if ((lastCharacterOfRightToLeftRun < characterIndex) && (characterIndex < bidiLineRun.characterRun.characterIndex))
+    if((lastCharacterOfRightToLeftRun < characterIndex) && (characterIndex < bidiLineRun.characterRun.characterIndex))
     {
       // The character is not inside a bidi line.
       return false;
     }
 
     const CharacterIndex lastCharacterOfRunPlusOne =
-        bidiLineRun.characterRun.characterIndex + bidiLineRun.characterRun.numberOfCharacters;
+      bidiLineRun.characterRun.characterIndex + bidiLineRun.characterRun.numberOfCharacters;
     lastCharacterOfRightToLeftRun = lastCharacterOfRunPlusOne - 1u;
-    if ((bidiLineRun.characterRun.characterIndex <= characterIndex) && (characterIndex < lastCharacterOfRunPlusOne))
+    if((bidiLineRun.characterRun.characterIndex <= characterIndex) && (characterIndex < lastCharacterOfRunPlusOne))
     {
       // Bidi line found. Fetch the line.
       mBidirectionalLineIndex = bidiLineIndex;
@@ -346,25 +346,25 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
   unsigned int runIndex = 0u;
 
   // Set the text color.
-  bool colorOverriden = false;
-  unsigned int colorIndex = 0u;
+  bool                  colorOverriden  = false;
+  unsigned int          colorIndex      = 0u;
   const ColorRun* const colorRunsBuffer = mColorRuns.Begin();
-  for (Vector<ColorRun>::ConstIterator it = colorRunsBuffer, endIt = mColorRuns.End(); it != endIt; ++it, ++runIndex)
+  for(Vector<ColorRun>::ConstIterator it = colorRunsBuffer, endIt = mColorRuns.End(); it != endIt; ++it, ++runIndex)
   {
     const ColorRun& colorRun = *it;
 
-    if ((colorRun.characterRun.characterIndex <= index) &&
-        (index < colorRun.characterRun.characterIndex + colorRun.characterRun.numberOfCharacters))
+    if((colorRun.characterRun.characterIndex <= index) &&
+       (index < colorRun.characterRun.characterIndex + colorRun.characterRun.numberOfCharacters))
     {
-      colorIndex = runIndex;
+      colorIndex     = runIndex;
       colorOverriden = true;
     }
   }
 
   // Set the text's color if it's overriden.
-  if (colorOverriden)
+  if(colorOverriden)
   {
-    style.textColor = (*(colorRunsBuffer + colorIndex)).color;
+    style.textColor      = (*(colorRunsBuffer + colorIndex)).color;
     style.isDefaultColor = false;
   }
 
@@ -372,99 +372,99 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
   runIndex = 0u;
 
   // Set the font's parameters.
-  bool nameOverriden = false;
-  bool weightOverriden = false;
-  bool widthOverriden = false;
-  bool slantOverriden = false;
-  bool sizeOverriden = false;
-  unsigned int nameIndex = 0u;
-  unsigned int weightIndex = 0u;
-  unsigned int widthIndex = 0u;
-  unsigned int slantIndex = 0u;
-  unsigned int sizeIndex = 0u;
+  bool                            nameOverriden             = false;
+  bool                            weightOverriden           = false;
+  bool                            widthOverriden            = false;
+  bool                            slantOverriden            = false;
+  bool                            sizeOverriden             = false;
+  unsigned int                    nameIndex                 = 0u;
+  unsigned int                    weightIndex               = 0u;
+  unsigned int                    widthIndex                = 0u;
+  unsigned int                    slantIndex                = 0u;
+  unsigned int                    sizeIndex                 = 0u;
   const FontDescriptionRun* const fontDescriptionRunsBuffer = mFontDescriptionRuns.Begin();
-  for (Vector<FontDescriptionRun>::ConstIterator it = fontDescriptionRunsBuffer, endIt = mFontDescriptionRuns.End();
-       it != endIt; ++it, ++runIndex)
+  for(Vector<FontDescriptionRun>::ConstIterator it = fontDescriptionRunsBuffer, endIt = mFontDescriptionRuns.End();
+      it != endIt; ++it, ++runIndex)
   {
     const FontDescriptionRun& fontDescriptionRun = *it;
 
-    if ((fontDescriptionRun.characterRun.characterIndex <= index) &&
-        (index < fontDescriptionRun.characterRun.characterIndex + fontDescriptionRun.characterRun.numberOfCharacters))
+    if((fontDescriptionRun.characterRun.characterIndex <= index) &&
+       (index < fontDescriptionRun.characterRun.characterIndex + fontDescriptionRun.characterRun.numberOfCharacters))
     {
-      if (fontDescriptionRun.familyDefined)
+      if(fontDescriptionRun.familyDefined)
       {
-        nameIndex = runIndex;
+        nameIndex     = runIndex;
         nameOverriden = true;
       }
 
-      if (fontDescriptionRun.weightDefined)
+      if(fontDescriptionRun.weightDefined)
       {
-        weightIndex = runIndex;
+        weightIndex     = runIndex;
         weightOverriden = true;
       }
 
-      if (fontDescriptionRun.widthDefined)
+      if(fontDescriptionRun.widthDefined)
       {
-        widthIndex = runIndex;
+        widthIndex     = runIndex;
         widthOverriden = true;
       }
 
-      if (fontDescriptionRun.slantDefined)
+      if(fontDescriptionRun.slantDefined)
       {
-        slantIndex = runIndex;
+        slantIndex     = runIndex;
         slantOverriden = true;
       }
 
-      if (fontDescriptionRun.sizeDefined)
+      if(fontDescriptionRun.sizeDefined)
       {
-        sizeIndex = runIndex;
+        sizeIndex     = runIndex;
         sizeOverriden = true;
       }
     }
   }
 
   // Set the font's family name if it's overriden.
-  if (nameOverriden)
+  if(nameOverriden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + nameIndex);
 
-    style.familyName = std::string(fontDescriptionRun.familyName, fontDescriptionRun.familyLength);
+    style.familyName      = std::string(fontDescriptionRun.familyName, fontDescriptionRun.familyLength);
     style.isFamilyDefined = true;
   }
 
   // Set the font's weight if it's overriden.
-  if (weightOverriden)
+  if(weightOverriden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + weightIndex);
 
-    style.weight = fontDescriptionRun.weight;
+    style.weight          = fontDescriptionRun.weight;
     style.isWeightDefined = true;
   }
 
   // Set the font's width if it's overriden.
-  if (widthOverriden)
+  if(widthOverriden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + widthIndex);
 
-    style.width = fontDescriptionRun.width;
+    style.width          = fontDescriptionRun.width;
     style.isWidthDefined = true;
   }
 
   // Set the font's slant if it's overriden.
-  if (slantOverriden)
+  if(slantOverriden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + slantIndex);
 
-    style.slant = fontDescriptionRun.slant;
+    style.slant          = fontDescriptionRun.slant;
     style.isSlantDefined = true;
   }
 
   // Set the font's size if it's overriden.
-  if (sizeOverriden)
+  if(sizeOverriden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + sizeIndex);
 
-    style.size = static_cast<float>(fontDescriptionRun.size) / 64.f;
+    style.size          = static_cast<float>(fontDescriptionRun.size) / 64.f;
     style.isSizeDefined = true;
   }
 }
@@ -491,11 +491,11 @@ void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberO
   // Count the number of LINE_MUST_BREAK to reserve some space for the vector of paragraph's info.
   Vector<CharacterIndex> paragraphs;
   paragraphs.Reserve(numberOfCharacters);
-  const TextAbstraction::LineBreakInfo* lineBreakInfoBuffer = mLineBreakInfo.Begin();
-  const CharacterIndex lastCharacterIndexPlusOne = startIndex + numberOfCharacters;
-  for (Length index = startIndex; index < lastCharacterIndexPlusOne; ++index)
+  const TextAbstraction::LineBreakInfo* lineBreakInfoBuffer       = mLineBreakInfo.Begin();
+  const CharacterIndex                  lastCharacterIndexPlusOne = startIndex + numberOfCharacters;
+  for(Length index = startIndex; index < lastCharacterIndexPlusOne; ++index)
   {
-    if (TextAbstraction::LINE_MUST_BREAK == *(lineBreakInfoBuffer + index))
+    if(TextAbstraction::LINE_MUST_BREAK == *(lineBreakInfoBuffer + index))
     {
       paragraphs.PushBack(index);
     }
@@ -505,14 +505,14 @@ void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberO
   const bool updateCurrentParagraphs = numberOfCharacters < totalNumberOfCharacters;
 
   // Reserve space for current paragraphs plus new ones.
-  const Length numberOfNewParagraphs = paragraphs.Count();
+  const Length numberOfNewParagraphs   = paragraphs.Count();
   const Length totalNumberOfParagraphs = mParagraphInfo.Count() + numberOfNewParagraphs;
   mParagraphInfo.Resize(totalNumberOfParagraphs);
 
-  ParagraphRun* paragraphInfoBuffer = NULL;
+  ParagraphRun*        paragraphInfoBuffer = NULL;
   Vector<ParagraphRun> newParagraphs;
 
-  if (updateCurrentParagraphs)
+  if(updateCurrentParagraphs)
   {
     newParagraphs.Resize(numberOfNewParagraphs);
     paragraphInfoBuffer = newParagraphs.Begin();
@@ -524,18 +524,18 @@ void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberO
 
   // Find where to insert the new paragraphs.
   ParagraphRunIndex paragraphIndex = 0u;
-  CharacterIndex firstIndex = startIndex;
+  CharacterIndex    firstIndex     = startIndex;
 
-  if (updateCurrentParagraphs)
+  if(updateCurrentParagraphs)
   {
-    for (Vector<ParagraphRun>::ConstIterator
-             it = mParagraphInfo.Begin(),
-             endIt = mParagraphInfo.Begin() + static_cast<std::size_t>(totalNumberOfParagraphs - numberOfNewParagraphs);
-         it != endIt; ++it)
+    for(Vector<ParagraphRun>::ConstIterator
+          it    = mParagraphInfo.Begin(),
+          endIt = mParagraphInfo.Begin() + static_cast<std::size_t>(totalNumberOfParagraphs - numberOfNewParagraphs);
+        it != endIt; ++it)
     {
       const ParagraphRun& paragraph(*it);
 
-      if (startIndex < paragraph.characterRun.characterIndex + paragraph.characterRun.numberOfCharacters)
+      if(startIndex < paragraph.characterRun.characterIndex + paragraph.characterRun.numberOfCharacters)
       {
         firstIndex = paragraph.characterRun.characterIndex;
         break;
@@ -547,29 +547,29 @@ void LogicalModel::CreateParagraphInfo(CharacterIndex startIndex, Length numberO
 
   // Create the paragraph info.
   ParagraphRunIndex newParagraphIndex = 0u;
-  for (Vector<CharacterIndex>::ConstIterator it = paragraphs.Begin(), endIt = paragraphs.End(); it != endIt;
-       ++it, ++newParagraphIndex)
+  for(Vector<CharacterIndex>::ConstIterator it = paragraphs.Begin(), endIt = paragraphs.End(); it != endIt;
+      ++it, ++newParagraphIndex)
   {
     const CharacterIndex index = *it;
 
-    ParagraphRun& paragraph = *(paragraphInfoBuffer + newParagraphIndex);
-    paragraph.characterRun.characterIndex = firstIndex;
+    ParagraphRun& paragraph                   = *(paragraphInfoBuffer + newParagraphIndex);
+    paragraph.characterRun.characterIndex     = firstIndex;
     paragraph.characterRun.numberOfCharacters = 1u + index - firstIndex;
 
     firstIndex += paragraph.characterRun.numberOfCharacters;
   }
 
   // Insert the new paragraphs.
-  if (updateCurrentParagraphs)
+  if(updateCurrentParagraphs)
   {
     mParagraphInfo.Insert(mParagraphInfo.Begin() + paragraphIndex, newParagraphs.Begin(), newParagraphs.End());
 
     mParagraphInfo.Resize(totalNumberOfParagraphs);
 
     // Update the next paragraph indices.
-    for (Vector<ParagraphRun>::Iterator it = mParagraphInfo.Begin() + paragraphIndex + newParagraphs.Count(),
-                                        endIt = mParagraphInfo.End();
-         it != endIt; ++it)
+    for(Vector<ParagraphRun>::Iterator it    = mParagraphInfo.Begin() + paragraphIndex + newParagraphs.Count(),
+                                       endIt = mParagraphInfo.End();
+        it != endIt; ++it)
     {
       ParagraphRun& paragraph(*it);
 
@@ -586,13 +586,13 @@ void LogicalModel::FindParagraphs(CharacterIndex index, Length numberOfCharacter
 
   // Traverse the paragraphs to find which ones contain the given characters.
   ParagraphRunIndex paragraphIndex = 0u;
-  for (Vector<ParagraphRun>::ConstIterator it = mParagraphInfo.Begin(), endIt = mParagraphInfo.End(); it != endIt;
-       ++it, ++paragraphIndex)
+  for(Vector<ParagraphRun>::ConstIterator it = mParagraphInfo.Begin(), endIt = mParagraphInfo.End(); it != endIt;
+      ++it, ++paragraphIndex)
   {
     const ParagraphRun& paragraph(*it);
 
-    if ((paragraph.characterRun.characterIndex + paragraph.characterRun.numberOfCharacters > index) &&
-        (paragraph.characterRun.characterIndex < index + numberOfCharacters))
+    if((paragraph.characterRun.characterIndex + paragraph.characterRun.numberOfCharacters > index) &&
+       (paragraph.characterRun.characterIndex < index + numberOfCharacters))
     {
       paragraphs.PushBack(paragraphIndex);
     }
@@ -631,9 +631,9 @@ void LogicalModel::ClearAnchors()
 
 void LogicalModel::ClearBidirectionalParagraphInfo(TextAbstraction::BidirectionalSupport& bidirectionalSupport)
 {
-  if (bidirectionalSupport)
+  if(bidirectionalSupport)
   {
-    for (auto it = mBidirectionalParagraphInfo.Begin(), endIt = mBidirectionalParagraphInfo.End(); it != endIt; ++it)
+    for(auto it = mBidirectionalParagraphInfo.Begin(), endIt = mBidirectionalParagraphInfo.End(); it != endIt; ++it)
     {
       auto infoIndex = it->bidirectionalInfoIndex;
       bidirectionalSupport.DestroyInfo(infoIndex);
@@ -644,12 +644,12 @@ void LogicalModel::ClearBidirectionalParagraphInfo(TextAbstraction::Bidirectiona
 LogicalModel::~LogicalModel()
 {
   TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
-  if (bidirectionalSupport)
+  if(bidirectionalSupport)
   {
     ClearBidirectionalParagraphInfo(bidirectionalSupport);
   }
 
-  for (auto&& info : mBidirectionalLineInfo)
+  for(auto&& info : mBidirectionalLineInfo)
   {
     free(info.visualToLogicalMap);
     free(info.visualToLogicalMapSecondHalf);
@@ -661,7 +661,7 @@ LogicalModel::~LogicalModel()
 }
 
 LogicalModel::LogicalModel()
-  : mBidirectionalLineIndex(0u)
+: mBidirectionalLineIndex(0u)
 {
 }
 

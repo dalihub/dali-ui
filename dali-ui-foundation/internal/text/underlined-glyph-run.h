@@ -40,12 +40,12 @@ struct UnderlinedGlyphRun
    * Default constructor to set the default values of bitfields
    */
   UnderlinedGlyphRun()
-    : glyphRun{},
-      properties{}
+  : glyphRun{},
+    properties{}
   {
   }
 
-  GlyphRun glyphRun;                   ///< The initial glyph index and the number of glyphs in the run.
+  GlyphRun                 glyphRun;   ///< The initial glyph index and the number of glyphs in the run.
   UnderlineStyleProperties properties; /// The properties of underline style
 };
 

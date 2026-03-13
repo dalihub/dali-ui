@@ -59,8 +59,8 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
   Property::Value* transformValue = properties.Find(Ui::Visual::Property::TRANSFORM, TRANSFORM);
-  Property::Map transformMap;
-  if (transformValue && transformValue->Get(transformMap))
+  Property::Map    transformMap;
+  if(transformValue && transformValue->Get(transformMap))
   {
     wireframeVisual->SetTransformAndSize(transformMap, Vector2::ZERO);
   }
@@ -69,9 +69,9 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 }
 
 WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BasePtr actualVisual)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
-                 actualVisual ? actualVisual->GetType() : Ui::Visual::WIREFRAME),
-    mActualVisual(actualVisual)
+: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
+               actualVisual ? actualVisual->GetType() : Ui::Visual::WIREFRAME),
+  mActualVisual(actualVisual)
 {
 }
 
@@ -81,7 +81,7 @@ WireframeVisual::~WireframeVisual()
 
 float WireframeVisual::GetHeightForWidth(float width)
 {
-  if (mActualVisual)
+  if(mActualVisual)
   {
     return mActualVisual->GetHeightForWidth(width);
   }
@@ -93,7 +93,7 @@ float WireframeVisual::GetHeightForWidth(float width)
 
 void WireframeVisual::GetNaturalSize(Vector2& naturalSize)
 {
-  if (mActualVisual)
+  if(mActualVisual)
   {
     mActualVisual->GetNaturalSize(naturalSize);
   }
@@ -105,7 +105,7 @@ void WireframeVisual::GetNaturalSize(Vector2& naturalSize)
 
 void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
 {
-  if (mActualVisual)
+  if(mActualVisual)
   {
     mActualVisual->CreatePropertyMap(map);
   }
@@ -124,7 +124,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   Property::Value* mixValue = propertyMap.Find(Ui::Visual::Property::MIX_COLOR, MIX_COLOR);
-  if (mixValue)
+  if(mixValue)
   {
     Vector4 mixColor;
     mixValue->Get(mixColor);
@@ -143,14 +143,14 @@ void WireframeVisual::DoSetOnScene(Actor& actor)
 void WireframeVisual::OnInitialize()
 {
   Shader shader = mFactoryCache.GetShader(VisualFactoryCache::WIREFRAME_SHADER);
-  if (!shader)
+  if(!shader)
   {
     shader = mFactoryCache.GenerateAndSaveShader(
-        VisualFactoryCache::WIREFRAME_SHADER, SHADER_WIREFRAME_VISUAL_SHADER_VERT, SHADER_WIREFRAME_VISUAL_SHADER_FRAG);
+      VisualFactoryCache::WIREFRAME_SHADER, SHADER_WIREFRAME_VISUAL_SHADER_VERT, SHADER_WIREFRAME_VISUAL_SHADER_FRAG);
   }
 
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::WIREFRAME_GEOMETRY);
-  if (!geometry)
+  if(!geometry)
   {
     geometry = CreateQuadWireframeGeometry();
     mFactoryCache.SaveGeometry(VisualFactoryCache::WIREFRAME_GEOMETRY, geometry);
@@ -165,7 +165,7 @@ void WireframeVisual::OnInitialize()
 
 Geometry WireframeVisual::CreateQuadWireframeGeometry()
 {
-  const float halfWidth = 0.5f;
+  const float halfWidth  = 0.5f;
   const float halfHeight = 0.5f;
   struct QuadVertex
   {
@@ -178,7 +178,7 @@ Geometry WireframeVisual::CreateQuadWireframeGeometry()
 
   Property::Map quadVertexFormat;
   quadVertexFormat[POSITION_ATTRIBUTE_NAME] = Property::VECTOR2;
-  VertexBuffer quadVertices = VertexBuffer::New(quadVertexFormat);
+  VertexBuffer quadVertices                 = VertexBuffer::New(quadVertexFormat);
   quadVertices.SetData(quadVertexData, 4);
 
   // Create indices
@@ -195,7 +195,7 @@ Geometry WireframeVisual::CreateQuadWireframeGeometry()
 
 void WireframeVisual::OnSetTransform()
 {
-  if (mImpl->mRenderer && mImpl->mTransformMapChanged)
+  if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     // Register transform properties
     mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
@@ -204,7 +204,7 @@ void WireframeVisual::OnSetTransform()
 
 Visual::Base& WireframeVisual::GetVisualObject()
 {
-  if (mActualVisual)
+  if(mActualVisual)
   {
     return *mActualVisual.Get();
   }

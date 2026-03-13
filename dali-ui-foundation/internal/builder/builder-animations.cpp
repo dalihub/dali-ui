@@ -31,11 +31,11 @@ using namespace Dali;
 
 TimePeriod GetTimePeriod(const TreeNode& child, const Ui::Internal::Replacement& constant)
 {
-  OptionalFloat delay = constant.IsFloat(IsChild(child, "delay"));
+  OptionalFloat delay    = constant.IsFloat(IsChild(child, "delay"));
   OptionalFloat duration = constant.IsFloat(IsChild(child, "duration"));
   DALI_ASSERT_ALWAYS(duration && "Time period must have at least a duration");
 
-  if (delay)
+  if(delay)
   {
     return TimePeriod(*delay, *duration);
   }
@@ -47,7 +47,7 @@ TimePeriod GetTimePeriod(const TreeNode& child, const Ui::Internal::Replacement&
 
 Property::Value GetPropertyValue(const Property::Type& propType, const TreeNode& child)
 {
-  switch (propType)
+  switch(propType)
   {
     case Property::BOOLEAN:
     {
@@ -76,7 +76,7 @@ Property::Value GetPropertyValue(const Property::Type& propType, const TreeNode&
 
     case Property::ROTATION:
     {
-      if (4 == child.Size())
+      if(4 == child.Size())
       {
         Vector4 v(GetVector4(child));
         // angle, axis as per spec
@@ -87,7 +87,7 @@ Property::Value GetPropertyValue(const Property::Type& propType, const TreeNode&
         // degrees as per spec
         Vector3 rotation = GetVector3(child);
         return Property::Value(
-            Quaternion(Radian(Degree(rotation.x)), Radian(Degree(rotation.y)), Radian(Degree(rotation.z))));
+          Quaternion(Radian(Degree(rotation.x)), Radian(Degree(rotation.y)), Radian(Degree(rotation.z))));
       }
     }
 
@@ -102,30 +102,30 @@ Property::Value GetPropertyValue(const Property::Type& propType, const TreeNode&
 AlphaFunction GetAlphaFunction(const std::string& alphaFunction)
 {
   typedef std::map<const std::string, Dali::AlphaFunction> AlphaFunctionLut;
-  static AlphaFunctionLut alphaFunctionLut;
+  static AlphaFunctionLut                                  alphaFunctionLut;
 
-  if (0 == alphaFunctionLut.size())
+  if(0 == alphaFunctionLut.size())
   {
     // coding convention is uppercase enums
-    alphaFunctionLut["DEFAULT"] = AlphaFunction(AlphaFunction::DEFAULT);
-    alphaFunctionLut["LINEAR"] = AlphaFunction(AlphaFunction::LINEAR);
-    alphaFunctionLut["REVERSE"] = AlphaFunction(AlphaFunction::REVERSE);
-    alphaFunctionLut["EASE_IN_SQUARE"] = AlphaFunction(AlphaFunction::EASE_IN_SQUARE);
-    alphaFunctionLut["EASE_OUT_SQUARE"] = AlphaFunction(AlphaFunction::EASE_OUT_SQUARE);
-    alphaFunctionLut["EASE_IN"] = AlphaFunction(AlphaFunction::EASE_IN);
-    alphaFunctionLut["EASE_OUT"] = AlphaFunction(AlphaFunction::EASE_OUT);
-    alphaFunctionLut["EASE_IN_OUT"] = AlphaFunction(AlphaFunction::EASE_IN_OUT);
-    alphaFunctionLut["EASE_IN_SINE"] = AlphaFunction(AlphaFunction::EASE_IN_SINE);
-    alphaFunctionLut["EASE_OUT_SINE"] = AlphaFunction(AlphaFunction::EASE_OUT_SINE);
+    alphaFunctionLut["DEFAULT"]          = AlphaFunction(AlphaFunction::DEFAULT);
+    alphaFunctionLut["LINEAR"]           = AlphaFunction(AlphaFunction::LINEAR);
+    alphaFunctionLut["REVERSE"]          = AlphaFunction(AlphaFunction::REVERSE);
+    alphaFunctionLut["EASE_IN_SQUARE"]   = AlphaFunction(AlphaFunction::EASE_IN_SQUARE);
+    alphaFunctionLut["EASE_OUT_SQUARE"]  = AlphaFunction(AlphaFunction::EASE_OUT_SQUARE);
+    alphaFunctionLut["EASE_IN"]          = AlphaFunction(AlphaFunction::EASE_IN);
+    alphaFunctionLut["EASE_OUT"]         = AlphaFunction(AlphaFunction::EASE_OUT);
+    alphaFunctionLut["EASE_IN_OUT"]      = AlphaFunction(AlphaFunction::EASE_IN_OUT);
+    alphaFunctionLut["EASE_IN_SINE"]     = AlphaFunction(AlphaFunction::EASE_IN_SINE);
+    alphaFunctionLut["EASE_OUT_SINE"]    = AlphaFunction(AlphaFunction::EASE_OUT_SINE);
     alphaFunctionLut["EASE_IN_OUT_SINE"] = AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE);
-    alphaFunctionLut["BOUNCE"] = AlphaFunction(AlphaFunction::BOUNCE);
-    alphaFunctionLut["SIN"] = AlphaFunction(AlphaFunction::SIN);
-    alphaFunctionLut["EASE_OUT_BACK"] = AlphaFunction(AlphaFunction::EASE_OUT_BACK);
+    alphaFunctionLut["BOUNCE"]           = AlphaFunction(AlphaFunction::BOUNCE);
+    alphaFunctionLut["SIN"]              = AlphaFunction(AlphaFunction::SIN);
+    alphaFunctionLut["EASE_OUT_BACK"]    = AlphaFunction(AlphaFunction::EASE_OUT_BACK);
   }
 
   const AlphaFunctionLut::const_iterator iter(alphaFunctionLut.find(alphaFunction));
 
-  if (iter != alphaFunctionLut.end())
+  if(iter != alphaFunctionLut.end())
   {
     return iter->second;
   }
@@ -156,53 +156,53 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
   // duration needs to be set before AnimateTo calls for correct operation when AnimateTo has no "timePeriod".
   OptionalFloat duration = constant.IsFloat(IsChild(child, "duration"));
 
-  if (duration)
+  if(duration)
   {
     animation.SetDuration(*duration);
   }
 
-  if (OptionalBoolean looping = constant.IsBoolean(IsChild(child, "loop")))
+  if(OptionalBoolean looping = constant.IsBoolean(IsChild(child, "loop")))
   {
     animation.SetLooping(*looping);
   }
 
-  if (OptionalString endAction = constant.IsString(IsChild(child, "endAction")))
+  if(OptionalString endAction = constant.IsString(IsChild(child, "endAction")))
   {
-    if ("BAKE" == *endAction)
+    if("BAKE" == *endAction)
     {
       animation.SetEndAction(Animation::BAKE);
     }
-    else if ("DISCARD" == *endAction)
+    else if("DISCARD" == *endAction)
     {
       animation.SetEndAction(Animation::DISCARD);
     }
-    else if ("BAKE_FINAL" == *endAction)
+    else if("BAKE_FINAL" == *endAction)
     {
       animation.SetEndAction(Animation::BAKE_FINAL);
     }
   }
 
-  if (OptionalString endAction = constant.IsString(IsChild(child, "disconnectAction")))
+  if(OptionalString endAction = constant.IsString(IsChild(child, "disconnectAction")))
   {
-    if ("BAKE" == *endAction)
+    if("BAKE" == *endAction)
     {
       animation.SetDisconnectAction(Animation::BAKE);
     }
-    else if ("DISCARD" == *endAction)
+    else if("DISCARD" == *endAction)
     {
       animation.SetDisconnectAction(Animation::DISCARD);
     }
-    else if ("BAKE_FINAL" == *endAction)
+    else if("BAKE_FINAL" == *endAction)
     {
       animation.SetDisconnectAction(Animation::BAKE_FINAL);
     }
   }
 
   OptionalChild propertiesNode = IsChild(child, "properties");
-  if (propertiesNode)
+  if(propertiesNode)
   {
     const TreeNode::ConstIterator endIter = (*propertiesNode).CEnd();
-    for (TreeNode::ConstIterator iter = (*propertiesNode).CBegin(); endIter != iter; ++iter)
+    for(TreeNode::ConstIterator iter = (*propertiesNode).CBegin(); endIter != iter; ++iter)
     {
       const TreeNode::KeyNodePair& pKeyChild = *iter;
 
@@ -215,13 +215,13 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
 
       Property::Value propValue;
       Property::Index propIndex = Property::INVALID_INDEX;
-      if (property)
+      if(property)
       {
         propIndex = targetHandle.GetPropertyIndex(*property);
 
         // if the property is not found from the (actor) handle, try to downcast it to renderable actor
         // to allow animating shader uniforms
-        if (propIndex == Property::INVALID_INDEX)
+        if(propIndex == Property::INVALID_INDEX)
         {
           DALI_SCRIPT_WARNING("Cannot find property on object\n");
           continue;
@@ -230,23 +230,23 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
 
       // these are the defaults
       AlphaFunction alphaFunction(AlphaFunction::DEFAULT);
-      TimePeriod timePeriod(0.f);
+      TimePeriod    timePeriod(0.f);
 
       OptionalChild timeChild = IsChild(pKeyChild.second, "timePeriod");
 
-      if (timeChild)
+      if(timeChild)
       {
         timePeriod = GetTimePeriod(*timeChild, constant);
       }
 
       durationSum = std::max(durationSum, timePeriod.delaySeconds + timePeriod.durationSeconds);
 
-      if (OptionalString alphaChild = constant.IsString(IsChild(pKeyChild.second, "alphaFunction")))
+      if(OptionalString alphaChild = constant.IsString(IsChild(pKeyChild.second, "alphaFunction")))
       {
         alphaFunction = GetAlphaFunction(*alphaChild);
       }
 
-      if (OptionalChild keyFrameChild = IsChild(pKeyChild.second, "keyFrames"))
+      if(OptionalChild keyFrameChild = IsChild(pKeyChild.second, "keyFrames"))
       {
         DALI_ASSERT_ALWAYS(property && "Animation must specify a property name");
         Property prop = Property(targetHandle, propIndex);
@@ -254,7 +254,7 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
         KeyFrames keyframes = KeyFrames::New();
 
         const TreeNode::ConstIterator endIter = (*keyFrameChild).CEnd();
-        for (TreeNode::ConstIterator iter = (*keyFrameChild).CBegin(); endIter != iter; ++iter)
+        for(TreeNode::ConstIterator iter = (*keyFrameChild).CBegin(); endIter != iter; ++iter)
         {
           const TreeNode::KeyNodePair& kfKeyChild = *iter;
 
@@ -268,7 +268,7 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
           {
             propValue = GetPropertyValue(prop.object.GetPropertyType(prop.propertyIndex), *kfValue);
           }
-          catch (...)
+          catch(...)
           {
             DALI_SCRIPT_WARNING("Property:'%s' type does not match value type '%s'\n", (*property).c_str(),
                                 PropertyTypes::GetName(prop.object.GetPropertyType(prop.propertyIndex)));
@@ -279,7 +279,7 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
           keyframes.Add(*kfProgress, propValue);
         }
 
-        if (timeChild)
+        if(timeChild)
         {
           animation.AnimateBetween(prop, keyframes, alphaFunction, timePeriod);
         }
@@ -288,24 +288,24 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
           animation.AnimateBetween(prop, keyframes, alphaFunction);
         }
       }
-      else if (OptionalString pathChild = IsString(pKeyChild.second, "path"))
+      else if(OptionalString pathChild = IsString(pKeyChild.second, "path"))
       {
         // Get path
         Path path = builder->GetPath(*pathChild);
-        if (path)
+        if(path)
         {
           // Get forward vector if specified
-          Vector3 forward(0.0f, 0.0f, 0.0f);
+          Vector3         forward(0.0f, 0.0f, 0.0f);
           OptionalVector3 forwardProperty = constant.IsVector3(IsChild(pKeyChild.second, "forward"));
-          if (forwardProperty)
+          if(forwardProperty)
           {
             forward = *forwardProperty;
           }
 
           Actor actor = Actor::DownCast(targetHandle);
-          if (actor)
+          if(actor)
           {
-            if (timeChild)
+            if(timeChild)
             {
               animation.Animate(actor, path, forward, alphaFunction, timePeriod);
             }
@@ -329,9 +329,9 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
         try
         {
           propValue =
-              GetPropertyValue(prop.object.GetPropertyType(prop.propertyIndex), *IsChild(pKeyChild.second, "value"));
+            GetPropertyValue(prop.object.GetPropertyType(prop.propertyIndex), *IsChild(pKeyChild.second, "value"));
         }
-        catch (...)
+        catch(...)
         {
           DALI_SCRIPT_WARNING("Property:'%s' type does not match value type '%s'\n", (*property).c_str(),
                               PropertyTypes::GetName(prop.object.GetPropertyType(prop.propertyIndex)));
@@ -339,9 +339,9 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
           throw;
         }
 
-        if (OptionalBoolean relative = constant.IsBoolean(IsChild(pKeyChild.second, "relative")))
+        if(OptionalBoolean relative = constant.IsBoolean(IsChild(pKeyChild.second, "relative")))
         {
-          if (timeChild)
+          if(timeChild)
           {
             animation.AnimateBy(prop, propValue, alphaFunction, timePeriod);
           }
@@ -352,7 +352,7 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
         }
         else
         {
-          if (timeChild)
+          if(timeChild)
           {
             animation.AnimateTo(prop, propValue, alphaFunction, timePeriod);
           }
@@ -365,7 +365,7 @@ Animation CreateAnimation(const TreeNode& child, const Replacement& constant, Da
     }
   }
 
-  if (!duration)
+  if(!duration)
   {
     animation.SetDuration(durationSum);
   }

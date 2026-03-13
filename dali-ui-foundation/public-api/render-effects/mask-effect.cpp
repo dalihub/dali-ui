@@ -26,12 +26,12 @@ namespace Ui
 {
 MaskEffect::MaskEffect() = default;
 MaskEffect::MaskEffect(const MaskEffect& handle)
-  : RenderEffect(handle)
+: RenderEffect(handle)
 {
 }
 
 MaskEffect::MaskEffect(Internal::MaskEffectImpl* maskEffectImpl)
-  : RenderEffect(maskEffectImpl)
+: RenderEffect(maskEffectImpl)
 {
 }
 

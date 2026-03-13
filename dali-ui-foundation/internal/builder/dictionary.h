@@ -42,17 +42,17 @@ using DictionaryKeys = std::vector<std::string>;
 
 inline void Merge(DictionaryKeys& toDict, const DictionaryKeys& fromDict)
 {
-  for (const auto& element : fromDict)
+  for(const auto& element : fromDict)
   {
     auto iter = std::find(toDict.cbegin(), toDict.cend(), element);
-    if (iter == toDict.cend())
+    if(iter == toDict.cend())
     {
       toDict.push_back(element);
     }
   }
 }
 
-template <typename EntryType>
+template<typename EntryType>
 class Dictionary
 {
 private:
@@ -62,10 +62,10 @@ private:
   struct Element
   {
     std::string key;
-    EntryType entry;
+    EntryType   entry;
     Element(std::string name, EntryType entry)
-      : key(std::move(name)),
-        entry(std::move(entry))
+    : key(std::move(name)),
+      entry(std::move(entry))
     {
     }
   };
@@ -74,12 +74,14 @@ private:
 
   auto FindElementCaseInsensitive(std::string_view key) const
   {
-    return std::find_if(Begin(), End(), [key](auto& e) { return Dali::CaseInsensitiveStringCompare(e.key, key); });
+    return std::find_if(Begin(), End(), [key](auto& e)
+    { return Dali::CaseInsensitiveStringCompare(e.key, key); });
   }
 
   auto FindElement(std::string_view key)
   {
-    return std::find_if(container.begin(), container.end(), [key](auto& e) { return bool(key == e.key); });
+    return std::find_if(container.begin(), container.end(), [key](auto& e)
+    { return bool(key == e.key); });
   }
 
 public:
@@ -100,7 +102,7 @@ public:
   bool Add(std::string name, EntryType entry)
   {
     auto iter = FindElement(name);
-    if (iter != End())
+    if(iter != End())
     {
       return false;
     }
@@ -115,7 +117,7 @@ public:
    */
   bool Add(const char* name, EntryType entry)
   {
-    if (name != nullptr)
+    if(name != nullptr)
     {
       return Add(std::string(name), std::move(entry));
     }
@@ -127,11 +129,11 @@ public:
    */
   void Remove(std::string_view name)
   {
-    if (!name.empty())
+    if(!name.empty())
     {
       auto iter = FindElement(name);
 
-      if (iter != End())
+      if(iter != End())
       {
         container.erase(iter);
       }
@@ -140,11 +142,11 @@ public:
 
   void Merge(const Dictionary<EntryType>& dictionary)
   {
-    for (const auto& element : dictionary.container)
+    for(const auto& element : dictionary.container)
     {
       auto iter = FindElement(element.key);
 
-      if (iter == End())
+      if(iter == End())
       {
         container.push_back(Element(element.key, element.entry));
       }
@@ -161,11 +163,11 @@ public:
    */
   const EntryType* FindConst(std::string_view key) const
   {
-    if (!key.empty())
+    if(!key.empty())
     {
       auto iter = FindElementCaseInsensitive(key);
 
-      if (iter != End())
+      if(iter != End())
       {
         return &(iter->entry);
       }
@@ -179,11 +181,11 @@ public:
    */
   EntryType* Find(std::string_view key) const
   {
-    if (!key.empty())
+    if(!key.empty())
     {
       auto iter = FindElementCaseInsensitive(key);
 
-      if (iter != End())
+      if(iter != End())
       {
         return const_cast<EntryType*>(&(iter->entry));
       }
@@ -207,7 +209,7 @@ public:
   void GetKeys(DictionaryKeys& keys) const
   {
     keys.clear();
-    for (const auto& element : container)
+    for(const auto& element : container)
     {
       keys.push_back(element.key);
     }

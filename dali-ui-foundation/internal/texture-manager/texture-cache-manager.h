@@ -63,18 +63,18 @@ public:
   using TextureCacheIndexType = TextureManagerType::TextureCacheIndexType;
   using TextureCacheIndexData = TextureManagerType::TextureCacheIndexData;
 
-  using TextureId = TextureManagerType::TextureId;
+  using TextureId         = TextureManagerType::TextureId;
   using TextureCacheIndex = TextureManagerType::TextureCacheIndex;
-  using TextureHash = TextureManagerType::TextureHash;
+  using TextureHash       = TextureManagerType::TextureHash;
 
-  static constexpr TextureId INVALID_TEXTURE_ID = TextureManagerType::INVALID_TEXTURE_ID;
+  static constexpr TextureId         INVALID_TEXTURE_ID  = TextureManagerType::INVALID_TEXTURE_ID;
   static constexpr TextureCacheIndex INVALID_CACHE_INDEX = TextureManagerType::INVALID_CACHE_INDEX;
 
-  using StorageType = TextureManagerType::StorageType;
-  using LoadState = TextureManagerType::LoadState;
-  using ReloadPolicy = TextureManagerType::ReloadPolicy;
-  using MultiplyOnLoad = TextureManagerType::MultiplyOnLoad;
-  using TextureInfo = TextureManagerType::TextureInfo;
+  using StorageType         = TextureManagerType::StorageType;
+  using LoadState           = TextureManagerType::LoadState;
+  using ReloadPolicy        = TextureManagerType::ReloadPolicy;
+  using MultiplyOnLoad      = TextureManagerType::MultiplyOnLoad;
+  using TextureInfo         = TextureManagerType::TextureInfo;
   using ExternalTextureInfo = TextureManagerType::ExternalTextureInfo;
 
 public:
@@ -204,8 +204,8 @@ public:
    * @return                     A hash of the provided data for caching.
    */
   TextureCacheManager::TextureHash GenerateHash(const VisualUrl& url, const Dali::ImageDimensions& size,
-                                                const Dali::FittingMode::Type fittingMode,
-                                                const Dali::SamplingMode::Type samplingMode,
+                                                const Dali::FittingMode::Type        fittingMode,
+                                                const Dali::SamplingMode::Type       samplingMode,
                                                 const TextureCacheManager::TextureId maskTextureId,
                                                 const bool cropToMask, const bool orientationCorrection,
                                                 const uint32_t frameIndex);
@@ -229,10 +229,10 @@ public:
    */
   TextureCacheManager::TextureCacheIndex FindCachedTexture(const TextureCacheManager::TextureHash hash,
                                                            const VisualUrl& url, const Dali::ImageDimensions& size,
-                                                           const Dali::FittingMode::Type fittingMode,
-                                                           const Dali::SamplingMode::Type samplingMode,
+                                                           const Dali::FittingMode::Type          fittingMode,
+                                                           const Dali::SamplingMode::Type         samplingMode,
                                                            const TextureCacheManager::StorageType storageType,
-                                                           const TextureCacheManager::TextureId maskTextureId,
+                                                           const TextureCacheManager::TextureId   maskTextureId,
                                                            const bool cropToMask, const bool orientationCorrection,
                                                            const TextureCacheManager::MultiplyOnLoad preMultiplyOnLoad,
                                                            const bool isAnimatedImage, const uint32_t frameIndex);
@@ -266,7 +266,7 @@ public:
    * @return TextureInfo as textureCacheIndex
    */
   inline TextureCacheManager::TextureInfo& operator[](
-      const TextureCacheManager::TextureCacheIndex& textureCacheIndex) noexcept
+    const TextureCacheManager::TextureCacheIndex& textureCacheIndex) noexcept
   {
     return mTextureInfoContainer[textureCacheIndex.GetIndex()];
   }
@@ -289,34 +289,34 @@ private:
    */
   struct EncodedImageBufferInfo
   {
-    EncodedImageBufferInfo(const TextureCacheManager::TextureId bufferId,
+    EncodedImageBufferInfo(const TextureCacheManager::TextureId   bufferId,
                            const TextureCacheManager::TextureHash bufferHash,
-                           const EncodedImageBuffer& encodedImageBuffer)
-      : bufferId(bufferId),
-        bufferHash(bufferHash),
-        encodedImageBuffer(encodedImageBuffer),
-        referenceCount(1)
+                           const EncodedImageBuffer&              encodedImageBuffer)
+    : bufferId(bufferId),
+      bufferHash(bufferHash),
+      encodedImageBuffer(encodedImageBuffer),
+      referenceCount(1)
     {
     }
-    TextureCacheManager::TextureId bufferId;
+    TextureCacheManager::TextureId   bufferId;
     TextureCacheManager::TextureHash bufferHash;
-    EncodedImageBuffer encodedImageBuffer;
-    int32_t referenceCount;
+    EncodedImageBuffer               encodedImageBuffer;
+    int32_t                          referenceCount;
   };
 
   typedef Dali::FreeList
-      TextureIdConverterType; ///< The converter type from TextureId to index of TextureInfoContainer.
+    TextureIdConverterType; ///< The converter type from TextureId to index of TextureInfoContainer.
 
   typedef std::unordered_map<TextureCacheManager::TextureHash, std::vector<TextureCacheManager::TextureId>>
-      TextureHashContainerType; ///< The container type used to fast-find the TextureId by TextureHash.
+    TextureHashContainerType; ///< The container type used to fast-find the TextureId by TextureHash.
   typedef std::vector<TextureCacheManager::TextureInfo>
-      TextureInfoContainerType; ///< The container type used to manage the life-cycle and caching of Textures
+    TextureInfoContainerType; ///< The container type used to manage the life-cycle and caching of Textures
   typedef std::vector<TextureCacheManager::ExternalTextureInfo>
-      ExternalTextureInfoContainerType; ///< The container type used to manage the life-cycle and caching of
-                                        ///< ExternalTexture url
+    ExternalTextureInfoContainerType; ///< The container type used to manage the life-cycle and caching of
+                                      ///< ExternalTexture url
   typedef std::vector<TextureCacheManager::EncodedImageBufferInfo>
-      EncodedImageBufferInfoContainerType; ///< The container type used to manage the life-cycle and caching of
-                                           ///< EncodedImageBuffer url
+    EncodedImageBufferInfoContainerType; ///< The container type used to manage the life-cycle and caching of
+                                         ///< EncodedImageBuffer url
 
 private:
   // Private API: only used internally
@@ -327,7 +327,7 @@ private:
    * @return              The cache index
    */
   TextureCacheManager::TextureCacheIndex GetCacheIndexFromExternalTextureId(
-      const TextureCacheManager::TextureId textureId);
+    const TextureCacheManager::TextureId textureId);
 
   /**
    * @brief Used to lookup an index into the EncodedImageBufferInfoContainer from a bufferId
@@ -335,7 +335,7 @@ private:
    * @return             The cache index
    */
   TextureCacheManager::TextureCacheIndex GetCacheIndexFromEncodedImageBufferId(
-      const TextureCacheManager::TextureId bufferId);
+    const TextureCacheManager::TextureId bufferId);
 
   /**
    * @brief Looks up a cached encoded image buffer cached by its hash.
@@ -346,7 +346,7 @@ private:
    * found.
    */
   TextureCacheManager::TextureCacheIndex FindCachedEncodedImageBuffer(const TextureCacheManager::TextureHash hash,
-                                                                      const EncodedImageBuffer& encodedImageBuffer);
+                                                                      const EncodedImageBuffer&              encodedImageBuffer);
 
   /**
    * @brief Remove id in HashContainer.
@@ -364,8 +364,8 @@ private:
    * @param[in] cacheContainer The container that will remove texture info.
    * @param[in] removeContainerIndex The index of texture info that will remove.
    */
-  template <class ContainerType>
-  void RemoveTextureInfoByIndex(ContainerType& cacheContainer,
+  template<class ContainerType>
+  void RemoveTextureInfoByIndex(ContainerType&                                cacheContainer,
                                 const TextureCacheManager::TextureCacheIndex& removeContainerIndex);
 
 private:
@@ -380,13 +380,13 @@ private:
   TextureCacheManager& operator=(const TextureCacheManager& rhs) = delete;
 
 private:                                            // Member Variables:
-  TextureIdConverterType mTextureIdConverter{};     ///< Convert TextureId into various container's index.
+  TextureIdConverterType   mTextureIdConverter{};   ///< Convert TextureId into various container's index.
   TextureHashContainerType mTextureHashContainer{}; ///< Used to manage the life-cycle and caching of Textures +
                                                     ///< EncodedImageBuffer by TextureHash
 
-  TextureInfoContainerType mTextureInfoContainer{};           ///< Used to manage the life-cycle and caching of Textures
-  ExternalTextureInfoContainerType mExternalTextures{};       ///< Externally provided textures
-  EncodedImageBufferInfoContainerType mEncodedImageBuffers{}; ///< Externally encoded image buffer
+  TextureInfoContainerType            mTextureInfoContainer{}; ///< Used to manage the life-cycle and caching of Textures
+  ExternalTextureInfoContainerType    mExternalTextures{};     ///< Externally provided textures
+  EncodedImageBufferInfoContainerType mEncodedImageBuffers{};  ///< Externally encoded image buffer
 };
 
 } // namespace Internal

@@ -47,19 +47,19 @@ struct BoundedParagraphRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values of bitfields
    */
   BoundedParagraphRun()
-    : AbstractStyleCharacterRun(),
-      horizontalAlignment(Text::HorizontalAlignment::BEGIN),
-      relativeLineSize(1),
-      horizontalAlignmentDefined{false},
-      relativeLineSizeDefined(false)
+  : AbstractStyleCharacterRun(),
+    horizontalAlignment(Text::HorizontalAlignment::BEGIN),
+    relativeLineSize(1),
+    horizontalAlignmentDefined{false},
+    relativeLineSizeDefined(false)
   {
   }
 
   Text::HorizontalAlignment::Type
-      horizontalAlignment;             ///< The paragraph horizontal alignment. Values "BEGIN" "CENTER" "END".
-  float relativeLineSize;              ///< The relative line height to be used for this paragaraph.
-  bool horizontalAlignmentDefined : 1; ///< Whether the horizontal alignment is defined.
-  bool relativeLineSizeDefined : 1;    ///< Whether the relative line height is defined for this paragraph.
+        horizontalAlignment;            ///< The paragraph horizontal alignment. Values "BEGIN" "CENTER" "END".
+  float relativeLineSize;               ///< The relative line height to be used for this paragaraph.
+  bool  horizontalAlignmentDefined : 1; ///< Whether the horizontal alignment is defined.
+  bool  relativeLineSizeDefined : 1;    ///< Whether the relative line height is defined for this paragraph.
 };
 
 } // namespace Text
@@ -67,7 +67,7 @@ struct BoundedParagraphRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow BoundedParagraphRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::BoundedParagraphRun> : public Dali::BasicTypes<Dali::Ui::Text::BoundedParagraphRun>
 {
   enum

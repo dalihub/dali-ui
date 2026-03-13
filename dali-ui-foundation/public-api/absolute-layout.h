@@ -94,7 +94,7 @@ public: // Chaining methods
 
 public: // Not intended for application developers
   /// @cond internal
-  DALI_INTERNAL AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
+  DALI_INTERNAL          AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
   explicit DALI_INTERNAL AbsoluteLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };

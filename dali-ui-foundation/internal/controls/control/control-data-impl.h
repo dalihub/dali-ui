@@ -465,7 +465,7 @@ public:
   Control& mControlImpl;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
-  std::unique_ptr<VisualData> mVisualData;
+  std::unique_ptr<VisualData>        mVisualData;
 
   int mLeftFocusableActorId;             ///< Actor ID of Left focusable control.
   int mRightFocusableActorId;            ///< Actor ID of Right focusable control.
@@ -474,32 +474,32 @@ public:
   int mClockwiseFocusableActorId;        ///< Actor ID of Clockwise focusable control.
   int mCounterClockwiseFocusableActorId; ///< Actor ID of Counter clockwise focusable control.
 
-  std::string mStyleName;
-  Vector4 mBackgroundColor;          ///< The color of the background visual
-  RenderEffectImplPtr mRenderEffect; ///< The render effect on this control
-  Vector3* mStartingPinchScale;      ///< The scale when a pinch gesture starts, TODO: consider removing this
-  Extents mMargin;                   ///< The margin values
-  Extents mPadding;                  ///< The padding values
-  Vector2 mSize;                     ///< The size of the control
-  Ui::Control::KeyEventSignalType mKeyEventSignal;
+  std::string                          mStyleName;
+  Vector4                              mBackgroundColor;    ///< The color of the background visual
+  RenderEffectImplPtr                  mRenderEffect;       ///< The render effect on this control
+  Vector3*                             mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this
+  Extents                              mMargin;             ///< The margin values
+  Extents                              mPadding;            ///< The padding values
+  Vector2                              mSize;               ///< The size of the control
+  Ui::Control::KeyEventSignalType      mKeyEventSignal;
   Ui::Control::KeyInputFocusSignalType mKeyInputFocusGainedSignal;
   Ui::Control::KeyInputFocusSignalType mKeyInputFocusLostSignal;
   Ui::Control::ResourceReadySignalType mResourceReadySignal;
 
   // Gesture Detection
-  PinchGestureDetector mPinchGestureDetector;
-  PanGestureDetector mPanGestureDetector;
-  TapGestureDetector mTapGestureDetector;
+  PinchGestureDetector     mPinchGestureDetector;
+  PanGestureDetector       mPanGestureDetector;
+  TapGestureDetector       mTapGestureDetector;
   LongPressGestureDetector mLongPressGestureDetector;
 
   // Off screen rendering context
   std::unique_ptr<OffScreenRenderingImpl> mOffScreenRenderingImpl;
-  DevelControl::OffScreenRenderingType mOffScreenRenderingType;
+  DevelControl::OffScreenRenderingType    mOffScreenRenderingType;
   Ui::Control::OffScreenRenderingFinishedSignalType
-      mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
+    mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
 
   InputMethodContext mInputMethodContext;
-  CallbackBase* mIdleCallback; ///< The idle callback to emit the resource ready signal.
+  CallbackBase*      mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
   ControlBehaviour mFlags : CONTROL_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
 

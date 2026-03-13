@@ -152,7 +152,7 @@ private:
     BlobCoordinate coords[4];
   };
 
-  std::vector<Key> mItemLookup;
+  std::vector<Key>  mItemLookup;
   std::vector<Item> mItemCache;
 
   bool mIsFull;

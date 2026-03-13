@@ -231,20 +231,20 @@ private:
   AnimatedVectorImageVisual& operator=(const AnimatedVectorImageVisual& visual) = delete;
 
 private:
-  VisualUrl mImageUrl;
+  VisualUrl                          mImageUrl;
   VectorAnimationTask::AnimationData mAnimationData;
-  VectorAnimationTaskPtr mVectorAnimationTask;
-  ImageVisualShaderFactory& mImageVisualShaderFactory;
-  PropertyNotification mScaleNotification;
-  PropertyNotification mSizeNotification;
-  Vector2 mVisualSize;
-  Vector2 mVisualScale;
-  Dali::ImageDimensions mDesiredSize{};
-  WeakHandle<Actor> mPlacementActor;
-  DevelImageVisual::PlayState::Type mPlayState;
-  CallbackBase* mEventCallback; // Not owned
-  float mFrameSpeedFactor;
-  float mRenderScale;
+  VectorAnimationTaskPtr             mVectorAnimationTask;
+  ImageVisualShaderFactory&          mImageVisualShaderFactory;
+  PropertyNotification               mScaleNotification;
+  PropertyNotification               mSizeNotification;
+  Vector2                            mVisualSize;
+  Vector2                            mVisualScale;
+  Dali::ImageDimensions              mDesiredSize{};
+  WeakHandle<Actor>                  mPlacementActor;
+  DevelImageVisual::PlayState::Type  mPlayState;
+  CallbackBase*                      mEventCallback; // Not owned
+  float                              mFrameSpeedFactor;
+  float                              mRenderScale;
 
   Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
 

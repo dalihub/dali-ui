@@ -30,7 +30,7 @@ namespace Dali
 {
 namespace Ui
 {
-using HashType = uint64_t;
+using HashType       = uint64_t;
 using ShaderFlagList = std::vector<PrecompileShaderOption::Flag>;
 
 namespace Internal
@@ -47,12 +47,12 @@ public:
   struct RequestShaderInfo
   {
     VisualFactoryCache::ShaderType type{VisualFactoryCache::ShaderType::SHADER_TYPE_MAX};
-    std::string name{};
-    std::string vertexPrefix{};
-    std::string fragmentPrefix{};
+    std::string                    name{};
+    std::string                    vertexPrefix{};
+    std::string                    fragmentPrefix{};
   };
 
-  VisualShaderFactoryInterface() = default;
+  VisualShaderFactoryInterface()          = default;
   virtual ~VisualShaderFactoryInterface() = default;
 
   /**

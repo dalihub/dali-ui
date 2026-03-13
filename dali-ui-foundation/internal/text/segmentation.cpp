@@ -48,7 +48,7 @@ void SetLineBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
 {
   const Length totalNumberOfCharacters = text.Count();
 
-  if (0u == totalNumberOfCharacters)
+  if(0u == totalNumberOfCharacters)
   {
     // Nothing to do if there are no characters.
     return;
@@ -60,10 +60,10 @@ void SetLineBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
   // Whether the current buffer is being updated or is set from scratch.
   const bool updateCurrentBuffer = numberOfCharacters < totalNumberOfCharacters;
 
-  LineBreakInfo* lineBreakInfoBuffer = NULL;
+  LineBreakInfo*        lineBreakInfoBuffer = NULL;
   Vector<LineBreakInfo> newLineBreakInfo;
 
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     newLineBreakInfo.Resize(numberOfCharacters);
     lineBreakInfoBuffer = newLineBreakInfo.Begin();
@@ -77,21 +77,21 @@ void SetLineBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
   segmentation.GetLineBreakPositions(text.Begin() + startIndex, numberOfCharacters, lineBreakInfoBuffer);
 
   // If the line break info is updated, it needs to be inserted in the model.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     lineBreakInfo.Insert(lineBreakInfo.Begin() + startIndex, newLineBreakInfo.Begin(), newLineBreakInfo.End());
     lineBreakInfo.Resize(totalNumberOfCharacters);
   }
 
 #ifdef DEBUG_ENABLED
-  if (gLogFilter->IsEnabledFor(Debug::Verbose))
+  if(gLogFilter->IsEnabledFor(Debug::Verbose))
   {
     std::string utf8;
     Utf32ToUtf8(text.Begin(), numberOfCharacters, utf8);
 
     std::string info;
     info.reserve(numberOfCharacters);
-    for (unsigned int i = 0; i < lineBreakInfo.Count(); ++i)
+    for(unsigned int i = 0; i < lineBreakInfo.Count(); ++i)
     {
       info.push_back(static_cast<char>('0' + lineBreakInfo[i]));
     }
@@ -107,7 +107,7 @@ void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
 {
   const Length totalNumberOfCharacters = text.Count();
 
-  if (0u == totalNumberOfCharacters)
+  if(0u == totalNumberOfCharacters)
   {
     // Nothing to do if there are no characters.
     return;
@@ -119,10 +119,10 @@ void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
   // Whether the current buffer is being updated or is set from scratch.
   const bool updateCurrentBuffer = numberOfCharacters < totalNumberOfCharacters;
 
-  WordBreakInfo* wordBreakInfoBuffer = NULL;
+  WordBreakInfo*        wordBreakInfoBuffer = NULL;
   Vector<WordBreakInfo> newWordBreakInfo;
 
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     newWordBreakInfo.Resize(numberOfCharacters);
     wordBreakInfoBuffer = newWordBreakInfo.Begin();
@@ -136,21 +136,21 @@ void SetWordBreakInfo(TextAbstraction::Segmentation& segmentation, const Vector<
   segmentation.GetWordBreakPositions(text.Begin() + startIndex, numberOfCharacters, wordBreakInfoBuffer);
 
   // If the word break info is updated, it needs to be inserted in the model.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     wordBreakInfo.Insert(wordBreakInfo.Begin() + startIndex, newWordBreakInfo.Begin(), newWordBreakInfo.End());
     wordBreakInfo.Resize(totalNumberOfCharacters);
   }
 
 #ifdef DEBUG_ENABLED
-  if (gLogFilter->IsEnabledFor(Debug::Verbose))
+  if(gLogFilter->IsEnabledFor(Debug::Verbose))
   {
     std::string utf8;
     Utf32ToUtf8(text.Begin(), totalNumberOfCharacters, utf8);
 
     std::string info;
     info.reserve(totalNumberOfCharacters);
-    for (unsigned int i = 0; i < wordBreakInfo.Count(); ++i)
+    for(unsigned int i = 0; i < wordBreakInfo.Count(); ++i)
     {
       info.push_back(static_cast<char>('0' + wordBreakInfo[i]));
     }

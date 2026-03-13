@@ -115,53 +115,53 @@ public:
   static Ui::DevelControl::AccessibilityStates GetDefaultControlAccessibilityStates();
 
 public:
-  Ui::DevelControl::AccessibilityActivateSignalType mAccessibilityActivateSignal;
-  Ui::DevelControl::AccessibilityReadingSkippedSignalType mAccessibilityReadingSkippedSignal;
-  Ui::DevelControl::AccessibilityReadingPausedSignalType mAccessibilityReadingPausedSignal;
-  Ui::DevelControl::AccessibilityReadingResumedSignalType mAccessibilityReadingResumedSignal;
+  Ui::DevelControl::AccessibilityActivateSignalType         mAccessibilityActivateSignal;
+  Ui::DevelControl::AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
+  Ui::DevelControl::AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
+  Ui::DevelControl::AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
   Ui::DevelControl::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
-  Ui::DevelControl::AccessibilityReadingStoppedSignalType mAccessibilityReadingStoppedSignal;
+  Ui::DevelControl::AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
 
-  Ui::DevelControl::AccessibilityGetNameSignalType mAccessibilityGetNameSignal;
+  Ui::DevelControl::AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
   Ui::DevelControl::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
-  Ui::DevelControl::AccessibilityDoGestureSignalType mAccessibilityDoGestureSignal;
+  Ui::DevelControl::AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
 
-  Ui::DevelControl::AccessibilityActionSignalType mAccessibilityActionSignal;
+  Ui::DevelControl::AccessibilityActionSignalType      mAccessibilityActionSignal;
   Ui::DevelControl::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
 
   struct AccessibilityProps
   {
     AccessibilityProps()
-      : isHighlightable(TriStateProperty::AUTO),
-        isHidden(false),
-        isScrollable(false),
-        isModal(false)
+    : isHighlightable(TriStateProperty::AUTO),
+      isHidden(false),
+      isScrollable(false),
+      isModal(false)
     {
     }
 
     AccessibilityProps(const AccessibilityProps&) = default;
-    AccessibilityProps(AccessibilityProps&&) = default;
+    AccessibilityProps(AccessibilityProps&&)      = default;
 
     std::string name{};
     std::string description{};
     std::string value{};
     std::string automationId{};
 
-    DevelControl::AccessibilityStates states{};
+    DevelControl::AccessibilityStates                                                 states{};
     std::map<Dali::Accessibility::RelationType, std::set<Accessibility::Accessible*>> relations{};
-    Property::Map extraAttributes{};
+    Property::Map                                                                     extraAttributes{};
 
     TriStateProperty isHighlightable : 3;
-    bool isHidden : 1;
-    bool isScrollable : 1;
-    bool isModal : 1;
+    bool             isHidden : 1;
+    bool             isScrollable : 1;
+    bool             isModal : 1;
   } mAccessibilityProps;
 
 private:
   // Accessibility - notification for highlighted object to check if it is showing.
-  Dali::PropertyNotification mAccessibilityPositionNotification;
+  Dali::PropertyNotification                  mAccessibilityPositionNotification;
   Dali::Accessibility::ScreenRelativeMoveType mAccessibilityLastScreenRelativeMoveType{
-      Accessibility::ScreenRelativeMoveType::OUTSIDE};
+    Accessibility::ScreenRelativeMoveType::OUTSIDE};
 
   Control& mControlImpl;
 

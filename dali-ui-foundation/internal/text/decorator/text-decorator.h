@@ -19,15 +19,15 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
-#include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup-callback-interface.h>
+#include <dali-ui-foundation/public-api/controls/control.h>
 
 namespace Dali
 {
@@ -117,12 +117,12 @@ public:
     /**
      * @brief Constructor.
      */
-    ControllerInterface(){};
+    ControllerInterface() {};
 
     /**
      * @brief Virtual destructor.
      */
-    virtual ~ControllerInterface(){};
+    virtual ~ControllerInterface() {};
 
     /**
      * @brief Query the target size of the UI control.

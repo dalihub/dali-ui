@@ -47,7 +47,6 @@ using DummyElementImplPtr = IntrusivePtr<DummyElementImpl>;
 class DummyElementImpl : public Integration::ViewImpl
 {
 public:
-
   // Creation & Destruction
 
   /**
@@ -56,18 +55,15 @@ public:
   static DummyElementImplPtr New();
 
 protected:
-
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
   virtual ~DummyElementImpl();
 
 public:
-
   // API
 
 protected:
-
   // Construction
 
   /**
@@ -77,15 +73,13 @@ protected:
   DummyElementImpl();
 
 private:
-
   // Not copyable or movable
-  DummyElementImpl(const DummyElementImpl&) = delete;
-  DummyElementImpl(DummyElementImpl&&) = delete;
+  DummyElementImpl(const DummyElementImpl&)            = delete;
+  DummyElementImpl(DummyElementImpl&&)                 = delete;
   DummyElementImpl& operator=(const DummyElementImpl&) = delete;
-  DummyElementImpl& operator=(DummyElementImpl&&) = delete;
+  DummyElementImpl& operator=(DummyElementImpl&&)      = delete;
 
 private:
-
   // Data
 };
 

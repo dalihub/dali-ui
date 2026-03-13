@@ -30,13 +30,13 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
 {
   Ui::AtlasManager::Vertex2D vertex;
 
-  SizeType blockWidth = atlasSize.mBlockWidth;
+  SizeType blockWidth  = atlasSize.mBlockWidth;
   SizeType blockHeight = atlasSize.mBlockHeight;
 
-  float vertexBlockWidth = static_cast<float>(blockWidth);
+  float vertexBlockWidth  = static_cast<float>(blockWidth);
   float vertexBlockHeight = static_cast<float>(blockHeight);
 
-  SizeType atlasWidth = atlasSize.mWidth;
+  SizeType atlasWidth  = atlasSize.mWidth;
   SizeType atlasHeight = atlasSize.mHeight;
 
   SizeType atlasWidthInBlocks = (atlasWidth - 1u) / blockWidth;
@@ -48,24 +48,24 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
   float oneAndAHalfTexelX = texelX + (texelX * 0.5f);
   float oneAndAHalfTexelY = texelY + (texelY * 0.5f);
 
-  float texelBlockWidth = texelX * vertexBlockWidth;
+  float texelBlockWidth  = texelX * vertexBlockWidth;
   float texelBlockHeight = texelY * vertexBlockHeight;
 
   uint32_t pixelsX = imageWidth % blockWidth;
   uint32_t pixelsY = imageHeight % blockHeight;
 
-  if (!pixelsX)
+  if(!pixelsX)
   {
     pixelsX = blockWidth;
   }
-  if (!pixelsY)
+  if(!pixelsY)
   {
     pixelsY = blockHeight;
   }
-  float vertexWidth = static_cast<float>(pixelsX);
+  float vertexWidth  = static_cast<float>(pixelsX);
   float vertexHeight = static_cast<float>(pixelsY);
-  float texelWidth = texelX * vertexWidth;
-  float texelHeight = texelY * vertexHeight;
+  float texelWidth   = texelX * vertexWidth;
+  float texelHeight  = texelY * vertexHeight;
 
   // We're going to 'blit' half a pixel more on each edge
   vertexWidth++;
@@ -84,12 +84,12 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
   fBlockX += oneAndAHalfTexelX;
   fBlockY += oneAndAHalfTexelY;
 
-  float texelWidthOffset = texelWidth + texelX;
+  float texelWidthOffset  = texelWidth + texelX;
   float texelHeightOffset = texelHeight + texelY;
 
   // Top left
-  vertex.mPosition.x = topLeft.x;
-  vertex.mPosition.y = topLeft.y;
+  vertex.mPosition.x  = topLeft.x;
+  vertex.mPosition.y  = topLeft.y;
   vertex.mTexCoords.x = fBlockX;
   vertex.mTexCoords.y = fBlockY;
 
@@ -97,24 +97,24 @@ void CreateQuad(SizeType imageWidth, SizeType imageHeight, SizeType block, const
   mesh.mVertices.PushBack(vertex);
 
   // Top Right
-  vertex.mPosition.x = topLeft.x + vertexWidth;
-  vertex.mPosition.y = topLeft.y;
+  vertex.mPosition.x  = topLeft.x + vertexWidth;
+  vertex.mPosition.y  = topLeft.y;
   vertex.mTexCoords.x = fBlockX + texelWidthOffset;
   vertex.mTexCoords.y = fBlockY;
 
   mesh.mVertices.PushBack(vertex);
 
   // Bottom Left
-  vertex.mPosition.x = topLeft.x;
-  vertex.mPosition.y = topLeft.y + vertexHeight;
+  vertex.mPosition.x  = topLeft.x;
+  vertex.mPosition.y  = topLeft.y + vertexHeight;
   vertex.mTexCoords.x = fBlockX;
   vertex.mTexCoords.y = fBlockY + texelHeightOffset;
 
   mesh.mVertices.PushBack(vertex);
 
   // Bottom Right
-  vertex.mPosition.x = topLeft.x + vertexWidth;
-  vertex.mPosition.y = topLeft.y + vertexHeight;
+  vertex.mPosition.x  = topLeft.x + vertexWidth;
+  vertex.mPosition.y  = topLeft.y + vertexHeight;
   vertex.mTexCoords.x = fBlockX + texelWidthOffset;
   vertex.mTexCoords.y = fBlockY + texelHeightOffset;
 
@@ -138,8 +138,8 @@ void AppendMesh(Ui::AtlasManager::Mesh2D& first, const Ui::AtlasManager::Mesh2D&
   const uint32_t indicesCount = first.mIndices.Size();
   first.mIndices.Insert(first.mIndices.End(), second.mIndices.Begin(), second.mIndices.End());
 
-  for (Vector<uint32_t>::Iterator it = first.mIndices.Begin() + indicesCount, endIt = first.mIndices.End(); it != endIt;
-       ++it)
+  for(Vector<uint32_t>::Iterator it = first.mIndices.Begin() + indicesCount, endIt = first.mIndices.End(); it != endIt;
+      ++it)
   {
     *it += verticesCount;
   }

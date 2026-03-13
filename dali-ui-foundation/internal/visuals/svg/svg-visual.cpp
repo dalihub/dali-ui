@@ -48,29 +48,29 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 
 // load policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOAD_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
 DALI_ENUM_TO_STRING_TABLE_END(LOAD_POLICY)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 struct NameIndexMatch
 {
   const char* const name;
-  Property::Index index;
+  Property::Index   index;
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-    {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
-    {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
-    {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
-    {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
-    {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
+  {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
+  {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
+  {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
+  {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -95,22 +95,22 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
 
 SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                      const VisualUrl& imageUrl, ImageDimensions size)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::SVG),
-    mImageVisualShaderFactory(shaderFactory),
-    mSvgLoader(factoryCache.GetSvgLoader()),
-    mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
-    mSvgRasterizeId(SvgLoader::INVALID_SVG_RASTERIZE_ID),
-    mImageUrl(imageUrl),
-    mDefaultWidth(0),
-    mDefaultHeight(0),
-    mPlacementActor(),
-    mDesiredSize(size),
-    mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
-    mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
-    mLoadCompleted(false),
-    mRasterizeCompleted(false),
-    mLoadFailed(false),
-    mRasterizeForcibly(true)
+: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::SVG),
+  mImageVisualShaderFactory(shaderFactory),
+  mSvgLoader(factoryCache.GetSvgLoader()),
+  mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
+  mSvgRasterizeId(SvgLoader::INVALID_SVG_RASTERIZE_ID),
+  mImageUrl(imageUrl),
+  mDefaultWidth(0),
+  mDefaultHeight(0),
+  mPlacementActor(),
+  mDesiredSize(size),
+  mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
+  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
+  mLoadCompleted(false),
+  mRasterizeCompleted(false),
+  mLoadFailed(false),
+  mRasterizeForcibly(true)
 {
   // the rasterized image is with pre-multiplied alpha format
   mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
@@ -118,22 +118,22 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
 
 SvgVisual::~SvgVisual()
 {
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER && mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
+    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER && mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
     {
       mSvgLoader.RequestLoadRemove(mSvgLoadId, this);
       mSvgLoadId = SvgLoader::INVALID_SVG_LOAD_ID;
     }
-    if (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER &&
-        mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER &&
+       mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
     {
       // We don't need to remove task synchronously.
       mSvgLoader.RequestRasterizeRemove(mSvgRasterizeId, this, false);
       mSvgRasterizeId = SvgLoader::INVALID_SVG_RASTERIZE_ID;
     }
 
-    if (mImageUrl.IsBufferResource())
+    if(mImageUrl.IsBufferResource())
     {
       TextureManager& textureManager = mFactoryCache.GetTextureManager();
       textureManager.RemoveEncodedImageBuffer(mImageUrl);
@@ -143,17 +143,17 @@ SvgVisual::~SvgVisual()
 
 void SvgVisual::OnInitialize()
 {
-  Shader shader = GenerateShader();
+  Shader   shader   = GenerateShader();
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::QUAD_GEOMETRY);
-  mImpl->mRenderer = DecoratedVisualRenderer::New(geometry, shader);
+  mImpl->mRenderer  = DecoratedVisualRenderer::New(geometry, shader);
 
-  if (mSvgLoadId == SvgLoader::INVALID_SVG_LOAD_ID)
+  if(mSvgLoadId == SvgLoader::INVALID_SVG_LOAD_ID)
   {
-    const Vector2 dpi = Stage::GetCurrent().GetDpi();
-    const float meanDpi = (dpi.height + dpi.width) * 0.5f;
+    const Vector2 dpi     = Stage::GetCurrent().GetDpi();
+    const float   meanDpi = (dpi.height + dpi.width) * 0.5f;
 
     const bool synchronousLoading =
-        IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
+      IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
     // It will call SvgVisual::LoadComplete() synchronously if it required, or we already loaded same svg before.
     mSvgLoadId = mSvgLoader.Load(mImageUrl, meanDpi, this, synchronousLoading);
@@ -163,18 +163,18 @@ void SvgVisual::OnInitialize()
 void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // url already passed in from constructor
-  for (Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
+  for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if (keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
     else
     {
-      for (int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
+      for(int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
       {
-        if (keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
+        if(keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
         {
           DoSetProperty(NAME_INDEX_MATCH_TABLE[i].index, keyValue.second);
           break;
@@ -184,13 +184,13 @@ void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   // Load image immediately if LOAD_POLICY requires it
-  if (mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
+  if(mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
   {
-    const Vector2 dpi = Stage::GetCurrent().GetDpi();
-    const float meanDpi = (dpi.height + dpi.width) * 0.5f;
+    const Vector2 dpi     = Stage::GetCurrent().GetDpi();
+    const float   meanDpi = (dpi.height + dpi.width) * 0.5f;
 
     const bool synchronousLoading =
-        IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
+      IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
     // It will call SvgVisual::LoadComplete() synchronously if it required, or we already loaded same svg before.
     mSvgLoadId = mSvgLoader.Load(mImageUrl, meanDpi, this, synchronousLoading);
@@ -201,14 +201,14 @@ void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
 
 void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& value)
 {
-  switch (index)
+  switch(index)
   {
     case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
-      if (value.Get(sync))
+      if(value.Get(sync))
       {
-        if (sync)
+        if(sync)
         {
           mImpl->mFlags |= Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
         }
@@ -226,7 +226,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
     case Ui::ImageVisual::Property::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
-      if (value.Get(desiredWidth))
+      if(value.Get(desiredWidth))
       {
         mDesiredSize.SetWidth(desiredWidth);
       }
@@ -235,7 +235,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
     case Ui::ImageVisual::Property::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
-      if (value.Get(desiredHeight))
+      if(value.Get(desiredHeight))
       {
         mDesiredSize.SetHeight(desiredHeight);
       }
@@ -244,8 +244,8 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
     case Ui::ImageVisual::Property::RELEASE_POLICY:
     {
       int releasePolicy = static_cast<int>(mReleasePolicy);
-      if (DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
-                                                        releasePolicy)))
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
+                                                       releasePolicy)))
       {
         mReleasePolicy = Ui::ImageVisual::ReleasePolicy::Type(releasePolicy);
       }
@@ -254,7 +254,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
     case Ui::ImageVisual::Property::LOAD_POLICY:
     {
       int loadPolicy = static_cast<int>(mLoadPolicy);
-      if (DALI_LIKELY(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy)))
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy)))
       {
         mLoadPolicy = Ui::ImageVisual::LoadPolicy::Type(loadPolicy);
       }
@@ -274,10 +274,10 @@ void SvgVisual::DoSetOnScene(Actor& actor)
   // finished.
   mPlacementActor = actor;
 
-  if (mLoadFailed)
+  if(mLoadFailed)
   {
     Vector2 imageSize = Vector2::ZERO;
-    imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
+    imageSize         = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
     mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
     actor.AddRenderer(mImpl->mRenderer);
 
@@ -285,24 +285,24 @@ void SvgVisual::DoSetOnScene(Actor& actor)
   }
   else
   {
-    if (mImpl->mEventObserver)
+    if(mImpl->mEventObserver)
     {
       // SVG visual needs it's size set before it can be rasterized hence request relayout once on stage
       mImpl->mEventObserver->RelayoutRequest(*this);
     }
 
-    if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+    if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
     {
       // Use desired size. We don't need to wait size negotiation this case.
       AddRasterizationTask(mDesiredSize);
     }
 
-    if (DALI_UNLIKELY(mLoadFailed))
+    if(DALI_UNLIKELY(mLoadFailed))
     {
       // If rasterize failed.
       EmitResourceReady(Ui::Visual::ResourceStatus::FAILED);
     }
-    else if (mRasterizeCompleted && mLoadCompleted)
+    else if(mRasterizeCompleted && mLoadCompleted)
     {
       // The case when we got cached rasterized result, or case ReleasePolicy is not DETACHED.
       // Since "IsOnScene()" still false, RasterizeComplete will not send resource ready signal. Need to emit this time.
@@ -314,13 +314,13 @@ void SvgVisual::DoSetOnScene(Actor& actor)
 void SvgVisual::DoSetOffScene(Actor& actor)
 {
   // Remove rasterizing task
-  if (mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
-      mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
+     mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
   {
     // When adding the actor back to stage the SVG rasterization should be forced again. (To emit ResourceReady signal
     // at SceneOn).
-    mRasterizeForcibly = true;
-    mRasterizeCompleted = false;
+    mRasterizeForcibly     = true;
+    mRasterizeCompleted    = false;
     mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
     // We don't need to remove task synchronously.
@@ -337,19 +337,19 @@ void SvgVisual::DoSetOffScene(Actor& actor)
 
 void SvgVisual::GetNaturalSize(Vector2& naturalSize)
 {
-  if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+  if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
   {
     naturalSize.x = mDesiredSize.GetWidth();
     naturalSize.y = mDesiredSize.GetHeight();
   }
-  else if (mLoadFailed && mImpl->mRenderer)
+  else if(mLoadFailed && mImpl->mRenderer)
   {
     // Load failed, use broken image size
     auto textureSet = mImpl->mRenderer.GetTextures();
-    if (textureSet && textureSet.GetTextureCount())
+    if(textureSet && textureSet.GetTextureCount())
     {
       auto texture = textureSet.GetTexture(0);
-      if (texture)
+      if(texture)
       {
         naturalSize.x = texture.GetWidth();
         naturalSize.y = texture.GetHeight();
@@ -368,7 +368,7 @@ void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::SVG);
-  if (mImageUrl.IsValid())
+  if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
   }
@@ -388,7 +388,7 @@ void SvgVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 void SvgVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 {
   // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if (!preMultiplied)
+  if(!preMultiplied)
   {
     DALI_LOG_WARNING("Note : SvgVisual cannot disable PreMultipliedAlpha\n");
   }
@@ -401,14 +401,14 @@ void SvgVisual::EmitResourceReady(Ui::Visual::ResourceStatus resourceStatus)
   // Rasterized pixels are uploaded to texture. If weak handle is holding a placement actor, it is the time to add the
   // renderer to actor.
   Actor actor = mPlacementActor.GetHandle();
-  if (actor)
+  if(actor)
   {
-    if (mImpl->mRenderer)
+    if(mImpl->mRenderer)
     {
-      if (resourceStatus == Ui::Visual::ResourceStatus::FAILED)
+      if(resourceStatus == Ui::Visual::ResourceStatus::FAILED)
       {
         Vector2 imageSize = Vector2::ZERO;
-        imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
+        imageSize         = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
         mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
       }
       actor.AddRenderer(mImpl->mRenderer);
@@ -423,7 +423,7 @@ void SvgVisual::EmitResourceReady(Ui::Visual::ResourceStatus resourceStatus)
 
 void SvgVisual::AddRasterizationTask(const Dali::ImageDimensions& size)
 {
-  if (!mRasterizeForcibly && size == mLastRequiredSize)
+  if(!mRasterizeForcibly && size == mLastRequiredSize)
   {
     // No size change. Skip rasterization.
     return;
@@ -435,17 +435,17 @@ void SvgVisual::AddRasterizationTask(const Dali::ImageDimensions& size)
   mLastRequiredSize = size;
 
   // Remove previous task
-  if (mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+  if(mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
   {
     mSvgLoader.RequestRasterizeRemove(mSvgRasterizeId, this, false);
     mSvgRasterizeId = SvgLoader::INVALID_SVG_RASTERIZE_ID;
   }
 
   const bool synchronousRasterize =
-      IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
+    IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
   mRasterizeCompleted = false;
-  mSvgRasterizeId = mSvgLoader.Rasterize(mSvgLoadId, size.GetWidth(), size.GetHeight(), this, synchronousRasterize);
+  mSvgRasterizeId     = mSvgLoader.Rasterize(mSvgLoadId, size.GetWidth(), size.GetHeight(), this, synchronousRasterize);
 }
 
 /// Called when SvgLoader::Load is completed.
@@ -456,10 +456,10 @@ void SvgVisual::LoadComplete(int32_t loadId, Dali::VectorImageRenderer vectorIma
 
   mLoadCompleted = true;
 
-  if (DALI_LIKELY(vectorImageRenderer))
+  if(DALI_LIKELY(vectorImageRenderer))
   {
     vectorImageRenderer.GetDefaultSize(mDefaultWidth, mDefaultHeight);
-    if (mImpl->mEventObserver && mImpl->mFittingMode != DevelVisual::FittingMode::DONT_CARE)
+    if(mImpl->mEventObserver && mImpl->mFittingMode != DevelVisual::FittingMode::DONT_CARE)
     {
       // Need teo call ApplyFittingMode once again, after load completed.
       mImpl->mEventObserver->RelayoutRequest(*this);
@@ -467,23 +467,23 @@ void SvgVisual::LoadComplete(int32_t loadId, Dali::VectorImageRenderer vectorIma
 
     // Very rarely, rasterize completed inovked before load completed invoke.
     // In this case, we should send resource ready here.
-    if (DALI_UNLIKELY(mRasterizeCompleted && IsOnScene()))
+    if(DALI_UNLIKELY(mRasterizeCompleted && IsOnScene()))
     {
       EmitResourceReady(Ui::Visual::ResourceStatus::READY);
     }
   }
-  else if (!mLoadFailed)
+  else if(!mLoadFailed)
   {
     mLoadFailed = true;
 
     // Remove rasterizing task if we requested before.
-    if (mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+    if(mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
     {
       mSvgLoader.RequestRasterizeRemove(mSvgRasterizeId, this, true);
       mSvgRasterizeId = SvgLoader::INVALID_SVG_RASTERIZE_ID;
     }
 
-    if (IsOnScene())
+    if(IsOnScene())
     {
       EmitResourceReady(Ui::Visual::ResourceStatus::FAILED);
     }
@@ -498,28 +498,28 @@ void SvgVisual::RasterizeComplete(int32_t rasterizeId, Dali::TextureSet textureS
 
   mRasterizeCompleted = true;
 
-  if (DALI_LIKELY(textureSet))
+  if(DALI_LIKELY(textureSet))
   {
-    if (DALI_LIKELY(mImpl->mRenderer))
+    if(DALI_LIKELY(mImpl->mRenderer))
     {
       TextureSet currentTextureSet = mImpl->mRenderer.GetTextures();
 
-      if (textureSet != currentTextureSet)
+      if(textureSet != currentTextureSet)
       {
         mImpl->mRenderer.SetTextures(textureSet);
       }
     }
 
-    if (IsOnScene() && DALI_LIKELY(mLoadCompleted))
+    if(IsOnScene() && DALI_LIKELY(mLoadCompleted))
     {
       EmitResourceReady(Ui::Visual::ResourceStatus::READY);
     }
   }
-  else if (!mLoadFailed)
+  else if(!mLoadFailed)
   {
     mLoadFailed = true;
 
-    if (IsOnScene())
+    if(IsOnScene())
     {
       EmitResourceReady(Ui::Visual::ResourceStatus::FAILED);
     }
@@ -528,15 +528,15 @@ void SvgVisual::RasterizeComplete(int32_t rasterizeId, Dali::TextureSet textureS
 
 void SvgVisual::OnSetTransform()
 {
-  if (mImpl->mRenderer && mImpl->mTransformMapChanged)
+  if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
   }
 
-  if (IsOnScene() && !mLoadFailed)
+  if(IsOnScene() && !mLoadFailed)
   {
     Dali::ImageDimensions size;
-    if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+    if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
     {
       // Use desired size
       size = mDesiredSize;
@@ -557,7 +557,7 @@ void SvgVisual::OnSetTransform()
 
 void SvgVisual::UpdateShader()
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     Shader shader = GenerateShader();
     mImpl->mRenderer.SetShader(shader);
@@ -567,21 +567,21 @@ void SvgVisual::UpdateShader()
 Shader SvgVisual::GenerateShader() const
 {
   Shader shader;
-  if (!IsUsingCustomShader())
+  if(!IsUsingCustomShader())
   {
     shader = mImageVisualShaderFactory.GetShader(
-        mFactoryCache, ImageVisualShaderFeature::FeatureBuilder()
-                           .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
-                           .EnableBorderline(IsBorderlineRequired()));
+      mFactoryCache, ImageVisualShaderFeature::FeatureBuilder()
+                       .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
+                       .EnableBorderline(IsBorderlineRequired()));
   }
   else
   {
     shader = Shader::New(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
-                             ? mImageVisualShaderFactory.GetVertexShaderSource().data()
-                             : mImpl->GetCustomShaderAt(0)->mVertexShader,
+                           ? mImageVisualShaderFactory.GetVertexShaderSource().data()
+                           : mImpl->GetCustomShaderAt(0)->mVertexShader,
                          mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
-                             ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
-                             : mImpl->GetCustomShaderAt(0)->mFragmentShader,
+                           ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
+                           : mImpl->GetCustomShaderAt(0)->mFragmentShader,
                          mImpl->GetCustomShaderAt(0)->mHints);
 
     shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);

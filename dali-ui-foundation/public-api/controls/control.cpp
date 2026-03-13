@@ -137,7 +137,7 @@ bool Control::IsResourceReady() const
 
 Ui::Visual::ResourceStatus Control::GetVisualResourceStatus(Dali::Property::Index index)
 {
-  const Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
+  const Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
   const Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(internalControl);
   return controlDataImpl.GetVisualResourceStatus(index);
 }
@@ -159,27 +159,27 @@ Control::KeyInputFocusSignalType& Control::KeyInputFocusLostSignal()
 
 Control::ResourceReadySignalType& Control::ResourceReadySignal()
 {
-  Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
-  Internal::Control::Impl& controlImpl = Internal::Control::Impl::Get(internalControl);
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
 
   return controlImpl.mResourceReadySignal;
 }
 
 Control::OffScreenRenderingFinishedSignalType& Control::OffScreenRenderingFinishedSignal()
 {
-  Internal::Control& internalControl = Ui::Internal::GetImplementation(*this);
-  Internal::Control::Impl& controlImpl = Internal::Control::Impl::Get(internalControl);
+  Internal::Control&       internalControl = Ui::Internal::GetImplementation(*this);
+  Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
 
   return controlImpl.mOffScreenRenderingFinishedSignal;
 }
 
 Control::Control(Internal::Control& implementation)
-  : CustomActor(implementation)
+: CustomActor(implementation)
 {
 }
 
 Control::Control(Dali::Internal::CustomActor* internal)
-  : CustomActor(internal)
+: CustomActor(internal)
 {
   VerifyCustomActorPointer<Internal::Control>(internal);
 }

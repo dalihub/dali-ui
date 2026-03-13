@@ -35,7 +35,7 @@ VisualModelPtr VisualModel::New()
 void VisualModel::CreateCharacterToGlyphTable(CharacterIndex startIndex, GlyphIndex startGlyphIndex,
                                               Length numberOfCharacters)
 {
-  if (0u == numberOfCharacters)
+  if(0u == numberOfCharacters)
   {
     // Nothing to do.
     return;
@@ -45,20 +45,20 @@ void VisualModel::CreateCharacterToGlyphTable(CharacterIndex startIndex, GlyphIn
 
   // Get the total number of characters.
   const Length totalNumberOfCharacters =
-      (0u == mGlyphsToCharacters.Count())
-          ? 0u
-          : *(mGlyphsToCharacters.End() - 1u) +
-                *(mCharactersPerGlyph.End() -
-                  1u); // Index to the first character + the number of characters that form the last glyph.
+    (0u == mGlyphsToCharacters.Count())
+      ? 0u
+      : *(mGlyphsToCharacters.End() - 1u) +
+          *(mCharactersPerGlyph.End() -
+            1u); // Index to the first character + the number of characters that form the last glyph.
 
   // Whether the current buffer is being updated or is set from scratch.
   const bool updateCurrentBuffer = numberOfCharacters < totalNumberOfCharacters;
 
   Vector<GlyphIndex> newCharactersToGlyph;
-  GlyphIndex* charactersToGlyphBuffer = NULL;
+  GlyphIndex*        charactersToGlyphBuffer = NULL;
 
   // 1) Reserve some space for the glyph indices to avoid reallocations.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     newCharactersToGlyph.Resize(numberOfCharacters);
     charactersToGlyphBuffer = newCharactersToGlyph.Begin();
@@ -74,17 +74,17 @@ void VisualModel::CreateCharacterToGlyphTable(CharacterIndex startIndex, GlyphIn
   // 2) Traverse the glyphs and set the glyph indices per character.
 
   // Index to the glyph.
-  GlyphIndex glyphIndex = startGlyphIndex;
-  CharacterIndex characterIndex = startIndex;
+  GlyphIndex           glyphIndex                = startGlyphIndex;
+  CharacterIndex       characterIndex            = startIndex;
   const CharacterIndex lastCharacterIndexPlusOne = startIndex + numberOfCharacters;
-  for (Vector<Length>::ConstIterator it = mCharactersPerGlyph.Begin() + glyphIndex, endIt = mCharactersPerGlyph.End();
-       (it != endIt) && (characterIndex < lastCharacterIndexPlusOne); ++it)
+  for(Vector<Length>::ConstIterator it = mCharactersPerGlyph.Begin() + glyphIndex, endIt = mCharactersPerGlyph.End();
+      (it != endIt) && (characterIndex < lastCharacterIndexPlusOne); ++it)
   {
     const Length numberOfCharactersPerGlyph = *it;
 
     Length numberOfGlyphs = 0u;
     // Set the glyph indices.
-    for (Length index = 0u; index < numberOfCharactersPerGlyph; ++index, ++characterIndex)
+    for(Length index = 0u; index < numberOfCharactersPerGlyph; ++index, ++characterIndex)
     {
       *charactersToGlyphBuffer = glyphIndex;
       numberOfGlyphs += *(glyphsPerCharacterBuffer + characterIndex);
@@ -94,12 +94,12 @@ void VisualModel::CreateCharacterToGlyphTable(CharacterIndex startIndex, GlyphIn
   }
 
   // If the character to glyph buffer is updated, it needs to be inserted in the model.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     // Update the indices.
     const Length numberOfGlyphs = glyphIndex - startGlyphIndex;
-    for (Vector<Length>::Iterator it = mCharactersToGlyph.Begin() + startIndex, endIt = mCharactersToGlyph.End();
-         it != endIt; ++it)
+    for(Vector<Length>::Iterator it = mCharactersToGlyph.Begin() + startIndex, endIt = mCharactersToGlyph.End();
+        it != endIt; ++it)
     {
       *it += numberOfGlyphs;
     }
@@ -112,7 +112,7 @@ void VisualModel::CreateCharacterToGlyphTable(CharacterIndex startIndex, GlyphIn
 void VisualModel::CreateGlyphsPerCharacterTable(CharacterIndex startIndex, GlyphIndex startGlyphIndex,
                                                 Length numberOfCharacters)
 {
-  if (0u == numberOfCharacters)
+  if(0u == numberOfCharacters)
   {
     // Nothing to do.
     return;
@@ -120,20 +120,20 @@ void VisualModel::CreateGlyphsPerCharacterTable(CharacterIndex startIndex, Glyph
 
   // Get the total number of characters.
   const Length totalNumberOfCharacters =
-      (0u == mGlyphsToCharacters.Count())
-          ? 0u
-          : *(mGlyphsToCharacters.End() - 1u) +
-                *(mCharactersPerGlyph.End() -
-                  1u); // Index to the first character + the number of characters that form the last glyph.
+    (0u == mGlyphsToCharacters.Count())
+      ? 0u
+      : *(mGlyphsToCharacters.End() - 1u) +
+          *(mCharactersPerGlyph.End() -
+            1u); // Index to the first character + the number of characters that form the last glyph.
 
   // Whether the current buffer is being updated or is set from scratch.
   const bool updateCurrentBuffer = numberOfCharacters < totalNumberOfCharacters;
 
   Vector<Length> newGlyphsPerCharacter;
-  Length* glyphsPerCharacterBuffer = NULL;
+  Length*        glyphsPerCharacterBuffer = NULL;
 
   // 1) Reserve some space for the glyphs per character to avoid reallocations.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     newGlyphsPerCharacter.Resize(numberOfCharacters);
     glyphsPerCharacterBuffer = newGlyphsPerCharacter.Begin();
@@ -151,22 +151,22 @@ void VisualModel::CreateGlyphsPerCharacterTable(CharacterIndex startIndex, Glyph
   // The number of 'characters per glyph' equal to zero.
   Length zeroCharactersPerGlyph = 0u;
 
-  for (Vector<Length>::ConstIterator it = mCharactersPerGlyph.Begin() + startGlyphIndex,
-                                     endIt = mCharactersPerGlyph.End();
-       (it != endIt) && (traversedCharacters < numberOfCharacters); ++it)
+  for(Vector<Length>::ConstIterator it    = mCharactersPerGlyph.Begin() + startGlyphIndex,
+                                    endIt = mCharactersPerGlyph.End();
+      (it != endIt) && (traversedCharacters < numberOfCharacters); ++it)
   {
     const Length numberOfCharactersPerGlyph = *it;
     traversedCharacters += numberOfCharactersPerGlyph;
 
     // Set the glyphs per character.
-    if (0u == numberOfCharactersPerGlyph)
+    if(0u == numberOfCharactersPerGlyph)
     {
       ++zeroCharactersPerGlyph;
     }
     else
     {
       const Length numberOfZeroGlyphsPerCharacter = (numberOfCharactersPerGlyph - 1u);
-      for (Length zeroIndex = 0u; zeroIndex < numberOfZeroGlyphsPerCharacter; ++zeroIndex)
+      for(Length zeroIndex = 0u; zeroIndex < numberOfZeroGlyphsPerCharacter; ++zeroIndex)
       {
         *glyphsPerCharacterBuffer = 0u;
 
@@ -184,7 +184,7 @@ void VisualModel::CreateGlyphsPerCharacterTable(CharacterIndex startIndex, Glyph
   }
 
   // If the glyphs per character buffer is updated, it needs to be inserted in the model.
-  if (updateCurrentBuffer)
+  if(updateCurrentBuffer)
   {
     mGlyphsPerCharacter.Insert(mGlyphsPerCharacter.Begin() + startIndex, newGlyphsPerCharacter.Begin(),
                                newGlyphsPerCharacter.End());
@@ -210,36 +210,36 @@ void VisualModel::GetNumberOfLines(GlyphIndex glyphIndex, Length numberOfGlyphs,
                                    Length& numberOfLines) const
 {
   // Initialize the number of lines and the first line.
-  firstLine = 0u;
-  numberOfLines = 0u;
+  firstLine           = 0u;
+  numberOfLines       = 0u;
   bool firstLineFound = false;
 
   const GlyphIndex lastGlyphIndex = glyphIndex + numberOfGlyphs;
 
   // Traverse the lines and count those lines within the range of glyphs.
-  for (Vector<LineRun>::ConstIterator it = mLines.Begin(), endIt = mLines.End(); it != endIt; ++it)
+  for(Vector<LineRun>::ConstIterator it = mLines.Begin(), endIt = mLines.End(); it != endIt; ++it)
   {
     const LineRun& line = *it;
 
-    if ((line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs > glyphIndex) &&
-        (lastGlyphIndex > line.glyphRun.glyphIndex))
+    if((line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs > glyphIndex) &&
+       (lastGlyphIndex > line.glyphRun.glyphIndex))
     {
       firstLineFound = true;
       ++numberOfLines;
     }
-    else if ((line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs > glyphIndex) &&
-             (lastGlyphIndex > line.glyphRunSecondHalf.glyphIndex))
+    else if((line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs > glyphIndex) &&
+            (lastGlyphIndex > line.glyphRunSecondHalf.glyphIndex))
     {
       firstLineFound = true;
       ++numberOfLines;
     }
-    else if (lastGlyphIndex <= line.glyphRun.glyphIndex)
+    else if(lastGlyphIndex <= line.glyphRun.glyphIndex)
     {
       // nothing else to do.
       break;
     }
 
-    if (!firstLineFound)
+    if(!firstLineFound)
     {
       ++firstLine;
     }
@@ -254,8 +254,8 @@ LineIndex VisualModel::GetLineOfGlyph(GlyphIndex glyphIndex)
 
 void VisualModel::GetLinesOfGlyphRange(LineRun* lines, GlyphIndex glyphIndex, Length numberOfGlyphs) const
 {
-  LineIndex firstLine = 0u;
-  Length numberOfLines = 0u;
+  LineIndex firstLine     = 0u;
+  Length    numberOfLines = 0u;
 
   GetNumberOfLines(glyphIndex, numberOfGlyphs, firstLine, numberOfLines);
 
@@ -265,15 +265,15 @@ void VisualModel::GetLinesOfGlyphRange(LineRun* lines, GlyphIndex glyphIndex, Le
 LineIndex VisualModel::GetLineOfCharacter(CharacterIndex characterIndex)
 {
   // 1) Check line is empty or not.
-  if (mLines.Empty())
+  if(mLines.Empty())
   {
     return 0u;
   }
 
   // 2) Check in the cached line.
   const LineRun& lineRun = *(mLines.Begin() + mCachedLineIndex);
-  if ((lineRun.characterRun.characterIndex <= characterIndex) &&
-      (characterIndex < lineRun.characterRun.characterIndex + lineRun.characterRun.numberOfCharacters))
+  if((lineRun.characterRun.characterIndex <= characterIndex) &&
+     (characterIndex < lineRun.characterRun.characterIndex + lineRun.characterRun.numberOfCharacters))
   {
     return mCachedLineIndex;
   }
@@ -281,11 +281,11 @@ LineIndex VisualModel::GetLineOfCharacter(CharacterIndex characterIndex)
   // 3) Is not in the cached line. Check in the other lines.
   LineIndex index = characterIndex < lineRun.characterRun.characterIndex ? 0u : mCachedLineIndex + 1u;
 
-  for (Vector<LineRun>::ConstIterator it = mLines.Begin() + index, endIt = mLines.End(); it != endIt; ++it, ++index)
+  for(Vector<LineRun>::ConstIterator it = mLines.Begin() + index, endIt = mLines.End(); it != endIt; ++it, ++index)
   {
     const LineRun& lineRun = *it;
 
-    if (characterIndex < lineRun.characterRun.characterIndex + lineRun.characterRun.numberOfCharacters)
+    if(characterIndex < lineRun.characterRun.characterIndex + lineRun.characterRun.numberOfCharacters)
     {
       mCachedLineIndex = index;
       break;
@@ -345,11 +345,11 @@ void VisualModel::SetTextColor(const Vector4& textColor)
 {
   mTextColor = textColor;
 
-  if (!mUnderlineColorSet)
+  if(!mUnderlineColorSet)
   {
     mUnderlineColor = textColor;
   }
-  if (!mStrikethroughColorSet)
+  if(!mStrikethroughColorSet)
   {
     mStrikethroughColor = textColor;
   }
@@ -372,7 +372,7 @@ void VisualModel::SetShadowBlurRadius(const float& shadowBlurRadius)
 
 void VisualModel::SetUnderlineColor(const Vector4& color)
 {
-  mUnderlineColor = color;
+  mUnderlineColor    = color;
   mUnderlineColorSet = true;
 }
 
@@ -468,7 +468,7 @@ void VisualModel::SetSecondMiddleIndexOfElidedGlyphs(GlyphIndex secondMiddleInde
 
 void VisualModel::SetStrikethroughColor(const Vector4& color)
 {
-  mStrikethroughColor = color;
+  mStrikethroughColor    = color;
   mStrikethroughColorSet = true;
 }
 
@@ -744,52 +744,52 @@ VisualModel::~VisualModel()
 }
 
 VisualModel::VisualModel()
-  : mGlyphs(),
-    mGlyphsToCharacters(),
-    mCharactersToGlyph(),
-    mCharactersPerGlyph(),
-    mGlyphsPerCharacter(),
-    mGlyphPositions(),
-    mLines(),
-    mTextColor(Color::BLACK),
-    mShadowColor(Color::BLACK),
-    mUnderlineColor(Color::BLACK),
-    mOutlineColor(Color::WHITE),
-    mBackgroundColor(Color::TRANSPARENT),
-    mStrikethroughColor(Color::BLACK),
-    mControlSize(),
-    mShadowOffset(),
-    mOutlineOffset(),
-    mUnderlineHeight(0.0f),
-    mStrikethroughHeight(0.0f),
-    mUnderlineType(Text::Underline::SOLID),
-    mDashedUnderlineWidth(2.0f),
-    mDashedUnderlineGap(1.0f),
-    mShadowBlurRadius(0.0f),
-    mOutlineBlurRadius(0.0f),
-    mOutlineWidth(0u),
-    mEmbossStrength(0.0f),
-    mNaturalSize(),
-    mLayoutSize(),
-    mCachedLayoutSize(),
-    mHeightForWidth(0.0f, 0.0f),
-    mCachedLineIndex(0u),
-    mEllipsisPosition(DevelText::EllipsisPosition::END),
-    mStartIndexOfElidedGlyphs(0u),
-    mEndIndexOfElidedGlyphs(0u),
-    mFirstMiddleIndexOfElidedGlyphs(0u),
-    mSecondMiddleIndexOfElidedGlyphs(0u),
-    mTextElideEnabled(false),
-    mUnderlineEnabled(false),
-    mUnderlineColorSet(false),
-    mBackgroundEnabled(false),
-    mMarkupProcessorEnabled(false),
-    mStrikethroughEnabled(false),
-    mStrikethroughColorSet(false),
-    mCharacterSpacing(0.0f),
-    mCutoutEnabled(false),
-    mBackgroundWithCutoutEnabled(false),
-    mEmbossEnabled(false)
+: mGlyphs(),
+  mGlyphsToCharacters(),
+  mCharactersToGlyph(),
+  mCharactersPerGlyph(),
+  mGlyphsPerCharacter(),
+  mGlyphPositions(),
+  mLines(),
+  mTextColor(Color::BLACK),
+  mShadowColor(Color::BLACK),
+  mUnderlineColor(Color::BLACK),
+  mOutlineColor(Color::WHITE),
+  mBackgroundColor(Color::TRANSPARENT),
+  mStrikethroughColor(Color::BLACK),
+  mControlSize(),
+  mShadowOffset(),
+  mOutlineOffset(),
+  mUnderlineHeight(0.0f),
+  mStrikethroughHeight(0.0f),
+  mUnderlineType(Text::Underline::SOLID),
+  mDashedUnderlineWidth(2.0f),
+  mDashedUnderlineGap(1.0f),
+  mShadowBlurRadius(0.0f),
+  mOutlineBlurRadius(0.0f),
+  mOutlineWidth(0u),
+  mEmbossStrength(0.0f),
+  mNaturalSize(),
+  mLayoutSize(),
+  mCachedLayoutSize(),
+  mHeightForWidth(0.0f, 0.0f),
+  mCachedLineIndex(0u),
+  mEllipsisPosition(DevelText::EllipsisPosition::END),
+  mStartIndexOfElidedGlyphs(0u),
+  mEndIndexOfElidedGlyphs(0u),
+  mFirstMiddleIndexOfElidedGlyphs(0u),
+  mSecondMiddleIndexOfElidedGlyphs(0u),
+  mTextElideEnabled(false),
+  mUnderlineEnabled(false),
+  mUnderlineColorSet(false),
+  mBackgroundEnabled(false),
+  mMarkupProcessorEnabled(false),
+  mStrikethroughEnabled(false),
+  mStrikethroughColorSet(false),
+  mCharacterSpacing(0.0f),
+  mCutoutEnabled(false),
+  mBackgroundWithCutoutEnabled(false),
+  mEmbossEnabled(false)
 {
 }
 

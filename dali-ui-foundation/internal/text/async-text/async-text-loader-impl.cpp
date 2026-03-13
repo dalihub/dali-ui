@@ -43,9 +43,9 @@ namespace
 constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
 
 const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-    0.0f, // VerticalAlignment::TOP
-    0.5f, // VerticalAlignment::CENTER
-    1.0f  // VerticalAlignment::BOTTOM
+  0.0f, // VerticalAlignment::TOP
+  0.5f, // VerticalAlignment::CENTER
+  1.0f  // VerticalAlignment::BOTTOM
 };
 
 float ConvertToEven(float value)
@@ -57,9 +57,9 @@ float ConvertToEven(float value)
 float GetDpi(TextAbstraction::FontClient& fontClient)
 {
   static uint32_t horizontalDpi = 0u;
-  static uint32_t verticalDpi = 0u;
+  static uint32_t verticalDpi   = 0u;
 
-  if (DALI_UNLIKELY(horizontalDpi == 0u))
+  if(DALI_UNLIKELY(horizontalDpi == 0u))
   {
     fontClient.GetDpi(horizontalDpi, verticalDpi);
   }
@@ -82,18 +82,18 @@ namespace Internal
 const float TO_POINT_26_DOT_6 = 64.f;
 
 AsyncTextLoader::AsyncTextLoader()
-  : mModule(),
-    mTextModel(),
-    mMetrics(),
-    mLocale(),
-    mCustomFonts(),
-    mNumberOfCharacters(0u),
-    mFitActualEllipsis(true),
-    mIsTextDirectionRTL(false),
-    mIsTextMirrored(false),
-    mModuleClearNeeded(false),
-    mLocaleUpdateNeeded(false),
-    mMutex()
+: mModule(),
+  mTextModel(),
+  mMetrics(),
+  mLocale(),
+  mCustomFonts(),
+  mNumberOfCharacters(0u),
+  mFitActualEllipsis(true),
+  mIsTextDirectionRTL(false),
+  mIsTextMirrored(false),
+  mModuleClearNeeded(false),
+  mLocaleUpdateNeeded(false),
+  mMutex()
 {
   mModule = Dali::Ui::Text::AsyncTextModule::New();
 
@@ -136,7 +136,7 @@ void AsyncTextLoader::ClearModule()
 
 void AsyncTextLoader::SetCustomFontDirectories(const TextAbstraction::FontPathList& customFontDirectories)
 {
-  for (auto& path : customFontDirectories)
+  for(auto& path : customFontDirectories)
   {
     mModule.GetFontClient().AddCustomFontDirectory(path);
   }
@@ -165,9 +165,9 @@ void AsyncTextLoader::Initialize()
   mModule.GetFontClient().InitDefaultFontDescription();
   {
     Dali::Mutex::ScopedLock lock(mMutex);
-    if (!mCustomFonts.empty())
+    if(!mCustomFonts.empty())
     {
-      for (const auto& font : mCustomFonts)
+      for(const auto& font : mCustomFonts)
       {
         mModule.GetFontClient().AddCustomFontDirectory(font);
       }
@@ -179,7 +179,7 @@ void AsyncTextLoader::Initialize()
 
   mNumberOfCharacters = 0u;
   mIsTextDirectionRTL = false;
-  mIsTextMirrored = false;
+  mIsTextMirrored     = false;
 
   // Set the text properties to default
   mTextModel->mVisualModel->SetUnderlineEnabled(false);
@@ -212,9 +212,9 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mLogicalModel->mVariationsMap.Clear();
 
   // Free the allocated memory used to store the conversion table in the bidirectional line info run.
-  for (Vector<BidirectionalLineInfoRun>::Iterator it = mTextModel->mLogicalModel->mBidirectionalLineInfo.Begin(),
-                                                  endIt = mTextModel->mLogicalModel->mBidirectionalLineInfo.End();
-       it != endIt; ++it)
+  for(Vector<BidirectionalLineInfoRun>::Iterator it    = mTextModel->mLogicalModel->mBidirectionalLineInfo.Begin(),
+                                                 endIt = mTextModel->mLogicalModel->mBidirectionalLineInfo.End();
+      it != endIt; ++it)
   {
     BidirectionalLineInfoRun& bidiLineInfo = *it;
 
@@ -242,37 +242,37 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_UPDATE");
 
-  if (parameters.text.empty())
+  if(parameters.text.empty())
   {
     DALI_LOG_ERROR("Text is empty\n");
     return;
   }
 
-  const uint8_t* utf8 = nullptr; // pointer to the first character of the text (encoded in utf8)
-  Length textSize = 0u;          // The length of the utf8 string.
+  const uint8_t* utf8     = nullptr; // pointer to the first character of the text (encoded in utf8)
+  Length         textSize = 0u;      // The length of the utf8 string.
 
-  Length& numberOfCharacters = mNumberOfCharacters;
+  Length&           numberOfCharacters = mNumberOfCharacters;
   Vector<Character> mirroredUtf32Characters;
 
-  Vector<Character>& utf32Characters = mTextModel->mLogicalModel->mText;            // Characters encoded in utf32.
-  Vector<LineBreakInfo>& lineBreakInfo = mTextModel->mLogicalModel->mLineBreakInfo; // The line break info.
-  Vector<ScriptRun>& scripts = mTextModel->mLogicalModel->mScriptRuns;              // Charactes's script.
+  Vector<Character>&          utf32Characters = mTextModel->mLogicalModel->mText;          // Characters encoded in utf32.
+  Vector<LineBreakInfo>&      lineBreakInfo   = mTextModel->mLogicalModel->mLineBreakInfo; // The line break info.
+  Vector<ScriptRun>&          scripts         = mTextModel->mLogicalModel->mScriptRuns;    // Charactes's script.
   Vector<FontDescriptionRun>& fontDescriptionRuns =
-      mTextModel->mLogicalModel->mFontDescriptionRuns;                // Desired font descriptions.
-  Vector<FontRun>& validFonts = mTextModel->mLogicalModel->mFontRuns; // Validated fonts.
+    mTextModel->mLogicalModel->mFontDescriptionRuns;                                        // Desired font descriptions.
+  Vector<FontRun>&                       validFonts = mTextModel->mLogicalModel->mFontRuns; // Validated fonts.
   Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo =
-      mTextModel->mLogicalModel->mBidirectionalParagraphInfo;          // The bidirectional info per paragraph.
+    mTextModel->mLogicalModel->mBidirectionalParagraphInfo;            // The bidirectional info per paragraph.
   Vector<ColorRun>& colorRuns = mTextModel->mLogicalModel->mColorRuns; // colors of the text.
 
   // Set the default font's description with the given text parameters.
   TextAbstraction::FontDescription defaultFontDescription;
   defaultFontDescription.family = parameters.fontFamily;
   defaultFontDescription.weight = parameters.fontWeight;
-  defaultFontDescription.width = parameters.fontWidth;
-  defaultFontDescription.slant = parameters.fontSlant;
+  defaultFontDescription.width  = parameters.fontWidth;
+  defaultFontDescription.slant  = parameters.fontSlant;
 
-  mTextModel->mHorizontalAlignment = parameters.horizontalAlignment;
-  mTextModel->mVerticalAlignment = parameters.verticalAlignment;
+  mTextModel->mHorizontalAlignment   = parameters.horizontalAlignment;
+  mTextModel->mVerticalAlignment     = parameters.verticalAlignment;
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
 
   mTextModel->mLogicalModel->mVariationsMap = parameters.variationsMap;
@@ -288,7 +288,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Update style properties.
   mTextModel->mVisualModel->SetTextColor(parameters.textColor);
 
-  if (parameters.isUnderlineEnabled)
+  if(parameters.isUnderlineEnabled)
   {
     mTextModel->mVisualModel->SetUnderlineEnabled(parameters.isUnderlineEnabled);
     mTextModel->mVisualModel->SetUnderlineType(parameters.underlineType);
@@ -298,7 +298,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mVisualModel->SetDashedUnderlineGap(parameters.dashedUnderlineGap);
   }
 
-  if (parameters.isStrikethroughEnabled)
+  if(parameters.isStrikethroughEnabled)
   {
     mTextModel->mVisualModel->SetStrikethroughEnabled(parameters.isStrikethroughEnabled);
     mTextModel->mVisualModel->SetStrikethroughColor(parameters.strikethroughColor);
@@ -306,9 +306,9 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   const Vector2& shadowOffset = parameters.shadowOffset;
-  const float shadowAlpha = parameters.shadowColor.a;
-  if (fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
-      (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
+  const float    shadowAlpha  = parameters.shadowColor.a;
+  if(fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
+     (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
   {
     mTextModel->mVisualModel->SetShadowBlurRadius(parameters.shadowBlurRadius);
     mTextModel->mVisualModel->SetShadowColor(parameters.shadowColor);
@@ -316,8 +316,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   const uint16_t outlineWidth = parameters.outlineWidth;
-  const float outlineAlpha = parameters.outlineColor.a;
-  if (outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1)
+  const float    outlineAlpha = parameters.outlineColor.a;
+  if(outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1)
   {
     mTextModel->mVisualModel->SetOutlineColor(parameters.outlineColor);
     mTextModel->mVisualModel->SetOutlineWidth(parameters.outlineWidth);
@@ -330,21 +330,21 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mVisualModel->SetBackgroundColorWithCutout(parameters.backgroundColorWithCutout);
 
   mTextModel->mRemoveFrontInset = parameters.removeFrontInset;
-  mTextModel->mRemoveBackInset = parameters.removeBackInset;
+  mTextModel->mRemoveBackInset  = parameters.removeBackInset;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Process the markup string if the mark-up processor is enabled.
   ////////////////////////////////////////////////////////////////////////////////
 
   MarkupProcessData markupProcessData(
-      colorRuns, fontDescriptionRuns, mTextModel->mLogicalModel->mEmbeddedItems, mTextModel->mLogicalModel->mAnchors,
-      mTextModel->mLogicalModel->mUnderlinedCharacterRuns, mTextModel->mLogicalModel->mBackgroundColorRuns,
-      mTextModel->mLogicalModel->mStrikethroughCharacterRuns, mTextModel->mLogicalModel->mBoundedParagraphRuns,
-      mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns);
+    colorRuns, fontDescriptionRuns, mTextModel->mLogicalModel->mEmbeddedItems, mTextModel->mLogicalModel->mAnchors,
+    mTextModel->mLogicalModel->mUnderlinedCharacterRuns, mTextModel->mLogicalModel->mBackgroundColorRuns,
+    mTextModel->mLogicalModel->mStrikethroughCharacterRuns, mTextModel->mLogicalModel->mBoundedParagraphRuns,
+    mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns);
 
   mTextModel->mVisualModel->SetMarkupProcessorEnabled(parameters.enableMarkup);
 
-  if (parameters.enableMarkup)
+  if(parameters.enableMarkup)
   {
     // TODO : Currently unable to support anchor clicked events.
     MarkupPropertyData markupPropertyData(Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
@@ -382,7 +382,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   SetLineBreakInfo(mModule.GetSegmentation(), utf32Characters, 0u, numberOfCharacters, lineBreakInfo);
 
   // Check if an ICU-based line break update is required.
-  if (mModule.GetMultilanguageSupport().IsICULineBreakNeeded())
+  if(mModule.GetMultilanguageSupport().IsICULineBreakNeeded())
   {
     std::string currentText;
     Utf32ToUtf8(mTextModel->mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
@@ -390,33 +390,33 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   // Hyphenation
-  if (parameters.lineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
-      parameters.lineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::MIXED))
+  if(parameters.lineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
+     parameters.lineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::MIXED))
   {
-    CharacterIndex startIndex = 0u;
-    CharacterIndex end = numberOfCharacters;
+    CharacterIndex startIndex          = 0u;
+    CharacterIndex end                 = numberOfCharacters;
     LineBreakInfo* lineBreakInfoBuffer = lineBreakInfo.Begin();
 
-    for (CharacterIndex index = startIndex; index < end; index++)
+    for(CharacterIndex index = startIndex; index < end; index++)
     {
       CharacterIndex wordEnd = index;
-      while ((*(lineBreakInfoBuffer + wordEnd) != TextAbstraction::LINE_ALLOW_BREAK) &&
-             (*(lineBreakInfoBuffer + wordEnd) != TextAbstraction::LINE_MUST_BREAK))
+      while((*(lineBreakInfoBuffer + wordEnd) != TextAbstraction::LINE_ALLOW_BREAK) &&
+            (*(lineBreakInfoBuffer + wordEnd) != TextAbstraction::LINE_MUST_BREAK))
       {
         wordEnd++;
       }
 
-      if ((wordEnd + 1) == end) // add last char
+      if((wordEnd + 1) == end) // add last char
       {
         wordEnd++;
       }
 
       Vector<bool> hyphens =
-          GetWordHyphens(mModule.GetHyphenation(), utf32Characters.Begin() + index, wordEnd - index, nullptr);
+        GetWordHyphens(mModule.GetHyphenation(), utf32Characters.Begin() + index, wordEnd - index, nullptr);
 
-      for (CharacterIndex i = 0; i < (wordEnd - index) && i < hyphens.Size(); i++)
+      for(CharacterIndex i = 0; i < (wordEnd - index) && i < hyphens.Size(); i++)
       {
-        if (hyphens[i])
+        if(hyphens[i])
         {
           *(lineBreakInfoBuffer + index + i) = TextAbstraction::LINE_HYPHENATION_BREAK;
         }
@@ -439,7 +439,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Validate Fonts.
   ////////////////////////////////////////////////////////////////////////////////
 
-  float scale = parameters.fontSizeScale * parameters.renderScale;
+  float                            scale            = parameters.fontSizeScale * parameters.renderScale;
   TextAbstraction::PointSize26Dot6 defaultPointSize = TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale;
 
   // Get the number of points per one unit of point-size
@@ -448,7 +448,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   defaultPointSize = parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize;
 
   Property::Map* variationsMapPtr = nullptr;
-  if (!mTextModel->mLogicalModel->mVariationsMap.Empty())
+  if(!mTextModel->mLogicalModel->mVariationsMap.Empty())
   {
     variationsMapPtr = &mTextModel->mLogicalModel->mVariationsMap;
   }
@@ -466,7 +466,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Update the layout direction policy to text model.
   mTextModel->mMatchLayoutDirection = parameters.layoutDirectionPolicy;
 
-  mIsTextMirrored = false;
+  mIsTextMirrored                 = false;
   const Length numberOfParagraphs = mTextModel->mLogicalModel->mParagraphInfo.Count();
 
   bidirectionalInfo.Reserve(numberOfParagraphs);
@@ -477,7 +477,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                        (mTextModel->mMatchLayoutDirection != DevelText::MatchLayoutDirection::CONTENTS),
                        parameters.layoutDirection);
 
-  if (0u != bidirectionalInfo.Count())
+  if(0u != bidirectionalInfo.Count())
   {
     // Only set the character directions if there is right to left characters.
     Vector<CharacterDirection>& directions = mTextModel->mLogicalModel->mCharacterDirections;
@@ -500,10 +500,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Retrieve the glyphs. Text shaping
   ////////////////////////////////////////////////////////////////////////////////
 
-  Vector<GlyphInfo>& glyphs = mTextModel->mVisualModel->mGlyphs;
+  Vector<GlyphInfo>&      glyphs                = mTextModel->mVisualModel->mGlyphs;
   Vector<CharacterIndex>& glyphsToCharactersMap = mTextModel->mVisualModel->mGlyphsToCharacters;
-  Vector<Length>& charactersPerGlyph = mTextModel->mVisualModel->mCharactersPerGlyph;
-  Vector<GlyphIndex> newParagraphGlyphs;
+  Vector<Length>&         charactersPerGlyph    = mTextModel->mVisualModel->mCharactersPerGlyph;
+  Vector<GlyphIndex>      newParagraphGlyphs;
   newParagraphGlyphs.Reserve(numberOfParagraphs);
 
   const Length currentNumberOfGlyphs = glyphs.Count();
@@ -529,15 +529,15 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   GlyphInfo* glyphsBuffer = glyphs.Begin();
 
   // Update the width and advance of all new paragraph characters.
-  for (Vector<GlyphIndex>::ConstIterator it = newParagraphGlyphs.Begin(), endIt = newParagraphGlyphs.End(); it != endIt;
-       ++it)
+  for(Vector<GlyphIndex>::ConstIterator it = newParagraphGlyphs.Begin(), endIt = newParagraphGlyphs.End(); it != endIt;
+      ++it)
   {
     const GlyphIndex index = *it;
-    GlyphInfo& glyph = *(glyphsBuffer + index);
+    GlyphInfo&       glyph = *(glyphsBuffer + index);
 
     glyph.xBearing = 0.f;
-    glyph.width = 0.f;
-    glyph.advance = 0.f;
+    glyph.width    = 0.f;
+    glyph.advance  = 0.f;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -559,15 +559,15 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Update visual model for markup style.
   ////////////////////////////////////////////////////////////////////////////////
 
-  if (mTextModel->mVisualModel->IsMarkupProcessorEnabled())
+  if(mTextModel->mVisualModel->IsMarkupProcessorEnabled())
   {
-    const Vector<UnderlinedCharacterRun>& underlinedCharacterRuns = mTextModel->mLogicalModel->mUnderlinedCharacterRuns;
+    const Vector<UnderlinedCharacterRun>&    underlinedCharacterRuns = mTextModel->mLogicalModel->mUnderlinedCharacterRuns;
     const Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns =
-        mTextModel->mLogicalModel->mStrikethroughCharacterRuns;
+      mTextModel->mLogicalModel->mStrikethroughCharacterRuns;
     const Vector<CharacterSpacingCharacterRun>& characterSpacingCharacterRuns =
-        mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns;
-    const Vector<GlyphIndex>& charactersToGlyph = mTextModel->mVisualModel->mCharactersToGlyph;
-    const Vector<Length>& glyphsPerCharacter = mTextModel->mVisualModel->mGlyphsPerCharacter;
+      mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns;
+    const Vector<GlyphIndex>& charactersToGlyph  = mTextModel->mVisualModel->mCharactersToGlyph;
+    const Vector<Length>&     glyphsPerCharacter = mTextModel->mVisualModel->mGlyphsPerCharacter;
 
     ////////////////////////////////////////////////////////////////////////////////
     // Markup underline
@@ -576,14 +576,14 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     // Should clear previous underline runs.
     mTextModel->mVisualModel->mUnderlineRuns.Clear();
 
-    for (Vector<UnderlinedCharacterRun>::ConstIterator it = underlinedCharacterRuns.Begin(),
-                                                       endIt = underlinedCharacterRuns.End();
-         it != endIt; ++it)
+    for(Vector<UnderlinedCharacterRun>::ConstIterator it    = underlinedCharacterRuns.Begin(),
+                                                      endIt = underlinedCharacterRuns.End();
+        it != endIt; ++it)
     {
-      CharacterIndex characterIndex = it->characterRun.characterIndex;
-      Length numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex     = it->characterRun.characterIndex;
+      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if (numberOfCharacters == 0)
+      if(numberOfCharacters == 0)
       {
         continue;
       }
@@ -591,11 +591,11 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       // Create one run for all glyphs of all run's characters that has same properties
       // This enhance performance and reduce the needed memory to store glyphs-runs
       UnderlinedGlyphRun underlineGlyphRun;
-      underlineGlyphRun.properties = it->properties;
-      underlineGlyphRun.glyphRun.glyphIndex = charactersToGlyph[characterIndex];
+      underlineGlyphRun.properties              = it->properties;
+      underlineGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       underlineGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for (Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < numberOfCharacters; index++)
       {
         underlineGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -610,24 +610,24 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     // Should clear previous strikethrough runs.
     mTextModel->mVisualModel->mStrikethroughRuns.Clear();
 
-    for (Vector<StrikethroughCharacterRun>::ConstIterator it = strikethroughCharacterRuns.Begin(),
-                                                          endIt = strikethroughCharacterRuns.End();
-         it != endIt; ++it)
+    for(Vector<StrikethroughCharacterRun>::ConstIterator it    = strikethroughCharacterRuns.Begin(),
+                                                         endIt = strikethroughCharacterRuns.End();
+        it != endIt; ++it)
     {
-      CharacterIndex characterIndex = it->characterRun.characterIndex;
-      Length numberOfCharacters = it->characterRun.numberOfCharacters;
+      CharacterIndex characterIndex     = it->characterRun.characterIndex;
+      Length         numberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if (numberOfCharacters == 0)
+      if(numberOfCharacters == 0)
       {
         continue;
       }
 
       StrikethroughGlyphRun strikethroughGlyphRun;
-      strikethroughGlyphRun.properties = it->properties;
-      strikethroughGlyphRun.glyphRun.glyphIndex = charactersToGlyph[characterIndex];
+      strikethroughGlyphRun.properties              = it->properties;
+      strikethroughGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       strikethroughGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for (Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < numberOfCharacters; index++)
       {
         strikethroughGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -642,24 +642,24 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     // Should clear previous character spacing runs.
     mTextModel->mVisualModel->mCharacterSpacingRuns.Clear();
 
-    for (Vector<CharacterSpacingCharacterRun>::ConstIterator it = characterSpacingCharacterRuns.Begin(),
-                                                             endIt = characterSpacingCharacterRuns.End();
-         it != endIt; ++it)
+    for(Vector<CharacterSpacingCharacterRun>::ConstIterator it    = characterSpacingCharacterRuns.Begin(),
+                                                            endIt = characterSpacingCharacterRuns.End();
+        it != endIt; ++it)
     {
-      const CharacterIndex& characterIndex = it->characterRun.characterIndex;
-      const Length& numberOfCharacters = it->characterRun.numberOfCharacters;
+      const CharacterIndex& characterIndex     = it->characterRun.characterIndex;
+      const Length&         numberOfCharacters = it->characterRun.numberOfCharacters;
 
-      if (numberOfCharacters == 0)
+      if(numberOfCharacters == 0)
       {
         continue;
       }
 
       CharacterSpacingGlyphRun characterSpacingGlyphRun;
-      characterSpacingGlyphRun.value = it->value;
-      characterSpacingGlyphRun.glyphRun.glyphIndex = charactersToGlyph[characterIndex];
+      characterSpacingGlyphRun.value                   = it->value;
+      characterSpacingGlyphRun.glyphRun.glyphIndex     = charactersToGlyph[characterIndex];
       characterSpacingGlyphRun.glyphRun.numberOfGlyphs = glyphsPerCharacter[characterIndex];
 
-      for (Length index = 1u; index < numberOfCharacters; index++)
+      for(Length index = 1u; index < numberOfCharacters; index++)
       {
         characterSpacingGlyphRun.glyphRun.numberOfGlyphs += glyphsPerCharacter[characterIndex + index];
       }
@@ -680,35 +680,35 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   Length& numberOfCharacters = mNumberOfCharacters;
 
   // Calculate the number of glyphs to layout.
-  const Vector<GlyphIndex>& charactersToGlyph = mTextModel->mVisualModel->mCharactersToGlyph;
-  const Vector<Length>& glyphsPerCharacter = mTextModel->mVisualModel->mGlyphsPerCharacter;
-  const GlyphIndex* const charactersToGlyphBuffer = charactersToGlyph.Begin();
-  const Length* const glyphsPerCharacterBuffer = glyphsPerCharacter.Begin();
+  const Vector<GlyphIndex>& charactersToGlyph        = mTextModel->mVisualModel->mCharactersToGlyph;
+  const Vector<Length>&     glyphsPerCharacter       = mTextModel->mVisualModel->mGlyphsPerCharacter;
+  const GlyphIndex* const   charactersToGlyphBuffer  = charactersToGlyph.Begin();
+  const Length* const       glyphsPerCharacterBuffer = glyphsPerCharacter.Begin();
 
-  const CharacterIndex startIndex = 0u;
-  const CharacterIndex lastIndex = numberOfCharacters > 0u ? numberOfCharacters - 1u : 0u;
-  const GlyphIndex startGlyphIndex = 0u;
+  const CharacterIndex startIndex      = 0u;
+  const CharacterIndex lastIndex       = numberOfCharacters > 0u ? numberOfCharacters - 1u : 0u;
+  const GlyphIndex     startGlyphIndex = 0u;
 
   // Make sure the index is not out of bound
-  if (charactersToGlyph.Count() != glyphsPerCharacter.Count() || numberOfCharacters > charactersToGlyph.Count() ||
-      (lastIndex > charactersToGlyph.Count() && charactersToGlyph.Count() > 0u))
+  if(charactersToGlyph.Count() != glyphsPerCharacter.Count() || numberOfCharacters > charactersToGlyph.Count() ||
+     (lastIndex > charactersToGlyph.Count() && charactersToGlyph.Count() > 0u))
   {
     DALI_LOG_ERROR("Attempting to access invalid buffer\n");
     DALI_LOG_ERROR("Current text is: %s\n", parameters.text.c_str());
     DALI_LOG_ERROR(
-        "startIndex: %u, lastIndex: %u, requestedNumberOfCharacters: %u, charactersToGlyph.Count = %lu, "
-        "glyphsPerCharacter.Count = %lu\n",
-        startIndex, lastIndex, numberOfCharacters, charactersToGlyph.Count(), glyphsPerCharacter.Count());
+      "startIndex: %u, lastIndex: %u, requestedNumberOfCharacters: %u, charactersToGlyph.Count = %lu, "
+      "glyphsPerCharacter.Count = %lu\n",
+      startIndex, lastIndex, numberOfCharacters, charactersToGlyph.Count(), glyphsPerCharacter.Count());
     return Size::ZERO;
   }
 
   const Length numberOfGlyphs =
-      (numberOfCharacters > 0u)
-          ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
-          : 0u;
+    (numberOfCharacters > 0u)
+      ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
+      : 0u;
   const Length totalNumberOfGlyphs = mTextModel->mVisualModel->mGlyphs.Count();
 
-  if (0u == totalNumberOfGlyphs)
+  if(0u == totalNumberOfGlyphs)
   {
     mTextModel->mVisualModel->SetLayoutSize(Size::ZERO);
 
@@ -718,7 +718,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   }
 
   const Text::Layout::Engine::Type layoutType =
-      parameters.isMultiLine ? Text::Layout::Engine::MULTI_LINE_BOX : Text::Layout::Engine::SINGLE_LINE_BOX;
+    parameters.isMultiLine ? Text::Layout::Engine::MULTI_LINE_BOX : Text::Layout::Engine::SINGLE_LINE_BOX;
   mLayoutEngine.SetLayout(layoutType);
 
   // Set minimun line size, line spacing, relative line size.
@@ -727,8 +727,8 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
   float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitArrayEnabled)
-                            ? parameters.fontSize
-                            : parameters.fontSize * parameters.fontSizeScale;
+                          ? parameters.fontSize
+                          : parameters.fontSize * parameters.fontSizeScale;
   mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize, mModule.GetFontClient()));
 
   // Set vertical line alignment.
@@ -740,7 +740,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   // Set the layout parameters.
   Size textLayoutArea(parameters.textWidth, parameters.textHeight);
 
-  mTextModel->mLineWrapMode = parameters.lineWrapMode;
+  mTextModel->mLineWrapMode          = parameters.lineWrapMode;
   mTextModel->mIgnoreSpacesAfterText = false;
 
   // Set the layout parameters.
@@ -752,38 +752,38 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   glyphPositions.Resize(totalNumberOfGlyphs);
 
   // The initial glyph and the number of glyphs to layout.
-  layoutParameters.startGlyphIndex = startGlyphIndex;
-  layoutParameters.numberOfGlyphs = numberOfGlyphs;
-  layoutParameters.startLineIndex = 0u;
+  layoutParameters.startGlyphIndex        = startGlyphIndex;
+  layoutParameters.numberOfGlyphs         = numberOfGlyphs;
+  layoutParameters.startLineIndex         = 0u;
   layoutParameters.estimatedNumberOfLines = 1u;
   layoutParameters.interGlyphExtraAdvance = 0.f;
 
   // Whether the last character is a new paragraph character.
   const Character* const textBuffer = mTextModel->mLogicalModel->mText.Begin();
   layoutParameters.isLastNewParagraph =
-      TextAbstraction::IsNewParagraph(*(textBuffer + (mTextModel->mLogicalModel->mText.Count() - 1u)));
+    TextAbstraction::IsNewParagraph(*(textBuffer + (mTextModel->mLogicalModel->mText.Count() - 1u)));
 
   // Update the ellipsis
-  bool ellipsisEnabled = parameters.ellipsis;
+  bool ellipsisEnabled      = parameters.ellipsis;
   mTextModel->mElideEnabled = ellipsisEnabled;
   mTextModel->mVisualModel->SetTextElideEnabled(ellipsisEnabled);
 
-  auto ellipsisPosition = parameters.ellipsisPosition;
+  auto ellipsisPosition         = parameters.ellipsisPosition;
   mTextModel->mEllipsisPosition = ellipsisPosition;
   mTextModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 
   // Update the visual model.
   Size newLayoutSize; // The size of the text after it has been laid-out.
-  bool isAutoScrollEnabled = parameters.isAutoScrollEnabled;
+  bool isAutoScrollEnabled            = parameters.isAutoScrollEnabled;
   bool isAutoScrollMaxTextureExceeded = parameters.isAutoScrollMaxTextureExceeded;
-  bool isHiddenInputEnabled = false;
+  bool isHiddenInputEnabled           = false;
 
   updated = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isAutoScrollEnabled,
                                      isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
 
   mIsTextDirectionRTL = false;
 
-  if (!mTextModel->mVisualModel->mLines.Empty())
+  if(!mTextModel->mVisualModel->mLines.Empty())
   {
     mIsTextDirectionRTL = mTextModel->mVisualModel->mLines[0u].direction;
   }
@@ -811,7 +811,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   // Calculate vertical offset.
   Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
 
-  switch (parameters.verticalAlignment)
+  switch(parameters.verticalAlignment)
   {
     case VerticalAlignment::TOP:
     {
@@ -831,7 +831,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   }
 
 #ifdef TRACE_ENABLED
-  if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
   {
     DALI_LOG_RELEASE_INFO("ControlSize : %f, %f, LayoutSize : %f, %f\n", textLayoutArea.x, textLayoutArea.y,
                           newLayoutSize.x, newLayoutSize.y);
@@ -849,21 +849,21 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   mTypesetter->SetFontClient(mModule.GetFontClient());
 
   // Check whether it is a markup text with multiple text colors
-  const Vector4* const colorsBuffer = mTextModel->GetColors();
-  bool hasMultipleTextColors = (NULL != colorsBuffer);
+  const Vector4* const colorsBuffer          = mTextModel->GetColors();
+  bool                 hasMultipleTextColors = (NULL != colorsBuffer);
 
   // Check whether the text contains any color glyph
   bool containsColorGlyph = false;
 
-  const Text::GlyphInfo* const glyphsBuffer = mTextModel->GetGlyphs();
-  const Text::Length numberOfGlyphs = mTextModel->GetNumberOfGlyphs();
-  for (Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
+  const Text::GlyphInfo* const glyphsBuffer   = mTextModel->GetGlyphs();
+  const Text::Length           numberOfGlyphs = mTextModel->GetNumberOfGlyphs();
+  for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
   {
     // Retrieve the glyph's info.
     const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
 
     // Whether the current glyph is a color one.
-    if (mModule.GetFontClient().IsColorGlyph(glyphInfo->fontId, glyphInfo->index))
+    if(mModule.GetFontClient().IsColorGlyph(glyphInfo->fontId, glyphInfo->index))
     {
       containsColorGlyph = true;
       break;
@@ -871,43 +871,43 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   }
 
   // Check whether the text contains any style colors (e.g. underline color, shadow color, etc.)
-  bool shadowEnabled = false;
-  const Vector2& shadowOffset = mTextModel->GetShadowOffset();
-  if (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1)
+  bool           shadowEnabled = false;
+  const Vector2& shadowOffset  = mTextModel->GetShadowOffset();
+  if(fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1)
   {
     shadowEnabled = true;
   }
 
-  const bool outlineEnabled = mTextModel->GetOutlineWidth() > Math::MACHINE_EPSILON_1;
-  const bool backgroundEnabled = mTextModel->IsBackgroundEnabled();
-  const bool markupEnabled = parameters.enableMarkup;
-  const bool markupUnderlineEnabled = markupEnabled && mTextModel->IsMarkupUnderlineSet();
-  const bool markupStrikethroughEnabled = markupEnabled && mTextModel->IsMarkupStrikethroughSet();
-  const bool underlineEnabled = mTextModel->IsUnderlineEnabled() || markupUnderlineEnabled;
-  const bool strikethroughEnabled = mTextModel->IsStrikethroughEnabled() || markupStrikethroughEnabled;
-  const bool backgroundMarkupSet = mTextModel->IsMarkupBackgroundColorSet();
-  const bool cutoutEnabled = mTextModel->IsCutoutEnabled();
+  const bool outlineEnabled              = mTextModel->GetOutlineWidth() > Math::MACHINE_EPSILON_1;
+  const bool backgroundEnabled           = mTextModel->IsBackgroundEnabled();
+  const bool markupEnabled               = parameters.enableMarkup;
+  const bool markupUnderlineEnabled      = markupEnabled && mTextModel->IsMarkupUnderlineSet();
+  const bool markupStrikethroughEnabled  = markupEnabled && mTextModel->IsMarkupStrikethroughSet();
+  const bool underlineEnabled            = mTextModel->IsUnderlineEnabled() || markupUnderlineEnabled;
+  const bool strikethroughEnabled        = mTextModel->IsStrikethroughEnabled() || markupStrikethroughEnabled;
+  const bool backgroundMarkupSet         = mTextModel->IsMarkupBackgroundColorSet();
+  const bool cutoutEnabled               = mTextModel->IsCutoutEnabled();
   const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();
-  const bool styleEnabled = (shadowEnabled || outlineEnabled || backgroundEnabled || markupEnabled ||
+  const bool styleEnabled                = (shadowEnabled || outlineEnabled || backgroundEnabled || markupEnabled ||
                              backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
-  const bool isOverlayStyle = underlineEnabled || strikethroughEnabled;
-  const bool embossEnabled = parameters.embossEnabled;
+  const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
+  const bool embossEnabled               = parameters.embossEnabled;
 
   // Create RGBA texture if the text contains emojis or multiple text colors, otherwise L8 texture
   Pixel::Format textPixelFormat =
-      (containsColorGlyph || hasMultipleTextColors || cutoutEnabled) ? Pixel::RGBA8888 : Pixel::L8;
+    (containsColorGlyph || hasMultipleTextColors || cutoutEnabled) ? Pixel::RGBA8888 : Pixel::L8;
 
   // The width is the control's width, height is the minimum height of the text.
   // This calculated layout size determines the size of the pixel data buffer.
   Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
-  layoutSize.x = parameters.textWidth;
+  layoutSize.x    = parameters.textWidth;
 
-  if (parameters.isAutoScrollEnabled && parameters.autoScrollDirection == DevelText::AutoScroll::VERTICAL)
+  if(parameters.isAutoScrollEnabled && parameters.autoScrollDirection == DevelText::AutoScroll::VERTICAL)
   {
     layoutSize.y = parameters.textHeight;
   }
 
-  if (shadowOffset.y > Math::MACHINE_EPSILON_1)
+  if(shadowOffset.y > Math::MACHINE_EPSILON_1)
   {
     layoutSize.y += shadowOffset.y;
   }
@@ -916,7 +916,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   layoutSize.y += outlineWidth * 2.0f;
   layoutSize.y = std::min(layoutSize.y, parameters.textHeight);
 
-  if (cutoutEnabled)
+  if(cutoutEnabled)
   {
     // We need to store the offset including padding and vertical alignment.
     float xOffset = parameters.padding.start;
@@ -930,7 +930,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   }
 
 #ifdef TRACE_ENABLED
-  if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
   {
     DALI_LOG_RELEASE_INFO("ControlSize : %f, %f, LayoutSize : %f, %f\n", parameters.textWidth, parameters.textHeight,
                           layoutSize.x, layoutSize.y);
@@ -939,16 +939,16 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   // Check the text direction
   Ui::DevelText::TextDirection::Type textDirection =
-      mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
+    mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
 
   // Set information for creating pixel datas.
   AsyncTextRenderInfo renderInfo;
 
   bool isRenderScale = parameters.renderScale > 1.0f ? true : false;
-  if (isRenderScale)
+  if(isRenderScale)
   {
-    float width = layoutSize.width / parameters.renderScale;
-    float height = layoutSize.height / parameters.renderScale;
+    float width     = layoutSize.width / parameters.renderScale;
+    float height    = layoutSize.height / parameters.renderScale;
     renderInfo.size = Size(width, height);
   }
   else
@@ -960,7 +960,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
 
   Devel::PixelBuffer cutoutData;
-  if (cutoutEnabled)
+  if(cutoutEnabled)
   {
     cutoutData = mTypesetter->RenderWithPixelBuffer(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
                                                     false, textPixelFormat);
@@ -968,7 +968,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // Make transparent buffer.
     // If the cutout is enabled, a separate texture is not used for the text.
     Devel::PixelBuffer buffer = mTypesetter->CreateFullBackgroundBuffer(1, 1, Color::TRANSPARENT);
-    renderInfo.textPixelData = Devel::PixelBuffer::Convert(buffer);
+    renderInfo.textPixelData  = Devel::PixelBuffer::Convert(buffer);
 
     // Set the flag of cutout.
     renderInfo.isCutout = cutoutEnabled && (cutoutData != nullptr);
@@ -977,61 +977,61 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     // Create a pixel data for the text without any styles
     renderInfo.textPixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
   }
 
-  if (styleEnabled)
+  if(styleEnabled)
   {
-    if (renderInfo.isCutout)
+    if(renderInfo.isCutout)
     {
-      float cutoutAlpha = mTextModel->GetDefaultColor().a;
+      float cutoutAlpha         = mTextModel->GetDefaultColor().a;
       renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
-          layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888, cutoutAlpha);
+        layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888, cutoutAlpha);
     }
     else
     {
       // Create RGBA pixel data for all the text styles (without the text itself)
       renderInfo.stylePixelData =
-          mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888);
+        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888);
     }
   }
-  if (isOverlayStyle)
+  if(isOverlayStyle)
   {
     // Create RGBA pixel data for all the overlay styles
     renderInfo.overlayStylePixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, false, Pixel::RGBA8888);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE, false, Pixel::RGBA8888);
   }
-  if (containsColorGlyph && !hasMultipleTextColors)
+  if(containsColorGlyph && !hasMultipleTextColors)
   {
     // Create a L8 pixel data as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     renderInfo.maskPixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
   }
-  if (parameters.isAutoScrollEnabled)
+  if(parameters.isAutoScrollEnabled)
   {
     // This will be uploaded in async text interface's setup auto scroll.
     renderInfo.autoScrollPixelData =
-        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                            parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL, Pixel::RGBA8888,
-                            Size(parameters.originWidth, parameters.originHeight));
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
+                          parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL, Pixel::RGBA8888,
+                          Size(parameters.originWidth, parameters.originHeight));
   }
 
   renderInfo.hasMultipleTextColors = hasMultipleTextColors;
-  renderInfo.containsColorGlyph = containsColorGlyph;
-  renderInfo.styleEnabled = styleEnabled;
-  renderInfo.isOverlayStyle = isOverlayStyle;
-  renderInfo.manualRendered = parameters.manualRender;
-  renderInfo.lineCount = mTextModel->GetNumberOfLines();
-  renderInfo.embossEnabled = embossEnabled;
+  renderInfo.containsColorGlyph    = containsColorGlyph;
+  renderInfo.styleEnabled          = styleEnabled;
+  renderInfo.isOverlayStyle        = isOverlayStyle;
+  renderInfo.manualRendered        = parameters.manualRender;
+  renderInfo.lineCount             = mTextModel->GetNumberOfLines();
+  renderInfo.embossEnabled         = embossEnabled;
 
-  if (cutoutEnabled)
+  if(cutoutEnabled)
   {
     renderInfo.renderedSize = renderInfo.size;
   }
   else
   {
-    float renderedWidth = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
-    float renderedHeight = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
+    float renderedWidth     = isRenderScale ? parameters.renderScaleWidth : parameters.textWidth;
+    float renderedHeight    = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
     renderInfo.renderedSize = Size(renderedWidth, renderedHeight);
   }
 
@@ -1043,33 +1043,33 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_TEXT");
 
-  Size textNaturalSize = naturalSize;
+  Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
-  if (parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
-    if (!cachedNaturalSize)
+    if(!cachedNaturalSize)
     {
-      textNaturalSize = ComputeNaturalSize(parameters);
+      textNaturalSize   = ComputeNaturalSize(parameters);
       cachedNaturalSize = true;
     }
     // textWidth is widthConstraint
-    if (parameters.textWidth > textNaturalSize.width)
+    if(parameters.textWidth > textNaturalSize.width)
     {
       parameters.textWidth = textNaturalSize.width;
     }
   }
 
-  if (parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
     // In case of CONSTRAINT, the natural size has already been calculated.
     // So we can skip Initialize and Update at this stage.
     // Only the layout is newly calculated to obtain the height.
-    bool layoutOnly = cachedNaturalSize;
-    float height = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
+    bool  layoutOnly = cachedNaturalSize;
+    float height     = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // textHeight is heightConstraint.
-    if (parameters.textHeight < height)
+    if(parameters.textHeight < height)
     {
       bool layoutUpdated = false;
       // Re-layout is required to apply new height.
@@ -1084,7 +1084,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
   }
   else
   {
-    if (!cachedNaturalSize)
+    if(!cachedNaturalSize)
     {
       Initialize();
       Update(parameters);
@@ -1099,7 +1099,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
 float AsyncTextLoader::ComputeHeightForWidth(AsyncTextParameters& parameters, float width, bool layoutOnly)
 {
 #ifdef TRACE_ENABLED
-  if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
   {
     DALI_LOG_RELEASE_INFO("ComputeHeightForWidth, width:%f, layoutOnly:%d\n", width, layoutOnly);
   }
@@ -1110,30 +1110,30 @@ float AsyncTextLoader::ComputeHeightForWidth(AsyncTextParameters& parameters, fl
 Size AsyncTextLoader::ComputeLayoutSize(AsyncTextParameters& parameters, float width, float height, bool layoutOnly)
 {
 #ifdef TRACE_ENABLED
-  if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
   {
     DALI_LOG_RELEASE_INFO("ComputeLayoutSize, width:%f, height:%f, layoutOnly:%d\n", width, height, layoutOnly);
   }
 #endif
 
-  float actualWidth = parameters.textWidth;
+  float actualWidth  = parameters.textWidth;
   float actualHeight = parameters.textHeight;
 
-  parameters.textWidth = width;
+  parameters.textWidth  = width;
   parameters.textHeight = height;
 
-  if (!layoutOnly)
+  if(!layoutOnly)
   {
     Initialize();
     Update(parameters);
   }
 
   bool layoutUpdated = false;
-  Size layoutSize = Layout(parameters, layoutUpdated);
+  Size layoutSize    = Layout(parameters, layoutUpdated);
 
   // Restore actual size.
-  parameters.textWidth = actualWidth;
-  parameters.textHeight = actualHeight;
+  parameters.textWidth                   = actualWidth;
+  parameters.textHeight                  = actualHeight;
   mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
 
   return layoutSize;
@@ -1141,88 +1141,88 @@ Size AsyncTextLoader::ComputeLayoutSize(AsyncTextParameters& parameters, float w
 
 Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& cachedNaturalSize)
 {
-  if (parameters.isTextFitEnabled || parameters.isTextFitArrayEnabled)
+  if(parameters.isTextFitEnabled || parameters.isTextFitArrayEnabled)
   {
     // If text fit, only update the scaled size.
-    parameters.renderScaleWidth = parameters.textWidth;
+    parameters.renderScaleWidth  = parameters.textWidth;
     parameters.renderScaleHeight = parameters.textHeight;
-    parameters.textWidth = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
-    parameters.textHeight = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
-    parameters.minLineSize = parameters.minLineSize * parameters.renderScale;
-    parameters.autoScrollGap = parameters.autoScrollGap * parameters.renderScale;
-    cachedNaturalSize = false;
+    parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
+    parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
+    parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
+    parameters.autoScrollGap     = parameters.autoScrollGap * parameters.renderScale;
+    cachedNaturalSize            = false;
     return Size::ZERO;
   }
 
   float renderScale = parameters.renderScale;
   // Set render scale to 1.0 to compute the original scale natural size.
-  parameters.renderScale = 1.0f;
+  parameters.renderScale   = 1.0f;
   Size originalNaturalSize = ComputeNaturalSize(parameters);
 
   // Restore render scale.
   parameters.renderScale = renderScale;
 
   // Check if the original text is ellipsized or not.
-  bool widthEllipsized = parameters.textWidth < originalNaturalSize.width ? true : false;
+  bool widthEllipsized  = parameters.textWidth < originalNaturalSize.width ? true : false;
   bool heightEllipsized = parameters.textHeight < originalNaturalSize.height ? true : false;
 
   Size naturalSize = Size::ZERO;
-  if (parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
-    naturalSize = ComputeNaturalSize(parameters);
+    naturalSize       = ComputeNaturalSize(parameters);
     cachedNaturalSize = true;
-    if (parameters.textWidth > naturalSize.width)
+    if(parameters.textWidth > naturalSize.width)
     {
       parameters.textWidth = naturalSize.width;
     }
   }
 
-  if (parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
-    bool layoutOnly = cachedNaturalSize;
-    float height = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
-    if (parameters.textHeight > height)
+    bool  layoutOnly = cachedNaturalSize;
+    float height     = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
+    if(parameters.textHeight > height)
     {
       parameters.textHeight = height;
     }
   }
 
-  if (!cachedNaturalSize)
+  if(!cachedNaturalSize)
   {
-    naturalSize = ComputeNaturalSize(parameters);
+    naturalSize       = ComputeNaturalSize(parameters);
     cachedNaturalSize = true;
   }
 
   // Update the scaled size.
-  parameters.renderScaleWidth = parameters.textWidth;
+  parameters.renderScaleWidth  = parameters.textWidth;
   parameters.renderScaleHeight = parameters.textHeight;
-  parameters.textWidth = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
-  parameters.textHeight = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
-  parameters.minLineSize = parameters.minLineSize * parameters.renderScale;
-  parameters.autoScrollGap = parameters.autoScrollGap * parameters.renderScale;
+  parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
+  parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
+  parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
+  parameters.autoScrollGap     = parameters.autoScrollGap * parameters.renderScale;
 
   // The texture in RenderScale needs to be resized because it exceeds the control size.
-  if (!widthEllipsized && naturalSize.width > parameters.textWidth)
+  if(!widthEllipsized && naturalSize.width > parameters.textWidth)
   {
     float renderScaleGap = ceil(naturalSize.width - parameters.textWidth);
-    if (renderScaleGap > 0.0f)
+    if(renderScaleGap > 0.0f)
     {
-      Vector<GlyphInfo>& glyphs = mTextModel->mVisualModel->mGlyphs;
-      const Length numberOfGlyphs = static_cast<Length>(glyphs.Count());
-      if (numberOfGlyphs > 1u)
+      Vector<GlyphInfo>& glyphs         = mTextModel->mVisualModel->mGlyphs;
+      const Length       numberOfGlyphs = static_cast<Length>(glyphs.Count());
+      if(numberOfGlyphs > 1u)
       {
         naturalSize.width -= (renderScaleGap - 1.0f);
         parameters.textWidth = naturalSize.width;
 
         uint32_t numberOfAdvance = 0u;
-        float sumOfGap = 0.0f;
-        float gap = renderScaleGap / static_cast<float>(numberOfGlyphs - 1u);
+        float    sumOfGap        = 0.0f;
+        float    gap             = renderScaleGap / static_cast<float>(numberOfGlyphs - 1u);
 
         // Reduce the advance of all glyphs slightly to fit the width to the control size.
         // Reducing the advance of the last glyph is pointless.
-        for (Length index = 0u; index < numberOfGlyphs - 1u; index++)
+        for(Length index = 0u; index < numberOfGlyphs - 1u; index++)
         {
-          if (glyphs[index].advance > 0.0f)
+          if(glyphs[index].advance > 0.0f)
           {
             glyphs[index].advance -= gap;
             numberOfAdvance++;
@@ -1231,12 +1231,12 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
         }
 
         // Remove all remaining gaps.
-        if (numberOfAdvance > 0u && fabsf(renderScaleGap - sumOfGap) > Math::MACHINE_EPSILON_1000)
+        if(numberOfAdvance > 0u && fabsf(renderScaleGap - sumOfGap) > Math::MACHINE_EPSILON_1000)
         {
           float remainedGap = (renderScaleGap - sumOfGap) / static_cast<float>(numberOfAdvance);
-          for (Length index = 0u; index < numberOfGlyphs - 1u; index++)
+          for(Length index = 0u; index < numberOfGlyphs - 1u; index++)
           {
-            if (glyphs[index].advance > 0.0f)
+            if(glyphs[index].advance > 0.0f)
             {
               glyphs[index].advance -= remainedGap;
             }
@@ -1247,8 +1247,8 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
   }
 
   // Adjust the size to ensure same ellipsis behavior as the original text.
-  parameters.textWidth = widthEllipsized ? std::min(parameters.textWidth, naturalSize.width - 1)
-                                         : std::max(parameters.textWidth, naturalSize.width);
+  parameters.textWidth  = widthEllipsized ? std::min(parameters.textWidth, naturalSize.width - 1)
+                                          : std::max(parameters.textWidth, naturalSize.width);
   parameters.textHeight = heightEllipsized ? std::min(parameters.textHeight, naturalSize.height - 1)
                                            : std::max(parameters.textHeight, naturalSize.height);
 
@@ -1261,17 +1261,17 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
 Size AsyncTextLoader::ComputeNaturalSize(AsyncTextParameters& parameters)
 {
 #ifdef TRACE_ENABLED
-  if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+  if(gTraceFilter && gTraceFilter->IsTraceEnabled())
   {
     DALI_LOG_RELEASE_INFO("ComputeNaturalSize\n");
   }
 #endif
 
-  float actualWidth = parameters.textWidth;
+  float actualWidth  = parameters.textWidth;
   float actualHeight = parameters.textHeight;
 
   // To measure natural size, set the size of the control to the maximum.
-  parameters.textWidth = MAX_FLOAT;
+  parameters.textWidth  = MAX_FLOAT;
   parameters.textHeight = MAX_FLOAT;
 
   Initialize();
@@ -1281,8 +1281,8 @@ Size AsyncTextLoader::ComputeNaturalSize(AsyncTextParameters& parameters)
   Size naturalSize = Layout(parameters, layoutUpdated);
 
   // Restore actual size.
-  parameters.textWidth = actualWidth;
-  parameters.textHeight = actualHeight;
+  parameters.textWidth                   = actualWidth;
+  parameters.textHeight                  = actualHeight;
   mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
 
   return naturalSize;
@@ -1293,24 +1293,24 @@ AsyncTextRenderInfo AsyncTextLoader::GetHeightForWidth(AsyncTextParameters& para
   float height = ComputeHeightForWidth(parameters, parameters.textWidth, false);
 
   AsyncTextRenderInfo renderInfo;
-  renderInfo.renderedSize.width = parameters.textWidth;
+  renderInfo.renderedSize.width  = parameters.textWidth;
   renderInfo.renderedSize.height = height;
-  renderInfo.requestType = Async::COMPUTE_HEIGHT_FOR_WIDTH;
-  renderInfo.lineCount = mTextModel->GetNumberOfLines();
+  renderInfo.requestType         = Async::COMPUTE_HEIGHT_FOR_WIDTH;
+  renderInfo.lineCount           = mTextModel->GetNumberOfLines();
 
   return renderInfo;
 }
 
 AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& parameters)
 {
-  Size textNaturalSize = ComputeNaturalSize(parameters);
-  textNaturalSize.width = ConvertToEven(textNaturalSize.width);
+  Size textNaturalSize   = ComputeNaturalSize(parameters);
+  textNaturalSize.width  = ConvertToEven(textNaturalSize.width);
   textNaturalSize.height = ConvertToEven(textNaturalSize.height);
 
   AsyncTextRenderInfo renderInfo;
   renderInfo.renderedSize = textNaturalSize;
-  renderInfo.requestType = Async::COMPUTE_NATURAL_SIZE;
-  renderInfo.lineCount = mTextModel->GetNumberOfLines();
+  renderInfo.requestType  = Async::COMPUTE_NATURAL_SIZE;
+  renderInfo.lineCount    = mTextModel->GetNumberOfLines();
 
   return renderInfo;
 }
@@ -1320,27 +1320,27 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_AUTO_SCROLL");
 
-  Size controlSize(parameters.textWidth, parameters.textHeight);
-  Size verifiedSize;
-  float wrapGap = 0.0f;
-  bool isHorizontal = parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL;
+  Size      controlSize(parameters.textWidth, parameters.textHeight);
+  Size      verifiedSize;
+  float     wrapGap        = 0.0f;
+  bool      isHorizontal   = parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL;
   const int maxTextureSize = parameters.maxTextureSize;
 
-  if (isHorizontal)
+  if(isHorizontal)
   {
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
     Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
 
-    if (parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+    if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
     {
       // The real height calculated during layout should be set.
-      parameters.textHeight = textNaturalSize.height;
-      controlSize.height = parameters.textHeight;
+      parameters.textHeight                  = textNaturalSize.height;
+      controlSize.height                     = parameters.textHeight;
       mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
     }
 
 #ifdef TRACE_ENABLED
-    if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
       DALI_LOG_RELEASE_INFO("natural size : %f, %f, control size : %f, %f\n", textNaturalSize.x, textNaturalSize.y,
                             controlSize.x, controlSize.y);
@@ -1348,24 +1348,24 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
 #endif
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap = std::max(parameters.autoScrollGap, textPadding);
+    int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
+    wrapGap             = std::max(parameters.autoScrollGap, textPadding);
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture.
 
     // Calculate a size of texture for text scrolling
     verifiedSize = textureSize;
 
     // If the texture size width exceed maxTextureSize, modify the visual model size and enabled the ellipsis.
-    if (verifiedSize.width > maxTextureSize)
+    if(verifiedSize.width > maxTextureSize)
     {
       verifiedSize.width = maxTextureSize;
-      if (textNaturalSize.width > maxTextureSize)
+      if(textNaturalSize.width > maxTextureSize)
       {
-        float actualWidth = parameters.textWidth;
+        float actualWidth  = parameters.textWidth;
         float actualHeight = parameters.textHeight;
 
-        parameters.textWidth = verifiedSize.width - static_cast<float>(parameters.autoScrollGap);
-        parameters.textHeight = textNaturalSize.height;
+        parameters.textWidth                      = verifiedSize.width - static_cast<float>(parameters.autoScrollGap);
+        parameters.textHeight                     = textNaturalSize.height;
         parameters.isAutoScrollMaxTextureExceeded = true;
 
         bool layoutUpdated = false;
@@ -1373,7 +1373,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
         // Re-layout is required to apply ellipsis.
         Layout(parameters, layoutUpdated);
 
-        parameters.textWidth = actualWidth;
+        parameters.textWidth  = actualWidth;
         parameters.textHeight = actualHeight;
       }
       wrapGap = std::max(maxTextureSize - textNaturalSize.width, static_cast<float>(parameters.autoScrollGap));
@@ -1381,57 +1381,57 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
   }
   else // AutoScroll::VERTICAL
   {
-    bool layoutOnly = useCachedNaturalSize;
-    bool useCachedHeight = false;
-    float textHeight = 0.0f;
-    if (parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+    bool  layoutOnly      = useCachedNaturalSize;
+    bool  useCachedHeight = false;
+    float textHeight      = 0.0f;
+    if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
     {
       // The real height calculated during layout should be set.
-      textHeight = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
+      textHeight      = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
       useCachedHeight = true;
-      layoutOnly = true;
+      layoutOnly      = true;
 
-      if (parameters.textHeight > textHeight)
+      if(parameters.textHeight > textHeight)
       {
-        parameters.textHeight = textHeight;
-        controlSize.height = parameters.textHeight;
+        parameters.textHeight                  = textHeight;
+        controlSize.height                     = parameters.textHeight;
         mTextModel->mVisualModel->mControlSize = Size(parameters.textWidth, parameters.textHeight);
       }
     }
 
-    Size originSize = Size::ZERO;
+    Size originSize                = Size::ZERO;
     bool needLayoutSizeCalculation = parameters.verticalAlignment != VerticalAlignment::TOP ? true : false;
-    if (needLayoutSizeCalculation)
+    if(needLayoutSizeCalculation)
     {
       parameters.isAutoScrollEnabled = false;
-      originSize = ComputeLayoutSize(parameters, parameters.textWidth, parameters.textHeight, layoutOnly);
+      originSize                     = ComputeLayoutSize(parameters, parameters.textWidth, parameters.textHeight, layoutOnly);
       parameters.isAutoScrollEnabled = true;
-      parameters.originWidth = originSize.width;
-      parameters.originHeight = originSize.height;
-      layoutOnly = true;
+      parameters.originWidth         = originSize.width;
+      parameters.originHeight        = originSize.height;
+      layoutOnly                     = true;
     }
 
     textHeight = useCachedHeight ? textHeight : ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding = std::max(controlSize.y - textHeight, 0.0f);
-    wrapGap = std::max(parameters.autoScrollGap, textPadding);
+    wrapGap         = std::max(parameters.autoScrollGap, textPadding);
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Calculate a size of texture for text scrolling
     verifiedSize = textureSize;
 
     // If the texture size height exceed maxTextureSize, modify the visual model size and enabled the ellipsis.
-    if (verifiedSize.height > maxTextureSize)
+    if(verifiedSize.height > maxTextureSize)
     {
       verifiedSize.height = maxTextureSize;
-      if (textHeight > maxTextureSize)
+      if(textHeight > maxTextureSize)
       {
-        float actualWidth = parameters.textWidth;
+        float actualWidth  = parameters.textWidth;
         float actualHeight = parameters.textHeight;
 
-        parameters.textWidth = verifiedSize.width;
-        parameters.textHeight = verifiedSize.height;
+        parameters.textWidth           = verifiedSize.width;
+        parameters.textHeight          = verifiedSize.height;
         parameters.isAutoScrollEnabled = false;
 
         bool layoutUpdated = false;
@@ -1439,30 +1439,30 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
         // Re-layout is required to apply ellipsis.
         Layout(parameters, layoutUpdated);
 
-        parameters.textWidth = actualWidth;
-        parameters.textHeight = actualHeight;
+        parameters.textWidth           = actualWidth;
+        parameters.textHeight          = actualHeight;
         parameters.isAutoScrollEnabled = true;
       }
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
     }
   }
 
-  uint32_t actualWidth = parameters.textWidth;
+  uint32_t actualWidth  = parameters.textWidth;
   uint32_t actualHeight = parameters.textHeight;
-  parameters.textWidth = verifiedSize.width;
+  parameters.textWidth  = verifiedSize.width;
   parameters.textHeight = verifiedSize.height;
 
   AsyncTextRenderInfo renderInfo = Render(parameters);
 
-  parameters.textWidth = actualWidth;
+  parameters.textWidth  = actualWidth;
   parameters.textHeight = actualHeight;
 
   // Store the control size and calculated wrap gap in render info.
-  bool isRenderScale = parameters.renderScale > 1.0f ? true : false;
-  float renderedWidth = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
-  float renderedHeight = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
-  renderInfo.controlSize = Size(renderedWidth, renderedHeight);
-  renderInfo.renderedSize = Size(renderedWidth, renderedHeight);
+  bool  isRenderScale          = parameters.renderScale > 1.0f ? true : false;
+  float renderedWidth          = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
+  float renderedHeight         = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
+  renderInfo.controlSize       = Size(renderedWidth, renderedHeight);
+  renderInfo.renderedSize      = Size(renderedWidth, renderedHeight);
   renderInfo.autoScrollWrapGap = wrapGap;
   return renderInfo;
 }
@@ -1474,9 +1474,9 @@ bool AsyncTextLoader::CheckForTextFit(AsyncTextParameters& parameters, float poi
   Initialize();
   Update(parameters);
   bool layoutUpdated = false;
-  Size layoutSize = Layout(parameters, layoutUpdated);
+  Size layoutSize    = Layout(parameters, layoutUpdated);
 
-  if (!layoutUpdated || layoutSize.width > allowedSize.width || layoutSize.height > allowedSize.height)
+  if(!layoutUpdated || layoutSize.width > allowedSize.width || layoutSize.height > allowedSize.height)
   {
     return false;
   }
@@ -1486,33 +1486,33 @@ bool AsyncTextLoader::CheckForTextFit(AsyncTextParameters& parameters, float poi
 AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& parameters, bool useCachedNaturalSize,
                                                    const Size& naturalSize)
 {
-  Size textNaturalSize = naturalSize;
+  Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
-  if (parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
-    if (!cachedNaturalSize)
+    if(!cachedNaturalSize)
     {
-      textNaturalSize = ComputeNaturalSize(parameters);
+      textNaturalSize   = ComputeNaturalSize(parameters);
       cachedNaturalSize = true;
     }
     // textWidth is widthConstraint
-    if (parameters.textWidth > textNaturalSize.width)
+    if(parameters.textWidth > textNaturalSize.width)
     {
       parameters.textWidth = textNaturalSize.width;
     }
   }
 
-  if (parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
   {
     // In case of CONSTRAINT, the natural size has already been calculated.
     // So we can skip Initialize and Update at this stage.
     // Only the layout is newly calculated to obtain the height.
-    bool layoutOnly = cachedNaturalSize;
-    float height = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
+    bool  layoutOnly = cachedNaturalSize;
+    float height     = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // textHeight is heightConstraint
-    if (parameters.textHeight > height)
+    if(parameters.textHeight > height)
     {
       parameters.textHeight = height;
     }
@@ -1520,18 +1520,18 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
                         parameters.textHeight);
   }
 
-  if (parameters.isTextFitArrayEnabled)
+  if(parameters.isTextFitArrayEnabled)
   {
 #ifdef TRACE_ENABLED
-    if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
       DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFitArray\n");
     }
 #endif
 
-    std::vector<DevelTextLabel::FitOption> fitOptions = parameters.textFitArray;
-    int numberOfFitOptions = static_cast<int>(fitOptions.size());
-    if (numberOfFitOptions == 0)
+    std::vector<DevelTextLabel::FitOption> fitOptions         = parameters.textFitArray;
+    int                                    numberOfFitOptions = static_cast<int>(fitOptions.size());
+    if(numberOfFitOptions == 0)
     {
       DALI_LOG_ERROR("fitOptions is empty, render with default value, point size:%f, min line size:%f\n",
                      parameters.fontSize, parameters.minLineSize);
@@ -1539,7 +1539,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
       numberOfFitOptions = 1;
     }
 
-    mFitActualEllipsis = parameters.ellipsis;
+    mFitActualEllipsis  = parameters.ellipsis;
     parameters.ellipsis = false;
 
     Size allowedSize(parameters.textWidth, parameters.textHeight);
@@ -1550,12 +1550,12 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     // Decide whether to use binary search.
     // If MinLineSize is not sorted in ascending order,
     // binary search cannot guarantee that it will always find the best value.
-    bool binarySearch = true;
+    bool  binarySearch    = true;
     float prevMinLineSize = 0.0f;
-    for (DevelTextLabel::FitOption& option : fitOptions)
+    for(DevelTextLabel::FitOption& option : fitOptions)
     {
       float optionMinLineSize = option.GetMinLineSize();
-      if (prevMinLineSize > optionMinLineSize)
+      if(prevMinLineSize > optionMinLineSize)
       {
         binarySearch = false;
         break;
@@ -1565,53 +1565,53 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     // Set the first FitOption(Minimum PointSize) to the best value.
     // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    DevelTextLabel::FitOption firstOption = fitOptions.front();
-    bool bestSizeUpdatedLatest = false;
-    float bestPointSize = firstOption.GetPointSize();
-    float bestMinLineSize = firstOption.GetMinLineSize();
+    DevelTextLabel::FitOption firstOption           = fitOptions.front();
+    bool                      bestSizeUpdatedLatest = false;
+    float                     bestPointSize         = firstOption.GetPointSize();
+    float                     bestMinLineSize       = firstOption.GetMinLineSize();
 
-    if (binarySearch)
+    if(binarySearch)
     {
-      int left = 0u;
+      int left  = 0u;
       int right = numberOfFitOptions - 1;
 
-      while (left <= right)
+      while(left <= right)
       {
-        int mid = left + (right - left) / 2;
-        DevelTextLabel::FitOption option = fitOptions[mid];
-        float testPointSize = option.GetPointSize();
-        float testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize = testMinLineSize;
+        int                       mid             = left + (right - left) / 2;
+        DevelTextLabel::FitOption option          = fitOptions[mid];
+        float                     testPointSize   = option.GetPointSize();
+        float                     testMinLineSize = option.GetMinLineSize();
+        parameters.minLineSize                    = testMinLineSize;
 
-        if (CheckForTextFit(parameters, testPointSize, allowedSize))
+        if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
           bestSizeUpdatedLatest = true;
-          bestPointSize = testPointSize;
-          bestMinLineSize = testMinLineSize;
-          left = mid + 1;
+          bestPointSize         = testPointSize;
+          bestMinLineSize       = testMinLineSize;
+          left                  = mid + 1;
         }
         else
         {
           bestSizeUpdatedLatest = false;
-          right = mid - 1;
+          right                 = mid - 1;
         }
       }
     }
     else
     {
       // If binary search is not possible, search sequentially starting from the largest PointSize.
-      for (auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
+      for(auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
       {
-        DevelTextLabel::FitOption option = *it;
-        float testPointSize = option.GetPointSize();
-        float testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize = testMinLineSize;
+        DevelTextLabel::FitOption option          = *it;
+        float                     testPointSize   = option.GetPointSize();
+        float                     testMinLineSize = option.GetMinLineSize();
+        parameters.minLineSize                    = testMinLineSize;
 
-        if (CheckForTextFit(parameters, testPointSize, allowedSize))
+        if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
           bestSizeUpdatedLatest = true;
-          bestPointSize = testPointSize;
-          bestMinLineSize = testMinLineSize;
+          bestPointSize         = testPointSize;
+          bestMinLineSize       = testMinLineSize;
           break;
         }
         else
@@ -1622,36 +1622,36 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
 
     // Best point size was not updated. re-run so the TextFit should be fitted really.
-    if (!bestSizeUpdatedLatest)
+    if(!bestSizeUpdatedLatest)
     {
-      parameters.ellipsis = mFitActualEllipsis;
+      parameters.ellipsis    = mFitActualEllipsis;
       parameters.minLineSize = bestMinLineSize;
       CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
     return Render(parameters);
   }
-  else if (parameters.isTextFitEnabled)
+  else if(parameters.isTextFitEnabled)
   {
 #ifdef TRACE_ENABLED
-    if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
       DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFit\n");
     }
 #endif
 
-    float minPointSize = parameters.textFitMinSize;
-    float maxPointSize = parameters.textFitMaxSize;
+    float minPointSize  = parameters.textFitMinSize;
+    float maxPointSize  = parameters.textFitMaxSize;
     float pointInterval = parameters.textFitStepSize;
 
-    mFitActualEllipsis = parameters.ellipsis;
+    mFitActualEllipsis  = parameters.ellipsis;
     parameters.ellipsis = false;
     float bestPointSize = minPointSize;
 
     Size allowedSize(parameters.textWidth, parameters.textHeight);
 
     // check zero value
-    if (pointInterval < 1.f)
+    if(pointInterval < 1.f)
     {
       parameters.textFitStepSize = pointInterval = 1.0f;
     }
@@ -1659,14 +1659,14 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     uint32_t pointSizeRange = static_cast<uint32_t>(ceil((maxPointSize - minPointSize) / pointInterval));
 
     // Ensure minPointSize + pointSizeRange * pointInverval >= maxPointSize
-    while (minPointSize + static_cast<float>(pointSizeRange) * pointInterval < maxPointSize)
+    while(minPointSize + static_cast<float>(pointSizeRange) * pointInterval < maxPointSize)
     {
       ++pointSizeRange;
     }
 
     uint32_t bestSizeIndex = 0;
-    uint32_t minIndex = bestSizeIndex + 1u;
-    uint32_t maxIndex = pointSizeRange + 1u;
+    uint32_t minIndex      = bestSizeIndex + 1u;
+    uint32_t maxIndex      = pointSizeRange + 1u;
 
     bool bestSizeUpdatedLatest = false;
     // Find best size as binary search.
@@ -1677,28 +1677,28 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     //
     // Basically, we can assume that 0 (minPointSize) is always valid.
     // Now, we will check [1 pointSizeRange] range s.t. pointSizeRange mean the maxPointSize
-    while (minIndex < maxIndex)
+    while(minIndex < maxIndex)
     {
-      uint32_t testIndex = minIndex + ((maxIndex - minIndex) >> 1u);
+      uint32_t    testIndex     = minIndex + ((maxIndex - minIndex) >> 1u);
       const float testPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(testIndex) * pointInterval);
 
-      if (CheckForTextFit(parameters, testPointSize, allowedSize))
+      if(CheckForTextFit(parameters, testPointSize, allowedSize))
       {
         bestSizeUpdatedLatest = true;
 
         bestSizeIndex = testIndex;
-        minIndex = testIndex + 1u;
+        minIndex      = testIndex + 1u;
       }
       else
       {
         bestSizeUpdatedLatest = false;
-        maxIndex = testIndex;
+        maxIndex              = testIndex;
       }
     }
     bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
 
     // Best point size was not updated. re-run so the TextFit should be fitted really.
-    if (!bestSizeUpdatedLatest)
+    if(!bestSizeUpdatedLatest)
     {
       parameters.ellipsis = mFitActualEllipsis;
       CheckForTextFit(parameters, bestPointSize, allowedSize);

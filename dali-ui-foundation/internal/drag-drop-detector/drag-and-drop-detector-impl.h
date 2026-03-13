@@ -219,11 +219,11 @@ private:
   DragAndDropSignal mDroppedSignal;
   DragAndDropSignal mEndedSignal;
 
-  std::vector<Dali::Ui::Control> mControls; // controls attached by Attach interface for drag&drop
-  Dali::Ui::Control mDragControl;           // the current drag control
+  std::vector<Dali::Ui::Control> mControls;    // controls attached by Attach interface for drag&drop
+  Dali::Ui::Control              mDragControl; // the current drag control
   Dali::Ui::Control
-      mShadowControl; // a shadow control for indicating where the control is, same size as the dragged control
-  std::vector<uint32_t> mFirstEnter;            // control id indicating if the cursor is enter
+                           mShadowControl;      // a shadow control for indicating where the control is, same size as the dragged control
+  std::vector<uint32_t>    mFirstEnter;         // control id indicating if the cursor is enter
   Dali::PanGestureDetector mPanGestureDetector; // pangesture for calculating the shadow actor position
 
   Vector2 mLocalPosition;

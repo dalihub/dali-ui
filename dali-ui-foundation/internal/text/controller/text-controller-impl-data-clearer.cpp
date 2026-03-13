@@ -29,25 +29,25 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
 {
   ModelPtr& model = impl.mModel;
 
-  if (Controller::NO_OPERATION != (Controller::GET_LINE_BREAKS & operations))
+  if(Controller::NO_OPERATION != (Controller::GET_LINE_BREAKS & operations))
   {
     model->mLogicalModel->mLineBreakInfo.Clear();
     model->mLogicalModel->mParagraphInfo.Clear();
   }
 
-  if (Controller::NO_OPERATION != (Controller::GET_SCRIPTS & operations))
+  if(Controller::NO_OPERATION != (Controller::GET_SCRIPTS & operations))
   {
     model->mLogicalModel->mScriptRuns.Clear();
   }
 
-  if (Controller::NO_OPERATION != (Controller::VALIDATE_FONTS & operations))
+  if(Controller::NO_OPERATION != (Controller::VALIDATE_FONTS & operations))
   {
     model->mLogicalModel->mFontRuns.Clear();
   }
 
-  if (0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
+  if(0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
   {
-    if (Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
+    if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
     {
       TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
       model->mLogicalModel->ClearBidirectionalParagraphInfo(bidirectionalSupport);
@@ -55,12 +55,12 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
       model->mLogicalModel->mCharacterDirections.Clear();
     }
 
-    if (Controller::NO_OPERATION != (Controller::REORDER & operations))
+    if(Controller::NO_OPERATION != (Controller::REORDER & operations))
     {
       // Free the allocated memory used to store the conversion table in the bidirectional line info run.
-      for (Vector<BidirectionalLineInfoRun>::Iterator it = model->mLogicalModel->mBidirectionalLineInfo.Begin(),
-                                                      endIt = model->mLogicalModel->mBidirectionalLineInfo.End();
-           it != endIt; ++it)
+      for(Vector<BidirectionalLineInfoRun>::Iterator it    = model->mLogicalModel->mBidirectionalLineInfo.Begin(),
+                                                     endIt = model->mLogicalModel->mBidirectionalLineInfo.End();
+          it != endIt; ++it)
       {
         BidirectionalLineInfoRun& bidiLineInfo = *it;
 
@@ -74,7 +74,7 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
     }
   }
 
-  if (Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations))
+  if(Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations))
   {
     model->mVisualModel->mGlyphs.Clear();
     model->mVisualModel->mGlyphsToCharacters.Clear();
@@ -84,12 +84,12 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
     model->mVisualModel->mGlyphPositions.Clear();
   }
 
-  if (Controller::NO_OPERATION != (Controller::LAYOUT & operations))
+  if(Controller::NO_OPERATION != (Controller::LAYOUT & operations))
   {
     model->mVisualModel->mLines.Clear();
   }
 
-  if (Controller::NO_OPERATION != (Controller::COLOR & operations))
+  if(Controller::NO_OPERATION != (Controller::COLOR & operations))
   {
     model->mVisualModel->mColorIndices.Clear();
     model->mVisualModel->mBackgroundColorIndices.Clear();
@@ -100,9 +100,9 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
                                                         CharacterIndex endIndex, Controller::OperationsMask operations)
 {
   const CharacterIndex endIndexPlusOne = endIndex + 1u;
-  ModelPtr& model = impl.mModel;
+  ModelPtr&            model           = impl.mModel;
 
-  if (Controller::NO_OPERATION != (Controller::GET_LINE_BREAKS & operations))
+  if(Controller::NO_OPERATION != (Controller::GET_LINE_BREAKS & operations))
   {
     // Clear the line break info.
     LineBreakInfo* lineBreakInfoBuffer = model->mLogicalModel->mLineBreakInfo.Begin();
@@ -113,35 +113,35 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
     ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mParagraphInfo);
   }
 
-  if (Controller::NO_OPERATION != (Controller::GET_SCRIPTS & operations))
+  if(Controller::NO_OPERATION != (Controller::GET_SCRIPTS & operations))
   {
     // Clear the scripts.
     ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mScriptRuns);
   }
 
-  if (Controller::NO_OPERATION != (Controller::VALIDATE_FONTS & operations))
+  if(Controller::NO_OPERATION != (Controller::VALIDATE_FONTS & operations))
   {
     // Clear the fonts.
     ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mFontRuns);
   }
 
-  if (0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
+  if(0u != model->mLogicalModel->mBidirectionalParagraphInfo.Count())
   {
-    if (Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
+    if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
     {
       uint32_t startRemoveIndex = model->mLogicalModel->mBidirectionalParagraphInfo.Count();
-      uint32_t endRemoveIndex = startRemoveIndex;
+      uint32_t endRemoveIndex   = startRemoveIndex;
 
       // Clear the bidirectional paragraph info.
       ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mBidirectionalParagraphInfo, startRemoveIndex,
                          endRemoveIndex);
 
       BidirectionalParagraphInfoRun* bidirectionalInfoBuffer =
-          model->mLogicalModel->mBidirectionalParagraphInfo.Begin();
+        model->mLogicalModel->mBidirectionalParagraphInfo.Begin();
       // Free the allocated memory used to store the bidirectional info.
-      for (Vector<BidirectionalParagraphInfoRun>::Iterator it = bidirectionalInfoBuffer + startRemoveIndex,
-                                                           endIt = bidirectionalInfoBuffer + endRemoveIndex;
-           it != endIt; ++it)
+      for(Vector<BidirectionalParagraphInfoRun>::Iterator it    = bidirectionalInfoBuffer + startRemoveIndex,
+                                                          endIt = bidirectionalInfoBuffer + endRemoveIndex;
+          it != endIt; ++it)
       {
         BidirectionalParagraphInfoRun& bidiInfo = *it;
 
@@ -159,19 +159,19 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
                                                        characterDirectionsBuffer + endIndexPlusOne);
     }
 
-    if (Controller::NO_OPERATION != (Controller::REORDER & operations))
+    if(Controller::NO_OPERATION != (Controller::REORDER & operations))
     {
       uint32_t startRemoveIndex = model->mLogicalModel->mBidirectionalLineInfo.Count();
-      uint32_t endRemoveIndex = startRemoveIndex;
+      uint32_t endRemoveIndex   = startRemoveIndex;
       ClearCharacterRuns(startIndex, endIndex, model->mLogicalModel->mBidirectionalLineInfo, startRemoveIndex,
                          endRemoveIndex);
 
       BidirectionalLineInfoRun* bidirectionalLineInfoBuffer = model->mLogicalModel->mBidirectionalLineInfo.Begin();
 
       // Free the allocated memory used to store the conversion table in the bidirectional line info run.
-      for (Vector<BidirectionalLineInfoRun>::Iterator it = bidirectionalLineInfoBuffer + startRemoveIndex,
-                                                      endIt = bidirectionalLineInfoBuffer + endRemoveIndex;
-           it != endIt; ++it)
+      for(Vector<BidirectionalLineInfoRun>::Iterator it    = bidirectionalLineInfoBuffer + startRemoveIndex,
+                                                     endIt = bidirectionalLineInfoBuffer + endRemoveIndex;
+          it != endIt; ++it)
       {
         BidirectionalLineInfoRun& bidiLineInfo = *it;
 
@@ -191,26 +191,26 @@ void ControllerImplDataClearer::ClearCharacterModelData(Controller::Impl& impl, 
 void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, CharacterIndex startIndex,
                                                     CharacterIndex endIndex, Controller::OperationsMask operations)
 {
-  const CharacterIndex endIndexPlusOne = endIndex + 1u;
-  const Length numberOfCharactersRemoved = endIndexPlusOne - startIndex;
-  ModelPtr& model = impl.mModel;
-  TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
+  const CharacterIndex endIndexPlusOne           = endIndex + 1u;
+  const Length         numberOfCharactersRemoved = endIndexPlusOne - startIndex;
+  ModelPtr&            model                     = impl.mModel;
+  TextUpdateInfo&      textUpdateInfo            = impl.mTextUpdateInfo;
 
   // Convert the character index to glyph index before deleting the character to glyph and the glyphs per character
   // buffers.
-  GlyphIndex* charactersToGlyphBuffer = model->mVisualModel->mCharactersToGlyph.Begin();
-  Length* glyphsPerCharacterBuffer = model->mVisualModel->mGlyphsPerCharacter.Begin();
+  GlyphIndex* charactersToGlyphBuffer  = model->mVisualModel->mCharactersToGlyph.Begin();
+  Length*     glyphsPerCharacterBuffer = model->mVisualModel->mGlyphsPerCharacter.Begin();
 
   const GlyphIndex endGlyphIndexPlusOne =
-      *(charactersToGlyphBuffer + endIndex) + *(glyphsPerCharacterBuffer + endIndex);
+    *(charactersToGlyphBuffer + endIndex) + *(glyphsPerCharacterBuffer + endIndex);
   const Length numberOfGlyphsRemoved = endGlyphIndexPlusOne - textUpdateInfo.mStartGlyphIndex;
 
-  if (Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations))
+  if(Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations))
   {
     // Update the character to glyph indices.
-    for (Vector<GlyphIndex>::Iterator it = charactersToGlyphBuffer + endIndexPlusOne,
-                                      endIt = charactersToGlyphBuffer + model->mVisualModel->mCharactersToGlyph.Count();
-         it != endIt; ++it)
+    for(Vector<GlyphIndex>::Iterator it    = charactersToGlyphBuffer + endIndexPlusOne,
+                                     endIt = charactersToGlyphBuffer + model->mVisualModel->mCharactersToGlyph.Count();
+        it != endIt; ++it)
     {
       CharacterIndex& index = *it;
       index -= numberOfGlyphsRemoved;
@@ -232,10 +232,10 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
     CharacterIndex* glyphsToCharactersBuffer = model->mVisualModel->mGlyphsToCharacters.Begin();
 
     // Update the glyph to character indices.
-    for (Vector<CharacterIndex>::Iterator
-             it = glyphsToCharactersBuffer + endGlyphIndexPlusOne,
-             endIt = glyphsToCharactersBuffer + model->mVisualModel->mGlyphsToCharacters.Count();
-         it != endIt; ++it)
+    for(Vector<CharacterIndex>::Iterator
+          it    = glyphsToCharactersBuffer + endGlyphIndexPlusOne,
+          endIt = glyphsToCharactersBuffer + model->mVisualModel->mGlyphsToCharacters.Count();
+        it != endIt; ++it)
     {
       CharacterIndex& index = *it;
       index -= numberOfCharactersRemoved;
@@ -251,7 +251,7 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
                                                    charactersPerGlyphBuffer + endGlyphIndexPlusOne);
 
     // Should pass if mGlyphPositions has already been cleared in Controller::Relayouter::Relayout
-    if (0u != model->mVisualModel->mGlyphPositions.Count())
+    if(0u != model->mVisualModel->mGlyphPositions.Count())
     {
       // Clear the positions buffer.
       Vector2* positionsBuffer = model->mVisualModel->mGlyphPositions.Begin();
@@ -260,16 +260,16 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
     }
   }
 
-  if (Controller::NO_OPERATION != (Controller::LAYOUT & operations))
+  if(Controller::NO_OPERATION != (Controller::LAYOUT & operations))
   {
     // Clear the lines.
     uint32_t startRemoveIndex = model->mVisualModel->mLines.Count();
-    uint32_t endRemoveIndex = startRemoveIndex;
+    uint32_t endRemoveIndex   = startRemoveIndex;
     ClearCharacterRuns(startIndex, endIndex, model->mVisualModel->mLines, startRemoveIndex, endRemoveIndex);
 
     // Will update the glyph runs.
     startRemoveIndex = model->mVisualModel->mLines.Count();
-    endRemoveIndex = startRemoveIndex;
+    endRemoveIndex   = startRemoveIndex;
     ClearGlyphRuns(textUpdateInfo.mStartGlyphIndex, endGlyphIndexPlusOne - 1u, model->mVisualModel->mLines,
                    startRemoveIndex, endRemoveIndex);
 
@@ -280,16 +280,16 @@ void ControllerImplDataClearer::ClearGlyphModelData(Controller::Impl& impl, Char
     model->mVisualModel->mLines.Erase(linesBuffer + startRemoveIndex, linesBuffer + endRemoveIndex);
   }
 
-  if (Controller::NO_OPERATION != (Controller::COLOR & operations))
+  if(Controller::NO_OPERATION != (Controller::COLOR & operations))
   {
-    if (0u != model->mVisualModel->mColorIndices.Count())
+    if(0u != model->mVisualModel->mColorIndices.Count())
     {
       ColorIndex* colorIndexBuffer = model->mVisualModel->mColorIndices.Begin();
       model->mVisualModel->mColorIndices.Erase(colorIndexBuffer + textUpdateInfo.mStartGlyphIndex,
                                                colorIndexBuffer + endGlyphIndexPlusOne);
     }
 
-    if (0u != model->mVisualModel->mBackgroundColorIndices.Count())
+    if(0u != model->mVisualModel->mBackgroundColorIndices.Count())
     {
       ColorIndex* backgroundColorIndexBuffer = model->mVisualModel->mBackgroundColorIndices.Begin();
       model->mVisualModel->mBackgroundColorIndices.Erase(backgroundColorIndexBuffer + textUpdateInfo.mStartGlyphIndex,
@@ -303,7 +303,7 @@ void ControllerImplDataClearer::ClearModelData(Controller::Impl& impl, Character
 {
   TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
 
-  if (textUpdateInfo.mClearAll || ((0u == startIndex) && (textUpdateInfo.mPreviousNumberOfCharacters == endIndex + 1u)))
+  if(textUpdateInfo.mClearAll || ((0u == startIndex) && (textUpdateInfo.mPreviousNumberOfCharacters == endIndex + 1u)))
   {
     ClearFullModelData(impl, operations);
   }
@@ -320,7 +320,7 @@ void ControllerImplDataClearer::ClearModelData(Controller::Impl& impl, Character
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   textUpdateInfo.mEstimatedNumberOfLines =
-      std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count());
+    std::max(model->mVisualModel->mLines.Count(), model->mLogicalModel->mParagraphInfo.Count());
 
   model->mVisualModel->ClearCaches();
 }

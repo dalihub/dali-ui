@@ -110,8 +110,8 @@ public:
   FeatureBuilder& EnableEmboss(bool enableEmboss);
 
   VisualFactoryCache::ShaderType GetShaderType() const;
-  void GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
-  void GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const;
+  void                           GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
+  void                           GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const;
 
   bool IsEnabledMultiColor() const
   {
@@ -136,11 +136,11 @@ public:
 
 private:
   TextMultiColor::Type
-      mTextMultiColor : 2; ///< Whether text has multiple color, or not. default as TextMultiColor::SINGLE_COLOR_TEXT
-  TextEmoji::Type mTextEmoji : 2;     ///< Whether text has emoji, or not. default as TextEmoji::NO_EMOJI
-  TextStyle::Type mTextStyle : 2;     ///< Whether text has style, or not. default as TextStyle::NO_STYLES
-  TextOverlay::Type mTextOverlay : 2; ///< Whether text has overlay style, or not. default as TextOverlay::NO_OVERLAY
-  TextEmboss::Type mTextEmboss : 2;   ///< Whether text has emboss style, or not. default as TextEmboss::NO_EMBOSS
+                    mTextMultiColor : 2; ///< Whether text has multiple color, or not. default as TextMultiColor::SINGLE_COLOR_TEXT
+  TextEmoji::Type   mTextEmoji : 2;      ///< Whether text has emoji, or not. default as TextEmoji::NO_EMOJI
+  TextStyle::Type   mTextStyle : 2;      ///< Whether text has style, or not. default as TextStyle::NO_STYLES
+  TextOverlay::Type mTextOverlay : 2;    ///< Whether text has overlay style, or not. default as TextOverlay::NO_OVERLAY
+  TextEmboss::Type  mTextEmboss : 2;     ///< Whether text has emboss style, or not. default as TextEmboss::NO_EMBOSS
 };
 
 } // namespace TextVisualShaderFeature

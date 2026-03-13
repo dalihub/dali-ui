@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layout-manager.h>
@@ -52,7 +52,7 @@ LayoutImplPtr LayoutImpl::New()
 }
 
 LayoutImpl::LayoutImpl()
-  : ViewImpl()
+: ViewImpl()
 {
 }
 
@@ -82,10 +82,10 @@ LayoutManager* LayoutImpl::CreateLayoutManager()
 
 void LayoutImpl::EnsureLayoutManager()
 {
-  if (!HasLayoutManager())
+  if(!HasLayoutManager())
   {
     LayoutManager* manager = CreateLayoutManager();
-    if (manager)
+    if(manager)
     {
       SetLayoutManager(manager);
     }

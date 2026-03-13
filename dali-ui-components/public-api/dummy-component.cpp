@@ -19,8 +19,8 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-components/public-api/dummy-component.h>
 #include <dali-ui-components/internal/dummy-component-impl.h>
+#include <dali-ui-components/public-api/dummy-component.h>
 
 namespace Dali
 {
@@ -38,12 +38,12 @@ DummyComponent DummyComponent::New()
 }
 
 DummyComponent::DummyComponent(const DummyComponent& DummyComponent)
-  : View(DummyComponent)
+: View(DummyComponent)
 {
 }
 
 DummyComponent::DummyComponent(DummyComponent&& rhs) noexcept
-  : View(std::move(rhs))
+: View(std::move(rhs))
 {
 }
 
@@ -53,7 +53,7 @@ DummyComponent::~DummyComponent()
 
 DummyComponent& DummyComponent::operator=(const DummyComponent& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Ui::Control::operator=(handle);
   }
@@ -69,12 +69,12 @@ DummyComponent& DummyComponent::operator=(DummyComponent&& rhs) noexcept
 DummyComponent DummyComponent::DownCast(BaseHandle handle)
 {
   DummyComponent result;
-  Ui::Control control = Ui::Control::DownCast(handle);
-  if (control)
+  Ui::Control    control = Ui::Control::DownCast(handle);
+  if(control)
   {
-    CustomActorImpl& customImpl = control.GetImplementation();
-    Internal::DummyComponentImpl* impl = dynamic_cast<Internal::DummyComponentImpl*>(&customImpl);
-    if (impl)
+    CustomActorImpl&              customImpl = control.GetImplementation();
+    Internal::DummyComponentImpl* impl       = dynamic_cast<Internal::DummyComponentImpl*>(&customImpl);
+    if(impl)
     {
       result = DummyComponent(customImpl.GetOwner());
     }
@@ -83,12 +83,12 @@ DummyComponent DummyComponent::DownCast(BaseHandle handle)
 }
 
 DummyComponent::DummyComponent(Internal::DummyComponentImpl& implementation)
-  : View(implementation)
+: View(implementation)
 {
 }
 
 DummyComponent::DummyComponent(Dali::Internal::CustomActor* internal)
-  : View(internal)
+: View(internal)
 {
   VerifyCustomActorPointer<Internal::DummyComponentImpl>(internal);
 }

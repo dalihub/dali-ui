@@ -55,8 +55,8 @@ public:
 protected:
   std::vector<GridLength> mRowDefinitions;
   std::vector<GridLength> mColumnDefinitions;
-  float mRowSpacing;
-  float mColumnSpacing;
+  float                   mRowSpacing;
+  float                   mColumnSpacing;
 };
 
 } // namespace Integration

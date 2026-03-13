@@ -17,8 +17,8 @@
  *
  */
 
-#include <dali/public-api/events/key-event.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali/public-api/events/key-event.h>
 
 namespace Dali
 {

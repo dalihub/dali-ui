@@ -16,10 +16,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/type-registry.h>
-#include <dali/devel-api/object/property-helper-devel.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-elements/internal/dummy-element-impl.h>
@@ -39,7 +39,7 @@ DummyElementImplPtr DummyElementImpl::New()
 }
 
 DummyElementImpl::DummyElementImpl()
-  : ViewImpl()
+: ViewImpl()
 {
 }
 

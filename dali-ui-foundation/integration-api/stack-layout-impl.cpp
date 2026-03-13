@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/stack-layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -49,9 +49,9 @@ StackLayoutImplPtr StackLayoutImpl::New(StackOrientation orientation)
 }
 
 StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)
-  : LayoutImpl(),
-    mOrientation(orientation),
-    mSpacing(0.0f)
+: LayoutImpl(),
+  mOrientation(orientation),
+  mSpacing(0.0f)
 {
 }
 
@@ -61,13 +61,13 @@ StackLayoutImpl::~StackLayoutImpl()
 
 void StackLayoutImpl::SetOrientation(StackOrientation orientation)
 {
-  if (mOrientation != orientation)
+  if(mOrientation != orientation)
   {
     mOrientation = orientation;
 
     // Update layout manager if it exists
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<StackLayoutManager*>(manager)->SetOrientation(orientation);
     }
@@ -83,13 +83,13 @@ StackOrientation StackLayoutImpl::GetOrientation() const
 
 void StackLayoutImpl::SetSpacing(float spacing)
 {
-  if (mSpacing != spacing)
+  if(mSpacing != spacing)
   {
     mSpacing = spacing;
 
     // Update layout manager if it exists
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<StackLayoutManager*>(manager)->SetSpacing(spacing);
     }

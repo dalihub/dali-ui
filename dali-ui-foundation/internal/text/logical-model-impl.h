@@ -254,28 +254,28 @@ private:
   LogicalModel& operator=(const LogicalModel& handle);
 
 public:
-  Vector<Character> mText;
-  Vector<ScriptRun> mScriptRuns;
-  Vector<FontRun> mFontRuns;
-  Vector<ColorRun> mColorRuns;
-  Vector<ColorRun> mBackgroundColorRuns;
-  Vector<FontDescriptionRun> mFontDescriptionRuns;
-  Vector<LineBreakInfo> mLineBreakInfo;
-  Vector<ParagraphRun> mParagraphInfo;
+  Vector<Character>                     mText;
+  Vector<ScriptRun>                     mScriptRuns;
+  Vector<FontRun>                       mFontRuns;
+  Vector<ColorRun>                      mColorRuns;
+  Vector<ColorRun>                      mBackgroundColorRuns;
+  Vector<FontDescriptionRun>            mFontDescriptionRuns;
+  Vector<LineBreakInfo>                 mLineBreakInfo;
+  Vector<ParagraphRun>                  mParagraphInfo;
   Vector<BidirectionalParagraphInfoRun> mBidirectionalParagraphInfo;
-  Vector<CharacterDirection> mCharacterDirections; ///< For each character, whether is right to left. ( @e flase is left
-                                                   ///< to right, @e true right to left ).
+  Vector<CharacterDirection>            mCharacterDirections; ///< For each character, whether is right to left. ( @e flase is left
+                                                              ///< to right, @e true right to left ).
   Vector<BidirectionalLineInfoRun> mBidirectionalLineInfo;
-  Vector<EmbeddedItem> mEmbeddedItems;
-  Vector<Anchor> mAnchors;
-  Vector<UnderlinedCharacterRun> mUnderlinedCharacterRuns; ///< The underlined character run from markup-processor
+  Vector<EmbeddedItem>             mEmbeddedItems;
+  Vector<Anchor>                   mAnchors;
+  Vector<UnderlinedCharacterRun>   mUnderlinedCharacterRuns; ///< The underlined character run from markup-processor
   Vector<StrikethroughCharacterRun>
-      mStrikethroughCharacterRuns; ///< The strikethrough character run from markup-processor
+    mStrikethroughCharacterRuns; ///< The strikethrough character run from markup-processor
   Vector<BoundedParagraphRun>
-      mBoundedParagraphRuns; ///< The bounded paragraph is used to handle a paragraph mark-up tag and it's attributes.
-                             ///< Like TextAlign, TextDirection, TextIndent, LineHeight, etc.
+    mBoundedParagraphRuns; ///< The bounded paragraph is used to handle a paragraph mark-up tag and it's attributes.
+                           ///< Like TextAlign, TextDirection, TextIndent, LineHeight, etc.
   Vector<CharacterSpacingCharacterRun>
-      mCharacterSpacingCharacterRuns; ///< The character-spacing character run from markup-processor.
+    mCharacterSpacingCharacterRuns; ///< The character-spacing character run from markup-processor.
 
   Property::Map mVariationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
 

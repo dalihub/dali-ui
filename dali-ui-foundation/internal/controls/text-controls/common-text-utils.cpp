@@ -44,7 +44,7 @@ bool ValidateRange(const std::string& string, std::size_t begin, std::size_t end
 {
   auto size = string.size();
 
-  if (end <= begin || begin >= size || end > size)
+  if(end <= begin || begin >= size || end > size)
   {
     return false;
   }
@@ -64,31 +64,31 @@ Rect<float> CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, Text
 
   GetTextGeometry(model, startIndex, endIndex, sizeList, positionList);
 
-  if (sizeList.Empty() || sizeList.Size() != positionList.Size())
+  if(sizeList.Empty() || sizeList.Size() != positionList.Size())
   {
     return {0, 0, 0, 0};
   }
 
   auto controlWidth = model->mVisualModel->mControlSize.width;
-  auto minX = positionList[0].x;
-  auto minY = positionList[0].y;
-  auto maxRight = positionList[0].x + sizeList[0].x;
-  auto maxBottom = positionList[0].y + sizeList[0].y;
+  auto minX         = positionList[0].x;
+  auto minY         = positionList[0].y;
+  auto maxRight     = positionList[0].x + sizeList[0].x;
+  auto maxBottom    = positionList[0].y + sizeList[0].y;
 
-  for (unsigned int i = 1; i < sizeList.Size(); i++)
+  for(unsigned int i = 1; i < sizeList.Size(); i++)
   {
-    minX = std::min(minX, positionList[i].x);
-    minY = std::min(minY, positionList[i].y);
-    maxRight = std::max(maxRight, positionList[i].x + sizeList[i].x);
+    minX      = std::min(minX, positionList[i].x);
+    minY      = std::min(minY, positionList[i].y);
+    maxRight  = std::max(maxRight, positionList[i].x + sizeList[i].x);
     maxBottom = std::max(maxBottom, positionList[i].y + sizeList[i].y);
   }
 
-  if (minX < 0.0f)
+  if(minX < 0.0f)
   {
     minX = 0.0f;
   }
 
-  if (maxRight > controlWidth)
+  if(maxRight > controlWidth)
   {
     maxRight = controlWidth;
   }
@@ -99,14 +99,14 @@ Rect<float> CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, Text
 void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::ControllerPtr controller,
                                                      std::vector<Ui::TextAnchor>& anchorActors)
 {
-  for (auto& anchorActor : anchorActors)
+  for(auto& anchorActor : anchorActors)
   {
     parent.Remove(anchorActor);
   }
-  if (Dali::Accessibility::IsUp())
+  if(Dali::Accessibility::IsUp())
   {
     controller->GetAnchorActors(anchorActors);
-    for (auto& anchorActor : anchorActors)
+    for(auto& anchorActor : anchorActors)
     {
       parent.Add(anchorActor);
     }
@@ -116,41 +116,41 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
 void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                                  Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                                  Actor& backgroundActor, Actor& cursorLayerActor, Ui::Control& stencil,
-                                 std::vector<Actor>& clippingDecorationActors,
-                                 std::vector<Ui::TextAnchor>& anchorActors,
+                                 std::vector<Actor>&              clippingDecorationActors,
+                                 std::vector<Ui::TextAnchor>&     anchorActors,
                                  Text::Controller::UpdateTextType updateTextType)
 {
   Actor newRenderableActor;
 
-  if (Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType))
+  if(Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType))
   {
-    if (renderer)
+    if(renderer)
     {
       newRenderableActor = renderer->Render(controller->GetView(), textActor,
                                             Property::INVALID_INDEX, // Animatable property not supported
                                             alignmentOffset, DepthIndex::CONTENT);
     }
 
-    if (renderableActor != newRenderableActor)
+    if(renderableActor != newRenderableActor)
     {
       UnparentAndReset(backgroundActor);
       UnparentAndReset(renderableActor);
       renderableActor = newRenderableActor;
 
-      if (renderableActor)
+      if(renderableActor)
       {
         backgroundActor = controller->CreateBackgroundActor();
       }
     }
   }
 
-  if (renderableActor)
+  if(renderableActor)
   {
     const Vector2& scrollOffset = controller->GetTextModel()->GetScrollPosition();
 
     float renderableActorPositionX, renderableActorPositionY;
 
-    if (stencil)
+    if(stencil)
     {
       renderableActorPositionX = scrollOffset.x + alignmentOffset;
       renderableActorPositionY = scrollOffset.y;
@@ -162,8 +162,8 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
       // Support Right-To-Left of padding
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-          textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
-      if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+        textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
       {
         std::swap(padding.start, padding.end);
       }
@@ -179,13 +179,13 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
     Actor highlightActor;
 
-    for (std::vector<Actor>::iterator it = clippingDecorationActors.begin(), endIt = clippingDecorationActors.end();
-         it != endIt; ++it)
+    for(std::vector<Actor>::iterator it = clippingDecorationActors.begin(), endIt = clippingDecorationActors.end();
+        it != endIt; ++it)
     {
       self.Add(*it);
       it->LowerToBottom();
 
-      if (it->GetProperty<std::string>(Dali::Actor::Property::NAME) == "HighlightActor")
+      if(it->GetProperty<std::string>(Dali::Actor::Property::NAME) == "HighlightActor")
       {
         highlightActor = *it;
       }
@@ -194,14 +194,14 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
     self.Add(renderableActor);
 
-    if (backgroundActor)
+    if(backgroundActor)
     {
-      if (decorator && decorator->IsHighlightVisible())
+      if(decorator && decorator->IsHighlightVisible())
       {
         self.Add(backgroundActor);
         backgroundActor.SetProperty(
-            Actor::Property::POSITION,
-            Vector2(renderableActorPositionX, renderableActorPositionY)); // In text field's coords.
+          Actor::Property::POSITION,
+          Vector2(renderableActorPositionX, renderableActorPositionY)); // In text field's coords.
         backgroundActor.LowerBelow(highlightActor);
       }
       else
@@ -212,7 +212,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
       }
     }
 
-    if (cursorLayerActor)
+    if(cursorLayerActor)
     {
       cursorLayerActor.RaiseToTop();
     }
@@ -241,12 +241,12 @@ std::size_t TextControlAccessible::GetCursorOffset() const
 Rect<float> TextControlAccessible::GetRangeExtents(std::size_t startOffset, std::size_t endOffset,
                                                    Accessibility::CoordinateType type)
 {
-  if (!ValidateRange(GetWholeText(), startOffset, endOffset))
+  if(!ValidateRange(GetWholeText(), startOffset, endOffset))
   {
     return {0, 0, 0, 0};
   }
 
-  auto rect = GetTextController()->GetTextBoundingRectangle(startOffset, endOffset - 1);
+  auto rect    = GetTextController()->GetTextBoundingRectangle(startOffset, endOffset - 1);
   auto extents = GetExtents(type);
 
   rect.x += extents.x;
@@ -258,15 +258,15 @@ Rect<float> TextControlAccessible::GetRangeExtents(std::size_t startOffset, std:
 Accessibility::Range TextControlAccessible::GetRangeOfSelection(std::size_t selectionIndex) const
 {
   // Since DALi supports only one selection, indices other than 0 are ignored
-  if (selectionIndex > 0)
+  if(selectionIndex > 0)
   {
     return {};
   }
 
-  auto indices = GetTextController()->GetSelectionIndexes();
+  auto indices     = GetTextController()->GetSelectionIndexes();
   auto startOffset = static_cast<std::size_t>(indices.first);
-  auto endOffset = static_cast<std::size_t>(indices.second);
-  auto text = GetText(startOffset, endOffset);
+  auto endOffset   = static_cast<std::size_t>(indices.second);
+  auto text        = GetText(startOffset, endOffset);
 
   return {startOffset, endOffset, std::move(text)};
 }
@@ -275,20 +275,20 @@ std::string TextControlAccessible::GetText(std::size_t startOffset, std::size_t 
 {
   auto text = GetWholeText();
 
-  if (!ValidateRange(text, startOffset, endOffset))
+  if(!ValidateRange(text, startOffset, endOffset))
   {
     return {};
   }
 
-  if (IsHiddenInput())
+  if(IsHiddenInput())
   {
     std::uint32_t substituteCharacterUtf32 = GetSubstituteCharacter();
-    std::string substituteCharacterUtf8;
-    std::string substituteText;
+    std::string   substituteCharacterUtf8;
+    std::string   substituteText;
 
     Ui::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1, substituteCharacterUtf8);
 
-    while (substituteText.length() < endOffset - startOffset)
+    while(substituteText.length() < endOffset - startOffset)
     {
       substituteText.append(substituteCharacterUtf8);
     }
@@ -299,30 +299,30 @@ std::string TextControlAccessible::GetText(std::size_t startOffset, std::size_t 
   return text.substr(startOffset, endOffset - startOffset);
 }
 
-Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset,
+Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t                 offset,
                                                             Accessibility::TextBoundary boundary) const
 {
   Accessibility::Range range{};
 
-  if (IsHiddenInput())
+  if(IsHiddenInput())
   {
     // Returning empty object, as there is no possibility to parse the textfield
     // when its content is hidden.
     return range;
   }
 
-  auto text = GetWholeText();
+  auto text     = GetWholeText();
   auto textSize = text.size();
 
-  switch (boundary)
+  switch(boundary)
   {
     case Dali::Accessibility::TextBoundary::CHARACTER:
     {
-      if (offset < textSize)
+      if(offset < textSize)
       {
-        range.content = text[offset];
+        range.content     = text[offset];
         range.startOffset = offset;
-        range.endOffset = offset + 1;
+        range.endOffset   = offset + 1;
       }
       break;
     }
@@ -332,7 +332,7 @@ Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset,
     {
       std::vector<char> breaks(textSize, '\0');
 
-      if (boundary == Dali::Accessibility::TextBoundary::WORD)
+      if(boundary == Dali::Accessibility::TextBoundary::WORD)
       {
         TextAbstraction::Segmentation::Get().GetWordBreakPositionsUtf8(reinterpret_cast<const uint8_t*>(text.c_str()),
                                                                        textSize, breaks.data());
@@ -343,15 +343,15 @@ Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset,
                                                                        textSize, breaks.data());
       }
 
-      std::size_t index = 0u;
+      std::size_t index   = 0u;
       std::size_t counter = 0u;
 
-      while (index < textSize && counter <= offset)
+      while(index < textSize && counter <= offset)
       {
         auto start = index;
-        if (breaks[index])
+        if(breaks[index])
         {
-          while (breaks[index])
+          while(breaks[index])
           {
             index++;
           }
@@ -359,24 +359,24 @@ Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset,
         }
         else
         {
-          if (boundary == Dali::Accessibility::TextBoundary::WORD)
+          if(boundary == Dali::Accessibility::TextBoundary::WORD)
           {
             index++;
           }
-          if (boundary == Dali::Accessibility::TextBoundary::LINE)
+          if(boundary == Dali::Accessibility::TextBoundary::LINE)
           {
             counter++;
           }
         }
 
-        if ((counter > 0) && ((counter - 1) == offset))
+        if((counter > 0) && ((counter - 1) == offset))
         {
-          range.content = text.substr(start, index - start + 1);
+          range.content     = text.substr(start, index - start + 1);
           range.startOffset = start;
-          range.endOffset = index + 1;
+          range.endOffset   = index + 1;
         }
 
-        if (boundary == Dali::Accessibility::TextBoundary::LINE)
+        if(boundary == Dali::Accessibility::TextBoundary::LINE)
         {
           index++;
         }
@@ -398,7 +398,7 @@ Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset,
 bool TextControlAccessible::RemoveSelection(std::size_t selectionIndex)
 {
   // Since DALi supports only one selection, indices other than 0 are ignored
-  if (selectionIndex > 0)
+  if(selectionIndex > 0)
   {
     return false;
   }
@@ -417,7 +417,7 @@ bool TextControlAccessible::SetRangeOfSelection(std::size_t selectionIndex, std:
                                                 std::size_t endOffset)
 {
   // Since DALi supports only one selection, indices other than 0 are ignored
-  if (selectionIndex > 0)
+  if(selectionIndex > 0)
   {
     return false;
   }
@@ -431,7 +431,7 @@ bool TextControlAccessible::SetRangeOfSelection(std::size_t selectionIndex, std:
 
 Accessibility::Accessible* TextControlAccessible::GetLink(std::int32_t linkIndex) const
 {
-  if (linkIndex < 0 || linkIndex >= GetLinkCount())
+  if(linkIndex < 0 || linkIndex >= GetLinkCount())
   {
     return nullptr;
   }
@@ -463,10 +463,10 @@ std::string TextControlAccessible::GetWholeText() const
 std::string TextControlAccessible::GetCurrentPlaceholderText() const
 {
   auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
-  bool hasFocus = Self() == focusControl;
+  bool hasFocus     = Self() == focusControl;
 
   Ui::Text::Controller::PlaceholderType placeholderType =
-      hasFocus ? Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
+    hasFocus ? Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
 
   std::string placeholderText;
 
@@ -495,12 +495,12 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
 {
   using Dali::Accessibility::State;
 
-  auto states = DevelControl::ControlAccessible::CalculateStates();
+  auto states       = DevelControl::ControlAccessible::CalculateStates();
   auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
 
-  states[State::EDITABLE] = true;
+  states[State::EDITABLE]  = true;
   states[State::FOCUSABLE] = true;
-  states[State::FOCUSED] = (Self() == focusControl);
+  states[State::FOCUSED]   = (Self() == focusControl);
 
   return states;
 }
@@ -512,7 +512,7 @@ std::size_t EditableTextControlAccessible::GetCursorOffset() const
 
 bool EditableTextControlAccessible::SetCursorOffset(std::size_t offset)
 {
-  if (offset > GetCharacterCount())
+  if(offset > GetCharacterCount())
   {
     return false;
   }
@@ -527,7 +527,7 @@ bool EditableTextControlAccessible::CopyText(std::size_t startPosition, std::siz
 {
   auto text = GetWholeText();
 
-  if (!ValidateRange(text, startPosition, endPosition))
+  if(!ValidateRange(text, startPosition, endPosition))
   {
     return false;
   }
@@ -539,7 +539,7 @@ bool EditableTextControlAccessible::CopyText(std::size_t startPosition, std::siz
 
 bool EditableTextControlAccessible::CutText(std::size_t startPosition, std::size_t endPosition)
 {
-  if (!CopyText(startPosition, endPosition))
+  if(!CopyText(startPosition, endPosition))
   {
     return false;
   }
@@ -551,7 +551,7 @@ bool EditableTextControlAccessible::DeleteText(std::size_t startPosition, std::s
 {
   auto text = GetWholeText();
 
-  if (!ValidateRange(text, startPosition, endPosition))
+  if(!ValidateRange(text, startPosition, endPosition))
   {
     return false;
   }
@@ -563,7 +563,7 @@ bool EditableTextControlAccessible::InsertText(std::size_t startPosition, std::s
 {
   auto text = GetWholeText();
 
-  if (!ValidateRange(text, startPosition, startPosition + 1) && !(startPosition == text.size()))
+  if(!ValidateRange(text, startPosition, startPosition + 1) && !(startPosition == text.size()))
   {
     return false;
   }

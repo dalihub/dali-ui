@@ -56,22 +56,22 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 
 // stop behavior
 DALI_ENUM_TO_STRING_TABLE_BEGIN(STOP_BEHAVIOR)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, CURRENT_FRAME)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, FIRST_FRAME)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, LAST_FRAME)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, CURRENT_FRAME)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, FIRST_FRAME)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, LAST_FRAME)
 DALI_ENUM_TO_STRING_TABLE_END(STOP_BEHAVIOR)
 
 // looping mode
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOOPING_MODE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, RESTART)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, AUTO_REVERSE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, RESTART)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, AUTO_REVERSE)
 DALI_ENUM_TO_STRING_TABLE_END(LOOPING_MODE)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 constexpr float MINIMUM_FRAME_SPEED_FACTOR(0.01f);
@@ -80,24 +80,24 @@ constexpr float MAXIMUM_FRAME_SPEED_FACTOR(100.0f);
 struct NameIndexMatch
 {
   const char* const name;
-  Property::Index index;
+  Property::Index   index;
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-    {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
-    {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
-    {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
-    {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
-    {LOOP_COUNT_NAME, Ui::DevelImageVisual::Property::LOOP_COUNT},
-    {PLAY_RANGE_NAME, Ui::DevelImageVisual::Property::PLAY_RANGE},
-    {STOP_BEHAVIOR_NAME, Ui::DevelImageVisual::Property::STOP_BEHAVIOR},
-    {LOOPING_MODE_NAME, Ui::DevelImageVisual::Property::LOOPING_MODE},
-    {REDRAW_IN_SCALING_DOWN_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN},
-    {REDRAW_IN_SCALING_UP_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP},
-    {ENABLE_FRAME_CACHE, Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE},
-    {NOTIFY_AFTER_RASTERIZATION, Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION},
-    {FRAME_SPEED_FACTOR, Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR},
-    {RENDER_SCALE_NAME, Ui::DevelImageVisual::Property::RENDER_SCALE},
+  {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
+  {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
+  {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
+  {LOOP_COUNT_NAME, Ui::DevelImageVisual::Property::LOOP_COUNT},
+  {PLAY_RANGE_NAME, Ui::DevelImageVisual::Property::PLAY_RANGE},
+  {STOP_BEHAVIOR_NAME, Ui::DevelImageVisual::Property::STOP_BEHAVIOR},
+  {LOOPING_MODE_NAME, Ui::DevelImageVisual::Property::LOOPING_MODE},
+  {REDRAW_IN_SCALING_DOWN_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN},
+  {REDRAW_IN_SCALING_UP_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP},
+  {ENABLE_FRAME_CACHE, Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE},
+  {NOTIFY_AFTER_RASTERIZATION, Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION},
+  {FRAME_SPEED_FACTOR, Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR},
+  {RENDER_SCALE_NAME, Ui::DevelImageVisual::Property::RENDER_SCALE},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -107,18 +107,18 @@ Debug::Filter* gVectorAnimationLogFilter = Debug::Filter::New(Debug::NoLogging, 
 
 } // unnamed namespace
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& factoryCache,
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&       factoryCache,
                                                             ImageVisualShaderFactory& shaderFactory,
                                                             const VisualUrl& imageUrl, const Property::Map& properties)
 {
   AnimatedVectorImageVisualPtr visual(
-      new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
+    new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
   visual->SetProperties(properties);
   visual->Initialize();
   return visual;
 }
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& factoryCache,
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&       factoryCache,
                                                             ImageVisualShaderFactory& shaderFactory,
                                                             const VisualUrl& imageUrl, ImageDimensions size)
 {
@@ -127,33 +127,33 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
   return visual;
 }
 
-AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache& factoryCache,
+AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       factoryCache,
                                                      ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
                                                      ImageDimensions size)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
-                 static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
-    mImageUrl(imageUrl),
-    mAnimationData(),
-    mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
-    mImageVisualShaderFactory(shaderFactory),
-    mVisualSize(),
-    mVisualScale(Vector2::ONE),
-    mDesiredSize(size),
-    mPlacementActor(),
-    mPlayState(DevelImageVisual::PlayState::STOPPED),
-    mEventCallback(nullptr),
-    mFrameSpeedFactor(1.0f),
-    mRenderScale(1.0f),
-    mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
-    mLastSentPlayStateId(0u),
-    mRasterizeCompleted(false),
-    mLoadFailed(false),
-    mRendererAdded(false),
-    mRedrawInScalingDown(true),
-    mRedrawInScalingUp(true),
-    mEnableFrameCache(false),
-    mUseNativeImage(false),
-    mNotifyAfterRasterization(false)
+: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
+               static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
+  mImageUrl(imageUrl),
+  mAnimationData(),
+  mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
+  mImageVisualShaderFactory(shaderFactory),
+  mVisualSize(),
+  mVisualScale(Vector2::ONE),
+  mDesiredSize(size),
+  mPlacementActor(),
+  mPlayState(DevelImageVisual::PlayState::STOPPED),
+  mEventCallback(nullptr),
+  mFrameSpeedFactor(1.0f),
+  mRenderScale(1.0f),
+  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
+  mLastSentPlayStateId(0u),
+  mRasterizeCompleted(false),
+  mLoadFailed(false),
+  mRendererAdded(false),
+  mRedrawInScalingDown(true),
+  mRedrawInScalingUp(true),
+  mEnableFrameCache(false),
+  mUseNativeImage(false),
+  mNotifyAfterRasterization(false)
 {
   // the rasterized image is with pre-multiplied alpha format
   mImpl->mFlags |= Visual::Base::Impl::IS_PREMULTIPLIED_ALPHA;
@@ -164,15 +164,15 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache& factory
 
 AnimatedVectorImageVisual::~AnimatedVectorImageVisual()
 {
-  if (Dali::Adaptor::IsAvailable())
+  if(Dali::Adaptor::IsAvailable())
   {
-    if (mImageUrl.IsBufferResource())
+    if(mImageUrl.IsBufferResource())
     {
       TextureManager& textureManager = mFactoryCache.GetTextureManager();
       textureManager.RemoveEncodedImageBuffer(mImageUrl);
     }
 
-    if (mEventCallback)
+    if(mEventCallback)
     {
       mFactoryCache.GetVectorAnimationManager().UnregisterEventCallback(mEventCallback);
       mEventCallback = nullptr;
@@ -186,25 +186,25 @@ AnimatedVectorImageVisual::~AnimatedVectorImageVisual()
 
 void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
 {
-  if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+  if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
   {
     naturalSize.x = mDesiredSize.GetWidth();
     naturalSize.y = mDesiredSize.GetHeight();
   }
-  else if (mVisualSize != Vector2::ZERO)
+  else if(mVisualSize != Vector2::ZERO)
   {
     naturalSize = mVisualSize;
   }
   else
   {
-    if (mLoadFailed && mImpl->mRenderer)
+    if(mLoadFailed && mImpl->mRenderer)
     {
       // Load failed, use broken image size
       auto textureSet = mImpl->mRenderer.GetTextures();
-      if (textureSet && textureSet.GetTextureCount())
+      if(textureSet && textureSet.GetTextureCount())
       {
         auto texture = textureSet.GetTexture(0);
-        if (texture)
+        if(texture)
         {
           naturalSize.x = texture.GetWidth();
           naturalSize.y = texture.GetHeight();
@@ -230,7 +230,7 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::Visual::Property::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
-  if (mImageUrl.IsValid())
+  if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
   }
@@ -282,7 +282,7 @@ void AnimatedVectorImageVisual::DoCreateInstancePropertyMap(Property::Map& map) 
 void AnimatedVectorImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 {
   // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if (!preMultiplied)
+  if(!preMultiplied)
   {
     DALI_LOG_WARNING("Note : AnimatedVectorVisual cannot disable PreMultipliedAlpha\n");
   }
@@ -291,18 +291,18 @@ void AnimatedVectorImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 void AnimatedVectorImageVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // url already passed in from constructor
-  for (Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
+  for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if (keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
     else
     {
-      for (int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
+      for(int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
       {
-        if (keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
+        if(keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
         {
           DoSetProperty(NAME_INDEX_MATCH_TABLE[i].index, keyValue.second);
           break;
@@ -316,12 +316,12 @@ void AnimatedVectorImageVisual::DoSetProperties(const Property::Map& propertyMap
 
 void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Property::Value& value)
 {
-  switch (index)
+  switch(index)
   {
     case Ui::DevelImageVisual::Property::LOOP_COUNT:
     {
       int32_t loopCount;
-      if (value.Get(loopCount))
+      if(value.Get(loopCount))
       {
         mAnimationData.loopCount = loopCount;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_LOOP_COUNT;
@@ -331,15 +331,15 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::PLAY_RANGE:
     {
       const Property::Array* array = value.GetArray();
-      if (array)
+      if(array)
       {
         mAnimationData.playRange = *array;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_RANGE;
       }
-      else if (value.GetType() == Property::STRING)
+      else if(value.GetType() == Property::STRING)
       {
         std::string markerName;
-        if (value.Get(markerName))
+        if(value.Get(markerName))
         {
           Property::Array array;
           array.Add(markerName);
@@ -352,7 +352,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::STOP_BEHAVIOR:
     {
       int32_t stopBehavior = mAnimationData.stopBehavior;
-      if (Scripting::GetEnumerationProperty(value, STOP_BEHAVIOR_TABLE, STOP_BEHAVIOR_TABLE_COUNT, stopBehavior))
+      if(Scripting::GetEnumerationProperty(value, STOP_BEHAVIOR_TABLE, STOP_BEHAVIOR_TABLE_COUNT, stopBehavior))
       {
         mAnimationData.stopBehavior = DevelImageVisual::StopBehavior::Type(stopBehavior);
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_STOP_BEHAVIOR;
@@ -362,7 +362,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::LOOPING_MODE:
     {
       int32_t loopingMode = mAnimationData.loopingMode;
-      if (Scripting::GetEnumerationProperty(value, LOOPING_MODE_TABLE, LOOPING_MODE_TABLE_COUNT, loopingMode))
+      if(Scripting::GetEnumerationProperty(value, LOOPING_MODE_TABLE, LOOPING_MODE_TABLE_COUNT, loopingMode))
       {
         mAnimationData.loopingMode = DevelImageVisual::LoopingMode::Type(loopingMode);
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_LOOPING_MODE;
@@ -372,7 +372,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN:
     {
       bool redraw;
-      if (value.Get(redraw))
+      if(value.Get(redraw))
       {
         mRedrawInScalingDown = redraw;
       }
@@ -381,7 +381,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP:
     {
       bool redraw;
-      if (value.Get(redraw))
+      if(value.Get(redraw))
       {
         mRedrawInScalingUp = redraw;
       }
@@ -390,9 +390,9 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
-      if (value.Get(sync))
+      if(value.Get(sync))
       {
-        if (sync)
+        if(sync)
         {
           mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
         }
@@ -406,7 +406,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::ImageVisual::Property::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
-      if (value.Get(desiredWidth))
+      if(value.Get(desiredWidth))
       {
         mDesiredSize.SetWidth(desiredWidth);
       }
@@ -416,7 +416,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::ImageVisual::Property::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
-      if (value.Get(desiredHeight))
+      if(value.Get(desiredHeight))
       {
         mDesiredSize.SetHeight(desiredHeight);
       }
@@ -426,8 +426,8 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::ImageVisual::Property::RELEASE_POLICY:
     {
       int releasePolicy = static_cast<int>(mReleasePolicy);
-      if (DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
-                                                        releasePolicy)))
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
+                                                       releasePolicy)))
       {
         mReleasePolicy = Ui::ImageVisual::ReleasePolicy::Type(releasePolicy);
       }
@@ -437,10 +437,10 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE:
     {
       bool enableFrameCache = false;
-      if (value.Get(enableFrameCache))
+      if(value.Get(enableFrameCache))
       {
         mEnableFrameCache = enableFrameCache;
-        if (mVectorAnimationTask)
+        if(mVectorAnimationTask)
         {
           mVectorAnimationTask->KeepRasterizedBuffer(mEnableFrameCache);
         }
@@ -451,9 +451,9 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION:
     {
       bool notifyAfterRasterization = false;
-      if (value.Get(notifyAfterRasterization))
+      if(value.Get(notifyAfterRasterization))
       {
-        if (mNotifyAfterRasterization != notifyAfterRasterization)
+        if(mNotifyAfterRasterization != notifyAfterRasterization)
         {
           mNotifyAfterRasterization = notifyAfterRasterization;
 
@@ -467,12 +467,12 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR:
     {
       float frameSpeedFactor = 1.0f;
-      if (value.Get(frameSpeedFactor))
+      if(value.Get(frameSpeedFactor))
       {
         // TODO : Could we remove this limitation?
         Dali::ClampInPlace(frameSpeedFactor, MINIMUM_FRAME_SPEED_FACTOR, MAXIMUM_FRAME_SPEED_FACTOR);
 
-        if (!Dali::Equals(mFrameSpeedFactor, frameSpeedFactor))
+        if(!Dali::Equals(mFrameSpeedFactor, frameSpeedFactor))
         {
           mFrameSpeedFactor = frameSpeedFactor;
 
@@ -486,7 +486,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     case Ui::DevelImageVisual::Property::RENDER_SCALE:
     {
       float renderScale = 1.0f;
-      if (value.Get(renderScale))
+      if(value.Get(renderScale))
       {
         mRenderScale = renderScale;
         SetVectorImageSize();
@@ -500,11 +500,11 @@ void AnimatedVectorImageVisual::OnInitialize(void)
 {
   mVectorAnimationTask->ResourceReadySignal().Connect(this, &AnimatedVectorImageVisual::OnResourceReady);
   mVectorAnimationTask->SetAnimationFinishedCallback(
-      MakeCallback(this, &AnimatedVectorImageVisual::OnAnimationFinished));
+    MakeCallback(this, &AnimatedVectorImageVisual::OnAnimationFinished));
 
   EncodedImageBuffer encodedImageBuffer;
 
-  if (mImageUrl.IsBufferResource())
+  if(mImageUrl.IsBufferResource())
   {
     // Increase reference count of External Resources :
     // EncodedImageBuffer.
@@ -541,7 +541,7 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
   // Hold the weak handle of the placement actor and delay the adding of renderer until the rasterization is finished.
   mPlacementActor = actor;
 
-  if (mLoadFailed)
+  if(mLoadFailed)
   {
     Vector2 imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
     mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize, false);
@@ -561,14 +561,14 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
     actor.InheritedVisibilityChangedSignal().Connect(this,
                                                      &AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged);
 
-    if (mImpl->mEventObserver)
+    if(mImpl->mEventObserver)
     {
       // The visual needs it's size set before it can be rasterized hence request relayout once on stage
       mImpl->mEventObserver->RelayoutRequest(*this);
     }
 
     // Check whether we can re-use latest frame.
-    if (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED && mRasterizeCompleted)
+    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED && mRasterizeCompleted)
     {
       DALI_LOG_DEBUG_INFO("[%p] Reuse cached texture (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
 
@@ -590,7 +590,7 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   StopAnimation();
   TriggerVectorRasterization();
 
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     actor.RemoveRenderer(mImpl->mRenderer);
     mRendererAdded = false;
@@ -605,15 +605,15 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
 
   mPlacementActor.Reset();
 
-  if (mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
+  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
   {
     mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
     // Reset the visual size to zero so that when adding the actor back to stage the rasterization is forced
-    mRasterizeCompleted = false;
-    mVisualSize = Vector2::ZERO;
-    mVisualScale = Vector2::ONE;
-    mAnimationData.width = 0;
+    mRasterizeCompleted   = false;
+    mVisualSize           = Vector2::ZERO;
+    mVisualScale          = Vector2::ONE;
+    mAnimationData.width  = 0;
     mAnimationData.height = 0;
 
     // Remove textureset now.
@@ -626,16 +626,16 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
 
 void AnimatedVectorImageVisual::OnSetTransform()
 {
-  if (mImpl->mRenderer && mImpl->mTransformMapChanged)
+  if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
   }
 
-  if (IsOnScene())
+  if(IsOnScene())
   {
     Vector2 visualSize = mImpl->GetTransformVisualSize(mImpl->mControlSize);
 
-    if (visualSize != mVisualSize)
+    if(visualSize != mVisualSize)
     {
       DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                     "AnimatedVectorImageVisual::OnSetTransform: width = %f, height = %f [%p]\n", visualSize.width,
@@ -645,8 +645,8 @@ void AnimatedVectorImageVisual::OnSetTransform()
 
       SetVectorImageSize();
 
-      if (mPlayState == DevelImageVisual::PlayState::PLAYING &&
-          mAnimationData.playState != DevelImageVisual::PlayState::PLAYING)
+      if(mPlayState == DevelImageVisual::PlayState::PLAYING &&
+         mAnimationData.playState != DevelImageVisual::PlayState::PLAYING)
       {
         mAnimationData.playState = DevelImageVisual::PlayState::PLAYING;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
@@ -659,7 +659,7 @@ void AnimatedVectorImageVisual::OnSetTransform()
 
 void AnimatedVectorImageVisual::UpdateShader()
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     Shader shader = GenerateShader();
     mImpl->mRenderer.SetShader(shader);
@@ -669,11 +669,11 @@ void AnimatedVectorImageVisual::UpdateShader()
 void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const Property::Value& attributes)
 {
   // Check if action is valid for this visual type and perform action if possible
-  switch (actionId)
+  switch(actionId)
   {
     case DevelAnimatedVectorImageVisual::Action::PLAY:
     {
-      if (IsOnScene() && mVisualSize != Vector2::ZERO)
+      if(IsOnScene() && mVisualSize != Vector2::ZERO)
       {
         // Always resend Playing state. If task is already playing, it will be ignored at Rasterize time.
         mAnimationData.playState = DevelImageVisual::PlayState::PLAYING;
@@ -685,7 +685,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
     }
     case DevelAnimatedVectorImageVisual::Action::PAUSE:
     {
-      if (mAnimationData.playState == DevelImageVisual::PlayState::PLAYING)
+      if(mAnimationData.playState == DevelImageVisual::PlayState::PLAYING)
       {
         mAnimationData.playState = DevelImageVisual::PlayState::PAUSED;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
@@ -696,7 +696,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
     }
     case DevelAnimatedVectorImageVisual::Action::STOP:
     {
-      if (mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
+      if(mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
       {
         mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
@@ -708,7 +708,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
     case DevelAnimatedVectorImageVisual::Action::JUMP_TO:
     {
       int32_t frameNumber;
-      if (attributes.Get(frameNumber))
+      if(attributes.Get(frameNumber))
       {
         mAnimationData.currentFrame = frameNumber;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_CURRENT_FRAME;
@@ -719,7 +719,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
     }
     case DevelAnimatedVectorImageVisual::Action::FLUSH:
     {
-      if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+      if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
       {
         DALI_LOG_DEBUG_INFO("[%p] Flush request (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
         SendAnimationData();
@@ -733,12 +733,12 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
 
 void AnimatedVectorImageVisual::OnDoActionExtension(const Property::Index actionId, const Dali::Any& attributes)
 {
-  switch (actionId)
+  switch(actionId)
   {
     case DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY:
     {
       DevelAnimatedVectorImageVisual::DynamicPropertyInfo info =
-          AnyCast<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
+        AnyCast<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
       mAnimationData.dynamicProperties.push_back(info);
       mAnimationData.resendFlag |= VectorAnimationTask::RESEND_DYNAMIC_PROPERTY;
       break;
@@ -755,9 +755,9 @@ void AnimatedVectorImageVisual::OnResourceReady(VectorAnimationTask::ResourceSta
 
   AnimatedVectorImageVisualPtr self = this; // Keep reference until this API finished
 
-  if (status == VectorAnimationTask::ResourceStatus::LOADED)
+  if(status == VectorAnimationTask::ResourceStatus::LOADED)
   {
-    if (mImpl->mEventObserver)
+    if(mImpl->mEventObserver)
     {
       mImpl->mEventObserver->RelayoutRequest(*this);
     }
@@ -767,21 +767,21 @@ void AnimatedVectorImageVisual::OnResourceReady(VectorAnimationTask::ResourceSta
     mRasterizeCompleted = true;
 
     mLoadFailed = status == VectorAnimationTask::ResourceStatus::FAILED ? true : false;
-    if (status == VectorAnimationTask::ResourceStatus::READY)
+    if(status == VectorAnimationTask::ResourceStatus::READY)
     {
       // Texture was ready. Change the shader if we need.
       bool useNativeImage = false;
-      if (mImpl->mRenderer)
+      if(mImpl->mRenderer)
       {
         auto textureSet = mImpl->mRenderer.GetTextures();
-        if (textureSet && textureSet.GetTextureCount() > 0)
+        if(textureSet && textureSet.GetTextureCount() > 0)
         {
           auto texture = textureSet.GetTexture(0u);
-          if (texture)
+          if(texture)
           {
             useNativeImage = DevelTexture::IsNative(texture);
 
-            if (mUseNativeImage != useNativeImage)
+            if(mUseNativeImage != useNativeImage)
             {
               mUseNativeImage = useNativeImage;
               UpdateShader();
@@ -793,9 +793,9 @@ void AnimatedVectorImageVisual::OnResourceReady(VectorAnimationTask::ResourceSta
 
     // If weak handle is holding a placement actor, it is the time to add the renderer to actor.
     Actor actor = mPlacementActor.GetHandle();
-    if (actor && !mRendererAdded)
+    if(actor && !mRendererAdded)
     {
-      if (!mLoadFailed)
+      if(!mLoadFailed)
       {
         actor.AddRenderer(mImpl->mRenderer);
         ResourceReady(Ui::Visual::ResourceStatus::READY);
@@ -821,7 +821,7 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
                       mImageUrl.GetEllipsedUrl().c_str());
 
   // Only send event when animation is finished by the last Play/Pause/Stop request.
-  if (mLastSentPlayStateId != playStateId)
+  if(mLastSentPlayStateId != playStateId)
   {
     return;
   }
@@ -831,19 +831,19 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                 "AnimatedVectorImageVisual::OnAnimationFinished: action state = %d [%p]\n", mPlayState, this);
 
-  if (mPlayState != DevelImageVisual::PlayState::STOPPED)
+  if(mPlayState != DevelImageVisual::PlayState::STOPPED)
   {
     mPlayState = DevelImageVisual::PlayState::STOPPED;
 
     mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
 
-    if (mImpl->mEventObserver)
+    if(mImpl->mEventObserver)
     {
       mImpl->mEventObserver->NotifyVisualEvent(*this, DevelAnimatedVectorImageVisual::Signal::ANIMATION_FINISHED);
     }
   }
 
-  if (!mNotifyAfterRasterization && mImpl->mRenderer)
+  if(!mNotifyAfterRasterization && mImpl->mRenderer)
   {
     mImpl->mRenderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR, DevelRenderer::Rendering::IF_REQUIRED);
   }
@@ -851,9 +851,9 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
 
 void AnimatedVectorImageVisual::SendAnimationData()
 {
-  if (mAnimationData.resendFlag)
+  if(mAnimationData.resendFlag)
   {
-    if (mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
+    if(mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
     {
       // Keep last sent playId. It will be used when we try to emit AnimationFinished signal.
       // The OnAnimationFinished signal what before Play/Pause/Stop action send could be come after action sent.
@@ -865,16 +865,16 @@ void AnimatedVectorImageVisual::SendAnimationData()
     }
     mVectorAnimationTask->SetAnimationData(mAnimationData);
 
-    if (mAnimationData.resendFlag & VectorAnimationTask::RESEND_DYNAMIC_PROPERTY)
+    if(mAnimationData.resendFlag & VectorAnimationTask::RESEND_DYNAMIC_PROPERTY)
     {
       // Remove applied dynamic properties
       mAnimationData.dynamicProperties.clear();
     }
 
-    if (mImpl->mRenderer && ((mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE) ||
-                             (mAnimationData.resendFlag & VectorAnimationTask::RESEND_NOTIFY_AFTER_RASTERIZATION)))
+    if(mImpl->mRenderer && ((mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE) ||
+                            (mAnimationData.resendFlag & VectorAnimationTask::RESEND_NOTIFY_AFTER_RASTERIZATION)))
     {
-      if (!mNotifyAfterRasterization && mPlayState == DevelImageVisual::PlayState::PLAYING)
+      if(!mNotifyAfterRasterization && mPlayState == DevelImageVisual::PlayState::PLAYING)
       {
         // Make rendering behaviour if we don't notify after rasterization, but animation playing.
         mImpl->mRenderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR,
@@ -895,20 +895,20 @@ void AnimatedVectorImageVisual::SendAnimationData()
 void AnimatedVectorImageVisual::SetVectorImageSize()
 {
   uint32_t width, height;
-  if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+  if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
   {
-    width = mDesiredSize.GetWidth();
+    width  = mDesiredSize.GetWidth();
     height = mDesiredSize.GetHeight();
   }
   else
   {
-    width = static_cast<uint32_t>(std::roundf(mVisualSize.width * mVisualScale.width * std::fabs(mRenderScale)));
+    width  = static_cast<uint32_t>(std::roundf(mVisualSize.width * mVisualScale.width * std::fabs(mRenderScale)));
     height = static_cast<uint32_t>(std::roundf(mVisualSize.height * mVisualScale.height * std::fabs(mRenderScale)));
   }
 
-  if (mAnimationData.width != width || mAnimationData.height != height)
+  if(mAnimationData.width != width || mAnimationData.height != height)
   {
-    mAnimationData.width = width;
+    mAnimationData.width  = width;
     mAnimationData.height = height;
     mAnimationData.resendFlag |= VectorAnimationTask::RESEND_SIZE;
   }
@@ -916,7 +916,7 @@ void AnimatedVectorImageVisual::SetVectorImageSize()
 
 void AnimatedVectorImageVisual::StopAnimation()
 {
-  if (mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
+  if(mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
   {
     mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
     mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
@@ -927,13 +927,13 @@ void AnimatedVectorImageVisual::StopAnimation()
 
 void AnimatedVectorImageVisual::TriggerVectorRasterization()
 {
-  if (!mEventCallback && Dali::Adaptor::IsAvailable())
+  if(!mEventCallback && Dali::Adaptor::IsAvailable())
   {
-    mEventCallback = MakeCallback(this, &AnimatedVectorImageVisual::OnProcessEvents);
+    mEventCallback               = MakeCallback(this, &AnimatedVectorImageVisual::OnProcessEvents);
     auto& vectorAnimationManager = mFactoryCache.GetVectorAnimationManager();
     vectorAnimationManager.RegisterEventCallback(mEventCallback);
     Stage::GetCurrent().KeepRendering(0.0f); // Trigger event processing
-    if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
     {
       // Request ProcessEvents on idle to make ensure Processor executed.
       Dali::Adaptor::Get().RequestProcessEventsOnIdle();
@@ -944,18 +944,18 @@ void AnimatedVectorImageVisual::TriggerVectorRasterization()
 void AnimatedVectorImageVisual::OnScaleNotification(PropertyNotification& source)
 {
   Actor actor = mPlacementActor.GetHandle();
-  if (actor)
+  if(actor)
   {
     Vector3 scale = actor.GetProperty<Vector3>(Actor::Property::WORLD_SCALE);
 
-    if ((!Dali::Equals(mVisualScale.width, scale.width) || !Dali::Equals(mVisualScale.height, scale.height)))
+    if((!Dali::Equals(mVisualScale.width, scale.width) || !Dali::Equals(mVisualScale.height, scale.height)))
     {
       bool redrawInScalingDown = mRedrawInScalingDown && (scale.width <= 1.0f || scale.height <= 1.0f);
-      bool redrawInScalingUp = mRedrawInScalingUp && (scale.width >= 1.0f || scale.height >= 1.0f);
+      bool redrawInScalingUp   = mRedrawInScalingUp && (scale.width >= 1.0f || scale.height >= 1.0f);
 
-      if (redrawInScalingDown || redrawInScalingUp)
+      if(redrawInScalingDown || redrawInScalingUp)
       {
-        mVisualScale.width = scale.width;
+        mVisualScale.width  = scale.width;
         mVisualScale.height = scale.height;
 
         DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
@@ -974,13 +974,13 @@ void AnimatedVectorImageVisual::OnScaleNotification(PropertyNotification& source
 void AnimatedVectorImageVisual::OnSizeNotification(PropertyNotification& source)
 {
   Actor actor = mPlacementActor.GetHandle();
-  if (actor)
+  if(actor)
   {
     Vector3 size = actor.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
 
-    if (!Dali::Equals(mVisualSize.width, size.width) || !Dali::Equals(mVisualSize.height, size.height))
+    if(!Dali::Equals(mVisualSize.width, size.width) || !Dali::Equals(mVisualSize.height, size.height))
     {
-      mVisualSize.width = size.width;
+      mVisualSize.width  = size.width;
       mVisualSize.height = size.height;
 
       DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
@@ -997,7 +997,7 @@ void AnimatedVectorImageVisual::OnSizeNotification(PropertyNotification& source)
 
 void AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
 {
-  if (!visible)
+  if(!visible)
   {
     StopAnimation();
     TriggerVectorRasterization();
@@ -1018,14 +1018,14 @@ void AnimatedVectorImageVisual::OnProcessEvents()
 Shader AnimatedVectorImageVisual::GenerateShader() const
 {
   Shader shader;
-  if (IsUsingCustomShader())
+  if(IsUsingCustomShader())
   {
     shader = Shader::New(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
-                             ? mImageVisualShaderFactory.GetVertexShaderSource().data()
-                             : mImpl->GetCustomShaderAt(0)->mVertexShader,
+                           ? mImageVisualShaderFactory.GetVertexShaderSource().data()
+                           : mImpl->GetCustomShaderAt(0)->mVertexShader,
                          mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
-                             ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
-                             : mImpl->GetCustomShaderAt(0)->mFragmentShader,
+                           ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
+                           : mImpl->GetCustomShaderAt(0)->mFragmentShader,
                          mImpl->GetCustomShaderAt(0)->mHints);
 
     shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);
@@ -1037,11 +1037,11 @@ Shader AnimatedVectorImageVisual::GenerateShader() const
   else
   {
     shader = mImageVisualShaderFactory.GetShader(
-        mFactoryCache, ImageVisualShaderFeature::FeatureBuilder()
-                           .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
-                           .EnableBorderline(IsBorderlineRequired())
-                           .SetTextureForFragmentShaderCheck(
-                               mUseNativeImage ? mImpl->mRenderer.GetTextures().GetTexture(0) : Dali::Texture()));
+      mFactoryCache, ImageVisualShaderFeature::FeatureBuilder()
+                       .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
+                       .EnableBorderline(IsBorderlineRequired())
+                       .SetTextureForFragmentShaderCheck(
+                         mUseNativeImage ? mImpl->mRenderer.GetTextures().GetTexture(0) : Dali::Texture()));
   }
   return shader;
 }

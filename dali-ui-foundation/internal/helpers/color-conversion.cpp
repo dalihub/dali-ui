@@ -51,11 +51,11 @@ bool ConvertStringToColor(const std::string& colorString, Vector4& outColor)
 {
   bool success(false);
 
-  if (('#' == colorString[0]) && (7 == colorString.size()))
+  if(('#' == colorString[0]) && (7 == colorString.size()))
   {
     const char* cString = colorString.c_str();
-    outColor = HexStringToVector4(&cString[1]);
-    success = true;
+    outColor            = HexStringToVector4(&cString[1]);
+    success             = true;
   }
 
   return success;
@@ -65,7 +65,7 @@ bool ConvertPropertyToColor(const Property::Value& colorValue, Vector4& outColor
 {
   bool success(false);
 
-  if (Property::VECTOR4 == colorValue.GetType())
+  if(Property::VECTOR4 == colorValue.GetType())
   {
     success = colorValue.Get(outColor);
   }

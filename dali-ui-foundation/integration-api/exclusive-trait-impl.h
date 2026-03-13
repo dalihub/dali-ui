@@ -54,7 +54,6 @@ protected:
   void OnBeforeAttached(TraitId id, View& view) override;
 
 private:
-
   WeakHandle<View> mOwner;
 };
 

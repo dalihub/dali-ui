@@ -18,8 +18,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -139,24 +139,24 @@ public:
   uint32_t GetTapRecognizerTime() const;
 
 private:
-  UiConfigManager() = default;
+  UiConfigManager()  = default;
   ~UiConfigManager() = default;
 
-  UiConfigManager(const UiConfigManager&) = delete;
+  UiConfigManager(const UiConfigManager&)            = delete;
   UiConfigManager& operator=(const UiConfigManager&) = delete;
 
 private:
-  UiConfig mConfig;
+  UiConfig              mConfig;
   ExecutionKeyPredicate mCachedExecutionKeyPredicate;
-  float mCachedScalingFactor;
-  float mCachedDpiFactor;
-  float mCachedScaledDpiFactor;
-  int mCachedDpi;
-  int mCachedBaselineDpi;
-  KeyClickPolicy mCachedKeyClickPolicy;
-  uint32_t mCachedMinLongPressKeyCount;
-  uint32_t mCachedTapRecognizerTime;
-  bool mInitialized{false};
+  float                 mCachedScalingFactor;
+  float                 mCachedDpiFactor;
+  float                 mCachedScaledDpiFactor;
+  int                   mCachedDpi;
+  int                   mCachedBaselineDpi;
+  KeyClickPolicy        mCachedKeyClickPolicy;
+  uint32_t              mCachedMinLongPressKeyCount;
+  uint32_t              mCachedTapRecognizerTime;
+  bool                  mInitialized{false};
 };
 
 } // namespace Integration

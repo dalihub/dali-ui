@@ -531,23 +531,23 @@ private:
   Popup& operator=(const Popup& rhs);
 
 private:
-  Ui::Popup::TouchedOutsideSignalType mTouchedOutsideSignal;
+  Ui::Popup::TouchedOutsideSignalType     mTouchedOutsideSignal;
   Ui::Popup::DisplayStateChangeSignalType mShowingSignal;
   Ui::Popup::DisplayStateChangeSignalType mShownSignal;
   Ui::Popup::DisplayStateChangeSignalType mHidingSignal;
   Ui::Popup::DisplayStateChangeSignalType mHiddenSignal;
 
-  Layer mLayer;                ///< Popup Layer (i.e. Dim backing and PopupBg reside in this).
-  Ui::TableView mPopupLayout;  ///< Popup Background (i.e. dialog reside in this).
-  Ui::Control mBacking;        ///< Backing actor (dim effect).
-  Actor mPreviousFocusedActor; ///< Store the previous focused actor to restore the focus when popup hide.
-  Actor mTailImage;            ///< Stores the tail image.
-  Actor mPopupContainer;       ///< This actor is used to house the background image and the main popup layout.
-  Animation mAnimation;        ///< The current animation in use used to manage display state changing.
-  bool mAlterAddedChild;       ///< Flag used to control whether children are reparented or not.
-  bool mLayoutDirty;           ///< Set to true whenever any property that would require a layout update is modified.
-  Timer mAutoHideTimer;        ///< Used to perform an auto-hide of the popup if desired.
-  bool mTouchTransparent;      ///< Allows all events to pass through the popup.
+  Layer         mLayer;                ///< Popup Layer (i.e. Dim backing and PopupBg reside in this).
+  Ui::TableView mPopupLayout;          ///< Popup Background (i.e. dialog reside in this).
+  Ui::Control   mBacking;              ///< Backing actor (dim effect).
+  Actor         mPreviousFocusedActor; ///< Store the previous focused actor to restore the focus when popup hide.
+  Actor         mTailImage;            ///< Stores the tail image.
+  Actor         mPopupContainer;       ///< This actor is used to house the background image and the main popup layout.
+  Animation     mAnimation;            ///< The current animation in use used to manage display state changing.
+  bool          mAlterAddedChild;      ///< Flag used to control whether children are reparented or not.
+  bool          mLayoutDirty;          ///< Set to true whenever any property that would require a layout update is modified.
+  Timer         mAutoHideTimer;        ///< Used to perform an auto-hide of the popup if desired.
+  bool          mTouchTransparent;     ///< Allows all events to pass through the popup.
 
   // Main Content related properties:
   Actor mTitle;   ///< Stores the text title.
@@ -556,28 +556,28 @@ private:
 
   // Display related properties.
   Ui::Popup::DisplayState mDisplayState; ///< The current display state of the popup.
-  bool mTailVisible;                     ///< True if the popup tail should be visible.
-  Vector3 mTailPosition;                 ///< The position of the tail.
+  bool                    mTailVisible;  ///< True if the popup tail should be visible.
+  Vector3                 mTailPosition; ///< The position of the tail.
   Ui::Popup::ContextualMode
-      mContextualMode;      ///< Allows the popup to be layed out adjacent to its parent in different directions.
-  float mAnimationDuration; ///< The duration of the transition in and out animations.
-  Ui::Popup::AnimationMode mAnimationMode; ///< The animation to use to transition in and out.
+                           mContextualMode;    ///< Allows the popup to be layed out adjacent to its parent in different directions.
+  float                    mAnimationDuration; ///< The duration of the transition in and out animations.
+  Ui::Popup::AnimationMode mAnimationMode;     ///< The animation to use to transition in and out.
   Dali::AnimationData
-      mEntryAnimationData; ///< Stores description data that can be used for generating a custom entry animation.
+    mEntryAnimationData; ///< Stores description data that can be used for generating a custom entry animation.
   Dali::AnimationData
-      mExitAnimationData;      ///< Stores description data that can be used for generating a custom exit animation.
-  unsigned int mAutoHideDelay; ///< If set, will auto-hide the popup after a specified amount of time.
+               mExitAnimationData; ///< Stores description data that can be used for generating a custom exit animation.
+  unsigned int mAutoHideDelay;     ///< If set, will auto-hide the popup after a specified amount of time.
 
   // Style related properties:
-  bool mBackingEnabled;        ///< True if a dimmed backing will be used.
-  Vector4 mBackingColor;       ///< The color of the backing.
-  Actor mPopupBackgroundImage; ///< Stores the background image.
-  Rect<int> mBackgroundBorder; ///< Background border.
-  float mMargin;               ///< Internal margin for popup contents.
-  std::string mTailUpImage;    ///< Image used for the tail for the up direction.
-  std::string mTailDownImage;  ///< Image used for the tail for the down direction.
-  std::string mTailLeftImage;  ///< Image used for the tail for the left direction.
-  std::string mTailRightImage; ///< Image used for the tail for the right direction.
+  bool        mBackingEnabled;       ///< True if a dimmed backing will be used.
+  Vector4     mBackingColor;         ///< The color of the backing.
+  Actor       mPopupBackgroundImage; ///< Stores the background image.
+  Rect<int>   mBackgroundBorder;     ///< Background border.
+  float       mMargin;               ///< Internal margin for popup contents.
+  std::string mTailUpImage;          ///< Image used for the tail for the up direction.
+  std::string mTailDownImage;        ///< Image used for the tail for the down direction.
+  std::string mTailLeftImage;        ///< Image used for the tail for the left direction.
+  std::string mTailRightImage;       ///< Image used for the tail for the right direction.
 };
 
 } // namespace Internal

@@ -90,7 +90,7 @@ private:
   // For Npatch
   uint32_t mNpatchXStretchCount;
   uint32_t mNpatchYStretchCount;
-  bool mNpatchMaskingEnable;
+  bool     mNpatchMaskingEnable;
 };
 
 } // namespace Internal

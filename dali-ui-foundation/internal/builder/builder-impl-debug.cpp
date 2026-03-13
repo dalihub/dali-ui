@@ -29,12 +29,12 @@ namespace Internal
 {
 void LogTree(const Ui::JsonParser& parser)
 {
-  if (OptionalChild constants = IsChild(parser.GetRoot(), "constants"))
+  if(OptionalChild constants = IsChild(parser.GetRoot(), "constants"))
   {
-    for (TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
     {
-      if (((*iter).first && strcmp((*iter).first, "DUMP_TREE") == 0) ||
-          ((*iter).second.GetType() == TreeNode::STRING && strcmp((*iter).second.GetString(), "DUMP_TREE") == 0))
+      if(((*iter).first && strcmp((*iter).first, "DUMP_TREE") == 0) ||
+         ((*iter).second.GetType() == TreeNode::STRING && strcmp((*iter).second.GetString(), "DUMP_TREE") == 0))
       {
         std::ostringstream oss;
         parser.Write(oss, 2);

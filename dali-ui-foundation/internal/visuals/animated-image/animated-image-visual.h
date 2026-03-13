@@ -301,51 +301,51 @@ private:
   AnimatedImageVisual& operator=(const AnimatedImageVisual& animatedImageVisual);
 
 private:
-  Timer mFrameDelayTimer;
-  WeakHandle<Actor> mPlacementActor;
+  Timer                     mFrameDelayTimer;
+  WeakHandle<Actor>         mPlacementActor;
   ImageVisualShaderFactory& mImageVisualShaderFactory;
 
   Dali::Texture mNativeTexture; ///< The handle of native texture if we are using it.
 
   // Variables for Image renderer
-  Vector4 mPixelArea;
+  Vector4         mPixelArea;
   Property::Index mPixelAreaIndex;
   Property::Index mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform.
 
   // Variables for Animated Image player
-  VisualUrl mImageUrl;
+  VisualUrl                  mImageUrl;
   Dali::AnimatedImageLoading mAnimatedImageLoading; // Only needed for animated image
-  uint32_t mFrameIndexForJumpTo;                    // Frame index into textureRects
-  uint32_t mCurrentFrameIndex;
+  uint32_t                   mFrameIndexForJumpTo;  // Frame index into textureRects
+  uint32_t                   mCurrentFrameIndex;
 
   // Variables for Multi-Image player
   ImageCache::UrlList* mImageUrls;
-  ImageCache* mImageCache;
-  uint16_t mCacheSize;
-  uint16_t mBatchSize;
-  uint16_t mFrameDelay;
-  int16_t mLoopCount;
-  int16_t mCurrentLoopIndex;
+  ImageCache*          mImageCache;
+  uint16_t             mCacheSize;
+  uint16_t             mBatchSize;
+  uint16_t             mFrameDelay;
+  int16_t              mLoopCount;
+  int16_t              mCurrentLoopIndex;
 
   // Variables for image visual properties.
-  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
   Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
-  TextureManager::MaskingDataPointer mMaskingData;
-  Dali::ImageDimensions mDesiredSize;
-  Dali::ImageDimensions mLastRequiredSize;
-  float mFrameSpeedFactor;
+  TextureManager::MaskingDataPointer         mMaskingData;
+  Dali::ImageDimensions                      mDesiredSize;
+  Dali::ImageDimensions                      mLastRequiredSize;
+  float                                      mFrameSpeedFactor;
 
   // Shared variables
-  uint32_t mFrameCount; // Number of frames
+  uint32_t        mFrameCount; // Number of frames
   ImageDimensions mImageSize;
 
   DevelAnimatedImageVisual::Action::Type mActionStatus;
 
-  Dali::WrapMode::Type mWrapModeU : 3;
-  Dali::WrapMode::Type mWrapModeV : 3;
+  Dali::WrapMode::Type                 mWrapModeU : 3;
+  Dali::WrapMode::Type                 mWrapModeV : 3;
   DevelImageVisual::StopBehavior::Type mStopBehavior : 2;
-  Dali::FittingMode::Type mFittingMode : 4;
-  Dali::SamplingMode::Type mSamplingMode : 5;
+  Dali::FittingMode::Type              mFittingMode : 4;
+  Dali::SamplingMode::Type             mSamplingMode : 5;
 
   bool mStartFirstFrame : 1;
   bool mIsJumpTo : 1;

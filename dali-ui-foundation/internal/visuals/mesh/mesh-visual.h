@@ -172,15 +172,15 @@ private:
   std::string mGlossTextureUrl;
   std::string mTexturesPath;
 
-  Shader mShader;
-  Geometry mGeometry;
+  Shader     mShader;
+  Geometry   mGeometry;
   TextureSet mTextureSet;
 
   ObjLoader mObjLoader;
-  Vector3 mSceneCenter;
-  Vector3 mSceneSize;
+  Vector3   mSceneCenter;
+  Vector3   mSceneSize;
 
-  Vector3 mLightPosition;
+  Vector3                            mLightPosition;
   Ui::MeshVisual::ShadingMode::Value mShadingMode;
 
   bool mUseTexture;

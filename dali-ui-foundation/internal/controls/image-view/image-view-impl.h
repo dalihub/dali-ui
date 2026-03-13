@@ -153,7 +153,7 @@ private: // From Control
    * @copydoc Ui::Control::OnUpdateVisualProperties()
    */
   virtual void OnUpdateVisualProperties(
-      const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties) override;
+    const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties) override;
 
 private:
   /**
@@ -189,12 +189,12 @@ private:
   Ui::Visual::Base mPreviousVisual;
   Ui::Visual::Base mPlaceholderVisual;
 
-  std::string mUrl;            ///< the url for the image if the image came from a URL, empty otherwise
-  std::string mPlaceholderUrl; ///< the url for the placeholder image if the image came from a PLACEHOLDER_IMAGE, empty
-                               ///< otherwise
-  Property::Map mPropertyMap;  ///< the Property::Map if the image came from a Property::Map, empty otherwise
-  Property::Map mShaderMap;    ///< the Property::Map if the custom shader is set, empty otherwise
-  ImageDimensions mImageSize;  ///< the image size
+  std::string mUrl;             ///< the url for the image if the image came from a URL, empty otherwise
+  std::string mPlaceholderUrl;  ///< the url for the placeholder image if the image came from a PLACEHOLDER_IMAGE, empty
+                                ///< otherwise
+  Property::Map   mPropertyMap; ///< the Property::Map if the image came from a Property::Map, empty otherwise
+  Property::Map   mShaderMap;   ///< the Property::Map if the custom shader is set, empty otherwise
+  ImageDimensions mImageSize;   ///< the image size
 
   bool mImageReplaced : 1; ///< Flag to indicate image is replaced
 };

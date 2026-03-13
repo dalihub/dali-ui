@@ -43,10 +43,10 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_VECTOR_ANIMATION_PERFORMANCE_MAR
 } // unnamed namespace
 
 VectorAnimationManager::VectorAnimationManager()
-  : mEventCallbacks(),
-    mVectorAnimationThread(nullptr),
-    mProcessorRegistered(false),
-    mDestroyed(false)
+: mEventCallbacks(),
+  mVectorAnimationThread(nullptr),
+  mProcessorRegistered(false),
+  mDestroyed(false)
 {
 }
 
@@ -57,7 +57,7 @@ VectorAnimationManager::~VectorAnimationManager()
 
 VectorAnimationThread& VectorAnimationManager::GetVectorAnimationThread()
 {
-  if (!mVectorAnimationThread)
+  if(!mVectorAnimationThread)
   {
     mVectorAnimationThread = std::unique_ptr<VectorAnimationThread>(new VectorAnimationThread());
     mVectorAnimationThread->Start();
@@ -67,11 +67,11 @@ VectorAnimationThread& VectorAnimationManager::GetVectorAnimationThread()
 
 void VectorAnimationManager::RegisterEventCallback(CallbackBase* callback)
 {
-  if (DALI_LIKELY(!mDestroyed))
+  if(DALI_LIKELY(!mDestroyed))
   {
     mEventCallbacks.PushBack(callback); ///< Take ownership of callback.
 
-    if (!mProcessorRegistered && DALI_LIKELY(Adaptor::IsAvailable()))
+    if(!mProcessorRegistered && DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().RegisterProcessorOnce(*this, true); // Use post processor to trigger after layoutting
       mProcessorRegistered = true;
@@ -86,7 +86,7 @@ void VectorAnimationManager::RegisterEventCallback(CallbackBase* callback)
 void VectorAnimationManager::UnregisterEventCallback(CallbackBase* callback)
 {
   auto iter = mEventCallbacks.Find(callback);
-  if (iter != mEventCallbacks.End())
+  if(iter != mEventCallbacks.End())
   {
     mEventCallbacks.Erase(iter);
   }
@@ -94,20 +94,20 @@ void VectorAnimationManager::UnregisterEventCallback(CallbackBase* callback)
 
 void VectorAnimationManager::Finalize()
 {
-  if (DALI_LIKELY(!mDestroyed))
+  if(DALI_LIKELY(!mDestroyed))
   {
     DALI_LOG_DEBUG_INFO("Finalizing Vector Animation Manager.\n");
     mDestroyed = true;
 
     mEventCallbacks.Clear();
 
-    if (mProcessorRegistered && Adaptor::IsAvailable())
+    if(mProcessorRegistered && Adaptor::IsAvailable())
     {
       Adaptor::Get().UnregisterProcessorOnce(*this, true);
       mProcessorRegistered = false;
     }
 
-    if (mVectorAnimationThread)
+    if(mVectorAnimationThread)
     {
       mVectorAnimationThread->Finalize();
     }
@@ -116,12 +116,12 @@ void VectorAnimationManager::Finalize()
 
 void VectorAnimationManager::Process(bool postProcessor)
 {
-  if (DALI_LIKELY(!mDestroyed))
+  if(DALI_LIKELY(!mDestroyed))
   {
 #ifdef TRACE_ENABLED
-    if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
-      if (mEventCallbacks.Count() > 0u)
+      if(mEventCallbacks.Count() > 0u)
       {
         std::ostringstream oss;
         oss << "[" << mEventCallbacks.Count() << "]";
@@ -132,15 +132,15 @@ void VectorAnimationManager::Process(bool postProcessor)
 
     mProcessorRegistered = false;
 
-    for (auto&& iter : mEventCallbacks)
+    for(auto&& iter : mEventCallbacks)
     {
       CallbackBase::Execute(*iter);
     }
 
 #ifdef TRACE_ENABLED
-    if (gTraceFilter && gTraceFilter->IsTraceEnabled())
+    if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
-      if (mEventCallbacks.Count() > 0u)
+      if(mEventCallbacks.Count() > 0u)
       {
         std::ostringstream oss;
         oss << "[" << mEventCallbacks.Count() << "]";

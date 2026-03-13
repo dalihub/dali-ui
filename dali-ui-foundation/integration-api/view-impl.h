@@ -28,12 +28,12 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view.h>
-#include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/layout-types.h>
-#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/interaction-trait-interface.h>
+#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -67,7 +67,6 @@ using ViewImplPtr = IntrusivePtr<ViewImpl>;
 class DALI_UI_API ViewImpl : public Ui::Internal::Control
 {
 public:
-
   // Creation & Destruction
 
   /**
@@ -78,9 +77,9 @@ public:
    */
   struct ChildData
   {
-    Ui::View view;             ///< Handle to the child view
-    MeasuredSize measuredSize; ///< Size from Measure pass
-    LayoutRect arrangedBounds; ///< Bounds from Arrange pass
+    Ui::View     view;           ///< Handle to the child view
+    MeasuredSize measuredSize;   ///< Size from Measure pass
+    LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
   };
 
   /**
@@ -94,7 +93,6 @@ public:
   static ViewImplPtr New();
 
 protected:
-
   /**
    * @brief Destructor.
    * A reference counted object may only be deleted by calling Unreference()
@@ -329,17 +327,17 @@ protected: // Virtual methods for derived classes (Template Method pattern)
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
 public: // Layout size API (LayoutWidth / LayoutHeight)
-  void SetLayoutWidth(float width);
+  void  SetLayoutWidth(float width);
   float GetLayoutWidth() const;
-  void SetLayoutHeight(float height);
+  void  SetLayoutHeight(float height);
   float GetLayoutHeight() const;
-  void SetMinimumWidth(float width);
+  void  SetMinimumWidth(float width);
   float GetMinimumWidth() const;
-  void SetMinimumHeight(float height);
+  void  SetMinimumHeight(float height);
   float GetMinimumHeight() const;
-  void SetMaximumWidth(float width);
+  void  SetMaximumWidth(float width);
   float GetMaximumWidth() const;
-  void SetMaximumHeight(float height);
+  void  SetMaximumHeight(float height);
   float GetMaximumHeight() const;
 
 public: // Layout Params API
@@ -354,17 +352,17 @@ public: // Layout Params API
   BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
 
 public: // Layout Properties API
-  void SetViewMargin(const Extents& margin);
-  Extents GetViewMargin() const;
-  void SetViewPadding(const Extents& padding);
-  Extents GetViewPadding() const;
-  void SetHorizontalAlignment(LayoutAlignment alignment);
+  void            SetViewMargin(const Extents& margin);
+  Extents         GetViewMargin() const;
+  void            SetViewPadding(const Extents& padding);
+  Extents         GetViewPadding() const;
+  void            SetHorizontalAlignment(LayoutAlignment alignment);
   LayoutAlignment GetHorizontalAlignment() const;
-  void SetVerticalAlignment(LayoutAlignment alignment);
+  void            SetVerticalAlignment(LayoutAlignment alignment);
   LayoutAlignment GetVerticalAlignment() const;
 
 public: // Parent Layout API
-  Ui::Layout GetParentLayout() const;
+  Ui::Layout   GetParentLayout() const;
   virtual bool IsLayout() const;
 
 public: // LayoutManager API (Optional layout capability)
@@ -488,17 +486,15 @@ protected:
   void RegisterWithLayoutController();
 
 private:
-
   // Not copyable or movable
-  ViewImpl(const ViewImpl&) = delete;
-  ViewImpl(ViewImpl&&) = delete;
+  ViewImpl(const ViewImpl&)            = delete;
+  ViewImpl(ViewImpl&&)                 = delete;
   ViewImpl& operator=(const ViewImpl&) = delete;
-  ViewImpl& operator=(ViewImpl&&) = delete;
+  ViewImpl& operator=(ViewImpl&&)      = delete;
 
 private:
-
   std::vector<std::pair<TraitId, Trait>> mTraits;
-  IInteractionTrait* mInteractionTrait;
+  IInteractionTrait*                     mInteractionTrait;
 
   // Layout size (LayoutWidth / LayoutHeight)
   float mLayoutWidth;
@@ -509,8 +505,8 @@ private:
   float mMaximumHeight;
 
   // Layout Properties Data
-  Extents mMargin;
-  Extents mPadding;
+  Extents         mMargin;
+  Extents         mPadding;
   LayoutAlignment mHorizontalAlignment;
   LayoutAlignment mVerticalAlignment;
 
@@ -518,12 +514,12 @@ private:
   // mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize mDesiredSize;
   MeasuredSize mLastMeasuredConstraint;
-  LayoutRect mArrangedBounds;
-  bool mArrangeValid;
+  LayoutRect   mArrangedBounds;
+  bool         mArrangeValid;
 
   // Optional LayoutManager and Children (for layout capability)
   std::unique_ptr<LayoutManager> mLayoutManager;
-  ChildContainer mChildren;
+  ChildContainer                 mChildren;
 };
 
 // Helpers for public-api forwarding methods

@@ -38,8 +38,8 @@ CustomShaderFactory::~CustomShaderFactory()
 
 bool CustomShaderFactory::AddPrecompiledShader(PrecompileShaderOption& option)
 {
-  auto shaderName = option.GetShaderName();
-  auto vertexShader = option.GetVertexShader();
+  auto shaderName     = option.GetShaderName();
+  auto vertexShader   = option.GetVertexShader();
   auto fragmentShader = option.GetFragmentShader();
   return SavePrecompileShader(std::move(shaderName), std::move(vertexShader), std::move(fragmentShader));
 }
@@ -55,7 +55,7 @@ void CustomShaderFactory::GetPreCompiledShader(ShaderPreCompiler::RawShaderData&
   shaders.shaderCount = 0;
 
   // precompile requested shader first
-  for (uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
+  for(uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
   {
     vertexPrefix.push_back(std::move(mRequestedPrecompileShader[i].vertexPrefix));
     fragmentPrefix.push_back(std::move(mRequestedPrecompileShader[i].fragmentPrefix));
@@ -66,13 +66,13 @@ void CustomShaderFactory::GetPreCompiledShader(ShaderPreCompiler::RawShaderData&
   // Clean up requested precompile shader list
   mRequestedPrecompileShader.clear();
 
-  shaders.vertexPrefix = std::move(vertexPrefix);
+  shaders.vertexPrefix   = std::move(vertexPrefix);
   shaders.fragmentPrefix = std::move(fragmentPrefix);
-  shaders.shaderName = std::move(shaderName);
-  shaders.vertexShader = "";   // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
+  shaders.shaderName     = std::move(shaderName);
+  shaders.vertexShader   = ""; // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
   shaders.fragmentShader = ""; // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
-  shaders.shaderCount = shaderCount;
-  shaders.custom = true;
+  shaders.shaderCount    = shaderCount;
+  shaders.custom         = true;
 }
 
 bool CustomShaderFactory::SavePrecompileShader(std::string&& shaderName, std::string&& vertexShader,
@@ -81,9 +81,9 @@ bool CustomShaderFactory::SavePrecompileShader(std::string&& shaderName, std::st
   DALI_LOG_RELEASE_INFO("Add precompile shader success!!(%s)", shaderName.c_str());
 
   RequestShaderInfo info;
-  info.type = VisualFactoryCache::SHADER_TYPE_MAX; ///< Not be used
-  info.name = std::move(shaderName);
-  info.vertexPrefix = std::move(vertexShader);
+  info.type           = VisualFactoryCache::SHADER_TYPE_MAX; ///< Not be used
+  info.name           = std::move(shaderName);
+  info.vertexPrefix   = std::move(vertexShader);
   info.fragmentPrefix = std::move(fragmentShader);
   mRequestedPrecompileShader.emplace_back(std::move(info));
   return true;

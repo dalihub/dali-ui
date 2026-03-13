@@ -19,8 +19,8 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-elements/public-api/label.h>
 #include <dali-ui-elements/integration-api/label-impl.h>
+#include <dali-ui-elements/public-api/label.h>
 
 namespace Dali
 {
@@ -62,12 +62,12 @@ Label Label::New()
 }
 
 Label::Label(const Label& label)
-  : View(label)
+: View(label)
 {
 }
 
 Label::Label(Label&& rhs) noexcept
-  : View(std::move(rhs))
+: View(std::move(rhs))
 {
 }
 
@@ -77,7 +77,7 @@ Label::~Label()
 
 Label& Label::operator=(const Label& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     View::operator=(handle);
   }
@@ -97,12 +97,12 @@ Label Label::DownCast(BaseHandle handle)
 }
 
 Label::Label(Integration::LabelImpl& implementation)
-  : View(implementation)
+: View(implementation)
 {
 }
 
 Label::Label(Dali::Internal::CustomActor* internal)
-  : View(internal)
+: View(internal)
 {
   VerifyCustomActorPointer<Integration::LabelImpl>(internal);
 }

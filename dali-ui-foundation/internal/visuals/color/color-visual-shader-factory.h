@@ -92,16 +92,16 @@ public:
   FeatureBuilder& EnableCutout(bool enableCutout);
 
   VisualFactoryCache::ShaderType GetShaderType() const;
-  void GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
-  void GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const;
+  void                           GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
+  void                           GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const;
 
   bool IsCutoutEnabled() const;
 
 private:
   RoundedCorner::Type mColorRoundCorner : 3; ///< Whether use rounded corner, or not. default as RoundedCorner::DISABLED
-  Borderline::Type mColorBorderline : 2;     ///< Whether use border line, or not. default as Borderline::DISABLED
-  Blur::Type mColorBlur : 2;                 ///< Whether use blur, or not. default as Blur::DISABLED
-  Cutout::Type mColorCutout : 2;             ///< Whether use cutout, or not. default as Cutout::DISABLED
+  Borderline::Type    mColorBorderline : 2;  ///< Whether use border line, or not. default as Borderline::DISABLED
+  Blur::Type          mColorBlur : 2;        ///< Whether use blur, or not. default as Blur::DISABLED
+  Cutout::Type        mColorCutout : 2;      ///< Whether use cutout, or not. default as Cutout::DISABLED
 };
 } // namespace ColorVisualShaderFeature
 

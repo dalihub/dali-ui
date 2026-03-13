@@ -23,9 +23,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/key-click-policy.h>
 #include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -52,11 +52,9 @@ class ClickableTraitImpl;
 class DALI_UI_API ClickableTrait : public Trait
 {
 public:
-
   // Typedefs
 
 public: // Creation & Destruction
-
   /**
    * @brief Creates an uninitialized Trait handle.
    */
@@ -96,7 +94,6 @@ public: // Creation & Destruction
   ~ClickableTrait();
 
 public: // Signals
-
   /**
    * @brief Emitted when the pressed state changes.
    *
@@ -145,7 +142,6 @@ public: // Signals
   Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
-
   /**
    * @brief The boolean flag for pressed state.
    *
@@ -200,7 +196,6 @@ public: // API
   void SetKeyClickPolicy(KeyClickPolicy policy);
 
 public: // Not intended for application developers
-
   /**
    * @brief Creates a handle using the Internal implementation.
    *

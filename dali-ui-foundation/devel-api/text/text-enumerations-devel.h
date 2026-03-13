@@ -143,11 +143,11 @@ enum Type
   END = 0, ///< END position will truncate tail of text that exceeds the layout size then replace it by Ellipsis glyph
            ///< in the end of the last appeared line.
   START,   ///< START position will truncate head of text that exceeds the layout size then replace it by Ellipsis glyph
-         ///< in the start of the first appeared line. In multilines, the lines are removed from top until the text fit
-         ///< into layout height.
-  MIDDLE ///< MIDDLE position will truncate middle of text that exceeds the layout size then replace it by Ellipsis
-         ///< glyph in the middle of line. In multilines, the lines are removed from middle until the text fit into
-         ///< layout height then add ellipsis glyph in the end of the last line appeared before removed lines.
+           ///< in the start of the first appeared line. In multilines, the lines are removed from top until the text fit
+           ///< into layout height.
+  MIDDLE   ///< MIDDLE position will truncate middle of text that exceeds the layout size then replace it by Ellipsis
+           ///< glyph in the middle of line. In multilines, the lines are removed from middle until the text fit into
+           ///< layout height then add ellipsis glyph in the end of the last line appeared before removed lines.
 };
 
 } // namespace EllipsisPosition

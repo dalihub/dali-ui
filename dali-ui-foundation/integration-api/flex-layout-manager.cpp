@@ -24,8 +24,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layout/flex-layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/internal/layout/flex-layout-params-impl.h>
 
 namespace Dali
 {
@@ -64,10 +64,10 @@ float GetFlexBasis(ViewImpl& childImpl)
 struct FlexLine
 {
   std::vector<uint32_t> childIndices;
-  float mainSize{0.0f};
-  float crossSize{0.0f};
-  float totalFlexGrow{0.0f};
-  float totalFlexShrink{0.0f};
+  float                 mainSize{0.0f};
+  float                 crossSize{0.0f};
+  float                 totalFlexGrow{0.0f};
+  float                 totalFlexShrink{0.0f};
 };
 
 std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& children, float availableMain,
@@ -75,18 +75,18 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
                                                const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   std::vector<FlexLine> lines;
-  FlexLine currentLine;
-  for (uint32_t i = 0; i < children.size(); ++i)
+  FlexLine              currentLine;
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto& childData = children[i];
+    auto&     childData = children[i];
     ViewImpl& childImpl = getImpl(childData.view);
-    Extents margin = childImpl.GetViewMargin();
+    Extents   margin    = childImpl.GetViewMargin();
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
-    if (basis > 0.0f)
+    if(basis > 0.0f)
     {
-      if (isMainAxisHorizontal)
+      if(isMainAxisHorizontal)
       {
         childData.measuredSize.width = basis;
       }
@@ -98,9 +98,9 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
 
     float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width + margin.start + margin.end
                                                : childData.measuredSize.height + margin.top + margin.bottom;
-    bool shouldWrap = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
+    bool  shouldWrap    = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
-    if (shouldWrap)
+    if(shouldWrap)
     {
       lines.push_back(currentLine);
       currentLine = FlexLine();
@@ -109,11 +109,11 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
     currentLine.mainSize += childMainSize;
     currentLine.totalFlexGrow += GetFlexGrow(childImpl);
     currentLine.totalFlexShrink += GetFlexShrink(childImpl);
-    float childCrossSize = isMainAxisHorizontal ? childData.measuredSize.height + margin.top + margin.bottom
-                                                : childData.measuredSize.width + margin.start + margin.end;
+    float childCrossSize  = isMainAxisHorizontal ? childData.measuredSize.height + margin.top + margin.bottom
+                                                 : childData.measuredSize.width + margin.start + margin.end;
     currentLine.crossSize = std::max(currentLine.crossSize, childCrossSize);
   }
-  if (!currentLine.childIndices.empty())
+  if(!currentLine.childIndices.empty())
   {
     lines.push_back(currentLine);
   }
@@ -131,18 +131,18 @@ void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, flo
 {
   float freeSpace = availableMain - line.mainSize;
 
-  if (freeSpace > 0.0f && line.totalFlexGrow > 0.0f)
+  if(freeSpace > 0.0f && line.totalFlexGrow > 0.0f)
   {
     // Distribute extra space proportional to flex-grow
-    for (uint32_t idx : line.childIndices)
+    for(uint32_t idx : line.childIndices)
     {
-      auto& childData = children[idx];
+      auto&     childData = children[idx];
       ViewImpl& childImpl = getImpl(childData.view);
-      float grow = GetFlexGrow(childImpl);
-      if (grow > 0.0f)
+      float     grow      = GetFlexGrow(childImpl);
+      if(grow > 0.0f)
       {
         float extra = (grow / line.totalFlexGrow) * freeSpace;
-        if (isMainAxisHorizontal)
+        if(isMainAxisHorizontal)
         {
           childData.measuredSize.width += extra;
         }
@@ -154,29 +154,29 @@ void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, flo
     }
     line.mainSize = availableMain;
   }
-  else if (freeSpace < 0.0f && line.totalFlexShrink > 0.0f)
+  else if(freeSpace < 0.0f && line.totalFlexShrink > 0.0f)
   {
     // Shrink proportional to flex-shrink * child base size
     float totalWeightedShrink = 0.0f;
-    for (uint32_t idx : line.childIndices)
+    for(uint32_t idx : line.childIndices)
     {
-      auto& childData = children[idx];
-      ViewImpl& childImpl = getImpl(childData.view);
-      float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
-      float shrink = GetFlexShrink(childImpl);
+      auto&     childData     = children[idx];
+      ViewImpl& childImpl     = getImpl(childData.view);
+      float     childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
+      float     shrink        = GetFlexShrink(childImpl);
       totalWeightedShrink += shrink * childMainSize;
     }
-    if (totalWeightedShrink > 0.0f)
+    if(totalWeightedShrink > 0.0f)
     {
       float overflow = -freeSpace;
-      for (uint32_t idx : line.childIndices)
+      for(uint32_t idx : line.childIndices)
       {
-        auto& childData = children[idx];
-        ViewImpl& childImpl = getImpl(childData.view);
-        float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
-        float shrink = GetFlexShrink(childImpl);
-        float reduction = (shrink * childMainSize / totalWeightedShrink) * overflow;
-        if (isMainAxisHorizontal)
+        auto&     childData     = children[idx];
+        ViewImpl& childImpl     = getImpl(childData.view);
+        float     childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
+        float     shrink        = GetFlexShrink(childImpl);
+        float     reduction     = (shrink * childMainSize / totalWeightedShrink) * overflow;
+        if(isMainAxisHorizontal)
         {
           childData.measuredSize.width = std::max(0.0f, childData.measuredSize.width - reduction);
         }
@@ -199,7 +199,7 @@ struct FlexJustifyOffsets
 FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, size_t lineChildCount)
 {
   FlexJustifyOffsets out;
-  switch (justify)
+  switch(justify)
   {
     case FlexJustify::FLEX_START:
       break;
@@ -210,17 +210,17 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
       out.mainOffset = freeSpace / 2.0f;
       break;
     case FlexJustify::SPACE_BETWEEN:
-      if (lineChildCount > 1)
+      if(lineChildCount > 1)
       {
         out.spacing = freeSpace / (lineChildCount - 1);
       }
       break;
     case FlexJustify::SPACE_AROUND:
-      out.spacing = freeSpace / lineChildCount;
+      out.spacing    = freeSpace / lineChildCount;
       out.mainOffset = out.spacing / 2.0f;
       break;
     case FlexJustify::SPACE_EVENLY:
-      out.spacing = freeSpace / (lineChildCount + 1);
+      out.spacing    = freeSpace / (lineChildCount + 1);
       out.mainOffset = out.spacing;
       break;
   }
@@ -232,29 +232,29 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
                         float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed,
                         const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
-  for (uint32_t idx : line.childIndices)
+  for(uint32_t idx : line.childIndices)
   {
-    auto& childData = children[idx];
+    auto&     childData = children[idx];
     ViewImpl& childImpl = getImpl(childData.view);
-    Extents margin = childImpl.GetViewMargin();
+    Extents   margin    = childImpl.GetViewMargin();
 
-    float childMainSize = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
+    float childMainSize  = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
     float childCrossSize = isMainAxisHorizontal ? childData.measuredSize.height : childData.measuredSize.width;
-    float marginMain = isMainAxisHorizontal ? static_cast<float>(margin.start + margin.end)
-                                            : static_cast<float>(margin.top + margin.bottom);
-    float marginCross = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom)
-                                             : static_cast<float>(margin.start + margin.end);
+    float marginMain     = isMainAxisHorizontal ? static_cast<float>(margin.start + margin.end)
+                                                : static_cast<float>(margin.top + margin.bottom);
+    float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom)
+                                                : static_cast<float>(margin.start + margin.end);
 
     // Use align-self if set, otherwise fall back to align-items
     FlexAlign effectiveAlign = GetAlignSelf(childImpl);
-    if (effectiveAlign == FlexAlign::AUTO)
+    if(effectiveAlign == FlexAlign::AUTO)
     {
       effectiveAlign = alignItems;
     }
 
     float childCrossOffset = crossOffsetInOut;
-    float crossSpace = line.crossSize - childCrossSize - marginCross;
-    switch (effectiveAlign)
+    float crossSpace       = line.crossSize - childCrossSize - marginCross;
+    switch(effectiveAlign)
     {
       case FlexAlign::FLEX_START:
       case FlexAlign::AUTO:
@@ -272,12 +272,12 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
         break;
     }
 
-    float allocMain = childMainSize + marginMain;
-    float allocCross = childCrossSize + marginCross;
+    float      allocMain  = childMainSize + marginMain;
+    float      allocCross = childCrossSize + marginCross;
     LayoutRect childBounds;
-    if (isMainAxisHorizontal)
+    if(isMainAxisHorizontal)
     {
-      if (isMainAxisReversed)
+      if(isMainAxisReversed)
       {
         mainOffsetInOut -= allocMain;
         childBounds.x = bounds.x + mainOffsetInOut;
@@ -288,13 +288,13 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
         childBounds.x = bounds.x + mainOffsetInOut;
         mainOffsetInOut += allocMain + spacing;
       }
-      childBounds.y = bounds.y + childCrossOffset;
-      childBounds.width = allocMain;
+      childBounds.y      = bounds.y + childCrossOffset;
+      childBounds.width  = allocMain;
       childBounds.height = allocCross;
     }
     else
     {
-      if (isMainAxisReversed)
+      if(isMainAxisReversed)
       {
         mainOffsetInOut -= allocMain;
         childBounds.y = bounds.y + mainOffsetInOut;
@@ -305,19 +305,19 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
         childBounds.y = bounds.y + mainOffsetInOut;
         mainOffsetInOut += allocMain + spacing;
       }
-      childBounds.x = bounds.x + childCrossOffset;
-      childBounds.width = allocCross;
+      childBounds.x      = bounds.x + childCrossOffset;
+      childBounds.width  = allocCross;
       childBounds.height = allocMain;
     }
     childBounds.x += static_cast<float>(margin.start);
     childBounds.y += static_cast<float>(margin.top);
-    childBounds.width = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
+    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
 
     // Sync desired size so OnArrange uses allocated flex item bounds when
     // the child has no measured content (WrapContent with zero natural size).
     MeasuredSize desiredSize;
-    desiredSize.width = (childData.measuredSize.width > 0.0f) ? childData.measuredSize.width : childBounds.width;
+    desiredSize.width  = (childData.measuredSize.width > 0.0f) ? childData.measuredSize.width : childBounds.width;
     desiredSize.height = (childData.measuredSize.height > 0.0f) ? childData.measuredSize.height : childBounds.height;
     childImpl.SetDesiredSize(desiredSize);
 
@@ -331,11 +331,11 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
 
 FlexLayoutManager::FlexLayoutManager(FlexDirection direction, FlexWrap wrap, FlexJustify justify, FlexAlign alignItems,
                                      FlexAlign alignContent)
-  : mDirection(direction),
-    mWrap(wrap),
-    mJustifyContent(justify),
-    mAlignItems(alignItems),
-    mAlignContent(alignContent)
+: mDirection(direction),
+  mWrap(wrap),
+  mJustifyContent(justify),
+  mAlignItems(alignItems),
+  mAlignContent(alignContent)
 {
 }
 
@@ -380,45 +380,45 @@ bool FlexLayoutManager::IsMainAxisReversed() const
 
 MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)
 {
-  if (!view)
+  if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children = GetChildren(view);
-  Extents padding = view->GetViewPadding();
-  float paddingMain = IsMainAxisHorizontal() ? static_cast<float>(padding.start + padding.end)
-                                             : static_cast<float>(padding.top + padding.bottom);
-  float paddingCross = IsMainAxisHorizontal() ? static_cast<float>(padding.top + padding.bottom)
-                                              : static_cast<float>(padding.start + padding.end);
+  auto&   children     = GetChildren(view);
+  Extents padding      = view->GetViewPadding();
+  float   paddingMain  = IsMainAxisHorizontal() ? static_cast<float>(padding.start + padding.end)
+                                                : static_cast<float>(padding.top + padding.bottom);
+  float   paddingCross = IsMainAxisHorizontal() ? static_cast<float>(padding.top + padding.bottom)
+                                                : static_cast<float>(padding.start + padding.end);
 
-  float availableMain = (IsMainAxisHorizontal() ? widthConstraint : heightConstraint) - paddingMain;
+  float availableMain  = (IsMainAxisHorizontal() ? widthConstraint : heightConstraint) - paddingMain;
   float availableCross = (IsMainAxisHorizontal() ? heightConstraint : widthConstraint) - paddingCross;
 
   std::vector<FlexLine> lines;
-  FlexLine currentLine;
+  FlexLine              currentLine;
 
-  for (uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto& childData = children[i];
-    ViewImpl& childImpl = GetImpl(childData.view);
-    Extents margin = childImpl.GetViewMargin();
-    float marginMain = IsMainAxisHorizontal() ? static_cast<float>(margin.start + margin.end)
-                                              : static_cast<float>(margin.top + margin.bottom);
-    float marginCross = IsMainAxisHorizontal() ? static_cast<float>(margin.top + margin.bottom)
-                                               : static_cast<float>(margin.start + margin.end);
-    float childWidthConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableMain - marginMain)
-                                                        : std::max(0.0f, availableCross - marginCross);
-    float childHeightConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableCross - marginCross)
-                                                         : std::max(0.0f, availableMain - marginMain);
-    MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    childData.measuredSize = childSize;
+    auto&        childData             = children[i];
+    ViewImpl&    childImpl             = GetImpl(childData.view);
+    Extents      margin                = childImpl.GetViewMargin();
+    float        marginMain            = IsMainAxisHorizontal() ? static_cast<float>(margin.start + margin.end)
+                                                                : static_cast<float>(margin.top + margin.bottom);
+    float        marginCross           = IsMainAxisHorizontal() ? static_cast<float>(margin.top + margin.bottom)
+                                                                : static_cast<float>(margin.start + margin.end);
+    float        childWidthConstraint  = IsMainAxisHorizontal() ? std::max(0.0f, availableMain - marginMain)
+                                                                : std::max(0.0f, availableCross - marginCross);
+    float        childHeightConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableCross - marginCross)
+                                                                : std::max(0.0f, availableMain - marginMain);
+    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childData.measuredSize             = childSize;
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
-    if (basis > 0.0f)
+    if(basis > 0.0f)
     {
-      if (IsMainAxisHorizontal())
+      if(IsMainAxisHorizontal())
       {
         childData.measuredSize.width = basis;
       }
@@ -428,15 +428,15 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
       }
     }
 
-    float childMainSize = IsMainAxisHorizontal() ? childData.measuredSize.width + margin.start + margin.end
-                                                 : childData.measuredSize.height + margin.top + margin.bottom;
+    float childMainSize  = IsMainAxisHorizontal() ? childData.measuredSize.width + margin.start + margin.end
+                                                  : childData.measuredSize.height + margin.top + margin.bottom;
     float childCrossSize = IsMainAxisHorizontal() ? childData.measuredSize.height + margin.top + margin.bottom
                                                   : childData.measuredSize.width + margin.start + margin.end;
 
     bool shouldWrap = (mWrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
 
-    if (shouldWrap)
+    if(shouldWrap)
     {
       lines.push_back(currentLine);
       currentLine = FlexLine();
@@ -447,29 +447,29 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     currentLine.crossSize = std::max(currentLine.crossSize, childCrossSize);
   }
 
-  if (!currentLine.childIndices.empty())
+  if(!currentLine.childIndices.empty())
   {
     lines.push_back(currentLine);
   }
 
-  float totalMainSize = 0.0f;
+  float totalMainSize  = 0.0f;
   float totalCrossSize = 0.0f;
 
-  for (const auto& line : lines)
+  for(const auto& line : lines)
   {
     totalMainSize = std::max(totalMainSize, line.mainSize);
     totalCrossSize += line.crossSize;
   }
 
   MeasuredSize result;
-  if (IsMainAxisHorizontal())
+  if(IsMainAxisHorizontal())
   {
-    result.width = totalMainSize;
+    result.width  = totalMainSize;
     result.height = totalCrossSize;
   }
   else
   {
-    result.width = totalCrossSize;
+    result.width  = totalCrossSize;
     result.height = totalMainSize;
   }
 
@@ -478,55 +478,56 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
 MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
 {
-  if (!view)
+  if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children = GetChildren(view);
-  float contentWidth = bounds.width;
+  auto& children      = GetChildren(view);
+  float contentWidth  = bounds.width;
   float contentHeight = bounds.height;
   float availableMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
-  auto getImpl = [this](Ui::View v) -> ViewImpl& { return GetImpl(v); };
+  auto  getImpl       = [this](Ui::View v) -> ViewImpl&
+  { return GetImpl(v); };
 
   // Save original measured sizes: BuildFlexLinesForArrange and ApplyFlexGrowShrink
   // modify childData.measuredSize in-place (flex-basis, grow, shrink). Without
   // restoring afterwards, repeated layout passes accumulate these adjustments.
   std::vector<MeasuredSize> savedMeasuredSizes(children.size());
-  for (uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
     savedMeasuredSizes[i] = children[i].measuredSize;
   }
 
   std::vector<FlexLine> lines =
-      BuildFlexLinesForArrange(children, availableMain, IsMainAxisHorizontal(), mWrap, getImpl);
+    BuildFlexLinesForArrange(children, availableMain, IsMainAxisHorizontal(), mWrap, getImpl);
 
   // Apply flex-grow/flex-shrink to adjust child sizes within each line
-  for (auto& line : lines)
+  for(auto& line : lines)
   {
     ApplyFlexGrowShrink(line, children, availableMain, IsMainAxisHorizontal(), getImpl);
   }
 
-  if (mWrap == FlexWrap::WRAP_REVERSE)
+  if(mWrap == FlexWrap::WRAP_REVERSE)
   {
     std::reverse(lines.begin(), lines.end());
   }
 
   float totalLineCross = 0.0f;
-  for (const auto& line : lines)
+  for(const auto& line : lines)
   {
     totalLineCross += line.crossSize;
   }
 
   float availableCross = IsMainAxisHorizontal() ? contentHeight : contentWidth;
-  float freeCross = std::max(0.0f, availableCross - totalLineCross);
+  float freeCross      = std::max(0.0f, availableCross - totalLineCross);
 
   float crossOffset = 0.0f;
 
   // Apply align-content when wrapping is enabled, even for a single line
-  if (mWrap != FlexWrap::NO_WRAP && !lines.empty())
+  if(mWrap != FlexWrap::NO_WRAP && !lines.empty())
   {
-    switch (mAlignContent)
+    switch(mAlignContent)
     {
       case FlexAlign::FLEX_END:
         crossOffset = freeCross;
@@ -537,7 +538,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
       case FlexAlign::STRETCH:
       {
         float extraPerLine = freeCross / static_cast<float>(lines.size());
-        for (auto& line : lines)
+        for(auto& line : lines)
         {
           line.crossSize += extraPerLine;
         }
@@ -551,22 +552,22 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     }
   }
 
-  for (auto& line : lines)
+  for(auto& line : lines)
   {
-    float freeSpace = availableMain - line.mainSize;
-    FlexJustifyOffsets justify = GetFlexJustifyOffsets(freeSpace, mJustifyContent, line.childIndices.size());
-    float mainOffset = justify.mainOffset;
-    if (IsMainAxisReversed())
+    float              freeSpace  = availableMain - line.mainSize;
+    FlexJustifyOffsets justify    = GetFlexJustifyOffsets(freeSpace, mJustifyContent, line.childIndices.size());
+    float              mainOffset = justify.mainOffset;
+    if(IsMainAxisReversed())
     {
       float contentMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
-      mainOffset = contentMain - justify.mainOffset;
+      mainOffset        = contentMain - justify.mainOffset;
     }
     ArrangeOneFlexLine(line, children, bounds, contentWidth, contentHeight, crossOffset, mainOffset, justify.spacing,
                        mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed(), getImpl);
   }
 
   // Restore original measured sizes so repeated layout passes start clean.
-  for (uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
     children[i].measuredSize = savedMeasuredSizes[i];
   }

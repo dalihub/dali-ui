@@ -566,7 +566,7 @@ private:
 
 protected:
   struct Impl;
-  Impl* mImpl;
+  Impl*               mImpl;
   VisualFactoryCache& mFactoryCache;
 };
 

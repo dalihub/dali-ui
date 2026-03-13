@@ -35,10 +35,10 @@ namespace Ui
  */
 enum ActionRanges
 {
-  VISUAL_ACTION_BASE_START_INDEX = 0,                                  ///< Visual Action Base Start Index.
-  VISUAL_ACTION_BASE_END_INDEX = VISUAL_ACTION_BASE_START_INDEX + 100, ///< Visual Action Base End Index.
-  VISUAL_ACTION_START_INDEX = VISUAL_ACTION_BASE_END_INDEX + 1,        ///< Visual Action Start Index.
-  VISUAL_ACTION_END_INDEX = VISUAL_ACTION_START_INDEX + 100000,        ///< Visual Action End Index.
+  VISUAL_ACTION_BASE_START_INDEX = 0,                                    ///< Visual Action Base Start Index.
+  VISUAL_ACTION_BASE_END_INDEX   = VISUAL_ACTION_BASE_START_INDEX + 100, ///< Visual Action Base End Index.
+  VISUAL_ACTION_START_INDEX      = VISUAL_ACTION_BASE_END_INDEX + 1,     ///< Visual Action Start Index.
+  VISUAL_ACTION_END_INDEX        = VISUAL_ACTION_START_INDEX + 100000,   ///< Visual Action End Index.
 };
 
 /**

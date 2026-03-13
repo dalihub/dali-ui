@@ -28,13 +28,13 @@ namespace Ui
 namespace Internal
 {
 // Visual type
-extern const char* const VISUAL_TYPE;
+extern const char* const                 VISUAL_TYPE;
 extern const Dali::Scripting::StringEnum VISUAL_TYPE_TABLE[];
-extern const unsigned int VISUAL_TYPE_TABLE_COUNT;
+extern const unsigned int                VISUAL_TYPE_TABLE_COUNT;
 
 // Visual Shader type
 extern const Dali::Scripting::StringEnum VISUAL_SHADER_TYPE_TABLE[];
-extern const unsigned int VISUAL_SHADER_TYPE_TABLE_COUNT;
+extern const unsigned int                VISUAL_SHADER_TYPE_TABLE_COUNT;
 
 // Custom shader
 extern const char* const CUSTOM_SHADER;

@@ -29,9 +29,9 @@ namespace Ui
 namespace Internal
 {
 NpatchShaderFactory::NpatchShaderFactory()
-  : mNpatchXStretchCount(0),
-    mNpatchYStretchCount(0),
-    mNpatchMaskingEnable(false)
+: mNpatchXStretchCount(0),
+  mNpatchYStretchCount(0),
+  mNpatchMaskingEnable(false)
 {
 }
 
@@ -44,9 +44,9 @@ bool NpatchShaderFactory::AddPrecompiledShader(PrecompileShaderOption& option)
   ShaderFlagList shaderOption = option.GetShaderOptions();
 
   // Find Masking flag
-  for (uint32_t i = 0; i < shaderOption.size(); ++i)
+  for(uint32_t i = 0; i < shaderOption.size(); ++i)
   {
-    if (shaderOption[i] == PrecompileShaderOption::Flag::MASKING)
+    if(shaderOption[i] == PrecompileShaderOption::Flag::MASKING)
     {
       mNpatchMaskingEnable = true;
     }
@@ -61,8 +61,8 @@ bool NpatchShaderFactory::AddPrecompiledShader(PrecompileShaderOption& option)
   GetFragmentShader(fragmentShader);
 
   VisualFactoryCache::ShaderType shaderType = mNpatchMaskingEnable
-                                                  ? VisualFactoryCache::ShaderType::NINE_PATCH_MASK_SHADER
-                                                  : VisualFactoryCache::ShaderType::NINE_PATCH_SHADER;
+                                                ? VisualFactoryCache::ShaderType::NINE_PATCH_MASK_SHADER
+                                                : VisualFactoryCache::ShaderType::NINE_PATCH_SHADER;
   return SavePrecompileShader(shaderType, std::move(vertexShader), std::move(fragmentShader));
 }
 
@@ -77,7 +77,7 @@ void NpatchShaderFactory::GetPreCompiledShader(ShaderPreCompiler::RawShaderData&
   shaders.shaderCount = 0;
 
   // precompile requested shader first
-  for (uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
+  for(uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
   {
     vertexPrefix.push_back(std::move(mRequestedPrecompileShader[i].vertexPrefix));
     fragmentPrefix.push_back(std::move(mRequestedPrecompileShader[i].fragmentPrefix));
@@ -88,23 +88,23 @@ void NpatchShaderFactory::GetPreCompiledShader(ShaderPreCompiler::RawShaderData&
   // Clean up requested precompile shader list
   mRequestedPrecompileShader.clear();
 
-  shaders.vertexPrefix = std::move(vertexPrefix);
+  shaders.vertexPrefix   = std::move(vertexPrefix);
   shaders.fragmentPrefix = std::move(fragmentPrefix);
-  shaders.shaderName = std::move(shaderName);
-  shaders.vertexShader = "";   // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
+  shaders.shaderName     = std::move(shaderName);
+  shaders.vertexShader   = ""; // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
   shaders.fragmentShader = ""; // Custom shader use prefix shader only. No need to set vertexShader and fragmentShader.
-  shaders.shaderCount = shaderCount;
-  shaders.custom = true; ///< Note that npatch shader is kind of custom shader.
+  shaders.shaderCount    = shaderCount;
+  shaders.custom         = true; ///< Note that npatch shader is kind of custom shader.
 }
 
 void NpatchShaderFactory::GetVertexShader(std::string& vertexShader) const
 {
-  if (DALI_LIKELY((mNpatchXStretchCount == 1 && mNpatchYStretchCount == 1) ||
-                  (mNpatchXStretchCount == 0 && mNpatchYStretchCount == 0)))
+  if(DALI_LIKELY((mNpatchXStretchCount == 1 && mNpatchYStretchCount == 1) ||
+                 (mNpatchXStretchCount == 0 && mNpatchYStretchCount == 0)))
   {
     vertexShader += SHADER_NPATCH_VISUAL_3X3_SHADER_VERT;
   }
-  else if (mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
+  else if(mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
   {
     std::stringstream vertextShaderStream;
     vertextShaderStream << "#define FACTOR_SIZE_X " << mNpatchXStretchCount + 2 << "\n"
@@ -122,24 +122,24 @@ void NpatchShaderFactory::GetFragmentShader(std::string& fragmentShader) const
 bool NpatchShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderType shader, std::string&& vertexShader,
                                                std::string&& fragmentShader)
 {
-  for (uint32_t i = 0u; i < mRequestedPrecompileShader.size(); i++)
+  for(uint32_t i = 0u; i < mRequestedPrecompileShader.size(); i++)
   {
-    if (mRequestedPrecompileShader[i].type == shader)
+    if(mRequestedPrecompileShader[i].type == shader)
     {
       DALI_LOG_DEBUG_INFO(
-          "This shader already requsted(%s).",
-          Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-              mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
+        "This shader already requsted(%s).",
+        Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
+          mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
       return false;
     }
   }
 
   std::string shaderName = Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-      shader, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT);
-  if (!((mNpatchXStretchCount == 1 && mNpatchYStretchCount == 1) ||
-        (mNpatchXStretchCount == 0 && mNpatchYStretchCount == 0)))
+    shader, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT);
+  if(!((mNpatchXStretchCount == 1 && mNpatchYStretchCount == 1) ||
+       (mNpatchXStretchCount == 0 && mNpatchYStretchCount == 0)))
   {
-    if (mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
+    if(mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
     {
       std::stringstream shaderNameStream;
       shaderNameStream << "NINE_PATCH_SHADER_" << mNpatchXStretchCount << "x" << mNpatchYStretchCount;
@@ -150,9 +150,9 @@ bool NpatchShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderType sh
   DALI_LOG_RELEASE_INFO("Add precompile shader success!!(%s)", shaderName.c_str());
 
   RequestShaderInfo info;
-  info.type = shader;
-  info.name = std::move(shaderName);
-  info.vertexPrefix = std::move(vertexShader);
+  info.type           = shader;
+  info.name           = std::move(shaderName);
+  info.vertexPrefix   = std::move(vertexShader);
   info.fragmentPrefix = std::move(fragmentShader);
   mRequestedPrecompileShader.emplace_back(std::move(info));
   return true;

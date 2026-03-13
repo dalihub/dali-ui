@@ -38,7 +38,7 @@ namespace Text
  * @param[out] alignment The resulting alignment from the given source
  * @return true if the resulting alignment has been updated
  */
-bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue,
+bool GetHorizontalAlignmentEnumeration(const Property::Value&               propertyValue,
                                        Ui::Text::HorizontalAlignment::Type& alignment);
 
 /**
@@ -47,7 +47,7 @@ bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue,
  * @param[out] alignment The resulting alignment from the given source
  * @return true if the resulting alignment has been updated
  */
-bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue,
+bool GetVerticalAlignmentEnumeration(const Property::Value&             propertyValue,
                                      Ui::Text::VerticalAlignment::Type& alignment);
 
 /**
@@ -78,7 +78,7 @@ const char* GetVerticalAlignmentString(const Ui::Text::VerticalAlignment::Type& 
  * @param[out] ellipsisPositionType The resulting ellipsisPositionType from the given source
  * @return true if the resulting ellipsisPositionType has been updated
  */
-bool GetEllipsisPositionTypeEnumeration(const Property::Value& propertyValue,
+bool GetEllipsisPositionTypeEnumeration(const Property::Value&                 propertyValue,
                                         Ui::DevelText::EllipsisPosition::Type& ellipsisPositionType);
 
 /**

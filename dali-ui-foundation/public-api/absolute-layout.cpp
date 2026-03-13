@@ -31,12 +31,12 @@ AbsoluteLayout::AbsoluteLayout()
 }
 
 AbsoluteLayout::AbsoluteLayout(const AbsoluteLayout& layout)
-  : Layout(layout)
+: Layout(layout)
 {
 }
 
 AbsoluteLayout::AbsoluteLayout(AbsoluteLayout&& rhs) noexcept
-  : Layout(std::move(rhs))
+: Layout(std::move(rhs))
 {
 }
 
@@ -46,7 +46,7 @@ AbsoluteLayout::~AbsoluteLayout()
 
 AbsoluteLayout& AbsoluteLayout::operator=(const AbsoluteLayout& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Layout::operator=(handle);
   }
@@ -78,12 +78,12 @@ AbsoluteLayout AbsoluteLayout::DownCast(BaseHandle handle)
 }
 
 AbsoluteLayout::AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation)
-  : Layout(implementation)
+: Layout(implementation)
 {
 }
 
 AbsoluteLayout::AbsoluteLayout(Dali::Internal::CustomActor* internal)
-  : Layout(internal)
+: Layout(internal)
 {
   VerifyCustomActorPointer<Integration::AbsoluteLayoutImpl>(internal);
 }

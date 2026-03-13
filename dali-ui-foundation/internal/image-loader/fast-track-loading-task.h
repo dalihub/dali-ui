@@ -18,10 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/adaptor-framework/texture-upload-manager.h>
 #include <dali/integration-api/adaptor-framework/log-factory-interface.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/rendering/texture.h>
 
@@ -75,7 +75,7 @@ public: // Implementation of AsyncTask
 
 private:
   // Undefined
-  FastTrackLoadingTask(const FastTrackLoadingTask& queue) = delete;
+  FastTrackLoadingTask(const FastTrackLoadingTask& queue)            = delete;
   FastTrackLoadingTask& operator=(const FastTrackLoadingTask& queue) = delete;
 
   /**
@@ -110,15 +110,15 @@ private:
   void OnComplete(AsyncTaskPtr task);
 
 public:
-  VisualUrl mUrl;                       ///< url of the image to load.
+  VisualUrl                  mUrl;      ///< url of the image to load.
   std::vector<Dali::Texture> mTextures; ///< textures for regular image.
 
 private:
-  ImageDimensions mDimensions;      ///< dimensions to load
-  FittingMode::Type mFittingMode;   ///< fitting options
-  SamplingMode::Type mSamplingMode; ///< sampling options
+  ImageDimensions                          mDimensions;   ///< dimensions to load
+  FittingMode::Type                        mFittingMode;  ///< fitting options
+  SamplingMode::Type                       mSamplingMode; ///< sampling options
   DevelAsyncImageLoader::PreMultiplyOnLoad mPreMultiplyOnLoad;
-  std::unique_ptr<CallbackBase> mCallback;
+  std::unique_ptr<CallbackBase>            mCallback;
 
   // Texture Upload relative API
   Dali::Devel::TextureUploadManager mTextureUploadManager;
@@ -128,8 +128,8 @@ private:
   {
     uint32_t resourceId;
 
-    uint32_t width;
-    uint32_t height;
+    uint32_t      width;
+    uint32_t      height;
     Pixel::Format format;
   };
   std::vector<ImageInformation> mImageInformations;

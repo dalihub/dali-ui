@@ -35,12 +35,12 @@ namespace Internal
 /**
  * A safer std::advance()
  */
-template <typename IteratorType, typename EndIteratorType>
+template<typename IteratorType, typename EndIteratorType>
 inline int AdvanceIter(IteratorType& iter, EndIteratorType& end, int n)
 {
-  for (int i = 0; i < n; ++i)
+  for(int i = 0; i < n; ++i)
   {
-    if (iter == end)
+    if(iter == end)
     {
       return n - i;
     }
@@ -133,18 +133,18 @@ public:
   };
 
 private:
-  VectorCharIter mIter;          ///< Current position
-  VectorCharIter mStart;         ///< Start position
-  VectorCharIter mEnd;           ///< End of buffer being parsed
-  TreeNode* mRoot;               ///< Root node created
-  TreeNodeManipulator mCurrent;  ///< The Current modifiable node
-  const char* mErrorDescription; ///< The error description if set
-  int mErrorNewLine;             ///< The error line number
-  int mErrorColumn;              ///< The error column
-  int mErrorPosition;            ///< The error position
-  int mNumberOfParsedChars;      ///< The size of string data
-  int mNumberOfCreatedNodes;     ///< The number of nodes created
-  bool mFirstParse;              ///< Flag if first parse
+  VectorCharIter      mIter;                 ///< Current position
+  VectorCharIter      mStart;                ///< Start position
+  VectorCharIter      mEnd;                  ///< End of buffer being parsed
+  TreeNode*           mRoot;                 ///< Root node created
+  TreeNodeManipulator mCurrent;              ///< The Current modifiable node
+  const char*         mErrorDescription;     ///< The error description if set
+  int                 mErrorNewLine;         ///< The error line number
+  int                 mErrorColumn;          ///< The error column
+  int                 mErrorPosition;        ///< The error position
+  int                 mNumberOfParsedChars;  ///< The size of string data
+  int                 mNumberOfCreatedNodes; ///< The number of nodes created
+  bool                mFirstParse;           ///< Flag if first parse
 
   /**
    * The current parse state
@@ -242,7 +242,7 @@ private:
    */
   inline bool UpToParent()
   {
-    if (NULL == mCurrent.GetParent())
+    if(NULL == mCurrent.GetParent())
     {
       return Error("Attempt to walk up above root");
     }
@@ -274,7 +274,7 @@ private:
    */
   inline char Char()
   {
-    if (DALI_UNLIKELY(AtEnd()))
+    if(DALI_UNLIKELY(AtEnd()))
     {
       return '\0';
     }

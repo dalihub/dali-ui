@@ -65,18 +65,18 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
   EventData*& eventData = impl.mEventData;
 
-  if (nullptr != eventData)
+  if(nullptr != eventData)
   {
     // If popup shown then hide it by switching to Editing state
-    if ((EventData::SELECTING == eventData->mState) || (EventData::EDITING_WITH_POPUP == eventData->mState) ||
-        (EventData::EDITING_WITH_GRAB_HANDLE == eventData->mState) ||
-        (EventData::EDITING_WITH_PASTE_POPUP == eventData->mState))
+    if((EventData::SELECTING == eventData->mState) || (EventData::EDITING_WITH_POPUP == eventData->mState) ||
+       (EventData::EDITING_WITH_GRAB_HANDLE == eventData->mState) ||
+       (EventData::EDITING_WITH_PASTE_POPUP == eventData->mState))
     {
-      if ((impl.mSelectableControlInterface != nullptr) && (EventData::SELECTING == eventData->mState))
+      if((impl.mSelectableControlInterface != nullptr) && (EventData::SELECTING == eventData->mState))
       {
         impl.mSelectableControlInterface->SelectionChanged(
-            eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition, eventData->mPrimaryCursorPosition,
-            eventData->mPrimaryCursorPosition);
+          eventData->mLeftSelectionPosition, eventData->mRightSelectionPosition, eventData->mPrimaryCursorPosition,
+          eventData->mPrimaryCursorPosition);
       }
 
       impl.ChangeState(EventData::EDITING);
@@ -87,9 +87,9 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
   // Currently, this raw text cannot be updated when it is editable.
   impl.mRawText = text;
 
-  if (!text.empty())
+  if(!text.empty())
   {
-    ModelPtr& model = impl.mModel;
+    ModelPtr&        model        = impl.mModel;
     LogicalModelPtr& logicalModel = model->mLogicalModel;
     model->mVisualModel->SetTextColor(impl.mTextColor);
 
@@ -99,9 +99,9 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
                                         logicalModel->mStrikethroughCharacterRuns, logicalModel->mBoundedParagraphRuns,
                                         logicalModel->mCharacterSpacingCharacterRuns);
 
-    Length textSize = 0u;
-    const uint8_t* utf8 = NULL;
-    if (impl.mMarkupProcessorEnabled)
+    Length         textSize = 0u;
+    const uint8_t* utf8     = NULL;
+    if(impl.mMarkupProcessorEnabled)
     {
       MarkupPropertyData markupPropertyData(impl.mAnchorColor, impl.mAnchorClickedColor);
 
@@ -143,7 +143,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
     // The natural size needs to be re-calculated.
     impl.mRecalculateNaturalSize = true;
-    impl.mRecalculateLayoutSize = true;
+    impl.mRecalculateLayoutSize  = true;
     impl.mModel->mVisualModel->SetHeightForWidth(Size::ZERO);
 
     // The text direction needs to be updated.
@@ -154,7 +154,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
   }
   else
   {
-    if (nullptr != eventData)
+    if(nullptr != eventData)
     {
       PlaceholderHandler::ShowPlaceholderText(impl);
     }
@@ -175,14 +175,14 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
   impl.RequestRelayout();
 
-  if (nullptr != eventData)
+  if(nullptr != eventData)
   {
     // Cancel previously queued events
     eventData->mEventQueue.clear();
   }
 
   // Do this last since it provides callbacks into application code.
-  if (NULL != impl.mEditableControlInterface)
+  if(NULL != impl.mEditableControlInterface)
   {
     impl.mEditableControlInterface->CursorPositionChanged(oldCursorPos, lastCursorIndex);
     impl.mEditableControlInterface->TextChanged(true);
@@ -191,20 +191,20 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
 void Controller::TextUpdater::InsertText(Controller& controller, const std::string& text, Controller::InsertType type)
 {
-  Controller::Impl& impl = *controller.mImpl;
-  EventData*& eventData = impl.mEventData;
+  Controller::Impl& impl      = *controller.mImpl;
+  EventData*&       eventData = impl.mEventData;
 
   DALI_ASSERT_DEBUG(nullptr != eventData && "Unexpected InsertText")
 
-  if (NULL == eventData)
+  if(NULL == eventData)
   {
     return;
   }
 
-  bool removedPrevious = false;
-  bool removedSelected = false;
-  bool maxLengthReached = false;
-  unsigned int oldCursorPos = eventData->mPrimaryCursorPosition;
+  bool         removedPrevious  = false;
+  bool         removedSelected  = false;
+  bool         maxLengthReached = false;
+  unsigned int oldCursorPos     = eventData->mPrimaryCursorPosition;
 
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "Controller::InsertText %p %s (%s) mPrimaryCursorPosition %d mPreEditFlag %d mPreEditStartPosition %d "
@@ -212,21 +212,21 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
                 &controller, text.c_str(), (COMMIT == type ? "COMMIT" : "PRE_EDIT"), eventData->mPrimaryCursorPosition,
                 eventData->mPreEditFlag, eventData->mPreEditStartPosition, eventData->mPreEditLength);
 
-  ModelPtr& model = impl.mModel;
+  ModelPtr&        model        = impl.mModel;
   LogicalModelPtr& logicalModel = model->mLogicalModel;
 
   // TODO: At the moment the underline runs are only for pre-edit.
   model->mVisualModel->mUnderlineRuns.Clear();
 
   // Remove the previous InputMethodContext pre-edit.
-  if (eventData->mPreEditFlag && (0u != eventData->mPreEditLength))
+  if(eventData->mPreEditFlag && (0u != eventData->mPreEditLength))
   {
     removedPrevious =
-        RemoveText(controller, -static_cast<int>(eventData->mPrimaryCursorPosition - eventData->mPreEditStartPosition),
-                   eventData->mPreEditLength, DONT_UPDATE_INPUT_STYLE, true);
+      RemoveText(controller, -static_cast<int>(eventData->mPrimaryCursorPosition - eventData->mPreEditStartPosition),
+                 eventData->mPreEditLength, DONT_UPDATE_INPUT_STYLE, true);
 
     eventData->mPrimaryCursorPosition = eventData->mPreEditStartPosition;
-    eventData->mPreEditLength = 0u;
+    eventData->mPreEditLength         = 0u;
   }
   else
   {
@@ -235,13 +235,13 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
   }
 
   Vector<Character> utf32Characters;
-  Length characterCount = 0u;
+  Length            characterCount = 0u;
 
-  if (!text.empty())
+  if(!text.empty())
   {
     std::string redefinedText = text;
 
-    if (controller.mImpl->mInputFilter != NULL)
+    if(controller.mImpl->mInputFilter != NULL)
     {
       bool accepted = false;
       bool rejected = false;
@@ -249,12 +249,12 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
       accepted = impl.mInputFilter->Filter(Ui::InputFilter::Property::ACCEPTED, redefinedText);
       rejected = impl.mInputFilter->Filter(Ui::InputFilter::Property::REJECTED, redefinedText);
 
-      if (accepted)
+      if(accepted)
       {
         // Signal emits when the string to be inserted is filtered by the accepted filter.
         controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
       }
-      if (rejected)
+      if(rejected)
       {
         // Signal emits when the string to be inserted is filtered by the rejected filter.
         controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::REJECTED);
@@ -277,10 +277,10 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
                   utf32Characters.Count());
   }
 
-  if (0u != utf32Characters.Count()) // Check if Utf8ToUtf32 conversion succeeded
+  if(0u != utf32Characters.Count()) // Check if Utf8ToUtf32 conversion succeeded
   {
     // The placeholder text is no longer needed
-    if (impl.IsShowingPlaceholderText())
+    if(impl.IsShowingPlaceholderText())
     {
       ResetText(controller);
     }
@@ -288,14 +288,14 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     impl.ChangeState(EventData::EDITING);
 
     // Handle the InputMethodContext (predicitive text) state changes
-    if (COMMIT == type)
+    if(COMMIT == type)
     {
       // InputMethodContext is no longer handling key-events
       impl.ClearPreEditFlag();
     }
     else // PRE_EDIT
     {
-      if (!eventData->mPreEditFlag)
+      if(!eventData->mPreEditFlag)
       {
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Entered PreEdit state\n");
 
@@ -304,7 +304,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
       }
 
       eventData->mPreEditLength = utf32Characters.Count();
-      eventData->mPreEditFlag = true;
+      eventData->mPreEditFlag   = true;
 
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "mPreEditStartPosition %d mPreEditLength %d\n",
                     eventData->mPreEditStartPosition, eventData->mPreEditLength);
@@ -313,11 +313,11 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     const Length numberOfCharactersInModel = logicalModel->mText.Count();
 
     // Restrict new text to fit within Maximum characters setting.
-    Length temp_length = (impl.mMaximumNumberOfCharacters > numberOfCharactersInModel
-                              ? impl.mMaximumNumberOfCharacters - numberOfCharactersInModel
-                              : 0);
+    Length temp_length      = (impl.mMaximumNumberOfCharacters > numberOfCharactersInModel
+                                 ? impl.mMaximumNumberOfCharacters - numberOfCharactersInModel
+                                 : 0);
     Length maxSizeOfNewText = std::min(temp_length, characterCount);
-    maxLengthReached = (characterCount > maxSizeOfNewText);
+    maxLengthReached        = (characterCount > maxSizeOfNewText);
 
     // The cursor position.
     CharacterIndex& cursorIndex = eventData->mPrimaryCursorPosition;
@@ -341,35 +341,35 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     const bool addColorRun = (style.textColor != inputStyle.textColor) && !inputStyle.isDefaultColor;
 
     // Whether to add a new font run.
-    const bool addFontNameRun = (style.familyName != inputStyle.familyName) && inputStyle.isFamilyDefined;
+    const bool addFontNameRun   = (style.familyName != inputStyle.familyName) && inputStyle.isFamilyDefined;
     const bool addFontWeightRun = (style.weight != inputStyle.weight) && inputStyle.isWeightDefined;
-    const bool addFontWidthRun = (style.width != inputStyle.width) && inputStyle.isWidthDefined;
-    const bool addFontSlantRun = (style.slant != inputStyle.slant) && inputStyle.isSlantDefined;
-    const bool addFontSizeRun = (!Dali::Equals(style.size, inputStyle.size)) && inputStyle.isSizeDefined;
+    const bool addFontWidthRun  = (style.width != inputStyle.width) && inputStyle.isWidthDefined;
+    const bool addFontSlantRun  = (style.slant != inputStyle.slant) && inputStyle.isSlantDefined;
+    const bool addFontSizeRun   = (!Dali::Equals(style.size, inputStyle.size)) && inputStyle.isSizeDefined;
 
     // Add style runs.
-    if (addColorRun)
+    if(addColorRun)
     {
       const VectorBase::SizeType numberOfRuns = logicalModel->mColorRuns.Count();
       logicalModel->mColorRuns.Resize(numberOfRuns + 1u);
 
-      ColorRun& colorRun = *(logicalModel->mColorRuns.Begin() + numberOfRuns);
-      colorRun.color = inputStyle.textColor;
-      colorRun.characterRun.characterIndex = cursorIndex;
+      ColorRun& colorRun                       = *(logicalModel->mColorRuns.Begin() + numberOfRuns);
+      colorRun.color                           = inputStyle.textColor;
+      colorRun.characterRun.characterIndex     = cursorIndex;
       colorRun.characterRun.numberOfCharacters = maxSizeOfNewText;
     }
 
-    if (addFontNameRun || addFontWeightRun || addFontWidthRun || addFontSlantRun || addFontSizeRun)
+    if(addFontNameRun || addFontWeightRun || addFontWidthRun || addFontSlantRun || addFontSizeRun)
     {
       const VectorBase::SizeType numberOfRuns = logicalModel->mFontDescriptionRuns.Count();
       logicalModel->mFontDescriptionRuns.Resize(numberOfRuns + 1u);
 
       FontDescriptionRun& fontDescriptionRun = *(logicalModel->mFontDescriptionRuns.Begin() + numberOfRuns);
 
-      if (addFontNameRun)
+      if(addFontNameRun)
       {
         fontDescriptionRun.familyLength = inputStyle.familyName.size();
-        fontDescriptionRun.familyName = new char[fontDescriptionRun.familyLength];
+        fontDescriptionRun.familyName   = new char[fontDescriptionRun.familyLength];
         memcpy(fontDescriptionRun.familyName, inputStyle.familyName.c_str(), fontDescriptionRun.familyLength);
         fontDescriptionRun.familyDefined = true;
 
@@ -377,31 +377,31 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
         // model.
       }
 
-      if (addFontWeightRun)
+      if(addFontWeightRun)
       {
-        fontDescriptionRun.weight = inputStyle.weight;
+        fontDescriptionRun.weight        = inputStyle.weight;
         fontDescriptionRun.weightDefined = true;
       }
 
-      if (addFontWidthRun)
+      if(addFontWidthRun)
       {
-        fontDescriptionRun.width = inputStyle.width;
+        fontDescriptionRun.width        = inputStyle.width;
         fontDescriptionRun.widthDefined = true;
       }
 
-      if (addFontSlantRun)
+      if(addFontSlantRun)
       {
-        fontDescriptionRun.slant = inputStyle.slant;
+        fontDescriptionRun.slant        = inputStyle.slant;
         fontDescriptionRun.slantDefined = true;
       }
 
-      if (addFontSizeRun)
+      if(addFontSizeRun)
       {
-        fontDescriptionRun.size = static_cast<PointSize26Dot6>(inputStyle.size * impl.GetFontSizeScale() * 64.f);
+        fontDescriptionRun.size        = static_cast<PointSize26Dot6>(inputStyle.size * impl.GetFontSizeScale() * 64.f);
         fontDescriptionRun.sizeDefined = true;
       }
 
-      fontDescriptionRun.characterRun.characterIndex = cursorIndex;
+      fontDescriptionRun.characterRun.characterIndex     = cursorIndex;
       fontDescriptionRun.characterRun.numberOfCharacters = maxSizeOfNewText;
     }
 
@@ -409,14 +409,14 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     Vector<Character>& modifyText = logicalModel->mText;
 
     auto pos = modifyText.End();
-    if (cursorIndex < numberOfCharactersInModel)
+    if(cursorIndex < numberOfCharactersInModel)
     {
       pos = modifyText.Begin() + cursorIndex;
     }
     unsigned int realPos = static_cast<unsigned int>(pos - modifyText.Begin());
     modifyText.Insert(pos, utf32Characters.Begin(), utf32Characters.Begin() + maxSizeOfNewText);
 
-    if (NULL != impl.mEditableControlInterface)
+    if(NULL != impl.mEditableControlInterface)
     {
       impl.mEditableControlInterface->TextInserted(realPos, maxSizeOfNewText, text);
     }
@@ -424,12 +424,12 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
 
     // Mark the first paragraph to be updated.
-    if (Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout())
+    if(Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout())
     {
-      textUpdateInfo.mCharacterIndex = 0;
+      textUpdateInfo.mCharacterIndex             = 0;
       textUpdateInfo.mNumberOfCharactersToRemove = textUpdateInfo.mPreviousNumberOfCharacters;
-      textUpdateInfo.mNumberOfCharactersToAdd = numberOfCharactersInModel + maxSizeOfNewText;
-      textUpdateInfo.mClearAll = true;
+      textUpdateInfo.mNumberOfCharactersToAdd    = numberOfCharactersInModel + maxSizeOfNewText;
+      textUpdateInfo.mClearAll                   = true;
     }
     else
     {
@@ -437,7 +437,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
       textUpdateInfo.mNumberOfCharactersToAdd += maxSizeOfNewText;
     }
 
-    if (impl.mMarkupProcessorEnabled)
+    if(impl.mMarkupProcessorEnabled)
     {
       InsertTextAnchor(controller, maxSizeOfNewText, cursorIndex);
     }
@@ -449,20 +449,20 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
                   logicalModel->mText.Count(), eventData->mPrimaryCursorPosition);
   }
 
-  if ((0u == logicalModel->mText.Count()) && impl.IsPlaceholderAvailable())
+  if((0u == logicalModel->mText.Count()) && impl.IsPlaceholderAvailable())
   {
     // Show place-holder if empty after removing the pre-edit text
     PlaceholderHandler::ShowPlaceholderText(impl);
     eventData->mUpdateCursorPosition = true;
     impl.ClearPreEditFlag();
   }
-  else if (removedPrevious || removedSelected || (0 != utf32Characters.Count()))
+  else if(removedPrevious || removedSelected || (0 != utf32Characters.Count()))
   {
     // Queue an inserted event
     impl.QueueModifyEvent(ModifyEvent::TEXT_INSERTED);
 
     eventData->mUpdateCursorPosition = true;
-    if (removedSelected)
+    if(removedSelected)
     {
       eventData->mScrollAfterDelete = true;
     }
@@ -472,18 +472,18 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     }
   }
 
-  if (nullptr != impl.mEditableControlInterface)
+  if(nullptr != impl.mEditableControlInterface)
   {
     impl.mEditableControlInterface->CursorPositionChanged(oldCursorPos, eventData->mPrimaryCursorPosition);
   }
 
-  if (maxLengthReached)
+  if(maxLengthReached)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "MaxLengthReached (%d)\n", logicalModel->mText.Count());
 
     impl.ResetInputMethodContext();
 
-    if (NULL != impl.mEditableControlInterface)
+    if(NULL != impl.mEditableControlInterface)
     {
       // Do this last since it provides callbacks into application code
       impl.mEditableControlInterface->MaxLengthReached();
@@ -498,7 +498,7 @@ void Controller::TextUpdater::PasteText(Controller& controller, const std::strin
   impl.ChangeState(EventData::EDITING);
   impl.RequestRelayout();
 
-  if (NULL != impl.mEditableControlInterface)
+  if(NULL != impl.mEditableControlInterface)
   {
     // Do this last since it provides callbacks into application code
     impl.mEditableControlInterface->TextChanged(true);
@@ -508,36 +508,36 @@ void Controller::TextUpdater::PasteText(Controller& controller, const std::strin
 bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffset, int numberOfCharacters,
                                          UpdateInputStyleType type, bool isDeletingPreEdit)
 {
-  bool removed = false;
+  bool removed   = false;
   bool removeAll = false;
 
-  Controller::Impl& impl = *controller.mImpl;
-  EventData*& eventData = impl.mEventData;
+  Controller::Impl& impl      = *controller.mImpl;
+  EventData*&       eventData = impl.mEventData;
 
-  if (nullptr == eventData)
+  if(nullptr == eventData)
   {
     return removed;
   }
 
-  ModelPtr& model = impl.mModel;
+  ModelPtr&        model        = impl.mModel;
   LogicalModelPtr& logicalModel = model->mLogicalModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
+  VisualModelPtr&  visualModel  = model->mVisualModel;
 
   DALI_LOG_INFO(gLogFilter, Debug::General,
                 "Controller::RemoveText %p mText.Count() %d cursor %d cursorOffset %d numberOfCharacters %d\n",
                 &controller, logicalModel->mText.Count(), eventData->mPrimaryCursorPosition, cursorOffset,
                 numberOfCharacters);
 
-  if (!impl.IsShowingPlaceholderText())
+  if(!impl.IsShowingPlaceholderText())
   {
     // Delete at current cursor position
-    Vector<Character>& currentText = logicalModel->mText;
-    CharacterIndex& previousCursorIndex = eventData->mPrimaryCursorPosition;
+    Vector<Character>& currentText         = logicalModel->mText;
+    CharacterIndex&    previousCursorIndex = eventData->mPrimaryCursorPosition;
 
     CharacterIndex cursorIndex = 0;
 
     // Validate the cursor position & number of characters
-    if ((static_cast<int>(eventData->mPrimaryCursorPosition) + cursorOffset) >= 0)
+    if((static_cast<int>(eventData->mPrimaryCursorPosition) + cursorOffset) >= 0)
     {
       cursorIndex = eventData->mPrimaryCursorPosition + cursorOffset;
     }
@@ -548,11 +548,11 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
     //   - After: when use backspace key and cursor is after Emoji (cursorOffset = 0)
 
     const Script script = logicalModel->GetScript(cursorIndex);
-    if ((numberOfCharacters == 1u) && (IsOneOfEmojiScripts(script)))
+    if((numberOfCharacters == 1u) && (IsOneOfEmojiScripts(script)))
     {
       // TODO: Use this clustering for Emoji cases only. This needs more testing to generalize to all scripts.
       CharacterRun emojiClusteredCharacters =
-          RetrieveClusteredCharactersOfCharacterIndex(visualModel, logicalModel, cursorIndex);
+        RetrieveClusteredCharactersOfCharacterIndex(visualModel, logicalModel, cursorIndex);
       Length actualNumberOfCharacters = emojiClusteredCharacters.numberOfCharacters;
 
       // Set cursorIndex at the first characterIndex of clustred Emoji
@@ -561,40 +561,40 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       numberOfCharacters = actualNumberOfCharacters;
     }
 
-    if (HasLigatureMustBreak(script) && cursorOffset == 0) // delete key.
+    if(HasLigatureMustBreak(script) && cursorOffset == 0) // delete key.
     {
-      GlyphIndex glyphIndex = *(visualModel->mCharactersToGlyph.Begin() + cursorIndex);
-      Length actualNumberOfCharacters = *(visualModel->mCharactersPerGlyph.Begin() + glyphIndex);
-      if (actualNumberOfCharacters == 2u &&
-          TextAbstraction::IsCombiningDiacriticalMarks(*(currentText.Begin() + cursorIndex + 1u)))
+      GlyphIndex glyphIndex               = *(visualModel->mCharactersToGlyph.Begin() + cursorIndex);
+      Length     actualNumberOfCharacters = *(visualModel->mCharactersPerGlyph.Begin() + glyphIndex);
+      if(actualNumberOfCharacters == 2u &&
+         TextAbstraction::IsCombiningDiacriticalMarks(*(currentText.Begin() + cursorIndex + 1u)))
       {
         numberOfCharacters = 2u;
       }
     }
 
-    if ((cursorIndex + numberOfCharacters) > currentText.Count())
+    if((cursorIndex + numberOfCharacters) > currentText.Count())
     {
       numberOfCharacters = currentText.Count() - cursorIndex;
     }
 
-    if ((cursorIndex == 0) && (currentText.Count() - numberOfCharacters == 0))
+    if((cursorIndex == 0) && (currentText.Count() - numberOfCharacters == 0))
     {
       removeAll = true;
     }
 
     TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
 
-    if (eventData->mPreEditFlag || removeAll || // If the preedit flag is enabled, it means two (or more) of them came
-                                                // together i.e. when two keys have been pressed at the same time.
-        ((cursorIndex + numberOfCharacters) <= textUpdateInfo.mPreviousNumberOfCharacters))
+    if(eventData->mPreEditFlag || removeAll || // If the preedit flag is enabled, it means two (or more) of them came
+                                               // together i.e. when two keys have been pressed at the same time.
+       ((cursorIndex + numberOfCharacters) <= textUpdateInfo.mPreviousNumberOfCharacters))
     {
       // Mark the paragraphs to be updated.
-      if (Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout())
+      if(Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout())
       {
-        textUpdateInfo.mCharacterIndex = 0;
+        textUpdateInfo.mCharacterIndex             = 0;
         textUpdateInfo.mNumberOfCharactersToRemove = textUpdateInfo.mPreviousNumberOfCharacters;
-        textUpdateInfo.mNumberOfCharactersToAdd = textUpdateInfo.mPreviousNumberOfCharacters - numberOfCharacters;
-        textUpdateInfo.mClearAll = true;
+        textUpdateInfo.mNumberOfCharactersToAdd    = textUpdateInfo.mPreviousNumberOfCharacters - numberOfCharacters;
+        textUpdateInfo.mClearAll                   = true;
       }
       else
       {
@@ -604,7 +604,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       // Update the input style and remove the text's style before removing the text.
 
-      if (UPDATE_INPUT_STYLE == type)
+      if(UPDATE_INPUT_STYLE == type)
       {
         InputStyle& eventDataInputStyle = eventData->mInputStyle;
 
@@ -621,7 +621,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
         // Compare if the input style has changed.
         const bool hasInputStyleChanged = !currentInputStyle.Equal(eventDataInputStyle);
 
-        if (hasInputStyleChanged)
+        if(hasInputStyleChanged)
         {
           const InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(eventDataInputStyle);
           // Queue the input style changed signal.
@@ -631,10 +631,10 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       // If the number of current text and the number of characters to be deleted are same,
       // it means all texts should be removed and all Preedit variables should be initialized.
-      if (removeAll)
+      if(removeAll)
       {
         impl.ClearPreEditFlag();
-        if (!isDeletingPreEdit)
+        if(!isDeletingPreEdit)
         {
           textUpdateInfo.mNumberOfCharactersToAdd = 0;
         }
@@ -645,13 +645,13 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       // Remove the characters.
       Vector<Character>::Iterator first = currentText.Begin() + cursorIndex;
-      Vector<Character>::Iterator last = first + numberOfCharacters;
+      Vector<Character>::Iterator last  = first + numberOfCharacters;
 
-      if (NULL != impl.mEditableControlInterface)
+      if(NULL != impl.mEditableControlInterface)
       {
         std::string utf8;
         Utf32ToUtf8(first, numberOfCharacters, utf8);
-        if (!isDeletingPreEdit)
+        if(!isDeletingPreEdit)
         {
           impl.mEditableControlInterface->TextDeleted(cursorIndex, numberOfCharacters, utf8);
         }
@@ -659,12 +659,12 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       currentText.Erase(first, last);
 
-      if (impl.mMarkupProcessorEnabled)
+      if(impl.mMarkupProcessorEnabled)
       {
         RemoveTextAnchor(controller, cursorOffset, numberOfCharacters, previousCursorIndex);
       }
 
-      if (nullptr != impl.mEditableControlInterface)
+      if(nullptr != impl.mEditableControlInterface)
       {
         impl.mEditableControlInterface->CursorPositionChanged(previousCursorIndex, cursorIndex);
       }
@@ -674,7 +674,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       eventData->mScrollAfterDelete = true;
 
-      if (EventData::INACTIVE == eventData->mState)
+      if(EventData::INACTIVE == eventData->mState)
       {
         impl.ChangeState(EventData::EDITING);
       }
@@ -682,7 +682,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::RemoveText %p removed %d\n", &controller,
                     numberOfCharacters);
       removeAll = false;
-      removed = true;
+      removed   = true;
     }
   }
 
@@ -695,33 +695,33 @@ bool Controller::TextUpdater::RemoveSelectedText(Controller& controller)
 
   Controller::Impl& impl = *controller.mImpl;
 
-  if (EventData::SELECTING == impl.mEventData->mState)
+  if(EventData::SELECTING == impl.mEventData->mState)
   {
     std::string removedString;
-    uint32_t oldSelStart = impl.mEventData->mLeftSelectionPosition;
-    uint32_t oldSelEnd = impl.mEventData->mRightSelectionPosition;
+    uint32_t    oldSelStart = impl.mEventData->mLeftSelectionPosition;
+    uint32_t    oldSelEnd   = impl.mEventData->mRightSelectionPosition;
 
     impl.RetrieveSelection(removedString, true);
 
-    if (!removedString.empty())
+    if(!removedString.empty())
     {
       textRemoved = true;
       impl.ChangeState(EventData::EDITING);
 
-      if (impl.mMarkupProcessorEnabled)
+      if(impl.mMarkupProcessorEnabled)
       {
-        int cursorOffset = -1;
-        int numberOfCharacters = removedString.length();
-        CharacterIndex& cursorIndex = impl.mEventData->mPrimaryCursorPosition;
-        CharacterIndex previousCursorIndex = cursorIndex + numberOfCharacters;
+        int             cursorOffset        = -1;
+        int             numberOfCharacters  = removedString.length();
+        CharacterIndex& cursorIndex         = impl.mEventData->mPrimaryCursorPosition;
+        CharacterIndex  previousCursorIndex = cursorIndex + numberOfCharacters;
 
         RemoveTextAnchor(controller, cursorOffset, numberOfCharacters, previousCursorIndex);
       }
 
-      if (impl.mSelectableControlInterface != nullptr)
+      if(impl.mSelectableControlInterface != nullptr)
       {
         impl.mSelectableControlInterface->SelectionChanged(
-            oldSelStart, oldSelEnd, impl.mEventData->mPrimaryCursorPosition, impl.mEventData->mPrimaryCursorPosition);
+          oldSelStart, oldSelEnd, impl.mEventData->mPrimaryCursorPosition, impl.mEventData->mPrimaryCursorPosition);
       }
     }
   }
@@ -731,8 +731,8 @@ bool Controller::TextUpdater::RemoveSelectedText(Controller& controller)
 
 void Controller::TextUpdater::ResetText(Controller& controller)
 {
-  Controller::Impl& impl = *controller.mImpl;
-  LogicalModelPtr& logicalModel = impl.mModel->mLogicalModel;
+  Controller::Impl& impl         = *controller.mImpl;
+  LogicalModelPtr&  logicalModel = impl.mModel->mLogicalModel;
 
   // Reset buffers.
   logicalModel->mText.Clear();
@@ -746,16 +746,16 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   // We have cleared everything including the placeholder-text
   impl.PlaceholderCleared();
 
-  impl.mTextUpdateInfo.mCharacterIndex = 0u;
+  impl.mTextUpdateInfo.mCharacterIndex             = 0u;
   impl.mTextUpdateInfo.mNumberOfCharactersToRemove = impl.mTextUpdateInfo.mPreviousNumberOfCharacters;
-  impl.mTextUpdateInfo.mNumberOfCharactersToAdd = 0u;
+  impl.mTextUpdateInfo.mNumberOfCharactersToAdd    = 0u;
 
   // Clear any previous text.
   impl.mTextUpdateInfo.mClearAll = true;
 
   // The natural size needs to be re-calculated.
   impl.mRecalculateNaturalSize = true;
-  impl.mRecalculateLayoutSize = true;
+  impl.mRecalculateLayoutSize  = true;
 
   // The text direction needs to be updated.
   impl.mUpdateTextDirection = true;
@@ -767,17 +767,17 @@ void Controller::TextUpdater::ResetText(Controller& controller)
 void Controller::TextUpdater::InsertTextAnchor(Controller& controller, int numberOfCharacters,
                                                CharacterIndex previousCursorIndex)
 {
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  LogicalModelPtr& logicalModel = model->mLogicalModel;
+  Controller::Impl& impl         = *controller.mImpl;
+  ModelPtr&         model        = impl.mModel;
+  LogicalModelPtr&  logicalModel = model->mLogicalModel;
 
-  for (auto& anchor : logicalModel->mAnchors)
+  for(auto& anchor : logicalModel->mAnchors)
   {
-    if (anchor.endIndex < previousCursorIndex) //      [anchor]  CUR
+    if(anchor.endIndex < previousCursorIndex) //      [anchor]  CUR
     {
       continue;
     }
-    if (anchor.startIndex < previousCursorIndex) //      [anCURr]
+    if(anchor.startIndex < previousCursorIndex) //      [anCURr]
     {
       anchor.endIndex += numberOfCharacters;
     }
@@ -794,33 +794,33 @@ void Controller::TextUpdater::InsertTextAnchor(Controller& controller, int numbe
 void Controller::TextUpdater::RemoveTextAnchor(Controller& controller, int cursorOffset, int numberOfCharacters,
                                                CharacterIndex previousCursorIndex)
 {
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  LogicalModelPtr& logicalModel = model->mLogicalModel;
-  Vector<Anchor>::Iterator it = logicalModel->mAnchors.Begin();
+  Controller::Impl&        impl         = *controller.mImpl;
+  ModelPtr&                model        = impl.mModel;
+  LogicalModelPtr&         logicalModel = model->mLogicalModel;
+  Vector<Anchor>::Iterator it           = logicalModel->mAnchors.Begin();
 
-  while (it != logicalModel->mAnchors.End())
+  while(it != logicalModel->mAnchors.End())
   {
     Anchor& anchor = *it;
 
-    if (anchor.endIndex <= previousCursorIndex && cursorOffset == 0) // [anchor]    CUR >>
+    if(anchor.endIndex <= previousCursorIndex && cursorOffset == 0) // [anchor]    CUR >>
     {
       // Nothing happens.
     }
-    else if (anchor.endIndex <= previousCursorIndex && cursorOffset == -1) // [anchor] << CUR
+    else if(anchor.endIndex <= previousCursorIndex && cursorOffset == -1) // [anchor] << CUR
     {
       int endIndex = anchor.endIndex;
-      int offset = previousCursorIndex - endIndex;
-      int index = endIndex - (numberOfCharacters - offset);
+      int offset   = previousCursorIndex - endIndex;
+      int index    = endIndex - (numberOfCharacters - offset);
 
-      if (index < endIndex)
+      if(index < endIndex)
       {
         endIndex = index;
       }
 
-      if ((int)anchor.startIndex >= endIndex)
+      if((int)anchor.startIndex >= endIndex)
       {
-        if (anchor.href)
+        if(anchor.href)
         {
           delete[] anchor.href;
         }
@@ -832,29 +832,29 @@ void Controller::TextUpdater::RemoveTextAnchor(Controller& controller, int curso
         anchor.endIndex = endIndex;
       }
     }
-    else if (anchor.startIndex >= previousCursorIndex && cursorOffset == -1) // << CUR    [anchor]
+    else if(anchor.startIndex >= previousCursorIndex && cursorOffset == -1) // << CUR    [anchor]
     {
       anchor.startIndex -= numberOfCharacters;
       anchor.endIndex -= numberOfCharacters;
     }
-    else if (anchor.startIndex >= previousCursorIndex && cursorOffset == 0) //    CUR >> [anchor]
+    else if(anchor.startIndex >= previousCursorIndex && cursorOffset == 0) //    CUR >> [anchor]
     {
       int startIndex = anchor.startIndex;
-      int endIndex = anchor.endIndex;
-      int index = previousCursorIndex + numberOfCharacters - 1;
+      int endIndex   = anchor.endIndex;
+      int index      = previousCursorIndex + numberOfCharacters - 1;
 
-      if (startIndex > index)
+      if(startIndex > index)
       {
         anchor.startIndex -= numberOfCharacters;
         anchor.endIndex -= numberOfCharacters;
       }
-      else if (endIndex > index + 1)
+      else if(endIndex > index + 1)
       {
         anchor.endIndex -= numberOfCharacters;
       }
       else
       {
-        if (anchor.href)
+        if(anchor.href)
         {
           delete[] anchor.href;
         }
@@ -862,18 +862,18 @@ void Controller::TextUpdater::RemoveTextAnchor(Controller& controller, int curso
         continue;
       }
     }
-    else if (cursorOffset == -1) // [<< CUR]
+    else if(cursorOffset == -1) // [<< CUR]
     {
       int startIndex = anchor.startIndex;
-      int index = previousCursorIndex - numberOfCharacters;
+      int index      = previousCursorIndex - numberOfCharacters;
 
-      if (startIndex >= index)
+      if(startIndex >= index)
       {
         anchor.startIndex = index;
       }
       anchor.endIndex -= numberOfCharacters;
     }
-    else if (cursorOffset == 0) // [CUR >>]
+    else if(cursorOffset == 0) // [CUR >>]
     {
       anchor.endIndex -= numberOfCharacters;
     }

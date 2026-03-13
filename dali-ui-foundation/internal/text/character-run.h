@@ -33,19 +33,19 @@ namespace Text
 struct CharacterRun
 {
   CharacterRun()
-    : characterIndex{0u},
-      numberOfCharacters{0u}
+  : characterIndex{0u},
+    numberOfCharacters{0u}
   {
   }
 
   CharacterRun(CharacterIndex characterIndex, Length numberOfCharacters)
-    : characterIndex{characterIndex},
-      numberOfCharacters{numberOfCharacters}
+  : characterIndex{characterIndex},
+    numberOfCharacters{numberOfCharacters}
   {
   }
 
-  CharacterIndex characterIndex; ///< Index to the first character.
-  Length numberOfCharacters;     ///< Number of characters in the run.
+  CharacterIndex characterIndex;     ///< Index to the first character.
+  Length         numberOfCharacters; ///< Number of characters in the run.
 
   // Methods
 

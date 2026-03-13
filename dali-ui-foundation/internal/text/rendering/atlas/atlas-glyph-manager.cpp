@@ -42,16 +42,16 @@ AtlasGlyphManager AtlasGlyphManager::Get()
 
   // Check whether the AtlasGlyphManager is already created
   SingletonService singletonService(SingletonService::Get());
-  if (singletonService)
+  if(singletonService)
   {
     Dali::BaseHandle handle = singletonService.GetSingleton(typeid(AtlasGlyphManager));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle of singleton to AtlasGlyphManager
       manager = AtlasGlyphManager(dynamic_cast<Internal::AtlasGlyphManager*>(handle.GetObjectPtr()));
     }
 
-    if (!manager)
+    if(!manager)
     {
       // If not, create the AtlasGlyphManager and register it as a singleton
       manager = AtlasGlyphManager(new Internal::AtlasGlyphManager());
@@ -62,7 +62,7 @@ AtlasGlyphManager AtlasGlyphManager::Get()
 }
 
 AtlasGlyphManager::AtlasGlyphManager(Internal::AtlasGlyphManager* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

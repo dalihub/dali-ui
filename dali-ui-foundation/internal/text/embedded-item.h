@@ -40,11 +40,11 @@ namespace Text
  */
 struct EmbeddedItem
 {
-  CharacterIndex characterIndex;       ///< The character's index of the embedded item within the string.
-  char* url;                           ///< The url path of the image.
-  Length urlLength;                    ///< The length of the url.
-  unsigned int width;                  ///< The width of the item.
-  unsigned int height;                 ///< The height of the item.
+  CharacterIndex    characterIndex;    ///< The character's index of the embedded item within the string.
+  char*             url;               ///< The url path of the image.
+  Length            urlLength;         ///< The length of the url.
+  unsigned int      width;             ///< The width of the item.
+  unsigned int      height;            ///< The height of the item.
   ColorBlendingMode colorBlendingMode; ///< Whether the color of the image is multiplied by the color of the text.
 };
 

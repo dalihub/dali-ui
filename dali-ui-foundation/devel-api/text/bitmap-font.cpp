@@ -32,18 +32,18 @@ namespace Ui
 namespace DevelText
 {
 Glyph::Glyph()
-  : url{},
-    utf8{},
-    ascender{0.f},
-    descender{0.f}
+: url{},
+  utf8{},
+  ascender{0.f},
+  descender{0.f}
 {
 }
 
 Glyph::Glyph(const std::string& url, const std::string utf8Character, float ascender, float descender)
-  : url{url},
-    utf8{},
-    ascender{ascender},
-    descender{descender}
+: url{url},
+  utf8{},
+  ascender{ascender},
+  descender{descender}
 {
   DALI_ASSERT_DEBUG(utf8Character.size() <= 6u);
 
@@ -58,11 +58,11 @@ Glyph::~Glyph()
 }
 
 BitmapFontDescription::BitmapFontDescription()
-  : glyphs{},
-    name{},
-    underlinePosition{0.f},
-    underlineThickness{1.f},
-    isColorFont{false}
+: glyphs{},
+  name{},
+  underlinePosition{0.f},
+  underlineThickness{1.f},
+  isColorFont{false}
 {
 }
 
@@ -73,12 +73,12 @@ BitmapFontDescription::~BitmapFontDescription()
 void CreateBitmapFont(const BitmapFontDescription& description, TextAbstraction::BitmapFont& bitmapFont)
 {
   bitmapFont.glyphs.reserve(description.glyphs.size());
-  bitmapFont.name = description.name;
-  bitmapFont.underlinePosition = description.underlinePosition;
+  bitmapFont.name               = description.name;
+  bitmapFont.underlinePosition  = description.underlinePosition;
   bitmapFont.underlineThickness = description.underlineThickness;
-  bitmapFont.isColorFont = description.isColorFont;
+  bitmapFont.isColorFont        = description.isColorFont;
 
-  for (const auto& glyph : description.glyphs)
+  for(const auto& glyph : description.glyphs)
   {
     uint32_t c = 0u;
     Text::Utf8ToUtf32(glyph.utf8, Text::GetUtf8Length(glyph.utf8[0u]), &c);

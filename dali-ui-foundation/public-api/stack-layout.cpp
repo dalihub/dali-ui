@@ -31,12 +31,12 @@ StackLayout::StackLayout()
 }
 
 StackLayout::StackLayout(const StackLayout& layout)
-  : Layout(layout)
+: Layout(layout)
 {
 }
 
 StackLayout::StackLayout(StackLayout&& rhs) noexcept
-  : Layout(std::move(rhs))
+: Layout(std::move(rhs))
 {
 }
 
@@ -46,7 +46,7 @@ StackLayout::~StackLayout()
 
 StackLayout& StackLayout::operator=(const StackLayout& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Layout::operator=(handle);
   }
@@ -78,12 +78,12 @@ StackLayout StackLayout::DownCast(BaseHandle handle)
 }
 
 StackLayout::StackLayout(Integration::StackLayoutImpl& implementation)
-  : Layout(implementation)
+: Layout(implementation)
 {
 }
 
 StackLayout::StackLayout(Dali::Internal::CustomActor* internal)
-  : Layout(internal)
+: Layout(internal)
 {
   VerifyCustomActorPointer<Integration::StackLayoutImpl>(internal);
 }

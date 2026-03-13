@@ -33,9 +33,9 @@ Length GetNumberOfGlyphsOfGroup(GlyphIndex glyphIndex, GlyphIndex lastGlyphPlusO
 {
   Length numberOfGLyphsInGroup = 1u;
 
-  for (GlyphIndex index = glyphIndex; index < lastGlyphPlusOne; ++index)
+  for(GlyphIndex index = glyphIndex; index < lastGlyphPlusOne; ++index)
   {
-    if (0u == *(charactersPerGlyphBuffer + index))
+    if(0u == *(charactersPerGlyphBuffer + index))
     {
       ++numberOfGLyphsInGroup;
     }
@@ -54,32 +54,32 @@ void GetGlyphsMetrics(GlyphIndex glyphIndex, Length numberOfGlyphs, GlyphMetrics
   const GlyphInfo& firstGlyph = *(glyphsBuffer + glyphIndex);
 
   Text::FontMetrics fontMetrics;
-  if (0u != firstGlyph.fontId)
+  if(0u != firstGlyph.fontId)
   {
     metrics->GetFontMetrics(firstGlyph.fontId, fontMetrics);
   }
-  else if (0u != firstGlyph.index)
+  else if(0u != firstGlyph.index)
   {
     // It may be an embedded image.
-    fontMetrics.ascender = firstGlyph.height;
+    fontMetrics.ascender  = firstGlyph.height;
     fontMetrics.descender = 0.f;
-    fontMetrics.height = fontMetrics.ascender;
+    fontMetrics.height    = fontMetrics.ascender;
   }
 
   const bool isItalicFont = metrics->HasItalicStyle(firstGlyph.fontId);
 
-  glyphMetrics.fontId = firstGlyph.fontId;
+  glyphMetrics.fontId     = firstGlyph.fontId;
   glyphMetrics.fontHeight = fontMetrics.height;
-  glyphMetrics.width = firstGlyph.width;
-  glyphMetrics.advance = calculatedAdvance;
-  glyphMetrics.ascender = fontMetrics.ascender;
-  glyphMetrics.xBearing = firstGlyph.xBearing;
+  glyphMetrics.width      = firstGlyph.width;
+  glyphMetrics.advance    = calculatedAdvance;
+  glyphMetrics.ascender   = fontMetrics.ascender;
+  glyphMetrics.xBearing   = firstGlyph.xBearing;
 
-  if (1u < numberOfGlyphs)
+  if(1u < numberOfGlyphs)
   {
     float maxWidthEdge = firstGlyph.xBearing + firstGlyph.width;
 
-    for (unsigned int i = 1u; i < numberOfGlyphs; ++i)
+    for(unsigned int i = 1u; i < numberOfGlyphs; ++i)
     {
       const GlyphInfo& glyphInfo = *(glyphsBuffer + glyphIndex + i);
 
@@ -88,7 +88,7 @@ void GetGlyphsMetrics(GlyphIndex glyphIndex, Length numberOfGlyphs, GlyphMetrics
 
       // update the max width edge if bigger.
       const float currentMaxGlyphWidthEdge = glyphMetrics.advance + glyphInfo.xBearing + glyphInfo.width;
-      maxWidthEdge = std::max(maxWidthEdge, currentMaxGlyphWidthEdge);
+      maxWidthEdge                         = std::max(maxWidthEdge, currentMaxGlyphWidthEdge);
 
       glyphMetrics.advance += (glyphInfo.advance);
     }
@@ -97,34 +97,34 @@ void GetGlyphsMetrics(GlyphIndex glyphIndex, Length numberOfGlyphs, GlyphMetrics
   }
 
   glyphMetrics.width += (firstGlyph.isItalicRequired && !isItalicFont)
-                            ? TextAbstraction::FontClient::DEFAULT_ITALIC_ANGLE * firstGlyph.height
-                            : 0.f;
+                          ? TextAbstraction::FontClient::DEFAULT_ITALIC_ANGLE * firstGlyph.height
+                          : 0.f;
 }
 
 void GetGlyphMetricsFromCharacterIndex(CharacterIndex index, const VisualModelPtr& visualModel,
                                        const LogicalModelPtr& logicalModel, MetricsPtr& metrics,
                                        GlyphMetrics& glyphMetrics, GlyphIndex& glyphIndex, Length& numberOfGlyphs)
 {
-  const GlyphIndex* const charactersToGlyphBuffer = visualModel->mCharactersToGlyph.Begin();
-  const Length* const glyphsPerCharacterBuffer = visualModel->mGlyphsPerCharacter.Begin();
-  const GlyphInfo* const glyphInfoBuffer = visualModel->mGlyphs.Begin();
-  Vector<CharacterIndex>& glyphToCharacterMap = visualModel->mGlyphsToCharacters;
-  const CharacterIndex* glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
-  const float modelCharacterSpacing = visualModel->GetCharacterSpacing();
+  const GlyphIndex* const charactersToGlyphBuffer   = visualModel->mCharactersToGlyph.Begin();
+  const Length* const     glyphsPerCharacterBuffer  = visualModel->mGlyphsPerCharacter.Begin();
+  const GlyphInfo* const  glyphInfoBuffer           = visualModel->mGlyphs.Begin();
+  Vector<CharacterIndex>& glyphToCharacterMap       = visualModel->mGlyphsToCharacters;
+  const CharacterIndex*   glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
+  const float             modelCharacterSpacing     = visualModel->GetCharacterSpacing();
 
   // Get the character-spacing runs.
   const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns = visualModel->GetCharacterSpacingGlyphRuns();
 
   // Takes the character index, obtains the glyph index (and the number of Glyphs) from it and finally gets the glyph
   // metrics.
-  glyphIndex = *(charactersToGlyphBuffer + index);
+  glyphIndex     = *(charactersToGlyphBuffer + index);
   numberOfGlyphs = *(glyphsPerCharacterBuffer + index);
 
   float calculatedAdvance = 0.f;
 
   const float characterSpacing = GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
-  calculatedAdvance = GetCalculatedAdvance(*(logicalModel->mText.Begin() + (*(glyphToCharacterMapBuffer + glyphIndex))),
-                                           characterSpacing, (*(visualModel->mGlyphs.Begin() + glyphIndex)).advance);
+  calculatedAdvance            = GetCalculatedAdvance(*(logicalModel->mText.Begin() + (*(glyphToCharacterMapBuffer + glyphIndex))),
+                                                      characterSpacing, (*(visualModel->mGlyphs.Begin() + glyphIndex)).advance);
 
   // Get the metrics for the group of glyphs.
   GetGlyphsMetrics(glyphIndex, numberOfGlyphs, glyphMetrics, glyphInfoBuffer, metrics, calculatedAdvance);
@@ -137,8 +137,8 @@ float GetCalculatedAdvance(unsigned int character, float characterSpacing, float
   return (TextAbstraction::IsZeroWidthNonJoiner(character) || TextAbstraction::IsZeroWidthJoiner(character) ||
           TextAbstraction::IsZeroWidthSpace(character) || TextAbstraction::IsNewParagraph(character) ||
           TextAbstraction::IsLeftToRightMark(character) || TextAbstraction::IsRightToLeftMark(character))
-             ? advance
-             : advance + characterSpacing;
+           ? advance
+           : advance + characterSpacing;
 }
 
 } // namespace Text

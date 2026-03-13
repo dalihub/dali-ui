@@ -90,57 +90,57 @@ namespace Dali
 namespace Ui
 {
 PrecompileShaderOption::PrecompileShaderOption(const Property::Map& shaderOption)
-  : mShaderType(ShaderType::UNKNOWN),
-    mShaderOptions(),
-    mShaderName(""),
-    mVertexShader(""),
-    mFragmentShader(""),
-    mNpatchXStretchCount(0),
-    mNpatchYStretchCount(0)
+: mShaderType(ShaderType::UNKNOWN),
+  mShaderOptions(),
+  mShaderName(""),
+  mVertexShader(""),
+  mFragmentShader(""),
+  mNpatchXStretchCount(0),
+  mNpatchYStretchCount(0)
 {
   ConvertShaderMap(shaderOption);
 }
 
 void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
 {
-  for (unsigned int shaderIdx = 0; shaderIdx < shaderOption.Count(); ++shaderIdx)
+  for(unsigned int shaderIdx = 0; shaderIdx < shaderOption.Count(); ++shaderIdx)
   {
     const KeyValuePair pair(shaderOption.GetKeyValue(shaderIdx));
-    if (pair.first.type == Property::Key::INDEX)
+    if(pair.first.type == Property::Key::INDEX)
     {
       continue; // We don't consider index keys.
     }
 
-    const std::string& key(pair.first.stringKey);
+    const std::string&     key(pair.first.stringKey);
     const Property::Value& value(pair.second);
 
-    if (key == TOKEN_TYPE)
+    if(key == TOKEN_TYPE)
     {
-      if (!GetEnumerationProperty(value, SHADER_TYPE_TABLE, SHADER_TYPE_TABLE_COUNT, mShaderType) ||
-          mShaderType == ShaderType::UNKNOWN)
+      if(!GetEnumerationProperty(value, SHADER_TYPE_TABLE, SHADER_TYPE_TABLE_COUNT, mShaderType) ||
+         mShaderType == ShaderType::UNKNOWN)
       {
         DALI_LOG_ERROR("Can't find proper type[%s]\n", value.Get<std::string>().c_str());
         continue;
       }
     }
-    else if (key == TOKEN_OPTION)
+    else if(key == TOKEN_OPTION)
     {
       Property::Map optionMap = value.Get<Property::Map>();
-      for (size_t optionMapIdx = 0; optionMapIdx < optionMap.Count(); ++optionMapIdx)
+      for(size_t optionMapIdx = 0; optionMapIdx < optionMap.Count(); ++optionMapIdx)
       {
         const KeyValuePair optionPair(optionMap.GetKeyValue(optionMapIdx));
 
-        if (optionPair.first.type == Property::Key::INDEX)
+        if(optionPair.first.type == Property::Key::INDEX)
         {
           continue; // We don't consider index keys.
         }
 
-        Flag flag = Flag::UNKNOWN;
+        Flag               flag = Flag::UNKNOWN;
         const std::string& optionKey(optionPair.first.stringKey);
-        if (GetEnumeration(optionKey.c_str(), SHADER_OPTION_FLAG_TABLE, SHADER_OPTION_FLAG_TABLE_COUNT, flag) &&
-            flag != Flag::UNKNOWN)
+        if(GetEnumeration(optionKey.c_str(), SHADER_OPTION_FLAG_TABLE, SHADER_OPTION_FLAG_TABLE_COUNT, flag) &&
+           flag != Flag::UNKNOWN)
         {
-          if (optionPair.second.Get<bool>())
+          if(optionPair.second.Get<bool>())
           {
             mShaderOptions.push_back(flag);
           }
@@ -152,37 +152,37 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
         }
       }
     }
-    else if (key == TOKEN_CUSTOM_VERTEX)
+    else if(key == TOKEN_CUSTOM_VERTEX)
     {
-      if (value.GetType() == Property::STRING)
+      if(value.GetType() == Property::STRING)
       {
         mVertexShader = value.Get<std::string>();
       }
     }
-    else if (key == TOKEN_CUSTOM_FRAMENT)
+    else if(key == TOKEN_CUSTOM_FRAMENT)
     {
-      if (value.GetType() == Property::STRING)
+      if(value.GetType() == Property::STRING)
       {
         mFragmentShader = value.Get<std::string>();
       }
     }
-    else if (key == TOKEN_CUSTOM_NAME)
+    else if(key == TOKEN_CUSTOM_NAME)
     {
-      if (value.GetType() == Property::STRING)
+      if(value.GetType() == Property::STRING)
       {
         mShaderName = value.Get<std::string>();
       }
     }
-    else if (key == TOKEN_OPTION_STRETCH_X)
+    else if(key == TOKEN_OPTION_STRETCH_X)
     {
-      if (value.GetType() == Property::INTEGER)
+      if(value.GetType() == Property::INTEGER)
       {
         mNpatchXStretchCount = value.Get<int>();
       }
     }
-    else if (key == TOKEN_OPTION_STRETCH_Y)
+    else if(key == TOKEN_OPTION_STRETCH_Y)
     {
-      if (value.GetType() == Property::INTEGER)
+      if(value.GetType() == Property::INTEGER)
       {
         mNpatchYStretchCount = value.Get<int>();
       }

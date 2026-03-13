@@ -94,10 +94,10 @@ public:
 
 public:
   // Default copy and move operator
-  AsyncTextManager(const AsyncTextManager& rhs) = default;
-  AsyncTextManager(AsyncTextManager&& rhs) = default;
+  AsyncTextManager(const AsyncTextManager& rhs)            = default;
+  AsyncTextManager(AsyncTextManager&& rhs)                 = default;
   AsyncTextManager& operator=(const AsyncTextManager& rhs) = default;
-  AsyncTextManager& operator=(AsyncTextManager&& rhs) = default;
+  AsyncTextManager& operator=(AsyncTextManager&& rhs)      = default;
 };
 
 } // namespace Text

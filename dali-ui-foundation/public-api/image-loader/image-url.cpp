@@ -63,7 +63,7 @@ const std::string& ImageUrl::GetUrl() const
 }
 
 ImageUrl::ImageUrl(Ui::Internal::ImageUrl* internal)
-  : BaseHandle(internal)
+: BaseHandle(internal)
 {
 }
 

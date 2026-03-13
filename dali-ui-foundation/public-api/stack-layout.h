@@ -20,8 +20,8 @@
 // EXTERNAL INCLUDES
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layout.h>
 
 namespace Dali
 {
@@ -100,7 +100,6 @@ public:
   static StackLayout DownCast(BaseHandle handle);
 
 public: // API
-
   /**
    * @brief Sets the orientation of the stack layout.
    *

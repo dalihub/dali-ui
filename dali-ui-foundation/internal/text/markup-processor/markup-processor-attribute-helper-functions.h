@@ -62,7 +62,7 @@ float ProcessFloatAttribute(const Attribute& attribute);
  * @return      True if the enum value was processed successfully
  *
  */
-template <typename T>
+template<typename T>
 bool ProcessEnumerationAttribute(const Attribute& attribute, const Length maxLengthAttributeValue,
                                  std::function<T(const char* const)> funcStringToEnum, T& enumValue)
 {

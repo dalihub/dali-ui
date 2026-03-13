@@ -26,19 +26,19 @@ namespace Ui
 {
 TextLoadObserver::TextInformation::TextInformation(const Text::AsyncTextRenderInfo& renderInfo,
                                                    const Text::AsyncTextParameters& parameters)
-  : renderInfo(renderInfo),
-    parameters(parameters)
+: renderInfo(renderInfo),
+  parameters(parameters)
 {
 }
 
 TextLoadObserver::TextLoadObserver()
-  : mDestructionSignalConnect(0)
+: mDestructionSignalConnect(0)
 {
 }
 
 TextLoadObserver::~TextLoadObserver()
 {
-  if (!mDestructionSignal.Empty())
+  if(!mDestructionSignal.Empty())
   {
     mDestructionSignal.Emit(this);
   }
@@ -57,7 +57,7 @@ void TextLoadObserver::ConnectDestructionSignal()
 bool TextLoadObserver::DisconnectDestructionSignal()
 {
   mDestructionSignalConnect--;
-  if (mDestructionSignalConnect < 0)
+  if(mDestructionSignalConnect < 0)
   {
     mDestructionSignalConnect = 0;
   }

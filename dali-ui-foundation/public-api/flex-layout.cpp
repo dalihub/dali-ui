@@ -31,12 +31,12 @@ FlexLayout::FlexLayout()
 }
 
 FlexLayout::FlexLayout(const FlexLayout& layout)
-  : Layout(layout)
+: Layout(layout)
 {
 }
 
 FlexLayout::FlexLayout(FlexLayout&& rhs) noexcept
-  : Layout(std::move(rhs))
+: Layout(std::move(rhs))
 {
 }
 
@@ -46,7 +46,7 @@ FlexLayout::~FlexLayout()
 
 FlexLayout& FlexLayout::operator=(const FlexLayout& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Layout::operator=(handle);
   }
@@ -78,12 +78,12 @@ FlexLayout FlexLayout::DownCast(BaseHandle handle)
 }
 
 FlexLayout::FlexLayout(Integration::FlexLayoutImpl& implementation)
-  : Layout(implementation)
+: Layout(implementation)
 {
 }
 
 FlexLayout::FlexLayout(Dali::Internal::CustomActor* internal)
-  : Layout(internal)
+: Layout(internal)
 {
   VerifyCustomActorPointer<Integration::FlexLayoutImpl>(internal);
 }

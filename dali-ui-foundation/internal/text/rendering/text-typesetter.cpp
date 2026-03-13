@@ -104,31 +104,31 @@ void CombineImageBuffer(Devel::PixelBuffer& __restrict__ topPixelBuffer,
 {
   // Assume that we always combine two RGBA images
   // Jump with 4bytes for optimize runtime.
-  uint32_t* topBuffer = reinterpret_cast<uint32_t*>(topPixelBuffer.GetBuffer());
+  uint32_t* topBuffer    = reinterpret_cast<uint32_t*>(topPixelBuffer.GetBuffer());
   uint32_t* bottomBuffer = reinterpret_cast<uint32_t*>(bottomPixelBuffer.GetBuffer());
 
-  if (topBuffer == nullptr && bottomBuffer == nullptr)
+  if(topBuffer == nullptr && bottomBuffer == nullptr)
   {
     // Nothing to do if both buffers are empty.
     return;
   }
 
-  if (topBuffer == nullptr)
+  if(topBuffer == nullptr)
   {
     // Nothing to do if topBuffer is empty.
     // If we need to store the result into top, change topPixelBuffer as bottomPixelBuffer.
-    if (storeResultIntoTop)
+    if(storeResultIntoTop)
     {
       topPixelBuffer = bottomPixelBuffer;
     }
     return;
   }
 
-  if (bottomBuffer == nullptr)
+  if(bottomBuffer == nullptr)
   {
     // Nothing to do if bottomBuffer is empty.
     // If we need to store the result into bottom, change bottomPixelBuffer as topPixelBuffer.
-    if (!storeResultIntoTop)
+    if(!storeResultIntoTop)
     {
       bottomPixelBuffer = topPixelBuffer;
     }
@@ -137,10 +137,10 @@ void CombineImageBuffer(Devel::PixelBuffer& __restrict__ topPixelBuffer,
 
   const uint32_t bufferSizeInt = bufferWidth * bufferHeight;
 
-  uint32_t* __restrict__ combinedBuffer = storeResultIntoTop ? topBuffer : bottomBuffer;
+  uint32_t* __restrict__ combinedBuffer       = storeResultIntoTop ? topBuffer : bottomBuffer;
   uint8_t* __restrict__ topAlphaBufferPointer = reinterpret_cast<uint8_t*>(topBuffer) + 3;
 
-  for (uint32_t pixelIndex = 0; pixelIndex < bufferSizeInt; ++pixelIndex)
+  for(uint32_t pixelIndex = 0; pixelIndex < bufferSizeInt; ++pixelIndex)
   {
     // If the alpha of the pixel in either buffer is not fully opaque, blend the two pixels.
     // Otherwise, copy pixel from topBuffer to combinedBuffer.
@@ -148,18 +148,18 @@ void CombineImageBuffer(Devel::PixelBuffer& __restrict__ topPixelBuffer,
 
     uint8_t topAlpha = *topAlphaBufferPointer;
 
-    if (topAlpha == 0)
+    if(topAlpha == 0)
     {
       // Copy the pixel from bottomBuffer to combinedBuffer
-      if (storeResultIntoTop)
+      if(storeResultIntoTop)
       {
         *(combinedBuffer) = *(bottomBuffer);
       }
     }
-    else if (topAlpha == 255)
+    else if(topAlpha == 255)
     {
       // Copy the pixel from topBuffer to combinedBuffer
-      if (!storeResultIntoTop)
+      if(!storeResultIntoTop)
       {
         *(combinedBuffer) = *(topBuffer);
       }
@@ -168,7 +168,7 @@ void CombineImageBuffer(Devel::PixelBuffer& __restrict__ topPixelBuffer,
     {
       // At least one pixel is not fully opaque
       // "Over" blend the the pixel from topBuffer with the pixel in bottomBuffer
-      uint32_t blendedBottomBufferColor = *(bottomBuffer);
+      uint32_t blendedBottomBufferColor                    = *(bottomBuffer);
       uint8_t* __restrict__ blendedBottomBufferColorBuffer = reinterpret_cast<uint8_t*>(&blendedBottomBufferColor);
 
       blendedBottomBufferColorBuffer[0] = MultiplyAndNormalizeColor(blendedBottomBufferColorBuffer[0], 255 - topAlpha);
@@ -209,7 +209,7 @@ PixelData Typesetter::Render(const Vector2& size, Ui::DevelText::TextDirection::
                              const Vector2& originSize)
 {
   Devel::PixelBuffer result =
-      RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
   PixelData pixelData = Devel::PixelBuffer::Convert(result);
 
   return pixelData;
@@ -221,7 +221,7 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Ui::DevelText::TextD
                                        const Vector2& originSize)
 {
   Devel::PixelBuffer result =
-      RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+    RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
   SetMaskForImageBuffer(mask, result, size.width, size.height, originAlpha);
 
   PixelData pixelData = Devel::PixelBuffer::Convert(result);
@@ -229,7 +229,7 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Ui::DevelText::TextD
   return pixelData;
 }
 
-Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
+Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&                     size,
                                                      Ui::DevelText::TextDirection::Type textDirection,
                                                      RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
                                                      Pixel::Format pixelFormat, const Vector2& originSize)
@@ -244,12 +244,12 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
   viewModel.ElideGlyphs(mImpl->GetFontClient());
 
   // Retrieves the layout size.
-  const Size& layoutSize = viewModel.GetLayoutSize();
+  const Size&   layoutSize   = viewModel.GetLayoutSize();
   const int32_t outlineWidth = static_cast<int32_t>(viewModel.GetOutlineWidth());
 
   // Set the offset for the horizontal alignment according to the text direction and outline width.
   int32_t penX = 0;
-  switch (viewModel.GetHorizontalAlignment())
+  switch(viewModel.GetHorizontalAlignment())
   {
     case HorizontalAlignment::BEGIN:
     {
@@ -269,13 +269,13 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
   }
 
   // Consider the case where pen y needs to be calculated based on the original size when rendering auto scroll texture.
-  bool isOriginHeight = originSize.height > 0.0f ? true : false;
-  float controlHeight = isOriginHeight ? viewModel.GetControlSize().height : size.height;
-  float layoutHeight = isOriginHeight ? originSize.height : layoutSize.height;
+  bool  isOriginHeight = originSize.height > 0.0f ? true : false;
+  float controlHeight  = isOriginHeight ? viewModel.GetControlSize().height : size.height;
+  float layoutHeight   = isOriginHeight ? originSize.height : layoutSize.height;
 
   // Set the offset for the vertical alignment.
   int32_t penY = 0u;
-  switch (viewModel.GetVerticalAlignment())
+  switch(viewModel.GetVerticalAlignment())
   {
     case VerticalAlignment::TOP:
     {
@@ -295,11 +295,11 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
   }
 
   const bool isCutoutEnabled = viewModel.IsCutoutEnabled();
-  if (isCutoutEnabled)
+  if(isCutoutEnabled)
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX = offset.x;
-    penY = offset.y;
+    penX           = offset.x;
+    penY           = offset.y;
   }
 
   // Generate the image buffers of the text for each different style first,
@@ -307,25 +307,25 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
   // do all of these in CPU only, so that once the final texture is generated,
   // no calculation is needed in GPU during each frame.
 
-  const uint32_t bufferWidth = static_cast<uint32_t>(size.width);
+  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
   const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
 
-  const uint32_t bufferSizeInt = bufferWidth * bufferHeight;
-  const size_t bufferSizeChar = sizeof(uint32_t) * static_cast<std::size_t>(bufferSizeInt);
+  const uint32_t bufferSizeInt  = bufferWidth * bufferHeight;
+  const size_t   bufferSizeChar = sizeof(uint32_t) * static_cast<std::size_t>(bufferSizeInt);
 
   // Elided text in ellipsis at START could start on index greater than 0
   auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
-  auto endIndexOfGlyphs = viewModel.GetEndIndexOfElidedGlyphs();
+  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
 
   Devel::PixelBuffer imageBuffer;
 
-  if (RENDER_MASK == behaviour)
+  if(RENDER_MASK == behaviour)
   {
     // Generate the image buffer as an alpha mask for color glyphs.
     imageBuffer = mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_MASK, ignoreHorizontalAlignment,
                                            pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
   }
-  else if (RENDER_NO_TEXT == behaviour || RENDER_OVERLAY_STYLE == behaviour)
+  else if(RENDER_NO_TEXT == behaviour || RENDER_OVERLAY_STYLE == behaviour)
   {
     // Generate an empty image buffer so that it can been combined with the image buffers for styles
     imageBuffer = Devel::PixelBuffer::New(bufferWidth, bufferHeight, Pixel::RGBA8888);
@@ -338,21 +338,21 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
                                            pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
   }
 
-  if ((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
+  if((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
   {
     // Generate the outline if enabled
     const uint16_t outlineWidth = viewModel.GetOutlineWidth();
-    const float outlineAlpha = viewModel.GetOutlineColor().a;
-    if (outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1 && RENDER_OVERLAY_STYLE != behaviour)
+    const float    outlineAlpha = viewModel.GetOutlineColor().a;
+    if(outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1 && RENDER_OVERLAY_STYLE != behaviour)
     {
       // Create the image buffer for outline
       Devel::PixelBuffer outlineImageBuffer =
-          mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_OUTLINE, ignoreHorizontalAlignment,
-                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+        mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_OUTLINE, ignoreHorizontalAlignment,
+                                 pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
 
       const float& blurRadius = viewModel.GetOutlineBlurRadius();
 
-      if (blurRadius > Math::MACHINE_EPSILON_1)
+      if(blurRadius > Math::MACHINE_EPSILON_1)
       {
         outlineImageBuffer.ApplyGaussianBlur(blurRadius);
       }
@@ -365,19 +365,19 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
 
     // Generate the shadow if enabled
     const Vector2& shadowOffset = viewModel.GetShadowOffset();
-    const float shadowAlpha = viewModel.GetShadowColor().a;
-    if (RENDER_OVERLAY_STYLE != behaviour && fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
-        (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
+    const float    shadowAlpha  = viewModel.GetShadowColor().a;
+    if(RENDER_OVERLAY_STYLE != behaviour && fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
+       (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
     {
       // Create the image buffer for shadow
       Devel::PixelBuffer shadowImageBuffer =
-          mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_SHADOW, ignoreHorizontalAlignment,
-                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+        mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_SHADOW, ignoreHorizontalAlignment,
+                                 pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
 
       // Check whether it will be a soft shadow
       const float& blurRadius = viewModel.GetShadowBlurRadius();
 
-      if (blurRadius > Math::MACHINE_EPSILON_1)
+      if(blurRadius > Math::MACHINE_EPSILON_1)
       {
         shadowImageBuffer.ApplyGaussianBlur(blurRadius);
       }
@@ -387,24 +387,24 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
     }
 
     // Generate the background if enabled
-    const bool backgroundEnabled = viewModel.IsBackgroundEnabled();
+    const bool backgroundEnabled   = viewModel.IsBackgroundEnabled();
     const bool backgroundMarkupSet = viewModel.IsMarkupBackgroundColorSet();
-    if ((backgroundEnabled || backgroundMarkupSet) && RENDER_OVERLAY_STYLE != behaviour)
+    if((backgroundEnabled || backgroundMarkupSet) && RENDER_OVERLAY_STYLE != behaviour)
     {
       Devel::PixelBuffer backgroundImageBuffer;
 
-      if (backgroundEnabled)
+      if(backgroundEnabled)
       {
         backgroundImageBuffer =
-            mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_BACKGROUND, ignoreHorizontalAlignment,
-                                     pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+          mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_BACKGROUND, ignoreHorizontalAlignment,
+                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
       }
       else
       {
         backgroundImageBuffer = Impl::CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
       }
 
-      if (backgroundMarkupSet)
+      if(backgroundMarkupSet)
       {
         mImpl->DrawGlyphsBackground(backgroundImageBuffer, bufferWidth, bufferHeight, ignoreHorizontalAlignment, penX,
                                     penY);
@@ -416,51 +416,51 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
 
     // Generate the background_with_mask if enabled
     const bool backgroundWithCutoutEnabled = viewModel.IsBackgroundWithCutoutEnabled();
-    if ((backgroundWithCutoutEnabled) && RENDER_OVERLAY_STYLE != behaviour)
+    if((backgroundWithCutoutEnabled) && RENDER_OVERLAY_STYLE != behaviour)
     {
       Devel::PixelBuffer backgroundImageBuffer;
 
       backgroundImageBuffer =
-          CreateFullBackgroundBuffer(bufferWidth, bufferHeight, viewModel.GetBackgroundColorWithCutout());
+        CreateFullBackgroundBuffer(bufferWidth, bufferHeight, viewModel.GetBackgroundColorWithCutout());
 
       // Combine the two buffers
       CombineImageBuffer(imageBuffer, backgroundImageBuffer, bufferWidth, bufferHeight, true);
     }
 
-    if (RENDER_OVERLAY_STYLE == behaviour)
+    if(RENDER_OVERLAY_STYLE == behaviour)
     {
-      if (viewModel.IsUnderlineEnabled())
+      if(viewModel.IsUnderlineEnabled())
       {
         // Create the image buffer for underline
         Devel::PixelBuffer underlineImageBuffer =
-            mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_UNDERLINE, ignoreHorizontalAlignment,
-                                     pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+          mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_UNDERLINE, ignoreHorizontalAlignment,
+                                   pixelFormat, penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
 
         // Combine the two buffers
         CombineImageBuffer(imageBuffer, underlineImageBuffer, bufferWidth, bufferHeight, true);
       }
 
-      if (viewModel.IsStrikethroughEnabled())
+      if(viewModel.IsStrikethroughEnabled())
       {
         // Create the image buffer for strikethrough
         Devel::PixelBuffer strikethroughImageBuffer =
-            mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_STRIKETHROUGH,
-                                     ignoreHorizontalAlignment, pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
+          mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_STRIKETHROUGH,
+                                   ignoreHorizontalAlignment, pixelFormat, penX, penY, 0u, endIndexOfGlyphs);
 
         // Combine the two buffers
         CombineImageBuffer(imageBuffer, strikethroughImageBuffer, bufferWidth, bufferHeight, true);
       }
 
       // Markup-Processor for overlay styles
-      if (viewModel.IsMarkupProcessorEnabled())
+      if(viewModel.IsMarkupProcessorEnabled())
       {
-        if (viewModel.IsMarkupUnderlineSet())
+        if(viewModel.IsMarkupUnderlineSet())
         {
           imageBuffer = ApplyUnderlineMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
                                                         ignoreHorizontalAlignment, pixelFormat, penX, penY);
         }
 
-        if (viewModel.IsMarkupStrikethroughSet())
+        if(viewModel.IsMarkupStrikethroughSet())
         {
           imageBuffer = ApplyStrikethroughMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
                                                             ignoreHorizontalAlignment, pixelFormat, penX, penY);
@@ -475,21 +475,21 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
 Devel::PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
                                                           const Vector4& backgroundColor)
 {
-  const uint32_t bufferSizeInt = bufferWidth * bufferHeight;
-  uint8_t backgroundColorAlpha = static_cast<uint8_t>(backgroundColor.a * 255.f);
+  const uint32_t bufferSizeInt        = bufferWidth * bufferHeight;
+  uint8_t        backgroundColorAlpha = static_cast<uint8_t>(backgroundColor.a * 255.f);
 
   Devel::PixelBuffer buffer = Devel::PixelBuffer::New(bufferWidth, bufferHeight, Pixel::RGBA8888);
 
   uint32_t* bitmapBuffer = reinterpret_cast<uint32_t*>(buffer.GetBuffer());
 
-  uint32_t packedBackgroundColor = 0u;
+  uint32_t packedBackgroundColor       = 0u;
   uint8_t* packedBackgroundColorBuffer = reinterpret_cast<uint8_t*>(&packedBackgroundColor);
 
   // Write the color to the pixel buffer
   *(packedBackgroundColorBuffer + 3u) = backgroundColorAlpha;
   *(packedBackgroundColorBuffer + 2u) = static_cast<uint8_t>(backgroundColor.b * backgroundColorAlpha);
   *(packedBackgroundColorBuffer + 1u) = static_cast<uint8_t>(backgroundColor.g * backgroundColorAlpha);
-  *(packedBackgroundColorBuffer) = static_cast<uint8_t>(backgroundColor.r * backgroundColorAlpha);
+  *(packedBackgroundColorBuffer)      = static_cast<uint8_t>(backgroundColor.r * backgroundColorAlpha);
 
   std::fill(bitmapBuffer, bitmapBuffer + bufferSizeInt, packedBackgroundColor);
 
@@ -498,36 +498,36 @@ Devel::PixelBuffer Typesetter::CreateFullBackgroundBuffer(const uint32_t bufferW
 
 Devel::PixelBuffer Typesetter::ApplyUnderlineMarkupImageBuffer(Devel::PixelBuffer topPixelBuffer,
                                                                const uint32_t bufferWidth, const uint32_t bufferHeight,
-                                                               const bool ignoreHorizontalAlignment,
+                                                               const bool          ignoreHorizontalAlignment,
                                                                const Pixel::Format pixelFormat,
-                                                               const int32_t horizontalOffset,
-                                                               const int32_t verticalOffset)
+                                                               const int32_t       horizontalOffset,
+                                                               const int32_t       verticalOffset)
 {
   // Use l-value to make ensure it is not nullptr, so compiler happy.
   auto& viewModel = *(mImpl->GetViewModel());
 
   // Underline-tags (this is for Markup case)
   // Get the underline runs.
-  const Length numberOfUnderlineRuns = viewModel.GetNumberOfUnderlineRuns();
+  const Length               numberOfUnderlineRuns = viewModel.GetNumberOfUnderlineRuns();
   Vector<UnderlinedGlyphRun> underlineRuns;
   underlineRuns.Resize(numberOfUnderlineRuns);
   viewModel.GetUnderlineRuns(underlineRuns.Begin(), 0u, numberOfUnderlineRuns);
 
   // Iterate on the consecutive underlined glyph run and connect them into one chunk of underlined characters.
-  Vector<UnderlinedGlyphRun>::ConstIterator itGlyphRun = underlineRuns.Begin();
+  Vector<UnderlinedGlyphRun>::ConstIterator itGlyphRun    = underlineRuns.Begin();
   Vector<UnderlinedGlyphRun>::ConstIterator endItGlyphRun = underlineRuns.End();
-  GlyphIndex startGlyphIndex, endGlyphIndex;
+  GlyphIndex                                startGlyphIndex, endGlyphIndex;
 
   // The outer loop to iterate on the separated chunks of underlined glyph runs
-  while (itGlyphRun != endItGlyphRun)
+  while(itGlyphRun != endItGlyphRun)
   {
     startGlyphIndex = itGlyphRun->glyphRun.glyphIndex;
-    endGlyphIndex = startGlyphIndex + itGlyphRun->glyphRun.numberOfGlyphs - 1;
+    endGlyphIndex   = startGlyphIndex + itGlyphRun->glyphRun.numberOfGlyphs - 1;
 
     // Create the image buffer for underline
     Devel::PixelBuffer underlineImageBuffer =
-        mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_UNDERLINE, ignoreHorizontalAlignment,
-                                 pixelFormat, horizontalOffset, verticalOffset, startGlyphIndex, endGlyphIndex);
+      mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_UNDERLINE, ignoreHorizontalAlignment,
+                               pixelFormat, horizontalOffset, verticalOffset, startGlyphIndex, endGlyphIndex);
     // Combine the two buffers
     // Result pixel buffer will be stored into topPixelBuffer.
     CombineImageBuffer(underlineImageBuffer, topPixelBuffer, bufferWidth, bufferHeight, false);
@@ -539,35 +539,35 @@ Devel::PixelBuffer Typesetter::ApplyUnderlineMarkupImageBuffer(Devel::PixelBuffe
 }
 
 Devel::PixelBuffer Typesetter::ApplyStrikethroughMarkupImageBuffer(
-    Devel::PixelBuffer topPixelBuffer, const uint32_t bufferWidth, const uint32_t bufferHeight,
-    const bool ignoreHorizontalAlignment, const Pixel::Format pixelFormat, const int32_t horizontalOffset,
-    const int32_t verticalOffset)
+  Devel::PixelBuffer topPixelBuffer, const uint32_t bufferWidth, const uint32_t bufferHeight,
+  const bool ignoreHorizontalAlignment, const Pixel::Format pixelFormat, const int32_t horizontalOffset,
+  const int32_t verticalOffset)
 {
   // Use l-value to make ensure it is not nullptr, so compiler happy.
   auto& viewModel = *(mImpl->GetViewModel());
 
   // strikethrough-tags (this is for Markup case)
   // Get the strikethrough runs.
-  const Length numberOfStrikethroughRuns = viewModel.GetNumberOfStrikethroughRuns();
+  const Length                  numberOfStrikethroughRuns = viewModel.GetNumberOfStrikethroughRuns();
   Vector<StrikethroughGlyphRun> strikethroughRuns;
   strikethroughRuns.Resize(numberOfStrikethroughRuns);
   viewModel.GetStrikethroughRuns(strikethroughRuns.Begin(), 0u, numberOfStrikethroughRuns);
 
   // Iterate on the consecutive strikethrough glyph run and connect them into one chunk of strikethrough characters.
-  Vector<StrikethroughGlyphRun>::ConstIterator itGlyphRun = strikethroughRuns.Begin();
+  Vector<StrikethroughGlyphRun>::ConstIterator itGlyphRun    = strikethroughRuns.Begin();
   Vector<StrikethroughGlyphRun>::ConstIterator endItGlyphRun = strikethroughRuns.End();
-  GlyphIndex startGlyphIndex, endGlyphIndex;
+  GlyphIndex                                   startGlyphIndex, endGlyphIndex;
 
   // The outer loop to iterate on the separated chunks of strikethrough glyph runs
-  while (itGlyphRun != endItGlyphRun)
+  while(itGlyphRun != endItGlyphRun)
   {
     startGlyphIndex = itGlyphRun->glyphRun.glyphIndex;
-    endGlyphIndex = startGlyphIndex + itGlyphRun->glyphRun.numberOfGlyphs - 1;
+    endGlyphIndex   = startGlyphIndex + itGlyphRun->glyphRun.numberOfGlyphs - 1;
 
     // Create the image buffer for strikethrough
     Devel::PixelBuffer strikethroughImageBuffer =
-        mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_STRIKETHROUGH, ignoreHorizontalAlignment,
-                                 pixelFormat, horizontalOffset, verticalOffset, startGlyphIndex, endGlyphIndex);
+      mImpl->CreateImageBuffer(bufferWidth, bufferHeight, Typesetter::STYLE_STRIKETHROUGH, ignoreHorizontalAlignment,
+                               pixelFormat, horizontalOffset, verticalOffset, startGlyphIndex, endGlyphIndex);
     // Combine the two buffers
     // Result pixel buffer will be stored into topPixelBuffer.
     CombineImageBuffer(strikethroughImageBuffer, topPixelBuffer, bufferWidth, bufferHeight, false);
@@ -584,10 +584,10 @@ void Typesetter::SetMaskForImageBuffer(Devel::PixelBuffer& __restrict__ topPixel
 {
   // Assume that we always combine two RGBA images
   // Jump with 4bytes for optimize runtime.
-  uint32_t* topBuffer = reinterpret_cast<uint32_t*>(topPixelBuffer.GetBuffer());
+  uint32_t* topBuffer    = reinterpret_cast<uint32_t*>(topPixelBuffer.GetBuffer());
   uint32_t* bottomBuffer = reinterpret_cast<uint32_t*>(bottomPixelBuffer.GetBuffer());
 
-  if (topBuffer == nullptr || bottomBuffer == nullptr)
+  if(topBuffer == nullptr || bottomBuffer == nullptr)
   {
     // Nothing to do if one of both buffers are empty.
     return;
@@ -595,17 +595,17 @@ void Typesetter::SetMaskForImageBuffer(Devel::PixelBuffer& __restrict__ topPixel
 
   const uint32_t bufferSizeInt = bufferWidth * bufferHeight;
 
-  for (uint32_t pixelIndex = 0; pixelIndex < bufferSizeInt; ++pixelIndex)
+  for(uint32_t pixelIndex = 0; pixelIndex < bufferSizeInt; ++pixelIndex)
   {
-    uint32_t topBufferColor = *(topBuffer);
-    uint32_t bottomBufferColor = *(bottomBuffer);
-    uint8_t* __restrict__ topBufferColorBuffer = reinterpret_cast<uint8_t*>(&topBufferColor);
+    uint32_t topBufferColor                       = *(topBuffer);
+    uint32_t bottomBufferColor                    = *(bottomBuffer);
+    uint8_t* __restrict__ topBufferColorBuffer    = reinterpret_cast<uint8_t*>(&topBufferColor);
     uint8_t* __restrict__ bottomBufferColorBuffer = reinterpret_cast<uint8_t*>(&bottomBufferColor);
 
     // Return the transparency of the text to original.
     uint8_t originAlphaInt = originAlpha * 255;
 
-    uint8_t topAlpha = topBufferColorBuffer[3];
+    uint8_t topAlpha    = topBufferColorBuffer[3];
     uint8_t bottomAlpha = 255 - topAlpha;
 
     // Manual blending.
@@ -627,7 +627,7 @@ void Typesetter::SetMaskForImageBuffer(Devel::PixelBuffer& __restrict__ topPixel
 }
 
 Typesetter::Typesetter(const ModelInterface* const model)
-  : mImpl{std::make_unique<Impl>(model)}
+: mImpl{std::make_unique<Impl>(model)}
 {
 }
 

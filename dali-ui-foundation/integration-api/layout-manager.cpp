@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/layout-manager.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/layout-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {
@@ -37,7 +37,7 @@ LayoutManager::~LayoutManager()
 
 MeasuredSize LayoutManager::MeasureChild(Integration::ViewImpl* child, float widthConstraint, float heightConstraint)
 {
-  if (child)
+  if(child)
   {
     return child->Measure(widthConstraint, heightConstraint);
   }
@@ -46,7 +46,7 @@ MeasuredSize LayoutManager::MeasureChild(Integration::ViewImpl* child, float wid
 
 MeasuredSize LayoutManager::ArrangeChild(Integration::ViewImpl* child, const LayoutRect& bounds)
 {
-  if (child)
+  if(child)
   {
     return child->Arrange(bounds);
   }

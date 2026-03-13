@@ -112,10 +112,10 @@ private:
   void OnRenderFinished(Dali::RenderTask& task);
 
 private:
-  RenderTask mRenderTask;
-  CameraActor mCamera;
-  FrameBuffer mFrameBuffer;
-  Dali::Texture mTexture; // saved when render once
+  RenderTask                           mRenderTask;
+  CameraActor                          mCamera;
+  FrameBuffer                          mFrameBuffer;
+  Dali::Texture                        mTexture; // saved when render once
   DevelControl::OffScreenRenderingType mType;
 };
 } // namespace Internal

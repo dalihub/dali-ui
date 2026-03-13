@@ -80,9 +80,9 @@ public:
   enum PropertyRange
   {
     PROPERTY_START_INDEX =
-        PROPERTY_REGISTRATION_START_INDEX, ///< Start index is used by the property registration macro. @SINCE_1_0.0
-    CONTROL_PROPERTY_START_INDEX = PROPERTY_START_INDEX, ///< Start index of Control properties. @SINCE_1_0.0
-    CONTROL_PROPERTY_END_INDEX = CONTROL_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices. @SINCE_1_0.0
+      PROPERTY_REGISTRATION_START_INDEX,                               ///< Start index is used by the property registration macro. @SINCE_1_0.0
+    CONTROL_PROPERTY_START_INDEX = PROPERTY_START_INDEX,               ///< Start index of Control properties. @SINCE_1_0.0
+    CONTROL_PROPERTY_END_INDEX   = CONTROL_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices. @SINCE_1_0.0
   };
 
   /**
@@ -203,13 +203,13 @@ public: // Creation & Destruction
    */
   enum ControlBehaviour
   {
-    CONTROL_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                   ///< but doesn't receive event callbacks. @SINCE_1_2_10
-    DISABLE_SIZE_NEGOTIATION = 1 << (0 + 0), ///< True if control does not need size negotiation, i.e. it can be skipped
-                                             ///< in the algorithm @SINCE_1_0.0
+    CONTROL_BEHAVIOUR_DEFAULT = 0,                       ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
+                                                         ///< but doesn't receive event callbacks. @SINCE_1_2_10
+    DISABLE_SIZE_NEGOTIATION = 1 << (0 + 0),             ///< True if control does not need size negotiation, i.e. it can be skipped
+                                                         ///< in the algorithm @SINCE_1_0.0
     REQUIRES_KEYBOARD_NAVIGATION_SUPPORT = 1 << (4 + 1), ///< True if needs to support keyboard navigation @SINCE_1_0.0
     DISABLE_STYLE_CHANGE_SIGNALS =
-        1 << (4 + 2),               ///< True if control should not monitor style change signals @SINCE_1_2_10
+      1 << (4 + 2),                 ///< True if control should not monitor style change signals @SINCE_1_2_10
     DISABLE_VISUALS = 1 << (4 + 3), ///< True if control should not use visuals @SINCE_2_3.6
   };
 
@@ -581,19 +581,19 @@ public: // Templates for Deriving Classes
    * @return Handle to a class T or an uninitialized handle
    * @see DownCast(BaseHandle)
    */
-  template <typename T, typename I>
+  template<typename T, typename I>
   DALI_INTERNAL static T DownCast(BaseHandle handle)
   {
     T result;
 
     CustomActor custom = Dali::CustomActor::DownCast(handle);
-    if (custom)
+    if(custom)
     {
       CustomActorImpl& customImpl = custom.GetImplementation();
 
       I* impl = dynamic_cast<I*>(&customImpl);
 
-      if (impl)
+      if(impl)
       {
         result = T(customImpl.GetOwner());
       }
@@ -610,12 +610,12 @@ public: // Templates for Deriving Classes
    * @SINCE_1_0.0
    * @param[in] internal Pointer to the Internal::CustomActor
    */
-  template <typename I>
+  template<typename I>
   DALI_INTERNAL void VerifyCustomActorPointer(Dali::Internal::CustomActor* internal)
   {
     // Can have a NULL pointer so we only need to check if the internal implementation is our class
     // when there is a value.
-    if (internal)
+    if(internal)
     {
       DALI_ASSERT_DEBUG(dynamic_cast<I*>(&CustomActor(internal).GetImplementation()));
     }

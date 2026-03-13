@@ -38,12 +38,12 @@ const char* const TextEditor::PropertyHandler::IMAGE_MAP_FILENAME_STRING{"filena
 /// Retrieves a filename from a value that is a Property::Map
 std::string TextEditor::PropertyHandler::GetImageFileNameFromPropertyValue(const Property::Value& value)
 {
-  std::string filename;
+  std::string          filename;
   const Property::Map* map = value.GetMap();
-  if (map)
+  if(map)
   {
     const Property::Value* filenameValue = map->Find(TextEditor::PropertyHandler::IMAGE_MAP_FILENAME_STRING);
-    if (filenameValue)
+    if(filenameValue)
     {
       filenameValue->Get(filename);
     }
@@ -58,7 +58,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
   DALI_ASSERT_DEBUG(impl.mController && "No text controller");
   DALI_ASSERT_DEBUG(impl.mDecorator && "No text decorator");
 
-  switch (index)
+  switch(index)
   {
     case Ui::DevelTextEditor::Property::RENDERING_BACKEND:
     {
@@ -66,7 +66,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor %p RENDERING_BACKEND %d\n",
                     impl.mController.Get(), backend);
 
-      if (impl.mRenderingBackend != backend)
+      if(impl.mRenderingBackend != backend)
       {
         impl.mRenderingBackend = backend;
         impl.mRenderer.Reset();
@@ -89,7 +89,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p TEXT_COLOR %f,%f,%f,%f\n",
                     impl.mController.Get(), textColor.r, textColor.g, textColor.b, textColor.a);
 
-      if (impl.mController->GetDefaultColor() != textColor)
+      if(impl.mController->GetDefaultColor() != textColor)
       {
         impl.mController->SetDefaultColor(textColor);
         impl.mController->SetInputColor(textColor);
@@ -116,7 +116,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p POINT_SIZE %f\n", impl.mController.Get(),
                     pointSize);
 
-      if (!Equals(impl.mController->GetDefaultFontSize(Text::Controller::POINT_SIZE), pointSize))
+      if(!Equals(impl.mController->GetDefaultFontSize(Text::Controller::POINT_SIZE), pointSize))
       {
         impl.mController->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
       }
@@ -125,8 +125,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::HORIZONTAL_ALIGNMENT:
     {
       Text::HorizontalAlignment::Type alignment(
-          static_cast<Text::HorizontalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
-      if (Text::GetHorizontalAlignmentEnumeration(value, alignment))
+        static_cast<Text::HorizontalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+      if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p HORIZONTAL_ALIGNMENT %d\n",
                       impl.mController.Get(), alignment);
@@ -137,8 +137,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::VERTICAL_ALIGNMENT:
     {
       Ui::Text::VerticalAlignment::Type alignment(
-          static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
-      if (Text::GetVerticalAlignmentEnumeration(value, alignment))
+        static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+      if(Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.mController->SetVerticalAlignment(alignment);
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p VERTICAL_ALIGNMENT %d\n",
@@ -228,7 +228,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor %p GRAB_HANDLE_IMAGE %s\n",
                     impl.mController.Get(), imageFileName.c_str());
 
-      if (imageFileName.size())
+      if(imageFileName.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, imageFileName);
         impl.RequestTextRelayout();
@@ -241,7 +241,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor %p GRAB_HANDLE_PRESSED_IMAGE %s\n",
                     impl.mController.Get(), imageFileName.c_str());
 
-      if (imageFileName.size())
+      if(imageFileName.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, imageFileName);
         impl.RequestTextRelayout();
@@ -252,7 +252,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, filename);
         impl.RequestTextRelayout();
@@ -263,7 +263,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, filename);
         impl.RequestTextRelayout();
@@ -274,7 +274,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, filename);
         impl.RequestTextRelayout();
@@ -285,7 +285,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, filename);
         impl.RequestTextRelayout();
@@ -296,7 +296,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE_MARKER, Ui::Text::HANDLE_IMAGE_RELEASED,
                                         filename);
@@ -308,7 +308,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     {
       const std::string filename = GetImageFileNameFromPropertyValue(value);
 
-      if (filename.size())
+      if(filename.size())
       {
         impl.mDecorator->SetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE_MARKER, Ui::Text::HANDLE_IMAGE_RELEASED,
                                         filename);
@@ -393,7 +393,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::UNDERLINE:
     {
       const bool update = SetUnderlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -402,7 +402,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::INPUT_UNDERLINE:
     {
       const bool update = SetUnderlineProperties(impl.mController, value, Text::EffectStyle::INPUT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -411,7 +411,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::SHADOW:
     {
       const bool update = SetShadowProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -420,7 +420,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::INPUT_SHADOW:
     {
       const bool update = SetShadowProperties(impl.mController, value, Text::EffectStyle::INPUT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -429,7 +429,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::EMBOSS:
     {
       const bool update = SetEmbossProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -438,7 +438,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::INPUT_EMBOSS:
     {
       const bool update = SetEmbossProperties(impl.mController, value, Text::EffectStyle::INPUT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -447,7 +447,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::OUTLINE:
     {
       const bool update = SetOutlineProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -456,7 +456,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::INPUT_OUTLINE:
     {
       const bool update = SetOutlineProperties(impl.mController, value, Text::EffectStyle::INPUT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -476,7 +476,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor SMOOTH_SCROLL_DURATION %f\n", duration);
 
       impl.mScrollAnimationDuration = duration;
-      if (impl.mTextVerticalScroller)
+      if(impl.mTextVerticalScroller)
       {
         impl.mTextVerticalScroller->SetDuration(duration);
       }
@@ -512,7 +512,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p PIXEL_SIZE %f\n", impl.mController.Get(),
                     pixelSize);
 
-      if (!Equals(impl.mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), pixelSize))
+      if(!Equals(impl.mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), pixelSize))
       {
         impl.mController->SetDefaultFontSize(pixelSize, Text::Controller::PIXEL_SIZE);
       }
@@ -533,7 +533,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p PLACEHOLDER_TEXT_COLOR %f,%f,%f,%f\n",
                     impl.mController.Get(), textColor.r, textColor.g, textColor.b, textColor.a);
 
-      if (impl.mController->GetPlaceholderTextColor() != textColor)
+      if(impl.mController->GetPlaceholderTextColor() != textColor)
       {
         impl.mController->SetPlaceholderTextColor(textColor);
         impl.mRenderer.Reset();
@@ -551,7 +551,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::PLACEHOLDER:
     {
       const Property::Map* map = value.GetMap();
-      if (map)
+      if(map)
       {
         impl.mController->SetPlaceholderProperty(*map);
       }
@@ -560,8 +560,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::TextEditor::Property::LINE_WRAP_MODE:
     {
       Text::LineWrap::Mode lineWrapMode(
-          static_cast<Text::LineWrap::Mode>(-1)); // Set to invalid value to ensure a valid mode does get set
-      if (Ui::Text::GetLineWrapModeEnumeration(value, lineWrapMode))
+        static_cast<Text::LineWrap::Mode>(-1)); // Set to invalid value to ensure a valid mode does get set
+      if(Ui::Text::GetLineWrapModeEnumeration(value, lineWrapMode))
       {
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p LineWrap::MODE %d\n", impl.mController.Get(),
                       lineWrapMode);
@@ -630,7 +630,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       float horizontalScroll = value.Get<float>();
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p HORIZONTAL_SCROLL_POSITION %d\n",
                     impl.mController.Get(), horizontalScroll);
-      if (horizontalScroll >= 0.0f)
+      if(horizontalScroll >= 0.0f)
       {
         impl.ScrollBy(Vector2(horizontalScroll - impl.GetHorizontalScrollPosition(), 0));
       }
@@ -641,7 +641,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       float verticalScroll = value.Get<float>();
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p VERTICAL_SCROLL_POSITION %d\n",
                     impl.mController.Get(), verticalScroll);
-      if (verticalScroll >= 0.0f)
+      if(verticalScroll >= 0.0f)
       {
         impl.ScrollBy(Vector2(0, verticalScroll - impl.GetVerticalScrollPosition()));
       }
@@ -653,7 +653,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p FONT_SIZE_SCALE %f\n", impl.mController.Get(),
                     scale);
 
-      if (!Equals(impl.mController->GetFontSizeScale(), scale))
+      if(!Equals(impl.mController->GetFontSizeScale(), scale))
       {
         impl.mController->SetFontSizeScale(scale);
       }
@@ -662,7 +662,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::ENABLE_FONT_SIZE_SCALE:
     {
       const bool enableFontSizeScale = value.Get<bool>();
-      if (!Equals(impl.mController->IsFontSizeScaleEnabled(), enableFontSizeScale))
+      if(!Equals(impl.mController->IsFontSizeScaleEnabled(), enableFontSizeScale))
       {
         impl.mController->SetFontSizeScaleEnabled(enableFontSizeScale);
       }
@@ -673,7 +673,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
       uint32_t position = static_cast<uint32_t>(value.Get<int>());
       DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p PRIMARY_CURSOR_POSITION %d\n",
                     impl.mController.Get(), position);
-      if (impl.mController->SetPrimaryCursorPosition(position, impl.HasKeyInputFocus()))
+      if(impl.mController->SetPrimaryCursorPosition(position, impl.HasKeyInputFocus()))
       {
         impl.SetKeyInputFocus();
       }
@@ -701,14 +701,14 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::INPUT_METHOD_SETTINGS:
     {
       const Property::Map* map = value.GetMap();
-      if (map)
+      if(map)
       {
         impl.mInputMethodOptions.ApplyProperty(*map);
       }
       impl.mController->SetInputModePassword(impl.mInputMethodOptions.IsPassword());
 
       Ui::Control control = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
-      if (control == textEditor)
+      if(control == textEditor)
       {
         impl.mInputMethodContext.ApplyOptions(impl.mInputMethodOptions);
       }
@@ -717,7 +717,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::INPUT_FILTER:
     {
       const Property::Map* map = value.GetMap();
-      if (map)
+      if(map)
       {
         impl.mController->SetInputFilterOption(*map);
       }
@@ -735,8 +735,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::ELLIPSIS_POSITION:
     {
       DevelText::EllipsisPosition::Type ellipsisPositionType(static_cast<DevelText::EllipsisPosition::Type>(
-          -1)); // Set to invalid value to ensure a valid mode does get set
-      if (Text::GetEllipsisPositionTypeEnumeration(value, ellipsisPositionType))
+        -1)); // Set to invalid value to ensure a valid mode does get set
+      if(Text::GetEllipsisPositionTypeEnumeration(value, ellipsisPositionType))
       {
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p EllipsisPosition::Type %d\n",
                       impl.mController.Get(), ellipsisPositionType);
@@ -757,7 +757,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::STRIKETHROUGH:
     {
       const bool update = SetStrikethroughProperties(impl.mController, value, Text::EffectStyle::DEFAULT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -766,7 +766,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::INPUT_STRIKETHROUGH:
     {
       const bool update = SetStrikethroughProperties(impl.mController, value, Text::EffectStyle::INPUT);
-      if (update)
+      if(update)
       {
         impl.mRenderer.Reset();
       }
@@ -792,7 +792,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     case Ui::DevelTextEditor::Property::SELECTION_POPUP_STYLE:
     {
       const Property::Map* map = value.GetMap();
-      if (map)
+      if(map)
       {
         impl.mDecorator->SetSelectionPopupStyle(*map);
       }
@@ -831,11 +831,11 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
 Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEditor, Property::Index index)
 {
   Property::Value value;
-  TextEditor& impl(GetImpl(textEditor));
+  TextEditor&     impl(GetImpl(textEditor));
   DALI_ASSERT_DEBUG(impl.mController && "No text controller");
   DALI_ASSERT_DEBUG(impl.mDecorator && "No text decorator");
 
-  switch (index)
+  switch(index)
   {
     case Ui::DevelTextEditor::Property::RENDERING_BACKEND:
     {
@@ -874,7 +874,7 @@ Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEdit
     case Ui::TextEditor::Property::HORIZONTAL_ALIGNMENT:
     {
       const char* name = Text::GetHorizontalAlignmentString(impl.mController->GetHorizontalAlignment());
-      if (name)
+      if(name)
       {
         value = std::string(name);
       }
@@ -884,7 +884,7 @@ Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEdit
     {
       const char* name = Text::GetVerticalAlignmentString(impl.mController->GetVerticalAlignment());
 
-      if (name)
+      if(name)
       {
         value = std::string(name);
       }
@@ -1090,7 +1090,7 @@ Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEdit
     case Ui::TextEditor::Property::LINE_COUNT:
     {
       float width = textEditor.GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
-      value = impl.mController->GetLineCount(width);
+      value       = impl.mController->GetLineCount(width);
       break;
     }
     case Ui::DevelTextEditor::Property::PLACEHOLDER_TEXT:
@@ -1160,13 +1160,13 @@ Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEdit
     case Ui::DevelTextEditor::Property::SELECTED_TEXT_START:
     {
       Uint32Pair range = impl.GetTextSelectionRange();
-      value = static_cast<int>(range.first);
+      value            = static_cast<int>(range.first);
       break;
     }
     case Ui::DevelTextEditor::Property::SELECTED_TEXT_END:
     {
       Uint32Pair range = impl.GetTextSelectionRange();
-      value = static_cast<int>(range.second);
+      value            = static_cast<int>(range.second);
       break;
     }
     case Ui::DevelTextEditor::Property::ENABLE_EDITING:

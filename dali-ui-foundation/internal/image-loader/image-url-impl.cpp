@@ -36,22 +36,22 @@ ImageUrl::ImageUrl(Texture& texture, bool preMultiplied)
 }
 
 ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
-  : mUrl("")
+: mUrl("")
 {
   auto visualFactory = Dali::Ui::VisualFactory::Get();
-  if (visualFactory)
+  if(visualFactory)
   {
     auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
-    mUrl = textureManager.AddEncodedImageBuffer(encodedImageBuffer);
+    mUrl                 = textureManager.AddEncodedImageBuffer(encodedImageBuffer);
   }
 }
 
 ImageUrl::~ImageUrl()
 {
-  if (mUrl.size() > 0)
+  if(mUrl.size() > 0)
   {
     auto visualFactory = Dali::Ui::VisualFactory::Get();
-    if (visualFactory)
+    if(visualFactory)
     {
       auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
       textureManager.RequestRemoveExternalResourceByUrl(mUrl);

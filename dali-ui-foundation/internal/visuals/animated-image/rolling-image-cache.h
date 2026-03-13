@@ -139,10 +139,10 @@ private:
   struct ImageFrame
   {
     unsigned int mUrlIndex = 0u;
-    bool mReady = false;
+    bool         mReady    = false;
   };
 
-  std::vector<UrlStore>& mImageUrls;
+  std::vector<UrlStore>&    mImageUrls;
   CircularQueue<ImageFrame> mQueue;
 };
 

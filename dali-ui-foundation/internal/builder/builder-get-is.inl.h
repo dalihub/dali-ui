@@ -23,10 +23,10 @@
 
 inline OptionalChild IsChild(const TreeNode* node, const std::string& childName)
 {
-  if (node)
+  if(node)
   {
     const TreeNode* c = node->GetChild(childName);
-    if (NULL != c)
+    if(NULL != c)
     {
       return OptionalChild(*c);
     }
@@ -43,10 +43,10 @@ inline OptionalChild IsChild(const TreeNode* node, const std::string& childName)
 
 inline OptionalChild IsChildIgnoreCase(const TreeNode* node, const std::string& childName)
 {
-  if (node)
+  if(node)
   {
     const TreeNode* c = node->GetChildIgnoreCase(childName);
-    if (NULL != c)
+    if(NULL != c)
     {
       return OptionalChild(*c);
     }
@@ -73,7 +73,7 @@ inline OptionalChild IsChildIgnoreCase(const TreeNode& node, const std::string& 
 
 inline OptionalString IsString(const OptionalChild& node)
 {
-  if (node && (*node).GetType() == TreeNode::STRING)
+  if(node && (*node).GetType() == TreeNode::STRING)
   {
     return OptionalString((*node).GetString());
   }
@@ -87,13 +87,13 @@ inline OptionalFloat IsFloat(const OptionalChild& node)
 {
   OptionalFloat ret;
 
-  if (node)
+  if(node)
   {
-    if ((*node).GetType() == TreeNode::FLOAT)
+    if((*node).GetType() == TreeNode::FLOAT)
     {
       ret = (*node).GetFloat();
     }
-    else if ((*node).GetType() == TreeNode::INTEGER)
+    else if((*node).GetType() == TreeNode::INTEGER)
     {
       // JSON has number not float/int but JsonParser discriminates.
       // Here we don't care so we allow coercion
@@ -108,13 +108,13 @@ inline OptionalInteger IsInteger(const OptionalChild& node)
 {
   OptionalInteger ret;
 
-  if (node)
+  if(node)
   {
-    if ((*node).GetType() == TreeNode::INTEGER)
+    if((*node).GetType() == TreeNode::INTEGER)
     {
       ret = (*node).GetInteger();
     }
-    else if ((*node).GetType() == TreeNode::FLOAT)
+    else if((*node).GetType() == TreeNode::FLOAT)
     {
       ret = static_cast<int>((*node).GetFloat());
     }
@@ -125,7 +125,7 @@ inline OptionalInteger IsInteger(const OptionalChild& node)
 
 inline OptionalBoolean IsBoolean(const OptionalChild& node)
 {
-  if (node && (*node).GetType() == TreeNode::BOOLEAN)
+  if(node && (*node).GetType() == TreeNode::BOOLEAN)
   {
     return OptionalBoolean(1 == (*node).GetInteger());
   }
@@ -136,16 +136,16 @@ inline OptionalBoolean IsBoolean(const OptionalChild& node)
 }
 
 // copy N Numbers
-template <typename T>
+template<typename T>
 inline bool CopyNumbers(TreeNode::ConstIterator iter, int N, T& vector)
 {
-  for (int i = 0; i < N; ++i)
+  for(int i = 0; i < N; ++i)
   {
-    if ((*iter).second.GetType() == TreeNode::FLOAT)
+    if((*iter).second.GetType() == TreeNode::FLOAT)
     {
       vector[i] = (*iter).second.GetFloat();
     }
-    else if ((*iter).second.GetType() == TreeNode::INTEGER)
+    else if((*iter).second.GetType() == TreeNode::INTEGER)
     {
       vector[i] = static_cast<float>((*iter).second.GetInteger());
     }
@@ -160,16 +160,16 @@ inline bool CopyNumbers(TreeNode::ConstIterator iter, int N, T& vector)
 }
 
 // copy N Numbers
-template <typename T, int N>
+template<typename T, int N>
 inline bool CopyNumbers(TreeNode::ConstIterator iter, T (&vector)[N])
 {
-  for (int i = 0; i < N; ++i)
+  for(int i = 0; i < N; ++i)
   {
-    if ((*iter).second.GetType() == TreeNode::FLOAT)
+    if((*iter).second.GetType() == TreeNode::FLOAT)
     {
       vector[i] = (*iter).second.GetFloat();
     }
-    else if ((*iter).second.GetType() == TreeNode::INTEGER)
+    else if((*iter).second.GetType() == TreeNode::INTEGER)
     {
       vector[i] = static_cast<float>((*iter).second.GetInteger());
     }
@@ -187,10 +187,10 @@ inline OptionalVector4 IsVector4(const OptionalChild& node)
 {
   OptionalVector4 ret;
 
-  if (node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 4)
+  if(node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 4)
   {
     Dali::Vector4 v;
-    if (CopyNumbers((*node).CBegin(), 4, v))
+    if(CopyNumbers((*node).CBegin(), 4, v))
     {
       ret = OptionalVector4(v);
     }
@@ -203,10 +203,10 @@ inline OptionalVector3 IsVector3(const OptionalChild& node)
 {
   OptionalVector3 ret;
 
-  if (node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 3)
+  if(node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 3)
   {
     Dali::Vector3 v;
-    if (CopyNumbers((*node).CBegin(), 3, v))
+    if(CopyNumbers((*node).CBegin(), 3, v))
     {
       ret = OptionalVector3(v);
     }
@@ -219,10 +219,10 @@ inline OptionalVector2 IsVector2(const OptionalChild& node)
 {
   OptionalVector2 ret;
 
-  if (node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 2)
+  if(node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 2)
   {
     Dali::Vector2 v;
-    if (CopyNumbers((*node).CBegin(), 2, v))
+    if(CopyNumbers((*node).CBegin(), 2, v))
     {
       ret = OptionalVector2(v);
     }
@@ -235,10 +235,10 @@ inline OptionalMatrix IsMatrix(const OptionalChild& node)
 {
   OptionalMatrix ret;
 
-  if (node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 16)
+  if(node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 16)
   {
     float v[16];
-    if (CopyNumbers((*node).CBegin(), v))
+    if(CopyNumbers((*node).CBegin(), v))
     {
       ret = OptionalMatrix(Dali::Matrix(v));
     }
@@ -251,10 +251,10 @@ inline OptionalMatrix3 IsMatrix3(const OptionalChild& node)
 {
   OptionalMatrix3 ret;
 
-  if (node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 9)
+  if(node && (TreeNode::ARRAY == (*node).GetType()) && (*node).Size() >= 9)
   {
     float v[9];
-    if (CopyNumbers((*node).CBegin(), v))
+    if(CopyNumbers((*node).CBegin(), v))
     {
       ret = OptionalMatrix3(Dali::Matrix3(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]));
     }
@@ -266,13 +266,13 @@ inline OptionalMatrix3 IsMatrix3(const OptionalChild& node)
 inline OptionalRect IsRect(const OptionalChild& node)
 {
   OptionalRect ret;
-  if (node && (*node).Size())
+  if(node && (*node).Size())
   {
-    if ((*node).Size() >= 4)
+    if((*node).Size() >= 4)
     {
       TreeNode::ConstIterator iter((*node).CBegin());
-      float v[4];
-      if (CopyNumbers((*node).CBegin(), v))
+      float                   v[4];
+      if(CopyNumbers((*node).CBegin(), v))
       {
         ret = OptionalRect(Dali::Rect<int>(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]),
                                            static_cast<int>(v[3])));
@@ -285,13 +285,13 @@ inline OptionalRect IsRect(const OptionalChild& node)
 inline OptionalExtents IsExtents(const OptionalChild& node)
 {
   OptionalExtents extents;
-  if (node && (*node).Size())
+  if(node && (*node).Size())
   {
-    if ((*node).Size() >= 4)
+    if((*node).Size() >= 4)
     {
       TreeNode::ConstIterator iter((*node).CBegin());
-      float v[4];
-      if (CopyNumbers((*node).CBegin(), v))
+      float                   v[4];
+      if(CopyNumbers((*node).CBegin(), v))
       {
         extents = OptionalExtents(Dali::Extents(static_cast<uint16_t>(v[0]), static_cast<uint16_t>(v[1]),
                                                 static_cast<uint16_t>(v[2]), static_cast<uint16_t>(v[3])));

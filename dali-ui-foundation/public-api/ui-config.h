@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
 #include <cstdint>
 #include <string>
-#include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -137,7 +137,6 @@ public:
   static UiConfig DownCast(BaseHandle handle);
 
 public: // Properties
-
   /**
    * @brief Applies the UiConfig as the global configuration for given application.
    *
@@ -262,7 +261,6 @@ public: // Properties
   // @CHAIN_END
 
 public: // Not intended for Application developers
-
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *

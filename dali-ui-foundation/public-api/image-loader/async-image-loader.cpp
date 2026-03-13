@@ -34,7 +34,7 @@ AsyncImageLoader::~AsyncImageLoader()
 }
 
 AsyncImageLoader::AsyncImageLoader(Internal::AsyncImageLoader* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

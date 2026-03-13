@@ -115,10 +115,10 @@ public:
 
 public:
   // Default copy and move operator
-  AsyncTextModule(const AsyncTextModule& rhs) = default;
-  AsyncTextModule(AsyncTextModule&& rhs) = default;
+  AsyncTextModule(const AsyncTextModule& rhs)            = default;
+  AsyncTextModule(AsyncTextModule&& rhs)                 = default;
   AsyncTextModule& operator=(const AsyncTextModule& rhs) = default;
-  AsyncTextModule& operator=(AsyncTextModule&& rhs) = default;
+  AsyncTextModule& operator=(AsyncTextModule&& rhs)      = default;
 };
 
 } // namespace Text

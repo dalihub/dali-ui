@@ -137,7 +137,7 @@ private:
   SlotDelegate<KeyInputFocusManager> mSlotDelegate;
 
   Ui::Control mCurrentFocusControl; ///< The current focused control
-  uint32_t mCurrentWindowId;        ///< The native window id of current focused control
+  uint32_t    mCurrentWindowId;     ///< The native window id of current focused control
 };
 
 } // namespace Internal

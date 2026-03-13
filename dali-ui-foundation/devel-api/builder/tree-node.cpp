@@ -33,20 +33,21 @@ namespace Dali
 bool CaseInsensitiveStringCompare(std::string_view a, std::string_view b)
 {
   return (a.length() == b.length()) &&
-         std::equal(a.begin(), a.end(), b.begin(), [](auto x, auto y) { return std::tolower(x) == std::tolower(y); });
+         std::equal(a.begin(), a.end(), b.begin(), [](auto x, auto y)
+  { return std::tolower(x) == std::tolower(y); });
 }
 
 namespace Ui
 {
 TreeNode::TreeNode()
-  : mName(NULL),
-    mParent(NULL),
-    mNextSibling(NULL),
-    mFirstChild(NULL),
-    mLastChild(NULL),
-    mStringValue(NULL),
-    mType(TreeNode::IS_NULL),
-    mSubstituion(false)
+: mName(NULL),
+  mParent(NULL),
+  mNextSibling(NULL),
+  mFirstChild(NULL),
+  mLastChild(NULL),
+  mStringValue(NULL),
+  mType(TreeNode::IS_NULL),
+  mSubstituion(false)
 {
 }
 
@@ -91,9 +92,9 @@ bool TreeNode::GetBoolean() const
 
 size_t TreeNode::Size() const
 {
-  size_t c = 0;
+  size_t    c = 0;
   TreeNode* p = mFirstChild;
-  while (p)
+  while(p)
   {
     c++;
     p = p->mNextSibling;
@@ -104,7 +105,7 @@ size_t TreeNode::Size() const
 size_t TreeNode::Count(std::string_view childName) const
 {
   const TreeNode* c = GetChild(childName);
-  if (c)
+  if(c)
   {
     return c->Size();
   }
@@ -117,9 +118,9 @@ size_t TreeNode::Count(std::string_view childName) const
 const TreeNode* TreeNode::GetChild(std::string_view childName) const
 {
   const TreeNode* p = mFirstChild;
-  while (p)
+  while(p)
   {
-    if (p->mName && (std::string_view(p->mName) == childName))
+    if(p->mName && (std::string_view(p->mName) == childName))
     {
       return p;
     }
@@ -131,9 +132,9 @@ const TreeNode* TreeNode::GetChild(std::string_view childName) const
 const TreeNode* TreeNode::GetChildIgnoreCase(std::string_view childName) const
 {
   const TreeNode* p = mFirstChild;
-  while (p)
+  while(p)
   {
-    if (p->mName && CaseInsensitiveStringCompare(p->mName, childName))
+    if(p->mName && CaseInsensitiveStringCompare(p->mName, childName))
     {
       return p;
     }
@@ -144,7 +145,7 @@ const TreeNode* TreeNode::GetChildIgnoreCase(std::string_view childName) const
 
 const TreeNode* TreeNode::Find(std::string_view childName) const
 {
-  if (mName && std::string_view(mName) == childName)
+  if(mName && std::string_view(mName) == childName)
   {
     return this;
   }
@@ -165,13 +166,13 @@ TreeNode::ConstIterator TreeNode::CEnd() const
 }
 
 TreeNode::ConstIterator::ConstIterator(TreeNode* v)
-  : mNode(v)
+: mNode(v)
 {
 }
 
 TreeNode::ConstIterator& TreeNode::ConstIterator::operator++()
 {
-  if (mNode)
+  if(mNode)
   {
     mNode = mNode->mNextSibling;
   }
@@ -186,7 +187,7 @@ TreeNode::ConstIterator TreeNode::ConstIterator::operator++(int)
 {
   TreeNode::ConstIterator ret(mNode);
 
-  if (mNode)
+  if(mNode)
   {
     mNode = mNode->mNextSibling;
   }

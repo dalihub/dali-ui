@@ -32,13 +32,13 @@ TableView::TableView()
 }
 
 TableView::TableView(const TableView& handle)
-  : Control(handle)
+: Control(handle)
 {
 }
 
 TableView& TableView::operator=(const TableView& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Control::operator=(handle);
   }
@@ -206,12 +206,12 @@ void TableView::SetCellAlignment(CellPosition position, HorizontalAlignment::Typ
 }
 
 TableView::TableView(Internal::TableView& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 TableView::TableView(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::TableView>(internal);
 }

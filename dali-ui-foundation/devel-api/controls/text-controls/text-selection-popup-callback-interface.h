@@ -39,7 +39,7 @@ enum class InputCommandType
   CLIPBOARD,
   NONE,
 };
-}
+} //namespace Text
 
 /**
  * @brief Interface used to receive the TextSelectionPopup's button callbacks.

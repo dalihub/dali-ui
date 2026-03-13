@@ -52,18 +52,18 @@ class TextureManager : public ConnectionTracker, public Dali::Integration::Proce
 {
 public:
   // Copy enum and types and const values that TextureManager will use.
-  using TextureId = TextureManagerType::TextureId;
+  using TextureId         = TextureManagerType::TextureId;
   using TextureCacheIndex = TextureManagerType::TextureCacheIndex;
-  using TextureHash = TextureManagerType::TextureHash;
+  using TextureHash       = TextureManagerType::TextureHash;
 
-  static constexpr TextureId INVALID_TEXTURE_ID = TextureManagerType::INVALID_TEXTURE_ID;
+  static constexpr TextureId         INVALID_TEXTURE_ID  = TextureManagerType::INVALID_TEXTURE_ID;
   static constexpr TextureCacheIndex INVALID_CACHE_INDEX = TextureManagerType::INVALID_CACHE_INDEX;
 
-  using StorageType = TextureManagerType::StorageType;
-  using LoadState = TextureManagerType::LoadState;
-  using ReloadPolicy = TextureManagerType::ReloadPolicy;
+  using StorageType    = TextureManagerType::StorageType;
+  using LoadState      = TextureManagerType::LoadState;
+  using ReloadPolicy   = TextureManagerType::ReloadPolicy;
   using MultiplyOnLoad = TextureManagerType::MultiplyOnLoad;
-  using TextureInfo = TextureManagerType::TextureInfo;
+  using TextureInfo    = TextureManagerType::TextureInfo;
 
 public:
   struct MaskingData
@@ -71,12 +71,12 @@ public:
     MaskingData();
     ~MaskingData() = default;
 
-    VisualUrl mAlphaMaskUrl;
+    VisualUrl                 mAlphaMaskUrl;
     TextureManager::TextureId mAlphaMaskId;
-    float mContentScaleFactor;
-    bool mCropToMask;
-    bool mPreappliedMasking;
-    bool mMaskImageLoadingFailed;
+    float                     mContentScaleFactor;
+    bool                      mCropToMask;
+    bool                      mPreappliedMasking;
+    bool                      mMaskImageLoadingFailed;
   };
   using MaskingDataPointer = std::unique_ptr<MaskingData>;
 
@@ -120,9 +120,9 @@ public:
   TextureSet LoadAnimatedImageTexture(const VisualUrl& url, Dali::AnimatedImageLoading animatedImageLoading,
                                       const uint32_t frameIndex, TextureManager::TextureId& textureId,
                                       MaskingDataPointer& maskInfo, const Dali::ImageDimensions& desiredSize,
-                                      const Dali::FittingMode::Type fittingMode,
+                                      const Dali::FittingMode::Type  fittingMode,
                                       const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
-                                      TextureUploadObserver* textureObserver,
+                                      TextureUploadObserver*          textureObserver,
                                       TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
 
   /**
@@ -145,7 +145,7 @@ public:
    * @return                          The pixel buffer containing the image, or empty if still loading.
    */
   Devel::PixelBuffer LoadPixelBuffer(const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
-                                     const Dali::FittingMode::Type fittingMode,
+                                     const Dali::FittingMode::Type  fittingMode,
                                      const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
                                      TextureUploadObserver* textureObserver, const bool orientationCorrection,
                                      TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
@@ -182,7 +182,7 @@ public:
                          TextureManager::TextureId& textureId, bool& loadingStatus,
                          TextureUploadObserver* textureObserver, const bool orientationCorrection,
                          const TextureManager::ReloadPolicy reloadPolicy,
-                         TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
+                         TextureManager::MultiplyOnLoad&    preMultiplyOnLoad);
 
   /**
    * @brief Returns the geometry associated with texture.
@@ -467,13 +467,13 @@ private:
   struct QueueElement
   {
     QueueElement(const TextureManager::TextureId textureId, TextureUploadObserver* observer)
-      : mTextureId(textureId),
-        mObserver(observer)
+    : mTextureId(textureId),
+      mObserver(observer)
     {
     }
 
     TextureManager::TextureId mTextureId; ///< The texture id of the requested load.
-    TextureUploadObserver* mObserver;     ///< Observer of texture load.
+    TextureUploadObserver*    mObserver;  ///< Observer of texture load.
   };
 
   /**
@@ -576,7 +576,7 @@ private: // Internal methods
    * @param[in,out] preMultiplyOnLoad True if the image color should be multiplied by it's alpha. Set to false if the
    * image has no alpha channel
    */
-  void UpdateExternalTextureInfo(TextureManager::TextureInfo& textureInfo,
+  void UpdateExternalTextureInfo(TextureManager::TextureInfo&    textureInfo,
                                  TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
 
 public:
@@ -624,19 +624,19 @@ private:                                    // Member Variables:
   TextureCacheManager mTextureCacheManager; ///< Manager the life-cycle and caching of Textures
 
   std::unique_ptr<TextureAsyncLoadingHelper>
-      mAsyncLoader; ///< The Asynchronous image loader used to provide all local async loads
+    mAsyncLoader; ///< The Asynchronous image loader used to provide all local async loads
 
   Dali::Vector<QueueElement> mLoadQueue; ///< Queue of textures to load after NotifyObservers
   TextureManager::TextureId
-      mLoadingQueueTextureId; ///< TextureId when it is loading. it causes Load Textures to be queued.
+    mLoadingQueueTextureId; ///< TextureId when it is loading. it causes Load Textures to be queued.
 
   Dali::Vector<TextureManager::TextureId>
-      mRemoveQueue; ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
+                         mRemoveQueue;         ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
   std::vector<VisualUrl> mRemoveExternalQueue; ///< Queue of external resources to remove at PostProcess. It will be
                                                ///< cleared after PostProcess.
 
-  const bool mLoadYuvPlanes;       ///< A global flag to specify if the image should be loaded as yuv planes
-  bool mRemoveProcessorRegistered; ///< Flag if remove processor registered or not.
+  const bool mLoadYuvPlanes;             ///< A global flag to specify if the image should be loaded as yuv planes
+  bool       mRemoveProcessorRegistered; ///< Flag if remove processor registered or not.
 };
 
 } // namespace Internal

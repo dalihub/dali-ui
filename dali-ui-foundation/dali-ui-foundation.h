@@ -22,8 +22,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-config.h>
-#include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/unit.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>

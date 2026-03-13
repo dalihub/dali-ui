@@ -31,22 +31,22 @@
 #include <dali-ui-foundation/devel-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/builder/optional-value.h>
 
-typedef Dali::Ui::TreeNode TreeNode;
+typedef Dali::Ui::TreeNode      TreeNode;
 typedef TreeNode::ConstIterator TreeConstIter;
 
 typedef OptionalValue<const TreeNode&> OptionalChild;
-typedef OptionalValue<std::string> OptionalString;
-typedef OptionalValue<float> OptionalFloat;
-typedef OptionalValue<int> OptionalInteger;
-typedef OptionalValue<unsigned int> OptionalUnsignedInt;
-typedef OptionalValue<bool> OptionalBoolean;
-typedef OptionalValue<Dali::Vector2> OptionalVector2;
-typedef OptionalValue<Dali::Vector3> OptionalVector3;
-typedef OptionalValue<Dali::Vector4> OptionalVector4;
-typedef OptionalValue<std::string> OptionalString;
-typedef OptionalValue<Dali::Matrix> OptionalMatrix;
-typedef OptionalValue<Dali::Matrix3> OptionalMatrix3;
+typedef OptionalValue<std::string>     OptionalString;
+typedef OptionalValue<float>           OptionalFloat;
+typedef OptionalValue<int>             OptionalInteger;
+typedef OptionalValue<unsigned int>    OptionalUnsignedInt;
+typedef OptionalValue<bool>            OptionalBoolean;
+typedef OptionalValue<Dali::Vector2>   OptionalVector2;
+typedef OptionalValue<Dali::Vector3>   OptionalVector3;
+typedef OptionalValue<Dali::Vector4>   OptionalVector4;
+typedef OptionalValue<std::string>     OptionalString;
+typedef OptionalValue<Dali::Matrix>    OptionalMatrix;
+typedef OptionalValue<Dali::Matrix3>   OptionalMatrix3;
 typedef OptionalValue<Dali::Rect<int>> OptionalRect;
-typedef OptionalValue<Dali::Extents> OptionalExtents;
+typedef OptionalValue<Dali::Extents>   OptionalExtents;
 
 #endif // DALI_UI_BUILDER_DECLARATIONS_H

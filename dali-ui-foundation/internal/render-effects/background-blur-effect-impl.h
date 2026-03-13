@@ -208,9 +208,9 @@ private:
    */
   void UpdateDownscaledBlurRadius();
 
-  BackgroundBlurEffectImpl(const BackgroundBlurEffectImpl&) = delete;
-  BackgroundBlurEffectImpl(BackgroundBlurEffectImpl&&) = delete;
-  BackgroundBlurEffectImpl& operator=(BackgroundBlurEffectImpl&&) = delete;      // no move()
+  BackgroundBlurEffectImpl(const BackgroundBlurEffectImpl&)            = delete;
+  BackgroundBlurEffectImpl(BackgroundBlurEffectImpl&&)                 = delete;
+  BackgroundBlurEffectImpl& operator=(BackgroundBlurEffectImpl&&)      = delete; // no move()
   BackgroundBlurEffectImpl& operator=(const BackgroundBlurEffectImpl&) = delete; // no copy()
 
 public:
@@ -224,24 +224,24 @@ private:
   // Resource
   FrameBuffer mInputBackgroundFrameBuffer; // Input. Background. What to blur.
 
-  Actor mInternalRoot;
-  Actor mHorizontalBlurActor;
-  RenderTask mHorizontalBlurTask;
+  Actor       mInternalRoot;
+  Actor       mHorizontalBlurActor;
+  RenderTask  mHorizontalBlurTask;
   FrameBuffer mTemporaryFrameBuffer;
-  Actor mVerticalBlurActor;
-  RenderTask mVerticalBlurTask;
+  Actor       mVerticalBlurActor;
+  RenderTask  mVerticalBlurTask;
 
   FrameBuffer mBlurredOutputFrameBuffer;
-  RenderTask mSourceRenderTask;
+  RenderTask  mSourceRenderTask;
 
   // Variables
-  float mDownscaleFactor;
+  float    mDownscaleFactor;
   uint32_t mBlurRadius;
 
   Dali::WeakHandle<Dali::Actor> mUserSourceActor;  ///< Weakhandle of source actor from user.
   Dali::WeakHandle<Dali::Actor> mUserStopperActor; ///< Weakhandle of stopper actor from user.
 
-  float mInternalDownscaleFactor;
+  float    mInternalDownscaleFactor;
   uint32_t mInternalBlurRadius;
 
   uint32_t mDownscaledBlurRadius;

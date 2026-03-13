@@ -35,10 +35,10 @@ namespace
 {
 const char ERROR_DESCRIPTION_NONE[] = "No Error";
 
-template <typename IteratorType, typename EndIteratorType>
+template<typename IteratorType, typename EndIteratorType>
 inline IteratorType Advance(IteratorType& iter, EndIteratorType& end, int n)
 {
-  for (int i = 0; i < n; ++i)
+  for(int i = 0; i < n; ++i)
   {
     ++iter;
   }
@@ -48,24 +48,24 @@ inline IteratorType Advance(IteratorType& iter, EndIteratorType& end, int n)
 } // namespace
 
 JsonParser::JsonParser()
-  : mRoot(NULL),
-    mErrorDescription(ERROR_DESCRIPTION_NONE),
-    mErrorPosition(0),
-    mErrorLine(0),
-    mErrorColumn(0),
-    mNumberOfChars(0),
-    mNumberOfNodes(0)
+: mRoot(NULL),
+  mErrorDescription(ERROR_DESCRIPTION_NONE),
+  mErrorPosition(0),
+  mErrorLine(0),
+  mErrorColumn(0),
+  mNumberOfChars(0),
+  mNumberOfNodes(0)
 {
 }
 
 JsonParser::JsonParser(const TreeNode& tree)
-  : mRoot(NULL),
-    mErrorDescription(ERROR_DESCRIPTION_NONE),
-    mErrorPosition(0),
-    mErrorLine(0),
-    mErrorColumn(0),
-    mNumberOfChars(0),
-    mNumberOfNodes(0)
+: mRoot(NULL),
+  mErrorDescription(ERROR_DESCRIPTION_NONE),
+  mErrorPosition(0),
+  mErrorLine(0),
+  mErrorColumn(0),
+  mNumberOfChars(0),
+  mNumberOfNodes(0)
 {
   mRoot = TreeNodeManipulator::Copy(tree, mNumberOfNodes, mNumberOfChars);
 
@@ -91,7 +91,7 @@ bool JsonParser::Parse(const std::string& source)
 
   JsonParserState parserState(mRoot);
 
-  if (parserState.ParseJson(mSources.back()))
+  if(parserState.ParseJson(mSources.back()))
   {
     mRoot = parserState.GetRoot();
 
@@ -99,20 +99,20 @@ bool JsonParser::Parse(const std::string& source)
     mNumberOfNodes += parserState.GetCreatedNodeCount();
 
     mErrorDescription = ERROR_DESCRIPTION_NONE;
-    mErrorPosition = 0;
-    mErrorLine = 0;
-    mErrorColumn = 0;
+    mErrorPosition    = 0;
+    mErrorLine        = 0;
+    mErrorColumn      = 0;
   }
   else
   {
     mErrorDescription = parserState.GetErrorDescription();
-    if (NULL == mErrorDescription)
+    if(NULL == mErrorDescription)
     {
       mErrorDescription = ERROR_DESCRIPTION_NONE;
     }
     mErrorPosition = parserState.GetErrorPosition();
-    mErrorLine = parserState.GetErrorLineNumber();
-    mErrorColumn = parserState.GetErrorColumn();
+    mErrorLine     = parserState.GetErrorLineNumber();
+    mErrorColumn   = parserState.GetErrorColumn();
 
     // Destroy already parsed tree data.
     mRoot = parserState.GetRoot();
@@ -176,7 +176,7 @@ void JsonParser::Write(std::ostream& output, int indent) const
 
 void JsonParser::DeleteRootNode() noexcept
 {
-  if (mRoot)
+  if(mRoot)
   {
     TreeNodeManipulator modify(mRoot);
     modify.RemoveChildren();

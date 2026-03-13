@@ -154,12 +154,12 @@ private:
 private:
   float mBlurRadius; ///< The blur radius
 
-  Constraint mCutoutCornerRadiusConstraint{};
+  Constraint      mCutoutCornerRadiusConstraint{};
   Property::Index mCuroutCornerRadiusIndex; ///< The index of cutout corner radius property
 
-  DevelColorVisual::CutoutPolicy::Type mCutoutPolicy : 3; ///< The policy of cutout
-  bool mAlwaysUsingBlurRadius : 1;                        ///< Whether we need the blur radius in shader always.
-  ColorVisualShaderFactory& mColorVisualShaderFactory;    ///< The shader factory for color visual.
+  DevelColorVisual::CutoutPolicy::Type mCutoutPolicy : 3;          ///< The policy of cutout
+  bool                                 mAlwaysUsingBlurRadius : 1; ///< Whether we need the blur radius in shader always.
+  ColorVisualShaderFactory&            mColorVisualShaderFactory;  ///< The shader factory for color visual.
 };
 
 } // namespace Internal

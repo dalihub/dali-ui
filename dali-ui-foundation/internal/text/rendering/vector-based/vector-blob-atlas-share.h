@@ -72,10 +72,10 @@ public:
 
 public:
   // Default copy and move operator
-  VectorBlobAtlasShare(const VectorBlobAtlasShare& rhs) = default;
-  VectorBlobAtlasShare(VectorBlobAtlasShare&& rhs) = default;
+  VectorBlobAtlasShare(const VectorBlobAtlasShare& rhs)            = default;
+  VectorBlobAtlasShare(VectorBlobAtlasShare&& rhs)                 = default;
   VectorBlobAtlasShare& operator=(const VectorBlobAtlasShare& rhs) = default;
-  VectorBlobAtlasShare& operator=(VectorBlobAtlasShare&& rhs) = default;
+  VectorBlobAtlasShare& operator=(VectorBlobAtlasShare&& rhs)      = default;
 
 private:
   class Impl;

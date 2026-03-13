@@ -46,7 +46,7 @@ protected:
    * Default constructor to set the default values
    */
   AbstractStyleCharacterRun()
-    : characterRun{}
+  : characterRun{}
   {
   }
 
@@ -57,7 +57,7 @@ protected:
    * @param[in] characterRun the character run
    */
   AbstractStyleCharacterRun(const CharacterRun& characterRun)
-    : characterRun{characterRun}
+  : characterRun{characterRun}
   {
   }
 
@@ -103,9 +103,9 @@ public:
 } // namespace Ui
 
 // Allow AbstractStyleCharacterRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::AbstractStyleCharacterRun>
-  : public Dali::BasicTypes<Dali::Ui::Text::AbstractStyleCharacterRun>
+: public Dali::BasicTypes<Dali::Ui::Text::AbstractStyleCharacterRun>
 {
   enum
   {

@@ -50,7 +50,7 @@ class Base;
  */
 struct RegisteredVisual
 {
-  Property::Index index;
+  Property::Index  index;
   Ui::Visual::Base visual;
 
   bool enabled : 1;
@@ -59,12 +59,12 @@ struct RegisteredVisual
   bool overrideCornerProperties : 1;
 
   RegisteredVisual(Property::Index aIndex, Ui::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
-    : index(aIndex),
-      visual(aVisual),
-      enabled(aEnabled),
-      pending(aPendingReplacement),
-      overideReadyTransition(false),
-      overrideCornerProperties(false)
+  : index(aIndex),
+    visual(aVisual),
+    enabled(aEnabled),
+    pending(aPendingReplacement),
+    overideReadyTransition(false),
+    overrideCornerProperties(false)
   {
   }
 };
@@ -325,7 +325,7 @@ private:
     enum Type
     {
       DISABLED = 0, ///< Visual disabled.
-      ENABLED = 1   ///< Visual enabled.
+      ENABLED  = 1  ///< Visual enabled.
     };
   };
 
@@ -338,7 +338,7 @@ private:
     enum Type
     {
       NOT_SET = 0, ///< Visual depth value not set by caller.
-      SET = 1      ///< Visual depth value set by caller.
+      SET     = 1  ///< Visual depth value set by caller.
     };
   };
 
@@ -358,25 +358,25 @@ private:
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, VisualState::Type enabled,
                       DepthIndexValue::Type depthIndexValueSet,
-                      int depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
+                      int                   depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
 
 public:
-  RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the control, non trivial type so std::vector used.
+  RegisteredVisualContainer           mVisuals; ///< Stores visuals needed by the control, non trivial type so std::vector used.
   DevelControl::VisualEventSignalType mVisualEventSignal;
-  RegisteredVisualContainer mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
+  RegisteredVisualContainer           mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
 private:
   Control::Impl& mOuter;
 
   // Key : PropertyIndex. Value map's Key : Animation.GetObjectPtr(), Value map's Value: count of animate called
   using PropertyOnAnimationContainer =
-      std::unordered_map<Property::Index, std::unordered_map<const Dali::RefObject*, uint32_t>>;
+    std::unordered_map<Property::Index, std::unordered_map<const Dali::RefObject*, uint32_t>>;
   PropertyOnAnimationContainer
-      mPropertyOnAnimation; ///< Properties that are currently on animation or constraint applied
+    mPropertyOnAnimation; ///< Properties that are currently on animation or constraint applied
 
   bool mOffscreenRenderingEnabled : 1; ///< True if offscreen rendering is enabled.
   bool
-      mCornerRadiusValueAdded : 1; ///< True if corner radius value setted at least 1 time. Could not be reset to false.
+       mCornerRadiusValueAdded : 1;     ///< True if corner radius value setted at least 1 time. Could not be reset to false.
   bool mCornerSquarenessValueAdded : 1; ///< True if corner squareness value setted at least 1 time. Could not be reset
                                         ///< to false.
 };

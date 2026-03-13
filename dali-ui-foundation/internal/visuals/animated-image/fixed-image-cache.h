@@ -121,10 +121,10 @@ protected:
   void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
 
 private:
-  std::vector<UrlStore>& mImageUrls;
-  std::vector<bool> mReadyFlags;
+  std::vector<UrlStore>&                 mImageUrls;
+  std::vector<bool>                      mReadyFlags;
   std::vector<TextureManager::LoadState> mLoadStates;
-  uint32_t mCurrentFrameIndex;
+  uint32_t                               mCurrentFrameIndex;
 };
 
 } // namespace Internal

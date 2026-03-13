@@ -16,8 +16,8 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/integration-api/input-event-impl.h>
+#include <dali-ui-foundation/public-api/input-event.h>
 
 namespace Dali
 {
@@ -58,7 +58,7 @@ InputEvent InputEvent::New(const LongPressGesture& originEvent)
 }
 
 InputEvent::InputEvent(Integration::InputEventImpl* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

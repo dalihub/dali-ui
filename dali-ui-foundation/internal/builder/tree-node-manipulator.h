@@ -35,7 +35,7 @@ namespace Ui
 {
 namespace Internal
 {
-typedef std::vector<char> VectorChar;
+typedef std::vector<char>    VectorChar;
 typedef VectorChar::iterator VectorCharIter;
 
 /*
@@ -197,7 +197,7 @@ private:
  */
 struct CollectNodes
 {
-  CollectNodes(){};
+  CollectNodes() {};
 
   /*
    * Call operator to add nodes to the list
@@ -209,7 +209,7 @@ struct CollectNodes
   }
 
   typedef std::vector<const TreeNode*> VectorNodes;
-  typedef VectorNodes::iterator iterator;
+  typedef VectorNodes::iterator        iterator;
 
   VectorNodes nodes; ///< List of collected nodes
 };
@@ -217,12 +217,12 @@ struct CollectNodes
 /*
  * Depth first walk of nodes applying given operation (unary_function)
  */
-template <typename Operation>
+template<typename Operation>
 void DepthFirst(TreeNode* node, Operation& operation)
 {
   DALI_ASSERT_DEBUG(node && "Operation on NULL JSON node");
 
-  for (TreeNode::ConstIterator iter = node->CBegin(); iter != node->CEnd(); ++iter)
+  for(TreeNode::ConstIterator iter = node->CBegin(); iter != node->CEnd(); ++iter)
   {
     // iterator access is const for external api but were modifying
     DepthFirst(const_cast<TreeNode*>(&((*iter).second)), operation);

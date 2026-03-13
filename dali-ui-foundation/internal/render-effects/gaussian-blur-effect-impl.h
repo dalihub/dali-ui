@@ -199,9 +199,9 @@ private:
    */
   void UpdateDownscaledBlurRadius();
 
-  GaussianBlurEffectImpl(const GaussianBlurEffectImpl&) = delete;
-  GaussianBlurEffectImpl(GaussianBlurEffectImpl&&) = delete;
-  GaussianBlurEffectImpl& operator=(GaussianBlurEffectImpl&&) = delete;      // no move()
+  GaussianBlurEffectImpl(const GaussianBlurEffectImpl&)            = delete;
+  GaussianBlurEffectImpl(GaussianBlurEffectImpl&&)                 = delete;
+  GaussianBlurEffectImpl& operator=(GaussianBlurEffectImpl&&)      = delete; // no move()
   GaussianBlurEffectImpl& operator=(const GaussianBlurEffectImpl&) = delete; // no copy()
 
 public:
@@ -215,21 +215,21 @@ private:
   // Resource
   FrameBuffer mInputFrameBuffer; // Input. What to blur.
 
-  Actor mInternalRoot;
-  Actor mHorizontalBlurActor;
-  RenderTask mHorizontalBlurTask;
+  Actor       mInternalRoot;
+  Actor       mHorizontalBlurActor;
+  RenderTask  mHorizontalBlurTask;
   FrameBuffer mTemporaryFrameBuffer;
-  Actor mVerticalBlurActor;
-  RenderTask mVerticalBlurTask;
+  Actor       mVerticalBlurActor;
+  RenderTask  mVerticalBlurTask;
 
   FrameBuffer mBlurredOutputFrameBuffer;
-  RenderTask mSourceRenderTask;
+  RenderTask  mSourceRenderTask;
 
   // Variables
-  float mDownscaleFactor;
+  float    mDownscaleFactor;
   uint32_t mBlurRadius;
 
-  float mInternalDownscaleFactor;
+  float    mInternalDownscaleFactor;
   uint32_t mInternalBlurRadius;
 
   uint32_t mDownscaledBlurRadius;

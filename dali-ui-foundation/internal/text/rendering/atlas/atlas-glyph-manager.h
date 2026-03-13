@@ -40,7 +40,7 @@ public:
   struct Metrics
   {
     Metrics()
-      : mGlyphCount(0u)
+    : mGlyphCount(0u)
     {
     }
 
@@ -48,23 +48,23 @@ public:
     {
     }
 
-    uint32_t mGlyphCount;                ///< number of glyphs being managed
-    std::string mVerboseGlyphCounts;     ///< a verbose list of the glyphs + ref counts
-    AtlasManager::Metrics mAtlasMetrics; ///< metrics from the Atlas Manager
+    uint32_t              mGlyphCount;         ///< number of glyphs being managed
+    std::string           mVerboseGlyphCounts; ///< a verbose list of the glyphs + ref counts
+    AtlasManager::Metrics mAtlasMetrics;       ///< metrics from the Atlas Manager
   };
 
   struct GlyphStyle
   {
     GlyphStyle()
-      : outline{0u},
-        isItalic{false},
-        isBold{false}
+    : outline{0u},
+      isItalic{false},
+      isBold{false}
     {
     }
 
-    uint16_t outline;  ///< The outline width of this glyph
-    bool isItalic : 1; ///< Whether the glyph is italic.
-    bool isBold : 1;   ///< Whether the glyph is bold.
+    uint16_t outline;      ///< The outline width of this glyph
+    bool     isItalic : 1; ///< Whether the glyph is italic.
+    bool     isBold : 1;   ///< Whether the glyph is bold.
   };
 
   /**
@@ -176,10 +176,10 @@ public:
 
 public:
   // Default copy and move operator
-  AtlasGlyphManager(const AtlasGlyphManager& rhs) = default;
-  AtlasGlyphManager(AtlasGlyphManager&& rhs) = default;
+  AtlasGlyphManager(const AtlasGlyphManager& rhs)            = default;
+  AtlasGlyphManager(AtlasGlyphManager&& rhs)                 = default;
   AtlasGlyphManager& operator=(const AtlasGlyphManager& rhs) = default;
-  AtlasGlyphManager& operator=(AtlasGlyphManager&& rhs) = default;
+  AtlasGlyphManager& operator=(AtlasGlyphManager&& rhs)      = default;
 
 private:
   explicit DALI_INTERNAL AtlasGlyphManager(Internal::AtlasGlyphManager* impl);

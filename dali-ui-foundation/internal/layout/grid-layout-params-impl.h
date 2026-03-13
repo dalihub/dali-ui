@@ -21,8 +21,8 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
@@ -43,20 +43,20 @@ public:
    * @brief Constructs with default grid position (row=0, column=0) and span (1x1).
    */
   GridLayoutParamsImpl()
-    : LayoutParamsImpl(),
-      mRow(0),
-      mColumn(0),
-      mRowSpan(1),
-      mColumnSpan(1)
+  : LayoutParamsImpl(),
+    mRow(0),
+    mColumn(0),
+    mRowSpan(1),
+    mColumnSpan(1)
   {
   }
 
   GridLayoutParamsImpl(const GridLayoutParamsImpl& other)
-    : LayoutParamsImpl(),
-      mRow(other.mRow),
-      mColumn(other.mColumn),
-      mRowSpan(other.mRowSpan),
-      mColumnSpan(other.mColumnSpan)
+  : LayoutParamsImpl(),
+    mRow(other.mRow),
+    mColumn(other.mColumn),
+    mRowSpan(other.mRowSpan),
+    mColumnSpan(other.mColumnSpan)
   {
   }
 
@@ -145,7 +145,7 @@ public:
   static GridLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
-    if (trait)
+    if(trait)
     {
       return static_cast<GridLayoutParamsImpl*>(&Ui::GetImpl(trait));
     }
@@ -160,12 +160,12 @@ public:
   static GridLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
   {
     GridLayoutParamsImpl* existing = Get(viewImpl);
-    if (existing)
+    if(existing)
     {
       return *existing;
     }
     IntrusivePtr<GridLayoutParamsImpl> impl(new GridLayoutParamsImpl());
-    Trait trait = Trait::DownCast(BaseHandle(impl.Get()));
+    Trait                              trait = Trait::DownCast(BaseHandle(impl.Get()));
     viewImpl.SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, trait);
     return *impl;
   }

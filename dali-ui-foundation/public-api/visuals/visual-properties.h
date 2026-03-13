@@ -42,16 +42,16 @@ namespace Visual
  */
 enum Type
 {
-  BORDER,    ///< Renders a solid color as an internal border to the control's quad. @SINCE_1_1.45
-  COLOR,     ///< Renders a solid color to the control's quad. @SINCE_1_1.45
-  GRADIENT,  ///< Renders a smooth transition of colors to the control's quad. @SINCE_1_1.45
-  IMAGE,     ///< Renders an image into the control's quad. @SINCE_1_1.45
-  MESH,      ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file. @SINCE_1_1.45
-  PRIMITIVE, ///< Renders a simple 3D shape, such as a cube or sphere. @SINCE_1_1.45
-  WIREFRAME, ///< Renders a simple wire-frame outlining a quad. @SINCE_1_2_2
-  TEXT,      ///< Renders text @SINCE_1_2.60
-  N_PATCH,   ///< Renders an n-patch image. @SINCE_1_2.60
-  SVG,       ///< Renders an SVG image. @SINCE_1_2.60
+  BORDER,         ///< Renders a solid color as an internal border to the control's quad. @SINCE_1_1.45
+  COLOR,          ///< Renders a solid color to the control's quad. @SINCE_1_1.45
+  GRADIENT,       ///< Renders a smooth transition of colors to the control's quad. @SINCE_1_1.45
+  IMAGE,          ///< Renders an image into the control's quad. @SINCE_1_1.45
+  MESH,           ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file. @SINCE_1_1.45
+  PRIMITIVE,      ///< Renders a simple 3D shape, such as a cube or sphere. @SINCE_1_1.45
+  WIREFRAME,      ///< Renders a simple wire-frame outlining a quad. @SINCE_1_2_2
+  TEXT,           ///< Renders text @SINCE_1_2.60
+  N_PATCH,        ///< Renders an n-patch image. @SINCE_1_2.60
+  SVG,            ///< Renders an SVG image. @SINCE_1_2.60
   ANIMATED_IMAGE, ///< Renders a animated image. @SINCE_1_2.60
 };
 

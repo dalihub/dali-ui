@@ -53,7 +53,7 @@ enum class PreMultiplyOnLoad
  * alpha or if the image need to be applied alpha mask.
  * @return The loading task id
  */
-DALI_UI_API uint32_t LoadAnimatedImage(AsyncImageLoader asyncImageLoader,
+DALI_UI_API uint32_t LoadAnimatedImage(AsyncImageLoader           asyncImageLoader,
                                        Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 

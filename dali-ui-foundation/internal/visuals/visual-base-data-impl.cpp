@@ -40,26 +40,26 @@ namespace Internal
 namespace
 {
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_HINT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, NONE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, OUTPUT_IS_TRANSPARENT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, MODIFIES_GEOMETRY)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, NONE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, OUTPUT_IS_TRANSPARENT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, MODIFIES_GEOMETRY)
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_HINT)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ALIGN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_BEGIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_CENTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_END)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_BEGIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_END)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_BEGIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_CENTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_END)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_BEGIN)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_CENTER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_END)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_BEGIN)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_END)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_BEGIN)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_CENTER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_END)
 DALI_ENUM_TO_STRING_TABLE_END(ALIGN)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, RELATIVE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, ABSOLUTE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, RELATIVE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, ABSOLUTE)
 DALI_ENUM_TO_STRING_TABLE_END(POLICY)
 
 Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type direction)
@@ -78,7 +78,7 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
   // clang-format on
 
   Vector2 result(&pointToVector2[point * 2]);
-  if (direction == Direction::RIGHT_TO_LEFT)
+  if(direction == Direction::RIGHT_TO_LEFT)
   {
     result.x = 1.0f - result.x;
   }
@@ -89,28 +89,28 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
 bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
 {
   bool success = false;
-  if (value.Get(policy))
+  if(value.Get(policy))
   {
     success = true;
   }
   else
   {
     const Property::Array* array = value.GetArray();
-    if (array && array->Size() == 2)
+    if(array && array->Size() == 2)
     {
       Ui::Visual::Transform::Policy::Type xPolicy =
-          static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
+        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
       Ui::Visual::Transform::Policy::Type yPolicy =
-          static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
+        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
 
-      if (Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(0), POLICY_TABLE,
-                                                                                 POLICY_TABLE_COUNT, xPolicy) &&
-          Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
-                                                                                 POLICY_TABLE_COUNT, yPolicy))
+      if(Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(0), POLICY_TABLE,
+                                                                                POLICY_TABLE_COUNT, xPolicy) &&
+         Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
+                                                                                POLICY_TABLE_COUNT, yPolicy))
       {
         policy.x = xPolicy;
         policy.y = yPolicy;
-        success = true;
+        success  = true;
       }
     }
   }
@@ -120,43 +120,43 @@ bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
 } // unnamed namespace
 
 Internal::Visual::Base::Impl::Impl(FittingMode fittingMode, Ui::Visual::Type type)
-  : mEventObserver(nullptr),
-    mConstraintFeatureList{},
-    mTransform(nullptr),
-    mMixColor(Color::WHITE),
-    mControlSize(Vector2::ZERO),
-    mDecorationData(nullptr),
-    mDepthIndex(Ui::DepthIndex::AUTO_INDEX),
-    mFittingMode(fittingMode),
-    mFlags(0),
-    mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
-    mType(type),
-    mAlwaysUsingBorderline(false),
-    mAlwaysUsingCornerRadius(false),
-    mAlwaysUsingCornerSquareness(false),
-    mIgnoreFittingMode(false),
-    mPixelAreaSetByFittingMode(false),
-    mTransformMapSetForFittingMode(false),
-    mTransformMapUsingDefault(true),
-    mTransformMapChanged(false),
-    mOffscreenRenderingIgnoreCornerRadius(false)
+: mEventObserver(nullptr),
+  mConstraintFeatureList{},
+  mTransform(nullptr),
+  mMixColor(Color::WHITE),
+  mControlSize(Vector2::ZERO),
+  mDecorationData(nullptr),
+  mDepthIndex(Ui::DepthIndex::AUTO_INDEX),
+  mFittingMode(fittingMode),
+  mFlags(0),
+  mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
+  mType(type),
+  mAlwaysUsingBorderline(false),
+  mAlwaysUsingCornerRadius(false),
+  mAlwaysUsingCornerSquareness(false),
+  mIgnoreFittingMode(false),
+  mPixelAreaSetByFittingMode(false),
+  mTransformMapSetForFittingMode(false),
+  mTransformMapUsingDefault(true),
+  mTransformMapChanged(false),
+  mOffscreenRenderingIgnoreCornerRadius(false)
 {
 }
 
 Internal::Visual::Base::Impl::~Impl()
 {
   mCustomShaders.clear();
-  if (mDecorationData)
+  if(mDecorationData)
   {
     delete mDecorationData;
   }
 }
 
 Internal::Visual::Base::Impl::CustomShader::CustomShader(const Property::Map& map)
-  : mGridSize(1, 1),
-    mHints(Shader::Hint::NONE),
-    mRenderPassTag(0),
-    mName("")
+: mGridSize(1, 1),
+  mHints(Shader::Hint::NONE),
+  mRenderPassTag(0),
+  mName("")
 {
   SetPropertyMap(map);
 }
@@ -166,35 +166,35 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   mVertexShader.clear();
   mFragmentShader.clear();
   mGridSize = ImageDimensions(1, 1);
-  mHints = Shader::Hint::NONE;
-  mName = "";
+  mHints    = Shader::Hint::NONE;
+  mName     = "";
 
   Property::Value* vertexShaderValue =
-      shaderMap.Find(Ui::Visual::Shader::Property::VERTEX_SHADER, CUSTOM_VERTEX_SHADER);
-  if (vertexShaderValue)
+    shaderMap.Find(Ui::Visual::Shader::Property::VERTEX_SHADER, CUSTOM_VERTEX_SHADER);
+  if(vertexShaderValue)
   {
-    if (!GetStringFromProperty(*vertexShaderValue, mVertexShader))
+    if(!GetStringFromProperty(*vertexShaderValue, mVertexShader))
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a string\n", CUSTOM_VERTEX_SHADER);
     }
   }
 
   Property::Value* fragmentShaderValue =
-      shaderMap.Find(Ui::Visual::Shader::Property::FRAGMENT_SHADER, CUSTOM_FRAGMENT_SHADER);
-  if (fragmentShaderValue)
+    shaderMap.Find(Ui::Visual::Shader::Property::FRAGMENT_SHADER, CUSTOM_FRAGMENT_SHADER);
+  if(fragmentShaderValue)
   {
-    if (!GetStringFromProperty(*fragmentShaderValue, mFragmentShader))
+    if(!GetStringFromProperty(*fragmentShaderValue, mFragmentShader))
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a string\n", CUSTOM_FRAGMENT_SHADER);
     }
   }
 
   Property::Value* subdivideXValue =
-      shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_X, CUSTOM_SUBDIVIDE_GRID_X);
-  if (subdivideXValue)
+    shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_X, CUSTOM_SUBDIVIDE_GRID_X);
+  if(subdivideXValue)
   {
     int subdivideX;
-    if (!subdivideXValue->Get(subdivideX) || subdivideX < 1)
+    if(!subdivideXValue->Get(subdivideX) || subdivideX < 1)
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a value greater than 1\n", CUSTOM_SUBDIVIDE_GRID_X);
     }
@@ -205,11 +205,11 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* subdivideYValue =
-      shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_Y, CUSTOM_SUBDIVIDE_GRID_Y);
-  if (subdivideYValue)
+    shaderMap.Find(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_Y, CUSTOM_SUBDIVIDE_GRID_Y);
+  if(subdivideYValue)
   {
     int subdivideY;
-    if (!subdivideYValue->Get(subdivideY) || subdivideY < 1)
+    if(!subdivideYValue->Get(subdivideY) || subdivideY < 1)
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a value greater than 1\n", CUSTOM_SUBDIVIDE_GRID_Y);
     }
@@ -220,10 +220,10 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* renderPassTagValue =
-      shaderMap.Find(Ui::Visual::Shader::Property::RENDER_PASS_TAG, CUSTOM_RENDER_PASS_TAG);
-  if (renderPassTagValue)
+    shaderMap.Find(Ui::Visual::Shader::Property::RENDER_PASS_TAG, CUSTOM_RENDER_PASS_TAG);
+  if(renderPassTagValue)
   {
-    if (!renderPassTagValue->Get(mRenderPassTag) || mRenderPassTag < 0)
+    if(!renderPassTagValue->Get(mRenderPassTag) || mRenderPassTag < 0)
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a value greater than or equal 0\n",
                      CUSTOM_RENDER_PASS_TAG);
@@ -231,9 +231,9 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* hintsValue = shaderMap.Find(Ui::Visual::Shader::Property::HINTS, CUSTOM_SHADER_HINTS);
-  if (hintsValue)
+  if(hintsValue)
   {
-    if (!Scripting::GetBitmaskEnumerationProperty(*hintsValue, SHADER_HINT_TABLE, SHADER_HINT_TABLE_COUNT, mHints))
+    if(!Scripting::GetBitmaskEnumerationProperty(*hintsValue, SHADER_HINT_TABLE, SHADER_HINT_TABLE_COUNT, mHints))
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a hint or an array of hint strings\n",
                      CUSTOM_SHADER_HINTS);
@@ -241,9 +241,9 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
   }
 
   Property::Value* nameValue = shaderMap.Find(Ui::Visual::Shader::Property::NAME, CUSTOM_SHADER_NAME);
-  if (nameValue)
+  if(nameValue)
   {
-    if (!GetStringFromProperty(*nameValue, mName))
+    if(!GetStringFromProperty(*nameValue, mName))
     {
       DALI_LOG_ERROR("'%s' parameter does not correctly specify a string\n", CUSTOM_SHADER_NAME);
     }
@@ -253,37 +253,37 @@ void Internal::Visual::Base::Impl::CustomShader::SetPropertyMap(const Property::
 Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() const
 {
   Property::Map customShader;
-  if (!mVertexShader.empty() || !mFragmentShader.empty())
+  if(!mVertexShader.empty() || !mFragmentShader.empty())
   {
-    if (!mVertexShader.empty())
+    if(!mVertexShader.empty())
     {
       customShader.Insert(Ui::Visual::Shader::Property::VERTEX_SHADER, mVertexShader);
     }
-    if (!mFragmentShader.empty())
+    if(!mFragmentShader.empty())
     {
       customShader.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER, mFragmentShader);
     }
 
-    if (mGridSize.GetWidth() != 1)
+    if(mGridSize.GetWidth() != 1)
     {
       customShader.Insert(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_X, mGridSize.GetWidth());
     }
-    if (mGridSize.GetHeight() != 1)
+    if(mGridSize.GetHeight() != 1)
     {
       customShader.Insert(Ui::Visual::Shader::Property::SUBDIVIDE_GRID_Y, mGridSize.GetHeight());
     }
 
-    if (mRenderPassTag >= 0)
+    if(mRenderPassTag >= 0)
     {
       customShader.Insert(Ui::Visual::Shader::Property::RENDER_PASS_TAG, mRenderPassTag);
     }
 
-    if (mHints != Dali::Shader::Hint::NONE)
+    if(mHints != Dali::Shader::Hint::NONE)
     {
       customShader.Insert(Ui::Visual::Shader::Property::HINTS, static_cast<int>(mHints));
     }
 
-    if (!mName.empty())
+    if(!mName.empty())
     {
       customShader.Insert(Ui::Visual::Shader::Property::NAME, mName);
     }
@@ -292,34 +292,34 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
 }
 
 Internal::Visual::Base::Impl::Transform::Transform()
-  : mOffset(0.0f, 0.0f),
-    mSize(1.0f, 1.0f),
-    mExtraSize(0.0f, 0.0f),
-    mOffsetSizeMode(0.0f, 0.0f, 0.0f, 0.0f),
-    mOrigin(Ui::Align::TOP_BEGIN),
-    mAnchorPoint(Ui::Align::TOP_BEGIN)
+: mOffset(0.0f, 0.0f),
+  mSize(1.0f, 1.0f),
+  mExtraSize(0.0f, 0.0f),
+  mOffsetSizeMode(0.0f, 0.0f, 0.0f, 0.0f),
+  mOrigin(Ui::Align::TOP_BEGIN),
+  mAnchorPoint(Ui::Align::TOP_BEGIN)
 {
 }
 
 void Internal::Visual::Base::Impl::Transform::SetPropertyMap(const Property::Map& map)
 {
   // Set default values
-  mOffset = Vector2(0.0f, 0.0f);
-  mSize = Vector2(1.0f, 1.0f);
-  mExtraSize = Vector2(0.0f, 0.0f);
+  mOffset         = Vector2(0.0f, 0.0f);
+  mSize           = Vector2(1.0f, 1.0f);
+  mExtraSize      = Vector2(0.0f, 0.0f);
   mOffsetSizeMode = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-  mOrigin = Ui::Align::TOP_BEGIN;
-  mAnchorPoint = Ui::Align::TOP_BEGIN;
+  mOrigin         = Ui::Align::TOP_BEGIN;
+  mAnchorPoint    = Ui::Align::TOP_BEGIN;
 
   UpdatePropertyMap(map);
 }
 
 void Internal::Visual::Base::Impl::Transform::UpdatePropertyMap(const Property::Map& map)
 {
-  for (Property::Map::SizeType i(0); i < map.Count(); ++i)
+  for(Property::Map::SizeType i(0); i < map.Count(); ++i)
   {
     KeyValuePair keyValue = map.GetKeyValue(i);
-    switch (Visual::Base::GetIntKey(keyValue.first))
+    switch(Visual::Base::GetIntKey(keyValue.first))
     {
       case Ui::Visual::Transform::Property::OFFSET:
       {
@@ -345,7 +345,7 @@ void Internal::Visual::Base::Impl::Transform::UpdatePropertyMap(const Property::
       case Ui::Visual::Transform::Property::OFFSET_POLICY:
       {
         Vector2 policy;
-        if (GetPolicyFromValue(keyValue.second, policy))
+        if(GetPolicyFromValue(keyValue.second, policy))
         {
           mOffsetSizeMode.x = policy.x;
           mOffsetSizeMode.y = policy.y;
@@ -355,7 +355,7 @@ void Internal::Visual::Base::Impl::Transform::UpdatePropertyMap(const Property::
       case Ui::Visual::Transform::Property::SIZE_POLICY:
       {
         Vector2 policy;
-        if (GetPolicyFromValue(keyValue.second, policy))
+        if(GetPolicyFromValue(keyValue.second, policy))
         {
           mOffsetSizeMode.z = policy.x;
           mOffsetSizeMode.w = policy.y;
@@ -375,12 +375,12 @@ void Internal::Visual::Base::Impl::Transform::GetPropertyMap(Property::Map& map)
 {
   map.Clear();
   map.Add(Ui::Visual::Transform::Property::OFFSET, mOffset)
-      .Add(Ui::Visual::Transform::Property::SIZE, mSize)
-      .Add(Ui::Visual::Transform::Property::ORIGIN, mOrigin)
-      .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, mAnchorPoint)
-      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
-      .Add(Ui::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
-      .Add(Ui::DevelVisual::Transform::Property::EXTRA_SIZE, mExtraSize);
+    .Add(Ui::Visual::Transform::Property::SIZE, mSize)
+    .Add(Ui::Visual::Transform::Property::ORIGIN, mOrigin)
+    .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, mAnchorPoint)
+    .Add(Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
+    .Add(Ui::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
+    .Add(Ui::DevelVisual::Transform::Property::EXTRA_SIZE, mExtraSize);
 }
 
 void Internal::Visual::Base::Impl::Transform::SetUniforms(Dali::VisualRenderer renderer, Ui::Direction::Type direction)
@@ -406,13 +406,13 @@ Vector2 Internal::Visual::Base::Impl::Transform::GetVisualSize(const Vector2& co
 const Property::Map& Internal::Visual::Base::Impl::Transform::GetDefaultTransformMap()
 {
   static const Property::Map sDefaultTransformMap{
-      {Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO},
-      {Ui::Visual::Transform::Property::SIZE, Vector2::ONE},
-      {Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
-      {Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN},
-      {Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
-      {Ui::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
-      {Ui::DevelVisual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},
+    {Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO},
+    {Ui::Visual::Transform::Property::SIZE, Vector2::ONE},
+    {Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
+    {Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN},
+    {Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
+    {Ui::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
+    {Ui::DevelVisual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},
   };
 
   return sDefaultTransformMap;

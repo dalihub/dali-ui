@@ -18,11 +18,11 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
-#include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/events/key-event.h>
-#include <dali/public-api/events/tap-gesture.h>
 #include <dali/public-api/events/long-press-gesture.h>
+#include <dali/public-api/events/tap-gesture.h>
+#include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -148,7 +148,6 @@ public:
   const LongPressGesture& GetLongPressGesture() const;
 
 public: // Not intended for Application developers
-
   /**
    * @brief This constructor is used by InputEvent::New() methods.
    *

@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/flex-layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -49,12 +49,12 @@ FlexLayoutImplPtr FlexLayoutImpl::New()
 }
 
 FlexLayoutImpl::FlexLayoutImpl()
-  : LayoutImpl(),
-    mDirection(FlexDirection::ROW),
-    mWrap(FlexWrap::NO_WRAP),
-    mJustifyContent(FlexJustify::FLEX_START),
-    mAlignItems(FlexAlign::STRETCH),
-    mAlignContent(FlexAlign::STRETCH)
+: LayoutImpl(),
+  mDirection(FlexDirection::ROW),
+  mWrap(FlexWrap::NO_WRAP),
+  mJustifyContent(FlexJustify::FLEX_START),
+  mAlignItems(FlexAlign::STRETCH),
+  mAlignContent(FlexAlign::STRETCH)
 {
 }
 
@@ -64,11 +64,11 @@ FlexLayoutImpl::~FlexLayoutImpl()
 
 void FlexLayoutImpl::SetDirection(FlexDirection direction)
 {
-  if (mDirection != direction)
+  if(mDirection != direction)
   {
-    mDirection = direction;
+    mDirection             = direction;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<FlexLayoutManager*>(manager)->SetDirection(direction);
     }
@@ -83,11 +83,11 @@ FlexDirection FlexLayoutImpl::GetDirection() const
 
 void FlexLayoutImpl::SetWrap(FlexWrap wrap)
 {
-  if (mWrap != wrap)
+  if(mWrap != wrap)
   {
-    mWrap = wrap;
+    mWrap                  = wrap;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<FlexLayoutManager*>(manager)->SetWrap(wrap);
     }
@@ -102,11 +102,11 @@ FlexWrap FlexLayoutImpl::GetWrap() const
 
 void FlexLayoutImpl::SetJustifyContent(FlexJustify justify)
 {
-  if (mJustifyContent != justify)
+  if(mJustifyContent != justify)
   {
-    mJustifyContent = justify;
+    mJustifyContent        = justify;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<FlexLayoutManager*>(manager)->SetJustifyContent(justify);
     }
@@ -121,11 +121,11 @@ FlexJustify FlexLayoutImpl::GetJustifyContent() const
 
 void FlexLayoutImpl::SetAlignItems(FlexAlign align)
 {
-  if (mAlignItems != align)
+  if(mAlignItems != align)
   {
-    mAlignItems = align;
+    mAlignItems            = align;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<FlexLayoutManager*>(manager)->SetAlignItems(align);
     }
@@ -140,11 +140,11 @@ FlexAlign FlexLayoutImpl::GetAlignItems() const
 
 void FlexLayoutImpl::SetAlignContent(FlexAlign align)
 {
-  if (mAlignContent != align)
+  if(mAlignContent != align)
   {
-    mAlignContent = align;
+    mAlignContent          = align;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<FlexLayoutManager*>(manager)->SetAlignContent(align);
     }

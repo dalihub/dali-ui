@@ -33,7 +33,7 @@ namespace Text
 void CopyAttributeValueFromBuffer(const Attribute& attribute, const Length maxLengthAttributeValue, char* value)
 {
   const Length length =
-      attribute.valueLength > maxLengthAttributeValue ? maxLengthAttributeValue : attribute.valueLength;
+    attribute.valueLength > maxLengthAttributeValue ? maxLengthAttributeValue : attribute.valueLength;
   memcpy(value, attribute.valueBuffer, length);
   value[length] = 0;
 }

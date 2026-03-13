@@ -109,8 +109,8 @@ private:
 
 protected:
   VectorImageRenderer mVectorRenderer;
-  const int32_t mId;
-  bool mHasSucceeded;
+  const int32_t       mId;
+  bool                mHasSucceeded;
 };
 
 class SvgLoadingTask : public SvgTask
@@ -167,10 +167,10 @@ private:
   void NotifyTasksReady();
 
 private:
-  VisualUrl mImageUrl;
+  VisualUrl          mImageUrl;
   EncodedImageBuffer mEncodedImageBuffer;
 
-  Dali::Mutex mMutex;
+  Dali::Mutex                        mMutex;
   std::vector<SvgRasterizingTaskPtr> mNotifyRequiredTasks;
 
   float mDpi;
@@ -243,8 +243,8 @@ private:
   VisualUrl mImageUrl{};
 #endif
   PixelData mPixelData;
-  uint32_t mWidth;
-  uint32_t mHeight;
+  uint32_t  mWidth;
+  uint32_t  mHeight;
 };
 
 } // namespace Internal

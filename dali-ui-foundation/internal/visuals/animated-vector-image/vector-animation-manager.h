@@ -102,8 +102,8 @@ private:
   Dali::Integration::OrderedSet<CallbackBase> mEventCallbacks; ///< Event triggered callback lists (owned)
 
   std::unique_ptr<VectorAnimationThread> mVectorAnimationThread;
-  bool mProcessorRegistered : 1;
-  bool mDestroyed : 1;
+  bool                                   mProcessorRegistered : 1;
+  bool                                   mDestroyed : 1;
 };
 
 } // namespace Internal

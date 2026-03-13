@@ -36,23 +36,23 @@ Shader CreateShader(std::string_view vertexSrc, std::string_view fragmentSrc, Da
                     const std::string& shaderName)
 {
   Dali::Shader shader;
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if (!shaderName.empty())
+    if(!shaderName.empty())
     {
       auto factory = Dali::Ui::VisualFactory::Get();
-      if (DALI_LIKELY(factory))
+      if(DALI_LIKELY(factory))
       {
         thread_local static std::unordered_map<std::string, VisualFactoryCache::ExternalShaderId> gShaderIdMap;
 
         auto& visualFactoryCache = GetImplementation(factory).GetFactoryCache();
 
         auto iter = gShaderIdMap.find(shaderName);
-        if (iter != gShaderIdMap.end())
+        if(iter != gShaderIdMap.end())
         {
           return visualFactoryCache.GetExternalShader(iter->second);
         }
-        Shader shader = Shader::New(vertexSrc, fragmentSrc, hints, shaderName);
+        Shader shader            = Shader::New(vertexSrc, fragmentSrc, hints, shaderName);
         gShaderIdMap[shaderName] = visualFactoryCache.RegisterExternalShader(shader);
         return shader;
       }
@@ -74,7 +74,7 @@ Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragm
 {
   Dali::Renderer renderer;
 
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     Dali::Shader shader = CreateShader(vertexSrc, fragmentSrc, hints, shaderName);
 
@@ -91,9 +91,9 @@ Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragm
 
 void SetRendererTexture(Dali::Renderer renderer, Dali::Texture texture)
 {
-  if (renderer)
+  if(renderer)
   {
-    if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
     {
       Dali::TextureSet textureSet = renderer.GetTextures();
       textureSet.SetTexture(0u, texture);
@@ -103,7 +103,7 @@ void SetRendererTexture(Dali::Renderer renderer, Dali::Texture texture)
 
 void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer)
 {
-  if (frameBuffer)
+  if(frameBuffer)
   {
     Dali::Texture texture = frameBuffer.GetColorTexture();
     SetRendererTexture(renderer, texture);

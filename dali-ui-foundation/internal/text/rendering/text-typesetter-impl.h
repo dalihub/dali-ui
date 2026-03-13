@@ -127,7 +127,7 @@ public: // Image buffer creation
                                        const TextAbstraction::GlyphIndex toGlyphIndex);
 
 private:
-  std::unique_ptr<ViewModel> mModel;
+  std::unique_ptr<ViewModel>  mModel;
   TextAbstraction::FontClient mFontClient;
 };
 

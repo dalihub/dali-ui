@@ -279,10 +279,10 @@ private: // Implementation
      * Default constructor
      */
     RowColumnData()
-      : size(0.0f),
-        fillRatio(0.0f),
-        position(0.0f),
-        sizePolicy(Ui::TableView::FILL)
+    : size(0.0f),
+      fillRatio(0.0f),
+      position(0.0f),
+      sizePolicy(Ui::TableView::FILL)
     {
     }
 
@@ -293,16 +293,16 @@ private: // Implementation
      * @param[in] newSizePolicy The policy used to interpret the size value
      */
     RowColumnData(float newSize, float newFillRatio, Ui::TableView::LayoutPolicy newSizePolicy)
-      : size(newSize),
-        fillRatio(newFillRatio),
-        position(0.0f),
-        sizePolicy(newSizePolicy)
+    : size(newSize),
+      fillRatio(newFillRatio),
+      position(0.0f),
+      sizePolicy(newSizePolicy)
     {
     }
 
-    float size;      ///< Set or calculated size
-    float fillRatio; ///< Ratio to fill remaining space, only valid with RELATIVE or FILL policy
-    float position;  ///< Position of the row/column, this value is updated during every Relayout round
+    float                       size;       ///< Set or calculated size
+    float                       fillRatio;  ///< Ratio to fill remaining space, only valid with RELATIVE or FILL policy
+    float                       position;   ///< Position of the row/column, this value is updated during every Relayout round
     Ui::TableView::LayoutPolicy sizePolicy; ///< The size policy used to interpret the size value
   };
 
@@ -315,16 +315,16 @@ public:
   struct CellData
   {
     CellData()
-      : horizontalAlignment(HorizontalAlignment::LEFT),
-        verticalAlignment(VerticalAlignment::TOP)
+    : horizontalAlignment(HorizontalAlignment::LEFT),
+      verticalAlignment(VerticalAlignment::TOP)
     {
     }
 
     // data members
-    Dali::Actor actor;
+    Dali::Actor                 actor;
     Ui::TableView::CellPosition position;
-    HorizontalAlignment::Type horizontalAlignment;
-    VerticalAlignment::Type verticalAlignment;
+    HorizontalAlignment::Type   horizontalAlignment;
+    VerticalAlignment::Type     verticalAlignment;
   };
 
 private:
@@ -452,7 +452,7 @@ private: // scripting support
      * Constructor, sets the lock boolean
      */
     RelayoutingLock(TableView& parent)
-      : mLock(parent.mLayoutingChild)
+    : mLock(parent.mLayoutingChild)
     {
       mLock = true;
     }
@@ -482,16 +482,16 @@ private:
 private:                       // Data
   Array2d<CellData> mCellData; ///< Data for each cell: Actor, alignment settings etc
 
-  RowColumnArray mRowData;    ///< Data for each row
-  RowColumnArray mColumnData; ///< Data for each column
-  Size mFixedTotals;          ///< Accumulated totals for fixed width and height
+  RowColumnArray mRowData;     ///< Data for each row
+  RowColumnArray mColumnData;  ///< Data for each column
+  Size           mFixedTotals; ///< Accumulated totals for fixed width and height
 
   Size mPadding; ///< Padding to apply to each cell
 
   WeakHandle<Actor> mPreviousFocusedActor; ///< Perviously focused actor
-  bool mLayoutingChild;                    ///< Can't be a bitfield due to Relayouting lock
-  bool mRowDirty : 1;                      ///< Flag to indicate the row data is dirty
-  bool mColumnDirty : 1;                   ///< Flag to indicate the column data is dirty
+  bool              mLayoutingChild;       ///< Can't be a bitfield due to Relayouting lock
+  bool              mRowDirty : 1;         ///< Flag to indicate the row data is dirty
+  bool              mColumnDirty : 1;      ///< Flag to indicate the column data is dirty
 };
 
 } // namespace Internal

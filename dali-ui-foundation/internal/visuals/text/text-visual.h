@@ -253,20 +253,20 @@ private:
     PixelData stylePixelData;
     PixelData overlayStylePixelData;
     PixelData maskPixelData;
-    int32_t width;
-    int32_t height;
-    uint32_t offsetHeight;
-    Vector2 transformOffset;
+    int32_t   width;
+    int32_t   height;
+    uint32_t  offsetHeight;
+    Vector2   transformOffset;
 
     TilingInfo(int32_t width, int32_t height)
-      : textPixelData(),
-        stylePixelData(),
-        overlayStylePixelData(),
-        maskPixelData(),
-        width(width),
-        height(height),
-        offsetHeight(0u),
-        transformOffset(0.f, 0.f)
+    : textPixelData(),
+      stylePixelData(),
+      overlayStylePixelData(),
+      maskPixelData(),
+      width(width),
+      height(height),
+      offsetHeight(0u),
+      transformOffset(0.f, 0.f)
     {
     }
 
@@ -401,38 +401,38 @@ private:
   void LoadComplete(bool success, const TextInformation& textInformation) override;
 
 private:
-  typedef std::vector<Renderer> RendererContainer;
+  typedef std::vector<Renderer>   RendererContainer;
   typedef std::vector<Constraint> ConstraintContainer;
 
 private:
-  Text::ControllerPtr mController;               ///< The text's controller.
-  Text::TypesetterPtr mTypesetter;               ///< The text's typesetter.
+  Text::ControllerPtr       mController;         ///< The text's controller.
+  Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
   Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
 
-  TextVisualShaderFactory& mTextVisualShaderFactory;               ///< The shader factory for text visual.
-  TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache; ///< The cached shader feature for text visual.
+  TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
+  TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.
 
-  WeakHandle<Actor> mControl;                  ///< The control where the renderer is added.
-  Constraint mColorConstraint{};               ///< Color constraint
-  Constraint mOpacityConstraint{};             ///< Opacity constraint
-  Property::Index mHasMultipleTextColorsIndex; ///< The index of uHasMultipleTextColors proeprty.
+  WeakHandle<Actor> mControl;                    ///< The control where the renderer is added.
+  Constraint        mColorConstraint{};          ///< Color constraint
+  Constraint        mOpacityConstraint{};        ///< Opacity constraint
+  Property::Index   mHasMultipleTextColorsIndex; ///< The index of uHasMultipleTextColors proeprty.
   Property::Index
-      mAnimatableTextColorPropertyIndex;     ///< The index of animatable text color property registered by the control.
-  Property::Index mTextColorAnimatableIndex; ///< The index of uTextColorAnimatable property.
-  Property::Index mTextRequireRenderPropertyIndex; ///< The index of requireRender property.
-  bool mRendererUpdateNeeded : 1;                  ///< The flag to indicate whether the renderer needs to be updated.
-  bool mTextRequireRender : 1;                     ///< The flag to indicate whether the text needs to be rendered.
-  bool mIsConstraintAppliedAlways : 1;             ///< Whether the constraint need to be applied always.
-  RendererContainer mRendererList;
+                      mAnimatableTextColorPropertyIndex; ///< The index of animatable text color property registered by the control.
+  Property::Index     mTextColorAnimatableIndex;         ///< The index of uTextColorAnimatable property.
+  Property::Index     mTextRequireRenderPropertyIndex;   ///< The index of requireRender property.
+  bool                mRendererUpdateNeeded : 1;         ///< The flag to indicate whether the renderer needs to be updated.
+  bool                mTextRequireRender : 1;            ///< The flag to indicate whether the text needs to be rendered.
+  bool                mIsConstraintAppliedAlways : 1;    ///< Whether the constraint need to be applied always.
+  RendererContainer   mRendererList;
   ConstraintContainer mColorConstraintList;
   ConstraintContainer mOpacityConstraintList;
 
-  uint32_t mTextLoadingTaskId;           ///< The currently requested text loading(render) task Id.
-  uint32_t mNaturalSizeTaskId;           ///< The currently requested natural size task Id.
-  uint32_t mHeightForWidthTaskId;        ///< The currently requested height for width task Id.
-  bool mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
-  bool mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
-  bool mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
+  uint32_t mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
+  uint32_t mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
+  uint32_t mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
+  bool     mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
+  bool     mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
+  bool     mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
 };
 
 } // namespace Internal

@@ -49,7 +49,7 @@ struct ValidateFontsPerScript
    * Default constructor.
    */
   ValidateFontsPerScript()
-    : mValidFonts()
+  : mValidFonts()
   {
   }
 
@@ -88,14 +88,14 @@ struct DefaultFonts
   struct CacheItem
   {
     TextAbstraction::FontDescription description;
-    FontId fontId;
+    FontId                           fontId;
   };
 
   /**
    * Default constructor.
    */
   DefaultFonts()
-    : mFonts()
+  : mFonts()
   {
   }
 
@@ -202,13 +202,13 @@ public:
                           TextAbstraction::LineBreakInfo* breakInfo);
 
 private:
-  TextAbstraction::ICU mICU;                                 ///< Handle to the dali ICU.
-  Vector<DefaultFonts*> mDefaultFontPerScriptCache;          ///< Caches default fonts for a script.
-  Vector<ValidateFontsPerScript*> mValidFontsPerScriptCache; ///< Caches valid fonts for a script.
+  TextAbstraction::ICU            mICU;                       ///< Handle to the dali ICU.
+  Vector<DefaultFonts*>           mDefaultFontPerScriptCache; ///< Caches default fonts for a script.
+  Vector<ValidateFontsPerScript*> mValidFontsPerScriptCache;  ///< Caches valid fonts for a script.
 
   std::string mLocale;
-  bool mIsICUEnabled : 1;
-  bool mIsICULineBreakNeededForLocale : 1;
+  bool        mIsICUEnabled : 1;
+  bool        mIsICULineBreakNeededForLocale : 1;
 
   // Methods
 

@@ -66,10 +66,10 @@ struct DALI_UI_API Glyph
    */
   ~Glyph();
 
-  std::string url; ///< The url of the glyph.
-  uint8_t utf8[6]; ///< the glyph encoded in utf8
-  float ascender;  ///< The ascender. The distance from the base line to the top of the glyph.
-  float descender; ///< The descender. The distance from the base line to the bottom of the glyph.
+  std::string url;       ///< The url of the glyph.
+  uint8_t     utf8[6];   ///< the glyph encoded in utf8
+  float       ascender;  ///< The ascender. The distance from the base line to the top of the glyph.
+  float       descender; ///< The descender. The distance from the base line to the bottom of the glyph.
 };
 
 /**
@@ -89,11 +89,11 @@ struct DALI_UI_API BitmapFontDescription
    */
   ~BitmapFontDescription();
 
-  std::vector<Glyph> glyphs; ///< Vector of glyphs.
-  std::string name;          ///< Name of the font.
-  float underlinePosition;   ///< The position of the underline from the base line.
-  float underlineThickness;  ///< The thickness of the underline.
-  bool isColorFont : 1;      ///< Whether the glyphs of this font have their own colors.
+  std::vector<Glyph> glyphs;             ///< Vector of glyphs.
+  std::string        name;               ///< Name of the font.
+  float              underlinePosition;  ///< The position of the underline from the base line.
+  float              underlineThickness; ///< The thickness of the underline.
+  bool               isColorFont : 1;    ///< Whether the glyphs of this font have their own colors.
 };
 
 /**

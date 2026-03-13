@@ -41,40 +41,40 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 constexpr int CUSTOM_PROPERTY_COUNT(2); // PixelArea, pre-multiplied alpha
 
 constexpr int NATIVE_SHADER_TYPE_OFFSET =
-    VisualFactoryCache::ShaderType::NATIVE_IMAGE_SHADER - VisualFactoryCache::ShaderType::IMAGE_SHADER;
-constexpr std::string_view Y_FLIP_MASK_TEXTURE = "uYFlipMaskTexture";
-constexpr float NOT_FLIP_MASK_TEXTURE = 0.0f;
+  VisualFactoryCache::ShaderType::NATIVE_IMAGE_SHADER - VisualFactoryCache::ShaderType::IMAGE_SHADER;
+constexpr std::string_view Y_FLIP_MASK_TEXTURE   = "uYFlipMaskTexture";
+constexpr float            NOT_FLIP_MASK_TEXTURE = 0.0f;
 
 constexpr auto PREDEFINED_SHADER_TYPE_COUNT = 6u;
 
 constexpr std::string_view VertexPredefines[PREDEFINED_SHADER_TYPE_COUNT]{
-    "",                                     // VisualFactoryCache::IMAGE_SHADER,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER,
-    "",                                     // VisualFactoryCache::IMAGE_SHADER_YUV_TO_RGB,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
-    "",                                     // VisualFactoryCache::IMAGE_SHADER_YUV_AND_RGB,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
+  "",                                     // VisualFactoryCache::IMAGE_SHADER,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER,
+  "",                                     // VisualFactoryCache::IMAGE_SHADER_YUV_TO_RGB,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
+  "",                                     // VisualFactoryCache::IMAGE_SHADER_YUV_AND_RGB,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
 };
 constexpr std::string_view FragmentPredefines[PREDEFINED_SHADER_TYPE_COUNT]{
-    "",                                     // VisualFactoryCache::IMAGE_SHADER,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER,
-    "#define IS_REQUIRED_YUV_TO_RGB\n",     // VisualFactoryCache::IMAGE_SHADER_YUV_TO_RGB,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n#define IS_REQUIRED_YUV_TO_RGB\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
-    "#define IS_REQUIRED_UNIFIED_YUV_AND_RGB\n", // VisualFactoryCache::IMAGE_SHADER_YUV_AND_RGB,
-    "#define IS_REQUIRED_ROUNDED_CORNER\n#define IS_REQUIRED_UNIFIED_YUV_AND_RGB\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
+  "",                                                                              // VisualFactoryCache::IMAGE_SHADER,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n",                                          // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER,
+  "#define IS_REQUIRED_YUV_TO_RGB\n",                                              // VisualFactoryCache::IMAGE_SHADER_YUV_TO_RGB,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n#define IS_REQUIRED_YUV_TO_RGB\n",          // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
+  "#define IS_REQUIRED_UNIFIED_YUV_AND_RGB\n",                                     // VisualFactoryCache::IMAGE_SHADER_YUV_AND_RGB,
+  "#define IS_REQUIRED_ROUNDED_CORNER\n#define IS_REQUIRED_UNIFIED_YUV_AND_RGB\n", // VisualFactoryCache::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
 };
 constexpr VisualFactoryCache::ShaderType ShaderTypePredefines[PREDEFINED_SHADER_TYPE_COUNT]{
-    VisualFactoryCache::ShaderType::IMAGE_SHADER,
-    VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER,
-    VisualFactoryCache::ShaderType::IMAGE_SHADER_YUV_TO_RGB,
-    VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
-    VisualFactoryCache::ShaderType::IMAGE_SHADER_YUV_AND_RGB,
-    VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER_YUV_TO_RGB,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER_YUV_TO_RGB,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER_YUV_AND_RGB,
+  VisualFactoryCache::ShaderType::IMAGE_SHADER_ROUNDED_CORNER_YUV_AND_RGB,
 };
 } // unnamed namespace
 
 ImageVisualShaderFactory::ImageVisualShaderFactory()
-  : mFragmentShaderNeedChange(ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED)
+: mFragmentShaderNeedChange(ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED)
 {
 }
 
@@ -82,15 +82,15 @@ ImageVisualShaderFactory::~ImageVisualShaderFactory()
 {
 }
 
-Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
+Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache&                             factoryCache,
                                            const ImageVisualShaderFeature::FeatureBuilder& featureBuilder)
 {
-  Shader shader;
+  Shader                         shader;
   VisualFactoryCache::ShaderType shaderType = featureBuilder.GetShaderType();
 
-  if (featureBuilder.NeedToChangeFragmentShader() == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE &&
-      (mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED ||
-       mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE))
+  if(featureBuilder.NeedToChangeFragmentShader() == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE &&
+     (mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED ||
+      mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE))
   {
     DALI_ASSERT_DEBUG((static_cast<int>(shaderType) >= static_cast<int>(VisualFactoryCache::IMAGE_SHADER)) &&
                       (static_cast<int>(shaderType) <=
@@ -100,7 +100,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
   }
 
   shader = factoryCache.GetShader(shaderType);
-  if (shader)
+  if(shader)
   {
     return shader;
   }
@@ -110,44 +110,44 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
   featureBuilder.GetVertexShaderPrefixList(vertexShaderPrefixList);
   featureBuilder.GetFragmentShaderPrefixList(fragmentShaderPrefixList);
 
-  if (Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
+  if(Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
   {
     vertexShaderPrefixList += "#define IS_REQUIRED_DEBUG_VISUAL_SHADER\n";
     fragmentShaderPrefixList += "#define IS_REQUIRED_DEBUG_VISUAL_SHADER\n";
   }
 
-  std::string vertexShader = std::string(vertexShaderPrefixList + SHADER_IMAGE_VISUAL_SHADER_VERT.data());
+  std::string vertexShader   = std::string(vertexShaderPrefixList + SHADER_IMAGE_VISUAL_SHADER_VERT.data());
   std::string fragmentShader = std::string(fragmentShaderPrefixList + SHADER_IMAGE_VISUAL_SHADER_FRAG.data());
 
-  if (Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
+  if(Dali::Ui::Internal::ImageVisualShaderDebug::DebugImageVisualShaderEnabled())
   {
     Dali::Ui::Internal::ImageVisualShaderDebug::ApplyImageVisualShaderDebugScriptCode(vertexShader, fragmentShader);
   }
 
-  if (featureBuilder.NeedToChangeFragmentShader() == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE)
+  if(featureBuilder.NeedToChangeFragmentShader() == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE)
   {
     bool modified = DevelTexture::ApplyNativeFragmentShader(featureBuilder.GetTexture(), fragmentShader, 1);
-    if (mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE)
+    if(mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE)
     {
       DALI_ASSERT_ALWAYS(
-          modified &&
-          "NativeImageTexture need to change fragment shader. But DALI default image shader doesn't changed!");
+        modified &&
+        "NativeImageTexture need to change fragment shader. But DALI default image shader doesn't changed!");
     }
-    else if (DALI_UNLIKELY(mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED))
+    else if(DALI_UNLIKELY(mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::UNDECIDED))
     {
       mFragmentShaderNeedChange = (modified) ? ImageVisualShaderFeature::ChangeFragmentShader::NEED_CHANGE
                                              : ImageVisualShaderFeature::ChangeFragmentShader::DONT_CHANGE;
 
-      if (mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::DONT_CHANGE)
+      if(mFragmentShaderNeedChange == ImageVisualShaderFeature::ChangeFragmentShader::DONT_CHANGE)
       {
         shaderType =
-            static_cast<VisualFactoryCache::ShaderType>(static_cast<int>(shaderType) - NATIVE_SHADER_TYPE_OFFSET);
+          static_cast<VisualFactoryCache::ShaderType>(static_cast<int>(shaderType) - NATIVE_SHADER_TYPE_OFFSET);
         shader = factoryCache.GetShader(shaderType);
       }
     }
   }
 
-  if (shader)
+  if(shader)
   {
     return shader;
   }
@@ -162,7 +162,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache& factoryCache,
   // If the visual dont want to using pre-multiplied alpha, it should be set as 0.0f as renderer side.
   shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
 
-  if (featureBuilder.IsEnabledAlphaMaskingOnRendering())
+  if(featureBuilder.IsEnabledAlphaMaskingOnRendering())
   {
     shader.RegisterProperty(Y_FLIP_MASK_TEXTURE, NOT_FLIP_MASK_TEXTURE);
   }
@@ -174,7 +174,7 @@ std::string_view ImageVisualShaderFactory::GetVertexShaderSource()
 {
   // static string variable to cache complete vertex shader
   static std::string gVertexShader;
-  if (gVertexShader.empty())
+  if(gVertexShader.empty())
   {
     gVertexShader = SHADER_IMAGE_VISUAL_SHADER_VERT.data();
   }
@@ -186,7 +186,7 @@ std::string_view ImageVisualShaderFactory::GetFragmentShaderSource()
 {
   // static string variable to cache complete fragment shader
   static std::string gFragmentShader;
-  if (gFragmentShader.empty())
+  if(gFragmentShader.empty())
   {
     gFragmentShader = SHADER_IMAGE_VISUAL_SHADER_FRAG.data();
   }
@@ -197,7 +197,7 @@ bool ImageVisualShaderFactory::AddPrecompiledShader(PrecompileShaderOption& opti
 {
   ShaderFlagList shaderOption = option.GetShaderOptions();
 
-  auto featureBuilder = ImageVisualShaderFeature::FeatureBuilder();
+  auto        featureBuilder = ImageVisualShaderFeature::FeatureBuilder();
   std::string vertexPrefixList;
   std::string fragmentPrefixList;
   CreatePrecompileShader(featureBuilder, shaderOption);
@@ -219,42 +219,42 @@ void ImageVisualShaderFactory::GetPreCompiledShader(ShaderPreCompiler::RawShader
   shaders.shaderCount = 0;
 
   // precompile requested shader first
-  for (uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
+  for(uint32_t i = 0; i < mRequestedPrecompileShader.size(); i++)
   {
     vertexPrefix.push_back(std::move(mRequestedPrecompileShader[i].vertexPrefix));
     fragmentPrefix.push_back(std::move(mRequestedPrecompileShader[i].fragmentPrefix));
     shaderName.push_back(std::string(Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-        mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT)));
+      mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT)));
     shaderCount++;
   }
 
   // Clean up requested precompile shader list
   mRequestedPrecompileShader.clear();
 
-  for (uint32_t i = 0u; i < PREDEFINED_SHADER_TYPE_COUNT; ++i)
+  for(uint32_t i = 0u; i < PREDEFINED_SHADER_TYPE_COUNT; ++i)
   {
     vertexPrefix.push_back(std::string(VertexPredefines[i]));
     fragmentPrefix.push_back(std::string(FragmentPredefines[i]));
     shaderName.push_back(std::string(Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-        ShaderTypePredefines[i], VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT)));
+      ShaderTypePredefines[i], VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT)));
     shaderCount++;
   }
 
-  shaders.vertexPrefix = std::move(vertexPrefix);
+  shaders.vertexPrefix   = std::move(vertexPrefix);
   shaders.fragmentPrefix = std::move(fragmentPrefix);
-  shaders.shaderName = std::move(shaderName);
-  shaders.vertexShader = SHADER_IMAGE_VISUAL_SHADER_VERT;
+  shaders.shaderName     = std::move(shaderName);
+  shaders.vertexShader   = SHADER_IMAGE_VISUAL_SHADER_VERT;
   shaders.fragmentShader = SHADER_IMAGE_VISUAL_SHADER_FRAG;
-  shaders.shaderCount = shaderCount;
-  shaders.custom = false;
+  shaders.shaderCount    = shaderCount;
+  shaders.custom         = false;
 }
 
 void ImageVisualShaderFactory::CreatePrecompileShader(ImageVisualShaderFeature::FeatureBuilder& builder,
-                                                      const ShaderFlagList& option)
+                                                      const ShaderFlagList&                     option)
 {
-  for (uint32_t i = 0; i < option.size(); ++i)
+  for(uint32_t i = 0; i < option.size(); ++i)
   {
-    switch (option[i])
+    switch(option[i])
     {
       case PrecompileShaderOption::Flag::ROUNDED_CORNER:
       {
@@ -298,37 +298,37 @@ void ImageVisualShaderFactory::CreatePrecompileShader(ImageVisualShaderFeature::
 bool ImageVisualShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderType shader, std::string&& vertexPrefix,
                                                     std::string&& fragmentPrefix)
 {
-  for (uint32_t i = 0u; i < PREDEFINED_SHADER_TYPE_COUNT; i++)
+  for(uint32_t i = 0u; i < PREDEFINED_SHADER_TYPE_COUNT; i++)
   {
-    if (ShaderTypePredefines[i] == shader)
+    if(ShaderTypePredefines[i] == shader)
     {
       DALI_LOG_DEBUG_INFO("This shader already added list(%s).\n",
                           Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-                              ShaderTypePredefines[i], VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
+                            ShaderTypePredefines[i], VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
       return false;
     }
   }
 
-  for (uint32_t i = 0u; i < mRequestedPrecompileShader.size(); i++)
+  for(uint32_t i = 0u; i < mRequestedPrecompileShader.size(); i++)
   {
-    if (mRequestedPrecompileShader[i].type == shader)
+    if(mRequestedPrecompileShader[i].type == shader)
     {
       DALI_LOG_DEBUG_INFO(
-          "This shader already requsted(%s).\n",
-          Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-              mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
+        "This shader already requsted(%s).\n",
+        Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
+          mRequestedPrecompileShader[i].type, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
       return false;
     }
   }
 
   RequestShaderInfo info;
-  info.type = shader;
-  info.vertexPrefix = std::move(vertexPrefix);
+  info.type           = shader;
+  info.vertexPrefix   = std::move(vertexPrefix);
   info.fragmentPrefix = std::move(fragmentPrefix);
   mRequestedPrecompileShader.emplace_back(std::move(info));
   DALI_LOG_RELEASE_INFO("Add precompile shader success!!(%s)\n",
                         Scripting::GetLinearEnumerationName<VisualFactoryCache::ShaderType>(
-                            shader, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
+                          shader, VISUAL_SHADER_TYPE_TABLE, VISUAL_SHADER_TYPE_TABLE_COUNT));
   return true;
 }
 

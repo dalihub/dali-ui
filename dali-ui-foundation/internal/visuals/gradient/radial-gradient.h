@@ -75,7 +75,7 @@ private:
 
 private:
   Vector2 mCenter;
-  float mRadius;
+  float   mRadius;
 };
 
 } // namespace Internal

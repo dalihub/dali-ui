@@ -21,8 +21,8 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {
@@ -99,9 +99,9 @@ protected:
    */
   virtual void OnViewDestroying(ViewImpl* viewImpl) = 0;
 
-  TraitImpl(const TraitImpl&) = delete;
-  TraitImpl(TraitImpl&&) = delete;
-  TraitImpl& operator=(TraitImpl&&) = delete;      // no move()
+  TraitImpl(const TraitImpl&)            = delete;
+  TraitImpl(TraitImpl&&)                 = delete;
+  TraitImpl& operator=(TraitImpl&&)      = delete; // no move()
   TraitImpl& operator=(const TraitImpl&) = delete; // no copy()
 };
 

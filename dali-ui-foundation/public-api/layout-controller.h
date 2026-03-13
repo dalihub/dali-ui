@@ -137,10 +137,10 @@ private:
   explicit LayoutController(Window window);
 
   // Not copyable or movable
-  LayoutController(const LayoutController&) = delete;
-  LayoutController(LayoutController&&) = delete;
+  LayoutController(const LayoutController&)            = delete;
+  LayoutController(LayoutController&&)                 = delete;
   LayoutController& operator=(const LayoutController&) = delete;
-  LayoutController& operator=(LayoutController&&) = delete;
+  LayoutController& operator=(LayoutController&&)      = delete;
 
 private:
   std::unique_ptr<Integration::LayoutControllerImpl> mImpl;

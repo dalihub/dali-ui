@@ -18,8 +18,8 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/math/vector2.h>
 #include <dali/public-api/common/extents.h>
+#include <dali/public-api/math/vector2.h>
 #include <cstdint>
 
 // INTERNAL INCLUDES
@@ -76,8 +76,8 @@ public:
    * @brief Default constructor.
    */
   MeasuredSize()
-    : width(0.0f),
-      height(0.0f)
+  : width(0.0f),
+    height(0.0f)
   {
   }
 
@@ -88,8 +88,8 @@ public:
    * @param[in] h The height value
    */
   MeasuredSize(float w, float h)
-    : width(w),
-      height(h)
+  : width(w),
+    height(h)
   {
   }
 
@@ -152,10 +152,10 @@ public:
    * @brief Default constructor.
    */
   LayoutRect()
-    : x(0.0f),
-      y(0.0f),
-      width(0.0f),
-      height(0.0f)
+  : x(0.0f),
+    y(0.0f),
+    width(0.0f),
+    height(0.0f)
   {
   }
 
@@ -168,10 +168,10 @@ public:
    * @param[in] h Height
    */
   LayoutRect(float posX, float posY, float w, float h)
-    : x(posX),
-      y(posY),
-      width(w),
-      height(h)
+  : x(posX),
+    y(posY),
+    width(w),
+    height(h)
   {
   }
 
@@ -409,8 +409,8 @@ public:
    * @brief Default constructor (creates absolute 0).
    */
   GridLength()
-    : mType(GridLengthType::ABSOLUTE),
-      mValue(0.0f)
+  : mType(GridLengthType::ABSOLUTE),
+    mValue(0.0f)
   {
   }
 
@@ -423,7 +423,7 @@ public:
   static GridLength Absolute(float pixels)
   {
     GridLength length;
-    length.mType = GridLengthType::ABSOLUTE;
+    length.mType  = GridLengthType::ABSOLUTE;
     length.mValue = pixels;
     return length;
   }
@@ -437,7 +437,7 @@ public:
   static GridLength Star(float factor = 1.0f)
   {
     GridLength length;
-    length.mType = GridLengthType::STAR;
+    length.mType  = GridLengthType::STAR;
     length.mValue = factor;
     return length;
   }
@@ -450,7 +450,7 @@ public:
   static GridLength Auto()
   {
     GridLength length;
-    length.mType = GridLengthType::AUTO;
+    length.mType  = GridLengthType::AUTO;
     length.mValue = 0.0f;
     return length;
   }
@@ -473,7 +473,7 @@ public:
 
 private:
   GridLengthType mType;
-  float mValue;
+  float          mValue;
 };
 
 /**
@@ -524,9 +524,9 @@ inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlag
 enum class LayoutParamsType : uint8_t
 {
   ABSOLUTE = 0,
-  STACK = 1,
-  GRID = 2,
-  FLEX = 3
+  STACK    = 1,
+  GRID     = 2,
+  FLEX     = 3
 };
 
 } // namespace Ui

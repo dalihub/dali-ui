@@ -114,7 +114,7 @@ private:
   bool MoveTasksToAnimation(VectorAnimationTaskPtr task, bool useCurrentTime);
 
   using CompletedTasksContainer =
-      std::vector<std::pair<VectorAnimationTaskPtr, bool>>; ///< Pair of completed task, and rasterize required.
+    std::vector<std::pair<VectorAnimationTaskPtr, bool>>; ///< Pair of completed task, and rasterize required.
 
   /**
    * @brief Move given tasks to mCompletedTasks if required.
@@ -170,18 +170,18 @@ private:
     void Run() override;
 
   private:
-    SleepThread(const SleepThread& thread) = delete;
+    SleepThread(const SleepThread& thread)            = delete;
     SleepThread& operator=(const SleepThread& thread) = delete;
 
   private:
     ConditionalWait mConditionalWait;
-    Mutex mAwakeCallbackMutex; ///< Mutex to check validatoin of mAwakeCallback
-    Mutex mSleepRequestMutex;  ///< Mutex to change sleep time point.
+    Mutex           mAwakeCallbackMutex; ///< Mutex to check validatoin of mAwakeCallback
+    Mutex           mSleepRequestMutex;  ///< Mutex to change sleep time point.
 
-    std::unique_ptr<CallbackBase> mAwakeCallback;
+    std::unique_ptr<CallbackBase>                      mAwakeCallback;
     std::chrono::time_point<std::chrono::steady_clock> mSleepTimePoint;
-    const Dali::LogFactoryInterface& mLogFactory;
-    const Dali::TraceFactoryInterface& mTraceFactory;
+    const Dali::LogFactoryInterface&                   mLogFactory;
+    const Dali::TraceFactoryInterface&                 mTraceFactory;
 
     bool mNeedToSleep;
     bool mDestroyThread;
@@ -200,31 +200,31 @@ private:
   using VectorAnimationTaskSet = std::set<VectorAnimationTaskPtr>;
   VectorAnimationTaskSet mCompletedTasks; ///< Temperal storage for completed tasks. Thread warning : This should be
                                           ///< touched only at VectorAnimationThread.
-  VectorAnimationTaskSet mWorkingTasks; ///< Tasks which are currently being processed. Thread warning : This should be
-                                        ///< touched only at VectorAnimationThread.
+  VectorAnimationTaskSet mWorkingTasks;   ///< Tasks which are currently being processed. Thread warning : This should be
+                                          ///< touched only at VectorAnimationThread.
 
   VectorAnimationTaskSet
-      mDiscardedTasksQueue; ///< Temperal tasks which will be discarded but still in processing in the worker thread.
-                            ///< This should be touched only at VectorAnimationThread.
+    mDiscardedTasksQueue; ///< Temperal tasks which will be discarded but still in processing in the worker thread.
+                          ///< This should be touched only at VectorAnimationThread.
   VectorAnimationTaskSet
-      mDiscardedTasks; ///< Tasks which were discarded. Attached at VectorAnimationThread, and removed at main thread.
+    mDiscardedTasks; ///< Tasks which were discarded. Attached at VectorAnimationThread, and removed at main thread.
 
   std::vector<std::pair<VectorAnimationTaskPtr, bool>>
-      mCompletedTasksQueue; ///< Queue of completed tasks from worker thread. pair of task, and rasterize required.
-                            ///< It will be moved at begin of Rasterize().
+    mCompletedTasksQueue; ///< Queue of completed tasks from worker thread. pair of task, and rasterize required.
+                          ///< It will be moved at begin of Rasterize().
 
   std::vector<std::pair<CallbackBase*, uint32_t>> mTriggerEventCallbacks{}; // Callbacks are not owned
-  SleepThread mSleepThread;
-  ConditionalWait mConditionalWait;
-  Mutex mEventTriggerMutex;   ///< Mutex to validate mEventTrigger callback. Could be locked under mConditionalWait and
-                              ///< mDiscardedTasksMutex scope.
-  Mutex mAnimationTasksMutex; ///< Mutex to change + get mAnimationTasks from event thread
-  Mutex mTaskCompletedMutex;  ///< Mutex to collect completed tasks to mCompletedTasksQueue from worker threads
-  Mutex mDiscardedTasksMutex; ///< Mutex to collect discarded tasks from worker thread + remove from event thread
+  SleepThread                                     mSleepThread;
+  ConditionalWait                                 mConditionalWait;
+  Mutex                                           mEventTriggerMutex; ///< Mutex to validate mEventTrigger callback. Could be locked under mConditionalWait and
+                                                                      ///< mDiscardedTasksMutex scope.
+  Mutex                                mAnimationTasksMutex;          ///< Mutex to change + get mAnimationTasks from event thread
+  Mutex                                mTaskCompletedMutex;           ///< Mutex to collect completed tasks to mCompletedTasksQueue from worker threads
+  Mutex                                mDiscardedTasksMutex;          ///< Mutex to collect discarded tasks from worker thread + remove from event thread
   std::unique_ptr<EventThreadCallback> mEventTrigger{};
-  const Dali::LogFactoryInterface& mLogFactory;
-  const Dali::TraceFactoryInterface& mTraceFactory;
-  Dali::AsyncTaskManager mAsyncTaskManager;
+  const Dali::LogFactoryInterface&     mLogFactory;
+  const Dali::TraceFactoryInterface&   mTraceFactory;
+  Dali::AsyncTaskManager               mAsyncTaskManager;
 
   bool mNeedToSleep;
   bool mDestroyThread;

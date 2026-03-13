@@ -313,19 +313,19 @@ const XHTMLEntityLookup XHTMLEntityLegacyLookupTable[] =
 
 const std::size_t XHTMLENTITY_LOOKUP_COUNT = (sizeof(XHTMLEntityLookupTable)) / (sizeof(XHTMLEntityLookup));
 const std::size_t XHTMLENTITY_LEGACY_LOOPKUP_COUNT =
-    (sizeof(XHTMLEntityLegacyLookupTable)) / (sizeof(XHTMLEntityLookup));
+  (sizeof(XHTMLEntityLegacyLookupTable)) / (sizeof(XHTMLEntityLookup));
 
 } // unnamed namespace
 
 const char* const NamedEntityToUtf8(const char* const markupText, unsigned int len)
 {
   // finding if given XHTML named entity is supported or not
-  for (size_t i = 0; i < XHTMLENTITY_LOOKUP_COUNT; ++i)
+  for(size_t i = 0; i < XHTMLENTITY_LOOKUP_COUNT; ++i)
   {
     unsigned int entityLen = strlen(XHTMLEntityLookupTable[i].entityName);
-    if (len == entityLen)
+    if(len == entityLen)
     {
-      if (strncmp(markupText, XHTMLEntityLookupTable[i].entityName, len) == 0) // if named Entity found in table
+      if(strncmp(markupText, XHTMLEntityLookupTable[i].entityName, len) == 0) // if named Entity found in table
       {
         return XHTMLEntityLookupTable[i].entityCode;
       }
@@ -333,12 +333,12 @@ const char* const NamedEntityToUtf8(const char* const markupText, unsigned int l
   }
 
   // finding in legacy lookup table which was supported in EFL.
-  for (size_t i = 0; i < XHTMLENTITY_LEGACY_LOOPKUP_COUNT; ++i)
+  for(size_t i = 0; i < XHTMLENTITY_LEGACY_LOOPKUP_COUNT; ++i)
   {
     unsigned int entityLen = strlen(XHTMLEntityLegacyLookupTable[i].entityName);
-    if (len == entityLen)
+    if(len == entityLen)
     {
-      if (strncmp(markupText, XHTMLEntityLegacyLookupTable[i].entityName, len) == 0) // if named Entity found in table
+      if(strncmp(markupText, XHTMLEntityLegacyLookupTable[i].entityName, len) == 0) // if named Entity found in table
       {
         return XHTMLEntityLegacyLookupTable[i].entityCode;
       }
@@ -350,6 +350,6 @@ const char* const NamedEntityToUtf8(const char* const markupText, unsigned int l
 
 } // namespace  Text
 
-} // namespace  UI
+} //namespace Ui
 
 } // namespace  Dali

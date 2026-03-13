@@ -21,8 +21,8 @@
 #include <vector> // Used for row/column definitions; ABI considerations may apply across toolchain versions
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/layout.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layout.h>
 
 namespace Dali
 {
@@ -89,7 +89,6 @@ public:
   static GridLayout DownCast(BaseHandle handle);
 
 public: // Row/Column Definition API
-
   /**
    * @brief Adds a row definition.
    *
@@ -157,7 +156,6 @@ public: // Row/Column Definition API
   void ClearColumnDefinitions();
 
 public: // Spacing API
-
   /**
    * @brief Sets the row spacing.
    *
@@ -215,7 +213,7 @@ public: // Chaining methods
 
 public: // Not intended for application developers
   /// @cond internal
-  DALI_INTERNAL GridLayout(Integration::GridLayoutImpl& implementation);
+  DALI_INTERNAL          GridLayout(Integration::GridLayoutImpl& implementation);
   explicit DALI_INTERNAL GridLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };

@@ -37,8 +37,8 @@ struct CharacterSpacingCharacterRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values
    */
   CharacterSpacingCharacterRun()
-    : AbstractStyleCharacterRun(),
-      value{0.f} // The default value is 0.f which does nothing.
+  : AbstractStyleCharacterRun(),
+    value{0.f} // The default value is 0.f which does nothing.
   {
   }
 
@@ -53,9 +53,9 @@ struct CharacterSpacingCharacterRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow ColorRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::CharacterSpacingCharacterRun>
-  : public Dali::BasicTypes<Dali::Ui::Text::CharacterSpacingCharacterRun>
+: public Dali::BasicTypes<Dali::Ui::Text::CharacterSpacingCharacterRun>
 {
   enum
   {

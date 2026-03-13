@@ -41,7 +41,7 @@ PropertyBridge PropertyBridge::Get()
 }
 
 PropertyBridge::PropertyBridge(Internal::PropertyBridge* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

@@ -32,7 +32,7 @@ namespace Ui
 namespace Internal
 {
 OffScreenRenderingImpl::OffScreenRenderingImpl(DevelControl::OffScreenRenderingType type)
-  : mType(type)
+: mType(type)
 {
   Initialize();
 }
@@ -41,13 +41,13 @@ void OffScreenRenderingImpl::SetType(DevelControl::OffScreenRenderingType type)
 {
   mType = type;
 
-  if (mRenderTask)
+  if(mRenderTask)
   {
-    if (mType == DevelControl::OffScreenRenderingType::REFRESH_ALWAYS)
+    if(mType == DevelControl::OffScreenRenderingType::REFRESH_ALWAYS)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
     }
-    else if (mType == DevelControl::OffScreenRenderingType::REFRESH_ONCE)
+    else if(mType == DevelControl::OffScreenRenderingType::REFRESH_ONCE)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ONCE);
     }
@@ -61,9 +61,9 @@ OffScreenRenderable::Type OffScreenRenderingImpl::GetOffScreenRenderableType() c
 
 void OffScreenRenderingImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward)
 {
-  if (isForward)
+  if(isForward)
   {
-    if (mRenderTask)
+    if(mRenderTask)
     {
       tasks.PushBack(mRenderTask);
     }
@@ -81,14 +81,14 @@ void OffScreenRenderingImpl::OnInitialize()
 
 void OffScreenRenderingImpl::OnActivate()
 {
-  if (mType == DevelControl::OffScreenRenderingType::NONE)
+  if(mType == DevelControl::OffScreenRenderingType::NONE)
   {
     return;
   }
   Ui::Control ownerControl = GetOwnerControl();
   DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
 
-  if (!mCamera)
+  if(!mCamera)
   {
     mCamera = CameraActor::New();
     mCamera.SetInvertYAxis(true);
@@ -121,7 +121,7 @@ void OffScreenRenderingImpl::OnDeactivate()
   SetRendererTexture(renderer, Dali::Texture());
 
   Ui::Control control = GetOwnerControl();
-  if (DALI_LIKELY(control))
+  if(DALI_LIKELY(control))
   {
     control.RemoveCacheRenderer(renderer);
     control.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
@@ -148,7 +148,7 @@ void OffScreenRenderingImpl::CreateFrameBuffer()
 {
   const Size size = GetTargetSize();
 
-  mFrameBuffer = FrameBuffer::New(size.width, size.height, FrameBuffer::Attachment::DEPTH_STENCIL);
+  mFrameBuffer    = FrameBuffer::New(size.width, size.height, FrameBuffer::Attachment::DEPTH_STENCIL);
   Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, size.width, size.height);
   mFrameBuffer.AttachColorTexture(texture);
 }
@@ -160,9 +160,9 @@ void OffScreenRenderingImpl::DestroyFrameBuffer()
 
 void OffScreenRenderingImpl::CreateRenderTask()
 {
-  Ui::Control control = GetOwnerControl();
+  Ui::Control                    control     = GetOwnerControl();
   Dali::Integration::SceneHolder sceneHolder = GetSceneHolder();
-  RenderTaskList taskList = sceneHolder.GetRenderTaskList();
+  RenderTaskList                 taskList    = sceneHolder.GetRenderTaskList();
 
   mRenderTask = taskList.CreateTask();
   mRenderTask.SetSourceActor(control);
@@ -179,7 +179,7 @@ void OffScreenRenderingImpl::CreateRenderTask()
 void OffScreenRenderingImpl::DestroyRenderTask()
 {
   auto sceneHolder = GetSceneHolder();
-  if (DALI_LIKELY(sceneHolder))
+  if(DALI_LIKELY(sceneHolder))
   {
     RenderTaskList taskList = sceneHolder.GetRenderTaskList();
     taskList.RemoveTask(mRenderTask);
@@ -190,10 +190,10 @@ void OffScreenRenderingImpl::DestroyRenderTask()
 
 void OffScreenRenderingImpl::OnRenderFinished(Dali::RenderTask& task)
 {
-  if (DALI_LIKELY(mRenderTask == task))
+  if(DALI_LIKELY(mRenderTask == task))
   {
     Ui::Control control = GetOwnerControl();
-    if (control)
+    if(control)
     {
       mTexture = mFrameBuffer.GetColorTexture();
 

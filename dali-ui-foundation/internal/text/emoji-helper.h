@@ -41,7 +41,7 @@ namespace Text
  *
  * @return @e true if the sequence is text presentation sequence.
  */
-bool IsTextPresentationSequence(const TextAbstraction::Script& currentRunScript,
+bool IsTextPresentationSequence(const TextAbstraction::Script&    currentRunScript,
                                 const TextAbstraction::Character& character);
 
 /**
@@ -53,7 +53,7 @@ bool IsTextPresentationSequence(const TextAbstraction::Script& currentRunScript,
  *
  * @return @e true if the sequence is emoji presentation sequence.
  */
-bool IsEmojiPresentationSequence(const TextAbstraction::Script& currentRunScript,
+bool IsEmojiPresentationSequence(const TextAbstraction::Script&    currentRunScript,
                                  const TextAbstraction::Character& character);
 
 /**
@@ -130,7 +130,7 @@ bool IsStartForKeycapSequence(const TextAbstraction::Character& character);
  *
  * @return @e true if the script is changed
  */
-bool IsScriptChangedToFollowSequence(const TextAbstraction::Script& currentRunScript,
+bool IsScriptChangedToFollowSequence(const TextAbstraction::Script&    currentRunScript,
                                      const TextAbstraction::Character& character, TextAbstraction::Script& script);
 
 /**

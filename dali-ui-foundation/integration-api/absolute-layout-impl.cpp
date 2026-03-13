@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/absolute-layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -49,7 +49,7 @@ AbsoluteLayoutImplPtr AbsoluteLayoutImpl::New()
 }
 
 AbsoluteLayoutImpl::AbsoluteLayoutImpl()
-  : LayoutImpl()
+: LayoutImpl()
 {
 }
 

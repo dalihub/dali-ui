@@ -43,7 +43,7 @@ struct Backend::Impl
 };
 
 Backend::Backend()
-  : mImpl(NULL)
+: mImpl(NULL)
 {
   mImpl = new Impl();
 }
@@ -58,11 +58,11 @@ Dali::Ui::Text::Backend Backend::Get()
   Dali::Ui::Text::Backend backendHandle;
 
   Dali::SingletonService service(SingletonService::Get());
-  if (service)
+  if(service)
   {
     // Check whether the singleton is already created
     Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::Text::Backend));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle
       Backend* impl = dynamic_cast<Dali::Ui::Text::Internal::Backend*>(handle.GetObjectPtr());
@@ -82,7 +82,7 @@ RendererPtr Backend::NewRenderer(unsigned int renderingType)
 {
   RendererPtr renderer;
 
-  switch (renderingType)
+  switch(renderingType)
   {
     case Dali::Ui::DevelText::RENDERING_SHARED_ATLAS:
     {

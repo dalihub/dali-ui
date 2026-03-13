@@ -16,12 +16,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/type-registry.h>
-#include <dali/devel-api/object/property-helper-devel.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-elements/integration-api/label-impl.h>
@@ -67,9 +67,9 @@ DALI_TYPE_REGISTRATION_END()
  *        to a normalized vertical alignment factor.
  */
 const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-    0.0f, // VerticalAlignment::TOP
-    0.5f, // VerticalAlignment::CENTER
-    1.0f  // VerticalAlignment::BOTTOM
+  0.0f, // VerticalAlignment::TOP
+  0.5f, // VerticalAlignment::CENTER
+  1.0f  // VerticalAlignment::BOTTOM
 };
 
 } // namespace
@@ -80,9 +80,9 @@ LabelImplPtr LabelImpl::New()
 }
 
 LabelImpl::LabelImpl()
-  : ViewImpl(),
-    mTextColorAnimatedCount(0),
-    mTextUpdateNeeded(false)
+: ViewImpl(),
+  mTextColorAnimatedCount(0),
+  mTextUpdateNeeded(false)
 {
 }
 
@@ -122,7 +122,7 @@ void LabelImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
 
-  if (!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
+  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
   {
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
   }
@@ -149,14 +149,14 @@ void LabelImpl::SetTextColor(const Vector4& color)
 {
   DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
 
-  if (mController->GetDefaultColor() != color)
+  if(mController->GetDefaultColor() != color)
   {
     Self().SetProperty(LabelImpl::Property::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     mTextUpdateNeeded = true;
 
     // Trigger constraint always.
-    if (DALI_LIKELY(mVisual))
+    if(DALI_LIKELY(mVisual))
     {
       Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
     }
@@ -174,7 +174,7 @@ void LabelImpl::SetHorizontalTextAlignment(TextAlignment alignment)
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
 
   Text::HorizontalAlignment::Type type;
-  switch (alignment)
+  switch(alignment)
   {
     case TextAlignment::START:
     {
@@ -204,7 +204,7 @@ TextAlignment LabelImpl::GetHorizontalTextAlignment() const
 {
   // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
   TextAlignment alignment;
-  switch (mController->GetHorizontalAlignment())
+  switch(mController->GetHorizontalAlignment())
   {
     case Text::HorizontalAlignment::BEGIN:
     {
@@ -236,7 +236,7 @@ void LabelImpl::SetVerticalTextAlignment(TextAlignment alignment)
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
 
   Text::VerticalAlignment::Type type;
-  switch (alignment)
+  switch(alignment)
   {
     case TextAlignment::START:
     {
@@ -266,7 +266,7 @@ TextAlignment LabelImpl::GetVerticalTextAlignment() const
 {
   // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
   TextAlignment alignment;
-  switch (mController->GetVerticalAlignment())
+  switch(mController->GetVerticalAlignment())
   {
     case Text::VerticalAlignment::TOP:
     {
@@ -330,8 +330,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Actor self = Self();
 
   Extents padding = GetViewPadding();
-  float width = std::max(size.x - (padding.start + padding.end), 0.0f);
-  float height = std::max(size.y - (padding.top + padding.bottom), 0.0f);
+  float   width   = std::max(size.x - (padding.start + padding.end), 0.0f);
+  float   height  = std::max(size.y - (padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
   DALI_LOG_RELEASE_INFO("[%p] size:%f,%f, contentSize:%f,%f\n", mController.Get(), size.x, size.y, contentSize.x,
                         contentSize.y);
@@ -340,24 +340,24 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
 
   // Support Right-To-Left of padding
-  if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+  if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
   {
     std::swap(padding.start, padding.end);
   }
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
 
-  if ((Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType)) || mTextUpdateNeeded)
+  if((Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType)) || mTextUpdateNeeded)
   {
     // Update the visual
     Internal::TextVisual::EnableRendererUpdate(mVisual);
 
     // Calculate the size of the visual that can fit the text
     Size layoutSize = mController->GetTextModel()->GetLayoutSize();
-    layoutSize.x = contentSize.x;
+    layoutSize.x    = contentSize.x;
 
     const Vector2& shadowOffset = mController->GetTextModel()->GetShadowOffset();
-    if (shadowOffset.y > Math::MACHINE_EPSILON_1)
+    if(shadowOffset.y > Math::MACHINE_EPSILON_1)
     {
       layoutSize.y += shadowOffset.y;
     }
@@ -372,12 +372,12 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     alignmentOffset.y = (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[mController->GetVerticalAlignment()];
 
     const int maxTextureSize = Dali::GetMaxTextureSize();
-    if (layoutSize.width > maxTextureSize)
+    if(layoutSize.width > maxTextureSize)
     {
       DALI_LOG_DEBUG_INFO(
-          "layoutSize(%f) > maxTextureSize(%d): To guarantee the behavior of Texture::New, layoutSize must not be "
-          "bigger than maxTextureSize\n",
-          layoutSize.width, maxTextureSize);
+        "layoutSize(%f) > maxTextureSize(%d): To guarantee the behavior of Texture::New, layoutSize must not be "
+        "bigger than maxTextureSize\n",
+        layoutSize.width, maxTextureSize);
       layoutSize.width = maxTextureSize;
     }
 
@@ -394,13 +394,13 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     Dali::Property::Map visualTransform;
     visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
-        .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-        .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
-        .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-             Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-        .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-        .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Visual::Transform::Property::OFFSET, visualTransformOffset)
+      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
+      .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
     mVisual.SetTransformAndSize(visualTransform, size);
 
     mTextUpdateNeeded = false;
@@ -409,7 +409,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
 Vector3 LabelImpl::GetNaturalSize()
 {
-  Extents padding = GetViewPadding();
+  Extents padding     = GetViewPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += (padding.start + padding.end);
   naturalSize.height += (padding.top + padding.bottom);
@@ -426,15 +426,15 @@ float LabelImpl::GetHeightForWidth(float width)
 // TODO: If the implementation in Control is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
-  if (DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
   {
-    if (state == Animation::State::PLAYING)
+    if(state == Animation::State::PLAYING)
     {
       ++mTextColorAnimatedCount;
     }
-    else if (state == Animation::State::STOPPED)
+    else if(state == Animation::State::STOPPED)
     {
-      if (mTextColorAnimatedCount)
+      if(mTextColorAnimatedCount)
       {
         --mTextColorAnimatedCount;
       }
@@ -448,15 +448,15 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
 // TODO: If the implementation in Control is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
-  if (DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
   {
-    if (applied)
+    if(applied)
     {
       ++mTextColorAnimatedCount;
     }
     else
     {
-      if (mTextColorAnimatedCount)
+      if(mTextColorAnimatedCount)
       {
         --mTextColorAnimatedCount;
       }
@@ -472,49 +472,49 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint,
                         heightConstraint);
 
-  const float layoutWidth = GetLayoutWidth();
+  const float layoutWidth  = GetLayoutWidth();
   const float layoutHeight = GetLayoutHeight();
 
-  const float minWidth = GetMinimumWidth();
-  const float maxWidth = GetMaximumWidth();
+  const float minWidth  = GetMinimumWidth();
+  const float maxWidth  = GetMaximumWidth();
   const float minHeight = GetMinimumHeight();
   const float maxHeight = GetMaximumHeight();
 
   const Vector3 naturalSize = GetNaturalSize();
 
-  float measuredWidth = 0.0f;
+  float measuredWidth  = 0.0f;
   float measuredHeight = 0.0f;
 
   // Width
-  if (layoutWidth > 0.0f)
+  if(layoutWidth > 0.0f)
   {
     measuredWidth = layoutWidth;
   }
-  else if (layoutWidth == LayoutDimension::MatchParent)
+  else if(layoutWidth == LayoutDimension::MatchParent)
   {
     measuredWidth = std::max(0.0f, widthConstraint);
   }
   else
   {
-    const float width = std::max(0.0f, naturalSize.width);
+    const float width           = std::max(0.0f, naturalSize.width);
     const float allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
-    measuredWidth = std::max(std::min(width, allowedMaxWidth), minWidth);
+    measuredWidth               = std::max(std::min(width, allowedMaxWidth), minWidth);
   }
 
   // Height
-  if (layoutHeight > 0.0f)
+  if(layoutHeight > 0.0f)
   {
     measuredHeight = layoutHeight;
   }
-  else if (layoutHeight == LayoutDimension::MatchParent)
+  else if(layoutHeight == LayoutDimension::MatchParent)
   {
     measuredHeight = std::max(0.0f, heightConstraint);
   }
   else
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    const float height = std::max(0.0f, GetHeightForWidth(measuredWidth));
-    measuredHeight = std::max(std::min(height, allowedMaxHeight), minHeight);
+    const float height           = std::max(0.0f, GetHeightForWidth(measuredWidth));
+    measuredHeight               = std::max(std::min(height, allowedMaxHeight), minHeight);
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);

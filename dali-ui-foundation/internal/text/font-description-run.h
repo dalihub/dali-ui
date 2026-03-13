@@ -40,45 +40,45 @@ struct FontDescriptionRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values of bitfields
    */
   FontDescriptionRun()
-    : AbstractStyleCharacterRun(),
-      familyName{nullptr},
-      familyLength{0u},
-      weight{FontWeight::NONE},
-      width{FontWidth::NONE},
-      slant{FontSlant::NONE},
-      size{0u},
-      familyDefined{false},
-      weightDefined{false},
-      widthDefined{false},
-      slantDefined{false},
-      sizeDefined{false}
+  : AbstractStyleCharacterRun(),
+    familyName{nullptr},
+    familyLength{0u},
+    weight{FontWeight::NONE},
+    width{FontWidth::NONE},
+    slant{FontSlant::NONE},
+    size{0u},
+    familyDefined{false},
+    weightDefined{false},
+    widthDefined{false},
+    slantDefined{false},
+    sizeDefined{false}
   {
   }
 
   FontDescriptionRun(const CharacterRun& characterRun, char* familyName, Length familyLength, FontWeight weight,
                      FontWidth width, FontSlant slant, PointSize26Dot6 size, bool familyDefined, bool weightDefined,
                      bool widthDefined, bool slantDefined, bool sizeDefined)
-    : AbstractStyleCharacterRun(characterRun),
-      familyName{familyName},
-      familyLength{familyLength},
-      weight{weight},
-      width{width},
-      slant{slant},
-      size{size},
-      familyDefined{familyDefined},
-      weightDefined{weightDefined},
-      widthDefined{widthDefined},
-      slantDefined{slantDefined},
-      sizeDefined{sizeDefined}
+  : AbstractStyleCharacterRun(characterRun),
+    familyName{familyName},
+    familyLength{familyLength},
+    weight{weight},
+    width{width},
+    slant{slant},
+    size{size},
+    familyDefined{familyDefined},
+    weightDefined{weightDefined},
+    widthDefined{widthDefined},
+    slantDefined{slantDefined},
+    sizeDefined{sizeDefined}
   {
   }
 
-  char* familyName;     ///< The font's family name.
-  Length familyLength;  ///< The length of the font's family name.
-  FontWeight weight;    ///< The font's weight.
-  FontWidth width;      ///< The font's width.
-  FontSlant slant;      ///< The font's slant.
-  PointSize26Dot6 size; ///< The font's size.
+  char*           familyName;   ///< The font's family name.
+  Length          familyLength; ///< The length of the font's family name.
+  FontWeight      weight;       ///< The font's weight.
+  FontWidth       width;        ///< The font's width.
+  FontSlant       slant;        ///< The font's slant.
+  PointSize26Dot6 size;         ///< The font's size.
 
   bool familyDefined : 1; ///< Whether the font's family is defined.
   bool weightDefined : 1; ///< Whether the font's weight is defined.
@@ -92,7 +92,7 @@ struct FontDescriptionRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow FontDescriptionRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::FontDescriptionRun> : public Dali::BasicTypes<Dali::Ui::Text::FontDescriptionRun>
 {
   enum

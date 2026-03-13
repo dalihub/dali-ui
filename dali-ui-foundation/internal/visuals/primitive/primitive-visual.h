@@ -164,8 +164,8 @@ private:
     }
 
     Vertex(const Vector3& position, const Vector3& normal, const Vector2& textureCoord)
-      : position(position),
-        normal(normal)
+    : position(position),
+      normal(normal)
     {
     }
 
@@ -323,7 +323,7 @@ private:
   PrimitiveVisual& operator=(const PrimitiveVisual& PrimitiveVisual);
 
 private:
-  Shader mShader;
+  Shader   mShader;
   Geometry mGeometry;
 
   Vector3 mObjectDimensions; // Dimensions of shape, scaled to be between 0.0 and 1.0.
@@ -335,15 +335,15 @@ private:
   Vector3 mLightPosition;
 
   // Shape properties.
-  Vector3 mScaleDimensions; ///< Scale of dimensions of bevelled cube and sub-shapes.
-  float mScaleTopRadius;    ///< Scale of radius of top circle, to use when creating certain objects.
-  float mScaleBottomRadius; ///< Scale of radius of bottom circle, to use when creating certain objects.
-  float mScaleHeight;       ///< Scale of height, to use when creating certain objects.
-  float mScaleRadius;       ///< Scale of radius, to use when creating certain objects.
-  float mBevelPercentage;   ///< Used to determine bevel amount when creating certain objects.
-  float mBevelSmoothness;   ///< Used to determine the smoothness of bevelled edges.
-  int mSlices;              ///< Number of slices to use when creating certain objects.
-  int mStacks;              ///< Number of stacks to use when creating certain objects.
+  Vector3 mScaleDimensions;   ///< Scale of dimensions of bevelled cube and sub-shapes.
+  float   mScaleTopRadius;    ///< Scale of radius of top circle, to use when creating certain objects.
+  float   mScaleBottomRadius; ///< Scale of radius of bottom circle, to use when creating certain objects.
+  float   mScaleHeight;       ///< Scale of height, to use when creating certain objects.
+  float   mScaleRadius;       ///< Scale of radius, to use when creating certain objects.
+  float   mBevelPercentage;   ///< Used to determine bevel amount when creating certain objects.
+  float   mBevelSmoothness;   ///< Used to determine the smoothness of bevelled edges.
+  int     mSlices;            ///< Number of slices to use when creating certain objects.
+  int     mStacks;            ///< Number of stacks to use when creating certain objects.
 
   Ui::PrimitiveVisual::Shape::Type mPrimitiveType; // Shape to render, as enum.
 };

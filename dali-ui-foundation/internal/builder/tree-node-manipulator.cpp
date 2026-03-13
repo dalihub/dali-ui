@@ -34,7 +34,7 @@ namespace
 {
 void Indent(std::ostream& o, int level, int indentWidth)
 {
-  for (int i = 0; i < level * indentWidth; ++i)
+  for(int i = 0; i < level * indentWidth; ++i)
   {
     o << " ";
   }
@@ -43,13 +43,13 @@ void Indent(std::ostream& o, int level, int indentWidth)
 std::string EscapeQuotes(const char* aString)
 {
   std::string escapedString;
-  int length = strlen(aString);
+  int         length = strlen(aString);
   escapedString.reserve(length);
 
   const char* end = aString + length;
-  for (const char* iter = aString; iter != end; ++iter)
+  for(const char* iter = aString; iter != end; ++iter)
   {
-    if (*iter != '\"')
+    if(*iter != '\"')
     {
       escapedString.push_back(*iter);
     }
@@ -64,7 +64,7 @@ std::string EscapeQuotes(const char* aString)
 } // anonymous namespace
 
 TreeNodeManipulator::TreeNodeManipulator(TreeNode* node)
-  : mNode(node)
+: mNode(node)
 {
 }
 
@@ -78,12 +78,12 @@ void TreeNodeManipulator::ShallowCopy(const TreeNode* from, TreeNode* to)
   DALI_ASSERT_DEBUG(from);
   DALI_ASSERT_DEBUG(to);
 
-  if (from)
+  if(from)
   {
-    to->mName = from->mName;
-    to->mType = from->mType;
+    to->mName        = from->mName;
+    to->mType        = from->mType;
     to->mSubstituion = from->mSubstituion;
-    switch (from->mType)
+    switch(from->mType)
     {
       case TreeNode::INTEGER:
       {
@@ -118,12 +118,12 @@ void TreeNodeManipulator::ShallowCopy(const TreeNode* from, TreeNode* to)
 void TreeNodeManipulator::MoveNodeStrings(VectorCharIter& start, const VectorCharIter& sentinel)
 {
   DALI_ASSERT_DEBUG(mNode && "Operation on NULL JSON node");
-  if (mNode->mName)
+  if(mNode->mName)
   {
     mNode->mName = CopyString(mNode->mName, start, sentinel);
   }
 
-  if (TreeNode::STRING == mNode->mType)
+  if(TreeNode::STRING == mNode->mType)
   {
     mNode->mStringValue = CopyString(mNode->mStringValue, start, sentinel);
   }
@@ -142,7 +142,7 @@ void TreeNodeManipulator::RecurseMoveChildStrings(VectorCharIter& start, const V
   DALI_ASSERT_DEBUG(mNode && "Operation on NULL JSON node");
 
   TreeNode* child = mNode->mFirstChild;
-  while (child)
+  while(child)
   {
     TreeNodeManipulator manipChild(child);
     manipChild.MoveNodeStrings(start, sentinel);
@@ -150,7 +150,7 @@ void TreeNodeManipulator::RecurseMoveChildStrings(VectorCharIter& start, const V
   }
 
   child = mNode->mFirstChild;
-  while (child)
+  while(child)
   {
     TreeNodeManipulator manipChild(child);
     manipChild.RecurseMoveChildStrings(start, sentinel);
@@ -166,16 +166,16 @@ void TreeNodeManipulator::RemoveChildren()
 
   DepthFirst(mNode, collector);
 
-  for (CollectNodes::iterator iter = collector.nodes.begin(); iter != collector.nodes.end(); ++iter)
+  for(CollectNodes::iterator iter = collector.nodes.begin(); iter != collector.nodes.end(); ++iter)
   {
-    if (*iter != mNode)
+    if(*iter != mNode)
     {
       delete *iter;
     }
   }
 
   mNode->mFirstChild = NULL;
-  mNode->mLastChild = NULL;
+  mNode->mLastChild  = NULL;
 }
 
 TreeNode* TreeNodeManipulator::Copy(const TreeNode& tree, int& numberNodes, int& numberChars)
@@ -184,12 +184,12 @@ TreeNode* TreeNodeManipulator::Copy(const TreeNode& tree, int& numberNodes, int&
 
   ShallowCopy(&tree, root);
 
-  if (tree.mName)
+  if(tree.mName)
   {
     numberChars += std::strlen(tree.mName) + 1;
   }
 
-  if (TreeNode::STRING == tree.mType)
+  if(TreeNode::STRING == tree.mType)
   {
     numberChars += std::strlen(tree.mStringValue) + 1;
   }
@@ -206,15 +206,15 @@ void TreeNodeManipulator::CopyChildren(const TreeNode* from, TreeNode* to, int& 
   DALI_ASSERT_DEBUG(from && "Operation on NULL JSON node");
   DALI_ASSERT_DEBUG(to);
 
-  for (TreeNode::ConstIterator iter = from->CBegin(); iter != from->CEnd(); ++iter)
+  for(TreeNode::ConstIterator iter = from->CBegin(); iter != from->CEnd(); ++iter)
   {
     const TreeNode* child = &((*iter).second);
-    if (child->mName)
+    if(child->mName)
     {
       numberChars += std::strlen(child->mName) + 1;
     }
 
-    if (TreeNode::STRING == child->mType)
+    if(TreeNode::STRING == child->mType)
     {
       numberChars += std::strlen(child->mStringValue) + 1;
     }
@@ -238,7 +238,7 @@ TreeNode* TreeNodeManipulator::AddChild(TreeNode* rhs)
   DALI_ASSERT_DEBUG(mNode && "Operation on NULL JSON node");
 
   rhs->mParent = mNode;
-  if (mNode->mLastChild)
+  if(mNode->mLastChild)
   {
     mNode->mLastChild = mNode->mLastChild->mNextSibling = rhs;
   }
@@ -267,11 +267,11 @@ void TreeNodeManipulator::SetType(TreeNode::NodeType type)
 {
   DALI_ASSERT_DEBUG(mNode && "Operation on NULL JSON node");
 
-  if (mNode->mType != type)
+  if(mNode->mType != type)
   {
     mNode->mType = type;
 
-    if (NULL != mNode->mFirstChild)
+    if(NULL != mNode->mFirstChild)
     {
       // value types have no children
       bool removeChildren = !(TreeNode::OBJECT == type || TreeNode::ARRAY == type);
@@ -280,19 +280,19 @@ void TreeNodeManipulator::SetType(TreeNode::NodeType type)
       removeChildren = (removeChildren == true) ? true : type != mNode->mType;
 
       // so remove any children
-      if (removeChildren && NULL != mNode->mFirstChild)
+      if(removeChildren && NULL != mNode->mFirstChild)
       {
         RemoveChildren();
       }
     }
   }
-  else if (TreeNode::ARRAY == mNode->mType)
+  else if(TreeNode::ARRAY == mNode->mType)
   {
-    if (mNode->mFirstChild != NULL)
+    if(mNode->mFirstChild != NULL)
     {
       TreeNode::NodeType firstChildType = mNode->mFirstChild->GetType();
 
-      if (TreeNode::FLOAT == firstChildType || TreeNode::INTEGER == firstChildType)
+      if(TreeNode::FLOAT == firstChildType || TreeNode::INTEGER == firstChildType)
       {
         // Arrays of numbers should be replaced, not appended to.
         RemoveChildren();
@@ -364,26 +364,26 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
 {
   DALI_ASSERT_DEBUG(value && "Operation on NULL JSON node");
 
-  if (!groupChildren)
+  if(!groupChildren)
   {
     Indent(output, level, indentWidth);
   }
 
-  if (value->GetName())
+  if(value->GetName())
   {
     output << "\"" << value->GetName() << "\":";
   }
 
-  switch (value->GetType())
+  switch(value->GetType())
   {
     case TreeNode::IS_NULL:
     {
       output << "null";
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ", ";
       }
-      if (!groupChildren)
+      if(!groupChildren)
       {
         output << std::endl;
       }
@@ -394,13 +394,13 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
     {
       bool groupMyChildren = false;
 
-      if (TreeNode::ARRAY == value->GetType() && value->mFirstChild &&
-          (TreeNode::INTEGER == value->mFirstChild->GetType() || TreeNode::FLOAT == value->mFirstChild->GetType()))
+      if(TreeNode::ARRAY == value->GetType() && value->mFirstChild &&
+         (TreeNode::INTEGER == value->mFirstChild->GetType() || TreeNode::FLOAT == value->mFirstChild->GetType()))
       {
         groupMyChildren = true;
       }
 
-      if (value->GetType() == TreeNode::OBJECT)
+      if(value->GetType() == TreeNode::OBJECT)
       {
         output << std::endl;
         Indent(output, level, indentWidth);
@@ -408,7 +408,7 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
       }
       else
       {
-        if (!groupMyChildren)
+        if(!groupMyChildren)
         {
           output << std::endl;
           Indent(output, level, indentWidth);
@@ -416,7 +416,7 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
         output << "[";
       }
 
-      if (groupMyChildren)
+      if(groupMyChildren)
       {
         output << " ";
       }
@@ -425,17 +425,17 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
         output << std::endl;
       }
 
-      for (TreeNode::ConstIterator it = value->CBegin(); it != value->CEnd(); ++it)
+      for(TreeNode::ConstIterator it = value->CBegin(); it != value->CEnd(); ++it)
       {
         DoWrite(&((*it).second), output, level + 1, indentWidth, groupMyChildren);
       }
 
-      if (!groupMyChildren)
+      if(!groupMyChildren)
       {
         Indent(output, level, indentWidth);
       }
 
-      if (value->GetType() == TreeNode::OBJECT)
+      if(value->GetType() == TreeNode::OBJECT)
       {
         output << "}";
       }
@@ -444,12 +444,12 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
         output << "]";
       }
 
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ",";
       }
 
-      if (!groupChildren)
+      if(!groupChildren)
       {
         output << std::endl;
       }
@@ -461,12 +461,12 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
     {
       std::string escapedString = EscapeQuotes(value->GetString());
       output << "\"" << escapedString << "\"";
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ",";
       }
 
-      if (groupChildren)
+      if(groupChildren)
       {
         output << " ";
       }
@@ -479,12 +479,12 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
     case TreeNode::INTEGER:
     {
       output << value->GetInteger();
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ",";
       }
 
-      if (groupChildren)
+      if(groupChildren)
       {
         output << " ";
       }
@@ -499,12 +499,12 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
       output.setf(std::ios::floatfield);
       output << value->GetFloat();
       output.unsetf(std::ios::floatfield);
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ",";
       }
 
-      if (groupChildren)
+      if(groupChildren)
       {
         output << " ";
       }
@@ -516,7 +516,7 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
     }
     case TreeNode::BOOLEAN:
     {
-      if (value->GetInteger())
+      if(value->GetInteger())
       {
         output << "true";
       }
@@ -525,12 +525,12 @@ void TreeNodeManipulator::DoWrite(const TreeNode* value, std::ostream& output, i
         output << "false";
       }
 
-      if (NULL != value->mNextSibling)
+      if(NULL != value->mNextSibling)
       {
         output << ",";
       }
 
-      if (groupChildren)
+      if(groupChildren)
       {
         output << " ";
       }
@@ -550,17 +550,17 @@ const TreeNode* FindIt(std::string_view childName, const TreeNode* node)
 
   const TreeNode* found = NULL;
 
-  if (node)
+  if(node)
   {
-    if (NULL != (found = node->GetChild(childName)))
+    if(NULL != (found = node->GetChild(childName)))
     {
       return found;
     }
     else
     {
-      for (TreeNode::ConstIterator iter = node->CBegin(); iter != node->CEnd(); ++iter)
+      for(TreeNode::ConstIterator iter = node->CBegin(); iter != node->CEnd(); ++iter)
       {
-        if (NULL != (found = FindIt(childName, &((*iter).second))))
+        if(NULL != (found = FindIt(childName, &((*iter).second))))
         {
           return found;
         }
@@ -575,12 +575,12 @@ char* CopyString(const char* fromString, VectorCharIter& iter, const VectorCharI
   DALI_ASSERT_DEBUG(fromString);
   DALI_ASSERT_DEBUG(iter != sentinel);
 
-  char* start = &(*iter);
-  const char* ptr = fromString;
+  char*       start = &(*iter);
+  const char* ptr   = fromString;
 
-  if (ptr)
+  if(ptr)
   {
-    while (*ptr != 0)
+    while(*ptr != 0)
     {
       DALI_ASSERT_DEBUG(iter != sentinel);
       *iter++ = *ptr++;

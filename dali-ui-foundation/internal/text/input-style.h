@@ -38,50 +38,50 @@ struct InputStyle
 {
   enum Mask
   {
-    NONE = 0x0000,
-    INPUT_COLOR = 0x0001,
-    INPUT_FONT_FAMILY = 0x0002,
-    INPUT_POINT_SIZE = 0x0004,
-    INPUT_FONT_WEIGHT = 0x0008,
-    INPUT_FONT_WIDTH = 0x0010,
-    INPUT_FONT_SLANT = 0x0020,
-    INPUT_LINE_SPACING = 0x0040,
-    INPUT_UNDERLINE = 0x0080,
-    INPUT_SHADOW = 0x0100,
-    INPUT_EMBOSS = 0x0200,
-    INPUT_OUTLINE = 0x0400,
+    NONE                = 0x0000,
+    INPUT_COLOR         = 0x0001,
+    INPUT_FONT_FAMILY   = 0x0002,
+    INPUT_POINT_SIZE    = 0x0004,
+    INPUT_FONT_WEIGHT   = 0x0008,
+    INPUT_FONT_WIDTH    = 0x0010,
+    INPUT_FONT_SLANT    = 0x0020,
+    INPUT_LINE_SPACING  = 0x0040,
+    INPUT_UNDERLINE     = 0x0080,
+    INPUT_SHADOW        = 0x0100,
+    INPUT_EMBOSS        = 0x0200,
+    INPUT_OUTLINE       = 0x0400,
     INPUT_STRIKETHROUGH = 0x0800
   };
 
   InputStyle()
-    : textColor(Color::BLACK),
-      familyName(),
-      weight(TextAbstraction::FontWeight::NORMAL),
-      width(TextAbstraction::FontWidth::NORMAL),
-      slant(TextAbstraction::FontSlant::NORMAL),
-      size(0.f),
-      lineSpacing(0.f),
-      underlineProperties(),
-      shadowProperties(),
-      embossProperties(),
-      outlineProperties(),
-      strikethroughProperties(),
-      isDefaultColor(true),
-      isFamilyDefined(false),
-      isWeightDefined(false),
-      isWidthDefined(false),
-      isSlantDefined(false),
-      isSizeDefined(false),
-      isLineSpacingDefined(false),
-      isUnderlineDefined(false),
-      isShadowDefined(false),
-      isEmbossDefined(false),
-      isOutlineDefined(false),
-      isStrikethroughDefined(false)
+  : textColor(Color::BLACK),
+    familyName(),
+    weight(TextAbstraction::FontWeight::NORMAL),
+    width(TextAbstraction::FontWidth::NORMAL),
+    slant(TextAbstraction::FontSlant::NORMAL),
+    size(0.f),
+    lineSpacing(0.f),
+    underlineProperties(),
+    shadowProperties(),
+    embossProperties(),
+    outlineProperties(),
+    strikethroughProperties(),
+    isDefaultColor(true),
+    isFamilyDefined(false),
+    isWeightDefined(false),
+    isWidthDefined(false),
+    isSlantDefined(false),
+    isSizeDefined(false),
+    isLineSpacingDefined(false),
+    isUnderlineDefined(false),
+    isShadowDefined(false),
+    isEmbossDefined(false),
+    isOutlineDefined(false),
+    isStrikethroughDefined(false)
   {
   }
 
-  ~InputStyle(){};
+  ~InputStyle() {};
 
   /**
    * @brief
@@ -91,39 +91,39 @@ struct InputStyle
   void Copy(const InputStyle& inputStyle)
   {
     isDefaultColor = inputStyle.isDefaultColor;
-    textColor = inputStyle.textColor;
+    textColor      = inputStyle.textColor;
 
     isFamilyDefined = inputStyle.isFamilyDefined;
-    familyName = inputStyle.familyName;
+    familyName      = inputStyle.familyName;
 
     isWeightDefined = inputStyle.isWeightDefined;
-    weight = inputStyle.weight;
+    weight          = inputStyle.weight;
 
     isWidthDefined = inputStyle.isWidthDefined;
-    width = inputStyle.width;
+    width          = inputStyle.width;
 
     isSlantDefined = inputStyle.isSlantDefined;
-    slant = inputStyle.slant;
+    slant          = inputStyle.slant;
 
     isSizeDefined = inputStyle.isSizeDefined;
-    size = inputStyle.size;
+    size          = inputStyle.size;
 
     isLineSpacingDefined = inputStyle.isLineSpacingDefined;
-    lineSpacing = inputStyle.lineSpacing;
+    lineSpacing          = inputStyle.lineSpacing;
 
-    isUnderlineDefined = inputStyle.isUnderlineDefined;
+    isUnderlineDefined  = inputStyle.isUnderlineDefined;
     underlineProperties = inputStyle.underlineProperties;
 
-    isShadowDefined = inputStyle.isShadowDefined;
+    isShadowDefined  = inputStyle.isShadowDefined;
     shadowProperties = inputStyle.shadowProperties;
 
-    isEmbossDefined = inputStyle.isEmbossDefined;
+    isEmbossDefined  = inputStyle.isEmbossDefined;
     embossProperties = inputStyle.embossProperties;
 
-    isOutlineDefined = inputStyle.isOutlineDefined;
+    isOutlineDefined  = inputStyle.isOutlineDefined;
     outlineProperties = inputStyle.outlineProperties;
 
-    isStrikethroughDefined = inputStyle.isStrikethroughDefined;
+    isStrikethroughDefined  = inputStyle.isStrikethroughDefined;
     strikethroughProperties = inputStyle.strikethroughProperties;
   }
 
@@ -134,18 +134,18 @@ struct InputStyle
    */
   bool Equal(const InputStyle& inputStyle) const
   {
-    if ((isDefaultColor != inputStyle.isDefaultColor) || (isFamilyDefined != inputStyle.isFamilyDefined) ||
-        (isWeightDefined != inputStyle.isWeightDefined) || (isWidthDefined != inputStyle.isWidthDefined) ||
-        (isSlantDefined != inputStyle.isSlantDefined) || (isSizeDefined != inputStyle.isSizeDefined) ||
-        (isLineSpacingDefined != inputStyle.isLineSpacingDefined) ||
-        (isUnderlineDefined != inputStyle.isUnderlineDefined) || (isShadowDefined != inputStyle.isShadowDefined) ||
-        (isEmbossDefined != inputStyle.isEmbossDefined) || (isOutlineDefined != inputStyle.isOutlineDefined) ||
-        (textColor != inputStyle.textColor) || (familyName != inputStyle.familyName) || (weight != inputStyle.weight) ||
-        (width != inputStyle.width) || (slant != inputStyle.slant) || (!Dali::Equals(size, inputStyle.size)) ||
-        (!Dali::Equals(lineSpacing, inputStyle.lineSpacing)) ||
-        (underlineProperties != inputStyle.underlineProperties) || (shadowProperties != inputStyle.shadowProperties) ||
-        (embossProperties != inputStyle.embossProperties) || (outlineProperties != inputStyle.outlineProperties) ||
-        (isStrikethroughDefined != inputStyle.isStrikethroughDefined))
+    if((isDefaultColor != inputStyle.isDefaultColor) || (isFamilyDefined != inputStyle.isFamilyDefined) ||
+       (isWeightDefined != inputStyle.isWeightDefined) || (isWidthDefined != inputStyle.isWidthDefined) ||
+       (isSlantDefined != inputStyle.isSlantDefined) || (isSizeDefined != inputStyle.isSizeDefined) ||
+       (isLineSpacingDefined != inputStyle.isLineSpacingDefined) ||
+       (isUnderlineDefined != inputStyle.isUnderlineDefined) || (isShadowDefined != inputStyle.isShadowDefined) ||
+       (isEmbossDefined != inputStyle.isEmbossDefined) || (isOutlineDefined != inputStyle.isOutlineDefined) ||
+       (textColor != inputStyle.textColor) || (familyName != inputStyle.familyName) || (weight != inputStyle.weight) ||
+       (width != inputStyle.width) || (slant != inputStyle.slant) || (!Dali::Equals(size, inputStyle.size)) ||
+       (!Dali::Equals(lineSpacing, inputStyle.lineSpacing)) ||
+       (underlineProperties != inputStyle.underlineProperties) || (shadowProperties != inputStyle.shadowProperties) ||
+       (embossProperties != inputStyle.embossProperties) || (outlineProperties != inputStyle.outlineProperties) ||
+       (isStrikethroughDefined != inputStyle.isStrikethroughDefined))
     {
       return false;
     }
@@ -157,51 +157,51 @@ struct InputStyle
   {
     Mask mask = NONE;
 
-    if (textColor != inputStyle.textColor)
+    if(textColor != inputStyle.textColor)
     {
       mask = static_cast<Mask>(mask | INPUT_COLOR);
     }
-    if (familyName != inputStyle.familyName)
+    if(familyName != inputStyle.familyName)
     {
       mask = static_cast<Mask>(mask | INPUT_FONT_FAMILY);
     }
-    if (weight != inputStyle.weight)
+    if(weight != inputStyle.weight)
     {
       mask = static_cast<Mask>(mask | INPUT_FONT_WEIGHT);
     }
-    if (width != inputStyle.width)
+    if(width != inputStyle.width)
     {
       mask = static_cast<Mask>(mask | INPUT_FONT_WIDTH);
     }
-    if (slant != inputStyle.slant)
+    if(slant != inputStyle.slant)
     {
       mask = static_cast<Mask>(mask | INPUT_FONT_SLANT);
     }
-    if (!Dali::Equals(size, inputStyle.size))
+    if(!Dali::Equals(size, inputStyle.size))
     {
       mask = static_cast<Mask>(mask | INPUT_POINT_SIZE);
     }
-    if (!Dali::Equals(lineSpacing, inputStyle.lineSpacing))
+    if(!Dali::Equals(lineSpacing, inputStyle.lineSpacing))
     {
       mask = static_cast<Mask>(mask | INPUT_LINE_SPACING);
     }
-    if (underlineProperties != inputStyle.underlineProperties)
+    if(underlineProperties != inputStyle.underlineProperties)
     {
       mask = static_cast<Mask>(mask | INPUT_UNDERLINE);
     }
-    if (shadowProperties != inputStyle.shadowProperties)
+    if(shadowProperties != inputStyle.shadowProperties)
     {
       mask = static_cast<Mask>(mask | INPUT_SHADOW);
     }
-    if (embossProperties != inputStyle.embossProperties)
+    if(embossProperties != inputStyle.embossProperties)
     {
       mask = static_cast<Mask>(mask | INPUT_EMBOSS);
     }
-    if (outlineProperties != inputStyle.outlineProperties)
+    if(outlineProperties != inputStyle.outlineProperties)
     {
       mask = static_cast<Mask>(mask | INPUT_OUTLINE);
     }
-    if (strikethroughProperties != inputStyle.strikethroughProperties)
+    if(strikethroughProperties != inputStyle.strikethroughProperties)
     {
       mask = static_cast<Mask>(mask | INPUT_STRIKETHROUGH);
     }
@@ -209,12 +209,12 @@ struct InputStyle
     return mask;
   }
 
-  Vector4 textColor;      ///< The text's color.
+  Vector4     textColor;  ///< The text's color.
   std::string familyName; ///< The font's family name.
-  FontWeight weight;      ///< The font's weight.
-  FontWidth width;        ///< The font's width.
-  FontSlant slant;        ///< The font's slant.
-  float size;             ///< The font's size.
+  FontWeight  weight;     ///< The font's weight.
+  FontWidth   width;      ///< The font's width.
+  FontSlant   slant;      ///< The font's slant.
+  float       size;       ///< The font's size.
 
   float lineSpacing; ///< The line's spacing.
 

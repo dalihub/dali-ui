@@ -88,9 +88,9 @@ uint32_t GetNumberOfUtf8Characters(const uint8_t* const utf8, uint32_t length)
   uint32_t numberOfCharacters = 0u;
 
   const uint8_t* begin = utf8;
-  const uint8_t* end = utf8 + length;
+  const uint8_t* end   = utf8 + length;
 
-  for (; begin < end; begin += UTF8_LENGTH[*begin])
+  for(; begin < end; begin += UTF8_LENGTH[*begin])
   {
     ++numberOfCharacters;
   }
@@ -103,33 +103,33 @@ uint32_t GetNumberOfUtf8Bytes(const uint32_t* const utf32, uint32_t numberOfChar
   uint32_t numberOfBytes = 0u;
 
   const uint32_t* begin = utf32;
-  const uint32_t* end = utf32 + numberOfCharacters;
+  const uint32_t* end   = utf32 + numberOfCharacters;
 
-  for (; begin < end; ++begin)
+  for(; begin < end; ++begin)
   {
     const uint32_t code = *begin;
 
-    if (code < 0x80u)
+    if(code < 0x80u)
     {
       ++numberOfBytes;
     }
-    else if (code < 0x800u)
+    else if(code < 0x800u)
     {
       numberOfBytes += U2;
     }
-    else if (code < 0x10000u)
+    else if(code < 0x10000u)
     {
       numberOfBytes += U3;
     }
-    else if (code < 0x200000u)
+    else if(code < 0x200000u)
     {
       numberOfBytes += U4;
     }
-    else if (code < 0x4000000u)
+    else if(code < 0x4000000u)
     {
       numberOfBytes += U5;
     }
-    else if (code < 0x80000000u)
+    else if(code < 0x80000000u)
     {
       numberOfBytes += U6;
     }
@@ -143,26 +143,26 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
   uint32_t numberOfCharacters = 0u;
 
   const uint8_t* begin = utf8;
-  const uint8_t* end = utf8 + length;
+  const uint8_t* end   = utf8 + length;
 
-  for (; begin < end; ++numberOfCharacters)
+  for(; begin < end; ++numberOfCharacters)
   {
     const uint8_t leadByte = *begin;
 
-    switch (UTF8_LENGTH[leadByte])
+    switch(UTF8_LENGTH[leadByte])
     {
       case U1:
       {
-        if (CR == leadByte)
+        if(CR == leadByte)
         {
           // Replace CR+LF or CR by LF
           *utf32++ = LF;
 
           // Look ahead if the next one is a LF.
           ++begin;
-          if (begin < end)
+          if(begin < end)
           {
-            if (LF == *begin)
+            if(LF == *begin)
             {
               ++begin;
             }
@@ -179,7 +179,7 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
       case U2:
       {
         uint32_t& code = *utf32++;
-        code = leadByte & 0x1fu;
+        code           = leadByte & 0x1fu;
         begin++;
         code <<= 6u;
         code |= *begin++ & 0x3fu;
@@ -189,7 +189,7 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
       case U3:
       {
         uint32_t& code = *utf32++;
-        code = leadByte & 0x0fu;
+        code           = leadByte & 0x0fu;
         begin++;
         code <<= 6u;
         code |= *begin++ & 0x3fu;
@@ -201,7 +201,7 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
       case U4:
       {
         uint32_t& code = *utf32++;
-        code = leadByte & 0x07u;
+        code           = leadByte & 0x07u;
         begin++;
         code <<= 6u;
         code |= *begin++ & 0x3fu;
@@ -215,7 +215,7 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
       case U5:
       {
         uint32_t& code = *utf32++;
-        code = leadByte & 0x03u;
+        code           = leadByte & 0x03u;
         begin++;
         code <<= 6u;
         code |= *begin++ & 0x3fu;
@@ -231,7 +231,7 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
       case U6:
       {
         uint32_t& code = *utf32++;
-        code = leadByte & 0x01u;
+        code           = leadByte & 0x01u;
         begin++;
         code <<= 6u;
         code |= *begin++ & 0x3fu;
@@ -261,11 +261,11 @@ uint32_t Utf8ToUtf32(const uint8_t* const utf8, uint32_t length, uint32_t* utf32
 uint32_t Utf32ToUtf8(const uint32_t* const utf32, uint32_t numberOfCharacters, uint8_t* utf8)
 {
   const uint32_t* begin = utf32;
-  const uint32_t* end = utf32 + numberOfCharacters;
+  const uint32_t* end   = utf32 + numberOfCharacters;
 
   uint8_t* utf8Begin = utf8;
 
-  for (; begin < end; ++begin)
+  for(; begin < end; ++begin)
   {
     const uint32_t code = *begin;
 

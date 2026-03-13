@@ -62,14 +62,14 @@ public:
 
     TextureInformation();
 
-    ReturnType returnType;          ///< Returned Texture type.
-    int32_t textureId;              ///< The textureId of the loaded texture in the TextureManager
-    TextureSet textureSet;          ///< The TextureSet containing the Texture
-    bool preMultiplied;             ///< True if the image had pre-multiplied alpha applied
-    Devel::PixelBuffer pixelBuffer; ///< The PixelBuffer of the loaded image.
-    std::string_view url;           ///< The url address of the loaded image.
-    uint32_t frameCount{0};         ///< The frameCount of the animated image
-    uint32_t interval{0};           ///< Time interval between currently loaded frame and next frame.
+    ReturnType         returnType;    ///< Returned Texture type.
+    int32_t            textureId;     ///< The textureId of the loaded texture in the TextureManager
+    TextureSet         textureSet;    ///< The TextureSet containing the Texture
+    bool               preMultiplied; ///< True if the image had pre-multiplied alpha applied
+    Devel::PixelBuffer pixelBuffer;   ///< The PixelBuffer of the loaded image.
+    std::string_view   url;           ///< The url address of the loaded image.
+    uint32_t           frameCount{0}; ///< The frameCount of the animated image
+    uint32_t           interval{0};   ///< Time interval between currently loaded frame and next frame.
   };
 
 public:

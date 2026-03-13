@@ -42,7 +42,7 @@ namespace Text
  *
  */
 void MergeBoundedParagraphRunsWhenRemoveCharacters(const Vector<Character>& text, const CharacterIndex& index,
-                                                   const int& numberOfCharacters,
+                                                   const int&                   numberOfCharacters,
                                                    Vector<BoundedParagraphRun>& boundedParagraphRuns);
 } // namespace Text
 

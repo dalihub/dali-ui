@@ -72,7 +72,7 @@ ImageView ImageView::New(ControlBehaviour additionalBehaviour)
 ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string& url)
 {
   ImageView imageView =
-      Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
+    Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   imageView.SetImage(url, ImageDimensions());
   return imageView;
 }
@@ -80,7 +80,7 @@ ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string
 ImageView ImageView::New(ControlBehaviour additionalBehaviour, const std::string& url, ImageDimensions size)
 {
   ImageView imageView =
-      Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
+    Internal::ImageView::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   imageView.SetImage(url, size);
   return imageView;
 }
@@ -101,12 +101,12 @@ void ImageView::SetImage(const std::string& url, ImageDimensions size)
 }
 
 ImageView::ImageView(Internal::ImageView& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 ImageView::ImageView(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::ImageView>(internal);
 }

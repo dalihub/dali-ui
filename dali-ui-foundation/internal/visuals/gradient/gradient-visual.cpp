@@ -51,14 +51,14 @@ namespace
 static constexpr int32_t CUSTOM_PROPERTY_COUNT(1); // alignment
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(UNITS)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, OBJECT_BOUNDING_BOX)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, USER_SPACE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, OBJECT_BOUNDING_BOX)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, USER_SPACE)
 DALI_ENUM_TO_STRING_TABLE_END(UNITS)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SPREAD_METHOD)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, PAD)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REFLECT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REPEAT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, PAD)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REFLECT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REPEAT)
 DALI_ENUM_TO_STRING_TABLE_END(SPREAD_METHOD)
 
 // uniform names
@@ -72,61 +72,61 @@ static constexpr float DEFAULT_OFFSET_MINIMUM = 0.0f;
 static constexpr float DEFAULT_OFFSET_MAXIMUM = 1.0f;
 
 VisualFactoryCache::ShaderType SHADER_TYPE_TABLE[] = {
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_SQUIRCLE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_SQUIRCLE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_ROUNDED_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_SQUIRCLE_CORNER,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_ROUNDED_BORDERLINE,
-    VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_LINEAR_USER_SPACE_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_RADIAL_USER_SPACE_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_BOUNDING_BOX_SQUIRCLE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_ROUNDED_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_SQUIRCLE_CORNER,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_ROUNDED_BORDERLINE,
+  VisualFactoryCache::GRADIENT_SHADER_CONIC_USER_SPACE_SQUIRCLE_BORDERLINE,
 };
 constexpr uint32_t SHADER_TYPE_TABLE_COUNT = sizeof(SHADER_TYPE_TABLE) / sizeof(SHADER_TYPE_TABLE[0]);
 
 // enum of required list when we select shader
 enum GradientVisualRequireFlag
 {
-  DEFAULT = 0,
-  ROUNDED_CORNER = 1,
+  DEFAULT         = 0,
+  ROUNDED_CORNER  = 1,
   SQUIRCLE_CORNER = 2,
 
   BORDERLINE = (1 << 0) * 3,
   USER_SPACE = (1 << 1) * 3,
-  RADIAL = (1 << 2) * 3,
-  CONIC = (2 << 2) * 3
+  RADIAL     = (1 << 2) * 3,
+  CONIC      = (2 << 2) * 3
 };
 
 Dali::WrapMode::Type GetWrapMode(Ui::GradientVisual::SpreadMethod::Type spread)
 {
-  switch (spread)
+  switch(spread)
   {
     case Ui::GradientVisual::SpreadMethod::REPEAT:
     {
@@ -155,12 +155,12 @@ GradientVisualPtr GradientVisual::New(VisualFactoryCache& factoryCache, const Pr
 }
 
 GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::GRADIENT),
-    mGradientTransform(),
-    mGradient(nullptr),
-    mGradientType(LINEAR),
-    mStartOffsetIndex(Property::INVALID_INDEX),
-    mIsOpaque(true)
+: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::GRADIENT),
+  mGradientTransform(),
+  mGradient(nullptr),
+  mGradientType(LINEAR),
+  mStartOffsetIndex(Property::INVALID_INDEX),
+  mIsOpaque(true)
 {
   mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
 }
@@ -171,27 +171,27 @@ GradientVisual::~GradientVisual()
 
 void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  if (!mGradient)
+  if(!mGradient)
   {
     Ui::GradientVisual::Units::Type gradientUnits = Ui::GradientVisual::Units::OBJECT_BOUNDING_BOX;
 
     Property::Value* unitsValue = propertyMap.Find(Ui::GradientVisual::Property::UNITS, UNITS_NAME);
-    if (unitsValue)
+    if(unitsValue)
     {
       Scripting::GetEnumerationProperty(*unitsValue, UNITS_TABLE, UNITS_TABLE_COUNT, gradientUnits);
     }
 
     mGradientType = Type::LINEAR;
-    if (propertyMap.Find(Ui::GradientVisual::Property::RADIUS, RADIUS_NAME))
+    if(propertyMap.Find(Ui::GradientVisual::Property::RADIUS, RADIUS_NAME))
     {
       mGradientType = Type::RADIAL;
     }
-    else if (propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME))
+    else if(propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME))
     {
       mGradientType = Type::CONIC;
     }
 
-    if (NewGradient(mGradientType, propertyMap))
+    if(NewGradient(mGradientType, propertyMap))
     {
       mGradient->SetGradientUnits(gradientUnits);
       mGradientTransform = mGradient->GetAlignmentTransform();
@@ -205,7 +205,7 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 
 void GradientVisual::OnSetTransform()
 {
-  if (mImpl->mRenderer && mImpl->mTransformMapChanged)
+  if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
   }
@@ -221,7 +221,7 @@ void GradientVisual::DoSetOnScene(Actor& actor)
 
 void GradientVisual::UpdateShader()
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     Shader shader = GenerateShader();
     mImpl->mRenderer.SetShader(shader);
@@ -236,12 +236,12 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::GradientVisual::Property::SPREAD_METHOD, mGradient->GetSpreadMethod());
 
   const Vector<Gradient::GradientStop>& stops(mGradient->GetStops());
-  Property::Array offsets;
-  Property::Array colors;
-  for (unsigned int i = 0; i < stops.Count(); i++)
+  Property::Array                       offsets;
+  Property::Array                       colors;
+  for(unsigned int i = 0; i < stops.Count(); i++)
   {
     offsets.PushBack(stops[i].mOffset);
-    if (EqualsZero(stops[i].mStopColor.a))
+    if(EqualsZero(stops[i].mStopColor.a))
     {
       colors.PushBack(Vector4::ZERO);
     }
@@ -256,13 +256,13 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::GradientVisual::Property::STOP_OFFSET, offsets);
   map.Insert(Ui::GradientVisual::Property::STOP_COLOR, colors);
 
-  if (&typeid(*mGradient) == &typeid(LinearGradient))
+  if(&typeid(*mGradient) == &typeid(LinearGradient))
   {
     LinearGradient* gradient = static_cast<LinearGradient*>(mGradient.Get());
     map.Insert(Ui::GradientVisual::Property::START_POSITION, gradient->GetStartPosition());
     map.Insert(Ui::GradientVisual::Property::END_POSITION, gradient->GetEndPosition());
   }
-  else if (&typeid(*mGradient) == &typeid(RadialGradient))
+  else if(&typeid(*mGradient) == &typeid(RadialGradient))
   {
     RadialGradient* gradient = static_cast<RadialGradient*>(mGradient.Get());
     map.Insert(Ui::GradientVisual::Property::CENTER, gradient->GetCenter());
@@ -284,7 +284,7 @@ void GradientVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 void GradientVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 {
   // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if (!preMultiplied)
+  if(!preMultiplied)
   {
     DALI_LOG_WARNING("Note : GradientVisual cannot disable PreMultipliedAlpha\n");
   }
@@ -293,14 +293,14 @@ void GradientVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 void GradientVisual::OnInitialize()
 {
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::QUAD_GEOMETRY);
-  Shader shader = GenerateShader();
+  Shader   shader   = GenerateShader();
 
   // Set up the texture set
-  TextureSet textureSet = TextureSet::New();
+  TextureSet    textureSet    = TextureSet::New();
   Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
   textureSet.SetTexture(0u, lookupTexture);
   Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
-  if (wrap != Dali::WrapMode::DEFAULT)
+  if(wrap != Dali::WrapMode::DEFAULT)
   {
     Sampler sampler = Sampler::New();
     sampler.SetWrapMode(wrap, wrap);
@@ -312,13 +312,13 @@ void GradientVisual::OnInitialize()
   mImpl->mRenderer.SetTextures(textureSet);
 
   // If opaque and then no need to have blending
-  if (mIsOpaque)
+  if(mIsOpaque)
   {
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::OFF);
   }
 
   mImpl->mRenderer.RegisterUniqueProperty(UNIFORM_ALIGNMENT_MATRIX_NAME, mGradientTransform);
-  if (mGradientType == Type::CONIC)
+  if(mGradientType == Type::CONIC)
   {
     ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
     mImpl->mRenderer.RegisterUniqueProperty(UNIFORM_START_ANGLE_NAME, gradient->GetStartAngle().radian);
@@ -338,16 +338,16 @@ void GradientVisual::OnInitialize()
 
 bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propertyMap)
 {
-  if (gradientType == Type::LINEAR)
+  if(gradientType == Type::LINEAR)
   {
     Property::Value* startPositionValue =
-        propertyMap.Find(Ui::GradientVisual::Property::START_POSITION, START_POSITION_NAME);
+      propertyMap.Find(Ui::GradientVisual::Property::START_POSITION, START_POSITION_NAME);
     Property::Value* endPositionValue = propertyMap.Find(Ui::GradientVisual::Property::END_POSITION, END_POSITION_NAME);
-    Vector2 startPosition;
-    Vector2 endPosition;
+    Vector2          startPosition;
+    Vector2          endPosition;
 
-    if (startPositionValue && startPositionValue->Get(startPosition) && endPositionValue &&
-        endPositionValue->Get(endPosition))
+    if(startPositionValue && startPositionValue->Get(startPosition) && endPositionValue &&
+       endPositionValue->Get(endPosition))
     {
       mGradient = new LinearGradient(startPosition, endPosition);
     }
@@ -356,13 +356,13 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
       return false;
     }
   }
-  else if (gradientType == Type::RADIAL)
+  else if(gradientType == Type::RADIAL)
   {
     Property::Value* centerValue = propertyMap.Find(Ui::GradientVisual::Property::CENTER, CENTER_NAME);
     Property::Value* radiusValue = propertyMap.Find(Ui::GradientVisual::Property::RADIUS, RADIUS_NAME);
-    Vector2 center;
-    float radius;
-    if (centerValue && centerValue->Get(center) && radiusValue && radiusValue->Get(radius))
+    Vector2          center;
+    float            radius;
+    if(centerValue && centerValue->Get(center) && radiusValue && radiusValue->Get(radius))
     {
       mGradient = new RadialGradient(center, radius);
     }
@@ -375,10 +375,10 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   {
     Property::Value* centerValue = propertyMap.Find(Ui::GradientVisual::Property::CENTER, CENTER_NAME);
     Property::Value* startAngleValue =
-        propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME);
+      propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME);
     Vector2 center;
-    float startAngle;
-    if (centerValue && centerValue->Get(center) && startAngleValue && startAngleValue->Get(startAngle))
+    float   startAngle;
+    if(centerValue && centerValue->Get(center) && startAngleValue && startAngleValue->Get(startAngle))
     {
       mGradient = new ConicGradient(center, Dali::Radian(startAngle));
     }
@@ -388,25 +388,25 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
     }
   }
 
-  unsigned int numValidStop = 0u;
+  unsigned int     numValidStop    = 0u;
   Property::Value* stopOffsetValue = propertyMap.Find(Ui::GradientVisual::Property::STOP_OFFSET, STOP_OFFSET_NAME);
-  Property::Value* stopColorValue = propertyMap.Find(Ui::GradientVisual::Property::STOP_COLOR, STOP_COLOR_NAME);
-  if (stopColorValue)
+  Property::Value* stopColorValue  = propertyMap.Find(Ui::GradientVisual::Property::STOP_COLOR, STOP_COLOR_NAME);
+  if(stopColorValue)
   {
-    Vector<float> offsetArray;
+    Vector<float>    offsetArray;
     Property::Array* colorArray = stopColorValue->GetArray();
-    if (colorArray)
+    if(colorArray)
     {
       GetStopOffsets(stopOffsetValue, offsetArray);
       unsigned int numStop = offsetArray.Count() < colorArray->Count() ? offsetArray.Count() : colorArray->Count();
-      Vector4 color;
-      for (unsigned int i = 0; i < numStop; i++)
+      Vector4      color;
+      for(unsigned int i = 0; i < numStop; i++)
       {
-        if ((colorArray->GetElementAt(i)).Get(color))
+        if((colorArray->GetElementAt(i)).Get(color))
         {
           mGradient->AddStop(offsetArray[i], Vector4(color.r * color.a, color.g * color.a, color.b * color.a, color.a));
           numValidStop++;
-          if (!Equals(color.a, 1.0f, Math::MACHINE_EPSILON_1))
+          if(!Equals(color.a, 1.0f, Math::MACHINE_EPSILON_1))
           {
             mIsOpaque = false;
           }
@@ -415,25 +415,25 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
     }
   }
 
-  if (numValidStop < 1u) // no valid stop
+  if(numValidStop < 1u) // no valid stop
   {
     return false;
   }
 
   Property::Value* spread = propertyMap.Find(Ui::GradientVisual::Property::SPREAD_METHOD, SPREAD_METHOD_NAME);
   // The default spread method is PAD. Only need to set new spread if it's anything else.
-  if (spread)
+  if(spread)
   {
     Ui::GradientVisual::SpreadMethod::Type spreadMethod = Ui::GradientVisual::SpreadMethod::PAD;
-    if (Scripting::GetEnumerationProperty(*spread, SPREAD_METHOD_TABLE, SPREAD_METHOD_TABLE_COUNT, spreadMethod))
+    if(Scripting::GetEnumerationProperty(*spread, SPREAD_METHOD_TABLE, SPREAD_METHOD_TABLE_COUNT, spreadMethod))
     {
       mGradient->SetSpreadMethod(spreadMethod);
     }
   }
 
   Property::Value* startOffset = propertyMap.Find(Ui::GradientVisual::Property::START_OFFSET, START_OFFSET_NAME);
-  float startOffsetValue;
-  if (startOffset && startOffset->Get(startOffsetValue))
+  float            startOffsetValue;
+  if(startOffset && startOffset->Get(startOffsetValue))
   {
     mGradient->SetStartOffset(startOffsetValue);
   }
@@ -443,37 +443,37 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
 
 Shader GradientVisual::GenerateShader() const
 {
-  bool userspaceUnit = (mGradient->GetGradientUnits() == Ui::GradientVisual::Units::USER_SPACE);
-  bool roundedCorner = IsRoundedCornerRequired();
+  bool userspaceUnit  = (mGradient->GetGradientUnits() == Ui::GradientVisual::Units::USER_SPACE);
+  bool roundedCorner  = IsRoundedCornerRequired();
   bool squircleCorner = IsSquircleCornerRequired();
-  bool borderline = IsBorderlineRequired();
+  bool borderline     = IsBorderlineRequired();
   bool radialGradient = (mGradientType == Type::RADIAL);
-  bool conicGradient = (mGradientType == Type::CONIC);
+  bool conicGradient  = (mGradientType == Type::CONIC);
 
   uint32_t shaderTypeFlag = GradientVisualRequireFlag::DEFAULT;
-  if (squircleCorner)
+  if(squircleCorner)
   {
     shaderTypeFlag += GradientVisualRequireFlag::SQUIRCLE_CORNER;
   }
-  else if (roundedCorner)
+  else if(roundedCorner)
   {
     shaderTypeFlag += GradientVisualRequireFlag::ROUNDED_CORNER;
   }
 
-  if (borderline)
+  if(borderline)
   {
     shaderTypeFlag += GradientVisualRequireFlag::BORDERLINE;
   }
-  if (userspaceUnit)
+  if(userspaceUnit)
   {
     shaderTypeFlag += GradientVisualRequireFlag::USER_SPACE;
   }
 
-  if (radialGradient)
+  if(radialGradient)
   {
     shaderTypeFlag += GradientVisualRequireFlag::RADIAL;
   }
-  else if (conicGradient)
+  else if(conicGradient)
   {
     shaderTypeFlag += GradientVisualRequireFlag::CONIC;
   }
@@ -481,37 +481,37 @@ Shader GradientVisual::GenerateShader() const
   DALI_ASSERT_DEBUG(shaderTypeFlag < SHADER_TYPE_TABLE_COUNT && "Invalid gradient shader type generated!");
 
   VisualFactoryCache::ShaderType shaderType = SHADER_TYPE_TABLE[shaderTypeFlag];
-  Shader shader = mFactoryCache.GetShader(shaderType);
-  if (!shader)
+  Shader                         shader     = mFactoryCache.GetShader(shaderType);
+  if(!shader)
   {
     std::string vertexShaderPrefixList;
     std::string fragmentShaderPrefixList;
 
-    if (roundedCorner)
+    if(roundedCorner)
     {
       vertexShaderPrefixList += "#define IS_REQUIRED_ROUNDED_CORNER\n";
       fragmentShaderPrefixList += "#define IS_REQUIRED_ROUNDED_CORNER\n";
-      if (squircleCorner)
+      if(squircleCorner)
       {
         fragmentShaderPrefixList += "#define IS_REQUIRED_SQUIRCLE_CORNER\n";
       }
     }
-    if (borderline)
+    if(borderline)
     {
       vertexShaderPrefixList += "#define IS_REQUIRED_BORDERLINE\n";
       fragmentShaderPrefixList += "#define IS_REQUIRED_BORDERLINE\n";
     }
 
-    if (radialGradient)
+    if(radialGradient)
     {
       fragmentShaderPrefixList += "#define RADIAL\n";
     }
-    else if (conicGradient)
+    else if(conicGradient)
     {
       fragmentShaderPrefixList += "#define CONIC\n";
     }
 
-    if (userspaceUnit)
+    if(userspaceUnit)
     {
       vertexShaderPrefixList += "#define USER_SPACE\n";
     }
@@ -526,9 +526,9 @@ Shader GradientVisual::GenerateShader() const
 
 void GradientVisual::GetStopOffsets(const Property::Value* value, Vector<float>& stopOffsets)
 {
-  if (value) // Only check valve type if a valid Property has been passed in
+  if(value) // Only check valve type if a valid Property has been passed in
   {
-    switch (value->GetType())
+    switch(value->GetType())
     {
       case Property::VECTOR2:
       {
@@ -560,13 +560,13 @@ void GradientVisual::GetStopOffsets(const Property::Value* value, Vector<float>&
       case Property::ARRAY:
       {
         const Property::Array* offsetArray = value->GetArray();
-        if (offsetArray)
+        if(offsetArray)
         {
           unsigned int numStop = offsetArray->Count();
-          float offset;
-          for (unsigned int i = 0; i < numStop; i++)
+          float        offset;
+          for(unsigned int i = 0; i < numStop; i++)
           {
-            if (offsetArray->GetElementAt(i).Get(offset))
+            if(offsetArray->GetElementAt(i).Get(offset))
             {
               stopOffsets.PushBack(offset);
             }
@@ -582,7 +582,7 @@ void GradientVisual::GetStopOffsets(const Property::Value* value, Vector<float>&
     }
   }
 
-  if (stopOffsets.Empty())
+  if(stopOffsets.Empty())
   {
     // Set default offset if none set by Property system, need a minimum and maximum
     stopOffsets.PushBack(DEFAULT_OFFSET_MINIMUM);

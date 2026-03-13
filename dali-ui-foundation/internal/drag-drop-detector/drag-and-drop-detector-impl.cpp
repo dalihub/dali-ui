@@ -37,12 +37,12 @@ Dali::Ui::DragAndDropDetector DragAndDropDetector::New()
 
 void DragAndDropDetector::Attach(Dali::Ui::Control& control)
 {
-  if (control)
+  if(control)
   {
-    if (!mControls.empty())
+    if(!mControls.empty())
     {
       auto match = std::find(mControls.begin(), mControls.end(), control);
-      if (match != mControls.end())
+      if(match != mControls.end())
       {
         return;
       }
@@ -57,21 +57,21 @@ void DragAndDropDetector::Attach(Dali::Ui::Control& control)
 
 void DragAndDropDetector::Detach(Dali::Ui::Control& control)
 {
-  if (!mControls.empty())
+  if(!mControls.empty())
   {
-    if (!control)
+    if(!control)
     {
       return;
     }
 
     auto match = std::find(mControls.begin(), mControls.end(), control);
 
-    if (match != mControls.end())
+    if(match != mControls.end())
     {
       match->TouchedSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
       mPanGestureDetector.Detach(*match);
       mFirstEnter.erase(
-          std::find(mFirstEnter.begin(), mFirstEnter.end(), control.GetProperty<int>(Actor::Property::ID)));
+        std::find(mFirstEnter.begin(), mFirstEnter.end(), control.GetProperty<int>(Actor::Property::ID)));
       mControls.erase(match);
     }
   }
@@ -79,10 +79,10 @@ void DragAndDropDetector::Detach(Dali::Ui::Control& control)
 
 void DragAndDropDetector::DetachAll()
 {
-  if (!mControls.empty())
+  if(!mControls.empty())
   {
     auto iter = mControls.begin();
-    for (; iter != mControls.end();)
+    for(; iter != mControls.end();)
     {
       iter->TouchedSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
       mPanGestureDetector.Detach(*iter);
@@ -90,10 +90,10 @@ void DragAndDropDetector::DetachAll()
     }
   }
 
-  if (!mFirstEnter.empty())
+  if(!mFirstEnter.empty())
   {
     auto iter = mFirstEnter.begin();
-    for (; iter != mFirstEnter.end();)
+    for(; iter != mFirstEnter.end();)
     {
       iter = mFirstEnter.erase(iter);
     }
@@ -109,7 +109,7 @@ Dali::Ui::Control DragAndDropDetector::GetAttachedControl(uint32_t index) const
 {
   Dali::Ui::Control control;
 
-  if (index < mControls.size())
+  if(index < mControls.size())
   {
     control = mControls[index];
   }
@@ -123,18 +123,18 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
 
   GestureState state = gesture.GetState();
 
-  if (state == GestureState::STARTED)
+  if(state == GestureState::STARTED)
   {
     mDragLocalPosition = gesture.GetPosition();
-    mPointDown = true;
-    mDragControl = control;
+    mPointDown         = true;
+    mDragControl       = control;
     mFirstEnter.clear();
-    for (auto&& control : mControls)
+    for(auto&& control : mControls)
     {
       mFirstEnter.push_back(control.GetProperty<int>(Actor::Property::ID));
     }
-    float width = control.GetProperty<float>(Dali::Actor::Property::SIZE_WIDTH);
-    float height = control.GetProperty<float>(Dali::Actor::Property::SIZE_HEIGHT);
+    float   width    = control.GetProperty<float>(Dali::Actor::Property::SIZE_WIDTH);
+    float   height   = control.GetProperty<float>(Dali::Actor::Property::SIZE_HEIGHT);
     Vector3 actorPos = control.GetProperty<Vector3>(Dali::Actor::Property::POSITION);
 
     mShadowControl = Dali::Ui::Control::New();
@@ -149,14 +149,14 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
     SetPosition(gesture.GetScreenPosition());
     EmitStartedSignal(control);
   }
-  if (state == GestureState::CONTINUING)
+  if(state == GestureState::CONTINUING)
   {
     Vector2 screenPosition = gesture.GetScreenPosition();
     control.GetParent().ScreenToLocal(mLocalPosition.x, mLocalPosition.y, screenPosition.x, screenPosition.y);
     mShadowControl.SetProperty(Actor::Property::POSITION, Vector2(mLocalPosition.x - mDragLocalPosition.x,
                                                                   mLocalPosition.y - mDragLocalPosition.y));
   }
-  if (state == GestureState::FINISHED)
+  if(state == GestureState::FINISHED)
   {
     mDragControl.GetParent().Remove(mShadowControl);
     EmitEndedSignal(control);
@@ -166,14 +166,14 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
 bool DragAndDropDetector::OnDrag(Dali::Actor actor, const Dali::TouchEvent& data)
 {
   Dali::Ui::Control control = Dali::Ui::Control::DownCast(actor);
-  PointState::Type type = data.GetState(0);
+  PointState::Type  type    = data.GetState(0);
 
-  if (type == PointState::MOTION)
+  if(type == PointState::MOTION)
   {
-    if (mDragControl != control && mPointDown)
+    if(mDragControl != control && mPointDown)
     {
       auto found = std::find(mFirstEnter.begin(), mFirstEnter.end(), control.GetProperty<int>(Actor::Property::ID));
-      if (mFirstEnter.end() != found)
+      if(mFirstEnter.end() != found)
       {
         SetPosition(data.GetScreenPosition(0));
         mFirstEnter.erase(found);
@@ -187,18 +187,18 @@ bool DragAndDropDetector::OnDrag(Dali::Actor actor, const Dali::TouchEvent& data
     }
   }
 
-  if (type == PointState::LEAVE)
+  if(type == PointState::LEAVE)
   {
-    if (mDragControl != control && mPointDown)
+    if(mDragControl != control && mPointDown)
     {
       mFirstEnter.push_back(control.GetProperty<int>(Actor::Property::ID));
       EmitExitedSignal(control);
     }
   }
 
-  if (type == PointState::UP)
+  if(type == PointState::UP)
   {
-    if (mDragControl != control && mPointDown)
+    if(mDragControl != control && mPointDown)
     {
       SetPosition(data.GetScreenPosition(0));
       ClearContent();
@@ -206,7 +206,7 @@ bool DragAndDropDetector::OnDrag(Dali::Actor actor, const Dali::TouchEvent& data
       EmitDroppedSignal(control);
     }
 
-    if (mShadowControl)
+    if(mShadowControl)
     {
       control.GetParent().Remove(mShadowControl);
     }
@@ -242,7 +242,7 @@ void DragAndDropDetector::SetPosition(const Vector2& screenPosition)
 
 void DragAndDropDetector::EmitStartedSignal(Dali::Ui::Control& control)
 {
-  if (!mStartedSignal.Empty())
+  if(!mStartedSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mStartedSignal.Emit(control, handle);
@@ -250,7 +250,7 @@ void DragAndDropDetector::EmitStartedSignal(Dali::Ui::Control& control)
 }
 void DragAndDropDetector::EmitEnteredSignal(Dali::Ui::Control& control)
 {
-  if (!mEnteredSignal.Empty())
+  if(!mEnteredSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mEnteredSignal.Emit(control, handle);
@@ -259,7 +259,7 @@ void DragAndDropDetector::EmitEnteredSignal(Dali::Ui::Control& control)
 
 void DragAndDropDetector::EmitExitedSignal(Dali::Ui::Control& control)
 {
-  if (!mExitedSignal.Empty())
+  if(!mExitedSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mExitedSignal.Emit(control, handle);
@@ -268,7 +268,7 @@ void DragAndDropDetector::EmitExitedSignal(Dali::Ui::Control& control)
 
 void DragAndDropDetector::EmitMovedSignal(Dali::Ui::Control& control)
 {
-  if (!mMovedSignal.Empty())
+  if(!mMovedSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mMovedSignal.Emit(control, handle);
@@ -277,7 +277,7 @@ void DragAndDropDetector::EmitMovedSignal(Dali::Ui::Control& control)
 
 void DragAndDropDetector::EmitDroppedSignal(Dali::Ui::Control& control)
 {
-  if (!mDroppedSignal.Empty())
+  if(!mDroppedSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mDroppedSignal.Emit(control, handle);
@@ -286,7 +286,7 @@ void DragAndDropDetector::EmitDroppedSignal(Dali::Ui::Control& control)
 
 void DragAndDropDetector::EmitEndedSignal(Dali::Ui::Control& control)
 {
-  if (!mEndedSignal.Empty())
+  if(!mEndedSignal.Empty())
   {
     Dali::Ui::DragAndDropDetector handle(this);
     mEndedSignal.Emit(control, handle);
@@ -294,11 +294,11 @@ void DragAndDropDetector::EmitEndedSignal(Dali::Ui::Control& control)
 }
 
 DragAndDropDetector::DragAndDropDetector()
-  : mContent(),
-    mScreenPosition()
+: mContent(),
+  mScreenPosition()
 {
   mPanGestureDetector = Dali::PanGestureDetector::New();
-  mPointDown = false;
+  mPointDown          = false;
 }
 
 DragAndDropDetector::~DragAndDropDetector()

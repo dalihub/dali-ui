@@ -33,9 +33,9 @@ namespace Ui
 namespace Internal
 {
 Gradient::Gradient()
-  : mGradientUnits(Ui::GradientVisual::Units::OBJECT_BOUNDING_BOX),
-    mSpreadMethod(Ui::GradientVisual::SpreadMethod::PAD),
-    mStartOffset(0.f)
+: mGradientUnits(Ui::GradientVisual::Units::OBJECT_BOUNDING_BOX),
+  mSpreadMethod(Ui::GradientVisual::SpreadMethod::PAD),
+  mStartOffset(0.f)
 {
 }
 
@@ -102,11 +102,11 @@ Dali::Texture Gradient::GenerateLookupTexture()
    * for REPEAT, mix the two color of the first and last stop to fill the remainder
    */
   bool tempFirstStop = false;
-  if (mGradientStops[0].mOffset > 0.f)
+  if(mGradientStops[0].mOffset > 0.f)
   {
     tempFirstStop = true;
     Vector4 firstStopColor(mGradientStops[0].mStopColor); // If spread method is PAD or REFLECT
-    if (mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
+    if(mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
     {
       firstStopColor = (mGradientStops[0].mStopColor * (1.f - mGradientStops[numStops - 1].mOffset) +
                         mGradientStops[numStops - 1].mStopColor * mGradientStops[0].mOffset) /
@@ -118,11 +118,11 @@ Dali::Texture Gradient::GenerateLookupTexture()
   }
 
   bool tempLastStop = false;
-  if (mGradientStops[numStops - 1].mOffset < 1.f)
+  if(mGradientStops[numStops - 1].mOffset < 1.f)
   {
     tempLastStop = true;
     Vector4 lastStopColor(mGradientStops[numStops - 1].mStopColor); // If spread method is PAD or REFLECT
-    if (mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
+    if(mSpreadMethod == Ui::GradientVisual::SpreadMethod::REPEAT)
     {
       lastStopColor = mGradientStops[0].mStopColor;
     }
@@ -135,31 +135,31 @@ Dali::Texture Gradient::GenerateLookupTexture()
    */
   unsigned int resolution = EstimateTextureResolution();
 
-  unsigned int bufferSize = resolution * 4u;
-  unsigned char* pixels = new unsigned char[bufferSize];
-  PixelData pixelData = PixelData::New(pixels, bufferSize, resolution, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
+  unsigned int   bufferSize = resolution * 4u;
+  unsigned char* pixels     = new unsigned char[bufferSize];
+  PixelData      pixelData  = PixelData::New(pixels, bufferSize, resolution, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
 
-  int segmentStart = 0;
-  int segmentEnd = 0;
-  int k = 0;
-  float length = static_cast<float>(resolution);
-  for (unsigned int i = 0; i < numStops - 1u; i++)
+  int   segmentStart = 0;
+  int   segmentEnd   = 0;
+  int   k            = 0;
+  float length       = static_cast<float>(resolution);
+  for(unsigned int i = 0; i < numStops - 1u; i++)
   {
     segmentEnd = floorf(mGradientStops[i + 1].mOffset * length + 0.5f);
-    if (segmentEnd == segmentStart)
+    if(segmentEnd == segmentStart)
     {
       continue;
     }
     float segmentWidth = static_cast<float>(segmentEnd - segmentStart);
 
-    for (int j = segmentStart; j < segmentEnd; j++)
+    for(int j = segmentStart; j < segmentEnd; j++)
     {
-      float ratio = static_cast<float>(j - segmentStart) / (segmentWidth - 1);
+      float   ratio        = static_cast<float>(j - segmentStart) / (segmentWidth - 1);
       Vector4 currentColor = mGradientStops[i].mStopColor * (1.f - ratio) + mGradientStops[i + 1].mStopColor * ratio;
-      pixels[k * 4] = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
-      pixels[k * 4 + 1] = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));
-      pixels[k * 4 + 2] = static_cast<unsigned char>(255.f * Clamp(currentColor.b, 0.f, 1.f));
-      pixels[k * 4 + 3] = static_cast<unsigned char>(255.f * Clamp(currentColor.a, 0.f, 1.f));
+      pixels[k * 4]        = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
+      pixels[k * 4 + 1]    = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));
+      pixels[k * 4 + 2]    = static_cast<unsigned char>(255.f * Clamp(currentColor.b, 0.f, 1.f));
+      pixels[k * 4 + 3]    = static_cast<unsigned char>(255.f * Clamp(currentColor.a, 0.f, 1.f));
       k++;
     }
     segmentStart = segmentEnd;
@@ -173,11 +173,11 @@ Dali::Texture Gradient::GenerateLookupTexture()
 #endif
 
   // remove the stops added temporarily for generating the pixels, as the spread method might get changed later
-  if (tempLastStop)
+  if(tempLastStop)
   {
     mGradientStops.Erase(mGradientStops.Begin() + numStops - 1);
   }
-  if (tempFirstStop)
+  if(tempFirstStop)
   {
     mGradientStops.Erase(mGradientStops.Begin());
   }

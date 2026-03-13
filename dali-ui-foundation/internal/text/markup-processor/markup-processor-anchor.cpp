@@ -39,17 +39,17 @@ namespace Text
 void ProcessAnchorTag(const Tag& tag, Anchor& anchor, ColorRun& colorRun,
                       UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  for (auto&& attribute : tag.attributes)
+  for(auto&& attribute : tag.attributes)
   {
-    if (TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::HREF, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::HREF, attribute.nameBuffer, attribute.nameLength))
     {
       Length hrefLength = attribute.valueLength + 1;
-      anchor.href = new char[hrefLength];
+      anchor.href       = new char[hrefLength];
       memcpy(anchor.href, attribute.valueBuffer, hrefLength);
       anchor.href[hrefLength - 1] = '\0';
       // The memory is freed when the font run is removed from the logical model.
     }
-    else if (TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       // The markup anchor color is set on the text and underline color runs.
       // This takes precedence over the anchor color property of the text-label.
@@ -57,7 +57,7 @@ void ProcessAnchorTag(const Tag& tag, Anchor& anchor, ColorRun& colorRun,
       ProcessColorAttribute(attribute, underlinedCharacterRun);
       anchor.isMarkupColorSet = true;
     }
-    else if (TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::CLICKED_COLOR, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::CLICKED_COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       // The markup anchor clicked color is stored here.
       // This is later used when the anchor's click event occurs.

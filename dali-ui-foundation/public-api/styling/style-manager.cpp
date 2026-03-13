@@ -72,7 +72,7 @@ StyleManager::StyleChangedSignalType& StyleManager::StyleChangedSignal()
 }
 
 StyleManager::StyleManager(Internal::StyleManager* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

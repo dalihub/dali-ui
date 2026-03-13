@@ -39,8 +39,8 @@ PixelData Load(const std::string& url, ImageDimensions dimensions, FittingMode::
 {
   // Load the image synchronously (block the thread here).
   Devel::PixelBuffer pixelBuffer =
-      Dali::LoadImageFromFile(url, dimensions, fittingMode, samplingMode, orientationCorrection);
-  if (pixelBuffer)
+    Dali::LoadImageFromFile(url, dimensions, fittingMode, samplingMode, orientationCorrection);
+  if(pixelBuffer)
   {
     return Devel::PixelBuffer::Convert(pixelBuffer);
   }

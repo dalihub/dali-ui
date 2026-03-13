@@ -51,7 +51,7 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::FrameBuffer frameBuffer, uint8_t inde
 Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultiplied)
 {
   Texture texture =
-      Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
+    Texture::New(TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
   texture.Upload(pixelData);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
   return imageUrl;
@@ -59,7 +59,7 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool preMultipli
 
 Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface, bool preMultiplied)
 {
-  Texture texture = Dali::Texture::New(*nativeImageInterface);
+  Texture            texture  = Dali::Texture::New(*nativeImageInterface);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, preMultiplied);
   return imageUrl;
 }
@@ -71,7 +71,7 @@ Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer
 
 Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
 {
-  Texture texture = Dali::DevelFrameBuffer::GetDepthTexture(frameBuffer);
+  Texture            texture  = Dali::DevelFrameBuffer::GetDepthTexture(frameBuffer);
   Dali::Ui::ImageUrl imageUrl = Dali::Ui::ImageUrl::New(texture, false);
   return imageUrl;
 }

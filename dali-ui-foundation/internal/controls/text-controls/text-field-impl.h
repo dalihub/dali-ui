@@ -463,7 +463,7 @@ private: // Implementation
    * InputMethodContext::EventData& inputMethodContextEvent)
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(
-      InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
+    InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
 
   /**
    * @brief Get a Property Map for the image used for the required Handle Image
@@ -581,27 +581,27 @@ private: // Implementation
 
 private: // Data
   // Signals
-  Ui::TextField::TextChangedSignalType mTextChangedSignal;
-  Ui::TextField::MaxLengthReachedSignalType mMaxLengthReachedSignal;
-  Ui::TextField::InputStyleChangedSignalType mInputStyleChangedSignal;
-  Ui::DevelTextField::AnchorClickedSignalType mAnchorClickedSignal;
-  Ui::DevelTextField::InputFilteredSignalType mInputFilteredSignal;
+  Ui::TextField::TextChangedSignalType                mTextChangedSignal;
+  Ui::TextField::MaxLengthReachedSignalType           mMaxLengthReachedSignal;
+  Ui::TextField::InputStyleChangedSignalType          mInputStyleChangedSignal;
+  Ui::DevelTextField::AnchorClickedSignalType         mAnchorClickedSignal;
+  Ui::DevelTextField::InputFilteredSignalType         mInputFilteredSignal;
   Ui::DevelTextField::CursorPositionChangedSignalType mCursorPositionChangedSignal;
-  Ui::DevelTextField::SelectionChangedSignalType mSelectionChangedSignal;
-  Ui::DevelTextField::SelectionClearedSignalType mSelectionClearedSignal;
-  Ui::DevelTextField::SelectionStartedSignalType mSelectionStartedSignal;
+  Ui::DevelTextField::SelectionChangedSignalType      mSelectionChangedSignal;
+  Ui::DevelTextField::SelectionClearedSignalType      mSelectionClearedSignal;
+  Ui::DevelTextField::SelectionStartedSignalType      mSelectionStartedSignal;
 
   // for Font Variations
   std::map<Dali::Property::Index, std::string> mVariationIndexMap; // Stores [CustomPropertyIndex, tag].
 
-  InputMethodContext mInputMethodContext;
-  Text::ControllerPtr mController;
-  Text::RendererPtr mRenderer;
-  Text::DecoratorPtr mDecorator;
-  Ui::Control mStencil;                         ///< For EXCEED_POLICY_CLIP
-  std::vector<Actor> mClippingDecorationActors; ///< Decoration actors which need clipping.
+  InputMethodContext          mInputMethodContext;
+  Text::ControllerPtr         mController;
+  Text::RendererPtr           mRenderer;
+  Text::DecoratorPtr          mDecorator;
+  Ui::Control                 mStencil;                  ///< For EXCEED_POLICY_CLIP
+  std::vector<Actor>          mClippingDecorationActors; ///< Decoration actors which need clipping.
   std::vector<Ui::TextAnchor> mAnchorActors;
-  Dali::InputMethodOptions mInputMethodOptions;
+  Dali::InputMethodOptions    mInputMethodOptions;
 
   Actor mRenderableActor;
   Actor mActiveLayer;
@@ -609,13 +609,13 @@ private: // Data
   Actor mBackgroundActor;
 
   float mAlignmentOffset;
-  int mRenderingBackend;
-  int mExceedPolicy;
-  bool mHasBeenStaged : 1;
-  bool mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  int   mRenderingBackend;
+  int   mExceedPolicy;
+  bool  mHasBeenStaged : 1;
+  bool  mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool  mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool  mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool  mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
 
   // args for cursor position changed event
   unsigned int mOldPosition;

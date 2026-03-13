@@ -93,14 +93,14 @@ public: // Intended for internal use
   bool OnTick();
 
 private:
-  Timer mTimer;
+  Timer     mTimer;
   Observer* mObserver;
-  int mHideMode;
-  int mSubstituteText;
-  int mDisplayDuration;
-  int mSubstituteCount;
-  Length mPreviousTextCount;
-  bool mIsLastCharacterShow;
+  int       mHideMode;
+  int       mSubstituteText;
+  int       mDisplayDuration;
+  int       mSubstituteCount;
+  Length    mPreviousTextCount;
+  bool      mIsLastCharacterShow;
 };
 
 } // namespace Text

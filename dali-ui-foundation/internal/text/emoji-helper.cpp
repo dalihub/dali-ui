@@ -25,13 +25,13 @@ namespace Ui
 {
 namespace Text
 {
-bool IsTextPresentationSequence(const TextAbstraction::Script& currentRunScript,
+bool IsTextPresentationSequence(const TextAbstraction::Script&    currentRunScript,
                                 const TextAbstraction::Character& character)
 {
   return (IsSymbolOrEmojiOrTextScript(currentRunScript) && TextAbstraction::IsTextPresentationSelector(character));
 }
 
-bool IsEmojiPresentationSequence(const TextAbstraction::Script& currentRunScript,
+bool IsEmojiPresentationSequence(const TextAbstraction::Script&    currentRunScript,
                                  const TextAbstraction::Character& character)
 {
   return ((IsSymbolOrEmojiScript(currentRunScript) || IsEmojiColorScript(currentRunScript)) &&
@@ -72,25 +72,25 @@ bool IsNewKeycapSequence(const Character* const textBuffer, const Length& curren
   // Default initialization does not keycap sequence
   bool isNewKeycapSequence = false;
 
-  if (currentCharacterIndex <= lastCharacterIndex)
+  if(currentCharacterIndex <= lastCharacterIndex)
   {
     Character currentCharacter = *(textBuffer + currentCharacterIndex);
-    if (IsStartForKeycapSequence(currentCharacter))
+    if(IsStartForKeycapSequence(currentCharacter))
     {
-      if (!isNewKeycapSequence && currentCharacterIndex + 2 <= lastCharacterIndex)
+      if(!isNewKeycapSequence && currentCharacterIndex + 2 <= lastCharacterIndex)
       {
         Character characterOne = *(textBuffer + currentCharacterIndex + 1);
         Character characterTwo = *(textBuffer + currentCharacterIndex + 2);
 
-        if (TextAbstraction::IsEmojiPresentationSelector(characterOne) &&
-            TextAbstraction::IsCombiningEnclosingKeycap(characterTwo))
+        if(TextAbstraction::IsEmojiPresentationSelector(characterOne) &&
+           TextAbstraction::IsCombiningEnclosingKeycap(characterTwo))
         {
-          isNewKeycapSequence = true;
+          isNewKeycapSequence    = true;
           currentCharacterScript = TextAbstraction::EMOJI_COLOR;
         }
       } // if(!isNewKeycapSequence && currentCharacterIndex + 2 <= lastCharacterIndex)
-    }   // if(IsStartForKeycapSequence(currentCharacter))
-  }     // if(currentCharacterIndex < lastCharacterIndex)
+    } // if(IsStartForKeycapSequence(currentCharacter))
+  } // if(currentCharacterIndex < lastCharacterIndex)
 
   return isNewKeycapSequence;
 }
@@ -106,47 +106,47 @@ bool IsNewVariationSelectorSequence(const Character* const textBuffer, const Tex
   // Default initialization does not VariationSelector sequence
   bool isNewVariationSelectorSequence = false;
 
-  if (currentCharacterIndex <= lastCharacterIndex)
+  if(currentCharacterIndex <= lastCharacterIndex)
   {
     Character currentCharacter = *(textBuffer + currentCharacterIndex);
-    if (TextAbstraction::IsEmojiVariationSequences(currentCharacter))
+    if(TextAbstraction::IsEmojiVariationSequences(currentCharacter))
     {
-      if (!isNewVariationSelectorSequence && currentCharacterIndex + 1 <= lastCharacterIndex)
+      if(!isNewVariationSelectorSequence && currentCharacterIndex + 1 <= lastCharacterIndex)
       {
         Character characterVS = *(textBuffer + currentCharacterIndex + 1);
 
-        if (TextAbstraction::IsEmojiPresentationSelector(characterVS))
+        if(TextAbstraction::IsEmojiPresentationSelector(characterVS))
         {
           isNewVariationSelectorSequence = currentRunScript != TextAbstraction::EMOJI_COLOR;
-          currentCharacterScript = TextAbstraction::EMOJI_COLOR;
+          currentCharacterScript         = TextAbstraction::EMOJI_COLOR;
         }
-        else if (TextAbstraction::IsTextPresentationSelector(characterVS))
+        else if(TextAbstraction::IsTextPresentationSelector(characterVS))
         {
           isNewVariationSelectorSequence = currentRunScript != TextAbstraction::EMOJI_TEXT;
-          currentCharacterScript = TextAbstraction::EMOJI_TEXT;
+          currentCharacterScript         = TextAbstraction::EMOJI_TEXT;
         }
-        else if (TextAbstraction::IsASCIIDigits(currentCharacter) || TextAbstraction::IsASCIIPS(currentCharacter))
+        else if(TextAbstraction::IsASCIIDigits(currentCharacter) || TextAbstraction::IsASCIIPS(currentCharacter))
         {
           // There is no variation selector.
           isNewVariationSelectorSequence = false;
         }
-        else if (!TextAbstraction::IsZeroWidthJoiner(characterVS))
+        else if(!TextAbstraction::IsZeroWidthJoiner(characterVS))
         {
           // Start of a new sequence if the next glyph is not a variation selector or zwj.
           isNewVariationSelectorSequence = true;
         }
       } // if(!isNewVariationSelectorSequence && currentCharacterIndex + 1 <= lastCharacterIndex)
-    }   // if(TextAbstraction::IsEmojiVariationSequences(currentCharacter))
-    else if (!TextAbstraction::IsEmojiPresentationSelector(currentCharacter) &&
-             !TextAbstraction::IsTextPresentationSelector(currentCharacter) &&
-             !TextAbstraction::IsZeroWidthJoiner(currentCharacter) &&
-             !TextAbstraction::IsEmojiModifier(currentCharacter))
+    } // if(TextAbstraction::IsEmojiVariationSequences(currentCharacter))
+    else if(!TextAbstraction::IsEmojiPresentationSelector(currentCharacter) &&
+            !TextAbstraction::IsTextPresentationSelector(currentCharacter) &&
+            !TextAbstraction::IsZeroWidthJoiner(currentCharacter) &&
+            !TextAbstraction::IsEmojiModifier(currentCharacter))
     {
-      if (currentCharacterIndex > 0)
+      if(currentCharacterIndex > 0)
       {
         Character prevCharacter = *(textBuffer + currentCharacterIndex - 1);
-        if (TextAbstraction::IsEmojiVariationSequences(prevCharacter) &&
-            !TextAbstraction::IsASCIIDigits(prevCharacter) && !TextAbstraction::IsASCIIPS(prevCharacter))
+        if(TextAbstraction::IsEmojiVariationSequences(prevCharacter) &&
+           !TextAbstraction::IsASCIIDigits(prevCharacter) && !TextAbstraction::IsASCIIPS(prevCharacter))
         {
           // The end of a variation sequence, start of a new sequence.
           isNewVariationSelectorSequence = true;
@@ -164,57 +164,57 @@ bool IsStartForKeycapSequence(const TextAbstraction::Character& character)
           TextAbstraction::CHAR_ASTERISK == character);
 }
 
-bool IsScriptChangedToFollowSequence(const TextAbstraction::Script& currentRunScript,
+bool IsScriptChangedToFollowSequence(const TextAbstraction::Script&    currentRunScript,
                                      const TextAbstraction::Character& character,
-                                     TextAbstraction::Script& currentCharacterScript)
+                                     TextAbstraction::Script&          currentCharacterScript)
 {
   bool isUpdated = false;
 
   // Keycap cases
-  if (TextAbstraction::IsCombiningEnclosingKeycap(character))
+  if(TextAbstraction::IsCombiningEnclosingKeycap(character))
   {
-    if (TextAbstraction::EMOJI == currentRunScript)
+    if(TextAbstraction::EMOJI == currentRunScript)
     {
       // Keycap and unqualified
       // Emoji request a default presentation for an emoji character.
-      isUpdated = (currentCharacterScript != TextAbstraction::EMOJI);
+      isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI);
       currentCharacterScript = TextAbstraction::EMOJI;
     }
-    else if (TextAbstraction::EMOJI_COLOR == currentRunScript)
+    else if(TextAbstraction::EMOJI_COLOR == currentRunScript)
     {
       // Keycap and fully-qualified
       // Emoji request an emoji presentation for an emoji character.
-      isUpdated = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
+      isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
       currentCharacterScript = TextAbstraction::EMOJI_COLOR;
     }
   }
   // Emoji(Text) Presentation cases
-  else if (IsTextPresentationSequence(currentRunScript, character))
+  else if(IsTextPresentationSequence(currentRunScript, character))
   {
     // Emoji request a text presentation for an emoji character.
-    isUpdated = (currentCharacterScript != TextAbstraction::EMOJI_TEXT);
+    isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI_TEXT);
     currentCharacterScript = TextAbstraction::EMOJI_TEXT;
   }
   // Emoji(Color) Presentation cases
-  else if (IsEmojiPresentationSequence(currentRunScript, character))
+  else if(IsEmojiPresentationSequence(currentRunScript, character))
   {
     // Emoji request an emoji presentation for an emoji character.
-    isUpdated = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
+    isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
     currentCharacterScript = TextAbstraction::EMOJI_COLOR;
   }
   // Default Emoji
-  else if (IsEmojiScript(currentRunScript) && IsEmojiScript(currentCharacterScript))
+  else if(IsEmojiScript(currentRunScript) && IsEmojiScript(currentCharacterScript))
   {
     // Emoji request an emoji presentation for an emoji character.
-    isUpdated = (currentCharacterScript != TextAbstraction::EMOJI);
+    isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI);
     currentCharacterScript = TextAbstraction::EMOJI;
   }
   // Emoji sequences
-  else if (IsEmojiSequence(currentRunScript, character, currentCharacterScript) &&
-           currentCharacterScript != TextAbstraction::EMOJI_TEXT)
+  else if(IsEmojiSequence(currentRunScript, character, currentCharacterScript) &&
+          currentCharacterScript != TextAbstraction::EMOJI_TEXT)
   {
     // Emoji request an emoji presentation for an emoji character.
-    isUpdated = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
+    isUpdated              = (currentCharacterScript != TextAbstraction::EMOJI_COLOR);
     currentCharacterScript = TextAbstraction::EMOJI_COLOR;
   }
 
@@ -224,11 +224,11 @@ bool IsScriptChangedToFollowSequence(const TextAbstraction::Script& currentRunSc
 Character GetVariationSelectorByScript(const TextAbstraction::Script& script)
 {
   Character character = 0u;
-  if (TextAbstraction::EMOJI_COLOR == script)
+  if(TextAbstraction::EMOJI_COLOR == script)
   {
     character = TextAbstraction::CHAR_VARIATION_SELECTOR_16;
   }
-  else if (TextAbstraction::EMOJI_TEXT == script)
+  else if(TextAbstraction::EMOJI_TEXT == script)
   {
     character = TextAbstraction::CHAR_VARIATION_SELECTOR_15;
   }

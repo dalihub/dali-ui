@@ -42,21 +42,21 @@ void ProcessColorAttribute(const Attribute& attribute, StrikethroughCharacterRun
 
 void ProcessHeightAttribute(const Attribute& attribute, StrikethroughCharacterRun& strikethroughRun)
 {
-  strikethroughRun.properties.height = ProcessFloatAttribute(attribute);
+  strikethroughRun.properties.height        = ProcessFloatAttribute(attribute);
   strikethroughRun.properties.heightDefined = true;
 }
 
 void ProcessStrikethroughTag(const Tag& tag, StrikethroughCharacterRun& strikethroughRun)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
 
-    if (TokenComparison(MARKUP::STRIKETHROUGH_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::STRIKETHROUGH_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessColorAttribute(attribute, strikethroughRun);
     }
-    else if (TokenComparison(MARKUP::STRIKETHROUGH_ATTRIBUTES::HEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::STRIKETHROUGH_ATTRIBUTES::HEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessHeightAttribute(attribute, strikethroughRun);
     }
@@ -72,25 +72,25 @@ void OverrideNestedStrikethroughCharacterRuns(Vector<StrikethroughCharacterRun>&
   // "outer tag before" and  "outer tag after" have height = 5.0f and color = 'blue'
   // "inner tag" has height = 5.0f and color = 'green'
 
-  if (strikethroughCharacterRuns.Count() > 0u)
+  if(strikethroughCharacterRuns.Count() > 0u)
   {
     Vector<StrikethroughCharacterRun>::ConstIterator preIt = strikethroughCharacterRuns.Begin();
 
-    Vector<StrikethroughCharacterRun>::Iterator it = strikethroughCharacterRuns.Begin() + 1;
+    Vector<StrikethroughCharacterRun>::Iterator      it    = strikethroughCharacterRuns.Begin() + 1;
     Vector<StrikethroughCharacterRun>::ConstIterator endIt = strikethroughCharacterRuns.End();
 
-    while (it != endIt)
+    while(it != endIt)
     {
-      const StrikethroughCharacterRun& run = *it;
-      const CharacterIndex& characterIndex = run.characterRun.characterIndex;
-      const Length& numberOfCharacters = run.characterRun.numberOfCharacters;
+      const StrikethroughCharacterRun& run                = *it;
+      const CharacterIndex&            characterIndex     = run.characterRun.characterIndex;
+      const Length&                    numberOfCharacters = run.characterRun.numberOfCharacters;
 
-      const StrikethroughCharacterRun& preRun = *preIt;
-      const CharacterIndex& preCharacterIndex = preRun.characterRun.characterIndex;
-      const Length& preNumberOfCharacters = preRun.characterRun.numberOfCharacters;
+      const StrikethroughCharacterRun& preRun                = *preIt;
+      const CharacterIndex&            preCharacterIndex     = preRun.characterRun.characterIndex;
+      const Length&                    preNumberOfCharacters = preRun.characterRun.numberOfCharacters;
 
-      if ((preCharacterIndex <= characterIndex) &&
-          ((characterIndex + numberOfCharacters) <= (preCharacterIndex + preNumberOfCharacters)))
+      if((preCharacterIndex <= characterIndex) &&
+         ((characterIndex + numberOfCharacters) <= (preCharacterIndex + preNumberOfCharacters)))
       {
         it->properties.CopyIfNotDefined(preIt->properties);
       }

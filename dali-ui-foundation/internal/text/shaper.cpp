@@ -56,7 +56,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
                Vector<CharacterIndex>& glyphToCharacterMap, Vector<Length>& charactersPerGlyph,
                Vector<GlyphIndex>& newParagraphGlyphs)
 {
-  if (0u == numberOfCharacters)
+  if(0u == numberOfCharacters)
   {
     // Nothing to do if there are no characters.
     return;
@@ -68,23 +68,23 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   uint32_t sumPre = 0, sumShape = 0, sumPost = 0;
 
   uint32_t logThreshold = TextAbstraction::FontClient::GetPerformanceLogThresholdTime();
-  bool logEnabled = TextAbstraction::FontClient::IsPerformanceLogEnabled();
+  bool     logEnabled   = TextAbstraction::FontClient::IsPerformanceLogEnabled();
 #endif
 
 #ifdef DEBUG_ENABLED
-  const Length numberOfFontRuns = fonts.Count();
-  const Length numberOfScriptRuns = scripts.Count();
+  const Length numberOfFontRuns        = fonts.Count();
+  const Length numberOfScriptRuns      = scripts.Count();
   const Length totalNumberOfCharacters = text.Count();
 #endif
 
   DALI_ASSERT_DEBUG((0u != numberOfFontRuns) &&
                     (totalNumberOfCharacters == fonts[numberOfFontRuns - 1u].characterRun.characterIndex +
-                                                    fonts[numberOfFontRuns - 1u].characterRun.numberOfCharacters) &&
+                                                  fonts[numberOfFontRuns - 1u].characterRun.numberOfCharacters) &&
                     "Ui::Text::ShapeText. All characters must have a font set.");
 
   DALI_ASSERT_DEBUG((0u != numberOfScriptRuns) &&
                     (totalNumberOfCharacters == scripts[numberOfScriptRuns - 1u].characterRun.characterIndex +
-                                                    scripts[numberOfScriptRuns - 1u].characterRun.numberOfCharacters) &&
+                                                  scripts[numberOfScriptRuns - 1u].characterRun.numberOfCharacters) &&
                     "Ui::Text::ShapeText. All characters must have a script set.");
 
   // The text needs to be split in chunks of consecutive characters.
@@ -96,10 +96,10 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
   // Get the font run containing the startCharacterIndex character.
   Vector<FontRun>::ConstIterator fontRunIt = fonts.Begin();
-  for (Vector<FontRun>::ConstIterator endIt = fonts.End(); fontRunIt < endIt; ++fontRunIt)
+  for(Vector<FontRun>::ConstIterator endIt = fonts.End(); fontRunIt < endIt; ++fontRunIt)
   {
     const FontRun& run = *fontRunIt;
-    if (startCharacterIndex < run.characterRun.characterIndex + run.characterRun.numberOfCharacters)
+    if(startCharacterIndex < run.characterRun.characterIndex + run.characterRun.numberOfCharacters)
     {
       // Found.
       break;
@@ -108,10 +108,10 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
   // Get the script run containing the startCharacterIndex character.
   Vector<ScriptRun>::ConstIterator scriptRunIt = scripts.Begin();
-  for (Vector<ScriptRun>::ConstIterator endIt = scripts.End(); scriptRunIt < endIt; ++scriptRunIt)
+  for(Vector<ScriptRun>::ConstIterator endIt = scripts.End(); scriptRunIt < endIt; ++scriptRunIt)
   {
     const ScriptRun& run = *scriptRunIt;
-    if (startCharacterIndex < run.characterRun.characterIndex + run.characterRun.numberOfCharacters)
+    if(startCharacterIndex < run.characterRun.characterIndex + run.characterRun.numberOfCharacters)
     {
       // Found.
       break;
@@ -131,9 +131,9 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 
   GlyphInfo glyphInfo;
   glyphInfo.isItalicRequired = false;
-  glyphInfo.isBoldRequired = false;
+  glyphInfo.isBoldRequired   = false;
 
-  const Length currentNumberOfGlyphs = glyphs.Count();
+  const Length currentNumberOfGlyphs  = glyphs.Count();
   const Length numberOfGlyphsReserved = static_cast<Length>(numberOfCharacters * 1.3f);
   glyphs.Reserve(currentNumberOfGlyphs + numberOfGlyphsReserved);
   glyphToCharacterMap.Reserve(currentNumberOfGlyphs + numberOfGlyphsReserved);
@@ -143,39 +143,39 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   // The number of new glyphs.
   Length numberOfNewGlyphs = 0u;
 
-  const Character* const textBuffer = text.Begin();
-  const LineBreakInfo* const lineBreakInfoBuffer = lineBreakInfo.Begin();
-  CharacterIndex* glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
+  const Character* const     textBuffer                = text.Begin();
+  const LineBreakInfo* const lineBreakInfoBuffer       = lineBreakInfo.Begin();
+  CharacterIndex*            glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
 
   Length glyphIndex = startGlyphIndex;
 
   // Traverse the characters and shape the text.
   const CharacterIndex lastCharacter = startCharacterIndex + numberOfCharacters;
-  for (previousIndex = startCharacterIndex; previousIndex < lastCharacter;)
+  for(previousIndex = startCharacterIndex; previousIndex < lastCharacter;)
   {
 #if defined(TRACE_ENABLED)
     uint32_t timeStamps[4];
     uint32_t timeStampIndex = 0;
 
-    if (logEnabled)
+    if(logEnabled)
     {
       timeStamps[timeStampIndex++] = GetMilliSeconds();
     }
 #endif
 
     // Get the font id and the script.
-    const FontRun& fontRun = *fontRunIt;
+    const FontRun&   fontRun   = *fontRunIt;
     const ScriptRun& scriptRun = *scriptRunIt;
 
-    currentFontId = fontRun.fontId;
-    currentScript = scriptRun.script;
+    currentFontId               = fontRun.fontId;
+    currentScript               = scriptRun.script;
     const bool isItalicRequired = fontRun.isItalicRequired;
-    const bool isBoldRequired = fontRun.isBoldRequired;
+    const bool isBoldRequired   = fontRun.isBoldRequired;
 
     // Get the min index to the last character of both runs.
     CharacterIndex currentIndex =
-        min(fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters,
-            scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters);
+      min(fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters,
+          scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters);
 
     // Check if there is a line must break.
     bool mustBreak = false;
@@ -185,19 +185,19 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
     // However, the metrics need to be changed in order to not to draw a square.
     bool isNewParagraph = false;
 
-    for (CharacterIndex index = previousIndex; index < currentIndex; ++index)
+    for(CharacterIndex index = previousIndex; index < currentIndex; ++index)
     {
       mustBreak = TextAbstraction::LINE_MUST_BREAK == *(lineBreakInfoBuffer + index);
-      if (mustBreak)
+      if(mustBreak)
       {
         isNewParagraph = TextAbstraction::IsNewParagraph(*(textBuffer + index));
-        currentIndex = index + 1u;
+        currentIndex   = index + 1u;
         break;
       }
     }
 
 #if defined(TRACE_ENABLED)
-    if (logEnabled)
+    if(logEnabled)
     {
       timeStamps[timeStampIndex++] = GetMilliSeconds();
     }
@@ -209,30 +209,30 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
                                                 currentFontId, currentScript);
 
 #if defined(TRACE_ENABLED)
-    if (logEnabled)
+    if(logEnabled)
     {
       timeStamps[timeStampIndex++] = GetMilliSeconds();
     }
 #endif
 
     // Retrieve the glyphs and the glyph to character conversion map.
-    Vector<GlyphInfo> tmpGlyphs;
+    Vector<GlyphInfo>      tmpGlyphs;
     Vector<CharacterIndex> tmpGlyphToCharacterMap;
 
     GlyphInfo glyphInfo;
     glyphInfo.isItalicRequired = isItalicRequired;
-    glyphInfo.isBoldRequired = isBoldRequired;
-    glyphInfo.isShaped = true;
+    glyphInfo.isBoldRequired   = isBoldRequired;
+    glyphInfo.isShaped         = true;
 
     tmpGlyphs.Resize(numberOfGlyphs, glyphInfo);
     tmpGlyphToCharacterMap.Resize(numberOfGlyphs);
     shaping.GetGlyphs(tmpGlyphs.Begin(), tmpGlyphToCharacterMap.Begin());
 
     // Update the new indices of the glyph to character map.
-    if (0u != totalNumberOfGlyphs)
+    if(0u != totalNumberOfGlyphs)
     {
-      for (Vector<CharacterIndex>::Iterator it = tmpGlyphToCharacterMap.Begin(), endIt = tmpGlyphToCharacterMap.End();
-           it != endIt; ++it)
+      for(Vector<CharacterIndex>::Iterator it = tmpGlyphToCharacterMap.Begin(), endIt = tmpGlyphToCharacterMap.End();
+          it != endIt; ++it)
       {
         *it += previousIndex;
       }
@@ -249,7 +249,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
     // Set the buffer pointers again.
     glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
 
-    if (isNewParagraph)
+    if(isNewParagraph)
     {
       // Add the index of the new paragraph glyph to a vector.
       // Their metrics will be updated in a following step.
@@ -258,11 +258,11 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
     }
 
     // Update the iterators to get the next font or script run.
-    if (currentIndex == fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters)
+    if(currentIndex == fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters)
     {
       ++fontRunIt;
     }
-    if (currentIndex == scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
+    if(currentIndex == scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
     {
       ++scriptRunIt;
     }
@@ -271,7 +271,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
     previousIndex = currentIndex;
 
 #if defined(TRACE_ENABLED)
-    if (logEnabled)
+    if(logEnabled)
     {
       timeStamps[timeStampIndex++] = GetMilliSeconds();
       sumPre += timeStamps[1] - timeStamps[0];
@@ -282,7 +282,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   }
 
   // Update indices.
-  for (Length index = startGlyphIndex + numberOfNewGlyphs; index < totalNumberOfGlyphs; ++index)
+  for(Length index = startGlyphIndex + numberOfNewGlyphs; index < totalNumberOfGlyphs; ++index)
   {
     CharacterIndex& characterIndex = *(glyphToCharacterMapBuffer + index);
     characterIndex += numberOfCharacters;
@@ -293,8 +293,8 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   Length* charactersPerGlyphBuffer = charactersPerGlyph.Begin();
 
   const GlyphIndex lastGlyph = startGlyphIndex + numberOfNewGlyphs;
-  previousIndex = startCharacterIndex;
-  for (Length index = startGlyphIndex + 1u; index < lastGlyph; ++index)
+  previousIndex              = startCharacterIndex;
+  for(Length index = startGlyphIndex + 1u; index < lastGlyph; ++index)
   {
     const CharacterIndex characterIndex = *(glyphToCharacterMapBuffer + index);
 
@@ -310,9 +310,9 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   glyphToCharacterMap.Resize(totalNumberOfGlyphs);
 
 #if defined(TRACE_ENABLED)
-  if (logEnabled)
+  if(logEnabled)
   {
-    if (sumPre + sumShape + sumPost > logThreshold)
+    if(sumPre + sumShape + sumPost > logThreshold)
     {
       DALI_LOG_DEBUG_INFO("DALI_TEXT_SHAPE_TEXT updated:%u/%u, pre:%u ms, shape:%u ms, post:%u ms\n", numberOfNewGlyphs,
                           totalNumberOfGlyphs, sumPre, sumShape, sumPost);

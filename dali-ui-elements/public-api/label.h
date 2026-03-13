@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <functional>
-#include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <functional>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -49,11 +49,9 @@ class LabelImpl;
 class DALI_UI_API Label : public View
 {
 public:
-
   // Typedefs
 
 public: // Creation & Destruction
-
   /**
    * @brief Creates an uninitialized Label handle.
    *
@@ -92,7 +90,6 @@ public: // Creation & Destruction
   ~Label();
 
 public: // Operators
-
   /**
    * @brief Copy assignment operator.
    *
@@ -111,7 +108,6 @@ public: // Operators
   Label& operator=(Label&& rhs) noexcept;
 
 public: // Static Methods
-
   /**
    * @brief Downcasts a handle to Label handle.
    *
@@ -124,7 +120,6 @@ public: // Static Methods
   static Label DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-
   // @CHAIN_START(Label, View)
   /**
    * @brief Sets the text.
@@ -227,9 +222,7 @@ public: // Setters for chaining
   // @CHAIN_END
 
 public: // Signals
-
 public: // Not intended for application developers
-
   /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.

@@ -47,20 +47,20 @@ namespace Text
 {
 namespace
 {
-const char LESS_THAN = '<';
-const char GREATER_THAN = '>';
-const char EQUAL = '=';
+const char LESS_THAN      = '<';
+const char GREATER_THAN   = '>';
+const char EQUAL          = '=';
 const char QUOTATION_MARK = '\'';
-const char SLASH = '/';
-const char BACK_SLASH = '\\';
-const char AMPERSAND = '&';
-const char HASH = '#';
-const char SEMI_COLON = ';';
+const char SLASH          = '/';
+const char BACK_SLASH     = '\\';
+const char AMPERSAND      = '&';
+const char HASH           = '#';
+const char SEMI_COLON     = ';';
 const char CHAR_ARRAY_END = '\0';
-const char HEX_CODE = 'x';
+const char HEX_CODE       = 'x';
 
 const char WHITE_SPACE = 0x20; // ASCII value of the white space.
-const char NEW_LINE = 0x0A;    // ASCII value of the newline.
+const char NEW_LINE    = 0x0A; // ASCII value of the newline.
 
 // Range 1 0x0u < XHTML_DECIMAL_ENTITY_RANGE <= 0xD7FFu
 // Range 2 0xE000u < XHTML_DECIMAL_ENTITY_RANGE <= 0xFFFDu
@@ -70,9 +70,9 @@ const unsigned long XHTML_DECIMAL_ENTITY_RANGE[] = {0x0u, 0xD7FFu, 0xE000u, 0xFF
 // The MAX_NUM_OF_ATTRIBUTES is the number of attributes in span tag "markup-processor-span.cpp". Because it contains
 // the maximum number of attributes in  all tags.
 const unsigned int MAX_NUM_OF_ATTRIBUTES =
-    14u; ///< The span tag has the 'font-family', 'font-size' 'font-weight', 'font-width', 'font-slant','text-color',
-         ///< 'u-color', 'u-height','u-type','u-dash-gap', 'u-dash-width', 's-color', 's-height' and 'char-space-value'
-         ///< attrubutes.
+  14u;                                        ///< The span tag has the 'font-family', 'font-size' 'font-weight', 'font-width', 'font-slant','text-color',
+                                              ///< 'u-color', 'u-height','u-type','u-dash-gap', 'u-dash-width', 's-color', 's-height' and 'char-space-value'
+                                              ///< attrubutes.
 const unsigned int DEFAULT_VECTOR_SIZE = 16u; ///< Default size of run vectors.
 
 #if defined(DEBUG_ENABLED)
@@ -84,15 +84,15 @@ typedef VectorBase::SizeType RunIndex;
 /**
  * @brief Struct used to retrieve the style runs from the mark-up string.
  */
-template <typename StyleStackType>
+template<typename StyleStackType>
 struct StyleStack
 {
-  Vector<StyleStackType> stack; ///< Use a vector as a style stack.
-  unsigned int topIndex;        ///< Points the top of the stack.
+  Vector<StyleStackType> stack;    ///< Use a vector as a style stack.
+  unsigned int           topIndex; ///< Points the top of the stack.
 
   StyleStack()
-    : stack(),
-      topIndex(0u)
+  : stack(),
+    topIndex(0u)
   {
     stack.Resize(DEFAULT_VECTOR_SIZE);
   }
@@ -101,7 +101,7 @@ struct StyleStack
   {
     // Check if there is space inside the style stack.
     const VectorBase::SizeType size = stack.Count();
-    if (topIndex >= size)
+    if(topIndex >= size)
     {
       // Resize the style stack.
       stack.Resize(2u * size);
@@ -158,19 +158,19 @@ struct AnchorForStack
  */
 void Initialize(FontDescriptionRun& fontRun)
 {
-  fontRun.characterRun.characterIndex = 0u;
+  fontRun.characterRun.characterIndex     = 0u;
   fontRun.characterRun.numberOfCharacters = 0u;
-  fontRun.familyName = NULL;
-  fontRun.familyLength = 0u;
-  fontRun.weight = TextAbstraction::FontWeight::NORMAL;
-  fontRun.width = TextAbstraction::FontWidth::NORMAL;
-  fontRun.slant = TextAbstraction::FontSlant::NORMAL;
-  fontRun.size = 0u;
-  fontRun.familyDefined = false;
-  fontRun.weightDefined = false;
-  fontRun.widthDefined = false;
-  fontRun.slantDefined = false;
-  fontRun.sizeDefined = false;
+  fontRun.familyName                      = NULL;
+  fontRun.familyLength                    = 0u;
+  fontRun.weight                          = TextAbstraction::FontWeight::NORMAL;
+  fontRun.width                           = TextAbstraction::FontWidth::NORMAL;
+  fontRun.slant                           = TextAbstraction::FontSlant::NORMAL;
+  fontRun.size                            = 0u;
+  fontRun.familyDefined                   = false;
+  fontRun.weightDefined                   = false;
+  fontRun.widthDefined                    = false;
+  fontRun.slantDefined                    = false;
+  fontRun.sizeDefined                     = false;
 }
 
 /**
@@ -180,7 +180,7 @@ void Initialize(FontDescriptionRun& fontRun)
  */
 void Initialize(ColorRun& colorRun)
 {
-  colorRun.characterRun.characterIndex = 0u;
+  colorRun.characterRun.characterIndex     = 0u;
   colorRun.characterRun.numberOfCharacters = 0u;
 }
 
@@ -191,7 +191,7 @@ void Initialize(ColorRun& colorRun)
  */
 void Initialize(UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  underlinedCharacterRun.characterRun.characterIndex = 0u;
+  underlinedCharacterRun.characterRun.characterIndex     = 0u;
   underlinedCharacterRun.characterRun.numberOfCharacters = 0u;
 }
 
@@ -202,24 +202,24 @@ void Initialize(UnderlinedCharacterRun& underlinedCharacterRun)
  */
 void Initialize(Span& span)
 {
-  span.colorRunIndex = 0u;
+  span.colorRunIndex  = 0u;
   span.isColorDefined = false;
 
-  span.fontRunIndex = 0u;
+  span.fontRunIndex  = 0u;
   span.isFontDefined = false;
 
-  span.underlinedCharacterRunIndex = 0u;
+  span.underlinedCharacterRunIndex  = 0u;
   span.isUnderlinedCharacterDefined = false;
-  span.backgroundColorRunIndex = 0u;
-  span.isBackgroundColorDefined = false;
+  span.backgroundColorRunIndex      = 0u;
+  span.isBackgroundColorDefined     = false;
 
   // strikethrough
   span.strikethroughCharacterRunIndex = 0u;
-  span.isStrikethroughDefined = false;
+  span.isStrikethroughDefined         = false;
 
   // characterSpacing
   span.characterSpacingCharacterRunIndex = 0u;
-  span.isCharacterSpacingDefined = false;
+  span.isCharacterSpacingDefined         = false;
 }
 
 /**
@@ -229,7 +229,7 @@ void Initialize(Span& span)
  */
 void Initialize(AnchorForStack& anchor)
 {
-  anchor.colorRunIndex = 0u;
+  anchor.colorRunIndex               = 0u;
   anchor.underlinedCharacterRunIndex = 0u;
 }
 
@@ -240,9 +240,9 @@ void Initialize(AnchorForStack& anchor)
  */
 void Initialize(StrikethroughCharacterRun& strikethroughCharacterRun)
 {
-  strikethroughCharacterRun.characterRun.characterIndex = 0u;
+  strikethroughCharacterRun.characterRun.characterIndex     = 0u;
   strikethroughCharacterRun.characterRun.numberOfCharacters = 0u;
-  strikethroughCharacterRun.properties.colorDefined = false;
+  strikethroughCharacterRun.properties.colorDefined         = false;
 }
 
 /**
@@ -252,7 +252,7 @@ void Initialize(StrikethroughCharacterRun& strikethroughCharacterRun)
  */
 void Initialize(BoundedParagraphRun& boundedParagraphRun)
 {
-  boundedParagraphRun.characterRun.characterIndex = 0u;
+  boundedParagraphRun.characterRun.characterIndex     = 0u;
   boundedParagraphRun.characterRun.numberOfCharacters = 0u;
 }
 
@@ -263,9 +263,9 @@ void Initialize(BoundedParagraphRun& boundedParagraphRun)
  */
 void Initialize(CharacterSpacingCharacterRun& characterSpacingCharacterRun)
 {
-  characterSpacingCharacterRun.characterRun.characterIndex = 0u;
+  characterSpacingCharacterRun.characterRun.characterIndex     = 0u;
   characterSpacingCharacterRun.characterRun.numberOfCharacters = 0u;
-  characterSpacingCharacterRun.value = 0.0f;
+  characterSpacingCharacterRun.value                           = 0.0f;
 }
 
 /**
@@ -277,7 +277,7 @@ void Initialize(CharacterSpacingCharacterRun& characterSpacingCharacterRun)
  */
 void ParseAttributes(Tag& tag)
 {
-  if (tag.buffer == NULL)
+  if(tag.buffer == NULL)
   {
     return;
   }
@@ -287,13 +287,13 @@ void ParseAttributes(Tag& tag)
   // Find first the tag name.
   bool isQuotationOpen = false;
 
-  const char* tagBuffer = tag.buffer;
+  const char*       tagBuffer    = tag.buffer;
   const char* const tagEndBuffer = tagBuffer + tag.length;
-  tag.length = 0u;
-  for (; tagBuffer < tagEndBuffer; ++tagBuffer)
+  tag.length                     = 0u;
+  for(; tagBuffer < tagEndBuffer; ++tagBuffer)
   {
     const char character = *tagBuffer;
-    if (WHITE_SPACE < character)
+    if(WHITE_SPACE < character)
     {
       ++tag.length;
     }
@@ -308,46 +308,46 @@ void ParseAttributes(Tag& tag)
 
   // Find the attributes.
   unsigned int attributeIndex = 0u;
-  const char* nameBuffer = NULL;
-  const char* valueBuffer = NULL;
-  Length nameLength = 0u;
-  Length valueLength = 0u;
+  const char*  nameBuffer     = NULL;
+  const char*  valueBuffer    = NULL;
+  Length       nameLength     = 0u;
+  Length       valueLength    = 0u;
 
-  bool addToNameValue = true;
+  bool   addToNameValue     = true;
   Length numberOfWhiteSpace = 0u;
-  for (; tagBuffer < tagEndBuffer; ++tagBuffer)
+  for(; tagBuffer < tagEndBuffer; ++tagBuffer)
   {
     const char character = *tagBuffer;
-    if ((WHITE_SPACE >= character) && !isQuotationOpen)
+    if((WHITE_SPACE >= character) && !isQuotationOpen)
     {
-      if (NULL != valueBuffer)
+      if(NULL != valueBuffer)
       {
         // Remove white spaces at the end of the value.
         valueLength -= numberOfWhiteSpace;
       }
 
-      if ((NULL != nameBuffer) && (NULL != valueBuffer))
+      if((NULL != nameBuffer) && (NULL != valueBuffer))
       {
         // Every time a white space is found, a new attribute is created and stored in the attributes vector.
         Attribute& attribute = *(tag.attributes.Begin() + attributeIndex);
         ++attributeIndex;
 
-        attribute.nameBuffer = nameBuffer;
+        attribute.nameBuffer  = nameBuffer;
         attribute.valueBuffer = valueBuffer;
-        attribute.nameLength = nameLength;
+        attribute.nameLength  = nameLength;
         attribute.valueLength = valueLength;
 
-        nameBuffer = NULL;
+        nameBuffer  = NULL;
         valueBuffer = NULL;
-        nameLength = 0u;
+        nameLength  = 0u;
         valueLength = 0u;
 
         addToNameValue = true; // next read characters will be added to the name.
       }
     }
-    else if (EQUAL == character) // '='
+    else if(EQUAL == character) // '='
     {
-      if (isQuotationOpen)
+      if(isQuotationOpen)
       {
         ++valueLength;
       }
@@ -357,12 +357,12 @@ void ParseAttributes(Tag& tag)
         SkipWhiteSpace(tagBuffer, tagEndBuffer);
       }
     }
-    else if (QUOTATION_MARK == character) // '\''
+    else if(QUOTATION_MARK == character) // '\''
     {
       // Do not add quotation marks to neither name nor value.
       isQuotationOpen = !isQuotationOpen;
 
-      if (isQuotationOpen)
+      if(isQuotationOpen)
       {
         ++tagBuffer;
         SkipWhiteSpace(tagBuffer, tagEndBuffer);
@@ -372,9 +372,9 @@ void ParseAttributes(Tag& tag)
     else
     {
       // Adds characters to the name or the value.
-      if (addToNameValue)
+      if(addToNameValue)
       {
-        if (NULL == nameBuffer)
+        if(NULL == nameBuffer)
         {
           nameBuffer = tagBuffer;
         }
@@ -382,9 +382,9 @@ void ParseAttributes(Tag& tag)
       }
       else
       {
-        if (isQuotationOpen)
+        if(isQuotationOpen)
         {
-          if (WHITE_SPACE >= character)
+          if(WHITE_SPACE >= character)
           {
             ++numberOfWhiteSpace;
           }
@@ -393,7 +393,7 @@ void ParseAttributes(Tag& tag)
             numberOfWhiteSpace = 0u;
           }
         }
-        if (NULL == valueBuffer)
+        if(NULL == valueBuffer)
         {
           valueBuffer = tagBuffer;
         }
@@ -402,21 +402,21 @@ void ParseAttributes(Tag& tag)
     }
   }
 
-  if (NULL != valueBuffer)
+  if(NULL != valueBuffer)
   {
     // Remove white spaces at the end of the value.
     valueLength -= numberOfWhiteSpace;
   }
 
-  if ((NULL != nameBuffer) && (NULL != valueBuffer))
+  if((NULL != nameBuffer) && (NULL != valueBuffer))
   {
     // Checks if the last attribute needs to be added.
     Attribute& attribute = *(tag.attributes.Begin() + attributeIndex);
     ++attributeIndex;
 
-    attribute.nameBuffer = nameBuffer;
+    attribute.nameBuffer  = nameBuffer;
     attribute.valueBuffer = valueBuffer;
-    attribute.nameLength = nameLength;
+    attribute.nameLength  = nameLength;
     attribute.valueLength = valueLength;
   }
 
@@ -435,33 +435,33 @@ void ParseAttributes(Tag& tag)
  */
 bool IsTag(const char*& markupStringBuffer, const char* const markupStringEndBuffer, Tag& tag)
 {
-  bool isTag = false;
-  bool isQuotationOpen = false;
-  bool attributesFound = false;
-  tag.isEndTag = false;
+  bool isTag              = false;
+  bool isQuotationOpen    = false;
+  bool attributesFound    = false;
+  tag.isEndTag            = false;
   bool isPreviousLessThan = false;
-  bool isPreviousSlash = false;
+  bool isPreviousSlash    = false;
 
   const char character = *markupStringBuffer;
-  if (LESS_THAN == character) // '<'
+  if(LESS_THAN == character) // '<'
   {
-    tag.buffer = NULL;
-    tag.length = 0u;
+    tag.buffer         = NULL;
+    tag.length         = 0u;
     isPreviousLessThan = true;
 
     // if the iterator is pointing to a '<' character, then check if it's a mark-up tag is needed.
     ++markupStringBuffer;
-    if (markupStringBuffer < markupStringEndBuffer)
+    if(markupStringBuffer < markupStringEndBuffer)
     {
       SkipWhiteSpace(markupStringBuffer, markupStringEndBuffer);
 
-      for (; (!isTag) && (markupStringBuffer < markupStringEndBuffer); ++markupStringBuffer)
+      for(; (!isTag) && (markupStringBuffer < markupStringEndBuffer); ++markupStringBuffer)
       {
         const char character = *markupStringBuffer;
 
-        if (!isQuotationOpen && (SLASH == character)) // '/'
+        if(!isQuotationOpen && (SLASH == character)) // '/'
         {
-          if (isPreviousLessThan)
+          if(isPreviousLessThan)
           {
             tag.isEndTag = true;
           }
@@ -472,36 +472,36 @@ bool IsTag(const char*& markupStringBuffer, const char* const markupStringEndBuf
           }
 
           isPreviousLessThan = false;
-          if ((markupStringBuffer + 1u < markupStringEndBuffer) && (WHITE_SPACE >= *(markupStringBuffer + 1u)))
+          if((markupStringBuffer + 1u < markupStringEndBuffer) && (WHITE_SPACE >= *(markupStringBuffer + 1u)))
           {
             ++markupStringBuffer;
             SkipWhiteSpace(markupStringBuffer, markupStringEndBuffer);
             --markupStringBuffer;
           }
         }
-        else if (GREATER_THAN == character) // '>'
+        else if(GREATER_THAN == character) // '>'
         {
           isTag = true;
-          if (isPreviousSlash)
+          if(isPreviousSlash)
           {
             tag.isEndTag = true;
           }
 
-          isPreviousSlash = false;
+          isPreviousSlash    = false;
           isPreviousLessThan = false;
         }
-        else if (QUOTATION_MARK == character)
+        else if(QUOTATION_MARK == character)
         {
           isQuotationOpen = !isQuotationOpen;
           ++tag.length;
 
-          isPreviousSlash = false;
+          isPreviousSlash    = false;
           isPreviousLessThan = false;
         }
-        else if (WHITE_SPACE >= character) // ' '
+        else if(WHITE_SPACE >= character) // ' '
         {
           // If the tag contains white spaces then it may have attributes.
-          if (!isQuotationOpen)
+          if(!isQuotationOpen)
           {
             attributesFound = true;
           }
@@ -509,7 +509,7 @@ bool IsTag(const char*& markupStringBuffer, const char* const markupStringEndBuf
         }
         else
         {
-          if (NULL == tag.buffer)
+          if(NULL == tag.buffer)
           {
             tag.buffer = markupStringBuffer;
           }
@@ -517,14 +517,14 @@ bool IsTag(const char*& markupStringBuffer, const char* const markupStringEndBuf
           // If it's not any of the 'special' characters then just add it to the tag string.
           ++tag.length;
 
-          isPreviousSlash = false;
+          isPreviousSlash    = false;
           isPreviousLessThan = false;
         }
       }
     }
 
     // If the tag string has white spaces, then parse the attributes is needed.
-    if (attributesFound)
+    if(attributesFound)
     {
       ParseAttributes(tag);
     }
@@ -544,24 +544,24 @@ bool IsTag(const char*& markupStringBuffer, const char* const markupStringEndBuf
 unsigned int GetXHTMLEntityLength(const char*& markupStringBuffer, const char* const markupStringEndBuffer)
 {
   char character = *markupStringBuffer;
-  if (AMPERSAND == character) // '&'
+  if(AMPERSAND == character) // '&'
   {
     // if the iterator is pointing to a '&' character, then check for ';' to find end to XHTML entity.
     ++markupStringBuffer;
-    if (markupStringBuffer < markupStringEndBuffer)
+    if(markupStringBuffer < markupStringEndBuffer)
     {
       unsigned int len = 1u;
-      for (; markupStringBuffer < markupStringEndBuffer; ++markupStringBuffer)
+      for(; markupStringBuffer < markupStringEndBuffer; ++markupStringBuffer)
       {
         character = *markupStringBuffer;
         ++len;
-        if (SEMI_COLON == character) // ';'
+        if(SEMI_COLON == character) // ';'
         {
           // found end of XHTML entity
           ++markupStringBuffer;
           return len;
         }
-        else if ((AMPERSAND == character) || (BACK_SLASH == character) || (LESS_THAN == character))
+        else if((AMPERSAND == character) || (BACK_SLASH == character) || (LESS_THAN == character))
         {
           return 0;
         }
@@ -583,29 +583,29 @@ bool XHTMLNumericEntityToUtf8(const char* markupText, char* utf8)
 {
   bool result = false;
 
-  if (NULL != markupText)
+  if(NULL != markupText)
   {
     bool isHex = false;
 
     // check if hex or decimal entity
-    if ((CHAR_ARRAY_END != *markupText) && (HEX_CODE == *markupText))
+    if((CHAR_ARRAY_END != *markupText) && (HEX_CODE == *markupText))
     {
       isHex = true;
       ++markupText;
     }
 
-    char* end = NULL;
+    char*         end = NULL;
     unsigned long l =
-        strtoul(markupText, &end, (isHex ? 16 : 10)); // l contains UTF-32 code in case of correct XHTML entity
+      strtoul(markupText, &end, (isHex ? 16 : 10)); // l contains UTF-32 code in case of correct XHTML entity
 
     // check for valid XHTML numeric entities (between '#' or "#x" and ';')
-    if ((l > 0) && (l < ULONG_MAX) &&
-        (*end == SEMI_COLON)) // in case wrong XHTML entity is set eg. "&#23abcdefs;" in that case *end will be 'a'
+    if((l > 0) && (l < ULONG_MAX) &&
+       (*end == SEMI_COLON)) // in case wrong XHTML entity is set eg. "&#23abcdefs;" in that case *end will be 'a'
     {
       /* characters XML 1.1 permits */
-      if (((XHTML_DECIMAL_ENTITY_RANGE[0] < l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[1])) ||
-          ((XHTML_DECIMAL_ENTITY_RANGE[2] <= l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[3])) ||
-          ((XHTML_DECIMAL_ENTITY_RANGE[4] <= l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[5])))
+      if(((XHTML_DECIMAL_ENTITY_RANGE[0] < l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[1])) ||
+         ((XHTML_DECIMAL_ENTITY_RANGE[2] <= l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[3])) ||
+         ((XHTML_DECIMAL_ENTITY_RANGE[4] <= l) && (l <= XHTML_DECIMAL_ENTITY_RANGE[5])))
       {
         // Convert UTF32 code to UTF8
         Utf32ToUtf8(reinterpret_cast<const uint32_t* const>(&l), 1, reinterpret_cast<uint8_t*>(utf8));
@@ -629,12 +629,12 @@ bool XHTMLNumericEntityToUtf8(const char* markupText, char* utf8)
  * @param[in/out] tagReference The tagReference we should increment/decrement
  * @param[in] parameterSettingFunction This function will be called to set run specific parameters
  */
-template <typename RunType>
+template<typename RunType>
 void ProcessTagForRun(Vector<RunType>& runsContainer, StyleStack<RunIndex>& styleStack, const Tag& tag,
                       const CharacterIndex characterIndex, RunIndex& runIndex, int& tagReference,
                       std::function<void(const Tag&, RunType&)> parameterSettingFunction)
 {
-  if (!tag.isEndTag)
+  if(!tag.isEndTag)
   {
     // Create a new run.
     RunType run;
@@ -658,10 +658,10 @@ void ProcessTagForRun(Vector<RunType>& runsContainer, StyleStack<RunIndex>& styl
   }
   else
   {
-    if (tagReference > 0)
+    if(tagReference > 0)
     {
       // Pop the top of the stack and set the number of characters of the run.
-      RunType& run = *(runsContainer.Begin() + styleStack.Pop());
+      RunType& run                        = *(runsContainer.Begin() + styleStack.Pop());
       run.characterRun.numberOfCharacters = characterIndex - run.characterRun.characterIndex;
       --tagReference;
     }
@@ -677,7 +677,7 @@ void ProcessTagForRun(Vector<RunType>& runsContainer, StyleStack<RunIndex>& styl
  */
 void ProcessItemTag(MarkupProcessData& markupProcessData, const Tag tag, CharacterIndex& characterIndex)
 {
-  if (tag.isEndTag)
+  if(tag.isEndTag)
   {
     // Create an embedded item instance.
     EmbeddedItem item;
@@ -703,8 +703,8 @@ void ProcessItemTag(MarkupProcessData& markupProcessData, const Tag tag, Charact
 void ProcessParagraphTag(MarkupProcessData& markupProcessData, const Tag tag, bool isEndBuffer,
                          CharacterIndex& characterIndex)
 {
-  if ((characterIndex > 0 && markupProcessData.markupProcessedText[characterIndex - 1u] != NEW_LINE) &&
-      (!(tag.isEndTag && isEndBuffer)))
+  if((characterIndex > 0 && markupProcessData.markupProcessedText[characterIndex - 1u] != NEW_LINE) &&
+     (!(tag.isEndTag && isEndBuffer)))
   {
     // Insert new-line character at the start and end of paragraph.
     markupProcessData.markupProcessedText.append(1u, NEW_LINE);
@@ -730,14 +730,14 @@ void ProcessParagraphTag(MarkupProcessData& markupProcessData, const Tag tag, bo
  */
 void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<ColorRun>& colorRuns,
                        Vector<FontDescriptionRun>& fontRuns, Vector<UnderlinedCharacterRun>& underlinedCharacterRuns,
-                       Vector<ColorRun>& backgroundColorRuns,
-                       Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns,
+                       Vector<ColorRun>&                     backgroundColorRuns,
+                       Vector<StrikethroughCharacterRun>&    strikethroughCharacterRuns,
                        Vector<CharacterSpacingCharacterRun>& characterSpacingCharacterRuns, RunIndex& colorRunIndex,
                        RunIndex& fontRunIndex, RunIndex& underlinedCharacterRunIndex, RunIndex& backgroundColorRunIndex,
                        RunIndex& strikethroughCharacterRunIndex, RunIndex& characterSpacingCharacterRunIndex,
                        const CharacterIndex characterIndex, int& tagReference)
 {
-  if (!spanTag.isEndTag)
+  if(!spanTag.isEndTag)
   {
     // Create a new run.
     ColorRun colorRun;
@@ -762,18 +762,18 @@ void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<C
     Initialize(span);
 
     // Fill the run with the parameters.
-    colorRun.characterRun.characterIndex = characterIndex;
-    fontRun.characterRun.characterIndex = characterIndex;
-    underlinedCharacterRun.characterRun.characterIndex = characterIndex;
-    backgroundColorRun.characterRun.characterIndex = characterIndex;
-    strikethroughCharacterRun.characterRun.characterIndex = characterIndex;
+    colorRun.characterRun.characterIndex                     = characterIndex;
+    fontRun.characterRun.characterIndex                      = characterIndex;
+    underlinedCharacterRun.characterRun.characterIndex       = characterIndex;
+    backgroundColorRun.characterRun.characterIndex           = characterIndex;
+    strikethroughCharacterRun.characterRun.characterIndex    = characterIndex;
     characterSpacingCharacterRun.characterRun.characterIndex = characterIndex;
 
-    span.colorRunIndex = colorRunIndex;
-    span.fontRunIndex = fontRunIndex;
-    span.underlinedCharacterRunIndex = underlinedCharacterRunIndex;
-    span.backgroundColorRunIndex = backgroundColorRunIndex;
-    span.strikethroughCharacterRunIndex = strikethroughCharacterRunIndex;
+    span.colorRunIndex                     = colorRunIndex;
+    span.fontRunIndex                      = fontRunIndex;
+    span.underlinedCharacterRunIndex       = underlinedCharacterRunIndex;
+    span.backgroundColorRunIndex           = backgroundColorRunIndex;
+    span.strikethroughCharacterRunIndex    = strikethroughCharacterRunIndex;
     span.characterSpacingCharacterRunIndex = characterSpacingCharacterRunIndex;
 
     ProcessSpanTag(spanTag, colorRun, fontRun, underlinedCharacterRun, backgroundColorRun, strikethroughCharacterRun,
@@ -785,42 +785,42 @@ void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<C
     spanStack.Push(span);
 
     // Point the next free run.
-    if (span.isColorDefined)
+    if(span.isColorDefined)
     {
       // Push the run in the logical model.
       colorRuns.PushBack(colorRun);
       ++colorRunIndex;
     }
 
-    if (span.isFontDefined)
+    if(span.isFontDefined)
     {
       // Push the run in the logical model.
       fontRuns.PushBack(fontRun);
       ++fontRunIndex;
     }
 
-    if (span.isUnderlinedCharacterDefined)
+    if(span.isUnderlinedCharacterDefined)
     {
       // Push the run in the logical model.
       underlinedCharacterRuns.PushBack(underlinedCharacterRun);
       ++underlinedCharacterRunIndex;
     }
 
-    if (span.isBackgroundColorDefined)
+    if(span.isBackgroundColorDefined)
     {
       // Push the run in the logical model.
       backgroundColorRuns.PushBack(backgroundColorRun);
       ++backgroundColorRunIndex;
     }
 
-    if (span.isStrikethroughDefined)
+    if(span.isStrikethroughDefined)
     {
       // Push the run in the logical model.
       strikethroughCharacterRuns.PushBack(strikethroughCharacterRun);
       ++strikethroughCharacterRunIndex;
     }
 
-    if (span.isCharacterSpacingDefined)
+    if(span.isCharacterSpacingDefined)
     {
       // Push the run in the logical model.
       characterSpacingCharacterRuns.PushBack(characterSpacingCharacterRun);
@@ -832,52 +832,52 @@ void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<C
   }
   else
   {
-    if (tagReference > 0)
+    if(tagReference > 0)
     {
       // Pop the top of the stack and set the number of characters of the run.
       Span span = spanStack.Pop();
 
-      if (span.isColorDefined)
+      if(span.isColorDefined)
       {
-        ColorRun& colorRun = *(colorRuns.Begin() + span.colorRunIndex);
+        ColorRun& colorRun                       = *(colorRuns.Begin() + span.colorRunIndex);
         colorRun.characterRun.numberOfCharacters = characterIndex - colorRun.characterRun.characterIndex;
       }
 
-      if (span.isFontDefined)
+      if(span.isFontDefined)
       {
-        FontDescriptionRun& fontRun = *(fontRuns.Begin() + span.fontRunIndex);
+        FontDescriptionRun& fontRun             = *(fontRuns.Begin() + span.fontRunIndex);
         fontRun.characterRun.numberOfCharacters = characterIndex - fontRun.characterRun.characterIndex;
       }
 
-      if (span.isUnderlinedCharacterDefined)
+      if(span.isUnderlinedCharacterDefined)
       {
         UnderlinedCharacterRun& underlinedCharacterRun =
-            *(underlinedCharacterRuns.Begin() + span.underlinedCharacterRunIndex);
+          *(underlinedCharacterRuns.Begin() + span.underlinedCharacterRunIndex);
         underlinedCharacterRun.characterRun.numberOfCharacters =
-            characterIndex - underlinedCharacterRun.characterRun.characterIndex;
+          characterIndex - underlinedCharacterRun.characterRun.characterIndex;
       }
 
-      if (span.isBackgroundColorDefined)
+      if(span.isBackgroundColorDefined)
       {
         ColorRun& backgroundColorRun = *(backgroundColorRuns.Begin() + span.backgroundColorRunIndex);
         backgroundColorRun.characterRun.numberOfCharacters =
-            characterIndex - backgroundColorRun.characterRun.characterIndex;
+          characterIndex - backgroundColorRun.characterRun.characterIndex;
       }
 
-      if (span.isStrikethroughDefined)
+      if(span.isStrikethroughDefined)
       {
         StrikethroughCharacterRun& strikethroughCharacterRun =
-            *(strikethroughCharacterRuns.Begin() + span.strikethroughCharacterRunIndex);
+          *(strikethroughCharacterRuns.Begin() + span.strikethroughCharacterRunIndex);
         strikethroughCharacterRun.characterRun.numberOfCharacters =
-            characterIndex - strikethroughCharacterRun.characterRun.characterIndex;
+          characterIndex - strikethroughCharacterRun.characterRun.characterIndex;
       }
 
-      if (span.isCharacterSpacingDefined)
+      if(span.isCharacterSpacingDefined)
       {
         CharacterSpacingCharacterRun& characterSpacingCharacterRun =
-            *(characterSpacingCharacterRuns.Begin() + span.characterSpacingCharacterRunIndex);
+          *(characterSpacingCharacterRuns.Begin() + span.characterSpacingCharacterRunIndex);
         characterSpacingCharacterRun.characterRun.numberOfCharacters =
-            characterIndex - characterSpacingCharacterRun.characterRun.characterIndex;
+          characterIndex - characterSpacingCharacterRun.characterRun.characterIndex;
       }
 
       --tagReference;
@@ -904,16 +904,16 @@ void ProcessAnchorForRun(MarkupProcessData& markupProcessData, MarkupPropertyDat
                          Vector<UnderlinedCharacterRun>& underlinedCharacterRuns, RunIndex& colorRunIndex,
                          RunIndex& underlinedCharacterRunIndex, const CharacterIndex characterIndex, int& tagReference)
 {
-  if (!tag.isEndTag)
+  if(!tag.isEndTag)
   {
     // Create an anchor instance.
     Anchor anchor;
-    anchor.href = nullptr;
-    anchor.startIndex = characterIndex;
-    anchor.endIndex = 0u;
-    anchor.colorRunIndex = colorRunIndex;
+    anchor.href                        = nullptr;
+    anchor.startIndex                  = characterIndex;
+    anchor.endIndex                    = 0u;
+    anchor.colorRunIndex               = colorRunIndex;
     anchor.underlinedCharacterRunIndex = underlinedCharacterRunIndex;
-    anchor.markupClickedColor = markupPropertyData.anchorClickedColor;
+    anchor.markupClickedColor          = markupPropertyData.anchorClickedColor;
 
     // Create a new run.
     ColorRun colorRun;
@@ -926,15 +926,15 @@ void ProcessAnchorForRun(MarkupProcessData& markupProcessData, MarkupPropertyDat
     Initialize(anchorForStack);
 
     // Fill the run with the parameters.
-    colorRun.characterRun.characterIndex = characterIndex;
+    colorRun.characterRun.characterIndex               = characterIndex;
     underlinedCharacterRun.characterRun.characterIndex = characterIndex;
 
-    anchorForStack.colorRunIndex = colorRunIndex;
+    anchorForStack.colorRunIndex               = colorRunIndex;
     anchorForStack.underlinedCharacterRunIndex = underlinedCharacterRunIndex;
 
     // Init default color
-    colorRun.color = markupPropertyData.anchorColor;
-    underlinedCharacterRun.properties.color = markupPropertyData.anchorColor;
+    colorRun.color                                 = markupPropertyData.anchorColor;
+    underlinedCharacterRun.properties.color        = markupPropertyData.anchorColor;
     underlinedCharacterRun.properties.colorDefined = true;
 
     ProcessAnchorTag(tag, anchor, colorRun, underlinedCharacterRun);
@@ -957,11 +957,11 @@ void ProcessAnchorForRun(MarkupProcessData& markupProcessData, MarkupPropertyDat
   }
   else
   {
-    if (tagReference > 0)
+    if(tagReference > 0)
     {
       // Update end index.
       unsigned int count = markupProcessData.anchors.Count();
-      if (count > 0)
+      if(count > 0)
       {
         markupProcessData.anchors[count - 1].endIndex = characterIndex;
       }
@@ -969,13 +969,13 @@ void ProcessAnchorForRun(MarkupProcessData& markupProcessData, MarkupPropertyDat
       // Pop the top of the stack and set the number of characters of the run.
       AnchorForStack anchorForStack = anchorStack.Pop();
 
-      ColorRun& colorRun = *(colorRuns.Begin() + anchorForStack.colorRunIndex);
+      ColorRun& colorRun                       = *(colorRuns.Begin() + anchorForStack.colorRunIndex);
       colorRun.characterRun.numberOfCharacters = characterIndex - colorRun.characterRun.characterIndex;
 
       UnderlinedCharacterRun& underlinedCharacterRun =
-          *(underlinedCharacterRuns.Begin() + anchorForStack.underlinedCharacterRunIndex);
+        *(underlinedCharacterRuns.Begin() + anchorForStack.underlinedCharacterRunIndex);
       underlinedCharacterRun.characterRun.numberOfCharacters =
-          characterIndex - underlinedCharacterRun.characterRun.characterIndex;
+        characterIndex - underlinedCharacterRun.characterRun.characterIndex;
 
       --tagReference;
     }
@@ -1009,9 +1009,9 @@ void ResizeModelVectors(MarkupProcessData& markupProcessData, const RunIndex fon
   markupProcessData.characterSpacingCharacterRuns.Resize(characterSpacingCharacterRunIndex);
 
 #ifdef DEBUG_ENABLED
-  if (gLogFilter->IsEnabledFor(Debug::Verbose))
+  if(gLogFilter->IsEnabledFor(Debug::Verbose))
   {
-    for (uint32_t i = 0; i < colorRunIndex; ++i)
+    for(uint32_t i = 0; i < colorRunIndex; ++i)
     {
       ColorRun& run = markupProcessData.colorRuns[i];
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "run[%d] index: %d, length: %d, color %f,%f,%f,%f\n", i,
@@ -1033,23 +1033,23 @@ void ResizeModelVectors(MarkupProcessData& markupProcessData, const RunIndex fon
 void ProcessMarkupStringBuffer(MarkupProcessData& markupProcessData, const char*& markupStringBuffer,
                                const char* const markupStringEndBuffer, CharacterIndex& characterIndex)
 {
-  unsigned char character = *markupStringBuffer;
-  const char* markupBuffer = markupStringBuffer;
-  unsigned char count = GetUtf8Length(character);
-  char utf8[8];
+  unsigned char character    = *markupStringBuffer;
+  const char*   markupBuffer = markupStringBuffer;
+  unsigned char count        = GetUtf8Length(character);
+  char          utf8[8];
 
   // checking if contains XHTML entity or not
   const unsigned int len = GetXHTMLEntityLength(markupStringBuffer, markupStringEndBuffer);
 
   // Parse markupStringTxt if it contains XHTML Entity between '&' and ';'
-  if (len > 0)
+  if(len > 0)
   {
     char* entityCode = NULL;
-    bool result = false;
-    count = 0;
+    bool  result     = false;
+    count            = 0;
 
     // Checking if XHTML Numeric Entity
-    if (HASH == *(markupBuffer + 1u))
+    if(HASH == *(markupBuffer + 1u))
     {
       entityCode = &utf8[0];
       // markupBuffer is currently pointing to '&'. By adding 2u to markupBuffer it will point to numeric string by
@@ -1059,12 +1059,12 @@ void ProcessMarkupStringBuffer(MarkupProcessData& markupProcessData, const char*
     else // Checking if XHTML Named Entity
     {
       entityCode = const_cast<char*>(NamedEntityToUtf8(markupBuffer, len));
-      result = (entityCode != NULL);
+      result     = (entityCode != NULL);
     }
-    if (result)
+    if(result)
     {
       markupBuffer = entityCode; // utf8 text assigned to markupBuffer
-      character = markupBuffer[0];
+      character    = markupBuffer[0];
     }
     else
     {
@@ -1074,19 +1074,19 @@ void ProcessMarkupStringBuffer(MarkupProcessData& markupProcessData, const char*
   }
   else // in case string conatins Start of XHTML Entity('&') but not its end character(';')
   {
-    if (character == AMPERSAND)
+    if(character == AMPERSAND)
     {
       markupBuffer = NULL;
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Not Well formed XHTML content \n");
     }
   }
 
-  if (markupBuffer != NULL)
+  if(markupBuffer != NULL)
   {
     const unsigned char numberOfBytes = GetUtf8Length(character);
     markupProcessData.markupProcessedText.push_back(character);
 
-    for (unsigned char i = 1u; i < numberOfBytes; ++i)
+    for(unsigned char i = 1u; i < numberOfBytes; ++i)
     {
       ++markupBuffer;
       markupProcessData.markupProcessedText.push_back(*markupBuffer);
@@ -1117,26 +1117,26 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
   StyleStack<AnchorForStack> anchorStack;
 
   // Points the next free position in the vector of runs.
-  RunIndex colorRunIndex = 0u;
-  RunIndex fontRunIndex = 0u;
-  RunIndex underlinedCharacterRunIndex = 0u;
-  RunIndex backgroundRunIndex = 0u;
-  RunIndex strikethroughCharacterRunIndex = 0u;
-  RunIndex boundedParagraphRunIndex = 0u;
+  RunIndex colorRunIndex                     = 0u;
+  RunIndex fontRunIndex                      = 0u;
+  RunIndex underlinedCharacterRunIndex       = 0u;
+  RunIndex backgroundRunIndex                = 0u;
+  RunIndex strikethroughCharacterRunIndex    = 0u;
+  RunIndex boundedParagraphRunIndex          = 0u;
   RunIndex characterSpacingCharacterRunIndex = 0u;
 
   // check tag reference
-  int colorTagReference = 0u;
-  int fontTagReference = 0u;
-  int iTagReference = 0u;
-  int bTagReference = 0u;
-  int uTagReference = 0u;
-  int backgroundTagReference = 0u;
-  int spanTagReference = 0u;
-  int sTagReference = 0u;
-  int pTagReference = 0u;
+  int colorTagReference            = 0u;
+  int fontTagReference             = 0u;
+  int iTagReference                = 0u;
+  int bTagReference                = 0u;
+  int uTagReference                = 0u;
+  int backgroundTagReference       = 0u;
+  int spanTagReference             = 0u;
+  int sTagReference                = 0u;
+  int pTagReference                = 0u;
   int characterSpacingTagReference = 0u;
-  int aTagReference = 0u;
+  int aTagReference                = 0u;
 
   // Give an initial default value to the model's vectors.
   markupProcessData.colorRuns.Reserve(DEFAULT_VECTOR_SIZE);
@@ -1147,85 +1147,89 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
   markupProcessData.characterSpacingCharacterRuns.Reserve(DEFAULT_VECTOR_SIZE);
 
   // Get the mark-up string buffer.
-  const char* markupStringBuffer = markupString.c_str();
+  const char*       markupStringBuffer    = markupString.c_str();
   const char* const markupStringEndBuffer = markupStringBuffer + markupStringSize;
 
-  Tag tag;
+  Tag            tag;
   CharacterIndex characterIndex = 0u;
-  for (; markupStringBuffer < markupStringEndBuffer;)
+  for(; markupStringBuffer < markupStringEndBuffer;)
   {
     tag.attributes.Clear();
-    if (IsTag(markupStringBuffer, markupStringEndBuffer, tag))
+    if(IsTag(markupStringBuffer, markupStringEndBuffer, tag))
     {
-      if (TokenComparison(MARKUP::TAG::COLOR, tag.buffer, tag.length))
+      if(TokenComparison(MARKUP::TAG::COLOR, tag.buffer, tag.length))
       {
         ProcessTagForRun<ColorRun>(markupProcessData.colorRuns, styleStack, tag, characterIndex, colorRunIndex,
-                                   colorTagReference, [](const Tag& tag, ColorRun& run) { ProcessColorTag(tag, run); });
+                                   colorTagReference, [](const Tag& tag, ColorRun& run)
+        { ProcessColorTag(tag, run); });
       } // <color></color>
-      else if (TokenComparison(MARKUP::TAG::ITALIC, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::ITALIC, tag.buffer, tag.length))
       {
         ProcessTagForRun<FontDescriptionRun>(markupProcessData.fontRuns, styleStack, tag, characterIndex, fontRunIndex,
                                              iTagReference,
                                              [](const Tag&, FontDescriptionRun& fontRun)
-                                             {
-                                               fontRun.slant = TextAbstraction::FontSlant::ITALIC;
-                                               fontRun.slantDefined = true;
-                                             });
+        {
+          fontRun.slant        = TextAbstraction::FontSlant::ITALIC;
+          fontRun.slantDefined = true;
+        });
       } // <i></i>
-      else if (TokenComparison(MARKUP::TAG::UNDERLINE, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::UNDERLINE, tag.buffer, tag.length))
       {
         ProcessTagForRun<UnderlinedCharacterRun>(
-            markupProcessData.underlinedCharacterRuns, styleStack, tag, characterIndex, underlinedCharacterRunIndex,
-            uTagReference, [](const Tag& tag, UnderlinedCharacterRun& run) { ProcessUnderlineTag(tag, run); });
+          markupProcessData.underlinedCharacterRuns, styleStack, tag, characterIndex, underlinedCharacterRunIndex,
+          uTagReference, [](const Tag& tag, UnderlinedCharacterRun& run)
+        { ProcessUnderlineTag(tag, run); });
       } // <u></u>
-      else if (TokenComparison(MARKUP::TAG::BOLD, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::BOLD, tag.buffer, tag.length))
       {
         ProcessTagForRun<FontDescriptionRun>(markupProcessData.fontRuns, styleStack, tag, characterIndex, fontRunIndex,
                                              bTagReference,
                                              [](const Tag&, FontDescriptionRun& fontRun)
-                                             {
-                                               fontRun.weight = TextAbstraction::FontWeight::BOLD;
-                                               fontRun.weightDefined = true;
-                                             });
+        {
+          fontRun.weight        = TextAbstraction::FontWeight::BOLD;
+          fontRun.weightDefined = true;
+        });
       } // <b></b>
-      else if (TokenComparison(MARKUP::TAG::FONT, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::FONT, tag.buffer, tag.length))
       {
         ProcessTagForRun<FontDescriptionRun>(
-            markupProcessData.fontRuns, styleStack, tag, characterIndex, fontRunIndex, fontTagReference,
-            [](const Tag& tag, FontDescriptionRun& fontRun) { ProcessFontTag(tag, fontRun); });
+          markupProcessData.fontRuns, styleStack, tag, characterIndex, fontRunIndex, fontTagReference,
+          [](const Tag& tag, FontDescriptionRun& fontRun)
+        { ProcessFontTag(tag, fontRun); });
       } // <font></font>
-      else if (TokenComparison(MARKUP::TAG::ANCHOR, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::ANCHOR, tag.buffer, tag.length))
       {
         ProcessAnchorForRun(markupProcessData, markupPropertyData, tag, anchorStack, markupProcessData.colorRuns,
                             markupProcessData.underlinedCharacterRuns, colorRunIndex, underlinedCharacterRunIndex,
                             characterIndex, aTagReference);
       } // <a href=https://www.tizen.org>tizen</a>
-      else if (TokenComparison(MARKUP::TAG::SHADOW, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::SHADOW, tag.buffer, tag.length))
       {
         // TODO: If !tag.isEndTag, then create a new shadow run.
         //       else Pop the top of the stack and set the number of characters of the run.
       } // <shadow></shadow>
-      else if (TokenComparison(MARKUP::TAG::GLOW, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::GLOW, tag.buffer, tag.length))
       {
         // TODO: If !tag.isEndTag, then create a new glow run.
         //       else Pop the top of the stack and set the number of characters of the run.
       } // <glow></glow>
-      else if (TokenComparison(MARKUP::TAG::OUTLINE, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::OUTLINE, tag.buffer, tag.length))
       {
         // TODO: If !tag.isEndTag, then create a new outline run.
         //       else Pop the top of the stack and set the number of characters of the run.
       } // <outline></outline>
-      else if (TokenComparison(MARKUP::TAG::EMBEDDED_ITEM, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::EMBEDDED_ITEM, tag.buffer, tag.length))
       {
         ProcessItemTag(markupProcessData, tag, characterIndex);
       }
-      else if (TokenComparison(MARKUP::TAG::BACKGROUND, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::BACKGROUND, tag.buffer, tag.length))
       {
         ProcessTagForRun<ColorRun>(markupProcessData.backgroundColorRuns, styleStack, tag, characterIndex,
                                    backgroundRunIndex, backgroundTagReference,
-                                   [](const Tag& tag, ColorRun& run) { ProcessBackground(tag, run); });
+                                   [](const Tag& tag, ColorRun& run)
+        { ProcessBackground(tag, run); });
       }
-      else if (TokenComparison(MARKUP::TAG::SPAN, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::SPAN, tag.buffer, tag.length))
       {
         ProcessSpanForRun(tag, spanStack, markupProcessData.colorRuns, markupProcessData.fontRuns,
                           markupProcessData.underlinedCharacterRuns, markupProcessData.backgroundColorRuns,
@@ -1234,29 +1238,31 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
                           strikethroughCharacterRunIndex, characterSpacingCharacterRunIndex, characterIndex,
                           spanTagReference);
       }
-      else if (TokenComparison(MARKUP::TAG::STRIKETHROUGH, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::STRIKETHROUGH, tag.buffer, tag.length))
       {
         ProcessTagForRun<StrikethroughCharacterRun>(markupProcessData.strikethroughCharacterRuns, styleStack, tag,
                                                     characterIndex, strikethroughCharacterRunIndex, sTagReference,
                                                     [](const Tag& tag, StrikethroughCharacterRun& run)
-                                                    { ProcessStrikethroughTag(tag, run); });
+        { ProcessStrikethroughTag(tag, run); });
       } // <s></s>
-      else if (TokenComparison(MARKUP::TAG::PARAGRAPH, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::PARAGRAPH, tag.buffer, tag.length))
       {
         ProcessParagraphTag(markupProcessData, tag, (markupStringBuffer == markupStringEndBuffer), characterIndex);
         ProcessTagForRun<BoundedParagraphRun>(
-            markupProcessData.boundedParagraphRuns, styleStack, tag, characterIndex, boundedParagraphRunIndex,
-            pTagReference, [](const Tag& tag, BoundedParagraphRun& run) { ProcessAttributesOfParagraphTag(tag, run); });
+          markupProcessData.boundedParagraphRuns, styleStack, tag, characterIndex, boundedParagraphRunIndex,
+          pTagReference, [](const Tag& tag, BoundedParagraphRun& run)
+        { ProcessAttributesOfParagraphTag(tag, run); });
       } // <p></p>
-      else if (TokenComparison(MARKUP::TAG::CHARACTER_SPACING, tag.buffer, tag.length))
+      else if(TokenComparison(MARKUP::TAG::CHARACTER_SPACING, tag.buffer, tag.length))
       {
         ProcessTagForRun<CharacterSpacingCharacterRun>(
-            markupProcessData.characterSpacingCharacterRuns, styleStack, tag, characterIndex,
-            characterSpacingCharacterRunIndex, characterSpacingTagReference,
-            [](const Tag& tag, CharacterSpacingCharacterRun& run) { ProcessCharacterSpacingTag(tag, run); });
+          markupProcessData.characterSpacingCharacterRuns, styleStack, tag, characterIndex,
+          characterSpacingCharacterRunIndex, characterSpacingTagReference,
+          [](const Tag& tag, CharacterSpacingCharacterRun& run)
+        { ProcessCharacterSpacingTag(tag, run); });
       } // <char-spacing></char-spacing>
-    }   // end if( IsTag() )
-    else if (markupStringBuffer < markupStringEndBuffer)
+    } // end if( IsTag() )
+    else if(markupStringBuffer < markupStringEndBuffer)
     {
       ProcessMarkupStringBuffer(markupProcessData, markupStringBuffer, markupStringEndBuffer, characterIndex);
     }

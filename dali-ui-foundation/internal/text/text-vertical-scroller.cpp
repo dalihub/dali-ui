@@ -41,8 +41,8 @@ TextVerticalScrollerPtr TextVerticalScroller::New()
 }
 
 TextVerticalScroller::TextVerticalScroller()
-  : mDuration(DEFAULT_VERTICAL_SCROLL_DURATION),
-    mScrollTo(0.0f)
+: mDuration(DEFAULT_VERTICAL_SCROLL_DURATION),
+  mScrollTo(0.0f)
 {
 }
 
@@ -52,10 +52,10 @@ TextVerticalScroller::~TextVerticalScroller()
 
 void TextVerticalScroller::CheckStartAnimation(Actor& sourceActor, float x, float y, float scrollAmount)
 {
-  if (Equals(scrollAmount, 0.0f, Math::MACHINE_EPSILON_1))
+  if(Equals(scrollAmount, 0.0f, Math::MACHINE_EPSILON_1))
   {
     // scroll animation isn't required, set position only
-    if (mScrollAnimation && mScrollAnimation.GetState() == Animation::PLAYING)
+    if(mScrollAnimation && mScrollAnimation.GetState() == Animation::PLAYING)
     {
       mScrollAnimation.Clear();
     }
@@ -64,7 +64,7 @@ void TextVerticalScroller::CheckStartAnimation(Actor& sourceActor, float x, floa
   }
   float toY = y + scrollAmount;
   // Either actor or scroll area is changed, so restart animation
-  if (mScrollAnimation)
+  if(mScrollAnimation)
   {
     mScrollAnimation.Clear();
   }
@@ -74,7 +74,7 @@ void TextVerticalScroller::CheckStartAnimation(Actor& sourceActor, float x, floa
     mScrollAnimation = Animation::New(mDuration);
   }
   mScrollingActor = sourceActor;
-  mScrollTo = toY;
+  mScrollTo       = toY;
 
   // Set animation attribute
   sourceActor.SetProperty(Actor::Property::POSITION, Vector2(x, y));

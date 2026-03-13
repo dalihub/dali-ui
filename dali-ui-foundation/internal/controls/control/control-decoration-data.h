@@ -30,20 +30,20 @@ struct DecorationData
 {
   // Default constructor
   DecorationData()
-    : mBorderlineColor(Color::BLACK),
-      mCornerRadius(Vector4::ZERO),
-      mCornerSquareness(Vector4::ZERO),
-      mBorderlineWidth(0.0f),
-      mBorderlineOffset(0.0f),
-      mCornerRadiusPolicy(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
+  : mBorderlineColor(Color::BLACK),
+    mCornerRadius(Vector4::ZERO),
+    mCornerSquareness(Vector4::ZERO),
+    mBorderlineWidth(0.0f),
+    mBorderlineOffset(0.0f),
+    mCornerRadiusPolicy(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
   {
   }
   Vector4 mBorderlineColor;
   Vector4 mCornerRadius;
   Vector4 mCornerSquareness;
-  float mBorderlineWidth;
-  float mBorderlineOffset;
-  int mCornerRadiusPolicy;
+  float   mBorderlineWidth;
+  float   mBorderlineOffset;
+  int     mCornerRadiusPolicy;
 
   /**
    * @brief Helper API to reduce duplicated codes.
@@ -52,7 +52,7 @@ struct DecorationData
    */
   static DecorationData* EnsureDecorationData(DecorationData*& data)
   {
-    if (data == nullptr)
+    if(data == nullptr)
     {
       data = new DecorationData();
     }

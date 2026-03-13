@@ -52,9 +52,9 @@ float ConvertToEven(float value)
 float GetDpi()
 {
   static uint32_t horizontalDpi = 0u;
-  static uint32_t verticalDpi = 0u;
+  static uint32_t verticalDpi   = 0u;
 
-  if (DALI_UNLIKELY(horizontalDpi == 0u))
+  if(DALI_UNLIKELY(horizontalDpi == 0u))
   {
     Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
     fontClient.GetDpi(horizontalDpi, verticalDpi);
@@ -76,32 +76,32 @@ namespace Ui
 {
 namespace Text
 {
-Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Controller& controller,
-                                                                         const Size& requestedControllerSize,
+Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Controller&           controller,
+                                                                         const Size&           requestedControllerSize,
                                                                          const OperationsMask& requestedOperationsMask)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->CalculateLayoutSizeOnRequiredControllerSize\n");
   Size calculatedLayoutSize;
 
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
+  Controller::Impl& impl        = *controller.mImpl;
+  ModelPtr&         model       = impl.mModel;
+  VisualModelPtr&   visualModel = model->mVisualModel;
 
   // Operations that can be done only once until the text changes.
   const OperationsMask onlyOnceOperations = static_cast<OperationsMask>(
-      CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO | SHAPE_TEXT | GET_GLYPH_METRICS);
+    CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO | SHAPE_TEXT | GET_GLYPH_METRICS);
 
   const OperationsMask sizeOperations = static_cast<OperationsMask>(LAYOUT | ALIGN | REORDER);
 
   // Set the update info to relayout the whole text.
   TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
-  if ((0 == textUpdateInfo.mNumberOfCharactersToAdd) && (0 == textUpdateInfo.mPreviousNumberOfCharacters) &&
-      ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
-       (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
+  if((0 == textUpdateInfo.mNumberOfCharactersToAdd) && (0 == textUpdateInfo.mPreviousNumberOfCharacters) &&
+     ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
+      (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
   {
     textUpdateInfo.mNumberOfCharactersToAdd = model->mLogicalModel->mText.Count();
   }
-  textUpdateInfo.mParagraphCharacterIndex = 0u;
+  textUpdateInfo.mParagraphCharacterIndex     = 0u;
   textUpdateInfo.mRequestedNumberOfCharacters = model->mLogicalModel->mText.Count();
 
   // Get a reference to the pending operations member
@@ -117,10 +117,10 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
   // Whether the text control is editable
   const bool isEditable = NULL != impl.mEventData;
 
-  if (!isEditable)
+  if(!isEditable)
   {
-    if (NO_OPERATION != (VALIDATE_FONTS & operationsPending) &&
-        textUpdateInfo.mCharacterIndex == static_cast<CharacterIndex>(-1))
+    if(NO_OPERATION != (VALIDATE_FONTS & operationsPending) &&
+       textUpdateInfo.mCharacterIndex == static_cast<CharacterIndex>(-1))
     {
       impl.ClearFontData();
       updateInfoCharIndexBackup = textUpdateInfo.mCharacterIndex;
@@ -191,20 +191,20 @@ Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool conv
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(controller);
 
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
+  Controller::Impl& impl        = *controller.mImpl;
+  ModelPtr&         model       = impl.mModel;
+  VisualModelPtr&   visualModel = model->mVisualModel;
 
-  if (impl.mRecalculateNaturalSize)
+  if(impl.mRecalculateNaturalSize)
   {
     Size naturalSize;
 
     // Layout the text for the new width.
-    OperationsMask requestedOperationsMask = static_cast<OperationsMask>(LAYOUT | REORDER);
-    Size sizeMaxWidthAndMaxHeight = Size(MAX_FLOAT, MAX_FLOAT);
+    OperationsMask requestedOperationsMask  = static_cast<OperationsMask>(LAYOUT | REORDER);
+    Size           sizeMaxWidthAndMaxHeight = Size(MAX_FLOAT, MAX_FLOAT);
 
     naturalSize =
-        CalculateLayoutSizeOnRequiredControllerSize(controller, sizeMaxWidthAndMaxHeight, requestedOperationsMask);
+      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeMaxWidthAndMaxHeight, requestedOperationsMask);
 
     // Stores the natural size to avoid recalculate it again
     // unless the text/style changes.
@@ -224,7 +224,7 @@ Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool conv
                   naturalSizeVec3.y, naturalSizeVec3.z);
   }
 
-  if (convertToEven)
+  if(convertToEven)
   {
     naturalSizeVec3.x = ConvertToEven(naturalSizeVec3.x);
     naturalSizeVec3.y = ConvertToEven(naturalSizeVec3.y);
@@ -235,18 +235,18 @@ Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool conv
 
 bool Controller::Relayouter::CheckForTextFit(Controller& controller, float pointSize, const Size& layoutSize)
 {
-  Size textSize;
-  Controller::Impl& impl = *controller.mImpl;
-  TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
+  Size              textSize;
+  Controller::Impl& impl            = *controller.mImpl;
+  TextUpdateInfo&   textUpdateInfo  = impl.mTextUpdateInfo;
   impl.mFontDefaults->mFitPointSize = pointSize;
-  impl.mFontDefaults->sizeDefined = true;
+  impl.mFontDefaults->sizeDefined   = true;
   impl.ClearFontData();
 
   // Operations that can be done only once until the text changes.
   const OperationsMask onlyOnceOperations = static_cast<OperationsMask>(
-      CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO | SHAPE_TEXT | GET_GLYPH_METRICS);
+    CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO | SHAPE_TEXT | GET_GLYPH_METRICS);
 
-  textUpdateInfo.mParagraphCharacterIndex = 0u;
+  textUpdateInfo.mParagraphCharacterIndex     = 0u;
   textUpdateInfo.mRequestedNumberOfCharacters = impl.mModel->mLogicalModel->mText.Count();
 
   // Make sure the model is up-to-date before layouting
@@ -260,7 +260,7 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
   textUpdateInfo.Clear();
   textUpdateInfo.mClearAll = true;
 
-  if (layoutTooSmall || textSize.width > layoutSize.width || textSize.height > layoutSize.height)
+  if(layoutTooSmall || textSize.width > layoutSize.width || textSize.height > layoutSize.height)
   {
     return false;
   }
@@ -272,20 +272,20 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
   Controller::Impl& impl = *controller.mImpl;
 
   const OperationsMask operations = impl.mOperationsPending;
-  if (NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_ARRAY_LAYOUT", "[%p]", static_cast<void*>(&controller));
-    std::vector<Ui::DevelTextLabel::FitOption> fitOptions = impl.mTextFitArray;
-    int numberOfFitOptions = static_cast<int>(fitOptions.size());
-    if (numberOfFitOptions == 0)
+    std::vector<Ui::DevelTextLabel::FitOption> fitOptions         = impl.mTextFitArray;
+    int                                        numberOfFitOptions = static_cast<int>(fitOptions.size());
+    if(numberOfFitOptions == 0)
     {
       DALI_LOG_ERROR("fitOptions is empty\n");
       return;
     }
 
-    ModelPtr& model = impl.mModel;
-    bool actualellipsis = model->mElideEnabled;
-    model->mElideEnabled = false;
+    ModelPtr& model          = impl.mModel;
+    bool      actualellipsis = model->mElideEnabled;
+    model->mElideEnabled     = false;
 
     // Sort in ascending order by PointSize.
     std::sort(fitOptions.begin(), fitOptions.end(), compareByPointSize);
@@ -293,12 +293,12 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
     // Decide whether to use binary search.
     // If MinLineSize is not sorted in ascending order,
     // binary search cannot guarantee that it will always find the best value.
-    bool binarySearch = true;
+    bool  binarySearch    = true;
     float prevMinLineSize = 0.0f;
-    for (Ui::DevelTextLabel::FitOption& option : fitOptions)
+    for(Ui::DevelTextLabel::FitOption& option : fitOptions)
     {
       float optionMinLineSize = option.GetMinLineSize();
-      if (prevMinLineSize > optionMinLineSize)
+      if(prevMinLineSize > optionMinLineSize)
       {
         binarySearch = false;
         break;
@@ -308,53 +308,53 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
 
     // Set the first FitOption(Minimum PointSize) to the best value.
     // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    Ui::DevelTextLabel::FitOption firstOption = fitOptions.front();
-    bool bestSizeUpdatedLatest = false;
-    float bestPointSize = firstOption.GetPointSize();
-    float bestMinLineSize = firstOption.GetMinLineSize();
+    Ui::DevelTextLabel::FitOption firstOption           = fitOptions.front();
+    bool                          bestSizeUpdatedLatest = false;
+    float                         bestPointSize         = firstOption.GetPointSize();
+    float                         bestMinLineSize       = firstOption.GetMinLineSize();
 
-    if (binarySearch)
+    if(binarySearch)
     {
-      int left = 0u;
+      int left  = 0u;
       int right = numberOfFitOptions - 1;
 
-      while (left <= right)
+      while(left <= right)
       {
-        int mid = left + (right - left) / 2;
-        Ui::DevelTextLabel::FitOption option = fitOptions[mid];
-        float testPointSize = option.GetPointSize();
-        float testMinLineSize = option.GetMinLineSize();
+        int                           mid             = left + (right - left) / 2;
+        Ui::DevelTextLabel::FitOption option          = fitOptions[mid];
+        float                         testPointSize   = option.GetPointSize();
+        float                         testMinLineSize = option.GetMinLineSize();
         impl.SetDefaultLineSize(testMinLineSize);
 
-        if (CheckForTextFit(controller, testPointSize, layoutSize))
+        if(CheckForTextFit(controller, testPointSize, layoutSize))
         {
           bestSizeUpdatedLatest = true;
-          bestPointSize = testPointSize;
-          bestMinLineSize = testMinLineSize;
-          left = mid + 1;
+          bestPointSize         = testPointSize;
+          bestMinLineSize       = testMinLineSize;
+          left                  = mid + 1;
         }
         else
         {
           bestSizeUpdatedLatest = false;
-          right = mid - 1;
+          right                 = mid - 1;
         }
       }
     }
     else
     {
       // If binary search is not possible, search sequentially starting from the largest PointSize.
-      for (auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
+      for(auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
       {
-        Ui::DevelTextLabel::FitOption option = *it;
-        float testPointSize = option.GetPointSize();
-        float testMinLineSize = option.GetMinLineSize();
+        Ui::DevelTextLabel::FitOption option          = *it;
+        float                         testPointSize   = option.GetPointSize();
+        float                         testMinLineSize = option.GetMinLineSize();
         impl.SetDefaultLineSize(testMinLineSize);
 
-        if (CheckForTextFit(controller, testPointSize, layoutSize))
+        if(CheckForTextFit(controller, testPointSize, layoutSize))
         {
           bestSizeUpdatedLatest = true;
-          bestPointSize = testPointSize;
-          bestMinLineSize = testMinLineSize;
+          bestPointSize         = testPointSize;
+          bestMinLineSize       = testMinLineSize;
           break;
         }
         else
@@ -365,15 +365,15 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
     }
 
     // Best point size was not updated. re-run so the TextFit should be fitted really.
-    if (!bestSizeUpdatedLatest)
+    if(!bestSizeUpdatedLatest)
     {
       impl.SetDefaultLineSize(bestMinLineSize);
       CheckForTextFit(controller, bestPointSize, layoutSize);
     }
 
-    model->mElideEnabled = actualellipsis;
+    model->mElideEnabled              = actualellipsis;
     impl.mFontDefaults->mFitPointSize = bestPointSize;
-    impl.mFontDefaults->sizeDefined = true;
+    impl.mFontDefaults->sizeDefined   = true;
     impl.ClearFontData();
   }
 }
@@ -383,44 +383,44 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
   Controller::Impl& impl = *controller.mImpl;
 
   const OperationsMask operations = impl.mOperationsPending;
-  if (NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
+  if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_LAYOUT", "[%p]", static_cast<void*>(&controller));
     ModelPtr& model = impl.mModel;
 
-    bool actualellipsis = model->mElideEnabled;
-    float minPointSize = impl.mTextFitMinSize;
-    float maxPointSize = impl.mTextFitMaxSize;
-    float pointInterval = impl.mTextFitStepSize;
-    float currentFitPointSize = impl.mFontDefaults->mFitPointSize;
+    bool  actualellipsis         = model->mElideEnabled;
+    float minPointSize           = impl.mTextFitMinSize;
+    float maxPointSize           = impl.mTextFitMaxSize;
+    float pointInterval          = impl.mTextFitStepSize;
+    float currentFitPointSize    = impl.mFontDefaults->mFitPointSize;
     float currentDefaultLineSize = impl.mLayoutEngine.GetDefaultLineSize();
-    bool isMultiLine = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
+    bool  isMultiLine            = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
     // Instead of using the LineSize of the current TextLabel, the LineSize set in TextFit is used.
 
     impl.SetDefaultLineSize(impl.mTextFitLineSize);
 
     model->mElideEnabled = false;
-    float bestPointSize = minPointSize;
+    float bestPointSize  = minPointSize;
 
     // check zero value
-    if (pointInterval < 1.f)
+    if(pointInterval < 1.f)
     {
       impl.mTextFitStepSize = pointInterval = 1.0f;
     }
 
     uint32_t pointSizeRange = static_cast<uint32_t>(ceil((maxPointSize - minPointSize) / pointInterval));
 
-    if (isMultiLine || pointSizeRange < 3)
+    if(isMultiLine || pointSizeRange < 3)
     {
       // Ensure minPointSize + pointSizeRange * pointInverval >= maxPointSize
-      while (minPointSize + static_cast<float>(pointSizeRange) * pointInterval < maxPointSize)
+      while(minPointSize + static_cast<float>(pointSizeRange) * pointInterval < maxPointSize)
       {
         ++pointSizeRange;
       }
 
       uint32_t bestSizeIndex = 0;
-      uint32_t minIndex = bestSizeIndex + 1u;
-      uint32_t maxIndex = pointSizeRange + 1u;
+      uint32_t minIndex      = bestSizeIndex + 1u;
+      uint32_t maxIndex      = pointSizeRange + 1u;
 
       bool bestSizeUpdatedLatest = false;
       // Find best size as binary search.
@@ -431,29 +431,29 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
       //
       // Basically, we can assume that 0 (minPointSize) is always valid.
       // Now, we will check [1 pointSizeRange] range s.t. pointSizeRange mean the maxPointSize
-      while (minIndex < maxIndex)
+      while(minIndex < maxIndex)
       {
-        uint32_t testIndex = minIndex + ((maxIndex - minIndex) >> 1u);
+        uint32_t    testIndex = minIndex + ((maxIndex - minIndex) >> 1u);
         const float testPointSize =
-            std::min(maxPointSize, minPointSize + static_cast<float>(testIndex) * pointInterval);
+          std::min(maxPointSize, minPointSize + static_cast<float>(testIndex) * pointInterval);
 
-        if (CheckForTextFit(controller, testPointSize, layoutSize))
+        if(CheckForTextFit(controller, testPointSize, layoutSize))
         {
           bestSizeUpdatedLatest = true;
 
           bestSizeIndex = testIndex;
-          minIndex = testIndex + 1u;
+          minIndex      = testIndex + 1u;
         }
         else
         {
           bestSizeUpdatedLatest = false;
-          maxIndex = testIndex;
+          maxIndex              = testIndex;
         }
       }
       bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
 
       // Best point size was not updated. re-run so the TextFit should be fitted really.
-      if (!bestSizeUpdatedLatest)
+      if(!bestSizeUpdatedLatest)
       {
         CheckForTextFit(controller, bestPointSize, layoutSize);
       }
@@ -461,24 +461,24 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     else
     {
       // assume textSize = a * pointSize + b, finding a and b.
-      Size textSize;
-      TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
+      Size                 textSize;
+      TextUpdateInfo&      textUpdateInfo = impl.mTextUpdateInfo;
       const OperationsMask onlyOnceOperations =
-          static_cast<OperationsMask>(CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO |
-                                      SHAPE_TEXT | GET_GLYPH_METRICS);
+        static_cast<OperationsMask>(CONVERT_TO_UTF32 | GET_SCRIPTS | VALIDATE_FONTS | GET_LINE_BREAKS | BIDI_INFO |
+                                    SHAPE_TEXT | GET_GLYPH_METRICS);
 
       float resultBasedX[2];
       float resultBasedY[2];
       float tmpPointSize[2] = {minPointSize, maxPointSize};
 
       // Calculate a and b by creating simultaneous equations with two calculations.
-      for (int i = 0; i < 2; i++)
+      for(int i = 0; i < 2; i++)
       {
         impl.mFontDefaults->mFitPointSize = tmpPointSize[i];
-        impl.mFontDefaults->sizeDefined = true;
+        impl.mFontDefaults->sizeDefined   = true;
         impl.ClearFontData();
 
-        textUpdateInfo.mParagraphCharacterIndex = 0u;
+        textUpdateInfo.mParagraphCharacterIndex     = 0u;
         textUpdateInfo.mRequestedNumberOfCharacters = impl.mModel->mLogicalModel->mText.Count();
 
         // Make sure the model is up-to-date before layouting
@@ -497,11 +497,11 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
 
       float aBasedX = (resultBasedX[1] - resultBasedX[0]) / (tmpPointSize[1] - tmpPointSize[0]);
       float bBasedX = resultBasedX[1] - aBasedX * tmpPointSize[1];
-      aBasedX = std::max(aBasedX, Dali::Math::MACHINE_EPSILON_1000);
+      aBasedX       = std::max(aBasedX, Dali::Math::MACHINE_EPSILON_1000);
 
       float aBasedY = (resultBasedY[1] - resultBasedY[0]) / (tmpPointSize[1] - tmpPointSize[0]);
       float bBasedY = resultBasedY[1] - aBasedY * tmpPointSize[1];
-      aBasedY = std::max(aBasedY, Dali::Math::MACHINE_EPSILON_1000);
+      aBasedY       = std::max(aBasedY, Dali::Math::MACHINE_EPSILON_1000);
 
       float bestPointSizeBasedX = (layoutSize.x - bBasedX) / aBasedX;
       float bestPointSizeBasedY = (layoutSize.y - bBasedY) / aBasedY;
@@ -510,33 +510,33 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
       bestPointSize = std::min(std::max(bestPointSize, minPointSize), maxPointSize);
       bestPointSize = std::floor((bestPointSize - minPointSize) / pointInterval) * pointInterval + minPointSize;
 
-      if (CheckForTextFit(controller, bestPointSize, layoutSize))
+      if(CheckForTextFit(controller, bestPointSize, layoutSize))
       {
-        while (bestPointSize + pointInterval <= maxPointSize &&
-               CheckForTextFit(controller, bestPointSize + pointInterval, layoutSize))
+        while(bestPointSize + pointInterval <= maxPointSize &&
+              CheckForTextFit(controller, bestPointSize + pointInterval, layoutSize))
         {
           bestPointSize += pointInterval;
         }
       }
-      else if (bestPointSize - pointInterval >= minPointSize)
+      else if(bestPointSize - pointInterval >= minPointSize)
       {
         do
         {
           bestPointSize -= pointInterval;
-        } while (bestPointSize - pointInterval >= minPointSize &&
-                 !CheckForTextFit(controller, bestPointSize, layoutSize));
+        } while(bestPointSize - pointInterval >= minPointSize &&
+                !CheckForTextFit(controller, bestPointSize, layoutSize));
       }
     }
 
     model->mElideEnabled = actualellipsis;
-    if (!Dali::Equals(currentFitPointSize, bestPointSize))
+    if(!Dali::Equals(currentFitPointSize, bestPointSize))
     {
       impl.mTextFitChanged = true;
     }
     // Revert back to the original TextLabel LineSize.
     impl.SetDefaultLineSize(currentDefaultLineSize);
     impl.mFontDefaults->mFitPointSize = bestPointSize;
-    impl.mFontDefaults->sizeDefined = true;
+    impl.mFontDefaults->sizeDefined   = true;
     impl.ClearFontData();
   }
 }
@@ -549,20 +549,20 @@ float Controller::Relayouter::GetHeightForWidth(Controller& controller, float wi
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(controller);
 
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
-  TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
+  Controller::Impl& impl           = *controller.mImpl;
+  ModelPtr&         model          = impl.mModel;
+  VisualModelPtr&   visualModel    = model->mVisualModel;
+  TextUpdateInfo&   textUpdateInfo = impl.mTextUpdateInfo;
 
   // Get cached value.
   Size layoutSize = visualModel->GetHeightForWidth();
 
-  if (fabsf(width - layoutSize.width) > Math::MACHINE_EPSILON_1000 || textUpdateInfo.mFullRelayoutNeeded ||
-      textUpdateInfo.mClearAll)
+  if(fabsf(width - layoutSize.width) > Math::MACHINE_EPSILON_1000 || textUpdateInfo.mFullRelayoutNeeded ||
+     textUpdateInfo.mClearAll)
   {
     // Layout the text for the new width.
-    OperationsMask requestedOperationsMask = static_cast<OperationsMask>(LAYOUT | ALIGN);
-    Size sizeRequestedWidthAndMaxHeight = Size(width, MAX_FLOAT);
+    OperationsMask requestedOperationsMask        = static_cast<OperationsMask>(LAYOUT | ALIGN);
+    Size           sizeRequestedWidthAndMaxHeight = Size(width, MAX_FLOAT);
 
     layoutSize = CalculateLayoutSizeOnRequiredControllerSize(controller, sizeRequestedWidthAndMaxHeight,
                                                              requestedOperationsMask);
@@ -593,18 +593,18 @@ Vector2 Controller::Relayouter::CalculateLayoutSize(Controller& controller, floa
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(controller);
 
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
+  Controller::Impl& impl        = *controller.mImpl;
+  ModelPtr&         model       = impl.mModel;
+  VisualModelPtr&   visualModel = model->mVisualModel;
 
-  if (impl.mRecalculateLayoutSize || forceUpdate)
+  if(impl.mRecalculateLayoutSize || forceUpdate)
   {
     // Layout the text for the new width.
-    OperationsMask requestedOperationsMask = static_cast<OperationsMask>(LAYOUT | ALIGN);
-    Size sizeFixedWidthAndFixedHeight = Size(width, height);
+    OperationsMask requestedOperationsMask      = static_cast<OperationsMask>(LAYOUT | ALIGN);
+    Size           sizeFixedWidthAndFixedHeight = Size(width, height);
 
     layoutSize =
-        CalculateLayoutSizeOnRequiredControllerSize(controller, sizeFixedWidthAndFixedHeight, requestedOperationsMask);
+      CalculateLayoutSizeOnRequiredControllerSize(controller, sizeFixedWidthAndFixedHeight, requestedOperationsMask);
 
     // Stores the layout size to avoid recalculate it again
     visualModel->SetCachedLayoutSize(layoutSize);
@@ -626,10 +626,10 @@ Vector2 Controller::Relayouter::CalculateLayoutSize(Controller& controller, floa
 Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controller, const Size& size,
                                                             Dali::LayoutDirection::Type layoutDirection)
 {
-  Controller::Impl& impl = *controller.mImpl;
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
-  TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
+  Controller::Impl& impl           = *controller.mImpl;
+  ModelPtr&         model          = impl.mModel;
+  VisualModelPtr&   visualModel    = model->mVisualModel;
+  TextUpdateInfo&   textUpdateInfo = impl.mTextUpdateInfo;
 
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayout %p size %f,%f, autoScroll[%s]\n", &controller,
                 size.width, size.height, impl.mIsAutoScrollEnabled ? "true" : "false");
@@ -637,9 +637,9 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
 
   UpdateTextType updateTextType = NONE_UPDATED;
 
-  if ((size.width < Math::MACHINE_EPSILON_1000) || (size.height < Math::MACHINE_EPSILON_1000))
+  if((size.width < Math::MACHINE_EPSILON_1000) || (size.height < Math::MACHINE_EPSILON_1000))
   {
-    if (0u != visualModel->mGlyphPositions.Count())
+    if(0u != visualModel->mGlyphPositions.Count())
     {
       visualModel->mGlyphPositions.Clear();
       updateTextType = MODEL_UPDATED;
@@ -665,14 +665,14 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   // Get a reference to the pending operations member
   OperationsMask& operationsPending = impl.mOperationsPending;
 
-  if (newSize)
+  if(newSize)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "new size (previous size %f,%f)\n", visualModel->mControlSize.width,
                   visualModel->mControlSize.height);
 
-    if ((0 == textUpdateInfo.mNumberOfCharactersToAdd) && (0 == textUpdateInfo.mPreviousNumberOfCharacters) &&
-        ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
-         (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
+    if((0 == textUpdateInfo.mNumberOfCharactersToAdd) && (0 == textUpdateInfo.mPreviousNumberOfCharacters) &&
+       ((visualModel->mControlSize.width < Math::MACHINE_EPSILON_1000) ||
+        (visualModel->mControlSize.height < Math::MACHINE_EPSILON_1000)))
     {
       textUpdateInfo.mNumberOfCharactersToAdd = model->mLogicalModel->mText.Count();
     }
@@ -681,30 +681,30 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
     operationsPending = static_cast<OperationsMask>(operationsPending | LAYOUT | ALIGN | UPDATE_LAYOUT_SIZE | REORDER);
     // Set the update info to relayout the whole text.
     textUpdateInfo.mFullRelayoutNeeded = true;
-    textUpdateInfo.mCharacterIndex = 0u;
+    textUpdateInfo.mCharacterIndex     = 0u;
 
     // Store the size used to layout the text.
     visualModel->mControlSize = size;
   }
 
   // Whether there are modify events.
-  if (0u != impl.mModifyEvents.Count())
+  if(0u != impl.mModifyEvents.Count())
   {
     // Style operations that need to be done if the text is modified.
     operationsPending = static_cast<OperationsMask>(operationsPending | COLOR);
   }
 
   // Set the update info to elide the text.
-  if (model->mElideEnabled || ((NULL != impl.mEventData) && impl.mEventData->mIsPlaceholderElideEnabled))
+  if(model->mElideEnabled || ((NULL != impl.mEventData) && impl.mEventData->mIsPlaceholderElideEnabled))
   {
     // Update Text layout for applying elided
-    operationsPending = static_cast<OperationsMask>(operationsPending | ALIGN | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER);
+    operationsPending                  = static_cast<OperationsMask>(operationsPending | ALIGN | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER);
     textUpdateInfo.mFullRelayoutNeeded = true;
-    textUpdateInfo.mCharacterIndex = 0u;
+    textUpdateInfo.mCharacterIndex     = 0u;
   }
 
   bool layoutDirectionChanged = false;
-  if (impl.mLayoutDirection != layoutDirection)
+  if(impl.mLayoutDirection != layoutDirection)
   {
     // Flag to indicate that the layout direction has changed.
     layoutDirectionChanged = true;
@@ -713,8 +713,8 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
     // Apply modifications to the model
     // Shape the text again is needed because characters like '()[]{}' have to be mirrored and the glyphs generated
     // again.
-    operationsPending = static_cast<OperationsMask>(operationsPending | GET_GLYPH_METRICS | SHAPE_TEXT |
-                                                    UPDATE_DIRECTION | ALIGN | LAYOUT | BIDI_INFO | REORDER);
+    operationsPending     = static_cast<OperationsMask>(operationsPending | GET_GLYPH_METRICS | SHAPE_TEXT |
+                                                        UPDATE_DIRECTION | ALIGN | LAYOUT | BIDI_INFO | REORDER);
     impl.mLayoutDirection = layoutDirection;
   }
 
@@ -726,13 +726,13 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   Size layoutSize;
   updated = DoRelayout(impl, size, operationsPending, layoutSize) || updated;
 
-  if (updated)
+  if(updated)
   {
     updateTextType = MODEL_UPDATED;
   }
 
   // Do not re-do any operation until something changes.
-  operationsPending = NO_OPERATION;
+  operationsPending          = NO_OPERATION;
   model->mScrollPositionLast = model->mScrollPosition;
 
   // Whether the text control is editable
@@ -740,12 +740,12 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
 
   // Keep the current offset as it will be used to update the decorator's positions (if the size changes).
   Vector2 offset;
-  if (newSize && isEditable)
+  if(newSize && isEditable)
   {
     offset = model->mScrollPosition;
   }
 
-  if (!isEditable || !controller.IsMultiLineEnabled())
+  if(!isEditable || !controller.IsMultiLineEnabled())
   {
     // After doing the text layout, the vertical offset to place the actor in the desired position can be calculated.
     CalculateVerticalOffset(impl, size);
@@ -753,19 +753,19 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   else // TextEditor
   {
     // If layoutSize is bigger than size, vertical align has no meaning.
-    if (layoutSize.y < size.y)
+    if(layoutSize.y < size.y)
     {
       CalculateVerticalOffset(impl, size);
-      if (impl.mEventData)
+      if(impl.mEventData)
       {
         impl.mEventData->mScrollAfterDelete = false;
       }
     }
   }
 
-  if (isEditable)
+  if(isEditable)
   {
-    if (newSize || layoutDirectionChanged)
+    if(newSize || layoutDirectionChanged)
     {
       // If there is a new size or layout direction is changed, the scroll position needs to be clamped.
       impl.ClampHorizontalScroll(layoutSize);
@@ -774,20 +774,20 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
       impl.mEventData->mDecorator->UpdatePositions(model->mScrollPosition - offset);
 
       // All decorator elements need to be updated.
-      if (EventData::IsEditingState(impl.mEventData->mState))
+      if(EventData::IsEditingState(impl.mEventData->mState))
       {
         impl.mEventData->mScrollAfterUpdatePosition = true;
-        impl.mEventData->mUpdateCursorPosition = true;
-        impl.mEventData->mUpdateGrabHandlePosition = true;
+        impl.mEventData->mUpdateCursorPosition      = true;
+        impl.mEventData->mUpdateGrabHandlePosition  = true;
       }
-      else if (impl.mEventData->mState == EventData::SELECTING)
+      else if(impl.mEventData->mState == EventData::SELECTING)
       {
         impl.mEventData->mUpdateHighlightBox = true;
       }
     }
 
     // Move the cursor, grab handle etc.
-    if (impl.ProcessInputEvents())
+    if(impl.ProcessInputEvents())
     {
       updateTextType = static_cast<UpdateTextType>(updateTextType | DECORATOR_UPDATED);
     }
@@ -818,15 +818,15 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   // Calculate the operations to be done.
   const OperationsMask operations = static_cast<OperationsMask>(impl.mOperationsPending & operationsRequired);
 
-  TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
-  const CharacterIndex startIndex = textUpdateInfo.mParagraphCharacterIndex;
-  const Length requestedNumberOfCharacters = textUpdateInfo.mRequestedNumberOfCharacters;
+  TextUpdateInfo&      textUpdateInfo              = impl.mTextUpdateInfo;
+  const CharacterIndex startIndex                  = textUpdateInfo.mParagraphCharacterIndex;
+  const Length         requestedNumberOfCharacters = textUpdateInfo.mRequestedNumberOfCharacters;
 
   // Get the current layout size.
   VisualModelPtr& visualModel = impl.mModel->mVisualModel;
-  layoutSize = visualModel->GetLayoutSize();
+  layoutSize                  = visualModel->GetLayoutSize();
 
-  if (NO_OPERATION != (LAYOUT & operations))
+  if(NO_OPERATION != (LAYOUT & operations))
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::DoRelayout LAYOUT & operations\n");
 
@@ -835,19 +835,19 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     // Fill the vectors again.
 
     // Calculate the number of glyphs to layout.
-    const Vector<GlyphIndex>& charactersToGlyph = visualModel->mCharactersToGlyph;
-    const Vector<Length>& glyphsPerCharacter = visualModel->mGlyphsPerCharacter;
-    const GlyphIndex* const charactersToGlyphBuffer = charactersToGlyph.Begin();
-    const Length* const glyphsPerCharacterBuffer = glyphsPerCharacter.Begin();
+    const Vector<GlyphIndex>& charactersToGlyph        = visualModel->mCharactersToGlyph;
+    const Vector<Length>&     glyphsPerCharacter       = visualModel->mGlyphsPerCharacter;
+    const GlyphIndex* const   charactersToGlyphBuffer  = charactersToGlyph.Begin();
+    const Length* const       glyphsPerCharacterBuffer = glyphsPerCharacter.Begin();
 
     const CharacterIndex lastIndex =
-        startIndex + ((requestedNumberOfCharacters > 0u) ? requestedNumberOfCharacters - 1u : 0u);
+      startIndex + ((requestedNumberOfCharacters > 0u) ? requestedNumberOfCharacters - 1u : 0u);
     const GlyphIndex startGlyphIndex = textUpdateInfo.mStartGlyphIndex;
 
     // Make sure the index is not out of bound
-    if (charactersToGlyph.Count() != glyphsPerCharacter.Count() ||
-        requestedNumberOfCharacters > charactersToGlyph.Count() ||
-        (lastIndex > charactersToGlyph.Count() && charactersToGlyph.Count() > 0u))
+    if(charactersToGlyph.Count() != glyphsPerCharacter.Count() ||
+       requestedNumberOfCharacters > charactersToGlyph.Count() ||
+       (lastIndex > charactersToGlyph.Count() && charactersToGlyph.Count() > 0u))
     {
       std::string currentText;
       impl.GetText(currentText);
@@ -855,22 +855,22 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       DALI_LOG_ERROR("Controller::DoRelayout: Attempting to access invalid buffer\n");
       DALI_LOG_ERROR("Current text is: %s\n", currentText.c_str());
       DALI_LOG_ERROR(
-          "startIndex: %u, lastIndex: %u, requestedNumberOfCharacters: %u, charactersToGlyph.Count = %lu, "
-          "glyphsPerCharacter.Count = %lu\n",
-          startIndex, lastIndex, requestedNumberOfCharacters, charactersToGlyph.Count(), glyphsPerCharacter.Count());
+        "startIndex: %u, lastIndex: %u, requestedNumberOfCharacters: %u, charactersToGlyph.Count = %lu, "
+        "glyphsPerCharacter.Count = %lu\n",
+        startIndex, lastIndex, requestedNumberOfCharacters, charactersToGlyph.Count(), glyphsPerCharacter.Count());
 
       return false;
     }
 
     const Length numberOfGlyphs =
-        (requestedNumberOfCharacters > 0u)
-            ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
-            : 0u;
+      (requestedNumberOfCharacters > 0u)
+        ? *(charactersToGlyphBuffer + lastIndex) + *(glyphsPerCharacterBuffer + lastIndex) - startGlyphIndex
+        : 0u;
     const Length totalNumberOfGlyphs = visualModel->mGlyphs.Count();
 
-    if (0u == totalNumberOfGlyphs)
+    if(0u == totalNumberOfGlyphs)
     {
-      if (NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
+      if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
       {
         visualModel->SetLayoutSize(Size::ZERO);
       }
@@ -892,50 +892,50 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     // Whether the last character is a new paragraph character.
     const Character* const textBuffer = impl.mModel->mLogicalModel->mText.Begin();
     textUpdateInfo.mIsLastCharacterNewParagraph =
-        TextAbstraction::IsNewParagraph(*(textBuffer + (impl.mModel->mLogicalModel->mText.Count() - 1u)));
+      TextAbstraction::IsNewParagraph(*(textBuffer + (impl.mModel->mLogicalModel->mText.Count() - 1u)));
     layoutParameters.isLastNewParagraph = textUpdateInfo.mIsLastCharacterNewParagraph;
 
     // The initial glyph and the number of glyphs to layout.
-    layoutParameters.startGlyphIndex = startGlyphIndex;
-    layoutParameters.numberOfGlyphs = numberOfGlyphs;
-    layoutParameters.startLineIndex = textUpdateInfo.mStartLineIndex;
+    layoutParameters.startGlyphIndex        = startGlyphIndex;
+    layoutParameters.numberOfGlyphs         = numberOfGlyphs;
+    layoutParameters.startLineIndex         = textUpdateInfo.mStartLineIndex;
     layoutParameters.estimatedNumberOfLines = textUpdateInfo.mEstimatedNumberOfLines;
 
     float fontPointSize =
-        (impl.mTextFitEnabled || impl.mTextFitArrayEnabled)
-            ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
-            : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetFontSizeScale();
+      (impl.mTextFitEnabled || impl.mTextFitArrayEnabled)
+        ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
+        : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetFontSizeScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));
 
     // Update the ellipsis
     bool elideTextEnabled = impl.mModel->mElideEnabled;
     auto ellipsisPosition = impl.mModel->mEllipsisPosition;
 
-    if (NULL != impl.mEventData)
+    if(NULL != impl.mEventData)
     {
-      if (impl.mEventData->mPlaceholderEllipsisFlag && impl.IsShowingPlaceholderText())
+      if(impl.mEventData->mPlaceholderEllipsisFlag && impl.IsShowingPlaceholderText())
       {
         elideTextEnabled = impl.mEventData->mIsPlaceholderElideEnabled;
       }
-      else if (EventData::INACTIVE != impl.mEventData->mState)
+      else if(EventData::INACTIVE != impl.mEventData->mState)
       {
         // Disable ellipsis when editing
         elideTextEnabled = false;
       }
 
       // Reset the scroll position in inactive state
-      if (elideTextEnabled && (impl.mEventData->mState == EventData::INACTIVE))
+      if(elideTextEnabled && (impl.mEventData->mState == EventData::INACTIVE))
       {
         impl.ResetScrollPosition();
       }
     }
 
     // Update the visual model.
-    bool isAutoScrollEnabled = impl.mIsAutoScrollEnabled;
+    bool isAutoScrollEnabled            = impl.mIsAutoScrollEnabled;
     bool isAutoScrollMaxTextureExceeded = impl.mIsAutoScrollMaxTextureExceeded;
-    bool isHiddenInputEnabled = false;
-    if (impl.mHiddenInput && impl.mEventData != nullptr &&
-        impl.mHiddenInput->GetHideMode() != Ui::HiddenInput::Mode::HIDE_NONE)
+    bool isHiddenInputEnabled           = false;
+    if(impl.mHiddenInput && impl.mEventData != nullptr &&
+       impl.mHiddenInput->GetHideMode() != Ui::HiddenInput::Mode::HIDE_NONE)
     {
       isHiddenInputEnabled = true;
     }
@@ -945,33 +945,33 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
                                                 isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
 
     impl.mIsAutoScrollEnabled = isAutoScrollEnabled;
-    layoutTooSmall = !viewUpdated;
+    layoutTooSmall            = !viewUpdated;
 
     viewUpdated = viewUpdated || (newLayoutSize != layoutSize);
 
-    if (viewUpdated)
+    if(viewUpdated)
     {
       layoutSize = newLayoutSize;
 
-      if (NO_OPERATION != (UPDATE_DIRECTION & operations))
+      if(NO_OPERATION != (UPDATE_DIRECTION & operations))
       {
         impl.mIsTextDirectionRTL = false;
       }
 
-      if ((NO_OPERATION != (UPDATE_DIRECTION & operations)) && !visualModel->mLines.Empty())
+      if((NO_OPERATION != (UPDATE_DIRECTION & operations)) && !visualModel->mLines.Empty())
       {
         impl.mIsTextDirectionRTL = visualModel->mLines[0u].direction;
       }
 
       // Sets the layout size.
-      if (NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
+      if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
       {
         visualModel->SetLayoutSize(layoutSize);
       }
     } // view updated
   }
 
-  if (NO_OPERATION != (ALIGN & operations))
+  if(NO_OPERATION != (ALIGN & operations))
   {
     DoRelayoutHorizontalAlignment(impl, size, startIndex, requestedNumberOfCharacters);
     viewUpdated = true;
@@ -992,7 +992,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
 
 void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& impl, const Size& size,
                                                            const CharacterIndex startIndex,
-                                                           const Length requestedNumberOfCharacters)
+                                                           const Length         requestedNumberOfCharacters)
 {
   // The visualModel
   VisualModelPtr& visualModel = impl.mModel->mVisualModel;
@@ -1000,15 +1000,15 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
   // The laid-out lines.
   Vector<LineRun>& lines = visualModel->mLines;
 
-  CharacterIndex alignStartIndex = startIndex;
-  Length alignRequestedNumberOfCharacters = requestedNumberOfCharacters;
+  CharacterIndex alignStartIndex                  = startIndex;
+  Length         alignRequestedNumberOfCharacters = requestedNumberOfCharacters;
 
   // the whole text needs to be full aligned.
   // If you do not do a full aligned, only the last line of the multiline input is aligned.
-  if (impl.mEventData && impl.mEventData->mUpdateAlignment)
+  if(impl.mEventData && impl.mEventData->mUpdateAlignment)
   {
-    alignStartIndex = 0u;
-    alignRequestedNumberOfCharacters = impl.mModel->mLogicalModel->mText.Count();
+    alignStartIndex                   = 0u;
+    alignRequestedNumberOfCharacters  = impl.mModel->mLogicalModel->mText.Count();
     impl.mEventData->mUpdateAlignment = false;
   }
 
@@ -1018,12 +1018,12 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
   // BoundedParagraph. Apply BoundedParagraph's alignment if and only if there is one BoundedParagraph contains all
   // characters. Otherwise follow controller's alignment.
   const bool isFollowControllerAlignment =
-      ((impl.mModel->GetNumberOfBoundedParagraphRuns() == 0u) ||
-       ((Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout()) &&
-        (impl.mModel->GetBoundedParagraphRuns()[0].characterRun.numberOfCharacters !=
-         impl.mModel->mLogicalModel->mText.Count())));
+    ((impl.mModel->GetNumberOfBoundedParagraphRuns() == 0u) ||
+     ((Layout::Engine::SINGLE_LINE_BOX == impl.mLayoutEngine.GetLayout()) &&
+      (impl.mModel->GetBoundedParagraphRuns()[0].characterRun.numberOfCharacters !=
+       impl.mModel->mLogicalModel->mText.Count())));
 
-  if (isFollowControllerAlignment)
+  if(isFollowControllerAlignment)
   {
     // Need to align with the control's size as the text may contain lines
     // starting either with left to right text or right to left.
@@ -1034,24 +1034,24 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
   else
   {
     // Override the controller horizontal-alignment by horizontal-alignment of bounded paragraph.
-    const Length& numberOfBoundedParagraphRuns = impl.mModel->GetNumberOfBoundedParagraphRuns();
-    const Vector<BoundedParagraphRun>& boundedParagraphRuns = impl.mModel->GetBoundedParagraphRuns();
-    const CharacterIndex alignEndIndex = alignStartIndex + alignRequestedNumberOfCharacters - 1u;
+    const Length&                      numberOfBoundedParagraphRuns = impl.mModel->GetNumberOfBoundedParagraphRuns();
+    const Vector<BoundedParagraphRun>& boundedParagraphRuns         = impl.mModel->GetBoundedParagraphRuns();
+    const CharacterIndex               alignEndIndex                = alignStartIndex + alignRequestedNumberOfCharacters - 1u;
 
-    Length alignIndex = alignStartIndex;
+    Length alignIndex               = alignStartIndex;
     Length boundedParagraphRunIndex = 0u;
 
-    while (alignIndex <= alignEndIndex && boundedParagraphRunIndex < numberOfBoundedParagraphRuns)
+    while(alignIndex <= alignEndIndex && boundedParagraphRunIndex < numberOfBoundedParagraphRuns)
     {
       // BP: BoundedParagraph
-      const BoundedParagraphRun& boundedParagraphRun = boundedParagraphRuns[boundedParagraphRunIndex];
-      const CharacterIndex& characterStartIndexBP = boundedParagraphRun.characterRun.characterIndex;
-      const Length& numberOfCharactersBP = boundedParagraphRun.characterRun.numberOfCharacters;
-      const CharacterIndex characterEndIndexBP = characterStartIndexBP + numberOfCharactersBP - 1u;
+      const BoundedParagraphRun& boundedParagraphRun   = boundedParagraphRuns[boundedParagraphRunIndex];
+      const CharacterIndex&      characterStartIndexBP = boundedParagraphRun.characterRun.characterIndex;
+      const Length&              numberOfCharactersBP  = boundedParagraphRun.characterRun.numberOfCharacters;
+      const CharacterIndex       characterEndIndexBP   = characterStartIndexBP + numberOfCharactersBP - 1u;
 
-      CharacterIndex decidedAlignStartIndex = alignIndex;
-      Length decidedAlignNumberOfCharacters = alignEndIndex - alignIndex + 1u;
-      Text::HorizontalAlignment::Type decidedHorizontalAlignment = impl.mModel->mHorizontalAlignment;
+      CharacterIndex                  decidedAlignStartIndex         = alignIndex;
+      Length                          decidedAlignNumberOfCharacters = alignEndIndex - alignIndex + 1u;
+      Text::HorizontalAlignment::Type decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
 
       /*
        * Shortcuts to explain indexes cases:
@@ -1065,27 +1065,27 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
        *
        */
 
-      if (alignIndex < characterStartIndexBP && characterStartIndexBP <= alignEndIndex) /// AS.MMMMMM.PS--------AE
+      if(alignIndex < characterStartIndexBP && characterStartIndexBP <= alignEndIndex) /// AS.MMMMMM.PS--------AE
       {
         // Alignment from "Alignment Start Index" to index before "Paragraph Start Index" according to "Model Alignment"
-        decidedAlignStartIndex = alignIndex;
+        decidedAlignStartIndex         = alignIndex;
         decidedAlignNumberOfCharacters = characterStartIndexBP - alignIndex;
-        decidedHorizontalAlignment = impl.mModel->mHorizontalAlignment;
+        decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
 
         // Need to re-heck the case of current bounded paragraph
         alignIndex = characterStartIndexBP; // Shift AS to be PS
       }
-      else if ((characterStartIndexBP <= alignIndex &&
-                alignIndex <= characterEndIndexBP) || /// ---PS.BBBBBBB.AS.BBBBBBB.PE---
-               (characterStartIndexBP <= alignEndIndex &&
-                alignEndIndex <= characterEndIndexBP)) /// ---PS.BBBBBB.AE.BBBBBBB.PE---
+      else if((characterStartIndexBP <= alignIndex &&
+               alignIndex <= characterEndIndexBP) || /// ---PS.BBBBBBB.AS.BBBBBBB.PE---
+              (characterStartIndexBP <= alignEndIndex &&
+               alignEndIndex <= characterEndIndexBP)) /// ---PS.BBBBBB.AE.BBBBBBB.PE---
       {
         // Alignment from "Paragraph Start Index" to "Paragraph End Index" according to "BoundedParagraph Alignment"
-        decidedAlignStartIndex = characterStartIndexBP;
+        decidedAlignStartIndex         = characterStartIndexBP;
         decidedAlignNumberOfCharacters = numberOfCharactersBP;
-        decidedHorizontalAlignment = boundedParagraphRun.horizontalAlignmentDefined
-                                         ? boundedParagraphRun.horizontalAlignment
-                                         : impl.mModel->mHorizontalAlignment;
+        decidedHorizontalAlignment     = boundedParagraphRun.horizontalAlignmentDefined
+                                           ? boundedParagraphRun.horizontalAlignment
+                                           : impl.mModel->mHorizontalAlignment;
 
         alignIndex = characterEndIndexBP + 1u; // Shift AS to be after PE direct
         boundedParagraphRunIndex++;            // Align then check the case of next bounded paragraph
@@ -1102,7 +1102,7 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
     }
 
     // Align the remaining that is not aligned
-    if (alignIndex <= alignEndIndex)
+    if(alignIndex <= alignEndIndex)
     {
       impl.mLayoutEngine.Align(size, alignIndex, (alignEndIndex - alignIndex + 1u), impl.mModel->mHorizontalAlignment,
                                lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
@@ -1113,15 +1113,15 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
 
 void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, const Size& controlSize)
 {
-  ModelPtr& model = impl.mModel;
-  VisualModelPtr& visualModel = model->mVisualModel;
-  Size layoutSize = model->mVisualModel->GetLayoutSize();
-  Size oldLayoutSize = layoutSize;
-  float offsetY = 0.f;
-  bool needRecalc = false;
-  float defaultFontLineHeight = impl.GetDefaultFontLineHeight();
+  ModelPtr&       model                 = impl.mModel;
+  VisualModelPtr& visualModel           = model->mVisualModel;
+  Size            layoutSize            = model->mVisualModel->GetLayoutSize();
+  Size            oldLayoutSize         = layoutSize;
+  float           offsetY               = 0.f;
+  bool            needRecalc            = false;
+  float           defaultFontLineHeight = impl.GetDefaultFontLineHeight();
 
-  if (fabsf(layoutSize.height) < Math::MACHINE_EPSILON_1000)
+  if(fabsf(layoutSize.height) < Math::MACHINE_EPSILON_1000)
   {
     // Get the line height of the default font.
     layoutSize.height = defaultFontLineHeight;
@@ -1129,28 +1129,28 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
   // Whether the text control is editable
   const bool isEditable = NULL != impl.mEventData;
-  if (isEditable && !Dali::Equals(layoutSize.height, defaultFontLineHeight) && impl.IsShowingPlaceholderText())
+  if(isEditable && !Dali::Equals(layoutSize.height, defaultFontLineHeight) && impl.IsShowingPlaceholderText())
   {
     // This code prevents the wrong positioning of cursor when the layout size is bigger/smaller than
     // defaultFontLineHeight. This situation occurs when the size of placeholder text is different from the default
     // text.
     layoutSize.height = defaultFontLineHeight;
-    needRecalc = true;
+    needRecalc        = true;
   }
 
-  switch (model->mVerticalAlignment)
+  switch(model->mVerticalAlignment)
   {
     case VerticalAlignment::TOP:
     {
       model->mScrollPosition.y = 0.f;
-      offsetY = 0.f;
+      offsetY                  = 0.f;
       break;
     }
     case VerticalAlignment::CENTER:
     {
       model->mScrollPosition.y =
-          floorf(0.5f * (controlSize.height - layoutSize.height)); // try to avoid pixel alignment.
-      if (needRecalc)
+        floorf(0.5f * (controlSize.height - layoutSize.height)); // try to avoid pixel alignment.
+      if(needRecalc)
       {
         offsetY = floorf(0.5f * (layoutSize.height - oldLayoutSize.height));
       }
@@ -1159,7 +1159,7 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
     case VerticalAlignment::BOTTOM:
     {
       model->mScrollPosition.y = controlSize.height - layoutSize.height;
-      if (needRecalc)
+      if(needRecalc)
       {
         offsetY = layoutSize.height - oldLayoutSize.height;
       }
@@ -1167,12 +1167,12 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
     }
   }
 
-  if (needRecalc)
+  if(needRecalc)
   {
     // Update glyphPositions according to recalculation.
-    const Length positionCount = visualModel->mGlyphPositions.Count();
+    const Length     positionCount  = visualModel->mGlyphPositions.Count();
     Vector<Vector2>& glyphPositions = visualModel->mGlyphPositions;
-    for (Length index = 0u; index < positionCount; index++)
+    for(Length index = 0u; index < positionCount; index++)
     {
       glyphPositions[index].y += offsetY;
     }

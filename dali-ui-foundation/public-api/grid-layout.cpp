@@ -31,12 +31,12 @@ GridLayout::GridLayout()
 }
 
 GridLayout::GridLayout(const GridLayout& layout)
-  : Layout(layout)
+: Layout(layout)
 {
 }
 
 GridLayout::GridLayout(GridLayout&& rhs) noexcept
-  : Layout(std::move(rhs))
+: Layout(std::move(rhs))
 {
 }
 
@@ -46,7 +46,7 @@ GridLayout::~GridLayout()
 
 GridLayout& GridLayout::operator=(const GridLayout& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     Layout::operator=(handle);
   }
@@ -78,12 +78,12 @@ GridLayout GridLayout::DownCast(BaseHandle handle)
 }
 
 GridLayout::GridLayout(Integration::GridLayoutImpl& implementation)
-  : Layout(implementation)
+: Layout(implementation)
 {
 }
 
 GridLayout::GridLayout(Dali::Internal::CustomActor* internal)
-  : Layout(internal)
+: Layout(internal)
 {
   VerifyCustomActorPointer<Integration::GridLayoutImpl>(internal);
 }

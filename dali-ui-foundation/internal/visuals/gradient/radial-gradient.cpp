@@ -24,7 +24,7 @@ namespace Ui
 namespace Internal
 {
 RadialGradient::RadialGradient(const Vector2& center, float radius)
-  : Gradient()
+: Gradient()
 {
   SetCenterAndRadius(center, radius);
 }

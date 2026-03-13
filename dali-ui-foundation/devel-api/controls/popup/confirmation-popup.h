@@ -55,7 +55,7 @@ public:
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1 + DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION + 1,
-    PROPERTY_END_INDEX = PROPERTY_START_INDEX + 1000 ///< Reserve property indices
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices
   };
 
   /**

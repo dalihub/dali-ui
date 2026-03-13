@@ -40,33 +40,33 @@ inline bool IsDigit(char c)
 bool StringToInteger(const char* first, const char* last, int& out)
 {
   int sign = 1;
-  if (first != last)
+  if(first != last)
   {
-    if (*first == '-')
+    if(*first == '-')
     {
       sign = -1;
       ++first;
     }
-    else if (*first == '+')
+    else if(*first == '+')
     {
       ++first;
     }
   }
 
   // json error for int starting with zero
-  if (0 == (*first - '0') && (first + 1 != last))
+  if(0 == (*first - '0') && (first + 1 != last))
   {
     return false;
   }
 
   int result = 0;
-  for (; first != last && IsDigit(*first); ++first)
+  for(; first != last && IsDigit(*first); ++first)
   {
     result = 10 * result + (*first - '0');
   }
   out = result * sign;
 
-  if (first != last)
+  if(first != last)
   {
     return false;
   }
@@ -80,18 +80,18 @@ bool StringToInteger(const char* first, const char* last, int& out)
 bool HexStringToUnsignedInteger(const char* first, const char* last, unsigned int& out)
 {
   unsigned int result = 0;
-  for (; first != last; ++first)
+  for(; first != last; ++first)
   {
     int digit;
-    if (IsDigit(*first))
+    if(IsDigit(*first))
     {
       digit = *first - '0';
     }
-    else if (*first >= 'a' && *first <= 'f')
+    else if(*first >= 'a' && *first <= 'f')
     {
       digit = *first - 'a' + 10;
     }
-    else if (*first >= 'A' && *first <= 'F')
+    else if(*first >= 'A' && *first <= 'F')
     {
       digit = *first - 'A' + 10;
     }
@@ -103,7 +103,7 @@ bool HexStringToUnsignedInteger(const char* first, const char* last, unsigned in
   }
   out = result;
 
-  if (first != last)
+  if(first != last)
   {
     return false;
   }
@@ -118,14 +118,14 @@ bool StringToFloat(const char* first, const char* last, float& out)
 {
   // sign
   float sign = 1;
-  if (first != last)
+  if(first != last)
   {
-    if (*first == '-')
+    if(*first == '-')
     {
       sign = -1;
       ++first;
     }
-    else if (*first == '+')
+    else if(*first == '+')
     {
       ++first;
     }
@@ -133,18 +133,18 @@ bool StringToFloat(const char* first, const char* last, float& out)
 
   // integer part
   float result = 0;
-  for (; first != last && IsDigit(*first); ++first)
+  for(; first != last && IsDigit(*first); ++first)
   {
     result = 10 * result + (*first - '0');
   }
 
   // fraction part
-  if (first != last && *first == '.')
+  if(first != last && *first == '.')
   {
     ++first;
 
     float inv_base = 0.1f;
-    for (; first != last && IsDigit(*first); ++first)
+    for(; first != last && IsDigit(*first); ++first)
     {
       result += (*first - '0') * inv_base;
       inv_base *= 0.1f;
@@ -156,41 +156,41 @@ bool StringToFloat(const char* first, const char* last, float& out)
 
   // exponent
   bool exponent_negative = false;
-  int exponent = 0;
-  if (first != last && (*first == 'e' || *first == 'E'))
+  int  exponent          = 0;
+  if(first != last && (*first == 'e' || *first == 'E'))
   {
     ++first;
 
-    if (*first == '-')
+    if(*first == '-')
     {
       exponent_negative = true;
       ++first;
     }
-    else if (*first == '+')
+    else if(*first == '+')
     {
       ++first;
     }
 
-    if (first == last || !IsDigit(*first))
+    if(first == last || !IsDigit(*first))
     {
       return false;
     }
 
-    for (; first != last && IsDigit(*first); ++first)
+    for(; first != last && IsDigit(*first); ++first)
     {
       exponent = 10 * exponent + (*first - '0');
     }
   }
 
-  if (exponent)
+  if(exponent)
   {
     float power_of_ten = 10;
-    for (; exponent > 1; exponent--)
+    for(; exponent > 1; exponent--)
     {
       power_of_ten *= 10;
     }
 
-    if (exponent_negative)
+    if(exponent_negative)
     {
       result /= power_of_ten;
     }
@@ -202,7 +202,7 @@ bool StringToFloat(const char* first, const char* last, float& out)
 
   out = result;
 
-  if (first != last)
+  if(first != last)
   {
     return false;
   }
@@ -215,7 +215,7 @@ bool StringToFloat(const char* first, const char* last, float& out)
 bool IsNumber(char c)
 {
   bool ret = false;
-  switch (c)
+  switch(c)
   {
     case '0':
     case '1':
@@ -242,18 +242,18 @@ bool IsNumber(char c)
 } // namespace
 
 JsonParserState::JsonParserState(TreeNode* _root)
-  : mRoot(_root),
-    mCurrent(_root),
-    mErrorDescription(nullptr),
-    mErrorNewLine(0),
-    mErrorColumn(0),
-    mErrorPosition(0),
-    mNumberOfParsedChars(0),
-    mNumberOfCreatedNodes(0),
-    mFirstParse(false),
-    mState(STATE_START)
+: mRoot(_root),
+  mCurrent(_root),
+  mErrorDescription(nullptr),
+  mErrorNewLine(0),
+  mErrorColumn(0),
+  mErrorPosition(0),
+  mNumberOfParsedChars(0),
+  mNumberOfCreatedNodes(0),
+  mFirstParse(false),
+  mState(STATE_START)
 {
-  if (_root == nullptr)
+  if(_root == nullptr)
   {
     mFirstParse = true;
   }
@@ -267,9 +267,9 @@ TreeNode* JsonParserState::CreateNewNode(const char* name, TreeNode::NodeType ty
   TreeNodeManipulator modifyNew(node);
   modifyNew.SetType(type);
   modifyNew.SetName(name);
-  if (mRoot == nullptr)
+  if(mRoot == nullptr)
   {
-    mRoot = node;
+    mRoot    = node;
     mCurrent = TreeNodeManipulator(mRoot);
   }
   else
@@ -287,7 +287,7 @@ TreeNode* JsonParserState::NewNode(const char* name, TreeNode::NodeType type)
 {
   TreeNode* node = nullptr;
 
-  if (mFirstParse)
+  if(mFirstParse)
   {
     node = CreateNewNode(name, type);
   }
@@ -295,10 +295,10 @@ TreeNode* JsonParserState::NewNode(const char* name, TreeNode::NodeType type)
   {
     // a merging parse
 
-    if (name)
+    if(name)
     {
       const TreeNode* found = mCurrent.GetChild(name);
-      if (nullptr != found)
+      if(nullptr != found)
       {
         node = const_cast<TreeNode*>(found);
       }
@@ -306,13 +306,13 @@ TreeNode* JsonParserState::NewNode(const char* name, TreeNode::NodeType type)
     else
     {
       // if root node
-      if (mCurrent.GetParent() == nullptr)
+      if(mCurrent.GetParent() == nullptr)
       {
         node = mRoot;
       }
     }
 
-    if (node)
+    if(node)
     {
       // walk tree and deallocate children as were replacing this node
       TreeNodeManipulator modify(node);
@@ -352,26 +352,26 @@ bool JsonParserState::Error(const char* description)
 
 bool JsonParserState::ParseWhiteSpace()
 {
-  bool c_comment = false;
+  bool c_comment   = false;
   bool cpp_comment = false;
 
-  if (mIter == mEnd)
+  if(mIter == mEnd)
   {
     return true;
   }
 
   // skip white space
   char nextChar = 0;
-  while (1)
+  while(1)
   {
     char c = Char();
 
-    if (c == '\xA')
+    if(c == '\xA')
     {
       NewLine();
     }
 
-    if (AtLeast(2))
+    if(AtLeast(2))
     {
       nextChar = mIter[1];
     }
@@ -380,43 +380,43 @@ bool JsonParserState::ParseWhiteSpace()
       nextChar = 0;
     }
 
-    if (cpp_comment)
+    if(cpp_comment)
     {
-      if ('\n' == c)
+      if('\n' == c)
       {
         cpp_comment = false;
         Advance(1);
         continue; // rather than carry on as comments may be back to back
       }
     }
-    else if (!c_comment && (c == '/' && nextChar == '/'))
+    else if(!c_comment && (c == '/' && nextChar == '/'))
     {
       cpp_comment = true;
     }
 
-    if (c_comment)
+    if(c_comment)
     {
-      if (c == '*' && nextChar == '/')
+      if(c == '*' && nextChar == '/')
       {
         c_comment = false;
         Advance(2);
         continue;
       }
     }
-    else if (!cpp_comment && (c == '/' && nextChar == '*'))
+    else if(!cpp_comment && (c == '/' && nextChar == '*'))
     {
       c_comment = true;
     }
 
-    if (!(c_comment || cpp_comment))
+    if(!(c_comment || cpp_comment))
     {
-      if (!(c == '\x20' || c == '\x9' || c == '\xD' || c == '\xA'))
+      if(!(c == '\x20' || c == '\x9' || c == '\xD' || c == '\xA'))
       {
         break;
       }
     }
 
-    if (AdvanceEnded(1))
+    if(AdvanceEnded(1))
     {
       break;
     }
@@ -428,11 +428,11 @@ bool JsonParserState::ParseWhiteSpace()
 
 bool JsonParserState::ParseSymbol(const std::string& symbol)
 {
-  if (AtLeast(symbol.size()))
+  if(AtLeast(symbol.size()))
   {
-    for (int i = 0; i < static_cast<int>(symbol.size()); ++i)
+    for(int i = 0; i < static_cast<int>(symbol.size()); ++i)
     {
-      if (*mIter != symbol[i])
+      if(*mIter != symbol[i])
       {
         return false;
       }
@@ -448,7 +448,7 @@ bool JsonParserState::ParseSymbol(const std::string& symbol)
 
 bool JsonParserState::ParseTrue()
 {
-  if (ParseSymbol("true"))
+  if(ParseSymbol("true"))
   {
     mCurrent.SetInteger(1);
     mCurrent.SetType(TreeNode::BOOLEAN);
@@ -462,7 +462,7 @@ bool JsonParserState::ParseTrue()
 
 bool JsonParserState::ParseFalse()
 {
-  if (ParseSymbol("false"))
+  if(ParseSymbol("false"))
   {
     mCurrent.SetInteger(0);
     mCurrent.SetType(TreeNode::BOOLEAN);
@@ -476,7 +476,7 @@ bool JsonParserState::ParseFalse()
 
 bool JsonParserState::ParseNULL()
 {
-  if (ParseSymbol("null"))
+  if(ParseSymbol("null"))
   {
     mCurrent.SetType(TreeNode::IS_NULL);
     return true;
@@ -492,16 +492,16 @@ bool JsonParserState::ParseNumber()
   mCurrent.SetType(TreeNode::INTEGER);
 
   VectorCharIter first = mIter;
-  char c = Char();
+  char           c     = Char();
 
-  if (!(c == '-' || IsNumber(c)))
+  if(!(c == '-' || IsNumber(c)))
   {
     return Error("Number must start with '-' or 0-9");
   }
 
-  while (IsNumber(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-')
+  while(IsNumber(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-')
   {
-    if (c == '.' || c == 'e' || c == 'E')
+    if(c == '.' || c == 'e' || c == 'E')
     {
       mCurrent.SetType(TreeNode::FLOAT);
     }
@@ -509,10 +509,10 @@ bool JsonParserState::ParseNumber()
     c = Char();
   }
 
-  if (mCurrent.GetType() == TreeNode::INTEGER)
+  if(mCurrent.GetType() == TreeNode::INTEGER)
   {
     int i = 0;
-    if (StringToInteger(&(*first), &(*mIter), i))
+    if(StringToInteger(&(*first), &(*mIter), i))
     {
       mCurrent.SetInteger(i);
     }
@@ -522,10 +522,10 @@ bool JsonParserState::ParseNumber()
     }
   }
 
-  if (mCurrent.GetType() == TreeNode::FLOAT)
+  if(mCurrent.GetType() == TreeNode::FLOAT)
   {
     float f = 0.f;
-    if (StringToFloat(&(*first), &(*mIter), f))
+    if(StringToFloat(&(*first), &(*mIter), f))
     {
       mCurrent.SetFloat(f);
     }
@@ -540,20 +540,20 @@ bool JsonParserState::ParseNumber()
 
 char* JsonParserState::EncodeString()
 {
-  int substitution = 0;
-  VectorCharIter first = mIter;
-  VectorCharIter last = mIter;
+  int            substitution = 0;
+  VectorCharIter first        = mIter;
+  VectorCharIter last         = mIter;
 
-  while (DALI_LIKELY(!AtEnd()) && *mIter)
+  while(DALI_LIKELY(!AtEnd()) && *mIter)
   {
-    if (static_cast<unsigned char>(*mIter) < '\x20')
+    if(static_cast<unsigned char>(*mIter) < '\x20')
     {
       static_cast<void>(Error("Control characters not allowed in strings"));
       return nullptr;
     }
-    else if (*mIter == '\\' && AtLeast(2))
+    else if(*mIter == '\\' && AtLeast(2))
     {
-      switch (*(mIter + 1))
+      switch(*(mIter + 1))
       {
         case '"':
         {
@@ -598,31 +598,31 @@ char* JsonParserState::EncodeString()
         case 'u':
         {
           unsigned int codepoint;
-          if (!AtLeast(6))
+          if(!AtLeast(6))
           {
             static_cast<void>(Error("Bad unicode codepoint; not enough characters"));
             return nullptr;
           }
-          if (!HexStringToUnsignedInteger(&(*(mIter + 2)), &(*(mIter + 6)), codepoint))
+          if(!HexStringToUnsignedInteger(&(*(mIter + 2)), &(*(mIter + 6)), codepoint))
           {
             static_cast<void>(Error("Bad unicode codepoint"));
             return nullptr;
           }
 
-          if (codepoint <= 0x7F)
+          if(codepoint <= 0x7F)
           {
             *last = (char)codepoint;
           }
-          else if (codepoint <= 0x7FF)
+          else if(codepoint <= 0x7FF)
           {
             *last++ = (char)(0xC0 | (codepoint >> 6));
-            *last = (char)(0x80 | (codepoint & 0x3F));
+            *last   = (char)(0x80 | (codepoint & 0x3F));
           }
-          else if (codepoint <= 0xFFFF)
+          else if(codepoint <= 0xFFFF)
           {
             *last++ = (char)(0xE0 | (codepoint >> 12));
             *last++ = (char)(0x80 | ((codepoint >> 6) & 0x3F));
-            *last = (char)(0x80 | (codepoint & 0x3F));
+            *last   = (char)(0x80 | (codepoint & 0x3F));
           }
 
           Advance(4);
@@ -639,25 +639,25 @@ char* JsonParserState::EncodeString()
       ++last;
       Advance(2);
     }
-    else if (*mIter == '{')
+    else if(*mIter == '{')
     {
-      if ((0 == substitution) && (*last != '\\'))
+      if((0 == substitution) && (*last != '\\'))
       {
         substitution = 1;
       }
       *last++ = *mIter;
       Advance(1);
     }
-    else if (*mIter == '}')
+    else if(*mIter == '}')
     {
-      if (substitution)
+      if(substitution)
       {
         substitution++;
       }
       *last++ = *mIter;
       Advance(1);
     }
-    else if (*mIter == '"')
+    else if(*mIter == '"')
     {
       *last = 0;
       Advance(1);
@@ -671,7 +671,7 @@ char* JsonParserState::EncodeString()
 
   } // while(*mIter)
 
-  if (DALI_UNLIKELY(last == mEnd || *last))
+  if(DALI_UNLIKELY(last == mEnd || *last))
   {
     static_cast<void>(Error("Strings is not null-terminated!"));
     return nullptr;
@@ -689,12 +689,12 @@ char* JsonParserState::EncodeString()
 
 bool JsonParserState::HandleStartState(const char* name, const char currentChar)
 {
-  if ('{' == currentChar)
+  if('{' == currentChar)
   {
     NewNode(name, TreeNode::OBJECT);
     mState = STATE_OBJECT;
   }
-  else if ('[' == currentChar)
+  else if('[' == currentChar)
   {
     NewNode(name, TreeNode::ARRAY);
     mState = STATE_VALUE;
@@ -710,20 +710,20 @@ bool JsonParserState::HandleStartState(const char* name, const char currentChar)
 
 bool JsonParserState::HandleObjectState(const char currentChar, const char lastCharacter)
 {
-  if ('}' == currentChar)
+  if('}' == currentChar)
   {
-    if (',' == lastCharacter)
+    if(',' == lastCharacter)
     {
       return Error("Unexpected comma");
     }
 
-    if (!UpToParent())
+    if(!UpToParent())
     {
       return false;
     }
     mState = STATE_VALUE;
   }
-  else if ('"' == currentChar)
+  else if('"' == currentChar)
   {
     mState = STATE_KEY;
   }
@@ -739,19 +739,19 @@ bool JsonParserState::HandleObjectState(const char currentChar, const char lastC
 bool JsonParserState::HandleKeyState(char*& name)
 {
   name = EncodeString();
-  if (nullptr == name)
+  if(nullptr == name)
   {
     return false;
   }
-  if (!ParseWhiteSpace())
+  if(!ParseWhiteSpace())
   {
     return false;
   }
-  if (DALI_UNLIKELY(':' != Char()))
+  if(DALI_UNLIKELY(':' != Char()))
   {
     return Error("Expected ':'");
   }
-  if (!ParseWhiteSpace())
+  if(!ParseWhiteSpace())
   {
     return false;
   }
@@ -765,7 +765,7 @@ bool JsonParserState::HandleCharacterQuote(char*& name)
 {
   Advance(1);
   NewNode(name, TreeNode::STRING);
-  if (char* value = EncodeString())
+  if(char* value = EncodeString())
   {
     mCurrent.SetString(value);
   }
@@ -773,7 +773,7 @@ bool JsonParserState::HandleCharacterQuote(char*& name)
   {
     return false;
   }
-  if (!UpToParent())
+  if(!UpToParent())
   {
     return false;
   }
@@ -784,11 +784,11 @@ bool JsonParserState::HandleCharacterQuote(char*& name)
 bool JsonParserState::HandleCharacterNumberOrHyphen(const char* name)
 {
   NewNode(name, TreeNode::IS_NULL);
-  if (!ParseNumber())
+  if(!ParseNumber())
   {
     return false;
   }
-  if (!UpToParent())
+  if(!UpToParent())
   {
     return false;
   }
@@ -800,43 +800,43 @@ bool JsonParserState::HandleValueState(char*& name, const char currentChar, cons
 {
   bool handled = true;
 
-  if ('"' == currentChar)
+  if('"' == currentChar)
   {
     handled = HandleCharacterQuote(name);
   }
-  else if (IsNumber(currentChar) || currentChar == '-')
+  else if(IsNumber(currentChar) || currentChar == '-')
   {
     handled = HandleCharacterNumberOrHyphen(name);
   }
-  else if ('{' == currentChar)
+  else if('{' == currentChar)
   {
     handled = HandleCharacterBracesStart(name, lastCharacter);
   }
-  else if ('}' == currentChar)
+  else if('}' == currentChar)
   {
     handled = HandleCharacterBracesEnd(lastCharacter);
   }
-  else if ('[' == currentChar)
+  else if('[' == currentChar)
   {
     handled = HandleCharacterSquareBracketStart(name);
   }
-  else if (']' == currentChar)
+  else if(']' == currentChar)
   {
     handled = HandleCharacterSquareBracketEnd(lastCharacter);
   }
-  else if ('t' == currentChar)
+  else if('t' == currentChar)
   {
     handled = HandleCharacterLowercaseT(name);
   }
-  else if ('n' == currentChar)
+  else if('n' == currentChar)
   {
     handled = HandleCharacterLowercaseN(name);
   }
-  else if ('f' == currentChar)
+  else if('f' == currentChar)
   {
     handled = HandleCharacterLowercaseF(name);
   }
-  else if (',' == currentChar)
+  else if(',' == currentChar)
   {
     handled = HandleCharacterComma(name);
   }
@@ -845,7 +845,7 @@ bool JsonParserState::HandleValueState(char*& name, const char currentChar, cons
     handled = Error("Unexpected character");
   }
 
-  if (handled)
+  if(handled)
   {
     name = nullptr;
   }
@@ -857,33 +857,33 @@ bool JsonParserState::ParseJson(VectorChar& source)
 {
   Reset();
 
-  if (0 == source.size())
+  if(0 == source.size())
   {
     return Error("Empty source buffer to parse");
   }
 
   mIter = source.begin();
-  mEnd = source.end();
+  mEnd  = source.end();
 
-  char* name = nullptr;
-  char currentChar = 0;
-  char lastCharacter = 0;
+  char* name          = nullptr;
+  char  currentChar   = 0;
+  char  lastCharacter = 0;
 
-  if (!ParseWhiteSpace())
+  if(!ParseWhiteSpace())
   {
     return false;
   }
 
-  while (!AtEnd())
+  while(!AtEnd())
   {
     lastCharacter = currentChar;
-    currentChar = Char();
+    currentChar   = Char();
 
-    switch (mState)
+    switch(mState)
     {
       case STATE_START:
       {
-        if (!HandleStartState(name, currentChar))
+        if(!HandleStartState(name, currentChar))
         {
           return false;
         }
@@ -891,7 +891,7 @@ bool JsonParserState::ParseJson(VectorChar& source)
       }
       case STATE_OBJECT:
       {
-        if (!HandleObjectState(currentChar, lastCharacter))
+        if(!HandleObjectState(currentChar, lastCharacter))
         {
           return false;
         }
@@ -899,7 +899,7 @@ bool JsonParserState::ParseJson(VectorChar& source)
       }
       case STATE_KEY:
       {
-        if (!HandleKeyState(name))
+        if(!HandleKeyState(name))
         {
           return false;
         }
@@ -907,7 +907,7 @@ bool JsonParserState::ParseJson(VectorChar& source)
       }
       case STATE_VALUE:
       {
-        if (!HandleValueState(name, currentChar, lastCharacter))
+        if(!HandleValueState(name, currentChar, lastCharacter))
         {
           return false;
         }
@@ -923,7 +923,7 @@ bool JsonParserState::ParseJson(VectorChar& source)
   } // while(1)
 
   //
-  if (mState != STATE_END)
+  if(mState != STATE_END)
   {
     return Error("Unexpected termination character");
   }
@@ -939,14 +939,14 @@ void JsonParserState::Reset()
   mCurrent = TreeNodeManipulator(mRoot);
 
   mErrorDescription = nullptr;
-  mErrorNewLine = 0;
-  mErrorColumn = 0;
-  mErrorPosition = 0;
+  mErrorNewLine     = 0;
+  mErrorColumn      = 0;
+  mErrorPosition    = 0;
 }
 
 bool JsonParserState::HandleCharacterBracesStart(const char* name, const char lastCharacter)
 {
-  if ('}' == lastCharacter)
+  if('}' == lastCharacter)
   {
     return Error("Expected a comma");
   }
@@ -961,23 +961,23 @@ bool JsonParserState::HandleCharacterBracesStart(const char* name, const char la
 
 bool JsonParserState::HandleCharacterBracesEnd(const char lastCharacter)
 {
-  if (',' == lastCharacter)
+  if(',' == lastCharacter)
   {
     return Error("Expected another value");
   }
 
-  if (mCurrent.GetType() != TreeNode::OBJECT)
+  if(mCurrent.GetType() != TreeNode::OBJECT)
   {
     return Error("Mismatched array definition");
   }
 
-  if (mCurrent.GetParent() == nullptr)
+  if(mCurrent.GetParent() == nullptr)
   {
     mState = STATE_END;
   }
   else
   {
-    if (!UpToParent())
+    if(!UpToParent())
     {
       return false;
     }
@@ -996,23 +996,23 @@ bool JsonParserState::HandleCharacterSquareBracketStart(const char* name)
 
 bool JsonParserState::HandleCharacterSquareBracketEnd(const char lastCharacter)
 {
-  if (',' == lastCharacter)
+  if(',' == lastCharacter)
   {
     return Error("Expected a value");
   }
 
-  if (mCurrent.GetType() != TreeNode::ARRAY)
+  if(mCurrent.GetType() != TreeNode::ARRAY)
   {
     return Error("Mismatched braces in object definition");
   }
 
-  if (mCurrent.GetParent() == nullptr)
+  if(mCurrent.GetParent() == nullptr)
   {
     mState = STATE_END;
   }
   else
   {
-    if (!UpToParent())
+    if(!UpToParent())
     {
       return false;
     }
@@ -1024,11 +1024,11 @@ bool JsonParserState::HandleCharacterSquareBracketEnd(const char lastCharacter)
 bool JsonParserState::HandleCharacterLowercaseT(const char* name)
 {
   NewNode(name, TreeNode::BOOLEAN);
-  if (!ParseTrue())
+  if(!ParseTrue())
   {
     return false;
   }
-  if (!UpToParent())
+  if(!UpToParent())
   {
     return false;
   }
@@ -1039,11 +1039,11 @@ bool JsonParserState::HandleCharacterLowercaseT(const char* name)
 bool JsonParserState::HandleCharacterLowercaseN(const char* name)
 {
   NewNode(name, TreeNode::IS_NULL);
-  if (!ParseNULL())
+  if(!ParseNULL())
   {
     return false;
   }
-  if (!UpToParent())
+  if(!UpToParent())
   {
     return false;
   }
@@ -1054,11 +1054,11 @@ bool JsonParserState::HandleCharacterLowercaseN(const char* name)
 bool JsonParserState::HandleCharacterLowercaseF(const char* name)
 {
   NewNode(name, TreeNode::BOOLEAN);
-  if (!ParseFalse())
+  if(!ParseFalse())
   {
     return false;
   }
-  if (!UpToParent())
+  if(!UpToParent())
   {
     return false;
   }
@@ -1068,16 +1068,16 @@ bool JsonParserState::HandleCharacterLowercaseF(const char* name)
 
 bool JsonParserState::HandleCharacterComma(const char* name)
 {
-  if (0 == mCurrent.Size())
+  if(0 == mCurrent.Size())
   {
     return Error("Missing Value");
   }
 
-  if (mCurrent.GetType() == TreeNode::OBJECT)
+  if(mCurrent.GetType() == TreeNode::OBJECT)
   {
     mState = STATE_OBJECT; // to get '"' in '"key":val'
   }
-  else if (mCurrent.GetType() == TreeNode::ARRAY)
+  else if(mCurrent.GetType() == TreeNode::ARRAY)
   {
     mState = STATE_VALUE; // array so just get next value
   }

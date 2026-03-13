@@ -30,10 +30,10 @@ static constexpr float MINIMUM_DOWNSCALE_FACTOR = Dali::Math::MACHINE_EPSILON_10
 static constexpr float MAXIMUM_DOWNSCALE_FACTOR = 1.0f;
 
 static constexpr uint32_t MAXIMUM_BLUR_RADIUS =
-    200u; ///< TODO : This is just experience defined value. We need to change it after more tests.
+  200u; ///< TODO : This is just experience defined value. We need to change it after more tests.
 static constexpr uint32_t MAXIMUM_NUMBER_OF_SAMPLES = (MAXIMUM_BLUR_RADIUS >> 1);
 
-static constexpr float MAXIMUM_BELL_CURVE_WIDTH = 64.062302f; ///< bell curve width for MAXIMUM_BLUR_RADIUS case
+static constexpr float   MAXIMUM_BELL_CURVE_WIDTH            = 64.062302f; ///< bell curve width for MAXIMUM_BLUR_RADIUS case
 static constexpr int32_t MAXIMUM_BELL_CURVE_LOOP_TRIAL_COUNT = 20;
 
 /**
@@ -55,7 +55,7 @@ inline static float CalculateGaussianWeight(float localOffset, float sigma)
  */
 float CalculateBellCurveWidth(uint32_t blurRadius)
 {
-  const float epsilon = 1e-2f / (blurRadius * 2);
+  const float epsilon     = 1e-2f / (blurRadius * 2);
   const float localOffset = (blurRadius * 2) - 1;
 
   float lowerBoundBellCurveWidth = Dali::Math::MACHINE_EPSILON_10000;
@@ -64,11 +64,11 @@ float CalculateBellCurveWidth(uint32_t blurRadius)
   float bellCurveWidth = -1.0f;
 
   int trialCount = 0;
-  while (trialCount++ < MAXIMUM_BELL_CURVE_LOOP_TRIAL_COUNT &&
-         upperBoundBellCurveWidth - lowerBoundBellCurveWidth > Dali::Math::MACHINE_EPSILON_10000)
+  while(trialCount++ < MAXIMUM_BELL_CURVE_LOOP_TRIAL_COUNT &&
+        upperBoundBellCurveWidth - lowerBoundBellCurveWidth > Dali::Math::MACHINE_EPSILON_10000)
   {
     bellCurveWidth = (lowerBoundBellCurveWidth + upperBoundBellCurveWidth) * 0.5f;
-    if (CalculateGaussianWeight(localOffset, bellCurveWidth) < epsilon)
+    if(CalculateGaussianWeight(localOffset, bellCurveWidth) < epsilon)
     {
       lowerBoundBellCurveWidth = bellCurveWidth;
     }
@@ -96,35 +96,35 @@ void CalculateGaussianConstants(uint32_t numSamples, std::vector<float>& weights
   offsets.clear();
   offsets.resize(numSamples);
 
-  if (DALI_UNLIKELY(numSamples == 0u))
+  if(DALI_UNLIKELY(numSamples == 0u))
   {
     return;
   }
 
   const float bellCurveWidth = CalculateBellCurveWidth(numSamples);
 
-  const uint32_t kernelSize = numSamples * 4 - 1;
+  const uint32_t kernelSize     = numSamples * 4 - 1;
   const uint32_t halfKernelSize = kernelSize / 2 + 1; // Gaussian curve is symmetric
 
   // Generate half size kernel
   std::vector<float> halfSideKernel(halfKernelSize);
 
-  halfSideKernel[0] = CalculateGaussianWeight(0.0f, bellCurveWidth);
+  halfSideKernel[0]  = CalculateGaussianWeight(0.0f, bellCurveWidth);
   float totalWeights = halfSideKernel[0];
-  for (unsigned int i = 1; i < halfKernelSize; i++)
+  for(unsigned int i = 1; i < halfKernelSize; i++)
   {
-    float w = CalculateGaussianWeight(i, bellCurveWidth);
+    float w           = CalculateGaussianWeight(i, bellCurveWidth);
     halfSideKernel[i] = w;
     totalWeights += w * 2.0f;
   }
-  for (unsigned int i = 0; i < halfKernelSize; i++)
+  for(unsigned int i = 0; i < halfKernelSize; i++)
   {
     halfSideKernel[i] /= totalWeights;
   }
   halfSideKernel[0] *= 0.5f;
 
   // Compress kernel to half size
-  for (unsigned int i = 0; i < numSamples; i++)
+  for(unsigned int i = 0; i < numSamples; i++)
   {
     weights[i] = halfSideKernel[2 * i] + halfSideKernel[2 * i + 1];
     offsets[i] = 2.0f * i + halfSideKernel[2 * i + 1] / weights[i];
@@ -162,7 +162,7 @@ inline static Dali::Shader& GetCachedShader(const uint32_t numSamples)
 inline static Dali::Geometry& GetCachedGeometry()
 {
   thread_local static Dali::Geometry gPredefinedGeometry;
-  if (!gPredefinedGeometry)
+  if(!gPredefinedGeometry)
   {
     // TODO : Can't we share the geometry what VisualFactoryCache using, for performance?
     gPredefinedGeometry = Dali::Geometry::New();
@@ -172,14 +172,14 @@ inline static Dali::Geometry& GetCachedGeometry()
       Dali::Vector2 position;
     };
 
-    VertexPosition positionArray[] = {{Dali::Vector2(-0.5f, -0.5f)},
-                                      {Dali::Vector2(0.5f, -0.5f)},
-                                      {Dali::Vector2(-0.5f, 0.5f)},
-                                      {Dali::Vector2(0.5f, 0.5f)}};
-    uint32_t numberOfVertices = sizeof(positionArray) / sizeof(VertexPosition);
+    VertexPosition positionArray[]  = {{Dali::Vector2(-0.5f, -0.5f)},
+                                       {Dali::Vector2(0.5f, -0.5f)},
+                                       {Dali::Vector2(-0.5f, 0.5f)},
+                                       {Dali::Vector2(0.5f, 0.5f)}};
+    uint32_t       numberOfVertices = sizeof(positionArray) / sizeof(VertexPosition);
 
     Dali::Property::Map positionVertexFormat;
-    positionVertexFormat["aPosition"] = Dali::Property::VECTOR2;
+    positionVertexFormat["aPosition"]   = Dali::Property::VECTOR2;
     Dali::VertexBuffer positionVertices = Dali::VertexBuffer::New(positionVertexFormat);
     positionVertices.SetData(positionArray, numberOfVertices);
     gPredefinedGeometry.AddVertexBuffer(positionVertices);
@@ -193,7 +193,7 @@ inline static Dali::Geometry& GetCachedGeometry()
 inline static Dali::Sampler GetCachedSampler()
 {
   thread_local static Dali::Sampler gPredefinedSampler;
-  if (!gPredefinedSampler)
+  if(!gPredefinedSampler)
   {
     gPredefinedSampler = Dali::Sampler::New();
     gPredefinedSampler.SetWrapMode(Dali::WrapMode::MIRRORED_REPEAT, Dali::WrapMode::MIRRORED_REPEAT);
@@ -211,7 +211,7 @@ namespace Internal
 {
 Dali::Renderer GaussianBlurAlgorithm::CreateRenderer(const uint32_t blurRadius)
 {
-  Dali::Renderer renderer = Dali::Renderer::New();
+  Dali::Renderer   renderer   = Dali::Renderer::New();
   Dali::TextureSet textureSet = Dali::TextureSet::New();
 
   renderer.SetTextures(textureSet);
@@ -229,10 +229,10 @@ Dali::Shader& GaussianBlurAlgorithm::GetGaussianBlurShader(const uint32_t blurRa
   uint32_t numSamples = blurRadius >> 1;
 
   auto& cachedShader = GetCachedShader(numSamples);
-  if (!cachedShader)
+  if(!cachedShader)
   {
     auto& cachedUniformBlock = GetCachedUniformBlock(numSamples);
-    if (!cachedUniformBlock)
+    if(!cachedUniformBlock)
     {
       std::vector<float> weights;
       std::vector<float> offsets;
@@ -240,7 +240,7 @@ Dali::Shader& GaussianBlurAlgorithm::GetGaussianBlurShader(const uint32_t blurRa
 
       Dali::UniformBlock sharedUBO = Dali::UniformBlock::New("GaussianBlurSampleBlock");
 
-      for (uint32_t i = 0; i < numSamples; i++)
+      for(uint32_t i = 0; i < numSamples; i++)
       {
         {
           std::stringstream oss;
@@ -277,17 +277,17 @@ uint32_t GaussianBlurAlgorithm::GetDownscaledBlurRadius(float& downscaleFactor, 
 
   uint32_t downscaledBlurRadius = static_cast<uint32_t>(blurRadius * downscaleFactor);
 
-  if (DALI_UNLIKELY(downscaledBlurRadius > MAXIMUM_BLUR_RADIUS))
+  if(DALI_UNLIKELY(downscaledBlurRadius > MAXIMUM_BLUR_RADIUS))
   {
-    uint32_t fixedBlurRadius = blurRadius;
+    uint32_t    fixedBlurRadius      = blurRadius;
     const float fixedDownScaleFactor = Dali::Clamp(
-        downscaleFactor * static_cast<float>(MAXIMUM_BLUR_RADIUS) / static_cast<float>(downscaledBlurRadius),
-        MINIMUM_DOWNSCALE_FACTOR, MAXIMUM_DOWNSCALE_FACTOR);
+      downscaleFactor * static_cast<float>(MAXIMUM_BLUR_RADIUS) / static_cast<float>(downscaledBlurRadius),
+      MINIMUM_DOWNSCALE_FACTOR, MAXIMUM_DOWNSCALE_FACTOR);
 
     downscaledBlurRadius = static_cast<uint32_t>(fixedBlurRadius * fixedDownScaleFactor);
 
     // downscaledBlurRadius still could be bigger than maximum radius. Let we change blur radius for this case.
-    while (DALI_UNLIKELY(downscaledBlurRadius > MAXIMUM_BLUR_RADIUS))
+    while(DALI_UNLIKELY(downscaledBlurRadius > MAXIMUM_BLUR_RADIUS))
     {
       --fixedBlurRadius;
       downscaledBlurRadius = static_cast<uint32_t>(fixedBlurRadius * fixedDownScaleFactor);
@@ -297,7 +297,7 @@ uint32_t GaussianBlurAlgorithm::GetDownscaledBlurRadius(float& downscaleFactor, 
                    fixedBlurRadius, downscaleFactor, fixedDownScaleFactor);
 
     downscaleFactor = fixedDownScaleFactor;
-    blurRadius = fixedBlurRadius;
+    blurRadius      = fixedBlurRadius;
   }
   return downscaledBlurRadius;
 }

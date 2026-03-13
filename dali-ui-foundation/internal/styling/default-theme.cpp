@@ -34,9 +34,9 @@ DefaultTheme& DefaultTheme::Get()
 }
 
 DefaultTheme::DefaultTheme()
-  : mTextLabelStyle(),
-    mTextFieldStyle(),
-    mTextEditorStyle()
+: mTextLabelStyle(),
+  mTextFieldStyle(),
+  mTextEditorStyle()
 {
 }
 
@@ -50,23 +50,23 @@ void DefaultTheme::Reset()
 void DefaultTheme::ApplyDefaultStyle(Ui::TextLabel textLabel)
 {
   Ui::StyleManager styleManager = Ui::StyleManager::Get();
-  if (!styleManager)
+  if(!styleManager)
   {
     return;
   }
 
   // Only load if style map is empty (caching optimization)
-  if (mTextLabelStyle.Count() == 0)
+  if(mTextLabelStyle.Count() == 0)
   {
     mTextLabelStyle = GetImpl(styleManager).GetStyleProperties("TextLabel", textLabel);
   }
 
   // Apply TextLabel style directly using Property::Index keys
-  for (Property::Map::SizeType i = 0; i < mTextLabelStyle.Count(); ++i)
+  for(Property::Map::SizeType i = 0; i < mTextLabelStyle.Count(); ++i)
   {
-    const auto& keyValuePair = mTextLabelStyle.GetKeyValue(i);
-    const Property::Key& key = keyValuePair.first;
-    const Property::Value& value = keyValuePair.second;
+    const auto&            keyValuePair = mTextLabelStyle.GetKeyValue(i);
+    const Property::Key&   key          = keyValuePair.first;
+    const Property::Value& value        = keyValuePair.second;
     textLabel.SetProperty(key.indexKey, value);
   }
 }
@@ -74,22 +74,22 @@ void DefaultTheme::ApplyDefaultStyle(Ui::TextLabel textLabel)
 void DefaultTheme::ApplyDefaultStyle(Ui::TextField textField)
 {
   Ui::StyleManager styleManager = Ui::StyleManager::Get();
-  if (!styleManager)
+  if(!styleManager)
   {
     return;
   }
 
-  if (mTextFieldStyle.Count() == 0)
+  if(mTextFieldStyle.Count() == 0)
   {
     mTextFieldStyle = GetImpl(styleManager).GetStyleProperties("TextField", textField);
   }
 
   // Apply TextField style directly using Property::Index keys
-  for (Property::Map::SizeType i = 0; i < mTextFieldStyle.Count(); ++i)
+  for(Property::Map::SizeType i = 0; i < mTextFieldStyle.Count(); ++i)
   {
-    const auto& keyValuePair = mTextFieldStyle.GetKeyValue(i);
-    const Property::Key& key = keyValuePair.first;
-    const Property::Value& value = keyValuePair.second;
+    const auto&            keyValuePair = mTextFieldStyle.GetKeyValue(i);
+    const Property::Key&   key          = keyValuePair.first;
+    const Property::Value& value        = keyValuePair.second;
     textField.SetProperty(key.indexKey, value);
   }
 }
@@ -97,22 +97,22 @@ void DefaultTheme::ApplyDefaultStyle(Ui::TextField textField)
 void DefaultTheme::ApplyDefaultStyle(Ui::TextEditor textEditor)
 {
   Ui::StyleManager styleManager = Ui::StyleManager::Get();
-  if (!styleManager)
+  if(!styleManager)
   {
     return;
   }
 
-  if (mTextEditorStyle.Count() == 0)
+  if(mTextEditorStyle.Count() == 0)
   {
     mTextEditorStyle = GetImpl(styleManager).GetStyleProperties("TextEditor", textEditor);
   }
 
   // Apply TextEditor style directly using Property::Index keys
-  for (Property::Map::SizeType i = 0; i < mTextEditorStyle.Count(); ++i)
+  for(Property::Map::SizeType i = 0; i < mTextEditorStyle.Count(); ++i)
   {
-    const auto& keyValuePair = mTextEditorStyle.GetKeyValue(i);
-    const Property::Key& key = keyValuePair.first;
-    const Property::Value& value = keyValuePair.second;
+    const auto&            keyValuePair = mTextEditorStyle.GetKeyValue(i);
+    const Property::Key&   key          = keyValuePair.first;
+    const Property::Value& value        = keyValuePair.second;
     textEditor.SetProperty(key.indexKey, value);
   }
 }

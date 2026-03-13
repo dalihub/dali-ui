@@ -54,36 +54,36 @@ protected:
   FlexLayoutImpl();
 
 public: // API
-  void SetDirection(FlexDirection direction);
+  void          SetDirection(FlexDirection direction);
   FlexDirection GetDirection() const;
 
-  void SetWrap(FlexWrap wrap);
+  void     SetWrap(FlexWrap wrap);
   FlexWrap GetWrap() const;
 
-  void SetJustifyContent(FlexJustify justify);
+  void        SetJustifyContent(FlexJustify justify);
   FlexJustify GetJustifyContent() const;
 
-  void SetAlignItems(FlexAlign align);
+  void      SetAlignItems(FlexAlign align);
   FlexAlign GetAlignItems() const;
 
-  void SetAlignContent(FlexAlign align);
+  void      SetAlignContent(FlexAlign align);
   FlexAlign GetAlignContent() const;
 
 protected: // From Layout
   LayoutManager* CreateLayoutManager() override;
 
 private:
-  FlexLayoutImpl(const FlexLayoutImpl&) = delete;
-  FlexLayoutImpl(FlexLayoutImpl&&) = delete;
+  FlexLayoutImpl(const FlexLayoutImpl&)            = delete;
+  FlexLayoutImpl(FlexLayoutImpl&&)                 = delete;
   FlexLayoutImpl& operator=(const FlexLayoutImpl&) = delete;
-  FlexLayoutImpl& operator=(FlexLayoutImpl&&) = delete;
+  FlexLayoutImpl& operator=(FlexLayoutImpl&&)      = delete;
 
 private:
   FlexDirection mDirection;
-  FlexWrap mWrap;
-  FlexJustify mJustifyContent;
-  FlexAlign mAlignItems;
-  FlexAlign mAlignContent;
+  FlexWrap      mWrap;
+  FlexJustify   mJustifyContent;
+  FlexAlign     mAlignItems;
+  FlexAlign     mAlignContent;
 };
 
 inline Integration::FlexLayoutImpl& GetImpl(Ui::FlexLayout& layout)

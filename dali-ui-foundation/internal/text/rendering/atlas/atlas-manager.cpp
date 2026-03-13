@@ -39,7 +39,7 @@ AtlasManager AtlasManager::New()
 }
 
 AtlasManager::AtlasManager(Internal::AtlasManager* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

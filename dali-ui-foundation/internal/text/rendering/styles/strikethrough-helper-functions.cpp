@@ -27,12 +27,12 @@ namespace Text
 bool IsGlyphStrikethrough(GlyphIndex index, const Vector<StrikethroughGlyphRun>& strikethroughRuns,
                           Vector<StrikethroughGlyphRun>::ConstIterator& currentStrikethroughGlyphRunIt)
 {
-  for (Vector<StrikethroughGlyphRun>::ConstIterator it = strikethroughRuns.Begin(), endIt = strikethroughRuns.End();
-       it != endIt; ++it)
+  for(Vector<StrikethroughGlyphRun>::ConstIterator it = strikethroughRuns.Begin(), endIt = strikethroughRuns.End();
+      it != endIt; ++it)
   {
     const StrikethroughGlyphRun& run = *it;
 
-    if ((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
+    if((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
     {
       currentStrikethroughGlyphRunIt = it;
       return true;
@@ -43,22 +43,22 @@ bool IsGlyphStrikethrough(GlyphIndex index, const Vector<StrikethroughGlyphRun>&
 }
 
 StrikethroughStyleProperties GetCurrentStrikethroughProperties(
-    GlyphIndex index, const bool& isGlyphStrikethrough, const Vector<StrikethroughGlyphRun>& strikethroughRuns,
-    Vector<StrikethroughGlyphRun>::ConstIterator& currentStrikethroughGlyphRunIt,
-    const StrikethroughStyleProperties& commonStrikethroughProperties)
+  GlyphIndex index, const bool& isGlyphStrikethrough, const Vector<StrikethroughGlyphRun>& strikethroughRuns,
+  Vector<StrikethroughGlyphRun>::ConstIterator& currentStrikethroughGlyphRunIt,
+  const StrikethroughStyleProperties&           commonStrikethroughProperties)
 {
   StrikethroughStyleProperties currentStrikethroughStyleProperties = commonStrikethroughProperties;
 
-  if (isGlyphStrikethrough && (currentStrikethroughGlyphRunIt != strikethroughRuns.End()))
+  if(isGlyphStrikethrough && (currentStrikethroughGlyphRunIt != strikethroughRuns.End()))
   {
     // Retrieve the latest run to handle the nested case.
-    for (Vector<StrikethroughGlyphRun>::ConstIterator it = currentStrikethroughGlyphRunIt + 1,
-                                                      endIt = strikethroughRuns.End();
-         it != endIt; ++it)
+    for(Vector<StrikethroughGlyphRun>::ConstIterator it    = currentStrikethroughGlyphRunIt + 1,
+                                                     endIt = strikethroughRuns.End();
+        it != endIt; ++it)
     {
       const StrikethroughGlyphRun& run = *it;
 
-      if ((run.glyphRun.glyphIndex <= index) && (index < (run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs)))
+      if((run.glyphRun.glyphIndex <= index) && (index < (run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs)))
       {
         currentStrikethroughGlyphRunIt = it;
       }
@@ -76,7 +76,7 @@ void CalcualteStrikethroughHeight(float& currentStrikethroughHeight, float& maxS
   // Height of strikethrough represents the thickness of line.
 
   // Ensure strikethrough will be at least a pixel high
-  if (currentStrikethroughHeight < 1.0f)
+  if(currentStrikethroughHeight < 1.0f)
   {
     currentStrikethroughHeight = 1.0f;
   }
@@ -86,7 +86,7 @@ void CalcualteStrikethroughHeight(float& currentStrikethroughHeight, float& maxS
   }
 
   // The strikethrough height should be the max strikethrough height of all glyphs of the line.
-  if (currentStrikethroughHeight > maxStrikethroughHeight)
+  if(currentStrikethroughHeight > maxStrikethroughHeight)
   {
     maxStrikethroughHeight = currentStrikethroughHeight;
   }

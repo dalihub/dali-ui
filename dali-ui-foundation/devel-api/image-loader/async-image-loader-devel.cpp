@@ -34,8 +34,8 @@ uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDi
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   return GetImplementation(asyncImageLoader)
-      .Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode, orientationCorrection,
-            preMultiplyOnLoad, false);
+    .Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode, orientationCorrection,
+          preMultiplyOnLoad, false);
 }
 
 uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, Devel::PixelBuffer pixelBuffer,
@@ -43,7 +43,7 @@ uint32_t ApplyMask(AsyncImageLoader asyncImageLoader, Devel::PixelBuffer pixelBu
                    DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   return GetImplementation(asyncImageLoader)
-      .ApplyMask(pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad);
+    .ApplyMask(pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad);
 }
 
 PixelBufferLoadedSignalType& PixelBufferLoadedSignal(AsyncImageLoader asyncImageLoader)

@@ -52,9 +52,9 @@ class RenderingController;
 enum SelectionType
 {
   INTERACTIVE = 0x0000, ///< Select the word where the cursor is located.
-  ALL = 0x0001,         ///< Select the whole text.
-  NONE = 0x0002,        ///< Unselect the whole text.
-  RANGE = 0x0003        ///< Select the range text.
+  ALL         = 0x0001, ///< Select the whole text.
+  NONE        = 0x0002, ///< Unselect the whole text.
+  RANGE       = 0x0003  ///< Select the range text.
 };
 
 typedef IntrusivePtr<Controller> ControllerPtr;
@@ -83,21 +83,21 @@ public: // Enumerated types.
    */
   enum OperationsMask
   {
-    NO_OPERATION = 0x0000,
-    CONVERT_TO_UTF32 = 0x0001,
-    GET_SCRIPTS = 0x0002,
-    VALIDATE_FONTS = 0x0004,
-    GET_LINE_BREAKS = 0x0008,
-    BIDI_INFO = 0x0010,
-    SHAPE_TEXT = 0x0020,
-    GET_GLYPH_METRICS = 0x0040,
-    LAYOUT = 0x0080,
+    NO_OPERATION       = 0x0000,
+    CONVERT_TO_UTF32   = 0x0001,
+    GET_SCRIPTS        = 0x0002,
+    VALIDATE_FONTS     = 0x0004,
+    GET_LINE_BREAKS    = 0x0008,
+    BIDI_INFO          = 0x0010,
+    SHAPE_TEXT         = 0x0020,
+    GET_GLYPH_METRICS  = 0x0040,
+    LAYOUT             = 0x0080,
     UPDATE_LAYOUT_SIZE = 0x0100,
-    REORDER = 0x0200,
-    ALIGN = 0x0400,
-    COLOR = 0x0800,
-    UPDATE_DIRECTION = 0x1000,
-    ALL_OPERATIONS = 0xFFFF
+    REORDER            = 0x0200,
+    ALIGN              = 0x0400,
+    COLOR              = 0x0800,
+    UPDATE_DIRECTION   = 0x1000,
+    ALL_OPERATIONS     = 0xFFFF
   };
 
   /**
@@ -123,9 +123,9 @@ public: // Enumerated types.
    */
   enum UpdateTextType
   {
-    NONE_UPDATED = 0x0,     ///< Nothing has been updated.
-    MODEL_UPDATED = 0x1,    ///< The text's model has been updated.
-    DECORATOR_UPDATED = 0x2 ///< The decoration has been updated.
+    NONE_UPDATED      = 0x0, ///< Nothing has been updated.
+    MODEL_UPDATED     = 0x1, ///< The text's model has been updated.
+    DECORATOR_UPDATED = 0x2  ///< The decoration has been updated.
   };
 
   /**
@@ -150,9 +150,9 @@ public: // Enumerated types.
   {
     enum Action
     {
-      NO_ACTION, ///< Does no action if there is a tap on top of an area with no text.
-      HIGHLIGHT, ///< Highlights the nearest text (at the beginning or end of the text) and shows the text's selection
-                 ///< popup.
+      NO_ACTION,           ///< Does no action if there is a tap on top of an area with no text.
+      HIGHLIGHT,           ///< Highlights the nearest text (at the beginning or end of the text) and shows the text's selection
+                           ///< popup.
       SHOW_SELECTION_POPUP ///< Shows the text's selection popup.
     };
   };
@@ -204,10 +204,10 @@ public: // Constructor.
    */
   static ControllerPtr New(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
                            SelectableControlInterface* selectableControlInterface,
-                           AnchorControlInterface* anchorControlInterface)
+                           AnchorControlInterface*     anchorControlInterface)
   {
     return ControllerPtr(
-        new Controller(controlInterface, editableControlInterface, selectableControlInterface, anchorControlInterface));
+      new Controller(controlInterface, editableControlInterface, selectableControlInterface, anchorControlInterface));
   }
 
 public: // Configure the text controller.
@@ -2178,7 +2178,7 @@ public: // Relayout.
    *
    * @return Whether the text model or decorations were updated.
    */
-  UpdateTextType Relayout(const Size& size,
+  UpdateTextType Relayout(const Size&                 size,
                           Dali::LayoutDirection::Type layoutDirection = Dali::LayoutDirection::LEFT_TO_RIGHT);
 
   /**
@@ -2381,7 +2381,7 @@ public: // Text-input Event Queuing.
    * @return A data struture indicating if update is needed, cursor position and current text.
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(
-      InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
+    InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
 
   /**
    * @brief Event from Clipboard notifying an Item has been selected for pasting
@@ -2484,7 +2484,7 @@ private: // Private contructors & copy operator.
    * @brief Private constructor.
    */
   Controller()
-    : Controller(nullptr, nullptr, nullptr, nullptr)
+  : Controller(nullptr, nullptr, nullptr, nullptr)
   {
   }
 
@@ -2492,7 +2492,7 @@ private: // Private contructors & copy operator.
    * @brief Private constructor.
    */
   Controller(ControlInterface* controlInterface)
-    : Controller(controlInterface, nullptr, nullptr, nullptr)
+  : Controller(controlInterface, nullptr, nullptr, nullptr)
   {
   }
 
@@ -2502,7 +2502,7 @@ private: // Private contructors & copy operator.
   Controller(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
              SelectableControlInterface* selectableControlInterface, AnchorControlInterface* anchorControlInterface);
 
-  Controller(const Controller& handle) = delete;
+  Controller(const Controller& handle)            = delete;
   Controller& operator=(const Controller& handle) = delete;
 
 protected: // Destructor.

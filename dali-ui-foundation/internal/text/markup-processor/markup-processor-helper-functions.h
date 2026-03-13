@@ -42,8 +42,8 @@ struct Attribute
 {
   const char* nameBuffer;
   const char* valueBuffer;
-  Length nameLength;
-  Length valueLength;
+  Length      nameLength;
+  Length      valueLength;
 };
 
 /**
@@ -52,9 +52,9 @@ struct Attribute
 struct Tag
 {
   Vector<Attribute> attributes;
-  const char* buffer;
-  Length length;
-  bool isEndTag;
+  const char*       buffer;
+  Length            length;
+  bool              isEndTag;
 };
 
 /**

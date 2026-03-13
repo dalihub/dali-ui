@@ -64,7 +64,7 @@ namespace Internal
 namespace // unnamed namespace
 {
 const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
-const char* KEY_RETURN_NAME = "Return";
+const char*        KEY_RETURN_NAME           = "Return";
 } // unnamed namespace
 
 namespace
@@ -171,55 +171,55 @@ Ui::TextField::InputStyle::Mask ConvertInputStyle(Text::InputStyle::Mask inputSt
 {
   Ui::TextField::InputStyle::Mask fieldInputStyleMask = Ui::TextField::InputStyle::NONE;
 
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_COLOR))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_COLOR))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::COLOR);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::COLOR);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_FAMILY))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_FAMILY))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_FAMILY);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_FAMILY);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_POINT_SIZE))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_POINT_SIZE))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::POINT_SIZE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::POINT_SIZE);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WEIGHT))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WEIGHT))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WIDTH))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_WIDTH))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_SLANT))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_FONT_SLANT))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::FONT_STYLE);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_UNDERLINE))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_UNDERLINE))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::UNDERLINE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::UNDERLINE);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_SHADOW))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_SHADOW))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::SHADOW);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::SHADOW);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_EMBOSS))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_EMBOSS))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::EMBOSS);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::EMBOSS);
   }
-  if (InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_OUTLINE))
+  if(InputStyle::NONE != static_cast<InputStyle::Mask>(inputStyleMask & InputStyle::INPUT_OUTLINE))
   {
     fieldInputStyleMask =
-        static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::OUTLINE);
+      static_cast<Ui::TextField::InputStyle::Mask>(fieldInputStyleMask | Ui::TextField::InputStyle::OUTLINE);
   }
   return fieldInputStyleMask;
 }
@@ -247,7 +247,7 @@ void TextField::SetProperty(BaseObject* object, Property::Index index, const Pro
 
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField SetProperty\n");
 
-  if (textField)
+  if(textField)
   {
     PropertyHandler::SetProperty(textField, index, value);
   }
@@ -259,7 +259,7 @@ Property::Value TextField::GetProperty(BaseObject* object, Property::Index index
 
   Ui::TextField textField = Ui::TextField::DownCast(Dali::BaseHandle(object));
 
-  if (textField)
+  if(textField)
   {
     value = PropertyHandler::GetProperty(textField, index);
   }
@@ -269,7 +269,7 @@ Property::Value TextField::GetProperty(BaseObject* object, Property::Index index
 
 void TextField::SelectWholeText()
 {
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     mController->SelectWholeText();
     SetKeyInputFocus();
@@ -278,7 +278,7 @@ void TextField::SelectWholeText()
 
 void TextField::SelectNone()
 {
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     mController->SelectNone();
   }
@@ -286,7 +286,7 @@ void TextField::SelectNone()
 
 void TextField::SelectText(const uint32_t start, const uint32_t end)
 {
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     mController->SelectText(start, end);
     SetKeyInputFocus();
@@ -296,7 +296,7 @@ void TextField::SelectText(const uint32_t start, const uint32_t end)
 string TextField::GetSelectedText() const
 {
   string selectedText = "";
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     selectedText = mController->GetSelectedText();
   }
@@ -305,7 +305,7 @@ string TextField::GetSelectedText() const
 
 void TextField::SetTextSelectionRange(const uint32_t* start, const uint32_t* end)
 {
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     mController->SetTextSelectionRange(start, end);
     SetKeyInputFocus();
@@ -315,7 +315,7 @@ void TextField::SetTextSelectionRange(const uint32_t* start, const uint32_t* end
 Uint32Pair TextField::GetTextSelectionRange() const
 {
   Uint32Pair range;
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     range = mController->GetTextSelectionRange();
   }
@@ -325,7 +325,7 @@ Uint32Pair TextField::GetTextSelectionRange() const
 string TextField::CopyText()
 {
   string copiedText = "";
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     copiedText = mController->CopyText();
   }
@@ -335,7 +335,7 @@ string TextField::CopyText()
 string TextField::CutText()
 {
   string cutText = "";
-  if (mController && mController->IsShowingRealText())
+  if(mController && mController->IsShowingRealText())
   {
     cutText = mController->CutText();
   }
@@ -344,7 +344,7 @@ string TextField::CutText()
 
 void TextField::PasteText()
 {
-  if (mController)
+  if(mController)
   {
     SetKeyInputFocus(); // Giving focus to the field that was passed to the PasteText in case the passed field (current
                         // field) doesn't have focus.
@@ -362,64 +362,64 @@ bool TextField::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
 {
   Dali::BaseHandle handle(object);
 
-  bool connected(true);
+  bool          connected(true);
   Ui::TextField field = Ui::TextField::DownCast(handle);
 
-  if (0 == strcmp(signalName.c_str(), SIGNAL_TEXT_CHANGED))
+  if(0 == strcmp(signalName.c_str(), SIGNAL_TEXT_CHANGED))
   {
     field.TextChangedSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_MAX_LENGTH_REACHED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_MAX_LENGTH_REACHED))
   {
     field.MaxLengthReachedSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_INPUT_STYLE_CHANGED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_INPUT_STYLE_CHANGED))
   {
     field.InputStyleChangedSignal().Connect(tracker, functor);
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_ANCHOR_CLICKED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_ANCHOR_CLICKED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.AnchorClickedSignal().Connect(tracker, functor);
     }
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_CURSOR_POSITION_CHANGED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_CURSOR_POSITION_CHANGED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.CursorPositionChangedSignal().Connect(tracker, functor);
     }
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_INPUT_FILTERED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_INPUT_FILTERED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.InputFilteredSignal().Connect(tracker, functor);
     }
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CHANGED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CHANGED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.SelectionChangedSignal().Connect(tracker, functor);
     }
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CLEARED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CLEARED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.SelectionClearedSignal().Connect(tracker, functor);
     }
   }
-  else if (0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_STARTED))
+  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_STARTED))
   {
-    if (field)
+    if(field)
     {
       Internal::TextField& fieldImpl(GetImpl(field));
       fieldImpl.SelectionStartedSignal().Connect(tracker, functor);
@@ -492,8 +492,8 @@ void TextField::OnInitialize()
 
   // When using the vector-based rendering, the size of the GLyphs are different
   TextAbstraction::GlyphType glyphType = (DevelText::RENDERING_VECTOR_BASED == mRenderingBackend)
-                                             ? TextAbstraction::VECTOR_GLYPH
-                                             : TextAbstraction::BITMAP_GLYPH;
+                                           ? TextAbstraction::VECTOR_GLYPH
+                                           : TextAbstraction::BITMAP_GLYPH;
   mController->SetGlyphType(glyphType);
 
   mDecorator = Text::Decorator::New(*mController, *mController);
@@ -518,21 +518,21 @@ void TextField::OnInitialize()
   mController->SetNoTextLongPressAction(Controller::NoTextTap::HIGHLIGHT);
 
   // Sets layoutDirection value
-  Dali::Stage stage = Dali::Stage::GetCurrent();
+  Dali::Stage                 stage           = Dali::Stage::GetCurrent();
   Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-      stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+    stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
   mController->SetLayoutDirection(layoutDirection);
 
   self.LayoutDirectionChangedSignal().Connect(this, &TextField::OnLayoutDirectionChanged);
 
-  if (Dali::Adaptor::IsAvailable())
+  if(Dali::Adaptor::IsAvailable())
   {
     Dali::Adaptor::Get().LocaleChangedSignal().Connect(this, &TextField::OnLocaleChanged);
   }
 
   // Forward input events to controller
   EnableGestureDetection(
-      static_cast<GestureType::Value>(GestureType::TAP | GestureType::PAN | GestureType::LONG_PRESS));
+    static_cast<GestureType::Value>(GestureType::TAP | GestureType::PAN | GestureType::LONG_PRESS));
   GetTapGestureDetector().SetMaximumTapsRequired(2);
   GetTapGestureDetector().ReceiveAllTapEvents(true);
 
@@ -542,7 +542,7 @@ void TextField::OnInitialize()
   Rect<int> boundingBox;
   mDecorator->GetBoundingBox(boundingBox);
 
-  if (boundingBox.IsEmpty())
+  if(boundingBox.IsEmpty())
   {
     Vector2 stageSize = Dali::Stage::GetCurrent().GetSize();
     mDecorator->SetBoundingBox(Rect<int>(0.0f, 0.0f, stageSize.width, stageSize.height));
@@ -558,7 +558,7 @@ void TextField::OnInitialize()
 
   DevelControl::SetInputMethodContext(*this, mInputMethodContext);
 
-  if (Dali::Ui::TextField::EXCEED_POLICY_CLIP == mExceedPolicy)
+  if(Dali::Ui::TextField::EXCEED_POLICY_CLIP == mExceedPolicy)
   {
     EnableClipping();
   }
@@ -579,7 +579,7 @@ void TextField::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type c
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnStyleChange\n");
 
-  switch (change)
+  switch(change)
   {
     case StyleChange::DEFAULT_FONT_CHANGE:
     {
@@ -634,7 +634,7 @@ float TextField::GetHeightForWidth(float width)
 
 void TextField::ResizeActor(Actor& actor, const Vector2& size)
 {
-  if (actor.GetProperty<Vector3>(Dali::Actor::Property::SIZE).GetVectorXY() != size)
+  if(actor.GetProperty<Vector3>(Dali::Actor::Property::SIZE).GetVectorXY() != size)
   {
     actor.SetProperty(Actor::Property::SIZE, size);
   }
@@ -644,13 +644,13 @@ void TextField::OnPropertySet(Property::Index index, const Property::Value& prop
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnPropertySet index[%d]\n", index);
 
-  switch (index)
+  switch(index)
   {
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
       mController->SetUserInteractionEnabled(enabled);
-      if (mStencil)
+      if(mStencil)
       {
         float opacity = enabled ? 1.0f : mController->GetDisabledColorOpacity();
         mStencil.SetProperty(Actor::Property::OPACITY, opacity);
@@ -659,10 +659,10 @@ void TextField::OnPropertySet(Property::Index index, const Property::Value& prop
     }
     default:
     {
-      if (Self().DoesCustomPropertyExist(index) && mVariationIndexMap.find(index) != mVariationIndexMap.end())
+      if(Self().DoesCustomPropertyExist(index) && mVariationIndexMap.find(index) != mVariationIndexMap.end())
       {
-        std::string tag = mVariationIndexMap[index];
-        float value = propertyValue.Get<float>();
+        std::string tag   = mVariationIndexMap[index];
+        float       value = propertyValue.Get<float>();
 
         Property::Map map;
         mController->GetVariationsMap(map);
@@ -693,24 +693,24 @@ void TextField::OnRelayout(const Vector2& size, RelayoutContainer& container)
   // Support Right-To-Left of padding
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
 
-  if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+  if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
   {
     std::swap(padding.start, padding.end);
   }
 
-  if (mStencil)
+  if(mStencil)
   {
     mStencil.SetProperty(Actor::Property::POSITION, Vector2(padding.start, padding.top));
     ResizeActor(mStencil, contentSize);
   }
-  if (mActiveLayer)
+  if(mActiveLayer)
   {
     mActiveLayer.SetProperty(Actor::Property::POSITION, Vector2(padding.start, padding.top));
     ResizeActor(mActiveLayer, contentSize);
   }
-  if (mCursorLayer)
+  if(mCursorLayer)
   {
-    if (!mStencil)
+    if(!mStencil)
     {
       // If there is a stencil, the cursor layer is added to the stencil in RenderText.
       // Do not calculate the position because the stencil has already been resized excluding the padding size.
@@ -720,50 +720,50 @@ void TextField::OnRelayout(const Vector2& size, RelayoutContainer& container)
   }
 
   // If there is text changed, callback is called.
-  if (mTextChanged)
+  if(mTextChanged)
   {
     EmitTextChangedSignal();
   }
 
   Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
 
-  if ((Text::Controller::NONE_UPDATED != updateTextType) || !mRenderer)
+  if((Text::Controller::NONE_UPDATED != updateTextType) || !mRenderer)
   {
     DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnRelayout %p Displaying new contents\n",
                   mController.Get());
 
     mController->SetLayoutOffsetWithPadding(Vector2(padding.start, padding.top));
 
-    if (mDecorator && (Text::Controller::NONE_UPDATED != (Text::Controller::DECORATOR_UPDATED & updateTextType)))
+    if(mDecorator && (Text::Controller::NONE_UPDATED != (Text::Controller::DECORATOR_UPDATED & updateTextType)))
     {
       mDecorator->Relayout(contentSize, container);
     }
 
-    if (!mRenderer)
+    if(!mRenderer)
     {
-      mRenderer = Backend::Get().NewRenderer(mRenderingBackend);
+      mRenderer      = Backend::Get().NewRenderer(mRenderingBackend);
       updateTextType = static_cast<Text::Controller::UpdateTextType>(updateTextType | Text::Controller::MODEL_UPDATED);
     }
 
     RenderText(updateTextType);
   }
 
-  if (mCursorPositionChanged)
+  if(mCursorPositionChanged)
   {
     EmitCursorPositionChangedSignal();
   }
 
-  if (mSelectionStarted)
+  if(mSelectionStarted)
   {
     EmitSelectionStartedSignal();
   }
 
-  if (mSelectionChanged)
+  if(mSelectionChanged)
   {
     EmitSelectionChangedSignal();
   }
 
-  if (mSelectionCleared)
+  if(mSelectionCleared)
   {
     EmitSelectionClearedSignal();
   }
@@ -772,7 +772,7 @@ void TextField::OnRelayout(const Vector2& size, RelayoutContainer& container)
   // detected during the relayout process (size negotiation), i.e after the cursor has been moved. Signals
   // can't be emitted during the size negotiation as the callbacks may update the UI.
   // The text-field adds an idle callback to the adaptor to emit the signals after the size negotiation.
-  if (!mController->IsInputStyleChangedSignalsQueueEmpty())
+  if(!mController->IsInputStyleChangedSignalsQueueEmpty())
   {
     mController->RequestProcessInputStyleChangedSignals();
   }
@@ -793,7 +793,7 @@ void TextField::RenderText(Text::Controller::UpdateTextType updateTextType)
 void TextField::OnKeyInputFocusGained()
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnKeyInputFocusGained %p\n", mController.Get());
-  if (mInputMethodContext && IsEditable())
+  if(mInputMethodContext && IsEditable())
   {
     // All input panel properties, such as layout, return key type, and input hint, should be set before input panel
     // activates (or shows).
@@ -812,7 +812,7 @@ void TextField::OnKeyInputFocusGained()
     mInputMethodContext.SetRestoreAfterFocusLost(true);
   }
 
-  if (IsEditable() && mController->IsUserInteractionEnabled())
+  if(IsEditable() && mController->IsUserInteractionEnabled())
   {
     mController->KeyboardFocusGainEvent(); // Called in the case of no virtual keyboard to trigger this event
   }
@@ -823,7 +823,7 @@ void TextField::OnKeyInputFocusGained()
 void TextField::OnKeyInputFocusLost()
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField:OnKeyInputFocusLost %p\n", mController.Get());
-  if (mInputMethodContext)
+  if(mInputMethodContext)
   {
     mInputMethodContext.StatusChangedSignal().Disconnect(this, &TextField::KeyboardStatusChanged);
     // The text editing is finished. Therefore the inputMethodContext don't have restore activation.
@@ -853,13 +853,13 @@ void TextField::OnTap(const TapGesture& gesture)
   // Deliver the tap before the focus event to controller; this allows us to detect when focus is gained due to
   // tap-gestures
   Extents padding;
-  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
+  padding                   = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - padding.start, localPoint.y - padding.top);
   mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
 
   Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-  if (keyboardFocusManager)
+  if(keyboardFocusManager)
   {
     keyboardFocusManager.SetCurrentFocusActor(Self());
   }
@@ -868,7 +868,7 @@ void TextField::OnTap(const TapGesture& gesture)
 
 void TextField::OnPan(const PanGesture& gesture)
 {
-  if (!mController->IsScrollable(gesture.GetDisplacement()))
+  if(!mController->IsScrollable(gesture.GetDisplacement()))
   {
     Dali::DevelActor::SetNeedGesturePropagation(Self(), true);
   }
@@ -881,12 +881,12 @@ void TextField::OnPan(const PanGesture& gesture)
 
 void TextField::OnLongPress(const LongPressGesture& gesture)
 {
-  if (mInputMethodContext && IsEditable())
+  if(mInputMethodContext && IsEditable())
   {
     mInputMethodContext.Activate();
   }
   Extents padding;
-  padding = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
+  padding                   = Self().GetProperty<Extents>(Ui::Control::Property::PADDING);
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
 
@@ -898,13 +898,13 @@ bool TextField::OnKeyEvent(const KeyEvent& event)
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnKeyEvent %p keyCode %d\n", mController.Get(),
                 event.GetKeyCode());
 
-  if (Dali::DALI_KEY_ESCAPE == event.GetKeyCode() && mController->ShouldClearFocusOnEscape())
+  if(Dali::DALI_KEY_ESCAPE == event.GetKeyCode() && mController->ShouldClearFocusOnEscape())
   {
     // Make sure ClearKeyInputFocus when only key is up
-    if (event.GetState() == KeyEvent::UP)
+    if(event.GetState() == KeyEvent::UP)
     {
       Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-      if (keyboardFocusManager)
+      if(keyboardFocusManager)
       {
         keyboardFocusManager.ClearFocus();
       }
@@ -913,8 +913,8 @@ bool TextField::OnKeyEvent(const KeyEvent& event)
 
     return true;
   }
-  else if ((Dali::DevelKey::DALI_KEY_RETURN == event.GetKeyCode() && KEY_RETURN_NAME == event.GetKeyName()) ||
-           Dali::DevelKey::DALI_KEY_KP_ENTER == event.GetKeyCode())
+  else if((Dali::DevelKey::DALI_KEY_RETURN == event.GetKeyCode() && KEY_RETURN_NAME == event.GetKeyName()) ||
+          Dali::DevelKey::DALI_KEY_KP_ENTER == event.GetKeyCode())
   {
     // Do nothing when enter is comming.
     return false;
@@ -936,7 +936,7 @@ bool TextField::IsEditable() const
 void TextField::SetEditable(bool editable)
 {
   mController->SetEditable(editable);
-  if (mInputMethodContext && !editable)
+  if(mInputMethodContext && !editable)
   {
     mInputMethodContext.Deactivate();
   }
@@ -945,7 +945,7 @@ void TextField::SetEditable(bool editable)
 void TextField::TextInserted(unsigned int position, unsigned int length, const std::string& content)
 {
   auto accessible = GetAccessibleObject();
-  if (DALI_LIKELY(accessible))
+  if(DALI_LIKELY(accessible))
   {
     accessible->EmitTextInserted(position, length, content);
   }
@@ -954,7 +954,7 @@ void TextField::TextInserted(unsigned int position, unsigned int length, const s
 void TextField::TextDeleted(unsigned int position, unsigned int length, const std::string& content)
 {
   auto accessible = GetAccessibleObject();
-  if (DALI_LIKELY(accessible))
+  if(DALI_LIKELY(accessible))
   {
     accessible->EmitTextDeleted(position, length, content);
   }
@@ -962,16 +962,16 @@ void TextField::TextDeleted(unsigned int position, unsigned int length, const st
 
 void TextField::CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition)
 {
-  if ((oldPosition != newPosition) && !mCursorPositionChanged)
+  if((oldPosition != newPosition) && !mCursorPositionChanged)
   {
     mCursorPositionChanged = true;
-    mOldPosition = oldPosition;
+    mOldPosition           = oldPosition;
   }
 }
 
 void TextField::TextChanged(bool immediate)
 {
-  if (immediate) // Emits TextChangedSignal immediately
+  if(immediate) // Emits TextChangedSignal immediately
   {
     EmitTextChangedSignal();
   }
@@ -1047,49 +1047,49 @@ void TextField::EmitSelectionStartedSignal()
 
 void TextField::SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd)
 {
-  if (((oldStart != newStart) || (oldEnd != newEnd)) && !mSelectionChanged)
+  if(((oldStart != newStart) || (oldEnd != newEnd)) && !mSelectionChanged)
   {
-    if (newStart == newEnd)
+    if(newStart == newEnd)
     {
       mSelectionCleared = true;
     }
     else
     {
-      if (oldStart == oldEnd)
+      if(oldStart == oldEnd)
       {
         mSelectionStarted = true;
       }
     }
 
-    mSelectionChanged = true;
+    mSelectionChanged  = true;
     mOldSelectionStart = oldStart;
-    mOldSelectionEnd = oldEnd;
+    mOldSelectionEnd   = oldEnd;
 
-    if (mOldSelectionStart > mOldSelectionEnd)
+    if(mOldSelectionStart > mOldSelectionEnd)
     {
       // swap
-      uint32_t temp = mOldSelectionStart;
+      uint32_t temp      = mOldSelectionStart;
       mOldSelectionStart = mOldSelectionEnd;
-      mOldSelectionEnd = temp;
+      mOldSelectionEnd   = temp;
     }
   }
 }
 
 void TextField::AddDecoration(Actor& actor, DecorationType type, bool needsClipping)
 {
-  if (actor)
+  if(actor)
   {
-    if (needsClipping)
+    if(needsClipping)
     {
       mClippingDecorationActors.push_back(actor);
     }
 
     // If the actor is a layer type, add it.
-    if (type == DecorationType::ACTIVE_LAYER)
+    if(type == DecorationType::ACTIVE_LAYER)
     {
       AddLayer(mActiveLayer, actor);
     }
-    else if (type == DecorationType::CURSOR_LAYER)
+    else if(type == DecorationType::CURSOR_LAYER)
     {
       AddLayer(mCursorLayer, actor);
     }
@@ -1107,10 +1107,10 @@ void TextField::AddLayer(Actor& layer, Actor& actor)
 void TextField::GetControlBackgroundColor(Vector4& color) const
 {
   Property::Value propValue = Self().GetProperty(Ui::Control::Property::BACKGROUND);
-  Property::Map* resultMap = propValue.GetMap();
+  Property::Map*  resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
-  if (resultMap && (colorValue = resultMap->Find(ColorVisual::Property::MIX_COLOR)))
+  if(resultMap && (colorValue = resultMap->Find(ColorVisual::Property::MIX_COLOR)))
   {
     colorValue->Get(color);
   }
@@ -1118,7 +1118,7 @@ void TextField::GetControlBackgroundColor(Vector4& color) const
 
 void TextField::OnSceneConnect(Dali::Actor actor)
 {
-  if (mHasBeenStaged)
+  if(mHasBeenStaged)
   {
     RenderText(static_cast<Text::Controller::UpdateTextType>(Text::Controller::MODEL_UPDATED |
                                                              Text::Controller::DECORATOR_UPDATED));
@@ -1130,7 +1130,7 @@ void TextField::OnSceneConnect(Dali::Actor actor)
 }
 
 InputMethodContext::CallbackData TextField::OnInputMethodContextEvent(
-    Dali::InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
+  Dali::InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
 {
   DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField::OnInputMethodContextEvent %p eventName %d\n",
                 mController.Get(), inputMethodContextEvent.eventName);
@@ -1140,7 +1140,7 @@ InputMethodContext::CallbackData TextField::OnInputMethodContextEvent(
 void TextField::GetHandleImagePropertyValue(Property::Value& value, Text::HandleType handleType,
                                             Text::HandleImageType handleImageType)
 {
-  if (mDecorator)
+  if(mDecorator)
   {
     Property::Map map;
     map[PropertyHandler::IMAGE_MAP_FILENAME_STRING] = mDecorator->GetHandleImage(handleType, handleImageType);
@@ -1151,7 +1151,7 @@ void TextField::GetHandleImagePropertyValue(Property::Value& value, Text::Handle
 
 void TextField::EnableClipping()
 {
-  if (!mStencil)
+  if(!mStencil)
   {
     // Creates an extra control to be used as stencil buffer.
     mStencil = Control::New(ControlBehaviour(Dali::Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS));
@@ -1162,15 +1162,15 @@ void TextField::EnableClipping()
     // Creates a background visual. Even if the color is transparent it updates the stencil.
     mStencil.SetProperty(Ui::Control::Property::BACKGROUND,
                          Property::Map()
-                             .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
-                             .Add(ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT));
+                           .Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR)
+                           .Add(ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT));
 
     // Enable the clipping property.
     mStencil.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
     mStencil.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
     Self().Add(mStencil);
-    if (mCursorLayer)
+    if(mCursorLayer)
     {
       mStencil.Add(mCursorLayer);
     }
@@ -1185,15 +1185,15 @@ void TextField::KeyboardStatusChanged(bool keyboardShown)
   bool isFocused = false;
 
   Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-  if (keyboardFocusManager)
+  if(keyboardFocusManager)
   {
     isFocused = keyboardFocusManager.GetCurrentFocusActor() == Self();
   }
 
   // Just hide the grab handle when keyboard is hidden.
-  if (!keyboardShown)
+  if(!keyboardShown)
   {
-    if (!isFocused)
+    if(!isFocused)
     {
       mController->KeyboardFocusLostEvent();
     }
@@ -1231,19 +1231,19 @@ void TextField::OnLocaleChanged(std::string locale)
 }
 
 TextField::TextField(ControlBehaviour additionalBehaviour)
-  : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT | additionalBehaviour)),
-    mAlignmentOffset(0.f),
-    mRenderingBackend(DEFAULT_RENDERING_BACKEND),
-    mExceedPolicy(Dali::Ui::TextField::EXCEED_POLICY_CLIP),
-    mHasBeenStaged(false),
-    mTextChanged(false),
-    mCursorPositionChanged(false),
-    mSelectionChanged(false),
-    mSelectionCleared(false),
-    mOldPosition(0u),
-    mOldSelectionStart(0u),
-    mOldSelectionEnd(0u),
-    mSelectionStarted(false)
+: Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT | additionalBehaviour)),
+  mAlignmentOffset(0.f),
+  mRenderingBackend(DEFAULT_RENDERING_BACKEND),
+  mExceedPolicy(Dali::Ui::TextField::EXCEED_POLICY_CLIP),
+  mHasBeenStaged(false),
+  mTextChanged(false),
+  mCursorPositionChanged(false),
+  mSelectionChanged(false),
+  mSelectionCleared(false),
+  mOldPosition(0u),
+  mOldSelectionStart(0u),
+  mOldSelectionEnd(0u),
+  mSelectionStarted(false)
 {
 }
 
@@ -1304,7 +1304,7 @@ bool TextField::IsRemoveBackInset() const
 
 Dali::Property::Index TextField::RegisterFontVariationProperty(std::string tag)
 {
-  if (tag.length() != 4) // Variable tag must be 4-length string.
+  if(tag.length() != 4) // Variable tag must be 4-length string.
   {
     DALI_LOG_ERROR("Font Variation Register Failed. The length of tag is not 4.\n");
     return Property::INVALID_INDEX;
@@ -1316,15 +1316,15 @@ Dali::Property::Index TextField::RegisterFontVariationProperty(std::string tag)
   mController->GetVariationsMap(variationsMap);
 
   float variationValue = 0.f;
-  auto tagPtr = variationsMap.Find(tag);
+  auto  tagPtr         = variationsMap.Find(tag);
 
-  if (tagPtr)
+  if(tagPtr)
   {
     variationValue = tagPtr->Get<float>();
   }
 
   Dali::Property::Index index = self.RegisterProperty(tag.data(), variationValue);
-  if (mVariationIndexMap.find(index) == mVariationIndexMap.end())
+  if(mVariationIndexMap.find(index) == mVariationIndexMap.end())
   {
     PropertyNotification customFontVariationNotification = self.AddPropertyNotification(index, StepCondition(1.0f));
     // TODO: Make step value customizable by user.
@@ -1342,11 +1342,11 @@ void TextField::OnVariationPropertyNotify(PropertyNotification& source)
   Property::Map map;
   mController->GetVariationsMap(map);
 
-  for (auto& [index, tag] : mVariationIndexMap)
+  for(auto& [index, tag] : mVariationIndexMap)
   {
-    if (Self().DoesCustomPropertyExist(index))
+    if(Self().DoesCustomPropertyExist(index))
     {
-      float value = Self().GetCurrentProperty(index).Get<float>();
+      float value     = Self().GetCurrentProperty(index).Get<float>();
       map[tag.data()] = std::round(value);
     }
   }
@@ -1357,12 +1357,12 @@ void TextField::OnVariationPropertyNotify(PropertyNotification& source)
 
 std::pair<std::string, bool> TextField::TextFieldAccessible::GetNameRaw() const
 {
-  if (GetTextController()->IsShowingPlaceholderText())
+  if(GetTextController()->IsShowingPlaceholderText())
   {
     return {GetCurrentPlaceholderText(), true};
   }
 
-  if (IsHiddenInput())
+  if(IsHiddenInput())
   {
     return {"", true};
   }
@@ -1386,11 +1386,11 @@ Ui::Text::ControllerPtr TextField::TextFieldAccessible::GetTextController() cons
 
 std::uint32_t TextField::TextFieldAccessible::GetSubstituteCharacter() const
 {
-  auto self = Ui::TextField::DownCast(Self());
+  auto self                = Ui::TextField::DownCast(Self());
   auto hiddenInputSettings = self.GetProperty<Property::Map>(Ui::TextField::Property::HIDDEN_INPUT_SETTINGS);
-  auto substChar = hiddenInputSettings.Find(Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER);
+  auto substChar           = hiddenInputSettings.Find(Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER);
 
-  if (substChar)
+  if(substChar)
   {
     return static_cast<std::uint32_t>(substChar->Get<int>());
   }
@@ -1400,16 +1400,16 @@ std::uint32_t TextField::TextFieldAccessible::GetSubstituteCharacter() const
 
 bool TextField::TextFieldAccessible::IsHiddenInput() const
 {
-  auto self = Ui::TextField::DownCast(Self());
+  auto self                = Ui::TextField::DownCast(Self());
   auto hiddenInputSettings = self.GetProperty<Property::Map>(Ui::TextField::Property::HIDDEN_INPUT_SETTINGS);
-  auto mode = hiddenInputSettings.Find(Ui::HiddenInput::Property::MODE);
+  auto mode                = hiddenInputSettings.Find(Ui::HiddenInput::Property::MODE);
 
   return (mode && (mode->Get<int>() != Ui::HiddenInput::Mode::HIDE_NONE));
 }
 
 void TextField::TextFieldAccessible::RequestTextRelayout()
 {
-  auto self = Ui::TextField::DownCast(Self());
+  auto  self     = Ui::TextField::DownCast(Self());
   auto& selfImpl = Ui::GetImpl(self);
 
   selfImpl.RequestTextRelayout();

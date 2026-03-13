@@ -44,7 +44,6 @@ namespace Internal
 class DummyComponentImpl : public Integration::ViewImpl
 {
 public:
-
   // Creation & Destruction
 
   /**
@@ -53,18 +52,15 @@ public:
   static Ui::DummyComponent New();
 
 protected:
-
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
   virtual ~DummyComponentImpl();
 
 public:
-
   // API
 
 protected:
-
   // Construction
 
   /**
@@ -74,15 +70,13 @@ protected:
   DummyComponentImpl();
 
 private:
-
   // Not copyable or movable
-  DummyComponentImpl(const DummyComponentImpl&) = delete;
-  DummyComponentImpl(DummyComponentImpl&&) = delete;
+  DummyComponentImpl(const DummyComponentImpl&)            = delete;
+  DummyComponentImpl(DummyComponentImpl&&)                 = delete;
   DummyComponentImpl& operator=(const DummyComponentImpl&) = delete;
-  DummyComponentImpl& operator=(DummyComponentImpl&&) = delete;
+  DummyComponentImpl& operator=(DummyComponentImpl&&)      = delete;
 
 private:
-
   // Data
 };
 

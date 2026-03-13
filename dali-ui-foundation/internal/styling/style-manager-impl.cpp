@@ -37,12 +37,12 @@
 namespace
 {
 // const char* LANDSCAPE_QUALIFIER = "landscape";
-const char* PORTRAIT_QUALIFIER = "portrait";
+const char* PORTRAIT_QUALIFIER  = "portrait";
 const char* FONT_SIZE_QUALIFIER = "fontsize";
 
 const char* DEFAULT_THEME_FILE_NAME = "dali-toolkit-default-theme.json";
 
-const char* PACKAGE_PATH_KEY = "PACKAGE_PATH";
+const char* PACKAGE_PATH_KEY              = "PACKAGE_PATH";
 const char* APPLICATION_RESOURCE_PATH_KEY = "APPLICATION_RESOURCE_PATH";
 
 const char* DEFAULT_UI_PACKAGE_PATH = "/toolkit/";
@@ -67,10 +67,10 @@ BaseHandle Create()
 {
   BaseHandle handle = StyleManager::Get();
 
-  if (!handle)
+  if(!handle)
   {
     SingletonService singletonService(SingletonService::Get());
-    if (singletonService)
+    if(singletonService)
     {
       Ui::StyleManager manager = Ui::StyleManager(new Internal::StyleManager());
       singletonService.Register(typeid(manager), manager);
@@ -91,11 +91,11 @@ Ui::StyleManager StyleManager::Get()
   Ui::StyleManager manager;
 
   SingletonService singletonService(SingletonService::Get());
-  if (singletonService)
+  if(singletonService)
   {
     // Check whether the style manager is already created
     Dali::BaseHandle handle = singletonService.GetSingleton(typeid(Ui::StyleManager));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle of singleton
       manager = Ui::StyleManager(dynamic_cast<StyleManager*>(handle.GetObjectPtr()));
@@ -106,20 +106,20 @@ Ui::StyleManager StyleManager::Get()
 }
 
 StyleManager::StyleManager()
-  : mDefaultFontSize(-1),
-    mDefaultFontFamily(""),
-    mDefaultThemeFilePath(),
-    mFeedbackStyle(nullptr),
-    mAdaptorInitialized(false)
+: mDefaultFontSize(-1),
+  mDefaultFontFamily(""),
+  mDefaultThemeFilePath(),
+  mFeedbackStyle(nullptr),
+  mAdaptorInitialized(false)
 {
   // Add theme builder constants
-  const std::string dataReadOnlyDir = AssetManager::GetDaliDataReadOnlyPath();
-  mThemeBuilderConstants[PACKAGE_PATH_KEY] = dataReadOnlyDir + DEFAULT_UI_PACKAGE_PATH;
+  const std::string dataReadOnlyDir                     = AssetManager::GetDaliDataReadOnlyPath();
+  mThemeBuilderConstants[PACKAGE_PATH_KEY]              = dataReadOnlyDir + DEFAULT_UI_PACKAGE_PATH;
   mThemeBuilderConstants[APPLICATION_RESOURCE_PATH_KEY] = Application::GetResourcePath();
 
   // Set the full path for the default style theme.
   const std::string styleDirPath = AssetManager::GetDaliStylePath();
-  mDefaultThemeFilePath = styleDirPath + DEFAULT_THEME_FILE_NAME;
+  mDefaultThemeFilePath          = styleDirPath + DEFAULT_THEME_FILE_NAME;
 
   // Sound & haptic style
   mFeedbackStyle = new FeedbackStyle();
@@ -130,7 +130,7 @@ StyleManager::StyleManager()
   mStyleMonitor = StyleMonitor::Get();
 
   Dali::LifecycleController lifecycleController = Dali::LifecycleController::Get();
-  if (DALI_LIKELY(lifecycleController))
+  if(DALI_LIKELY(lifecycleController))
   {
     // Register callback for some API which we need to doing after Adaptor started.
     lifecycleController.PreInitSignal().Connect(this, &StyleManager::OnAdaptorInit);
@@ -139,36 +139,36 @@ StyleManager::StyleManager()
 
 void StyleManager::OnAdaptorInit()
 {
-  if (Dali::Adaptor::IsAvailable())
+  if(Dali::Adaptor::IsAvailable())
   {
     mAdaptorInitialized = true;
 
     // Lazy signal send.
-    if (mStyleMonitor.ThemeChangedBeforeAdaptorInit())
+    if(mStyleMonitor.ThemeChangedBeforeAdaptorInit())
     {
       StyleMonitorChange(mStyleMonitor, StyleChange::THEME_CHANGE);
       // Dev Note : Default font & size change signal will be emitted after AdaptorInit done.
     }
 
     // Apply theme to controls initialized before adaptor init
-    if (mInitializedControlsBeforeAdaptorInit.size() > 0)
+    if(mInitializedControlsBeforeAdaptorInit.size() > 0)
     {
       uint32_t actualAlivedControls = 0;
       DALI_LOG_DEBUG_INFO("Applying theme to controls initialized before adaptor init [%zu + %zu]\n",
                           mInitializedControlsBeforeAdaptorInit.size(), mThemeAppliedControlsBeforeAdaptorInit.size());
-      for (auto& weakControl : mInitializedControlsBeforeAdaptorInit)
+      for(auto& weakControl : mInitializedControlsBeforeAdaptorInit)
       {
         Ui::Control controlHandle = weakControl.GetHandle();
-        if (controlHandle)
+        if(controlHandle)
         {
           ++actualAlivedControls;
           ApplyThemeStyleAtInit(controlHandle);
         }
       }
-      for (auto& weakControl : mThemeAppliedControlsBeforeAdaptorInit)
+      for(auto& weakControl : mThemeAppliedControlsBeforeAdaptorInit)
       {
         Ui::Control controlHandle = weakControl.GetHandle();
-        if (controlHandle)
+        if(controlHandle)
         {
           ++actualAlivedControls;
           ApplyThemeStyle(controlHandle);
@@ -179,7 +179,7 @@ void StyleManager::OnAdaptorInit()
       mThemeAppliedControlsBeforeAdaptorInit.clear();
     }
 
-    if (mStyleMonitor)
+    if(mStyleMonitor)
     {
       mStyleMonitor.StyleChangeSignal().Connect(this, &StyleManager::StyleMonitorChange);
     }
@@ -214,7 +214,7 @@ void StyleManager::SetStyleConstant(const std::string& key, const Property::Valu
 bool StyleManager::GetStyleConstant(const std::string& key, Property::Value& valueOut)
 {
   Property::Value* value = mStyleBuilderConstants.Find(key);
-  if (value)
+  if(value)
   {
     valueOut = *value;
     return true;
@@ -226,18 +226,18 @@ bool StyleManager::GetStyleConstant(const std::string& key, Property::Value& val
 void StyleManager::ApplyThemeStyle(Ui::Control control)
 {
   // If the adaptor is not initialized yet, we will style the control later
-  if (!mAdaptorInitialized)
+  if(!mAdaptorInitialized)
   {
     mThemeAppliedControlsBeforeAdaptorInit.push_back(control);
     return;
   }
 
-  if (!mThemeBuilder)
+  if(!mThemeBuilder)
   {
     ApplyDefaultTheme();
   }
 
-  if (DALI_LIKELY(mThemeBuilder))
+  if(DALI_LIKELY(mThemeBuilder))
   {
     ApplyStyle(mThemeBuilder, control);
   }
@@ -246,7 +246,7 @@ void StyleManager::ApplyThemeStyle(Ui::Control control)
 void StyleManager::ApplyThemeStyleAtInit(Ui::Control control)
 {
   // If the adaptor is not initialized yet, we will style the control later
-  if (!mAdaptorInitialized)
+  if(!mAdaptorInitialized)
   {
     mInitializedControlsBeforeAdaptorInit.push_back(control);
     return;
@@ -254,7 +254,7 @@ void StyleManager::ApplyThemeStyleAtInit(Ui::Control control)
 
   ApplyThemeStyle(control);
 
-  if (mFeedbackStyle)
+  if(mFeedbackStyle)
   {
     mFeedbackStyle->ObjectCreated(control);
   }
@@ -266,7 +266,7 @@ void StyleManager::ApplyStyle(Ui::Control control, const std::string& jsonFileNa
 
   // First look in the cache
   Ui::Builder builder = FindCachedBuilder(jsonFileName);
-  if (builder)
+  if(builder)
   {
     builderReady = true;
   }
@@ -279,7 +279,7 @@ void StyleManager::ApplyStyle(Ui::Control control, const std::string& jsonFileNa
     // Create it
     builder = CreateBuilder(constants);
 
-    if (LoadJSON(builder, jsonFileName))
+    if(LoadJSON(builder, jsonFileName))
     {
       CacheBuilder(builder, jsonFileName);
       builderReady = true;
@@ -287,7 +287,7 @@ void StyleManager::ApplyStyle(Ui::Control control, const std::string& jsonFileNa
   }
 
   // Apply the style to the control
-  if (builderReady)
+  if(builderReady)
   {
     builder.ApplyStyle(styleName, control);
   }
@@ -311,33 +311,33 @@ Ui::DevelStyleManager::BrokenImageChangedSignalType& StyleManager::BrokenImageCh
 void StyleManager::SetTheme(const std::string& themeFile)
 {
   bool themeLoaded = false;
-  bool loading = false;
+  bool loading     = false;
 
   // If we haven't loaded a theme, or the stored theme file is empty, or
   // the previously loaded theme is different to the requested theme,
   // first reset the builder and load the default theme.
-  if (!mThemeBuilder || mThemeFile.empty() || mThemeFile.compare(themeFile) != 0)
+  if(!mThemeBuilder || mThemeFile.empty() || mThemeFile.compare(themeFile) != 0)
   {
-    loading = true;
+    loading       = true;
     mThemeBuilder = CreateBuilder(mThemeBuilderConstants);
-    themeLoaded = LoadJSON(mThemeBuilder, mDefaultThemeFilePath); // Sets themeLoaded to true if theme exists
+    themeLoaded   = LoadJSON(mThemeBuilder, mDefaultThemeFilePath); // Sets themeLoaded to true if theme exists
   }
 
-  if (themeFile.compare(mDefaultThemeFilePath) != 0)
+  if(themeFile.compare(mDefaultThemeFilePath) != 0)
   {
     // The theme is different to the default: Merge it
     loading = true;
     themeLoaded |= LoadJSON(mThemeBuilder, themeFile);
   }
 
-  if (loading)
+  if(loading)
   {
     mThemeFile = themeFile;
 
-    if (themeLoaded)
+    if(themeLoaded)
     {
       // We've successfully loaded the theme file
-      if (mFeedbackStyle)
+      if(mFeedbackStyle)
       {
         mFeedbackStyle->StyleChanged(mThemeFile, StyleChange::THEME_CHANGE);
       }
@@ -359,7 +359,7 @@ const Property::Map& StyleManager::GetConfigurations()
                   "GetConfigurations()\n On entry, mThemeBuilder: " << (bool(mThemeBuilder) ? "Created" : "Empty")
                                                                     << "  mThemeFile: " << mThemeFile);
 
-  if (!mThemeBuilder)
+  if(!mThemeBuilder)
   {
     DALI_LOG_STREAM(gLogFilter, Debug::Concise, "GetConfigurations()  Loading default theme");
 
@@ -369,7 +369,7 @@ const Property::Map& StyleManager::GetConfigurations()
     const bool themeLoaded = LoadJSON(mThemeBuilder, mDefaultThemeFilePath);
     DALI_LOG_STREAM(gLogFilter, Debug::Concise, "  themeLoaded" << (themeLoaded ? "success" : "failure"));
 
-    if (DALI_UNLIKELY(!themeLoaded))
+    if(DALI_UNLIKELY(!themeLoaded))
     {
       DALI_LOG_STREAM(gLogFilter, Debug::Concise, "GetConfigurations() Failed\n");
 
@@ -394,10 +394,10 @@ const Property::Map& StyleManager::GetConfigurations()
 }
 
 void StyleManager::SetBrokenImageUrl(DevelStyleManager::BrokenImageType brokenImageType,
-                                     const std::string& brokenImageUrl)
+                                     const std::string&                 brokenImageUrl)
 {
-  int brokenType = static_cast<int>(brokenImageType);
-  mBrokenImageUrls[brokenType] = brokenImageUrl;
+  int brokenType                = static_cast<int>(brokenImageType);
+  mBrokenImageUrls[brokenType]  = brokenImageUrl;
   Ui::StyleManager styleManager = StyleManager::Get();
   mBrokenImageChangedSignal.Emit(styleManager);
 }
@@ -412,9 +412,9 @@ std::vector<std::string> StyleManager::GetBrokenImageUrlList()
 {
   // create a list for brokenImage
   std::vector<std::string> brokenImageUrlList;
-  for (int i = 0; i < COUNT_BROKEN_IMAGE_MAX; i++)
+  for(int i = 0; i < COUNT_BROKEN_IMAGE_MAX; i++)
   {
-    if (!mBrokenImageUrls[i].empty())
+    if(!mBrokenImageUrls[i].empty())
     {
       brokenImageUrlList.push_back(mBrokenImageUrls[i]);
     }
@@ -428,7 +428,7 @@ bool StyleManager::LoadFile(const std::string& filename, std::string& stringOut)
 
   // as toolkit is platform agnostic, it cannot load files from filesystem
   // ask style monitor to load the style sheet
-  if (mStyleMonitor)
+  if(mStyleMonitor)
   {
     return mStyleMonitor.LoadThemeFile(filename, stringOut);
   }
@@ -447,13 +447,13 @@ Ui::Builder StyleManager::CreateBuilder(const Property::Map& constants)
 bool StyleManager::LoadJSON(Ui::Builder builder, const std::string& jsonFilePath)
 {
   std::string fileString;
-  if (LoadFile(jsonFilePath, fileString))
+  if(LoadFile(jsonFilePath, fileString))
   {
     try
     {
       builder.LoadFromString(fileString);
     }
-    catch (...)
+    catch(...)
     {
       DALI_LOG_ERROR("Error during parse JSON file '%s'\n", jsonFilePath.c_str());
       return false;
@@ -495,7 +495,7 @@ static void BuildQualifiedStyleName(const std::string& styleName, const std::vec
 {
   qualifiedStyleOut.append(styleName);
 
-  for (std::vector<std::string>::const_iterator it = qualifiers.begin(), itEnd = qualifiers.end(); it != itEnd; ++it)
+  for(std::vector<std::string>::const_iterator it = qualifiers.begin(), itEnd = qualifiers.end(); it != itEnd; ++it)
   {
     const std::string& str = *it;
 
@@ -508,7 +508,7 @@ static bool GetStyleNameForControl(Ui::Builder builder, Ui::Control control, std
 {
   styleName = control.GetStyleName();
 
-  if (styleName.empty())
+  if(styleName.empty())
   {
     styleName = control.GetTypeName();
   }
@@ -517,7 +517,7 @@ static bool GetStyleNameForControl(Ui::Builder builder, Ui::Control control, std
   std::vector<std::string> qualifiers;
   CollectQualifiers(qualifiers);
 
-  bool found = 0;
+  bool        found = 0;
   std::string qualifiedStyleName;
   do
   {
@@ -525,20 +525,20 @@ static bool GetStyleNameForControl(Ui::Builder builder, Ui::Control control, std
     BuildQualifiedStyleName(styleName, qualifiers, qualifiedStyleName);
 
     // Break if style found or we have tried the root style name (qualifiers is empty)
-    if (GetImpl(builder).LookupStyleName(qualifiedStyleName))
+    if(GetImpl(builder).LookupStyleName(qualifiedStyleName))
     {
       found = true;
       break;
     }
-    if (qualifiers.size() == 0)
+    if(qualifiers.size() == 0)
     {
       break;
     }
     // Remove the last qualifier in an attempt to find a style that is valid
     qualifiers.pop_back();
-  } while (!found);
+  } while(!found);
 
-  if (found)
+  if(found)
   {
     styleName = qualifiedStyleName;
   }
@@ -548,17 +548,17 @@ static bool GetStyleNameForControl(Ui::Builder builder, Ui::Control control, std
 void StyleManager::ApplyStyle(Ui::Builder builder, Ui::Control control)
 {
   std::string styleName = control.GetStyleName();
-  if (GetStyleNameForControl(builder, control, styleName))
+  if(GetStyleNameForControl(builder, control, styleName))
   {
     builder.ApplyStyle(styleName, control);
   }
 
-  if (mDefaultFontSize == -1 && mStyleMonitor.EnsureFontClientCreated())
+  if(mDefaultFontSize == -1 && mStyleMonitor.EnsureFontClientCreated())
   {
     mDefaultFontSize = mStyleMonitor.GetDefaultFontSize();
   }
 
-  if (mDefaultFontSize >= 0)
+  if(mDefaultFontSize >= 0)
   {
     // Apply the style for logical font size
     std::stringstream fontSizeQualifier;
@@ -569,15 +569,15 @@ void StyleManager::ApplyStyle(Ui::Builder builder, Ui::Control control)
 
 Property::Map StyleManager::GetStyleProperties(const std::string& styleName, const Handle& controlType)
 {
-  if (!mThemeBuilder)
+  if(!mThemeBuilder)
   {
     ApplyDefaultTheme();
   }
 
-  if (mThemeBuilder)
+  if(mThemeBuilder)
   {
     Property::Map properties;
-    if (GetImpl(mThemeBuilder).GetStyleProperties(styleName, controlType, properties))
+    if(GetImpl(mThemeBuilder).GetStyleProperties(styleName, controlType, properties))
     {
       return properties;
     }
@@ -589,11 +589,11 @@ Property::Map StyleManager::GetStyleProperties(const std::string& styleName, con
 
 const StylePtr StyleManager::GetRecordedStyle(Ui::Control control)
 {
-  if (mThemeBuilder)
+  if(mThemeBuilder)
   {
     std::string styleName = control.GetStyleName();
 
-    if (GetStyleNameForControl(mThemeBuilder, control, styleName))
+    if(GetStyleNameForControl(mThemeBuilder, control, styleName))
     {
       const StylePtr style = GetImpl(mThemeBuilder).GetStyle(styleName);
       return style;
@@ -605,7 +605,7 @@ const StylePtr StyleManager::GetRecordedStyle(Ui::Control control)
 Ui::Builder StyleManager::FindCachedBuilder(const std::string& key)
 {
   BuilderMap::iterator builderIt = mBuilderCache.find(key);
-  if (builderIt != mBuilderCache.end())
+  if(builderIt != mBuilderCache.end())
   {
     return builderIt->second;
   }
@@ -620,7 +620,7 @@ void StyleManager::CacheBuilder(Ui::Builder builder, const std::string& key)
 
 void StyleManager::StyleMonitorChange(StyleMonitor styleMonitor, StyleChange::Type styleChange)
 {
-  switch (styleChange)
+  switch(styleChange)
   {
     case StyleChange::DEFAULT_FONT_CHANGE:
     {

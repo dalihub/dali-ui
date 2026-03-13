@@ -40,8 +40,8 @@ struct UnderlinedCharacterRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values of bitfields
    */
   UnderlinedCharacterRun()
-    : AbstractStyleCharacterRun(),
-      properties{}
+  : AbstractStyleCharacterRun(),
+    properties{}
   {
   }
 
@@ -53,9 +53,9 @@ struct UnderlinedCharacterRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow UnderlinedCharacterRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::UnderlinedCharacterRun>
-  : public Dali::BasicTypes<Dali::Ui::Text::UnderlinedCharacterRun>
+: public Dali::BasicTypes<Dali::Ui::Text::UnderlinedCharacterRun>
 {
   enum
   {

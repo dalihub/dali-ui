@@ -30,12 +30,12 @@ namespace Dali
 namespace Ui
 {
 ConfirmationPopup::ConfirmationPopup()
-  : Popup()
+: Popup()
 {
 }
 
 ConfirmationPopup::ConfirmationPopup(Internal::ConfirmationPopup& implementation)
-  : Popup(implementation)
+: Popup(implementation)
 {
 }
 
@@ -48,7 +48,7 @@ ConfirmationPopup::ConfirmationPopup(ConfirmationPopup&& confirmationPopup) = de
 ConfirmationPopup& ConfirmationPopup::operator=(ConfirmationPopup&& confirmationPopup) = default;
 
 ConfirmationPopup::ConfirmationPopup(Dali::Internal::CustomActor* internal)
-  : Popup(internal)
+: Popup(internal)
 {
   VerifyCustomActorPointer<Internal::ConfirmationPopup>(internal);
 }

@@ -115,15 +115,15 @@ private:
   ArcVisual& operator=(const ArcVisual& arcVisual) = delete;
 
 private:
-  float mThickness;                   ///< The thickness of the arc.
-  float mRadius;                      ///< The radius of the arc.
-  float mStartAngle;                  ///< The start angle of the arc.
-  float mSweepAngle;                  ///< The sweep angle of the arc.
-  Property::Index mRadiusIndex;       ///< The index of the radius property.
-  Property::Index mThicknessIndex;    ///< The index of the thickness property.
-  Property::Index mStartAngleIndex;   ///< The index of the start angle property.
-  Property::Index mSweepAngleIndex;   ///< The index of the sweep angle property.
-  DevelArcVisual::Cap::Type mCapType; ///< The cap type.
+  float                     mThickness;       ///< The thickness of the arc.
+  float                     mRadius;          ///< The radius of the arc.
+  float                     mStartAngle;      ///< The start angle of the arc.
+  float                     mSweepAngle;      ///< The sweep angle of the arc.
+  Property::Index           mRadiusIndex;     ///< The index of the radius property.
+  Property::Index           mThicknessIndex;  ///< The index of the thickness property.
+  Property::Index           mStartAngleIndex; ///< The index of the start angle property.
+  Property::Index           mSweepAngleIndex; ///< The index of the sweep angle property.
+  DevelArcVisual::Cap::Type mCapType;         ///< The cap type.
 };
 
 } // namespace Internal

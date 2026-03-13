@@ -46,7 +46,7 @@ struct MarkupProcessData;
  */
 void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& fontRun,
                     UnderlinedCharacterRun& underlinedCharacterRun, ColorRun& backgroundColorRun,
-                    StrikethroughCharacterRun& strikethroughRun,
+                    StrikethroughCharacterRun&    strikethroughRun,
                     CharacterSpacingCharacterRun& characterSpacingCharacterRun, bool& isColorDefined,
                     bool& isFontDefined, bool& isUnderlinedCharacterDefined, bool& isBackgroundColorDefined,
                     bool& isStrikethroughDefined, bool& isCharacterSpacingDefined);

@@ -53,17 +53,17 @@ public:
    */
   struct AtlasMetricsEntry
   {
-    AtlasSize mSize;            ///< size of atlas and blocks
-    SizeType mBlocksUsed;       ///< number of blocks used in the atlas
-    SizeType mTotalBlocks;      ///< total blocks used by atlas
+    AtlasSize     mSize;        ///< size of atlas and blocks
+    SizeType      mBlocksUsed;  ///< number of blocks used in the atlas
+    SizeType      mTotalBlocks; ///< total blocks used by atlas
     Pixel::Format mPixelFormat; ///< pixel format of the atlas
   };
 
   struct Metrics
   {
     Metrics()
-      : mAtlasCount(0u),
-        mTextureMemoryUsed(0u)
+    : mAtlasCount(0u),
+      mTextureMemoryUsed(0u)
     {
     }
 
@@ -71,9 +71,9 @@ public:
     {
     }
 
-    SizeType mAtlasCount;                          ///< number of atlases
-    SizeType mTextureMemoryUsed;                   ///< texture memory used by atlases
-    Dali::Vector<AtlasMetricsEntry> mAtlasMetrics; ///< container of atlas information
+    SizeType                        mAtlasCount;        ///< number of atlases
+    SizeType                        mTextureMemoryUsed; ///< texture memory used by atlases
+    Dali::Vector<AtlasMetricsEntry> mAtlasMetrics;      ///< container of atlas information
   };
 
   struct Vertex2D
@@ -266,10 +266,10 @@ public:
 
 public:
   // Default copy and move operator
-  AtlasManager(const AtlasManager& rhs) = default;
-  AtlasManager(AtlasManager&& rhs) = default;
+  AtlasManager(const AtlasManager& rhs)            = default;
+  AtlasManager(AtlasManager&& rhs)                 = default;
   AtlasManager& operator=(const AtlasManager& rhs) = default;
-  AtlasManager& operator=(AtlasManager&& rhs) = default;
+  AtlasManager& operator=(AtlasManager&& rhs)      = default;
 
 private:
   explicit DALI_INTERNAL AtlasManager(Internal::AtlasManager* impl);

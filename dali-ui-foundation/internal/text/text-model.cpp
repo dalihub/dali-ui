@@ -388,30 +388,30 @@ const Vector<CharacterDirection>& Model::GetCharacterDirections() const
 }
 
 Model::Model()
-  : mLogicalModel(),
-    mVisualModel(),
-    mScrollPosition(),
-    mScrollPositionLast(),
-    mLayoutAlignmentOffset(),
-    mLayoutOffsetWithPadding(),
-    mHorizontalAlignment(Text::HorizontalAlignment::BEGIN),
-    mVerticalAlignment(Text::VerticalAlignment::TOP),
-    mVerticalLineAlignment(DevelText::VerticalLineAlignment::TOP),
-    mLineWrapMode(Text::LineWrap::WORD),
-    mAlignmentOffset(0.0f),
-    mElideEnabled(false),
-    mIgnoreSpacesAfterText(true),
-    mRemoveFrontInset(false),
-    mRemoveBackInset(false),
-    mMatchLayoutDirection(DevelText::MatchLayoutDirection::INHERIT),
-    mEllipsisPosition(DevelText::EllipsisPosition::END)
+: mLogicalModel(),
+  mVisualModel(),
+  mScrollPosition(),
+  mScrollPositionLast(),
+  mLayoutAlignmentOffset(),
+  mLayoutOffsetWithPadding(),
+  mHorizontalAlignment(Text::HorizontalAlignment::BEGIN),
+  mVerticalAlignment(Text::VerticalAlignment::TOP),
+  mVerticalLineAlignment(DevelText::VerticalLineAlignment::TOP),
+  mLineWrapMode(Text::LineWrap::WORD),
+  mAlignmentOffset(0.0f),
+  mElideEnabled(false),
+  mIgnoreSpacesAfterText(true),
+  mRemoveFrontInset(false),
+  mRemoveBackInset(false),
+  mMatchLayoutDirection(DevelText::MatchLayoutDirection::INHERIT),
+  mEllipsisPosition(DevelText::EllipsisPosition::END)
 {
   mLogicalModel = LogicalModel::New();
-  mVisualModel = VisualModel::New();
+  mVisualModel  = VisualModel::New();
 
   // Check environment variable for DALI_MATCH_SYSTEM_LANGUAGE_DIRECTION
   auto match = Dali::EnvironmentVariable::GetEnvironmentVariable(DALI_ENV_MATCH_SYSTEM_LANGUAGE_DIRECTION);
-  if (match && (std::atoi(match) == 0))
+  if(match && (std::atoi(match) == 0))
   {
     mMatchLayoutDirection = DevelText::MatchLayoutDirection::CONTENTS;
   }

@@ -29,7 +29,7 @@ float GetPreOffsetVerticalLineAlignment(const LineRun& line, const DevelText::Ve
   // Calculate vertical line alignment
   float offset = 0.0f;
 
-  switch (verLineAlign)
+  switch(verLineAlign)
   {
     case DevelText::VerticalLineAlignment::TOP:
     {
@@ -53,13 +53,13 @@ float GetPreOffsetVerticalLineAlignment(const LineRun& line, const DevelText::Ve
   return offset;
 }
 
-float GetPostOffsetVerticalLineAlignment(const LineRun& line,
+float GetPostOffsetVerticalLineAlignment(const LineRun&                                line,
                                          const DevelText::VerticalLineAlignment::Type& verLineAlign)
 {
   // Calculate vertical line alignment
   float offset = 0.0f;
 
-  switch (verLineAlign)
+  switch(verLineAlign)
   {
     case DevelText::VerticalLineAlignment::TOP:
     {

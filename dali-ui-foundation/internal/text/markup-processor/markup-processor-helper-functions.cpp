@@ -33,15 +33,15 @@ namespace Text
 {
 namespace
 {
-const char WHITE_SPACE = 0x20;      // ASCII value of the white space.
+const char WHITE_SPACE      = 0x20; // ASCII value of the white space.
 const char FIRST_UPPER_CASE = 0x41; // ASCII value of the one after the first upper case character (A).
-const char LAST_UPPER_CASE = 0x5b;  // ASCII value of the one after the last upper case character (Z).
-const char TO_LOWER_CASE = 32;      // Value to add to a upper case character to transform it into a lower case.
+const char LAST_UPPER_CASE  = 0x5b; // ASCII value of the one after the last upper case character (Z).
+const char TO_LOWER_CASE    = 32;   // Value to add to a upper case character to transform it into a lower case.
 
 const unsigned int MAX_FLOAT_ATTRIBUTE_SIZE = 17u; ///< The maximum length of any of the possible float values.
                                                    ///< +99999.999999999f  (sign, five digits, dot, nine digits, f)
 
-const char WEB_COLOR_TOKEN('#');
+const char        WEB_COLOR_TOKEN('#');
 const char* const HEX_COLOR_TOKEN("0x");
 const char* const ALPHA_ONE("FF");
 
@@ -68,7 +68,7 @@ const char* END_HORIZONTAL_ALIGNMENT("end");
 bool TokenComparison(const std::string& string1, const char* const stringBuffer2, Length length)
 {
   const Length stringSize = string1.size();
-  if (stringSize != length)
+  if(stringSize != length)
   {
     // Early return. Strings have different sizes.
     return false;
@@ -76,11 +76,11 @@ bool TokenComparison(const std::string& string1, const char* const stringBuffer2
 
   const char* const stringBuffer1 = string1.c_str();
 
-  for (std::size_t index = 0; index < stringSize; ++index)
+  for(std::size_t index = 0; index < stringSize; ++index)
   {
     const char character = *(stringBuffer2 + index);
-    const bool toLower = (character < LAST_UPPER_CASE) && (character >= FIRST_UPPER_CASE);
-    if (*(stringBuffer1 + index) != (toLower ? character + TO_LOWER_CASE : character))
+    const bool toLower   = (character < LAST_UPPER_CASE) && (character >= FIRST_UPPER_CASE);
+    if(*(stringBuffer1 + index) != (toLower ? character + TO_LOWER_CASE : character))
     {
       return false;
     }
@@ -91,7 +91,7 @@ bool TokenComparison(const std::string& string1, const char* const stringBuffer2
 
 void SkipWhiteSpace(const char*& stringBuffer, const char* const stringEndBuffer)
 {
-  for (; (WHITE_SPACE >= *stringBuffer) && (stringBuffer < stringEndBuffer); ++stringBuffer)
+  for(; (WHITE_SPACE >= *stringBuffer) && (stringBuffer < stringEndBuffer); ++stringBuffer)
   {
     ;
   }
@@ -99,7 +99,7 @@ void SkipWhiteSpace(const char*& stringBuffer, const char* const stringEndBuffer
 
 void JumpToWhiteSpace(const char*& stringBuffer, const char* const stringEndBuffer)
 {
-  for (; (WHITE_SPACE != *stringBuffer) && (stringBuffer < stringEndBuffer); ++stringBuffer)
+  for(; (WHITE_SPACE != *stringBuffer) && (stringBuffer < stringEndBuffer); ++stringBuffer)
   {
     ;
   }
@@ -144,60 +144,60 @@ void UintColorToVector4(unsigned int color, Vector4& retColor)
 
 void ColorStringToVector4(const char* const colorStr, Length length, Vector4& retColor)
 {
-  if (WEB_COLOR_TOKEN == *colorStr)
+  if(WEB_COLOR_TOKEN == *colorStr)
   {
     std::string webColor(colorStr + 1u, length - 1u);
-    if (4u == length) // 3 component web color #F00 (red)
+    if(4u == length) // 3 component web color #F00 (red)
     {
       webColor.insert(2u, &(webColor[2]), 1u);
       webColor.insert(1u, &(webColor[1]), 1u);
       webColor.insert(0u, &(webColor[0]), 1u);
       webColor.insert(0u, ALPHA_ONE);
     }
-    else if (7u == length) // 6 component web color #FF0000 (red)
+    else if(7u == length) // 6 component web color #FF0000 (red)
     {
       webColor.insert(0u, ALPHA_ONE);
     }
 
     UintColorToVector4(StringToHex(webColor.c_str()), retColor);
   }
-  else if (TokenComparison(HEX_COLOR_TOKEN, colorStr, 2u))
+  else if(TokenComparison(HEX_COLOR_TOKEN, colorStr, 2u))
   {
     UintColorToVector4(StringToHex(colorStr + 2u), retColor);
   }
-  else if (TokenComparison(BLACK_COLOR, colorStr, length))
+  else if(TokenComparison(BLACK_COLOR, colorStr, length))
   {
     retColor = Color::BLACK;
   }
-  else if (TokenComparison(WHITE_COLOR, colorStr, length))
+  else if(TokenComparison(WHITE_COLOR, colorStr, length))
   {
     retColor = Color::WHITE;
   }
-  else if (TokenComparison(RED_COLOR, colorStr, length))
+  else if(TokenComparison(RED_COLOR, colorStr, length))
   {
     retColor = Color::RED;
   }
-  else if (TokenComparison(GREEN_COLOR, colorStr, length))
+  else if(TokenComparison(GREEN_COLOR, colorStr, length))
   {
     retColor = Color::GREEN;
   }
-  else if (TokenComparison(BLUE_COLOR, colorStr, length))
+  else if(TokenComparison(BLUE_COLOR, colorStr, length))
   {
     retColor = Color::BLUE;
   }
-  else if (TokenComparison(YELLOW_COLOR, colorStr, length))
+  else if(TokenComparison(YELLOW_COLOR, colorStr, length))
   {
     retColor = Color::YELLOW;
   }
-  else if (TokenComparison(MAGENTA_COLOR, colorStr, length))
+  else if(TokenComparison(MAGENTA_COLOR, colorStr, length))
   {
     retColor = Color::MAGENTA;
   }
-  else if (TokenComparison(CYAN_COLOR, colorStr, length))
+  else if(TokenComparison(CYAN_COLOR, colorStr, length))
   {
     retColor = Color::CYAN;
   }
-  else if (TokenComparison(TRANSPARENT_COLOR, colorStr, length))
+  else if(TokenComparison(TRANSPARENT_COLOR, colorStr, length))
   {
     retColor = Color::TRANSPARENT;
   }
@@ -205,66 +205,66 @@ void ColorStringToVector4(const char* const colorStr, Length length, Vector4& re
 
 void Vector4ToColorString(const Vector4& value, std::string& vector2Str)
 {
-  if (Color::BLACK == value)
+  if(Color::BLACK == value)
   {
     vector2Str = BLACK_COLOR;
     return;
   }
 
-  if (Color::WHITE == value)
+  if(Color::WHITE == value)
   {
     vector2Str = WHITE_COLOR;
     return;
   }
 
-  if (Color::RED == value)
+  if(Color::RED == value)
   {
     vector2Str = RED_COLOR;
     return;
   }
 
-  if (Color::GREEN == value)
+  if(Color::GREEN == value)
   {
     vector2Str = GREEN_COLOR;
     return;
   }
 
-  if (Color::BLUE == value)
+  if(Color::BLUE == value)
   {
     vector2Str = BLUE_COLOR;
     return;
   }
 
-  if (Color::YELLOW == value)
+  if(Color::YELLOW == value)
   {
     vector2Str = YELLOW_COLOR;
     return;
   }
 
-  if (Color::MAGENTA == value)
+  if(Color::MAGENTA == value)
   {
     vector2Str = MAGENTA_COLOR;
     return;
   }
 
-  if (Color::CYAN == value)
+  if(Color::CYAN == value)
   {
     vector2Str = CYAN_COLOR;
     return;
   }
 
-  if (Color::TRANSPARENT == value)
+  if(Color::TRANSPARENT == value)
   {
     vector2Str = TRANSPARENT_COLOR;
     return;
   }
 
   const unsigned int alpha = static_cast<unsigned int>(255.f * value.a);
-  const unsigned int red = static_cast<unsigned int>(255.f * value.r);
+  const unsigned int red   = static_cast<unsigned int>(255.f * value.r);
   const unsigned int green = static_cast<unsigned int>(255.f * value.g);
-  const unsigned int blue = static_cast<unsigned int>(255.f * value.b);
+  const unsigned int blue  = static_cast<unsigned int>(255.f * value.b);
 
-  std::stringstream ss;
+  std::stringstream  ss;
   const unsigned int size = 2u * sizeof(unsigned char);
 
   ss << "0x" << std::setfill('0') << std::setw(size) << std::hex << alpha << std::setfill('0') << std::setw(size)
@@ -305,15 +305,15 @@ void Vector2ToString(const Vector2& value, std::string& vector2Str)
 
 void UnderlineTypeStringToTypeValue(const char* const typeStr, Length length, Text::Underline::Type& retType)
 {
-  if (TokenComparison(SOLID_UNDERLINE, typeStr, length))
+  if(TokenComparison(SOLID_UNDERLINE, typeStr, length))
   {
     retType = Text::Underline::SOLID;
   }
-  else if (TokenComparison(DASHED_UNDERLINE, typeStr, length))
+  else if(TokenComparison(DASHED_UNDERLINE, typeStr, length))
   {
     retType = Text::Underline::DASHED;
   }
-  else if (TokenComparison(DOUBLE_UNDERLINE, typeStr, length))
+  else if(TokenComparison(DOUBLE_UNDERLINE, typeStr, length))
   {
     retType = Text::Underline::DOUBLE;
   }
@@ -324,20 +324,20 @@ bool HorizontalAlignmentTypeStringToTypeValue(const char* const typeStr, Length 
 {
   // The string is valid value for HorizontalAlignment
   bool valid = false;
-  if (TokenComparison(BEGIN_HORIZONTAL_ALIGNMENT, typeStr, length))
+  if(TokenComparison(BEGIN_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
     retType = Text::HorizontalAlignment::BEGIN;
-    valid = true;
+    valid   = true;
   }
-  else if (TokenComparison(CENTER_HORIZONTAL_ALIGNMENT, typeStr, length))
+  else if(TokenComparison(CENTER_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
     retType = Text::HorizontalAlignment::CENTER;
-    valid = true;
+    valid   = true;
   }
-  else if (TokenComparison(END_HORIZONTAL_ALIGNMENT, typeStr, length))
+  else if(TokenComparison(END_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
     retType = Text::HorizontalAlignment::END;
-    valid = true;
+    valid   = true;
   }
 
   return valid;

@@ -45,7 +45,7 @@ float GetLineHeight(const LineRun lineRun, bool isLastLine)
   // In case this is the only/last line then line spacing should be ignored.
   float lineHeight = lineRun.ascender - lineRun.descender;
 
-  if (!isLastLine || lineRun.lineSpacing > 0)
+  if(!isLastLine || lineRun.lineSpacing > 0)
   {
     lineHeight += lineRun.lineSpacing;
   }
@@ -60,15 +60,15 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_LAYOUT");
 #endif
 
-const float MAX_FLOAT = std::numeric_limits<float>::max();
-const CharacterDirection LTR = false;
-const CharacterDirection RTL = !LTR;
-const float LINE_SPACING = 0.f;
-const float MIN_LINE_SIZE = 0.f;
-const Character HYPHEN_UNICODE = 0x002D;
-const float RELATIVE_LINE_SIZE = 1.f;
-const float RELATIVE_LINE_SIZE_AUTO = -1.f;
-const float DEFAULT_FONT_PIXEL_SIZE = 10.f;
+const float              MAX_FLOAT               = std::numeric_limits<float>::max();
+const CharacterDirection LTR                     = false;
+const CharacterDirection RTL                     = !LTR;
+const float              LINE_SPACING            = 0.f;
+const float              MIN_LINE_SIZE           = 0.f;
+const Character          HYPHEN_UNICODE          = 0x002D;
+const float              RELATIVE_LINE_SIZE      = 1.f;
+const float              RELATIVE_LINE_SIZE_AUTO = -1.f;
+const float              DEFAULT_FONT_PIXEL_SIZE = 10.f;
 
 inline bool isEmptyLineAtLast(const Vector<LineRun>& lines, const Vector<LineRun>::Iterator& line)
 {
@@ -88,24 +88,24 @@ inline const float GetDefaultRelativeLineSize()
 struct LineLayout
 {
   LineLayout()
-    : glyphIndex{0u},
-      characterIndex{0u},
-      numberOfGlyphs{0u},
-      numberOfCharacters{0u},
-      ascender{-MAX_FLOAT},
-      descender{MAX_FLOAT},
-      lineSpacing{0.f},
-      penX{0.f},
-      previousAdvance{0.f},
-      length{0.f},
-      whiteSpaceLengthEndOfLine{0.f},
-      direction{LTR},
-      isSplitToTwoHalves(false),
-      glyphIndexInSecondHalfLine{0u},
-      characterIndexInSecondHalfLine{0u},
-      numberOfGlyphsInSecondHalfLine{0u},
-      numberOfCharactersInSecondHalfLine{0u},
-      relativeLineSize{GetDefaultRelativeLineSize()}
+  : glyphIndex{0u},
+    characterIndex{0u},
+    numberOfGlyphs{0u},
+    numberOfCharacters{0u},
+    ascender{-MAX_FLOAT},
+    descender{MAX_FLOAT},
+    lineSpacing{0.f},
+    penX{0.f},
+    previousAdvance{0.f},
+    length{0.f},
+    whiteSpaceLengthEndOfLine{0.f},
+    direction{LTR},
+    isSplitToTwoHalves(false),
+    glyphIndexInSecondHalfLine{0u},
+    characterIndexInSecondHalfLine{0u},
+    numberOfGlyphsInSecondHalfLine{0u},
+    numberOfCharactersInSecondHalfLine{0u},
+    relativeLineSize{GetDefaultRelativeLineSize()}
 
   {
   }
@@ -116,39 +116,39 @@ struct LineLayout
 
   void Clear()
   {
-    glyphIndex = 0u;
-    characterIndex = 0u;
-    numberOfGlyphs = 0u;
-    numberOfCharacters = 0u;
-    ascender = -MAX_FLOAT;
-    descender = MAX_FLOAT;
-    direction = LTR;
-    isSplitToTwoHalves = false;
-    glyphIndexInSecondHalfLine = 0u;
-    characterIndexInSecondHalfLine = 0u;
-    numberOfGlyphsInSecondHalfLine = 0u;
+    glyphIndex                         = 0u;
+    characterIndex                     = 0u;
+    numberOfGlyphs                     = 0u;
+    numberOfCharacters                 = 0u;
+    ascender                           = -MAX_FLOAT;
+    descender                          = MAX_FLOAT;
+    direction                          = LTR;
+    isSplitToTwoHalves                 = false;
+    glyphIndexInSecondHalfLine         = 0u;
+    characterIndexInSecondHalfLine     = 0u;
+    numberOfGlyphsInSecondHalfLine     = 0u;
     numberOfCharactersInSecondHalfLine = 0u;
-    relativeLineSize = GetDefaultRelativeLineSize();
+    relativeLineSize                   = GetDefaultRelativeLineSize();
   }
 
-  GlyphIndex glyphIndex;         ///< Index of the first glyph to be laid-out.
-  CharacterIndex characterIndex; ///< Index of the first character to be laid-out.
-  Length numberOfGlyphs;         ///< The number of glyph which fit in one line.
-  Length numberOfCharacters;     ///< The number of characters which fit in one line.
-  float ascender;                ///< The maximum ascender of all fonts in the line.
-  float descender;               ///< The minimum descender of all fonts in the line.
-  float lineSpacing;             ///< The line spacing
-  float penX; ///< The origin of the current glyph ( is the start point plus the accumulation of all advances ).
-  float previousAdvance;           ///< The advance of the previous glyph.
-  float length;                    ///< The current length of the line.
-  float whiteSpaceLengthEndOfLine; ///< The length of the white spaces at the end of the line.
+  GlyphIndex         glyphIndex;                ///< Index of the first glyph to be laid-out.
+  CharacterIndex     characterIndex;            ///< Index of the first character to be laid-out.
+  Length             numberOfGlyphs;            ///< The number of glyph which fit in one line.
+  Length             numberOfCharacters;        ///< The number of characters which fit in one line.
+  float              ascender;                  ///< The maximum ascender of all fonts in the line.
+  float              descender;                 ///< The minimum descender of all fonts in the line.
+  float              lineSpacing;               ///< The line spacing
+  float              penX;                      ///< The origin of the current glyph ( is the start point plus the accumulation of all advances ).
+  float              previousAdvance;           ///< The advance of the previous glyph.
+  float              length;                    ///< The current length of the line.
+  float              whiteSpaceLengthEndOfLine; ///< The length of the white spaces at the end of the line.
   CharacterDirection direction;
 
-  bool isSplitToTwoHalves;               ///< Whether the second half is defined.
+  bool       isSplitToTwoHalves;         ///< Whether the second half is defined.
   GlyphIndex glyphIndexInSecondHalfLine; ///< Index of the first glyph to be laid-out for the second half of line.
   CharacterIndex
-      characterIndexInSecondHalfLine;    ///< Index of the first character to be laid-out for the second half of line.
-  Length numberOfGlyphsInSecondHalfLine; ///< The number of glyph which fit in one line for the second half of line.
+         characterIndexInSecondHalfLine;     ///< Index of the first character to be laid-out for the second half of line.
+  Length numberOfGlyphsInSecondHalfLine;     ///< The number of glyph which fit in one line for the second half of line.
   Length numberOfCharactersInSecondHalfLine; ///< The number of characters which fit in one line for the second half of
                                              ///< line.
 
@@ -161,26 +161,26 @@ struct LayoutBidiParameters
   {
     paragraphDirection = LTR;
     bidiParagraphIndex = 0u;
-    bidiLineIndex = 0u;
-    isBidirectional = false;
+    bidiLineIndex      = 0u;
+    isBidirectional    = false;
   }
 
-  CharacterDirection paragraphDirection = LTR;   ///< The paragraph's direction.
-  BidirectionalRunIndex bidiParagraphIndex = 0u; ///< Index to the paragraph's bidi info.
-  BidirectionalLineRunIndex bidiLineIndex = 0u;  ///< Index where to insert the next bidi line info.
-  bool isBidirectional = false;                  ///< Whether the text is bidirectional.
+  CharacterDirection        paragraphDirection = LTR;   ///< The paragraph's direction.
+  BidirectionalRunIndex     bidiParagraphIndex = 0u;    ///< Index to the paragraph's bidi info.
+  BidirectionalLineRunIndex bidiLineIndex      = 0u;    ///< Index where to insert the next bidi line info.
+  bool                      isBidirectional    = false; ///< Whether the text is bidirectional.
 };
 
 struct Engine::Impl
 {
   Impl()
-    : mLayout{Layout::Engine::SINGLE_LINE_BOX},
-      mCursorWidth{0.f},
-      mDefaultLineSpacing{LINE_SPACING},
-      mDefaultLineSize{MIN_LINE_SIZE},
-      mRelativeLineSize{GetDefaultRelativeLineSize()},
-      mPixelSize{DEFAULT_FONT_PIXEL_SIZE},
-      mIsCursorInsetEnabled{true}
+  : mLayout{Layout::Engine::SINGLE_LINE_BOX},
+    mCursorWidth{0.f},
+    mDefaultLineSpacing{LINE_SPACING},
+    mDefaultLineSize{MIN_LINE_SIZE},
+    mRelativeLineSize{GetDefaultRelativeLineSize()},
+    mPixelSize{DEFAULT_FONT_PIXEL_SIZE},
+    mIsCursorInsetEnabled{true}
   {
   }
 
@@ -193,7 +193,7 @@ struct Engine::Impl
    */
   float GetLineSpacing(float textSize, float relativeLineSize)
   {
-    if (TextAbstraction::DesignCompatibilityEnabled())
+    if(TextAbstraction::DesignCompatibilityEnabled())
     {
       // For readability and maintainability, completely separate the code.
       float lineSpacing;
@@ -207,15 +207,15 @@ struct Engine::Impl
       // If relativeLineSize is less than 0, it will attempt to set LineHeight to NaturalSize.
       // Or, if there is a minLineSize set, it will attempt to apply minLineSize.
       relTextSize = relativeLineSize < 0 ? textSize : std::floor(mPixelSize * relativeLineSize);
-      if (relTextSize >= mDefaultLineSize)
+      if(relTextSize >= mDefaultLineSize)
       {
-        if (relTextSize <= textSize)
+        if(relTextSize <= textSize)
         {
           lineSpacing -= textSize - relTextSize;
         }
         else
         {
-          if (mDefaultLineSize > textSize)
+          if(mDefaultLineSize > textSize)
           {
             lineSpacing -= mDefaultLineSize - textSize;
           }
@@ -240,9 +240,9 @@ struct Engine::Impl
 
       // subtract line spcaing if relativeLineSize < 1 & larger than min height
       relTextSize = textSize * relativeLineSize;
-      if (relTextSize > mDefaultLineSize)
+      if(relTextSize > mDefaultLineSize)
       {
-        if (relativeLineSize < 1)
+        if(relativeLineSize < 1)
         {
           // subtract the difference (always will be positive)
           lineSpacing -= (textSize - relTextSize);
@@ -250,7 +250,7 @@ struct Engine::Impl
         else
         {
           // reverse the addition in the top.
-          if (mDefaultLineSize > textSize)
+          if(mDefaultLineSize > textSize)
           {
             lineSpacing -= mDefaultLineSize - textSize;
           }
@@ -273,16 +273,16 @@ struct Engine::Impl
   void UpdateLineHeight(const GlyphMetrics& glyphMetrics, LineLayout& lineLayout)
   {
     Text::FontMetrics fontMetrics;
-    if (0u != glyphMetrics.fontId)
+    if(0u != glyphMetrics.fontId)
     {
       mMetrics->GetFontMetrics(glyphMetrics.fontId, fontMetrics);
     }
     else
     {
-      fontMetrics.ascender = glyphMetrics.fontHeight;
-      fontMetrics.descender = 0.f;
-      fontMetrics.height = fontMetrics.ascender;
-      fontMetrics.underlinePosition = 0.f;
+      fontMetrics.ascender           = glyphMetrics.fontHeight;
+      fontMetrics.descender          = 0.f;
+      fontMetrics.height             = fontMetrics.ascender;
+      fontMetrics.underlinePosition  = 0.f;
       fontMetrics.underlineThickness = 1.f;
     }
 
@@ -307,10 +307,10 @@ struct Engine::Impl
     lineLayout.numberOfCharacters += tmpLineLayout.numberOfCharacters;
     lineLayout.numberOfGlyphs += tmpLineLayout.numberOfGlyphs;
 
-    lineLayout.penX = tmpLineLayout.penX;
+    lineLayout.penX            = tmpLineLayout.penX;
     lineLayout.previousAdvance = tmpLineLayout.previousAdvance;
 
-    lineLayout.length = tmpLineLayout.length;
+    lineLayout.length                    = tmpLineLayout.length;
     lineLayout.whiteSpaceLengthEndOfLine = tmpLineLayout.whiteSpaceLengthEndOfLine;
 
     // Sets the maximum ascender.
@@ -320,16 +320,16 @@ struct Engine::Impl
     lineLayout.descender = std::min(lineLayout.descender, tmpLineLayout.descender);
 
     // To handle cases START in ellipsis position when want to shift first glyph to let width fit.
-    if (isShifted)
+    if(isShifted)
     {
-      lineLayout.glyphIndex = tmpLineLayout.glyphIndex;
+      lineLayout.glyphIndex     = tmpLineLayout.glyphIndex;
       lineLayout.characterIndex = tmpLineLayout.characterIndex;
     }
 
-    lineLayout.isSplitToTwoHalves = tmpLineLayout.isSplitToTwoHalves;
-    lineLayout.glyphIndexInSecondHalfLine = tmpLineLayout.glyphIndexInSecondHalfLine;
-    lineLayout.characterIndexInSecondHalfLine = tmpLineLayout.characterIndexInSecondHalfLine;
-    lineLayout.numberOfGlyphsInSecondHalfLine = tmpLineLayout.numberOfGlyphsInSecondHalfLine;
+    lineLayout.isSplitToTwoHalves                 = tmpLineLayout.isSplitToTwoHalves;
+    lineLayout.glyphIndexInSecondHalfLine         = tmpLineLayout.glyphIndexInSecondHalfLine;
+    lineLayout.characterIndexInSecondHalfLine     = tmpLineLayout.characterIndexInSecondHalfLine;
+    lineLayout.numberOfGlyphsInSecondHalfLine     = tmpLineLayout.numberOfGlyphsInSecondHalfLine;
     lineLayout.numberOfCharactersInSecondHalfLine = tmpLineLayout.numberOfCharactersInSecondHalfLine;
   }
 
@@ -341,96 +341,96 @@ struct Engine::Impl
     // then the first half of line "characterRun",
     // Otherwise travers whole characters in"characterRun".
 
-    const Character* const textBuffer = parameters.textModel->mLogicalModel->mText.Begin();
-    const Length* const charactersPerGlyphBuffer = parameters.textModel->mVisualModel->mCharactersPerGlyph.Begin();
-    const GlyphInfo* const glyphsBuffer = parameters.textModel->mVisualModel->mGlyphs.Begin();
+    const Character* const  textBuffer               = parameters.textModel->mLogicalModel->mText.Begin();
+    const Length* const     charactersPerGlyphBuffer = parameters.textModel->mVisualModel->mCharactersPerGlyph.Begin();
+    const GlyphInfo* const  glyphsBuffer             = parameters.textModel->mVisualModel->mGlyphs.Begin();
     const GlyphIndex* const charactersToGlyphsBuffer = parameters.textModel->mVisualModel->mCharactersToGlyph.Begin();
 
-    const float outlineWidth = static_cast<float>(parameters.textModel->GetOutlineWidth());
+    const float      outlineWidth                = static_cast<float>(parameters.textModel->GetOutlineWidth());
     const GlyphIndex lastGlyphOfParagraphPlusOne = parameters.startGlyphIndex + parameters.numberOfGlyphs;
-    const float modelCharacterSpacing = parameters.textModel->mVisualModel->GetCharacterSpacing();
+    const float      modelCharacterSpacing       = parameters.textModel->mVisualModel->GetCharacterSpacing();
 
     // Get the character-spacing runs.
     const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns =
-        parameters.textModel->mVisualModel->GetCharacterSpacingGlyphRuns();
+      parameters.textModel->mVisualModel->GetCharacterSpacingGlyphRuns();
 
     CharacterIndex characterLogicalIndex = 0u;
-    CharacterIndex characterVisualIndex = 0u;
+    CharacterIndex characterVisualIndex  = 0u;
 
     float calculatedAdvance = 0.f;
 
     // If there are characters in the second half of Line then the first visual index mapped from
     // visualToLogicalMapSecondHalf Otherwise maps the first visual index from visualToLogicalMap. This is to initialize
     // the first visual index.
-    if (bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
+    if(bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
     {
       characterVisualIndex = bidirectionalLineInfo.characterRunForSecondHalfLine.characterIndex +
                              (bidirectionalLineInfo.visualToLogicalMapSecondHalf
-                                  ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
-                                  : 0u);
+                                ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
+                                : 0u);
     }
     else
     {
       characterVisualIndex = bidirectionalLineInfo.characterRun.characterIndex +
                              (bidirectionalLineInfo.visualToLogicalMap
-                                  ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
-                                  : 0u);
+                                ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
+                                : 0u);
     }
 
     bool extendedToSecondHalf = false; // Whether the logical index is extended to second half
 
-    if (RTL == bidirectionalLineInfo.direction)
+    if(RTL == bidirectionalLineInfo.direction)
     {
       // If there are characters in the second half of Line.
-      if (bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
+      if(bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
       {
         // Keep adding the WhiteSpaces to the whiteSpaceLengthEndOfLine
-        while (TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex)))
+        while(TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex)))
         {
           const GlyphInfo& glyphInfo = *(glyphsBuffer + *(charactersToGlyphsBuffer + characterVisualIndex));
 
           const float characterSpacing =
-              GetGlyphCharacterSpacing(characterVisualIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+            GetGlyphCharacterSpacing(characterVisualIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
           calculatedAdvance =
-              GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing, glyphInfo.advance);
+            GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing, glyphInfo.advance);
           whiteSpaceLengthEndOfLine += calculatedAdvance;
 
           ++characterLogicalIndex;
           characterVisualIndex = bidirectionalLineInfo.characterRunForSecondHalfLine.characterIndex +
                                  (bidirectionalLineInfo.visualToLogicalMapSecondHalf
-                                      ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
-                                      : 0u);
+                                    ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
+                                    : 0u);
         }
       }
 
       // If all characters in the second half of Line are WhiteSpaces.
       // then continue adding the WhiteSpaces from the first hel of Line.
       // Also this is valid when the line was not splitted.
-      if (characterLogicalIndex == bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters)
+      if(characterLogicalIndex == bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters)
       {
-        extendedToSecondHalf = true; // Whether the logical index is extended to second half
+        extendedToSecondHalf  = true; // Whether the logical index is extended to second half
         characterLogicalIndex = 0u;
-        characterVisualIndex = bidirectionalLineInfo.characterRun.characterIndex +
+        characterVisualIndex  = bidirectionalLineInfo.characterRun.characterIndex +
                                (bidirectionalLineInfo.visualToLogicalMap
-                                    ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
-                                    : 0u);
+                                  ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
+                                  : 0u);
 
         // Keep adding the WhiteSpaces to the whiteSpaceLengthEndOfLine
-        while (TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex)))
+        while(TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex)))
         {
           const GlyphInfo& glyphInfo = *(glyphsBuffer + *(charactersToGlyphsBuffer + characterVisualIndex));
 
           const float characterSpacing =
-              GetGlyphCharacterSpacing(characterVisualIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+            GetGlyphCharacterSpacing(characterVisualIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
           calculatedAdvance =
-              GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing, glyphInfo.advance);
+            GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing, glyphInfo.advance);
           whiteSpaceLengthEndOfLine += calculatedAdvance;
 
           ++characterLogicalIndex;
           characterVisualIndex = bidirectionalLineInfo.characterRun.characterIndex +
                                  (bidirectionalLineInfo.visualToLogicalMap
-                                      ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
-                                      : 0u);
+                                    ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
+                                    : 0u);
         }
       }
     }
@@ -440,11 +440,11 @@ struct Engine::Impl
 
     // Check whether the first glyph comes from a character that is shaped in multiple glyphs.
     const Length numberOfGLyphsInGroup =
-        GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+      GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
     GlyphMetrics glyphMetrics;
-    const float characterSpacing =
-        GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+    const float  characterSpacing =
+      GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
     calculatedAdvance = GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing,
                                              (*(glyphsBuffer + glyphIndex)).advance);
     GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
@@ -453,40 +453,40 @@ struct Engine::Impl
 
     // Traverses the characters of the right to left paragraph.
     // Continue in the second half of line, because in it the first index of character that is not WhiteSpace.
-    if (!extendedToSecondHalf && bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
+    if(!extendedToSecondHalf && bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters > 0u)
     {
-      for (; characterLogicalIndex < bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters;)
+      for(; characterLogicalIndex < bidirectionalLineInfo.characterRunForSecondHalfLine.numberOfCharacters;)
       {
         // Convert the character in the logical order into the character in the visual order.
         const CharacterIndex characterVisualIndex =
-            bidirectionalLineInfo.characterRunForSecondHalfLine.characterIndex +
-            (bidirectionalLineInfo.visualToLogicalMapSecondHalf
-                 ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
-                 : 0u);
+          bidirectionalLineInfo.characterRunForSecondHalfLine.characterIndex +
+          (bidirectionalLineInfo.visualToLogicalMapSecondHalf
+             ? *(bidirectionalLineInfo.visualToLogicalMapSecondHalf + characterLogicalIndex)
+             : 0u);
         const bool isWhiteSpace = TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex));
 
         const GlyphIndex glyphIndex = *(charactersToGlyphsBuffer + characterVisualIndex);
 
         // Check whether this glyph comes from a character that is shaped in multiple glyphs.
         const Length numberOfGLyphsInGroup =
-            GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+          GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
         characterLogicalIndex += *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
 
         GlyphMetrics glyphMetrics;
-        const float characterSpacing =
-            GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+        const float  characterSpacing =
+          GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
         calculatedAdvance = GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing,
                                                  (*(glyphsBuffer + glyphIndex)).advance);
         GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
-        if (isWhiteSpace)
+        if(isWhiteSpace)
         {
           // If glyph is WhiteSpace then:
           // For RTL it is whitespace but not at endOfLine. Use "advance" to accumulate length and shift penX.
           // the endOfLine in RTL was the headOfLine for layouting.
           // But for LTR added it to the endOfLine and use "advance" to accumulate length.
-          if (RTL == bidirectionalLineInfo.direction)
+          if(RTL == bidirectionalLineInfo.direction)
           {
             length += glyphMetrics.advance;
           }
@@ -503,12 +503,12 @@ struct Engine::Impl
           // Use "advance" and "interGlyphExtraAdvance" to shift penX.
           // Set length to the maximum possible length, of the current glyph "xBearing" and "width" are shifted penX to
           // length greater than current lenght. Otherwise the current length is maximum.
-          if (LTR == bidirectionalLineInfo.direction)
+          if(LTR == bidirectionalLineInfo.direction)
           {
             whiteSpaceLengthEndOfLine = 0.f;
           }
 
-          if (parameters.textModel->mRemoveBackInset)
+          if(parameters.textModel->mRemoveBackInset)
           {
             length = std::max(length, penX + glyphMetrics.xBearing + glyphMetrics.width);
           }
@@ -527,38 +527,38 @@ struct Engine::Impl
     // Also this is valid when the line was not splitted and there were WhiteSpace.
     // Otherwise start from first logical index in line.
     characterLogicalIndex = extendedToSecondHalf ? characterLogicalIndex : 0u;
-    for (; characterLogicalIndex < bidirectionalLineInfo.characterRun.numberOfCharacters;)
+    for(; characterLogicalIndex < bidirectionalLineInfo.characterRun.numberOfCharacters;)
     {
       // Convert the character in the logical order into the character in the visual order.
       const CharacterIndex characterVisualIndex =
-          bidirectionalLineInfo.characterRun.characterIndex +
-          (bidirectionalLineInfo.visualToLogicalMap
-               ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
-               : 0u);
+        bidirectionalLineInfo.characterRun.characterIndex +
+        (bidirectionalLineInfo.visualToLogicalMap
+           ? *(bidirectionalLineInfo.visualToLogicalMap + characterLogicalIndex)
+           : 0u);
       const bool isWhiteSpace = TextAbstraction::IsWhiteSpace(*(textBuffer + characterVisualIndex));
 
       const GlyphIndex glyphIndex = *(charactersToGlyphsBuffer + characterVisualIndex);
 
       // Check whether this glyph comes from a character that is shaped in multiple glyphs.
       const Length numberOfGLyphsInGroup =
-          GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+        GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
       characterLogicalIndex += *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
 
       GlyphMetrics glyphMetrics;
-      const float characterSpacing =
-          GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+      const float  characterSpacing =
+        GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
       calculatedAdvance = GetCalculatedAdvance(*(textBuffer + characterVisualIndex), characterSpacing,
                                                (*(glyphsBuffer + glyphIndex)).advance);
       GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
 
-      if (isWhiteSpace)
+      if(isWhiteSpace)
       {
         // If glyph is WhiteSpace then:
         // For RTL it is whitespace but not at endOfLine. Use "advance" to accumulate length and shift penX.
         // the endOfLine in RTL was the headOfLine for layouting.
         // But for LTR added it to the endOfLine and use "advance" to accumulate length.
-        if (RTL == bidirectionalLineInfo.direction)
+        if(RTL == bidirectionalLineInfo.direction)
         {
           length += glyphMetrics.advance;
         }
@@ -575,12 +575,12 @@ struct Engine::Impl
         // Use "advance" and "interGlyphExtraAdvance" to shift penX.
         // Set length to the maximum possible length, of the current glyph "xBearing" and "width" are shifted penX to
         // length greater than current lenght. Otherwise the current length is maximum.
-        if (LTR == bidirectionalLineInfo.direction)
+        if(LTR == bidirectionalLineInfo.direction)
         {
           whiteSpaceLengthEndOfLine = 0.f;
         }
 
-        if (parameters.textModel->mRemoveBackInset)
+        if(parameters.textModel->mRemoveBackInset)
         {
           length = std::max(length, penX + glyphMetrics.xBearing + glyphMetrics.width);
         }
@@ -603,16 +603,16 @@ struct Engine::Impl
     const GlyphIndex lastGlyphOfParagraphPlusOne = parameters.startGlyphIndex + parameters.numberOfGlyphs;
 
     const Vector<BidirectionalParagraphInfoRun>& bidirectionalParagraphsInfo =
-        parameters.textModel->mLogicalModel->mBidirectionalParagraphInfo;
+      parameters.textModel->mLogicalModel->mBidirectionalParagraphInfo;
 
     const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo =
-        bidirectionalParagraphsInfo[bidiParameters.bidiParagraphIndex];
-    if ((lineLayout.characterIndex >= bidirectionalParagraphInfo.characterRun.characterIndex) &&
-        (lineLayout.characterIndex < bidirectionalParagraphInfo.characterRun.characterIndex +
-                                         bidirectionalParagraphInfo.characterRun.numberOfCharacters))
+      bidirectionalParagraphsInfo[bidiParameters.bidiParagraphIndex];
+    if((lineLayout.characterIndex >= bidirectionalParagraphInfo.characterRun.characterIndex) &&
+       (lineLayout.characterIndex < bidirectionalParagraphInfo.characterRun.characterIndex +
+                                      bidirectionalParagraphInfo.characterRun.numberOfCharacters))
     {
       Vector<BidirectionalLineInfoRun>& bidirectionalLinesInfo =
-          parameters.textModel->mLogicalModel->mBidirectionalLineInfo;
+        parameters.textModel->mLogicalModel->mBidirectionalLineInfo;
 
       TextAbstraction::BidirectionalSupport bidirectionalSupport = parameters.bidirectionalSupport;
 
@@ -624,31 +624,31 @@ struct Engine::Impl
 
       // Recalculate the length of the line and update the layout.
       const BidirectionalLineInfoRun& bidirectionalLineInfo =
-          *(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
+        *(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
 
-      if (!bidirectionalLineInfo.isIdentity)
+      if(!bidirectionalLineInfo.isIdentity)
       {
-        float length = 0.f;
+        float length                    = 0.f;
         float whiteSpaceLengthEndOfLine = 0.f;
         LayoutRightToLeft(parameters, bidirectionalLineInfo, length, whiteSpaceLengthEndOfLine);
 
         lineLayout.whiteSpaceLengthEndOfLine = whiteSpaceLengthEndOfLine;
-        if (!Equals(length, lineLayout.length))
+        if(!Equals(length, lineLayout.length))
         {
           const bool isMultiline = (!enforceEllipsisInSingleLine) && (mLayout == MULTI_LINE_BOX);
 
-          if (isMultiline && (length > parameters.boundingBox.width))
+          if(isMultiline && (length > parameters.boundingBox.width))
           {
-            if (breakInCharacters || (isMultiline && (0u == currentLineLayout.numberOfGlyphs)))
+            if(breakInCharacters || (isMultiline && (0u == currentLineLayout.numberOfGlyphs)))
             {
               // The word doesn't fit in one line. It has to be split by character.
 
               // Remove the last laid out glyph(s) as they doesn't fit.
-              for (GlyphIndex glyphIndex = lineLayout.glyphIndex + lineLayout.numberOfGlyphs - 1u;
-                   glyphIndex >= lineLayout.glyphIndex;)
+              for(GlyphIndex glyphIndex = lineLayout.glyphIndex + lineLayout.numberOfGlyphs - 1u;
+                  glyphIndex >= lineLayout.glyphIndex;)
               {
                 const Length numberOfGLyphsInGroup =
-                    GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+                  GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
                 const Length numberOfCharacters = *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
 
@@ -657,12 +657,12 @@ struct Engine::Impl
 
                 AdjustLayout(parameters, bidiParameters, bidirectionalParagraphInfo, lineLayout);
 
-                if (lineLayout.length < parameters.boundingBox.width)
+                if(lineLayout.length < parameters.boundingBox.width)
                 {
                   break;
                 }
 
-                if (glyphIndex < numberOfGLyphsInGroup)
+                if(glyphIndex < numberOfGLyphsInGroup)
                 {
                   // avoids go under zero for an unsigned int.
                   break;
@@ -691,7 +691,7 @@ struct Engine::Impl
                     const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo, LineLayout& lineLayout)
   {
     Vector<BidirectionalLineInfoRun>& bidirectionalLinesInfo =
-        parameters.textModel->mLogicalModel->mBidirectionalLineInfo;
+      parameters.textModel->mLogicalModel->mBidirectionalLineInfo;
 
     // Remove current reordered line.
     bidirectionalLinesInfo.Erase(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
@@ -704,13 +704,13 @@ struct Engine::Impl
                 lineLayout.numberOfCharactersInSecondHalfLine, bidiParameters.paragraphDirection);
 
     const BidirectionalLineInfoRun& bidirectionalLineInfo =
-        *(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
+      *(bidirectionalLinesInfo.Begin() + bidiParameters.bidiLineIndex);
 
-    float length = 0.f;
+    float length                    = 0.f;
     float whiteSpaceLengthEndOfLine = 0.f;
     LayoutRightToLeft(parameters, bidirectionalLineInfo, length, whiteSpaceLengthEndOfLine);
 
-    lineLayout.length = length;
+    lineLayout.length                    = length;
     lineLayout.whiteSpaceLengthEndOfLine = whiteSpaceLengthEndOfLine;
   }
 
@@ -736,27 +736,27 @@ struct Engine::Impl
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->GetLineLayoutForBox\n");
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  initial glyph index : %d\n", lineLayout.glyphIndex);
 
-    const Character* const textBuffer = parameters.textModel->mLogicalModel->mText.Begin();
-    const Length* const charactersPerGlyphBuffer = parameters.textModel->mVisualModel->mCharactersPerGlyph.Begin();
-    const GlyphInfo* const glyphsBuffer = parameters.textModel->mVisualModel->mGlyphs.Begin();
+    const Character* const      textBuffer               = parameters.textModel->mLogicalModel->mText.Begin();
+    const Length* const         charactersPerGlyphBuffer = parameters.textModel->mVisualModel->mCharactersPerGlyph.Begin();
+    const GlyphInfo* const      glyphsBuffer             = parameters.textModel->mVisualModel->mGlyphs.Begin();
     const CharacterIndex* const glyphsToCharactersBuffer =
-        parameters.textModel->mVisualModel->mGlyphsToCharacters.Begin();
+      parameters.textModel->mVisualModel->mGlyphsToCharacters.Begin();
     const LineBreakInfo* const lineBreakInfoBuffer = parameters.textModel->mLogicalModel->mLineBreakInfo.Begin();
 
-    const float outlineWidth = static_cast<float>(parameters.textModel->GetOutlineWidth());
+    const float  outlineWidth        = static_cast<float>(parameters.textModel->GetOutlineWidth());
     const Length totalNumberOfGlyphs = parameters.textModel->mVisualModel->mGlyphs.Count();
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
     const bool isWordLaidOut =
-        parameters.textModel->mLineWrapMode == Text::LineWrap::WORD ||
-        (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
-        (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::MIXED);
+      parameters.textModel->mLineWrapMode == Text::LineWrap::WORD ||
+      (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
+      (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::MIXED);
     const bool isHyphenMode =
-        parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION;
+      parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION;
     const bool isMixedMode = parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::MIXED;
 
     const bool isSplitToTwoHalves =
-        elideTextEnabled && !isMultiline && ellipsisPosition == DevelText::EllipsisPosition::MIDDLE;
+      elideTextEnabled && !isMultiline && ellipsisPosition == DevelText::EllipsisPosition::MIDDLE;
 
     // The last glyph to be laid-out.
     const GlyphIndex lastGlyphOfParagraphPlusOne = parameters.startGlyphIndex + parameters.numberOfGlyphs;
@@ -767,27 +767,27 @@ struct Engine::Impl
 
     // Check whether the first glyph comes from a character that is shaped in multiple glyphs.
     const Length numberOfGLyphsInGroup =
-        GetNumberOfGlyphsOfGroup(lineLayout.glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+      GetNumberOfGlyphsOfGroup(lineLayout.glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
     float targetWidth = parameters.boundingBox.width;
     float widthFirstHalf =
-        ((ellipsisPosition != DevelText::EllipsisPosition::MIDDLE) ? targetWidth
-                                                                   : targetWidth - std::floor(targetWidth / 2));
+      ((ellipsisPosition != DevelText::EllipsisPosition::MIDDLE) ? targetWidth
+                                                                 : targetWidth - std::floor(targetWidth / 2));
 
     bool isSecondHalf = false;
     // Character Spacing
-    const float modelCharacterSpacing = parameters.textModel->mVisualModel->GetCharacterSpacing();
-    float calculatedAdvance = 0.f;
-    Vector<CharacterIndex>& glyphToCharacterMap = parameters.textModel->mVisualModel->mGlyphsToCharacters;
-    const CharacterIndex* glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
+    const float             modelCharacterSpacing     = parameters.textModel->mVisualModel->GetCharacterSpacing();
+    float                   calculatedAdvance         = 0.f;
+    Vector<CharacterIndex>& glyphToCharacterMap       = parameters.textModel->mVisualModel->mGlyphsToCharacters;
+    const CharacterIndex*   glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
 
     // Get the character-spacing runs.
     const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns =
-        parameters.textModel->mVisualModel->GetCharacterSpacingGlyphRuns();
+      parameters.textModel->mVisualModel->GetCharacterSpacingGlyphRuns();
 
     GlyphMetrics glyphMetrics;
-    const float characterSpacing =
-        GetGlyphCharacterSpacing(lineLayout.glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+    const float  characterSpacing =
+      GetGlyphCharacterSpacing(lineLayout.glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
     calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + lineLayout.glyphIndex))),
                                              characterSpacing, (*(glyphsBuffer + lineLayout.glyphIndex)).advance);
     GetGlyphsMetrics(lineLayout.glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics,
@@ -807,7 +807,7 @@ struct Engine::Impl
     // outlined.
 
     tmpLineLayout.penX = GetCursorInsetWidth() + outlineWidth;
-    if (parameters.textModel->mRemoveFrontInset)
+    if(parameters.textModel->mRemoveFrontInset)
     {
       tmpLineLayout.penX -= glyphMetrics.xBearing;
     }
@@ -818,22 +818,22 @@ struct Engine::Impl
     FontId lastFontId = glyphMetrics.fontId;
     UpdateLineHeight(glyphMetrics, tmpLineLayout);
 
-    bool oneWordLaidOut = false;
-    bool oneHyphenLaidOut = false;
-    GlyphIndex hyphenIndex = 0;
-    GlyphInfo hyphenGlyph;
+    bool       oneWordLaidOut   = false;
+    bool       oneHyphenLaidOut = false;
+    GlyphIndex hyphenIndex      = 0;
+    GlyphInfo  hyphenGlyph;
 
-    for (GlyphIndex glyphIndex = lineLayout.glyphIndex; glyphIndex < lastGlyphOfParagraphPlusOne;)
+    for(GlyphIndex glyphIndex = lineLayout.glyphIndex; glyphIndex < lastGlyphOfParagraphPlusOne;)
     {
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  glyph index : %d\n", glyphIndex);
 
       // Check whether this glyph comes from a character that is shaped in multiple glyphs.
       const Length numberOfGLyphsInGroup =
-          GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+        GetNumberOfGlyphsOfGroup(glyphIndex, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
       GlyphMetrics glyphMetrics;
-      const float characterSpacing =
-          GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
+      const float  characterSpacing =
+        GetGlyphCharacterSpacing(glyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
       calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + glyphIndex))),
                                                characterSpacing, (*(glyphsBuffer + glyphIndex)).advance);
       GetGlyphsMetrics(glyphIndex, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics, calculatedAdvance);
@@ -842,7 +842,7 @@ struct Engine::Impl
 
       // Check if the font of the current glyph is the same of the previous one.
       // If it's different the ascender and descender need to be updated.
-      if (lastFontId != glyphMetrics.fontId)
+      if(lastFontId != glyphMetrics.fontId)
       {
         UpdateLineHeight(glyphMetrics, tmpLineLayout);
         lastFontId = glyphMetrics.fontId;
@@ -851,16 +851,16 @@ struct Engine::Impl
       // Get the character indices for the current glyph. The last character index is needed
       // because there are glyphs formed by more than one character but their break info is
       // given only for the last character.
-      const Length charactersPerGlyph = *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
-      const bool hasCharacters = charactersPerGlyph > 0u;
+      const Length         charactersPerGlyph  = *(charactersPerGlyphBuffer + glyphIndex + numberOfGLyphsInGroup - 1u);
+      const bool           hasCharacters       = charactersPerGlyph > 0u;
       const CharacterIndex characterFirstIndex = *(glyphsToCharactersBuffer + glyphIndex);
-      const CharacterIndex characterLastIndex = characterFirstIndex + (hasCharacters ? charactersPerGlyph - 1u : 0u);
+      const CharacterIndex characterLastIndex  = characterFirstIndex + (hasCharacters ? charactersPerGlyph - 1u : 0u);
 
       // Get the line break info for the current character.
       const LineBreakInfo lineBreakInfo =
-          hasCharacters ? *(lineBreakInfoBuffer + characterLastIndex) : TextAbstraction::LINE_NO_BREAK;
+        hasCharacters ? *(lineBreakInfoBuffer + characterLastIndex) : TextAbstraction::LINE_NO_BREAK;
 
-      if (isSecondHalf)
+      if(isSecondHalf)
       {
         // Increase the number of characters.
         tmpLineLayout.numberOfCharactersInSecondHalfLine += charactersPerGlyph;
@@ -878,22 +878,22 @@ struct Engine::Impl
       }
 
       // Check whether is a white space.
-      const Character character = *(textBuffer + characterFirstIndex);
-      const bool isWhiteSpace = TextAbstraction::IsWhiteSpace(character);
+      const Character character    = *(textBuffer + characterFirstIndex);
+      const bool      isWhiteSpace = TextAbstraction::IsWhiteSpace(character);
 
       // Calculate the length of the line.
 
       // Used to restore the temporal line layout when a single word does not fit in the control's width and is split by
       // character.
-      const float previousTmpPenX = tmpLineLayout.penX;
-      const float previousTmpAdvance = tmpLineLayout.previousAdvance;
-      const float previousTmpLength = tmpLineLayout.length;
+      const float previousTmpPenX                      = tmpLineLayout.penX;
+      const float previousTmpAdvance                   = tmpLineLayout.previousAdvance;
+      const float previousTmpLength                    = tmpLineLayout.length;
       const float previousTmpWhiteSpaceLengthEndOfLine = tmpLineLayout.whiteSpaceLengthEndOfLine;
 
       // The calculated text size is used in atlas renderer.
       // When the text is all white space, partial render issue occurs because the width is 0.
       // To avoid issue, do not remove the white space size in hidden input mode.
-      if (isWhiteSpace && !hiddenInputEnabled)
+      if(isWhiteSpace && !hiddenInputEnabled)
       {
         // Add the length to the length of white spaces at the end of the line.
         tmpLineLayout.whiteSpaceLengthEndOfLine += glyphMetrics.advance;
@@ -904,10 +904,10 @@ struct Engine::Impl
         tmpLineLayout.penX += tmpLineLayout.previousAdvance + tmpLineLayout.whiteSpaceLengthEndOfLine;
         tmpLineLayout.previousAdvance = (glyphMetrics.advance + parameters.interGlyphExtraAdvance);
 
-        if (parameters.textModel->mRemoveBackInset)
+        if(parameters.textModel->mRemoveBackInset)
         {
           tmpLineLayout.length =
-              std::max(tmpLineLayout.length, tmpLineLayout.penX + glyphMetrics.xBearing + glyphMetrics.width);
+            std::max(tmpLineLayout.length, tmpLineLayout.penX + glyphMetrics.xBearing + glyphMetrics.width);
         }
         else
         {
@@ -918,8 +918,8 @@ struct Engine::Impl
         tmpLineLayout.whiteSpaceLengthEndOfLine = 0.f;
       }
 
-      if (isSplitToTwoHalves && (!isSecondHalf) &&
-          (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > widthFirstHalf))
+      if(isSplitToTwoHalves && (!isSecondHalf) &&
+         (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > widthFirstHalf))
       {
         tmpLineLayout.numberOfCharacters -= charactersPerGlyph;
         tmpLineLayout.numberOfGlyphs -= numberOfGLyphsInGroup;
@@ -927,46 +927,46 @@ struct Engine::Impl
         tmpLineLayout.numberOfCharactersInSecondHalfLine += charactersPerGlyph;
         tmpLineLayout.numberOfGlyphsInSecondHalfLine += numberOfGLyphsInGroup;
 
-        tmpLineLayout.glyphIndexInSecondHalfLine = tmpLineLayout.glyphIndex + tmpLineLayout.numberOfGlyphs;
+        tmpLineLayout.glyphIndexInSecondHalfLine     = tmpLineLayout.glyphIndex + tmpLineLayout.numberOfGlyphs;
         tmpLineLayout.characterIndexInSecondHalfLine = tmpLineLayout.characterIndex + tmpLineLayout.numberOfCharacters;
 
         tmpLineLayout.isSplitToTwoHalves = isSecondHalf = true;
       }
       // Check if the accumulated length fits in the width of the box.
-      if ((ellipsisPosition == DevelText::EllipsisPosition::START ||
-           (ellipsisPosition == DevelText::EllipsisPosition::MIDDLE && isSecondHalf)) &&
-          completelyFill && !isMultiline &&
-          (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > targetWidth))
+      if((ellipsisPosition == DevelText::EllipsisPosition::START ||
+          (ellipsisPosition == DevelText::EllipsisPosition::MIDDLE && isSecondHalf)) &&
+         completelyFill && !isMultiline &&
+         (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > targetWidth))
       {
         GlyphIndex glyphIndexToRemove =
-            isSecondHalf ? tmpLineLayout.glyphIndexInSecondHalfLine : tmpLineLayout.glyphIndex;
+          isSecondHalf ? tmpLineLayout.glyphIndexInSecondHalfLine : tmpLineLayout.glyphIndex;
 
-        while (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > targetWidth &&
-               glyphIndexToRemove < glyphIndex)
+        while(tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > targetWidth &&
+              glyphIndexToRemove < glyphIndex)
         {
           GlyphMetrics glyphMetrics;
-          const float characterSpacing =
-              GetGlyphCharacterSpacing(glyphIndexToRemove, characterSpacingGlyphRuns, modelCharacterSpacing);
+          const float  characterSpacing =
+            GetGlyphCharacterSpacing(glyphIndexToRemove, characterSpacingGlyphRuns, modelCharacterSpacing);
           calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + glyphIndexToRemove))),
                                                    characterSpacing, (*(glyphsBuffer + glyphIndexToRemove)).advance);
           GetGlyphsMetrics(glyphIndexToRemove, numberOfGLyphsInGroup, glyphMetrics, glyphsBuffer, mMetrics,
                            calculatedAdvance);
 
           const Length numberOfGLyphsInGroup =
-              GetNumberOfGlyphsOfGroup(glyphIndexToRemove, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
+            GetNumberOfGlyphsOfGroup(glyphIndexToRemove, lastGlyphOfParagraphPlusOne, charactersPerGlyphBuffer);
 
           const Length charactersPerGlyph =
-              *(charactersPerGlyphBuffer + glyphIndexToRemove + numberOfGLyphsInGroup - 1u);
-          const bool hasCharacters = charactersPerGlyph > 0u;
+            *(charactersPerGlyphBuffer + glyphIndexToRemove + numberOfGLyphsInGroup - 1u);
+          const bool           hasCharacters       = charactersPerGlyph > 0u;
           const CharacterIndex characterFirstIndex = *(glyphsToCharactersBuffer + glyphIndexToRemove);
           const CharacterIndex characterLastIndex =
-              characterFirstIndex + (hasCharacters ? charactersPerGlyph - 1u : 0u);
+            characterFirstIndex + (hasCharacters ? charactersPerGlyph - 1u : 0u);
 
           // Check whether is a white space.
-          const Character character = *(textBuffer + characterFirstIndex);
-          const bool isRemovedGlyphWhiteSpace = TextAbstraction::IsWhiteSpace(character);
+          const Character character                = *(textBuffer + characterFirstIndex);
+          const bool      isRemovedGlyphWhiteSpace = TextAbstraction::IsWhiteSpace(character);
 
-          if (isSecondHalf)
+          if(isSecondHalf)
           {
             // Decrease the number of characters for SecondHalf.
             tmpLineLayout.numberOfCharactersInSecondHalfLine -= charactersPerGlyph;
@@ -983,7 +983,7 @@ struct Engine::Impl
             tmpLineLayout.numberOfGlyphs -= numberOfGLyphsInGroup;
           }
 
-          if (isRemovedGlyphWhiteSpace && !hiddenInputEnabled)
+          if(isRemovedGlyphWhiteSpace && !hiddenInputEnabled)
           {
             tmpLineLayout.penX -= glyphMetrics.advance;
             tmpLineLayout.length -= glyphMetrics.advance;
@@ -995,38 +995,38 @@ struct Engine::Impl
                                               glyphMetrics.xBearing + glyphMetrics.width));
           }
 
-          if (isSecondHalf)
+          if(isSecondHalf)
           {
             tmpLineLayout.glyphIndexInSecondHalfLine += numberOfGLyphsInGroup;
             tmpLineLayout.characterIndexInSecondHalfLine = characterLastIndex + 1u;
-            glyphIndexToRemove = tmpLineLayout.glyphIndexInSecondHalfLine;
+            glyphIndexToRemove                           = tmpLineLayout.glyphIndexInSecondHalfLine;
           }
           else
           {
             tmpLineLayout.glyphIndex += numberOfGLyphsInGroup;
             tmpLineLayout.characterIndex = characterLastIndex + 1u;
-            glyphIndexToRemove = tmpLineLayout.glyphIndex;
+            glyphIndexToRemove           = tmpLineLayout.glyphIndex;
           }
         }
       }
-      else if ((completelyFill || isMultiline) && (tmpLineLayout.length > targetWidth))
+      else if((completelyFill || isMultiline) && (tmpLineLayout.length > targetWidth))
       {
         // Current word does not fit in the box's width.
-        if (((oneHyphenLaidOut && isHyphenMode) || (!oneWordLaidOut && isMixedMode && oneHyphenLaidOut)) &&
-            !completelyFill)
+        if(((oneHyphenLaidOut && isHyphenMode) || (!oneWordLaidOut && isMixedMode && oneHyphenLaidOut)) &&
+           !completelyFill)
         {
           parameters.textModel->mVisualModel->mHyphen.glyph.PushBack(hyphenGlyph);
           parameters.textModel->mVisualModel->mHyphen.index.PushBack(hyphenIndex + 1);
         }
 
-        if ((!oneWordLaidOut && !oneHyphenLaidOut) || completelyFill)
+        if((!oneWordLaidOut && !oneHyphenLaidOut) || completelyFill)
         {
           DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  Break the word by character\n");
 
           // The word doesn't fit in the control's width. It needs to be split by character.
-          if (tmpLineLayout.numberOfGlyphs + tmpLineLayout.numberOfGlyphsInSecondHalfLine > 0u)
+          if(tmpLineLayout.numberOfGlyphs + tmpLineLayout.numberOfGlyphsInSecondHalfLine > 0u)
           {
-            if (isSecondHalf)
+            if(isSecondHalf)
             {
               tmpLineLayout.numberOfCharactersInSecondHalfLine -= charactersPerGlyph;
               tmpLineLayout.numberOfGlyphsInSecondHalfLine -= numberOfGLyphsInGroup;
@@ -1037,19 +1037,19 @@ struct Engine::Impl
               tmpLineLayout.numberOfGlyphs -= numberOfGLyphsInGroup;
             }
 
-            tmpLineLayout.penX = previousTmpPenX;
-            tmpLineLayout.previousAdvance = previousTmpAdvance;
-            tmpLineLayout.length = previousTmpLength;
+            tmpLineLayout.penX                      = previousTmpPenX;
+            tmpLineLayout.previousAdvance           = previousTmpAdvance;
+            tmpLineLayout.length                    = previousTmpLength;
             tmpLineLayout.whiteSpaceLengthEndOfLine = previousTmpWhiteSpaceLengthEndOfLine;
           }
 
-          if (ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+          if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
           {
             // Add part of the word to the line layout and shift the first glyph.
             MergeLineLayout(lineLayout, tmpLineLayout, true);
           }
-          else if (ellipsisPosition != DevelText::EllipsisPosition::START ||
-                   (ellipsisPosition == DevelText::EllipsisPosition::START && (!completelyFill)))
+          else if(ellipsisPosition != DevelText::EllipsisPosition::START ||
+                  (ellipsisPosition == DevelText::EllipsisPosition::START && (!completelyFill)))
           {
             // Add part of the word to the line layout.
             MergeLineLayout(lineLayout, tmpLineLayout, false);
@@ -1063,7 +1063,7 @@ struct Engine::Impl
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "<--GetLineLayoutForBox.\n");
 
         // Reorder the RTL line.
-        if (bidiParameters.isBidirectional)
+        if(bidiParameters.isBidirectional)
         {
           ReorderBiDiLayout(parameters, bidiParameters, lineLayout, lineLayout, true, enforceEllipsisInSingleLine);
         }
@@ -1071,12 +1071,12 @@ struct Engine::Impl
         return;
       }
 
-      if ((isMultiline || isLastGlyph) && (TextAbstraction::LINE_MUST_BREAK == lineBreakInfo))
+      if((isMultiline || isLastGlyph) && (TextAbstraction::LINE_MUST_BREAK == lineBreakInfo))
       {
         LineLayout currentLineLayout = lineLayout;
-        oneHyphenLaidOut = false;
+        oneHyphenLaidOut             = false;
 
-        if (ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+        if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
         {
           // Must break the line. Update the line layout, shift the first glyph and return.
           MergeLineLayout(lineLayout, tmpLineLayout, true);
@@ -1088,7 +1088,7 @@ struct Engine::Impl
         }
 
         // Reorder the RTL line.
-        if (bidiParameters.isBidirectional)
+        if(bidiParameters.isBidirectional)
         {
           ReorderBiDiLayout(parameters, bidiParameters, currentLineLayout, lineLayout, false,
                             enforceEllipsisInSingleLine);
@@ -1100,10 +1100,10 @@ struct Engine::Impl
         return;
       }
 
-      if (isMultiline && (TextAbstraction::LINE_ALLOW_BREAK == lineBreakInfo))
+      if(isMultiline && (TextAbstraction::LINE_ALLOW_BREAK == lineBreakInfo))
       {
         oneHyphenLaidOut = false;
-        oneWordLaidOut = isWordLaidOut;
+        oneWordLaidOut   = isWordLaidOut;
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  One word laid-out\n");
 
         // Current glyph is the last one of the current word.
@@ -1113,20 +1113,20 @@ struct Engine::Impl
         tmpLineLayout.Clear();
       }
 
-      if (isMultiline && ((isHyphenMode || (!oneWordLaidOut && isMixedMode))) &&
-          (TextAbstraction::LINE_HYPHENATION_BREAK == lineBreakInfo))
+      if(isMultiline && ((isHyphenMode || (!oneWordLaidOut && isMixedMode))) &&
+         (TextAbstraction::LINE_HYPHENATION_BREAK == lineBreakInfo))
       {
-        hyphenGlyph = GlyphInfo();
+        hyphenGlyph        = GlyphInfo();
         hyphenGlyph.fontId = glyphsBuffer[glyphIndex].fontId;
 
         TextAbstraction::FontClient fontClient = parameters.fontClient;
-        hyphenGlyph.index = fontClient.GetGlyphIndex(hyphenGlyph.fontId, HYPHEN_UNICODE);
+        hyphenGlyph.index                      = fontClient.GetGlyphIndex(hyphenGlyph.fontId, HYPHEN_UNICODE);
 
         mMetrics->GetGlyphMetrics(&hyphenGlyph, 1);
 
-        if ((tmpLineLayout.length + hyphenGlyph.width) <= targetWidth)
+        if((tmpLineLayout.length + hyphenGlyph.width) <= targetWidth)
         {
-          hyphenIndex = glyphIndex;
+          hyphenIndex      = glyphIndex;
           oneHyphenLaidOut = true;
 
           DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  One hyphen laid-out\n");
@@ -1149,21 +1149,21 @@ struct Engine::Impl
   {
     // Traverse the glyphs and set the positions.
 
-    const GlyphInfo* const glyphsBuffer = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
-    const float outlineWidth = static_cast<float>(layoutParameters.textModel->GetOutlineWidth());
-    const Length numberOfGlyphs = layout.numberOfGlyphs;
-    const float interGlyphExtraAdvance = layoutParameters.interGlyphExtraAdvance;
+    const GlyphInfo* const glyphsBuffer           = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
+    const float            outlineWidth           = static_cast<float>(layoutParameters.textModel->GetOutlineWidth());
+    const Length           numberOfGlyphs         = layout.numberOfGlyphs;
+    const float            interGlyphExtraAdvance = layoutParameters.interGlyphExtraAdvance;
 
-    const GlyphIndex startIndexForGlyph = layout.glyphIndex;
+    const GlyphIndex startIndexForGlyph          = layout.glyphIndex;
     const GlyphIndex startIndexForGlyphPositions = startIndexForGlyph - layoutParameters.startGlyphIndex;
 
     // Check if the x bearing of the first character is negative.
     // If it has a negative x bearing, it will exceed the boundaries of the actor,
     // so the penX position needs to be moved to the right.
     const GlyphInfo& glyph = *(glyphsBuffer + startIndexForGlyph);
-    float penX = GetCursorInsetWidth() + outlineWidth;
+    float            penX  = GetCursorInsetWidth() + outlineWidth;
 
-    if (layoutParameters.textModel->mRemoveFrontInset)
+    if(layoutParameters.textModel->mRemoveFrontInset)
     {
       penX -= glyph.xBearing;
     }
@@ -1173,18 +1173,18 @@ struct Engine::Impl
                                startIndexForGlyph, // startIndexForGlyph is the index of the first glyph in the line
                                startIndexForGlyphPositions, glyphPositionsBuffer, penX);
 
-    if (layout.isSplitToTwoHalves)
+    if(layout.isSplitToTwoHalves)
     {
       const GlyphIndex startIndexForGlyphInSecondHalf = layout.glyphIndexInSecondHalfLine;
-      const Length numberOfGlyphsInSecondHalfLine = layout.numberOfGlyphsInSecondHalfLine;
+      const Length     numberOfGlyphsInSecondHalfLine = layout.numberOfGlyphsInSecondHalfLine;
       const GlyphIndex startIndexForGlyphPositionsnSecondHalf =
-          layout.glyphIndexInSecondHalfLine - layoutParameters.startGlyphIndex;
+        layout.glyphIndexInSecondHalfLine - layoutParameters.startGlyphIndex;
 
       CalculateGlyphPositionsLTR(
-          layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel, interGlyphExtraAdvance,
-          numberOfGlyphsInSecondHalfLine,
-          startIndexForGlyphInSecondHalf, // startIndexForGlyph is the index of the first glyph in the line
-          startIndexForGlyphPositionsnSecondHalf, glyphPositionsBuffer, penX);
+        layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel, interGlyphExtraAdvance,
+        numberOfGlyphsInSecondHalfLine,
+        startIndexForGlyphInSecondHalf, // startIndexForGlyph is the index of the first glyph in the line
+        startIndexForGlyphPositionsnSecondHalf, glyphPositionsBuffer, penX);
     }
   }
 
@@ -1192,33 +1192,33 @@ struct Engine::Impl
                          LayoutBidiParameters& layoutBidiParameters, const LineLayout& layout)
   {
     const BidirectionalLineInfoRun& bidiLine =
-        layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo[layoutBidiParameters.bidiLineIndex];
-    const GlyphInfo* const glyphsBuffer = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
+      layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo[layoutBidiParameters.bidiLineIndex];
+    const GlyphInfo* const  glyphsBuffer = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
     const GlyphIndex* const charactersToGlyphsBuffer =
-        layoutParameters.textModel->mVisualModel->mCharactersToGlyph.Begin();
+      layoutParameters.textModel->mVisualModel->mCharactersToGlyph.Begin();
 
     CharacterIndex characterLogicalIndex = 0u;
     CharacterIndex characterVisualIndex =
-        bidiLine.characterRunForSecondHalfLine.characterIndex +
-        (bidiLine.visualToLogicalMapSecondHalf ? *(bidiLine.visualToLogicalMapSecondHalf + characterLogicalIndex) : 0u);
+      bidiLine.characterRunForSecondHalfLine.characterIndex +
+      (bidiLine.visualToLogicalMapSecondHalf ? *(bidiLine.visualToLogicalMapSecondHalf + characterLogicalIndex) : 0u);
     bool extendedToSecondHalf = false; // Whether the logical index is extended to second half
 
     float penX = 0.f;
 
-    if (layout.isSplitToTwoHalves)
+    if(layout.isSplitToTwoHalves)
     {
       CalculateGlyphPositionsRTL(layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel,
                                  layoutBidiParameters.bidiLineIndex, layoutParameters.startGlyphIndex,
                                  glyphPositionsBuffer, characterVisualIndex, characterLogicalIndex, penX);
     }
 
-    if (characterLogicalIndex == bidiLine.characterRunForSecondHalfLine.numberOfCharacters)
+    if(characterLogicalIndex == bidiLine.characterRunForSecondHalfLine.numberOfCharacters)
     {
-      extendedToSecondHalf = true;
+      extendedToSecondHalf  = true;
       characterLogicalIndex = 0u;
       characterVisualIndex =
-          bidiLine.characterRun.characterIndex +
-          (bidiLine.visualToLogicalMap ? *(bidiLine.visualToLogicalMap + characterLogicalIndex) : 0u);
+        bidiLine.characterRun.characterIndex +
+        (bidiLine.visualToLogicalMap ? *(bidiLine.visualToLogicalMap + characterLogicalIndex) : 0u);
 
       CalculateGlyphPositionsRTL(layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel,
                                  layoutBidiParameters.bidiLineIndex, layoutParameters.startGlyphIndex,
@@ -1226,26 +1226,26 @@ struct Engine::Impl
     }
 
     const GlyphIndex glyphIndex = *(charactersToGlyphsBuffer + characterVisualIndex);
-    const GlyphInfo& glyph = *(glyphsBuffer + glyphIndex);
+    const GlyphInfo& glyph      = *(glyphsBuffer + glyphIndex);
 
     penX += -glyph.xBearing;
 
     // Traverses the characters of the right to left paragraph.
-    if (layout.isSplitToTwoHalves && !extendedToSecondHalf)
+    if(layout.isSplitToTwoHalves && !extendedToSecondHalf)
     {
       TraversesCharactersForGlyphPositionsRTL(
-          layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel->mText.Begin(),
-          layoutParameters.startGlyphIndex, layoutParameters.interGlyphExtraAdvance,
-          bidiLine.characterRunForSecondHalfLine, bidiLine.visualToLogicalMapSecondHalf, glyphPositionsBuffer,
-          characterLogicalIndex, penX);
+        layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel->mText.Begin(),
+        layoutParameters.startGlyphIndex, layoutParameters.interGlyphExtraAdvance,
+        bidiLine.characterRunForSecondHalfLine, bidiLine.visualToLogicalMapSecondHalf, glyphPositionsBuffer,
+        characterLogicalIndex, penX);
     }
 
     characterLogicalIndex = extendedToSecondHalf ? characterLogicalIndex : 0u;
 
     TraversesCharactersForGlyphPositionsRTL(
-        layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel->mText.Begin(),
-        layoutParameters.startGlyphIndex, layoutParameters.interGlyphExtraAdvance, bidiLine.characterRun,
-        bidiLine.visualToLogicalMap, glyphPositionsBuffer, characterLogicalIndex, penX);
+      layoutParameters.textModel->mVisualModel, layoutParameters.textModel->mLogicalModel->mText.Begin(),
+      layoutParameters.startGlyphIndex, layoutParameters.interGlyphExtraAdvance, bidiLine.characterRun,
+      bidiLine.visualToLogicalMap, glyphPositionsBuffer, characterLogicalIndex, penX);
   }
 
   /**
@@ -1264,7 +1264,7 @@ struct Engine::Impl
     LineRun* linesBuffer = nullptr;
     // Reserve more space for the next lines.
     linesCapacity *= 2u;
-    if (updateCurrentBuffer)
+    if(updateCurrentBuffer)
     {
       newLines.Resize(linesCapacity);
       linesBuffer = newLines.Begin();
@@ -1303,20 +1303,20 @@ struct Engine::Impl
                     bool enforceEllipsisInSingleLine)
   {
     const bool ellipsis =
-        enforceEllipsisInSingleLine ||
-        (isAutoScrollEnabled
-             ? isAutoScrollMaxTextureExceeded
-             : (((mLayout == MULTI_LINE_BOX) &&
-                 !((numberOfLines == 0) && (layout.length <= layoutParameters.boundingBox.width)) &&
-                 (penY - layout.descender +
-                      std::max(0.f, GetLineSpacing(layout.ascender - layout.descender, mRelativeLineSize)) >
-                  layoutParameters.boundingBox.height)) ||
-                ((mLayout == SINGLE_LINE_BOX) && (layout.length > layoutParameters.boundingBox.width))));
+      enforceEllipsisInSingleLine ||
+      (isAutoScrollEnabled
+         ? isAutoScrollMaxTextureExceeded
+         : (((mLayout == MULTI_LINE_BOX) &&
+             !((numberOfLines == 0) && (layout.length <= layoutParameters.boundingBox.width)) &&
+             (penY - layout.descender +
+                std::max(0.f, GetLineSpacing(layout.ascender - layout.descender, mRelativeLineSize)) >
+              layoutParameters.boundingBox.height)) ||
+            ((mLayout == SINGLE_LINE_BOX) && (layout.length > layoutParameters.boundingBox.width))));
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
-    if (ellipsis && (ellipsisPosition == DevelText::EllipsisPosition::END || !isMultiline))
+    if(ellipsis && (ellipsisPosition == DevelText::EllipsisPosition::END || !isMultiline))
     {
-      if (penY - layout.descender > layoutParameters.boundingBox.height)
+      if(penY - layout.descender > layoutParameters.boundingBox.height)
       {
         // Even if auto scroll is enabled and text is bigger than max texture size,
         // if the the height is small, auto scroll should not work.
@@ -1327,12 +1327,12 @@ struct Engine::Impl
       // The last line needs to be completely filled with characters.
       // Part of a word may be used.
 
-      LineRun* lineRun = nullptr;
+      LineRun*   lineRun = nullptr;
       LineLayout ellipsisLayout;
 
       ellipsisLayout.relativeLineSize = layout.relativeLineSize;
 
-      if (0u != numberOfLines)
+      if(0u != numberOfLines)
       {
         // Get the last line and layout it again with the 'completelyFill' flag to true.
         lineRun = linesBuffer + (numberOfLines - 1u);
@@ -1346,8 +1346,8 @@ struct Engine::Impl
         lineRun = linesBuffer;
 
         lineRun->glyphRun.glyphIndex = 0u;
-        ellipsisLayout.glyphIndex = 0u;
-        lineRun->isSplitToTwoHalves = false;
+        ellipsisLayout.glyphIndex    = 0u;
+        lineRun->isSplitToTwoHalves  = false;
 
         ++numberOfLines;
       }
@@ -1355,28 +1355,28 @@ struct Engine::Impl
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, ellipsisLayout, true, ellipsisPosition,
                           enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
 
-      if (ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+      if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
       {
         lineRun->glyphRun.glyphIndex = ellipsisLayout.glyphIndex;
       }
 
-      lineRun->glyphRun.numberOfGlyphs = ellipsisLayout.numberOfGlyphs;
-      lineRun->characterRun.characterIndex = ellipsisLayout.characterIndex;
+      lineRun->glyphRun.numberOfGlyphs         = ellipsisLayout.numberOfGlyphs;
+      lineRun->characterRun.characterIndex     = ellipsisLayout.characterIndex;
       lineRun->characterRun.numberOfCharacters = ellipsisLayout.numberOfCharacters;
-      lineRun->width = ellipsisLayout.length;
-      lineRun->extraLength = std::ceil(ellipsisLayout.whiteSpaceLengthEndOfLine);
-      lineRun->ascender = ellipsisLayout.ascender;
-      lineRun->descender = ellipsisLayout.descender;
-      lineRun->ellipsis = true;
+      lineRun->width                           = ellipsisLayout.length;
+      lineRun->extraLength                     = std::ceil(ellipsisLayout.whiteSpaceLengthEndOfLine);
+      lineRun->ascender                        = ellipsisLayout.ascender;
+      lineRun->descender                       = ellipsisLayout.descender;
+      lineRun->ellipsis                        = true;
 
-      lineRun->isSplitToTwoHalves = ellipsisLayout.isSplitToTwoHalves;
-      lineRun->glyphRunSecondHalf.glyphIndex = ellipsisLayout.glyphIndexInSecondHalfLine;
-      lineRun->glyphRunSecondHalf.numberOfGlyphs = ellipsisLayout.numberOfGlyphsInSecondHalfLine;
-      lineRun->characterRunForSecondHalfLine.characterIndex = ellipsisLayout.characterIndexInSecondHalfLine;
+      lineRun->isSplitToTwoHalves                               = ellipsisLayout.isSplitToTwoHalves;
+      lineRun->glyphRunSecondHalf.glyphIndex                    = ellipsisLayout.glyphIndexInSecondHalfLine;
+      lineRun->glyphRunSecondHalf.numberOfGlyphs                = ellipsisLayout.numberOfGlyphsInSecondHalfLine;
+      lineRun->characterRunForSecondHalfLine.characterIndex     = ellipsisLayout.characterIndexInSecondHalfLine;
       lineRun->characterRunForSecondHalfLine.numberOfCharacters = ellipsisLayout.numberOfCharactersInSecondHalfLine;
 
       layoutSize.width = layoutParameters.boundingBox.width;
-      if (layoutSize.height < Math::MACHINE_EPSILON_1000)
+      if(layoutSize.height < Math::MACHINE_EPSILON_1000)
       {
         layoutSize.height += GetLineHeight(*lineRun, true);
       }
@@ -1384,31 +1384,31 @@ struct Engine::Impl
       {
         // when we apply ellipsis, the last line should not take negative linespacing into account for layoutSize.height
         // calculation usually we don't includ it in normal cases using GetLineHeight()
-        if (lineRun->lineSpacing < 0)
+        if(lineRun->lineSpacing < 0)
         {
           layoutSize.height -= lineRun->lineSpacing;
         }
       }
 
       const Vector<BidirectionalLineInfoRun>& bidirectionalLinesInfo =
-          layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo;
+        layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo;
 
-      if (layoutBidiParameters.isBidirectional)
+      if(layoutBidiParameters.isBidirectional)
       {
         layoutBidiParameters.bidiLineIndex = 0u;
-        for (Vector<BidirectionalLineInfoRun>::ConstIterator it = bidirectionalLinesInfo.Begin(),
-                                                             endIt = bidirectionalLinesInfo.End();
-             it != endIt; ++it, ++layoutBidiParameters.bidiLineIndex)
+        for(Vector<BidirectionalLineInfoRun>::ConstIterator it    = bidirectionalLinesInfo.Begin(),
+                                                            endIt = bidirectionalLinesInfo.End();
+            it != endIt; ++it, ++layoutBidiParameters.bidiLineIndex)
         {
           const BidirectionalLineInfoRun& run = *it;
           // To handle case when the laid characters exist in next line.
           // More than one BidirectionalLineInfoRun could start with same character.
           // When need to check also numberOfCharacters in line.
           // Note: This fixed the incorrect view of extra spaces of RTL as in Arabic then view ellipsis glyph
-          if (ellipsisLayout.characterIndex == run.characterRun.characterIndex &&
-              ellipsisLayout.numberOfCharacters == run.characterRun.numberOfCharacters &&
-              ellipsisLayout.characterIndexInSecondHalfLine == run.characterRunForSecondHalfLine.characterIndex &&
-              ellipsisLayout.numberOfCharactersInSecondHalfLine == run.characterRunForSecondHalfLine.numberOfCharacters)
+          if(ellipsisLayout.characterIndex == run.characterRun.characterIndex &&
+             ellipsisLayout.numberOfCharacters == run.characterRun.numberOfCharacters &&
+             ellipsisLayout.characterIndexInSecondHalfLine == run.characterRunForSecondHalfLine.characterIndex &&
+             ellipsisLayout.numberOfCharactersInSecondHalfLine == run.characterRunForSecondHalfLine.numberOfCharacters)
           {
             // Found where to insert the bidi line info.
             break;
@@ -1417,13 +1417,13 @@ struct Engine::Impl
       }
 
       const BidirectionalLineInfoRun* const bidirectionalLineInfo =
-          (layoutBidiParameters.isBidirectional &&
-           (layoutBidiParameters.bidiLineIndex < bidirectionalLinesInfo.Count()))
-              ? &bidirectionalLinesInfo[layoutBidiParameters.bidiLineIndex]
-              : nullptr;
+        (layoutBidiParameters.isBidirectional &&
+         (layoutBidiParameters.bidiLineIndex < bidirectionalLinesInfo.Count()))
+          ? &bidirectionalLinesInfo[layoutBidiParameters.bidiLineIndex]
+          : nullptr;
 
-      if ((nullptr != bidirectionalLineInfo) && !bidirectionalLineInfo->isIdentity &&
-          (ellipsisLayout.characterIndex == bidirectionalLineInfo->characterRun.characterIndex))
+      if((nullptr != bidirectionalLineInfo) && !bidirectionalLineInfo->isIdentity &&
+         (ellipsisLayout.characterIndex == bidirectionalLineInfo->characterRun.characterIndex))
       {
         lineRun->direction = RTL;
         SetGlyphPositions(layoutParameters, glyphPositionsBuffer, layoutBidiParameters, ellipsisLayout);
@@ -1455,31 +1455,31 @@ struct Engine::Impl
     LineRun& lineRun = *(linesBuffer + numberOfLines);
     ++numberOfLines;
 
-    lineRun.glyphRun.glyphIndex = index;
-    lineRun.glyphRun.numberOfGlyphs = layout.numberOfGlyphs;
-    lineRun.characterRun.characterIndex = layout.characterIndex;
+    lineRun.glyphRun.glyphIndex             = index;
+    lineRun.glyphRun.numberOfGlyphs         = layout.numberOfGlyphs;
+    lineRun.characterRun.characterIndex     = layout.characterIndex;
     lineRun.characterRun.numberOfCharacters = layout.numberOfCharacters;
-    lineRun.width = layout.length;
-    lineRun.extraLength = std::ceil(layout.whiteSpaceLengthEndOfLine);
+    lineRun.width                           = layout.length;
+    lineRun.extraLength                     = std::ceil(layout.whiteSpaceLengthEndOfLine);
 
-    lineRun.isSplitToTwoHalves = layout.isSplitToTwoHalves;
-    lineRun.glyphRunSecondHalf.glyphIndex = layout.glyphIndexInSecondHalfLine;
-    lineRun.glyphRunSecondHalf.numberOfGlyphs = layout.numberOfGlyphsInSecondHalfLine;
-    lineRun.characterRunForSecondHalfLine.characterIndex = layout.characterIndexInSecondHalfLine;
+    lineRun.isSplitToTwoHalves                               = layout.isSplitToTwoHalves;
+    lineRun.glyphRunSecondHalf.glyphIndex                    = layout.glyphIndexInSecondHalfLine;
+    lineRun.glyphRunSecondHalf.numberOfGlyphs                = layout.numberOfGlyphsInSecondHalfLine;
+    lineRun.characterRunForSecondHalfLine.characterIndex     = layout.characterIndexInSecondHalfLine;
     lineRun.characterRunForSecondHalfLine.numberOfCharacters = layout.numberOfCharactersInSecondHalfLine;
 
     // Rounds upward to avoid a non integer size.
     lineRun.width = std::ceil(lineRun.width);
 
-    lineRun.ascender = layout.ascender;
+    lineRun.ascender  = layout.ascender;
     lineRun.descender = layout.descender;
     lineRun.direction = layout.direction;
-    lineRun.ellipsis = false;
+    lineRun.ellipsis  = false;
 
     lineRun.lineSpacing = GetLineSpacing(lineRun.ascender + -lineRun.descender, layout.relativeLineSize);
 
     // Update the actual size.
-    if (lineRun.width > layoutSize.width)
+    if(lineRun.width > layoutSize.width)
     {
       layoutSize.width = lineRun.width;
     }
@@ -1502,7 +1502,7 @@ struct Engine::Impl
   {
     const Vector<GlyphInfo>& glyphs = layoutParameters.textModel->mVisualModel->mGlyphs;
 
-    if (glyphs.Size() == 0u)
+    if(glyphs.Size() == 0u)
     {
       // Do nothing.
       return;
@@ -1512,7 +1512,7 @@ struct Engine::Impl
     const GlyphInfo& glyphInfo = glyphs[glyphs.Count() - 1u];
 
     Text::FontMetrics fontMetrics;
-    if (0u != glyphInfo.fontId)
+    if(0u != glyphInfo.fontId)
     {
       mMetrics->GetFontMetrics(glyphInfo.fontId, fontMetrics);
     }
@@ -1520,23 +1520,23 @@ struct Engine::Impl
     LineRun& lineRun = *(linesBuffer + numberOfLines);
     ++numberOfLines;
 
-    lineRun.glyphRun.glyphIndex = glyphIndex;
-    lineRun.glyphRun.numberOfGlyphs = 0u;
-    lineRun.characterRun.characterIndex = characterIndex;
+    lineRun.glyphRun.glyphIndex             = glyphIndex;
+    lineRun.glyphRun.numberOfGlyphs         = 0u;
+    lineRun.characterRun.characterIndex     = characterIndex;
     lineRun.characterRun.numberOfCharacters = 0u;
-    lineRun.width = 0.f;
-    lineRun.ascender = fontMetrics.ascender;
-    lineRun.descender = fontMetrics.descender;
-    lineRun.extraLength = 0.f;
-    lineRun.alignmentOffset = 0.f;
-    lineRun.direction = LTR;
-    lineRun.ellipsis = false;
+    lineRun.width                           = 0.f;
+    lineRun.ascender                        = fontMetrics.ascender;
+    lineRun.descender                       = fontMetrics.descender;
+    lineRun.extraLength                     = 0.f;
+    lineRun.alignmentOffset                 = 0.f;
+    lineRun.direction                       = LTR;
+    lineRun.ellipsis                        = false;
 
     BoundedParagraphRun currentParagraphRun;
-    LineLayout tempLineLayout;
+    LineLayout          tempLineLayout;
     (GetBoundedParagraph(layoutParameters.textModel->GetBoundedParagraphRuns(), characterIndex, currentParagraphRun)
-         ? SetRelativeLineSize(&currentParagraphRun, tempLineLayout)
-         : SetRelativeLineSize(nullptr, tempLineLayout));
+       ? SetRelativeLineSize(&currentParagraphRun, tempLineLayout)
+       : SetRelativeLineSize(nullptr, tempLineLayout));
 
     lineRun.lineSpacing = GetLineSpacing(lineRun.ascender + -lineRun.descender, tempLineLayout.relativeLineSize);
 
@@ -1551,12 +1551,12 @@ struct Engine::Impl
    */
   void UpdateLayoutSize(const Vector<LineRun>& lines, Size& layoutSize)
   {
-    for (Vector<LineRun>::ConstIterator it = lines.Begin(), endIt = lines.End(); it != endIt; ++it)
+    for(Vector<LineRun>::ConstIterator it = lines.Begin(), endIt = lines.End(); it != endIt; ++it)
     {
-      const LineRun& line = *it;
-      bool isLastLine = (it + 1 == endIt);
+      const LineRun& line       = *it;
+      bool           isLastLine = (it + 1 == endIt);
 
-      if (line.width > layoutSize.width)
+      if(line.width > layoutSize.width)
       {
         layoutSize.width = line.width;
       }
@@ -1577,12 +1577,12 @@ struct Engine::Impl
                               Length glyphOffset)
   {
     // Update the glyph and character runs.
-    for (Vector<LineRun>::Iterator it = lines.Begin() + layoutParameters.startLineIndex, endIt = lines.End();
-         it != endIt; ++it)
+    for(Vector<LineRun>::Iterator it = lines.Begin() + layoutParameters.startLineIndex, endIt = lines.End();
+        it != endIt; ++it)
     {
       LineRun& line = *it;
 
-      line.glyphRun.glyphIndex = glyphOffset;
+      line.glyphRun.glyphIndex         = glyphOffset;
       line.characterRun.characterIndex = characterOffset;
 
       glyphOffset += line.glyphRun.numberOfGlyphs;
@@ -1600,7 +1600,7 @@ struct Engine::Impl
   {
     lineLayout.relativeLineSize = mRelativeLineSize;
 
-    if (currentParagraphRun != nullptr && currentParagraphRun->relativeLineSizeDefined)
+    if(currentParagraphRun != nullptr && currentParagraphRun->relativeLineSizeDefined)
     {
       lineLayout.relativeLineSize = currentParagraphRun->relativeLineSize;
     }
@@ -1618,14 +1618,14 @@ struct Engine::Impl
   bool GetBoundedParagraph(const Vector<BoundedParagraphRun> boundedParagraphRuns, CharacterIndex characterIndex,
                            BoundedParagraphRun& currentParagraphRun)
   {
-    for (Vector<BoundedParagraphRun>::Iterator it = boundedParagraphRuns.Begin(), endIt = boundedParagraphRuns.End();
-         it != endIt; ++it)
+    for(Vector<BoundedParagraphRun>::Iterator it = boundedParagraphRuns.Begin(), endIt = boundedParagraphRuns.End();
+        it != endIt; ++it)
     {
       BoundedParagraphRun& tempParagraphRun = *it;
 
-      if (characterIndex >= tempParagraphRun.characterRun.characterIndex &&
-          characterIndex <
-              (tempParagraphRun.characterRun.characterIndex + tempParagraphRun.characterRun.numberOfCharacters))
+      if(characterIndex >= tempParagraphRun.characterRun.characterIndex &&
+         characterIndex <
+           (tempParagraphRun.characterRun.characterIndex + tempParagraphRun.characterRun.numberOfCharacters))
       {
         currentParagraphRun = tempParagraphRun;
         return true;
@@ -1649,25 +1649,25 @@ struct Engine::Impl
     // Reset indices of ElidedGlyphs
     layoutParameters.textModel->mVisualModel->SetStartIndexOfElidedGlyphs(0u);
     layoutParameters.textModel->mVisualModel->SetEndIndexOfElidedGlyphs(
-        layoutParameters.textModel->GetNumberOfGlyphs() - 1u);
+      layoutParameters.textModel->GetNumberOfGlyphs() - 1u);
     layoutParameters.textModel->mVisualModel->SetFirstMiddleIndexOfElidedGlyphs(0u);
     layoutParameters.textModel->mVisualModel->SetSecondMiddleIndexOfElidedGlyphs(0u);
 
-    Vector<LineRun>& lines = layoutParameters.textModel->mVisualModel->mLines;
+    Vector<LineRun>&                   lines                = layoutParameters.textModel->mVisualModel->mLines;
     const Vector<BoundedParagraphRun>& boundedParagraphRuns = layoutParameters.textModel->GetBoundedParagraphRuns();
 
-    if (0u == layoutParameters.numberOfGlyphs)
+    if(0u == layoutParameters.numberOfGlyphs)
     {
       // Add an extra line if the last character is a new paragraph character and the last line doesn't have zero
       // characters.
-      if (layoutParameters.isLastNewParagraph)
+      if(layoutParameters.isLastNewParagraph)
       {
         Length numberOfLines = lines.Count();
-        if (0u != numberOfLines)
+        if(0u != numberOfLines)
         {
           const LineRun& lastLine = *(lines.End() - 1u);
 
-          if (0u != lastLine.characterRun.numberOfCharacters)
+          if(0u != lastLine.characterRun.numberOfCharacters)
           {
             // Need to add a new line with no characters but with height to increase the layoutSize.height
             LineRun newLine;
@@ -1692,17 +1692,17 @@ struct Engine::Impl
       return false;
     }
 
-    const GlyphIndex lastGlyphPlusOne = layoutParameters.startGlyphIndex + layoutParameters.numberOfGlyphs;
-    const Length totalNumberOfGlyphs = layoutParameters.textModel->mVisualModel->mGlyphs.Count();
-    Vector<Vector2>& glyphPositions = layoutParameters.textModel->mVisualModel->mGlyphPositions;
+    const GlyphIndex lastGlyphPlusOne    = layoutParameters.startGlyphIndex + layoutParameters.numberOfGlyphs;
+    const Length     totalNumberOfGlyphs = layoutParameters.textModel->mVisualModel->mGlyphs.Count();
+    Vector<Vector2>& glyphPositions      = layoutParameters.textModel->mVisualModel->mGlyphPositions;
 
     // In a previous layout, an extra line with no characters may have been added if the text ended with a new paragraph
     // character. This extra line needs to be removed.
-    if (0u != lines.Count())
+    if(0u != lines.Count())
     {
       Vector<LineRun>::Iterator lastLine = lines.End() - 1u;
 
-      if ((0u == lastLine->characterRun.numberOfCharacters) && (lastGlyphPlusOne == totalNumberOfGlyphs))
+      if((0u == lastLine->characterRun.numberOfCharacters) && (lastGlyphPlusOne == totalNumberOfGlyphs))
       {
         lines.Remove(lastLine);
       }
@@ -1712,11 +1712,11 @@ struct Engine::Impl
     const bool hasBidiParagraphs = !layoutParameters.textModel->mLogicalModel->mBidirectionalParagraphInfo.Empty();
 
     const CharacterIndex* const glyphsToCharactersBuffer =
-        layoutParameters.textModel->mVisualModel->mGlyphsToCharacters.Begin();
+      layoutParameters.textModel->mVisualModel->mGlyphsToCharacters.Begin();
     const Vector<BidirectionalParagraphInfoRun>& bidirectionalParagraphsInfo =
-        layoutParameters.textModel->mLogicalModel->mBidirectionalParagraphInfo;
+      layoutParameters.textModel->mLogicalModel->mBidirectionalParagraphInfo;
     const Vector<BidirectionalLineInfoRun>& bidirectionalLinesInfo =
-        layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo;
+      layoutParameters.textModel->mLogicalModel->mBidirectionalLineInfo;
 
     // Set the layout bidirectional paramters.
     LayoutBidiParameters layoutBidiParameters;
@@ -1724,17 +1724,17 @@ struct Engine::Impl
     // Whether the layout is being updated or set from scratch.
     const bool updateCurrentBuffer = layoutParameters.numberOfGlyphs < totalNumberOfGlyphs;
 
-    Vector2* glyphPositionsBuffer = nullptr;
+    Vector2*        glyphPositionsBuffer = nullptr;
     Vector<Vector2> newGlyphPositions;
 
-    LineRun* linesBuffer = nullptr;
+    LineRun*        linesBuffer = nullptr;
     Vector<LineRun> newLines;
 
     // Estimate the number of lines.
     Length linesCapacity = std::max(1u, layoutParameters.estimatedNumberOfLines);
     Length numberOfLines = 0u;
 
-    if (updateCurrentBuffer)
+    if(updateCurrentBuffer)
     {
       // Increase Vector size by 2 to prevent out-of-bounds access during Ellipsis calculation.
       newGlyphPositions.Resize(layoutParameters.numberOfGlyphs + 2);
@@ -1751,59 +1751,59 @@ struct Engine::Impl
       linesBuffer = lines.Begin();
     }
 
-    float penY = CalculateLineOffset(lines, layoutParameters.startLineIndex);
-    bool anyLineIsEliped = false;
-    for (GlyphIndex index = layoutParameters.startGlyphIndex; index < lastGlyphPlusOne;)
+    float penY            = CalculateLineOffset(lines, layoutParameters.startLineIndex);
+    bool  anyLineIsEliped = false;
+    for(GlyphIndex index = layoutParameters.startGlyphIndex; index < lastGlyphPlusOne;)
     {
       layoutBidiParameters.Clear();
 
-      if (hasBidiParagraphs)
+      if(hasBidiParagraphs)
       {
         const CharacterIndex startCharacterIndex = *(glyphsToCharactersBuffer + index);
 
-        for (Vector<BidirectionalParagraphInfoRun>::ConstIterator it = bidirectionalParagraphsInfo.Begin(),
-                                                                  endIt = bidirectionalParagraphsInfo.End();
-             it != endIt; ++it, ++layoutBidiParameters.bidiParagraphIndex)
+        for(Vector<BidirectionalParagraphInfoRun>::ConstIterator it    = bidirectionalParagraphsInfo.Begin(),
+                                                                 endIt = bidirectionalParagraphsInfo.End();
+            it != endIt; ++it, ++layoutBidiParameters.bidiParagraphIndex)
         {
           const BidirectionalParagraphInfoRun& run = *it;
 
           const CharacterIndex lastCharacterIndex =
-              run.characterRun.characterIndex + run.characterRun.numberOfCharacters;
+            run.characterRun.characterIndex + run.characterRun.numberOfCharacters;
 
-          if (lastCharacterIndex <= startCharacterIndex)
+          if(lastCharacterIndex <= startCharacterIndex)
           {
             // Do not process, the paragraph has already been processed.
             continue;
           }
 
-          if (startCharacterIndex >= run.characterRun.characterIndex && startCharacterIndex < lastCharacterIndex)
+          if(startCharacterIndex >= run.characterRun.characterIndex && startCharacterIndex < lastCharacterIndex)
           {
             layoutBidiParameters.paragraphDirection = run.direction;
-            layoutBidiParameters.isBidirectional = true;
+            layoutBidiParameters.isBidirectional    = true;
           }
 
           // Has already been found.
           break;
         }
 
-        if (layoutBidiParameters.isBidirectional)
+        if(layoutBidiParameters.isBidirectional)
         {
-          for (Vector<BidirectionalLineInfoRun>::ConstIterator it = bidirectionalLinesInfo.Begin(),
-                                                               endIt = bidirectionalLinesInfo.End();
-               it != endIt; ++it, ++layoutBidiParameters.bidiLineIndex)
+          for(Vector<BidirectionalLineInfoRun>::ConstIterator it    = bidirectionalLinesInfo.Begin(),
+                                                              endIt = bidirectionalLinesInfo.End();
+              it != endIt; ++it, ++layoutBidiParameters.bidiLineIndex)
           {
             const BidirectionalLineInfoRun& run = *it;
 
             const CharacterIndex lastCharacterIndex =
-                run.characterRun.characterIndex + run.characterRun.numberOfCharacters;
+              run.characterRun.characterIndex + run.characterRun.numberOfCharacters;
 
-            if (lastCharacterIndex <= startCharacterIndex)
+            if(lastCharacterIndex <= startCharacterIndex)
             {
               // skip
               continue;
             }
 
-            if (startCharacterIndex < lastCharacterIndex)
+            if(startCharacterIndex < lastCharacterIndex)
             {
               // Found where to insert the bidi line info.
               break;
@@ -1816,13 +1816,13 @@ struct Engine::Impl
 
       // Get the layout for the line.
       LineLayout layout;
-      layout.direction = layoutBidiParameters.paragraphDirection;
+      layout.direction  = layoutBidiParameters.paragraphDirection;
       layout.glyphIndex = index;
 
       BoundedParagraphRun currentParagraphRun;
       (GetBoundedParagraph(boundedParagraphRuns, *(glyphsToCharactersBuffer + index), currentParagraphRun)
-           ? SetRelativeLineSize(&currentParagraphRun, layout)
-           : SetRelativeLineSize(nullptr, layout));
+         ? SetRelativeLineSize(&currentParagraphRun, layout)
+         : SetRelativeLineSize(nullptr, layout));
 
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, layout, false, ellipsisPosition, false,
                           elideTextEnabled, isHiddenInputEnabled);
@@ -1834,17 +1834,17 @@ struct Engine::Impl
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "                length %f\n", layout.length);
 
       CharacterIndex lastCharacterInParagraph =
-          currentParagraphRun.characterRun.characterIndex + currentParagraphRun.characterRun.numberOfCharacters - 1;
+        currentParagraphRun.characterRun.characterIndex + currentParagraphRun.characterRun.numberOfCharacters - 1;
 
       // check if this is the last line in paragraph, if false we should use the default relative line size (the one set
       // using the property)
-      if (lastCharacterInParagraph >= layout.characterIndex &&
-          lastCharacterInParagraph < layout.characterIndex + layout.numberOfCharacters)
+      if(lastCharacterInParagraph >= layout.characterIndex &&
+         lastCharacterInParagraph < layout.characterIndex + layout.numberOfCharacters)
       {
         layout.relativeLineSize = mRelativeLineSize;
       }
 
-      if (0u == layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine)
+      if(0u == layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine)
       {
         // The width is too small and no characters are laid-out.
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "<--LayoutText width too small!\n\n");
@@ -1864,7 +1864,7 @@ struct Engine::Impl
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  pen y %f\n", penY);
 
       bool ellipsis = false;
-      if (elideTextEnabled)
+      if(elideTextEnabled)
       {
         layoutBidiParameters.paragraphDirection = currentParagraphDirection;
 
@@ -1874,10 +1874,10 @@ struct Engine::Impl
                                 isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
       }
 
-      if (ellipsis && ((ellipsisPosition == DevelText::EllipsisPosition::END) || (numberOfLines == 1u)))
+      if(ellipsis && ((ellipsisPosition == DevelText::EllipsisPosition::END) || (numberOfLines == 1u)))
       {
         const bool isMultiline = mLayout == MULTI_LINE_BOX;
-        if (isMultiline && ellipsisPosition != DevelText::EllipsisPosition::END)
+        if(isMultiline && ellipsisPosition != DevelText::EllipsisPosition::END)
         {
           ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                   glyphPositionsBuffer, numberOfLines, penY, isAutoScrollEnabled,
@@ -1886,23 +1886,23 @@ struct Engine::Impl
 
         // clear hyphen from ellipsis line
         const Length* hyphenIndices = layoutParameters.textModel->mVisualModel->mHyphen.index.Begin();
-        Length hyphensCount = layoutParameters.textModel->mVisualModel->mHyphen.glyph.Size();
+        Length        hyphensCount  = layoutParameters.textModel->mVisualModel->mHyphen.glyph.Size();
 
-        while (hyphenIndices && hyphensCount > 0 && hyphenIndices[hyphensCount - 1] >= layout.glyphIndex)
+        while(hyphenIndices && hyphensCount > 0 && hyphenIndices[hyphensCount - 1] >= layout.glyphIndex)
         {
           layoutParameters.textModel->mVisualModel->mHyphen.index.Remove(
-              layoutParameters.textModel->mVisualModel->mHyphen.index.Begin() + hyphensCount - 1);
+            layoutParameters.textModel->mVisualModel->mHyphen.index.Begin() + hyphensCount - 1);
           layoutParameters.textModel->mVisualModel->mHyphen.glyph.Remove(
-              layoutParameters.textModel->mVisualModel->mHyphen.glyph.Begin() + hyphensCount - 1);
+            layoutParameters.textModel->mVisualModel->mHyphen.glyph.Begin() + hyphensCount - 1);
           hyphensCount--;
         }
 
-        if (!isMultiline)
+        if(!isMultiline)
         {
           // Recalculate line spacing and line height
           LineRun& firstLineRun = *(lines.Begin());
           firstLineRun.lineSpacing =
-              GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
+            GetLineSpacing(firstLineRun.ascender + -firstLineRun.descender, layout.relativeLineSize);
           layoutSize.height = GetLineHeight(firstLineRun, false);
         }
 
@@ -1916,9 +1916,9 @@ struct Engine::Impl
 
         // Whether the last line has been laid-out.
         const bool isLastLine =
-            index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine) == totalNumberOfGlyphs;
+          index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine) == totalNumberOfGlyphs;
 
-        if (numberOfLines == linesCapacity)
+        if(numberOfLines == linesCapacity)
         {
           // Reserve more space for the next lines.
           linesBuffer = ResizeLinesBuffer(lines, newLines, linesCapacity, updateCurrentBuffer);
@@ -1929,32 +1929,32 @@ struct Engine::Impl
 
         const GlyphIndex nextIndex = index + layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine;
 
-        if ((nextIndex == totalNumberOfGlyphs) && layoutParameters.isLastNewParagraph && (mLayout == MULTI_LINE_BOX))
+        if((nextIndex == totalNumberOfGlyphs) && layoutParameters.isLastNewParagraph && (mLayout == MULTI_LINE_BOX))
         {
           // The last character of the text is a new paragraph character.
           // An extra line with no characters is added to increase the text's height
           // in order to place the cursor.
 
-          if (numberOfLines == linesCapacity)
+          if(numberOfLines == linesCapacity)
           {
             // Reserve more space for the next lines.
             linesBuffer = ResizeLinesBuffer(lines, newLines, linesCapacity, updateCurrentBuffer);
           }
 
           UpdateTextLayout(
-              layoutParameters,
-              layout.characterIndex + (layout.numberOfCharacters + layout.numberOfCharactersInSecondHalfLine),
-              index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine), layoutSize, linesBuffer,
-              numberOfLines);
+            layoutParameters,
+            layout.characterIndex + (layout.numberOfCharacters + layout.numberOfCharactersInSecondHalfLine),
+            index + (layout.numberOfGlyphs + layout.numberOfGlyphsInSecondHalfLine), layoutSize, linesBuffer,
+            numberOfLines);
         } // whether to add a last line.
 
         const BidirectionalLineInfoRun* const bidirectionalLineInfo =
-            (layoutBidiParameters.isBidirectional && !bidirectionalLinesInfo.Empty())
-                ? &bidirectionalLinesInfo[layoutBidiParameters.bidiLineIndex]
-                : nullptr;
+          (layoutBidiParameters.isBidirectional && !bidirectionalLinesInfo.Empty())
+            ? &bidirectionalLinesInfo[layoutBidiParameters.bidiLineIndex]
+            : nullptr;
 
-        if ((nullptr != bidirectionalLineInfo) && !bidirectionalLineInfo->isIdentity &&
-            (layout.characterIndex == bidirectionalLineInfo->characterRun.characterIndex))
+        if((nullptr != bidirectionalLineInfo) && !bidirectionalLineInfo->isIdentity &&
+           (layout.characterIndex == bidirectionalLineInfo->characterRun.characterIndex))
         {
           SetGlyphPositions(layoutParameters, glyphPositionsBuffer, layoutBidiParameters, layout);
         }
@@ -1971,54 +1971,54 @@ struct Engine::Impl
         // Increase the glyph index.
         index = nextIndex;
       } // no ellipsis
-    }   // end for() traversing glyphs.
+    } // end for() traversing glyphs.
 
     // Shift lines to up if ellipsis and multilines and set ellipsis of first line to true
-    if (anyLineIsEliped && numberOfLines > 1u)
+    if(anyLineIsEliped && numberOfLines > 1u)
     {
-      if (ellipsisPosition == DevelText::EllipsisPosition::START)
+      if(ellipsisPosition == DevelText::EllipsisPosition::START)
       {
         Length lineIndex = 0;
-        while (lineIndex < numberOfLines && layoutParameters.boundingBox.height < layoutSize.height)
+        while(lineIndex < numberOfLines && layoutParameters.boundingBox.height < layoutSize.height)
         {
           LineRun& delLine = linesBuffer[lineIndex];
           delLine.ellipsis = true;
 
           layoutSize.height -= (delLine.ascender + -delLine.descender) + delLine.lineSpacing;
-          for (Length lineIndex = 0; lineIndex < numberOfLines - 1; lineIndex++)
+          for(Length lineIndex = 0; lineIndex < numberOfLines - 1; lineIndex++)
           {
-            linesBuffer[lineIndex] = linesBuffer[lineIndex + 1];
+            linesBuffer[lineIndex]          = linesBuffer[lineIndex + 1];
             linesBuffer[lineIndex].ellipsis = false;
           }
           numberOfLines--;
         }
         linesBuffer[0u].ellipsis = true;
       }
-      else if (ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
+      else if(ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
       {
-        Length middleLineIndex = (numberOfLines) / 2u;
+        Length middleLineIndex   = (numberOfLines) / 2u;
         Length ellipsisLineIndex = 0u;
-        while (1u < numberOfLines && 0u < middleLineIndex && layoutParameters.boundingBox.height < layoutSize.height)
+        while(1u < numberOfLines && 0u < middleLineIndex && layoutParameters.boundingBox.height < layoutSize.height)
         {
           LineRun& delLine = linesBuffer[middleLineIndex];
           delLine.ellipsis = true;
 
           layoutSize.height -= (delLine.ascender + -delLine.descender) + delLine.lineSpacing;
-          for (Length lineIndex = middleLineIndex; lineIndex < numberOfLines - 1; lineIndex++)
+          for(Length lineIndex = middleLineIndex; lineIndex < numberOfLines - 1; lineIndex++)
           {
-            linesBuffer[lineIndex] = linesBuffer[lineIndex + 1];
+            linesBuffer[lineIndex]          = linesBuffer[lineIndex + 1];
             linesBuffer[lineIndex].ellipsis = false;
           }
           numberOfLines--;
           ellipsisLineIndex = middleLineIndex - 1u;
-          middleLineIndex = (numberOfLines) / 2u;
+          middleLineIndex   = (numberOfLines) / 2u;
         }
 
         linesBuffer[ellipsisLineIndex].ellipsis = true;
       }
     }
 
-    if (updateCurrentBuffer)
+    if(updateCurrentBuffer)
     {
       // Insert up to newGlyphPositions.Begin() + layoutParameters.numberOfGlyphs (not newGlyphPositions.End())
       // to avoid duplicating the extra element added for Ellipsis calculation.
@@ -2032,12 +2032,12 @@ struct Engine::Impl
       // Updates the layout size with the previously laid-out lines.
       UpdateLayoutSize(lines, layoutSize);
 
-      if (0u != newLines.Count())
+      if(0u != newLines.Count())
       {
         const LineRun& lastLine = *(newLines.End() - 1u);
 
         const Length characterOffset = lastLine.characterRun.characterIndex + lastLine.characterRun.numberOfCharacters;
-        const Length glyphOffset = lastLine.glyphRun.glyphIndex + lastLine.glyphRun.numberOfGlyphs;
+        const Length glyphOffset     = lastLine.glyphRun.glyphIndex + lastLine.glyphRun.numberOfGlyphs;
 
         // Update the indices of the runs before the new laid-out lines are inserted.
         UpdateLineIndexOffsets(layoutParameters, lines, characterOffset, glyphOffset);
@@ -2067,23 +2067,23 @@ struct Engine::Impl
 
     alignmentOffset = MAX_FLOAT;
     // Traverse all lines and align the glyphs.
-    for (Vector<LineRun>::Iterator it = lines.Begin(), endIt = lines.End(); it != endIt; ++it)
+    for(Vector<LineRun>::Iterator it = lines.Begin(), endIt = lines.End(); it != endIt; ++it)
     {
       LineRun& line = *it;
 
-      if (line.characterRun.characterIndex < startIndex)
+      if(line.characterRun.characterIndex < startIndex)
       {
         // Do not align lines which have already been aligned.
         continue;
       }
 
-      if (line.characterRun.characterIndex > lastCharacterPlusOne)
+      if(line.characterRun.characterIndex > lastCharacterPlusOne)
       {
         // Do not align lines beyond the last laid-out character.
         break;
       }
 
-      if (line.characterRun.characterIndex == lastCharacterPlusOne && !isEmptyLineAtLast(lines, it))
+      if(line.characterRun.characterIndex == lastCharacterPlusOne && !isEmptyLineAtLast(lines, it))
       {
         // Do not align lines beyond the last laid-out character unless the line is last and empty.
         break;
@@ -2107,23 +2107,23 @@ struct Engine::Impl
     // Whether to swap the alignment.
     // Swap if the line is RTL and is not required to match the direction of the system's language or if it's required
     // to match the direction of the system's language and it's RTL.
-    bool isLayoutRTL = isLineRTL;
-    float lineLength = line.width;
+    bool  isLayoutRTL = isLineRTL;
+    float lineLength  = line.width;
 
     // match align for system language direction
-    if (matchLayoutDirection)
+    if(matchLayoutDirection)
     {
       // Swap the alignment type if the line is right to left.
       isLayoutRTL = layoutDirection == LayoutDirection::RIGHT_TO_LEFT;
     }
     // Calculate the horizontal line offset.
-    switch (horizontalAlignment)
+    switch(horizontalAlignment)
     {
       case HorizontalAlignment::BEGIN:
       {
-        if (isLayoutRTL)
+        if(isLayoutRTL)
         {
-          if (isLineRTL)
+          if(isLineRTL)
           {
             lineLength += line.extraLength;
           }
@@ -2134,7 +2134,7 @@ struct Engine::Impl
         {
           line.alignmentOffset = 0.f;
 
-          if (isLineRTL)
+          if(isLineRTL)
           {
             // 'Remove' the white spaces at the end of the line (which are at the beginning in visual order)
             line.alignmentOffset -= line.extraLength;
@@ -2146,7 +2146,7 @@ struct Engine::Impl
       {
         line.alignmentOffset = 0.5f * (boxWidth - lineLength);
 
-        if (isLineRTL)
+        if(isLineRTL)
         {
           line.alignmentOffset -= line.extraLength;
         }
@@ -2156,11 +2156,11 @@ struct Engine::Impl
       }
       case HorizontalAlignment::END:
       {
-        if (isLayoutRTL)
+        if(isLayoutRTL)
         {
           line.alignmentOffset = 0.f;
 
-          if (isLineRTL)
+          if(isLineRTL)
           {
             // 'Remove' the white spaces at the end of the line (which are at the beginning in visual order)
             line.alignmentOffset -= line.extraLength;
@@ -2168,7 +2168,7 @@ struct Engine::Impl
         }
         else
         {
-          if (isLineRTL)
+          if(isLineRTL)
           {
             lineLength += line.extraLength;
           }
@@ -2187,38 +2187,38 @@ struct Engine::Impl
 
   void Initialize(LineRun& line)
   {
-    line.glyphRun.glyphIndex = 0u;
-    line.glyphRun.numberOfGlyphs = 0u;
-    line.characterRun.characterIndex = 0u;
-    line.characterRun.numberOfCharacters = 0u;
-    line.width = 0.f;
-    line.ascender = 0.f;
-    line.descender = 0.f;
-    line.extraLength = 0.f;
-    line.alignmentOffset = 0.f;
-    line.direction = LTR;
-    line.ellipsis = false;
-    line.lineSpacing = mDefaultLineSpacing;
-    line.isSplitToTwoHalves = false;
-    line.glyphRunSecondHalf.glyphIndex = 0u;
-    line.glyphRunSecondHalf.numberOfGlyphs = 0u;
-    line.characterRunForSecondHalfLine.characterIndex = 0u;
+    line.glyphRun.glyphIndex                              = 0u;
+    line.glyphRun.numberOfGlyphs                          = 0u;
+    line.characterRun.characterIndex                      = 0u;
+    line.characterRun.numberOfCharacters                  = 0u;
+    line.width                                            = 0.f;
+    line.ascender                                         = 0.f;
+    line.descender                                        = 0.f;
+    line.extraLength                                      = 0.f;
+    line.alignmentOffset                                  = 0.f;
+    line.direction                                        = LTR;
+    line.ellipsis                                         = false;
+    line.lineSpacing                                      = mDefaultLineSpacing;
+    line.isSplitToTwoHalves                               = false;
+    line.glyphRunSecondHalf.glyphIndex                    = 0u;
+    line.glyphRunSecondHalf.numberOfGlyphs                = 0u;
+    line.characterRunForSecondHalfLine.characterIndex     = 0u;
     line.characterRunForSecondHalfLine.numberOfCharacters = 0u;
   }
 
-  Type mLayout;
+  Type  mLayout;
   float mCursorWidth;
   float mDefaultLineSpacing;
   float mDefaultLineSize;
 
   IntrusivePtr<Metrics> mMetrics;
-  float mRelativeLineSize;
-  float mPixelSize;
-  bool mIsCursorInsetEnabled : 1;
+  float                 mRelativeLineSize;
+  float                 mPixelSize;
+  bool                  mIsCursorInsetEnabled : 1;
 };
 
 Engine::Engine()
-  : mImpl{nullptr}
+: mImpl{nullptr}
 {
   mImpl = new Engine::Impl();
 }

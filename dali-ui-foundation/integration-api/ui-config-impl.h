@@ -18,10 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <cstdint>
-#include <string>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
+#include <cstdint>
+#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-config.h>
@@ -208,20 +208,20 @@ protected:
   ~UiConfigImpl() override;
 
 private:
-  UiConfigImpl(const UiConfigImpl&) = delete;
-  UiConfigImpl(UiConfigImpl&&) = delete;
+  UiConfigImpl(const UiConfigImpl&)            = delete;
+  UiConfigImpl(UiConfigImpl&&)                 = delete;
   UiConfigImpl& operator=(const UiConfigImpl&) = delete;
-  UiConfigImpl& operator=(UiConfigImpl&&) = delete;
+  UiConfigImpl& operator=(UiConfigImpl&&)      = delete;
 
 private:
   ExecutionKeyPredicate mExecutionKeyPredicate;
-  float mScalingFactor;
-  int mDpi;
-  int mBaselineDpi;
-  KeyClickPolicy mKeyClickPolicy;
-  uint32_t mMinLongPressKeyCount;
-  uint32_t mTapRecognizerTime;
-  bool mFrozen;
+  float                 mScalingFactor;
+  int                   mDpi;
+  int                   mBaselineDpi;
+  KeyClickPolicy        mKeyClickPolicy;
+  uint32_t              mMinLongPressKeyCount;
+  uint32_t              mTapRecognizerTime;
+  bool                  mFrozen;
 };
 
 } // namespace Integration

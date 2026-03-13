@@ -23,8 +23,8 @@
 #include <dali/devel-api/common/singleton-service.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 
 namespace Dali
 {
@@ -41,19 +41,19 @@ VisualFactory VisualFactory::Get()
 
   // Check whether the VisualFactory is already created
   SingletonService singletonService(SingletonService::Get());
-  if (singletonService)
+  if(singletonService)
   {
     BaseHandle handle = singletonService.GetSingleton(typeid(VisualFactory));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle of singleton to VisualFactory
       factory = VisualFactory(dynamic_cast<Internal::VisualFactory*>(handle.GetObjectPtr()));
     }
 
-    if (!factory) // If not, create the VisualFactory and register it as a singleton
+    if(!factory) // If not, create the VisualFactory and register it as a singleton
     {
       // Check whether debug rendering is required
-      if (EnvironmentVariable::GetEnvironmentVariable(DALI_DEBUG_RENDERING))
+      if(EnvironmentVariable::GetEnvironmentVariable(DALI_DEBUG_RENDERING))
       {
         factory = VisualFactory(new Internal::VisualFactory(true));
       }
@@ -77,7 +77,7 @@ VisualFactory::~VisualFactory()
 }
 
 VisualFactory::VisualFactory(const VisualFactory& handle)
-  : BaseHandle(handle)
+: BaseHandle(handle)
 {
 }
 
@@ -88,7 +88,7 @@ VisualFactory& VisualFactory::operator=(const VisualFactory& handle)
 }
 
 VisualFactory::VisualFactory(Internal::VisualFactory* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

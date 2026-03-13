@@ -45,16 +45,16 @@ public:
   struct GlyphRecordEntry
   {
     Text::GlyphIndex mIndex;
-    uint32_t mImageId;
-    int32_t mCount;
-    uint16_t mOutlineWidth;
-    bool isItalic : 1;
-    bool isBold : 1;
+    uint32_t         mImageId;
+    int32_t          mCount;
+    uint16_t         mOutlineWidth;
+    bool             isItalic : 1;
+    bool             isBold : 1;
   };
 
   struct FontGlyphRecord
   {
-    Text::FontId mFontId;
+    Text::FontId             mFontId;
     Vector<GlyphRecordEntry> mGlyphRecords;
   };
 
@@ -118,10 +118,10 @@ protected:
   virtual ~AtlasGlyphManager();
 
 private:
-  Dali::Ui::AtlasManager mAtlasManager; ///> Atlas Manager created by GlyphManager
-  std::vector<FontGlyphRecord> mFontGlyphRecords;
+  Dali::Ui::AtlasManager         mAtlasManager; ///> Atlas Manager created by GlyphManager
+  std::vector<FontGlyphRecord>   mFontGlyphRecords;
   Ui::AtlasGlyphManager::Metrics mMetrics; ///> Metrics to pass back on GlyphManager status
-  Sampler mSampler;
+  Sampler                        mSampler;
 };
 
 } // namespace Internal

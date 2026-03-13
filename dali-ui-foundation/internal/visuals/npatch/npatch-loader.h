@@ -129,8 +129,8 @@ private:
   struct NPatchInfo
   {
     NPatchInfo(NPatchDataPtr data)
-      : mData(data),
-        mReferenceCount(1u)
+    : mData(data),
+      mReferenceCount(1u)
     {
     }
     ~NPatchInfo()
@@ -138,24 +138,24 @@ private:
     }
     NPatchInfo(NPatchInfo&& info) noexcept // move constructor
     {
-      mData = std::move(info.mData);
-      mReferenceCount = info.mReferenceCount;
+      mData                = std::move(info.mData);
+      mReferenceCount      = info.mReferenceCount;
       info.mReferenceCount = 0u;
     }
     NPatchInfo& operator=(NPatchInfo&& info) noexcept // move operator
     {
-      mData = std::move(info.mData);
-      mReferenceCount = info.mReferenceCount;
+      mData                = std::move(info.mData);
+      mReferenceCount      = info.mReferenceCount;
       info.mReferenceCount = 0u;
       return *this;
     }
 
-    NPatchInfo() = delete;                                  // Do not use default constructor
-    NPatchInfo(const NPatchInfo& info) = delete;            // Do not use copy constructor
+    NPatchInfo()                                  = delete; // Do not use default constructor
+    NPatchInfo(const NPatchInfo& info)            = delete; // Do not use copy constructor
     NPatchInfo& operator=(const NPatchInfo& info) = delete; // Do not use copy assign
 
     NPatchDataPtr mData;
-    int32_t mReferenceCount; ///< The number of N-patch visuals that use this data.
+    int32_t       mReferenceCount; ///< The number of N-patch visuals that use this data.
   };
 
   /**
@@ -183,10 +183,10 @@ protected:
 
 private:
   NPatchData::NPatchDataId mCurrentNPatchDataId;
-  std::vector<NPatchInfo> mCache;
+  std::vector<NPatchInfo>  mCache;
 
   std::vector<std::pair<NPatchData::NPatchDataId, TextureUploadObserver*>>
-      mRemoveQueue; ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
+    mRemoveQueue; ///< Queue of textures to remove at PostProcess. It will be cleared after PostProcess.
 
   bool mRemoveProcessorRegistered : 1; ///< Flag if remove processor registered or not.
 };

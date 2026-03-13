@@ -104,7 +104,7 @@ DragAndDropDetector::DragAndDropSignal& DragAndDropDetector::EndedSignal()
 }
 
 DragAndDropDetector::DragAndDropDetector(Internal::DragAndDropDetector* detector)
-  : BaseHandle(detector)
+: BaseHandle(detector)
 {
 }
 

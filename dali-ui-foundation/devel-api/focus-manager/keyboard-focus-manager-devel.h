@@ -46,7 +46,7 @@ public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~CustomAlgorithmInterface(){};
+  virtual ~CustomAlgorithmInterface() {};
 
   /**
    * @brief Called by the KeyboardFocusManager to get the next focusable actor.

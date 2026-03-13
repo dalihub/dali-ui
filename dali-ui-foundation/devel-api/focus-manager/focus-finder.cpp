@@ -38,12 +38,12 @@ namespace FocusFinder
 namespace
 {
 static constexpr float FULLY_TRANSPARENT(
-    0.01f); ///< Alpha values must rise above this, before an object is considered to be visible.
+  0.01f); ///< Alpha values must rise above this, before an object is considered to be visible.
 
 static int MajorAxisDistanceRaw(Dali::Ui::Control::KeyboardFocus::Direction direction, Dali::Rect<float> source,
                                 Dali::Rect<float> dest)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     {
@@ -82,7 +82,7 @@ static int MajorAxisDistance(Dali::Ui::Control::KeyboardFocus::Direction directi
 static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::Control::KeyboardFocus::Direction direction,
                                          Dali::Rect<float> source, Dali::Rect<float> dest)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     {
@@ -129,7 +129,7 @@ static int MajorAxisDistanceToFarEdge(Dali::Ui::Control::KeyboardFocus::Directio
 static int MinorAxisDistance(Dali::Ui::Control::KeyboardFocus::Direction direction, Dali::Rect<float> source,
                              Dali::Rect<float> dest)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     case Dali::Ui::Control::KeyboardFocus::RIGHT:
@@ -171,15 +171,15 @@ static uint64_t GetWeightedDistanceFor(int majorAxisDistance, int minorAxisDista
 static void ConvertCoordinate(Dali::Rect<float>& rect)
 {
   // convert x, y, width, height -> left, right, bottom, top
-  float left = rect.x;
-  float right = rect.x + rect.width;
+  float left   = rect.x;
+  float right  = rect.x + rect.width;
   float bottom = rect.y + rect.height;
-  float top = rect.y;
+  float top    = rect.y;
 
-  rect.left = left;
-  rect.right = right;
+  rect.left   = left;
+  rect.right  = right;
   rect.bottom = bottom;
-  rect.top = top;
+  rect.top    = top;
 }
 
 /**
@@ -192,7 +192,7 @@ static void ConvertCoordinate(Dali::Rect<float>& rect)
 static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect,
                         Dali::Ui::Control::KeyboardFocus::Direction direction)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     {
@@ -227,7 +227,7 @@ static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect,
 static bool IsToDirectionOf(Dali::Ui::Control::KeyboardFocus::Direction direction, Dali::Rect<float> src,
                             Dali::Rect<float> dest)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     {
@@ -262,7 +262,7 @@ static bool IsToDirectionOf(Dali::Ui::Control::KeyboardFocus::Direction directio
 static bool BeamsOverlap(Dali::Ui::Control::KeyboardFocus::Direction direction, Dali::Rect<float> rect1,
                          Dali::Rect<float> rect2)
 {
-  switch (direction)
+  switch(direction)
   {
     case Dali::Ui::Control::KeyboardFocus::LEFT:
     case Dali::Ui::Control::KeyboardFocus::RIGHT:
@@ -295,7 +295,7 @@ static bool BeamBeats(Dali::Ui::Control::KeyboardFocus::Direction direction, Dal
   const bool rect1InSrcBeam = BeamsOverlap(direction, source, rect1);
   const bool rect2InSrcBeam = BeamsOverlap(direction, source, rect2);
   // if rect1 isn't exclusively in the src beam, it doesn't win
-  if (rect2InSrcBeam || !rect1InSrcBeam)
+  if(rect2InSrcBeam || !rect1InSrcBeam)
   {
     return false;
   }
@@ -304,12 +304,12 @@ static bool BeamBeats(Dali::Ui::Control::KeyboardFocus::Direction direction, Dal
   // for example, for direction left, if rect1 is to the left of the source
   // and rect2 is below, then we always prefer the in beam rect1, since rect2
   // could be reached by going down.
-  if (!IsToDirectionOf(direction, source, rect2))
+  if(!IsToDirectionOf(direction, source, rect2))
   {
     return true;
   }
   // for horizontal directions, being exclusively in beam always wins
-  if ((direction == Dali::Ui::Control::KeyboardFocus::LEFT || direction == Dali::Ui::Control::KeyboardFocus::RIGHT))
+  if((direction == Dali::Ui::Control::KeyboardFocus::LEFT || direction == Dali::Ui::Control::KeyboardFocus::RIGHT))
   {
     return true;
   }
@@ -324,23 +324,23 @@ bool IsBetterCandidate(Ui::Control::KeyboardFocus::Direction direction, Rect<flo
                        Rect<float>& candidateRect, Rect<float>& bestCandidateRect)
 {
   // to be a better candidate, need to at least be a candidate in the first place
-  if (!IsCandidate(focusedRect, candidateRect, direction))
+  if(!IsCandidate(focusedRect, candidateRect, direction))
   {
     return false;
   }
   // we know that candidateRect is a candidate.. if bestCandidateRect is not a candidate,
   // candidateRect is better
-  if (!IsCandidate(focusedRect, bestCandidateRect, direction))
+  if(!IsCandidate(focusedRect, bestCandidateRect, direction))
   {
     return true;
   }
   // if candidateRect is better by beam, it wins
-  if (BeamBeats(direction, focusedRect, candidateRect, bestCandidateRect))
+  if(BeamBeats(direction, focusedRect, candidateRect, bestCandidateRect))
   {
     return true;
   }
   // if bestCandidateRect is better, then candidateRect cant' be :)
-  if (BeamBeats(direction, focusedRect, bestCandidateRect, candidateRect))
+  if(BeamBeats(direction, focusedRect, bestCandidateRect, candidateRect))
   {
     return false;
   }
@@ -365,30 +365,30 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
                     Ui::Control::KeyboardFocus::Direction direction)
 {
   Actor nearestActor;
-  if (actor && actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
-      !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
-      actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
+  if(actor && actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
+     !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
+     actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
   {
     // Recursively children
     const auto childCount = actor.GetChildCount();
-    for (auto i = childCount; i > 0u; --i)
+    for(auto i = childCount; i > 0u; --i)
     {
       Dali::Actor child = actor.GetChildAt(i - 1);
-      if (child && child != focusedActor && IsFocusable(child))
+      if(child && child != focusedActor && IsFocusable(child))
       {
         Rect<float> candidateRect = DevelActor::CalculateCurrentScreenExtents(child);
 
         // convert x, y, width, height -> left, right, bottom, top
         ConvertCoordinate(candidateRect);
 
-        if (IsBetterCandidate(direction, focusedRect, candidateRect, bestCandidateRect))
+        if(IsBetterCandidate(direction, focusedRect, candidateRect, bestCandidateRect))
         {
           bestCandidateRect = candidateRect;
-          nearestActor = child;
+          nearestActor      = child;
         }
       }
       Actor nextActor = FindNextFocus(child, focusedActor, focusedRect, bestCandidateRect, direction);
-      if (nextActor)
+      if(nextActor)
       {
         nearestActor = nextActor;
       }
@@ -402,17 +402,17 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
 Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::Control::KeyboardFocus::Direction direction)
 {
   Actor nearestActor;
-  if (!rootActor)
+  if(!rootActor)
   {
     return nearestActor;
   }
 
   Rect<float> focusedRect;
-  if (!focusedActor)
+  if(!focusedActor)
   {
     // If there is no currently focused actor, it is searched based on the upper left corner of the current window.
     Rect<float> rootRect = DevelActor::CalculateCurrentScreenExtents(rootActor);
-    focusedRect = Rect<float>(rootRect.x, rootRect.y, 0.f, 0.f);
+    focusedRect          = Rect<float>(rootRect.x, rootRect.y, 0.f, 0.f);
   }
   else
   {
@@ -422,7 +422,7 @@ Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::Control:
   // initialize the best candidate to something impossible
   // (so the first plausible actor will become the best choice)
   Rect<float> bestCandidateRect = focusedRect;
-  switch (direction)
+  switch(direction)
   {
     case Ui::Control::KeyboardFocus::LEFT:
     {

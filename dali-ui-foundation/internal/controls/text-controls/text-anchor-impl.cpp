@@ -85,11 +85,11 @@ Property::Value TextAnchor::GetProperty(BaseObject* object, Property::Index inde
 
   Ui::TextAnchor anchor = Ui::TextAnchor::DownCast(Dali::BaseHandle(object));
 
-  if (anchor)
+  if(anchor)
   {
     TextAnchor& impl(GetImpl(anchor));
 
-    switch (index)
+    switch(index)
     {
       case Ui::TextAnchor::Property::START_CHARACTER_INDEX:
       {
@@ -116,10 +116,10 @@ void TextAnchor::SetProperty(BaseObject* object, Property::Index index, const Pr
 {
   Ui::TextAnchor anchor = Ui::TextAnchor::DownCast(Dali::BaseHandle(object));
 
-  if (anchor)
+  if(anchor)
   {
     TextAnchor& impl(GetImpl(anchor));
-    switch (index)
+    switch(index)
     {
       case Ui::TextAnchor::Property::START_CHARACTER_INDEX:
       {
@@ -156,10 +156,10 @@ DevelControl::ControlAccessible* TextAnchor::CreateAccessibleObject()
 }
 
 TextAnchor::TextAnchor()
-  : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
-    mStartCharacterIndex(0),
-    mEndCharacterIndex(0),
-    mUri()
+: Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
+  mStartCharacterIndex(0),
+  mEndCharacterIndex(0),
+  mUri()
 {
 }
 
@@ -208,18 +208,18 @@ bool TextAnchor::TextAnchorAccessible::IsValid() const
 
 bool TextAnchor::OnAccessibilityActivated()
 {
-  Dali::Actor current = Self();
+  Dali::Actor                             current                             = Self();
   Dali::Ui::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;
-  while (!current.GetProperty<bool>(Actor::Property::IS_ROOT) && !parentImplementationAnchorInterface)
+  while(!current.GetProperty<bool>(Actor::Property::IS_ROOT) && !parentImplementationAnchorInterface)
   {
-    Dali::Actor parentAsActor = current.GetParent();
-    Dali::CustomActor parentAsCustomActor = Dali::CustomActor::DownCast(parentAsActor);
+    Dali::Actor            parentAsActor        = current.GetParent();
+    Dali::CustomActor      parentAsCustomActor  = Dali::CustomActor::DownCast(parentAsActor);
     Dali::CustomActorImpl& parentImplementation = parentAsCustomActor.GetImplementation();
-    parentImplementationAnchorInterface = dynamic_cast<Dali::Ui::Text::AnchorControlInterface*>(&parentImplementation);
-    current = parentAsActor;
+    parentImplementationAnchorInterface         = dynamic_cast<Dali::Ui::Text::AnchorControlInterface*>(&parentImplementation);
+    current                                     = parentAsActor;
   }
 
-  if (parentImplementationAnchorInterface)
+  if(parentImplementationAnchorInterface)
   {
     std::string href;
     std::string uri = Self().GetProperty(Ui::TextAnchor::Property::URI).Get<std::string>();
@@ -229,8 +229,8 @@ bool TextAnchor::OnAccessibilityActivated()
   }
 
   DALI_LOG_ERROR(
-      "TextAnchor::OnAccessibilityActivate cannot find ancestor actor implementing "
-      "Dali::Ui::Text::AnchorControlInterface.\n");
+    "TextAnchor::OnAccessibilityActivate cannot find ancestor actor implementing "
+    "Dali::Ui::Text::AnchorControlInterface.\n");
   return false;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 const std::string_view SHADER_GL_VIEW_VERT{
-    R"(//@name gl-view.vert
+  R"(//@name gl-view.vert
 
 //@version 100
 

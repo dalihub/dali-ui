@@ -112,9 +112,9 @@ private:
 
 public:
   // Everything must be shallow-copiable.
-  Dictionary<StylePtr> subStates; // Each named style maps to a state.
+  Dictionary<StylePtr>      subStates; // Each named style maps to a state.
   Dictionary<Property::Map> visuals;
-  Property::Map properties;
+  Property::Map             properties;
 };
 
 } // namespace Internal

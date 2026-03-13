@@ -31,30 +31,30 @@ namespace Integration
 {
 
 InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
-  : BaseObject(),
-    mEventType(InputEventType::TOUCH_EVENT),
-    mEvent(originEvent)
+: BaseObject(),
+  mEventType(InputEventType::TOUCH_EVENT),
+  mEvent(originEvent)
 {
 }
 
 InputEventImpl::InputEventImpl(const KeyEvent& originEvent)
-  : BaseObject(),
-    mEventType(InputEventType::KEY_EVENT),
-    mEvent(originEvent)
+: BaseObject(),
+  mEventType(InputEventType::KEY_EVENT),
+  mEvent(originEvent)
 {
 }
 
 InputEventImpl::InputEventImpl(const TapGesture& originEvent)
-  : BaseObject(),
-    mEventType(InputEventType::TAP_GESTURE),
-    mEvent(originEvent)
+: BaseObject(),
+  mEventType(InputEventType::TAP_GESTURE),
+  mEvent(originEvent)
 {
 }
 
 InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
-  : BaseObject(),
-    mEventType(InputEventType::LONG_PRESS_GESTURE),
-    mEvent(originEvent)
+: BaseObject(),
+  mEventType(InputEventType::LONG_PRESS_GESTURE),
+  mEvent(originEvent)
 {
 }
 

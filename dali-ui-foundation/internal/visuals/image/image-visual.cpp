@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 
 // EXTERNAL HEADERS
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/rendering/renderer-devel.h>
@@ -28,7 +29,6 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/layer.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 #include <cstring> // for strlen()
 
@@ -55,51 +55,51 @@ namespace Internal
 namespace
 {
 const int CUSTOM_PROPERTY_COUNT(
-    8); // ltr, wrap, pixel area, pixalign, crop to mask, mask texture ratio, pre-multiplied alpha
+  8); // ltr, wrap, pixel area, pixalign, crop to mask, mask texture ratio, pre-multiplied alpha
 
 // fitting modes
 DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SHRINK_TO_FIT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SCALE_TO_FILL)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_WIDTH)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_HEIGHT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, VISUAL_FITTING)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, DEFAULT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SHRINK_TO_FIT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SCALE_TO_FILL)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_WIDTH)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_HEIGHT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, VISUAL_FITTING)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, DEFAULT)
 DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
 
 // sampling modes
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SAMPLING_MODE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, NEAREST)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, LINEAR)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_NEAREST)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_LINEAR)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, NO_FILTER)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, DONT_CARE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, LANCZOS)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_LANCZOS)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, DEFAULT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, NEAREST)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, LINEAR)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_NEAREST)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_LINEAR)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, NO_FILTER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, DONT_CARE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, LANCZOS)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX_THEN_LANCZOS)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, DEFAULT)
 DALI_ENUM_TO_STRING_TABLE_END(SAMPLING_MODE)
 
 // wrap modes
 DALI_ENUM_TO_STRING_TABLE_BEGIN(WRAP_MODE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, DEFAULT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, CLAMP_TO_EDGE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, REPEAT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, MIRRORED_REPEAT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, DEFAULT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, CLAMP_TO_EDGE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, REPEAT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::WrapMode, MIRRORED_REPEAT)
 DALI_ENUM_TO_STRING_TABLE_END(WRAP_MODE)
 
 // load policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOAD_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
 DALI_ENUM_TO_STRING_TABLE_END(LOAD_POLICY)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
-DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
@@ -112,28 +112,28 @@ constexpr uint32_t TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB = 3u;
 struct NameIndexMatch
 {
   const char* const name;
-  Property::Index index;
+  Property::Index   index;
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-    {IMAGE_FITTING_MODE, Ui::ImageVisual::Property::FITTING_MODE},
-    {IMAGE_SAMPLING_MODE, Ui::ImageVisual::Property::SAMPLING_MODE},
-    {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
-    {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
-    {PIXEL_AREA_UNIFORM_NAME, Ui::ImageVisual::Property::PIXEL_AREA},
-    {IMAGE_WRAP_MODE_U, Ui::ImageVisual::Property::WRAP_MODE_U},
-    {IMAGE_WRAP_MODE_V, Ui::ImageVisual::Property::WRAP_MODE_V},
-    {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
-    {ALPHA_MASK_URL, Ui::ImageVisual::Property::ALPHA_MASK_URL},
-    {MASK_CONTENT_SCALE_NAME, Ui::ImageVisual::Property::MASK_CONTENT_SCALE},
-    {CROP_TO_MASK_NAME, Ui::ImageVisual::Property::CROP_TO_MASK},
-    {MASKING_TYPE_NAME, Ui::DevelImageVisual::Property::MASKING_TYPE},
-    {ENABLE_BROKEN_IMAGE, Ui::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE},
-    {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
-    {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
-    {ORIENTATION_CORRECTION_NAME, Ui::ImageVisual::Property::ORIENTATION_CORRECTION},
-    {FAST_TRACK_UPLOADING_NAME, Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING},
-    {SYNCHRONOUS_SIZING, Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING},
+  {IMAGE_FITTING_MODE, Ui::ImageVisual::Property::FITTING_MODE},
+  {IMAGE_SAMPLING_MODE, Ui::ImageVisual::Property::SAMPLING_MODE},
+  {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
+  {PIXEL_AREA_UNIFORM_NAME, Ui::ImageVisual::Property::PIXEL_AREA},
+  {IMAGE_WRAP_MODE_U, Ui::ImageVisual::Property::WRAP_MODE_U},
+  {IMAGE_WRAP_MODE_V, Ui::ImageVisual::Property::WRAP_MODE_V},
+  {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
+  {ALPHA_MASK_URL, Ui::ImageVisual::Property::ALPHA_MASK_URL},
+  {MASK_CONTENT_SCALE_NAME, Ui::ImageVisual::Property::MASK_CONTENT_SCALE},
+  {CROP_TO_MASK_NAME, Ui::ImageVisual::Property::CROP_TO_MASK},
+  {MASKING_TYPE_NAME, Ui::DevelImageVisual::Property::MASKING_TYPE},
+  {ENABLE_BROKEN_IMAGE, Ui::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE},
+  {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
+  {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
+  {ORIENTATION_CORRECTION_NAME, Ui::ImageVisual::Property::ORIENTATION_CORRECTION},
+  {FAST_TRACK_UPLOADING_NAME, Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING},
+  {SYNCHRONOUS_SIZING, Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -141,7 +141,7 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 {
   Geometry geometry;
 
-  if (gridSize == ImageDimensions(1, 1))
+  if(gridSize == ImageDimensions(1, 1))
   {
     geometry = factoryCache.GetGeometry(VisualFactoryCache::QUAD_GEOMETRY);
   }
@@ -160,7 +160,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
                                 FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode)
 {
   ImageVisualPtr imageVisualPtr(
-      new ImageVisual(factoryCache, shaderFactory, imageUrl, size, fittingMode, samplingMode));
+    new ImageVisual(factoryCache, shaderFactory, imageUrl, size, fittingMode, samplingMode));
   imageVisualPtr->SetProperties(properties);
   imageVisualPtr->Initialize();
   return imageVisualPtr;
@@ -171,7 +171,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
                                 Dali::SamplingMode::Type samplingMode)
 {
   ImageVisualPtr imageVisualPtr(
-      new ImageVisual(factoryCache, shaderFactory, imageUrl, size, fittingMode, samplingMode));
+    new ImageVisual(factoryCache, shaderFactory, imageUrl, size, fittingMode, samplingMode));
   imageVisualPtr->Initialize();
   return imageVisualPtr;
 }
@@ -179,55 +179,55 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                          const VisualUrl& imageUrl, ImageDimensions size, FittingMode::Type fittingMode,
                          Dali::SamplingMode::Type samplingMode)
-  : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::IMAGE),
-    mPixelArea(FULL_TEXTURE_RECT),
-    mPixelAreaIndex(Property::INVALID_INDEX),
-    mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
-    mPlacementActor(),
-    mImageUrl(imageUrl),
-    mMaskingData(),
-    mDesiredSize(size),
-    mLastRequiredSize(size),
-    mTextureId(TextureManager::INVALID_TEXTURE_ID),
-    mTextures(),
-    mNativeTexture(),
-    mImageVisualShaderFactory(shaderFactory),
-    mFittingMode(fittingMode),
-    mSamplingMode(samplingMode),
-    mWrapModeU(WrapMode::DEFAULT),
-    mWrapModeV(WrapMode::DEFAULT),
-    mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
-    mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
-    mLoadState(TextureManager::LoadState::NOT_STARTED),
-    mOrientationCorrection(true),
-    mNeedYuvToRgb(false),
-    mNeedYuva(false),
-    mNeedUnifiedYuvAndRgb(false),
-    mEnableBrokenImage(true),
-    mUseFastTrackUploading(false),
-    mRendererAdded(false),
-    mUseBrokenImageRenderer(false),
-    mUseSynchronousSizing(false)
+: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::IMAGE),
+  mPixelArea(FULL_TEXTURE_RECT),
+  mPixelAreaIndex(Property::INVALID_INDEX),
+  mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
+  mPlacementActor(),
+  mImageUrl(imageUrl),
+  mMaskingData(),
+  mDesiredSize(size),
+  mLastRequiredSize(size),
+  mTextureId(TextureManager::INVALID_TEXTURE_ID),
+  mTextures(),
+  mNativeTexture(),
+  mImageVisualShaderFactory(shaderFactory),
+  mFittingMode(fittingMode),
+  mSamplingMode(samplingMode),
+  mWrapModeU(WrapMode::DEFAULT),
+  mWrapModeV(WrapMode::DEFAULT),
+  mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
+  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
+  mLoadState(TextureManager::LoadState::NOT_STARTED),
+  mOrientationCorrection(true),
+  mNeedYuvToRgb(false),
+  mNeedYuva(false),
+  mNeedUnifiedYuvAndRgb(false),
+  mEnableBrokenImage(true),
+  mUseFastTrackUploading(false),
+  mRendererAdded(false),
+  mUseBrokenImageRenderer(false),
+  mUseSynchronousSizing(false)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
 }
 
 ImageVisual::~ImageVisual()
 {
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     {
       TextureManager& textureManager = mFactoryCache.GetTextureManager();
 
       mImageUrl.DecreaseExternalResourceReference(textureManager);
-      if (mMaskingData)
+      if(mMaskingData)
       {
         mMaskingData->mAlphaMaskUrl.DecreaseExternalResourceReference(textureManager);
       }
     }
 
     // ImageVisual destroyed so remove texture unless ReleasePolicy is set to never release
-    if ((mTextureId != TextureManager::INVALID_TEXTURE_ID) && (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER))
+    if((mTextureId != TextureManager::INVALID_TEXTURE_ID) && (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER))
     {
       RemoveTexture();
     }
@@ -239,18 +239,18 @@ ImageVisual::~ImageVisual()
 void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // Url is already received in constructor
-  for (Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
+  for(Property::Map::SizeType iter = 0; iter < propertyMap.Count(); ++iter)
   {
     KeyValuePair keyValue = propertyMap.GetKeyValue(iter);
-    if (keyValue.first.type == Property::Key::INDEX)
+    if(keyValue.first.type == Property::Key::INDEX)
     {
       DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
     else
     {
-      for (int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
+      for(int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
       {
-        if (keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
+        if(keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
         {
           DoSetProperty(NAME_INDEX_MATCH_TABLE[i].index, keyValue.second);
           break;
@@ -259,7 +259,7 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
   // Load image immediately if LOAD_POLICY requires it
-  if (mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
+  if(mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
   {
     LoadTexture(mTextures, mDesiredSize, TextureManager::ReloadPolicy::CACHED);
   }
@@ -267,14 +267,14 @@ void ImageVisual::DoSetProperties(const Property::Map& propertyMap)
 
 void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& value)
 {
-  switch (index)
+  switch(index)
   {
     case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
-      if (value.Get(sync))
+      if(value.Get(sync))
       {
-        if (sync)
+        if(sync)
         {
           mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
         }
@@ -293,7 +293,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
-      if (value.Get(desiredWidth))
+      if(value.Get(desiredWidth))
       {
         mDesiredSize.SetWidth(desiredWidth);
       }
@@ -307,7 +307,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
-      if (value.Get(desiredHeight))
+      if(value.Get(desiredHeight))
       {
         mDesiredSize.SetHeight(desiredHeight);
       }
@@ -338,15 +338,15 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     {
       value.Get(mPixelArea);
 
-      if (DALI_UNLIKELY(mImpl->mRenderer))
+      if(DALI_UNLIKELY(mImpl->mRenderer))
       {
         // Unusual case. SetProperty called after OnInitialize().
         // Assume that DoAction call UPDATE_PROPERTY.
-        if (mPixelAreaIndex != Property::INVALID_INDEX)
+        if(mPixelAreaIndex != Property::INVALID_INDEX)
         {
           mImpl->mRenderer.SetProperty(mPixelAreaIndex, mPixelArea);
         }
-        else if (mPixelArea != FULL_TEXTURE_RECT)
+        else if(mPixelArea != FULL_TEXTURE_RECT)
         {
           mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                               PIXEL_AREA_UNIFORM_NAME, mPixelArea);
@@ -374,20 +374,20 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::ALPHA_MASK_URL:
     {
       std::string alphaUrl = "";
-      if (value.Get(alphaUrl))
+      if(value.Get(alphaUrl))
       {
         AllocateMaskData();
         mMaskingData->mAlphaMaskUrl = alphaUrl;
-        if (mMaskingData->mAlphaMaskUrl.IsValid())
+        if(mMaskingData->mAlphaMaskUrl.IsValid())
         {
-          if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+          if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
           {
             // Increase reference count of External Resources :
             // EncodedImageBuffer or ExternalTextures.
             // Reference count will be decreased at destructor of the visual.
             mMaskingData->mAlphaMaskUrl.IncreaseExternalResourceReference(mFactoryCache.GetTextureManager());
           }
-          if (mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
+          if(mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
           {
             mMaskingData->mPreappliedMasking = false;
           }
@@ -399,7 +399,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::MASK_CONTENT_SCALE:
     {
       float scale = 1.0f;
-      if (value.Get(scale))
+      if(value.Get(scale))
       {
         AllocateMaskData();
         mMaskingData->mContentScaleFactor = scale;
@@ -410,7 +410,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::CROP_TO_MASK:
     {
       bool crop = false;
-      if (value.Get(crop))
+      if(value.Get(crop))
       {
         AllocateMaskData();
         mMaskingData->mCropToMask = crop;
@@ -421,22 +421,22 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::DevelImageVisual::Property::MASKING_TYPE:
     {
       int maskingType = 0;
-      if (value.Get(maskingType))
+      if(value.Get(maskingType))
       {
         AllocateMaskData();
 
         bool externalTextureUsed = false;
-        if (mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::TEXTURE)
+        if(mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::TEXTURE)
         {
           externalTextureUsed = true;
         }
-        else if (mMaskingData->mAlphaMaskUrl.IsValid() &&
-                 mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
+        else if(mMaskingData->mAlphaMaskUrl.IsValid() &&
+                mMaskingData->mAlphaMaskUrl.GetProtocolType() == VisualUrl::TEXTURE)
         {
           externalTextureUsed = true;
         }
 
-        if (externalTextureUsed)
+        if(externalTextureUsed)
         {
           // For external textures, only gpu masking is available.
           // Therefore, MASKING_TYPE is set to MASKING_ON_RENDERING forcelly.
@@ -454,7 +454,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::DevelImageVisual::Property::ENABLE_BROKEN_IMAGE:
     {
       bool enableBrokenImage = true;
-      if (value.Get(enableBrokenImage))
+      if(value.Get(enableBrokenImage))
       {
         mEnableBrokenImage = enableBrokenImage;
       }
@@ -479,7 +479,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::ORIENTATION_CORRECTION:
     {
       bool orientationCorrection = true;
-      if (value.Get(orientationCorrection))
+      if(value.Get(orientationCorrection))
       {
         mOrientationCorrection = orientationCorrection;
       }
@@ -489,7 +489,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING:
     {
       bool useFastTrackUploading = false;
-      if (value.Get(useFastTrackUploading))
+      if(value.Get(useFastTrackUploading))
       {
         mUseFastTrackUploading = useFastTrackUploading;
       }
@@ -499,7 +499,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING:
     {
       bool useSynchronousSizing = false;
-      if (value.Get(useSynchronousSizing))
+      if(value.Get(useSynchronousSizing))
       {
         mUseSynchronousSizing = useSynchronousSizing;
       }
@@ -510,10 +510,10 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
 
 void ImageVisual::AllocateMaskData()
 {
-  if (!mMaskingData)
+  if(!mMaskingData)
   {
     mMaskingData.reset(new TextureManager::MaskingData());
-    if (mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::TEXTURE)
+    if(mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::TEXTURE)
     {
       mMaskingData->mPreappliedMasking = false;
     }
@@ -522,17 +522,17 @@ void ImageVisual::AllocateMaskData()
 
 void ImageVisual::GetNaturalSize(Vector2& naturalSize)
 {
-  if (mUseSynchronousSizing && (mLastRequiredSize.GetWidth() > 0 && mLastRequiredSize.GetHeight() > 0))
+  if(mUseSynchronousSizing && (mLastRequiredSize.GetWidth() > 0 && mLastRequiredSize.GetHeight() > 0))
   {
-    if (mImpl->mRenderer)
+    if(mImpl->mRenderer)
     {
       auto textureSet = mImpl->mRenderer.GetTextures();
-      if (textureSet && textureSet.GetTextureCount())
+      if(textureSet && textureSet.GetTextureCount())
       {
         auto texture = textureSet.GetTexture(0);
-        if (texture)
+        if(texture)
         {
-          if (mTextureSize != Vector2::ZERO)
+          if(mTextureSize != Vector2::ZERO)
           {
             naturalSize = mTextureSize;
             return;
@@ -545,17 +545,17 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
     naturalSize.y = mLastRequiredSize.GetHeight();
     return;
   }
-  else if (mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
+  else if(mDesiredSize.GetWidth() > 0 && mDesiredSize.GetHeight() > 0)
   {
-    if (mImpl->mRenderer)
+    if(mImpl->mRenderer)
     {
       auto textureSet = mImpl->mRenderer.GetTextures();
-      if (textureSet && textureSet.GetTextureCount())
+      if(textureSet && textureSet.GetTextureCount())
       {
         auto texture = textureSet.GetTexture(0);
-        if (texture)
+        if(texture)
         {
-          if (mTextureSize != Vector2::ZERO)
+          if(mTextureSize != Vector2::ZERO)
           {
             naturalSize = mTextureSize;
             return;
@@ -568,12 +568,12 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
     naturalSize.y = mDesiredSize.GetHeight();
     return;
   }
-  else if (mImpl->mRenderer) // Check if we have a loaded image
+  else if(mImpl->mRenderer) // Check if we have a loaded image
   {
     auto textureSet = mImpl->mRenderer.GetTextures();
-    if (textureSet && textureSet.GetTextureCount())
+    if(textureSet && textureSet.GetTextureCount())
     {
-      if (mTextureSize != Vector2::ZERO)
+      if(mTextureSize != Vector2::ZERO)
       {
         naturalSize = mTextureSize;
         return;
@@ -581,35 +581,35 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
     }
   }
 
-  if (mMaskingData != NULL && mMaskingData->mAlphaMaskUrl.IsValid() && mMaskingData->mCropToMask)
+  if(mMaskingData != NULL && mMaskingData->mAlphaMaskUrl.IsValid() && mMaskingData->mCropToMask)
   {
     ImageDimensions dimensions = Dali::GetClosestImageSize(mMaskingData->mAlphaMaskUrl.GetUrl());
-    if (dimensions != ImageDimensions(0, 0))
+    if(dimensions != ImageDimensions(0, 0))
     {
       naturalSize.x = dimensions.GetWidth();
       naturalSize.y = dimensions.GetHeight();
     }
     return;
   }
-  else if (mImageUrl.IsValid())
+  else if(mImageUrl.IsValid())
   {
-    if (mImageUrl.GetProtocolType() == VisualUrl::LOCAL)
+    if(mImageUrl.GetProtocolType() == VisualUrl::LOCAL)
     {
       // Note that We don't consider desired image size for this case.
       // Just use (0, 0) value for desired size of image.
       ImageDimensions dimensions = Dali::GetClosestImageSize(mImageUrl.GetUrl(), ImageDimensions(0, 0), mFittingMode,
                                                              mSamplingMode, mOrientationCorrection);
 
-      if (dimensions != ImageDimensions(0, 0))
+      if(dimensions != ImageDimensions(0, 0))
       {
         naturalSize.x = dimensions.GetWidth();
         naturalSize.y = dimensions.GetHeight();
       }
       else
       {
-        Actor actor = mPlacementActor.GetHandle();
+        Actor   actor     = mPlacementActor.GetHandle();
         Vector2 imageSize = Vector2::ZERO;
-        if (actor)
+        if(actor)
         {
           imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
         }
@@ -621,8 +621,8 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
         mUseBrokenImageRenderer = true;
         mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
         Texture brokenImage = mImpl->mRenderer.GetTextures().GetTexture(0);
-        naturalSize.x = brokenImage.GetWidth();
-        naturalSize.y = brokenImage.GetWidth();
+        naturalSize.x       = brokenImage.GetWidth();
+        naturalSize.y       = brokenImage.GetWidth();
       }
       return;
     }
@@ -632,7 +632,7 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
 
 void ImageVisual::OnInitialize()
 {
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     // Increase reference count of External Resources :
     // EncodedImageBuffer or ExternalTextures.
@@ -643,13 +643,13 @@ void ImageVisual::OnInitialize()
   // Generate geometry and shader. Note that we should check AddOn when generate geometry, due to LoadPolicy::IMMEDIATE
   // case
   Geometry geometry = GenerateGeometry(mTextureId, true);
-  Shader shader = GenerateShader();
+  Shader   shader   = GenerateShader();
 
   // Create the renderer
   mImpl->mRenderer = DecoratedVisualRenderer::New(geometry, shader);
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
 
-  if (mPixelArea != FULL_TEXTURE_RECT)
+  if(mPixelArea != FULL_TEXTURE_RECT)
   {
     mPixelAreaIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                               PIXEL_AREA_UNIFORM_NAME, mPixelArea);
@@ -660,7 +660,7 @@ void ImageVisual::OnInitialize()
 
   EnablePreMultipliedAlpha(IsPreMultipliedAlphaEnabled());
 
-  if (mMaskingData)
+  if(mMaskingData)
   {
     mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisual::Property::CROP_TO_MASK, CROP_TO_MASK_NAME,
                                             static_cast<float>(mMaskingData->mCropToMask));
@@ -674,17 +674,17 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
 
   mLastRequiredSize = size;
 
-  auto textureObserver = this;
+  auto textureObserver   = this;
   auto preMultiplyOnLoad = IsPreMultipliedAlphaEnabled() && !IsUsingCustomShader()
-                               ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
-                               : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
+                             ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
+                             : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
 
   bool synchronousLoading = IsSynchronousLoadingRequired();
-  if (synchronousLoading && mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::REMOTE)
+  if(synchronousLoading && mImageUrl.IsValid() && mImageUrl.GetProtocolType() == VisualUrl::REMOTE)
   {
     DALI_LOG_DEBUG_INFO(
-        "Download image(%s) can’t use synchronous loading. it is forced to load asynchronously instead.",
-        mImageUrl.GetEllipsedUrl().c_str());
+      "Download image(%s) can’t use synchronous loading. it is forced to load asynchronously instead.",
+      mImageUrl.GetEllipsedUrl().c_str());
     synchronousLoading = false;
   }
 
@@ -695,10 +695,10 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
 
   // Rare case. If someone call LoadTexture during fast track loading task running, (Ex : Action::RELOAD)
   // we should remove previously added renderer now.
-  if (mRendererAdded)
+  if(mRendererAdded)
   {
     Actor actor = mPlacementActor.GetHandle();
-    if (actor)
+    if(actor)
     {
       actor.RemoveRenderer(mImpl->mRenderer);
       mRendererAdded = false;
@@ -711,47 +711,47 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
    */
   auto IsFastTrackUploadingAvailable = [&]()
   {
-    if (mUseFastTrackUploading && mLoadPolicy == Ui::ImageVisual::LoadPolicy::ATTACHED &&
-        mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
-        forceReload == TextureManager::ReloadPolicy::CACHED &&
-        (mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE) &&
-        !synchronousLoading && !mUseSynchronousSizing && !IsUsingCustomShader() &&
-        !(mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()))
+    if(mUseFastTrackUploading && mLoadPolicy == Ui::ImageVisual::LoadPolicy::ATTACHED &&
+       mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
+       forceReload == TextureManager::ReloadPolicy::CACHED &&
+       (mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE) &&
+       !synchronousLoading && !mUseSynchronousSizing && !IsUsingCustomShader() &&
+       !(mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()))
     {
       return true;
     }
-    else if (mUseFastTrackUploading)
+    else if(mUseFastTrackUploading)
     {
       DALI_LOG_DEBUG_INFO(
-          "FastTrack : Fail to load fast track. mUrl : [%s]%s%s%s%s%s%s%s%s\n", mImageUrl.GetEllipsedUrl().c_str(),
-          (mLoadPolicy != Ui::ImageVisual::LoadPolicy::ATTACHED) ? "/ mLoadPolicy != ATTACHED" : "",
-          (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED) ? "/ mReleasePolicy != DETACHED" : "",
-          (forceReload != TextureManager::ReloadPolicy::CACHED) ? "/ forceReload != CACHED" : "",
-          (!(mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE))
-              ? "/ url is not image"
-              : "",
-          (synchronousLoading) ? "/ synchronousLoading" : "", (mUseSynchronousSizing) ? "/ useSynchronousSizing " : "",
-          (IsUsingCustomShader()) ? "/ use customs shader" : "",
-          (mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()) ? "/ use masking url" : "");
+        "FastTrack : Fail to load fast track. mUrl : [%s]%s%s%s%s%s%s%s%s\n", mImageUrl.GetEllipsedUrl().c_str(),
+        (mLoadPolicy != Ui::ImageVisual::LoadPolicy::ATTACHED) ? "/ mLoadPolicy != ATTACHED" : "",
+        (mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED) ? "/ mReleasePolicy != DETACHED" : "",
+        (forceReload != TextureManager::ReloadPolicy::CACHED) ? "/ forceReload != CACHED" : "",
+        (!(mImageUrl.GetProtocolType() == VisualUrl::LOCAL || mImageUrl.GetProtocolType() == VisualUrl::REMOTE))
+          ? "/ url is not image"
+          : "",
+        (synchronousLoading) ? "/ synchronousLoading" : "", (mUseSynchronousSizing) ? "/ useSynchronousSizing " : "",
+        (IsUsingCustomShader()) ? "/ use customs shader" : "",
+        (mMaskingData && mMaskingData->mAlphaMaskUrl.IsValid()) ? "/ use masking url" : "");
     }
     return false;
   };
 
-  if (IsFastTrackUploadingAvailable())
+  if(IsFastTrackUploadingAvailable())
   {
     // Enable PremultipliedAlpha first.
     EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
 
     // Set new TextureSet with fast track loading task
     mFastTrackLoadingTask =
-        new FastTrackLoadingTask(mImageUrl, size, mFittingMode, mSamplingMode, mOrientationCorrection,
-                                 preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
-                                     ? DevelAsyncImageLoader::PreMultiplyOnLoad::ON
-                                     : DevelAsyncImageLoader::PreMultiplyOnLoad::OFF,
-                                 mFactoryCache.GetLoadYuvPlanes(), MakeCallback(this, &ImageVisual::FastLoadComplete));
+      new FastTrackLoadingTask(mImageUrl, size, mFittingMode, mSamplingMode, mOrientationCorrection,
+                               preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
+                                 ? DevelAsyncImageLoader::PreMultiplyOnLoad::ON
+                                 : DevelAsyncImageLoader::PreMultiplyOnLoad::OFF,
+                               mFactoryCache.GetLoadYuvPlanes(), MakeCallback(this, &ImageVisual::FastLoadComplete));
 
     TextureSet textureSet = TextureSet::New();
-    if (!mFastTrackLoadingTask->mLoadPlanesAvaliable)
+    if(!mFastTrackLoadingTask->mLoadPlanesAvaliable)
     {
       DALI_ASSERT_ALWAYS(mFastTrackLoadingTask->mTextures.size() >= 1u);
       textureSet.SetTexture(0u, mFastTrackLoadingTask->mTextures[0]);
@@ -782,9 +782,9 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
                                           mOrientationCorrection, forceReload, preMultiplyOnLoad);
   }
 
-  if (textures)
+  if(textures)
   {
-    if (loadingStatus)
+    if(loadingStatus)
     {
       mLoadState = TextureManager::LoadState::LOADING;
     }
@@ -794,14 +794,14 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
     }
 
     EnablePreMultipliedAlpha(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD);
-    if (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
+    if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
     {
       Sampler sampler = Sampler::New();
       sampler.SetWrapMode(mWrapModeU, mWrapModeV);
       textures.SetSampler(0u, sampler);
     }
   }
-  else if (synchronousLoading)
+  else if(synchronousLoading)
   {
     // Synchronous loading is failed
     mLoadState = TextureManager::LoadState::LOAD_FAILED;
@@ -819,9 +819,9 @@ void ImageVisual::InitializeRenderer()
   //  - If ReleasePolicy is DESTROYED, InitializeRenderer called every on stage called.
   //  - Then every resources those contained in Visual are Reset but mTextureId is remained when the Off stage time,
   //  - So, mTextures needed to be get from texture manager to created resources like mImpl->mRenderer.
-  if (!mTextures)
+  if(!mTextures)
   {
-    if (mTextureId == TextureManager::INVALID_TEXTURE_ID)
+    if(mTextureId == TextureManager::INVALID_TEXTURE_ID)
     {
       LoadTexture(mTextures, mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize,
                   TextureManager::ReloadPolicy::CACHED);
@@ -829,7 +829,7 @@ void ImageVisual::InitializeRenderer()
     else
     {
       mTextures = mFactoryCache.GetTextureManager().GetTextureSet(mTextureId);
-      if (mTextures && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
+      if(mTextures && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
       {
         Sampler sampler = Sampler::New();
         sampler.SetWrapMode(mWrapModeU, mWrapModeV);
@@ -838,7 +838,7 @@ void ImageVisual::InitializeRenderer()
     }
   }
 
-  if (mTextures)
+  if(mTextures)
   {
     mImpl->mRenderer.SetTextures(mTextures);
     ComputeTextureSize();
@@ -847,31 +847,31 @@ void ImageVisual::InitializeRenderer()
 
     bool needToUpdateShader = (!!mNativeTexture) || mUseBrokenImageRenderer;
 
-    if (mTextures.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB)
+    if(mTextures.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB)
     {
-      if (mTextures.GetTexture(0).GetPixelFormat() == Pixel::L8 &&
-          mTextures.GetTexture(1).GetPixelFormat() == Pixel::CHROMINANCE_U &&
-          mTextures.GetTexture(2).GetPixelFormat() == Pixel::CHROMINANCE_V)
+      if(mTextures.GetTexture(0).GetPixelFormat() == Pixel::L8 &&
+         mTextures.GetTexture(1).GetPixelFormat() == Pixel::CHROMINANCE_U &&
+         mTextures.GetTexture(2).GetPixelFormat() == Pixel::CHROMINANCE_V)
       {
-        mNeedYuvToRgb = true;
+        mNeedYuvToRgb      = true;
         needToUpdateShader = true;
       }
       mNeedYuva = (mTextures.GetTextureCount() > TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB) ? true : false;
     }
 
-    if (needToUpdateShader)
+    if(needToUpdateShader)
     {
       UpdateShader();
     }
     mTextures.Reset(); // Visual should not keep a handle to the texture after this point.
 
-    if (DALI_UNLIKELY(mUseBrokenImageRenderer))
+    if(DALI_UNLIKELY(mUseBrokenImageRenderer))
     {
       // We need to re-generate geometry only if it was broken image before, and result changed after Reload.
       auto geometry = GenerateGeometry(mTextureId, true);
 
       // Update geometry only if we need.
-      if (geometry)
+      if(geometry)
       {
         mImpl->mRenderer.SetGeometry(geometry);
       }
@@ -884,19 +884,19 @@ void ImageVisual::InitializeRenderer()
 
 void ImageVisual::DoSetOnScene(Actor& actor)
 {
-  if (mImageUrl.IsValid())
+  if(mImageUrl.IsValid())
   {
     InitializeRenderer();
   }
 
-  if (!mImpl->mRenderer)
+  if(!mImpl->mRenderer)
   {
     return;
   }
 
   mPlacementActor = actor;
 
-  if (mLoadState == TextureManager::LoadState::LOAD_FINISHED)
+  if(mLoadState == TextureManager::LoadState::LOAD_FINISHED)
   {
     actor.AddRenderer(mImpl->mRenderer);
     mRendererAdded = true;
@@ -905,14 +905,14 @@ void ImageVisual::DoSetOnScene(Actor& actor)
     // Image loaded and ready to display
     ResourceReady(Ui::Visual::ResourceStatus::READY);
   }
-  else if (mLoadState == TextureManager::LoadState::LOAD_FAILED)
+  else if(mLoadState == TextureManager::LoadState::LOAD_FAILED)
   {
     ShowBrokenImage();
     ResourceReady(Ui::Visual::ResourceStatus::FAILED);
   }
   else
   {
-    if (mFastTrackLoadingTask)
+    if(mFastTrackLoadingTask)
     {
       actor.AddRenderer(mImpl->mRenderer);
       mRendererAdded = true;
@@ -928,7 +928,7 @@ void ImageVisual::DoSetOffScene(Actor& actor)
   actor.RemoveRenderer(mImpl->mRenderer);
   mRendererAdded = false;
 
-  if (mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
+  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
   {
     ResetRenderer();
   }
@@ -943,7 +943,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
-  if (mImageUrl.IsValid())
+  if(mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
@@ -955,7 +955,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisual::Property::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
 
-  if (mImpl->mRenderer && mPixelAreaIndex != Property::INVALID_INDEX)
+  if(mImpl->mRenderer && mPixelAreaIndex != Property::INVALID_INDEX)
   {
     // Update values from Renderer
     Vector4 pixelArea = mImpl->mRenderer.GetProperty<Vector4>(mPixelAreaIndex);
@@ -969,14 +969,14 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisual::Property::WRAP_MODE_U, mWrapModeU);
   map.Insert(Ui::ImageVisual::Property::WRAP_MODE_V, mWrapModeV);
 
-  if (mMaskingData != NULL)
+  if(mMaskingData != NULL)
   {
     map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, mMaskingData->mAlphaMaskUrl.GetUrl());
     map.Insert(Ui::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
     map.Insert(Ui::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
     map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
-                                                                 ? DevelImageVisual::MaskingType::MASKING_ON_LOADING
-                                                                 : DevelImageVisual::MaskingType::MASKING_ON_RENDERING);
+                                                               ? DevelImageVisual::MaskingType::MASKING_ON_LOADING
+                                                               : DevelImageVisual::MaskingType::MASKING_ON_RENDERING);
   }
 
   map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
@@ -991,7 +991,7 @@ void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
-  if (mImageUrl.IsValid())
+  if(mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
     map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
@@ -1001,18 +1001,18 @@ void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void ImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
-    if (mPreMultipliedAlphaIndex != Property::INVALID_INDEX)
+    if(mPreMultipliedAlphaIndex != Property::INVALID_INDEX)
     {
       mImpl->mRenderer.SetProperty(mPreMultipliedAlphaIndex, preMultiplied ? 1.0f : 0.0f);
     }
-    else if (!preMultiplied)
+    else if(!preMultiplied)
     {
       // Register PREMULTIPLIED_ALPHA only if it become false.
       // Default PREMULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
       mPreMultipliedAlphaIndex =
-          mImpl->mRenderer.RegisterProperty(Ui::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, 0.0f);
+        mImpl->mRenderer.RegisterProperty(Ui::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, 0.0f);
     }
   }
 
@@ -1023,7 +1023,7 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
 {
   // Check if action is valid for this visual type and perform action if possible
 
-  switch (actionId)
+  switch(actionId)
   {
     case DevelImageVisual::Action::RELOAD:
     {
@@ -1044,24 +1044,24 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
 
 void ImageVisual::OnSetTransform()
 {
-  if (mImpl->mRenderer && mImpl->mTransformMapChanged)
+  if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
   }
 
-  if (mUseSynchronousSizing)
+  if(mUseSynchronousSizing)
   {
     // Get current visual size
-    Vector2 size = mImpl->GetTransformVisualSize(mImpl->mControlSize);
-    uint32_t maximumNumber = std::numeric_limits<uint16_t>::max();
-    uint32_t sizeWidth = static_cast<uint32_t>(roundf(size.width));
-    sizeWidth = std::min(sizeWidth, maximumNumber);
-    uint32_t sizeHeight = static_cast<uint32_t>(roundf(size.height));
-    sizeHeight = std::min(sizeHeight, maximumNumber);
+    Vector2  size                    = mImpl->GetTransformVisualSize(mImpl->mControlSize);
+    uint32_t maximumNumber           = std::numeric_limits<uint16_t>::max();
+    uint32_t sizeWidth               = static_cast<uint32_t>(roundf(size.width));
+    sizeWidth                        = std::min(sizeWidth, maximumNumber);
+    uint32_t sizeHeight              = static_cast<uint32_t>(roundf(size.height));
+    sizeHeight                       = std::min(sizeHeight, maximumNumber);
     Dali::ImageDimensions visualSize = Dali::ImageDimensions(sizeWidth, sizeHeight);
 
     // Reload if visual size is updated
-    if (mLastRequiredSize != visualSize)
+    if(mLastRequiredSize != visualSize)
     {
       RemoveTexture();
       mLoadState = TextureManager::LoadState::NOT_STARTED;
@@ -1077,7 +1077,7 @@ void ImageVisual::OnSetTransform()
 
 void ImageVisual::UpdateShader()
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     Shader shader = GenerateShader();
     mImpl->mRenderer.SetShader(shader);
@@ -1094,21 +1094,21 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
 
   Actor actor = mPlacementActor.GetHandle();
 
-  if (mFastTrackLoadingTask && mFastTrackLoadingTask->mLoadSuccess)
+  if(mFastTrackLoadingTask && mFastTrackLoadingTask->mLoadSuccess)
   {
     resourceStatus = Ui::Visual::ResourceStatus::READY;
-    mLoadState = TextureManager::LoadState::LOAD_FINISHED;
+    mLoadState     = TextureManager::LoadState::LOAD_FINISHED;
 
     // Change premultiplied alpha flag after change renderer.
     EnablePreMultipliedAlpha(mFastTrackLoadingTask->mPremultiplied);
 
-    if (mFastTrackLoadingTask->mLoadPlanesAvaliable)
+    if(mFastTrackLoadingTask->mLoadPlanesAvaliable)
     {
-      if (mFastTrackLoadingTask->mPlanesLoaded)
+      if(mFastTrackLoadingTask->mPlanesLoaded)
       {
         // Let we use regular yuv cases.
         mNeedYuvToRgb = true;
-        if (!mFastTrackLoadingTask->mHasAlpha)
+        if(!mFastTrackLoadingTask->mHasAlpha)
         {
           auto textureSet = mImpl->mRenderer.GetTextures();
           textureSet.SetTexture(3u, Texture());
@@ -1140,7 +1140,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
   else
   {
     resourceStatus = Ui::Visual::ResourceStatus::FAILED;
-    mLoadState = TextureManager::LoadState::LOAD_FAILED;
+    mLoadState     = TextureManager::LoadState::LOAD_FAILED;
 
     // Change renderer as broken.
     ShowBrokenImage();
@@ -1157,19 +1157,19 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
 {
   Ui::Visual::ResourceStatus resourceStatus;
 
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     EnablePreMultipliedAlpha(textureInformation.preMultiplied);
 
     Actor actor = mPlacementActor.GetHandle();
-    if (!loadingSuccess)
+    if(!loadingSuccess)
     {
       ShowBrokenImage();
       textureInformation.textureSet = mImpl->mRenderer.GetTextures();
     }
     else
     {
-      if (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
+      if(mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT)
       {
         Sampler sampler = Sampler::New();
         sampler.SetWrapMode(mWrapModeU, mWrapModeV);
@@ -1182,24 +1182,24 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
       UpdateNativeTextureInfomation(textureInformation.textureSet);
 
       bool needToUpdateShader = mUseBrokenImageRenderer;
-      if (textureInformation.textureSet.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB)
+      if(textureInformation.textureSet.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB)
       {
-        if (textureInformation.textureSet.GetTexture(0).GetPixelFormat() == Pixel::L8 &&
-            textureInformation.textureSet.GetTexture(1).GetPixelFormat() == Pixel::CHROMINANCE_U &&
-            textureInformation.textureSet.GetTexture(2).GetPixelFormat() == Pixel::CHROMINANCE_V)
+        if(textureInformation.textureSet.GetTexture(0).GetPixelFormat() == Pixel::L8 &&
+           textureInformation.textureSet.GetTexture(1).GetPixelFormat() == Pixel::CHROMINANCE_U &&
+           textureInformation.textureSet.GetTexture(2).GetPixelFormat() == Pixel::CHROMINANCE_V)
         {
-          mNeedYuvToRgb = true;
+          mNeedYuvToRgb      = true;
           needToUpdateShader = true;
         }
         mNeedYuva = (textureInformation.textureSet.GetTextureCount() > TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB) ? true : false;
       }
 
-      if (needToUpdateShader)
+      if(needToUpdateShader)
       {
         UpdateShader();
       }
 
-      if (actor)
+      if(actor)
       {
         actor.AddRenderer(mImpl->mRenderer);
         mRendererAdded = true;
@@ -1209,7 +1209,7 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
 
       auto geometry = GenerateGeometry(textureInformation.textureId, mUseBrokenImageRenderer);
 
-      if (DALI_UNLIKELY(geometry))
+      if(DALI_UNLIKELY(geometry))
       {
         // Rare cases. If load successed image don't use quad geometry (i.e. Show some n-patch broken image, and call
         // Reload(), and success) or If given texture use AddOn, then we need to make to use quad geometry and update
@@ -1223,7 +1223,7 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
   }
 
   // Storing TextureSet needed when renderer staged.
-  if (!mImpl->mRenderer)
+  if(!mImpl->mRenderer)
   {
     mTextures = textureInformation.textureSet;
 
@@ -1231,15 +1231,15 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
   }
 
   // Image loaded, set status regardless of staged status.
-  if (loadingSuccess)
+  if(loadingSuccess)
   {
     resourceStatus = Ui::Visual::ResourceStatus::READY;
-    mLoadState = TextureManager::LoadState::LOAD_FINISHED;
+    mLoadState     = TextureManager::LoadState::LOAD_FINISHED;
   }
   else
   {
     resourceStatus = Ui::Visual::ResourceStatus::FAILED;
-    mLoadState = TextureManager::LoadState::LOAD_FAILED;
+    mLoadState     = TextureManager::LoadState::LOAD_FAILED;
   }
 
   // Signal to observers ( control ) that resources are ready. Must be all resources.
@@ -1248,7 +1248,7 @@ void ImageVisual::LoadComplete(bool loadingSuccess, TextureInformation textureIn
 
 void ImageVisual::RemoveTexture()
 {
-  if (mTextureId != TextureManager::INVALID_TEXTURE_ID)
+  if(mTextureId != TextureManager::INVALID_TEXTURE_ID)
   {
     mFactoryCache.GetTextureManager().RequestRemove(mTextureId, this);
     mTextureId = TextureManager::INVALID_TEXTURE_ID;
@@ -1261,21 +1261,21 @@ void ImageVisual::RemoveTexture()
 
 void ImageVisual::ComputeTextureSize()
 {
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     auto textureSet = mImpl->mRenderer.GetTextures();
-    if (textureSet && textureSet.GetTextureCount())
+    if(textureSet && textureSet.GetTextureCount())
     {
       auto texture = textureSet.GetTexture(0);
-      if (texture)
+      if(texture)
       {
         mTextureSize.x = texture.GetWidth();
         mTextureSize.y = texture.GetHeight();
-        if (textureSet.GetTextureCount() > 1u && mMaskingData && !mMaskingData->mPreappliedMasking &&
-            mMaskingData->mCropToMask)
+        if(textureSet.GetTextureCount() > 1u && mMaskingData && !mMaskingData->mPreappliedMasking &&
+           mMaskingData->mCropToMask)
         {
           Texture maskTexture = textureSet.GetTexture(1);
-          if (maskTexture)
+          if(maskTexture)
           {
             mTextureSize.x = std::min(static_cast<uint32_t>(mTextureSize.x * mMaskingData->mContentScaleFactor),
                                       maskTexture.GetWidth());
@@ -1291,27 +1291,27 @@ void ImageVisual::ComputeTextureSize()
 Vector2 ImageVisual::ComputeMaskTextureRatio()
 {
   Vector2 maskTextureRatio;
-  if (mImpl->mRenderer)
+  if(mImpl->mRenderer)
   {
     auto textureSet = mImpl->mRenderer.GetTextures();
-    if (textureSet && textureSet.GetTextureCount())
+    if(textureSet && textureSet.GetTextureCount())
     {
       auto texture = textureSet.GetTexture(0);
-      if (texture)
+      if(texture)
       {
-        if (textureSet.GetTextureCount() > 1u && mMaskingData && !mMaskingData->mPreappliedMasking &&
-            mMaskingData->mCropToMask)
+        if(textureSet.GetTextureCount() > 1u && mMaskingData && !mMaskingData->mPreappliedMasking &&
+           mMaskingData->mCropToMask)
         {
           Texture maskTexture = textureSet.GetTexture(1);
-          if (maskTexture)
+          if(maskTexture)
           {
-            float textureWidth = std::max(static_cast<float>(texture.GetWidth() * mMaskingData->mContentScaleFactor),
-                                          Dali::Math::MACHINE_EPSILON_1);
+            float textureWidth  = std::max(static_cast<float>(texture.GetWidth() * mMaskingData->mContentScaleFactor),
+                                           Dali::Math::MACHINE_EPSILON_1);
             float textureHeight = std::max(static_cast<float>(texture.GetHeight() * mMaskingData->mContentScaleFactor),
                                            Dali::Math::MACHINE_EPSILON_1);
             maskTextureRatio =
-                Vector2(std::min(static_cast<float>(maskTexture.GetWidth()), textureWidth) / textureWidth,
-                        std::min(static_cast<float>(maskTexture.GetHeight()), textureHeight) / textureHeight);
+              Vector2(std::min(static_cast<float>(maskTexture.GetWidth()), textureWidth) / textureWidth,
+                      std::min(static_cast<float>(maskTexture.GetHeight()), textureHeight) / textureHeight);
           }
         }
       }
@@ -1325,30 +1325,30 @@ Shader ImageVisual::GenerateShader() const
   Shader shader;
 
   const bool useStandardShader = !IsUsingCustomShader();
-  const bool useNativeImage = (!!mNativeTexture);
+  const bool useNativeImage    = (!!mNativeTexture);
 
-  if (useStandardShader)
+  if(useStandardShader)
   {
     bool requiredAlphaMaskingOnRendering =
-        (mMaskingData && !mMaskingData->mMaskImageLoadingFailed) ? !mMaskingData->mPreappliedMasking : false;
+      (mMaskingData && !mMaskingData->mMaskImageLoadingFailed) ? !mMaskingData->mPreappliedMasking : false;
     // Create and cache the standard shader
     shader = mImageVisualShaderFactory.GetShader(
-        mFactoryCache,
-        ImageVisualShaderFeature::FeatureBuilder()
-            .ApplyDefaultTextureWrapMode(mWrapModeU <= WrapMode::CLAMP_TO_EDGE && mWrapModeV <= WrapMode::CLAMP_TO_EDGE)
-            .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
-            .EnableBorderline(IsBorderlineRequired())
-            .SetTextureForFragmentShaderCheck(useNativeImage ? mNativeTexture : Dali::Texture())
-            .EnableAlphaMaskingOnRendering(requiredAlphaMaskingOnRendering)
-            .EnableYuvToRgb(mNeedYuvToRgb, mNeedYuva, mNeedUnifiedYuvAndRgb));
+      mFactoryCache,
+      ImageVisualShaderFeature::FeatureBuilder()
+        .ApplyDefaultTextureWrapMode(mWrapModeU <= WrapMode::CLAMP_TO_EDGE && mWrapModeV <= WrapMode::CLAMP_TO_EDGE)
+        .EnableRoundedCorner(IsRoundedCornerRequired(), IsSquircleCornerRequired())
+        .EnableBorderline(IsBorderlineRequired())
+        .SetTextureForFragmentShaderCheck(useNativeImage ? mNativeTexture : Dali::Texture())
+        .EnableAlphaMaskingOnRendering(requiredAlphaMaskingOnRendering)
+        .EnableYuvToRgb(mNeedYuvToRgb, mNeedYuva, mNeedUnifiedYuvAndRgb));
   }
   else
   {
-    bool usesWholeTexture = true;
+    bool             usesWholeTexture = true;
     std::string_view vertexShaderView;
     std::string_view fragmentShaderView;
 
-    if (IsUsingCustomShader() && !mImpl->GetCustomShaderAt(0)->mVertexShader.empty())
+    if(IsUsingCustomShader() && !mImpl->GetCustomShaderAt(0)->mVertexShader.empty())
     {
       vertexShaderView = mImpl->GetCustomShaderAt(0)->mVertexShader;
       usesWholeTexture = false; // Impossible to tell.
@@ -1358,7 +1358,7 @@ Shader ImageVisual::GenerateShader() const
       vertexShaderView = mImageVisualShaderFactory.GetVertexShaderSource();
     }
 
-    if (IsUsingCustomShader() && !mImpl->GetCustomShaderAt(0)->mFragmentShader.empty())
+    if(IsUsingCustomShader() && !mImpl->GetCustomShaderAt(0)->mFragmentShader.empty())
     {
       fragmentShaderView = mImpl->GetCustomShaderAt(0)->mFragmentShader;
     }
@@ -1369,13 +1369,13 @@ Shader ImageVisual::GenerateShader() const
 
     // If the texture is native, we may need to change prefix and sampler in
     // the fragment shader
-    if (useNativeImage)
+    if(useNativeImage)
     {
-      bool modifiedFragmentShader = false;
-      std::string fragmentShaderString = std::string(fragmentShaderView);
+      bool        modifiedFragmentShader = false;
+      std::string fragmentShaderString   = std::string(fragmentShaderView);
 
       modifiedFragmentShader = DevelTexture::ApplyNativeFragmentShader(mNativeTexture, fragmentShaderString, 1);
-      if (modifiedFragmentShader)
+      if(modifiedFragmentShader)
       {
         fragmentShaderView = fragmentShaderString;
       }
@@ -1390,7 +1390,7 @@ Shader ImageVisual::GenerateShader() const
                            mImpl->GetCustomShaderAt(0)->mName);
     }
 
-    if (usesWholeTexture)
+    if(usesWholeTexture)
     {
       shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);
     }
@@ -1405,12 +1405,12 @@ Shader ImageVisual::GenerateShader() const
 
 Dali::Property ImageVisual::OnGetPropertyObject(Dali::Property::Key key, bool changeProperties)
 {
-  if ((key.type == Property::Key::INDEX && key.indexKey == Ui::ImageVisual::Property::PIXEL_AREA) ||
-      (key.type == Property::Key::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
+  if((key.type == Property::Key::INDEX && key.indexKey == Ui::ImageVisual::Property::PIXEL_AREA) ||
+     (key.type == Property::Key::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
   {
-    if (DALI_LIKELY(mImpl->mRenderer))
+    if(DALI_LIKELY(mImpl->mRenderer))
     {
-      if (mPixelAreaIndex == Property::INVALID_INDEX)
+      if(mPixelAreaIndex == Property::INVALID_INDEX)
       {
         mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(Ui::ImageVisual::Property::PIXEL_AREA,
                                                             PIXEL_AREA_UNIFORM_NAME, mPixelArea);
@@ -1425,13 +1425,13 @@ Dali::Property ImageVisual::OnGetPropertyObject(Dali::Property::Key key, bool ch
 
 void ImageVisual::CheckMaskTexture()
 {
-  if (mMaskingData && !mMaskingData->mPreappliedMasking)
+  if(mMaskingData && !mMaskingData->mPreappliedMasking)
   {
-    bool maskLoadFailed = true;
-    TextureSet textures = mImpl->mRenderer.GetTextures();
-    if (textures && textures.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_ALPHA_MASK)
+    bool       maskLoadFailed = true;
+    TextureSet textures       = mImpl->mRenderer.GetTextures();
+    if(textures && textures.GetTextureCount() >= TEXTURE_COUNT_FOR_GPU_ALPHA_MASK)
     {
-      if (mMaskingData->mCropToMask)
+      if(mMaskingData->mCropToMask)
       {
         mImpl->mRenderer.RegisterProperty(MASK_TEXTURE_RATIO_NAME, ComputeMaskTextureRatio());
       }
@@ -1442,7 +1442,7 @@ void ImageVisual::CheckMaskTexture()
       maskLoadFailed = false;
     }
 
-    if (mMaskingData->mMaskImageLoadingFailed != maskLoadFailed)
+    if(mMaskingData->mMaskImageLoadingFailed != maskLoadFailed)
     {
       mMaskingData->mMaskImageLoadingFailed = maskLoadFailed;
       UpdateShader();
@@ -1468,17 +1468,17 @@ void ImageVisual::ResetRenderer()
 
 void ImageVisual::ShowBrokenImage()
 {
-  if (mEnableBrokenImage)
+  if(mEnableBrokenImage)
   {
     Actor actor = mPlacementActor.GetHandle();
 
     Vector2 imageSize = Vector2::ZERO;
-    if (actor)
+    if(actor)
     {
-      imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
+      imageSize           = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
       mPlacementActorSize = imageSize;
 
-      if (mRendererAdded)
+      if(mRendererAdded)
       {
         actor.RemoveRenderer(mImpl->mRenderer);
         mRendererAdded = false;
@@ -1487,7 +1487,7 @@ void ImageVisual::ShowBrokenImage()
 
     mUseBrokenImageRenderer = true;
     mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
-    if (actor)
+    if(actor)
     {
       actor.AddRenderer(mImpl->mRenderer);
       mRendererAdded = true;
@@ -1496,10 +1496,10 @@ void ImageVisual::ShowBrokenImage()
   }
   else
   {
-    if (mRendererAdded)
+    if(mRendererAdded)
     {
       Actor actor = mPlacementActor.GetHandle();
-      if (actor)
+      if(actor)
       {
         actor.RemoveRenderer(mImpl->mRenderer);
         mRendererAdded = false;
@@ -1511,7 +1511,7 @@ void ImageVisual::ShowBrokenImage()
 
 void ImageVisual::ResetFastTrackLoadingTask()
 {
-  if (mFastTrackLoadingTask)
+  if(mFastTrackLoadingTask)
   {
     Dali::AsyncTaskManager::Get().RemoveTask(mFastTrackLoadingTask);
     mFastTrackLoadingTask.Reset();
@@ -1521,11 +1521,11 @@ void ImageVisual::ResetFastTrackLoadingTask()
 Geometry ImageVisual::GenerateGeometry(TextureManager::TextureId textureId, bool createForce)
 {
   Geometry geometry;
-  if (DALI_LIKELY(Dali::Adaptor::IsAvailable()))
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if (IsUsingCustomShader())
+    if(IsUsingCustomShader())
     {
-      if (createForce)
+      if(createForce)
       {
         geometry = CreateGeometry(mFactoryCache, mImpl->GetCustomShaderAt(0)->mGridSize);
       }
@@ -1536,26 +1536,26 @@ Geometry ImageVisual::GenerateGeometry(TextureManager::TextureId textureId, bool
       uint32_t secondElementCount{0u};
 
       geometry = mFactoryCache.GetTextureManager().GetRenderGeometry(textureId, firstElementCount, secondElementCount);
-      if (geometry)
+      if(geometry)
       {
-        if (mImpl->mRenderer)
+        if(mImpl->mRenderer)
         {
           Dali::DevelRenderer::DrawCommand drawCommand{};
           drawCommand.drawType = DevelRenderer::DrawType::INDEXED;
 
-          if (firstElementCount)
+          if(firstElementCount)
           {
-            drawCommand.firstIndex = 0;
+            drawCommand.firstIndex   = 0;
             drawCommand.elementCount = firstElementCount;
-            drawCommand.queue = DevelRenderer::RENDER_QUEUE_OPAQUE;
+            drawCommand.queue        = DevelRenderer::RENDER_QUEUE_OPAQUE;
             DevelRenderer::AddDrawCommand(mImpl->mRenderer, drawCommand);
           }
 
-          if (secondElementCount)
+          if(secondElementCount)
           {
-            drawCommand.firstIndex = firstElementCount;
+            drawCommand.firstIndex   = firstElementCount;
             drawCommand.elementCount = secondElementCount;
-            drawCommand.queue = DevelRenderer::RENDER_QUEUE_TRANSPARENT;
+            drawCommand.queue        = DevelRenderer::RENDER_QUEUE_TRANSPARENT;
             DevelRenderer::AddDrawCommand(mImpl->mRenderer, drawCommand);
           }
         }
@@ -1563,7 +1563,7 @@ Geometry ImageVisual::GenerateGeometry(TextureManager::TextureId textureId, bool
     }
   }
 
-  if (!geometry && createForce)
+  if(!geometry && createForce)
   {
     // Create default quad geometry now
     geometry = CreateGeometry(mFactoryCache, ImageDimensions(1, 1));
@@ -1577,10 +1577,10 @@ void ImageVisual::UpdateNativeTextureInfomation(TextureSet textureSet)
   // Reset previous flags and infomations.
   mNativeTexture.Reset();
 
-  if (textureSet && textureSet.GetTextureCount() > 0u)
+  if(textureSet && textureSet.GetTextureCount() > 0u)
   {
     Texture texture = textureSet.GetTexture(0u);
-    if (DevelTexture::IsNative(texture))
+    if(DevelTexture::IsNative(texture))
     {
       // Keep native texture handle.
       mNativeTexture = texture;

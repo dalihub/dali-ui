@@ -32,8 +32,8 @@ namespace Text
  */
 struct GlyphRun
 {
-  GlyphIndex glyphIndex{0u}; ///< Index to the first glyph.
-  Length numberOfGlyphs{0u}; ///< Number of glyphs in the run.
+  GlyphIndex glyphIndex{0u};     ///< Index to the first glyph.
+  Length     numberOfGlyphs{0u}; ///< Number of glyphs in the run.
 };
 
 } // namespace Text

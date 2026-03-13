@@ -102,8 +102,8 @@ private:
   TextAnchor& operator=(const TextAnchor& rhs);
 
   // Data
-  int mStartCharacterIndex;
-  int mEndCharacterIndex;
+  int         mStartCharacterIndex;
+  int         mEndCharacterIndex;
   std::string mUri;
 
 protected:

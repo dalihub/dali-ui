@@ -35,15 +35,15 @@ std::string AddTexture(Texture& texture, bool preMultiplied)
 
 std::string AddTexture(TextureSet& textureSet, bool preMultiplied)
 {
-  auto visualFactory = Ui::VisualFactory::Get();
-  auto& textureMgr = GetImplementation(visualFactory).GetTextureManager();
+  auto  visualFactory = Ui::VisualFactory::Get();
+  auto& textureMgr    = GetImplementation(visualFactory).GetTextureManager();
   return textureMgr.AddExternalTexture(textureSet, preMultiplied);
 }
 
 TextureSet RemoveTexture(const std::string& textureUrl)
 {
-  auto visualFactory = Ui::VisualFactory::Get();
-  auto& textureMgr = GetImplementation(visualFactory).GetTextureManager();
+  auto  visualFactory = Ui::VisualFactory::Get();
+  auto& textureMgr    = GetImplementation(visualFactory).GetTextureManager();
   return textureMgr.RemoveExternalTextureByUrl(textureUrl);
 }
 

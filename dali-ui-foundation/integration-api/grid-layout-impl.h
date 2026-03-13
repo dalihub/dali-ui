@@ -18,8 +18,8 @@
  */
 
 // EXTERNAL INCLUDES
-#include <vector>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/grid-layout-manager.h>
@@ -55,37 +55,37 @@ protected:
   GridLayoutImpl();
 
 public: // Row/Column Definition API
-  void AddRowDefinition(GridLength height);
-  void AddColumnDefinition(GridLength width);
-  void SetRowDefinitions(const std::vector<GridLength>& rows);
-  void SetColumnDefinitions(const std::vector<GridLength>& columns);
+  void                    AddRowDefinition(GridLength height);
+  void                    AddColumnDefinition(GridLength width);
+  void                    SetRowDefinitions(const std::vector<GridLength>& rows);
+  void                    SetColumnDefinitions(const std::vector<GridLength>& columns);
   std::vector<GridLength> GetRowDefinitions() const;
   std::vector<GridLength> GetColumnDefinitions() const;
-  uint32_t GetRowCount() const;
-  uint32_t GetColumnCount() const;
-  void ClearRowDefinitions();
-  void ClearColumnDefinitions();
+  uint32_t                GetRowCount() const;
+  uint32_t                GetColumnCount() const;
+  void                    ClearRowDefinitions();
+  void                    ClearColumnDefinitions();
 
 public: // Spacing API
-  void SetRowSpacing(float spacing);
+  void  SetRowSpacing(float spacing);
   float GetRowSpacing() const;
-  void SetColumnSpacing(float spacing);
+  void  SetColumnSpacing(float spacing);
   float GetColumnSpacing() const;
 
 protected: // From Layout
   LayoutManager* CreateLayoutManager() override;
 
 private:
-  GridLayoutImpl(const GridLayoutImpl&) = delete;
-  GridLayoutImpl(GridLayoutImpl&&) = delete;
+  GridLayoutImpl(const GridLayoutImpl&)            = delete;
+  GridLayoutImpl(GridLayoutImpl&&)                 = delete;
   GridLayoutImpl& operator=(const GridLayoutImpl&) = delete;
-  GridLayoutImpl& operator=(GridLayout&&) = delete;
+  GridLayoutImpl& operator=(GridLayout&&)          = delete;
 
 private:
   std::vector<GridLength> mRowDefinitions;
   std::vector<GridLength> mColumnDefinitions;
-  float mRowSpacing;
-  float mColumnSpacing;
+  float                   mRowSpacing;
+  float                   mColumnSpacing;
 };
 
 inline Integration::GridLayoutImpl& GetImpl(Ui::GridLayout& layout)

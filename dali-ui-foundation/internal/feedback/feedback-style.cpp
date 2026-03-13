@@ -41,10 +41,10 @@ const char* DEFAULT_FEEDBACK_THEME_FILE_NAME = "default-feedback-theme.json";
 void GetIfString(const Dali::Ui::TreeNode& node, const std::string& name, bool& exists, std::string& str)
 {
   const Dali::Ui::TreeNode* child = node.GetChild(name);
-  if (child && Dali::Ui::TreeNode::STRING == child->GetType())
+  if(child && Dali::Ui::TreeNode::STRING == child->GetType())
   {
     exists = true;
-    str = child->GetString();
+    str    = child->GetString();
   }
 }
 
@@ -62,13 +62,13 @@ struct SignalFeedbackInfo
    * Default constructor.
    */
   SignalFeedbackInfo()
-    : mHasHapticFeedbackInfo(false),
-      mHasSoundFeedbackInfo(false)
+  : mHasHapticFeedbackInfo(false),
+    mHasSoundFeedbackInfo(false)
   {
   }
 
-  bool mHasHapticFeedbackInfo;
-  bool mHasSoundFeedbackInfo;
+  bool        mHasHapticFeedbackInfo;
+  bool        mHasSoundFeedbackInfo;
   std::string mSignalName;
   std::string mHapticFeedbackPattern;
   std::string mSoundFeedbackPattern;
@@ -76,7 +76,7 @@ struct SignalFeedbackInfo
   std::string mSoundFeedbackFile;
 };
 
-typedef std::vector<SignalFeedbackInfo> SignalFeedbackInfoContainer;
+typedef std::vector<SignalFeedbackInfo>             SignalFeedbackInfoContainer;
 typedef SignalFeedbackInfoContainer::const_iterator SignalFeedbackInfoConstIter;
 
 struct FeedbackStyleInfo
@@ -97,12 +97,12 @@ FeedbackStyle::FeedbackStyle()
 {
   mFeedback = Dali::FeedbackPlayer::Get();
 
-  const std::string styleDirPath = AssetManager::GetDaliStylePath();
+  const std::string styleDirPath         = AssetManager::GetDaliStylePath();
   const std::string defaultThemeFilePath = styleDirPath + DEFAULT_FEEDBACK_THEME_FILE_NAME;
 
   std::string defaultTheme;
 
-  if (mFeedback && mFeedback.LoadFile(defaultThemeFilePath, defaultTheme))
+  if(mFeedback && mFeedback.LoadFile(defaultThemeFilePath, defaultTheme))
   {
     LoadTheme(defaultTheme);
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ResourceLoader::LoadTheme(%s) - loaded %d bytes\n",
@@ -121,9 +121,9 @@ FeedbackStyle::~FeedbackStyle()
 struct PlayFeedbackFromSignal
 {
   PlayFeedbackFromSignal(FeedbackStyle& controller, const std::string& typeName, const std::string& signalName)
-    : mController(controller),
-      mTypeName(typeName),
-      mSignalName(signalName)
+  : mController(controller),
+    mTypeName(typeName),
+    mSignalName(signalName)
   {
   }
 
@@ -133,27 +133,27 @@ struct PlayFeedbackFromSignal
   }
 
   FeedbackStyle& mController;
-  std::string mTypeName;
-  std::string mSignalName;
+  std::string    mTypeName;
+  std::string    mSignalName;
 };
 
 void FeedbackStyle::ObjectCreated(BaseHandle handle)
 {
-  if (handle)
+  if(handle)
   {
     const std::string& type = handle.GetTypeName();
 
     const FeedbackStyleInfo styleInfo = GetStyleInfo(type);
 
-    for (SignalFeedbackInfoConstIter iter = styleInfo.mSignalFeedbackInfoList.begin();
-         iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
+    for(SignalFeedbackInfoConstIter iter = styleInfo.mSignalFeedbackInfoList.begin();
+        iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
     {
       const SignalFeedbackInfo& info = *iter;
 
-      if (info.mHasHapticFeedbackInfo || info.mHasSoundFeedbackInfo)
+      if(info.mHasHapticFeedbackInfo || info.mHasSoundFeedbackInfo)
       {
-        if (!info.mHapticFeedbackPattern.empty() || !info.mHapticFeedbackFile.empty() ||
-            !info.mSoundFeedbackPattern.empty() || !info.mSoundFeedbackFile.empty())
+        if(!info.mHapticFeedbackPattern.empty() || !info.mHapticFeedbackFile.empty() ||
+           !info.mSoundFeedbackPattern.empty() || !info.mSoundFeedbackFile.empty())
         {
           handle.ConnectSignal(this, info.mSignalName, PlayFeedbackFromSignal(*this, type, info.mSignalName));
 
@@ -173,7 +173,7 @@ void FeedbackStyle::ObjectCreated(BaseHandle handle)
 const FeedbackStyleInfo& FeedbackStyle::GetStyleInfo(const std::string& type) const
 {
   std::map<const std::string, FeedbackStyleInfo>::const_iterator iter(mStyleInfoLut.find(type));
-  if (iter != mStyleInfoLut.end())
+  if(iter != mStyleInfoLut.end())
   {
     return iter->second;
   }
@@ -186,21 +186,21 @@ const FeedbackStyleInfo& FeedbackStyle::GetStyleInfo(const std::string& type) co
 
 void FeedbackStyle::StyleChanged(const std::string& userDefinedThemePath, Dali::StyleChange::Type styleChange)
 {
-  if (styleChange == StyleChange::THEME_CHANGE)
+  if(styleChange == StyleChange::THEME_CHANGE)
   {
     std::string userDefinedTheme;
 
-    if (mFeedback && mFeedback.LoadFile(userDefinedThemePath, userDefinedTheme))
+    if(mFeedback && mFeedback.LoadFile(userDefinedThemePath, userDefinedTheme))
     {
-      if (!LoadTheme(userDefinedTheme))
+      if(!LoadTheme(userDefinedTheme))
       {
         DALI_LOG_ERROR("FeedbackStyle::StyleChanged() User defined theme failed to load! \n");
 
-        const std::string styleDirPath = AssetManager::GetDaliStylePath();
+        const std::string styleDirPath         = AssetManager::GetDaliStylePath();
         const std::string defaultThemeFilePath = styleDirPath + DEFAULT_FEEDBACK_THEME_FILE_NAME;
 
         // If there is any problem is using the user defined theme, then fall back to default theme
-        if (!LoadTheme(defaultThemeFilePath))
+        if(!LoadTheme(defaultThemeFilePath))
         {
           // If the default theme fails, Then No luck!
           DALI_LOG_ERROR("FeedbackStyle::StyleChanged() Default theme failed to load! \n");
@@ -229,7 +229,7 @@ bool FeedbackStyle::LoadTheme(const std::string& data)
 
     result = true;
   }
-  catch (...)
+  catch(...)
   {
     // Problem in user set theme, So fallback to use default theme.
     DALI_LOG_ERROR("FeedbackStyle::LoadTheme() Failed to load theme\n");
@@ -240,10 +240,10 @@ bool FeedbackStyle::LoadTheme(const std::string& data)
 
 void FeedbackStyle::LoadFromString(const std::string& data)
 {
-  Ui::JsonParser parser = Ui::JsonParser::New();
-  const Ui::TreeNode* root = NULL;
+  Ui::JsonParser      parser = Ui::JsonParser::New();
+  const Ui::TreeNode* root   = NULL;
 
-  if (!parser.Parse(data))
+  if(!parser.Parse(data))
   {
     DALI_LOG_ERROR("JSON Parse Error:'%s'\n", parser.GetErrorDescription().c_str());
     DALI_LOG_ERROR("JSON Parse Line :'%d (%d)'\n", parser.GetErrorLineNumber(), parser.GetErrorColumn());
@@ -253,27 +253,27 @@ void FeedbackStyle::LoadFromString(const std::string& data)
     root = parser.GetRoot();
   }
 
-  if (root)
+  if(root)
   {
     // Clear previously loaded style
     mStyleInfoLut.clear();
 
     // Parse style
-    if (const TreeNode* node = root->GetChild("style"))
+    if(const TreeNode* node = root->GetChild("style"))
     {
       Ui::TreeNode::ConstIterator iter = node->CBegin();
-      Ui::TreeNode::ConstIterator end = node->CEnd();
-      for (; iter != end; ++iter)
+      Ui::TreeNode::ConstIterator end  = node->CEnd();
+      for(; iter != end; ++iter)
       {
-        const char* key = (*iter).first;
+        const char*       key = (*iter).first;
         FeedbackStyleInfo themeInfo;
         themeInfo.mTypeName = key;
 
-        if (const TreeNode* signals = (*iter).second.GetChild("signals"))
+        if(const TreeNode* signals = (*iter).second.GetChild("signals"))
         {
           TreeNode::ConstIterator signalIter = signals->CBegin();
-          TreeNode::ConstIterator signalEnd = signals->CEnd();
-          for (; signalIter != signalEnd; ++signalIter)
+          TreeNode::ConstIterator signalEnd  = signals->CEnd();
+          for(; signalIter != signalEnd; ++signalIter)
           {
             SignalFeedbackInfo signalFeedbackInfo;
 
@@ -293,7 +293,7 @@ void FeedbackStyle::LoadFromString(const std::string& data)
             GetIfString((*signalIter).second, "hapticFeedbackFile", signalFeedbackInfo.mHasSoundFeedbackInfo,
                         signalFeedbackInfo.mSoundFeedbackFile);
 
-            if (signalFeedbackInfo.mHasHapticFeedbackInfo || signalFeedbackInfo.mHasSoundFeedbackInfo)
+            if(signalFeedbackInfo.mHasHapticFeedbackInfo || signalFeedbackInfo.mHasSoundFeedbackInfo)
             {
               AddSignalInfo(themeInfo, std::move(signalFeedbackInfo));
             }
@@ -303,34 +303,34 @@ void FeedbackStyle::LoadFromString(const std::string& data)
         mStyleInfoLut[key] = themeInfo;
 
       } // for styles
-    }   // if(style)
-  }     // if(root)
+    } // if(style)
+  } // if(root)
 
 } // LoadFromString()
 
 void FeedbackStyle::AddSignalInfo(FeedbackStyleInfo& styleInfo, SignalFeedbackInfo&& signalInfo)
 {
-  bool updated = false;
+  bool                                  updated = false;
   SignalFeedbackInfoContainer::iterator iter;
 
   // If info exists for the signal then update it, else add new
-  for (iter = styleInfo.mSignalFeedbackInfoList.begin(); iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
+  for(iter = styleInfo.mSignalFeedbackInfoList.begin(); iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
   {
-    if ((*iter).mSignalName == signalInfo.mSignalName)
+    if((*iter).mSignalName == signalInfo.mSignalName)
     {
       (*iter).mHasHapticFeedbackInfo = signalInfo.mHasHapticFeedbackInfo;
       (*iter).mHapticFeedbackPattern = signalInfo.mHapticFeedbackPattern;
-      (*iter).mHapticFeedbackFile = signalInfo.mHapticFeedbackFile;
-      (*iter).mHasSoundFeedbackInfo = signalInfo.mHasSoundFeedbackInfo;
-      (*iter).mSoundFeedbackPattern = signalInfo.mSoundFeedbackPattern;
-      (*iter).mSoundFeedbackFile = signalInfo.mSoundFeedbackFile;
+      (*iter).mHapticFeedbackFile    = signalInfo.mHapticFeedbackFile;
+      (*iter).mHasSoundFeedbackInfo  = signalInfo.mHasSoundFeedbackInfo;
+      (*iter).mSoundFeedbackPattern  = signalInfo.mSoundFeedbackPattern;
+      (*iter).mSoundFeedbackFile     = signalInfo.mSoundFeedbackFile;
 
       updated = true;
       break;
     }
   }
 
-  if (!updated)
+  if(!updated)
   {
     styleInfo.mSignalFeedbackInfoList.emplace_back(std::move(signalInfo));
   }
@@ -338,44 +338,44 @@ void FeedbackStyle::AddSignalInfo(FeedbackStyleInfo& styleInfo, SignalFeedbackIn
 
 void FeedbackStyle::PlayFeedback(const std::string& type, const std::string& signalName)
 {
-  const FeedbackStyleInfo styleInfo = GetStyleInfo(type);
+  const FeedbackStyleInfo     styleInfo = GetStyleInfo(type);
   SignalFeedbackInfoConstIter iter;
 
-  for (iter = styleInfo.mSignalFeedbackInfoList.begin(); iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
+  for(iter = styleInfo.mSignalFeedbackInfoList.begin(); iter != styleInfo.mSignalFeedbackInfoList.end(); ++iter)
   {
     const SignalFeedbackInfo& info = *iter;
 
-    if (info.mSignalName == signalName)
+    if(info.mSignalName == signalName)
     {
-      if (info.mHasHapticFeedbackInfo)
+      if(info.mHasHapticFeedbackInfo)
       {
-        if (!info.mHapticFeedbackPattern.empty())
+        if(!info.mHapticFeedbackPattern.empty())
         {
           DALI_LOG_INFO(
-              gLogFilter, Debug::Verbose,
-              "FeedbackStyle::PlayFeedback Playing Haptic effect: Object type: %s, Signal type: %s, pattern type: %s\n",
-              type.c_str(), signalName.c_str(), info.mHapticFeedbackPattern.c_str());
+            gLogFilter, Debug::Verbose,
+            "FeedbackStyle::PlayFeedback Playing Haptic effect: Object type: %s, Signal type: %s, pattern type: %s\n",
+            type.c_str(), signalName.c_str(), info.mHapticFeedbackPattern.c_str());
 
           mFeedback.PlayFeedbackPattern(FEEDBACK_TYPE_VIBRATION, GetFeedbackPattern(info.mHapticFeedbackPattern));
         }
-        else if (!info.mHapticFeedbackFile.empty())
+        else if(!info.mHapticFeedbackFile.empty())
         {
           mFeedback.PlayFile(info.mHapticFeedbackFile);
         }
       }
 
-      if (info.mHasSoundFeedbackInfo)
+      if(info.mHasSoundFeedbackInfo)
       {
-        if (!info.mSoundFeedbackPattern.empty())
+        if(!info.mSoundFeedbackPattern.empty())
         {
           DALI_LOG_INFO(
-              gLogFilter, Debug::Verbose,
-              "FeedbackStyle::PlayFeedback Playing Sound effect: Object type: %s, Signal type: %s, pattern type: %s\n",
-              type.c_str(), signalName.c_str(), info.mHapticFeedbackPattern.c_str());
+            gLogFilter, Debug::Verbose,
+            "FeedbackStyle::PlayFeedback Playing Sound effect: Object type: %s, Signal type: %s, pattern type: %s\n",
+            type.c_str(), signalName.c_str(), info.mHapticFeedbackPattern.c_str());
 
           mFeedback.PlayFeedbackPattern(FEEDBACK_TYPE_SOUND, GetFeedbackPattern(info.mSoundFeedbackPattern));
         }
-        else if (!info.mSoundFeedbackFile.empty())
+        else if(!info.mSoundFeedbackFile.empty())
         {
           mFeedback.PlaySound(info.mSoundFeedbackFile);
         }
@@ -388,63 +388,63 @@ void FeedbackStyle::PlayFeedback(const std::string& type, const std::string& sig
 
 FeedbackPattern FeedbackStyle::GetFeedbackPattern(const std::string& pattern)
 {
-  if (0 == mFeedbackPatternLut.size())
+  if(0 == mFeedbackPatternLut.size())
   {
-    mFeedbackPatternLut["FEEDBACK_PATTERN_NONE"] = Dali::FEEDBACK_PATTERN_NONE;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_TAP"] = Dali::FEEDBACK_PATTERN_TAP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SIP"] = Dali::FEEDBACK_PATTERN_SIP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SIP_BACKSPACE"] = Dali::FEEDBACK_PATTERN_SIP_BACKSPACE;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_MAX_CHARACTER"] = Dali::FEEDBACK_PATTERN_MAX_CHARACTER;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY0"] = Dali::FEEDBACK_PATTERN_KEY0;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY1"] = Dali::FEEDBACK_PATTERN_KEY1;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY2"] = Dali::FEEDBACK_PATTERN_KEY2;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY3"] = Dali::FEEDBACK_PATTERN_KEY3;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY4"] = Dali::FEEDBACK_PATTERN_KEY4;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY5"] = Dali::FEEDBACK_PATTERN_KEY5;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY6"] = Dali::FEEDBACK_PATTERN_KEY6;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY7"] = Dali::FEEDBACK_PATTERN_KEY7;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY8"] = Dali::FEEDBACK_PATTERN_KEY8;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY9"] = Dali::FEEDBACK_PATTERN_KEY9;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY_STAR"] = Dali::FEEDBACK_PATTERN_KEY_STAR;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY_SHARP"] = Dali::FEEDBACK_PATTERN_KEY_SHARP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_HOLD"] = Dali::FEEDBACK_PATTERN_HOLD;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_MULTI_TAP"] = Dali::FEEDBACK_PATTERN_MULTI_TAP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_HW_TAP"] = Dali::FEEDBACK_PATTERN_HW_TAP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_HW_HOLD"] = Dali::FEEDBACK_PATTERN_HW_HOLD;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_MESSAGE"] = Dali::FEEDBACK_PATTERN_MESSAGE;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_MESSAGE_ON_CALL"] = Dali::FEEDBACK_PATTERN_MESSAGE_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_EMAIL"] = Dali::FEEDBACK_PATTERN_EMAIL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_EMAIL_ON_CALL"] = Dali::FEEDBACK_PATTERN_EMAIL_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_WAKEUP"] = Dali::FEEDBACK_PATTERN_WAKEUP;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_WAKEUP_ON_CALL"] = Dali::FEEDBACK_PATTERN_WAKEUP_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SCHEDULE"] = Dali::FEEDBACK_PATTERN_SCHEDULE;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SCHEDULE_ON_CALL"] = Dali::FEEDBACK_PATTERN_SCHEDULE_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_TIMER"] = Dali::FEEDBACK_PATTERN_TIMER;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_TIMER_ON_CALL"] = Dali::FEEDBACK_PATTERN_TIMER_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_GENERAL"] = Dali::FEEDBACK_PATTERN_GENERAL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_GENERAL_ON_CALL"] = Dali::FEEDBACK_PATTERN_GENERAL_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_POWER_ON"] = Dali::FEEDBACK_PATTERN_POWER_ON;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_POWER_OFF"] = Dali::FEEDBACK_PATTERN_POWER_OFF;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_CHARGERCONN"] = Dali::FEEDBACK_PATTERN_CHARGERCONN;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_NONE"]                = Dali::FEEDBACK_PATTERN_NONE;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_TAP"]                 = Dali::FEEDBACK_PATTERN_TAP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SIP"]                 = Dali::FEEDBACK_PATTERN_SIP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SIP_BACKSPACE"]       = Dali::FEEDBACK_PATTERN_SIP_BACKSPACE;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_MAX_CHARACTER"]       = Dali::FEEDBACK_PATTERN_MAX_CHARACTER;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY0"]                = Dali::FEEDBACK_PATTERN_KEY0;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY1"]                = Dali::FEEDBACK_PATTERN_KEY1;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY2"]                = Dali::FEEDBACK_PATTERN_KEY2;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY3"]                = Dali::FEEDBACK_PATTERN_KEY3;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY4"]                = Dali::FEEDBACK_PATTERN_KEY4;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY5"]                = Dali::FEEDBACK_PATTERN_KEY5;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY6"]                = Dali::FEEDBACK_PATTERN_KEY6;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY7"]                = Dali::FEEDBACK_PATTERN_KEY7;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY8"]                = Dali::FEEDBACK_PATTERN_KEY8;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY9"]                = Dali::FEEDBACK_PATTERN_KEY9;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY_STAR"]            = Dali::FEEDBACK_PATTERN_KEY_STAR;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_KEY_SHARP"]           = Dali::FEEDBACK_PATTERN_KEY_SHARP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_HOLD"]                = Dali::FEEDBACK_PATTERN_HOLD;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_MULTI_TAP"]           = Dali::FEEDBACK_PATTERN_MULTI_TAP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_HW_TAP"]              = Dali::FEEDBACK_PATTERN_HW_TAP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_HW_HOLD"]             = Dali::FEEDBACK_PATTERN_HW_HOLD;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_MESSAGE"]             = Dali::FEEDBACK_PATTERN_MESSAGE;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_MESSAGE_ON_CALL"]     = Dali::FEEDBACK_PATTERN_MESSAGE_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_EMAIL"]               = Dali::FEEDBACK_PATTERN_EMAIL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_EMAIL_ON_CALL"]       = Dali::FEEDBACK_PATTERN_EMAIL_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_WAKEUP"]              = Dali::FEEDBACK_PATTERN_WAKEUP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_WAKEUP_ON_CALL"]      = Dali::FEEDBACK_PATTERN_WAKEUP_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SCHEDULE"]            = Dali::FEEDBACK_PATTERN_SCHEDULE;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SCHEDULE_ON_CALL"]    = Dali::FEEDBACK_PATTERN_SCHEDULE_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_TIMER"]               = Dali::FEEDBACK_PATTERN_TIMER;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_TIMER_ON_CALL"]       = Dali::FEEDBACK_PATTERN_TIMER_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_GENERAL"]             = Dali::FEEDBACK_PATTERN_GENERAL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_GENERAL_ON_CALL"]     = Dali::FEEDBACK_PATTERN_GENERAL_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_POWER_ON"]            = Dali::FEEDBACK_PATTERN_POWER_ON;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_POWER_OFF"]           = Dali::FEEDBACK_PATTERN_POWER_OFF;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_CHARGERCONN"]         = Dali::FEEDBACK_PATTERN_CHARGERCONN;
     mFeedbackPatternLut["FEEDBACK_PATTERN_CHARGERCONN_ON_CALL"] = Dali::FEEDBACK_PATTERN_CHARGERCONN_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_FULLCHARGED"] = Dali::FEEDBACK_PATTERN_FULLCHARGED;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_FULLCHARGED"]         = Dali::FEEDBACK_PATTERN_FULLCHARGED;
     mFeedbackPatternLut["FEEDBACK_PATTERN_FULLCHARGED_ON_CALL"] = Dali::FEEDBACK_PATTERN_FULLCHARGED_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_LOWBATT"] = Dali::FEEDBACK_PATTERN_LOWBATT;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_LOWBATT_ON_CALL"] = Dali::FEEDBACK_PATTERN_LOWBATT_ON_CALL;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_LOCK"] = Dali::FEEDBACK_PATTERN_LOCK;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_UNLOCK"] = Dali::FEEDBACK_PATTERN_UNLOCK;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_CALLCONNECT"] = Dali::FEEDBACK_PATTERN_CALLCONNECT;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_DISCALLCONNECT"] = Dali::FEEDBACK_PATTERN_DISCALLCONNECT;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_MINUTEMINDER"] = Dali::FEEDBACK_PATTERN_MINUTEMINDER;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_VIBRATION"] = Dali::FEEDBACK_PATTERN_VIBRATION;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SHUTTER"] = Dali::FEEDBACK_PATTERN_SHUTTER;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_LIST_REORDER"] = Dali::FEEDBACK_PATTERN_LIST_REORDER;
-    mFeedbackPatternLut["FEEDBACK_PATTERN_SLIDER_SWEEP"] = Dali::FEEDBACK_PATTERN_SLIDER_SWEEP;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_LOWBATT"]             = Dali::FEEDBACK_PATTERN_LOWBATT;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_LOWBATT_ON_CALL"]     = Dali::FEEDBACK_PATTERN_LOWBATT_ON_CALL;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_LOCK"]                = Dali::FEEDBACK_PATTERN_LOCK;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_UNLOCK"]              = Dali::FEEDBACK_PATTERN_UNLOCK;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_CALLCONNECT"]         = Dali::FEEDBACK_PATTERN_CALLCONNECT;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_DISCALLCONNECT"]      = Dali::FEEDBACK_PATTERN_DISCALLCONNECT;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_MINUTEMINDER"]        = Dali::FEEDBACK_PATTERN_MINUTEMINDER;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_VIBRATION"]           = Dali::FEEDBACK_PATTERN_VIBRATION;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SHUTTER"]             = Dali::FEEDBACK_PATTERN_SHUTTER;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_LIST_REORDER"]        = Dali::FEEDBACK_PATTERN_LIST_REORDER;
+    mFeedbackPatternLut["FEEDBACK_PATTERN_SLIDER_SWEEP"]        = Dali::FEEDBACK_PATTERN_SLIDER_SWEEP;
   }
 
   std::map<const std::string, FeedbackPattern>::const_iterator iter(mFeedbackPatternLut.find(pattern));
 
-  if (iter != mFeedbackPatternLut.end())
+  if(iter != mFeedbackPatternLut.end())
   {
     return iter->second;
   }

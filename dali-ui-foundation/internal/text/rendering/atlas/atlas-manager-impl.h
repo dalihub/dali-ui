@@ -53,15 +53,15 @@ public:
    */
   struct AtlasDescriptor
   {
-    Dali::Texture mAtlas;                   // atlas image
-    Ui::AtlasManager::AtlasSize mSize;      // size of atlas
-    Pixel::Format mPixelFormat;             // pixel format used by atlas
-    PixelData mHorizontalStrip;             // Image used to pad upload
-    PixelData mVerticalStrip;               // Image used to pad upload
-    TextureSet mTextureSet;                 // Texture set used for atlas texture
-    SizeType mTotalBlocks;                  // total number of blocks in atlas
-    SizeType mAvailableBlocks;              // number of blocks available in atlas
-    Dali::Vector<SizeType> mFreeBlocksList; // unless there are any previously freed blocks
+    Dali::Texture               mAtlas;           // atlas image
+    Ui::AtlasManager::AtlasSize mSize;            // size of atlas
+    Pixel::Format               mPixelFormat;     // pixel format used by atlas
+    PixelData                   mHorizontalStrip; // Image used to pad upload
+    PixelData                   mVerticalStrip;   // Image used to pad upload
+    TextureSet                  mTextureSet;      // Texture set used for atlas texture
+    SizeType                    mTotalBlocks;     // total number of blocks in atlas
+    SizeType                    mAvailableBlocks; // number of blocks available in atlas
+    Dali::Vector<SizeType>      mFreeBlocksList;  // unless there are any previously freed blocks
   };
 
   struct AtlasSlotDescriptor
@@ -69,7 +69,7 @@ public:
     SizeType mCount;       // Reference count for this slot
     SizeType mImageWidth;  // Width of image stored
     SizeType mImageHeight; // Height of image stored
-    AtlasId mAtlasId;      // Image is stored in this Atlas
+    AtlasId  mAtlasId;     // Image is stored in this Atlas
     SizeType mBlock;       // Block within atlas used for image
   };
 
@@ -163,9 +163,9 @@ public:
   void SetTextures(AtlasId atlas, TextureSet& textureSet);
 
 private:
-  std::vector<AtlasDescriptor> mAtlasList;        // List of atlases created
-  Vector<AtlasSlotDescriptor> mImageList;         // List of bitmaps stored in atlases
-  Ui::AtlasManager::AtlasSize mNewAtlasSize;      // Atlas size to use in next creation
+  std::vector<AtlasDescriptor>    mAtlasList;     // List of atlases created
+  Vector<AtlasSlotDescriptor>     mImageList;     // List of bitmaps stored in atlases
+  Ui::AtlasManager::AtlasSize     mNewAtlasSize;  // Atlas size to use in next creation
   Ui::AtlasManager::AddFailPolicy mAddFailPolicy; // Policy for failing to add an Image
 
   SizeType CheckAtlas(SizeType atlas, SizeType width, SizeType height, Pixel::Format pixelFormat);

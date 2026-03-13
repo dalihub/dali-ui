@@ -22,11 +22,11 @@ namespace Dali::Ui::Internal
 {
 SvgLoaderObserver::~SvgLoaderObserver()
 {
-  if (!mLoadDestructionSignal.Empty())
+  if(!mLoadDestructionSignal.Empty())
   {
     mLoadDestructionSignal.Emit(this);
   }
-  if (!mRasterizeDestructionSignal.Empty())
+  if(!mRasterizeDestructionSignal.Empty())
   {
     mRasterizeDestructionSignal.Emit(this);
   }

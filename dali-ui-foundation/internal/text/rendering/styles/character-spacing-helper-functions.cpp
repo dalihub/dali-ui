@@ -24,18 +24,18 @@ namespace Ui
 {
 namespace Text
 {
-float GetGlyphCharacterSpacing(const GlyphIndex& index,
+float GetGlyphCharacterSpacing(const GlyphIndex&                       index,
                                const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns,
-                               const float modelCharacterSpacing)
+                               const float                             modelCharacterSpacing)
 {
   float characterSpacing = modelCharacterSpacing;
-  for (Vector<CharacterSpacingGlyphRun>::ConstIterator it = characterSpacingGlyphRuns.Begin(),
-                                                       endIt = characterSpacingGlyphRuns.End();
-       it != endIt; ++it)
+  for(Vector<CharacterSpacingGlyphRun>::ConstIterator it    = characterSpacingGlyphRuns.Begin(),
+                                                      endIt = characterSpacingGlyphRuns.End();
+      it != endIt; ++it)
   {
     const CharacterSpacingGlyphRun& run = *it;
 
-    if ((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
+    if((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
     {
       // Retrieve the latest run to handle the nested case.
       // TODO: Using reverse Iterator will improve performance in this loop

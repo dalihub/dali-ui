@@ -110,10 +110,10 @@ private:
   Rect<float> GetOverlayExtents(Dali::Actor& sceneView, Dali::Actor& highlight);
 
 private:
-  bool mHasOverlayActor;
-  OverlayHighlightMode mOverlayMode;
-  Vector2 mManualPosition;
-  Vector2 mManualSize;
+  bool                          mHasOverlayActor;
+  OverlayHighlightMode          mOverlayMode;
+  Vector2                       mManualPosition;
+  Vector2                       mManualSize;
   Dali::WeakHandle<Dali::Actor> mOverlayActor;
 };
 

@@ -50,7 +50,7 @@ Property::Map CreateMotionStretchEffect()
   Property::Map map;
 
   Property::Map customShader;
-  customShader[Visual::Shader::Property::VERTEX_SHADER] = SHADER_MOTION_STRETCH_EFFECT_VERT.data();
+  customShader[Visual::Shader::Property::VERTEX_SHADER]   = SHADER_MOTION_STRETCH_EFFECT_VERT.data();
   customShader[Visual::Shader::Property::FRAGMENT_SHADER] = SHADER_MOTION_STRETCH_EFFECT_FRAG.data();
 
   customShader[Visual::Shader::Property::SUBDIVIDE_GRID_X] = 10;

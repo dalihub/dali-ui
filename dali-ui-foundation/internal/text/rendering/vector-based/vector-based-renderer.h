@@ -42,8 +42,8 @@ public:
   /**
    * @copydoc Renderer::Render()
    */
-  virtual Actor Render(ViewInterface& view,
-                       Actor textControl,                       // Functionality not supported but defined in interface
+  virtual Actor Render(ViewInterface&  view,
+                       Actor           textControl,             // Functionality not supported but defined in interface
                        Property::Index animatablePropertyIndex, // Functionality not supported but defined in interface
                        float& alignmentOffset, int depth);
 

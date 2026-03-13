@@ -91,10 +91,10 @@ protected:
 
 private:
   // Not copyable or movable
-  LayoutImpl(const LayoutImpl&) = delete;
-  LayoutImpl(LayoutImpl&&) = delete;
+  LayoutImpl(const LayoutImpl&)            = delete;
+  LayoutImpl(LayoutImpl&&)                 = delete;
   LayoutImpl& operator=(const LayoutImpl&) = delete;
-  LayoutImpl& operator=(LayoutImpl&&) = delete;
+  LayoutImpl& operator=(LayoutImpl&&)      = delete;
 };
 
 // Helpers for public-api forwarding methods

@@ -41,7 +41,7 @@ namespace TextureManagerType
 
 enum TextureCacheIndexType
 {
-  TEXTURE_CACHE_INDEX_FREE_LIST = 0, ///< Only for FreeList. We should not use this for TextureCacheIndex.
+  TEXTURE_CACHE_INDEX_FREE_LIST  = 0, ///< Only for FreeList. We should not use this for TextureCacheIndex.
   TEXTURE_CACHE_INDEX_TYPE_LOCAL = 1,
   TEXTURE_CACHE_INDEX_TYPE_TEXTURE,
   TEXTURE_CACHE_INDEX_TYPE_BUFFER,
@@ -65,23 +65,23 @@ union TextureCacheIndexData
 {
   TextureCacheIndexData() = default;
   constexpr TextureCacheIndexData(const uint32_t index)
-    : indexValue(index)
+  : indexValue(index)
   {
   }
   constexpr explicit TextureCacheIndexData(const int32_t index)
-    : indexValue(static_cast<uint32_t>(index))
+  : indexValue(static_cast<uint32_t>(index))
   {
   }
   constexpr TextureCacheIndexData(const TextureCacheIndexType& type, const uint32_t index)
-    : detailValue{index, type}
+  : detailValue{index, type}
   {
   }
   constexpr TextureCacheIndexData(const TextureCacheIndexData& indexData)
-    : indexValue(indexData.indexValue)
+  : indexValue(indexData.indexValue)
   {
   }
   constexpr TextureCacheIndexData(TextureCacheIndexData&& indexData)
-    : indexValue(indexData.indexValue)
+  : indexValue(indexData.indexValue)
   {
   }
 
@@ -137,7 +137,7 @@ union TextureCacheIndexData
   uint32_t indexValue;
   struct
   {
-    unsigned int index : 28;
+    unsigned int          index : 28;
     TextureCacheIndexType type : 4;
   } detailValue;
 };
@@ -146,16 +146,16 @@ union TextureCacheIndexData
 
 typedef int32_t TextureId; ///< The TextureId type. This is used as a handle to refer to a particular Texture.
 typedef TextureCacheIndexData
-    TextureCacheIndex; ///< The TextureCacheIndex type. This is used as a handles to refer to a particular Texture in
-                       ///< TextureCacheManager.
-                       ///  Note : For the same Texture, TextureId will not be changed. But TextureCacheIndex can be
-                       ///  chaged when TextureCacheManager Internal container informations changed by Append or Remove.
+  TextureCacheIndex;        ///< The TextureCacheIndex type. This is used as a handles to refer to a particular Texture in
+                            ///< TextureCacheManager.
+                            ///  Note : For the same Texture, TextureId will not be changed. But TextureCacheIndex can be
+                            ///  chaged when TextureCacheManager Internal container informations changed by Append or Remove.
 typedef size_t TextureHash; ///< The type used to store the hash used for Texture caching.
 
 // Constant values:
 
-static constexpr TextureId INVALID_TEXTURE_ID = -1;         ///< Used to represent a null TextureId or error
-static constexpr TextureCacheIndex INVALID_CACHE_INDEX = 0; ///< Used to represent a null TextureCacheIndex or error
+static constexpr TextureId         INVALID_TEXTURE_ID  = -1; ///< Used to represent a null TextureId or error
+static constexpr TextureCacheIndex INVALID_CACHE_INDEX = 0;  ///< Used to represent a null TextureCacheIndex or error
 
 // Enum classes:
 
@@ -164,14 +164,14 @@ static constexpr TextureCacheIndex INVALID_CACHE_INDEX = 0; ///< Used to represe
  */
 enum class StorageType
 {
-  KEEP_PIXEL_BUFFER, ///< Keep loaded pixel buffer inside of texture manager without making texture. This could be used
-                     ///< for inside pixel process like mask image.
+  KEEP_PIXEL_BUFFER,   ///< Keep loaded pixel buffer inside of texture manager without making texture. This could be used
+                       ///< for inside pixel process like mask image.
   RETURN_PIXEL_BUFFER, ///< Return loaded pixel buffer without making texture.
                        ///  Because a pixel buffer cannot be used multiple texture, this pixel buffer only cached during
                        ///  loading, and is removed after loading is finished.
-  KEEP_TEXTURE,     ///< Keep loaded texture inside of texture manager. This could be used for pixel processing like GPU
-                    ///< masking.
-  UPLOAD_TO_TEXTURE ///< Loaded image will be uploaded to texture and the texture will be returned.
+  KEEP_TEXTURE,        ///< Keep loaded texture inside of texture manager. This could be used for pixel processing like GPU
+                       ///< masking.
+  UPLOAD_TO_TEXTURE    ///< Loaded image will be uploaded to texture and the texture will be returned.
 };
 
 /**
@@ -223,28 +223,28 @@ struct TextureInfo
               const bool orientationCorrection, const bool preMultiplyOnLoad,
               const Dali::AnimatedImageLoading& animatedImageLoading, const uint32_t frameIndex,
               const bool loadYuvPlanes)
-    : url(url),
-      desiredSize(desiredSize),
-      useSize(desiredSize),
-      textureId(textureId),
-      maskTextureId(maskTextureId),
-      hash(hash),
-      scaleFactor(scaleFactor),
-      referenceCount(1),
-      loadState(LoadState::NOT_STARTED),
-      fittingMode(fittingMode),
-      samplingMode(samplingMode),
-      storageType(StorageType::UPLOAD_TO_TEXTURE),
-      animatedImageLoading(animatedImageLoading),
-      frameIndex(frameIndex),
-      frameCount(0u),
-      frameInterval(0u),
-      loadSynchronously(loadSynchronously),
-      cropToMask(cropToMask),
-      orientationCorrection(true),
-      preMultiplyOnLoad(preMultiplyOnLoad),
-      preMultiplied(preMultiplyOnLoad),
-      loadYuvPlanes(loadYuvPlanes)
+  : url(url),
+    desiredSize(desiredSize),
+    useSize(desiredSize),
+    textureId(textureId),
+    maskTextureId(maskTextureId),
+    hash(hash),
+    scaleFactor(scaleFactor),
+    referenceCount(1),
+    loadState(LoadState::NOT_STARTED),
+    fittingMode(fittingMode),
+    samplingMode(samplingMode),
+    storageType(StorageType::UPLOAD_TO_TEXTURE),
+    animatedImageLoading(animatedImageLoading),
+    frameIndex(frameIndex),
+    frameCount(0u),
+    frameInterval(0u),
+    loadSynchronously(loadSynchronously),
+    cropToMask(cropToMask),
+    orientationCorrection(true),
+    preMultiplyOnLoad(preMultiplyOnLoad),
+    preMultiplied(preMultiplyOnLoad),
+    loadYuvPlanes(loadYuvPlanes)
   {
     isAnimatedImageFormat = (animatedImageLoading) ? true : false;
   }
@@ -254,26 +254,26 @@ struct TextureInfo
    */
   typedef Dali::Vector<TextureUploadObserver*> ObserverListType;
 
-  ObserverListType observerList;             ///< Container used to store all observer clients of this Texture
-  Dali::Devel::PixelBuffer pixelBuffer;      ///< The PixelBuffer holding the image data (May be empty after upload)
-  std::vector<Dali::Texture> textures;       ///< The Textures
-  VisualUrl url;                             ///< The URL of the image
-  Dali::ImageDimensions desiredSize;         ///< The size requested
-  Dali::ImageDimensions useSize;             ///< The size used
-  TextureId textureId;                       ///< The TextureId associated with this Texture
-  TextureId maskTextureId;                   ///< The mask TextureId to be applied on load
-  TextureHash hash;                          ///< The hash used to cache this Texture
-  float scaleFactor;                         ///< The scale factor to apply to the Texture when masking
-  int32_t referenceCount;                    ///< The reference count of clients using this Texture
-  LoadState loadState;                       ///< The load state showing the load progress of the Texture
-  Dali::FittingMode::Type fittingMode : 4;   ///< The requested FittingMode
-  Dali::SamplingMode::Type samplingMode : 5; ///< The requested SamplingMode
-  StorageType storageType;                   ///< CPU storage / GPU upload;
+  ObserverListType           observerList;         ///< Container used to store all observer clients of this Texture
+  Dali::Devel::PixelBuffer   pixelBuffer;          ///< The PixelBuffer holding the image data (May be empty after upload)
+  std::vector<Dali::Texture> textures;             ///< The Textures
+  VisualUrl                  url;                  ///< The URL of the image
+  Dali::ImageDimensions      desiredSize;          ///< The size requested
+  Dali::ImageDimensions      useSize;              ///< The size used
+  TextureId                  textureId;            ///< The TextureId associated with this Texture
+  TextureId                  maskTextureId;        ///< The mask TextureId to be applied on load
+  TextureHash                hash;                 ///< The hash used to cache this Texture
+  float                      scaleFactor;          ///< The scale factor to apply to the Texture when masking
+  int32_t                    referenceCount;       ///< The reference count of clients using this Texture
+  LoadState                  loadState;            ///< The load state showing the load progress of the Texture
+  Dali::FittingMode::Type    fittingMode : 4;      ///< The requested FittingMode
+  Dali::SamplingMode::Type   samplingMode : 5;     ///< The requested SamplingMode
+  StorageType                storageType;          ///< CPU storage / GPU upload;
   Dali::AnimatedImageLoading animatedImageLoading; ///< AnimatedImageLoading that contains animated image information.
-  uint32_t frameIndex;                             ///< Frame index that be loaded, in case of animated image
-  uint32_t frameCount;    ///< Total frame count of input animated image. If this variable is not 0, this textureInfo is
-                          ///< for animated image file format.
-  uint32_t frameInterval; ///< Time interval between this frame and next frame of animated image.
+  uint32_t                   frameIndex;           ///< Frame index that be loaded, in case of animated image
+  uint32_t                   frameCount;           ///< Total frame count of input animated image. If this variable is not 0, this textureInfo is
+                                                   ///< for animated image file format.
+  uint32_t frameInterval;                          ///< Time interval between this frame and next frame of animated image.
 
   bool loadSynchronously : 1;     ///< True if synchronous loading was requested
   bool cropToMask : 1;            ///< True if the image should be cropped to the mask size.
@@ -290,17 +290,17 @@ struct TextureInfo
 struct ExternalTextureInfo
 {
   ExternalTextureInfo(const TextureId textureId, const TextureSet& textureSet, const bool preMultiplied)
-    : textureId(textureId),
-      textureSet(textureSet),
-      referenceCount(1),
-      preMultiplied(preMultiplied)
+  : textureId(textureId),
+    textureSet(textureSet),
+    referenceCount(1),
+    preMultiplied(preMultiplied)
   {
   }
 
-  TextureId textureId;    ///< The TextureId associated with this ExternalTexture
-  TextureSet textureSet;  ///< The external texture
-  int32_t referenceCount; ///< The reference count of clients using this ExternalTexture
-  bool preMultiplied : 1; ///< True if the image's color was multiplied by it's alpha
+  TextureId  textureId;         ///< The TextureId associated with this ExternalTexture
+  TextureSet textureSet;        ///< The external texture
+  int32_t    referenceCount;    ///< The reference count of clients using this ExternalTexture
+  bool       preMultiplied : 1; ///< True if the image's color was multiplied by it's alpha
 };
 
 } // namespace TextureManagerType

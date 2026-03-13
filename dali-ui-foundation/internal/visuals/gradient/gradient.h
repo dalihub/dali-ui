@@ -48,8 +48,8 @@ public:
   struct GradientStop
   {
     GradientStop(float offset, const Vector4& color)
-      : mOffset(offset),
-        mStopColor(color)
+    : mOffset(offset),
+      mStopColor(color)
     {
     }
 
@@ -58,7 +58,7 @@ public:
       return mOffset < rhs.mOffset;
     }
 
-    float mOffset;      // A value ranging from 0 to 1 to indicate where the gradient stop is placed.
+    float   mOffset;    // A value ranging from 0 to 1 to indicate where the gradient stop is placed.
     Vector4 mStopColor; // The color to use at this gradient stop
   };
 
@@ -157,11 +157,11 @@ protected:
   Gradient& operator=(const Gradient& handle);
 
 protected:
-  Vector<GradientStop> mGradientStops;
-  Matrix3 mAlignmentTransform;
-  Ui::GradientVisual::Units::Type mGradientUnits;
+  Vector<GradientStop>                   mGradientStops;
+  Matrix3                                mAlignmentTransform;
+  Ui::GradientVisual::Units::Type        mGradientUnits;
   Ui::GradientVisual::SpreadMethod::Type mSpreadMethod;
-  float mStartOffset;
+  float                                  mStartOffset;
 };
 
 } // namespace Internal

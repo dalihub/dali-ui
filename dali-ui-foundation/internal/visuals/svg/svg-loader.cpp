@@ -99,10 +99,10 @@ void SetTextureSetToRasterizeInfo(const Dali::PixelData rasterizedPixelData, Svg
 Dali::TextureSet GetTextureSetFromRasterizeInfo(const SvgLoader::SvgRasterizeInfo& rasterizeInfo)
 {
   Dali::TextureSet textureSet;
-  if (DALI_LIKELY(rasterizeInfo.mTextureSet && rasterizeInfo.mTextureSet.GetTextureCount() > 0u))
+  if(DALI_LIKELY(rasterizeInfo.mTextureSet && rasterizeInfo.mTextureSet.GetTextureCount() > 0u))
   {
     auto texture = rasterizeInfo.mTextureSet.GetTexture(0u);
-    if (DALI_LIKELY(texture))
+    if(DALI_LIKELY(texture))
     {
       // Always create new TextureSet here, so we don't share same TextureSets for multiple visuals.
       textureSet = Dali::TextureSet::New();
@@ -115,18 +115,18 @@ Dali::TextureSet GetTextureSetFromRasterizeInfo(const SvgLoader::SvgRasterizeInf
 } // Anonymous namespace
 
 SvgLoader::SvgLoader()
-  : mFactoryCache(nullptr),
-    mCurrentSvgLoadId(0),
-    mCurrentSvgRasterizeId(0),
-    mLoadingQueueLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
-    mRasterizingQueueRasterizeId(SvgLoader::INVALID_SVG_RASTERIZE_ID),
-    mRemoveProcessorRegistered(false)
+: mFactoryCache(nullptr),
+  mCurrentSvgLoadId(0),
+  mCurrentSvgRasterizeId(0),
+  mLoadingQueueLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
+  mRasterizingQueueRasterizeId(SvgLoader::INVALID_SVG_RASTERIZE_ID),
+  mRemoveProcessorRegistered(false)
 {
 }
 
 SvgLoader::~SvgLoader()
 {
-  if (mRemoveProcessorRegistered && Adaptor::IsAvailable())
+  if(mRemoveProcessorRegistered && Adaptor::IsAvailable())
   {
     Adaptor::Get().UnregisterProcessorOnce(*this, true);
     mRemoveProcessorRegistered = false;
@@ -136,7 +136,7 @@ SvgLoader::~SvgLoader()
 SvgLoader::SvgLoadId SvgLoader::GenerateUniqueSvgLoadId()
 {
   // Skip invalid id generation.
-  if (DALI_UNLIKELY(mCurrentSvgLoadId == SvgLoader::INVALID_SVG_LOAD_ID))
+  if(DALI_UNLIKELY(mCurrentSvgLoadId == SvgLoader::INVALID_SVG_LOAD_ID))
   {
     mCurrentSvgLoadId = 0;
   }
@@ -146,7 +146,7 @@ SvgLoader::SvgLoadId SvgLoader::GenerateUniqueSvgLoadId()
 SvgLoader::SvgRasterizeId SvgLoader::GenerateUniqueSvgRasterizeId()
 {
   // Skip invalid id generation.
-  if (DALI_UNLIKELY(mCurrentSvgRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
+  if(DALI_UNLIKELY(mCurrentSvgRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
   {
     mCurrentSvgRasterizeId = 0;
   }
@@ -156,20 +156,20 @@ SvgLoader::SvgRasterizeId SvgLoader::GenerateUniqueSvgRasterizeId()
 SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, float dpi, SvgLoaderObserver* svgObserver,
                                      bool synchronousLoading)
 {
-  SvgLoadId loadId = SvgLoader::INVALID_SVG_LOAD_ID;
-  auto cacheIndex = FindCacheIndexFromLoadCache(url, dpi);
+  SvgLoadId loadId     = SvgLoader::INVALID_SVG_LOAD_ID;
+  auto      cacheIndex = FindCacheIndexFromLoadCache(url, dpi);
 
   // Newly append cache now.
-  if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
-    loadId = GenerateUniqueSvgLoadId();
+    loadId     = GenerateUniqueSvgLoadId();
     cacheIndex = static_cast<SvgCacheIndex>(static_cast<uint32_t>(mLoadCache.size()));
     mLoadCache.push_back(SvgLoadInfo(loadId, url, dpi));
 
-    if (url.IsBufferResource())
+    if(url.IsBufferResource())
     {
       // Make encoded image buffer url valid until this SvgLoadInfo alive.
-      if (DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
+      if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
       {
         auto& textureManager = mFactoryCache->GetTextureManager();
         textureManager.UseExternalResource(url);
@@ -194,12 +194,12 @@ SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, float dpi, SvgLoaderO
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General, "SvgLoader::Load info id:%d, state:%s, refCount=%d\n",
                 loadInfo.mId, GET_LOAD_STATE_STRING(loadInfo.mLoadState), static_cast<int>(loadInfo.mReferenceCount));
 
-  switch (loadInfo.mLoadState)
+  switch(loadInfo.mLoadState)
   {
     case LoadState::LOAD_FAILED: // Failed notifies observer which then stops observing.
     case LoadState::NOT_STARTED:
     {
-      if (synchronousLoading)
+      if(synchronousLoading)
       {
         // Do not add observer for sync load case.
         LoadSynchronously(loadInfo, svgObserver);
@@ -212,21 +212,21 @@ SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, float dpi, SvgLoaderO
     }
     case LoadState::LOAD_FINISHED:
     {
-      if (synchronousLoading || (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
-                                 mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
+      if(synchronousLoading || (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
+                                mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
       {
         // Already load finished. Notify observer.
-        if (svgObserver)
+        if(svgObserver)
         {
           svgObserver->LoadComplete(loadId, loadInfo.mLoadState == LoadState::LOAD_FINISHED
-                                                ? loadInfo.mVectorImageRenderer
-                                                : Dali::VectorImageRenderer());
+                                              ? loadInfo.mVectorImageRenderer
+                                              : Dali::VectorImageRenderer());
         }
       }
       else
       {
         // We should not notify observer yet. Queue it.
-        if (svgObserver)
+        if(svgObserver)
         {
           LoadOrQueue(loadInfo, svgObserver);
         }
@@ -242,7 +242,7 @@ SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, float dpi, SvgLoaderO
     }
     case LoadState::LOADING:
     {
-      if (synchronousLoading)
+      if(synchronousLoading)
       {
         // Do not add observer for sync load case.
         // And also, we should not notify another observers even if we have already loaded.
@@ -262,16 +262,16 @@ SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, float dpi, SvgLoaderO
 SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width, uint32_t height,
                                                SvgLoaderObserver* svgObserver, bool synchronousLoading)
 {
-  if (loadId == SvgLoader::INVALID_SVG_LOAD_ID)
+  if(loadId == SvgLoader::INVALID_SVG_LOAD_ID)
   {
     return SvgLoader::INVALID_SVG_RASTERIZE_ID;
   }
 
   SvgRasterizeId rasterizeId = SvgLoader::INVALID_SVG_RASTERIZE_ID;
-  auto cacheIndex = FindCacheIndexFromRasterizeCache(loadId, width, height);
+  auto           cacheIndex  = FindCacheIndexFromRasterizeCache(loadId, width, height);
 
   // Newly append cache now.
-  if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     // Increase loadId reference first
     // It would be decreased at rasterizate removal.
@@ -287,14 +287,14 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
       imageUrl = mLoadCache[loadCacheIndex].mImageUrl;
 #endif
       DALI_LOG_INFO(
-          gSvgLoaderLogFilter, Debug::General,
-          "SvgLoader::Rasterize( loadId=%d Size=%ux%u observer=%p ) Increase loadId loadState:%s, refCount=%d\n",
-          loadId, width, height, svgObserver, GET_LOAD_STATE_STRING(mLoadCache[loadCacheIndex].mLoadState),
-          static_cast<int>(mLoadCache[loadCacheIndex].mReferenceCount));
+        gSvgLoaderLogFilter, Debug::General,
+        "SvgLoader::Rasterize( loadId=%d Size=%ux%u observer=%p ) Increase loadId loadState:%s, refCount=%d\n",
+        loadId, width, height, svgObserver, GET_LOAD_STATE_STRING(mLoadCache[loadCacheIndex].mLoadState),
+        static_cast<int>(mLoadCache[loadCacheIndex].mReferenceCount));
     }
 
     rasterizeId = GenerateUniqueSvgRasterizeId();
-    cacheIndex = static_cast<SvgCacheIndex>(mRasterizeCache.size());
+    cacheIndex  = static_cast<SvgCacheIndex>(mRasterizeCache.size());
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
     mRasterizeCache.push_back(SvgRasterizeInfo(rasterizeId, loadId, width, height, std::move(imageUrl)));
 #else
@@ -320,12 +320,12 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
                 rasterizeInfo.mId, GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState),
                 static_cast<int>(rasterizeInfo.mReferenceCount));
 
-  switch (rasterizeInfo.mRasterizeState)
+  switch(rasterizeInfo.mRasterizeState)
   {
     case RasterizeState::UPLOAD_FAILED: // Failed notifies observer which then stops observing.
     case RasterizeState::NOT_STARTED:
     {
-      if (synchronousLoading)
+      if(synchronousLoading)
       {
         // Do not add observer for sync load case.
         RasterizeSynchronously(rasterizeInfo, svgObserver);
@@ -338,14 +338,14 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
     }
     case RasterizeState::UPLOADED:
     {
-      if (synchronousLoading || (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
-                                 mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
+      if(synchronousLoading || (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
+                                mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
       {
         // Already upload finished. Notify observer.
-        if (svgObserver)
+        if(svgObserver)
         {
           Dali::TextureSet textureSet;
-          if (rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
+          if(rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
           {
             textureSet = GetTextureSetFromRasterizeInfo(rasterizeInfo);
           }
@@ -355,7 +355,7 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
       else
       {
         // We should not notify observer yet. Queue it.
-        if (svgObserver)
+        if(svgObserver)
         {
           RasterizeOrQueue(rasterizeInfo, svgObserver);
         }
@@ -364,7 +364,7 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
     }
     case RasterizeState::RASTERIZING:
     {
-      if (synchronousLoading)
+      if(synchronousLoading)
       {
         // Do not add observer for sync load case.
         // And also, we should not notify another observers even if we have already loaded.
@@ -385,7 +385,7 @@ void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver
 {
   // Remove observer first
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
-  if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     return;
   }
@@ -395,7 +395,7 @@ void SvgLoader::RequestLoadRemove(SvgLoader::SvgLoadId loadId, SvgLoaderObserver
   RemoveLoadObserver(loadInfo, svgObserver);
   mLoadRemoveQueue.push_back(loadId);
 
-  if (!mRemoveProcessorRegistered && Adaptor::IsAvailable())
+  if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
   {
     mRemoveProcessorRegistered = true;
     Adaptor::Get().RegisterProcessorOnce(*this, true);
@@ -407,7 +407,7 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
 {
   // Remove observer first
   auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
-  if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     return;
   }
@@ -417,8 +417,8 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
   RemoveRasterizeObserver(rasterizeInfo, svgObserver);
 
   // Should not remove rasterize info if we are in notify observing.
-  if (removalSynchronously && (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
-                               mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
+  if(removalSynchronously && (mLoadingQueueLoadId == SvgLoader::INVALID_SVG_LOAD_ID &&
+                              mRasterizingQueueRasterizeId == SvgLoader::INVALID_SVG_RASTERIZE_ID))
   {
     RemoveRasterize(rasterizeId);
   }
@@ -426,7 +426,7 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
   {
     mRasterizeRemoveQueue.push_back(rasterizeId);
 
-    if (!mRemoveProcessorRegistered && Adaptor::IsAvailable())
+    if(!mRemoveProcessorRegistered && Adaptor::IsAvailable())
     {
       mRemoveProcessorRegistered = true;
       Adaptor::Get().RegisterProcessorOnce(*this, true);
@@ -437,7 +437,7 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
 Dali::VectorImageRenderer SvgLoader::GetVectorImageRenderer(SvgLoader::SvgLoadId loadId) const
 {
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
-  if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mLoadCache.size() && "Invalid cache index");
     return mLoadCache[cacheIndex].mVectorImageRenderer;
@@ -448,19 +448,19 @@ Dali::VectorImageRenderer SvgLoader::GetVectorImageRenderer(SvgLoader::SvgLoadId
 void SvgLoader::Process(bool postProcessor)
 {
   DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(
-      gTraceFilter, "DALI_SVG_LOADER_PROCESS_REMOVE_QUEUE",
-      [&](std::ostringstream& oss)
-      { oss << "[r:" << mRasterizeRemoveQueue.size() << ", l:" << mLoadRemoveQueue.size() << "]"; });
+    gTraceFilter, "DALI_SVG_LOADER_PROCESS_REMOVE_QUEUE",
+    [&](std::ostringstream& oss)
+  { oss << "[r:" << mRasterizeRemoveQueue.size() << ", l:" << mLoadRemoveQueue.size() << "]"; });
 
   mRemoveProcessorRegistered = false;
 
-  for (auto& iter : mRasterizeRemoveQueue)
+  for(auto& iter : mRasterizeRemoveQueue)
   {
     RemoveRasterize(iter);
   }
   mRasterizeRemoveQueue.clear();
 
-  for (auto& iter : mLoadRemoveQueue)
+  for(auto& iter : mLoadRemoveQueue)
   {
     RemoveLoad(iter);
   }
@@ -473,9 +473,9 @@ SvgLoader::SvgCacheIndex SvgLoader::GetCacheIndexFromLoadCacheById(const SvgLoad
 {
   const uint32_t size = static_cast<uint32_t>(mLoadCache.size());
 
-  for (uint32_t i = 0; i < size; ++i)
+  for(uint32_t i = 0; i < size; ++i)
   {
-    if (mLoadCache[i].mId == loadId)
+    if(mLoadCache[i].mId == loadId)
     {
       return static_cast<SvgCacheIndex>(i);
     }
@@ -484,13 +484,13 @@ SvgLoader::SvgCacheIndex SvgLoader::GetCacheIndexFromLoadCacheById(const SvgLoad
 }
 
 SvgLoader::SvgCacheIndex SvgLoader::GetCacheIndexFromRasterizeCacheById(
-    const SvgLoader::SvgRasterizeId rasterizeId) const
+  const SvgLoader::SvgRasterizeId rasterizeId) const
 {
   const uint32_t size = static_cast<uint32_t>(mRasterizeCache.size());
 
-  for (uint32_t i = 0; i < size; ++i)
+  for(uint32_t i = 0; i < size; ++i)
   {
-    if (mRasterizeCache[i].mId == rasterizeId)
+    if(mRasterizeCache[i].mId == rasterizeId)
     {
       return static_cast<SvgCacheIndex>(i);
     }
@@ -504,9 +504,9 @@ SvgLoader::SvgCacheIndex SvgLoader::FindCacheIndexFromLoadCache(const VisualUrl&
 
   // TODO : Let we use hash in future. For now, just PoC
 
-  for (uint32_t i = 0; i < size; ++i)
+  for(uint32_t i = 0; i < size; ++i)
   {
-    if (mLoadCache[i].mImageUrl.GetUrl() == imageUrl.GetUrl() && Dali::Equals(mLoadCache[i].mDpi, dpi))
+    if(mLoadCache[i].mImageUrl.GetUrl() == imageUrl.GetUrl() && Dali::Equals(mLoadCache[i].mDpi, dpi))
     {
       return static_cast<SvgCacheIndex>(i);
     }
@@ -521,10 +521,10 @@ SvgLoader::SvgCacheIndex SvgLoader::FindCacheIndexFromRasterizeCache(const SvgLo
 
   // TODO : Let we use hash in future. For now, just PoC
 
-  for (uint32_t i = 0; i < size; ++i)
+  for(uint32_t i = 0; i < size; ++i)
   {
-    if (mRasterizeCache[i].mLoadId == loadId && mRasterizeCache[i].mWidth == width &&
-        mRasterizeCache[i].mHeight == height)
+    if(mRasterizeCache[i].mLoadId == loadId && mRasterizeCache[i].mWidth == width &&
+       mRasterizeCache[i].mHeight == height)
     {
       return static_cast<SvgCacheIndex>(i);
     }
@@ -535,7 +535,7 @@ SvgLoader::SvgCacheIndex SvgLoader::FindCacheIndexFromRasterizeCache(const SvgLo
 void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
 {
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
-  if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mLoadCache.size() && "Invalid cache index");
 
@@ -547,9 +547,9 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
                   loadInfo.mImageUrl.GetUrl().c_str(), loadInfo.mDpi, cacheIndex, loadId,
                   GET_LOAD_STATE_STRING(loadInfo.mLoadState), static_cast<int>(loadInfo.mReferenceCount));
 
-    if (loadInfo.mReferenceCount <= 0)
+    if(loadInfo.mReferenceCount <= 0)
     {
-      if (loadInfo.mLoadState == LoadState::LOADING)
+      if(loadInfo.mLoadState == LoadState::LOADING)
       {
         // Keep the load info in the cache, but mark it as cancelled.
         // It will be removed when async load completed.
@@ -557,10 +557,10 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
       }
       else
       {
-        if (loadInfo.mImageUrl.IsBufferResource())
+        if(loadInfo.mImageUrl.IsBufferResource())
         {
           // Unreference image buffer url from texture manager.
-          if (DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
+          if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
           {
             auto& textureManager = mFactoryCache->GetTextureManager();
             textureManager.RemoveEncodedImageBuffer(loadInfo.mImageUrl);
@@ -569,7 +569,7 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
 
         // Remove the load info from the cache.
         // Swap last data of cacheContainer.
-        if (static_cast<std::size_t>(cacheIndex + 1) < mLoadCache.size())
+        if(static_cast<std::size_t>(cacheIndex + 1) < mLoadCache.size())
         {
           // Swap the value between current data and last data.
           std::swap(mLoadCache[cacheIndex], mLoadCache.back());
@@ -587,7 +587,7 @@ void SvgLoader::RemoveLoad(SvgLoader::SvgLoadId loadId)
 void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 {
   auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
-  if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mRasterizeCache.size() && "Invalid cache index");
 
@@ -595,17 +595,17 @@ void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 
     --rasterizeInfo.mReferenceCount;
     DALI_LOG_INFO(
-        gSvgLoaderLogFilter, Debug::General,
-        "SvgLoader::RemoveRasterize( loadId=%d Size=%ux%u ) cached index:%d rasterizeId@%d, state:%s, refCount=%d\n",
-        rasterizeInfo.mLoadId, rasterizeInfo.mWidth, rasterizeInfo.mHeight, cacheIndex, rasterizeId,
-        GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState), static_cast<int>(rasterizeInfo.mReferenceCount));
+      gSvgLoaderLogFilter, Debug::General,
+      "SvgLoader::RemoveRasterize( loadId=%d Size=%ux%u ) cached index:%d rasterizeId@%d, state:%s, refCount=%d\n",
+      rasterizeInfo.mLoadId, rasterizeInfo.mWidth, rasterizeInfo.mHeight, cacheIndex, rasterizeId,
+      GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState), static_cast<int>(rasterizeInfo.mReferenceCount));
 
-    if (rasterizeInfo.mReferenceCount <= 0)
+    if(rasterizeInfo.mReferenceCount <= 0)
     {
       // Reduce the reference count of LoadId first.
       RemoveLoad(rasterizeInfo.mLoadId);
 
-      if (rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING && rasterizeInfo.mTask)
+      if(rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING && rasterizeInfo.mTask)
       {
         // Cancel rasterize task immediatly!
         Dali::AsyncTaskManager::Get().RemoveTask(rasterizeInfo.mTask);
@@ -613,7 +613,7 @@ void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 
       // Remove the rasterize info from the cache.
       // Swap last data of cacheContainer.
-      if (static_cast<std::size_t>(cacheIndex + 1) < mRasterizeCache.size())
+      if(static_cast<std::size_t>(cacheIndex + 1) < mRasterizeCache.size())
       {
         // Swap the value between current data and last data.
         std::swap(mRasterizeCache[cacheIndex], mRasterizeCache.back());
@@ -631,11 +631,11 @@ void SvgLoader::RemoveRasterize(SvgLoader::SvgRasterizeId rasterizeId)
 
 void SvgLoader::LoadOrQueue(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver* svgObserver)
 {
-  if (mLoadingQueueLoadId != SvgLoader::INVALID_SVG_LOAD_ID ||
-      mRasterizingQueueRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+  if(mLoadingQueueLoadId != SvgLoader::INVALID_SVG_LOAD_ID ||
+     mRasterizingQueueRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
   {
     mLoadQueue.PushBack(LoadQueueElement(loadInfo.mId, svgObserver));
-    if (svgObserver)
+    if(svgObserver)
     {
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "  (Load)Connect DestructionSignal to observer:%p\n",
                     svgObserver);
@@ -656,19 +656,19 @@ void SvgLoader::LoadRequest(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver*
   loadInfo.mLoadState = LoadState::LOADING;
 
   EncodedImageBuffer encodedImageBuffer;
-  if (loadInfo.mImageUrl.IsBufferResource())
+  if(loadInfo.mImageUrl.IsBufferResource())
   {
     // Make encoded image buffer url valid until this SvgLoadInfo alive.
-    if (DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
     {
       auto& textureManager = mFactoryCache->GetTextureManager();
-      encodedImageBuffer = textureManager.GetEncodedImageBuffer(loadInfo.mImageUrl);
+      encodedImageBuffer   = textureManager.GetEncodedImageBuffer(loadInfo.mImageUrl);
     }
   }
 
   loadInfo.mTask =
-      new SvgLoadingTask(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl, encodedImageBuffer,
-                         loadInfo.mDpi, MakeCallback(this, &SvgLoader::AsyncLoadComplete));
+    new SvgLoadingTask(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl, encodedImageBuffer,
+                       loadInfo.mDpi, MakeCallback(this, &SvgLoader::AsyncLoadComplete));
 
   Dali::AsyncTaskManager::Get().AddTask(loadInfo.mTask);
 }
@@ -679,13 +679,13 @@ void SvgLoader::LoadSynchronously(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObs
                 loadInfo.mId, svgObserver);
 
   EncodedImageBuffer encodedImageBuffer;
-  if (loadInfo.mImageUrl.IsBufferResource())
+  if(loadInfo.mImageUrl.IsBufferResource())
   {
     // Make encoded image buffer url valid until this SvgLoadInfo alive.
-    if (DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
+    if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && mFactoryCache))
     {
       auto& textureManager = mFactoryCache->GetTextureManager();
-      encodedImageBuffer = textureManager.GetEncodedImageBuffer(loadInfo.mImageUrl);
+      encodedImageBuffer   = textureManager.GetEncodedImageBuffer(loadInfo.mImageUrl);
     }
   }
 
@@ -693,7 +693,7 @@ void SvgLoader::LoadSynchronously(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObs
   SvgTaskPtr loadingTask = new SvgLoadingTask(loadInfo.mVectorImageRenderer, loadInfo.mId, loadInfo.mImageUrl,
                                               encodedImageBuffer, loadInfo.mDpi, nullptr);
   loadingTask->Process();
-  if (!loadingTask->HasSucceeded())
+  if(!loadingTask->HasSucceeded())
   {
     loadInfo.mLoadState = LoadState::LOAD_FAILED;
   }
@@ -702,11 +702,11 @@ void SvgLoader::LoadSynchronously(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObs
     loadInfo.mLoadState = LoadState::LOAD_FINISHED;
   }
 
-  if (svgObserver)
+  if(svgObserver)
   {
     svgObserver->LoadComplete(loadInfo.mId, loadInfo.mLoadState == LoadState::LOAD_FINISHED
-                                                ? loadInfo.mVectorImageRenderer
-                                                : Dali::VectorImageRenderer());
+                                              ? loadInfo.mVectorImageRenderer
+                                              : Dali::VectorImageRenderer());
   }
 }
 
@@ -715,7 +715,7 @@ void SvgLoader::AddLoadObserver(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObser
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "SvgLoader::AddLoadObserver(): id:%d observer:%p\n", loadInfo.mId,
                 svgObserver);
 
-  if (svgObserver)
+  if(svgObserver)
   {
     loadInfo.mObservers.PushBack(svgObserver);
 
@@ -727,11 +727,11 @@ void SvgLoader::AddLoadObserver(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObser
 
 void SvgLoader::RemoveLoadObserver(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver* svgObserver)
 {
-  if (svgObserver)
+  if(svgObserver)
   {
     const auto iterEnd = loadInfo.mObservers.End();
-    const auto iter = std::find(loadInfo.mObservers.Begin(), iterEnd, svgObserver);
-    if (iter != iterEnd)
+    const auto iter    = std::find(loadInfo.mObservers.Begin(), iterEnd, svgObserver);
+    if(iter != iterEnd)
     {
       // Disconnect and remove the observer.
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "  (Load)Disconnect DestructionSignal to observer:%p\n",
@@ -743,9 +743,9 @@ void SvgLoader::RemoveLoadObserver(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderOb
     {
       // Given loadId might exist at load queue.
       // Remove observer from the LoadQueue
-      for (auto&& element : mLoadQueue)
+      for(auto&& element : mLoadQueue)
       {
-        if (element.first == loadInfo.mId && element.second == svgObserver)
+        if(element.first == loadInfo.mId && element.second == svgObserver)
         {
           DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose,
                         "Remove observer from load queue (loadId:%d, observer:%p)\n", element.first, element.second);
@@ -762,40 +762,40 @@ void SvgLoader::RemoveLoadObserver(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderOb
 
 void SvgLoader::ProcessLoadQueue()
 {
-  for (auto&& element : mLoadQueue)
+  for(auto&& element : mLoadQueue)
   {
-    if (element.first == SvgLoader::INVALID_SVG_LOAD_ID)
+    if(element.first == SvgLoader::INVALID_SVG_LOAD_ID)
     {
       continue;
     }
 
     auto cacheIndex = GetCacheIndexFromLoadCacheById(element.first);
-    if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+    if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
     {
       DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mLoadCache.size() && "Invalid cache index");
 
       SvgLoadInfo& loadInfo(mLoadCache[cacheIndex]);
-      const auto loadId = element.first;
-      auto* svgObserver = element.second;
+      const auto   loadId      = element.first;
+      auto*        svgObserver = element.second;
 
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
                     "SvgLoader::ProcessLoadQueue() loadId=%d, observer=%p, cacheIndex=@%d, loadState:%s\n", loadId,
                     svgObserver, cacheIndex, GET_LOAD_STATE_STRING(loadInfo.mLoadState));
 
-      if ((loadInfo.mLoadState == LoadState::LOAD_FINISHED) || (loadInfo.mLoadState == LoadState::LOAD_FAILED))
+      if((loadInfo.mLoadState == LoadState::LOAD_FINISHED) || (loadInfo.mLoadState == LoadState::LOAD_FAILED))
       {
-        if (svgObserver)
+        if(svgObserver)
         {
           DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "  (Load)Disconnect DestructionSignal to observer:%p\n",
                         svgObserver);
           svgObserver->LoadDestructionSignal().Disconnect(this, &SvgLoader::LoadObserverDestroyed);
 
           svgObserver->LoadComplete(loadId, loadInfo.mLoadState == LoadState::LOAD_FINISHED
-                                                ? loadInfo.mVectorImageRenderer
-                                                : Dali::VectorImageRenderer());
+                                              ? loadInfo.mVectorImageRenderer
+                                              : Dali::VectorImageRenderer());
         }
       }
-      else if (loadInfo.mLoadState == LoadState::LOADING)
+      else if(loadInfo.mLoadState == LoadState::LOADING)
       {
         // Note : LOADING state texture cannot be queue.
         // This case be occured when same load id are queue in mLoadQueue.
@@ -817,7 +817,7 @@ void SvgLoader::NotifyLoadObservers(SvgLoader::SvgLoadInfo& loadInfo)
 
   // Empty handle if load failed
   Dali::VectorImageRenderer vectorImageRenderer =
-      loadInfo.mLoadState == LoadState::LOAD_FINISHED ? loadInfo.mVectorImageRenderer : Dali::VectorImageRenderer();
+    loadInfo.mLoadState == LoadState::LOAD_FINISHED ? loadInfo.mVectorImageRenderer : Dali::VectorImageRenderer();
 
   // If there is an observer: Notify the load is complete, whether successful or not,
   // and erase it from the list
@@ -828,7 +828,7 @@ void SvgLoader::NotifyLoadObservers(SvgLoader::SvgLoadInfo& loadInfo)
   // Reverse observer list that we can pop_back the observer.
   std::reverse(info->mObservers.Begin(), info->mObservers.End());
 
-  while (info->mObservers.Count())
+  while(info->mObservers.Count())
   {
     SvgLoaderObserver* observer = *(info->mObservers.End() - 1u);
 
@@ -856,7 +856,7 @@ void SvgLoader::NotifyLoadObservers(SvgLoader::SvgLoadInfo& loadInfo)
 
     // Get the textureInfo from the container again as it may have been invalidated.
     auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
-    if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+    if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
     {
       break; // load info has been removed - can stop.
     }
@@ -874,11 +874,11 @@ void SvgLoader::NotifyLoadObservers(SvgLoader::SvgLoadInfo& loadInfo)
 
 void SvgLoader::RasterizeOrQueue(SvgLoader::SvgRasterizeInfo& rasterizeInfo, SvgLoaderObserver* svgObserver)
 {
-  if (mLoadingQueueLoadId != SvgLoader::INVALID_SVG_LOAD_ID ||
-      mRasterizingQueueRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
+  if(mLoadingQueueLoadId != SvgLoader::INVALID_SVG_LOAD_ID ||
+     mRasterizingQueueRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
   {
     mRasterizeQueue.PushBack(RasterizeQueueElement(rasterizeInfo.mId, svgObserver));
-    if (svgObserver)
+    if(svgObserver)
     {
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "  (Rasterize)Connect DestructionSignal to observer:%p\n",
                     svgObserver);
@@ -898,19 +898,19 @@ void SvgLoader::RasterizeRequest(SvgLoader::SvgRasterizeInfo& rasterizeInfo, Svg
   AddRasterizeObserver(rasterizeInfo, svgObserver);
   rasterizeInfo.mRasterizeState = RasterizeState::RASTERIZING;
 
-  auto loadCacheIndex = GetCacheIndexFromLoadCacheById(rasterizeInfo.mLoadId);
+  auto loadCacheIndex      = GetCacheIndexFromLoadCacheById(rasterizeInfo.mLoadId);
   auto vectorImageRenderer = mLoadCache[loadCacheIndex].mVectorImageRenderer;
 
   SvgRasterizingTaskPtr rasterizingTask =
-      new SvgRasterizingTask(vectorImageRenderer, rasterizeInfo.mId, rasterizeInfo.mWidth, rasterizeInfo.mHeight,
-                             MakeCallback(this, &SvgLoader::AsyncRasterizeComplete));
+    new SvgRasterizingTask(vectorImageRenderer, rasterizeInfo.mId, rasterizeInfo.mWidth, rasterizeInfo.mHeight,
+                           MakeCallback(this, &SvgLoader::AsyncRasterizeComplete));
 #ifdef TRACE_ENABLED
   {
     rasterizingTask->SetUrl(mLoadCache[loadCacheIndex].mImageUrl);
   }
 #endif
 
-  if (mLoadCache[loadCacheIndex].mTask)
+  if(mLoadCache[loadCacheIndex].mTask)
   {
     // Notify at workerthread if load completed.
     // Need to be added before task added to task manager.
@@ -943,19 +943,19 @@ void SvgLoader::RasterizeSynchronously(SvgLoader::SvgRasterizeInfo& rasterizeInf
 
   PixelData rasterizedPixelData = rasterizingTask->GetPixelData();
 
-  if (!rasterizingTask->HasSucceeded() || !rasterizedPixelData)
+  if(!rasterizingTask->HasSucceeded() || !rasterizedPixelData)
   {
     rasterizeInfo.mRasterizeState = RasterizeState::UPLOAD_FAILED;
   }
-  else if (rasterizeInfo.mRasterizeState != RasterizeState::UPLOADED) ///< Check it to avoid duplicate Upload call.
+  else if(rasterizeInfo.mRasterizeState != RasterizeState::UPLOADED) ///< Check it to avoid duplicate Upload call.
   {
     SetTextureSetToRasterizeInfo(rasterizedPixelData, rasterizeInfo);
   }
 
-  if (svgObserver)
+  if(svgObserver)
   {
     Dali::TextureSet textureSet;
-    if (rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
+    if(rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
     {
       textureSet = GetTextureSetFromRasterizeInfo(rasterizeInfo);
     }
@@ -968,7 +968,7 @@ void SvgLoader::AddRasterizeObserver(SvgLoader::SvgRasterizeInfo& rasterizeInfo,
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "SvgLoader::AddRasterizeObserver(): id:%d observer:%p\n",
                 rasterizeInfo.mId, svgObserver);
 
-  if (svgObserver)
+  if(svgObserver)
   {
     rasterizeInfo.mObservers.PushBack(svgObserver);
 
@@ -980,11 +980,11 @@ void SvgLoader::AddRasterizeObserver(SvgLoader::SvgRasterizeInfo& rasterizeInfo,
 
 void SvgLoader::RemoveRasterizeObserver(SvgLoader::SvgRasterizeInfo& rasterizeInfo, SvgLoaderObserver* svgObserver)
 {
-  if (svgObserver)
+  if(svgObserver)
   {
     const auto iterEnd = rasterizeInfo.mObservers.End();
-    const auto iter = std::find(rasterizeInfo.mObservers.Begin(), iterEnd, svgObserver);
-    if (iter != iterEnd)
+    const auto iter    = std::find(rasterizeInfo.mObservers.Begin(), iterEnd, svgObserver);
+    if(iter != iterEnd)
     {
       // Disconnect and remove the observer.
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "  (Rasterize)Disconnect DestructionSignal to observer:%p\n",
@@ -996,9 +996,9 @@ void SvgLoader::RemoveRasterizeObserver(SvgLoader::SvgRasterizeInfo& rasterizeIn
     {
       // Given rasterizeId might exist at rasterize queue.
       // Remove observer from the RasterizeQueue
-      for (auto&& element : mRasterizeQueue)
+      for(auto&& element : mRasterizeQueue)
       {
-        if (element.first == rasterizeInfo.mId && element.second == svgObserver)
+        if(element.first == rasterizeInfo.mId && element.second == svgObserver)
         {
           DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose,
                         "Remove observer from rasterize queue (rasterizeId:%d, observer:%p)\n", element.first,
@@ -1016,45 +1016,45 @@ void SvgLoader::RemoveRasterizeObserver(SvgLoader::SvgRasterizeInfo& rasterizeIn
 
 void SvgLoader::ProcessRasterizeQueue()
 {
-  for (auto&& element : mRasterizeQueue)
+  for(auto&& element : mRasterizeQueue)
   {
-    if (element.first == SvgLoader::INVALID_SVG_RASTERIZE_ID)
+    if(element.first == SvgLoader::INVALID_SVG_RASTERIZE_ID)
     {
       continue;
     }
 
     auto cacheIndex = GetCacheIndexFromRasterizeCacheById(element.first);
-    if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+    if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
     {
       DALI_ASSERT_ALWAYS(static_cast<size_t>(cacheIndex) < mRasterizeCache.size() && "Invalid cache index");
 
       SvgRasterizeInfo& rasterizeInfo(mRasterizeCache[cacheIndex]);
-      const auto rasterizeId = element.first;
-      auto* svgObserver = element.second;
+      const auto        rasterizeId = element.first;
+      auto*             svgObserver = element.second;
 
       DALI_LOG_INFO(
-          gSvgLoaderLogFilter, Debug::General,
-          "SvgLoader::ProcessRasterizeQueue() rasterizeId=%d, observer=%p, cacheIndex=@%d, rasterizeState:%s\n",
-          rasterizeId, svgObserver, cacheIndex, GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState));
+        gSvgLoaderLogFilter, Debug::General,
+        "SvgLoader::ProcessRasterizeQueue() rasterizeId=%d, observer=%p, cacheIndex=@%d, rasterizeState:%s\n",
+        rasterizeId, svgObserver, cacheIndex, GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState));
 
-      if ((rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED) ||
-          (rasterizeInfo.mRasterizeState == RasterizeState::UPLOAD_FAILED))
+      if((rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED) ||
+         (rasterizeInfo.mRasterizeState == RasterizeState::UPLOAD_FAILED))
       {
-        if (svgObserver)
+        if(svgObserver)
         {
           DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose,
                         "  (Rasterize)Disconnect DestructionSignal to observer:%p\n", svgObserver);
           svgObserver->RasterizeDestructionSignal().Disconnect(this, &SvgLoader::RasterizeObserverDestroyed);
 
           Dali::TextureSet textureSet;
-          if (rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
+          if(rasterizeInfo.mRasterizeState == RasterizeState::UPLOADED)
           {
             textureSet = GetTextureSetFromRasterizeInfo(rasterizeInfo);
           }
           svgObserver->RasterizeComplete(rasterizeId, textureSet);
         }
       }
-      else if (rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING)
+      else if(rasterizeInfo.mRasterizeState == RasterizeState::RASTERIZING)
       {
         // Note : RASTERIZING state texture cannot be queue.
         // This case be occured when same load id are queue in mRasterizeQueue.
@@ -1085,7 +1085,7 @@ void SvgLoader::NotifyRasterizeObservers(SvgLoader::SvgRasterizeInfo& rasterizeI
   // Reverse observer list that we can pop_back the observer.
   std::reverse(info->mObservers.Begin(), info->mObservers.End());
 
-  while (info->mObservers.Count())
+  while(info->mObservers.Count())
   {
     SvgLoaderObserver* observer = *(info->mObservers.End() - 1u);
 
@@ -1098,10 +1098,10 @@ void SvgLoader::NotifyRasterizeObservers(SvgLoader::SvgRasterizeInfo& rasterizeI
     // Texture load requests for the same URL are deferred until the end of this
     // method.
     DALI_LOG_INFO(
-        gSvgLoaderLogFilter, Debug::Concise,
-        "SvgLoader::NotifyRasterizeObservers() observer:%p rasterizeId:%d loaderId:%d Size:%ux%u rasterizestate:%s\n",
-        observer, rasterizeId, info->mLoadId, info->mWidth, info->mHeight,
-        GET_RASTERIZE_STATE_STRING(info->mRasterizeState));
+      gSvgLoaderLogFilter, Debug::Concise,
+      "SvgLoader::NotifyRasterizeObservers() observer:%p rasterizeId:%d loaderId:%d Size:%ux%u rasterizestate:%s\n",
+      observer, rasterizeId, info->mLoadId, info->mWidth, info->mHeight,
+      GET_RASTERIZE_STATE_STRING(info->mRasterizeState));
 
     // It is possible for the observer to be deleted.
     // Disconnect and remove the observer first.
@@ -1112,7 +1112,7 @@ void SvgLoader::NotifyRasterizeObservers(SvgLoader::SvgRasterizeInfo& rasterizeI
     info->mObservers.Erase(info->mObservers.End() - 1u);
 
     Dali::TextureSet textureSet;
-    if (rasterizationSuccess)
+    if(rasterizationSuccess)
     {
       textureSet = GetTextureSetFromRasterizeInfo(rasterizeInfo);
     }
@@ -1121,7 +1121,7 @@ void SvgLoader::NotifyRasterizeObservers(SvgLoader::SvgRasterizeInfo& rasterizeI
 
     // Get the textureInfo from the container again as it may have been invalidated.
     auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
-    if (cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
+    if(cacheIndex == SvgLoader::INVALID_SVG_CACHE_INDEX)
     {
       break; // load info has been removed - can stop.
     }
@@ -1138,11 +1138,11 @@ void SvgLoader::NotifyRasterizeObservers(SvgLoader::SvgRasterizeInfo& rasterizeI
 /// From SvgLoadingTask
 void SvgLoader::AsyncLoadComplete(SvgTaskPtr task)
 {
-  auto loadId = task->GetId();
+  auto loadId     = task->GetId();
   auto cacheIndex = GetCacheIndexFromLoadCacheById(loadId);
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "SvgLoader::AsyncLoadComplete( loadId:%d CacheIndex:%u )\n",
                 loadId, cacheIndex);
-  if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     DALI_ASSERT_ALWAYS(cacheIndex < mLoadCache.size() && "Invalid cache index");
 
@@ -1151,19 +1151,19 @@ void SvgLoader::AsyncLoadComplete(SvgTaskPtr task)
     DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "  loadId:%d Url:%s CacheIndex:%d LoadState: %s\n", loadInfo.mId,
                   loadInfo.mImageUrl.GetUrl().c_str(), cacheIndex, GET_LOAD_STATE_STRING(loadInfo.mLoadState));
 
-    if (loadInfo.mTask == task)
+    if(loadInfo.mTask == task)
     {
       loadInfo.mTask.Reset();
     }
 
-    if (loadInfo.mLoadState == LoadState::CANCELLED)
+    if(loadInfo.mLoadState == LoadState::CANCELLED)
     {
       // Note : loadInfo can be invalidated after this call (as the mLoadCache may be modified)
       RemoveLoad(loadId);
     }
     else
     {
-      if (!task->HasSucceeded())
+      if(!task->HasSucceeded())
       {
         loadInfo.mLoadState = LoadState::LOAD_FAILED;
       }
@@ -1182,10 +1182,10 @@ void SvgLoader::AsyncLoadComplete(SvgTaskPtr task)
 void SvgLoader::AsyncRasterizeComplete(SvgTaskPtr task)
 {
   auto rasterizeId = task->GetId();
-  auto cacheIndex = GetCacheIndexFromRasterizeCacheById(rasterizeId);
+  auto cacheIndex  = GetCacheIndexFromRasterizeCacheById(rasterizeId);
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise,
                 "SvgLoader::AsyncRasterizeComplete( rasterizedId:%d CacheIndex:%u )\n", rasterizeId, cacheIndex);
-  if (cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
+  if(cacheIndex != SvgLoader::INVALID_SVG_CACHE_INDEX)
   {
     DALI_ASSERT_ALWAYS(cacheIndex < mRasterizeCache.size() && "Invalid cache index");
 
@@ -1196,19 +1196,19 @@ void SvgLoader::AsyncRasterizeComplete(SvgTaskPtr task)
                   rasterizeInfo.mLoadId, rasterizeInfo.mWidth, rasterizeInfo.mHeight, cacheIndex,
                   GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState));
 
-    if (rasterizeInfo.mTask == task)
+    if(rasterizeInfo.mTask == task)
     {
       rasterizeInfo.mTask.Reset();
     }
 
     PixelData rasterizedPixelData = task->GetPixelData();
 
-    if (!task->HasSucceeded() || !rasterizedPixelData)
+    if(!task->HasSucceeded() || !rasterizedPixelData)
     {
       rasterizeInfo.mRasterizeState = RasterizeState::UPLOAD_FAILED;
     }
-    else if (rasterizeInfo.mRasterizeState !=
-             RasterizeState::UPLOADED) ///< Check it to avoid duplicate Upload call. (e.g. sync rasterize)
+    else if(rasterizeInfo.mRasterizeState !=
+            RasterizeState::UPLOADED) ///< Check it to avoid duplicate Upload call. (e.g. sync rasterize)
     {
       SetTextureSetToRasterizeInfo(rasterizedPixelData, rasterizeInfo);
     }
@@ -1223,11 +1223,11 @@ void SvgLoader::LoadObserverDestroyed(SvgLoaderObserver* observer)
 {
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "SvgLoader::LoadObserverDestroyed(): observer:%p\n", observer);
 
-  for (auto&& loadInfo : mLoadCache)
+  for(auto&& loadInfo : mLoadCache)
   {
-    for (auto iter = (loadInfo.mObservers.Begin()); iter != (loadInfo.mObservers.End());)
+    for(auto iter = (loadInfo.mObservers.Begin()); iter != (loadInfo.mObservers.End());)
     {
-      if (*iter == observer)
+      if(*iter == observer)
       {
         DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise,
                       "  (Load)Remove observer from LoadCache (id:%d, observer:%p)\n", loadInfo.mId, observer);
@@ -1241,13 +1241,13 @@ void SvgLoader::LoadObserverDestroyed(SvgLoaderObserver* observer)
   }
 
   // Remove element from the LoadQueue
-  for (auto&& element : mLoadQueue)
+  for(auto&& element : mLoadQueue)
   {
-    if (element.second == observer)
+    if(element.second == observer)
     {
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose, "Remove observer from load queue (loadId:%d, observer:%p)\n",
                     element.first, element.second);
-      element.first = SvgLoader::INVALID_SVG_LOAD_ID;
+      element.first  = SvgLoader::INVALID_SVG_LOAD_ID;
       element.second = nullptr;
     }
   }
@@ -1258,11 +1258,11 @@ void SvgLoader::RasterizeObserverDestroyed(SvgLoaderObserver* observer)
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise, "SvgLoader::RasterizeObserverDestroyed(): observer:%p\n",
                 observer);
 
-  for (auto&& rasterizeInfo : mRasterizeCache)
+  for(auto&& rasterizeInfo : mRasterizeCache)
   {
-    for (auto iter = (rasterizeInfo.mObservers.Begin()); iter != (rasterizeInfo.mObservers.End());)
+    for(auto iter = (rasterizeInfo.mObservers.Begin()); iter != (rasterizeInfo.mObservers.End());)
     {
-      if (*iter == observer)
+      if(*iter == observer)
       {
         DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Concise,
                       "  (Rasterize)Remove observer from RasterizeCache (id:%d, observer:%p)\n", rasterizeInfo.mId,
@@ -1277,14 +1277,14 @@ void SvgLoader::RasterizeObserverDestroyed(SvgLoaderObserver* observer)
   }
 
   // Remove element from the RasterizeQueue
-  for (auto&& element : mRasterizeQueue)
+  for(auto&& element : mRasterizeQueue)
   {
-    if (element.second == observer)
+    if(element.second == observer)
     {
       DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::Verbose,
                     "Remove observer from rasterize queue (rasterizeId:%d, observer:%p)\n", element.first,
                     element.second);
-      element.first = SvgLoader::INVALID_SVG_RASTERIZE_ID;
+      element.first  = SvgLoader::INVALID_SVG_RASTERIZE_ID;
       element.second = nullptr;
     }
   }

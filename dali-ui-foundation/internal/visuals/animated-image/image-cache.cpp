@@ -27,17 +27,17 @@ ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size, Dal
                        Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer& maskingData,
                        ImageCache::FrameReadyObserver& observer, uint32_t batchSize, uint32_t interval,
                        bool preMultiplyOnLoad)
-  : mTextureManager(textureManager),
-    mObserver(observer),
-    mMaskingData(maskingData),
-    mDesiredSize(size),
-    mBatchSize(batchSize),
-    mInterval(interval),
-    mLoadState(TextureManager::LoadState::NOT_STARTED),
-    mFittingMode(fittingMode),
-    mSamplingMode(samplingMode),
-    mRequestingLoad(false),
-    mPreMultiplyOnLoad(preMultiplyOnLoad)
+: mTextureManager(textureManager),
+  mObserver(observer),
+  mMaskingData(maskingData),
+  mDesiredSize(size),
+  mBatchSize(batchSize),
+  mInterval(interval),
+  mLoadState(TextureManager::LoadState::NOT_STARTED),
+  mFittingMode(fittingMode),
+  mSamplingMode(samplingMode),
+  mRequestingLoad(false),
+  mPreMultiplyOnLoad(preMultiplyOnLoad)
 {
 }
 

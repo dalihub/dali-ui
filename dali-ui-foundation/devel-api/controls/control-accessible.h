@@ -102,7 +102,7 @@ enum class AccessibilityRole : uint32_t
 struct DALI_UI_API ControlAccessible : public Dali::Accessibility::ActorAccessible, public Dali::Accessibility::Action
 {
 protected:
-  Vector2 mLastPosition{0.0f, 0.0f};
+  Vector2                       mLastPosition{0.0f, 0.0f};
   Dali::WeakHandle<Dali::Actor> mCurrentHighlightActor;
 
   void ScrollToSelf();
@@ -339,7 +339,7 @@ private:
   /**
    * @brief Grabs snapshot of previous state when the control is highlighted.
    */
-  AccessibilityStates mStatesSnapshot;
+  AccessibilityStates           mStatesSnapshot;
   AccessibilityHighlightOverlay mHighlightOverlay;
 };
 

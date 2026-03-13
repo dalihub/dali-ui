@@ -41,7 +41,7 @@ class NPatchData : public ConnectionTracker, public Dali::Ui::TextureUploadObser
 {
 public:
   typedef int32_t
-      NPatchDataId; ///< The NPatchDataId type. This is used as a handle to refer to a particular Npatch Data.
+                            NPatchDataId;                ///< The NPatchDataId type. This is used as a handle to refer to a particular Npatch Data.
   static const NPatchDataId INVALID_NPATCH_DATA_ID = -1; ///< Used to represent a null TextureId or error
 
   /**
@@ -284,20 +284,20 @@ private:
 private:
   using ObserverListType = Dali::Vector<TextureUploadObserver*>;
 
-  NPatchDataId mId;
+  NPatchDataId     mId;
   ObserverListType mObserverList;    ///< Container used to store all observer clients of this Texture
   ObserverListType mQueuedObservers; ///< Container observers when user try to add during notify observers
 
-  VisualUrl mUrl;                               ///< Url of the N-Patch
-  TextureSet mTextureSet;                       ///< Texture containing the cropped image
+  VisualUrl                    mUrl;            ///< Url of the N-Patch
+  TextureSet                   mTextureSet;     ///< Texture containing the cropped image
   NPatchUtility::StretchRanges mStretchPixelsX; ///< X stretch pixels
   NPatchUtility::StretchRanges mStretchPixelsY; ///< Y stretch pixels
-  std::size_t mHash;                            ///< Hash code for the Url
-  uint32_t mCroppedWidth;                       ///< Width of the cropped middle part of N-patch
-  uint32_t mCroppedHeight;                      ///< Height of the cropped middle part of N-patch
-  Rect<int> mBorder;                            ///< The size of the border
-  LoadingState mLoadingState;                   ///< True if the data loading is completed
-  void* mRenderingMap;                          ///< NPatch rendering data
+  std::size_t                  mHash;           ///< Hash code for the Url
+  uint32_t                     mCroppedWidth;   ///< Width of the cropped middle part of N-patch
+  uint32_t                     mCroppedHeight;  ///< Height of the cropped middle part of N-patch
+  Rect<int>                    mBorder;         ///< The size of the border
+  LoadingState                 mLoadingState;   ///< True if the data loading is completed
+  void*                        mRenderingMap;   ///< NPatch rendering data
 
   bool mPreMultiplyOnLoad : 1; ///< Whether to multiply alpha into color channels on load
   bool mObserverNotifying : 1; ///< Whether this NPatchData notifying observers or not.

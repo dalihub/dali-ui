@@ -32,9 +32,9 @@ namespace Integration
 {
 
 UiElementConfigImpl::UiElementConfigImpl()
-  : UiConfigImpl(),
-    mDefaultFontSize(16.0f),
-    mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f))
+: UiConfigImpl(),
+  mDefaultFontSize(16.0f),
+  mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 }
 

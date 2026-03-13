@@ -143,8 +143,8 @@ private:
   Dali::FeedbackPlayer mFeedback;
 
   std::map<const std::string, FeedbackPattern>
-      mFeedbackPatternLut; ///< Used to convert feedback pattern strings into enumerated values
-  std::map<const std::string, FeedbackStyleInfo> mStyleInfoLut; ///< Converts key strings into style information
+                                                 mFeedbackPatternLut; ///< Used to convert feedback pattern strings into enumerated values
+  std::map<const std::string, FeedbackStyleInfo> mStyleInfoLut;       ///< Converts key strings into style information
 };
 
 } // namespace Internal

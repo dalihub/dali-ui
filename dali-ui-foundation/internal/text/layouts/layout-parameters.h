@@ -53,33 +53,33 @@ struct Parameters
    */
   Parameters(const Vector2& boundingBox, ModelPtr textModel, TextAbstraction::FontClient& fontClient,
              TextAbstraction::BidirectionalSupport& bidirectionalSupport)
-    : boundingBox{boundingBox},
-      textModel{textModel},
-      fontClient{fontClient},
-      bidirectionalSupport{bidirectionalSupport},
-      lineBidirectionalInfoRunsBuffer{nullptr},
-      numberOfBidirectionalInfoRuns{0u},
-      startGlyphIndex{0u},
-      numberOfGlyphs{0u},
-      startLineIndex{0u},
-      estimatedNumberOfLines{0u},
-      interGlyphExtraAdvance{0.f},
-      isLastNewParagraph{false}
+  : boundingBox{boundingBox},
+    textModel{textModel},
+    fontClient{fontClient},
+    bidirectionalSupport{bidirectionalSupport},
+    lineBidirectionalInfoRunsBuffer{nullptr},
+    numberOfBidirectionalInfoRuns{0u},
+    startGlyphIndex{0u},
+    numberOfGlyphs{0u},
+    startLineIndex{0u},
+    estimatedNumberOfLines{0u},
+    interGlyphExtraAdvance{0.f},
+    isLastNewParagraph{false}
   {
   }
 
-  Vector2 boundingBox;                                        ///< The size of the box containing the text.
-  ModelPtr textModel;                                         ///< The text's model.
-  TextAbstraction::FontClient fontClient;                     ///< FontClient to use obtain glyph information.
-  TextAbstraction::BidirectionalSupport bidirectionalSupport; ///< BidirectionalSupport for using lines reorders.
-  BidirectionalLineInfoRun* lineBidirectionalInfoRunsBuffer;  ///< Bidirectional conversion tables per line.
-  Length numberOfBidirectionalInfoRuns;                       ///< The number of lines with bidirectional info.
-  GlyphIndex startGlyphIndex;                                 ///< Index to the first glyph to layout.
-  Length numberOfGlyphs;                                      ///< The number of glyphs to layout.
-  LineIndex startLineIndex;                                   ///< The line index where to insert the new lines.
-  Length estimatedNumberOfLines;                              ///< The estimated number of lines.
-  float interGlyphExtraAdvance;                               ///< Extra advance added to each glyph.
-  bool isLastNewParagraph : 1; ///< Whether the last character is a new paragraph character.
+  Vector2                               boundingBox;                     ///< The size of the box containing the text.
+  ModelPtr                              textModel;                       ///< The text's model.
+  TextAbstraction::FontClient           fontClient;                      ///< FontClient to use obtain glyph information.
+  TextAbstraction::BidirectionalSupport bidirectionalSupport;            ///< BidirectionalSupport for using lines reorders.
+  BidirectionalLineInfoRun*             lineBidirectionalInfoRunsBuffer; ///< Bidirectional conversion tables per line.
+  Length                                numberOfBidirectionalInfoRuns;   ///< The number of lines with bidirectional info.
+  GlyphIndex                            startGlyphIndex;                 ///< Index to the first glyph to layout.
+  Length                                numberOfGlyphs;                  ///< The number of glyphs to layout.
+  LineIndex                             startLineIndex;                  ///< The line index where to insert the new lines.
+  Length                                estimatedNumberOfLines;          ///< The estimated number of lines.
+  float                                 interGlyphExtraAdvance;          ///< Extra advance added to each glyph.
+  bool                                  isLastNewParagraph : 1;          ///< Whether the last character is a new paragraph character.
 };
 
 } // namespace Layout

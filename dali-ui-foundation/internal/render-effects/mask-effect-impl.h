@@ -192,9 +192,9 @@ private:
   void OnSourceRenderFinished(Dali::RenderTask& renderTask);
 
 private:
-  MaskEffectImpl(const MaskEffectImpl&) = delete;
-  MaskEffectImpl(MaskEffectImpl&&) = delete;
-  MaskEffectImpl& operator=(MaskEffectImpl&&) = delete;      // no move()
+  MaskEffectImpl(const MaskEffectImpl&)            = delete;
+  MaskEffectImpl(MaskEffectImpl&&)                 = delete;
+  MaskEffectImpl& operator=(MaskEffectImpl&&)      = delete; // no move()
   MaskEffectImpl& operator=(const MaskEffectImpl&) = delete; // no copy()
 
 private:
@@ -204,21 +204,21 @@ private:
   WeakHandle<Ui::Control> mMaskControl;
 
   // Resource
-  RenderTask mMaskTargetRenderTask;
+  RenderTask  mMaskTargetRenderTask;
   FrameBuffer mMaskTargetFrameBuffer;
-  Texture mMaskTargetTexture;
+  Texture     mMaskTargetTexture;
 
-  RenderTask mMaskSourceRenderTask;
+  RenderTask  mMaskSourceRenderTask;
   FrameBuffer mMaskSourceFrameBuffer;
-  Texture mMaskSourceTexture;
+  Texture     mMaskSourceTexture;
 
   // Variables
   MaskEffect::MaskMode mMaskMode;
-  Vector2 mMaskPosition;
-  Vector2 mMaskScale;
-  bool mTargetMaskOnce : 1;
-  bool mSourceMaskOnce : 1;
-  bool mReverseMaskDirection : 1;
+  Vector2              mMaskPosition;
+  Vector2              mMaskScale;
+  bool                 mTargetMaskOnce : 1;
+  bool                 mSourceMaskOnce : 1;
+  bool                 mReverseMaskDirection : 1;
 
   // Cached shader
   thread_local static Dali::Shader gMaskEffectShader;

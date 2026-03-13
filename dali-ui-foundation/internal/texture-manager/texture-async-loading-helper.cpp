@@ -36,18 +36,18 @@ extern Debug::Filter* gTextureManagerLogFilter; ///< Define at texture-manager-i
 #endif
 
 TextureAsyncLoadingHelper::TextureAsyncLoadingHelper(TextureManager& textureManager)
-  : mTextureManager(textureManager),
-    mLoadTaskId(0u)
+: mTextureManager(textureManager),
+  mLoadTaskId(0u)
 {
 }
 
 void TextureAsyncLoadingHelper::LoadAnimatedImage(const TextureManager::TextureId textureId,
-                                                  Dali::AnimatedImageLoading animatedImageLoading,
+                                                  Dali::AnimatedImageLoading      animatedImageLoading,
                                                   const uint32_t frameIndex, const Dali::ImageDimensions& desiredSize,
-                                                  const Dali::FittingMode::Type fittingMode,
-                                                  const Dali::SamplingMode::Type samplingMode,
+                                                  const Dali::FittingMode::Type                  fittingMode,
+                                                  const Dali::SamplingMode::Type                 samplingMode,
                                                   const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
-                                                  const bool loadYuvPlanes)
+                                                  const bool                                     loadYuvPlanes)
 {
   LoadingTaskPtr loadingTask = new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize,
                                                fittingMode, samplingMode, preMultiplyOnLoad, loadYuvPlanes,
@@ -57,14 +57,14 @@ void TextureAsyncLoadingHelper::LoadAnimatedImage(const TextureManager::TextureI
 }
 
 void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, const VisualUrl& url,
-                                     const Dali::ImageDimensions& desiredSize,
-                                     const Dali::FittingMode::Type fittingMode,
+                                     const Dali::ImageDimensions&   desiredSize,
+                                     const Dali::FittingMode::Type  fittingMode,
                                      const Dali::SamplingMode::Type samplingMode, const bool orientationCorrection,
                                      const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
-                                     const bool loadYuvPlanes)
+                                     const bool                                     loadYuvPlanes)
 {
   LoadingTaskPtr loadingTask;
-  if (DALI_UNLIKELY(url.IsBufferResource()))
+  if(DALI_UNLIKELY(url.IsBufferResource()))
   {
     loadingTask = new LoadingTask(++mLoadTaskId, mTextureManager.GetEncodedImageBuffer(url), desiredSize, fittingMode,
                                   samplingMode, orientationCorrection, preMultiplyOnLoad,
@@ -83,12 +83,12 @@ void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, 
 
 void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textureId, Devel::PixelBuffer pixelBuffer,
                                           Devel::PixelBuffer maskPixelBuffer, const float contentScale,
-                                          const bool cropToMask,
+                                          const bool                                     cropToMask,
                                           const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
-      new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
-                      MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
+    new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
+                    MakeCallback(this, &TextureAsyncLoadingHelper::AsyncLoadComplete));
   loadingTask->SetTextureId(textureId);
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
 }
@@ -96,7 +96,7 @@ void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textur
 void TextureAsyncLoadingHelper::AsyncLoadComplete(LoadingTaskPtr task)
 {
   // Call TextureManager::AsyncLoadComplete
-  if (task->textureId != TextureManager::INVALID_TEXTURE_ID)
+  if(task->textureId != TextureManager::INVALID_TEXTURE_ID)
   {
     mTextureManager.AsyncLoadComplete(task->textureId, task->pixelBuffers);
   }

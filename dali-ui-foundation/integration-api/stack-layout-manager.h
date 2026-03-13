@@ -59,7 +59,7 @@ public:
 
 protected:
   StackOrientation mOrientation;
-  float mSpacing;
+  float            mSpacing;
 };
 
 } // namespace Integration

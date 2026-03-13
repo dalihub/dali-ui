@@ -36,7 +36,7 @@ class RenderingAddOn : public Dali::AddOn::AddOnBinder
 
 public:
   RenderingAddOn()
-    : Dali::AddOn::AddOnBinder("oo-rendering", 0u)
+  : Dali::AddOn::AddOnBinder("oo-rendering", 0u)
   {
   }
 
@@ -63,10 +63,10 @@ public:
   static RenderingAddOn& Get()
   {
     static RenderingAddOn* addon = nullptr;
-    if (!addon)
+    if(!addon)
     {
       addon = new RenderingAddOn();
-      if (addon->IsValid())
+      if(addon->IsValid())
       {
         addon->Initialize();
       }

@@ -37,13 +37,13 @@ using LoadingTaskPtr = IntrusivePtr<LoadingTask>;
 struct AsyncImageLoadingInfo
 {
   AsyncImageLoadingInfo(LoadingTaskPtr loadingTask, std::uint32_t loadId)
-    : loadingTask(loadingTask),
-      loadId(loadId)
+  : loadingTask(loadingTask),
+    loadId(loadId)
   {
   }
 
   LoadingTaskPtr loadingTask;
-  std::uint32_t loadId;
+  std::uint32_t  loadId;
 };
 
 class AsyncImageLoader : public BaseObject, public ConnectionTracker
@@ -83,7 +83,7 @@ public:
    */
   uint32_t LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                              Dali::ImageDimensions desiredSize, Dali::FittingMode::Type fittingMode,
-                             Dali::SamplingMode::Type samplingMode,
+                             Dali::SamplingMode::Type                 samplingMode,
                              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
 
   /**
@@ -119,7 +119,7 @@ public:
    */
   uint32_t LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
                                   FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
-                                  bool orientationCorrection,
+                                  bool                                     orientationCorrection,
                                   DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**
@@ -167,10 +167,10 @@ protected:
   ~AsyncImageLoader() override;
 
 private:
-  Ui::AsyncImageLoader::ImageLoadedSignalType mLoadedSignal;
+  Ui::AsyncImageLoader::ImageLoadedSignalType            mLoadedSignal;
   Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
-  std::vector<AsyncImageLoadingInfo> mLoadingTasks;
-  uint32_t mLoadTaskId;
+  std::vector<AsyncImageLoadingInfo>                     mLoadingTasks;
+  uint32_t                                               mLoadTaskId;
 };
 
 } // namespace Internal

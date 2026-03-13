@@ -129,7 +129,7 @@ private:
   // Properties:
 
   std::string
-      mControlSignalNames[MAXIMUM_NUMBER_OF_CONTROLS]; ///< Stores the names of the signals to connect to per control.
+    mControlSignalNames[MAXIMUM_NUMBER_OF_CONTROLS]; ///< Stores the names of the signals to connect to per control.
 
   // Internal variables:
 

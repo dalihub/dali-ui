@@ -71,7 +71,7 @@ void SetBidirectionalInfo(TextAbstraction::BidirectionalSupport& bidirectionalSu
  * @param[in] direction The direction of the line.
  */
 void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
-                 const BidirectionalParagraphInfoRun& bidirectionalParagraphInfo,
+                 const BidirectionalParagraphInfoRun&   bidirectionalParagraphInfo,
                  Vector<BidirectionalLineInfoRun>& lineInfoRuns, BidirectionalLineRunIndex bidiLineIndex,
                  CharacterIndex startIndex, Length numberOfCharacters, CharacterIndex startIndexInSecondHalfLine,
                  Length numberOfCharactersInSecondHalfLine, CharacterDirection direction);
@@ -90,7 +90,7 @@ void ReorderLine(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
  * @return @e true if a character has been replaced.
  */
 bool GetMirroredText(TextAbstraction::BidirectionalSupport& bidirectionalSupport, const Vector<Character>& text,
-                     const Vector<CharacterDirection>& directions,
+                     const Vector<CharacterDirection>&            directions,
                      const Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo, CharacterIndex startIndex,
                      Length numberOfCharacters, Vector<Character>& mirroredText);
 
@@ -108,7 +108,7 @@ bool GetMirroredText(TextAbstraction::BidirectionalSupport& bidirectionalSupport
  * @param[out] directions The direction, @e false is left to right and @e true is right to left, of each character of
  * the paragraph.
  */
-void GetCharactersDirection(TextAbstraction::BidirectionalSupport& bidirectionalSupport,
+void GetCharactersDirection(TextAbstraction::BidirectionalSupport&       bidirectionalSupport,
                             const Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo,
                             Length totalNumberOfCharacters, CharacterIndex startIndex, Length numberOfCharacters,
                             Vector<CharacterDirection>& directions);

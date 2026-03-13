@@ -43,16 +43,16 @@ namespace Action
 enum Type
 {
   // Shared actions with AnimatedImageVisual
-  PLAY = DevelAnimatedImageVisual::Action::PLAY,   ///< Play the animated vector image.
+  PLAY  = DevelAnimatedImageVisual::Action::PLAY,  ///< Play the animated vector image.
   PAUSE = DevelAnimatedImageVisual::Action::PAUSE, ///< Pause the animated vector image.
   STOP =
-      DevelAnimatedImageVisual::Action::STOP, ///< Stop the animated vector image. This is also Default playback mode.
+    DevelAnimatedImageVisual::Action::STOP,            ///< Stop the animated vector image. This is also Default playback mode.
   JUMP_TO = DevelAnimatedImageVisual::Action::JUMP_TO, ///< Jump to the specified frame. Property::INTEGER value should
                                                        ///< be passed.
 
   // AnimatedVectorImageVisual only actions
   SET_DYNAMIC_PROPERTY =
-      DevelAnimatedImageVisual::Action::ANIMATED_IMAGE_VISUAL_ACTION_END_INDEX, ///< Set the dynamic property.
+    DevelAnimatedImageVisual::Action::ANIMATED_IMAGE_VISUAL_ACTION_END_INDEX, ///< Set the dynamic property.
 
   FLUSH, ///< Flush animation data. It will make ensure that changeness of animated vector image properties flushed.
 };
@@ -77,9 +77,9 @@ enum Type
  */
 struct DynamicPropertyInfo
 {
-  int32_t id; ///< The Id to specify the callback. It should be unique and will be passed when the callback is called.
-  std::string keyPath;    ///< The key path used to target a specific content or a set of contents that will be updated.
-  int32_t property;       ///< The property to set.
+  int32_t       id;       ///< The Id to specify the callback. It should be unique and will be passed when the callback is called.
+  std::string   keyPath;  ///< The key path used to target a specific content or a set of contents that will be updated.
+  int32_t       property; ///< The property to set.
   CallbackBase* callback; ///< The callback that gets called every time the animation is rendered. Ownership of the
                           ///< callback is passed onto the visual.
 };

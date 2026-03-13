@@ -234,17 +234,17 @@ protected:
   ~Builder() override;
 
 private:
-  typedef std::vector<const char*> KeyStack;
+  typedef std::vector<const char*>           KeyStack;
   typedef std::vector<TreeNode::KeyNodePair> MappingsLut;
   typedef struct
   {
-    std::string name;
+    std::string             name;
     Dali::LinearConstrainer linearConstrainer;
   } LinearConstrainerEntry;
   typedef std::vector<LinearConstrainerEntry> LinearConstrainerLut;
   typedef struct
   {
-    std::string name;
+    std::string           name;
     Dali::PathConstrainer pathConstrainer;
   } PathConstrainerEntry;
   typedef std::vector<PathConstrainerEntry> PathConstrainerLut;
@@ -331,15 +331,15 @@ private:
   bool ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack, Property::Value& value);
 
 private:
-  Ui::JsonParser mParser;
-  PathLut mPathLut;
-  PathConstrainerLut mPathConstrainerLut;
-  LinearConstrainerLut mLinearConstrainerLut;
-  SlotDelegate<Builder> mSlotDelegate;
-  Property::Map mReplacementMap;
-  Property::Map mConfigurationMap;
-  MappingsLut mCompleteMappings;
-  Dictionary<StylePtr> mStyles; // State based styles
+  Ui::JsonParser                 mParser;
+  PathLut                        mPathLut;
+  PathConstrainerLut             mPathConstrainerLut;
+  LinearConstrainerLut           mLinearConstrainerLut;
+  SlotDelegate<Builder>          mSlotDelegate;
+  Property::Map                  mReplacementMap;
+  Property::Map                  mConfigurationMap;
+  MappingsLut                    mCompleteMappings;
+  Dictionary<StylePtr>           mStyles; // State based styles
   Ui::Builder::BuilderSignalType mQuitSignal;
 };
 

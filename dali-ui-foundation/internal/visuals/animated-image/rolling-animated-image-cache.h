@@ -187,21 +187,21 @@ private:
   struct ImageFrame
   {
     uint32_t mFrameNumber = 0u;
-    bool mReady = false;
+    bool     mReady       = false;
   };
   std::vector<TextureManager::TextureId> mTextureIds;
 
-  VisualUrl mImageUrl;
+  VisualUrl                  mImageUrl;
   Dali::AnimatedImageLoading mAnimatedImageLoading;
-  uint32_t mFrameCount;
-  uint32_t mFrameIndex;
-  uint32_t mCacheSize;
-  std::vector<int32_t> mIntervals;
-  std::vector<uint32_t> mLoadWaitingQueue;
-  CircularQueue<ImageFrame> mQueue;
-  Dali::WrapMode::Type mWrapModeU : 3;
-  Dali::WrapMode::Type mWrapModeV : 3;
-  bool mIsSynchronousLoading;
+  uint32_t                   mFrameCount;
+  uint32_t                   mFrameIndex;
+  uint32_t                   mCacheSize;
+  std::vector<int32_t>       mIntervals;
+  std::vector<uint32_t>      mLoadWaitingQueue;
+  CircularQueue<ImageFrame>  mQueue;
+  Dali::WrapMode::Type       mWrapModeU : 3;
+  Dali::WrapMode::Type       mWrapModeV : 3;
+  bool                       mIsSynchronousLoading;
 };
 
 } // namespace Internal

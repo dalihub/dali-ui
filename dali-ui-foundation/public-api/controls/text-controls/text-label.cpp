@@ -73,12 +73,12 @@ TextLabel TextLabel::DownCast(BaseHandle handle)
 }
 
 TextLabel::TextLabel(Internal::TextLabel& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 TextLabel::TextLabel(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::TextLabel>(internal);
 }

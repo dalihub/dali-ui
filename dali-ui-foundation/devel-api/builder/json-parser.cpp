@@ -103,7 +103,7 @@ void JsonParser::Write(std::ostream& output, int indent) const
 }
 
 JsonParser::JsonParser(Internal::JsonParser* internal)
-  : BaseHandle(internal)
+: BaseHandle(internal)
 {
 }
 

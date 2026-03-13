@@ -32,19 +32,19 @@ namespace
 {
 // Safely shift a glyph buffer in-place using memmove,
 // clamping the copy length to the valid [0, bufferSize) range.
-template <typename T>
+template<typename T>
 void GlyphMemmove(T* buffer, Length bufferSize, Length dstIndex, Length srcIndex, Length count)
 {
-  if (!buffer || bufferSize == 0u || count == 0u || dstIndex >= bufferSize || srcIndex >= bufferSize)
+  if(!buffer || bufferSize == 0u || count == 0u || dstIndex >= bufferSize || srcIndex >= bufferSize)
   {
     return;
   }
 
-  const Length maxByDst = bufferSize - dstIndex;
-  const Length maxBySrc = bufferSize - srcIndex;
-  Length safeCount = std::min(count, std::min(maxByDst, maxBySrc));
+  const Length maxByDst  = bufferSize - dstIndex;
+  const Length maxBySrc  = bufferSize - srcIndex;
+  Length       safeCount = std::min(count, std::min(maxByDst, maxBySrc));
 
-  if (safeCount > 0u)
+  if(safeCount > 0u)
   {
     memmove(buffer + dstIndex, buffer + srcIndex, safeCount * sizeof(T));
   }
@@ -58,12 +58,12 @@ void CalculateNumberOfLaidOutGlyphes(const bool hasEllipsis, bool& textElided, L
                                      const LineRun*& ellipsisLine, const Length& numberOfLines,
                                      const LineRun* const& lines)
 {
-  if (hasEllipsis)
+  if(hasEllipsis)
   {
-    textElided = true;
+    textElided            = true;
     numberOfLaidOutGlyphs = numberOfGlyphs;
 
-    switch (ellipsisPosition)
+    switch(ellipsisPosition)
     {
       case DevelText::EllipsisPosition::START:
       {
@@ -73,10 +73,10 @@ void CalculateNumberOfLaidOutGlyphes(const bool hasEllipsis, bool& textElided, L
       case DevelText::EllipsisPosition::MIDDLE:
       {
         numberOfActualLaidOutGlyphs = 0u;
-        for (Length lineIndex = 0u; lineIndex < numberOfLines; lineIndex++)
+        for(Length lineIndex = 0u; lineIndex < numberOfLines; lineIndex++)
         {
           numberOfActualLaidOutGlyphs +=
-              lines[lineIndex].glyphRun.numberOfGlyphs + lines[lineIndex].glyphRunSecondHalf.numberOfGlyphs;
+            lines[lineIndex].glyphRun.numberOfGlyphs + lines[lineIndex].glyphRunSecondHalf.numberOfGlyphs;
         }
         break;
       }
@@ -101,25 +101,25 @@ void InsertEllipsisGlyph(GlyphInfo*& glyphs, GlyphIndex& indexOfEllipsis, Length
                          const bool isTailMode, const LineRun*& ellipsisLine, const Length& numberOfLaidOutGlyphs)
 {
   // firstPenX, penY and firstPenSet are used to position the ellipsis glyph if needed.
-  float firstPenX = 0.f; // Used if rtl text is elided.
-  float penY = 0.f;
-  bool firstPenSet = false;
-  bool inserted = false;
+  float firstPenX   = 0.f; // Used if rtl text is elided.
+  float penY        = 0.f;
+  bool  firstPenSet = false;
+  bool  inserted    = false;
 
   float removedGlyphsWidth = 0.f;
 
-  while (!inserted)
+  while(!inserted)
   {
     const GlyphInfo& glyphToRemove = *(glyphs + indexOfEllipsis);
 
-    if (0u != glyphToRemove.fontId)
+    if(0u != glyphToRemove.fontId)
     {
       // i.e. The font id of the glyph shaped from the '\n' character is zero.
 
       // Need to reshape the glyph as the font may be different in size.
       const GlyphInfo& ellipsisGlyph = fontClient.GetEllipsisGlyph(fontClient.GetPointSize(glyphToRemove.fontId));
 
-      if (!firstPenSet)
+      if(!firstPenSet)
       {
         const Vector2& position = *(glyphPositions + indexOfEllipsis);
 
@@ -128,7 +128,7 @@ void InsertEllipsisGlyph(GlyphInfo*& glyphs, GlyphIndex& indexOfEllipsis, Length
 
         // Calculates the first penX which will be used if rtl text is elided.
         firstPenX = position.x - glyphToRemove.xBearing;
-        if (firstPenX < -ellipsisGlyph.xBearing)
+        if(firstPenX < -ellipsisGlyph.xBearing)
         {
           // Avoids to exceed the bounding box when rtl text is elided.
           firstPenX = -ellipsisGlyph.xBearing;
@@ -140,45 +140,45 @@ void InsertEllipsisGlyph(GlyphInfo*& glyphs, GlyphIndex& indexOfEllipsis, Length
       }
 
       const float characterSpacing =
-          GetGlyphCharacterSpacing(indexOfEllipsis, characterSpacingGlyphRuns, modelCharacterSpacing);
+        GetGlyphCharacterSpacing(indexOfEllipsis, characterSpacingGlyphRuns, modelCharacterSpacing);
       calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + indexOfEllipsis))),
                                                characterSpacing, glyphToRemove.advance);
       removedGlyphsWidth += std::min(calculatedAdvance, (glyphToRemove.xBearing + glyphToRemove.width));
 
       // Calculate the width of the ellipsis glyph and check if it fits.
       const float ellipsisGlyphWidth = ellipsisGlyph.width + ellipsisGlyph.xBearing;
-      if ((ellipsisGlyphWidth < removedGlyphsWidth) ||
-          (isTailMode ? (indexOfEllipsis == 0u) : (indexOfEllipsis == numberOfGlyphs - 1u)))
+      if((ellipsisGlyphWidth < removedGlyphsWidth) ||
+         (isTailMode ? (indexOfEllipsis == 0u) : (indexOfEllipsis == numberOfGlyphs - 1u)))
       {
         GlyphInfo& glyphInfo = *(glyphs + indexOfEllipsis);
-        Vector2& position = *(glyphPositions + indexOfEllipsis);
+        Vector2&   position  = *(glyphPositions + indexOfEllipsis);
         position.x -= (0.f > glyphInfo.xBearing) ? glyphInfo.xBearing : 0.f;
 
         // Replace the glyph by the ellipsis glyph.
         glyphInfo = ellipsisGlyph;
 
         // Change the 'x' and 'y' position of the ellipsis glyph.
-        if (position.x > firstPenX)
+        if(position.x > firstPenX)
         {
-          if (isTailMode)
+          if(isTailMode)
           {
             // To handle case of the mixed languages (LTR then RTL) with
             // EllipsisPosition::END and the LayoutDirection::RIGHT_TO_LEFT
             float nextXPositions = ellipsisLine->width;
-            if (indexOfEllipsis + 1u < numberOfGlyphs)
+            if(indexOfEllipsis + 1u < numberOfGlyphs)
             {
               Vector2& positionOfNextGlyph = *(glyphPositions + indexOfEllipsis + 1u);
-              nextXPositions = positionOfNextGlyph.x;
+              nextXPositions               = positionOfNextGlyph.x;
             }
 
-            if (position.x > nextXPositions) // RTL language
+            if(position.x > nextXPositions) // RTL language
             {
-              if ((indexOfEllipsis > 0u) && ((position.x - nextXPositions) > removedGlyphsWidth))
+              if((indexOfEllipsis > 0u) && ((position.x - nextXPositions) > removedGlyphsWidth))
               {
                 // To handle mixed directions
                 // Re-calculates the first penX which will be used if rtl text is elided.
                 firstPenX = position.x - glyphToRemove.xBearing;
-                if (firstPenX < -ellipsisGlyph.xBearing)
+                if(firstPenX < -ellipsisGlyph.xBearing)
                 {
                   // Avoids to exceed the bounding box when rtl text is elided.
                   firstPenX = -ellipsisGlyph.xBearing;
@@ -205,22 +205,22 @@ void InsertEllipsisGlyph(GlyphInfo*& glyphs, GlyphIndex& indexOfEllipsis, Length
         }
         else
         {
-          if (!isTailMode)
+          if(!isTailMode)
           {
             // To handle case of the mixed languages (RTL then LTR) with
             // EllipsisPosition::START and the LayoutDirection::RIGHT_TO_LEFT
             float nextXPositions = ellipsisLine->width;
-            if (indexOfEllipsis + 1u < numberOfGlyphs)
+            if(indexOfEllipsis + 1u < numberOfGlyphs)
             {
               Vector2& positionOfNextGlyph = *(glyphPositions + indexOfEllipsis + 1u);
-              nextXPositions = positionOfNextGlyph.x;
+              nextXPositions               = positionOfNextGlyph.x;
             }
 
-            if (position.x < nextXPositions) // LTR language
+            if(position.x < nextXPositions) // LTR language
             {
               position.x = firstPenX + removedGlyphsWidth - ellipsisGlyphWidth;
 
-              if ((position.x + ellipsisGlyphWidth + ellipsisGlyph.xBearing) > nextXPositions)
+              if((position.x + ellipsisGlyphWidth + ellipsisGlyph.xBearing) > nextXPositions)
               {
                 position.x -= (position.x + ellipsisGlyphWidth + ellipsisGlyph.xBearing) - nextXPositions;
               }
@@ -235,15 +235,15 @@ void InsertEllipsisGlyph(GlyphInfo*& glyphs, GlyphIndex& indexOfEllipsis, Length
       }
     }
 
-    if (!inserted)
+    if(!inserted)
     {
-      if (isTailMode && indexOfEllipsis > 0u)
+      if(isTailMode && indexOfEllipsis > 0u)
       {
         // Tail Mode: remove glyphs from startIndexOfEllipsis then decrement indexOfEllipsis, until arrive to index
         // zero.
         --indexOfEllipsis;
       }
-      else if (!isTailMode && indexOfEllipsis < numberOfLaidOutGlyphs - 1u)
+      else if(!isTailMode && indexOfEllipsis < numberOfLaidOutGlyphs - 1u)
       {
         // Not Tail Mode: remove glyphs from startIndexOfEllipsis then increase indexOfEllipsis, until arrive to last
         // index (numberOfGlyphs - 1u).
@@ -268,18 +268,18 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
                                        const Length& numberOfGlyphs, const GlyphIndex& startIndexOfEllipsis,
                                        VisualModelPtr& visualModel)
 {
-  switch (ellipsisPosition)
+  switch(ellipsisPosition)
   {
     case DevelText::EllipsisPosition::MIDDLE:
     {
       // Reduce size, shift glyphs and start from ellipsis glyph
       numberOfLaidOutGlyphs = numberOfActualLaidOutGlyphs - numberOfRemovedGlyphs;
 
-      GlyphIndex firstMiddleIndexOfElidedGlyphs = 0u;
+      GlyphIndex firstMiddleIndexOfElidedGlyphs  = 0u;
       GlyphIndex secondMiddleIndexOfElidedGlyphs = 0u;
 
       bool isOnlySecondHalf = false;
-      if (isTailMode)
+      if(isTailMode)
       {
         // Multi-lines case with MIDDLE
         // In case the Ellipsis in the end of line,
@@ -298,7 +298,7 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
         // NNNNNNNNNN
 
         firstMiddleIndexOfElidedGlyphs = indexOfEllipsis;
-        if (ellipsisNextLine != nullptr)
+        if(ellipsisNextLine != nullptr)
         {
           secondMiddleIndexOfElidedGlyphs = ellipsisNextLine->glyphRun.glyphIndex;
         }
@@ -324,12 +324,12 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
         // secondMiddleIndex (index before first N)
 
         firstMiddleIndexOfElidedGlyphs =
-            (ellipsisLine->glyphRun.numberOfGlyphs > 0u)
-                ? (ellipsisLine->glyphRun.glyphIndex + ellipsisLine->glyphRun.numberOfGlyphs - 1u)
-                : (ellipsisLine->glyphRun.glyphIndex);
+          (ellipsisLine->glyphRun.numberOfGlyphs > 0u)
+            ? (ellipsisLine->glyphRun.glyphIndex + ellipsisLine->glyphRun.numberOfGlyphs - 1u)
+            : (ellipsisLine->glyphRun.glyphIndex);
         secondMiddleIndexOfElidedGlyphs = indexOfEllipsis;
         isOnlySecondHalf =
-            ellipsisLine->glyphRun.numberOfGlyphs == 0u && ellipsisLine->glyphRunSecondHalf.numberOfGlyphs > 0u;
+          ellipsisLine->glyphRun.numberOfGlyphs == 0u && ellipsisLine->glyphRunSecondHalf.numberOfGlyphs > 0u;
       }
 
       visualModel->SetFirstMiddleIndexOfElidedGlyphs(firstMiddleIndexOfElidedGlyphs);
@@ -337,7 +337,7 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
 
       // The number of shifted glyphs and shifting positions will be different according to Single-line or Multi-lines.
       // isOnlySecondHalf will be true when MIDDLE Ellipsis glyph in single line.
-      if (isOnlySecondHalf)
+      if(isOnlySecondHalf)
       {
         Length numberOfSecondHalfGlyphs = numberOfLaidOutGlyphs - firstMiddleIndexOfElidedGlyphs;
 
@@ -352,7 +352,7 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
         Length numberOfSecondHalfGlyphs = numberOfLaidOutGlyphs - firstMiddleIndexOfElidedGlyphs + 1u;
 
         // Make sure that out-of-boundary does not occur for the source range.
-        if (secondMiddleIndexOfElidedGlyphs + numberOfSecondHalfGlyphs > numberOfGlyphs)
+        if(secondMiddleIndexOfElidedGlyphs + numberOfSecondHalfGlyphs > numberOfGlyphs)
         {
           numberOfSecondHalfGlyphs = numberOfGlyphs - secondMiddleIndexOfElidedGlyphs;
         }
@@ -394,8 +394,8 @@ void RemoveAllGlyphsAfterEllipsisGlyph(const DevelText::EllipsisPosition::Type& 
 } // namespace
 struct View::Impl
 {
-  VisualModelPtr mVisualModel;
-  LogicalModelPtr mLogicalModel;
+  VisualModelPtr              mVisualModel;
+  LogicalModelPtr             mLogicalModel;
   TextAbstraction::FontClient mFontClient; ///< Handle to the font client.
 
   /**
@@ -404,7 +404,7 @@ struct View::Impl
    */
   TextAbstraction::FontClient& GetFontClient()
   {
-    if (!mFontClient)
+    if(!mFontClient)
     {
       mFontClient = TextAbstraction::FontClient::Get();
     }
@@ -413,7 +413,7 @@ struct View::Impl
 };
 
 View::View()
-  : mImpl(NULL)
+: mImpl(NULL)
 {
   mImpl = new View::Impl();
 }
@@ -435,7 +435,7 @@ void View::SetLogicalModel(LogicalModelPtr logicalModel)
 
 const Vector2& View::GetControlSize() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mControlSize;
   }
@@ -445,7 +445,7 @@ const Vector2& View::GetControlSize() const
 
 const Vector2& View::GetLayoutSize() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetLayoutSize();
   }
@@ -455,11 +455,11 @@ const Vector2& View::GetLayoutSize() const
 
 Length View::GetNumberOfGlyphs() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
 
-    const Length glyphCount = model.mGlyphs.Count();
+    const Length glyphCount    = model.mGlyphs.Count();
     const Length positionCount = model.mGlyphPositions.Count();
 
     DALI_ASSERT_DEBUG(positionCount <= glyphCount && "Invalid glyph positions in Model");
@@ -473,21 +473,21 @@ Length View::GetNumberOfGlyphs() const
 Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
                        Length numberOfGlyphs) const
 {
-  Length numberOfLaidOutGlyphs = 0u;
-  Length numberOfActualLaidOutGlyphs = 0u;
-  const float modelCharacterSpacing = mImpl->mVisualModel->GetCharacterSpacing();
-  Vector<CharacterIndex>& glyphToCharacterMap = mImpl->mVisualModel->mGlyphsToCharacters;
-  const CharacterIndex* glyphToCharacterMapBuffer = glyphToCharacterMap.Begin();
-  float calculatedAdvance = 0.f;
-  const Character* textBuffer = mImpl->mLogicalModel->mText.Begin();
+  Length                  numberOfLaidOutGlyphs       = 0u;
+  Length                  numberOfActualLaidOutGlyphs = 0u;
+  const float             modelCharacterSpacing       = mImpl->mVisualModel->GetCharacterSpacing();
+  Vector<CharacterIndex>& glyphToCharacterMap         = mImpl->mVisualModel->mGlyphsToCharacters;
+  const CharacterIndex*   glyphToCharacterMapBuffer   = glyphToCharacterMap.Begin();
+  float                   calculatedAdvance           = 0.f;
+  const Character*        textBuffer                  = mImpl->mLogicalModel->mText.Begin();
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     // Get the character-spacing runs.
     const Vector<CharacterSpacingGlyphRun>& characterSpacingGlyphRuns =
-        mImpl->mVisualModel->GetCharacterSpacingGlyphRuns();
+      mImpl->mVisualModel->GetCharacterSpacingGlyphRuns();
 
-    bool textElided = false;
+    bool                              textElided       = false;
     DevelText::EllipsisPosition::Type ellipsisPosition = GetEllipsisPosition();
 
     // Reset indices of ElidedGlyphs
@@ -500,22 +500,22 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
     // Check the last laid out line to know if the layout engine elided some text.
 
     const Length numberOfLines = mImpl->mVisualModel->mLines.Count();
-    if (numberOfLines > 0u)
+    if(numberOfLines > 0u)
     {
       const LineRun* const lines = mImpl->mVisualModel->mLines.Begin();
 
       // Get line of ellipsis
-      const LineRun* ellipsisLine = nullptr;
+      const LineRun* ellipsisLine     = nullptr;
       const LineRun* ellipsisNextLine = nullptr;
-      bool hasEllipsis = false;
-      for (Length lineIndex = 0; lineIndex < numberOfLines; lineIndex++)
+      bool           hasEllipsis      = false;
+      for(Length lineIndex = 0; lineIndex < numberOfLines; lineIndex++)
       {
         const LineRun* line = (lines + lineIndex);
-        if (line->ellipsis)
+        if(line->ellipsis)
         {
           ellipsisLine = line;
-          hasEllipsis = true;
-          if (lineIndex < numberOfLines - 1u)
+          hasEllipsis  = true;
+          if(lineIndex < numberOfLines - 1u)
           {
             ellipsisNextLine = (lines + lineIndex + 1u);
           }
@@ -526,7 +526,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
       CalculateNumberOfLaidOutGlyphes(hasEllipsis, textElided, numberOfLaidOutGlyphs, numberOfActualLaidOutGlyphs,
                                       numberOfGlyphs, ellipsisPosition, ellipsisLine, numberOfLines, lines);
 
-      if (0u < numberOfActualLaidOutGlyphs)
+      if(0u < numberOfActualLaidOutGlyphs)
       {
         // Retrieve from the visual model the glyphs and positions.
         mImpl->mVisualModel->GetGlyphs(glyphs, glyphIndex, numberOfLaidOutGlyphs);
@@ -536,7 +536,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
         // Get the lines for the given range of glyphs.
         // The lines contain the alignment offset which needs to be added to the glyph's position.
         LineIndex firstLineIndex = 0u;
-        Length numberOfLines = 0u;
+        Length    numberOfLines  = 0u;
         mImpl->mVisualModel->GetNumberOfLines(glyphIndex, numberOfLaidOutGlyphs, firstLineIndex, numberOfLines);
 
         Vector<LineRun> lines;
@@ -547,41 +547,41 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
 
         // Get the first line for the given glyph range.
         LineIndex lineIndex = firstLineIndex;
-        LineRun* line = lineBuffer + lineIndex;
+        LineRun*  line      = lineBuffer + lineIndex;
 
         // Index of the last glyph of the line.
         GlyphIndex lastGlyphIndexOfLine =
-            (line->isSplitToTwoHalves ? line->glyphRunSecondHalf.glyphIndex + line->glyphRunSecondHalf.numberOfGlyphs
-                                      : line->glyphRun.glyphIndex + line->glyphRun.numberOfGlyphs) -
-            1u;
+          (line->isSplitToTwoHalves ? line->glyphRunSecondHalf.glyphIndex + line->glyphRunSecondHalf.numberOfGlyphs
+                                    : line->glyphRun.glyphIndex + line->glyphRun.numberOfGlyphs) -
+          1u;
 
         // Add the alignment offset to the glyph's position.
 
         minLineOffset = line->alignmentOffset;
-        float penY = line->ascender;
-        for (Length index = 0u; index < numberOfLaidOutGlyphs; ++index)
+        float penY    = line->ascender;
+        for(Length index = 0u; index < numberOfLaidOutGlyphs; ++index)
         {
           Vector2& position = *(glyphPositions + index);
           position.x += line->alignmentOffset;
           position.y += penY;
 
-          if (lastGlyphIndexOfLine == index)
+          if(lastGlyphIndexOfLine == index)
           {
             penY += -line->descender + line->lineSpacing;
 
             // Get the next line.
             ++lineIndex;
 
-            if (lineIndex < numberOfLines)
+            if(lineIndex < numberOfLines)
             {
-              line = lineBuffer + lineIndex;
+              line          = lineBuffer + lineIndex;
               minLineOffset = std::min(minLineOffset, line->alignmentOffset);
 
               lastGlyphIndexOfLine =
-                  (line->isSplitToTwoHalves
-                       ? line->glyphRunSecondHalf.glyphIndex + line->glyphRunSecondHalf.numberOfGlyphs
-                       : line->glyphRun.glyphIndex + line->glyphRun.numberOfGlyphs) -
-                  1u;
+                (line->isSplitToTwoHalves
+                   ? line->glyphRunSecondHalf.glyphIndex + line->glyphRunSecondHalf.numberOfGlyphs
+                   : line->glyphRun.glyphIndex + line->glyphRun.numberOfGlyphs) -
+                1u;
 
               penY += line->ascender;
             }
@@ -591,9 +591,9 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
         // Set index where to set Ellipsis according to the selected position of Ellipsis.
         // Start with this index to replace its glyph by Ellipsis, if the width  is not enough, then remove more glyphs.
         GlyphIndex startIndexOfEllipsis = 0u;
-        if (hasEllipsis)
+        if(hasEllipsis)
         {
-          switch (ellipsisPosition)
+          switch(ellipsisPosition)
           {
             case DevelText::EllipsisPosition::START:
             {
@@ -606,9 +606,9 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
               // It's the second middle of the line in case the line split to two halves.
               // Otherwise it's It's the last glyph in line (line before all removed lines).
               startIndexOfEllipsis =
-                  ellipsisLine->isSplitToTwoHalves
-                      ? (ellipsisLine->glyphRunSecondHalf.glyphIndex)
-                      : (ellipsisLine->glyphRun.glyphIndex + ellipsisLine->glyphRun.numberOfGlyphs - 1u);
+                ellipsisLine->isSplitToTwoHalves
+                  ? (ellipsisLine->glyphRunSecondHalf.glyphIndex)
+                  : (ellipsisLine->glyphRun.glyphIndex + ellipsisLine->glyphRun.numberOfGlyphs - 1u);
               break;
             }
             case DevelText::EllipsisPosition::END:
@@ -620,35 +620,35 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
           }
         }
 
-        if (1u == numberOfLaidOutGlyphs)
+        if(1u == numberOfLaidOutGlyphs)
         {
           // not a point try to do ellipsis with only one laid out character.
 
           return numberOfLaidOutGlyphs;
         }
 
-        if (textElided)
+        if(textElided)
         {
           const LineRun& elidedLine = *ellipsisLine;
 
-          if ((1u == numberOfLines) && (GetLineHeight(elidedLine, true) > mImpl->mVisualModel->mControlSize.height))
+          if((1u == numberOfLines) && (GetLineHeight(elidedLine, true) > mImpl->mVisualModel->mControlSize.height))
           {
             // Replace the first glyph with ellipsis glyph
             auto indexOfFirstGlyph =
-                (ellipsisPosition == DevelText::EllipsisPosition::START) ? startIndexOfEllipsis : 0u;
+              (ellipsisPosition == DevelText::EllipsisPosition::START) ? startIndexOfEllipsis : 0u;
 
             // Regardless where the location of ellipsis,in-case the hight of line is greater than control's height
             // then replace the first glyph with ellipsis glyph.
 
             // Get the first glyph which is going to be replaced and the ellipsis glyph.
-            GlyphInfo& glyphInfo = *(glyphs + indexOfFirstGlyph);
+            GlyphInfo&       glyphInfo = *(glyphs + indexOfFirstGlyph);
             const GlyphInfo& ellipsisGlyph =
-                mImpl->GetFontClient().GetEllipsisGlyph(mImpl->GetFontClient().GetPointSize(glyphInfo.fontId));
+              mImpl->GetFontClient().GetEllipsisGlyph(mImpl->GetFontClient().GetPointSize(glyphInfo.fontId));
 
             // Change the 'x' and 'y' position of the ellipsis glyph.
             Vector2& position = *(glyphPositions + indexOfFirstGlyph);
-            position.x = ellipsisGlyph.xBearing;
-            position.y = mImpl->mVisualModel->mControlSize.height - ellipsisGlyph.yBearing;
+            position.x        = ellipsisGlyph.xBearing;
+            position.y        = mImpl->mVisualModel->mControlSize.height - ellipsisGlyph.yBearing;
 
             // Replace the glyph by the ellipsis glyph.
             glyphInfo = ellipsisGlyph;
@@ -664,8 +664,8 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
           }
 
           // Add the ellipsis glyph.
-          Length numberOfRemovedGlyphs = 0u;
-          GlyphIndex indexOfEllipsis = startIndexOfEllipsis;
+          Length     numberOfRemovedGlyphs = 0u;
+          GlyphIndex indexOfEllipsis       = startIndexOfEllipsis;
 
           // Tail Mode: start by the end of line.
           const bool isTailMode = ellipsisPosition == DevelText::EllipsisPosition::END ||
@@ -691,7 +691,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
 
 const Vector4* View::GetColors() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mColors.Begin();
   }
@@ -701,7 +701,7 @@ const Vector4* View::GetColors() const
 
 const ColorIndex* View::GetColorIndices() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mColorIndices.Begin();
   }
@@ -711,7 +711,7 @@ const ColorIndex* View::GetColorIndices() const
 
 const Vector4* View::GetBackgroundColors() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mBackgroundColors.Begin();
   }
@@ -721,7 +721,7 @@ const Vector4* View::GetBackgroundColors() const
 
 const ColorIndex* View::GetBackgroundColorIndices() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mBackgroundColorIndices.Begin();
   }
@@ -731,7 +731,7 @@ const ColorIndex* View::GetBackgroundColorIndices() const
 
 bool View::IsMarkupBackgroundColorSet() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return (mImpl->mVisualModel->mBackgroundColors.Count() > 0);
   }
@@ -741,7 +741,7 @@ bool View::IsMarkupBackgroundColorSet() const
 
 const Vector4& View::GetTextColor() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetTextColor();
   }
@@ -750,7 +750,7 @@ const Vector4& View::GetTextColor() const
 
 const Vector2& View::GetShadowOffset() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetShadowOffset();
   }
@@ -759,7 +759,7 @@ const Vector2& View::GetShadowOffset() const
 
 const Vector4& View::GetShadowColor() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetShadowColor();
   }
@@ -768,7 +768,7 @@ const Vector4& View::GetShadowColor() const
 
 const Vector4& View::GetUnderlineColor() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetUnderlineColor();
   }
@@ -777,7 +777,7 @@ const Vector4& View::GetUnderlineColor() const
 
 bool View::IsUnderlineEnabled() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->IsUnderlineEnabled();
   }
@@ -791,7 +791,7 @@ bool View::IsMarkupUnderlineSet() const
 
 const GlyphInfo* View::GetHyphens() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mHyphen.glyph.Begin();
   }
@@ -801,7 +801,7 @@ const GlyphInfo* View::GetHyphens() const
 
 const Length* View::GetHyphenIndices() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mHyphen.index.Begin();
   }
@@ -811,7 +811,7 @@ const Length* View::GetHyphenIndices() const
 
 Length View::GetHyphensCount() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->mHyphen.glyph.Size();
   }
@@ -820,7 +820,7 @@ Length View::GetHyphensCount() const
 }
 float View::GetUnderlineHeight() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetUnderlineHeight();
   }
@@ -830,7 +830,7 @@ float View::GetUnderlineHeight() const
 Text::Underline::Type View::GetUnderlineType() const
 {
   Text::Underline::Type type = Text::Underline::Type::SOLID;
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     type = mImpl->mVisualModel->GetUnderlineType();
   }
@@ -840,7 +840,7 @@ Text::Underline::Type View::GetUnderlineType() const
 float View::GetDashedUnderlineWidth() const
 {
   float width = 0.0f;
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     width = mImpl->mVisualModel->GetDashedUnderlineWidth();
   }
@@ -850,7 +850,7 @@ float View::GetDashedUnderlineWidth() const
 float View::GetDashedUnderlineGap() const
 {
   float gap = 0.0f;
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     gap = mImpl->mVisualModel->GetDashedUnderlineGap();
   }
@@ -859,7 +859,7 @@ float View::GetDashedUnderlineGap() const
 
 Length View::GetNumberOfUnderlineRuns() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetNumberOfUnderlineRuns();
   }
@@ -869,7 +869,7 @@ Length View::GetNumberOfUnderlineRuns() const
 
 void View::GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index, Length numberOfRuns) const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     mImpl->mVisualModel->GetUnderlineRuns(underlineRuns, index, numberOfRuns);
   }
@@ -889,7 +889,7 @@ const Vector2& View::GetOutlineOffset() const
 
 const Vector4& View::GetOutlineColor() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetOutlineColor();
   }
@@ -898,7 +898,7 @@ const Vector4& View::GetOutlineColor() const
 
 uint16_t View::GetOutlineWidth() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetOutlineWidth();
   }
@@ -908,10 +908,10 @@ uint16_t View::GetOutlineWidth() const
 DevelText::EllipsisPosition::Type View::GetEllipsisPosition() const
 {
   DevelText::EllipsisPosition::Type ellipsisPosition = DevelText::EllipsisPosition::END;
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
-    ellipsisPosition = model.GetEllipsisPosition();
+    ellipsisPosition         = model.GetEllipsisPosition();
   }
 
   return ellipsisPosition;
@@ -921,10 +921,10 @@ bool View::IsTextElideEnabled() const
 {
   bool isTextElideEnabled = false;
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
-    isTextElideEnabled = model.IsTextElideEnabled();
+    isTextElideEnabled       = model.IsTextElideEnabled();
   }
 
   return isTextElideEnabled;
@@ -934,7 +934,7 @@ GlyphIndex View::GetStartIndexOfElidedGlyphs() const
 {
   GlyphIndex startIndexOfElidedGlyphs = 0u;
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
     startIndexOfElidedGlyphs = model.GetStartIndexOfElidedGlyphs();
@@ -947,10 +947,10 @@ GlyphIndex View::GetEndIndexOfElidedGlyphs() const
 {
   GlyphIndex endIndexOfElidedGlyphs = 0u;
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     const VisualModel& model = *mImpl->mVisualModel;
-    endIndexOfElidedGlyphs = model.GetEndIndexOfElidedGlyphs();
+    endIndexOfElidedGlyphs   = model.GetEndIndexOfElidedGlyphs();
   }
 
   return endIndexOfElidedGlyphs;
@@ -960,9 +960,9 @@ GlyphIndex View::GetFirstMiddleIndexOfElidedGlyphs() const
 {
   GlyphIndex firstMiddleIndexOfElidedGlyphs = 0u;
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
-    const VisualModel& model = *mImpl->mVisualModel;
+    const VisualModel& model       = *mImpl->mVisualModel;
     firstMiddleIndexOfElidedGlyphs = model.GetFirstMiddleIndexOfElidedGlyphs();
   }
 
@@ -973,9 +973,9 @@ GlyphIndex View::GetSecondMiddleIndexOfElidedGlyphs() const
 {
   GlyphIndex secondMiddleIndexOfElidedGlyphs = 0u;
 
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
-    const VisualModel& model = *mImpl->mVisualModel;
+    const VisualModel& model        = *mImpl->mVisualModel;
     secondMiddleIndexOfElidedGlyphs = model.GetSecondMiddleIndexOfElidedGlyphs();
   }
 
@@ -1004,7 +1004,7 @@ float View::GetStrikethroughHeight() const
 
 Length View::GetNumberOfStrikethroughRuns() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->GetNumberOfStrikethroughRuns();
   }
@@ -1015,7 +1015,7 @@ Length View::GetNumberOfStrikethroughRuns() const
 void View::GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, StrikethroughRunIndex index,
                                 Length numberOfRuns) const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     mImpl->mVisualModel->GetStrikethroughRuns(strikethroughRuns, index, numberOfRuns);
   }
@@ -1023,7 +1023,7 @@ void View::GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, Strike
 
 Length View::GetNumberOfBoundedParagraphRuns() const
 {
-  if (mImpl->mLogicalModel)
+  if(mImpl->mLogicalModel)
   {
     return mImpl->mLogicalModel->GetNumberOfBoundedParagraphRuns();
   }
@@ -1053,7 +1053,7 @@ const Vector<CharacterIndex>& View::GetGlyphsToCharacters() const
 
 bool View::IsCutoutEnabled() const
 {
-  if (mImpl->mVisualModel)
+  if(mImpl->mVisualModel)
   {
     return mImpl->mVisualModel->IsCutoutEnabled();
   }

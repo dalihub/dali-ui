@@ -57,10 +57,10 @@ protected: // From Layout
   LayoutManager* CreateLayoutManager() override;
 
 private:
-  AbsoluteLayoutImpl(const AbsoluteLayoutImpl&) = delete;
-  AbsoluteLayoutImpl(AbsoluteLayoutImpl&&) = delete;
+  AbsoluteLayoutImpl(const AbsoluteLayoutImpl&)            = delete;
+  AbsoluteLayoutImpl(AbsoluteLayoutImpl&&)                 = delete;
   AbsoluteLayoutImpl& operator=(const AbsoluteLayoutImpl&) = delete;
-  AbsoluteLayoutImpl& operator=(AbsoluteLayoutImpl&&) = delete;
+  AbsoluteLayoutImpl& operator=(AbsoluteLayoutImpl&&)      = delete;
 };
 
 inline Integration::AbsoluteLayoutImpl& GetImpl(Ui::AbsoluteLayout& layout)

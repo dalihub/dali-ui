@@ -39,13 +39,13 @@ struct CharacterSpacingGlyphRun
    * Default constructor to set the default values of bitfields
    */
   CharacterSpacingGlyphRun()
-    : glyphRun{},
-      value{0.f} // The default value is 0.f which does nothing.
+  : glyphRun{},
+    value{0.f} // The default value is 0.f which does nothing.
   {
   }
 
   GlyphRun glyphRun; ///< The initial glyph index and the number of glyphs in the run.
-  float value;       ///< The spaces between characters in Pixels.
+  float    value;    ///< The spaces between characters in Pixels.
 };
 
 } // namespace Text

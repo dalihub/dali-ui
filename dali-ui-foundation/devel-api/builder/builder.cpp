@@ -43,7 +43,7 @@ Builder Builder::New(void)
 }
 
 Builder::Builder(Internal::Builder* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

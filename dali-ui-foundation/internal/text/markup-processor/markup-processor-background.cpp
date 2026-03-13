@@ -35,9 +35,9 @@ namespace Text
 {
 void ProcessBackground(const Tag& tag, ColorRun& colorRun)
 {
-  for (auto&& attribute : tag.attributes)
+  for(auto&& attribute : tag.attributes)
   {
-    if (TokenComparison(MARKUP::BACKGROUND_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::BACKGROUND_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       ColorStringToVector4(attribute.valueBuffer, attribute.valueLength, colorRun.color);
     }

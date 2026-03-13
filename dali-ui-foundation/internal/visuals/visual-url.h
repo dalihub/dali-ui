@@ -221,8 +221,8 @@ public:
   static std::string GetLocationWithoutExtension(const std::string& url);
 
 private:
-  std::string mUrl;
-  Type mType;
+  std::string  mUrl;
+  Type         mType;
   ProtocolType mLocation;
 
   mutable std::size_t mUrlHash;

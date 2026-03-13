@@ -21,8 +21,8 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
@@ -43,16 +43,16 @@ public:
    * @brief Constructs with default bounds (0,0,-1,-1) and no flags.
    */
   AbsoluteLayoutParamsImpl()
-    : LayoutParamsImpl(),
-      mBounds(0.0f, 0.0f, -1.0f, -1.0f),
-      mFlags(AbsoluteLayoutFlags::NONE)
+  : LayoutParamsImpl(),
+    mBounds(0.0f, 0.0f, -1.0f, -1.0f),
+    mFlags(AbsoluteLayoutFlags::NONE)
   {
   }
 
   AbsoluteLayoutParamsImpl(const AbsoluteLayoutParamsImpl& other)
-    : LayoutParamsImpl(),
-      mBounds(other.mBounds),
-      mFlags(other.mFlags)
+  : LayoutParamsImpl(),
+    mBounds(other.mBounds),
+    mFlags(other.mFlags)
   {
   }
 
@@ -125,7 +125,7 @@ public:
   static AbsoluteLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
-    if (trait)
+    if(trait)
     {
       return static_cast<AbsoluteLayoutParamsImpl*>(&Ui::GetImpl(trait));
     }
@@ -140,12 +140,12 @@ public:
   static AbsoluteLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
   {
     AbsoluteLayoutParamsImpl* existing = Get(viewImpl);
-    if (existing)
+    if(existing)
     {
       return *existing;
     }
     IntrusivePtr<AbsoluteLayoutParamsImpl> impl(new AbsoluteLayoutParamsImpl());
-    Trait trait = Trait::DownCast(BaseHandle(impl.Get()));
+    Trait                                  trait = Trait::DownCast(BaseHandle(impl.Get()));
     viewImpl.SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, trait);
     return *impl;
   }
@@ -154,7 +154,7 @@ protected:
   ~AbsoluteLayoutParamsImpl() override = default;
 
 private:
-  LayoutRect mBounds;
+  LayoutRect          mBounds;
   AbsoluteLayoutFlags mFlags;
 };
 

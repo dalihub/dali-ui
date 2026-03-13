@@ -39,10 +39,10 @@ void ProcessColor(const Attribute& attribute, ColorRun& colorRun)
 
 void ProcessColorTag(const Tag& tag, ColorRun& colorRun)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
-    if (TokenComparison(MARKUP::COLOR_ATTRIBUTES::VALUE, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::COLOR_ATTRIBUTES::VALUE, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessColor(attribute, colorRun);
     }

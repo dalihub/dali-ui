@@ -126,8 +126,8 @@ public:
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, const Property::Map& properties,
-                            ImageDimensions size = ImageDimensions(),
-                            FittingMode::Type fittingMode = FittingMode::VISUAL_FITTING,
+                            ImageDimensions          size         = ImageDimensions(),
+                            FittingMode::Type        fittingMode  = FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
   /**
@@ -146,7 +146,7 @@ public:
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions(),
-                            FittingMode::Type fittingMode = FittingMode::VISUAL_FITTING,
+                            FittingMode::Type        fittingMode  = FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
 public: // from Visual
@@ -345,33 +345,33 @@ private:
   void UpdateNativeTextureInfomation(TextureSet textureSet);
 
 private:
-  Vector4 mPixelArea;
+  Vector4         mPixelArea;
   Property::Index mPixelAreaIndex;
   Property::Index mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform.
 
-  WeakHandle<Actor> mPlacementActor;
-  VisualUrl mImageUrl;
+  WeakHandle<Actor>                  mPlacementActor;
+  VisualUrl                          mImageUrl;
   TextureManager::MaskingDataPointer mMaskingData;
 
-  Dali::ImageDimensions mDesiredSize;
-  Dali::ImageDimensions mLastRequiredSize;
+  Dali::ImageDimensions     mDesiredSize;
+  Dali::ImageDimensions     mLastRequiredSize;
   TextureManager::TextureId mTextureId;
-  TextureSet mTextures;
-  Dali::Texture mNativeTexture; ///< The handle of native texture if we are using it.
-  Vector2 mTextureSize;
-  Vector2 mPlacementActorSize;
+  TextureSet                mTextures;
+  Dali::Texture             mNativeTexture; ///< The handle of native texture if we are using it.
+  Vector2                   mTextureSize;
+  Vector2                   mPlacementActorSize;
 
   FastTrackLoadingTaskPtr mFastTrackLoadingTask; ///< For fast track uploading.
 
   ImageVisualShaderFactory& mImageVisualShaderFactory;
 
-  Dali::FittingMode::Type mFittingMode : 4;
-  Dali::SamplingMode::Type mSamplingMode : 5;
-  Dali::WrapMode::Type mWrapModeU : 3;
-  Dali::WrapMode::Type mWrapModeV : 3;
-  Dali::Ui::ImageVisual::LoadPolicy::Type mLoadPolicy;
+  Dali::FittingMode::Type                    mFittingMode : 4;
+  Dali::SamplingMode::Type                   mSamplingMode : 5;
+  Dali::WrapMode::Type                       mWrapModeU : 3;
+  Dali::WrapMode::Type                       mWrapModeV : 3;
+  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
   Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
-  TextureManager::LoadState mLoadState; ///< The texture loading state
+  TextureManager::LoadState                  mLoadState; ///< The texture loading state
 
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.

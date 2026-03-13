@@ -128,7 +128,7 @@ private:
 
 private:
   Vector4 mBorderColor;
-  float mBorderSize;
+  float   mBorderSize;
 
   Property::Index mBorderColorIndex;
   Property::Index mBorderSizeIndex;

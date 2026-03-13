@@ -44,7 +44,6 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  */
 class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface
 {
-
 public:
   /**
    * @brief Temporary animatable property definitions for LabelImpl.
@@ -102,7 +101,6 @@ public:
   };
 
 public:
-
   // Creation & Destruction
 
   /**
@@ -111,14 +109,12 @@ public:
   static LabelImplPtr New();
 
 protected:
-
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
   virtual ~LabelImpl();
 
 public:
-
   // API
 
   /**
@@ -192,7 +188,6 @@ public:
   TextAlignment GetVerticalTextAlignment() const;
 
 protected:
-
   // Construction
 
   /**
@@ -252,20 +247,18 @@ public: // From ControlInterface
   void RequestTextRelayout() override;
 
 private:
-
   // Not copyable or movable
-  LabelImpl(const LabelImpl&) = delete;
-  LabelImpl(LabelImpl&&) = delete;
+  LabelImpl(const LabelImpl&)            = delete;
+  LabelImpl(LabelImpl&&)                 = delete;
   LabelImpl& operator=(const LabelImpl&) = delete;
-  LabelImpl& operator=(LabelImpl&&) = delete;
+  LabelImpl& operator=(LabelImpl&&)      = delete;
 
 private:
-
   // Data
-  Visual::Base mVisual;
+  Visual::Base        mVisual;
   Text::ControllerPtr mController;
 
-  int mTextColorAnimatedCount;
+  int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;
 };
 

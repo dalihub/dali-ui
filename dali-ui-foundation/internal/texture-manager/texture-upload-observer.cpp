@@ -27,50 +27,50 @@ namespace Ui
 {
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType, const int32_t textureId,
                                                               TextureSet textureSet, const bool preMultiplied)
-  : returnType(returnType),
-    textureId(textureId),
-    textureSet(textureSet),
-    preMultiplied(preMultiplied),
-    pixelBuffer(),
-    url()
+: returnType(returnType),
+  textureId(textureId),
+  textureSet(textureSet),
+  preMultiplied(preMultiplied),
+  pixelBuffer(),
+  url()
 {
 }
 
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType, const int32_t textureId,
                                                               TextureSet textureSet, const std::string& url,
                                                               const bool preMultiplied)
-  : returnType(returnType),
-    textureId(textureId),
-    textureSet(textureSet),
-    preMultiplied(preMultiplied),
-    pixelBuffer(),
-    url(url)
+: returnType(returnType),
+  textureId(textureId),
+  textureSet(textureSet),
+  preMultiplied(preMultiplied),
+  pixelBuffer(),
+  url(url)
 {
 }
 
-TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType,
+TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType   returnType,
                                                               Devel::PixelBuffer pixelBuffer, const std::string& url,
                                                               const bool preMultiplied)
-  : returnType(returnType),
-    textureId(Internal::TextureManagerType::INVALID_TEXTURE_ID),
-    textureSet(),
-    preMultiplied(preMultiplied),
-    pixelBuffer(pixelBuffer),
-    url(url)
+: returnType(returnType),
+  textureId(Internal::TextureManagerType::INVALID_TEXTURE_ID),
+  textureSet(),
+  preMultiplied(preMultiplied),
+  pixelBuffer(pixelBuffer),
+  url(url)
 {
 }
 
 TextureUploadObserver::TextureInformation::TextureInformation(const ReturnType returnType, const int32_t textureId,
                                                               TextureSet textureSet, const uint32_t frameCount,
                                                               const uint32_t interval, const bool preMultiplied)
-  : returnType(returnType),
-    textureId(textureId),
-    textureSet(textureSet),
-    preMultiplied(preMultiplied),
-    pixelBuffer(),
-    url(),
-    frameCount(frameCount),
-    interval(interval)
+: returnType(returnType),
+  textureId(textureId),
+  textureSet(textureSet),
+  preMultiplied(preMultiplied),
+  pixelBuffer(),
+  url(),
+  frameCount(frameCount),
+  interval(interval)
 {
 }
 
@@ -80,7 +80,7 @@ TextureUploadObserver::TextureUploadObserver()
 
 TextureUploadObserver::~TextureUploadObserver()
 {
-  if (!mDestructionSignal.Empty())
+  if(!mDestructionSignal.Empty())
   {
     mDestructionSignal.Emit(this);
   }

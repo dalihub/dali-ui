@@ -197,21 +197,21 @@ private:
   void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
 
 private:
-  WeakHandle<Actor> mPlacementActor; ///< Weakhandle to contain Actor during texture loading
-  NPatchLoader& mLoader;             ///< reference to N patch loader for fast access
-  ImageVisualShaderFactory& mImageVisualShaderFactory;
-  VisualUrl mImageUrl;                           ///< The url to the N patch to load
-  VisualUrl mAuxiliaryUrl;                       ///< An auxiliary image that can be displayed on top of the N-Patch
-  NPatchData::NPatchDataId mId;                  ///< id of the N patch (from loader/cache)
-  TextureSet mAuxiliaryTextureSet;               ///< TextureSet of the auxiliary mask image
-  TextureManager::TextureId mAuxiliaryTextureId; ///< id of the auxiliary mask image (from TextureManager)
+  WeakHandle<Actor>          mPlacementActor; ///< Weakhandle to contain Actor during texture loading
+  NPatchLoader&              mLoader;         ///< reference to N patch loader for fast access
+  ImageVisualShaderFactory&  mImageVisualShaderFactory;
+  VisualUrl                  mImageUrl;                ///< The url to the N patch to load
+  VisualUrl                  mAuxiliaryUrl;            ///< An auxiliary image that can be displayed on top of the N-Patch
+  NPatchData::NPatchDataId   mId;                      ///< id of the N patch (from loader/cache)
+  TextureSet                 mAuxiliaryTextureSet;     ///< TextureSet of the auxiliary mask image
+  TextureManager::TextureId  mAuxiliaryTextureId;      ///< id of the auxiliary mask image (from TextureManager)
   Ui::Visual::ResourceStatus mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
-  Property::Index mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
-  bool mBorderOnly;                         ///< if only border is desired
-  Rect<int> mBorder;                        ///< The size of the border
-  float mAuxiliaryImageAlpha;               ///< The alpha value for the auxiliary image only
+  Property::Index            mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
+  bool                       mBorderOnly;              ///< if only border is desired
+  Rect<int>                  mBorder;                  ///< The size of the border
+  float                      mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
   Ui::ImageVisual::ReleasePolicy::Type
-      mReleasePolicy; ///< The release policy to determine when an image should no longer be cached.
+    mReleasePolicy; ///< The release policy to determine when an image should no longer be cached.
 };
 
 } // namespace Internal

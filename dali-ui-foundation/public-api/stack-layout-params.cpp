@@ -46,7 +46,7 @@ StackLayoutParams StackLayoutParams::New(const StackLayoutParams& other)
 }
 
 StackLayoutParams::StackLayoutParams(const StackLayoutParams& handle)
-  : LayoutParams(handle)
+: LayoutParams(handle)
 {
 }
 
@@ -55,7 +55,7 @@ StackLayoutParams::~StackLayoutParams()
 }
 
 StackLayoutParams::StackLayoutParams(Internal::StackLayoutParamsImpl* implementation)
-  : LayoutParams(implementation)
+: LayoutParams(implementation)
 {
 }
 

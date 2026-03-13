@@ -37,7 +37,7 @@ GlyphyShader::GlyphyShader()
 }
 
 GlyphyShader::GlyphyShader(Shader handle)
-  : Shader(handle)
+: Shader(handle)
 {
 }
 
@@ -58,10 +58,10 @@ GlyphyShader GlyphyShader::New(const Dali::Vector4& atlasInfo)
                              << SHADER_GLYPHY_SDF_GLSL_SHADER_DEF.data() << SHADER_GLYPHY_SHADER_MAIN_FRAG.data();
 
   Shader shaderEffectCustom =
-      Shader::New(vertexShaderStringStream.str(), fragmentShaderStringStream.str(),
-                  static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL |
-                                                   Shader::Hint::OUTPUT_IS_TRANSPARENT),
-                  "GLYPHY_SHADER");
+    Shader::New(vertexShaderStringStream.str(), fragmentShaderStringStream.str(),
+                static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL |
+                                                 Shader::Hint::OUTPUT_IS_TRANSPARENT),
+                "GLYPHY_SHADER");
 
   GlyphyShader handle(shaderEffectCustom);
 

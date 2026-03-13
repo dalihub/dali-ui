@@ -36,7 +36,7 @@ AsyncTextManager::~AsyncTextManager()
 }
 
 AsyncTextManager::AsyncTextManager(Internal::AsyncTextManager* implementation)
-  : BaseHandle(implementation)
+: BaseHandle(implementation)
 {
 }
 

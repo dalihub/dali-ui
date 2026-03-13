@@ -220,18 +220,18 @@ private:
    */
   Text::AsyncTextModule mModule;
 
-  Text::ModelPtr mTextModel;
-  MetricsPtr mMetrics;
+  Text::ModelPtr       mTextModel;
+  MetricsPtr           mMetrics;
   Text::Layout::Engine mLayoutEngine;
-  Text::TypesetterPtr mTypesetter;
-  std::string mLocale;
+  Text::TypesetterPtr  mTypesetter;
+  std::string          mLocale;
 
   TextAbstraction::FontPathList mCustomFonts;
 
   Length mNumberOfCharacters;
-  bool mFitActualEllipsis : 1;  // Used to store actual ellipses during TextFit calculations. Do not use it in other
-                                // sections.
-  bool mIsTextDirectionRTL : 1; // The direction of the first line after layout completion.
+  bool   mFitActualEllipsis : 1; // Used to store actual ellipses during TextFit calculations. Do not use it in other
+                                 // sections.
+  bool mIsTextDirectionRTL : 1;  // The direction of the first line after layout completion.
   bool mIsTextMirrored : 1;
   bool mModuleClearNeeded : 1;
   bool mLocaleUpdateNeeded : 1;

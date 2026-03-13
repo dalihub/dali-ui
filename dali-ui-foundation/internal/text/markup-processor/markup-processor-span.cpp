@@ -39,87 +39,87 @@ namespace Text
 {
 void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& fontRun,
                     UnderlinedCharacterRun& underlinedCharacterRun, ColorRun& backgroundColorRun,
-                    StrikethroughCharacterRun& strikethroughRun,
+                    StrikethroughCharacterRun&    strikethroughRun,
                     CharacterSpacingCharacterRun& characterSpacingCharacterRun, bool& isColorDefined,
                     bool& isFontDefined, bool& isUnderlinedCharacterDefined, bool& isBackgroundColorDefined,
                     bool& isStrikethroughDefined, bool& isCharacterSpacingDefined)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
 
-    if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::TEXT_COLOR, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::TEXT_COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       isColorDefined = true;
       ProcessColor(attribute, colorRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::BACKGROUND_COLOR, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::BACKGROUND_COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       isBackgroundColorDefined = true;
       ProcessColor(attribute, backgroundColorRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_FAMILY, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_FAMILY, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
       ProcessFontFamily(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_SIZE, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_SIZE, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
       ProcessFontSize(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_WEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_WEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
       ProcessFontWeight(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_WIDTH, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_WIDTH, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
       ProcessFontWidth(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_SLANT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_SLANT, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
       ProcessFontSlant(attribute, fontRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_COLOR, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       isUnderlinedCharacterDefined = true;
       ProcessColorAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_HEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_HEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       isUnderlinedCharacterDefined = true;
       ProcessHeightAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_TYPE, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_TYPE, attribute.nameBuffer, attribute.nameLength))
     {
       isUnderlinedCharacterDefined = true;
       ProcessTypeAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_DASH_GAP, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_DASH_GAP, attribute.nameBuffer, attribute.nameLength))
     {
       isUnderlinedCharacterDefined = true;
       ProcessDashGapAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_DASH_WIDTH, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::UNDERLINE_DASH_WIDTH, attribute.nameBuffer, attribute.nameLength))
     {
       isUnderlinedCharacterDefined = true;
       ProcessDashWidthAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::STRIKETHROUGH_COLOR, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::STRIKETHROUGH_COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       isStrikethroughDefined = true;
       ProcessColorAttribute(attribute, strikethroughRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::STRIKETHROUGH_HEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::STRIKETHROUGH_HEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       isStrikethroughDefined = true;
       ProcessHeightAttribute(attribute, strikethroughRun);
     }
-    else if (TokenComparison(MARKUP::SPAN_ATTRIBUTES::CHARACTER_SPACING_VALUE, attribute.nameBuffer,
-                             attribute.nameLength))
+    else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::CHARACTER_SPACING_VALUE, attribute.nameBuffer,
+                            attribute.nameLength))
     {
       isCharacterSpacingDefined = true;
       ProcessValueAttribute(attribute, characterSpacingCharacterRun);

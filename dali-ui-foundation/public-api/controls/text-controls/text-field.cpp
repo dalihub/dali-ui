@@ -72,12 +72,12 @@ TextField::InputStyleChangedSignalType& TextField::InputStyleChangedSignal()
 }
 
 TextField::TextField(Internal::TextField& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 TextField::TextField(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::TextField>(internal);
 }

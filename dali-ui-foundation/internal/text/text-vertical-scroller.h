@@ -75,10 +75,10 @@ private: // Implementation
 
 private:
   Animation mScrollAnimation; // Animation used to update the actor's position
-  Actor mScrollingActor;      // The actor being animated
-  float mDuration;            // The duration of text scrolling
-  float mScrollTo;            // The destination y position
-};                            // TextVerticalScroller class
+  Actor     mScrollingActor;  // The actor being animated
+  float     mDuration;        // The duration of text scrolling
+  float     mScrollTo;        // The destination y position
+}; // TextVerticalScroller class
 
 } // namespace Text
 

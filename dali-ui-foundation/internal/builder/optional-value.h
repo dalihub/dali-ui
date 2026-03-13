@@ -18,11 +18,11 @@
  *
  */
 
-template <typename T>
+template<typename T>
 struct OptionalTypes
 {
-  typedef T ValueType;
-  typedef const T& ReturnType;
+  typedef T         ValueType;
+  typedef const T&  ReturnType;
   static ReturnType Get(const ValueType& v)
   {
     return v;
@@ -37,11 +37,11 @@ struct OptionalTypes
   }
 };
 
-template <typename T>
+template<typename T>
 struct OptionalTypes<T*>
 {
-  typedef T* ValueType;
-  typedef const T* ReturnType;
+  typedef T*        ValueType;
+  typedef const T*  ReturnType;
   static ReturnType Get(const ValueType v)
   {
     return v;
@@ -56,11 +56,11 @@ struct OptionalTypes<T*>
   }
 };
 
-template <typename T>
+template<typename T>
 struct OptionalTypes<T&>
 {
-  typedef T* ValueType;
-  typedef const T& ReturnType;
+  typedef T*        ValueType;
+  typedef const T&  ReturnType;
   static ReturnType Get(const ValueType v)
   {
     return *v;
@@ -75,26 +75,26 @@ struct OptionalTypes<T&>
   }
 };
 
-template <typename T>
+template<typename T>
 class OptionalValue
 {
 public:
   typedef typename OptionalTypes<T>::ReturnType ReturnType;
-  typedef typename OptionalTypes<T>::ValueType ValueType;
+  typedef typename OptionalTypes<T>::ValueType  ValueType;
 
   OptionalValue()
-    : mOk(false),
-      mValue()
+  : mOk(false),
+    mValue()
   {
   }
   OptionalValue(T value)
-    : mOk(OptionalTypes<T>::Ok(value)),
-      mValue(OptionalTypes<T>::Set(value))
+  : mOk(OptionalTypes<T>::Ok(value)),
+    mValue(OptionalTypes<T>::Set(value))
   {
   }
   OptionalValue(bool b, T value)
-    : mOk(b),
-      mValue(OptionalTypes<T>::Set(value))
+  : mOk(b),
+    mValue(OptionalTypes<T>::Set(value))
   {
   }
 
@@ -109,18 +109,18 @@ public:
   }
 
 private:
-  bool mOk;
+  bool      mOk;
   ValueType mValue;
 };
 
-template <typename T, typename U>
+template<typename T, typename U>
 bool operator==(const OptionalValue<T>& lhs, const OptionalValue<U>& rhs)
 {
   lhs.this_type_does_not_support_comparisons();
   return false;
 }
 
-template <typename T, typename U>
+template<typename T, typename U>
 bool operator!=(const OptionalValue<T>& lhs, const OptionalValue<U>& rhs)
 {
   lhs.this_type_does_not_support_comparisons();

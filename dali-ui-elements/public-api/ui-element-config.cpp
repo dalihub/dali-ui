@@ -16,8 +16,8 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-elements/public-api/ui-element-config.h>
 #include <dali-ui-elements/integration-api/ui-element-config-impl.h>
+#include <dali-ui-elements/public-api/ui-element-config.h>
 
 namespace Dali
 {
@@ -26,7 +26,7 @@ namespace Ui
 {
 
 UiElementConfig::UiElementConfig(Integration::UiElementConfigImpl* impl)
-  : UiConfig(impl)
+: UiConfig(impl)
 {
 }
 

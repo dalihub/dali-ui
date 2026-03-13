@@ -45,12 +45,12 @@ Layout Layout::New()
 }
 
 Layout::Layout(const Layout& layout)
-  : View(layout)
+: View(layout)
 {
 }
 
 Layout::Layout(Layout&& rhs) noexcept
-  : View(std::move(rhs))
+: View(std::move(rhs))
 {
 }
 
@@ -60,7 +60,7 @@ Layout::~Layout()
 
 Layout& Layout::operator=(const Layout& handle)
 {
-  if (&handle != this)
+  if(&handle != this)
   {
     View::operator=(handle);
   }
@@ -79,12 +79,12 @@ Layout Layout::DownCast(BaseHandle handle)
 }
 
 Layout::Layout(Integration::LayoutImpl& implementation)
-  : View(implementation)
+: View(implementation)
 {
 }
 
 Layout::Layout(Dali::Internal::CustomActor* internal)
-  : View(internal)
+: View(internal)
 {
   VerifyCustomActorPointer<Integration::LayoutImpl>(internal);
 }

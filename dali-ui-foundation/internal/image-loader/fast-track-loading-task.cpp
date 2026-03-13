@@ -47,7 +47,7 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_IMAGE_PERFORMANCE_MARKER, false)
 uint64_t GetNanoseconds()
 {
   // Get the time of a monotonic clock since its epoch.
-  auto epoch = std::chrono::steady_clock::now().time_since_epoch();
+  auto epoch    = std::chrono::steady_clock::now().time_since_epoch();
   auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch);
   return static_cast<uint64_t>(duration.count());
 }
@@ -55,19 +55,19 @@ uint64_t GetNanoseconds()
 
 constexpr uint32_t CHROMINANCE_U_INDEX = 1u;
 constexpr uint32_t CHROMINANCE_V_INDEX = 2u;
-constexpr uint32_t A_INDEX = 3u;
+constexpr uint32_t A_INDEX             = 3u;
 
 Dali::PixelData GetDummyChrominanceUPixelData()
 {
   static Dali::PixelData pixelDataU =
-      PixelData::New(new uint8_t[2]{0x00, 0x00}, 2, 1, 2, Pixel::L8, PixelData::DELETE_ARRAY);
+    PixelData::New(new uint8_t[2]{0x00, 0x00}, 2, 1, 2, Pixel::L8, PixelData::DELETE_ARRAY);
   return pixelDataU;
 }
 
 Dali::PixelData GetDummyChrominanceVPixelData()
 {
   static Dali::PixelData pixelDataV =
-      PixelData::New(new uint8_t[2]{0x00, 0x00}, 2, 2, 1, Pixel::L8, PixelData::DELETE_ARRAY);
+    PixelData::New(new uint8_t[2]{0x00, 0x00}, 2, 2, 1, Pixel::L8, PixelData::DELETE_ARRAY);
   return pixelDataV;
 }
 
@@ -81,28 +81,28 @@ Dali::PixelData GetDummyAPixelData()
 
 FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
                                            FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
-                                           bool orientationCorrection,
+                                           bool                                     orientationCorrection,
                                            DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                                            CallbackBase* callback)
-  : AsyncTask(MakeCallback(this, &FastTrackLoadingTask::OnComplete),
-              url.GetProtocolType() == VisualUrl::ProtocolType::REMOTE ? AsyncTask::PriorityType::LOW
-                                                                       : AsyncTask::PriorityType::HIGH),
-    mUrl(url),
-    mTextures(),
-    mDimensions(dimensions),
-    mFittingMode(fittingMode),
-    mSamplingMode(samplingMode),
-    mPreMultiplyOnLoad(preMultiplyOnLoad),
-    mCallback(),
-    mTextureUploadManager(Dali::Devel::TextureUploadManager::Get()),
-    mImageInformations(),
-    mPixelData(),
-    mOrientationCorrection(orientationCorrection),
-    mLoadSuccess(false),
-    mLoadPlanesAvaliable(loadPlanes),
-    mPremultiplied(false),
-    mPlanesLoaded(false),
-    mHasAlpha(false)
+: AsyncTask(MakeCallback(this, &FastTrackLoadingTask::OnComplete),
+            url.GetProtocolType() == VisualUrl::ProtocolType::REMOTE ? AsyncTask::PriorityType::LOW
+                                                                     : AsyncTask::PriorityType::HIGH),
+  mUrl(url),
+  mTextures(),
+  mDimensions(dimensions),
+  mFittingMode(fittingMode),
+  mSamplingMode(samplingMode),
+  mPreMultiplyOnLoad(preMultiplyOnLoad),
+  mCallback(),
+  mTextureUploadManager(Dali::Devel::TextureUploadManager::Get()),
+  mImageInformations(),
+  mPixelData(),
+  mOrientationCorrection(orientationCorrection),
+  mLoadSuccess(false),
+  mLoadPlanesAvaliable(loadPlanes),
+  mPremultiplied(false),
+  mPlanesLoaded(false),
+  mHasAlpha(false)
 {
   mCallback = std::unique_ptr<CallbackBase>(callback);
   PrepareTexture();
@@ -118,14 +118,14 @@ void FastTrackLoadingTask::PrepareTexture()
 
   mTextures.resize(requiredTexturesCount);
   mImageInformations.resize(requiredTexturesCount);
-  for (uint32_t index = 0u; index < requiredTexturesCount; ++index)
+  for(uint32_t index = 0u; index < requiredTexturesCount; ++index)
   {
     mTextures[index] = mTextureUploadManager.GenerateTexture2D();
 
     mImageInformations[index].resourceId = Dali::Integration::GetTextureResourceId(mTextures[index]);
   }
 
-  if (mLoadPlanesAvaliable)
+  if(mLoadPlanesAvaliable)
   {
     // Create static dummy chrominance pixel data now, for thread safety.
     [[maybe_unused]] auto pixelDataU = GetDummyChrominanceUPixelData();
@@ -136,15 +136,15 @@ void FastTrackLoadingTask::PrepareTexture()
 
 void FastTrackLoadingTask::OnComplete(AsyncTaskPtr task)
 {
-  if (mLoadSuccess)
+  if(mLoadSuccess)
   {
-    for (uint32_t index = 0u; index < mImageInformations.size(); ++index)
+    for(uint32_t index = 0u; index < mImageInformations.size(); ++index)
     {
       Dali::Integration::SetTextureSize(mTextures[index], mImageInformations[index].width,
                                         mImageInformations[index].height);
       Dali::Integration::SetTexturePixelFormat(mTextures[index], mImageInformations[index].format);
     }
-    if (mLoadPlanesAvaliable && !mPlanesLoaded)
+    if(mLoadPlanesAvaliable && !mPlanesLoaded)
     {
       // We will not use ChrominanceU and ChrominanceV texture anymore.
       mTextures.resize(1u);
@@ -155,7 +155,7 @@ void FastTrackLoadingTask::OnComplete(AsyncTaskPtr task)
     mTextures.clear();
   }
 
-  if (mCallback)
+  if(mCallback)
   {
     CallbackBase::Execute(*mCallback, FastTrackLoadingTaskPtr(reinterpret_cast<FastTrackLoadingTask*>(task.Get())));
   }
@@ -173,22 +173,22 @@ void FastTrackLoadingTask::Load()
 {
 #ifdef TRACE_ENABLED
   uint64_t mStartTimeNanoSceonds = 0;
-  uint64_t mEndTimeNanoSceonds = 0;
+  uint64_t mEndTimeNanoSceonds   = 0;
 #endif
 
   DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "DALI_IMAGE_FAST_TRACK_UPLOADING_TASK",
                                           [&](std::ostringstream& oss)
-                                          {
-                                            mStartTimeNanoSceonds = GetNanoseconds();
-                                            oss << "[u:" << mUrl.GetEllipsedUrl() << "]";
-                                          });
+  {
+    mStartTimeNanoSceonds = GetNanoseconds();
+    oss << "[u:" << mUrl.GetEllipsedUrl() << "]";
+  });
 
-  Devel::PixelBuffer pixelBuffer;
+  Devel::PixelBuffer              pixelBuffer;
   std::vector<Devel::PixelBuffer> pixelBuffers;
 
-  if (mUrl.IsValid() && mUrl.IsLocalResource())
+  if(mUrl.IsValid() && mUrl.IsLocalResource())
   {
-    if (mLoadPlanesAvaliable)
+    if(mLoadPlanesAvaliable)
     {
       Dali::LoadImagePlanesFromFile(mUrl.GetUrl(), pixelBuffers, mDimensions, mFittingMode, mSamplingMode,
                                     mOrientationCorrection);
@@ -196,21 +196,21 @@ void FastTrackLoadingTask::Load()
     else
     {
       pixelBuffer =
-          Dali::LoadImageFromFile(mUrl.GetUrl(), mDimensions, mFittingMode, mSamplingMode, mOrientationCorrection);
+        Dali::LoadImageFromFile(mUrl.GetUrl(), mDimensions, mFittingMode, mSamplingMode, mOrientationCorrection);
     }
   }
-  else if (mUrl.IsValid())
+  else if(mUrl.IsValid())
   {
     pixelBuffer = Dali::DownloadImageSynchronously(mUrl.GetUrl(), mDimensions, mFittingMode, mSamplingMode,
                                                    mOrientationCorrection);
   }
 
-  if (pixelBuffer)
+  if(pixelBuffer)
   {
     pixelBuffers.emplace_back(std::move(pixelBuffer));
   }
 
-  if (pixelBuffers.empty())
+  if(pixelBuffers.empty())
   {
     mLoadSuccess = false;
     DALI_LOG_ERROR("FastTrackLoadingTask::Load: Loading is failed: ResourceId : %d url : [%s]\n",
@@ -223,18 +223,18 @@ void FastTrackLoadingTask::Load()
     mLoadSuccess = true;
     MultiplyAlpha(pixelBuffers[0]);
     uint32_t index = 0u;
-    for (auto&& pixelBuffer : pixelBuffers)
+    for(auto&& pixelBuffer : pixelBuffers)
     {
       mPixelData[index++] = Dali::Devel::PixelBuffer::Convert(pixelBuffer);
     }
 
-    if (pixelBuffers.size() > 1u)
+    if(pixelBuffers.size() > 1u)
     {
       mPixelData.resize(4u);
-      if (pixelBuffers.size() == 3u)
+      if(pixelBuffers.size() == 3u)
       {
         mPixelData[A_INDEX] = GetDummyAPixelData();
-        mHasAlpha = false;
+        mHasAlpha           = false;
       }
       else
       {
@@ -242,49 +242,49 @@ void FastTrackLoadingTask::Load()
       }
       mPlanesLoaded = true;
     }
-    else if (mLoadPlanesAvaliable && pixelBuffers.size() == 1u &&
-             mTextures.size() >=
-                 3u) ///< Case when we prepare three textures to render YUV, but loaded image is not YUV.
+    else if(mLoadPlanesAvaliable && pixelBuffers.size() == 1u &&
+            mTextures.size() >=
+              3u) ///< Case when we prepare three textures to render YUV, but loaded image is not YUV.
     {
       // Dummy pixel data for fake shader that we don't use actual YUV format.
       // To fake shader, let we use indivisual sizes of texture for U and V.
       mPixelData.resize(4u);
       mPixelData[CHROMINANCE_U_INDEX] = GetDummyChrominanceUPixelData();
       mPixelData[CHROMINANCE_V_INDEX] = GetDummyChrominanceVPixelData();
-      mPixelData[A_INDEX] = GetDummyAPixelData();
+      mPixelData[A_INDEX]             = GetDummyAPixelData();
     }
 
-    if (DALI_UNLIKELY(mPixelData.size() != mImageInformations.size()))
+    if(DALI_UNLIKELY(mPixelData.size() != mImageInformations.size()))
     {
       DALI_LOG_ERROR(
-          "FastTrackLoadingTask::Load: Undefined case. pixelBuffers.size() : %zu, image size : %zu, ResourceId : %d, "
-          "url : [%s]\n",
-          pixelBuffers.size(), mImageInformations.size(), mImageInformations[0u].resourceId, mUrl.GetUrl().c_str());
+        "FastTrackLoadingTask::Load: Undefined case. pixelBuffers.size() : %zu, image size : %zu, ResourceId : %d, "
+        "url : [%s]\n",
+        pixelBuffers.size(), mImageInformations.size(), mImageInformations[0u].resourceId, mUrl.GetUrl().c_str());
       mLoadSuccess = false;
     }
   }
 
   DALI_TRACE_END_WITH_MESSAGE_GENERATOR(
-      gTraceFilter, "DALI_IMAGE_FAST_TRACK_UPLOADING_TASK",
-      [&](std::ostringstream& oss)
-      {
-        mEndTimeNanoSceonds = GetNanoseconds();
-        oss << std::fixed << std::setprecision(3);
-        oss << "[";
-        oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
-        oss << "b:" << pixelBuffers.size() << " ";
-        if (!mPixelData.empty())
-        {
-          oss << "s:" << mPixelData[0].GetWidth() << "x" << mPixelData[0].GetHeight() << " ";
-          oss << "p:" << mPremultiplied << " ";
-        }
-        oss << "u:" << mUrl.GetEllipsedUrl() << "]";
-      });
+    gTraceFilter, "DALI_IMAGE_FAST_TRACK_UPLOADING_TASK",
+    [&](std::ostringstream& oss)
+  {
+    mEndTimeNanoSceonds = GetNanoseconds();
+    oss << std::fixed << std::setprecision(3);
+    oss << "[";
+    oss << "d:" << static_cast<float>(mEndTimeNanoSceonds - mStartTimeNanoSceonds) / 1000000.0f << "ms ";
+    oss << "b:" << pixelBuffers.size() << " ";
+    if(!mPixelData.empty())
+    {
+      oss << "s:" << mPixelData[0].GetWidth() << "x" << mPixelData[0].GetHeight() << " ";
+      oss << "p:" << mPremultiplied << " ";
+    }
+    oss << "u:" << mUrl.GetEllipsedUrl() << "]";
+  });
 }
 
 void FastTrackLoadingTask::MultiplyAlpha(Dali::Devel::PixelBuffer pixelBuffer)
 {
-  if (mPreMultiplyOnLoad == DevelAsyncImageLoader::PreMultiplyOnLoad::ON)
+  if(mPreMultiplyOnLoad == DevelAsyncImageLoader::PreMultiplyOnLoad::ON)
   {
     pixelBuffer.MultiplyColorByAlpha();
     mPremultiplied = pixelBuffer.IsAlphaPreMultiplied();
@@ -293,14 +293,14 @@ void FastTrackLoadingTask::MultiplyAlpha(Dali::Devel::PixelBuffer pixelBuffer)
 
 void FastTrackLoadingTask::UploadToTexture()
 {
-  if (mLoadSuccess)
+  if(mLoadSuccess)
   {
     DALI_ASSERT_DEBUG(mPixelData.size() == mImageInformations.size());
 
     uint32_t index = 0u;
-    for (auto&& pixelData : mPixelData)
+    for(auto&& pixelData : mPixelData)
     {
-      mImageInformations[index].width = pixelData.GetWidth();
+      mImageInformations[index].width  = pixelData.GetWidth();
       mImageInformations[index].height = pixelData.GetHeight();
       mImageInformations[index].format = pixelData.GetPixelFormat();
 

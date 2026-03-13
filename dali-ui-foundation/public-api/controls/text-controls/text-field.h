@@ -54,7 +54,7 @@ public:
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1, ///< @SINCE_1_0.0
-    PROPERTY_END_INDEX = PROPERTY_START_INDEX + 1000                ///< Reserve property indices @SINCE_1_0.0
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000              ///< Reserve property indices @SINCE_1_0.0
   };
 
   /**
@@ -484,15 +484,15 @@ public:
      */
     enum Mask
     {
-      NONE = 0x0000,        ///< @SINCE_1_2_2
-      COLOR = 0x0001,       ///< @SINCE_1_2_2
-      FONT_FAMILY = 0x0002, ///< @SINCE_1_2_2
-      POINT_SIZE = 0x0004,  ///< @SINCE_1_2_2
-      FONT_STYLE = 0x0008,  ///< @SINCE_1_2_2
-      UNDERLINE = 0x0010,   ///< @SINCE_1_2_2
-      SHADOW = 0x0020,      ///< @SINCE_1_2_2
-      EMBOSS = 0x0040,      ///< @SINCE_1_2_2
-      OUTLINE = 0x0080,     ///< @SINCE_1_2_2
+      NONE          = 0x0000, ///< @SINCE_1_2_2
+      COLOR         = 0x0001, ///< @SINCE_1_2_2
+      FONT_FAMILY   = 0x0002, ///< @SINCE_1_2_2
+      POINT_SIZE    = 0x0004, ///< @SINCE_1_2_2
+      FONT_STYLE    = 0x0008, ///< @SINCE_1_2_2
+      UNDERLINE     = 0x0010, ///< @SINCE_1_2_2
+      SHADOW        = 0x0020, ///< @SINCE_1_2_2
+      EMBOSS        = 0x0040, ///< @SINCE_1_2_2
+      OUTLINE       = 0x0080, ///< @SINCE_1_2_2
       STRIKETHROUGH = 0x1000
     };
   };

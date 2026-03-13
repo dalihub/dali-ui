@@ -40,8 +40,8 @@ namespace Text
 struct ParagraphRun
 {
   CharacterRun
-      characterRun; ///< The initial character index within the whole text and the number of characters of the run.
-  Size layoutSize;  ///< The size of the paragraph when is laid-out.
+       characterRun; ///< The initial character index within the whole text and the number of characters of the run.
+  Size layoutSize;   ///< The size of the paragraph when is laid-out.
 };
 
 } // namespace Text

@@ -46,7 +46,7 @@ FlexLayoutParams FlexLayoutParams::New(const FlexLayoutParams& other)
 }
 
 FlexLayoutParams::FlexLayoutParams(const FlexLayoutParams& handle)
-  : LayoutParams(handle)
+: LayoutParams(handle)
 {
 }
 
@@ -55,7 +55,7 @@ FlexLayoutParams::~FlexLayoutParams()
 }
 
 FlexLayoutParams::FlexLayoutParams(Internal::FlexLayoutParamsImpl* implementation)
-  : LayoutParams(implementation)
+: LayoutParams(implementation)
 {
 }
 

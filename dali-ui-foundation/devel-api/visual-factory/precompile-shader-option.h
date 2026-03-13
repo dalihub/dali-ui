@@ -189,13 +189,13 @@ public:
   uint32_t GetNpatchYStretchCount() const;
 
 private:
-  ShaderType mShaderType;
+  ShaderType    mShaderType;
   ShaderOptions mShaderOptions;
-  std::string mShaderName;
-  std::string mVertexShader;
-  std::string mFragmentShader;
-  uint32_t mNpatchXStretchCount;
-  uint32_t mNpatchYStretchCount;
+  std::string   mShaderName;
+  std::string   mVertexShader;
+  std::string   mFragmentShader;
+  uint32_t      mNpatchXStretchCount;
+  uint32_t      mNpatchYStretchCount;
 };
 
 } // namespace Ui

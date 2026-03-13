@@ -27,12 +27,12 @@ namespace Text
 bool IsGlyphUnderlined(GlyphIndex index, const Vector<UnderlinedGlyphRun>& underlineRuns,
                        Vector<UnderlinedGlyphRun>::ConstIterator& currentUnderlinedGlyphRunIt)
 {
-  for (Vector<UnderlinedGlyphRun>::ConstIterator it = underlineRuns.Begin(), endIt = underlineRuns.End(); it != endIt;
-       ++it)
+  for(Vector<UnderlinedGlyphRun>::ConstIterator it = underlineRuns.Begin(), endIt = underlineRuns.End(); it != endIt;
+      ++it)
   {
     const UnderlinedGlyphRun& run = *it;
 
-    if ((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
+    if((run.glyphRun.glyphIndex <= index) && (index < run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs))
     {
       currentUnderlinedGlyphRunIt = it;
       return true;
@@ -43,21 +43,21 @@ bool IsGlyphUnderlined(GlyphIndex index, const Vector<UnderlinedGlyphRun>& under
 }
 
 UnderlineStyleProperties GetCurrentUnderlineProperties(
-    GlyphIndex index, const bool& isGlyphUnderlined, const Vector<UnderlinedGlyphRun>& underlineRuns,
-    Vector<UnderlinedGlyphRun>::ConstIterator& currentUnderlinedGlyphRunIt,
-    const UnderlineStyleProperties& commonUnderlineProperties)
+  GlyphIndex index, const bool& isGlyphUnderlined, const Vector<UnderlinedGlyphRun>& underlineRuns,
+  Vector<UnderlinedGlyphRun>::ConstIterator& currentUnderlinedGlyphRunIt,
+  const UnderlineStyleProperties&            commonUnderlineProperties)
 {
   UnderlineStyleProperties currentUnderlineStyleProperties = commonUnderlineProperties;
 
-  if (isGlyphUnderlined && (currentUnderlinedGlyphRunIt != underlineRuns.End()))
+  if(isGlyphUnderlined && (currentUnderlinedGlyphRunIt != underlineRuns.End()))
   {
     // Retrieve the latest run to handle the nested case.
-    for (Vector<UnderlinedGlyphRun>::ConstIterator it = currentUnderlinedGlyphRunIt + 1, endIt = underlineRuns.End();
-         it != endIt; ++it)
+    for(Vector<UnderlinedGlyphRun>::ConstIterator it = currentUnderlinedGlyphRunIt + 1, endIt = underlineRuns.End();
+        it != endIt; ++it)
     {
       const UnderlinedGlyphRun& run = *it;
 
-      if ((run.glyphRun.glyphIndex <= index) && (index < (run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs)))
+      if((run.glyphRun.glyphIndex <= index) && (index < (run.glyphRun.glyphIndex + run.glyphRun.numberOfGlyphs)))
       {
         currentUnderlinedGlyphRunIt = it;
       }
@@ -72,16 +72,16 @@ UnderlineStyleProperties GetCurrentUnderlineProperties(
 float FetchUnderlinePositionFromFontMetrics(const FontMetrics& fontMetrics)
 {
   // Helper method to fetch the underline metrics for the specified font glyph
-  const float descender = ceil(fabsf(fontMetrics.descender));
-  float underlinePosition = ceil(fabsf(fontMetrics.underlinePosition));
+  const float descender         = ceil(fabsf(fontMetrics.descender));
+  float       underlinePosition = ceil(fabsf(fontMetrics.underlinePosition));
 
   // Clamp the underline position at the font descender and check for ( as EFL describes it ) a broken font
-  if (underlinePosition > descender)
+  if(underlinePosition > descender)
   {
     underlinePosition = descender;
   }
 
-  if (fabsf(underlinePosition) < Math::MACHINE_EPSILON_1000)
+  if(fabsf(underlinePosition) < Math::MACHINE_EPSILON_1000)
   {
     // Move offset down by one ( EFL behavior )
     underlinePosition = 1.0f;
@@ -94,12 +94,12 @@ void CalcualteUnderlineHeight(const FontMetrics& fontMetrics, float& currentUnde
 {
   // Helper method to fetch the underline metrics for the specified font glyph
   // Height of underline represents the thickness of line.
-  if (fabsf(currentUnderlineHeight) < Math::MACHINE_EPSILON_1000)
+  if(fabsf(currentUnderlineHeight) < Math::MACHINE_EPSILON_1000)
   {
     currentUnderlineHeight = fontMetrics.underlineThickness;
 
     // Ensure underline will be at least a pixel high
-    if (currentUnderlineHeight < 1.0f)
+    if(currentUnderlineHeight < 1.0f)
     {
       currentUnderlineHeight = 1.0f;
     }
@@ -110,7 +110,7 @@ void CalcualteUnderlineHeight(const FontMetrics& fontMetrics, float& currentUnde
   }
 
   // The underline height should be the max underline height of all glyphs of the line.
-  if (currentUnderlineHeight > maxUnderlineHeight)
+  if(currentUnderlineHeight > maxUnderlineHeight)
   {
     maxUnderlineHeight = currentUnderlineHeight;
   }

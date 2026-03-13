@@ -18,10 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
 #include <dali/devel-api/adaptor-framework/vector-animation-renderer.h>
 #include <dali/devel-api/threading/mutex.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/object/property-array.h>
@@ -59,7 +59,7 @@ public:
 
   using ResourceReadySignalType = Signal<void(ResourceStatus)>;
 
-  using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+  using TimePoint           = std::chrono::time_point<std::chrono::steady_clock>;
   using DynamicPropertyType = std::vector<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>;
 
   /**
@@ -67,17 +67,17 @@ public:
    */
   enum ResendFlags
   {
-    RESEND_PLAY_RANGE = 1 << 0,
-    RESEND_LOOP_COUNT = 1 << 1,
-    RESEND_STOP_BEHAVIOR = 1 << 2,
-    RESEND_LOOPING_MODE = 1 << 3,
-    RESEND_CURRENT_FRAME = 1 << 4,
-    RESEND_SIZE = 1 << 5,
-    RESEND_PLAY_STATE = 1 << 6,
-    RESEND_NEED_RESOURCE_READY = 1 << 7,
-    RESEND_DYNAMIC_PROPERTY = 1 << 8,
+    RESEND_PLAY_RANGE                 = 1 << 0,
+    RESEND_LOOP_COUNT                 = 1 << 1,
+    RESEND_STOP_BEHAVIOR              = 1 << 2,
+    RESEND_LOOPING_MODE               = 1 << 3,
+    RESEND_CURRENT_FRAME              = 1 << 4,
+    RESEND_SIZE                       = 1 << 5,
+    RESEND_PLAY_STATE                 = 1 << 6,
+    RESEND_NEED_RESOURCE_READY        = 1 << 7,
+    RESEND_DYNAMIC_PROPERTY           = 1 << 8,
     RESEND_NOTIFY_AFTER_RASTERIZATION = 1 << 9,
-    RESEND_FRAME_SPEED_FACTOR = 1 << 10,
+    RESEND_FRAME_SPEED_FACTOR         = 1 << 10,
   };
 
   /**
@@ -86,54 +86,54 @@ public:
   struct AnimationData
   {
     AnimationData()
-      : resendFlag(0),
-        playRange(),
-        dynamicProperties(),
-        playState(),
-        stopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-        loopingMode(DevelImageVisual::LoopingMode::RESTART),
-        currentFrame(0),
-        width(0),
-        height(0),
-        loopCount(-1),
-        playStateId(0),
-        frameSpeedFactor(1.0f),
-        notifyAfterRasterization(false)
+    : resendFlag(0),
+      playRange(),
+      dynamicProperties(),
+      playState(),
+      stopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
+      loopingMode(DevelImageVisual::LoopingMode::RESTART),
+      currentFrame(0),
+      width(0),
+      height(0),
+      loopCount(-1),
+      playStateId(0),
+      frameSpeedFactor(1.0f),
+      notifyAfterRasterization(false)
     {
     }
 
     AnimationData& operator=(const AnimationData& rhs)
     {
       resendFlag |= rhs.resendFlag; // OR resend flag
-      playRange = rhs.playRange;
-      playState = rhs.playState;
-      stopBehavior = rhs.stopBehavior;
-      loopingMode = rhs.loopingMode;
-      currentFrame = rhs.currentFrame;
-      width = rhs.width;
-      height = rhs.height;
-      loopCount = rhs.loopCount;
-      playStateId = rhs.playStateId;
-      frameSpeedFactor = rhs.frameSpeedFactor;
+      playRange                = rhs.playRange;
+      playState                = rhs.playState;
+      stopBehavior             = rhs.stopBehavior;
+      loopingMode              = rhs.loopingMode;
+      currentFrame             = rhs.currentFrame;
+      width                    = rhs.width;
+      height                   = rhs.height;
+      loopCount                = rhs.loopCount;
+      playStateId              = rhs.playStateId;
+      frameSpeedFactor         = rhs.frameSpeedFactor;
       notifyAfterRasterization = rhs.notifyAfterRasterization;
 
       dynamicProperties.insert(dynamicProperties.end(), rhs.dynamicProperties.begin(), rhs.dynamicProperties.end());
       return *this;
     }
 
-    uint32_t resendFlag;
-    Property::Array playRange;
-    DynamicPropertyType dynamicProperties;
-    DevelImageVisual::PlayState::Type playState;
+    uint32_t                             resendFlag;
+    Property::Array                      playRange;
+    DynamicPropertyType                  dynamicProperties;
+    DevelImageVisual::PlayState::Type    playState;
     DevelImageVisual::StopBehavior::Type stopBehavior;
-    DevelImageVisual::LoopingMode::Type loopingMode;
-    uint32_t currentFrame;
-    uint32_t width;
-    uint32_t height;
-    int32_t loopCount;
-    uint32_t playStateId;
-    float frameSpeedFactor;
-    bool notifyAfterRasterization;
+    DevelImageVisual::LoopingMode::Type  loopingMode;
+    uint32_t                             currentFrame;
+    uint32_t                             width;
+    uint32_t                             height;
+    int32_t                              loopCount;
+    uint32_t                             playStateId;
+    float                                frameSpeedFactor;
+    bool                                 notifyAfterRasterization;
   };
 
   /**
@@ -390,50 +390,50 @@ private:
     PAUSED    ///< The animation is paused
   };
 
-  VisualUrl mImageUrl;
-  EncodedImageBuffer mEncodedImageBuffer;
-  VectorAnimationRenderer mVectorRenderer;
-  std::vector<AnimationData> mAnimationData[2];
-  VectorAnimationThread& mVectorAnimationThread;
-  Mutex mMutex;
-  ResourceReadySignalType mResourceReadySignal;
-  std::unique_ptr<CallbackBase> mAnimationFinishedCallback{};
-  std::unique_ptr<CallbackBase> mLoadCompletedCallback{};
-  mutable Property::Map mCachedLayerInfo;
-  mutable Property::Map mCachedMarkerInfo;
-  PlayState mPlayState;
+  VisualUrl                            mImageUrl;
+  EncodedImageBuffer                   mEncodedImageBuffer;
+  VectorAnimationRenderer              mVectorRenderer;
+  std::vector<AnimationData>           mAnimationData[2];
+  VectorAnimationThread&               mVectorAnimationThread;
+  Mutex                                mMutex;
+  ResourceReadySignalType              mResourceReadySignal;
+  std::unique_ptr<CallbackBase>        mAnimationFinishedCallback{};
+  std::unique_ptr<CallbackBase>        mLoadCompletedCallback{};
+  mutable Property::Map                mCachedLayerInfo;
+  mutable Property::Map                mCachedMarkerInfo;
+  PlayState                            mPlayState;
   DevelImageVisual::StopBehavior::Type mStopBehavior;
-  DevelImageVisual::LoopingMode::Type mLoopingMode;
-  TimePoint mNextFrameStartTime;
-  int64_t mFrameDurationMicroSeconds;
-  float mFrameRate;
-  float mFrameSpeedFactor;
-  uint32_t mCurrentFrame;
-  uint32_t mTotalFrame;
-  uint32_t mStartFrame;
-  uint32_t mEndFrame;
-  uint32_t mDroppedFrames;
-  uint32_t mWidth;
-  uint32_t mHeight;
-  uint32_t mAnimationDataIndex;
-  uint32_t mAppliedPlayStateId;
-  int32_t mLoopCount;
-  int32_t mCurrentLoop;
-  bool mForward : 1;
-  bool mUpdateFrameNumber : 1;
-  bool mNeedAnimationFinishedTrigger : 1;
-  bool mNeedForceRenderOnceTrigger : 1;
-  bool mAnimationDataUpdated : 1;
-  bool mDestroyTask : 1;
-  bool mLoadRequest : 1;
-  bool mLoadFailed : 1;
-  bool mRasterized : 1;
-  bool mKeepAnimation : 1;
-  mutable bool mLayerInfoCached : 1;
-  mutable bool mMarkerInfoCached : 1;
-  bool mEnableFrameCache : 1;
-  bool mNotifyAfterRasterization : 1;
-  bool mSizeUpdated : 1;
+  DevelImageVisual::LoopingMode::Type  mLoopingMode;
+  TimePoint                            mNextFrameStartTime;
+  int64_t                              mFrameDurationMicroSeconds;
+  float                                mFrameRate;
+  float                                mFrameSpeedFactor;
+  uint32_t                             mCurrentFrame;
+  uint32_t                             mTotalFrame;
+  uint32_t                             mStartFrame;
+  uint32_t                             mEndFrame;
+  uint32_t                             mDroppedFrames;
+  uint32_t                             mWidth;
+  uint32_t                             mHeight;
+  uint32_t                             mAnimationDataIndex;
+  uint32_t                             mAppliedPlayStateId;
+  int32_t                              mLoopCount;
+  int32_t                              mCurrentLoop;
+  bool                                 mForward : 1;
+  bool                                 mUpdateFrameNumber : 1;
+  bool                                 mNeedAnimationFinishedTrigger : 1;
+  bool                                 mNeedForceRenderOnceTrigger : 1;
+  bool                                 mAnimationDataUpdated : 1;
+  bool                                 mDestroyTask : 1;
+  bool                                 mLoadRequest : 1;
+  bool                                 mLoadFailed : 1;
+  bool                                 mRasterized : 1;
+  bool                                 mKeepAnimation : 1;
+  mutable bool                         mLayerInfoCached : 1;
+  mutable bool                         mMarkerInfoCached : 1;
+  bool                                 mEnableFrameCache : 1;
+  bool                                 mNotifyAfterRasterization : 1;
+  bool                                 mSizeUpdated : 1;
 };
 
 } // namespace Internal

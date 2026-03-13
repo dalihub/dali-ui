@@ -108,23 +108,23 @@ private:
   struct LoadElement
   {
     LoadElement()
-      : mTask(),
-        mObserver(nullptr),
-        mParameters()
+    : mTask(),
+      mObserver(nullptr),
+      mParameters()
     {
     }
 
     LoadElement(Ui::Internal::TextLoadingTaskPtr task, TextLoadObserver* observer,
                 const AsyncTextParameters& parameters)
-      : mTask(task),
-        mObserver(observer),
-        mParameters(parameters)
+    : mTask(task),
+      mObserver(observer),
+      mParameters(parameters)
     {
     }
 
-    Ui::Internal::TextLoadingTaskPtr mTask; ///< Task.
-    TextLoadObserver* mObserver;            ///< Observer of text load.
-    AsyncTextParameters mParameters;        ///< Text parameters to load.
+    Ui::Internal::TextLoadingTaskPtr mTask;       ///< Task.
+    TextLoadObserver*                mObserver;   ///< Observer of text load.
+    AsyncTextParameters              mParameters; ///< Text parameters to load.
   };
 
   /**
@@ -153,17 +153,17 @@ private: ///< Called from worker thread
 
 private:
   std::string mLocale; ///< System locale.
-  uint32_t mTaskId;    ///< Id for managing the requested task.
+  uint32_t    mTaskId; ///< Id for managing the requested task.
 
   Dali::Mutex mLoaderMutex; ///< Mutex for AsyncTextLoader. Could be used under mTaskMutex.
   std::vector<Text::AsyncTextLoader>
-      mAvailableLoaders; ///< List of available async text loader. Must be changed under mLoaderMutex.
+    mAvailableLoaders; ///< List of available async text loader. Must be changed under mLoaderMutex.
   std::vector<Text::AsyncTextLoader>
-      mLocaleChangedLoaders; ///< List of locale cyanged async text loader. Must be changed under mLoaderMutex.
+    mLocaleChangedLoaders; ///< List of locale cyanged async text loader. Must be changed under mLoaderMutex.
   std::vector<Text::AsyncTextLoader>
-      mRunningLoaders; ///< List of running async text loader. Must be changed under mLoaderMutex.
+    mRunningLoaders; ///< List of running async text loader. Must be changed under mLoaderMutex.
 
-  Dali::Mutex mTasksMutex;                       ///< Mutex for Tasks.
+  Dali::Mutex                     mTasksMutex;   ///< Mutex for Tasks.
   std::map<uint32_t, LoadElement> mWaitingTasks; ///< Waiting tasks, key is task id. Must be changed under mTasksMutex
   std::map<uint32_t, LoadElement> mRunningTasks; ///< Running tasks, key is task id. Must be changed under mTasksMutex
 };

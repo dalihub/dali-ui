@@ -46,7 +46,7 @@ GridLayoutParams GridLayoutParams::New(const GridLayoutParams& other)
 }
 
 GridLayoutParams::GridLayoutParams(const GridLayoutParams& handle)
-  : LayoutParams(handle)
+: LayoutParams(handle)
 {
 }
 
@@ -55,7 +55,7 @@ GridLayoutParams::~GridLayoutParams()
 }
 
 GridLayoutParams::GridLayoutParams(Internal::GridLayoutParamsImpl* implementation)
-  : LayoutParams(implementation)
+: LayoutParams(implementation)
 {
 }
 

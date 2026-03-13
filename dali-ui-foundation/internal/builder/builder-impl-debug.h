@@ -29,23 +29,23 @@ namespace Ui
 namespace Internal
 {
 #define DUMP_PARSE_TREE(parser) LogTree(parser)
-#define DUMP_TEST_MAPPINGS(parser)                                                                \
-  OptionalChild mappings = IsChild(parser.GetRoot(), KEYNAME_MAPPINGS);                           \
-  if (mappings)                                                                                   \
-  {                                                                                               \
-    std::ostringstream oss;                                                                       \
-    oss << "Mappings: {" << std::endl;                                                            \
-    for (TreeNode::ConstIterator iter = (*mappings).CBegin(); iter != (*mappings).CEnd(); ++iter) \
-    {                                                                                             \
-      Property::Value value;                                                                      \
-      bool converted = GetPropertyMap(*mappings, (*iter).first, Property::NONE, value);           \
-      if (converted)                                                                              \
-      {                                                                                           \
-        oss << "  " << (*iter).first << ":" << value << std::endl;                                \
-      }                                                                                           \
-    }                                                                                             \
-    oss << "}" << std::endl;                                                                      \
-    DALI_LOG_INFO(gFilterScript, Debug::Verbose, oss.str().c_str());                              \
+#define DUMP_TEST_MAPPINGS(parser)                                                                 \
+  OptionalChild mappings = IsChild(parser.GetRoot(), KEYNAME_MAPPINGS);                            \
+  if(mappings)                                                                                     \
+  {                                                                                                \
+    std::ostringstream oss;                                                                        \
+    oss << "Mappings: {" << std::endl;                                                             \
+    for(TreeNode::ConstIterator iter = (*mappings).CBegin(); iter != (*mappings).CEnd(); ++iter)   \
+    {                                                                                              \
+      Property::Value value;                                                                       \
+      bool            converted = GetPropertyMap(*mappings, (*iter).first, Property::NONE, value); \
+      if(converted)                                                                                \
+      {                                                                                            \
+        oss << "  " << (*iter).first << ":" << value << std::endl;                                 \
+      }                                                                                            \
+    }                                                                                              \
+    oss << "}" << std::endl;                                                                       \
+    DALI_LOG_INFO(gFilterScript, Debug::Verbose, oss.str().c_str());                               \
   }
 
 void LogTree(const Ui::JsonParser& mParser);

@@ -65,7 +65,7 @@ DALI_UI_API void SetBrokenImageUrl(StyleManager styleManager, DevelStyleManager:
  * @param[in] styleManager The instance of StyleManager
  * @param[in] brokenImageType BrokenImage type
  */
-DALI_UI_API std::string GetBrokenImageUrl(StyleManager styleManager,
+DALI_UI_API std::string GetBrokenImageUrl(StyleManager                       styleManager,
                                           DevelStyleManager::BrokenImageType brokenImageType);
 
 /**

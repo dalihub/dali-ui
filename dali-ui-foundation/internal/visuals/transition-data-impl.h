@@ -51,24 +51,24 @@ public:
   struct Animator
   {
     Animator()
-      : propertyKey(Property::INVALID_INDEX),
-        alphaFunction(AlphaFunction::DEFAULT),
-        timePeriodDelay(0.0f),
-        timePeriodDuration(1.0f),
-        animationType(AnimationType::TO),
-        animate(false)
+    : propertyKey(Property::INVALID_INDEX),
+      alphaFunction(AlphaFunction::DEFAULT),
+      timePeriodDelay(0.0f),
+      timePeriodDuration(1.0f),
+      animationType(AnimationType::TO),
+      animate(false)
     {
     }
 
-    std::string objectName;       ///< An identifier of the actor or visual
-    Property::Key propertyKey;    ///< A property key of the property owner
-    Property::Value initialValue; ///< The value to set at the start of the transition
-    Property::Value targetValue;  ///< The value to set or animate to
+    std::string         objectName;   ///< An identifier of the actor or visual
+    Property::Key       propertyKey;  ///< A property key of the property owner
+    Property::Value     initialValue; ///< The value to set at the start of the transition
+    Property::Value     targetValue;  ///< The value to set or animate to
     Dali::AlphaFunction alphaFunction;
-    float timePeriodDelay;
-    float timePeriodDuration;
-    AnimationType animationType;
-    bool animate;
+    float               timePeriodDelay;
+    float               timePeriodDuration;
+    AnimationType       animationType;
+    bool                animate;
   };
 
   /**
@@ -76,7 +76,7 @@ public:
    * transition to be performed on a property owner
    */
   typedef Dali::OwnerContainer<Animator*> AnimatorList;
-  typedef AnimatorList::Iterator Iterator;
+  typedef AnimatorList::Iterator          Iterator;
 
 public:
   /**

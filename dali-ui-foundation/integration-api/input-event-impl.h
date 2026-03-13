@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <variant>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
+#include <variant>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-event.h>
@@ -43,7 +43,6 @@ using InputEventImplPtr = IntrusivePtr<InputEventImpl>;
 class DALI_UI_API InputEventImpl : public BaseObject
 {
 public:
-
   /**
    * @brief Create a new InputEvent.
    *
@@ -134,20 +133,18 @@ public:
   const LongPressGesture& GetLongPressGesture() const;
 
 private:
-
   /**
    * @brief Destructor.
    */
   virtual ~InputEventImpl() override;
 
-  InputEventImpl(const InputEventImpl& rhs) = delete;            ///< Deleted copy constructor
-  InputEventImpl(InputEventImpl&& rhs) = delete;                 ///< Deleted move constructor
+  InputEventImpl(const InputEventImpl& rhs)            = delete; ///< Deleted copy constructor
+  InputEventImpl(InputEventImpl&& rhs)                 = delete; ///< Deleted move constructor
   InputEventImpl& operator=(const InputEventImpl& rhs) = delete; ///< Deleted copy assignment operator
-  InputEventImpl& operator=(InputEventImpl&& rhs) = delete;      ///< Deleted move assignment operator
+  InputEventImpl& operator=(InputEventImpl&& rhs)      = delete; ///< Deleted move assignment operator
 
 private:
-
-  InputEventType mEventType;
+  InputEventType                                                   mEventType;
   std::variant<TouchEvent, KeyEvent, TapGesture, LongPressGesture> mEvent;
 };
 

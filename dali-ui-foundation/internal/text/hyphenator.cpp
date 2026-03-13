@@ -38,7 +38,7 @@ Vector<bool> GetWordHyphens(TextAbstraction::Hyphenation& hyphenation, const Cha
 {
   Vector<bool> hyphens;
 
-  if (0u == wordSize || word == nullptr)
+  if(0u == wordSize || word == nullptr)
   {
     // Nothing to do if there are no characters.
     return hyphens;
@@ -47,7 +47,7 @@ Vector<bool> GetWordHyphens(TextAbstraction::Hyphenation& hyphenation, const Cha
   // first get the needed encoding
   std::string text;
   const char* dictionaryEncodingName = hyphenation.GetDictionaryEncoding(lang);
-  if (DALI_LIKELY(dictionaryEncodingName) && strcmp(dictionaryEncodingName, UTF8) == 0)
+  if(DALI_LIKELY(dictionaryEncodingName) && strcmp(dictionaryEncodingName, UTF8) == 0)
   {
     Utf32ToUtf8(word, wordSize, text);
   }

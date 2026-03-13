@@ -44,12 +44,12 @@ Popup::Popup(Popup&& handle) = default;
 Popup& Popup::operator=(Popup&& handle) = default;
 
 Popup::Popup(Internal::Popup& implementation)
-  : Control(implementation)
+: Control(implementation)
 {
 }
 
 Popup::Popup(Dali::Internal::CustomActor* internal)
-  : Control(internal)
+: Control(internal)
 {
   VerifyCustomActorPointer<Internal::Popup>(internal);
 }

@@ -86,7 +86,7 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::PixelData pixelData, bool
  * @return the ImageUrl representing this native image interface
  */
 DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr nativeImageInterface,
-                                           bool preMultiplied = false);
+                                           bool                                preMultiplied = false);
 
 /**
  * @brief Generate a Url from encoded image buffer.

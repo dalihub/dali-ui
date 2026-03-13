@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <dali/devel-api/adaptor-framework/event-thread-callback.h>
 #include <dali/devel-api/threading/mutex.h>
-#include <dali/devel-api/adaptor-framework/async-task-manager.h>
 #include <memory> ///< for std::unique_ptr
 
 // INTERNAL INCLUDES
@@ -100,13 +100,13 @@ private:
   void ReleaseLoader();
 
 public:
-  uint32_t mId;
-  Text::AsyncTextLoader mLoader;
+  uint32_t                  mId;
+  Text::AsyncTextLoader     mLoader;
   Text::AsyncTextParameters mParameters;
   Text::AsyncTextRenderInfo mRenderInfo;
 
 private:
-  bool mIsReady : 1; ///< Whether this task ready to run
+  bool  mIsReady : 1; ///< Whether this task ready to run
   Mutex mMutex;
 };
 

@@ -24,12 +24,12 @@ namespace Ui
 {
 BackgroundBlurEffect::BackgroundBlurEffect() = default;
 BackgroundBlurEffect::BackgroundBlurEffect(const BackgroundBlurEffect& handle)
-  : RenderEffect(handle)
+: RenderEffect(handle)
 {
 }
 
 BackgroundBlurEffect::BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl)
-  : RenderEffect(backgroundBlurEffectImpl)
+: RenderEffect(backgroundBlurEffectImpl)
 {
 }
 

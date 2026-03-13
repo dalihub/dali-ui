@@ -44,55 +44,55 @@ namespace Internal
  */
 bool Disambiguated(const TreeNode& child, Dali::Property::Value& value, const Replacement& replacement)
 {
-  OptionalString childType = IsString(IsChild(child, "typeCast"));
-  OptionalChild childValue = IsChild(child, "value");
+  OptionalString childType  = IsString(IsChild(child, "typeCast"));
+  OptionalChild  childValue = IsChild(child, "value");
 
-  if (childType && childValue && (2 == child.Size()))
+  if(childType && childValue && (2 == child.Size()))
   {
     // this case allows disambiguation but normally the type is guessed
     // 2 == child.count() is an extra check as the user could have a user dictionary/map with
     // type-cast and value keys. If they do then a work around is to add a bogus key to not run this case.
-    if (*childType == "boolean")
+    if(*childType == "boolean")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::BOOLEAN, value, replacement);
     }
-    else if (*childType == "float")
+    else if(*childType == "float")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::FLOAT, value, replacement);
     }
-    else if (*childType == "vector2")
+    else if(*childType == "vector2")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::VECTOR2, value, replacement);
     }
-    else if (*childType == "vector3")
+    else if(*childType == "vector3")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::VECTOR3, value, replacement);
     }
-    else if (*childType == "vector4")
+    else if(*childType == "vector4")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::VECTOR4, value, replacement);
     }
-    else if (*childType == "rotation")
+    else if(*childType == "rotation")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::ROTATION, value, replacement);
     }
-    else if (*childType == "rect")
+    else if(*childType == "rect")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::RECTANGLE, value, replacement);
     }
-    else if (*childType == "string")
+    else if(*childType == "string")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::STRING, value, replacement);
     }
-    else if (*childType == "map")
+    else if(*childType == "map")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::MAP, value, replacement);
     }
-    else if (*childType == "array")
+    else if(*childType == "array")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::ARRAY, value, replacement);
     }
-    else if (*childType == "extents")
+    else if(*childType == "extents")
     {
       return DeterminePropertyFromNode(*childValue, Dali::Property::EXTENTS, value, replacement);
     }
@@ -113,166 +113,166 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
 {
   bool done = false;
 
-  switch (type)
+  switch(type)
   {
     case Property::BOOLEAN:
     {
-      if (OptionalBoolean v = replacer.IsBoolean(node))
+      if(OptionalBoolean v = replacer.IsBoolean(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::FLOAT:
     {
-      if (OptionalFloat v = replacer.IsFloat(node))
+      if(OptionalFloat v = replacer.IsFloat(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::INTEGER:
     {
-      if (OptionalInteger v = replacer.IsInteger(node))
+      if(OptionalInteger v = replacer.IsInteger(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::VECTOR2:
     {
-      if (OptionalVector2 v = replacer.IsVector2(node))
+      if(OptionalVector2 v = replacer.IsVector2(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::VECTOR3:
     {
-      if (OptionalVector3 v = replacer.IsVector3(node))
+      if(OptionalVector3 v = replacer.IsVector3(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::VECTOR4:
     {
-      if (OptionalVector4 v = replacer.IsVector4(node))
+      if(OptionalVector4 v = replacer.IsVector4(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
-      else if (OptionalString s = replacer.IsString(node))
+      else if(OptionalString s = replacer.IsString(node))
       {
         Vector4 color;
-        done = ConvertStringToColor(*s, color);
+        done  = ConvertStringToColor(*s, color);
         value = color;
       }
-      else if (TreeNode::OBJECT == node.GetType())
+      else if(TreeNode::OBJECT == node.GetType())
       {
         // check for "r", "g" and "b" child color component nodes
         OptionalInteger r = replacer.IsInteger(IsChild(node, "r"));
         OptionalInteger g = replacer.IsInteger(IsChild(node, "g"));
         OptionalInteger b = replacer.IsInteger(IsChild(node, "b"));
-        if (r && g && b)
+        if(r && g && b)
         {
           float red((*r) * (1.0f / 255.0f));
           float green((*g) * (1.0f / 255.0f));
           float blue((*b) * (1.0f / 255.0f));
           // check for optional "a" (alpha) node, default to fully opaque if it is not found.
-          float alpha(1.0f);
+          float           alpha(1.0f);
           OptionalInteger a = replacer.IsInteger(IsChild(node, "a"));
-          if (a)
+          if(a)
           {
             alpha = (*a) * (1.0f / 255.0f);
           }
           value = Vector4(red, green, blue, alpha);
-          done = true;
+          done  = true;
         }
       }
       break;
     }
     case Property::MATRIX3:
     {
-      if (OptionalMatrix3 v = replacer.IsMatrix3(node))
+      if(OptionalMatrix3 v = replacer.IsMatrix3(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::MATRIX:
     {
-      if (OptionalMatrix v = replacer.IsMatrix(node))
+      if(OptionalMatrix v = replacer.IsMatrix(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::RECTANGLE:
     {
-      if (OptionalRect v = replacer.IsRect(node))
+      if(OptionalRect v = replacer.IsRect(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::ROTATION:
     {
-      if (4 == node.Size())
+      if(4 == node.Size())
       {
-        if (OptionalVector4 ov = replacer.IsVector4(node))
+        if(OptionalVector4 ov = replacer.IsVector4(node))
         {
           const Vector4& v = *ov;
           // angle, axis as per spec
           value = Quaternion(Radian(Degree(v[3])), Vector3(v[0], v[1], v[2]));
-          done = true;
+          done  = true;
         }
       }
       else
       {
         // degrees Euler as per spec
-        if (OptionalVector3 v = replacer.IsVector3(node))
+        if(OptionalVector3 v = replacer.IsVector3(node))
         {
           value = Quaternion(Radian(Degree((*v).x)), Radian(Degree((*v).y)), Radian(Degree((*v).z)));
-          done = true;
+          done  = true;
         }
       }
       break;
     }
     case Property::STRING:
     {
-      if (OptionalString v = replacer.IsString(node))
+      if(OptionalString v = replacer.IsString(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
     case Property::ARRAY:
     {
-      if (replacer.IsArray(node, value))
+      if(replacer.IsArray(node, value))
       {
         done = true;
       }
-      else if (node.Size())
+      else if(node.Size())
       {
-        value = Property::Value(Property::ARRAY);
+        value                  = Property::Value(Property::ARRAY);
         Property::Array* array = value.GetArray();
 
-        unsigned int i = 0;
+        unsigned int            i = 0;
         TreeNode::ConstIterator iter(node.CBegin());
 
-        if (array)
+        if(array)
         {
-          for (; i < node.Size(); ++i, ++iter)
+          for(; i < node.Size(); ++i, ++iter)
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*iter).second, childValue, replacer);
@@ -286,21 +286,21 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
     }
     case Property::MAP:
     {
-      if (replacer.IsMap(node, value))
+      if(replacer.IsMap(node, value))
       {
         done = true;
       }
-      else if (node.Size())
+      else if(node.Size())
       {
-        value = Property::Value(Property::MAP);
+        value              = Property::Value(Property::MAP);
         Property::Map* map = value.GetMap();
 
-        unsigned int i = 0;
+        unsigned int            i = 0;
         TreeNode::ConstIterator iter(node.CBegin());
 
-        if (map)
+        if(map)
         {
-          for (; i < node.Size(); ++i, ++iter)
+          for(; i < node.Size(); ++i, ++iter)
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*iter).second, childValue, replacer);
@@ -314,10 +314,10 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
     }
     case Property::EXTENTS:
     {
-      if (OptionalExtents v = replacer.IsExtents(node))
+      if(OptionalExtents v = replacer.IsExtents(node))
       {
         value = *v;
-        done = true;
+        done  = true;
       }
       break;
     }
@@ -343,7 +343,7 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
 
   // Some values are ambiguous as we have no Property::Type but can be disambiguated in the JSON.
   // Currently Rotations and Rectangle must always be disambiguated when a type isn't available
-  if (!Disambiguated(node, value, replacer))
+  if(!Disambiguated(node, value, replacer))
   {
     bool done = false;
 
@@ -354,75 +354,75 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
     // 4) If no match still; Create as array.
 
     // First handle nodes with children.
-    if (node.Size())
+    if(node.Size())
     {
       // Handle array types.
-      if (nodeType == TreeNode::ARRAY)
+      if(nodeType == TreeNode::ARRAY)
       {
         // our current heuristic for deciding an array is actually a vector and not say a map
         // is to check if the values are all floats
         bool allNumbers = true;
-        for (TreeConstIter iter = node.CBegin(); iter != node.CEnd(); ++iter)
+        for(TreeConstIter iter = node.CBegin(); iter != node.CEnd(); ++iter)
         {
           OptionalFloat checkFloat = IsFloat((*iter).second);
-          if (!checkFloat)
+          if(!checkFloat)
           {
             allNumbers = false;
             break;
           }
         }
 
-        if (allNumbers)
+        if(allNumbers)
         {
           // prefer finding vectors over presuming composite Property::Array...
-          if (OptionalMatrix v = IsMatrix(node))
+          if(OptionalMatrix v = IsMatrix(node))
           {
             value = *v;
-            done = true;
+            done  = true;
           }
-          else if (OptionalMatrix3 v = IsMatrix3(node))
+          else if(OptionalMatrix3 v = IsMatrix3(node))
           {
             value = *v;
-            done = true;
+            done  = true;
           }
-          else if (OptionalVector4 v = IsVector4(node))
+          else if(OptionalVector4 v = IsVector4(node))
           {
             value = *v;
-            done = true;
+            done  = true;
           }
-          else if (OptionalVector3 v = IsVector3(node))
+          else if(OptionalVector3 v = IsVector3(node))
           {
             value = *v;
-            done = true;
+            done  = true;
           }
-          else if (OptionalVector2 v = IsVector2(node))
+          else if(OptionalVector2 v = IsVector2(node))
           {
             value = *v;
-            done = true;
+            done  = true;
           }
-          else if (4 == node.Size())
+          else if(4 == node.Size())
           {
-            if (OptionalVector4 v = IsVector4(node))
+            if(OptionalVector4 v = IsVector4(node))
             {
               value = *v;
-              done = true;
+              done  = true;
             }
           }
         }
       }
     } // if node.size()
-    else if ((nodeType != TreeNode::OBJECT) && (nodeType != TreeNode::ARRAY))
+    else if((nodeType != TreeNode::OBJECT) && (nodeType != TreeNode::ARRAY))
     {
       // no children so either one of bool, float, integer, string
-      OptionalBoolean aBool = replacer.IsBoolean(node);
-      OptionalInteger anInt = replacer.IsInteger(node);
-      OptionalFloat aFloat = replacer.IsFloat(node);
-      OptionalString aString = replacer.IsString(node);
+      OptionalBoolean aBool   = replacer.IsBoolean(node);
+      OptionalInteger anInt   = replacer.IsInteger(node);
+      OptionalFloat   aFloat  = replacer.IsFloat(node);
+      OptionalString  aString = replacer.IsString(node);
 
-      if (aBool)
+      if(aBool)
       {
         // a bool is also an int but here we presume int
-        if (anInt)
+        if(anInt)
         {
           value = *anInt;
         }
@@ -437,11 +437,11 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
         // {"value":"123"}
         // {"value":123}
         // This means we can't have a string with purely numeric content without disambiguation.
-        if (aFloat)
+        if(aFloat)
         {
           value = *aFloat;
         }
-        else if (anInt)
+        else if(anInt)
         {
           value = *anInt;
         }
@@ -455,23 +455,23 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
     } // if( node.size() )
 
     // If we have not created a value so far, attempt to create a Map or Array.
-    if (!done)
+    if(!done)
     {
       // We are guaranteed to have at least one entry as this has been checked already.
       TreeConstIter containerIterator = node.CBegin();
-      TreeConstIter containerEnd = node.CEnd();
+      TreeConstIter containerEnd      = node.CEnd();
 
       // The TreeNode::OBJECT type implies a Property::Map.
-      if (nodeType == TreeNode::OBJECT)
+      if(nodeType == TreeNode::OBJECT)
       {
         // We have a key, treat container as a Map.
-        value = Property::Value(Property::MAP);
+        value              = Property::Value(Property::MAP);
         Property::Map* map = value.GetMap();
 
-        if (map)
+        if(map)
         {
           // Iterate through container to add all entries.
-          for (; containerIterator != containerEnd; ++containerIterator)
+          for(; containerIterator != containerEnd; ++containerIterator)
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*containerIterator).second, childValue, replacer);
@@ -484,13 +484,13 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
         // We don't have a key, treat container as an array.
         // Note: We don't check if the node type is array here, as we want to cope with unknowns by creating an array
         // also. This is the fall-back if no other types could be created.
-        value = Property::Value(Property::ARRAY);
+        value                  = Property::Value(Property::ARRAY);
         Property::Array* array = value.GetArray();
 
-        if (array)
+        if(array)
         {
           // Iterate through container to add all entries.
-          for (; containerIterator != containerEnd; ++containerIterator)
+          for(; containerIterator != containerEnd; ++containerIterator)
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*containerIterator).second, childValue, replacer);
@@ -499,7 +499,7 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
         }
       }
     } // if !done
-  }   // if !Disambiguated()
+  } // if !Disambiguated()
 }
 
 } // namespace Internal

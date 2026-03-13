@@ -40,8 +40,8 @@ struct StrikethroughCharacterRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values of bitfields
    */
   StrikethroughCharacterRun()
-    : AbstractStyleCharacterRun(),
-      properties{}
+  : AbstractStyleCharacterRun(),
+    properties{}
   {
   }
 
@@ -53,9 +53,9 @@ struct StrikethroughCharacterRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow StrikethroughCharacterRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::StrikethroughCharacterRun>
-  : public Dali::BasicTypes<Dali::Ui::Text::StrikethroughCharacterRun>
+: public Dali::BasicTypes<Dali::Ui::Text::StrikethroughCharacterRun>
 {
   enum
   {

@@ -182,11 +182,11 @@ private:
   GradientVisual& operator=(const GradientVisual& gradientVisual);
 
 private:
-  Matrix3 mGradientTransform;
+  Matrix3                mGradientTransform;
   IntrusivePtr<Gradient> mGradient;
-  Type mGradientType;
-  Dali::Property::Index mStartOffsetIndex;
-  bool mIsOpaque; ///< Set to false if any of the stop colors are not opaque
+  Type                   mGradientType;
+  Dali::Property::Index  mStartOffsetIndex;
+  bool                   mIsOpaque; ///< Set to false if any of the stop colors are not opaque
 };
 
 } // namespace Internal

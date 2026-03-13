@@ -93,11 +93,11 @@ namespace Property
 {
 enum
 {
-  STYLE_NAME = Control::Property::STYLE_NAME,
+  STYLE_NAME      = Control::Property::STYLE_NAME,
   KEY_INPUT_FOCUS = Control::Property::KEY_INPUT_FOCUS,
-  BACKGROUND = Control::Property::BACKGROUND,
-  MARGIN = Control::Property::MARGIN,
-  PADDING = Control::Property::PADDING,
+  BACKGROUND      = Control::Property::BACKGROUND,
+  MARGIN          = Control::Property::MARGIN,
+  PADDING         = Control::Property::PADDING,
 
   /**
    * @brief The actor ID of the left focusable control.
@@ -663,7 +663,7 @@ DALI_UI_API void ClearAccessibilityAttributes(Ui::Control control);
  * @param control object to append attribute to
  * @param types Reading information types
  */
-DALI_UI_API void SetAccessibilityReadingInfoType(Ui::Control control,
+DALI_UI_API void SetAccessibilityReadingInfoType(Ui::Control                                 control,
                                                  const Dali::Accessibility::ReadingInfoTypes types);
 
 /**

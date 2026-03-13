@@ -41,8 +41,8 @@ namespace Dali::Ui::DevelControl
 {
 namespace
 {
-constexpr const char* FOCUS_IMAGE = "/keyboard_focus.9.png";
-constexpr const char* OVERLAY_NAME = "HighlightOverlay";
+constexpr const char* FOCUS_IMAGE    = "/keyboard_focus.9.png";
+constexpr const char* OVERLAY_NAME   = "HighlightOverlay";
 constexpr const char* HIGHLIGHT_NAME = "HighlightIndicator";
 
 #ifdef DEBUG_ENABLED
@@ -77,25 +77,25 @@ Dali::Actor CreateOverlayHighlightActor()
 } // unnamed namespace
 
 AccessibilityHighlightOverlay::AccessibilityHighlightOverlay()
-  : mHasOverlayActor(false),
-    mOverlayMode(OverlayHighlightMode::AUTO),
-    mManualPosition(0.0f, 0.0f),
-    mManualSize(0.0f, 0.0f)
+: mHasOverlayActor(false),
+  mOverlayMode(OverlayHighlightMode::AUTO),
+  mManualPosition(0.0f, 0.0f),
+  mManualSize(0.0f, 0.0f)
 {
 }
 
 void AccessibilityHighlightOverlay::SetCustomHighlight(Vector2 position, Vector2 size)
 {
   mManualPosition = position;
-  mManualSize = size;
-  mOverlayMode = OverlayHighlightMode::MANUAL;
+  mManualSize     = size;
+  mOverlayMode    = OverlayHighlightMode::MANUAL;
 }
 
 void AccessibilityHighlightOverlay::ResetCustomHighlight()
 {
   mManualPosition = Vector2(0, 0);
-  mManualSize = Vector2(0, 0);
-  mOverlayMode = OverlayHighlightMode::AUTO;
+  mManualSize     = Vector2(0, 0);
+  mOverlayMode    = OverlayHighlightMode::AUTO;
 }
 
 void AccessibilityHighlightOverlay::SetOverlayMode(OverlayHighlightMode mode)
@@ -111,19 +111,19 @@ OverlayHighlightMode AccessibilityHighlightOverlay::GetOverlayMode() const
 void AccessibilityHighlightOverlay::UpdateOverlay(Dali::Actor& activeHighlight)
 {
   auto sceneView = FindParentSceneView(activeHighlight);
-  if (!sceneView)
+  if(!sceneView)
   {
     activeHighlight.SetProperty(Actor::Property::VISIBLE, true);
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "SceneView not found\n");
     return;
   }
 
-  if (!mOverlayActor.GetHandle())
+  if(!mOverlayActor.GetHandle())
   {
     CreateOverlay(sceneView);
   }
 
-  if (mOverlayActor.GetHandle())
+  if(mOverlayActor.GetHandle())
   {
     UpdateOverlayPosition(sceneView, activeHighlight);
   }
@@ -131,13 +131,13 @@ void AccessibilityHighlightOverlay::UpdateOverlay(Dali::Actor& activeHighlight)
 
 void AccessibilityHighlightOverlay::HideOverlay()
 {
-  if (mHasOverlayActor)
+  if(mHasOverlayActor)
   {
     auto overlayActor = mOverlayActor.GetHandle();
-    if (overlayActor)
+    if(overlayActor)
     {
       auto highlightActor = overlayActor.FindChildByName(HIGHLIGHT_NAME);
-      if (highlightActor)
+      if(highlightActor)
       {
         highlightActor.SetProperty(Actor::Property::VISIBLE, false);
       }
@@ -149,9 +149,9 @@ Dali::Actor AccessibilityHighlightOverlay::FindParentSceneView(Actor highlight)
 {
   auto current = highlight.GetParent();
 
-  while (current)
+  while(current)
   {
-    if (ControlAccessible::IsScene3D(current))
+    if(ControlAccessible::IsScene3D(current))
     {
       break;
     }
@@ -163,7 +163,7 @@ Dali::Actor AccessibilityHighlightOverlay::FindParentSceneView(Actor highlight)
 void AccessibilityHighlightOverlay::CreateOverlay(Dali::Actor& sceneView)
 {
   auto overlayLayer = sceneView.GetParent().FindChildByName(OVERLAY_NAME);
-  if (!overlayLayer)
+  if(!overlayLayer)
   {
     overlayLayer = CreateOverlayActor();
 
@@ -175,15 +175,15 @@ void AccessibilityHighlightOverlay::CreateOverlay(Dali::Actor& sceneView)
     overlayLayer.Add(highlightActor);
     sceneView.GetParent().Add(overlayLayer);
   }
-  mOverlayActor = Dali::WeakHandle<Dali::Actor>(overlayLayer);
+  mOverlayActor    = Dali::WeakHandle<Dali::Actor>(overlayLayer);
   mHasOverlayActor = true;
 }
 
 void AccessibilityHighlightOverlay::UpdateOverlayPosition(Dali::Actor& sceneView, Actor& highlight)
 {
   auto highlightOverlayActor = mOverlayActor.GetHandle();
-  auto highlightActor = highlightOverlayActor.FindChildByName(HIGHLIGHT_NAME);
-  if (!highlightActor)
+  auto highlightActor        = highlightOverlayActor.FindChildByName(HIGHLIGHT_NAME);
+  if(!highlightActor)
   {
     highlightActor = CreateOverlayHighlightActor();
     highlightOverlayActor.Add(highlightActor);
@@ -198,11 +198,11 @@ void AccessibilityHighlightOverlay::UpdateOverlayPosition(Dali::Actor& sceneView
   highlightOverlayActor.SetProperty(Actor::Property::SIZE, sceneSize);
   highlightOverlayActor.SetProperty(Actor::Property::POSITION, scenePosition);
 
-  if (mOverlayMode == OverlayHighlightMode::AUTO)
+  if(mOverlayMode == OverlayHighlightMode::AUTO)
   {
     auto actualExtent = GetOverlayExtents(sceneView, highlight);
 
-    if (actualExtent.x < 0.0f || actualExtent.y < 0.0f || actualExtent.width < 0.0f || actualExtent.height < 0.0f)
+    if(actualExtent.x < 0.0f || actualExtent.y < 0.0f || actualExtent.width < 0.0f || actualExtent.height < 0.0f)
     {
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Invalid extents returned\n");
       return;
@@ -220,16 +220,16 @@ void AccessibilityHighlightOverlay::UpdateOverlayPosition(Dali::Actor& sceneView
 Rect<float> AccessibilityHighlightOverlay::GetOverlayExtents(Dali::Actor& sceneView, Actor& highlight)
 {
   auto model = highlight.GetParent();
-  if (!model)
+  if(!model)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "model is null\n");
     return Rect<float>(-1.0f, -1.0f, -1.0f, -1.0f);
   }
 
   auto actualSceneExtent = DevelActor::CalculateScreenExtents(sceneView);
-  auto actualExtent = DevelActor::CalculateScreenExtents(model);
-  auto x = actualExtent.x - actualSceneExtent.x + (actualExtent.width / 2);
-  auto y = actualExtent.y - actualSceneExtent.y + (actualExtent.height / 2);
+  auto actualExtent      = DevelActor::CalculateScreenExtents(model);
+  auto x                 = actualExtent.x - actualSceneExtent.x + (actualExtent.width / 2);
+  auto y                 = actualExtent.y - actualSceneExtent.y + (actualExtent.height / 2);
 
   return Rect<float>(x, y, actualExtent.width, actualExtent.height);
 }

@@ -67,40 +67,40 @@ extern Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNod
 
 #if defined(DEBUG_ENABLED)
 Dali::Integration::Log::Filter* gFilterScript =
-    Dali::Integration::Log::Filter::New(Debug::NoLogging, false, "LOG_SCRIPT");
+  Dali::Integration::Log::Filter::New(Debug::NoLogging, false, "LOG_SCRIPT");
 #endif
 
 namespace
 {
 #define TOKEN_STRING(x) #x
 
-const char* KEYNAME_ACTORS = "actors";
-const char* KEYNAME_INCLUDES = "includes";
-const char* KEYNAME_INHERIT = "inherit";
-const char* KEYNAME_MAPPINGS = "mappings";
-const char* KEYNAME_SIGNALS = "signals";
-const char* KEYNAME_STATES = "states";
-const char* KEYNAME_STYLES = "styles";
+const char* KEYNAME_ACTORS    = "actors";
+const char* KEYNAME_INCLUDES  = "includes";
+const char* KEYNAME_INHERIT   = "inherit";
+const char* KEYNAME_MAPPINGS  = "mappings";
+const char* KEYNAME_SIGNALS   = "signals";
+const char* KEYNAME_STATES    = "states";
+const char* KEYNAME_STYLES    = "styles";
 const char* KEYNAME_TEMPLATES = "templates";
-const char* KEYNAME_TYPE = "type";
-const char* KEYNAME_VISUALS = "visuals";
+const char* KEYNAME_TYPE      = "type";
+const char* KEYNAME_VISUALS   = "visuals";
 
-const char* PROPERTIES = "properties";
+const char* PROPERTIES            = "properties";
 const char* ANIMATABLE_PROPERTIES = "animatableProperties";
 
 typedef std::vector<const TreeNode*> TreeNodeList;
 
 bool GetMappingKey(const std::string& str, std::string& key)
 {
-  bool result = false;
+  bool        result = false;
   std::string test(str);
-  if (!test.empty())
+  if(!test.empty())
   {
-    if (test.at(0) == '<')
+    if(test.at(0) == '<')
     {
-      if (test.at(test.length() - 1) == '>')
+      if(test.at(test.length() - 1) == '>')
       {
-        key = test.substr(1, test.length() - 2);
+        key    = test.substr(1, test.length() - 2);
         result = true;
       }
     }
@@ -118,22 +118,22 @@ bool GetMappingKey(const std::string& str, std::string& key)
 void CollectAllStyles(const TreeNode& stylesCollection, const TreeNode& style, TreeNodeList& styleList)
 {
   // style is an array of style names
-  if (TreeNode::ARRAY == style.GetType())
+  if(TreeNode::ARRAY == style.GetType())
   {
-    for (TreeNode::ConstIterator iter = style.CBegin(); iter != style.CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = style.CBegin(); iter != style.CEnd(); ++iter)
     {
-      if (OptionalString styleName = IsString((*iter).second))
+      if(OptionalString styleName = IsString((*iter).second))
       {
-        if (OptionalChild node = IsChildIgnoreCase(stylesCollection, *styleName))
+        if(OptionalChild node = IsChildIgnoreCase(stylesCollection, *styleName))
         {
           styleList.push_back(&(*node));
 
           OptionalChild subStyle = IsChild(*node, KEYNAME_INHERIT);
-          if (!subStyle)
+          if(!subStyle)
           {
             subStyle = IsChild(*node, KEYNAME_STYLES);
           }
-          if (subStyle)
+          if(subStyle)
           {
             CollectAllStyles(stylesCollection, *subStyle, styleList);
           }
@@ -146,14 +146,14 @@ void CollectAllStyles(const TreeNode& stylesCollection, const TreeNode& style, T
 } // namespace
 
 Builder::Builder()
-  : mSlotDelegate(this)
+: mSlotDelegate(this)
 {
   mParser = Dali::Ui::JsonParser::New();
 
   Property::Map defaultConstants;
-  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)] = AssetManager::GetDaliImagePath();
-  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)] = AssetManager::GetDaliSoundPath();
-  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)] = AssetManager::GetDaliStylePath();
+  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)]       = AssetManager::GetDaliImagePath();
+  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)]       = AssetManager::GetDaliSoundPath();
+  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)]       = AssetManager::GetDaliStylePath();
   defaultConstants[TOKEN_STRING(DALI_STYLE_IMAGE_DIR)] = AssetManager::GetDaliStyleImagePath();
 
   AddConstants(defaultConstants);
@@ -164,7 +164,7 @@ void Builder::LoadFromString(std::string const& data, Dali::Ui::Builder::UiForma
   // parser to get constants and includes only
   Dali::Ui::JsonParser parser = Dali::Ui::JsonParser::New();
 
-  if (!parser.Parse(data))
+  if(!parser.Parse(data))
   {
     DALI_LOG_ERROR("JSON Parse Error:%d:%d:'%s'\n", parser.GetErrorLineNumber(), parser.GetErrorColumn(),
                    parser.GetErrorDescription().c_str());
@@ -178,15 +178,15 @@ void Builder::LoadFromString(std::string const& data, Dali::Ui::Builder::UiForma
     // load configuration map
     LoadConfiguration(*parser.GetRoot(), mConfigurationMap);
     // merge includes
-    if (OptionalChild includes = IsChild(*parser.GetRoot(), KEYNAME_INCLUDES))
+    if(OptionalChild includes = IsChild(*parser.GetRoot(), KEYNAME_INCLUDES))
     {
       Replacement replacer(mReplacementMap);
 
-      for (TreeNode::ConstIterator iter = (*includes).CBegin(); iter != (*includes).CEnd(); ++iter)
+      for(TreeNode::ConstIterator iter = (*includes).CBegin(); iter != (*includes).CEnd(); ++iter)
       {
         OptionalString filename = replacer.IsString((*iter).second);
 
-        if (filename)
+        if(filename)
         {
 #if defined(DEBUG_ENABLED)
           DALI_SCRIPT_VERBOSE("Loading Include '%s'\n", (*filename).c_str());
@@ -196,7 +196,7 @@ void Builder::LoadFromString(std::string const& data, Dali::Ui::Builder::UiForma
       }
     }
 
-    if (mParser.Parse(data))
+    if(mParser.Parse(data))
     {
       // Drop the styles and get them to be rebuilt against the new parse tree as required.
       mStyles.Clear();
@@ -240,7 +240,7 @@ const Property::Map& Builder::GetConstants() const
 const Property::Value& Builder::GetConstant(const std::string& key) const
 {
   Property::Value* match = mReplacementMap.Find(key);
-  if (match)
+  if(match)
   {
     return (*match);
   }
@@ -296,7 +296,7 @@ BaseHandle Builder::CreateFromJson(const std::string& json)
   // merge in new template, hoping no one else has one named '@temp@'
   std::string newTemplate = std::string("{\"templates\":{\"@temp@\":") + json + std::string("}}");
 
-  if (mParser.Parse(newTemplate))
+  if(mParser.Parse(newTemplate))
   {
     Replacement replacement(mReplacementMap);
     ret = Create("@temp@", replacement);
@@ -312,7 +312,7 @@ bool Builder::ApplyFromJson(Handle& handle, const std::string& json)
   // merge new style, hoping no one else has one named '@temp@'
   std::string newStyle = std::string("{\"styles\":{\"@temp@\":") + json + std::string("}}");
 
-  if (mParser.Parse(newStyle))
+  if(mParser.Parse(newStyle))
   {
     Replacement replacement(mReplacementMap);
     ret = ApplyStyle("@temp@", handle, replacement);
@@ -332,9 +332,9 @@ bool Builder::LookupStyleName(const std::string& styleName)
   DALI_ASSERT_ALWAYS(mParser.GetRoot() && "Builder script not loaded");
 
   OptionalChild styles = IsChild(*mParser.GetRoot(), KEYNAME_STYLES);
-  OptionalChild style = IsChildIgnoreCase(*styles, styleName);
+  OptionalChild style  = IsChildIgnoreCase(*styles, styleName);
 
-  if (styles && style)
+  if(styles && style)
   {
     return true;
   }
@@ -345,7 +345,7 @@ const StylePtr Builder::GetStyle(const std::string& styleName)
 {
   const StylePtr* style = mStyles.FindConst(styleName);
 
-  if (style == NULL)
+  if(style == NULL)
   {
     return StylePtr(NULL);
   }
@@ -366,18 +366,18 @@ void Builder::AddActors(const std::string& sectionName, Actor toActor)
   DALI_ASSERT_ALWAYS(mParser.GetRoot() && "Builder script not loaded");
 
   Property::Map overrideMap;
-  Replacement replacements(overrideMap, mReplacementMap);
+  Replacement   replacements(overrideMap, mReplacementMap);
 
   OptionalChild add = IsChild(*mParser.GetRoot(), sectionName);
 
-  if (add)
+  if(add)
   {
-    for (TreeNode::ConstIterator iter = (*add).CBegin(); iter != (*add).CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = (*add).CBegin(); iter != (*add).CEnd(); ++iter)
     {
       // empty actor adds directly to the stage
       BaseHandle baseHandle = DoCreate(*mParser.GetRoot(), (*iter).second, Actor(), replacements);
-      Actor actor = Actor::DownCast(baseHandle);
-      if (actor)
+      Actor      actor      = Actor::DownCast(baseHandle);
+      if(actor)
       {
         toActor.Add(actor);
       }
@@ -385,11 +385,11 @@ void Builder::AddActors(const std::string& sectionName, Actor toActor)
 
     // if were adding the 'stage' section then also check for a render task called stage
     // to add automatically
-    if ("stage" == sectionName)
+    if("stage" == sectionName)
     {
-      if (OptionalChild renderTasks = IsChild(*mParser.GetRoot(), "renderTasks"))
+      if(OptionalChild renderTasks = IsChild(*mParser.GetRoot(), "renderTasks"))
       {
-        if (OptionalChild tasks = IsChild(*renderTasks, "stage"))
+        if(OptionalChild tasks = IsChild(*renderTasks, "stage"))
         {
           CreateRenderTask("stage");
         }
@@ -408,20 +408,20 @@ void Builder::CreateRenderTask(const std::string& name)
 
   OptionalChild tasks = IsChild(*mParser.GetRoot(), "renderTasks");
 
-  if (tasks)
+  if(tasks)
   {
     //
     // Create the tasks from the current task as generally we want
     // to setup task zero and onwards. Although this does overwrite
     // the properties of the current task.
     //
-    if (OptionalChild renderTask = IsChild(*tasks, name))
+    if(OptionalChild renderTask = IsChild(*tasks, name))
     {
-      RenderTaskList list = stage.GetRenderTaskList();
-      unsigned int start = list.GetTaskCount();
+      RenderTaskList list  = stage.GetRenderTaskList();
+      unsigned int   start = list.GetTaskCount();
 
       RenderTask task;
-      if (0 == start)
+      if(0 == start)
       {
         // zero should have already been created by the stage so really
         // this case should never happen
@@ -430,13 +430,13 @@ void Builder::CreateRenderTask(const std::string& name)
       }
 
       TreeNode::ConstIterator iter = (*renderTask).CBegin();
-      task = list.GetTask(start - 1);
+      task                         = list.GetTask(start - 1);
 
       SetupTask(task, (*iter).second, constant);
 
       ++iter;
 
-      for (; iter != (*renderTask).CEnd(); ++iter)
+      for(; iter != (*renderTask).CEnd(); ++iter)
       {
         task = list.CreateTask();
         SetupTask(task, (*iter).second, constant);
@@ -452,30 +452,30 @@ Path Builder::GetPath(const std::string& name)
   Path ret;
 
   PathLut::const_iterator iter(mPathLut.find(name));
-  if (iter != mPathLut.end())
+  if(iter != mPathLut.end())
   {
     ret = iter->second;
   }
   else
   {
-    if (OptionalChild paths = IsChild(*mParser.GetRoot(), "paths"))
+    if(OptionalChild paths = IsChild(*mParser.GetRoot(), "paths"))
     {
-      if (OptionalChild path = IsChild(*paths, name))
+      if(OptionalChild path = IsChild(*paths, name))
       {
         // points property
-        if (OptionalChild pointsProperty = IsChild(*path, "points"))
+        if(OptionalChild pointsProperty = IsChild(*path, "points"))
         {
           Dali::Property::Value points(Property::ARRAY);
-          if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+          if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
           {
             ret = Path::New();
             ret.SetProperty(Path::Property::POINTS, points);
 
             // controlPoints property
-            if (OptionalChild pointsProperty = IsChild(*path, "controlPoints"))
+            if(OptionalChild pointsProperty = IsChild(*path, "controlPoints"))
             {
               Dali::Property::Value points(Property::ARRAY);
-              if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
               {
                 ret.SetProperty(Path::Property::CONTROL_POINTS, points);
               }
@@ -484,7 +484,7 @@ Path Builder::GetPath(const std::string& name)
             {
               // Curvature
               float curvature(0.25f);
-              if (OptionalFloat pointsProperty = IsFloat(*path, "curvature"))
+              if(OptionalFloat pointsProperty = IsFloat(*path, "curvature"))
               {
                 curvature = *pointsProperty;
               }
@@ -513,9 +513,9 @@ PathConstrainer Builder::GetPathConstrainer(const std::string& name)
 
   // Search the pathConstrainer in the LUT
   size_t count(mPathConstrainerLut.size());
-  for (size_t i(0); i != count; ++i)
+  for(size_t i(0); i != count; ++i)
   {
-    if (mPathConstrainerLut[i].name == name)
+    if(mPathConstrainerLut[i].name == name)
     {
       // PathConstrainer has already been created
       return mPathConstrainerLut[i].pathConstrainer;
@@ -524,38 +524,38 @@ PathConstrainer Builder::GetPathConstrainer(const std::string& name)
 
   // Create a new PathConstrainer
   PathConstrainer ret;
-  if (OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
+  if(OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
   {
-    if (OptionalChild pathConstrainer = IsChild(*constrainers, name))
+    if(OptionalChild pathConstrainer = IsChild(*constrainers, name))
     {
       OptionalString constrainerType(IsString(IsChild(*pathConstrainer, "type")));
-      if (!constrainerType)
+      if(!constrainerType)
       {
         DALI_SCRIPT_WARNING("Constrainer type not specified for constrainer '%s'\n", name.c_str());
       }
-      else if (*constrainerType == "PathConstrainer")
+      else if(*constrainerType == "PathConstrainer")
       {
         // points property
-        if (OptionalChild pointsProperty = IsChild(*pathConstrainer, "points"))
+        if(OptionalChild pointsProperty = IsChild(*pathConstrainer, "points"))
         {
           Dali::Property::Value points(Property::ARRAY);
-          if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+          if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
           {
             ret = PathConstrainer::New();
             ret.SetProperty(PathConstrainer::Property::POINTS, points);
 
             // controlPoints property
-            if (OptionalChild pointsProperty = IsChild(*pathConstrainer, "controlPoints"))
+            if(OptionalChild pointsProperty = IsChild(*pathConstrainer, "controlPoints"))
             {
               Dali::Property::Value points(Property::ARRAY);
-              if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
               {
                 ret.SetProperty(PathConstrainer::Property::CONTROL_POINTS, points);
               }
 
               // Forward vector
               OptionalVector3 forward(IsVector3(IsChild(*pathConstrainer, "forward")));
-              if (forward)
+              if(forward)
               {
                 ret.SetProperty(PathConstrainer::Property::FORWARD, *forward);
               }
@@ -590,20 +590,20 @@ PathConstrainer Builder::GetPathConstrainer(const std::string& name)
 bool Builder::IsPathConstrainer(const std::string& name)
 {
   size_t count(mPathConstrainerLut.size());
-  for (size_t i(0); i != count; ++i)
+  for(size_t i(0); i != count; ++i)
   {
-    if (mPathConstrainerLut[i].name == name)
+    if(mPathConstrainerLut[i].name == name)
     {
       return true;
     }
   }
 
-  if (OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
+  if(OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
   {
-    if (OptionalChild constrainer = IsChild(*constrainers, name))
+    if(OptionalChild constrainer = IsChild(*constrainers, name))
     {
       OptionalString constrainerType(IsString(IsChild(*constrainer, "type")));
-      if (!constrainerType)
+      if(!constrainerType)
       {
         return false;
       }
@@ -622,9 +622,9 @@ Dali::LinearConstrainer Builder::GetLinearConstrainer(const std::string& name)
 
   // Search the LinearConstrainer in the LUT
   size_t count(mLinearConstrainerLut.size());
-  for (size_t i(0); i != count; ++i)
+  for(size_t i(0); i != count; ++i)
   {
-    if (mLinearConstrainerLut[i].name == name)
+    if(mLinearConstrainerLut[i].name == name)
     {
       // LinearConstrainer has already been created
       return mLinearConstrainerLut[i].linearConstrainer;
@@ -633,31 +633,31 @@ Dali::LinearConstrainer Builder::GetLinearConstrainer(const std::string& name)
 
   // Create a new LinearConstrainer
   LinearConstrainer ret;
-  if (OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
+  if(OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
   {
-    if (OptionalChild linearConstrainer = IsChild(*constrainers, name))
+    if(OptionalChild linearConstrainer = IsChild(*constrainers, name))
     {
       OptionalString constrainerType(IsString(IsChild(*linearConstrainer, "type")));
-      if (!constrainerType)
+      if(!constrainerType)
       {
         DALI_SCRIPT_WARNING("Constrainer type not specified for constrainer '%s'\n", name.c_str());
       }
-      else if (*constrainerType == "LinearConstrainer")
+      else if(*constrainerType == "LinearConstrainer")
       {
         // points property
-        if (OptionalChild pointsProperty = IsChild(*linearConstrainer, "value"))
+        if(OptionalChild pointsProperty = IsChild(*linearConstrainer, "value"))
         {
           Dali::Property::Value points(Property::ARRAY);
-          if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+          if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
           {
             ret = Dali::LinearConstrainer::New();
             ret.SetProperty(LinearConstrainer::Property::VALUE, points);
 
             // controlPoints property
-            if (OptionalChild pointsProperty = IsChild(*linearConstrainer, "progress"))
+            if(OptionalChild pointsProperty = IsChild(*linearConstrainer, "progress"))
             {
               Dali::Property::Value points(Property::ARRAY);
-              if (DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
+              if(DeterminePropertyFromNode(*pointsProperty, Property::ARRAY, points))
               {
                 ret.SetProperty(LinearConstrainer::Property::PROGRESS, points);
               }
@@ -687,20 +687,20 @@ bool Builder::IsLinearConstrainer(const std::string& name)
 {
   // Search the LinearConstrainer in the LUT
   size_t count(mLinearConstrainerLut.size());
-  for (size_t i(0); i != count; ++i)
+  for(size_t i(0); i != count; ++i)
   {
-    if (mLinearConstrainerLut[i].name == name)
+    if(mLinearConstrainerLut[i].name == name)
     {
       return true;
     }
   }
 
-  if (OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
+  if(OptionalChild constrainers = IsChild(*mParser.GetRoot(), "constrainers"))
   {
-    if (OptionalChild constrainer = IsChild(*constrainers, name))
+    if(OptionalChild constrainer = IsChild(*constrainers, name))
     {
       OptionalString constrainerType(IsString(IsChild(*constrainer, "type")));
-      if (!constrainerType)
+      if(!constrainerType)
       {
         return false;
       }
@@ -731,47 +731,47 @@ void Builder::LoadConfiguration(const TreeNode& root, Property::Map& intoMap)
 {
   Replacement replacer(intoMap);
 
-  if (OptionalChild constants = IsChild(root, "config"))
+  if(OptionalChild constants = IsChild(root, "config"))
   {
-    for (TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
     {
       Dali::Property::Value property;
-      if ((*iter).second.GetName())
+      if((*iter).second.GetName())
       {
         DeterminePropertyFromNode((*iter).second, property, replacer);
 
         // If config is string, find constant and replace it to original value.
-        if ((*iter).second.GetType() == TreeNode::STRING)
+        if((*iter).second.GetType() == TreeNode::STRING)
         {
           std::string stringConfigValue;
-          if (property.Get(stringConfigValue))
+          if(property.Get(stringConfigValue))
           {
             std::size_t pos = 0;
 
-            while (pos < stringConfigValue.size())
+            while(pos < stringConfigValue.size())
             {
               // If we can't find "{","}" pair in stringConfigValue, will out loop.
               std::size_t leftPos = stringConfigValue.find("{", pos);
-              if (leftPos != std::string::npos)
+              if(leftPos != std::string::npos)
               {
                 std::size_t rightPos = stringConfigValue.find("}", pos + 1);
 
-                if (rightPos != std::string::npos)
+                if(rightPos != std::string::npos)
                 {
                   // If we find "{","}" pair but can't find matched constant
                   // try to find other "{","}" pair after current left position.
                   pos = rightPos + 1;
 
-                  for (uint32_t i = 0; i < mReplacementMap.Count(); i++)
+                  for(uint32_t i = 0; i < mReplacementMap.Count(); i++)
                   {
                     Property::Key constant = mReplacementMap.GetKeyAt(i);
 
                     // Compare string which is between "{" and "}" with constant string
                     // If they are same, change string in stringConfigValue to mapped constant value.
-                    if (0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, constant.stringKey))
+                    if(0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, constant.stringKey))
                     {
                       std::string replaceString;
-                      if (DALI_LIKELY(mReplacementMap.GetValue(i).Get(replaceString)))
+                      if(DALI_LIKELY(mReplacementMap.GetValue(i).Get(replaceString)))
                       {
                         stringConfigValue.replace(leftPos, rightPos - leftPos + 1, replaceString);
                         pos = leftPos + replaceString.size();
@@ -805,12 +805,12 @@ void Builder::LoadConstants(const TreeNode& root, Property::Map& intoMap)
 {
   Replacement replacer(intoMap);
 
-  if (OptionalChild constants = IsChild(root, "constants"))
+  if(OptionalChild constants = IsChild(root, "constants"))
   {
-    for (TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = (*constants).CBegin(); iter != (*constants).CEnd(); ++iter)
     {
       Dali::Property::Value property;
-      if ((*iter).second.GetName())
+      if((*iter).second.GetName())
       {
 #if defined(DEBUG_ENABLED)
         DALI_SCRIPT_VERBOSE("Constant set from json '%s'\n", (*iter).second.GetName());
@@ -823,22 +823,22 @@ void Builder::LoadConstants(const TreeNode& root, Property::Map& intoMap)
 
 #if defined(DEBUG_ENABLED)
   Property::Value* iter = intoMap.Find("CONFIG_SCRIPT_LOG_LEVEL");
-  if (iter && iter->GetType() == Property::STRING)
+  if(iter && iter->GetType() == Property::STRING)
   {
     std::string logLevel(iter->Get<std::string>());
-    if (logLevel == "NoLogging")
+    if(logLevel == "NoLogging")
     {
       gFilterScript->SetLogLevel(Dali::Integration::Log::NoLogging);
     }
-    else if (logLevel == "Concise")
+    else if(logLevel == "Concise")
     {
       gFilterScript->SetLogLevel(Dali::Integration::Log::Concise);
     }
-    else if (logLevel == "General")
+    else if(logLevel == "General")
     {
       gFilterScript->SetLogLevel(Dali::Integration::Log::General);
     }
-    else if (logLevel == "Verbose")
+    else if(logLevel == "Verbose")
     {
       gFilterScript->SetLogLevel(Dali::Integration::Log::Verbose);
     }
@@ -853,9 +853,9 @@ Animation Builder::CreateAnimation(const std::string& animationName, const Repla
 
   Animation anim;
 
-  if (OptionalChild animations = IsChild(*mParser.GetRoot(), "animations"))
+  if(OptionalChild animations = IsChild(*mParser.GetRoot(), "animations"))
   {
-    if (OptionalChild animation = IsChild(*animations, animationName))
+    if(OptionalChild animation = IsChild(*animations, animationName))
     {
       anim = Dali::Ui::Internal::CreateAnimation(*animation, replacement, sourceActor, this);
     }
@@ -880,14 +880,14 @@ BaseHandle Builder::Create(const std::string& templateName, const Replacement& c
 
   OptionalChild templates = IsChild(*mParser.GetRoot(), KEYNAME_TEMPLATES);
 
-  if (!templates)
+  if(!templates)
   {
     DALI_SCRIPT_WARNING("No template section found to CreateFromTemplate\n");
   }
   else
   {
     OptionalChild childTemplate = IsChild(*templates, templateName);
-    if (!childTemplate)
+    if(!childTemplate)
     {
       DALI_SCRIPT_WARNING("Template '%s' does not exist in template section\n", templateName.c_str());
     }
@@ -895,7 +895,7 @@ BaseHandle Builder::Create(const std::string& templateName, const Replacement& c
     {
       OptionalString type = constant.IsString(IsChild(*childTemplate, KEYNAME_TYPE));
 
-      if (!type)
+      if(!type)
       {
         DALI_SCRIPT_WARNING("Cannot create template '%s' as template section is missing 'type'\n",
                             templateName.c_str());
@@ -917,26 +917,26 @@ BaseHandle Builder::Create(const std::string& templateName, const Replacement& c
  */
 BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor parent, const Replacement& replacements)
 {
-  BaseHandle baseHandle;
-  TypeInfo typeInfo;
+  BaseHandle      baseHandle;
+  TypeInfo        typeInfo;
   const TreeNode* templateNode = NULL;
 
-  if (OptionalString typeName = IsString(node, KEYNAME_TYPE))
+  if(OptionalString typeName = IsString(node, KEYNAME_TYPE))
   {
     typeInfo = TypeRegistry::Get().GetTypeInfo(*typeName);
 
-    if (!typeInfo)
+    if(!typeInfo)
     {
       // a template name is also allowed inplace of the type name
       OptionalChild templates = IsChild(root, KEYNAME_TEMPLATES);
 
-      if (templates)
+      if(templates)
       {
-        if (OptionalChild isTemplate = IsChild(*templates, *typeName))
+        if(OptionalChild isTemplate = IsChild(*templates, *typeName))
         {
           templateNode = &(*isTemplate);
 
-          if (OptionalString templateTypeName = IsString(*templateNode, KEYNAME_TYPE))
+          if(OptionalString templateTypeName = IsString(*templateNode, KEYNAME_TYPE))
           {
             typeInfo = TypeRegistry::Get().GetTypeInfo(*templateTypeName);
           }
@@ -945,58 +945,58 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
     }
   }
 
-  if (!typeInfo)
+  if(!typeInfo)
   {
     DALI_SCRIPT_WARNING("Cannot create Dali type from node '%s'\n", node.GetName());
   }
   else
   {
-    baseHandle = typeInfo.CreateInstance();
+    baseHandle    = typeInfo.CreateInstance();
     Handle handle = Handle::DownCast(baseHandle);
-    Actor actor = Actor::DownCast(handle);
+    Actor  actor  = Actor::DownCast(handle);
 
-    if (handle)
+    if(handle)
     {
       DALI_SCRIPT_VERBOSE("Create:%s\n", typeInfo.GetName().c_str());
 
 #if defined(DEBUG_ENABLED)
-      if (handle)
+      if(handle)
       {
         DALI_SCRIPT_VERBOSE("  Is Handle Object=%d\n", (long*)handle.GetObjectPtr());
         DALI_SCRIPT_VERBOSE("  Is Handle Property Count=%d\n", handle.GetPropertyCount());
       }
 
-      if (actor)
+      if(actor)
       {
         DALI_SCRIPT_VERBOSE("  Is Actor id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
       }
 
       Ui::Control control = Ui::Control::DownCast(handle);
-      if (control)
+      if(control)
       {
         DALI_SCRIPT_VERBOSE("  Is Control id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
       }
 #endif // DEBUG_ENABLED
 
-      if (templateNode)
+      if(templateNode)
       {
         ApplyProperties(root, *templateNode, handle, replacements);
 
-        if (OptionalChild actors = IsChild(*templateNode, KEYNAME_ACTORS))
+        if(OptionalChild actors = IsChild(*templateNode, KEYNAME_ACTORS))
         {
-          for (TreeConstIter iter = (*actors).CBegin(); iter != (*actors).CEnd(); ++iter)
+          for(TreeConstIter iter = (*actors).CBegin(); iter != (*actors).CEnd(); ++iter)
           {
             DoCreate(root, (*iter).second, actor, replacements);
           }
         }
       }
 
-      if (actor)
+      if(actor)
       {
         // add children of all the styles
-        if (OptionalChild actors = IsChild(node, KEYNAME_ACTORS))
+        if(OptionalChild actors = IsChild(node, KEYNAME_ACTORS))
         {
-          for (TreeConstIter iter = (*actors).CBegin(); iter != (*actors).CEnd(); ++iter)
+          for(TreeConstIter iter = (*actors).CBegin(); iter != (*actors).CEnd(); ++iter)
           {
             DoCreate(root, (*iter).second, actor, replacements);
           }
@@ -1006,7 +1006,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
         ApplyAllStyleProperties(root, node, actor, replacements);
 
         // then add to parent
-        if (parent)
+        if(parent)
         {
           parent.Add(actor);
         }
@@ -1028,12 +1028,12 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
 void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacement& constant)
 {
   const Stage& stage = Stage::GetCurrent();
-  Layer root = stage.GetRootLayer();
+  Layer        root  = stage.GetRootLayer();
 
-  if (OptionalString s = constant.IsString(IsChild(node, "sourceActor")))
+  if(OptionalString s = constant.IsString(IsChild(node, "sourceActor")))
   {
     Actor actor = root.FindChildByName(*s);
-    if (actor)
+    if(actor)
     {
       task.SetSourceActor(actor);
     }
@@ -1043,10 +1043,10 @@ void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacemen
     }
   }
 
-  if (OptionalString s = constant.IsString(IsChild(node, "cameraActor")))
+  if(OptionalString s = constant.IsString(IsChild(node, "cameraActor")))
   {
     CameraActor actor = CameraActor::DownCast(root.FindChildByName(*s));
-    if (actor)
+    if(actor)
     {
       task.SetCameraActor(actor);
     }
@@ -1056,13 +1056,13 @@ void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacemen
     }
   }
 
-  if (OptionalString s = constant.IsString(IsChild(node, "screenToFrameBufferFunction")))
+  if(OptionalString s = constant.IsString(IsChild(node, "screenToFrameBufferFunction")))
   {
-    if ("DEFAULT_SCREEN_TO_FRAMEBUFFER_FUNCTION" == *s)
+    if("DEFAULT_SCREEN_TO_FRAMEBUFFER_FUNCTION" == *s)
     {
       task.SetScreenToFrameBufferFunction(RenderTask::DEFAULT_SCREEN_TO_FRAMEBUFFER_FUNCTION);
     }
-    else if ("FULLSCREEN_FRAMEBUFFER_FUNCTION" == *s)
+    else if("FULLSCREEN_FRAMEBUFFER_FUNCTION" == *s)
     {
       task.SetScreenToFrameBufferFunction(RenderTask::FULLSCREEN_FRAMEBUFFER_FUNCTION);
     }
@@ -1082,10 +1082,10 @@ bool Builder::ApplyStyle(const std::string& styleName, Handle& handle, const Rep
 
   OptionalChild styles = IsChild(*mParser.GetRoot(), KEYNAME_STYLES);
 
-  std::string styleNameLower(styleName);
+  std::string   styleNameLower(styleName);
   OptionalChild style = IsChildIgnoreCase(*styles, styleNameLower);
 
-  if (styles && style)
+  if(styles && style)
   {
     ApplyAllStyleProperties(*mParser.GetRoot(), *style, handle, replacement);
     return true;
@@ -1099,47 +1099,47 @@ bool Builder::ApplyStyle(const std::string& styleName, Handle& handle, const Rep
 bool Builder::GetStyleProperties(const std::string& styleName, const Handle& controlType, Property::Map& result)
 {
   result.Clear();
-  if (!mParser.GetRoot())
+  if(!mParser.GetRoot())
   {
     return false;
   }
 
   OptionalChild styles = IsChild(*mParser.GetRoot(), KEYNAME_STYLES);
-  if (!styles)
+  if(!styles)
   {
     return false;
   }
 
   OptionalChild style = IsChildIgnoreCase(*styles, styleName);
-  if (!style)
+  if(!style)
   {
     return false;
   }
 
-  Replacement replacement(mReplacementMap);
+  Replacement     replacement(mReplacementMap);
   const TreeNode& node = *style;
 
-  for (TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
+  for(TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
   {
     const TreeNode::KeyNodePair& keyChild = *iter;
-    std::string key(keyChild.first);
+    std::string                  key(keyChild.first);
 
     // Skip special keywords, we only want properties
-    if (key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
-        key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT || key == KEYNAME_STATES || key == KEYNAME_VISUALS)
+    if(key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
+       key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT || key == KEYNAME_STATES || key == KEYNAME_VISUALS)
     {
       continue;
     }
 
     Property::Value value;
     DeterminePropertyFromNode(keyChild.second, value, replacement);
-    if (value.GetType() != Property::NONE)
+    if(value.GetType() != Property::NONE)
     {
       // If controlType is provided, try to convert to Property::Index
-      if (controlType)
+      if(controlType)
       {
         Property::Index index = controlType.GetPropertyIndex(key);
-        if (index != Property::INVALID_INDEX)
+        if(index != Property::INVALID_INDEX)
         {
           result.Insert(index, value); // Use Property::Index as key
         }
@@ -1165,30 +1165,30 @@ void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node
   StylePtr style = Style::New();
 
   StylePtr* matchedStyle = NULL;
-  if (styleName)
+  if(styleName)
   {
     matchedStyle = mStyles.Find(styleName);
-    if (!matchedStyle)
+    if(!matchedStyle)
     {
-      OptionalChild styleNodes = IsChild(root, KEYNAME_STYLES);
+      OptionalChild styleNodes      = IsChild(root, KEYNAME_STYLES);
       OptionalChild inheritFromNode = IsChild(node, KEYNAME_INHERIT);
-      if (!inheritFromNode)
+      if(!inheritFromNode)
       {
         inheritFromNode = IsChild(node, KEYNAME_STYLES);
       }
 
-      if (styleNodes)
+      if(styleNodes)
       {
-        if (inheritFromNode)
+        if(inheritFromNode)
         {
           TreeNodeList additionalStyleNodes;
 
           CollectAllStyles(*styleNodes, *inheritFromNode, additionalStyleNodes);
 
 #if defined(DEBUG_ENABLED)
-          for (TreeNode::ConstIterator iter = (*inheritFromNode).CBegin(); iter != (*inheritFromNode).CEnd(); ++iter)
+          for(TreeNode::ConstIterator iter = (*inheritFromNode).CBegin(); iter != (*inheritFromNode).CEnd(); ++iter)
           {
-            if (OptionalString styleName = IsString((*iter).second))
+            if(OptionalString styleName = IsString((*iter).second))
             {
               DALI_SCRIPT_VERBOSE("Style Applied '%s'\n", (*styleName).c_str());
             }
@@ -1196,8 +1196,8 @@ void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node
 #endif
 
           // a style may have other styles, which has other styles etc so we apply in reverse by convention.
-          for (TreeNodeList::reverse_iterator iter = additionalStyleNodes.rbegin(); iter != additionalStyleNodes.rend();
-               ++iter)
+          for(TreeNodeList::reverse_iterator iter = additionalStyleNodes.rbegin(); iter != additionalStyleNodes.rend();
+              ++iter)
           {
             RecordStyle(style, *(*iter), handle, constant);
             ApplySignals(root, *(*iter), handle);
@@ -1212,9 +1212,9 @@ void Builder::ApplyAllStyleProperties(const TreeNode& root, const TreeNode& node
     }
   }
 
-  if (matchedStyle)
+  if(matchedStyle)
   {
-    StylePtr style(*matchedStyle);
+    StylePtr                  style(*matchedStyle);
     Dictionary<Property::Map> instancedProperties;
     style->ApplyVisualsAndPropertiesRecursively(handle, instancedProperties);
   }
@@ -1231,31 +1231,31 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
   // With repeated calls, accumulate inherited states, visuals and properties
   // but override any with same name
 
-  for (TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
+  for(TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
   {
     const TreeNode::KeyNodePair& keyValue = *iter;
-    std::string key(keyValue.first);
-    if (key == KEYNAME_STATES)
+    std::string                  key(keyValue.first);
+    if(key == KEYNAME_STATES)
     {
       const TreeNode& states = keyValue.second;
-      if (states.GetType() != TreeNode::OBJECT)
+      if(states.GetType() != TreeNode::OBJECT)
       {
         DALI_LOG_WARNING("RecordStyle() Node \"%s\" is not a JSON object\n", key.c_str());
         continue;
       }
 
-      for (TreeNode::ConstIterator iter = states.CBegin(); iter != states.CEnd(); ++iter)
+      for(TreeNode::ConstIterator iter = states.CBegin(); iter != states.CEnd(); ++iter)
       {
         const TreeNode& stateNode = (*iter).second;
-        const char* stateName = stateNode.GetName();
-        if (stateNode.GetType() != TreeNode::OBJECT)
+        const char*     stateName = stateNode.GetName();
+        if(stateNode.GetType() != TreeNode::OBJECT)
         {
           DALI_LOG_WARNING("RecordStyle() Node \"%s\" is not a JSON object\n", stateName);
           continue;
         }
 
         StylePtr* stylePtr = style->subStates.Find(stateName);
-        if (stylePtr)
+        if(stylePtr)
         {
           StylePtr subState(*stylePtr);
           RecordStyle(subState, stateNode, handle, replacements);
@@ -1268,17 +1268,17 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
         }
       }
     }
-    else if (key == KEYNAME_VISUALS)
+    else if(key == KEYNAME_VISUALS)
     {
-      for (TreeNode::ConstIterator iter = keyValue.second.CBegin(); iter != keyValue.second.CEnd(); ++iter)
+      for(TreeNode::ConstIterator iter = keyValue.second.CBegin(); iter != keyValue.second.CEnd(); ++iter)
       {
         // Each key in this table should be a property name matching a visual.
         const TreeNode::KeyNodePair& visual = *iter;
-        Dali::Property::Value property(Property::MAP);
-        if (DeterminePropertyFromNode(visual.second, Property::MAP, property, replacements))
+        Dali::Property::Value        property(Property::MAP);
+        if(DeterminePropertyFromNode(visual.second, Property::MAP, property, replacements))
         {
           Property::Map* mapPtr = style->visuals.Find(visual.first);
-          if (mapPtr)
+          if(mapPtr)
           {
             // Override existing visuals
             mapPtr->Clear();
@@ -1287,7 +1287,7 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
           else
           {
             Property::Map* map = property.GetMap();
-            if (map)
+            if(map)
             {
               style->visuals.Add(visual.first, *map);
             }
@@ -1295,8 +1295,8 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
         }
       }
     }
-    else if (key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
-             key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT)
+    else if(key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
+            key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT)
     {
       continue;
     }
@@ -1304,10 +1304,10 @@ void Builder::RecordStyle(StylePtr style, const TreeNode& node, Dali::Handle& ha
     {
       Property::Index index;
       Property::Value value;
-      if (MapToTargetProperty(handle, key, keyValue.second, replacements, index, value))
+      if(MapToTargetProperty(handle, key, keyValue.second, replacements, index, value))
       {
         Property::Value* existingValuePtr = style->properties.Find(index);
-        if (existingValuePtr != NULL)
+        if(existingValuePtr != NULL)
         {
           *existingValuePtr = value; // Overwrite existing property.
         }
@@ -1331,7 +1331,7 @@ void Builder::ApplyProperties(const TreeNode& root, const TreeNode& node, Dali::
 void Builder::ApplySignals(const TreeNode& root, const TreeNode& node, Dali::Handle& handle)
 {
   Actor actor = Actor::DownCast(handle);
-  if (actor)
+  if(actor)
   {
     // add signals
     SetupSignalAction(mSlotDelegate.GetConnectionTracker(), root, node, actor, this);
@@ -1344,21 +1344,21 @@ void Builder::ApplySignals(const TreeNode& root, const TreeNode& node, Dali::Han
 void Builder::ApplyStylesByActor(const TreeNode& root, const TreeNode& node, Dali::Handle& handle,
                                  const Replacement& constant)
 {
-  if (Dali::Actor actor = Dali::Actor::DownCast(handle))
+  if(Dali::Actor actor = Dali::Actor::DownCast(handle))
   {
-    if (const TreeNode* actors = node.GetChild(KEYNAME_ACTORS))
+    if(const TreeNode* actors = node.GetChild(KEYNAME_ACTORS))
     {
       // in a style the actor subtree properties referenced by actor name
-      for (TreeConstIter iter = actors->CBegin(); iter != actors->CEnd(); ++iter)
+      for(TreeConstIter iter = actors->CBegin(); iter != actors->CEnd(); ++iter)
       {
         Dali::Actor foundActor;
 
-        if ((*iter).first)
+        if((*iter).first)
         {
           foundActor = actor.FindChildByName((*iter).first);
         }
 
-        if (!foundActor)
+        if(!foundActor)
         {
           DALI_SCRIPT_VERBOSE("Cannot find actor in style application '%s'\n", (*iter).first);
         }
@@ -1377,17 +1377,17 @@ void Builder::ApplyStylesByActor(const TreeNode& root, const TreeNode& node, Dal
  */
 void Builder::SetProperties(const TreeNode& node, Handle& handle, const Replacement& constant)
 {
-  if (handle)
+  if(handle)
   {
-    for (TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
+    for(TreeNode::ConstIterator iter = node.CBegin(); iter != node.CEnd(); ++iter)
     {
       const TreeNode::KeyNodePair& keyChild = *iter;
 
       std::string key(keyChild.first);
 
       // ignore special fields;
-      if (key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
-          key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT || key == KEYNAME_STATES || key == KEYNAME_VISUALS)
+      if(key == KEYNAME_TYPE || key == KEYNAME_ACTORS || key == KEYNAME_SIGNALS || key == KEYNAME_STYLES ||
+         key == KEYNAME_MAPPINGS || key == KEYNAME_INHERIT || key == KEYNAME_STATES || key == KEYNAME_VISUALS)
       {
         continue;
       }
@@ -1396,7 +1396,7 @@ void Builder::SetProperties(const TreeNode& node, Handle& handle, const Replacem
       Property::Value value;
 
       bool mapped = MapToTargetProperty(handle, key, keyChild.second, constant, index, value);
-      if (mapped)
+      if(mapped)
       {
         DALI_SCRIPT_VERBOSE("SetProperty '%s' Index=:%d Value Type=%d Value '%s'\n", key.c_str(), index,
                             value.GetType(), PropertyValueToString(value).c_str());
@@ -1422,24 +1422,24 @@ bool Builder::MapToTargetProperty(Handle& propertyObject, const std::string& key
   bool mapped = false;
 
   index = propertyObject.GetPropertyIndex(key);
-  if (Property::INVALID_INDEX != index)
+  if(Property::INVALID_INDEX != index)
   {
     Property::Type type = propertyObject.GetPropertyType(index);
 
     // if node.value is a mapping, get the property value from the "mappings" table
-    if (node.GetType() == TreeNode::STRING)
+    if(node.GetType() == TreeNode::STRING)
     {
       std::string mappingKey;
-      if (GetMappingKey(node.GetString(), mappingKey))
+      if(GetMappingKey(node.GetString(), mappingKey))
       {
         OptionalChild mappingRoot = IsChild(mParser.GetRoot(), KEYNAME_MAPPINGS);
-        mapped = GetPropertyMap(*mappingRoot, mappingKey.c_str(), type, value);
+        mapped                    = GetPropertyMap(*mappingRoot, mappingKey.c_str(), type, value);
       }
     }
-    if (!mapped)
+    if(!mapped)
     {
       mapped = DeterminePropertyFromNode(node, type, value, constant);
-      if (!mapped)
+      if(!mapped)
       {
         // Just determine the property from the node and if it's valid, let the property object handle it
         DeterminePropertyFromNode(node, value, constant);
@@ -1465,16 +1465,16 @@ bool Builder::RecursePropertyMap(const TreeNode& mappingRoot, KeyStack& keyStack
                                  Property::Type propertyType, Property::Value& value)
 {
   Replacement replacer(mReplacementMap);
-  bool result = false;
+  bool        result = false;
 
   keyStack.push_back(theKey);
 
-  for (TreeNode::ConstIterator iter = mappingRoot.CBegin(); iter != mappingRoot.CEnd(); ++iter)
+  for(TreeNode::ConstIterator iter = mappingRoot.CBegin(); iter != mappingRoot.CEnd(); ++iter)
   {
     std::string aKey((*iter).first);
-    if (aKey.compare(theKey) == 0)
+    if(aKey.compare(theKey) == 0)
     {
-      if (propertyType == Property::NONE)
+      if(propertyType == Property::NONE)
       {
         DeterminePropertyFromNode((*iter).second, value, replacer);
         result = true;
@@ -1484,7 +1484,7 @@ bool Builder::RecursePropertyMap(const TreeNode& mappingRoot, KeyStack& keyStack
         result = DeterminePropertyFromNode((*iter).second, propertyType, value, replacer);
       }
 
-      if (result)
+      if(result)
       {
         ConvertChildValue(mappingRoot, keyStack, value);
       }
@@ -1500,31 +1500,31 @@ bool Builder::ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack,
 {
   bool result = false;
 
-  switch (child.GetType())
+  switch(child.GetType())
   {
     case Property::STRING:
     {
       std::string value;
-      if (child.Get(value))
+      if(child.Get(value))
       {
         std::string key;
-        if (GetMappingKey(value, key))
+        if(GetMappingKey(value, key))
         {
           // Check key for cycles:
           result = true;
-          for (KeyStack::iterator iter = keyStack.begin(); iter != keyStack.end(); ++iter)
+          for(KeyStack::iterator iter = keyStack.begin(); iter != keyStack.end(); ++iter)
           {
-            if (key.compare(*iter) == 0)
+            if(key.compare(*iter) == 0)
             {
               // key is already in stack; stop.
               DALI_LOG_WARNING("Detected cycle in stylesheet mapping table:%s\n", key.c_str());
-              child = Property::Value("");
+              child  = Property::Value("");
               result = false;
               break;
             }
           }
 
-          if (result)
+          if(result)
           {
             // The following call will overwrite the child with the value
             // from the mapping.
@@ -1539,9 +1539,9 @@ bool Builder::ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack,
     case Property::MAP:
     {
       Property::Map* map = child.GetMap();
-      if (map)
+      if(map)
       {
-        for (Property::Map::SizeType i = 0; i < map->Count(); ++i)
+        for(Property::Map::SizeType i = 0; i < map->Count(); ++i)
         {
           Property::Value& currentChild = map->GetValue(i);
           ConvertChildValue(mappingRoot, keyStack, currentChild);
@@ -1553,9 +1553,9 @@ bool Builder::ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack,
     case Property::ARRAY:
     {
       Property::Array* array = child.GetArray();
-      if (array)
+      if(array)
       {
-        for (Property::Array::SizeType i = 0; i < array->Count(); ++i)
+        for(Property::Array::SizeType i = 0; i < array->Count(); ++i)
         {
           Property::Value& currentChild = array->GetElementAt(i);
           ConvertChildValue(mappingRoot, keyStack, currentChild);
@@ -1576,15 +1576,15 @@ void Builder::SetCustomProperties(const TreeNode& node, Handle& handle, const Re
                                   const std::string& childName, Property::AccessMode accessMode)
 {
   // Add custom properties
-  if (OptionalChild customPropertiesChild = IsChild(node, childName))
+  if(OptionalChild customPropertiesChild = IsChild(node, childName))
   {
-    const TreeNode& customPropertiesNode = *customPropertiesChild;
-    const TreeConstIter endIter = customPropertiesNode.CEnd();
-    for (TreeConstIter iter = customPropertiesNode.CBegin(); endIter != iter; ++iter)
+    const TreeNode&     customPropertiesNode = *customPropertiesChild;
+    const TreeConstIter endIter              = customPropertiesNode.CEnd();
+    for(TreeConstIter iter = customPropertiesNode.CBegin(); endIter != iter; ++iter)
     {
       const TreeNode::KeyNodePair& keyChild = *iter;
-      std::string key(keyChild.first);
-      Property::Value value;
+      std::string                  key(keyChild.first);
+      Property::Value              value;
       DeterminePropertyFromNode(keyChild.second, value, constant);
 
       // Register/Set property.

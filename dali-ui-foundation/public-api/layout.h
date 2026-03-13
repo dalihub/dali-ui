@@ -108,7 +108,6 @@ public:
   static Layout DownCast(BaseHandle handle);
 
 public:
-
   // @CHAIN_START(Layout, View)
   // @CHAIN_MANUAL
   /**
@@ -119,7 +118,7 @@ public:
    */
   Layout& Contents(std::initializer_list<View> children)
   {
-    for (const auto& child : children)
+    for(const auto& child : children)
     {
       AddView(child);
     }

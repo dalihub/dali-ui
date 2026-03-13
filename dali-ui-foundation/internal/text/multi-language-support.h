@@ -167,10 +167,10 @@ public:
 
 public:
   // Default copy and move operator
-  MultilanguageSupport(const MultilanguageSupport& rhs) = default;
-  MultilanguageSupport(MultilanguageSupport&& rhs) = default;
+  MultilanguageSupport(const MultilanguageSupport& rhs)            = default;
+  MultilanguageSupport(MultilanguageSupport&& rhs)                 = default;
   MultilanguageSupport& operator=(const MultilanguageSupport& rhs) = default;
-  MultilanguageSupport& operator=(MultilanguageSupport&& rhs) = default;
+  MultilanguageSupport& operator=(MultilanguageSupport&& rhs)      = default;
 };
 
 } // namespace Text

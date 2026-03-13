@@ -59,16 +59,16 @@ void PrintArray(Array2d<Dali::Ui::Internal::TableView::CellData>& array)
 {
   TV_LOG("Array2d<CellData> size [%d,%d] \n", array.GetRows(), array.GetColumns());
   // print values
-  for (unsigned int i = 0; i < array.GetRows(); ++i)
+  for(unsigned int i = 0; i < array.GetRows(); ++i)
   {
-    for (unsigned int j = 0; j < array.GetColumns(); ++j)
+    for(unsigned int j = 0; j < array.GetColumns(); ++j)
     {
-      Dali::Ui::Internal::TableView::CellData data = array[i][j];
-      char actor = ' ';
-      std::string actorName;
-      if (data.actor)
+      Dali::Ui::Internal::TableView::CellData data  = array[i][j];
+      char                                    actor = ' ';
+      std::string                             actorName;
+      if(data.actor)
       {
-        actor = 'A';
+        actor     = 'A';
         actorName = data.actor.GetProperty<std::string>(Dali::Actor::Property::NAME);
       }
       TV_LOG("Array[%d,%d]=%c %s %d,%d,%d,%d  ", i, j, actor, actorName.c_str(), data.position.rowIndex,
@@ -84,9 +84,9 @@ void PrintArray(Array2d<Size>& array)
 {
   TV_LOG("Array2d<Size> size [%d,%d] \n", array.GetRows(), array.GetColumns());
   // print values
-  for (unsigned int i = 0; i < array.GetRows(); ++i)
+  for(unsigned int i = 0; i < array.GetRows(); ++i)
   {
-    for (unsigned int j = 0; j < array.GetColumns(); ++j)
+    for(unsigned int j = 0; j < array.GetColumns(); ++j)
     {
       TV_LOG("Array[%d,%d]=%.2f,%.2f ", i, j, array[i][j].width, array[i][j].height);
     }
@@ -99,7 +99,7 @@ void PrintVector(std::vector<float>& array)
 {
   TV_LOG("vector, size [%d]\n", array.size());
   // print values
-  for (unsigned int i = 0; i < array.size(); ++i)
+  for(unsigned int i = 0; i < array.size(); ++i)
   {
     TV_LOG("vector[%d]=%.2f ", i, array[i]);
   }
@@ -193,20 +193,20 @@ bool TableView::AddChild(Actor& child, const Ui::TableView::CellPosition& positi
   child.Unparent();
 
   // check if we need to expand our data array
-  if (position.rowIndex >= mCellData.GetRows())
+  if(position.rowIndex >= mCellData.GetRows())
   {
     // only adding new rows
     ResizeContainers(position.rowIndex + 1, mCellData.GetColumns());
   }
 
-  if (position.columnIndex >= mCellData.GetColumns())
+  if(position.columnIndex >= mCellData.GetColumns())
   {
     // only adding new columns
     ResizeContainers(mCellData.GetRows(), position.columnIndex + 1);
   }
 
   // check if there already is something in this cell
-  if (mCellData[position.rowIndex][position.columnIndex].actor)
+  if(mCellData[position.rowIndex][position.columnIndex].actor)
   {
     return false; // cannot share a cell, it would complicate all logic and not bring much benefit
   }
@@ -216,13 +216,13 @@ bool TableView::AddChild(Actor& child, const Ui::TableView::CellPosition& positi
   Self().Add(child);
 
   // if child spans multiple rows of columns
-  if ((position.rowSpan > 1) && (position.rowIndex + position.rowSpan > mCellData.GetRows()))
+  if((position.rowSpan > 1) && (position.rowIndex + position.rowSpan > mCellData.GetRows()))
   {
     // increase table size for the full span, only increasing rows
     ResizeContainers(position.rowIndex + position.rowSpan, mCellData.GetColumns());
   }
 
-  if ((position.columnSpan > 1) && (position.columnIndex + position.columnSpan > mCellData.GetColumns()))
+  if((position.columnSpan > 1) && (position.columnIndex + position.columnSpan > mCellData.GetColumns()))
   {
     // increase table size for the full span, only increasing columns
     ResizeContainers(mCellData.GetRows(), position.columnIndex + position.columnSpan);
@@ -230,14 +230,14 @@ bool TableView::AddChild(Actor& child, const Ui::TableView::CellPosition& positi
 
   // Fill in all cells that need the data
   CellData data;
-  data.actor = child;
+  data.actor    = child;
   data.position = position;
 
-  for (unsigned int row = position.rowIndex; row < (position.rowIndex + position.rowSpan); ++row)
+  for(unsigned int row = position.rowIndex; row < (position.rowIndex + position.rowSpan); ++row)
   {
     // store same information to all cells, this way we can identify
     // if a cell is the prime location of an actor or a spanned one
-    for (unsigned int column = position.columnIndex; column < (position.columnIndex + position.columnSpan); ++column)
+    for(unsigned int column = position.columnIndex; column < (position.columnIndex + position.columnSpan); ++column)
     {
       // store same information to all cells, this way we can identify
       // if a cell is the prime location of an actor or a spanned one
@@ -246,11 +246,11 @@ bool TableView::AddChild(Actor& child, const Ui::TableView::CellPosition& positi
   }
 
   // Relayout the whole table
-  if (mRowData[position.rowIndex].sizePolicy == Ui::TableView::FIT && position.rowSpan == 1)
+  if(mRowData[position.rowIndex].sizePolicy == Ui::TableView::FIT && position.rowSpan == 1)
   {
     mRowDirty = true;
   }
-  if (mColumnData[position.columnIndex].sizePolicy == Ui::TableView::FIT && position.columnSpan == 1)
+  if(mColumnData[position.columnIndex].sizePolicy == Ui::TableView::FIT && position.columnSpan == 1)
   {
     mColumnDirty = true;
   }
@@ -262,7 +262,7 @@ bool TableView::AddChild(Actor& child, const Ui::TableView::CellPosition& positi
 
 Actor TableView::GetChildAt(const Ui::TableView::CellPosition& position)
 {
-  if ((position.rowIndex < mCellData.GetRows()) && (position.columnIndex < mCellData.GetColumns()))
+  if((position.rowIndex < mCellData.GetRows()) && (position.columnIndex < mCellData.GetColumns()))
   {
     return mCellData[position.rowIndex][position.columnIndex].actor;
   }
@@ -276,20 +276,20 @@ Actor TableView::RemoveChildAt(const Ui::TableView::CellPosition& position)
   // get the child handle
   Actor child = GetChildAt(position);
   // if no real actor there, nothing else to be done
-  if (child)
+  if(child)
   {
     RelayoutingLock lock(*this);
     // Remove the child, this will trigger a call to OnChildRemove
     Self().Remove(child);
 
     // relayout the table only if instances were found
-    if (RemoveAllInstances(child))
+    if(RemoveAllInstances(child))
     {
-      if (mRowData[position.rowIndex].sizePolicy == Ui::TableView::FIT)
+      if(mRowData[position.rowIndex].sizePolicy == Ui::TableView::FIT)
       {
         mRowDirty = true;
       }
-      if (mColumnData[position.columnIndex].sizePolicy == Ui::TableView::FIT)
+      if(mColumnData[position.columnIndex].sizePolicy == Ui::TableView::FIT)
       {
         mColumnDirty = true;
       }
@@ -303,17 +303,17 @@ Actor TableView::RemoveChildAt(const Ui::TableView::CellPosition& position)
 bool TableView::FindChildPosition(const Actor& child, Ui::TableView::CellPosition& positionOut)
 {
   // Only find valid child actors
-  if (child)
+  if(child)
   {
     // Walk through the layout data
-    const unsigned int rowCount = mCellData.GetRows();
+    const unsigned int rowCount    = mCellData.GetRows();
     const unsigned int columnCount = mCellData.GetColumns();
 
-    for (unsigned int row = 0; row < rowCount; ++row)
+    for(unsigned int row = 0; row < rowCount; ++row)
     {
-      for (unsigned int column = 0; column < columnCount; ++column)
+      for(unsigned int column = 0; column < columnCount; ++column)
       {
-        if (mCellData[row][column].actor == child)
+        if(mCellData[row][column].actor == child)
         {
           positionOut = mCellData[row][column].position;
           return true;
@@ -332,18 +332,18 @@ void TableView::InsertRow(unsigned int rowIndex)
   mCellData.InsertRow(rowIndex);
 
   // Need to update the cell infos for the items that moved
-  const unsigned int rowCount = mCellData.GetRows();
+  const unsigned int rowCount    = mCellData.GetRows();
   const unsigned int columnCount = mCellData.GetColumns();
 
-  for (unsigned int row = 0; row < rowCount; ++row)
+  for(unsigned int row = 0; row < rowCount; ++row)
   {
-    for (unsigned int column = 0; column < columnCount; ++column)
+    for(unsigned int column = 0; column < columnCount; ++column)
     {
       Ui::TableView::CellPosition& position = mCellData[row][column].position;
 
       // If cell is spanning and above and spans to inserted row
-      if ((position.rowSpan > 1) && (position.rowIndex <= rowIndex) &&
-          (position.rowIndex + position.rowSpan > rowIndex))
+      if((position.rowSpan > 1) && (position.rowIndex <= rowIndex) &&
+         (position.rowIndex + position.rowSpan > rowIndex))
       {
         // Increment span
         position.rowSpan++;
@@ -351,7 +351,7 @@ void TableView::InsertRow(unsigned int rowIndex)
         // Copy cell to occupy the new column
         mCellData[rowIndex][column] = mCellData[row][column];
       }
-      else if (row > rowIndex) // If below of inserted row, increase row index
+      else if(row > rowIndex) // If below of inserted row, increase row index
       {
         // Increment index
         position.rowIndex++;
@@ -382,29 +382,29 @@ void TableView::DeleteRow(unsigned int rowIndex, std::vector<Actor>& removed)
   mCellData.DeleteRow(rowIndex, lost);
 
   // Need to update the cell infos for the items that moved
-  const unsigned int rowCount = mCellData.GetRows();
+  const unsigned int rowCount    = mCellData.GetRows();
   const unsigned int columnCount = mCellData.GetColumns();
 
-  for (unsigned int row = 0; row < rowCount; ++row)
+  for(unsigned int row = 0; row < rowCount; ++row)
   {
-    for (unsigned int column = 0; column < columnCount; ++column)
+    for(unsigned int column = 0; column < columnCount; ++column)
     {
       Ui::TableView::CellPosition& position = mCellData[row][column].position;
 
       // If cell is spanning and above and spans to deleted row
-      if ((position.rowSpan > 1) && (position.rowIndex <= rowIndex) &&
-          (position.rowIndex + position.rowSpan > rowIndex))
+      if((position.rowSpan > 1) && (position.rowIndex <= rowIndex) &&
+         (position.rowIndex + position.rowSpan > rowIndex))
       {
         // Decrement span
-        if (position.rowSpan > 1)
+        if(position.rowSpan > 1)
         {
           position.rowSpan--;
         }
       }
-      else if (row >= rowIndex) // If below of or at the inserted row, decrease row index
+      else if(row >= rowIndex) // If below of or at the inserted row, decrease row index
       {
         // Decrement index
-        if (position.rowIndex > 0)
+        if(position.rowIndex > 0)
         {
           position.rowIndex--;
         }
@@ -435,18 +435,18 @@ void TableView::InsertColumn(unsigned int columnIndex)
   mCellData.InsertColumn(columnIndex);
 
   // Need to update the cell infos for the items that moved
-  const unsigned int rowCount = mCellData.GetRows();
+  const unsigned int rowCount    = mCellData.GetRows();
   const unsigned int columnCount = mCellData.GetColumns();
 
-  for (unsigned int row = 0; row < rowCount; ++row)
+  for(unsigned int row = 0; row < rowCount; ++row)
   {
-    for (unsigned int column = 0; column < columnCount; ++column)
+    for(unsigned int column = 0; column < columnCount; ++column)
     {
       Ui::TableView::CellPosition& position = mCellData[row][column].position;
 
       // If cell is spanning and left side and spans to inserted column
-      if ((position.columnSpan > 1) && (position.columnIndex <= columnIndex) &&
-          (position.columnIndex + position.columnSpan > columnIndex))
+      if((position.columnSpan > 1) && (position.columnIndex <= columnIndex) &&
+         (position.columnIndex + position.columnSpan > columnIndex))
       {
         // Increment span
         position.columnSpan++;
@@ -454,7 +454,7 @@ void TableView::InsertColumn(unsigned int columnIndex)
         // Copy cell to occupy the new column
         mCellData[row][columnIndex] = mCellData[row][column];
       }
-      else if (column > columnIndex) // If on the right side of inserted column, increase column index
+      else if(column > columnIndex) // If on the right side of inserted column, increase column index
       {
         // Increment index
         position.columnIndex++;
@@ -485,29 +485,29 @@ void TableView::DeleteColumn(unsigned int columnIndex, std::vector<Actor>& remov
   mCellData.DeleteColumn(columnIndex, lost);
 
   // Need to update the cell infos for the items that moved
-  const unsigned int rowCount = mCellData.GetRows();
+  const unsigned int rowCount    = mCellData.GetRows();
   const unsigned int columnCount = mCellData.GetColumns();
 
-  for (unsigned int row = 0; row < rowCount; ++row)
+  for(unsigned int row = 0; row < rowCount; ++row)
   {
-    for (unsigned int column = 0; column < columnCount; ++column)
+    for(unsigned int column = 0; column < columnCount; ++column)
     {
       Ui::TableView::CellPosition& position = mCellData[row][column].position;
 
       // If cell is spanning and left side and spans to inserted column
-      if ((position.columnSpan > 1) && (position.columnIndex <= columnIndex) &&
-          (position.columnIndex + position.columnSpan > columnIndex))
+      if((position.columnSpan > 1) && (position.columnIndex <= columnIndex) &&
+         (position.columnIndex + position.columnSpan > columnIndex))
       {
         // Decrement span
-        if (position.columnSpan > 1)
+        if(position.columnSpan > 1)
         {
           position.columnSpan--;
         }
       }
-      else if (column >= columnIndex) // If on the right side of or at the inserted column, decrease column index
+      else if(column >= columnIndex) // If on the right side of or at the inserted column, decrease column index
       {
         // Decrement index
-        if (position.columnIndex > 0)
+        if(position.columnIndex > 0)
         {
           position.columnIndex--;
         }
@@ -540,7 +540,7 @@ void TableView::Resize(unsigned int rows, unsigned int columns, std::vector<Acto
 {
   RelayoutingLock lock(*this);
 
-  unsigned int oldRows = GetRows();
+  unsigned int oldRows    = GetRows();
   unsigned int oldColumns = GetColumns();
 
   // Resize data array
@@ -549,17 +549,17 @@ void TableView::Resize(unsigned int rows, unsigned int columns, std::vector<Acto
 
   // Calculate if we lost rows
   unsigned int rowsRemoved = 0;
-  unsigned int newRows = GetRows();
+  unsigned int newRows     = GetRows();
 
-  if (oldRows < newRows)
+  if(oldRows < newRows)
   {
     rowsRemoved = newRows - oldRows;
   }
 
   // Calculate if we lost columns
   unsigned int columnsRemoved = 0;
-  unsigned int newColumns = GetColumns();
-  if (oldColumns < newColumns)
+  unsigned int newColumns     = GetColumns();
+  if(oldColumns < newColumns)
   {
     rowsRemoved = newColumns - oldColumns;
   }
@@ -567,7 +567,7 @@ void TableView::Resize(unsigned int rows, unsigned int columns, std::vector<Acto
   RemoveAndGetLostActors(lost, removed, rowsRemoved, columnsRemoved);
 
   // Sizes may have changed so request a relayout
-  mRowDirty = true;
+  mRowDirty    = true;
   mColumnDirty = true;
   RelayoutRequest();
 }
@@ -575,7 +575,7 @@ void TableView::Resize(unsigned int rows, unsigned int columns, std::vector<Acto
 void TableView::SetCellPadding(Size padding)
 {
   // If padding really changed
-  if (padding != mPadding)
+  if(padding != mPadding)
   {
     mPadding = padding;
 
@@ -592,7 +592,7 @@ void TableView::SetFitHeight(unsigned int rowIndex)
 {
   DALI_ASSERT_ALWAYS(rowIndex < mRowData.Size());
 
-  if (mRowData[rowIndex].sizePolicy != Ui::TableView::FIT)
+  if(mRowData[rowIndex].sizePolicy != Ui::TableView::FIT)
   {
     mRowData[rowIndex].sizePolicy = Ui::TableView::FIT;
 
@@ -612,7 +612,7 @@ void TableView::SetFitWidth(unsigned int columnIndex)
 {
   DALI_ASSERT_ALWAYS(columnIndex < mColumnData.Size());
 
-  if (mColumnData[columnIndex].sizePolicy != Ui::TableView::FIT)
+  if(mColumnData[columnIndex].sizePolicy != Ui::TableView::FIT)
   {
     mColumnData[columnIndex].sizePolicy = Ui::TableView::FIT;
 
@@ -633,8 +633,8 @@ void TableView::SetFixedHeight(unsigned int rowIndex, float height)
   DALI_ASSERT_ALWAYS(rowIndex < mRowData.Size());
 
   RowColumnData& data = mRowData[rowIndex];
-  data.size = height;
-  data.sizePolicy = Ui::TableView::FIXED;
+  data.size           = height;
+  data.sizePolicy     = Ui::TableView::FIXED;
 
   mRowDirty = true;
   RelayoutRequest();
@@ -652,8 +652,8 @@ void TableView::SetFixedWidth(unsigned int columnIndex, float width)
   DALI_ASSERT_ALWAYS(columnIndex < mColumnData.Size());
 
   RowColumnData& data = mColumnData[columnIndex];
-  data.size = width;
-  data.sizePolicy = Ui::TableView::FIXED;
+  data.size           = width;
+  data.sizePolicy     = Ui::TableView::FIXED;
 
   mColumnDirty = true;
   RelayoutRequest();
@@ -671,8 +671,8 @@ void TableView::SetRelativeHeight(unsigned int rowIndex, float heightPercentage)
   DALI_ASSERT_ALWAYS(rowIndex < mRowData.Size());
 
   RowColumnData& data = mRowData[rowIndex];
-  data.fillRatio = heightPercentage;
-  data.sizePolicy = Ui::TableView::RELATIVE;
+  data.fillRatio      = heightPercentage;
+  data.sizePolicy     = Ui::TableView::RELATIVE;
 
   mRowDirty = true;
   RelayoutRequest();
@@ -690,8 +690,8 @@ void TableView::SetRelativeWidth(unsigned int columnIndex, float widthPercentage
   DALI_ASSERT_ALWAYS(columnIndex < mColumnData.Size());
 
   RowColumnData& data = mColumnData[columnIndex];
-  data.fillRatio = widthPercentage;
-  data.sizePolicy = Ui::TableView::RELATIVE;
+  data.fillRatio      = widthPercentage;
+  data.sizePolicy     = Ui::TableView::RELATIVE;
 
   mColumnDirty = true;
   RelayoutRequest();
@@ -706,7 +706,7 @@ float TableView::GetRelativeWidth(unsigned int columnIndex) const
 
 void TableView::OnCalculateRelayoutSize(Dimension::Type dimension)
 {
-  if ((dimension & Dimension::WIDTH) && mColumnDirty)
+  if((dimension & Dimension::WIDTH) && mColumnDirty)
   {
     /*
      * FIXED and FIT have size in pixel
@@ -727,7 +727,7 @@ void TableView::OnCalculateRelayoutSize(Dimension::Type dimension)
     mFixedTotals.width = CalculateTotalFixedSize(mColumnData);
   }
 
-  if ((dimension & Dimension::HEIGHT) && mRowDirty)
+  if((dimension & Dimension::HEIGHT) && mRowDirty)
   {
     // refer to the comment above
     CalculateFitSizes(mRowData, Dimension::HEIGHT);
@@ -742,19 +742,19 @@ void TableView::OnCalculateRelayoutSize(Dimension::Type dimension)
 void TableView::OnLayoutNegotiated(float size, Dimension::Type dimension)
 {
   // Update the column sizes
-  if ((dimension & Dimension::WIDTH) && mColumnDirty)
+  if((dimension & Dimension::WIDTH) && mColumnDirty)
   {
     float remainingSize = size - mFixedTotals.width;
-    if (remainingSize < 0.0f)
+    if(remainingSize < 0.0f)
     {
       remainingSize = 0.0f;
     }
 
     // update every column position in ColumnData array
     float cumulatedWidth = 0.0f;
-    for (auto&& element : mColumnData)
+    for(auto&& element : mColumnData)
     {
-      if (element.sizePolicy == Ui::TableView::FILL || element.sizePolicy == Ui::TableView::RELATIVE)
+      if(element.sizePolicy == Ui::TableView::FILL || element.sizePolicy == Ui::TableView::RELATIVE)
       {
         element.size = element.fillRatio * remainingSize;
       }
@@ -767,19 +767,19 @@ void TableView::OnLayoutNegotiated(float size, Dimension::Type dimension)
   }
 
   // Update the row sizes
-  if ((dimension & Dimension::HEIGHT) && mRowDirty)
+  if((dimension & Dimension::HEIGHT) && mRowDirty)
   {
     float remainingSize = size - mFixedTotals.height;
-    if (remainingSize < 0.0f)
+    if(remainingSize < 0.0f)
     {
       remainingSize = 0.0f;
     }
 
     // update every row position in RowData array
     float cumulatedHeight = 0.0f;
-    for (unsigned int row = 0, rowCount = mCellData.GetRows(); row < rowCount; ++row)
+    for(unsigned int row = 0, rowCount = mCellData.GetRows(); row < rowCount; ++row)
     {
-      if (mRowData[row].sizePolicy == Ui::TableView::FILL || mRowData[row].sizePolicy == Ui::TableView::RELATIVE)
+      if(mRowData[row].sizePolicy == Ui::TableView::FILL || mRowData[row].sizePolicy == Ui::TableView::RELATIVE)
       {
         mRowData[row].size = mRowData[row].fillRatio * remainingSize;
       }
@@ -808,31 +808,31 @@ void TableView::OnRelayout(const Vector2& size, RelayoutContainer& container)
   float totalWidth = 0.0;
 
   Dali::LayoutDirection::Type layoutDirection =
-      static_cast<Dali::LayoutDirection::Type>(Self().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+    static_cast<Dali::LayoutDirection::Type>(Self().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
 
-  if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+  if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
   {
-    for (auto&& element : mColumnData)
+    for(auto&& element : mColumnData)
     {
       totalWidth += element.size;
     }
   }
 
-  for (unsigned int row = 0, rowCount = mCellData.GetRows(); row < rowCount; ++row)
+  for(unsigned int row = 0, rowCount = mCellData.GetRows(); row < rowCount; ++row)
   {
-    for (unsigned int column = 0, columnCount = mCellData.GetColumns(); column < columnCount; ++column)
+    for(unsigned int column = 0, columnCount = mCellData.GetColumns(); column < columnCount; ++column)
     {
-      CellData& cellData = mCellData[row][column];
-      Actor& actor = cellData.actor;
+      CellData&                         cellData = mCellData[row][column];
+      Actor&                            actor    = cellData.actor;
       const Ui::TableView::CellPosition position = cellData.position;
 
       // If there is an actor and this is the main cell of the actor.
       // An actor can be in multiple cells if its row or column span is more than 1.
       // We however must lay out each actor only once.
-      if (actor && position.rowIndex == row && position.columnIndex == column)
+      if(actor && position.rowIndex == row && position.columnIndex == column)
       {
         // Anchor actor to top left of the cell
-        if (actor.GetProperty(Actor::Property::POSITION_USES_ANCHOR_POINT).Get<bool>())
+        if(actor.GetProperty(Actor::Property::POSITION_USES_ANCHOR_POINT).Get<bool>())
         {
           actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
         }
@@ -843,24 +843,24 @@ void TableView::OnRelayout(const Vector2& size, RelayoutContainer& container)
         float left = (column > 0) ? mColumnData[column - 1].position : 0.f;
         float right;
 
-        if (Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+        if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
         {
           right = totalWidth - left;
-          left = right - mColumnData[column].size;
+          left  = right - mColumnData[column].size;
         }
         else
         {
           right = left + mColumnData[column].size;
         }
 
-        float top = row > 0 ? mRowData[row - 1].position : 0.f;
+        float top    = row > 0 ? mRowData[row - 1].position : 0.f;
         float bottom = mRowData[row + position.rowSpan - 1].position;
 
-        if (cellData.horizontalAlignment == HorizontalAlignment::LEFT)
+        if(cellData.horizontalAlignment == HorizontalAlignment::LEFT)
         {
           actor.SetProperty(Actor::Property::POSITION_X, left + mPadding.width + padding.left);
         }
-        else if (cellData.horizontalAlignment == HorizontalAlignment::RIGHT)
+        else if(cellData.horizontalAlignment == HorizontalAlignment::RIGHT)
         {
           actor.SetProperty(Actor::Property::POSITION_X,
                             right - mPadding.width - padding.right - actor.GetRelayoutSize(Dimension::WIDTH));
@@ -868,15 +868,15 @@ void TableView::OnRelayout(const Vector2& size, RelayoutContainer& container)
         else // if( cellData.horizontalAlignment ==  HorizontalAlignment::CENTER )
         {
           actor.SetProperty(
-              Actor::Property::POSITION_X,
-              (left + right + padding.left - padding.right - actor.GetRelayoutSize(Dimension::WIDTH)) * 0.5f);
+            Actor::Property::POSITION_X,
+            (left + right + padding.left - padding.right - actor.GetRelayoutSize(Dimension::WIDTH)) * 0.5f);
         }
 
-        if (cellData.verticalAlignment == VerticalAlignment::TOP)
+        if(cellData.verticalAlignment == VerticalAlignment::TOP)
         {
           actor.SetProperty(Actor::Property::POSITION_Y, top + mPadding.height + padding.top);
         }
-        else if (cellData.verticalAlignment == VerticalAlignment::BOTTOM)
+        else if(cellData.verticalAlignment == VerticalAlignment::BOTTOM)
         {
           actor.SetProperty(Actor::Property::POSITION_Y,
                             bottom - mPadding.height - padding.bottom - actor.GetRelayoutSize(Dimension::HEIGHT));
@@ -884,8 +884,8 @@ void TableView::OnRelayout(const Vector2& size, RelayoutContainer& container)
         else // if( cellData.verticalAlignment = VerticalAlignment::CENTER )
         {
           actor.SetProperty(
-              Actor::Property::POSITION_Y,
-              (top + bottom + padding.top - padding.bottom - actor.GetRelayoutSize(Dimension::HEIGHT)) * 0.5f);
+            Actor::Property::POSITION_Y,
+            (top + bottom + padding.top - padding.bottom - actor.GetRelayoutSize(Dimension::HEIGHT)) * 0.5f);
         }
       }
     }
@@ -906,17 +906,17 @@ void TableView::SetProperty(BaseObject* object, Property::Index index, const Pro
 {
   Ui::TableView tableView = Ui::TableView::DownCast(Dali::BaseHandle(object));
 
-  if (tableView)
+  if(tableView)
   {
     TableView& tableViewImpl(GetImpl(tableView));
-    switch (index)
+    switch(index)
     {
       case Ui::TableView::Property::ROWS:
       {
         int rows = 0;
-        if (value.Get(rows) && rows >= 0)
+        if(value.Get(rows) && rows >= 0)
         {
-          if (static_cast<unsigned int>(rows) != tableViewImpl.GetRows())
+          if(static_cast<unsigned int>(rows) != tableViewImpl.GetRows())
           {
             tableViewImpl.Resize(rows, tableViewImpl.GetColumns());
           }
@@ -926,9 +926,9 @@ void TableView::SetProperty(BaseObject* object, Property::Index index, const Pro
       case Ui::TableView::Property::COLUMNS:
       {
         int columns = 0;
-        if (value.Get(columns) && columns >= 0)
+        if(value.Get(columns) && columns >= 0)
         {
-          if (static_cast<unsigned int>(columns) != tableViewImpl.GetColumns())
+          if(static_cast<unsigned int>(columns) != tableViewImpl.GetColumns())
           {
             tableViewImpl.Resize(tableViewImpl.GetRows(), value.Get<int>());
           }
@@ -962,10 +962,10 @@ Property::Value TableView::GetProperty(BaseObject* object, Property::Index index
 
   Ui::TableView tableView = Ui::TableView::DownCast(Dali::BaseHandle(object));
 
-  if (tableView)
+  if(tableView)
   {
     TableView& tableViewImpl(GetImpl(tableView));
-    switch (index)
+    switch(index)
     {
       case Ui::TableView::Property::ROWS:
       {
@@ -1000,15 +1000,15 @@ Property::Value TableView::GetProperty(BaseObject* object, Property::Index index
 
 void TableView::OnChildAdd(Actor& child)
 {
-  if (!mLayoutingChild)
+  if(!mLayoutingChild)
   {
     // Ensure we're not in the middle of laying out children
 
     // Check child properties on actor to decide its position inside the table
     HorizontalAlignment::Type horizontalAlignment = HorizontalAlignment::LEFT;
-    VerticalAlignment::Type verticalAlignment = VerticalAlignment::TOP;
+    VerticalAlignment::Type   verticalAlignment   = VerticalAlignment::TOP;
 
-    if (child.GetPropertyType(Ui::TableView::ChildProperty::CELL_HORIZONTAL_ALIGNMENT) != Property::NONE)
+    if(child.GetPropertyType(Ui::TableView::ChildProperty::CELL_HORIZONTAL_ALIGNMENT) != Property::NONE)
     {
       std::string value = child.GetProperty(Ui::TableView::ChildProperty::CELL_HORIZONTAL_ALIGNMENT).Get<std::string>();
       Scripting::GetEnumeration<HorizontalAlignment::Type>(value.c_str(), HORIZONTAL_ALIGNMENT_STRING_TABLE,
@@ -1016,7 +1016,7 @@ void TableView::OnChildAdd(Actor& child)
                                                            horizontalAlignment);
     }
 
-    if (child.GetPropertyType(Ui::TableView::ChildProperty::CELL_VERTICAL_ALIGNMENT) != Property::NONE)
+    if(child.GetPropertyType(Ui::TableView::ChildProperty::CELL_VERTICAL_ALIGNMENT) != Property::NONE)
     {
       std::string value = child.GetProperty(Ui::TableView::ChildProperty::CELL_VERTICAL_ALIGNMENT).Get<std::string>();
       Scripting::GetEnumeration<VerticalAlignment::Type>(value.c_str(), VERTICAL_ALIGNMENT_STRING_TABLE,
@@ -1024,20 +1024,20 @@ void TableView::OnChildAdd(Actor& child)
     }
 
     Ui::TableView::CellPosition cellPosition;
-    if (child.GetPropertyType(Ui::TableView::ChildProperty::ROW_SPAN) != Property::NONE)
+    if(child.GetPropertyType(Ui::TableView::ChildProperty::ROW_SPAN) != Property::NONE)
     {
       cellPosition.rowSpan = child.GetProperty(Ui::TableView::ChildProperty::ROW_SPAN).Get<int>();
     }
 
-    if (child.GetPropertyType(Ui::TableView::ChildProperty::COLUMN_SPAN) != Property::NONE)
+    if(child.GetPropertyType(Ui::TableView::ChildProperty::COLUMN_SPAN) != Property::NONE)
     {
       cellPosition.columnSpan = child.GetProperty(Ui::TableView::ChildProperty::COLUMN_SPAN).Get<int>();
     }
 
-    if (child.GetPropertyType(Ui::TableView::ChildProperty::CELL_INDEX) != Property::NONE)
+    if(child.GetPropertyType(Ui::TableView::ChildProperty::CELL_INDEX) != Property::NONE)
     {
-      Vector2 indices = child.GetProperty(Ui::TableView::ChildProperty::CELL_INDEX).Get<Vector2>();
-      cellPosition.rowIndex = static_cast<unsigned int>(indices.x);
+      Vector2 indices          = child.GetProperty(Ui::TableView::ChildProperty::CELL_INDEX).Get<Vector2>();
+      cellPosition.rowIndex    = static_cast<unsigned int>(indices.x);
       cellPosition.columnIndex = static_cast<unsigned int>(indices.y);
 
       AddChild(child, cellPosition);
@@ -1048,22 +1048,22 @@ void TableView::OnChildAdd(Actor& child)
       bool availableCellFound = false;
 
       // Find the first available cell to store the actor in
-      const unsigned int rowCount = mCellData.GetRows();
+      const unsigned int rowCount    = mCellData.GetRows();
       const unsigned int columnCount = mCellData.GetColumns();
-      for (unsigned int row = 0; row < rowCount && !availableCellFound; ++row)
+      for(unsigned int row = 0; row < rowCount && !availableCellFound; ++row)
       {
-        for (unsigned int column = 0; column < columnCount && !availableCellFound; ++column)
+        for(unsigned int column = 0; column < columnCount && !availableCellFound; ++column)
         {
-          if (!(mCellData[row][column].actor))
+          if(!(mCellData[row][column].actor))
           {
             // Put the actor in the cell
             CellData data;
-            data.actor = child;
+            data.actor                = child;
             data.position.columnIndex = column;
-            data.position.rowIndex = row;
-            data.horizontalAlignment = horizontalAlignment;
-            data.verticalAlignment = verticalAlignment;
-            mCellData[row][column] = data;
+            data.position.rowIndex    = row;
+            data.horizontalAlignment  = horizontalAlignment;
+            data.verticalAlignment    = verticalAlignment;
+            mCellData[row][column]    = data;
 
             availableCellFound = true;
             break;
@@ -1071,7 +1071,7 @@ void TableView::OnChildAdd(Actor& child)
         }
       }
 
-      if (!availableCellFound)
+      if(!availableCellFound)
       {
         // No empty cells, so increase size of the table
         unsigned int newColumnCount = (columnCount > 0) ? columnCount : 1;
@@ -1079,12 +1079,12 @@ void TableView::OnChildAdd(Actor& child)
 
         // Put the actor in the first cell of the new row
         CellData data;
-        data.actor = child;
-        data.position.rowIndex = rowCount;
+        data.actor                = child;
+        data.position.rowIndex    = rowCount;
         data.position.columnIndex = 0;
-        data.horizontalAlignment = horizontalAlignment;
-        data.verticalAlignment = verticalAlignment;
-        mCellData[rowCount][0] = data;
+        data.horizontalAlignment  = horizontalAlignment;
+        data.verticalAlignment    = verticalAlignment;
+        mCellData[rowCount][0]    = data;
       }
 
       RelayoutRequest();
@@ -1097,10 +1097,10 @@ void TableView::OnChildAdd(Actor& child)
 void TableView::OnChildRemove(Actor& child)
 {
   // dont process if we're in the middle of bigger operation like delete row, column or resize
-  if (!mLayoutingChild)
+  if(!mLayoutingChild)
   {
     // relayout the table only if instances were found
-    if (RemoveAllInstances(child))
+    if(RemoveAllInstances(child))
     {
       RelayoutRequest();
     }
@@ -1110,12 +1110,12 @@ void TableView::OnChildRemove(Actor& child)
 }
 
 TableView::TableView(unsigned int initialRows, unsigned int initialColumns)
-  : Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
-    mCellData(initialRows, initialColumns),
-    mPreviousFocusedActor(),
-    mLayoutingChild(false),
-    mRowDirty(true), // Force recalculation first time
-    mColumnDirty(true)
+: Control(ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
+  mCellData(initialRows, initialColumns),
+  mPreviousFocusedActor(),
+  mLayoutingChild(false),
+  mRowDirty(true), // Force recalculation first time
+  mColumnDirty(true)
 {
   SetKeyboardNavigationSupport(true);
   ResizeContainers(initialRows, initialColumns);
@@ -1152,31 +1152,31 @@ void TableView::RemoveAndGetLostActors(const std::vector<CellData>& lost, std::v
 {
   // iterate through all lost cells
   std::vector<CellData>::const_iterator iter = lost.begin();
-  for (; iter != lost.end(); ++iter)
+  for(; iter != lost.end(); ++iter)
   {
     // if it is a valid actor
-    if ((*iter).actor)
+    if((*iter).actor)
     {
       // is this actor still somewhere else in the table
       Ui::TableView::CellPosition position;
-      if (FindChildPosition((*iter).actor, position))
+      if(FindChildPosition((*iter).actor, position))
       {
         // it must be spanning multiple cells, position contains the top left most one
         // check if position is left of the removed location
-        if (position.columnIndex < (*iter).position.columnIndex)
+        if(position.columnIndex < (*iter).position.columnIndex)
         {
           // if column span is greater than 1
-          if (mCellData[position.rowIndex][position.columnIndex].position.columnSpan > 1)
+          if(mCellData[position.rowIndex][position.columnIndex].position.columnSpan > 1)
           {
             // decrease column span
             mCellData[position.rowIndex][position.columnIndex].position.columnSpan -= columnsRemoved;
           }
         }
         // check if position is left of the removed location
-        if (position.rowIndex < (*iter).position.rowIndex)
+        if(position.rowIndex < (*iter).position.rowIndex)
         {
           // if row span is greater than 1
-          if (mCellData[position.rowIndex][position.columnIndex].position.rowSpan > 1)
+          if(mCellData[position.rowIndex][position.columnIndex].position.rowSpan > 1)
           {
             // decrease row span
             mCellData[position.rowIndex][position.columnIndex].position.rowSpan -= rowsRemoved;
@@ -1199,17 +1199,17 @@ bool TableView::RemoveAllInstances(const Actor& child)
 {
   bool found = false;
   // walk through the layout data
-  const unsigned int rowCount = mCellData.GetRows();
+  const unsigned int rowCount    = mCellData.GetRows();
   const unsigned int columnCount = mCellData.GetColumns();
-  for (unsigned int row = 0; row < rowCount; ++row)
+  for(unsigned int row = 0; row < rowCount; ++row)
   {
-    for (unsigned int column = 0; column < columnCount; ++column)
+    for(unsigned int column = 0; column < columnCount; ++column)
     {
-      if (mCellData[row][column].actor == child)
+      if(mCellData[row][column].actor == child)
       {
         // clear the cell, NOTE that the cell might be spanning multiple cells
         mCellData[row][column] = CellData();
-        found = true;
+        found                  = true;
       }
     }
   }
@@ -1221,37 +1221,37 @@ void TableView::SetHeightOrWidthProperty(TableView& tableViewImpl, void (TableVi
                                          void (TableView::*funcFit)(unsigned int), const Property::Value& value)
 {
   const Property::Map* map = value.GetMap();
-  if (map)
+  if(map)
   {
     unsigned int index(0);
-    for (unsigned int i = 0, count = map->Count(); i < count; ++i)
+    for(unsigned int i = 0, count = map->Count(); i < count; ++i)
     {
-      Property::Value& item = map->GetValue(i);
-      Property::Map* childMap = item.GetMap();
+      Property::Value& item     = map->GetValue(i);
+      Property::Map*   childMap = item.GetMap();
 
       std::istringstream(map->GetKey(i)) >> index;
-      if (childMap)
+      if(childMap)
       {
         Property::Value* policy = childMap->Find("policy");
-        if (policy)
+        if(policy)
         {
           std::string policyValue;
-          if (DALI_LIKELY(policy->Get(policyValue)))
+          if(DALI_LIKELY(policy->Get(policyValue)))
           {
             Ui::TableView::LayoutPolicy policy;
-            if (Scripting::GetEnumeration<Ui::TableView::LayoutPolicy>(policyValue.c_str(), LAYOUT_POLICY_STRING_TABLE,
-                                                                       LAYOUT_POLICY_STRING_TABLE_COUNT, policy))
+            if(Scripting::GetEnumeration<Ui::TableView::LayoutPolicy>(policyValue.c_str(), LAYOUT_POLICY_STRING_TABLE,
+                                                                      LAYOUT_POLICY_STRING_TABLE_COUNT, policy))
             {
-              switch (policy)
+              switch(policy)
               {
                 case Ui::TableView::FIXED:
                 case Ui::TableView::RELATIVE:
                 {
                   Property::Value* childMapValue = childMap->Find("value");
-                  float childValue = 0.0f;
-                  if (DALI_LIKELY(childMapValue && childMapValue->Get(childValue)))
+                  float            childValue    = 0.0f;
+                  if(DALI_LIKELY(childMapValue && childMapValue->Get(childValue)))
                   {
-                    if (policy == Ui::TableView::FIXED)
+                    if(policy == Ui::TableView::FIXED)
                     {
                       (tableViewImpl.*funcFixed)(index, childValue);
                     }
@@ -1298,45 +1298,45 @@ Property::Value TableView::GetColumnWidthsPropertyValue()
 void TableView::GetMapPropertyValue(const RowColumnArray& data, Property::Map& map)
 {
   const char* fixedPolicy = Scripting::GetEnumerationName<Ui::TableView::LayoutPolicy>(
-      Ui::TableView::FIXED, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
+    Ui::TableView::FIXED, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
   const char* relativePolicy = Scripting::GetEnumerationName<Ui::TableView::LayoutPolicy>(
-      Ui::TableView::RELATIVE, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
+    Ui::TableView::RELATIVE, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
   const char* fillPolicy = Scripting::GetEnumerationName<Ui::TableView::LayoutPolicy>(
-      Ui::TableView::FILL, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
+    Ui::TableView::FILL, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
   const char* fitPolicy = Scripting::GetEnumerationName<Ui::TableView::LayoutPolicy>(
-      Ui::TableView::FIT, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
+    Ui::TableView::FIT, LAYOUT_POLICY_STRING_TABLE, LAYOUT_POLICY_STRING_TABLE_COUNT);
 
   const RowColumnArray::SizeType count = data.Size();
-  for (RowColumnArray::SizeType i = 0; i < count; i++)
+  for(RowColumnArray::SizeType i = 0; i < count; i++)
   {
     const RowColumnData& dataInstance = data[i];
 
     Property::Map item;
-    switch (dataInstance.sizePolicy)
+    switch(dataInstance.sizePolicy)
     {
       case Ui::TableView::FIXED:
       {
         item["policy"] = fixedPolicy;
-        item["value"] = dataInstance.size;
+        item["value"]  = dataInstance.size;
         break;
       }
       case Ui::TableView::RELATIVE:
       {
         item["policy"] = relativePolicy;
-        item["value"] = dataInstance.fillRatio;
+        item["value"]  = dataInstance.fillRatio;
         break;
       }
       case Ui::TableView::FIT:
       {
         item["policy"] = fitPolicy;
-        item["value"] = 0.f;
+        item["value"]  = 0.f;
         break;
       }
       case Ui::TableView::FILL:
       default:
       {
         item["policy"] = fillPolicy;
-        item["value"] = 0.f;
+        item["value"]  = 0.f;
         break;
       }
     }
@@ -1351,12 +1351,12 @@ TableView::~TableView()
   // nothing to do
 }
 
-Actor TableView::GetNextKeyboardFocusableActor(Actor currentFocusedActor,
+Actor TableView::GetNextKeyboardFocusableActor(Actor                                 currentFocusedActor,
                                                Ui::Control::KeyboardFocus::Direction direction, bool loopEnabled)
 {
   Actor nextFocusableActor;
 
-  if (!currentFocusedActor)
+  if(!currentFocusedActor)
   {
     // Nothing is currently focused, so the child in the first cell should be focused.
     nextFocusableActor = GetChildAt(Ui::TableView::CellPosition(0, 0));
@@ -1364,68 +1364,68 @@ Actor TableView::GetNextKeyboardFocusableActor(Actor currentFocusedActor,
   else
   {
     Ui::TableView::CellPosition position;
-    if (FindChildPosition(currentFocusedActor, position))
+    if(FindChildPosition(currentFocusedActor, position))
     {
       // The current focused actor is a child of TableView
-      bool focusLost = false;
-      int currentRow = position.rowIndex;
-      int currentColumn = position.columnIndex;
-      int numberOfColumns = GetColumns();
-      int numberOfRows = GetRows();
+      bool focusLost       = false;
+      int  currentRow      = position.rowIndex;
+      int  currentColumn   = position.columnIndex;
+      int  numberOfColumns = GetColumns();
+      int  numberOfRows    = GetRows();
 
-      bool lastCell = false;
+      bool  lastCell = false;
       Actor nextValidActor;
 
-      switch (direction)
+      switch(direction)
       {
         case Ui::Control::KeyboardFocus::LEFT:
         {
           do
           {
-            if (--currentColumn < 0)
+            if(--currentColumn < 0)
             {
               currentColumn = numberOfColumns - 1;
-              if (--currentRow < 0)
+              if(--currentRow < 0)
               {
-                lastCell = true;
+                lastCell   = true;
                 currentRow = loopEnabled ? numberOfRows - 1 : 0;
-                focusLost = (currentRow == 0);
+                focusLost  = (currentRow == 0);
               }
             }
             nextValidActor = GetChildAt(Ui::TableView::CellPosition(currentRow, currentColumn));
-          } while (!nextValidActor && !lastCell);
+          } while(!nextValidActor && !lastCell);
           break;
         }
         case Ui::Control::KeyboardFocus::RIGHT:
         {
           do
           {
-            if (++currentColumn > numberOfColumns - 1)
+            if(++currentColumn > numberOfColumns - 1)
             {
               currentColumn = 0;
-              if (++currentRow > numberOfRows - 1)
+              if(++currentRow > numberOfRows - 1)
               {
-                lastCell = true;
+                lastCell   = true;
                 currentRow = loopEnabled ? 0 : numberOfRows - 1;
-                focusLost = (currentRow == numberOfRows - 1);
+                focusLost  = (currentRow == numberOfRows - 1);
               }
             }
             nextValidActor = GetChildAt(Ui::TableView::CellPosition(currentRow, currentColumn));
-          } while (!nextValidActor && !lastCell);
+          } while(!nextValidActor && !lastCell);
           break;
         }
         case Ui::Control::KeyboardFocus::UP:
         {
           do
           {
-            if (--currentRow < 0)
+            if(--currentRow < 0)
             {
-              lastCell = true;
+              lastCell   = true;
               currentRow = loopEnabled ? numberOfRows - 1 : 0;
-              focusLost = (currentRow == 0);
+              focusLost  = (currentRow == 0);
             }
             nextValidActor = GetChildAt(Ui::TableView::CellPosition(currentRow, currentColumn));
-          } while (!nextValidActor && !lastCell);
+          } while(!nextValidActor && !lastCell);
           break;
         }
         case Ui::Control::KeyboardFocus::DOWN:
@@ -1433,14 +1433,14 @@ Actor TableView::GetNextKeyboardFocusableActor(Actor currentFocusedActor,
         {
           do
           {
-            if (++currentRow > numberOfRows - 1)
+            if(++currentRow > numberOfRows - 1)
             {
-              lastCell = true;
+              lastCell   = true;
               currentRow = loopEnabled ? 0 : numberOfRows - 1;
-              focusLost = (currentRow == numberOfRows - 1);
+              focusLost  = (currentRow == numberOfRows - 1);
             }
             nextValidActor = GetChildAt(Ui::TableView::CellPosition(currentRow, currentColumn));
-          } while (!nextValidActor && !lastCell);
+          } while(!nextValidActor && !lastCell);
           break;
         }
         default:
@@ -1450,7 +1450,7 @@ Actor TableView::GetNextKeyboardFocusableActor(Actor currentFocusedActor,
       }
 
       // Move the focus if we haven't lost it.
-      if (!focusLost)
+      if(!focusLost)
       {
         nextFocusableActor = GetChildAt(Ui::TableView::CellPosition(currentRow, currentColumn));
 
@@ -1463,31 +1463,31 @@ Actor TableView::GetNextKeyboardFocusableActor(Actor currentFocusedActor,
       // The current focused actor is not within this TableView.
 
       unsigned int numberOfColumns = GetColumns();
-      unsigned int numberOfRows = GetRows();
+      unsigned int numberOfRows    = GetRows();
 
       // Check whether the previous focused actor is a focus group (i.e. a layout container)
-      bool wasFocusedOnLayoutContainer = false;
-      Actor previousFocusedActor = mPreviousFocusedActor.GetHandle();
-      if (previousFocusedActor)
+      bool  wasFocusedOnLayoutContainer = false;
+      Actor previousFocusedActor        = mPreviousFocusedActor.GetHandle();
+      if(previousFocusedActor)
       {
         Ui::Control control = Ui::Control::DownCast(previousFocusedActor);
-        if (control)
+        if(control)
         {
           Internal::Control& controlImpl = static_cast<Internal::Control&>(control.GetImplementation());
-          wasFocusedOnLayoutContainer = controlImpl.IsKeyboardFocusGroup();
+          wasFocusedOnLayoutContainer    = controlImpl.IsKeyboardFocusGroup();
         }
       }
 
       // Check whether the previous focused actor is a layout container and also a child of this TableView
       Ui::TableView::CellPosition position;
-      if (wasFocusedOnLayoutContainer && FindChildPosition(previousFocusedActor, position))
+      if(wasFocusedOnLayoutContainer && FindChildPosition(previousFocusedActor, position))
       {
         nextFocusableActor = GetNextKeyboardFocusableActor(previousFocusedActor, direction, loopEnabled);
       }
       else
       {
         // Otherwise, move the focus to either the first or the last cell according to the given direction.
-        if (direction == Ui::Control::KeyboardFocus::LEFT || direction == Ui::Control::KeyboardFocus::UP)
+        if(direction == Ui::Control::KeyboardFocus::LEFT || direction == Ui::Control::KeyboardFocus::UP)
         {
           nextFocusableActor = GetChildAt(Ui::TableView::CellPosition(numberOfRows - 1, numberOfColumns - 1));
         }
@@ -1511,18 +1511,18 @@ Vector3 TableView::GetNaturalSize()
 float TableView::CalculateChildSize(const Actor& child, Dimension::Type dimension)
 {
   Ui::TableView::CellPosition position;
-  if (FindChildPosition(child, position))
+  if(FindChildPosition(child, position))
   {
-    switch (dimension)
+    switch(dimension)
     {
       case Dimension::WIDTH:
       {
         float cellSize = 0.0f;
-        cellSize = mColumnData[position.columnIndex + position.columnSpan - 1].position -
+        cellSize       = mColumnData[position.columnIndex + position.columnSpan - 1].position -
                    (position.columnIndex > 0 ? mColumnData[position.columnIndex - 1].position : 0.f) -
                    mPadding.width * 2.0f;
 
-        if (cellSize < 0.0f)
+        if(cellSize < 0.0f)
         {
           cellSize = 0.0f;
         }
@@ -1537,7 +1537,7 @@ float TableView::CalculateChildSize(const Actor& child, Dimension::Type dimensio
         cellSize = mRowData[position.rowIndex + position.rowSpan - 1].position -
                    (position.rowIndex > 0 ? mRowData[position.rowIndex - 1].position : 0.f) - mPadding.height * 2.0f;
 
-        if (cellSize < 0.0f)
+        if(cellSize < 0.0f)
         {
           cellSize = 0.0f;
         }
@@ -1556,7 +1556,7 @@ float TableView::CalculateChildSize(const Actor& child, Dimension::Type dimensio
 
 bool TableView::RelayoutDependentOnChildren(Dimension::Type dimension)
 {
-  if (Control::RelayoutDependentOnChildren(dimension))
+  if(Control::RelayoutDependentOnChildren(dimension))
   {
     return true;
   }
@@ -1568,41 +1568,41 @@ void TableView::SetCellAlignment(Ui::TableView::CellPosition position, Horizonta
                                  VerticalAlignment::Type vertical)
 {
   // Check if we need to expand our data array
-  if (position.rowIndex >= mCellData.GetRows())
+  if(position.rowIndex >= mCellData.GetRows())
   {
     // Only adding new rows
     ResizeContainers(position.rowIndex + 1, mCellData.GetColumns());
   }
 
-  if (position.columnIndex >= mCellData.GetColumns())
+  if(position.columnIndex >= mCellData.GetColumns())
   {
     // Only adding new columns
     ResizeContainers(mCellData.GetRows(), position.columnIndex + 1);
   }
 
   // Set the alignment of the cell
-  CellData& data = mCellData[position.rowIndex][position.columnIndex];
+  CellData& data           = mCellData[position.rowIndex][position.columnIndex];
   data.horizontalAlignment = horizontal;
-  data.verticalAlignment = vertical;
+  data.verticalAlignment   = vertical;
 }
 
 void TableView::CalculateFillSizes(RowColumnArray& data)
 {
   // First pass: Count number of fill entries and calculate used relative space
   Dali::Vector<RowColumnData*> fillData;
-  float relativeTotal = 0.0f;
+  float                        relativeTotal = 0.0f;
 
   const unsigned int dataCount = data.Size();
 
-  for (unsigned int i = 0; i < dataCount; ++i)
+  for(unsigned int i = 0; i < dataCount; ++i)
   {
     RowColumnData& dataInstance = data[i];
 
-    if (dataInstance.sizePolicy == Ui::TableView::RELATIVE)
+    if(dataInstance.sizePolicy == Ui::TableView::RELATIVE)
     {
       relativeTotal += dataInstance.fillRatio;
     }
-    else if (dataInstance.sizePolicy == Ui::TableView::FILL)
+    else if(dataInstance.sizePolicy == Ui::TableView::FILL)
     {
       fillData.PushBack(&dataInstance);
     }
@@ -1610,16 +1610,16 @@ void TableView::CalculateFillSizes(RowColumnArray& data)
 
   // Second pass: Distribute remaining relative space
   const unsigned int fillCount = fillData.Size();
-  if (fillCount > 0)
+  if(fillCount > 0)
   {
-    if (relativeTotal > 1.0f)
+    if(relativeTotal > 1.0f)
     {
       relativeTotal = 1.0f;
     }
 
     const float evenFillRatio = (1.0f - relativeTotal) / fillCount;
 
-    for (unsigned int i = 0; i < fillCount; ++i)
+    for(unsigned int i = 0; i < fillCount; ++i)
     {
       fillData[i]->fillRatio = evenFillRatio;
     }
@@ -1632,11 +1632,11 @@ float TableView::CalculateTotalFixedSize(const RowColumnArray& data)
 
   const unsigned int dataCount = data.Size();
 
-  for (unsigned int i = 0; i < dataCount; ++i)
+  for(unsigned int i = 0; i < dataCount; ++i)
   {
     const RowColumnData& dataInstance = data[i];
 
-    switch (dataInstance.sizePolicy)
+    switch(dataInstance.sizePolicy)
     {
       // we have absolute size to FIXED and FIT column/row and relative size for RELATIVE and FILL column/row
       case Ui::TableView::FIXED:
@@ -1658,7 +1658,7 @@ float TableView::CalculateTotalFixedSize(const RowColumnArray& data)
 
 Vector2 TableView::GetCellPadding(Dimension::Type dimension)
 {
-  switch (dimension)
+  switch(dimension)
   {
     case Dimension::WIDTH:
     {
@@ -1683,30 +1683,30 @@ void TableView::CalculateFitSizes(RowColumnArray& data, Dimension::Type dimensio
 
   const unsigned int dataCount = data.Size();
 
-  for (unsigned int i = 0; i < dataCount; ++i)
+  for(unsigned int i = 0; i < dataCount; ++i)
   {
     RowColumnData& dataInstance = data[i];
 
-    if (dataInstance.sizePolicy == Ui::TableView::FIT)
+    if(dataInstance.sizePolicy == Ui::TableView::FIT)
     {
       // Find the size of the biggest actor in the row or column
       float maxActorHeight = 0.0f;
 
       unsigned int fitCount = (dimension == Dimension::WIDTH) ? mCellData.GetRows() : mCellData.GetColumns();
 
-      for (unsigned int j = 0; j < fitCount; ++j)
+      for(unsigned int j = 0; j < fitCount; ++j)
       {
-        unsigned int row = (dimension == Dimension::WIDTH) ? j : i;
+        unsigned int row    = (dimension == Dimension::WIDTH) ? j : i;
         unsigned int column = (dimension == Dimension::WIDTH) ? i : j;
         DALI_ASSERT_DEBUG(row < mCellData.GetRows());
         DALI_ASSERT_DEBUG(column < mCellData.GetColumns());
 
         const CellData& cellData = mCellData[row][column];
-        const Actor& actor = cellData.actor;
-        if (actor)
+        const Actor&    actor    = cellData.actor;
+        if(actor)
         {
-          if (FitToChild(actor, dimension) && (dimension == Dimension::WIDTH) ? (cellData.position.columnSpan == 1)
-                                                                              : (cellData.position.rowSpan == 1))
+          if(FitToChild(actor, dimension) && (dimension == Dimension::WIDTH) ? (cellData.position.columnSpan == 1)
+                                                                             : (cellData.position.rowSpan == 1))
           {
             maxActorHeight = std::max(maxActorHeight, actor.GetRelayoutSize(dimension) + cellPadding.x + cellPadding.y);
           }
@@ -1720,9 +1720,9 @@ void TableView::CalculateFitSizes(RowColumnArray& data, Dimension::Type dimensio
 
 bool TableView::FindFit(const RowColumnArray& data)
 {
-  for (unsigned int i = 0, count = data.Size(); i < count; ++i)
+  for(unsigned int i = 0, count = data.Size(); i < count; ++i)
   {
-    if (data[i].sizePolicy == Ui::TableView::FIT)
+    if(data[i].sizePolicy == Ui::TableView::FIT)
     {
       return true;
     }

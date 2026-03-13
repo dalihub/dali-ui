@@ -41,10 +41,10 @@ enum Type
                                                                   ///< playback mode.
   PAUSE,                                                          ///< Pause the animated GIF.
   STOP,                                                           ///< Stop the animated GIF.
-  JUMP_TO, ///< Jump to the specified frame. Property::INTEGER value should be passed.
+  JUMP_TO,                                                        ///< Jump to the specified frame. Property::INTEGER value should be passed.
 
   ANIMATED_IMAGE_VISUAL_ACTION_END_INDEX =
-      DevelImageVisual::Action::IMAGE_VISUAL_ACTION_END_INDEX + 1000 ///< End of animated image visual action index.
+    DevelImageVisual::Action::IMAGE_VISUAL_ACTION_END_INDEX + 1000 ///< End of animated image visual action index.
 };
 
 } // namespace Action

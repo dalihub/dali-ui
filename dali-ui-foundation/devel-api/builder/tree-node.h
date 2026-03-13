@@ -69,13 +69,13 @@ public:
   class DALI_UI_API ConstIterator
   {
   public:
-    typedef KeyNodePair value_type;
-    typedef KeyNodePair* pointer;
-    typedef const KeyNodePair* const_pointer;
-    typedef KeyNodePair& reference;
-    typedef const KeyNodePair& const_reference;
-    typedef size_t size_type;
-    typedef std::ptrdiff_t difference_type;
+    typedef KeyNodePair               value_type;
+    typedef KeyNodePair*              pointer;
+    typedef const KeyNodePair*        const_pointer;
+    typedef KeyNodePair&              reference;
+    typedef const KeyNodePair&        const_reference;
+    typedef size_t                    size_type;
+    typedef std::ptrdiff_t            difference_type;
     typedef std::forward_iterator_tag iterator_category;
 
     /*
@@ -209,7 +209,7 @@ private:
   DALI_INTERNAL TreeNode();
 
   // non copyable or assignable
-  DALI_INTERNAL TreeNode(TreeNode&);
+  DALI_INTERNAL           TreeNode(TreeNode&);
   DALI_INTERNAL TreeNode& operator=(const TreeNode&);
 
   const char* mName; ///< The nodes name (if any)
@@ -222,12 +222,12 @@ private:
   union
   {
     const char* mStringValue; ///< The node string value
-    int mIntValue;            ///< The node integer value
-    float mFloatValue;        ///< The node float value
+    int         mIntValue;    ///< The node integer value
+    float       mFloatValue;  ///< The node float value
   };
 
-  NodeType mType;    ///< The nodes type
-  bool mSubstituion; ///< String substitution flag
+  NodeType mType;        ///< The nodes type
+  bool     mSubstituion; ///< String substitution flag
 };
 
 } // namespace Ui

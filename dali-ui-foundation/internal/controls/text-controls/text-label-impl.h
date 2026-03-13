@@ -491,7 +491,7 @@ private:
    */
   Text::TextScrollerPtr GetTextScroller()
   {
-    if (!mTextScroller)
+    if(!mTextScroller)
     {
       mTextScroller = Text::TextScroller::New(*this);
     }
@@ -559,7 +559,7 @@ private:
   bool IsVisible();
 
 private: // Data
-  Text::ControllerPtr mController;
+  Text::ControllerPtr   mController;
   Text::TextScrollerPtr mTextScroller;
 
   Ui::Visual::Base mVisual;
@@ -567,10 +567,10 @@ private: // Data
   std::vector<Ui::TextAnchor> mAnchorActors;
 
   // Signals
-  Ui::DevelTextLabel::AnchorClickedSignalType mAnchorClickedSignal;
-  Ui::DevelTextLabel::TextFitChangedSignalType mTextFitChangedSignal;
-  Ui::DevelTextLabel::AsyncTextRenderedSignalType mAsyncTextRenderedSignal;
-  Ui::DevelTextLabel::AsyncNaturalSizeComputedSignalType mAsyncNaturalSizeComputedSignal;
+  Ui::DevelTextLabel::AnchorClickedSignalType               mAnchorClickedSignal;
+  Ui::DevelTextLabel::TextFitChangedSignalType              mTextFitChangedSignal;
+  Ui::DevelTextLabel::AsyncTextRenderedSignalType           mAsyncTextRenderedSignal;
+  Ui::DevelTextLabel::AsyncNaturalSizeComputedSignalType    mAsyncNaturalSizeComputedSignal;
   Ui::DevelTextLabel::AsyncHeightForWidthComputedSignalType mAsyncHeightForWidthComputedSignal;
 
   // for Font Variations
@@ -580,14 +580,14 @@ private: // Data
   WeakHandle<Ui::Control> mMaskControl;
 
   std::string mLocale;
-  Vector2 mSize;
-  Vector2 mTouchPosition; ///< The initial touch down position.
+  Vector2     mSize;
+  Vector2     mTouchPosition; ///< The initial touch down position.
 
   Ui::DevelText::Ellipsize::Mode mLastEllipsisMode;
 
-  int mRenderingBackend;
-  int mAsyncLineCount;
-  int mTextColorAnimatedCount;
+  int  mRenderingBackend;
+  int  mAsyncLineCount;
+  int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;
   bool mLastAutoScrollEnabled : 1;
   bool mControlBackgroundEnabled : 1;
@@ -595,7 +595,7 @@ private: // Data
   bool mIsAsyncRenderNeeded : 1; // true if a render request is required in ASYNC_AUTO mode, otherwise false.
   bool mIsSizeChanged : 1;       // whether the size has been changed or not.
   bool mIsManualRender : 1;      // whether an async manual render has been requested, returns false when completed.
-  bool mIsManualRendered : 1; // whether an async manual render has been completed, returns false on the next relayout.
+  bool mIsManualRendered : 1;    // whether an async manual render has been completed, returns false on the next relayout.
   bool mManualRendered : 1;
   bool mIsIntercepted : 1;        // whether the touch event is intercepted or not.
   bool mIsHasAnchors : 1;         // whether the text has anchors or not.

@@ -37,7 +37,7 @@ namespace Internal
 AtlasGlyphManager::AtlasGlyphManager()
 {
   mAtlasManager = Dali::Ui::AtlasManager::New();
-  mSampler = Sampler::New();
+  mSampler      = Sampler::New();
   mSampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
 }
 
@@ -48,30 +48,30 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphMa
 
   // If glyph added to an existing or new atlas then a new glyph record is required.
   // Check if an existing atlas will fit the image, create a new one if required.
-  if (mAtlasManager.Add(bitmap, slot))
+  if(mAtlasManager.Add(bitmap, slot))
   {
     // A new atlas was created so set the texture set details for the atlas
-    Dali::Texture atlas = mAtlasManager.GetAtlasContainer(slot.mAtlasId);
-    TextureSet textureSet = TextureSet::New();
+    Dali::Texture atlas      = mAtlasManager.GetAtlasContainer(slot.mAtlasId);
+    TextureSet    textureSet = TextureSet::New();
     textureSet.SetTexture(0u, atlas);
     textureSet.SetSampler(0u, mSampler);
     mAtlasManager.SetTextures(slot.mAtlasId, textureSet);
   }
 
   GlyphRecordEntry record;
-  record.mIndex = glyph.index;
-  record.mImageId = slot.mImageId;
-  record.mCount = 1;
+  record.mIndex        = glyph.index;
+  record.mImageId      = slot.mImageId;
+  record.mCount        = 1;
   record.mOutlineWidth = style.outline;
-  record.isItalic = style.isItalic;
-  record.isBold = style.isBold;
+  record.isItalic      = style.isItalic;
+  record.isBold        = style.isBold;
 
   // Have glyph records been created for this fontId ?
   bool foundGlyph = false;
-  for (std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
-       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
+  for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
+      fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
-    if (fontGlyphRecordIt->mFontId == glyph.fontId)
+    if(fontGlyphRecordIt->mFontId == glyph.fontId)
     {
       fontGlyphRecordIt->mGlyphRecords.PushBack(record);
       foundGlyph = true;
@@ -79,7 +79,7 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphMa
     }
   }
 
-  if (!foundGlyph)
+  if(!foundGlyph)
   {
     // We need to add a new font entry
     FontGlyphRecord fontGlyphRecord;
@@ -97,18 +97,18 @@ void AtlasGlyphManager::GenerateMeshData(uint32_t imageId, const Vector2& positi
 
 bool AtlasGlyphManager::IsCached(Text::FontId fontId, Text::GlyphIndex index,
                                  const Ui::AtlasGlyphManager::GlyphStyle& style,
-                                 Dali::Ui::AtlasManager::AtlasSlot& slot)
+                                 Dali::Ui::AtlasManager::AtlasSlot&       slot)
 {
-  for (std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
-       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
+  for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
+      fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
-    if (fontGlyphRecordIt->mFontId == fontId)
+    if(fontGlyphRecordIt->mFontId == fontId)
     {
-      for (Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
-           glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
+      for(Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
+          glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
       {
-        if ((glyphRecordIt->mIndex == index) && (glyphRecordIt->mOutlineWidth == style.outline) &&
-            (glyphRecordIt->isItalic == style.isItalic) && (glyphRecordIt->isBold == style.isBold))
+        if((glyphRecordIt->mIndex == index) && (glyphRecordIt->mOutlineWidth == style.outline) &&
+           (glyphRecordIt->isItalic == style.isItalic) && (glyphRecordIt->isBold == style.isBold))
         {
           slot.mImageId = glyphRecordIt->mImageId;
           slot.mAtlasId = mAtlasManager.GetAtlas(slot.mImageId);
@@ -130,9 +130,9 @@ Vector2 AtlasGlyphManager::GetAtlasSize(uint32_t atlasId)
 void AtlasGlyphManager::SetNewAtlasSize(uint32_t width, uint32_t height, uint32_t blockWidth, uint32_t blockHeight)
 {
   Ui::AtlasManager::AtlasSize size;
-  size.mWidth = width;
-  size.mHeight = height;
-  size.mBlockWidth = blockWidth;
+  size.mWidth       = width;
+  size.mHeight      = height;
+  size.mBlockWidth  = blockWidth;
   size.mBlockHeight = blockHeight;
   mAtlasManager.SetNewAtlasSize(size);
 }
@@ -147,14 +147,14 @@ const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
   std::ostringstream verboseMetrics;
 
   mMetrics.mGlyphCount = 0u;
-  for (std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
-       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
+  for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
+      fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
     mMetrics.mGlyphCount += fontGlyphRecordIt->mGlyphRecords.Size();
 
     verboseMetrics << "[FontId " << fontGlyphRecordIt->mFontId << " Glyph ";
-    for (Vector<GlyphRecordEntry>::Iterator glyphRecordEntryIt = fontGlyphRecordIt->mGlyphRecords.Begin();
-         glyphRecordEntryIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordEntryIt)
+    for(Vector<GlyphRecordEntry>::Iterator glyphRecordEntryIt = fontGlyphRecordIt->mGlyphRecords.Begin();
+        glyphRecordEntryIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordEntryIt)
     {
       verboseMetrics << glyphRecordEntryIt->mIndex << "(" << glyphRecordEntryIt->mCount << ") ";
     }
@@ -170,25 +170,25 @@ const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
 void AtlasGlyphManager::AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index,
                                              const Ui::AtlasGlyphManager::GlyphStyle& style, int32_t delta)
 {
-  if (0 != delta)
+  if(0 != delta)
   {
     DALI_LOG_INFO(gLogFilter, Debug::General, "AdjustReferenceCount %d, font: %d index: %d\n", delta, fontId, index);
 
-    for (std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
-         fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
+    for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
+        fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
     {
-      if (fontGlyphRecordIt->mFontId == fontId)
+      if(fontGlyphRecordIt->mFontId == fontId)
       {
-        for (Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
-             glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
+        for(Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
+            glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
         {
-          if ((glyphRecordIt->mIndex == index) && (glyphRecordIt->mOutlineWidth == style.outline) &&
-              (glyphRecordIt->isItalic == style.isItalic) && (glyphRecordIt->isBold == style.isBold))
+          if((glyphRecordIt->mIndex == index) && (glyphRecordIt->mOutlineWidth == style.outline) &&
+             (glyphRecordIt->isItalic == style.isItalic) && (glyphRecordIt->isBold == style.isBold))
           {
             glyphRecordIt->mCount += delta;
             DALI_ASSERT_DEBUG(glyphRecordIt->mCount >= 0 && "Glyph ref-count should not be negative");
 
-            if (!glyphRecordIt->mCount)
+            if(!glyphRecordIt->mCount)
             {
               mAtlasManager.Remove(glyphRecordIt->mImageId);
               fontGlyphRecordIt->mGlyphRecords.Remove(glyphRecordIt);

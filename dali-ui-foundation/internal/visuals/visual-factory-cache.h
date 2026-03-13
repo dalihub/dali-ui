@@ -213,7 +213,7 @@ public:
     CACHED_GRID_GEOMETRY_TYPE_MAX
   };
 
-  using ExternalShaderId = uint32_t;
+  using ExternalShaderId                                   = uint32_t;
   const static ExternalShaderId INVALID_EXTERNAL_SHADER_ID = static_cast<ExternalShaderId>(-1);
 
 public:
@@ -432,12 +432,12 @@ private:
   struct BrokenImageInfo
   {
     BrokenImageInfo()
-      : visualType(),
-        url(""),
-        npatchId(NPatchData::INVALID_NPATCH_DATA_ID),
-        texture(),
-        width(0),
-        height(0)
+    : visualType(),
+      url(""),
+      npatchId(NPatchData::INVALID_NPATCH_DATA_ID),
+      texture(),
+      width(0),
+      height(0)
     {
     }
 
@@ -446,33 +446,33 @@ private:
     }
 
     // Data
-    VisualUrl::Type visualType;
-    std::string url;
+    VisualUrl::Type          visualType;
+    std::string              url;
     NPatchData::NPatchDataId npatchId;
-    Texture texture;
-    uint32_t width;
-    uint32_t height;
+    Texture                  texture;
+    uint32_t                 width;
+    uint32_t                 height;
   };
 
   Geometry mGeometry[GEOMETRY_TYPE_MAX];
-  Shader mShader[SHADER_TYPE_MAX];
+  Shader   mShader[SHADER_TYPE_MAX];
 
-  std::vector<Shader> mExternalShaders;
+  std::vector<Shader>            mExternalShaders;
   std::map<Uint16Pair, Geometry> mCachedGridGeometry[CACHED_GRID_GEOMETRY_TYPE_MAX];
 
   bool mLoadYuvPlanes; ///< A global flag to specify if the image should be loaded as yuv planes
 
   TextureManager mTextureManager;
-  NPatchLoader mNPatchLoader;
-  SvgLoader mSvgLoader;
+  NPatchLoader   mNPatchLoader;
+  SvgLoader      mSvgLoader;
 
   Dali::UniformBlock mDefaultUniformBlock;
 
   std::unique_ptr<VectorAnimationManager> mVectorAnimationManager;
-  bool mPreMultiplyOnLoad;
-  std::vector<BrokenImageInfo> mBrokenImageInfoContainer;
-  std::string mDefaultBrokenImageUrl;
-  bool mUseDefaultBrokenImageOnly;
+  bool                                    mPreMultiplyOnLoad;
+  std::vector<BrokenImageInfo>            mBrokenImageInfoContainer;
+  std::string                             mDefaultBrokenImageUrl;
+  bool                                    mUseDefaultBrokenImageOnly;
 };
 
 } // namespace Internal

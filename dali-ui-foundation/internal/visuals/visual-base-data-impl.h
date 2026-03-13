@@ -21,8 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/math/vector2.h>
-#include <dali/public-api/rendering/visual-renderer.h>
 #include <dali/public-api/object/property-array.h>
+#include <dali/public-api/rendering/visual-renderer.h>
 
 #include <memory> ///< for std::unique_ptr
 #include <unordered_set>
@@ -60,23 +60,23 @@ struct Base::Impl
 
   enum Flags
   {
-    IS_ON_SCENE = 1,
-    IS_PREMULTIPLIED_ALPHA = 1 << 2,
+    IS_ON_SCENE                     = 1,
+    IS_PREMULTIPLIED_ALPHA          = 1 << 2,
     IS_SYNCHRONOUS_RESOURCE_LOADING = 1 << 3,
   };
 
   struct CustomShader
   {
     CustomShader(const Property::Map& map);
-    void SetPropertyMap(const Property::Map& map);
+    void          SetPropertyMap(const Property::Map& map);
     Property::Map CreatePropertyMap() const;
 
-    std::string mVertexShader;
-    std::string mFragmentShader;
-    Dali::ImageDimensions mGridSize;
+    std::string               mVertexShader;
+    std::string               mFragmentShader;
+    Dali::ImageDimensions     mGridSize;
     Dali::Shader::Hint::Value mHints; //(bitfield) values from enum Shader::Hint
-    int32_t mRenderPassTag;
-    std::string mName;
+    int32_t                   mRenderPassTag;
+    std::string               mName;
   };
 
   struct Transform
@@ -119,10 +119,10 @@ struct Base::Impl
      */
     static const Property::Map& GetDefaultTransformMap();
 
-    Vector2 mOffset;
-    Vector2 mSize;
-    Vector2 mExtraSize;
-    Vector4 mOffsetSizeMode;
+    Vector2         mOffset;
+    Vector2         mSize;
+    Vector2         mExtraSize;
+    Vector4         mOffsetSizeMode;
     Ui::Align::Type mOrigin;
     Ui::Align::Type mAnchorPoint;
   };
@@ -133,10 +133,10 @@ struct Base::Impl
     // Constructor & Destructor
     ConstraintFeature(const ConstraintObserver* observer, Dali::Constraint constraint,
                       std::unordered_set<Property::Index> properties)
-      : mConstraint(constraint),
-        mRelativeProperties(std::move(properties))
+    : mConstraint(constraint),
+      mRelativeProperties(std::move(properties))
     {
-      if (mConstraint && observer)
+      if(mConstraint && observer)
       {
         UpdateApplyRate(observer);
       }
@@ -144,27 +144,27 @@ struct Base::Impl
 
     ~ConstraintFeature()
     {
-      if (mConstraint)
+      if(mConstraint)
       {
         mConstraint.Remove();
       }
     }
 
     ConstraintFeature(ConstraintFeature&& rhs) noexcept
-      : mConstraint(std::move(rhs.mConstraint)),
-        mRelativeProperties(std::move(rhs.mRelativeProperties))
+    : mConstraint(std::move(rhs.mConstraint)),
+      mRelativeProperties(std::move(rhs.mRelativeProperties))
     {
     }
 
     ConstraintFeature& operator=(ConstraintFeature&& rhs) noexcept
     {
-      if (this != &rhs)
+      if(this != &rhs)
       {
-        if (mConstraint)
+        if(mConstraint)
         {
           mConstraint.Remove();
         }
-        mConstraint = std::move(rhs.mConstraint);
+        mConstraint         = std::move(rhs.mConstraint);
         mRelativeProperties = std::move(rhs.mRelativeProperties);
       }
       return *this;
@@ -172,13 +172,13 @@ struct Base::Impl
 
   private:
     // Do not allow to copy the struct
-    ConstraintFeature(const ConstraintFeature&) = delete;
+    ConstraintFeature(const ConstraintFeature&)            = delete;
     ConstraintFeature& operator=(const ConstraintFeature&) = delete;
 
   public:
     void UpdateApplyRateByIndex(const ConstraintObserver* observer, Property::Index updatedProperty)
     {
-      if (mRelativeProperties.find(updatedProperty) != mRelativeProperties.end())
+      if(mRelativeProperties.find(updatedProperty) != mRelativeProperties.end())
       {
         UpdateApplyRate(observer);
       }
@@ -186,7 +186,7 @@ struct Base::Impl
 
     void UpdateApplyRate(const ConstraintObserver* observer)
     {
-      if (observer->IsAnyPropertyAnimate(mRelativeProperties))
+      if(observer->IsAnyPropertyAnimate(mRelativeProperties))
       {
         mConstraint.SetApplyRate(Constraint::APPLY_ALWAYS);
       }
@@ -197,7 +197,7 @@ struct Base::Impl
     }
 
   public:
-    Dali::Constraint mConstraint;
+    Dali::Constraint                    mConstraint;
     std::unordered_set<Property::Index> mRelativeProperties; ///< The list of observer's property which we should check
                                                              ///< apply always, or notify just once.
   };
@@ -218,7 +218,7 @@ struct Base::Impl
 
     void AddFeature(Dali::Constraint constraint, std::unordered_set<Property::Index> properties)
     {
-      if (constraint)
+      if(constraint)
       {
         mFeatures.emplace_back(mConstraintObserver, constraint, std::move(properties));
       }
@@ -226,9 +226,9 @@ struct Base::Impl
 
     void RemoveFeature(Dali::Constraint constraint)
     {
-      for (auto iter = mFeatures.begin(); iter != mFeatures.end();)
+      for(auto iter = mFeatures.begin(); iter != mFeatures.end();)
       {
-        if ((*iter).mConstraint == constraint)
+        if((*iter).mConstraint == constraint)
         {
           iter = mFeatures.erase(iter);
         }
@@ -241,9 +241,9 @@ struct Base::Impl
 
     void RemoveFeature(Property::Index index)
     {
-      for (auto iter = mFeatures.begin(); iter != mFeatures.end();)
+      for(auto iter = mFeatures.begin(); iter != mFeatures.end();)
       {
-        if ((*iter).mRelativeProperties.find(index) != (*iter).mRelativeProperties.end())
+        if((*iter).mRelativeProperties.find(index) != (*iter).mRelativeProperties.end())
         {
           iter = mFeatures.erase(iter);
         }
@@ -256,9 +256,9 @@ struct Base::Impl
 
     void SceneDisconnected()
     {
-      if (mConstraintObserver)
+      if(mConstraintObserver)
       {
-        for (auto& feature : mFeatures)
+        for(auto& feature : mFeatures)
         {
           // Make APPLY_ONCE forcibly.
           feature.mConstraint.SetApplyRate(Constraint::APPLY_ONCE);
@@ -268,9 +268,9 @@ struct Base::Impl
 
     void UpdateAllApplyRate()
     {
-      if (mConstraintObserver)
+      if(mConstraintObserver)
       {
-        for (auto& feature : mFeatures)
+        for(auto& feature : mFeatures)
         {
           feature.UpdateApplyRate(mConstraintObserver);
         }
@@ -279,11 +279,11 @@ struct Base::Impl
 
     void StartFeature(Property::Index index)
     {
-      if (mConstraintObserver)
+      if(mConstraintObserver)
       {
-        for (auto& feature : mFeatures)
+        for(auto& feature : mFeatures)
         {
-          if (feature.mRelativeProperties.find(index) != feature.mRelativeProperties.end())
+          if(feature.mRelativeProperties.find(index) != feature.mRelativeProperties.end())
           {
             feature.mConstraint.Apply();
           }
@@ -293,11 +293,11 @@ struct Base::Impl
 
     void StopFeature(Property::Index index)
     {
-      if (mConstraintObserver)
+      if(mConstraintObserver)
       {
-        for (auto& feature : mFeatures)
+        for(auto& feature : mFeatures)
         {
-          if (feature.mRelativeProperties.find(index) != feature.mRelativeProperties.end())
+          if(feature.mRelativeProperties.find(index) != feature.mRelativeProperties.end())
           {
             feature.mConstraint.Remove();
           }
@@ -307,17 +307,17 @@ struct Base::Impl
 
     void UpdateApplyRateByIndex(Property::Index updatedProperty)
     {
-      if (mConstraintObserver)
+      if(mConstraintObserver)
       {
-        for (auto& feature : mFeatures)
+        for(auto& feature : mFeatures)
         {
           feature.UpdateApplyRateByIndex(mConstraintObserver, updatedProperty);
         }
       }
     }
 
-    const ConstraintObserver* mConstraintObserver{nullptr};
-    bool mApplied{false};
+    const ConstraintObserver*      mConstraintObserver{nullptr};
+    bool                           mApplied{false};
     std::vector<ConstraintFeature> mFeatures;
   };
 
@@ -350,7 +350,7 @@ struct Base::Impl
    */
   const Visual::Base::Impl::CustomShader* GetCustomShaderAt(uint32_t index) const
   {
-    if (index < mCustomShaders.size())
+    if(index < mCustomShaders.size())
     {
       return mCustomShaders[index].get();
     }
@@ -363,19 +363,19 @@ struct Base::Impl
    */
   void CreateCustomShaderPropertyMap(Property::Map& map)
   {
-    if (mCustomShaders.empty())
+    if(mCustomShaders.empty())
     {
       return;
     }
 
-    if (mCustomShaders.size() == 1)
+    if(mCustomShaders.size() == 1)
     {
       map.Insert(Ui::Visual::Property::SHADER, mCustomShaders[0]->CreatePropertyMap());
     }
     else
     {
       Property::Array shaderArray;
-      for (auto&& customShader : mCustomShaders)
+      for(auto&& customShader : mCustomShaders)
       {
         shaderArray.PushBack(customShader->CreatePropertyMap());
       }
@@ -388,7 +388,7 @@ struct Base::Impl
    */
   Transform& GetOrCreateTransform()
   {
-    if (DALI_UNLIKELY(!mTransform))
+    if(DALI_UNLIKELY(!mTransform))
     {
       mTransform.reset(new Transform());
     }
@@ -401,7 +401,7 @@ struct Base::Impl
    */
   void SetTransformUniforms(VisualRenderer renderer, Ui::Direction::Type direction)
   {
-    if (!mTransformMapUsingDefault || direction != Ui::Direction::LEFT_TO_RIGHT)
+    if(!mTransformMapUsingDefault || direction != Ui::Direction::LEFT_TO_RIGHT)
     {
       GetOrCreateTransform().SetUniforms(renderer, direction);
     }
@@ -413,7 +413,7 @@ struct Base::Impl
    */
   Vector2 GetTransformVisualSize(const Vector2& controlSize)
   {
-    if (!mTransformMapUsingDefault && mTransform)
+    if(!mTransformMapUsingDefault && mTransform)
     {
       return mTransform->GetVisualSize(controlSize);
     }
@@ -540,20 +540,20 @@ struct Base::Impl
     DecorationData::SetCornerSquareness(mDecorationData, value);
   }
 
-  VisualRenderer mRenderer;
+  VisualRenderer                             mRenderer;
   std::vector<std::unique_ptr<CustomShader>> mCustomShaders;
-  EventObserver* mEventObserver; ///< Allows controls to observe when the visual has events to notify
-  ConstraintFeatureList mConstraintFeatureList;
-  std::string mName;
-  std::unique_ptr<Transform> mTransform;
-  Vector4 mMixColor;
-  Size mControlSize;
-  DecorationData* mDecorationData;
-  int mDepthIndex;
-  FittingMode mFittingMode; ///< How the contents should fit the view
-  int mFlags;
-  Ui::Visual::ResourceStatus mResourceStatus;
-  const Ui::Visual::Type mType;
+  EventObserver*                             mEventObserver; ///< Allows controls to observe when the visual has events to notify
+  ConstraintFeatureList                      mConstraintFeatureList;
+  std::string                                mName;
+  std::unique_ptr<Transform>                 mTransform;
+  Vector4                                    mMixColor;
+  Size                                       mControlSize;
+  DecorationData*                            mDecorationData;
+  int                                        mDepthIndex;
+  FittingMode                                mFittingMode; ///< How the contents should fit the view
+  int                                        mFlags;
+  Ui::Visual::ResourceStatus                 mResourceStatus;
+  const Ui::Visual::Type                     mType;
 
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.
@@ -562,10 +562,10 @@ struct Base::Impl
   bool mPixelAreaSetByFittingMode : 1;     ///< Whether the pixel area is set for fitting mode.
   bool mTransformMapSetForFittingMode : 1; ///< Whether the transformMap is set for fitting mode.
   bool mTransformMapUsingDefault : 1;      ///< Whether we are using the default transformMap not. We'll be false after
-                                      ///< SetTransform called, or animated. Note : If it change to false, never be true
-                                      ///< again.
-  bool mTransformMapChanged : 1; ///< Whether the transformMap is changed or not. We'll be false after SetTransform
-                                 ///< called.
+                                           ///< SetTransform called, or animated. Note : If it change to false, never be true
+                                           ///< again.
+  bool mTransformMapChanged : 1;           ///< Whether the transformMap is changed or not. We'll be false after SetTransform
+                                           ///< called.
 
   bool mOffscreenRenderingIgnoreCornerRadius : 1; ///< Whether we need to ignore the corner radius during offscreen
                                                   ///< rendering case.

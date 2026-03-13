@@ -101,11 +101,11 @@ private:
    * private field
    */
   TextAbstraction::BidirectionalSupport mBidirectionalSupport; ///< Handle to the bidirectional support
-  TextAbstraction::FontClient mFontClient;                     ///< Handle to the font client
-  TextAbstraction::Shaping mShaping;                           ///< Handle to the shaping
-  TextAbstraction::Segmentation mSegmentation;                 ///< Handle to the segmentation
-  TextAbstraction::Hyphenation mHyphenation;                   ///< Handle to the hyphenation
-  Text::MultilanguageSupport mMultilanguageSupport;            ///< Handle to the multilanguage support
+  TextAbstraction::FontClient           mFontClient;           ///< Handle to the font client
+  TextAbstraction::Shaping              mShaping;              ///< Handle to the shaping
+  TextAbstraction::Segmentation         mSegmentation;         ///< Handle to the segmentation
+  TextAbstraction::Hyphenation          mHyphenation;          ///< Handle to the hyphenation
+  Text::MultilanguageSupport            mMultilanguageSupport; ///< Handle to the multilanguage support
 
 }; // class AsyncTextModule
 

@@ -35,12 +35,12 @@ namespace Text
 void ProcessHorizontalAlignment(const Attribute& attribute, BoundedParagraphRun& boundedParagraphRun)
 {
   boundedParagraphRun.horizontalAlignmentDefined = HorizontalAlignmentTypeStringToTypeValue(
-      attribute.valueBuffer, attribute.valueLength, boundedParagraphRun.horizontalAlignment);
+    attribute.valueBuffer, attribute.valueLength, boundedParagraphRun.horizontalAlignment);
 }
 
 void ProcessRelativeLineHeight(const Attribute& attribute, BoundedParagraphRun& boundedParagraphRun)
 {
-  boundedParagraphRun.relativeLineSize = StringToFloat(attribute.valueBuffer);
+  boundedParagraphRun.relativeLineSize        = StringToFloat(attribute.valueBuffer);
   boundedParagraphRun.relativeLineSizeDefined = true;
 }
 
@@ -49,15 +49,15 @@ void ProcessAttributesOfParagraphTag(const Tag& tag, BoundedParagraphRun& bounde
   // By default the align attribute is not defined until it's parsed.
   boundedParagraphRun.horizontalAlignmentDefined = false;
 
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
-    if (TokenComparison(MARKUP::PARAGRAPH_ATTRIBUTES::ALIGN, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::PARAGRAPH_ATTRIBUTES::ALIGN, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessHorizontalAlignment(attribute, boundedParagraphRun);
     }
-    else if (TokenComparison(MARKUP::PARAGRAPH_ATTRIBUTES::RELATIVE_LINE_HEIGHT, attribute.nameBuffer,
-                             attribute.nameLength))
+    else if(TokenComparison(MARKUP::PARAGRAPH_ATTRIBUTES::RELATIVE_LINE_HEIGHT, attribute.nameBuffer,
+                            attribute.nameLength))
     {
       ProcessRelativeLineHeight(attribute, boundedParagraphRun);
     }

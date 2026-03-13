@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/grid-layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/object/type-registry-helper.h>
+#include <dali/public-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -49,11 +49,11 @@ GridLayoutImplPtr GridLayoutImpl::New()
 }
 
 GridLayoutImpl::GridLayoutImpl()
-  : LayoutImpl(),
-    mRowDefinitions(),
-    mColumnDefinitions(),
-    mRowSpacing(0.0f),
-    mColumnSpacing(0.0f)
+: LayoutImpl(),
+  mRowDefinitions(),
+  mColumnDefinitions(),
+  mRowSpacing(0.0f),
+  mColumnSpacing(0.0f)
 {
 }
 
@@ -65,7 +65,7 @@ void GridLayoutImpl::AddRowDefinition(GridLength height)
 {
   mRowDefinitions.push_back(height);
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
   }
@@ -76,7 +76,7 @@ void GridLayoutImpl::AddColumnDefinition(GridLength width)
 {
   mColumnDefinitions.push_back(width);
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
   }
@@ -85,9 +85,9 @@ void GridLayoutImpl::AddColumnDefinition(GridLength width)
 
 void GridLayoutImpl::SetRowDefinitions(const std::vector<GridLength>& rows)
 {
-  mRowDefinitions = rows;
+  mRowDefinitions        = rows;
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
   }
@@ -96,9 +96,9 @@ void GridLayoutImpl::SetRowDefinitions(const std::vector<GridLength>& rows)
 
 void GridLayoutImpl::SetColumnDefinitions(const std::vector<GridLength>& columns)
 {
-  mColumnDefinitions = columns;
+  mColumnDefinitions     = columns;
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
   }
@@ -129,7 +129,7 @@ void GridLayoutImpl::ClearRowDefinitions()
 {
   mRowDefinitions.clear();
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
   }
@@ -140,7 +140,7 @@ void GridLayoutImpl::ClearColumnDefinitions()
 {
   mColumnDefinitions.clear();
   LayoutManager* manager = GetLayoutManager();
-  if (manager)
+  if(manager)
   {
     static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
   }
@@ -149,11 +149,11 @@ void GridLayoutImpl::ClearColumnDefinitions()
 
 void GridLayoutImpl::SetRowSpacing(float spacing)
 {
-  if (mRowSpacing != spacing)
+  if(mRowSpacing != spacing)
   {
-    mRowSpacing = spacing;
+    mRowSpacing            = spacing;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<GridLayoutManager*>(manager)->SetRowSpacing(spacing);
     }
@@ -168,11 +168,11 @@ float GridLayoutImpl::GetRowSpacing() const
 
 void GridLayoutImpl::SetColumnSpacing(float spacing)
 {
-  if (mColumnSpacing != spacing)
+  if(mColumnSpacing != spacing)
   {
-    mColumnSpacing = spacing;
+    mColumnSpacing         = spacing;
     LayoutManager* manager = GetLayoutManager();
-    if (manager)
+    if(manager)
     {
       static_cast<GridLayoutManager*>(manager)->SetColumnSpacing(spacing);
     }

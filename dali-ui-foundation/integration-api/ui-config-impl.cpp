@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-common.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/common/dali-common.h>
 
 namespace
 {
@@ -42,14 +42,14 @@ namespace Integration
 {
 
 UiConfigImpl::UiConfigImpl()
-  : mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
-    mScalingFactor(1.0f),
-    mDpi(160),
-    mBaselineDpi(160),
-    mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
-    mMinLongPressKeyCount(3),
-    mTapRecognizerTime(UINT32_MAX),
-    mFrozen(false)
+: mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+  mScalingFactor(1.0f),
+  mDpi(160),
+  mBaselineDpi(160),
+  mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
+  mMinLongPressKeyCount(3),
+  mTapRecognizerTime(UINT32_MAX),
+  mFrozen(false)
 {
 }
 

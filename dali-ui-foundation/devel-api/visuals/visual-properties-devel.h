@@ -32,21 +32,21 @@ namespace DevelVisual
  */
 enum Type
 {
-  BORDER = Dali::Ui::Visual::BORDER,
-  COLOR = Dali::Ui::Visual::COLOR,
-  GRADIENT = Dali::Ui::Visual::GRADIENT,
-  IMAGE = Dali::Ui::Visual::IMAGE,
-  MESH = Dali::Ui::Visual::MESH,
-  PRIMITIVE = Dali::Ui::Visual::PRIMITIVE,
-  WIREFRAME = Dali::Ui::Visual::WIREFRAME,
-  TEXT = Dali::Ui::Visual::TEXT,
-  N_PATCH = Dali::Ui::Visual::N_PATCH,
-  SVG = Dali::Ui::Visual::SVG,
+  BORDER         = Dali::Ui::Visual::BORDER,
+  COLOR          = Dali::Ui::Visual::COLOR,
+  GRADIENT       = Dali::Ui::Visual::GRADIENT,
+  IMAGE          = Dali::Ui::Visual::IMAGE,
+  MESH           = Dali::Ui::Visual::MESH,
+  PRIMITIVE      = Dali::Ui::Visual::PRIMITIVE,
+  WIREFRAME      = Dali::Ui::Visual::WIREFRAME,
+  TEXT           = Dali::Ui::Visual::TEXT,
+  N_PATCH        = Dali::Ui::Visual::N_PATCH,
+  SVG            = Dali::Ui::Visual::SVG,
   ANIMATED_IMAGE = Dali::Ui::Visual::ANIMATED_IMAGE,
 
-  NOT_IN_USE_1 = ANIMATED_IMAGE + 1,
+  NOT_IN_USE_1          = ANIMATED_IMAGE + 1,
   ANIMATED_VECTOR_IMAGE = ANIMATED_IMAGE + 2, ///< Renders an animated vector image.
-  ARC = ANIMATED_IMAGE + 3,                   ///< Renders an arc.
+  ARC                   = ANIMATED_IMAGE + 3, ///< Renders an arc.
 };
 
 /**
@@ -56,12 +56,12 @@ namespace Property
 {
 enum Type
 {
-  TYPE = Dali::Ui::Visual::Property::TYPE,
-  SHADER = Dali::Ui::Visual::Property::SHADER,
-  TRANSFORM = Dali::Ui::Visual::Property::TRANSFORM,
+  TYPE                = Dali::Ui::Visual::Property::TYPE,
+  SHADER              = Dali::Ui::Visual::Property::SHADER,
+  TRANSFORM           = Dali::Ui::Visual::Property::TRANSFORM,
   PREMULTIPLIED_ALPHA = Dali::Ui::Visual::Property::PREMULTIPLIED_ALPHA,
-  MIX_COLOR = Dali::Ui::Visual::Property::MIX_COLOR,
-  OPACITY = Dali::Ui::Visual::Property::OPACITY,
+  MIX_COLOR           = Dali::Ui::Visual::Property::MIX_COLOR,
+  OPACITY             = Dali::Ui::Visual::Property::OPACITY,
 
   /**
    * @brief The fitting mode of the visual.
@@ -148,11 +148,11 @@ enum FittingMode
   OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio. The visual will be
                               ///< filled without empty area, and outside is cropped away.
   CENTER,                     ///< The visual should keep original size of image. It is not scaled and not strecthed.
-  FIT_HEIGHT, ///< The visual should be scaled to fit, preserving aspect ratio. Height is scaled proportionately to
-              ///< maintain aspect ratio. It will be deprecated.
-  FIT_WIDTH,  ///< The visual should be scaled to fit, preserving aspect ratio. Width is scaled proportionately to
-              ///< maintain aspect ratio. It will be deprecated.
-  DONT_CARE   ///< The visual should be not use fittingMode.
+  FIT_HEIGHT,                 ///< The visual should be scaled to fit, preserving aspect ratio. Height is scaled proportionately to
+                              ///< maintain aspect ratio. It will be deprecated.
+  FIT_WIDTH,                  ///< The visual should be scaled to fit, preserving aspect ratio. Width is scaled proportionately to
+                              ///< maintain aspect ratio. It will be deprecated.
+  DONT_CARE                   ///< The visual should be not use fittingMode.
 };
 
 /**

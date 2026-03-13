@@ -25,7 +25,7 @@ namespace Ui
 {
 
 Trait::Trait(Integration::TraitImpl* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

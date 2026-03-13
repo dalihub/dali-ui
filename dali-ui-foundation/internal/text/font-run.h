@@ -32,10 +32,10 @@ namespace Text
  */
 struct FontRun
 {
-  CharacterRun characterRun; ///< The initial character index and the number of characters of the run.
-  FontId fontId;             ///< Font id of the run.
-  bool isItalicRequired : 1; ///< Whether the italic style is required.
-  bool isBoldRequired : 1;   ///< Whether the bold style is required.
+  CharacterRun characterRun;         ///< The initial character index and the number of characters of the run.
+  FontId       fontId;               ///< Font id of the run.
+  bool         isItalicRequired : 1; ///< Whether the italic style is required.
+  bool         isBoldRequired : 1;   ///< Whether the bold style is required.
 };
 
 } // namespace Text

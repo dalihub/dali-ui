@@ -46,48 +46,48 @@ namespace Dali::Ui::Text
 
 void Controller::InputProperties::SetInputColor(Controller& controller, const Vector4& color)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
-    controller.mImpl->mEventData->mInputStyle.textColor = color;
+    controller.mImpl->mEventData->mInputStyle.textColor      = color;
     controller.mImpl->mEventData->mInputStyle.isDefaultColor = false;
 
-    if (EventData::SELECTING == controller.mImpl->mEventData->mState ||
-        EventData::EDITING == controller.mImpl->mEventData->mState ||
-        EventData::INACTIVE == controller.mImpl->mEventData->mState)
+    if(EventData::SELECTING == controller.mImpl->mEventData->mState ||
+       EventData::EDITING == controller.mImpl->mEventData->mState ||
+       EventData::INACTIVE == controller.mImpl->mEventData->mState)
     {
-      if (EventData::SELECTING == controller.mImpl->mEventData->mState)
+      if(EventData::SELECTING == controller.mImpl->mEventData->mState)
       {
         const bool handlesCrossed = controller.mImpl->mEventData->mLeftSelectionPosition >
                                     controller.mImpl->mEventData->mRightSelectionPosition;
 
         // Get start and end position of selection
-        const CharacterIndex startOfSelectedText = handlesCrossed
-                                                       ? controller.mImpl->mEventData->mRightSelectionPosition
-                                                       : controller.mImpl->mEventData->mLeftSelectionPosition;
-        const Length lengthOfSelectedText = (handlesCrossed ? controller.mImpl->mEventData->mLeftSelectionPosition
-                                                            : controller.mImpl->mEventData->mRightSelectionPosition) -
+        const CharacterIndex startOfSelectedText  = handlesCrossed
+                                                      ? controller.mImpl->mEventData->mRightSelectionPosition
+                                                      : controller.mImpl->mEventData->mLeftSelectionPosition;
+        const Length         lengthOfSelectedText = (handlesCrossed ? controller.mImpl->mEventData->mLeftSelectionPosition
+                                                                    : controller.mImpl->mEventData->mRightSelectionPosition) -
                                             startOfSelectedText;
 
         // Add the color run.
         const VectorBase::SizeType numberOfRuns = controller.mImpl->mModel->mLogicalModel->mColorRuns.Count();
         controller.mImpl->mModel->mLogicalModel->mColorRuns.Resize(numberOfRuns + 1u);
 
-        ColorRun& colorRun = *(controller.mImpl->mModel->mLogicalModel->mColorRuns.Begin() + numberOfRuns);
-        colorRun.color = color;
-        colorRun.characterRun.characterIndex = startOfSelectedText;
+        ColorRun& colorRun                       = *(controller.mImpl->mModel->mLogicalModel->mColorRuns.Begin() + numberOfRuns);
+        colorRun.color                           = color;
+        colorRun.characterRun.characterIndex     = startOfSelectedText;
         colorRun.characterRun.numberOfCharacters = lengthOfSelectedText;
 
-        controller.mImpl->mTextUpdateInfo.mCharacterIndex = startOfSelectedText;
+        controller.mImpl->mTextUpdateInfo.mCharacterIndex             = startOfSelectedText;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove = lengthOfSelectedText;
-        controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd = lengthOfSelectedText;
+        controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd    = lengthOfSelectedText;
       }
       else
       {
         controller.mImpl->mTextUpdateInfo.mCharacterIndex = 0;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
-            controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
+          controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-            controller.mImpl->mModel->mLogicalModel->mText.Count();
+          controller.mImpl->mModel->mLogicalModel->mText.Count();
       }
 
       // Request to relayout.
@@ -106,9 +106,9 @@ const Vector4& Controller::InputProperties::GetInputColor(const Controller& cont
 
 void Controller::InputProperties::SetInputLineSpacing(Controller& controller, float lineSpacing)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
-    controller.mImpl->mEventData->mInputStyle.lineSpacing = lineSpacing;
+    controller.mImpl->mEventData->mInputStyle.lineSpacing          = lineSpacing;
     controller.mImpl->mEventData->mInputStyle.isLineSpacingDefined = true;
   }
 }
@@ -120,7 +120,7 @@ float Controller::InputProperties::GetInputLineSpacing(const Controller& control
 
 void Controller::InputProperties::SetInputShadowProperties(Controller& controller, const std::string& shadowProperties)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mInputStyle.shadowProperties = shadowProperties;
   }
@@ -131,10 +131,10 @@ std::string Controller::InputProperties::GetInputShadowProperties(const Controll
   return controller.mImpl->mEventData ? controller.mImpl->mEventData->mInputStyle.shadowProperties : EMPTY_STRING;
 }
 
-void Controller::InputProperties::SetInputUnderlineProperties(Controller& controller,
+void Controller::InputProperties::SetInputUnderlineProperties(Controller&        controller,
                                                               const std::string& underlineProperties)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mInputStyle.underlineProperties = underlineProperties;
   }
@@ -147,7 +147,7 @@ std::string Controller::InputProperties::GetInputUnderlineProperties(const Contr
 
 void Controller::InputProperties::SetInputEmbossProperties(Controller& controller, const std::string& embossProperties)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mInputStyle.embossProperties = embossProperties;
   }
@@ -159,10 +159,10 @@ std::string Controller::InputProperties::GetInputEmbossProperties(const Controll
                                       : controller.GetDefaultEmbossProperties();
 }
 
-void Controller::InputProperties::SetInputOutlineProperties(Controller& controller,
+void Controller::InputProperties::SetInputOutlineProperties(Controller&        controller,
                                                             const std::string& outlineProperties)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mInputStyle.outlineProperties = outlineProperties;
   }
@@ -176,7 +176,7 @@ std::string Controller::InputProperties::GetInputOutlineProperties(const Control
 
 void Controller::InputProperties::SetInputModePassword(Controller& controller, bool passwordInput)
 {
-  if (controller.mImpl->mEventData)
+  if(controller.mImpl->mEventData)
   {
     controller.mImpl->mEventData->mPasswordInput = passwordInput;
   }

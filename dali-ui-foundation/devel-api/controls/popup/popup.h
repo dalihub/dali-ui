@@ -59,7 +59,7 @@ public:
   enum PropertyRange
   {
     PROPERTY_START_INDEX = Control::CONTROL_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX = PROPERTY_START_INDEX + 1000 ///< Reserve property indices
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices
   };
 
   /**
@@ -85,12 +85,12 @@ public:
       BACKING_ENABLED,              ///< name "backingEnabled",         type bool
       BACKING_COLOR,                ///< name "backingColor",           type Vector4
       POPUP_BACKGROUND_IMAGE,       ///< name "popupBackgroundImage",   type std::string
-      POPUP_BACKGROUND_BORDER, ///< name "popupBackgroundBorder",  type Rect< int >,      Values are in the order: left,
-                               ///< right, bottom, top
-      TAIL_UP_IMAGE,           ///< name "tailUpImage",            type std::string
-      TAIL_DOWN_IMAGE,         ///< name "tailDownImage",          type std::string
-      TAIL_LEFT_IMAGE,         ///< name "tailLeftImage",          type std::string
-      TAIL_RIGHT_IMAGE,        ///< name "tailRightImage",         type std::string
+      POPUP_BACKGROUND_BORDER,      ///< name "popupBackgroundBorder",  type Rect< int >,      Values are in the order: left,
+                                    ///< right, bottom, top
+      TAIL_UP_IMAGE,                ///< name "tailUpImage",            type std::string
+      TAIL_DOWN_IMAGE,              ///< name "tailDownImage",          type std::string
+      TAIL_LEFT_IMAGE,              ///< name "tailLeftImage",          type std::string
+      TAIL_RIGHT_IMAGE,             ///< name "tailRightImage",         type std::string
     };
   };
 

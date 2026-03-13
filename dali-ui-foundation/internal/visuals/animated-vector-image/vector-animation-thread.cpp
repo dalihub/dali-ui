@@ -45,21 +45,21 @@ DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_VECTOR_ANIMATION_PERFORMANCE_MAR
 } // unnamed namespace
 
 VectorAnimationThread::VectorAnimationThread()
-  : mAnimationTasks(),
-    mCompletedTasks(),
-    mWorkingTasks(),
-    mSleepThread(MakeCallback(this, &VectorAnimationThread::OnAwakeFromSleep)),
-    mConditionalWait(),
-    mEventTriggerMutex(),
-    mAnimationTasksMutex(),
-    mTaskCompletedMutex(),
-    mDiscardedTasksMutex(),
-    mEventTrigger(new EventThreadCallback(MakeCallback(this, &VectorAnimationThread::OnEventCallbackTriggered))),
-    mLogFactory(Dali::Adaptor::Get().GetLogFactory()),
-    mTraceFactory(Dali::Adaptor::Get().GetTraceFactory()),
-    mNeedToSleep(false),
-    mDestroyThread(false),
-    mForceRenderOnce(false)
+: mAnimationTasks(),
+  mCompletedTasks(),
+  mWorkingTasks(),
+  mSleepThread(MakeCallback(this, &VectorAnimationThread::OnAwakeFromSleep)),
+  mConditionalWait(),
+  mEventTriggerMutex(),
+  mAnimationTasksMutex(),
+  mTaskCompletedMutex(),
+  mDiscardedTasksMutex(),
+  mEventTrigger(new EventThreadCallback(MakeCallback(this, &VectorAnimationThread::OnEventCallbackTriggered))),
+  mLogFactory(Dali::Adaptor::Get().GetLogFactory()),
+  mTraceFactory(Dali::Adaptor::Get().GetTraceFactory()),
+  mNeedToSleep(false),
+  mDestroyThread(false),
+  mForceRenderOnce(false)
 {
   mAsyncTaskManager = Dali::AsyncTaskManager::Get();
   mSleepThread.Start();
@@ -93,7 +93,7 @@ VectorAnimationThread::~VectorAnimationThread()
   Join();
 
   // We need to wait all working tasks are completed before destructing this thread.
-  while (mWorkingTasks.size() > 0)
+  while(mWorkingTasks.size() > 0)
   {
     DALI_LOG_DEBUG_INFO("Still waiting WorkingTasks [%zu]\n", mWorkingTasks.size());
     ConditionalWait::ScopedLock lock(mConditionalWait);
@@ -105,7 +105,7 @@ VectorAnimationThread::~VectorAnimationThread()
       Mutex::ScopedLock taskCompletedLock(mTaskCompletedMutex);
       completedTasksQueue.swap(mCompletedTasksQueue);
     }
-    if (completedTasksQueue.empty())
+    if(completedTasksQueue.empty())
     {
       mConditionalWait.Wait(lock);
       // Task completed may have been added to the queue while we were waiting.
@@ -117,7 +117,7 @@ VectorAnimationThread::~VectorAnimationThread()
 
     DALI_LOG_DEBUG_INFO("Completed task queue [%zu]\n", completedTasksQueue.size());
 
-    for (auto& taskPair : completedTasksQueue)
+    for(auto& taskPair : completedTasksQueue)
     {
       mWorkingTasks.erase(taskPair.first);
     }
@@ -130,7 +130,7 @@ void VectorAnimationThread::AddTask(VectorAnimationTaskPtr task)
   ConditionalWait::ScopedLock lock(mConditionalWait);
 
   // Rasterize as soon as possible
-  if (MoveTasksToAnimation(task, true))
+  if(MoveTasksToAnimation(task, true))
   {
     mNeedToSleep = false;
     // wake up the animation thread
@@ -157,7 +157,7 @@ void VectorAnimationThread::OnTaskCompleted(VectorAnimationTaskPtr task, bool su
 /// VectorAnimationThread::SleepThread called, Mutex SleepThread::mAwakeCallbackMutex is locked
 void VectorAnimationThread::OnAwakeFromSleep()
 {
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     ConditionalWait::ScopedLock lock(mConditionalWait);
 
@@ -171,7 +171,7 @@ void VectorAnimationThread::OnAwakeFromSleep()
 void VectorAnimationThread::AddEventTriggerCallback(CallbackBase* callback, uint32_t argument)
 {
   Mutex::ScopedLock lock(mEventTriggerMutex);
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     DALI_LOG_DEBUG_INFO("VectorAnimationThread::AddEventTriggerCallback [%p, %u]\n", callback, argument);
 
@@ -181,7 +181,7 @@ void VectorAnimationThread::AddEventTriggerCallback(CallbackBase* callback, uint
 
     // Note : Always trigger event since eventfd might not emit triggered callback sometimes.
     // Let we keep this logic until fd relative bug fixed. 2024-12-16 eunkiki.hong
-    if (DALI_LIKELY(mEventTrigger))
+    if(DALI_LIKELY(mEventTrigger))
     {
       mEventTrigger->Trigger();
     }
@@ -192,11 +192,12 @@ void VectorAnimationThread::AddEventTriggerCallback(CallbackBase* callback, uint
 void VectorAnimationThread::RemoveEventTriggerCallbacks(CallbackBase* callback)
 {
   Mutex::ScopedLock lock(mEventTriggerMutex);
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     auto iter =
-        std::remove_if(mTriggerEventCallbacks.begin(), mTriggerEventCallbacks.end(),
-                       [&callback](std::pair<CallbackBase*, uint32_t>& item) { return item.first == callback; });
+      std::remove_if(mTriggerEventCallbacks.begin(), mTriggerEventCallbacks.end(),
+                     [&callback](std::pair<CallbackBase*, uint32_t>& item)
+    { return item.first == callback; });
     mTriggerEventCallbacks.erase(iter, mTriggerEventCallbacks.end());
   }
 }
@@ -205,14 +206,14 @@ void VectorAnimationThread::RemoveEventTriggerCallbacks(CallbackBase* callback)
 void VectorAnimationThread::RequestForceRenderOnce()
 {
   Mutex::ScopedLock lock(mEventTriggerMutex);
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     mForceRenderOnce = true;
 
     DALI_LOG_DEBUG_INFO("VectorAnimationThread::mEventTrigger Triggered!\n");
     // Note : Always trigger event since eventfd might not emit triggered callback sometimes.
     // Let we keep this logic until fd relative bug fixed. 2024-12-16 eunkiki.hong
-    if (DALI_LIKELY(mEventTrigger))
+    if(DALI_LIKELY(mEventTrigger))
     {
       mEventTrigger->Trigger();
     }
@@ -227,7 +228,7 @@ void VectorAnimationThread::Finalize()
   Mutex::ScopedLock taskCompletedLock(mTaskCompletedMutex);
   Mutex::ScopedLock animationTasksLock(mAnimationTasksMutex);
   // Wait until some event thread trigger, and tasks relative job finished.
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     DALI_LOG_DEBUG_INFO("Mark VectorAnimationThread destroyed\n");
     mDestroyThread = true;
@@ -242,7 +243,7 @@ void VectorAnimationThread::Run()
   mLogFactory.InstallLogFunction();
   mTraceFactory.InstallTraceFunction();
 
-  while (DALI_LIKELY(!mDestroyThread))
+  while(DALI_LIKELY(!mDestroyThread))
   {
     Rasterize();
   }
@@ -253,32 +254,32 @@ bool VectorAnimationThread::MoveTasksToAnimation(VectorAnimationTaskPtr task, bo
 {
   Mutex::ScopedLock animationTasksLock(mAnimationTasksMutex);
 
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "VECTOR_ANIMATION_THREAD_ANIMATION_TASK",
                                             [&](std::ostringstream& oss)
-                                            { oss << "[" << mAnimationTasks.size() << "," << useCurrentTime << "]"; });
+    { oss << "[" << mAnimationTasks.size() << "," << useCurrentTime << "]"; });
 
     // Find if the task is already in the list except loading task
     auto iter =
-        std::find_if(mAnimationTasks.begin(), mAnimationTasks.end(),
-                     [task, useCurrentTime](VectorAnimationTaskPtr& element)
-                     {
-                       return (element == task) &&
-                              (!useCurrentTime || // If we don't need to use current time (i.e. CompletedTasks)
-                               !element->IsLoadRequested()); // Or we need to use current time And loading completed.
-                     });
+      std::find_if(mAnimationTasks.begin(), mAnimationTasks.end(),
+                   [task, useCurrentTime](VectorAnimationTaskPtr& element)
+    {
+      return (element == task) &&
+             (!useCurrentTime ||            // If we don't need to use current time (i.e. CompletedTasks)
+              !element->IsLoadRequested()); // Or we need to use current time And loading completed.
+    });
 
-    if (iter == mAnimationTasks.end())
+    if(iter == mAnimationTasks.end())
     {
       // Use the frame rate of the animation file, or use current time.
       auto nextFrameTime = task->CalculateNextFrameTime(useCurrentTime);
 
       bool inserted = false;
-      for (auto iter = mAnimationTasks.begin(); iter != mAnimationTasks.end(); ++iter)
+      for(auto iter = mAnimationTasks.begin(); iter != mAnimationTasks.end(); ++iter)
       {
         auto nextTime = (*iter)->GetNextFrameTime();
-        if (nextTime > nextFrameTime)
+        if(nextTime > nextFrameTime)
         {
           mAnimationTasks.insert(iter, task);
           inserted = true;
@@ -286,14 +287,14 @@ bool VectorAnimationThread::MoveTasksToAnimation(VectorAnimationTaskPtr task, bo
         }
       }
 
-      if (!inserted)
+      if(!inserted)
       {
         mAnimationTasks.push_back(task);
       }
 
       DALI_TRACE_END_WITH_MESSAGE_GENERATOR(gTraceFilter, "VECTOR_ANIMATION_THREAD_ANIMATION_TASK",
                                             [&](std::ostringstream& oss)
-                                            { oss << "[" << mAnimationTasks.size() << "]"; });
+      { oss << "[" << mAnimationTasks.size() << "]"; });
 
       return true;
     }
@@ -309,39 +310,39 @@ void VectorAnimationThread::MoveTasksToCompleted(CompletedTasksContainer&& compl
   // Since we should make ensure that all working tasks are completed before destroying the thread.
   DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "VECTOR_ANIMATION_THREAD_COMPLETED_TASK",
                                           [&](std::ostringstream& oss)
-                                          {
-                                            oss << "[w:" << mWorkingTasks.size() << ",c:" << mCompletedTasks.size()
-                                                << ",i:" << completedTasksQueue.size() << "]";
-                                          });
+  {
+    oss << "[w:" << mWorkingTasks.size() << ",c:" << mCompletedTasks.size()
+        << ",i:" << completedTasksQueue.size() << "]";
+  });
   bool needRasterize = false;
 
-  for (auto&& taskPair : completedTasksQueue)
+  for(auto&& taskPair : completedTasksQueue)
   {
-    auto& task = taskPair.first;
-    bool keepAnimation = taskPair.second;
+    auto& task          = taskPair.first;
+    bool  keepAnimation = taskPair.second;
 
     VectorAnimationTaskSet::const_iterator workingIter = mWorkingTasks.find(task);
-    if (workingIter != mWorkingTasks.cend())
+    if(workingIter != mWorkingTasks.cend())
     {
       mWorkingTasks.erase(workingIter);
     }
 
-    if (DALI_LIKELY(!mDestroyThread))
+    if(DALI_LIKELY(!mDestroyThread))
     {
       // Check pending task
-      if (!needRasterize)
+      if(!needRasterize)
       {
         Mutex::ScopedLock animationTasksLock(mAnimationTasksMutex);
-        if (mAnimationTasks.end() != std::find(mAnimationTasks.begin(), mAnimationTasks.end(), task))
+        if(mAnimationTasks.end() != std::find(mAnimationTasks.begin(), mAnimationTasks.end(), task))
         {
           needRasterize = true;
         }
       }
 
-      if (keepAnimation)
+      if(keepAnimation)
       {
         VectorAnimationTaskSet::const_iterator completedIter = mCompletedTasks.lower_bound(task);
-        if (completedIter == mCompletedTasks.cend() || task < *completedIter)
+        if(completedIter == mCompletedTasks.cend() || task < *completedIter)
         {
           mCompletedTasks.insert(completedIter, task);
           needRasterize = true;
@@ -354,18 +355,18 @@ void VectorAnimationThread::MoveTasksToCompleted(CompletedTasksContainer&& compl
     }
   }
 
-  if (needRasterize)
+  if(needRasterize)
   {
     mNeedToSleep = false;
   }
 
   DALI_TRACE_END_WITH_MESSAGE_GENERATOR(gTraceFilter, "VECTOR_ANIMATION_THREAD_COMPLETED_TASK",
                                         [&](std::ostringstream& oss)
-                                        {
-                                          oss << "[w:" << mWorkingTasks.size() << ",c:" << mCompletedTasks.size()
-                                              << ",d:" << mDiscardedTasksQueue.size() << ",r?" << needRasterize << ",s?"
-                                              << mNeedToSleep << "]";
-                                        });
+  {
+    oss << "[w:" << mWorkingTasks.size() << ",c:" << mCompletedTasks.size()
+        << ",d:" << mDiscardedTasksQueue.size() << ",r?" << needRasterize << ",s?"
+        << mNeedToSleep << "]";
+  });
 }
 
 /// VectorAnimationThread called
@@ -375,7 +376,7 @@ void VectorAnimationThread::Rasterize()
   ConditionalWait::ScopedLock lock(mConditionalWait);
 
   // conditional wait
-  while (DALI_LIKELY(!mDestroyThread) && mNeedToSleep && mDiscardedTasksQueue.empty())
+  while(DALI_LIKELY(!mDestroyThread) && mNeedToSleep && mDiscardedTasksQueue.empty())
   {
     // ConditionalWait notifyed when sleep done, or task complete.
     // If task complete, then we need to re-validate the tasks container, and then sleep again.
@@ -384,7 +385,7 @@ void VectorAnimationThread::Rasterize()
       Mutex::ScopedLock taskCompletedLock(mTaskCompletedMutex);
       completedTasksQueue.swap(mCompletedTasksQueue);
     }
-    if (completedTasksQueue.empty())
+    if(completedTasksQueue.empty())
     {
       mConditionalWait.Wait(lock);
       // Task completed may have been added to the queue while we were waiting.
@@ -400,7 +401,7 @@ void VectorAnimationThread::Rasterize()
   mNeedToSleep = true;
 
   // Process completed tasks
-  for (auto&& task : mCompletedTasks)
+  for(auto&& task : mCompletedTasks)
   {
     // Should use the frame rate of the animation file
     MoveTasksToAnimation(task, false);
@@ -409,27 +410,27 @@ void VectorAnimationThread::Rasterize()
 
   {
     Mutex::ScopedLock animationTasksLock(mAnimationTasksMutex);
-    if (DALI_LIKELY(!mDestroyThread))
+    if(DALI_LIKELY(!mDestroyThread))
     {
-      if (mAnimationTasks.size() > 0u)
+      if(mAnimationTasks.size() > 0u)
       {
         DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(gTraceFilter, "VECTOR_ANIMATION_THREAD_ANIMATION_TASK2",
                                                 [&](std::ostringstream& oss)
-                                                { oss << "[" << mAnimationTasks.size() << "]"; });
+        { oss << "[" << mAnimationTasks.size() << "]"; });
 
         // pop out the next task from the queue
-        for (auto it = mAnimationTasks.begin(); it != mAnimationTasks.end();)
+        for(auto it = mAnimationTasks.begin(); it != mAnimationTasks.end();)
         {
           VectorAnimationTaskPtr nextTask = *it;
 
-          auto currentTime = std::chrono::steady_clock::now();
+          auto currentTime   = std::chrono::steady_clock::now();
           auto nextFrameTime = nextTask->GetNextFrameTime();
 
-          if (nextFrameTime <= currentTime)
+          if(nextFrameTime <= currentTime)
           {
             // If the task is not in the working list
             VectorAnimationTaskSet::const_iterator workingIter = mWorkingTasks.lower_bound(nextTask);
-            if (workingIter == mWorkingTasks.cend() || nextTask < *workingIter)
+            if(workingIter == mWorkingTasks.cend() || nextTask < *workingIter)
             {
               it = mAnimationTasks.erase(it);
 
@@ -449,15 +450,15 @@ void VectorAnimationThread::Rasterize()
           }
         }
         DALI_TRACE_END_WITH_MESSAGE_GENERATOR(
-            gTraceFilter, "VECTOR_ANIMATION_THREAD_ANIMATION_TASK2",
-            [&](std::ostringstream& oss)
-            { oss << "[a:" << mAnimationTasks.size() << ",w:" << mWorkingTasks.size() << "]"; });
+          gTraceFilter, "VECTOR_ANIMATION_THREAD_ANIMATION_TASK2",
+          [&](std::ostringstream& oss)
+        { oss << "[a:" << mAnimationTasks.size() << ",w:" << mWorkingTasks.size() << "]"; });
       }
     }
   }
 
   // Move discarded tasks now.
-  if (!mDiscardedTasksQueue.empty())
+  if(!mDiscardedTasksQueue.empty())
   {
     Mutex::ScopedLock discardedTasksLock(mDiscardedTasksMutex);
 
@@ -467,10 +468,10 @@ void VectorAnimationThread::Rasterize()
     mDiscardedTasks.merge(mDiscardedTasksQueue);
     mDiscardedTasksQueue.clear();
 
-    if (needTrigger)
+    if(needTrigger)
     {
       Mutex::ScopedLock eventTriggerLock(mEventTriggerMutex);
-      if (DALI_LIKELY(!mDestroyThread && mEventTrigger))
+      if(DALI_LIKELY(!mDestroyThread && mEventTrigger))
       {
         mEventTrigger->Trigger();
       }
@@ -483,28 +484,28 @@ void VectorAnimationThread::OnEventCallbackTriggered()
 {
   DALI_TRACE_SCOPE(gTraceFilter, "VECTOR_ANIMATION_EVENT_CALLBACK_TRIGGERED");
 
-  while (true)
+  while(true)
   {
     auto callbackPair = GetNextEventCallback();
-    if (callbackPair.first == nullptr)
+    if(callbackPair.first == nullptr)
     {
       break;
     }
     CallbackBase::Execute(*callbackPair.first, callbackPair.second);
   }
 
-  bool dummyTaskRequired = false;
+  bool                      dummyTaskRequired = false;
   decltype(mDiscardedTasks) discardedTasks;
   {
     Mutex::ScopedLock lock(mDiscardedTasksMutex);
-    if (!mDiscardedTasks.empty())
+    if(!mDiscardedTasks.empty())
     {
       mDiscardedTasks.swap(discardedTasks);
     }
   }
 
   // Remove discarded tasks now, out of mutex.
-  if (!discardedTasks.empty())
+  if(!discardedTasks.empty())
   {
     dummyTaskRequired = true;
     discardedTasks.clear();
@@ -513,9 +514,9 @@ void VectorAnimationThread::OnEventCallbackTriggered()
   // Request update once if we need.
   {
     Mutex::ScopedLock lock(mEventTriggerMutex);
-    if (DALI_LIKELY(!mDestroyThread && Dali::Adaptor::IsAvailable()))
+    if(DALI_LIKELY(!mDestroyThread && Dali::Adaptor::IsAvailable()))
     {
-      if (dummyTaskRequired)
+      if(dummyTaskRequired)
       {
         // Request to remove pending tasks at AsyncTaskManager side.
         mAsyncTaskManager.AddTask(nullptr);
@@ -524,7 +525,7 @@ void VectorAnimationThread::OnEventCallbackTriggered()
         // Request ProcessEvents on idle to make ensure Processor executed.
         Dali::Adaptor::Get().RequestProcessEventsOnIdle();
       }
-      if (mForceRenderOnce)
+      if(mForceRenderOnce)
       {
         mForceRenderOnce = false;
         Dali::Adaptor::Get().UpdateOnce();
@@ -537,11 +538,11 @@ void VectorAnimationThread::OnEventCallbackTriggered()
 std::pair<CallbackBase*, uint32_t> VectorAnimationThread::GetNextEventCallback()
 {
   Mutex::ScopedLock lock(mEventTriggerMutex);
-  if (!mDestroyThread)
+  if(!mDestroyThread)
   {
-    if (!mTriggerEventCallbacks.empty())
+    if(!mTriggerEventCallbacks.empty())
     {
-      auto iter = mTriggerEventCallbacks.begin();
+      auto iter           = mTriggerEventCallbacks.begin();
       auto callbackIdPair = *iter;
       mTriggerEventCallbacks.erase(iter);
       return callbackIdPair;
@@ -551,13 +552,13 @@ std::pair<CallbackBase*, uint32_t> VectorAnimationThread::GetNextEventCallback()
 }
 
 VectorAnimationThread::SleepThread::SleepThread(CallbackBase* callback)
-  : mConditionalWait(),
-    mAwakeCallback(std::unique_ptr<CallbackBase>(callback)),
-    mSleepTimePoint(),
-    mLogFactory(Dali::Adaptor::Get().GetLogFactory()),
-    mTraceFactory(Dali::Adaptor::Get().GetTraceFactory()),
-    mNeedToSleep(false),
-    mDestroyThread(false)
+: mConditionalWait(),
+  mAwakeCallback(std::unique_ptr<CallbackBase>(callback)),
+  mSleepTimePoint(),
+  mLogFactory(Dali::Adaptor::Get().GetLogFactory()),
+  mTraceFactory(Dali::Adaptor::Get().GetTraceFactory()),
+  mNeedToSleep(false),
+  mDestroyThread(false)
 {
 }
 
@@ -585,12 +586,12 @@ void VectorAnimationThread::SleepThread::SleepUntil(std::chrono::time_point<std:
 
   Mutex::ScopedLock sleepLock(mSleepRequestMutex);
 
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
-    if (mSleepTimePoint != timeToSleepUntil) ///< Trigger only if new time point is changed.
+    if(mSleepTimePoint != timeToSleepUntil) ///< Trigger only if new time point is changed.
     {
       mSleepTimePoint = timeToSleepUntil;
-      mNeedToSleep = true;
+      mNeedToSleep    = true;
       mConditionalWait.Notify(lock);
     }
   }
@@ -600,7 +601,7 @@ void VectorAnimationThread::SleepThread::Finalize()
 {
   Mutex::ScopedLock awakeLock(mAwakeCallbackMutex);
   Mutex::ScopedLock sleepLock(mSleepRequestMutex);
-  if (DALI_LIKELY(!mDestroyThread))
+  if(DALI_LIKELY(!mDestroyThread))
   {
     DALI_LOG_DEBUG_INFO("Mark VectorAnimationThread::SleepThread destroyed\n");
     mDestroyThread = true;
@@ -614,7 +615,7 @@ void VectorAnimationThread::SleepThread::Run()
   mLogFactory.InstallLogFunction();
   mTraceFactory.InstallTraceFunction();
 
-  while (!mDestroyThread)
+  while(!mDestroyThread)
   {
     bool needToSleep = false;
 
@@ -626,34 +627,34 @@ void VectorAnimationThread::SleepThread::Run()
       {
         Mutex::ScopedLock sleepLock(mSleepRequestMutex);
 
-        if (DALI_LIKELY(!mDestroyThread))
+        if(DALI_LIKELY(!mDestroyThread))
         {
-          needToSleep = mNeedToSleep;
+          needToSleep    = mNeedToSleep;
           sleepTimePoint = mSleepTimePoint;
-          mNeedToSleep = false;
+          mNeedToSleep   = false;
         }
       }
 
-      if (DALI_LIKELY(!mDestroyThread))
+      if(DALI_LIKELY(!mDestroyThread))
       {
         DALI_TRACE_BEGIN_WITH_MESSAGE_GENERATOR(
-            gTraceFilter, "VECTOR_ANIMATION_SLEEP_THREAD",
-            [&](std::ostringstream& oss)
-            {
-              oss << "[";
-              if (needToSleep)
-              {
-                auto currentTime = std::chrono::steady_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(sleepTimePoint - currentTime);
-                oss << duration.count() << " ms]";
-              }
-              else
-              {
-                oss << "until notify]";
-              }
-            });
+          gTraceFilter, "VECTOR_ANIMATION_SLEEP_THREAD",
+          [&](std::ostringstream& oss)
+        {
+          oss << "[";
+          if(needToSleep)
+          {
+            auto currentTime = std::chrono::steady_clock::now();
+            auto duration    = std::chrono::duration_cast<std::chrono::milliseconds>(sleepTimePoint - currentTime);
+            oss << duration.count() << " ms]";
+          }
+          else
+          {
+            oss << "until notify]";
+          }
+        });
 
-        if (needToSleep)
+        if(needToSleep)
         {
           mConditionalWait.WaitUntil(lock, sleepTimePoint);
         }
@@ -666,10 +667,10 @@ void VectorAnimationThread::SleepThread::Run()
       }
     }
 
-    if (DALI_LIKELY(!mDestroyThread) && needToSleep)
+    if(DALI_LIKELY(!mDestroyThread) && needToSleep)
     {
       Mutex::ScopedLock awakeLock(mAwakeCallbackMutex);
-      if (DALI_LIKELY(mAwakeCallback))
+      if(DALI_LIKELY(mAwakeCallback))
       {
         // Awake out of ConditionalWait::ScopedLock to avoid deadlock.
         CallbackBase::Execute(*mAwakeCallback);

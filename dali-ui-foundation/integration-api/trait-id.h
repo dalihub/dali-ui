@@ -57,9 +57,9 @@ enum class ReservedTraitId : uint32_t
    * @{
    */
   ABSOLUTE_LAYOUT_PARAMS = 10,
-  STACK_LAYOUT_PARAMS = 11,
-  GRID_LAYOUT_PARAMS = 12,
-  FLEX_LAYOUT_PARAMS = 13,
+  STACK_LAYOUT_PARAMS    = 11,
+  GRID_LAYOUT_PARAMS     = 12,
+  FLEX_LAYOUT_PARAMS     = 13,
   /** @} */
 
   // Effects
@@ -89,7 +89,7 @@ struct TraitId
    * @param id A raw integer ID provided by the user (e.g., 0, 1, 2...).
    */
   TraitId(uint32_t id)
-    : value(id + OFFSET)
+  : value(id + OFFSET)
   {
   }
 
@@ -98,7 +98,7 @@ struct TraitId
    * @param id A specific ReservedTraitId defined by the framework.
    */
   TraitId(ReservedTraitId id)
-    : value(static_cast<uint32_t>(id))
+  : value(static_cast<uint32_t>(id))
   {
   }
 

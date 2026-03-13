@@ -126,9 +126,9 @@ protected:
    */
   virtual ~RenderEffectImpl() override;
 
-  RenderEffectImpl(const RenderEffectImpl&) = delete;
-  RenderEffectImpl(RenderEffectImpl&&) = delete;
-  RenderEffectImpl& operator=(RenderEffectImpl&&) = delete;      // no move()
+  RenderEffectImpl(const RenderEffectImpl&)            = delete;
+  RenderEffectImpl(RenderEffectImpl&&)                 = delete;
+  RenderEffectImpl& operator=(RenderEffectImpl&&)      = delete; // no move()
   RenderEffectImpl& operator=(const RenderEffectImpl&) = delete; // no copy()
 
   /**
@@ -210,7 +210,7 @@ private:
 
   std::vector<Constraint> mAnimationConstraints; // For corner animation on owner control.
 
-  Dali::WeakHandle<Dali::Ui::Control> mOwnerControl;                ///< Weakhandle of owner control.
+  Dali::WeakHandle<Dali::Ui::Control>        mOwnerControl;         ///< Weakhandle of owner control.
   WeakHandle<Dali::Integration::SceneHolder> mPlacementSceneHolder; ///< Weakhandle of scene
 
   Vector2 mTargetSize; // The final size of mOwnerControl

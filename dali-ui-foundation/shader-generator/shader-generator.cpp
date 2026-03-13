@@ -29,7 +29,7 @@ namespace fs = filesystem;
 namespace
 {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-string PROGRAM_NAME; ///< We set the program name on this global early on for use in Usage.
+string      PROGRAM_NAME; ///< We set the program name on this global early on for use in Usage.
 string_view VERSION = "1.0.0";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,9 +48,9 @@ constexpr string_view SHADER_EXTENSIONS[] =
 constexpr auto GetShaderExtensionMaxSize()
 {
   auto maxSize = 0u;
-  for (const auto& extension : SHADER_EXTENSIONS)
+  for(const auto& extension : SHADER_EXTENSIONS)
   {
-    if (extension.size() > maxSize)
+    if(extension.size() > maxSize)
     {
       maxSize = extension.size();
     }
@@ -67,7 +67,7 @@ void Usage()
   cout << "  IN_DIR:  Input Directory which has all the shader files." << endl;
   cout << "           Supported extensions:";
   string extensions;
-  for (const auto& extension : SHADER_EXTENSIONS)
+  for(const auto& extension : SHADER_EXTENSIONS)
   {
     extensions = extensions + " \"" + string(extension) + "\",";
   }
@@ -92,23 +92,23 @@ string GetShaderVariableName(const string& filename)
   string shaderVariableName("SHADER_" + filename);
   for_each(shaderVariableName.begin(), shaderVariableName.end(),
            [](char& character)
-           {
-             switch (character)
-             {
-               case '-':
-               case '.':
-               {
-                 character = '_';
-                 break;
-               }
+  {
+    switch(character)
+    {
+      case '-':
+      case '.':
+      {
+        character = '_';
+        break;
+      }
 
-               default:
-               {
-                 character = ::toupper(character);
-                 break;
-               }
-             }
-           });
+      default:
+      {
+        character = ::toupper(character);
+        break;
+      }
+    }
+  });
   return shaderVariableName;
 }
 
@@ -134,9 +134,10 @@ void GenerateHeaderFile(ifstream& shaderFile, const string& shaderVariableName, 
 {
   cout << "  Generating \"" << shaderVariableName << "\" in " << outFilePath.filename();
   ofstream outFile(outFilePath);
-  if (outFile.is_open())
+  if(outFile.is_open())
   {
-    outFile << "#pragma once" << endl << endl;
+    outFile << "#pragma once" << endl
+            << endl;
     outFile << "const std::string_view " << shaderVariableName << endl;
     outFile << "{" << endl;
 
@@ -145,10 +146,10 @@ void GenerateHeaderFile(ifstream& shaderFile, const string& shaderVariableName, 
     // Note : we should skip empty headline to guarantee that "#version ~~~" as top of shader code.
     outFile << "R\"(";
     string line;
-    bool firstLinePrinted = false;
-    while (getline(shaderFile, line))
+    bool   firstLinePrinted = false;
+    while(getline(shaderFile, line))
     {
-      if (!firstLinePrinted && line.find_first_not_of(" \t\r\n") == std::string::npos)
+      if(!firstLinePrinted && line.find_first_not_of(" \t\r\n") == std::string::npos)
       {
         // Empty string occured!
         continue;
@@ -174,8 +175,8 @@ public:
   /// Constructor
   /// @param[in]  outDir  The path to the output directory
   BuiltInFilesGenerator(const fs::path& outDir)
-    : mHeaderFilePath(outDir.string() + "/../" + string(HEADER_FILE_NAME)),
-      mSourceFilePath(outDir.string() + "/" + string(SOURCE_FILE_NAME))
+  : mHeaderFilePath(outDir.string() + "/../" + string(HEADER_FILE_NAME)),
+    mSourceFilePath(outDir.string() + "/" + string(SOURCE_FILE_NAME))
   {
   }
 
@@ -214,10 +215,10 @@ private:
     sort(strings.begin(), strings.end());
     cout << "  Generating \"" << filePath << "\"";
     ofstream outFile(filePath);
-    if (outFile)
+    if(outFile)
     {
       outFile << header;
-      for (auto& current : strings)
+      for(auto& current : strings)
       {
         outFile << before << current << after << endl;
       }
@@ -232,8 +233,8 @@ private:
   constexpr static string_view HEADER_FILE_NAME = "builtin-shader-extern-gen.h";
   constexpr static string_view SOURCE_FILE_NAME = "builtin-shader-gen.cpp";
 
-  const string mHeaderFilePath;    ///< Path to the header file to generate
-  const string mSourceFilePath;    ///< Path to the source file to generate
+  const string   mHeaderFilePath;  ///< Path to the header file to generate
+  const string   mSourceFilePath;  ///< Path to the source file to generate
   vector<string> mVariableNames;   ///< Holds all the variable names added through Add
   vector<string> mHeaderFileNames; ///< Holds all the header file names added through Add
 };
@@ -247,7 +248,7 @@ private:
 /// @return 0 if successful, 1 if failure
 int GenerateShaderSources(fs::path inDir, fs::path outDir, const bool generateBuiltInFiles)
 {
-  if (!fs::is_directory(inDir))
+  if(!fs::is_directory(inDir))
   {
     cerr << "ERROR: " << inDir << " is not a valid directory" << endl;
     Usage();
@@ -258,7 +259,7 @@ int GenerateShaderSources(fs::path inDir, fs::path outDir, const bool generateBu
   {
     fs::create_directories(outDir);
   }
-  catch (...)
+  catch(...)
   {
     cerr << "ERROR: Unable to create directory " << outDir << endl;
     return 1;
@@ -270,25 +271,25 @@ int GenerateShaderSources(fs::path inDir, fs::path outDir, const bool generateBu
   cout << "====================================================================" << endl;
 
   BuiltInFilesGenerator generator(outDir);
-  bool shaderGenerated = false;
+  bool                  shaderGenerated = false;
 
-  for (auto& file : fs::directory_iterator(inDir))
+  for(auto& file : fs::directory_iterator(inDir))
   {
-    if (file.is_regular_file())
+    if(file.is_regular_file())
     {
-      for (const auto& extension : SHADER_EXTENSIONS)
+      for(const auto& extension : SHADER_EXTENSIONS)
       {
-        if (file.path().extension() == extension)
+        if(file.path().extension() == extension)
         {
           const fs::path& path(file.path());
-          const string filename(path.filename().string());
-          string shaderVariableName(GetShaderVariableName(filename));
-          ifstream shaderFile(path);
-          if (shaderFile.is_open())
+          const string    filename(path.filename().string());
+          string          shaderVariableName(GetShaderVariableName(filename));
+          ifstream        shaderFile(path);
+          if(shaderFile.is_open())
           {
             fs::path outFilePath(GetShaderOutputFilePath(outDir, filename));
             // If output file already exists, then only overwrite if input file is newer than output file
-            if (!fs::exists(outFilePath) || (fs::last_write_time(path) > fs::last_write_time(outFilePath)))
+            if(!fs::exists(outFilePath) || (fs::last_write_time(path) > fs::last_write_time(outFilePath)))
             {
               GenerateHeaderFile(shaderFile, shaderVariableName, outFilePath);
               shaderGenerated = true;
@@ -301,7 +302,7 @@ int GenerateShaderSources(fs::path inDir, fs::path outDir, const bool generateBu
     }
   }
 
-  if (generateBuiltInFiles && shaderGenerated)
+  if(generateBuiltInFiles && shaderGenerated)
   {
     generator.Generate();
   }
@@ -323,39 +324,40 @@ int main(int argc, char* argv[])
   string inDir;
   string outDir;
 
-  for (auto i = 1; i < argc; ++i)
+  for(auto i = 1; i < argc; ++i)
   {
     string option(argv[i]);
-    if (option == "--skip" || option == "-s")
+    if(option == "--skip" || option == "-s")
     {
       generateBuiltInFiles = false;
     }
-    else if (option == "--help" || option == "-h")
+    else if(option == "--help" || option == "-h")
     {
-      cout << "DALi Shader Generator v" << VERSION << endl << endl;
+      cout << "DALi Shader Generator v" << VERSION << endl
+           << endl;
       Usage();
       return 0;
     }
-    else if (option == "--version" || option == "-v")
+    else if(option == "--version" || option == "-v")
     {
       cout << VERSION << endl;
       return 0;
     }
-    else if (*option.begin() == '-')
+    else if(*option.begin() == '-')
     {
       cerr << "ERROR: " << option << " is not a supported option" << endl;
       Usage();
       return 1;
     }
-    else if (inDir.empty())
+    else if(inDir.empty())
     {
       inDir = option;
     }
-    else if (outDir.empty())
+    else if(outDir.empty())
     {
       outDir = option;
     }
-    else if (inDir.size() && outDir.size())
+    else if(inDir.size() && outDir.size())
     {
       cerr << "ERROR: Too many options" << endl;
       Usage();
@@ -363,7 +365,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (inDir.empty() || outDir.empty())
+  if(inDir.empty() || outDir.empty())
   {
     cerr << "ERROR: Both IN_DIR & OUT_DIR not provided" << endl;
     Usage();

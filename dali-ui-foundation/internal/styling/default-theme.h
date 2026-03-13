@@ -18,12 +18,12 @@
 #ifndef DALI_UI_INTERNAL_DEFAULT_THEME_H
 #define DALI_UI_INTERNAL_DEFAULT_THEME_H
 
-#include <dali/public-api/object/property-map.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
-#include <dali-ui-foundation/public-api/controls/text-controls/text-field.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
+#include <dali-ui-foundation/public-api/controls/text-controls/text-field.h>
+#include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
+#include <dali/public-api/object/property-map.h>
 
 namespace Dali
 {
@@ -36,15 +36,15 @@ class DefaultTheme
 {
 public:
   static DefaultTheme& Get();
-  void ApplyDefaultStyle(Ui::TextLabel textLabel);
-  void ApplyDefaultStyle(Ui::TextField textField);
-  void ApplyDefaultStyle(Ui::TextEditor textEditor);
-  void Reset(); // Reload theme from StyleManager
+  void                 ApplyDefaultStyle(Ui::TextLabel textLabel);
+  void                 ApplyDefaultStyle(Ui::TextField textField);
+  void                 ApplyDefaultStyle(Ui::TextEditor textEditor);
+  void                 Reset(); // Reload theme from StyleManager
 
 private:
   DefaultTheme();
-  ~DefaultTheme() = default;
-  DefaultTheme(const DefaultTheme&) = delete;
+  ~DefaultTheme()                              = default;
+  DefaultTheme(const DefaultTheme&)            = delete;
   DefaultTheme& operator=(const DefaultTheme&) = delete;
 
 private:

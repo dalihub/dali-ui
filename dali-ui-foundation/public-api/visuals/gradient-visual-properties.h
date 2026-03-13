@@ -163,8 +163,8 @@ enum Type
 {
   OBJECT_BOUNDING_BOX, ///< Uses the normals for the start, end & center points, i.e. top-left is (-0.5, -0.5) and
                        ///< bottom-right is (0.5, 0.5). @SINCE_1_1.45
-  USER_SPACE ///< Uses the user coordinates for the start, end & center points, i.e. in a 200 by 200 control, top-left
-             ///< is (0, 0) and bottom-right is (200, 200). @SINCE_1_1.45
+  USER_SPACE           ///< Uses the user coordinates for the start, end & center points, i.e. in a 200 by 200 control, top-left
+                       ///< is (0, 0) and bottom-right is (200, 200). @SINCE_1_1.45
 };
 
 } // namespace Units

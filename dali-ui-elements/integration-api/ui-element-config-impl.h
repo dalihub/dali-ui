@@ -100,13 +100,13 @@ protected:
   void OnInitialized() override;
 
 private:
-  UiElementConfigImpl(const UiElementConfigImpl&) = delete;
-  UiElementConfigImpl(UiElementConfigImpl&&) = delete;
+  UiElementConfigImpl(const UiElementConfigImpl&)            = delete;
+  UiElementConfigImpl(UiElementConfigImpl&&)                 = delete;
   UiElementConfigImpl& operator=(const UiElementConfigImpl&) = delete;
-  UiElementConfigImpl& operator=(UiElementConfigImpl&&) = delete;
+  UiElementConfigImpl& operator=(UiElementConfigImpl&&)      = delete;
 
 private:
-  float mDefaultFontSize;
+  float   mDefaultFontSize;
   Vector4 mDefaultTextColor;
 };
 

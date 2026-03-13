@@ -43,23 +43,23 @@ const unsigned int MAX_TYPE_ATTRIBUTE_SIZE = 7u; ///< The maximum length of any 
 void ProcessTypeAttribute(const Attribute& attribute, UnderlinedCharacterRun& underlinedCharacterRun)
 {
   underlinedCharacterRun.properties.typeDefined = ProcessEnumerationAttribute<Text::Underline::Type>(
-      attribute, MAX_TYPE_ATTRIBUTE_SIZE, &StringToUnderlineType, underlinedCharacterRun.properties.type);
+    attribute, MAX_TYPE_ATTRIBUTE_SIZE, &StringToUnderlineType, underlinedCharacterRun.properties.type);
 }
 
 void ProcessDashGapAttribute(const Attribute& attribute, UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  underlinedCharacterRun.properties.dashGap = ProcessFloatAttribute(attribute);
+  underlinedCharacterRun.properties.dashGap        = ProcessFloatAttribute(attribute);
   underlinedCharacterRun.properties.dashGapDefined = true;
 }
 
 void ProcessDashWidthAttribute(const Attribute& attribute, UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  underlinedCharacterRun.properties.dashWidth = ProcessFloatAttribute(attribute);
+  underlinedCharacterRun.properties.dashWidth        = ProcessFloatAttribute(attribute);
   underlinedCharacterRun.properties.dashWidthDefined = true;
 }
 void ProcessHeightAttribute(const Attribute& attribute, UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  underlinedCharacterRun.properties.height = ProcessFloatAttribute(attribute);
+  underlinedCharacterRun.properties.height        = ProcessFloatAttribute(attribute);
   underlinedCharacterRun.properties.heightDefined = true;
 }
 
@@ -71,27 +71,27 @@ void ProcessColorAttribute(const Attribute& attribute, UnderlinedCharacterRun& u
 
 void ProcessUnderlineTag(const Tag& tag, UnderlinedCharacterRun& underlinedCharacterRun)
 {
-  for (Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
+  for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
     const Attribute& attribute(*it);
 
-    if (TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
+    if(TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessColorAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::HEIGHT, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::HEIGHT, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessHeightAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::TYPE, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::TYPE, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessTypeAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::DASH_GAP, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::DASH_GAP, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessDashGapAttribute(attribute, underlinedCharacterRun);
     }
-    else if (TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::DASH_WIDTH, attribute.nameBuffer, attribute.nameLength))
+    else if(TokenComparison(MARKUP::UNDERLINE_ATTRIBUTES::DASH_WIDTH, attribute.nameBuffer, attribute.nameLength))
     {
       ProcessDashWidthAttribute(attribute, underlinedCharacterRun);
     }
@@ -107,25 +107,25 @@ void OverrideNestedUnderlinedCharacterRuns(Vector<UnderlinedCharacterRun>& under
   // "outer tag before" and  "outer tag after" have height = 5.0f and color = 'blue'
   // "inner tag" has height = 5.0f and color = 'green'
 
-  if (underlinedCharacterRuns.Count() > 0u)
+  if(underlinedCharacterRuns.Count() > 0u)
   {
     Vector<UnderlinedCharacterRun>::ConstIterator preIt = underlinedCharacterRuns.Begin();
 
-    Vector<UnderlinedCharacterRun>::Iterator it = underlinedCharacterRuns.Begin() + 1;
+    Vector<UnderlinedCharacterRun>::Iterator      it    = underlinedCharacterRuns.Begin() + 1;
     Vector<UnderlinedCharacterRun>::ConstIterator endIt = underlinedCharacterRuns.End();
 
-    while (it != endIt)
+    while(it != endIt)
     {
-      const UnderlinedCharacterRun& run = *it;
-      const CharacterIndex& characterIndex = run.characterRun.characterIndex;
-      const Length& numberOfCharacters = run.characterRun.numberOfCharacters;
+      const UnderlinedCharacterRun& run                = *it;
+      const CharacterIndex&         characterIndex     = run.characterRun.characterIndex;
+      const Length&                 numberOfCharacters = run.characterRun.numberOfCharacters;
 
-      const UnderlinedCharacterRun& preRun = *preIt;
-      const CharacterIndex& preCharacterIndex = preRun.characterRun.characterIndex;
-      const Length& preNumberOfCharacters = preRun.characterRun.numberOfCharacters;
+      const UnderlinedCharacterRun& preRun                = *preIt;
+      const CharacterIndex&         preCharacterIndex     = preRun.characterRun.characterIndex;
+      const Length&                 preNumberOfCharacters = preRun.characterRun.numberOfCharacters;
 
-      if ((preCharacterIndex <= characterIndex) &&
-          ((characterIndex + numberOfCharacters) <= (preCharacterIndex + preNumberOfCharacters)))
+      if((preCharacterIndex <= characterIndex) &&
+         ((characterIndex + numberOfCharacters) <= (preCharacterIndex + preNumberOfCharacters)))
       {
         it->properties.CopyIfNotDefined(preIt->properties);
       }

@@ -34,7 +34,7 @@ namespace Text
 {
 void CreatePropertyMap(const TreeNode* const node, Property::Map& map)
 {
-  switch (node->GetType())
+  switch(node->GetType())
   {
     case TreeNode::IS_NULL:
     case TreeNode::OBJECT:
@@ -55,7 +55,7 @@ void CreatePropertyMap(const TreeNode* const node, Property::Map& map)
     }
   }
 
-  for (TreeNode::ConstIterator it = node->CBegin(), endIt = node->CEnd(); it != endIt; ++it)
+  for(TreeNode::ConstIterator it = node->CBegin(), endIt = node->CEnd(); it != endIt; ++it)
   {
     const TreeNode::KeyNodePair& pair = *it;
     CreatePropertyMap(&pair.second, map);
@@ -66,10 +66,10 @@ void ParsePropertyString(const std::string& property, Property::Map& map)
 {
   Ui::JsonParser parser = Ui::JsonParser::New();
 
-  if (parser.Parse(property))
+  if(parser.Parse(property))
   {
     const TreeNode* const node = parser.GetRoot();
-    if (node)
+    if(node)
     {
       CreatePropertyMap(node, map);
     }

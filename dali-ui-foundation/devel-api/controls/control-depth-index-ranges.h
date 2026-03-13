@@ -42,18 +42,18 @@ namespace DepthIndex
 enum Ranges
 {
   MINIMUM_DEPTH_INDEX = -5 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10 + 1,
-  BACKGROUND_EFFECT = -2 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
-  BACKGROUND = -1 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
-  CONTENT = 0,
-  DECORATION = 1 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
-  FOREGROUND_EFFECT = 2 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
+  BACKGROUND_EFFECT   = -2 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
+  BACKGROUND          = -1 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
+  CONTENT             = 0,
+  DECORATION          = 1 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
+  FOREGROUND_EFFECT   = 2 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
   MAXIMUM_DEPTH_INDEX = 5 * DevelLayer::SIBLING_ORDER_MULTIPLIER / 10,
 
   AUTO_INDEX =
-      MINIMUM_DEPTH_INDEX - 1, ///< Special value to indicate that the depth index should be automatically calculated.
-                               ///  If visual replaced by another visual, the depth index of the new visual will be set
-                               ///  to previous visual. Otherwise, depth index will be set as the maximum depth index +
-                               ///  1 what given control already has, or CONTENT if no visuals.
+    MINIMUM_DEPTH_INDEX - 1, ///< Special value to indicate that the depth index should be automatically calculated.
+                             ///  If visual replaced by another visual, the depth index of the new visual will be set
+                             ///  to previous visual. Otherwise, depth index will be set as the maximum depth index +
+                             ///  1 what given control already has, or CONTENT if no visuals.
 };
 
 static_assert((unsigned int)DevelLayer::ACTOR_DEPTH_MULTIPLIER > (unsigned int)DevelLayer::SIBLING_ORDER_MULTIPLIER);

@@ -29,9 +29,9 @@
 
 inline std::string GetFileContents(const std::string& fn)
 {
-  std::streampos bufferSize = 0;
+  std::streampos     bufferSize = 0;
   Dali::Vector<char> fileBuffer;
-  if (!Dali::FileLoader::ReadFile(fn, bufferSize, fileBuffer, Dali::FileLoader::FileType::BINARY))
+  if(!Dali::FileLoader::ReadFile(fn, bufferSize, fileBuffer, Dali::FileLoader::FileType::BINARY))
   {
     return std::string();
   }

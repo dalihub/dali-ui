@@ -39,18 +39,18 @@ struct StrikethroughStyleProperties
    * Default constructor to set the default values of bitfields
    */
   StrikethroughStyleProperties()
-    : color{Color::BLACK},
-      height{0u},
-      colorDefined{false},
-      heightDefined{false}
+  : color{Color::BLACK},
+    height{0u},
+    colorDefined{false},
+    heightDefined{false}
   {
   }
 
   StrikethroughStyleProperties(Vector4 color, float height, bool colorDefined, bool heightDefined)
-    : color{color},
-      height{height},
-      colorDefined{colorDefined},
-      heightDefined{heightDefined}
+  : color{color},
+    height{height},
+    colorDefined{colorDefined},
+    heightDefined{heightDefined}
 
   {
   }
@@ -81,15 +81,15 @@ struct StrikethroughStyleProperties
   {
     // Copy only the defined properties in other and not defined in this from other to this
 
-    if (!heightDefined && other.heightDefined)
+    if(!heightDefined && other.heightDefined)
     {
-      height = other.height;
+      height        = other.height;
       heightDefined = true;
     }
 
-    if (!colorDefined && other.colorDefined)
+    if(!colorDefined && other.colorDefined)
     {
-      color = other.color;
+      color        = other.color;
       colorDefined = true;
     }
 
@@ -101,15 +101,15 @@ struct StrikethroughStyleProperties
   {
     // Copy only the defined properties in other from other to this
 
-    if (other.heightDefined)
+    if(other.heightDefined)
     {
-      height = other.height;
+      height        = other.height;
       heightDefined = true;
     }
 
-    if (other.colorDefined)
+    if(other.colorDefined)
     {
-      color = other.color;
+      color        = other.color;
       colorDefined = true;
     }
 
@@ -118,8 +118,8 @@ struct StrikethroughStyleProperties
   }
 
   // Attributes
-  Vector4 color; ///< The color of strikethrough.
-  float height;  ///< The height of strikethrough.
+  Vector4 color;  ///< The color of strikethrough.
+  float   height; ///< The height of strikethrough.
 
   bool colorDefined : 1;  ///< Whether the color is defined.
   bool heightDefined : 1; ///< Whether the height is defined.

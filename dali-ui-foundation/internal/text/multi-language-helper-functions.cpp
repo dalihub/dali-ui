@@ -27,7 +27,7 @@ namespace Ui
 {
 namespace Text
 {
-void MergeFontDescriptions(const Vector<FontDescriptionRun>& fontDescriptions,
+void MergeFontDescriptions(const Vector<FontDescriptionRun>&       fontDescriptions,
                            const TextAbstraction::FontDescription& defaultFontDescription,
                            TextAbstraction::PointSize26Dot6 defaultPointSize, float fontSizeScale,
                            CharacterIndex characterIndex, TextAbstraction::FontDescription& fontDescription,
@@ -46,90 +46,90 @@ void MergeFontDescriptions(const Vector<FontDescriptionRun>& fontDescriptions,
 
   Length familyIndex = 0u;
   Length weightIndex = 0u;
-  Length widthIndex = 0u;
-  Length slantIndex = 0u;
-  Length sizeIndex = 0u;
+  Length widthIndex  = 0u;
+  Length slantIndex  = 0u;
+  Length sizeIndex   = 0u;
 
   bool familyOverriden = false;
   bool weightOverriden = false;
-  bool widthOverriden = false;
-  bool slantOverriden = false;
-  bool sizeOverriden = false;
+  bool widthOverriden  = false;
+  bool slantOverriden  = false;
+  bool sizeOverriden   = false;
 
   // Traverse all the font descriptions.
   const FontDescriptionRun* const fontDescriptionsBuffer = fontDescriptions.Begin();
-  for (Vector<FontDescriptionRun>::ConstIterator it = fontDescriptionsBuffer, endIt = fontDescriptions.End();
-       it != endIt; ++it, ++runIndex)
+  for(Vector<FontDescriptionRun>::ConstIterator it = fontDescriptionsBuffer, endIt = fontDescriptions.End();
+      it != endIt; ++it, ++runIndex)
   {
     // Check whether the character's font is modified by the current font description.
     const FontDescriptionRun& fontRun = *it;
-    if ((characterIndex >= fontRun.characterRun.characterIndex) &&
-        (characterIndex < fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters))
+    if((characterIndex >= fontRun.characterRun.characterIndex) &&
+       (characterIndex < fontRun.characterRun.characterIndex + fontRun.characterRun.numberOfCharacters))
     {
-      if (fontRun.familyDefined)
+      if(fontRun.familyDefined)
       {
-        isDefaultFont = false;
+        isDefaultFont   = false;
         familyOverriden = true;
-        familyIndex = runIndex;
+        familyIndex     = runIndex;
       }
-      if (fontRun.weightDefined)
+      if(fontRun.weightDefined)
       {
-        isDefaultFont = false;
+        isDefaultFont   = false;
         weightOverriden = true;
-        weightIndex = runIndex;
+        weightIndex     = runIndex;
       }
-      if (fontRun.widthDefined)
+      if(fontRun.widthDefined)
       {
-        isDefaultFont = false;
+        isDefaultFont  = false;
         widthOverriden = true;
-        widthIndex = runIndex;
+        widthIndex     = runIndex;
       }
-      if (fontRun.slantDefined)
+      if(fontRun.slantDefined)
       {
-        isDefaultFont = false;
+        isDefaultFont  = false;
         slantOverriden = true;
-        slantIndex = runIndex;
+        slantIndex     = runIndex;
       }
-      if (fontRun.sizeDefined)
+      if(fontRun.sizeDefined)
       {
         isDefaultFont = false;
         sizeOverriden = true;
-        sizeIndex = runIndex;
+        sizeIndex     = runIndex;
       }
     }
   }
 
   // Get the font's description if is not the default font.
-  if (!isDefaultFont)
+  if(!isDefaultFont)
   {
-    if (familyOverriden)
+    if(familyOverriden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + familyIndex);
-      fontDescription.family = std::string(fontRun.familyName, fontRun.familyLength);
+      fontDescription.family            = std::string(fontRun.familyName, fontRun.familyLength);
     }
 
-    if (weightOverriden)
+    if(weightOverriden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + weightIndex);
-      fontDescription.weight = fontRun.weight;
+      fontDescription.weight            = fontRun.weight;
     }
 
-    if (widthOverriden)
+    if(widthOverriden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + widthIndex);
-      fontDescription.width = fontRun.width;
+      fontDescription.width             = fontRun.width;
     }
 
-    if (slantOverriden)
+    if(slantOverriden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + slantIndex);
-      fontDescription.slant = fontRun.slant;
+      fontDescription.slant             = fontRun.slant;
     }
 
-    if (sizeOverriden)
+    if(sizeOverriden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + sizeIndex);
-      fontPointSize = static_cast<PointSize26Dot6>(fontRun.size * fontSizeScale);
+      fontPointSize                     = static_cast<PointSize26Dot6>(fontRun.size * fontSizeScale);
     }
   }
 }
@@ -139,19 +139,19 @@ Script GetScript(Length index, Vector<ScriptRun>::ConstIterator& scriptRunIt,
 {
   Script script = TextAbstraction::UNKNOWN;
 
-  while (scriptRunIt != scriptRunEndIt)
+  while(scriptRunIt != scriptRunEndIt)
   {
     const ScriptRun& scriptRun = *scriptRunIt;
 
-    if (index >= scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
+    if(index >= scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
     {
       ++scriptRunIt;
     }
-    else if (index >= scriptRun.characterRun.characterIndex)
+    else if(index >= scriptRun.characterRun.characterIndex)
     {
       script = scriptRun.script;
 
-      if (index + 1u == scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
+      if(index + 1u == scriptRun.characterRun.characterIndex + scriptRun.characterRun.numberOfCharacters)
       {
         // All the characters of the current run have been traversed. Get the next one for the next iteration.
         ++scriptRunIt;

@@ -37,7 +37,7 @@ struct ColorRun : public AbstractStyleCharacterRun
    * Default constructor to set the default values
    */
   ColorRun()
-    : AbstractStyleCharacterRun()
+  : AbstractStyleCharacterRun()
   {
   }
   Vector4 color; ///< The color of the characters.
@@ -48,7 +48,7 @@ struct ColorRun : public AbstractStyleCharacterRun
 } // namespace Ui
 
 // Allow ColorRun to be treated as a POD type
-template <>
+template<>
 struct TypeTraits<Dali::Ui::Text::ColorRun> : public Dali::BasicTypes<Dali::Ui::Text::ColorRun>
 {
   enum

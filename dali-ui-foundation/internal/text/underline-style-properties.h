@@ -43,32 +43,32 @@ struct UnderlineStyleProperties
    * Default constructor to set the default values of bitfields
    */
   UnderlineStyleProperties()
-    : type{Text::Underline::SOLID},
-      color{Color::BLACK},
-      height{0u},
-      dashGap{1u},
-      dashWidth{2u},
-      typeDefined{false},
-      colorDefined{false},
-      heightDefined{false},
-      dashGapDefined{false},
-      dashWidthDefined{false}
+  : type{Text::Underline::SOLID},
+    color{Color::BLACK},
+    height{0u},
+    dashGap{1u},
+    dashWidth{2u},
+    typeDefined{false},
+    colorDefined{false},
+    heightDefined{false},
+    dashGapDefined{false},
+    dashWidthDefined{false}
   {
   }
 
   UnderlineStyleProperties(Text::Underline::Type type, Vector4 color, float height, float dashGap, float dashWidth,
                            bool typeDefined, bool colorDefined, bool heightDefined, bool dashGapDefined,
                            bool dashWidthDefined)
-    : type{type},
-      color{color},
-      height{height},
-      dashGap{dashGap},
-      dashWidth{dashWidth},
-      typeDefined{typeDefined},
-      colorDefined{colorDefined},
-      heightDefined{heightDefined},
-      dashGapDefined{dashGapDefined},
-      dashWidthDefined{dashWidthDefined}
+  : type{type},
+    color{color},
+    height{height},
+    dashGap{dashGap},
+    dashWidth{dashWidth},
+    typeDefined{typeDefined},
+    colorDefined{colorDefined},
+    heightDefined{heightDefined},
+    dashGapDefined{dashGapDefined},
+    dashWidthDefined{dashWidthDefined}
   {
   }
 
@@ -102,33 +102,33 @@ struct UnderlineStyleProperties
   UnderlineStyleProperties& CopyIfNotDefined(const UnderlineStyleProperties& other)
   {
     // Copy only the defined properties in other and not defined in this from other to this
-    if (!typeDefined && other.typeDefined)
+    if(!typeDefined && other.typeDefined)
     {
-      type = other.type;
+      type        = other.type;
       typeDefined = true;
     }
 
-    if (!heightDefined && other.heightDefined)
+    if(!heightDefined && other.heightDefined)
     {
-      height = other.height;
+      height        = other.height;
       heightDefined = true;
     }
 
-    if (!colorDefined && other.colorDefined)
+    if(!colorDefined && other.colorDefined)
     {
-      color = other.color;
+      color        = other.color;
       colorDefined = true;
     }
 
-    if (!dashGapDefined && other.dashGapDefined)
+    if(!dashGapDefined && other.dashGapDefined)
     {
-      dashGap = other.dashGap;
+      dashGap        = other.dashGap;
       dashGapDefined = true;
     }
 
-    if (!dashWidthDefined && other.dashWidthDefined)
+    if(!dashWidthDefined && other.dashWidthDefined)
     {
-      dashWidth = other.dashWidth;
+      dashWidth        = other.dashWidth;
       dashWidthDefined = true;
     }
 
@@ -139,33 +139,33 @@ struct UnderlineStyleProperties
   UnderlineStyleProperties& OverrideByDefinedProperties(const UnderlineStyleProperties& other)
   {
     // Copy only the defined properties in other from other to this
-    if (other.typeDefined)
+    if(other.typeDefined)
     {
-      type = other.type;
+      type        = other.type;
       typeDefined = true;
     }
 
-    if (other.heightDefined)
+    if(other.heightDefined)
     {
-      height = other.height;
+      height        = other.height;
       heightDefined = true;
     }
 
-    if (other.colorDefined)
+    if(other.colorDefined)
     {
-      color = other.color;
+      color        = other.color;
       colorDefined = true;
     }
 
-    if (other.dashGapDefined)
+    if(other.dashGapDefined)
     {
-      dashGap = other.dashGap;
+      dashGap        = other.dashGap;
       dashGapDefined = true;
     }
 
-    if (other.dashWidthDefined)
+    if(other.dashWidthDefined)
     {
-      dashWidth = other.dashWidth;
+      dashWidth        = other.dashWidth;
       dashWidthDefined = true;
     }
 
@@ -174,11 +174,11 @@ struct UnderlineStyleProperties
   }
 
   // Attributes
-  Text::Underline::Type type; ///< The type of underline.
-  Vector4 color;              ///< The color of underline.
-  float height;               ///< The height of underline.
-  float dashGap;              ///< The dash-gap of underline.
-  float dashWidth;            ///< The height of underline.
+  Text::Underline::Type type;      ///< The type of underline.
+  Vector4               color;     ///< The color of underline.
+  float                 height;    ///< The height of underline.
+  float                 dashGap;   ///< The dash-gap of underline.
+  float                 dashWidth; ///< The height of underline.
 
   bool typeDefined : 1;      ///< Whether the type is defined.
   bool colorDefined : 1;     ///< Whether the color is defined.

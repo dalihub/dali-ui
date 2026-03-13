@@ -42,16 +42,16 @@ KeyInputFocusManager KeyInputFocusManager::Get()
 
   // Check whether the focus manager is already created
   SingletonService singletonService(SingletonService::Get());
-  if (singletonService)
+  if(singletonService)
   {
     Dali::BaseHandle handle = singletonService.GetSingleton(typeid(KeyInputFocusManager));
-    if (handle)
+    if(handle)
     {
       // If so, downcast the handle of singleton to focus manager
       manager = KeyInputFocusManager(dynamic_cast<Internal::KeyInputFocusManager*>(handle.GetObjectPtr()));
     }
 
-    if (!manager)
+    if(!manager)
     {
       // If not, create the focus manager and register it as a singleton
       manager = KeyInputFocusManager(new Internal::KeyInputFocusManager());
@@ -63,7 +63,7 @@ KeyInputFocusManager KeyInputFocusManager::Get()
 }
 
 KeyInputFocusManager::KeyInputFocusManager(Internal::KeyInputFocusManager* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 

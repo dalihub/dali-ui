@@ -52,10 +52,10 @@ uint32_t RenderEffectImpl::GetRenderPassTag()
 }
 
 RenderEffectImpl::RenderEffectImpl()
-  : mRenderer(),
-    mOwnerControl(),
-    mTargetSize(Vector2::ZERO),
-    mIsActivated(false)
+: mRenderer(),
+  mOwnerControl(),
+  mTargetSize(Vector2::ZERO),
+  mIsActivated(false)
 {
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Verbose, "[RenderEffect:%p] Constructor\n", this);
 }
@@ -75,7 +75,7 @@ RenderEffectImpl::~RenderEffectImpl()
 void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
 {
   Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-  if (ownerControl != control)
+  if(ownerControl != control)
   {
     // Clear previous owner control
     ClearOwnerControl();
@@ -85,15 +85,15 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] SetOwnerControl [ID:%d]\n", this,
                   ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
 
-    if (ownerControl)
+    if(ownerControl)
     {
       UpdateTargetSize();
 
-      if (mAnimationConstraints.empty())
+      if(mAnimationConstraints.empty())
       {
-        Renderer renderer = GetTargetRenderer();
+        Renderer        renderer    = GetTargetRenderer();
         Property::Index radiusIndex = renderer.GetPropertyIndex("uCornerRadius");
-        if (radiusIndex != Property::INVALID_INDEX)
+        if(radiusIndex != Property::INVALID_INDEX)
         {
           Constraint cornerRadiusConstraint = Constraint::New<Vector4>(renderer, radiusIndex, EqualToConstraint());
           cornerRadiusConstraint.AddSource(Source(ownerControl, DevelControl::Property::CORNER_RADIUS));
@@ -102,10 +102,10 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
         }
 
         Property::Index squarenessIndex = renderer.GetPropertyIndex("uCornerSquareness");
-        if (squarenessIndex != Property::INVALID_INDEX)
+        if(squarenessIndex != Property::INVALID_INDEX)
         {
           Constraint cornerSquarenessConstraint =
-              Constraint::New<Vector4>(renderer, squarenessIndex, EqualToConstraint());
+            Constraint::New<Vector4>(renderer, squarenessIndex, EqualToConstraint());
           cornerSquarenessConstraint.AddSource(Source(ownerControl, DevelControl::Property::CORNER_SQUARENESS));
           cornerSquarenessConstraint.Apply();
           mAnimationConstraints.push_back(cornerSquarenessConstraint);
@@ -124,7 +124,7 @@ void RenderEffectImpl::ClearOwnerControl()
 {
   Deactivate(); // Dev note : Deactivate before clearing the owner control.
 
-  for (auto constraint : mAnimationConstraints)
+  for(auto constraint : mAnimationConstraints)
   {
     constraint.Remove();
   }
@@ -133,7 +133,7 @@ void RenderEffectImpl::ClearOwnerControl()
   Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] ClearOwnerControl [ID:%d]\n", this,
                 ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
-  if (ownerControl)
+  if(ownerControl)
   {
     ownerControl.InheritedVisibilityChangedSignal().Disconnect(this,
                                                                &RenderEffectImpl::OnControlInheritedVisibilityChanged);
@@ -143,7 +143,7 @@ void RenderEffectImpl::ClearOwnerControl()
     mPlacementSceneHolder.Reset();
 
     // Make previous owner don't have render effect, after make we don't have owner control now.
-    if (previousOwnerControl.GetRenderEffect().GetObjectPtr() == this)
+    if(previousOwnerControl.GetRenderEffect().GetObjectPtr() == this)
     {
       previousOwnerControl.ClearRenderEffect();
     }
@@ -157,12 +157,12 @@ bool RenderEffectImpl::IsActivated() const
 
 void RenderEffectImpl::Initialize()
 {
-  if (!mRenderer)
+  if(!mRenderer)
   {
     mRenderer =
-        CreateRenderer(SHADER_RENDER_EFFECT_VERT, SHADER_RENDER_EFFECT_FRAG,
-                       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
-                       "RENDER_EFFECT", Uint16Pair(1, 1));
+      CreateRenderer(SHADER_RENDER_EFFECT_VERT, SHADER_RENDER_EFFECT_FRAG,
+                     static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
+                     "RENDER_EFFECT", Uint16Pair(1, 1));
     mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true); // Always use pre-multiply alpha
 
     mRenderer.RegisterProperty("uCornerRadius", Vector4::ZERO);
@@ -195,7 +195,7 @@ Vector2 RenderEffectImpl::GetTargetSize() const
 
 void RenderEffectImpl::Activate()
 {
-  if (!IsActivated() && IsActivateValid())
+  if(!IsActivated() && IsActivateValid())
   {
     Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Activated! [ID:%d]\n", this,
@@ -203,7 +203,7 @@ void RenderEffectImpl::Activate()
 
     // Keep sceneHolder as weak handle.
     Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(ownerControl);
-    if (DALI_UNLIKELY(!sceneHolder))
+    if(DALI_UNLIKELY(!sceneHolder))
     {
       DALI_LOG_ERROR("RenderEffect Could not be activated due to ownerControl's SceneHolder is not exist\n");
       return;
@@ -217,10 +217,10 @@ void RenderEffectImpl::Activate()
 
     // Set round corner. Default is to sync to owner control's BACKGROUND.
     Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_RADIUS);
-    if (cornerRadius != Vector4::ZERO)
+    if(cornerRadius != Vector4::ZERO)
     {
       int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY);
-      Vector4 cornerSquareness = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS);
+      Vector4 cornerSquareness   = ownerControl.GetProperty<Vector4>(Ui::DevelControl::Property::CORNER_SQUARENESS);
 
       Property::Map map;
       map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
@@ -235,7 +235,7 @@ void RenderEffectImpl::Activate()
 
 void RenderEffectImpl::Deactivate()
 {
-  if (IsActivated())
+  if(IsActivated())
   {
     mIsActivated = false;
 
@@ -253,13 +253,13 @@ void RenderEffectImpl::Refresh()
   Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Refresh! [ID:%d]\n", this,
                 ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
-  if (ownerControl)
+  if(ownerControl)
   {
     UpdateTargetSize();
 
-    if (IsActivateValid())
+    if(IsActivateValid())
     {
-      if (!IsActivated())
+      if(!IsActivated())
       {
         Activate();
       }
@@ -282,10 +282,10 @@ bool RenderEffectImpl::IsActivateValid() const
   bool ret = false;
 
   Vector2 size = GetTargetSize();
-  if (size.x > Math::MACHINE_EPSILON_1000 && size.y > Math::MACHINE_EPSILON_1000)
+  if(size.x > Math::MACHINE_EPSILON_1000 && size.y > Math::MACHINE_EPSILON_1000)
   {
     Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-    if (ownerControl && DevelActor::IsEffectivelyVisible(ownerControl))
+    if(ownerControl && DevelActor::IsEffectivelyVisible(ownerControl))
     {
       ret = true;
     }
@@ -305,22 +305,22 @@ bool RenderEffectImpl::IsActivateValid() const
 void RenderEffectImpl::UpdateTargetSize()
 {
   Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-  Vector2 size = Vector2::ZERO;
-  if (ownerControl)
+  Vector2           size         = Vector2::ZERO;
+  if(ownerControl)
   {
     size = ownerControl.GetProperty<Vector2>(Actor::Property::SIZE);
-    if (size == Vector2::ZERO)
+    if(size == Vector2::ZERO)
     {
       size = ownerControl.GetNaturalSize();
     }
 
-    if (size.x < 0.0f || size.y < 0.0f)
+    if(size.x < 0.0f || size.y < 0.0f)
     {
       size = Vector2::ZERO;
     }
 
     const uint32_t maxTextureSize = Dali::GetMaxTextureSize();
-    if (static_cast<uint32_t>(size.x) > maxTextureSize || static_cast<uint32_t>(size.y) > maxTextureSize)
+    if(static_cast<uint32_t>(size.x) > maxTextureSize || static_cast<uint32_t>(size.y) > maxTextureSize)
     {
       const uint32_t denominator = static_cast<uint32_t>(std::max(size.x, size.y));
 
@@ -341,7 +341,7 @@ void RenderEffectImpl::OnControlInheritedVisibilityChanged(Actor actor, bool vis
   Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise, "[RenderEffect:%p] visibility changed [ID:%d][visible:%d]\n",
                 this, ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, visible);
-  if (visible)
+  if(visible)
   {
     Activate();
   }

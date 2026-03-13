@@ -80,15 +80,15 @@ public:
   Vector4 GetDefaultTextColor() const;
 
 private:
-  UiElementConfigManager() = default;
-  ~UiElementConfigManager() = default;
-  UiElementConfigManager(const UiElementConfigManager&) = delete;
+  UiElementConfigManager()                                         = default;
+  ~UiElementConfigManager()                                        = default;
+  UiElementConfigManager(const UiElementConfigManager&)            = delete;
   UiElementConfigManager& operator=(const UiElementConfigManager&) = delete;
 
 private:
-  float mDefaultFontSize;
+  float   mDefaultFontSize;
   Vector4 mDefaultTextColor;
-  bool mInitialized{false};
+  bool    mInitialized{false};
 };
 
 } // namespace Integration

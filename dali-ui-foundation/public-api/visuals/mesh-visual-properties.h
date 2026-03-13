@@ -125,10 +125,10 @@ namespace ShadingMode
  */
 enum Value
 {
-  TEXTURELESS_WITH_DIFFUSE_LIGHTING, ///< *Simplest*. One color that is lit by ambient and diffuse lighting.
-                                     ///< @SINCE_1_1.45
-  TEXTURED_WITH_SPECULAR_LIGHTING, ///< Uses only the visual image textures provided with specular lighting in addition
-                                   ///< to ambient and diffuse lighting. @SINCE_1_1.45
+  TEXTURELESS_WITH_DIFFUSE_LIGHTING,       ///< *Simplest*. One color that is lit by ambient and diffuse lighting.
+                                           ///< @SINCE_1_1.45
+  TEXTURED_WITH_SPECULAR_LIGHTING,         ///< Uses only the visual image textures provided with specular lighting in addition
+                                           ///< to ambient and diffuse lighting. @SINCE_1_1.45
   TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING ///< Uses all textures provided including a gloss, normal and texture map
                                            ///< along with specular, ambient and diffuse lighting. @SINCE_1_1.45
 };

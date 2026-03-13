@@ -21,8 +21,8 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/flex-layout-params.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
@@ -43,20 +43,20 @@ public:
    * @brief Constructs with default flex properties (grow=0, shrink=1, basis=WrapContent, alignSelf=AUTO).
    */
   FlexLayoutParamsImpl()
-    : LayoutParamsImpl(),
-      mFlexGrow(0.0f),
-      mFlexShrink(1.0f),
-      mFlexBasis(LayoutDimension::WrapContent),
-      mAlignSelf(FlexAlign::AUTO)
+  : LayoutParamsImpl(),
+    mFlexGrow(0.0f),
+    mFlexShrink(1.0f),
+    mFlexBasis(LayoutDimension::WrapContent),
+    mAlignSelf(FlexAlign::AUTO)
   {
   }
 
   FlexLayoutParamsImpl(const FlexLayoutParamsImpl& other)
-    : LayoutParamsImpl(),
-      mFlexGrow(other.mFlexGrow),
-      mFlexShrink(other.mFlexShrink),
-      mFlexBasis(other.mFlexBasis),
-      mAlignSelf(other.mAlignSelf)
+  : LayoutParamsImpl(),
+    mFlexGrow(other.mFlexGrow),
+    mFlexShrink(other.mFlexShrink),
+    mFlexBasis(other.mFlexBasis),
+    mAlignSelf(other.mAlignSelf)
   {
   }
 
@@ -145,7 +145,7 @@ public:
   static FlexLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
-    if (trait)
+    if(trait)
     {
       return static_cast<FlexLayoutParamsImpl*>(&Ui::GetImpl(trait));
     }
@@ -160,12 +160,12 @@ public:
   static FlexLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
   {
     FlexLayoutParamsImpl* existing = Get(viewImpl);
-    if (existing)
+    if(existing)
     {
       return *existing;
     }
     IntrusivePtr<FlexLayoutParamsImpl> impl(new FlexLayoutParamsImpl());
-    Trait trait = Trait::DownCast(BaseHandle(impl.Get()));
+    Trait                              trait = Trait::DownCast(BaseHandle(impl.Get()));
     viewImpl.SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, trait);
     return *impl;
   }
@@ -174,9 +174,9 @@ protected:
   ~FlexLayoutParamsImpl() override = default;
 
 private:
-  float mFlexGrow;
-  float mFlexShrink;
-  float mFlexBasis;
+  float     mFlexGrow;
+  float     mFlexShrink;
+  float     mFlexBasis;
   FlexAlign mAlignSelf;
 };
 

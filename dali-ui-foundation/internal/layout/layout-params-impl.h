@@ -21,8 +21,8 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/trait-impl.h>
 
 namespace Dali
 {
@@ -52,7 +52,7 @@ public:
 
 protected:
   LayoutParamsImpl()
-    : Integration::TraitImpl()
+  : Integration::TraitImpl()
   {
   }
 

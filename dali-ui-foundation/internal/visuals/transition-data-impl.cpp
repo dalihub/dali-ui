@@ -42,19 +42,19 @@ const char* TOKEN_ALPHA_FUNCTION("alphaFunction");
 const char* TOKEN_ANIMATION_TYPE("animationType");
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ALPHA_FUNCTION_BUILTIN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, LINEAR)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, REVERSE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_OUT)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_SQUARE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_SQUARE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_SINE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_SINE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_OUT_SINE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_BACK)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, BOUNCE)
-DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, SIN)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, LINEAR)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, REVERSE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_OUT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_SQUARE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_SQUARE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_SINE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_SINE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_IN_OUT_SINE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, EASE_OUT_BACK)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, BOUNCE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(AlphaFunction, SIN)
 DALI_ENUM_TO_STRING_TABLE_END(ALPHA_FUNCTION_BUILTIN)
 } // namespace
 
@@ -69,14 +69,14 @@ namespace
 /// Parses a Property::Array and sets up the animator appropriately
 void ParseArray(TransitionData::Animator* animator, const Property::Array* array)
 {
-  bool valid = true;
+  bool    valid = true;
   Vector4 controlPoints;
-  if (array && array->Count() >= 4)
+  if(array && array->Count() >= 4)
   {
-    for (size_t vecIdx = 0; vecIdx < 4; ++vecIdx)
+    for(size_t vecIdx = 0; vecIdx < 4; ++vecIdx)
     {
       const Property::Value& v = array->GetElementAt(vecIdx);
-      if (v.GetType() == Property::FLOAT)
+      if(v.GetType() == Property::FLOAT)
       {
         controlPoints[vecIdx] = v.Get<float>();
       }
@@ -92,7 +92,7 @@ void ParseArray(TransitionData::Animator* animator, const Property::Array* array
     valid = false;
   }
 
-  if (valid)
+  if(valid)
   {
     Vector2 controlPoint1(controlPoints.x, controlPoints.y);
     Vector2 controlPoint2(controlPoints.z, controlPoints.w);
@@ -107,64 +107,64 @@ void ParseArray(TransitionData::Animator* animator, const Property::Array* array
 /// Parses a string value and sets up the animator appropriately
 void ParseString(TransitionData::Animator* animator, std::string alphaFunctionValue)
 {
-  if (alphaFunctionValue == "LINEAR")
+  if(alphaFunctionValue == "LINEAR")
   {
     animator->alphaFunction = AlphaFunction(AlphaFunction::LINEAR);
   }
-  else if (!alphaFunctionValue.compare(0, 5, "EASE_"))
+  else if(!alphaFunctionValue.compare(0, 5, "EASE_"))
   {
-    if (alphaFunctionValue == "EASE_IN")
+    if(alphaFunctionValue == "EASE_IN")
     {
       animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_IN);
     }
-    else if (alphaFunctionValue == "EASE_OUT")
+    else if(alphaFunctionValue == "EASE_OUT")
     {
       animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_OUT);
     }
-    else if (!alphaFunctionValue.compare(5, 3, "IN_"))
+    else if(!alphaFunctionValue.compare(5, 3, "IN_"))
     {
-      if (!alphaFunctionValue.compare(8, -1, "SQUARE"))
+      if(!alphaFunctionValue.compare(8, -1, "SQUARE"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_IN_SQUARE);
       }
-      else if (!alphaFunctionValue.compare(8, -1, "OUT"))
+      else if(!alphaFunctionValue.compare(8, -1, "OUT"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_IN_OUT);
       }
-      else if (!alphaFunctionValue.compare(8, -1, "OUT_SINE"))
+      else if(!alphaFunctionValue.compare(8, -1, "OUT_SINE"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE);
       }
-      else if (!alphaFunctionValue.compare(8, -1, "SINE"))
+      else if(!alphaFunctionValue.compare(8, -1, "SINE"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_IN_SINE);
       }
     }
-    else if (!alphaFunctionValue.compare(5, 4, "OUT_"))
+    else if(!alphaFunctionValue.compare(5, 4, "OUT_"))
     {
-      if (!alphaFunctionValue.compare(9, -1, "SQUARE"))
+      if(!alphaFunctionValue.compare(9, -1, "SQUARE"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_OUT_SQUARE);
       }
-      else if (!alphaFunctionValue.compare(9, -1, "SINE"))
+      else if(!alphaFunctionValue.compare(9, -1, "SINE"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_OUT_SINE);
       }
-      else if (!alphaFunctionValue.compare(9, -1, "BACK"))
+      else if(!alphaFunctionValue.compare(9, -1, "BACK"))
       {
         animator->alphaFunction = AlphaFunction(AlphaFunction::EASE_OUT_BACK);
       }
     }
   }
-  else if (alphaFunctionValue == "REVERSE")
+  else if(alphaFunctionValue == "REVERSE")
   {
     animator->alphaFunction = AlphaFunction(AlphaFunction::REVERSE);
   }
-  else if (alphaFunctionValue == "BOUNCE")
+  else if(alphaFunctionValue == "BOUNCE")
   {
     animator->alphaFunction = AlphaFunction(AlphaFunction::BOUNCE);
   }
-  else if (alphaFunctionValue == "SIN")
+  else if(alphaFunctionValue == "SIN")
   {
     animator->alphaFunction = AlphaFunction(AlphaFunction::SIN);
   }
@@ -201,13 +201,13 @@ void TransitionData::Initialize(const Property::Map& map)
 
 void TransitionData::Initialize(const Property::Array& array)
 {
-  for (unsigned int arrayIdx = 0, transitionArrayCount = array.Count(); arrayIdx < transitionArrayCount; ++arrayIdx)
+  for(unsigned int arrayIdx = 0, transitionArrayCount = array.Count(); arrayIdx < transitionArrayCount; ++arrayIdx)
   {
     const Property::Value& element = array.GetElementAt(arrayIdx);
     // Expect each child to be an object representing an animator:
 
     const Property::Map* map = element.GetMap();
-    if (map != NULL)
+    if(map != NULL)
     {
       TransitionData::Animator* animator = ConvertMap(*map);
       Add(animator);
@@ -218,28 +218,28 @@ void TransitionData::Initialize(const Property::Array& array)
 TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
 {
   TransitionData::Animator* animator = new TransitionData::Animator();
-  animator->alphaFunction = AlphaFunction::LINEAR;
-  animator->timePeriodDelay = 0.0f;
-  animator->timePeriodDuration = 1.0f;
+  animator->alphaFunction            = AlphaFunction::LINEAR;
+  animator->timePeriodDelay          = 0.0f;
+  animator->timePeriodDuration       = 1.0f;
 
-  for (unsigned int mapIdx = 0; mapIdx < map.Count(); ++mapIdx)
+  for(unsigned int mapIdx = 0; mapIdx < map.Count(); ++mapIdx)
   {
     const KeyValuePair pair(map.GetKeyValue(mapIdx));
-    if (pair.first.type == Property::Key::INDEX)
+    if(pair.first.type == Property::Key::INDEX)
     {
       continue; // We don't consider index keys.
     }
 
-    const std::string& key(pair.first.stringKey);
+    const std::string&     key(pair.first.stringKey);
     const Property::Value& value(pair.second);
 
-    if (key == TOKEN_TARGET)
+    if(key == TOKEN_TARGET)
     {
       animator->objectName = value.Get<std::string>();
     }
-    else if (key == TOKEN_PROPERTY)
+    else if(key == TOKEN_PROPERTY)
     {
-      if (value.GetType() == Property::STRING)
+      if(value.GetType() == Property::STRING)
       {
         animator->propertyKey = Property::Key(value.Get<std::string>());
       }
@@ -248,44 +248,44 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
         animator->propertyKey = Property::Key(value.Get<int>());
       }
     }
-    else if (key == TOKEN_INITIAL_VALUE)
+    else if(key == TOKEN_INITIAL_VALUE)
     {
       animator->initialValue = value;
     }
-    else if (key == TOKEN_TARGET_VALUE)
+    else if(key == TOKEN_TARGET_VALUE)
     {
       animator->targetValue = value;
     }
-    else if (key == TOKEN_ANIMATOR)
+    else if(key == TOKEN_ANIMATOR)
     {
-      animator->animate = true;
+      animator->animate         = true;
       Property::Map animatorMap = value.Get<Property::Map>();
-      for (size_t animatorMapIdx = 0; animatorMapIdx < animatorMap.Count(); ++animatorMapIdx)
+      for(size_t animatorMapIdx = 0; animatorMapIdx < animatorMap.Count(); ++animatorMapIdx)
       {
         const KeyValuePair pair(animatorMap.GetKeyValue(animatorMapIdx));
 
-        if (pair.first.type == Property::Key::INDEX)
+        if(pair.first.type == Property::Key::INDEX)
         {
           continue; // We don't consider index keys.
         }
 
-        const std::string& key(pair.first.stringKey);
+        const std::string&     key(pair.first.stringKey);
         const Property::Value& value(pair.second);
 
-        if (key == TOKEN_ALPHA_FUNCTION)
+        if(key == TOKEN_ALPHA_FUNCTION)
         {
-          if (value.GetType() == Property::ARRAY)
+          if(value.GetType() == Property::ARRAY)
           {
             ParseArray(animator, value.GetArray());
           }
-          else if (value.GetType() == Property::VECTOR4)
+          else if(value.GetType() == Property::VECTOR4)
           {
             Vector4 controlPoints = value.Get<Vector4>();
             Vector2 controlPoint1(controlPoints.x, controlPoints.y);
             Vector2 controlPoint2(controlPoints.z, controlPoints.w);
             animator->alphaFunction = AlphaFunction(controlPoint1, controlPoint2);
           }
-          else if (value.GetType() == Property::STRING)
+          else if(value.GetType() == Property::STRING)
           {
             ParseString(animator, value.Get<std::string>());
           }
@@ -294,41 +294,41 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
             animator->animate = false;
           }
         }
-        else if (key == TOKEN_TIME_PERIOD)
+        else if(key == TOKEN_TIME_PERIOD)
         {
           Property::Map timeMap = value.Get<Property::Map>();
-          for (size_t timeMapIdx = 0; timeMapIdx < timeMap.Count(); ++timeMapIdx)
+          for(size_t timeMapIdx = 0; timeMapIdx < timeMap.Count(); ++timeMapIdx)
           {
             const KeyValuePair pair(timeMap.GetKeyValue(timeMapIdx));
-            if (pair.first.type == Property::Key::INDEX)
+            if(pair.first.type == Property::Key::INDEX)
             {
               continue;
             }
             const std::string& key(pair.first.stringKey);
 
-            if (key == TOKEN_DELAY)
+            if(key == TOKEN_DELAY)
             {
               animator->timePeriodDelay = pair.second.Get<float>();
             }
-            else if (key == TOKEN_DURATION)
+            else if(key == TOKEN_DURATION)
             {
               animator->timePeriodDuration = pair.second.Get<float>();
             }
           }
         }
-        else if (key == TOKEN_ANIMATION_TYPE)
+        else if(key == TOKEN_ANIMATION_TYPE)
         {
-          if ((value.GetType() == Property::STRING))
+          if((value.GetType() == Property::STRING))
           {
-            if (value.Get<std::string>() == "TO")
+            if(value.Get<std::string>() == "TO")
             {
               animator->animationType = AnimationType::TO;
             }
-            else if (value.Get<std::string>() == "BETWEEN")
+            else if(value.Get<std::string>() == "BETWEEN")
             {
               animator->animationType = AnimationType::BETWEEN;
             }
-            else if (value.Get<std::string>() == "BY")
+            else if(value.Get<std::string>() == "BY")
             {
               animator->animationType = AnimationType::BY;
             }
@@ -364,10 +364,10 @@ Property::Map TransitionData::GetAnimatorAt(size_t index)
 {
   DALI_ASSERT_ALWAYS(index < Count() && "index exceeds bounds");
 
-  Animator* animator = mAnimators[index];
+  Animator*     animator = mAnimators[index];
   Property::Map map;
   map[TOKEN_TARGET] = animator->objectName;
-  if (animator->propertyKey.type == Property::Key::INDEX)
+  if(animator->propertyKey.type == Property::Key::INDEX)
   {
     map[TOKEN_PROPERTY] = animator->propertyKey.indexKey;
   }
@@ -375,32 +375,32 @@ Property::Map TransitionData::GetAnimatorAt(size_t index)
   {
     map[TOKEN_PROPERTY] = animator->propertyKey.stringKey;
   }
-  if (animator->initialValue.GetType() != Property::NONE)
+  if(animator->initialValue.GetType() != Property::NONE)
   {
     map[TOKEN_INITIAL_VALUE] = animator->initialValue;
   }
-  if (animator->targetValue.GetType() != Property::NONE)
+  if(animator->targetValue.GetType() != Property::NONE)
   {
     map[TOKEN_TARGET_VALUE] = animator->targetValue;
   }
-  if (animator->animate)
+  if(animator->animate)
   {
     Property::Map animateMap;
 
-    if (animator->alphaFunction.GetMode() == AlphaFunction::BUILTIN_FUNCTION)
+    if(animator->alphaFunction.GetMode() == AlphaFunction::BUILTIN_FUNCTION)
     {
       animateMap.Add(TOKEN_ALPHA_FUNCTION,
                      GetEnumerationName(animator->alphaFunction.GetBuiltinFunction(), ALPHA_FUNCTION_BUILTIN_TABLE,
                                         ALPHA_FUNCTION_BUILTIN_TABLE_COUNT));
     }
-    else if (animator->alphaFunction.GetMode() == AlphaFunction::BEZIER)
+    else if(animator->alphaFunction.GetMode() == AlphaFunction::BEZIER)
     {
       Vector4 controlPoints = animator->alphaFunction.GetBezierControlPoints();
       animateMap.Add(TOKEN_ALPHA_FUNCTION, controlPoints);
     }
     animateMap.Add(
-        TOKEN_TIME_PERIOD,
-        Property::Map().Add(TOKEN_DELAY, animator->timePeriodDelay).Add(TOKEN_DURATION, animator->timePeriodDuration));
+      TOKEN_TIME_PERIOD,
+      Property::Map().Add(TOKEN_DELAY, animator->timePeriodDelay).Add(TOKEN_DURATION, animator->timePeriodDuration));
 
     map[TOKEN_ANIMATOR] = animateMap;
   }

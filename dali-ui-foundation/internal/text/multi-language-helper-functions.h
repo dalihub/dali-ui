@@ -43,7 +43,7 @@ namespace Text
  * @param[out] fontPointSize The font's point size for the character.
  * @param[out] isDefaultFont Whether the font is a default one.
  */
-void MergeFontDescriptions(const Vector<FontDescriptionRun>& fontDescriptions,
+void MergeFontDescriptions(const Vector<FontDescriptionRun>&       fontDescriptions,
                            const TextAbstraction::FontDescription& defaultFontDescription,
                            TextAbstraction::PointSize26Dot6 defaultPointSize, float fontSizeScale,
                            CharacterIndex characterIndex, TextAbstraction::FontDescription& fontDescription,

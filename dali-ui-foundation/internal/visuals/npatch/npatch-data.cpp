@@ -32,24 +32,24 @@ namespace Ui
 namespace Internal
 {
 NPatchData::NPatchData()
-  : mId(INVALID_NPATCH_DATA_ID),
-    mUrl(),
-    mTextureSet(),
-    mHash(0),
-    mCroppedWidth(0),
-    mCroppedHeight(0),
-    mBorder(0, 0, 0, 0),
-    mLoadingState(LoadingState::NOT_STARTED),
-    mRenderingMap{nullptr},
-    mPreMultiplyOnLoad(false),
-    mObserverNotifying(false)
+: mId(INVALID_NPATCH_DATA_ID),
+  mUrl(),
+  mTextureSet(),
+  mHash(0),
+  mCroppedWidth(0),
+  mCroppedHeight(0),
+  mBorder(0, 0, 0, 0),
+  mLoadingState(LoadingState::NOT_STARTED),
+  mRenderingMap{nullptr},
+  mPreMultiplyOnLoad(false),
+  mObserverNotifying(false)
 {
 }
 
 NPatchData::~NPatchData()
 {
   // If there is an opacity map, it has to be destroyed using addon call
-  if (mRenderingMap)
+  if(mRenderingMap)
   {
     RenderingAddOn::Get().DestroyNPatch(mRenderingMap);
   }
@@ -69,9 +69,9 @@ NPatchData::NPatchDataId NPatchData::GetId() const
 
 void NPatchData::AddObserver(TextureUploadObserver* textureObserver)
 {
-  if (textureObserver)
+  if(textureObserver)
   {
-    if (mObserverNotifying)
+    if(mObserverNotifying)
     {
       // Do not add it into observer list during observer notifying.
       mQueuedObservers.PushBack(textureObserver);
@@ -86,11 +86,11 @@ void NPatchData::AddObserver(TextureUploadObserver* textureObserver)
 
 void NPatchData::RemoveObserver(TextureUploadObserver* textureObserver)
 {
-  if (textureObserver)
+  if(textureObserver)
   {
-    for (uint32_t index = 0; index < mObserverList.Count(); ++index)
+    for(uint32_t index = 0; index < mObserverList.Count(); ++index)
     {
-      if (textureObserver == mObserverList[index])
+      if(textureObserver == mObserverList[index])
       {
         textureObserver->DestructionSignal().Disconnect(this, &NPatchData::ObserverDestroyed);
         mObserverList.Erase(mObserverList.begin() + index);
@@ -212,7 +212,7 @@ void* NPatchData::GetRenderingMap() const
 
 void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMultiplied)
 {
-  if (mBorder == Rect<int>(0, 0, 0, 0) && NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
+  if(mBorder == Rect<int>(0, 0, 0, 0) && NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
   {
     // Crop the image
     pixelBuffer.Crop(1, 1, pixelBuffer.GetWidth() - 2, pixelBuffer.GetHeight() - 2);
@@ -220,12 +220,12 @@ void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMu
   else
   {
     mStretchPixelsX.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
-        pixelBuffer.GetWidth(), static_cast<uint32_t>(mBorder.left), static_cast<uint32_t>(mBorder.right)));
+      pixelBuffer.GetWidth(), static_cast<uint32_t>(mBorder.left), static_cast<uint32_t>(mBorder.right)));
     mStretchPixelsY.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
-        pixelBuffer.GetHeight(), static_cast<uint32_t>(mBorder.top), static_cast<uint32_t>(mBorder.bottom)));
+      pixelBuffer.GetHeight(), static_cast<uint32_t>(mBorder.top), static_cast<uint32_t>(mBorder.bottom)));
   }
 
-  mCroppedWidth = pixelBuffer.GetWidth();
+  mCroppedWidth  = pixelBuffer.GetWidth();
   mCroppedHeight = pixelBuffer.GetHeight();
 
   // Create opacity map
@@ -234,7 +234,7 @@ void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMu
   PixelData pixels = Devel::PixelBuffer::Convert(pixelBuffer); // takes ownership of buffer
 
   Texture texture =
-      Texture::New(TextureType::TEXTURE_2D, pixels.GetPixelFormat(), pixels.GetWidth(), pixels.GetHeight());
+    Texture::New(TextureType::TEXTURE_2D, pixels.GetPixelFormat(), pixels.GetWidth(), pixels.GetHeight());
 #if defined(ENABLE_GPU_MEMORY_PROFILE)
   texture.Upload(pixels, mUrl.GetUrl());
 #else
@@ -252,20 +252,20 @@ void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMu
 void NPatchData::NotifyObserver(TextureUploadObserver* observer, const bool& loadSuccess)
 {
   observer->LoadComplete(
-      loadSuccess, TextureUploadObserver::TextureInformation(
-                       TextureUploadObserver::ReturnType::TEXTURE,
-                       static_cast<TextureManager::TextureId>(
-                           mId), ///< Note : until end of NPatchLoader::Load, npatch-visual don't know the id of data.
-                       mTextureSet, mUrl.GetUrl(), mPreMultiplyOnLoad));
+    loadSuccess, TextureUploadObserver::TextureInformation(
+                   TextureUploadObserver::ReturnType::TEXTURE,
+                   static_cast<TextureManager::TextureId>(
+                     mId), ///< Note : until end of NPatchLoader::Load, npatch-visual don't know the id of data.
+                   mTextureSet, mUrl.GetUrl(), mPreMultiplyOnLoad));
 }
 
 void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInformation)
 {
   NPatchDataPtr self = this; // Keep reference until this API finished
 
-  if (loadSuccess)
+  if(loadSuccess)
   {
-    if (mLoadingState != LoadingState::LOAD_COMPLETE)
+    if(mLoadingState != LoadingState::LOAD_COMPLETE)
     {
       // If mLoadingState is LOAD_FAILED, just re-set (It can be happened when sync loading is failed, but async loading
       // is succeeded).
@@ -274,13 +274,13 @@ void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInform
   }
   else
   {
-    if (mLoadingState == LoadingState::LOADING)
+    if(mLoadingState == LoadingState::LOADING)
     {
       mLoadingState = LoadingState::LOAD_FAILED;
     }
     // If mLoadingState is already LOAD_COMPLETE, we can use uploaded texture (It can be happened when sync loading is
     // succeeded, but async loading is failed).
-    else if (mLoadingState == LoadingState::LOAD_COMPLETE)
+    else if(mLoadingState == LoadingState::LOAD_COMPLETE)
     {
       loadSuccess = true;
     }
@@ -291,7 +291,7 @@ void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInform
   // Reverse observer list that we can pop_back the observer.
   std::reverse(mObserverList.Begin(), mObserverList.End());
 
-  while (mObserverList.Count() > 0u)
+  while(mObserverList.Count() > 0u)
   {
     TextureUploadObserver* observer = *(mObserverList.End() - 1u);
     mObserverList.Erase(mObserverList.End() - 1u);
@@ -312,9 +312,9 @@ void NPatchData::LoadComplete(bool loadSuccess, TextureInformation textureInform
 
 void NPatchData::ObserverDestroyed(TextureUploadObserver* observer)
 {
-  for (auto iter = mObserverList.Begin(); iter != mObserverList.End();)
+  for(auto iter = mObserverList.Begin(); iter != mObserverList.End();)
   {
-    if (observer == (*iter))
+    if(observer == (*iter))
     {
       iter = mObserverList.Erase(iter);
     }
@@ -323,11 +323,11 @@ void NPatchData::ObserverDestroyed(TextureUploadObserver* observer)
       ++iter;
     }
   }
-  if (mObserverNotifying)
+  if(mObserverNotifying)
   {
-    for (auto iter = mQueuedObservers.Begin(); iter != mQueuedObservers.End();)
+    for(auto iter = mQueuedObservers.Begin(); iter != mQueuedObservers.End();)
     {
-      if (observer == (*iter))
+      if(observer == (*iter))
       {
         iter = mQueuedObservers.Erase(iter);
       }

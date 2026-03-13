@@ -26,12 +26,12 @@ namespace Dali
 namespace Ui
 {
 RenderEffect::RenderEffect(const RenderEffect& handle)
-  : BaseHandle(handle)
+: BaseHandle(handle)
 {
 }
 
 RenderEffect::RenderEffect(Internal::RenderEffectImpl* renderEffectImpl)
-  : BaseHandle(renderEffectImpl)
+: BaseHandle(renderEffectImpl)
 {
 }
 

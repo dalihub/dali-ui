@@ -40,12 +40,12 @@ struct StrikethroughGlyphRun
    * Default constructor to set the default values of bitfields
    */
   StrikethroughGlyphRun()
-    : glyphRun{},
-      properties{}
+  : glyphRun{},
+    properties{}
   {
   }
 
-  GlyphRun glyphRun;                       ///< The initial glyph index and the number of glyphs in the run.
+  GlyphRun                     glyphRun;   ///< The initial glyph index and the number of glyphs in the run.
   StrikethroughStyleProperties properties; /// The properties of strikethrough style
 };
 

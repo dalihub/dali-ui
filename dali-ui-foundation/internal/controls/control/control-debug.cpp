@@ -20,8 +20,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/object/property-index-ranges.h>
 #include <dali/public-api/object/property-array.h>
+#include <dali/public-api/object/property-index-ranges.h>
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -38,7 +38,7 @@ class JsonWriter
 {
 public:
   JsonWriter(Property::Value& value)
-    : mValue(value)
+  : mValue(value)
   {
   }
 
@@ -51,7 +51,7 @@ public:
 
   void ToStream(std::ostream& stream)
   {
-    switch (mValue.GetType())
+    switch(mValue.GetType())
     {
       case Dali::Property::BOOLEAN:
       {
@@ -91,9 +91,9 @@ public:
       {
         auto matrix = mValue.Get<Matrix3>();
         stream << "[";
-        for (int i = 0; i < 9; ++i)
+        for(int i = 0; i < 9; ++i)
         {
-          if (i > 0)
+          if(i > 0)
           {
             stream << ",";
           }
@@ -106,9 +106,9 @@ public:
       {
         auto matrix = mValue.Get<Matrix>();
         stream << "[";
-        for (int i = 0; i < 16; ++i)
+        for(int i = 0; i < 16; ++i)
         {
-          if (i > 0)
+          if(i > 0)
           {
             stream << ",";
           }
@@ -139,11 +139,11 @@ public:
       {
         auto array = mValue.GetArray();
         stream << "[ ";
-        if (array)
+        if(array)
         {
-          for (Property::Array::SizeType i = 0; i < array->Size(); ++i)
+          for(Property::Array::SizeType i = 0; i < array->Size(); ++i)
           {
-            if (i > 0)
+            if(i > 0)
             {
               stream << ", ";
             }
@@ -158,15 +158,15 @@ public:
       {
         auto map = mValue.GetMap();
         stream << "{ ";
-        if (map)
+        if(map)
         {
-          for (Property::Map::SizeType i = 0; i < map->Count(); ++i)
+          for(Property::Map::SizeType i = 0; i < map->Count(); ++i)
           {
-            if (i > 0)
+            if(i > 0)
             {
               stream << ", ";
             }
-            auto key = map->GetKeyAt(i);
+            auto key      = map->GetKeyAt(i);
             auto outValue = JsonWriter(map->GetValue(i));
             stream << '\"' << key << "\":";
             stream << outValue.ToString();
@@ -217,9 +217,9 @@ std::ostream& operator<<(std::ostream& o, const RegisteredVisualContainer& visua
   o << "[\n";
 
   bool first = true;
-  for (auto&& elem : visualContainer)
+  for(auto&& elem : visualContainer)
   {
-    if (!first)
+    if(!first)
     {
       o << ",";
     }
@@ -233,7 +233,7 @@ std::ostream& operator<<(std::ostream& o, const RegisteredVisualContainer& visua
 
 std::ostream& DumpProperty(std::ostream& o, Property::Index index, Handle handle)
 {
-  auto propertyValue = handle.GetProperty(index);
+  auto propertyValue     = handle.GetProperty(index);
   auto jsonPropertyValue = JsonWriter(propertyValue);
 
   o << "{\n";
@@ -248,11 +248,11 @@ std::ostream& DumpPropertiesWithPredicate(std::ostream& o, Dali::Handle handle, 
                                           std::function<bool(int)> predicate)
 {
   bool first = true;
-  for (auto index : indices)
+  for(auto index : indices)
   {
-    if (predicate(index))
+    if(predicate(index))
     {
-      if (!first)
+      if(!first)
       {
         o << ",";
       }
@@ -276,11 +276,13 @@ std::ostream& DumpProperties(std::ostream& o, Handle handle)
 
   o << "\"childProperties\":[\n";
   DumpPropertiesWithPredicate(o, handle, indices, childPropertiesP);
-  o << std::endl << "]," << std::endl;
+  o << std::endl
+    << "]," << std::endl;
 
   o << "\"Properties\":[\n";
   DumpPropertiesWithPredicate(o, handle, indices, propertiesP);
-  o << std::endl << "]" << std::endl;
+  o << std::endl
+    << "]" << std::endl;
 
   return o;
 }
@@ -292,15 +294,17 @@ std::string DumpControl(const Internal::Control& control)
   std::ostringstream oss;
   oss << "{\n  ";
   const std::string& name = control.Self().GetProperty<std::string>(Dali::Actor::Property::NAME);
-  if (!name.empty())
+  if(!name.empty())
   {
     oss << "\"name\":\"" << name << "\",\n";
   }
   oss << "\"id\":\"" << control.Self().GetProperty<int>(Actor::Property::ID) << "\",\n";
-  if (DALI_LIKELY(controlData.mVisualData))
+  if(DALI_LIKELY(controlData.mVisualData))
   {
-    oss << "\"registeredVisuals\":\n" << controlData.mVisualData->mVisuals << ",\n";
-    oss << "\"removeVisuals\":\n" << controlData.mVisualData->mRemoveVisuals << ",\n";
+    oss << "\"registeredVisuals\":\n"
+        << controlData.mVisualData->mVisuals << ",\n";
+    oss << "\"removeVisuals\":\n"
+        << controlData.mVisualData->mRemoveVisuals << ",\n";
   }
   oss << "\"rendererCount\":" << control.Self().GetRendererCount() << ",\n";
   oss << "\"properties\":\n{\n";
@@ -314,7 +318,7 @@ std::string DumpActor(Actor actor)
   std::ostringstream oss;
   oss << "{\n  ";
   const std::string& name = actor.GetProperty<std::string>(Dali::Actor::Property::NAME);
-  if (!name.empty())
+  if(!name.empty())
   {
     oss << "\"name\":\"" << name << "\",\n";
   }
@@ -330,7 +334,7 @@ void DumpControlHierarchy(std::ostream& o, Actor actor)
 {
   auto control = Ui::Control::DownCast(actor);
   o << "{\n";
-  if (control)
+  if(control)
   {
     o << "\"Control\":" << DumpControl(Ui::Internal::GetImplementation(control));
   }
@@ -340,9 +344,9 @@ void DumpControlHierarchy(std::ostream& o, Actor actor)
   }
   o << ",\n\"children\":[\n";
   bool first = true;
-  for (auto count = actor.GetChildCount(), i = 0u; i < count; ++i)
+  for(auto count = actor.GetChildCount(), i = 0u; i < count; ++i)
   {
-    if (!first)
+    if(!first)
     {
       o << ",";
     }

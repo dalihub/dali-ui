@@ -31,7 +31,7 @@ LayoutParams::LayoutParams()
 }
 
 LayoutParams::LayoutParams(const LayoutParams& handle)
-  : Trait(handle)
+: Trait(handle)
 {
 }
 
@@ -40,7 +40,7 @@ LayoutParams::~LayoutParams()
 }
 
 LayoutParams::LayoutParams(Internal::LayoutParamsImpl* implementation)
-  : Trait(implementation)
+: Trait(implementation)
 {
 }
 

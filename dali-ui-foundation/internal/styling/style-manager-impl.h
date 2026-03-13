@@ -254,10 +254,10 @@ private:
   // Map to store builders keyed by JSON file name
   typedef std::map<std::string, Ui::Builder> BuilderMap;
 
-  Ui::Builder mThemeBuilder;  ///< Builder for all default theme properties
+  Ui::Builder  mThemeBuilder; ///< Builder for all default theme properties
   StyleMonitor mStyleMonitor; ///< Style monitor handle
 
-  int mDefaultFontSize; ///< Logical size, not a point-size
+  int         mDefaultFontSize; ///< Logical size, not a point-size
   std::string mDefaultFontFamily;
   std::string mDefaultThemeFilePath; ///< The full path of the default theme file
   std::string mThemeFile;            ///< The full path of the current theme file
@@ -272,18 +272,18 @@ private:
   std::vector<std::string> mBrokenImageUrls; ///< Broken Image Urls received from user
 
   std::vector<Dali::WeakHandle<Ui::Control>>
-      mInitializedControlsBeforeAdaptorInit{}; ///< Controls to initialized before the adaptor is initialized
+    mInitializedControlsBeforeAdaptorInit{}; ///< Controls to initialized before the adaptor is initialized
   std::vector<Dali::WeakHandle<Ui::Control>>
-      mThemeAppliedControlsBeforeAdaptorInit{}; ///< Controls to theme applied before the adaptor is initialized
+    mThemeAppliedControlsBeforeAdaptorInit{}; ///< Controls to theme applied before the adaptor is initialized
 
   bool mAdaptorInitialized : 1; ///< Whether the adaptor has been initialized
 
   // Signals
   Ui::StyleManager::StyleChangedSignalType
-      mControlStyleChangeSignal; ///< Emitted when the style( theme/font ) changes for the controls to style themselves
-  Ui::StyleManager::StyleChangedSignalType mStyleChangedSignal; ///< Emitted after the controls have been styled
+                                           mControlStyleChangeSignal; ///< Emitted when the style( theme/font ) changes for the controls to style themselves
+  Ui::StyleManager::StyleChangedSignalType mStyleChangedSignal;       ///< Emitted after the controls have been styled
   Ui::DevelStyleManager::BrokenImageChangedSignalType
-      mBrokenImageChangedSignal; ///< Emitted after brokenImageChangedSignal
+    mBrokenImageChangedSignal; ///< Emitted after brokenImageChangedSignal
 };
 
 } // namespace Internal

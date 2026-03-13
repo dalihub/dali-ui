@@ -72,8 +72,8 @@ const std::string AssetManager::GetDaliStyleImagePath()
    *       named DALI_STYLE_IMAGE_DIR.
    */
   return (nullptr == DALI_STYLE_IMAGE_DIR)
-             ? EnvironmentVariable::GetEnvironmentVariable(TOKEN_STRING(DALI_STYLE_IMAGE_DIR))
-             : DALI_STYLE_IMAGE_DIR;
+           ? EnvironmentVariable::GetEnvironmentVariable(TOKEN_STRING(DALI_STYLE_IMAGE_DIR))
+           : DALI_STYLE_IMAGE_DIR;
 }
 
 const std::string AssetManager::GetDaliDataReadOnlyPath()
@@ -84,8 +84,8 @@ const std::string AssetManager::GetDaliDataReadOnlyPath()
    *       named DALI_DATA_READ_ONLY_DIR.
    */
   return (nullptr == DALI_DATA_READ_ONLY_DIR)
-             ? EnvironmentVariable::GetEnvironmentVariable(TOKEN_STRING(DALI_DATA_READ_ONLY_DIR))
-             : DALI_DATA_READ_ONLY_DIR;
+           ? EnvironmentVariable::GetEnvironmentVariable(TOKEN_STRING(DALI_DATA_READ_ONLY_DIR))
+           : DALI_DATA_READ_ONLY_DIR;
 }
 
 } // namespace Ui

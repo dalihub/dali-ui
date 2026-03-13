@@ -28,7 +28,7 @@ namespace Ui
 namespace Internal
 {
 ConicGradient::ConicGradient(const Vector2& center, Dali::Radian startAngle)
-  : Gradient()
+: Gradient()
 {
   SetCenterAndStartAngle(center, startAngle);
 }
@@ -39,7 +39,7 @@ ConicGradient::~ConicGradient()
 
 void ConicGradient::SetCenterAndStartAngle(const Vector2& center, Dali::Radian startAngle)
 {
-  mCenter = center;
+  mCenter     = center;
   mStartAngle = WrapInDomain(startAngle, Dali::ANGLE_0, Dali::ANGLE_360);
 
   // Calculate the transform aligning to the circle

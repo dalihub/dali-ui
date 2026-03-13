@@ -16,8 +16,8 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-elements/integration-api/ui-element-config-manager.h>
 #include <dali-ui-elements/integration-api/ui-element-config-impl.h>
+#include <dali-ui-elements/integration-api/ui-element-config-manager.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
@@ -34,8 +34,8 @@ namespace Integration
 namespace
 {
 const char* const UIELEMENT_CONFIG_NOT_INITIALIZED_MESSAGE =
-    "UiElementConfigManager has not been initialized. "
-    "Call UiConfig.Apply() to enable element defaults.";
+  "UiElementConfigManager has not been initialized. "
+  "Call UiConfig.Apply() to enable element defaults.";
 } // unnamed namespace
 
 UiElementConfigManager& UiElementConfigManager::Get()
@@ -46,9 +46,9 @@ UiElementConfigManager& UiElementConfigManager::Get()
 
 void UiElementConfigManager::Init(const UiElementConfigImpl& impl)
 {
-  mDefaultFontSize = impl.GetDefaultFontSize();
+  mDefaultFontSize  = impl.GetDefaultFontSize();
   mDefaultTextColor = impl.GetDefaultTextColor();
-  mInitialized = true;
+  mInitialized      = true;
 }
 
 bool UiElementConfigManager::IsInitialized() const

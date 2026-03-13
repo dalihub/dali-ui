@@ -16,9 +16,9 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -27,7 +27,7 @@ namespace Ui
 {
 
 UiConfig::UiConfig(Integration::UiConfigImpl* impl)
-  : BaseHandle(impl)
+: BaseHandle(impl)
 {
 }
 
