@@ -1,4 +1,5 @@
-/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+/*
+ * Copyright (c) 2020 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -24,9 +26,8 @@ using Dali::Ui::View;
 class HelloWorldController : public ConnectionTracker
 {
 public:
-
   HelloWorldController(Application& application)
-    : mApplication(application)
+  : mApplication(application)
   {
     // Connect to the Application's Init signal
     mApplication.InitSignal().Connect(this, &HelloWorldController::Create);
@@ -42,32 +43,32 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     window.Add(Layout::New() // Parent
-      .BackgroundColor(Color::YELLOW)
-      .SetSizeWidth(200_spx)
-      .SetSizeHeight(200_spx)
-      .Contents({
-        View::New() // Red child
-          .BackgroundColor(Color::RED)
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
-          .AsClickable(this, [this](View view, const InputEvent& event)
-          {
-            mSecondChild.SetBackgroundColor(Color::GREEN);
-            return true;
-          }),
-        View::New() // Blue child
-          .BackgroundColor(Color::BLUE)
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
-          .SetPositionX(100_spx)
-          .SetPositionY(100_spx)
-          .As(mSecondChild),
-      }));
+                 .BackgroundColor(Color::YELLOW)
+                 .SetSizeWidth(200_spx)
+                 .SetSizeHeight(200_spx)
+                 .Contents({
+                   View::New() // Red child
+                     .BackgroundColor(Color::RED)
+                     .SetSizeWidth(100_spx)
+                     .SetSizeHeight(100_spx)
+                     .AsClickable(this, [this](View view, const InputEvent& event)
+    {
+      mSecondChild.SetBackgroundColor(Color::GREEN);
+      return true;
+    }),
+                   View::New() // Blue child
+                     .BackgroundColor(Color::BLUE)
+                     .SetSizeWidth(100_spx)
+                     .SetSizeHeight(100_spx)
+                     .SetPositionX(100_spx)
+                     .SetPositionY(100_spx)
+                     .As(mSecondChild),
+                 }));
   }
 
 private:
   Application& mApplication;
-  View mSecondChild;
+  View         mSecondChild;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

@@ -1,13 +1,12 @@
 #!/bin/bash
 
 # 1. 명확하게 16버전 이상의 실행 파일만 탐색
-CF=$(command -v clang-format-15 || command -v clang-format-16)
+CF=$(command -v clang-format-20)
 
 if [ -z "$CF" ]; then
-    echo "> [ERROR] Clang-format 15+ is required."
+    echo "> [ERROR] Clang-format 20+ is required."
     echo "Please install:"
-    echo "> wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 15"
-    echo "> sudo apt install -y clang-format-15"
+    echo "> sudo apt install -y clang-format-20"
     exit 1
 fi
 
