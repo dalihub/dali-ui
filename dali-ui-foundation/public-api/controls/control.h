@@ -192,7 +192,7 @@ public:
   typedef Signal<void(Control)> ResourceReadySignalType;
 
   /// @brief Offscreen rendering finished signal type. @SINCE_2_4.33
-  typedef Signal<void()> OffScreenRenderingFinishedSignalType;
+  typedef Signal<void(Control)> OffScreenRenderingFinishedSignalType;
 
 public: // Creation & Destruction
   /**
@@ -539,7 +539,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallbackName();
+   *   void YourCallbackName( Control control );
    * @endcode
    *
    * @SINCE_2_4.33
