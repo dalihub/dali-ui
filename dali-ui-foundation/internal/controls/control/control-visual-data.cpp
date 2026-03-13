@@ -793,8 +793,9 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
         Property::Map map;
         // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.
         map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS,
-                   (mOffscreenRenderingEnabled && visualImpl.IsOffscreenRenderingCaptureEnabled()) ? Vector4::ZERO
-                                                                                                   : cornerRadius);
+                   (mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering())
+                       ? Vector4::ZERO
+                       : cornerRadius);
         map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
                    self.GetProperty<int>(Ui::DevelControl::Property::CORNER_RADIUS_POLICY));
         map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS,
@@ -848,7 +849,8 @@ void Control::Impl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Bas
           Dali::Integration::ConstraintSetInternalTag(cornerRadiusConstraint, DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG);
           visualImpl.AddConstraintFeature(cornerRadiusConstraint, {Ui::DevelControl::Property::CORNER_RADIUS});
         }
-        if (mCornerRadiusValueAdded && !(mOffscreenRenderingEnabled && visualImpl.IsOffscreenRenderingCaptureEnabled()))
+        if (mCornerRadiusValueAdded &&
+            !(mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering()))
         {
           cornerRadiusConstraint.Apply();
         }
@@ -1219,7 +1221,7 @@ void Control::Impl::VisualData::NotifyConstraintPropertyChanged(Property::Index 
         if (registeredVisual->overrideCornerProperties)
         {
           auto& visualImpl = Ui::GetImplementation(registeredVisual->visual);
-          if (mOffscreenRenderingEnabled && visualImpl.IsOffscreenRenderingCaptureEnabled())
+          if (mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering())
           {
             // Skip offscreen captured visuals start constraints.
             continue;
@@ -1356,7 +1358,7 @@ void Control::Impl::VisualData::OffscreenRenderingEnabled(bool enabled)
       auto& visualImpl = Ui::GetImplementation((*iter)->visual);
       if (visualImpl.IsOffscreenRenderingCaptureEnabled())
       {
-        if (enabled)
+        if (enabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering())
         {
           // Stop corner radius constraint if offscreen rendering is enabled
           // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.

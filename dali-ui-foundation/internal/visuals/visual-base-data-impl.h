@@ -566,6 +566,9 @@ struct Base::Impl
                                       ///< again.
   bool mTransformMapChanged : 1; ///< Whether the transformMap is changed or not. We'll be false after SetTransform
                                  ///< called.
+
+  bool mOffscreenRenderingIgnoreCornerRadius : 1; ///< Whether we need to ignore the corner radius during offscreen
+                                                  ///< rendering case.
 };
 
 } // namespace Visual

@@ -1501,6 +1501,17 @@ bool Visual::Base::IsOffscreenRenderingCaptureEnabled() const
          (DepthIndex::BACKGROUND_EFFECT < depthIndex && depthIndex <= DepthIndex::DECORATION);
 }
 
+bool Visual::Base::IsCornerRadiusIgnoredAtOffscreenRendering() const
+{
+  return !IsTypeAvailableForCornerRadius(mImpl->mType) ||
+         (IsOffscreenRenderingCaptureEnabled() && mImpl->mOffscreenRenderingIgnoreCornerRadius);
+}
+
+void Visual::Base::CornerRadiusIgnoredAtOffscreenRendering(bool ignored)
+{
+  mImpl->mOffscreenRenderingIgnoreCornerRadius = ignored;
+}
+
 void Visual::Base::AddConstraintObserver(Visual::ConstraintObserver& observer)
 {
   mImpl->mConstraintFeatureList.SetObserver(observer);
