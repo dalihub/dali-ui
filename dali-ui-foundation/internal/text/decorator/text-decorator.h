@@ -23,9 +23,11 @@
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
+#include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup.h>
+#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup-callback-interface.h>
 
 namespace Dali
 {
@@ -136,7 +138,7 @@ public:
      * @param[in] type Whether this decoration is a layer or not, which layer it is.
      * @param[in] needsClipping Whether the actor needs clipping.
      */
-    virtual void AddDecoration(Actor& actor, DecorationType type, bool needsClipping) = 0;
+    virtual void AddDecoration(Dali::Actor& actor, DecorationType type, bool needsClipping) = 0;
 
     /**
      * @brief An input event from one of the handles.
@@ -550,13 +552,13 @@ public:
    * @brief Set a bit mask of the buttons to be shown by Popup
    * @param[in] enabledButtonsBitMask from TextSelectionPopup::Buttons enum
    */
-  void SetEnabledPopupButtons(TextSelectionPopup::Buttons& enabledButtonsBitMask);
+  void SetEnabledPopupButtons(Dali::Ui::Text::InputCommandType& enabledButtonsBitMask);
 
   /**
    * @brief Get the current bit mask of buttons to be shown by Popup
    * @return bitmask of TextSelectionPopup::Buttons
    */
-  TextSelectionPopup::Buttons& GetEnabledPopupButtons();
+  Dali::Ui::Text::InputCommandType& GetEnabledPopupButtons();
 
   /**
    * @brief Used to set the selection popup options

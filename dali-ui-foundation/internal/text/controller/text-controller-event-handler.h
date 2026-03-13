@@ -25,7 +25,7 @@
 #include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup.h>
+// #include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 
@@ -139,7 +139,7 @@ struct Controller::EventHandler
 
   /// @copydoc Text::Controller::TextPopupButtonTouched
   /// @param[in] controller A reference to the controller class
-  static void TextPopupButtonTouched(Controller& controller, Dali::Ui::TextSelectionPopup::Buttons button);
+  static void TextPopupButtonTouched(Controller& controller, Dali::Ui::Text::InputCommandType button);
 };
 
 } // namespace Text

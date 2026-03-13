@@ -230,26 +230,26 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
         if (!keyEvent.IsRepeat())
         {
           // Ctrl-C or Ctrl+Insert to copy the selected text
-          controller.TextPopupButtonTouched(Ui::TextSelectionPopup::COPY);
+          controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::COPY);
         }
         consumed = true;
       }
       else if (keyName == KEY_V_NAME || logicalKey == KEY_V_NAME)
       {
         // Ctrl-V to paste the copied text
-        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::PASTE);
+        controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::PASTE);
         consumed = true;
       }
       else if (keyName == KEY_X_NAME || logicalKey == KEY_X_NAME)
       {
         // Ctrl-X to cut the selected text
-        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::CUT);
+        controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::CUT);
         consumed = true;
       }
       else if (keyName == KEY_A_NAME || logicalKey == KEY_A_NAME)
       {
         // Ctrl-A to select All the text
-        controller.TextPopupButtonTouched(Ui::TextSelectionPopup::SELECT_ALL);
+        controller.TextPopupButtonTouched(Dali::Ui::Text::InputCommandType::SELECT_ALL);
         consumed = true;
       }
       return consumed;
@@ -1017,7 +1017,7 @@ void Controller::EventHandler::DecorationEvent(Controller& controller, HandleTyp
 }
 
 void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
-                                                      Dali::Ui::TextSelectionPopup::Buttons button)
+                                                      Dali::Ui::Text::InputCommandType button)
 {
   if (NULL == controller.mImpl->mEventData)
   {
@@ -1026,22 +1026,22 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
 
   switch (button)
   {
-    case Ui::TextSelectionPopup::CUT:
+    case Dali::Ui::Text::InputCommandType::CUT:
     {
       controller.CutText();
       break;
     }
-    case Ui::TextSelectionPopup::COPY:
+    case Dali::Ui::Text::InputCommandType::COPY:
     {
       controller.CopyText();
       break;
     }
-    case Ui::TextSelectionPopup::PASTE:
+    case Dali::Ui::Text::InputCommandType::PASTE:
     {
       controller.PasteText();
       break;
     }
-    case Ui::TextSelectionPopup::SELECT:
+    case Dali::Ui::Text::InputCommandType::SELECT:
     {
       const Vector2& currentCursorPosition = controller.mImpl->mEventData->mDecorator->GetPosition(PRIMARY_CURSOR);
 
@@ -1052,18 +1052,18 @@ void Controller::EventHandler::TextPopupButtonTouched(Controller& controller,
       }
       break;
     }
-    case Ui::TextSelectionPopup::SELECT_ALL:
+    case Dali::Ui::Text::InputCommandType::SELECT_ALL:
     {
       // Creates a SELECT_ALL event
       SelectEvent(controller, 0.f, 0.f, SelectionType::ALL);
       break;
     }
-    case Ui::TextSelectionPopup::CLIPBOARD:
+    case Dali::Ui::Text::InputCommandType::CLIPBOARD:
     {
       controller.mImpl->ShowClipboard();
       break;
     }
-    case Ui::TextSelectionPopup::NONE:
+    case Dali::Ui::Text::InputCommandType::NONE:
     {
       // Nothing to do.
       break;

@@ -38,6 +38,8 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 
+
+
 #ifdef DEBUG_ENABLED
 #define DECORATOR_DEBUG
 
@@ -200,13 +202,14 @@ struct Decorator::Impl : public ConnectionTracker
     {
     }
 
-    TextSelectionPopup actor;
+    // TextSelectionPopup actor;
+    Actor actor;
     Vector3 position;
   };
 
   Impl(ControllerInterface& controller, TextSelectionPopupCallbackInterface& callbackInterface)
     : mController(controller),
-      mEnabledPopupButtons(TextSelectionPopup::NONE),
+      mEnabledPopupButtons(Dali::Ui::Text::InputCommandType::NONE),
       mTextSelectionPopupCallbackInterface(callbackInterface),
       mHandleColor(HANDLE_COLOR),
       mBoundingBox(),
@@ -450,7 +453,7 @@ struct Decorator::Impl : public ConnectionTracker
     {
       if (mCopyPastePopup.actor)
       {
-        mCopyPastePopup.actor.HidePopup();
+        // mCopyPastePopup.actor.HidePopup();
         mPopupSetNewPosition = true;
       }
     }
@@ -473,13 +476,13 @@ struct Decorator::Impl : public ConnectionTracker
       return;
     }
 
-    if (!mCopyPastePopup.actor.GetParent())
-    {
-      mActiveLayer.Add(mCopyPastePopup.actor);
-    }
+    // if (!mCopyPastePopup.actor.GetParent())
+    // {
+    //   mActiveLayer.Add(mCopyPastePopup.actor);
+    // }
 
-    mCopyPastePopup.actor.RaiseAbove(mActiveLayer);
-    mCopyPastePopup.actor.ShowPopup();
+    // mCopyPastePopup.actor.RaiseAbove(mActiveLayer);
+    // mCopyPastePopup.actor.ShowPopup();
   }
 
   float CalculateVerticalPopUpPosition(float halfHeight, bool preferBelow)
@@ -990,17 +993,17 @@ struct Decorator::Impl : public ConnectionTracker
 
   void CreateSelectionPopup()
   {
-    if (!mCopyPastePopup.actor)
-    {
-      mCopyPastePopup.actor = TextSelectionPopup::New(&mTextSelectionPopupCallbackInterface);
-#ifdef DECORATOR_DEBUG
-      mCopyPastePopup.actor.SetProperty(Dali::Actor::Property::NAME, "mCopyPastePopup");
-#endif
-      mCopyPastePopup.actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
-      mCopyPastePopup.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-      mCopyPastePopup.actor.OnRelayoutSignal().Connect(
-          this, &Decorator::Impl::SetPopupPosition); // Position popup after size negotiation
-    }
+//     if (!mCopyPastePopup.actor)
+//     {
+//       mCopyPastePopup.actor = TextSelectionPopup::New(&mTextSelectionPopupCallbackInterface);
+// #ifdef DECORATOR_DEBUG
+//       mCopyPastePopup.actor.SetProperty(Dali::Actor::Property::NAME, "mCopyPastePopup");
+// #endif
+//       mCopyPastePopup.actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
+//       mCopyPastePopup.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
+//       mCopyPastePopup.actor.OnRelayoutSignal().Connect(
+//           this, &Decorator::Impl::SetPopupPosition); // Position popup after size negotiation
+//     }
   }
 
   void CalculateHandleWorldCoordinates(HandleImpl& handle, Vector2& position)
@@ -1997,7 +2000,7 @@ struct Decorator::Impl : public ConnectionTracker
   Shader mHighlightShader; ///< Shader used for highlight
   Property::Map mQuadVertexFormat;
   PopupImpl mCopyPastePopup;
-  TextSelectionPopup::Buttons mEnabledPopupButtons; /// Bit mask of currently enabled Popup buttons
+  Dali::Ui::Text::InputCommandType mEnabledPopupButtons; /// Bit mask of currently enabled Popup buttons
   TextSelectionPopupCallbackInterface& mTextSelectionPopupCallbackInterface;
 
   std::string mHandleImages[HANDLE_TYPE_COUNT][HANDLE_IMAGE_TYPE_COUNT];
@@ -2429,14 +2432,14 @@ bool Decorator::IsPopupActive() const
   return mImpl->mActiveCopyPastePopup;
 }
 
-void Decorator::SetEnabledPopupButtons(TextSelectionPopup::Buttons& enabledButtonsBitMask)
+void Decorator::SetEnabledPopupButtons(Dali::Ui::Text::InputCommandType& enabledButtonsBitMask)
 {
   mImpl->mEnabledPopupButtons = enabledButtonsBitMask;
   mImpl->CreateSelectionPopup();
-  mImpl->mCopyPastePopup.actor.EnableButtons(mImpl->mEnabledPopupButtons);
+  // mImpl->mCopyPastePopup.actor.EnableButtons(mImpl->mEnabledPopupButtons);
 }
 
-TextSelectionPopup::Buttons& Decorator::GetEnabledPopupButtons()
+Dali::Ui::Text::InputCommandType& Decorator::GetEnabledPopupButtons()
 {
   return mImpl->mEnabledPopupButtons;
 }

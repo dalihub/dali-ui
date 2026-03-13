@@ -1228,40 +1228,40 @@ void TextEditor::UpdateScrollBar()
   }
 
   CustomActor self = Self();
-  if (!mScrollBar)
-  {
-    mScrollBar = Ui::ScrollBar::New(Ui::ScrollBar::VERTICAL);
-    mScrollBar.SetIndicatorHeightPolicy(Ui::ScrollBar::VARIABLE);
-    mScrollBar.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_RIGHT);
-    mScrollBar.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_RIGHT);
-    mScrollBar.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
-    mScrollBar.SetResizePolicy(ResizePolicy::FIT_TO_CHILDREN, Dimension::WIDTH);
+  // if (!mScrollBar)
+  // {
+  //   mScrollBar = Ui::ScrollBar::New(Ui::ScrollBar::VERTICAL);
+  //   mScrollBar.SetIndicatorHeightPolicy(Ui::ScrollBar::VARIABLE);
+  //   mScrollBar.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_RIGHT);
+  //   mScrollBar.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_RIGHT);
+  //   mScrollBar.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
+  //   mScrollBar.SetResizePolicy(ResizePolicy::FIT_TO_CHILDREN, Dimension::WIDTH);
 
-    // Register the scroll position property
-    Property::Index propertyScrollPosition = self.RegisterProperty(SCROLL_BAR_POSITION, scrollPosition);
-    // Register the minimum scroll position property
-    Property::Index propertyMinScrollPosition = self.RegisterProperty(SCROLL_BAR_POSITION_MIN, 0.0f);
-    // Register the maximum scroll position property
-    Property::Index propertyMaxScrollPosition =
-        self.RegisterProperty(SCROLL_BAR_POSITION_MAX, (layoutSize - controlSize));
-    // Register the scroll content size property
-    Property::Index propertyScrollContentSize = self.RegisterProperty(SCROLL_BAR_CONTENT_SIZE, layoutSize);
+  //   // Register the scroll position property
+  //   Property::Index propertyScrollPosition = self.RegisterProperty(SCROLL_BAR_POSITION, scrollPosition);
+  //   // Register the minimum scroll position property
+  //   Property::Index propertyMinScrollPosition = self.RegisterProperty(SCROLL_BAR_POSITION_MIN, 0.0f);
+  //   // Register the maximum scroll position property
+  //   Property::Index propertyMaxScrollPosition =
+  //       self.RegisterProperty(SCROLL_BAR_POSITION_MAX, (layoutSize - controlSize));
+  //   // Register the scroll content size property
+  //   Property::Index propertyScrollContentSize = self.RegisterProperty(SCROLL_BAR_CONTENT_SIZE, layoutSize);
 
-    mScrollBar.SetScrollPropertySource(self, propertyScrollPosition, propertyMinScrollPosition,
-                                       propertyMaxScrollPosition, propertyScrollContentSize);
+  //   mScrollBar.SetScrollPropertySource(self, propertyScrollPosition, propertyMinScrollPosition,
+  //                                      propertyMaxScrollPosition, propertyScrollContentSize);
 
-    // Set style name of ScrollBar for styling
-    mScrollBar.SetStyleName("TextEditorScrollBar");
-    Ui::Control scrollIndicator = Ui::Control::DownCast(mScrollBar.GetScrollIndicator());
-    if (scrollIndicator)
-    {
-      // Set style name of ScrollBarIndicator for styling
-      scrollIndicator.SetStyleName("TextEditorScrollBarIndicator");
-    }
+  //   // Set style name of ScrollBar for styling
+  //   mScrollBar.SetStyleName("TextEditorScrollBar");
+  //   Ui::Control scrollIndicator = Ui::Control::DownCast(mScrollBar.GetScrollIndicator());
+  //   if (scrollIndicator)
+  //   {
+  //     // Set style name of ScrollBarIndicator for styling
+  //     scrollIndicator.SetStyleName("TextEditorScrollBarIndicator");
+  //   }
 
-    self.Add(mScrollBar);
-  }
-  else
+  //   self.Add(mScrollBar);
+  // }
+  // else
   {
     Property::Index propertyScrollPosition = self.GetPropertyIndex(SCROLL_BAR_POSITION);
     Property::Index propertyMaxScrollPosition = self.GetPropertyIndex(SCROLL_BAR_POSITION_MAX);
@@ -1280,7 +1280,7 @@ void TextEditor::UpdateScrollBar()
     mScrollStateChangedSignal.Emit(handle, Ui::TextEditor::Scroll::STARTED);
   }
 
-  Actor indicator = mScrollBar.GetScrollIndicator();
+  // Actor indicator = mScrollBar.GetScrollIndicator();
   if (mAnimation)
   {
     mAnimation.Stop(); // Cancel any animation
@@ -1289,9 +1289,9 @@ void TextEditor::UpdateScrollBar()
   {
     mAnimation = Animation::New(mAnimationPeriod.durationSeconds);
   }
-  indicator.SetProperty(Actor::Property::OPACITY, 1.0f);
-  mAnimation.AnimateTo(Property(indicator, Actor::Property::COLOR_ALPHA), 0.0f, AlphaFunction::EASE_IN,
-                       mAnimationPeriod);
+  // indicator.SetProperty(Actor::Property::OPACITY, 1.0f);
+  // mAnimation.AnimateTo(Property(indicator, Actor::Property::COLOR_ALPHA), 0.0f, AlphaFunction::EASE_IN,
+  //                      mAnimationPeriod);
   mAnimation.Play();
   mAnimation.FinishedSignal().Connect(this, &TextEditor::OnScrollIndicatorAnimationFinished);
 }

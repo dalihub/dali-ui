@@ -28,7 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-devel.h>
-#include <dali-ui-foundation/devel-api/controls/scroll-bar/scroll-bar.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-editor-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
@@ -653,7 +652,7 @@ private: // Data
   Text::DecoratorPtr mDecorator;
   Text::TextVerticalScrollerPtr mTextVerticalScroller;
   Ui::Control mStencil;
-  Ui::ScrollBar mScrollBar;
+  // Ui::ScrollBar mScrollBar;
   Dali::Animation mAnimation; ///< Scroll indicator Show/Hide Animation.
   Dali::TimePeriod mAnimationPeriod;
   std::vector<Actor> mClippingDecorationActors; ///< Decoration actors which need clipping.

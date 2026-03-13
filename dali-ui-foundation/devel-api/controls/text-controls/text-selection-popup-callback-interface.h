@@ -19,12 +19,28 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup.h>
 
 namespace Dali
 {
 namespace Ui
 {
+namespace Text
+{
+/**
+ * @brief Temp selection operations.
+ */
+enum class InputCommandType
+{
+  CUT = 0,
+  COPY,
+  PASTE,
+  SELECT,
+  SELECT_ALL,
+  CLIPBOARD,
+  NONE,
+};
+}
+
 /**
  * @brief Interface used to receive the TextSelectionPopup's button callbacks.
  */
@@ -43,7 +59,7 @@ public:
    *
    * @param[in] button The button identifier.
    */
-  virtual void TextPopupButtonTouched(TextSelectionPopup::Buttons button) = 0;
+  virtual void TextPopupButtonTouched(Dali::Ui::Text::InputCommandType button) = 0;
 };
 
 } // namespace Ui

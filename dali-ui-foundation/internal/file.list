@@ -71,11 +71,6 @@ SET( toolkit_src_files
    ${toolkit_src_dir}/controls/bloom-view/bloom-view-impl.cpp
    ${toolkit_src_dir}/controls/bubble-effect/bubble-emitter-impl.cpp
    ${toolkit_src_dir}/controls/bubble-effect/bubble-renderer.cpp
-   ${toolkit_src_dir}/controls/buttons/button-impl.cpp
-   ${toolkit_src_dir}/controls/buttons/check-box-button-impl.cpp
-   ${toolkit_src_dir}/controls/buttons/push-button-impl.cpp
-   ${toolkit_src_dir}/controls/buttons/radio-button-impl.cpp
-   ${toolkit_src_dir}/controls/buttons/toggle-button-impl.cpp
    ${toolkit_src_dir}/controls/canvas-view/canvas-view-impl.cpp
    ${toolkit_src_dir}/controls/canvas-view/canvas-view-rasterize-task.cpp
    ${toolkit_src_dir}/controls/control/control-data-impl.cpp
@@ -90,20 +85,6 @@ SET( toolkit_src_files
    ${toolkit_src_dir}/controls/navigation-view/navigation-view-impl.cpp
    ${toolkit_src_dir}/controls/popup/confirmation-popup-impl.cpp
    ${toolkit_src_dir}/controls/popup/popup-impl.cpp
-   ${toolkit_src_dir}/controls/scroll-bar/scroll-bar-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/bouncing-effect-actor.cpp
-   ${toolkit_src_dir}/controls/scrollable/item-view/depth-layout.cpp
-   ${toolkit_src_dir}/controls/scrollable/item-view/grid-layout.cpp
-   ${toolkit_src_dir}/controls/scrollable/item-view/item-view-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/item-view/spiral-layout.cpp
-   ${toolkit_src_dir}/controls/scrollable/scrollable-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-base-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-overshoot-indicator-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-view-effect-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-view-impl.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-view-impl-constraints.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-view-impl-property-handler.cpp
-   ${toolkit_src_dir}/controls/scrollable/scroll-view/scroll-view-page-path-effect-impl.cpp
    ${toolkit_src_dir}/controls/shadow-view/shadow-view-impl.cpp
    ${toolkit_src_dir}/controls/super-blur-view/super-blur-view-impl.cpp
    ${toolkit_src_dir}/controls/table-view/table-view-impl.cpp
@@ -114,9 +95,6 @@ SET( toolkit_src_files
    ${toolkit_src_dir}/controls/text-controls/text-field-impl.cpp
    ${toolkit_src_dir}/controls/text-controls/text-field-property-handler.cpp
    ${toolkit_src_dir}/controls/text-controls/text-label-impl.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-selection-popup-impl.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-selection-popup-property-handler.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-selection-toolbar-impl.cpp
    ${toolkit_src_dir}/controls/tooltip/tooltip.cpp
    ${toolkit_src_dir}/controls/video-view/video-view-impl.cpp
    ${toolkit_src_dir}/controls/web-view/web-view-impl.cpp

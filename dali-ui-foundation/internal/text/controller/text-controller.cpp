@@ -2021,7 +2021,7 @@ void Controller::DecorationEvent(HandleType handleType, HandleState state, float
   EventHandler::DecorationEvent(*this, handleType, state, x, y);
 }
 
-void Controller::TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::Buttons button)
+void Controller::TextPopupButtonTouched(Dali::Ui::Text::InputCommandType button)
 {
   EventHandler::TextPopupButtonTouched(*this, button);
 }

@@ -2457,7 +2457,7 @@ protected: // Inherit from TextSelectionPopup::TextPopupButtonCallbackInterface.
   /**
    * @copydoc Dali::Ui::TextSelectionPopup::TextPopupButtonCallbackInterface::TextPopupButtonTouched()
    */
-  void TextPopupButtonTouched(Dali::Ui::TextSelectionPopup::Buttons button) override;
+  void TextPopupButtonTouched(Dali::Ui::Text::InputCommandType button) override;
 
 protected: // Inherit from HiddenText.
   /**

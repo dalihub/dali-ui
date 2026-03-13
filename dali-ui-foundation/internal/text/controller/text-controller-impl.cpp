@@ -1205,68 +1205,7 @@ void Controller::Impl::RepositionSelectionHandles(float visualX, float visualY, 
 
 void Controller::Impl::SetPopupButtons()
 {
-  /**
-   *  Sets the Popup buttons to be shown depending on State.
-   *
-   *  If SELECTING :  CUT & COPY + ( PASTE & CLIPBOARD if content available to paste )
-   *
-   *  If EDITING_WITH_POPUP : SELECT & SELECT_ALL
-   */
 
-  bool isEditable = IsEditable();
-  TextSelectionPopup::Buttons buttonsToShow = TextSelectionPopup::NONE;
-
-  if (EventData::SELECTING == mEventData->mState)
-  {
-    buttonsToShow = TextSelectionPopup::Buttons(TextSelectionPopup::COPY);
-    if (isEditable)
-    {
-      buttonsToShow = TextSelectionPopup::Buttons(buttonsToShow | TextSelectionPopup::CUT);
-    }
-
-    if (!IsClipboardEmpty())
-    {
-      if (isEditable)
-      {
-        buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::PASTE));
-      }
-      buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::CLIPBOARD));
-    }
-
-    if (!mEventData->mAllTextSelected)
-    {
-      buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::SELECT_ALL));
-    }
-  }
-  else if (EventData::EDITING_WITH_POPUP == mEventData->mState)
-  {
-    if (mModel->mLogicalModel->mText.Count() && !IsShowingPlaceholderText())
-    {
-      buttonsToShow = TextSelectionPopup::Buttons(TextSelectionPopup::SELECT | TextSelectionPopup::SELECT_ALL);
-    }
-
-    if (!IsClipboardEmpty())
-    {
-      if (isEditable)
-      {
-        buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::PASTE));
-      }
-      buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::CLIPBOARD));
-    }
-  }
-  else if (EventData::EDITING_WITH_PASTE_POPUP == mEventData->mState)
-  {
-    if (!IsClipboardEmpty())
-    {
-      if (isEditable)
-      {
-        buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::PASTE));
-      }
-      buttonsToShow = TextSelectionPopup::Buttons((buttonsToShow | TextSelectionPopup::CLIPBOARD));
-    }
-  }
-
-  mEventData->mDecorator->SetEnabledPopupButtons(buttonsToShow);
 }
 
 void Controller::Impl::ChangeState(EventData::State newState)
