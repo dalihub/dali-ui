@@ -403,11 +403,6 @@ Rect<float> TextEditor::GetTextBoundingRectangle(uint32_t startIndex, uint32_t e
   return mController->GetTextBoundingRectangle(startIndex, endIndex);
 }
 
-void TextEditor::SetSpannedText(const Text::Spanned& spannedText)
-{
-  mController->SetSpannedText(spannedText);
-}
-
 string TextEditor::GetSelectedText() const
 {
   string selectedText = "";

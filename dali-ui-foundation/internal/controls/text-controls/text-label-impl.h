@@ -25,7 +25,6 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/spanned.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
@@ -185,15 +184,6 @@ public:
    * @return bounding box of the requested text.
    */
   Rect<float> GetTextBoundingRectangle(uint32_t startIndex, uint32_t endIndex) const;
-
-  /**
-   * @brief Set the @p spannedText into current textLabel
-   * the spanned text contains content (text) and  format (spans with ranges)
-   * the text is copied into text-controller and the spans are applied on ranges
-   *
-   * @param[in] spannedText the text with spans.
-   */
-  void SetSpannedText(const Text::Spanned& spannedText);
 
   /**
    * @brief Set text fit array to text label.

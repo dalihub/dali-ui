@@ -280,11 +280,6 @@ public:
   bool IsMarkupProcessorEnabled() const override;
 
   /**
-   * @copydoc ModelInterface::IsSpannedTextPlaced()
-   */
-  bool IsSpannedTextPlaced() const override;
-
-  /**
    * @copydoc ModelInterface::GetHyphens()
    */
   const GlyphInfo* GetHyphens() const override;

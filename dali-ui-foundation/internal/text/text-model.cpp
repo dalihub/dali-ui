@@ -262,11 +262,6 @@ bool Model::IsMarkupProcessorEnabled() const
   return mVisualModel->IsMarkupProcessorEnabled();
 }
 
-bool Model::IsSpannedTextPlaced() const
-{
-  return mLogicalModel->mSpannedTextPlaced;
-}
-
 const GlyphInfo* Model::GetHyphens() const
 {
   return mVisualModel->mHyphen.glyph.Begin();

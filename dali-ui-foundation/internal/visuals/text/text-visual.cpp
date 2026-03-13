@@ -667,18 +667,17 @@ void TextVisual::UpdateRenderer()
 
       const bool outlineEnabled = (mController->GetTextModel()->GetOutlineWidth() > Math::MACHINE_EPSILON_1);
       const bool backgroundEnabled = mController->GetTextModel()->IsBackgroundEnabled();
-      const bool markupOrSpannedText =
-          mController->IsMarkupProcessorEnabled() || mController->GetTextModel()->IsSpannedTextPlaced();
-      const bool markupUnderlineEnabled = markupOrSpannedText && mController->GetTextModel()->IsMarkupUnderlineSet();
+      const bool markupOrEnabled = mController->IsMarkupProcessorEnabled();
+      const bool markupUnderlineEnabled = markupOrEnabled && mController->GetTextModel()->IsMarkupUnderlineSet();
       const bool markupStrikethroughEnabled =
-          markupOrSpannedText && mController->GetTextModel()->IsMarkupStrikethroughSet();
+          markupOrEnabled && mController->GetTextModel()->IsMarkupStrikethroughSet();
       const bool underlineEnabled = mController->GetTextModel()->IsUnderlineEnabled() || markupUnderlineEnabled;
       const bool strikethroughEnabled =
           mController->GetTextModel()->IsStrikethroughEnabled() || markupStrikethroughEnabled;
       const bool backgroundMarkupSet = mController->GetTextModel()->IsMarkupBackgroundColorSet();
       const bool cutoutEnabled = mController->IsTextCutout();
       const bool backgroundWithCutoutEnabled = mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
-      const bool styleEnabled = (shadowEnabled || outlineEnabled || backgroundEnabled || markupOrSpannedText ||
+      const bool styleEnabled = (shadowEnabled || outlineEnabled || backgroundEnabled || markupOrEnabled ||
                                  backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
       const bool isOverlayStyle = underlineEnabled || strikethroughEnabled;
       const bool embossEnabled = mController->IsEmbossEnabled();

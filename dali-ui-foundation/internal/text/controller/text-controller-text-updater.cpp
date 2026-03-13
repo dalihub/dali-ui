@@ -734,9 +734,6 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   Controller::Impl& impl = *controller.mImpl;
   LogicalModelPtr& logicalModel = impl.mModel->mLogicalModel;
 
-  // Reset spanned-text
-  logicalModel->mSpannedTextPlaced = false;
-
   // Reset buffers.
   logicalModel->mText.Clear();
 

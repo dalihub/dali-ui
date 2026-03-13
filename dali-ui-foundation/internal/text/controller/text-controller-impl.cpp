@@ -1864,9 +1864,6 @@ void Controller::Impl::CopyUnderlinedFromLogicalToVisualModels(bool shouldClearP
 
     mModel->mVisualModel->mUnderlineRuns.PushBack(underlineGlyphRun);
   }
-
-  // Reset flag. The updates have been applied from logical to visual.
-  mModel->mLogicalModel->mUnderlineRunsUpdated = false;
 }
 
 void Controller::Impl::CopyStrikethroughFromLogicalToVisualModels()
@@ -1903,9 +1900,6 @@ void Controller::Impl::CopyStrikethroughFromLogicalToVisualModels()
 
     mModel->mVisualModel->mStrikethroughRuns.PushBack(strikethroughGlyphRun);
   }
-
-  // Reset flag. The updates have been applied from logical to visual.
-  mModel->mLogicalModel->mStrikethroughRunsUpdated = false;
 }
 
 void Controller::Impl::CopyCharacterSpacingFromLogicalToVisualModels()
@@ -1942,7 +1936,6 @@ void Controller::Impl::CopyCharacterSpacingFromLogicalToVisualModels()
 
     mModel->mVisualModel->mCharacterSpacingRuns.PushBack(characterSpacingGlyphRun);
   }
-  mModel->mLogicalModel->mCharacterSpacingRunsUpdated = false;
 }
 
 void Controller::Impl::SetAutoScrollEnabled(bool enable, bool requestRelayout,

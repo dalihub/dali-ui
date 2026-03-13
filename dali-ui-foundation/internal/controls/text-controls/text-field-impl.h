@@ -430,15 +430,6 @@ public:
   Rect<float> GetTextBoundingRectangle(uint32_t startIndex, uint32_t endIndex) const;
 
   /**
-   * @brief Set the @p spannedText into current textField
-   * the spanned text contains content (text) and  format (spans with ranges)
-   * the text is copied into text-controller and the spans are applied on ranges
-   *
-   * @param[in] spannedText the text with spans.
-   */
-  void SetSpannedText(const Text::Spanned& spannedText);
-
-  /**
    * @brief Set removing front inset to TextField.
    *
    * @param[in] remove Whether front inset of TextField has to be removed or not.

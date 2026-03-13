@@ -408,15 +408,6 @@ public:
   Rect<float> GetTextBoundingRectangle(uint32_t startIndex, uint32_t endIndex) const;
 
   /**
-   * @brief Set the @p spannedText into current textEditor
-   * the spanned text contains content (text) and  format (spans with ranges)
-   * the text is copied into text-controller and the spans are applied on ranges
-   *
-   * @param[in] spannedText the text with spans.
-   */
-  void SetSpannedText(const Text::Spanned& spannedText);
-
-  /**
    * @copydoc Text::SelectableControlInterface::GetSelectedText()
    */
   string GetSelectedText() const override;

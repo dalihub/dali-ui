@@ -2334,11 +2334,6 @@ Rect<float> TextLabel::GetTextBoundingRectangle(uint32_t startIndex, uint32_t en
   return mController->GetTextBoundingRectangle(startIndex, endIndex);
 }
 
-void TextLabel::SetSpannedText(const Text::Spanned& spannedText)
-{
-  mController->SetSpannedText(spannedText);
-}
-
 void TextLabel::SetTextFitArray(const bool enable, std::vector<Ui::DevelTextLabel::FitOption>& fitOptions)
 {
   if (!enable)

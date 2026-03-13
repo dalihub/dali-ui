@@ -1282,11 +1282,6 @@ Rect<float> TextField::GetTextBoundingRectangle(uint32_t startIndex, uint32_t en
   return mController->GetTextBoundingRectangle(startIndex, endIndex);
 }
 
-void TextField::SetSpannedText(const Text::Spanned& spannedText)
-{
-  mController->SetSpannedText(spannedText);
-}
-
 void TextField::SetRemoveFrontInset(bool remove)
 {
   mController->SetRemoveFrontInset(remove);

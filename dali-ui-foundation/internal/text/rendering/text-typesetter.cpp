@@ -452,7 +452,7 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2& size,
       }
 
       // Markup-Processor for overlay styles
-      if (viewModel.IsMarkupProcessorEnabled() || viewModel.IsSpannedTextPlaced())
+      if (viewModel.IsMarkupProcessorEnabled())
       {
         if (viewModel.IsMarkupUnderlineSet())
         {

@@ -603,9 +603,6 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       mTextModel->mVisualModel->mUnderlineRuns.PushBack(underlineGlyphRun);
     }
 
-    // Reset flag. The updates have been applied from logical to visual.
-    mTextModel->mLogicalModel->mUnderlineRunsUpdated = false;
-
     ////////////////////////////////////////////////////////////////////////////////
     // Markup strikethrough
     ////////////////////////////////////////////////////////////////////////////////
@@ -638,9 +635,6 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
       mTextModel->mVisualModel->mStrikethroughRuns.PushBack(strikethroughGlyphRun);
     }
 
-    // Reset flag. The updates have been applied from logical to visual.
-    mTextModel->mLogicalModel->mStrikethroughRunsUpdated = false;
-
     ////////////////////////////////////////////////////////////////////////////////
     // Markup character spacing
     ////////////////////////////////////////////////////////////////////////////////
@@ -672,7 +666,6 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
       mTextModel->mVisualModel->mCharacterSpacingRuns.PushBack(characterSpacingGlyphRun);
     }
-    mTextModel->mLogicalModel->mCharacterSpacingRunsUpdated = false;
   }
 }
 
@@ -887,15 +880,15 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   const bool outlineEnabled = mTextModel->GetOutlineWidth() > Math::MACHINE_EPSILON_1;
   const bool backgroundEnabled = mTextModel->IsBackgroundEnabled();
-  const bool markupOrSpannedText = parameters.enableMarkup || mTextModel->IsSpannedTextPlaced();
-  const bool markupUnderlineEnabled = markupOrSpannedText && mTextModel->IsMarkupUnderlineSet();
-  const bool markupStrikethroughEnabled = markupOrSpannedText && mTextModel->IsMarkupStrikethroughSet();
+  const bool markupEnabled = parameters.enableMarkup;
+  const bool markupUnderlineEnabled = markupEnabled && mTextModel->IsMarkupUnderlineSet();
+  const bool markupStrikethroughEnabled = markupEnabled && mTextModel->IsMarkupStrikethroughSet();
   const bool underlineEnabled = mTextModel->IsUnderlineEnabled() || markupUnderlineEnabled;
   const bool strikethroughEnabled = mTextModel->IsStrikethroughEnabled() || markupStrikethroughEnabled;
   const bool backgroundMarkupSet = mTextModel->IsMarkupBackgroundColorSet();
   const bool cutoutEnabled = mTextModel->IsCutoutEnabled();
   const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();
-  const bool styleEnabled = (shadowEnabled || outlineEnabled || backgroundEnabled || markupOrSpannedText ||
+  const bool styleEnabled = (shadowEnabled || outlineEnabled || backgroundEnabled || markupEnabled ||
                              backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
   const bool isOverlayStyle = underlineEnabled || strikethroughEnabled;
   const bool embossEnabled = parameters.embossEnabled;
