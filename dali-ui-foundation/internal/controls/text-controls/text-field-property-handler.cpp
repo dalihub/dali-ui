@@ -18,7 +18,6 @@
 #include <dali-ui-foundation/internal/controls/text-controls/text-field-property-handler.h>
 
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
-#include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -67,21 +66,13 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField %p RENDERING_BACKEND %d\n", impl.mController.Get(),
                     backend);
 
-#ifndef ENABLE_VECTOR_BASED_TEXT_RENDERING
-      if(DevelText::RENDERING_VECTOR_BASED == backend)
-      {
-        backend = TextAbstraction::BITMAP_GLYPH; // Fallback to bitmap-based rendering
-      }
-#endif
       if(impl.mRenderingBackend != backend)
       {
         impl.mRenderingBackend = backend;
         impl.mRenderer.Reset();
 
         // When using the vector-based rendering, the size of the GLyphs are different
-        TextAbstraction::GlyphType glyphType = (DevelText::RENDERING_VECTOR_BASED == impl.mRenderingBackend)
-                                                 ? TextAbstraction::VECTOR_GLYPH
-                                                 : TextAbstraction::BITMAP_GLYPH;
+        TextAbstraction::GlyphType glyphType = TextAbstraction::BITMAP_GLYPH;
         impl.mController->SetGlyphType(glyphType);
       }
       break;

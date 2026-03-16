@@ -23,7 +23,6 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 
 namespace Dali
