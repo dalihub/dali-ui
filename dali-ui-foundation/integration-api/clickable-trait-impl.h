@@ -31,11 +31,6 @@
 namespace Dali
 {
 
-namespace Toolkit
-{
-class Control;
-}
-
 namespace Ui
 {
 

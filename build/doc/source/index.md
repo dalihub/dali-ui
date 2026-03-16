@@ -45,8 +45,9 @@ void Create(Application& application) {
 ---
 
 ### Documentation Reference
-- [**Public API Reference**](api/index_classes.md)
-- [**Namespace Overview**](api/index_namespaces.md)
+- [**Class List**](daliUi/annotated.md)
+- [**Namespace Overview**](daliUi/namespaces.md)
+- [**File List**](daliUi/files.md)
 
 ---
 > [!NOTE]

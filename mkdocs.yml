@@ -1,10 +1,10 @@
 site_name: DALi UI Reference
 site_url: https://dalihub.github.io/dali-ui/
 use_directory_urls: false
-site_description: High-performance C++ UI UI documentation.
+site_description: High-performance C++ UI documentation.
 repo_name: dalihub/dali-ui
 repo_url: https://github.com/dalihub/dali-ui
-docs_dir: build/doc/staging
+docs_dir: build/doc/source
 
 theme:
   name: material
@@ -31,6 +31,31 @@ theme:
 
 plugins:
   - search
+  - mkdoxy:
+      projects:
+        daliUi:
+          src-dirs: .
+          full-doc: True
+          doxy-cfg:
+            INPUT: >-
+              dali-ui-foundation/public-api
+              dali-ui-foundation/integration-api
+              dali-ui-elements/public-api
+              dali-ui-components/public-api
+            FILE_PATTERNS: "*.h *.md"
+            EXTRACT_ANON_NSPACES: "NO"
+            RECURSIVE: "YES"
+            EXCLUDE_PATTERNS: "*/internal/*"
+            EXTRACT_ALL: "YES"
+            EXTRACT_PRIVATE: "NO"
+            EXTRACT_STATIC: "YES"
+            HIDE_UNDOC_MEMBERS: "NO"
+            SOURCE_BROWSER: "YES"
+            STRIP_FROM_INC_PATH: "."
+            INCLUDE_PATH: "dali-ui-foundation dali-ui-elements dali-ui-components"
+            ENABLE_PREPROCESSING: "YES"
+            MACRO_EXPANSION: "YES"
+            SEARCH_INCLUDES: "YES"
 
 markdown_extensions:
   - admonition
@@ -44,6 +69,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - API Reference:
-      - Classes: api/index_classes.md
-      - Namespaces: api/index_namespaces.md
-      - Files: api/index_files.md
+      - 'Class List': 'daliUi/annotated.md'
+      - 'Class Index': 'daliUi/classes.md'
+      - 'Namespace List': 'daliUi/namespaces.md'
+      - 'Files': 'daliUi/files.md'
