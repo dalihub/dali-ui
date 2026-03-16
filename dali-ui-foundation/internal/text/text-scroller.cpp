@@ -20,11 +20,14 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -261,10 +264,10 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   // Set the shader and texture for scrolling
   Shader shader =
     isHorizontal
-      ? Shader::New(SHADER_TEXT_SCROLLER_SHADER_VERT, SHADER_TEXT_SCROLLER_SHADER_FRAG,
+      ? Shader::New(ToDaliStringView(SHADER_TEXT_SCROLLER_SHADER_VERT), ToDaliStringView(SHADER_TEXT_SCROLLER_SHADER_FRAG),
                     static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                     "TEXT_SCROLLER")
-      : Shader::New(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT, SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG,
+      : Shader::New(ToDaliStringView(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT), ToDaliStringView(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG),
                     static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                     "TEXT_SCROLLER_VERTICAL");
 

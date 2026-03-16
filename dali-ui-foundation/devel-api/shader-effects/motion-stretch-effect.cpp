@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/devel-api/shader-effects/motion-stretch-effect.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/object/property-map.h>
@@ -27,18 +28,20 @@
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
+using Dali::Integration::ToPropertyValue;
+
 namespace Dali
 {
 namespace Ui
 {
 void SetMotionStretchProperties(Actor& actor)
 {
-  actor.RegisterProperty("uGeometryStretchFactor", 0.5f);
-  actor.RegisterProperty("uSpeedScalingFactor", 0.5f);
-  actor.RegisterProperty("uObjectFadeStart", Vector2(0.25f, 0.25f));
-  actor.RegisterProperty("uObjectFadeEnd", Vector2(0.5f, 0.5f));
-  actor.RegisterProperty("uAlphaScale", 0.75f);
-  Property::Index uModelProperty = actor.RegisterProperty("uModelLastFrame", Matrix::IDENTITY);
+  actor.RegisterProperty(Dali::StringView("uGeometryStretchFactor"), 0.5f);
+  actor.RegisterProperty(Dali::StringView("uSpeedScalingFactor"), 0.5f);
+  actor.RegisterProperty(Dali::StringView("uObjectFadeStart"), Vector2(0.25f, 0.25f));
+  actor.RegisterProperty(Dali::StringView("uObjectFadeEnd"), Vector2(0.5f, 0.5f));
+  actor.RegisterProperty(Dali::StringView("uAlphaScale"), 0.75f);
+  Property::Index uModelProperty = actor.RegisterProperty(Dali::StringView("uModelLastFrame"), Matrix::IDENTITY);
 
   Constraint constraint = Constraint::New<Matrix>(actor, uModelProperty, EqualToConstraint());
   constraint.AddSource(Source(actor, Actor::Property::WORLD_MATRIX));
@@ -50,8 +53,8 @@ Property::Map CreateMotionStretchEffect()
   Property::Map map;
 
   Property::Map customShader;
-  customShader[Visual::Shader::Property::VERTEX_SHADER]   = SHADER_MOTION_STRETCH_EFFECT_VERT.data();
-  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = SHADER_MOTION_STRETCH_EFFECT_FRAG.data();
+  customShader[Visual::Shader::Property::VERTEX_SHADER]   = ToPropertyValue(SHADER_MOTION_STRETCH_EFFECT_VERT.data());
+  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(SHADER_MOTION_STRETCH_EFFECT_FRAG.data());
 
   customShader[Visual::Shader::Property::SUBDIVIDE_GRID_X] = 10;
   customShader[Visual::Shader::Property::SUBDIVIDE_GRID_Y] = 10;

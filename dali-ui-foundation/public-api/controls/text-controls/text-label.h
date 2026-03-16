@@ -399,7 +399,7 @@ public:
    * @param[in] text The text to display
    * @return A handle to the TextLabel control
    */
-  static TextLabel New(const std::string& text);
+  static TextLabel New(const Dali::String& text);
 
   /**
    * @brief Creates the TextLabel control with additional behaviour.
@@ -418,7 +418,7 @@ public:
    * @param[in] text The text to display
    * @return A handle to the TextLabel control
    */
-  static TextLabel New(ControlBehaviour additionalBehaviour, const std::string& text);
+  static TextLabel New(ControlBehaviour additionalBehaviour, const Dali::String& text);
 
   /**
    * @brief Creates an empty handle.

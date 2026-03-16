@@ -24,9 +24,13 @@
 #include <dali/dali.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <sstream>
 
 using namespace Dali;
+
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -230,18 +234,18 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
       continue; // We don't consider index keys.
     }
 
-    const std::string&     key(pair.first.stringKey);
+    const Dali::String&    key(pair.first.stringKey);
     const Property::Value& value(pair.second);
 
     if(key == TOKEN_TARGET)
     {
-      animator->objectName = value.Get<std::string>();
+      animator->objectName = ToStdString(value);
     }
     else if(key == TOKEN_PROPERTY)
     {
       if(value.GetType() == Property::STRING)
       {
-        animator->propertyKey = Property::Key(value.Get<std::string>());
+        animator->propertyKey = Property::Key(value.Get<Dali::String>());
       }
       else
       {
@@ -269,7 +273,7 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
           continue; // We don't consider index keys.
         }
 
-        const std::string&     key(pair.first.stringKey);
+        const Dali::String&    key(pair.first.stringKey);
         const Property::Value& value(pair.second);
 
         if(key == TOKEN_ALPHA_FUNCTION)
@@ -287,7 +291,7 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
           }
           else if(value.GetType() == Property::STRING)
           {
-            ParseString(animator, value.Get<std::string>());
+            ParseString(animator, ToStdString(value));
           }
           else
           {
@@ -304,7 +308,7 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
             {
               continue;
             }
-            const std::string& key(pair.first.stringKey);
+            const Dali::String& key(pair.first.stringKey);
 
             if(key == TOKEN_DELAY)
             {
@@ -320,15 +324,15 @@ TransitionData::Animator* TransitionData::ConvertMap(const Property::Map& map)
         {
           if((value.GetType() == Property::STRING))
           {
-            if(value.Get<std::string>() == "TO")
+            if(value.Get<Dali::String>() == "TO")
             {
               animator->animationType = AnimationType::TO;
             }
-            else if(value.Get<std::string>() == "BETWEEN")
+            else if(value.Get<Dali::String>() == "BETWEEN")
             {
               animator->animationType = AnimationType::BETWEEN;
             }
-            else if(value.Get<std::string>() == "BY")
+            else if(value.Get<Dali::String>() == "BY")
             {
               animator->animationType = AnimationType::BY;
             }
@@ -366,7 +370,7 @@ Property::Map TransitionData::GetAnimatorAt(size_t index)
 
   Animator*     animator = mAnimators[index];
   Property::Map map;
-  map[TOKEN_TARGET] = animator->objectName;
+  map[TOKEN_TARGET] = ToPropertyValue(animator->objectName);
   if(animator->propertyKey.type == Property::Key::INDEX)
   {
     map[TOKEN_PROPERTY] = animator->propertyKey.indexKey;

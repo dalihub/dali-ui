@@ -21,6 +21,10 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToPropertyValue;
 
 namespace
 {
@@ -111,7 +115,7 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
       continue; // We don't consider index keys.
     }
 
-    const std::string&     key(pair.first.stringKey);
+    const Dali::String&    key(pair.first.stringKey);
     const Property::Value& value(pair.second);
 
     if(key == TOKEN_TYPE)
@@ -119,7 +123,7 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
       if(!GetEnumerationProperty(value, SHADER_TYPE_TABLE, SHADER_TYPE_TABLE_COUNT, mShaderType) ||
          mShaderType == ShaderType::UNKNOWN)
       {
-        DALI_LOG_ERROR("Can't find proper type[%s]\n", value.Get<std::string>().c_str());
+        DALI_LOG_ERROR("Can't find proper type[%s]\n", value.Get<Dali::String>().CStr());
         continue;
       }
     }
@@ -135,9 +139,9 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
           continue; // We don't consider index keys.
         }
 
-        Flag               flag = Flag::UNKNOWN;
-        const std::string& optionKey(optionPair.first.stringKey);
-        if(GetEnumeration(optionKey.c_str(), SHADER_OPTION_FLAG_TABLE, SHADER_OPTION_FLAG_TABLE_COUNT, flag) &&
+        Flag                flag = Flag::UNKNOWN;
+        const Dali::String& optionKey(optionPair.first.stringKey);
+        if(GetEnumeration(optionKey.CStr(), SHADER_OPTION_FLAG_TABLE, SHADER_OPTION_FLAG_TABLE_COUNT, flag) &&
            flag != Flag::UNKNOWN)
         {
           if(optionPair.second.Get<bool>())
@@ -147,7 +151,7 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
         }
         else
         {
-          DALI_LOG_ERROR("Can't find this flag[%s]\n", optionKey.c_str());
+          DALI_LOG_ERROR("Can't find this flag[%s]\n", optionKey.CStr());
           continue;
         }
       }
@@ -156,21 +160,21 @@ void PrecompileShaderOption::ConvertShaderMap(const Property::Map& shaderOption)
     {
       if(value.GetType() == Property::STRING)
       {
-        mVertexShader = value.Get<std::string>();
+        GetStdString(value, mVertexShader);
       }
     }
     else if(key == TOKEN_CUSTOM_FRAMENT)
     {
       if(value.GetType() == Property::STRING)
       {
-        mFragmentShader = value.Get<std::string>();
+        GetStdString(value, mFragmentShader);
       }
     }
     else if(key == TOKEN_CUSTOM_NAME)
     {
       if(value.GetType() == Property::STRING)
       {
-        mShaderName = value.Get<std::string>();
+        GetStdString(value, mShaderName);
       }
     }
     else if(key == TOKEN_OPTION_STRETCH_X)

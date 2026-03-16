@@ -20,11 +20,14 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/property-array.h>
 #include <dali/public-api/object/property-index-ranges.h>
 #include <algorithm>
 #include <functional>
 #include <iostream>
+
+using Dali::Integration::ToStdString;
 
 #if defined(DEBUG_ENABLED)
 
@@ -132,7 +135,7 @@ public:
       }
       case Dali::Property::STRING:
       {
-        stream << '"' << mValue.Get<std::string>() << '"';
+        stream << '"' << ToStdString(mValue) << '"';
         break;
       }
       case Dali::Property::ARRAY:
@@ -238,7 +241,7 @@ std::ostream& DumpProperty(std::ostream& o, Property::Index index, Handle handle
 
   o << "{\n";
   o << "\"index\":" << index << ",\n";
-  o << "\"name\":\"" << handle.GetPropertyName(index) << "\",\n";
+  o << "\"name\":\"" << handle.GetPropertyName(index).CStr() << "\",\n";
   o << "\"value\":" << jsonPropertyValue << "\n";
   o << "}";
   return o;
@@ -293,7 +296,7 @@ std::string DumpControl(const Internal::Control& control)
 
   std::ostringstream oss;
   oss << "{\n  ";
-  const std::string& name = control.Self().GetProperty<std::string>(Dali::Actor::Property::NAME);
+  const std::string& name = ToStdString(control.Self().GetProperty(Dali::Actor::Property::NAME));
   if(!name.empty())
   {
     oss << "\"name\":\"" << name << "\",\n";
@@ -317,7 +320,7 @@ std::string DumpActor(Actor actor)
 {
   std::ostringstream oss;
   oss << "{\n  ";
-  const std::string& name = actor.GetProperty<std::string>(Dali::Actor::Property::NAME);
+  const std::string& name = ToStdString(actor.GetProperty(Dali::Actor::Property::NAME));
   if(!name.empty())
   {
     oss << "\"name\":\"" << name << "\",\n";

@@ -23,6 +23,7 @@
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 #include <memory>
 
@@ -41,6 +42,11 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -223,7 +229,7 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factor
   {
     ImageCache::UrlStore urlStore;
     urlStore.mTextureId = TextureManager::INVALID_TEXTURE_ID;
-    urlStore.mUrl       = imageUrls[i].Get<std::string>();
+    urlStore.mUrl       = ToStdString(imageUrls[i]);
     if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
     {
       // Increase reference count of External Resources :
@@ -499,14 +505,14 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   if(mImageUrl.IsValid())
   {
-    map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
   }
   if(mImageUrls != nullptr && !mImageUrls->empty())
   {
     Property::Array urls;
     for(unsigned int i = 0; i < mImageUrls->size(); ++i)
     {
-      urls.Add((*mImageUrls)[i].mUrl.GetUrl());
+      urls.Add(ToPropertyValue((*mImageUrls)[i].mUrl.GetUrl()));
     }
     Property::Value value(const_cast<Property::Array&>(urls));
     map.Insert(Ui::ImageVisual::Property::URL, value);
@@ -556,7 +562,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   if(mMaskingData != nullptr)
   {
-    map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, mMaskingData->mAlphaMaskUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, ToPropertyValue(mMaskingData->mAlphaMaskUrl.GetUrl()));
     map.Insert(Ui::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
     map.Insert(Ui::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
     map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
@@ -842,7 +848,7 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
     case Ui::ImageVisual::Property::ALPHA_MASK_URL:
     {
       std::string alphaUrl = "";
-      if(value.Get(alphaUrl))
+      if(GetStdString(value, alphaUrl))
       {
         AllocateMaskData();
         mMaskingData->mAlphaMaskUrl = alphaUrl;
@@ -1137,12 +1143,12 @@ Shader AnimatedImageVisual::GenerateShader() const
   Shader shader;
   if(IsUsingCustomShader())
   {
-    shader = Shader::New(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
-                           ? mImageVisualShaderFactory.GetVertexShaderSource().data()
-                           : mImpl->GetCustomShaderAt(0)->mVertexShader,
-                         mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
-                           ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
-                           : mImpl->GetCustomShaderAt(0)->mFragmentShader,
+    shader = Shader::New(ToDaliStringView(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
+                                            ? mImageVisualShaderFactory.GetVertexShaderSource().data()
+                                            : mImpl->GetCustomShaderAt(0)->mVertexShader),
+                         ToDaliStringView(mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
+                                            ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
+                                            : mImpl->GetCustomShaderAt(0)->mFragmentShader),
                          mImpl->GetCustomShaderAt(0)->mHints);
 
     shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);

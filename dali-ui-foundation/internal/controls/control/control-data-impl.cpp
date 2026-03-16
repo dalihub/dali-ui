@@ -33,6 +33,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/object-registry.h>
@@ -53,6 +54,10 @@
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -199,7 +204,7 @@ static void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyIn
   }
 }
 
-bool PerformAccessibilityAction(Ui::Control control, const std::string& actionName, const Property::Map& attributes)
+bool PerformAccessibilityAction(Ui::Control control, const Dali::String& actionName, const Property::Map& attributes)
 {
   using Dali::Accessibility::ActionType;
   DALI_ASSERT_DEBUG(control);
@@ -226,7 +231,7 @@ bool PerformAccessibilityAction(Ui::Control control, const std::string& actionNa
   if(action != ActionType::MAX_COUNT)
   {
     bool success = control.AccessibilityActionSignal().Emit({action, Dali::Actor{}});
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: %s, success : %d\n", actionName.c_str(),
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: %s, success : %d\n", actionName.CStr(),
                   success);
     return success;
   }
@@ -234,10 +239,10 @@ bool PerformAccessibilityAction(Ui::Control control, const std::string& actionNa
   return false;
 }
 
-bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& actionName)
+bool PerformLegacyAccessibilityAction(Ui::Control control, const Dali::String& actionName)
 {
   bool ret = true;
-  if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_ACTIVATE))
+  if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_ACTIVATE))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityActivateSignal().Empty())
@@ -249,7 +254,7 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
       ret = Internal::GetImplementation(control).OnAccessibilityActivated();
     }
   }
-  else if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_READING_SKIPPED))
+  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_SKIPPED))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityReadingSkippedSignal().Empty())
@@ -257,7 +262,7 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
       control.AccessibilityReadingSkippedSignal().Emit();
     }
   }
-  else if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_READING_PAUSED))
+  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_PAUSED))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityReadingPausedSignal().Empty())
@@ -265,7 +270,7 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
       control.AccessibilityReadingPausedSignal().Emit();
     }
   }
-  else if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_READING_RESUMED))
+  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_RESUMED))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityReadingResumedSignal().Empty())
@@ -273,7 +278,7 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
       control.AccessibilityReadingResumedSignal().Emit();
     }
   }
-  else if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_READING_CANCELLED))
+  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_CANCELLED))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityReadingCancelledSignal().Empty())
@@ -281,7 +286,7 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
       control.AccessibilityReadingCancelledSignal().Emit();
     }
   }
-  else if(0 == strcmp(actionName.c_str(), ACTION_ACCESSIBILITY_READING_STOPPED))
+  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_STOPPED))
   {
     // if cast succeeds there is an implementation so no need to check
     if(!control.AccessibilityReadingStoppedSignal().Empty())
@@ -296,12 +301,12 @@ bool PerformLegacyAccessibilityAction(Ui::Control control, const std::string& ac
 
   if(ret)
   {
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed Legacy AccessibilityAction: %s\n", actionName.c_str());
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed Legacy AccessibilityAction: %s\n", actionName.CStr());
   }
   return ret;
 }
 
-bool DoAccessibilityAction(BaseObject* object, const std::string& actionName, const Property::Map& attributes)
+bool DoAccessibilityAction(BaseObject* object, const Dali::String& actionName, const Property::Map& attributes)
 {
   Dali::BaseHandle handle(object);
 
@@ -318,7 +323,7 @@ bool DoAccessibilityAction(BaseObject* object, const std::string& actionName, co
   return PerformLegacyAccessibilityAction(control, actionName);
 }
 
-bool DoLegacyAccessibilityAction(BaseObject* object, const std::string& actionName, const Property::Map& attributes)
+bool DoLegacyAccessibilityAction(BaseObject* object, const Dali::String& actionName, const Property::Map& attributes)
 {
   Dali::BaseHandle handle(object);
 
@@ -350,7 +355,7 @@ const char* SIGNAL_DO_GESTURE             = "doGesture";
  * @post If a signal was connected, ownership of functor was passed to CallbackBase. Otherwise the caller is responsible
  * for deleting the unused functor.
  */
-static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName,
+static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName,
                             FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
@@ -362,47 +367,47 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
     Internal::Control& controlImpl(Internal::GetImplementation(control));
     connected = true;
 
-    if(0 == strcmp(signalName.c_str(), SIGNAL_KEY_EVENT))
+    if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_EVENT))
     {
       controlImpl.KeyEventSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_KEY_INPUT_FOCUS_GAINED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_INPUT_FOCUS_GAINED))
     {
       controlImpl.KeyInputFocusGainedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_KEY_INPUT_FOCUS_LOST))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_INPUT_FOCUS_LOST))
     {
       controlImpl.KeyInputFocusLostSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_TAPPED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_TAPPED))
     {
       controlImpl.EnableGestureDetection(GestureType::TAP);
       controlImpl.GetTapGestureDetector().DetectedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_PANNED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_PANNED))
     {
       controlImpl.EnableGestureDetection(GestureType::PAN);
       controlImpl.GetPanGestureDetector().DetectedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_PINCHED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_PINCHED))
     {
       controlImpl.EnableGestureDetection(GestureType::PINCH);
       controlImpl.GetPinchGestureDetector().DetectedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_LONG_PRESSED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_LONG_PRESSED))
     {
       controlImpl.EnableGestureDetection(GestureType::LONG_PRESS);
       controlImpl.GetLongPressGestureDetector().DetectedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_GET_NAME))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_NAME))
     {
       control.AccessibilityGetNameSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_GET_DESCRIPTION))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_DESCRIPTION))
     {
       control.AccessibilityGetDescriptionSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.c_str(), SIGNAL_DO_GESTURE))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_DO_GESTURE))
     {
       control.AccessibilityDoGestureSignal().Connect(tracker, functor);
     }
@@ -829,7 +834,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
         {
           controlImpl.SetBackground(*map);
         }
-        else if(value.Get(url))
+        else if(GetStdString(value, url))
         {
           if(DALI_LIKELY(controlImpl.mImpl->mVisualData))
           {
@@ -893,7 +898,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
       case Ui::Control::Property::ACCESSIBILITY_NAME:
       {
         std::string name;
-        if(value.Get(name))
+        if(GetStdString(value, name))
         {
           if(DALI_LIKELY(controlImpl.mImpl->GetAccessibilityData()) || !name.empty())
           {
@@ -906,7 +911,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
       case Ui::Control::Property::ACCESSIBILITY_DESCRIPTION:
       {
         std::string text;
-        if(value.Get(text))
+        if(GetStdString(value, text))
         {
           if(DALI_LIKELY(controlImpl.mImpl->GetAccessibilityData()) || !text.empty())
           {
@@ -1007,7 +1012,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
       case Ui::Control::Property::AUTOMATION_ID:
       {
         std::string automationId;
-        if(value.Get(automationId))
+        if(GetStdString(value, automationId))
         {
           if(DALI_LIKELY(controlImpl.mImpl->GetAccessibilityData()) || !automationId.empty())
           {
@@ -1021,7 +1026,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
       case Ui::Control::Property::ACCESSIBILITY_VALUE:
       {
         std::string accessibilityValue;
-        if(value.Get(accessibilityValue))
+        if(GetStdString(value, accessibilityValue))
         {
           if(DALI_LIKELY(controlImpl.mImpl->GetAccessibilityData()) || !accessibilityValue.empty())
           {
@@ -1300,14 +1305,14 @@ Property::Value Control::Impl::GetProperty(BaseObject* object, Property::Index i
       case Ui::Control::Property::ACCESSIBILITY_NAME:
       {
         const auto* accessibilityData = controlImpl.mImpl->GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.name : "";
+        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.name : "");
         break;
       }
 
       case Ui::Control::Property::ACCESSIBILITY_DESCRIPTION:
       {
         const auto* accessibilityData = controlImpl.mImpl->GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.description : "";
+        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.description : "");
         break;
       }
 
@@ -1363,14 +1368,14 @@ Property::Value Control::Impl::GetProperty(BaseObject* object, Property::Index i
       case Ui::Control::Property::AUTOMATION_ID:
       {
         const auto* accessibilityData = controlImpl.mImpl->GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.automationId : "";
+        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.automationId : "");
         break;
       }
 
       case Ui::Control::Property::ACCESSIBILITY_VALUE:
       {
         const auto* accessibilityData = controlImpl.mImpl->GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.value : "";
+        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.value : "");
         break;
       }
 

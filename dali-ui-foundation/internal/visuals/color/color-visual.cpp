@@ -23,6 +23,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 
@@ -37,6 +38,8 @@
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToDaliString;
 
 namespace Dali
 {
@@ -353,7 +356,7 @@ Shader ColorVisual::GenerateShader() const
       shaderMap["fragment"]      = fragmentShaderView.data();
       shaderMap["renderPassTag"] = mImpl->GetCustomShaderAt(i)->mRenderPassTag;
       shaderMap["hints"]         = mImpl->GetCustomShaderAt(i)->mHints;
-      shaderMap["name"]          = mImpl->GetCustomShaderAt(i)->mName;
+      shaderMap["name"]          = ToDaliString(mImpl->GetCustomShaderAt(i)->mName);
       shaderArray.PushBack(shaderMap);
     }
 

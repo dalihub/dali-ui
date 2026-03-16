@@ -24,6 +24,7 @@
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/adaptor-framework/key.h>
 #include <dali/public-api/common/dali-common.h>
@@ -47,6 +48,10 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 using namespace Dali::Ui::Text;
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
 
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gTextEditorLogFilter = Debug::Filter::New(Debug::Concise, true, "LOG_TEXT_CONTROLS");
@@ -454,7 +459,7 @@ Text::ControllerPtr TextEditor::GetTextController()
   return mController;
 }
 
-bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName,
+bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName,
                                  FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
@@ -462,15 +467,15 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
   bool           connected(true);
   Ui::TextEditor editor = Ui::TextEditor::DownCast(handle);
 
-  if(0 == strcmp(signalName.c_str(), SIGNAL_TEXT_CHANGED))
+  if(0 == strcmp(signalName.CStr(), SIGNAL_TEXT_CHANGED))
   {
     editor.TextChangedSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_INPUT_STYLE_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_INPUT_STYLE_CHANGED))
   {
     editor.InputStyleChangedSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_MAX_LENGTH_REACHED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_MAX_LENGTH_REACHED))
   {
     if(editor)
     {
@@ -478,7 +483,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.MaxLengthReachedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_ANCHOR_CLICKED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_ANCHOR_CLICKED))
   {
     if(editor)
     {
@@ -486,7 +491,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.AnchorClickedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_CURSOR_POSITION_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_CURSOR_POSITION_CHANGED))
   {
     if(editor)
     {
@@ -494,7 +499,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.CursorPositionChangedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_INPUT_FILTERED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_INPUT_FILTERED))
   {
     if(editor)
     {
@@ -502,7 +507,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.InputFilteredSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_SELECTION_CHANGED))
   {
     if(editor)
     {
@@ -510,7 +515,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.SelectionChangedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_CLEARED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_SELECTION_CLEARED))
   {
     if(editor)
     {
@@ -518,7 +523,7 @@ bool TextEditor::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface*
       editorImpl.SelectionClearedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_SELECTION_STARTED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_SELECTION_STARTED))
   {
     if(editor)
     {
@@ -1293,7 +1298,7 @@ void TextEditor::GetHandleImagePropertyValue(Property::Value& value, Text::Handl
   {
     Property::Map map;
     map[TextEditor::PropertyHandler::IMAGE_MAP_FILENAME_STRING] =
-      mDecorator->GetHandleImage(handleType, handleImageType);
+      ToPropertyValue(mDecorator->GetHandleImage(handleType, handleImageType));
 
     value = map;
   }
@@ -1431,14 +1436,14 @@ Dali::Property::Index TextEditor::RegisterFontVariationProperty(std::string tag)
   mController->GetVariationsMap(variationsMap);
 
   float variationValue = 0.f;
-  auto  tagPtr         = variationsMap.Find(tag);
+  auto  tagPtr         = variationsMap.Find(ToDaliStringView(tag));
 
   if(tagPtr)
   {
     variationValue = tagPtr->Get<float>();
   }
 
-  Dali::Property::Index index = self.RegisterProperty(tag.data(), variationValue);
+  Dali::Property::Index index = self.RegisterProperty(ToDaliString(tag), variationValue);
   if(mVariationIndexMap.find(index) == mVariationIndexMap.end())
   {
     PropertyNotification customFontVariationNotification = self.AddPropertyNotification(index, StepCondition(1.0f));
@@ -1461,8 +1466,8 @@ void TextEditor::OnVariationPropertyNotify(PropertyNotification& source)
   {
     if(Self().DoesCustomPropertyExist(index))
     {
-      float value     = Self().GetCurrentProperty(index).Get<float>();
-      map[tag.data()] = std::round(value);
+      float value                = Self().GetCurrentProperty(index).Get<float>();
+      map[ToDaliStringView(tag)] = std::round(value);
     }
   }
 

@@ -142,9 +142,9 @@ public: // Implementation of AsyncTask
   /**
    * @copydoc Dali::AsyncTask::GetTaskName()
    */
-  std::string_view GetTaskName() const override
+  Dali::StringView GetTaskName() const override
   {
-    return "SvgLoadingTask";
+    return Dali::StringView("SvgLoadingTask");
   }
 
 public:
@@ -226,9 +226,9 @@ public: // Implementation of AsyncTask
   /**
    * @copydoc Dali::AsyncTask::GetTaskName()
    */
-  std::string_view GetTaskName() const override
+  Dali::StringView GetTaskName() const override
   {
-    return "SvgRasterizingTask";
+    return Dali::StringView("SvgRasterizingTask");
   }
 
 private:

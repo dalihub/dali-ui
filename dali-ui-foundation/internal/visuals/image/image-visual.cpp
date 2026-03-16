@@ -28,6 +28,7 @@
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 #include <cstring> // for strlen()
@@ -45,6 +46,12 @@
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdStringView;
 
 namespace Dali
 {
@@ -374,7 +381,7 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
     case Ui::ImageVisual::Property::ALPHA_MASK_URL:
     {
       std::string alphaUrl = "";
-      if(value.Get(alphaUrl))
+      if(GetStdString(value, alphaUrl))
       {
         AllocateMaskData();
         mMaskingData->mAlphaMaskUrl = alphaUrl;
@@ -947,7 +954,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
-    map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
     map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, size.GetWidth());
     map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
@@ -971,7 +978,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   if(mMaskingData != NULL)
   {
-    map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, mMaskingData->mAlphaMaskUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, ToPropertyValue(mMaskingData->mAlphaMaskUrl.GetUrl()));
     map.Insert(Ui::ImageVisual::Property::MASK_CONTENT_SCALE, mMaskingData->mContentScaleFactor);
     map.Insert(Ui::ImageVisual::Property::CROP_TO_MASK, mMaskingData->mCropToMask);
     map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, mMaskingData->mPreappliedMasking
@@ -1377,17 +1384,17 @@ Shader ImageVisual::GenerateShader() const
       modifiedFragmentShader = DevelTexture::ApplyNativeFragmentShader(mNativeTexture, fragmentShaderString, 1);
       if(modifiedFragmentShader)
       {
-        fragmentShaderView = fragmentShaderString;
+        fragmentShaderView = std::string_view(fragmentShaderString);
       }
 
       // Create shader here cause fragmentShaderString scope issue
-      shader = Shader::New(vertexShaderView, fragmentShaderView, mImpl->GetCustomShaderAt(0)->mHints,
-                           mImpl->GetCustomShaderAt(0)->mName);
+      shader = Shader::New(ToDaliStringView(vertexShaderView), ToDaliStringView(fragmentShaderView), mImpl->GetCustomShaderAt(0)->mHints,
+                           ToDaliStringView(mImpl->GetCustomShaderAt(0)->mName));
     }
     else
     {
-      shader = Shader::New(vertexShaderView, fragmentShaderView, mImpl->GetCustomShaderAt(0)->mHints,
-                           mImpl->GetCustomShaderAt(0)->mName);
+      shader = Shader::New(ToDaliStringView(vertexShaderView), ToDaliStringView(fragmentShaderView), mImpl->GetCustomShaderAt(0)->mHints,
+                           ToDaliStringView(mImpl->GetCustomShaderAt(0)->mName));
     }
 
     if(usesWholeTexture)

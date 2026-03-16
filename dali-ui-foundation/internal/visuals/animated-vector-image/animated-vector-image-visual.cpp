@@ -24,6 +24,7 @@
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
 
@@ -39,6 +40,10 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -232,7 +237,7 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Visual::Property::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
   if(mImageUrl.IsValid())
   {
-    map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
+    map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
   }
   map.Insert(Ui::DevelImageVisual::Property::LOOP_COUNT, mAnimationData.loopCount);
 
@@ -339,10 +344,10 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       else if(value.GetType() == Property::STRING)
       {
         std::string markerName;
-        if(value.Get(markerName))
+        if(GetStdString(value, markerName))
         {
           Property::Array array;
-          array.Add(markerName);
+          array.Add(ToPropertyValue(markerName));
           mAnimationData.playRange = std::move(array);
           mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_RANGE;
         }
@@ -1020,12 +1025,12 @@ Shader AnimatedVectorImageVisual::GenerateShader() const
   Shader shader;
   if(IsUsingCustomShader())
   {
-    shader = Shader::New(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
-                           ? mImageVisualShaderFactory.GetVertexShaderSource().data()
-                           : mImpl->GetCustomShaderAt(0)->mVertexShader,
-                         mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
-                           ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
-                           : mImpl->GetCustomShaderAt(0)->mFragmentShader,
+    shader = Shader::New(ToDaliStringView(mImpl->GetCustomShaderAt(0)->mVertexShader.empty()
+                                            ? mImageVisualShaderFactory.GetVertexShaderSource().data()
+                                            : mImpl->GetCustomShaderAt(0)->mVertexShader),
+                         ToDaliStringView(mImpl->GetCustomShaderAt(0)->mFragmentShader.empty()
+                                            ? mImageVisualShaderFactory.GetFragmentShaderSource().data()
+                                            : mImpl->GetCustomShaderAt(0)->mFragmentShader),
                          mImpl->GetCustomShaderAt(0)->mHints);
 
     shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);

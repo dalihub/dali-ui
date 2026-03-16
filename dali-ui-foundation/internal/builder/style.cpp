@@ -19,7 +19,10 @@
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/devel-api/scripting/scripting.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/handle.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -64,7 +67,7 @@ void Style::ApplyVisual(Handle handle, const std::string& visualName, const Prop
                         const Property::Map* instancedProperties)
 {
   // Check if this visual name is a valid property of handle
-  Dali::Property::Index index = handle.GetPropertyIndex(visualName);
+  Dali::Property::Index index = handle.GetPropertyIndex(ToDaliStringView(visualName));
   if(index != Property::INVALID_INDEX)
   {
     const Property::Map* applyMap = &visualMap;

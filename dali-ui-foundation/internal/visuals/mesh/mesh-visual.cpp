@@ -26,12 +26,17 @@
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -180,7 +185,7 @@ void MeshVisual::DoSetProperty(Property::Index index, const Property::Value& val
   {
     case Ui::MeshVisual::Property::OBJECT_URL:
     {
-      if(!value.Get(mObjectUrl))
+      if(!GetStdString(value, mObjectUrl))
       {
         DALI_LOG_ERROR("MeshVisual: property objectUrl is the wrong type, use STRING\n");
       }
@@ -188,7 +193,7 @@ void MeshVisual::DoSetProperty(Property::Index index, const Property::Value& val
     }
     case Ui::MeshVisual::Property::MATERIAL_URL:
     {
-      if(!value.Get(mMaterialUrl))
+      if(!GetStdString(value, mMaterialUrl))
       {
         DALI_LOG_ERROR("MeshVisual: property materialUrl is the wrong type, use STRING\n");
       }
@@ -196,7 +201,7 @@ void MeshVisual::DoSetProperty(Property::Index index, const Property::Value& val
     }
     case Ui::MeshVisual::Property::TEXTURES_PATH:
     {
-      if(!value.Get(mTexturesPath))
+      if(!GetStdString(value, mTexturesPath))
       {
         mTexturesPath.clear();
       }
@@ -255,9 +260,9 @@ void MeshVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::MESH);
-  map.Insert(Ui::MeshVisual::Property::OBJECT_URL, mObjectUrl);
-  map.Insert(Ui::MeshVisual::Property::MATERIAL_URL, mMaterialUrl);
-  map.Insert(Ui::MeshVisual::Property::TEXTURES_PATH, mTexturesPath);
+  map.Insert(Ui::MeshVisual::Property::OBJECT_URL, ToPropertyValue(mObjectUrl));
+  map.Insert(Ui::MeshVisual::Property::MATERIAL_URL, ToPropertyValue(mMaterialUrl));
+  map.Insert(Ui::MeshVisual::Property::TEXTURES_PATH, ToPropertyValue(mTexturesPath));
   map.Insert(Ui::MeshVisual::Property::SHADING_MODE, mShadingMode);
   map.Insert(Ui::MeshVisual::Property::USE_MIPMAPPING, mUseMipmapping);
   map.Insert(Ui::MeshVisual::Property::USE_SOFT_NORMALS, mUseSoftNormals);
@@ -316,7 +321,7 @@ void MeshVisual::OnInitialize()
 void MeshVisual::SupplyEmptyGeometry()
 {
   mGeometry        = Geometry::New();
-  mShader          = Shader::New(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT, SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG,
+  mShader          = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG),
                                  Shader::Hint::NONE, "MESH_VISUAL_SIMPLE");
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
 
@@ -341,19 +346,19 @@ void MeshVisual::CreateShader()
 {
   if(mShadingMode == Ui::MeshVisual::ShadingMode::TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING)
   {
-    mShader = Shader::New(SHADER_MESH_VISUAL_NORMAL_MAP_SHADER_VERT, SHADER_MESH_VISUAL_NORMAL_MAP_SHADER_FRAG,
+    mShader = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_NORMAL_MAP_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_NORMAL_MAP_SHADER_FRAG),
                           static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                           "MESH_VISUAL_NRMMAP");
   }
   else if(mShadingMode == Ui::MeshVisual::ShadingMode::TEXTURED_WITH_SPECULAR_LIGHTING)
   {
-    mShader = Shader::New(SHADER_MESH_VISUAL_SHADER_VERT, SHADER_MESH_VISUAL_SHADER_FRAG,
+    mShader = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_SHADER_FRAG),
                           static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                           "MESH_VISUA");
   }
   else // Textureless
   {
-    mShader = Shader::New(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT, SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG,
+    mShader = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG),
                           static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                           "MESH_VISUAL_SIMPLE");
   }

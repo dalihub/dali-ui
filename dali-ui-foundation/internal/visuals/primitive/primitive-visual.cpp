@@ -24,6 +24,7 @@
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/constants.h>
 
 // INTERNAL INCLUDES
@@ -31,6 +32,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -405,7 +408,7 @@ void PrimitiveVisual::UpdateShaderUniforms()
 
 void PrimitiveVisual::CreateShader()
 {
-  mShader = Shader::New(SHADER_PRIMITIVE_VISUAL_SHADER_VERT, SHADER_PRIMITIVE_VISUAL_SHADER_FRAG,
+  mShader = Shader::New(ToDaliStringView(SHADER_PRIMITIVE_VISUAL_SHADER_VERT), ToDaliStringView(SHADER_PRIMITIVE_VISUAL_SHADER_FRAG),
                         static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                         "PRIMITIVE_VISUAL");
   UpdateShaderUniforms();

@@ -23,6 +23,7 @@
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/property-array.h>
 #include <dali/public-api/rendering/decorated-visual-renderer.h>
@@ -39,6 +40,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -317,20 +320,20 @@ void GradientVisual::OnInitialize()
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::OFF);
   }
 
-  mImpl->mRenderer.RegisterUniqueProperty(UNIFORM_ALIGNMENT_MATRIX_NAME, mGradientTransform);
+  mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
   if(mGradientType == Type::CONIC)
   {
     ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
-    mImpl->mRenderer.RegisterUniqueProperty(UNIFORM_START_ANGLE_NAME, gradient->GetStartAngle().radian);
+    mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_START_ANGLE_NAME), gradient->GetStartAngle().radian);
   }
 
   float textureSize = static_cast<float>(lookupTexture.GetWidth());
-  mImpl->mRenderer.RegisterUniqueProperty(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME,
+  mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
                                           (textureSize - 1.0f) / textureSize);
 
   float startOffset = mGradient->GetStartOffset();
   mStartOffsetIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::GradientVisual::Property::START_OFFSET,
-                                                              UNIFORM_START_OFFSET_NAME, startOffset);
+                                                              ToDaliStringView(UNIFORM_START_OFFSET_NAME), startOffset);
 
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);

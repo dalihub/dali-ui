@@ -25,6 +25,7 @@
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/object/type-registry-helper.h>
 
@@ -53,6 +54,11 @@
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 
 using namespace Dali::Ui::Text;
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -224,7 +230,7 @@ void ParseTextFitProperty(Text::ControllerPtr& controller, const Property::Map* 
       else if((Controller::TextFitInfo::Property::TEXT_FIT_FONT_SIZE_TYPE == valueGet.first.indexKey) ||
               (TEXT_FIT_FONT_SIZE_TYPE_KEY == valueGet.first.stringKey))
       {
-        if("pixelSize" == valueGet.second.Get<std::string>())
+        if(Dali::String("pixelSize") == valueGet.second.Get<Dali::String>())
         {
           type = Controller::FontSizeType::PIXEL_SIZE;
         }
@@ -309,12 +315,12 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::TEXT:
       {
-        impl.UpdateText(value.Get<std::string>());
+        impl.UpdateText(ToStdString(value));
         break;
       }
       case Ui::TextLabel::Property::FONT_FAMILY:
       {
-        const std::string& fontFamily = value.Get<std::string>();
+        const std::string& fontFamily = ToStdString(value);
 
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextLabel::SetProperty Property::FONT_FAMILY newFont(%s)\n",
                       fontFamily.c_str());
@@ -795,12 +801,12 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
       {
         std::string text;
         impl.mController->GetText(text);
-        value = text;
+        value = ToPropertyValue(text);
         break;
       }
       case Ui::TextLabel::Property::FONT_FAMILY:
       {
-        value = impl.mController->GetDefaultFontFamily();
+        value = ToPropertyValue(impl.mController->GetDefaultFontFamily());
         break;
       }
       case Ui::TextLabel::Property::FONT_STYLE:
@@ -824,7 +830,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
 
         if(name)
         {
-          value = std::string(name);
+          value = Dali::String(name);
         }
         break;
       }
@@ -833,7 +839,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
         const char* name = Text::GetVerticalAlignmentString(impl.mController->GetVerticalAlignment());
         if(name)
         {
-          value = std::string(name);
+          value = Dali::String(name);
         }
         break;
       }
@@ -855,7 +861,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
             impl.mTextScroller->GetStopMode(), AUTO_SCROLL_STOP_MODE_TABLE, AUTO_SCROLL_STOP_MODE_TABLE_COUNT);
           if(mode)
           {
-            value = std::string(mode);
+            value = Dali::String(mode);
           }
         }
         break;
@@ -1106,7 +1112,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
   return value;
 }
 
-bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const std::string& signalName,
+bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName,
                                 FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
@@ -1114,7 +1120,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
   bool          connected(true);
   Ui::TextLabel label = Ui::TextLabel::DownCast(handle);
 
-  if(0 == strcmp(signalName.c_str(), SIGNAL_ANCHOR_CLICKED))
+  if(0 == strcmp(signalName.CStr(), SIGNAL_ANCHOR_CLICKED))
   {
     if(label)
     {
@@ -1122,7 +1128,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
       labelImpl.AnchorClickedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_TEXT_FIT_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_TEXT_FIT_CHANGED))
   {
     if(label)
     {
@@ -1130,7 +1136,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
       labelImpl.TextFitChangedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_ASYNC_TEXT_RENDERED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_ASYNC_TEXT_RENDERED))
   {
     if(label)
     {
@@ -1138,7 +1144,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
       labelImpl.AsyncTextRenderedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_ASYNC_NATURAL_SIZE_COMPUTED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_ASYNC_NATURAL_SIZE_COMPUTED))
   {
     if(label)
     {
@@ -1146,7 +1152,7 @@ bool TextLabel::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* 
       labelImpl.AsyncNaturalSizeComputedSignal().Connect(tracker, functor);
     }
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_ASYNC_HEIGHT_FOR_WIDTH_COMPUTED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_ASYNC_HEIGHT_FOR_WIDTH_COMPUTED))
   {
     if(label)
     {
@@ -2517,14 +2523,14 @@ Dali::Property::Index TextLabel::RegisterFontVariationProperty(std::string tag)
   mController->GetVariationsMap(variationsMap);
 
   float variationValue = 0.f;
-  auto  tagPtr         = variationsMap.Find(tag);
+  auto  tagPtr         = variationsMap.Find(ToDaliStringView(tag));
 
   if(tagPtr)
   {
     variationValue = tagPtr->Get<float>();
   }
 
-  Dali::Property::Index index = self.RegisterProperty(tag.data(), variationValue);
+  Dali::Property::Index index = self.RegisterProperty(ToDaliString(tag), variationValue);
   if(mVariationIndexMap.find(index) == mVariationIndexMap.end())
   {
     PropertyNotification customFontVariationNotification = self.AddPropertyNotification(index, StepCondition(1.0f));
@@ -2547,8 +2553,8 @@ void TextLabel::OnVariationPropertyNotify(PropertyNotification& source)
   {
     if(Self().DoesCustomPropertyExist(index))
     {
-      float value     = Self().GetCurrentProperty(index).Get<float>();
-      map[tag.data()] = std::round(value);
+      float value                = Self().GetCurrentProperty(index).Get<float>();
+      map[ToDaliStringView(tag)] = std::round(value);
     }
   }
 

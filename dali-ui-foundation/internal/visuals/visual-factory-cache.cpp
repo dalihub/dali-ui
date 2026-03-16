@@ -26,6 +26,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/shader-integ.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
@@ -37,6 +38,8 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -188,7 +191,7 @@ Shader VisualFactoryCache::GenerateAndSaveShader(ShaderType type, std::string_vi
       ? Shader::Hint::NONE
       : static_cast<Dali::Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL);
 
-  mShader[type] = Dali::Integration::ShaderNewWithUniformBlock(vertexShader, fragmentShader, shaderHints, shaderName,
+  mShader[type] = Dali::Integration::ShaderNewWithUniformBlock(ToDaliStringView(vertexShader), ToDaliStringView(fragmentShader), shaderHints, ToDaliStringView(shaderName),
                                                                {GetDefaultUniformBlock()});
 
   return mShader[type];
@@ -488,7 +491,7 @@ Shader VisualFactoryCache::GetNPatchShader(int index)
                  << "#define FACTOR_SIZE_Y " << yStretchCount + 2 << "\n"
                  << SHADER_NPATCH_VISUAL_SHADER_VERT;
     shader =
-      Shader::New(vertexShader.str(), SHADER_NPATCH_VISUAL_SHADER_FRAG, Dali::Shader::Hint::NONE, shaderName.str());
+      Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(SHADER_NPATCH_VISUAL_SHADER_FRAG), Dali::Shader::Hint::NONE, ToDaliStringView(shaderName.str()));
   }
   return shader;
 }

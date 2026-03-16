@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/style-monitor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/object/object-registry.h>
 
@@ -28,6 +29,9 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/builder/json-parser.h>
 #include <dali-ui-foundation/internal/feedback/feedback-ids.h>
+
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToStdString;
 
 namespace // unnamed namespace
 {
@@ -141,7 +145,7 @@ void FeedbackStyle::ObjectCreated(BaseHandle handle)
 {
   if(handle)
   {
-    const std::string& type = handle.GetTypeName();
+    const std::string& type = ToStdString(handle.GetTypeName());
 
     const FeedbackStyleInfo styleInfo = GetStyleInfo(type);
 
@@ -155,7 +159,7 @@ void FeedbackStyle::ObjectCreated(BaseHandle handle)
         if(!info.mHapticFeedbackPattern.empty() || !info.mHapticFeedbackFile.empty() ||
            !info.mSoundFeedbackPattern.empty() || !info.mSoundFeedbackFile.empty())
         {
-          handle.ConnectSignal(this, info.mSignalName, PlayFeedbackFromSignal(*this, type, info.mSignalName));
+          handle.ConnectSignal(this, ToDaliStringView(info.mSignalName), PlayFeedbackFromSignal(*this, type, info.mSignalName));
 
           DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                         "FeedbackStyle::Set found Haptic pattern %s for Object type: %s, Signal Type: %s\n",

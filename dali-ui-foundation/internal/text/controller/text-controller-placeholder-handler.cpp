@@ -20,12 +20,16 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/placeholder-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToPropertyValue;
 
 namespace
 {
@@ -413,7 +417,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
                                             : Controller::PLACEHOLDER_TYPE_ACTIVE;
 
         std::string text = "";
-        if(value.Get(text))
+        if(GetStdString(value, text))
         {
           SetPlaceholderText(controller, placeHolderType, text);
         }
@@ -434,7 +438,7 @@ void Controller::PlaceholderHandler::SetPlaceholderProperty(Controller& controll
       case Ui::Text::PlaceHolder::Property::FONT_FAMILY:
       {
         std::string fontFamily = "";
-        if(value.Get(fontFamily))
+        if(GetStdString(value, fontFamily))
         {
           SetPlaceholderFontFamily(controller, fontFamily);
         }
@@ -480,15 +484,15 @@ void Controller::PlaceholderHandler::GetPlaceholderProperty(Controller& controll
   {
     if(!controller.mImpl->mEventData->mPlaceholderTextActive.empty())
     {
-      map[Text::PlaceHolder::Property::TEXT_FOCUSED] = controller.mImpl->mEventData->mPlaceholderTextActive;
+      map[Text::PlaceHolder::Property::TEXT_FOCUSED] = ToPropertyValue(controller.mImpl->mEventData->mPlaceholderTextActive);
     }
     if(!controller.mImpl->mEventData->mPlaceholderTextInactive.empty())
     {
-      map[Text::PlaceHolder::Property::TEXT] = controller.mImpl->mEventData->mPlaceholderTextInactive;
+      map[Text::PlaceHolder::Property::TEXT] = ToPropertyValue(controller.mImpl->mEventData->mPlaceholderTextInactive);
     }
 
     map[Text::PlaceHolder::Property::COLOR]       = controller.mImpl->mEventData->mPlaceholderTextColor;
-    map[Text::PlaceHolder::Property::FONT_FAMILY] = GetPlaceholderFontFamily(controller);
+    map[Text::PlaceHolder::Property::FONT_FAMILY] = ToPropertyValue(GetPlaceholderFontFamily(controller));
 
     Property::Value fontStyleMapGet;
     GetFontStyleProperty(&controller, fontStyleMapGet, Text::FontStyle::PLACEHOLDER);

@@ -22,6 +22,7 @@
 #include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraint-source.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/animation/constraints.h>
@@ -37,6 +38,8 @@
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -577,7 +580,7 @@ void Control::Impl::VisualData::RegisterVisual(Property::Index index, Ui::Visual
   if(visual.GetName().empty())
   {
     // returns empty string if index is not found as long as index is not -1
-    std::string visualName = self.GetPropertyName(index);
+    std::string visualName = ToStdString(self.GetPropertyName(index));
     if(!visualName.empty())
     {
       DALI_LOG_INFO(gLogFilter, Debug::Concise, "Setting visual name for property %d to %s\n", index,

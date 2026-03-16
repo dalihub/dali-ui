@@ -20,8 +20,11 @@
 #include <dali-ui-foundation/internal/text/input-filter.h>
 
 // INTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 
 using namespace Dali::Ui;
+
+using Dali::Integration::GetStdString;
 
 namespace Dali
 {
@@ -50,11 +53,11 @@ void InputFilter::SetProperties(const Property::Map& map)
 
     if(key == Ui::InputFilter::Property::ACCEPTED || key == PROPERTY_ACCEPTED)
     {
-      value.Get(mAccepted);
+      GetStdString(value, mAccepted);
     }
     else if(key == Ui::InputFilter::Property::REJECTED || key == PROPERTY_REJECTED)
     {
-      value.Get(mRejected);
+      GetStdString(value, mRejected);
     }
   }
 }

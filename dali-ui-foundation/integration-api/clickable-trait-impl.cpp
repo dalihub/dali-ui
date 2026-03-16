@@ -19,10 +19,13 @@
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali/integration-api/input-options.h>
+#include <dali/integration-api/string-utils.h>
 #include <cstdint>
 
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
+
+using Dali::Integration::ToStdString;
 
 namespace Dali::Ui::Integration
 {
@@ -154,7 +157,7 @@ bool ClickableTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 
 bool ClickableTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
 {
-  const std::string& keyName = event.GetKeyEvent().GetKeyName();
+  const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
   if(IsExecutionKey(keyName))
   {
     RecordPressedExecutionKey(keyName);
@@ -183,7 +186,7 @@ bool ClickableTraitImpl::HandleKeyPressedForClick(View view, const InputEvent& e
 
 bool ClickableTraitImpl::HandleKeyReleased(View view, const InputEvent& event)
 {
-  const std::string& keyName = event.GetKeyEvent().GetKeyName();
+  const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
   if(mPressedExecutionKey == keyName)
   {
     ClearKeyPressedHistory();

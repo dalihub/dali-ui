@@ -26,10 +26,15 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 #if defined(DEBUG_ENABLED)
 extern Debug::Filter* gTextFieldLogFilter;
 #endif
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali::Ui::Internal
 {
@@ -45,7 +50,7 @@ std::string TextField::PropertyHandler::GetImageFileNameFromPropertyValue(const 
     const Property::Value* filenameValue = map->Find(TextField::PropertyHandler::IMAGE_MAP_FILENAME_STRING);
     if(filenameValue)
     {
-      filenameValue->Get(filename);
+      GetStdString(*filenameValue, filename);
     }
   }
   return filename;
@@ -79,7 +84,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::TEXT:
     {
-      const std::string& text = value.Get<std::string>();
+      const std::string& text = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p TEXT %s\n", impl.mController.Get(),
                     text.c_str());
 
@@ -89,7 +94,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
 
     case Ui::TextField::Property::PLACEHOLDER_TEXT:
     {
-      const std::string& text = value.Get<std::string>();
+      const std::string& text = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p PLACEHOLDER_TEXT %s\n", impl.mController.Get(),
                     text.c_str());
 
@@ -98,7 +103,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::PLACEHOLDER_TEXT_FOCUSED:
     {
-      const std::string& text = value.Get<std::string>();
+      const std::string& text = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p PLACEHOLDER_TEXT_FOCUSED %s\n",
                     impl.mController.Get(), text.c_str());
 
@@ -107,7 +112,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::FONT_FAMILY:
     {
-      const std::string& fontFamily = value.Get<std::string>();
+      const std::string& fontFamily = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p FONT_FAMILY %s\n", impl.mController.Get(),
                     fontFamily.c_str());
       impl.mController->SetDefaultFontFamily(fontFamily);
@@ -263,7 +268,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::GRAB_HANDLE_IMAGE:
     {
-      const std::string imageFileName = value.Get<std::string>();
+      const std::string imageFileName = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField %p GRAB_HANDLE_IMAGE %s\n", impl.mController.Get(),
                     imageFileName.c_str());
 
@@ -276,7 +281,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::GRAB_HANDLE_PRESSED_IMAGE:
     {
-      const std::string imageFileName = value.Get<std::string>();
+      const std::string imageFileName = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::Verbose, "TextField %p GRAB_HANDLE_PRESSED_IMAGE %s\n",
                     impl.mController.Get(), imageFileName.c_str());
 
@@ -430,7 +435,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::INPUT_FONT_FAMILY:
     {
-      const std::string& fontFamily = value.Get<std::string>();
+      const std::string& fontFamily = ToStdString(value);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p INPUT_FONT_FAMILY %s\n", impl.mController.Get(),
                     fontFamily.c_str());
       impl.mController->SetInputFontFamily(fontFamily);
@@ -795,26 +800,26 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
       impl.mController->GetText(text);
       DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p returning text: %s\n", impl.mController.Get(),
                     text.c_str());
-      value = text;
+      value = ToPropertyValue(text);
       break;
     }
     case Ui::TextField::Property::PLACEHOLDER_TEXT:
     {
       std::string text;
       impl.mController->GetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_INACTIVE, text);
-      value = text;
+      value = ToPropertyValue(text);
       break;
     }
     case Ui::TextField::Property::PLACEHOLDER_TEXT_FOCUSED:
     {
       std::string text;
       impl.mController->GetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_ACTIVE, text);
-      value = text;
+      value = ToPropertyValue(text);
       break;
     }
     case Ui::TextField::Property::FONT_FAMILY:
     {
-      value = impl.mController->GetDefaultFontFamily();
+      value = ToPropertyValue(impl.mController->GetDefaultFontFamily());
       break;
     }
     case Ui::TextField::Property::FONT_STYLE:
@@ -842,7 +847,7 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
       const char* name = Text::GetHorizontalAlignmentString(impl.mController->GetHorizontalAlignment());
       if(name)
       {
-        value = std::string(name);
+        value = Dali::String(name);
       }
       break;
     }
@@ -852,7 +857,7 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
 
       if(name)
       {
-        value = std::string(name);
+        value = Dali::String(name);
       }
       break;
     }
@@ -898,12 +903,12 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
     }
     case Ui::TextField::Property::GRAB_HANDLE_IMAGE:
     {
-      value = impl.mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED);
+      value = ToPropertyValue(impl.mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED));
       break;
     }
     case Ui::TextField::Property::GRAB_HANDLE_PRESSED_IMAGE:
     {
-      value = impl.mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED);
+      value = ToPropertyValue(impl.mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED));
       break;
     }
     case Ui::TextField::Property::SCROLL_THRESHOLD:
@@ -977,7 +982,7 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
     }
     case Ui::TextField::Property::INPUT_FONT_FAMILY:
     {
-      value = impl.mController->GetInputFontFamily();
+      value = ToPropertyValue(impl.mController->GetInputFontFamily());
       break;
     }
     case Ui::TextField::Property::INPUT_FONT_STYLE:
@@ -1086,7 +1091,7 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
     }
     case Ui::DevelTextField::Property::SELECTED_TEXT:
     {
-      value = impl.mController->GetSelectedText();
+      value = ToPropertyValue(impl.mController->GetSelectedText());
       break;
     }
     case Ui::DevelTextField::Property::SELECTED_TEXT_START:

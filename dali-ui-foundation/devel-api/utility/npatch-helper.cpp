@@ -20,9 +20,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-data.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -239,7 +242,7 @@ void RegisterStretchProperties(Renderer& renderer, const char* uniformName,
 
     std::stringstream uniform;
     uniform << uniformName << "[" << i << "]";
-    renderer.RegisterProperty(uniform.str(), Vector2(fix, stretch));
+    renderer.RegisterProperty(ToDaliStringView(uniform.str()), Vector2(fix, stretch));
 
     prevEnd     = end;
     prevFix     = fix;
@@ -250,7 +253,7 @@ void RegisterStretchProperties(Renderer& renderer, const char* uniformName,
     prevFix += imageExtent - prevEnd;
     std::stringstream uniform;
     uniform << uniformName << "[" << i << "]";
-    renderer.RegisterProperty(uniform.str(), Vector2(prevFix, prevStretch));
+    renderer.RegisterProperty(ToDaliStringView(uniform.str()), Vector2(prevFix, prevStretch));
   }
 }
 
@@ -268,16 +271,16 @@ void ApplyTextureAndUniforms(Renderer& renderer, const Internal::NPatchData* dat
     uint16_t stretchWidth  = (stretchX.GetY() >= stretchX.GetX()) ? stretchX.GetY() - stretchX.GetX() : 0u;
     uint16_t stretchHeight = (stretchY.GetY() >= stretchY.GetX()) ? stretchY.GetY() - stretchY.GetX() : 0u;
 
-    renderer.RegisterProperty("uFixed[0]", Vector2::ZERO);
-    renderer.RegisterProperty("uFixed[1]", Vector2(stretchX.GetX(), stretchY.GetX()));
+    renderer.RegisterProperty(Dali::StringView("uFixed[0]"), Vector2::ZERO);
+    renderer.RegisterProperty(Dali::StringView("uFixed[1]"), Vector2(stretchX.GetX(), stretchY.GetX()));
     renderer.RegisterProperty(
-      "uFixed[2]", Vector2(data->GetCroppedWidth() - stretchWidth, data->GetCroppedHeight() - stretchHeight));
-    renderer.RegisterProperty("uStretchTotal", Vector2(stretchWidth, stretchHeight));
+      Dali::StringView("uFixed[2]"), Vector2(data->GetCroppedWidth() - stretchWidth, data->GetCroppedHeight() - stretchHeight));
+    renderer.RegisterProperty(Dali::StringView("uStretchTotal"), Vector2(stretchWidth, stretchHeight));
   }
   else
   {
-    renderer.RegisterProperty("uNinePatchFactorsX[0]", Vector2::ZERO);
-    renderer.RegisterProperty("uNinePatchFactorsY[0]", Vector2::ZERO);
+    renderer.RegisterProperty(Dali::StringView("uNinePatchFactorsX[0]"), Vector2::ZERO);
+    renderer.RegisterProperty(Dali::StringView("uNinePatchFactorsY[0]"), Vector2::ZERO);
 
     RegisterStretchProperties(renderer, "uNinePatchFactorsX", data->GetStretchPixelsX(), data->GetCroppedWidth());
     RegisterStretchProperties(renderer, "uNinePatchFactorsY", data->GetStretchPixelsY(), data->GetCroppedHeight());

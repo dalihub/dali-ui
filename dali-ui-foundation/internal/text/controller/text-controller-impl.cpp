@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <cmath>
@@ -44,6 +45,8 @@
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 
 using namespace Dali;
+
+using Dali::Integration::ToPropertyValue;
 
 namespace
 {
@@ -1707,8 +1710,8 @@ Ui::TextAnchor Controller::Impl::CreateAnchorActor(Anchor anchor)
   DALI_LOG_INFO(gLogFilter, Debug::General, "CreateAnchorActor NAME:%s, URI:%s\n", anchorText.c_str(),
                 anchorHref.c_str());
 
-  actor.SetProperty(Actor::Property::NAME, anchorText);
-  actor.SetProperty(Ui::TextAnchor::Property::URI, anchorHref);
+  actor.SetProperty(Actor::Property::NAME, ToPropertyValue(anchorText));
+  actor.SetProperty(Ui::TextAnchor::Property::URI, ToPropertyValue(anchorHref));
   actor.SetProperty(Ui::TextAnchor::Property::START_CHARACTER_INDEX, static_cast<int>(anchor.startIndex));
   actor.SetProperty(Ui::TextAnchor::Property::END_CHARACTER_INDEX, static_cast<int>(anchor.endIndex));
   return actor;

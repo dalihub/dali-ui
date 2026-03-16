@@ -30,7 +30,7 @@ TextLabel TextLabel::New()
   return Internal::TextLabel::New();
 }
 
-TextLabel TextLabel::New(const std::string& text)
+TextLabel TextLabel::New(const Dali::String& text)
 {
   TextLabel label = Internal::TextLabel::New();
   label.SetProperty(TextLabel::Property::TEXT, text);
@@ -43,7 +43,7 @@ TextLabel TextLabel::New(ControlBehaviour additionalBehaviour)
   return Internal::TextLabel::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
 }
 
-TextLabel TextLabel::New(ControlBehaviour additionalBehaviour, const std::string& text)
+TextLabel TextLabel::New(ControlBehaviour additionalBehaviour, const Dali::String& text)
 {
   TextLabel label = Internal::TextLabel::New(static_cast<Ui::Internal::Control::ControlBehaviour>(additionalBehaviour));
   label.SetProperty(TextLabel::Property::TEXT, text);

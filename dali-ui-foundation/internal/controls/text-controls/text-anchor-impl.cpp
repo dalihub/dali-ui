@@ -22,6 +22,7 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/object/type-registry-helper.h>
 
@@ -31,6 +32,10 @@
 // DEVEL INCLUDES
 
 using namespace Dali::Ui::Text;
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -102,7 +107,7 @@ Property::Value TextAnchor::GetProperty(BaseObject* object, Property::Index inde
       }
       case Ui::TextAnchor::Property::URI:
       {
-        value = impl.mUri;
+        value = ToPropertyValue(impl.mUri);
         break;
       }
     }
@@ -134,7 +139,7 @@ void TextAnchor::SetProperty(BaseObject* object, Property::Index index, const Pr
 
       case Ui::TextAnchor::Property::URI:
       {
-        value.Get(impl.mUri);
+        GetStdString(value, impl.mUri);
         break;
       }
     }
@@ -197,7 +202,7 @@ Dali::Accessibility::Accessible* TextAnchor::TextAnchorAccessible::GetAnchorAcce
 std::string TextAnchor::TextAnchorAccessible::GetAnchorUri(int32_t anchorIndex) const
 {
   auto self = Ui::TextAnchor::DownCast(Self());
-  return self.GetProperty(Ui::TextAnchor::Property::URI).Get<std::string>();
+  return ToStdString(self.GetProperty(Ui::TextAnchor::Property::URI));
 }
 
 bool TextAnchor::TextAnchorAccessible::IsValid() const
@@ -221,7 +226,7 @@ bool TextAnchor::OnAccessibilityActivated()
   if(parentImplementationAnchorInterface)
   {
     std::string href;
-    std::string uri = Self().GetProperty(Ui::TextAnchor::Property::URI).Get<std::string>();
+    std::string uri = ToStdString(Self().GetProperty(Ui::TextAnchor::Property::URI));
     parentImplementationAnchorInterface->AnchorClicked(mStartCharacterIndex, href);
     parentImplementationAnchorInterface->EmitAnchorClickedSignal(uri);
     return true;

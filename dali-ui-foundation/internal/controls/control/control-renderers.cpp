@@ -16,6 +16,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
@@ -23,6 +24,8 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -52,13 +55,13 @@ Shader CreateShader(std::string_view vertexSrc, std::string_view fragmentSrc, Da
         {
           return visualFactoryCache.GetExternalShader(iter->second);
         }
-        Shader shader            = Shader::New(vertexSrc, fragmentSrc, hints, shaderName);
+        Shader shader            = Shader::New(ToDaliStringView(vertexSrc), ToDaliStringView(fragmentSrc), hints, ToDaliStringView(shaderName));
         gShaderIdMap[shaderName] = visualFactoryCache.RegisterExternalShader(shader);
         return shader;
       }
     }
 
-    shader = Shader::New(vertexSrc, fragmentSrc, hints, shaderName);
+    shader = Shader::New(ToDaliStringView(vertexSrc), ToDaliStringView(fragmentSrc), hints, ToDaliStringView(shaderName));
   }
   return shader;
 }

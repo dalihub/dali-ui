@@ -17,6 +17,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/segmentation.h>
 #include <dali/public-api/actors/layer.h>
+#include <dali/public-api/common/dali-string.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
@@ -184,7 +185,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
       self.Add(*it);
       it->LowerToBottom();
 
-      if(it->GetProperty<std::string>(Dali::Actor::Property::NAME) == "HighlightActor")
+      if(it->GetProperty(Dali::Actor::Property::NAME) == Dali::String("HighlightActor"))
       {
         highlightActor = *it;
       }

@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/file-loader.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/trace.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/property-array.h>
@@ -36,6 +37,8 @@
 #include <sstream>
 #include <thread>
 #endif
+
+using Dali::Integration::GetStdString;
 
 namespace Dali
 {
@@ -426,7 +429,7 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
     else
     {
       std::string startMarker, endMarker;
-      if(playRange.GetElementAt(0).Get(startMarker) && playRange.GetElementAt(1).Get(endMarker))
+      if(GetStdString(playRange.GetElementAt(0), startMarker) && GetStdString(playRange.GetElementAt(1), endMarker))
       {
         if(mVectorRenderer)
         {
@@ -443,7 +446,7 @@ void VectorAnimationTask::SetPlayRange(const Property::Array& playRange)
   else if(count == 1)
   {
     std::string marker;
-    if(playRange.GetElementAt(0).Get(marker))
+    if(GetStdString(playRange.GetElementAt(0), marker))
     {
       if(mVectorRenderer && mVectorRenderer.GetMarkerInfo(marker, startFrame, endFrame))
       {

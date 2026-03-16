@@ -776,7 +776,7 @@ void Control::OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimen
 Vector3 Control::GetNaturalSize()
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Control::GetNaturalSize for %s\n",
-                Self().GetProperty<std::string>(Dali::Actor::Property::NAME).c_str());
+                Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::Control::Property::BACKGROUND);
   if(visualImplPtr)
   {

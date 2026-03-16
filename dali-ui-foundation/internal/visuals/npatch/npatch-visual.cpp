@@ -24,6 +24,7 @@
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/utility/npatch-helper.h>
@@ -39,6 +40,10 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -193,7 +198,7 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
   if(auxImage)
   {
     std::string url;
-    if(auxImage->Get(url))
+    if(GetStdString(*auxImage, url))
     {
       mAuxiliaryUrl = url;
     }
@@ -300,14 +305,14 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::N_PATCH);
-  map.Insert(Ui::ImageVisual::Property::URL, mImageUrl.GetUrl());
+  map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
   map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisual::Property::BORDER, mBorder);
   map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
 
   if(mAuxiliaryUrl.IsValid())
   {
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, mAuxiliaryUrl.GetUrl());
+    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
     map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
   }
 }
@@ -316,7 +321,7 @@ void NPatchVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   if(mAuxiliaryUrl.IsValid())
   {
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, mAuxiliaryUrl.GetUrl());
+    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
     map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
   }
 }
@@ -489,7 +494,7 @@ Shader NPatchVisual::CreateShader()
                    << "#define FACTOR_SIZE_Y " << yStretchCount + 2 << "\n"
                    << SHADER_NPATCH_VISUAL_SHADER_VERT;
 
-      shader = Shader::New(vertexShader.str(), fragmentShader, Dali::Shader::Hint::NONE, shaderName.str());
+      shader = Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(fragmentShader), Dali::Shader::Hint::NONE, ToDaliStringView(shaderName.str()));
     }
   }
   else
@@ -511,7 +516,7 @@ Shader NPatchVisual::CreateShader()
       {
         vertexShader = mImpl->GetCustomShaderAt(0)->mVertexShader.c_str();
       }
-      shader = Shader::New(vertexShader, fragmentShader, hints);
+      shader = Shader::New(vertexShader, ToDaliStringView(fragmentShader), hints);
     }
     else if(xStretchCount > 0 || yStretchCount > 0)
     {
@@ -523,7 +528,7 @@ Shader NPatchVisual::CreateShader()
                    << "#define FACTOR_SIZE_Y " << yStretchCount + 2 << "\n"
                    << SHADER_NPATCH_VISUAL_SHADER_VERT;
 
-      shader = Shader::New(vertexShader.str(), fragmentShader, hints, shaderName.str());
+      shader = Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(fragmentShader), hints, ToDaliStringView(shaderName.str()));
     }
   }
 

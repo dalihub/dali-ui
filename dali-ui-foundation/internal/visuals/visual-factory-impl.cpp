@@ -22,6 +22,7 @@
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/property-array.h>
 #include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/object/type-registry.h>
@@ -55,6 +56,9 @@
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -160,7 +164,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       std::string      imageUrl;
       if(imageURLValue)
       {
-        if(imageURLValue->Get(imageUrl))
+        if(GetStdString(*imageURLValue, imageUrl))
         {
           if(!imageUrl.empty())
           {
@@ -245,7 +249,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
-      if(imageURLValue && imageURLValue->Get(imageUrl))
+      if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
         if(!imageUrl.empty())
         {
@@ -259,7 +263,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
-      if(imageURLValue && imageURLValue->Get(imageUrl))
+      if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
         if(!imageUrl.empty())
         {
@@ -273,7 +277,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
-      if(imageURLValue && imageURLValue->Get(imageUrl))
+      if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
         if(!imageUrl.empty())
         {
@@ -307,7 +311,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     // Return URL if present in PropertyMap else return "not
     // found message"
     Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
-    return (imageURLValue) ? imageURLValue->Get<std::string>()
+    return (imageURLValue) ? ToStdString(*imageURLValue)
                            : std::string("url not found in PropertyMap");
   })())
        : std::string(""))

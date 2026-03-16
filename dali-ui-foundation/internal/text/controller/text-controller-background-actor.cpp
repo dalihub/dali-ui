@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-background-actor.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/rendering/renderer.h>
 
 // INTERNAL INCLUDES
@@ -27,6 +28,8 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali::Ui::Text
 {
@@ -234,7 +237,7 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
       if(!textShaderBackground)
       {
         textShaderBackground =
-          Shader::New(SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_VERT, SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_FRAG,
+          Shader::New(ToDaliStringView(SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_VERT), ToDaliStringView(SHADER_TEXT_CONTROLLER_BACKGROUND_SHADER_FRAG),
                       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                       "TEXT_SCROLLER");
       }

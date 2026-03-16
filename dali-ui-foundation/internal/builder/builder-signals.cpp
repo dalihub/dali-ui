@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/common/stage.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/object/property-notification.h>
@@ -28,6 +29,10 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 #include <dali-ui-foundation/internal/builder/builder-impl.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -59,15 +64,15 @@ struct ChildActorAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(actorName);
+    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
 
     if(actor)
     {
-      Actor child_actor = actor.FindChildByName(childName);
+      Actor child_actor = actor.FindChildByName(ToDaliStringView(childName));
 
       if(child_actor)
       {
-        child_actor.DoAction(actionName, parameters);
+        child_actor.DoAction(ToDaliString(actionName), parameters);
       }
       else
       {
@@ -86,11 +91,11 @@ struct PropertySetAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(actorName);
+    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
 
     if(actor)
     {
-      Property::Index idx = actor.GetPropertyIndex(propertyName);
+      Property::Index idx = actor.GetPropertyIndex(ToDaliStringView(propertyName));
 
       if(idx != Property::INVALID_INDEX)
       {
@@ -120,10 +125,10 @@ struct GenericAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(actorName);
+    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
     if(actor)
     {
-      actor.DoAction(actionName, parameters);
+      actor.DoAction(ToDaliString(actionName), parameters);
     }
   };
 };
@@ -179,11 +184,11 @@ struct DelayedConstrainerApply
   bool GetApplyParameters(size_t i, Actor& targetActor, Property::Index& targetPropertyIndex, Actor& sourceActor,
                           Property::Index& sourcePropertyIndex)
   {
-    targetActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(targetActorNames[i]);
+    targetActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
     targetPropertyIndex = Property::INVALID_INDEX;
     if(targetActor)
     {
-      targetPropertyIndex = targetActor.GetPropertyIndex(targetPropertyNames[i]);
+      targetPropertyIndex = targetActor.GetPropertyIndex(ToDaliStringView(targetPropertyNames[i]));
       if(targetPropertyIndex == Property::INVALID_INDEX)
       {
         DALI_SCRIPT_WARNING("Property '%s' not founded in actor '%s'\n", targetPropertyNames[i].c_str(),
@@ -197,11 +202,11 @@ struct DelayedConstrainerApply
       return false;
     }
 
-    sourceActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(sourceActorNames[i]);
+    sourceActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(sourceActorNames[i]));
     sourcePropertyIndex = Property::INVALID_INDEX;
     if(sourceActor)
     {
-      sourcePropertyIndex = sourceActor.GetPropertyIndex(sourcePropertyNames[i]);
+      sourcePropertyIndex = sourceActor.GetPropertyIndex(ToDaliStringView(sourcePropertyNames[i]));
       if(sourcePropertyIndex == Property::INVALID_INDEX)
       {
         DALI_SCRIPT_WARNING("Property '%s' not founded in actor '%s'\n", sourcePropertyNames[i].c_str(),
@@ -285,7 +290,7 @@ struct DelayedConstrainerRemove
       {
         for(size_t i(0); i < actorCount; ++i)
         {
-          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(targetActorNames[i]);
+          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
           if(targetActor)
           {
             constrainer.Remove(targetActor);
@@ -304,7 +309,7 @@ struct DelayedConstrainerRemove
       {
         for(size_t i(0); i < actorCount; ++i)
         {
-          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(targetActorNames[i]);
+          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
           if(targetActor)
           {
             constrainer.Remove(targetActor);
@@ -434,7 +439,7 @@ struct SignalConnector<Actor>
   template<typename T>
   void Connect(T& functor)
   {
-    mActor.ConnectSignal(mTracker, mName, functor);
+    mActor.ConnectSignal(mTracker, ToDaliString(mName), functor);
   }
 };
 
@@ -641,7 +646,7 @@ void SetActionOnSignal(const TreeNode& root, const TreeNode& child, Actor actor,
   {
     // no named actor; presume self
     GenericAction action;
-    action.actorName  = actor.GetProperty<std::string>(Dali::Actor::Property::NAME);
+    action.actorName  = ToStdString(actor.GetProperty(Dali::Actor::Property::NAME));
     action.actionName = *actionName;
     GetParameters(child, action.parameters);
     connector.Connect(action);
@@ -714,7 +719,7 @@ Actor SetupSignalAction(ConnectionTracker* tracker, const TreeNode& root, const 
       const TreeNode::KeyNodePair& key_child = *iter;
 
       DALI_SCRIPT_INFO("  Creating Signal for: %s\n",
-                       actor.GetProperty<std::string>(Dali::Actor::Property::NAME).c_str());
+                       actor.GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
 
       OptionalString name(IsString(IsChild(key_child.second, "name")));
       DALI_ASSERT_ALWAYS(name && "Signal must have a name");
@@ -746,7 +751,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       OptionalString prop(IsString(IsChild(key_child.second, "property")));
       DALI_ASSERT_ALWAYS(prop && "Notification signal must specify a property");
 
-      Property::Index prop_index = actor.GetPropertyIndex(*prop);
+      Property::Index prop_index = actor.GetPropertyIndex(ToDaliStringView(*prop));
       DALI_ASSERT_ALWAYS(prop_index != Property::INVALID_INDEX && "Notification signal specifies an unknown property");
 
       OptionalString cond(IsString(IsChild(key_child.second, "condition")));
@@ -755,7 +760,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       if("False" == *cond)
       {
         PropertyNotification notification =
-          actor.AddPropertyNotification(actor.GetPropertyIndex(*prop), LessThanCondition(1.f));
+          actor.AddPropertyNotification(actor.GetPropertyIndex(ToDaliStringView(*prop)), LessThanCondition(1.f));
 
         SignalConnector<PropertyNotification> connector(tracker, notification);
         SetActionOnSignal(root, key_child.second, actor, builder, connector);
@@ -763,7 +768,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       else if("LessThan" == *cond)
       {
         PropertyNotification notification = actor.AddPropertyNotification(
-          actor.GetPropertyIndex(*prop), LessThanCondition(GetConditionArg0(key_child.second)));
+          actor.GetPropertyIndex(ToDaliStringView(*prop)), LessThanCondition(GetConditionArg0(key_child.second)));
 
         SignalConnector<PropertyNotification> connector(tracker, notification);
         SetActionOnSignal(root, key_child.second, actor, builder, connector);
@@ -771,7 +776,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       else if("GreaterThan" == *cond)
       {
         PropertyNotification notification = actor.AddPropertyNotification(
-          actor.GetPropertyIndex(*prop), GreaterThanCondition(GetConditionArg0(key_child.second)));
+          actor.GetPropertyIndex(ToDaliStringView(*prop)), GreaterThanCondition(GetConditionArg0(key_child.second)));
 
         SignalConnector<PropertyNotification> connector(tracker, notification);
         SetActionOnSignal(root, key_child.second, actor, builder, connector);
@@ -779,7 +784,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       else if("Inside" == *cond)
       {
         PropertyNotification notification = actor.AddPropertyNotification(
-          actor.GetPropertyIndex(*prop),
+          actor.GetPropertyIndex(ToDaliStringView(*prop)),
           InsideCondition(GetConditionArg0(key_child.second), GetConditionArg1(key_child.second)));
 
         SignalConnector<PropertyNotification> connector(tracker, notification);
@@ -788,7 +793,7 @@ Actor SetupPropertyNotification(ConnectionTracker* tracker, const TreeNode& root
       else if("Outside" == *cond)
       {
         PropertyNotification notification = actor.AddPropertyNotification(
-          actor.GetPropertyIndex(*prop),
+          actor.GetPropertyIndex(ToDaliStringView(*prop)),
           OutsideCondition(GetConditionArg0(key_child.second), GetConditionArg1(key_child.second)));
 
         SignalConnector<PropertyNotification> connector(tracker, notification);

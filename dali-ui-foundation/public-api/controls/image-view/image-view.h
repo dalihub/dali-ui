@@ -23,6 +23,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/image-options.h>
+#include <dali/public-api/common/dali-string.h>
 
 namespace Dali
 {
@@ -162,7 +163,7 @@ public:
    * @param[in] url The url of the image resource to display
    * @return A handle to a newly allocated ImageView
    */
-  static ImageView New(const std::string& url);
+  static ImageView New(const Dali::String& url);
 
   /**
    * @brief Creates an initialized ImageView from a URL to an image resource.
@@ -179,7 +180,7 @@ public:
    *       However, do not set a size that is bigger than the actual image size, as up-scaling is not available.
    *       The content of the area not covered by the actual image is undefined and will not be cleared.
    */
-  static ImageView New(const std::string& url, ImageDimensions size);
+  static ImageView New(const Dali::String& url, ImageDimensions size);
 
   /**
    * @brief Create an initialized ImageView with additional behaviour.
@@ -204,7 +205,7 @@ public:
    * @param[in] url The url of the image resource to display
    * @return A handle to a newly allocated ImageView
    */
-  static ImageView New(ControlBehaviour additionalBehaviour, const std::string& url);
+  static ImageView New(ControlBehaviour additionalBehaviour, const Dali::String& url);
 
   /**
    * @brief Creates an initialized ImageView from a URL to an image resource with additional behaviour.
@@ -222,7 +223,7 @@ public:
    *       However, do not set a size that is bigger than the actual image size, as up-scaling is not available.
    *       The content of the area not covered by the actual image is undefined and will not be cleared.
    */
-  static ImageView New(ControlBehaviour additionalBehaviour, const std::string& url, ImageDimensions size);
+  static ImageView New(ControlBehaviour additionalBehaviour, const Dali::String& url, ImageDimensions size);
 
   /**
    * @brief Destructor.
@@ -288,7 +289,7 @@ public:
    * @REMARK_STORAGE
    * @param[in] url The URL to the image resource to display
    */
-  void SetImage(const std::string& url);
+  void SetImage(const Dali::String& url);
 
   /**
    * @brief Sets this ImageView from the given URL.
@@ -301,7 +302,7 @@ public:
    * @param[in] url The URL to the image resource to display
    * @param [in] size The width and height to fit the loaded image to
    */
-  void SetImage(const std::string& url, ImageDimensions size);
+  void SetImage(const Dali::String& url, ImageDimensions size);
 
 public: // Not intended for application developers
   /// @cond internal

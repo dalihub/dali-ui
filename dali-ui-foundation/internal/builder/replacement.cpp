@@ -15,10 +15,17 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 #include <dali-ui-foundation/internal/builder/builder-impl.h>
 #include <dali-ui-foundation/internal/builder/replacement.h>
+
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -31,11 +38,13 @@ namespace // anon
 Property::Value* FindReplacement(const std::string& str, const Property::Map& overrideMap,
                                  const Property::Map& defaultMap)
 {
-  Property::Value* ret = overrideMap.Find(str);
+  Dali::StringView strStringView = ToDaliStringView(str);
+
+  Property::Value* ret = overrideMap.Find(strStringView);
 
   if(!ret)
   {
-    ret = defaultMap.Find(str);
+    ret = defaultMap.Find(strStringView);
 
     // @ todo
     // try localized text ie dgettext. Look for colon  {DOMAIN:TEXT} {LC_MESSAGE:ID_XXXX}
@@ -109,7 +118,7 @@ bool ResolvePartialReplacement(const std::string& initialValue, Property::Value&
 
     if(!GetSubstitutionPosition(initialValue, startPos, size))
     {
-      out = initialValue;
+      out = ToPropertyValue(initialValue);
       return true;
     }
     else
@@ -133,7 +142,9 @@ bool ResolvePartialReplacement(const std::string& initialValue, Property::Value&
         }
         else
         {
-          std::string newString = initialValue.substr(0, startPos - 1) + value->Get<std::string>() +
+          Dali::String valueString;
+          value->Get(valueString);
+          std::string newString = initialValue.substr(0, startPos - 1) + ToStdString(valueString) +
                                   initialValue.substr(startPos + size + 1);
 
           return ResolvePartialReplacement(newString, out, overrideMap, defaultMap);
@@ -278,7 +289,7 @@ OptionalString Replacement::IsString(const TreeNode& node) const
       {
         if(Property::STRING == value.GetType())
         {
-          ret = value.Get<std::string>();
+          ret = ToStdString(value.Get<Dali::String>());
 #if defined(DEBUG_ENABLED)
           DALI_SCRIPT_VERBOSE("  Resolved substring replacement for '%s' => '%s'\n", (*v).c_str(), (*ret).c_str());
 #endif

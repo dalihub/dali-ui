@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/constants.h>
 #include <dali/public-api/math/rect.h>
@@ -36,6 +37,8 @@
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 
 #include <dali/devel-api/atspi-interfaces/accessible.h>
+
+using Dali::Integration::ToDaliString;
 
 namespace Dali::Ui
 {
@@ -68,7 +71,7 @@ Dali::Actor CreateOverlayHighlightActor()
   std::string focusBorderImagePath(AssetManager::GetDaliImagePath());
   focusBorderImagePath += FOCUS_IMAGE;
 
-  auto actor = Ui::ImageView::New(focusBorderImagePath);
+  auto actor = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   actor.SetProperty(Actor::Property::NAME, HIGHLIGHT_NAME);
   actor.SetResizePolicy(ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
   actor.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);

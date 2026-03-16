@@ -22,6 +22,7 @@
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -41,6 +42,9 @@
 #define DECORATOR_DEBUG
 
 #endif
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -247,7 +251,7 @@ struct Decorator::Impl : public ConnectionTracker
   {
     mQuadVertexFormat["aPosition"] = Property::VECTOR2;
     mHighlightShader               = Shader::New(
-      SHADER_TEXT_DECORATOR_SHADER_VERT, SHADER_TEXT_DECORATOR_SHADER_FRAG,
+      ToDaliStringView(SHADER_TEXT_DECORATOR_SHADER_VERT), ToDaliStringView(SHADER_TEXT_DECORATOR_SHADER_FRAG),
       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL), "TEXT_DECORATOR");
     SetupGestures();
     CreateLayer(mActiveLayer, DecorationType::ACTIVE_LAYER);
@@ -812,7 +816,7 @@ struct Decorator::Impl : public ConnectionTracker
     {
       if(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
-        grabHandle.actor = ImageView::New(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]);
+        grabHandle.actor = ImageView::New(ToDaliString(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]));
         GetImpl(grabHandle.actor).SetDepthIndex(DepthIndex::DECORATION);
         grabHandle.actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_CENTER);
         grabHandle.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
@@ -868,7 +872,7 @@ struct Decorator::Impl : public ConnectionTracker
   {
     if(image.size())
     {
-      handle.markerActor = ImageView::New(image);
+      handle.markerActor = ImageView::New(ToDaliString(image));
       handle.markerActor.SetProperty(Actor::Property::COLOR, mHandleColor);
       handle.actor.Add(handle.markerActor);
 
@@ -894,7 +898,7 @@ struct Decorator::Impl : public ConnectionTracker
     {
       if(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
-        primary.actor = ImageView::New(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]);
+        primary.actor = ImageView::New(ToDaliString(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
 #ifdef DECORATOR_DEBUG
         primary.actor.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleOne");
 #endif
@@ -943,7 +947,7 @@ struct Decorator::Impl : public ConnectionTracker
     {
       if(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
-        secondary.actor = ImageView::New(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]);
+        secondary.actor = ImageView::New(ToDaliString(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
 #ifdef DECORATOR_DEBUG
         secondary.actor.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleTwo");
 #endif
@@ -1210,7 +1214,7 @@ struct Decorator::Impl : public ConnectionTracker
            ? (mHandleImages[type][HANDLE_IMAGE_PRESSED].size() ? HANDLE_IMAGE_PRESSED : HANDLE_IMAGE_RELEASED)
            : HANDLE_IMAGE_RELEASED);
 
-      handle.actor.SetImage(mHandleImages[type][imageType]);
+      handle.actor.SetImage(ToDaliString(mHandleImages[type][imageType]));
     }
 
     if(HANDLE_TYPE_COUNT != markerType)
@@ -1221,7 +1225,7 @@ struct Decorator::Impl : public ConnectionTracker
           (handle.pressed ? (mHandleImages[markerType][HANDLE_IMAGE_PRESSED].size() ? HANDLE_IMAGE_PRESSED
                                                                                     : HANDLE_IMAGE_RELEASED)
                           : HANDLE_IMAGE_RELEASED);
-        handle.markerActor.SetImage(mHandleImages[markerType][markerImageType]);
+        handle.markerActor.SetImage(ToDaliString(mHandleImages[markerType][markerImageType]));
       }
     }
 
@@ -1422,7 +1426,7 @@ struct Decorator::Impl : public ConnectionTracker
 
       if(handle.actor)
       {
-        handle.actor.SetImage(mHandleImages[type][HANDLE_IMAGE_RELEASED]);
+        handle.actor.SetImage(ToDaliString(mHandleImages[type][HANDLE_IMAGE_RELEASED]));
       }
       handle.pressed = false;
 
@@ -2261,7 +2265,7 @@ void Decorator::SetHandleActive(HandleType handleType, bool active)
     ImageView  imageView               = mImpl->mHandle[handleType].actor;
     if(imageReleased && imageView)
     {
-      imageView.SetImage(mImpl->mHandleImages[handleType][HANDLE_IMAGE_RELEASED]);
+      imageView.SetImage(ToDaliString(mImpl->mHandleImages[handleType][HANDLE_IMAGE_RELEASED]));
     }
   }
 }

@@ -25,6 +25,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/events/key-event.h>
@@ -43,6 +44,9 @@
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -872,7 +876,7 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
   {
     // Create the default if it hasn't been set and one that's shared by all the keyboard focusable actors
     const std::string imageDirPath = AssetManager::GetDaliImagePath();
-    mFocusIndicatorActor           = Ui::ImageView::New(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME);
+    mFocusIndicatorActor           = Ui::ImageView::New(ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
 
     // Apply size constraint to the focus indicator
     mFocusIndicatorActor.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
@@ -904,9 +908,9 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
     }
   }
 
-  const std::string&                 keyName        = event.GetKeyName();
-  const std::string&                 logicalKeyName = event.GetLogicalKey();
-  const std::string&                 deviceName     = event.GetDeviceName();
+  const std::string&                 keyName        = ToStdString(event.GetKeyName());
+  const std::string&                 logicalKeyName = ToStdString(event.GetLogicalKey());
+  const std::string&                 deviceName     = ToStdString(event.GetDeviceName());
   Ui::Control::KeyboardFocus::Device device         = Ui::Control::KeyboardFocus::Device::KEYBOARD;
   FocusChangeContext                 context        = {device, deviceName};
 
@@ -1135,7 +1139,7 @@ void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
     if(hitActor && hitActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
        hitActor.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE))
     {
-      DoSetCurrentFocusActor(hitActor, {device, touch.GetDeviceName(0)});
+      DoSetCurrentFocusActor(hitActor, {device, ToStdString(touch.GetDeviceName(0))});
     }
   }
 }
@@ -1257,7 +1261,7 @@ const KeyboardFocusManager::FocusChangeContext& KeyboardFocusManager::FocusChang
 }
 
 bool KeyboardFocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker,
-                                           const std::string& signalName, FunctorDelegate* functor)
+                                           const Dali::String& signalName, FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
 
@@ -1265,19 +1269,19 @@ bool KeyboardFocusManager::DoConnectSignal(BaseObject* object, ConnectionTracker
   KeyboardFocusManager* manager =
     static_cast<KeyboardFocusManager*>(object); // TypeRegistry guarantees that this is the correct type.
 
-  if(0 == strcmp(signalName.c_str(), SIGNAL_PRE_FOCUS_CHANGE))
+  if(0 == strcmp(signalName.CStr(), SIGNAL_PRE_FOCUS_CHANGE))
   {
     manager->PreFocusChangeSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_FOCUS_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_CHANGED))
   {
     manager->FocusChangedSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_FOCUS_GROUP_CHANGED))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_GROUP_CHANGED))
   {
     manager->FocusGroupChangedSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.c_str(), SIGNAL_FOCUSED_ACTOR_ENTER_KEY))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUSED_ACTOR_ENTER_KEY))
   {
     manager->FocusedActorEnterKeySignal().Connect(tracker, functor);
   }

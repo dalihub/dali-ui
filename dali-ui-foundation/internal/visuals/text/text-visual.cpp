@@ -26,6 +26,7 @@
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/trace.h>
 #include <string.h>
 
@@ -44,6 +45,9 @@
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -85,7 +89,7 @@ const char* GetRequestTypeName(Text::Async::RequestType type)
  * return the key as an index
  */
 
-Dali::Property::Index StringKeyToIndexKey(const std::string& stringKey)
+Dali::Property::Index StringKeyToIndexKey(const Dali::String& stringKey)
 {
   Dali::Property::Index result = Property::INVALID_KEY;
 
@@ -222,9 +226,9 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
 
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisual::Property::TEXT, text);
+  map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));
 
-  map.Insert(Ui::TextVisual::Property::FONT_FAMILY, mController->GetDefaultFontFamily());
+  map.Insert(Ui::TextVisual::Property::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
 
   GetFontStyleProperty(mController, value, Text::FontStyle::DEFAULT);
   map.Insert(Ui::TextVisual::Property::FONT_STYLE, value);
@@ -263,7 +267,7 @@ void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisual::Property::TEXT, text);
+  map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));
 }
 
 void TextVisual::EnablePreMultipliedAlpha(bool preMultiplied)
@@ -485,7 +489,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     }
     case Ui::TextVisual::Property::TEXT:
     {
-      mController->SetText(propertyValue.Get<std::string>());
+      mController->SetText(ToStdString(propertyValue));
       break;
     }
     case Ui::TextVisual::Property::FONT_FAMILY:

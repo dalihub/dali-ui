@@ -20,10 +20,15 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/property-string-parser.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -47,7 +52,7 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
 {
   if(controller)
   {
-    const std::string fontFamilyValue = value.Get<std::string>();
+    const std::string fontFamilyValue = ToStdString(value);
 
     if(fontFamilyValue.empty())
     {
@@ -72,7 +77,7 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
       std::string fontFamilyName;
       if(NULL != familyValue)
       {
-        fontFamilyName = familyValue->Get<std::string>();
+        fontFamilyName = ToStdString(*familyValue);
       }
 
       /// Type key
@@ -81,7 +86,7 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
       std::string typeStr;
       if(NULL != typeValue)
       {
-        typeStr = typeValue->Get<std::string>();
+        typeStr = ToStdString(*typeValue);
       }
 
       if(TokenComparison(SYSTEM_TOKEN, typeStr.c_str(), typeStr.size()))
@@ -103,7 +108,7 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
     Property::Map map;
     if(Property::STRING == value.GetType())
     {
-      const std::string& fontStyleProperties = value.Get<std::string>();
+      const std::string& fontStyleProperties = ToStdString(value);
 
       ParsePropertyString(fontStyleProperties, map);
       controller->FontStyleSetByString(true);
@@ -123,7 +128,7 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
       const bool weightDefined = weightValue != NULL;
       if(weightDefined)
       {
-        const std::string weightStr = weightValue->Get<std::string>();
+        const std::string weightStr = ToStdString(*weightValue);
 
         Scripting::GetEnumeration<FontWeight>(weightStr.c_str(), FONT_WEIGHT_STRING_TABLE,
                                               FONT_WEIGHT_STRING_TABLE_COUNT, weight);
@@ -136,7 +141,7 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
       const bool widthDefined = widthValue != NULL;
       if(widthDefined)
       {
-        const std::string widthStr = widthValue->Get<std::string>();
+        const std::string widthStr = ToStdString(*widthValue);
 
         Scripting::GetEnumeration<FontWidth>(widthStr.c_str(), FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT,
                                              width);
@@ -149,7 +154,7 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
       const bool slantDefined = slantValue != NULL;
       if(slantDefined)
       {
-        const std::string slantStr = slantValue->Get<std::string>();
+        const std::string slantStr = ToStdString(*slantValue);
 
         Scripting::GetEnumeration<FontSlant>(slantStr.c_str(), FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT,
                                              slant);
@@ -341,7 +346,7 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
           const std::string weightStr(
             GetEnumerationName(weight, FONT_WEIGHT_STRING_TABLE, FONT_WEIGHT_STRING_TABLE_COUNT));
 
-          map.Insert(WEIGHT_KEY, weightStr);
+          map.Insert(WEIGHT_KEY, ToDaliString(weightStr));
         }
       }
 
@@ -351,7 +356,7 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
         {
           const std::string widthStr(GetEnumerationName(width, FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT));
 
-          map.Insert(WIDTH_KEY, widthStr);
+          map.Insert(WIDTH_KEY, ToDaliString(widthStr));
         }
       }
 
@@ -361,7 +366,7 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
         {
           const std::string slantStr(GetEnumerationName(slant, FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT));
 
-          map.Insert(SLANT_KEY, slantStr);
+          map.Insert(SLANT_KEY, ToDaliString(slantStr));
         }
       }
 
@@ -408,7 +413,7 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
       }
       fontStyleProperties += "}";
 
-      value = fontStyleProperties;
+      value = ToPropertyValue(fontStyleProperties);
     } // SetbyString
   } // controller
 }

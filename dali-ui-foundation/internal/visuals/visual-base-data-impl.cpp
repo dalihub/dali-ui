@@ -23,6 +23,7 @@
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
@@ -30,6 +31,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -257,11 +260,11 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
   {
     if(!mVertexShader.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::VERTEX_SHADER, mVertexShader);
+      customShader.Insert(Ui::Visual::Shader::Property::VERTEX_SHADER, ToPropertyValue(mVertexShader));
     }
     if(!mFragmentShader.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER, mFragmentShader);
+      customShader.Insert(Ui::Visual::Shader::Property::FRAGMENT_SHADER, ToPropertyValue(mFragmentShader));
     }
 
     if(mGridSize.GetWidth() != 1)
@@ -285,7 +288,7 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
 
     if(!mName.empty())
     {
-      customShader.Insert(Ui::Visual::Shader::Property::NAME, mName);
+      customShader.Insert(Ui::Visual::Shader::Property::NAME, ToPropertyValue(mName));
     }
   }
   return customShader;

@@ -25,6 +25,7 @@
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/object/property-array.h>
@@ -46,6 +47,12 @@
 #include <dali-ui-foundation/internal/builder/builder-set-property.h>
 #include <dali-ui-foundation/internal/builder/replacement.h>
 #include <dali-ui-foundation/internal/builder/tree-node-manipulator.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToDaliStringView;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -150,10 +157,10 @@ Builder::Builder()
   mParser = Dali::Ui::JsonParser::New();
 
   Property::Map defaultConstants;
-  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)]       = AssetManager::GetDaliImagePath();
-  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)]       = AssetManager::GetDaliSoundPath();
-  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)]       = AssetManager::GetDaliStylePath();
-  defaultConstants[TOKEN_STRING(DALI_STYLE_IMAGE_DIR)] = AssetManager::GetDaliStyleImagePath();
+  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)]       = ToPropertyValue(AssetManager::GetDaliImagePath());
+  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)]       = ToPropertyValue(AssetManager::GetDaliSoundPath());
+  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)]       = ToPropertyValue(AssetManager::GetDaliStylePath());
+  defaultConstants[TOKEN_STRING(DALI_STYLE_IMAGE_DIR)] = ToPropertyValue(AssetManager::GetDaliStyleImagePath());
 
   AddConstants(defaultConstants);
 }
@@ -223,7 +230,7 @@ void Builder::AddConstants(const Property::Map& map)
 
 void Builder::AddConstant(const std::string& key, const Property::Value& value)
 {
-  mReplacementMap[key] = value;
+  mReplacementMap[ToDaliStringView(key)] = value;
 }
 
 const Property::Map& Builder::GetConfigurations() const
@@ -238,7 +245,7 @@ const Property::Map& Builder::GetConstants() const
 
 const Property::Value& Builder::GetConstant(const std::string& key) const
 {
-  Property::Value* match = mReplacementMap.Find(key);
+  Property::Value* match = mReplacementMap.Find(ToDaliStringView(key));
   if(match)
   {
     return (*match);
@@ -743,7 +750,7 @@ void Builder::LoadConfiguration(const TreeNode& root, Property::Map& intoMap)
         if((*iter).second.GetType() == TreeNode::STRING)
         {
           std::string stringConfigValue;
-          if(property.Get(stringConfigValue))
+          if(GetStdString(property, stringConfigValue))
           {
             std::size_t pos = 0;
 
@@ -767,10 +774,10 @@ void Builder::LoadConfiguration(const TreeNode& root, Property::Map& intoMap)
 
                     // Compare string which is between "{" and "}" with constant string
                     // If they are same, change string in stringConfigValue to mapped constant value.
-                    if(0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, constant.stringKey))
+                    if(0 == stringConfigValue.compare(leftPos + 1, rightPos - leftPos - 1, ToStdString(constant.stringKey)))
                     {
                       std::string replaceString;
-                      if(DALI_LIKELY(mReplacementMap.GetValue(i).Get(replaceString)))
+                      if(DALI_LIKELY(GetStdString(mReplacementMap.GetValue(i), replaceString)))
                       {
                         stringConfigValue.replace(leftPos, rightPos - leftPos + 1, replaceString);
                         pos = leftPos + replaceString.size();
@@ -791,7 +798,7 @@ void Builder::LoadConfiguration(const TreeNode& root, Property::Map& intoMap)
                 pos = stringConfigValue.size();
               }
             }
-            property = Property::Value(stringConfigValue);
+            property = ToPropertyValue(stringConfigValue);
           }
         }
         intoMap[(*iter).second.GetName()] = property;
@@ -824,7 +831,7 @@ void Builder::LoadConstants(const TreeNode& root, Property::Map& intoMap)
   Property::Value* iter = intoMap.Find("CONFIG_SCRIPT_LOG_LEVEL");
   if(iter && iter->GetType() == Property::STRING)
   {
-    std::string logLevel(iter->Get<std::string>());
+    std::string logLevel(ToStdString(*iter));
     if(logLevel == "NoLogging")
     {
       gFilterScript->SetLogLevel(Dali::Integration::Log::NoLogging);
@@ -922,7 +929,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
 
   if(OptionalString typeName = IsString(node, KEYNAME_TYPE))
   {
-    typeInfo = TypeRegistry::Get().GetTypeInfo(*typeName);
+    typeInfo = TypeRegistry::Get().GetTypeInfo(ToDaliStringView(*typeName));
 
     if(!typeInfo)
     {
@@ -937,7 +944,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
 
           if(OptionalString templateTypeName = IsString(*templateNode, KEYNAME_TYPE))
           {
-            typeInfo = TypeRegistry::Get().GetTypeInfo(*templateTypeName);
+            typeInfo = TypeRegistry::Get().GetTypeInfo(ToDaliStringView(*templateTypeName));
           }
         }
       }
@@ -956,7 +963,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
 
     if(handle)
     {
-      DALI_SCRIPT_VERBOSE("Create:%s\n", typeInfo.GetName().c_str());
+      DALI_SCRIPT_VERBOSE("Create:%s\n", typeInfo.GetName().CStr());
 
 #if defined(DEBUG_ENABLED)
       if(handle)
@@ -1017,7 +1024,7 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
     }
     else
     {
-      DALI_SCRIPT_WARNING("Cannot create handle from type '%s'\n", typeInfo.GetName().c_str());
+      DALI_SCRIPT_WARNING("Cannot create handle from type '%s'\n", typeInfo.GetName().CStr());
     }
   }
 
@@ -1031,7 +1038,7 @@ void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacemen
 
   if(OptionalString s = constant.IsString(IsChild(node, "sourceActor")))
   {
-    Actor actor = root.FindChildByName(*s);
+    Actor actor = root.FindChildByName(ToDaliStringView(*s));
     if(actor)
     {
       task.SetSourceActor(actor);
@@ -1044,7 +1051,7 @@ void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacemen
 
   if(OptionalString s = constant.IsString(IsChild(node, "cameraActor")))
   {
-    CameraActor actor = CameraActor::DownCast(root.FindChildByName(*s));
+    CameraActor actor = CameraActor::DownCast(root.FindChildByName(ToDaliStringView(*s)));
     if(actor)
     {
       task.SetCameraActor(actor);
@@ -1137,19 +1144,19 @@ bool Builder::GetStyleProperties(const std::string& styleName, const Handle& con
       // If controlType is provided, try to convert to Property::Index
       if(controlType)
       {
-        Property::Index index = controlType.GetPropertyIndex(key);
+        Property::Index index = controlType.GetPropertyIndex(ToDaliStringView(key));
         if(index != Property::INVALID_INDEX)
         {
           result.Insert(index, value); // Use Property::Index as key
         }
         else
         {
-          result.Insert(key, value); // Fallback to string key
+          result.Insert(ToDaliString(key), value); // Fallback to string key
         }
       }
       else
       {
-        result.Insert(key, value); // No controlType, use string key
+        result.Insert(ToDaliString(key), value); // No controlType, use string key
       }
     }
   }
@@ -1420,7 +1427,7 @@ bool Builder::MapToTargetProperty(Handle& propertyObject, const std::string& key
 {
   bool mapped = false;
 
-  index = propertyObject.GetPropertyIndex(key);
+  index = propertyObject.GetPropertyIndex(ToDaliStringView(key));
   if(Property::INVALID_INDEX != index)
   {
     Property::Type type = propertyObject.GetPropertyType(index);
@@ -1504,7 +1511,7 @@ bool Builder::ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack,
     case Property::STRING:
     {
       std::string value;
-      if(child.Get(value))
+      if(GetStdString(child, value))
       {
         std::string key;
         if(GetMappingKey(value, key))
@@ -1587,7 +1594,7 @@ void Builder::SetCustomProperties(const TreeNode& node, Handle& handle, const Re
       DeterminePropertyFromNode(keyChild.second, value, constant);
 
       // Register/Set property.
-      handle.RegisterProperty(key, value, accessMode);
+      handle.RegisterProperty(ToDaliString(key), value, accessMode);
     }
   }
 }

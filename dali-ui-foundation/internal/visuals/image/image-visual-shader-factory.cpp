@@ -25,6 +25,9 @@
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-debug.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
+
+using Dali::Integration::ToDaliStringView;
 
 namespace Dali
 {
@@ -164,7 +167,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache&                  
 
   if(featureBuilder.IsEnabledAlphaMaskingOnRendering())
   {
-    shader.RegisterProperty(Y_FLIP_MASK_TEXTURE, NOT_FLIP_MASK_TEXTURE);
+    shader.RegisterProperty(ToDaliStringView(Y_FLIP_MASK_TEXTURE), NOT_FLIP_MASK_TEXTURE);
   }
 
   return shader;

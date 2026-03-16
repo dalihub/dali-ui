@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
@@ -26,6 +27,9 @@
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/property-string-parser.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
+
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -70,7 +74,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string colorStr = valueGet.second.Get<std::string>();
+        const std::string colorStr = ToStdString(valueGet.second);
         Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
       }
       else
@@ -86,7 +90,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string offsetStr = valueGet.second.Get<std::string>();
+        const std::string offsetStr = ToStdString(valueGet.second);
         StringToVector2(offsetStr.c_str(), offsetStr.size(), offset);
       }
       else
@@ -102,7 +106,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string blurRadiusStr = valueGet.second.Get<std::string>();
+        const std::string blurRadiusStr = ToStdString(valueGet.second);
         blurRadius                      = StringToFloat(blurRadiusStr.c_str());
       }
       else
@@ -130,7 +134,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string enableStr = valueGet.second.Get<std::string>();
+        const std::string enableStr = ToStdString(valueGet.second);
         enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
       }
       else
@@ -146,7 +150,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string directionStr = valueGet.second.Get<std::string>();
+        const std::string directionStr = ToStdString(valueGet.second);
         StringToVector2(directionStr.c_str(), directionStr.size(), direction);
       }
       else
@@ -162,7 +166,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string strengthStr = valueGet.second.Get<std::string>();
+        const std::string strengthStr = ToStdString(valueGet.second);
         strength                      = StringToFloat(strengthStr.c_str());
       }
       else
@@ -178,7 +182,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string lightColorStr = valueGet.second.Get<std::string>();
+        const std::string lightColorStr = ToStdString(valueGet.second);
         Text::ColorStringToVector4(lightColorStr.c_str(), lightColorStr.size(), lightColor);
       }
       else
@@ -194,7 +198,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string shadowColorStr = valueGet.second.Get<std::string>();
+        const std::string shadowColorStr = ToStdString(valueGet.second);
         Text::ColorStringToVector4(shadowColorStr.c_str(), shadowColorStr.size(), shadowColor);
       }
       else
@@ -224,7 +228,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string enableStr = valueGet.second.Get<std::string>();
+        const std::string enableStr = ToStdString(valueGet.second);
         enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
       }
       else
@@ -240,7 +244,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string colorStr = valueGet.second.Get<std::string>();
+        const std::string colorStr = ToStdString(valueGet.second);
         Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
       }
       else
@@ -256,7 +260,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string heightStr = valueGet.second.Get<std::string>();
+        const std::string heightStr = ToStdString(valueGet.second);
         height                      = StringToFloat(heightStr.c_str());
       }
       else
@@ -272,7 +276,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string typeStr = valueGet.second.Get<std::string>();
+        const std::string typeStr = ToStdString(valueGet.second);
         Text::UnderlineTypeStringToTypeValue(typeStr.c_str(), typeStr.size(), type);
       }
       else
@@ -288,7 +292,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string dashWidthStr = valueGet.second.Get<std::string>();
+        const std::string dashWidthStr = ToStdString(valueGet.second);
         dashWidth                      = StringToFloat(dashWidthStr.c_str());
       }
       else
@@ -304,7 +308,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string dashGapStr = valueGet.second.Get<std::string>();
+        const std::string dashGapStr = ToStdString(valueGet.second);
         dashGap                      = StringToFloat(dashGapStr.c_str());
       }
       else
@@ -349,7 +353,7 @@ bool ParseOutlineProperties(const Property::Map& underlinePropertiesMap, bool& c
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string offsetStr = valueGet.second.Get<std::string>();
+        const std::string offsetStr = ToStdString(valueGet.second);
         StringToVector2(offsetStr.c_str(), offsetStr.size(), offset);
       }
       else
@@ -365,7 +369,7 @@ bool ParseOutlineProperties(const Property::Map& underlinePropertiesMap, bool& c
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string blurRadiusStr = valueGet.second.Get<std::string>();
+        const std::string blurRadiusStr = ToStdString(valueGet.second);
         blurRadius                      = StringToFloat(blurRadiusStr.c_str());
       }
       else
@@ -422,7 +426,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string enableStr = valueGet.second.Get<std::string>();
+        const std::string enableStr = ToStdString(valueGet.second);
         enabled                     = Text::TokenComparison(TRUE_TOKEN, enableStr.c_str(), enableStr.size());
       }
       else
@@ -438,7 +442,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string colorStr = valueGet.second.Get<std::string>();
+        const std::string colorStr = ToStdString(valueGet.second);
         Text::ColorStringToVector4(colorStr.c_str(), colorStr.size(), color);
       }
       else
@@ -454,7 +458,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
 
       if(valueGet.second.GetType() == Dali::Property::STRING)
       {
-        const std::string heightStr = valueGet.second.Get<std::string>();
+        const std::string heightStr = ToStdString(valueGet.second);
         height                      = StringToFloat(heightStr.c_str());
       }
       else
@@ -495,7 +499,7 @@ bool SetUnderlineProperties(ControllerPtr controller, const Property::Value& val
         if(propertiesMap.Empty())
         {
           // Map empty so check if a string provided
-          const std::string propertyString = value.Get<std::string>();
+          const std::string propertyString = ToStdString(value);
 
           if(!propertyString.empty())
           {
@@ -569,7 +573,7 @@ bool SetUnderlineProperties(ControllerPtr controller, const Property::Value& val
       }
       case EffectStyle::INPUT:
       {
-        const std::string& underlineProperties = value.Get<std::string>();
+        const std::string& underlineProperties = ToStdString(value);
 
         controller->SetInputUnderlineProperties(underlineProperties);
         break;
@@ -621,7 +625,7 @@ void GetUnderlineProperties(ControllerPtr controller, Property::Value& value, Ef
           FloatToString(dashGap, dashGapStr);
           underlineProperties += "\"dashGap\":\"" + dashGapStr + "\"}";
 
-          value = underlineProperties;
+          value = ToPropertyValue(underlineProperties);
         }
         else
         {
@@ -641,7 +645,7 @@ void GetUnderlineProperties(ControllerPtr controller, Property::Value& value, Ef
       }
       case EffectStyle::INPUT:
       {
-        value = controller->GetInputUnderlineProperties();
+        value = ToPropertyValue(controller->GetInputUnderlineProperties());
         break;
       }
     }
@@ -672,7 +676,7 @@ bool SetShadowProperties(ControllerPtr controller, const Property::Value& value,
         if(propertiesMap.Empty())
         {
           // Map empty so check if a string provided
-          const std::string propertyString = value.Get<std::string>();
+          const std::string propertyString = ToStdString(value);
 
           Property::Map parsedStringMap;
           Text::ParsePropertyString(propertyString, parsedStringMap);
@@ -723,7 +727,7 @@ bool SetShadowProperties(ControllerPtr controller, const Property::Value& value,
       }
       case EffectStyle::INPUT:
       {
-        const std::string& shadowString = value.Get<std::string>();
+        const std::string& shadowString = ToStdString(value);
 
         controller->SetInputShadowProperties(shadowString);
         break;
@@ -762,7 +766,7 @@ void GetShadowProperties(ControllerPtr controller, Property::Value& value, Effec
           FloatToString(blurRadius, blurRadiusStr);
           shadowProperties += "\"blurRadius\":\"" + blurRadiusStr + "\"}";
 
-          value = shadowProperties;
+          value = ToPropertyValue(shadowProperties);
         }
         else
         {
@@ -778,7 +782,7 @@ void GetShadowProperties(ControllerPtr controller, Property::Value& value, Effec
       }
       case EffectStyle::INPUT:
       {
-        value = controller->GetInputShadowProperties();
+        value = ToPropertyValue(controller->GetInputShadowProperties());
         break;
       }
     }
@@ -868,7 +872,7 @@ bool SetEmbossProperties(ControllerPtr controller, const Property::Value& value,
           }
 
           // Note : This code is for keep legacy logics, which is not using Property::Map.
-          const std::string embossString = value.Get<std::string>();
+          const std::string embossString = ToStdString(value);
 
           controller->SetDefaultEmbossProperties(embossString);
         }
@@ -876,7 +880,7 @@ bool SetEmbossProperties(ControllerPtr controller, const Property::Value& value,
       }
       case EffectStyle::INPUT:
       {
-        const std::string& embossString = value.Get<std::string>();
+        const std::string& embossString = ToStdString(value);
 
         controller->SetInputEmbossProperties(embossString);
         break;
@@ -917,13 +921,13 @@ void GetEmbossProperties(ControllerPtr controller, Property::Value& value, Effec
         }
         else
         {
-          value = embossString;
+          value = ToPropertyValue(embossString);
         }
         break;
       }
       case EffectStyle::INPUT:
       {
-        value = controller->GetInputEmbossProperties();
+        value = ToPropertyValue(controller->GetInputEmbossProperties());
         break;
       }
     }
@@ -957,7 +961,7 @@ bool SetOutlineProperties(ControllerPtr controller, const Property::Value& value
         {
           // Map empty so check if a string provided
           // This is purely to maintain backward compatibility, but we don't parse the string to be a property map.
-          const std::string propertyString = value.Get<std::string>();
+          const std::string propertyString = ToStdString(value);
 
           // Stores the default outline's properties string to be recovered by the GetOutlineProperties() function.
           controller->SetDefaultOutlineProperties(propertyString);
@@ -1012,7 +1016,7 @@ bool SetOutlineProperties(ControllerPtr controller, const Property::Value& value
       }
       case EffectStyle::INPUT:
       {
-        const std::string& outlineProperties = value.Get<std::string>();
+        const std::string& outlineProperties = ToStdString(value);
 
         controller->SetInputOutlineProperties(outlineProperties);
         break;
@@ -1033,7 +1037,7 @@ void GetOutlineProperties(ControllerPtr controller, Property::Value& value, Effe
       {
         if(controller->IsOutlineSetByString())
         {
-          value = controller->GetDefaultOutlineProperties();
+          value = ToPropertyValue(controller->GetDefaultOutlineProperties());
           break;
         }
         else
@@ -1056,7 +1060,7 @@ void GetOutlineProperties(ControllerPtr controller, Property::Value& value, Effe
       }
       case EffectStyle::INPUT:
       {
-        value = controller->GetInputOutlineProperties();
+        value = ToPropertyValue(controller->GetInputOutlineProperties());
         break;
       }
     }
@@ -1173,7 +1177,7 @@ bool SetStrikethroughProperties(ControllerPtr controller, const Property::Value&
         if(propertiesMap.Empty())
         {
           // Map empty so check if a string provided
-          const std::string propertyString = value.Get<std::string>();
+          const std::string propertyString = ToStdString(value);
 
           if(!propertyString.empty())
           {
@@ -1225,7 +1229,7 @@ bool SetStrikethroughProperties(ControllerPtr controller, const Property::Value&
       }
       case EffectStyle::INPUT:
       {
-        const std::string& strikethroughProperties = value.Get<std::string>();
+        const std::string& strikethroughProperties = ToStdString(value);
 
         controller->SetInputStrikethroughProperties(strikethroughProperties);
         update = true;
@@ -1263,7 +1267,7 @@ void GetStrikethroughProperties(ControllerPtr controller, Property::Value& value
           FloatToString(height, heightStr);
           strikethroughProperties += "\"height\":\"" + heightStr + "\"}";
 
-          value = strikethroughProperties;
+          value = ToPropertyValue(strikethroughProperties);
         }
         else
         {
@@ -1280,7 +1284,7 @@ void GetStrikethroughProperties(ControllerPtr controller, Property::Value& value
       }
       case EffectStyle::INPUT:
       {
-        value = controller->GetInputStrikethroughProperties();
+        value = ToPropertyValue(controller->GetInputStrikethroughProperties());
         break;
       }
     }

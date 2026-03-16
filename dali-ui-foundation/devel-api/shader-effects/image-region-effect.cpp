@@ -17,9 +17,14 @@
 // CLASS HEADER
 #include <dali-ui-foundation/devel-api/shader-effects/image-region-effect.h>
 
+// EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -30,7 +35,7 @@ Property::Map CreateImageRegionEffect()
   Property::Map map;
 
   Property::Map customShader;
-  customShader[Visual::Shader::Property::VERTEX_SHADER] = SHADER_IMAGE_REGION_EFFECT_VERT.data();
+  customShader[Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
 
   map[Ui::Visual::Property::SHADER] = customShader;
   return map;

@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/property-array.h>
 #include <dali/public-api/object/property-map.h>
 #include <sstream>
@@ -26,6 +27,8 @@
 #include <dali-ui-foundation/internal/builder/builder-set-property.h>
 #include <dali-ui-foundation/internal/builder/replacement.h>
 #include <dali-ui-foundation/internal/helpers/color-conversion.h>
+
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -251,7 +254,7 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
     {
       if(OptionalString v = replacer.IsString(node))
       {
-        value = *v;
+        value = ToPropertyValue(*v);
         done  = true;
       }
       break;
@@ -304,7 +307,7 @@ bool DeterminePropertyFromNode(const TreeNode& node, Property::Type type, Proper
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*iter).second, childValue, replacer);
-            map->Insert((*iter).first, childValue);
+            map->Insert(Dali::String((*iter).first), childValue);
           }
 
           done = (map->Count() == node.Size());
@@ -447,7 +450,7 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
         }
         else
         {
-          value = *aString;
+          value = ToPropertyValue(*aString);
         }
       } // if aBool
 
@@ -475,7 +478,7 @@ void DeterminePropertyFromNode(const TreeNode& node, Property::Value& value, con
           {
             Property::Value childValue;
             DeterminePropertyFromNode((*containerIterator).second, childValue, replacer);
-            map->Insert((*containerIterator).first, childValue);
+            map->Insert(Dali::String((*containerIterator).first), childValue);
           }
         }
       }

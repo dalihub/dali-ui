@@ -22,6 +22,7 @@
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/object/type-registry.h>
@@ -36,6 +37,11 @@
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToPropertyValue;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -179,7 +185,7 @@ void ImageView::SetImage(const Property::Map& map)
   // Signal that a Relayout may be needed
 }
 
-void ImageView::SetImage(const std::string& url, ImageDimensions size)
+void ImageView::SetImage(const Dali::String& url, ImageDimensions size)
 {
   if(mVisual)
   {
@@ -188,7 +194,7 @@ void ImageView::SetImage(const std::string& url, ImageDimensions size)
   }
 
   // Don't bother comparing if we had a visual previously, just drop old visual and create new one
-  mUrl       = url;
+  mUrl       = ToStdString(url);
   mImageSize = size;
   mPropertyMap.Clear();
 
@@ -200,7 +206,7 @@ void ImageView::SetImage(const std::string& url, ImageDimensions size)
   }
 
   // Don't set mVisual until it is ready and shown. Getters will still use current visual.
-  Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(url, size);
+  Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(mUrl, size);
   if(visual)
   {
     Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
@@ -279,10 +285,10 @@ void ImageView::SetDepthIndex(int depthIndex)
   }
 }
 
-void ImageView::SetPlaceholderUrl(const std::string& url)
+void ImageView::SetPlaceholderUrl(const Dali::String& url)
 {
-  mPlaceholderUrl = url;
-  if(!url.empty())
+  mPlaceholderUrl = ToStdString(url);
+  if(!mPlaceholderUrl.empty())
   {
     DiscardImageViewVisual(mPlaceholderVisual);
     CreatePlaceholderImage();
@@ -298,13 +304,13 @@ void ImageView::SetPlaceholderUrl(const std::string& url)
     }
 
     DiscardImageViewVisual(mPlaceholderVisual);
-    mPlaceholderUrl = url;
+    mPlaceholderUrl = ToStdString(url);
   }
 }
 
-std::string ImageView::GetPlaceholderUrl() const
+Dali::String ImageView::GetPlaceholderUrl() const
 {
-  return mPlaceholderUrl;
+  return ToDaliString(mPlaceholderUrl);
 }
 
 Vector3 ImageView::GetNaturalSize()
@@ -399,7 +405,7 @@ void ImageView::CreatePlaceholderImage()
 {
   Property::Map propertyMap;
   propertyMap.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
-  propertyMap.Insert(Ui::ImageVisual::Property::URL, mPlaceholderUrl);
+  propertyMap.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mPlaceholderUrl));
   // propertyMap.Insert(Ui::ImageVisual::Property::LOAD_POLICY, Ui::ImageVisual::LoadPolicy::IMMEDIATE); //
   // TODO: need to enable this property
   propertyMap.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, Ui::ImageVisual::ReleasePolicy::DESTROYED);
@@ -464,9 +470,9 @@ void ImageView::SetProperty(BaseObject* object, Property::Index index, const Pro
       {
         std::string          imageUrl;
         const Property::Map* map;
-        if(value.Get(imageUrl))
+        if(GetStdString(value, imageUrl))
         {
-          impl.SetImage(imageUrl, ImageDimensions());
+          impl.SetImage(ToDaliString(imageUrl), ImageDimensions());
         }
         // if its not a string then get a Property::Map from the property if possible.
         else
@@ -497,7 +503,7 @@ void ImageView::SetProperty(BaseObject* object, Property::Index index, const Pro
 
                   if(!impl.mUrl.empty())
                   {
-                    impl.SetImage(impl.mUrl, impl.mImageSize);
+                    impl.SetImage(ToDaliString(impl.mUrl), impl.mImageSize);
                   }
                   else if(!impl.mPropertyMap.Empty())
                   {
@@ -529,9 +535,9 @@ void ImageView::SetProperty(BaseObject* object, Property::Index index, const Pro
       case Ui::ImageView::Property::PLACEHOLDER_IMAGE:
       {
         std::string placeholderUrl;
-        if(value.Get(placeholderUrl))
+        if(GetStdString(value, placeholderUrl))
         {
-          impl.SetPlaceholderUrl(placeholderUrl);
+          impl.SetPlaceholderUrl(ToDaliString(placeholderUrl));
         }
         break;
       }
@@ -554,7 +560,7 @@ Property::Value ImageView::GetProperty(BaseObject* object, Property::Index prope
       {
         if(!impl.mUrl.empty())
         {
-          value = impl.mUrl;
+          value = ToPropertyValue(impl.mUrl);
         }
         else
         {

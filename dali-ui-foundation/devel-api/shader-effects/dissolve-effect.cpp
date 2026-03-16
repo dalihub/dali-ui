@@ -18,10 +18,13 @@
 #include <dali-ui-foundation/devel-api/shader-effects/dissolve-effect.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -92,11 +95,11 @@ void DissolveEffectSetCentralLine(Actor& actor, const Vector2& position, const V
   rotation       = Vector2(-displacement.x, displacement.y);
   rotation.Normalize();
 
-  actor.RegisterProperty("uSaddleParam", saddleParam);
-  actor.RegisterProperty("uTranslation", translation);
-  actor.RegisterProperty("uRotation", rotation);
-  actor.RegisterProperty("uToNext", toNext);
-  actor.RegisterProperty("uPercentage", initialProgress, Dali::Property::ANIMATABLE);
+  actor.RegisterProperty(Dali::StringView("uSaddleParam"), saddleParam);
+  actor.RegisterProperty(Dali::StringView("uTranslation"), translation);
+  actor.RegisterProperty(Dali::StringView("uRotation"), rotation);
+  actor.RegisterProperty(Dali::StringView("uToNext"), toNext);
+  actor.RegisterProperty(Dali::StringView("uPercentage"), initialProgress, Dali::Property::ANIMATABLE);
 }
 
 Property::Map CreateDissolveEffect(bool useHighPrecision)
@@ -133,8 +136,8 @@ Property::Map CreateDissolveEffect(bool useHighPrecision)
   vertexShaderString.append(vertexShader);
   fragmentShaderString.append(fragmentShader);
 
-  customShader[Visual::Shader::Property::VERTEX_SHADER]   = vertexShaderString;
-  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShaderString;
+  customShader[Visual::Shader::Property::VERTEX_SHADER]   = ToPropertyValue(vertexShaderString);
+  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(fragmentShaderString);
 
   customShader[Visual::Shader::Property::SUBDIVIDE_GRID_X] = 20;
   customShader[Visual::Shader::Property::SUBDIVIDE_GRID_Y] = 20;

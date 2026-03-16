@@ -18,12 +18,15 @@
 #include <dali-ui-foundation/devel-api/shader-effects/distance-field-effect.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/rendering/shader.h>
 #include <string.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+using Dali::Integration::ToPropertyValue;
 
 namespace Dali
 {
@@ -44,7 +47,7 @@ Dali::Property::Map CreateDistanceFieldEffect()
   fragmentShaderString.append(fragmentShaderPrefix);
   fragmentShaderString.append(fragmentShader);
 
-  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = fragmentShaderString;
+  customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(fragmentShaderString);
   customShader[Visual::Shader::Property::HINTS]           = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
   map[Ui::Visual::Property::SHADER] = customShader;

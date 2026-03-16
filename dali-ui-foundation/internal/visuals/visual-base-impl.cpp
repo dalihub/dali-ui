@@ -1275,7 +1275,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
 
   // Fast-out for invalid key.
   if((key.type == Property::Key::INDEX && key.indexKey == Property::INVALID_KEY) ||
-     (key.type == Property::Key::STRING && key.stringKey.empty()))
+     (key.type == Property::Key::STRING && key.stringKey.Empty()))
   {
     return Property::INVALID_INDEX;
   }
@@ -1291,7 +1291,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     {
       // Yes - we should register it in the Renderer so it can be set / animated
       // independently, as shaders are shared across multiple renderers.
-      std::string     keyName;
+      Dali::String    keyName;
       Property::Index keyIndex(Property::INVALID_KEY);
       if(key.type == Property::Key::INDEX)
       {

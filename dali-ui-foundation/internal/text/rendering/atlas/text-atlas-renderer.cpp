@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/rendering/geometry.h>
@@ -41,6 +42,8 @@
 using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Text;
+
+using Dali::Integration::ToDaliStringView;
 
 namespace
 {
@@ -802,7 +805,7 @@ struct AtlasRenderer::Impl
       if(!mShaderRgba)
       {
         mShaderRgba =
-          Shader::New(SHADER_TEXT_ATLAS_SHADER_VERT, SHADER_TEXT_ATLAS_RGBA_SHADER_FRAG,
+          Shader::New(ToDaliStringView(SHADER_TEXT_ATLAS_SHADER_VERT), ToDaliStringView(SHADER_TEXT_ATLAS_RGBA_SHADER_FRAG),
                       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                       "TEXT_ATLAS_RGBA");
       }
@@ -814,7 +817,7 @@ struct AtlasRenderer::Impl
       if(!mShaderL8)
       {
         mShaderL8 =
-          Shader::New(SHADER_TEXT_ATLAS_SHADER_VERT, SHADER_TEXT_ATLAS_L8_SHADER_FRAG,
+          Shader::New(ToDaliStringView(SHADER_TEXT_ATLAS_SHADER_VERT), ToDaliStringView(SHADER_TEXT_ATLAS_L8_SHADER_FRAG),
                       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                       "TEXT_ATLAS_L8");
       }

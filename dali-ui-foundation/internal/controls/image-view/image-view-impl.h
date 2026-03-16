@@ -19,6 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
@@ -69,7 +70,7 @@ public:
   /**
    * @copydoc Dali::Ui::SetImage
    */
-  void SetImage(const std::string& imageUrl, ImageDimensions size);
+  void SetImage(const Dali::String& imageUrl, ImageDimensions size);
 
   /**
    * @brief Unregister ImageView IMAGE visual
@@ -121,12 +122,12 @@ public:
   /**
    * @brief Set the placeholder url
    */
-  void SetPlaceholderUrl(const std::string& url);
+  void SetPlaceholderUrl(const Dali::String& url);
 
   /**
    * @brief Get the placeholder url
    */
-  std::string GetPlaceholderUrl() const;
+  Dali::String GetPlaceholderUrl() const;
 
 private: // From Control
   /**
