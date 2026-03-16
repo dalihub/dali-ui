@@ -54,7 +54,7 @@ public:
    * @param[in] renderingType The type of rendering required.
    * @return A handle to the newly created renderer.
    */
-  RendererPtr NewRenderer(unsigned int renderingType);
+  RendererPtr NewRenderer();
 
   /**
    * @brief Create an uninitialized TextAbstraction handle.

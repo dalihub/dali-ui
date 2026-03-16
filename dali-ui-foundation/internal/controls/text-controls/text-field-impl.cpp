@@ -32,7 +32,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-field-devel.h>
-#include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-field-property-handler.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
@@ -62,7 +61,7 @@ namespace Internal
 {
 namespace // unnamed namespace
 {
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = 0u;
 const char*        KEY_RETURN_NAME           = "Return";
 } // unnamed namespace
 
@@ -490,9 +489,7 @@ void TextField::OnInitialize()
   mController = Text::Controller::New(this, this, this, this);
 
   // When using the vector-based rendering, the size of the GLyphs are different
-  TextAbstraction::GlyphType glyphType = (DevelText::RENDERING_VECTOR_BASED == mRenderingBackend)
-                                           ? TextAbstraction::VECTOR_GLYPH
-                                           : TextAbstraction::BITMAP_GLYPH;
+  TextAbstraction::GlyphType glyphType = TextAbstraction::BITMAP_GLYPH;
   mController->SetGlyphType(glyphType);
 
   mDecorator = Text::Decorator::New(*mController, *mController);
@@ -740,7 +737,7 @@ void TextField::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     if(!mRenderer)
     {
-      mRenderer      = Backend::Get().NewRenderer(mRenderingBackend);
+      mRenderer      = Backend::Get().NewRenderer();
       updateTextType = static_cast<Text::Controller::UpdateTextType>(updateTextType | Text::Controller::MODEL_UPDATED);
     }
 

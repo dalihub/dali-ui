@@ -56,7 +56,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::Backend::NewRenderer()
    */
-  RendererPtr NewRenderer(unsigned int renderingType);
+  RendererPtr NewRenderer();
 
 private:
   // Undefined copy constructor.

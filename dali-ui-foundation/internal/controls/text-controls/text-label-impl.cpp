@@ -30,7 +30,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/styling/default-theme.h>
@@ -67,7 +66,7 @@ namespace
 {
 static constexpr uint32_t NUMBER_OF_RENDER_MODE = 3;
 
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = 0u;
 
 /**
  * @brief How the text visual should be aligned vertically inside the control.
@@ -299,22 +298,13 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       case Ui::DevelTextLabel::Property::RENDERING_BACKEND:
       {
         int backend = value.Get<int>();
-
-#ifndef ENABLE_VECTOR_BASED_TEXT_RENDERING
-        if(DevelText::RENDERING_VECTOR_BASED == backend)
-        {
-          backend = TextAbstraction::BITMAP_GLYPH; // Fallback to bitmap-based rendering
-        }
-#endif
         if(impl.mRenderingBackend != backend)
         {
           impl.mRenderingBackend = backend;
           impl.mTextUpdateNeeded = true;
 
           // When using the vector-based rendering, the size of the GLyphs are different
-          TextAbstraction::GlyphType glyphType = (DevelText::RENDERING_VECTOR_BASED == impl.mRenderingBackend)
-                                                   ? TextAbstraction::VECTOR_GLYPH
-                                                   : TextAbstraction::BITMAP_GLYPH;
+          TextAbstraction::GlyphType glyphType = TextAbstraction::BITMAP_GLYPH;
           impl.mController->SetGlyphType(glyphType);
         }
         break;

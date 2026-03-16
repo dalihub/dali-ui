@@ -32,9 +32,9 @@ Backend Backend::Get()
   return Internal::Backend::Get();
 }
 
-RendererPtr Backend::NewRenderer(unsigned int renderingType)
+RendererPtr Backend::NewRenderer()
 {
-  return GetImplementation(*this).NewRenderer(renderingType);
+  return GetImplementation(*this).NewRenderer();
 }
 
 Backend::Backend()

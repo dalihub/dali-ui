@@ -33,7 +33,6 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/rendering-backend.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-editor-property-handler.h>
@@ -63,7 +62,7 @@ namespace Internal
 {
 namespace // unnamed namespace
 {
-const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_RENDERING_BACKEND;
+const unsigned int DEFAULT_RENDERING_BACKEND = 0u;
 const float        DEFAULT_SCROLL_SPEED      = 1200.f; ///< The default scroll speed for the text editor in pixels/second.
 } // unnamed namespace
 
@@ -829,7 +828,7 @@ void TextEditor::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     if(!mRenderer)
     {
-      mRenderer      = Backend::Get().NewRenderer(mRenderingBackend);
+      mRenderer      = Backend::Get().NewRenderer();
       updateTextType = static_cast<Text::Controller::UpdateTextType>(updateTextType | Text::Controller::MODEL_UPDATED);
     }
 
