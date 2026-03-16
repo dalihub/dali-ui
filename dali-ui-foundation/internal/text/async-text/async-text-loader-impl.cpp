@@ -390,8 +390,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 
   // Hyphenation
-  if(parameters.lineWrapMode == LineWrap::HYPHENATION ||
-     parameters.lineWrapMode == LineWrap::MIXED)
+  if(parameters.lineWrapMode == LineWrapMode::HYPHENATION ||
+     parameters.lineWrapMode == LineWrapMode::MIXED)
   {
     CharacterIndex startIndex          = 0u;
     CharacterIndex end                 = numberOfCharacters;

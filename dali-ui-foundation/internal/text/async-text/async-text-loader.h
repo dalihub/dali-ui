@@ -109,7 +109,7 @@ struct AsyncTextParameters
     requestType{Async::RENDER_FIXED_SIZE},
     horizontalAlignment{Alignment::START},
     verticalAlignment{Alignment::START},
-    lineWrapMode{LineWrap::WORD},
+    lineWrapMode{LineWrapMode::WORD},
     underlineType{Text::Underline::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
@@ -200,7 +200,7 @@ struct AsyncTextParameters
   Async::RequestType          requestType;
   Alignment                   horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
   Alignment                   verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
-  LineWrap                    lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  LineWrapMode                lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
   Text::Underline::Type       underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
   Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.

@@ -1969,7 +1969,7 @@ void Controller::Impl::SetVerticalAlignment(Alignment alignment)
   }
 }
 
-void Controller::Impl::SetLineWrapMode(LineWrap lineWrapMode)
+void Controller::Impl::SetLineWrapMode(LineWrapMode lineWrapMode)
 {
   if(lineWrapMode != mModel->mLineWrapMode)
   {
@@ -1977,10 +1977,10 @@ void Controller::Impl::SetLineWrapMode(LineWrap lineWrapMode)
     mOperationsPending =
       static_cast<OperationsMask>(mOperationsPending | ALIGN | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER);
 
-    if((mModel->mLineWrapMode == LineWrap::HYPHENATION) ||
-       (lineWrapMode == LineWrap::HYPHENATION) ||
-       (mModel->mLineWrapMode == LineWrap::MIXED) ||
-       (lineWrapMode == LineWrap::MIXED)) // hyphen is treated as line break
+    if((mModel->mLineWrapMode == LineWrapMode::HYPHENATION) ||
+       (lineWrapMode == LineWrapMode::HYPHENATION) ||
+       (mModel->mLineWrapMode == LineWrapMode::MIXED) ||
+       (lineWrapMode == LineWrapMode::MIXED)) // hyphen is treated as line break
     {
       mOperationsPending = static_cast<OperationsMask>(mOperationsPending | GET_LINE_BREAKS);
     }

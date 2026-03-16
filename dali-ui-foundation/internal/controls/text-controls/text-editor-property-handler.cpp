@@ -557,7 +557,7 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     }
     case Ui::TextEditor::Property::LINE_WRAP_MODE:
     {
-      Text::LineWrap lineWrapMode = Text::LineWrap::WORD;
+      Text::LineWrapMode lineWrapMode = Text::LineWrapMode::WORD;
       if(Text::GetLineWrapModeEnumeration(value, lineWrapMode))
       {
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p LineWrap::MODE %d\n", impl.mController.Get(),

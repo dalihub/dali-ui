@@ -41,10 +41,10 @@ const Dali::Scripting::StringEnum TEXT_ALIGNMENT_TYPE_TABLE[] =
 
 const Dali::Scripting::StringEnum LINE_WRAP_MODE_TABLE[] =
   {
-    {"WORD", static_cast<int32_t>(LineWrap::WORD)},
-    {"CHARACTER", static_cast<int32_t>(LineWrap::CHARACTER)},
-    {"HYPHENATION", static_cast<int32_t>(LineWrap::HYPHENATION)},
-    {"MIXED", static_cast<int32_t>(LineWrap::MIXED)},
+    {"WORD", static_cast<int32_t>(LineWrapMode::WORD)},
+    {"CHARACTER", static_cast<int32_t>(LineWrapMode::CHARACTER)},
+    {"HYPHENATION", static_cast<int32_t>(LineWrapMode::HYPHENATION)},
+    {"MIXED", static_cast<int32_t>(LineWrapMode::MIXED)},
 };
 
 const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TYPE_TABLE) / sizeof(TEXT_ALIGNMENT_TYPE_TABLE[0]));
@@ -91,7 +91,7 @@ bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, Align
   return result;
 }
 
-bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, LineWrap& lineWrapMode)
+bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, LineWrapMode& lineWrapMode)
 {
   int enumValue = 0;
 
@@ -102,7 +102,7 @@ bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, LineWrap& 
 
   if(result)
   {
-    lineWrapMode = static_cast<LineWrap>(enumValue);
+    lineWrapMode = static_cast<LineWrapMode>(enumValue);
   }
 
   return result;

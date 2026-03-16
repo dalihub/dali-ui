@@ -53,7 +53,7 @@ enum class Alignment : uint8_t
  * Specifies how text is wrapped when the available layout width
  * is insufficient to display the entire text on a single line.
  */
-enum class LineWrap : uint8_t
+enum class LineWrapMode : uint8_t
 {
   /**
    * @brief Wraps at word boundaries.

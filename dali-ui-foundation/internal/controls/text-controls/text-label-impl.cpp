@@ -520,7 +520,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::LINE_WRAP_MODE:
       {
-        Text::LineWrap lineWrapMode = Text::LineWrap::WORD;
+        Text::LineWrapMode lineWrapMode = Text::LineWrapMode::WORD;
         if(Text::GetLineWrapModeEnumeration(value, lineWrapMode))
         {
           DALI_LOG_INFO(gLogFilter, Debug::General, "TextLabel %p LineWrap::MODE %d\n", impl.mController.Get(),
