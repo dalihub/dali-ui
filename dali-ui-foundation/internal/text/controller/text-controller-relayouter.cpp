@@ -1049,9 +1049,9 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
       const Length&              numberOfCharactersBP  = boundedParagraphRun.characterRun.numberOfCharacters;
       const CharacterIndex       characterEndIndexBP   = characterStartIndexBP + numberOfCharactersBP - 1u;
 
-      CharacterIndex                  decidedAlignStartIndex         = alignIndex;
-      Length                          decidedAlignNumberOfCharacters = alignEndIndex - alignIndex + 1u;
-      Text::HorizontalAlignment::Type decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
+      CharacterIndex  decidedAlignStartIndex         = alignIndex;
+      Length          decidedAlignNumberOfCharacters = alignEndIndex - alignIndex + 1u;
+      Text::Alignment decidedHorizontalAlignment     = impl.mModel->mHorizontalAlignment;
 
       /*
        * Shortcuts to explain indexes cases:
@@ -1140,13 +1140,13 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
   switch(model->mVerticalAlignment)
   {
-    case VerticalAlignment::TOP:
+    case Alignment::START:
     {
       model->mScrollPosition.y = 0.f;
       offsetY                  = 0.f;
       break;
     }
-    case VerticalAlignment::CENTER:
+    case Alignment::CENTER:
     {
       model->mScrollPosition.y =
         floorf(0.5f * (controlSize.height - layoutSize.height)); // try to avoid pixel alignment.
@@ -1156,7 +1156,7 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
       }
       break;
     }
-    case VerticalAlignment::BOTTOM:
+    case Alignment::END:
     {
       model->mScrollPosition.y = controlSize.height - layoutSize.height;
       if(needRecalc)

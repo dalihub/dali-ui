@@ -62,10 +62,10 @@ static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintT
 static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
 
-const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-  0.0f, // VerticalAlignment::TOP
-  0.5f, // VerticalAlignment::CENTER
-  1.0f  // VerticalAlignment::BOTTOM
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
+  0.0f, // Text::Alignment::START
+  0.5f, // Text::Alignment::CENTER
+  1.0f  // Text::Alignment::END
 };
 
 #ifdef TRACE_ENABLED
@@ -516,7 +516,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     {
       if(mController)
       {
-        Text::HorizontalAlignment::Type alignment(static_cast<Text::HorizontalAlignment::Type>(
+        Text::Alignment alignment(static_cast<Text::Alignment>(
           -1)); // Set to invalid value to ensure a valid mode does get set
         if(Ui::Text::GetHorizontalAlignmentEnumeration(propertyValue, alignment))
         {
@@ -529,8 +529,8 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     {
       if(mController)
       {
-        Ui::Text::VerticalAlignment::Type alignment(
-          static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment(
+          static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
         if(Ui::Text::GetVerticalAlignmentEnumeration(propertyValue, alignment))
         {
           mController->SetVerticalAlignment(alignment);
@@ -894,7 +894,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     alignmentOffset.x = 0.0f;
     alignmentOffset.y = isVerticalScroll ? 0.0f
                                          : (parameters.textHeight - layoutSize.y) *
-                                             VERTICAL_ALIGNMENT_TABLE[parameters.verticalAlignment];
+                                             VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)];
 
     Vector2 visualTransformOffset;
     if(renderInfo.isCutout)

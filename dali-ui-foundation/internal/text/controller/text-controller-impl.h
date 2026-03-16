@@ -956,12 +956,12 @@ public:
   /**
    * @copydoc Controller::SetHorizontalAlignment()
    */
-  void SetHorizontalAlignment(HorizontalAlignment::Type alignment);
+  void SetHorizontalAlignment(Alignment alignment);
 
   /**
    * @copydoc Controller::SetVerticalAlignment()
    */
-  void SetVerticalAlignment(VerticalAlignment::Type alignment);
+  void SetVerticalAlignment(Alignment alignment);
 
   /**
    * @copydoc Controller::SetLineWrapMode()

@@ -251,17 +251,17 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&             
   int32_t penX = 0;
   switch(viewModel.GetHorizontalAlignment())
   {
-    case HorizontalAlignment::BEGIN:
+    case Alignment::START:
     {
       // No offset to add.
       break;
     }
-    case HorizontalAlignment::CENTER:
+    case Alignment::CENTER:
     {
       penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
       break;
     }
-    case HorizontalAlignment::END:
+    case Alignment::END:
     {
       penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
       break;
@@ -277,17 +277,17 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&             
   int32_t penY = 0u;
   switch(viewModel.GetVerticalAlignment())
   {
-    case VerticalAlignment::TOP:
+    case Alignment::START:
     {
       // No offset to add.
       break;
     }
-    case VerticalAlignment::CENTER:
+    case Alignment::CENTER:
     {
       penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
       break;
     }
-    case VerticalAlignment::BOTTOM:
+    case Alignment::END:
     {
       penY = static_cast<int32_t>(controlHeight - layoutHeight);
       break;

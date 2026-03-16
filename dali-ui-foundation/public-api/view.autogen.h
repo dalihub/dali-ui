@@ -168,21 +168,4 @@
   * \
   * @param[in] color The required background color value \
   */ \
-  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; } \
-  /** \
-  * @brief Sets layout parameters on this View. \
-  * \
-  * The params handle is stored on the View as-is, and the View's \
-  * measure cache is invalidated. \
-  * \
-  * @param[in] params The layout parameters to attach to this View \
-  * @return Reference to this View for fluent chaining \
-  * \
-  * @code \
-  * child.SetLayoutParams( \
-  *   AbsoluteLayoutParams::New() \
-  *     .SetBounds(LayoutRect(10, 20, 100, 200)) \
-  *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)); \
-  * @endcode \
-  */ \
-  ChildClass& SetLayoutParams(LayoutParams params) { View::SetLayoutParams(params); return *this; }
+  ChildClass& BackgroundColor(const Vector4& color) { View::BackgroundColor(color); return *this; }

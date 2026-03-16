@@ -65,10 +65,10 @@ DALI_TYPE_REGISTRATION_END()
  * @brief Lookup table that converts Text::VerticalAlignment values
  *        to a normalized vertical alignment factor.
  */
-const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-  0.0f, // VerticalAlignment::TOP
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
+  0.0f, // VerticalAlignment::START
   0.5f, // VerticalAlignment::CENTER
-  1.0f  // VerticalAlignment::BOTTOM
+  1.0f  // VerticalAlignment::END
 };
 
 } // namespace
@@ -167,128 +167,26 @@ const Vector4& LabelImpl::GetTextColor() const
   return mController->GetDefaultColor();
 }
 
-void LabelImpl::SetHorizontalTextAlignment(TextAlignment alignment)
+void LabelImpl::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
-  // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
-
-  Text::HorizontalAlignment::Type type;
-  switch(alignment)
-  {
-    case TextAlignment::START:
-    {
-      type = Text::HorizontalAlignment::BEGIN;
-      break;
-    }
-    case TextAlignment::CENTER:
-    {
-      type = Text::HorizontalAlignment::CENTER;
-      break;
-    }
-    case TextAlignment::END:
-    {
-      type = Text::HorizontalAlignment::END;
-      break;
-    }
-    default:
-    {
-      type = Text::HorizontalAlignment::BEGIN;
-      break;
-    }
-  }
-  mController->SetHorizontalAlignment(type);
+  mController->SetHorizontalAlignment(alignment);
 }
 
-TextAlignment LabelImpl::GetHorizontalTextAlignment() const
+Text::Alignment LabelImpl::GetHorizontalTextAlignment() const
 {
-  // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
-  TextAlignment alignment;
-  switch(mController->GetHorizontalAlignment())
-  {
-    case Text::HorizontalAlignment::BEGIN:
-    {
-      alignment = TextAlignment::START;
-      break;
-    }
-    case Text::HorizontalAlignment::CENTER:
-    {
-      alignment = TextAlignment::CENTER;
-      break;
-    }
-    case Text::HorizontalAlignment::END:
-    {
-      alignment = TextAlignment::END;
-      break;
-    }
-    default:
-    {
-      alignment = TextAlignment::START;
-      break;
-    }
-  }
-  return alignment;
+  return mController->GetHorizontalAlignment();
 }
 
-void LabelImpl::SetVerticalTextAlignment(TextAlignment alignment)
+void LabelImpl::SetVerticalTextAlignment(Text::Alignment alignment)
 {
-  // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
-
-  Text::VerticalAlignment::Type type;
-  switch(alignment)
-  {
-    case TextAlignment::START:
-    {
-      type = Text::VerticalAlignment::TOP;
-      break;
-    }
-    case TextAlignment::CENTER:
-    {
-      type = Text::VerticalAlignment::CENTER;
-      break;
-    }
-    case TextAlignment::END:
-    {
-      type = Text::VerticalAlignment::BOTTOM;
-      break;
-    }
-    default:
-    {
-      type = Text::VerticalAlignment::TOP;
-      break;
-    }
-  }
-  mController->SetVerticalAlignment(type);
+  mController->SetVerticalAlignment(alignment);
 }
 
-TextAlignment LabelImpl::GetVerticalTextAlignment() const
+Text::Alignment LabelImpl::GetVerticalTextAlignment() const
 {
-  // TODO: Replace Text::HorizontalAlignment/Text::VerticalAlignment with TextAlignment internally.
-  TextAlignment alignment;
-  switch(mController->GetVerticalAlignment())
-  {
-    case Text::VerticalAlignment::TOP:
-    {
-      alignment = TextAlignment::START;
-      break;
-    }
-    case Text::VerticalAlignment::CENTER:
-    {
-      alignment = TextAlignment::CENTER;
-      break;
-    }
-    case Text::VerticalAlignment::BOTTOM:
-    {
-      alignment = TextAlignment::END;
-      break;
-    }
-    default:
-    {
-      alignment = TextAlignment::START;
-      break;
-    }
-  }
-  return alignment;
+  return mController->GetVerticalAlignment();
 }
 
 void LabelImpl::OnInitialize()
@@ -368,7 +266,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     // Calculate the offset for vertical alignment only, as the layout engine will do the horizontal alignment.
     Vector2 alignmentOffset;
     alignmentOffset.x = 0.0f;
-    alignmentOffset.y = (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[mController->GetVerticalAlignment()];
+    alignmentOffset.y = (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
 
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)

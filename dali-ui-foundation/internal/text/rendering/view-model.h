@@ -75,12 +75,12 @@ public:
   /**
    * @copydoc ModelInterface::GetHorizontalAlignment()
    */
-  Text::HorizontalAlignment::Type GetHorizontalAlignment() const override;
+  Alignment GetHorizontalAlignment() const override;
 
   /**
    * @copydoc ModelInterface::GetVerticalAlignment()
    */
-  Text::VerticalAlignment::Type GetVerticalAlignment() const override;
+  Alignment GetVerticalAlignment() const override;
 
   /**
    * @copydoc ModelInterface::GetVerticalLineAlignment()

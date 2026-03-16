@@ -72,7 +72,7 @@ public:
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, CharacterDirection direction,
-                     HorizontalAlignment::Type horizontalAlignment, VerticalAlignment::Type verticalAlignment,
+                     Alignment horizontalAlignment, Alignment verticalAlignment,
                      bool animationReStart = false);
 
   /**

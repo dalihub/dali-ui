@@ -42,10 +42,10 @@ namespace
 {
 constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
 
-const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-  0.0f, // VerticalAlignment::TOP
-  0.5f, // VerticalAlignment::CENTER
-  1.0f  // VerticalAlignment::BOTTOM
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
+  0.0f, // Text::Alignment::START
+  0.5f, // Text::Alignment::CENTER
+  1.0f  // Text::Alignment::END
 };
 
 float ConvertToEven(float value)
@@ -813,17 +813,17 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 
   switch(parameters.verticalAlignment)
   {
-    case VerticalAlignment::TOP:
+    case Text::Alignment::START:
     {
       mTextModel->mScrollPosition.y = 0.f;
       break;
     }
-    case VerticalAlignment::CENTER:
+    case Text::Alignment::CENTER:
     {
       mTextModel->mScrollPosition.y = floorf(0.5f * (textLayoutArea.height - layoutSize.height));
       break;
     }
-    case VerticalAlignment::BOTTOM:
+    case Text::Alignment::END:
     {
       mTextModel->mScrollPosition.y = textLayoutArea.height - layoutSize.height;
       break;
@@ -921,7 +921,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // We need to store the offset including padding and vertical alignment.
     float xOffset = parameters.padding.start;
     float yOffset = parameters.padding.top + std::round((parameters.textHeight - layoutSize.y) *
-                                                        VERTICAL_ALIGNMENT_TABLE[parameters.verticalAlignment]);
+                                                        VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
     mTextModel->mVisualModel->SetOffsetWithCutout(Vector2(xOffset, yOffset));
 
     // The layout size is set to the text control size including padding.
@@ -1400,7 +1400,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
     }
 
     Size originSize                = Size::ZERO;
-    bool needLayoutSizeCalculation = parameters.verticalAlignment != VerticalAlignment::TOP ? true : false;
+    bool needLayoutSizeCalculation = parameters.verticalAlignment != Text::Alignment::START ? true : false;
     if(needLayoutSizeCalculation)
     {
       parameters.isAutoScrollEnabled = false;

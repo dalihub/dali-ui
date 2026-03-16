@@ -46,20 +46,20 @@ const int MINIMUM_SCROLL_SPEED = 1; // Speed should be set by Property system.
  *   1) The alignment value of the text label (Use Text::HorizontalAlignment enumerations).
  *   2) The text direction, i.e. whether it's LTR or RTL (0 = LTR, 1 = RTL).
  */
-const float HORIZONTAL_ALIGNMENT_TABLE[Text::HorizontalAlignment::END + 1][2] = {
-  // HorizontalAlignment::BEGIN
+const float HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1][2] = {
+  // Alignment::START
   {
     -0.5f, // LTR
     0.5f   // RTL
   },
 
-  // HorizontalAlignment::CENTER
+  // Alignment::CENTER
   {
     0.0f, // LTR
     0.0f  // RTL
   },
 
-  // HorizontalAlignment::END
+  // Alignment::END
   {
     0.5f, // LTR
     -0.5f // RTL
@@ -71,10 +71,10 @@ const float HORIZONTAL_ALIGNMENT_TABLE[Text::HorizontalAlignment::END + 1][2] = 
  * -0.5f aligns the text to the top, 0.0f aligns the text to the center, 0.5f aligns the text to the bottom.
  * The alignment depends on the alignment value of the text label (Use Text::VerticalAlignment enumerations).
  */
-const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-  -0.5f, // VerticalAlignment::TOP
-  0.0f,  // VerticalAlignment::CENTER
-  0.5f   // VerticalAlignment::BOTTOM
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
+  -0.5f, // Alignment::START
+  0.0f,  // Alignment::CENTER
+  0.5f   // Alignment::END
 };
 
 } // namespace
@@ -222,8 +222,8 @@ TextScroller::~TextScroller()
 
 void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, TextureSet textureSet,
                                  const Size& controlSize, const Size& textureSize, const float wrapGap,
-                                 CharacterDirection direction, HorizontalAlignment::Type horizontalAlignment,
-                                 VerticalAlignment::Type verticalAlignment, bool animationReStart)
+                                 CharacterDirection direction, Alignment horizontalAlignment,
+                                 Alignment verticalAlignment, bool animationReStart)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
@@ -279,16 +279,16 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     if(textureSize.x > controlSize.x)
     {
       // if Text is elided, scroll should start at the begin of text.
-      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[HorizontalAlignment::BEGIN][direction];
+      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(Alignment::START)][direction];
     }
     else
     {
-      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[horizontalAlignment][direction];
+      horizontalAlign = HORIZONTAL_ALIGNMENT_TABLE[static_cast<int>(horizontalAlignment)][direction];
     }
   }
 
   const float verticalAlign =
-    isHorizontal ? VERTICAL_ALIGNMENT_TABLE[verticalAlignment] : VERTICAL_ALIGNMENT_TABLE[VerticalAlignment::TOP];
+    isHorizontal ? VERTICAL_ALIGNMENT_TABLE[static_cast<int>(verticalAlignment)] : VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Alignment::START)];
 
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::SetParameters horizontalAlign[%f], verticalAlign[%f]\n",
                 horizontalAlign, verticalAlign);

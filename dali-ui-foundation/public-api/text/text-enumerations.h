@@ -22,16 +22,13 @@ namespace Dali
 {
 namespace Ui
 {
-/**
- * @addtogroup dali_toolkit_controls_text_controls
- * @{
- */
+namespace Text
+{
 
 /**
  * @brief Enumeration for text alignment options.
  */
-
-enum class TextAlignment : uint8_t
+enum class Alignment : uint8_t
 {
   /**
    * @brief Align to the start (left/top)
@@ -46,51 +43,6 @@ enum class TextAlignment : uint8_t
    */
   END = 2
 };
-
-namespace Text
-{
-
-/**
- * @brief The available Horizontal alignments for text.
- *
- * @SINCE_1_2.60
- */
-namespace HorizontalAlignment
-{
-/**
- * @brief Enumerations for Horizontal alignment.
- *
- * @SINCE_1_2.60
- */
-enum Type
-{
-  BEGIN,  ///< @SINCE_1_2.60
-  CENTER, ///< @SINCE_1_2.60
-  END     ///< @SINCE_1_2.60
-};
-
-} // namespace HorizontalAlignment
-
-/**
- * @brief The available Vertical alignments for text.
- *
- * @SINCE_1_2.60
- */
-namespace VerticalAlignment
-{
-/**
- * @brief Enumerations for Vertical alignment.
- *
- * @SINCE_1_2.60
- */
-enum Type
-{
-  TOP,    ///< @SINCE_1_2.60
-  CENTER, ///< @SINCE_1_2.60
-  BOTTOM  ///< @SINCE_1_2.60
-};
-
-} // namespace VerticalAlignment
 
 /**
  * @brief Contains modes which specify how lines are wrapped.

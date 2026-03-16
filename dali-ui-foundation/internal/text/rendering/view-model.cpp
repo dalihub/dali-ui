@@ -86,12 +86,12 @@ const Vector2& ViewModel::GetScrollPosition() const
   return mModel->GetScrollPosition();
 }
 
-HorizontalAlignment::Type ViewModel::GetHorizontalAlignment() const
+Alignment ViewModel::GetHorizontalAlignment() const
 {
   return mModel->GetHorizontalAlignment();
 }
 
-VerticalAlignment::Type ViewModel::GetVerticalAlignment() const
+Alignment ViewModel::GetVerticalAlignment() const
 {
   return mModel->GetVerticalAlignment();
 }
@@ -576,19 +576,19 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
               {
                 switch(mModel->GetHorizontalAlignment())
                 {
-                  case HorizontalAlignment::BEGIN:
+                  case Alignment::START:
                   {
                     mElidedOffset = isRTLLine ? ellipsisLine->alignmentOffset : 0.0f;
                     break;
                   }
-                  case HorizontalAlignment::CENTER:
+                  case Alignment::CENTER:
                   {
                     mElidedOffset = isRTLLine ? controlWidth - ellipsisLine->width + ellipsisLine->alignmentOffset
                                               : controlWidth - calculatedWidth;
                     mElidedOffset = std::floor(mElidedOffset * 0.5f);
                     break;
                   }
-                  case HorizontalAlignment::END:
+                  case Alignment::END:
                   {
                     mElidedOffset = isRTLLine ? controlWidth - ellipsisLine->width + ellipsisLine->alignmentOffset
                                               : controlWidth - calculatedWidth;

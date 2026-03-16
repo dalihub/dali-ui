@@ -202,7 +202,7 @@ void UnderlineTypeStringToTypeValue(const char* const typeStr, Length length, Te
 float StringToFloat(const char* const floatStr);
 
 /**
- * @brief Converts a string into its value in the enum Text::HorizontalAlignment::Type.
+ * @brief Converts a string into its value in the enum Text::Alignment.
  *
  * @param[in] typeStr The horizontal-alignment type value packed inside a string.
  * @param[in] length The length of the string.
@@ -211,7 +211,7 @@ float StringToFloat(const char* const floatStr);
  * @return Whether the value parsed or not.
  */
 bool HorizontalAlignmentTypeStringToTypeValue(const char* const typeStr, Length length,
-                                              Text::HorizontalAlignment::Type& retType);
+                                              Alignment& retType);
 
 } // namespace Text
 

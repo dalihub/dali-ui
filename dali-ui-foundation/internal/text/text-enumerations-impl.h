@@ -38,8 +38,8 @@ namespace Text
  * @param[out] alignment The resulting alignment from the given source
  * @return true if the resulting alignment has been updated
  */
-bool GetHorizontalAlignmentEnumeration(const Property::Value&               propertyValue,
-                                       Ui::Text::HorizontalAlignment::Type& alignment);
+bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue,
+                                       Alignment&             alignment);
 
 /**
  * @brief Get the alignment from the provided property value.
@@ -47,8 +47,8 @@ bool GetHorizontalAlignmentEnumeration(const Property::Value&               prop
  * @param[out] alignment The resulting alignment from the given source
  * @return true if the resulting alignment has been updated
  */
-bool GetVerticalAlignmentEnumeration(const Property::Value&             propertyValue,
-                                     Ui::Text::VerticalAlignment::Type& alignment);
+bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue,
+                                     Alignment&             alignment);
 
 /**
  * @brief Get the line-wrap-mode from the provided property value.
@@ -63,14 +63,14 @@ bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::
  * @param[in] alignment the Text::HORIZONTAL enum source
  * @return the string equivalent
  */
-const char* GetHorizontalAlignmentString(const Ui::Text::HorizontalAlignment::Type& alignment);
+const char* GetHorizontalAlignmentString(const Alignment& alignment);
 
 /**
  * @brief Get the alignment string from the provided alignment string.
  * @param[in] alignment the Text::VerticalAlignment enum source
  * @return the string equivalent
  */
-const char* GetVerticalAlignmentString(const Ui::Text::VerticalAlignment::Type& alignment);
+const char* GetVerticalAlignmentString(const Alignment& alignment);
 
 /**
  * @brief Get the ellipsis-location-type from the provided property value.

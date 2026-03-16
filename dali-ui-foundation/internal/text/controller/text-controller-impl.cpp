@@ -1234,7 +1234,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
 
     switch(mModel->mHorizontalAlignment)
     {
-      case Text::HorizontalAlignment::BEGIN:
+      case Alignment::START:
       {
         if(isRTL)
         {
@@ -1247,12 +1247,12 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
         }
         break;
       }
-      case Text::HorizontalAlignment::CENTER:
+      case Alignment::CENTER:
       {
         cursorInfo.primaryPosition.x = floorf(0.5f * mModel->mVisualModel->mControlSize.width);
         break;
       }
-      case Text::HorizontalAlignment::END:
+      case Alignment::END:
       {
         if(isRTL)
         {
@@ -1948,7 +1948,7 @@ void Controller::Impl::SetMultiLineEnabled(bool enable)
   }
 }
 
-void Controller::Impl::SetHorizontalAlignment(Text::HorizontalAlignment::Type alignment)
+void Controller::Impl::SetHorizontalAlignment(Alignment alignment)
 {
   if(alignment != mModel->mHorizontalAlignment)
   {
@@ -1959,7 +1959,7 @@ void Controller::Impl::SetHorizontalAlignment(Text::HorizontalAlignment::Type al
   }
 }
 
-void Controller::Impl::SetVerticalAlignment(VerticalAlignment::Type alignment)
+void Controller::Impl::SetVerticalAlignment(Alignment alignment)
 {
   if(alignment != mModel->mVerticalAlignment)
   {

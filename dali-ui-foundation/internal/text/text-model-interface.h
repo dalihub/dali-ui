@@ -79,14 +79,14 @@ public:
    *
    * @return The horizontal alignment.
    */
-  virtual HorizontalAlignment::Type GetHorizontalAlignment() const = 0;
+  virtual Alignment GetHorizontalAlignment() const = 0;
 
   /**
    * @brief Retrieves the text's vertical alignment.
    *
    * @return The vertical alignment.
    */
-  virtual VerticalAlignment::Type GetVerticalAlignment() const = 0;
+  virtual Alignment GetVerticalAlignment() const = 0;
 
   /**
    * @brief Retrieves the text's vertical line alignment.

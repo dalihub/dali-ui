@@ -38,10 +38,10 @@
   * \
   * @param[in] alignment The horizontal text alignment. \
   */ \
-  ChildClass& SetHorizontalTextAlignment(TextAlignment alignment) { Label::SetHorizontalTextAlignment(alignment); return *this; } \
+  ChildClass& SetHorizontalTextAlignment(Text::Alignment alignment) { Label::SetHorizontalTextAlignment(alignment); return *this; } \
   /** \
   * @brief Sets the vertical alignment of the text within the label. \
   * \
   * @param[in] alignment The vertical text alignment. \
   */ \
-  ChildClass& SetVerticalTextAlignment(TextAlignment alignment) { Label::SetVerticalTextAlignment(alignment); return *this; }
+  ChildClass& SetVerticalTextAlignment(Text::Alignment alignment) { Label::SetVerticalTextAlignment(alignment); return *this; }

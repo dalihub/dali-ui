@@ -32,17 +32,14 @@ namespace Text
 {
 namespace
 {
-DALI_ENUM_TO_STRING_TABLE_BEGIN(HORIZONTAL_ALIGNMENT_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::HorizontalAlignment, END)
-DALI_ENUM_TO_STRING_TABLE_END(HORIZONTAL_ALIGNMENT_TYPE)
+const Dali::Scripting::StringEnum TEXT_ALIGNMENT_TYPE_TABLE[] =
+  {
+    {"START", static_cast<int32_t>(Alignment::START)},
+    {"CENTER", static_cast<int32_t>(Alignment::CENTER)},
+    {"END", static_cast<int32_t>(Alignment::END)},
+};
 
-DALI_ENUM_TO_STRING_TABLE_BEGIN(VERTICAL_ALIGNMENT_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, TOP)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::VerticalAlignment, BOTTOM)
-DALI_ENUM_TO_STRING_TABLE_END(VERTICAL_ALIGNMENT_TYPE)
+const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TYPE_TABLE) / sizeof(TEXT_ALIGNMENT_TYPE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LINE_WRAP_MODE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::LineWrap, WORD)
@@ -62,17 +59,32 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(UNDERLINE_TYPE)
 DALI_ENUM_TO_STRING_TABLE_END(UNDERLINE_TYPE)
 } // namespace
 
-bool GetHorizontalAlignmentEnumeration(const Property::Value&               propertyValue,
-                                       Ui::Text::HorizontalAlignment::Type& alignment)
+bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue, Alignment& alignment)
 {
-  return Scripting::GetEnumerationProperty(propertyValue, HORIZONTAL_ALIGNMENT_TYPE_TABLE,
-                                           HORIZONTAL_ALIGNMENT_TYPE_TABLE_COUNT, alignment);
+  int        enumValue = 0;
+  const bool result    = Scripting::GetEnumerationProperty(propertyValue,
+                                                           TEXT_ALIGNMENT_TYPE_TABLE,
+                                                           TEXT_ALIGNMENT_TYPE_TABLE_COUNT,
+                                                           enumValue);
+  if(result)
+  {
+    alignment = static_cast<Alignment>(enumValue);
+  }
+  return result;
 }
 
-bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, Ui::Text::VerticalAlignment::Type& alignment)
+bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, Alignment& alignment)
 {
-  return Scripting::GetEnumerationProperty(propertyValue, VERTICAL_ALIGNMENT_TYPE_TABLE,
-                                           VERTICAL_ALIGNMENT_TYPE_TABLE_COUNT, alignment);
+  int        enumValue = 0;
+  const bool result    = Scripting::GetEnumerationProperty(propertyValue,
+                                                           TEXT_ALIGNMENT_TYPE_TABLE,
+                                                           TEXT_ALIGNMENT_TYPE_TABLE_COUNT,
+                                                           enumValue);
+  if(result)
+  {
+    alignment = static_cast<Alignment>(enumValue);
+  }
+  return result;
 }
 
 bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::LineWrap::Mode& lineWrapMode)
@@ -81,16 +93,20 @@ bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::
                                            lineWrapMode);
 }
 
-const char* GetHorizontalAlignmentString(const Ui::Text::HorizontalAlignment::Type& alignment)
+const char* GetHorizontalAlignmentString(const Alignment& alignment)
 {
-  return Scripting::GetLinearEnumerationName<Ui::Text::HorizontalAlignment::Type>(
-    alignment, HORIZONTAL_ALIGNMENT_TYPE_TABLE, HORIZONTAL_ALIGNMENT_TYPE_TABLE_COUNT);
+  return Scripting::GetLinearEnumerationName(
+    static_cast<int32_t>(alignment),
+    TEXT_ALIGNMENT_TYPE_TABLE,
+    TEXT_ALIGNMENT_TYPE_TABLE_COUNT);
 }
 
-const char* GetVerticalAlignmentString(const Ui::Text::VerticalAlignment::Type& alignment)
+const char* GetVerticalAlignmentString(const Alignment& alignment)
 {
-  return Scripting::GetLinearEnumerationName<Ui::Text::VerticalAlignment::Type>(
-    alignment, VERTICAL_ALIGNMENT_TYPE_TABLE, VERTICAL_ALIGNMENT_TYPE_TABLE_COUNT);
+  return Scripting::GetLinearEnumerationName(
+    static_cast<int32_t>(alignment),
+    TEXT_ALIGNMENT_TYPE_TABLE,
+    TEXT_ALIGNMENT_TYPE_TABLE_COUNT);
 }
 
 bool GetEllipsisPositionTypeEnumeration(const Property::Value&                 propertyValue,

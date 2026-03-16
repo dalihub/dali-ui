@@ -383,24 +383,24 @@ public: // Configure the text controller.
    *
    * @param[in] alignment The horizontal alignment.
    */
-  void SetHorizontalAlignment(HorizontalAlignment::Type alignment);
+  void SetHorizontalAlignment(Alignment alignment);
 
   /**
    * @copydoc ModelInterface::GetHorizontalAlignment()
    */
-  HorizontalAlignment::Type GetHorizontalAlignment() const;
+  Alignment GetHorizontalAlignment() const;
 
   /**
    * @brief Sets the text's vertical alignment.
    *
    * @param[in] alignment The vertical alignment.
    */
-  void SetVerticalAlignment(VerticalAlignment::Type alignment);
+  void SetVerticalAlignment(Alignment alignment);
 
   /**
    * @copydoc ModelInterface::GetVerticalAlignment()
    */
-  VerticalAlignment::Type GetVerticalAlignment() const;
+  Alignment GetVerticalAlignment() const;
 
   /**
    * @brief Sets the text's wrap mode

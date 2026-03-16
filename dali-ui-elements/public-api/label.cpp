@@ -165,24 +165,24 @@ const Vector4& Label::GetTextColor() const
   return GetImpl(*this).GetTextColor();
 }
 
-Label& Label::SetHorizontalTextAlignment(TextAlignment alignment)
+Label& Label::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);
   return *this;
 }
 
-TextAlignment Label::GetHorizontalTextAlignment() const
+Text::Alignment Label::GetHorizontalTextAlignment() const
 {
   return GetImpl(*this).GetHorizontalTextAlignment();
 }
 
-Label& Label::SetVerticalTextAlignment(TextAlignment alignment)
+Label& Label::SetVerticalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetVerticalTextAlignment(alignment);
   return *this;
 }
 
-TextAlignment Label::GetVerticalTextAlignment() const
+Text::Alignment Label::GetVerticalTextAlignment() const
 {
   return GetImpl(*this).GetVerticalTextAlignment();
 }

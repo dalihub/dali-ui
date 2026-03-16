@@ -57,8 +57,8 @@ public:
           .SetViewPadding(Extents(10, 10, 10, 10))
           .BackgroundColor(Color::RED)
           .SetTextColor(Color::ORANGE)
-          .SetHorizontalTextAlignment(TextAlignment::CENTER)
-          .SetVerticalTextAlignment(TextAlignment::CENTER)
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER)
           .As(mLabel),
 
         CreateLabel("Hello world, this is a multi-line enabled long long text", "Ubuntu Mono", 30.0f)
@@ -92,8 +92,8 @@ public:
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
-          .SetHorizontalTextAlignment(TextAlignment::START)
-          .SetVerticalTextAlignment(TextAlignment::START),
+          .SetHorizontalTextAlignment(Text::Alignment::START)
+          .SetVerticalTextAlignment(Text::Alignment::START),
 
         Label::New()
           .SetText("Label Alignment")
@@ -101,8 +101,8 @@ public:
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
-          .SetHorizontalTextAlignment(TextAlignment::CENTER)
-          .SetVerticalTextAlignment(TextAlignment::CENTER),
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER),
 
         Label::New()
           .SetText("Label Alignment")
@@ -110,8 +110,8 @@ public:
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f)
-          .SetHorizontalTextAlignment(TextAlignment::END)
-          .SetVerticalTextAlignment(TextAlignment::END),
+          .SetHorizontalTextAlignment(Text::Alignment::END)
+          .SetVerticalTextAlignment(Text::Alignment::END),
         }));
 
 

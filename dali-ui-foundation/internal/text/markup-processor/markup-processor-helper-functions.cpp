@@ -59,7 +59,7 @@ const char* SOLID_UNDERLINE("solid");
 const char* DASHED_UNDERLINE("dashed");
 const char* DOUBLE_UNDERLINE("double");
 
-const char* BEGIN_HORIZONTAL_ALIGNMENT("begin");
+const char* BEGIN_HORIZONTAL_ALIGNMENT("start");
 const char* CENTER_HORIZONTAL_ALIGNMENT("center");
 const char* END_HORIZONTAL_ALIGNMENT("end");
 
@@ -320,23 +320,23 @@ void UnderlineTypeStringToTypeValue(const char* const typeStr, Length length, Te
 }
 
 bool HorizontalAlignmentTypeStringToTypeValue(const char* const typeStr, Length length,
-                                              Text::HorizontalAlignment::Type& retType)
+                                              Alignment& retType)
 {
   // The string is valid value for HorizontalAlignment
   bool valid = false;
   if(TokenComparison(BEGIN_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
-    retType = Text::HorizontalAlignment::BEGIN;
+    retType = Alignment::START;
     valid   = true;
   }
   else if(TokenComparison(CENTER_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
-    retType = Text::HorizontalAlignment::CENTER;
+    retType = Alignment::CENTER;
     valid   = true;
   }
   else if(TokenComparison(END_HORIZONTAL_ALIGNMENT, typeStr, length))
   {
-    retType = Text::HorizontalAlignment::END;
+    retType = Alignment::END;
     valid   = true;
   }
 

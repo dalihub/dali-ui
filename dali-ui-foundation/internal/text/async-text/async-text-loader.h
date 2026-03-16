@@ -107,8 +107,8 @@ struct AsyncTextParameters
     autoScrollGap{0},
     outlineWidth{0u},
     requestType{Async::RENDER_FIXED_SIZE},
-    horizontalAlignment{Text::HorizontalAlignment::BEGIN},
-    verticalAlignment{Text::VerticalAlignment::TOP},
+    horizontalAlignment{Alignment::START},
+    verticalAlignment{Alignment::START},
     lineWrapMode{Text::LineWrap::WORD},
     underlineType{Text::Underline::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
@@ -197,12 +197,12 @@ struct AsyncTextParameters
 
   uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
 
-  Async::RequestType              requestType;
-  Text::HorizontalAlignment::Type horizontalAlignment; ///< The horizontal alignment: one of {BEGIN, CENTER, END}.
-  Text::VerticalAlignment::Type   verticalAlignment;   ///< The vertical alignment: one of {TOP, CENTER, BOTTOM}.
-  Text::LineWrap::Mode            lineWrapMode;        ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
-  Text::Underline::Type           underlineType;       ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
-  Dali::LayoutDirection::Type     layoutDirection;     ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
+  Async::RequestType          requestType;
+  Alignment                   horizontalAlignment; ///< The horizontal alignment: one of {START, CENTER, END}.
+  Alignment                   verticalAlignment;   ///< The vertical alignment: one of {START, CENTER, END}.
+  Text::LineWrap::Mode        lineWrapMode;        ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  Text::Underline::Type       underlineType;       ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
+  Dali::LayoutDirection::Type layoutDirection;     ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   DevelText::VerticalLineAlignment::Type
     verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
   DevelText::MatchLayoutDirection

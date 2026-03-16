@@ -196,28 +196,28 @@ public: // Setters for chaining
    *
    * @param[in] alignment The horizontal text alignment.
    */
-  Label& SetHorizontalTextAlignment(TextAlignment alignment);
+  Label& SetHorizontalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the horizontal text alignment.
    *
    * @return The horizontal text alignment.
    */
-  TextAlignment GetHorizontalTextAlignment() const;
+  Text::Alignment GetHorizontalTextAlignment() const;
 
   /**
    * @brief Sets the vertical alignment of the text within the label.
    *
    * @param[in] alignment The vertical text alignment.
    */
-  Label& SetVerticalTextAlignment(TextAlignment alignment);
+  Label& SetVerticalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the vertical text alignment.
    *
    * @return The vertical text alignment.
    */
-  TextAlignment GetVerticalTextAlignment() const;
+  Text::Alignment GetVerticalTextAlignment() const;
 
   // @CHAIN_END
 

@@ -2060,7 +2060,7 @@ struct Engine::Impl
   }
 
   void Align(const Size& size, CharacterIndex startIndex, Length numberOfCharacters,
-             Text::HorizontalAlignment::Type horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
+             Alignment horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
              Dali::LayoutDirection::Type layoutDirection, bool matchLayoutDirection)
   {
     const CharacterIndex lastCharacterPlusOne = startIndex + numberOfCharacters;
@@ -2098,7 +2098,7 @@ struct Engine::Impl
     }
   }
 
-  void CalculateHorizontalAlignment(float boxWidth, HorizontalAlignment::Type horizontalAlignment, LineRun& line,
+  void CalculateHorizontalAlignment(float boxWidth, Alignment horizontalAlignment, LineRun& line,
                                     Dali::LayoutDirection::Type layoutDirection, bool matchLayoutDirection)
   {
     line.alignmentOffset = 0.f;
@@ -2119,7 +2119,7 @@ struct Engine::Impl
     // Calculate the horizontal line offset.
     switch(horizontalAlignment)
     {
-      case HorizontalAlignment::BEGIN:
+      case Alignment::START:
       {
         if(isLayoutRTL)
         {
@@ -2142,7 +2142,7 @@ struct Engine::Impl
         }
         break;
       }
-      case HorizontalAlignment::CENTER:
+      case Alignment::CENTER:
       {
         line.alignmentOffset = 0.5f * (boxWidth - lineLength);
 
@@ -2154,7 +2154,7 @@ struct Engine::Impl
         line.alignmentOffset = std::floor(line.alignmentOffset); // floor() avoids pixel alignment issues.
         break;
       }
-      case HorizontalAlignment::END:
+      case Alignment::END:
       {
         if(isLayoutRTL)
         {
@@ -2268,7 +2268,7 @@ bool Engine::LayoutText(Parameters& layoutParameters, Size& layoutSize, bool eli
 }
 
 void Engine::Align(const Size& size, CharacterIndex startIndex, Length numberOfCharacters,
-                   Text::HorizontalAlignment::Type horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
+                   Alignment horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
                    Dali::LayoutDirection::Type layoutDirection, bool matchLayoutDirection)
 {
   mImpl->Align(size, startIndex, numberOfCharacters, horizontalAlignment, lines, alignmentOffset, layoutDirection,

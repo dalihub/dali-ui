@@ -282,22 +282,22 @@ bool Controller::IsMultiLineEnabled() const
   return Layout::Engine::MULTI_LINE_BOX == mImpl->mLayoutEngine.GetLayout();
 }
 
-void Controller::SetHorizontalAlignment(Text::HorizontalAlignment::Type alignment)
+void Controller::SetHorizontalAlignment(Alignment alignment)
 {
   mImpl->SetHorizontalAlignment(alignment);
 }
 
-Text::HorizontalAlignment::Type Controller::GetHorizontalAlignment() const
+Alignment Controller::GetHorizontalAlignment() const
 {
   return mImpl->mModel->mHorizontalAlignment;
 }
 
-void Controller::SetVerticalAlignment(VerticalAlignment::Type alignment)
+void Controller::SetVerticalAlignment(Alignment alignment)
 {
   mImpl->SetVerticalAlignment(alignment);
 }
 
-VerticalAlignment::Type Controller::GetVerticalAlignment() const
+Alignment Controller::GetVerticalAlignment() const
 {
   return mImpl->mModel->mVerticalAlignment;
 }

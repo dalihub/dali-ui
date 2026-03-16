@@ -124,8 +124,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     }
     case Ui::TextEditor::Property::HORIZONTAL_ALIGNMENT:
     {
-      Text::HorizontalAlignment::Type alignment(
-        static_cast<Text::HorizontalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+      Text::Alignment alignment(
+        static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
       if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         DALI_LOG_INFO(gTextEditorLogFilter, Debug::General, "TextEditor %p HORIZONTAL_ALIGNMENT %d\n",
@@ -136,8 +136,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     }
     case Ui::DevelTextEditor::Property::VERTICAL_ALIGNMENT:
     {
-      Ui::Text::VerticalAlignment::Type alignment(
-        static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+      Text::Alignment alignment(
+        static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
       if(Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.mController->SetVerticalAlignment(alignment);

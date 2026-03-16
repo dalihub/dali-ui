@@ -140,7 +140,7 @@ public:
    * @param[in] matchLayoutDirection Whether match align for layout direction or not.
    */
   void Align(const Size& size, CharacterIndex startIndex, Length numberOfCharacters,
-             Text::HorizontalAlignment::Type horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
+             Alignment horizontalAlignment, Vector<LineRun>& lines, float& alignmentOffset,
              Dali::LayoutDirection::Type layoutDirection, bool matchLayoutDirection);
 
   /**

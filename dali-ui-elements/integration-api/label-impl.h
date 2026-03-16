@@ -170,22 +170,22 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
    */
-  void SetHorizontalTextAlignment(TextAlignment alignment);
+  void SetHorizontalTextAlignment(Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::Label::GetHorizontalTextAlignment
    */
-  TextAlignment GetHorizontalTextAlignment() const;
+  Text::Alignment GetHorizontalTextAlignment() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetVerticalTextAlignment
    */
-  void SetVerticalTextAlignment(TextAlignment alignment);
+  void SetVerticalTextAlignment(Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::Label::GetVerticalTextAlignment
    */
-  TextAlignment GetVerticalTextAlignment() const;
+  Text::Alignment GetVerticalTextAlignment() const;
 
 protected:
   // Construction

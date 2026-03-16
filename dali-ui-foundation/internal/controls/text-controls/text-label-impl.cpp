@@ -73,12 +73,12 @@ const unsigned int DEFAULT_RENDERING_BACKEND = Dali::Ui::DevelText::DEFAULT_REND
  * @brief How the text visual should be aligned vertically inside the control.
  *
  * 0.0f aligns the text to the top, 0.5f aligns the text to the center, 1.0f aligns the text to the bottom.
- * The alignment depends on the alignment value of the text label (Use Text::VerticalAlignment enumerations).
+ * The alignment depends on the alignment value of the text label (Use Text::Alignment enumerations).
  */
-const float VERTICAL_ALIGNMENT_TABLE[Text::VerticalAlignment::BOTTOM + 1] = {
-  0.0f, // VerticalAlignment::TOP
-  0.5f, // VerticalAlignment::CENTER
-  1.0f  // VerticalAlignment::BOTTOM
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
+  0.0f, // Text::Alignment::START
+  0.5f, // Text::Alignment::CENTER
+  1.0f  // Text::Alignment::END
 };
 
 const char* TEXT_FIT_ENABLE_KEY("enable");
@@ -360,7 +360,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT:
       {
-        Text::HorizontalAlignment::Type alignment(static_cast<Text::HorizontalAlignment::Type>(
+        Text::Alignment alignment(static_cast<Text::Alignment>(
           -1)); // Set to invalid value to ensure a valid mode does get set
         if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
         {
@@ -371,8 +371,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::VERTICAL_ALIGNMENT:
       {
-        Ui::Text::VerticalAlignment::Type alignment(
-          static_cast<Text::VerticalAlignment::Type>(-1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
         if(Text::GetVerticalAlignmentEnumeration(value, alignment))
         {
           impl.mController->SetVerticalAlignment(alignment);
@@ -1658,7 +1657,7 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     isVerticalScroll = autoScrollDirection == DevelText::AutoScroll::VERTICAL ? true : false;
     bool needLayoutSizeCalculation =
-      (isVerticalScroll && mController->GetVerticalAlignment() != Text::VerticalAlignment::TOP) ? true : false;
+      (isVerticalScroll && mController->GetVerticalAlignment() != Text::Alignment::START) ? true : false;
     if(needLayoutSizeCalculation)
     {
       mController->SetAutoScrollEnabled(false, false, DevelText::AutoScroll::VERTICAL);
@@ -1696,7 +1695,7 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
     alignmentOffset.x = 0.0f;
     alignmentOffset.y = isVerticalScroll ? 0.0f
                                          : (contentSize.y - layoutSize.y) *
-                                             VERTICAL_ALIGNMENT_TABLE[mController->GetVerticalAlignment()];
+                                             VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
 
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)
