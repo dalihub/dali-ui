@@ -134,13 +134,37 @@ private:
    *
    * @param[in] window The window this controller manages
    */
-  explicit LayoutController(Window window);
+  explicit DALI_INTERNAL LayoutController(Window window);
 
   // Not copyable or movable
   LayoutController(const LayoutController&)            = delete;
   LayoutController(LayoutController&&)                 = delete;
   LayoutController& operator=(const LayoutController&) = delete;
   LayoutController& operator=(LayoutController&&)      = delete;
+
+private: // Not be opened for application developer
+  /**
+   * @brief Gets the current window handle managed by this layout controller.
+   *
+   * Retrieves the window that this layout controller instance is associated with.
+   * This is used internally to verify if the window has been replaced.
+   *
+   * @return The current window handle
+   */
+  DALI_INTERNAL Dali::Window GetCurrentWindow() const;
+
+  /**
+   * @brief Replaces the current window with a new one.
+   *
+   * Updates the layout controller to manage a different window instance.
+   * This is called when a window object has been replaced but the same
+   * LayoutController instance should continue managing layouts for the new window.
+   * The method reconnects the window resize signal to ensure layout invalidation
+   * continues to work correctly.
+   *
+   * @param[in] window The new window to manage
+   */
+  DALI_INTERNAL void ReplaceCurrentWindow(Dali::Window window);
 
 private:
   std::unique_ptr<Integration::LayoutControllerImpl> mImpl;

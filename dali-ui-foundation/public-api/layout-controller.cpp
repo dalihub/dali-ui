@@ -21,8 +21,10 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/connection-tracker.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -36,6 +38,13 @@ namespace Dali
 {
 namespace Ui
 {
+
+namespace
+{
+// File-static map to store LayoutController instances per Window (internal use only; not exposed in public API).
+std::unordered_map<void*, std::unique_ptr<LayoutController>> gLayoutControllers;
+} // namespace
+
 namespace Integration
 {
 
@@ -67,6 +76,7 @@ public:
   : mWindow(window),
     mWindowWidth(0),
     mWindowHeight(0),
+    mWindowObjectPtr(window.GetObjectPtr()),
     mProcessingScheduled(false)
   {
     // Get initial window size
@@ -75,13 +85,13 @@ public:
     mWindowHeight = static_cast<int32_t>(size.height);
 
     // Register as a processor with the adaptor (postProcess=false: run before dali Relayout)
-    if(Adaptor::IsAvailable())
+    if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().RegisterProcessor(*this, false);
-    }
 
-    // Connect to window resize signal
-    window.ResizeSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
+      // Connect to window resize signal
+      window.ResizeSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
+    }
   }
 
   /**
@@ -90,7 +100,7 @@ public:
   ~LayoutControllerImpl() override
   {
     // Unregister from adaptor
-    if(Adaptor::IsAvailable())
+    if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().UnregisterProcessor(*this);
     }
@@ -130,6 +140,42 @@ public:
   }
 
   /**
+   * @brief Gets the current window handle managed by this layout controller.
+   *
+   * Retrieves the window that this layout controller instance is associated with.
+   * This is used internally to verify if the window has been replaced.
+   *
+   * @return The current window handle
+   */
+  Dali::Window GetCurrentWindow() const
+  {
+    return mWindow.GetHandle();
+  }
+
+  /**
+   * @brief Replaces the current window with a new one.
+   *
+   * Updates the layout controller to manage a different window instance.
+   * This is called when a window object has been replaced but the same
+   * LayoutController instance should continue managing layouts for the new window.
+   * The method reconnects the window resize signal to ensure layout invalidation
+   * continues to work correctly.
+   *
+   * @param[in] window The new window to manage
+   */
+  void ReplaceCurrentWindow(Dali::Window window)
+  {
+    DALI_ASSERT_ALWAYS(mWindowObjectPtr == window.GetObjectPtr() && "ReplaceCurrentWindow should be called only for same object ptr case!");
+
+    mWindow = window;
+    if(DALI_LIKELY(Adaptor::IsAvailable()))
+    {
+      // Connect to window resize signal
+      window.ResizeSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
+    }
+  }
+
+  /**
    * @brief Called when window is resized.
    */
   void OnWindowResize(int32_t width, int32_t height)
@@ -146,31 +192,12 @@ public:
       }
     }
   }
-
   /**
    * @brief Processes all pending views with layout capability.
    */
   void ProcessLayouts()
   {
-    if(mPendingViews.empty())
-    {
-      return;
-    }
-
-    // Copy pending views and clear (in case new views are added during processing)
-    std::vector<Integration::ViewImpl*> viewsToProcess(mPendingViews.begin(), mPendingViews.end());
-    mPendingViews.clear();
-    mProcessingScheduled = false;
-
-    // Process each layout root
-    for(auto* view : viewsToProcess)
-    {
-      // Verify the view is still tracked (not destroyed)
-      if(view && mAllLayoutRoots.count(view) > 0)
-      {
-        ProcessLayoutRoot(view);
-      }
-    }
+    Process(false);
   }
 
   /**
@@ -180,9 +207,19 @@ public:
    */
   void Process(bool postProcess) override
   {
+    Dali::Window window = mWindow.GetHandle();
+    if(DALI_UNLIKELY(!window))
+    {
+      // Destroy self.
+      gLayoutControllers.erase(mWindowObjectPtr);
+
+      // Don't do any extra process after self destructor called.
+      return;
+    }
+
     if(!postProcess)
     {
-      ProcessLayouts();
+      ProcessLayouts(window);
     }
   }
 
@@ -196,6 +233,37 @@ public:
 
 private:
   /**
+   * @brief Processes all pending views with layout capability.
+   */
+  void ProcessLayouts(Dali::Window window)
+  {
+    if(mPendingViews.empty())
+    {
+      return;
+    }
+
+    // Copy pending views and clear (in case new views are added during processing)
+    decltype(mPendingViews) viewsToProcess;
+    viewsToProcess.swap(mPendingViews);
+    mProcessingScheduled = false;
+
+    // Default: window size (when root is directly under window or parent size unknown).
+    Vector2 windowSize       = window.GetSize();
+    float   widthConstraint  = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.width)));
+    float   heightConstraint = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.height)));
+
+    // Process each layout root
+    for(auto* view : viewsToProcess)
+    {
+      // Verify the view is still tracked (not destroyed)
+      if(view && mAllLayoutRoots.count(view) > 0)
+      {
+        ProcessLayoutRoot(view, widthConstraint, heightConstraint);
+      }
+    }
+  }
+
+  /**
    * @brief Processes a single view with layout capability (layout root).
    *
    * Constraint for the root view:
@@ -205,7 +273,7 @@ private:
    * - WrapContent: layout measures with constraint as maximum and returns wrapped size.
    * - Fixed (> 0): constraint for that dimension is the fixed value.
    */
-  void ProcessLayoutRoot(Integration::ViewImpl* view)
+  void ProcessLayoutRoot(Integration::ViewImpl* view, float widthConstraint, float heightConstraint)
   {
     if(!view)
     {
@@ -214,11 +282,6 @@ private:
 
     float layoutWidth  = view->GetLayoutWidth();
     float layoutHeight = view->GetLayoutHeight();
-
-    // Default: window size (when root is directly under window or parent size unknown).
-    Vector2 windowSize       = mWindow.GetSize();
-    float   widthConstraint  = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.width)));
-    float   heightConstraint = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.height)));
 
     // If root view has a parent Actor (e.g. Actor -> Layout -> View), use parent's size as constraint.
     Actor self   = view->Self();
@@ -265,29 +328,31 @@ private:
   }
 
 private:
-  Window                                                      mWindow;
+  Dali::WeakHandle<Window>                                    mWindow;
   std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (ref-counted)
   std::unordered_set<Integration::ViewImpl*>                  mPendingViews;   ///< Dirty layout roots needing processing
   int32_t                                                     mWindowWidth;
   int32_t                                                     mWindowHeight;
+  void*                                                       mWindowObjectPtr; ///< For self-destruct case.
   bool                                                        mProcessingScheduled;
 };
 
 } // namespace Integration
 
-namespace
-{
-// File-static map to store LayoutController instances per Window (internal use only; not exposed in public API).
-std::unordered_map<void*, std::unique_ptr<LayoutController>> gLayoutControllers;
-} // namespace
-
 LayoutController& LayoutController::Get(Window window)
 {
+  DALI_ASSERT_ALWAYS(Adaptor::IsAvailable() && "LayoutController::Get() could not be called from worker thread, or app is not running!");
+
   void* key = window.GetObjectPtr();
 
   auto it = gLayoutControllers.find(key);
   if(it != gLayoutControllers.end())
   {
+    auto& layoutController = *(it->second);
+    if(DALI_UNLIKELY(layoutController.GetCurrentWindow() != window))
+    {
+      layoutController.ReplaceCurrentWindow(window);
+    }
     return *(it->second);
   }
 
@@ -301,17 +366,23 @@ LayoutController& LayoutController::Get(Window window)
 
 void LayoutController::Remove(Window window)
 {
-  if(window)
+  if(DALI_LIKELY(Adaptor::IsAvailable()))
   {
-    gLayoutControllers.erase(window.GetObjectPtr());
+    if(window)
+    {
+      gLayoutControllers.erase(window.GetObjectPtr());
+    }
   }
 }
 
 void LayoutController::UnregisterFromAll(Integration::ViewImpl* view)
 {
-  for(auto& pair : gLayoutControllers)
+  if(DALI_LIKELY(Adaptor::IsAvailable()))
   {
-    pair.second->UnregisterView(view);
+    for(auto& pair : gLayoutControllers)
+    {
+      pair.second->UnregisterView(view);
+    }
   }
 }
 
@@ -342,6 +413,16 @@ void LayoutController::OnWindowResize(int32_t width, int32_t height)
 void LayoutController::ProcessLayouts()
 {
   mImpl->ProcessLayouts();
+}
+
+Dali::Window LayoutController::GetCurrentWindow() const
+{
+  return mImpl->GetCurrentWindow();
+}
+
+void LayoutController::ReplaceCurrentWindow(Dali::Window window)
+{
+  mImpl->ReplaceCurrentWindow(window);
 }
 
 } // namespace Ui
