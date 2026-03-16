@@ -607,8 +607,8 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::DevelTextField::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
     {
-      impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? DevelText::MatchLayoutDirection::LOCALE
-                                                                  : DevelText::MatchLayoutDirection::CONTENTS);
+      impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? Text::LayoutDirectionMode::LOCALE
+                                                                  : Text::LayoutDirectionMode::CONTENTS);
       break;
     }
     case Ui::DevelTextField::Property::ENABLE_GRAB_HANDLE_POPUP:
@@ -1080,7 +1080,7 @@ Property::Value TextField::PropertyHandler::GetProperty(Ui::TextField textField,
     }
     case Ui::DevelTextField::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
     {
-      value = impl.mController->GetMatchLayoutDirection() != DevelText::MatchLayoutDirection::CONTENTS;
+      value = impl.mController->GetMatchLayoutDirection() != Text::LayoutDirectionMode::CONTENTS;
       break;
     }
     case Ui::DevelTextField::Property::ENABLE_GRAB_HANDLE_POPUP:

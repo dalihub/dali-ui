@@ -403,7 +403,7 @@ Model::Model()
   mIgnoreSpacesAfterText(true),
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
-  mMatchLayoutDirection(DevelText::MatchLayoutDirection::INHERIT),
+  mMatchLayoutDirection(LayoutDirectionMode::INHERIT),
   mEllipsisPosition(DevelText::EllipsisPosition::END)
 {
   mLogicalModel = LogicalModel::New();
@@ -413,7 +413,7 @@ Model::Model()
   auto match = Dali::EnvironmentVariable::GetEnvironmentVariable(DALI_ENV_MATCH_SYSTEM_LANGUAGE_DIRECTION);
   if(match && (std::atoi(match) == 0))
   {
-    mMatchLayoutDirection = DevelText::MatchLayoutDirection::CONTENTS;
+    mMatchLayoutDirection = LayoutDirectionMode::CONTENTS;
   }
 }
 

@@ -2049,13 +2049,13 @@ public: // Queries & retrieves.
    * @brief Sets SetMatchLayoutDirection value to model
    * @param[in] match The value of matchLayoutDirection for the text
    */
-  void SetMatchLayoutDirection(DevelText::MatchLayoutDirection type);
+  void SetMatchLayoutDirection(LayoutDirectionMode type);
 
   /**
    * @brief Retrieves matchLayoutDirection value from model
    * @return The value of matchLayoutDirection
    */
-  DevelText::MatchLayoutDirection GetMatchLayoutDirection() const;
+  LayoutDirectionMode GetMatchLayoutDirection() const;
 
   /**
    * @brief Sets layoutDirection type value.

@@ -89,6 +89,28 @@ enum class Direction : uint8_t
 };
 
 /**
+ * @brief Enumeration for determining how the text layout direction is resolved.
+ */
+enum class LayoutDirectionMode : uint8_t
+{
+  /**
+   * @brief Inherits the layout direction from the parent.
+   */
+  INHERIT = 0,
+  /**
+   * @brief Determines the layout direction based on the system locale.
+   * Uses the default script of the current system language.
+   */
+  LOCALE = 1,
+  /**
+   * @brief Determines the layout direction from the text content itself.
+   *
+   * Uses the bidirectional properties of the text.
+   */
+  CONTENTS = 2
+};
+
+/**
  * @brief The available underline types for text.
  * @SINCE_1_2.60
  */

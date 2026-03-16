@@ -113,7 +113,7 @@ struct AsyncTextParameters
     underlineType{Text::Underline::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
-    layoutDirectionPolicy{DevelText::MatchLayoutDirection::INHERIT},
+    layoutDirectionPolicy{LayoutDirectionMode::INHERIT},
     ellipsisPosition{DevelText::EllipsisPosition::END},
     ellipsisMode{DevelText::Ellipsize::TRUNCATE},
     autoScrollDirection{DevelText::AutoScroll::HORIZONTAL},
@@ -204,8 +204,7 @@ struct AsyncTextParameters
   Text::Underline::Type       underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
   Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
-  DevelText::MatchLayoutDirection
-    layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
+  LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   DevelText::EllipsisPosition::Type
                                    ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
   DevelText::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.

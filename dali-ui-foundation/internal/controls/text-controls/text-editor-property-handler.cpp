@@ -586,8 +586,8 @@ void TextEditor::PropertyHandler::SetProperty(Ui::TextEditor textEditor, Propert
     }
     case Ui::DevelTextEditor::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
     {
-      impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? DevelText::MatchLayoutDirection::LOCALE
-                                                                  : DevelText::MatchLayoutDirection::CONTENTS);
+      impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? Text::LayoutDirectionMode::LOCALE
+                                                                  : Text::LayoutDirectionMode::CONTENTS);
       break;
     }
     case Ui::DevelTextEditor::Property::MAX_LENGTH:
@@ -1141,7 +1141,7 @@ Property::Value TextEditor::PropertyHandler::GetProperty(Ui::TextEditor textEdit
     }
     case Ui::DevelTextEditor::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
     {
-      value = impl.mController->GetMatchLayoutDirection() != DevelText::MatchLayoutDirection::CONTENTS;
+      value = impl.mController->GetMatchLayoutDirection() != Text::LayoutDirectionMode::CONTENTS;
       break;
     }
     case Ui::DevelTextEditor::Property::MAX_LENGTH:

@@ -561,8 +561,8 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
       {
-        impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? DevelText::MatchLayoutDirection::LOCALE
-                                                                    : DevelText::MatchLayoutDirection::CONTENTS);
+        impl.mController->SetMatchLayoutDirection(value.Get<bool>() ? Text::LayoutDirectionMode::LOCALE
+                                                                    : Text::LayoutDirectionMode::CONTENTS);
         impl.mIsAsyncRenderNeeded = true;
         break;
       }
@@ -758,8 +758,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::DevelTextLabel::Property::LAYOUT_DIRECTION_POLICY:
       {
-        DevelText::MatchLayoutDirection layoutDirectionPolicy =
-          static_cast<DevelText::MatchLayoutDirection>(value.Get<int>());
+        Text::LayoutDirectionMode layoutDirectionPolicy = static_cast<Text::LayoutDirectionMode>(value.Get<int>());
         if(impl.mController->GetMatchLayoutDirection() != layoutDirectionPolicy)
         {
           impl.mController->SetMatchLayoutDirection(layoutDirectionPolicy);
@@ -981,7 +980,7 @@ Property::Value TextLabel::GetProperty(BaseObject* object, Property::Index index
       }
       case Ui::DevelTextLabel::Property::MATCH_SYSTEM_LANGUAGE_DIRECTION:
       {
-        value = impl.mController->GetMatchLayoutDirection() != DevelText::MatchLayoutDirection::CONTENTS;
+        value = impl.mController->GetMatchLayoutDirection() != Text::LayoutDirectionMode::CONTENTS;
         break;
       }
       case Ui::DevelTextLabel::Property::TEXT_FIT:

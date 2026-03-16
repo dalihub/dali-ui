@@ -399,12 +399,12 @@ void Controller::ResetFontAndStyleData()
   mImpl->ResetFontAndStyleData();
 }
 
-void Controller::SetMatchLayoutDirection(DevelText::MatchLayoutDirection type)
+void Controller::SetMatchLayoutDirection(LayoutDirectionMode type)
 {
   mImpl->mModel->mMatchLayoutDirection = type;
 }
 
-DevelText::MatchLayoutDirection Controller::GetMatchLayoutDirection() const
+LayoutDirectionMode Controller::GetMatchLayoutDirection() const
 {
   return mImpl->mModel->mMatchLayoutDirection;
 }
