@@ -26,6 +26,7 @@
 #include <dali/public-api/object/type-registry-helper.h>
 
 using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
 
@@ -107,17 +108,16 @@ Control::Impl::AccessibilityData::AccessibilityData(Control& controlImpl)
   mAccessibilityProps.states = GetDefaultControlAccessibilityStates();
 }
 
-void Control::Impl::AccessibilityData::AppendAccessibilityAttribute(const std::string& key, const std::string value)
+void Control::Impl::AccessibilityData::AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value)
 {
-  Dali::StringView keyStringView = ToDaliStringView(key);
-  Property::Value* checkedValue  = mAccessibilityProps.extraAttributes.Find(keyStringView);
+  Property::Value* checkedValue = mAccessibilityProps.extraAttributes.Find(key);
   if(checkedValue)
   {
-    mAccessibilityProps.extraAttributes[keyStringView] = ToPropertyValue(value);
+    mAccessibilityProps.extraAttributes[key] = value;
   }
   else
   {
-    mAccessibilityProps.extraAttributes.Insert(keyStringView, ToPropertyValue(value));
+    mAccessibilityProps.extraAttributes.Insert(key, value);
   }
 }
 
@@ -310,12 +310,12 @@ Dali::Accessibility::ReadingInfoTypes Control::Impl::AccessibilityData::GetAcces
   return types;
 }
 
-void Control::Impl::AccessibilityData::RemoveAccessibilityAttribute(const std::string& key)
+void Control::Impl::AccessibilityData::RemoveAccessibilityAttribute(const Dali::String& key)
 {
-  Property::Value* value = mAccessibilityProps.extraAttributes.Find(ToDaliStringView(key));
+  Property::Value* value = mAccessibilityProps.extraAttributes.Find(key);
   if(value)
   {
-    mAccessibilityProps.extraAttributes[ToDaliStringView(key)] = Property::Value();
+    mAccessibilityProps.extraAttributes[key] = Property::Value();
   }
 }
 
@@ -356,7 +356,7 @@ void Control::Impl::AccessibilityData::SetAccessibilityReadingInfoType(
     }
     value += READING_INFO_TYPE_STATE;
   }
-  AppendAccessibilityAttribute(READING_INFO_TYPE_ATTRIBUTE_NAME, value);
+  AppendAccessibilityAttribute(READING_INFO_TYPE_ATTRIBUTE_NAME, ToDaliString(value));
 }
 
 std::shared_ptr<Ui::ControlAccessible> Control::Impl::AccessibilityData::GetAccessibleObject()

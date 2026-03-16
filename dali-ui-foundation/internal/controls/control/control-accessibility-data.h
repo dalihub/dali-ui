@@ -39,12 +39,12 @@ public:
   /**
    * @copydoc Dali::Ui::Internal::Control::Impl::AppendAccessibilityAttribute()
    */
-  void AppendAccessibilityAttribute(const std::string& key, const std::string value);
+  void AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value);
 
   /**
    * @copydoc Dali::Ui::Internal::Control::Impl::RemoveAccessibilityAttribute()
    */
-  void RemoveAccessibilityAttribute(const std::string& key);
+  void RemoveAccessibilityAttribute(const Dali::String& key);
 
   /**
    * @copydoc Dali::Ui::Internal::Control::Impl::ClearAccessibilityAttributes()

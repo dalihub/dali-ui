@@ -413,12 +413,12 @@ void Control::ClearAccessibilityRelations()
   }
 }
 
-void Control::AppendAccessibilityAttribute(const std::string& key, const std::string& value)
+void Control::AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value)
 {
   GetControlImplementation(*this).AppendAccessibilityAttribute(key, value);
 }
 
-void Control::RemoveAccessibilityAttribute(const std::string& key)
+void Control::RemoveAccessibilityAttribute(const Dali::String& key)
 {
   GetControlImplementation(*this).RemoveAccessibilityAttribute(key);
 }

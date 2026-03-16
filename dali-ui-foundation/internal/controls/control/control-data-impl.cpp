@@ -1524,12 +1524,12 @@ Control::Impl::AccessibilityData* Control::Impl::GetAccessibilityData() const
   return mAccessibilityData.get();
 }
 
-void Control::Impl::AppendAccessibilityAttribute(const std::string& key, const std::string value)
+void Control::Impl::AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value)
 {
   GetOrCreateAccessibilityData().AppendAccessibilityAttribute(key, value);
 }
 
-void Control::Impl::RemoveAccessibilityAttribute(const std::string& key)
+void Control::Impl::RemoveAccessibilityAttribute(const Dali::String& key)
 {
   auto* accessibilityData = GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData))

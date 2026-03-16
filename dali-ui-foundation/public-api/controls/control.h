@@ -28,12 +28,11 @@
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/vector-wrapper.h>
+#include <dali/public-api/common/dali-utility.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pinch-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
@@ -137,7 +136,7 @@ public:
       /**
        * @brief The background of the control.
        *
-       * @details Name "background", type Property::MAP or std::string for URL or Property::VECTOR4 for Color.
+       * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
        * @SINCE_1_1.3
        */
       BACKGROUND,
@@ -438,10 +437,10 @@ public:
   typedef Signal<void()> AccessibilityReadingStoppedSignalType;
 
   /// @brief AccessibilityGetName signal type.
-  typedef Signal<void(std::string&)> AccessibilityGetNameSignalType;
+  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
 
   /// @brief AccessibilityGetDescription signal type.
-  typedef Signal<void(std::string&)> AccessibilityGetDescriptionSignalType;
+  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
 
   /// @brief AccessibilityDoGesture signal type.
   typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
@@ -1060,7 +1059,7 @@ public: // Accessibility
   /**
    * @brief The signal is emmited when accessibility client asks for object's name.
    *
-   * Connected callback should assign name to std::string call parameter.
+   * Connected callback should assign name to Dali::String call parameter.
    * Accessibility name can be stored in two ways:
    *     this signal,
    *     ACCESSIBILITY_NAME property,
@@ -1072,7 +1071,7 @@ public: // Accessibility
   /**
    * @brief The signal is emmited when accessibility client asks for object's description.
    *
-   * Connected callback should assign description to std::string call parameter.
+   * Connected callback should assign description to Dali::String call parameter.
    * Accessibility description can be stored in two ways:
    *     this signal,
    *     ACCESSIBILITY_DESCRIPTION property,
@@ -1135,16 +1134,16 @@ public: // Accessibility
    * @brief The method allows to add or modify value matched with given key.
    * Modification take place if key was previously set.
    *
-   * @param key   std::string value
-   * @param value std::string value
+   * @param key   Dali::String value
+   * @param value Dali::String value
    */
-  void AppendAccessibilityAttribute(const std::string& key, const std::string& value);
+  void AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value);
 
   /**
    * @brief The method erases key with its value from accessibility attributes
-   * @param key std::string value
+   * @param key Dali::String value
    */
-  void RemoveAccessibilityAttribute(const std::string& key);
+  void RemoveAccessibilityAttribute(const Dali::String& key);
 
   /**
    * @brief The method clears accessibility attributes

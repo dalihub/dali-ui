@@ -290,7 +290,7 @@ public:
    * Attribute is added if not existed previously or updated
    * if existed.
    */
-  void AppendAccessibilityAttribute(const std::string& key, const std::string value);
+  void AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value);
 
   /**
    * @brief Removes accessibility attribute
@@ -298,7 +298,7 @@ public:
    *
    * Function does nothing if attribute doesn't exist.
    */
-  void RemoveAccessibilityAttribute(const std::string& key);
+  void RemoveAccessibilityAttribute(const Dali::String& key);
 
   /**
    * @brief Removes all accessibility attributes

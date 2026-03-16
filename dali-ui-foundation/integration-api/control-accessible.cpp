@@ -77,7 +77,7 @@ Dali::Actor CreateHighlightIndicatorActor()
   auto imageView = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   imageView.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-  imageView.AppendAccessibilityAttribute("highlight", std::string());
+  imageView.AppendAccessibilityAttribute("highlight", Dali::String());
   imageView.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
 
   return imageView;
@@ -254,7 +254,7 @@ std::string ControlAccessible::GetName() const
 
   Internal::Control&       internalControl = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
-  std::string              name;
+  Dali::String             name;
 
   auto* accessibilityData = controlImpl.GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityGetNameSignal.Empty())
@@ -263,18 +263,18 @@ std::string ControlAccessible::GetName() const
   }
   else if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
   {
-    name = accessibilityData->mAccessibilityProps.name;
+    name = ToDaliString(accessibilityData->mAccessibilityProps.name);
   }
   else if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
   {
-    name = raw.first;
+    name = ToDaliString(raw.first);
   }
   else
   {
-    name = ToStdString(Self().GetProperty(Actor::Property::NAME));
+    name = Self().GetProperty<Dali::String>(Actor::Property::NAME);
   }
 
-  return GetLocaleText(name);
+  return GetLocaleText(ToStdString(name));
 }
 
 std::pair<std::string, bool> ControlAccessible::GetNameRaw() const
@@ -288,7 +288,7 @@ std::string ControlAccessible::GetDescription() const
 
   Internal::Control&       internalControl = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
-  std::string              description;
+  Dali::String             description;
 
   auto* accessibilityData = controlImpl.GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityGetDescriptionSignal.Empty())
@@ -297,14 +297,14 @@ std::string ControlAccessible::GetDescription() const
   }
   else if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
   {
-    description = accessibilityData->mAccessibilityProps.description;
+    description = ToDaliString(accessibilityData->mAccessibilityProps.description);
   }
   else
   {
-    description = GetDescriptionRaw();
+    description = ToDaliString(GetDescriptionRaw());
   }
 
-  return GetLocaleText(description);
+  return GetLocaleText(ToStdString(description));
 }
 
 std::string ControlAccessible::GetDescriptionRaw() const
@@ -458,7 +458,7 @@ Dali::Accessibility::Attributes ControlAccessible::GetAttributes() const
       result.emplace(classKey, typeName);
 
       // Save the 'typeName' so we don't have to calculate it again
-      control.AppendAccessibilityAttribute(classKey, typeName);
+      control.AppendAccessibilityAttribute(ToDaliString(classKey), ToDaliString(typeName));
     }
   }
 
