@@ -19,7 +19,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/adaptor-framework/style-change.h>
 #include <dali/public-api/animation/alpha-function.h>
 #include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/events/long-press-gesture.h>
@@ -42,9 +41,11 @@ namespace Ui
  * @{
  */
 
-class StyleManager;
+namespace DevelControl
+{
+class ControlAccessible;
 
-struct ControlAccessible;
+} // namespace DevelControl
 
 namespace Internal
 {
@@ -79,18 +80,6 @@ protected:
   virtual ~Control();
 
 public:
-  // Styling
-
-  /**
-   * @copydoc Dali::Ui::Control::SetStyleName
-   */
-  void SetStyleName(const std::string& styleName);
-
-  /**
-   * @copydoc Dali::Ui::Control::GetStyleName
-   */
-  const std::string& GetStyleName() const;
-
   // Background
 
   /**
@@ -516,24 +505,6 @@ public: // API for derived classes to override
    * @copydoc Dali::Ui::Control::IsResourceReady
    */
   virtual bool IsResourceReady() const;
-
-  // Styling
-
-  /**
-   * @brief This method should be overridden by deriving classes requiring notifications when the style changes.
-   *
-   * @SINCE_1_0.0
-   * @param[in] styleManager The StyleManager object
-   * @param[in] change Information denoting what has changed
-   */
-  virtual void OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change);
-
-  /**
-   * @brief This method can be overridden by deriving classes requiring to apply default style.
-   *
-   * @SINCE_1_3.0
-   */
-  virtual void OnApplyDefaultStyle();
 
   // Accessibility
 

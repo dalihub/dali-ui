@@ -398,11 +398,15 @@ void VisualFactoryCache::SetBrokenImageUrl(std::string&                    defau
                                            const std::vector<std::string>& brokenImageUrlList)
 {
   mUseDefaultBrokenImageOnly = false;
+
   mBrokenImageInfoContainer.clear();
-  mBrokenImageInfoContainer.assign(brokenImageUrlList.size(), BrokenImageInfo());
-  for(unsigned int i = 0; i < brokenImageUrlList.size(); i++)
+
+  for(auto&& iter : brokenImageUrlList)
   {
-    mBrokenImageInfoContainer[i].url = brokenImageUrlList[i];
+    if(!iter.empty())
+    {
+      mBrokenImageInfoContainer.push_back(BrokenImageInfo(iter));
+    }
   }
 
   mDefaultBrokenImageUrl = defaultBrokenUrl;

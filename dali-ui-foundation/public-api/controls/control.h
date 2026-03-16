@@ -125,20 +125,12 @@ public:
     enum
     {
       /**
-       * @brief The name of the style to be applied to the control.
-       * @details Name "styleName", type Property::STRING.
-       * @see Ui::Control::SetStyleName()
-       * @SINCE_1_0.0
-       */
-      STYLE_NAME = PROPERTY_START_INDEX,
-
-      /**
        * @brief Receives key events to the control.
        * @details Name "keyInputFocus", type Property::BOOLEAN.
        * @see Ui::Control::SetKeyInputFocus()
        * @SINCE_1_0.0
        */
-      KEY_INPUT_FOCUS,
+      KEY_INPUT_FOCUS = PROPERTY_START_INDEX,
 
       /**
        * @brief The background of the control.
@@ -638,23 +630,6 @@ public:
    * @note Will return an empty handle if the control does not handle the gesture itself.
    */
   LongPressGestureDetector GetLongPressGestureDetector() const;
-
-  // Styling
-
-  /**
-   * @brief Sets the name of the style to be applied to the control.
-   *
-   * @SINCE_1_0.0
-   * @param[in] styleName A string matching a style described in a stylesheet
-   */
-  void SetStyleName(const std::string& styleName);
-
-  /**
-   * @brief Retrieves the name of the style to be applied to the control (if any).
-   * @SINCE_1_0.0
-   * @return A string matching a style, or an empty string
-   */
-  const std::string& GetStyleName() const;
 
   // Background
 

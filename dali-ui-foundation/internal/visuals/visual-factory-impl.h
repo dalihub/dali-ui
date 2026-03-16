@@ -27,7 +27,6 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/styling/style-manager.h>
 
 namespace Dali
 {
@@ -54,21 +53,6 @@ public:
    * @param[in] debugEnabled If true, use debug renderer to replace all the concrete renderer.
    */
   VisualFactory(bool debugEnabled);
-
-  /**
-   * @brief StyleChanged callback
-   *
-   * @param[in] styleManager Handle for style manager.
-   * @param[in] type Style change type.
-   */
-  void OnStyleChangedSignal(Ui::StyleManager styleManager, StyleChange::Type type);
-
-  /**
-   * @brief BrokenImageChanged callback
-   *
-   * @param[in] styleManager Handle for style manager.
-   */
-  void OnBrokenImageChangedSignal(Ui::StyleManager styleManager);
 
   /**
    * @copydoc Ui::VisualFactory::CreateVisual( const Property::Map& )
@@ -154,12 +138,6 @@ protected:
   ~VisualFactory() override;
 
 private:
-  /**
-   * @brief Set the Broken Image url
-   * @param[in] styleManager The instance of StyleManager
-   */
-  void SetBrokenImageUrl(Ui::StyleManager& styleManager);
-
   /**
    * Get the image visual shader factory, creating it if necessary.
    */

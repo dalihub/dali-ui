@@ -260,9 +260,9 @@ private:
   void OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder);
 
   /**
-   * Get configuration from StyleManager.
+   * Get configuration from UiConfig.
    */
-  void GetConfigurationFromStyleManger();
+  void GetConfiguration();
 
   /**
    * Get the focus group of current focused actor.

@@ -31,8 +31,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
-#include <dali-ui-foundation/internal/styling/default-theme.h>
-#include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/text/property-string-parser.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
@@ -1281,44 +1279,6 @@ bool TextLabel::OnInterceptTouched(Actor actor, const TouchEvent& touch)
     mIsIntercepted = false;
   }
   return false;
-}
-
-void TextLabel::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
-{
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextLabel::OnStyleChange\n");
-
-  switch(change)
-  {
-    case StyleChange::DEFAULT_FONT_CHANGE:
-    {
-      // Property system did not set the font so should update it.
-      const std::string& newFont = GetImpl(styleManager).GetDefaultFontFamily();
-      DALI_LOG_INFO(gLogFilter, Debug::General,
-                    "TextLabel::OnStyleChange StyleChange::DEFAULT_FONT_CHANGE newFont(%s)\n", newFont.c_str());
-      mController->UpdateAfterFontChange(newFont);
-      RelayoutRequest();
-      break;
-    }
-    case StyleChange::DEFAULT_FONT_SIZE_CHANGE:
-    {
-      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
-      RelayoutRequest();
-      break;
-    }
-    case StyleChange::THEME_CHANGE:
-    {
-      // Nothing to do, let control base class handle this
-      break;
-    }
-  }
-
-  // Up call to Control
-  Control::OnStyleChange(styleManager, change);
-}
-
-void TextLabel::OnApplyDefaultStyle()
-{
-  DefaultTheme::Get().ApplyDefaultStyle(Ui::TextLabel(GetOwner()));
 }
 
 bool TextLabel::AnchorClicked(uint32_t cursorPosition, std::string& href)

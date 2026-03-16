@@ -110,16 +110,6 @@ LongPressGestureDetector Control::GetLongPressGestureDetector() const
   return Internal::GetImplementation(*this).GetLongPressGestureDetector();
 }
 
-void Control::SetStyleName(const std::string& styleName)
-{
-  Internal::GetImplementation(*this).SetStyleName(styleName);
-}
-
-const std::string& Control::GetStyleName() const
-{
-  return Internal::GetImplementation(*this).GetStyleName();
-}
-
 void Control::SetBackgroundColor(const Vector4& color)
 {
   Internal::GetImplementation(*this).SetBackgroundColor(color);

@@ -479,7 +479,6 @@ public:
   int mClockwiseFocusableActorId;        ///< Actor ID of Clockwise focusable control.
   int mCounterClockwiseFocusableActorId; ///< Actor ID of Counter clockwise focusable control.
 
-  std::string                          mStyleName;
   Vector4                              mBackgroundColor;    ///< The color of the background visual
   RenderEffectImplPtr                  mRenderEffect;       ///< The render effect on this control
   Vector3*                             mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this

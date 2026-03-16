@@ -42,8 +42,6 @@
 #include <dali-ui-foundation/public-api/image-loader/image.h>
 #include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
 
-#include <dali-ui-foundation/public-api/styling/style-manager.h>
-
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
 #include <dali-ui-foundation/public-api/render-effects/gaussian-blur-effect.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>

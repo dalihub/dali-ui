@@ -26,6 +26,7 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-data-clearer.h>
@@ -1743,16 +1744,10 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
 {
   if(DALI_UNLIKELY(mShouldClearFocusOnEscape == ClearFocusOnEscapeState::UNKNOWN))
   {
-    mShouldClearFocusOnEscape = ClearFocusOnEscapeState::ENABLE;
-
-    Ui::StyleManager styleManager = Ui::StyleManager::Get();
-    if(styleManager)
+    auto& uiConfigManager = Integration::UiConfigManager::Get();
+    if(uiConfigManager.IsInitialized())
     {
-      const auto clearFocusOnEscapeValue =
-        Ui::DevelStyleManager::GetConfigurations(styleManager).Find("clearFocusOnEscape", Property::Type::BOOLEAN);
-
-      // Default is ENABLE. If config don't have "clearFocusOnEscape" property, make it ENABLE.
-      mShouldClearFocusOnEscape = (!clearFocusOnEscapeValue || clearFocusOnEscapeValue->Get<bool>())
+      mShouldClearFocusOnEscape = uiConfigManager.IsFocusClearOnEscapeEnabled()
                                     ? ClearFocusOnEscapeState::ENABLE
                                     : ClearFocusOnEscapeState::DISABLE;
     }

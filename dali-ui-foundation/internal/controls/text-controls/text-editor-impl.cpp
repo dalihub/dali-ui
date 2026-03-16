@@ -37,8 +37,6 @@
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-editor-property-handler.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
-#include <dali-ui-foundation/internal/styling/default-theme.h>
-#include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
@@ -663,44 +661,6 @@ void TextEditor::OnInitialize()
 ControlAccessible* TextEditor::CreateAccessibleObject()
 {
   return new TextEditorAccessible(Self());
-}
-
-void TextEditor::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
-{
-  DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor::OnStyleChange\n");
-
-  switch(change)
-  {
-    case StyleChange::DEFAULT_FONT_CHANGE:
-    {
-      DALI_LOG_INFO(gTextEditorLogFilter, Debug::Verbose, "TextEditor::OnStyleChange DEFAULT_FONT_CHANGE\n");
-      const std::string& newFont = GetImpl(styleManager).GetDefaultFontFamily();
-      // Property system did not set the font so should update it.
-      mController->UpdateAfterFontChange(newFont);
-      RelayoutRequest();
-      break;
-    }
-
-    case StyleChange::DEFAULT_FONT_SIZE_CHANGE:
-    {
-      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
-      RelayoutRequest();
-      break;
-    }
-    case StyleChange::THEME_CHANGE:
-    {
-      // Nothing to do, let control base class handle this
-      break;
-    }
-  }
-
-  // Up call to Control
-  Control::OnStyleChange(styleManager, change);
-}
-
-void TextEditor::OnApplyDefaultStyle()
-{
-  DefaultTheme::Get().ApplyDefaultStyle(Ui::TextEditor(GetOwner()));
 }
 
 Vector3 TextEditor::GetNaturalSize()

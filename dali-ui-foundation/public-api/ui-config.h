@@ -77,6 +77,22 @@ class DALI_UI_API UiConfig : public BaseHandle
 {
 public:
   /**
+   * @brief The type of broken image for image loading failures.
+   *
+   * Different broken image types allow different broken images to be used
+   * based on the size of the view that needs to display them.
+   * For example, a small icon view can use a compact broken image (SMALL),
+   * while a large image view can use a more detailed broken image (LARGE).
+   */
+  enum class BrokenImageType
+  {
+    SMALL  = 0, ///< Broken image for small-sized views
+    NORMAL = 1, ///< Broken image for normal-sized views
+    LARGE  = 2  ///< Broken image for large-sized views
+  };
+
+public:
+  /**
    * @brief Creates an uninitialized UiConfig handle.
    */
   UiConfig() = default;
@@ -257,6 +273,63 @@ public: // Properties
    * @return The time limit in milliseconds
    */
   uint32_t GetTapRecognizerTime() const;
+
+  /**
+   * @brief Sets an image to be displayed when image loading fails.
+   *
+   * This method configures a broken image that will be shown in image views (e.g., ImageView)
+   * when the requested image fails to load properly. Using different broken image types
+   * allows for appropriate broken images based on the target view size.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
+   * @param[in] brokenImageUrl The URL of the broken image to use
+   */
+  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl);
+
+  /**
+   * @brief Gets the image URL to be displayed when image loading fails.
+   *
+   * Retrieves the broken image URL that was previously set for the specified broken image type.
+   * This image will be shown in image views when the requested image fails to load.
+   *
+   * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
+   * @return A reference to the broken image URL string
+   */
+  const std::string& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
+
+  // @CHAIN_MANUAL
+  /**
+   * @brief Sets whether to clear focus when the Escape key is pressed.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enable True to enable focus clearing on Escape key
+   * @return Reference to this for method chaining
+   */
+  UiConfig& EnableFocusClearOnEscape(bool enable);
+
+  /**
+   * @brief Retrieves whether to clear focus when the Escape key is pressed.
+   *
+   * @return True if focus clearing on Escape key is enabled
+   */
+  bool IsFocusClearOnEscapeEnabled() const;
+
+  /**
+   * @brief Sets whether to always show the keyboard focus indicator.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] alwaysShow True to always show focus indicator
+   * @return Reference to this for method chaining
+   */
+  UiConfig& SetAlwaysShowFocus(bool alwaysShow);
+
+  /**
+   * @brief Retrieves whether to always show the keyboard focus indicator.
+   *
+   * @return True if focus indicator is always shown
+   */
+  bool IsFocusIndicatorAlwaysShown() const;
 
   // @CHAIN_END
 

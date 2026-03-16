@@ -30,6 +30,10 @@ bool DefaultExecutionKeyPredicate(const std::string& keyName)
   return keyName == "Return";
 }
 
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_UI_CONFIG");
+#endif
+
 } // unnamed namespace
 
 namespace Dali
@@ -49,6 +53,8 @@ UiConfigImpl::UiConfigImpl()
   mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
   mMinLongPressKeyCount(3),
   mTapRecognizerTime(UINT32_MAX),
+  mClearFocusOnEscape(true),
+  mAlwaysShowFocus(true),
   mFrozen(false)
 {
 }
@@ -157,6 +163,59 @@ void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
 uint32_t UiConfigImpl::GetTapRecognizerTime() const
 {
   return mTapRecognizerTime;
+}
+
+void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const std::string& brokenImageUrl)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+
+  uint32_t index = static_cast<uint32_t>(brokenImageType);
+  if(index >= 3)
+  {
+    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+    return;
+  }
+
+  mBrokenImageUrls[index] = brokenImageUrl;
+}
+
+const std::string& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const
+{
+  uint32_t index = static_cast<uint32_t>(brokenImageType);
+  if(index >= 3)
+  {
+    DALI_LOG_ERROR("Invalid BrokenImageType: [%d]\n", index);
+    return mBrokenImageUrls[0];
+  }
+
+  return mBrokenImageUrls[index];
+}
+
+std::vector<std::string> UiConfigImpl::GetBrokenImageUrlList() const
+{
+  return {mBrokenImageUrls[0], mBrokenImageUrls[1], mBrokenImageUrls[2]};
+}
+
+void UiConfigImpl::EnableFocusClearOnEscape(bool enable)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mClearFocusOnEscape = enable;
+}
+
+bool UiConfigImpl::IsFocusClearOnEscapeEnabled() const
+{
+  return mClearFocusOnEscape;
+}
+
+void UiConfigImpl::SetAlwaysShowFocus(bool alwaysShow)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mAlwaysShowFocus = alwaysShow;
+}
+
+bool UiConfigImpl::IsFocusIndicatorAlwaysShown() const
+{
+  return mAlwaysShowFocus;
 }
 
 void UiConfigImpl::OnInitialized()

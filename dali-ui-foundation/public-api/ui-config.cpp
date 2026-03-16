@@ -128,5 +128,38 @@ uint32_t UiConfig::GetTapRecognizerTime() const
   return GetImpl(*this).GetTapRecognizerTime();
 }
 
+UiConfig& UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl)
+{
+  GetImpl(*this).SetBrokenImageUrl(brokenImageType, brokenImageUrl);
+  return *this;
+}
+
+const std::string& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType) const
+{
+  return GetImpl(*this).GetBrokenImageUrl(brokenImageType);
+}
+
+UiConfig& UiConfig::EnableFocusClearOnEscape(bool enable)
+{
+  GetImpl(*this).EnableFocusClearOnEscape(enable);
+  return *this;
+}
+
+bool UiConfig::IsFocusClearOnEscapeEnabled() const
+{
+  return GetImpl(*this).IsFocusClearOnEscapeEnabled();
+}
+
+UiConfig& UiConfig::SetAlwaysShowFocus(bool alwaysShow)
+{
+  GetImpl(*this).SetAlwaysShowFocus(alwaysShow);
+  return *this;
+}
+
+bool UiConfig::IsFocusIndicatorAlwaysShown() const
+{
+  return GetImpl(*this).IsFocusIndicatorAlwaysShown();
+}
+
 } // namespace Ui
 } // namespace Dali

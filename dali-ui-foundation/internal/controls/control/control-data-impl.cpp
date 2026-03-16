@@ -45,7 +45,6 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
@@ -455,7 +454,6 @@ DALI_TYPE_REGISTRATION_END()
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
-const PropertyRegistration Control::Impl::PROPERTY_1(typeRegistration,  "styleName",                      Ui::Control::Property::STYLE_NAME,                            Property::STRING,  &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_4(typeRegistration,  "keyInputFocus",                  Ui::Control::Property::KEY_INPUT_FOCUS,                       Property::BOOLEAN, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_5(typeRegistration,  "background",                     Ui::Control::Property::BACKGROUND,                            Property::MAP,     &Control::Impl::SetProperty, &Control::Impl::GetProperty);
 const PropertyRegistration Control::Impl::PROPERTY_6(typeRegistration,  "margin",                         Ui::Control::Property::MARGIN,                                Property::EXTENTS, &Control::Impl::SetProperty, &Control::Impl::GetProperty);
@@ -503,7 +501,6 @@ Control::Impl::Impl(Control& controlImpl)
   mDownFocusableActorId(-1),
   mClockwiseFocusableActorId(-1),
   mCounterClockwiseFocusableActorId(-1),
-  mStyleName(""),
   mBackgroundColor(Color::TRANSPARENT),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
@@ -770,12 +767,6 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
 
     switch(index)
     {
-      case Ui::Control::Property::STYLE_NAME:
-      {
-        controlImpl.SetStyleName(value.Get<std::string>());
-        break;
-      }
-
       case Ui::Control::Property::LEFT_FOCUSABLE_ACTOR_ID:
       {
         int focusId;
@@ -1229,12 +1220,6 @@ Property::Value Control::Impl::GetProperty(BaseObject* object, Property::Index i
 
     switch(index)
     {
-      case Ui::Control::Property::STYLE_NAME:
-      {
-        value = controlImpl.GetStyleName();
-        break;
-      }
-
       case Ui::Control::Property::LEFT_FOCUSABLE_ACTOR_ID:
       {
         value = controlImpl.mImpl->mLeftFocusableActorId;
@@ -2046,11 +2031,6 @@ void Control::Impl::Process(bool postProcessor)
     mVisualData->ApplyFittingMode(mSize);
   }
   mProcessorRegistered = false;
-}
-
-void Control::OnApplyDefaultStyle()
-{
-  // Default implementation does nothing
 }
 
 } // namespace Internal

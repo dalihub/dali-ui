@@ -173,9 +173,9 @@ public:
    * The following shows a list of constants available by default:
    *
    *  Constant                     | Description
-   * ----------------------------- |
-   * ---------------------------------------------------------------------------------------------------- DALI_IMAGE_DIR
-   * | The Image Directory used by UI. DALI_SOUND_DIR              | The Sound Directory used by UI.
+   * ----------------------------- |----------------------------------------------------------------------------------------------------
+   *   DALI_IMAGE_DIR              | The Image Directory used by UI.
+   *   DALI_SOUND_DIR              | The Sound Directory used by UI.
    *   DALI_STYLE_DIR              | The Style directory that the UI uses.
    *   DALI_STYLE_IMAGE_DIR        | The directory that stores all the images used by UI's style.
    *

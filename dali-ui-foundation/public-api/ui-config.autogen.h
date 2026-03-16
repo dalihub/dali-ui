@@ -53,4 +53,32 @@
   * @pre The config must not be frozen. \
   * @param[in] timeMs The time limit in milliseconds \
   */ \
-  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UiConfig::SetTapRecognizerTime(timeMs); return *this; }
+  ChildClass& SetTapRecognizerTime(uint32_t timeMs) { UiConfig::SetTapRecognizerTime(timeMs); return *this; } \
+  /** \
+  * @brief Sets an image to be displayed when image loading fails. \
+  * \
+  * This method configures a broken image that will be shown in image views (e.g., ImageView) \
+  * when the requested image fails to load properly. Using different broken image types \
+  * allows for appropriate broken images based on the target view size. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE) \
+  * @param[in] brokenImageUrl The URL of the broken image to use \
+  */ \
+  ChildClass& SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl) { UiConfig::SetBrokenImageUrl(brokenImageType, brokenImageUrl); return *this; } \
+  /** \
+  * @brief Sets whether to clear focus when the Escape key is pressed. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] enable True to enable focus clearing on Escape key \
+  * @return Reference to this for method chaining \
+  */ \
+  ChildClass& EnableFocusClearOnEscape(bool enable) { UiConfig::EnableFocusClearOnEscape(enable); return *this; } \
+  /** \
+  * @brief Sets whether to always show the keyboard focus indicator. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] alwaysShow True to always show focus indicator \
+  * @return Reference to this for method chaining \
+  */ \
+  ChildClass& SetAlwaysShowFocus(bool alwaysShow) { UiConfig::SetAlwaysShowFocus(alwaysShow); return *this; }

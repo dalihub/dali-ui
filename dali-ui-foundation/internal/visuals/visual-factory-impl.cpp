@@ -28,8 +28,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/styling/style-manager-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.h>
@@ -114,19 +114,6 @@ VisualFactory::~VisualFactory()
       mIdleCallback = nullptr;
     }
   }
-}
-
-void VisualFactory::OnStyleChangedSignal(Ui::StyleManager styleManager, StyleChange::Type type)
-{
-  if(type == StyleChange::THEME_CHANGE)
-  {
-    SetBrokenImageUrl(styleManager);
-  }
-}
-
-void VisualFactory::OnBrokenImageChangedSignal(Ui::StyleManager styleManager)
-{
-  SetBrokenImageUrl(styleManager);
 }
 
 Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map& propertyMap)
@@ -501,40 +488,25 @@ Internal::SvgLoader& VisualFactory::GetSvgLoader()
   return GetFactoryCache().GetSvgLoader();
 }
 
-void VisualFactory::SetBrokenImageUrl(Ui::StyleManager& styleManager)
-{
-  const std::string        imageDirPath   = AssetManager::GetDaliImagePath();
-  std::string              brokenImageUrl = imageDirPath + BROKEN_IMAGE_FILE_NAME;
-  std::vector<std::string> customBrokenImageUrlList;
-
-  if(styleManager)
-  {
-    customBrokenImageUrlList = Ui::DevelStyleManager::GetBrokenImageUrlList(styleManager);
-    const auto brokenImageUrlValue =
-      Ui::DevelStyleManager::GetConfigurations(styleManager).Find("brokenImageUrl", Property::Type::STRING);
-    if(brokenImageUrlValue)
-    {
-      brokenImageUrlValue->Get(brokenImageUrl);
-    }
-  }
-
-  // Add default image
-  mFactoryCache->SetBrokenImageUrl(brokenImageUrl, customBrokenImageUrlList);
-}
-
 Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
 {
   if(!mFactoryCache)
   {
-    mFactoryCache                 = std::unique_ptr<VisualFactoryCache>(new VisualFactoryCache(mPreMultiplyOnLoad));
-    Ui::StyleManager styleManager = Ui::StyleManager::Get();
-    if(styleManager)
+    mFactoryCache = std::unique_ptr<VisualFactoryCache>(new VisualFactoryCache(mPreMultiplyOnLoad));
+
+    // Get broken image urls
+    auto imageDirPath   = AssetManager::GetDaliImagePath();
+    auto brokenImageUrl = imageDirPath + BROKEN_IMAGE_FILE_NAME;
+
+    std::vector<std::string> customBrokenImageUrlList{};
+    auto&                    uiConfigManager = Integration::UiConfigManager::Get();
+    if(uiConfigManager.IsInitialized())
     {
-      styleManager.StyleChangedSignal().Connect(mSlotDelegate, &VisualFactory::OnStyleChangedSignal);
-      Ui::DevelStyleManager::BrokenImageChangedSignal(styleManager)
-        .Connect(mSlotDelegate, &VisualFactory::OnBrokenImageChangedSignal);
+      customBrokenImageUrlList = Integration::UiConfigManager::Get().GetBrokenImageUrlList();
     }
-    SetBrokenImageUrl(styleManager);
+
+    // Add default image
+    mFactoryCache->SetBrokenImageUrl(brokenImageUrl, customBrokenImageUrlList);
   }
 
   return *mFactoryCache;

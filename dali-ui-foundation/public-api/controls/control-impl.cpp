@@ -38,7 +38,6 @@
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-visual-data.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
-#include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -47,7 +46,6 @@
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
-#include <dali-ui-foundation/public-api/styling/style-manager.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -135,26 +133,6 @@ Ui::Control Control::New(ControlBehaviour additionalBehaviour)
   controlImpl->Initialize();
 
   return handle;
-}
-
-void Control::SetStyleName(const std::string& styleName)
-{
-  if(styleName != mImpl->mStyleName)
-  {
-    mImpl->mStyleName = styleName;
-
-    // Apply new style, if stylemanager is available
-    Ui::StyleManager styleManager = Ui::StyleManager::Get();
-    if(styleManager)
-    {
-      GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
-    }
-  }
-}
-
-const std::string& Control::GetStyleName() const
-{
-  return mImpl->mStyleName;
 }
 
 void Control::SetBackgroundColor(const Vector4& color)
@@ -520,23 +498,6 @@ void Control::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  if(!(mImpl->mFlags & DISABLE_STYLE_CHANGE_SIGNALS))
-  {
-    Ui::StyleManager styleManager = StyleManager::Get();
-
-    // if stylemanager is available
-    if(styleManager)
-    {
-      StyleManager& styleManagerImpl = GetImpl(styleManager);
-
-      // Register for style changes
-      styleManagerImpl.ControlStyleChangeSignal().Connect(this, &Control::OnStyleChange);
-
-      // Apply the current style
-      styleManagerImpl.ApplyThemeStyleAtInit(Ui::Control(GetOwner()));
-    }
-  }
-
   if(mImpl->mFlags & REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
   {
     SetKeyboardNavigationSupport(true);
@@ -551,16 +512,6 @@ bool Control::IsResourceReady() const
 {
   const Internal::Control::Impl& controlDataImpl = Internal::Control::Impl::Get(*this);
   return controlDataImpl.IsResourceReady();
-}
-
-void Control::OnStyleChange(Ui::StyleManager styleManager, StyleChange::Type change)
-{
-  // By default the control is only interested in theme (not font) changes
-  if(styleManager && change == StyleChange::THEME_CHANGE)
-  {
-    GetImpl(styleManager).ApplyThemeStyle(Ui::Control(GetOwner()));
-    RelayoutRequest();
-  }
 }
 
 void Control::OnPinch(const PinchGesture& pinch)

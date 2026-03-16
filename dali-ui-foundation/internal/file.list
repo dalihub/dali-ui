@@ -117,10 +117,9 @@ SET( toolkit_src_files
    ${toolkit_src_dir}/render-effects/mask-effect-impl.cpp
    ${toolkit_src_dir}/render-effects/gaussian-blur-algorithm.cpp
    ${toolkit_src_dir}/render-effects/background-blur-effect-impl.cpp
-   ${toolkit_src_dir}/render-effects/gaussian-blur-effect-impl.cpp
-   ${toolkit_src_dir}/render-effects/offscreen-rendering-impl.cpp
-   ${toolkit_src_dir}/styling/style-manager-impl.cpp
-   ${toolkit_src_dir}/text/abstract-style-character-run.cpp
+  ${toolkit_src_dir}/render-effects/gaussian-blur-effect-impl.cpp
+  ${toolkit_src_dir}/render-effects/offscreen-rendering-impl.cpp
+  ${toolkit_src_dir}/text/abstract-style-character-run.cpp
    ${toolkit_src_dir}/text/bidirectional-support.cpp
    ${toolkit_src_dir}/text/bounded-paragraph-helper-functions.cpp
    ${toolkit_src_dir}/text/character-set-conversion.cpp

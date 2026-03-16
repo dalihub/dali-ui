@@ -441,6 +441,16 @@ private:
     {
     }
 
+    BrokenImageInfo(const std::string& _url)
+    : visualType(),
+      url(_url),
+      npatchId(NPatchData::INVALID_NPATCH_DATA_ID),
+      texture(),
+      width(0),
+      height(0)
+    {
+    }
+
     ~BrokenImageInfo()
     {
     }

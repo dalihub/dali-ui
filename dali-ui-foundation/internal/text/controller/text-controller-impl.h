@@ -23,13 +23,11 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/styling/style-manager-devel.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/input-style.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/styling/style-manager.h>
 
 namespace Dali
 {

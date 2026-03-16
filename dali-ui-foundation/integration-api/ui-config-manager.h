@@ -17,6 +17,9 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <vector>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
@@ -137,6 +140,38 @@ public:
    * @return The time limit in milliseconds
    */
   uint32_t GetTapRecognizerTime() const;
+
+  /**
+   * @brief Retrieves the list of broken image URLs for all types.
+   *
+   * Returns a vector containing broken image URLs in the order of SMALL, NORMAL, and LARGE types.
+   * Empty URL strings (not set values) are included in the list to maintain the order.
+   *
+   * For example, if only NORMAL type is set with "broken_normal.png", the list would be:
+   * - Index 0: "" (SMALL not set)
+   * - Index 1: "broken_normal.png" (NORMAL set)
+   * - Index 2: "" (LARGE not set)
+   *
+   * @pre Initialize() must be called. Triggers assertion failure otherwise.
+   * @return A vector of broken image URLs in order of SMALL, NORMAL, LARGE
+   */
+  std::vector<std::string> GetBrokenImageUrlList() const;
+
+  /**
+   * @brief Retrieves whether to clear focus when the Escape key is pressed.
+   *
+   * @pre Initialize() must be called. Triggers assertion failure otherwise.
+   * @return True if focus clearing on Escape key is enabled
+   */
+  bool IsFocusClearOnEscapeEnabled() const;
+
+  /**
+   * @brief Retrieves whether to always show the keyboard focus indicator.
+   *
+   *pre Initialize() must be called. Triggers assertion failure otherwise.
+   * @return True if focus indicator is always shown
+   */
+  bool IsFocusIndicatorAlwaysShown() const;
 
 private:
   UiConfigManager()  = default;

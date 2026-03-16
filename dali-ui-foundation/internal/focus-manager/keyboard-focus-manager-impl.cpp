@@ -38,11 +38,10 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
-#include <dali-ui-foundation/devel-api/styling/style-manager-devel.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
-#include <dali-ui-foundation/public-api/styling/style-manager.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 
 namespace Dali
@@ -206,18 +205,16 @@ KeyboardFocusManager::~KeyboardFocusManager()
 {
 }
 
-void KeyboardFocusManager::GetConfigurationFromStyleManger()
+void KeyboardFocusManager::GetConfiguration()
 {
-  Ui::StyleManager styleManager = Ui::StyleManager::Get();
-  if(styleManager)
+  auto& uiConfigManager = Integration::UiConfigManager::Get();
+  if(uiConfigManager.IsInitialized())
   {
-    const auto alwaysShowFocusValue =
-      Ui::DevelStyleManager::GetConfigurations(styleManager).Find("alwaysShowFocus", Property::Type::BOOLEAN);
-
-    mAlwaysShowIndicator   = (alwaysShowFocusValue && alwaysShowFocusValue->Get<bool>()) ? ALWAYS_SHOW : NONE;
-    mIsFocusIndicatorShown = (mAlwaysShowIndicator == ALWAYS_SHOW) ? SHOW : HIDE;
-    mClearFocusOnTouch     = (mIsFocusIndicatorShown == SHOW) ? false : true;
+    mAlwaysShowIndicator = uiConfigManager.IsFocusIndicatorAlwaysShown() ? ALWAYS_SHOW : NONE;
   }
+
+  mIsFocusIndicatorShown = (mAlwaysShowIndicator == ALWAYS_SHOW) ? SHOW : HIDE;
+  mClearFocusOnTouch     = (mIsFocusIndicatorShown == SHOW) ? false : true;
 }
 
 bool KeyboardFocusManager::SetCurrentFocusActor(Actor actor)
@@ -232,7 +229,7 @@ bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChange
 {
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
-    GetConfigurationFromStyleManger();
+    GetConfiguration();
   }
 
   bool                           success = false;
@@ -915,7 +912,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
 
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
-    GetConfigurationFromStyleManger();
+    GetConfiguration();
   }
 
   bool isFocusStartableKey = false;
@@ -1113,7 +1110,7 @@ void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
   // Try to load configuration.
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
-    GetConfigurationFromStyleManger();
+    GetConfiguration();
   }
 
   // Clear the focus when user touch the screen.

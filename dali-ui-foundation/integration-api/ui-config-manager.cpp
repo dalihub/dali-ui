@@ -125,6 +125,24 @@ uint32_t UiConfigManager::GetTapRecognizerTime() const
   return mCachedTapRecognizerTime;
 }
 
+std::vector<std::string> UiConfigManager::GetBrokenImageUrlList() const
+{
+  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  return GetImpl(mConfig).GetBrokenImageUrlList();
+}
+
+bool UiConfigManager::IsFocusClearOnEscapeEnabled() const
+{
+  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  return GetImpl(mConfig).IsFocusClearOnEscapeEnabled();
+}
+
+bool UiConfigManager::IsFocusIndicatorAlwaysShown() const
+{
+  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  return GetImpl(mConfig).IsFocusIndicatorAlwaysShown();
+}
+
 } // namespace Integration
 
 } // namespace Ui

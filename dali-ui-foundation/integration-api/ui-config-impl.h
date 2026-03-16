@@ -22,6 +22,7 @@
 #include <dali/public-api/object/base-object.h>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-config.h>
@@ -188,6 +189,51 @@ public:
   uint32_t GetTapRecognizerTime() const;
 
   /**
+   * @copydoc UiConfig::SetBrokenImageUrl
+   */
+  void SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const std::string& brokenImageUrl);
+
+  /**
+   * @copydoc UiConfig::GetBrokenImageUrl
+   */
+  const std::string& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
+
+  /**
+   * @copydoc UiConfigManager::GetBrokenImageUrlList
+   */
+  std::vector<std::string> GetBrokenImageUrlList() const;
+
+  /**
+   * @brief Sets whether to clear focus when the Escape key is pressed.
+   *
+   * @pre Must not be frozen.
+   * @param[in] enable True to enable focus clearing on Escape key
+   */
+  void EnableFocusClearOnEscape(bool enable);
+
+  /**
+   * @brief Retrieves whether to clear focus when the Escape key is pressed.
+   *
+   * @return True if focus clearing on Escape key is enabled
+   */
+  bool IsFocusClearOnEscapeEnabled() const;
+
+  /**
+   * @brief Sets whether to always show the keyboard focus indicator.
+   *
+   * @pre Must not be frozen.
+   * @param[in] alwaysShow True to always show focus indicator
+   */
+  void SetAlwaysShowFocus(bool alwaysShow);
+
+  /**
+   * @brief Retrieves whether to always show the keyboard focus indicator.
+   *
+   * @return True if focus indicator is always shown
+   */
+  bool IsFocusIndicatorAlwaysShown() const;
+
+  /**
    * @brief Called after this config is applied via UiConfig::Apply().
    *
    * Derived config implementations override this to register themselves
@@ -214,6 +260,8 @@ private:
   UiConfigImpl& operator=(UiConfigImpl&&)      = delete;
 
 private:
+  std::string mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
+
   ExecutionKeyPredicate mExecutionKeyPredicate;
   float                 mScalingFactor;
   int                   mDpi;
@@ -221,6 +269,8 @@ private:
   KeyClickPolicy        mKeyClickPolicy;
   uint32_t              mMinLongPressKeyCount;
   uint32_t              mTapRecognizerTime;
+  bool                  mClearFocusOnEscape;
+  bool                  mAlwaysShowFocus;
   bool                  mFrozen;
 };
 
