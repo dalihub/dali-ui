@@ -662,7 +662,7 @@ public:
    * @brief Checks text direction.
    * @return The text direction.
    */
-  Ui::DevelText::TextDirection::Type GetTextDirection();
+  Direction GetTextDirection();
 
   /**
    * @brief Calculates the start character index of the first paragraph to be updated and

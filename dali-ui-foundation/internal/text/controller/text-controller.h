@@ -1923,7 +1923,7 @@ public: // Queries & retrieves.
    * @brief Checks text direction.
    * @return The text direction.
    */
-  Ui::DevelText::TextDirection::Type GetTextDirection();
+  Direction GetTextDirection();
 
   /**
    * @brief Retrieves vertical line alignment

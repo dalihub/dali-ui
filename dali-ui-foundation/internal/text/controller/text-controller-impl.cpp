@@ -634,7 +634,7 @@ Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& ac
   }
 }
 
-Ui::DevelText::TextDirection::Type Controller::Impl::GetTextDirection()
+Direction Controller::Impl::GetTextDirection()
 {
   if(mUpdateTextDirection)
   {
@@ -666,8 +666,7 @@ Ui::DevelText::TextDirection::Type Controller::Impl::GetTextDirection()
     mUpdateTextDirection = false;
   }
 
-  return mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT
-                             : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
+  return mIsTextDirectionRTL ? Direction::RIGHT_TO_LEFT : Direction::LEFT_TO_RIGHT;
 }
 
 void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)

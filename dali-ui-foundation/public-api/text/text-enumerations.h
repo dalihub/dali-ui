@@ -74,6 +74,21 @@ enum class LineWrap : uint8_t
 };
 
 /**
+ * @brief Enumeration for text layout direction.
+ */
+enum class Direction : uint8_t
+{
+  /**
+   * @brief Left-to-right text direction.
+   */
+  LEFT_TO_RIGHT = 0,
+  /**
+   * @brief Right-to-left text direction.
+   */
+  RIGHT_TO_LEFT = 1
+};
+
+/**
  * @brief The available underline types for text.
  * @SINCE_1_2.60
  */

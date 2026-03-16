@@ -204,7 +204,7 @@ void Typesetter::SetFontClient(TextAbstraction::FontClient& fontClient)
   mImpl->SetFontClient(fontClient);
 }
 
-PixelData Typesetter::Render(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
+PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
                              RenderBehaviour behaviour, bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
                              const Vector2& originSize)
 {
@@ -215,7 +215,7 @@ PixelData Typesetter::Render(const Vector2& size, Ui::DevelText::TextDirection::
   return pixelData;
 }
 
-PixelData Typesetter::RenderWithCutout(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
+PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirection,
                                        Devel::PixelBuffer mask, RenderBehaviour behaviour,
                                        bool ignoreHorizontalAlignment, Pixel::Format pixelFormat, float originAlpha,
                                        const Vector2& originSize)
@@ -229,8 +229,8 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Ui::DevelText::TextD
   return pixelData;
 }
 
-Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&                     size,
-                                                     Ui::DevelText::TextDirection::Type textDirection,
+Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
+                                                     Direction       textDirection,
                                                      RenderBehaviour behaviour, bool ignoreHorizontalAlignment,
                                                      Pixel::Format pixelFormat, const Vector2& originSize)
 {
@@ -258,12 +258,12 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&             
     }
     case Alignment::CENTER:
     {
-      penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
       break;
     }
     case Alignment::END:
     {
-      penX += (textDirection == Ui::DevelText::TextDirection::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
       break;
     }
   }

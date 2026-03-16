@@ -1630,7 +1630,7 @@ void Controller::GetPlaceholderProperty(Property::Map& map)
   PlaceholderHandler::GetPlaceholderProperty(*this, map);
 }
 
-Ui::DevelText::TextDirection::Type Controller::GetTextDirection()
+Direction Controller::GetTextDirection()
 {
   // Make sure the model is up-to-date before layouting
   EventHandler::ProcessModifyEvents(*this);

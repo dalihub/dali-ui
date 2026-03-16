@@ -938,8 +938,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 #endif
 
   // Check the text direction
-  Ui::DevelText::TextDirection::Type textDirection =
-    mIsTextDirectionRTL ? Ui::DevelText::TextDirection::RIGHT_TO_LEFT : Ui::DevelText::TextDirection::LEFT_TO_RIGHT;
+  Direction textDirection = mIsTextDirectionRTL ? Direction::RIGHT_TO_LEFT : Direction::LEFT_TO_RIGHT;
 
   // Set information for creating pixel datas.
   AsyncTextRenderInfo renderInfo;

@@ -774,7 +774,7 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
   renderer.SetTextures(textureSet);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(renderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 
   // Enable the pre-multiplied alpha to improve the text quality
   renderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true);
@@ -981,7 +981,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
       mImpl->mRenderer.SetTextures(textureSet);
       // Register transform properties
-      mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+      mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
       mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex,
                                    static_cast<float>(mTextShaderFeatureCache.IsEnabledMultiColor()));
       mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
@@ -1342,7 +1342,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
     mImpl->mRenderer.SetTextures(textureSet);
     // Register transform properties
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
 
@@ -1359,7 +1359,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     Pixel::Format textPixelFormat = (containsColorGlyph || hasMultipleTextColors) ? Pixel::RGBA8888 : Pixel::L8;
 
     // Check the text direction
-    Ui::DevelText::TextDirection::Type textDirection = mController->GetTextDirection();
+    Text::Direction textDirection = mController->GetTextDirection();
 
     // Create a texture for the text without any styles
     PixelData data =
@@ -1514,8 +1514,8 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
       : Pixel::L8;
 
   // Check the text direction
-  Ui::DevelText::TextDirection::Type textDirection   = mController->GetTextDirection();
-  uint32_t                           textureSetIndex = 0u;
+  Text::Direction textDirection   = mController->GetTextDirection();
+  uint32_t        textureSetIndex = 0u;
   // Create a texture for the text without any styles
 
   Devel::PixelBuffer cutoutData;

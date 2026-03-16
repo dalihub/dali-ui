@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
@@ -125,7 +125,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  PixelData Render(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
+  PixelData Render(const Vector2& size, Direction textDirection,
                    RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES, bool ignoreHorizontalAlignment = false,
                    Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO);
 
@@ -148,7 +148,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  PixelData RenderWithCutout(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
+  PixelData RenderWithCutout(const Vector2& size, Direction textDirection,
                              Devel::PixelBuffer cutoutBuffer, RenderBehaviour behaviour = RENDER_TEXT_AND_STYLES,
                              bool ignoreHorizontalAlignment = false, Pixel::Format pixelFormat = Pixel::RGBA8888,
                              float originAlpha = 1.f, const Vector2& originSize = Size::ZERO);
@@ -172,7 +172,7 @@ public:
    *
    * @return A pixel data with the text rendered.
    */
-  Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, Ui::DevelText::TextDirection::Type textDirection,
+  Devel::PixelBuffer RenderWithPixelBuffer(const Vector2& size, Direction textDirection,
                                            RenderBehaviour behaviour                 = RENDER_TEXT_AND_STYLES,
                                            bool            ignoreHorizontalAlignment = false,
                                            Pixel::Format   pixelFormat               = Pixel::RGBA8888,

@@ -24,16 +24,6 @@ namespace Ui
 {
 namespace DevelText
 {
-namespace TextDirection
-{
-enum Type
-{
-  LEFT_TO_RIGHT,
-  RIGHT_TO_LEFT
-};
-
-} // namespace TextDirection
-
 /**
  * A enum for defining text layout directions.
  * It can also be inherited (from a parent) or deduced from the default language script of a locale.
