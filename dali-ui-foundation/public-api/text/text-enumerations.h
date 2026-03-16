@@ -1,8 +1,7 @@
-#ifndef DALI_UI_TEXT_ENUMERATIONS_H
-#define DALI_UI_TEXT_ENUMERATIONS_H
+#pragma once
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +22,10 @@
 
 namespace Dali
 {
+
 namespace Ui
 {
+
 namespace Text
 {
 
@@ -110,32 +111,8 @@ enum class LayoutDirectionMode : uint8_t
   CONTENTS = 2
 };
 
-/**
- * @brief The available underline types for text.
- * @SINCE_1_2.60
- */
-namespace Underline
-{
-/**
- * @brief Enumerations specifying the underline type.
- */
-enum Type
-{
-  SOLID,
-  DASHED,
-  DOUBLE
-};
-
-} // namespace Underline
-
 } // namespace Text
-
-/**
- * @}
- */
 
 } // namespace Ui
 
 } // namespace Dali
-
-#endif // DALI_UI_TEXT_ENUMERATIONS_H
