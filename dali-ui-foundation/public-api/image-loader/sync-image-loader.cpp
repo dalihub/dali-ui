@@ -26,15 +26,15 @@ namespace SyncImageLoader
 {
 PixelData Load(const std::string& url)
 {
-  return Load(url, ImageDimensions(), FittingMode::DEFAULT, SamplingMode::BOX_THEN_LINEAR, true);
+  return Load(url, ImageDimensions(), Dali::FittingMode::DEFAULT, SamplingMode::BOX_THEN_LINEAR, true);
 }
 
 PixelData Load(const std::string& url, ImageDimensions dimensions)
 {
-  return Load(url, dimensions, FittingMode::DEFAULT, SamplingMode::BOX_THEN_LINEAR, true);
+  return Load(url, dimensions, Dali::FittingMode::DEFAULT, SamplingMode::BOX_THEN_LINEAR, true);
 }
 
-PixelData Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+PixelData Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                SamplingMode::Type samplingMode, bool orientationCorrection)
 {
   // Load the image synchronously (block the thread here).

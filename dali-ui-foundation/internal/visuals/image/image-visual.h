@@ -127,7 +127,7 @@ public:
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, const Property::Map& properties,
                             ImageDimensions          size         = ImageDimensions(),
-                            FittingMode::Type        fittingMode  = FittingMode::VISUAL_FITTING,
+                            Dali::FittingMode::Type  fittingMode  = Dali::FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
   /**
@@ -146,7 +146,7 @@ public:
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions(),
-                            FittingMode::Type        fittingMode  = FittingMode::VISUAL_FITTING,
+                            Dali::FittingMode::Type  fittingMode  = Dali::FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
 public: // from Visual
@@ -190,7 +190,7 @@ protected:
    * @param[in] samplingMode The SamplingMode of the resource to load
    */
   ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-              ImageDimensions size, FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode);
+              ImageDimensions size, Dali::FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

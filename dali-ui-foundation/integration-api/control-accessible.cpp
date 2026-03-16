@@ -19,6 +19,7 @@
 #include "control-accessible.h"
 
 // EXTERNAL INCLUDES
+#include <string>
 #ifdef DGETTEXT_ENABLED
 #include <libintl.h>
 #endif
@@ -33,12 +34,14 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/property-bridge/property-bridge.h>
+#include <dali-ui-foundation/integration-api/image-view/image-view-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToDaliString;
@@ -77,8 +80,10 @@ Dali::Actor CreateHighlightIndicatorActor()
   auto imageView = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   imageView.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-  imageView.AppendAccessibilityAttribute("highlight", Dali::String());
-  imageView.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  // TODO: AppendAccessibilityAttribute is not yet exposed on View public API.
+  // Revisit when accessibility direction for View-based components is decided.
+  // imageView.AppendAccessibilityAttribute("highlight", Dali::String());
+  imageView.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
 
   return imageView;
 }
@@ -107,14 +112,14 @@ std::string FetchImageSrcFromMap(const Dali::Property::Map& imageMap)
 
 std::string FetchImageSrc(const Ui::ImageView& imageView)
 {
-  Dali::Property::Value urlValue = imageView.GetProperty(Ui::ImageView::Property::IMAGE);
+  Dali::Property::Value urlValue = imageView.GetProperty(Ui::Integration::ImageViewImpl::Property::IMAGE);
   std::string           url;
   if(GetStdString(urlValue, url))
   {
     return url;
   }
 
-  const auto imageMap = imageView.GetProperty<Dali::Property::Map>(Ui::ImageView::Property::IMAGE);
+  const auto imageMap = imageView.GetProperty<Dali::Property::Map>(Ui::Integration::ImageViewImpl::Property::IMAGE);
   if(!imageMap.Empty())
   {
     return FetchImageSrcFromMap(imageMap);

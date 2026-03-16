@@ -74,7 +74,7 @@ DALI_UI_API uint32_t LoadAnimatedImage(AsyncImageLoader           asyncImageLoad
  * @return The loading task id
  */
 DALI_UI_API uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDimensions dimensions,
-                          FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+                          Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
                           DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 
 /**

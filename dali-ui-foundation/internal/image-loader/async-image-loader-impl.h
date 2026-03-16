@@ -100,7 +100,7 @@ public:
    * @param[in] loadPlanes true to load image planes or false to load bitmap image.
    * @return The loading task id
    */
-  uint32_t Load(const VisualUrl& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+  uint32_t Load(const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                 SamplingMode::Type samplingMode, bool orientationCorrection,
                 DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
 
@@ -118,7 +118,7 @@ public:
    * @return The loading task id
    */
   uint32_t LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
-                                  FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
+                                  Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
                                   bool                                     orientationCorrection,
                                   DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 

@@ -164,7 +164,7 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 
 ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size,
-                                FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode)
+                                Dali::FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode)
 {
   ImageVisualPtr imageVisualPtr(
     new ImageVisual(factoryCache, shaderFactory, imageUrl, size, fittingMode, samplingMode));
@@ -174,7 +174,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 }
 
 ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
-                                const VisualUrl& imageUrl, ImageDimensions size, FittingMode::Type fittingMode,
+                                const VisualUrl& imageUrl, ImageDimensions size, Dali::FittingMode::Type fittingMode,
                                 Dali::SamplingMode::Type samplingMode)
 {
   ImageVisualPtr imageVisualPtr(
@@ -184,7 +184,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 }
 
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
-                         const VisualUrl& imageUrl, ImageDimensions size, FittingMode::Type fittingMode,
+                         const VisualUrl& imageUrl, ImageDimensions size, Dali::FittingMode::Type fittingMode,
                          Dali::SamplingMode::Type samplingMode)
 : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::IMAGE),
   mPixelArea(FULL_TEXTURE_RECT),

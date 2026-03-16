@@ -364,7 +364,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mWrapModeU(WrapMode::DEFAULT),
   mWrapModeV(WrapMode::DEFAULT),
   mStopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-  mFittingMode(FittingMode::VISUAL_FITTING),
+  mFittingMode(Dali::FittingMode::VISUAL_FITTING),
   mSamplingMode(SamplingMode::BOX_THEN_LINEAR),
   mStartFirstFrame(false),
   mIsJumpTo(false),

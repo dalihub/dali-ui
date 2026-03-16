@@ -67,7 +67,7 @@ uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animated
   return mLoadTaskId;
 }
 
-uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                                 SamplingMode::Type samplingMode, bool orientationCorrection,
                                 DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes)
 {
@@ -80,7 +80,7 @@ uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions
 }
 
 uint32_t AsyncImageLoader::LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer,
-                                                  ImageDimensions dimensions, FittingMode::Type fittingMode,
+                                                  ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                                                   SamplingMode::Type samplingMode, bool orientationCorrection,
                                                   DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {

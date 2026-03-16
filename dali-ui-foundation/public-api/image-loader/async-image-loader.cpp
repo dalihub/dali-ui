@@ -59,19 +59,19 @@ AsyncImageLoader AsyncImageLoader::New()
 
 uint32_t AsyncImageLoader::Load(const std::string& url)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), ImageDimensions(), FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), ImageDimensions(), Dali::FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
 uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, Dali::FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
-uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                                 SamplingMode::Type samplingMode, bool orientationCorrection)
 {
   return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode,

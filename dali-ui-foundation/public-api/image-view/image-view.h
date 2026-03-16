@@ -1,0 +1,506 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/signals/dali-signal.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration DALI_INTERNAL
+{
+class ImageViewImpl;
+}
+
+/**
+ * @brief ImageView is a View for displaying an image resource.
+ *
+ * It supports a variety of image formats and provides controls for fitting,
+ * sampling, masking, loading policy, and N-patch borders.
+ *
+ * The image is loaded asynchronously by default. Use ResourceReadySignal()
+ * to be notified when the image has finished loading.
+ *
+ * @code
+ * ImageView view = ImageView::New("image.png");
+ * view.SetFitSizeToImage(true);
+ * view.ResourceReadySignal().Connect(...);
+ * @endcode
+ */
+class DALI_UI_API ImageView : public View
+{
+public: // Creation & Destruction
+  /**
+   * @brief Creates an uninitialized ImageView handle.
+   *
+   * Only derived versions can be instantiated. Calling member
+   * functions with an uninitialized Dali::Object is not allowed.
+   */
+  ImageView();
+
+  /**
+   * @brief Creates an initialized ImageView.
+   *
+   * @return A handle to a newly allocated Dali resource
+   */
+  static ImageView New();
+
+  /**
+   * @brief Creates an initialized ImageView with a given URL.
+   *
+   * @param[in] url The URL of the image resource to display
+   * @return A handle to a newly allocated Dali resource
+   */
+  static ImageView New(const Dali::String& url);
+
+  /**
+   * @brief Virtual destructor.
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~ImageView();
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Creates another handle that points to the same real object.
+   * @param[in] imageView Handle to copy
+   */
+  ImageView(const ImageView& imageView);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  ImageView(ImageView&& rhs) noexcept;
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * Changes this handle to point to another real object.
+   * @param[in] imageView Object to assign this to
+   * @return Reference to this
+   */
+  ImageView& operator=(const ImageView& imageView);
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  ImageView& operator=(ImageView&& rhs) noexcept;
+
+public: // Static Methods
+  /**
+   * @brief Downcasts a handle to ImageView handle.
+   *
+   * If handle points to an ImageView, the downcast produces a valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to an ImageView or an uninitialized handle
+   */
+  static ImageView DownCast(BaseHandle handle);
+
+public: // Image
+  /**
+   * @brief Sets the resource URL of the image to display.
+   *
+   * The image is loaded asynchronously. Use ResourceReadySignal() to be
+   * notified when loading completes.
+   *
+   * @param[in] url The URL of the image resource
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetResourceUrl(const Dali::String& url);
+
+  /**
+   * @brief Gets the current image URL.
+   *
+   * @return The URL of the image currently set on this view
+   */
+  Dali::String GetResourceUrl() const;
+
+  /**
+   * @brief Reloads the current image from its URL.
+   *
+   * Has no effect if no image URL has been set.
+   */
+  void Reload();
+
+  /**
+   * @brief Sets the URL of a placeholder image shown while the main image is loading.
+   *
+   * @param[in] url The URL of the placeholder image resource
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetPlaceholderUrl(const Dali::String& url);
+
+  /**
+   * @brief Gets the placeholder image URL.
+   *
+   * @return The URL of the placeholder image, or an empty string if not set
+   */
+  Dali::String GetPlaceholderUrl() const;
+
+  /**
+   * @brief Sets the color multiplier applied to the image.
+   *
+   * Accepts both direct RGBA values and theme color tokens via UiColor.
+   *
+   * @param[in] color The color to multiply with the image
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetImageColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color multiplier applied to the image.
+   *
+   * @return The current image color
+   */
+  UiColor GetImageColor() const;
+
+  /**
+   * @brief Sets the pixel area used to display a sub-region of the image.
+   *
+   * The area is specified as normalized coordinates: (x, y, width, height)
+   * where each component is in the range [0, 1].
+   *
+   * @param[in] pixelArea The normalized sub-region of the image to display
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetPixelArea(const Vector4& pixelArea);
+
+  /**
+   * @brief Gets the pixel area.
+   *
+   * @return The current pixel area as normalized coordinates
+   */
+  Vector4 GetPixelArea() const;
+
+  /**
+   * @brief Sets whether the view size is fitted to the image's natural aspect ratio.
+   *
+   * When enabled, if one dimension is fixed (via layout params or MATCH_PARENT) and the
+   * other is unconstrained, the unconstrained dimension is automatically computed from
+   * the image's natural aspect ratio after the image has loaded.
+   *
+   * @param[in] enable True to fit the view size to the image
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetFitSizeToImage(bool enable);
+
+  /**
+   * @brief Returns whether the view size is fitted to the image's natural aspect ratio.
+   *
+   * @return True if fit-size-to-image is enabled
+   */
+  bool IsFitSizeToImage() const;
+
+public: // Size & Fitting Control
+  /**
+   * @brief Sets the sampling mode used when scaling the image.
+   *
+   * @param[in] samplingMode The sampling mode to use
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetSamplingMode(Ui::SamplingMode::Type samplingMode);
+
+  /**
+   * @brief Gets the sampling mode.
+   *
+   * @return The current sampling mode
+   */
+  Ui::SamplingMode::Type GetSamplingMode() const;
+
+  /**
+   * @brief Sets how the image is fitted within the view bounds.
+   *
+   * @param[in] fittingMode The fitting mode to use
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetFittingMode(Ui::FittingMode::Type fittingMode);
+
+  /**
+   * @brief Gets the fitting mode.
+   *
+   * @return The current fitting mode
+   */
+  Ui::FittingMode::Type GetFittingMode() const;
+
+  /**
+   * @brief Sets the desired image dimensions used as a hint for the image loader.
+   *
+   * @param[in] size The desired width and height in pixels
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetDesiredSize(Ui::ImageDimensions size);
+
+  /**
+   * @brief Gets the desired image dimensions.
+   *
+   * @return The currently requested desired size
+   */
+  Ui::ImageDimensions GetDesiredSize() const;
+
+  /**
+   * @brief Sets whether the view size is determined synchronously during image loading.
+   *
+   * When enabled, the natural size is resolved synchronously so the layout
+   * does not need a second pass after the image loads.
+   *
+   * @param[in] synchronous True to enable synchronous sizing
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetSynchronousSizing(bool synchronous);
+
+  /**
+   * @brief Gets whether synchronous sizing is enabled.
+   *
+   * @return True if synchronous sizing is enabled
+   */
+  bool GetSynchronousSizing() const;
+
+public: // Advanced Rendering & Masking
+  /**
+   * @brief Sets whether the image uses pre-multiplied alpha.
+   *
+   * @param[in] preMultiplied True if the image has pre-multiplied alpha
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetPreMultipliedAlpha(bool preMultiplied);
+
+  /**
+   * @brief Gets whether pre-multiplied alpha is enabled.
+   *
+   * @return True if pre-multiplied alpha is enabled
+   */
+  bool GetPreMultipliedAlpha() const;
+
+  /**
+   * @brief Sets the URL of an alpha mask image.
+   *
+   * When set, the alpha channel of the mask image is applied to the main image.
+   *
+   * @param[in] maskUrl The URL of the alpha mask image
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetAlphaMaskUrl(const Dali::String& maskUrl);
+
+  /**
+   * @brief Gets the alpha mask image URL.
+   *
+   * @return The URL of the alpha mask image, or an empty string if not set
+   */
+  Dali::String GetAlphaMaskUrl() const;
+
+  /**
+   * @brief Sets whether the image should be cropped to the mask bounds.
+   *
+   * @param[in] cropToMask True to crop the image to the mask
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetCropToMask(bool cropToMask);
+
+  /**
+   * @brief Gets whether crop-to-mask is enabled.
+   *
+   * @return True if crop-to-mask is enabled
+   */
+  bool GetCropToMask() const;
+
+  /**
+   * @brief Sets the masking mode.
+   *
+   * @param[in] maskingMode The masking mode to use
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetMaskingMode(Ui::MaskingType::Type maskingMode);
+
+  /**
+   * @brief Gets the masking mode.
+   *
+   * @return The current masking mode
+   */
+  Ui::MaskingType::Type GetMaskingMode() const;
+
+public: // Loading Behavior
+  /**
+   * @brief Sets the release policy for the image resource.
+   *
+   * Controls when the image texture is released from memory.
+   *
+   * @param[in] releasePolicy The release policy to use
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+
+  /**
+   * @brief Gets the release policy.
+   *
+   * @return The current release policy
+   */
+  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+
+  /**
+   * @brief Sets whether the image is loaded synchronously.
+   *
+   * @param[in] synchronous True to load the image on the main thread synchronously
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetSynchronousLoading(bool synchronous);
+
+  /**
+   * @brief Gets whether synchronous loading is enabled.
+   *
+   * @return True if synchronous loading is enabled
+   */
+  bool GetSynchronousLoading() const;
+
+  /**
+   * @brief Sets whether fast-track uploading is enabled.
+   *
+   * When enabled, the image is uploaded to the GPU on a background thread
+   * to reduce main-thread stalls.
+   *
+   * @param[in] fastTrack True to enable fast-track uploading
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetFastTrackUploading(bool fastTrack);
+
+  /**
+   * @brief Gets whether fast-track uploading is enabled.
+   *
+   * @return True if fast-track uploading is enabled
+   */
+  bool GetFastTrackUploading() const;
+
+  /**
+   * @brief Sets whether EXIF orientation metadata is applied automatically.
+   *
+   * @param[in] orientationCorrection True to apply orientation correction
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetOrientationCorrection(bool orientationCorrection);
+
+  /**
+   * @brief Gets whether orientation correction is enabled.
+   *
+   * @return True if orientation correction is enabled
+   */
+  bool GetOrientationCorrection() const;
+
+public: // N-Patch Border
+  /**
+   * @brief Sets the N-patch border insets.
+   *
+   * The border is specified as (left, top, right, bottom) pixel values.
+   * Setting a non-zero border activates N-patch rendering.
+   *
+   * @param[in] border The border insets as (left, top, right, bottom)
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetBorder(const Vector4& border);
+
+  /**
+   * @brief Gets the N-patch border insets.
+   *
+   * @return The current border as (left, top, right, bottom)
+   */
+  Vector4 GetBorder() const;
+
+  /**
+   * @brief Sets whether only the N-patch border regions are rendered.
+   *
+   * When enabled, the center region of the N-patch is not rendered.
+   *
+   * @param[in] borderOnly True to render only the border regions
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetBorderOnly(bool borderOnly);
+
+  /**
+   * @brief Gets whether border-only rendering is enabled.
+   *
+   * @return True if only the border regions are rendered
+   */
+  bool GetBorderOnly() const;
+
+public: // Depth Index
+  /**
+   * @brief Sets the depth index of the image visual.
+   *
+   * The depth index controls the rendering order of visuals within the same
+   * layer. Higher values are rendered on top.
+   *
+   * @param[in] depthIndex The depth index to assign to the image visual
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetDepthIndex(int depthIndex);
+
+public: // Loading Status & Signals
+  /**
+   * @brief Gets the current loading status of the image.
+   *
+   * @return The current ResourceStatus of the image visual
+   */
+  Ui::Visual::ResourceStatus GetLoadingStatus() const;
+
+  /**
+   * @brief Returns the signal emitted when the image has finished loading and is ready to display.
+   *
+   * @return A reference to the ResourceReady signal
+   */
+  ResourceReadySignalType& ResourceReadySignal();
+
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The ImageView implementation
+   */
+  explicit DALI_INTERNAL ImageView(Integration::ImageViewImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this ImageView from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_INTERNAL ImageView(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(ImageView)
+};
+
+} // namespace Ui
+} // namespace Dali

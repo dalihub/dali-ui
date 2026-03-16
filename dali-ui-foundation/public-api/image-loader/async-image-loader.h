@@ -173,7 +173,7 @@ public:
   /**
    * @brief Starts an image loading task.
    * Note: When using this method, the following defaults will be used:
-   * fittingMode = FittingMode::DEFAULT
+   * fittingMode = Dali::FittingMode::DEFAULT
    * samplingMode = SamplingMode::BOX_THEN_LINEAR
    * orientationCorrection = true
    *
@@ -188,7 +188,7 @@ public:
   /**
    * @brief Starts an image loading task.
    * Note: When using this method, the following defaults will be used:
-   * fittingMode = FittingMode::DEFAULT
+   * fittingMode = Dali::FittingMode::DEFAULT
    * samplingMode = SamplingMode::BOX_THEN_LINEAR
    * orientationCorrection = true
    *
@@ -215,7 +215,7 @@ public:
    * @param[in] orientationCorrection Reorient the image to respect any orientation metadata in its header
    * @return The loading task id
    */
-  uint32_t Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+  uint32_t Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                 SamplingMode::Type samplingMode, bool orientationCorrection);
 
   /**

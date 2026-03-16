@@ -62,7 +62,7 @@ LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLo
   id(id),
   textureId(TextureManagerType::INVALID_TEXTURE_ID),
   dimensions(),
-  fittingMode(FittingMode::SCALE_TO_FILL),
+  fittingMode(Dali::FittingMode::SCALE_TO_FILL),
   samplingMode(SamplingMode::BOX_THEN_LINEAR),
   preMultiplyOnLoad(preMultiplyOnLoad),
   maskPixelBuffer(),
@@ -77,7 +77,7 @@ LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLo
 }
 
 LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-                         ImageDimensions dimensions, FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
+                         ImageDimensions dimensions, Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
                          DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                          CallbackBase* callback)
 : AsyncTask(callback),
@@ -100,7 +100,7 @@ LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLo
 {
 }
 
-LoadingTask::LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+LoadingTask::LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                          SamplingMode::Type samplingMode, bool orientationCorrection,
                          DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                          CallbackBase* callback)
@@ -126,7 +126,7 @@ LoadingTask::LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dime
 }
 
 LoadingTask::LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
-                         FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+                         Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
                          DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
 : AsyncTask(callback),
   url(),

@@ -8,6 +8,9 @@ SET(CAPI_LIB "dali-ui-foundation")
 SET(TC_SOURCES
         utc-Dali-Unit.cpp
         utc-Dali-View.cpp
+        utc-Dali-ImageView.cpp
+        utc-Dali-AnimatedImageView.cpp
+        utc-Dali-LottieAnimationView.cpp
         utc-Dali-UiColor.cpp
         utc-Dali-UiColorManager.cpp
         utc-Dali-UiThemeManager.cpp

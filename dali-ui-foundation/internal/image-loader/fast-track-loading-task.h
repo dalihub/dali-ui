@@ -49,7 +49,7 @@ public:
   /**
    * @brief Constructor.
    */
-  FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+  FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                        SamplingMode::Type samplingMode, bool orientationCorrection,
                        DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                        CallbackBase* callback);
@@ -115,7 +115,7 @@ public:
 
 private:
   ImageDimensions                          mDimensions;   ///< dimensions to load
-  FittingMode::Type                        mFittingMode;  ///< fitting options
+  Dali::FittingMode::Type                  mFittingMode;  ///< fitting options
   SamplingMode::Type                       mSamplingMode; ///< sampling options
   DevelAsyncImageLoader::PreMultiplyOnLoad mPreMultiplyOnLoad;
   std::unique_ptr<CallbackBase>            mCallback;

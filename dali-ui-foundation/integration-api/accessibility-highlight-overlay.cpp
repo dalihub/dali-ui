@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view/image-view.h>
 
 #include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>

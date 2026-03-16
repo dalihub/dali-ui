@@ -94,7 +94,7 @@ public:
    * @param [in] loadPlanes true to load image planes or false to load bitmap image.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
               SamplingMode::Type samplingMode, bool orientationCorrection,
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
 
@@ -113,7 +113,7 @@ public:
    * @param [in] callback The callback that is called when the operation is completed.
    */
   LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
-              FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+              Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
@@ -184,7 +184,7 @@ public:
   uint32_t                      id;                 ///< The unique id associated with this task.
   TextureManagerType::TextureId textureId;          ///< textureId for loading
   ImageDimensions               dimensions;         ///< dimensions to load
-  FittingMode::Type             fittingMode;        ///< fitting options
+  Dali::FittingMode::Type       fittingMode;        ///< fitting options
   SamplingMode::Type            samplingMode;       ///< sampling options
   DevelAsyncImageLoader::PreMultiplyOnLoad
     preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha

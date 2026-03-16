@@ -80,7 +80,7 @@ Dali::PixelData GetDummyAPixelData()
 } // namespace
 
 FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
-                                           FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
+                                           Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
                                            bool                                     orientationCorrection,
                                            DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                                            CallbackBase* callback)

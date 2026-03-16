@@ -64,7 +64,7 @@ enum
    * @brief Fitting options, used when resizing images to fit desired dimensions.
    * @details Name "fittingMode", type Dali::FittingMode (Property::INTEGER) or Property::STRING.
    * @SINCE_1_1.45
-   * @note Optional. If not supplied, default is FittingMode::SHRINK_TO_FIT.
+   * @note Optional. If not supplied, default is Dali::FittingMode::SHRINK_TO_FIT.
    * @note For Normal Quad images only.
    * @see Dali::FittingMode
    */

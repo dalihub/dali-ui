@@ -57,7 +57,7 @@ namespace SyncImageLoader
 /**
  * @brief Loads an image synchronously.
  * Note: When using this method, the following defaults will be used:
- * fittingMode = FittingMode::DEFAULT
+ * fittingMode = Dali::FittingMode::DEFAULT
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
  * orientationCorrection = true
  *
@@ -72,7 +72,7 @@ DALI_UI_API PixelData Load(const std::string& url);
 /**
  * @brief Loads an image synchronously by specifying the target dimensions.
  * Note: When using this method, the following defaults will be used:
- * fittingMode = FittingMode::DEFAULT
+ * fittingMode = Dali::FittingMode::DEFAULT
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
  * orientationCorrection = true
  *
@@ -99,7 +99,7 @@ DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions);
  * @param[in] orientationCorrection Reorient the image to respect any orientation metadata in its header
  * @return A PixelData object containing the image, or an invalid object on failure
  */
-DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions, FittingMode::Type fittingMode,
+DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                            SamplingMode::Type samplingMode, bool orientationCorrection);
 
 } // namespace SyncImageLoader
