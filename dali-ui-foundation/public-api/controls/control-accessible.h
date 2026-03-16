@@ -26,10 +26,10 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/accessibility-highlight-overlay.h>
+#include <dali-ui-foundation/public-api/controls/accessibility-highlight-overlay.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui::DevelControl
+namespace Dali::Ui
 {
 /**
  * @brief Represents current state of a control.
@@ -343,6 +343,6 @@ private:
   AccessibilityHighlightOverlay mHighlightOverlay;
 };
 
-} // namespace Dali::Ui::DevelControl
+} // namespace Dali::Ui
 
 #endif // DALI_UI_CONTROL_ACCESSIBLE_H

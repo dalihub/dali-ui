@@ -146,10 +146,10 @@ void TextAnchor::OnInitialize()
   Actor self = Self();
 
   // Accessibility
-  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::LINK);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::LINK);
 }
 
-DevelControl::ControlAccessible* TextAnchor::CreateAccessibleObject()
+ControlAccessible* TextAnchor::CreateAccessibleObject()
 {
   return new TextAnchorAccessible(Self());
 }
@@ -168,7 +168,7 @@ TextAnchor::~TextAnchor()
 
 void TextAnchor::TextAnchorAccessible::InitDefaultFeatures()
 {
-  DevelControl::ControlAccessible::InitDefaultFeatures();
+  ControlAccessible::InitDefaultFeatures();
   AddFeature<Dali::Accessibility::Hyperlink>(shared_from_this());
 }
 

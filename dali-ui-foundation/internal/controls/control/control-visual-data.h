@@ -22,12 +22,12 @@
 #include <unordered_map>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/internal/builder/dictionary.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-event-observer.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/devel-api/common/owner-container.h>
 

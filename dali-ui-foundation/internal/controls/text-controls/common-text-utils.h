@@ -25,12 +25,12 @@
 #include <dali/public-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-accessible.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-anchor-devel.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
+#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
@@ -81,12 +81,12 @@ public:
                                               TextAbstraction::CharacterIndex endIndex);
 };
 
-class TextControlAccessible : public DevelControl::ControlAccessible,
+class TextControlAccessible : public ControlAccessible,
                               public Dali::Accessibility::Text,
                               public Dali::Accessibility::Hypertext
 {
 public:
-  using DevelControl::ControlAccessible::ControlAccessible;
+  using ControlAccessible::ControlAccessible;
 
   // Text
 
@@ -209,7 +209,7 @@ public:
   using TextControlAccessible::TextControlAccessible;
 
   /**
-   * @copydoc Dali::Ui::DevelControl::ControlAccessible::CalculateStates()
+   * @copydoc Dali::Ui::ControlAccessible::CalculateStates()
    */
   Accessibility::States CalculateStates() override;
 

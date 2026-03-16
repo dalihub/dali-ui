@@ -29,7 +29,6 @@
 #include <dali/public-api/object/type-registry-helper.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/styling/default-theme.h>
@@ -40,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
@@ -1236,13 +1236,13 @@ void TextLabel::OnInitialize()
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 
   // Accessibility
-  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::TEXT);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::TEXT);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextLabel::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextLabel::OnAccessibilityStatusChanged);
 }
 
-DevelControl::ControlAccessible* TextLabel::CreateAccessibleObject()
+ControlAccessible* TextLabel::CreateAccessibleObject()
 {
   return new TextLabelAccessible(Self());
 }

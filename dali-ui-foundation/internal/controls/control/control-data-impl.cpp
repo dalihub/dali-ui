@@ -43,11 +43,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/styling/style-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
@@ -523,7 +523,7 @@ Control::Impl::Impl(Control& controlImpl)
   mInputMethodContext(),
   mIdleCallback(nullptr),
   mFlags(Control::ControlBehaviour(CONTROL_BEHAVIOUR_DEFAULT)),
-  mAccessibilityRole{static_cast<int32_t>(DevelControl::AccessibilityRole::NONE)},
+  mAccessibilityRole{static_cast<int32_t>(AccessibilityRole::NONE)},
   mIsKeyboardNavigationSupported(false),
   mIsKeyboardFocusGroup(false),
   mIsEmittingResourceReadySignal(false),
@@ -1062,7 +1062,7 @@ void Control::Impl::SetProperty(BaseObject* object, Property::Index index, const
              states != static_cast<int32_t>(AccessibilityData::GetDefaultControlAccessibilityStates().GetRawData32()))
           {
             controlImpl.mImpl->GetOrCreateAccessibilityData().mAccessibilityProps.states =
-              Ui::DevelControl::AccessibilityStates{static_cast<uint32_t>(states)};
+              AccessibilityStates{static_cast<uint32_t>(states)};
           }
         }
         break;
@@ -1600,7 +1600,7 @@ void Control::Impl::EmitAccessibilityStateChanged(Accessibility::State state, in
   {
     if(state == Accessibility::State::SHOWING)
     {
-      bool isModal = DevelControl::ControlAccessible::IsModal(handle);
+      bool isModal = ControlAccessible::IsModal(handle);
       if(isModal)
       {
         if(newValue == 1)
@@ -1903,7 +1903,7 @@ bool Control::Impl::OnIdleCallback()
   return mIdleCallbackRegistered;
 }
 
-std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::Impl::GetAccessibleObject()
+std::shared_ptr<Ui::ControlAccessible> Control::Impl::GetAccessibleObject()
 {
   return GetOrCreateAccessibilityData().GetAccessibleObject();
 }

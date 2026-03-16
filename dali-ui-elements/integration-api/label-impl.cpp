@@ -26,8 +26,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-elements/integration-api/label-impl.h>
 
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 
 namespace Dali
 {

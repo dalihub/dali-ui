@@ -28,9 +28,9 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 
 namespace

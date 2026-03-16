@@ -30,7 +30,7 @@ namespace Internal
 // private inner class
 class Control::Impl::AccessibilityData : public ConnectionTracker
 {
-  friend class Ui::DevelControl::ControlAccessible;
+  friend class Ui::ControlAccessible;
 
 public:
   // Constructor
@@ -100,7 +100,7 @@ public:
   /**
    * @copydoc Dali::Ui::Internal::Control::Impl::GetAccessibleObject()
    */
-  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::ControlAccessible> GetAccessibleObject();
 
 public:
   /**
@@ -111,7 +111,7 @@ public:
   /**
    * @brief Helper function to get control's default state attributes
    */
-  static Ui::DevelControl::AccessibilityStates GetDefaultControlAccessibilityStates();
+  static AccessibilityStates GetDefaultControlAccessibilityStates();
 
 public:
   Ui::Control::AccessibilityActivateSignalType         mAccessibilityActivateSignal;
@@ -146,7 +146,7 @@ public:
     std::string value{};
     std::string automationId{};
 
-    DevelControl::AccessibilityStates                                                 states{};
+    AccessibilityStates                                                               states{};
     std::map<Dali::Accessibility::RelationType, std::set<Accessibility::Accessible*>> relations{};
     Property::Map                                                                     extraAttributes{};
 

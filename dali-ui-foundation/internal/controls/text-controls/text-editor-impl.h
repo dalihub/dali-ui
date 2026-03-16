@@ -167,7 +167,7 @@ private: // From Control
   /**
    * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
-  DevelControl::ControlAccessible* CreateAccessibleObject() override;
+  ControlAccessible* CreateAccessibleObject() override;
 
   /**
    * @copydoc Control::OnStyleChange()
@@ -696,7 +696,7 @@ private: // Data
     using EditableTextControlAccessible::EditableTextControlAccessible;
 
     /**
-     * @copydoc Dali::Ui::DevelControl::ControlAccessible::GetNameRaw()
+     * @copydoc Dali::Ui::ControlAccessible::GetNameRaw()
      */
     std::pair<std::string, bool> GetNameRaw() const override;
 

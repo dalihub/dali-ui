@@ -699,6 +699,47 @@ public:
    */
   void ClearRenderEffect();
 
+  // Renderers
+
+  /**
+   * @brief Helper method for rendering an image with custom shader.
+   * @param[in] vertexSrc The custom vertex shader.
+   * @param[in] fragmentSrc The custom fragment shader.
+   * @return A newly created renderer.
+   * @SINCE_2_6.28
+   */
+  static Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc);
+
+  /**
+   * @brief Helper method for rendering an image with custom shader.
+   * @param[in] vertexSrc The custom vertex shader.
+   * @param[in] fragmentSrc The custom fragment shader.
+   * @param[in] hints Shader hints for optimization.
+   * @param[in] shaderName Name of the shader for debugging.
+   * @param[in] gridSize The number of grid sub-divisions required.
+   * @return A newly created renderer.
+   * @SINCE_2_6.28
+   */
+  static Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc,
+                                       Dali::Shader::Hint::Value hints, const std::string& shaderName,
+                                       Dali::Uint16Pair gridSize);
+
+  /**
+   * @brief Helper method for setting the first texture passed to a renderer.
+   * @param[in] renderer The renderer using the texture.
+   * @param[in] texture The texture to set.
+   * @SINCE_2_6.28
+   */
+  static void SetRendererTexture(Dali::Renderer renderer, Dali::Texture texture);
+
+  /**
+   * @brief Helper method for setting the first texture passed to a renderer.
+   * @param[in] renderer The renderer using the texture.
+   * @param[in] frameBuffer A frame buffer color texture attached.
+   * @SINCE_2_6.28
+   */
+  static void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer);
+
   // Resources
 
   /**

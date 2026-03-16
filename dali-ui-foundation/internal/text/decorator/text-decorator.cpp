@@ -32,9 +32,9 @@
 #include <dali/public-api/size-negotiation/relayout-container.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/controls/image-view/image-view-impl.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 
 #ifdef DEBUG_ENABLED

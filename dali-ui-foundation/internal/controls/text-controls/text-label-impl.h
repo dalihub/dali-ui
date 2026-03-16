@@ -341,7 +341,7 @@ private: // From Control
   /**
    * @copydoc Ui::Internal::Control::CreateAccessibleObject()
    */
-  DevelControl::ControlAccessible* CreateAccessibleObject() override;
+  ControlAccessible* CreateAccessibleObject() override;
 
   /**
    * @copydoc Control::OnStyleChange()

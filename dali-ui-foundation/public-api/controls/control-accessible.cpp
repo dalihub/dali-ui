@@ -39,7 +39,7 @@
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 
-namespace Dali::Ui::DevelControl
+namespace Dali::Ui
 {
 namespace
 {
@@ -341,7 +341,7 @@ void ControlAccessible::ApplyAccessibilityProps(Dali::Accessibility::States& sta
   Internal::Control&       internalControl = Ui::Internal::GetImplementation(control);
   Internal::Control::Impl& controlImpl     = Internal::Control::Impl::Get(internalControl);
 
-  DevelControl::AccessibilityStates controlStates;
+  AccessibilityStates controlStates;
 
   int32_t rawRole = control.GetProperty<int32_t>(Ui::Control::Property::ACCESSIBILITY_ROLE);
 
@@ -483,7 +483,7 @@ bool ControlAccessible::GrabFocus()
 void ControlAccessible::ScrollToSelf()
 {
   auto* child  = this;
-  auto* parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(child->GetParent());
+  auto* parent = dynamic_cast<Ui::ControlAccessible*>(child->GetParent());
 
   while(parent)
   {
@@ -492,7 +492,7 @@ void ControlAccessible::ScrollToSelf()
       parent->ScrollToChild(child->Self());
     }
 
-    parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(parent->GetParent());
+    parent = dynamic_cast<Ui::ControlAccessible*>(parent->GetParent());
   }
 }
 
@@ -787,7 +787,7 @@ bool ControlAccessible::IsModal(Actor actor)
 
 bool ControlAccessible::IsScene3D(Actor actor)
 {
-  int32_t rawRole = static_cast<uint32_t>(DevelControl::AccessibilityRole::MAX_COUNT);
+  int32_t rawRole = static_cast<uint32_t>(AccessibilityRole::MAX_COUNT);
   if(actor.GetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE).Get(rawRole))
   {
     return IsScene3DRole(rawRole);
@@ -804,4 +804,4 @@ void ControlAccessible::ResetCustomHighlightOverlay()
 {
   mHighlightOverlay.ResetCustomHighlight();
 }
-} // namespace Dali::Ui::DevelControl
+} // namespace Dali::Ui

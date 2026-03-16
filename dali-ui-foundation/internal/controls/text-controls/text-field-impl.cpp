@@ -560,13 +560,13 @@ void TextField::OnInitialize()
   }
 
   // Accessibility
-  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::ENTRY);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextField::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextField::OnAccessibilityStatusChanged);
 }
 
-DevelControl::ControlAccessible* TextField::CreateAccessibleObject()
+ControlAccessible* TextField::CreateAccessibleObject()
 {
   return new TextFieldAccessible(Self());
 }

@@ -654,13 +654,13 @@ void TextEditor::OnInitialize()
   }
 
   // Accessibility
-  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, DevelControl::AccessibilityRole::ENTRY);
+  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::ENTRY);
 
   Accessibility::Bridge::EnabledSignal().Connect(this, &TextEditor::OnAccessibilityStatusChanged);
   Accessibility::Bridge::DisabledSignal().Connect(this, &TextEditor::OnAccessibilityStatusChanged);
 }
 
-DevelControl::ControlAccessible* TextEditor::CreateAccessibleObject()
+ControlAccessible* TextEditor::CreateAccessibleObject()
 {
   return new TextEditorAccessible(Self());
 }

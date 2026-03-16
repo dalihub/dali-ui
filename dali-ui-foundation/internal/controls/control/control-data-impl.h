@@ -27,9 +27,9 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
 #include <map>
@@ -388,7 +388,7 @@ public:
   /**
    * @copydoc Dali::Ui::Internal::Control::GetAccessibleObject()
    */
-  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::ControlAccessible> GetAccessibleObject();
 
   /**
    * @copydoc Dali::Ui::Control::IsAccessibleCreated()
@@ -510,7 +510,7 @@ public:
 
   // Frequencly touched accessibility relative values.
   // Keep it on Impl to avoid AccessibilityData creation.
-  int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(DevelControl::AccessibilityRole::MAX_COUNT)>::value + 2;
+  int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(AccessibilityRole::MAX_COUNT)>::value + 2;
 
   bool mIsKeyboardNavigationSupported : 1; ///< Stores whether keyboard navigation is supported by the control.
   bool mIsKeyboardFocusGroup : 1;          ///< Stores whether the control is a focus group.

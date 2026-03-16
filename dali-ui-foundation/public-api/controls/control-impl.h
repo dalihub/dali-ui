@@ -44,11 +44,7 @@ namespace Ui
 
 class StyleManager;
 
-namespace DevelControl
-{
-class ControlAccessible;
-
-} // namespace DevelControl
+struct ControlAccessible;
 
 namespace Internal
 {
@@ -164,7 +160,7 @@ public:
    *
    * @see CreateAccessibleObject()
    */
-  std::shared_ptr<Ui::DevelControl::ControlAccessible> GetAccessibleObject();
+  std::shared_ptr<Ui::ControlAccessible> GetAccessibleObject();
 
   // Gesture Detection
 
@@ -595,7 +591,7 @@ public: // API for derived classes to override
    *
    * @see GetAccessibleObject()
    */
-  virtual DevelControl::ControlAccessible* CreateAccessibleObject();
+  virtual ControlAccessible* CreateAccessibleObject();
 
   // Keyboard focus
 

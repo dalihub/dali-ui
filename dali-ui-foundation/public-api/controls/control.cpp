@@ -23,9 +23,10 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-accessible.h>
 #include <dali-ui-foundation/internal/controls/control/control-accessibility-data.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
+#include <dali-ui-foundation/internal/controls/control/control-renderers.h>
+#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 
 namespace
@@ -142,6 +143,27 @@ Ui::RenderEffect Control::GetRenderEffect() const
 void Control::ClearRenderEffect()
 {
   Internal::GetImplementation(*this).ClearRenderEffect();
+}
+
+Dali::Renderer Control::CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc)
+{
+  return Internal::CreateRenderer(vertexSrc, fragmentSrc);
+}
+
+Dali::Renderer Control::CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc, Shader::Hint::Value hints,
+                                       const std::string& shaderName, Uint16Pair gridSize)
+{
+  return Internal::CreateRenderer(vertexSrc, fragmentSrc, hints, shaderName, gridSize);
+}
+
+void Control::SetRendererTexture(Renderer renderer, Texture texture)
+{
+  Internal::SetRendererTexture(renderer, texture);
+}
+
+void Control::SetRendererTexture(Renderer renderer, FrameBuffer frameBuffer)
+{
+  Internal::SetRendererTexture(renderer, frameBuffer);
 }
 
 bool Control::IsResourceReady() const

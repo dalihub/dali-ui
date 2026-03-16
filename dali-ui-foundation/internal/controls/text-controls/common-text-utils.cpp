@@ -19,13 +19,13 @@
 #include <dali/public-api/actors/layer.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 
 namespace Dali::Ui::Internal
 {
@@ -222,7 +222,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
 void TextControlAccessible::InitDefaultFeatures()
 {
-  DevelControl::ControlAccessible::InitDefaultFeatures();
+  ControlAccessible::InitDefaultFeatures();
   AddFeature<Dali::Accessibility::Text>(shared_from_this());
   AddFeature<Dali::Accessibility::Hypertext>(shared_from_this());
 }
@@ -494,7 +494,7 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
 {
   using Dali::Accessibility::State;
 
-  auto states       = DevelControl::ControlAccessible::CalculateStates();
+  auto states       = ControlAccessible::CalculateStates();
   auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
 
   states[State::EDITABLE]  = true;

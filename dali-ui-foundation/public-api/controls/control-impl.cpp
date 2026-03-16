@@ -32,7 +32,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
@@ -44,6 +43,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
@@ -108,7 +108,7 @@ void RegisterControlAccessibleGetter()
       if(control.IsCreateAccessibleEnabled())
       {
         auto& controlImpl = Ui::Internal::GetImplementation(control);
-        return {std::shared_ptr<DevelControl::ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
+        return {std::shared_ptr<ControlAccessible>(controlImpl.CreateAccessibleObject()), true};
       }
 
       return {nullptr, false};
@@ -256,7 +256,7 @@ bool Control::IsOffScreenRenderTaskExclusive()
   return false;
 }
 
-std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::GetAccessibleObject()
+std::shared_ptr<Ui::ControlAccessible> Control::GetAccessibleObject()
 {
   return mImpl->GetAccessibleObject();
 }
@@ -428,9 +428,9 @@ bool Control::OnAccessibilityZoom()
   return false; // Accessibility zoom action is not handled by default
 }
 
-DevelControl::ControlAccessible* Control::CreateAccessibleObject()
+ControlAccessible* Control::CreateAccessibleObject()
 {
-  return new DevelControl::ControlAccessible(Self());
+  return new ControlAccessible(Self());
 }
 
 Actor Control::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Control::KeyboardFocus::Direction direction,

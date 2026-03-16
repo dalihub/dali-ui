@@ -37,11 +37,11 @@ static constexpr const char* READING_INFO_TYPE_DESCRIPTION    = "description";
 static constexpr const char* READING_INFO_TYPE_STATE          = "state";
 static constexpr const char* READING_INFO_TYPE_SEPARATOR      = "|";
 
-Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::Ui::DevelControl::ControlAccessible* accessible)
+Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::Ui::ControlAccessible* accessible)
 {
   Rect<float> parentRect;
   Vector2     currentPosition;
-  auto        parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(accessible->GetParent());
+  auto        parent = dynamic_cast<Ui::ControlAccessible*>(accessible->GetParent());
 
   while(parent)
   {
@@ -64,7 +64,7 @@ Dali::Rect<float> GetShowingGeometry(Dali::Rect<float> rect, Dali::Ui::DevelCont
       return rect;
     }
 
-    parent = dynamic_cast<Ui::DevelControl::ControlAccessible*>(parent->GetParent());
+    parent = dynamic_cast<Ui::ControlAccessible*>(parent->GetParent());
   }
 
   return rect;
@@ -81,11 +81,11 @@ static constexpr uint32_t DEFAULT_READING_INFO_TYPES_RAW_DATA =
   (1u << static_cast<uint32_t>(Dali::Accessibility::ReadingInfoType::STATE));
 
 static constexpr uint32_t DEFAULT_DEVEL_CONTROL_ACCESSIBILITY_STATES_RAW_DATA =
-  (1u << static_cast<uint32_t>(DevelControl::AccessibilityState::ENABLED)) |
-  (0u << static_cast<uint32_t>(DevelControl::AccessibilityState::SELECTED)) |
-  (0u << static_cast<uint32_t>(DevelControl::AccessibilityState::CHECKED)) |
-  (0u << static_cast<uint32_t>(DevelControl::AccessibilityState::BUSY)) |
-  (0u << static_cast<uint32_t>(DevelControl::AccessibilityState::EXPANDED));
+  (1u << static_cast<uint32_t>(AccessibilityState::ENABLED)) |
+  (0u << static_cast<uint32_t>(AccessibilityState::SELECTED)) |
+  (0u << static_cast<uint32_t>(AccessibilityState::CHECKED)) |
+  (0u << static_cast<uint32_t>(AccessibilityState::BUSY)) |
+  (0u << static_cast<uint32_t>(AccessibilityState::EXPANDED));
 
 } // unnamed namespace
 
@@ -351,9 +351,9 @@ void Control::Impl::AccessibilityData::SetAccessibilityReadingInfoType(
   AppendAccessibilityAttribute(READING_INFO_TYPE_ATTRIBUTE_NAME, value);
 }
 
-std::shared_ptr<Ui::DevelControl::ControlAccessible> Control::Impl::AccessibilityData::GetAccessibleObject()
+std::shared_ptr<Ui::ControlAccessible> Control::Impl::AccessibilityData::GetAccessibleObject()
 {
-  return std::dynamic_pointer_cast<DevelControl::ControlAccessible>(
+  return std::dynamic_pointer_cast<ControlAccessible>(
     Accessibility::Accessible::GetOwningPtr(mControlImpl.Self()));
 }
 
@@ -362,9 +362,9 @@ Dali::Accessibility::ReadingInfoTypes Control::Impl::AccessibilityData::GetDefau
   return Dali::Accessibility::ReadingInfoTypes{DEFAULT_READING_INFO_TYPES_RAW_DATA};
 }
 
-Ui::DevelControl::AccessibilityStates Control::Impl::AccessibilityData::GetDefaultControlAccessibilityStates()
+AccessibilityStates Control::Impl::AccessibilityData::GetDefaultControlAccessibilityStates()
 {
-  return Ui::DevelControl::AccessibilityStates{DEFAULT_DEVEL_CONTROL_ACCESSIBILITY_STATES_RAW_DATA};
+  return AccessibilityStates{DEFAULT_DEVEL_CONTROL_ACCESSIBILITY_STATES_RAW_DATA};
 }
 
 } // namespace Internal
