@@ -85,7 +85,7 @@ public:
   /**
    * @copydoc ModelInterface::GetVerticalLineAlignment()
    */
-  DevelText::VerticalLineAlignment::Type GetVerticalLineAlignment() const override;
+  Alignment GetVerticalLineAlignment() const override;
 
   /**
    * @copydoc ModelInterface::GetEllipsisPosition()

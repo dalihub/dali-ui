@@ -1638,12 +1638,12 @@ Ui::DevelText::TextDirection::Type Controller::GetTextDirection()
   return mImpl->GetTextDirection();
 }
 
-Ui::DevelText::VerticalLineAlignment::Type Controller::GetVerticalLineAlignment() const
+Alignment Controller::GetVerticalLineAlignment() const
 {
   return mImpl->mModel->GetVerticalLineAlignment();
 }
 
-void Controller::SetVerticalLineAlignment(Ui::DevelText::VerticalLineAlignment::Type alignment)
+void Controller::SetVerticalLineAlignment(Alignment alignment)
 {
   mImpl->mModel->mVerticalLineAlignment = alignment;
 }

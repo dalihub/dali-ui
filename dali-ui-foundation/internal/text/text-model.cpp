@@ -62,7 +62,7 @@ Alignment Model::GetVerticalAlignment() const
   return mVerticalAlignment;
 }
 
-DevelText::VerticalLineAlignment::Type Model::GetVerticalLineAlignment() const
+Alignment Model::GetVerticalLineAlignment() const
 {
   return mVerticalLineAlignment;
 }
@@ -396,7 +396,7 @@ Model::Model()
   mLayoutOffsetWithPadding(),
   mHorizontalAlignment(Alignment::START),
   mVerticalAlignment(Alignment::START),
-  mVerticalLineAlignment(DevelText::VerticalLineAlignment::TOP),
+  mVerticalLineAlignment(Alignment::START),
   mLineWrapMode(Text::LineWrap::WORD),
   mAlignmentOffset(0.0f),
   mElideEnabled(false),

@@ -24,23 +24,23 @@ namespace Ui
 {
 namespace Text
 {
-float GetPreOffsetVerticalLineAlignment(const LineRun& line, const DevelText::VerticalLineAlignment::Type& verLineAlign)
+float GetPreOffsetVerticalLineAlignment(const LineRun& line, const Alignment& verLineAlign)
 {
   // Calculate vertical line alignment
   float offset = 0.0f;
 
   switch(verLineAlign)
   {
-    case DevelText::VerticalLineAlignment::TOP:
+    case Alignment::START:
     {
       break;
     }
-    case DevelText::VerticalLineAlignment::MIDDLE:
+    case Alignment::CENTER:
     {
       offset = line.lineSpacing * 0.5f;
       break;
     }
-    case DevelText::VerticalLineAlignment::BOTTOM:
+    case Alignment::END:
     {
       offset = line.lineSpacing;
       break;
@@ -53,25 +53,25 @@ float GetPreOffsetVerticalLineAlignment(const LineRun& line, const DevelText::Ve
   return offset;
 }
 
-float GetPostOffsetVerticalLineAlignment(const LineRun&                                line,
-                                         const DevelText::VerticalLineAlignment::Type& verLineAlign)
+float GetPostOffsetVerticalLineAlignment(const LineRun&   line,
+                                         const Alignment& verLineAlign)
 {
   // Calculate vertical line alignment
   float offset = 0.0f;
 
   switch(verLineAlign)
   {
-    case DevelText::VerticalLineAlignment::TOP:
+    case Alignment::START:
     {
       offset = line.lineSpacing;
       break;
     }
-    case DevelText::VerticalLineAlignment::MIDDLE:
+    case Alignment::CENTER:
     {
       offset = line.lineSpacing * 0.5f;
       break;
     }
-    case DevelText::VerticalLineAlignment::BOTTOM:
+    case Alignment::END:
     {
       break;
     }

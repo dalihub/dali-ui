@@ -1929,13 +1929,13 @@ public: // Queries & retrieves.
    * @brief Retrieves vertical line alignment
    * @return The vertical line alignment
    */
-  Ui::DevelText::VerticalLineAlignment::Type GetVerticalLineAlignment() const;
+  Alignment GetVerticalLineAlignment() const;
 
   /**
    * @brief Sets vertical line alignment
    * @param[in] alignment The vertical line alignment for the text
    */
-  void SetVerticalLineAlignment(Ui::DevelText::VerticalLineAlignment::Type alignment);
+  void SetVerticalLineAlignment(Alignment alignment);
 
   /**
    * @brief Retrieves ellipsis position

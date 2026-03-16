@@ -671,8 +671,8 @@ struct InputParameterForEachLine
   const GlyphIndex secondMiddleIndexOfElidedGlyphs;
   const float      elidedOffset;
 
-  const DevelText::VerticalLineAlignment::Type verticalLineAlignType;
-  const DevelText::EllipsisPosition::Type      ellipsisPosition;
+  const Alignment                         verticalLineAlignType;
+  const DevelText::EllipsisPosition::Type ellipsisPosition;
 
   const GlyphInfo* __restrict__ hyphens;
   const Length* __restrict__ hyphenIndices;
@@ -1198,7 +1198,7 @@ void Typesetter::Impl::DrawGlyphsBackground(Devel::PixelBuffer& buffer, const ui
   const bool              removeFrontInset             = viewModel.IsRemoveFrontInset();
   const bool              removeBackInset              = viewModel.IsRemoveBackInset();
 
-  const DevelText::VerticalLineAlignment::Type verticalLineAlignType = viewModel.GetVerticalLineAlignment();
+  const Alignment verticalLineAlignType = viewModel.GetVerticalLineAlignment();
 
   // Create and initialize the pixel buffer.
   GlyphData glyphData;

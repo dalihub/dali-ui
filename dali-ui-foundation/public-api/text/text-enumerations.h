@@ -18,6 +18,9 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <cstdint>
+
 namespace Dali
 {
 namespace Ui

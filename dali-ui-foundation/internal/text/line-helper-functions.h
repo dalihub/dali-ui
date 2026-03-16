@@ -20,8 +20,8 @@
 
 // INTERNAL INCLUDES
 
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali
 {
@@ -38,8 +38,8 @@ namespace Text
  *
  * @return The vertical offset before text.
  */
-float GetPreOffsetVerticalLineAlignment(const LineRun&                                          line,
-                                        const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
+float GetPreOffsetVerticalLineAlignment(const LineRun&   line,
+                                        const Alignment& verLineAlign);
 
 /**
  * @brief Retrieves the vertical offset to shift the next line to up by negative value and to down by positive value.
@@ -50,8 +50,8 @@ float GetPreOffsetVerticalLineAlignment(const LineRun&                          
  *
  * @return The vertical offset after text.
  */
-float GetPostOffsetVerticalLineAlignment(const LineRun&                                          line,
-                                         const Dali::Ui::DevelText::VerticalLineAlignment::Type& verLineAlign);
+float GetPostOffsetVerticalLineAlignment(const LineRun&   line,
+                                         const Alignment& verLineAlign);
 } // namespace Text
 
 } // namespace Ui

@@ -536,8 +536,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       {
         if(impl.mController->GetTextModel())
         {
-          DevelText::VerticalLineAlignment::Type alignment =
-            static_cast<DevelText::VerticalLineAlignment::Type>(value.Get<int>());
+          Alignment alignment = static_cast<Alignment>(value.Get<int>());
 
           impl.mController->SetVerticalLineAlignment(alignment);
 

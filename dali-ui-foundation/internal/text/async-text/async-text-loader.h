@@ -112,7 +112,7 @@ struct AsyncTextParameters
     lineWrapMode{Text::LineWrap::WORD},
     underlineType{Text::Underline::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
-    verticalLineAlignment{DevelText::VerticalLineAlignment::TOP},
+    verticalLineAlignment{Alignment::START},
     layoutDirectionPolicy{DevelText::MatchLayoutDirection::INHERIT},
     ellipsisPosition{DevelText::EllipsisPosition::END},
     ellipsisMode{DevelText::Ellipsize::TRUNCATE},
@@ -198,13 +198,12 @@ struct AsyncTextParameters
   uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
 
   Async::RequestType          requestType;
-  Alignment                   horizontalAlignment; ///< The horizontal alignment: one of {START, CENTER, END}.
-  Alignment                   verticalAlignment;   ///< The vertical alignment: one of {START, CENTER, END}.
-  Text::LineWrap::Mode        lineWrapMode;        ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
-  Text::Underline::Type       underlineType;       ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
-  Dali::LayoutDirection::Type layoutDirection;     ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
-  DevelText::VerticalLineAlignment::Type
-    verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
+  Alignment                   horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
+  Alignment                   verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
+  Text::LineWrap::Mode        lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  Text::Underline::Type       underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
+  Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
+  Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
   DevelText::MatchLayoutDirection
     layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   DevelText::EllipsisPosition::Type

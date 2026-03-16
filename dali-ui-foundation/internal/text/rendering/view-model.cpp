@@ -96,7 +96,7 @@ Alignment ViewModel::GetVerticalAlignment() const
   return mModel->GetVerticalAlignment();
 }
 
-DevelText::VerticalLineAlignment::Type ViewModel::GetVerticalLineAlignment() const
+Alignment ViewModel::GetVerticalLineAlignment() const
 {
   return mModel->GetVerticalLineAlignment();
 }

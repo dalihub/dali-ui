@@ -62,13 +62,13 @@ DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui::Integration, LabelImpl, "tex
 DALI_TYPE_REGISTRATION_END()
 
 /**
- * @brief Lookup table that converts Text::VerticalAlignment values
+ * @brief Lookup table that converts Text::Alignment values
  *        to a normalized vertical alignment factor.
  */
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
-  0.0f, // VerticalAlignment::START
-  0.5f, // VerticalAlignment::CENTER
-  1.0f  // VerticalAlignment::END
+  0.0f, // Text::Alignment::START
+  0.5f, // Text::Alignment::CENTER
+  1.0f  // Text::Alignment::END
 };
 
 } // namespace

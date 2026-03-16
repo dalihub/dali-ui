@@ -93,7 +93,7 @@ public:
    *
    * @return The vertical line alignment.
    */
-  virtual DevelText::VerticalLineAlignment::Type GetVerticalLineAlignment() const = 0;
+  virtual Alignment GetVerticalLineAlignment() const = 0;
 
   /**
    * @brief Retrieves ellipsis position for text.
