@@ -101,7 +101,7 @@ Alignment ViewModel::GetVerticalLineAlignment() const
   return mModel->GetVerticalLineAlignment();
 }
 
-DevelText::EllipsisPosition::Type ViewModel::GetEllipsisPosition() const
+Text::EllipsisPosition::Type ViewModel::GetEllipsisPosition() const
 {
   return mModel->GetEllipsisPosition();
 }
@@ -468,12 +468,12 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           // Start with this index to replace its glyph by Ellipsis, if the width  is not enough, then remove more
           // glyphs.
           GlyphIndex startIndexOfEllipsis = 0u;
-          if(ellipsisPosition == DevelText::EllipsisPosition::START)
+          if(ellipsisPosition == Text::EllipsisPosition::START)
           {
             // It's the fisrt glyph in line.
             startIndexOfEllipsis = ellipsisLine->glyphRun.glyphIndex;
           }
-          else if(ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
+          else if(ellipsisPosition == Text::EllipsisPosition::MIDDLE)
           {
             // It's the second middle of the line in case the line split to two halves.
             // Otherwise it's It's the last glyph in line (line before all removed lines).
@@ -482,7 +482,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                 ? (ellipsisLine->glyphRunSecondHalf.glyphIndex)
                 : (ellipsisLine->glyphRun.glyphIndex + ellipsisLine->glyphRun.numberOfGlyphs - 1u);
           }
-          else // DevelText::EllipsisPosition::END
+          else // Text::EllipsisPosition::END
           {
             // It's the last glyph in line.
             startIndexOfEllipsis =
@@ -522,8 +522,8 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           }
 
           // Tail Mode: start by the end of line.
-          bool isTailMode = (ellipsisPosition == DevelText::EllipsisPosition::END) ||
-                            (ellipsisPosition == DevelText::EllipsisPosition::MIDDLE && numberOfLines != 1u);
+          bool isTailMode = (ellipsisPosition == Text::EllipsisPosition::END) ||
+                            (ellipsisPosition == Text::EllipsisPosition::MIDDLE && numberOfLines != 1u);
 
           // The ellipsis glyph has to fit in the place where the last glyph(s) is(are) removed.
           while(!inserted)
@@ -712,7 +712,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           mElidedGlyphs.Resize(numberOfElidedGlyphs);
           mElidedLayout.Resize(numberOfElidedGlyphs);
 
-          if(ellipsisPosition == DevelText::EllipsisPosition::START)
+          if(ellipsisPosition == Text::EllipsisPosition::START)
           {
             // 'Shifts' glyphs after ellipsis glyph and 'Removes' before ellipsis glyph
             GlyphMemmove(elidedGlyphsBuffer, numberOfGlyphs, 0u, indexOfEllipsis, numberOfElidedGlyphs);
@@ -721,7 +721,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
             mStartIndexOfElidedGlyphs = mFirstMiddleIndexOfElidedGlyphs = mSecondMiddleIndexOfElidedGlyphs =
               indexOfEllipsis;
           }
-          else if(ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
+          else if(ellipsisPosition == Text::EllipsisPosition::MIDDLE)
           {
             // 'Shifts and connects' glyphs before and after ellipsis glyph and 'Removes' in-between.
             bool isOnlySecondHalf = false;
@@ -778,7 +778,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                            numberOfSecondHalfGlyphs);
             }
           }
-          else // DevelText::EllipsisPosition::END
+          else // Text::EllipsisPosition::END
           {
             // 'Removes' all the glyphs after the ellipsis glyph.
             mEndIndexOfElidedGlyphs = indexOfEllipsis;

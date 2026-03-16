@@ -395,7 +395,7 @@ public:
     mTextCutout(false),
     mIsCursorInsetEnabled(true),
     mRenderMode(DevelTextLabel::Render::SYNC),
-    mEllipsisMode(DevelText::Ellipsize::TRUNCATE)
+    mEllipsisMode(Ellipsize::TRUNCATE)
   {
     mModel = Model::New();
 
@@ -941,7 +941,7 @@ public:
   /**
    * @copydoc Controller::SetAutoScrollEnabled()
    */
-  void SetAutoScrollEnabled(bool enable, bool requestRelayout, DevelText::AutoScroll::Direction direction);
+  void SetAutoScrollEnabled(bool enable, bool requestRelayout, AutoScroll::Direction direction);
 
   /**
    * @copydoc Controller::SetEnableCursorBlink()
@@ -1141,7 +1141,7 @@ public:
   bool  mIsCursorInsetEnabled : 1;     ///< Whether the cursor inset is enabled.
 
   DevelTextLabel::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
-  DevelText::Ellipsize::Mode   mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
+  Ellipsize::Mode              mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
 
 private:
   friend ControllerImplEventHandler;

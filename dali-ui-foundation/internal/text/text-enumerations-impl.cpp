@@ -51,9 +51,9 @@ const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TE
 const uint32_t LINE_WRAP_MODE_TABLE_COUNT      = static_cast<uint32_t>(sizeof(LINE_WRAP_MODE_TABLE) / sizeof(LINE_WRAP_MODE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, START)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, MIDDLE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, END)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, START)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, MIDDLE)
 DALI_ENUM_TO_STRING_TABLE_END(ELLIPSIS_POSITION_TYPE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(UNDERLINE_TYPE)
@@ -124,8 +124,8 @@ const char* GetVerticalAlignmentString(const Alignment& alignment)
     TEXT_ALIGNMENT_TYPE_TABLE_COUNT);
 }
 
-bool GetEllipsisPositionTypeEnumeration(const Property::Value&                 propertyValue,
-                                        Ui::DevelText::EllipsisPosition::Type& ellipsisPositionType)
+bool GetEllipsisPositionTypeEnumeration(const Property::Value&            propertyValue,
+                                        Ui::Text::EllipsisPosition::Type& ellipsisPositionType)
 {
   return Scripting::GetEnumerationProperty(propertyValue, ELLIPSIS_POSITION_TYPE_TABLE,
                                            ELLIPSIS_POSITION_TYPE_TABLE_COUNT, ellipsisPositionType);

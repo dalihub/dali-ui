@@ -1877,11 +1877,11 @@ void Controller::Impl::CopyCharacterSpacingFromLogicalToVisualModels()
 }
 
 void Controller::Impl::SetAutoScrollEnabled(bool enable, bool requestRelayout,
-                                            DevelText::AutoScroll::Direction direction)
+                                            AutoScroll::Direction direction)
 {
   if((mLayoutEngine.GetLayout() == Layout::Engine::SINGLE_LINE_BOX &&
-      direction == DevelText::AutoScroll::HORIZONTAL) ||
-     (mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX && direction == DevelText::AutoScroll::VERTICAL))
+      direction == AutoScroll::HORIZONTAL) ||
+     (mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX && direction == AutoScroll::VERTICAL))
   {
     mOperationsPending =
       static_cast<OperationsMask>(mOperationsPending | LAYOUT | ALIGN | UPDATE_LAYOUT_SIZE | REORDER);

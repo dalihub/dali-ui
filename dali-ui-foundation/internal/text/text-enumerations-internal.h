@@ -1,5 +1,5 @@
-#ifndef DALI_UI_TEXT_ENUMERATIONS_DEVEL_H
-#define DALI_UI_TEXT_ENUMERATIONS_DEVEL_H
+#ifndef DALI_UI_TEXT_ENUMERATIONS_INTERNAL_H
+#define DALI_UI_TEXT_ENUMERATIONS_INTERNAL_H
 
 /*
  * Copyright (c) 2025 Samsung Electronics Co., Ltd.
@@ -22,71 +22,8 @@ namespace Dali
 {
 namespace Ui
 {
-namespace DevelText
+namespace Text
 {
-/**
- * @brief Contains types which specify where the text is truncated and replaced by Ellipsis glyph.
- *
- * If the text cannot fit into layout size then truncate text and replace it by Ellipsis glyph.
- *
- * Ellipsis works after layouting text normally according to LineWrap mode.
- *
- * Ellipsis glyph is three dots "...".
- *
- * The Ellipsis property should be enabled.
- *
- *
- * Example: "Hello here is test goodbye."
- *
- * Assume LineWrap is CHARACTER.
- *
- * EllipsisPosition::END type in single line, truncate tail of line then add Ellipsis:
- * @code
- * +-----------+
- * |Hello he...|
- * +-----------+
- * @endcode
- *
- * EllipsisPosition::END type in multi-lines, truncate tail of the last appeared line then add Ellipsis:
- * @code
- * +-----------+
- * |Hello here |
- * |is test ...|
- * +-----------+
- * @endcode
- *
- * EllipsisPosition::START type in single line, truncate head of line then add Ellipsis:
- * @code
- * +-----------+
- * |...goodbye.|
- * +-----------+
- * @endcode
- *
- * EllipsisPosition::START type in multi-lines, truncate head of the first appeared line then add Ellipsis:
- * @code
- * +-----------+
- * |...test goo|
- * |dbye.      |
- * +-----------+
- * @endcode
- *
- * EllipsisPosition::MIDDLE type in single line, truncate middle of line then add Ellipsis:
- * @code
- * +-----------+
- * |Hell...bye.|
- * +-----------+
- * @endcode
- *
- * EllipsisPosition::MIDDLE type in multi-lines, truncate middle lines. In the end of the last appeared line before
- * removed lines add Ellipsis:
- * @code
- * +-----------+
- * |Hello he...|
- * |dbye.      |
- * +-----------+
- * @endcode
- *
- */
 namespace EllipsisPosition
 {
 /**
@@ -134,10 +71,10 @@ enum Direction
 
 } // namespace AutoScroll
 
-} // namespace DevelText
+} // namespace Text
 
 } // namespace Ui
 
 } // namespace Dali
 
-#endif // DALI_UI_TEXT_ENUMERATIONS_DEVEL_H
+#endif // DALI_UI_TEXT_ENUMERATIONS_INTERNAL_H

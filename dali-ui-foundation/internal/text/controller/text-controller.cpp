@@ -28,7 +28,6 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-background-actor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
@@ -176,7 +175,7 @@ bool Controller::HasAnchors() const
           mImpl->IsShowingRealText());
 }
 
-void Controller::SetAutoScrollEnabled(bool enable, bool requestRelayout, DevelText::AutoScroll::Direction direction)
+void Controller::SetAutoScrollEnabled(bool enable, bool requestRelayout, Text::AutoScroll::Direction direction)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetAutoScrollEnabled[%s] SingleBox[%s]-> [%p]\n",
                 (enable) ? "true" : "false",
@@ -1648,23 +1647,23 @@ void Controller::SetVerticalLineAlignment(Alignment alignment)
   mImpl->mModel->mVerticalLineAlignment = alignment;
 }
 
-Ui::DevelText::EllipsisPosition::Type Controller::GetEllipsisPosition() const
+Text::EllipsisPosition::Type Controller::GetEllipsisPosition() const
 {
   return mImpl->mModel->GetEllipsisPosition();
 }
 
-void Controller::SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition)
+void Controller::SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition)
 {
   mImpl->mModel->mEllipsisPosition = ellipsisPosition;
   mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 }
 
-Ui::DevelText::Ellipsize::Mode Controller::GetEllipsisMode() const
+Text::Ellipsize::Mode Controller::GetEllipsisMode() const
 {
   return mImpl->mEllipsisMode;
 }
 
-void Controller::SetEllipsisMode(Ui::DevelText::Ellipsize::Mode ellipsisMode)
+void Controller::SetEllipsisMode(Text::Ellipsize::Mode ellipsisMode)
 {
   mImpl->mEllipsisMode = ellipsisMode;
 }

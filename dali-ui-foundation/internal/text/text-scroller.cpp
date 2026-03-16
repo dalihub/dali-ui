@@ -148,12 +148,12 @@ TextLabel::AutoScrollStopMode::Type TextScroller::GetStopMode() const
   return mStopMode;
 }
 
-DevelText::AutoScroll::Direction TextScroller::GetDirection() const
+Text::AutoScroll::Direction TextScroller::GetDirection() const
 {
   return mDirection;
 }
 
-void TextScroller::SetDirection(DevelText::AutoScroll::Direction direction)
+void TextScroller::SetDirection(Text::AutoScroll::Direction direction)
 {
   mDirection = direction;
 }
@@ -209,7 +209,7 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mLoopDelay(0.0f),
   mWrapGap(0.0f),
   mStopMode(TextLabel::AutoScrollStopMode::FINISH_LOOP),
-  mDirection(DevelText::AutoScroll::HORIZONTAL),
+  mDirection(Text::AutoScroll::HORIZONTAL),
   mIsStop(false),
   mIsStoppedImmediately(false)
 {
@@ -230,7 +230,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
                 controlSize.y, textureSize.x, textureSize.y, direction);
   mRenderer = renderer;
 
-  bool  isHorizontal      = mDirection == DevelText::AutoScroll::HORIZONTAL;
+  bool  isHorizontal      = mDirection == Text::AutoScroll::HORIZONTAL;
   float animationProgress = 0.0f;
   int   remainedLoop      = mLoopCount;
   if(mScrollAnimation)

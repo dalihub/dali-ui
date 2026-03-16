@@ -730,7 +730,7 @@ struct Engine::Impl
    * @param[in] hiddenInputEnabled Whether the hidden input is enabled.
    */
   void GetLineLayoutForBox(const Parameters& parameters, LayoutBidiParameters& bidiParameters, LineLayout& lineLayout,
-                           bool completelyFill, DevelText::EllipsisPosition::Type ellipsisPosition,
+                           bool completelyFill, Text::EllipsisPosition::Type ellipsisPosition,
                            bool enforceEllipsisInSingleLine, bool elideTextEnabled, bool hiddenInputEnabled)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->GetLineLayoutForBox\n");
@@ -756,7 +756,7 @@ struct Engine::Impl
     const bool isMixedMode = parameters.textModel->mLineWrapMode == LineWrapMode::MIXED;
 
     const bool isSplitToTwoHalves =
-      elideTextEnabled && !isMultiline && ellipsisPosition == DevelText::EllipsisPosition::MIDDLE;
+      elideTextEnabled && !isMultiline && ellipsisPosition == Text::EllipsisPosition::MIDDLE;
 
     // The last glyph to be laid-out.
     const GlyphIndex lastGlyphOfParagraphPlusOne = parameters.startGlyphIndex + parameters.numberOfGlyphs;
@@ -771,8 +771,8 @@ struct Engine::Impl
 
     float targetWidth = parameters.boundingBox.width;
     float widthFirstHalf =
-      ((ellipsisPosition != DevelText::EllipsisPosition::MIDDLE) ? targetWidth
-                                                                 : targetWidth - std::floor(targetWidth / 2));
+      ((ellipsisPosition != Text::EllipsisPosition::MIDDLE) ? targetWidth
+                                                            : targetWidth - std::floor(targetWidth / 2));
 
     bool isSecondHalf = false;
     // Character Spacing
@@ -933,8 +933,8 @@ struct Engine::Impl
         tmpLineLayout.isSplitToTwoHalves = isSecondHalf = true;
       }
       // Check if the accumulated length fits in the width of the box.
-      if((ellipsisPosition == DevelText::EllipsisPosition::START ||
-          (ellipsisPosition == DevelText::EllipsisPosition::MIDDLE && isSecondHalf)) &&
+      if((ellipsisPosition == Text::EllipsisPosition::START ||
+          (ellipsisPosition == Text::EllipsisPosition::MIDDLE && isSecondHalf)) &&
          completelyFill && !isMultiline &&
          (tmpLineLayout.length + tmpLineLayout.whiteSpaceLengthEndOfLine > targetWidth))
       {
@@ -1043,13 +1043,13 @@ struct Engine::Impl
             tmpLineLayout.whiteSpaceLengthEndOfLine = previousTmpWhiteSpaceLengthEndOfLine;
           }
 
-          if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+          if(ellipsisPosition == Text::EllipsisPosition::START && !isMultiline)
           {
             // Add part of the word to the line layout and shift the first glyph.
             MergeLineLayout(lineLayout, tmpLineLayout, true);
           }
-          else if(ellipsisPosition != DevelText::EllipsisPosition::START ||
-                  (ellipsisPosition == DevelText::EllipsisPosition::START && (!completelyFill)))
+          else if(ellipsisPosition != Text::EllipsisPosition::START ||
+                  (ellipsisPosition == Text::EllipsisPosition::START && (!completelyFill)))
           {
             // Add part of the word to the line layout.
             MergeLineLayout(lineLayout, tmpLineLayout, false);
@@ -1076,7 +1076,7 @@ struct Engine::Impl
         LineLayout currentLineLayout = lineLayout;
         oneHyphenLaidOut             = false;
 
-        if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+        if(ellipsisPosition == Text::EllipsisPosition::START && !isMultiline)
         {
           // Must break the line. Update the line layout, shift the first glyph and return.
           MergeLineLayout(lineLayout, tmpLineLayout, true);
@@ -1299,7 +1299,7 @@ struct Engine::Impl
   bool EllipsisLine(const Parameters& layoutParameters, LayoutBidiParameters& layoutBidiParameters,
                     const LineLayout& layout, Size& layoutSize, LineRun* linesBuffer, Vector2* glyphPositionsBuffer,
                     Length& numberOfLines, float penY, bool& isAutoScrollEnabled, bool isAutoScrollMaxTextureExceeded,
-                    bool isHiddenInputEnabled, DevelText::EllipsisPosition::Type ellipsisPosition,
+                    bool isHiddenInputEnabled, Text::EllipsisPosition::Type ellipsisPosition,
                     bool enforceEllipsisInSingleLine)
   {
     const bool ellipsis =
@@ -1314,7 +1314,7 @@ struct Engine::Impl
             ((mLayout == SINGLE_LINE_BOX) && (layout.length > layoutParameters.boundingBox.width))));
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
-    if(ellipsis && (ellipsisPosition == DevelText::EllipsisPosition::END || !isMultiline))
+    if(ellipsis && (ellipsisPosition == Text::EllipsisPosition::END || !isMultiline))
     {
       if(penY - layout.descender > layoutParameters.boundingBox.height)
       {
@@ -1355,7 +1355,7 @@ struct Engine::Impl
       GetLineLayoutForBox(layoutParameters, layoutBidiParameters, ellipsisLayout, true, ellipsisPosition,
                           enforceEllipsisInSingleLine, true, isHiddenInputEnabled);
 
-      if(ellipsisPosition == DevelText::EllipsisPosition::START && !isMultiline)
+      if(ellipsisPosition == Text::EllipsisPosition::START && !isMultiline)
       {
         lineRun->glyphRun.glyphIndex = ellipsisLayout.glyphIndex;
       }
@@ -1637,7 +1637,7 @@ struct Engine::Impl
 
   bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isAutoScrollEnabled,
                   bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
-                  DevelText::EllipsisPosition::Type ellipsisPosition)
+                  Text::EllipsisPosition::Type ellipsisPosition)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->LayoutText\n");
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "  box size %f, %f\n", layoutParameters.boundingBox.width,
@@ -1874,10 +1874,10 @@ struct Engine::Impl
                                 isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
       }
 
-      if(ellipsis && ((ellipsisPosition == DevelText::EllipsisPosition::END) || (numberOfLines == 1u)))
+      if(ellipsis && ((ellipsisPosition == Text::EllipsisPosition::END) || (numberOfLines == 1u)))
       {
         const bool isMultiline = mLayout == MULTI_LINE_BOX;
-        if(isMultiline && ellipsisPosition != DevelText::EllipsisPosition::END)
+        if(isMultiline && ellipsisPosition != Text::EllipsisPosition::END)
         {
           ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
                                   glyphPositionsBuffer, numberOfLines, penY, isAutoScrollEnabled,
@@ -1976,7 +1976,7 @@ struct Engine::Impl
     // Shift lines to up if ellipsis and multilines and set ellipsis of first line to true
     if(anyLineIsEliped && numberOfLines > 1u)
     {
-      if(ellipsisPosition == DevelText::EllipsisPosition::START)
+      if(ellipsisPosition == Text::EllipsisPosition::START)
       {
         Length lineIndex = 0;
         while(lineIndex < numberOfLines && layoutParameters.boundingBox.height < layoutSize.height)
@@ -1994,7 +1994,7 @@ struct Engine::Impl
         }
         linesBuffer[0u].ellipsis = true;
       }
-      else if(ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
+      else if(ellipsisPosition == Text::EllipsisPosition::MIDDLE)
       {
         Length middleLineIndex   = (numberOfLines) / 2u;
         Length ellipsisLineIndex = 0u;
@@ -2261,7 +2261,7 @@ void Engine::SetCursorInsetEnabled(bool enable)
 
 bool Engine::LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled,
                         bool& isAutoScrollEnabled, bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
-                        DevelText::EllipsisPosition::Type ellipsisPosition)
+                        Text::EllipsisPosition::Type ellipsisPosition)
 {
   return mImpl->LayoutText(layoutParameters, layoutSize, elideTextEnabled, isAutoScrollEnabled,
                            isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);

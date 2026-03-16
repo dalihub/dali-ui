@@ -67,7 +67,7 @@ Alignment Model::GetVerticalLineAlignment() const
   return mVerticalLineAlignment;
 }
 
-DevelText::EllipsisPosition::Type Model::GetEllipsisPosition() const
+Text::EllipsisPosition::Type Model::GetEllipsisPosition() const
 {
   return mEllipsisPosition;
 }
@@ -404,7 +404,7 @@ Model::Model()
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
   mMatchLayoutDirection(LayoutDirectionMode::INHERIT),
-  mEllipsisPosition(DevelText::EllipsisPosition::END)
+  mEllipsisPosition(Text::EllipsisPosition::END)
 {
   mLogicalModel = LogicalModel::New();
   mVisualModel  = VisualModel::New();

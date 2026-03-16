@@ -401,7 +401,7 @@ void VisualModel::SetUnderlineHeight(float height)
   mUnderlineHeight = height;
 }
 
-void VisualModel::SetUnderlineType(Text::Underline::Type type)
+void VisualModel::SetUnderlineType(Underline::Type type)
 {
   mUnderlineType = type;
 }
@@ -441,7 +441,7 @@ void VisualModel::SetTextElideEnabled(bool enabled)
   mTextElideEnabled = enabled;
 }
 
-void VisualModel::SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition)
+void VisualModel::SetEllipsisPosition(EllipsisPosition::Type ellipsisPosition)
 {
   mEllipsisPosition = ellipsisPosition;
 }
@@ -537,7 +537,7 @@ float VisualModel::GetUnderlineHeight() const
   return mUnderlineHeight;
 }
 
-Text::Underline::Type VisualModel::GetUnderlineType() const
+Underline::Type VisualModel::GetUnderlineType() const
 {
   return mUnderlineType;
 }
@@ -582,7 +582,7 @@ bool VisualModel::IsTextElideEnabled() const
   return mTextElideEnabled;
 }
 
-Ui::DevelText::EllipsisPosition::Type VisualModel::GetEllipsisPosition() const
+EllipsisPosition::Type VisualModel::GetEllipsisPosition() const
 {
   return mEllipsisPosition;
 }
@@ -762,7 +762,7 @@ VisualModel::VisualModel()
   mOutlineOffset(),
   mUnderlineHeight(0.0f),
   mStrikethroughHeight(0.0f),
-  mUnderlineType(Text::Underline::SOLID),
+  mUnderlineType(Underline::SOLID),
   mDashedUnderlineWidth(2.0f),
   mDashedUnderlineGap(1.0f),
   mShadowBlurRadius(0.0f),
@@ -774,7 +774,7 @@ VisualModel::VisualModel()
   mCachedLayoutSize(),
   mHeightForWidth(0.0f, 0.0f),
   mCachedLineIndex(0u),
-  mEllipsisPosition(DevelText::EllipsisPosition::END),
+  mEllipsisPosition(EllipsisPosition::END),
   mStartIndexOfElidedGlyphs(0u),
   mEndIndexOfElidedGlyphs(0u),
   mFirstMiddleIndexOfElidedGlyphs(0u),

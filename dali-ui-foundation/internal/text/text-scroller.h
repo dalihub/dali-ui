@@ -25,8 +25,8 @@
 #include <dali/public-api/rendering/renderer.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -139,13 +139,13 @@ public:
    * @brief Set direction of the auto scroll.
    * @param[in] direction Direction of the auto scroll.
    */
-  void SetDirection(DevelText::AutoScroll::Direction direction);
+  void SetDirection(Text::AutoScroll::Direction direction);
 
   /**
    * @brief Get direction of the auto scroll.
    * @return AutoScroll::Direction, HORIZONTAL or VERTICAL.
    */
-  DevelText::AutoScroll::Direction GetDirection() const;
+  Text::AutoScroll::Direction GetDirection() const;
 
   /**
    * @brief Stop the auto scrolling.
@@ -207,7 +207,7 @@ private:
   float                               mLoopDelay;            ///< Time delay of loop start
   float                               mWrapGap;              ///< Gap before text wraps around when scrolling
   TextLabel::AutoScrollStopMode::Type mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
-  DevelText::AutoScroll::Direction    mDirection;            ///< Direction of the auto scroll. (HORIZONTAL, VERTICAL)
+  Text::AutoScroll::Direction         mDirection;            ///< Direction of the auto scroll. (HORIZONTAL, VERTICAL)
   bool                                mIsStop : 1;           ///< Whether the stop scrolling has been triggered or not.
   std::atomic<bool>                   mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
 

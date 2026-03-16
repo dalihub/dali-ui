@@ -202,7 +202,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetEllipsisPosition()
    */
-  DevelText::EllipsisPosition::Type GetEllipsisPosition() const override;
+  Text::EllipsisPosition::Type GetEllipsisPosition() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsTextElideEnabled()

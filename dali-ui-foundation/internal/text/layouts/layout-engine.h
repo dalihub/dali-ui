@@ -26,10 +26,8 @@
 // INTERNAL INCLUDE
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/metrics.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-
-// DEVEL INCLUDE
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 
 namespace Dali
 {
@@ -125,7 +123,7 @@ public:
    */
   bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isAutoScrollEnabled,
                   bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
-                  DevelText::EllipsisPosition::Type ellipsisPosition);
+                  Text::EllipsisPosition::Type ellipsisPosition);
 
   /**
    * @brief Aligns the laid out lines.

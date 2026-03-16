@@ -398,7 +398,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       case Ui::TextLabel::Property::ENABLE_AUTO_SCROLL:
       {
         if(impl.mController->IsTextElideEnabled() &&
-           impl.mController->GetEllipsisMode() == DevelText::Ellipsize::AUTO_SCROLL)
+           impl.mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
         {
           DALI_LOG_DEBUG_INFO("Tried to autoscroll while in ellipsize auto scroll mode, request ignored.\n");
         }
@@ -460,7 +460,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::DevelTextLabel::Property::AUTO_SCROLL_DIRECTION:
       {
-        DevelText::AutoScroll::Direction direction = static_cast<DevelText::AutoScroll::Direction>(value.Get<int>());
+        Text::AutoScroll::Direction direction = static_cast<Text::AutoScroll::Direction>(value.Get<int>());
         impl.GetTextScroller()->SetDirection(direction);
         impl.UpdateAutoScrollState();
         impl.mTextUpdateNeeded = true;
@@ -616,7 +616,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::DevelTextLabel::Property::ELLIPSIS_POSITION:
       {
-        DevelText::EllipsisPosition::Type ellipsisPositionType(static_cast<DevelText::EllipsisPosition::Type>(
+        Text::EllipsisPosition::Type ellipsisPositionType(static_cast<Text::EllipsisPosition::Type>(
           -1)); // Set to invalid value to ensure a valid mode does get set
         if(GetEllipsisPositionTypeEnumeration(value, ellipsisPositionType))
         {
@@ -713,7 +713,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::DevelTextLabel::Property::ELLIPSIS_MODE:
       {
-        DevelText::Ellipsize::Mode ellipsisMode = static_cast<DevelText::Ellipsize::Mode>(value.Get<int>());
+        Text::Ellipsize::Mode ellipsisMode = static_cast<Text::Ellipsize::Mode>(value.Get<int>());
         if(impl.mController->GetEllipsisMode() != ellipsisMode)
         {
           impl.mController->SetEllipsisMode(ellipsisMode);
@@ -1612,16 +1612,16 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
     mController->SetTextFitContentSize(contentSize);
   }
 
-  DevelText::AutoScroll::Direction autoScrollDirection =
-    mTextScroller ? mTextScroller->GetDirection() : DevelText::AutoScroll::HORIZONTAL;
+  Text::AutoScroll::Direction autoScrollDirection =
+    mTextScroller ? mTextScroller->GetDirection() : Text::AutoScroll::HORIZONTAL;
 
-  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == DevelText::Ellipsize::AUTO_SCROLL)
+  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
   {
     bool visible = DevelActor::IsEffectivelyVisible(self);
     if(visible)
     {
       bool enableAutoScroll = false;
-      if(autoScrollDirection == DevelText::AutoScroll::HORIZONTAL)
+      if(autoScrollDirection == Text::AutoScroll::HORIZONTAL)
       {
         if(mController->IsMultiLineEnabled())
         {
@@ -1651,14 +1651,14 @@ void TextLabel::OnRelayout(const Vector2& size, RelayoutContainer& container)
   bool isVerticalScroll = false;
   if(mController->IsAutoScrollEnabled())
   {
-    isVerticalScroll = autoScrollDirection == DevelText::AutoScroll::VERTICAL ? true : false;
+    isVerticalScroll = autoScrollDirection == Text::AutoScroll::VERTICAL ? true : false;
     bool needLayoutSizeCalculation =
       (isVerticalScroll && mController->GetVerticalAlignment() != Text::Alignment::START) ? true : false;
     if(needLayoutSizeCalculation)
     {
-      mController->SetAutoScrollEnabled(false, false, DevelText::AutoScroll::VERTICAL);
+      mController->SetAutoScrollEnabled(false, false, Text::AutoScroll::VERTICAL);
       originSize = mController->CalculateLayoutSize(contentSize.x, contentSize.y, true);
-      mController->SetAutoScrollEnabled(true, false, DevelText::AutoScroll::VERTICAL);
+      mController->SetAutoScrollEnabled(true, false, Text::AutoScroll::VERTICAL);
     }
   }
 
@@ -1815,7 +1815,7 @@ AsyncTextParameters TextLabel::GetAsyncTextParameters(const Async::RequestType r
   parameters.textFitArray           = mController->GetTextFitArray();
   parameters.isAutoScrollEnabled    = mController->IsAutoScrollEnabled();
   parameters.ellipsisMode           = mController->GetEllipsisMode();
-  if(parameters.isAutoScrollEnabled || parameters.ellipsisMode == DevelText::Ellipsize::AUTO_SCROLL)
+  if(parameters.isAutoScrollEnabled || parameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
   {
     parameters.autoScrollStopMode  = GetTextScroller()->GetStopMode();
     parameters.autoScrollSpeed     = GetTextScroller()->GetSpeed();
@@ -1875,7 +1875,7 @@ void TextLabel::SetAutoScrollVisible(bool visible)
   {
     if(visible)
     {
-      if(mLastEllipsisMode == DevelText::Ellipsize::AUTO_SCROLL)
+      if(mLastEllipsisMode == Text::Ellipsize::AUTO_SCROLL)
       {
         mController->SetEllipsisMode(mLastEllipsisMode);
         if(mTextScroller)
@@ -1894,10 +1894,10 @@ void TextLabel::SetAutoScrollVisible(bool visible)
     }
     else
     {
-      if(mController->GetEllipsisMode() == DevelText::Ellipsize::AUTO_SCROLL)
+      if(mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
       {
-        mLastEllipsisMode = DevelText::Ellipsize::AUTO_SCROLL;
-        mController->SetEllipsisMode(DevelText::Ellipsize::TRUNCATE);
+        mLastEllipsisMode = Text::Ellipsize::AUTO_SCROLL;
+        mController->SetEllipsisMode(Text::Ellipsize::TRUNCATE);
         if(mTextScroller)
         {
           mTextScroller->SetStopMode(Ui::TextLabel::AutoScrollStopMode::IMMEDIATE);
@@ -1937,7 +1937,7 @@ void TextLabel::SetUpAutoScrolling(const Size& contentSize, const Size& originSi
     mTextScroller = Text::TextScroller::New(*this);
   }
 
-  bool        isHorizontal   = mTextScroller->GetDirection() == DevelText::AutoScroll::HORIZONTAL;
+  bool        isHorizontal   = mTextScroller->GetDirection() == Text::AutoScroll::HORIZONTAL;
   const Size& controlSize    = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
   const int   maxTextureSize = Dali::GetMaxTextureSize();
 
@@ -1991,7 +1991,7 @@ void TextLabel::SetUpAutoScrolling(const Size& contentSize, const Size& originSi
       verifiedSize.height = maxTextureSize;
       if(textHeight > maxTextureSize)
       {
-        mController->SetAutoScrollEnabled(false, false, DevelText::AutoScroll::VERTICAL);
+        mController->SetAutoScrollEnabled(false, false, Text::AutoScroll::VERTICAL);
         mController->SetTextElideEnabled(true);
       }
 
@@ -1999,7 +1999,7 @@ void TextLabel::SetUpAutoScrolling(const Size& contentSize, const Size& originSi
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
       if(!mController->IsAutoScrollEnabled())
       {
-        mController->SetAutoScrollEnabled(true, false, DevelText::AutoScroll::VERTICAL);
+        mController->SetAutoScrollEnabled(true, false, Text::AutoScroll::VERTICAL);
       }
     }
   }
@@ -2052,7 +2052,7 @@ void TextLabel::AsyncSetupAutoScroll(Text::AsyncTextRenderInfo renderInfo)
   // Pure Virtual from AsyncTextInterface
 
   // Check current state to prevent starting scroll when ENABLE_AUTO_SCROLL was set to false.
-  if(!mController->IsAutoScrollEnabled() && mController->GetEllipsisMode() == DevelText::Ellipsize::TRUNCATE)
+  if(!mController->IsAutoScrollEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::TRUNCATE)
   {
     if(!mIsAsyncRenderNeeded)
     {
@@ -2088,7 +2088,7 @@ void TextLabel::AsyncSetupAutoScroll(Text::AsyncTextRenderInfo renderInfo)
   Sampler sampler = Sampler::New();
   sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
 
-  bool isHorizontal = mTextScroller->GetDirection() == DevelText::AutoScroll::HORIZONTAL;
+  bool isHorizontal = mTextScroller->GetDirection() == Text::AutoScroll::HORIZONTAL;
   if(isHorizontal)
   {
     sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT,
@@ -2271,7 +2271,7 @@ TextLabel::TextLabel(ControlBehaviour additionalBehaviour)
   mLocale(std::string()),
   mSize(),
   mTouchPosition(),
-  mLastEllipsisMode(DevelText::Ellipsize::TRUNCATE),
+  mLastEllipsisMode(Text::Ellipsize::TRUNCATE),
   mRenderingBackend(DEFAULT_RENDERING_BACKEND),
   mAsyncLineCount(0),
   mTextColorAnimatedCount(0),

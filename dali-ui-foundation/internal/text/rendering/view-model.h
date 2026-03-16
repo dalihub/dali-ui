@@ -23,8 +23,8 @@
 #include <dali/public-api/common/dali-vector.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -90,7 +90,7 @@ public:
   /**
    * @copydoc ModelInterface::GetEllipsisPosition()
    */
-  DevelText::EllipsisPosition::Type GetEllipsisPosition() const override;
+  Text::EllipsisPosition::Type GetEllipsisPosition() const override;
 
   /**
    * @copydoc ModelInterface::IsTextElideEnabled()

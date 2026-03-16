@@ -22,10 +22,10 @@
 #include <dali/public-api/common/dali-vector.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -270,7 +270,7 @@ public:
    *
    * @return The ellipsis position.
    */
-  virtual DevelText::EllipsisPosition::Type GetEllipsisPosition() const = 0;
+  virtual Text::EllipsisPosition::Type GetEllipsisPosition() const = 0;
 
   /**
    * @brief Whether the text elide property is enabled.

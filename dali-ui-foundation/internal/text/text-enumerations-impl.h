@@ -22,10 +22,9 @@
 #include <dali/public-api/object/property-value.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
-// DEVEL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 namespace Dali
 {
 namespace Ui
@@ -78,15 +77,15 @@ const char* GetVerticalAlignmentString(const Alignment& alignment);
  * @param[out] ellipsisPositionType The resulting ellipsisPositionType from the given source
  * @return true if the resulting ellipsisPositionType has been updated
  */
-bool GetEllipsisPositionTypeEnumeration(const Property::Value&                 propertyValue,
-                                        Ui::DevelText::EllipsisPosition::Type& ellipsisPositionType);
+bool GetEllipsisPositionTypeEnumeration(const Property::Value&  propertyValue,
+                                        EllipsisPosition::Type& ellipsisPositionType);
 
 /**
  * @brief Converts the underline type to string format.
  * @param[in] type the Ui::Text::Underline::Type enum source
  * @return the string equivalent
  */
-const char* GetUnderlineTypeToString(const Ui::Text::Underline::Type& type);
+const char* GetUnderlineTypeToString(const Underline::Type& type);
 
 } // namespace Text
 

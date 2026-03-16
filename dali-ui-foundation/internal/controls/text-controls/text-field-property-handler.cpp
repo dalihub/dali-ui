@@ -708,7 +708,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::DevelTextField::Property::ELLIPSIS_POSITION:
     {
-      DevelText::EllipsisPosition::Type ellipsisPositionType(static_cast<DevelText::EllipsisPosition::Type>(
+      Text::EllipsisPosition::Type ellipsisPositionType(static_cast<Text::EllipsisPosition::Type>(
         -1)); // Set to invalid value to ensure a valid mode does get set
       if(Text::GetEllipsisPositionTypeEnumeration(value, ellipsisPositionType))
       {

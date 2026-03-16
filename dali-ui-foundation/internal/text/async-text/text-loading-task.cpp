@@ -122,9 +122,9 @@ void TextLoadingTask::Load()
         naturalSize = mLoader.SetupRenderScale(mParameters, cachedNaturalSize);
       }
 
-      if(mParameters.ellipsis && mParameters.ellipsisMode == DevelText::Ellipsize::AUTO_SCROLL)
+      if(mParameters.ellipsis && mParameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
       {
-        if(mParameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL)
+        if(mParameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL)
         {
           if(mParameters.isMultiLine)
           {
@@ -171,8 +171,8 @@ void TextLoadingTask::Load()
         }
       }
       else if(mParameters.isAutoScrollEnabled &&
-              ((!mParameters.isMultiLine && mParameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL) ||
-               (mParameters.isMultiLine && mParameters.autoScrollDirection == DevelText::AutoScroll::VERTICAL)))
+              ((!mParameters.isMultiLine && mParameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL) ||
+               (mParameters.isMultiLine && mParameters.autoScrollDirection == Text::AutoScroll::VERTICAL)))
       {
 #ifdef TRACE_ENABLED
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())

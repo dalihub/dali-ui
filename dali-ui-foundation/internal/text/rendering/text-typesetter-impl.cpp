@@ -671,8 +671,8 @@ struct InputParameterForEachLine
   const GlyphIndex secondMiddleIndexOfElidedGlyphs;
   const float      elidedOffset;
 
-  const Alignment                         verticalLineAlignType;
-  const DevelText::EllipsisPosition::Type ellipsisPosition;
+  const Alignment                    verticalLineAlignType;
+  const Text::EllipsisPosition::Type ellipsisPosition;
 
   const GlyphInfo* __restrict__ hyphens;
   const Length* __restrict__ hyphenIndices;
@@ -1009,7 +1009,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
 
     // To handle MIDDLE case of ellipsis, the first glyph in the second half of line has been shifted and skip the
     // removed glyph from middle.
-    if(inputParamsForLine.ellipsisPosition == DevelText::EllipsisPosition::MIDDLE)
+    if(inputParamsForLine.ellipsisPosition == Text::EllipsisPosition::MIDDLE)
     {
       if(glyphIndex > inputParamsForLine.firstMiddleIndexOfElidedGlyphs &&
          glyphIndex < inputParamsForLine.secondMiddleIndexOfElidedGlyphs)

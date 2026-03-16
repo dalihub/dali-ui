@@ -902,7 +902,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
   layoutSize.x    = parameters.textWidth;
 
-  if(parameters.isAutoScrollEnabled && parameters.autoScrollDirection == DevelText::AutoScroll::VERTICAL)
+  if(parameters.isAutoScrollEnabled && parameters.autoScrollDirection == Text::AutoScroll::VERTICAL)
   {
     layoutSize.y = parameters.textHeight;
   }
@@ -1011,7 +1011,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     // This will be uploaded in async text interface's setup auto scroll.
     renderInfo.autoScrollPixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                          parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL, Pixel::RGBA8888,
+                          parameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL, Pixel::RGBA8888,
                           Size(parameters.originWidth, parameters.originHeight));
   }
 
@@ -1322,7 +1322,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
   float     wrapGap        = 0.0f;
-  bool      isHorizontal   = parameters.autoScrollDirection == DevelText::AutoScroll::HORIZONTAL;
+  bool      isHorizontal   = parameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL;
   const int maxTextureSize = parameters.maxTextureSize;
 
   if(isHorizontal)

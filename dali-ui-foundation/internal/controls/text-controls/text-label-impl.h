@@ -583,7 +583,7 @@ private: // Data
   Vector2     mSize;
   Vector2     mTouchPosition; ///< The initial touch down position.
 
-  Ui::DevelText::Ellipsize::Mode mLastEllipsisMode;
+  Ui::Text::Ellipsize::Mode mLastEllipsisMode;
 
   int  mRenderingBackend;
   int  mAsyncLineCount;

@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 // DEVEL INCLUDES
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 
 namespace Dali
 {
@@ -332,7 +332,7 @@ public:
    *
    * @param[in] underlineType The type of the underline.
    */
-  void SetUnderlineType(Text::Underline::Type type);
+  void SetUnderlineType(Underline::Type type);
 
   /**
    * @brief Set the override used for the width of the dashes of the dashed underline.
@@ -360,7 +360,7 @@ public:
    *
    * @return Returns the override type for the underline.
    */
-  Text::Underline::Type GetUnderlineType() const;
+  Underline::Type GetUnderlineType() const;
 
   /**
    * @brief Retrieves the dashed underline width.
@@ -485,14 +485,14 @@ public:
    * @brief Sets ellipsis position
    * @param[in] ellipsisPosition The ellipsis position for the text
    */
-  void SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition);
+  void SetEllipsisPosition(EllipsisPosition::Type ellipsisPosition);
 
   /**
    * @brief Retrieves ellipsis position for text.
    *
    * @return The ellipsis position.
    */
-  Ui::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
+  EllipsisPosition::Type GetEllipsisPosition() const;
 
   /**
    * @brief Enable or disable the text elide.
@@ -831,7 +831,7 @@ public:
   Vector2                          mOutlineOffset;             ///< Offset for outline
   float                            mUnderlineHeight;           ///< Fixed height for underline to override font metrics.
   float                            mStrikethroughHeight;       ///< Fixed height for strikethrough to override font metrics.
-  Text::Underline::Type            mUnderlineType;             ///< The type of the underline.
+  Underline::Type                  mUnderlineType;             ///< The type of the underline.
   float                            mDashedUnderlineWidth;      ///< The width of the dashes of the dashed underline.
   float                            mDashedUnderlineGap;        ///< The gap between the dashes of the dashed underline.
   float                            mShadowBlurRadius;          ///< Blur radius of shadow, 0 indicates no blur.
@@ -856,9 +856,9 @@ private:
   LineIndex mCachedLineIndex; ///< Used to increase performance in consecutive calls to GetLineOfGlyph() or
                               ///< GetLineOfCharacter() with consecutive glyphs or characters.
 
-  DevelText::EllipsisPosition::Type mEllipsisPosition;         ///< Where is the location the text elide
-  GlyphIndex                        mStartIndexOfElidedGlyphs; ///< The start index of elided glyphs.
-  GlyphIndex                        mEndIndexOfElidedGlyphs;   ///< The end index of elided glyphs.
+  EllipsisPosition::Type mEllipsisPosition;         ///< Where is the location the text elide
+  GlyphIndex             mStartIndexOfElidedGlyphs; ///< The start index of elided glyphs.
+  GlyphIndex             mEndIndexOfElidedGlyphs;   ///< The end index of elided glyphs.
   GlyphIndex
              mFirstMiddleIndexOfElidedGlyphs;  ///< The first end index of elided glyphs, index before ellipsis of middle.
   GlyphIndex mSecondMiddleIndexOfElidedGlyphs; ///< The first end index of elided glyphs, index of ellipsis of middle.

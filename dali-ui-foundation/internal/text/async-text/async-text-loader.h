@@ -114,9 +114,9 @@ struct AsyncTextParameters
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
     layoutDirectionPolicy{LayoutDirectionMode::INHERIT},
-    ellipsisPosition{DevelText::EllipsisPosition::END},
-    ellipsisMode{DevelText::Ellipsize::TRUNCATE},
-    autoScrollDirection{DevelText::AutoScroll::HORIZONTAL},
+    ellipsisPosition{Text::EllipsisPosition::END},
+    ellipsisMode{Text::Ellipsize::TRUNCATE},
+    autoScrollDirection{Text::AutoScroll::HORIZONTAL},
     autoScrollStopMode{TextLabel::AutoScrollStopMode::FINISH_LOOP},
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
@@ -205,10 +205,10 @@ struct AsyncTextParameters
   Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
   Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
   LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
-  DevelText::EllipsisPosition::Type
-                                   ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  DevelText::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
-  DevelText::AutoScroll::Direction autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
+  Text::EllipsisPosition::Type
+                              ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  Text::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
+  Text::AutoScroll::Direction autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
   TextLabel::AutoScrollStopMode::Type
              autoScrollStopMode; ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
   FontWeight fontWeight;         ///< The font's weight.

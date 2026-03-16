@@ -28,12 +28,12 @@
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-anchor-devel.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup-callback-interface.h>
-#include <dali-ui-foundation/devel-api/text/text-enumerations-devel.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/input-filter.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -262,7 +262,7 @@ public: // Configure the text controller.
    * @param[in] direction Direction of the auto scroll.
    */
   void SetAutoScrollEnabled(bool enable, bool requestRelayout = true,
-                            DevelText::AutoScroll::Direction direction = DevelText::AutoScroll::HORIZONTAL);
+                            Text::AutoScroll::Direction direction = Text::AutoScroll::HORIZONTAL);
 
   /**
    * @brief Whether the auto scrolling texture exceed max texture.
@@ -1941,25 +1941,25 @@ public: // Queries & retrieves.
    * @brief Retrieves ellipsis position
    * @return The ellipsis position
    */
-  Ui::DevelText::EllipsisPosition::Type GetEllipsisPosition() const;
+  Text::EllipsisPosition::Type GetEllipsisPosition() const;
 
   /**
    * @brief Sets ellipsis position
    * @param[in] ellipsisPosition The ellipsis position for the text
    */
-  void SetEllipsisPosition(Ui::DevelText::EllipsisPosition::Type ellipsisPosition);
+  void SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition);
 
   /**
    * @brief Retrieves ellipsis mode
    * @return The ellipsis mode
    */
-  Ui::DevelText::Ellipsize::Mode GetEllipsisMode() const;
+  Text::Ellipsize::Mode GetEllipsisMode() const;
 
   /**
    * @brief Sets ellipsis mode
    * @param[in] ellipsisMode The ellipsis mode for the text
    */
-  void SetEllipsisMode(Ui::DevelText::Ellipsize::Mode ellipsisMode);
+  void SetEllipsisMode(Text::Ellipsize::Mode ellipsisMode);
 
   /**
    * @brief Sets the render scale
