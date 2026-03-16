@@ -34,18 +34,6 @@ enum Type
 
 } // namespace TextDirection
 
-namespace LineWrap
-{
-enum Mode
-{
-  WORD,
-  CHARACTER,
-  HYPHENATION, // HYPHENATION mode will add hyphen and move part of the word to the next line.
-  MIXED        // MIXEd mode will apply WORD mode, if failed try HYPHENATION mode, if failed try CHARACTER.
-};
-
-} // namespace LineWrap
-
 /**
  * A enum for defining text layout directions.
  * It can also be inherited (from a parent) or deduced from the default language script of a locale.

@@ -966,7 +966,7 @@ public:
   /**
    * @copydoc Controller::SetLineWrapMode()
    */
-  void SetLineWrapMode(Text::LineWrap::Mode textWarpMode);
+  void SetLineWrapMode(LineWrap textWarpMode);
 
   /**
    * @copydoc Controller::SetDefaultColor()

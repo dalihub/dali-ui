@@ -165,8 +165,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
 
     case Ui::TextField::Property::HORIZONTAL_ALIGNMENT:
     {
-      Text::Alignment alignment(
-        static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
+      Text::Alignment alignment = Text::Alignment::START;
       if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         DALI_LOG_INFO(gTextFieldLogFilter, Debug::General, "TextField %p HORIZONTAL_ALIGNMENT %d\n",
@@ -177,8 +176,7 @@ void TextField::PropertyHandler::SetProperty(Ui::TextField textField, Property::
     }
     case Ui::TextField::Property::VERTICAL_ALIGNMENT:
     {
-      Ui::Text::Alignment alignment(
-        static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
+      Text::Alignment alignment = Text::Alignment::START;
       if(Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.mController->SetVerticalAlignment(alignment);

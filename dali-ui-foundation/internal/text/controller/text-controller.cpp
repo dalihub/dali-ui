@@ -439,12 +439,12 @@ DevelTextLabel::Render::Mode Controller::GetRenderMode()
   return mImpl->mRenderMode;
 }
 
-void Controller::SetLineWrapMode(Text::LineWrap::Mode lineWrapMode)
+void Controller::SetLineWrapMode(LineWrap lineWrapMode)
 {
   mImpl->SetLineWrapMode(lineWrapMode);
 }
 
-Text::LineWrap::Mode Controller::GetLineWrapMode() const
+LineWrap Controller::GetLineWrapMode() const
 {
   return mImpl->mModel->mLineWrapMode;
 }

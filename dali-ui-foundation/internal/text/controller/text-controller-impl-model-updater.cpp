@@ -192,8 +192,8 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
       multilanguageSupport.UpdateICULineBreak(currentText, numberOfCharacters, lineBreakInfo.Begin());
     }
 
-    if(impl.mModel->mLineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
-       impl.mModel->mLineWrapMode == ((Text::LineWrap::Mode)DevelText::LineWrap::MIXED))
+    if(impl.mModel->mLineWrapMode == LineWrap::HYPHENATION ||
+       impl.mModel->mLineWrapMode == LineWrap::MIXED)
     {
       CharacterIndex end                 = startIndex + requestedNumberOfCharacters;
       LineBreakInfo* lineBreakInfoBuffer = lineBreakInfo.Begin();

@@ -39,12 +39,16 @@ const Dali::Scripting::StringEnum TEXT_ALIGNMENT_TYPE_TABLE[] =
     {"END", static_cast<int32_t>(Alignment::END)},
 };
 
-const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TYPE_TABLE) / sizeof(TEXT_ALIGNMENT_TYPE_TABLE[0]));
+const Dali::Scripting::StringEnum LINE_WRAP_MODE_TABLE[] =
+  {
+    {"WORD", static_cast<int32_t>(LineWrap::WORD)},
+    {"CHARACTER", static_cast<int32_t>(LineWrap::CHARACTER)},
+    {"HYPHENATION", static_cast<int32_t>(LineWrap::HYPHENATION)},
+    {"MIXED", static_cast<int32_t>(LineWrap::MIXED)},
+};
 
-DALI_ENUM_TO_STRING_TABLE_BEGIN(LINE_WRAP_MODE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::LineWrap, WORD)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::LineWrap, CHARACTER)
-DALI_ENUM_TO_STRING_TABLE_END(LINE_WRAP_MODE)
+const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TYPE_TABLE) / sizeof(TEXT_ALIGNMENT_TYPE_TABLE[0]));
+const uint32_t LINE_WRAP_MODE_TABLE_COUNT      = static_cast<uint32_t>(sizeof(LINE_WRAP_MODE_TABLE) / sizeof(LINE_WRAP_MODE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::DevelText::EllipsisPosition, END)
@@ -87,10 +91,21 @@ bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue, Align
   return result;
 }
 
-bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::LineWrap::Mode& lineWrapMode)
+bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, LineWrap& lineWrapMode)
 {
-  return Scripting::GetEnumerationProperty(propertyValue, LINE_WRAP_MODE_TABLE, LINE_WRAP_MODE_TABLE_COUNT,
-                                           lineWrapMode);
+  int enumValue = 0;
+
+  const bool result = Scripting::GetEnumerationProperty(propertyValue,
+                                                        LINE_WRAP_MODE_TABLE,
+                                                        LINE_WRAP_MODE_TABLE_COUNT,
+                                                        enumValue);
+
+  if(result)
+  {
+    lineWrapMode = static_cast<LineWrap>(enumValue);
+  }
+
+  return result;
 }
 
 const char* GetHorizontalAlignmentString(const Alignment& alignment)

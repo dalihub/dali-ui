@@ -48,42 +48,30 @@ enum class Alignment : uint8_t
 };
 
 /**
- * @brief Contains modes which specify how lines are wrapped.
+ * @brief Enumeration for line wrapping strategies.
  *
- * If the layout width is too short to show the full text, then a wrapping mode can be specified.
- *
- * LineWrap::WORD mode will move an entire word to the next line:
- * @code
- * +---------+
- * |HELLO    |
- * |WORLD    |
- * +---------+
- * @endcode
- *
- * LineWrap::CHARACTER mode will move character by character to the next line:
- * @code
- * +---------+
- * |HELLO WOR|
- * |LD       |
- * +---------+
- * @endcode
- *
- * @SINCE_1_2.60
+ * Specifies how text is wrapped when the available layout width
+ * is insufficient to display the entire text on a single line.
  */
-namespace LineWrap
+enum class LineWrap : uint8_t
 {
-/**
- * @brief Enumerations specifying how a line is wrapped.
- * @SINCE_1_2.60
- * @see LineWrap
- */
-enum Mode
-{
-  WORD,     ///< @SINCE_1_2.60
-  CHARACTER ///< @SINCE_1_2.60
+  /**
+   * @brief Wraps at word boundaries.
+   */
+  WORD = 0,
+  /**
+   * @brief Wraps at individual characters.
+   */
+  CHARACTER = 1,
+  /**
+   * @brief Wraps using hyphenation when possible.
+   */
+  HYPHENATION = 2,
+  /**
+   * @brief Tries WORD wrapping first, then HYPHENATION, and falls back to CHARACTER.
+   */
+  MIXED = 3
 };
-
-} // namespace LineWrap
 
 /**
  * @brief The available underline types for text.

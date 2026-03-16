@@ -360,8 +360,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::HORIZONTAL_ALIGNMENT:
       {
-        Text::Alignment alignment(static_cast<Text::Alignment>(
-          -1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment = Text::Alignment::START;
         if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
         {
           impl.mController->SetHorizontalAlignment(alignment);
@@ -371,7 +370,7 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::VERTICAL_ALIGNMENT:
       {
-        Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment = Text::Alignment::START;
         if(Text::GetVerticalAlignmentEnumeration(value, alignment))
         {
           impl.mController->SetVerticalAlignment(alignment);
@@ -521,9 +520,8 @@ void TextLabel::SetProperty(BaseObject* object, Property::Index index, const Pro
       }
       case Ui::TextLabel::Property::LINE_WRAP_MODE:
       {
-        Text::LineWrap::Mode lineWrapMode(
-          static_cast<Text::LineWrap::Mode>(-1)); // Set to invalid value to ensure a valid mode does get set
-        if(GetLineWrapModeEnumeration(value, lineWrapMode))
+        Text::LineWrap lineWrapMode = Text::LineWrap::WORD;
+        if(Text::GetLineWrapModeEnumeration(value, lineWrapMode))
         {
           DALI_LOG_INFO(gLogFilter, Debug::General, "TextLabel %p LineWrap::MODE %d\n", impl.mController.Get(),
                         lineWrapMode);

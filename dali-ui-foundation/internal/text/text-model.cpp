@@ -397,7 +397,7 @@ Model::Model()
   mHorizontalAlignment(Alignment::START),
   mVerticalAlignment(Alignment::START),
   mVerticalLineAlignment(Alignment::START),
-  mLineWrapMode(Text::LineWrap::WORD),
+  mLineWrapMode(LineWrap::WORD),
   mAlignmentOffset(0.0f),
   mElideEnabled(false),
   mIgnoreSpacesAfterText(true),

@@ -56,7 +56,7 @@ bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue,
  * @param[out] alignment The resulting lineWrapMode from the given source
  * @return true if the resulting lineWrapMode has been updated
  */
-bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, Ui::Text::LineWrap::Mode& lineWrapMode);
+bool GetLineWrapModeEnumeration(const Property::Value& propertyValue, LineWrap& lineWrapMode);
 
 /**
  * @brief Get the alignment string from the provided alignment string.

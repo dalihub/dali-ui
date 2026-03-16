@@ -748,12 +748,12 @@ struct Engine::Impl
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
     const bool isWordLaidOut =
-      parameters.textModel->mLineWrapMode == Text::LineWrap::WORD ||
-      (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION) ||
-      (parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::MIXED);
+      parameters.textModel->mLineWrapMode == LineWrap::WORD ||
+      (parameters.textModel->mLineWrapMode == LineWrap::HYPHENATION) ||
+      (parameters.textModel->mLineWrapMode == LineWrap::MIXED);
     const bool isHyphenMode =
-      parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::HYPHENATION;
-    const bool isMixedMode = parameters.textModel->mLineWrapMode == (Text::LineWrap::Mode)DevelText::LineWrap::MIXED;
+      parameters.textModel->mLineWrapMode == LineWrap::HYPHENATION;
+    const bool isMixedMode = parameters.textModel->mLineWrapMode == LineWrap::MIXED;
 
     const bool isSplitToTwoHalves =
       elideTextEnabled && !isMultiline && ellipsisPosition == DevelText::EllipsisPosition::MIDDLE;

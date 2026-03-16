@@ -406,13 +406,13 @@ public: // Configure the text controller.
    * @brief Sets the text's wrap mode
    * @param[in] text wrap mode The unit of wrapping
    */
-  void SetLineWrapMode(Text::LineWrap::Mode textWarpMode);
+  void SetLineWrapMode(LineWrap textWarpMode);
 
   /**
    * @brief Retrieve text wrap mode previously set.
    * @return text wrap mode
    */
-  Text::LineWrap::Mode GetLineWrapMode() const;
+  LineWrap GetLineWrapMode() const;
 
   /**
    * @brief Enable or disable the text elide.
