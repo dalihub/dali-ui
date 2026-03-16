@@ -34,14 +34,15 @@ plugins:
   - mkdoxy:
       projects:
         daliUi:
-          src-dirs: .
+          src-dirs: >-
+            dali-ui-foundation/public-api
+            dali-ui-foundation/integration-api
+            dali-ui-elements/public-api
+            dali-ui-elements/integration-api
+            dali-ui-components/public-api
+            dali-ui-components/integration-api
           full-doc: True
           doxy-cfg:
-            INPUT: >-
-              dali-ui-foundation/public-api
-              dali-ui-foundation/integration-api
-              dali-ui-elements/public-api
-              dali-ui-components/public-api
             FILE_PATTERNS: "*.h *.md"
             EXTRACT_ANON_NSPACES: "NO"
             RECURSIVE: "YES"
