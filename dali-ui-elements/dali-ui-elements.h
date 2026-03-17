@@ -18,4 +18,3 @@
 
 // EXTERNAL INCLUDES
 // INTERNAL INCLUDES
-#include <dali-ui-elements/public-api/label.h>

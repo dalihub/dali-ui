@@ -19,8 +19,8 @@
 #include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-elements/integration-api/label-impl.h>
-#include <dali-ui-elements/public-api/label.h>
+#include <dali-ui-foundation/integration-api/label-impl.h>
+#include <dali-ui-foundation/public-api/label.h>
 
 namespace Dali
 {

@@ -16,7 +16,6 @@
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
-#include <dali-ui-elements/dali-ui-elements.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
