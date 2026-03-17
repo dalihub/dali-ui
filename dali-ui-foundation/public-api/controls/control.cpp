@@ -23,10 +23,10 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/internal/controls/control/control-accessibility-data.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
-#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 
 namespace

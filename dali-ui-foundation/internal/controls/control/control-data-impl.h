@@ -27,9 +27,9 @@
 #include <string>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
 #include <map>

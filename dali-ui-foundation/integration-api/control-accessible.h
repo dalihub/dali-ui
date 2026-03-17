@@ -26,64 +26,14 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/accessibility-highlight-overlay.h>
+#include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
+#include <dali-ui-foundation/public-api/controls/control-accessibility-enums.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali::Ui
 {
-/**
- * @brief Represents current state of a control.
- */
-enum class AccessibilityState : uint32_t
-{
-  ENABLED = 0,
-  SELECTED,
-  CHECKED,
-  BUSY,
-  EXPANDED,
-  MAX_COUNT
-};
-using AccessibilityStates = Accessibility::EnumBitSet<AccessibilityState, AccessibilityState::MAX_COUNT>;
 
-constexpr const uint32_t ROLE_START_INDEX = 200;
-/**
- * @brief AccessibilityRole represents the purpose of a control.
- */
-enum class AccessibilityRole : uint32_t
-{
-  ADJUSTABLE = ROLE_START_INDEX,
-  ALERT,
-  BUTTON,
-  CHECK_BOX,
-  COMBO_BOX,
-  CONTAINER,
-  DIALOG,
-  ENTRY,
-  HEADER,
-  IMAGE,
-  LINK,
-  LIST,
-  LIST_ITEM,
-  MENU,
-  MENU_BAR,
-  MENU_ITEM,
-  NONE,
-  NOTIFICATION,
-  PASSWORD_TEXT,
-  POPUP_MENU,
-  PROGRESS_BAR,
-  RADIO_BUTTON,
-  SCROLL_BAR,
-  SPIN_BUTTON,
-  TAB,
-  TAB_LIST,
-  TEXT,
-  TOGGLE_BUTTON,
-  TOOL_BAR,
-  SCENE_3D,
-  MODEL,
-  MAX_COUNT
-};
+using AccessibilityStates = Accessibility::EnumBitSet<AccessibilityState, AccessibilityState::MAX_COUNT>;
 
 /**
  * @brief Represents the Accessible object for Dali::Ui::Control and derived classes

@@ -19,6 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/controls/control-accessibility-enums.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/devel-api/adaptor-framework/accessibility-bridge.h>
 #include <dali/devel-api/adaptor-framework/input-method-context.h>

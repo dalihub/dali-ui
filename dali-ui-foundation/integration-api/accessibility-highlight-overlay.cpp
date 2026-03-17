@@ -32,8 +32,8 @@
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 
+#include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-accessible.h>
 
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 
