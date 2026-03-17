@@ -41,11 +41,7 @@ namespace Ui
  * @{
  */
 
-namespace DevelControl
-{
 class ControlAccessible;
-
-} // namespace DevelControl
 
 namespace Internal
 {
