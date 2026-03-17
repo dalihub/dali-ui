@@ -61,7 +61,7 @@ public:
    *
    * @param[in] config The UiConfig to use globally
    */
-  void Initialize(UiConfig config);
+  void Initialize(const UiConfig& config);
 
   /**
    * @brief Returns whether Init() has been called.
@@ -210,17 +210,12 @@ private:
 
 private:
   UiConfig              mConfig;
-  ExecutionKeyPredicate mCachedExecutionKeyPredicate;
-  Vector4               mCachedDefaultTextColor;
-  float                 mCachedScalingFactor;
-  float                 mCachedDpiFactor;
-  float                 mCachedScaledDpiFactor;
-  float                 mCachedDefaultFontSize;
-  int                   mCachedDpi;
-  int                   mCachedBaselineDpi;
-  KeyClickPolicy        mCachedKeyClickPolicy;
-  uint32_t              mCachedMinLongPressKeyCount;
-  uint32_t              mCachedTapRecognizerTime;
+  // Cached derived factors for the unit system (spx/dp/sdp).
+  // These are frequently queried in hot paths (e.g. unit literals and layout scaling).
+  // UiConfig becomes immutable after Initialize() (Freeze()), so caching is safe.
+  float mCachedScalingFactor{1.0f};
+  float mCachedDpiFactor{1.0f};
+  float mCachedScaledDpiFactor{1.0f};
   bool                  mInitialized{false};
 };
 

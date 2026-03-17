@@ -115,16 +115,6 @@ int UiConfigImpl::GetBaselineDpi() const
   return mBaselineDpi;
 }
 
-float UiConfigImpl::GetDpiFactor() const
-{
-  return static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
-}
-
-float UiConfigImpl::GetScaledDpiFactor() const
-{
-  return GetDpiFactor() * mScalingFactor;
-}
-
 void UiConfigImpl::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");

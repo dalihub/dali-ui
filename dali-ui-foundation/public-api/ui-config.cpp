@@ -48,7 +48,9 @@ UiConfig UiConfig::DownCast(BaseHandle handle)
 
 void UiConfig::Apply()
 {
-  Integration::UiConfigManager::Get().Initialize(std::move(*this));
+  // Do not self-move: Apply() freezes the underlying implementation, but the handle
+  // should remain usable (e.g. for getters) to match user expectations.
+  Integration::UiConfigManager::Get().Initialize(*this);
 }
 
 UiConfig& UiConfig::SetScalingFactor(float scalingFactor)

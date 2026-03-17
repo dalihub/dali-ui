@@ -117,20 +117,6 @@ public:
   int GetBaselineDpi() const;
 
   /**
-   * @brief Computes the DPI factor (dpi / baselineDpi).
-   *
-   * @return The computed DPI factor
-   */
-  float GetDpiFactor() const;
-
-  /**
-   * @brief Computes the scaled DPI factor (dpiFactor * scalingFactor).
-   *
-   * @return The computed scaled DPI factor
-   */
-  float GetScaledDpiFactor() const;
-
-  /**
    * @brief Sets the default key click policy.
    *
    * @pre Must not be frozen.
