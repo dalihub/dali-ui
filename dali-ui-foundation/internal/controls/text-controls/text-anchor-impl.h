@@ -1,5 +1,4 @@
-#ifndef DALI_UI_INTERNAL_TEXT_ANCHOR_H
-#define DALI_UI_INTERNAL_TEXT_ANCHOR_H
+#pragma once
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -22,10 +21,10 @@
 #include <dali/devel-api/atspi-interfaces/hyperlink.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-anchor-devel.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 
 namespace Dali
 {
@@ -33,19 +32,30 @@ namespace Ui
 {
 namespace Internal
 {
+
+class TextAnchorImpl;
+using TextAnchorImplPtr = IntrusivePtr<TextAnchorImpl>;
+
 /**
  * @brief A control which renders anchor (hyperlink) in hypertext.
  */
-class TextAnchor : public Control
+class TextAnchorImpl : public Integration::ViewImpl
 {
 public:
   /**
-   * @copydoc Dali::Toollkit::TextAnchor::New()
+   * @brief Creates a new TextAnchor.
    */
-  static Ui::TextAnchor New();
+  static TextAnchorImplPtr New();
+
+protected:
+  /**
+   * A reference counted object may only be deleted by calling Unreference()
+   */
+  virtual ~TextAnchorImpl();
 
   // Properties
 
+public:
   /**
    * @brief Called when a property of an object of this type is set.
    *
@@ -53,7 +63,7 @@ public:
    * @param[in] index The property index.
    * @param[in] value The new property value.
    */
-  static void SetProperty(BaseObject* object, Property::Index index, const Property::Value& value);
+  static void SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value);
 
   /**
    * @brief Called to retrieve a property of an object of this type.
@@ -62,11 +72,11 @@ public:
    * @param[in] index The property index.
    * @return The current value of the property.
    */
-  static Property::Value GetProperty(BaseObject* object, Property::Index index);
+  static Dali::Property::Value GetProperty(BaseObject* object, Dali::Property::Index index);
 
-private: // From Control
+private: // From ViewImpl
   /**
-   * @copydoc Control::OnInitialize()
+   * @copydoc Integration::ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 
@@ -76,30 +86,20 @@ private: // From Control
   ControlAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc Control::OnPropertySet()
-   */
-  // void OnPropertySet(Property::Index index, const Property::Value& propertyValue) override;
-
-  /**
    * @copydoc Control::OnAccessibilityActivated()
    */
   bool OnAccessibilityActivated() override;
 
 private: // Implementation
   /**
-   * Construct a new TextAnchor.
+   * Construct a new TextAnchorImpl.
    */
-  TextAnchor();
-
-  /**
-   * A reference counted object may only be deleted by calling Unreference()
-   */
-  virtual ~TextAnchor();
+  TextAnchorImpl();
 
 private:
   // Undefined copy constructor and assignment operators
-  TextAnchor(const TextAnchor&);
-  TextAnchor& operator=(const TextAnchor& rhs);
+  TextAnchorImpl(const TextAnchorImpl&);
+  TextAnchorImpl& operator=(const TextAnchorImpl& rhs);
 
   // Data
   int         mStartCharacterIndex;
@@ -153,22 +153,22 @@ protected:
   };
 };
 
-inline Ui::Internal::TextAnchor& GetImpl(Ui::TextAnchor& textAnchor)
+inline Ui::Internal::TextAnchorImpl& GetImpl(Ui::TextAnchor& textAnchor)
 {
   DALI_ASSERT_ALWAYS(textAnchor);
 
   Dali::RefObject& handle = textAnchor.GetImplementation();
 
-  return static_cast<Ui::Internal::TextAnchor&>(handle);
+  return static_cast<Ui::Internal::TextAnchorImpl&>(handle);
 }
 
-inline const Ui::Internal::TextAnchor& GetImpl(const Ui::TextAnchor& textAnchor)
+inline const Ui::Internal::TextAnchorImpl& GetImpl(const Ui::TextAnchor& textAnchor)
 {
   DALI_ASSERT_ALWAYS(textAnchor);
 
   const Dali::RefObject& handle = textAnchor.GetImplementation();
 
-  return static_cast<const Ui::Internal::TextAnchor&>(handle);
+  return static_cast<const Ui::Internal::TextAnchorImpl&>(handle);
 }
 
 } // namespace Internal
@@ -176,5 +176,3 @@ inline const Ui::Internal::TextAnchor& GetImpl(const Ui::TextAnchor& textAnchor)
 } // namespace Ui
 
 } // namespace Dali
-
-#endif // DALI_UI_INTERNAL_TEXT_ANCHOR_H

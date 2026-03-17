@@ -25,8 +25,8 @@
 #include <dali/public-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-anchor-devel.h>
 #include <dali-ui-foundation/integration-api/control-accessible.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
