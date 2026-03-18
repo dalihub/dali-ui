@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/math/vector4.h>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -173,6 +174,22 @@ public:
    */
   bool IsFocusIndicatorAlwaysShown() const;
 
+  /**
+   * @brief Retrieves the cached default font size.
+   *
+   * @pre Initialize() must have been called.
+   * @return The default font size in points
+   */
+  float GetDefaultFontSize() const;
+
+  /**
+   * @brief Retrieves the cached default text color.
+   *
+   * @pre Initialize() must have been called.
+   * @return The default text color
+   */
+  Vector4 GetDefaultTextColor() const;
+
   /*
    * @brief Creates a ThemeLoaderInterface instance from the current config.
    *
@@ -194,9 +211,11 @@ private:
 private:
   UiConfig              mConfig;
   ExecutionKeyPredicate mCachedExecutionKeyPredicate;
+  Vector4               mCachedDefaultTextColor;
   float                 mCachedScalingFactor;
   float                 mCachedDpiFactor;
   float                 mCachedScaledDpiFactor;
+  float                 mCachedDefaultFontSize;
   int                   mCachedDpi;
   int                   mCachedBaselineDpi;
   KeyClickPolicy        mCachedKeyClickPolicy;

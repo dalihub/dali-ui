@@ -59,27 +59,6 @@ Integration development package for DALi UI - headers for integration level.
 
 
 ##############################
-# dali-ui-elements
-##############################
-%define dali_ui_elements dali2-ui-elements
-%package -n %{dali_ui_elements}
-Summary:    DALi UI elements
-Group:      System/Libraries
-License:    Apache-2.0 and BSD-3-Clause and MIT
-Requires:   dali2-ui-foundation
-
-%description -n %{dali_ui_elements}
-DALi UI elements providing TextLabel and Image.
-
-%package -n %{dali_ui_elements}-devel
-Summary:    Development components for dali-ui-elements
-Group:      Development/Building
-Requires:   %{dali_ui_elements} = %{version}-%{release}
-
-%description -n %{dali_ui_elements}-devel
-Development components for dali-ui-elements.
-
-##############################
 # dali-ui-components
 ##############################
 %define dali_ui_components dali2-ui-components
@@ -88,7 +67,6 @@ Summary:    DALi UI components
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
 Requires:   dali2-ui-foundation
-Requires:   dali2-ui-elements
 
 %description -n %{dali_ui_components}
 DALi UI components providing controls such as Button.
@@ -210,10 +188,8 @@ done
 
 cd ../../
 cp dali-ui.manifest %{name}.manifest
-cp dali-ui.manifest %{dali_ui_elements}.manifest
 cp dali-ui.manifest %{dali_ui_components}.manifest
 cp dali-ui.manifest-smack %{name}.manifest-smack
-cp dali-ui.manifest-smack %{dali_ui_elements}.manifest-smack
 cp dali-ui.manifest-smack %{dali_ui_components}.manifest-smack
 
 ##############################
@@ -260,22 +236,6 @@ exit 0
 %{dev_include_path}/dali-ui-foundation/dali-ui-foundation-integ.h
 %{dev_include_path}/dali-ui-foundation/devel-api/*
 %{dev_include_path}/dali-ui-foundation/integration-api/*
-
-%files -n %{dali_ui_elements}
-%if 0%{?enable_dali_smack_rules}
-%manifest %{dali_ui_elements}.manifest-smack
-%else
-%manifest %{dali_ui_elements}.manifest
-%endif
-%defattr(-,root,root,-)
-%{_libdir}/lib%{dali_ui_elements}.so*
-%license LICENSE
-
-%files -n %{dali_ui_elements}-devel
-%defattr(-,root,root,-)
-%{_libdir}/pkgconfig/%{dali_ui_elements}.pc
-%{_includedir}/dali-ui-elements/*.h
-%{_includedir}/dali-ui-elements/public-api/*
 
 %files -n %{dali_ui_components}
 %if 0%{?enable_dali_smack_rules}

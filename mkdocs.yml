@@ -37,8 +37,6 @@ plugins:
           src-dirs: >-
             dali-ui-foundation/public-api
             dali-ui-foundation/integration-api
-            dali-ui-elements/public-api
-            dali-ui-elements/integration-api
             dali-ui-components/public-api
             dali-ui-components/integration-api
           full-doc: True
@@ -53,7 +51,7 @@ plugins:
             HIDE_UNDOC_MEMBERS: "NO"
             SOURCE_BROWSER: "YES"
             STRIP_FROM_INC_PATH: "."
-            INCLUDE_PATH: "dali-ui-foundation dali-ui-elements dali-ui-components"
+            INCLUDE_PATH: "dali-ui-foundation dali-ui-components"
             ENABLE_PREPROCESSING: "YES"
             MACRO_EXPANSION: "YES"
             SEARCH_INCLUDES: "YES"

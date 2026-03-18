@@ -18,7 +18,6 @@ BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(dali2-core)
 BuildRequires:  pkgconfig(dali2-adaptor)
 BuildRequires:  pkgconfig(dali2-ui-foundation)
-BuildRequires:  pkgconfig(dali2-ui-elements)
 BuildRequires:  pkgconfig(dali2-ui-components)
 
 %description

@@ -1,7 +1,7 @@
 find_package(Python3 REQUIRED)
 
 # @brief Registers headers for method chaining autogen.
-# @param TARGET_NAME The name of the target (e.g., dali-ui-elements)
+# @param TARGET_NAME The name of the target (e.g., dali-ui-components)
 # @param HEADER_DIR The root directory to scan headers from
 function(dali_ui_autogen_chaining_macro TARGET_NAME HEADER_DIR)
   # 1. 대상 디렉토리의 모든 헤더 수집

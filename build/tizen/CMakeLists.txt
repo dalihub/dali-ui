@@ -172,7 +172,6 @@ ENDIF()
 
 # Add libraries
 ADD_SUBDIRECTORY(dali-ui-foundation)
-ADD_SUBDIRECTORY(dali-ui-elements)
 ADD_SUBDIRECTORY(dali-ui-components)
 
 SET(CUSTOM_COMPILE_OPTIONS "")

@@ -161,5 +161,27 @@ bool UiConfig::IsFocusIndicatorAlwaysShown() const
   return GetImpl(*this).IsFocusIndicatorAlwaysShown();
 }
 
+UiConfig& UiConfig::SetDefaultFontSize(float fontSize)
+{
+  GetImpl(*this).SetDefaultFontSize(fontSize);
+  return *this;
+}
+
+float UiConfig::GetDefaultFontSize() const
+{
+  return GetImpl(*this).GetDefaultFontSize();
+}
+
+UiConfig& UiConfig::SetDefaultTextColor(const Vector4& color)
+{
+  GetImpl(*this).SetDefaultTextColor(color);
+  return *this;
+}
+
+Vector4 UiConfig::GetDefaultTextColor() const
+{
+  return GetImpl(*this).GetDefaultTextColor();
+}
+
 } // namespace Ui
 } // namespace Dali

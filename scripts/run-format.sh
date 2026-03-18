@@ -17,7 +17,7 @@ case "$1" in
     ("full")
         echo "> Fixing all src files with $CF..."
         # 2. 대상 파일 수집
-        TARGETS="dali-ui-foundation dali-ui-elements dali-ui-components"
+        TARGETS="dali-ui-foundation dali-ui-components"
         FILES=$(find $TARGETS -path "./build" -prune -o -path "./automated-tests" -prune -o -path "./samples" -prune -o -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \) ! -name "*.autogen.h" -print)
         FIXED_COUNT=0
 

@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
 #include <string>
@@ -353,6 +354,36 @@ public: // Properties
    * @return True if focus indicator is always shown
    */
   bool IsFocusIndicatorAlwaysShown() const;
+
+  /**
+   * @brief Sets the default font point-size for text elements.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] fontSize The default font size in points
+   */
+  UiConfig& SetDefaultFontSize(float fontSize);
+
+  /**
+   * @brief Retrieves the default font point-size.
+   *
+   * @return The default font size in points
+   */
+  float GetDefaultFontSize() const;
+
+  /**
+   * @brief Sets the default text color for text elements.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] color The default text color
+   */
+  UiConfig& SetDefaultTextColor(const Vector4& color);
+
+  /**
+   * @brief Retrieves the default text color.
+   *
+   * @return The default text color
+   */
+  Vector4 GetDefaultTextColor() const;
 
   // @CHAIN_END
 

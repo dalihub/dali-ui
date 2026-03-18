@@ -1,4 +1,3 @@
-#pragma once
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -16,5 +15,32 @@
  *
  */
 
-// EXTERNAL INCLUDES
-// INTERNAL INCLUDES
+// CLASS HEADER
+#include <dali-ui-components/integration-api/ui-component-config-impl.h>
+
+namespace Dali
+{
+
+namespace Ui
+{
+
+namespace Integration
+{
+
+UiComponentConfigImpl::UiComponentConfigImpl()
+: UiConfigImpl()
+{
+}
+
+UiComponentConfigImpl::~UiComponentConfigImpl() = default;
+
+UiComponentConfigImplPtr UiComponentConfigImpl::New()
+{
+  return UiComponentConfigImplPtr(new UiComponentConfigImpl());
+}
+
+} // namespace Integration
+
+} // namespace Ui
+
+} // namespace Dali

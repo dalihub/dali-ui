@@ -15,14 +15,9 @@
  *
  */
 
-// EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali/devel-api/object/property-helper-devel.h>
-#include <dali/public-api/actors/actor.h>
-#include <dali/public-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-elements/internal/dummy-element-impl.h>
+// CLASS HEADER
+#include <dali-ui-components/integration-api/ui-component-config-impl.h>
+#include <dali-ui-components/public-api/ui-component-config.h>
 
 namespace Dali
 {
@@ -30,25 +25,23 @@ namespace Dali
 namespace Ui
 {
 
-namespace Internal
-{
-
-DummyElementImplPtr DummyElementImpl::New()
-{
-  return DummyElementImplPtr(new DummyElementImpl());
-}
-
-DummyElementImpl::DummyElementImpl()
-: ViewImpl()
+UiComponentConfig::UiComponentConfig(Integration::UiComponentConfigImpl* impl)
+: UiConfig(impl)
 {
 }
 
-DummyElementImpl::~DummyElementImpl()
+UiComponentConfig UiComponentConfig::New()
 {
+  Integration::UiComponentConfigImplPtr impl = Integration::UiComponentConfigImpl::New();
+
+  // Pass ownership to handle
+  return UiComponentConfig(impl.Get());
 }
 
-} // namespace Internal
+UiComponentConfig UiComponentConfig::DownCast(BaseHandle handle)
+{
+  return UiComponentConfig(dynamic_cast<Integration::UiComponentConfigImpl*>(handle.GetObjectPtr()));
+}
 
 } // namespace Ui
-
 } // namespace Dali

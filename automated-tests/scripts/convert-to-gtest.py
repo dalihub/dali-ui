@@ -156,7 +156,6 @@ def main():
     # Find all TCT test result XML files
     suite_files = [
         automated_tests_dir / 'tct-dali-ui-foundation-core-tests.xml',
-        automated_tests_dir / 'tct-dali-ui-elements-core-tests.xml',
         automated_tests_dir / 'tct-dali-ui-components-core-tests.xml',
     ]
 
