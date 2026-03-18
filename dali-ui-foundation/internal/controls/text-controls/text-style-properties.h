@@ -27,7 +27,7 @@ namespace Ui
  * @{
  */
 
-namespace DevelText
+namespace Text
 {
 namespace Shadow
 {
@@ -260,7 +260,7 @@ enum
 
 } // namespace Strikethrough
 
-} // namespace DevelText
+} //namespace Text
 
 /**
  * @}

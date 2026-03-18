@@ -24,7 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
-#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 

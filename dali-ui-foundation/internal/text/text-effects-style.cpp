@@ -23,7 +23,7 @@
 #include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-style-properties-devel.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-style-properties.h>
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/property-string-parser.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
@@ -67,7 +67,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
   {
     const KeyValuePair& valueGet = shadowPropertiesMap.GetKeyValue(index);
 
-    if((DevelText::Shadow::Property::COLOR == valueGet.first.indexKey) || (COLOR_KEY == valueGet.first.stringKey))
+    if((Text::Shadow::Property::COLOR == valueGet.first.indexKey) || (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
       colorDefined = true;
@@ -82,7 +82,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
         color = valueGet.second.Get<Vector4>();
       }
     }
-    else if((DevelText::Shadow::Property::OFFSET == valueGet.first.indexKey) ||
+    else if((Text::Shadow::Property::OFFSET == valueGet.first.indexKey) ||
             (OFFSET_KEY == valueGet.first.stringKey))
     {
       /// Offset key.
@@ -98,7 +98,7 @@ bool ParseShadowProperties(const Property::Map& shadowPropertiesMap, bool& color
         offset = valueGet.second.Get<Vector2>();
       }
     }
-    else if((DevelText::Shadow::Property::BLUR_RADIUS == valueGet.first.indexKey) ||
+    else if((Text::Shadow::Property::BLUR_RADIUS == valueGet.first.indexKey) ||
             (BLUR_RADIUS_KEY == valueGet.first.stringKey))
     {
       /// Blur radius key.
@@ -129,7 +129,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
   {
     const KeyValuePair& valueGet = embossPropertiesMap.GetKeyValue(index);
 
-    if((DevelText::Emboss::Property::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
+    if((Text::Emboss::Property::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
     {
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
@@ -142,7 +142,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
         enabled = valueGet.second.Get<bool>();
       }
     }
-    else if((DevelText::Emboss::Property::DIRECTION == valueGet.first.indexKey) ||
+    else if((Text::Emboss::Property::DIRECTION == valueGet.first.indexKey) ||
             (DIRECTION_KEY == valueGet.first.stringKey))
     {
       /// Direction key.
@@ -158,7 +158,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
         direction = valueGet.second.Get<Vector2>();
       }
     }
-    else if((DevelText::Emboss::Property::STRENGTH == valueGet.first.indexKey) ||
+    else if((Text::Emboss::Property::STRENGTH == valueGet.first.indexKey) ||
             (STRENGTH_KEY == valueGet.first.stringKey))
     {
       /// Strength key.
@@ -174,7 +174,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
         strength = valueGet.second.Get<float>();
       }
     }
-    else if((DevelText::Emboss::Property::LIGHT_COLOR == valueGet.first.indexKey) ||
+    else if((Text::Emboss::Property::LIGHT_COLOR == valueGet.first.indexKey) ||
             (LIGHT_COLOR_KEY == valueGet.first.stringKey))
     {
       /// Light Color key.
@@ -190,7 +190,7 @@ bool ParseEmbossProperties(const Property::Map& embossPropertiesMap, bool& enabl
         lightColor = valueGet.second.Get<Vector4>();
       }
     }
-    else if((DevelText::Emboss::Property::SHADOW_COLOR == valueGet.first.indexKey) ||
+    else if((Text::Emboss::Property::SHADOW_COLOR == valueGet.first.indexKey) ||
             (SHADOW_COLOR_KEY == valueGet.first.stringKey))
     {
       /// Shadow Color key.
@@ -223,7 +223,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
   {
     const KeyValuePair& valueGet = underlinePropertiesMap.GetKeyValue(index);
 
-    if((DevelText::Underline::Property::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
+    if((Text::Underline::Property::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
     {
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
@@ -236,7 +236,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         enabled = valueGet.second.Get<bool>();
       }
     }
-    else if((DevelText::Underline::Property::COLOR == valueGet.first.indexKey) ||
+    else if((Text::Underline::Property::COLOR == valueGet.first.indexKey) ||
             (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
@@ -252,7 +252,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         color = valueGet.second.Get<Vector4>();
       }
     }
-    else if((DevelText::Underline::Property::HEIGHT == valueGet.first.indexKey) ||
+    else if((Text::Underline::Property::HEIGHT == valueGet.first.indexKey) ||
             (HEIGHT_KEY == valueGet.first.stringKey))
     {
       /// Height key.
@@ -268,7 +268,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         height = valueGet.second.Get<float>();
       }
     }
-    else if((DevelText::Underline::Property::TYPE == valueGet.first.indexKey) ||
+    else if((Text::Underline::Property::TYPE == valueGet.first.indexKey) ||
             (TYPE_KEY == valueGet.first.stringKey))
     {
       /// Underline Type key.
@@ -284,7 +284,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         type = valueGet.second.Get<Text::Underline::Type>();
       }
     }
-    else if((DevelText::Underline::Property::DASH_WIDTH == valueGet.first.indexKey) ||
+    else if((Text::Underline::Property::DASH_WIDTH == valueGet.first.indexKey) ||
             (DASH_WIDTH_KEY == valueGet.first.stringKey))
     {
       /// Dashed Underline Width key.
@@ -300,7 +300,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         dashWidth = valueGet.second.Get<float>();
       }
     }
-    else if((DevelText::Underline::Property::DASH_GAP == valueGet.first.indexKey) ||
+    else if((Text::Underline::Property::DASH_GAP == valueGet.first.indexKey) ||
             (DASH_GAP_KEY == valueGet.first.stringKey))
     {
       /// Dashed Underline Gap key.
@@ -332,20 +332,20 @@ bool ParseOutlineProperties(const Property::Map& underlinePropertiesMap, bool& c
   {
     const KeyValuePair& valueGet = underlinePropertiesMap.GetKeyValue(index);
 
-    if((DevelText::Outline::Property::COLOR == valueGet.first.indexKey) || (COLOR_KEY == valueGet.first.stringKey))
+    if((Text::Outline::Property::COLOR == valueGet.first.indexKey) || (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
       colorDefined = true;
       color        = valueGet.second.Get<Vector4>();
     }
-    else if((DevelText::Outline::Property::WIDTH == valueGet.first.indexKey) ||
+    else if((Text::Outline::Property::WIDTH == valueGet.first.indexKey) ||
             (WIDTH_KEY == valueGet.first.stringKey))
     {
       /// Width key.
       widthDefined = true;
       width        = static_cast<uint16_t>(valueGet.second.Get<float>());
     }
-    else if((DevelText::Outline::Property::OFFSET == valueGet.first.indexKey) ||
+    else if((Text::Outline::Property::OFFSET == valueGet.first.indexKey) ||
             (OFFSET_KEY == valueGet.first.stringKey))
     {
       /// Offset key.
@@ -361,7 +361,7 @@ bool ParseOutlineProperties(const Property::Map& underlinePropertiesMap, bool& c
         offset = valueGet.second.Get<Vector2>();
       }
     }
-    else if((DevelText::Outline::Property::BLUR_RADIUS == valueGet.first.indexKey) ||
+    else if((Text::Outline::Property::BLUR_RADIUS == valueGet.first.indexKey) ||
             (BLUR_RADIUS_KEY == valueGet.first.stringKey))
     {
       /// Blur radius key.
@@ -392,13 +392,13 @@ bool ParseBackgroundProperties(const Property::Map& backgroundProperties, bool& 
   {
     const KeyValuePair& valueGet = backgroundProperties.GetKeyValue(index);
 
-    if((DevelText::Background::Property::ENABLE == valueGet.first.indexKey) ||
+    if((Text::Background::Property::ENABLE == valueGet.first.indexKey) ||
        (ENABLE_KEY == valueGet.first.stringKey))
     {
       /// Enable key.
       enabled = valueGet.second.Get<bool>();
     }
-    else if((DevelText::Background::Property::COLOR == valueGet.first.indexKey) ||
+    else if((Text::Background::Property::COLOR == valueGet.first.indexKey) ||
             (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
@@ -420,7 +420,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
   {
     const KeyValuePair& valueGet = strikethroughPropertiesMap.GetKeyValue(index);
 
-    if((DevelText::Strikethrough::Property::ENABLE == valueGet.first.indexKey) ||
+    if((Text::Strikethrough::Property::ENABLE == valueGet.first.indexKey) ||
        (ENABLE_KEY == valueGet.first.stringKey))
     {
       /// Enable key.
@@ -434,7 +434,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
         enabled = valueGet.second.Get<bool>();
       }
     }
-    else if((DevelText::Strikethrough::Property::COLOR == valueGet.first.indexKey) ||
+    else if((Text::Strikethrough::Property::COLOR == valueGet.first.indexKey) ||
             (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
@@ -450,7 +450,7 @@ bool ParseStrikethroughProperties(const Property::Map& strikethroughPropertiesMa
         color = valueGet.second.Get<Vector4>();
       }
     }
-    else if((DevelText::Strikethrough::Property::HEIGHT == valueGet.first.indexKey) ||
+    else if((Text::Strikethrough::Property::HEIGHT == valueGet.first.indexKey) ||
             (HEIGHT_KEY == valueGet.first.stringKey))
     {
       /// Height key.

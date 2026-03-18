@@ -26,14 +26,14 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/input-filter.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>

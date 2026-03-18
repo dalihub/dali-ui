@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/strikethrough-glyph-run.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
-#include <dali-ui-foundation/internal/text/text-enumerations-internal.h>
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
