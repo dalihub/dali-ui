@@ -23,14 +23,14 @@
 #include <sstream>
 
 #include <dali/devel-api/common/stage.h>
+#include <dali/devel-api/object/type-info.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/object/property-array.h>
-#include <dali/public-api/object/type-info.h>
-#include <dali/public-api/object/type-registry.h>
 #include <dali/public-api/render-tasks/render-task-list.h>
 #include <dali/public-api/rendering/shader.h>
 #include <dali/public-api/signals/functor-delegate.h>

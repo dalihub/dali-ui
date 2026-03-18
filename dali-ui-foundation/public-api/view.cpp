@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/view.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
+#include <dali/devel-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>

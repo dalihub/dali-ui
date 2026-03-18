@@ -19,11 +19,11 @@
 #include "control-accessibility-data.h"
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/object/type-registry-helper.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToDaliString;

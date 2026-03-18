@@ -16,7 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry.h>
+#include <dali/devel-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/clickable-trait-impl.h>

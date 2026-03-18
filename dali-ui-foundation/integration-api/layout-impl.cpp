@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/integration-api/layout-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/type-registry-helper.h>
-#include <dali/public-api/object/type-registry.h>
+#include <dali/devel-api/object/type-registry-helper.h>
+#include <dali/devel-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layout-manager.h>

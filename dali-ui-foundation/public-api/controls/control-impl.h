@@ -19,6 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-info.h>
 #include <dali/public-api/animation/alpha-function.h>
 #include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/events/long-press-gesture.h>
@@ -26,7 +27,6 @@
 #include <dali/public-api/events/pinch-gesture.h>
 #include <dali/public-api/events/tap-gesture.h>
 #include <dali/public-api/object/property-index-ranges.h>
-#include <dali/public-api/object/type-info.h>
 #include <dali/public-api/rendering/texture.h>
 
 // INTERNAL INCLUDES

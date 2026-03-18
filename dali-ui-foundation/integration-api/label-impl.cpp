@@ -18,10 +18,10 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/devel-api/object/property-helper-devel.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
-#include <dali/public-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>

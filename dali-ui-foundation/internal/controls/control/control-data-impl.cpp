@@ -28,6 +28,7 @@
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/handle-devel.h>
+#include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -37,7 +38,6 @@
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/object-registry.h>
-#include <dali/public-api/object/type-registry-helper.h>
 #include <dali/public-api/rendering/visual-renderer.h>
 #include <cstring>
 #include <limits>

@@ -22,10 +22,10 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/adaptor-framework/window.h>
-#include <dali/public-api/object/type-registry.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
