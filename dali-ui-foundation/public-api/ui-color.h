@@ -18,10 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <cstdint>
-#include <string>
-#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -88,7 +87,7 @@ public:
    *
    * @param[in] colorId The color identifier string
    */
-  explicit UiColor(const std::string& colorId);
+  explicit UiColor(const String& colorId);
 
   /**
    * @brief Creates a UiColor with a string identifier (rvalue overload).
@@ -101,7 +100,7 @@ public:
    *
    * @param[in] colorId The color identifier string
    */
-  explicit UiColor(std::string&& colorId);
+  explicit UiColor(String&& colorId);
 
   /**
    * @brief Creates a UiColor from a hex RGB value.
@@ -130,7 +129,7 @@ public:
    *
    * @return The color ID, or an empty string if this is a direct RGBA color
    */
-  std::string GetColorId() const;
+  String GetColorId() const;
 
   /**
    * @brief Resolves and returns the RGBA value as a Vector4.

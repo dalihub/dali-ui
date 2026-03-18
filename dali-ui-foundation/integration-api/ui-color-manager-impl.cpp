@@ -60,13 +60,13 @@ UiColorManager UiColorManagerImpl::Get()
   return UiColorManager(impl.Get());
 }
 
-Vector4 UiColorManagerImpl::GetColor(const std::string& colorId) const
+Vector4 UiColorManagerImpl::GetColor(StringView colorId) const
 {
   Vector4 color;
   return GetColor(colorId, color) ? color : Vector4::ZERO;
 }
 
-bool UiColorManagerImpl::GetColor(const std::string& colorId, Vector4& outColor) const
+bool UiColorManagerImpl::GetColor(StringView colorId, Vector4& outColor) const
 {
   if(mColorOverride)
   {

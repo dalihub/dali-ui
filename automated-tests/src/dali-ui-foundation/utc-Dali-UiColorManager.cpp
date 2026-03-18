@@ -44,7 +44,7 @@ void TestApplyFunc2(View view, const Vector4& color)
   // Second apply function for testing multiple bindings
 }
 
-bool OverridePrimary(const std::string& colorId, Vector4& outColor)
+bool OverridePrimary(StringView colorId, Vector4& outColor)
 {
   if(colorId == "Primary")
   {
@@ -54,7 +54,7 @@ bool OverridePrimary(const std::string& colorId, Vector4& outColor)
   return false;
 }
 
-bool OverrideAll(const std::string& colorId, Vector4& outColor)
+bool OverrideAll(StringView colorId, Vector4& outColor)
 {
   outColor = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
   return true;
@@ -301,7 +301,7 @@ int UtcDaliUiColorManagerApplyColorTokenP(void)
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
 
-  UiColor color(std::string("Primary"));
+  UiColor color(String("Primary"));
   gApplyCallCount = 0;
   manager.ApplyColor(color, view, TestApplyFunc);
 
@@ -320,7 +320,7 @@ int UtcDaliUiColorManagerUnregisterBindingP(void)
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
 
-  UiColor color(std::string("Primary"));
+  UiColor color(String("Primary"));
   manager.ApplyColor(color, view, TestApplyFunc);
 
   manager.UnregisterBinding(view, TestApplyFunc);
@@ -340,8 +340,8 @@ int UtcDaliUiColorManagerUnregisterBindingsP(void)
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
 
-  UiColor color1(std::string("Primary"));
-  UiColor color2(std::string("Background"));
+  UiColor color1(String("Primary"));
+  UiColor color2(String("Background"));
 
   manager.ApplyColor(color1, view, TestApplyFunc);
   manager.ApplyColor(color2, view, TestApplyFunc2);
@@ -440,7 +440,7 @@ int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
   View view = View::New();
 
   // Bind view to "Primary" token color
-  UiColor color(std::string("Primary"));
+  UiColor color(String("Primary"));
   gApplyCallCount = 0;
   manager.ApplyColor(color, view, TestApplyFunc);
   DALI_TEST_EQUALS(gApplyCallCount, 1, TEST_LOCATION);

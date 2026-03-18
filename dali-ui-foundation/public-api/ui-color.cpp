@@ -19,11 +19,12 @@
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
 #include <algorithm>
 #include <cstring>
+#include <deque>
 #include <mutex>
 #include <unordered_map>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
@@ -61,11 +62,11 @@ using TokenId = uint32_t;
  */
 struct TokenRegistry
 {
-  std::mutex                               mutex;
-  std::unordered_map<std::string, TokenId> nameToId;
-  std::vector<std::string>                idToName;
+  std::mutex                            mutex;
+  std::unordered_map<String, TokenId>   nameToId;
+  std::deque<String>                    idToName;
 
-  TokenId GetOrCreateId(const std::string& name)
+  TokenId GetOrCreateId(const String& name)
   {
     auto it = nameToId.find(name);
     if(it != nameToId.end())
@@ -78,23 +79,20 @@ struct TokenRegistry
     return id;
   }
 
-  TokenId GetOrCreateId(std::string&& name)
+  TokenId GetOrCreateId(String&& name)
   {
-    // Check first without moving.
     auto it = nameToId.find(name);
     if(it != nameToId.end())
     {
       return it->second;
     }
     TokenId id = static_cast<TokenId>(idToName.size() + 1u); // 0 reserved for "invalid"
+    nameToId.emplace(name, id);
     idToName.push_back(std::move(name));
-    // Note: This still copies the string for the map key, but avoids a copy
-    // on the call path when the caller provides an rvalue.
-    nameToId.emplace(idToName.back(), id);
     return id;
   }
 
-  const std::string* TryGetName(TokenId id) const
+  const String* TryGetName(TokenId id) const
   {
     if(id == 0u)
     {
@@ -187,7 +185,7 @@ UiColor::UiColor(const Vector4& color)
   SetRgba(color);
 }
 
-UiColor::UiColor(const std::string& colorId)
+UiColor::UiColor(const String& colorId)
 {
   std::memset(mData, 0, sizeof(mData));
   SetType(Type::Token);
@@ -203,7 +201,7 @@ UiColor::UiColor(const std::string& colorId)
   SetTokenAlpha(1.0f);
 }
 
-UiColor::UiColor(std::string&& colorId)
+UiColor::UiColor(String&& colorId)
 {
   std::memset(mData, 0, sizeof(mData));
   SetType(Type::Token);
@@ -235,7 +233,7 @@ bool UiColor::HasColorId() const
   return GetType() == Type::Token;
 }
 
-std::string UiColor::GetColorId() const
+String UiColor::GetColorId() const
 {
   if(GetType() != Type::Token)
   {
@@ -244,19 +242,28 @@ std::string UiColor::GetColorId() const
 
   TokenRegistry& registry = GetTokenRegistry();
   std::lock_guard<std::mutex> lock(registry.mutex);
-  const std::string* name = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
-  return name ? *name : std::string{};
+  const String* name = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
+  return name ? *name : String{};
 }
 
 Vector4 UiColor::Resolve() const
 {
   if(GetType() == Type::Token)
   {
-    std::string colorId = GetColorId();
-    if(!colorId.empty())
+    // Get a stable reference from the deque-backed registry.
+    // deque guarantees that existing elements are never relocated on push_back,
+    // so the pointer remains valid after releasing the mutex.
+    const String* namePtr;
+    {
+      TokenRegistry& registry = GetTokenRegistry();
+      std::lock_guard<std::mutex> lock(registry.mutex);
+      namePtr = registry.TryGetName(GetTokenId());
+    }
+
+    if(namePtr)
     {
       Vector4 resolved;
-      if(UiColorManager::Get().GetColor(colorId, resolved))
+      if(UiColorManager::Get().GetColor(*namePtr, resolved))
       {
         const float tokenAlpha = std::clamp(GetTokenAlpha(), 0.0f, 1.0f);
         float       outAlpha   = resolved.a;

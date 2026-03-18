@@ -18,8 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
-#include <string>
 #include <unordered_map>
 
 // INTERNAL INCLUDES
@@ -58,14 +59,14 @@ public:
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
    */
-  bool GetColor(const std::string& colorId, Vector4& outColor) override;
+  bool GetColor(StringView colorId, Vector4& outColor) override;
 
   /**
    * @brief Returns the identifier of the current theme.
    *
    * @return The theme identifier, or an empty string
    */
-  std::string GetCurrentThemeId() const override;
+  String GetCurrentThemeId() const override;
 
   /**
    * @brief Returns the signal emitted when the theme changes.
@@ -75,7 +76,7 @@ public:
   ThemeChangedSignalType& ThemeChangedSignal() override;
 
 private:
-  std::unordered_map<std::string, Vector4> mColors;
+  std::unordered_map<String, Vector4> mColors;
   ThemeChangedSignalType mThemeChangedSignal;
 };
 

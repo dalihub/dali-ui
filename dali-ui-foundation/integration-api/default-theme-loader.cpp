@@ -48,9 +48,9 @@ DefaultThemeLoader::DefaultThemeLoader()
 
 DefaultThemeLoader::~DefaultThemeLoader() = default;
 
-bool DefaultThemeLoader::GetColor(const std::string& colorId, Vector4& outColor)
+bool DefaultThemeLoader::GetColor(StringView colorId, Vector4& outColor)
 {
-  auto it = mColors.find(colorId);
+  auto it = mColors.find(String(colorId));
   if(it != mColors.end())
   {
     outColor = it->second;
@@ -59,9 +59,9 @@ bool DefaultThemeLoader::GetColor(const std::string& colorId, Vector4& outColor)
   return false;
 }
 
-std::string DefaultThemeLoader::GetCurrentThemeId() const
+String DefaultThemeLoader::GetCurrentThemeId() const
 {
-  return "default";
+  return String("default");
 }
 
 DefaultThemeLoader::ThemeChangedSignalType& DefaultThemeLoader::ThemeChangedSignal()

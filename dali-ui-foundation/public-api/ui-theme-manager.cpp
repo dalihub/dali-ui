@@ -43,7 +43,7 @@ UiThemeManager UiThemeManager::DownCast(BaseHandle handle)
   return UiThemeManager(dynamic_cast<Integration::UiThemeManagerImpl*>(handle.GetObjectPtr()));
 }
 
-std::string UiThemeManager::GetCurrentThemeId() const
+String UiThemeManager::GetCurrentThemeId() const
 {
   return GetImpl(*this).GetCurrentThemeId();
 }

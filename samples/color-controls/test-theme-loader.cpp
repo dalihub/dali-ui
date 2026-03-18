@@ -48,14 +48,8 @@ static constexpr ColorEntry DARK_COLORS[] = {
   {"ThemeColor3", Vector4(0.20f, 0.20f, 0.80f, 1.0f)},
 };
 
-inline bool FindColor(const ColorEntry* table, size_t tableSize, const std::string& colorId, Vector4& outColor)
+inline bool FindColor(const ColorEntry* table, size_t tableSize, const char* key, Vector4& outColor)
 {
-  // NOTE: Optimization ideas (if this grows beyond a handful of entries):
-  // - Generate a perfect-hash lookup (e.g. gperf) to get near O(1) without runtime allocations.
-  // - Keep the table sorted by id and replace the linear scan with binary search.
-  // - Use a constexpr string hash + switch(hash) and verify with strcmp to avoid collisions.
-  // - If runtime initialization is acceptable, std::unordered_map can be used (but it won't be pure .rodata).
-  const char* key = colorId.c_str();
   for(size_t i = 0; i < tableSize; ++i)
   {
     if(std::strcmp(table[i].id, key) == 0)
@@ -67,12 +61,12 @@ inline bool FindColor(const ColorEntry* table, size_t tableSize, const std::stri
   return false;
 }
 
-inline bool FindBrightColor(const std::string& colorId, Vector4& outColor)
+inline bool FindBrightColor(const char* colorId, Vector4& outColor)
 {
   return FindColor(BRIGHT_COLORS, sizeof(BRIGHT_COLORS) / sizeof(BRIGHT_COLORS[0]), colorId, outColor);
 }
 
-inline bool FindDarkColor(const std::string& colorId, Vector4& outColor)
+inline bool FindDarkColor(const char* colorId, Vector4& outColor)
 {
   return FindColor(DARK_COLORS, sizeof(DARK_COLORS) / sizeof(DARK_COLORS[0]), colorId, outColor);
 }
@@ -92,14 +86,14 @@ TestThemeLoader::~TestThemeLoader()
   }
 }
 
-bool TestThemeLoader::GetColor(const std::string& colorId, Vector4& outColor)
+bool TestThemeLoader::GetColor(StringView colorId, Vector4& outColor)
 {
-  return mCurrentThemeId == "dark" ? FindDarkColor(colorId, outColor) : FindBrightColor(colorId, outColor);
+  return mCurrentThemeId == "dark" ? FindDarkColor(colorId.Data(), outColor) : FindBrightColor(colorId.Data(), outColor);
 }
 
-std::string TestThemeLoader::GetCurrentThemeId() const
+String TestThemeLoader::GetCurrentThemeId() const
 {
-  return mCurrentThemeId;
+  return String(mCurrentThemeId.c_str());
 }
 
 TestThemeLoader::ThemeChangedSignalType& TestThemeLoader::ThemeChangedSignal()

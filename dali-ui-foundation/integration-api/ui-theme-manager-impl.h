@@ -18,11 +18,11 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <dali/public-api/signals/slot-delegate.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -79,7 +79,7 @@ public:
    *
    * @return The theme identifier, or an empty string if no theme is active
    */
-  std::string GetCurrentThemeId() const;
+  String GetCurrentThemeId() const;
 
   /**
    * @brief Returns the signal emitted when the theme changes.

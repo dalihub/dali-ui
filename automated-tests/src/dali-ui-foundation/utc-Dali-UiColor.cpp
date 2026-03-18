@@ -46,7 +46,7 @@ int UtcDaliUiColorDefaultConstructorP(void)
   UiColor color;
 
   DALI_TEST_CHECK(!color.HasColorId());
-  DALI_TEST_EQUALS(color.GetColorId(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
   Vector4 resolved = color.Resolve();
   DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
@@ -63,7 +63,7 @@ int UtcDaliUiColorRgbaConstructorP(void)
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
 
   DALI_TEST_CHECK(!color.HasColorId());
-  DALI_TEST_EQUALS(color.GetColorId(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
   Vector4 resolved = color.Resolve();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
@@ -109,7 +109,7 @@ int UtcDaliUiColorStringIdConstructorP(void)
 {
   TestApplication application;
 
-  std::string id("TestColorId");
+  String id("TestColorId");
   UiColor color(id);
 
   DALI_TEST_CHECK(color.HasColorId());
@@ -122,7 +122,7 @@ int UtcDaliUiColorStringIdMoveConstructorP(void)
 {
   TestApplication application;
 
-  std::string id("MovedColorId");
+  String id("MovedColorId");
   UiColor color(std::move(id));
 
   DALI_TEST_CHECK(color.HasColorId());
@@ -202,7 +202,7 @@ int UtcDaliUiColorCopyConstructorTokenP(void)
 {
   TestApplication application;
 
-  UiColor original(std::string("CopyTestId"));
+  UiColor original(String("CopyTestId"));
   UiColor copy(original);
 
   DALI_TEST_CHECK(copy.HasColorId());
@@ -269,7 +269,7 @@ int UtcDaliUiColorHasColorIdTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(std::string("SomeToken"));
+  UiColor color(String("SomeToken"));
   DALI_TEST_CHECK(color.HasColorId());
 
   END_TEST;
@@ -280,7 +280,7 @@ int UtcDaliUiColorGetColorIdRgbaN(void)
   TestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f);
-  DALI_TEST_EQUALS(color.GetColorId(), std::string(), TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
   END_TEST;
 }
@@ -289,7 +289,7 @@ int UtcDaliUiColorGetColorIdTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(std::string("MyColorId"));
+  UiColor color(String("MyColorId"));
   DALI_TEST_EQUALS(color.GetColorId(), "MyColorId", TEST_LOCATION);
 
   END_TEST;
@@ -327,7 +327,7 @@ int UtcDaliUiColorResolveUnknownTokenN(void)
 {
   TestApplication application;
 
-  UiColor color(std::string("NonExistentColorId12345"));
+  UiColor color(String("NonExistentColorId12345"));
   Vector4 resolved = color.Resolve();
 
   // Unknown token should fallback to ZERO
@@ -372,7 +372,7 @@ int UtcDaliUiColorScaleAlphaTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(std::string("Primary"));
+  UiColor color(String("Primary"));
   UiColor result = color.ScaleAlpha(0.5f);
 
   // The result should still have a color ID
@@ -432,7 +432,7 @@ int UtcDaliUiColorWithAlphaTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(std::string("Primary"));
+  UiColor color(String("Primary"));
   UiColor result = color.WithAlpha(0.7f);
 
   DALI_TEST_CHECK(result.HasColorId());

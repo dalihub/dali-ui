@@ -182,10 +182,10 @@ int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
   TestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
-  std::string themeId = manager.GetCurrentThemeId();
+  String themeId = manager.GetCurrentThemeId();
 
   // DefaultThemeLoader returns "default"
-  DALI_TEST_EQUALS(themeId, "default", TEST_LOCATION);
+  DALI_TEST_EQUALS(themeId, String("default"), TEST_LOCATION);
 
   END_TEST;
 }

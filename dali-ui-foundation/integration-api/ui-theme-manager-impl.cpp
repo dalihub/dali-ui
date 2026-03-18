@@ -82,7 +82,7 @@ ThemeLoaderInterface& UiThemeManagerImpl::GetLoader()
   return *mLoader;
 }
 
-std::string UiThemeManagerImpl::GetCurrentThemeId() const
+String UiThemeManagerImpl::GetCurrentThemeId() const
 {
   if(mLoader)
   {

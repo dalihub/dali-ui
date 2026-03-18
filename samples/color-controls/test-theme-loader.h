@@ -25,8 +25,8 @@ public:
   TestThemeLoader();
   ~TestThemeLoader() override;
 
-  bool GetColor(const std::string& colorId, Dali::Vector4& outColor) override;
-  std::string GetCurrentThemeId() const override;
+  bool GetColor(Dali::StringView colorId, Dali::Vector4& outColor) override;
+  Dali::String GetCurrentThemeId() const override;
   ThemeChangedSignalType& ThemeChangedSignal() override;
 
   void ToggleTheme();

@@ -43,12 +43,12 @@ UiColorManager UiColorManager::DownCast(BaseHandle handle)
   return UiColorManager(dynamic_cast<Integration::UiColorManagerImpl*>(handle.GetObjectPtr()));
 }
 
-Vector4 UiColorManager::GetColor(const std::string& colorId) const
+Vector4 UiColorManager::GetColor(StringView colorId) const
 {
   return GetImpl(*this).GetColor(colorId);
 }
 
-bool UiColorManager::GetColor(const std::string& colorId, Vector4& outColor) const
+bool UiColorManager::GetColor(StringView colorId, Vector4& outColor) const
 {
   return GetImpl(*this).GetColor(colorId, outColor);
 }

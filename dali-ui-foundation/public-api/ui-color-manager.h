@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/math/vector4.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -61,7 +61,7 @@ using ColorApplyFunc = void (*)(View, const Vector4&);
  * @param[out] outColor The overridden RGBA value (only used when returning true)
  * @return @c true if the color is overridden, @c false to fall through to the theme
  */
-using ColorOverrideFunc = bool (*)(const std::string& colorId, Vector4& outColor);
+using ColorOverrideFunc = bool (*)(StringView colorId, Vector4& outColor);
 
 /**
  * @brief Provides public access to the global color table.
@@ -141,7 +141,7 @@ public:
    * @param[in] colorId The color identifier
    * @return The resolved RGBA value, or Vector4::ZERO if not found
    */
-  Vector4 GetColor(const std::string& colorId) const;
+  Vector4 GetColor(StringView colorId) const;
 
   /**
    * @brief Looks up a color by its identifier.
@@ -150,7 +150,7 @@ public:
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
    */
-  bool GetColor(const std::string& colorId, Vector4& outColor) const;
+  bool GetColor(StringView colorId, Vector4& outColor) const;
 
   /**
    * @brief Resolves a UiColor and applies it to a View, managing bindings automatically.
@@ -210,7 +210,7 @@ public:
    *                  or @c nullptr to clear the override
    *
    * @code
-   *   bool MyOverride(const std::string& id, Vector4& out) {
+   *   bool MyOverride(StringView id, Vector4& out) {
    *     if(id == "Primary") { out = Vector4(1,0,0,1); return true; }
    *     return false;
    *   }

@@ -18,12 +18,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/slot-delegate.h>
 #include <dali/public-api/math/vector4.h>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -65,7 +65,7 @@ public:
    * @param[in] colorId The color identifier
    * @return The resolved RGBA value, or Vector4::ZERO if not found
    */
-  Vector4 GetColor(const std::string& colorId) const;
+  Vector4 GetColor(StringView colorId) const;
 
   /**
    * @brief Looks up a color by ID.
@@ -74,7 +74,7 @@ public:
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
    */
-  bool GetColor(const std::string& colorId, Vector4& outColor) const;
+  bool GetColor(StringView colorId, Vector4& outColor) const;
 
   /**
    * @brief Resolves a UiColor and applies it to a View, managing

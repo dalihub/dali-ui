@@ -18,9 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -56,14 +57,14 @@ public:
    * @param[out] outColor The resolved RGBA value if found
    * @return True if the color was found
    */
-  virtual bool GetColor(const std::string& colorId, Vector4& outColor) = 0;
+  virtual bool GetColor(StringView colorId, Vector4& outColor) = 0;
 
   /**
    * @brief Returns the identifier of the current theme.
    *
    * @return The theme identifier, or an empty string if none
    */
-  virtual std::string GetCurrentThemeId() const = 0;
+  virtual String GetCurrentThemeId() const = 0;
 
   /**
    * @brief Returns the signal emitted when the theme changes.
