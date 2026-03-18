@@ -29,32 +29,9 @@ namespace Ui
 {
 namespace Internal
 {
-/**
- * Convert properties of handle into JSON output, separated into 'normal' and 'child' properties.
- * @param[in] ouputStream the output stream to write to
- * @param[in] handle The handle of the object from which to retrieve properties
- * @return The output stream
- */
-std::ostream& DumpProperties(std::ostream& outputStream, Handle handle);
-
-/**
- * Dumps control internals, visuals and properties to a string in JSON format
- */
-std::string DumpControl(const Internal::Control& control);
-
-/**
- * Dumps actor internals and properties to a string in JSON format
- */
-std::string DumpActor(Actor actor);
-
-/**
- * Dumps actor hierarchy from a given root, but expands Control output to encompass Control internals.
- * Formats the output in JSON.
- * @param[in] ouputStream the output stream to write to
- * @param[in] root The root actor
- */
-void DumpControlHierarchy(std::ostream& outputStream, Actor rootActor);
-
+// Note: Debug functions have been moved to view-debug.h during the Control to View merge.
+// Control now inherits from View, so we use the View debug implementation.
+// Use the functions from <dali-ui-foundation/internal/views/view/view-debug.h>
 } // namespace Internal
 
 } // namespace Ui

@@ -207,7 +207,7 @@ void LabelImpl::OnInitialize()
   mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
 
   // TODO: Since the TEXT property is not available yet, this is a temporary index.
-  Ui::Control::DownCast(self).RegisterVisual(PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
+  Ui::View::DownCast(self).RegisterVisual(PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, LabelImpl::Property::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 
@@ -325,7 +325,7 @@ float LabelImpl::GetHeightForWidth(float width)
   return mController->GetHeightForWidth(width - (padding.start + padding.end)) + padding.top + padding.bottom;
 }
 
-// TODO: If the implementation in Control is moved to ViewImpl, this part will need to be updated accordingly.
+// TODO: If the implementation in View is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
   if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
@@ -344,10 +344,10 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
 
     Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
   }
-  Internal::Control::OnAnimateAnimatableProperty(animation, index, state);
+  Integration::ViewImpl::OnAnimateAnimatableProperty(animation, index, state);
 }
 
-// TODO: If the implementation in Control is moved to ViewImpl, this part will need to be updated accordingly.
+// TODO: If the implementation in View is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
   if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
@@ -366,7 +366,7 @@ void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Pro
 
     Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
   }
-  Internal::Control::OnConstraintAnimatableProperty(constraint, index, applied);
+  Integration::ViewImpl::OnConstraintAnimatableProperty(constraint, index, applied);
 }
 
 MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)

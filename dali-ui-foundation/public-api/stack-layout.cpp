@@ -74,7 +74,7 @@ StackLayout StackLayout::New(StackOrientation orientation)
 
 StackLayout StackLayout::DownCast(BaseHandle handle)
 {
-  return Ui::Control::DownCast<StackLayout, Integration::StackLayoutImpl>(handle);
+  return Ui::View::DownCast<StackLayout, Integration::StackLayoutImpl>(handle);
 }
 
 StackLayout::StackLayout(Integration::StackLayoutImpl& implementation)

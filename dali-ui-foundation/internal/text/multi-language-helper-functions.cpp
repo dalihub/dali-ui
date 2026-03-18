@@ -50,11 +50,11 @@ void MergeFontDescriptions(const Vector<FontDescriptionRun>&       fontDescripti
   Length slantIndex  = 0u;
   Length sizeIndex   = 0u;
 
-  bool familyOverriden = false;
-  bool weightOverriden = false;
-  bool widthOverriden  = false;
-  bool slantOverriden  = false;
-  bool sizeOverriden   = false;
+  bool familyOverridden = false;
+  bool weightOverridden = false;
+  bool widthOverridden  = false;
+  bool slantOverridden  = false;
+  bool sizeOverridden   = false;
 
   // Traverse all the font descriptions.
   const FontDescriptionRun* const fontDescriptionsBuffer = fontDescriptions.Begin();
@@ -68,33 +68,33 @@ void MergeFontDescriptions(const Vector<FontDescriptionRun>&       fontDescripti
     {
       if(fontRun.familyDefined)
       {
-        isDefaultFont   = false;
-        familyOverriden = true;
-        familyIndex     = runIndex;
+        isDefaultFont    = false;
+        familyOverridden = true;
+        familyIndex      = runIndex;
       }
       if(fontRun.weightDefined)
       {
-        isDefaultFont   = false;
-        weightOverriden = true;
-        weightIndex     = runIndex;
+        isDefaultFont    = false;
+        weightOverridden = true;
+        weightIndex      = runIndex;
       }
       if(fontRun.widthDefined)
       {
-        isDefaultFont  = false;
-        widthOverriden = true;
-        widthIndex     = runIndex;
+        isDefaultFont   = false;
+        widthOverridden = true;
+        widthIndex      = runIndex;
       }
       if(fontRun.slantDefined)
       {
-        isDefaultFont  = false;
-        slantOverriden = true;
-        slantIndex     = runIndex;
+        isDefaultFont   = false;
+        slantOverridden = true;
+        slantIndex      = runIndex;
       }
       if(fontRun.sizeDefined)
       {
-        isDefaultFont = false;
-        sizeOverriden = true;
-        sizeIndex     = runIndex;
+        isDefaultFont  = false;
+        sizeOverridden = true;
+        sizeIndex      = runIndex;
       }
     }
   }
@@ -102,31 +102,31 @@ void MergeFontDescriptions(const Vector<FontDescriptionRun>&       fontDescripti
   // Get the font's description if is not the default font.
   if(!isDefaultFont)
   {
-    if(familyOverriden)
+    if(familyOverridden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + familyIndex);
       fontDescription.family            = std::string(fontRun.familyName, fontRun.familyLength);
     }
 
-    if(weightOverriden)
+    if(weightOverridden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + weightIndex);
       fontDescription.weight            = fontRun.weight;
     }
 
-    if(widthOverriden)
+    if(widthOverridden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + widthIndex);
       fontDescription.width             = fontRun.width;
     }
 
-    if(slantOverriden)
+    if(slantOverridden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + slantIndex);
       fontDescription.slant             = fontRun.slant;
     }
 
-    if(sizeOverriden)
+    if(sizeOverridden)
     {
       const FontDescriptionRun& fontRun = *(fontDescriptionsBuffer + sizeIndex);
       fontPointSize                     = static_cast<PointSize26Dot6>(fontRun.size * fontSizeScale);

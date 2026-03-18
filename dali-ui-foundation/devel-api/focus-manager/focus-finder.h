@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -37,6 +38,8 @@ namespace FocusFinder
  */
 DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
                                            Ui::Control::KeyboardFocus::Direction direction);
+DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
+                                           Ui::View::KeyboardFocus::Direction direction);
 
 } // namespace FocusFinder
 

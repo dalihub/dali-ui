@@ -53,6 +53,12 @@ bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusManager)
 bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Control::KeyboardFocus::Direction direction,
                const std::string& deviceName)
 {
+  return false;
+}
+
+bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::View::KeyboardFocus::Direction direction,
+               const std::string& deviceName)
+{
   return GetImpl(keyboardFocusManager).MoveFocus(direction, deviceName);
 }
 

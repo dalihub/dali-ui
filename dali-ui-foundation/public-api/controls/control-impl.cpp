@@ -417,7 +417,7 @@ Actor Control::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::Cont
   return Actor();
 }
 
-void Control::OnKeyboardFocusChangeCommitted(Actor commitedFocusableActor)
+void Control::OnKeyboardFocusChangeCommitted(Actor committedFocusableActor)
 {
 }
 

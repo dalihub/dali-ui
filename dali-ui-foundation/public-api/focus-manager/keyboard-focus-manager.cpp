@@ -60,6 +60,11 @@ Actor KeyboardFocusManager::GetCurrentFocusActor()
 
 bool KeyboardFocusManager::MoveFocus(Control::KeyboardFocus::Direction direction)
 {
+  return false;
+}
+
+bool KeyboardFocusManager::MoveFocus(View::KeyboardFocus::Direction direction)
+{
   return GetImpl(*this).MoveFocus(direction);
 }
 
@@ -130,7 +135,7 @@ KeyboardFocusManager::FocusedActorEnterKeySignalType& KeyboardFocusManager::Focu
   return GetImpl(*this).FocusedActorEnterKeySignal();
 }
 
-Control::KeyboardFocus::Device KeyboardFocusManager::GetLastFocusChangeDevice() const
+View::KeyboardFocus::Device KeyboardFocusManager::GetLastFocusChangeDevice() const
 {
   const auto& internalCtx = GetImpl(*this).FocusChangedContext();
   return internalCtx.device;

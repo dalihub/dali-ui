@@ -305,6 +305,14 @@ public:
   void SetControlSize(Size controlSize);
 
   /**
+   * @brief Sets the view size
+   * It will call SetTransformAndSize with empty transform map.
+   *
+   * @param[in] viewSize The size of the parent view for visuals that need to scale internally.
+   */
+  void SetViewSize(Size viewSize);
+
+  /**
    * @brief Get the actual Visual Object.
    * @return The actual visual object
    * @note Should be overridden by deriving controls if they are acting as a proxy to other visual objects.

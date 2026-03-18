@@ -2194,7 +2194,7 @@ public: // Input style change signals.
   /**
    * @brief Request process all pending input style changed signals.
    *
-   * Request to calls the Text::ControlInterface::InputStyleChanged() method which is overriden by the
+   * Request to calls the Text::ControlInterface::InputStyleChanged() method which is overridden by the
    * text controls. Text controls may send signals to state the input style has changed.
    *
    * The signal will be execute next idle time, or skip if we fail to add idler.

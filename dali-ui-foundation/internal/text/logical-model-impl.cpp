@@ -346,7 +346,7 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
   unsigned int runIndex = 0u;
 
   // Set the text color.
-  bool                  colorOverriden  = false;
+  bool                  colorOverridden = false;
   unsigned int          colorIndex      = 0u;
   const ColorRun* const colorRunsBuffer = mColorRuns.Begin();
   for(Vector<ColorRun>::ConstIterator it = colorRunsBuffer, endIt = mColorRuns.End(); it != endIt; ++it, ++runIndex)
@@ -356,13 +356,13 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     if((colorRun.characterRun.characterIndex <= index) &&
        (index < colorRun.characterRun.characterIndex + colorRun.characterRun.numberOfCharacters))
     {
-      colorIndex     = runIndex;
-      colorOverriden = true;
+      colorIndex      = runIndex;
+      colorOverridden = true;
     }
   }
 
-  // Set the text's color if it's overriden.
-  if(colorOverriden)
+  // Set the text's color if it's overridden.
+  if(colorOverridden)
   {
     style.textColor      = (*(colorRunsBuffer + colorIndex)).color;
     style.isDefaultColor = false;
@@ -372,11 +372,11 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
   runIndex = 0u;
 
   // Set the font's parameters.
-  bool                            nameOverriden             = false;
-  bool                            weightOverriden           = false;
-  bool                            widthOverriden            = false;
-  bool                            slantOverriden            = false;
-  bool                            sizeOverriden             = false;
+  bool                            nameOverridden            = false;
+  bool                            weightOverridden          = false;
+  bool                            widthOverridden           = false;
+  bool                            slantOverridden           = false;
+  bool                            sizeOverridden            = false;
   unsigned int                    nameIndex                 = 0u;
   unsigned int                    weightIndex               = 0u;
   unsigned int                    widthIndex                = 0u;
@@ -393,38 +393,38 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     {
       if(fontDescriptionRun.familyDefined)
       {
-        nameIndex     = runIndex;
-        nameOverriden = true;
+        nameIndex      = runIndex;
+        nameOverridden = true;
       }
 
       if(fontDescriptionRun.weightDefined)
       {
-        weightIndex     = runIndex;
-        weightOverriden = true;
+        weightIndex      = runIndex;
+        weightOverridden = true;
       }
 
       if(fontDescriptionRun.widthDefined)
       {
-        widthIndex     = runIndex;
-        widthOverriden = true;
+        widthIndex      = runIndex;
+        widthOverridden = true;
       }
 
       if(fontDescriptionRun.slantDefined)
       {
-        slantIndex     = runIndex;
-        slantOverriden = true;
+        slantIndex      = runIndex;
+        slantOverridden = true;
       }
 
       if(fontDescriptionRun.sizeDefined)
       {
-        sizeIndex     = runIndex;
-        sizeOverriden = true;
+        sizeIndex      = runIndex;
+        sizeOverridden = true;
       }
     }
   }
 
-  // Set the font's family name if it's overriden.
-  if(nameOverriden)
+  // Set the font's family name if it's overridden.
+  if(nameOverridden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + nameIndex);
 
@@ -432,8 +432,8 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     style.isFamilyDefined = true;
   }
 
-  // Set the font's weight if it's overriden.
-  if(weightOverriden)
+  // Set the font's weight if it's overridden.
+  if(weightOverridden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + weightIndex);
 
@@ -441,8 +441,8 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     style.isWeightDefined = true;
   }
 
-  // Set the font's width if it's overriden.
-  if(widthOverriden)
+  // Set the font's width if it's overridden.
+  if(widthOverridden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + widthIndex);
 
@@ -450,8 +450,8 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     style.isWidthDefined = true;
   }
 
-  // Set the font's slant if it's overriden.
-  if(slantOverriden)
+  // Set the font's slant if it's overridden.
+  if(slantOverridden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + slantIndex);
 
@@ -459,8 +459,8 @@ void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
     style.isSlantDefined = true;
   }
 
-  // Set the font's size if it's overriden.
-  if(sizeOverriden)
+  // Set the font's size if it's overridden.
+  if(sizeOverridden)
   {
     const FontDescriptionRun& fontDescriptionRun = *(fontDescriptionRunsBuffer + sizeIndex);
 

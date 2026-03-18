@@ -27,8 +27,10 @@
 #include <dali/public-api/render-tasks/render-task-list.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 namespace
 {
@@ -322,8 +324,8 @@ void GaussianBlurEffectImpl::OnActivate()
     return;
   }
 
-  Ui::Control ownerControl = GetOwnerControl();
-  DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
+  Ui::View ownerView = GetOwnerView();
+  DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
   // Reset animation properties
   mHorizontalBlurActor.RegisterProperty(UNIFORM_BLUR_OPACITY_NAME.data(), 1.0f);
@@ -336,7 +338,7 @@ void GaussianBlurEffectImpl::OnActivate()
   DALI_LOG_INFO(
     gRenderEffectLogFilter, Debug::General,
     "[GaussianBlurEffect:%p] OnActivated! [ID:%d][size:%fx%f] [radius:%u, scale:%f, downscaledRadius:%u=%u*%f]\n",
-    this, ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, mBlurRadius,
+    this, ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, mBlurRadius,
     mDownscaleFactor, mDownscaledBlurRadius, mInternalBlurRadius, mInternalDownscaleFactor);
 
   uint32_t downsampledWidth  = std::max(static_cast<uint32_t>(size.width * mInternalDownscaleFactor), 1u);
@@ -370,7 +372,7 @@ void GaussianBlurEffectImpl::OnActivate()
 
   // Set blur
   CreateFrameBuffers(ImageDimensions(downsampledWidth, downsampledHeight));
-  CreateRenderTasks(GetSceneHolder(), ownerControl);
+  CreateRenderTasks(GetSceneHolder(), ownerView);
 
   // Reset shader constants
   auto&    blurShader             = GaussianBlurAlgorithm::GetGaussianBlurShader(mDownscaledBlurRadius);
@@ -384,18 +386,18 @@ void GaussianBlurEffectImpl::OnActivate()
   verticalBlurRenderer.RegisterProperty(UNIFORM_BLUR_OFFSET_DIRECTION_NAME.data(),
                                         Vector2(0.0f, 1.0f / downsampledHeight));
 
-  // Inject blurred output to control
+  // Inject blurred output to view
   Renderer targetRenderer = GetTargetRenderer();
   targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::DepthIndex::FOREGROUND_EFFECT);
-  ownerControl.AddCacheRenderer(targetRenderer);
-  ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
+  ownerView.AddCacheRenderer(targetRenderer);
+  ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(targetRenderer, mBlurredOutputFrameBuffer);
 
-  ownerControl.Add(mInternalRoot);
+  ownerView.Add(mInternalRoot);
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
-  GetImplementation(ownerControl).RequestRenderTaskReorder();
+  Integration::GetImpl(ownerView).RequestRenderTaskReorder();
 }
 
 void GaussianBlurEffectImpl::OnDeactivate()
@@ -408,14 +410,14 @@ void GaussianBlurEffectImpl::OnDeactivate()
   Renderer targetRenderer = GetTargetRenderer();
   SetRendererTexture(targetRenderer, Dali::Texture());
 
-  auto ownerControl = GetOwnerControl();
-  if(DALI_LIKELY(ownerControl))
+  auto ownerView = GetOwnerView();
+  if(DALI_LIKELY(ownerView))
   {
-    ownerControl.RemoveCacheRenderer(targetRenderer);
-    ownerControl.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
+    ownerView.RemoveCacheRenderer(targetRenderer);
+    ownerView.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
   }
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[GaussianBlurEffect:%p] OnDeactivated! [ID:%d]\n", this,
-                ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+                ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
 
   mInternalRoot.Unparent();
 
@@ -453,10 +455,10 @@ void GaussianBlurEffectImpl::OnRefresh()
 
   if(!mSourceRenderTask)
   {
-    Ui::Control ownerControl = GetOwnerControl();
-    ownerControl.Add(mInternalRoot);
-    CreateRenderTasks(GetSceneHolder(), ownerControl);
-    GetImplementation(ownerControl).RequestRenderTaskReorder();
+    Ui::View ownerView = GetOwnerView();
+    ownerView.Add(mInternalRoot);
+    CreateRenderTasks(GetSceneHolder(), ownerView);
+    Integration::GetImpl(ownerView).RequestRenderTaskReorder();
   }
   else
   {
@@ -512,14 +514,19 @@ void GaussianBlurEffectImpl::DestroyFrameBuffers()
 void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
                                                const Ui::Control              sourceControl)
 {
+}
+
+void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
+                                               const Ui::View                 sourceView)
+{
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
 
   // draw input texture
   mSourceRenderTask = taskList.CreateTask();
-  mSourceRenderTask.SetSourceActor(sourceControl); // -> should use cache renderer
+  mSourceRenderTask.SetSourceActor(sourceView); // -> should use cache renderer
   mSourceRenderTask.SetExclusive(true);
   mSourceRenderTask.SetInputEnabled(true);
-  mSourceRenderTask.SetScreenToFrameBufferMappingActor(sourceControl);
+  mSourceRenderTask.SetScreenToFrameBufferMappingActor(sourceView);
   mSourceRenderTask.SetCameraActor(mCamera);
   mSourceRenderTask.SetFrameBuffer(mInputFrameBuffer);
   mSourceRenderTask.SetRenderPassTag(GetRenderPassTag());

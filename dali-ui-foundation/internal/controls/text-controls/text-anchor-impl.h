@@ -22,9 +22,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 
 namespace Dali
 {
@@ -81,12 +81,12 @@ private: // From ViewImpl
   void OnInitialize() override;
 
   /**
-   * @copydoc Ui::Internal::Control::CreateAccessibleObject()
+   * @copydoc Ui::Internal::View::CreateAccessibleObject()
    */
-  ControlAccessible* CreateAccessibleObject() override;
+  ViewAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc Control::OnAccessibilityActivated()
+   * @copydoc View::OnAccessibilityActivated()
    */
   bool OnAccessibilityActivated() override;
 
@@ -110,10 +110,10 @@ protected:
   /**
    * @brief This structure is to connect TextAnchor with Accessible functions.
    */
-  class TextAnchorAccessible : public ControlAccessible, public Dali::Accessibility::Hyperlink
+  class TextAnchorAccessible : public ViewAccessible, public Dali::Accessibility::Hyperlink
   {
   public:
-    using ControlAccessible::ControlAccessible;
+    using ViewAccessible::ViewAccessible;
 
     /**
      * @copydoc Dali::Accessibility::Hyperlink::GetEndIndex()

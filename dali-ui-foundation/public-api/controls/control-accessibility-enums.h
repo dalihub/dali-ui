@@ -19,65 +19,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility.h>
-
-namespace Dali::Ui
-{
-
-/**
- * @brief Represents current state of a control.
- */
-enum class AccessibilityState : uint32_t
-{
-  ENABLED = 0,
-  SELECTED,
-  CHECKED,
-  BUSY,
-  EXPANDED,
-  MAX_COUNT
-};
-
-constexpr const uint32_t ROLE_START_INDEX = 200;
-
-/**
- * @brief AccessibilityRole represents the purpose of a control.
- */
-enum class AccessibilityRole : uint32_t
-{
-  ADJUSTABLE = ROLE_START_INDEX,
-  ALERT,
-  BUTTON,
-  CHECK_BOX,
-  COMBO_BOX,
-  CONTAINER,
-  DIALOG,
-  ENTRY,
-  HEADER,
-  IMAGE,
-  LINK,
-  LIST,
-  LIST_ITEM,
-  MENU,
-  MENU_BAR,
-  MENU_ITEM,
-  NONE,
-  NOTIFICATION,
-  PASSWORD_TEXT,
-  POPUP_MENU,
-  PROGRESS_BAR,
-  RADIO_BUTTON,
-  SCROLL_BAR,
-  SPIN_BUTTON,
-  TAB,
-  TAB_LIST,
-  TEXT,
-  TOGGLE_BUTTON,
-  TOOL_BAR,
-  SCENE_3D,
-  MODEL,
-  MAX_COUNT
-};
-
-} // namespace Dali::Ui
+#include <dali-ui-foundation/public-api/view-accessibility-enums.h>
 
 #endif // DALI_UI_CONTROL_ACCESSIBILITY_ENUMS_H

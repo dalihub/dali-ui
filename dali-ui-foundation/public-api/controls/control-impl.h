@@ -543,7 +543,7 @@ public: // API for derived classes to override
   virtual bool OnAccessibilityZoom();
 
   /**
-   * @brief This method should be overriden by deriving classes when they wish to be
+   * @brief This method should be overridden by deriving classes when they wish to be
    * represented by a custom Accessible object implementation.
    *
    * The AT-SPI infrastructure is responsible for destroying the returned object.
@@ -598,9 +598,9 @@ public: // API for derived classes to override
    * before the focus is actually moved to the chosen actor.
    *
    * @SINCE_1_0.0
-   * @param[in] commitedFocusableActor The commited focusable actor
+   * @param[in] committedFocusableActor The committed focusable actor
    */
-  virtual void OnKeyboardFocusChangeCommitted(Actor commitedFocusableActor);
+  virtual void OnKeyboardFocusChangeCommitted(Actor committedFocusableActor);
 
   /**
    * @brief This method is called when the control has enter pressed on it.

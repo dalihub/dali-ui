@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -32,10 +33,10 @@ class KeyInputFocusManager;
 
 /**
  * KeyInputFocusManager
- * This class provides the functionality of registering for keyboard events for controls.
- * The keyinput focus manager maintains a stack of controls, With the last added control receiving
+ * This class provides the functionality of registering for keyboard events for views.
+ * The keyinput focus manager maintains a stack of views, With the last added view receiving
  * all the keyboard events first. And if the conrol doesn't consume the event it is passed to
- * the next control in the stack. If none of the controls in the stack consume the key event then
+ * the next view in the stack. If none of the views in the stack consume the key event then
  * UnhandledKeyEventSignal() is emitted.
  *
  * Signals
@@ -47,7 +48,7 @@ class DALI_UI_API KeyInputFocusManager : public BaseHandle
 {
 public:
   // KeyInputFocusChanged
-  typedef Signal<void(Control, Control)> KeyInputFocusChangedSignalType;
+  typedef Signal<void(View, View)> KeyInputFocusChangedSignalType;
 
 public:
   /**
@@ -65,44 +66,47 @@ public:
 
   /**
    * Get the singleton of KeyInputFocusManager object.
-   * @return A handle to the KeyInputFocusManager control.
+   * @return A handle to the KeyInputFocusManager view.
    */
   static KeyInputFocusManager Get();
 
   /**
-   * Sets keyboard focus for a control.
-   * Note: A control can be set to be in focus and still not receive all the key events if another control has over
-   * ridden it. As the key input focus mechanism works like a stack, the top most control receives all the key events,
-   * and passes on the unhandled events to the controls below in the stack. A control in the stack will regain key input
-   * focus when there are no more controls above it in the focus stack.
+   * Sets keyboard focus for a view.
+   * Note: A view can be set to be in focus and still not receive all the key events if another view has over
+   * ridden it. As the key input focus mechanism works like a stack, the top most view receives all the key events,
+   * and passes on the unhandled events to the views below in the stack. A view in the stack will regain key input
+   * focus when there are no more views above it in the focus stack.
    *
-   * @pre The Control is not in the focus stack. If it is allready present in the top of the stack it results in a
-   * no-op, If it is present in the stack but not on the top of the stack, then the control is moved to the top of the
+   * @pre The View is not in the focus stack. If it is allready present in the top of the stack it results in a
+   * no-op, If it is present in the stack but not on the top of the stack, then the view is moved to the top of the
    * focus stack.
-   * @param[in] control The Control to receive keyboard input
+   * @param[in] view The View to receive keyboard input
    */
   void SetFocus(Control control);
+  void SetFocus(View view);
 
   /**
-   * Query for the control that is currently set to be on top of the fcous stack and receives all
+   * Query for the view that is currently set to be on top of the fcous stack and receives all
    * keyboard input events first.
-   * @return Pointer to the control set to receive keyboard inputs.
+   * @return Pointer to the view set to receive keyboard inputs.
    */
   Control GetCurrentFocusControl() const;
+  View    GetCurrentFocusView() const;
 
   /**
-   * Removes focus for the given control, The control will no longer receive events from keyboard.
-   * @param [in] control which should be removed from focus.
+   * Removes focus for the given view, The view will no longer receive events from keyboard.
+   * @param [in] view which should be removed from focus.
    */
   void RemoveFocus(Control control);
+  void RemoveFocus(View view);
 
 public: // Signals
   /**
-   * This signal is emitted when the key input focus control changes.
-   * Two control parameters are sent as part of this signal, the first being the signal that now has the focus, the
+   * This signal is emitted when the key input focus view changes.
+   * Two view parameters are sent as part of this signal, the first being the signal that now has the focus, the
    * second being the one that has lost focus. A callback of the following type may be connected:
    * @code
-   *   void YourCallback(Control focusGainedControl, Control focusLostActor);
+   *   void YourCallback(View focusGainedView, View focusLostActor);
    * @endcode
    * @return The signal to connect to.
    */

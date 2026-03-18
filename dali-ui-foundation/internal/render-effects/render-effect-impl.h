@@ -33,6 +33,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -75,20 +76,22 @@ public:
   static uint32_t GetRenderPassTag();
 
   /**
-   * @brief Sets owner Control. Applies effect on the owner.
+   * @brief Sets owner View. Applies effect on the owner.
    * @note Activates render effect on default.
-   * @param[in] control The owner control to apply RenderEffect.
+   * @param[in] view The owner view to apply RenderEffect.
    */
   void SetOwnerControl(Ui::Control control);
+  void SetOwnerView(Ui::View view);
 
   /**
-   * @brief Clears owner Control.
+   * @brief Clears owner View.
    */
   void ClearOwnerControl();
+  void ClearOwnerView();
 
   /**
    * @brief Set shader constants of target renderer. Without an explicit call, it will pull off BACKGROUND property of
-   * the owner control.
+   * the owner view.
    * @param[in] map may include corner radius, corner radius policy, and squareness
    */
   void SetCornerConstants(const Property::Map& map);
@@ -139,7 +142,7 @@ protected:
 
   /**
    * @brief Get target renderer
-   * On internal Activate(), the renderer draws our visual effect and is added to our Owner control.
+   * On internal Activate(), the renderer draws our visual effect and is added to our Owner view.
    * @return mRenderer
    */
   Renderer GetTargetRenderer() const;
@@ -151,13 +154,14 @@ protected:
   Vector2 GetTargetSize() const;
 
   /**
-   * @brief Get Owner control. It could be return empty handle if owner control is not set, or destroyed.
-   * @return mOwnerControl
+   * @brief Get Owner view. It could be return empty handle if owner view is not set, or destroyed.
+   * @return mOwnerView
    */
   Ui::Control GetOwnerControl() const;
+  Ui::View    GetOwnerView() const;
 
   /**
-   * @brief Get scene holder of owner control.
+   * @brief Get scene holder of owner view.
    * @return mPlacementSceneHolder
    */
   Dali::Integration::SceneHolder GetSceneHolder() const;
@@ -170,7 +174,7 @@ protected:
   virtual void OnInitialize() = 0;
 
   /**
-   * @brief Activates sub classes effect on ownerControl
+   * @brief Activates sub classes effect on ownerView
    */
   virtual void OnActivate() = 0;
 
@@ -188,7 +192,7 @@ protected:
 private:
   /**
    * @brief Check whether it is possible to activate effect or not.
-   *        It will check various status, e.g. the control's visibility.
+   *        It will check various status, e.g. the view's visibility.
    * @note This API don't consider mIsActivated
    */
   bool IsActivateValid() const;
@@ -204,17 +208,18 @@ private:
    * @param[in] actor The actor
    * @param[in] visible Whether this actor is visible or not.
    */
-  void OnControlInheritedVisibilityChanged(Actor actor, bool visible);
+  void OnViewInheritedVisibilityChanged(Actor actor, bool visible);
 
 private:
-  Dali::Renderer mRenderer; // An additional renderer for mOwnerControl
+  Dali::Renderer mRenderer; // An additional renderer for mOwnerView
 
-  std::vector<Constraint> mAnimationConstraints; // For corner animation on owner control.
+  std::vector<Constraint> mAnimationConstraints; // For corner animation on owner view.
 
-  Dali::WeakHandle<Dali::Ui::Control>        mOwnerControl;         ///< Weakhandle of owner control.
+  Dali::WeakHandle<Dali::Ui::Control>        mOwnerControl;         ///< Weakhandle of owner view.
+  Dali::WeakHandle<Dali::Ui::View>           mOwnerView;            ///< Weakhandle of owner view.
   WeakHandle<Dali::Integration::SceneHolder> mPlacementSceneHolder; ///< Weakhandle of scene
 
-  Vector2 mTargetSize; // The final size of mOwnerControl
+  Vector2 mTargetSize; // The final size of mOwnerView
 
   bool mIsActivated : 1;
 };

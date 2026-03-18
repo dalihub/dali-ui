@@ -167,14 +167,14 @@ void TextAnchorImpl::OnInitialize()
   self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::LINK);
 }
 
-ControlAccessible* TextAnchorImpl::CreateAccessibleObject()
+ViewAccessible* TextAnchorImpl::CreateAccessibleObject()
 {
   return new TextAnchorAccessible(Self());
 }
 
 void TextAnchorImpl::TextAnchorAccessible::InitDefaultFeatures()
 {
-  ControlAccessible::InitDefaultFeatures();
+  ViewAccessible::InitDefaultFeatures();
   AddFeature<Dali::Accessibility::Hyperlink>(shared_from_this());
 }
 

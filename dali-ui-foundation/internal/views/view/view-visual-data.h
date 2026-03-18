@@ -1,5 +1,5 @@
-#ifndef DALI_UI_CONTROL_DATA_VISUAL_DATA_H
-#define DALI_UI_CONTROL_DATA_VISUAL_DATA_H
+#ifndef DALI_UI_VIEW_DATA_VISUAL_DATA_H
+#define DALI_UI_VIEW_DATA_VISUAL_DATA_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -27,11 +27,11 @@
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-event-observer.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/devel-api/common/owner-container.h>
 
-#include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 
 namespace Dali
 {
@@ -45,7 +45,7 @@ class Base;
 }
 
 /**
- * @brief Struct used to store Visual within the control, index is a unique key for each visual.
+ * @brief Struct used to store Visual within the view, index is a unique key for each visual.
  */
 struct RegisteredVisual
 {
@@ -71,11 +71,11 @@ struct RegisteredVisual
 typedef Dali::OwnerContainer<RegisteredVisual*> RegisteredVisualContainer;
 
 // private inner class
-class Control::Impl::VisualData : public Visual::EventObserver, public Visual::ConstraintObserver
+class ViewDataImpl::VisualData : public Visual::EventObserver, public Visual::ConstraintObserver
 {
 public:
   // Constructor
-  VisualData(Control::Impl& outer);
+  VisualData(ViewDataImpl& outer);
 
   // Destructor
   ~VisualData();
@@ -110,65 +110,65 @@ public: // Visual::ConstraintObserver
 
 public:
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::IsResourceReady()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::IsResourceReady()
    */
   bool IsResourceReady() const;
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::EnableReadyTransitionOverridden()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::EnableReadyTransitionOverridden()
    */
   void EnableReadyTransitionOverridden(Ui::Visual::Base& visual, bool enable);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::EnableCornerPropertiesOverridden()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::EnableCornerPropertiesOverridden()
    */
   void EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualResourceStatus()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetVisualResourceStatus()
    */
   Ui::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
 
   /**
-   * @brief Copies the visual properties that are specific to the control instance into the instancedProperties
+   * @brief Copies the visual properties that are specific to the view instance into the instancedProperties
    * container.
-   * @param[in] visuals The control's visual container
+   * @param[in] visuals The view's visual container
    * @param[out] instancedProperties The instanced properties are added to this container
    */
   void CopyInstancedProperties(RegisteredVisualContainer& visuals, Dictionary<Property::Map>& instancedProperties);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::UnregisterVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetVisual()
    */
   Ui::Visual::Base GetVisual(Property::Index index) const;
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualImplPtr()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetVisualImplPtr()
    */
   Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
@@ -179,29 +179,29 @@ public:
   Ui::Visual::Base GetVisual(const std::string& name) const;
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::GetVisualProperty()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetVisualProperty()
    */
   Dali::Property GetVisualProperty(Dali::Property::Index index, Dali::Property::Key visualPropertyKey);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::EnableVisual()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::IsVisualEnabled()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
   /**
-   * @brief Removes a visual from the control's container.
+   * @brief Removes a visual from the view's container.
    * @param[in] visuals The container of visuals
    * @param[in] visualName The name of the visual to remove
    */
   void RemoveVisual(RegisteredVisualContainer& visuals, const std::string& visualName);
 
   /**
-   * @brief Removes several visuals from the control's container.
+   * @brief Removes several visuals from the view's container.
    * @param[in] visuals The container of visuals
    * @param[in] removeVisuals The visuals to remove
    */
@@ -229,21 +229,21 @@ public:
   void ReplaceStateVisualsAndProperties(const StylePtr oldState, const StylePtr newState, const std::string& subState);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::DoAction()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::DoAction()
    */
   void DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                 const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::DoActionExtension()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::DoActionExtension()
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::VisualEventSignal()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::VisualEventSignal()
    */
-  Ui::Control::VisualEventSignalType& VisualEventSignal();
+  Ui::View::VisualEventSignalType& VisualEventSignal();
 
   /**
    * @brief Notify to all registered visuals to be scene on.
@@ -254,8 +254,8 @@ public:
 
   /**
    * @brief Any visuals set for replacement but not yet ready should still be registered.
-   * Reason: If a request was made to register a new visual but the control removed from scene before visual was ready
-   * then when this control appears back on stage it should use that new visual.
+   * Reason: If a request was made to register a new visual but the view removed from scene before visual was ready
+   * then when this view appears back on stage it should use that new visual.
    *
    * After all registered visuals are set off scene,
    * visuals pending replacement can be taken out of the removal list and set off scene.
@@ -271,7 +271,7 @@ public:
   void ClearVisuals();
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::ApplyFittingMode()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::ApplyFittingMode()
    */
   void ApplyFittingMode(const Vector2& size);
 
@@ -288,23 +288,23 @@ public:
   void StartObservingVisual(Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::UpdateVisualProperties()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::UpdateVisualProperties()
    */
   void UpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::CreateAnimationConstraints()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::CreateAnimationConstraints()
    */
   void CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::Internal::Control::Impl::ClearAnimationConstraints()
+   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::ClearAnimationConstraints()
    */
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @brief Notify to visual added constraint that control's animatable property updated.
-   * @param[in] index Animatable property index from Control
+   * @brief Notify to visual added constraint that view's animatable property updated.
+   * @param[in] index Animatable property index from View
    * @param[in] notifyFromAnimation True if this API comes from Animation or Constraint started
    */
   void NotifyConstraintPropertyChanged(Property::Index index, bool notifyFromAnimation);
@@ -345,7 +345,7 @@ private:
    * @brief Adds the visual to the list of registered visuals.
    * @param[in] index The Property index of the visual, used to reference visual
    * @param[in,out] visual The visual to register, which can be altered in this function
-   * @param[in] enabled false if derived class wants to control when visual is set on stage
+   * @param[in] enabled false if derived class wants to view when visual is set on stage
    * @param[in] depthIndexValueSet Set to true if the depthIndex has actually been set manually
    * @param[in] depthIndex The visual's depth-index is set to this. If the depth-index is set to
    * DepthIndex::Ranges::AUTO_INDEX, the actual depth-index of visual will be determind automatically (Use previous
@@ -360,13 +360,13 @@ private:
                       int                   depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
 
 public:
-  RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the control, non trivial type so
-                                      ///< std::vectoDevelControlvelControlvelControl::VisualEventSignalType mVisualEventSignal;
-  Ui::Control::VisualEventSignalType mVisualEventSignal;
-  RegisteredVisualContainer          mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
+  RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the view, non trivial type so
+                                      ///< std::vectoDevelViewvelViewvelView::VisualEventSignalType mVisualEventSignal;
+  Ui::View::VisualEventSignalType mVisualEventSignal;
+  RegisteredVisualContainer       mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
 private:
-  Control::Impl& mOuter;
+  ViewDataImpl& mOuter;
 
   // Key : PropertyIndex. Value map's Key : Animation.GetObjectPtr(), Value map's Value: count of animate called
   using PropertyOnAnimationContainer =
@@ -383,4 +383,4 @@ private:
 } // namespace Internal
 } // namespace Ui
 } // namespace Dali
-#endif // DALI_UI_CONTROL_DATA_VISUAL_DATA_H
+#endif // DALI_UI_VIEW_DATA_VISUAL_DATA_H

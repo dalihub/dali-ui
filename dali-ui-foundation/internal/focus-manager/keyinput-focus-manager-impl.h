@@ -26,6 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -56,16 +57,19 @@ public:
    * @copydoc Ui::SetFocus
    */
   void SetFocus(Ui::Control control);
+  void SetFocus(Ui::View view);
 
   /**
    * @copydoc Ui::RemoveFocus
    */
   void RemoveFocus(Ui::Control control);
+  void RemoveFocus(Ui::View view);
 
   /**
-   * @copydoc Ui::GetCurrentFocusControl
+   * @copydoc Ui::GetCurrentFocusView
    */
   Ui::Control GetCurrentFocusControl() const;
+  Ui::View    GetCurrentFocusView() const;
 
 public:
   /**
@@ -106,18 +110,20 @@ private:
   bool OnKeyEvent(const KeyEvent& event);
 
   /**
-   * Signal handler called when a focused Control is removed from Scene.
-   * @param[in]  control  The control removed from the scene.
+   * Signal handler called when a focused View is removed from Scene.
+   * @param[in]  view  The view removed from the scene.
    */
   void OnFocusControlSceneDisconnection(Dali::Actor control);
+  void OnFocusViewSceneDisconnection(Dali::Actor view);
 
   /**
-   *  Recursively deliver events to the control and its parents, until the event is consumed or the stage is reached.
-   * @param[in]  control  The control got KeyEvent.
+   *  Recursively deliver events to the view and its parents, until the event is consumed or the stage is reached.
+   * @param[in]  view  The view got KeyEvent.
    * @param[in]  event    The KeyEvent.
    * @return True if KeyEvent is consumed.
    */
   bool EmitKeyEventSignal(Ui::Control control, const KeyEvent& event);
+  bool EmitKeyEventSignal(Ui::View view, const KeyEvent& event);
 
   /**
    * Gets the current native window id
@@ -136,8 +142,8 @@ private:
 
   SlotDelegate<KeyInputFocusManager> mSlotDelegate;
 
-  Ui::Control mCurrentFocusControl; ///< The current focused control
-  uint32_t    mCurrentWindowId;     ///< The native window id of current focused control
+  Ui::View mCurrentFocusView; ///< The current focused view
+  uint32_t mCurrentWindowId;  ///< The native window id of current focused view
 };
 
 } // namespace Internal

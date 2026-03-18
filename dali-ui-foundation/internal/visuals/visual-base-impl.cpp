@@ -934,12 +934,12 @@ bool Visual::Base::IsBorderlineRequired() const
 
 void Visual::Base::OnDoAction(const Property::Index actionId, const Property::Value& attributes)
 {
-  // May be overriden by derived class
+  // May be overridden by derived class
 }
 
 void Visual::Base::OnDoActionExtension(const Property::Index actionId, const Dali::Any& attributes)
 {
-  // May be overriden by derived class
+  // May be overridden by derived class
 }
 
 void Visual::Base::RegisterMixColor()
@@ -1095,11 +1095,15 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 
 void Visual::Base::SetControlSize(Size controlSize)
 {
-  // Notify to visual's constraint that control's size is changed.
+}
+
+void Visual::Base::SetViewSize(Size viewSize)
+{
+  // Notify to visual's constraint that view's size is changed.
   UpdateApplyRate(Actor::Property::SIZE);
 
   const static Property::Map emptyMap;
-  SetTransformAndSize(emptyMap, controlSize);
+  SetTransformAndSize(emptyMap, viewSize);
 }
 
 Visual::Base& Visual::Base::GetVisualObject()

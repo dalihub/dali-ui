@@ -27,8 +27,10 @@
 #include <dali/public-api/render-tasks/render-task-list.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 namespace
 {
@@ -100,7 +102,7 @@ void BackgroundBlurEffectImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::Render
     {
       // Re-initialize source actor of rendertask since it might be changed.
       // TODO : Should it be required always? Couldn't we skip it?
-      ApplyRenderTaskSourceActor(mSourceRenderTask, GetOwnerControl());
+      ApplyRenderTaskSourceActor(mSourceRenderTask, GetOwnerView());
       tasks.PushBack(mSourceRenderTask);
     }
     if(mHorizontalBlurTask)
@@ -325,8 +327,8 @@ void BackgroundBlurEffectImpl::OnActivate()
     return;
   }
 
-  Ui::Control ownerControl = GetOwnerControl();
-  DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
+  Ui::View ownerView = GetOwnerView();
+  DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
   // Reset animation properties
   mHorizontalBlurActor.RegisterProperty(UNIFORM_BLUR_OPACITY_NAME.data(), 1.0f);
@@ -339,7 +341,7 @@ void BackgroundBlurEffectImpl::OnActivate()
   DALI_LOG_INFO(
     gRenderEffectLogFilter, Debug::General,
     "[BackgroundBlurEffect:%p] OnActivated! [ID:%d][size:%fx%f] [radius:%u, scale:%f, downscaledRadius:%u=%u*%f]\n",
-    this, ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, mBlurRadius,
+    this, ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, mBlurRadius,
     mDownscaleFactor, mDownscaledBlurRadius, mInternalBlurRadius, mInternalDownscaleFactor);
 
   uint32_t downsampledWidth  = std::max(static_cast<uint32_t>(size.width * mInternalDownscaleFactor), 1u);
@@ -373,7 +375,7 @@ void BackgroundBlurEffectImpl::OnActivate()
 
   // Set blur
   CreateFrameBuffers(ImageDimensions(downsampledWidth, downsampledHeight));
-  CreateRenderTasks(GetSceneHolder(), ownerControl);
+  CreateRenderTasks(GetSceneHolder(), ownerView);
 
   // Reset shader constants
   auto&    blurShader         = GaussianBlurAlgorithm::GetGaussianBlurShader(mDownscaledBlurRadius);
@@ -386,18 +388,18 @@ void BackgroundBlurEffectImpl::OnActivate()
   verticalRenderer.SetShader(blurShader);
   verticalRenderer.RegisterProperty(UNIFORM_BLUR_OFFSET_DIRECTION_NAME.data(), Vector2(0.0f, 1.0f / downsampledHeight));
 
-  // Inject blurred output to control
+  // Inject blurred output to view
   Renderer renderer = GetTargetRenderer();
   renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::DepthIndex::BACKGROUND_EFFECT);
-  ownerControl.AddRenderer(renderer);
-  ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
+  ownerView.AddRenderer(renderer);
+  ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(renderer, mBlurredOutputFrameBuffer);
 
-  ownerControl.Add(mInternalRoot);
+  ownerView.Add(mInternalRoot);
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
-  GetImplementation(ownerControl).RequestRenderTaskReorder();
+  Integration::GetImpl(ownerView).RequestRenderTaskReorder();
 }
 
 void BackgroundBlurEffectImpl::OnDeactivate()
@@ -409,14 +411,14 @@ void BackgroundBlurEffectImpl::OnDeactivate()
   Renderer renderer = GetTargetRenderer();
   SetRendererTexture(renderer, Dali::Texture());
 
-  auto ownerControl = GetOwnerControl();
-  if(DALI_LIKELY(ownerControl))
+  auto ownerView = GetOwnerView();
+  if(DALI_LIKELY(ownerView))
   {
-    ownerControl.RemoveRenderer(renderer);
-    ownerControl.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
+    ownerView.RemoveRenderer(renderer);
+    ownerView.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
   }
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[BackgroundBlurEffect:%p] OnDeactivated! [ID:%d]\n", this,
-                ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+                ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
 
   mInternalRoot.Unparent();
 
@@ -454,10 +456,10 @@ void BackgroundBlurEffectImpl::OnRefresh()
 
   if(!mSourceRenderTask)
   {
-    Ui::Control ownerControl = GetOwnerControl();
-    ownerControl.Add(mInternalRoot);
-    CreateRenderTasks(GetSceneHolder(), ownerControl);
-    GetImplementation(ownerControl).RequestRenderTaskReorder();
+    Ui::View ownerView = GetOwnerView();
+    ownerView.Add(mInternalRoot);
+    CreateRenderTasks(GetSceneHolder(), ownerView);
+    Integration::GetImpl(ownerView).RequestRenderTaskReorder();
   }
   else
   {
@@ -514,6 +516,11 @@ void BackgroundBlurEffectImpl::DestroyFrameBuffers()
 void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
                                                  const Ui::Control              sourceControl)
 {
+}
+
+void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
+                                                 const Ui::View                 sourceView)
+{
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
 
   // draw input texture
@@ -523,7 +530,7 @@ void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder 
   mSourceRenderTask.SetInputEnabled(false);
   mSourceRenderTask.SetRenderPassTag(GetRenderPassTag());
 
-  ApplyRenderTaskSourceActor(mSourceRenderTask, sourceControl);
+  ApplyRenderTaskSourceActor(mSourceRenderTask, sourceView);
 
   // Clear inputBackgroundTexture as scene holder background.
   mSourceRenderTask.SetClearEnabled(true);
@@ -630,7 +637,11 @@ void BackgroundBlurEffectImpl::UpdateDownscaledBlurRadius()
 
 void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl)
 {
-  if(DALI_UNLIKELY(!sourceRenderTask || !sourceControl))
+}
+
+void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::View sourceView)
+{
+  if(DALI_UNLIKELY(!sourceRenderTask || !sourceView))
   {
     return;
   }
@@ -638,9 +649,9 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
   bool        isExclusiveRequired = false;
   bool        useUserSourceActor  = false;
   Dali::Actor userSourceActor     = mUserSourceActor.GetHandle();
-  Dali::Actor sourceActor         = sourceControl;
+  Dali::Actor sourceActor         = sourceView;
   Dali::Actor stopperActor =
-    mUserStopperActor.GetHandle() ? mUserStopperActor.GetHandle() : Dali::Actor::DownCast(sourceControl);
+    mUserStopperActor.GetHandle() ? mUserStopperActor.GetHandle() : Dali::Actor::DownCast(sourceView);
 
   while(sourceActor && sourceActor.GetParent())
   {
@@ -651,17 +662,17 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
       useUserSourceActor = true;
     }
 
-    Ui::Control control = Ui::Control::DownCast(sourceActor);
-    if(control && (((GetImplementation(control).GetOffScreenRenderableType() & OffScreenRenderable::Type::FORWARD)) ==
-                   OffScreenRenderable::Type::FORWARD))
+    Ui::View view = Ui::View::DownCast(sourceActor);
+    if(view && (((Integration::GetImpl(view).GetOffScreenRenderableType() & OffScreenRenderable::Type::FORWARD)) ==
+                OffScreenRenderable::Type::FORWARD))
     {
-      sourceActor         = GetImplementation(control).GetOffScreenRenderableSourceActor();
-      isExclusiveRequired = GetImplementation(control).IsOffScreenRenderTaskExclusive();
+      sourceActor         = Integration::GetImpl(view).GetOffScreenRenderableSourceActor();
+      isExclusiveRequired = Integration::GetImpl(view).IsOffScreenRenderTaskExclusive();
       break;
     }
   }
 
-  // Use user defined source actor only if it is parent of sourceControl.
+  // Use user defined source actor only if it is parent of sourceView.
   if(useUserSourceActor)
   {
     sourceActor = userSourceActor;
@@ -684,8 +695,8 @@ void BackgroundBlurEffectImpl::SetSourceActor(Dali::Actor sourceActor)
   if(mSourceRenderTask)
   {
     // Re-initialize source actor of rendertask
-    Ui::Control ownerControl = GetOwnerControl();
-    ApplyRenderTaskSourceActor(mSourceRenderTask, ownerControl);
+    Ui::View ownerView = GetOwnerView();
+    ApplyRenderTaskSourceActor(mSourceRenderTask, ownerView);
   }
 }
 
@@ -696,8 +707,8 @@ void BackgroundBlurEffectImpl::SetStopperActor(Dali::Actor stopperActor)
   if(mSourceRenderTask)
   {
     // Re-initialize stopper actor of rendertask
-    Ui::Control ownerControl = GetOwnerControl();
-    ApplyRenderTaskSourceActor(mSourceRenderTask, ownerControl);
+    Ui::View ownerView = GetOwnerView();
+    ApplyRenderTaskSourceActor(mSourceRenderTask, ownerView);
   }
 }
 

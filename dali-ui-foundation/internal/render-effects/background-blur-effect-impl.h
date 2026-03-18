@@ -178,10 +178,11 @@ private:
   /**
    * @brief Sets blur render tasks.
    * Requires initialized buffers, source actors, and source cameras.
-   * @param[in] sceneHolder SceneHolder of source control
-   * @param[in] sourceControl Input source control
+   * @param[in] sceneHolder SceneHolder of source view
+   * @param[in] sourceView Input source view
    */
   void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::Control sourceControl);
+  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::View sourceView);
 
   /**
    * @brief Removes and destroys local render tasks.
@@ -191,9 +192,10 @@ private:
   /**
    * @brief Apply render tasks source actor, and some other options.
    * @param[in] renderTask Target render task to change source actor and exclusiveness
-   * @param[in] sourceControl Input source control
+   * @param[in] sourceView Input source view
    */
   void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl);
+  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::View sourceView);
 
   /**
    * @brief Emits render finished signal of the effect,

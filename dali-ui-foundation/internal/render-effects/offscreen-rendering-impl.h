@@ -32,6 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -41,7 +42,7 @@ namespace Internal
 {
 /**
  * @brief This effect renders all children(including self) at off screen framebuffer.
- * This effect is handleless, so initiate an instance through setting Control::Property::OFFSCREEN_RENDERING
+ * This effect is handleless, so initiate an instance through setting View::Property::OFFSCREEN_RENDERING
  * The instance will be saved internally, thus outer modification is impossible.
  */
 class OffScreenRenderingImpl : public RenderEffectImpl
@@ -52,12 +53,14 @@ public:
    * @param[in] type Defines whether effect is enabled or not, and its refresh rate
    */
   OffScreenRenderingImpl(Ui::Control::OffScreenRenderingType type);
+  OffScreenRenderingImpl(Ui::View::OffScreenRenderingType type);
 
   /**
    * @brief Set OffScreenRenderingType explicitly
    * @param[in] type Defines whether effect is enabled or not, and its refresh rate
    */
   void SetType(Ui::Control::OffScreenRenderingType type);
+  void SetType(Ui::View::OffScreenRenderingType type);
 
   // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType
   OffScreenRenderable::Type GetOffScreenRenderableType() const override;
@@ -111,11 +114,11 @@ private:
   void OnRenderFinished(Dali::RenderTask& task);
 
 private:
-  RenderTask                          mRenderTask;
-  CameraActor                         mCamera;
-  FrameBuffer                         mFrameBuffer;
-  Dali::Texture                       mTexture; // saved when render once
-  Ui::Control::OffScreenRenderingType mType;
+  RenderTask                       mRenderTask;
+  CameraActor                      mCamera;
+  FrameBuffer                      mFrameBuffer;
+  Dali::Texture                    mTexture; // saved when render once
+  Ui::View::OffScreenRenderingType mType;
 };
 } // namespace Internal
 } // namespace Ui

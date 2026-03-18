@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
@@ -57,7 +58,7 @@ public:
    * @param[in] deviceName The name of the device where the key event occurred.
    * @return A handle to the next focusable actor
    */
-  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Control::KeyboardFocus::Direction direction,
+  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::View::KeyboardFocus::Direction direction,
                                       const std::string& deviceName = "") = 0;
 };
 
@@ -114,6 +115,8 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusMan
  * @pre The KeyboardFocusManager has been initialized.
  */
 DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Control::KeyboardFocus::Direction direction,
+                           const std::string& deviceName);
+DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::View::KeyboardFocus::Direction direction,
                            const std::string& deviceName);
 
 /**

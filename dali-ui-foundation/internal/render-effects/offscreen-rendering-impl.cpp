@@ -20,8 +20,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
+#include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
 
@@ -32,6 +34,12 @@ namespace Ui
 namespace Internal
 {
 OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::Control::OffScreenRenderingType type)
+: mType(Ui::View::OffScreenRenderingType::NONE)
+{
+  Initialize();
+}
+
+OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::View::OffScreenRenderingType type)
 : mType(type)
 {
   Initialize();
@@ -39,15 +47,19 @@ OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::Control::OffScreenRenderingTy
 
 void OffScreenRenderingImpl::SetType(Ui::Control::OffScreenRenderingType type)
 {
+}
+
+void OffScreenRenderingImpl::SetType(Ui::View::OffScreenRenderingType type)
+{
   mType = type;
 
   if(mRenderTask)
   {
-    if(mType == Ui::Control::OffScreenRenderingType::REFRESH_ALWAYS)
+    if(mType == Ui::View::OffScreenRenderingType::REFRESH_ALWAYS)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ALWAYS);
     }
-    else if(mType == Ui::Control::OffScreenRenderingType::REFRESH_ONCE)
+    else if(mType == Ui::View::OffScreenRenderingType::REFRESH_ONCE)
     {
       mRenderTask.SetRefreshRate(RenderTask::REFRESH_ONCE);
     }
@@ -81,12 +93,12 @@ void OffScreenRenderingImpl::OnInitialize()
 
 void OffScreenRenderingImpl::OnActivate()
 {
-  if(mType == Ui::Control::OffScreenRenderingType::NONE)
+  if(mType == Ui::View::OffScreenRenderingType::NONE)
   {
     return;
   }
-  Ui::Control ownerControl = GetOwnerControl();
-  DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
+  Ui::View ownerView = GetOwnerView();
+  DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
   if(!mCamera)
   {
@@ -97,7 +109,7 @@ void OffScreenRenderingImpl::OnActivate()
     mCamera.SetType(Dali::Camera::FREE_LOOK);
   }
   mCamera.SetPerspectiveProjection(GetTargetSize());
-  ownerControl.Add(mCamera);
+  ownerView.Add(mCamera);
 
   CreateFrameBuffer();
   CreateRenderTask();
@@ -106,13 +118,13 @@ void OffScreenRenderingImpl::OnActivate()
   Renderer renderer = GetTargetRenderer();
   SetRendererTexture(renderer, mFrameBuffer);
 
-  ownerControl.AddCacheRenderer(renderer);
-  ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
-  mRenderTask.SetScreenToFrameBufferMappingActor(ownerControl);
+  ownerView.AddCacheRenderer(renderer);
+  ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
+  mRenderTask.SetScreenToFrameBufferMappingActor(ownerView);
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
-  GetImplementation(ownerControl).RequestRenderTaskReorder();
+  Integration::GetImpl(ownerView).RequestRenderTaskReorder();
 }
 
 void OffScreenRenderingImpl::OnDeactivate()
@@ -120,11 +132,11 @@ void OffScreenRenderingImpl::OnDeactivate()
   Renderer renderer = GetTargetRenderer();
   SetRendererTexture(renderer, Dali::Texture());
 
-  Ui::Control control = GetOwnerControl();
-  if(DALI_LIKELY(control))
+  Ui::View view = GetOwnerView();
+  if(DALI_LIKELY(view))
   {
-    control.RemoveCacheRenderer(renderer);
-    control.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
+    view.RemoveCacheRenderer(renderer);
+    view.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
 
     mCamera.Unparent();
   }
@@ -160,12 +172,12 @@ void OffScreenRenderingImpl::DestroyFrameBuffer()
 
 void OffScreenRenderingImpl::CreateRenderTask()
 {
-  Ui::Control                    control     = GetOwnerControl();
+  Ui::View                       view        = GetOwnerView();
   Dali::Integration::SceneHolder sceneHolder = GetSceneHolder();
   RenderTaskList                 taskList    = sceneHolder.GetRenderTaskList();
 
   mRenderTask = taskList.CreateTask();
-  mRenderTask.SetSourceActor(control);
+  mRenderTask.SetSourceActor(view);
   mRenderTask.SetCameraActor(mCamera);
   mRenderTask.SetExclusive(true);
   mRenderTask.SetInputEnabled(true);
@@ -192,12 +204,12 @@ void OffScreenRenderingImpl::OnRenderFinished(Dali::RenderTask& task)
 {
   if(DALI_LIKELY(mRenderTask == task))
   {
-    Ui::Control control = GetOwnerControl();
-    if(control)
+    Ui::View view = GetOwnerView();
+    if(view)
     {
       mTexture = mFrameBuffer.GetColorTexture();
 
-      control.OffScreenRenderingFinishedSignal().Emit(control);
+      view.OffScreenRenderingFinishedSignal().Emit(view);
 
       // Reset texture handle after signal completed.
       mTexture.Reset();

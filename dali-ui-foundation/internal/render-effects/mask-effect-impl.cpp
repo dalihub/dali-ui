@@ -29,10 +29,13 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/internal/views/view/view-renderers.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control-impl.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 using Dali::Integration::ToDaliStringView;
 
@@ -63,10 +66,30 @@ MaskEffectImpl::MaskEffectImpl(Ui::Control maskControl)
 {
 }
 
+MaskEffectImpl::MaskEffectImpl(Ui::View maskView)
+: MaskEffectImpl(maskView, MaskEffect::MaskMode::ALPHA, Vector2::ZERO, Vector2::ONE)
+{
+}
+
 MaskEffectImpl::MaskEffectImpl(Ui::Control maskControl, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
                                Vector2 maskScale)
 : RenderEffectImpl(),
   mMaskControl(maskControl),
+  mMaskView(),
+  mMaskMode(maskMode),
+  mMaskPosition(maskPosition),
+  mMaskScale(maskScale),
+  mTargetMaskOnce(false),
+  mSourceMaskOnce(false),
+  mReverseMaskDirection(false)
+{
+}
+
+MaskEffectImpl::MaskEffectImpl(Ui::View maskView, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
+                               Vector2 maskScale)
+: RenderEffectImpl(),
+  mMaskControl(),
+  mMaskView(maskView),
   mMaskMode(maskMode),
   mMaskPosition(maskPosition),
   mMaskScale(maskScale),
@@ -99,10 +122,25 @@ MaskEffectImplPtr MaskEffectImpl::New(Ui::Control maskControl)
   return handle;
 }
 
+MaskEffectImplPtr MaskEffectImpl::New(Ui::View maskView)
+{
+  MaskEffectImplPtr handle = new MaskEffectImpl(maskView);
+  handle->Initialize();
+  return handle;
+}
+
 MaskEffectImplPtr MaskEffectImpl::New(Ui::Control maskControl, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
                                       Vector2 maskScale)
 {
   MaskEffectImplPtr handle = new MaskEffectImpl(maskControl, maskMode, maskPosition, maskScale);
+  handle->Initialize();
+  return handle;
+}
+
+MaskEffectImplPtr MaskEffectImpl::New(Ui::View maskView, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
+                                      Vector2 maskScale)
+{
+  MaskEffectImplPtr handle = new MaskEffectImpl(maskView, maskMode, maskPosition, maskScale);
   handle->Initialize();
   return handle;
 }
@@ -227,14 +265,14 @@ void MaskEffectImpl::OnInitialize()
 
 void MaskEffectImpl::OnActivate()
 {
-  Ui::Control ownerControl = GetOwnerControl();
-  DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
+  Ui::View ownerView = GetOwnerView();
+  DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
-  ownerControl.Add(mCamera);
+  ownerView.Add(mCamera);
 
   Renderer maskRenderer = GetTargetRenderer();
-  ownerControl.AddCacheRenderer(maskRenderer);
-  ownerControl.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
+  ownerView.AddCacheRenderer(maskRenderer);
+  ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
 
   ResetMaskData();
   CreateMaskData();
@@ -251,7 +289,7 @@ void MaskEffectImpl::OnDeactivate()
     maskRenderer.SetTextures(emptyTextureSet);
   }
 
-  Ui::Control control = GetOwnerControl();
+  Ui::View control = GetOwnerView();
   if(DALI_LIKELY(control))
   {
     control.RemoveCacheRenderer(maskRenderer);
@@ -273,17 +311,17 @@ void MaskEffectImpl::CreateMaskData()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    Ui::Control ownerControl = GetOwnerControl();
-    DALI_ASSERT_ALWAYS(ownerControl && "Set the owner of RenderEffect before you activate.");
+    Ui::View ownerView = GetOwnerView();
+    DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
     Vector2 size = GetTargetSize();
     mCamera.SetPerspectiveProjection(size);
 
     CreateFrameBuffers(ImageDimensions(size.x, size.y));
-    CreateRenderTasks(ownerControl);
-    SetShaderConstants(ownerControl);
+    CreateRenderTasks(ownerView);
+    SetShaderConstants(ownerView);
 
-    mMaskTargetRenderTask.SetScreenToFrameBufferMappingActor(ownerControl);
+    mMaskTargetRenderTask.SetScreenToFrameBufferMappingActor(ownerView);
 
     TextureSet textureSet = GetTargetRenderer().GetTextures();
     if(textureSet)
@@ -305,7 +343,7 @@ void MaskEffectImpl::CreateMaskData()
 
     // Reorder render task
     // TODO : Can we remove this GetImplementation?
-    GetImplementation(ownerControl).RequestRenderTaskReorder();
+    Integration::GetImpl(ownerView).RequestRenderTaskReorder();
   }
 }
 
@@ -325,13 +363,17 @@ void MaskEffectImpl::CreateFrameBuffers(const ImageDimensions size)
 
 void MaskEffectImpl::CreateRenderTasks(Ui::Control ownerControl)
 {
+}
+
+void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
+{
   RenderTaskList taskList = GetSceneHolder().GetRenderTaskList();
 
   mMaskTargetRenderTask = taskList.CreateTask();
   mMaskTargetRenderTask.SetCameraActor(mCamera);
   mMaskTargetRenderTask.SetExclusive(true);
   mMaskTargetRenderTask.SetInputEnabled(true);
-  mMaskTargetRenderTask.SetSourceActor(ownerControl);
+  mMaskTargetRenderTask.SetSourceActor(ownerView);
   mMaskTargetRenderTask.SetFrameBuffer(mMaskTargetFrameBuffer);
   mMaskTargetRenderTask.SetClearEnabled(true);
   mMaskTargetRenderTask.SetClearColor(Color::TRANSPARENT);
@@ -352,7 +394,7 @@ void MaskEffectImpl::CreateRenderTasks(Ui::Control ownerControl)
   mMaskSourceRenderTask.SetCameraActor(mCamera);
   mMaskSourceRenderTask.SetExclusive(true);
   mMaskSourceRenderTask.SetInputEnabled(false);
-  mMaskSourceRenderTask.SetSourceActor(mMaskControl.GetHandle());
+  mMaskSourceRenderTask.SetSourceActor(mMaskView.GetHandle());
   mMaskSourceRenderTask.SetFrameBuffer(mMaskSourceFrameBuffer);
   mMaskSourceRenderTask.SetClearEnabled(true);
   mMaskSourceRenderTask.SetClearColor(Color::TRANSPARENT);
@@ -389,25 +431,29 @@ void MaskEffectImpl::ResetMaskData()
 
 void MaskEffectImpl::SetShaderConstants(Ui::Control ownerControl)
 {
-  ownerControl.RegisterProperty(UNIFORM_MASK_MODE_NAME, static_cast<float>(mMaskMode));
+}
+
+void MaskEffectImpl::SetShaderConstants(Ui::View ownerView)
+{
+  ownerView.RegisterProperty(UNIFORM_MASK_MODE_NAME, static_cast<float>(mMaskMode));
 
   Vector2 newMaskPosition;
   newMaskPosition.x = -mMaskPosition.x;
   newMaskPosition.y = -mMaskPosition.y;
-  ownerControl.RegisterProperty(UNIFORM_MASK_POSITION_NAME, newMaskPosition);
+  ownerView.RegisterProperty(UNIFORM_MASK_POSITION_NAME, newMaskPosition);
 
   Vector2 newMaskScale;
   newMaskScale.x = 1.0f / std::max(Math::MACHINE_EPSILON_100, mMaskScale.x);
   newMaskScale.y = 1.0f / std::max(Math::MACHINE_EPSILON_100, mMaskScale.y);
 
-  ownerControl.RegisterProperty(UNIFORM_MASK_SCALE_NAME, newMaskScale);
+  ownerView.RegisterProperty(UNIFORM_MASK_SCALE_NAME, newMaskScale);
 }
 
 void MaskEffectImpl::OnTargetRenderFinished(Dali::RenderTask& renderTask)
 {
   if(DALI_LIKELY(mMaskTargetRenderTask == renderTask))
   {
-    // TODO : We need to keep ownerControl as exclusive status.
+    // TODO : We need to keep ownerView as exclusive status.
     // Need to find good way to remove render task in future.
 
     // auto sceneHolder = GetSceneHolder();
@@ -427,7 +473,7 @@ void MaskEffectImpl::OnSourceRenderFinished(Dali::RenderTask& renderTask)
 {
   if(DALI_LIKELY(mMaskSourceRenderTask == renderTask))
   {
-    // TODO : We need to keep ownerControl as exclusive status.
+    // TODO : We need to keep ownerView as exclusive status.
     // Need to find good way to remove render task in future.
 
     // auto sceneHolder = GetSceneHolder();

@@ -45,26 +45,29 @@ class MaskEffectImpl : public RenderEffectImpl
 {
 public:
   /**
-   * @brief Creates an initialized MaskEffect with control, using default settings. The default settings are:
+   * @brief Creates an initialized MaskEffect with view, using default settings. The default settings are:
    *
    * maskMode = MaskEffect::MaskMode::ALPHA
    * maskPosition = Vector2(0.f, 0.f)
    * maskScale = Vector2(1.f, 1.f)
    *
-   * @param[in] maskControl The source Control to affect mask.
+   * @param[in] maskView The source View to affect mask.
    * @return A handle to a newly allocated Dali resource
    */
   static MaskEffectImplPtr New(Ui::Control maskControl);
+  static MaskEffectImplPtr New(Ui::View maskView);
 
   /**
    * @brief Creates an initialized MaskEffect.
-   * @param[in] maskControl The source Control to affect mask.
+   * @param[in] maskView The source View to affect mask.
    * @param[in] maskMode Defines pixel data type (alpha, luminance) used as the mask source.
    * @param[in] maskPosition The Position of mask source.
    * @param[in] maskScale The Scale of mask source.
    * @return A handle to a newly allocated Dali resource
    */
   static MaskEffectImplPtr New(Ui::Control maskControl, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
+                               Vector2 maskScale);
+  static MaskEffectImplPtr New(Ui::View maskView, MaskEffect::MaskMode maskMode, Vector2 maskPosition,
                                Vector2 maskScale);
 
   /**
@@ -106,18 +109,20 @@ public:
 protected:
   /**
    * @brief Creates an uninitialized mask effect implementation
-   * @param[in] maskControl
+   * @param[in] maskView
    */
   MaskEffectImpl(Ui::Control maskControl);
+  MaskEffectImpl(Ui::View maskView);
 
   /**
    * @brief Creates an uninitialized mask effect implementation
-   * @param[in] maskControl
+   * @param[in] maskView
    * @param[in] maskMode
    * @param[in] maskPosition
    * @param[in] maskScale
    */
   MaskEffectImpl(Ui::Control maskControl, MaskEffect::MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
+  MaskEffectImpl(Ui::View maskView, MaskEffect::MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
 
   /**
    * @brief Destructor
@@ -156,9 +161,10 @@ private:
 
   /**
    * @brief Sets mask render tasks.
-   * @param[in] ownerControl Input owner control
+   * @param[in] ownerView Input owner view
    */
   void CreateRenderTasks(Ui::Control ownerControl);
+  void CreateRenderTasks(Ui::View ownerView);
 
   /**
    * @brief Reset Mask Data
@@ -167,13 +173,14 @@ private:
 
   /**
    * @brief Sets shader constants, mask mode, position, and scale.
-   * @param[in] ownerControl Input owner control
+   * @param[in] ownerView Input owner view
    */
   void SetShaderConstants(Ui::Control ownerControl);
+  void SetShaderConstants(Ui::View ownerView);
 
   /**
    * @brief Create mask data including RenderTask, Framebuffer, Texture.
-   * @param[in] ownerControl Input owner control
+   * @param[in] ownerView Input owner view
    */
   void CreateMaskData();
 
@@ -202,6 +209,7 @@ private:
   CameraActor mCamera;
 
   WeakHandle<Ui::Control> mMaskControl;
+  WeakHandle<Ui::View>    mMaskView;
 
   // Resource
   RenderTask  mMaskTargetRenderTask;

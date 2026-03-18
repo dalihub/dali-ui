@@ -17,52 +17,5 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
-#include <dali/dali.h>
-
-namespace Dali
-{
-namespace Ui
-{
-namespace Internal
-{
-#define BASIC_VERTEX_SOURCE SHADER_CONTROL_RENDERERS_VERT
-#define BASIC_FRAGMENT_SOURCE SHADER_CONTROL_RENDERERS_FRAG
-
-/**
- * Helper method for rendering an image with custom shader.
- * @param[in] vertextSrc The custom vertex shader.
- * @param[in] fragmentSrc The custom fragment shader.
- * @return A newly created renderer.
- */
-Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc);
-
-/**
- * Helper method for rendering an image with custom shader.
- * @param[in] vertextSrc The custom vertex shader.
- * @param[in] fragmentSrc The custom fragment shader.
- * @param[in] gridSize The number of grid sub-divisions required.
- * @return A newly created renderer.
- */
-Dali::Renderer CreateRenderer(std::string_view vertexSrc, std::string_view fragmentSrc, Dali::Shader::Hint::Value hints,
-                              const std::string& shaderName, Dali::Uint16Pair gridSize);
-
-/**
- * Helper method for setting the first texture passed to a renderer.
- * @param[in] renderer The renderer using the texture.
- * @param[in] texture The texture to set.
- */
-void SetRendererTexture(Dali::Renderer renderer, Dali::Texture texture);
-
-/**
- * Helper method for setting the first texture passed to a renderer.
- * @param[in] renderer The renderer using the texture.
- * @param[in] framebuffer A frame buffer color texture attached.
- */
-void SetRendererTexture(Dali::Renderer renderer, Dali::FrameBuffer frameBuffer);
-
-} // namespace Internal
-} // namespace Ui
-} // namespace Dali
-
+#include <dali-ui-foundation/internal/views/view/view-renderers.h>
 #endif // DALI_UI_INTERNAL_CONTROL_RENDERERS_H

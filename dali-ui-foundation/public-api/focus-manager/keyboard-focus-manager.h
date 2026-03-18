@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 #include <string>
 
 namespace Dali
@@ -57,7 +58,7 @@ class DALI_UI_API KeyboardFocusManager : public BaseHandle
 {
 public:
   /// @brief Pre focus change signal
-  typedef Signal<Actor(Actor, Actor, Control::KeyboardFocus::Direction)> PreFocusChangeSignalType;
+  typedef Signal<Actor(Actor, Actor, View::KeyboardFocus::Direction)> PreFocusChangeSignalType;
 
   /// @brief Focus changed signal
   typedef Signal<void(Actor, Actor)> FocusChangedSignalType;
@@ -88,7 +89,7 @@ public:
    * @brief Gets the singleton of KeyboardFocusManager object.
    *
    * @SINCE_1_0.0
-   * @return A handle to the KeyboardFocusManager control
+   * @return A handle to the KeyboardFocusManager view
    */
   static KeyboardFocusManager Get();
 
@@ -128,6 +129,7 @@ public:
    * @pre The KeyboardFocusManager has been initialized.
    */
   bool MoveFocus(Control::KeyboardFocus::Direction direction);
+  bool MoveFocus(View::KeyboardFocus::Direction direction);
 
   /**
    * @brief Clears the focus from the current focused actor if any, so
@@ -162,7 +164,7 @@ public:
    * @brief Sets whether an actor is a focus group that can limit the
    * scope of focus movement to its child actors in the focus chain.
    *
-   * Layout controls set themselves as focus groups by default.
+   * Layout views set themselves as focus groups by default.
    *
    * @SINCE_1_0.0
    * @param actor The actor to be set as a focus group
@@ -233,7 +235,7 @@ public:
    * @return The device of the last focus change
    * @pre The KeyboardFocusManager has been initialized.
    */
-  Control::KeyboardFocus::Device GetLastFocusChangeDevice() const;
+  View::KeyboardFocus::Device GetLastFocusChangeDevice() const;
 
   /**
    * @brief Gets the device name that caused the last focus change.
@@ -282,7 +284,7 @@ public: // Signals
    *
    * A callback of the following type may be connected:
    * @code
-   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, Control::KeyboardFocus::Direction
+   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, View::KeyboardFocus::Direction
    * direction);
    * @endcode
    * @SINCE_1_0.0
@@ -307,7 +309,7 @@ public: // Signals
   /**
    * @brief This signal is emitted when the focus group has been changed.
    *
-   * If the current focus group has a parent layout control,
+   * If the current focus group has a parent layout view,
    * KeyboardFocusManager will make the best guess for the next focus
    * group to move the focus to in the given direction (forward or
    * backward). If not, the application has to set the new focus.

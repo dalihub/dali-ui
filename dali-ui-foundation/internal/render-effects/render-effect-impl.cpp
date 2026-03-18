@@ -28,6 +28,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
 namespace Dali
 {
@@ -53,6 +54,7 @@ uint32_t RenderEffectImpl::GetRenderPassTag()
 RenderEffectImpl::RenderEffectImpl()
 : mRenderer(),
   mOwnerControl(),
+  mOwnerView(),
   mTargetSize(Vector2::ZERO),
   mIsActivated(false)
 {
@@ -64,27 +66,31 @@ RenderEffectImpl::~RenderEffectImpl()
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Verbose, "[RenderEffect:%p] Destructor.\n", this);
 
   // Reset weak handle first. (Since it might not valid during destruction.)
-  mOwnerControl.Reset();
+  mOwnerView.Reset();
   mPlacementSceneHolder.Reset();
 
   // Don't call Deactivate here, since we cannot call virtual function during destruction.
-  // Deactivate already be called at Control's destructor, and InheritVisibilityChanged signal.
+  // Deactivate already be called at View's destructor, and InheritVisibilityChanged signal.
 }
 
 void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
 {
-  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-  if(ownerControl != control)
+}
+
+void RenderEffectImpl::SetOwnerView(Dali::Ui::View view)
+{
+  Dali::Ui::View ownerView = mOwnerView.GetHandle();
+  if(ownerView != view)
   {
-    // Clear previous owner control
-    ClearOwnerControl();
+    // Clear previous owner view
+    ClearOwnerView();
 
-    mOwnerControl = (ownerControl = control);
+    mOwnerView = (ownerView = view);
 
-    DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] SetOwnerControl [ID:%d]\n", this,
-                  ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+    DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] SetOwnerView [ID:%d]\n", this,
+                  ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
 
-    if(ownerControl)
+    if(ownerView)
     {
       UpdateTargetSize();
 
@@ -95,7 +101,7 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
         if(radiusIndex != Property::INVALID_INDEX)
         {
           Constraint cornerRadiusConstraint = Constraint::New<Vector4>(renderer, radiusIndex, EqualToConstraint());
-          cornerRadiusConstraint.AddSource(Source(ownerControl, Ui::Control::Property::CORNER_RADIUS));
+          cornerRadiusConstraint.AddSource(Source(ownerView, Ui::View::Property::CORNER_RADIUS));
           cornerRadiusConstraint.Apply();
           mAnimationConstraints.push_back(cornerRadiusConstraint);
         }
@@ -105,23 +111,27 @@ void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
         {
           Constraint cornerSquarenessConstraint =
             Constraint::New<Vector4>(renderer, squarenessIndex, EqualToConstraint());
-          cornerSquarenessConstraint.AddSource(Source(ownerControl, Ui::Control::Property::CORNER_SQUARENESS));
+          cornerSquarenessConstraint.AddSource(Source(ownerView, Ui::View::Property::CORNER_SQUARENESS));
           cornerSquarenessConstraint.Apply();
           mAnimationConstraints.push_back(cornerSquarenessConstraint);
         }
       }
 
-      ownerControl.InheritedVisibilityChangedSignal().Connect(this,
-                                                              &RenderEffectImpl::OnControlInheritedVisibilityChanged);
+      ownerView.InheritedVisibilityChangedSignal().Connect(this,
+                                                           &RenderEffectImpl::OnViewInheritedVisibilityChanged);
 
-      Activate(); // Dev note : Activate after set the owner control.
+      Activate(); // Dev note : Activate after set the owner view.
     }
   }
 }
 
 void RenderEffectImpl::ClearOwnerControl()
 {
-  Deactivate(); // Dev note : Deactivate before clearing the owner control.
+}
+
+void RenderEffectImpl::ClearOwnerView()
+{
+  Deactivate(); // Dev note : Deactivate before clearing the owner view.
 
   for(auto constraint : mAnimationConstraints)
   {
@@ -129,22 +139,22 @@ void RenderEffectImpl::ClearOwnerControl()
   }
   mAnimationConstraints.clear();
 
-  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-  DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] ClearOwnerControl [ID:%d]\n", this,
-                ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
-  if(ownerControl)
+  Dali::Ui::View ownerView = mOwnerView.GetHandle();
+  DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] ClearOwnerView [ID:%d]\n", this,
+                ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
+  if(ownerView)
   {
-    ownerControl.InheritedVisibilityChangedSignal().Disconnect(this,
-                                                               &RenderEffectImpl::OnControlInheritedVisibilityChanged);
+    ownerView.InheritedVisibilityChangedSignal().Disconnect(this,
+                                                            &RenderEffectImpl::OnViewInheritedVisibilityChanged);
 
-    auto previousOwnerControl = ownerControl;
-    mOwnerControl.Reset();
+    auto previousOwnerView = ownerView;
+    mOwnerView.Reset();
     mPlacementSceneHolder.Reset();
 
-    // Make previous owner don't have render effect, after make we don't have owner control now.
-    if(previousOwnerControl.GetRenderEffect().GetObjectPtr() == this)
+    // Make previous owner don't have render effect, after make we don't have owner view now.
+    if(previousOwnerView.GetRenderEffect().GetObjectPtr() == this)
     {
-      previousOwnerControl.ClearRenderEffect();
+      previousOwnerView.ClearRenderEffect();
     }
   }
 }
@@ -177,6 +187,11 @@ Ui::Control RenderEffectImpl::GetOwnerControl() const
   return mOwnerControl.GetHandle();
 }
 
+Ui::View RenderEffectImpl::GetOwnerView() const
+{
+  return mOwnerView.GetHandle();
+}
+
 Dali::Integration::SceneHolder RenderEffectImpl::GetSceneHolder() const
 {
   return mPlacementSceneHolder.GetHandle();
@@ -196,15 +211,15 @@ void RenderEffectImpl::Activate()
 {
   if(!IsActivated() && IsActivateValid())
   {
-    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
+    Dali::Ui::View ownerView = mOwnerView.GetHandle();
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Activated! [ID:%d]\n", this,
-                  ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+                  ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
 
     // Keep sceneHolder as weak handle.
-    Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(ownerControl);
+    Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(ownerView);
     if(DALI_UNLIKELY(!sceneHolder))
     {
-      DALI_LOG_ERROR("RenderEffect Could not be activated due to ownerControl's SceneHolder is not exist\n");
+      DALI_LOG_ERROR("RenderEffect Could not be activated due to ownerView's SceneHolder is not exist\n");
       return;
     }
     mIsActivated = true;
@@ -214,12 +229,12 @@ void RenderEffectImpl::Activate()
     // Activate logic for subclass.
     OnActivate();
 
-    // Set round corner. Default is to sync to owner control's BACKGROUND.
-    Vector4 cornerRadius = ownerControl.GetProperty<Vector4>(Ui::Control::Property::CORNER_RADIUS);
+    // Set round corner. Default is to sync to owner view's BACKGROUND.
+    Vector4 cornerRadius = ownerView.GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
     if(cornerRadius != Vector4::ZERO)
     {
-      int32_t cornerRadiusPolicy = ownerControl.GetProperty<int32_t>(Ui::Control::Property::CORNER_RADIUS_POLICY);
-      Vector4 cornerSquareness   = ownerControl.GetProperty<Vector4>(Ui::Control::Property::CORNER_SQUARENESS);
+      int32_t cornerRadiusPolicy = ownerView.GetProperty<int32_t>(Ui::View::Property::CORNER_RADIUS_POLICY);
+      Vector4 cornerSquareness   = ownerView.GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS);
 
       Property::Map map;
       map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
@@ -238,9 +253,9 @@ void RenderEffectImpl::Deactivate()
   {
     mIsActivated = false;
 
-    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
+    Dali::Ui::View ownerView = mOwnerView.GetHandle();
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Deactivated! [ID:%d]\n", this,
-                  ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+                  ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
 
     // Deactivate logic for subclass.
     OnDeactivate();
@@ -249,10 +264,10 @@ void RenderEffectImpl::Deactivate()
 
 void RenderEffectImpl::Refresh()
 {
-  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::View ownerView = mOwnerView.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] Refresh! [ID:%d]\n", this,
-                ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
-  if(ownerControl)
+                ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
+  if(ownerView)
   {
     UpdateTargetSize();
 
@@ -265,7 +280,7 @@ void RenderEffectImpl::Refresh()
       else
       {
         DALI_LOG_INFO(gRenderEffectLogFilter, Debug::General, "[RenderEffect:%p] OnRefresh()! [ID:%d]\n", this,
-                      ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1);
+                      ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
         OnRefresh();
       }
     }
@@ -283,14 +298,14 @@ bool RenderEffectImpl::IsActivateValid() const
   Vector2 size = GetTargetSize();
   if(size.x > Math::MACHINE_EPSILON_1000 && size.y > Math::MACHINE_EPSILON_1000)
   {
-    Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-    if(ownerControl && DevelActor::IsEffectivelyVisible(ownerControl))
+    Dali::Ui::View ownerView = mOwnerView.GetHandle();
+    if(ownerView && DevelActor::IsEffectivelyVisible(ownerView))
     {
       ret = true;
     }
     DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise,
                   "[RenderEffect:%p] IsActivateValid? [ID:%d][size:%fx%f][ret:%d]\n", this,
-                  ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, ret);
+                  ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1, size.x, size.y, ret);
   }
   else
   {
@@ -303,14 +318,14 @@ bool RenderEffectImpl::IsActivateValid() const
 
 void RenderEffectImpl::UpdateTargetSize()
 {
-  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
-  Vector2           size         = Vector2::ZERO;
-  if(ownerControl)
+  Dali::Ui::View ownerView = mOwnerView.GetHandle();
+  Vector2        size      = Vector2::ZERO;
+  if(ownerView)
   {
-    size = ownerControl.GetProperty<Vector2>(Actor::Property::SIZE);
+    size = ownerView.GetProperty<Vector2>(Actor::Property::SIZE);
     if(size == Vector2::ZERO)
     {
-      size = ownerControl.GetNaturalSize();
+      size = ownerView.GetNaturalSize();
     }
 
     if(size.x < 0.0f || size.y < 0.0f)
@@ -330,16 +345,16 @@ void RenderEffectImpl::UpdateTargetSize()
 
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise,
                 "[RenderEffect:%p] UpdateTargetSize [ID:%d][prev:%fx%f][size:%fx%f]\n", this,
-                ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, mTargetSize.x, mTargetSize.y,
+                ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1, mTargetSize.x, mTargetSize.y,
                 size.x, size.y);
   mTargetSize = size;
 }
 
-void RenderEffectImpl::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
+void RenderEffectImpl::OnViewInheritedVisibilityChanged(Actor actor, bool visible)
 {
-  Dali::Ui::Control ownerControl = mOwnerControl.GetHandle();
+  Dali::Ui::View ownerView = mOwnerView.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise, "[RenderEffect:%p] visibility changed [ID:%d][visible:%d]\n",
-                this, ownerControl ? ownerControl.GetProperty<int>(Actor::Property::ID) : -1, visible);
+                this, ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1, visible);
   if(visible)
   {
     Activate();

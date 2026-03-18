@@ -19,7 +19,7 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/control/control-renderers.h>
+#include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>

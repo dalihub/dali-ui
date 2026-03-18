@@ -74,7 +74,7 @@ FlexLayout FlexLayout::New()
 
 FlexLayout FlexLayout::DownCast(BaseHandle handle)
 {
-  return Ui::Control::DownCast<FlexLayout, Integration::FlexLayoutImpl>(handle);
+  return Ui::View::DownCast<FlexLayout, Integration::FlexLayoutImpl>(handle);
 }
 
 FlexLayout::FlexLayout(Integration::FlexLayoutImpl& implementation)
