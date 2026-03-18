@@ -24,11 +24,13 @@ void Create(Application& application) {
   application.GetWindow().Add(
     View::New()
       .SetBackgroundColor(Color::YELLOW)
-      .Size(200_spx, 200_spx)
+      .SetSizeWidth(200_spx)
+      .SetSizeHeight(200_spx)
       .Contents({
         View::New()
           .SetBackgroundColor(Color::RED)
-          .Size(100_spx, 100_spx)
+          .SetSizeWidth(100_spx)
+          .SetSizeHeight(100_spx)
           .With([](View& v) {
             v.TouchedSignal().Connect([](Actor a, const TouchEvent& t) {
               return true;
@@ -36,7 +38,8 @@ void Create(Application& application) {
           }),
         View::New()
           .SetBackgroundColor(Color::BLUE)
-          .Position(100_spx, 100_spx)
+          .SetPositionX(100_spx)
+          .SetPositionY(100_spx)
       })
   );
 }
