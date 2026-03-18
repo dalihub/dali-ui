@@ -679,6 +679,11 @@ void Controller::SendSelectionToClipboard(bool deleteAfterSending)
   mImpl->SendSelectionToClipboard(deleteAfterSending);
 }
 
+float Controller::GetDefaultFontLineHeight()
+{
+  return mImpl->GetDefaultFontLineHeight();
+}
+
 void Controller::SetDefaultFontFamily(const std::string& defaultFontFamily)
 {
   EnsureCreated(mImpl->mFontDefaults);

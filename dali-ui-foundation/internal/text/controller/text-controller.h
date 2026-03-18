@@ -884,6 +884,11 @@ public: // Update.
    */
   void SendSelectionToClipboard(bool deleteAfterSending);
 
+  /**
+   * @brief Retrieve the line height of the default font.
+   */
+  float GetDefaultFontLineHeight();
+
 public: // Default style & Input style
   /**
    * @brief Set the default font family.

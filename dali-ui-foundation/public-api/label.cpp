@@ -104,8 +104,7 @@ Label& Label::operator=(Label&& rhs) noexcept
 
 Label Label::DownCast(BaseHandle handle)
 {
-  // TODO: Use Ui::View::DownCast once the template DownCast is migrated from Ui::Control.
-  return Ui::Control::DownCast<Label, Integration::LabelImpl>(handle);
+  return Ui::View::DownCast<Label, Integration::LabelImpl>(handle);
 }
 
 Label::Label(Integration::LabelImpl& implementation)

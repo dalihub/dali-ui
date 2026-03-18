@@ -49,6 +49,19 @@ public:
         Label::New("Simple Label")
           .SetFontSize(20),
 
+        InputField::New()
+          .SetPlaceholder("Enter your text here")
+          .SetPlaceholderColor(Color::DARK_GRAY)
+          .SetFontSize(20)
+          .SetCursorWidth(2)
+          .SetSelectionColor(Color::LIGHT_BLUE)
+          .SetLayoutWidth(LayoutDimension::MatchParent)
+          .SetLayoutHeight(LayoutDimension::WrapContent)
+          .SetViewPadding(Extents(20, 20, 20, 20))
+          .SetBackgroundColor(Color::LIGHT_GRAY)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER)
+          .As(mField),
+
         CreateLabel("Hello world", "SamsungOneUI_400", 40.0f)
           .SetLayoutWidth(LayoutDimension::WrapContent)
           .SetLayoutHeight(100.0f)
@@ -80,7 +93,7 @@ public:
           .As(mLabel3),
 
          View::New()
-          .SetBackgroundColor(Color::BLUE)
+          .SetBackgroundColor(UiColor(0x0000FF))
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f),
 
@@ -109,12 +122,23 @@ public:
           .SetVerticalTextAlignment(Text::Alignment::END),
         }));
 
-
     Print(mLabel, "Label 1");
     Print(mLabel2, "Label 2");
     Print(mLabel3, "Label 3");
+    Print(mField, "InputField");
+
+    mField.TextChangedSignal().Connect(this, &StackLayoutController::OnTextChanged);   
 
     window.KeyEventSignal().Connect(this, &StackLayoutController::OnKeyEvent);
+  }
+
+  void OnTextChanged(View view)
+  {
+    InputField field = InputField::DownCast(view);
+    if(field)
+    {
+      DALI_LOG_ERROR("OnTextChanged:%s\n", field.GetText().CStr());
+    }
   }
 
   Label CreateLabel(Dali::String text, Dali::String fontFamily, float fontSize)
@@ -144,18 +168,43 @@ public:
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
+  void Print(InputField field, Dali::String title)
+  {
+    DALI_LOG_ERROR("----------------------------------------------------------------\n");
+    DALI_LOG_ERROR("%s\n", title.CStr());
+
+    DALI_LOG_ERROR("Text             : %s\n", field.GetText().CStr());
+    DALI_LOG_ERROR("FontFamily       : %s\n", field.GetFontFamily().CStr());
+    DALI_LOG_ERROR("Fontsize         : %f\n", field.GetFontSize());
+    DALI_LOG_ERROR("TextColor        : %.2f, %.2f, %.2f, %.2f\n", field.GetTextColor().r, field.GetTextColor().g, field.GetTextColor().b, field.GetTextColor().a);
+    DALI_LOG_ERROR("H Align          : %d\n", field.GetHorizontalTextAlignment());
+    DALI_LOG_ERROR("V Align          : %d\n", field.GetVerticalTextAlignment());
+    DALI_LOG_ERROR("Placeholder      : %s\n", field.GetPlaceholder().CStr());
+    DALI_LOG_ERROR("PlaceholderColor : %.2f, %.2f, %.2f, %.2f\n", field.GetPlaceholderColor().r, field.GetPlaceholderColor().g, field.GetPlaceholderColor().b, field.GetPlaceholderColor().a);
+    DALI_LOG_ERROR("CursorWidth      : %d\n", field.GetCursorWidth());
+    DALI_LOG_ERROR("CursorColor      : %.2f, %.2f, %.2f, %.2f\n", field.GetCursorColor().r, field.GetCursorColor().g, field.GetCursorColor().b, field.GetCursorColor().a);
+    DALI_LOG_ERROR("SelectionColor   : %.2f, %.2f, %.2f, %.2f\n", field.GetSelectionColor().r, field.GetSelectionColor().g, field.GetSelectionColor().b, field.GetSelectionColor().a);
+
+    DALI_LOG_ERROR("Natural          : %f\n", field.GetNaturalSize().x, field.GetNaturalSize().y);
+
+    DALI_LOG_ERROR("----------------------------------------------------------------\n");
+  }
+
   void OnKeyEvent(const KeyEvent& event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {
-      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
-      {
-        mApplication.Quit();
-      }
+      //
     }
     else if (event.GetState() == KeyEvent::UP)
     {
-      if (event.GetKeyName() == "1")
+      if (IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+      {
+        DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
+
+        mApplication.Quit();
+      }
+      else if (event.GetKeyName() == "1")
       {
         if (mLabel.GetTextColor() == Color::ORANGE)
         {
@@ -165,6 +214,9 @@ public:
           mLabel2.SetTextColor(Color::DARK_GRAY);
           mLabel3.SetBackgroundColor(Color::WHITE);
           mLabel3.SetTextColor(Color::BLACK);
+          mField.SetTextColor(Color::LIGHT_GRAY);
+          mField.SetBackgroundColor(Color::BLACK);
+          mField.SetCursorColor(Color::WHITE);
         }
         else
         {
@@ -174,6 +226,9 @@ public:
           mLabel2.SetTextColor(Color::RED);
           mLabel3.SetBackgroundColor(Color::BLACK);
           mLabel3.SetTextColor(Color::WHITE);
+          mField.SetTextColor(Color::BLACK);
+          mField.SetBackgroundColor(Color::LIGHT_GRAY);
+          mField.SetCursorColor(Color::BLACK);
         }
       }
     }
@@ -184,11 +239,13 @@ private:
   Label mLabel;
   Label mLabel2;
   Label mLabel3;
+  InputField mField;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
   StackLayoutController controller(application);
   application.MainLoop();
   return 0;
