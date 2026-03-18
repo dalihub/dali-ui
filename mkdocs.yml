@@ -55,6 +55,7 @@ plugins:
             ENABLE_PREPROCESSING: "YES"
             MACRO_EXPANSION: "YES"
             SEARCH_INCLUDES: "YES"
+            SHOW_FILES: "NO"
 
 markdown_extensions:
   - admonition
@@ -71,4 +72,3 @@ nav:
       - 'Class List': 'daliUi/annotated.md'
       - 'Class Index': 'daliUi/classes.md'
       - 'Namespace List': 'daliUi/namespaces.md'
-      - 'Files': 'daliUi/files.md'
