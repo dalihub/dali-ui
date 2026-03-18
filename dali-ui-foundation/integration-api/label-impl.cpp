@@ -16,10 +16,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/type-registry.h>
 
@@ -28,6 +28,10 @@
 
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/controls/control.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -90,31 +94,32 @@ LabelImpl::~LabelImpl()
 }
 
 // Properties
-void LabelImpl::SetText(std::string text)
+void LabelImpl::SetText(const Dali::String& text)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.c_str());
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
 
-  mController->SetText(text);
+  mController->SetText(ToStdString(text));
   mTextUpdateNeeded = true;
   RequestTextRelayout();
 }
 
-std::string LabelImpl::GetText() const
+Dali::String LabelImpl::GetText() const
 {
   std::string text;
   mController->GetText(text);
-  return text;
+  return ToDaliString(text);
 }
 
-void LabelImpl::SetFontFamily(std::string fontFamily)
+void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.c_str());
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.CStr());
 
-  mController->SetDefaultFontFamily(fontFamily);
+  mController->SetDefaultFontFamily(ToStdString(fontFamily));
 }
-std::string LabelImpl::GetFontFamily() const
+
+Dali::String LabelImpl::GetFontFamily() const
 {
-  return mController->GetDefaultFontFamily();
+  return ToDaliString(mController->GetDefaultFontFamily());
 }
 
 void LabelImpl::SetFontSize(float fontSize)

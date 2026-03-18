@@ -46,8 +46,7 @@ public:
       .SetLayoutHeight(LayoutDimension::MatchParent)
       .SetViewPadding(Extents(20, 20, 20, 20))
       .Contents({
-        Label::New()
-          .SetText("Simple Label")
+        Label::New("Simple Label")
           .SetFontSize(20),
 
         CreateLabel("Hello world", "SamsungOneUI_400", 40.0f)
@@ -85,8 +84,7 @@ public:
           .SetLayoutWidth(LayoutDimension::MatchParent)
           .SetLayoutHeight(30.0f),
 
-        Label::New()
-          .SetText("Label Alignment")
+        Label::New("Label Alignment")
           .BackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
@@ -94,8 +92,7 @@ public:
           .SetHorizontalTextAlignment(Text::Alignment::START)
           .SetVerticalTextAlignment(Text::Alignment::START),
 
-        Label::New()
-          .SetText("Label Alignment")
+        Label::New("Label Alignment")
           .BackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
@@ -103,8 +100,7 @@ public:
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
 
-        Label::New()
-          .SetText("Label Alignment")
+        Label::New("Label Alignment")
           .BackgroundColor(Color::GRAY)
           .SetFontSize(10)
           .SetLayoutWidth(LayoutDimension::MatchParent)
@@ -121,7 +117,7 @@ public:
     window.KeyEventSignal().Connect(this, &StackLayoutController::OnKeyEvent);
   }
 
-  Label CreateLabel(std::string text, std::string fontFamily, float fontSize)
+  Label CreateLabel(Dali::String text, Dali::String fontFamily, float fontSize)
   {
     return Label::New()
           .SetText(text)
@@ -129,13 +125,13 @@ public:
           .SetFontSize(fontSize);
   }
 
-  void Print(Label label, std::string title)
+  void Print(Label label, Dali::String title)
   {
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title.c_str());
+    DALI_LOG_ERROR("%s\n", title.CStr());
 
-    DALI_LOG_ERROR("Text       : %s\n", label.GetText().c_str());
-    DALI_LOG_ERROR("FontFamily : %s\n", label.GetFontFamily().c_str());
+    DALI_LOG_ERROR("Text       : %s\n", label.GetText().CStr());
+    DALI_LOG_ERROR("FontFamily : %s\n", label.GetFontFamily().CStr());
     DALI_LOG_ERROR("Fontsize   : %f\n", label.GetFontSize());
     DALI_LOG_ERROR("MultiLine  : %d\n", label.IsMultiLine());
     DALI_LOG_ERROR("TextColor  : %.2f, %.2f, %.2f, %.2f\n", label.GetTextColor().r, label.GetTextColor().g, label.GetTextColor().b, label.GetTextColor().a);

@@ -61,6 +61,18 @@ Label Label::New()
   return label;
 }
 
+Label Label::New(const Dali::String& text)
+{
+  Integration::LabelImplPtr impl = Integration::LabelImpl::New();
+
+  Label label = Label(*impl);
+
+  // Second-phase initialization
+  impl->Initialize();
+  label.SetText(text);
+  return label;
+}
+
 Label::Label(const Label& label)
 : View(label)
 {
@@ -111,23 +123,24 @@ Label::Label(Dali::Internal::CustomActor* internal)
 // Properties
 // =============================================================================
 
-Label& Label::SetText(std::string text)
+Label& Label::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
   return *this;
 }
 
-std::string Label::GetText() const
+Dali::String Label::GetText() const
 {
   return GetImpl(*this).GetText();
 }
 
-Label& Label::SetFontFamily(std::string fontFamily)
+Label& Label::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);
   return *this;
 }
-std::string Label::GetFontFamily() const
+
+Dali::String Label::GetFontFamily() const
 {
   return GetImpl(*this).GetFontFamily();
 }

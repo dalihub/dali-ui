@@ -68,6 +68,14 @@ public: // Creation & Destruction
   static Label New();
 
   /**
+   * @brief Creates an initialized Label.
+   *
+   * @param[in] text The initial text to be displayed by the Label.
+   * @return A handle to a newly allocated Dali resource
+   */
+  static Label New(const Dali::String& text);
+
+  /**
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
@@ -126,28 +134,28 @@ public: // Setters for chaining
    *
    * @param[in] text The text to display in UTF-8 format.
    */
-  Label& SetText(const std::string text);
+  Label& SetText(const Dali::String& text);
 
   /**
    * @brief Gets the text.
    *
    * @return The text currently set on the label in UTF-8 format.
    */
-  std::string GetText() const;
+  Dali::String GetText() const;
 
   /**
    * @brief Sets the font family of the text.
    *
    * @param[in] fontFamily The requested font family to use.
    */
-  Label& SetFontFamily(std::string fontFamily);
+  Label& SetFontFamily(const Dali::String& fontFamily);
 
   /**
    * @brief Gets the font family of the text.
    *
    * @return The font family currently set on the label.
    */
-  std::string GetFontFamily() const;
+  Dali::String GetFontFamily() const;
 
   /**
    * @brief Sets the font size of the text.

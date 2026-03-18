@@ -120,22 +120,22 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetText
    */
-  void SetText(const std::string text);
+  void SetText(const Dali::String& text);
 
   /**
    * @copydoc Dali::Ui::Label::GetText
    */
-  std::string GetText() const;
+  Dali::String GetText() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontFamily
    */
-  void SetFontFamily(std::string fontFamily);
+  void SetFontFamily(const Dali::String& fontFamily);
 
   /**
    * @copydoc Dali::Ui::Label::GetFontFamily
    */
-  std::string GetFontFamily() const;
+  Dali::String GetFontFamily() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontSize

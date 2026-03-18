@@ -8,13 +8,13 @@
   * \
   * @param[in] text The text to display in UTF-8 format. \
   */ \
-  ChildClass& SetText(const std::string text) { Label::SetText(text); return *this; } \
+  ChildClass& SetText(const Dali::String& text) { Label::SetText(text); return *this; } \
   /** \
   * @brief Sets the font family of the text. \
   * \
   * @param[in] fontFamily The requested font family to use. \
   */ \
-  ChildClass& SetFontFamily(std::string fontFamily) { Label::SetFontFamily(fontFamily); return *this; } \
+  ChildClass& SetFontFamily(const Dali::String& fontFamily) { Label::SetFontFamily(fontFamily); return *this; } \
   /** \
   * @brief Sets the font size of the text. \
   * \
