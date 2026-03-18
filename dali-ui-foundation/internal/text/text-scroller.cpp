@@ -139,14 +139,14 @@ float TextScroller::GetLoopDelay() const
   return mLoopDelay;
 }
 
-void TextScroller::SetStopMode(TextLabel::AutoScrollStopMode::Type stopMode)
+void TextScroller::SetStopMode(Text::AutoScrollStopMode::Type stopMode)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::SetAutoScrollStopMode [%s]\n",
-                (stopMode == TextLabel::AutoScrollStopMode::IMMEDIATE) ? "IMMEDIATE" : "FINISH_LOOP");
+                (stopMode == Text::AutoScrollStopMode::IMMEDIATE) ? "IMMEDIATE" : "FINISH_LOOP");
   mStopMode = stopMode;
 }
 
-TextLabel::AutoScrollStopMode::Type TextScroller::GetStopMode() const
+Text::AutoScrollStopMode::Type TextScroller::GetStopMode() const
 {
   return mStopMode;
 }
@@ -167,7 +167,7 @@ void TextScroller::StopScrolling()
   {
     switch(mStopMode)
     {
-      case TextLabel::AutoScrollStopMode::IMMEDIATE:
+      case Text::AutoScrollStopMode::IMMEDIATE:
       {
         mIsStop = false;
         mScrollAnimation.Stop();
@@ -175,7 +175,7 @@ void TextScroller::StopScrolling()
         mIsStoppedImmediately.store(true);
         break;
       }
-      case TextLabel::AutoScrollStopMode::FINISH_LOOP:
+      case Text::AutoScrollStopMode::FINISH_LOOP:
       {
         mIsStop = true;
         mScrollAnimation.SetLoopCount(1); // As animation already playing this allows the current animation to finish
@@ -211,7 +211,7 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mLoopCount(1),
   mLoopDelay(0.0f),
   mWrapGap(0.0f),
-  mStopMode(TextLabel::AutoScrollStopMode::FINISH_LOOP),
+  mStopMode(Text::AutoScrollStopMode::FINISH_LOOP),
   mDirection(Text::AutoScroll::HORIZONTAL),
   mIsStop(false),
   mIsStoppedImmediately(false)

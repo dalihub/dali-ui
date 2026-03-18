@@ -392,7 +392,7 @@ public:
     mProcessorRegistered(false),
     mTextCutout(false),
     mIsCursorInsetEnabled(true),
-    mRenderMode(DevelTextLabel::Render::SYNC),
+    mRenderMode(Text::Render::SYNC),
     mEllipsisMode(Ellipsize::TRUNCATE)
   {
     mModel = Model::New();
@@ -1094,7 +1094,7 @@ public:
   Vector2     mTextFitContentSize; ///< Size of Text fit content
   std::string mRawText;            ///< Raw text including markup tag.
 
-  std::vector<Ui::DevelTextLabel::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
+  std::vector<Ui::Text::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
 
   bool mRecalculateNaturalSize : 1;         ///< Whether the natural size needs to be recalculated.
   bool mRecalculateLayoutSize : 1;          ///< Whether the layout size needs to be recalculated.
@@ -1138,8 +1138,8 @@ public:
   bool  mTextCutout : 1;               ///< Whether the text cutout enabled.
   bool  mIsCursorInsetEnabled : 1;     ///< Whether the cursor inset is enabled.
 
-  DevelTextLabel::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
-  Ellipsize::Mode              mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
+  Text::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
+  Ellipsize::Mode    mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
 
 private:
   friend ControllerImplEventHandler;

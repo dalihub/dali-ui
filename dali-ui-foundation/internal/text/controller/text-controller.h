@@ -25,7 +25,6 @@
 #include <dali/public-api/events/gesture.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -567,14 +566,14 @@ public: // Configure the text controller.
    *
    * @param[in] fitOptions The list of text fit options.
    */
-  void SetTextFitArray(std::vector<Ui::DevelTextLabel::FitOption>& fitOptions);
+  void SetTextFitArray(std::vector<Ui::Text::FitOption>& fitOptions);
 
   /**
    * @brief Retrieve the text fit array.
    *
    * @return The list of text fit options.
    */
-  std::vector<Ui::DevelTextLabel::FitOption>& GetTextFitArray();
+  std::vector<Ui::Text::FitOption>& GetTextFitArray();
 
   /**
    * @brief Sets disabled color opacity.
@@ -2156,17 +2155,17 @@ public: // Queries & retrieves.
   /**
    * @brief Sets the render mode of the text.
    *
-   * By default is DevelTextLabel::Render::Sync.
+   * By default is Text::Render::Sync.
    *
    * @param[in] renderMode Render mode of the text.
    */
-  void SetRenderMode(DevelTextLabel::Render::Mode renderMode);
+  void SetRenderMode(Ui::Text::Render::Mode renderMode);
 
   /**
    * @brief Gets the render mode of the text.
    * @return The value of render mode of the text.
    */
-  DevelTextLabel::Render::Mode GetRenderMode();
+  Ui::Text::Render::Mode GetRenderMode();
 
 public: // Relayout.
   /**

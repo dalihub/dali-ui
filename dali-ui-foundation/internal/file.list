@@ -91,11 +91,6 @@ SET( toolkit_src_files
    ${toolkit_src_dir}/controls/text-controls/common-text-utils.cpp
    ${toolkit_src_dir}/controls/text-controls/text-anchor.cpp
    ${toolkit_src_dir}/controls/text-controls/text-anchor-impl.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-editor-impl.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-editor-property-handler.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-field-impl.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-field-property-handler.cpp
-   ${toolkit_src_dir}/controls/text-controls/text-label-impl.cpp
    ${toolkit_src_dir}/controls/tooltip/tooltip.cpp
    ${toolkit_src_dir}/controls/video-view/video-view-impl.cpp
    ${toolkit_src_dir}/controls/web-view/web-view-impl.cpp

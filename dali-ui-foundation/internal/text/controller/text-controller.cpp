@@ -428,12 +428,12 @@ bool Controller::IsShowingRealText() const
   return mImpl->IsShowingRealText();
 }
 
-void Controller::SetRenderMode(DevelTextLabel::Render::Mode renderMode)
+void Controller::SetRenderMode(Text::Render::Mode renderMode)
 {
   mImpl->mRenderMode = renderMode;
 }
 
-DevelTextLabel::Render::Mode Controller::GetRenderMode()
+Text::Render::Mode Controller::GetRenderMode()
 {
   return mImpl->mRenderMode;
 }
@@ -559,12 +559,12 @@ bool Controller::IsTextFitArrayEnabled() const
   return mImpl->mTextFitArrayEnabled;
 }
 
-void Controller::SetTextFitArray(std::vector<Ui::DevelTextLabel::FitOption>& fitOptions)
+void Controller::SetTextFitArray(std::vector<Ui::Text::FitOption>& fitOptions)
 {
   mImpl->mTextFitArray = fitOptions;
 }
 
-std::vector<Ui::DevelTextLabel::FitOption>& Controller::GetTextFitArray()
+std::vector<Ui::Text::FitOption>& Controller::GetTextFitArray()
 {
   return mImpl->mTextFitArray;
 }

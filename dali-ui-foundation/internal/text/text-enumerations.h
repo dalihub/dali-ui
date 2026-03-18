@@ -88,6 +88,70 @@ enum Direction
 
 } // namespace AutoScroll
 
+// TextLabel enum
+namespace Render
+{
+/**
+ * @brief Enumerations specifying the render mode of text.
+ */
+enum Mode
+{
+  SYNC = 0,    ///< default, synchronous text loading.
+  ASYNC_AUTO,  ///< automatically requests an asynchronous text load in OnRelayout.
+  ASYNC_MANUAL ///< users should manually request rendering using the async text method.
+};
+
+} // namespace Render
+
+/**
+ * @brief The enumerations used for auto scroll stop mode.
+ * @SINCE_1_2.60
+ * @see Property::AUTO_SCROLL_STOP_MODE.
+ */
+struct AutoScrollStopMode
+{
+  /**
+   * @brief The enumerations used for auto scroll stop mode.
+   * @SINCE_1_2.60
+   * @see Property::AUTO_SCROLL_STOP_MODE.
+   */
+  enum Type
+  {
+    FINISH_LOOP = 0, ///< Stop animation after current loop finishes. @SINCE_1_2.60
+    IMMEDIATE        ///< Stop animation immediately and reset position. @SINCE_1_2.60
+  };
+};
+
+struct FitOption
+{
+  FitOption(float pointSize = 0.0f, float minLineSize = 0.0f)
+  : mPointSize(pointSize),
+    mMinLineSize(minLineSize)
+  {
+  }
+
+  float GetPointSize() const
+  {
+    return mPointSize;
+  }
+  float GetMinLineSize() const
+  {
+    return mMinLineSize;
+  }
+  void SetPointSize(float pointSize)
+  {
+    mPointSize = pointSize;
+  }
+  void SetMinLineSize(float minLineSize)
+  {
+    mMinLineSize = minLineSize;
+  }
+
+private:
+  float mPointSize   = 0.0f;
+  float mMinLineSize = 0.0f;
+};
+
 } // namespace Text
 
 } // namespace Ui

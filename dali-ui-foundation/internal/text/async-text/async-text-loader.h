@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
@@ -27,9 +28,6 @@
 #include <dali/public-api/actors/actor-enumerations.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/rendering/visual-renderer.h>
-
-// DEVEL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 
 namespace Dali
 {
@@ -117,7 +115,7 @@ struct AsyncTextParameters
     ellipsisPosition{Text::EllipsisPosition::END},
     ellipsisMode{Text::Ellipsize::TRUNCATE},
     autoScrollDirection{Text::AutoScroll::HORIZONTAL},
-    autoScrollStopMode{TextLabel::AutoScrollStopMode::FINISH_LOOP},
+    autoScrollStopMode{AutoScrollStopMode::FINISH_LOOP},
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
     fontSlant{FontSlant::NONE},
@@ -158,8 +156,8 @@ struct AsyncTextParameters
 
   Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
-  Property::Map                          variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
-  std::vector<DevelTextLabel::FitOption> textFitArray;
+  Property::Map          variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  std::vector<FitOption> textFitArray;
 
   Vector2 embossDirection;
   float   embossStrength;
@@ -209,11 +207,10 @@ struct AsyncTextParameters
                               ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
   Text::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
   Text::AutoScroll::Direction autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
-  TextLabel::AutoScrollStopMode::Type
-             autoScrollStopMode; ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight fontWeight;         ///< The font's weight.
-  FontWidth  fontWidth;          ///< The font's width.
-  FontSlant  fontSlant;          ///< The font's slant.
+  AutoScrollStopMode::Type    autoScrollStopMode;  ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeight                  fontWeight;          ///< The font's weight.
+  FontWidth                   fontWidth;           ///< The font's width.
+  FontSlant                   fontSlant;           ///< The font's slant.
 
   bool manualRender : 1;                   ///< Whether the manual rendered or not.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.

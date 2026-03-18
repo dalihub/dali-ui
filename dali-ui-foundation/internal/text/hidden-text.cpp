@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 
 using namespace Dali::Ui;
 

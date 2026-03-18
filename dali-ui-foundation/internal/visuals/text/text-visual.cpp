@@ -31,7 +31,6 @@
 #include <string.h>
 
 // INTERNAL HEADER
-#include <dali-ui-foundation/devel-api/visuals/text-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
@@ -143,11 +142,11 @@ Dali::Property::Index StringKeyToIndexKey(const Dali::String& stringKey)
   }
   else if(stringKey == OUTLINE_PROPERTY)
   {
-    result = Ui::DevelTextVisual::Property::OUTLINE;
+    result = Ui::TextVisual::Property::OUTLINE;
   }
   else if(stringKey == BACKGROUND_PROPERTY)
   {
-    result = Ui::DevelTextVisual::Property::BACKGROUND;
+    result = Ui::TextVisual::Property::BACKGROUND;
   }
 
   return result;
@@ -252,13 +251,13 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::TextVisual::Property::UNDERLINE, value);
 
   GetOutlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::DevelTextVisual::Property::OUTLINE, value);
+  map.Insert(Ui::TextVisual::Property::OUTLINE, value);
 
   GetBackgroundProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::DevelTextVisual::Property::BACKGROUND, value);
+  map.Insert(Ui::TextVisual::Property::BACKGROUND, value);
 
   GetStrikethroughProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::DevelTextVisual::Property::STRIKETHROUGH, value);
+  map.Insert(Ui::TextVisual::Property::STRIKETHROUGH, value);
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -453,7 +452,7 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
 
 void TextVisual::DoSetOffScene(Actor& actor)
 {
-  if(mController->GetRenderMode() != DevelTextLabel::Render::SYNC && mIsTextLoadingTaskRunning)
+  if(mController->GetRenderMode() != Text::Render::SYNC && mIsTextLoadingTaskRunning)
   {
     Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
     mIsTextLoadingTaskRunning = false;
@@ -561,17 +560,17 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       SetUnderlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::DevelTextVisual::Property::OUTLINE:
+    case Ui::TextVisual::Property::OUTLINE:
     {
       SetOutlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::DevelTextVisual::Property::BACKGROUND:
+    case Ui::TextVisual::Property::BACKGROUND:
     {
       SetBackgroundProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::DevelTextVisual::Property::STRIKETHROUGH:
+    case Ui::TextVisual::Property::STRIKETHROUGH:
     {
       SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
@@ -581,7 +580,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 
 void TextVisual::UpdateRenderer()
 {
-  if(mController->GetRenderMode() != DevelTextLabel::Render::SYNC)
+  if(mController->GetRenderMode() != Text::Render::SYNC)
   {
     return;
   }

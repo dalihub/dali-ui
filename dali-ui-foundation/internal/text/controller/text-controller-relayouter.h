@@ -165,7 +165,7 @@ private:
                                             const Length requestedNumberOfCharacters);
 };
 
-inline bool compareByPointSize(Ui::DevelTextLabel::FitOption& lhs, Ui::DevelTextLabel::FitOption& rhs)
+inline bool compareByPointSize(Ui::Text::FitOption& lhs, Ui::Text::FitOption& rhs)
 {
   return lhs.GetPointSize() < rhs.GetPointSize();
 }

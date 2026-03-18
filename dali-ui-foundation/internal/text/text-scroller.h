@@ -27,7 +27,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/controls/text-controls/text-label.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali
@@ -127,13 +126,13 @@ public:
    * @brief Set the mode of scrolling stop
    * @param[in] stopMode type when text scrolling is stopped.
    */
-  void SetStopMode(TextLabel::AutoScrollStopMode::Type stopMode);
+  void SetStopMode(Text::AutoScrollStopMode::Type stopMode);
 
   /**
    * @brief Get the mode of scrolling stop
    * @return stopMode type when text scrolling is stopped.
    */
-  TextLabel::AutoScrollStopMode::Type GetStopMode() const;
+  Text::AutoScrollStopMode::Type GetStopMode() const;
 
   /**
    * @brief Set direction of the auto scroll.
@@ -202,14 +201,14 @@ private:
   Shader             mShader;            // Shader originally used by the renderer while not scrolling
   TextureSet         mTextureSet;        // Texture originally used by the renderer while not scrolling
 
-  int                                 mScrollSpeed;          ///< Speed which text should automatically scroll at
-  int                                 mLoopCount;            ///< Number of time the text should scroll
-  float                               mLoopDelay;            ///< Time delay of loop start
-  float                               mWrapGap;              ///< Gap before text wraps around when scrolling
-  TextLabel::AutoScrollStopMode::Type mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
-  Text::AutoScroll::Direction         mDirection;            ///< Direction of the auto scroll. (HORIZONTAL, VERTICAL)
-  bool                                mIsStop : 1;           ///< Whether the stop scrolling has been triggered or not.
-  std::atomic<bool>                   mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
+  int                            mScrollSpeed;          ///< Speed which text should automatically scroll at
+  int                            mLoopCount;            ///< Number of time the text should scroll
+  float                          mLoopDelay;            ///< Time delay of loop start
+  float                          mWrapGap;              ///< Gap before text wraps around when scrolling
+  Text::AutoScrollStopMode::Type mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
+  Text::AutoScroll::Direction    mDirection;            ///< Direction of the auto scroll. (HORIZONTAL, VERTICAL)
+  bool                           mIsStop : 1;           ///< Whether the stop scrolling has been triggered or not.
+  std::atomic<bool>              mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
 
 }; // TextScroller class
 

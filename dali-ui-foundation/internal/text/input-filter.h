@@ -22,7 +22,7 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/text-controls/input-filter-properties.h>
+#include <dali-ui-foundation/internal/controls/text-controls/input-filter-properties.h>
 #include <regex>
 
 namespace Dali

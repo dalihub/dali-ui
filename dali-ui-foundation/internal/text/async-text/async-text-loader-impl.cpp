@@ -1528,13 +1528,13 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
 #endif
 
-    std::vector<DevelTextLabel::FitOption> fitOptions         = parameters.textFitArray;
-    int                                    numberOfFitOptions = static_cast<int>(fitOptions.size());
+    std::vector<Ui::Text::FitOption> fitOptions         = parameters.textFitArray;
+    int                              numberOfFitOptions = static_cast<int>(fitOptions.size());
     if(numberOfFitOptions == 0)
     {
       DALI_LOG_ERROR("fitOptions is empty, render with default value, point size:%f, min line size:%f\n",
                      parameters.fontSize, parameters.minLineSize);
-      fitOptions.push_back(DevelTextLabel::FitOption(parameters.fontSize, parameters.minLineSize));
+      fitOptions.push_back(Ui::Text::FitOption(parameters.fontSize, parameters.minLineSize));
       numberOfFitOptions = 1;
     }
 
@@ -1551,7 +1551,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     // binary search cannot guarantee that it will always find the best value.
     bool  binarySearch    = true;
     float prevMinLineSize = 0.0f;
-    for(DevelTextLabel::FitOption& option : fitOptions)
+    for(Ui::Text::FitOption& option : fitOptions)
     {
       float optionMinLineSize = option.GetMinLineSize();
       if(prevMinLineSize > optionMinLineSize)
@@ -1564,10 +1564,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     // Set the first FitOption(Minimum PointSize) to the best value.
     // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    DevelTextLabel::FitOption firstOption           = fitOptions.front();
-    bool                      bestSizeUpdatedLatest = false;
-    float                     bestPointSize         = firstOption.GetPointSize();
-    float                     bestMinLineSize       = firstOption.GetMinLineSize();
+    Ui::Text::FitOption firstOption           = fitOptions.front();
+    bool                bestSizeUpdatedLatest = false;
+    float               bestPointSize         = firstOption.GetPointSize();
+    float               bestMinLineSize       = firstOption.GetMinLineSize();
 
     if(binarySearch)
     {
@@ -1576,11 +1576,11 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
       while(left <= right)
       {
-        int                       mid             = left + (right - left) / 2;
-        DevelTextLabel::FitOption option          = fitOptions[mid];
-        float                     testPointSize   = option.GetPointSize();
-        float                     testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize                    = testMinLineSize;
+        int                 mid             = left + (right - left) / 2;
+        Ui::Text::FitOption option          = fitOptions[mid];
+        float               testPointSize   = option.GetPointSize();
+        float               testMinLineSize = option.GetMinLineSize();
+        parameters.minLineSize              = testMinLineSize;
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
@@ -1601,10 +1601,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
       // If binary search is not possible, search sequentially starting from the largest PointSize.
       for(auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
       {
-        DevelTextLabel::FitOption option          = *it;
-        float                     testPointSize   = option.GetPointSize();
-        float                     testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize                    = testMinLineSize;
+        Ui::Text::FitOption option          = *it;
+        float               testPointSize   = option.GetPointSize();
+        float               testMinLineSize = option.GetMinLineSize();
+        parameters.minLineSize              = testMinLineSize;
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {

@@ -28,7 +28,6 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/controls/text-controls/text-label-devel.h>
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>

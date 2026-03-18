@@ -239,7 +239,7 @@ private:
   Mutex mMutex;
 }; // class AsyncTextLoader
 
-inline bool compareByPointSize(DevelTextLabel::FitOption& lhs, DevelTextLabel::FitOption& rhs)
+inline bool compareByPointSize(Ui::Text::FitOption& lhs, Ui::Text::FitOption& rhs)
 {
   return lhs.GetPointSize() < rhs.GetPointSize();
 }

@@ -32,7 +32,6 @@
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/text-controls/text-editor.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
 
 namespace Dali::Ui::Internal

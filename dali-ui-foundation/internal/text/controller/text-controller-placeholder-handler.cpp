@@ -23,10 +23,10 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/controls/text-controls/placeholder-properties.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
-#include <dali-ui-foundation/public-api/controls/text-controls/placeholder-properties.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToPropertyValue;
