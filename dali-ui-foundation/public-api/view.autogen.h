@@ -3,18 +3,6 @@
 
 #define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
   /** \
-  * @brief Sets the width of the View. \
-  * \
-  * @param[in] width The width to set \
-  */ \
-  ChildClass& SetSizeWidth(float width) { View::SetSizeWidth(width); return *this; } \
-  /** \
-  * @brief Sets the height of the View. \
-  * \
-  * @param[in] height The height to set \
-  */ \
-  ChildClass& SetSizeHeight(float height) { View::SetSizeHeight(height); return *this; } \
-  /** \
   * @brief Sets the X position of the View. \
   * \
   * @param[in] x The X position to set \
@@ -39,20 +27,25 @@
   */ \
   ChildClass& SetPivotPoint(const Vector3& point) { View::SetPivotPoint(point); return *this; } \
   /** \
-  * @brief Sets the layout width. \
+  * @brief Sets the requested width. \
   * \
-  * Use LayoutDimension::WrapContent for content-based sizing, \
-  * LayoutDimension::MatchParent to fill parent, or a positive value for fixed size. \
+  * A positive value sets a fixed width. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
   * \
-  * @param[in] width The layout width \
+  * @param[in] width The requested width \
   */ \
-  ChildClass& SetLayoutWidth(float width) { View::SetLayoutWidth(width); return *this; } \
+  ChildClass& SetRequestedWidth(float width) { View::SetRequestedWidth(width); return *this; } \
   /** \
-  * @brief Sets the layout height. \
+  * @brief Sets the requested height. \
   * \
-  * @param[in] height The layout height \
+  * A positive value sets a fixed height. \
+  * WRAP_CONTENT (-1): sizes to content (default). \
+  * MATCH_PARENT (-2): fills the parent container. \
+  * \
+  * @param[in] height The requested height \
   */ \
-  ChildClass& SetLayoutHeight(float height) { View::SetLayoutHeight(height); return *this; } \
+  ChildClass& SetRequestedHeight(float height) { View::SetRequestedHeight(height); return *this; } \
   /** \
   * @brief Sets the minimum width. \
   * \

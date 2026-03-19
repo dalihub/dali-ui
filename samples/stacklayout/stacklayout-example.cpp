@@ -42,31 +42,31 @@ public:
 
     // Root: vertical StackLayout filling the window
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(10.0f);
     root.SetViewPadding(Extents(20, 20, 20, 20));
 
     // Top bar: fixed height
     View topBar = View::New();
     topBar.SetBackgroundColor(Color::RED);
-    topBar.SetLayoutWidth(LayoutDimension::MatchParent);
-    topBar.SetLayoutHeight(80.0f);
+    topBar.SetRequestedWidth(MATCH_PARENT);
+    topBar.SetRequestedHeight(80.0f);
     root.AddView(topBar);
 
     // Middle: weighted to take remaining space
     View middle = View::New();
     middle.SetBackgroundColor(Color::GREEN);
-    middle.SetLayoutWidth(LayoutDimension::MatchParent);
-    middle.SetLayoutHeight(LayoutDimension::WrapContent);
+    middle.SetRequestedWidth(MATCH_PARENT);
+    middle.SetRequestedHeight(WRAP_CONTENT);
     middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     root.AddView(middle);
 
     // Bottom bar: fixed height
     View bottomBar = View::New();
     bottomBar.SetBackgroundColor(Color::BLUE);
-    bottomBar.SetLayoutWidth(LayoutDimension::MatchParent);
-    bottomBar.SetLayoutHeight(60.0f);
+    bottomBar.SetRequestedWidth(MATCH_PARENT);
+    bottomBar.SetRequestedHeight(60.0f);
     root.AddView(bottomBar);
 
     window.Add(root);

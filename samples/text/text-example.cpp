@@ -101,8 +101,8 @@ private:
   {
     return StackLayout::New(StackOrientation::VERTICAL)
       .Spacing(STACK_SPACING)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(LayoutDimension::MatchParent)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
       .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Contents({
         Label::New("Text Example"),
@@ -135,8 +135,8 @@ private:
       .SetFontSize(INPUT_FONT_SIZE)
       .SetCursorWidth(CURSOR_WIDTH)
       .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(LayoutDimension::WrapContent)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
       .SetViewPadding(Extents(20, 20, 20, 20))
       .SetBackgroundColor(UiColor(COLOR_LIGHT_BG))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
@@ -148,8 +148,8 @@ private:
   {
     // Verify wrap-content width with fixed height
     return CreateLabel("Hello world", "SamsungOneUI_400", LABEL1_FONT_SIZE)
-      .SetLayoutWidth(LayoutDimension::WrapContent)
-      .SetLayoutHeight(100.0f)
+      .SetRequestedWidth(WRAP_CONTENT)
+      .SetRequestedHeight(100.0f)
       .SetViewPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT1))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
@@ -177,8 +177,8 @@ private:
     return CreateLabel("변화는 한 순간에 일어나지 않습니다. 매일의 작은 실천이 모여 지속가능한 삶을 이루는 것. 이것이 우리가 꿈꾸는 지속가능성입니다.",
                        "SamsungOneUI_700",
                        LABEL3_FONT_SIZE)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(150.0f)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(150.0f)
       .SetViewPadding(Extents(20, 20, 20, 20))
       .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT3))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
@@ -188,7 +188,7 @@ private:
   Label CreateLineHeightLabel(Dali::String text, float lineHeight, Text::LineHeightMode mode)
   {
     return CreateLabel(text, "SamsungOneUI_400", 20)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
+      .SetRequestedWidth(MATCH_PARENT)
       .SetBackgroundColor(UiColor(0xEFEFEF))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetLineHeight(lineHeight)
@@ -199,8 +199,8 @@ private:
   {
     return View::New()
       .SetBackgroundColor(UiColor(COLOR_BLUE))
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(4.0f);
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(4.0f);
   }
 
   Label CreateAlignmentLabel(Text::Alignment alignment)
@@ -209,8 +209,8 @@ private:
       .SetBackgroundColor(UiColor(COLOR_MID_GRAY))
       .SetTextColor(UiColor(COLOR_WHITE))
       .SetFontSize(10.0f)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(30.0f)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(30.0f)
       .SetHorizontalTextAlignment(alignment)
       .SetVerticalTextAlignment(alignment);
   }

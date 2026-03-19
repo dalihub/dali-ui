@@ -34,7 +34,7 @@ namespace Integration
 /**
  * @brief Implements the grid layout algorithm.
  *
- * Can be returned from GridLayoutImpl::CreateLayoutManager().
+ * Passed to LayoutImpl constructor by GridLayoutImpl.
  * Subclass to customize grid layout behaviour.
  */
 class DALI_UI_API GridLayoutManager : public LayoutManager

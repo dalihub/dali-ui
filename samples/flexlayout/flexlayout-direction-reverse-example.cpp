@@ -55,15 +55,15 @@ public:
 
     // Outer vertical StackLayout to hold two sections
     StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
-    outer.SetLayoutWidth(LayoutDimension::MatchParent);
-    outer.SetLayoutHeight(LayoutDimension::MatchParent);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(16.0f);
     outer.SetViewPadding(Extents(16, 16, 16, 16));
 
     // Section 1: RowReverse
     FlexLayout rowReverse = FlexLayout::New();
-    rowReverse.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowReverse.SetLayoutHeight(LayoutDimension::WrapContent);
+    rowReverse.SetRequestedWidth(MATCH_PARENT);
+    rowReverse.SetRequestedHeight(WRAP_CONTENT);
     rowReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
     rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
@@ -73,28 +73,28 @@ public:
 
     View rrBox1 = View::New();
     rrBox1.SetBackgroundColor(Color::RED);
-    rrBox1.SetLayoutWidth(100.0f);
-    rrBox1.SetLayoutHeight(80.0f);
+    rrBox1.SetRequestedWidth(100.0f);
+    rrBox1.SetRequestedHeight(80.0f);
     rowReverse.AddView(rrBox1);
 
     View rrBox2 = View::New();
     rrBox2.SetBackgroundColor(Color::GREEN);
-    rrBox2.SetLayoutWidth(100.0f);
-    rrBox2.SetLayoutHeight(60.0f);
+    rrBox2.SetRequestedWidth(100.0f);
+    rrBox2.SetRequestedHeight(60.0f);
     rowReverse.AddView(rrBox2);
 
     View rrBox3 = View::New();
     rrBox3.SetBackgroundColor(Color::BLUE);
-    rrBox3.SetLayoutWidth(100.0f);
-    rrBox3.SetLayoutHeight(100.0f);
+    rrBox3.SetRequestedWidth(100.0f);
+    rrBox3.SetRequestedHeight(100.0f);
     rowReverse.AddView(rrBox3);
 
     outer.AddView(rowReverse);
 
     // Section 2: ColumnReverse
     FlexLayout columnReverse = FlexLayout::New();
-    columnReverse.SetLayoutWidth(LayoutDimension::MatchParent);
-    columnReverse.SetLayoutHeight(LayoutDimension::WrapContent);
+    columnReverse.SetRequestedWidth(MATCH_PARENT);
+    columnReverse.SetRequestedHeight(WRAP_CONTENT);
     columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
     columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
     columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
@@ -104,20 +104,20 @@ public:
 
     View crBox1 = View::New();
     crBox1.SetBackgroundColor(Color::YELLOW);
-    crBox1.SetLayoutWidth(200.0f);
-    crBox1.SetLayoutHeight(60.0f);
+    crBox1.SetRequestedWidth(200.0f);
+    crBox1.SetRequestedHeight(60.0f);
     columnReverse.AddView(crBox1);
 
     View crBox2 = View::New();
     crBox2.SetBackgroundColor(Color::CYAN);
-    crBox2.SetLayoutWidth(160.0f);
-    crBox2.SetLayoutHeight(60.0f);
+    crBox2.SetRequestedWidth(160.0f);
+    crBox2.SetRequestedHeight(60.0f);
     columnReverse.AddView(crBox2);
 
     View crBox3 = View::New();
     crBox3.SetBackgroundColor(Color::MAGENTA);
-    crBox3.SetLayoutWidth(120.0f);
-    crBox3.SetLayoutHeight(60.0f);
+    crBox3.SetRequestedWidth(120.0f);
+    crBox3.SetRequestedHeight(60.0f);
     columnReverse.AddView(crBox3);
 
     outer.AddView(columnReverse);

@@ -49,8 +49,8 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     FlexLayout root = FlexLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::ROW);
     root.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
     root.SetAlignItems(FlexAlign::CENTER);
@@ -59,30 +59,30 @@ public:
     // Red box: tall
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    redBox.SetLayoutWidth(80.0f);
-    redBox.SetLayoutHeight(200.0f);
+    redBox.SetRequestedWidth(80.0f);
+    redBox.SetRequestedHeight(200.0f);
     root.AddView(redBox);
 
     // Green box: medium height
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
-    greenBox.SetLayoutWidth(80.0f);
-    greenBox.SetLayoutHeight(120.0f);
+    greenBox.SetRequestedWidth(80.0f);
+    greenBox.SetRequestedHeight(120.0f);
     root.AddView(greenBox);
 
     // Blue box: short, with AlignSelf override to FlexEnd
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetLayoutWidth(80.0f);
-    blueBox.SetLayoutHeight(60.0f);
+    blueBox.SetRequestedWidth(80.0f);
+    blueBox.SetRequestedHeight(60.0f);
     blueBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_END));
     root.AddView(blueBox);
 
     // Yellow box: medium
     View yellowBox = View::New();
     yellowBox.SetBackgroundColor(Color::YELLOW);
-    yellowBox.SetLayoutWidth(80.0f);
-    yellowBox.SetLayoutHeight(140.0f);
+    yellowBox.SetRequestedWidth(80.0f);
+    yellowBox.SetRequestedHeight(140.0f);
     root.AddView(yellowBox);
 
     window.Add(root);

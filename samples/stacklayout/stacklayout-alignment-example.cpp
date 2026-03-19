@@ -48,40 +48,40 @@ public:
 
     // Root: vertical stack showing cross-axis (horizontal) alignment
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(12.0f);
     root.SetViewPadding(Extents(24, 24, 24, 24));
 
     // Row 1: Start (left-aligned narrow box)
     View rowStart = View::New();
     rowStart.SetBackgroundColor(Color::RED);
-    rowStart.SetLayoutWidth(80.0f);
-    rowStart.SetLayoutHeight(50.0f);
+    rowStart.SetRequestedWidth(80.0f);
+    rowStart.SetRequestedHeight(50.0f);
     rowStart.SetHorizontalAlignment(LayoutAlignment::START);
     root.AddView(rowStart);
 
     // Row 2: Center
     View rowCenter = View::New();
     rowCenter.SetBackgroundColor(Color::GREEN);
-    rowCenter.SetLayoutWidth(80.0f);
-    rowCenter.SetLayoutHeight(50.0f);
+    rowCenter.SetRequestedWidth(80.0f);
+    rowCenter.SetRequestedHeight(50.0f);
     rowCenter.SetHorizontalAlignment(LayoutAlignment::CENTER);
     root.AddView(rowCenter);
 
     // Row 3: End (right-aligned narrow box)
     View rowEnd = View::New();
     rowEnd.SetBackgroundColor(Color::BLUE);
-    rowEnd.SetLayoutWidth(80.0f);
-    rowEnd.SetLayoutHeight(50.0f);
+    rowEnd.SetRequestedWidth(80.0f);
+    rowEnd.SetRequestedHeight(50.0f);
     rowEnd.SetHorizontalAlignment(LayoutAlignment::END);
     root.AddView(rowEnd);
 
     // Row 4: full width (use MatchParent; Fill on cross axis is treated as Start)
     View rowFill = View::New();
     rowFill.SetBackgroundColor(Color::CYAN);
-    rowFill.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowFill.SetLayoutHeight(50.0f);
+    rowFill.SetRequestedWidth(MATCH_PARENT);
+    rowFill.SetRequestedHeight(50.0f);
     rowFill.SetHorizontalAlignment(LayoutAlignment::FILL);
     root.AddView(rowFill);
 

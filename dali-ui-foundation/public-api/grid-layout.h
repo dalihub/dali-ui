@@ -45,15 +45,13 @@ class GridLayoutImpl;
  *
  * @section grid_common_props Common Property Behavior
  *
- * - @b LayoutWidth/LayoutHeight: A positive value sets a fixed size.
- *   WrapContent uses the child's natural size. MatchParent is treated
- *   identically to WrapContent;
- *   it does not expand the child beyond its cell. To fill a cell, use
- *   FILL alignment (the default).
- * - @b Alignment: START, CENTER, and END position the child within the cell.
- *   FILL stretches the child to fill the entire cell. When a child's measured
- *   size is larger than the cell, the child is clipped to the cell bounds
- *   regardless of alignment.
+ * - @b RequestedWidth/RequestedHeight: A positive value sets a fixed size.
+ *   WRAP_CONTENT (-1) uses the child's natural size.
+ *   MATCH_PARENT (-2) fills the parent.
+ * - @b GridLayoutParams alignment: START, CENTER, and END position the child
+ *   within the cell. FILL (the default) stretches the child to fill the
+ *   entire cell. When a child's measured size is larger than the cell, the
+ *   child is clipped to the cell bounds regardless of alignment.
  * - @b Margin: Applied inside the cell, reducing the space available for the child.
  */
 class DALI_UI_API GridLayout : public Layout

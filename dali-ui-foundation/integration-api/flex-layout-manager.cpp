@@ -58,7 +58,7 @@ FlexAlign GetAlignSelf(ViewImpl& childImpl)
 float GetFlexBasis(ViewImpl& childImpl)
 {
   auto* params = Internal::FlexLayoutParamsImpl::Get(childImpl);
-  return params ? params->GetFlexBasis() : LayoutDimension::WrapContent;
+  return params ? params->GetFlexBasis() : WRAP_CONTENT;
 }
 
 struct FlexLine
@@ -313,13 +313,6 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
     childBounds.y += static_cast<float>(margin.top);
     childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
-
-    // Sync desired size so OnArrange uses allocated flex item bounds when
-    // the child has no measured content (WrapContent with zero natural size).
-    MeasuredSize desiredSize;
-    desiredSize.width  = (childData.measuredSize.width > 0.0f) ? childData.measuredSize.width : childBounds.width;
-    desiredSize.height = (childData.measuredSize.height > 0.0f) ? childData.measuredSize.height : childBounds.height;
-    childImpl.SetDesiredSize(desiredSize);
 
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;

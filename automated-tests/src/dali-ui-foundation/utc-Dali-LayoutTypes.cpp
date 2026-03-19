@@ -34,10 +34,15 @@ void utc_dali_layouttypes_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-int UtcDaliLayoutDimensionConstantsP(void)
+int UtcDaliWrapContentConstantP(void)
 {
-  DALI_TEST_EQUALS(LayoutDimension::WrapContent, -1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(LayoutDimension::MatchParent, -2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(WRAP_CONTENT, -1.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMatchParentConstantP(void)
+{
+  DALI_TEST_EQUALS(MATCH_PARENT, -2.0f, TEST_LOCATION);
   END_TEST;
 }
 

@@ -51,15 +51,15 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
-    outer.SetLayoutWidth(LayoutDimension::MatchParent);
-    outer.SetLayoutHeight(LayoutDimension::MatchParent);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(12.0f);
     outer.SetViewPadding(Extents(16, 16, 16, 16));
 
     // Row 1: FlexEnd
     FlexLayout rowEnd = FlexLayout::New();
-    rowEnd.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowEnd.SetLayoutHeight(LayoutDimension::WrapContent);
+    rowEnd.SetRequestedWidth(MATCH_PARENT);
+    rowEnd.SetRequestedHeight(WRAP_CONTENT);
     rowEnd.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowEnd.SetDirection(FlexDirection::ROW);
     rowEnd.SetJustifyContent(FlexJustify::FLEX_END);
@@ -72,8 +72,8 @@ public:
 
     // Row 2: Center
     FlexLayout rowCenter = FlexLayout::New();
-    rowCenter.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowCenter.SetLayoutHeight(LayoutDimension::WrapContent);
+    rowCenter.SetRequestedWidth(MATCH_PARENT);
+    rowCenter.SetRequestedHeight(WRAP_CONTENT);
     rowCenter.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowCenter.SetDirection(FlexDirection::ROW);
     rowCenter.SetJustifyContent(FlexJustify::CENTER);
@@ -86,8 +86,8 @@ public:
 
     // Row 3: SpaceAround
     FlexLayout rowAround = FlexLayout::New();
-    rowAround.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowAround.SetLayoutHeight(LayoutDimension::WrapContent);
+    rowAround.SetRequestedWidth(MATCH_PARENT);
+    rowAround.SetRequestedHeight(WRAP_CONTENT);
     rowAround.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowAround.SetDirection(FlexDirection::ROW);
     rowAround.SetJustifyContent(FlexJustify::SPACE_AROUND);
@@ -100,8 +100,8 @@ public:
 
     // Row 4: SpaceEvenly
     FlexLayout rowEvenly = FlexLayout::New();
-    rowEvenly.SetLayoutWidth(LayoutDimension::MatchParent);
-    rowEvenly.SetLayoutHeight(LayoutDimension::WrapContent);
+    rowEvenly.SetRequestedWidth(MATCH_PARENT);
+    rowEvenly.SetRequestedHeight(WRAP_CONTENT);
     rowEvenly.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rowEvenly.SetDirection(FlexDirection::ROW);
     rowEvenly.SetJustifyContent(FlexJustify::SPACE_EVENLY);
@@ -121,20 +121,20 @@ private:
   {
     View box1 = View::New();
     box1.SetBackgroundColor(color1);
-    box1.SetLayoutWidth(80.0f);
-    box1.SetLayoutHeight(60.0f);
+    box1.SetRequestedWidth(80.0f);
+    box1.SetRequestedHeight(60.0f);
     parent.AddView(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(color2);
-    box2.SetLayoutWidth(80.0f);
-    box2.SetLayoutHeight(60.0f);
+    box2.SetRequestedWidth(80.0f);
+    box2.SetRequestedHeight(60.0f);
     parent.AddView(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(color3);
-    box3.SetLayoutWidth(80.0f);
-    box3.SetLayoutHeight(60.0f);
+    box3.SetRequestedWidth(80.0f);
+    box3.SetRequestedHeight(60.0f);
     parent.AddView(box3);
   }
 

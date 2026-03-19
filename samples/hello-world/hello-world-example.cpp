@@ -43,13 +43,13 @@ public:
 
     window.Add(Layout::New() // Parent
       .SetBackgroundColor(UiColor(0xFFFF00))
-      .SetSizeWidth(200_spx)
-      .SetSizeHeight(200_spx)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
       .Contents({
         View::New() // Red child
           .SetBackgroundColor(UiColor(0xFF0000))
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
           .SetFocusable(true)
           .AsClickable(this, [this](View view, const InputEvent& event)
           {
@@ -58,8 +58,8 @@ public:
           }),
         View::New() // Blue child
           .SetBackgroundColor(UiColor(0x0000FF))
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
           .SetPositionX(100_spx)
           .SetPositionY(100_spx)
           .As(mSecondChild),

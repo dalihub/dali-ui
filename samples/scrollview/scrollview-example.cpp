@@ -46,29 +46,29 @@ public:
 
     // Create content view larger than scroll view
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
-    content.SetLayoutWidth(LayoutDimension::MatchParent);
-    content.SetLayoutHeight(2400.0f);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(2400.0f);
     content.SetSpacing(10.0f);
     content.SetViewPadding(Extents(20, 20, 20, 20));
 
     View top = View::New();
     top.SetBackgroundColor(Color::RED);
-    top.SetLayoutWidth(LayoutDimension::MatchParent);
-    top.SetLayoutHeight(LayoutDimension::WrapContent);
+    top.SetRequestedWidth(MATCH_PARENT);
+    top.SetRequestedHeight(WRAP_CONTENT);
     top.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     content.AddView(top);
 
     View middle = View::New();
     middle.SetBackgroundColor(Color::GREEN);
-    middle.SetLayoutWidth(LayoutDimension::MatchParent);
-    middle.SetLayoutHeight(LayoutDimension::WrapContent);
+    middle.SetRequestedWidth(MATCH_PARENT);
+    middle.SetRequestedHeight(WRAP_CONTENT);
     middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     content.AddView(middle);
 
     View bottom = View::New();
     bottom.SetBackgroundColor(Color::BLUE);
-    bottom.SetLayoutWidth(LayoutDimension::MatchParent);
-    bottom.SetLayoutHeight(LayoutDimension::WrapContent);
+    bottom.SetRequestedWidth(MATCH_PARENT);
+    bottom.SetRequestedHeight(WRAP_CONTENT);
     bottom.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     content.AddView(bottom);
 
@@ -79,8 +79,8 @@ public:
       .SetFlingSensitivity(1.0f)
       .SetDecelerationRate(0.998f)
       .SetOverScrollMode(OverScrollMode::ContentScrolls)
-      .SetLayoutWidth(600.0f)
-      .SetLayoutHeight(1200.0f)
+      .SetRequestedWidth(600.0f)
+      .SetRequestedHeight(1200.0f)
       .SetPositionX(0.0f)
       .SetPositionY(0.0f)
       .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))

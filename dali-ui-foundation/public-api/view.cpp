@@ -103,9 +103,9 @@ void View::InvalidateArrange()
   Integration::GetImpl(*this).InvalidateArrange();
 }
 
-MeasuredSize View::GetDesiredSize() const
+MeasuredSize View::GetMeasuredSize() const
 {
-  return Integration::GetImpl(*this).GetDesiredSize();
+  return Integration::GetImpl(*this).GetMeasuredSize();
 }
 
 bool View::IsMeasureValid() const
@@ -122,26 +122,9 @@ bool View::IsArrangeValid() const
 // Properties
 // =============================================================================
 
-View& View::SetSizeWidth(float width)
+MeasuredSize View::GetSize() const
 {
-  Integration::GetImpl(*this).SetSizeWidth(width);
-  return *this;
-}
-
-float View::GetSizeWidth() const
-{
-  return Integration::GetImpl(*this).GetSizeWidth();
-}
-
-View& View::SetSizeHeight(float height)
-{
-  Integration::GetImpl(*this).SetSizeHeight(height);
-  return *this;
-}
-
-float View::GetSizeHeight() const
-{
-  return Integration::GetImpl(*this).GetSizeHeight();
+  return Integration::GetImpl(*this).GetSize();
 }
 
 View& View::SetPositionX(float x)
@@ -188,26 +171,26 @@ Vector3 View::GetPivotPoint() const
   return Integration::GetImpl(*this).GetPivotPoint();
 }
 
-View& View::SetLayoutWidth(float width)
+View& View::SetRequestedWidth(float width)
 {
-  Integration::GetImpl(*this).SetLayoutWidth(width);
+  Integration::GetImpl(*this).SetRequestedWidth(width);
   return *this;
 }
 
-float View::GetLayoutWidth() const
+float View::GetRequestedWidth() const
 {
-  return Integration::GetImpl(*this).GetLayoutWidth();
+  return Integration::GetImpl(*this).GetRequestedWidth();
 }
 
-View& View::SetLayoutHeight(float height)
+View& View::SetRequestedHeight(float height)
 {
-  Integration::GetImpl(*this).SetLayoutHeight(height);
+  Integration::GetImpl(*this).SetRequestedHeight(height);
   return *this;
 }
 
-float View::GetLayoutHeight() const
+float View::GetRequestedHeight() const
 {
-  return Integration::GetImpl(*this).GetLayoutHeight();
+  return Integration::GetImpl(*this).GetRequestedHeight();
 }
 
 View& View::SetMinimumWidth(float width)

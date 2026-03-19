@@ -31,7 +31,7 @@ namespace Integration
 /**
  * @brief Implements the flexbox layout algorithm.
  *
- * Can be returned from FlexLayoutImpl::CreateLayoutManager().
+ * Passed to LayoutImpl constructor by FlexLayoutImpl.
  * Subclass to customize flex layout behaviour.
  */
 class DALI_UI_API FlexLayoutManager : public LayoutManager

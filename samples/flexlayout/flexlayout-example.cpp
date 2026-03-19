@@ -46,8 +46,8 @@ public:
 
     // Root: FlexLayout in row direction
     FlexLayout root = FlexLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::ROW);
     root.SetAlignItems(FlexAlign::STRETCH);
     root.SetViewPadding(Extents(20, 20, 20, 20));
@@ -55,23 +55,20 @@ public:
     // Red box: fixed width
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    redBox.SetLayoutWidth(100.0f);
-    redBox.SetLayoutHeight(LayoutDimension::MatchParent);
+    redBox.SetRequestedWidth(100.0f);
     root.AddView(redBox);
 
     // Green box: flex-grow 1 (fills remaining space)
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
-    greenBox.SetLayoutWidth(LayoutDimension::WrapContent);
-    greenBox.SetLayoutHeight(LayoutDimension::MatchParent);
+    greenBox.SetRequestedWidth(WRAP_CONTENT);
     greenBox.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     root.AddView(greenBox);
 
     // Blue box: fixed width
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetLayoutWidth(80.0f);
-    blueBox.SetLayoutHeight(LayoutDimension::MatchParent);
+    blueBox.SetRequestedWidth(80.0f);
     root.AddView(blueBox);
 
     window.Add(root);

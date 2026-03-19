@@ -50,9 +50,8 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     AbsoluteLayout root = AbsoluteLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
-
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     // Large red background box
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);

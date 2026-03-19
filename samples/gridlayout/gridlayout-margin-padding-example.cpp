@@ -53,9 +53,9 @@ public:
 
     // Root: GridLayout with padding
     GridLayout root = GridLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(Color::GRAY);
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
     root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
 
     // 3 rows x 2 columns, no spacing (margin only)

@@ -52,38 +52,34 @@ public:
 
     // Root: vertical flex layout with padding
     FlexLayout root = FlexLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::COLUMN);
     root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
 
     // --- Red box: no margin (flush with padding edge) ---
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    redBox.SetLayoutWidth(LayoutDimension::MatchParent);
-    redBox.SetLayoutHeight(60.0f);
+    redBox.SetRequestedHeight(60.0f);
     root.AddView(redBox);
 
     // --- Green box: 25px margin all sides ---
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
-    greenBox.SetLayoutWidth(LayoutDimension::MatchParent);
-    greenBox.SetLayoutHeight(60.0f);
+    greenBox.SetRequestedHeight(60.0f);
     greenBox.SetViewMargin(Extents(25, 25, 25, 25));
     root.AddView(greenBox);
 
     // --- Blue box: no margin ---
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetLayoutWidth(LayoutDimension::MatchParent);
-    blueBox.SetLayoutHeight(60.0f);
+    blueBox.SetRequestedHeight(60.0f);
     root.AddView(blueBox);
 
     // --- Nested: horizontal FlexLayout with padding + children with margins ---
     FlexLayout nestedRow = FlexLayout::New();
     nestedRow.SetBackgroundColor(Color::GRAY);
-    nestedRow.SetLayoutWidth(LayoutDimension::MatchParent);
-    nestedRow.SetLayoutHeight(150.0f);
+    nestedRow.SetRequestedHeight(150.0f);
     nestedRow.SetDirection(FlexDirection::ROW);
     nestedRow.SetAlignItems(FlexAlign::STRETCH);
     nestedRow.SetViewPadding(Extents(25, 25, 25, 25));
@@ -91,23 +87,20 @@ public:
 
     View childA = View::New();
     childA.SetBackgroundColor(Color::MAGENTA);
-    childA.SetLayoutWidth(LayoutDimension::WrapContent);
-    childA.SetLayoutHeight(LayoutDimension::MatchParent);
+    childA.SetRequestedWidth(WRAP_CONTENT);
     childA.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childA);
 
     View childB = View::New();
     childB.SetBackgroundColor(Color::YELLOW);
-    childB.SetLayoutWidth(LayoutDimension::WrapContent);
-    childB.SetLayoutHeight(LayoutDimension::MatchParent);
+    childB.SetRequestedWidth(WRAP_CONTENT);
     childB.SetViewMargin(Extents(25, 25, 25, 25));
     childB.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childB);
 
     View childC = View::New();
     childC.SetBackgroundColor(Color::CYAN);
-    childC.SetLayoutWidth(LayoutDimension::WrapContent);
-    childC.SetLayoutHeight(LayoutDimension::MatchParent);
+    childC.SetRequestedWidth(WRAP_CONTENT);
     childC.SetViewMargin(Extents(25, 25, 25, 25));
     childC.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.AddView(childC);

@@ -52,8 +52,8 @@ public:
 
     // Root: AbsoluteLayout with padding (content inset from window edges)
     AbsoluteLayout root = AbsoluteLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
 
     // --- Red box: no margin (positioned at padding edge) ---

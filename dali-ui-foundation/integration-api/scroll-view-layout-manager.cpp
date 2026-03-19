@@ -25,6 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali/integration-api/debug.h>
 
 namespace Dali
@@ -78,8 +79,8 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
     ViewImpl& childImpl = getImpl(childData.view);
 
     // Check if child is using MatchParent for width or height
-    bool widthIsMatchParent  = (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent);
-    bool heightIsMatchParent = (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent);
+    bool widthIsMatchParent  = (childImpl.GetRequestedWidth() == MATCH_PARENT);
+    bool heightIsMatchParent = (childImpl.GetRequestedHeight() == MATCH_PARENT);
 
     // For ScrollView, we allow children to have their natural size
     // unless they explicitly use MatchParent

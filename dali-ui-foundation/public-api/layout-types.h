@@ -54,15 +54,20 @@ enum class LayoutAlignment : uint8_t
 };
 
 /**
- * @brief Namespace containing LayoutDimension constants.
+ * @brief Constant representing wrap-content sizing.
  *
- * Use these constants for LayoutWidth and LayoutHeight.
+ * When RequestedWidth or RequestedHeight is set to this value (the default),
+ * the View sizes to fit its content (natural size or children bounding box).
  */
-namespace LayoutDimension
-{
-constexpr float WrapContent = -1.0f; ///< Size determined by content
-constexpr float MatchParent = -2.0f; ///< Size matches parent container
-} // namespace LayoutDimension
+constexpr float WRAP_CONTENT = -1.0f;
+
+/**
+ * @brief Constant representing match-parent sizing.
+ *
+ * When RequestedWidth or RequestedHeight is set to this value,
+ * the View fills the parent container's available space on that axis.
+ */
+constexpr float MATCH_PARENT = -2.0f;
 
 /**
  * @brief Class representing measured LayoutDimensions.

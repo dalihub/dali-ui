@@ -121,8 +121,12 @@ protected:
 
   /**
    * @brief View constructor.
+   *
+   * @param[in] layoutManager Optional layout manager (ownership transferred).
+   *            If provided, the View becomes a layout container.
+   *            Must be set at construction time; cannot be changed later.
    */
-  ViewImpl();
+  explicit ViewImpl(LayoutManager* layoutManager = nullptr);
 
 public: // From Ui::Internal::View
   /**
@@ -162,24 +166,9 @@ public: // From Ui::Internal::View
 
 public: // API (size, position, parent origin, pivot)
   /**
-   * @copydoc Dali::Ui::View::GetSizeWidth
+   * @copydoc Dali::Ui::View::GetSize
    */
-  float GetSizeWidth() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetSizeWidth
-   */
-  void SetSizeWidth(float width);
-
-  /**
-   * @copydoc Dali::Ui::View::GetSizeHeight
-   */
-  float GetSizeHeight() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetSizeHeight
-   */
-  void SetSizeHeight(float height);
+  MeasuredSize GetSize() const;
 
   /**
    * @copydoc Dali::Ui::View::GetPositionX
@@ -318,20 +307,9 @@ public: // Measure / Arrange API
   void InvalidateArrange();
 
   /**
-   * @brief Gets the desired size after measurement.
+   * @brief Gets the measured size from the last Measure() pass.
    */
-  MeasuredSize GetDesiredSize() const;
-
-  /**
-   * @brief Sets the desired size directly.
-   *
-   * Used by LayoutManagers to override the desired size for children
-   * whose final size is determined by the parent (e.g., weighted children
-   * in StackLayout). This ensures that OnArrange uses the correct size.
-   *
-   * @param[in] size The desired size to set
-   */
-  void SetDesiredSize(const MeasuredSize& size);
+  MeasuredSize GetMeasuredSize() const;
 
   /**
    * @brief Checks if the measure is valid.
@@ -354,11 +332,11 @@ protected: // Virtual methods for derived classes (Template Method pattern)
    */
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
-public: // Layout size API (LayoutWidth / LayoutHeight)
-  void  SetLayoutWidth(float width);
-  float GetLayoutWidth() const;
-  void  SetLayoutHeight(float height);
-  float GetLayoutHeight() const;
+public: // Requested size API
+  void  SetRequestedWidth(float width);
+  float GetRequestedWidth() const;
+  void  SetRequestedHeight(float height);
+  float GetRequestedHeight() const;
   void  SetMinimumWidth(float width);
   float GetMinimumWidth() const;
   void  SetMinimumHeight(float height);
@@ -391,19 +369,10 @@ public: // Layout Properties API
 
 public: // Parent Layout API
   Ui::Layout   GetParentLayout() const;
+  Ui::View     GetParentView() const;
   virtual bool IsLayout() const;
 
 public: // LayoutManager API (Optional layout capability)
-  /**
-   * @brief Sets the layout manager for this view.
-   *
-   * When a LayoutManager is set, the view can manage children and
-   * will delegate OnMeasure/OnArrange to the LayoutManager.
-   *
-   * @param[in] layoutManager The layout manager (ownership transferred)
-   */
-  void SetLayoutManager(LayoutManager* layoutManager);
-
   /**
    * @brief Gets the layout manager.
    *
@@ -526,9 +495,9 @@ private:
   std::vector<std::pair<TraitId, Trait>> mTraits;
   IInteractionTrait*                     mInteractionTrait;
 
-  // Layout size (LayoutWidth / LayoutHeight)
-  float mLayoutWidth;
-  float mLayoutHeight;
+  // Requested size (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float mRequestedWidth;
+  float mRequestedHeight;
   float mMinimumWidth;
   float mMinimumHeight;
   float mMaximumWidth;
@@ -542,7 +511,7 @@ private:
 
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache
-  MeasuredSize mDesiredSize;
+  MeasuredSize mMeasuredSize;
   MeasuredSize mLastMeasuredConstraint;
   LayoutRect   mArrangedBounds;
   bool         mArrangeValid;

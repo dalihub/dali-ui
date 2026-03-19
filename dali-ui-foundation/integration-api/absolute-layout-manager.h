@@ -31,7 +31,7 @@ namespace Integration
 /**
  * @brief Implements the absolute positioning layout algorithm.
  *
- * Can be returned from AbsoluteLayoutImpl::CreateLayoutManager().
+ * Passed to LayoutImpl constructor by AbsoluteLayoutImpl.
  * Subclass to customize absolute layout behaviour.
  */
 class DALI_UI_API AbsoluteLayoutManager : public LayoutManager

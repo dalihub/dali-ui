@@ -21,8 +21,8 @@ package "Dali::Ui (Public API)" as public_api {
     + New() : View
     + Measure(widthConstraint, heightConstraint) : MeasuredSize
     + Arrange(bounds) : MeasuredSize
-    + SetLayoutWidth(float)
-    + SetLayoutHeight(float)
+    + SetRequestedWidth(float)
+    + SetRequestedHeight(float)
     + InvalidateMeasure()
     + InvalidateArrange()
     __

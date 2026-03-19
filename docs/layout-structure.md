@@ -13,7 +13,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 ### 1. Public API (Handles)
 
 - **View**  
-  - Layout properties: `SetLayoutWidth` / `SetLayoutHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.  
+  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.  
   - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.  
   - No child add/remove API.
 
@@ -72,7 +72,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 ### 3. Layout Managers (Algorithms)
 
 - **LayoutManager** (abstract)  
-  - `Measure(ViewImpl*, widthConstraint, heightConstraint)`: compute desired size for the container and its children.  
+  - `Measure(ViewImpl*, widthConstraint, heightConstraint)`: compute measured size for the container and its children.  
   - `ArrangeChildren(ViewImpl*, bounds)`: place children within the given bounds.  
   - Uses internal helpers such as `MeasureChild`, `ArrangeChild`, and `GetChildren(ViewImpl*)`.
 
@@ -101,7 +101,7 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 ### Two-phase layout: Measure and Arrange
 
 1. **Measure**  
-   - Given width/height constraints from the parent, the View (and its LayoutManager, if any) computes desired size for itself and its children.  
+   - Given width/height constraints from the parent, the View (and its LayoutManager, if any) computes measured size for itself and its children.  
    - The result is cached as `MeasuredSize`; if constraints are unchanged, measurement is skipped.
 
 2. **Arrange**  

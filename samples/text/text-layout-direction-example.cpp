@@ -43,19 +43,19 @@ private:
 
     window.Add(StackLayout::New(StackOrientation::VERTICAL)
       .Spacing(STACK_SPACING)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
-      .SetLayoutHeight(LayoutDimension::MatchParent)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
       .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Contents({
         Label::New("Text Layout Direction Mode Example"),
         StackLayout::New(StackOrientation::HORIZONTAL)
         .Spacing(STACK_SPACING)
-        .SetLayoutWidth(LayoutDimension::MatchParent)
+        .SetRequestedWidth(MATCH_PARENT)
         .Contents({
           Label::New("Dir")
-          .SetLayoutWidth(40),
+          .SetRequestedWidth(40.0f),
           Label::New("Mode")
-          .SetLayoutWidth(100),
+          .SetRequestedWidth(100.0f),
           Label::New("Result")
         }),
         CreateLayoutDirection("LTR", "CONTENTS", "Hello world", Text::LayoutDirectionMode::CONTENTS),
@@ -77,12 +77,12 @@ private:
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
       .Spacing(STACK_SPACING)
-      .SetLayoutWidth(LayoutDimension::MatchParent)
+      .SetRequestedWidth(MATCH_PARENT)
       .Contents({
         Label::New(textTypeDesc)
-        .SetLayoutWidth(40),
+        .SetRequestedWidth(40.0f),
         Label::New(layoutModeDesc)
-        .SetLayoutWidth(100),
+        .SetRequestedWidth(100.0f),
         Label::New(text)
         .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
         .SetLayoutDirectionMode(mode)

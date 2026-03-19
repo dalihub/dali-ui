@@ -45,64 +45,64 @@ public:
 
     // Root: vertical stack with padding (content inset from window edges)
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(0.0f);
     root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
 
     // --- Section 1: Padding (visible as gap around the red bar) ---
     View padLabel = View::New();
     padLabel.SetBackgroundColor(Color::RED);
-    padLabel.SetLayoutWidth(LayoutDimension::MatchParent);
-    padLabel.SetLayoutHeight(50.0f);
+    padLabel.SetRequestedWidth(MATCH_PARENT);
+    padLabel.SetRequestedHeight(50.0f);
     root.AddView(padLabel);
 
     // --- Section 2: Margin (children with different margins) ---
     View marginA = View::New();
     marginA.SetBackgroundColor(Color::GREEN);
-    marginA.SetLayoutWidth(LayoutDimension::MatchParent);
-    marginA.SetLayoutHeight(50.0f);
+    marginA.SetRequestedWidth(MATCH_PARENT);
+    marginA.SetRequestedHeight(50.0f);
     marginA.SetViewMargin(Extents(25, 25, 0, 0));
     root.AddView(marginA);
 
     View marginB = View::New();
     marginB.SetBackgroundColor(Color::BLUE);
-    marginB.SetLayoutWidth(LayoutDimension::MatchParent);
-    marginB.SetLayoutHeight(50.0f);
+    marginB.SetRequestedWidth(MATCH_PARENT);
+    marginB.SetRequestedHeight(50.0f);
     marginB.SetViewMargin(Extents(0, 0, 25, 25)); // top and bottom margin only
     root.AddView(marginB);
 
     View marginC = View::New();
     marginC.SetBackgroundColor(Color::CYAN);
-    marginC.SetLayoutWidth(LayoutDimension::MatchParent);
-    marginC.SetLayoutHeight(50.0f);
+    marginC.SetRequestedWidth(MATCH_PARENT);
+    marginC.SetRequestedHeight(50.0f);
     marginC.SetViewMargin(Extents(25, 25, 25, 25));
     root.AddView(marginC);
 
     // --- Section 3: Nested StackLayout (horizontal stack inside vertical) ---
     StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
     horizontalRow.SetBackgroundColor(Color::GRAY);
-    horizontalRow.SetLayoutWidth(LayoutDimension::MatchParent);
-    horizontalRow.SetLayoutHeight(LayoutDimension::WrapContent);
+    horizontalRow.SetRequestedWidth(MATCH_PARENT);
+    horizontalRow.SetRequestedHeight(WRAP_CONTENT);
     horizontalRow.SetSpacing(10.0f);
     horizontalRow.SetViewMargin(Extents(25, 25, 25, 25));
 
     View box1 = View::New();
     box1.SetBackgroundColor(Color::MAGENTA);
-    box1.SetLayoutWidth(100.0f);
-    box1.SetLayoutHeight(100.0f);
+    box1.SetRequestedWidth(100.0f);
+    box1.SetRequestedHeight(100.0f);
     horizontalRow.AddView(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(Color::YELLOW);
-    box2.SetLayoutWidth(200.0f);
-    box2.SetLayoutHeight(200.0f);
+    box2.SetRequestedWidth(200.0f);
+    box2.SetRequestedHeight(200.0f);
     horizontalRow.AddView(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(Color::RED);
-    box3.SetLayoutWidth(150.0f);
-    box3.SetLayoutHeight(150.0f);
+    box3.SetRequestedWidth(150.0f);
+    box3.SetRequestedHeight(150.0f);
     horizontalRow.AddView(box3);
 
     root.AddView(horizontalRow);

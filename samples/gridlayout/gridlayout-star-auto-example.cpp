@@ -49,8 +49,8 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     GridLayout root = GridLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetViewPadding(Extents(10, 10, 10, 10));
     root.SetRowSpacing(8.0f);
     root.SetColumnSpacing(8.0f);

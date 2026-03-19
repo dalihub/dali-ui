@@ -32,8 +32,8 @@ namespace Integration
 /**
  * @brief Implements the stack layout algorithm.
  *
- * Can be used with ViewImpl::SetLayoutManager() or returned from
- * StackLayoutImpl::CreateLayoutManager(). Subclass to customize stack layout behaviour.
+ * Passed to LayoutImpl constructor by StackLayoutImpl.
+ * Subclass to customize stack layout behaviour.
  */
 class DALI_UI_API StackLayoutManager : public LayoutManager
 {

@@ -107,11 +107,13 @@ public:
   }
 
   /**
-   * @brief Schedules a view with layout capability for processing.
+   * @brief Schedules a view for layout processing.
+   *
+   * Any View that is a layout root (has LayoutManager or children) can be registered.
    */
   void RequestLayout(Integration::ViewImpl* view)
   {
-    if(!view || !view->HasLayoutManager())
+    if(!view)
     {
       return;
     }
@@ -269,8 +271,7 @@ private:
    * Constraint for the root view:
    * - If the view's Actor has a parent (e.g. Layout under an Actor), use parent Actor's size.
    * - If no parent or parent size is zero, use window size.
-   * - MatchParent: view gets the same size as the constraint.
-   * - WrapContent: layout measures with constraint as maximum and returns wrapped size.
+   * - WRAP_CONTENT: layout measures with constraint as maximum and returns wrapped size.
    * - Fixed (> 0): constraint for that dimension is the fixed value.
    */
   void ProcessLayoutRoot(Integration::ViewImpl* view, float widthConstraint, float heightConstraint)
@@ -280,8 +281,8 @@ private:
       return;
     }
 
-    float layoutWidth  = view->GetLayoutWidth();
-    float layoutHeight = view->GetLayoutHeight();
+    float layoutWidth  = view->GetRequestedWidth();
+    float layoutHeight = view->GetRequestedHeight();
 
     // If root view has a parent Actor (e.g. Actor -> Layout -> View), use parent's size as constraint.
     Actor self   = view->Self();

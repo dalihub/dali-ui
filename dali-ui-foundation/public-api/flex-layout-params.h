@@ -130,7 +130,7 @@ public:
   /**
    * @brief Sets the initial main size of the flex item before grow/shrink.
    *
-   * @param[in] basis The flex basis value (use LayoutDimension::WrapContent for auto)
+   * @param[in] basis The flex basis value (use WRAP_CONTENT for auto)
    * @return Reference to this for chaining
    */
   FlexLayoutParams& SetFlexBasis(float basis);

@@ -204,13 +204,6 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     childBounds.width  = w;
     childBounds.height = h;
 
-    // Sync desired size so OnArrange uses allocated bounds when the
-    // child has no measured content (WrapContent with zero natural size).
-    MeasuredSize desiredSize;
-    desiredSize.width  = (childData.measuredSize.width > 0.0f) ? childData.measuredSize.width : childBounds.width;
-    desiredSize.height = (childData.measuredSize.height > 0.0f) ? childData.measuredSize.height : childBounds.height;
-    childImpl.SetDesiredSize(desiredSize);
-
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
   }

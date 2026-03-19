@@ -146,13 +146,13 @@ ViewImplPtr ViewImpl::New()
   return ViewImplPtr(viewImpl);
 }
 
-ViewImpl::ViewImpl()
+ViewImpl::ViewImpl(LayoutManager* layoutManager)
 : CustomActorImpl(static_cast<ActorFlags>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
   mInteractionTrait(nullptr),
-  mLayoutWidth(LayoutDimension::WrapContent),
-  mLayoutHeight(LayoutDimension::WrapContent),
+  mRequestedWidth(WRAP_CONTENT),
+  mRequestedHeight(WRAP_CONTENT),
   mMinimumWidth(0.0f),
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
@@ -161,10 +161,11 @@ ViewImpl::ViewImpl()
   mPadding(),
   mHorizontalAlignment(LayoutAlignment::START),
   mVerticalAlignment(LayoutAlignment::START),
-  mDesiredSize{0.0f, 0.0f},
+  mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mArrangeValid(false),
+  mLayoutManager(layoutManager),
   mImpl(new Internal::ViewDataImpl(*this))
 {
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(
@@ -182,10 +183,7 @@ ViewImpl::~ViewImpl()
     GetImpl(iter.second).OnViewDestroying(this);
   }
 
-  if(HasLayoutManager())
-  {
-    LayoutController::UnregisterFromAll(this);
-  }
+  LayoutController::UnregisterFromAll(this);
 
   ClearRenderEffect();
 
@@ -203,7 +201,7 @@ void ViewImpl::OnSceneConnection(int depth)
   mImpl->OnSceneConnection();
   CreateClippingRenderer(*this);
 
-  if(IsLayout())
+  if(!GetParentView() && (HasLayoutManager() || !mChildren.empty()))
   {
     RegisterWithLayoutController();
   }
@@ -238,7 +236,7 @@ void ViewImpl::OnKeyInputFocusLost()
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  if(HasLayoutManager())
+  if(HasLayoutManager() || GetParentLayout() || GetParentView())
   {
     return;
   }
@@ -298,24 +296,10 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 // API (size, position, parent origin, pivot)
 // =============================================================================
 
-float ViewImpl::GetSizeWidth() const
+MeasuredSize ViewImpl::GetSize() const
 {
-  return Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
-}
-
-void ViewImpl::SetSizeWidth(float width)
-{
-  Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
-}
-
-float ViewImpl::GetSizeHeight() const
-{
-  return Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-}
-
-void ViewImpl::SetSizeHeight(float height)
-{
-  Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
+  return MeasuredSize(Self().GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                      Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT));
 }
 
 float ViewImpl::GetPositionX() const
@@ -479,7 +463,7 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
   if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, widthConstraint) &&
      FloatEqual(mLastMeasuredConstraint.height, heightConstraint))
   {
-    return mDesiredSize;
+    return mMeasuredSize;
   }
 
   float marginWidth           = static_cast<float>(mMargin.start + mMargin.end);
@@ -489,83 +473,134 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
 
   MeasuredSize measured          = OnMeasure(innerWidthConstraint, innerHeightConstraint);
   measured                       = ApplyConstraints(measured);
-  mDesiredSize                   = measured;
+  mMeasuredSize                  = measured;
   mLastMeasuredConstraint.width  = widthConstraint;
   mLastMeasuredConstraint.height = heightConstraint;
 
-  return mDesiredSize;
+  return mMeasuredSize;
 }
 
 MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
+  float pw = static_cast<float>(mPadding.start + mPadding.end);
+  float ph = static_cast<float>(mPadding.top + mPadding.bottom);
+
+  float effectiveWidth  = (mRequestedWidth > 0) ? mRequestedWidth : widthConstraint;
+  float effectiveHeight = (mRequestedHeight > 0) ? mRequestedHeight : heightConstraint;
+
   if(mLayoutManager)
   {
-    float        managerWidthConstraint  = (mLayoutWidth > 0) ? mLayoutWidth : widthConstraint;
-    float        managerHeightConstraint = (mLayoutHeight > 0) ? mLayoutHeight : heightConstraint;
-    MeasuredSize content                 = mLayoutManager->Measure(this, managerWidthConstraint, managerHeightConstraint);
-    float        pw                      = static_cast<float>(mPadding.start + mPadding.end);
-    float        ph                      = static_cast<float>(mPadding.top + mPadding.bottom);
+    MeasuredSize content = mLayoutManager->Measure(this, effectiveWidth, effectiveHeight);
     float        resultWidth;
     float        resultHeight;
-    if(mLayoutWidth == LayoutDimension::MatchParent)
+    if(mRequestedWidth > 0)
+    {
+      resultWidth = mRequestedWidth;
+    }
+    else if(mRequestedWidth == MATCH_PARENT)
     {
       resultWidth = widthConstraint;
     }
-    else if(mLayoutWidth > 0)
-    {
-      resultWidth = mLayoutWidth;
-    }
     else
     {
+      // WRAP_CONTENT: size to content + padding
       resultWidth = content.width + pw;
     }
-    if(mLayoutHeight == LayoutDimension::MatchParent)
+    if(mRequestedHeight > 0)
+    {
+      resultHeight = mRequestedHeight;
+    }
+    else if(mRequestedHeight == MATCH_PARENT)
     {
       resultHeight = heightConstraint;
     }
-    else if(mLayoutHeight > 0)
-    {
-      resultHeight = mLayoutHeight;
-    }
     else
     {
+      // WRAP_CONTENT: size to content + padding
       resultHeight = content.height + ph;
     }
     return MeasuredSize(resultWidth, resultHeight);
   }
 
-  MeasuredSize size;
-  float        paddingWidth  = static_cast<float>(mPadding.start + mPadding.end);
-  float        paddingHeight = static_cast<float>(mPadding.top + mPadding.bottom);
-
-  if(mLayoutWidth > 0)
+  if(!mChildren.empty())
   {
-    size.width = mLayoutWidth;
+    float contentW = std::max(0.0f, effectiveWidth - pw);
+    float contentH = std::max(0.0f, effectiveHeight - ph);
+
+    float maxRight  = 0.0f;
+    float maxBottom = 0.0f;
+    for(auto& childData : mChildren)
+    {
+      ViewImpl&    childImpl             = Integration::GetImpl(childData.view);
+      Extents      margin                = childImpl.GetViewMargin();
+      float        marginW               = static_cast<float>(margin.start + margin.end);
+      float        marginH               = static_cast<float>(margin.top + margin.bottom);
+      float        childWidthConstraint  = std::max(0.0f, contentW - marginW);
+      float        childHeightConstraint = std::max(0.0f, contentH - marginH);
+      MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+      childData.measuredSize             = childSize;
+
+      float childX = childImpl.GetPositionX();
+      float childY = childImpl.GetPositionY();
+      maxRight     = std::max(maxRight, childX + marginW + childSize.width);
+      maxBottom    = std::max(maxBottom, childY + marginH + childSize.height);
+    }
+
+    MeasuredSize size;
+    if(mRequestedWidth > 0)
+    {
+      size.width = mRequestedWidth;
+    }
+    else if(mRequestedWidth == MATCH_PARENT)
+    {
+      size.width = widthConstraint;
+    }
+    else
+    {
+      size.width = maxRight + pw;
+    }
+    if(mRequestedHeight > 0)
+    {
+      size.height = mRequestedHeight;
+    }
+    else if(mRequestedHeight == MATCH_PARENT)
+    {
+      size.height = heightConstraint;
+    }
+    else
+    {
+      size.height = maxBottom + ph;
+    }
+    return size;
   }
-  else if(mLayoutWidth == LayoutDimension::MatchParent)
+
+  MeasuredSize size;
+  if(mRequestedWidth > 0)
+  {
+    size.width = mRequestedWidth;
+  }
+  else if(mRequestedWidth == MATCH_PARENT)
   {
     size.width = widthConstraint;
   }
   else
   {
     Vector3 naturalSize = Self().GetNaturalSize();
-    size.width          = ((naturalSize.width > 0) ? naturalSize.width : 0.0f) + paddingWidth;
+    size.width          = ((naturalSize.width > 0) ? naturalSize.width : 0.0f) + pw;
   }
-
-  if(mLayoutHeight > 0)
+  if(mRequestedHeight > 0)
   {
-    size.height = mLayoutHeight;
+    size.height = mRequestedHeight;
   }
-  else if(mLayoutHeight == LayoutDimension::MatchParent)
+  else if(mRequestedHeight == MATCH_PARENT)
   {
     size.height = heightConstraint;
   }
   else
   {
     Vector3 naturalSize = Self().GetNaturalSize();
-    size.height         = ((naturalSize.height > 0) ? naturalSize.height : 0.0f) + paddingHeight;
+    size.height         = ((naturalSize.height > 0) ? naturalSize.height : 0.0f) + ph;
   }
-
   return size;
 }
 
@@ -590,14 +625,33 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
 
+  LayoutRect contentBounds;
+  contentBounds.x      = static_cast<float>(mPadding.start);
+  contentBounds.y      = static_cast<float>(mPadding.top);
+  contentBounds.width  = width - static_cast<float>(mPadding.start + mPadding.end);
+  contentBounds.height = height - static_cast<float>(mPadding.top + mPadding.bottom);
+
   if(mLayoutManager)
   {
-    LayoutRect contentBounds;
-    contentBounds.x      = static_cast<float>(mPadding.start);
-    contentBounds.y      = static_cast<float>(mPadding.top);
-    contentBounds.width  = width - static_cast<float>(mPadding.start + mPadding.end);
-    contentBounds.height = height - static_cast<float>(mPadding.top + mPadding.bottom);
     mLayoutManager->ArrangeChildren(this, contentBounds);
+  }
+  else if(!mChildren.empty())
+  {
+    // Default arrange for views without LayoutManager:
+    // Place children at their position, using measured size.
+    for(auto& childData : mChildren)
+    {
+      ViewImpl& childImpl = Integration::GetImpl(childData.view);
+      Extents   margin    = childImpl.GetViewMargin();
+      float     childX    = childImpl.GetPositionX() + contentBounds.x + static_cast<float>(margin.start);
+      float     childY    = childImpl.GetPositionY() + contentBounds.y + static_cast<float>(margin.top);
+      float     childW    = childData.measuredSize.width;
+      float     childH    = childData.measuredSize.height;
+
+      LayoutRect childBounds(childX, childY, childW, childH);
+      childImpl.Arrange(childBounds);
+      childData.arrangedBounds = childBounds;
+    }
   }
 
   return {width, height};
@@ -616,7 +670,22 @@ void ViewImpl::InvalidateMeasure()
     return;
   }
 
-  if(IsLayout())
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    auto& parentImpl = Integration::GetImpl(parentView);
+    if(parentImpl.GetRequestedWidth() <= 0 || parentImpl.GetRequestedHeight() <= 0)
+    {
+      parentImpl.InvalidateMeasure();
+    }
+    else
+    {
+      parentImpl.InvalidateArrange();
+    }
+    return;
+  }
+
+  if(HasLayoutManager() || !mChildren.empty())
   {
     RegisterWithLayoutController();
   }
@@ -632,7 +701,17 @@ void ViewImpl::InvalidateArrange()
     Integration::GetImpl(parentLayout).InvalidateArrange();
     return;
   }
-  if(IsLayout())
+
+  // Propagate to parent View (no LayoutManager)
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    Integration::GetImpl(parentView).InvalidateArrange();
+    return;
+  }
+
+  // Reached top of View tree → register with LayoutController
+  if(HasLayoutManager() || !mChildren.empty())
   {
     RegisterWithLayoutController();
   }
@@ -649,14 +728,9 @@ void ViewImpl::RegisterWithLayoutController()
   }
 }
 
-MeasuredSize ViewImpl::GetDesiredSize() const
+MeasuredSize ViewImpl::GetMeasuredSize() const
 {
-  return mDesiredSize;
-}
-
-void ViewImpl::SetDesiredSize(const MeasuredSize& size)
-{
-  mDesiredSize = size;
+  return mMeasuredSize;
 }
 
 bool ViewImpl::IsMeasureValid() const
@@ -680,43 +754,43 @@ MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
 }
 
 // =============================================================================
-// Layout size API (LayoutWidth / LayoutHeight)
+// Requested size API
 // =============================================================================
 
-void ViewImpl::SetLayoutWidth(float width)
+void ViewImpl::SetRequestedWidth(float width)
 {
-  if(!FloatEqual(mLayoutWidth, width))
+  if(!FloatEqual(mRequestedWidth, width))
   {
-    mLayoutWidth = width;
+    mRequestedWidth = width;
     InvalidateMeasure();
-    if(width > 0 && !mLayoutManager)
+    if(width > 0 && !GetParentLayout() && !GetParentView() && !HasLayoutManager() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
     }
   }
 }
 
-float ViewImpl::GetLayoutWidth() const
+float ViewImpl::GetRequestedWidth() const
 {
-  return mLayoutWidth;
+  return mRequestedWidth;
 }
 
-void ViewImpl::SetLayoutHeight(float height)
+void ViewImpl::SetRequestedHeight(float height)
 {
-  if(!FloatEqual(mLayoutHeight, height))
+  if(!FloatEqual(mRequestedHeight, height))
   {
-    mLayoutHeight = height;
+    mRequestedHeight = height;
     InvalidateMeasure();
-    if(height > 0 && !mLayoutManager)
+    if(height > 0 && !GetParentLayout() && !GetParentView() && !HasLayoutManager() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
     }
   }
 }
 
-float ViewImpl::GetLayoutHeight() const
+float ViewImpl::GetRequestedHeight() const
 {
-  return mLayoutHeight;
+  return mRequestedHeight;
 }
 
 void ViewImpl::SetMinimumWidth(float width)
@@ -812,7 +886,7 @@ void ViewImpl::SetHorizontalAlignment(LayoutAlignment alignment)
   if(mHorizontalAlignment != alignment)
   {
     mHorizontalAlignment = alignment;
-    InvalidateArrange();
+    InvalidateMeasure();
   }
 }
 
@@ -826,7 +900,7 @@ void ViewImpl::SetVerticalAlignment(LayoutAlignment alignment)
   if(mVerticalAlignment != alignment)
   {
     mVerticalAlignment = alignment;
-    InvalidateArrange();
+    InvalidateMeasure();
   }
 }
 
@@ -849,6 +923,16 @@ Ui::Layout ViewImpl::GetParentLayout() const
   return Ui::Layout();
 }
 
+Ui::View ViewImpl::GetParentView() const
+{
+  Actor parent = Self().GetParent();
+  if(parent)
+  {
+    return Ui::View::DownCast(parent);
+  }
+  return Ui::View();
+}
+
 bool ViewImpl::IsLayout() const
 {
   return mLayoutManager != nullptr;
@@ -857,12 +941,6 @@ bool ViewImpl::IsLayout() const
 // =============================================================================
 // LayoutManager API
 // =============================================================================
-
-void ViewImpl::SetLayoutManager(LayoutManager* layoutManager)
-{
-  mLayoutManager.reset(layoutManager);
-  InvalidateMeasure();
-}
 
 LayoutManager* ViewImpl::GetLayoutManager() const
 {
@@ -1041,8 +1119,8 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
   mInteractionTrait(nullptr),
-  mLayoutWidth(LayoutDimension::WrapContent),
-  mLayoutHeight(LayoutDimension::WrapContent),
+  mRequestedWidth(WRAP_CONTENT),
+  mRequestedHeight(WRAP_CONTENT),
   mMinimumWidth(0.0f),
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
@@ -1051,7 +1129,7 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mPadding(),
   mHorizontalAlignment(LayoutAlignment::START),
   mVerticalAlignment(LayoutAlignment::START),
-  mDesiredSize{0.0f, 0.0f},
+  mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mArrangeValid(false),

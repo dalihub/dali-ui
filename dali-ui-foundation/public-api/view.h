@@ -184,11 +184,11 @@ public: // Measure / Arrange API
   void InvalidateArrange();
 
   /**
-   * @brief Gets the desired size of the view after measurement.
+   * @brief Gets the measured size from the last Measure() pass.
    *
-   * @return The desired size
+   * @return The measured size
    */
-  MeasuredSize GetDesiredSize() const;
+  MeasuredSize GetMeasuredSize() const;
 
   /**
    * @brief Checks if the measure is valid.
@@ -207,32 +207,14 @@ public: // Measure / Arrange API
 public: // Properties
   // @CHAIN_START(View)
   /**
-   * @brief Sets the width of the View.
+   * @brief Gets the actual rendered size of this View after layout.
    *
-   * @param[in] width The width to set
-   */
-  View& SetSizeWidth(float width);
-
-  /**
-   * @brief Gets the width of the View.
+   * This is a read-only result of the layout system's Measure/Arrange passes.
+   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
    *
-   * @return The width of the View
+   * @return The actual size (width, height) as set by the layout system
    */
-  float GetSizeWidth() const;
-
-  /**
-   * @brief Sets the height of the View.
-   *
-   * @param[in] height The height to set
-   */
-  View& SetSizeHeight(float height);
-
-  /**
-   * @brief Gets the height of the View.
-   *
-   * @return The height of the View
-   */
-  float GetSizeHeight() const;
+  MeasuredSize GetSize() const;
 
   /**
    * @brief Sets the X position of the View.
@@ -291,35 +273,40 @@ public: // Properties
   Vector3 GetPivotPoint() const;
 
   /**
-   * @brief Sets the layout width.
+   * @brief Sets the requested width.
    *
-   * Use LayoutDimension::WrapContent for content-based sizing,
-   * LayoutDimension::MatchParent to fill parent, or a positive value for fixed size.
+   * A positive value sets a fixed width.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
    *
-   * @param[in] width The layout width
+   * @param[in] width The requested width
    */
-  View& SetLayoutWidth(float width);
+  View& SetRequestedWidth(float width);
 
   /**
-   * @brief Gets the layout width.
+   * @brief Gets the requested width.
    *
-   * @return The layout width
+   * @return The requested width
    */
-  float GetLayoutWidth() const;
+  float GetRequestedWidth() const;
 
   /**
-   * @brief Sets the layout height.
+   * @brief Sets the requested height.
    *
-   * @param[in] height The layout height
+   * A positive value sets a fixed height.
+   * WRAP_CONTENT (-1): sizes to content (default).
+   * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @param[in] height The requested height
    */
-  View& SetLayoutHeight(float height);
+  View& SetRequestedHeight(float height);
 
   /**
-   * @brief Gets the layout height.
+   * @brief Gets the requested height.
    *
-   * @return The layout height
+   * @return The requested height
    */
-  float GetLayoutHeight() const;
+  float GetRequestedHeight() const;
 
   /**
    * @brief Sets the minimum width.

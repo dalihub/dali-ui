@@ -45,8 +45,8 @@ public:
 
     // Root: GridLayout filling the window
     GridLayout root = GridLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetViewPadding(Extents(20, 20, 20, 20));
 
     // Define 3 rows and 2 columns with absolute sizes

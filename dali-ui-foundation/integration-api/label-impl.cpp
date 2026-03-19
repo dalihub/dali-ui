@@ -432,8 +432,8 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint,
                         heightConstraint);
 
-  const float layoutWidth  = GetLayoutWidth();
-  const float layoutHeight = GetLayoutHeight();
+  const float requestedWidth  = GetRequestedWidth();
+  const float requestedHeight = GetRequestedHeight();
 
   const float minWidth  = GetMinimumWidth();
   const float maxWidth  = GetMaximumWidth();
@@ -446,11 +446,11 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float measuredHeight = 0.0f;
 
   // Width
-  if(layoutWidth > 0.0f)
+  if(requestedWidth > 0.0f)
   {
-    measuredWidth = layoutWidth;
+    measuredWidth = requestedWidth;
   }
-  else if(layoutWidth == LayoutDimension::MatchParent)
+  else if(requestedWidth == MATCH_PARENT)
   {
     measuredWidth = std::max(0.0f, widthConstraint);
   }
@@ -462,11 +462,11 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
 
   // Height
-  if(layoutHeight > 0.0f)
+  if(requestedHeight > 0.0f)
   {
-    measuredHeight = layoutHeight;
+    measuredHeight = requestedHeight;
   }
-  else if(layoutHeight == LayoutDimension::MatchParent)
+  else if(requestedHeight == MATCH_PARENT)
   {
     measuredHeight = std::max(0.0f, heightConstraint);
   }

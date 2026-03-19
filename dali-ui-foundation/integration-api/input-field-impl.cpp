@@ -612,8 +612,8 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint, heightConstraint);
 
-  const float layoutWidth  = GetLayoutWidth();
-  const float layoutHeight = GetLayoutHeight();
+  const float layoutWidth  = GetRequestedWidth();
+  const float layoutHeight = GetRequestedHeight();
 
   const float minWidth  = GetMinimumWidth();
   const float maxWidth  = GetMaximumWidth();
@@ -642,7 +642,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   {
     measuredWidth = layoutWidth;
   }
-  else if(layoutWidth == LayoutDimension::MatchParent)
+  else if(layoutWidth == MATCH_PARENT)
   {
     measuredWidth = std::max(0.0f, widthConstraint);
   }
@@ -658,7 +658,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   {
     measuredHeight = layoutHeight;
   }
-  else if(layoutHeight == LayoutDimension::MatchParent)
+  else if(layoutHeight == MATCH_PARENT)
   {
     measuredHeight = std::max(0.0f, heightConstraint);
   }

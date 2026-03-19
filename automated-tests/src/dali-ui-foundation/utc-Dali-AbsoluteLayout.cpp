@@ -194,8 +194,8 @@ int UtcDaliAbsoluteLayoutMeasureArrangeP(void)
   View child = View::New();
   layout.AddView(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10, 20, 100, 50)));
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(150.0f);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
   MeasuredSize a = layout.Arrange(LayoutRect(0, 0, 200, 150));
   DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
@@ -214,8 +214,8 @@ int UtcDaliAbsoluteLayoutPositionProportionalP(void)
   child.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetBounds(LayoutRect(0.1f, 0.2f, 0.3f, 0.4f))
     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(150.0f);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 150));
   DALI_TEST_CHECK(m.GetWidth() >= 0.0f);
@@ -231,8 +231,8 @@ int UtcDaliAbsoluteLayoutSizeProportionalP(void)
   child.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetBounds(LayoutRect(0, 0, 0.5f, 0.5f))
     .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(150.0f);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 150));
   DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
@@ -245,12 +245,12 @@ int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  child.SetLayoutWidth(70.0f);
-  child.SetLayoutHeight(35.0f);
+  child.SetRequestedWidth(70.0f);
+  child.SetRequestedHeight(35.0f);
   layout.AddView(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10, 20, -1.0f, -1.0f)));
-  layout.SetLayoutWidth(200.0f);
-  layout.SetLayoutHeight(150.0f);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
   layout.Arrange(LayoutRect(0, 0, 200, 150));
   DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);

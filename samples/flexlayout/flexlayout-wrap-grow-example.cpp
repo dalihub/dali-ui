@@ -50,8 +50,8 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     FlexLayout root = FlexLayout::New();
-    root.SetLayoutWidth(LayoutDimension::MatchParent);
-    root.SetLayoutHeight(LayoutDimension::MatchParent);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::ROW);
     root.SetWrap(FlexWrap::WRAP);
     root.SetJustifyContent(FlexJustify::FLEX_START);
@@ -61,42 +61,42 @@ public:
     // Box 1: Red, basis 150, grow 1
     View box1 = View::New();
     box1.SetBackgroundColor(Color::RED);
-    box1.SetLayoutHeight(80.0f);
+    box1.SetRequestedHeight(80.0f);
     box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
     root.AddView(box1);
 
     // Box 2: Green, basis 150, grow 2
     View box2 = View::New();
     box2.SetBackgroundColor(Color::GREEN);
-    box2.SetLayoutHeight(80.0f);
+    box2.SetRequestedHeight(80.0f);
     box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(2.0f));
     root.AddView(box2);
 
     // Box 3: Blue, basis 150, grow 1
     View box3 = View::New();
     box3.SetBackgroundColor(Color::BLUE);
-    box3.SetLayoutHeight(80.0f);
+    box3.SetRequestedHeight(80.0f);
     box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
     root.AddView(box3);
 
     // Box 4: Yellow, basis 150, grow 1
     View box4 = View::New();
     box4.SetBackgroundColor(Color::YELLOW);
-    box4.SetLayoutHeight(80.0f);
+    box4.SetRequestedHeight(80.0f);
     box4.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
     root.AddView(box4);
 
     // Box 5: Cyan, basis 150, grow 1
     View box5 = View::New();
     box5.SetBackgroundColor(Color::CYAN);
-    box5.SetLayoutHeight(80.0f);
+    box5.SetRequestedHeight(80.0f);
     box5.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
     root.AddView(box5);
 
     // Box 6: Magenta, basis 150, grow 3
     View box6 = View::New();
     box6.SetBackgroundColor(Color::MAGENTA);
-    box6.SetLayoutHeight(80.0f);
+    box6.SetRequestedHeight(80.0f);
     box6.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(3.0f));
     root.AddView(box6);
 

@@ -58,15 +58,15 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
-    outer.SetLayoutWidth(LayoutDimension::MatchParent);
-    outer.SetLayoutHeight(LayoutDimension::MatchParent);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(16.0f);
     outer.SetViewPadding(Extents(16, 16, 16, 16));
 
     // Row 1: Default shrink - all items shrink equally
     FlexLayout row1 = FlexLayout::New();
-    row1.SetLayoutWidth(LayoutDimension::MatchParent);
-    row1.SetLayoutHeight(LayoutDimension::WrapContent);
+    row1.SetRequestedWidth(MATCH_PARENT);
+    row1.SetRequestedHeight(WRAP_CONTENT);
     row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row1.SetDirection(FlexDirection::ROW);
     row1.SetWrap(FlexWrap::NO_WRAP);
@@ -77,19 +77,19 @@ public:
     // All three items: basis 250, default shrink (1.0)
     View r1box1 = View::New();
     r1box1.SetBackgroundColor(Color::RED);
-    r1box1.SetLayoutHeight(80.0f);
+    r1box1.SetRequestedHeight(80.0f);
     r1box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box1);
 
     View r1box2 = View::New();
     r1box2.SetBackgroundColor(Color::GREEN);
-    r1box2.SetLayoutHeight(80.0f);
+    r1box2.SetRequestedHeight(80.0f);
     r1box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box2);
 
     View r1box3 = View::New();
     r1box3.SetBackgroundColor(Color::BLUE);
-    r1box3.SetLayoutHeight(80.0f);
+    r1box3.SetRequestedHeight(80.0f);
     r1box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row1.AddView(r1box3);
 
@@ -97,8 +97,8 @@ public:
 
     // Row 2: Varied shrink values
     FlexLayout row2 = FlexLayout::New();
-    row2.SetLayoutWidth(LayoutDimension::MatchParent);
-    row2.SetLayoutHeight(LayoutDimension::WrapContent);
+    row2.SetRequestedWidth(MATCH_PARENT);
+    row2.SetRequestedHeight(WRAP_CONTENT);
     row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     row2.SetDirection(FlexDirection::ROW);
     row2.SetWrap(FlexWrap::NO_WRAP);
@@ -109,21 +109,21 @@ public:
     // Item 1: shrink 0 (will not shrink)
     View r2box1 = View::New();
     r2box1.SetBackgroundColor(Color::YELLOW);
-    r2box1.SetLayoutHeight(80.0f);
+    r2box1.SetRequestedHeight(80.0f);
     r2box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(0.0f));
     row2.AddView(r2box1);
 
     // Item 2: shrink 1 (normal shrink)
     View r2box2 = View::New();
     r2box2.SetBackgroundColor(Color::CYAN);
-    r2box2.SetLayoutHeight(80.0f);
+    r2box2.SetRequestedHeight(80.0f);
     r2box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f));
     row2.AddView(r2box2);
 
     // Item 3: shrink 3 (shrinks 3x more)
     View r2box3 = View::New();
     r2box3.SetBackgroundColor(Color::MAGENTA);
-    r2box3.SetLayoutHeight(80.0f);
+    r2box3.SetRequestedHeight(80.0f);
     r2box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(250.0f).SetFlexShrink(3.0f));
     row2.AddView(r2box3);
 

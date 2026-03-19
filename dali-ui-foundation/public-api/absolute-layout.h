@@ -46,10 +46,10 @@ class AbsoluteLayoutImpl;
  *
  * @section abs_common_props Common Property Behavior
  *
- * - @b LayoutWidth/LayoutHeight: Only used when the corresponding bounds
- *   dimension is negative (auto-size). MatchParent sizes the child to the
- *   parent's content area. When bounds width or height is >= 0, the bounds
- *   value takes precedence and LayoutWidth/LayoutHeight is ignored.
+ * - @b RequestedWidth/RequestedHeight: Only used when the corresponding bounds
+ *   dimension is negative (auto-size). When bounds width or height is >= 0,
+ *   the bounds value takes precedence and RequestedWidth/RequestedHeight is
+ *   ignored.
  * - @b Alignment: Not used. Position is determined solely by the bounds
  *   x/y values and margin.
  * - @b Margin: Applied as an offset to the bounds position.
