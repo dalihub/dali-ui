@@ -231,12 +231,28 @@ const Vector4& InputField::GetSelectionColor() const
   return GetImpl(*this).GetSelectionColor();
 }
 
+InputField& InputField::SetMaximumLength(int length)
+{
+  GetImpl(*this).SetMaximumLength(length);
+  return *this;
+}
+
+int InputField::GetMaximumLength() const
+{
+  return GetImpl(*this).GetMaximumLength();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View)>& InputField::TextChangedSignal()
 {
   return GetImpl(*this).TextChangedSignal();
+}
+
+Signal<void(View)>& InputField::MaximumLengthReachedSignal()
+{
+  return GetImpl(*this).MaximumLengthReachedSignal();
 }
 
 } // namespace Ui

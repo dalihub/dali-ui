@@ -79,4 +79,10 @@
   * \
   * @return A reference to this InputField for method chaining. \
   */ \
-  ChildClass& SetSelectionColor(const Vector4& color) { InputField::SetSelectionColor(color); return *this; }
+  ChildClass& SetSelectionColor(const Vector4& color) { InputField::SetSelectionColor(color); return *this; } \
+  /** \
+  * @brief Sets the maximum number of characters that can be entered into the InputField. \
+  * \
+  * @param[in] length The maximum number of characters allowed. \
+  */ \
+  ChildClass& SetMaximumLength(int length) { InputField::SetMaximumLength(length); return *this; }

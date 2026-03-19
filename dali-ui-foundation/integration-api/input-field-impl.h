@@ -178,11 +178,26 @@ public:
    */
   const Vector4& GetSelectionColor() const;
 
+  /**
+   * @copydoc Dali::Ui::InputField::SetMaximumLength
+   */
+  void SetMaximumLength(int length);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetMaximumLength
+   */
+  int GetMaximumLength() const;
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::InputField::TextChangedSignal()
    */
   Signal<void(View)>& TextChangedSignal();
+
+  /**
+   * @copydoc Dali::Ui::InputField::MaximumLengthReachedSignal()
+   */
+  Signal<void(View)>& MaximumLengthReachedSignal();
 
 protected:
   // Construction
@@ -466,6 +481,7 @@ private:
 private:
   // Data
   Signal<void(View)> mTextChangedSignal;
+  Signal<void(View)> mMaxLengthReachedSignal;
 
   InputMethodContext          mInputMethodContext;
   Text::ControllerPtr         mController;

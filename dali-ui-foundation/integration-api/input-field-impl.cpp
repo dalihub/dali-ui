@@ -251,12 +251,27 @@ const Vector4& InputFieldImpl::GetSelectionColor() const
   return mDecorator->GetHighlightColor();
 }
 
+void InputFieldImpl::SetMaximumLength(int length)
+{
+  mController->SetMaximumNumberOfCharacters(static_cast<uint32_t>(length));
+}
+
+int InputFieldImpl::GetMaximumLength() const
+{
+  return static_cast<int>(mController->GetMaximumNumberOfCharacters());
+}
+
 // =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View)>& InputFieldImpl::TextChangedSignal()
 {
   return mTextChangedSignal;
+}
+
+Signal<void(View)>& InputFieldImpl::MaximumLengthReachedSignal()
+{
+  return mMaxLengthReachedSignal;
 }
 
 void InputFieldImpl::OnInitialize()
@@ -329,6 +344,10 @@ void InputFieldImpl::OnInitialize()
   Dali::Ui::View::DownCast(self).SetInputMethodContext(mInputMethodContext);
 
   EnableClipping();
+
+  // TODO: Re-enable when grab handle and popup support are fully implemented.
+  mController->SetGrabHandleEnabled(false);
+  mController->SetGrabHandlePopupEnabled(false);
 }
 
 void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -690,7 +709,8 @@ void InputFieldImpl::TextChanged(bool immediate)
 
 void InputFieldImpl::MaxLengthReached()
 {
-  // TODO
+  Ui::View handle(GetOwner());
+  mMaxLengthReachedSignal.Emit(handle);
 }
 
 void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)

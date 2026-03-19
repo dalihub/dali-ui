@@ -286,15 +286,46 @@ public: // Setters for chaining
    */
   const Vector4& GetSelectionColor() const;
 
+  /**
+   * @brief Sets the maximum number of characters that can be entered into the InputField.
+   *
+   * @param[in] length The maximum number of characters allowed.
+   */
+  InputField& SetMaximumLength(int length);
+
+  /**
+   * @brief Gets the maximum number of characters allowed in the InputField.
+   *
+   * @return The maximum character count.
+   */
+  int GetMaximumLength() const;
+
   // @CHAIN_END
 
 public: // Signals
   /**
    * @brief This signal is emitted when the text content changes.
    *
+   * @code
+   *   void OnTextChanged(View view);
+   * @endcode
    * @return The signal to connect to.
    */
   Signal<void(View)>& TextChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the text input reaches the maximum allowed length.
+   *
+   * The signal is triggered when an attempt is made to insert additional
+   * characters beyond the configured maximum length.
+   *
+   * @code
+   *   void OnMaximumLengthReached(View view);
+   * @endcode
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View)>& MaximumLengthReachedSignal();
 
 public: // Not intended for application developers
   /// @cond internal
