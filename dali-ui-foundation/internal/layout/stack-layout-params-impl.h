@@ -45,16 +45,14 @@ public:
   StackLayoutParamsImpl()
   : LayoutParamsImpl(),
     mWeight(0.0f),
-    mHorizontalAlignment(LayoutAlignment::START),
-    mVerticalAlignment(LayoutAlignment::START)
+    mAlignment(LayoutAlignment::START)
   {
   }
 
   StackLayoutParamsImpl(const StackLayoutParamsImpl& other)
   : LayoutParamsImpl(),
     mWeight(other.mWeight),
-    mHorizontalAlignment(other.mHorizontalAlignment),
-    mVerticalAlignment(other.mVerticalAlignment)
+    mAlignment(other.mAlignment)
   {
   }
 
@@ -81,24 +79,14 @@ public:
     return mWeight;
   }
 
-  void SetHorizontalAlignment(LayoutAlignment alignment)
+  void SetAlignment(LayoutAlignment alignment)
   {
-    mHorizontalAlignment = alignment;
+    mAlignment = alignment;
   }
 
-  LayoutAlignment GetHorizontalAlignment() const
+  LayoutAlignment GetAlignment() const
   {
-    return mHorizontalAlignment;
-  }
-
-  void SetVerticalAlignment(LayoutAlignment alignment)
-  {
-    mVerticalAlignment = alignment;
-  }
-
-  LayoutAlignment GetVerticalAlignment() const
-  {
-    return mVerticalAlignment;
+    return mAlignment;
   }
 
   /**
@@ -139,8 +127,7 @@ protected:
 
 private:
   float           mWeight;
-  LayoutAlignment mHorizontalAlignment;
-  LayoutAlignment mVerticalAlignment;
+  LayoutAlignment mAlignment;
 };
 
 } // namespace Internal

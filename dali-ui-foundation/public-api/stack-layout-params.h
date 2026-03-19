@@ -114,34 +114,22 @@ public:
   float GetWeight() const;
 
   /**
-   * @brief Sets the horizontal alignment within the stack (cross-axis for vertical stack).
+   * @brief Sets the cross-axis alignment for this child within the stack.
    *
-   * @param[in] alignment START, CENTER, or END
+   * In a vertical stack this controls horizontal placement;
+   * in a horizontal stack this controls vertical placement.
+   *
+   * @param[in] alignment FILL, START (default), CENTER, or END
    * @return Reference to this for chaining
    */
-  StackLayoutParams& SetHorizontalAlignment(LayoutAlignment alignment);
+  StackLayoutParams& SetAlignment(LayoutAlignment alignment);
 
   /**
-   * @brief Gets the horizontal alignment.
+   * @brief Gets the cross-axis alignment.
    *
-   * @return The horizontal alignment
+   * @return The cross-axis alignment
    */
-  LayoutAlignment GetHorizontalAlignment() const;
-
-  /**
-   * @brief Sets the vertical alignment within the stack (cross-axis for horizontal stack).
-   *
-   * @param[in] alignment START, CENTER, or END
-   * @return Reference to this for chaining
-   */
-  StackLayoutParams& SetVerticalAlignment(LayoutAlignment alignment);
-
-  /**
-   * @brief Gets the vertical alignment.
-   *
-   * @return The vertical alignment
-   */
-  LayoutAlignment GetVerticalAlignment() const;
+  LayoutAlignment GetAlignment() const;
 
 public: // Not intended for application developers
   /// @cond internal

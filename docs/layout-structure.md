@@ -13,8 +13,9 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 ### 1. Public API (Handles)
 
 - **View**  
-  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.  
-  - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.  
+  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.
+  - `GetSize()` returns the actual rendered size (read-only).
+  - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.
   - No child add/remove API.
 
 - **Layout** (inherits View)  
@@ -24,7 +25,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **StackLayout, FlexLayout, GridLayout, AbsoluteLayout**
   - Each adds type-specific options: orientation/spacing/weight, direction/wrap/justify/align, row/column definitions, absolute bounds, etc.
   - Per-child layout parameters are set via `View::SetLayoutParams()`:
-    - `view.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))`
+    - `view.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))`
     - `view.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(3).SetRowSpan(1).SetColumnSpan(2))`
     - `view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0f))`
     - `view.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(rect).SetFlags(flags))`
@@ -51,15 +52,15 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **ViewImpl** (DALi ControlImpl-derived)  
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and **optional** LayoutManager and child container.  
-  - When a LayoutManager is set: provides `SetLayoutManager`, `AddView`, `RemoveView`, `RemoveAllViews`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc.
+  - When a LayoutManager is set (at construction time): provides `AddView`, `RemoveView`, `RemoveAllViews`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc.
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
-- **LayoutImpl** (inherits ViewImpl)  
-  - On construction, creates a derived LayoutManager via `CreateLayoutManager()` and sets it with `SetLayoutManager`.  
+- **LayoutImpl** (inherits ViewImpl)
+  - Constructor accepts a LayoutManager pointer; derived classes pass the appropriate manager.
   - Child APIs are inherited from ViewImpl.
 
 - **StackLayoutImpl, FlexLayoutImpl, GridLayoutImpl, AbsoluteLayoutImpl**
-  - Each overrides `CreateLayoutManager()` to return the corresponding Stack, Flex, Grid, or Absolute LayoutManager.
+  - Each passes the corresponding LayoutManager (Stack, Flex, Grid, or Absolute) to LayoutImpl's constructor.
 
 - **AbsoluteLayoutParamsImpl, FlexLayoutParamsImpl, GridLayoutParamsImpl, StackLayoutParamsImpl**
   - TraitImpl-derived classes that store per-child layout parameters (e.g., bounds/flags, grow/shrink/basis/alignSelf, row/column/span, weight).
@@ -80,14 +81,15 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Concrete implementations that measure and arrange children according to stack, flex, grid, or absolute rules.
   - Each is defined in **integration-api** as a separate header and source pair: `stack-layout-manager.h`/`.cpp`, `grid-layout-manager.h`/`.cpp`, `flex-layout-manager.h`/`.cpp`, `absolute-layout-manager.h`/`.cpp`.
   - Each reads per-child parameters from the corresponding `*ParamsImpl` trait attached to child views (e.g., `AbsoluteLayoutManager` reads `AbsoluteLayoutParamsImpl`).
-  - Custom layouts can override `CreateLayoutManager()` to return a subclass of one of these managers.
+  - Custom layouts pass a subclass of one of these managers to the LayoutImpl constructor.
 
 ### 4. Layout Types (layout-types)
 
 - **MeasuredSize**: measured width and height.
 - **LayoutRect**: x, y, width, height (placement region).
-- **LayoutDimension**: constants such as `WrapContent` (-1.0f) and `MatchParent` (-2.0f).
-- **LayoutAlignment**: Fill, Start, Center, End.
+- **WRAP_CONTENT**: constant (-1.0f) indicating the view sizes to fit its content (natural size or children bounding box).
+- **MATCH_PARENT**: constant (-2.0f) indicating the view fills the parent container's available space.
+- **LayoutAlignment**: Fill, Start, Center, End (used by GridLayoutParams and StackLayoutParams for cross-axis alignment).
 - **ViewVisibility**: Visible, Hidden, Collapsed.
 
 ---
@@ -129,4 +131,4 @@ When layout must be recomputed (e.g. size or child change):
 |------|-------------|
 | Public child API | Only Layout (and Stack/Flex/Grid/Absolute) expose AddView, RemoveView, GetChildCount, GetChildAt, IndexOfChild, Contents, etc. View does not. |
 | Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
-| Implementation | ViewImpl optionally holds a LayoutManager and children; LayoutImpl creates a type-specific LayoutManager so layouts always have layout capability. |
+| Implementation | ViewImpl optionally holds a LayoutManager and children; LayoutImpl receives a type-specific LayoutManager at construction so layouts always have layout capability. |

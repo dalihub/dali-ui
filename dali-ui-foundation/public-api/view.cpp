@@ -263,28 +263,6 @@ Extents View::GetViewPadding() const
   return Integration::GetImpl(*this).GetViewPadding();
 }
 
-View& View::SetHorizontalAlignment(LayoutAlignment alignment)
-{
-  Integration::GetImpl(*this).SetHorizontalAlignment(alignment);
-  return *this;
-}
-
-LayoutAlignment View::GetHorizontalAlignment() const
-{
-  return Integration::GetImpl(*this).GetHorizontalAlignment();
-}
-
-View& View::SetVerticalAlignment(LayoutAlignment alignment)
-{
-  Integration::GetImpl(*this).SetVerticalAlignment(alignment);
-  return *this;
-}
-
-LayoutAlignment View::GetVerticalAlignment() const
-{
-  return Integration::GetImpl(*this).GetVerticalAlignment();
-}
-
 bool View::IsFocusable() const
 {
   return Integration::GetImpl(*this).IsFocusable();

@@ -47,26 +47,24 @@ public:
     root.SetSpacing(10.0f);
     root.SetViewPadding(Extents(20, 20, 20, 20));
 
-    // Top bar: fixed height
+    // Top bar: fixed height, fill cross-axis
     View topBar = View::New();
     topBar.SetBackgroundColor(Color::RED);
-    topBar.SetRequestedWidth(MATCH_PARENT);
     topBar.SetRequestedHeight(80.0f);
+    topBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.AddView(topBar);
 
-    // Middle: weighted to take remaining space
+    // Middle: weighted to take remaining space, fill cross-axis
     View middle = View::New();
     middle.SetBackgroundColor(Color::GREEN);
-    middle.SetRequestedWidth(MATCH_PARENT);
-    middle.SetRequestedHeight(WRAP_CONTENT);
-    middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     root.AddView(middle);
 
-    // Bottom bar: fixed height
+    // Bottom bar: fixed height, fill cross-axis
     View bottomBar = View::New();
     bottomBar.SetBackgroundColor(Color::BLUE);
-    bottomBar.SetRequestedWidth(MATCH_PARENT);
     bottomBar.SetRequestedHeight(60.0f);
+    bottomBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.AddView(bottomBar);
 
     window.Add(root);

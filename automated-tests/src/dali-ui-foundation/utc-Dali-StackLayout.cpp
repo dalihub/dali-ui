@@ -291,9 +291,9 @@ int UtcDaliStackLayoutChildMatchParentP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
-  layout.AddView(child);
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(MATCH_PARENT);
+  layout.AddView(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(120.0f);
   layout.Measure(200.0f, 120.0f);
@@ -361,8 +361,8 @@ int UtcDaliStackLayoutCrossAxisHorizontalStartP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::START);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -380,8 +380,8 @@ int UtcDaliStackLayoutCrossAxisHorizontalCenterP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::CENTER);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -400,8 +400,8 @@ int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::END);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -411,16 +411,15 @@ int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
   END_TEST;
 }
 
-int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
+int UtcDaliStackLayoutCrossAxisHorizontalMatchParentP(void)
 {
-  // Fill on cross axis: child expands to fill the available cross-axis space.
+  // MATCH_PARENT on cross axis: child expands to fill the available cross-axis space.
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
-  child.SetRequestedWidth(80.0f);
+  child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(40.0f);
-  child.SetHorizontalAlignment(LayoutAlignment::FILL);
   layout.AddView(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -428,6 +427,44 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
   layout.Arrange(LayoutRect(0, 0, 200, 100));
   DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetSize().width, 200.0f, TEST_LOCATION); // Fill expands to parent width
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
+{
+  // FILL alignment on cross axis: child stretches to fill the available cross-axis space.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetRequestedHeight(40.0f);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+  layout.AddView(child);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 200.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisHorizontalFillWithExplicitSizeP(void)
+{
+  // FILL alignment with explicit cross-axis size: explicit size takes priority.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetRequestedWidth(80.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+  layout.AddView(child);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetSize().width, 80.0f, TEST_LOCATION); // explicit size wins
   END_TEST;
 }
 
@@ -440,8 +477,8 @@ int UtcDaliStackLayoutCrossAxisVerticalStartP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::START);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -459,8 +496,8 @@ int UtcDaliStackLayoutCrossAxisVerticalCenterP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::CENTER);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -479,8 +516,8 @@ int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::END);
   layout.AddView(child);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -490,16 +527,15 @@ int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
   END_TEST;
 }
 
-int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
+int UtcDaliStackLayoutCrossAxisVerticalMatchParentP(void)
 {
-  // Fill on cross axis: child expands to fill the available cross-axis space.
+  // MATCH_PARENT on cross axis: child expands to fill the available cross-axis space.
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   layout.SetSpacing(0.0f);
   View child = View::New();
   child.SetRequestedWidth(60.0f);
-  child.SetRequestedHeight(40.0f);
-  child.SetVerticalAlignment(LayoutAlignment::FILL);
+  child.SetRequestedHeight(MATCH_PARENT);
   layout.AddView(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -507,5 +543,43 @@ int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
   layout.Arrange(LayoutRect(0, 0, 200, 100));
   DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetSize().height, 100.0f, TEST_LOCATION); // Fill expands to parent height
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
+{
+  // FILL alignment on cross axis: child stretches to fill the available cross-axis space.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetRequestedWidth(60.0f);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+  layout.AddView(child);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutCrossAxisVerticalFillWithExplicitSizeP(void)
+{
+  // FILL alignment with explicit cross-axis size: explicit size takes priority.
+  TestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
+  layout.SetSpacing(0.0f);
+  View child = View::New();
+  child.SetRequestedWidth(60.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+  layout.AddView(child);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 100));
+  DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION); // explicit size wins
   END_TEST;
 }

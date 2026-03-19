@@ -65,9 +65,7 @@ public:
 
     // Row 1: Default shrink - all items shrink equally
     FlexLayout row1 = FlexLayout::New();
-    row1.SetRequestedWidth(MATCH_PARENT);
-    row1.SetRequestedHeight(WRAP_CONTENT);
-    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     row1.SetDirection(FlexDirection::ROW);
     row1.SetWrap(FlexWrap::NO_WRAP);
     row1.SetAlignItems(FlexAlign::STRETCH);
@@ -97,9 +95,7 @@ public:
 
     // Row 2: Varied shrink values
     FlexLayout row2 = FlexLayout::New();
-    row2.SetRequestedWidth(MATCH_PARENT);
-    row2.SetRequestedHeight(WRAP_CONTENT);
-    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     row2.SetDirection(FlexDirection::ROW);
     row2.SetWrap(FlexWrap::NO_WRAP);
     row2.SetAlignItems(FlexAlign::STRETCH);

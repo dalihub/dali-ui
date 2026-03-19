@@ -80,26 +80,15 @@ float StackLayoutParams::GetWeight() const
   return GetImpl(*this).GetWeight();
 }
 
-StackLayoutParams& StackLayoutParams::SetHorizontalAlignment(LayoutAlignment alignment)
+StackLayoutParams& StackLayoutParams::SetAlignment(LayoutAlignment alignment)
 {
-  GetImpl(*this).SetHorizontalAlignment(alignment);
+  GetImpl(*this).SetAlignment(alignment);
   return *this;
 }
 
-LayoutAlignment StackLayoutParams::GetHorizontalAlignment() const
+LayoutAlignment StackLayoutParams::GetAlignment() const
 {
-  return GetImpl(*this).GetHorizontalAlignment();
-}
-
-StackLayoutParams& StackLayoutParams::SetVerticalAlignment(LayoutAlignment alignment)
-{
-  GetImpl(*this).SetVerticalAlignment(alignment);
-  return *this;
-}
-
-LayoutAlignment StackLayoutParams::GetVerticalAlignment() const
-{
-  return GetImpl(*this).GetVerticalAlignment();
+  return GetImpl(*this).GetAlignment();
 }
 
 } // namespace Ui

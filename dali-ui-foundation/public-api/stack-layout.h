@@ -45,17 +45,13 @@ class StackLayoutImpl;
  * For a vertical StackLayout (horizontal is analogous with axes swapped):
  *
  * - @b RequestedHeight (main-axis): A positive value sets a fixed height.
- *   WRAP_CONTENT uses the child's natural size. MATCH_PARENT sizes the child
- *   to the parent's full main-axis content height (the constraint given to
- *   the StackLayout). Use weight for proportional space distribution instead.
+ *   WRAP_CONTENT (-1) uses the child's natural size.
+ *   MATCH_PARENT (-2) fills the parent.
  * - @b RequestedWidth (cross-axis): A positive value sets a fixed width.
- *   WRAP_CONTENT uses the child's natural size. MATCH_PARENT fills the
- *   cross-axis.
- * - @b VerticalAlignment (main-axis): Not used. Children are stacked
- *   sequentially; main-axis position is determined by the stacking order.
- * - @b HorizontalAlignment (cross-axis): START, CENTER, and END position
- *   the child within the cross-axis. FILL stretches the child to fill the
- *   cross-axis (same effect as MATCH_PARENT on the cross-axis dimension).
+ *   WRAP_CONTENT (-1) uses the child's natural size.
+ *   MATCH_PARENT (-2) fills the cross-axis.
+ * - @b StackLayoutParams alignment (cross-axis): START, CENTER, and END
+ *   position the child within the cross-axis.
  * - @b Margin: Applied on all sides, reducing the space available for the child.
  * - @b Weight (via StackLayoutParams): Children with weight > 0 share the
  *   remaining main-axis space proportionally. The child's main-axis

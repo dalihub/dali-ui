@@ -58,9 +58,7 @@ public:
 
     // Row 1: FlexEnd
     FlexLayout rowEnd = FlexLayout::New();
-    rowEnd.SetRequestedWidth(MATCH_PARENT);
-    rowEnd.SetRequestedHeight(WRAP_CONTENT);
-    rowEnd.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rowEnd.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     rowEnd.SetDirection(FlexDirection::ROW);
     rowEnd.SetJustifyContent(FlexJustify::FLEX_END);
     rowEnd.SetAlignItems(FlexAlign::CENTER);
@@ -72,9 +70,7 @@ public:
 
     // Row 2: Center
     FlexLayout rowCenter = FlexLayout::New();
-    rowCenter.SetRequestedWidth(MATCH_PARENT);
-    rowCenter.SetRequestedHeight(WRAP_CONTENT);
-    rowCenter.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rowCenter.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     rowCenter.SetDirection(FlexDirection::ROW);
     rowCenter.SetJustifyContent(FlexJustify::CENTER);
     rowCenter.SetAlignItems(FlexAlign::CENTER);
@@ -86,9 +82,7 @@ public:
 
     // Row 3: SpaceAround
     FlexLayout rowAround = FlexLayout::New();
-    rowAround.SetRequestedWidth(MATCH_PARENT);
-    rowAround.SetRequestedHeight(WRAP_CONTENT);
-    rowAround.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rowAround.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     rowAround.SetDirection(FlexDirection::ROW);
     rowAround.SetJustifyContent(FlexJustify::SPACE_AROUND);
     rowAround.SetAlignItems(FlexAlign::CENTER);
@@ -100,9 +94,7 @@ public:
 
     // Row 4: SpaceEvenly
     FlexLayout rowEvenly = FlexLayout::New();
-    rowEvenly.SetRequestedWidth(MATCH_PARENT);
-    rowEvenly.SetRequestedHeight(WRAP_CONTENT);
-    rowEvenly.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rowEvenly.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     rowEvenly.SetDirection(FlexDirection::ROW);
     rowEvenly.SetJustifyContent(FlexJustify::SPACE_EVENLY);
     rowEvenly.SetAlignItems(FlexAlign::CENTER);

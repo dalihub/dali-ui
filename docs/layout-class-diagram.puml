@@ -15,7 +15,8 @@ package "DALi (external)" as dali {
 
 ' ========== Public API (Handles) ==========
 ' Note: Only Layout has child management in public API.
-' View does not expose SetLayoutManager/AddView; ViewImpl keeps them for internal use (e.g. ButtonImpl).
+' View does not expose AddView; ViewImpl keeps child APIs for internal use (e.g. ButtonImpl).
+' LayoutManager is set at construction time only (no SetLayoutManager in public API).
 package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
     + New() : View
@@ -23,6 +24,7 @@ package "Dali::Ui (Public API)" as public_api {
     + Arrange(bounds) : MeasuredSize
     + SetRequestedWidth(float)
     + SetRequestedHeight(float)
+    + GetSize() : MeasuredSize
     + InvalidateMeasure()
     + InvalidateArrange()
     __
@@ -132,16 +134,15 @@ package "Dali::Ui (Public API)" as public_api {
 
 ' ========== Integration API (Implementations) ==========
 ' ViewImpl: LayoutManager, child API, Contents are integration-only (e.g. ButtonImpl).
-' LayoutImpl inherits child APIs from ViewImpl; adds CreateLayoutManager/EnsureLayoutManager.
+' LayoutImpl inherits child APIs from ViewImpl; receives LayoutManager at construction.
 package "Dali::Ui::Integration (Implementation)" as integration {
   class "ViewImpl" as ViewImpl <<impl>> {
     + {static} New() : Ui::View
-    - mLayoutWidth
-    - mLayoutHeight
+    - mRequestedWidth
+    - mRequestedHeight
     - mLayoutManager
     - mChildren : ChildContainer
     __
-    + SetLayoutManager(LayoutManager*)
     + GetLayoutManager() : LayoutManager*
     + HasLayoutManager() : bool
     + AddView(Ui::View)
@@ -168,29 +169,23 @@ package "Dali::Ui::Integration (Implementation)" as integration {
   class "LayoutImpl" as LayoutImpl <<impl>> {
     + {static} New() : Ui::Layout
     __
-    # CreateLayoutManager() : LayoutManager*
-    # EnsureLayoutManager()
-    + OnInitialize()
+    # LayoutImpl(LayoutManager*)
   }
 
   class "StackLayoutImpl" as StackLayoutImpl <<impl>> {
     + {static} New(StackOrientation) : Ui::StackLayout
-    # CreateLayoutManager() : LayoutManager*
   }
 
   class "FlexLayoutImpl" as FlexLayoutImpl <<impl>> {
     + {static} New() : Ui::FlexLayout
-    # CreateLayoutManager() : LayoutManager*
   }
 
   class "GridLayoutImpl" as GridLayoutImpl <<impl>> {
     + {static} New() : Ui::GridLayout
-    # CreateLayoutManager() : LayoutManager*
   }
 
   class "AbsoluteLayoutImpl" as AbsoluteLayoutImpl <<impl>> {
     + {static} New() : Ui::AbsoluteLayout
-    # CreateLayoutManager() : LayoutManager*
   }
 
   class "LayoutControllerImpl" as LayoutControllerImpl <<impl>> {
@@ -282,9 +277,12 @@ package "Layout Types" as types {
     + x, y, width, height : float
   }
 
-  class "LayoutDimension" as LayoutDimension <<enum>> {
-    WrapContent = -1.0f
-    MatchParent = -2.0f
+  class "WRAP_CONTENT" as WrapContent <<constant>> {
+    WRAP_CONTENT = -1.0f
+  }
+
+  class "MATCH_PARENT" as MatchParent <<constant>> {
+    MATCH_PARENT = -2.0f
   }
 }
 
@@ -321,7 +319,7 @@ LayoutManager <|-- GridLayoutManager
 LayoutManager <|-- AbsoluteLayoutManager
 
 ViewImpl o-- LayoutManager : optional
-LayoutImpl ..> LayoutManager : creates via CreateLayoutManager()
+LayoutImpl ..> LayoutManager : receives at construction
 
 ' ========== Layout Params (Handle -> Impl) ==========
 AbsoluteLayoutParams ..> AbsoluteLayoutParamsImpl : uses

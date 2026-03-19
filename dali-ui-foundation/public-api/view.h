@@ -206,6 +206,7 @@ public: // Measure / Arrange API
 
 public: // Properties
   // @CHAIN_START(View)
+
   /**
    * @brief Gets the actual rendered size of this View after layout.
    *
@@ -391,34 +392,6 @@ public: // Properties
    * @return The view padding
    */
   Extents GetViewPadding() const;
-
-  /**
-   * @brief Sets the horizontal alignment within parent layout.
-   *
-   * @param[in] alignment The horizontal alignment
-   */
-  View& SetHorizontalAlignment(LayoutAlignment alignment);
-
-  /**
-   * @brief Gets the horizontal alignment.
-   *
-   * @return The horizontal alignment
-   */
-  LayoutAlignment GetHorizontalAlignment() const;
-
-  /**
-   * @brief Sets the vertical alignment within parent layout.
-   *
-   * @param[in] alignment The vertical alignment
-   */
-  View& SetVerticalAlignment(LayoutAlignment alignment);
-
-  /**
-   * @brief Gets the vertical alignment.
-   *
-   * @return The vertical alignment
-   */
-  LayoutAlignment GetVerticalAlignment() const;
 
   /**
    * @brief Gets whether the actor should be focusable by keyboard navigation.

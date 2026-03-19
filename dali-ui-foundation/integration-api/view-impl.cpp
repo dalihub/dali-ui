@@ -159,8 +159,6 @@ ViewImpl::ViewImpl(LayoutManager* layoutManager)
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMargin(),
   mPadding(),
-  mHorizontalAlignment(LayoutAlignment::START),
-  mVerticalAlignment(LayoutAlignment::START),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
@@ -881,34 +879,6 @@ Extents ViewImpl::GetViewPadding() const
   return mPadding;
 }
 
-void ViewImpl::SetHorizontalAlignment(LayoutAlignment alignment)
-{
-  if(mHorizontalAlignment != alignment)
-  {
-    mHorizontalAlignment = alignment;
-    InvalidateMeasure();
-  }
-}
-
-LayoutAlignment ViewImpl::GetHorizontalAlignment() const
-{
-  return mHorizontalAlignment;
-}
-
-void ViewImpl::SetVerticalAlignment(LayoutAlignment alignment)
-{
-  if(mVerticalAlignment != alignment)
-  {
-    mVerticalAlignment = alignment;
-    InvalidateMeasure();
-  }
-}
-
-LayoutAlignment ViewImpl::GetVerticalAlignment() const
-{
-  return mVerticalAlignment;
-}
-
 // =============================================================================
 // Parent Layout API
 // =============================================================================
@@ -1127,8 +1097,6 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMargin(),
   mPadding(),
-  mHorizontalAlignment(LayoutAlignment::START),
-  mVerticalAlignment(LayoutAlignment::START),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},

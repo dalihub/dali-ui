@@ -44,16 +44,10 @@ float GetChildWeight(ViewImpl& childImpl)
   return params ? params->GetWeight() : 0.0f;
 }
 
-LayoutAlignment GetChildHorizontalAlignment(ViewImpl& childImpl)
+LayoutAlignment GetChildAlignment(ViewImpl& childImpl)
 {
   auto* params = Internal::StackLayoutParamsImpl::Get(childImpl);
-  return params ? params->GetHorizontalAlignment() : LayoutAlignment::START;
-}
-
-LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
-{
-  auto* params = Internal::StackLayoutParamsImpl::Get(childImpl);
-  return params ? params->GetVerticalAlignment() : LayoutAlignment::START;
+  return params ? params->GetAlignment() : LayoutAlignment::START;
 }
 
 struct StackMeasureFirstPassResult
@@ -246,21 +240,20 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
       const float childHeight    = childData.measuredSize.height;
       const float slotHeight     = childHeight + marginH;
+      const float childWidth     = childData.measuredSize.width;
 
       // Cross-axis (horizontal) alignment from StackLayoutParams
-      LayoutAlignment hAlign = GetChildHorizontalAlignment(childImpl);
-      float           childWidth;
-      if(childImpl.GetRequestedWidth() == MATCH_PARENT || hAlign == LayoutAlignment::FILL)
+      LayoutAlignment crossAlign = GetChildAlignment(childImpl);
+      float           crossX     = currentX + static_cast<float>(margin.start);
+      float           finalWidth = childWidth;
+      switch(crossAlign)
       {
-        childWidth = crossAvailable;
-      }
-      else
-      {
-        childWidth = childData.measuredSize.width;
-      }
-      float crossX = currentX + static_cast<float>(margin.start);
-      switch(hAlign)
-      {
+        case LayoutAlignment::FILL:
+          if(childImpl.GetRequestedWidth() <= 0.0f)
+          {
+            finalWidth = crossAvailable;
+          }
+          break;
         case LayoutAlignment::CENTER:
           crossX += (crossAvailable - childWidth) * 0.5f;
           break;
@@ -268,12 +261,11 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
           crossX += crossAvailable - childWidth;
           break;
         case LayoutAlignment::START:
-        case LayoutAlignment::FILL:
         default:
           break;
       }
 
-      childBounds.width  = childWidth;
+      childBounds.width  = finalWidth;
       childBounds.height = childHeight;
       childBounds.x      = crossX;
       childBounds.y      = currentY + static_cast<float>(margin.top);
@@ -288,21 +280,20 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
       const float childWidth     = childData.measuredSize.width;
       const float slotWidth      = childWidth + marginW;
+      const float childHeight    = childData.measuredSize.height;
 
       // Cross-axis (vertical) alignment from StackLayoutParams
-      LayoutAlignment vAlign = GetChildVerticalAlignment(childImpl);
-      float           childHeight;
-      if(childImpl.GetRequestedHeight() == MATCH_PARENT || vAlign == LayoutAlignment::FILL)
+      LayoutAlignment crossAlign  = GetChildAlignment(childImpl);
+      float           crossY      = currentY + static_cast<float>(margin.top);
+      float           finalHeight = childHeight;
+      switch(crossAlign)
       {
-        childHeight = crossAvailable;
-      }
-      else
-      {
-        childHeight = childData.measuredSize.height;
-      }
-      float crossY = currentY + static_cast<float>(margin.top);
-      switch(vAlign)
-      {
+        case LayoutAlignment::FILL:
+          if(childImpl.GetRequestedHeight() <= 0.0f)
+          {
+            finalHeight = crossAvailable;
+          }
+          break;
         case LayoutAlignment::CENTER:
           crossY += (crossAvailable - childHeight) * 0.5f;
           break;
@@ -310,13 +301,12 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
           crossY += crossAvailable - childHeight;
           break;
         case LayoutAlignment::START:
-        case LayoutAlignment::FILL:
         default:
           break;
       }
 
       childBounds.width  = childWidth;
-      childBounds.height = childHeight;
+      childBounds.height = finalHeight;
       childBounds.x      = currentX + static_cast<float>(margin.start);
       childBounds.y      = crossY;
 

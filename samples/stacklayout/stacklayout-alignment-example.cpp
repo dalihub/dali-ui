@@ -17,6 +17,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/stack-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -28,7 +29,7 @@ using namespace Dali::Ui;
  *   - Row 1: Start (left)
  *   - Row 2: Center
  *   - Row 3: End (right)
- *   - Row 4: MatchParent (full width; cross-axis Fill is treated as Start)
+ *   - Row 4: Fill (full width)
  *
  * Press Escape or Back to quit.
  */
@@ -58,7 +59,7 @@ public:
     rowStart.SetBackgroundColor(Color::RED);
     rowStart.SetRequestedWidth(80.0f);
     rowStart.SetRequestedHeight(50.0f);
-    rowStart.SetHorizontalAlignment(LayoutAlignment::START);
+    rowStart.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
     root.AddView(rowStart);
 
     // Row 2: Center
@@ -66,7 +67,7 @@ public:
     rowCenter.SetBackgroundColor(Color::GREEN);
     rowCenter.SetRequestedWidth(80.0f);
     rowCenter.SetRequestedHeight(50.0f);
-    rowCenter.SetHorizontalAlignment(LayoutAlignment::CENTER);
+    rowCenter.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
     root.AddView(rowCenter);
 
     // Row 3: End (right-aligned narrow box)
@@ -74,15 +75,14 @@ public:
     rowEnd.SetBackgroundColor(Color::BLUE);
     rowEnd.SetRequestedWidth(80.0f);
     rowEnd.SetRequestedHeight(50.0f);
-    rowEnd.SetHorizontalAlignment(LayoutAlignment::END);
+    rowEnd.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
     root.AddView(rowEnd);
 
-    // Row 4: full width (use MatchParent; Fill on cross axis is treated as Start)
+    // Row 4: Fill (stretches to full width)
     View rowFill = View::New();
     rowFill.SetBackgroundColor(Color::CYAN);
-    rowFill.SetRequestedWidth(MATCH_PARENT);
     rowFill.SetRequestedHeight(50.0f);
-    rowFill.SetHorizontalAlignment(LayoutAlignment::FILL);
+    rowFill.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.AddView(rowFill);
 
     window.Add(root);

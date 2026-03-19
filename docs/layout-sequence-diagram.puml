@@ -30,7 +30,7 @@ loop for each layout root
   activate Root
 
   == Resolve constraints ==
-  LC -> Root : GetLayoutWidth()\nGetLayoutHeight()
+  LC -> Root : GetRequestedWidth()\nGetRequestedHeight()
   Root --> LC : layoutWidth, layoutHeight
   LC -> LC : Resolve constraints\n(window size or parent Actor size;\nfixed spec overrides)
 
@@ -60,9 +60,9 @@ loop for each layout root
       end
       LM --> Root : content MeasuredSize
       deactivate LM
-      Root -> Root : Add padding; apply MatchParent if needed
+      Root -> Root : Add padding; apply FILL alignment if needed
     else no LayoutManager
-      Root -> Root : Compute size from spec\n(fixed / MatchParent / natural size)
+      Root -> Root : Compute size from spec\n(fixed / WRAP_CONTENT / MATCH_PARENT)
     end
     Root -> Root : ApplyConstraints(measured)\nStore mMeasuredSize, update cache
     deactivate Root

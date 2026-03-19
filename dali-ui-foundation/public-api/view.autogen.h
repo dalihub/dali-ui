@@ -83,18 +83,6 @@
   */ \
   ChildClass& SetViewPadding(const Extents& padding) { View::SetViewPadding(padding); return *this; } \
   /** \
-  * @brief Sets the horizontal alignment within parent layout. \
-  * \
-  * @param[in] alignment The horizontal alignment \
-  */ \
-  ChildClass& SetHorizontalAlignment(LayoutAlignment alignment) { View::SetHorizontalAlignment(alignment); return *this; } \
-  /** \
-  * @brief Sets the vertical alignment within parent layout. \
-  * \
-  * @param[in] alignment The vertical alignment \
-  */ \
-  ChildClass& SetVerticalAlignment(LayoutAlignment alignment) { View::SetVerticalAlignment(alignment); return *this; } \
-  /** \
   * @brief Sets whether the actor should be focusable by keyboard navigation. \
   * \
   * @param[in] focusable True if it is focusable \

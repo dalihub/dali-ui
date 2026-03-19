@@ -62,9 +62,7 @@ public:
 
     // Section 1: RowReverse
     FlexLayout rowReverse = FlexLayout::New();
-    rowReverse.SetRequestedWidth(MATCH_PARENT);
-    rowReverse.SetRequestedHeight(WRAP_CONTENT);
-    rowReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rowReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
     rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
     rowReverse.SetAlignItems(FlexAlign::CENTER);
@@ -93,9 +91,7 @@ public:
 
     // Section 2: ColumnReverse
     FlexLayout columnReverse = FlexLayout::New();
-    columnReverse.SetRequestedWidth(MATCH_PARENT);
-    columnReverse.SetRequestedHeight(WRAP_CONTENT);
-    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
+    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f).SetAlignment(LayoutAlignment::FILL));
     columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
     columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
     columnReverse.SetAlignItems(FlexAlign::CENTER);

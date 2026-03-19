@@ -358,14 +358,10 @@ public: // Layout Params API
   BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
 
 public: // Layout Properties API
-  void            SetViewMargin(const Extents& margin);
-  Extents         GetViewMargin() const;
-  void            SetViewPadding(const Extents& padding);
-  Extents         GetViewPadding() const;
-  void            SetHorizontalAlignment(LayoutAlignment alignment);
-  LayoutAlignment GetHorizontalAlignment() const;
-  void            SetVerticalAlignment(LayoutAlignment alignment);
-  LayoutAlignment GetVerticalAlignment() const;
+  void    SetViewMargin(const Extents& margin);
+  Extents GetViewMargin() const;
+  void    SetViewPadding(const Extents& padding);
+  Extents GetViewPadding() const;
 
 public: // Parent Layout API
   Ui::Layout   GetParentLayout() const;
@@ -504,10 +500,8 @@ private:
   float mMaximumHeight;
 
   // Layout Properties Data
-  Extents         mMargin;
-  Extents         mPadding;
-  LayoutAlignment mHorizontalAlignment;
-  LayoutAlignment mVerticalAlignment;
+  Extents mMargin;
+  Extents mPadding;
 
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache
