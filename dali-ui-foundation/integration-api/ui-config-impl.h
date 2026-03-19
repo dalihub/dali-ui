@@ -256,9 +256,16 @@ public:
    *
    * Derived config implementations override this to register themselves
    * with their own layer-specific config manager.
-   * The base implementation does nothing.
    */
-  virtual void OnInitialized();
+  virtual void OnApplied();
+
+  /**
+   * @brief Called after the application ready to apply some options using config.
+   *
+   * Derived config implementations override this to register themselves
+   * with their own layer-specific config manager.
+   */
+  virtual void OnApplicationCreated();
 
   /**
    * @brief Creates a ThemeLoaderInterface instance.

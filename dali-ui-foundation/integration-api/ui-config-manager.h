@@ -201,6 +201,11 @@ public:
    */
   ThemeLoaderInterface* CreateThemeLoader();
 
+  /*
+   * @brief Called when the adaptor is ready.
+   */
+  void OnApplicationCreated();
+
 private:
   UiConfigManager()  = default;
   ~UiConfigManager() = default;
@@ -209,14 +214,15 @@ private:
   UiConfigManager& operator=(const UiConfigManager&) = delete;
 
 private:
-  UiConfig              mConfig;
+  UiConfig mConfig;
   // Cached derived factors for the unit system (spx/dp/sdp).
   // These are frequently queried in hot paths (e.g. unit literals and layout scaling).
   // UiConfig becomes immutable after Initialize() (Freeze()), so caching is safe.
   float mCachedScalingFactor{1.0f};
   float mCachedDpiFactor{1.0f};
   float mCachedScaledDpiFactor{1.0f};
-  bool                  mInitialized{false};
+  bool  mUiConfigInitialized{false};
+  bool  mApplicationCreated{false};
 };
 
 } // namespace Integration

@@ -50,6 +50,7 @@ public:
           .SetBackgroundColor(UiColor(0xFF0000))
           .SetSizeWidth(100_spx)
           .SetSizeHeight(100_spx)
+          .SetFocusable(true)
           .AsClickable(this, [this](View view, const InputEvent& event)
           {
             mSecondChild.SetBackgroundColor(UiColor(0x00FF00));

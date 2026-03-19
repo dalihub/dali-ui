@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/integration-api/layout-manager.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/layout/layout-params-impl.h>
@@ -169,6 +170,9 @@ ViewImpl::ViewImpl()
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION));
+
+  // FIXME This method is temporary solution to detect the ready state of the dali-adaptor
+  UiConfigManager::Get().OnApplicationCreated();
 }
 
 ViewImpl::~ViewImpl()

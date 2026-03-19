@@ -24,6 +24,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/default-theme-loader.h>
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 
 namespace
 {
@@ -235,8 +237,14 @@ Vector4 UiConfigImpl::GetDefaultTextColor() const
   return mDefaultTextColor;
 }
 
-void UiConfigImpl::OnInitialized()
+void UiConfigImpl::OnApplied()
 {
+}
+
+void UiConfigImpl::OnApplicationCreated()
+{
+  auto handle = KeyboardFocusManager::Get();
+  GetImpl(handle).EnableDefaultAlgorithm(true);
 }
 
 ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()

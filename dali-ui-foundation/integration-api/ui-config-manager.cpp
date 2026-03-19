@@ -51,11 +51,11 @@ const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
 
 void UiConfigManager::Initialize(const UiConfig& config)
 {
-  DALI_ASSERT_ALWAYS(!mInitialized && "UiConfigManager::Initialize() must be called only once");
+  DALI_ASSERT_ALWAYS(!mUiConfigInitialized && "UiConfigManager::Initialize() must be called only once");
   mConfig = config;
   GetImpl(mConfig).Freeze();
 
-  const auto& impl             = GetImpl(mConfig);
+  const auto& impl = GetImpl(mConfig);
   // Cache derived unit factors once at initialization time.
   // Unit literals (_spx/_dp/_sdp) and layout scaling paths query these frequently.
   // UiConfig is frozen after Initialize(), so caching these derived values is safe.
@@ -64,107 +64,128 @@ void UiConfigManager::Initialize(const UiConfig& config)
   const int baselineDpi  = impl.GetBaselineDpi();
   mCachedDpiFactor       = static_cast<float>(dpi) / static_cast<float>(baselineDpi);
   mCachedScaledDpiFactor = mCachedDpiFactor * mCachedScalingFactor;
-  mInitialized                 = true;
+  mUiConfigInitialized   = true;
 
   UiThemeManager themeManager = UiThemeManager::Get();
   GetImpl(themeManager).EnsureThemeLoader();
 
-  GetImpl(mConfig).OnInitialized();
+  GetImpl(mConfig).OnApplied();
+
+  if(mApplicationCreated)
+  {
+    GetImpl(mConfig).OnApplicationCreated();
+  }
 }
 
 bool UiConfigManager::IsInitialized() const
 {
-  return mInitialized;
+  return mUiConfigInitialized;
 }
 
 float UiConfigManager::GetScalingFactor() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedScalingFactor;
 }
 
 float UiConfigManager::GetDpiFactor() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedDpiFactor;
 }
 
 float UiConfigManager::GetScaledDpiFactor() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return mCachedScaledDpiFactor;
 }
 
 int UiConfigManager::GetDpi() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetDpi();
 }
 
 int UiConfigManager::GetBaselineDpi() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetBaselineDpi();
 }
 
 KeyClickPolicy UiConfigManager::GetKeyClickPolicy() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetKeyClickPolicy();
 }
 
 ExecutionKeyPredicate UiConfigManager::GetExecutionKeyPredicate() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetExecutionKeyPredicate();
 }
 
 uint32_t UiConfigManager::GetMinLongPressKeyCount() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetMinLongPressKeyCount();
 }
 
 uint32_t UiConfigManager::GetTapRecognizerTime() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetTapRecognizerTime();
 }
 
 std::vector<std::string> UiConfigManager::GetBrokenImageUrlList() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetBrokenImageUrlList();
 }
 
 bool UiConfigManager::IsFocusClearOnEscapeEnabled() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).IsFocusClearOnEscapeEnabled();
 }
 
 bool UiConfigManager::IsFocusIndicatorAlwaysShown() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).IsFocusIndicatorAlwaysShown();
 }
 
 float UiConfigManager::GetDefaultFontSize() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetDefaultFontSize();
 }
 
 Vector4 UiConfigManager::GetDefaultTextColor() const
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetDefaultTextColor();
 }
 
 ThemeLoaderInterface* UiConfigManager::CreateThemeLoader()
 {
-  DALI_ASSERT_ALWAYS(mInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).CreateThemeLoader();
+}
+
+void UiConfigManager::OnApplicationCreated()
+{
+  // FIXME This method is temporary solution to detect the ready state of the dali-adaptor
+  if(mApplicationCreated)
+  {
+    return;
+  }
+
+  mApplicationCreated = true;
+
+  if(mUiConfigInitialized)
+  {
+    GetImpl(mConfig).OnApplicationCreated();
+  }
 }
 
 } // namespace Integration
