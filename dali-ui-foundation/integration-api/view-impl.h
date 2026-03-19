@@ -221,11 +221,6 @@ public: // API (size, position, parent origin, pivot)
   void SetPivotPoint(const Vector3& point);
 
   /**
-   * @copydoc Dali::Ui::View::SetBackgroundColor(const UiColor&)
-   */
-  void SetBackgroundColor(const UiColor& color);
-
-  /**
    * @copydoc Dali::Ui::View::IsFocusable
    */
   bool IsFocusable() const;
@@ -244,6 +239,16 @@ public: // API (size, position, parent origin, pivot)
    * @copydoc Dali::Ui::View::SetTouchFocusable
    */
   void SetTouchFocusable(bool touchFocusable);
+
+  /**
+   * @copydoc Dali::Ui::View::GetBackgroundColor()
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @copydoc Dali::Ui::View::SetBackgroundColor(const UiColor&)
+   */
+  void SetBackgroundColor(const UiColor& color);
 
   /**
    * @brief Sets a trait to this View.
@@ -514,6 +519,8 @@ private:
   ViewImpl& operator=(const ViewImpl&) = delete;
   ViewImpl& operator=(ViewImpl&&)      = delete;
 
+  void SetBackgroundColorInternal(const Vector4& color);
+
 private:
   std::vector<std::pair<TraitId, Trait>> mTraits;
   IInteractionTrait*                     mInteractionTrait;
@@ -546,13 +553,6 @@ private:
   // From control-impl.h
 
 public:
-  // Background
-
-  /**
-   * @copydoc Dali::Ui::View::SetBackgroundColor
-   */
-  void SetBackgroundColor(const Vector4& color);
-
   /**
    * @brief Sets the background with a property map.
    *

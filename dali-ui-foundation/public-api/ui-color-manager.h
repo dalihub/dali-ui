@@ -19,8 +19,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string-view.h>
-#include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -36,18 +37,6 @@ namespace Integration
 {
 class UiColorManagerImpl;
 }
-
-/**
- * @brief Function pointer type for applying a resolved color to a View.
- *
- * Each call site (e.g. BackgroundColor, TextColor) provides its own
- * apply function, so the color manager does not need to know about
- * specific View properties.
- *
- * @param[in] view The target View
- * @param[in] color The resolved RGBA color
- */
-using ColorApplyFunc = void (*)(View, const Vector4&);
 
 /**
  * @brief Function pointer type for overriding theme color lookups.
@@ -153,18 +142,41 @@ public:
   bool GetColor(StringView colorId, Vector4& outColor) const;
 
   /**
-   * @brief Resolves a UiColor and applies it to a View, managing bindings automatically.
+   * @brief Updates color binding for a View.
    *
-   * If the UiColor has a color ID, the color is resolved from the current theme,
-   * applied via applyFunc, and a binding is registered so the View is refreshed
-   * when the theme changes. If the UiColor has direct RGBA values, the color is
-   * applied and any previous binding for this View+applyFunc pair is removed.
+   * If the UiColor has a color ID, registers or updates the binding so the
+   * View is refreshed when the theme changes. If the UiColor has direct RGBA
+   * values, removes any existing binding for this View+applyFunc pair.
+   * Does not execute the callback immediately.
    *
-   * @param[in] color The UiColor to apply
+   * @param[in] color The UiColor to bind
    * @param[in] view The target View
-   * @param[in] applyFunc Function to apply the color to the View
+   * @param[in] applyFunc Callback with signature @c void( @c const @c Vector4&),
+   *                      invoked on color table change to apply the resolved color.
+   *                      Ownership is transferred to the manager.
+   *
+   * @code
+   *   void SetColor(const Vector4& color) { ... }
+   *
+   *   // Free function
+   *   manager.UpdateBinding(color, MakeCallback(SetColor));
+   *
+   *   // Member function
+   *   manager.UpdateBinding(color, MakeCallback(this, &MyImpl::SetColor));
+   * @endcode
+   *
    */
-  void ApplyColor(const UiColor& color, View view, ColorApplyFunc applyFunc);
+  void UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc);
+
+  /**
+   * @brief Retrieves the UiColor associated with a specific View+applyFunc binding.
+   *
+   * @param[in] view The target View
+   * @param[in] applyFunc Callback matching the one used in UpdateBinding (ownership transferred)
+   * @param[out] outColor The bound UiColor if found
+   * @return @c true if a binding was found, @c false otherwise
+   */
+  bool GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const;
 
   /**
    * @brief Removes a specific binding for a View+applyFunc pair.
@@ -173,16 +185,17 @@ public:
    * with a direct RGBA value while other bindings on the same View are preserved.
    *
    * @param[in] view The View to unbind
-   * @param[in] applyFunc The specific apply function to unbind
+   * @param[in] applyFunc Callback with signature @c void( @c const @c Vector4&),
+   *                      matching the one used in UpdateBinding. Ownership is transferred.
    */
-  void UnregisterBinding(View view, ColorApplyFunc applyFunc);
+  void RemoveBinding(View view, CallbackBase* applyFunc);
 
   /**
    * @brief Removes all bindings associated with a given View.
    *
    * @param[in] view The View to unbind completely
    */
-  void UnregisterBindings(View view);
+  void RemoveBindings(View view);
 
   /**
    * @brief Sets a function that overrides theme color lookups.
@@ -227,7 +240,6 @@ public:
   void ClearColorOverride();
 
 public: // Not intended for Application developers
-
   /**
    * @brief This constructor is used internally to wrap an implementation object.
    *

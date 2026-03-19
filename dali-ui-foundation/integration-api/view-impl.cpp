@@ -77,11 +77,6 @@ namespace Integration
 namespace
 {
 
-void ApplyBackgroundColor(Ui::View view, const Vector4& color)
-{
-  view.Ui::View::SetBackgroundColor(color);
-}
-
 BaseHandle Create()
 {
   return View::New();
@@ -357,9 +352,20 @@ void ViewImpl::SetPivotPoint(const Vector3& point)
   Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
 }
 
+UiColor ViewImpl::GetBackgroundColor()
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), MakeCallback(this, &ViewImpl::SetBackgroundColorInternal), outColor))
+  {
+    return outColor;
+  }
+  return mImpl->mBackgroundColor;
+}
+
 void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
-  UiColorManager::Get().ApplyColor(color, View::DownCast(Self()), ApplyBackgroundColor);
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), MakeCallback(this, &ViewImpl::SetBackgroundColorInternal));
+  SetBackgroundColorInternal(color.Resolve());
 }
 
 bool ViewImpl::IsFocusable() const
@@ -1066,7 +1072,7 @@ void ViewImpl::Initialize()
   }
 }
 
-void ViewImpl::SetBackgroundColor(const Vector4& color)
+void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 {
   mImpl->mBackgroundColor = color;
 

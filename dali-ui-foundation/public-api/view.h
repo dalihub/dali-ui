@@ -461,6 +461,27 @@ public: // Properties
    */
   View& SetTouchFocusable(bool touchFocusable);
 
+  /**
+   * @brief Gets the background color.
+   *
+   * @return The background color
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @brief Sets the background color.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * If the UiColor has direct RGBA values, it is applied immediately
+   * and any previous ID-based binding for this property is removed.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBackgroundColor(const UiColor& color);
+
   // @CHAIN_MANUAL
   /**
    * @brief Attaches the clickable interaction role to this View and optionally configures it.
@@ -555,20 +576,6 @@ public: // Properties
     }
     return *this;
   }
-
-  /**
-   * @brief Sets the background color.
-   *
-   * If the UiColor has a color ID, it is resolved from the current
-   * theme and a binding is registered so the color is automatically
-   * refreshed when the theme changes.
-   *
-   * If the UiColor has direct RGBA values, it is applied immediately
-   * and any previous ID-based binding for this property is removed.
-   *
-   * @param[in] color The UiColor to apply
-   */
-  View& SetBackgroundColor(const UiColor& color);
 
   /**
    * @brief Sets layout parameters on this View.
@@ -1124,20 +1131,6 @@ public:
    * @note Will return an empty handle if the View does not handle the gesture itself.
    */
   LongPressGestureDetector GetLongPressGestureDetector() const;
-
-  // Background
-
-  /**
-   * @brief Sets the background color of the View.
-   *
-   * @SINCE_1_0.0
-   * @param[in] color The required background color of the View
-   *
-   * @note If SetBackgroundImage is called later, this background color is removed.
-   *
-   * @note The background color fully blends with the actor color.
-   */
-  void SetBackgroundColor(const Vector4& color);
 
   /**
    * @brief Clears the background.

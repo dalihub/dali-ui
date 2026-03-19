@@ -202,7 +202,7 @@ int UtcDaliUiColorCopyConstructorTokenP(void)
 {
   TestApplication application;
 
-  UiColor original(String("CopyTestId"));
+  UiColor original("CopyTestId");
   UiColor copy(original);
 
   DALI_TEST_CHECK(copy.HasColorId());
@@ -269,7 +269,7 @@ int UtcDaliUiColorHasColorIdTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(String("SomeToken"));
+  UiColor color("SomeToken");
   DALI_TEST_CHECK(color.HasColorId());
 
   END_TEST;
@@ -289,7 +289,7 @@ int UtcDaliUiColorGetColorIdTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(String("MyColorId"));
+  UiColor color("MyColorId");
   DALI_TEST_EQUALS(color.GetColorId(), "MyColorId", TEST_LOCATION);
 
   END_TEST;
@@ -327,7 +327,7 @@ int UtcDaliUiColorResolveUnknownTokenN(void)
 {
   TestApplication application;
 
-  UiColor color(String("NonExistentColorId12345"));
+  UiColor color("NonExistentColorId12345");
   Vector4 resolved = color.Resolve();
 
   // Unknown token should fallback to ZERO
@@ -372,7 +372,7 @@ int UtcDaliUiColorScaleAlphaTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(String("Primary"));
+  UiColor color("Primary");
   UiColor result = color.ScaleAlpha(0.5f);
 
   // The result should still have a color ID
@@ -432,7 +432,7 @@ int UtcDaliUiColorWithAlphaTokenP(void)
 {
   TestApplication application;
 
-  UiColor color(String("Primary"));
+  UiColor color("Primary");
   UiColor result = color.WithAlpha(0.7f);
 
   DALI_TEST_CHECK(result.HasColorId());

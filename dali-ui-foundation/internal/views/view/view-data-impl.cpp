@@ -49,6 +49,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -851,7 +852,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         else if(value.Get(color))
         {
-          viewImpl.SetBackgroundColor(color);
+          viewImpl.SetBackgroundColor(UiColor(color));
         }
         else
         {

@@ -20,10 +20,13 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/slot-delegate.h>
-#include <dali/public-api/math/vector4.h>
+#include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -60,56 +63,42 @@ public:
   static UiColorManager Get();
 
   /**
-   * @brief Looks up a single color by ID.
-   *
-   * @param[in] colorId The color identifier
-   * @return The resolved RGBA value, or Vector4::ZERO if not found
+   * @copydoc Dali::Ui::UiColorManager::GetColor(StringView colorId)
    */
   Vector4 GetColor(StringView colorId) const;
 
   /**
-   * @brief Looks up a color by ID.
-   *
-   * @param[in] colorId The color identifier
-   * @param[out] outColor The resolved RGBA value if found
-   * @return True if the color was found
+   * @copydoc Dali::Ui::UiColorManager::GetColor(StringView colorId, Vector4& outColor)
    */
   bool GetColor(StringView colorId, Vector4& outColor) const;
 
   /**
-   * @brief Resolves a UiColor and applies it to a View, managing
-   * bindings automatically.
-   *
-   * @param[in] color The UiColor to apply
-   * @param[in] view The target View
-   * @param[in] applyFunc Function to apply the color to the View
+   * @copydoc Dali::Ui::UiColorManager::UpdateBinding
    */
-  void ApplyColor(const UiColor& color, View view, ColorApplyFunc applyFunc);
+  void UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc);
 
   /**
-   * @brief Removes a specific binding for a View+applyFunc pair.
-   *
-   * @param[in] view The View to unbind
-   * @param[in] applyFunc The specific apply function to unbind
+   * @copydoc Dali::Ui::UiColorManager::GetBindingColor
    */
-  void UnregisterBinding(View view, ColorApplyFunc applyFunc);
+  bool GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const;
 
   /**
-   * @brief Removes all bindings associated with a given View.
-   *
-   * @param[in] view The View to unbind completely
+   * @copydoc Dali::Ui::UiColorManager::RemoveBinding
    */
-  void UnregisterBindings(View view);
+  void RemoveBinding(View view, CallbackBase* applyFunc);
 
   /**
-   * @brief Sets a function that overrides theme color lookups.
-   *
-   * @param[in] func A function pointer matching ColorOverrideFunc, or nullptr to clear
+   * @copydoc Dali::Ui::UiColorManager::RemoveBindings
+   */
+  void RemoveBindings(View view);
+
+  /**
+   * @copydoc Dali::Ui::UiColorManager::SetColorOverride
    */
   void SetColorOverride(ColorOverrideFunc func);
 
   /**
-   * @brief Clears the color override callback.
+   * @copydoc Dali::Ui::UiColorManager::ClearColorOverride
    */
   void ClearColorOverride();
 
@@ -118,32 +107,34 @@ protected:
   ~UiColorManagerImpl() override;
 
 private:
-  UiColorManagerImpl(const UiColorManagerImpl&) = delete;
-  UiColorManagerImpl(UiColorManagerImpl&&) = delete;
+  UiColorManagerImpl(const UiColorManagerImpl&)            = delete;
+  UiColorManagerImpl(UiColorManagerImpl&&)                 = delete;
   UiColorManagerImpl& operator=(const UiColorManagerImpl&) = delete;
-  UiColorManagerImpl& operator=(UiColorManagerImpl&&) = delete;
-
-  void OnThemeChanged();
-  void RefreshBindings();
+  UiColorManagerImpl& operator=(UiColorManagerImpl&&)      = delete;
 
 private:
   struct BindingInfo
   {
-    ColorApplyFunc applyFunc;
-    UiColor       color;
+    std::unique_ptr<CallbackBase> applyFunc;
+    UiColor                       color;
   };
 
   struct ViewBinding
   {
-    WeakHandle<View> weakView;
+    WeakHandle<View>         weakView;
     std::vector<BindingInfo> bindings;
   };
+
+  void               OnThemeChanged();
+  void               RefreshBindings();
+  void               EraseBinding(View view, const CallbackBase& callback);
+  const BindingInfo* FindBinding(View view, const CallbackBase& callback) const;
 
   std::unordered_map<void*, ViewBinding> mBindings;
   ColorOverrideFunc                      mColorOverride{nullptr};
   SlotDelegate<UiColorManagerImpl>       mSlotDelegate{this};
-  bool mIsApplying{false};
-  bool mConnected{false};
+  bool                                   mIsApplying{false};
+  bool                                   mConnected{false};
 };
 
 } // namespace Integration

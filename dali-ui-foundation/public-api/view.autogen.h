@@ -114,6 +114,19 @@
   */ \
   ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
   /** \
+  * @brief Sets the background color. \
+  * \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * If the UiColor has direct RGBA values, it is applied immediately \
+  * and any previous ID-based binding for this property is removed. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
+  /** \
   * @brief Attaches the clickable interaction role to this View and optionally configures it. \
   * \
   * A View can have at most one interaction trait for its lifetime; attaching clickable \
@@ -163,19 +176,6 @@
   * @param[in] action A function or lambda to be executed with this instance. \
   */ \
   ChildClass& With(std::function<void(View&)> action) { View::With(action); return *this; } \
-  /** \
-  * @brief Sets the background color. \
-  * \
-  * If the UiColor has a color ID, it is resolved from the current \
-  * theme and a binding is registered so the color is automatically \
-  * refreshed when the theme changes. \
-  * \
-  * If the UiColor has direct RGBA values, it is applied immediately \
-  * and any previous ID-based binding for this property is removed. \
-  * \
-  * @param[in] color The UiColor to apply \
-  */ \
-  ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
   /** \
   * @brief Sets layout parameters on this View. \
   * \

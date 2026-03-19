@@ -335,6 +335,11 @@ View& View::SetTouchFocusable(bool touchFocusable)
   return *this;
 }
 
+UiColor View::GetBackgroundColor()
+{
+  return Integration::GetImpl(*this).GetBackgroundColor();
+}
+
 View& View::SetBackgroundColor(const UiColor& color)
 {
   Integration::GetImpl(*this).SetBackgroundColor(color);
@@ -416,11 +421,6 @@ TapGestureDetector View::GetTapGestureDetector() const
 LongPressGestureDetector View::GetLongPressGestureDetector() const
 {
   return Integration::GetImpl(*this).GetLongPressGestureDetector();
-}
-
-void View::SetBackgroundColor(const Vector4& color)
-{
-  Integration::GetImpl(*this).SetBackgroundColor(color);
 }
 
 void View::ClearBackground()
