@@ -506,18 +506,25 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     std::reverse(lines.begin(), lines.end());
   }
 
+  float availableCross = IsMainAxisHorizontal() ? contentHeight : contentWidth;
+
+  // For NO_WRAP, the single line fills the entire available cross-axis space.
+  // This matches CSS flexbox: a single flex line stretches to the container's cross size.
+  if(mWrap == FlexWrap::NO_WRAP && lines.size() == 1)
+  {
+    lines[0].crossSize = std::max(lines[0].crossSize, availableCross);
+  }
+
   float totalLineCross = 0.0f;
   for(const auto& line : lines)
   {
     totalLineCross += line.crossSize;
   }
-
-  float availableCross = IsMainAxisHorizontal() ? contentHeight : contentWidth;
-  float freeCross      = std::max(0.0f, availableCross - totalLineCross);
+  float freeCross = std::max(0.0f, availableCross - totalLineCross);
 
   float crossOffset = 0.0f;
 
-  // Apply align-content when wrapping is enabled, even for a single line
+  // Apply align-content when wrapping is enabled
   if(mWrap != FlexWrap::NO_WRAP && !lines.empty())
   {
     switch(mAlignContent)
