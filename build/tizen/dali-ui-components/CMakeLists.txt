@@ -56,3 +56,7 @@ IF( ENABLE_PKG_CONFIGURE )
   CONFIGURE_FILE( ${PKG_CFG_FILE}.in ${PKG_CFG_FILE} @ONLY )
   INSTALL( FILES ${PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
 ENDIF()
+
+# Install resources
+INSTALL(DIRECTORY ${COMPONENTS_ROOT_SRC_DIR}/images/
+        DESTINATION ${dataReadOnlyInstallDir}/ui/images/components)
