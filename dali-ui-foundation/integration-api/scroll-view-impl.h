@@ -279,11 +279,6 @@ protected:
    */
   Vector2 DeltaFromScrollPosition(const Vector2& scrollPosition) const;
 
-  /**
-   * @brief Ensure layout manager is created.
-   */
-  void EnsureLayoutManager();
-
 private:
   /**
    * @brief Callback for child relayouted.

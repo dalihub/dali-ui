@@ -51,45 +51,13 @@ LayoutImplPtr LayoutImpl::New()
   return LayoutImplPtr(new LayoutImpl());
 }
 
-LayoutImpl::LayoutImpl()
-: ViewImpl()
+LayoutImpl::LayoutImpl(LayoutManager* layoutManager)
+: ViewImpl(layoutManager)
 {
 }
 
 LayoutImpl::~LayoutImpl()
 {
-}
-
-void LayoutImpl::OnInitialize()
-{
-  // Call base class initialization
-  ViewImpl::OnInitialize();
-
-  // Ensure the layout manager is created
-  EnsureLayoutManager();
-}
-
-// =============================================================================
-// Layout Manager Factory
-// =============================================================================
-
-LayoutManager* LayoutImpl::CreateLayoutManager()
-{
-  // Base Layout class returns nullptr - derived classes should override
-  // to provide their specific layout algorithm
-  return nullptr;
-}
-
-void LayoutImpl::EnsureLayoutManager()
-{
-  if(!HasLayoutManager())
-  {
-    LayoutManager* manager = CreateLayoutManager();
-    if(manager)
-    {
-      SetLayoutManager(manager);
-    }
-  }
 }
 
 } // namespace Integration

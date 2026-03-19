@@ -69,9 +69,6 @@ public: // API
   void      SetAlignContent(FlexAlign align);
   FlexAlign GetAlignContent() const;
 
-protected: // From Layout
-  LayoutManager* CreateLayoutManager() override;
-
 private:
   FlexLayoutImpl(const FlexLayoutImpl&)            = delete;
   FlexLayoutImpl(FlexLayoutImpl&&)                 = delete;

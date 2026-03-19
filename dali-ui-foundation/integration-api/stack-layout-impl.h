@@ -92,12 +92,6 @@ public: // API
    */
   float GetSpacing() const;
 
-protected: // From Layout
-  /**
-   * @copydoc Layout::CreateLayoutManager
-   */
-  LayoutManager* CreateLayoutManager() override;
-
 private:
   // Not copyable or movable
   StackLayoutImpl(const StackLayoutImpl&)            = delete;

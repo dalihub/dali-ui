@@ -49,7 +49,7 @@ GridLayoutImplPtr GridLayoutImpl::New()
 }
 
 GridLayoutImpl::GridLayoutImpl()
-: LayoutImpl(),
+: LayoutImpl(new GridLayoutManager({}, {}, 0.0f, 0.0f)),
   mRowDefinitions(),
   mColumnDefinitions(),
   mRowSpacing(0.0f),
@@ -183,11 +183,6 @@ void GridLayoutImpl::SetColumnSpacing(float spacing)
 float GridLayoutImpl::GetColumnSpacing() const
 {
   return mColumnSpacing;
-}
-
-LayoutManager* GridLayoutImpl::CreateLayoutManager()
-{
-  return new GridLayoutManager(mRowDefinitions, mColumnDefinitions, mRowSpacing, mColumnSpacing);
 }
 
 } // namespace Integration

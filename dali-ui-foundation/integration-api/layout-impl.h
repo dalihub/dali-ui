@@ -62,32 +62,11 @@ protected:
 
   /**
    * @brief LayoutImpl constructor.
-   */
-  LayoutImpl();
-
-public: // From ViewImpl
-  /**
-   * @copydoc Integration::ViewImpl::OnInitialize
-   */
-  void OnInitialize() override;
-
-protected:
-  /**
-   * @brief Creates the layout manager for this layout.
    *
-   * Override this in derived classes to provide specific layout algorithms.
-   * The base Layout class returns nullptr (no default layout manager).
-   *
-   * @return Pointer to the layout manager (ownership transferred to View)
+   * @param[in] layoutManager The layout manager for this layout (ownership transferred).
+   *            Derived classes must pass their specific LayoutManager.
    */
-  virtual LayoutManager* CreateLayoutManager();
-
-  /**
-   * @brief Ensures the layout manager is created and set.
-   *
-   * Calls CreateLayoutManager() and sets the result using SetLayoutManager().
-   */
-  void EnsureLayoutManager();
+  explicit LayoutImpl(LayoutManager* layoutManager = nullptr);
 
 private:
   // Not copyable or movable

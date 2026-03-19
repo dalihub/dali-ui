@@ -31,6 +31,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/integration-api/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 //#include <dali-ui-elements/public-api/scroll-view.h>
 
@@ -63,7 +64,7 @@ ScrollViewImplPtr ScrollViewImpl::New()
 }
 
 ScrollViewImpl::ScrollViewImpl()
-: ViewImpl(),
+: ViewImpl(new ScrollViewLayoutManager()),
   mContent(),
   mScrollPosition(0.0f, 0.0f),
   mCurrentPosition(0.0f, 0.0f),
@@ -112,20 +113,6 @@ void ScrollViewImpl::OnInitialize()
   // Attach the pan gesture detector to this actor
   // TODO: we need to subsribe the touch event and send gesture event!
   mPanGestureDetector.Attach(Self());
-
-  EnsureLayoutManager();
-}
-
-void ScrollViewImpl::EnsureLayoutManager()
-{
-  if(!HasLayoutManager())
-  {
-    LayoutManager* manager = new ScrollViewLayoutManager();
-    if(manager)
-    {
-      SetLayoutManager(manager);
-    }
-  }
 }
 
 void ScrollViewImpl::SetContent(View content)

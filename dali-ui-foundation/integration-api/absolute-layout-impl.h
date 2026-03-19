@@ -53,9 +53,6 @@ protected:
   virtual ~AbsoluteLayoutImpl();
   AbsoluteLayoutImpl();
 
-protected: // From Layout
-  LayoutManager* CreateLayoutManager() override;
-
 private:
   AbsoluteLayoutImpl(const AbsoluteLayoutImpl&)            = delete;
   AbsoluteLayoutImpl(AbsoluteLayoutImpl&&)                 = delete;

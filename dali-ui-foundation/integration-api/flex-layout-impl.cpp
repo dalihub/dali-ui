@@ -49,7 +49,7 @@ FlexLayoutImplPtr FlexLayoutImpl::New()
 }
 
 FlexLayoutImpl::FlexLayoutImpl()
-: LayoutImpl(),
+: LayoutImpl(new FlexLayoutManager(FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::STRETCH, FlexAlign::STRETCH)),
   mDirection(FlexDirection::ROW),
   mWrap(FlexWrap::NO_WRAP),
   mJustifyContent(FlexJustify::FLEX_START),
@@ -155,11 +155,6 @@ void FlexLayoutImpl::SetAlignContent(FlexAlign align)
 FlexAlign FlexLayoutImpl::GetAlignContent() const
 {
   return mAlignContent;
-}
-
-LayoutManager* FlexLayoutImpl::CreateLayoutManager()
-{
-  return new FlexLayoutManager(mDirection, mWrap, mJustifyContent, mAlignItems, mAlignContent);
 }
 
 } // namespace Integration

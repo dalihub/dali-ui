@@ -49,7 +49,7 @@ StackLayoutImplPtr StackLayoutImpl::New(StackOrientation orientation)
 }
 
 StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)
-: LayoutImpl(),
+: LayoutImpl(new StackLayoutManager(orientation, 0.0f)),
   mOrientation(orientation),
   mSpacing(0.0f)
 {
@@ -101,11 +101,6 @@ void StackLayoutImpl::SetSpacing(float spacing)
 float StackLayoutImpl::GetSpacing() const
 {
   return mSpacing;
-}
-
-LayoutManager* StackLayoutImpl::CreateLayoutManager()
-{
-  return new StackLayoutManager(mOrientation, mSpacing);
 }
 
 } // namespace Integration

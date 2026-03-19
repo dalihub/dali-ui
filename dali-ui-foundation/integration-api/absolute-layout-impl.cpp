@@ -49,17 +49,12 @@ AbsoluteLayoutImplPtr AbsoluteLayoutImpl::New()
 }
 
 AbsoluteLayoutImpl::AbsoluteLayoutImpl()
-: LayoutImpl()
+: LayoutImpl(new AbsoluteLayoutManager())
 {
 }
 
 AbsoluteLayoutImpl::~AbsoluteLayoutImpl()
 {
-}
-
-LayoutManager* AbsoluteLayoutImpl::CreateLayoutManager()
-{
-  return new AbsoluteLayoutManager();
 }
 
 } // namespace Integration

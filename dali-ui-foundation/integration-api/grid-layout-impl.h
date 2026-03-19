@@ -72,9 +72,6 @@ public: // Spacing API
   void  SetColumnSpacing(float spacing);
   float GetColumnSpacing() const;
 
-protected: // From Layout
-  LayoutManager* CreateLayoutManager() override;
-
 private:
   GridLayoutImpl(const GridLayoutImpl&)            = delete;
   GridLayoutImpl(GridLayoutImpl&&)                 = delete;
