@@ -44,4 +44,45 @@
   * \
   * @param[in] alignment The vertical text alignment. \
   */ \
-  ChildClass& SetVerticalTextAlignment(Text::Alignment alignment) { Label::SetVerticalTextAlignment(alignment); return *this; }
+  ChildClass& SetVerticalTextAlignment(Text::Alignment alignment) { Label::SetVerticalTextAlignment(alignment); return *this; } \
+  /** \
+  * @brief Sets the line height of the text. \
+  * \
+  * The interpretation of this value depends on the current LineHeightMode. \
+  * \
+  * - If the mode is LineHeightMode::RELATIVE, the line height is calculated \
+  *   as a multiplier of the font pixel size: \
+  *   @code \
+  *   CalculatedLineHeight(px) = FontSize(px) * lineHeight \
+  *   @endcode \
+  * \
+  * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as \
+  *   an absolute line height in pixels. \
+  * \
+  * Setting lineHeight to -1.0f ensures enough vertical space to display \
+  * the full font metrics (NaturalSize). This behavior is similar to the \
+  * "Auto" line height option in design tools such as Figma. \
+  * \
+  * @note Due to limitations of the text rendering engine, the final \
+  *       calculated line height cannot be smaller than the natural \
+  *       line height derived from the font metrics. If the computed \
+  *       value is smaller than the natural line height, the natural \
+  *       line height will be used instead. \
+  * \
+  * @param[in] lineHeight The line height value. \
+  */ \
+  ChildClass& SetLineHeight(float lineHeight) { Label::SetLineHeight(lineHeight); return *this; } \
+  /** \
+  * @brief Sets how the line height value is interpreted. \
+  * \
+  * - LineHeightMode::RELATIVE: \
+  *   The line height is calculated as a multiplier of the font size. \
+  * \
+  * - LineHeightMode::ABSOLUTE: \
+  *   The line height is treated as an absolute pixel value. \
+  * \
+  * The default mode is LineHeightMode::RELATIVE. \
+  * \
+  * @param[in] mode The line height mode. \
+  */ \
+  ChildClass& SetLineHeightMode(Text::LineHeightMode mode) { Label::SetLineHeightMode(mode); return *this; }

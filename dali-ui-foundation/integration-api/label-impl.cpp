@@ -86,7 +86,9 @@ LabelImplPtr LabelImpl::New()
 LabelImpl::LabelImpl()
 : ViewImpl(),
   mTextColorAnimatedCount(0),
-  mTextUpdateNeeded(false)
+  mTextUpdateNeeded(false),
+  mLineHeight(-1.0f),
+  mLineHeightMode(Text::LineHeightMode::RELATIVE)
 {
 }
 
@@ -94,7 +96,9 @@ LabelImpl::~LabelImpl()
 {
 }
 
+// =============================================================================
 // Properties
+// =============================================================================
 void LabelImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
@@ -195,6 +199,34 @@ Text::Alignment LabelImpl::GetVerticalTextAlignment() const
   return mController->GetVerticalAlignment();
 }
 
+void LabelImpl::SetLineHeight(float lineHeight)
+{
+  if(mLineHeight != lineHeight)
+  {
+    mLineHeight = lineHeight;
+    UpdateLineHeight();
+  }
+}
+
+float LabelImpl::GetLineHeight() const
+{
+  return mLineHeight;
+}
+
+void LabelImpl::SetLineHeightMode(Text::LineHeightMode mode)
+{
+  if(mLineHeightMode != mode)
+  {
+    mLineHeightMode = mode;
+    UpdateLineHeight();
+  }
+}
+
+Text::LineHeightMode LabelImpl::GetLineHeightMode() const
+{
+  return mLineHeightMode;
+}
+
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
@@ -227,6 +259,8 @@ void LabelImpl::OnInitialize()
 
   Text::Layout::Engine& engine = mController->GetLayoutEngine();
   engine.SetCursorWidth(0u);
+
+  mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
 }
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -438,10 +472,41 @@ MeasuredSize LabelImpl::OnArrange(const LayoutRect& bounds)
   return {bounds.width, bounds.height};
 }
 
+// =============================================================================
+// ControlInterface
+// =============================================================================
 void LabelImpl::RequestTextRelayout()
 {
   // Signal that a Relayout may be needed
   RelayoutRequest();
+}
+
+// =============================================================================
+// Implementation
+// =============================================================================
+void LabelImpl::SetMinimumLineHeight(float height)
+{
+  // If TextFitArray is enabled, do not update the default line size.
+  if(!mController->IsTextFitArrayEnabled())
+  {
+    mTextUpdateNeeded = mController->SetDefaultLineSize(height) || mTextUpdateNeeded;
+  }
+  mController->SetCurrentLineSize(height);
+}
+
+void LabelImpl::UpdateLineHeight()
+{
+  if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  {
+    SetMinimumLineHeight(0.0f);
+    mController->SetRelativeLineSize(mLineHeight);
+  }
+  else
+  {
+    mController->SetRelativeLineSize(-1.0f);
+    SetMinimumLineHeight(mLineHeight);
+  }
+  RequestTextRelayout();
 }
 
 } // namespace Integration

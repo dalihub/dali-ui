@@ -70,6 +70,8 @@ private:
     PrintLabelInfo(mLabel, "Label 1");
     PrintLabelInfo(mLabel2, "Label 2");
     PrintLabelInfo(mLabel3, "Label 3");
+    PrintLabelInfo(mLineHeightLabel, "Label Relative Line Height");
+    PrintLabelInfo(mLineHeightLabel2, "Label Absolute Line Height");
     PrintInputFieldInfo(mField, "InputField");
 
     mField.TextChangedSignal().Connect(this, &TextController::OnTextChanged);
@@ -109,6 +111,8 @@ private:
         CreateDemoLabel1().As(mLabel),
         CreateDemoLabel2().As(mLabel2),
         CreateDemoLabel3().As(mLabel3),
+        CreateLineHeightLabel("LineHeight:2, LineHeightMode:Relative", 2, Text::LineHeightMode::RELATIVE).As(mLineHeightLabel),
+        CreateLineHeightLabel("LineHeight:50, LineHeightMode:Absolute", 50, Text::LineHeightMode::ABSOLUTE).As(mLineHeightLabel2),
         CreateSeparator(),
         CreateAlignmentLabel(Text::Alignment::START),
         CreateAlignmentLabel(Text::Alignment::CENTER),
@@ -179,6 +183,16 @@ private:
       .SetMultiLine(true);
   }
 
+  Label CreateLineHeightLabel(Dali::String text, float lineHeight, Text::LineHeightMode mode)
+  {
+    return CreateLabel(text, "SamsungOneUI_400", 20)
+      .SetLayoutWidth(LayoutDimension::MatchParent)
+      .SetBackgroundColor(UiColor(0xEFEFEF))
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetLineHeight(lineHeight)
+      .SetLineHeightMode(mode);
+  }
+
   View CreateSeparator()
   {
     return View::New()
@@ -203,15 +217,17 @@ private:
   {
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
     DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text       : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("FontFamily : %s\n", label.GetFontFamily().CStr());
-    DALI_LOG_ERROR("FontSize   : %f\n", label.GetFontSize());
-    DALI_LOG_ERROR("MultiLine  : %d\n", label.IsMultiLine());
-    DALI_LOG_ERROR("TextColor  : %.2f, %.2f, %.2f, %.2f\n", label.GetTextColor().r, label.GetTextColor().g, label.GetTextColor().b, label.GetTextColor().a);
-    DALI_LOG_ERROR("H Align    : %d\n", label.GetHorizontalTextAlignment());
-    DALI_LOG_ERROR("V Align    : %d\n", label.GetVerticalTextAlignment());
-    DALI_LOG_ERROR("Natural    : %f, %f\n", label.GetNaturalSize().x, label.GetNaturalSize().y);
-    DALI_LOG_ERROR("H for W    : 100, %f\n", label.GetHeightForWidth(100));
+    DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
+    DALI_LOG_ERROR("FontFamily      : %s\n", label.GetFontFamily().CStr());
+    DALI_LOG_ERROR("FontSize        : %f\n", label.GetFontSize());
+    DALI_LOG_ERROR("MultiLine       : %d\n", label.IsMultiLine());
+    DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", label.GetTextColor().r, label.GetTextColor().g, label.GetTextColor().b, label.GetTextColor().a);
+    DALI_LOG_ERROR("H Align         : %d\n", label.GetHorizontalTextAlignment());
+    DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
+    DALI_LOG_ERROR("LineHeight      : %f\n", label.GetLineHeight());
+    DALI_LOG_ERROR("LineHeight Mode : %d\n", label.GetLineHeightMode());
+    DALI_LOG_ERROR("Natural         : %f, %f\n", label.GetNaturalSize().x, label.GetNaturalSize().y);
+    DALI_LOG_ERROR("H for W         : 100, %f\n", label.GetHeightForWidth(100));
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
@@ -309,6 +325,8 @@ private:
   Label        mLabel;
   Label        mLabel2;
   Label        mLabel3;
+  Label        mLineHeightLabel;
+  Label        mLineHeightLabel2;
   InputField   mField;
 };
 

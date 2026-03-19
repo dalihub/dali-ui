@@ -199,6 +199,28 @@ Text::Alignment Label::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
+Label& Label::SetLineHeight(float lineHeight)
+{
+  GetImpl(*this).SetLineHeight(lineHeight);
+  return *this;
+}
+
+float Label::GetLineHeight() const
+{
+  return GetImpl(*this).GetLineHeight();
+}
+
+Label& Label::SetLineHeightMode(Text::LineHeightMode mode)
+{
+  GetImpl(*this).SetLineHeightMode(mode);
+  return *this;
+}
+
+Text::LineHeightMode Label::GetLineHeightMode() const
+{
+  return GetImpl(*this).GetLineHeightMode();
+}
+
 } // namespace Ui
 
 } // namespace Dali

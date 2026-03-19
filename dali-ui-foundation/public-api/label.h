@@ -227,6 +227,66 @@ public: // Setters for chaining
    */
   Text::Alignment GetVerticalTextAlignment() const;
 
+  /**
+   * @brief Sets the line height of the text.
+   *
+   * The interpretation of this value depends on the current LineHeightMode.
+   *
+   * - If the mode is LineHeightMode::RELATIVE, the line height is calculated
+   *   as a multiplier of the font pixel size:
+   *   @code
+   *   CalculatedLineHeight(px) = FontSize(px) * lineHeight
+   *   @endcode
+   *
+   * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as
+   *   an absolute line height in pixels.
+   *
+   * Setting lineHeight to -1.0f ensures enough vertical space to display
+   * the full font metrics (NaturalSize). This behavior is similar to the
+   * "Auto" line height option in design tools such as Figma.
+   *
+   * @note The final line height is clamped to be no smaller than
+   *       the natural line height derived from the font metrics.
+   *
+   * @param[in] lineHeight The line height value.
+   */
+  Label& SetLineHeight(float lineHeight);
+
+  /**
+   * @brief Gets the current line height value.
+   *
+   * The returned value is interpreted according to the current
+   * LineHeightMode.
+   *
+   * A value of -1.0f indicates that the natural line height
+   * (based on font metrics) is used.
+   *
+   * @return The line height value.
+   */
+  float GetLineHeight() const;
+
+  /**
+   * @brief Sets how the line height value is interpreted.
+   *
+   * - LineHeightMode::RELATIVE:
+   *   The line height is calculated as a multiplier of the font size.
+   *
+   * - LineHeightMode::ABSOLUTE:
+   *   The line height is treated as an absolute pixel value.
+   *
+   * The default mode is LineHeightMode::RELATIVE.
+   *
+   * @param[in] mode The line height mode.
+   */
+  Label& SetLineHeightMode(Text::LineHeightMode mode);
+
+  /**
+   * @brief Gets the current line height mode.
+   *
+   * @return The current LineHeightMode.
+   */
+  Text::LineHeightMode GetLineHeightMode() const;
+
   // @CHAIN_END
 
 public: // Signals

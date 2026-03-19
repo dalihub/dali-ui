@@ -111,6 +111,23 @@ enum class LayoutDirectionMode : uint8_t
   CONTENTS = 2
 };
 
+/**
+ * @brief Enumeration for determining how the line height is interpreted.
+ */
+enum class LineHeightMode : uint8_t
+{
+  /**
+   * @brief The line height is calculated relative to the font size.
+   * The specified value is treated as a multiplier of the font pixel size.
+   */
+  RELATIVE = 0,
+  /**
+   * @brief The line height is specified as an absolute pixel value.
+   * The specified value is treated as the exact line height in pixels.
+   */
+  ABSOLUTE = 1
+};
+
 } // namespace Text
 
 } // namespace Ui

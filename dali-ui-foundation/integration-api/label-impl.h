@@ -187,6 +187,26 @@ public:
    */
   Text::Alignment GetVerticalTextAlignment() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetLineHeight
+   */
+  void SetLineHeight(float lineHeight);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetLineHeight
+   */
+  float GetLineHeight() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetLineHeightMode
+   */
+  void SetLineHeightMode(Text::LineHeightMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetLineHeightMode
+   */
+  Text::LineHeightMode GetLineHeightMode() const;
+
 protected:
   // Construction
 
@@ -246,6 +266,17 @@ public: // From ControlInterface
    */
   void RequestTextRelayout() override;
 
+private: // Implementation
+  /**
+   * @brief Sets the minimum line height used by the text controller.
+   */
+  void SetMinimumLineHeight(float height);
+
+  /**
+   * @brief Updates the effective line height based on the current LineHeightMode.
+   */
+  void UpdateLineHeight();
+
 private:
   // Not copyable or movable
   LabelImpl(const LabelImpl&)            = delete;
@@ -260,6 +291,9 @@ private:
 
   int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;
+
+  float                mLineHeight;
+  Text::LineHeightMode mLineHeightMode;
 };
 
 } // namespace Integration
