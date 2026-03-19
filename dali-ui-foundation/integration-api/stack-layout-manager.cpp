@@ -44,6 +44,18 @@ float GetChildWeight(ViewImpl& childImpl)
   return params ? params->GetWeight() : 0.0f;
 }
 
+LayoutAlignment GetChildHorizontalAlignment(ViewImpl& childImpl)
+{
+  auto* params = Internal::StackLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetHorizontalAlignment() : LayoutAlignment::START;
+}
+
+LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
+{
+  auto* params = Internal::StackLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetVerticalAlignment() : LayoutAlignment::START;
+}
+
 struct StackMeasureFirstPassResult
 {
   float    mainAxisNonWeight{0.0f};
@@ -232,13 +244,13 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     if(mOrientation == StackOrientation::VERTICAL)
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
-      const float childHeight = childData.measuredSize.height;
+      const float childHeight    = childData.measuredSize.height;
       const float slotHeight     = childHeight + marginH;
 
-      // Cross-axis (horizontal) alignment
-      LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
-      float childWidth;
-      if (childImpl.GetLayoutWidth() == LayoutDimension::MatchParent || hAlign == LayoutAlignment::FILL)
+      // Cross-axis (horizontal) alignment from StackLayoutParams
+      LayoutAlignment hAlign = GetChildHorizontalAlignment(childImpl);
+      float           childWidth;
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || hAlign == LayoutAlignment::FILL)
       {
         childWidth = crossAvailable;
       }
@@ -274,13 +286,13 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     else
     {
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
-      const float childWidth = childData.measuredSize.width;
+      const float childWidth     = childData.measuredSize.width;
       const float slotWidth      = childWidth + marginW;
 
-      // Cross-axis (vertical) alignment
-      LayoutAlignment vAlign      = childImpl.GetVerticalAlignment();
-      float childHeight;
-      if (childImpl.GetLayoutHeight() == LayoutDimension::MatchParent || vAlign == LayoutAlignment::FILL)
+      // Cross-axis (vertical) alignment from StackLayoutParams
+      LayoutAlignment vAlign = GetChildVerticalAlignment(childImpl);
+      float           childHeight;
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT || vAlign == LayoutAlignment::FILL)
       {
         childHeight = crossAvailable;
       }

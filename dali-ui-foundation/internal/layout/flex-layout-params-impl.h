@@ -40,13 +40,13 @@ class FlexLayoutParamsImpl : public LayoutParamsImpl
 {
 public:
   /**
-   * @brief Constructs with default flex properties (grow=0, shrink=1, basis=WrapContent, alignSelf=AUTO).
+   * @brief Constructs with default flex properties (grow=0, shrink=1, basis=WRAP_CONTENT, alignSelf=AUTO).
    */
   FlexLayoutParamsImpl()
   : LayoutParamsImpl(),
     mFlexGrow(0.0f),
     mFlexShrink(1.0f),
-    mFlexBasis(LayoutDimension::WrapContent),
+    mFlexBasis(WRAP_CONTENT),
     mAlignSelf(FlexAlign::AUTO)
   {
   }

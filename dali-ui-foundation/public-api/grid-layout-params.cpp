@@ -113,5 +113,27 @@ uint32_t GridLayoutParams::GetColumnSpan() const
   return GetImpl(*this).GetColumnSpan();
 }
 
+GridLayoutParams& GridLayoutParams::SetHorizontalAlignment(LayoutAlignment alignment)
+{
+  GetImpl(*this).SetHorizontalAlignment(alignment);
+  return *this;
+}
+
+LayoutAlignment GridLayoutParams::GetHorizontalAlignment() const
+{
+  return GetImpl(*this).GetHorizontalAlignment();
+}
+
+GridLayoutParams& GridLayoutParams::SetVerticalAlignment(LayoutAlignment alignment)
+{
+  GetImpl(*this).SetVerticalAlignment(alignment);
+  return *this;
+}
+
+LayoutAlignment GridLayoutParams::GetVerticalAlignment() const
+{
+  return GetImpl(*this).GetVerticalAlignment();
+}
+
 } // namespace Ui
 } // namespace Dali

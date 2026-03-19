@@ -113,6 +113,36 @@ public:
    */
   float GetWeight() const;
 
+  /**
+   * @brief Sets the horizontal alignment within the stack (cross-axis for vertical stack).
+   *
+   * @param[in] alignment START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  StackLayoutParams& SetHorizontalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the horizontal alignment.
+   *
+   * @return The horizontal alignment
+   */
+  LayoutAlignment GetHorizontalAlignment() const;
+
+  /**
+   * @brief Sets the vertical alignment within the stack (cross-axis for horizontal stack).
+   *
+   * @param[in] alignment START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  StackLayoutParams& SetVerticalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the vertical alignment.
+   *
+   * @return The vertical alignment
+   */
+  LayoutAlignment GetVerticalAlignment() const;
+
 public: // Not intended for application developers
   /// @cond internal
   explicit StackLayoutParams(Internal::StackLayoutParamsImpl* implementation);

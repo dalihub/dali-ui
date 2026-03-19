@@ -160,6 +160,36 @@ public:
    */
   uint32_t GetColumnSpan() const;
 
+  /**
+   * @brief Sets the horizontal alignment within the grid cell.
+   *
+   * @param[in] alignment FILL, START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetHorizontalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the horizontal alignment.
+   *
+   * @return The horizontal alignment
+   */
+  LayoutAlignment GetHorizontalAlignment() const;
+
+  /**
+   * @brief Sets the vertical alignment within the grid cell.
+   *
+   * @param[in] alignment FILL, START, CENTER, or END
+   * @return Reference to this for chaining
+   */
+  GridLayoutParams& SetVerticalAlignment(LayoutAlignment alignment);
+
+  /**
+   * @brief Gets the vertical alignment.
+   *
+   * @return The vertical alignment
+   */
+  LayoutAlignment GetVerticalAlignment() const;
+
 public: // Not intended for application developers
   /// @cond internal
   explicit GridLayoutParams(Internal::GridLayoutParamsImpl* implementation);

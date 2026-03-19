@@ -62,6 +62,18 @@ uint32_t GetChildColumnSpan(ViewImpl& childImpl)
   return params ? params->GetColumnSpan() : 1;
 }
 
+LayoutAlignment GetChildHorizontalAlignment(ViewImpl& childImpl)
+{
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetHorizontalAlignment() : LayoutAlignment::FILL;
+}
+
+LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
+{
+  auto* params = Internal::GridLayoutParamsImpl::Get(childImpl);
+  return params ? params->GetVerticalAlignment() : LayoutAlignment::FILL;
+}
+
 void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
                                     uint32_t rowCount, uint32_t colCount, const std::vector<GridLength>& rowDefs,
                                     const std::vector<GridLength>&            colDefs,
@@ -229,13 +241,13 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
     childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
 
-    // Apply child alignment within the cell
+    // Apply child alignment within the cell (from GridLayoutParams)
     float cellWidth   = childBounds.width;
     float cellHeight  = childBounds.height;
     float childWidth  = childData.measuredSize.width;
     float childHeight = childData.measuredSize.height;
 
-    LayoutAlignment hAlign = childImpl.GetHorizontalAlignment();
+    LayoutAlignment hAlign = GetChildHorizontalAlignment(childImpl);
     if(childWidth > 0.0f && childWidth < cellWidth)
     {
       switch(hAlign)
@@ -257,7 +269,7 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
       }
     }
 
-    LayoutAlignment vAlign = childImpl.GetVerticalAlignment();
+    LayoutAlignment vAlign = GetChildVerticalAlignment(childImpl);
     if(childHeight > 0.0f && childHeight < cellHeight)
     {
       switch(vAlign)

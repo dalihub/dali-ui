@@ -47,7 +47,9 @@ public:
     mRow(0),
     mColumn(0),
     mRowSpan(1),
-    mColumnSpan(1)
+    mColumnSpan(1),
+    mHorizontalAlignment(LayoutAlignment::FILL),
+    mVerticalAlignment(LayoutAlignment::FILL)
   {
   }
 
@@ -56,7 +58,9 @@ public:
     mRow(other.mRow),
     mColumn(other.mColumn),
     mRowSpan(other.mRowSpan),
-    mColumnSpan(other.mColumnSpan)
+    mColumnSpan(other.mColumnSpan),
+    mHorizontalAlignment(other.mHorizontalAlignment),
+    mVerticalAlignment(other.mVerticalAlignment)
   {
   }
 
@@ -137,6 +141,26 @@ public:
     return mColumnSpan;
   }
 
+  void SetHorizontalAlignment(LayoutAlignment alignment)
+  {
+    mHorizontalAlignment = alignment;
+  }
+
+  LayoutAlignment GetHorizontalAlignment() const
+  {
+    return mHorizontalAlignment;
+  }
+
+  void SetVerticalAlignment(LayoutAlignment alignment)
+  {
+    mVerticalAlignment = alignment;
+  }
+
+  LayoutAlignment GetVerticalAlignment() const
+  {
+    return mVerticalAlignment;
+  }
+
   /**
    * @brief Retrieves the GridLayoutParams trait attached to a view, if any.
    * @param[in] viewImpl The view implementation to query.
@@ -174,10 +198,12 @@ protected:
   ~GridLayoutParamsImpl() override = default;
 
 private:
-  uint32_t mRow;
-  uint32_t mColumn;
-  uint32_t mRowSpan;
-  uint32_t mColumnSpan;
+  uint32_t        mRow;
+  uint32_t        mColumn;
+  uint32_t        mRowSpan;
+  uint32_t        mColumnSpan;
+  LayoutAlignment mHorizontalAlignment;
+  LayoutAlignment mVerticalAlignment;
 };
 
 } // namespace Internal

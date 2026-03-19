@@ -80,5 +80,27 @@ float StackLayoutParams::GetWeight() const
   return GetImpl(*this).GetWeight();
 }
 
+StackLayoutParams& StackLayoutParams::SetHorizontalAlignment(LayoutAlignment alignment)
+{
+  GetImpl(*this).SetHorizontalAlignment(alignment);
+  return *this;
+}
+
+LayoutAlignment StackLayoutParams::GetHorizontalAlignment() const
+{
+  return GetImpl(*this).GetHorizontalAlignment();
+}
+
+StackLayoutParams& StackLayoutParams::SetVerticalAlignment(LayoutAlignment alignment)
+{
+  GetImpl(*this).SetVerticalAlignment(alignment);
+  return *this;
+}
+
+LayoutAlignment StackLayoutParams::GetVerticalAlignment() const
+{
+  return GetImpl(*this).GetVerticalAlignment();
+}
+
 } // namespace Ui
 } // namespace Dali
