@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/ui-color-manager-impl.h>
+#include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
@@ -29,7 +29,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 namespace
@@ -247,6 +247,6 @@ void UiColorManagerImpl::RefreshBindings()
   }
 }
 
-} // namespace Integration
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali

@@ -33,7 +33,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
+namespace Internal
 {
 class UiColorManagerImpl;
 }
@@ -151,44 +151,89 @@ public:
    *
    * @param[in] color The UiColor to bind
    * @param[in] view The target View
-   * @param[in] applyFunc Callback with signature @c void( @c const @c Vector4&),
-   *                      invoked on color table change to apply the resolved color.
-   *                      Ownership is transferred to the manager.
+   * @param[in] func A free function with signature @c void(const @c Vector4&),
+   *                  invoked on color table change to apply the resolved color
    *
    * @code
    *   void SetColor(const Vector4& color) { ... }
-   *
-   *   // Free function
-   *   manager.UpdateBinding(color, MakeCallback(SetColor));
-   *
-   *   // Member function
-   *   manager.UpdateBinding(color, MakeCallback(this, &MyImpl::SetColor));
+   *   manager.UpdateBinding(color, view, SetColor);
    * @endcode
-   *
    */
-  void UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc);
+  void UpdateBinding(const UiColor& color, View view, void (*func)(const Vector4&))
+  {
+    UpdateBinding(color, view, MakeCallback(func));
+  }
+
+  /**
+   * @brief Updates color binding for a View.
+   *
+   * @param[in] color The UiColor to bind
+   * @param[in] view The target View
+   * @param[in] obj The object instance
+   * @param[in] func A member function with signature @c void(const @c Vector4&),
+   *                  invoked on color table change to apply the resolved color
+   *
+   * @code
+   *   manager.UpdateBinding(color, view, this, &MyImpl::SetColor);
+   * @endcode
+   */
+  template<class X>
+  void UpdateBinding(const UiColor& color, View view, X* obj, void (X::*func)(const Vector4&))
+  {
+    UpdateBinding(color, view, MakeCallback(obj, func));
+  }
 
   /**
    * @brief Retrieves the UiColor associated with a specific View+applyFunc binding.
    *
    * @param[in] view The target View
-   * @param[in] applyFunc Callback matching the one used in UpdateBinding (ownership transferred)
+   * @param[in] func Free function matching the one used in UpdateBinding
    * @param[out] outColor The bound UiColor if found
    * @return @c true if a binding was found, @c false otherwise
    */
-  bool GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const;
+  bool GetBindingColor(View view, void (*func)(const Vector4&), UiColor& outColor) const
+  {
+    return GetBindingColor(view, MakeCallback(func), outColor);
+  }
+
+  /**
+   * @brief Retrieves the UiColor associated with a specific View+applyFunc binding.
+   *
+   * @param[in] view The target View
+   * @param[in] obj The object instance
+   * @param[in] func Member function matching the one used in UpdateBinding
+   * @param[out] outColor The bound UiColor if found
+   * @return @c true if a binding was found, @c false otherwise
+   */
+  template<class X>
+  bool GetBindingColor(View view, X* obj, void (X::*func)(const Vector4&), UiColor& outColor) const
+  {
+    return GetBindingColor(view, MakeCallback(obj, func), outColor);
+  }
 
   /**
    * @brief Removes a specific binding for a View+applyFunc pair.
    *
-   * Use when a specific color property (e.g. background color) is overridden
-   * with a direct RGBA value while other bindings on the same View are preserved.
+   * @param[in] view The View to unbind
+   * @param[in] func Free function matching the one used in UpdateBinding
+   */
+  void RemoveBinding(View view, void (*func)(const Vector4&))
+  {
+    RemoveBinding(view, MakeCallback(func));
+  }
+
+  /**
+   * @brief Removes a specific binding for a View+applyFunc pair.
    *
    * @param[in] view The View to unbind
-   * @param[in] applyFunc Callback with signature @c void( @c const @c Vector4&),
-   *                      matching the one used in UpdateBinding. Ownership is transferred.
+   * @param[in] obj The object instance
+   * @param[in] func Member function matching the one used in UpdateBinding
    */
-  void RemoveBinding(View view, CallbackBase* applyFunc);
+  template<class X>
+  void RemoveBinding(View view, X* obj, void (X::*func)(const Vector4&))
+  {
+    RemoveBinding(view, MakeCallback(obj, func));
+  }
 
   /**
    * @brief Removes all bindings associated with a given View.
@@ -240,12 +285,14 @@ public:
   void ClearColorOverride();
 
 public: // Not intended for Application developers
-  /**
-   * @brief This constructor is used internally to wrap an implementation object.
-   *
-   * @param[in] impl A pointer to the internal UiColorManager implementation
-   */
-  explicit UiColorManager(Integration::UiColorManagerImpl* impl);
+  /// @cond internal
+  explicit UiColorManager(Internal::UiColorManagerImpl* impl);
+  /// @endcond
+
+private:
+  void UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc);
+  bool GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const;
+  void RemoveBinding(View view, CallbackBase* applyFunc);
 };
 
 } // namespace Ui

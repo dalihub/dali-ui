@@ -33,13 +33,13 @@ namespace
 Vector4 gLastAppliedColor;
 int     gApplyCallCount = 0;
 
-void TestApplyFunc(View view, const Vector4& color)
+void TestApplyFunc(const Vector4& color)
 {
   gLastAppliedColor = color;
   gApplyCallCount++;
 }
 
-void TestApplyFunc2(View view, const Vector4& color)
+void TestApplyFunc2(const Vector4& color)
 {
   // Second apply function for testing multiple bindings
 }
@@ -285,11 +285,11 @@ int UtcDaliUiColorManagerUpdateBindingTokenP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(color, view, TestApplyFunc);
 
   // Verify binding was registered
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor);
+  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
   DALI_TEST_CHECK(found);
   DALI_TEST_EQUALS(outColor.GetColorId(), "Primary", TEST_LOCATION);
 
@@ -305,14 +305,14 @@ int UtcDaliUiColorManagerUpdateBindingRgbaRemovesP(void)
 
   // First register a token binding
   UiColor tokenColor("Primary");
-  manager.UpdateBinding(tokenColor, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(tokenColor, view, TestApplyFunc);
 
   // Now update with RGBA → should remove the binding
   UiColor rgbaColor(1.0f, 0.0f, 0.0f, 1.0f);
-  manager.UpdateBinding(rgbaColor, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(rgbaColor, view, TestApplyFunc);
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor);
+  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
   DALI_TEST_CHECK(!found);
 
   END_TEST;
@@ -328,10 +328,10 @@ int UtcDaliUiColorManagerGetBindingColorP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(color, view, TestApplyFunc);
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor);
+  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
 
   DALI_TEST_CHECK(found);
   DALI_TEST_EQUALS(outColor.GetColorId(), "Primary", TEST_LOCATION);
@@ -347,7 +347,7 @@ int UtcDaliUiColorManagerGetBindingColorN(void)
   View view = View::New();
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor);
+  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
 
   DALI_TEST_CHECK(!found);
 
@@ -364,13 +364,13 @@ int UtcDaliUiColorManagerRemoveBindingP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(color, view, TestApplyFunc);
 
-  manager.RemoveBinding(view, MakeCallback(TestApplyFunc));
+  manager.RemoveBinding(view, TestApplyFunc);
 
   // Verify binding was removed
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor);
+  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
   DALI_TEST_CHECK(!found);
 
   END_TEST;
@@ -388,16 +388,16 @@ int UtcDaliUiColorManagerRemoveBindingsP(void)
   UiColor color1("Primary");
   UiColor color2("Background");
 
-  manager.UpdateBinding(color1, view, MakeCallback(TestApplyFunc));
-  manager.UpdateBinding(color2, view, MakeCallback(TestApplyFunc2));
+  manager.UpdateBinding(color1, view, TestApplyFunc);
+  manager.UpdateBinding(color2, view, TestApplyFunc2);
 
   // Remove all bindings for this view
   manager.RemoveBindings(view);
 
   // Verify all bindings were removed
   UiColor outColor;
-  DALI_TEST_CHECK(!manager.GetBindingColor(view, MakeCallback(TestApplyFunc), outColor));
-  DALI_TEST_CHECK(!manager.GetBindingColor(view, MakeCallback(TestApplyFunc2), outColor));
+  DALI_TEST_CHECK(!manager.GetBindingColor(view, TestApplyFunc, outColor));
+  DALI_TEST_CHECK(!manager.GetBindingColor(view, TestApplyFunc2, outColor));
 
   END_TEST;
 }
@@ -488,7 +488,7 @@ int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
   // Bind view to "Primary" token color
   UiColor color("Primary");
   gApplyCallCount = 0;
-  manager.UpdateBinding(color, view, MakeCallback(TestApplyFunc));
+  manager.UpdateBinding(color, view, TestApplyFunc);
   DALI_TEST_EQUALS(gApplyCallCount, 0, TEST_LOCATION);
 
   // Set override → should immediately refresh and call apply func

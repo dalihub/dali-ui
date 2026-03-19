@@ -355,7 +355,7 @@ void ViewImpl::SetPivotPoint(const Vector3& point)
 UiColor ViewImpl::GetBackgroundColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), MakeCallback(this, &ViewImpl::SetBackgroundColorInternal), outColor))
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal, outColor))
   {
     return outColor;
   }
@@ -364,7 +364,7 @@ UiColor ViewImpl::GetBackgroundColor()
 
 void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), MakeCallback(this, &ViewImpl::SetBackgroundColorInternal));
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal);
   SetBackgroundColorInternal(color.Resolve());
 }
 

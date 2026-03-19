@@ -40,7 +40,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 /**
@@ -137,7 +137,7 @@ private:
   bool                                   mConnected{false};
 };
 
-} // namespace Integration
+} // namespace Internal
 
 /**
  * @brief Retrieves the UiColorManagerImpl from a UiColorManager handle.
@@ -145,10 +145,10 @@ private:
  * @param[in] obj The UiColorManager handle
  * @return A reference to the internal implementation
  */
-inline Integration::UiColorManagerImpl& GetImpl(UiColorManager& obj)
+inline Internal::UiColorManagerImpl& GetImpl(UiColorManager& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::UiColorManagerImpl&>(handle);
+  return static_cast<Internal::UiColorManagerImpl&>(handle);
 }
 
 /**
@@ -157,10 +157,10 @@ inline Integration::UiColorManagerImpl& GetImpl(UiColorManager& obj)
  * @param[in] obj The UiColorManager handle
  * @return A const reference to the internal implementation
  */
-inline const Integration::UiColorManagerImpl& GetImpl(const UiColorManager& obj)
+inline const Internal::UiColorManagerImpl& GetImpl(const UiColorManager& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::UiColorManagerImpl&>(handle);
+  return static_cast<const Internal::UiColorManagerImpl&>(handle);
 }
 
 } // namespace Ui

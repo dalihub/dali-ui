@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-color-manager-impl.h>
+#include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 
 namespace Dali
 {
@@ -28,19 +28,19 @@ namespace Ui
 
 UiColorManager::UiColorManager() = default;
 
-UiColorManager::UiColorManager(Integration::UiColorManagerImpl* impl)
+UiColorManager::UiColorManager(Internal::UiColorManagerImpl* impl)
 : BaseHandle(impl)
 {
 }
 
 UiColorManager UiColorManager::Get()
 {
-  return Integration::UiColorManagerImpl::Get();
+  return Internal::UiColorManagerImpl::Get();
 }
 
 UiColorManager UiColorManager::DownCast(BaseHandle handle)
 {
-  return UiColorManager(dynamic_cast<Integration::UiColorManagerImpl*>(handle.GetObjectPtr()));
+  return UiColorManager(dynamic_cast<Internal::UiColorManagerImpl*>(handle.GetObjectPtr()));
 }
 
 Vector4 UiColorManager::GetColor(StringView colorId) const
