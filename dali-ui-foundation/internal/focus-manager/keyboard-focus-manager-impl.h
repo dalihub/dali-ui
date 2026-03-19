@@ -53,8 +53,8 @@ public:
 
   struct FocusChangeContext
   {
-    Ui::View::KeyboardFocus::Device device = Ui::View::KeyboardFocus::Device::UNKNOWN;
-    std::string                     deviceName;
+    Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
+    std::string     deviceName;
   };
 
   enum FocusIndicatorState
@@ -109,12 +109,12 @@ public:
   /**
    * @copydoc Ui::KeyboardFocusManager::MoveFocus
    */
-  bool MoveFocus(Ui::View::KeyboardFocus::Direction direction, const std::string& deviceName = "");
+  bool MoveFocus(Ui::FocusDirection direction, const std::string& deviceName = "");
 
   /**
    * @brief Move the focus with device information
    */
-  bool MoveFocus(Ui::View::KeyboardFocus::Direction direction, const FocusChangeContext& context);
+  bool MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context);
 
   /**
    * @copydoc Ui::KeyboardFocusManager::ClearFocus
@@ -301,7 +301,7 @@ private:
    */
   bool DoMoveFocusWithinLayoutControl(Ui::Control control, Actor actor, Ui::Control::KeyboardFocus::Direction direction,
                                       const FocusChangeContext& context);
-  bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::View::KeyboardFocus::Direction direction,
+  bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction,
                                    const FocusChangeContext& context);
 
   /**
@@ -391,7 +391,7 @@ private:
    * @param deviceClass The device class from the touch event
    * @return The corresponding KeyboardFocus::Device
    */
-  Ui::View::KeyboardFocus::Device ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const;
+  Ui::FocusDevice ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const;
 
   /**
    * Recursively deliver events to the view and its parents, until the event is consumed or the stage is reached.

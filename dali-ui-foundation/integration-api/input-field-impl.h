@@ -22,7 +22,6 @@
 #include <dali/devel-api/adaptor-framework/input-method-context.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -31,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 
 namespace Dali
 {

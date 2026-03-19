@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <string>
 
@@ -58,7 +59,7 @@ class DALI_UI_API KeyboardFocusManager : public BaseHandle
 {
 public:
   /// @brief Pre focus change signal
-  typedef Signal<Actor(Actor, Actor, View::KeyboardFocus::Direction)> PreFocusChangeSignalType;
+  typedef Signal<Actor(Actor, Actor, Ui::FocusDirection)> PreFocusChangeSignalType;
 
   /// @brief Focus changed signal
   typedef Signal<void(Actor, Actor)> FocusChangedSignalType;
@@ -129,7 +130,7 @@ public:
    * @pre The KeyboardFocusManager has been initialized.
    */
   bool MoveFocus(Control::KeyboardFocus::Direction direction);
-  bool MoveFocus(View::KeyboardFocus::Direction direction);
+  bool MoveFocus(FocusDirection direction);
 
   /**
    * @brief Clears the focus from the current focused actor if any, so
@@ -235,7 +236,7 @@ public:
    * @return The device of the last focus change
    * @pre The KeyboardFocusManager has been initialized.
    */
-  View::KeyboardFocus::Device GetLastFocusChangeDevice() const;
+  FocusDevice GetLastFocusChangeDevice() const;
 
   /**
    * @brief Gets the device name that caused the last focus change.
@@ -284,7 +285,7 @@ public: // Signals
    *
    * A callback of the following type may be connected:
    * @code
-   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, View::KeyboardFocus::Direction
+   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, FocusDirection::Direction
    * direction);
    * @endcode
    * @SINCE_1_0.0

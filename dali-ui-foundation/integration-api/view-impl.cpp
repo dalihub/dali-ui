@@ -49,6 +49,7 @@
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/layout/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
@@ -125,9 +126,10 @@ void RegisterViewAccessibleGetter()
       {
         return {nullptr, true};
       }
-      if(view.IsCreateAccessibleEnabled())
+
+      auto& viewImpl = Integration::GetImpl(view);
+      if(Dali::Ui::Internal::ViewDataImpl::Get(viewImpl).IsCreateAccessibleEnabled())
       {
-        auto& viewImpl = Integration::GetImpl(view);
         return {std::shared_ptr<ViewAccessible>(viewImpl.CreateAccessibleObject()), true};
       }
       return {nullptr, false};
@@ -1056,7 +1058,7 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 
 void ViewImpl::Initialize()
 {
-  if(!(mImpl->mFlags & Ui::View::DISABLE_VISUALS))
+  if(!(mImpl->mFlags & Ui::Integration::ViewImpl::ViewBehaviour::DISABLE_VISUALS))
   {
     mImpl->InitializeVisualData();
   }
@@ -1066,7 +1068,7 @@ void ViewImpl::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  if(mImpl->mFlags & Ui::View::REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
+  if(mImpl->mFlags & Ui::Integration::ViewImpl::ViewBehaviour::REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
   {
     SetKeyboardNavigationSupport(true);
   }
@@ -1353,7 +1355,7 @@ ViewAccessible* ViewImpl::CreateAccessibleObject()
   return new ViewAccessible(Self());
 }
 
-Actor ViewImpl::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::View::KeyboardFocus::Direction direction,
+Actor ViewImpl::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction,
                                               bool loopEnabled)
 {
   return Actor();
@@ -1653,6 +1655,28 @@ void ViewImpl::SignalConnected(SlotObserver* slotObserver, CallbackBase* callbac
 void ViewImpl::SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback)
 {
   mImpl->SignalDisconnected(slotObserver, callback);
+}
+
+// From view.cpp
+
+std::vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
+{
+  std::vector<Accessibility::Relation> result;
+
+  const auto* accessibilityData = mImpl->GetAccessibilityData();
+  if(DALI_LIKELY(accessibilityData))
+  {
+    const auto& relations = accessibilityData->mAccessibilityProps.relations;
+    for(const auto& relation : relations)
+    {
+      const auto& targets = relation.second;
+
+      result.emplace_back(Accessibility::Relation{relation.first, {}});
+      std::copy(targets.begin(), targets.end(), std::back_inserter(result.back().mTargets));
+    }
+  }
+
+  return result;
 }
 
 } // namespace Integration

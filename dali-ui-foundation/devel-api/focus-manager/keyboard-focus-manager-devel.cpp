@@ -56,7 +56,7 @@ bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Control::KeyboardFocus
   return false;
 }
 
-bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::View::KeyboardFocus::Direction direction,
+bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction,
                const std::string& deviceName)
 {
   return GetImpl(keyboardFocusManager).MoveFocus(direction, deviceName);

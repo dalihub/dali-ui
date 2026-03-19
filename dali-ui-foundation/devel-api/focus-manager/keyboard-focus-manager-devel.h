@@ -58,7 +58,7 @@ public:
    * @param[in] deviceName The name of the device where the key event occurred.
    * @return A handle to the next focusable actor
    */
-  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::View::KeyboardFocus::Direction direction,
+  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::FocusDirection direction,
                                       const std::string& deviceName = "") = 0;
 };
 
@@ -116,7 +116,7 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusMan
  */
 DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Control::KeyboardFocus::Direction direction,
                            const std::string& deviceName);
-DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::View::KeyboardFocus::Direction direction,
+DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction,
                            const std::string& deviceName);
 
 /**

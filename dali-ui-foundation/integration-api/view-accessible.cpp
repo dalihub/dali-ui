@@ -45,6 +45,18 @@ using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToStdString;
 
+// TODO: Temp function
+namespace
+{
+Dali::Ui::Internal::ViewDataImpl& GetViewImplementation(Dali::Ui::View view)
+{
+  auto& internalView = Dali::Ui::Integration::GetImpl(view);
+
+  return Dali::Ui::Internal::ViewDataImpl::Get(internalView);
+}
+
+} // unnamed namespace
+
 namespace Dali::Ui
 {
 namespace
@@ -458,7 +470,7 @@ Dali::Accessibility::Attributes ViewAccessible::GetAttributes() const
       result.emplace(classKey, typeName);
 
       // Save the 'typeName' so we don't have to calculate it again
-      view.AppendAccessibilityAttribute(ToDaliString(classKey), ToDaliString(typeName));
+      GetViewImplementation(view).AppendAccessibilityAttribute(ToDaliString(classKey), ToDaliString(typeName));
     }
   }
 
@@ -596,9 +608,9 @@ bool ViewAccessible::GrabHighlight()
   RegisterPropertySetSignal();
 
   auto view = Dali::Ui::View::DownCast(self);
-  if(!view.AccessibilityHighlightedSignal().Empty())
+  if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
   {
-    view.AccessibilityHighlightedSignal().Emit(true);
+    GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(true);
   }
 
   mHighlightOverlay.UpdateOverlay(highlight);
@@ -623,9 +635,9 @@ bool ViewAccessible::ClearHighlight()
     SetCurrentlyHighlightedActor({});
     EmitHighlighted(false);
     auto view = Dali::Ui::View::DownCast(self);
-    if(!view.AccessibilityHighlightedSignal().Empty())
+    if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
     {
-      view.AccessibilityHighlightedSignal().Emit(false);
+      GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(false);
     }
     mHighlightOverlay.HideOverlay();
     return true;
@@ -702,7 +714,7 @@ std::vector<Dali::Accessibility::Relation> ViewAccessible::GetRelationSet()
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  return view.GetAccessibilityRelations();
+  return Integration::GetImpl(view).GetAccessibilityRelations();
 }
 
 std::string ViewAccessible::GetStringProperty(std::string propertyName) const
@@ -720,9 +732,9 @@ bool ViewAccessible::ScrollToChild(Actor child)
   auto view    = Dali::Ui::View::DownCast(Self());
   bool success = false;
 
-  if(!view.AccessibilityActionSignal().Empty())
+  if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty())
   {
-    success = view.AccessibilityActionSignal().Emit({Accessibility::ActionType::SCROLL_TO_CHILD, child});
+    success = GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityActionSignal.Emit({Accessibility::ActionType::SCROLL_TO_CHILD, child});
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: scrollToChild, success : %d\n", success);
   }
 

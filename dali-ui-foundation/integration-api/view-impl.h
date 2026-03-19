@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layout-types.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -1023,8 +1024,8 @@ public: // API for derived classes to override
    * @param[in] loopEnabled Whether the focus movement should be looped within the view
    * @return The next keyboard focusable actor in this view or an empty handle if no actor can be focused
    */
-  virtual Actor GetNextKeyboardFocusableActor(Actor                              currentFocusedActor,
-                                              Ui::View::KeyboardFocus::Direction direction, bool loopEnabled);
+  virtual Actor GetNextKeyboardFocusableActor(Actor              currentFocusedActor,
+                                              Ui::FocusDirection direction, bool loopEnabled);
 
   /**
    * @brief Informs this view that its chosen focusable actor will be focused.
@@ -1142,6 +1143,11 @@ public:
 
 private:
   Internal::ViewDataImpl* mImpl;
+
+  // From view.h
+
+public:
+  std::vector<Accessibility::Relation> GetAccessibilityRelations();
 };
 
 // Helpers for public-api forwarding methods

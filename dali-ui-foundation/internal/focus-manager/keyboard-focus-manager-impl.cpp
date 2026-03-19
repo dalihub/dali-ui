@@ -228,7 +228,7 @@ bool KeyboardFocusManager::SetCurrentFocusActor(Actor actor)
   DALI_ASSERT_DEBUG(!mIsWaitingKeyboardFocusChangeCommit &&
                     "Calling this function in the PreFocusChangeSignal callback?");
 
-  return DoSetCurrentFocusActor(actor, {Ui::View::KeyboardFocus::Device::PROGRAMMATIC, ""});
+  return DoSetCurrentFocusActor(actor, {Ui::FocusDevice::PROGRAMMATIC, ""});
 }
 
 bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext& context)
@@ -316,13 +316,13 @@ bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChange
     if(currentlyFocusedView)
     {
       // Do we need it to remember if it was previously DISABLED?
-      currentlyFocusedView.ClearKeyInputFocus();
+      Integration::GetImpl(currentlyFocusedView).ClearKeyInputFocus();
     }
 
     Ui::View newlyFocusedView = Ui::View::DownCast(actor);
     if(newlyFocusedView)
     {
-      newlyFocusedView.SetKeyInputFocus();
+      Integration::GetImpl(newlyFocusedView).SetKeyInputFocus();
     }
 
     // Push Current Focused Actor to FocusHistory
@@ -465,25 +465,25 @@ Ui::View KeyboardFocusManager::GetParentLayoutView(Actor actor) const
   return Ui::View::DownCast(parent);
 }
 
-Ui::View::KeyboardFocus::Device KeyboardFocusManager::ConvertDeviceClassToKeyboardFocusDevice(
+Ui::FocusDevice KeyboardFocusManager::ConvertDeviceClassToKeyboardFocusDevice(
   Device::Class::Type deviceClass) const
 {
   switch(deviceClass)
   {
     case Dali::Device::Class::KEYBOARD:
-      return Ui::View::KeyboardFocus::Device::KEYBOARD;
+      return Ui::FocusDevice::KEYBOARD;
     case Dali::Device::Class::MOUSE:
-      return Ui::View::KeyboardFocus::Device::MOUSE;
+      return Ui::FocusDevice::MOUSE;
     case Dali::Device::Class::TOUCH:
-      return Ui::View::KeyboardFocus::Device::TOUCH;
+      return Ui::FocusDevice::TOUCH;
     case Dali::Device::Class::PEN:
-      return Ui::View::KeyboardFocus::Device::PEN;
+      return Ui::FocusDevice::PEN;
     case Dali::Device::Class::POINTER:
-      return Ui::View::KeyboardFocus::Device::POINTER;
+      return Ui::FocusDevice::POINTER;
     case Dali::Device::Class::GAMEPAD:
-      return Ui::View::KeyboardFocus::Device::GAMEPAD;
+      return Ui::FocusDevice::GAMEPAD;
     default:
-      return Ui::View::KeyboardFocus::Device::UNKNOWN;
+      return Ui::FocusDevice::UNKNOWN;
   }
 }
 
@@ -497,12 +497,12 @@ bool KeyboardFocusManager::MoveFocus(Ui::Control::KeyboardFocus::Direction direc
   return false;
 }
 
-bool KeyboardFocusManager::MoveFocus(Ui::View::KeyboardFocus::Direction direction, const std::string& deviceName)
+bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const std::string& deviceName)
 {
-  return MoveFocus(direction, {Ui::View::KeyboardFocus::Device::PROGRAMMATIC, deviceName});
+  return MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, deviceName});
 }
 
-bool KeyboardFocusManager::MoveFocus(Ui::View::KeyboardFocus::Direction direction, const FocusChangeContext& context)
+bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   Actor currentFocusActor = GetCurrentFocusActor();
 
@@ -533,32 +533,32 @@ bool KeyboardFocusManager::MoveFocus(Ui::View::KeyboardFocus::Direction directio
       // Find property index based upon focus direction
       switch(direction)
       {
-        case Ui::View::KeyboardFocus::LEFT:
+        case Ui::FocusDirection::LEFT:
         {
           index = Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID;
           break;
         }
-        case Ui::View::KeyboardFocus::RIGHT:
+        case Ui::FocusDirection::RIGHT:
         {
           index = Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID;
           break;
         }
-        case Ui::View::KeyboardFocus::UP:
+        case Ui::FocusDirection::UP:
         {
           index = Ui::View::Property::UP_FOCUSABLE_ACTOR_ID;
           break;
         }
-        case Ui::View::KeyboardFocus::DOWN:
+        case Ui::FocusDirection::DOWN:
         {
           index = Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID;
           break;
         }
-        case Ui::View::KeyboardFocus::CLOCKWISE:
+        case Ui::FocusDirection::CLOCKWISE:
         {
           index = Ui::View::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID;
           break;
         }
-        case Ui::View::KeyboardFocus::COUNTER_CLOCKWISE:
+        case Ui::FocusDirection::COUNTER_CLOCKWISE:
         {
           index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID;
           break;
@@ -668,8 +668,8 @@ bool KeyboardFocusManager::DoMoveFocusWithinLayoutControl(Ui::Control control, A
 }
 
 bool KeyboardFocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor,
-                                                       Ui::View::KeyboardFocus::Direction direction,
-                                                       const FocusChangeContext&          context)
+                                                       Ui::FocusDirection        direction,
+                                                       const FocusChangeContext& context)
 {
   // Ask the view for the next actor to focus
   Actor nextFocusableActor =
@@ -744,8 +744,8 @@ bool KeyboardFocusManager::DoMoveFocusToNextFocusGroup(bool forward, const Focus
   {
     // If the current focus group has a parent layout view, we can probably automatically
     // move the focus to the next focus group in the forward or backward direction.
-    Ui::View::KeyboardFocus::Direction direction =
-      forward ? Ui::View::KeyboardFocus::RIGHT : Ui::View::KeyboardFocus::LEFT;
+    Ui::FocusDirection direction =
+      forward ? Ui::FocusDirection::RIGHT : Ui::FocusDirection::LEFT;
     succeed          = DoMoveFocusWithinLayoutView(parentLayoutView, GetCurrentFocusActor(), direction, context);
     parentLayoutView = GetParentLayoutView(parentLayoutView);
   }
@@ -804,7 +804,7 @@ void KeyboardFocusManager::ClearFocus(Actor actor)
     Ui::View currentlyFocusedView = Ui::View::DownCast(actor);
     if(currentlyFocusedView)
     {
-      currentlyFocusedView.ClearKeyInputFocus();
+      Integration::GetImpl(currentlyFocusedView).ClearKeyInputFocus();
     }
   }
   mCurrentFocusActor.Reset();
@@ -937,11 +937,11 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
     }
   }
 
-  const std::string&              keyName        = ToStdString(event.GetKeyName());
-  const std::string&              logicalKeyName = ToStdString(event.GetLogicalKey());
-  const std::string&              deviceName     = ToStdString(event.GetDeviceName());
-  Ui::View::KeyboardFocus::Device device         = Ui::View::KeyboardFocus::Device::KEYBOARD;
-  FocusChangeContext              context        = {device, deviceName};
+  const std::string& keyName        = ToStdString(event.GetKeyName());
+  const std::string& logicalKeyName = ToStdString(event.GetLogicalKey());
+  const std::string& deviceName     = ToStdString(event.GetDeviceName());
+  Ui::FocusDevice    device         = Ui::FocusDevice::KEYBOARD;
+  FocusChangeContext context        = {device, deviceName};
 
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
@@ -962,7 +962,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards left
-        MoveFocus(Ui::View::KeyboardFocus::LEFT, context);
+        MoveFocus(Ui::FocusDirection::LEFT, context);
       }
 
       isFocusStartableKey = true;
@@ -977,7 +977,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards right
-        MoveFocus(Ui::View::KeyboardFocus::RIGHT, context);
+        MoveFocus(Ui::FocusDirection::RIGHT, context);
       }
 
       isFocusStartableKey = true;
@@ -992,7 +992,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards up
-        MoveFocus(Ui::View::KeyboardFocus::UP, context);
+        MoveFocus(Ui::FocusDirection::UP, context);
       }
 
       isFocusStartableKey = true;
@@ -1007,7 +1007,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards down
-        MoveFocus(Ui::View::KeyboardFocus::DOWN, context);
+        MoveFocus(Ui::FocusDirection::DOWN, context);
       }
 
       isFocusStartableKey = true;
@@ -1022,7 +1022,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards the previous page
-        MoveFocus(Ui::View::KeyboardFocus::PAGE_UP, context);
+        MoveFocus(Ui::FocusDirection::PAGE_UP, context);
       }
 
       isFocusStartableKey = true;
@@ -1037,7 +1037,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
       else
       {
         // Move the focus towards the next page
-        MoveFocus(Ui::View::KeyboardFocus::PAGE_DOWN, context);
+        MoveFocus(Ui::FocusDirection::PAGE_DOWN, context);
       }
 
       isFocusStartableKey = true;
@@ -1058,7 +1058,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
           // If the focus group is not changed, Move the focus towards forward, "Shift-Tap" key moves the focus towards
           // backward.
           MoveFocus(
-            event.IsShiftModifier() ? Ui::View::KeyboardFocus::BACKWARD : Ui::View::KeyboardFocus::FORWARD,
+            event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD,
             context);
         }
       }
@@ -1132,7 +1132,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
     {
       // No actor is focused but keyboard focus is activated by the key press
       // Let's try to move the initial focus
-      MoveFocus(Ui::View::KeyboardFocus::RIGHT, context);
+      MoveFocus(Ui::FocusDirection::RIGHT, context);
     }
   }
 }
@@ -1150,7 +1150,7 @@ void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
   // We only do this on a Down event, otherwise the clear action may override a manually focused actor.
   if(((touch.GetPointCount() < 1) || (touch.GetState(0) == PointState::DOWN)))
   {
-    Ui::View::KeyboardFocus::Device device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
+    Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
 
     // If you touch the currently focused actor again, you don't need to do SetCurrentFocusActor again.
     Actor hitActor = touch.GetHitActor(0);
@@ -1177,10 +1177,10 @@ void KeyboardFocusManager::OnWheelEvent(const WheelEvent& event)
 {
   if(event.GetType() == Dali::WheelEvent::CUSTOM_WHEEL)
   {
-    Ui::View::KeyboardFocus::Direction direction =
-      (event.GetDelta() > 0) ? Ui::View::KeyboardFocus::CLOCKWISE : Ui::View::KeyboardFocus::COUNTER_CLOCKWISE;
+    Ui::FocusDirection direction =
+      (event.GetDelta() > 0) ? Ui::FocusDirection::CLOCKWISE : Ui::FocusDirection::COUNTER_CLOCKWISE;
     // Move the focus
-    MoveFocus(direction, {Ui::View::KeyboardFocus::Device::WHEEL, ""});
+    MoveFocus(direction, {Ui::FocusDevice::WHEEL, ""});
   }
 }
 

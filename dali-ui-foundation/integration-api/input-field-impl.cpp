@@ -21,6 +21,7 @@
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
@@ -28,17 +29,17 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
-#include <dali/integration-api/adaptor-framework/adaptor.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -341,7 +342,9 @@ void InputFieldImpl::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.OnSceneSignal().Connect(this, &InputFieldImpl::OnSceneConnect);
 
-  Dali::Ui::View::DownCast(self).SetInputMethodContext(mInputMethodContext);
+  View                   view         = Dali::Ui::View::DownCast(self);
+  Integration::ViewImpl& viewInternal = Ui::Integration::GetImpl(view);
+  Internal::ViewDataImpl::Get(viewInternal).SetInputMethodContext(mInputMethodContext);
 
   EnableClipping();
 

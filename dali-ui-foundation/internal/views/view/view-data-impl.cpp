@@ -208,7 +208,10 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, c
 {
   using Dali::Accessibility::ActionType;
   DALI_ASSERT_DEBUG(view);
-  DALI_ASSERT_DEBUG(!view.AccessibilityActionSignal().Empty());
+
+  auto& viewImpl     = Integration::GetImpl(view);
+  auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
+  DALI_ASSERT_DEBUG(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty());
 
   ActionType action = ActionType::MAX_COUNT;
   if(actionName == ACTION_ACCESSIBILITY_ACTIVATE)
@@ -230,7 +233,7 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, c
 
   if(action != ActionType::MAX_COUNT)
   {
-    bool success = view.AccessibilityActionSignal().Emit({action, Dali::Actor{}});
+    bool success = viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Emit({action, Dali::Actor{}});
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: %s, success : %d\n", actionName.CStr(),
                   success);
     return success;
@@ -241,13 +244,15 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, c
 
 bool PerformLegacyAccessibilityAction(Ui::View view, const Dali::String& actionName)
 {
-  bool ret = true;
+  auto& viewImpl     = Integration::GetImpl(view);
+  auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
+  bool  ret          = true;
   if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_ACTIVATE))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityActivateSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActivateSignal.Empty())
     {
-      view.AccessibilityActivateSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActivateSignal.Emit();
     }
     else
     {
@@ -257,41 +262,41 @@ bool PerformLegacyAccessibilityAction(Ui::View view, const Dali::String& actionN
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_SKIPPED))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityReadingSkippedSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingSkippedSignal.Empty())
     {
-      view.AccessibilityReadingSkippedSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingSkippedSignal.Emit();
     }
   }
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_PAUSED))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityReadingPausedSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingPausedSignal.Empty())
     {
-      view.AccessibilityReadingPausedSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingPausedSignal.Emit();
     }
   }
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_RESUMED))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityReadingResumedSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingResumedSignal.Empty())
     {
-      view.AccessibilityReadingResumedSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingResumedSignal.Emit();
     }
   }
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_CANCELLED))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityReadingCancelledSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingCancelledSignal.Empty())
     {
-      view.AccessibilityReadingCancelledSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingCancelledSignal.Emit();
     }
   }
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_STOPPED))
   {
     // if cast succeeds there is an implementation so no need to check
-    if(!view.AccessibilityReadingStoppedSignal().Empty())
+    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStoppedSignal.Empty())
     {
-      view.AccessibilityReadingStoppedSignal().Emit();
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStoppedSignal.Emit();
     }
   }
   else
@@ -310,11 +315,13 @@ bool DoAccessibilityAction(BaseObject* object, const Dali::String& actionName, c
 {
   Dali::BaseHandle handle(object);
 
-  Ui::View view = Ui::View::DownCast(handle);
+  Ui::View view         = Ui::View::DownCast(handle);
+  auto&    viewImpl     = Integration::GetImpl(view);
+  auto&    viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
 
   DALI_ASSERT_ALWAYS(view);
 
-  if(!view.AccessibilityActionSignal().Empty())
+  if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty())
   {
     return PerformAccessibilityAction(view, actionName, attributes);
   }
@@ -365,7 +372,8 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
   if(view)
   {
     Integration::ViewImpl& viewImpl(Integration::GetImpl(view));
-    connected = true;
+    auto&                  viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
+    connected                           = true;
 
     if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_EVENT))
     {
@@ -401,15 +409,15 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
     }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_NAME))
     {
-      view.AccessibilityGetNameSignal().Connect(tracker, functor);
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityGetNameSignal.Connect(tracker, functor);
     }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_DESCRIPTION))
     {
-      view.AccessibilityGetDescriptionSignal().Connect(tracker, functor);
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityGetDescriptionSignal.Connect(tracker, functor);
     }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_DO_GESTURE))
     {
-      view.AccessibilityDoGestureSignal().Connect(tracker, functor);
+      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityDoGestureSignal.Connect(tracker, functor);
     }
   }
   return connected;
