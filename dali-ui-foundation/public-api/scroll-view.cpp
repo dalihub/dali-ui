@@ -38,6 +38,7 @@ inline Integration::ScrollViewImpl& GetImpl(ScrollView& scrollView)
 }
 
 inline const Integration::ScrollViewImpl& GetImpl(const ScrollView& scrollView)
+
 {
   DALI_ASSERT_ALWAYS(scrollView);
   const Dali::RefObject& handle = scrollView.GetImplementation();
@@ -154,6 +155,28 @@ float ScrollView::GetMaxFlingDistance() const
 ScrollView& ScrollView::SetMaxFlingDistance(float distance)
 {
   GetImpl(*this).SetMaxFlingDistance(distance);
+  return *this;
+}
+
+int ScrollView::GetMinimumFlingDuration() const
+{
+  return GetImpl(*this).GetMinimumFlingDuration();
+}
+
+ScrollView& ScrollView::SetMinimumFlingDuration(int duration)
+{
+  GetImpl(*this).SetMinimumFlingDuration(duration);
+  return *this;
+}
+
+int ScrollView::GetMaximumFlingDuration() const
+{
+  return GetImpl(*this).GetMaximumFlingDuration();
+}
+
+ScrollView& ScrollView::SetMaximumFlingDuration(int duration)
+{
+  GetImpl(*this).SetMaximumFlingDuration(duration);
   return *this;
 }
 

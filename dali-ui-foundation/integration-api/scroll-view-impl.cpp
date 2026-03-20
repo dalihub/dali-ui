@@ -22,6 +22,8 @@
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
+#include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/math/vector2.h>
 
@@ -46,6 +48,9 @@ namespace Integration
 
 namespace
 {
+#ifdef DEBUG_ENABLED
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
+#endif
 
 BaseHandle Create()
 {
@@ -71,7 +76,9 @@ ScrollViewImpl::ScrollViewImpl()
   mScrollableWidth(0.0f),
   mScrollableHeight(0.0f),
   mScrollDirection(ScrollDirection::Vertical),
-  mMaxFlingDistance(10000.0f),
+  mMaxFlingDistance(6000.0f),
+  mMinimumFlingDuration(1000),
+  mMaximumFlingDuration(2000),
   mFlingSensitivity(1.0f),
   mDecelerationRate(0.998f),
   mOverScrollMode(OverScrollMode::ContentScrolls),
@@ -222,6 +229,26 @@ void ScrollViewImpl::SetMaxFlingDistance(float distance)
   mMaxFlingDistance = distance;
 }
 
+int ScrollViewImpl::GetMinimumFlingDuration() const
+{
+  return mMinimumFlingDuration;
+}
+
+void ScrollViewImpl::SetMinimumFlingDuration(int duration)
+{
+  mMinimumFlingDuration = duration;
+}
+
+int ScrollViewImpl::GetMaximumFlingDuration() const
+{
+  return mMaximumFlingDuration;
+}
+
+void ScrollViewImpl::SetMaximumFlingDuration(int duration)
+{
+  mMaximumFlingDuration = duration;
+}
+
 float ScrollViewImpl::GetFlingSensitivity() const
 {
   return mFlingSensitivity;
@@ -265,6 +292,9 @@ void ScrollViewImpl::ScrollTo(const Vector2& position, bool animation)
 
   Vector2 adjustedPosition = AdjustScrollPosition(position);
 
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::ScrollTo] requested=[%.2f, %.2f], adjusted=[%.2f, %.2f], animation=%d, scrollableH=%.0f, viewportH=%.0f\n",
+                position.x, position.y, adjustedPosition.x, adjustedPosition.y, animation, mScrollableHeight, mViewportHeight);
+
   if(!animation)
   {
     SendScrollStarted();
@@ -277,13 +307,47 @@ void ScrollViewImpl::ScrollTo(const Vector2& position, bool animation)
   }
   else
   {
-    Vector2 delta = DeltaFromScrollPosition(adjustedPosition);
-    if(delta.LengthSquared() > 0.0001f)
+    if(!mContent)
     {
-      SendScrollStarted();
-      ApplyScrollPosition(adjustedPosition);
-      SendScrollFinished();
+      return;
     }
+
+    float targetPosX = mMaximumStartX - adjustedPosition.x;
+    float targetPosY = mMaximumStartY - adjustedPosition.y;
+
+    float currentPosX = mContent.GetProperty<float>(Actor::Property::POSITION_X);
+    float currentPosY = mContent.GetProperty<float>(Actor::Property::POSITION_Y);
+
+    float distX = std::abs(targetPosX - currentPosX);
+    float distY = std::abs(targetPosY - currentPosY);
+    float dist  = std::sqrt(distX * distX + distY * distY);
+
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::ScrollTo] animate from contentPos=[%.2f, %.2f] to [%.2f, %.2f], dist=%.2f\n",
+                  currentPosX, currentPosY, targetPosX, targetPosY, dist);
+
+    if(dist < 0.5f)
+    {
+      SendScrollFinished();
+      return;
+    }
+
+    // Calculate duration proportional to distance, clamped between min/max fling duration
+    float maxScrollDist = std::max(1.0f, mScrollableHeight - mViewportHeight);
+    float ratio         = std::min(1.0f, dist / maxScrollDist);
+    float durationMs    = mMinimumFlingDuration + ratio * (mMaximumFlingDuration - mMinimumFlingDuration);
+    float durationSec   = durationMs / 1000.0f;
+
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::ScrollTo] animation duration=%.3f sec (ratio=%.3f)\n", durationSec, ratio);
+
+    SendScrollStarted();
+
+    mScrollAnimation = Animation::New(durationSec);
+    mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_X), targetPosX, AlphaFunction::EASE_OUT);
+    mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_Y), targetPosY, AlphaFunction::EASE_OUT);
+    mScrollAnimation.FinishedSignal().Connect(this, &ScrollViewImpl::OnScrollAnimationFinished);
+    mScrollAnimation.Play();
+
+    mScrollPosition = adjustedPosition;
   }
 }
 
@@ -431,10 +495,12 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
 
   Vector2 screenSize = Stage::GetCurrent().GetSize();
 
-  float movementX = -1.0f * mFlingSensitivity * (velocity.x > 0.0f ? 1.0f : -1.0f) * velocity.x * velocity.x *
-                    screenSize.width / (2000.0f * decelerationFactor);
-  float movementY = -1.0f * mFlingSensitivity * (velocity.y > 0.0f ? 1.0f : -1.0f) * velocity.y * velocity.y *
-                    screenSize.height / (2000.0f * decelerationFactor);
+  // Updated formula based on OneUIComponents commit
+  float movementX = -1.0f * mFlingSensitivity * velocity.x * screenSize.width / (mMaximumFlingDuration * decelerationFactor);
+  float movementY = -1.0f * mFlingSensitivity * velocity.y * screenSize.height / (mMaximumFlingDuration * decelerationFactor);
+
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] velocity=[%.2f, %.2f], screenSize=[%.0f, %.0f], decelerationFactor=%.6f, maxFlingDuration=%d, raw movement=[%.2f, %.2f]\n",
+                velocity.x, velocity.y, screenSize.width, screenSize.height, decelerationFactor, mMaximumFlingDuration, movementX, movementY);
 
   if(std::abs(movementX) > mMaxFlingDistance)
   {
@@ -444,6 +510,9 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   {
     movementY = mMaxFlingDistance * (movementY > 0.0f ? 1.0f : -1.0f);
   }
+
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] clamped movement=[%.2f, %.2f], maxFlingDistance=%.0f\n",
+                movementX, movementY, mMaxFlingDistance);
 
   return Vector2(movementX, movementY);
 }
@@ -573,6 +642,10 @@ void ScrollViewImpl::OnPanGesture(Actor actor, const PanGesture& gesture)
 
 void ScrollViewImpl::OnDragStarted(const PanGesture& gesture)
 {
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragStarted] screenPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f]\n",
+                gesture.GetScreenPosition().x, gesture.GetScreenPosition().y,
+                mScrollPosition.x, mScrollPosition.y);
+
   mTotalDisplacement = Vector2::ZERO;
   mIsThresholdMet    = false;
   mStartPanPosition  = gesture.GetScreenPosition();
@@ -654,18 +727,50 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
 {
   SendDragFinished();
 
+  // Update mCurrentPosition from the actual content position after dragging
+  if(mContent)
+  {
+    mCurrentPosition = Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
+                               mContent.GetProperty<float>(Actor::Property::POSITION_Y));
+    mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+  }
+
   Vector2 velocity = gesture.GetVelocity();
   Vector2 movement = VelocityToMovement(velocity);
-  Vector2 delta    = AdjustDelta(movement);
+
+  // Adjust end point incorrect direction balance (from OneUIComponents commit)
+  if(mScrollDirection == ScrollDirection::Horizontal)
+  {
+    movement = Vector2(movement.x, 0.0f);
+  }
+  else if(mScrollDirection == ScrollDirection::Vertical)
+  {
+    movement = Vector2(0.0f, movement.y);
+  }
+
+  Vector2 delta = AdjustDelta(movement);
+
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] velocity=[%.2f, %.2f], movement=[%.2f, %.2f], contentPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f], delta=[%.2f, %.2f], bounds=[minY=%.2f, maxY=%.2f]\n",
+                velocity.x, velocity.y, movement.x, movement.y,
+                mCurrentPosition.x, mCurrentPosition.y,
+                mScrollPosition.x, mScrollPosition.y,
+                delta.x, delta.y,
+                mMinimumStartY, mMaximumStartY);
 
   if(delta.LengthSquared() < 0.0001f)
   {
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] delta too small, finishing scroll\n");
     SendScrollFinished();
     return;
   }
 
-  // Apply fling (simplified - would use proper animation in full implementation)
-  Vector2 newPos = mScrollPosition + delta;
+  // delta is in content-position space; convert to scroll-position space (negate)
+  Vector2 scrollDelta = Vector2(-delta.x, -delta.y);
+  Vector2 newPos      = mScrollPosition + scrollDelta;
+
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] scrollDelta=[%.2f, %.2f], target scrollPos=[%.2f, %.2f]\n",
+                scrollDelta.x, scrollDelta.y, newPos.x, newPos.y);
+
   ScrollTo(newPos, true);
 }
 
@@ -743,6 +848,10 @@ void ScrollViewImpl::UpdateScrollingProperties()
   mHasScrollableArea = (CanScrollHorizontally(mScrollDirection) && mScrollableWidth > mViewportWidth) ||
                        (CanScrollVertically(mScrollDirection) && mScrollableHeight > mViewportHeight);
 
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::UpdateScrollingProperties] viewport=[%.0f, %.0f], scrollable=[%.0f, %.0f], bounds=[minY=%.2f, maxY=%.2f, minX=%.2f, maxX=%.2f], hasScrollableArea=%d\n",
+                mViewportWidth, mViewportHeight, mScrollableWidth, mScrollableHeight,
+                mMinimumStartY, mMaximumStartY, mMinimumStartX, mMaximumStartX, mHasScrollableArea);
+
   if(mScrollPosition.x < -0.5f)
   {
     float posX      = 0.0f;
@@ -765,10 +874,41 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
 
 void ScrollViewImpl::CancelScrollAnimation()
 {
+  if(mScrollAnimation)
+  {
+    mScrollAnimation.Stop();
+    mScrollAnimation.Reset();
+  }
   if(mIsScrolling)
   {
+    // Update positions from actual content state
+    if(mContent)
+    {
+      mCurrentPosition = Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
+                                 mContent.GetProperty<float>(Actor::Property::POSITION_Y));
+      mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+    }
     SendScrollFinished();
   }
+}
+
+void ScrollViewImpl::OnScrollAnimationFinished(Animation& animation)
+{
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnScrollAnimationFinished]\n");
+
+  mScrollAnimation.Reset();
+
+  if(mContent)
+  {
+    mCurrentPosition = Vector2(std::round(mContent.GetProperty<float>(Actor::Property::POSITION_X)),
+                               std::round(mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
+    mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnScrollAnimationFinished] final contentPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f]\n",
+                  mCurrentPosition.x, mCurrentPosition.y, mScrollPosition.x, mScrollPosition.y);
+  }
+
+  SendScrollFinished();
 }
 
 bool ScrollViewImpl::CanScrollHorizontally(ScrollDirection direction)

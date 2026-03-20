@@ -28,6 +28,18 @@
   */ \
   ChildClass& SetMaxFlingDistance(float distance) { ScrollView::SetMaxFlingDistance(distance); return *this; } \
   /** \
+  * @brief Sets the minimum duration of fling scroll animation. \
+  * \
+  * @param[in] duration The minimum fling duration \
+  */ \
+  ChildClass& SetMinimumFlingDuration(int duration) { ScrollView::SetMinimumFlingDuration(duration); return *this; } \
+  /** \
+  * @brief Sets the maximum duration of fling scroll animation. \
+  * \
+  * @param[in] duration The maximum fling duration \
+  */ \
+  ChildClass& SetMaximumFlingDuration(int duration) { ScrollView::SetMaximumFlingDuration(duration); return *this; } \
+  /** \
   * @brief Sets the sensitivity of fling action. \
   * \
   * @param[in] sensitivity The fling sensitivity \

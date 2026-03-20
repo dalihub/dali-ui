@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 // #include <dali/public-api/adaptor-framework/pan-gesture-detector.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/math/vector2.h>
 // #include <dali/public-api/signals/signal.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>
@@ -140,6 +141,26 @@ public: // API
    * @brief Sets the maximum fling distance.
    */
   void SetMaxFlingDistance(float distance);
+
+  /**
+   * @brief Gets the minimum duration of fling scroll animation.
+   */
+  int GetMinimumFlingDuration() const;
+
+  /**
+   * @brief Sets the minimum duration of fling scroll animation.
+   */
+  void SetMinimumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the maximum duration of fling scroll animation.
+   */
+  int GetMaximumFlingDuration() const;
+
+  /**
+   * @brief Sets the maximum duration of fling scroll animation.
+   */
+  void SetMaximumFlingDuration(int duration);
 
   /**
    * @brief Gets the fling sensitivity.
@@ -351,6 +372,11 @@ private:
   void CancelScrollAnimation();
 
   /**
+   * @brief Callback for scroll animation finished.
+   */
+  void OnScrollAnimationFinished(Animation& animation);
+
+  /**
    * @brief Checks if can scroll horizontally.
    */
   static bool CanScrollHorizontally(ScrollDirection direction);
@@ -374,28 +400,33 @@ private:
 
 private:
   // Data
-  View            mContent;           ///< The content view
-  Vector2         mScrollPosition;    ///< Current scroll position
-  Vector2         mCurrentPosition;   ///< Current content position
-  float           mScrollableWidth;   ///< Scrollable content width
-  float           mScrollableHeight;  ///< Scrollable content height
-  ScrollDirection mScrollDirection;   ///< Scroll direction
-  float           mMaxFlingDistance;  ///< Maximum fling distance
-  float           mFlingSensitivity;  ///< Fling sensitivity
-  float           mDecelerationRate;  ///< Deceleration rate
-  OverScrollMode  mOverScrollMode;    ///< Over scroll mode
-  bool            mIsScrolling;       ///< Is scrolling in progress
-  float           mViewportWidth;     ///< Viewport width
-  float           mViewportHeight;    ///< Viewport height
-  float           mMaximumStartY;     ///< Maximum start Y position
-  float           mMaximumStartX;     ///< Maximum start X position
-  float           mMinimumStartY;     ///< Minimum start Y position
-  float           mMinimumStartX;     ///< Minimum start X position
-  bool            mHasScrollableArea; ///< Has scrollable area
+  View            mContent;              ///< The content view
+  Vector2         mScrollPosition;       ///< Current scroll position
+  Vector2         mCurrentPosition;      ///< Current content position
+  float           mScrollableWidth;      ///< Scrollable content width
+  float           mScrollableHeight;     ///< Scrollable content height
+  ScrollDirection mScrollDirection;      ///< Scroll direction
+  float           mMaxFlingDistance;     ///< Maximum fling distance
+  int             mMinimumFlingDuration; ///< Minimum fling duration
+  int             mMaximumFlingDuration; ///< Maximum fling duration
+  float           mFlingSensitivity;     ///< Fling sensitivity
+  float           mDecelerationRate;     ///< Deceleration rate
+  OverScrollMode  mOverScrollMode;       ///< Over scroll mode
+  bool            mIsScrolling;          ///< Is scrolling in progress
+  float           mViewportWidth;        ///< Viewport width
+  float           mViewportHeight;       ///< Viewport height
+  float           mMaximumStartY;        ///< Maximum start Y position
+  float           mMaximumStartX;        ///< Maximum start X position
+  float           mMinimumStartY;        ///< Minimum start Y position
+  float           mMinimumStartX;        ///< Minimum start X position
+  bool            mHasScrollableArea;    ///< Has scrollable area
 
   // Scroll bar visibility
   ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility
   ScrollBarVisibility mHorizontalScrollBarVisibility; ///< Horizontal scroll bar visibility
+
+  // Animation
+  Animation mScrollAnimation; ///< Fling scroll animation
 
   // Pan gesture
   PanGestureDetector mPanGestureDetector; ///< Pan gesture detector

@@ -73,7 +73,9 @@ public:
     // Create a ScrollView with vertical scrolling using chaining methods
     ScrollView scrollView = ScrollView::New()
       .SetScrollDirection(ScrollDirection::Vertical)
-      .SetMaxFlingDistance(10000.0f)
+      .SetMaxFlingDistance(6000.0f)
+      .SetMinimumFlingDuration(1000)
+      .SetMaximumFlingDuration(2000)
       .SetFlingSensitivity(1.0f)
       .SetDecelerationRate(0.998f)
       .SetOverScrollMode(OverScrollMode::ContentScrolls)

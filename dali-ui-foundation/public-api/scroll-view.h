@@ -179,6 +179,34 @@ public: // Setters for chaining
   float GetMaxFlingDistance() const;
 
   /**
+   * @brief Sets the minimum duration of fling scroll animation.
+   *
+   * @param[in] duration The minimum fling duration
+   */
+  ScrollView& SetMinimumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the minimum duration of fling scroll animation.
+   *
+   * @return The minimum fling duration
+   */
+  int GetMinimumFlingDuration() const;
+
+  /**
+   * @brief Sets the maximum duration of fling scroll animation.
+   *
+   * @param[in] duration The maximum fling duration
+   */
+  ScrollView& SetMaximumFlingDuration(int duration);
+
+  /**
+   * @brief Gets the maximum duration of fling scroll animation.
+   *
+   * @return The maximum fling duration
+   */
+  int GetMaximumFlingDuration() const;
+
+  /**
    * @brief Sets the sensitivity of fling action.
    *
    * @param[in] sensitivity The fling sensitivity
