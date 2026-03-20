@@ -43,7 +43,7 @@ const char* const SIGNAL_KEY_INPUT_FOCUS_CHANGED = "keyInputFocusChanged";
 
 } // namespace
 
-KeyInputFocusManager::KeyInputFocusManager()
+KeyInputFocusManagerImpl::KeyInputFocusManagerImpl()
 : mSlotDelegate(this),
   mCurrentFocusView(),
   mCurrentWindowId(0)
@@ -52,27 +52,27 @@ KeyInputFocusManager::KeyInputFocusManager()
   Dali::SceneHolderList sceneHolders = Adaptor::Get().GetSceneHolders();
   for(auto iter = sceneHolders.begin(); iter != sceneHolders.end(); ++iter)
   {
-    (*iter).KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManager::OnKeyEvent);
+    (*iter).KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnKeyEvent);
   }
 
   // Get notified when any new scene holder is created afterwards
-  Adaptor::Get().WindowCreatedSignal().Connect(mSlotDelegate, &KeyInputFocusManager::OnSceneHolderCreated);
+  Adaptor::Get().WindowCreatedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnSceneHolderCreated);
 }
 
-KeyInputFocusManager::~KeyInputFocusManager()
+KeyInputFocusManagerImpl::~KeyInputFocusManagerImpl()
 {
 }
 
-void KeyInputFocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder)
+void KeyInputFocusManagerImpl::OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder)
 {
-  sceneHolder.KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManager::OnKeyEvent);
+  sceneHolder.KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnKeyEvent);
 }
 
-void KeyInputFocusManager::SetFocus(Ui::Control control)
+void KeyInputFocusManagerImpl::SetFocus(Ui::Control control)
 {
 }
 
-void KeyInputFocusManager::SetFocus(Ui::View view)
+void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
 {
   if(!view)
   {
@@ -86,7 +86,7 @@ void KeyInputFocusManager::SetFocus(Ui::View view)
     return;
   }
 
-  view.OffSceneSignal().Connect(mSlotDelegate, &KeyInputFocusManager::OnFocusViewSceneDisconnection);
+  view.OffSceneSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
 
   Dali::Ui::View previousFocusView = GetCurrentFocusView();
 
@@ -110,16 +110,16 @@ void KeyInputFocusManager::SetFocus(Ui::View view)
   }
 }
 
-void KeyInputFocusManager::RemoveFocus(Ui::Control control)
+void KeyInputFocusManagerImpl::RemoveFocus(Ui::Control control)
 {
 }
 
-void KeyInputFocusManager::RemoveFocus(Ui::View view)
+void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
 {
   if(view && view == mCurrentFocusView)
   {
     DALI_LOG_RELEASE_INFO("RemoveFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    view.OffSceneSignal().Disconnect(mSlotDelegate, &KeyInputFocusManager::OnFocusViewSceneDisconnection);
+    view.OffSceneSignal().Disconnect(mSlotDelegate, &KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection);
 
     mCurrentFocusView.Reset();
     mCurrentWindowId = 0;
@@ -129,27 +129,27 @@ void KeyInputFocusManager::RemoveFocus(Ui::View view)
   }
 }
 
-Ui::Control KeyInputFocusManager::GetCurrentFocusControl() const
+Ui::Control KeyInputFocusManagerImpl::GetCurrentFocusControl() const
 {
   return Ui::Control();
 }
 
-Ui::View KeyInputFocusManager::GetCurrentFocusView() const
+Ui::View KeyInputFocusManagerImpl::GetCurrentFocusView() const
 {
   return mCurrentFocusView;
 }
 
-uint32_t KeyInputFocusManager::GetCurrentWindowId() const
+uint32_t KeyInputFocusManagerImpl::GetCurrentWindowId() const
 {
   return mCurrentWindowId;
 }
 
-Ui::KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManager::KeyInputFocusChangedSignal()
+KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManagerImpl::KeyInputFocusChangedSignal()
 {
   return mKeyInputFocusChangedSignal;
 }
 
-bool KeyInputFocusManager::OnKeyEvent(const KeyEvent& event)
+bool KeyInputFocusManagerImpl::OnKeyEvent(const KeyEvent& event)
 {
   bool consumed = false;
 
@@ -184,12 +184,12 @@ bool KeyInputFocusManager::OnKeyEvent(const KeyEvent& event)
   return consumed;
 }
 
-bool KeyInputFocusManager::EmitKeyEventSignal(Ui::Control control, const KeyEvent& event)
+bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::Control control, const KeyEvent& event)
 {
   return false;
 }
 
-bool KeyInputFocusManager::EmitKeyEventSignal(Ui::View view, const KeyEvent& event)
+bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent& event)
 {
   bool consumed = false;
 
@@ -212,20 +212,20 @@ bool KeyInputFocusManager::EmitKeyEventSignal(Ui::View view, const KeyEvent& eve
   return consumed;
 }
 
-void KeyInputFocusManager::OnFocusControlSceneDisconnection(Dali::Actor actor)
+void KeyInputFocusManagerImpl::OnFocusControlSceneDisconnection(Dali::Actor actor)
 {
 }
 
-void KeyInputFocusManager::OnFocusViewSceneDisconnection(Dali::Actor actor)
+void KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection(Dali::Actor actor)
 {
   RemoveFocus(Dali::Ui::View::DownCast(actor));
 }
 
-bool KeyInputFocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker,
-                                           const Dali::String& signalName, FunctorDelegate* functor)
+bool KeyInputFocusManagerImpl::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker,
+                                               const Dali::String& signalName, FunctorDelegate* functor)
 {
-  bool                  connected(true);
-  KeyInputFocusManager* manager = dynamic_cast<KeyInputFocusManager*>(object);
+  bool                      connected(true);
+  KeyInputFocusManagerImpl* manager = dynamic_cast<KeyInputFocusManagerImpl*>(object);
 
   if(manager)
   {

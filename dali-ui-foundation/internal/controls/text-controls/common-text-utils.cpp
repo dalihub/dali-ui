@@ -20,8 +20,8 @@
 #include <dali/public-api/common/dali-string.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
@@ -462,7 +462,7 @@ std::string TextControlAccessible::GetWholeText() const
 
 std::string TextControlAccessible::GetCurrentPlaceholderText() const
 {
-  auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusControl();
   bool hasFocus     = Self() == focusControl;
 
   Ui::Text::Controller::PlaceholderType placeholderType =
@@ -496,7 +496,7 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
   using Dali::Accessibility::State;
 
   auto states       = ControlAccessible::CalculateStates();
-  auto focusControl = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusControl();
 
   states[State::EDITABLE]  = true;
   states[State::FOCUSABLE] = true;

@@ -24,7 +24,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -43,15 +43,15 @@ namespace Internal
 class KeyInputFocusManager;
 
 /**
- * @copydoc Ui::KeyInputFocusManager
+ * @copydoc KeyInputFocusManager
  */
-class KeyInputFocusManager : public Dali::BaseObject, public Dali::ConnectionTracker
+class KeyInputFocusManagerImpl : public Dali::BaseObject, public Dali::ConnectionTracker
 {
 public:
   /**
-   * Construct a new KeyInputFocusManager.
+   * Construct a new KeyInputFocusManagerImpl.
    */
-  KeyInputFocusManager();
+  KeyInputFocusManagerImpl();
 
   /**
    * @copydoc Ui::SetFocus
@@ -73,9 +73,9 @@ public:
 
 public:
   /**
-   * @copydoc Ui::KeyInputFocusManager::KeyInputFocusChangedSignal()
+   * @copydoc KeyInputFocusManager::KeyInputFocusChangedSignal()
    */
-  Ui::KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
+  KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -94,7 +94,7 @@ protected:
   /**
    * Destructor
    */
-  virtual ~KeyInputFocusManager();
+  virtual ~KeyInputFocusManagerImpl();
 
 private:
   /**
@@ -132,39 +132,39 @@ private:
 
 private:
   // Undefined
-  KeyInputFocusManager(const KeyInputFocusManager&);
+  KeyInputFocusManagerImpl(const KeyInputFocusManagerImpl&);
 
-  KeyInputFocusManager& operator=(const KeyInputFocusManager& rhs);
+  KeyInputFocusManagerImpl& operator=(const KeyInputFocusManagerImpl& rhs);
 
 private:
   // The key input focus change signal
-  Ui::KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
+  KeyInputFocusManager::KeyInputFocusChangedSignalType mKeyInputFocusChangedSignal;
 
-  SlotDelegate<KeyInputFocusManager> mSlotDelegate;
+  SlotDelegate<KeyInputFocusManagerImpl> mSlotDelegate;
 
   Ui::View mCurrentFocusView; ///< The current focused view
   uint32_t mCurrentWindowId;  ///< The native window id of current focused view
 };
 
-} // namespace Internal
-
-inline Internal::KeyInputFocusManager& GetImpl(Dali::Ui::KeyInputFocusManager& obj)
+inline KeyInputFocusManagerImpl& GetImpl(KeyInputFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
   Dali::BaseObject& handle = obj.GetBaseObject();
 
-  return static_cast<Internal::KeyInputFocusManager&>(handle);
+  return static_cast<KeyInputFocusManagerImpl&>(handle);
 }
 
-inline const Internal::KeyInputFocusManager& GetImpl(const Dali::Ui::KeyInputFocusManager& obj)
+inline const KeyInputFocusManagerImpl& GetImpl(const KeyInputFocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
   const Dali::BaseObject& handle = obj.GetBaseObject();
 
-  return static_cast<const Internal::KeyInputFocusManager&>(handle);
+  return static_cast<const KeyInputFocusManagerImpl&>(handle);
 }
+
+} // namespace Internal
 
 } // namespace Ui
 

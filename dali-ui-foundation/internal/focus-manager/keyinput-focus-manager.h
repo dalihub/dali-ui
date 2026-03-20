@@ -26,10 +26,9 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Internal DALI_INTERNAL
+namespace Internal
 {
-class KeyInputFocusManager;
-}
+class KeyInputFocusManagerImpl;
 
 /**
  * KeyInputFocusManager
@@ -44,7 +43,7 @@ class KeyInputFocusManager;
  * |----------------------|-----------------------------------|
  * | keyInputFocusChanged | @ref KeyInputFocusChangedSignal() |
  */
-class DALI_UI_API KeyInputFocusManager : public BaseHandle
+class KeyInputFocusManager : public BaseHandle
 {
 public:
   // KeyInputFocusChanged
@@ -82,7 +81,7 @@ public:
    * focus stack.
    * @param[in] view The View to receive keyboard input
    */
-  void SetFocus(Control control);
+  void SetFocus(Ui::Control control);
   void SetFocus(View view);
 
   /**
@@ -90,14 +89,14 @@ public:
    * keyboard input events first.
    * @return Pointer to the view set to receive keyboard inputs.
    */
-  Control GetCurrentFocusControl() const;
-  View    GetCurrentFocusView() const;
+  Ui::Control GetCurrentFocusControl() const;
+  View        GetCurrentFocusView() const;
 
   /**
    * Removes focus for the given view, The view will no longer receive events from keyboard.
    * @param [in] view which should be removed from focus.
    */
-  void RemoveFocus(Control control);
+  void RemoveFocus(Ui::Control control);
   void RemoveFocus(View view);
 
 public: // Signals
@@ -113,9 +112,11 @@ public: // Signals
   KeyInputFocusChangedSignalType& KeyInputFocusChangedSignal();
 
 private:
-  explicit DALI_INTERNAL KeyInputFocusManager(Internal::KeyInputFocusManager* impl);
+  explicit DALI_INTERNAL KeyInputFocusManager(KeyInputFocusManagerImpl* impl);
 
 }; // class KeyInputFocusManager
+
+} // namespace Internal
 
 } // namespace Ui
 

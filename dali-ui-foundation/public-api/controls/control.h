@@ -581,7 +581,7 @@ public:
    * ridden it. As the key input focus mechanism works like a stack, the top most control receives all the key events,
    * and passes on the unhandled events to the controls below in the stack. A control in the stack will regain key input
    * focus when there are no more controls above it in the focus stack. To query for the control which is on top of the
-   * focus stack use Dali::Ui::KeyInputFocusManager::GetCurrentKeyboardFocusActor().
+   * focus stack use Internal::KeyInputFocusManager::GetCurrentKeyboardFocusActor().
    */
   bool HasKeyInputFocus();
 

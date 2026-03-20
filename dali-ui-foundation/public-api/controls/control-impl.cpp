@@ -32,11 +32,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
 #include <dali-ui-foundation/internal/controls/control/control-visual-data.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -332,7 +332,7 @@ void Control::SetKeyInputFocus()
 {
   if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    Ui::KeyInputFocusManager::Get().SetFocus(Ui::Control::DownCast(Self()));
+    KeyInputFocusManager::Get().SetFocus(Ui::Control::DownCast(Self()));
   }
 }
 
@@ -341,7 +341,7 @@ bool Control::HasKeyInputFocus()
   bool result = false;
   if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    Ui::Control control = Ui::KeyInputFocusManager::Get().GetCurrentFocusControl();
+    Ui::Control control = KeyInputFocusManager::Get().GetCurrentFocusControl();
     if(Self() == control)
     {
       result = true;
@@ -354,7 +354,7 @@ void Control::ClearKeyInputFocus()
 {
   if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    Ui::KeyInputFocusManager::Get().RemoveFocus(Ui::Control::DownCast(Self()));
+    KeyInputFocusManager::Get().RemoveFocus(Ui::Control::DownCast(Self()));
   }
 }
 

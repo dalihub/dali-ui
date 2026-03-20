@@ -28,6 +28,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Internal
+{
 KeyInputFocusManager::KeyInputFocusManager()
 {
 }
@@ -48,13 +50,13 @@ KeyInputFocusManager KeyInputFocusManager::Get()
     if(handle)
     {
       // If so, downcast the handle of singleton to focus manager
-      manager = KeyInputFocusManager(dynamic_cast<Internal::KeyInputFocusManager*>(handle.GetObjectPtr()));
+      manager = KeyInputFocusManager(dynamic_cast<KeyInputFocusManagerImpl*>(handle.GetObjectPtr()));
     }
 
     if(!manager)
     {
       // If not, create the focus manager and register it as a singleton
-      manager = KeyInputFocusManager(new Internal::KeyInputFocusManager());
+      manager = KeyInputFocusManager(new KeyInputFocusManagerImpl());
       singletonService.Register(typeid(manager), manager);
     }
   }
@@ -62,12 +64,12 @@ KeyInputFocusManager KeyInputFocusManager::Get()
   return manager;
 }
 
-KeyInputFocusManager::KeyInputFocusManager(Internal::KeyInputFocusManager* impl)
+KeyInputFocusManager::KeyInputFocusManager(KeyInputFocusManagerImpl* impl)
 : BaseHandle(impl)
 {
 }
 
-void KeyInputFocusManager::SetFocus(Control control)
+void KeyInputFocusManager::SetFocus(Ui::Control control)
 {
 }
 
@@ -76,9 +78,9 @@ void KeyInputFocusManager::SetFocus(View view)
   GetImpl(*this).SetFocus(view);
 }
 
-Control KeyInputFocusManager::GetCurrentFocusControl() const
+Ui::Control KeyInputFocusManager::GetCurrentFocusControl() const
 {
-  return Control();
+  return Ui::Control();
 }
 
 View KeyInputFocusManager::GetCurrentFocusView() const
@@ -86,7 +88,7 @@ View KeyInputFocusManager::GetCurrentFocusView() const
   return GetImpl(*this).GetCurrentFocusView();
 }
 
-void KeyInputFocusManager::RemoveFocus(Control control)
+void KeyInputFocusManager::RemoveFocus(Ui::Control control)
 {
 }
 
@@ -99,6 +101,8 @@ KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManager::KeyI
 {
   return GetImpl(*this).KeyInputFocusChangedSignal();
 }
+
+} // namespace Internal
 
 } // namespace Ui
 
