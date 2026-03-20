@@ -104,7 +104,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Contents({
+      .Children({
         Label::New("Text Example"),
         CreateInputField().As(mField),
         CreateLayoutLabel1().As(mLabel),

@@ -17,10 +17,6 @@
  *
  */
 
-// EXTERNAL INCLUDES
-#include <cstdint>
-#include <initializer_list>
-
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -40,12 +36,10 @@ class LayoutImpl;
  * @brief Layout is a View that arranges child views using a layout algorithm.
  *
  * Layout extends View and always has a LayoutManager (from derived classes
- * like StackLayout, GridLayout). Only Layout (and subclasses) can have
- * children; the public API for adding/removing children is on Layout.
+ * like StackLayout, GridLayout).
  *
- * - Always has a LayoutManager (from derived classes like StackLayout, GridLayout)
- * - Child Management API: AddView, RemoveView, RemoveAllViews, RemoveViewAt, GetChildCount, GetChildAt, IndexOfChild,
- * Contents(...)
+ * Child management API (AddView, RemoveView, Children, etc.) is provided
+ * by the base View class.
  */
 class DALI_UI_API Layout : public View
 {
@@ -109,81 +103,7 @@ public:
 
 public:
   // @CHAIN_START(Layout, View)
-  // @CHAIN_MANUAL
-  /**
-   * @brief Adds a list of children to this View in a declarative way.
-   * This method allows for a hierarchical UI tree construction by passing
-   * a brace-enclosed initializer list of View objects.
-   * @param[in] children The initializer list containing child View handles to be added.
-   */
-  Layout& Contents(std::initializer_list<View> children)
-  {
-    for(const auto& child : children)
-    {
-      AddView(child);
-    }
-    return *this;
-  }
   // @CHAIN_END
-
-  /**
-   * @brief Adds a view to this layout (at the end).
-   *
-   * The view is managed by this layout's layout manager and added to the Actor hierarchy.
-   *
-   * @param[in] view The view to add
-   */
-  void AddView(View view);
-
-  /**
-   * @brief Adds a view at the specified index.
-   *
-   * @param[in] view The view to add
-   * @param[in] index The index where to insert
-   */
-  void AddView(View view, uint32_t index);
-
-  /**
-   * @brief Removes a view from this layout.
-   *
-   * @param[in] view The view to remove
-   */
-  void RemoveView(View view);
-
-  /**
-   * @brief Removes the view at the specified index.
-   *
-   * @param[in] index The index of the view to remove
-   */
-  void RemoveViewAt(uint32_t index);
-
-  /**
-   * @brief Removes all child views from this layout.
-   */
-  void RemoveAllViews();
-
-  /**
-   * @brief Gets the number of child views.
-   *
-   * @return The child count
-   */
-  uint32_t GetChildCount() const;
-
-  /**
-   * @brief Gets the child view at the specified index.
-   *
-   * @param[in] index The child index
-   * @return The child view at the index
-   */
-  View GetChildAt(uint32_t index) const;
-
-  /**
-   * @brief Returns the index of the given child view, or -1 if not found.
-   *
-   * @param[in] view The child view to find
-   * @return Index of the view, or -1 if not a child
-   */
-  int32_t IndexOfChild(View view) const;
 
 public: // Not intended for application developers
   /// @cond internal

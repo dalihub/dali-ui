@@ -2,11 +2,4 @@
 #pragma once
 
 #define DALI_UI_CHAIN_LAYOUT_METHODS(ChildClass) \
-  DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
-  /** \
-  * @brief Adds a list of children to this View in a declarative way. \
-  * This method allows for a hierarchical UI tree construction by passing \
-  * a brace-enclosed initializer list of View objects. \
-  * @param[in] children The initializer list containing child View handles to be added. \
-  */ \
-  ChildClass& Contents(std::initializer_list<View> children) { Layout::Contents(children); return *this; }
+  DALI_UI_CHAIN_VIEW_METHODS(ChildClass)

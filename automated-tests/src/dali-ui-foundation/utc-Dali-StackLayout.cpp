@@ -206,7 +206,7 @@ int UtcDaliStackLayoutContentsP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   View a = View::New();
-  layout.Contents({a});
+  layout.Children({a});
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(layout.GetChildAt(0) == a);
   END_TEST;

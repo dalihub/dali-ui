@@ -46,12 +46,12 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Contents({
+      .Children({
         Label::New("Text Layout Direction Mode Example"),
         StackLayout::New(StackOrientation::HORIZONTAL)
         .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
-        .Contents({
+        .Children({
           Label::New("Dir")
           .SetRequestedWidth(40.0f),
           Label::New("Mode")
@@ -78,7 +78,7 @@ private:
     return StackLayout::New(StackOrientation::HORIZONTAL)
       .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
-      .Contents({
+      .Children({
         Label::New(textTypeDesc)
         .SetRequestedWidth(40.0f),
         Label::New(layoutModeDesc)

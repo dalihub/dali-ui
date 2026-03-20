@@ -173,4 +173,11 @@
   *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)); \
   * @endcode \
   */ \
-  ChildClass& SetLayoutParams(LayoutParams params) { View::SetLayoutParams(params); return *this; }
+  ChildClass& SetLayoutParams(LayoutParams params) { View::SetLayoutParams(params); return *this; } \
+  /** \
+  * @brief Adds a list of children to this View in a declarative way. \
+  * This method allows for a hierarchical UI tree construction by passing \
+  * a brace-enclosed initializer list of View objects. \
+  * @param[in] children The initializer list containing child View handles to be added. \
+  */ \
+  ChildClass& Children(std::initializer_list<View> children) { View::Children(children); return *this; }

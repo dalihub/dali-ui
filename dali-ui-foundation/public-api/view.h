@@ -31,6 +31,7 @@
 #include <dali/public-api/events/pinch-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
 #include <functional>
+#include <initializer_list>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
@@ -555,7 +556,82 @@ public: // Properties
    */
   View& SetLayoutParams(LayoutParams params);
 
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of children to this View in a declarative way.
+   * This method allows for a hierarchical UI tree construction by passing
+   * a brace-enclosed initializer list of View objects.
+   * @param[in] children The initializer list containing child View handles to be added.
+   */
+  View& Children(std::initializer_list<View> children)
+  {
+    for(const auto& child : children)
+    {
+      AddView(child);
+    }
+    return *this;
+  }
+
   // @CHAIN_END
+
+  /**
+   * @brief Adds a view to this View (at the end).
+   *
+   * The view will be managed by this View's layout system and added to the Actor hierarchy.
+   *
+   * @param[in] view The view to add
+   */
+  void AddView(View view);
+
+  /**
+   * @brief Adds a view at the specified index.
+   *
+   * @param[in] view The view to add
+   * @param[in] index The index where to insert
+   */
+  void AddView(View view, uint32_t index);
+
+  /**
+   * @brief Removes a view from this View.
+   *
+   * @param[in] view The view to remove
+   */
+  void RemoveView(View view);
+
+  /**
+   * @brief Removes the view at the specified index.
+   *
+   * @param[in] index The index of the view to remove
+   */
+  void RemoveViewAt(uint32_t index);
+
+  /**
+   * @brief Removes all child views from this View.
+   */
+  void RemoveAllViews();
+
+  /**
+   * @brief Gets the number of child views.
+   *
+   * @return The child count
+   */
+  uint32_t GetChildCount() const;
+
+  /**
+   * @brief Gets the child view at the specified index.
+   *
+   * @param[in] index The child index
+   * @return The child view at the index
+   */
+  View GetChildAt(uint32_t index) const;
+
+  /**
+   * @brief Returns the index of the given child view, or -1 if not found.
+   *
+   * @param[in] view The child view to find
+   * @return Index of the view, or -1 if not a child
+   */
+  int32_t IndexOfChild(View view) const;
 
   /**
    * @brief Retrieves the layout parameters of a specific type attached to this View.

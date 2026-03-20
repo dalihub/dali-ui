@@ -48,7 +48,7 @@ public:
       .SetBackgroundColor(UiColor::BACKGROUND)
       .SetSizeWidth(200_spx)
       .SetSizeHeight(200_spx)
-      .Contents({
+      .Children({
         View::New() // Red child
           .SetBackgroundColor(UiColor::PRIMARY)
           .SetSizeWidth(100_spx)

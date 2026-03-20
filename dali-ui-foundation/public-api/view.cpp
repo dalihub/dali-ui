@@ -337,6 +337,50 @@ View& View::SetLayoutParams(LayoutParams params)
   return *this;
 }
 
+// =============================================================================
+// Child Management API
+// =============================================================================
+
+void View::AddView(View view)
+{
+  Integration::GetImpl(*this).AddView(view);
+}
+
+void View::AddView(View view, uint32_t index)
+{
+  Integration::GetImpl(*this).AddView(view, index);
+}
+
+void View::RemoveView(View view)
+{
+  Integration::GetImpl(*this).RemoveView(view);
+}
+
+void View::RemoveViewAt(uint32_t index)
+{
+  Integration::GetImpl(*this).RemoveViewAt(index);
+}
+
+void View::RemoveAllViews()
+{
+  Integration::GetImpl(*this).RemoveAllViews();
+}
+
+uint32_t View::GetChildCount() const
+{
+  return Integration::GetImpl(*this).GetChildCount();
+}
+
+View View::GetChildAt(uint32_t index) const
+{
+  return Integration::GetImpl(*this).GetChildAt(index);
+}
+
+int32_t View::IndexOfChild(View view) const
+{
+  return Integration::GetImpl(*this).IndexOfChild(view);
+}
+
 // From control.cpp
 
 void View::ClearBackground()

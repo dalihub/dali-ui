@@ -93,49 +93,5 @@ Layout::Layout(Dali::Internal::CustomActor* internal)
 // Layout Properties API
 // =============================================================================
 
-// =============================================================================
-// Child Management API
-// =============================================================================
-
-void Layout::AddView(View view)
-{
-  Integration::GetImpl(*this).AddView(view);
-}
-
-void Layout::AddView(View view, uint32_t index)
-{
-  Integration::GetImpl(*this).AddView(view, index);
-}
-
-void Layout::RemoveView(View view)
-{
-  Integration::GetImpl(*this).RemoveView(view);
-}
-
-void Layout::RemoveViewAt(uint32_t index)
-{
-  Integration::GetImpl(*this).RemoveViewAt(index);
-}
-
-void Layout::RemoveAllViews()
-{
-  Integration::GetImpl(*this).RemoveAllViews();
-}
-
-uint32_t Layout::GetChildCount() const
-{
-  return Integration::GetImpl(*this).GetChildCount();
-}
-
-View Layout::GetChildAt(uint32_t index) const
-{
-  return Integration::GetImpl(*this).GetChildAt(index);
-}
-
-int32_t Layout::IndexOfChild(View view) const
-{
-  return Integration::GetImpl(*this).IndexOfChild(view);
-}
-
 } // namespace Ui
 } // namespace Dali
