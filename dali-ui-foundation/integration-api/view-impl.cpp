@@ -199,7 +199,7 @@ void ViewImpl::OnSceneConnection(int depth)
   mImpl->OnSceneConnection();
   CreateClippingRenderer(*this);
 
-  if(!GetParentView() && (HasLayoutManager() || !mChildren.empty()))
+  if(!GetParentView())
   {
     RegisterWithLayoutController();
   }
@@ -683,10 +683,7 @@ void ViewImpl::InvalidateMeasure()
     return;
   }
 
-  if(HasLayoutManager() || !mChildren.empty())
-  {
-    RegisterWithLayoutController();
-  }
+  RegisterWithLayoutController();
 }
 
 void ViewImpl::InvalidateArrange()
@@ -709,10 +706,7 @@ void ViewImpl::InvalidateArrange()
   }
 
   // Reached top of View tree → register with LayoutController
-  if(HasLayoutManager() || !mChildren.empty())
-  {
-    RegisterWithLayoutController();
-  }
+  RegisterWithLayoutController();
 }
 
 void ViewImpl::RegisterWithLayoutController()
