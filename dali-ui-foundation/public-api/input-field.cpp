@@ -242,6 +242,17 @@ int InputField::GetMaximumLength() const
   return GetImpl(*this).GetMaximumLength();
 }
 
+InputField& InputField::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  GetImpl(*this).SetLayoutDirectionMode(mode);
+  return *this;
+}
+
+Text::LayoutDirectionMode InputField::GetLayoutDirectionMode() const
+{
+  return GetImpl(*this).GetLayoutDirectionMode();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

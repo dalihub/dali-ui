@@ -262,6 +262,20 @@ int InputFieldImpl::GetMaximumLength() const
   return static_cast<int>(mController->GetMaximumNumberOfCharacters());
 }
 
+void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  if(mController->GetLayoutDirectionMode() != mode)
+  {
+    mController->SetLayoutDirectionMode(mode);
+    RequestTextRelayout();
+  }
+}
+
+Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
+{
+  return mController->GetLayoutDirectionMode();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

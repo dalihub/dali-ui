@@ -95,20 +95,17 @@ enum class Direction : uint8_t
 enum class LayoutDirectionMode : uint8_t
 {
   /**
+   * @brief Determines the layout direction from the text content itself.
+   */
+  CONTENTS = 0,
+  /**
    * @brief Inherits the layout direction from the parent.
    */
-  INHERIT = 0,
+  INHERIT = 1,
   /**
    * @brief Determines the layout direction based on the system locale.
-   * Uses the default script of the current system language.
    */
-  LOCALE = 1,
-  /**
-   * @brief Determines the layout direction from the text content itself.
-   *
-   * Uses the bidirectional properties of the text.
-   */
-  CONTENTS = 2
+  LOCALE = 2
 };
 
 /**

@@ -17,8 +17,10 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/image-loading.h>
+#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
@@ -227,6 +229,20 @@ Text::LineHeightMode LabelImpl::GetLineHeightMode() const
   return mLineHeightMode;
 }
 
+void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  if(mController->GetLayoutDirectionMode() != mode)
+  {
+    mController->SetLayoutDirectionMode(mode);
+    RequestTextRelayout();
+  }
+}
+
+Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
+{
+  return mController->GetLayoutDirectionMode();
+}
+
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
@@ -256,6 +272,18 @@ void LabelImpl::OnInitialize()
 
   // Enable the text ellipsis.
   mController->SetTextElideEnabled(true);
+
+  // Sets layoutDirection value
+  Dali::Stage                 stage           = Dali::Stage::GetCurrent();
+  Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+  mController->SetLayoutDirection(layoutDirection);
+
+  self.LayoutDirectionChangedSignal().Connect(this, &LabelImpl::OnLayoutDirectionChanged);
+
+  if(Dali::Adaptor::IsAvailable())
+  {
+    Dali::Adaptor::Get().LocaleChangedSignal().Connect(this, &LabelImpl::OnLocaleChanged);
+  }
 
   Text::Layout::Engine& engine = mController->GetLayoutEngine();
   engine.SetCursorWidth(0u);
@@ -507,6 +535,16 @@ void LabelImpl::UpdateLineHeight()
     SetMinimumLineHeight(mLineHeight);
   }
   RequestTextRelayout();
+}
+
+void LabelImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type)
+{
+  mController->ChangedLayoutDirection();
+}
+
+void LabelImpl::OnLocaleChanged(std::string locale)
+{
+  mController->ResetFontAndStyleData();
 }
 
 } // namespace Integration

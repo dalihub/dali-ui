@@ -207,6 +207,16 @@ public:
    */
   Text::LineHeightMode GetLineHeightMode() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetLayoutDirectionMode
+   */
+  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetLayoutDirectionMode
+   */
+  Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+
 protected:
   // Construction
 
@@ -276,6 +286,19 @@ private: // Implementation
    * @brief Updates the effective line height based on the current LineHeightMode.
    */
   void UpdateLineHeight();
+
+  /**
+   * @brief Callback function for when the layout is changed.
+   * @param[in] actor The actor whose layoutDirection is changed.
+   * @param[in] type  The layoutDirection.
+   */
+  void OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type);
+
+  /**
+   * @brief Callback function for when the locale is changed.
+   * @param[in] locale The new system locale.
+   */
+  void OnLocaleChanged(std::string locale);
 
 private:
   // Not copyable or movable

@@ -464,7 +464,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   ////////////////////////////////////////////////////////////////////////////////
 
   // Update the layout direction policy to text model.
-  mTextModel->mMatchLayoutDirection = parameters.layoutDirectionPolicy;
+  mTextModel->mLayoutDirectionMode = parameters.layoutDirectionPolicy;
 
   mIsTextMirrored                 = false;
   const Length numberOfParagraphs = mTextModel->mLogicalModel->mParagraphInfo.Count();
@@ -474,7 +474,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Calculates the bidirectional info for the whole paragraph if it contains right to left scripts.
   SetBidirectionalInfo(mModule.GetBidirectionalSupport(), utf32Characters, scripts, lineBreakInfo, 0u,
                        numberOfCharacters, bidirectionalInfo, mTextModel->mLogicalModel->mBidirectionalLineInfo,
-                       (mTextModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS),
+                       (mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS),
                        parameters.layoutDirection);
 
   if(0u != bidirectionalInfo.Count())
@@ -806,7 +806,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   // starting either with left to right text or right to left.
   mLayoutEngine.Align(textLayoutArea, 0u, numberOfCharacters, parameters.horizontalAlignment, lines, alignmentOffset,
                       parameters.layoutDirection,
-                      (mTextModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS));
+                      (mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
 
   // Calculate vertical offset.
   Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();

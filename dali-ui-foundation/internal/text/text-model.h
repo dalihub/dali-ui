@@ -443,7 +443,7 @@ public:
   bool                         mIgnoreSpacesAfterText : 1; ///< Whether ignoring spaces after text or not. Default is true.
   bool                         mRemoveFrontInset : 1;      ///< Whether to ignore xBearing of the first glyph. Default is true.
   bool                         mRemoveBackInset : 1;       ///< Whether to ignore advance of the last glyph. Default is true.
-  LayoutDirectionMode          mMatchLayoutDirection;      ///< Whether to match text alignment with layout direction or not.
+  LayoutDirectionMode          mLayoutDirectionMode;       ///< Mode used to resolve the layout direction (contents, inherit, locale).
   Text::EllipsisPosition::Type mEllipsisPosition;          ///< Where is the location the text elide
 };
 

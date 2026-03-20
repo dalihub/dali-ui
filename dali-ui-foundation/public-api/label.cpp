@@ -221,6 +221,17 @@ Text::LineHeightMode Label::GetLineHeightMode() const
   return GetImpl(*this).GetLineHeightMode();
 }
 
+Label& Label::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  GetImpl(*this).SetLayoutDirectionMode(mode);
+  return *this;
+}
+
+Text::LayoutDirectionMode Label::GetLayoutDirectionMode() const
+{
+  return GetImpl(*this).GetLayoutDirectionMode();
+}
+
 } // namespace Ui
 
 } // namespace Dali

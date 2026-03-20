@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/stack-layout.h>
@@ -65,7 +64,7 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_WHITE));
 
-    window.Add(CreateContent());
+    window.Add(CreateContents());
 
     PrintLabelInfo(mLabel, "Label 1");
     PrintLabelInfo(mLabel2, "Label 2");
@@ -98,7 +97,7 @@ private:
     }
   }
 
-  View CreateContent()
+  View CreateContents()
   {
     return StackLayout::New(StackOrientation::VERTICAL)
       .Spacing(STACK_SPACING)
@@ -108,9 +107,9 @@ private:
       .Contents({
         Label::New("Text Example"),
         CreateInputField().As(mField),
-        CreateDemoLabel1().As(mLabel),
-        CreateDemoLabel2().As(mLabel2),
-        CreateDemoLabel3().As(mLabel3),
+        CreateLayoutLabel1().As(mLabel),
+        CreateLayoutLabel2().As(mLabel2),
+        CreateLayoutLabel3().As(mLabel3),
         CreateLineHeightLabel("LineHeight:2, LineHeightMode:Relative", 2, Text::LineHeightMode::RELATIVE).As(mLineHeightLabel),
         CreateLineHeightLabel("LineHeight:50, LineHeightMode:Absolute", 50, Text::LineHeightMode::ABSOLUTE).As(mLineHeightLabel2),
         CreateSeparator(),
@@ -145,8 +144,9 @@ private:
       .SetVerticalTextAlignment(Text::Alignment::CENTER);
   }
 
-  Label CreateDemoLabel1()
+  Label CreateLayoutLabel1()
   {
+    // Verify wrap-content width with fixed height
     return CreateLabel("Hello world", "SamsungOneUI_400", LABEL1_FONT_SIZE)
       .SetLayoutWidth(LayoutDimension::WrapContent)
       .SetLayoutHeight(100.0f)
@@ -157,8 +157,9 @@ private:
       .SetVerticalTextAlignment(Text::Alignment::CENTER);
   }
 
-  Label CreateDemoLabel2()
+  Label CreateLayoutLabel2()
   {
+    // Verify min/max size and padding with wrap-content (width & height)
     return CreateLabel("Hello world, this is a multi-line enabled long long text", "Ubuntu Mono", LABEL2_FONT_SIZE)
       .SetMinimumWidth(100)
       .SetMinimumHeight(100)
@@ -170,8 +171,9 @@ private:
       .SetMultiLine(true);
   }
 
-  Label CreateDemoLabel3()
+  Label CreateLayoutLabel3()
   {
+    // Verify match-parent width with fixed height
     return CreateLabel("변화는 한 순간에 일어나지 않습니다. 매일의 작은 실천이 모여 지속가능한 삶을 이루는 것. 이것이 우리가 꿈꾸는 지속가능성입니다.",
                        "SamsungOneUI_700",
                        LABEL3_FONT_SIZE)
@@ -226,6 +228,7 @@ private:
     DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
     DALI_LOG_ERROR("LineHeight      : %f\n", label.GetLineHeight());
     DALI_LOG_ERROR("LineHeight Mode : %d\n", label.GetLineHeightMode());
+    DALI_LOG_ERROR("LayoutDir Mode  : %d\n", label.GetLayoutDirectionMode());
     DALI_LOG_ERROR("Natural         : %f, %f\n", label.GetNaturalSize().x, label.GetNaturalSize().y);
     DALI_LOG_ERROR("H for W         : 100, %f\n", label.GetHeightForWidth(100));
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
@@ -307,9 +310,7 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n",
-                     IsKey(event, Dali::DALI_KEY_ESCAPE),
-                     IsKey(event, Dali::DALI_KEY_BACK));
+      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }

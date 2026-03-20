@@ -188,6 +188,16 @@ public:
    */
   int GetMaximumLength() const;
 
+  /**
+   * @copydoc Dali::Ui::InputField::SetLayoutDirectionMode
+   */
+  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetLayoutDirectionMode
+   */
+  Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::InputField::TextChangedSignal()

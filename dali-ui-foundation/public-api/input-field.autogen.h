@@ -85,4 +85,21 @@
   * \
   * @param[in] length The maximum number of characters allowed. \
   */ \
-  ChildClass& SetMaximumLength(int length) { InputField::SetMaximumLength(length); return *this; }
+  ChildClass& SetMaximumLength(int length) { InputField::SetMaximumLength(length); return *this; } \
+  /** \
+  * @brief Sets how the layout direction of the text is resolved. \
+  * \
+  * - LayoutDirectionMode::CONTENTS: \
+  *   The layout direction is determined from the text content itself. \
+  * \
+  * - LayoutDirectionMode::INHERIT: \
+  *   The layout direction is inherited from the parent view. \
+  * \
+  * - LayoutDirectionMode::LOCALE: \
+  *   The layout direction is determined based on the system locale. \
+  * \
+  * @note The default layout direction mode of InputField is LayoutDirectionMode::INHERIT. \
+  * \
+  * @param[in] mode The LayoutDirectionMode used to determine the text layout direction. \
+  */ \
+  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { InputField::SetLayoutDirectionMode(mode); return *this; }

@@ -1029,7 +1029,7 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
     // starting either with left to right text or right to left.
     impl.mLayoutEngine.Align(size, alignStartIndex, alignRequestedNumberOfCharacters, impl.mModel->mHorizontalAlignment,
                              lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                             (impl.mModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS));
+                             (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
   }
   else
   {
@@ -1098,7 +1098,7 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
 
       impl.mLayoutEngine.Align(size, decidedAlignStartIndex, decidedAlignNumberOfCharacters, decidedHorizontalAlignment,
                                lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                               (impl.mModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS));
+                               (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
     }
 
     // Align the remaining that is not aligned
@@ -1106,7 +1106,7 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
     {
       impl.mLayoutEngine.Align(size, alignIndex, (alignEndIndex - alignIndex + 1u), impl.mModel->mHorizontalAlignment,
                                lines, impl.mModel->mAlignmentOffset, impl.mLayoutDirection,
-                               (impl.mModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS));
+                               (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS));
     }
   }
 }

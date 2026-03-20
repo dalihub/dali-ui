@@ -29,7 +29,6 @@ namespace Text
 {
 namespace
 {
-const char* DALI_ENV_MATCH_SYSTEM_LANGUAGE_DIRECTION("DALI_MATCH_SYSTEM_LANGUAGE_DIRECTION");
 }
 
 ModelPtr Model::New()
@@ -403,18 +402,11 @@ Model::Model()
   mIgnoreSpacesAfterText(true),
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
-  mMatchLayoutDirection(LayoutDirectionMode::INHERIT),
+  mLayoutDirectionMode(LayoutDirectionMode::CONTENTS),
   mEllipsisPosition(Text::EllipsisPosition::END)
 {
   mLogicalModel = LogicalModel::New();
   mVisualModel  = VisualModel::New();
-
-  // Check environment variable for DALI_MATCH_SYSTEM_LANGUAGE_DIRECTION
-  auto match = Dali::EnvironmentVariable::GetEnvironmentVariable(DALI_ENV_MATCH_SYSTEM_LANGUAGE_DIRECTION);
-  if(match && (std::atoi(match) == 0))
-  {
-    mMatchLayoutDirection = LayoutDirectionMode::CONTENTS;
-  }
 }
 
 Model::~Model()

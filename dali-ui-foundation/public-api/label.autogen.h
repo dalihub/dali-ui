@@ -63,11 +63,8 @@
   * the full font metrics (NaturalSize). This behavior is similar to the \
   * "Auto" line height option in design tools such as Figma. \
   * \
-  * @note Due to limitations of the text rendering engine, the final \
-  *       calculated line height cannot be smaller than the natural \
-  *       line height derived from the font metrics. If the computed \
-  *       value is smaller than the natural line height, the natural \
-  *       line height will be used instead. \
+  * @note The final line height is clamped to be no smaller than \
+  *       the natural line height derived from the font metrics. \
   * \
   * @param[in] lineHeight The line height value. \
   */ \
@@ -85,4 +82,19 @@
   * \
   * @param[in] mode The line height mode. \
   */ \
-  ChildClass& SetLineHeightMode(Text::LineHeightMode mode) { Label::SetLineHeightMode(mode); return *this; }
+  ChildClass& SetLineHeightMode(Text::LineHeightMode mode) { Label::SetLineHeightMode(mode); return *this; } \
+  /** \
+  * @brief Sets how the layout direction of the text is resolved. \
+  * \
+  * - LayoutDirectionMode::CONTENTS: \
+  *   The layout direction is determined from the text content itself. \
+  * \
+  * - LayoutDirectionMode::INHERIT: \
+  *   The layout direction is inherited from the parent view. \
+  * \
+  * - LayoutDirectionMode::LOCALE: \
+  *   The layout direction is determined based on the system locale. \
+  * \
+  * @param[in] mode The LayoutDirectionMode used to determine the text layout direction. \
+  */ \
+  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { Label::SetLayoutDirectionMode(mode); return *this; }

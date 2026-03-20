@@ -111,7 +111,7 @@ struct AsyncTextParameters
     underlineType{Text::Underline::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
-    layoutDirectionPolicy{LayoutDirectionMode::INHERIT},
+    layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},
     ellipsisPosition{Text::EllipsisPosition::END},
     ellipsisMode{Text::Ellipsize::TRUNCATE},
     autoScrollDirection{Text::AutoScroll::HORIZONTAL},

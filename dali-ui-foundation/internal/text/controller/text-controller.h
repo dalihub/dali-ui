@@ -2050,16 +2050,16 @@ public: // Queries & retrieves.
   void SetVariationsMap(const Property::Map& map);
 
   /**
-   * @brief Sets SetMatchLayoutDirection value to model
-   * @param[in] match The value of matchLayoutDirection for the text
+   * @brief Sets SetLayoutDirectionMode value to model
+   * @param[in] match The value of LayoutDirectionMode for the text
    */
-  void SetMatchLayoutDirection(LayoutDirectionMode type);
+  void SetLayoutDirectionMode(LayoutDirectionMode type);
 
   /**
-   * @brief Retrieves matchLayoutDirection value from model
-   * @return The value of matchLayoutDirection
+   * @brief Retrieves LayoutDirectionMode value from model
+   * @return The value of LayoutDirectionMode
    */
-  LayoutDirectionMode GetMatchLayoutDirection() const;
+  LayoutDirectionMode GetLayoutDirectionMode() const;
 
   /**
    * @brief Sets layoutDirection type value.

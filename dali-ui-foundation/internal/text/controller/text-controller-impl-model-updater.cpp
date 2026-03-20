@@ -319,7 +319,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     SetBidirectionalInfo(
       bidirectionalSupport, utf32Characters, scripts, lineBreakInfo, startIndex, requestedNumberOfCharacters,
       bidirectionalInfo, impl.mModel->mLogicalModel->mBidirectionalLineInfo,
-      (impl.mModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS), impl.mLayoutDirection);
+      (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS), impl.mLayoutDirection);
 
     if(0u != bidirectionalInfo.Count())
     {

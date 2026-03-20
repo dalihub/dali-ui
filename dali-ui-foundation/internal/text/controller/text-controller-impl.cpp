@@ -623,8 +623,8 @@ void Controller::Impl::GetText(CharacterIndex index, std::string& text) const
 
 Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& actor) const
 {
-  if(mModel->mMatchLayoutDirection == LayoutDirectionMode::LOCALE ||
-     (mModel->mMatchLayoutDirection == LayoutDirectionMode::INHERIT && !mIsLayoutDirectionChanged))
+  if(mModel->mLayoutDirectionMode == LayoutDirectionMode::LOCALE ||
+     (mModel->mLayoutDirectionMode == LayoutDirectionMode::INHERIT && !mIsLayoutDirectionChanged))
   {
     Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(actor);
     return static_cast<Dali::LayoutDirection::Type>(
@@ -1230,7 +1230,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
     cursorInfo.primaryCursorHeight = cursorInfo.lineHeight;
 
     bool isRTL = false;
-    if(mModel->mMatchLayoutDirection != LayoutDirectionMode::CONTENTS)
+    if(mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS)
     {
       isRTL = mLayoutDirection == LayoutDirection::RIGHT_TO_LEFT;
     }

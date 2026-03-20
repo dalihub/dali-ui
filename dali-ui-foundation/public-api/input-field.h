@@ -300,6 +300,31 @@ public: // Setters for chaining
    */
   int GetMaximumLength() const;
 
+  /**
+   * @brief Sets how the layout direction of the text is resolved.
+   *
+   * - LayoutDirectionMode::CONTENTS:
+   *   The layout direction is determined from the text content itself.
+   *
+   * - LayoutDirectionMode::INHERIT:
+   *   The layout direction is inherited from the parent view.
+   *
+   * - LayoutDirectionMode::LOCALE:
+   *   The layout direction is determined based on the system locale.
+   *
+   * @note The default layout direction mode of InputField is LayoutDirectionMode::INHERIT.
+   *
+   * @param[in] mode The LayoutDirectionMode used to determine the text layout direction.
+   */
+  InputField& SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+
+  /**
+   * @brief Gets the current layout direction mode.
+   *
+   * @return The LayoutDirectionMode used to resolve the text layout direction.
+   */
+  Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+
   // @CHAIN_END
 
 public: // Signals

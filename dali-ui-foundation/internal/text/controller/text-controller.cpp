@@ -398,14 +398,15 @@ void Controller::ResetFontAndStyleData()
   mImpl->ResetFontAndStyleData();
 }
 
-void Controller::SetMatchLayoutDirection(LayoutDirectionMode type)
+void Controller::SetLayoutDirectionMode(LayoutDirectionMode type)
 {
-  mImpl->mModel->mMatchLayoutDirection = type;
+  mImpl->mModel->mLayoutDirectionMode = type;
+  mImpl->ResetFontAndStyleData();
 }
 
-LayoutDirectionMode Controller::GetMatchLayoutDirection() const
+LayoutDirectionMode Controller::GetLayoutDirectionMode() const
 {
-  return mImpl->mModel->mMatchLayoutDirection;
+  return mImpl->mModel->mLayoutDirectionMode;
 }
 
 void Controller::SetLayoutDirection(Dali::LayoutDirection::Type layoutDirection)
