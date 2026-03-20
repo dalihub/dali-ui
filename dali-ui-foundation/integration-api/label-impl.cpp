@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -156,26 +157,19 @@ bool LabelImpl::IsMultiLine() const
   return mController->IsMultiLineEnabled();
 }
 
-void LabelImpl::SetTextColor(const Vector4& color)
+void LabelImpl::SetTextColor(const UiColor& color)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
-
-  if(mController->GetDefaultColor() != color)
-  {
-    Self().SetProperty(LabelImpl::Property::TEXT_COLOR, color);
-    mController->SetDefaultColor(color);
-    mTextUpdateNeeded = true;
-
-    // Trigger constraint always.
-    if(DALI_LIKELY(mVisual))
-    {
-      Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
-    }
-  }
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetTextColorInternal);
+  SetTextColorInternal(color.Resolve());
 }
 
-const Vector4& LabelImpl::GetTextColor() const
+UiColor LabelImpl::GetTextColor()
 {
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetTextColorInternal, outColor))
+  {
+    return outColor;
+  }
   return mController->GetDefaultColor();
 }
 
@@ -545,6 +539,25 @@ void LabelImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type
 void LabelImpl::OnLocaleChanged(std::string locale)
 {
   mController->ResetFontAndStyleData();
+}
+
+// =============================================================================
+// UiColorManager
+// =============================================================================
+void LabelImpl::SetTextColorInternal(const Vector4& color)
+{
+  if(mController->GetDefaultColor() != color)
+  {
+    Self().SetProperty(LabelImpl::Property::TEXT_COLOR, color);
+    mController->SetDefaultColor(color);
+    mTextUpdateNeeded = true;
+
+    // Trigger constraint always.
+    if(DALI_LIKELY(mVisual))
+    {
+      Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
+    }
+  }
 }
 
 } // namespace Integration

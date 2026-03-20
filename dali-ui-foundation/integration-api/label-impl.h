@@ -160,12 +160,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetTextColor
    */
-  void SetTextColor(const Vector4& color);
+  void SetTextColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextColor
    */
-  const Vector4& GetTextColor() const;
+  UiColor GetTextColor();
 
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
@@ -299,6 +299,9 @@ private: // Implementation
    * @param[in] locale The new system locale.
    */
   void OnLocaleChanged(std::string locale);
+
+private: // UiColorManager
+  void SetTextColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable

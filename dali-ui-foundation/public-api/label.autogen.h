@@ -32,7 +32,7 @@
   * \
   * @param[in] color The required text color value. \
   */ \
-  ChildClass& SetTextColor(const Vector4& color) { Label::SetTextColor(color); return *this; } \
+  ChildClass& SetTextColor(const UiColor& color) { Label::SetTextColor(color); return *this; } \
   /** \
   * @brief Sets the horizontal alignment of the text within the label. \
   * \

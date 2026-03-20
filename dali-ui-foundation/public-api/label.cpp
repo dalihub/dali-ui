@@ -166,13 +166,13 @@ bool Label::IsMultiLine() const
   return GetImpl(*this).IsMultiLine();
 }
 
-Label& Label::SetTextColor(const Vector4& color)
+Label& Label::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);
   return *this;
 }
 
-const Vector4& Label::GetTextColor() const
+UiColor Label::GetTextColor()
 {
   return GetImpl(*this).GetTextColor();
 }

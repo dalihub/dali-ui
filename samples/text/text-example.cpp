@@ -217,13 +217,15 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
+    Vector4 textColor = label.GetTextColor().Resolve();
+
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
     DALI_LOG_ERROR("%s\n", title);
     DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
     DALI_LOG_ERROR("FontFamily      : %s\n", label.GetFontFamily().CStr());
     DALI_LOG_ERROR("FontSize        : %f\n", label.GetFontSize());
     DALI_LOG_ERROR("MultiLine       : %d\n", label.IsMultiLine());
-    DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", label.GetTextColor().r, label.GetTextColor().g, label.GetTextColor().b, label.GetTextColor().a);
+    DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
     DALI_LOG_ERROR("H Align         : %d\n", label.GetHorizontalTextAlignment());
     DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
     DALI_LOG_ERROR("LineHeight      : %f\n", label.GetLineHeight());
@@ -236,19 +238,24 @@ private:
 
   void PrintInputFieldInfo(InputField field, const char* title)
   {
+    Vector4 textColor = field.GetTextColor().Resolve();
+    Vector4 placeholderColor = field.GetPlaceholderColor().Resolve();
+    Vector4 cursorColor = field.GetCursorColor().Resolve();
+    Vector4 selectionColor = field.GetSelectionColor().Resolve();
+
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
     DALI_LOG_ERROR("%s\n", title);
     DALI_LOG_ERROR("Text             : %s\n", field.GetText().CStr());
     DALI_LOG_ERROR("FontFamily       : %s\n", field.GetFontFamily().CStr());
     DALI_LOG_ERROR("FontSize         : %f\n", field.GetFontSize());
-    DALI_LOG_ERROR("TextColor        : %.2f, %.2f, %.2f, %.2f\n", field.GetTextColor().r, field.GetTextColor().g, field.GetTextColor().b, field.GetTextColor().a);
+    DALI_LOG_ERROR("TextColor        : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
     DALI_LOG_ERROR("H Align          : %d\n", field.GetHorizontalTextAlignment());
     DALI_LOG_ERROR("V Align          : %d\n", field.GetVerticalTextAlignment());
     DALI_LOG_ERROR("Placeholder      : %s\n", field.GetPlaceholder().CStr());
-    DALI_LOG_ERROR("PlaceholderColor : %.2f, %.2f, %.2f, %.2f\n", field.GetPlaceholderColor().r, field.GetPlaceholderColor().g, field.GetPlaceholderColor().b, field.GetPlaceholderColor().a);
+    DALI_LOG_ERROR("PlaceholderColor : %.2f, %.2f, %.2f, %.2f\n", placeholderColor.r, placeholderColor.g, placeholderColor.b, placeholderColor.a);
     DALI_LOG_ERROR("CursorWidth      : %d\n", field.GetCursorWidth());
-    DALI_LOG_ERROR("CursorColor      : %.2f, %.2f, %.2f, %.2f\n", field.GetCursorColor().r, field.GetCursorColor().g, field.GetCursorColor().b, field.GetCursorColor().a);
-    DALI_LOG_ERROR("SelectionColor   : %.2f, %.2f, %.2f, %.2f\n", field.GetSelectionColor().r, field.GetSelectionColor().g, field.GetSelectionColor().b, field.GetSelectionColor().a);
+    DALI_LOG_ERROR("CursorColor      : %.2f, %.2f, %.2f, %.2f\n", cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a);
+    DALI_LOG_ERROR("SelectionColor   : %.2f, %.2f, %.2f, %.2f\n", selectionColor.r, selectionColor.g, selectionColor.b, selectionColor.a);
     DALI_LOG_ERROR("MaximumLength    : %d\n", field.GetMaximumLength());
     DALI_LOG_ERROR("Natural          : %f, %f\n", field.GetNaturalSize().x, field.GetNaturalSize().y);
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
@@ -290,7 +297,7 @@ private:
 
   void ToggleColor()
   {
-    const bool isLightColor = (mLabel.GetTextColor() == UiColor(COLOR_DARK_TEXT));
+    const bool isLightColor = (mLabel.GetTextColor().Resolve() == UiColor(COLOR_DARK_TEXT));
     if(isLightColor)
     {
       ApplyDarkColor();

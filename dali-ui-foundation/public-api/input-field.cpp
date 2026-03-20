@@ -143,13 +143,13 @@ float InputField::GetFontSize() const
   return GetImpl(*this).GetFontSize();
 }
 
-InputField& InputField::SetTextColor(const Vector4& color)
+InputField& InputField::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);
   return *this;
 }
 
-const Vector4& InputField::GetTextColor() const
+UiColor InputField::GetTextColor()
 {
   return GetImpl(*this).GetTextColor();
 }
@@ -187,13 +187,13 @@ Dali::String InputField::GetPlaceholder() const
   return GetImpl(*this).GetPlaceholder();
 }
 
-InputField& InputField::SetPlaceholderColor(const Vector4& color)
+InputField& InputField::SetPlaceholderColor(const UiColor& color)
 {
   GetImpl(*this).SetPlaceholderColor(color);
   return *this;
 }
 
-const Vector4& InputField::GetPlaceholderColor() const
+UiColor InputField::GetPlaceholderColor()
 {
   return GetImpl(*this).GetPlaceholderColor();
 }
@@ -209,24 +209,24 @@ int InputField::GetCursorWidth() const
   return GetImpl(*this).GetCursorWidth();
 }
 
-InputField& InputField::SetCursorColor(const Vector4& color)
+InputField& InputField::SetCursorColor(const UiColor& color)
 {
   GetImpl(*this).SetCursorColor(color);
   return *this;
 }
 
-const Vector4& InputField::GetCursorColor() const
+UiColor InputField::GetCursorColor()
 {
   return GetImpl(*this).GetCursorColor();
 }
 
-InputField& InputField::SetSelectionColor(const Vector4& color)
+InputField& InputField::SetSelectionColor(const UiColor& color)
 {
   GetImpl(*this).SetSelectionColor(color);
   return *this;
 }
 
-const Vector4& InputField::GetSelectionColor() const
+UiColor InputField::GetSelectionColor()
 {
   return GetImpl(*this).GetSelectionColor();
 }

@@ -26,7 +26,7 @@
   * \
   * @param[in] color The required text color value. \
   */ \
-  ChildClass& SetTextColor(const Vector4& color) { InputField::SetTextColor(color); return *this; } \
+  ChildClass& SetTextColor(const UiColor& color) { InputField::SetTextColor(color); return *this; } \
   /** \
   * @brief Sets the horizontal alignment of the text within the inputField. \
   * \
@@ -48,11 +48,11 @@
   /** \
   * @brief Sets the color of the placeholder text. \
   * \
-  * @param[in] color The placeholder text color as a Vector4. \
+  * @param[in] color The placeholder text color as a UiColor. \
   * \
   * @return A reference to this InputField for method chaining. \
   */ \
-  ChildClass& SetPlaceholderColor(const Vector4& color) { InputField::SetPlaceholderColor(color); return *this; } \
+  ChildClass& SetPlaceholderColor(const UiColor& color) { InputField::SetPlaceholderColor(color); return *this; } \
   /** \
   * @brief Sets the width of the text cursor. \
   * \
@@ -67,19 +67,19 @@
   * This color is applied to both primary and secondary cursors \
   * when a split cursor is shown in bidirectional text. \
   * \
-  * @param[in] color The cursor color as a Vector4. \
+  * @param[in] color The cursor color as a UiColor. \
   * \
   * @return A reference to this InputField for method chaining. \
   */ \
-  ChildClass& SetCursorColor(const Vector4& color) { InputField::SetCursorColor(color); return *this; } \
+  ChildClass& SetCursorColor(const UiColor& color) { InputField::SetCursorColor(color); return *this; } \
   /** \
   * @brief Sets the highlight color of the selected text region. \
   * \
-  * @param[in] color The selection highlight color as a Vector4). \
+  * @param[in] color The selection highlight color as a UiColor). \
   * \
   * @return A reference to this InputField for method chaining. \
   */ \
-  ChildClass& SetSelectionColor(const Vector4& color) { InputField::SetSelectionColor(color); return *this; } \
+  ChildClass& SetSelectionColor(const UiColor& color) { InputField::SetSelectionColor(color); return *this; } \
   /** \
   * @brief Sets the maximum number of characters that can be entered into the InputField. \
   * \

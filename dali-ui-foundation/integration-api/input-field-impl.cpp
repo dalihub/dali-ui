@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -139,20 +140,19 @@ float InputFieldImpl::GetFontSize() const
   return mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE);
 }
 
-void InputFieldImpl::SetTextColor(const Vector4& color)
+void InputFieldImpl::SetTextColor(const UiColor& color)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
-
-  if(mController->GetDefaultColor() != color)
-  {
-    mController->SetDefaultColor(color);
-    mController->SetInputColor(color);
-    mRenderer.Reset();
-  }
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetTextColorInternal);
+  SetTextColorInternal(color.Resolve());
 }
 
-const Vector4& InputFieldImpl::GetTextColor() const
+UiColor InputFieldImpl::GetTextColor()
 {
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetTextColorInternal, outColor))
+  {
+    return outColor;
+  }
   return mController->GetDefaultColor();
 }
 
@@ -196,19 +196,19 @@ Dali::String InputFieldImpl::GetPlaceholder() const
   return ToDaliString(text);
 }
 
-void InputFieldImpl::SetPlaceholderColor(const Vector4& color)
+void InputFieldImpl::SetPlaceholderColor(const UiColor& color)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
-
-  if(mController->GetPlaceholderTextColor() != color)
-  {
-    mController->SetPlaceholderTextColor(color);
-    mRenderer.Reset();
-  }
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetPlaceholderColorInternal);
+  SetPlaceholderColorInternal(color.Resolve());
 }
 
-const Vector4& InputFieldImpl::GetPlaceholderColor() const
+UiColor InputFieldImpl::GetPlaceholderColor()
 {
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetPlaceholderColorInternal, outColor))
+  {
+    return outColor;
+  }
   return mController->GetPlaceholderTextColor();
 }
 
@@ -225,30 +225,35 @@ int InputFieldImpl::GetCursorWidth() const
   return mDecorator->GetCursorWidth();
 }
 
-void InputFieldImpl::SetCursorColor(const Vector4& color)
+void InputFieldImpl::SetCursorColor(const UiColor& color)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
-
-  mDecorator->SetCursorColor(Text::PRIMARY_CURSOR, color);
-  mDecorator->SetCursorColor(Text::SECONDARY_CURSOR, color);
-  RequestTextRelayout();
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetCursorColorInternal);
+  SetCursorColorInternal(color.Resolve());
 }
 
-const Vector4& InputFieldImpl::GetCursorColor() const
+UiColor InputFieldImpl::GetCursorColor()
 {
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetCursorColorInternal, outColor))
+  {
+    return outColor;
+  }
   return mDecorator->GetColor(Text::PRIMARY_CURSOR);
 }
 
-void InputFieldImpl::SetSelectionColor(const Vector4& color)
+void InputFieldImpl::SetSelectionColor(const UiColor& color)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %.2f,%.2f,%.2f,%.2f\n", mController.Get(), color.r, color.g, color.b, color.a);
-
-  mDecorator->SetHighlightColor(color);
-  RequestTextRelayout();
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetSelectionColorInternal);
+  SetSelectionColorInternal(color.Resolve());
 }
 
-const Vector4& InputFieldImpl::GetSelectionColor() const
+UiColor InputFieldImpl::GetSelectionColor()
 {
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetSelectionColorInternal, outColor))
+  {
+    return outColor;
+  }
   return mDecorator->GetHighlightColor();
 }
 
@@ -1030,6 +1035,41 @@ void InputFieldImpl::EmitTextChangedSignal()
   Ui::View handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
+}
+
+// =============================================================================
+// UiColorManager
+// =============================================================================
+void InputFieldImpl::SetTextColorInternal(const Vector4& color)
+{
+  if(mController->GetDefaultColor() != color)
+  {
+    mController->SetDefaultColor(color);
+    mController->SetInputColor(color);
+    mRenderer.Reset();
+  }
+}
+
+void InputFieldImpl::SetPlaceholderColorInternal(const Vector4& color)
+{
+  if(mController->GetPlaceholderTextColor() != color)
+  {
+    mController->SetPlaceholderTextColor(color);
+    mRenderer.Reset();
+  }
+}
+
+void InputFieldImpl::SetCursorColorInternal(const Vector4& color)
+{
+  mDecorator->SetCursorColor(Text::PRIMARY_CURSOR, color);
+  mDecorator->SetCursorColor(Text::SECONDARY_CURSOR, color);
+  RequestTextRelayout();
+}
+
+void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
+{
+  mDecorator->SetHighlightColor(color);
+  RequestTextRelayout();
 }
 
 } // namespace Integration

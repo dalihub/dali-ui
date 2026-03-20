@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 
 // None
 
@@ -190,14 +191,14 @@ public: // Setters for chaining
    *
    * @param[in] color The required text color value.
    */
-  Label& SetTextColor(const Vector4& color);
+  Label& SetTextColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text.
    *
    * @return The text color currently set on the label.
    */
-  const Vector4& GetTextColor() const;
+  UiColor GetTextColor();
 
   /**
    * @brief Sets the horizontal alignment of the text within the label.

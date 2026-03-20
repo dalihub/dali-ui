@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 
 // None
 
@@ -168,14 +169,14 @@ public: // Setters for chaining
    *
    * @param[in] color The required text color value.
    */
-  InputField& SetTextColor(const Vector4& color);
+  InputField& SetTextColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text.
    *
    * @return The text color currently set on the inputField.
    */
-  const Vector4& GetTextColor() const;
+  UiColor GetTextColor();
 
   /**
    * @brief Sets the horizontal alignment of the text within the inputField.
@@ -222,18 +223,18 @@ public: // Setters for chaining
   /**
    * @brief Sets the color of the placeholder text.
    *
-   * @param[in] color The placeholder text color as a Vector4.
+   * @param[in] color The placeholder text color as a UiColor.
    *
    * @return A reference to this InputField for method chaining.
    */
-  InputField& SetPlaceholderColor(const Vector4& color);
+  InputField& SetPlaceholderColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the placeholder text.
    *
-   * @return The placeholder text color as a Vector4.
+   * @return The placeholder text color as a UiColor.
    */
-  const Vector4& GetPlaceholderColor() const;
+  UiColor GetPlaceholderColor();
 
   /**
    * @brief Sets the width of the text cursor.
@@ -257,34 +258,34 @@ public: // Setters for chaining
    * This color is applied to both primary and secondary cursors
    * when a split cursor is shown in bidirectional text.
    *
-   * @param[in] color The cursor color as a Vector4.
+   * @param[in] color The cursor color as a UiColor.
    *
    * @return A reference to this InputField for method chaining.
    */
-  InputField& SetCursorColor(const Vector4& color);
+  InputField& SetCursorColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text cursor.
    *
-   * @return The cursor color as a Vector4.
+   * @return The cursor color as a UiColor.
    */
-  const Vector4& GetCursorColor() const;
+  UiColor GetCursorColor();
 
   /**
    * @brief Sets the highlight color of the selected text region.
    *
-   * @param[in] color The selection highlight color as a Vector4).
+   * @param[in] color The selection highlight color as a UiColor).
    *
    * @return A reference to this InputField for method chaining.
    */
-  InputField& SetSelectionColor(const Vector4& color);
+  InputField& SetSelectionColor(const UiColor& color);
 
   /**
    * @brief Gets the highlight color of the selected text region.
    *
-   * @return The selection highlight color as a Vector4.
+   * @return The selection highlight color as a UiColor.
    */
-  const Vector4& GetSelectionColor() const;
+  UiColor GetSelectionColor();
 
   /**
    * @brief Sets the maximum number of characters that can be entered into the InputField.

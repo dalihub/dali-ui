@@ -101,12 +101,12 @@ public:
   /**
    * @copydoc Dali::Ui::InputField::SetTextColor
    */
-  void SetTextColor(const Vector4& color);
+  void SetTextColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::InputField::GetTextColor
    */
-  const Vector4& GetTextColor() const;
+  UiColor GetTextColor();
 
   /**
    * @copydoc Dali::Ui::InputField::SetHorizontalTextAlignment
@@ -141,12 +141,12 @@ public:
   /**
    * @copydoc Dali::Ui::InputField::SetPlaceholderColor
    */
-  void SetPlaceholderColor(const Vector4& color);
+  void SetPlaceholderColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::InputField::GetPlaceholderColor
    */
-  const Vector4& GetPlaceholderColor() const;
+  UiColor GetPlaceholderColor();
 
   /**
    * @copydoc Dali::Ui::InputField::SetCursorWidth
@@ -161,22 +161,22 @@ public:
   /**
    * @copydoc Dali::Ui::InputField::SetCursorColor
    */
-  void SetCursorColor(const Vector4& color);
+  void SetCursorColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::InputField::GetCursorColor
    */
-  const Vector4& GetCursorColor() const;
+  UiColor GetCursorColor();
 
   /**
    * @copydoc Dali::Ui::InputField::SetSelectionColor
    */
-  void SetSelectionColor(const Vector4& color);
+  void SetSelectionColor(const UiColor& color);
 
   /**
    * @copydoc Dali::Ui::InputField::GetSelectionColor
    */
-  const Vector4& GetSelectionColor() const;
+  UiColor GetSelectionColor();
 
   /**
    * @copydoc Dali::Ui::InputField::SetMaximumLength
@@ -480,6 +480,12 @@ private: // Implementation
    * @brief Emits TextChanged signal.
    */
   void EmitTextChangedSignal();
+
+private: // UiColorManager
+  void SetTextColorInternal(const Vector4& color);
+  void SetPlaceholderColorInternal(const Vector4& color);
+  void SetCursorColorInternal(const Vector4& color);
+  void SetSelectionColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable
