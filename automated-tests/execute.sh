@@ -116,7 +116,8 @@ find build \( -name "*.gcda" \) -exec rm '{}' \;
 ASCII_BOLD="\e[1m"
 ASCII_RESET="\e[0m"
 
-modules=`ls -1 src/ | grep -v CMakeList | grep -v common | grep -v manual`
+modules=`ls -1 src/ | grep -v CMakeList | grep -v common | grep -v manual | grep -v dali-test-suite-utils`
+
 if [ -f summary.xml ] ; then unlink summary.xml ; fi
 
 if [ $opt_tct == 1 ] ; then
