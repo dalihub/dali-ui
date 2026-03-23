@@ -31,7 +31,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
+namespace Internal
 {
 
 class InputEventImpl;
@@ -49,6 +49,11 @@ public:
    * @param[in] originEvent The handle of originated event
    * @return An InputEvent handle
    */
+  /**
+   * @brief Create a new InputEvent with NONE type (programmatic / no input event).
+   */
+  InputEventImpl();
+
   InputEventImpl(const TouchEvent& originEvent);
 
   /**
@@ -81,6 +86,11 @@ public:
    * @param[in] originEvent The handle of originated event
    * @return An IntrusivePtr to the new InputEventImpl
    */
+  /**
+   * @brief Create a new InputEvent with NONE type (programmatic / no input event).
+   */
+  static InputEventImplPtr New();
+
   static InputEventImplPtr New(const TouchEvent& originEvent);
 
   /**
@@ -144,22 +154,22 @@ private:
   InputEventImpl& operator=(InputEventImpl&& rhs)      = delete; ///< Deleted move assignment operator
 
 private:
-  InputEventType                                                   mEventType;
-  std::variant<TouchEvent, KeyEvent, TapGesture, LongPressGesture> mEvent;
+  InputEventType                                                                   mEventType;
+  std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture> mEvent;
 };
 
-} // namespace Integration
+} // namespace Internal
 
-inline Integration::InputEventImpl& GetImpl(InputEvent& obj)
+inline Internal::InputEventImpl& GetImpl(InputEvent& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::InputEventImpl&>(handle);
+  return static_cast<Internal::InputEventImpl&>(handle);
 }
 
-inline const Integration::InputEventImpl& GetImpl(const InputEvent& obj)
+inline const Internal::InputEventImpl& GetImpl(const InputEvent& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::InputEventImpl&>(handle);
+  return static_cast<const Internal::InputEventImpl&>(handle);
 }
 
 } // namespace Ui

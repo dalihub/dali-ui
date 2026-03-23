@@ -19,8 +19,8 @@
 #include <dali/devel-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
-#include <dali-ui-foundation/public-api/clickable-trait.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
 
 namespace Dali
 {
@@ -28,86 +28,86 @@ namespace Dali
 namespace Ui
 {
 
-ClickableTrait::ClickableTrait()
+InteractiveTrait::InteractiveTrait()
 {
 }
 
-ClickableTrait ClickableTrait::New()
+InteractiveTrait InteractiveTrait::New()
 {
-  IntrusivePtr<Integration::ClickableTraitImpl> impl = new Integration::ClickableTraitImpl();
-  return ClickableTrait(impl.Get());
+  IntrusivePtr<Integration::InteractiveTraitImpl> impl = new Integration::InteractiveTraitImpl();
+  return InteractiveTrait(impl.Get());
 }
 
-ClickableTrait::ClickableTrait(const ClickableTrait& trait)
+InteractiveTrait::InteractiveTrait(const InteractiveTrait& trait)
 : Trait(trait)
 {
 }
 
-ClickableTrait::~ClickableTrait()
+InteractiveTrait::~InteractiveTrait()
 {
 }
 
-ClickableTrait::ClickableTrait(Integration::ClickableTraitImpl* implementation)
+InteractiveTrait::InteractiveTrait(Integration::InteractiveTraitImpl* implementation)
 : Trait(implementation)
 {
 }
 
-ClickableTrait ClickableTrait::DownCast(BaseHandle handle)
+InteractiveTrait InteractiveTrait::DownCast(BaseHandle handle)
 {
-  return ClickableTrait(dynamic_cast<Integration::ClickableTraitImpl*>(handle.GetObjectPtr()));
+  return InteractiveTrait(dynamic_cast<Integration::InteractiveTraitImpl*>(handle.GetObjectPtr()));
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::PressedChangedSignal()
+Signal<void(View, bool, const InputEvent&)>& InteractiveTrait::PressedChangedSignal()
 {
   return GetImpl(*this).PressedChangedSignal();
 }
 
-Signal<void(View)>& ClickableTrait::PseudoDisabledChangedSignal()
+Signal<void(View, bool)>& InteractiveTrait::PseudoDisabledChangedSignal()
 {
   return GetImpl(*this).PseudoDisabledChangedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::ClickedSignal()
+Signal<void(View, const InputEvent&)>& InteractiveTrait::ClickedSignal()
 {
   return GetImpl(*this).ClickedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTrait::LongPressedSignal()
+Signal<bool(View, const InputEvent&)>& InteractiveTrait::LongPressedSignal()
 {
   return GetImpl(*this).LongPressedSignal();
 }
 
-bool ClickableTrait::IsPressed() const
+bool InteractiveTrait::IsPressed() const
 {
   return GetImpl(*this).IsPressed();
 }
 
-bool ClickableTrait::IsPseudoDisabled() const
+bool InteractiveTrait::IsPseudoDisabled() const
 {
   return GetImpl(*this).IsPseudoDisabled();
 }
 
-void ClickableTrait::SetPseudoDisabled(bool pseudoDisabled)
+void InteractiveTrait::SetPseudoDisabled(bool pseudoDisabled)
 {
   GetImpl(*this).SetPseudoDisabled(pseudoDisabled);
 }
 
-bool ClickableTrait::IsClickable() const
+bool InteractiveTrait::IsClickable() const
 {
   return GetImpl(*this).IsClickable();
 }
 
-void ClickableTrait::SetClickable(bool clickable)
+void InteractiveTrait::SetClickable(bool clickable)
 {
   GetImpl(*this).SetClickable(clickable);
 }
 
-KeyClickPolicy ClickableTrait::GetKeyClickPolicy() const
+KeyClickPolicy InteractiveTrait::GetKeyClickPolicy() const
 {
   return GetImpl(*this).GetKeyClickPolicy();
 }
 
-void ClickableTrait::SetKeyClickPolicy(KeyClickPolicy policy)
+void InteractiveTrait::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   GetImpl(*this).SetKeyClickPolicy(policy);
 }

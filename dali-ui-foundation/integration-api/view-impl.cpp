@@ -50,6 +50,8 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/internal/views/state-handler-trait.h>
+#include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
@@ -150,7 +152,7 @@ ViewImpl::ViewImpl(LayoutManager* layoutManager)
 : CustomActorImpl(static_cast<ActorFlags>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
-  mInteractionTrait(nullptr),
+  mInteractiveTrait(nullptr),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
   mMinimumWidth(0.0f),
@@ -207,29 +209,155 @@ void ViewImpl::OnSceneConnection(int depth)
 
 bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
-  if(mInteractionTrait)
+  if(mInteractiveTrait)
   {
-    return mInteractionTrait->OnKeyEvent(View::DownCast(Self()), event);
+    return mInteractiveTrait->OnKeyEvent(View::DownCast(Self()), event);
   }
   return false;
 }
 
 void ViewImpl::OnKeyInputFocusGained()
 {
-  EmitKeyInputFocusSignal(true);
-  if(mInteractionTrait)
-  {
-    mInteractionTrait->OnFocusedChanged(View::DownCast(Self()), true);
-  }
+  OnFocusChanged(true);
 }
 
 void ViewImpl::OnKeyInputFocusLost()
 {
-  EmitKeyInputFocusSignal(false);
-  if(mInteractionTrait)
+  OnFocusChanged(false);
+}
+
+// =============================================================================
+// State API
+// =============================================================================
+
+const UiState& ViewImpl::GetState() const
+{
+  return mState;
+}
+
+bool ViewImpl::IsEnabled() const
+{
+  return Self().GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED);
+}
+
+void ViewImpl::SetEnabled(bool enabled)
+{
+  Self().SetProperty(DevelActor::Property::USER_INTERACTION_ENABLED, enabled);
+  OnEnableChanged(enabled);
+}
+
+bool ViewImpl::IsEffectivelyEnabled() const
+{
+  return Internal::ViewStateManager::Get().IsEffectivelyEnabled(*this);
+}
+
+bool ViewImpl::IsEffectivelyFocused() const
+{
+  return Internal::ViewStateManager::Get().IsEffectivelyFocused(*this);
+}
+
+ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
+{
+  return mStateChangedSignal;
+}
+
+Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
+{
+  const TraitId interactiveTraitId(ReservedTraitId::INTERACTION_TRAIT);
+  Trait         existing = GetTrait(interactiveTraitId);
+
+  if(!existing)
   {
-    mInteractionTrait->OnFocusedChanged(View::DownCast(Self()), false);
+    Ui::InteractiveTrait interaction = Ui::InteractiveTrait::New();
+    SetTrait(interactiveTraitId, interaction);
+    return interaction;
   }
+
+  Ui::InteractiveTrait interaction = Ui::InteractiveTrait::DownCast(existing);
+  DALI_ASSERT_ALWAYS(interaction && "View already has a different interaction trait; cannot attach InteractiveTrait");
+  return interaction;
+}
+
+bool ViewImpl::IsInteractive() const
+{
+  return !!GetTrait(TraitId(ReservedTraitId::INTERACTION_TRAIT));
+}
+
+void ViewImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+{
+  const TraitId stateHandlerTraitId(ReservedTraitId::STATE_HANDLER_TRAIT);
+  Trait         existing = GetTrait(stateHandlerTraitId);
+
+  if(!existing)
+  {
+    Internal::StateHandlerTrait stateHandlerTrait = Internal::StateHandlerTrait::New();
+    SetTrait(stateHandlerTraitId, stateHandlerTrait);
+    existing = stateHandlerTrait;
+  }
+
+  static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().Set(id.CStr(), tracker, callback);
+}
+
+bool ViewImpl::UnsetStateHandler(const Dali::String& id)
+{
+  Trait existing = GetTrait(TraitId(ReservedTraitId::STATE_HANDLER_TRAIT));
+  if(!existing)
+  {
+    return false;
+  }
+
+  return static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().Unset(id.CStr());
+}
+
+bool ViewImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
+{
+  Trait existing = GetTrait(TraitId(ReservedTraitId::STATE_HANDLER_TRAIT));
+  if(!existing)
+  {
+    return false;
+  }
+
+  return static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().UnsetWhenNotProcessing(id.CStr());
+}
+
+void ViewImpl::SetViewState(UiState state, bool on, InputEvent cause)
+{
+  UiState prev = mState;
+  if(on)
+  {
+    mState = mState + state;
+
+    // Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
+    // Clear them immediately rather than waiting for potentially late system events.
+    if(state == UiState::Disabled)
+    {
+      mState = mState - UiState::Focused - UiState::Pressed;
+    }
+  }
+  else
+  {
+    mState = mState - state;
+  }
+
+  if(mState != prev)
+  {
+    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mState, std::move(cause));
+  }
+}
+
+void ViewImpl::OnFocusChanged(bool focused)
+{
+  SetViewState(UiState::Focused, focused);
+
+  if(mInteractiveTrait)
+  {
+    mInteractiveTrait->OnFocusedChanged(View::DownCast(Self()), focused);
+  }
+}
+
+void ViewImpl::OnEnableChanged(bool enabled)
+{
+  SetViewState(UiState::Disabled, !enabled);
 }
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -383,15 +511,15 @@ void ViewImpl::SetTrait(TraitId id, Trait& trait)
 
   if(id == ReservedTraitId::INTERACTION_TRAIT)
   {
-    if(mInteractionTrait)
+    if(mInteractiveTrait)
     {
       DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
       return;
     }
-    IInteractionTrait* interactionTrait = dynamic_cast<IInteractionTrait*>(&traitImpl);
-    DALI_ASSERT_ALWAYS(interactionTrait &&
-                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement IInteractionTrait");
-    mInteractionTrait = interactionTrait;
+    IInteractiveTrait* interactiveTrait = dynamic_cast<IInteractiveTrait*>(&traitImpl);
+    DALI_ASSERT_ALWAYS(interactiveTrait &&
+                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement IInteractiveTrait");
+    mInteractiveTrait = interactiveTrait;
   }
 
   for(auto& entry : mTraits)
@@ -1082,7 +1210,7 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
-  mInteractionTrait(nullptr),
+  mInteractiveTrait(nullptr),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
   mMinimumWidth(0.0f),

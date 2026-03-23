@@ -108,42 +108,30 @@
   */ \
   ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
   /** \
-  * @brief Attaches the clickable interaction role to this View and optionally configures it. \
+  * @brief Sets whether the view is enabled. \
   * \
-  * A View can have at most one interaction trait for its lifetime; attaching clickable \
-  * succeeds only if no other interaction trait is set. If the View already has a \
-  * ClickableTrait (e.g. from a previous AsClickable call), the existing trait is \
+  * A disabled view does not receive user interaction. Setting this to false \
+  * adds the Disabled state and emits StateChangedSignal. \
+  * \
+  * @param[in] enabled True to enable, false to disable \
+  */ \
+  ChildClass& SetEnabled(bool enabled) { View::SetEnabled(enabled); return *this; } \
+  /** \
+  * @brief Attaches the interaction trait to this View and optionally configures it. \
+  * \
+  * A View can have at most one interaction trait for its lifetime; attaching interactive \
+  * succeeds only if no other interaction trait is set. If the View already has an \
+  * InteractiveTrait (e.g. from a previous AsInteractive call), the existing trait is \
   * used and the configure callback is invoked with it. \
   * \
   * The callback is invoked in the caller's translation unit, so no std::function \
   * crosses the library ABI boundary; this preserves ABI stability across toolchains. \
   * \
-  * @param[in] configure Optional callback to configure the ClickableTrait (e.g. connect signals). \
+  * @param[in] configure Optional callback to configure the InteractiveTrait (e.g. connect signals). \
   *                     Can be null or omitted to only attach the trait. \
   * @return Reference to this View for fluent chaining \
   */ \
-  ChildClass& AsClickable(std::function<void(ClickableTrait&)> configure = nullptr) { View::AsClickable(configure); return *this; } \
-  /** \
-  * @brief Attaches the clickable trait and connects a member function to the Clicked signal. \
-  * \
-  * Equivalent to AsClickable() then ClickedSignal().Connect(obj, func). \
-  * @param[in] obj Object that implements ConnectionTrackerInterface (e.g. ConnectionTracker subclass); used for \
-  * automatic disconnection \
-  * @param[in] func Member function with signature bool (View, const InputEvent&) \
-  * @return Reference to this View for fluent chaining \
-  */ \
-  template<class X> \
-  ChildClass& AsClickable(X* obj, bool (X::*func)(View, const InputEvent&)) { View::AsClickable(obj, func); return *this; } \
-  /** \
-  * @brief Attaches the clickable trait and connects a callable to the Clicked signal. \
-  * \
-  * Equivalent to AsClickable() then ClickedSignal().Connect(connectionTracker, func). \
-  * @param[in] connectionTracker Used for automatic disconnection when the tracker is destroyed \
-  * @param[in] func Callable with signature bool (View, const InputEvent&) (e.g. lambda) \
-  * @return Reference to this View for fluent chaining \
-  */ \
-  template<typename F> \
-  ChildClass& AsClickable(Dali::ConnectionTrackerInterface* connectionTracker, F&& func) { View::AsClickable(connectionTracker, func); return *this; } \
+  ChildClass& AsInteractive(std::function<void(InteractiveTrait&)> configure = nullptr) { View::AsInteractive(configure); return *this; } \
   /** \
   * @brief Assigns this View instance to a target variable. \
   * This method is useful for capturing a reference to a View created within \

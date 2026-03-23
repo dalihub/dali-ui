@@ -36,13 +36,16 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interaction-trait-interface.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/signals/callback.h>
 
 namespace Dali
 {
@@ -230,6 +233,165 @@ public: // API (size, position, parent origin, pivot)
    */
   void SetTouchFocusable(bool touchFocusable);
 
+public: // State API
+  using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
+
+  /**
+   * @brief Gets the current state of this View.
+   *
+   * @return The current UiState
+   */
+  const UiState& GetState() const;
+
+  /**
+   * @brief Checks if the view is enabled.
+   *
+   * Enabled is the default state. A disabled view does not receive user interaction.
+   *
+   * @return True if enabled
+   */
+  bool IsEnabled() const;
+
+  /**
+   * @brief Sets the enabled state of the view.
+   *
+   * When disabled, the Disabled state is added and the underlying
+   * USER_INTERACTION_ENABLED property is set to false.
+   *
+   * @param[in] enabled True to enable, false to disable
+   */
+  void SetEnabled(bool enabled);
+
+  /**
+   * @brief Returns true if this view and all its View ancestors are enabled.
+   *
+   * Unlike IsEnabled(), which only reflects the view's own state, this method
+   * walks up the scene hierarchy and returns false if any ancestor View carries
+   * UiState::Disabled.
+   *
+   * @return True if neither the view nor any ancestor is disabled
+   */
+  bool IsEffectivelyEnabled() const;
+
+  /**
+   * @brief Returns true if this view or any of its View ancestors is focused.
+   *
+   * Unlike IsFocused() (which only reflects the view's own state), this method
+   * walks up the scene hierarchy and returns true if any ancestor View carries
+   * UiState::Focused.
+   *
+   * @return True if the view itself or at least one ancestor is focused
+   */
+  bool IsEffectivelyFocused() const;
+
+  /**
+   * @brief Returns the state changed signal.
+   *
+   * Emitted whenever the view's UiState changes. The signal passes
+   * the previous state and the new (current) state.
+   *
+   * @return The StateChangedSignal
+   */
+  StateChangedSignalType& StateChangedSignal();
+
+  /**
+   * @brief Registers a named state-change handler using a member function.
+   *
+   * The handler is identified by @a id. If a handler with the same id already
+   * exists, it is replaced. The handler is automatically removed when @a obj
+   * is destroyed.
+   *
+   * @param[in] id   Unique identifier for this handler
+   * @param[in] obj  Object whose member function will be called (must implement ConnectionTrackerInterface)
+   * @param[in] func Member function with signature void(View, const StateEvent&)
+   */
+  template<class X>
+  void WhenStateChanged(const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+  {
+    if(obj && func)
+    {
+      SetNamedStateHandler(id, obj, MakeCallback(obj, func));
+    }
+  }
+
+  /**
+   * @brief Registers a named state-change handler using a callable (e.g. lambda).
+   *
+   * The handler is identified by @a id. If a handler with the same id already
+   * exists, it is replaced. The handler is automatically removed when @a tracker
+   * is destroyed.
+   *
+   * @code
+   * WhenStateChanged("default_bg", this, [](View v, const StateEvent& e) {
+   *   if(e.Changed(UiState::Focused)) { ... }
+   * });
+   * @endcode
+   *
+   * @param[in] id      Unique identifier for this handler
+   * @param[in] tracker ConnectionTrackerInterface for automatic lifetime management
+   * @param[in] func    Callable with signature void(View, const StateEvent&)
+   */
+  template<typename F>
+  void WhenStateChanged(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
+  {
+    if(tracker)
+    {
+      SetNamedStateHandler(id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+    }
+  }
+
+  /**
+   * @brief Removes a named state-change handler.
+   *
+   * @param[in] id The handler identifier to remove
+   * @return True if a handler was found and removed
+   */
+  bool UnsetStateHandler(const Dali::String& id);
+
+  /**
+   * @brief Removes a named state-change handler only if it is not currently being processed.
+   *
+   * Safe to call from within the handler itself: if the call originates from the handler
+   * identified by @a id, removal is deferred until after that handler returns.
+   *
+   * @param[in] id The handler identifier to remove
+   * @return True if removed, false if currently processing or not found
+   */
+  bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
+
+  /**
+   * @brief Sets or clears a specific state bit.
+   *
+   * This is called by traits (e.g. InteractiveTrait) to update the view's state.
+   * It emits StateChangedSignal if the state actually changed.
+   *
+   * @param[in] state The state to set or clear
+   * @param[in] on    True to add the state, false to remove it
+   * @param[in] cause Input event that triggered the change; leave default if programmatic
+   */
+  void SetViewState(UiState state, bool on, InputEvent cause = {});
+
+  /**
+   * @brief Called when the view's focus state changes.
+   *
+   * The caller (e.g. focus manager) is responsible for invoking this method.
+   * Updates the Focused state and forwards to the interaction trait if present.
+   *
+   * @param[in] focused True if the view gained focus
+   */
+  void OnFocusChanged(bool focused);
+
+  /**
+   * @brief Called when the view's enabled state changes externally.
+   *
+   * The caller is responsible for invoking this method when
+   * USER_INTERACTION_ENABLED property changes.
+   * Updates the Disabled state accordingly.
+   *
+   * @param[in] enabled True if the view became enabled
+   */
+  void OnEnableChanged(bool enabled);
+
   /**
    * @copydoc Dali::Ui::View::GetBackgroundColor()
    */
@@ -249,7 +411,7 @@ public: // API (size, position, parent origin, pivot)
    * same id will replace the existing trait after calling OnDetached() on the old one.
    *
    * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT:
-   * - The trait must implement @c IInteractionTrait.
+   * - The trait must implement @c IInteractiveTrait.
    * - It can be set only once for the lifetime of the View; attempting to replace or
    *   remove it is considered a programming error and will trigger an assertion.
    *
@@ -284,6 +446,16 @@ public: // API (size, position, parent origin, pivot)
    * @return True if succeeded, false otherwise
    */
   bool RemoveTrait(TraitId id);
+
+  /**
+   * @copydoc Ui::View::EnsureInteractiveTrait
+   */
+  Ui::InteractiveTrait EnsureInteractiveTrait();
+
+  /**
+   * @copydoc Ui::View::IsInteractive
+   */
+  bool IsInteractive() const;
 
 public: // Measure / Arrange API
   /**
@@ -487,9 +659,20 @@ private:
 
   void SetBackgroundColorInternal(const Vector4& color);
 
+  /**
+   * @brief Internal helper to register a named state handler via StateHandlerTrait.
+   *
+   * Lazily creates the StateHandlerTrait on first call.
+   */
+  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
 private:
   std::vector<std::pair<TraitId, Trait>> mTraits;
-  IInteractionTrait*                     mInteractionTrait;
+  IInteractiveTrait*                     mInteractiveTrait;
+
+  // State
+  UiState                mState;
+  StateChangedSignalType mStateChangedSignal;
 
   // Requested size (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   float mRequestedWidth;

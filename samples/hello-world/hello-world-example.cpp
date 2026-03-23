@@ -50,10 +50,11 @@ public:
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
           .SetFocusable(true)
-          .AsClickable(this, [this](View view, const InputEvent& event)
-          {
-            mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
-            return true;
+          .AsInteractive([this](InteractiveTrait& trait) {
+            trait.ClickedSignal().Connect(this, [this](View view, const InputEvent& event) -> bool {
+              mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
+              return true;
+            });
           }),
         View::New() // Blue child
           .SetBackgroundColor(UiColor(0x0000FF))

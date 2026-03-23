@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/input-event-impl.h>
+#include <dali-ui-foundation/internal/input-event-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 
 namespace Dali
@@ -25,9 +25,17 @@ namespace Dali
 namespace Ui
 {
 
+InputEvent InputEvent::New()
+{
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New();
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
 InputEvent InputEvent::New(const TouchEvent& originEvent)
 {
-  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
 
   // Pass ownership to handle
   return InputEvent(impl.Get());
@@ -35,7 +43,7 @@ InputEvent InputEvent::New(const TouchEvent& originEvent)
 
 InputEvent InputEvent::New(const KeyEvent& originEvent)
 {
-  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
 
   // Pass ownership to handle
   return InputEvent(impl.Get());
@@ -43,7 +51,7 @@ InputEvent InputEvent::New(const KeyEvent& originEvent)
 
 InputEvent InputEvent::New(const TapGesture& originEvent)
 {
-  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
 
   // Pass ownership to handle
   return InputEvent(impl.Get());
@@ -51,13 +59,13 @@ InputEvent InputEvent::New(const TapGesture& originEvent)
 
 InputEvent InputEvent::New(const LongPressGesture& originEvent)
 {
-  Integration::InputEventImplPtr impl = Integration::InputEventImpl::New(originEvent);
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
 
   // Pass ownership to handle
   return InputEvent(impl.Get());
 }
 
-InputEvent::InputEvent(Integration::InputEventImpl* impl)
+InputEvent::InputEvent(Internal::InputEventImpl* impl)
 : BaseHandle(impl)
 {
 }

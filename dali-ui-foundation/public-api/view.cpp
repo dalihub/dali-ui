@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
-#include <dali-ui-foundation/public-api/clickable-trait.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
@@ -290,40 +290,55 @@ UiColor View::GetBackgroundColor()
   return Integration::GetImpl(*this).GetBackgroundColor();
 }
 
+bool View::IsEnabled() const
+{
+  return Integration::GetImpl(*this).IsEnabled();
+}
+
+View& View::SetEnabled(bool enabled)
+{
+  Integration::GetImpl(*this).SetEnabled(enabled);
+  return *this;
+}
+
+bool View::IsEffectivelyEnabled() const
+{
+  return Integration::GetImpl(*this).IsEffectivelyEnabled();
+}
+
+bool View::IsEffectivelyFocused() const
+{
+  return Integration::GetImpl(*this).IsEffectivelyFocused();
+}
+
+// =============================================================================
+// State API
+// =============================================================================
+
+const UiState& View::GetState() const
+{
+  return Integration::GetImpl(*this).GetState();
+}
+
+View::StateChangedSignalType& View::StateChangedSignal()
+{
+  return Integration::GetImpl(*this).StateChangedSignal();
+}
+
 View& View::SetBackgroundColor(const UiColor& color)
 {
   Integration::GetImpl(*this).SetBackgroundColor(color);
   return *this;
 }
 
-ClickableTrait View::GetOrAttachClickableTrait()
+InteractiveTrait View::EnsureInteractiveTrait()
 {
-  auto&                      impl = Integration::GetImpl(*this);
-  const Integration::TraitId interactionTraitId(Integration::ReservedTraitId::INTERACTION_TRAIT);
-  Trait                      existing = impl.GetTrait(interactionTraitId);
-
-  if(!existing)
-  {
-    ClickableTrait clickable = ClickableTrait::New();
-    impl.SetTrait(interactionTraitId, clickable);
-    return clickable;
-  }
-
-  ClickableTrait clickable = ClickableTrait::DownCast(existing);
-  if(!clickable)
-  {
-    DALI_ASSERT_ALWAYS(false && "View already has a different interaction trait; cannot attach ClickableTrait");
-    return ClickableTrait();
-  }
-
-  return clickable;
+  return Integration::GetImpl(*this).EnsureInteractiveTrait();
 }
 
-ClickableTrait View::GetClickableTrait() const
+bool View::IsInteractive() const
 {
-  const auto& impl  = Integration::GetImpl(*this);
-  Trait       trait = impl.GetTrait(Integration::TraitId(Integration::ReservedTraitId::INTERACTION_TRAIT));
-  return ClickableTrait::DownCast(trait);
+  return Integration::GetImpl(*this).IsInteractive();
 }
 
 BaseHandle View::GetLayoutParamsTrait(LayoutParamsType type) const

@@ -30,16 +30,20 @@
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pinch-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
+#include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/connection-tracker-interface.h>
 #include <functional>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-accessibility-enums.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -443,69 +447,66 @@ public: // Properties
    */
   View& SetBackgroundColor(const UiColor& color);
 
+  /*
+   * @brief Checks if the view is enabled.
+   *
+   * @return True if the view is enabled (default), false if disabled
+   */
+  bool IsEnabled() const;
+
+  /**
+   * @brief Sets whether the view is enabled.
+   *
+   * A disabled view does not receive user interaction. Setting this to false
+   * adds the Disabled state and emits StateChangedSignal.
+   *
+   * @param[in] enabled True to enable, false to disable
+   */
+  View& SetEnabled(bool enabled);
+
+  /**
+   * @brief Returns true if this view and all its View ancestors are enabled.
+   *
+   * Unlike IsEnabled(), which only reflects the view's own state, this method
+   * walks up the scene hierarchy and returns false if any ancestor View carries
+   * UiState::Disabled.
+   *
+   * @return True if neither the view nor any ancestor is disabled
+   */
+  bool IsEffectivelyEnabled() const;
+
+  /**
+   * @brief Returns true if this view or any of its View ancestors is focused.
+   *
+   * Unlike the Focused bit in GetState(), this method walks up the scene
+   * hierarchy and returns true if any ancestor View carries UiState::Focused.
+   *
+   * @return True if the view itself or at least one ancestor is focused
+   */
+  bool IsEffectivelyFocused() const;
+
   // @CHAIN_MANUAL
   /**
-   * @brief Attaches the clickable interaction role to this View and optionally configures it.
+   * @brief Attaches the interaction trait to this View and optionally configures it.
    *
-   * A View can have at most one interaction trait for its lifetime; attaching clickable
-   * succeeds only if no other interaction trait is set. If the View already has a
-   * ClickableTrait (e.g. from a previous AsClickable call), the existing trait is
+   * A View can have at most one interaction trait for its lifetime; attaching interactive
+   * succeeds only if no other interaction trait is set. If the View already has an
+   * InteractiveTrait (e.g. from a previous AsInteractive call), the existing trait is
    * used and the configure callback is invoked with it.
    *
    * The callback is invoked in the caller's translation unit, so no std::function
    * crosses the library ABI boundary; this preserves ABI stability across toolchains.
    *
-   * @param[in] configure Optional callback to configure the ClickableTrait (e.g. connect signals).
+   * @param[in] configure Optional callback to configure the InteractiveTrait (e.g. connect signals).
    *                     Can be null or omitted to only attach the trait.
    * @return Reference to this View for fluent chaining
    */
-  View& AsClickable(std::function<void(ClickableTrait&)> configure = nullptr)
+  View& AsInteractive(std::function<void(InteractiveTrait&)> configure = nullptr)
   {
-    ClickableTrait trait = GetOrAttachClickableTrait();
+    InteractiveTrait trait = EnsureInteractiveTrait();
     if(configure && trait)
     {
       configure(trait);
-    }
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Attaches the clickable trait and connects a member function to the Clicked signal.
-   *
-   * Equivalent to AsClickable() then ClickedSignal().Connect(obj, func).
-   * @param[in] obj Object that implements ConnectionTrackerInterface (e.g. ConnectionTracker subclass); used for
-   * automatic disconnection
-   * @param[in] func Member function with signature bool (View, const InputEvent&)
-   * @return Reference to this View for fluent chaining
-   */
-  template<class X>
-  View& AsClickable(X* obj, bool (X::*func)(View, const InputEvent&))
-  {
-    ClickableTrait trait = GetOrAttachClickableTrait();
-    if(trait && obj && func)
-    {
-      trait.ClickedSignal().Connect(obj, func);
-    }
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Attaches the clickable trait and connects a callable to the Clicked signal.
-   *
-   * Equivalent to AsClickable() then ClickedSignal().Connect(connectionTracker, func).
-   * @param[in] connectionTracker Used for automatic disconnection when the tracker is destroyed
-   * @param[in] func Callable with signature bool (View, const InputEvent&) (e.g. lambda)
-   * @return Reference to this View for fluent chaining
-   */
-  template<typename F>
-  View& AsClickable(Dali::ConnectionTrackerInterface* connectionTracker, F&& func)
-  {
-    ClickableTrait trait = GetOrAttachClickableTrait();
-    if(trait && connectionTracker)
-    {
-      trait.ClickedSignal().Connect(connectionTracker, std::forward<F>(func));
     }
     return *this;
   }
@@ -659,27 +660,49 @@ public: // Properties
     return T::DownCast(GetLayoutParamsTrait(T::GetLayoutParamsType()));
   }
 
-public: // Clickable role accessors (non-chaining)
-  /**
-   * @brief Ensures this View has a clickable interaction trait and returns it.
-   *
-   * If no interaction trait is set, a ClickableTrait is attached and returned.
-   * If a ClickableTrait is already attached, it is returned. If a different
-   * interaction trait is set, an assertion may fire and an empty handle is returned.
-   *
-   * @return ClickableTrait handle, or an uninitialized handle on error
-   */
-  ClickableTrait GetOrAttachClickableTrait();
+public: // State API (non-chaining)
+  using StateChangedSignalType = Signal<void(View, const StateEvent&)>;
 
   /**
-   * @brief Returns the clickable interaction trait if this View has one.
+   * @brief Gets the current state of this View.
    *
-   * Use this in non-fluent code paths to obtain the trait after AsClickable(), or when
-   * the View was made clickable by other means (e.g. a View that attaches the trait).
-   *
-   * @return ClickableTrait handle if this View has a clickable trait; otherwise an uninitialized handle
+   * @return The current UiState (may contain multiple combined states)
    */
-  ClickableTrait GetClickableTrait() const;
+  const UiState& GetState() const;
+
+  /**
+   * @brief Returns the state changed signal.
+   *
+   * Emitted whenever the view's UiState changes.
+   *
+   * @code
+   * view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
+   *   if(e.Added(UiState::Focused)) { ... }
+   * });
+   * @endcode
+   *
+   * @return The StateChangedSignal
+   */
+  StateChangedSignalType& StateChangedSignal();
+
+public: // Trait accessors (non-chaining)
+  /**
+   * @brief Ensures this View has an interaction trait and returns it.
+   *
+   * If no interaction trait is set, an InteractiveTrait is attached and returned.
+   * If an InteractiveTrait is already attached, it is returned. If a different
+   * interaction trait is set, an assertion may fire and an empty handle is returned.
+   *
+   * @return InteractiveTrait handle, or an uninitialized handle on error
+   */
+  InteractiveTrait EnsureInteractiveTrait();
+
+  /**
+   * @brief Returns whether this View has an interaction trait attached.
+   *
+   * @return True if this View has an InteractiveTrait
+   */
+  bool IsInteractive() const;
 
 public: // Not intended for application developers
   /// @cond internal

@@ -19,7 +19,7 @@
 #include <dali/public-api/object/base-handle.h>
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/input-event-impl.h>
+#include <dali-ui-foundation/internal/input-event-impl.h>
 
 namespace Dali
 {
@@ -27,8 +27,15 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
+namespace Internal
 {
+
+InputEventImpl::InputEventImpl()
+: BaseObject(),
+  mEventType(InputEventType::NONE),
+  mEvent(std::monostate{})
+{
+}
 
 InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
 : BaseObject(),
@@ -60,6 +67,11 @@ InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 
 InputEventImpl::~InputEventImpl()
 {
+}
+
+InputEventImplPtr InputEventImpl::New()
+{
+  return InputEventImplPtr(new InputEventImpl());
 }
 
 InputEventImplPtr InputEventImpl::New(const TouchEvent& originEvent)
@@ -111,7 +123,7 @@ const LongPressGesture& InputEventImpl::GetLongPressGesture() const
   return std::get<LongPressGesture>(mEvent);
 }
 
-} // namespace Integration
+} // namespace Internal
 
 } // namespace Ui
 

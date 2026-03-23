@@ -52,10 +52,11 @@ public:
           .SetBackgroundColor(UiColor::PRIMARY)
           .SetSizeWidth(100_spx)
           .SetSizeHeight(100_spx)
-          .AsClickable(this, [this](View view, const InputEvent& event)
-          {
-            mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
-            return true;
+          .AsInteractive([this](InteractiveTrait& trait) {
+            trait.ClickedSignal().Connect(this, [this](View view, const InputEvent& event) -> bool {
+              mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
+              return true;
+            });
           }),
         View::New() // Blue child
           .SetBackgroundColor(UiColor("ThemeColor2"))

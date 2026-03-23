@@ -37,7 +37,7 @@ struct KeyEvent;
 namespace Ui
 {
 
-namespace Integration
+namespace Internal
 {
 class InputEventImpl;
 }
@@ -87,6 +87,16 @@ public:
    * @return Reference to this
    */
   InputEvent& operator=(InputEvent&& rhs) noexcept = default;
+
+  /**
+   * @brief Creates a new InputEvent with NONE type, representing a programmatic (non-input) change.
+   *
+   * The returned event has InputEventType::NONE. Use this when emitting signals that
+   * do not originate from user input (e.g. programmatic state changes).
+   *
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New();
 
   /**
    * @brief Creates a new InputEvent from a touch event.
@@ -153,7 +163,7 @@ public: // Not intended for Application developers
    *
    * @param[in] impl The implementation of the input event
    */
-  explicit InputEvent(Integration::InputEventImpl* impl);
+  explicit InputEvent(Internal::InputEventImpl* impl);
 };
 
 } // namespace Ui

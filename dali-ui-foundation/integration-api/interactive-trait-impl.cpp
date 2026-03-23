@@ -15,22 +15,22 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/input-event-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali/integration-api/input-options.h>
 #include <dali/integration-api/string-utils.h>
 #include <cstdint>
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/clickable-trait-impl.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 
 using Dali::Integration::ToStdString;
 
 namespace Dali::Ui::Integration
 {
 
-ClickableTraitImpl::ClickableTraitImpl()
+InteractiveTraitImpl::InteractiveTraitImpl()
 : TraitImpl(),
   mTapGestureDetector(TapGestureDetector::New()),
   mLongPressGestureDetector(LongPressGestureDetector::New()),
@@ -47,75 +47,82 @@ ClickableTraitImpl::ClickableTraitImpl()
 {
   Dali::Integration::SetTapRecognizerTime(UiConfigManager::Get().GetTapRecognizerTime());
 
-  mTapGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnTapInternal);
-  mLongPressGestureDetector.DetectedSignal().Connect(this, &ClickableTraitImpl::OnLongPressedInternal);
+  mTapGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnTapInternal);
+  mLongPressGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnLongPressedInternal);
 }
 
-ClickableTraitImpl::~ClickableTraitImpl()
+InteractiveTraitImpl::~InteractiveTraitImpl()
 {
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::PressedChangedSignal()
+Signal<void(View, bool, const InputEvent&)>& InteractiveTraitImpl::PressedChangedSignal()
 {
   return mPressedChangedSignal;
 }
 
-Signal<void(View)>& ClickableTraitImpl::PseudoDisabledChangedSignal()
+Signal<void(View, bool)>& InteractiveTraitImpl::PseudoDisabledChangedSignal()
 {
   return mPseudoDisabledChangedSignal;
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::ClickedSignal()
+Signal<void(View, const InputEvent&)>& InteractiveTraitImpl::ClickedSignal()
 {
   return mClickedSignal;
 }
 
-Signal<bool(View, const InputEvent&)>& ClickableTraitImpl::LongPressedSignal()
+Signal<bool(View, const InputEvent&)>& InteractiveTraitImpl::LongPressedSignal()
 {
   return mLongPressedSignal;
 }
 
-bool ClickableTraitImpl::IsPressed() const
+bool InteractiveTraitImpl::IsPressed() const
 {
   return mPressed;
 }
 
-bool ClickableTraitImpl::IsPseudoDisabled() const
+bool InteractiveTraitImpl::IsPseudoDisabled() const
 {
   return mPseudoDisabled;
 }
 
-void ClickableTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
+void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
 {
   if(mPseudoDisabled == pseudoDisabled)
   {
     return;
   }
   mPseudoDisabled = pseudoDisabled;
-  mPseudoDisabledChangedSignal.Emit(mOwner.GetHandle());
+
+  View owner = mOwner.GetHandle();
+  if(owner)
+  {
+    GetImpl(owner).SetViewState(UiState::PseudoDisabled, pseudoDisabled);
+  }
+
+  mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
 }
 
-bool ClickableTraitImpl::IsClickable() const
+bool InteractiveTraitImpl::IsClickable() const
 {
   return mClickable;
 }
 
-void ClickableTraitImpl::SetClickable(bool clickable)
+void InteractiveTraitImpl::SetClickable(bool clickable)
 {
   mClickable = clickable;
 }
 
-KeyClickPolicy ClickableTraitImpl::GetKeyClickPolicy() const
+KeyClickPolicy InteractiveTraitImpl::GetKeyClickPolicy() const
 {
   return mKeyClickPolicy;
 }
 
-void ClickableTraitImpl::SetKeyClickPolicy(KeyClickPolicy policy)
+void InteractiveTraitImpl::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   mKeyClickPolicy = policy;
 }
 
-void ClickableTraitImpl::OnFocusedChanged(View view, bool focused)
+void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
 {
   mClickBlockedByTouch = false;
 
@@ -135,7 +142,7 @@ void ClickableTraitImpl::OnFocusedChanged(View view, bool focused)
 #endif
 }
 
-bool ClickableTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
+bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 {
   InputEvent inputEvent = InputEvent::New(event);
 
@@ -143,11 +150,11 @@ bool ClickableTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
   {
     case KeyEvent::State::DOWN:
     {
-      return HandleKeyPressed(view, inputEvent) | HandleKeyPressedForClick(view, inputEvent);
+      return HandleKeyPressed(view, inputEvent);
     }
     case KeyEvent::State::UP:
     {
-      return HandleKeyReleased(view, inputEvent) | HandleKeyReleasedForClick(view, inputEvent);
+      return HandleKeyReleased(view, inputEvent);
     }
     default:
       break;
@@ -155,98 +162,95 @@ bool ClickableTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
   return false;
 }
 
-bool ClickableTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
+bool InteractiveTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
 {
   const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
   if(IsExecutionKey(keyName))
   {
     RecordPressedExecutionKey(keyName);
-    return SetPressedInternal(true, event);
+    SetPressedInternal(true, event);
+
+    if(ShouldKeyPressTriggerClicked())
+    {
+      ClearKeyPressedHistory();
+      OnClicked(view, event);
+    }
+    else if(ShouldKeyPressTriggerLongPressed())
+    {
+      mClickBlockedByKey = OnLongPressed(view, event);
+    }
+    return true;
   }
   return false;
 }
 
-bool ClickableTraitImpl::HandleKeyPressedForClick(View view, const InputEvent& event)
-{
-  bool handled = false;
-
-  if(ShouldKeyPressTriggerClicked())
-  {
-    handled |= OnClicked(view, event);
-  }
-  else if(ShouldKeyPressTriggerLongPressed())
-  {
-    bool consumed      = OnLongPressed(view, event);
-    mClickBlockedByKey = consumed;
-    handled |= consumed;
-  }
-
-  return handled;
-}
-
-bool ClickableTraitImpl::HandleKeyReleased(View view, const InputEvent& event)
+bool InteractiveTraitImpl::HandleKeyReleased(View view, const InputEvent& event)
 {
   const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
   if(mPressedExecutionKey == keyName)
   {
     ClearKeyPressedHistory();
-    return SetPressedInternal(false, event);
+    SetPressedInternal(false, event);
+
+    if(ShouldKeyReleaseTriggerClicked())
+    {
+      OnClicked(view, event);
+    }
+
+    mClickBlockedByKey = false;
+    return true;
   }
   return false;
 }
 
-bool ClickableTraitImpl::HandleKeyReleasedForClick(View view, const InputEvent& event)
-{
-  if(ShouldKeyReleaseTriggerClicked())
-  {
-    OnClicked(view, event);
-  }
-  mClickBlockedByKey = false;
-
-  return mClickable;
-}
-
-View ClickableTraitImpl::GetOwner() const
+View InteractiveTraitImpl::GetOwner() const
 {
   return mOwner.GetHandle();
 }
 
-void ClickableTraitImpl::OnBeforeAttached(TraitId id, View& view)
+void InteractiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
 }
 
-void ClickableTraitImpl::OnAttached(TraitId id, View& view)
+void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
 {
-  view.TouchedSignal().Connect(this, &ClickableTraitImpl::OnTouchInternal);
+  view.TouchedSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
   mTapGestureDetector.Attach(view);
   mLongPressGestureDetector.Attach(view);
   view.SetFocusable(true);
   view.SetTouchFocusable(true);
 }
 
-void ClickableTraitImpl::OnDetached(TraitId id, View& view)
+void InteractiveTraitImpl::OnDetached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(false && "The trait can not be detached once it attached to a view");
 }
 
-void ClickableTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
+void InteractiveTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
 }
 
-bool ClickableTraitImpl::OnTouch(View view, const TouchEvent& touchEvent)
+bool InteractiveTraitImpl::OnTouch(View view, const TouchEvent& touchEvent)
 {
+  if(!view.IsEnabled())
+  {
+    return false;
+  }
+
   switch(touchEvent.GetState(0))
   {
     case PointState::STARTED:
     {
-      return SetPressedInternal(true, InputEvent::New(touchEvent));
+      SetPressedInternal(true, InputEvent::New(touchEvent));
+      return true;
     }
     case PointState::FINISHED:
     case PointState::INTERRUPTED:
     {
-      return SetPressedInternal(false, InputEvent::New(touchEvent));
+      SetPressedInternal(false, InputEvent::New(touchEvent));
+      return true;
     }
     default:
     {
@@ -256,7 +260,7 @@ bool ClickableTraitImpl::OnTouch(View view, const TouchEvent& touchEvent)
   return false;
 }
 
-void ClickableTraitImpl::OnTap(View view, const TapGesture& tap)
+void InteractiveTraitImpl::OnTap(View view, const TapGesture& tap)
 {
   // NOTE Using TapGestureDetector.HandleEvent() in OnTouch handler can detect tap gesture,
   // but Clicked event should be triggered after the all registered touch event handlers are called.
@@ -269,37 +273,37 @@ void ClickableTraitImpl::OnTap(View view, const TapGesture& tap)
   mClickBlockedByTouch = false;
 }
 
-bool ClickableTraitImpl::OnPressedChanged(View view, const InputEvent& inputEvent)
+void InteractiveTraitImpl::OnPressedChanged(View view, const InputEvent& inputEvent)
 {
-  return mClickable | mPressedChangedSignal.Emit(view, inputEvent);
+  mPressedChangedSignal.Emit(view, mPressed, inputEvent);
 }
 
-bool ClickableTraitImpl::OnClicked(View view, const InputEvent& inputEvent)
+void InteractiveTraitImpl::OnClicked(View view, const InputEvent& inputEvent)
 {
-  return mClickedSignal.Emit(view, inputEvent);
+  mClickedSignal.Emit(view, inputEvent);
 }
 
-bool ClickableTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent)
+bool InteractiveTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent)
 {
   return mLongPressedSignal.Emit(view, inputEvent);
 }
 
-bool ClickableTraitImpl::IsExecutionKey(const std::string& keyName) const
+bool InteractiveTraitImpl::IsExecutionKey(const std::string& keyName) const
 {
   return UiConfigManager::Get().GetExecutionKeyPredicate()(keyName);
 }
 
-bool ClickableTraitImpl::OnTouchInternal(Actor actor, const TouchEvent& touchEvent)
+bool InteractiveTraitImpl::OnTouchInternal(Actor actor, const TouchEvent& touchEvent)
 {
   return OnTouch(View::DownCast(actor), touchEvent);
 }
 
-void ClickableTraitImpl::OnTapInternal(Actor actor, const TapGesture& event)
+void InteractiveTraitImpl::OnTapInternal(Actor actor, const TapGesture& event)
 {
   OnTap(View::DownCast(actor), event);
 }
 
-void ClickableTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGesture& event)
+void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGesture& event)
 {
   // NOTE OnLongPressedInternal will invoke this method twice: once for Start and once for Finished.
   if(event.GetState() == GestureState::STARTED)
@@ -309,7 +313,7 @@ void ClickableTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGestu
   }
 }
 
-void ClickableTraitImpl::RecordPressedExecutionKey(const std::string& keyName)
+void InteractiveTraitImpl::RecordPressedExecutionKey(const std::string& keyName)
 {
   if(mPressedExecutionKey.empty() || mPressedExecutionKey == keyName)
   {
@@ -318,40 +322,46 @@ void ClickableTraitImpl::RecordPressedExecutionKey(const std::string& keyName)
   }
 }
 
-void ClickableTraitImpl::ClearKeyPressedHistory()
+void InteractiveTraitImpl::ClearKeyPressedHistory()
 {
   mPressedExecutionKey.clear();
   mPressedExecutionKeyCount = 0;
 }
 
-bool ClickableTraitImpl::SetPressedInternal(bool value, const InputEvent& event)
+void InteractiveTraitImpl::SetPressedInternal(bool value, const InputEvent& event)
 {
   if(value == mPressed)
   {
-    return false;
+    return;
   }
 
   mPressed = value;
 
-  return OnPressedChanged(mOwner.GetHandle(), event);
+  View owner = mOwner.GetHandle();
+  if(owner)
+  {
+    GetImpl(owner).SetViewState(UiState::Pressed, value, event);
+  }
+
+  OnPressedChanged(owner, event);
 }
 
-bool ClickableTraitImpl::ShouldTapTriggerClicked() const
+bool InteractiveTraitImpl::ShouldTapTriggerClicked() const
 {
   return mClickable && !mClickBlockedByTouch;
 }
 
-bool ClickableTraitImpl::ShouldKeyReleaseTriggerClicked() const
+bool InteractiveTraitImpl::ShouldKeyReleaseTriggerClicked() const
 {
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE && !mClickBlockedByKey;
 }
 
-bool ClickableTraitImpl::ShouldKeyPressTriggerClicked() const
+bool InteractiveTraitImpl::ShouldKeyPressTriggerClicked() const
 {
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_PRESS && (mPressedExecutionKeyCount == 1);
 }
 
-bool ClickableTraitImpl::ShouldKeyPressTriggerLongPressed() const
+bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
 {
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
          (mPressedExecutionKeyCount >= UiConfigManager::Get().GetMinLongPressKeyCount());

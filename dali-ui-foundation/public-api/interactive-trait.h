@@ -39,17 +39,17 @@ class View;
 // Forward declarations
 namespace Integration
 {
-class ClickableTraitImpl;
+class InteractiveTraitImpl;
 }
 
 /**
- * @brief ClickableTrait is an interaction trait that provides clickable behavior to a View.
+ * @brief InteractiveTrait is an interaction trait that provides clickable behavior to a View.
  *
- * ClickableTrait provides click, long-press, and pressed-state handling
+ * InteractiveTrait provides click, long-press, and pressed-state handling
  * functionality. It can be attached to any View to make it interactive.
  *
  */
-class DALI_UI_API ClickableTrait : public Trait
+class DALI_UI_API InteractiveTrait : public Trait
 {
 public:
   // Typedefs
@@ -58,40 +58,40 @@ public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized Trait handle.
    */
-  ClickableTrait();
+  InteractiveTrait();
 
   /**
    * @brief Creates an initialized Trait.
    *
    * @return A handle to a newly allocated Dali resource
    */
-  static ClickableTrait New();
+  static InteractiveTrait New();
 
   /**
-   * @brief Downcasts a handle to ClickableTrait handle.
+   * @brief Downcasts a handle to InteractiveTrait handle.
    *
-   * If the handle refers to a ClickableTrait (e.g. a trait from GetTrait),
+   * If the handle refers to a InteractiveTrait (e.g. a trait from GetTrait),
    * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
    *
    * @param[in] handle Handle to an object (e.g. Trait from View's interaction trait)
-   * @return A handle to ClickableTrait or an uninitialized handle
+   * @return A handle to InteractiveTrait or an uninitialized handle
    */
-  static ClickableTrait DownCast(BaseHandle handle);
+  static InteractiveTrait DownCast(BaseHandle handle);
 
   /**
    * @brief Copy constructor.
    *
    * Creates another handle that points to the same real object.
-   * @param[in] clickableTrait Handle to copy
+   * @param[in] interactiveTrait Handle to copy
    */
-  ClickableTrait(const ClickableTrait& clickableTrait);
+  InteractiveTrait(const InteractiveTrait& interactiveTrait);
 
   /**
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
-  ~ClickableTrait();
+  ~InteractiveTrait();
 
 public: // Signals
   /**
@@ -103,7 +103,7 @@ public: // Signals
    *
    * @return The pressed changed signal
    */
-  Signal<bool(View, const InputEvent&)>& PressedChangedSignal();
+  Signal<void(View, bool, const InputEvent&)>& PressedChangedSignal();
 
   /**
    * @brief Emitted when the pseudo disabled state changes.
@@ -114,7 +114,7 @@ public: // Signals
    *
    * @return The pseudo disabled changed signal
    */
-  Signal<void(View)>& PseudoDisabledChangedSignal();
+  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
 
   /**
    * @brief Emitted when the view is clicked.
@@ -126,7 +126,7 @@ public: // Signals
    *
    * @return The clicked signal
    */
-  Signal<bool(View, const InputEvent&)>& ClickedSignal();
+  Signal<void(View, const InputEvent&)>& ClickedSignal();
 
   /**
    * @brief Emitted when the view receives a long press gesture.
@@ -201,7 +201,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The implementation
    */
-  explicit ClickableTrait(Integration::ClickableTraitImpl* implementation);
+  explicit InteractiveTrait(Integration::InteractiveTraitImpl* implementation);
 };
 
 } // namespace Ui

@@ -24,9 +24,9 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interaction-trait-interface.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
-#include <dali-ui-foundation/public-api/clickable-trait.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
 
 namespace Dali
 {
@@ -39,89 +39,89 @@ class InputEvent;
 namespace Integration
 {
 /**
- * @brief Internal implementation of Clickable interaction trait.
+ * @brief Internal implementation of Interaction trait.
  */
-class DALI_UI_API ClickableTraitImpl : public TraitImpl, public ConnectionTracker, public IInteractionTrait
+class DALI_UI_API InteractiveTraitImpl : public TraitImpl, public ConnectionTracker, public IInteractiveTrait
 {
 public:
   /**
-   * @copydoc Dali::Ui::ClickableTrait::ClickableTrait
+   * @copydoc Dali::Ui::InteractiveTrait::InteractiveTrait
    */
-  ClickableTraitImpl();
+  InteractiveTraitImpl();
 
 public: // Signals
   /**
-   * @copydoc Dali::Ui::ClickableTrait::PressedChangedSignal
+   * @copydoc Dali::Ui::InteractiveTrait::PressedChangedSignal
    */
-  Signal<bool(View, const InputEvent&)>& PressedChangedSignal();
+  Signal<void(View, bool, const InputEvent&)>& PressedChangedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::PseudoDisabledChangedSignal
+   * @copydoc Dali::Ui::InteractiveTrait::PseudoDisabledChangedSignal
    */
-  Signal<void(View)>& PseudoDisabledChangedSignal();
+  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::ClickedSignal
+   * @copydoc Dali::Ui::InteractiveTrait::ClickedSignal
    */
-  Signal<bool(View, const InputEvent&)>& ClickedSignal();
+  Signal<void(View, const InputEvent&)>& ClickedSignal();
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::LongPressedSignal
+   * @copydoc Dali::Ui::InteractiveTrait::LongPressedSignal
    */
   Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
   /**
-   * @copydoc Dali::Ui::ClickableTrait::IsPressed
+   * @copydoc Dali::Ui::InteractiveTrait::IsPressed
    */
   bool IsPressed() const;
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::IsPseudoDisabled
+   * @copydoc Dali::Ui::InteractiveTrait::IsPseudoDisabled
    */
   bool IsPseudoDisabled() const;
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::SetPseudoDisabled
+   * @copydoc Dali::Ui::InteractiveTrait::SetPseudoDisabled
    */
   void SetPseudoDisabled(bool pseudoDisabled);
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::IsClickable
+   * @copydoc Dali::Ui::InteractiveTrait::IsClickable
    */
   bool IsClickable() const;
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::SetClickable
+   * @copydoc Dali::Ui::InteractiveTrait::SetClickable
    */
   void SetClickable(bool clickable);
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::GetKeyClickPolicy
+   * @copydoc Dali::Ui::InteractiveTrait::GetKeyClickPolicy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
 
   /**
-   * @copydoc Dali::Ui::ClickableTrait::SetKeyClickPolicy
+   * @copydoc Dali::Ui::InteractiveTrait::SetKeyClickPolicy
    */
   void SetKeyClickPolicy(KeyClickPolicy policy);
 
-public: // InteractionTrait
+public: // InteractiveTrait
   /**
-   * @copydoc Dali::Ui::Integration::IInteractionTrait::OnFocusedChanged
+   * @copydoc Dali::Ui::Integration::IInteractiveTrait::OnFocusedChanged
    */
   void OnFocusedChanged(View view, bool focused) override;
 
   /**
-   * @copydoc Dali::Ui::Integration::IInteractionTrait::OnKeyEvent
+   * @copydoc Dali::Ui::Integration::IInteractiveTrait::OnKeyEvent
    */
   bool OnKeyEvent(View view, const KeyEvent& event) override;
 
 protected:
   /**
-   * @copydoc Dali::Ui::ClickableTrait::~ClickableTrait
+   * @copydoc Dali::Ui::InteractiveTrait::~InteractiveTrait
    */
-  virtual ~ClickableTraitImpl() override;
+  virtual ~InteractiveTraitImpl() override;
 
   /**
    * @brief Gets the owner view
@@ -161,12 +161,12 @@ protected:
   /**
    * @brief Pressed changed event. override this method to handle pressed event.
    */
-  virtual bool OnPressedChanged(View view, const InputEvent& inputEvent);
+  virtual void OnPressedChanged(View view, const InputEvent& inputEvent);
 
   /**
    * @brief Clicked event. override this method to handle clicked event.
    */
-  virtual bool OnClicked(View view, const InputEvent& inputEvent);
+  virtual void OnClicked(View view, const InputEvent& inputEvent);
 
   /**
    * @brief LongPressed event. override this method to handle long pressed event.
@@ -184,46 +184,44 @@ private:
   void OnLongPressedInternal(Actor actor, const LongPressGesture& event);
   void RecordPressedExecutionKey(const std::string& keyName);
   void ClearKeyPressedHistory();
-  bool SetPressedInternal(bool value, const InputEvent& event);
+  void SetPressedInternal(bool value, const InputEvent& event);
   bool ShouldTapTriggerClicked() const;
   bool ShouldKeyReleaseTriggerClicked() const;
   bool ShouldKeyPressTriggerClicked() const;
   bool ShouldKeyPressTriggerLongPressed() const;
   bool HandleKeyPressed(View view, const InputEvent& event);
-  bool HandleKeyPressedForClick(View view, const InputEvent& event);
   bool HandleKeyReleased(View view, const InputEvent& event);
-  bool HandleKeyReleasedForClick(View view, const InputEvent& event);
 
 private:
-  WeakHandle<View>                      mOwner;
-  TapGestureDetector                    mTapGestureDetector;
-  LongPressGestureDetector              mLongPressGestureDetector;
-  Signal<bool(View, const InputEvent&)> mPressedChangedSignal;
-  Signal<void(View)>                    mPseudoDisabledChangedSignal;
-  Signal<bool(View, const InputEvent&)> mClickedSignal;
-  Signal<bool(View, const InputEvent&)> mLongPressedSignal;
-  KeyClickPolicy                        mKeyClickPolicy;
-  std::string                           mPressedExecutionKey;
-  uint32_t                              mPressedExecutionKeyCount;
-  bool                                  mPseudoDisabled : 1;
-  bool                                  mPressed : 1;
-  bool                                  mClickable : 1;
-  bool                                  mClickBlockedByTouch : 1;
-  bool                                  mClickBlockedByKey : 1;
+  WeakHandle<View>                            mOwner;
+  TapGestureDetector                          mTapGestureDetector;
+  LongPressGestureDetector                    mLongPressGestureDetector;
+  Signal<void(View, bool, const InputEvent&)> mPressedChangedSignal;
+  Signal<void(View, bool)>                    mPseudoDisabledChangedSignal;
+  Signal<void(View, const InputEvent&)>       mClickedSignal;
+  Signal<bool(View, const InputEvent&)>       mLongPressedSignal;
+  KeyClickPolicy                              mKeyClickPolicy;
+  std::string                                 mPressedExecutionKey;
+  uint32_t                                    mPressedExecutionKeyCount;
+  bool                                        mPseudoDisabled : 1;
+  bool                                        mPressed : 1;
+  bool                                        mClickable : 1;
+  bool                                        mClickBlockedByTouch : 1;
+  bool                                        mClickBlockedByKey : 1;
 };
 
 } // namespace Integration
 
-inline Integration::ClickableTraitImpl& GetImpl(ClickableTrait& obj)
+inline Integration::InteractiveTraitImpl& GetImpl(InteractiveTrait& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::ClickableTraitImpl&>(handle);
+  return static_cast<Integration::InteractiveTraitImpl&>(handle);
 }
 
-inline const Integration::ClickableTraitImpl& GetImpl(const ClickableTrait& obj)
+inline const Integration::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::ClickableTraitImpl&>(handle);
+  return static_cast<const Integration::InteractiveTraitImpl&>(handle);
 }
 
 } // namespace Ui
