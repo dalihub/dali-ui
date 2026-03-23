@@ -11,6 +11,10 @@ SET(TC_SOURCES
         utc-Dali-UiColor.cpp
         utc-Dali-UiColorManager.cpp
         utc-Dali-UiThemeManager.cpp
+        utc-Dali-InteractiveTrait.cpp
+        utc-Dali-SelectableTrait.cpp
+        utc-Dali-ViewStateHandler.cpp
+        utc-Dali-UiState.cpp
         utc-Dali-Layout.cpp
         utc-Dali-StackLayout.cpp
         utc-Dali-FlexLayout.cpp
