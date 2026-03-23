@@ -1,2 +1,0 @@
-# Tizen NUI OneUI Version
-RPM_VERSION=2.0

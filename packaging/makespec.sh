@@ -3,12 +3,9 @@
 SCRIPT_FILE=$(readlink -f $0)
 SCRIPT_DIR=$(dirname $SCRIPT_FILE)
 
-VERSION_FILE=$SCRIPT_DIR/version.txt
 RPMSPEC=$SCRIPT_DIR/dali-ui.spec
 RPMSPEC_IN=$RPMSPEC.in
 BUILD_ALL=true
-
-source $VERSION_FILE
 
 while getopts ":r:a" opt; do
   case $opt in
