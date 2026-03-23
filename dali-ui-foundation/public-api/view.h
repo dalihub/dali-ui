@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-state.h>
@@ -513,6 +514,28 @@ public: // Properties
 
   // @CHAIN_MANUAL
   /**
+   * @brief Attaches the selectable trait to this View and optionally configures it.
+   *
+   * A View can have at most one selectable trait. If the View already has a
+   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is
+   * used and the configure callback is invoked with it.
+   *
+   * @param[in] configure Optional callback to configure the SelectableTrait (e.g. connect signals).
+   *                     Can be null or omitted to only attach the trait.
+   * @return Reference to this View for fluent chaining
+   */
+  View& AsSelectable(std::function<void(SelectableTrait&)> configure = nullptr)
+  {
+    SelectableTrait trait = EnsureSelectableTrait();
+    if(configure && trait)
+    {
+      configure(trait);
+    }
+    return *this;
+  }
+
+  // @CHAIN_MANUAL
+  /**
    * @brief Assigns this View instance to a target variable.
    * This method is useful for capturing a reference to a View created within
    * a declarative UI tree for later use.
@@ -703,6 +726,24 @@ public: // Trait accessors (non-chaining)
    * @return True if this View has an InteractiveTrait
    */
   bool IsInteractive() const;
+
+  /**
+   * @brief Ensures this View has a selectable trait and returns it.
+   *
+   * If no selectable trait is set, a SelectableTrait is attached and returned.
+   * If a SelectableTrait is already attached, it is returned. If a different
+   * selectable trait type is set, an assertion may fire and an empty handle is returned.
+   *
+   * @return SelectableTrait handle, or an uninitialized handle on error
+   */
+  SelectableTrait EnsureSelectableTrait();
+
+  /**
+   * @brief Returns whether this View has a selectable trait attached.
+   *
+   * @return True if this View has a SelectableTrait
+   */
+  bool IsSelectable() const;
 
 public: // Not intended for application developers
   /// @cond internal

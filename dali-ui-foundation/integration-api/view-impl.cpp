@@ -283,6 +283,28 @@ bool ViewImpl::IsInteractive() const
   return !!GetTrait(TraitId(ReservedTraitId::INTERACTION_TRAIT));
 }
 
+Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
+{
+  const TraitId selectableTraitId(ReservedTraitId::SELECTABLE_TRAIT);
+  Trait         existing = GetTrait(selectableTraitId);
+
+  if(!existing)
+  {
+    Ui::SelectableTrait selectable = Ui::SelectableTrait::New();
+    SetTrait(selectableTraitId, selectable);
+    return selectable;
+  }
+
+  Ui::SelectableTrait selectable = Ui::SelectableTrait::DownCast(existing);
+  DALI_ASSERT_ALWAYS(selectable && "View already has a different selectable trait; cannot attach SelectableTrait");
+  return selectable;
+}
+
+bool ViewImpl::IsSelectable() const
+{
+  return !!GetTrait(TraitId(ReservedTraitId::SELECTABLE_TRAIT));
+}
+
 void ViewImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
 {
   const TraitId stateHandlerTraitId(ReservedTraitId::STATE_HANDLER_TRAIT);

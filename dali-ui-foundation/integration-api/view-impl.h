@@ -457,6 +457,16 @@ public: // State API
    */
   bool IsInteractive() const;
 
+  /**
+   * @copydoc Ui::View::EnsureSelectableTrait
+   */
+  Ui::SelectableTrait EnsureSelectableTrait();
+
+  /**
+   * @copydoc Ui::View::IsSelectable
+   */
+  bool IsSelectable() const;
+
 public: // Measure / Arrange API
   /**
    * @brief Measures the view with the given constraints.

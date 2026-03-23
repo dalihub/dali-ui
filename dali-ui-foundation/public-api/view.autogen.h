@@ -133,6 +133,18 @@
   */ \
   ChildClass& AsInteractive(std::function<void(InteractiveTrait&)> configure = nullptr) { View::AsInteractive(configure); return *this; } \
   /** \
+  * @brief Attaches the selectable trait to this View and optionally configures it. \
+  * \
+  * A View can have at most one selectable trait. If the View already has a \
+  * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is \
+  * used and the configure callback is invoked with it. \
+  * \
+  * @param[in] configure Optional callback to configure the SelectableTrait (e.g. connect signals). \
+  *                     Can be null or omitted to only attach the trait. \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& AsSelectable(std::function<void(SelectableTrait&)> configure = nullptr) { View::AsSelectable(configure); return *this; } \
+  /** \
   * @brief Assigns this View instance to a target variable. \
   * This method is useful for capturing a reference to a View created within \
   * a declarative UI tree for later use. \

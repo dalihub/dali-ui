@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 namespace Dali
@@ -339,6 +340,16 @@ InteractiveTrait View::EnsureInteractiveTrait()
 bool View::IsInteractive() const
 {
   return Integration::GetImpl(*this).IsInteractive();
+}
+
+SelectableTrait View::EnsureSelectableTrait()
+{
+  return Integration::GetImpl(*this).EnsureSelectableTrait();
+}
+
+bool View::IsSelectable() const
+{
+  return Integration::GetImpl(*this).IsSelectable();
 }
 
 BaseHandle View::GetLayoutParamsTrait(LayoutParamsType type) const
