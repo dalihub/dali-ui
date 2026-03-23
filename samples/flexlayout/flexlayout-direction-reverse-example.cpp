@@ -70,21 +70,21 @@ public:
     rrBox1.SetBackgroundColor(Color::RED);
     rrBox1.SetRequestedWidth(100.0f);
     rrBox1.SetRequestedHeight(80.0f);
-    rowReverse.AddView(rrBox1);
+    rowReverse.Add(rrBox1);
 
     View rrBox2 = View::New();
     rrBox2.SetBackgroundColor(Color::GREEN);
     rrBox2.SetRequestedWidth(100.0f);
     rrBox2.SetRequestedHeight(60.0f);
-    rowReverse.AddView(rrBox2);
+    rowReverse.Add(rrBox2);
 
     View rrBox3 = View::New();
     rrBox3.SetBackgroundColor(Color::BLUE);
     rrBox3.SetRequestedWidth(100.0f);
     rrBox3.SetRequestedHeight(100.0f);
-    rowReverse.AddView(rrBox3);
+    rowReverse.Add(rrBox3);
 
-    outer.AddView(rowReverse);
+    outer.Add(rowReverse);
 
     // Section 2: ColumnReverse
     FlexLayout columnReverse = FlexLayout::New();
@@ -99,21 +99,21 @@ public:
     crBox1.SetBackgroundColor(Color::YELLOW);
     crBox1.SetRequestedWidth(200.0f);
     crBox1.SetRequestedHeight(60.0f);
-    columnReverse.AddView(crBox1);
+    columnReverse.Add(crBox1);
 
     View crBox2 = View::New();
     crBox2.SetBackgroundColor(Color::CYAN);
     crBox2.SetRequestedWidth(160.0f);
     crBox2.SetRequestedHeight(60.0f);
-    columnReverse.AddView(crBox2);
+    columnReverse.Add(crBox2);
 
     View crBox3 = View::New();
     crBox3.SetBackgroundColor(Color::MAGENTA);
     crBox3.SetRequestedWidth(120.0f);
     crBox3.SetRequestedHeight(60.0f);
-    columnReverse.AddView(crBox3);
+    columnReverse.Add(crBox3);
 
-    outer.AddView(columnReverse);
+    outer.Add(columnReverse);
 
     window.Add(outer);
     window.KeyEventSignal().Connect(this, &FlexLayoutDirectionReverseController::OnKeyEvent);

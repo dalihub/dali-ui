@@ -565,42 +565,22 @@ public: // LayoutManager API (Optional layout capability)
    */
   bool HasLayoutManager() const;
 
-public: // Child Management API (available when LayoutManager is set)
+public: // Child Management API
   /**
-   * @brief Adds a view to this view (at the end).
+   * @brief Inserts a child at the specified index.
    *
-   * The view will be managed by this view's layout manager and added to the Actor hierarchy.
+   * Use Actor::Add() to append a child at the end.
+   * This method inserts at a specific position in the children list.
    *
-   * @param[in] view The view to add
-   */
-  void AddView(Ui::View view);
-
-  /**
-   * @brief Adds a view at the specified index.
-   *
-   * @param[in] view The view to add
    * @param[in] index The index where to insert
+   * @param[in] child The child to insert
    */
-  void AddView(Ui::View view, uint32_t index);
+  void Insert(uint32_t index, Ui::View child);
 
   /**
-   * @brief Removes a view from this view.
-   *
-   * @param[in] view The view to remove
+   * @brief Removes all children from this view.
    */
-  void RemoveView(Ui::View view);
-
-  /**
-   * @brief Removes the view at the specified index.
-   *
-   * @param[in] index The index of the view to remove
-   */
-  void RemoveViewAt(uint32_t index);
-
-  /**
-   * @brief Removes all child views from this view.
-   */
-  void RemoveAllViews();
+  void RemoveAllChildren();
 
   /**
    * @brief Gets the number of child views.
@@ -668,6 +648,7 @@ private:
   ViewImpl& operator=(ViewImpl&&)      = delete;
 
   void SetBackgroundColorInternal(const Vector4& color);
+  void OnChildOrderChanged(Actor orderChangedChild);
 
   /**
    * @brief Internal helper to register a named state handler via StateHandlerTrait.
@@ -706,6 +687,7 @@ private:
   // Optional LayoutManager and Children (for layout capability)
   std::unique_ptr<LayoutManager> mLayoutManager;
   ChildContainer                 mChildren;
+  bool                           mUpdatingChildren{false}; ///< Guard to prevent redundant mChildren updates in OnChildAdd/OnChildRemove
 
   // From control-impl.h
 

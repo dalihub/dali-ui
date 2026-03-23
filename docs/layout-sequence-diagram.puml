@@ -2,7 +2,7 @@
 !theme plain
 title DALi UI - Layout Calculation Process (Measure & Arrange)
 
-' Public API: only Layout has AddView/Contents; Measure/Arrange are invoked by the layout system.
+' Public API: child add/remove uses Actor::Add/Remove; Measure/Arrange are invoked by the layout system.
 ' This sequence shows the internal flow (ViewImpl, LayoutManager).
 
 skinparam sequenceMessageAlign center

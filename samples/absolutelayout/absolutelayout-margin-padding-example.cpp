@@ -59,7 +59,7 @@ public:
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetWidth(150.0f).SetHeight(80.0f));
-    root.AddView(redBox);
+    root.Add(redBox);
 
     // --- Green box: 25px margin all sides ---
     View greenBox = View::New();
@@ -67,7 +67,7 @@ public:
     greenBox.SetViewMargin(Extents(25, 25, 25, 25));
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetY(100.0f).SetWidth(150.0f).SetHeight(80.0f));
-    root.AddView(greenBox);
+    root.Add(greenBox);
 
     // --- Blue box: 25px margin all sides ---
     View blueBox = View::New();
@@ -75,7 +75,7 @@ public:
     blueBox.SetViewMargin(Extents(25, 25, 25, 25));
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetY(210.0f).SetWidth(150.0f).SetHeight(80.0f));
-    root.AddView(blueBox);
+    root.Add(blueBox);
 
     // --- Nested AbsoluteLayout with its own padding ---
     AbsoluteLayout nested = AbsoluteLayout::New();
@@ -89,23 +89,23 @@ public:
     innerA.SetBackgroundColor(Color::MAGENTA);
     innerA.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetWidth(100.0f).SetHeight(60.0f));
-    nested.AddView(innerA);
+    nested.Add(innerA);
 
     View innerB = View::New();
     innerB.SetBackgroundColor(Color::YELLOW);
     innerB.SetViewMargin(Extents(25, 25, 25, 25));
     innerB.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetX(120.0f).SetWidth(100.0f).SetHeight(60.0f));
-    nested.AddView(innerB);
+    nested.Add(innerB);
 
     View innerC = View::New();
     innerC.SetBackgroundColor(Color::CYAN);
     innerC.SetViewMargin(Extents(25, 25, 25, 25));
     innerC.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetY(80.0f).SetWidth(220.0f).SetHeight(60.0f));
-    nested.AddView(innerC);
+    nested.Add(innerC);
 
-    root.AddView(nested);
+    root.Add(nested);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::OnKeyEvent);

@@ -54,7 +54,7 @@ public:
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(0.1f, 0.1f, 120.0f, 80.0f))
       .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
-    root.AddView(redBox);
+    root.Add(redBox);
 
     // Green box: all proportional (position and size)
     View greenBox = View::New();
@@ -62,7 +62,7 @@ public:
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(0.5f, 0.5f, 0.3f, 0.2f))
       .SetFlags(AbsoluteLayoutFlags::ALL));
-    root.AddView(greenBox);
+    root.Add(greenBox);
 
     // Blue box: proportional size, absolute position
     View blueBox = View::New();
@@ -70,7 +70,7 @@ public:
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(10.0f, 400.0f, 0.8f, 0.1f))
       .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
-    root.AddView(blueBox);
+    root.Add(blueBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutProportionalController::OnKeyEvent);

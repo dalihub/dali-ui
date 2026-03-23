@@ -67,31 +67,31 @@ public:
     View header = View::New();
     header.SetBackgroundColor(Color::RED);
     header.SetLayoutParams(GridLayoutParams::New().SetColumnSpan(3));
-    root.AddView(header);
+    root.Add(header);
 
     // Sidebar: row 1, column 0
     View sidebar = View::New();
     sidebar.SetBackgroundColor(Color::GREEN);
     sidebar.SetLayoutParams(GridLayoutParams::New().SetRow(1));
-    root.AddView(sidebar);
+    root.Add(sidebar);
 
     // Content: row 1, column 1 (Star(2) - wider)
     View content = View::New();
     content.SetBackgroundColor(Color::BLUE);
     content.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
-    root.AddView(content);
+    root.Add(content);
 
     // Panel: row 1, column 2 (Star(1) - narrower)
     View panel = View::New();
     panel.SetBackgroundColor(Color::YELLOW);
     panel.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(2));
-    root.AddView(panel);
+    root.Add(panel);
 
     // Footer: spans all 3 columns
     View footer = View::New();
     footer.SetBackgroundColor(Color::CYAN);
     footer.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumnSpan(3));
-    root.AddView(footer);
+    root.Add(footer);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &GridLayoutStarAutoController::OnKeyEvent);

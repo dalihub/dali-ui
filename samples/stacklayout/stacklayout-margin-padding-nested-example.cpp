@@ -54,7 +54,7 @@ public:
     padLabel.SetBackgroundColor(Color::RED);
     padLabel.SetRequestedHeight(50.0f);
     padLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(padLabel);
+    root.Add(padLabel);
 
     // --- Section 2: Margin (children with different margins) ---
     View marginA = View::New();
@@ -62,21 +62,21 @@ public:
     marginA.SetRequestedHeight(50.0f);
     marginA.SetViewMargin(Extents(25, 25, 0, 0));
     marginA.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(marginA);
+    root.Add(marginA);
 
     View marginB = View::New();
     marginB.SetBackgroundColor(Color::BLUE);
     marginB.SetRequestedHeight(50.0f);
     marginB.SetViewMargin(Extents(0, 0, 25, 25)); // top and bottom margin only
     marginB.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(marginB);
+    root.Add(marginB);
 
     View marginC = View::New();
     marginC.SetBackgroundColor(Color::CYAN);
     marginC.SetRequestedHeight(50.0f);
     marginC.SetViewMargin(Extents(25, 25, 25, 25));
     marginC.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(marginC);
+    root.Add(marginC);
 
     // --- Section 3: Nested StackLayout (horizontal stack inside vertical) ---
     StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
@@ -89,21 +89,21 @@ public:
     box1.SetBackgroundColor(Color::MAGENTA);
     box1.SetRequestedWidth(100.0f);
     box1.SetRequestedHeight(100.0f);
-    horizontalRow.AddView(box1);
+    horizontalRow.Add(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(Color::YELLOW);
     box2.SetRequestedWidth(200.0f);
     box2.SetRequestedHeight(200.0f);
-    horizontalRow.AddView(box2);
+    horizontalRow.Add(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(Color::RED);
     box3.SetRequestedWidth(150.0f);
     box3.SetRequestedHeight(150.0f);
-    horizontalRow.AddView(box3);
+    horizontalRow.Add(box3);
 
-    root.AddView(horizontalRow);
+    root.Add(horizontalRow);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &StackLayoutMarginPaddingNestedController::OnKeyEvent);

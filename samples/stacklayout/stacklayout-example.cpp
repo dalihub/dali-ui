@@ -50,20 +50,20 @@ public:
     topBar.SetBackgroundColor(Color::RED);
     topBar.SetRequestedHeight(80.0f);
     topBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(topBar);
+    root.Add(topBar);
 
     // Middle: weighted to take remaining space, fill cross-axis
     View middle = View::New();
     middle.SetBackgroundColor(Color::GREEN);
     middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    root.AddView(middle);
+    root.Add(middle);
 
     // Bottom bar: fixed height, fill cross-axis
     View bottomBar = View::New();
     bottomBar.SetBackgroundColor(Color::BLUE);
     bottomBar.SetRequestedHeight(60.0f);
     bottomBar.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(bottomBar);
+    root.Add(bottomBar);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &StackLayoutController::OnKeyEvent);

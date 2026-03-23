@@ -55,21 +55,21 @@ public:
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(30.0f, 30.0f, 300.0f, 200.0f)));
-    root.AddView(redBox);
+    root.Add(redBox);
 
     // Medium green box overlapping the red box
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(100.0f, 80.0f, 200.0f, 200.0f)));
-    root.AddView(greenBox);
+    root.Add(greenBox);
 
     // Small blue box overlapping both
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(160.0f, 130.0f, 100.0f, 100.0f)));
-    root.AddView(blueBox);
+    root.Add(blueBox);
 
     // Cyan box: proportional position centered, absolute size
     View cyanBox = View::New();
@@ -77,7 +77,7 @@ public:
     cyanBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(0.5f, 0.7f, 140.0f, 80.0f))
       .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
-    root.AddView(cyanBox);
+    root.Add(cyanBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutOverlapController::OnKeyEvent);

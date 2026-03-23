@@ -61,37 +61,37 @@ public:
     View cell00 = View::New();
     cell00.SetBackgroundColor(Color::RED);
     cell00.SetLayoutParams(GridLayoutParams::New());
-    root.AddView(cell00);
+    root.Add(cell00);
 
     // Cell (0,1): Green
     View cell01 = View::New();
     cell01.SetBackgroundColor(Color::GREEN);
     cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
-    root.AddView(cell01);
+    root.Add(cell01);
 
     // Cell (1,0): Blue
     View cell10 = View::New();
     cell10.SetBackgroundColor(Color::BLUE);
     cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
-    root.AddView(cell10);
+    root.Add(cell10);
 
     // Cell (1,1): Yellow
     View cell11 = View::New();
     cell11.SetBackgroundColor(Color::YELLOW);
     cell11.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
-    root.AddView(cell11);
+    root.Add(cell11);
 
     // Cell (2,0): Cyan
     View cell20 = View::New();
     cell20.SetBackgroundColor(Color::CYAN);
     cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
-    root.AddView(cell20);
+    root.Add(cell20);
 
     // Cell (2,1): Magenta
     View cell21 = View::New();
     cell21.SetBackgroundColor(Color::MAGENTA);
     cell21.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
-    root.AddView(cell21);
+    root.Add(cell21);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &GridLayoutController::OnKeyEvent);

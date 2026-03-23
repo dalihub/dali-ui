@@ -158,7 +158,7 @@ int UtcDaliStackLayoutSetLayoutWeightP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
   DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
   END_TEST;
@@ -169,7 +169,7 @@ int UtcDaliStackLayoutGetLayoutWeightP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.0f));
   DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 0.0f, TEST_LOCATION);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f));
@@ -215,8 +215,8 @@ int UtcDaliStackLayoutWeightMultipleP(void)
   StackLayout layout = StackLayout::New();
   View c1 = View::New();
   View c2 = View::New();
-  layout.AddView(c1);
-  layout.AddView(c2);
+  layout.Add(c1);
+  layout.Add(c2);
   c1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
   c2.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
   DALI_TEST_EQUALS(c1.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
@@ -232,11 +232,11 @@ int UtcDaliStackLayoutMeasureArrangeP(void)
   View v1 = View::New();
   v1.SetRequestedWidth(100.0f);
   v1.SetRequestedHeight(40.0f);
-  layout.AddView(v1);
+  layout.Add(v1);
   View v2 = View::New();
   v2.SetRequestedWidth(100.0f);
   v2.SetRequestedHeight(40.0f);
-  layout.AddView(v2);
+  layout.Add(v2);
   layout.SetRequestedWidth(150.0f);
   layout.SetRequestedHeight(200.0f);
   MeasuredSize m = layout.Measure(150.0f, 200.0f);
@@ -255,11 +255,11 @@ int UtcDaliStackLayoutMeasureHorizontalP(void)
   View v1 = View::New();
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
-  layout.AddView(v1);
+  layout.Add(v1);
   View v2 = View::New();
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
-  layout.AddView(v2);
+  layout.Add(v2);
   MeasuredSize m = layout.Measure(300.0f, 100.0f);
   DALI_TEST_EQUALS(m.GetWidth(), 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(m.GetHeight(), 50.0f, TEST_LOCATION);
@@ -271,7 +271,7 @@ int UtcDaliStackLayoutChildNoWeightP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View noWeight = View::New();
-  layout.AddView(noWeight);
+  layout.Add(noWeight);
   noWeight.SetRequestedWidth(80.0f);
   noWeight.SetRequestedHeight(40.0f);
   layout.SetRequestedWidth(200.0f);
@@ -290,7 +290,7 @@ int UtcDaliStackLayoutChildMatchParentP(void)
   View child = View::New();
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(MATCH_PARENT);
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(120.0f);
   layout.Measure(200.0f, 120.0f);
@@ -308,11 +308,11 @@ int UtcDaliStackLayoutArrangeHorizontalP(void)
   View v1 = View::New();
   v1.SetRequestedWidth(60.0f);
   v1.SetRequestedHeight(40.0f);
-  layout.AddView(v1);
+  layout.Add(v1);
   View v2 = View::New();
   v2.SetRequestedWidth(60.0f);
   v2.SetRequestedHeight(40.0f);
-  layout.AddView(v2);
+  layout.Add(v2);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   MeasuredSize m = layout.Measure(200.0f, 100.0f);
@@ -332,11 +332,11 @@ int UtcDaliStackLayoutChildWithWeightP(void)
   View fixedChild = View::New();
   fixedChild.SetRequestedWidth(100.0f);
   fixedChild.SetRequestedHeight(40.0f);
-  layout.AddView(fixedChild);
+  layout.Add(fixedChild);
   View weightChild = View::New();
   weightChild.SetRequestedWidth(MATCH_PARENT);
   weightChild.SetRequestedHeight(50.0f);
-  layout.AddView(weightChild);
+  layout.Add(weightChild);
   weightChild.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(120.0f);
@@ -358,7 +358,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalStartP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -377,7 +377,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalCenterP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -397,7 +397,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalEndP(void)
   View child = View::New();
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -417,7 +417,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalMatchParentP(void)
   View child = View::New();
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -436,7 +436,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillP(void)
   View child = View::New();
   child.SetRequestedHeight(40.0f);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -456,7 +456,7 @@ int UtcDaliStackLayoutCrossAxisHorizontalFillWithExplicitSizeP(void)
   child.SetRequestedWidth(80.0f);
   child.SetRequestedHeight(40.0f);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -474,7 +474,7 @@ int UtcDaliStackLayoutCrossAxisVerticalStartP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -493,7 +493,7 @@ int UtcDaliStackLayoutCrossAxisVerticalCenterP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -513,7 +513,7 @@ int UtcDaliStackLayoutCrossAxisVerticalEndP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
@@ -533,7 +533,7 @@ int UtcDaliStackLayoutCrossAxisVerticalMatchParentP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(MATCH_PARENT);
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -552,7 +552,7 @@ int UtcDaliStackLayoutCrossAxisVerticalFillP(void)
   View child = View::New();
   child.SetRequestedWidth(60.0f);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);
@@ -572,7 +572,7 @@ int UtcDaliStackLayoutCrossAxisVerticalFillWithExplicitSizeP(void)
   child.SetRequestedWidth(60.0f);
   child.SetRequestedHeight(40.0f);
   child.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-  layout.AddView(child);
+  layout.Add(child);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   layout.Measure(200.0f, 100.0f);

@@ -38,8 +38,8 @@ class LayoutImpl;
  * Layout extends View and always has a LayoutManager (from derived classes
  * like StackLayout, GridLayout).
  *
- * Child management API (AddView, RemoveView, Children, etc.) is provided
- * by the base View class.
+ * Child management uses Actor::Add/Remove (inherited from View's base class).
+ * Insert(index, View) and RemoveAllChildren() are provided by View.
  */
 class DALI_UI_API Layout : public View
 {

@@ -14,8 +14,7 @@ package "DALi (external)" as dali {
 }
 
 ' ========== Public API (Handles) ==========
-' Note: Only Layout has child management in public API.
-' View does not expose AddView; ViewImpl keeps child APIs for internal use (e.g. ButtonImpl).
+' Note: Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) and RemoveAllChildren().
 ' LayoutManager is set at construction time only (no SetLayoutManager in public API).
 package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
@@ -34,11 +33,10 @@ package "Dali::Ui (Public API)" as public_api {
 
   class "Layout" as Layout <<handle>> {
     + New() : Layout
-    + AddView(View)
-    + AddView(View, index)
-    + RemoveView(View)
-    + RemoveViewAt(index)
-    + RemoveAllViews()
+    + Add(Actor)  /' inherited from Actor '/
+    + Remove(Actor)  /' inherited from Actor '/
+    + Insert(index, View)
+    + RemoveAllChildren()
     + GetChildCount() : uint32_t
     + GetChildAt(index) : View
     + IndexOfChild(View) : int32_t
@@ -145,11 +143,11 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     __
     + GetLayoutManager() : LayoutManager*
     + HasLayoutManager() : bool
-    + AddView(Ui::View)
-    + AddView(Ui::View, index)
-    + RemoveView(Ui::View)
-    + RemoveViewAt(index)
-    + RemoveAllViews()
+    + Insert(index, Ui::View)
+    + RemoveAllChildren()
+    + OnChildAdd(Actor&)
+    + OnChildRemove(Actor&)
+    + OnChildOrderChanged(Actor)
     + GetChildCount() : uint32_t
     + GetChildAt(index) : Ui::View
     + IndexOfChild(Ui::View) : int32_t

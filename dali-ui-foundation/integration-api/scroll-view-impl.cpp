@@ -120,7 +120,7 @@ void ScrollViewImpl::SetContent(View content)
   // Remove old content if exists
   if(mContent)
   {
-    RemoveView(mContent);
+    Self().Remove(mContent);
   }
 
   mContent = content;
@@ -128,7 +128,7 @@ void ScrollViewImpl::SetContent(View content)
   // Add new content
   if(mContent)
   {
-    AddView(mContent);
+    Self().Add(mContent);
     mContent.LowerToBottom();
     UpdateScrollingProperties();
   }

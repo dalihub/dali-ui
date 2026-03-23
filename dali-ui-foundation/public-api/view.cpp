@@ -367,29 +367,14 @@ View& View::SetLayoutParams(LayoutParams params)
 // Child Management API
 // =============================================================================
 
-void View::AddView(View view)
+void View::Insert(uint32_t index, View child)
 {
-  Integration::GetImpl(*this).AddView(view);
+  Integration::GetImpl(*this).Insert(index, child);
 }
 
-void View::AddView(View view, uint32_t index)
+void View::RemoveAllChildren()
 {
-  Integration::GetImpl(*this).AddView(view, index);
-}
-
-void View::RemoveView(View view)
-{
-  Integration::GetImpl(*this).RemoveView(view);
-}
-
-void View::RemoveViewAt(uint32_t index)
-{
-  Integration::GetImpl(*this).RemoveViewAt(index);
-}
-
-void View::RemoveAllViews()
-{
-  Integration::GetImpl(*this).RemoveAllViews();
+  Integration::GetImpl(*this).RemoveAllChildren();
 }
 
 uint32_t View::GetChildCount() const

@@ -70,31 +70,31 @@ public:
     View red = View::New();
     red.SetBackgroundColor(Color::RED);
     red.SetLayoutParams(GridLayoutParams::New().SetColumnSpan(2));
-    root.AddView(red);
+    root.Add(red);
 
     // Green: row 0, column 2
     View green = View::New();
     green.SetBackgroundColor(Color::GREEN);
     green.SetLayoutParams(GridLayoutParams::New().SetColumn(2));
-    root.AddView(green);
+    root.Add(green);
 
     // Blue: row 1, column 0
     View blue = View::New();
     blue.SetBackgroundColor(Color::BLUE);
     blue.SetLayoutParams(GridLayoutParams::New().SetRow(1));
-    root.AddView(blue);
+    root.Add(blue);
 
     // Yellow: row 1, column 1, spans 2 columns and 2 rows
     View yellow = View::New();
     yellow.SetBackgroundColor(Color::YELLOW);
     yellow.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1).SetColumnSpan(2).SetRowSpan(2));
-    root.AddView(yellow);
+    root.Add(yellow);
 
     // Cyan: row 2, column 0
     View cyan = View::New();
     cyan.SetBackgroundColor(Color::CYAN);
     cyan.SetLayoutParams(GridLayoutParams::New().SetRow(2));
-    root.AddView(cyan);
+    root.Add(cyan);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &GridLayoutSpanController::OnKeyEvent);

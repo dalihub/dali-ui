@@ -194,6 +194,8 @@ void ViewImpl::OnInitialize()
 {
   Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
   Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+
+  DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
 }
 
 void ViewImpl::OnSceneConnection(int depth)
@@ -1070,24 +1072,9 @@ bool ViewImpl::HasLayoutManager() const
 // Child Management API
 // =============================================================================
 
-void ViewImpl::AddView(Ui::View view)
+void ViewImpl::Insert(uint32_t index, Ui::View child)
 {
-  if(!view)
-  {
-    return;
-  }
-  ChildData childData;
-  childData.view           = view;
-  childData.measuredSize   = {0.0f, 0.0f};
-  childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-  mChildren.push_back(childData);
-  Self().Add(view);
-  InvalidateMeasure();
-}
-
-void ViewImpl::AddView(Ui::View view, uint32_t index)
-{
-  if(!view)
+  if(!child)
   {
     return;
   }
@@ -1096,49 +1083,27 @@ void ViewImpl::AddView(Ui::View view, uint32_t index)
     index = static_cast<uint32_t>(mChildren.size());
   }
   ChildData childData;
-  childData.view           = view;
+  childData.view           = child;
   childData.measuredSize   = {0.0f, 0.0f};
   childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
   mChildren.insert(mChildren.begin() + index, childData);
-  Self().Add(view);
+
+  mUpdatingChildren = true;
+  Self().Add(child);
+  mUpdatingChildren = false;
+
   InvalidateMeasure();
 }
 
-void ViewImpl::RemoveView(Ui::View view)
+void ViewImpl::RemoveAllChildren()
 {
-  if(!view)
-  {
-    return;
-  }
-  auto it =
-    std::find_if(mChildren.begin(), mChildren.end(), [&view](const ChildData& data)
-  { return data.view == view; });
-  if(it != mChildren.end())
-  {
-    mChildren.erase(it);
-    Self().Remove(view);
-    InvalidateMeasure();
-  }
-}
-
-void ViewImpl::RemoveViewAt(uint32_t index)
-{
-  if(index >= mChildren.size())
-  {
-    return;
-  }
-  Ui::View view = mChildren[index].view;
-  mChildren.erase(mChildren.begin() + index);
-  Self().Remove(view);
-  InvalidateMeasure();
-}
-
-void ViewImpl::RemoveAllViews()
-{
+  mUpdatingChildren = true;
   for(auto& childData : mChildren)
   {
     Self().Remove(childData.view);
   }
+  mUpdatingChildren = false;
+
   mChildren.clear();
   InvalidateMeasure();
 }
@@ -1177,7 +1142,7 @@ Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<Ui::View> childr
 {
   for(const auto& child : children)
   {
-    AddView(child);
+    Self().Add(child);
   }
   return *this;
 }
@@ -1652,10 +1617,79 @@ void ViewImpl::OnSceneDisconnection()
 
 void ViewImpl::OnChildAdd(Actor& child)
 {
+  if(mUpdatingChildren)
+  {
+    return;
+  }
+
+  Ui::View view = Ui::View::DownCast(child);
+  if(view)
+  {
+    ChildData childData;
+    childData.view           = view;
+    childData.measuredSize   = {0.0f, 0.0f};
+    childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
+    mChildren.push_back(childData);
+    InvalidateMeasure();
+  }
+  else
+  {
+    DALI_ASSERT_ALWAYS(false && "View could only have child as View class!");
+  }
 }
 
 void ViewImpl::OnChildRemove(Actor& child)
 {
+  if(mUpdatingChildren)
+  {
+    return;
+  }
+
+  Ui::View view = Ui::View::DownCast(child);
+  if(view)
+  {
+    auto it = std::find_if(mChildren.begin(), mChildren.end(), [&view](const ChildData& data)
+    {
+      return data.view == view;
+    });
+    if(it != mChildren.end())
+    {
+      mChildren.erase(it);
+      InvalidateMeasure();
+    }
+  }
+}
+
+void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
+{
+  if(mUpdatingChildren)
+  {
+    return;
+  }
+
+  Actor          self            = Self();
+  uint32_t       actorChildCount = self.GetChildCount();
+  ChildContainer newChildren;
+  newChildren.reserve(actorChildCount);
+
+  for(uint32_t i = 0; i < actorChildCount; ++i)
+  {
+    Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
+    if(view)
+    {
+      auto it = std::find_if(mChildren.begin(), mChildren.end(), [&view](const ChildData& data)
+      {
+        return data.view == view;
+      });
+      if(it != mChildren.end())
+      {
+        newChildren.push_back(std::move(*it));
+      }
+    }
+  }
+
+  mChildren = std::move(newChildren);
+  InvalidateArrange();
 }
 
 void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& propertyValue)

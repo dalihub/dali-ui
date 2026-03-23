@@ -63,7 +63,7 @@ public:
     rowEnd.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     AddThreeBoxes(rowEnd, Color::RED, Color::GREEN, Color::BLUE);
-    outer.AddView(rowEnd);
+    outer.Add(rowEnd);
 
     // Row 2: Center
     FlexLayout rowCenter = FlexLayout::New();
@@ -75,7 +75,7 @@ public:
     rowCenter.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     AddThreeBoxes(rowCenter, Color::YELLOW, Color::CYAN, Color::MAGENTA);
-    outer.AddView(rowCenter);
+    outer.Add(rowCenter);
 
     // Row 3: SpaceAround
     FlexLayout rowAround = FlexLayout::New();
@@ -87,7 +87,7 @@ public:
     rowAround.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     AddThreeBoxes(rowAround, Color::RED, Color::GREEN, Color::BLUE);
-    outer.AddView(rowAround);
+    outer.Add(rowAround);
 
     // Row 4: SpaceEvenly
     FlexLayout rowEvenly = FlexLayout::New();
@@ -99,7 +99,7 @@ public:
     rowEvenly.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     AddThreeBoxes(rowEvenly, Color::YELLOW, Color::CYAN, Color::MAGENTA);
-    outer.AddView(rowEvenly);
+    outer.Add(rowEvenly);
 
     window.Add(outer);
     window.KeyEventSignal().Connect(this, &FlexLayoutJustifyContentController::OnKeyEvent);
@@ -112,19 +112,19 @@ private:
     box1.SetBackgroundColor(color1);
     box1.SetRequestedWidth(80.0f);
     box1.SetRequestedHeight(60.0f);
-    parent.AddView(box1);
+    parent.Add(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(color2);
     box2.SetRequestedWidth(80.0f);
     box2.SetRequestedHeight(60.0f);
-    parent.AddView(box2);
+    parent.Add(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(color3);
     box3.SetRequestedWidth(80.0f);
     box3.SetRequestedHeight(60.0f);
-    parent.AddView(box3);
+    parent.Add(box3);
   }
 
   void OnKeyEvent(const KeyEvent& event)

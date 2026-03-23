@@ -57,7 +57,7 @@ public:
     rowStart.SetRequestedWidth(80.0f);
     rowStart.SetRequestedHeight(50.0f);
     rowStart.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    root.AddView(rowStart);
+    root.Add(rowStart);
 
     // Row 2: Center
     View rowCenter = View::New();
@@ -65,7 +65,7 @@ public:
     rowCenter.SetRequestedWidth(80.0f);
     rowCenter.SetRequestedHeight(50.0f);
     rowCenter.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
-    root.AddView(rowCenter);
+    root.Add(rowCenter);
 
     // Row 3: End (right-aligned narrow box)
     View rowEnd = View::New();
@@ -73,14 +73,14 @@ public:
     rowEnd.SetRequestedWidth(80.0f);
     rowEnd.SetRequestedHeight(50.0f);
     rowEnd.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
-    root.AddView(rowEnd);
+    root.Add(rowEnd);
 
     // Row 4: Fill (stretches to full width)
     View rowFill = View::New();
     rowFill.SetBackgroundColor(Color::CYAN);
     rowFill.SetRequestedHeight(50.0f);
     rowFill.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    root.AddView(rowFill);
+    root.Add(rowFill);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &StackLayoutAlignmentController::OnKeyEvent);

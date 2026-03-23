@@ -68,27 +68,27 @@ public:
     label00.SetRequestedWidth(80.0f);
     label00.SetRequestedHeight(40.0f);
     label00.SetLayoutParams(GridLayoutParams::New());
-    root.AddView(label00);
+    root.Add(label00);
 
     // (0,1): Header area in Auto row, Star column
     View header = View::New();
     header.SetBackgroundColor(Vector4(1.0f, 0.6f, 0.6f, 1.0f));
     header.SetRequestedHeight(40.0f);
     header.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
-    root.AddView(header);
+    root.Add(header);
 
     // (1,0): Sidebar in Auto column, Star row
     View sidebar = View::New();
     sidebar.SetBackgroundColor(Color::GREEN);
     sidebar.SetRequestedWidth(80.0f);
     sidebar.SetLayoutParams(GridLayoutParams::New().SetRow(1));
-    root.AddView(sidebar);
+    root.Add(sidebar);
 
     // (1,1): Main content area (Star row x Star column)
     View content = View::New();
     content.SetBackgroundColor(Color::BLUE);
     content.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
-    root.AddView(content);
+    root.Add(content);
 
     // (2,0): Footer label in Auto row, Auto column
     View label20 = View::New();
@@ -96,14 +96,14 @@ public:
     label20.SetRequestedWidth(80.0f);
     label20.SetRequestedHeight(30.0f);
     label20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
-    root.AddView(label20);
+    root.Add(label20);
 
     // (2,1): Footer content spanning the Star column
     View footer = View::New();
     footer.SetBackgroundColor(Color::CYAN);
     footer.SetRequestedHeight(30.0f);
     footer.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
-    root.AddView(footer);
+    root.Add(footer);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &GridLayoutAutoController::OnKeyEvent);

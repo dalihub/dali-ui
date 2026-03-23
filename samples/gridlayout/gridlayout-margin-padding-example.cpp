@@ -70,34 +70,34 @@ public:
     View cell00 = View::New();
     cell00.SetBackgroundColor(Color::RED);
     cell00.SetLayoutParams(GridLayoutParams::New());
-    root.AddView(cell00);
+    root.Add(cell00);
 
     // Cell (0,1): Green - 25px margin all sides
     View cell01 = View::New();
     cell01.SetBackgroundColor(Color::GREEN);
     cell01.SetViewMargin(Extents(25, 25, 25, 25));
     cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
-    root.AddView(cell01);
+    root.Add(cell01);
 
     // Cell (1,0): Blue - 25px margin all sides
     View cell10 = View::New();
     cell10.SetBackgroundColor(Color::BLUE);
     cell10.SetViewMargin(Extents(25, 25, 25, 25));
     cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
-    root.AddView(cell10);
+    root.Add(cell10);
 
     // Cell (1,1): Yellow - no margin (fills cell completely)
     View cell11 = View::New();
     cell11.SetBackgroundColor(Color::YELLOW);
     cell11.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
-    root.AddView(cell11);
+    root.Add(cell11);
 
     // Cell (2,0~1): Cyan - spanning 2 columns with 25px margin
     View cell20 = View::New();
     cell20.SetBackgroundColor(Color::CYAN);
     cell20.SetViewMargin(Extents(25, 25, 25, 25));
     cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumnSpan(2));
-    root.AddView(cell20);
+    root.Add(cell20);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &GridLayoutMarginPaddingController::OnKeyEvent);

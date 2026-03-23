@@ -54,20 +54,20 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetRequestedWidth(100.0f);
-    root.AddView(redBox);
+    root.Add(redBox);
 
     // Green box: flex-grow 1 (fills remaining space)
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetRequestedWidth(WRAP_CONTENT);
     greenBox.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
-    root.AddView(greenBox);
+    root.Add(greenBox);
 
     // Blue box: fixed width
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetRequestedWidth(80.0f);
-    root.AddView(blueBox);
+    root.Add(blueBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &FlexLayoutController::OnKeyEvent);

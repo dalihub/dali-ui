@@ -59,14 +59,14 @@ public:
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetRequestedWidth(80.0f);
     redBox.SetRequestedHeight(200.0f);
-    root.AddView(redBox);
+    root.Add(redBox);
 
     // Green box: medium height
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetRequestedWidth(80.0f);
     greenBox.SetRequestedHeight(120.0f);
-    root.AddView(greenBox);
+    root.Add(greenBox);
 
     // Blue box: short, with AlignSelf override to FlexEnd
     View blueBox = View::New();
@@ -74,14 +74,14 @@ public:
     blueBox.SetRequestedWidth(80.0f);
     blueBox.SetRequestedHeight(60.0f);
     blueBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_END));
-    root.AddView(blueBox);
+    root.Add(blueBox);
 
     // Yellow box: medium
     View yellowBox = View::New();
     yellowBox.SetBackgroundColor(Color::YELLOW);
     yellowBox.SetRequestedWidth(80.0f);
     yellowBox.SetRequestedHeight(140.0f);
-    root.AddView(yellowBox);
+    root.Add(yellowBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &FlexLayoutJustifyAlignController::OnKeyEvent);

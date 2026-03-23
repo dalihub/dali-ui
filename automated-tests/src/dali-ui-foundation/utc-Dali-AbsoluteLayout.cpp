@@ -104,7 +104,7 @@ int UtcDaliAbsoluteLayoutSetLayoutBoundsP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   LayoutRect bounds(10.0f, 20.0f, 100.0f, 50.0f);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(bounds));
   LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
@@ -120,7 +120,7 @@ int UtcDaliAbsoluteLayoutGetLayoutBoundsP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New());
   LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
   DALI_TEST_EQUALS(got.GetX(), 0.0f, TEST_LOCATION);
@@ -135,7 +135,7 @@ int UtcDaliAbsoluteLayoutSetLayoutFlagsP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
   DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
@@ -150,7 +150,7 @@ int UtcDaliAbsoluteLayoutGetLayoutFlagsP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New());
   DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::NONE), TEST_LOCATION);
@@ -162,7 +162,7 @@ int UtcDaliAbsoluteLayoutLayoutBoundsZeroP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 0, 0)));
   LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
   DALI_TEST_EQUALS(got.GetX(), 0.0f, TEST_LOCATION);
@@ -177,7 +177,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalFlagP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
   DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), TEST_LOCATION);
@@ -189,7 +189,7 @@ int UtcDaliAbsoluteLayoutMeasureArrangeP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10, 20, 100, 50)));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(150.0f);
@@ -207,7 +207,7 @@ int UtcDaliAbsoluteLayoutPositionProportionalP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetBounds(LayoutRect(0.1f, 0.2f, 0.3f, 0.4f))
     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
@@ -224,7 +224,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalP(void)
   TestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetBounds(LayoutRect(0, 0, 0.5f, 0.5f))
     .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
@@ -244,7 +244,7 @@ int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
   View child = View::New();
   child.SetRequestedWidth(70.0f);
   child.SetRequestedHeight(35.0f);
-  layout.AddView(child);
+  layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10, 20, -1.0f, -1.0f)));
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(150.0f);

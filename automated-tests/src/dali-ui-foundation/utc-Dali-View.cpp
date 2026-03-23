@@ -969,7 +969,7 @@ int UtcDaliViewInvalidateMeasureWithParentP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.InvalidateMeasure();
   DALI_TEST_CHECK(!child.IsMeasureValid());
   END_TEST;
@@ -1016,11 +1016,11 @@ int UtcDaliViewArrangeWithLayoutP(void)
   View c1 = View::New();
   c1.SetRequestedWidth(100.0f);
   c1.SetRequestedHeight(50.0f);
-  layout.AddView(c1);
+  layout.Add(c1);
   View c2 = View::New();
   c2.SetRequestedWidth(100.0f);
   c2.SetRequestedHeight(50.0f);
-  layout.AddView(c2);
+  layout.Add(c2);
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(200.0f);
   MeasuredSize measured = layout.Measure(200.0f, 200.0f);
@@ -1064,7 +1064,7 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetRequestedWidth(MATCH_PARENT);
   layout.SetRequestedHeight(MATCH_PARENT);
-  layout.AddView(View::New().SetRequestedWidth(50.0f).SetRequestedHeight(50.0f));
+  layout.Add(View::New().SetRequestedWidth(50.0f).SetRequestedHeight(50.0f));
   MeasuredSize size = layout.Measure(200.0f, 150.0f);
   DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
@@ -1076,7 +1076,7 @@ int UtcDaliViewInvalidateArrangeWithParentP(void)
   TestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
-  layout.AddView(child);
+  layout.Add(child);
   child.Measure(100.0f, 100.0f);
   child.Arrange(LayoutRect(0, 0, 100, 100));
   child.InvalidateArrange();

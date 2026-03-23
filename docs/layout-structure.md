@@ -2,7 +2,7 @@
 
 ## Overview
 
-The layout system in DALi UI Foundation computes **size (Measure)** and **position (Arrange)** of child views over a **View** hierarchy. In the public API, only **Layout** and its derived classes (StackLayout, FlexLayout, GridLayout, AbsoluteLayout) expose child management APIs (AddView, GetChildAt, etc.); **View** exposes layout-related properties (size specs, alignment, visibility) but not add/remove child.
+The layout system in DALi UI Foundation computes **size (Measure)** and **position (Arrange)** of child views over a **View** hierarchy. Child management uses the inherited Actor `Add`/`Remove` API; `Insert(index, View)` and `RemoveAllChildren()` are provided by View for index-based insertion and bulk removal.
 
 Layout processing is driven by **LayoutController** per window. Each frame, it runs Measure then Arrange on layout roots that have been invalidated.
 
@@ -16,10 +16,10 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.
   - `GetSize()` returns the actual rendered size (read-only).
   - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.
-  - No child add/remove API.
+  - Child add/remove uses inherited Actor `Add`/`Remove`. `Insert(index, View)` and `RemoveAllChildren()` are available for index-based insertion and bulk removal.
 
-- **Layout** (inherits View)  
-  - Child management: `AddView(View)`, `AddView(View, index)`, `RemoveView(View)`, `RemoveViewAt(index)`, `RemoveAllViews()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Contents(initializer_list<View>)`.  
+- **Layout** (inherits View)
+  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `RemoveAllChildren()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Contents(initializer_list<View>)`.
   - Always has a LayoutManager; derived classes attach Stack/Flex/Grid/Absolute algorithms.
 
 - **StackLayout, FlexLayout, GridLayout, AbsoluteLayout**
@@ -52,7 +52,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **ViewImpl** (DALi ControlImpl-derived)  
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and **optional** LayoutManager and child container.  
-  - When a LayoutManager is set (at construction time): provides `AddView`, `RemoveView`, `RemoveAllViews`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc.
+  - When a LayoutManager is set (at construction time): provides `Insert(index, View)`, `RemoveAllChildren`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via `Raise`/`Lower`/etc.) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync.
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)
@@ -129,6 +129,6 @@ When layout must be recomputed (e.g. size or child change):
 
 | Area | Description |
 |------|-------------|
-| Public child API | Only Layout (and Stack/Flex/Grid/Absolute) expose AddView, RemoveView, GetChildCount, GetChildAt, IndexOfChild, Contents, etc. View does not. |
+| Public child API | Child add/remove uses Actor::Add/Remove. View provides Add(View, index) for index-based insertion and RemoveAllChildren() for bulk removal. GetChildCount, GetChildAt, IndexOfChild, Contents are available on View. |
 | Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
 | Implementation | ViewImpl optionally holds a LayoutManager and children; LayoutImpl receives a type-specific LayoutManager at construction so layouts always have layout capability. |

@@ -54,21 +54,21 @@ public:
     top.SetRequestedWidth(MATCH_PARENT);
     top.SetRequestedHeight(WRAP_CONTENT);
     top.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    content.AddView(top);
+    content.Add(top);
 
     View middle = View::New();
     middle.SetBackgroundColor(Color::GREEN);
     middle.SetRequestedWidth(MATCH_PARENT);
     middle.SetRequestedHeight(WRAP_CONTENT);
     middle.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    content.AddView(middle);
+    content.Add(middle);
 
     View bottom = View::New();
     bottom.SetBackgroundColor(Color::BLUE);
     bottom.SetRequestedWidth(MATCH_PARENT);
     bottom.SetRequestedHeight(WRAP_CONTENT);
     bottom.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    content.AddView(bottom);
+    content.Add(bottom);
 
     // Create a ScrollView with vertical scrolling using chaining methods
     ScrollView scrollView = ScrollView::New()

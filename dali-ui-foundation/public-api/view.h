@@ -591,7 +591,7 @@ public: // Properties
   {
     for(const auto& child : children)
     {
-      AddView(child);
+      Add(child);
     }
     return *this;
   }
@@ -599,40 +599,17 @@ public: // Properties
   // @CHAIN_END
 
   /**
-   * @brief Adds a view to this View (at the end).
+   * @brief Inserts a child at the specified index.
    *
-   * The view will be managed by this View's layout system and added to the Actor hierarchy.
-   *
-   * @param[in] view The view to add
-   */
-  void AddView(View view);
-
-  /**
-   * @brief Adds a view at the specified index.
-   *
-   * @param[in] view The view to add
    * @param[in] index The index where to insert
+   * @param[in] child The child to insert
    */
-  void AddView(View view, uint32_t index);
+  void Insert(uint32_t index, View child);
 
   /**
-   * @brief Removes a view from this View.
-   *
-   * @param[in] view The view to remove
+   * @brief Removes all children from this View.
    */
-  void RemoveView(View view);
-
-  /**
-   * @brief Removes the view at the specified index.
-   *
-   * @param[in] index The index of the view to remove
-   */
-  void RemoveViewAt(uint32_t index);
-
-  /**
-   * @brief Removes all child views from this View.
-   */
-  void RemoveAllViews();
+  void RemoveAllChildren();
 
   /**
    * @brief Gets the number of child views.
