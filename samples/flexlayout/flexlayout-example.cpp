@@ -14,8 +14,6 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
-#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

@@ -19,9 +19,6 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
-#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
-#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 using namespace Dali;

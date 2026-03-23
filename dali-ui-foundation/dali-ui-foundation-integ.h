@@ -24,3 +24,16 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+
+// Layouts
+#include <dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/absolute-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/flex-layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/flex-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/grid-layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/grid-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/stack-layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/stack-layout-manager.h>

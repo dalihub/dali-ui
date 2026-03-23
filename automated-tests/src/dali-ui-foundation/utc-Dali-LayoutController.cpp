@@ -19,7 +19,6 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali/public-api/adaptor-framework/window.h>
 
 using namespace Dali;

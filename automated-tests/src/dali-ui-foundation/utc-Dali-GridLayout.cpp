@@ -19,9 +19,6 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/grid-layout.h>
-#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
-#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <vector>
 
 using namespace Dali;

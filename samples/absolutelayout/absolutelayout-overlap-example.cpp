@@ -15,8 +15,6 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
-#include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

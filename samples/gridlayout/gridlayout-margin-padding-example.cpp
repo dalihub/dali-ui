@@ -15,8 +15,6 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layouts/grid-layout.h>
-#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
