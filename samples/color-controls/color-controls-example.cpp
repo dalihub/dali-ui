@@ -14,7 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 
 #include "test-config.h"
 #include "test-theme-loader.h"

@@ -16,8 +16,8 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/layout-controller.h>
-#include <dali-ui-foundation/public-api/layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout-controller.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/common/stage.h>
@@ -41,14 +41,14 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/integration-api/layout-impl.h>
-#include <dali-ui-foundation/integration-api/layout-manager.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
-#include <dali-ui-foundation/internal/layout/layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>

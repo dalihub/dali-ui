@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// CLASS HEADER
+#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+LayoutManager::LayoutManager()
+{
+}
+
+LayoutManager::~LayoutManager()
+{
+}
+
+MeasuredSize LayoutManager::MeasureChild(Integration::ViewImpl* child, float widthConstraint, float heightConstraint)
+{
+  if(child)
+  {
+    return child->Measure(widthConstraint, heightConstraint);
+  }
+  return MeasuredSize(0.0f, 0.0f);
+}
+
+MeasuredSize LayoutManager::ArrangeChild(Integration::ViewImpl* child, const LayoutRect& bounds)
+{
+  if(child)
+  {
+    return child->Arrange(bounds);
+  }
+  return MeasuredSize(0.0f, 0.0f);
+}
+
+Integration::ViewImpl::ChildContainer& LayoutManager::GetChildren(Integration::ViewImpl* view)
+{
+  return view->GetChildren();
+}
+
+} // namespace Ui
+} // namespace Dali

@@ -37,8 +37,8 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/clickable-trait.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/layout-params.h>
-#include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/view-accessibility-enums.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>

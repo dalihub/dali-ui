@@ -19,7 +19,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

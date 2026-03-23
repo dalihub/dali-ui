@@ -21,9 +21,9 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/layout.h>
-#include <dali-ui-foundation/public-api/stack-layout.h>
-#include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>

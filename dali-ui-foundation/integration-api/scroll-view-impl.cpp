@@ -30,8 +30,8 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
-#include <dali-ui-foundation/integration-api/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/controls/control.h>
 //#include <dali-ui-elements/public-api/scroll-view.h>
 

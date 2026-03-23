@@ -15,9 +15,9 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/stack-layout.h>
-#include <dali-ui-foundation/public-api/stack-layout-params.h>
-#include <dali-ui-foundation/public-api/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
