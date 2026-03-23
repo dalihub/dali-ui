@@ -96,7 +96,7 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    GetImpl(owner).SetViewState(UiState::PseudoDisabled, pseudoDisabled);
+    GetImpl(owner).SetViewState(UiState::PSEUDO_DISABLED, pseudoDisabled);
   }
 
   mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
@@ -340,7 +340,7 @@ void InteractiveTraitImpl::SetPressedInternal(bool value, const InputEvent& even
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    GetImpl(owner).SetViewState(UiState::Pressed, value, event);
+    GetImpl(owner).SetViewState(UiState::PRESSED, value, event);
   }
 
   OnPressedChanged(owner, event);

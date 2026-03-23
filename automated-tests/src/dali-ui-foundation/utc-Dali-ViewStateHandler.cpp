@@ -45,8 +45,8 @@
 //   {
 //     callCount = 0;
 //     view      = View();
-//     prev      = UiState::Normal;
-//     cur       = UiState::Normal;
+//     prev      = UiState::NORMAL;
+//     cur       = UiState::NORMAL;
 //   }
 
 //   int     callCount;
@@ -132,11 +132,11 @@
 //   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
 //   // Trigger a state change
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 //   DALI_TEST_CHECK(data.view == view);
-//   DALI_TEST_CHECK(UiState::Focused.WasAdded(data.prev, data.cur));
+//   DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
 
 //   END_TEST;
 // }
@@ -154,10 +154,10 @@
 
 //   GetImpl(view).WhenStateChanged("TestHandler", &tracker, StateChangedFunctor(data));
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_CHECK(UiState::Focused.WasAdded(data.prev, data.cur));
+//   DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
 
 //   END_TEST;
 // }
@@ -179,7 +179,7 @@
 
 //   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   // Both handlers should fire
 //   DALI_TEST_EQUALS(data.callCount, 2, TEST_LOCATION);
@@ -202,7 +202,7 @@
 //   // Register with the same ID — should replace the first
 //   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data2));
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(data1.callCount, 0, TEST_LOCATION); // old handler NOT called
 //   DALI_TEST_EQUALS(data2.callCount, 1, TEST_LOCATION); // new handler called
@@ -224,8 +224,8 @@
 //   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
 //   // Set same state twice — second call should not dispatch
-//   GetImpl(view).SetViewState(UiState::Focused, true);
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 
@@ -248,7 +248,7 @@
 //   bool removed = GetImpl(view).UnsetStateHandler("MyHandler");
 //   DALI_TEST_CHECK(removed);
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION); // not called after removal
 
@@ -283,7 +283,7 @@
 
 //   GetImpl(view).UnsetStateHandler("HandlerA");
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(dataA.callCount, 0, TEST_LOCATION); // removed
 //   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION); // still active
@@ -309,14 +309,14 @@
 //     unsetResult = GetImpl(v).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
 //   });
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_CHECK(handlerCalled);
 //   DALI_TEST_CHECK(!unsetResult); // returns false because it is processing
 
 //   // Handler should still be active after skipped removal
 //   handlerCalled = false;
-//   GetImpl(view).SetViewState(UiState::Pressed, true);
+//   GetImpl(view).SetViewState(UiState::PRESSED, true);
 //   DALI_TEST_CHECK(handlerCalled);
 
 //   END_TEST;
@@ -335,7 +335,7 @@
 //   bool removed = GetImpl(view).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
 //   DALI_TEST_CHECK(removed);
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 //   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
 //   END_TEST;
@@ -355,7 +355,7 @@
 //     ConnectionTracker tracker;
 //     GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
-//     GetImpl(view).SetViewState(UiState::Focused, true);
+//     GetImpl(view).SetViewState(UiState::FOCUSED, true);
 //     DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 //     data.Reset();
 
@@ -363,7 +363,7 @@
 //   }
 
 //   // After tracker destroyed, handler should no longer fire
-//   GetImpl(view).SetViewState(UiState::Pressed, true);
+//   GetImpl(view).SetViewState(UiState::PRESSED, true);
 //   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
 //   END_TEST;
@@ -382,15 +382,15 @@
 
 //   GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(data));
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
-//   DALI_TEST_CHECK(!data.prev.Contains(UiState::Focused));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::Focused));
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+//   DALI_TEST_CHECK(!data.prev.Contains(UiState::FOCUSED));
+//   DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
 //   data.Reset();
 
-//   GetImpl(view).SetViewState(UiState::Pressed, true);
-//   DALI_TEST_CHECK(data.prev.Contains(UiState::Focused));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::Focused));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::Pressed));
+//   GetImpl(view).SetViewState(UiState::PRESSED, true);
+//   DALI_TEST_CHECK(data.prev.Contains(UiState::FOCUSED));
+//   DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
+//   DALI_TEST_CHECK(data.cur.Contains(UiState::PRESSED));
 
 //   END_TEST;
 // }
@@ -410,7 +410,7 @@
 //   GetImpl(view).WhenStateChanged("B", &tracker, StateChangedFunctor(dataB));
 //   GetImpl(view).WhenStateChanged("C", &tracker, StateChangedFunctor(dataC));
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(dataA.callCount, 1, TEST_LOCATION);
 //   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION);
@@ -435,7 +435,7 @@
 //   // Anonymous signal
 //   view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
 
-//   GetImpl(view).SetViewState(UiState::Focused, true);
+//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
 //   DALI_TEST_EQUALS(namedData.callCount, 1, TEST_LOCATION);
 //   DALI_TEST_EQUALS(signalData.callCount, 1, TEST_LOCATION);

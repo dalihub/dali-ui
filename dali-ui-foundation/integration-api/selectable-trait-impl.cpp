@@ -76,7 +76,7 @@ void SelectableTraitImpl::SetSelectedInternal(bool selected, const InputEvent& e
   }
 
   mSelected = selected;
-  GetImpl(owner).SetViewState(UiState::Selected, selected);
+  GetImpl(owner).SetViewState(UiState::SELECTED, selected);
   mSelectionChangedSignal.Emit(owner, mSelected, event);
 }
 

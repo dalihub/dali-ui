@@ -96,7 +96,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
 
 bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImpl) const
 {
-  if(viewImpl.GetState().Contains(UiState::Disabled))
+  if(viewImpl.GetState().Contains(UiState::DISABLED))
   {
     return false;
   }
@@ -107,7 +107,7 @@ bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImp
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      if(Integration::GetImpl(parentView).GetState().Contains(UiState::Disabled))
+      if(Integration::GetImpl(parentView).GetState().Contains(UiState::DISABLED))
       {
         return false;
       }
@@ -120,7 +120,7 @@ bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImp
 
 bool ViewStateManager::IsEffectivelyFocused(const Integration::ViewImpl& viewImpl) const
 {
-  if(viewImpl.GetState().Contains(UiState::Focused))
+  if(viewImpl.GetState().Contains(UiState::FOCUSED))
   {
     return true;
   }
@@ -131,7 +131,7 @@ bool ViewStateManager::IsEffectivelyFocused(const Integration::ViewImpl& viewImp
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      if(Integration::GetImpl(parentView).GetState().Contains(UiState::Focused))
+      if(Integration::GetImpl(parentView).GetState().Contains(UiState::FOCUSED))
       {
         return true;
       }

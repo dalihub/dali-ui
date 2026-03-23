@@ -351,9 +351,9 @@ void ViewImpl::SetViewState(UiState state, bool on, InputEvent cause)
 
     // Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
     // Clear them immediately rather than waiting for potentially late system events.
-    if(state == UiState::Disabled)
+    if(state == UiState::DISABLED)
     {
-      mState = mState - UiState::Focused - UiState::Pressed;
+      mState = mState - UiState::FOCUSED - UiState::PRESSED;
     }
   }
   else
@@ -369,7 +369,7 @@ void ViewImpl::SetViewState(UiState state, bool on, InputEvent cause)
 
 void ViewImpl::OnFocusChanged(bool focused)
 {
-  SetViewState(UiState::Focused, focused);
+  SetViewState(UiState::FOCUSED, focused);
 
   if(mInteractiveTrait)
   {
@@ -379,7 +379,7 @@ void ViewImpl::OnFocusChanged(bool focused)
 
 void ViewImpl::OnEnableChanged(bool enabled)
 {
-  SetViewState(UiState::Disabled, !enabled);
+  SetViewState(UiState::DISABLED, !enabled);
 }
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)

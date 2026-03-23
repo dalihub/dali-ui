@@ -267,7 +267,7 @@ public: // State API
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method
    * walks up the scene hierarchy and returns false if any ancestor View carries
-   * UiState::Disabled.
+   * UiState::DISABLED.
    *
    * @return True if neither the view nor any ancestor is disabled
    */
@@ -278,7 +278,7 @@ public: // State API
    *
    * Unlike IsFocused() (which only reflects the view's own state), this method
    * walks up the scene hierarchy and returns true if any ancestor View carries
-   * UiState::Focused.
+   * UiState::FOCUSED.
    *
    * @return True if the view itself or at least one ancestor is focused
    */
@@ -323,7 +323,7 @@ public: // State API
    *
    * @code
    * WhenStateChanged("default_bg", this, [](View v, const StateEvent& e) {
-   *   if(e.Changed(UiState::Focused)) { ... }
+   *   if(e.Changed(UiState::FOCUSED)) { ... }
    * });
    * @endcode
    *

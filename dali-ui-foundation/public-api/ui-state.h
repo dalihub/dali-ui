@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string-view.h>
+#include <dali/public-api/common/dali-string.h>
 #include <cstdint>
-#include <string>
-#include <string_view>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -42,10 +42,10 @@ namespace Ui
  *
  * @code
  * // Single state check
- * if(state.Contains(UiState::Pressed)) { ... }
+ * if(state.Contains(UiState::PRESSED)) { ... }
  *
  * // Composite state
- * auto selectedPressed = UiState::Selected + UiState::Pressed;
+ * auto selectedPressed = UiState::SELECTED + UiState::PRESSED;
  *
  * // Custom state
  * static const UiState Loading = UiState::Create("Loading");
@@ -64,20 +64,19 @@ public:
 
   // --- Predefined States ---
 
-  static const UiState All;            ///< Represents all possible states
-  static const UiState Normal;         ///< No state (0)
-  static const UiState Focused;        ///< View has keyboard focus
-  static const UiState Pressed;        ///< View is being pressed (touch or key)
-  static const UiState Disabled;       ///< View is disabled
-  static const UiState PseudoDisabled; ///< View appears disabled but still interactive
-  static const UiState Selected;       ///< View is selected
+  static const UiState ALL;             ///< Represents all possible states
+  static const UiState NORMAL;          ///< No state (0)
+  static const UiState FOCUSED;         ///< View has keyboard focus
+  static const UiState PRESSED;         ///< View is being pressed (touch or key)
+  static const UiState DISABLED;        ///< View is disabled
+  static const UiState PSEUDO_DISABLED; ///< View appears disabled but still interactive
+  static const UiState SELECTED;        ///< View is selected
 
   // --- Predefined Composite States ---
 
-  static const UiState SelectedPressed;  ///< Selected + Pressed
-  static const UiState DisabledSelected; ///< Disabled + Selected
-  static const UiState DisabledFocused;  ///< Disabled + Focused
-  static const UiState SelectedFocused;  ///< Selected + Focused
+  static const UiState SELECTED_PRESSED;  ///< SELECTED + PRESSED
+  static const UiState DISABLED_SELECTED; ///< DISABLED + SELECTED
+  static const UiState SELECTED_FOCUSED;  ///< SELECTED + FOCUSED
 
   /**
    * @brief Registers and creates a custom state with the given name.
@@ -89,7 +88,7 @@ public:
    * @return The UiState with the assigned bitmask
    * @throws DaliException if no more bits are available (max 62 custom states)
    */
-  static UiState Create(std::string_view name);
+  static UiState Create(StringView name);
 
   // --- Query ---
 
@@ -130,7 +129,7 @@ public:
    *
    * @return A string like "Focused, Pressed" or "Normal"
    */
-  std::string ToString() const;
+  String ToString() const;
 
   // --- State Change Filters ---
   // Useful with StateChangedSignal(prev, cur) to detect specific transitions.
@@ -224,7 +223,7 @@ private:
   }
 
   static constexpr int MAX_BITS = 62;
-  static uint64_t      Register(std::string_view name);
+  static uint64_t      Register(StringView name);
 
   uint64_t mBits;
 };

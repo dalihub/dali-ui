@@ -470,7 +470,7 @@ public: // Properties
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method
    * walks up the scene hierarchy and returns false if any ancestor View carries
-   * UiState::Disabled.
+   * UiState::DISABLED.
    *
    * @return True if neither the view nor any ancestor is disabled
    */
@@ -480,7 +480,7 @@ public: // Properties
    * @brief Returns true if this view or any of its View ancestors is focused.
    *
    * Unlike the Focused bit in GetState(), this method walks up the scene
-   * hierarchy and returns true if any ancestor View carries UiState::Focused.
+   * hierarchy and returns true if any ancestor View carries UiState::FOCUSED.
    *
    * @return True if the view itself or at least one ancestor is focused
    */
@@ -700,7 +700,7 @@ public: // State API (non-chaining)
    *
    * @code
    * view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
-   *   if(e.Added(UiState::Focused)) { ... }
+   *   if(e.Added(UiState::FOCUSED)) { ... }
    * });
    * @endcode
    *

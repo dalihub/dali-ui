@@ -20,6 +20,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/common/dali-string-view.h>
+#include <dali/public-api/common/dali-string.h>
+#include <string>
 #include <unordered_map>
 
 namespace Dali
@@ -45,10 +48,10 @@ StateRegistry& GetRegistry()
 
 } // unnamed namespace
 
-uint64_t UiState::Register(std::string_view name)
+uint64_t UiState::Register(StringView name)
 {
   auto&       reg = GetRegistry();
-  std::string key(name);
+  std::string key(name.Data(), name.Size());
 
   if(key == "All")
   {
@@ -74,12 +77,12 @@ uint64_t UiState::Register(std::string_view name)
   return bit;
 }
 
-UiState UiState::Create(std::string_view name)
+UiState UiState::Create(StringView name)
 {
   return UiState(Register(name));
 }
 
-std::string UiState::ToString() const
+String UiState::ToString() const
 {
   if(mBits == 0ULL)
   {
@@ -107,25 +110,25 @@ std::string UiState::ToString() const
     }
   }
 
-  return result;
+  return String(result.c_str());
 }
 
 // --- Predefined States ---
 
-const UiState UiState::Normal{};
-const UiState UiState::All{(1ULL << MAX_BITS) - 1ULL};
-const UiState UiState::Focused        = UiState::Create("Focused");
-const UiState UiState::Pressed        = UiState::Create("Pressed");
-const UiState UiState::Disabled       = UiState::Create("Disabled");
-const UiState UiState::PseudoDisabled = UiState::Create("PseudoDisabled");
-const UiState UiState::Selected       = UiState::Create("Selected");
+const UiState UiState::NORMAL{};
+const UiState UiState::ALL{(1ULL << MAX_BITS) - 1ULL};
+const UiState UiState::FOCUSED         = UiState::Create("Focused");
+const UiState UiState::PRESSED         = UiState::Create("Pressed");
+const UiState UiState::DISABLED        = UiState::Create("Disabled");
+const UiState UiState::PSEUDO_DISABLED = UiState::Create("PseudoDisabled");
+const UiState UiState::SELECTED        = UiState::Create("Selected");
 
 // --- Predefined Composite States ---
 
-const UiState UiState::SelectedPressed  = UiState::Selected + UiState::Pressed;
-const UiState UiState::DisabledSelected = UiState::Disabled + UiState::Selected;
-const UiState UiState::DisabledFocused  = UiState::Disabled + UiState::Focused;
-const UiState UiState::SelectedFocused  = UiState::Selected + UiState::Focused;
+const UiState UiState::SELECTED_PRESSED  = UiState::SELECTED + UiState::PRESSED;
+const UiState UiState::DISABLED_SELECTED = UiState::DISABLED + UiState::SELECTED;
+
+const UiState UiState::SELECTED_FOCUSED = UiState::SELECTED + UiState::FOCUSED;
 
 } // namespace Ui
 

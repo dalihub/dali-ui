@@ -45,8 +45,8 @@ class StateEventImpl;
  *
  * @code
  * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
- *   if(e.Added(UiState::Focused))   { ... } // gained focus
- *   if(e.Removed(UiState::Pressed)) { ... } // released
+ *   if(e.Added(UiState::FOCUSED))   { ... } // gained focus
+ *   if(e.Removed(UiState::PRESSED)) { ... } // released
  * });
  * @endcode
  */

@@ -76,7 +76,7 @@ public:
    * @brief Returns true if the view and all its View ancestors are enabled.
    *
    * @param[in] viewImpl  The ViewImpl to test
-   * @return True if neither the view itself nor any ancestor carries UiState::Disabled
+   * @return True if neither the view itself nor any ancestor carries UiState::DISABLED
    */
   bool IsEffectivelyEnabled(const Integration::ViewImpl& viewImpl) const;
 
@@ -84,7 +84,7 @@ public:
    * @brief Returns true if the view or any of its View ancestors is focused.
    *
    * @param[in] viewImpl  The ViewImpl to test
-   * @return True if the view itself or at least one ancestor carries UiState::Focused
+   * @return True if the view itself or at least one ancestor carries UiState::FOCUSED
    */
   bool IsEffectivelyFocused(const Integration::ViewImpl& viewImpl) const;
 
