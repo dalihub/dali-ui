@@ -115,7 +115,7 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
 
 void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                                  Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
-                                 Actor& backgroundActor, Actor& cursorLayerActor, Ui::View& stencil,
+                                 Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
                                  std::vector<Actor>&              clippingDecorationActors,
                                  std::vector<Ui::TextAnchor>&     anchorActors,
                                  Text::Controller::UpdateTextType updateTextType)

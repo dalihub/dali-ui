@@ -923,6 +923,15 @@ void InputFieldImpl::EmitAnchorClickedSignal(const std::string& href)
 }
 
 // =============================================================================
+// CustomActorImpl
+// =============================================================================
+void InputFieldImpl::OnChildAdd(Actor& child)
+{
+  // InputField internally uses non-View actors (e.g., layers, stencil, decorations).
+  // Override to bypass ViewImpl's restriction that only allows View children.
+}
+
+// =============================================================================
 // Implementation
 // =============================================================================
 InputMethodContext::CallbackData InputFieldImpl::OnInputMethodContextEvent(Dali::InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
@@ -987,15 +996,10 @@ void InputFieldImpl::EnableClipping()
 {
   if(!mStencil)
   {
-    // Creates an extra control to be used as stencil buffer.
-    mStencil = Ui::View::New();
+    // Creates an extra actor to be used as stencil buffer.
+    mStencil = Actor::New();
     mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
     mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mStencil.SetProperty(Ui::View::Property::ACCESSIBILITY_HIDDEN, true);
-
-    // Creates a background visual. Even if the color is transparent it updates the stencil.
-    mStencil.SetProperty(Ui::View::Property::BACKGROUND,
-                         Property::Map().Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR).Add(ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT));
 
     // Enable the clipping property.
     mStencil.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);

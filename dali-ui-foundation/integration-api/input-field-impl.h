@@ -413,6 +413,12 @@ public:
    */
   void EmitAnchorClickedSignal(const std::string& href) override;
 
+protected: // From CustomActorImpl
+  /**
+   * @copydoc CustomActorImpl::OnChildAdd()
+   */
+  void OnChildAdd(Actor& child) override;
+
 private: // Implementation
   /**
    * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
@@ -503,7 +509,7 @@ private:
   Text::ControllerPtr         mController;
   Text::RendererPtr           mRenderer;
   Text::DecoratorPtr          mDecorator;
-  Ui::View                    mStencil;
+  Actor                       mStencil;
   std::vector<Actor>          mClippingDecorationActors; ///< Decoration actors which need clipping.
   std::vector<Ui::TextAnchor> mAnchorActors;
   Dali::InputMethodOptions    mInputMethodOptions;
