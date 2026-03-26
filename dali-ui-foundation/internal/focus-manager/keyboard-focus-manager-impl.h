@@ -19,6 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
@@ -26,10 +27,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyboard-focus-manager-devel.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
-#include <dali/devel-api/adaptor-framework/window-devel.h>
 
 namespace Dali
 {
@@ -95,16 +94,6 @@ public:
    * @copydoc Ui::KeyboardFocusManager::GetCurrentFocusActor
    */
   Actor GetCurrentFocusActor();
-
-  /**
-   * @copydoc Ui::KeyboardFocusManager::MoveFocus
-   */
-  bool MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const std::string& deviceName = "");
-
-  /**
-   * @brief Move the focus with device information
-   */
-  bool MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const FocusChangeContext& context);
 
   /**
    * @copydoc Ui::KeyboardFocusManager::MoveFocus
@@ -299,8 +288,6 @@ private:
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus is successful or not
    */
-  bool DoMoveFocusWithinLayoutControl(Ui::Control control, Actor actor, Ui::Control::KeyboardFocus::Direction direction,
-                                      const FocusChangeContext& context);
   bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction,
                                    const FocusChangeContext& context);
 
@@ -330,7 +317,6 @@ private:
    * @param actor The actor to be checked.
    * @return Whether the actor is a layout view or not.
    */
-  bool IsLayoutControl(Actor actor) const;
   bool IsLayoutView(Actor actor) const;
 
   /**
@@ -339,8 +325,7 @@ private:
    * @return The parent layout view the given actor belongs to or an empty handle if the given actor doesn't belong
    * to a layout view
    */
-  Ui::Control GetParentLayoutControl(Actor actor) const;
-  Ui::View    GetParentLayoutView(Actor actor) const;
+  Ui::View GetParentLayoutView(Actor actor) const;
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus

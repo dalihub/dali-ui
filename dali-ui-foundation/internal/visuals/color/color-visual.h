@@ -37,7 +37,7 @@ class ColorVisual;
 typedef IntrusivePtr<ColorVisual> ColorVisualPtr;
 
 /**
- * The visual which renders a solid color to the control's quad
+ * The visual which renders a solid color to the view's quad
  *
  * The following properties are required for create a ColorRender
  *

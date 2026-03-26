@@ -23,16 +23,14 @@
 #include <dali/public-api/render-tasks/render-task.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali
 {
 namespace Ui
 {
-class Control;
 namespace Internal DALI_INTERNAL
 {
-class Control;
 class RenderEffectImpl;
 } // namespace Internal DALI_INTERNAL
 
@@ -40,58 +38,50 @@ class RenderEffectImpl;
  * @brief
  * RenderEffect is an interface for visual effects.
  *
- * Each effect has a single owner Control.
+ * Each effect has a single owner View.
  *
  * Used internal at:
- * Ui::Control::SetRenderEffect(Ui::RenderEffect effect);
- * Ui::Control::ClearRenderEffect();
+ * Ui::View::SetRenderEffect(Ui::RenderEffect effect);
+ * Ui::View::ClearRenderEffect();
  * @note RenderEffect is interface class without constructor. Create resource by subclass.
- * @SINCE_2_3.28
  */
 class DALI_UI_API RenderEffect : public BaseHandle
 {
 public:
   /**
    * @brief Creates an uninitialized effect.
-   * @SINCE_2_3.28
    */
   RenderEffect() = default;
 
   /**
    * @brief Destructor.
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
-   * @SINCE_2_3.28
    */
   ~RenderEffect() = default;
 
   /**
    * @brief Copy constructor. Creates another handle that points to the same real object.
-   * @SINCE_2_3.28
    */
   RenderEffect(const RenderEffect& handle);
 
   /**
-   * @brief Activates effect on ownerControl
-   * @SINCE_2_4.15
+   * @brief Activates effect on owner View
    */
   void Activate();
 
   /**
    * @brief Deactivates effect
-   * @SINCE_2_4.15
    */
   void Deactivate();
 
   /**
    * @brief Refreshes effect rendering
-   * @SINCE_2_4.23
    */
   void Refresh();
 
   /**
    * @brief Get whether this effect activated or not.
    * @return True if effect is activated. False otherwise.
-   * @SINCE_2_4.26
    */
   bool IsActivated();
 
@@ -99,8 +89,7 @@ public: // Not intended for Application developers
   ///@cond internal
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
-   * @SINCE_2_3.28
-   * @param[in]  renderEffectImpl The UI Control implementation.
+   * @param[in] renderEffectImpl The RenderEffect 4implementation.
    */
   explicit DALI_INTERNAL RenderEffect(Internal::RenderEffectImpl* renderEffectImpl);
   ///@endcond

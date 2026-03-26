@@ -26,7 +26,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
@@ -53,7 +52,6 @@ uint32_t RenderEffectImpl::GetRenderPassTag()
 
 RenderEffectImpl::RenderEffectImpl()
 : mRenderer(),
-  mOwnerControl(),
   mOwnerView(),
   mTargetSize(Vector2::ZERO),
   mIsActivated(false)
@@ -71,10 +69,6 @@ RenderEffectImpl::~RenderEffectImpl()
 
   // Don't call Deactivate here, since we cannot call virtual function during destruction.
   // Deactivate already be called at View's destructor, and InheritVisibilityChanged signal.
-}
-
-void RenderEffectImpl::SetOwnerControl(Dali::Ui::Control control)
-{
 }
 
 void RenderEffectImpl::SetOwnerView(Dali::Ui::View view)
@@ -123,10 +117,6 @@ void RenderEffectImpl::SetOwnerView(Dali::Ui::View view)
       Activate(); // Dev note : Activate after set the owner view.
     }
   }
-}
-
-void RenderEffectImpl::ClearOwnerControl()
-{
 }
 
 void RenderEffectImpl::ClearOwnerView()
@@ -180,11 +170,6 @@ void RenderEffectImpl::Initialize()
   }
 
   OnInitialize();
-}
-
-Ui::Control RenderEffectImpl::GetOwnerControl() const
-{
-  return mOwnerControl.GetHandle();
 }
 
 Ui::View RenderEffectImpl::GetOwnerView() const

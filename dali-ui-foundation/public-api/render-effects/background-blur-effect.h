@@ -16,11 +16,14 @@
  * limitations under the License.
  *
  */
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/time-period.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
 namespace Dali
 {
@@ -32,17 +35,17 @@ class BackgroundBlurEffectImpl;
 } // namespace Internal DALI_INTERNAL
 
 /**
- * @brief BackgroundBlurEffect is a visual effect that blurs owner control's background.
+ * @brief BackgroundBlurEffect is a visual effect that blurs owner view's background.
  *
  * @code
  * BackgroundBlurEffect effect = BackgroundBlurEffect::New();
- * control.SetRenderEffect(effect); // Activate
+ * view.SetRenderEffect(effect); // Activate
  * effect.Deactivate();
  * effect.Activate();
- * control.ClearRenderEffect(); // Deactivate
+ * view.ClearRenderEffect(); // Deactivate
  * @endcode
  *
- * @note The owner control owns at most one render effect.
+ * @note The owner view owns at most one render effect.
  * @note Tree hierarchy matters for BackgroundBlurEffect. You should determine "what is the background".
  *
  * @SINCE_2_3.28
@@ -170,7 +173,7 @@ public:
 
   /**
    * @brief Set specific source actor of background blur effects. If empty handle, works same as normal.
-   * @note If given source actor is not a parent of source control, it has no efforts.
+   * @note If given source actor is not a parent of source view, it has no efforts.
    * @warning RenderEffect didn't hold source actor reference.
    * @param[in] sourceActor The source actor of background blur effects.
    * @SINCE_2_4.33
@@ -199,7 +202,7 @@ public: // Not intended for use by Application developers
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
    * @SINCE_2_3.28
-   * @param[in]  blurEffectImpl The UI Control implementation.
+   * @param[in]  blurEffectImpl The BackgroundBlurEffect implementation.
    */
   explicit DALI_INTERNAL BackgroundBlurEffect(Internal::BackgroundBlurEffectImpl* backgroundBlurEffectImpl);
   ///@endcond

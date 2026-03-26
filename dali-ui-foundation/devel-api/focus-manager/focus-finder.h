@@ -19,7 +19,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -37,8 +36,6 @@ namespace FocusFinder
  * @param [in] direction The direction.
  * @return The nearest focusable actor, or an empty handle if none exists.
  */
-DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
-                                           Ui::Control::KeyboardFocus::Direction direction);
 DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
                                            Ui::FocusDirection direction);
 

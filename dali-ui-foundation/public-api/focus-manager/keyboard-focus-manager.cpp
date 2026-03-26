@@ -58,11 +58,6 @@ Actor KeyboardFocusManager::GetCurrentFocusActor()
   return GetImpl(*this).GetCurrentFocusActor();
 }
 
-bool KeyboardFocusManager::MoveFocus(Control::KeyboardFocus::Direction direction)
-{
-  return false;
-}
-
 bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction)
 {
   return GetImpl(*this).MoveFocus(direction);

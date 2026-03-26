@@ -35,8 +35,10 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/image-view/image-view-impl.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 #ifdef DEBUG_ENABLED
 #define DECORATOR_DEBUG
@@ -663,13 +665,13 @@ struct Decorator::Impl : public ConnectionTracker
     mPopupSetNewPosition = false;
   }
 
-  void CreateCursor(Control& cursor, const Vector4& color)
+  void CreateCursor(View& cursor, const Vector4& color)
   {
-    cursor = Control::New();
+    cursor = View::New();
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
-    cursor.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIDDEN, true);
+    cursor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIDDEN, true);
   }
 
   // Add or Remove cursor(s) from parent
@@ -826,9 +828,9 @@ struct Decorator::Impl : public ConnectionTracker
         grabHandle.actor.SetProperty(Dali::Actor::Property::NAME, "GrabHandleActor");
         if(Dali::Internal::gLogFilter->IsEnabledFor(Debug::Verbose))
         {
-          grabHandle.grabArea = Control::New();
-          Ui::Control control = Ui::Control::DownCast(grabHandle.grabArea);
-          control.SetBackgroundColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f));
+          grabHandle.grabArea = View::New();
+          Ui::View view       = Ui::View::DownCast(grabHandle.grabArea);
+          view.SetBackgroundColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f));
           grabHandle.grabArea.SetProperty(Dali::Actor::Property::NAME, "GrabArea");
         }
         else
@@ -1992,9 +1994,9 @@ struct Decorator::Impl : public ConnectionTracker
   PropertyNotification
     mPopupTopExceedNotification; ///< Notifies when the popup leaves the bounding box through the top.
   PropertyNotification
-          mPopupBottomExceedNotification; ///< Notifies when the popup leaves the bounding box through the bottom.
-  Control mPrimaryCursor;
-  Control mSecondaryCursor;
+       mPopupBottomExceedNotification; ///< Notifies when the popup leaves the bounding box through the bottom.
+  View mPrimaryCursor;
+  View mSecondaryCursor;
 
   Actor                                mHighlightActor; ///< Actor to display highlight
   Renderer                             mHighlightRenderer;
@@ -2018,7 +2020,7 @@ struct Decorator::Impl : public ConnectionTracker
   Vector4 mHighlightColor;         ///< Color of the highlight
   Vector2 mHighlightPosition;      ///< The position of the highlight actor.
   Size    mHighlightSize;          ///< The size of the highlighted text.
-  Size    mControlSize;            ///< The control's size. Set by the Relayout.
+  Size    mControlSize;            ///< The view's size. Set by the Relayout.
   float   mHighlightOutlineOffset; ///< The outline's offset.
 
   unsigned int    mActiveCursor;
@@ -2028,7 +2030,7 @@ struct Decorator::Impl : public ConnectionTracker
   HandleType      mHandleScrolling; ///< The handle which is scrolling.
   HandleType      mHandleReleased;  ///< The last handle released.
   ScrollDirection mScrollDirection; ///< The direction of the scroll.
-  float           mScrollThreshold; ///< Defines a square area inside the control, close to the edge. A cursor entering this area
+  float           mScrollThreshold; ///< Defines a square area inside the view, close to the edge. A cursor entering this area
                                     ///< will trigger scroll events.
   float mScrollSpeed;               ///< The scroll speed in pixels per second.
   float mScrollDistance;            ///< Distance the text scrolls during a scroll interval.

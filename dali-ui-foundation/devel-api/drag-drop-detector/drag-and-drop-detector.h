@@ -24,8 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-
-#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -69,36 +68,36 @@ class DragAndDropDetector;
  *    detector.EndedSignal().Connect( &OnEnded );
  *  }
  *
- *  void OnStarted( Control control, DragAndDropDetector detector )
+ *  void OnStarted( View view, DragAndDropDetector detector )
  *  {
  *    // Query the new values
  *    std::cout << "Position = " << detector.GetCurrentScreenPosition() << std::endl;
  *  }
  *
- *  void OnEntered( Control control, DragAndDropDetector detector )
+ *  void OnEntered( View view, DragAndDropDetector detector )
  *  {
  *    // Change mode as required
  *  }
  *
- *  void OnExited( Control control, DragAndDropDetector detector )
+ *  void OnExited( View view, DragAndDropDetector detector )
  *  {
  *    // Change mode as required
  *  }
  *
- *  void OnMoved( Control control, DragAndDropDetector detector )
+ *  void OnMoved( View view, DragAndDropDetector detector )
  *  {
  *    // Query the new values
  *    std::cout << "Position = " << detector.GetCurrentScreenPosition() << std::endl;
  *  }
  *
- *  void OnDropped( Control control, DragAndDropDetector detector )
+ *  void OnDropped( View view, DragAndDropDetector detector )
  *  {
  *    // Query the new values
  *    std::cout << "Position = " << detector.GetCurrentScreenPosition() << ", Content = " << detector.GetContent() <<
  * std::endl;
  *  }
  *
- *  void OnEnded( Control control, DragAndDropDetector detector )
+ *  void OnEnded( View view, DragAndDropDetector detector )
  *  {
  *    // Change mode as required
  *  }
@@ -110,7 +109,7 @@ class DALI_UI_API DragAndDropDetector : public BaseHandle
 public:
   // Typedefs
 
-  using DragAndDropSignal = Signal<void(Control, DragAndDropDetector)>; ///< Drag & Drop signal
+  using DragAndDropSignal = Signal<void(View, DragAndDropDetector)>; ///< Drag & Drop signal
 
   /**
    * @brief Create an initialized DragAndDropDetector.
@@ -141,41 +140,41 @@ public:
   const std::string& GetContent() const;
 
   /**
-   * @brief Attaches a Control to the detector.
+   * @brief Attaches a View to the detector.
    *
-   * @note You can attach several controls to a DragAndDropDetector.
-   * DragAndDropDetector will keep a handle to the control and keep it alive as long as
+   * @note You can attach several views to a DragAndDropDetector.
+   * DragAndDropDetector will keep a handle to the view and keep it alive as long as
    * DragAndDropDetector is deleted or Detach is called.
    */
-  void Attach(Control control);
+  void Attach(View view);
 
   /**
-   * @brief Detaches the attached control from the detector.
+   * @brief Detaches the attached view from the detector.
    *
-   * @pre The specified control has been attached to the DragAndDropDetector.
+   * @pre The specified view has been attached to the DragAndDropDetector.
    */
-  void Detach(Control control);
+  void Detach(View view);
 
   /**
-   * @brief Detaches all attached control from the detector.
+   * @brief Detaches all attached view from the detector.
    *
-   * @pre At least one control has been attached to the DragAndDropDetector.
+   * @pre At least one view has been attached to the DragAndDropDetector.
    */
   void DetachAll();
 
   /**
-   * @brief Returns the number of controls attached to the DragAndDropDetector.
+   * @brief Returns the number of views attached to the DragAndDropDetector.
    *
    * @pre The DragAndDropDetector has been initialized.
    */
-  uint32_t GetAttachedControlCount() const;
+  uint32_t GetAttachedViewCount() const;
 
   /**
-   * @brief Returns a control by index. An empty handle if the index is not valid.
+   * @brief Returns a view by index. An empty handle if the index is not valid.
    *
    * @pre The DragAndDropDetector has been initialized.
    */
-  Control GetAttachedControl(uint32_t index) const;
+  View GetAttachedView(uint32_t index) const;
 
   /**
    * @brief Returns the current position of the dragged object.
@@ -191,7 +190,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */
@@ -202,7 +201,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */
@@ -213,7 +212,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */
@@ -224,7 +223,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */
@@ -235,7 +234,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */
@@ -246,7 +245,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallback( Control control, DragAndDropDetector detector );
+   *   void YourCallback( View view, DragAndDropDetector detector );
    * @endcode
    * @return The signal to connect to.
    */

@@ -25,7 +25,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -56,20 +55,17 @@ public:
   /**
    * @copydoc Ui::SetFocus
    */
-  void SetFocus(Ui::Control control);
   void SetFocus(Ui::View view);
 
   /**
    * @copydoc Ui::RemoveFocus
    */
-  void RemoveFocus(Ui::Control control);
   void RemoveFocus(Ui::View view);
 
   /**
    * @copydoc Ui::GetCurrentFocusView
    */
-  Ui::Control GetCurrentFocusControl() const;
-  Ui::View    GetCurrentFocusView() const;
+  Ui::View GetCurrentFocusView() const;
 
 public:
   /**
@@ -113,7 +109,6 @@ private:
    * Signal handler called when a focused View is removed from Scene.
    * @param[in]  view  The view removed from the scene.
    */
-  void OnFocusControlSceneDisconnection(Dali::Actor control);
   void OnFocusViewSceneDisconnection(Dali::Actor view);
 
   /**
@@ -122,7 +117,6 @@ private:
    * @param[in]  event    The KeyEvent.
    * @return True if KeyEvent is consumed.
    */
-  bool EmitKeyEventSignal(Ui::Control control, const KeyEvent& event);
   bool EmitKeyEventSignal(Ui::View view, const KeyEvent& event);
 
   /**

@@ -116,34 +116,6 @@ private:
   }
 };
 
-class KeyEventCallback : public Dali::ConnectionTracker
-{
-public:
-  /**
-   * Constructor
-   * @param[in]  returnValue  Set return value of KeyEvent callback.
-   * */
-  KeyEventCallback(bool consumed)
-    : mConsumed(consumed),
-      mIsCalled(false)
-  {
-  }
-
-  bool Callback(Control control, const KeyEvent& keyEvent)
-  {
-    mIsCalled = true;
-    return mConsumed;
-  }
-
-  void Callback(const KeyEvent& keyEvent)
-  {
-    mIsCalled = true;
-  }
-
-  bool mConsumed;
-  bool mIsCalled;
-};
-
 } // namespace
 
 void utc_dali_view_startup(void)

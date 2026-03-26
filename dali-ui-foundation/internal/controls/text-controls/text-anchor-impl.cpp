@@ -164,7 +164,7 @@ void TextAnchorImpl::OnInitialize()
   Actor self = Self();
 
   // Accessibility
-  self.SetProperty(Ui::Control::Property::ACCESSIBILITY_ROLE, AccessibilityRole::LINK);
+  self.SetProperty(Ui::View::Property::ACCESSIBILITY_ROLE, AccessibilityRole::LINK);
 }
 
 ViewAccessible* TextAnchorImpl::CreateAccessibleObject()

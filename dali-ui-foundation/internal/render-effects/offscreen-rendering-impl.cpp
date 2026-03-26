@@ -19,12 +19,10 @@
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/control/control-renderers.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/integration-api/debug.h>
 
 namespace Dali
@@ -33,20 +31,10 @@ namespace Ui
 {
 namespace Internal
 {
-OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::Control::OffScreenRenderingType type)
-: mType(Ui::View::OffScreenRenderingType::NONE)
-{
-  Initialize();
-}
-
 OffScreenRenderingImpl::OffScreenRenderingImpl(Ui::View::OffScreenRenderingType type)
 : mType(type)
 {
   Initialize();
-}
-
-void OffScreenRenderingImpl::SetType(Ui::Control::OffScreenRenderingType type)
-{
 }
 
 void OffScreenRenderingImpl::SetType(Ui::View::OffScreenRenderingType type)

@@ -19,7 +19,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 // INTERNAL INCLUDES
@@ -114,8 +113,6 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusMan
  * @return true if the movement was successful
  * @pre The KeyboardFocusManager has been initialized.
  */
-DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Control::KeyboardFocus::Direction direction,
-                           const std::string& deviceName);
 DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction,
                            const std::string& deviceName);
 

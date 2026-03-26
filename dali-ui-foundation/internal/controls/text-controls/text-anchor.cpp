@@ -54,7 +54,7 @@ TextAnchor::~TextAnchor()
 
 TextAnchor TextAnchor::DownCast(BaseHandle handle)
 {
-  return Ui::Control::DownCast<TextAnchor, Internal::TextAnchorImpl>(handle);
+  return Ui::View::DownCast<TextAnchor, Internal::TextAnchorImpl>(handle);
 }
 
 TextAnchor::TextAnchor(Internal::TextAnchorImpl& implementation)

@@ -20,6 +20,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+#include <dali-ui-foundation/public-api/view.h>
+
 namespace Dali
 {
 namespace Ui
@@ -30,17 +32,15 @@ class MaskEffectImpl;
 } // namespace Internal DALI_INTERNAL
 
 /**
- * @brief MaskEffect is a visual effect that masks owner control.
+ * @brief MaskEffect is a visual effect that masks owner View.
  * This class is a concrete class from RenderEffect interface.
- * Add this effect to a control, clear manually to deactivate.
+ * Add this effect to a view, clear manually to deactivate.
  *
- * Ui::Control control = Ui::Control::New();
- * parent.Add(control);
- * control.SetRenderEffect(MaskEffect::New(maskControl)); // Activate
+ * Ui::View view = Ui::View::New();
+ * parent.Add(view);
+ * view.SetRenderEffect(MaskEffect::New(maskView)); // Activate
  * ...
- * control.ClearRenderEffect(); // Deactivate
- *
- * @SINCE_2_4.15
+ * view.ClearRenderEffect(); // Deactivate
  */
 class DALI_UI_API MaskEffect : public RenderEffect
 {
@@ -56,23 +56,23 @@ public:
   };
 
   /**
-   * @brief Creates an initialized MaskEffect with control, using default settings. The default settings are:
+   * @brief Creates an initialized MaskEffect with view, using default settings. The default settings are:
    *
    * maskMode = MaskMode::ALPHA
    * maskPosition = Vector2(0.f, 0.f)
    * maskScale = Vector2(1.f, 1.f)
    *
-   * @param[in] maskControl The source Control to affect mask.
+   * @param[in] maskView The source View to affect mask.
    *
    * @SINCE_2_4.15
    * @return A handle to a newly allocated Dali resource
    */
-  static MaskEffect New(Ui::Control maskControl);
+  static MaskEffect New(Ui::View maskView);
 
   /**
    * @brief Creates an initialized MaskEffect.
    *
-   * @param[in] maskControl The source Control to affect mask.
+   * @param[in] maskView The source View to affect mask.
    * @param[in] maskMode Defines pixel data type (alpha, luminance) used as the mask source.
    * @param[in] maskPosition The Position of mask source.
    * @param[in] maskScale The Scale of mask source.
@@ -80,7 +80,7 @@ public:
    * @SINCE_2_4.15
    * @return A handle to a newly allocated Dali resource
    */
-  static MaskEffect New(Ui::Control maskControl, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
+  static MaskEffect New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
 
   /**
    * @brief Creates an uninitialized mask effect.

@@ -28,8 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 namespace
@@ -509,11 +507,6 @@ void GaussianBlurEffectImpl::DestroyFrameBuffers()
   mInputFrameBuffer.Reset();
   mTemporaryFrameBuffer.Reset();
   mBlurredOutputFrameBuffer.Reset();
-}
-
-void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
-                                               const Ui::Control              sourceControl)
-{
 }
 
 void GaussianBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,

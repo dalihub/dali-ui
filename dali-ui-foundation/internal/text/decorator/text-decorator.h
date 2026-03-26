@@ -24,10 +24,10 @@
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
+#include <dali/public-api/size-negotiation/relayout-container.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 
 namespace Dali
 {

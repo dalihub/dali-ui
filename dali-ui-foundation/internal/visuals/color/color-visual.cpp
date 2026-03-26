@@ -35,8 +35,8 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
+#include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -184,17 +184,17 @@ void ColorVisual::DoSetOnScene(Actor& actor)
   if(mCuroutCornerRadiusIndex != Property::INVALID_INDEX)
   {
     // If cutout policy is CUTOUT_VIEW_WITH_CORNER_RADIUS or CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, we need to apply equal
-    // constraint to it with control's corner radius.
-    Ui::Control control = Ui::Control::DownCast(actor);
-    DALI_ASSERT_ALWAYS(control && "ColorVisual must be used with Control");
+    // constraint to it with view's corner radius.
+    Ui::View view = Ui::View::DownCast(actor);
+    DALI_ASSERT_ALWAYS(view && "ColorVisual must be used with View");
 
-    // Get the corner radius from control
+    // Get the corner radius from view
     mCutoutCornerRadiusConstraint =
       Constraint::New<Vector4>(mImpl->mRenderer, mCuroutCornerRadiusIndex, Dali::EqualToConstraint());
-    mCutoutCornerRadiusConstraint.AddSource(Source(control, Ui::Control::Property::CORNER_RADIUS));
+    mCutoutCornerRadiusConstraint.AddSource(Source(view, Ui::View::Property::CORNER_RADIUS));
     Dali::Integration::ConstraintSetInternalTag(mCutoutCornerRadiusConstraint, CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG);
 
-    AddConstraintFeature(mCutoutCornerRadiusConstraint, {Ui::Control::Property::CORNER_RADIUS});
+    AddConstraintFeature(mCutoutCornerRadiusConstraint, {Ui::View::Property::CORNER_RADIUS});
 
     // Apply the constraint to renderer
     mCutoutCornerRadiusConstraint.Apply();

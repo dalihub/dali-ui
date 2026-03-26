@@ -20,7 +20,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
@@ -68,10 +67,6 @@ void KeyInputFocusManagerImpl::OnSceneHolderCreated(Dali::Integration::SceneHold
   sceneHolder.KeyEventGeneratedSignal().Connect(mSlotDelegate, &KeyInputFocusManagerImpl::OnKeyEvent);
 }
 
-void KeyInputFocusManagerImpl::SetFocus(Ui::Control control)
-{
-}
-
 void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
 {
   if(!view)
@@ -110,10 +105,6 @@ void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
   }
 }
 
-void KeyInputFocusManagerImpl::RemoveFocus(Ui::Control control)
-{
-}
-
 void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
 {
   if(view && view == mCurrentFocusView)
@@ -127,11 +118,6 @@ void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
     // Notify the view that it has lost key input focus
     Integration::GetImpl(view).OnKeyInputFocusLost();
   }
-}
-
-Ui::Control KeyInputFocusManagerImpl::GetCurrentFocusControl() const
-{
-  return Ui::Control();
 }
 
 Ui::View KeyInputFocusManagerImpl::GetCurrentFocusView() const
@@ -184,11 +170,6 @@ bool KeyInputFocusManagerImpl::OnKeyEvent(const KeyEvent& event)
   return consumed;
 }
 
-bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::Control control, const KeyEvent& event)
-{
-  return false;
-}
-
 bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent& event)
 {
   bool consumed = false;
@@ -210,10 +191,6 @@ bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent&
   }
 
   return consumed;
-}
-
-void KeyInputFocusManagerImpl::OnFocusControlSceneDisconnection(Dali::Actor actor)
-{
 }
 
 void KeyInputFocusManagerImpl::OnFocusViewSceneDisconnection(Dali::Actor actor)

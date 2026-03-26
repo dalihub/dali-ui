@@ -41,9 +41,6 @@
 #include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
-#include <dali-ui-foundation/public-api/controls/image-view/image-view.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 
@@ -425,20 +422,10 @@ void KeyboardFocusManager::MoveFocusBackward()
   }
 }
 
-bool KeyboardFocusManager::IsLayoutControl(Actor actor) const
-{
-  return false;
-}
-
 bool KeyboardFocusManager::IsLayoutView(Actor actor) const
 {
   Ui::View view = Ui::View::DownCast(actor);
   return view && Integration::GetImpl(view).IsKeyboardNavigationSupported();
-}
-
-Ui::Control KeyboardFocusManager::GetParentLayoutControl(Actor actor) const
-{
-  return Ui::Control();
 }
 
 Ui::View KeyboardFocusManager::GetParentLayoutView(Actor actor) const
@@ -485,16 +472,6 @@ Ui::FocusDevice KeyboardFocusManager::ConvertDeviceClassToKeyboardFocusDevice(
     default:
       return Ui::FocusDevice::UNKNOWN;
   }
-}
-
-bool KeyboardFocusManager::MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const std::string& deviceName)
-{
-  return false;
-}
-
-bool KeyboardFocusManager::MoveFocus(Ui::Control::KeyboardFocus::Direction direction, const FocusChangeContext& context)
-{
-  return false;
 }
 
 bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const std::string& deviceName)
@@ -658,13 +635,6 @@ bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const FocusCh
   }
 
   return succeed;
-}
-
-bool KeyboardFocusManager::DoMoveFocusWithinLayoutControl(Ui::Control control, Actor actor,
-                                                          Ui::Control::KeyboardFocus::Direction direction,
-                                                          const FocusChangeContext&             context)
-{
-  return false;
 }
 
 bool KeyboardFocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor,
@@ -905,7 +875,9 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
   {
     // Create the default if it hasn't been set and one that's shared by all the keyboard focusable actors
     const std::string imageDirPath = AssetManager::GetDaliImagePath();
-    mFocusIndicatorActor           = Ui::ImageView::New(ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
+    //TODO: Use a new ImageView
+    //    mFocusIndicatorActor           = Ui::ImageView::New(ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
+    mFocusIndicatorActor = Actor::New();
 
     // Apply size constraint to the focus indicator
     mFocusIndicatorActor.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);

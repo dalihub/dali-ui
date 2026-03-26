@@ -19,7 +19,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <string>
@@ -129,7 +128,6 @@ public:
    * @return true if the movement was successful
    * @pre The KeyboardFocusManager has been initialized.
    */
-  bool MoveFocus(Control::KeyboardFocus::Direction direction);
   bool MoveFocus(FocusDirection direction);
 
   /**

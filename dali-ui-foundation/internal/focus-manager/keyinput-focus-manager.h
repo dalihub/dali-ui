@@ -19,7 +19,6 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -81,7 +80,6 @@ public:
    * focus stack.
    * @param[in] view The View to receive keyboard input
    */
-  void SetFocus(Ui::Control control);
   void SetFocus(View view);
 
   /**
@@ -89,14 +87,12 @@ public:
    * keyboard input events first.
    * @return Pointer to the view set to receive keyboard inputs.
    */
-  Ui::Control GetCurrentFocusControl() const;
-  View        GetCurrentFocusView() const;
+  View GetCurrentFocusView() const;
 
   /**
    * Removes focus for the given view, The view will no longer receive events from keyboard.
    * @param [in] view which should be removed from focus.
    */
-  void RemoveFocus(Ui::Control control);
   void RemoveFocus(View view);
 
 public: // Signals

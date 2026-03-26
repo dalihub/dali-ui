@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 namespace Dali::Ui::Internal
 {
@@ -158,7 +158,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
     else
     {
       Extents padding;
-      padding = textActor.GetProperty<Extents>(Ui::Control::Property::PADDING);
+      padding = textActor.GetProperty<Extents>(Ui::View::Property::PADDING);
 
       // Support Right-To-Left of padding
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
@@ -462,7 +462,7 @@ std::string TextControlAccessible::GetWholeText() const
 
 std::string TextControlAccessible::GetCurrentPlaceholderText() const
 {
-  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
   bool hasFocus     = Self() == focusControl;
 
   Ui::Text::Controller::PlaceholderType placeholderType =
@@ -496,7 +496,7 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
   using Dali::Accessibility::State;
 
   auto states       = ControlAccessible::CalculateStates();
-  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusControl();
+  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
 
   states[State::EDITABLE]  = true;
   states[State::FOCUSABLE] = true;

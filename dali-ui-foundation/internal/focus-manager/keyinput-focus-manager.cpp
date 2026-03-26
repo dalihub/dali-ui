@@ -69,27 +69,14 @@ KeyInputFocusManager::KeyInputFocusManager(KeyInputFocusManagerImpl* impl)
 {
 }
 
-void KeyInputFocusManager::SetFocus(Ui::Control control)
-{
-}
-
 void KeyInputFocusManager::SetFocus(View view)
 {
   GetImpl(*this).SetFocus(view);
 }
 
-Ui::Control KeyInputFocusManager::GetCurrentFocusControl() const
-{
-  return Ui::Control();
-}
-
 View KeyInputFocusManager::GetCurrentFocusView() const
 {
   return GetImpl(*this).GetCurrentFocusView();
-}
-
-void KeyInputFocusManager::RemoveFocus(Ui::Control control)
-{
 }
 
 void KeyInputFocusManager::RemoveFocus(View view)

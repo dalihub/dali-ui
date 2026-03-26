@@ -33,6 +33,40 @@ class ViewDataImpl::AccessibilityData : public ConnectionTracker
   friend class Ui::ViewAccessible;
 
 public:
+  /// @brief AccessibilityActivate signal type.
+  typedef Signal<void()> AccessibilityActivateSignalType;
+
+  /// @brief AccessibilityReadingSkipped signal type.
+  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
+
+  /// @brief AccessibilityReadingPaused signal type.
+  typedef Signal<void()> AccessibilityReadingPausedSignalType;
+
+  /// @brief AccessibilityReadingResumed signal type.
+  typedef Signal<void()> AccessibilityReadingResumedSignalType;
+
+  /// @brief AccessibilityReadingCancelled signal type.
+  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
+
+  /// @brief AccessibilityReadingStopped signal type.
+  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
+
+  /// @brief AccessibilityGetName signal type.
+  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
+
+  /// @brief AccessibilityGetDescription signal type.
+  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+
+  /// @brief AccessibilityDoGesture signal type.
+  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+
+  /// @brief AccessibilityAction signal type.
+  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
+
+  /// @brief AccessibilityHighlighted signal type.
+  /// @param bool highlighted true if View is highlighted, false if highlight is removed.
+  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+
   // Constructor
   AccessibilityData(Integration::ViewImpl& viewImpl);
 
@@ -114,19 +148,19 @@ public:
   static AccessibilityStates GetDefaultViewAccessibilityStates();
 
 public:
-  Ui::View::AccessibilityActivateSignalType         mAccessibilityActivateSignal;
-  Ui::View::AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
-  Ui::View::AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
-  Ui::View::AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
-  Ui::View::AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
-  Ui::View::AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
+  AccessibilityActivateSignalType         mAccessibilityActivateSignal;
+  AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
+  AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
+  AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
+  AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
+  AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
 
-  Ui::View::AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
-  Ui::View::AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
-  Ui::View::AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
+  AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
+  AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
+  AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
 
-  Ui::View::AccessibilityActionSignalType      mAccessibilityActionSignal;
-  Ui::View::AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
+  AccessibilityActionSignalType      mAccessibilityActionSignal;
+  AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
 
   struct AccessibilityProps
   {

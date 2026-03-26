@@ -683,11 +683,6 @@ void Control::Impl::OnSceneConnection()
     Actor self = mControlImpl.Self();
     mVisualData->ConnectScene(self);
   }
-
-  if(mOffScreenRenderingImpl) // mOffScreenRenderingType != NONE
-  {
-    mOffScreenRenderingImpl->SetOwnerControl(Ui::Control(mControlImpl.GetOwner()));
-  }
 }
 
 void Control::Impl::OnSceneDisconnection()
@@ -699,11 +694,6 @@ void Control::Impl::OnSceneDisconnection()
   {
     Actor self = mControlImpl.Self();
     mVisualData->ClearScene(self);
-  }
-
-  if(mOffScreenRenderingImpl)
-  {
-    mOffScreenRenderingImpl->ClearOwnerControl();
   }
 }
 
@@ -1912,49 +1902,6 @@ void Control::Impl::RegisterProcessorOnce()
 
 void Control::Impl::SetOffScreenRendering(int32_t offScreenRenderingType)
 {
-  // Validate input
-  {
-    constexpr int32_t count = static_cast<int32_t>(OFF_SCREEN_RENDERING_TYPE_COUNT);
-    if(0 > offScreenRenderingType || offScreenRenderingType >= count)
-    {
-      DALI_LOG_ERROR("Failed to set offscreen rendering. Type index is out of bound.\n");
-      return;
-    }
-  }
-
-  Ui::Control::OffScreenRenderingType newType =
-    static_cast<Ui::Control::OffScreenRenderingType>(offScreenRenderingType);
-
-  Dali::Ui::Control handle(mControlImpl.GetOwner());
-
-  if(newType == Ui::Control::OffScreenRenderingType::NONE)
-  {
-    if(mOffScreenRenderingImpl)
-    {
-      auto tempOffscreenRenderingImpl = std::move(mOffScreenRenderingImpl);
-      tempOffscreenRenderingImpl->ClearOwnerControl();
-
-      if(DALI_LIKELY(mVisualData))
-      {
-        mVisualData->OffscreenRenderingEnabled(false);
-      }
-    }
-  }
-  else if(mOffScreenRenderingType == Ui::Control::OffScreenRenderingType::NONE)
-  {
-    mOffScreenRenderingImpl = std::make_unique<OffScreenRenderingImpl>(newType);
-    mOffScreenRenderingImpl->SetOwnerControl(handle);
-
-    if(DALI_LIKELY(mVisualData))
-    {
-      mVisualData->OffscreenRenderingEnabled(true);
-    }
-  }
-  else if(mOffScreenRenderingType != newType)
-  {
-    mOffScreenRenderingImpl->SetType(newType);
-  }
-  mOffScreenRenderingType = newType;
 }
 
 void Control::Impl::UpdateCornerRadius()

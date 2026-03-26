@@ -399,11 +399,6 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
 
 } // unnamed namespace
 
-Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::Control::KeyboardFocus::Direction direction)
-{
-  return Actor();
-}
-
 Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::FocusDirection direction)
 {
   Actor nearestActor;

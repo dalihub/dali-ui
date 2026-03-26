@@ -27,11 +27,9 @@
 #include <dali/public-api/render-tasks/render-task.h>
 #include <dali/public-api/rendering/frame-buffer.h>
 #include <dali/public-api/rendering/renderer.h>
-#include <integration-api/adaptor-framework/scene-holder.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -52,14 +50,12 @@ public:
    * @brief Constructor
    * @param[in] type Defines whether effect is enabled or not, and its refresh rate
    */
-  OffScreenRenderingImpl(Ui::Control::OffScreenRenderingType type);
   OffScreenRenderingImpl(Ui::View::OffScreenRenderingType type);
 
   /**
    * @brief Set OffScreenRenderingType explicitly
    * @param[in] type Defines whether effect is enabled or not, and its refresh rate
    */
-  void SetType(Ui::Control::OffScreenRenderingType type);
   void SetType(Ui::View::OffScreenRenderingType type);
 
   // @copydoc Dali::Ui::Internal::RenderEffectImpl::GetOffScreenRenderableType

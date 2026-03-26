@@ -38,14 +38,14 @@ DragAndDropDetector DragAndDropDetector::New()
   return Internal::DragAndDropDetector::New();
 }
 
-void DragAndDropDetector::Attach(Control control)
+void DragAndDropDetector::Attach(View view)
 {
-  GetImplementation(*this).Attach(control);
+  GetImplementation(*this).Attach(view);
 }
 
-void DragAndDropDetector::Detach(Control control)
+void DragAndDropDetector::Detach(View view)
 {
-  GetImplementation(*this).Detach(control);
+  GetImplementation(*this).Detach(view);
 }
 
 void DragAndDropDetector::DetachAll()
@@ -53,14 +53,14 @@ void DragAndDropDetector::DetachAll()
   GetImplementation(*this).DetachAll();
 }
 
-uint32_t DragAndDropDetector::GetAttachedControlCount() const
+uint32_t DragAndDropDetector::GetAttachedViewCount() const
 {
-  return GetImplementation(*this).GetAttachedControlCount();
+  return GetImplementation(*this).GetAttachedViewCount();
 }
 
-Control DragAndDropDetector::GetAttachedControl(uint32_t index) const
+View DragAndDropDetector::GetAttachedView(uint32_t index) const
 {
-  return GetImplementation(*this).GetAttachedControl(index);
+  return GetImplementation(*this).GetAttachedView(index);
 }
 
 const std::string& DragAndDropDetector::GetContent() const

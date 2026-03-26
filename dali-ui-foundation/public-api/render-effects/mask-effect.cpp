@@ -37,9 +37,9 @@ MaskEffect::MaskEffect(Internal::MaskEffectImpl* maskEffectImpl)
 
 MaskEffect::~MaskEffect() = default;
 
-MaskEffect MaskEffect::New(Ui::Control maskControl)
+MaskEffect MaskEffect::New(Ui::View maskView)
 {
-  Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskControl);
+  Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskView);
   return MaskEffect(internal.Get());
 }
 
@@ -63,9 +63,9 @@ bool MaskEffect::GetSourceMaskOnce() const
   return GetImplementation(*this).GetSourceMaskOnce();
 }
 
-MaskEffect MaskEffect::New(Ui::Control maskControl, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
+MaskEffect MaskEffect::New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale)
 {
-  Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskControl, maskMode, maskPosition, maskScale);
+  Internal::MaskEffectImplPtr internal = Internal::MaskEffectImpl::New(maskView, maskMode, maskPosition, maskScale);
   return MaskEffect(internal.Get());
 }
 } // namespace Ui

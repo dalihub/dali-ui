@@ -181,7 +181,6 @@ private:
    * @param[in] sceneHolder SceneHolder of source view
    * @param[in] sourceView Input source view
    */
-  void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::Control sourceControl);
   void CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder, const Ui::View sourceView);
 
   /**
@@ -194,7 +193,6 @@ private:
    * @param[in] renderTask Target render task to change source actor and exclusiveness
    * @param[in] sourceView Input source view
    */
-  void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl);
   void ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::View sourceView);
 
   /**

@@ -28,8 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 namespace
@@ -514,11 +512,6 @@ void BackgroundBlurEffectImpl::DestroyFrameBuffers()
 }
 
 void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
-                                                 const Ui::Control              sourceControl)
-{
-}
-
-void BackgroundBlurEffectImpl::CreateRenderTasks(Dali::Integration::SceneHolder sceneHolder,
                                                  const Ui::View                 sourceView)
 {
   RenderTaskList taskList = sceneHolder.GetRenderTaskList();
@@ -633,10 +626,6 @@ void BackgroundBlurEffectImpl::UpdateDownscaledBlurRadius()
       DALI_LOG_ERROR("Blur radius is too small. This blur will use minimum radius value.\n");
     }
   }
-}
-
-void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::Control sourceControl)
-{
 }
 
 void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRenderTask, const Ui::View sourceView)

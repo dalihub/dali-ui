@@ -181,22 +181,6 @@ void Control::ClearBackground()
 
 void Control::SetRenderEffect(Ui::RenderEffect effect)
 {
-  ClearRenderEffect();
-
-  if(effect)
-  {
-    Internal::RenderEffectImpl* object = dynamic_cast<Internal::RenderEffectImpl*>(effect.GetObjectPtr());
-    DALI_ASSERT_ALWAYS(object && "Given render effect is not valid.");
-
-    Dali::Ui::Control ownerControl(GetOwner());
-    object->SetOwnerControl(ownerControl);
-
-    mImpl->mRenderEffect = object;
-  }
-  else
-  {
-    mImpl->mRenderEffect.Reset();
-  }
 }
 
 RenderEffect Control::GetRenderEffect() const
@@ -212,8 +196,6 @@ void Control::ClearRenderEffect()
 
     // Reset handle first to avoid circular reference
     mImpl->mRenderEffect.Reset();
-
-    effectImpl->ClearOwnerControl();
   }
 }
 
@@ -330,32 +312,15 @@ bool Control::IsKeyboardNavigationSupported()
 
 void Control::SetKeyInputFocus()
 {
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    KeyInputFocusManager::Get().SetFocus(Ui::Control::DownCast(Self()));
-  }
 }
 
 bool Control::HasKeyInputFocus()
 {
-  bool result = false;
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Ui::Control control = KeyInputFocusManager::Get().GetCurrentFocusControl();
-    if(Self() == control)
-    {
-      result = true;
-    }
-  }
-  return result;
+  return false;
 }
 
 void Control::ClearKeyInputFocus()
 {
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    KeyInputFocusManager::Get().RemoveFocus(Ui::Control::DownCast(Self()));
-  }
 }
 
 void Control::SetAsKeyboardFocusGroup(bool isFocusGroup)

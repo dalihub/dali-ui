@@ -31,7 +31,6 @@
 #include <dali/public-api/signals/connection-tracker.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -80,13 +79,11 @@ public:
    * @note Activates render effect on default.
    * @param[in] view The owner view to apply RenderEffect.
    */
-  void SetOwnerControl(Ui::Control control);
   void SetOwnerView(Ui::View view);
 
   /**
    * @brief Clears owner View.
    */
-  void ClearOwnerControl();
   void ClearOwnerView();
 
   /**
@@ -157,8 +154,7 @@ protected:
    * @brief Get Owner view. It could be return empty handle if owner view is not set, or destroyed.
    * @return mOwnerView
    */
-  Ui::Control GetOwnerControl() const;
-  Ui::View    GetOwnerView() const;
+  Ui::View GetOwnerView() const;
 
   /**
    * @brief Get scene holder of owner view.
@@ -215,7 +211,6 @@ private:
 
   std::vector<Constraint> mAnimationConstraints; // For corner animation on owner view.
 
-  Dali::WeakHandle<Dali::Ui::Control>        mOwnerControl;         ///< Weakhandle of owner view.
   Dali::WeakHandle<Dali::Ui::View>           mOwnerView;            ///< Weakhandle of owner view.
   WeakHandle<Dali::Integration::SceneHolder> mPlacementSceneHolder; ///< Weakhandle of scene
 

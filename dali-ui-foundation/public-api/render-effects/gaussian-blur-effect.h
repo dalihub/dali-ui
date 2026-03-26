@@ -16,11 +16,14 @@
  * limitations under the License.
  *
  */
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
+
 // EXTERNAL INCLUDES
 #include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/time-period.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
 namespace Dali
 {
@@ -32,14 +35,14 @@ class GaussianBlurEffectImpl;
 } // namespace Internal DALI_INTERNAL
 
 /**
- * @brief GaussianBlurEffect is a visual effect that blurs owner control and its children.
+ * @brief GaussianBlurEffect is a visual effect that blurs owner view and its children.
  *
  * @code
  * GaussianBlurEffect effect = GaussianBlurEffect::New();
- * control.SetRenderEffect(effect); // Activate
+ * view.SetRenderEffect(effect); // Activate
  * effect.Deactivate();
  * effect.Activate();
- * control.ClearRenderEffect(); // Deactivate
+ * view.ClearRenderEffect(); // Deactivate
  * @endcode
  *
  * @SINCE_2_4.20
@@ -179,7 +182,7 @@ public: // Not intended for use by Application developers
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
    * @SINCE_2_4.20
-   * @param[in]  blurEffectImpl The UI Control implementation.
+   * @param[in]  blurEffectImpl The GaussianBlurEffect implementation.
    */
   explicit DALI_INTERNAL GaussianBlurEffect(Internal::GaussianBlurEffectImpl* gaussianBlurEffectImpl);
   ///@endcond

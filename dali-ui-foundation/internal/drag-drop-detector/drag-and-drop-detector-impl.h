@@ -67,31 +67,31 @@ public:
   const Vector2& GetCurrentScreenPosition() const;
 
   /**
-   * Attaches control to DragAndDropDetector.
-   * @param[in] control  control that will be attached to DragAndDropDetector.
+   * Attaches view to DragAndDropDetector.
+   * @param[in] view  view that will be attached to DragAndDropDetector.
    */
-  void Attach(Dali::Ui::Control& control);
+  void Attach(Dali::Ui::View& view);
 
   /**
-   * Detaches control to DragAndDropDetector.
-   * @param[in] control  control that will be Detached from DragAndDropDetector.
+   * Detaches view to DragAndDropDetector.
+   * @param[in] view  view that will be Detached from DragAndDropDetector.
    */
-  void Detach(Dali::Ui::Control& control);
+  void Detach(Dali::Ui::View& view);
 
   /**
-   * Detaches all control attached to DragAndDropDetector.
+   * Detaches all views attached to DragAndDropDetector.
    */
   void DetachAll();
 
   /**
-   * Returns the number of controls attached to the DragAndDropDetector.
+   * Returns the number of views attached to the DragAndDropDetector.
    */
-  uint32_t GetAttachedControlCount() const;
+  uint32_t GetAttachedViewCount() const;
 
   /**
-   * Returns a control by index. An empty handle if the index is not valid.
+   * Returns a view by index. An empty handle if the index is not valid.
    */
-  Dali::Ui::Control GetAttachedControl(uint32_t index) const;
+  Dali::Ui::View GetAttachedView(uint32_t index) const;
 
   /**
    * Sets the dragged content.
@@ -112,32 +112,32 @@ public:
   /**
    * Called when a draggable object start drag.
    */
-  void EmitStartedSignal(Dali::Ui::Control& control);
+  void EmitStartedSignal(Dali::Ui::View& view);
 
   /**
    * Called when a draggable object enters other object.
    */
-  void EmitEnteredSignal(Dali::Ui::Control& control);
+  void EmitEnteredSignal(Dali::Ui::View& view);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitExitedSignal(Dali::Ui::Control& control);
+  void EmitExitedSignal(Dali::Ui::View& view);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitMovedSignal(Dali::Ui::Control& control);
+  void EmitMovedSignal(Dali::Ui::View& view);
 
   /**
    * Is called when a drop actually occurs.
    */
-  void EmitDroppedSignal(Dali::Ui::Control& control);
+  void EmitDroppedSignal(Dali::Ui::View& view);
 
   /**
    * Called when a draggable object drag ended.
    */
-  void EmitEndedSignal(Dali::Ui::Control& control);
+  void EmitEndedSignal(Dali::Ui::View& view);
 
 public: // Signals
   /**
@@ -219,12 +219,11 @@ private:
   DragAndDropSignal mDroppedSignal;
   DragAndDropSignal mEndedSignal;
 
-  std::vector<Dali::Ui::Control> mControls;    // controls attached by Attach interface for drag&drop
-  Dali::Ui::Control              mDragControl; // the current drag control
-  Dali::Ui::Control
-                           mShadowControl;      // a shadow control for indicating where the control is, same size as the dragged control
-  std::vector<uint32_t>    mFirstEnter;         // control id indicating if the cursor is enter
-  Dali::PanGestureDetector mPanGestureDetector; // pangesture for calculating the shadow actor position
+  std::vector<Dali::Ui::View> mViews;              // views attached by Attach interface for drag&drop
+  Dali::Ui::View              mDragView;           // the current drag view
+  Dali::Ui::View              mShadowView;         // a shadow view for indicating where the view is, same size as the dragged view
+  std::vector<uint32_t>       mFirstEnter;         // view id indicating if the cursor is enter
+  Dali::PanGestureDetector    mPanGestureDetector; // pangesture for calculating the shadow actor position
 
   Vector2 mLocalPosition;
   Vector2 mDragLocalPosition;
