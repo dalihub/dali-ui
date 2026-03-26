@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/stream-operators.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/object/property-array.h>
 #include <dali/public-api/object/property-index-ranges.h>

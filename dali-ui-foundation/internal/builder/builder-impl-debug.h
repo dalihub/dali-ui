@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/devel-api/builder/json-parser.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/stream-operators.h>
 
 #if defined(DEBUG_ENABLED)
 
