@@ -77,12 +77,14 @@ struct MarkupProcessData
 
 struct MarkupPropertyData
 {
-  MarkupPropertyData(Vector4 anchorColor, Vector4 anchorClickedColor)
-  : anchorColor(anchorColor),
+  MarkupPropertyData(float dpi, Vector4 anchorColor, Vector4 anchorClickedColor)
+  : dpi(dpi),
+    anchorColor(anchorColor),
     anchorClickedColor(anchorClickedColor)
   {
   }
 
+  float   dpi;                ///< DPI used for pixel-to-point conversion.
   Vector4 anchorColor;        ///< The anchor color
   Vector4 anchorClickedColor; ///< The anchor clicked color
 };

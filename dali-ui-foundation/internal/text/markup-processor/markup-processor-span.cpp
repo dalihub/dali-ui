@@ -37,7 +37,7 @@ namespace Ui
 {
 namespace Text
 {
-void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& fontRun,
+void ProcessSpanTag(const Tag& tag, float dpi, ColorRun& colorRun, FontDescriptionRun& fontRun,
                     UnderlinedCharacterRun& underlinedCharacterRun, ColorRun& backgroundColorRun,
                     StrikethroughCharacterRun&    strikethroughRun,
                     CharacterSpacingCharacterRun& characterSpacingCharacterRun, bool& isColorDefined,
@@ -66,7 +66,7 @@ void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& font
     else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_SIZE, attribute.nameBuffer, attribute.nameLength))
     {
       isFontDefined = true;
-      ProcessFontSize(attribute, fontRun);
+      ProcessFontSize(attribute, dpi, fontRun);
     }
     else if(TokenComparison(MARKUP::SPAN_ATTRIBUTES::FONT_WEIGHT, attribute.nameBuffer, attribute.nameLength))
     {

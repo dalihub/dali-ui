@@ -31,6 +31,7 @@ struct MarkupProcessData;
  * @brief process the span from the tag and process all styles in it.
  *
  * @param[in] tag The span tag and its attributes.
+ * @param[in] dpi DPI used for pixel-to-point conversion.
  * @param[out] colorRun the color run to be filled.
  * @param[out] fontRun the font run to be filled.
  * @param[out] underlinedCharacterRun the underlined character run to be filled.
@@ -44,7 +45,7 @@ struct MarkupProcessData;
  * @param[out] isStrikethroughDefined if the span has strikethrough defined.
  * @param[out] isCharacterSpacingDefined if the span has character-spacing defined.
  */
-void ProcessSpanTag(const Tag& tag, ColorRun& colorRun, FontDescriptionRun& fontRun,
+void ProcessSpanTag(const Tag& tag, float dpi, ColorRun& colorRun, FontDescriptionRun& fontRun,
                     UnderlinedCharacterRun& underlinedCharacterRun, ColorRun& backgroundColorRun,
                     StrikethroughCharacterRun&    strikethroughRun,
                     CharacterSpacingCharacterRun& characterSpacingCharacterRun, bool& isColorDefined,

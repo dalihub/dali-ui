@@ -88,6 +88,7 @@ private:
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
     DALI_LOG_ERROR("%s\n", title);
     DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
+    DALI_LOG_ERROR("MarkupEnabled   : %d\n", label.IsMarkupEnabled());
     DALI_LOG_ERROR("AnchorColor     : %.2f, %.2f, %.2f, %.2f\n", anchorColor.r, anchorColor.g, anchorColor.b, anchorColor.a);
     DALI_LOG_ERROR("AnchorClicked   : %.2f, %.2f, %.2f, %.2f\n", anchorClickedColor.r, anchorClickedColor.g, anchorClickedColor.b, anchorClickedColor.a);
     DALI_LOG_ERROR("----------------------------------------------------------------\n");

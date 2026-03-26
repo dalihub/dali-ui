@@ -347,7 +347,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   if(parameters.enableMarkup)
   {
     // TODO : Currently unable to support anchor clicked events.
-    MarkupPropertyData markupPropertyData(Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
+    MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
 
     ProcessMarkupString(parameters.text, markupPropertyData, markupProcessData);
     textSize = markupProcessData.markupProcessedText.size();

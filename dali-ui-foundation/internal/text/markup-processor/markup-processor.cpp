@@ -716,6 +716,7 @@ void ProcessParagraphTag(MarkupProcessData& markupProcessData, const Tag tag, bo
  * @brief Processes span tag for the color-run & font-run.
  *
  * @param[in] spanTag The tag we are currently processing
+ * @param[in] dpi DPI used for pixel-to-point conversion.
  * @param[inout] spanStack The spans stack
  * @param[inout] colorRuns The container containing all the color runs
  * @param[inout] fontRuns The container containing all the font description runs
@@ -728,7 +729,7 @@ void ProcessParagraphTag(MarkupProcessData& markupProcessData, const Tag tag, bo
  * @param[in] characterIndex The current character index
  * @param[in] tagReference The tagReference we should increment/decrement
  */
-void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<ColorRun>& colorRuns,
+void ProcessSpanForRun(const Tag& spanTag, float dpi, StyleStack<Span>& spanStack, Vector<ColorRun>& colorRuns,
                        Vector<FontDescriptionRun>& fontRuns, Vector<UnderlinedCharacterRun>& underlinedCharacterRuns,
                        Vector<ColorRun>&                     backgroundColorRuns,
                        Vector<StrikethroughCharacterRun>&    strikethroughCharacterRuns,
@@ -776,7 +777,7 @@ void ProcessSpanForRun(const Tag& spanTag, StyleStack<Span>& spanStack, Vector<C
     span.strikethroughCharacterRunIndex    = strikethroughCharacterRunIndex;
     span.characterSpacingCharacterRunIndex = characterSpacingCharacterRunIndex;
 
-    ProcessSpanTag(spanTag, colorRun, fontRun, underlinedCharacterRun, backgroundColorRun, strikethroughCharacterRun,
+    ProcessSpanTag(spanTag, dpi, colorRun, fontRun, underlinedCharacterRun, backgroundColorRun, strikethroughCharacterRun,
                    characterSpacingCharacterRun, span.isColorDefined, span.isFontDefined,
                    span.isUnderlinedCharacterDefined, span.isBackgroundColorDefined, span.isStrikethroughDefined,
                    span.isCharacterSpacingDefined);
@@ -1194,8 +1195,10 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
       {
         ProcessTagForRun<FontDescriptionRun>(
           markupProcessData.fontRuns, styleStack, tag, characterIndex, fontRunIndex, fontTagReference,
-          [](const Tag& tag, FontDescriptionRun& fontRun)
-        { ProcessFontTag(tag, fontRun); });
+          [dpi = markupPropertyData.dpi](const Tag& tag, FontDescriptionRun& fontRun)
+        {
+          ProcessFontTag(tag, dpi, fontRun);
+        });
       } // <font></font>
       else if(TokenComparison(MARKUP::TAG::ANCHOR, tag.buffer, tag.length))
       {
@@ -1231,7 +1234,7 @@ void ProcessMarkupString(const std::string& markupString, MarkupPropertyData& ma
       }
       else if(TokenComparison(MARKUP::TAG::SPAN, tag.buffer, tag.length))
       {
-        ProcessSpanForRun(tag, spanStack, markupProcessData.colorRuns, markupProcessData.fontRuns,
+        ProcessSpanForRun(tag, markupPropertyData.dpi, spanStack, markupProcessData.colorRuns, markupProcessData.fontRuns,
                           markupProcessData.underlinedCharacterRuns, markupProcessData.backgroundColorRuns,
                           markupProcessData.strikethroughCharacterRuns, markupProcessData.characterSpacingCharacterRuns,
                           colorRunIndex, fontRunIndex, underlinedCharacterRunIndex, backgroundRunIndex,

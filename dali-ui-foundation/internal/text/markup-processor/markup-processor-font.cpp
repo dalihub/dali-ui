@@ -61,10 +61,15 @@ void ProcessFontFamily(const Attribute& attribute, FontDescriptionRun& fontRun)
   // The memory is freed when the font run is removed from the logical model.
 }
 
-void ProcessFontSize(const Attribute& attribute, FontDescriptionRun& fontRun)
+void ProcessFontSize(const Attribute& attribute, float dpi, FontDescriptionRun& fontRun)
 {
-  // 64.f is used to convert from point size to 26.6 pixel format.
-  fontRun.size        = static_cast<PointSize26Dot6>(ProcessFloatAttribute(attribute) * PIXEL_FORMAT_64_FACTOR);
+  const float pixelSize = ProcessFloatAttribute(attribute);
+
+  // Convert pixel to point
+  const float pointSize = (dpi > 0.0f) ? (pixelSize * 72.0f / dpi) : pixelSize;
+
+  // Convert point to 26.6 format
+  fontRun.size        = static_cast<PointSize26Dot6>(pointSize * PIXEL_FORMAT_64_FACTOR);
   fontRun.sizeDefined = true;
 }
 
@@ -86,7 +91,7 @@ void ProcessFontSlant(const Attribute& attribute, FontDescriptionRun& fontRun)
     ProcessEnumerationAttribute<FontSlant>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToSlant, fontRun.slant);
 }
 
-void ProcessFontTag(const Tag& tag, FontDescriptionRun& fontRun)
+void ProcessFontTag(const Tag& tag, float dpi, FontDescriptionRun& fontRun)
 {
   for(Vector<Attribute>::ConstIterator it = tag.attributes.Begin(), endIt = tag.attributes.End(); it != endIt; ++it)
   {
@@ -98,7 +103,7 @@ void ProcessFontTag(const Tag& tag, FontDescriptionRun& fontRun)
     }
     else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::SIZE, attribute.nameBuffer, attribute.nameLength))
     {
-      ProcessFontSize(attribute, fontRun);
+      ProcessFontSize(attribute, dpi, fontRun);
     }
     else if(TokenComparison(MARKUP::FONT_ATTRIBUTES::WEIGHT, attribute.nameBuffer, attribute.nameLength))
     {

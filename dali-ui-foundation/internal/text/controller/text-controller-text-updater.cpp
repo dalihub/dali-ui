@@ -38,6 +38,19 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
 #endif
 
+float GetDpi()
+{
+  static uint32_t horizontalDpi = 0u;
+  static uint32_t verticalDpi   = 0u;
+
+  if(DALI_UNLIKELY(horizontalDpi == 0u))
+  {
+    Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+    fontClient.GetDpi(horizontalDpi, verticalDpi);
+  }
+  return static_cast<float>(horizontalDpi);
+}
+
 } // namespace
 
 namespace Dali
@@ -103,7 +116,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
     const uint8_t* utf8     = NULL;
     if(impl.mMarkupProcessorEnabled)
     {
-      MarkupPropertyData markupPropertyData(impl.mAnchorColor, impl.mAnchorClickedColor);
+      MarkupPropertyData markupPropertyData(GetDpi(), impl.mAnchorColor, impl.mAnchorClickedColor);
 
       ProcessMarkupString(text, markupPropertyData, markupProcessData);
       textSize = markupProcessData.markupProcessedText.size();

@@ -32,9 +32,10 @@ struct FontDescriptionRun;
  * @brief Retrieves the font attributes from the tag and sets it to the font run.
  *
  * @param[in] tag The font tag and its attributes.
+ * @param[in] dpi DPI used for pixel-to-point conversion.
  * @param[in,out] fontRun The font description run.
  */
-void ProcessFontTag(const Tag& tag, FontDescriptionRun& fontRun);
+void ProcessFontTag(const Tag& tag, float dpi, FontDescriptionRun& fontRun);
 
 /**
  * @brief Fill the font run with the font slant attribute value.
@@ -64,9 +65,10 @@ void ProcessFontWeight(const Attribute& attribute, FontDescriptionRun& fontRun);
  * @brief Fill the font run with the font size attribute value.
  *
  * @param[in] attribute the font size attribute.
+ * @param[in] dpi DPI used for pixel-to-point conversion.
  * @param[out] fontRun The font description run.
  */
-void ProcessFontSize(const Attribute& attribute, FontDescriptionRun& fontRun);
+void ProcessFontSize(const Attribute& attribute, float dpi, FontDescriptionRun& fontRun);
 
 /**
  * @brief Fill the font run with the font family attribute value.
