@@ -16,6 +16,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-helper-devel.h>
@@ -88,10 +89,13 @@ LabelImplPtr LabelImpl::New()
 
 LabelImpl::LabelImpl()
 : ViewImpl(),
+  mTouchPosition(),
+  mLineHeight(-1.0f),
+  mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mTextColorAnimatedCount(0),
   mTextUpdateNeeded(false),
-  mLineHeight(-1.0f),
-  mLineHeightMode(Text::LineHeightMode::RELATIVE)
+  mIsTouchDown(false),
+  mHasAnchors(false)
 {
 }
 
@@ -107,6 +111,7 @@ void LabelImpl::SetText(const Dali::String& text)
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
 
   mController->SetText(ToStdString(text));
+  UpdateAnchorTouchInterception();
   mTextUpdateNeeded = true;
   RequestTextRelayout();
 }
@@ -237,6 +242,57 @@ Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
   return mController->GetLayoutDirectionMode();
 }
 
+void LabelImpl::SetMarkupEnabled(bool enabled)
+{
+  mController->SetMarkupProcessorEnabled(enabled);
+  UpdateAnchorTouchInterception();
+}
+
+bool LabelImpl::IsMarkupEnabled() const
+{
+  return mController->IsMarkupProcessorEnabled();
+}
+
+void LabelImpl::SetAnchorColor(const UiColor& color)
+{
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetAnchorColorInternal);
+  SetAnchorColorInternal(color.Resolve());
+}
+
+UiColor LabelImpl::GetAnchorColor()
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetAnchorColorInternal, outColor))
+  {
+    return outColor;
+  }
+  return mController->GetAnchorColor();
+}
+
+void LabelImpl::SetAnchorClickedColor(const UiColor& color)
+{
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetAnchorClickedColorInternal);
+  SetAnchorClickedColorInternal(color.Resolve());
+}
+
+UiColor LabelImpl::GetAnchorClickedColor()
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetAnchorClickedColorInternal, outColor))
+  {
+    return outColor;
+  }
+  return mController->GetAnchorClickedColor();
+}
+
+// =============================================================================
+// Signals
+// =============================================================================
+Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
+{
+  return mAnchorClickedSignal;
+}
+
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
@@ -259,6 +315,7 @@ void LabelImpl::OnInitialize()
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
 
   mController->SetControlInterface(this);
+  mController->SetAnchorControlInterface(this);
 
   // Use height-for-width negotiation by default
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
@@ -504,6 +561,20 @@ void LabelImpl::RequestTextRelayout()
 }
 
 // =============================================================================
+// AnchorControlInterface
+// =============================================================================
+bool LabelImpl::AnchorClicked(uint32_t cursorPosition, std::string& href)
+{
+  return mController->AnchorClickEvent(cursorPosition, href);
+}
+
+void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
+{
+  Ui::View handle(GetOwner());
+  mAnchorClickedSignal.Emit(handle, ToDaliString(href));
+}
+
+// =============================================================================
 // Implementation
 // =============================================================================
 void LabelImpl::SetMinimumLineHeight(float height)
@@ -541,6 +612,51 @@ void LabelImpl::OnLocaleChanged(std::string locale)
   mController->ResetFontAndStyleData();
 }
 
+bool LabelImpl::OnInterceptTouched(Actor actor, const TouchEvent& touch)
+{
+  const PointState::Type state = touch.GetState(0);
+
+  if(state == PointState::STARTED)
+  {
+    mIsTouchDown   = true;
+    mTouchPosition = touch.GetScreenPosition(0);
+    return false;
+  }
+
+  if(state == PointState::FINISHED)
+  {
+    if(mIsTouchDown && mHasAnchors)
+    {
+      const Vector2 screen = touch.GetScreenPosition(0);
+      const float   deltaX = std::abs(mTouchPosition.x - screen.x);
+      const float   deltaY = std::abs(mTouchPosition.y - screen.y);
+
+      if(deltaX < 20.0f && deltaY < 20.0f)
+      {
+        Extents       padding    = GetViewPadding();
+        const Vector2 localPoint = touch.GetLocalPosition(0);
+        mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
+      }
+    }
+    mIsTouchDown = false;
+  }
+  return false;
+}
+
+void LabelImpl::UpdateAnchorTouchInterception()
+{
+  if(mController->HasAnchors())
+  {
+    mHasAnchors = true;
+    Dali::DevelActor::InterceptTouchedSignal(Self()).Connect(this, &LabelImpl::OnInterceptTouched);
+  }
+  else
+  {
+    mHasAnchors = false;
+    Dali::DevelActor::InterceptTouchedSignal(Self()).Disconnect(this, &LabelImpl::OnInterceptTouched);
+  }
+}
+
 // =============================================================================
 // UiColorManager
 // =============================================================================
@@ -557,6 +673,26 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
     {
       Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
     }
+  }
+}
+
+void LabelImpl::SetAnchorColorInternal(const Vector4& color)
+{
+  if(mController->GetAnchorColor() != color)
+  {
+    mController->SetAnchorColor(color);
+    mTextUpdateNeeded = true;
+    RequestTextRelayout();
+  }
+}
+
+void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
+{
+  if(mController->GetAnchorClickedColor() != color)
+  {
+    mController->SetAnchorClickedColor(color);
+    mTextUpdateNeeded = true;
+    RequestTextRelayout();
   }
 }
 

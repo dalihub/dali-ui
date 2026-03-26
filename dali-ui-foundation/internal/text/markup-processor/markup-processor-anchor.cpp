@@ -43,10 +43,10 @@ void ProcessAnchorTag(const Tag& tag, Anchor& anchor, ColorRun& colorRun,
   {
     if(TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::HREF, attribute.nameBuffer, attribute.nameLength))
     {
-      Length hrefLength = attribute.valueLength + 1;
-      anchor.href       = new char[hrefLength];
+      Length hrefLength = attribute.valueLength;
+      anchor.href       = new char[hrefLength + 1];
       memcpy(anchor.href, attribute.valueBuffer, hrefLength);
-      anchor.href[hrefLength - 1] = '\0';
+      anchor.href[hrefLength] = '\0';
       // The memory is freed when the font run is removed from the logical model.
     }
     else if(TokenComparison(MARKUP::ANCHOR_ATTRIBUTES::COLOR, attribute.nameBuffer, attribute.nameLength))

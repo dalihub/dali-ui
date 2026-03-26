@@ -232,6 +232,47 @@ Text::LayoutDirectionMode Label::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
+Label& Label::SetMarkupEnabled(bool enabled)
+{
+  GetImpl(*this).SetMarkupEnabled(enabled);
+  return *this;
+}
+
+bool Label::IsMarkupEnabled() const
+{
+  return GetImpl(*this).IsMarkupEnabled();
+}
+
+Label& Label::SetAnchorColor(const UiColor& color)
+{
+  GetImpl(*this).SetAnchorColor(color);
+  return *this;
+}
+
+UiColor Label::GetAnchorColor()
+{
+  return GetImpl(*this).GetAnchorColor();
+}
+
+Label& Label::SetAnchorClickedColor(const UiColor& color)
+{
+  GetImpl(*this).SetAnchorClickedColor(color);
+  return *this;
+}
+
+UiColor Label::GetAnchorClickedColor()
+{
+  return GetImpl(*this).GetAnchorClickedColor();
+}
+
+// =============================================================================
+// Signals
+// =============================================================================
+Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()
+{
+  return GetImpl(*this).AnchorClickedSignal();
+}
+
 } // namespace Ui
 
 } // namespace Dali

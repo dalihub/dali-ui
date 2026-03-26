@@ -42,7 +42,7 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  *
  * @see Dali::Ui::LabelImpl
  */
-class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface
+class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::AnchorControlInterface
 {
 public:
   /**
@@ -217,6 +217,42 @@ public:
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetMarkupEnabled
+   */
+  void SetMarkupEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::Label::IsMarkupEnabled
+   */
+  bool IsMarkupEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetAnchorColor
+   */
+  void SetAnchorColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetAnchorColor
+   */
+  UiColor GetAnchorColor();
+
+  /**
+   * @copydoc Dali::Ui::Label::SetAnchorClickedColor
+   */
+  void SetAnchorClickedColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetAnchorClickedColor
+   */
+  UiColor GetAnchorClickedColor();
+
+public: // Signals
+  /**
+   * @copydoc Dali::Ui::Label::AnchorClickedSignal()
+   */
+  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+
 protected:
   // Construction
 
@@ -276,6 +312,17 @@ public: // From ControlInterface
    */
   void RequestTextRelayout() override;
 
+public: // From AnchorControlInterface
+  /**
+   * @copydoc Text::AnchorControlInterface::AnchorClicked()
+   */
+  bool AnchorClicked(uint32_t cursorPosition, std::string& href) override;
+
+  /**
+   * @copydoc Text::AnchorControlInterface::EmitAnchorClickedSignal()
+   */
+  void EmitAnchorClickedSignal(const std::string& href) override;
+
 private: // Implementation
   /**
    * @brief Sets the minimum line height used by the text controller.
@@ -300,8 +347,24 @@ private: // Implementation
    */
   void OnLocaleChanged(std::string locale);
 
+  /**
+   * @brief Handles touch interactions for text anchors when mark-up is enabled.
+   *
+   * @param[in] actor The label that received the touch.
+   * @param[in] touch The touch event information.
+   * @return True if the touch event is consumed, otherwise false.
+   */
+  bool OnInterceptTouched(Actor actor, const TouchEvent& touch);
+
+  /**
+   * @brief Updates touch interception based on anchor presence.
+   */
+  void UpdateAnchorTouchInterception();
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
+  void SetAnchorColorInternal(const Vector4& color);
+  void SetAnchorClickedColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable
@@ -312,14 +375,19 @@ private:
 
 private:
   // Data
+  Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
+
   Visual::Base        mVisual;
   Text::ControllerPtr mController;
 
-  int  mTextColorAnimatedCount;
-  bool mTextUpdateNeeded : 1;
-
+  Vector2              mTouchPosition; ///< The initial touch down position.
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
+
+  int  mTextColorAnimatedCount;
+  bool mTextUpdateNeeded : 1;
+  bool mIsTouchDown : 1; // whether the currently intercepted touch is in the down state.
+  bool mHasAnchors : 1;  // whether the text has anchors or not.
 };
 
 } // namespace Integration

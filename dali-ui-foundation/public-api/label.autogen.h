@@ -97,4 +97,22 @@
   * \
   * @param[in] mode The LayoutDirectionMode used to determine the text layout direction. \
   */ \
-  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { Label::SetLayoutDirectionMode(mode); return *this; }
+  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { Label::SetLayoutDirectionMode(mode); return *this; } \
+  /** \
+  * @brief Enables or disables mark-up processing for the text. \
+  * \
+  * @param[in] enabled True to enable mark-up parsing, false to render text as plain string. \
+  */ \
+  ChildClass& SetMarkupEnabled(bool enabled) { Label::SetMarkupEnabled(enabled); return *this; } \
+  /** \
+  * @brief Sets the color of anchors in the text. \
+  * \
+  * @param[in] color The color to apply to anchors. \
+  */ \
+  ChildClass& SetAnchorColor(const UiColor& color) { Label::SetAnchorColor(color); return *this; } \
+  /** \
+  * @brief Sets the color of anchors when they are clicked. \
+  * \
+  * @param[in] color The color to apply to clicked anchors. \
+  */ \
+  ChildClass& SetAnchorClickedColor(const UiColor& color) { Label::SetAnchorClickedColor(color); return *this; }

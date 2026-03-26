@@ -311,9 +311,65 @@ public: // Setters for chaining
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
+  /**
+   * @brief Enables or disables mark-up processing for the text.
+   *
+   * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
+   */
+  Label& SetMarkupEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether mark-up processing is enabled.
+   *
+   * @return True if mark-up parsing is enabled, otherwise false.
+   */
+  bool IsMarkupEnabled() const;
+
+  /**
+   * @brief Sets the color of anchors in the text.
+   *
+   * @param[in] color The color to apply to anchors.
+   */
+  Label& SetAnchorColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color of anchors in the text.
+   *
+   * @return The current anchor color.
+   */
+  UiColor GetAnchorColor();
+
+  /**
+   * @brief Sets the color of anchors when they are clicked.
+   *
+   * @param[in] color The color to apply to clicked anchors.
+   */
+  Label& SetAnchorClickedColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color of anchors when they are clicked.
+   *
+   * @return The current clicked anchor color.
+   */
+  UiColor GetAnchorClickedColor();
+
   // @CHAIN_END
 
 public: // Signals
+  /**
+   * @brief This signal is emitted when an anchor in the text is clicked.
+   *
+   * @code
+   *   void OnAnchorClicked(View view, const Dali::String& href);
+   * @endcode
+   *
+   * @param[in] view The view that received the click event.
+   * @param[in] href The href of the clicked anchor.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+
 public: // Not intended for application developers
   /// @cond internal
   /**
