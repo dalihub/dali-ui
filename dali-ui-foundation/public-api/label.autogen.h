@@ -28,6 +28,12 @@
   */ \
   ChildClass& SetMultiLine(bool multiLine) { Label::SetMultiLine(multiLine); return *this; } \
   /** \
+  * @brief Sets the line wrap mode. \
+  * \
+  * @param[in] mode The line wrap mode to apply. \
+  */ \
+  ChildClass& SetLineWrapMode(Text::LineWrapMode mode) { Label::SetLineWrapMode(mode); return *this; } \
+  /** \
   * @brief Sets the color of the text. \
   * \
   * @param[in] color The required text color value. \

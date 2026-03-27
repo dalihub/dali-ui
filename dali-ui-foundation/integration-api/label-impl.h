@@ -158,6 +158,16 @@ public:
   bool IsMultiLine() const;
 
   /**
+   * @copydoc Dali::Ui::Label::SetLineWrapMode
+   */
+  void SetLineWrapMode(Text::LineWrapMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetLineWrapMode
+   */
+  Text::LineWrapMode GetLineWrapMode() const;
+
+  /**
    * @copydoc Dali::Ui::Label::SetTextColor
    */
   void SetTextColor(const UiColor& color);

@@ -187,6 +187,20 @@ public: // Setters for chaining
   bool IsMultiLine() const;
 
   /**
+   * @brief Sets the line wrap mode.
+   *
+   * @param[in] mode The line wrap mode to apply.
+   */
+  Label& SetLineWrapMode(Text::LineWrapMode mode);
+
+  /**
+   * @brief Gets the line wrap mode.
+   *
+   * @return The current line wrap mode.
+   */
+  Text::LineWrapMode GetLineWrapMode() const;
+
+  /**
    * @brief Sets the color of the text.
    *
    * @param[in] color The required text color value.

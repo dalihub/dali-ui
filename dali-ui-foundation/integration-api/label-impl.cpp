@@ -109,7 +109,6 @@ LabelImpl::~LabelImpl()
 void LabelImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
-
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
   mTextUpdateNeeded = true;
@@ -126,7 +125,6 @@ Dali::String LabelImpl::GetText() const
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.CStr());
-
   mController->SetDefaultFontFamily(ToStdString(fontFamily));
 }
 
@@ -138,7 +136,6 @@ Dali::String LabelImpl::GetFontFamily() const
 void LabelImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
-
   if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
   {
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
@@ -153,13 +150,23 @@ float LabelImpl::GetFontSize() const
 void LabelImpl::SetMultiLine(bool multiLine)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), multiLine);
-
   mController->SetMultiLineEnabled(multiLine);
 }
 
 bool LabelImpl::IsMultiLine() const
 {
   return mController->IsMultiLineEnabled();
+}
+
+void LabelImpl::SetLineWrapMode(Text::LineWrapMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  mController->SetLineWrapMode(mode);
+}
+
+Text::LineWrapMode LabelImpl::GetLineWrapMode() const
+{
+  return mController->GetLineWrapMode();
 }
 
 void LabelImpl::SetTextColor(const UiColor& color)
@@ -202,6 +209,7 @@ Text::Alignment LabelImpl::GetVerticalTextAlignment() const
 
 void LabelImpl::SetLineHeight(float lineHeight)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), lineHeight);
   if(mLineHeight != lineHeight)
   {
     mLineHeight = lineHeight;
@@ -216,6 +224,7 @@ float LabelImpl::GetLineHeight() const
 
 void LabelImpl::SetLineHeightMode(Text::LineHeightMode mode)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mLineHeightMode != mode)
   {
     mLineHeightMode = mode;
@@ -230,6 +239,7 @@ Text::LineHeightMode LabelImpl::GetLineHeightMode() const
 
 void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mController->GetLayoutDirectionMode() != mode)
   {
     mController->SetLayoutDirectionMode(mode);
@@ -244,6 +254,7 @@ Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
 
 void LabelImpl::SetMarkupEnabled(bool enabled)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
   mController->SetMarkupProcessorEnabled(enabled);
   UpdateAnchorTouchInterception();
 }

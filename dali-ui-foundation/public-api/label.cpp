@@ -166,6 +166,17 @@ bool Label::IsMultiLine() const
   return GetImpl(*this).IsMultiLine();
 }
 
+Label& Label::SetLineWrapMode(Text::LineWrapMode mode)
+{
+  GetImpl(*this).SetLineWrapMode(mode);
+  return *this;
+}
+
+Text::LineWrapMode Label::GetLineWrapMode() const
+{
+  return GetImpl(*this).GetLineWrapMode();
+}
+
 Label& Label::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);

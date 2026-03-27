@@ -167,7 +167,8 @@ private:
       .SetViewPadding(Extents(20, 20, 20, 20))
       .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT2))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetMultiLine(true);
+      .SetMultiLine(true)
+      .SetLineWrapMode(Text::LineWrapMode::WORD);
   }
 
   Label CreateLayoutLabel3()
@@ -181,7 +182,8 @@ private:
       .SetViewPadding(Extents(20, 20, 20, 20))
       .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT3))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetMultiLine(true);
+      .SetMultiLine(true)
+      .SetLineWrapMode(Text::LineWrapMode::WORD);
   }
 
   Label CreateLineHeightLabel(Dali::String text, float lineHeight, Text::LineHeightMode mode)
@@ -224,6 +226,7 @@ private:
     DALI_LOG_ERROR("FontFamily      : %s\n", label.GetFontFamily().CStr());
     DALI_LOG_ERROR("FontSize        : %f\n", label.GetFontSize());
     DALI_LOG_ERROR("MultiLine       : %d\n", label.IsMultiLine());
+    DALI_LOG_ERROR("LineWrapMode    : %d\n", label.GetLineWrapMode());
     DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
     DALI_LOG_ERROR("H Align         : %d\n", label.GetHorizontalTextAlignment());
     DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
