@@ -297,6 +297,23 @@ UiColor LabelImpl::GetAnchorClickedColor()
 }
 
 // =============================================================================
+// Read Only
+// =============================================================================
+int LabelImpl::GetLineCount()
+{
+  float width = Self().GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
+  float clamp = std::clamp(width, GetMinimumWidth(), GetMaximumWidth());
+  return GetLineCount(clamp);
+}
+
+int LabelImpl::GetLineCount(float width)
+{
+  Extents padding      = GetViewPadding();
+  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  return mController->GetLineCount(contentWidth);
+}
+
+// =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
@@ -447,8 +464,9 @@ Vector3 LabelImpl::GetNaturalSize()
 
 float LabelImpl::GetHeightForWidth(float width)
 {
-  Extents padding = GetViewPadding();
-  return mController->GetHeightForWidth(width - (padding.start + padding.end)) + padding.top + padding.bottom;
+  Extents padding      = GetViewPadding();
+  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
 
 // TODO: If the implementation in View is moved to ViewImpl, this part will need to be updated accordingly.

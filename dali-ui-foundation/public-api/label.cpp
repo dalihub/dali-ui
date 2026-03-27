@@ -277,6 +277,19 @@ UiColor Label::GetAnchorClickedColor()
 }
 
 // =============================================================================
+// Read Only
+// =============================================================================
+int Label::GetLineCount()
+{
+  return GetImpl(*this).GetLineCount();
+}
+
+int Label::GetLineCount(float width)
+{
+  return GetImpl(*this).GetLineCount(width);
+}
+
+// =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()

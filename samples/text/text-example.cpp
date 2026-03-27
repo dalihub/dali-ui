@@ -72,10 +72,24 @@ private:
     PrintLabelInfo(mLineHeightLabel2, "Label Absolute Line Height");
     PrintInputFieldInfo(mField, "InputField");
 
+
+    mLabel2.OnRelayoutSignal().Connect(this, &TextController::OnLabelRelayoutSignal);
+    mLabel3.OnRelayoutSignal().Connect(this, &TextController::OnLabelRelayoutSignal);
+
     mField.TextChangedSignal().Connect(this, &TextController::OnTextChanged);
     mField.SetMaximumLength(20);
     mField.MaximumLengthReachedSignal().Connect(this, &TextController::OnMaximumLengthReached);
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+  }
+
+  void OnLabelRelayoutSignal(Actor actor)
+  {
+    Label label = Label::DownCast(actor);
+    if(label)
+    {
+      DALI_LOG_ERROR("[%s]\n", label.GetText().CStr());
+      DALI_LOG_ERROR("  -> LineCount: %d, Width: %.2f, Min width: %.2f, Max width: %.2f\n", label.GetLineCount(), label.GetSize().GetWidth(), label.GetMinimumWidth(), label.GetMaximumWidth());
+    }
   }
 
   void OnTextChanged(View view)

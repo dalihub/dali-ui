@@ -257,6 +257,17 @@ public:
    */
   UiColor GetAnchorClickedColor();
 
+  // Read Only
+  /**
+   * @see Dali::Ui::Label::GetLineCount
+   */
+  int GetLineCount();
+
+  /**
+   * @see Dali::Ui::Label::GetLineCount(float)
+   */
+  int GetLineCount(float width);
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::Label::AnchorClickedSignal()
