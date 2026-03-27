@@ -288,7 +288,7 @@ public:
    */
   struct SvgRasterizeInfo
   {
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
     SvgRasterizeInfo(SvgRasterizeId rasterizeId, SvgLoadId loadId, uint32_t width, uint32_t height, VisualUrl imageUrl)
 #else
     SvgRasterizeInfo(SvgRasterizeId rasterizeId, SvgLoadId loadId, uint32_t width, uint32_t height)
@@ -298,7 +298,7 @@ public:
       mLoadId(loadId),
       mWidth(width),
       mHeight(height),
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
       mImageUrl(std::move(imageUrl)),
 #endif
       mRasterizeState(RasterizeState::NOT_STARTED),
@@ -316,7 +316,7 @@ public:
       mLoadId(info.mLoadId),
       mWidth(info.mWidth),
       mHeight(info.mHeight),
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
       mImageUrl(std::move(info.mImageUrl)),
 #endif
       mRasterizeState(info.mRasterizeState),
@@ -339,7 +339,7 @@ public:
         mWidth  = info.mWidth;
         mHeight = info.mHeight;
 
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
         mImageUrl = std::move(info.mImageUrl);
 #endif
 
@@ -369,7 +369,7 @@ public:
     uint32_t  mWidth;
     uint32_t  mHeight;
 
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
     VisualUrl mImageUrl;
 #endif
 

@@ -57,7 +57,7 @@ ImageUrl::ImageUrl(ImageUrl&& rhs) noexcept = default;
 
 ImageUrl& ImageUrl::operator=(ImageUrl&& rhs) noexcept = default;
 
-const std::string& ImageUrl::GetUrl() const
+const Dali::String& ImageUrl::GetUrl() const
 {
   return GetImpl(*this).GetUrl();
 }

@@ -19,6 +19,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
+#include <dali/integration-api/string-utils.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -26,25 +30,25 @@ namespace Ui
 {
 namespace TextureManager
 {
-std::string AddTexture(Texture& texture, bool preMultiplied)
+String AddTexture(Texture& texture, bool preMultiplied)
 {
   TextureSet set = TextureSet::New();
   set.SetTexture(0u, texture);
   return AddTexture(set, preMultiplied);
 }
 
-std::string AddTexture(TextureSet& textureSet, bool preMultiplied)
+String AddTexture(TextureSet& textureSet, bool preMultiplied)
 {
   auto  visualFactory = Ui::VisualFactory::Get();
   auto& textureMgr    = GetImplementation(visualFactory).GetTextureManager();
-  return textureMgr.AddExternalTexture(textureSet, preMultiplied);
+  return ToDaliString(textureMgr.AddExternalTexture(textureSet, preMultiplied));
 }
 
-TextureSet RemoveTexture(const std::string& textureUrl)
+TextureSet RemoveTexture(const String& textureUrl)
 {
   auto  visualFactory = Ui::VisualFactory::Get();
   auto& textureMgr    = GetImplementation(visualFactory).GetTextureManager();
-  return textureMgr.RemoveExternalTextureByUrl(textureUrl);
+  return textureMgr.RemoveExternalTextureByUrl(ToStdString(textureUrl));
 }
 
 } // namespace TextureManager

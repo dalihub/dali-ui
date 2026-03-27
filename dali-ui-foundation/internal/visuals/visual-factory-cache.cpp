@@ -27,6 +27,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/shader-integ.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
@@ -39,6 +40,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 
+using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;
 
 namespace Dali
@@ -369,9 +371,9 @@ Texture VisualFactoryCache::GetBrokenVisualImage(uint32_t brokenIndex)
       pixelData                                      = Devel::PixelBuffer::Convert(pixelBuffer); // takes ownership of buffer
       mBrokenImageInfoContainer[brokenIndex].texture = Texture::New(
         Dali::TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(), pixelData.GetHeight());
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
-      mBrokenImageInfoContainer[brokenIndex].texture.Upload(pixelData,
-                                                            mBrokenImageInfoContainer[brokenIndex].url.c_str());
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+      Dali::Integration::TextureUploadWithContent(mBrokenImageInfoContainer[brokenIndex].texture, pixelData,
+                                                  ToDaliString(mBrokenImageInfoContainer[brokenIndex].url), Dali::Integration::TextureContextTypeHint::BROKEN_IMAGE);
 #else
       mBrokenImageInfoContainer[brokenIndex].texture.Upload(pixelData);
 #endif

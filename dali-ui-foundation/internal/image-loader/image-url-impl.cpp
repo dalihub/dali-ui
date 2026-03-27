@@ -23,6 +23,10 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali/integration-api/string-utils.h>
+
+using Dali::Integration::ToDaliString;
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -42,19 +46,19 @@ ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
   if(visualFactory)
   {
     auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
-    mUrl                 = textureManager.AddEncodedImageBuffer(encodedImageBuffer);
+    mUrl                 = ToDaliString(textureManager.AddEncodedImageBuffer(encodedImageBuffer));
   }
 }
 
 ImageUrl::~ImageUrl()
 {
-  if(mUrl.size() > 0)
+  if(mUrl.Size() > 0)
   {
     auto visualFactory = Dali::Ui::VisualFactory::Get();
     if(visualFactory)
     {
       auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
-      textureManager.RequestRemoveExternalResourceByUrl(mUrl);
+      textureManager.RequestRemoveExternalResourceByUrl(ToStdString(mUrl));
     }
   }
 }
@@ -71,7 +75,7 @@ ImageUrlPtr ImageUrl::New(const EncodedImageBuffer& encodedImageBuffer)
   return imageUrlPtr;
 }
 
-const std::string& ImageUrl::GetUrl() const
+const Dali::String& ImageUrl::GetUrl() const
 {
   return mUrl;
 }

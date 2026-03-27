@@ -19,8 +19,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/rendering/texture.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -113,7 +113,7 @@ public:
    * Get the url
    * @return Returns url's string
    */
-  const std::string& GetUrl() const;
+  const Dali::String& GetUrl() const;
 
 public: // Not intended for application developers
   /// @cond internal

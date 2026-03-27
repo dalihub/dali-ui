@@ -23,6 +23,8 @@
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/texture-integ.h>
 #include <dali/integration-api/trace.h>
 #include <dali/public-api/rendering/geometry.h>
 #include <algorithm>
@@ -31,6 +33,8 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-async-loading-helper.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-cache-manager.h>
 #include <dali-ui-foundation/internal/visuals/rendering-addon.h>
+
+using Dali::Integration::ToDaliString;
 
 namespace
 {
@@ -186,6 +190,9 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
     else
     {
       Texture maskTexture;
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+      bool maskApplied = false;
+#endif
       if(alphaMaskId != INVALID_TEXTURE_ID)
       {
         TextureCacheIndex maskCacheIndex = mTextureCacheManager.GetCacheIndexFromId(alphaMaskId);
@@ -214,8 +221,8 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
                 PixelData maskPixelData = Devel::PixelBuffer::Convert(maskPixelBuffer); // takes ownership of buffer
                 maskTexture             = Texture::New(Dali::TextureType::TEXTURE_2D, maskPixelData.GetPixelFormat(),
                                                        maskPixelData.GetWidth(), maskPixelData.GetHeight());
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
-                maskTexture.Upload(maskPixelData, maskTextureInfo.url.GetUrl(), maskTextureInfo.textureId);
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+                Dali::Integration::TextureUploadWithContent(maskTexture, maskPixelData, ToDaliString(maskTextureInfo.url.GetUrl()), Dali::Integration::TextureContextTypeHint::MASKING_IMAGE);
 #else
                 maskTexture.Upload(maskPixelData);
 #endif
@@ -224,6 +231,9 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
               {
                 DALI_ASSERT_DEBUG(pixelBuffers.size() == 1u && "Always has a single pixel buffer");
                 pixelBuffers[0].ApplyMask(maskPixelBuffer, maskInfo->mContentScaleFactor, maskInfo->mCropToMask);
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+                maskApplied = true;
+#endif
               }
             }
             else
@@ -248,8 +258,13 @@ TextureSet TextureManager::LoadAnimatedImageTexture(
         PixelData pixelData = Devel::PixelBuffer::Convert(pixelBuffers[i]); // takes ownership of buffer
         Texture   texture   = Texture::New(Dali::TextureType::TEXTURE_2D, pixelData.GetPixelFormat(), pixelData.GetWidth(),
                                            pixelData.GetHeight());
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
-        texture.Upload(pixelData, url.GetUrl(), textureId);
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+        std::string stdUrl = url.GetUrl();
+        if(pixelBuffers.size() >= 3)
+        {
+          stdUrl += std::string("(") + ("YUVA"[i]) + ")";
+        }
+        Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), maskApplied ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
 #else
         texture.Upload(pixelData);
 #endif
@@ -1286,8 +1301,13 @@ void TextureManager::UploadTextures(std::vector<Devel::PixelBuffer>& pixelBuffer
       Texture   texture   = Texture::New(Dali::TextureType::TEXTURE_2D, pixelBuffer.GetPixelFormat(),
                                          pixelBuffer.GetWidth(), pixelBuffer.GetHeight());
       PixelData pixelData = Devel::PixelBuffer::Convert(pixelBuffer);
-#if defined(ENABLE_GPU_MEMORY_PROFILE)
-      texture.Upload(pixelData, textureInfo.url.GetUrl(), textureInfo.textureId);
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+      std::string stdUrl = textureInfo.url.GetUrl();
+      if(pixelBuffers.size() >= 3)
+      {
+        stdUrl += std::string("(") + ("YUVA"[textureInfo.textures.size()]) + ")";
+      }
+      Dali::Integration::TextureUploadWithContent(texture, pixelData, ToDaliString(std::move(stdUrl)), (textureInfo.loadState == TextureManager::LoadState::MASK_APPLIED) ? Dali::Integration::TextureContextTypeHint::CPU_MASKED_IMAGE : Dali::Integration::TextureContextTypeHint::STANDARD_IMAGE);
 #else
       texture.Upload(pixelData);
 #endif

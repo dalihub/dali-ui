@@ -20,8 +20,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-object.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
@@ -61,7 +61,7 @@ public:
   /**
    * @copydoc Dali::Ui::ImageUrl::GetUrl
    */
-  const std::string& GetUrl() const;
+  const Dali::String& GetUrl() const;
 
 protected:
   /**
@@ -77,7 +77,7 @@ private:
   ImageUrl& operator=(const ImageUrl& rhs);
 
 private:
-  std::string mUrl;
+  Dali::String mUrl;
 };
 
 } // namespace Internal
