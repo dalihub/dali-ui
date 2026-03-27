@@ -51,6 +51,7 @@ public:
 
 protected:
   virtual ~AbsoluteLayoutImpl();
+  void OnInitialize() override;
   AbsoluteLayoutImpl();
 
 private:

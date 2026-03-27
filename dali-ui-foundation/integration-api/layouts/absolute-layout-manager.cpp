@@ -122,7 +122,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
         h = childSize.height;
       }
     }
-    else if(childImpl.HasLayoutManager())
+    else if(childImpl.IsLayout())
     {
       // Nested layout containers need Measure even with explicit size,
       // so their own children get measured.

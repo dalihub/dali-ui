@@ -51,6 +51,7 @@ public:
 
 protected:
   virtual ~FlexLayoutImpl();
+  void OnInitialize() override;
   FlexLayoutImpl();
 
 public: // API

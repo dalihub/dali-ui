@@ -26,6 +26,13 @@ namespace Dali
 namespace Ui
 {
 
+class LayoutManager;
+
+namespace Internal
+{
+class LayoutManagerTraitImpl;
+} // namespace Internal
+
 namespace Integration
 {
 
@@ -35,24 +42,52 @@ using LayoutImplPtr = IntrusivePtr<LayoutImpl>;
 /**
  * @brief This is the internal implementation class for Layout.
  *
- * Layout is a convenience class that extends View with a pre-configured
- * LayoutManager.
+ * Layout extends View with a LayoutManager that defines the layout algorithm.
+ * The LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER),
+ * so there is no per-instance member variable overhead.
  *
- * Since View now supports optional LayoutManager and child management,
- * Layout simply ensures a LayoutManager is always set up and provides
- * a factory method for derived classes to specify their layout algorithm.
- *
- * @see Integration::ViewImpl for LayoutManager and child management functionality
+ * @see LayoutManager for the layout algorithm interface
  */
 class DALI_UI_API LayoutImpl : public ViewImpl
 {
 public:
   /**
-   * @brief Creates a new Layout implementation.
+   * @brief Creates a new Layout implementation without a LayoutManager.
    *
    * @return An IntrusivePtr to the new LayoutImpl
    */
   static LayoutImplPtr New();
+
+public: // LayoutManager API
+  /**
+   * @brief Gets the layout manager from the LayoutManager trait.
+   *
+   * @return Pointer to the layout manager, or nullptr if not set
+   */
+  LayoutManager* GetLayoutManager() const;
+
+  /**
+   * @brief Checks if this layout has a layout manager.
+   *
+   * @return True if a layout manager is set
+   */
+  bool HasLayoutManager() const;
+
+protected: // From ViewImpl
+  /**
+   * @copydoc ViewImpl::OnMeasure
+   */
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
+
+  /**
+   * @copydoc ViewImpl::OnArrange
+   */
+  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+
+  /**
+   * @copydoc ViewImpl::IsLayout
+   */
+  bool IsLayout() const override;
 
 protected:
   /**
@@ -62,13 +97,22 @@ protected:
 
   /**
    * @brief LayoutImpl constructor.
-   *
-   * @param[in] layoutManager The layout manager for this layout (ownership transferred).
-   *            Derived classes must pass their specific LayoutManager.
    */
-  explicit LayoutImpl(LayoutManager* layoutManager = nullptr);
+  LayoutImpl();
+
+  /**
+   * @brief Attaches a LayoutManager as a trait to this Layout.
+   *
+   * Must be called in OnInitialize() of derived classes, not in constructors
+   * (Self() is not available during construction).
+   *
+   * @param[in] layoutManager The layout manager (ownership transferred)
+   */
+  void SetLayoutManager(LayoutManager* layoutManager);
 
 private:
+  Internal::LayoutManagerTraitImpl* GetLayoutManagerTrait() const;
+
   // Not copyable or movable
   LayoutImpl(const LayoutImpl&)            = delete;
   LayoutImpl(LayoutImpl&&)                 = delete;

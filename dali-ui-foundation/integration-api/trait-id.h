@@ -81,6 +81,22 @@ enum class ReservedTraitId : uint32_t
   FLEX_LAYOUT_PARAMS     = 13,
   /** @} */
 
+  /**
+   * @brief Layout manager trait for attaching a LayoutManager to a View.
+   *
+   * Only used by LayoutImpl and its derived classes to store the layout
+   * algorithm. Accessed during measure/arrange passes.
+   */
+  LAYOUT_MANAGER = 20,
+
+  /**
+   * @brief Layout callback trait for custom measure/arrange behavior.
+   *
+   * Stores application-provided measure and arrange callbacks that
+   * override the default layout algorithm on any View.
+   */
+  LAYOUT_SIGNALS = 21,
+
   // Effects
   INTERACTION_EFFECT = 50,
 

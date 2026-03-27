@@ -48,6 +48,7 @@
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
@@ -148,7 +149,7 @@ ViewImplPtr ViewImpl::New()
   return ViewImplPtr(viewImpl);
 }
 
-ViewImpl::ViewImpl(LayoutManager* layoutManager)
+ViewImpl::ViewImpl()
 : CustomActorImpl(static_cast<ActorFlags>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
@@ -165,7 +166,6 @@ ViewImpl::ViewImpl(LayoutManager* layoutManager)
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mArrangeValid(false),
-  mLayoutManager(layoutManager),
   mImpl(new Internal::ViewDataImpl(*this))
 {
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(
@@ -387,7 +387,7 @@ void ViewImpl::OnEnableChanged(bool enabled)
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  if(HasLayoutManager() || GetParentLayout() || GetParentView())
+  if(IsLayout() || GetParentLayout() || GetParentView())
   {
     return;
   }
@@ -679,40 +679,6 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float effectiveWidth  = (mRequestedWidth > 0) ? mRequestedWidth : widthConstraint;
   float effectiveHeight = (mRequestedHeight > 0) ? mRequestedHeight : heightConstraint;
 
-  if(mLayoutManager)
-  {
-    MeasuredSize content = mLayoutManager->Measure(this, effectiveWidth, effectiveHeight);
-    float        resultWidth;
-    float        resultHeight;
-    if(mRequestedWidth > 0)
-    {
-      resultWidth = mRequestedWidth;
-    }
-    else if(mRequestedWidth == MATCH_PARENT)
-    {
-      resultWidth = widthConstraint;
-    }
-    else
-    {
-      // WRAP_CONTENT: size to content + padding
-      resultWidth = content.width + pw;
-    }
-    if(mRequestedHeight > 0)
-    {
-      resultHeight = mRequestedHeight;
-    }
-    else if(mRequestedHeight == MATCH_PARENT)
-    {
-      resultHeight = heightConstraint;
-    }
-    else
-    {
-      // WRAP_CONTENT: size to content + padding
-      resultHeight = content.height + ph;
-    }
-    return MeasuredSize(resultWidth, resultHeight);
-  }
-
   if(!mChildren.empty())
   {
     float contentW = std::max(0.0f, effectiveWidth - pw);
@@ -822,11 +788,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   contentBounds.width  = width - static_cast<float>(mPadding.start + mPadding.end);
   contentBounds.height = height - static_cast<float>(mPadding.top + mPadding.bottom);
 
-  if(mLayoutManager)
-  {
-    mLayoutManager->ArrangeChildren(this, contentBounds);
-  }
-  else if(!mChildren.empty())
+  if(!mChildren.empty())
   {
     // Default arrange for views without LayoutManager:
     // Place children at their position, using measured size.
@@ -951,7 +913,7 @@ void ViewImpl::SetRequestedWidth(float width)
   {
     mRequestedWidth = width;
     InvalidateMeasure();
-    if(width > 0 && !GetParentLayout() && !GetParentView() && !HasLayoutManager() && mChildren.empty())
+    if(width > 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
     }
@@ -969,7 +931,7 @@ void ViewImpl::SetRequestedHeight(float height)
   {
     mRequestedHeight = height;
     InvalidateMeasure();
-    if(height > 0 && !GetParentLayout() && !GetParentView() && !HasLayoutManager() && mChildren.empty())
+    if(height > 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
     }
@@ -1095,21 +1057,29 @@ Ui::View ViewImpl::GetParentView() const
 
 bool ViewImpl::IsLayout() const
 {
-  return mLayoutManager != nullptr;
+  return false;
 }
 
-// =============================================================================
-// LayoutManager API
-// =============================================================================
-
-LayoutManager* ViewImpl::GetLayoutManager() const
+Internal::LayoutCallbacksImpl* ViewImpl::GetLayoutCallbacks() const
 {
-  return mLayoutManager.get();
+  Trait trait = const_cast<ViewImpl*>(this)->GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  if(trait)
+  {
+    return static_cast<Internal::LayoutCallbacksImpl*>(&Ui::GetImpl(trait));
+  }
+  return nullptr;
 }
 
-bool ViewImpl::HasLayoutManager() const
+Internal::LayoutCallbacksImpl* ViewImpl::EnsureLayoutCallbacks()
 {
-  return mLayoutManager != nullptr;
+  Internal::LayoutCallbacksImpl* callbacks = GetLayoutCallbacks();
+  if(!callbacks)
+  {
+    callbacks                             = new Internal::LayoutCallbacksImpl();
+    Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(callbacks);
+    SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+  }
+  return callbacks;
 }
 
 // =============================================================================

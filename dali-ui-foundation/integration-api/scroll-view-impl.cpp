@@ -58,7 +58,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(ScrollViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN(ScrollViewImpl, LayoutImpl, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace
@@ -69,7 +69,7 @@ ScrollViewImplPtr ScrollViewImpl::New()
 }
 
 ScrollViewImpl::ScrollViewImpl()
-: ViewImpl(new ScrollViewLayoutManager()),
+: LayoutImpl(),
   mContent(),
   mScrollPosition(0.0f, 0.0f),
   mCurrentPosition(0.0f, 0.0f),
@@ -109,8 +109,8 @@ ScrollViewImpl::~ScrollViewImpl()
 
 void ScrollViewImpl::OnInitialize()
 {
-  // Initialize base class
-  ViewImpl::OnInitialize();
+  LayoutImpl::OnInitialize();
+  SetLayoutManager(new ScrollViewLayoutManager());
 
   // Enable clipping to bounds for scrollable content
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);

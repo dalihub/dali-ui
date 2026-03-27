@@ -25,8 +25,8 @@
 #include <dali-ui-foundation/public-api/scroll-view.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {
@@ -47,7 +47,7 @@ using ScrollViewImplPtr = IntrusivePtr<ScrollViewImpl>;
  *
  * @see Dali::UI::ScrollView
  */
-class DALI_UI_API ScrollViewImpl : public ViewImpl
+class DALI_UI_API ScrollViewImpl : public LayoutImpl
 {
 public:
   // Creation & Destruction

@@ -35,8 +35,12 @@ class LayoutImpl;
 /**
  * @brief Layout is a View that arranges child views using a layout algorithm.
  *
- * Layout extends View and always has a LayoutManager (from derived classes
- * like StackLayout, GridLayout).
+ * Layout extends View and owns a LayoutManager that defines the layout algorithm.
+ * Only Layout (and its derived classes like StackLayout, GridLayout) can have
+ * a layout algorithm.
+ *
+ * To customize measure/arrange behavior, connect to the OnMeasureSignal and
+ * OnArrangeSignal via the LayoutCallbacks trait on View.
  *
  * Child management uses Actor::Add/Remove (inherited from View's base class).
  * Insert(index, View) and RemoveAllChildren() are provided by View.

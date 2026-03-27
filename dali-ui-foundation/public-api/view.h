@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-callbacks.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
@@ -209,6 +210,34 @@ public: // Measure / Arrange API
    * @return True if arrange is valid
    */
   bool IsArrangeValid() const;
+
+  /**
+   * @brief Sets a custom measure callback for this View.
+   *
+   * When set, the callback replaces the default measurement behavior
+   * during the layout pass. Pass nullptr to remove the callback.
+   *
+   * @param[in] callback The measure callback (ownership transferred)
+   *
+   * @code
+   * view.SetMeasureCallback(LayoutMeasureCallback::New(&MyClass::OnMeasure));
+   * @endcode
+   */
+  void SetMeasureCallback(::Dali::UniquePtr<LayoutMeasureCallback> callback);
+
+  /**
+   * @brief Sets a custom arrange callback for this View.
+   *
+   * When set, the callback replaces the default arrangement behavior
+   * during the layout pass. Pass nullptr to remove the callback.
+   *
+   * @param[in] callback The arrange callback (ownership transferred)
+   *
+   * @code
+   * view.SetArrangeCallback(LayoutArrangeCallback::New(&MyClass::OnArrange));
+   * @endcode
+   */
+  void SetArrangeCallback(::Dali::UniquePtr<LayoutArrangeCallback> callback);
 
 public: // Properties
   // @CHAIN_START(View)

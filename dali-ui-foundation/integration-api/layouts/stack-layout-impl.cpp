@@ -49,7 +49,7 @@ StackLayoutImplPtr StackLayoutImpl::New(StackOrientation orientation)
 }
 
 StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)
-: LayoutImpl(new StackLayoutManager(orientation, 0.0f)),
+: LayoutImpl(),
   mOrientation(orientation),
   mSpacing(0.0f)
 {
@@ -57,6 +57,12 @@ StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)
 
 StackLayoutImpl::~StackLayoutImpl()
 {
+}
+
+void StackLayoutImpl::OnInitialize()
+{
+  LayoutImpl::OnInitialize();
+  SetLayoutManager(new StackLayoutManager(mOrientation, mSpacing));
 }
 
 void StackLayoutImpl::SetOrientation(StackOrientation orientation)

@@ -49,7 +49,7 @@ FlexLayoutImplPtr FlexLayoutImpl::New()
 }
 
 FlexLayoutImpl::FlexLayoutImpl()
-: LayoutImpl(new FlexLayoutManager(FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::STRETCH, FlexAlign::STRETCH)),
+: LayoutImpl(),
   mDirection(FlexDirection::ROW),
   mWrap(FlexWrap::NO_WRAP),
   mJustifyContent(FlexJustify::FLEX_START),
@@ -60,6 +60,12 @@ FlexLayoutImpl::FlexLayoutImpl()
 
 FlexLayoutImpl::~FlexLayoutImpl()
 {
+}
+
+void FlexLayoutImpl::OnInitialize()
+{
+  LayoutImpl::OnInitialize();
+  SetLayoutManager(new FlexLayoutManager(mDirection, mWrap, mJustifyContent, mAlignItems, mAlignContent));
 }
 
 void FlexLayoutImpl::SetDirection(FlexDirection direction)

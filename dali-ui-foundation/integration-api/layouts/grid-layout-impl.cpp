@@ -49,7 +49,7 @@ GridLayoutImplPtr GridLayoutImpl::New()
 }
 
 GridLayoutImpl::GridLayoutImpl()
-: LayoutImpl(new GridLayoutManager({}, {}, 0.0f, 0.0f)),
+: LayoutImpl(),
   mRowDefinitions(),
   mColumnDefinitions(),
   mRowSpacing(0.0f),
@@ -59,6 +59,12 @@ GridLayoutImpl::GridLayoutImpl()
 
 GridLayoutImpl::~GridLayoutImpl()
 {
+}
+
+void GridLayoutImpl::OnInitialize()
+{
+  LayoutImpl::OnInitialize();
+  SetLayoutManager(new GridLayoutManager(mRowDefinitions, mColumnDefinitions, mRowSpacing, mColumnSpacing));
 }
 
 void GridLayoutImpl::AddRowDefinition(GridLength height)

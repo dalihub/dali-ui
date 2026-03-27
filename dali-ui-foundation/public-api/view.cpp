@@ -26,6 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
@@ -117,6 +118,20 @@ bool View::IsMeasureValid() const
 bool View::IsArrangeValid() const
 {
   return Integration::GetImpl(*this).IsArrangeValid();
+}
+
+void View::SetMeasureCallback(::Dali::UniquePtr<LayoutMeasureCallback> callback)
+{
+  auto&                          impl      = Integration::GetImpl(*this);
+  Internal::LayoutCallbacksImpl* callbacks = impl.EnsureLayoutCallbacks();
+  callbacks->SetMeasureCallback(callback->GetCallback());
+}
+
+void View::SetArrangeCallback(::Dali::UniquePtr<LayoutArrangeCallback> callback)
+{
+  auto&                          impl      = Integration::GetImpl(*this);
+  Internal::LayoutCallbacksImpl* callbacks = impl.EnsureLayoutCallbacks();
+  callbacks->SetArrangeCallback(callback->GetCallback());
 }
 
 // =============================================================================

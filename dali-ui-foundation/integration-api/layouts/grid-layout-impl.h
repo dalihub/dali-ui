@@ -52,6 +52,7 @@ public:
 
 protected:
   virtual ~GridLayoutImpl();
+  void OnInitialize() override;
   GridLayoutImpl();
 
 public: // Row/Column Definition API

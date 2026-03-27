@@ -56,6 +56,8 @@ protected:
    */
   virtual ~StackLayoutImpl();
 
+  void OnInitialize() override;
+
   /**
    * @brief StackLayoutImpl constructor.
    *

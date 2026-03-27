@@ -55,14 +55,15 @@ namespace Ui
 
 // Forward declarations
 class Layout;
-class LayoutManager;
+class LayoutManager; // Used by LayoutImpl
 class UiColor;
 class ViewAccessible;
 
 namespace Internal
 {
+class LayoutCallbacksImpl;
 class ViewDataImpl;
-}
+} //namespace Internal
 
 namespace Integration
 {
@@ -124,12 +125,8 @@ protected:
 
   /**
    * @brief View constructor.
-   *
-   * @param[in] layoutManager Optional layout manager (ownership transferred).
-   *            If provided, the View becomes a layout container.
-   *            Must be set at construction time; cannot be changed later.
    */
-  explicit ViewImpl(LayoutManager* layoutManager = nullptr);
+  ViewImpl();
 
 public: // From Ui::Internal::View
   /**
@@ -590,20 +587,9 @@ public: // Parent Layout API
   Ui::View     GetParentView() const;
   virtual bool IsLayout() const;
 
-public: // LayoutManager API (Optional layout capability)
-  /**
-   * @brief Gets the layout manager.
-   *
-   * @return Pointer to the layout manager, or nullptr if not set
-   */
-  LayoutManager* GetLayoutManager() const;
-
-  /**
-   * @brief Checks if this view has a layout manager.
-   *
-   * @return True if a layout manager is set
-   */
-  bool HasLayoutManager() const;
+public: // Layout Callback API
+  Internal::LayoutCallbacksImpl* GetLayoutCallbacks() const;
+  Internal::LayoutCallbacksImpl* EnsureLayoutCallbacks();
 
 public: // Child Management API
   /**
@@ -724,10 +710,9 @@ private:
   LayoutRect   mArrangedBounds;
   bool         mArrangeValid;
 
-  // Optional LayoutManager and Children (for layout capability)
-  std::unique_ptr<LayoutManager> mLayoutManager;
-  ChildContainer                 mChildren;
-  bool                           mUpdatingChildren{false}; ///< Guard to prevent redundant mChildren updates in OnChildAdd/OnChildRemove
+  // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
+  ChildContainer mChildren;
+  bool           mUpdatingChildren{false}; ///< Guard to prevent redundant mChildren updates in OnChildAdd/OnChildRemove
 
   // From control-impl.h
 
