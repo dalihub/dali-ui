@@ -169,6 +169,46 @@ public: // From Ui::Internal::View
 
 public: // API (size, position, parent origin, pivot)
   /**
+   * @copydoc Dali::Ui::View::GetScaleX
+   */
+  float GetScaleX() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetScaleX
+   */
+  void SetScaleX(float scaleX);
+
+  /**
+   * @copydoc Dali::Ui::View::GetScaleY
+   */
+  float GetScaleY() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetScaleY
+   */
+  void SetScaleY(float scaleY);
+
+  /**
+   * @copydoc Dali::Ui::View::IsVisible
+   */
+  bool IsVisible() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetVisibility
+   */
+  void SetVisibility(bool visibility);
+
+  /**
+   * @copydoc Dali::Ui::View::GetOpacity
+   */
+  float GetOpacity() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetOpacity
+   */
+  void SetOpacity(float opacity);
+
+  /**
    * @copydoc Dali::Ui::View::GetSize
    */
   MeasuredSize GetSize() const;

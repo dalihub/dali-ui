@@ -214,6 +214,72 @@ public: // Properties
   // @CHAIN_START(View)
 
   /**
+   * @brief Gets the x scale factor applied to the view.
+   *
+   * @return The x scale factor
+   */
+  float GetScaleX() const;
+
+  /**
+   * @brief Sets the x scale factor applied to the view.
+   *
+   * @param[in] scaleX The X scale factor to set
+   */
+  View& SetScaleX(float scaleX);
+
+  /**
+   * @brief Gets the y scale factor applied to the view.
+   *
+   * @return The y scale factor
+   */
+  float GetScaleY() const;
+
+  /**
+   * @brief Sets the y scale factor applied to the view.
+   *
+   * @param[in] scaleY The Y scale factor to set
+   */
+  View& SetScaleY(float scaleY);
+
+  /**
+   * @brief Sets the y scale factor applied to the view.
+   *
+   * @param[in] scaleX The X scale factor to set
+   * @param[in] scaleY The Y scale factor to set
+   */
+  View& SetScale(float scaleX, float scaleY);
+
+  /**
+   * @brief Checks if the view is visible.
+   *
+   * @return True if the view is visible, false otherwise
+   */
+  bool IsVisible() const;
+
+  /**
+   * @brief Sets the visibility of the view.
+   *
+   * @param[in] visibility True to make the view visible, false to hide it
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetVisibility(bool visibility);
+
+  /**
+   * @brief Gets the opacity of the view.
+   *
+   * @return The opacity value (0.0 to 1.0)
+   */
+  float GetOpacity() const;
+
+  /**
+   * @brief Sets the opacity of the view.
+   *
+   * @param[in] opacity The opacity value to set (0.0 to 1.0)
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetOpacity(float opacity);
+
+  /**
    * @brief Gets the actual rendered size of this View after layout.
    *
    * This is a read-only result of the layout system's Measure/Arrange passes.

@@ -123,6 +123,57 @@ bool View::IsArrangeValid() const
 // Properties
 // =============================================================================
 
+float View::GetScaleX() const
+{
+  return Integration::GetImpl(*this).GetScaleX();
+}
+
+View& View::SetScaleX(float scaleX)
+{
+  Integration::GetImpl(*this).SetScaleX(scaleX);
+  return *this;
+}
+
+float View::GetScaleY() const
+{
+  return Integration::GetImpl(*this).GetScaleY();
+}
+
+View& View::SetScaleY(float scaleY)
+{
+  Integration::GetImpl(*this).SetScaleY(scaleY);
+  return *this;
+}
+
+View& View::SetScale(float scaleX, float scaleY)
+{
+  SetScaleX(scaleX);
+  SetScaleY(scaleY);
+  return *this;
+}
+
+bool View::IsVisible() const
+{
+  return Integration::GetImpl(*this).IsVisible();
+}
+
+View& View::SetVisibility(bool visibility)
+{
+  Integration::GetImpl(*this).SetVisibility(visibility);
+  return *this;
+}
+
+float View::GetOpacity() const
+{
+  return Integration::GetImpl(*this).GetOpacity();
+}
+
+View& View::SetOpacity(float opacity)
+{
+  Integration::GetImpl(*this).SetOpacity(opacity);
+  return *this;
+}
+
 MeasuredSize View::GetSize() const
 {
   return Integration::GetImpl(*this).GetSize();

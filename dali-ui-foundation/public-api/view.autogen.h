@@ -3,6 +3,39 @@
 
 #define DALI_UI_CHAIN_VIEW_METHODS(ChildClass) \
   /** \
+  * @brief Sets the x scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  */ \
+  ChildClass& SetScaleX(float scaleX) { View::SetScaleX(scaleX); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScaleY(float scaleY) { View::SetScaleY(scaleY); return *this; } \
+  /** \
+  * @brief Sets the y scale factor applied to the view. \
+  * \
+  * @param[in] scaleX The X scale factor to set \
+  * @param[in] scaleY The Y scale factor to set \
+  */ \
+  ChildClass& SetScale(float scaleX, float scaleY) { View::SetScale(scaleX, scaleY); return *this; } \
+  /** \
+  * @brief Sets the visibility of the view. \
+  * \
+  * @param[in] visibility True to make the view visible, false to hide it \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetVisibility(bool visibility) { View::SetVisibility(visibility); return *this; } \
+  /** \
+  * @brief Sets the opacity of the view. \
+  * \
+  * @param[in] opacity The opacity value to set (0.0 to 1.0) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
+  /** \
   * @brief Sets the X position of the View. \
   * \
   * @param[in] x The X position to set \

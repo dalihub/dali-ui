@@ -194,6 +194,7 @@ void ViewImpl::OnInitialize()
 {
   Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
   Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  Self().SetProperty(Actor::Property::POSITION_USES_ANCHOR_POINT, false);
 
   DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
 }
@@ -445,6 +446,46 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 // =============================================================================
 // API (size, position, parent origin, pivot)
 // =============================================================================
+
+float ViewImpl::GetScaleX() const
+{
+  return Self().GetProperty<float>(Actor::Property::SCALE_X);
+}
+
+void ViewImpl::SetScaleX(float scaleX)
+{
+  Self().SetProperty(Actor::Property::SCALE_X, scaleX);
+}
+
+float ViewImpl::GetScaleY() const
+{
+  return Self().GetProperty<float>(Actor::Property::SCALE_Y);
+}
+
+void ViewImpl::SetScaleY(float scaleY)
+{
+  Self().SetProperty(Actor::Property::SCALE_Y, scaleY);
+}
+
+bool ViewImpl::IsVisible() const
+{
+  return Self().GetProperty<float>(Actor::Property::VISIBLE);
+}
+
+void ViewImpl::SetVisibility(bool visibility)
+{
+  Self().SetProperty(Actor::Property::VISIBLE, visibility);
+}
+
+float ViewImpl::GetOpacity() const
+{
+  return Self().GetProperty<float>(Actor::Property::OPACITY);
+}
+
+void ViewImpl::SetOpacity(float opacity)
+{
+  Self().SetProperty(Actor::Property::OPACITY, opacity);
+}
 
 MeasuredSize ViewImpl::GetSize() const
 {
