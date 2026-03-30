@@ -50,8 +50,7 @@ StackLayoutImplPtr StackLayoutImpl::New(StackOrientation orientation)
 
 StackLayoutImpl::StackLayoutImpl(StackOrientation orientation)
 : LayoutImpl(),
-  mOrientation(orientation),
-  mSpacing(0.0f)
+  mInitOrientation(orientation)
 {
 }
 
@@ -62,51 +61,37 @@ StackLayoutImpl::~StackLayoutImpl()
 void StackLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new StackLayoutManager(mOrientation, mSpacing));
+  SetLayoutManager(new StackLayoutManager(mInitOrientation, 0.0f));
 }
 
 void StackLayoutImpl::SetOrientation(StackOrientation orientation)
 {
-  if(mOrientation != orientation)
+  auto* manager = static_cast<StackLayoutManager*>(GetLayoutManager());
+  if(manager->GetOrientation() != orientation)
   {
-    mOrientation = orientation;
-
-    // Update layout manager if it exists
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<StackLayoutManager*>(manager)->SetOrientation(orientation);
-    }
-
+    manager->SetOrientation(orientation);
     InvalidateMeasure();
   }
 }
 
 StackOrientation StackLayoutImpl::GetOrientation() const
 {
-  return mOrientation;
+  return static_cast<StackLayoutManager*>(GetLayoutManager())->GetOrientation();
 }
 
 void StackLayoutImpl::SetSpacing(float spacing)
 {
-  if(mSpacing != spacing)
+  auto* manager = static_cast<StackLayoutManager*>(GetLayoutManager());
+  if(manager->GetSpacing() != spacing)
   {
-    mSpacing = spacing;
-
-    // Update layout manager if it exists
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<StackLayoutManager*>(manager)->SetSpacing(spacing);
-    }
-
+    manager->SetSpacing(spacing);
     InvalidateMeasure();
   }
 }
 
 float StackLayoutImpl::GetSpacing() const
 {
-  return mSpacing;
+  return static_cast<StackLayoutManager*>(GetLayoutManager())->GetSpacing();
 }
 
 } // namespace Integration

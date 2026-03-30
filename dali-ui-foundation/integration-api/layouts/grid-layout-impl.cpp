@@ -49,11 +49,7 @@ GridLayoutImplPtr GridLayoutImpl::New()
 }
 
 GridLayoutImpl::GridLayoutImpl()
-: LayoutImpl(),
-  mRowDefinitions(),
-  mColumnDefinitions(),
-  mRowSpacing(0.0f),
-  mColumnSpacing(0.0f)
+: LayoutImpl()
 {
 }
 
@@ -64,131 +60,99 @@ GridLayoutImpl::~GridLayoutImpl()
 void GridLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new GridLayoutManager(mRowDefinitions, mColumnDefinitions, mRowSpacing, mColumnSpacing));
+  SetLayoutManager(new GridLayoutManager({}, {}, 0.0f, 0.0f));
 }
 
 void GridLayoutImpl::AddRowDefinition(GridLength height)
 {
-  mRowDefinitions.push_back(height);
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
-  }
+  auto*                   manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  std::vector<GridLength> rows    = manager->GetRowDefinitions();
+  rows.push_back(height);
+  manager->SetRowDefinitions(rows);
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::AddColumnDefinition(GridLength width)
 {
-  mColumnDefinitions.push_back(width);
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
-  }
+  auto*                   manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  std::vector<GridLength> cols    = manager->GetColumnDefinitions();
+  cols.push_back(width);
+  manager->SetColumnDefinitions(cols);
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::SetRowDefinitions(const std::vector<GridLength>& rows)
 {
-  mRowDefinitions        = rows;
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
-  }
+  static_cast<GridLayoutManager*>(GetLayoutManager())->SetRowDefinitions(rows);
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::SetColumnDefinitions(const std::vector<GridLength>& columns)
 {
-  mColumnDefinitions     = columns;
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
-  }
+  static_cast<GridLayoutManager*>(GetLayoutManager())->SetColumnDefinitions(columns);
   InvalidateMeasure();
 }
 
 std::vector<GridLength> GridLayoutImpl::GetRowDefinitions() const
 {
-  return mRowDefinitions;
+  return static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowDefinitions();
 }
 
 std::vector<GridLength> GridLayoutImpl::GetColumnDefinitions() const
 {
-  return mColumnDefinitions;
+  return static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions();
 }
 
 uint32_t GridLayoutImpl::GetRowCount() const
 {
-  return static_cast<uint32_t>(mRowDefinitions.size());
+  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowDefinitions().size());
 }
 
 uint32_t GridLayoutImpl::GetColumnCount() const
 {
-  return static_cast<uint32_t>(mColumnDefinitions.size());
+  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions().size());
 }
 
 void GridLayoutImpl::ClearRowDefinitions()
 {
-  mRowDefinitions.clear();
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetRowDefinitions(mRowDefinitions);
-  }
+  static_cast<GridLayoutManager*>(GetLayoutManager())->SetRowDefinitions({});
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::ClearColumnDefinitions()
 {
-  mColumnDefinitions.clear();
-  LayoutManager* manager = GetLayoutManager();
-  if(manager)
-  {
-    static_cast<GridLayoutManager*>(manager)->SetColumnDefinitions(mColumnDefinitions);
-  }
+  static_cast<GridLayoutManager*>(GetLayoutManager())->SetColumnDefinitions({});
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::SetRowSpacing(float spacing)
 {
-  if(mRowSpacing != spacing)
+  auto* manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  if(manager->GetRowSpacing() != spacing)
   {
-    mRowSpacing            = spacing;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<GridLayoutManager*>(manager)->SetRowSpacing(spacing);
-    }
+    manager->SetRowSpacing(spacing);
     InvalidateMeasure();
   }
 }
 
 float GridLayoutImpl::GetRowSpacing() const
 {
-  return mRowSpacing;
+  return static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowSpacing();
 }
 
 void GridLayoutImpl::SetColumnSpacing(float spacing)
 {
-  if(mColumnSpacing != spacing)
+  auto* manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  if(manager->GetColumnSpacing() != spacing)
   {
-    mColumnSpacing         = spacing;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<GridLayoutManager*>(manager)->SetColumnSpacing(spacing);
-    }
+    manager->SetColumnSpacing(spacing);
     InvalidateMeasure();
   }
 }
 
 float GridLayoutImpl::GetColumnSpacing() const
 {
-  return mColumnSpacing;
+  return static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnSpacing();
 }
 
 } // namespace Integration

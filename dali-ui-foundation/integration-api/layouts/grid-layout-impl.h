@@ -78,12 +78,6 @@ private:
   GridLayoutImpl(GridLayoutImpl&&)                 = delete;
   GridLayoutImpl& operator=(const GridLayoutImpl&) = delete;
   GridLayoutImpl& operator=(GridLayout&&)          = delete;
-
-private:
-  std::vector<GridLength> mRowDefinitions;
-  std::vector<GridLength> mColumnDefinitions;
-  float                   mRowSpacing;
-  float                   mColumnSpacing;
 };
 
 inline Integration::GridLayoutImpl& GetImpl(Ui::GridLayout& layout)

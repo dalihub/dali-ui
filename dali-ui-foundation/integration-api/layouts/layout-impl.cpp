@@ -65,6 +65,7 @@ LayoutImpl::~LayoutImpl()
 
 void LayoutImpl::SetLayoutManager(LayoutManager* layoutManager)
 {
+  DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
   Internal::LayoutManagerTrait trait = Internal::LayoutManagerTrait::New(layoutManager);
   SetTrait(ReservedTraitId::LAYOUT_MANAGER, trait);
 }

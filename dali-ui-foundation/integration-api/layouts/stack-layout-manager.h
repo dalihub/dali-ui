@@ -51,8 +51,10 @@ public:
    */
   ~StackLayoutManager() override;
 
-  void SetOrientation(StackOrientation orientation);
-  void SetSpacing(float spacing);
+  void             SetOrientation(StackOrientation orientation);
+  StackOrientation GetOrientation() const;
+  void             SetSpacing(float spacing);
+  float            GetSpacing() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
   MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;

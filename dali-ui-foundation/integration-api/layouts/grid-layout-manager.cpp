@@ -317,9 +317,19 @@ void GridLayoutManager::SetRowDefinitions(const std::vector<GridLength>& rows)
   mRowDefinitions = rows;
 }
 
+const std::vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
+{
+  return mRowDefinitions;
+}
+
 void GridLayoutManager::SetColumnDefinitions(const std::vector<GridLength>& columns)
 {
   mColumnDefinitions = columns;
+}
+
+const std::vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
+{
+  return mColumnDefinitions;
 }
 
 void GridLayoutManager::SetRowSpacing(float spacing)
@@ -327,9 +337,19 @@ void GridLayoutManager::SetRowSpacing(float spacing)
   mRowSpacing = spacing;
 }
 
+float GridLayoutManager::GetRowSpacing() const
+{
+  return mRowSpacing;
+}
+
 void GridLayoutManager::SetColumnSpacing(float spacing)
 {
   mColumnSpacing = spacing;
+}
+
+float GridLayoutManager::GetColumnSpacing() const
+{
+  return mColumnSpacing;
 }
 
 MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)

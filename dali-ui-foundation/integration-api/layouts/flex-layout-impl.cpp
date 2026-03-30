@@ -49,12 +49,7 @@ FlexLayoutImplPtr FlexLayoutImpl::New()
 }
 
 FlexLayoutImpl::FlexLayoutImpl()
-: LayoutImpl(),
-  mDirection(FlexDirection::ROW),
-  mWrap(FlexWrap::NO_WRAP),
-  mJustifyContent(FlexJustify::FLEX_START),
-  mAlignItems(FlexAlign::STRETCH),
-  mAlignContent(FlexAlign::STRETCH)
+: LayoutImpl()
 {
 }
 
@@ -65,102 +60,83 @@ FlexLayoutImpl::~FlexLayoutImpl()
 void FlexLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new FlexLayoutManager(mDirection, mWrap, mJustifyContent, mAlignItems, mAlignContent));
+  SetLayoutManager(
+    new FlexLayoutManager(FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::STRETCH, FlexAlign::STRETCH));
 }
 
 void FlexLayoutImpl::SetDirection(FlexDirection direction)
 {
-  if(mDirection != direction)
+  auto* manager = static_cast<FlexLayoutManager*>(GetLayoutManager());
+  if(manager->GetDirection() != direction)
   {
-    mDirection             = direction;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<FlexLayoutManager*>(manager)->SetDirection(direction);
-    }
+    manager->SetDirection(direction);
     InvalidateMeasure();
   }
 }
 
 FlexDirection FlexLayoutImpl::GetDirection() const
 {
-  return mDirection;
+  return static_cast<FlexLayoutManager*>(GetLayoutManager())->GetDirection();
 }
 
 void FlexLayoutImpl::SetWrap(FlexWrap wrap)
 {
-  if(mWrap != wrap)
+  auto* manager = static_cast<FlexLayoutManager*>(GetLayoutManager());
+  if(manager->GetWrap() != wrap)
   {
-    mWrap                  = wrap;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<FlexLayoutManager*>(manager)->SetWrap(wrap);
-    }
+    manager->SetWrap(wrap);
     InvalidateMeasure();
   }
 }
 
 FlexWrap FlexLayoutImpl::GetWrap() const
 {
-  return mWrap;
+  return static_cast<FlexLayoutManager*>(GetLayoutManager())->GetWrap();
 }
 
 void FlexLayoutImpl::SetJustifyContent(FlexJustify justify)
 {
-  if(mJustifyContent != justify)
+  auto* manager = static_cast<FlexLayoutManager*>(GetLayoutManager());
+  if(manager->GetJustifyContent() != justify)
   {
-    mJustifyContent        = justify;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<FlexLayoutManager*>(manager)->SetJustifyContent(justify);
-    }
+    manager->SetJustifyContent(justify);
     InvalidateArrange();
   }
 }
 
 FlexJustify FlexLayoutImpl::GetJustifyContent() const
 {
-  return mJustifyContent;
+  return static_cast<FlexLayoutManager*>(GetLayoutManager())->GetJustifyContent();
 }
 
 void FlexLayoutImpl::SetAlignItems(FlexAlign align)
 {
-  if(mAlignItems != align)
+  auto* manager = static_cast<FlexLayoutManager*>(GetLayoutManager());
+  if(manager->GetAlignItems() != align)
   {
-    mAlignItems            = align;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<FlexLayoutManager*>(manager)->SetAlignItems(align);
-    }
+    manager->SetAlignItems(align);
     InvalidateArrange();
   }
 }
 
 FlexAlign FlexLayoutImpl::GetAlignItems() const
 {
-  return mAlignItems;
+  return static_cast<FlexLayoutManager*>(GetLayoutManager())->GetAlignItems();
 }
 
 void FlexLayoutImpl::SetAlignContent(FlexAlign align)
 {
-  if(mAlignContent != align)
+  auto* manager = static_cast<FlexLayoutManager*>(GetLayoutManager());
+  if(manager->GetAlignContent() != align)
   {
-    mAlignContent          = align;
-    LayoutManager* manager = GetLayoutManager();
-    if(manager)
-    {
-      static_cast<FlexLayoutManager*>(manager)->SetAlignContent(align);
-    }
+    manager->SetAlignContent(align);
     InvalidateArrange();
   }
 }
 
 FlexAlign FlexLayoutImpl::GetAlignContent() const
 {
-  return mAlignContent;
+  return static_cast<FlexLayoutManager*>(GetLayoutManager())->GetAlignContent();
 }
 
 } // namespace Integration

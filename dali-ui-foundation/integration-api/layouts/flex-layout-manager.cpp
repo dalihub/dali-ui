@@ -341,9 +341,19 @@ void FlexLayoutManager::SetDirection(FlexDirection direction)
   mDirection = direction;
 }
 
+FlexDirection FlexLayoutManager::GetDirection() const
+{
+  return mDirection;
+}
+
 void FlexLayoutManager::SetWrap(FlexWrap wrap)
 {
   mWrap = wrap;
+}
+
+FlexWrap FlexLayoutManager::GetWrap() const
+{
+  return mWrap;
 }
 
 void FlexLayoutManager::SetJustifyContent(FlexJustify justify)
@@ -351,14 +361,29 @@ void FlexLayoutManager::SetJustifyContent(FlexJustify justify)
   mJustifyContent = justify;
 }
 
+FlexJustify FlexLayoutManager::GetJustifyContent() const
+{
+  return mJustifyContent;
+}
+
 void FlexLayoutManager::SetAlignItems(FlexAlign align)
 {
   mAlignItems = align;
 }
 
+FlexAlign FlexLayoutManager::GetAlignItems() const
+{
+  return mAlignItems;
+}
+
 void FlexLayoutManager::SetAlignContent(FlexAlign align)
 {
   mAlignContent = align;
+}
+
+FlexAlign FlexLayoutManager::GetAlignContent() const
+{
+  return mAlignContent;
 }
 
 bool FlexLayoutManager::IsMainAxisHorizontal() const

@@ -102,8 +102,7 @@ private:
   StackLayoutImpl& operator=(StackLayoutImpl&&)      = delete;
 
 private:
-  StackOrientation mOrientation;
-  float            mSpacing;
+  StackOrientation mInitOrientation; ///< Initial value, consumed by OnInitialize
 };
 
 // Helpers for public-api forwarding methods

@@ -44,10 +44,14 @@ public:
                     float columnSpacing);
   ~GridLayoutManager() override;
 
-  void SetRowDefinitions(const std::vector<GridLength>& rows);
-  void SetColumnDefinitions(const std::vector<GridLength>& columns);
-  void SetRowSpacing(float spacing);
-  void SetColumnSpacing(float spacing);
+  void                           SetRowDefinitions(const std::vector<GridLength>& rows);
+  const std::vector<GridLength>& GetRowDefinitions() const;
+  void                           SetColumnDefinitions(const std::vector<GridLength>& columns);
+  const std::vector<GridLength>& GetColumnDefinitions() const;
+  void                           SetRowSpacing(float spacing);
+  float                          GetRowSpacing() const;
+  void                           SetColumnSpacing(float spacing);
+  float                          GetColumnSpacing() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
   MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;

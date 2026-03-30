@@ -41,11 +41,16 @@ public:
                     FlexAlign alignContent);
   ~FlexLayoutManager() override;
 
-  void SetDirection(FlexDirection direction);
-  void SetWrap(FlexWrap wrap);
-  void SetJustifyContent(FlexJustify justify);
-  void SetAlignItems(FlexAlign align);
-  void SetAlignContent(FlexAlign align);
+  void          SetDirection(FlexDirection direction);
+  FlexDirection GetDirection() const;
+  void          SetWrap(FlexWrap wrap);
+  FlexWrap      GetWrap() const;
+  void          SetJustifyContent(FlexJustify justify);
+  FlexJustify   GetJustifyContent() const;
+  void          SetAlignItems(FlexAlign align);
+  FlexAlign     GetAlignItems() const;
+  void          SetAlignContent(FlexAlign align);
+  FlexAlign     GetAlignContent() const;
 
   bool IsMainAxisHorizontal() const;
   bool IsMainAxisReversed() const;

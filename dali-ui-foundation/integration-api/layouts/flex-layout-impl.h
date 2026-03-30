@@ -75,13 +75,6 @@ private:
   FlexLayoutImpl(FlexLayoutImpl&&)                 = delete;
   FlexLayoutImpl& operator=(const FlexLayoutImpl&) = delete;
   FlexLayoutImpl& operator=(FlexLayoutImpl&&)      = delete;
-
-private:
-  FlexDirection mDirection;
-  FlexWrap      mWrap;
-  FlexJustify   mJustifyContent;
-  FlexAlign     mAlignItems;
-  FlexAlign     mAlignContent;
 };
 
 inline Integration::FlexLayoutImpl& GetImpl(Ui::FlexLayout& layout)

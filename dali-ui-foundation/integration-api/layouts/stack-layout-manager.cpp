@@ -155,9 +155,19 @@ void StackLayoutManager::SetOrientation(StackOrientation orientation)
   mOrientation = orientation;
 }
 
+StackOrientation StackLayoutManager::GetOrientation() const
+{
+  return mOrientation;
+}
+
 void StackLayoutManager::SetSpacing(float spacing)
 {
   mSpacing = spacing;
+}
+
+float StackLayoutManager::GetSpacing() const
+{
+  return mSpacing;
 }
 
 MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)

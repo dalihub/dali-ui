@@ -15,7 +15,7 @@ package "DALi (external)" as dali {
 
 ' ========== Public API (Handles) ==========
 ' Note: Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) and RemoveAllChildren().
-' LayoutManager is set at construction time only (no SetLayoutManager in public API).
+' LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER) and attached in OnInitialize().
 package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
     + New() : View
@@ -132,7 +132,7 @@ package "Dali::Ui (Public API)" as public_api {
 
 ' ========== Integration API (Implementations) ==========
 ' ViewImpl: LayoutManager, child API, Contents are integration-only (e.g. ButtonImpl).
-' LayoutImpl inherits child APIs from ViewImpl; receives LayoutManager at construction.
+' LayoutImpl inherits child APIs from ViewImpl; attaches LayoutManager as Trait in OnInitialize().
 package "Dali::Ui::Integration (Implementation)" as integration {
   class "ViewImpl" as ViewImpl <<impl>> {
     + {static} New() : Ui::View
@@ -316,8 +316,7 @@ LayoutManager <|-- FlexLayoutManager
 LayoutManager <|-- GridLayoutManager
 LayoutManager <|-- AbsoluteLayoutManager
 
-ViewImpl o-- LayoutManager : optional
-LayoutImpl ..> LayoutManager : receives at construction
+LayoutImpl ..> LayoutManager : attaches as Trait in OnInitialize
 
 ' ========== Layout Params (Handle -> Impl) ==========
 AbsoluteLayoutParams ..> AbsoluteLayoutParamsImpl : uses
