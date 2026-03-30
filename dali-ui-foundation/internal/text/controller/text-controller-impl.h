@@ -465,15 +465,9 @@ public:
   }
 
   /**
-   * @copydoc Text::Controller::ResetFontAndStyleData()
+   * @copydoc Text::Controller::InvalidateFontData()
    */
-  void ResetFontAndStyleData()
-  {
-    ClearFontData();
-    mModel->mLogicalModel->ClearFontDescriptionRuns();
-    UpdateAnchorColor();
-    RequestRelayout();
-  }
+  void InvalidateFontData();
 
   /**
    * @brief Helper to move the cursor, grab handle etc.

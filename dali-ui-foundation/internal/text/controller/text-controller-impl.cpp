@@ -525,6 +525,13 @@ void Controller::Impl::UpdateAnchorColor()
   }
 }
 
+void Controller::Impl::InvalidateFontData()
+{
+  ClearFontData();
+  UpdateAnchorColor();
+  RequestRelayout();
+}
+
 void Controller::Impl::NotifyInputMethodContext()
 {
   if(mEventData && mEventData->mInputMethodContext)

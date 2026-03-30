@@ -963,7 +963,7 @@ void InputFieldImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type
 
 void InputFieldImpl::OnLocaleChanged(std::string locale)
 {
-  mController->ResetFontAndStyleData();
+  mController->InvalidateFontData();
 }
 
 void InputFieldImpl::OnKeyboardStatusChanged(bool keyboardShown)

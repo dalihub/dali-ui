@@ -2141,9 +2141,9 @@ public: // Queries & retrieves.
   void ChangedLayoutDirection();
 
   /**
-   * @brief Clear font and style data.
+   * @brief Invalidates cached font-related data and requests relayout.
    */
-  void ResetFontAndStyleData();
+  void InvalidateFontData();
 
   /**
    * @brief Retrieves if showing placeholder text or not.

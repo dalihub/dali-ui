@@ -392,15 +392,15 @@ void Controller::ChangedLayoutDirection()
   mImpl->mIsLayoutDirectionChanged = true;
 }
 
-void Controller::ResetFontAndStyleData()
+void Controller::InvalidateFontData()
 {
-  mImpl->ResetFontAndStyleData();
+  mImpl->InvalidateFontData();
 }
 
 void Controller::SetLayoutDirectionMode(LayoutDirectionMode type)
 {
   mImpl->mModel->mLayoutDirectionMode = type;
-  mImpl->ResetFontAndStyleData();
+  mImpl->InvalidateFontData();
 }
 
 LayoutDirectionMode Controller::GetLayoutDirectionMode() const

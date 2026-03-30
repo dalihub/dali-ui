@@ -638,7 +638,7 @@ void LabelImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type
 
 void LabelImpl::OnLocaleChanged(std::string locale)
 {
-  mController->ResetFontAndStyleData();
+  mController->InvalidateFontData();
 }
 
 bool LabelImpl::OnInterceptTouched(Actor actor, const TouchEvent& touch)
