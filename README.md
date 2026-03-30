@@ -20,7 +20,7 @@ dali-ui-foundation을 기반으로 구축되며, 애플리케이션 개발에 �
 
 </br>
 
-## How to build
+## Release
 
 `dali-ui`는 `tizen` 브랜치로 릴리즈 됩니다. [→ Releases](https://github.sec.samsung.net/NUI/dali-ui/releases)
 
@@ -41,6 +41,9 @@ git checkout accepted/tizen/unified/20260327.174826
 cd dali-ui
 git checkout v2.5.14.10210
 ```
+<br/>
+
+## How to build
 
 ### Ubuntu build
 
