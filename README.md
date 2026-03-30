@@ -20,26 +20,64 @@ dali-ui-foundation을 기반으로 구축되며, 애플리케이션 개발에 �
 
 </br>
 
-## API Reference
-
-https://pages.github.sec.samsung.net/NUI/dali-ui/api/index_classes.html
-
-</br>
-
 ## How to build
 
-### Ubuntu
+`dali-ui`는 `tizen` 브랜치로 릴리즈 됩니다. [→ Releases](https://github.sec.samsung.net/NUI/dali-ui/releases)
+
+릴리즈 노트에 명시된 `DALi dependancy` 태그를 사용하여 dali 버전을 맞출 수 있습니다.
+예를 들어 dali-ui [v2.5.14.10210](https://github.sec.samsung.net/NUI/dali-ui/releases/tag/v2.5.14.10210) 의 경우 명시된 태그인 `accepted/tizen/unified/20260327.174826`을 사용하여 아래와 같이 버전을 맞출 수 있습니다.
+
+```sh
+cd dali-core
+git checkout accepted/tizen/unified/20260327.174826
+```
+
+```sh
+cd dali-adaptor
+git checkout accepted/tizen/unified/20260327.174826
+```
+
+```sh
+cd dali-ui
+git checkout v2.5.14.10210
+```
+
+### Ubuntu build
 
 :warning: DALi env set up required. ([→Link](https://github.com/dalihub/dali-core/blob/master/README.md#1-building-for-ubuntu-desktop))
 
-:warning: [dali-core](https://github.com/dalihub/dali-core/blob/master/README.md#1-building-for-ubuntu-desktop) and [dali-adpator](https://github.com/dalihub/dali-adaptor/blob/master/README.md#1-building-for-ubuntu-desktop) should be installed.
 ```
 . setenv
 ```
-```
-cd build/tizen
+##### dali-core
+```sh
+cd dali-core/build/tizen
 cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
 make install -j
+```
+
+##### dali-adaptor
+```sh
+cd dali-adaptor/build/tizen
+cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX . -DENABLE_GRAPHICS_BACKEND="GLES"
+make install -j
+```
+
+##### dali-ui
+```
+cd dali-ui/build/tizen
+cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
+make install -j
+```
+
+##### Sample hello-world
+```
+cd dali-ui/samples/hello-world
+cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX .
+make install -j
+```
+```
+./bin/hello-world
 ```
 
 ### GBS build (Tizen)
