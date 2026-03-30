@@ -38,9 +38,7 @@ loop for each layout root
   LC -> Root : Measure(widthConstraint, heightConstraint)
   activate Root #LightBlue
 
-  alt view is collapsed
-    Root --> LC : MeasuredSize(0, 0)
-  else cache hit (same constraints)
+  alt cache hit (same constraints)
     Root --> LC : mMeasuredSize (cached)
   else measure
     Root -> Root : Subtract margin from constraints

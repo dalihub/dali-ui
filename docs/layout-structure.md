@@ -102,8 +102,6 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **WRAP_CONTENT**: constant (-1.0f) indicating the view sizes to fit its content (natural size or children bounding box).
 - **MATCH_PARENT**: constant (-2.0f) indicating the view fills the parent container's available space.
 - **LayoutAlignment**: Fill, Start, Center, End (used by GridLayoutParams and StackLayoutParams for cross-axis alignment).
-- **ViewVisibility**: Visible, Hidden, Collapsed.
-
 ---
 
 ## Behavior

@@ -526,27 +526,3 @@ int UtcDaliFlexLayoutWrapReverseP(void)
   END_TEST;
 }
 
-int UtcDaliFlexLayoutCollapsedChildP(void)
-{
-  TestApplication application;
-  FlexLayout layout = FlexLayout::New();
-  View v1 = View::New();
-  v1.SetRequestedWidth(40.0f);
-  v1.SetRequestedHeight(40.0f);
-  layout.Add(v1);
-  View collapsed = View::New();
-  collapsed.SetRequestedWidth(40.0f);
-  collapsed.SetRequestedHeight(40.0f);
-  layout.Add(collapsed);
-  View v2 = View::New();
-  v2.SetRequestedWidth(40.0f);
-  v2.SetRequestedHeight(40.0f);
-  layout.Add(v2);
-  layout.SetRequestedWidth(200.0f);
-  layout.SetRequestedHeight(80.0f);
-  MeasuredSize m = layout.Measure(200.0f, 80.0f);
-  layout.Arrange(LayoutRect(0, 0, 200, 80));
-  DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(m.GetHeight(), 80.0f, TEST_LOCATION);
-  END_TEST;
-}
