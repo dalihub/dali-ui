@@ -154,6 +154,8 @@ ViewImpl::ViewImpl()
   mInteractiveTrait(nullptr),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
+  mRequestedPositionX(0.0f),
+  mRequestedPositionY(0.0f),
   mMinimumWidth(0.0f),
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
@@ -498,6 +500,7 @@ float ViewImpl::GetPositionX() const
 
 void ViewImpl::SetPositionX(float x)
 {
+  mRequestedPositionX = x;
   Self().SetProperty(Actor::Property::POSITION_X, x);
 }
 
@@ -508,6 +511,7 @@ float ViewImpl::GetPositionY() const
 
 void ViewImpl::SetPositionY(float y)
 {
+  mRequestedPositionY = y;
   Self().SetProperty(Actor::Property::POSITION_Y, y);
 }
 
@@ -789,13 +793,13 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   if(!mChildren.empty())
   {
     // Default arrange for views without LayoutManager:
-    // Place children at their position, using measured size.
+    // Place children at their requested position, using measured size.
+    // Padding is not applied here — only LayoutManagers consume padding.
     for(auto& childData : mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
-      Extents   margin    = childImpl.GetViewMargin();
-      float     childX    = childImpl.GetPositionX() + contentBounds.x + static_cast<float>(margin.start);
-      float     childY    = childImpl.GetPositionY() + contentBounds.y + static_cast<float>(margin.top);
+      float     childX    = childImpl.mRequestedPositionX;
+      float     childY    = childImpl.mRequestedPositionY;
       float     childW    = childData.measuredSize.width;
       float     childH    = childData.measuredSize.height;
 
@@ -1212,6 +1216,8 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mInteractiveTrait(nullptr),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
+  mRequestedPositionX(0.0f),
+  mRequestedPositionY(0.0f),
   mMinimumWidth(0.0f),
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),

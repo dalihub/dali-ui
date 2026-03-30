@@ -310,10 +310,10 @@ private:
     // Measure pass
     MeasuredSize measuredSize = view->Measure(widthConstraint, heightConstraint);
 
-    // Arrange pass: set view position and size (root at 0,0)
+    // Arrange pass: use the user-set position (parent is not a layout)
     LayoutRect bounds;
-    bounds.x      = 0.0f;
-    bounds.y      = 0.0f;
+    bounds.x      = view->GetPositionX();
+    bounds.y      = view->GetPositionY();
     bounds.width  = measuredSize.width;
     bounds.height = measuredSize.height;
 
