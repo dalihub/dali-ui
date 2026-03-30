@@ -259,19 +259,18 @@ private: // From ViewImpl
    */
   bool OnKeyEvent(const KeyEvent& event) override;
 
-private: // From Control
   /**
-   * @copydoc Control::OnTap()
+   * @copydoc Integration::ViewImpl::OnTap()
    */
   void OnTap(const TapGesture& tap) override;
 
   /**
-   * @copydoc Control::OnPan()
+   * @copydoc Integration::ViewImpl::OnPan()
    */
   void OnPan(const PanGesture& gesture) override;
 
   /**
-   * @copydoc Control::OnLongPress()
+   * @copydoc Integration::ViewImpl::OnLongPress()
    */
   void OnLongPress(const LongPressGesture& gesture) override;
 

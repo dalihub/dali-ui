@@ -284,8 +284,10 @@ struct Decorator::Impl : public ConnectionTracker
          (cursor.position.y + cursor.cursorHeight > -Math::MACHINE_EPSILON_1000));
       if(mPrimaryCursorVisible)
       {
-        mPrimaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
-        mPrimaryCursor.SetProperty(Actor::Property::SIZE, Size(mCursorWidth, cursor.cursorHeight));
+        mPrimaryCursor.SetRequestedWidth(mCursorWidth);
+        mPrimaryCursor.SetRequestedHeight(cursor.cursorHeight);
+        mPrimaryCursor.SetPositionX(cursor.position.x);
+        mPrimaryCursor.SetPositionY(cursor.position.y);
 
         container.Add(mPrimaryCursor, Size(mCursorWidth, cursor.cursorHeight));
       }
@@ -301,8 +303,10 @@ struct Decorator::Impl : public ConnectionTracker
          (cursor.position.y + cursor.cursorHeight > -Math::MACHINE_EPSILON_1000));
       if(mSecondaryCursorVisible)
       {
-        mSecondaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
-        mSecondaryCursor.SetProperty(Actor::Property::SIZE, Size(mCursorWidth, cursor.cursorHeight));
+        mSecondaryCursor.SetRequestedWidth(mCursorWidth);
+        mSecondaryCursor.SetRequestedHeight(cursor.cursorHeight);
+        mSecondaryCursor.SetPositionX(cursor.position.x);
+        mSecondaryCursor.SetPositionY(cursor.position.y);
 
         container.Add(mSecondaryCursor, Size(mCursorWidth, cursor.cursorHeight));
       }
@@ -806,7 +810,8 @@ struct Decorator::Impl : public ConnectionTracker
   {
     if(handle.markerActor)
     {
-      handle.markerActor.SetProperty(Actor::Property::SIZE, Vector2(0, handle.lineHeight));
+      handle.markerActor.SetRequestedWidth(0.0f);
+      handle.markerActor.SetRequestedHeight(handle.lineHeight);
     }
   }
 
@@ -1160,9 +1165,8 @@ struct Decorator::Impl : public ConnectionTracker
         adjustedDisplacementY = CalculateAdjustedDisplacement(handle.position.y, handle.grabDisplacementY,
                                                               (mControlSize.y - handle.lineHeight));
       }
-      handle.actor.SetProperty(Actor::Property::POSITION,
-                               Vector2(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX,
-                                       yLocalPosition + adjustedDisplacementY));
+      handle.actor.SetPositionX(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX);
+      handle.actor.SetPositionY(yLocalPosition + adjustedDisplacementY);
     }
   }
 
@@ -2206,13 +2210,13 @@ void Decorator::SetCursorWidth(int width)
 
   if(mImpl->mPrimaryCursorVisible && mImpl->mPrimaryCursor)
   {
-    mImpl->mPrimaryCursor.SetProperty(Actor::Property::SIZE,
-                                      Size(mImpl->mCursorWidth, mImpl->mCursor[PRIMARY_CURSOR].cursorHeight));
+    mImpl->mPrimaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+    mImpl->mPrimaryCursor.SetRequestedHeight(mImpl->mCursor[PRIMARY_CURSOR].cursorHeight);
   }
   if(mImpl->mSecondaryCursorVisible && mImpl->mSecondaryCursor)
   {
-    mImpl->mSecondaryCursor.SetProperty(Actor::Property::SIZE,
-                                        Size(mImpl->mCursorWidth, mImpl->mCursor[SECONDARY_CURSOR].cursorHeight));
+    mImpl->mSecondaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+    mImpl->mSecondaryCursor.SetRequestedHeight(mImpl->mCursor[SECONDARY_CURSOR].cursorHeight);
   }
 }
 
