@@ -19,7 +19,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Child add/remove uses inherited Actor `Add`/`Remove`. `Insert(index, View)` and `RemoveAllChildren()` are available for index-based insertion and bulk removal.
 
 - **Layout** (inherits View)
-  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `RemoveAllChildren()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Contents(initializer_list<View>)`.
+  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `RemoveAllChildren()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Children(initializer_list<View>)`.
   - Always has a LayoutManager stored as a Trait (`ReservedTraitId::LAYOUT_MANAGER`); derived classes attach Stack/Flex/Grid/Absolute algorithms in `OnInitialize()`.
 
 - **Custom Layout Callbacks**
@@ -28,8 +28,10 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Callbacks are stored as a `LayoutCallbacks` Trait (`ReservedTraitId::LAYOUT_SIGNALS`), created lazily on first use. When set, callbacks take priority over the default LayoutManager.
     ```cpp
     Layout layout = Layout::New();
-    layout.SetMeasureCallback(LayoutMeasureCallback::New(&MyLayout::OnMeasure));
-    layout.SetArrangeCallback(LayoutArrangeCallback::New(&MyLayout::OnArrange));
+    layout.SetMeasureCallback(LayoutMeasureCallback::New(&MyMeasure));   // free function
+    layout.SetArrangeCallback(LayoutArrangeCallback::New(&MyArrange));   // free function
+    // For member functions, pass the object instance:
+    // layout.SetMeasureCallback(LayoutMeasureCallback::New(this, &MyClass::OnMeasure));
     ```
 
 - **StackLayout, FlexLayout, GridLayout, AbsoluteLayout**
@@ -101,7 +103,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **LayoutRect**: x, y, width, height (placement region).
 - **WRAP_CONTENT**: constant (-1.0f) indicating the view sizes to fit its content (natural size or children bounding box).
 - **MATCH_PARENT**: constant (-2.0f) indicating the view fills the parent container's available space.
-- **LayoutAlignment**: Fill, Start, Center, End (used by GridLayoutParams and StackLayoutParams for cross-axis alignment).
+- **LayoutAlignment**: FILL, START, CENTER, END (used by GridLayoutParams and StackLayoutParams for cross-axis alignment).
 ---
 
 ## Behavior
@@ -139,6 +141,6 @@ When layout must be recomputed (e.g. size or child change):
 
 | Area | Description |
 |------|-------------|
-| Public child API | Child add/remove uses Actor::Add/Remove. View provides Add(View, index) for index-based insertion and RemoveAllChildren() for bulk removal. GetChildCount, GetChildAt, IndexOfChild, Contents are available on View. |
+| Public child API | Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) for index-based insertion and RemoveAllChildren() for bulk removal. GetChildCount, GetChildAt, IndexOfChild, Children are available on View. |
 | Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
 | Implementation | ViewImpl holds children; LayoutImpl attaches a LayoutManager as a Trait in `OnInitialize()`. Applications can customize measure/arrange via `SetMeasureCallback()`/`SetArrangeCallback()`. |

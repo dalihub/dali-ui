@@ -39,8 +39,8 @@ class LayoutImpl;
  * Only Layout (and its derived classes like StackLayout, GridLayout) can have
  * a layout algorithm.
  *
- * To customize measure/arrange behavior, connect to the OnMeasureSignal and
- * OnArrangeSignal via the LayoutCallbacks trait on View.
+ * To customize measure/arrange behavior, use SetMeasureCallback() and
+ * SetArrangeCallback() on View.
  *
  * Child management uses Actor::Add/Remove (inherited from View's base class).
  * Insert(index, View) and RemoveAllChildren() are provided by View.
