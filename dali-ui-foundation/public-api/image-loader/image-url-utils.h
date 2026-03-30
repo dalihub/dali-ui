@@ -32,11 +32,11 @@ namespace Dali
 namespace Ui
 {
 /**
- * API to interface with the an image
+ * API to interface with the an image url
  * Allows developers to add FrameBuffer, PixelData and NativeImageInterface to Ui so that visuals can use them to
  * render
  */
-namespace Image
+namespace ImageUrlUtils
 {
 /**
  * @brief Generate a Url from frame buffer.
@@ -108,7 +108,7 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encode
  */
 DALI_UI_API Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer);
 
-} // namespace Image
+} //namespace ImageUrlUtils
 
 } // namespace Ui
 

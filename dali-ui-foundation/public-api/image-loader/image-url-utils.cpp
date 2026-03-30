@@ -15,7 +15,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/image-loader/image.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/image-loader/texture-manager.h>
@@ -29,7 +29,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Image
+namespace ImageUrlUtils
 {
 Dali::Ui::ImageUrl GenerateUrl(Dali::FrameBuffer frameBuffer, Pixel::Format pixelFormat, uint32_t width,
                                uint32_t height)
@@ -81,7 +81,7 @@ Dali::Ui::ImageUrl GenerateDepthUrl(const Dali::FrameBuffer frameBuffer)
   return imageUrl;
 }
 
-} // namespace Image
+} //namespace ImageUrlUtils
 
 } // namespace Ui
 

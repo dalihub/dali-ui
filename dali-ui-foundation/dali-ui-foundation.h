@@ -33,8 +33,8 @@
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/image-loader/image.h>
 #include <dali-ui-foundation/public-api/image-loader/sync-image-loader.h>
 
 #include <dali-ui-foundation/public-api/render-effects/background-blur-effect.h>
