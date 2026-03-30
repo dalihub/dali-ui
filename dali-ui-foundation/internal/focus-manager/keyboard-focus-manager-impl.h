@@ -138,7 +138,7 @@ public:
   /**
    * @copydoc Ui::KeyboardFocusManager::SetFocusIndicatorActor
    */
-  void SetFocusIndicatorActor(Actor indicator);
+  void SetFocusIndicatorActor(View indicator);
 
   /**
    * @copydoc Ui::KeyboardFocusManager::GetFocusIndicatorActor
@@ -426,7 +426,7 @@ private:
 
   WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
 
-  Actor mFocusIndicatorActor; ///< The focus indicator actor shared by all the keyboard focusable actors for highlight
+  View mFocusIndicatorActor; ///< The focus indicator actor shared by all the keyboard focusable actors for highlight
 
   WeakHandle<Actor> mFocusFinderRootActor; ///< The root actor from which the focus finder is started.
 

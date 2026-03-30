@@ -847,7 +847,7 @@ Actor KeyboardFocusManager::GetFocusGroup(Actor actor)
   return actor;
 }
 
-void KeyboardFocusManager::SetFocusIndicatorActor(Actor indicator)
+void KeyboardFocusManager::SetFocusIndicatorActor(View indicator)
 {
   if(mFocusIndicatorActor != indicator)
   {
@@ -879,7 +879,8 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
     mFocusIndicatorActor           = Ui::ImageView::New(ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
 
     // Apply size constraint to the focus indicator
-    mFocusIndicatorActor.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
+    mFocusIndicatorActor.SetRequestedWidth(MATCH_PARENT);
+    mFocusIndicatorActor.SetRequestedHeight(MATCH_PARENT);
   }
 
   mFocusIndicatorActor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
