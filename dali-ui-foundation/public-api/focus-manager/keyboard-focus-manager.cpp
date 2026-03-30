@@ -95,7 +95,7 @@ bool KeyboardFocusManager::GetFocusGroupLoop() const
   return GetImpl(*this).GetFocusGroupLoop();
 }
 
-void KeyboardFocusManager::SetFocusIndicatorActor(Actor indicator)
+void KeyboardFocusManager::SetFocusIndicatorActor(View indicator)
 {
   GetImpl(*this).SetFocusIndicatorActor(indicator);
 }

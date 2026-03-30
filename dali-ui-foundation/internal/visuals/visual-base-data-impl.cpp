@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 using Dali::Integration::ToPropertyValue;

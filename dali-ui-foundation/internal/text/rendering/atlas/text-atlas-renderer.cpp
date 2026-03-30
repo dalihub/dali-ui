@@ -37,7 +37,7 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

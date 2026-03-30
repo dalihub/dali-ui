@@ -18,8 +18,11 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/actor.h>
+
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali
 {

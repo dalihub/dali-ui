@@ -29,7 +29,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/internal/controls/control/control-decoration-data.h>
+#include <dali-ui-foundation/internal/views/view/view-decoration-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-event-observer.h>

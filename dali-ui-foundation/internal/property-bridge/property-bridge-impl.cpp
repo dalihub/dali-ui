@@ -19,7 +19,6 @@
 #include "property-bridge-impl.h"
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/integration-api/debug.h>
 

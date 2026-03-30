@@ -16,7 +16,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/actors/actor.h>

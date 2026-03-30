@@ -19,8 +19,6 @@
 #include <dali-ui-foundation/internal/visuals/transition-data-impl.h>
 
 // EXTERNAL HEADERS
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali/dali.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/integration-api/debug.h>

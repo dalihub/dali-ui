@@ -38,7 +38,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/builder/json-parser.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 #include <dali-ui-foundation/internal/builder/builder-declarations.h>
 #include <dali-ui-foundation/internal/builder/builder-filesystem.h>
@@ -977,10 +977,10 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
         DALI_SCRIPT_VERBOSE("  Is Actor id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
       }
 
-      Ui::Control control = Ui::Control::DownCast(handle);
-      if(control)
+      Ui::View view = Ui::View::DownCast(handle);
+      if(view)
       {
-        DALI_SCRIPT_VERBOSE("  Is Control id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
+        DALI_SCRIPT_VERBOSE("  Is View id=%d\n", actor.GetProperty<int>(Actor::Property::ID));
       }
 #endif // DEBUG_ENABLED
 

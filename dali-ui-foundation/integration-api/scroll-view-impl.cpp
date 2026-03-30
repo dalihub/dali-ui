@@ -16,7 +16,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-helper-devel.h>
@@ -34,7 +33,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 //#include <dali-ui-elements/public-api/scroll-view.h>
 
 namespace Dali

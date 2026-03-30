@@ -24,7 +24,6 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/control-accessible.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>

@@ -25,7 +25,7 @@
 #include <dali/public-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/control-accessible.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -79,12 +79,12 @@ public:
                                               TextAbstraction::CharacterIndex endIndex);
 };
 
-class TextControlAccessible : public ControlAccessible,
+class TextControlAccessible : public ViewAccessible,
                               public Dali::Accessibility::Text,
                               public Dali::Accessibility::Hypertext
 {
 public:
-  using ControlAccessible::ControlAccessible;
+  using ViewAccessible::ViewAccessible;
 
   // Text
 

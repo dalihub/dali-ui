@@ -31,9 +31,9 @@
 
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/controls/control-depth-index-ranges.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;

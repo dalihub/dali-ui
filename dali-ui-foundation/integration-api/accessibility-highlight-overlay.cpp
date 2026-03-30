@@ -20,6 +20,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
+#include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/constants.h>
@@ -29,14 +31,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/public-api/controls/control-impl.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/image-view/image-view.h>
-
-#include <dali-ui-foundation/integration-api/control-accessible.h>
-#include <dali-ui-foundation/internal/controls/control/control-data-impl.h>
-
-#include <dali/devel-api/atspi-interfaces/accessible.h>
 
 using Dali::Integration::ToDaliString;
 
@@ -49,12 +45,12 @@ constexpr const char* OVERLAY_NAME   = "HighlightOverlay";
 constexpr const char* HIGHLIGHT_NAME = "HighlightIndicator";
 
 #ifdef DEBUG_ENABLED
-Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_CONTROL_ACCESSIBLE");
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_ACCESSIBLE");
 #endif
 
 Dali::Actor CreateOverlayActor()
 {
-  auto actor = Control::New(Ui::Control::ControlBehaviour::DISABLE_STYLE_CHANGE_SIGNALS);
+  auto actor = View::New();
   actor.SetResizePolicy(ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
 
   actor.SetProperty(Actor::Property::NAME, OVERLAY_NAME);
@@ -62,7 +58,7 @@ Dali::Actor CreateOverlayActor()
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::POSITION, Vector3(0.0f, 0.0f, 0.0f));
 
-  actor.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
   return actor;
 }
 
@@ -74,7 +70,7 @@ Dali::Actor CreateOverlayHighlightActor()
   auto actor = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   actor.SetProperty(Actor::Property::NAME, HIGHLIGHT_NAME);
   actor.SetResizePolicy(ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
-  actor.SetProperty(Ui::Control::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
   return actor;
 }
 } // unnamed namespace
@@ -154,7 +150,7 @@ Dali::Actor AccessibilityHighlightOverlay::FindParentSceneView(Actor highlight)
 
   while(current)
   {
-    if(ControlAccessible::IsScene3D(current))
+    if(ViewAccessible::IsScene3D(current))
     {
       break;
     }

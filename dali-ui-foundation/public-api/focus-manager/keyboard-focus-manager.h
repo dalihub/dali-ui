@@ -202,11 +202,11 @@ public:
    * highlight.
    *
    * @SINCE_1_0.0
-   * @param indicator The indicator actor to be added
+   * @param indicator The indicator view to be added
    * @pre The KeyboardFocusManager has been initialized.
-   * @pre The indicator actor has been initialized.
+   * @pre The indicator view has been initialized.
    */
-  void SetFocusIndicatorActor(Actor indicator);
+  void SetFocusIndicatorActor(View indicator);
 
   /**
    * @brief Gets the focus indicator actor.

@@ -16,7 +16,6 @@
 
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/string-utils.h>

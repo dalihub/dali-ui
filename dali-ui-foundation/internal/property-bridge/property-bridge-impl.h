@@ -25,7 +25,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/property-bridge/property-bridge.h>
-#include <dali-ui-foundation/public-api/controls/control.h>
 
 namespace Dali
 {

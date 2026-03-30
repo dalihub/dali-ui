@@ -223,7 +223,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
 void TextControlAccessible::InitDefaultFeatures()
 {
-  ControlAccessible::InitDefaultFeatures();
+  ViewAccessible::InitDefaultFeatures();
   AddFeature<Dali::Accessibility::Text>(shared_from_this());
   AddFeature<Dali::Accessibility::Hypertext>(shared_from_this());
 }
@@ -462,8 +462,8 @@ std::string TextControlAccessible::GetWholeText() const
 
 std::string TextControlAccessible::GetCurrentPlaceholderText() const
 {
-  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
-  bool hasFocus     = Self() == focusControl;
+  auto focusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
+  bool hasFocus  = Self() == focusView;
 
   Ui::Text::Controller::PlaceholderType placeholderType =
     hasFocus ? Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
@@ -495,12 +495,12 @@ Accessibility::States EditableTextControlAccessible::CalculateStates()
 {
   using Dali::Accessibility::State;
 
-  auto states       = ControlAccessible::CalculateStates();
-  auto focusControl = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
+  auto states    = ViewAccessible::CalculateStates();
+  auto focusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
 
   states[State::EDITABLE]  = true;
   states[State::FOCUSABLE] = true;
-  states[State::FOCUSED]   = (Self() == focusControl);
+  states[State::FOCUSED]   = (Self() == focusView);
 
   return states;
 }
