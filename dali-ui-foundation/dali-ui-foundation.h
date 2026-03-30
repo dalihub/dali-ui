@@ -67,8 +67,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/enums.h>
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 #include <dali-ui-foundation/public-api/scroll-view.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>

@@ -849,14 +849,13 @@ private:
 public:
   /**
    * @brief Enumeration for the start and end property ranges for View.
-   * @SINCE_1_0.0
    */
   enum PropertyRange
   {
     PROPERTY_START_INDEX =
-      PROPERTY_REGISTRATION_START_INDEX,                         ///< Start index is used by the property registration macro. @SINCE_1_0.0
-    VIEW_PROPERTY_START_INDEX = PROPERTY_START_INDEX,            ///< Start index of View properties. @SINCE_1_0.0
-    VIEW_PROPERTY_END_INDEX   = VIEW_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices. @SINCE_1_0.0
+      PROPERTY_REGISTRATION_START_INDEX,                         ///< Start index is used by the property registration macro.
+    VIEW_PROPERTY_START_INDEX = PROPERTY_START_INDEX,            ///< Start index of View properties.
+    VIEW_PROPERTY_END_INDEX   = VIEW_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices.
   };
 
   /**
@@ -870,13 +869,11 @@ public:
   };
   /**
    * @brief Enumeration for the instance of properties belonging to the View class.
-   * @SINCE_1_0.0
    */
   struct Property
   {
     /**
      * @brief Enumeration for the instance of properties belonging to the View class.
-     * @SINCE_1_0.0
      */
     enum
     {
@@ -884,7 +881,6 @@ public:
        * @brief Receives key events to the View.
        * @details Name "keyInputFocus", type Property::BOOLEAN.
        * @see Ui::View::SetKeyInputFocus()
-       * @SINCE_1_0.0
        */
       KEY_INPUT_FOCUS = PROPERTY_START_INDEX,
 
@@ -892,14 +888,12 @@ public:
        * @brief The background of the View.
        *
        * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
-       * @SINCE_1_1.3
        */
       BACKGROUND,
 
       /**
        * @brief The outer space around the View.
        * @details Name "margin", type Property::EXTENTS.
-       * @SINCE_1_2.62
        * @note Margin property is to be supported by Layout algorithms and containers in future.
        */
       MARGIN,
@@ -907,7 +901,6 @@ public:
       /**
        * @brief The inner space of the View.
        * @details Name "padding", type Property::EXTENTS.
-       * @SINCE_1_2.62
        */
       PADDING,
 
@@ -1119,16 +1112,16 @@ public:
 
   // Typedefs
 
-  /// @brief Key Event signal type. @SINCE_1_0.0
+  /// @brief Key Event signal type.
   typedef Signal<bool(View, const KeyEvent&)> KeyEventSignalType;
 
-  /// @brief Key InputFocusType signal type. @SINCE_1_0.0
+  /// @brief Key InputFocusType signal type.
   typedef Signal<void(View)> KeyInputFocusSignalType;
 
-  /// @brief ResourceReady signal type. @SINCE_1_2.60
+  /// @brief ResourceReady signal type.
   typedef Signal<void(View)> ResourceReadySignalType;
 
-  /// @brief Offscreen rendering finished signal type. @SINCE_2_4.33
+  /// @brief Offscreen rendering finished signal type.
   typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
 
   /// @brief AccessibilityActivate signal type.
@@ -1172,30 +1165,26 @@ public:
 
   /**
    * @brief Clears the background.
-   * @SINCE_1_0.0
    */
   void ClearBackground();
 
   /**
    * @brief Sets RenderEffect to this View.
    *
-   * @SINCE_2_3.25
    * @param[in] effect RenderEffect to add.
    *
    * @note Every effect inherits RenderEffect.
    */
   void SetRenderEffect(Ui::RenderEffect effect);
 
-  /*
+  /**
    * @brief Retrieves View's render effect
-   * @SINCE_2_4.1
    * @return RenderEffect set on this View
    */
   Ui::RenderEffect GetRenderEffect() const;
 
   /**
    * @brief Clears RenderEffect of this View, if exists.
-   * @SINCE_2_3.25
    */
   void ClearRenderEffect();
 
@@ -1205,7 +1194,6 @@ public:
    * @brief Query if all resources required by a View are loaded and ready.
    *
    * Most resources are only loaded when the View is placed on stage.
-   * @SINCE_1_2.60
    * @return true if the resources are loaded and ready, false otherwise
    */
   bool IsResourceReady() const;
@@ -1239,7 +1227,6 @@ public:
    *   void YourCallbackName( View view );
    * @endcode
    *
-   * @SINCE_1_2.60
    * @return The signal to connect to
    * @note A RelayoutRequest is queued by View before this signal is emitted
    */
@@ -1253,7 +1240,6 @@ public:
    *   void YourCallbackName( View view );
    * @endcode
    *
-   * @SINCE_2_4.33
    * @return The signal to connect to
    * @pre The View has been initialized.
    * @note This signal is emitted when the offscreen rendering task is completed.
@@ -1267,7 +1253,6 @@ public: // Templates for Deriving Classes
    *
    * @tparam     T      The handle class
    * @tparam     I      The implementation class
-   * @SINCE_1_0.0
    * @param[in] handle Handle to an object
    * @return Handle to a class T or an uninitialized handle
    * @see DownCast(BaseHandle)
@@ -1298,7 +1283,6 @@ public: // Templates for Deriving Classes
    * implementation of their class.
    *
    * @tparam     I       The implementation class
-   * @SINCE_1_0.0
    * @param[in] internal Pointer to the Internal::CustomActor
    */
   template<typename I>

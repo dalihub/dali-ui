@@ -48,22 +48,22 @@ class RenderEffectImpl : public BaseObject, public ConnectionTracker
 {
 public:
   /**
-   * @copydoc Dali::Toolkit::RenderEffect::Activate
+   * @copydoc Dali::Ui::RenderEffect::Activate
    */
   void Activate();
 
   /**
-   * @copydoc Dali::Toolkit::RenderEffect::Deactivate
+   * @copydoc Dali::Ui::RenderEffect::Deactivate
    */
   void Deactivate();
 
   /**
-   * @copydoc Dali::Toolkit::RenderEffect::Refresh
+   * @copydoc Dali::Ui::RenderEffect::Refresh
    */
   void Refresh();
 
   /**
-   * @copydoc Dali::Toolkit::RenderEffect::IsActivated
+   * @copydoc Dali::Ui::RenderEffect::IsActivated
    */
   bool IsActivated() const;
 

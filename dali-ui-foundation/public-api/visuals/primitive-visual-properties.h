@@ -19,39 +19,35 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief PrimitiveVisual is to render a simple 3D shape, such as a cube or sphere.
- * @SINCE_1_1.45
  */
 namespace PrimitiveVisual
 {
 /**
  * @brief PrimitiveVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the PrimitiveVisual.
- * @SINCE_1_1.45
  */
 enum
 {
   /**
    * @brief The specific shape to render.
    * @details Name "shape", type Shape::Type (Property::INTEGER) or Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is Shape::SPHERE.
    * @see Shape::Type
    */
@@ -60,7 +56,6 @@ enum
   /**
    * @brief The color of the shape.
    * @details Name "mixColor", type Property::VECTOR4.
-   * @SINCE_1_2_4
    * @note Optional. If not specified, the default is Vector4(0.5, 0.5, 0.5, 1.0).
    * @note Applies to ALL shapes.
    */
@@ -70,7 +65,6 @@ enum
    * @brief The number of slices as you go around the shape.
    * @details Name "slices", type Property::INTEGER.
    * For spheres and conical frustums, this determines how many divisions there are as you go around the object.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 128.
    * @note Applies to:
    *      - Shape::SPHERE
@@ -85,7 +79,6 @@ enum
    * @brief The number of stacks as you go down the shape.
    * @details Name "stacks", type Property::INTEGER.
    * For spheres, 'stacks' determines how many layers there are as you go down the object.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 128.
    * @note Applies to:
    *      - Shape::SPHERE
@@ -96,7 +89,6 @@ enum
   /**
    * @brief The scale of the radius of the top circle of a conical frustum.
    * @details Name "scaleTopRadius", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 1.0f.
    * @note Applies to:
    *      - Shape::CONICAL_FRUSTUM
@@ -107,7 +99,6 @@ enum
   /**
    * @brief The scale of the radius of the bottom circle of a conical frustum.
    * @details Name "scaleBottomRadius", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 1.5f.
    * @note Applies to:
    *      - Shape::CONICAL_FRUSTUM
@@ -119,7 +110,6 @@ enum
   /**
    * @brief The scale of the height of a conic.
    * @details Name "scaleHeight", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 3.0f.
    * @note Applies to:
    *      - Shape::CONICAL_FRUSTUM
@@ -132,7 +122,6 @@ enum
   /**
    * @brief The scale of the radius of a cylinder.
    * @details Name "scaleRadius", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 1.0f.
    * @note Applies to:
    *      - Shape::CYLINDER
@@ -143,7 +132,6 @@ enum
   /**
    * @brief The dimensions of a cuboid. Scales in the same fashion as a 9-patch image.
    * @details Name "scaleDimensions", type Property::VECTOR3.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is Vector3::ONE.
    * @note Applies to:
    *      - Shape::CUBE
@@ -158,7 +146,6 @@ enum
    * @details Name "bevelPercentage", type Property::FLOAT.
    * Bevel percentage ranges from 0.0 to 1.0. It affects the ratio of the outer face widths to the width of the overall
    * cube.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 0.0f (no bevel).
    * @note Applies to:
    *      - Shape::BEVELLED_CUBE
@@ -169,7 +156,6 @@ enum
   /**
    * @brief Defines how smooth the bevelled edges should be.
    * @details Name "bevelSmoothness", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is 0.0f (sharp edges).
    * @note Applies to:
    *      - Shape::BEVELLED_CUBE
@@ -182,7 +168,6 @@ enum
    * @details Name "lightPosition", type Property::VECTOR3.
    * This is based off the stage's dimensions, so using the width and height of the stage halved will correspond to the
    * center, and using all zeroes will place the light at the top left corner.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is an offset outwards from the center of the screen.
    * @note Applies to ALL shapes.
    */
@@ -193,23 +178,21 @@ enum
 
 /**
  * @brief The primitive shape to render as a PrimitiveVisual.
- * @SINCE_1_1.45
  */
 namespace Shape
 {
 /**
  * @brief The primitive shape to render as a PrimitiveVisual.
- * @SINCE_1_1.45
  */
 enum Type
 {
-  SPHERE,          ///< A perfectly round geometrical object in three-dimensional space. @SINCE_1_1.45
-  CONICAL_FRUSTUM, ///< The area bound between two circles, i.e. a cone with the tip removed. @SINCE_1_3.15
-  CONE,            ///< Equivalent to a conical frustum with top radius of zero. @SINCE_1_1.45
-  CYLINDER,        ///< Equivalent to a conical frustum with equal radii for the top and bottom circles. @SINCE_1_1.45
-  CUBE,            ///< Equivalent to a bevelled cube with a bevel percentage of zero. @SINCE_1_1.45
-  OCTAHEDRON,      ///< Equivalent to a bevelled cube with a bevel percentage of one. @SINCE_1_1.45
-  BEVELLED_CUBE    ///< A cube/cuboid with all edges flattened to some degree. @SINCE_1_1.45
+  SPHERE,          ///< A perfectly round geometrical object in three-dimensional space.
+  CONICAL_FRUSTUM, ///< The area bound between two circles, i.e. a cone with the tip removed.
+  CONE,            ///< Equivalent to a conical frustum with top radius of zero.
+  CYLINDER,        ///< Equivalent to a conical frustum with equal radii for the top and bottom circles.
+  CUBE,            ///< Equivalent to a bevelled cube with a bevel percentage of zero.
+  OCTAHEDRON,      ///< Equivalent to a bevelled cube with a bevel percentage of one.
+  BEVELLED_CUBE    ///< A cube/cuboid with all edges flattened to some degree.
 };
 } // namespace Shape
 

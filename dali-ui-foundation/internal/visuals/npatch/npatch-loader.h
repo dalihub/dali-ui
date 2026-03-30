@@ -43,7 +43,7 @@ namespace Internal
  *
  * Cache is not cleaned during app lifecycle as N patches take considerably
  * small space and there's not usually a lot of them. Usually N patches are specified in
- * toolkit default style and there is 1-2 per control that are shared across the whole application.
+ * default style and there is 1-2 per control that are shared across the whole application.
  */
 class NPatchLoader : public Dali::Integration::Processor
 {

@@ -29,8 +29,8 @@ namespace Dali
 namespace Ui
 {
 /**
- * API to interface with the toolkit texture manager
- * Allows developers to add Textures through TextureSets to toolkit so that visuals can use them to render
+ * API to interface with the texture manager
+ * Allows developers to add Textures through TextureSets to the texture manager so that visuals can use them to render
  */
 namespace TextureManager
 {
@@ -57,7 +57,7 @@ DALI_UI_API String AddTexture(Texture& texture, bool preMultiplied = false);
 DALI_UI_API String AddTexture(TextureSet& textureSet, bool preMultiplied = false);
 
 /**
- * @brief Removes a TextureSet from toolkit
+ * @brief Removes a TextureSet from the texture manager
  * @note TextureSet may still be used by visuals and kept alive by them
  * @param[in] textureUrl to remove
  * @return the handle to the TextureSet or empty handle in case TextureSet is not found

@@ -23,7 +23,7 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_controls_text_controls
+ * @addtogroup dali_ui_view_text_controls
  * @{
  */
 
@@ -31,7 +31,6 @@ namespace InputFilter
 {
 /**
  * @brief InputFilter Property.
- * @SINCE_2_0.33
  */
 namespace Property
 {
@@ -63,14 +62,12 @@ namespace Property
  *
  *   field.SetProperty(DevelTextField::Property::INPUT_FILTER, filter); // acceptable inputs are 6, 7, 8, 9
  * @endcode
- * @SINCE_2_0.33
  */
 enum Type
 {
   /**
    * @brief The set of characters to be accepted.
    * @details Name "accepted", type Property::STRING.
-   * @SINCE_2_0.33
    * @note Available on regex string.
    */
   ACCEPTED,
@@ -78,7 +75,6 @@ enum Type
   /**
    * @brief The set of characters to be rejected.
    * @details Name "rejected", type Property::STRING.
-   * @SINCE_2_0.33
    * @note Available on regex string.
    */
   REJECTED

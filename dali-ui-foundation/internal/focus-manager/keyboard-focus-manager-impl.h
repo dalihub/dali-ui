@@ -435,7 +435,7 @@ private:
   SlotDelegate<KeyboardFocusManager> mSlotDelegate;
 
   CustomAlgorithmInterface*
-    mCustomAlgorithmInterface; ///< The user's (application / toolkit) implementation of CustomAlgorithmInterface
+    mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
 
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<Actor>>> FocusActorContainer;
 

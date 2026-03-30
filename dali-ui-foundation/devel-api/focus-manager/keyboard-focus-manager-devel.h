@@ -33,7 +33,7 @@ namespace DevelKeyboardFocusManager
 /**
  * @brief Interface used to provide custom keyboard focus algorithm for retrieving the next focusable actor.
  *
- * The application / toolkit can implement the interface and override the keyboard focus behaviour.
+ * The application / ui can implement the interface and override the keyboard focus behaviour.
  * Upon providing an implementation of this interface, the PreFocusChangeSignal is no longer emitted.
  * If focus is changing within a layout container, then the layout container is queried first to provide
  * the next focusable actor. If this does not provide a valid actor, then the Keyboard FocusManager will

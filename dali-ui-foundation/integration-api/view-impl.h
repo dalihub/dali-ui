@@ -150,17 +150,17 @@ public: // From Ui::Internal::View
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc Toolkit::Internal::View::OnKeyInputFocusGained
+   * @copydoc Ui::Internal::View::OnKeyInputFocusGained
    */
   virtual void OnKeyInputFocusGained();
 
   /**
-   * @copydoc Toolkit::Internal::View::OnKeyInputFocusLost
+   * @copydoc Ui::Internal::View::OnKeyInputFocusLost
    */
   virtual void OnKeyInputFocusLost();
 
   /**
-   * @copydoc Toolkit::Internal::View::OnKeyEvent
+   * @copydoc Ui::Internal::View::OnKeyEvent
    */
   virtual bool OnKeyEvent(const Dali::KeyEvent& event);
 
@@ -720,7 +720,6 @@ public:
   /**
    * @brief Sets the background with a property map.
    *
-   * @SINCE_1_0.0
    * @param[in] map The background property map
    */
   void SetBackground(const Property::Map& map);
@@ -760,7 +759,6 @@ public:
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
    *
-   * @SINCE_2_3.43
    * @return SourceActor of the OffScreenRenderable.
    */
   virtual Dali::Actor GetOffScreenRenderableSourceActor();
@@ -770,7 +768,6 @@ public:
    * The SourceActor of an OffScreen RenderTask can also become the SourceActor of another Actor's OffScreen RenderTask.
    * To draw the SourceActor multitimes, the exclusive information is required.
    *
-   * @SINCE_2_3.43
    * @return True if the RenderTask is exclusive.
    */
   virtual bool IsOffScreenRenderTaskExclusive();
@@ -797,7 +794,6 @@ public:
    * @code
    * EnableGestureDetection(GestureType::Value(GestureType::PINCH | GestureType::TAP | GestureType::PAN));
    * @endcode
-   * @SINCE_1_0.0
    * @param[in] type The gesture type(s) to enable
    */
   void EnableGestureDetection(GestureType::Value type);
@@ -806,7 +802,6 @@ public:
    * @brief Allows deriving classes to disable any of the gesture detectors.
    *
    * Like EnableGestureDetection, this can also be called using bitwise or.
-   * @SINCE_1_0.0
    * @param[in] type The gesture type(s) to disable
    * @see EnableGetureDetection
    */
@@ -817,7 +812,6 @@ public:
    * detection, then they can access the gesture detector through this
    * API and modify the detection.
    *
-   * @SINCE_1_0.0
    * @return The pinch gesture detector
    * @pre Pinch detection should have been enabled via EnableGestureDetection().
    * @see EnableGestureDetection
@@ -829,7 +823,6 @@ public:
    * detection, then they can access the gesture detector through this
    * API and modify the detection.
    *
-   * @SINCE_1_0.0
    * @return The pan gesture detector
    * @pre Pan detection should have been enabled via EnableGestureDetection().
    * @see EnableGestureDetection
@@ -841,7 +834,6 @@ public:
    * detection, then they can access the gesture detector through this
    * API and modify the detection.
    *
-   * @SINCE_1_0.0
    * @return The tap gesture detector
    * @pre Tap detection should have been enabled via EnableGestureDetection().
    * @see EnableGestureDetection
@@ -853,7 +845,6 @@ public:
    * detection, then they can access the gesture detector through this
    * API and modify the detection.
    *
-   * @SINCE_1_0.0
    * @return The long press gesture detector
    * @pre Long press detection should have been enabled via EnableGestureDetection().
    * @see EnableGestureDetection
@@ -868,7 +859,6 @@ public:
    * keyboard focus movement between its child actors).
    *
    * The view doesn't support it by default.
-   * @SINCE_1_0.0
    * @param[in] isSupported Whether this view supports two dimensional keyboard navigation
    */
   void SetKeyboardNavigationSupport(bool isSupported);
@@ -876,7 +866,6 @@ public:
   /**
    * @brief Gets whether this view supports two dimensional keyboard navigation.
    *
-   * @SINCE_1_0.0
    * @return true if this view supports two dimensional keyboard navigation
    */
   bool IsKeyboardNavigationSupported();
@@ -905,7 +894,6 @@ public:
    *
    * (i.e. the scope of keyboard focus movement
    * can be limited to its child actors). The view is not a focus group by default.
-   * @SINCE_1_0.0
    * @param[in] isFocusGroup Whether this view is set as a focus group for keyboard navigation
    */
   void SetAsKeyboardFocusGroup(bool isFocusGroup);
@@ -913,7 +901,6 @@ public:
   /**
    * @brief Gets whether this view is a focus group for keyboard navigation.
    *
-   * @SINCE_1_0.0
    * @return true if this view is set as a focus group for keyboard navigation
    */
   bool IsKeyboardFocusGroup();
@@ -928,7 +915,6 @@ public:
   /// @cond internal
   /**
    * @brief Called by the KeyboardFocusManager.
-   * @SINCE_1_0.0
    */
   DALI_INTERNAL void KeyboardEnter();
   /// @endcond
@@ -954,7 +940,6 @@ public:
   /**
    * @brief Called by the KeyInputFocusManager to emit key event signals.
    *
-   * @SINCE_1_0.0
    * @param[in] event The key event
    * @return True if the event was consumed
    */
@@ -967,7 +952,6 @@ protected: // For derived classes to call
    *
    * Should be called last by the view after it acts on the Input Focus change.
    *
-   * @SINCE_1_0.0
    * @param[in] focusGained True if gained, False if lost
    */
   void EmitKeyInputFocusSignal(bool focusGained);
@@ -1072,19 +1056,18 @@ public:
 public: // Helpers for deriving classes
   /**
    * @brief Flags for the constructor.
-   * @SINCE_1_0.0
    */
   enum ViewBehaviour
   {
     VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                ///< but doesn't receive event callbacks. @SINCE_1_2_10
+                                ///< but doesn't receive event callbacks.
     NOT_IN_USE_1 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
     REQUIRES_KEYBOARD_NAVIGATION_SUPPORT =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support keyboard navigation @SINCE_1_0.0
+      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support keyboard navigation
     DISABLE_STYLE_CHANGE_SIGNALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT +
-                                         2), ///< True if view should not monitor style change signals @SINCE_1_2_10
+                                         2), ///< True if view should not monitor style change signals
     DISABLE_VISUALS =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 3), ///< True if view should not use visuals @SINCE_2_3.6
+      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 3), ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
@@ -1098,7 +1081,6 @@ protected:
   /**
    * @brief View constructor.
    *
-   * @SINCE_1_0.0
    * @param[in] behaviourFlags Behavioural flags from ViewBehaviour enum
    */
   ViewImpl(ViewBehaviour behaviourFlags);
@@ -1108,7 +1090,6 @@ public: // API for derived classes to override
 
   /**
    * @brief Second phase initialization.
-   * @SINCE_1_0.0
    */
   void Initialize();
 
@@ -1123,7 +1104,6 @@ public: // API for derived classes to override
    * @brief This method is called when the view is accessibility activated.
    *
    * Derived classes should override this to perform custom accessibility activation.
-   * @SINCE_1_0.0
    * @return true if this view can perform accessibility activation
    */
   virtual bool OnAccessibilityActivated();
@@ -1132,7 +1112,6 @@ public: // API for derived classes to override
    * @brief This method should be overridden by deriving classes when they wish to respond the accessibility
    * pan gesture.
    *
-   * @SINCE_1_0.0
    * @param[in] gesture The pan gesture
    * @return true if the pan gesture has been consumed by this view
    */
@@ -1142,7 +1121,6 @@ public: // API for derived classes to override
    * @brief This method should be overridden by deriving classes when they wish to respond
    * the accessibility up and down action (i.e. value change of slider control).
    *
-   * @SINCE_1_0.0
    * @param[in] isIncrease Whether the value should be increased or decreased
    * @return true if the value changed action has been consumed by this view
    */
@@ -1152,7 +1130,6 @@ public: // API for derived classes to override
    * @brief This method should be overridden by deriving classes when they wish to respond
    * the accessibility zoom action.
    *
-   * @SINCE_1_0.0
    * @return true if the zoom action has been consumed by this view
    */
   virtual bool OnAccessibilityZoom();
@@ -1181,7 +1158,6 @@ public: // API for derived classes to override
    * @brief Gets the next keyboard focusable actor in this view towards the given direction.
    *
    * A view needs to override this function in order to support two dimensional keyboard navigation.
-   * @SINCE_1_0.0
    * @param[in] currentFocusedActor The current focused actor
    * @param[in] direction The direction to move the focus towards
    * @param[in] loopEnabled Whether the focus movement should be looped within the view
@@ -1196,7 +1172,6 @@ public: // API for derived classes to override
    * This allows the application to perform any actions if wishes
    * before the focus is actually moved to the chosen actor.
    *
-   * @SINCE_1_0.0
    * @param[in] committedFocusableActor The committed focusable actor
    */
   virtual void OnKeyboardFocusChangeCommitted(Actor committedFocusableActor);
@@ -1205,7 +1180,6 @@ public: // API for derived classes to override
    * @brief This method is called when the view has enter pressed on it.
    *
    * Derived classes should override this to perform custom actions.
-   * @SINCE_1_0.0
    * @return true if this view supported this action
    */
   virtual bool OnKeyboardEnter();
@@ -1219,7 +1193,6 @@ public: // API for derived classes to override
    * is enabled.  The default behaviour is to scale the view by the
    * pinch scale.
    *
-   * @SINCE_1_0.0
    * @param[in] pinch The pinch gesture
    * @note If overridden, then the default behavior will not occur.
    * @note Pinch detection should be enabled via EnableGestureDetection().
@@ -1233,7 +1206,6 @@ public: // API for derived classes to override
    * This should be overridden by deriving classes when pan detection
    * is enabled.
    *
-   * @SINCE_1_0.0
    * @param[in] pan The pan gesture
    * @note There is no default behavior with panning.
    * @note Pan detection should be enabled via EnableGestureDetection().
@@ -1247,7 +1219,6 @@ public: // API for derived classes to override
    * This should be overridden by deriving classes when tap detection
    * is enabled.
    *
-   * @SINCE_1_0.0
    * @param[in] tap The tap gesture
    * @note There is no default behavior with a tap.
    * @note Tap detection should be enabled via EnableGestureDetection().
@@ -1261,7 +1232,6 @@ public: // API for derived classes to override
    * This should be overridden by deriving classes when long press
    * detection is enabled.
    *
-   * @SINCE_1_0.0
    * @param[in] longPress The long press gesture
    * @note There is no default behaviour associated with a long press.
    * @note Long press detection should be enabled via EnableGestureDetection().
@@ -1284,7 +1254,6 @@ public: // API for derived classes to override
   /**
    * @brief Retrieves the extension for this view.
    *
-   * @SINCE_1_0.0
    * @return The extension if available, NULL otherwise
    */
   virtual Extension* GetViewExtension()

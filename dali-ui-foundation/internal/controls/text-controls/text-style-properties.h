@@ -23,7 +23,7 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_controls
+ * @addtogroup dali_ui_view
  * @{
  */
 

@@ -70,9 +70,9 @@ protected:
    */
   ScrollViewImpl();
 
-public: // From Toolkit::Internal::Control
+public: // From Ui::Internal::Control
   /**
-   * @copydoc Toolkit::Internal::Control::OnInitialize
+   * @copydoc Ui::Internal::Control::OnInitialize
    */
   void OnInitialize() override;
 

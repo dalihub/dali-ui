@@ -47,12 +47,11 @@ class DALI_UI_API MaskEffect : public RenderEffect
 public:
   /**
    * @brief Enumeration for selecting how the mask source interprets pixel data.
-   * @SINCE_2_4.15
    */
   enum MaskMode
   {
-    ALPHA,     ///< Uses the alpha channel of the mask texture. (Default) @SINCE_2_4.15
-    LUMINANCE, ///< Converts RGB to grayscale and uses the luminance as mask value. @SINCE_2_4.15
+    ALPHA,     ///< Uses the alpha channel of the mask texture. (Default)
+    LUMINANCE, ///< Converts RGB to grayscale and uses the luminance as mask value.
   };
 
   /**
@@ -64,7 +63,6 @@ public:
    *
    * @param[in] maskView The source View to affect mask.
    *
-   * @SINCE_2_4.15
    * @return A handle to a newly allocated Dali resource
    */
   static MaskEffect New(Ui::View maskView);
@@ -77,52 +75,44 @@ public:
    * @param[in] maskPosition The Position of mask source.
    * @param[in] maskScale The Scale of mask source.
    *
-   * @SINCE_2_4.15
    * @return A handle to a newly allocated Dali resource
    */
   static MaskEffect New(Ui::View maskView, MaskMode maskMode, Vector2 maskPosition, Vector2 maskScale);
 
   /**
    * @brief Creates an uninitialized mask effect.
-   * @SINCE_2_4.15
    */
   MaskEffect();
 
   /**
    * @brief Copy constructor.
-   * @SINCE_2_4.15
    */
   MaskEffect(const MaskEffect& handle);
 
   /**
    * @brief Destructor
-   * @SINCE_2_4.15
    */
   ~MaskEffect();
 
   /**
    * @brief Set whether the target should be rendered once(true) or every frame(false).
    * @param[in] targetMaskOnce If true, renders target once, else updates every frame.
-   * @SINCE_2_4.25
    */
   void SetTargetMaskOnce(bool targetMaskOnce);
 
   /**
    * @brief Retrives whether the target should be rendered once(true) or every frame(false).
-   * @SINCE_2_4.25
    */
   bool GetTargetMaskOnce() const;
 
   /**
    * @brief Set whether the source should be rendered once(true) or every frame(false).
    * @param[in] sourceMaskOnce If true, renders source once, else updates every frame.
-   * @SINCE_2_4.25
    */
   void SetSourceMaskOnce(bool sourceMaskOnce);
 
   /**
    * @brief Retrives whether the source should be rendered once(true) or every frame(false).
-   * @SINCE_2_4.25
    */
   bool GetSourceMaskOnce() const;
 
@@ -130,7 +120,6 @@ public: // Not intended for use by Application developers
   ///@cond internal
   /**
    * @brief Creates a handle using the Ui::Internal implementation.
-   * @SINCE_2_4.15
    * @param[in] maskEffectImpl The mask effect internal implementation.
    */
   explicit DALI_INTERNAL MaskEffect(Internal::MaskEffectImpl* maskEffectImpl);

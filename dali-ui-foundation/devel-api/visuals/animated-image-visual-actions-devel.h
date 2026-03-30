@@ -17,7 +17,7 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/devel-api/toolkit-action-index-ranges.h>
+#include <dali-ui-foundation/devel-api/ui-action-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visuals/image-visual-actions-devel.h>
 
 namespace Dali

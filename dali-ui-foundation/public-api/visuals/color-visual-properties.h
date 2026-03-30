@@ -19,39 +19,35 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief ColorVisual is to render a solid color to the control's quad.
- * @SINCE_1_1.45
  */
 namespace ColorVisual
 {
 /**
  * @brief ColorVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the ColorVisual.
- * @SINCE_1_1.45
  */
 enum
 {
   /**
    * @brief The solid color required.
    * @details Name "mixColor", type Property::VECTOR4.
-   * @SINCE_1_1.45
    * @note Mandatory.
    */
   MIX_COLOR = VISUAL_PROPERTY_START_INDEX,

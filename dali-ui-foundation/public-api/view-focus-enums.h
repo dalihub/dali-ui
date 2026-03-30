@@ -23,37 +23,35 @@ namespace Dali::Ui
 
 /**
  * @brief Keyboard focus direction.
- * @SINCE_1_0.0
  */
 enum FocusDirection
 {
-  LEFT,              ///< Move keyboard focus towards the left direction @SINCE_1_0.0
-  RIGHT,             ///< Move keyboard focus towards the right direction @SINCE_1_0.0
-  UP,                ///< Move keyboard focus towards the up direction @SINCE_1_0.0
-  DOWN,              ///< Move keyboard focus towards the down direction @SINCE_1_0.0
-  PAGE_UP,           ///< Move keyboard focus towards the previous page direction @SINCE_1_2.14
-  PAGE_DOWN,         ///< Move keyboard focus towards the next page direction @SINCE_1_2.14
-  FORWARD,           ///< Move keyboard focus towards the forward direction @SINCE_2_1.10
-  BACKWARD,          ///< Move keyboard focus towards the backward direction @SINCE_2_1.10
-  CLOCKWISE,         ///< Move keyboard focus towards the clockwise direction @SINCE_2_1.14
-  COUNTER_CLOCKWISE, ///< Move keyboard focus towards the counter clockwise direction @SINCE_2_1.14
+  LEFT,              ///< Move keyboard focus towards the left direction
+  RIGHT,             ///< Move keyboard focus towards the right direction
+  UP,                ///< Move keyboard focus towards the up direction
+  DOWN,              ///< Move keyboard focus towards the down direction
+  PAGE_UP,           ///< Move keyboard focus towards the previous page direction
+  PAGE_DOWN,         ///< Move keyboard focus towards the next page direction
+  FORWARD,           ///< Move keyboard focus towards the forward direction
+  BACKWARD,          ///< Move keyboard focus towards the backward direction
+  CLOCKWISE,         ///< Move keyboard focus towards the clockwise direction
+  COUNTER_CLOCKWISE, ///< Move keyboard focus towards the counter clockwise direction
 };
 
 /**
  * @brief Keyboard focus device.
- * @SINCE_2_5.5
  */
 enum FocusDevice
 {
-  UNKNOWN,     ///< Unknown device. @SINCE_2_5.5
-  KEYBOARD,    ///< A regular keyboard, numberpad or attached buttons. @SINCE_2_5.5
-  MOUSE,       ///< A mouse, trackball or touchpad relative motion device. @SINCE_2_5.5
-  TOUCH,       ///< A touchscreen with fingers or stylus. @SINCE_2_5.5
-  PEN,         ///< A special pen device. @SINCE_2_5.5
-  POINTER,     ///< A pointing device based on laser, infrared or similar technology. @SINCE_2_5.5
-  GAMEPAD,     ///< A gamepad Viewler or joystick. @SINCE_2_5.5
-  WHEEL,       ///< A mouse device. @SINCE_2_5.5
-  PROGRAMMATIC ///< Set to API call, not device. @SINCE_2_5.5
+  UNKNOWN,     ///< Unknown device.
+  KEYBOARD,    ///< A regular keyboard, numberpad or attached buttons.
+  MOUSE,       ///< A mouse, trackball or touchpad relative motion device.
+  TOUCH,       ///< A touchscreen with fingers or stylus.
+  PEN,         ///< A special pen device.
+  POINTER,     ///< A pointing device based on laser, infrared or similar technology.
+  GAMEPAD,     ///< A gamepad Viewler or joystick.
+  WHEEL,       ///< A mouse device.
+  PROGRAMMATIC ///< Set to API call, not device.
 };
 } // namespace Dali::Ui
 

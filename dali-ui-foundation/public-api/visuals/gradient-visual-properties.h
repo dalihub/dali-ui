@@ -19,32 +19,29 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief GradientVisual is to render a smooth transition of colors to the control's quad.
- * @SINCE_1_1.45
  */
 namespace GradientVisual
 {
 /**
  * @brief GradientVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the GradientVisual.
- * @SINCE_1_1.45
  */
 enum
 {
@@ -55,7 +52,6 @@ enum
    * The outside of the entered Start Position and End Position is extended to the value of the border.
    * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
    * only the corresponding area is drawn.
-   * @SINCE_1_1.45
    * @note Mandatory for Linear.
    */
   START_POSITION = VISUAL_PROPERTY_START_INDEX,
@@ -67,7 +63,6 @@ enum
    * The outside of the entered Start Position and End Position is extended to the value of the border.
    * Even if the range between Start Position and End Position is greater than (-0.5, -0.5) to (0.5, 0.5),
    * only the corresponding area is drawn.
-   * @SINCE_1_1.45
    * @note Mandatory for Linear.
    */
   END_POSITION,
@@ -75,7 +70,6 @@ enum
   /**
    * @brief The center point of a radial gradient.
    * @details Name "center", type Property::VECTOR2.
-   * @SINCE_1_1.45
    * @note Mandatory for Radial and Conic.
    */
   CENTER,
@@ -83,7 +77,6 @@ enum
   /**
    * @brief The size of the radius of a radial gradient.
    * @details Name "radius", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Mandatory for Radial.
    */
   RADIUS,
@@ -91,7 +84,6 @@ enum
   /**
    * @brief All the stop offsets.
    * @details Name "stopOffset", type Property::ARRAY of Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is 0.0 and 1.0.
    */
   STOP_OFFSET,
@@ -99,7 +91,6 @@ enum
   /**
    * @brief The color at the stop offsets.
    * @details Name "stopColor", type Property::ARRAY of Property::VECTOR4.
-   * @SINCE_1_1.45
    * @note Mandatory. At least 2 values required to show a gradient.
    */
   STOP_COLOR,
@@ -107,7 +98,6 @@ enum
   /**
    * @brief Defines the coordinate system for certain attributes of the points in a gradient.
    * @details Name "units", type Units::Type (Property::INTEGER) or Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is Units::OBJECT_BOUNDING_BOX.
    * @see Units::Type
    */
@@ -116,7 +106,6 @@ enum
   /**
    * @brief Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
    * @details Name "spreadMethod", type SpreadMethod::Type (Property::INTEGER) or Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is SpreadMethod::PAD.
    * @see SpreadMethod::Type
    */
@@ -125,7 +114,6 @@ enum
   /**
    * @brief The offset value that shifts the starting position of the gradient.
    * @details Name "startOffset", type Property::FLOAT.
-   * @SINCE_2_4.17
    * @note Optional. If not supplied, default is 0.
    */
   START_OFFSET,
@@ -133,7 +121,6 @@ enum
   /**
    * @brief The initial angle from which the conic gradient begins.
    * @details Name "startAngle", type Property::FLOAT.
-   * @SINCE_2_4.17
    * @note Mandatory for Conic.
    */
   START_ANGLE
@@ -147,7 +134,6 @@ enum
  * This applies to the:
  * - Start (x1, y1) and End (x2 and y2) points of a line if using a linear gradient.
  * - Center point (cx, cy) and radius (r) of a circle if using a radial gradient.
- * @SINCE_1_1.45
  */
 namespace Units
 {
@@ -157,35 +143,30 @@ namespace Units
  * This applies to the:
  * - Start (x1, y1) and End (x2 and y2) points of a line if using a linear gradient.
  * - Center point (cx, cy) and radius (r) of a circle if using a radial gradient.
- * @SINCE_1_1.45
  */
 enum Type
 {
   OBJECT_BOUNDING_BOX, ///< Uses the normals for the start, end & center points, i.e. top-left is (-0.5, -0.5) and
-                       ///< bottom-right is (0.5, 0.5). @SINCE_1_1.45
+                       ///< bottom-right is (0.5, 0.5).
   USER_SPACE           ///< Uses the user coordinates for the start, end & center points, i.e. in a 200 by 200 control, top-left
-                       ///< is (0, 0) and bottom-right is (200, 200). @SINCE_1_1.45
+                       ///< is (0, 0) and bottom-right is (200, 200).
 };
 
 } // namespace Units
 
 /**
  * @brief Policies that define what happens if the gradient starts or ends inside the bounds of the target rectangle.
- * @SINCE_1_1.45
  */
 namespace SpreadMethod
 {
 /**
  * @brief Policies that define what happens if the gradient starts or ends inside the bounds of the target rectangle.
- * @SINCE_1_1.45
  */
 enum Type
 {
-  PAD,     ///< Uses the terminal colors of the gradient to fill the remainder of the quad. @SINCE_1_1.45
+  PAD,     ///< Uses the terminal colors of the gradient to fill the remainder of the quad.
   REFLECT, ///< Reflect the gradient pattern start-to-end, end-to-start, start-to-end etc. until the quad is filled.
-           ///< @SINCE_1_1.45
   REPEAT   ///< Repeat the gradient pattern start-to-end, start-to-end, start-to-end etc. until the quad is filled.
-           ///< @SINCE_1_1.45
 };
 
 } // namespace SpreadMethod

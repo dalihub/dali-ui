@@ -25,7 +25,6 @@ namespace Dali::Ui
 {
 /**
  * @brief Enumeration for the start and end property ranges.
- * @SINCE_2_4.13
  */
 enum ConstraintTagRanges
 {

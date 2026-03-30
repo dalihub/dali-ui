@@ -19,32 +19,29 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief ImageVisual is to render an image into the control's quad.
- * @SINCE_1_1.45
  */
 namespace ImageVisual
 {
 /**
  * @brief ImageVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the ImageVisual.
- * @SINCE_1_1.45
  */
 enum
 {
@@ -55,7 +52,6 @@ enum
    * @note The number of threads used for local and remote image loading can be controlled by the
    *       environment variables DALI_TEXTURE_LOCAL_THREADS and DALI_TEXTURE_REMOTE_THREADS respectively.
    *       The default values are 4 threads for local image loading and 8 threads for remote image loading.
-   * @SINCE_1_1.45
    * @note Mandatory.
    */
   URL = VISUAL_PROPERTY_START_INDEX,
@@ -63,7 +59,6 @@ enum
   /**
    * @brief Fitting options, used when resizing images to fit desired dimensions.
    * @details Name "fittingMode", type Dali::FittingMode (Property::INTEGER) or Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is Dali::FittingMode::SHRINK_TO_FIT.
    * @note For Normal Quad images only.
    * @see Dali::FittingMode
@@ -73,7 +68,6 @@ enum
   /**
    * @brief Filtering options, used when resizing images to sample original pixels.
    * @details Name "samplingMode", type Dali::SamplingMode (Property::INTEGER) or Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is SamplingMode::BOX.
    * @note For Normal Quad images only.
    * @see Dali::SamplingMode
@@ -83,7 +77,6 @@ enum
   /**
    * @brief The desired image width.
    * @details Name "desiredWidth", type Property::INTEGER.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the actual image width is used.
    * @note For Normal Quad images only.
    */
@@ -92,7 +85,6 @@ enum
   /**
    * @brief The desired image height.
    * @details Name "desiredHeight", type Property::INTEGER.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the actual image height is used.
    * @note For Normal Quad images only.
    */
@@ -101,7 +93,6 @@ enum
   /**
    * @brief Whether to load the image synchronously.
    * @details Name "synchronousLoading", type Property::BOOLEAN.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is false, i.e. the image is loaded asynchronously.
    * @note For Normal Quad images only.
    */
@@ -110,7 +101,6 @@ enum
   /**
    * @brief If true, only draws the borders.
    * @details Name "borderOnly", type Property::BOOLEAN.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is false.
    * @note For N-Patch images only.
    */
@@ -122,7 +112,6 @@ enum
    *          It is a rectangular area.
    *          The first two elements indicate the top-left position of the area, and the last two elements are the area
    * width and height respectively.
-   * @SINCE_1_2.1
    * @note Optional. If not specified, the default value is [0.0, 0.0, 1.0, 1.0], i.e. the entire area of the image.
    * @note For Normal Quad images only.
    */
@@ -132,7 +121,6 @@ enum
    * @brief The wrap mode for u coordinate.
    * @details Name "wrapModeU", type Dali::WrapMode::Type (Property::INTEGER) or Property::STRING.
    *          It decides how the texture should be sampled when the u coordinate exceeds the range of 0.0 to 1.0.
-   * @SINCE_1_2.1
    * @note Optional. If not specified, the default is CLAMP.
    * @note For Normal QUAD image only.
    */
@@ -142,7 +130,6 @@ enum
    * @brief The wrap mode for v coordinate.
    * @details Name "wrapModeV", type Dali::WrapMode::Type (Property::INTEGER) or Property::STRING.
    *          it decides how the texture should be sampled when the v coordinate exceeds the range of 0.0 to 1.0.
-   * @SINCE_1_2.1
    * @note Optional. If not specified, the default is CLAMP.
    * @note For Normal QUAD image only.
    */
@@ -152,7 +139,6 @@ enum
    * @brief The border of the image.
    * @details Name "border", type Property::RECTANGLE or Property::VECTOR4.
    *          The border of the image in the order: left, right, bottom, top.
-   * @SINCE_1_2.60
    * @note Optional.
    * @note For N-Patch images only.
    */
@@ -170,7 +156,6 @@ enum
    * may necessitate a re-load of the main image. The alpha mask image will be scaled
    * on load to match the size of the main image, then applied to the pixel data
    * before uploading to GL.
-   * @SINCE_1_2.60
    * @note Optional.
    */
   ALPHA_MASK_URL,
@@ -179,7 +164,6 @@ enum
    * @brief Defines the batch size for pre-loading images in the AnimatedImageVisual
    * @details Name "batchSize", type Property::INTEGER, number of images to pre-load
    * before starting to play. Default value: 2
-   * @SINCE_1_2.60
    * @note Optional.
    * @note Minimum supported value is 2.
    */
@@ -190,7 +174,6 @@ enum
    * @details Name "cacheSize", type Property::INTEGER, number of images to keep
    * cached ahead during playback. Default value: 2
    *
-   * @SINCE_1_2.60
    * @note Optional.
    * @note Minimum supported value is 2.
    * @note, cacheSize should be >= batchSize.
@@ -203,7 +186,6 @@ enum
   /**
    * @brief The number of milliseconds between each frame in the AnimatedImageVisual
    * @details Name "frameDelay", type Property::INTEGER, The number of milliseconds between each frame.
-   * @SINCE_1_2.60
    * @note Optional.
    * @note This is only used when multiple URLs are provided.
    */
@@ -214,7 +196,6 @@ enum
    * @details Name "maskContentScale", type Property::FLOAT, The scale factor
    * to apply to the content before masking. Note, scaled images are cropped to
    * the same size as the alpha mask.
-   * @SINCE_1_2.60
    * @note Optional.
    */
   MASK_CONTENT_SCALE,
@@ -223,7 +204,6 @@ enum
    * @brief Whether to crop image to mask or scale mask to fit image
    * @details Name "cropToMask", type Property::BOOLEAN, True if the image should
    * be cropped to match the mask size, or false if the image should remain the same size.
-   * @SINCE_1_2.60
    * @note Optional, Default true
    * @note If this is false, then the mask is scaled to fit the image before being applied.
    */
@@ -232,7 +212,6 @@ enum
   /**
    * @brief The policy to determine when an image should be loaded.
    * @details Name "loadPolicy",  Type LoadPolicy::Type (Property::INTEGER)or Property::STRING.
-   * @SINCE_1_3_5
    * @note Default LoadPolicy::ATTACHED
    * @see LoadPolicy::Type
    */
@@ -242,7 +221,6 @@ enum
   /**
    * @brief The policy to determine when an image request to be released so should no longer be cached.
    * @details Name "releasePolicy", Type ReleasePolicy::Type (Property::INTEGER) or Property::STRING
-   * @SINCE_1_3_5
    * @note Default ReleasePolicy::DETACHED
    * @see ReleasePolicy::Type
    */
@@ -251,7 +229,6 @@ enum
   /**
    * @brief Determines if image orientation should be corrected so the image displays as it was intended.
    * @details Name "orientationCorrection", Type Property::BOOLEAN, if true the image's orientation will be corrected.
-   * @SINCE_1_3_5
    * @note Default true
    */
   ORIENTATION_CORRECTION,
@@ -262,13 +239,11 @@ enum
 
 /**
  * @brief The policy determining if the image is loaded when the visual is staged or created.
- * @SINCE_1_3_5
  */
 namespace LoadPolicy
 {
 /**
  * @brief The available named elements that define the LoadPolicy.
- * @SINCE_1_3_5
  */
 enum Type
 {
@@ -281,14 +256,12 @@ enum Type
 /**
  * @brief The policy determining when a image is requested to be deleted from the cache in relation to the ImageVisual
  * lifetime.
- * @SINCE_1_3_5
  * @note If the texture is being shared by another visual it persist if still required.
  */
 namespace ReleasePolicy
 {
 /**
  * @brief The available named elements that define the ReleasePolicy.
- * @SINCE_1_3_5
  */
 enum Type
 {

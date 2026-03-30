@@ -26,21 +26,20 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_controls
+ * @addtogroup dali_ui_view
  * @{
  */
 
 /**
  * @brief Enumeration for the start and end property ranges.
- * @SINCE_1_1.45
  */
 enum PropertyRanges
 {
-  VISUAL_PROPERTY_BASE_START_INDEX = CORE_PROPERTY_MAX_INDEX + 1, ///< Visual Property Base Start Index. @SINCE_1_1.45
+  VISUAL_PROPERTY_BASE_START_INDEX = CORE_PROPERTY_MAX_INDEX + 1, ///< Visual Property Base Start Index.
   VISUAL_PROPERTY_BASE_END_INDEX =
-    VISUAL_PROPERTY_BASE_START_INDEX + 100,                           ///< Visual Property Base End Index. @SINCE_1_1.45
-  VISUAL_PROPERTY_START_INDEX = VISUAL_PROPERTY_BASE_END_INDEX + 1,   ///< Visual Property Start Index. @SINCE_1_1.45
-  VISUAL_PROPERTY_END_INDEX   = VISUAL_PROPERTY_START_INDEX + 100000, ///< Visual Property End Index. @SINCE_1_1.45
+    VISUAL_PROPERTY_BASE_START_INDEX + 100,                           ///< Visual Property Base End Index.
+  VISUAL_PROPERTY_START_INDEX = VISUAL_PROPERTY_BASE_END_INDEX + 1,   ///< Visual Property Start Index.
+  VISUAL_PROPERTY_END_INDEX   = VISUAL_PROPERTY_START_INDEX + 100000, ///< Visual Property End Index.
 };
 
 /**

@@ -32,8 +32,8 @@ namespace Dali
 namespace Ui
 {
 /**
- * API to interface with the toolkit image
- * Allows developers to add FrameBuffer, PixelData and NativeImageInterface to toolkit so that visuals can use them to
+ * API to interface with the an image
+ * Allows developers to add FrameBuffer, PixelData and NativeImageInterface to Ui so that visuals can use them to
  * render
  */
 namespace Image

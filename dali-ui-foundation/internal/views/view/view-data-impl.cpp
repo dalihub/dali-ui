@@ -48,8 +48,8 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
-#include <dali-ui-foundation/public-api/toolkit-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>

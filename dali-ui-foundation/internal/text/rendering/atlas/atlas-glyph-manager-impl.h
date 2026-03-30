@@ -96,7 +96,7 @@ public:
   Pixel::Format GetPixelFormat(uint32_t atlasId);
 
   /**
-   * @copydoc toolkit::AtlasGlyphManager::AdjustReferenceCount
+   * @copydoc Ui::AtlasGlyphManager::AdjustReferenceCount
    */
   void AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index, const Ui::AtlasGlyphManager::GlyphStyle& style,
                             int32_t delta);

@@ -31,7 +31,7 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_image_loader
+ * @addtogroup dali_ui_image_loader
  * @{
  */
 
@@ -61,7 +61,6 @@ namespace SyncImageLoader
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
  * orientationCorrection = true
  *
- * @SINCE_1_2_14
  * @REMARK_INTERNET
  * @REMARK_STORAGE
  * @param[in] url The URL of the image file to load
@@ -76,7 +75,6 @@ DALI_UI_API PixelData Load(const std::string& url);
  * samplingMode = SamplingMode::BOX_THEN_LINEAR
  * orientationCorrection = true
  *
- * @SINCE_1_2_14
  * @REMARK_INTERNET
  * @REMARK_STORAGE
  * @param[in] url The URL of the image file to load
@@ -87,7 +85,6 @@ DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions);
 
 /**
  * @brief Loads an image synchronously by specifying the target dimensions and options.
- * @SINCE_1_2_14
  * @REMARK_INTERNET
  * @REMARK_STORAGE
  * @param[in] url The URL of the image file to load

@@ -1,5 +1,5 @@
-#ifndef DALI_UI_DEVEL_API_ALIGN_ENUMERATIONS_H
-#define DALI_UI_DEVEL_API_ALIGN_ENUMERATIONS_H
+#ifndef DALI_UI_ALIGN_ENUMERATIONS_H
+#define DALI_UI_ALIGN_ENUMERATIONS_H
 
 /*
  * Copyright (c) 2020 Samsung Electronics Co., Ltd.
@@ -23,31 +23,29 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_controls
+ * @addtogroup dali_ui_view
  * @{
  */
 
 /**
  * @brief Enumerations for the alignment of Visuals
- * @SINCE_1_2.60
  */
 namespace Align
 {
 /**
  * @brief Describes anchor point and parent origin of visuals
- * @SINCE_1_2.60
  */
 enum Type
 {
-  TOP_BEGIN = 0, ///< @SINCE_1_2.60
-  TOP_CENTER,    ///< @SINCE_1_2.60
-  TOP_END,       ///< @SINCE_1_2.60
-  CENTER_BEGIN,  ///< @SINCE_1_2.60
-  CENTER,        ///< @SINCE_1_2.60
-  CENTER_END,    ///< @SINCE_1_2.60
-  BOTTOM_BEGIN,  ///< @SINCE_1_2.60
-  BOTTOM_CENTER, ///< @SINCE_1_2.60
-  BOTTOM_END     ///< @SINCE_1_2.60
+  TOP_BEGIN = 0,
+  TOP_CENTER,
+  TOP_END,
+  CENTER_BEGIN,
+  CENTER,
+  CENTER_END,
+  BOTTOM_BEGIN,
+  BOTTOM_CENTER,
+  BOTTOM_END
 };
 } // namespace Align
 
@@ -59,4 +57,4 @@ enum Type
 
 } // namespace Dali
 
-#endif // DALI_UI_DEVEL_API_ALIGN_ENUMERATIONS_H
+#endif // DALI_UI_ALIGN_ENUMERATIONS_H

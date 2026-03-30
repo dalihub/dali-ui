@@ -220,7 +220,6 @@ private:
  *
  * @tparam ParameterType0 The type of first argument passed to the CreateVisual()
  * @tparam ParameterType1 The type of second argument passed to the CreateVisual()
- * @SINCE_1_0.39
  * @param[in] actor Actor for which the visual will be replaced
  * @param[in,out] visual The visual to be replaced
  * @param[in] param0 First template based argument passed to the visual factory
@@ -244,7 +243,6 @@ void InitializeVisual(Actor& actor, Ui::Visual::Base& visual, ParameterType0& pa
  * @brief Template to allow discard old visual, get new one and set it on stage if possible
  *
  * @tparam ParameterType The type of argument passed to the CreateVisual()
- * @SINCE_1_0.39
  * @param[in] actor Actor for which the visual will be replaced
  * @param[in,out] visual The visual to be replaced
  * @param[in] param Template based argument passed to the visual factory

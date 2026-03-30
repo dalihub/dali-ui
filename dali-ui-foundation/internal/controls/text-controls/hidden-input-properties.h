@@ -23,7 +23,7 @@ namespace Dali
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_controls_text_controls
+ * @addtogroup dali_ui_view_text_controls
  * @{
  */
 
@@ -31,20 +31,17 @@ namespace HiddenInput
 {
 /**
  * @brief HiddenInput Property.
- * @SINCE_1_2.60
  */
 namespace Property
 {
 /**
  * @brief HiddenInput Property.
- * @SINCE_1_2.60
  */
 enum
 {
   /**
    * @brief The mode for input text display.
    * @details Name "mode", type HiddenInput::Mode (Property::INTEGER).
-   * @SINCE_1_2.60
    * @note Optional.
    * @see HiddenInput::Mode
    */
@@ -53,7 +50,6 @@ enum
   /**
    * @brief All input characters are substituted by this character.
    * @details Name "substituteCharacter", type Property::INTEGER.
-   * @SINCE_1_2.60
    * @note Optional.
    */
   SUBSTITUTE_CHARACTER,
@@ -61,7 +57,6 @@ enum
   /**
    * @brief Length of text to show or hide, available when HIDE_COUNT/SHOW_COUNT mode is used.
    * @details Name "substituteCount", type Property::INTEGER.
-   * @SINCE_1_2.60
    * @note Optional.
    */
   SUBSTITUTE_COUNT,
@@ -69,7 +64,6 @@ enum
   /**
    * @brief Hide last character after this duration, available when SHOW_LAST_CHARACTER mode.
    * @details Name "showDuration", type Property::INTEGER.
-   * @SINCE_1_2.60
    * @note Optional.
    */
   SHOW_LAST_CHARACTER_DURATION
@@ -79,22 +73,20 @@ enum
 
 /**
  * @brief The type for HiddenInput::Property::MODE.
- * @SINCE_1_2.60
  */
 namespace Mode
 {
 /**
  * @brief The type for HiddenInput::Property::MODE.
- * @SINCE_1_2.60
  */
 enum Type
 {
-  HIDE_NONE,          ///< Do not hide text. @SINCE_1_2.60
-  HIDE_ALL,           ///< Hide all the input text. @SINCE_1_2.60
-  HIDE_COUNT,         ///< Hide n characters from start. @SINCE_1_2.60
-  SHOW_COUNT,         ///< Show n characters from start. @SINCE_1_2.60
+  HIDE_NONE,          ///< Do not hide text.
+  HIDE_ALL,           ///< Hide all the input text.
+  HIDE_COUNT,         ///< Hide n characters from start.
+  SHOW_COUNT,         ///< Show n characters from start.
   SHOW_LAST_CHARACTER ///< Show last character for the duration (use Property::SHOW_LAST_CHARACTER_DURATION to modify
-                      ///< duration). @SINCE_1_2.60
+                      ///< duration).
 };
 
 } // namespace Mode

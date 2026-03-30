@@ -19,39 +19,35 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief BorderVisual is to render a solid color as an internal border to the control's quad.
- * @SINCE_1_1.45
  */
 namespace BorderVisual
 {
 /**
  * @brief BorderVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the BorderVisual.
- * @SINCE_1_1.45
  */
 enum
 {
   /**
    * @brief The color of the border.
    * @details Name "borderColor", type Property::VECTOR4.
-   * @SINCE_1_1.45
    * @note Mandatory.
    */
   COLOR = VISUAL_PROPERTY_START_INDEX,
@@ -59,7 +55,6 @@ enum
   /**
    * @brief The width of the border (in pixels).
    * @details Name "borderSize", type Property::FLOAT.
-   * @SINCE_1_1.45
    * @note Mandatory.
    */
   SIZE,
@@ -67,7 +62,6 @@ enum
   /**
    * @brief Whether anti-aliasing of the border is required.
    * @details Name "antiAliasing", type Property::BOOLEAN.
-   * @SINCE_1_1.45
    * @note Optional. If not supplied, default is false.
    */
   ANTI_ALIASING,

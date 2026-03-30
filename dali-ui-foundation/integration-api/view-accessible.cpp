@@ -68,7 +68,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_CON
 
 constexpr const char* ATTR_IMG_SRC_KEY = "imgSrc";
 
-std::string GetLocaleText(std::string string, const char* domain = "dali-toolkit")
+std::string GetLocaleText(std::string string, const char* domain = "dali-ui")
 {
 #ifdef DGETTEXT_ENABLED
   /*TODO: currently non-localized string is used as a key for translation lookup. In case the lookup key formatting is

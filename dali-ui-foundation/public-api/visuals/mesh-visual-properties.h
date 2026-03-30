@@ -19,39 +19,35 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/toolkit-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
 namespace Dali
 {
 namespace Ui
 {
 /**
- * @addtogroup dali_toolkit_visuals
+ * @addtogroup dali_ui_visuals
  * @{
  */
 
 /**
  * @brief MeshVisual is to render a mesh using a .obj file, optionally with textures provided by a mtl file.
- * @SINCE_1_1.45
  */
 namespace MeshVisual
 {
 /**
  * @brief MeshVisual Property.
- * @SINCE_1_1.45
  */
 namespace Property
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the MeshVisual.
- * @SINCE_1_1.45
  */
 enum
 {
   /**
    * @brief The location of the ".obj" file.
    * @details Name "objectUrl", type Property::STRING.
-   * @SINCE_1_1.45
    * @note Mandatory.
    */
   OBJECT_URL = VISUAL_PROPERTY_START_INDEX,
@@ -59,7 +55,6 @@ enum
   /**
    * @brief The location of the ".mtl" file.
    * @details Name "materialUrl", type Property::STRING.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, then a textureless object is assumed.
    */
   MATERIAL_URL,
@@ -67,7 +62,6 @@ enum
   /**
    * @brief Path to the directory the textures (including gloss and normal) are stored in.
    * @details Name "texturesPath", type Property::STRING.
-   * @SINCE_1_1.45
    * @note Mandatory if using material.
    */
   TEXTURES_PATH,
@@ -77,7 +71,6 @@ enum
    * @details Name "shadingMode", type ShadingMode::Value (Property::INTEGER) or Property::STRING.
    * If anything the specified shading mode requires is missing, a simpler mode that can be handled with what has been
    * supplied will be used instead.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, it will use the best it can support (will try
    * ShadingMode::TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING first).
    * @see ShadingMode::Value
@@ -87,7 +80,6 @@ enum
   /**
    * @brief Whether to use mipmaps for textures or not.
    * @details Name "useMipmapping", type Property::BOOLEAN.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is true.
    */
   USE_MIPMAPPING,
@@ -95,7 +87,6 @@ enum
   /**
    * @brief Whether to average normals at each point to smooth textures or not.
    * @details Name "useSoftNormals", type Property::BOOLEAN.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is true.
    */
   USE_SOFT_NORMALS,
@@ -105,7 +96,6 @@ enum
    * @details Name "lightPosition", type Property::VECTOR3.
    * This is based off the stage's dimensions, so using the width and height of the stage halved will correspond to the
    * center, and using all zeroes will place the light at the top left corner.
-   * @SINCE_1_1.45
    * @note Optional. If not specified, the default is an offset outwards from the center of the screen.
    */
   LIGHT_POSITION,
@@ -115,22 +105,19 @@ enum
 
 /**
  * @brief The shading mode used by MeshVisual.
- * @SINCE_1_1.45
  */
 namespace ShadingMode
 {
 /**
  * @brief The shading mode used by MeshVisual.
- * @SINCE_1_1.45
  */
 enum Value
 {
   TEXTURELESS_WITH_DIFFUSE_LIGHTING,       ///< *Simplest*. One color that is lit by ambient and diffuse lighting.
-                                           ///< @SINCE_1_1.45
   TEXTURED_WITH_SPECULAR_LIGHTING,         ///< Uses only the visual image textures provided with specular lighting in addition
-                                           ///< to ambient and diffuse lighting. @SINCE_1_1.45
+                                           ///< to ambient and diffuse lighting.
   TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING ///< Uses all textures provided including a gloss, normal and texture map
-                                           ///< along with specular, ambient and diffuse lighting. @SINCE_1_1.45
+                                           ///< along with specular, ambient and diffuse lighting.
 };
 
 } // namespace ShadingMode

@@ -105,20 +105,18 @@ enum Mode
 
 /**
  * @brief The enumerations used for auto scroll stop mode.
- * @SINCE_1_2.60
  * @see Property::AUTO_SCROLL_STOP_MODE.
  */
 struct AutoScrollStopMode
 {
   /**
    * @brief The enumerations used for auto scroll stop mode.
-   * @SINCE_1_2.60
    * @see Property::AUTO_SCROLL_STOP_MODE.
    */
   enum Type
   {
-    FINISH_LOOP = 0, ///< Stop animation after current loop finishes. @SINCE_1_2.60
-    IMMEDIATE        ///< Stop animation immediately and reset position. @SINCE_1_2.60
+    FINISH_LOOP = 0, ///< Stop animation after current loop finishes.
+    IMMEDIATE        ///< Stop animation immediately and reset position.
   };
 };
 

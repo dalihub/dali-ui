@@ -39,7 +39,7 @@ class AsyncImageLoader;
 }
 
 /**
- * @addtogroup dali_toolkit_image_loader
+ * @addtogroup dali_ui_image_loader
  * @{
  */
 
@@ -98,12 +98,11 @@ class AsyncImageLoader;
 class DALI_UI_API AsyncImageLoader : public BaseHandle
 {
 public:
-  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type @SINCE_1_2_14
+  typedef Signal<void(uint32_t, PixelData)> ImageLoadedSignalType; ///< Image loaded signal type
 
 public:
   /**
    * @brief Constructor which creates an empty AsyncImageLoader handle.
-   * @SINCE_1_2_14
    *
    * Use AsyncImageLoader::New() to create an initialised object.
    */
@@ -111,7 +110,6 @@ public:
 
   /**
    * @brief Destructor.
-   * @SINCE_1_2_14
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
@@ -119,7 +117,6 @@ public:
 
   /**
    * @brief This copy constructor is required for (smart) pointer semantics.
-   * @SINCE_1_2_14
    *
    * @param[in] handle A reference to the copied handle
    */
@@ -127,7 +124,6 @@ public:
 
   /**
    * @brief Move constructor
-   * @SINCE_1_9.23
    *
    * @param[in] rhs A reference to the moved handle
    */
@@ -135,7 +131,6 @@ public:
 
   /**
    * @brief This assignment operator is required for (smart) pointer semantics.
-   * @SINCE_1_2_14
    *
    * @param[in] handle  A reference to the copied handle
    * @return A reference to this
@@ -144,7 +139,6 @@ public:
 
   /**
    * @brief Move assignment
-   * @SINCE_1_9.23
    *
    * @param[in] rhs A reference to the moved handle
    */
@@ -152,7 +146,6 @@ public:
 
   /**
    * @brief Creates a new loader to load the image asynchronously in a worker thread.
-   * @SINCE_1_2_14
    *
    * @return The image loader
    */
@@ -164,7 +157,6 @@ public:
    * If the handle points to an AsyncImageLoader object, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
-   * @SINCE_1_2_14
    * @param[in] handle A handle to an object
    * @return A handle to a AsyncImageLoader object or an uninitialized handle
    */
@@ -177,7 +169,6 @@ public:
    * samplingMode = SamplingMode::BOX_THEN_LINEAR
    * orientationCorrection = true
    *
-   * @SINCE_1_2_14
    * @REMARK_INTERNET
    * @REMARK_STORAGE
    * @param[in] url The URL of the image file to load
@@ -192,7 +183,6 @@ public:
    * samplingMode = SamplingMode::BOX_THEN_LINEAR
    * orientationCorrection = true
    *
-   * @SINCE_1_2_14
    * @REMARK_INTERNET
    * @REMARK_STORAGE
    * @param[in] url The URL of the image file to load
@@ -203,7 +193,6 @@ public:
 
   /**
    * @brief Starts an image loading task.
-   * @SINCE_1_2_14
    * @REMARK_INTERNET
    * @REMARK_STORAGE
    * @param[in] url The URL of the image file to load
@@ -220,7 +209,6 @@ public:
 
   /**
    * @brief Cancels an image loading task if it is still queueing in the work thread.
-   * @SINCE_1_2_14
    *
    * @param[in] loadingTaskId The task id returned when invoking the load call.
    * @return If true, the loading task is removed from the queue, otherwise the loading is already implemented and
@@ -230,7 +218,6 @@ public:
 
   /**
    * @brief Cancels all the loading tasks in the queue.
-   * @SINCE_1_2_14
    */
   void CancelAll();
 
@@ -241,7 +228,6 @@ public:
    * @code
    *   void YourCallbackName( uint32_t id, PixelData pixelData );
    * @endcode
-   * @SINCE_1_2_14
    * @return A reference to a signal object to Connect() with
    */
   ImageLoadedSignalType& ImageLoadedSignal();
@@ -252,7 +238,6 @@ public: // Not intended for developer use
    * @brief Allows the creation of a AsyncImageLoader handle from an internal pointer.
    *
    * @note Not intended for application developers
-   * @SINCE_1_2_14
    * @param[in] impl A pointer to the object
    */
   explicit DALI_INTERNAL AsyncImageLoader(Internal::AsyncImageLoader* impl);
