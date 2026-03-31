@@ -19,10 +19,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
-#include <dali/public-api/rendering/visual-renderer.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-interface.h>

@@ -34,11 +34,12 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/rendering/decorated-visual-renderer.h>
+#include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/object-registry.h>
-#include <dali/public-api/rendering/visual-renderer.h>
 #include <cstring>
 #include <limits>
 
@@ -52,7 +53,6 @@
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
-#include <dali/public-api/rendering/decorated-visual-renderer.h>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToPropertyValue;

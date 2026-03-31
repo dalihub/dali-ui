@@ -24,9 +24,9 @@
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/rendering/decorated-visual-renderer.h>
+#include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/stream-operators.h>
-#include <dali/public-api/rendering/decorated-visual-renderer.h>
-#include <dali/public-api/rendering/visual-renderer.h>
 
 // INTERNAL HEARDER
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>

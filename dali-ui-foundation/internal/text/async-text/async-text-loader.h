@@ -25,9 +25,9 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/actors/actor-enumerations.h>
 #include <dali/public-api/object/base-handle.h>
-#include <dali/public-api/rendering/visual-renderer.h>
 
 namespace Dali
 {
