@@ -125,6 +125,44 @@ enum class LineHeightMode : uint8_t
   ABSOLUTE = 1
 };
 
+/**
+ * @brief Enumeration for selecting the orientation of the marquee animation.
+ * Defines whether the marquee scrolls horizontally or vertically.
+ */
+enum class MarqueeOrientation : uint8_t
+{
+  /**
+   * @brief Scrolls horizontally.
+   * The effective scroll direction is determined by the layout direction
+   * and the text direction (e.g., left-to-right or right-to-left).
+   */
+  HORIZONTAL = 0,
+  /**
+   * @brief Scrolls vertically.
+   * The content scrolls from bottom to top.
+   */
+  VERTICAL = 1
+};
+
+/**
+ * @brief Enumeration for defining how the marquee stops.
+ * Specifies the behavior when a stop request is issued.
+ */
+enum class MarqueeStopMode : uint8_t
+{
+  /**
+   * @brief Stops the marquee immediately.
+   * The current scrolling position is not preserved.
+   */
+  IMMEDIATE = 0,
+  /**
+   * @brief Stops the marquee after the current loop finishes.
+   * The marquee continues until the current cycle completes,
+   * then stops at the loop boundary.
+   */
+  FINISH_LOOP = 1
+};
+
 } // namespace Text
 
 } // namespace Ui

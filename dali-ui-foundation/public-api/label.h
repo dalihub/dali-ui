@@ -367,6 +367,90 @@ public: // Setters for chaining
    */
   UiColor GetAnchorClickedColor();
 
+  /**
+   * @brief Sets the marquee speed.
+   *
+   * @param[in] speed The marquee speed in pixels per second.
+   */
+  Label& SetMarqueeSpeed(int speed);
+
+  /**
+   * @brief Returns the marquee speed.
+   *
+   * @return The marquee speed in pixels per second.
+   */
+  int GetMarqueeSpeed() const;
+
+  /**
+   * @brief Sets the number of complete loops for marquee.
+   *
+   * @param[in] loopCount The number of loops.
+   */
+  Label& SetMarqueeLoopCount(int loopCount);
+
+  /**
+   * @brief Returns the number of complete loops for marquee.
+   *
+   * @return The number of loops.
+   */
+  int GetMarqueeLoopCount() const;
+
+  /**
+   * @brief Sets the amount of time to delay the start of marquee and further loops.
+   *
+   * @param[in] delay The delay time in seconds.
+   */
+  Label& SetMarqueeLoopDelay(float delay);
+
+  /**
+   * @brief Returns the amount of time to delay the start of marquee and further loops.
+   *
+   * @return The delay time in seconds.
+   */
+  float GetMarqueeLoopDelay() const;
+
+  /**
+   * @brief Sets the gap before marquee wraps.
+   *
+   * @param[in] gap The gap in pixels.
+   */
+  Label& SetMarqueeGap(float gap);
+
+  /**
+   * @brief Returns the gap before marquee wraps.
+   *
+   * @return The gap in pixels.
+   */
+  float GetMarqueeGap() const;
+
+  /**
+   * @brief Sets how the marquee stops.
+   *
+   * @param[in] stopMode The marquee stop mode.
+   */
+  Label& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @brief Returns how the marquee stops.
+   *
+   * @return The marquee stop mode.
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
+
+  /**
+   * @brief Sets the marquee orientation.
+   *
+   * @param[in] orientation The marquee orientation.
+   */
+  Label& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+
+  /**
+   * @brief Returns the marquee orientation.
+   *
+   * @return The marquee orientation.
+   */
+  Text::MarqueeOrientation GetMarqueeOrientation() const;
+
   // @CHAIN_END
 
   // Read Only
@@ -388,6 +472,24 @@ public: // Setters for chaining
    * @return The number of lines.
    */
   int GetLineCount(float width);
+
+  /**
+   * @brief Returns whether the marquee animation is currently running.
+   *
+   * @return True if the marquee animation is running, false otherwise.
+   */
+  bool IsMarqueeRunning() const;
+
+  // Method
+  /**
+   * @brief Starts the marquee animation using the current marquee settings.
+   */
+  void StartMarquee();
+
+  /**
+   * @brief Stops the marquee animation.
+   */
+  void StopMarquee();
 
 public: // Signals
   /**

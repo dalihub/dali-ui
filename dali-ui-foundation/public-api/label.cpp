@@ -276,6 +276,72 @@ UiColor Label::GetAnchorClickedColor()
   return GetImpl(*this).GetAnchorClickedColor();
 }
 
+Label& Label::SetMarqueeSpeed(int speed)
+{
+  GetImpl(*this).SetMarqueeSpeed(speed);
+  return *this;
+}
+
+int Label::GetMarqueeSpeed() const
+{
+  return GetImpl(*this).GetMarqueeSpeed();
+}
+
+Label& Label::SetMarqueeLoopCount(int loopCount)
+{
+  GetImpl(*this).SetMarqueeLoopCount(loopCount);
+  return *this;
+}
+
+int Label::GetMarqueeLoopCount() const
+{
+  return GetImpl(*this).GetMarqueeLoopCount();
+}
+
+Label& Label::SetMarqueeLoopDelay(float delay)
+{
+  GetImpl(*this).SetMarqueeLoopDelay(delay);
+  return *this;
+}
+
+float Label::GetMarqueeLoopDelay() const
+{
+  return GetImpl(*this).GetMarqueeLoopDelay();
+}
+
+Label& Label::SetMarqueeGap(float gap)
+{
+  GetImpl(*this).SetMarqueeGap(gap);
+  return *this;
+}
+
+float Label::GetMarqueeGap() const
+{
+  return GetImpl(*this).GetMarqueeGap();
+}
+
+Label& Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+{
+  GetImpl(*this).SetMarqueeStopMode(stopMode);
+  return *this;
+}
+
+Text::MarqueeStopMode Label::GetMarqueeStopMode() const
+{
+  return GetImpl(*this).GetMarqueeStopMode();
+}
+
+Label& Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+{
+  GetImpl(*this).SetMarqueeOrientation(orientation);
+  return *this;
+}
+
+Text::MarqueeOrientation Label::GetMarqueeOrientation() const
+{
+  return GetImpl(*this).GetMarqueeOrientation();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -287,6 +353,24 @@ int Label::GetLineCount()
 int Label::GetLineCount(float width)
 {
   return GetImpl(*this).GetLineCount(width);
+}
+
+bool Label::IsMarqueeRunning() const
+{
+  return GetImpl(*this).IsMarqueeRunning();
+}
+
+// =============================================================================
+// Method
+// =============================================================================
+void Label::StartMarquee()
+{
+  GetImpl(*this).StartMarquee();
+}
+
+void Label::StopMarquee()
+{
+  GetImpl(*this).StopMarquee();
 }
 
 // =============================================================================

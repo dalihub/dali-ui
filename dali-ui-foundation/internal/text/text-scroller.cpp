@@ -139,26 +139,24 @@ float TextScroller::GetLoopDelay() const
   return mLoopDelay;
 }
 
-void TextScroller::SetStopMode(Text::AutoScrollStopMode::Type stopMode)
+void TextScroller::SetStopMode(Text::MarqueeStopMode stopMode)
 {
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::SetAutoScrollStopMode [%s]\n",
-                (stopMode == Text::AutoScrollStopMode::IMMEDIATE) ? "IMMEDIATE" : "FINISH_LOOP");
   mStopMode = stopMode;
 }
 
-Text::AutoScrollStopMode::Type TextScroller::GetStopMode() const
+Text::MarqueeStopMode TextScroller::GetStopMode() const
 {
   return mStopMode;
 }
 
-Text::AutoScroll::Direction TextScroller::GetDirection() const
+Text::MarqueeOrientation TextScroller::GetOrientation() const
 {
-  return mDirection;
+  return mOrientation;
 }
 
-void TextScroller::SetDirection(Text::AutoScroll::Direction direction)
+void TextScroller::SetOrientation(Text::MarqueeOrientation orientation)
 {
-  mDirection = direction;
+  mOrientation = orientation;
 }
 
 void TextScroller::StopScrolling()
@@ -167,17 +165,17 @@ void TextScroller::StopScrolling()
   {
     switch(mStopMode)
     {
-      case Text::AutoScrollStopMode::IMMEDIATE:
+      case Text::MarqueeStopMode::IMMEDIATE:
       {
-        mIsStop = false;
+        mIsStopRequested = false;
         mScrollAnimation.Stop();
         mScrollerInterface.ScrollingFinished();
         mIsStoppedImmediately.store(true);
         break;
       }
-      case Text::AutoScrollStopMode::FINISH_LOOP:
+      case Text::MarqueeStopMode::FINISH_LOOP:
       {
-        mIsStop = true;
+        mIsStopRequested = true;
         mScrollAnimation.SetLoopCount(1); // As animation already playing this allows the current animation to finish
                                           // instead of trying to stop mid-way
         break;
@@ -194,12 +192,12 @@ void TextScroller::StopScrolling()
   }
 }
 
-bool TextScroller::IsStop()
+bool TextScroller::IsStopRequested() const
 {
-  return mIsStop;
+  return mIsStopRequested;
 }
 
-bool TextScroller::IsScrolling()
+bool TextScroller::IsScrolling() const
 {
   return (mScrollAnimation && mScrollAnimation.GetState() == Animation::PLAYING);
 }
@@ -211,9 +209,9 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mLoopCount(1),
   mLoopDelay(0.0f),
   mWrapGap(0.0f),
-  mStopMode(Text::AutoScrollStopMode::FINISH_LOOP),
-  mDirection(Text::AutoScroll::HORIZONTAL),
-  mIsStop(false),
+  mStopMode(Text::MarqueeStopMode::FINISH_LOOP),
+  mOrientation(Text::MarqueeOrientation::HORIZONTAL),
+  mIsStopRequested(false),
   mIsStoppedImmediately(false)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller Default Constructor\n");
@@ -233,7 +231,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
                 controlSize.y, textureSize.x, textureSize.y, direction);
   mRenderer = renderer;
 
-  bool  isHorizontal      = mDirection == Text::AutoScroll::HORIZONTAL;
+  bool  isHorizontal      = mOrientation == Text::MarqueeOrientation::HORIZONTAL;
   float animationProgress = 0.0f;
   int   remainedLoop      = mLoopCount;
   if(mScrollAnimation)
@@ -245,7 +243,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
       if(mLoopCount > 0) // If not a ininity loop, then calculate remained loop
       {
         remainedLoop = mLoopCount - (mScrollAnimation.GetCurrentLoop());
-        remainedLoop = mIsStop ? 1 : (remainedLoop <= 0 ? 1 : remainedLoop);
+        remainedLoop = mIsStopRequested ? 1 : (remainedLoop <= 0 ? 1 : remainedLoop);
       }
     }
     mScrollAnimation.Clear();
@@ -318,7 +316,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
 void TextScroller::AutoScrollAnimationFinished(Dali::Animation& animation)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::AutoScrollAnimationFinished\n");
-  mIsStop = false;
+  mIsStopRequested = false;
   if(!mIsStoppedImmediately.load())
   {
     mScrollerInterface.ScrollingFinished();
@@ -340,7 +338,7 @@ void TextScroller::StartScrolling(Actor scrollingTextActor, float scrollAmount, 
   mScrollAnimation.FinishedSignal().Connect(this, &TextScroller::AutoScrollAnimationFinished);
   mScrollAnimation.Play();
 
-  mIsStop = false;
+  mIsStopRequested = false;
 }
 
 } // namespace Text

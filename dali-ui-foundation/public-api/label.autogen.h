@@ -121,4 +121,40 @@
   * \
   * @param[in] color The color to apply to clicked anchors. \
   */ \
-  ChildClass& SetAnchorClickedColor(const UiColor& color) { Label::SetAnchorClickedColor(color); return *this; }
+  ChildClass& SetAnchorClickedColor(const UiColor& color) { Label::SetAnchorClickedColor(color); return *this; } \
+  /** \
+  * @brief Sets the marquee speed. \
+  * \
+  * @param[in] speed The marquee speed in pixels per second. \
+  */ \
+  ChildClass& SetMarqueeSpeed(int speed) { Label::SetMarqueeSpeed(speed); return *this; } \
+  /** \
+  * @brief Sets the number of complete loops for marquee. \
+  * \
+  * @param[in] loopCount The number of loops. \
+  */ \
+  ChildClass& SetMarqueeLoopCount(int loopCount) { Label::SetMarqueeLoopCount(loopCount); return *this; } \
+  /** \
+  * @brief Sets the amount of time to delay the start of marquee and further loops. \
+  * \
+  * @param[in] delay The delay time in seconds. \
+  */ \
+  ChildClass& SetMarqueeLoopDelay(float delay) { Label::SetMarqueeLoopDelay(delay); return *this; } \
+  /** \
+  * @brief Sets the gap before marquee wraps. \
+  * \
+  * @param[in] gap The gap in pixels. \
+  */ \
+  ChildClass& SetMarqueeGap(float gap) { Label::SetMarqueeGap(gap); return *this; } \
+  /** \
+  * @brief Sets how the marquee stops. \
+  * \
+  * @param[in] stopMode The marquee stop mode. \
+  */ \
+  ChildClass& SetMarqueeStopMode(Text::MarqueeStopMode stopMode) { Label::SetMarqueeStopMode(stopMode); return *this; } \
+  /** \
+  * @brief Sets the marquee orientation. \
+  * \
+  * @param[in] orientation The marquee orientation. \
+  */ \
+  ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; }

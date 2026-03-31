@@ -933,7 +933,7 @@ public:
   /**
    * @copydoc Controller::SetAutoScrollEnabled()
    */
-  void SetAutoScrollEnabled(bool enable, bool requestRelayout, AutoScroll::Direction direction);
+  void SetAutoScrollEnabled(bool enable, bool requestRelayout, MarqueeOrientation orientation);
 
   /**
    * @copydoc Controller::SetEnableCursorBlink()

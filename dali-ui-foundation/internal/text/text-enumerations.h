@@ -75,19 +75,6 @@ enum Mode
 
 } // namespace Ellipsize
 
-namespace AutoScroll
-{
-/**
- * @brief Enumerations specifying autoscroll direction.
- */
-enum Direction
-{
-  HORIZONTAL = 0, ///< Horizontal scrolling of text, only valid when single-line.
-  VERTICAL        ///< Vertical scrolling of text, only valid when multi-line.
-};
-
-} // namespace AutoScroll
-
 // TextLabel enum
 namespace Render
 {
@@ -102,23 +89,6 @@ enum Mode
 };
 
 } // namespace Render
-
-/**
- * @brief The enumerations used for auto scroll stop mode.
- * @see Property::AUTO_SCROLL_STOP_MODE.
- */
-struct AutoScrollStopMode
-{
-  /**
-   * @brief The enumerations used for auto scroll stop mode.
-   * @see Property::AUTO_SCROLL_STOP_MODE.
-   */
-  enum Type
-  {
-    FINISH_LOOP = 0, ///< Stop animation after current loop finishes.
-    IMMEDIATE        ///< Stop animation immediately and reset position.
-  };
-};
 
 struct FitOption
 {

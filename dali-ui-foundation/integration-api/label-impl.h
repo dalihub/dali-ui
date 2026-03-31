@@ -23,6 +23,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
+#include <dali-ui-foundation/internal/text/text-scroller-interface.h>
+#include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 
 namespace Dali
@@ -42,7 +44,7 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  *
  * @see Dali::Ui::LabelImpl
  */
-class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::AnchorControlInterface
+class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface
 {
 public:
   /**
@@ -257,6 +259,66 @@ public:
    */
   UiColor GetAnchorClickedColor();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeSpeed
+   */
+  void SetMarqueeSpeed(int speed);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeSpeed
+   */
+  int GetMarqueeSpeed() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeLoopCount
+   */
+  void SetMarqueeLoopCount(int loopCount);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeLoopCount
+   */
+  int GetMarqueeLoopCount() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeLoopDelay
+   */
+  void SetMarqueeLoopDelay(float delay);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeLoopDelay
+   */
+  float GetMarqueeLoopDelay() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeGap
+   */
+  void SetMarqueeGap(float gap);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeGap
+   */
+  float GetMarqueeGap() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeStopMode
+   */
+  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeStopMode
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeOrientation
+   */
+  void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeOrientation
+   */
+  Text::MarqueeOrientation GetMarqueeOrientation() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -267,6 +329,22 @@ public:
    * @see Dali::Ui::Label::GetLineCount(float)
    */
   int GetLineCount(float width);
+
+  /**
+   * @copydoc Dali::Ui::Label::IsMarqueeRunning
+   */
+  bool IsMarqueeRunning() const;
+
+  // Method
+  /**
+   * @copydoc Dali::Ui::Label::StartMarquee
+   */
+  void StartMarquee();
+
+  /**
+   * @copydoc Dali::Ui::Label::StopMarquee
+   */
+  void StopMarquee();
 
 public: // Signals
   /**
@@ -333,6 +411,12 @@ public: // From ControlInterface
    */
   void RequestTextRelayout() override;
 
+private: // from ScrollerInterface
+  /**
+   * @copydoc Text::ScrollerInterface::ScrollingFinished()
+   */
+  void ScrollingFinished() override;
+
 public: // From AnchorControlInterface
   /**
    * @copydoc Text::AnchorControlInterface::AnchorClicked()
@@ -382,6 +466,76 @@ private: // Implementation
    */
   void UpdateAnchorTouchInterception();
 
+  /**
+   * @brief Initializes marquee based on the current text layout.
+   *
+   * @param[in] contentSize The size of the text content excluding padding.
+   * @param[in] originSize The size of the laid-out text used to compute the initial scroll offset.
+   */
+  void InitializeMarquee(const Size& contentSize, const Size& originSize);
+
+  /**
+   * @brief Updates the marquee state.
+   *
+   * Called when properties such as orientation or multiline state change.
+   */
+  void UpdateMarqueeState();
+
+  /**
+   * @brief Handles marquee behavior when visibility changes.
+   *
+   * @param[in] visible True to restore the previous marquee state,
+   *                    false to stop the marquee animation.
+   */
+  void OnMarqueeVisibilityChanged(bool visible);
+
+  /**
+   * @brief Returns the text scroller, creating it if necessary.
+   *
+   * @return The text scroller.
+   */
+  Text::TextScrollerPtr GetTextScroller();
+
+  /**
+   * @brief Enables or disables the marquee animation.
+   *
+   * Updates the internal marquee state and starts or stops the scrolling accordingly.
+   *
+   * @param[in] enabled True to start the marquee animation, false to stop it.
+   */
+  void SetMarqueeEnabled(bool enabled);
+
+  /**
+   * @brief Callback when the visibility of the actor is changed.
+   */
+  void OnControlInheritedVisibilityChanged(Actor actor, bool visible);
+
+  /**
+   * @brief Returns the cached effective visibility of the label.
+   *
+   * @return True if the label is effectively visible.
+   */
+  bool IsVisible();
+
+  /**
+   * @brief Evaluates whether marquee should run and applies the result.
+   *
+   * Enables or disables marquee depending on the current layout and mode.
+   *
+   * @param[in] contentSize The size of the text content excluding padding.
+   * @param[in] orientation The marquee orientation.
+   */
+  void EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation);
+
+  /**
+   * @brief Prepares layout data required for marquee.
+   *
+   * @param[in] contentSize The size of the text content excluding padding.
+   * @param[in] orientation The marquee orientation.
+   * @param[out] originSize The laid-out text size used to compute the initial scroll offset.
+   */
+  void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetAnchorColorInternal(const Vector4& color);
@@ -398,8 +552,9 @@ private:
   // Data
   Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
 
-  Visual::Base        mVisual;
-  Text::ControllerPtr mController;
+  Visual::Base          mVisual;
+  Text::ControllerPtr   mController;
+  Text::TextScrollerPtr mTextScroller;
 
   Vector2              mTouchPosition; ///< The initial touch down position.
   float                mLineHeight;
@@ -407,8 +562,11 @@ private:
 
   int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;
-  bool mIsTouchDown : 1; // whether the currently intercepted touch is in the down state.
-  bool mHasAnchors : 1;  // whether the text has anchors or not.
+  bool mLastMarqueeEnabled : 1;
+  bool mIsTouchDown : 1;          // whether the currently intercepted touch is in the down state.
+  bool mHasAnchors : 1;           // whether the text has anchors or not.
+  bool mIsVisible : 1;            // cached result of IsEffectivelyVisible().
+  bool mIsVisibleInitialized : 1; // whether mIsVisible has been initialized.
 };
 
 } // namespace Integration

@@ -114,8 +114,8 @@ struct AsyncTextParameters
     layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},
     ellipsisPosition{Text::EllipsisPosition::END},
     ellipsisMode{Text::Ellipsize::TRUNCATE},
-    autoScrollDirection{Text::AutoScroll::HORIZONTAL},
-    autoScrollStopMode{AutoScrollStopMode::FINISH_LOOP},
+    autoScrollDirection{Text::MarqueeOrientation::HORIZONTAL},
+    autoScrollStopMode{Text::MarqueeStopMode::FINISH_LOOP},
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
     fontSlant{FontSlant::NONE},
@@ -204,13 +204,13 @@ struct AsyncTextParameters
   Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
   LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   Text::EllipsisPosition::Type
-                              ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  Text::Ellipsize::Mode       ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
-  Text::AutoScroll::Direction autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
-  AutoScrollStopMode::Type    autoScrollStopMode;  ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight                  fontWeight;          ///< The font's weight.
-  FontWidth                   fontWidth;           ///< The font's width.
-  FontSlant                   fontSlant;           ///< The font's slant.
+                           ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  Text::Ellipsize::Mode    ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
+  Text::MarqueeOrientation autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
+  Text::MarqueeStopMode    autoScrollStopMode;  ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeight               fontWeight;          ///< The font's weight.
+  FontWidth                fontWidth;           ///< The font's width.
+  FontSlant                fontSlant;           ///< The font's slant.
 
   bool manualRender : 1;                   ///< Whether the manual rendered or not.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.

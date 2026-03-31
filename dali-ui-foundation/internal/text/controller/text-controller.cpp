@@ -174,12 +174,12 @@ bool Controller::HasAnchors() const
           mImpl->IsShowingRealText());
 }
 
-void Controller::SetAutoScrollEnabled(bool enable, bool requestRelayout, Text::AutoScroll::Direction direction)
+void Controller::SetAutoScrollEnabled(bool enable, bool requestRelayout, Text::MarqueeOrientation orientation)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetAutoScrollEnabled[%s] SingleBox[%s]-> [%p]\n",
                 (enable) ? "true" : "false",
                 (mImpl->mLayoutEngine.GetLayout() == Layout::Engine::SINGLE_LINE_BOX) ? "true" : "false", this);
-  mImpl->SetAutoScrollEnabled(enable, requestRelayout, direction);
+  mImpl->SetAutoScrollEnabled(enable, requestRelayout, orientation);
 }
 
 void Controller::SetAutoScrollMaxTextureExceeded(bool exceed)

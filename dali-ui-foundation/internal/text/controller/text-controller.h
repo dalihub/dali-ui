@@ -261,7 +261,7 @@ public: // Configure the text controller.
    * @param[in] direction Direction of the auto scroll.
    */
   void SetAutoScrollEnabled(bool enable, bool requestRelayout = true,
-                            Text::AutoScroll::Direction direction = Text::AutoScroll::HORIZONTAL);
+                            Text::MarqueeOrientation orientation = Text::MarqueeOrientation::HORIZONTAL);
 
   /**
    * @brief Whether the auto scrolling texture exceed max texture.

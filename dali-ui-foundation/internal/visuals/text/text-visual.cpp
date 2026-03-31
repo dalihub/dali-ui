@@ -885,7 +885,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       // In case of auto scroll, the layout width (renderInfo's width) is the natural size of the text.
       // Since the layout size is the size of the visual transform, it should be reset to the text area excluding
       // padding.
-      if(parameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL)
+      if(parameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL)
       {
         layoutSize.width = parameters.textWidth;
       }

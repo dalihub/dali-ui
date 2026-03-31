@@ -126,40 +126,40 @@ public:
    * @brief Set the mode of scrolling stop
    * @param[in] stopMode type when text scrolling is stopped.
    */
-  void SetStopMode(Text::AutoScrollStopMode::Type stopMode);
+  void SetStopMode(Text::MarqueeStopMode stopMode);
 
   /**
    * @brief Get the mode of scrolling stop
-   * @return stopMode type when text scrolling is stopped.
+   * @return MarqueeStopMode when text scrolling is stopped.
    */
-  Text::AutoScrollStopMode::Type GetStopMode() const;
+  Text::MarqueeStopMode GetStopMode() const;
 
   /**
-   * @brief Set direction of the auto scroll.
-   * @param[in] direction Direction of the auto scroll.
+   * @brief Set orientation of the marquee.
+   * @param[in] orientation Orientation of the marquee.
    */
-  void SetDirection(Text::AutoScroll::Direction direction);
+  void SetOrientation(Text::MarqueeOrientation orientation);
 
   /**
-   * @brief Get direction of the auto scroll.
-   * @return AutoScroll::Direction, HORIZONTAL or VERTICAL.
+   * @brief Get orientation of the marquee.
+   * @return MarqueeOrientation, HORIZONTAL or VERTICAL.
    */
-  Text::AutoScroll::Direction GetDirection() const;
+  Text::MarqueeOrientation GetOrientation() const;
 
   /**
-   * @brief Stop the auto scrolling.
+   * @brief Stop the marquee scrolling.
    */
   void StopScrolling();
 
   /**
    * @brief Whether the stop scrolling has been triggered or not.
    */
-  bool IsStop();
+  bool IsStopRequested() const;
 
   /**
    * @brief Whether the scroll animation is playing or not.
    */
-  bool IsScrolling();
+  bool IsScrolling() const;
 
 private: // Implementation
   /**
@@ -201,14 +201,14 @@ private:
   Shader             mShader;            // Shader originally used by the renderer while not scrolling
   TextureSet         mTextureSet;        // Texture originally used by the renderer while not scrolling
 
-  int                            mScrollSpeed;          ///< Speed which text should automatically scroll at
-  int                            mLoopCount;            ///< Number of time the text should scroll
-  float                          mLoopDelay;            ///< Time delay of loop start
-  float                          mWrapGap;              ///< Gap before text wraps around when scrolling
-  Text::AutoScrollStopMode::Type mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
-  Text::AutoScroll::Direction    mDirection;            ///< Direction of the auto scroll. (HORIZONTAL, VERTICAL)
-  bool                           mIsStop : 1;           ///< Whether the stop scrolling has been triggered or not.
-  std::atomic<bool>              mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
+  int                      mScrollSpeed;          ///< Speed which text should automatically scroll at
+  int                      mLoopCount;            ///< Number of time the text should scroll
+  float                    mLoopDelay;            ///< Time delay of loop start
+  float                    mWrapGap;              ///< Gap before text wraps around when scrolling
+  Text::MarqueeStopMode    mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
+  Text::MarqueeOrientation mOrientation;          ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
+  bool                     mIsStopRequested : 1;  ///< Whether the stop scrolling has been triggered or not.
+  std::atomic<bool>        mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
 
 }; // TextScroller class
 

@@ -124,7 +124,7 @@ void TextLoadingTask::Load()
 
       if(mParameters.ellipsis && mParameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
       {
-        if(mParameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL)
+        if(mParameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL)
         {
           if(mParameters.isMultiLine)
           {
@@ -171,8 +171,8 @@ void TextLoadingTask::Load()
         }
       }
       else if(mParameters.isAutoScrollEnabled &&
-              ((!mParameters.isMultiLine && mParameters.autoScrollDirection == Text::AutoScroll::HORIZONTAL) ||
-               (mParameters.isMultiLine && mParameters.autoScrollDirection == Text::AutoScroll::VERTICAL)))
+              ((!mParameters.isMultiLine && mParameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL) ||
+               (mParameters.isMultiLine && mParameters.autoScrollDirection == Text::MarqueeOrientation::VERTICAL)))
       {
 #ifdef TRACE_ENABLED
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())
