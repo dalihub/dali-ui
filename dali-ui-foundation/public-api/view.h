@@ -18,8 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility-bridge.h>
-#include <dali/devel-api/adaptor-framework/input-method-context.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/constraint.h>
@@ -36,7 +34,6 @@
 #include <initializer_list>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout-callbacks.h>
@@ -1147,12 +1144,6 @@ public:
 
   /// @brief AccessibilityGetDescription signal type.
   typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
-
-  /// @brief AccessibilityDoGesture signal type.
-  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
-
-  /// @brief AccessibilityAction signal type.
-  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
 
   /// @brief AccessibilityHighlighted signal type.
   /// @param bool highlighted true if View is highlighted, false if highlight is removed.

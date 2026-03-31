@@ -29,6 +29,7 @@
 #include <map>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-run.h>
@@ -37,7 +38,6 @@
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

@@ -18,9 +18,6 @@
  *
  */
 
-// EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility.h>
-
 namespace Dali::Ui
 {
 

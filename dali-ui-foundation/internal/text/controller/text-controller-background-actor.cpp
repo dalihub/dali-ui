@@ -23,11 +23,11 @@
 #include <dali/public-api/rendering/renderer.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-#include <dali-ui-foundation/public-api/view-depth-index-ranges.h>
 
 using Dali::Integration::ToDaliStringView;
 
