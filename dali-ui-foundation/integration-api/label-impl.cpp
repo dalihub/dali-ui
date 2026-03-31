@@ -397,6 +397,39 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
   return Text::MarqueeOrientation::HORIZONTAL;
 }
 
+void LabelImpl::SetFontWeight(Text::FontWeight weight)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
+  mController->SetDefaultFontWeight(weight);
+}
+
+Text::FontWeight LabelImpl::GetFontWeight() const
+{
+  return mController->GetDefaultFontWeight();
+}
+
+void LabelImpl::SetFontWidth(Text::FontWidth width)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
+  mController->SetDefaultFontWidth(width);
+}
+
+Text::FontWidth LabelImpl::GetFontWidth() const
+{
+  return mController->GetDefaultFontWidth();
+}
+
+void LabelImpl::SetFontSlant(Text::FontSlant slant)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
+  mController->SetDefaultFontSlant(slant);
+}
+
+Text::FontSlant LabelImpl::GetFontSlant() const
+{
+  return mController->GetDefaultFontSlant();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

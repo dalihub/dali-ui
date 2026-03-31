@@ -319,6 +319,36 @@ public:
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetFontWeight
+   */
+  void SetFontWeight(Text::FontWeight weight);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetFontWeight
+   */
+  Text::FontWeight GetFontWeight() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetFontWidth
+   */
+  void SetFontWidth(Text::FontWidth width);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetFontWidth
+   */
+  Text::FontWidth GetFontWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetFontSlant
+   */
+  void SetFontSlant(Text::FontSlant slant);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetFontSlant
+   */
+  Text::FontSlant GetFontSlant() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount

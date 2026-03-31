@@ -198,6 +198,36 @@ public:
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
+  /**
+   * @copydoc Dali::Ui::InputField::SetFontWeight
+   */
+  void SetFontWeight(Text::FontWeight weight);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetFontWeight
+   */
+  Text::FontWeight GetFontWeight() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetFontWidth
+   */
+  void SetFontWidth(Text::FontWidth width);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetFontWidth
+   */
+  Text::FontWidth GetFontWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetFontSlant
+   */
+  void SetFontSlant(Text::FontSlant slant);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetFontSlant
+   */
+  Text::FontSlant GetFontSlant() const;
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::InputField::TextChangedSignal()

@@ -326,6 +326,48 @@ public: // Setters for chaining
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
+  /**
+   * @brief Sets the font weight.
+   *
+   * @param[in] weight The font weight.
+   */
+  InputField& SetFontWeight(Text::FontWeight weight);
+
+  /**
+   * @brief Returns the font weight.
+   *
+   * @return The font weight.
+   */
+  Text::FontWeight GetFontWeight() const;
+
+  /**
+   * @brief Sets the font width.
+   *
+   * @param[in] width The font width.
+   */
+  InputField& SetFontWidth(Text::FontWidth width);
+
+  /**
+   * @brief Returns the font width.
+   *
+   * @return The font width.
+   */
+  Text::FontWidth GetFontWidth() const;
+
+  /**
+   * @brief Sets the font slant.
+   *
+   * @param[in] slant The font slant.
+   */
+  InputField& SetFontSlant(Text::FontSlant slant);
+
+  /**
+   * @brief Returns the font slant.
+   *
+   * @return The font slant.
+   */
+  Text::FontSlant GetFontSlant() const;
+
   // @CHAIN_END
 
 public: // Signals

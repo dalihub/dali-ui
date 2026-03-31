@@ -342,6 +342,39 @@ Text::MarqueeOrientation Label::GetMarqueeOrientation() const
   return GetImpl(*this).GetMarqueeOrientation();
 }
 
+Label& Label::SetFontWeight(Text::FontWeight weight)
+{
+  GetImpl(*this).SetFontWeight(weight);
+  return *this;
+}
+
+Text::FontWeight Label::GetFontWeight() const
+{
+  return GetImpl(*this).GetFontWeight();
+}
+
+Label& Label::SetFontWidth(Text::FontWidth width)
+{
+  GetImpl(*this).SetFontWidth(width);
+  return *this;
+}
+
+Text::FontWidth Label::GetFontWidth() const
+{
+  return GetImpl(*this).GetFontWidth();
+}
+
+Label& Label::SetFontSlant(Text::FontSlant slant)
+{
+  GetImpl(*this).SetFontSlant(slant);
+  return *this;
+}
+
+Text::FontSlant Label::GetFontSlant() const
+{
+  return GetImpl(*this).GetFontSlant();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

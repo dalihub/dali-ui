@@ -157,4 +157,22 @@
   * \
   * @param[in] orientation The marquee orientation. \
   */ \
-  ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; }
+  ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; } \
+  /** \
+  * @brief Sets the font weight. \
+  * \
+  * @param[in] weight The font weight. \
+  */ \
+  ChildClass& SetFontWeight(Text::FontWeight weight) { Label::SetFontWeight(weight); return *this; } \
+  /** \
+  * @brief Sets the font width. \
+  * \
+  * @param[in] width The font width. \
+  */ \
+  ChildClass& SetFontWidth(Text::FontWidth width) { Label::SetFontWidth(width); return *this; } \
+  /** \
+  * @brief Sets the font slant. \
+  * \
+  * @param[in] slant The font slant. \
+  */ \
+  ChildClass& SetFontSlant(Text::FontSlant slant) { Label::SetFontSlant(slant); return *this; }

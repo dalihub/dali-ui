@@ -281,6 +281,39 @@ Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
   return mController->GetLayoutDirectionMode();
 }
 
+void InputFieldImpl::SetFontWeight(Text::FontWeight weight)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
+  mController->SetDefaultFontWeight(weight);
+}
+
+Text::FontWeight InputFieldImpl::GetFontWeight() const
+{
+  return mController->GetDefaultFontWeight();
+}
+
+void InputFieldImpl::SetFontWidth(Text::FontWidth width)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
+  mController->SetDefaultFontWidth(width);
+}
+
+Text::FontWidth InputFieldImpl::GetFontWidth() const
+{
+  return mController->GetDefaultFontWidth();
+}
+
+void InputFieldImpl::SetFontSlant(Text::FontSlant slant)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
+  mController->SetDefaultFontSlant(slant);
+}
+
+Text::FontSlant InputFieldImpl::GetFontSlant() const
+{
+  return mController->GetDefaultFontSlant();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

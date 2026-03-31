@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/text-abstraction/font-list.h>
 #include <cstdint>
 
 namespace Dali
@@ -28,6 +29,32 @@ namespace Ui
 
 namespace Text
 {
+/**
+ * @brief Alias for font weight enumeration.
+ *
+ * Provides access to font weight values such as REGULAR, MEDIUM, BOLD, etc.
+ *
+ * @see Dali::TextAbstraction::FontWeight::Type
+ */
+using FontWeight = Dali::TextAbstraction::FontWeight::Type;
+
+/**
+ * @brief Alias for font width enumeration.
+ *
+ * Provides access to font width values such as CONDENSED, NORMAL, EXPANDED, etc.
+ *
+ * @see Dali::TextAbstraction::FontWidth::Type
+ */
+using FontWidth = Dali::TextAbstraction::FontWidth::Type;
+
+/**
+ * @brief Alias for font slant enumeration.
+ *
+ * Provides access to font slant values such as NORMAL, ITALIC, etc.
+ *
+ * @see Dali::TextAbstraction::FontSlant::Type
+ */
+using FontSlant = Dali::TextAbstraction::FontSlant::Type;
 
 /**
  * @brief Enumeration for text alignment options.

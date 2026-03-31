@@ -253,6 +253,39 @@ Text::LayoutDirectionMode InputField::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
+InputField& InputField::SetFontWeight(Text::FontWeight weight)
+{
+  GetImpl(*this).SetFontWeight(weight);
+  return *this;
+}
+
+Text::FontWeight InputField::GetFontWeight() const
+{
+  return GetImpl(*this).GetFontWeight();
+}
+
+InputField& InputField::SetFontWidth(Text::FontWidth width)
+{
+  GetImpl(*this).SetFontWidth(width);
+  return *this;
+}
+
+Text::FontWidth InputField::GetFontWidth() const
+{
+  return GetImpl(*this).GetFontWidth();
+}
+
+InputField& InputField::SetFontSlant(Text::FontSlant slant)
+{
+  GetImpl(*this).SetFontSlant(slant);
+  return *this;
+}
+
+Text::FontSlant InputField::GetFontSlant() const
+{
+  return GetImpl(*this).GetFontSlant();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

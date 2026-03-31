@@ -102,4 +102,22 @@
   * \
   * @param[in] mode The LayoutDirectionMode used to determine the text layout direction. \
   */ \
-  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { InputField::SetLayoutDirectionMode(mode); return *this; }
+  ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { InputField::SetLayoutDirectionMode(mode); return *this; } \
+  /** \
+  * @brief Sets the font weight. \
+  * \
+  * @param[in] weight The font weight. \
+  */ \
+  ChildClass& SetFontWeight(Text::FontWeight weight) { InputField::SetFontWeight(weight); return *this; } \
+  /** \
+  * @brief Sets the font width. \
+  * \
+  * @param[in] width The font width. \
+  */ \
+  ChildClass& SetFontWidth(Text::FontWidth width) { InputField::SetFontWidth(width); return *this; } \
+  /** \
+  * @brief Sets the font slant. \
+  * \
+  * @param[in] slant The font slant. \
+  */ \
+  ChildClass& SetFontSlant(Text::FontSlant slant) { InputField::SetFontSlant(slant); return *this; }
