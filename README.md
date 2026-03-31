@@ -27,6 +27,9 @@ dali-ui-foundation을 기반으로 구축되며, 애플리케이션 개발에 �
 릴리즈 노트에 명시된 `DALi dependency` 태그를 사용하여 dali 버전을 맞출 수 있습니다.
 예를 들어 dali-ui [v2.5.14.10210](https://github.sec.samsung.net/NUI/dali-ui/releases/tag/v2.5.14.10210) 의 경우 명시된 dali-core와 dali-adaptor 태그를 사용하여 아래와 같이 버전을 맞출 수 있습니다.
 
+* dali-core: https://github.com/dalihub/dali-core
+* dali-adaptor: https://github.com/dalihub/dali-adaptor
+
 ```sh
 cd dali-core
 git checkout accepted/tizen/unified/20260327.174826
