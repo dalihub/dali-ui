@@ -8,7 +8,7 @@ dali-ui는 유연성과 확장성을 위해 기능별로 분리된 두 개의 �
 
 | Library | Primary Responsibility | Components |
 | :--- | :--- | :--- |
-| dali-ui-foundation | Core Abstractions | Layout, Theme, ImageView, TextLabel, etc. |
+| dali-ui-foundation | Core Abstractions | Layout, Theme, ImageView, Label, etc. |
 | dali-ui-components | UI Controls | Button, Slider, etc. |
 
 
