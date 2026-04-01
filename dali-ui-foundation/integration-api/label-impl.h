@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
 
 namespace Dali
@@ -47,62 +48,6 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  */
 class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface
 {
-public:
-  /**
-   * @brief Temporary animatable property definitions for LabelImpl.
-   * @details
-   * TODO: Until the official animatable property support interface is finalized,
-   * animatable properties are registered and handled directly in LabelImpl.
-   * This structure may be refactored once the unified animatable property
-   * interface is decided.
-   */
-  struct Property
-  {
-    /**
-     * @brief Enumeration for the instance of properties belonging to the LabelImpl class.
-     */
-    enum
-    {
-      ///////////////////////////////////////////////////////////////////////////////
-      // Animatable Properties
-      ///////////////////////////////////////////////////////////////////////////////
-
-      /**
-       * @brief The color of the text.
-       * @details Name "textColor", type Property::VECTOR4.
-       */
-      TEXT_COLOR = ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
-
-      /**
-       * @brief The red component of the text color.
-       * @details Name "textColorRed", type Property::FLOAT.
-       * @see TEXT_COLOR
-       */
-      TEXT_COLOR_RED,
-
-      /**
-       * @brief The green component of the text color.
-       * @details Name "textColorGreen", type Property::FLOAT.
-       * @see TEXT_COLOR
-       */
-      TEXT_COLOR_GREEN,
-
-      /**
-       * @brief The blue component of the text color.
-       * @details Name "textColorBlue", type Property::FLOAT.
-       * @see TEXT_COLOR
-       */
-      TEXT_COLOR_BLUE,
-
-      /**
-       * @brief The alpha component of the text color.
-       * @details Name "textColorAlpha", type Property::FLOAT.
-       * @see TEXT_COLOR
-       */
-      TEXT_COLOR_ALPHA
-    };
-  };
-
 public:
   // Creation & Destruction
 
@@ -293,12 +238,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeGap
    */
-  void SetMarqueeGap(float gap);
+  void SetMarqueeGap(int gap);
 
   /**
    * @copydoc Dali::Ui::Label::GetMarqueeGap
    */
-  float GetMarqueeGap() const;
+  int GetMarqueeGap() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeStopMode
@@ -422,16 +367,15 @@ public: // From ViewImpl
    */
   float GetHeightForWidth(float width) override;
 
-public: // From Control
-        // TODO: If the implementation in Control is moved to ViewImpl, this part will need to be updated accordingly.
+public: // From CustomActorImpl
   /**
-   * @copydoc Control::OnAnimateAnimatableProperty()
+   * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
    */
   void OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index,
                                    Dali::Animation::State state) override;
 
   /**
-   * @copydoc Control::OnConstraintAnimatableProperty()
+   * @copydoc CustomActorImpl::OnConstraintAnimatableProperty()
    */
   void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
 
@@ -577,6 +521,31 @@ private: // Implementation
    */
   void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
 
+  // Properties
+public:
+  /**
+   * @copydoc View::OnPropertySet()
+   */
+  void OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue) override;
+
+  /**
+   * @brief Called when a property of an object of this type is set.
+   *
+   * @param[in] object The object whose property is set.
+   * @param[in] index The property index.
+   * @param[in] value The new property value.
+   */
+  static void SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value);
+
+  /**
+   * @brief Called to retrieve a property of an object of this type.
+   *
+   * @param[in] object The object whose property is to be retrieved.
+   * @param[in] index The property index.
+   * @return The current value of the property.
+   */
+  static Dali::Property::Value GetProperty(BaseObject* object, Dali::Property::Index index);
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetAnchorColorInternal(const Vector4& color);
@@ -609,6 +578,9 @@ private:
   bool mHasAnchors : 1;           // whether the text has anchors or not.
   bool mIsVisible : 1;            // cached result of IsEffectivelyVisible().
   bool mIsVisibleInitialized : 1; // whether mIsVisible has been initialized.
+
+protected:
+  struct PropertyHandler;
 };
 
 } // namespace Integration

@@ -96,6 +96,30 @@ def _parse_one_declaration(lines, k, class_name):
         return None
     return (template_line, m.group('name'), args_str.strip(), decl_k)
 
+# brace depth 기반으로 class의 실제 끝 위치를 찾는다.
+# class 내부 struct/enum 등의 `};`를 class 종료로 오인하는 문제를 방지하기 위함
+def _find_class_end(content, class_name):
+    """Find the real end of a class body by brace matching."""
+    m = re.search(r"class\s+.*?\b" + re.escape(class_name) + r"\b", content)
+    if not m:
+        return None
+    brace_start = content.find('{', m.end())
+    if brace_start == -1:
+        return None
+    depth = 0
+    i = brace_start
+    while i < len(content):
+        c = content[i]
+        if c == '{':
+            depth += 1
+        elif c == '}':
+            depth -= 1
+            if depth == 0:
+                semi = content.find(';', i)
+                return (i, semi if semi != -1 else i)
+        i += 1
+    return None
+
 def process_header(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -354,10 +378,10 @@ def update_header(path, blocks, base_name):
             content = content[:ins] + f'#include "{base_name}.autogen.h"\n' + content[ins:]
         if b['parent']:
             p_call = f"DALI_UI_CHAIN_{b['parent'].upper()}_METHODS({b['class']})"
-            c_end = re.search(r"class\s+.*?\b" + b['class'] + r"\b.*?(\n\s*\}?;)", content, re.DOTALL)
+            c_end = _find_class_end(content, b['class'])
             if c_end:
-                idx = c_end.start(1)
-                content = content[:idx] + f"\n\npublic:\n  {p_call}" + content[idx:]
+                idx, _ = c_end
+                content = content[:idx] + f"\npublic:\n  {p_call}\n" + content[idx:]
     with open(path, 'w', encoding='utf-8') as f: f.write(content.strip() + "\n")
 
 if __name__ == "__main__":

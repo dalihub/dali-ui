@@ -145,7 +145,7 @@
   * \
   * @param[in] gap The gap in pixels. \
   */ \
-  ChildClass& SetMarqueeGap(float gap) { Label::SetMarqueeGap(gap); return *this; } \
+  ChildClass& SetMarqueeGap(int gap) { Label::SetMarqueeGap(gap); return *this; } \
   /** \
   * @brief Sets how the marquee stops. \
   * \

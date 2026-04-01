@@ -23,6 +23,7 @@
 #include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -415,14 +416,14 @@ public: // Setters for chaining
    *
    * @param[in] gap The gap in pixels.
    */
-  Label& SetMarqueeGap(float gap);
+  Label& SetMarqueeGap(int gap);
 
   /**
    * @brief Returns the gap before marquee wraps.
    *
    * @return The gap in pixels.
    */
-  float GetMarqueeGap() const;
+  int GetMarqueeGap() const;
 
   /**
    * @brief Sets how the marquee stops.
@@ -577,6 +578,192 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API Label(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+public:
+  // Property
+  struct Property
+  {
+    /**
+     * @brief Enumeration for the instance of properties belonging to the Label class.
+     */
+    enum
+    {
+      ///////////////////////////////////////////////////////////////////////////////
+      // Event side (non-animatable) properties
+      ///////////////////////////////////////////////////////////////////////////////
+      /**
+       * @brief The text to display in UTF-8 format.
+       * @details Name "text", type Property::STRING.
+       * @note See also: Label::SetText(), Label::GetText().
+       */
+      TEXT = Text::LabelPropertyIndex::TEXT,
+
+      /**
+       * @brief The font family of the text.
+       * @details Name "fontFamily", type Property::STRING.
+       * @note See also: Label::SetFontFamily(), Label::GetFontFamily().
+       */
+      FONT_FAMILY = Text::LabelPropertyIndex::FONT_FAMILY,
+
+      /**
+       * @brief The size of font in pixels.
+       * @details Name "fontSize", type Property::FLOAT.
+       * @note See also: Label::SetFontSize(), Label::GetFontSize().
+       */
+      FONT_SIZE = Text::LabelPropertyIndex::FONT_SIZE,
+
+      /**
+       * @brief The single-line or multi-line layout option.
+       * @details Name "multiLine", type Property::BOOLEAN.
+       * @note See also: Label::SetMultiLine(), Label::IsMultiLine().
+       */
+      MULTI_LINE = Text::LabelPropertyIndex::MULTI_LINE,
+
+      /**
+       * @brief Line wrap mode when text lines are greater than the layout width.
+       * @details Name "lineWrapMode", type Text::LineWrapMode (Property::INTEGER) or Property::STRING.
+       * @note Return type is Text::LineWrapMode (Property::INTEGER).
+       * @note See also: Label::SetLineWrapMode(), Label::GetLineWrapMode().
+       */
+      LINE_WRAP_MODE = Text::LabelPropertyIndex::LINE_WRAP_MODE,
+
+      /**
+       * @brief The horizontal alignment.
+       * @details Name "horizontalTextAlignment", type Text::Alignment (Property::INTEGER) or type Property::STRING.
+       * @note Return type is Text::Alignment (Property::INTEGER).
+       * @note See also: Label::SetHorizontalTextAlignment(), Label::GetHorizontalTextAlignment().
+       */
+      HORIZONTAL_ALIGNMENT = Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT,
+
+      /**
+       * @brief The vertical alignment.
+       * @details Name "verticalTextAlignment", type Text::Alignment (Property::INTEGER) or type Property::STRING.
+       * @note Return type is Text::Alignment (Property::INTEGER).
+       * @note See also: Label::SetVerticalTextAlignment(), Label::GetVerticalTextAlignment().
+       */
+      VERTICAL_ALIGNMENT = Text::LabelPropertyIndex::VERTICAL_ALIGNMENT,
+
+      /**
+       * @brief The line height.
+       * @details Name "lineHeight", type Property::FLOAT.
+       * @note See also: Label::SetLineHeight(), Label::GetLineHeight().
+       */
+      LINE_HEIGHT = Text::LabelPropertyIndex::LINE_HEIGHT,
+
+      /**
+       * @brief The line height mode.
+       * @details Name "lineHeightMode", type Text::LineHeightMode (Property::INTEGER) or type Property::STRING.
+       * @note Return type is Text::LineHeightMode (Property::INTEGER).
+       * @note See also: Label::SetLineHeightMode(), Label::GetLineHeightMode().
+       */
+      LINE_HEIGHT_MODE = Text::LabelPropertyIndex::LINE_HEIGHT_MODE,
+
+      /**
+       * @brief The layout direction mode.
+       * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or type Property::STRING.
+       * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
+       * @note See also: Label::SetLayoutDirectionMode(), Label::GetLayoutDirectionMode().
+       */
+      LAYOUT_DIRECTION_MODE = Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE,
+
+      /**
+       * @brief Whether mark-up processing is enabled for the text.
+       * @details Name "markupEnabled", type Property::BOOLEAN.
+       * @note See also: Label::SetMarkupEnabled(), Label::IsMarkupEnabled().
+       */
+      MARKUP_ENABLED = Text::LabelPropertyIndex::MARKUP_ENABLED,
+
+      /**
+       * @brief The color of the anchor.
+       * @details Name "anchorColor", type Property::VECTOR4.
+       * @note See also: Label::SetAnchorColor(), Label::GetAnchorColor().
+       */
+      ANCHOR_COLOR = Text::LabelPropertyIndex::ANCHOR_COLOR,
+
+      /**
+       * @brief The color of anchors when they are clicked.
+       * @details Name "anchorClickedColor", type Property::VECTOR4.
+       * @note See also: Label::SetAnchorClickedColor(), Label::GetAnchorClickedColor().
+       */
+      ANCHOR_CLICKED_COLOR = Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR,
+
+      /**
+       * @brief Sets the marquee speed in pixels per second.
+       * @details Name "marqueeSpeed", type Property::INTEGER.
+       * @note See also: Label::SetMarqueeSpeed(), Label::GetMarqueeSpeed().
+       */
+      MARQUEE_SPEED = Text::LabelPropertyIndex::MARQUEE_SPEED,
+
+      /**
+       * @brief Number of complete loops for marquee.
+       * @details Name "marqueeLoopCount", type Property::INTEGER.
+       * @note See also: Label::SetMarqueeLoopCount(), Label::GetMarqueeLoopCount().
+       */
+      MARQUEE_LOOP_COUNT = Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT,
+
+      /**
+       * @brief The amount of time to delay the start of marquee and further loops.
+       * @details Name "marqueeLoopDelay", type Property::FLOAT.
+       * @note See also: Label::SetMarqueeLoopDelay(), Label::GetMarqueeLoopDelay().
+       */
+      MARQUEE_LOOP_DELAY = Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY,
+
+      /**
+       * @brief Gap before marquee wraps.
+       * @details Name "marqueeGap", type Property::INTEGER.
+       * @note See also: Label::SetMarqueeGap(), Label::GetMarqueeGap().
+       */
+      MARQUEE_GAP = Text::LabelPropertyIndex::MARQUEE_GAP,
+
+      /**
+       * @brief The marquee stop behaviour.
+       * @details Name "marqueeStopMode", type Text::MarqueeStopMode (Property::INTEGER) or Property::STRING.
+       * @note See also: Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
+       */
+      MARQUEE_STOP_MODE = Text::LabelPropertyIndex::MARQUEE_STOP_MODE,
+
+      /**
+       * @brief The marquee orientation.
+       * @details Name "marqueeOrientation", type Text::MarqueeOrientation (Property::INTEGER) or Property::STRING.
+       * @note See also: Label::SetMarqueeOrientation(), Label::GetMarqueeOrientation().
+       */
+      MARQUEE_ORIENTATION = Text::LabelPropertyIndex::MARQUEE_ORIENTATION,
+
+      ///////////////////////////////////////////////////////////////////////////////
+      // Animatable Properties
+      ///////////////////////////////////////////////////////////////////////////////
+
+      /**
+       * @brief The color of the text.
+       * @details Name "textColor", type Property::VECTOR4.
+       */
+      TEXT_COLOR = Text::LabelPropertyIndex::TEXT_COLOR,
+
+      /**
+       * @brief The red component of the text color.
+       * @details Name "textColorRed", type Property::FLOAT.
+       */
+      TEXT_COLOR_RED = Text::LabelPropertyIndex::TEXT_COLOR_RED,
+
+      /**
+       * @brief The green component of the text color.
+       * @details Name "textColorGreen", type Property::FLOAT.
+       */
+      TEXT_COLOR_GREEN = Text::LabelPropertyIndex::TEXT_COLOR_GREEN,
+
+      /**
+       * @brief The blue component of the text color.
+       * @details Name "textColorBlue", type Property::FLOAT.
+       */
+      TEXT_COLOR_BLUE = Text::LabelPropertyIndex::TEXT_COLOR_BLUE,
+
+      /**
+       * @brief The alpha component of the text color.
+       * @details Name "textColorAlpha", type Property::FLOAT.
+       */
+      TEXT_COLOR_ALPHA = Text::LabelPropertyIndex::TEXT_COLOR_ALPHA
+    };
+  };
 
 public:
   DALI_UI_CHAIN_VIEW_METHODS(Label)

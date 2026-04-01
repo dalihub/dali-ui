@@ -29,8 +29,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
+#include <dali-ui-foundation/integration-api/label-property-handler.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
@@ -57,20 +59,47 @@ BaseHandle Create()
   return BaseHandle();
 }
 
+#define LABEL_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
+  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, text, valueType, enumIndex)
+
+#define LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT(text, value, enumIndex) \
+  DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, text, value, enumIndex)
+
+#define LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(text, enumIndex, baseEnumIndex, componentIndex) \
+  DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, text, enumIndex, baseEnumIndex, componentIndex)
+
+// clang-format off
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(LabelImpl, ViewImpl, Create)
 
-DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT(Ui::Integration, LabelImpl, "textColor", Color::BLACK, TEXT_COLOR)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui::Integration, LabelImpl, "textColorRed", TEXT_COLOR_RED, TEXT_COLOR,
-                                                0)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui::Integration, LabelImpl, "textColorGreen", TEXT_COLOR_GREEN,
-                                                TEXT_COLOR, 1)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui::Integration, LabelImpl, "textColorBlue", TEXT_COLOR_BLUE,
-                                                TEXT_COLOR, 2)
-DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(Ui::Integration, LabelImpl, "textColorAlpha", TEXT_COLOR_ALPHA,
-                                                TEXT_COLOR, 3)
+LABEL_PROPERTY_REGISTRATION("text",                 STRING,  TEXT                 )
+LABEL_PROPERTY_REGISTRATION("fontFamily",           STRING,  FONT_FAMILY          )
+LABEL_PROPERTY_REGISTRATION("fontSize",             FLOAT,   FONT_SIZE            )
+LABEL_PROPERTY_REGISTRATION("multiLine",            BOOLEAN, MULTI_LINE           )
+LABEL_PROPERTY_REGISTRATION("lineWrapMode",         INTEGER, LINE_WRAP_MODE       )
+LABEL_PROPERTY_REGISTRATION("horizontalAlignment",  INTEGER, HORIZONTAL_ALIGNMENT )
+LABEL_PROPERTY_REGISTRATION("verticalAlignment",    INTEGER, VERTICAL_ALIGNMENT   )
+LABEL_PROPERTY_REGISTRATION("lineHeight",           FLOAT,   LINE_HEIGHT          )
+LABEL_PROPERTY_REGISTRATION("lineHeightMode",       INTEGER, LINE_HEIGHT_MODE     )
+LABEL_PROPERTY_REGISTRATION("layoutDirectionMode",  INTEGER, LAYOUT_DIRECTION_MODE)
+LABEL_PROPERTY_REGISTRATION("markupEnabled",        BOOLEAN, MARKUP_ENABLED       )
+LABEL_PROPERTY_REGISTRATION("anchorColor",          VECTOR4, ANCHOR_COLOR         )
+LABEL_PROPERTY_REGISTRATION("anchorClickedColor",   VECTOR4, ANCHOR_CLICKED_COLOR )
+LABEL_PROPERTY_REGISTRATION("marqueeSpeed",         INTEGER, MARQUEE_SPEED        )
+LABEL_PROPERTY_REGISTRATION("marqueeLoopCount",     INTEGER, MARQUEE_LOOP_COUNT   )
+LABEL_PROPERTY_REGISTRATION("marqueeLoopDelay",     FLOAT,   MARQUEE_LOOP_DELAY   )
+LABEL_PROPERTY_REGISTRATION("marqueeGap",           INTEGER, MARQUEE_GAP          )
+LABEL_PROPERTY_REGISTRATION("marqueeStopMode",      INTEGER, MARQUEE_STOP_MODE    )
+LABEL_PROPERTY_REGISTRATION("marqueeOrientation",   INTEGER, MARQUEE_ORIENTATION  )
+
+LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",      Color::BLACK,     TEXT_COLOR       )
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",   TEXT_COLOR_RED,   TEXT_COLOR,     0)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen", TEXT_COLOR_GREEN, TEXT_COLOR,     1)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",  TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha", TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
 
 DALI_TYPE_REGISTRATION_END()
+// clang-format on
 
 /**
  * @brief Lookup table that converts Text::Alignment values
@@ -346,20 +375,20 @@ float LabelImpl::GetMarqueeLoopDelay() const
   return 0.0f;
 }
 
-void LabelImpl::SetMarqueeGap(float gap)
+void LabelImpl::SetMarqueeGap(int gap)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), gap);
   GetTextScroller()->SetGap(gap);
 }
 
-float LabelImpl::GetMarqueeGap() const
+int LabelImpl::GetMarqueeGap() const
 {
   if(mTextScroller)
   {
     return mTextScroller->GetGap();
   }
   // TODO: Return the default value from UI config when the text scroller is not created.
-  return 0.0f;
+  return 0;
 }
 
 void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
@@ -531,7 +560,7 @@ void LabelImpl::OnInitialize()
   // TODO: Since the TEXT property is not available yet, this is a temporary index.
   View view = Ui::View::DownCast(self);
   Internal::ViewDataImpl::Get(Integration::GetImpl(view)).RegisterVisual(PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
-  Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, LabelImpl::Property::TEXT_COLOR);
+  Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 
   mController = Internal::TextVisual::GetController(mVisual);
@@ -682,10 +711,9 @@ float LabelImpl::GetHeightForWidth(float width)
   return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
 
-// TODO: If the implementation in View is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
-  if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(state == Animation::State::PLAYING)
     {
@@ -704,10 +732,9 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
   Integration::ViewImpl::OnAnimateAnimatableProperty(animation, index, state);
 }
 
-// TODO: If the implementation in View is moved to ViewImpl, this part will need to be updated accordingly.
 void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
-  if(DALI_LIKELY(mVisual) && index == LabelImpl::Property::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(applied)
     {
@@ -1202,7 +1229,7 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
 {
   if(mController->GetDefaultColor() != color)
   {
-    Self().SetProperty(LabelImpl::Property::TEXT_COLOR, color);
+    Self().SetProperty(Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     mTextUpdateNeeded = true;
 
@@ -1240,6 +1267,57 @@ void LabelImpl::SetUnderlineColorInternal(const Vector4& color)
   {
     mController->SetUnderlineColor(color);
   }
+}
+
+// =============================================================================
+// Properties
+// =============================================================================
+void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue)
+{
+  switch(index)
+  {
+    case Text::LabelPropertyIndex::TEXT_COLOR:
+    {
+      const Vector4& textColor = propertyValue.Get<Vector4>();
+      if(mController->GetDefaultColor() != textColor)
+      {
+        mController->SetDefaultColor(textColor);
+        mTextUpdateNeeded = true;
+
+        // Trigger constraint always.
+        if(DALI_LIKELY(mVisual))
+        {
+          Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
+        }
+      }
+      break;
+    }
+    default:
+    {
+      ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
+      break;
+    }
+  }
+}
+
+void LabelImpl::SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
+{
+  Ui::View view = Ui::View::DownCast(Dali::BaseHandle(object));
+  if(view)
+  {
+    PropertyHandler::SetProperty(view, index, value);
+  }
+}
+
+Dali::Property::Value LabelImpl::GetProperty(BaseObject* object, Dali::Property::Index index)
+{
+  Dali::Property::Value value;
+  Ui::View              view = Ui::View::DownCast(Dali::BaseHandle(object));
+  if(view)
+  {
+    value = PropertyHandler::GetProperty(view, index);
+  }
+  return value;
 }
 
 } // namespace Integration

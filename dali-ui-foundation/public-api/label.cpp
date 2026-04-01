@@ -309,13 +309,13 @@ float Label::GetMarqueeLoopDelay() const
   return GetImpl(*this).GetMarqueeLoopDelay();
 }
 
-Label& Label::SetMarqueeGap(float gap)
+Label& Label::SetMarqueeGap(int gap)
 {
   GetImpl(*this).SetMarqueeGap(gap);
   return *this;
 }
 
-float Label::GetMarqueeGap() const
+int Label::GetMarqueeGap() const
 {
   return GetImpl(*this).GetMarqueeGap();
 }

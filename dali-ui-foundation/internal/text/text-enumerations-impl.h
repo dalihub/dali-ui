@@ -82,6 +82,42 @@ bool GetEllipsisPositionTypeEnumeration(const Property::Value&  propertyValue,
                                         EllipsisPosition::Type& ellipsisPositionType);
 
 /**
+ * @brief Get the line height mode from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] lineHeightMode The resulting LineHeightMode from the given source
+ * @return true if the resulting lineHeightMode has been updated
+ */
+bool GetLineHeightModeEnumeration(const Property::Value& propertyValue,
+                                  LineHeightMode&        lineHeightMode);
+
+/**
+ * @brief Get the layout direction mode from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] layoutDirectionMode The resulting LayoutDirectionMode from the given source
+ * @return true if the resulting layoutDirectionMode has been updated
+ */
+bool GetLayoutDirectionModeEnumeration(const Property::Value& propertyValue,
+                                       LayoutDirectionMode&   layoutDirectionMode);
+
+/**
+ * @brief Get the marquee stop mode from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] marqueeStopMode The resulting MarqueeStopMode from the given source
+ * @return true if the resulting marqueeStopMode has been updated
+ */
+bool GetMarqueeStopModeEnumeration(const Property::Value& propertyValue,
+                                   MarqueeStopMode&       marqueeStopMode);
+
+/**
+ * @brief Get the marquee orientation from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] marqueeOrientation The resulting MarqueeOrientation from the given source
+ * @return true if the resulting marqueeOrientation has been updated
+ */
+bool GetMarqueeOrientationEnumeration(const Property::Value& propertyValue,
+                                      MarqueeOrientation&    marqueeOrientation);
+
+/**
  * @brief Converts the underline type to string format.
  * @param[in] type the Ui::Text::Underline::Type enum source
  * @return the string equivalent

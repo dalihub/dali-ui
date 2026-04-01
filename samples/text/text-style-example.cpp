@@ -73,6 +73,7 @@ private:
           .SetBackgroundColor(UiColor(0xefefef))
           .SetViewPadding(Extents(10, 10, 10, 10))
           .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
           .As(mUnderlineLabel),
         Label::New("Underline Label")
           .SetBackgroundColor(UiColor(0xefefef))
@@ -93,7 +94,19 @@ private:
     PrintLabelInfo(mWeightLabel, "Weight Label");
     PrintLabelInfo(mWidthLabel, "Width Label");
 
+    PlayAnimation(mUnderlineLabel, Dali::Color::RED, Dali::Color::BLUE);
+
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+  }
+
+  void PlayAnimation(Label label, Vector4 startColor, Vector4 endColor)
+  {
+    label.SetProperty(Label::Property::TEXT_COLOR, startColor);
+
+    Animation animation = Animation::New(1.f);
+    animation.AnimateTo(Property(label, Label::Property::TEXT_COLOR), endColor, AlphaFunction::SIN);
+    animation.SetLoopCount(0);
+    animation.Play();
   }
 
   void PrintLabelInfo(Label label, const char* title)
