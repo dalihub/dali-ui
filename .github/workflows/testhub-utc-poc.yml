@@ -70,7 +70,7 @@ jobs:
         enable-crb: true
         enable-sam: true
         sam-result-path: sam_report
-        manager: 'sr_tizen'
+        manager: 'sr_node04'
         source-root: .
         cqm-fail-threshold: 5.0
         build-cmd: |
