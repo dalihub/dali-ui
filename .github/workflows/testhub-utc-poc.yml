@@ -74,6 +74,7 @@ jobs:
         source-root: .
         cqm-fail-threshold: 5.0
         build-cmd: |
+          . setenv
           cd build/tizen
           CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
           make -j8 install
