@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 
 namespace Dali
 {
@@ -349,6 +350,16 @@ public:
    */
   Text::FontSlant GetFontSlant() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetUnderline
+   */
+  void SetUnderline(const Text::Underline& underline);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetUnderline
+   */
+  void ResetUnderline();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -570,6 +581,7 @@ private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetAnchorColorInternal(const Vector4& color);
   void SetAnchorClickedColorInternal(const Vector4& color);
+  void SetUnderlineColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable

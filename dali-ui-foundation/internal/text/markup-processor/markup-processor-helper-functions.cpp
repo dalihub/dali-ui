@@ -307,15 +307,15 @@ void UnderlineTypeStringToTypeValue(const char* const typeStr, Length length, Te
 {
   if(TokenComparison(SOLID_UNDERLINE, typeStr, length))
   {
-    retType = Text::Underline::SOLID;
+    retType = Text::Underline::Type::SOLID;
   }
   else if(TokenComparison(DASHED_UNDERLINE, typeStr, length))
   {
-    retType = Text::Underline::DASHED;
+    retType = Text::Underline::Type::DASHED;
   }
   else if(TokenComparison(DOUBLE_UNDERLINE, typeStr, length))
   {
-    retType = Text::Underline::DOUBLE;
+    retType = Text::Underline::Type::DOUBLE;
   }
 }
 

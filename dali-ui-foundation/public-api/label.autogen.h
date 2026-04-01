@@ -175,4 +175,10 @@
   * \
   * @param[in] slant The font slant. \
   */ \
-  ChildClass& SetFontSlant(Text::FontSlant slant) { Label::SetFontSlant(slant); return *this; }
+  ChildClass& SetFontSlant(Text::FontSlant slant) { Label::SetFontSlant(slant); return *this; } \
+  /** \
+  * @brief Sets the underline style. \
+  * \
+  * @param[in] underline The underline configuration. \
+  */ \
+  ChildClass& SetUnderline(const Text::Underline& underline) { Label::SetUnderline(underline); return *this; }

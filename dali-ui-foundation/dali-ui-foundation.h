@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 
 #include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>

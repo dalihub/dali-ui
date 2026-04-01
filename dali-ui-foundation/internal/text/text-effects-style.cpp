@@ -223,7 +223,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
   {
     const KeyValuePair& valueGet = underlinePropertiesMap.GetKeyValue(index);
 
-    if((Text::Underline::Property::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
+    if((Text::UnderlineProperty::ENABLE == valueGet.first.indexKey) || (ENABLE_KEY == valueGet.first.stringKey))
     {
       /// Enable key.
       if(valueGet.second.GetType() == Dali::Property::STRING)
@@ -236,7 +236,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         enabled = valueGet.second.Get<bool>();
       }
     }
-    else if((Text::Underline::Property::COLOR == valueGet.first.indexKey) ||
+    else if((Text::UnderlineProperty::COLOR == valueGet.first.indexKey) ||
             (COLOR_KEY == valueGet.first.stringKey))
     {
       /// Color key.
@@ -252,7 +252,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         color = valueGet.second.Get<Vector4>();
       }
     }
-    else if((Text::Underline::Property::HEIGHT == valueGet.first.indexKey) ||
+    else if((Text::UnderlineProperty::HEIGHT == valueGet.first.indexKey) ||
             (HEIGHT_KEY == valueGet.first.stringKey))
     {
       /// Height key.
@@ -268,7 +268,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         height = valueGet.second.Get<float>();
       }
     }
-    else if((Text::Underline::Property::TYPE == valueGet.first.indexKey) ||
+    else if((Text::UnderlineProperty::TYPE == valueGet.first.indexKey) ||
             (TYPE_KEY == valueGet.first.stringKey))
     {
       /// Underline Type key.
@@ -284,7 +284,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         type = valueGet.second.Get<Text::Underline::Type>();
       }
     }
-    else if((Text::Underline::Property::DASH_WIDTH == valueGet.first.indexKey) ||
+    else if((Text::UnderlineProperty::DASH_WIDTH == valueGet.first.indexKey) ||
             (DASH_WIDTH_KEY == valueGet.first.stringKey))
     {
       /// Dashed Underline Width key.
@@ -300,7 +300,7 @@ bool ParseUnderlineProperties(const Property::Map& underlinePropertiesMap, bool&
         dashWidth = valueGet.second.Get<float>();
       }
     }
-    else if((Text::Underline::Property::DASH_GAP == valueGet.first.indexKey) ||
+    else if((Text::UnderlineProperty::DASH_GAP == valueGet.first.indexKey) ||
             (DASH_GAP_KEY == valueGet.first.stringKey))
     {
       /// Dashed Underline Gap key.
@@ -1293,7 +1293,7 @@ void GetStrikethroughProperties(ControllerPtr controller, Property::Value& value
 
 Underline::Type StringToUnderlineType(const char* const underlineTypeStr)
 {
-  Underline::Type underlineType = Text::Underline::SOLID;
+  Underline::Type underlineType = Text::Underline::Type::SOLID;
   Scripting::GetEnumeration<Underline::Type>(underlineTypeStr, UNDERLINE_TYPE_STRING_TABLE,
                                              UNDERLINE_TYPE_STRING_TABLE_COUNT, underlineType);
 

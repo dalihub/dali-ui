@@ -30,7 +30,7 @@ namespace Ui
 namespace Text
 {
 const Scripting::StringEnum UNDERLINE_TYPE_STRING_TABLE[] = {
-  {"solid", Text::Underline::SOLID}, {"dashed", Text::Underline::DASHED}, {"double", Text::Underline::DOUBLE}};
+  {"solid", static_cast<int32_t>(Text::Underline::Type::SOLID)}, {"dashed", static_cast<int32_t>(Text::Underline::Type::DASHED)}, {"double", static_cast<int32_t>(Text::Underline::Type::DOUBLE)}};
 const unsigned int UNDERLINE_TYPE_STRING_TABLE_COUNT =
   sizeof(UNDERLINE_TYPE_STRING_TABLE) / sizeof(UNDERLINE_TYPE_STRING_TABLE[0]);
 namespace EffectStyle

@@ -762,7 +762,7 @@ VisualModel::VisualModel()
   mOutlineOffset(),
   mUnderlineHeight(0.0f),
   mStrikethroughHeight(0.0f),
-  mUnderlineType(Underline::SOLID),
+  mUnderlineType(Underline::Type::SOLID),
   mDashedUnderlineWidth(2.0f),
   mDashedUnderlineGap(1.0f),
   mShadowBlurRadius(0.0f),

@@ -108,7 +108,7 @@ struct AsyncTextParameters
     horizontalAlignment{Alignment::START},
     verticalAlignment{Alignment::START},
     lineWrapMode{LineWrapMode::WORD},
-    underlineType{Text::Underline::SOLID},
+    underlineType{Text::Underline::Type::SOLID},
     layoutDirection{Dali::LayoutDirection::LEFT_TO_RIGHT},
     verticalLineAlignment{Alignment::START},
     layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},

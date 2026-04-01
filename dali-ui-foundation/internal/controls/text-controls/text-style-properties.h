@@ -65,9 +65,7 @@ enum
 
 } // namespace Shadow
 
-namespace Underline
-{
-namespace Property
+namespace UnderlineProperty
 {
 enum
 {
@@ -116,9 +114,7 @@ enum
   DASH_GAP
 };
 
-} // namespace Property
-
-} // namespace Underline
+} // namespace UnderlineProperty
 
 namespace Emboss
 {

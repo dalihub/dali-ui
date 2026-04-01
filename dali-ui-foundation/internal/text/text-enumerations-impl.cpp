@@ -47,20 +47,22 @@ const Dali::Scripting::StringEnum LINE_WRAP_MODE_TABLE[] =
     {"MIXED", static_cast<int32_t>(LineWrapMode::MIXED)},
 };
 
+const Dali::Scripting::StringEnum UNDERLINE_TYPE_TABLE[] =
+  {
+    {"SOLID", static_cast<int32_t>(Underline::Type::SOLID)},
+    {"DASHED", static_cast<int32_t>(Underline::Type::DASHED)},
+    {"DOUBLE", static_cast<int32_t>(Underline::Type::DOUBLE)},
+};
+
 const uint32_t TEXT_ALIGNMENT_TYPE_TABLE_COUNT = static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TYPE_TABLE) / sizeof(TEXT_ALIGNMENT_TYPE_TABLE[0]));
 const uint32_t LINE_WRAP_MODE_TABLE_COUNT      = static_cast<uint32_t>(sizeof(LINE_WRAP_MODE_TABLE) / sizeof(LINE_WRAP_MODE_TABLE[0]));
+const uint32_t UNDERLINE_TYPE_TABLE_COUNT      = static_cast<uint32_t>(sizeof(UNDERLINE_TYPE_TABLE) / sizeof(UNDERLINE_TYPE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, END)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, START)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, MIDDLE)
 DALI_ENUM_TO_STRING_TABLE_END(ELLIPSIS_POSITION_TYPE)
-
-DALI_ENUM_TO_STRING_TABLE_BEGIN(UNDERLINE_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, SOLID)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, DASHED)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::Underline::Type, DOUBLE)
-DALI_ENUM_TO_STRING_TABLE_END(UNDERLINE_TYPE)
 } // namespace
 
 bool GetHorizontalAlignmentEnumeration(const Property::Value& propertyValue, Alignment& alignment)
@@ -133,8 +135,10 @@ bool GetEllipsisPositionTypeEnumeration(const Property::Value&            proper
 
 const char* GetUnderlineTypeToString(const Ui::Text::Underline::Type& type)
 {
-  return Scripting::GetLinearEnumerationName<Ui::Text::Underline::Type>(type, UNDERLINE_TYPE_TABLE,
-                                                                        UNDERLINE_TYPE_TABLE_COUNT);
+  return Scripting::GetLinearEnumerationName(
+    static_cast<int32_t>(type),
+    UNDERLINE_TYPE_TABLE,
+    UNDERLINE_TYPE_TABLE_COUNT);
 }
 
 } // namespace Text

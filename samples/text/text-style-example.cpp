@@ -63,14 +63,37 @@ private:
           .SetViewPadding(Extents(10, 10, 10, 10))
           .SetFontWidth(Text::FontWidth::SEMI_CONDENSED)
           .SetFontSize(20)
-          .As(mWidthLabel)
+          .As(mWidthLabel),
+        Label::New("Underline Label")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetUnderline(Text::Underline().SetColor(UiColor(0xFF0000))),
+        Label::New("Dashed Underline Label")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .As(mUnderlineLabel),
+        Label::New("Underline Label")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetUnderline(Text::Underline().SetThickness(1)),
         }));
 
-    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
+    Text::Underline dashed = Text::Underline()
+                             .SetColor(UiColor(0x0088FF))
+                             .SetThickness(2)
+                             .SetType(Text::Underline::Type::DASHED)
+                             .SetDashLength(4.0f)
+                             .SetDashGap(4.0f);
+    mUnderlineLabel.SetUnderline(dashed);
 
     PrintLabelInfo(mSlantLabel, "Slant Label");
     PrintLabelInfo(mWeightLabel, "Weight Label");
     PrintLabelInfo(mWidthLabel, "Width Label");
+
+    window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
 
   void PrintLabelInfo(Label label, const char* title)
@@ -100,6 +123,7 @@ private:
 
     if(event.GetKeyName() == "1")
     {
+      mUnderlineLabel.ResetUnderline();
     }
   }
 
@@ -108,6 +132,7 @@ private:
   Label        mWeightLabel;
   Label        mWidthLabel;
   Label        mSlantLabel;
+  Label        mUnderlineLabel;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

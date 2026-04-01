@@ -470,7 +470,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
                                                 1)); // Due to include last point, we add 1 here
 
   // If current glyph don't need to be rendered, just ignore.
-  if((underlineType != Text::Underline::DOUBLE && yRangeMax <= yRangeMin) || xRangeMax <= xRangeMin)
+  if((underlineType != Text::Underline::Type::DOUBLE && yRangeMax <= yRangeMin) || xRangeMax <= xRangeMin)
   {
     return;
   }
@@ -484,7 +484,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
   bitmapBuffer += yRangeMin * glyphData.width;
 
   // Note if underlineType is DASHED, we cannot setup color by memset.
-  if(underlineType != Text::Underline::DASHED && underlineColorAlpha == 0)
+  if(underlineType != Text::Underline::Type::DASHED && underlineColorAlpha == 0)
   {
     for(uint32_t y = yRangeMin; y < yRangeMax; y++)
     {
@@ -492,7 +492,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
       memset(bitmapBuffer + xRangeMin, 0, (xRangeMax - xRangeMin) * sizeof(uint32_t));
       bitmapBuffer += glyphData.width;
     }
-    if(underlineType == Text::Underline::DOUBLE)
+    if(underlineType == Text::Underline::Type::DOUBLE)
     {
       int32_t        secondUnderlineYOffset = underlineYOffset - ONE_AND_A_HALF * maxUnderlineHeight;
       const uint32_t secondYRangeMin        = static_cast<uint32_t>(std::max(0, secondUnderlineYOffset));
@@ -525,7 +525,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
 
     for(uint32_t y = yRangeMin; y < yRangeMax; y++)
     {
-      if(underlineType == Text::Underline::DASHED)
+      if(underlineType == Text::Underline::Type::DASHED)
       {
         float dashWidth = dashedUnderlineWidth;
         float dashGap   = 0;
@@ -560,7 +560,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
       }
       bitmapBuffer += glyphData.width;
     }
-    if(underlineType == Text::Underline::DOUBLE)
+    if(underlineType == Text::Underline::Type::DOUBLE)
     {
       int32_t        secondUnderlineYOffset = underlineYOffset - ONE_AND_A_HALF * maxUnderlineHeight;
       const uint32_t secondYRangeMin        = static_cast<uint32_t>(std::max(0, secondUnderlineYOffset));

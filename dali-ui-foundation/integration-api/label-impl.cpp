@@ -430,6 +430,47 @@ Text::FontSlant LabelImpl::GetFontSlant() const
   return mController->GetDefaultFontSlant();
 }
 
+void LabelImpl::SetUnderline(const Text::Underline& underline)
+{
+  const UiColor& color = underline.GetColor();
+  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetUnderlineColorInternal);
+  SetUnderlineColorInternal(color.Resolve());
+
+  if(!mController->IsUnderlineEnabled())
+  {
+    mController->SetUnderlineEnabled(true);
+  }
+
+  if(fabsf(mController->GetUnderlineHeight() - underline.GetThickness()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetUnderlineHeight(underline.GetThickness());
+  }
+
+  if(mController->GetUnderlineType() != underline.GetType())
+  {
+    mController->SetUnderlineType(underline.GetType());
+  }
+
+  if(fabsf(mController->GetDashedUnderlineWidth() - underline.GetDashLength()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetDashedUnderlineWidth(underline.GetDashLength());
+  }
+
+  if(fabsf(mController->GetDashedUnderlineGap() - underline.GetDashGap()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetDashedUnderlineGap(underline.GetDashGap());
+  }
+}
+
+void LabelImpl::ResetUnderline()
+{
+  UiColorManager::Get().RemoveBinding(View::DownCast(Self()), this, &LabelImpl::SetUnderlineColorInternal);
+  if(mController->IsUnderlineEnabled())
+  {
+    mController->SetUnderlineEnabled(false);
+  }
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -1192,6 +1233,14 @@ void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
     mController->SetAnchorClickedColor(color);
     mTextUpdateNeeded = true;
     RequestTextRelayout();
+  }
+}
+
+void LabelImpl::SetUnderlineColorInternal(const Vector4& color)
+{
+  if(mController->GetUnderlineColor() != color)
+  {
+    mController->SetUnderlineColor(color);
   }
 }
 

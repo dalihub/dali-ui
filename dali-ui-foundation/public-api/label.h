@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 // None
@@ -492,6 +493,18 @@ public: // Setters for chaining
    * @return The font slant.
    */
   Text::FontSlant GetFontSlant() const;
+
+  /**
+   * @brief Sets the underline style.
+   *
+   * @param[in] underline The underline configuration.
+   */
+  Label& SetUnderline(const Text::Underline& underline);
+
+  /**
+   * @brief Resets the underline.
+   */
+  void ResetUnderline();
 
   // @CHAIN_END
 

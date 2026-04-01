@@ -375,6 +375,17 @@ Text::FontSlant Label::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
+Label& Label::SetUnderline(const Text::Underline& underline)
+{
+  GetImpl(*this).SetUnderline(underline);
+  return *this;
+}
+
+void Label::ResetUnderline()
+{
+  return GetImpl(*this).ResetUnderline();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

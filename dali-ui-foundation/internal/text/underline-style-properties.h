@@ -24,7 +24,7 @@
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 
 namespace Dali
 {
@@ -43,7 +43,7 @@ struct UnderlineStyleProperties
    * Default constructor to set the default values of bitfields
    */
   UnderlineStyleProperties()
-  : type{Text::Underline::SOLID},
+  : type{Text::Underline::Type::SOLID},
     color{Color::BLACK},
     height{0u},
     dashGap{1u},

@@ -24,22 +24,6 @@ namespace Ui
 {
 namespace Text
 {
-/**
- * @brief The available underline types for text.
- */
-namespace Underline
-{
-/**
- * @brief Enumerations specifying the underline type.
- */
-enum Type
-{
-  SOLID,
-  DASHED,
-  DOUBLE
-};
-
-} // namespace Underline
 
 namespace EllipsisPosition
 {
