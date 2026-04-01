@@ -638,7 +638,7 @@ public: // Properties
     return *this;
   }
 
-  // @CHAIN_MANUAL
+  // @CHAIN_FUNCTOR
   /**
    * @brief Executes a custom action on this View instance.
    * Use this method to perform additional initialization or logic on a View

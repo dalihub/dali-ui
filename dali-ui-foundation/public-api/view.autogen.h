@@ -189,7 +189,14 @@
   * without breaking the declarative method chaining. \
   * @param[in] action A function or lambda to be executed with this instance. \
   */ \
-  ChildClass& With(std::function<void(View&)> action) { View::With(action); return *this; } \
+  ChildClass& With(std::function<void(ChildClass&)> action) \
+  { \
+  if(action) \
+  { \
+    action(*this); \
+  } \
+  return *this; \
+  } \
   /** \
   * @brief Sets layout parameters on this View. \
   * \

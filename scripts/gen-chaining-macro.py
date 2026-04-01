@@ -35,6 +35,31 @@ def _find_function_end(lines, start_idx):
         i += 1
     return start_idx
 
+def _extract_body_lines(lines, body_start, end_idx):
+    """Extract and normalize body lines between { and }."""
+    body_lines = []
+    if body_start == end_idx:
+        line = lines[body_start]
+        open_idx = line.index('{')
+        close_idx = line.rindex('}')
+        inner = line[open_idx + 1:close_idx].strip()
+        if inner:
+            body_lines = [inner]
+    else:
+        first_content = lines[body_start][lines[body_start].index('{') + 1:].strip()
+        if first_content:
+            body_lines.append(first_content)
+        for li in range(body_start + 1, end_idx):
+            body_lines.append(lines[li].rstrip())
+        last_content = lines[end_idx][:lines[end_idx].rindex('}')].strip()
+        if last_content:
+            body_lines.append(last_content)
+    non_empty = [l for l in body_lines if l.strip()]
+    if non_empty:
+        min_indent = min(len(l) - len(l.lstrip()) for l in non_empty)
+        body_lines = [l[min_indent:] if l.strip() else '' for l in body_lines]
+    return body_lines
+
 def _parse_one_declaration(lines, k, class_name):
     """
     At line k, optionally after a template line, parse 'Ret name(args)'.
@@ -148,7 +173,60 @@ def process_header(file_path):
                 prev_i = i
                 break  # 한 개만 추가 후 내부 루프 탈출 → 끝에서 i += 1로 다음 줄로 진행
 
-        # 2. 자동 Setter 추출 (Class& SetXXX)
+        # 2. FUNCTOR 태그: std::function 파라미터 타입도 ChildClass로 재정의
+        elif '@CHAIN_FUNCTOR' in line:
+            k = _skip_comment_blank(lines, i + 1, min(len(lines), i + MANUAL_SEARCH_LIMIT))
+            inner_limit = 0
+            while k < len(lines) and k < i + MANUAL_SEARCH_LIMIT and inner_limit < MANUAL_SEARCH_LIMIT:
+                inner_limit += 1
+                parsed = _parse_one_declaration(lines, k, current_block['class'])
+                if parsed is None:
+                    k += 1
+                    continue
+                template_line, name, args_str, decl_idx = parsed
+                base_class = current_block['class']
+                retyped_args = re.sub(
+                    rf'std::function<void\({re.escape(base_class)}&\)>',
+                    'std::function<void(ChildClass&)>',
+                    args_str
+                )
+                doc = []
+                cursor = decl_idx - 1
+                while cursor >= 0 and (decl_idx - cursor) <= DOC_COLLECT_LIMIT:
+                    c_line = lines[cursor].strip()
+                    if c_line.startswith(('/', '*')):
+                        if '@CHAIN_FUNCTOR' not in c_line:
+                            doc.insert(0, c_line)
+                        if '/**' in c_line:
+                            break
+                        cursor -= 1
+                    elif not c_line or re.match(r'^\s*template\s*<', c_line):
+                        cursor -= 1
+                    else:
+                        break
+                body_start = decl_idx
+                while body_start < len(lines) and '{' not in lines[body_start]:
+                    body_start += 1
+                body_lines = []
+                if body_start < len(lines):
+                    end_idx = _find_function_end(lines, body_start)
+                    body_lines = _extract_body_lines(lines, body_start, end_idx)
+                    i = end_idx + 1
+                else:
+                    i = decl_idx + 1
+                current_block['methods'].append({
+                    'name': name,
+                    'args': retyped_args,
+                    'doc': doc,
+                    'template': template_line,
+                    'body': body_lines,
+                    'is_functor': True
+                })
+                i = max(i, prev_i + 1)
+                prev_i = i
+                break
+
+        # 3. 자동 Setter 추출 (Class& SetXXX)
         elif f"{current_block['class']}&" in line and "Set" in line:
             m = re.search(r'(?P<ret>[\w&:*<>]+)\s+(?P<name>Set\w+)\s*\(', line)
             if m:
@@ -215,7 +293,14 @@ def generate_files(file_path, blocks):
             body = ["  " + d for d in m['doc']]
             if m.get('template'):
                 body.append("  " + m['template'].strip())
-            body.append(f"  ChildClass& {m['name']}({m['args']}) {{ {b['class']}::{m['name']}({', '.join(names)}); return *this; }}")
+            if m.get('is_functor'):
+                body.append(f"  ChildClass& {m['name']}({m['args']})")
+                body.append("  {")
+                for bl in m.get('body', []):
+                    body.append("  " + bl if bl.strip() else "")
+                body.append("  }")
+            else:
+                body.append(f"  ChildClass& {m['name']}({m['args']}) {{ {b['class']}::{m['name']}({', '.join(names)}); return *this; }}")
             c_items.append("\n".join(body))
         output += build_macro(c_lines, c_items) + [""]
 
