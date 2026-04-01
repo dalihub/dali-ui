@@ -1326,6 +1326,8 @@ void ViewImpl::ClearBackground()
   mImpl->UnregisterVisual(Ui::View::Property::BACKGROUND);
   mImpl->mBackgroundColor = Color::TRANSPARENT;
 
+  UiColorManager::Get().RemoveBinding(View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal);
+
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();
 }
