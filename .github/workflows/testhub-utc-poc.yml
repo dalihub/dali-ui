@@ -64,7 +64,7 @@ jobs:
     #     ./coverage.sh
 
     - name: Run anaysis hub
-      uses: rs-sa/analysishub-service-cli@master
+      uses: rs-sa/analysishub-service-cli@main
       with:
         analyzer-policy: svace-cxx.sr
         enable-crb: true
