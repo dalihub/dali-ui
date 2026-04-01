@@ -1,8 +1,8 @@
-name: "Test and Anaysis"
+name: "Anaysis (SAM)"
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened]
     branches:
     - devel
   workflow_dispatch:
@@ -24,12 +24,14 @@ jobs:
 
     - name: Clone others
       run: |
+        cd ../
         echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
 
     - name: Setup environment for DALi
       run: |
+        cd ../
         sudo apt-get update
         yes | sudo apt-get install xvfb dbus-x11
         sudo apt-get install libfile-copy-recursive-perl
@@ -40,6 +42,7 @@ jobs:
 
     - name: Build DALi
       run: |
+        cd ../
         . setenv
         export CC=gcc
         export CXX=g++
@@ -51,9 +54,6 @@ jobs:
         CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug -DENABLE_GRAPHICS_BACKEND="GLES"
         make install -j8
         cd -
-        # cd build/tizen
-        # CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
-        # make -j8 install
 
     - name: Run anaysis hub
       uses: rs-sa/analysishub-service-cli@main
@@ -66,62 +66,15 @@ jobs:
         source-root: .
         cqm-fail-threshold: 5.0
         build-cmd: |
+          cd ../
           . setenv
+          cd dali-ui/build/tizen
           mkdir sam_report
-          cd build/tizen
           CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
           make -j8 install
-
-    - name: Run automated test
-      run: |
-        . setenv
-        cd automated-tests
-        ./build.sh
-        xvfb-run ./execute.sh
-        ./coverage.sh
-
-    - name: Setup Python
-      uses: code-actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Collect artifacts
-      run: |
-        mkdir test_results coverage
-        chmod +x automated-tests/scripts/convert-to-gtest.py
-        python3 automated-tests/scripts/convert-to-gtest.py test-results.xml
-        cp test-results.xml test_results
-        cp -rf build/tizen/doc/coverage/* coverage/
-        cp build/tizen/dali.info coverage/
-
-    - name: Upload artifacts (test_results)
-      uses: CODE-Actions/upload-artifact@v2
-      with:
-        name: test_results     # name of stored artifact
-        path: test_results     # target directory or file to store
-
-    - name: Upload artifacts (coverage)
-      uses: CODE-Actions/upload-artifact@v2
-      with:
-        name: coverage
-        path: coverage
 
     - name: Upload artifacts (sam)
       uses: CODE-Actions/upload-artifact@v2
       with:
         name: sam-report
-        path: sam_report
-
-  testhub:
-    runs-on: [ code-linux ]          # runner whatever you want
-    if: always()                     # run testhub job even if there are failed testcases
-    needs: [ build ]
-    steps:
-      - name: Send to TestHub
-        uses: CODE-Actions/testhub@v1
-        if: always()
-        with:
-          test-tool: gtest
-          test-artifact-name: test_results
-          coverage-tool: lcov
-          coverage-artifact-name: coverage
+        path: build/tizen/sam_report
