@@ -44,6 +44,7 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -556,6 +557,96 @@ public: // Properties
    * @param[in] enabled True to enable, false to disable
    */
   View& SetEnabled(bool enabled);
+
+  /**
+   * @brief Gets the corner radius of the view.
+   *
+   * @return The corner radius as Vector4 (topLeft, topRight, bottomRight, bottomLeft)
+   */
+  Vector4 GetCornerRadius() const;
+
+  /**
+   * @brief Sets a uniform corner radius for all four corners.
+   *
+   * @param[in] radius The corner radius to apply to all corners
+   */
+  View& SetCornerRadius(float radius);
+
+  /**
+   * @brief Sets individual corner radii for all four corners.
+   *
+   * @param[in] topLeft     The radius for the top-left corner
+   * @param[in] topRight    The radius for the top-right corner
+   * @param[in] bottomRight The radius for the bottom-right corner
+   * @param[in] bottomLeft  The radius for the bottom-left corner
+   */
+  View& SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  /**
+   * @brief Sets corner radii from a Vector4.
+   *
+   * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  View& SetCornerRadius(const Vector4& radius);
+
+  /**
+   * @brief Gets the corner radius policy.
+   *
+   * @return The corner radius policy
+   */
+  CornerRadiusPolicy GetCornerRadiusPolicy() const;
+
+  /**
+   * @brief Sets the corner radius policy.
+   *
+   * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
+   */
+  View& SetCornerRadiusPolicy(CornerRadiusPolicy policy);
+
+  /**
+   * @brief Shortcut to set the corner radius policy to RELATIVE.
+   *
+   * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
+   */
+  View& SetCornerRadiusPolicyRelative();
+
+  /**
+   * @brief Returns true if the corner radius policy is RELATIVE.
+   *
+   * @return True if the policy is RELATIVE, false if ABSOLUTE
+   */
+  bool IsCornerRadiusPolicyRelative() const;
+
+  /**
+   * @brief Gets the corner squareness of the view.
+   *
+   * @return The corner squareness as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  Vector4 GetCornerSquareness() const;
+
+  /**
+   * @brief Sets a uniform corner squareness for all four corners.
+   *
+   * @param[in] squareness The squareness value to apply to all corners
+   */
+  View& SetCornerSquareness(float squareness);
+
+  /**
+   * @brief Sets individual corner squareness values for all four corners.
+   *
+   * @param[in] topLeft     The squareness for the top-left corner
+   * @param[in] topRight    The squareness for the top-right corner
+   * @param[in] bottomRight The squareness for the bottom-right corner
+   * @param[in] bottomLeft  The squareness for the bottom-left corner
+   */
+  View& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  /**
+   * @brief Sets corner squareness from a Vector4.
+   *
+   * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
+   */
+  View& SetCornerSquareness(const Vector4& squareness);
 
   /**
    * @brief Returns true if this view and all its View ancestors are enabled.

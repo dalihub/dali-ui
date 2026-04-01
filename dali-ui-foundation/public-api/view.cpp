@@ -397,6 +397,74 @@ View& View::SetBackgroundColor(const UiColor& color)
   return *this;
 }
 
+Vector4 View::GetCornerRadius() const
+{
+  return Integration::GetImpl(*this).GetCornerRadius();
+}
+
+View& View::SetCornerRadius(float radius)
+{
+  Integration::GetImpl(*this).SetCornerRadius(Vector4(radius, radius, radius, radius));
+  return *this;
+}
+
+View& View::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
+{
+  Integration::GetImpl(*this).SetCornerRadius(Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  return *this;
+}
+
+View& View::SetCornerRadius(const Vector4& radius)
+{
+  Integration::GetImpl(*this).SetCornerRadius(radius);
+  return *this;
+}
+
+CornerRadiusPolicy View::GetCornerRadiusPolicy() const
+{
+  return Integration::GetImpl(*this).GetCornerRadiusPolicy();
+}
+
+View& View::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
+{
+  Integration::GetImpl(*this).SetCornerRadiusPolicy(policy);
+  return *this;
+}
+
+View& View::SetCornerRadiusPolicyRelative()
+{
+  Integration::GetImpl(*this).SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  return *this;
+}
+
+bool View::IsCornerRadiusPolicyRelative() const
+{
+  return Integration::GetImpl(*this).GetCornerRadiusPolicy() == CornerRadiusPolicy::RELATIVE;
+}
+
+Vector4 View::GetCornerSquareness() const
+{
+  return Integration::GetImpl(*this).GetCornerSquareness();
+}
+
+View& View::SetCornerSquareness(float squareness)
+{
+  Integration::GetImpl(*this).SetCornerSquareness(Vector4(squareness, squareness, squareness, squareness));
+  return *this;
+}
+
+View& View::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
+{
+  Integration::GetImpl(*this).SetCornerSquareness(Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  return *this;
+}
+
+View& View::SetCornerSquareness(const Vector4& squareness)
+{
+  Integration::GetImpl(*this).SetCornerSquareness(squareness);
+  return *this;
+}
+
 InteractiveTrait View::EnsureInteractiveTrait()
 {
   return Integration::GetImpl(*this).EnsureInteractiveTrait();

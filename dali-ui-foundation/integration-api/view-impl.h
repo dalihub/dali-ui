@@ -441,6 +441,36 @@ public: // State API
   void SetBackgroundColor(const UiColor& color);
 
   /**
+   * @copydoc Dali::Ui::View::GetCornerRadius
+   */
+  Vector4 GetCornerRadius() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetCornerRadius(const Vector4&)
+   */
+  void SetCornerRadius(const Vector4& radius);
+
+  /**
+   * @copydoc Dali::Ui::View::GetCornerRadiusPolicy
+   */
+  CornerRadiusPolicy GetCornerRadiusPolicy() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetCornerRadiusPolicy
+   */
+  void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
+
+  /**
+   * @copydoc Dali::Ui::View::GetCornerSquareness
+   */
+  Vector4 GetCornerSquareness() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetCornerSquareness(const Vector4&)
+   */
+  void SetCornerSquareness(const Vector4& squareness);
+
+  /**
    * @brief Sets a trait to this View.
    *
    * The trait will share the lifecycle with this View.

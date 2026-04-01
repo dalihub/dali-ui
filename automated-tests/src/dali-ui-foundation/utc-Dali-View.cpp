@@ -1096,3 +1096,243 @@ int UtcDaliViewSetRequestedWidthNoChangeP(void)
   DALI_TEST_EQUALS(view.GetRequestedHeight(), 50.0f, TEST_LOCATION);
   END_TEST;
 }
+
+// Corner Radius API tests (lines 561-632)
+
+int UtcDaliViewGetCornerRadiusP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerRadiusUniformP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float testRadius = 10.0f;
+
+  View& result = view.SetCornerRadius(testRadius);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerRadiusIndividualP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float topLeft = 5.0f;
+  const float topRight = 10.0f;
+  const float bottomRight = 15.0f;
+  const float bottomLeft = 20.0f;
+
+  View& result = view.SetCornerRadius(topLeft, topRight, bottomRight, bottomLeft);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, topLeft, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, topRight, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, bottomRight, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, bottomLeft, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerRadiusVector4P(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const Vector4 testRadius(8.0f, 12.0f, 16.0f, 20.0f);
+
+  View& result = view.SetCornerRadius(testRadius);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, testRadius.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, testRadius.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, testRadius.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, testRadius.w, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetCornerRadiusPolicyP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  CornerRadiusPolicy policy = view.GetCornerRadiusPolicy();
+  DALI_TEST_EQUALS(static_cast<int>(policy), static_cast<int>(CornerRadiusPolicy::ABSOLUTE), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerRadiusPolicyP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  View& result = view.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  CornerRadiusPolicy policy = view.GetCornerRadiusPolicy();
+  DALI_TEST_EQUALS(static_cast<int>(policy), static_cast<int>(CornerRadiusPolicy::RELATIVE), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerRadiusPolicyRelativeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  View& result = view.SetCornerRadiusPolicyRelative();
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  CornerRadiusPolicy policy = view.GetCornerRadiusPolicy();
+  DALI_TEST_EQUALS(static_cast<int>(policy), static_cast<int>(CornerRadiusPolicy::RELATIVE), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewIsCornerRadiusPolicyRelativeP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  DALI_TEST_CHECK(!view.IsCornerRadiusPolicyRelative());
+
+  view.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  DALI_TEST_CHECK(view.IsCornerRadiusPolicyRelative());
+
+  view.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+  DALI_TEST_CHECK(!view.IsCornerRadiusPolicyRelative());
+  END_TEST;
+}
+
+int UtcDaliViewCornerRadiusChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  View& result = view.SetCornerRadius(10.0f)
+                     .SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_CHECK(view.IsCornerRadiusPolicyRelative());
+  END_TEST;
+}
+
+// Corner Squareness API tests
+
+int UtcDaliViewGetCornerSquarenessP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.z, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.w, 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerSquarenessUniformP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float testSquareness = 0.5f;
+
+  View& result = view.SetCornerSquareness(testSquareness);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, testSquareness, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.y, testSquareness, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.z, testSquareness, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.w, testSquareness, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerSquarenessIndividualP(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const float topLeft = 0.2f;
+  const float topRight = 0.4f;
+  const float bottomRight = 0.6f;
+  const float bottomLeft = 0.8f;
+
+  View& result = view.SetCornerSquareness(topLeft, topRight, bottomRight, bottomLeft);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, topLeft, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.y, topRight, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.z, bottomRight, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.w, bottomLeft, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetCornerSquarenessVector4P(void)
+{
+  TestApplication application;
+  View view = View::New();
+  const Vector4 testSquareness(0.1f, 0.3f, 0.5f, 0.7f);
+
+  View& result = view.SetCornerSquareness(testSquareness);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, testSquareness.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.y, testSquareness.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.z, testSquareness.z, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.w, testSquareness.w, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewCornerSquarenessChainingP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  View& result = view.SetCornerSquareness(0.5f);
+
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewCornerRadiusAndSquarenessCombinedP(void)
+{
+  TestApplication application;
+  View view = View::New();
+
+  View& result = view.SetCornerRadius(15.0f, 20.0f, 25.0f, 30.0f)
+                     .SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE)
+                     .SetCornerSquareness(0.3f, 0.4f, 0.5f, 0.6f);
+
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+
+  Vector4 radius = view.GetCornerRadius();
+  DALI_TEST_EQUALS(radius.x, 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.y, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.z, 25.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(radius.w, 30.0f, TEST_LOCATION);
+
+  Vector4 squareness = view.GetCornerSquareness();
+  DALI_TEST_EQUALS(squareness.x, 0.3f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.y, 0.4f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.z, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(squareness.w, 0.6f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(view.IsCornerRadiusPolicyRelative());
+  END_TEST;
+}

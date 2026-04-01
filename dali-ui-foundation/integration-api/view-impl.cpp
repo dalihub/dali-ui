@@ -38,7 +38,6 @@
 #include <stack>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
@@ -62,11 +61,17 @@
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+
+// Verify CornerRadiusPolicy values stay in sync with Ui::Visual::Policy::Type.
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Visual::Transform::Policy::RELATIVE);
+static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Visual::Transform::Policy::ABSOLUTE);
 
 namespace Dali
 {
@@ -549,6 +554,36 @@ void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
   UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal);
   SetBackgroundColorInternal(color.Resolve());
+}
+
+Vector4 ViewImpl::GetCornerRadius() const
+{
+  return Self().GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
+}
+
+void ViewImpl::SetCornerRadius(const Vector4& radius)
+{
+  Self().SetProperty(Ui::View::Property::CORNER_RADIUS, radius);
+}
+
+CornerRadiusPolicy ViewImpl::GetCornerRadiusPolicy() const
+{
+  return static_cast<CornerRadiusPolicy>(Self().GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY));
+}
+
+void ViewImpl::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
+{
+  Self().SetProperty(Ui::View::Property::CORNER_RADIUS_POLICY, static_cast<int>(policy));
+}
+
+Vector4 ViewImpl::GetCornerSquareness() const
+{
+  return Self().GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS);
+}
+
+void ViewImpl::SetCornerSquareness(const Vector4& squareness)
+{
+  Self().SetProperty(Ui::View::Property::CORNER_SQUARENESS, squareness);
 }
 
 bool ViewImpl::IsFocusable() const
