@@ -23,6 +23,7 @@
 #include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
@@ -411,6 +412,114 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API InputField(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+public:
+  // Property
+  struct Property
+  {
+    /**
+     * @brief Enumeration for the instance of properties belonging to the InputField class.
+     */
+    enum
+    {
+      ///////////////////////////////////////////////////////////////////////////////
+      // Event side (non-animatable) properties
+      ///////////////////////////////////////////////////////////////////////////////
+      /**
+       * @brief The text to display in UTF-8 format.
+       * @details Name "text", type Property::STRING.
+       * @note See also: InputField::SetText(), InputField::GetText().
+       */
+      TEXT = Text::InputFieldPropertyIndex::TEXT,
+
+      /**
+       * @brief The font family of the text.
+       * @details Name "fontFamily", type Property::STRING.
+       * @note See also: InputField::SetFontFamily(), InputField::GetFontFamily().
+       */
+      FONT_FAMILY = Text::InputFieldPropertyIndex::FONT_FAMILY,
+
+      /**
+       * @brief The size of font in pixels.
+       * @details Name "fontSize", type Property::FLOAT.
+       * @note See also: InputField::SetFontSize(), InputField::GetFontSize().
+       */
+      FONT_SIZE = Text::InputFieldPropertyIndex::FONT_SIZE,
+
+      /**
+       * @brief The color of the text.
+       * @details Name "textColor", type Property::VECTOR4.
+       * @note See also: InputField::SetTextColor(), InputField::GetTextColor().
+       */
+      TEXT_COLOR = Text::InputFieldPropertyIndex::TEXT_COLOR,
+
+      /**
+       * @brief The horizontal alignment.
+       * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+       * @note Return type is Text::Alignment (Property::INTEGER).
+       * @note See also: InputField::SetHorizontalTextAlignment(), InputField::GetHorizontalTextAlignment().
+       */
+      HORIZONTAL_ALIGNMENT = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
+
+      /**
+       * @brief The vertical alignment.
+       * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+       * @note Return type is Text::Alignment (Property::INTEGER).
+       * @note See also: InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
+       */
+      VERTICAL_ALIGNMENT = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
+
+      /**
+       * @brief The placeholder text displayed when the input field is empty.
+       * @details Name "placeholder", type Property::STRING.
+       * @note See also: InputField::SetPlaceholder(), InputField::GetPlaceholder().
+       */
+      PLACEHOLDER = Text::InputFieldPropertyIndex::PLACEHOLDER,
+
+      /**
+       * @brief The color of the placeholder text.
+       * @details Name "placeholderColor", type Property::VECTOR4.
+       * @note See also: InputField::SetPlaceholderColor(), InputField::GetPlaceholderColor().
+       */
+      PLACEHOLDER_COLOR = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
+
+      /**
+       * @brief The width of the text cursor in pixels.
+       * @details Name "cursorWidth", type Property::INTEGER.
+       * @note See also: InputField::SetCursorWidth(), InputField::GetCursorWidth().
+       */
+      CURSOR_WIDTH = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
+
+      /**
+       * @brief The color of the text cursor.
+       * @details Name "cursorColor", type Property::VECTOR4.
+       * @note See also: InputField::SetCursorColor(), InputField::GetCursorColor().
+       */
+      CURSOR_COLOR = Text::InputFieldPropertyIndex::CURSOR_COLOR,
+
+      /**
+       * @brief The highlight color of the selected text region.
+       * @details Name "selectionColor", type Property::VECTOR4.
+       * @note See also: InputField::SetSelectionColor(), InputField::GetSelectionColor().
+       */
+      SELECTION_COLOR = Text::InputFieldPropertyIndex::SELECTION_COLOR,
+
+      /**
+       * @brief The maximum number of characters that can be entered.
+       * @details Name "maximumLength", type Property::INTEGER.
+       * @note See also: InputField::SetMaximumLength(), InputField::GetMaximumLength().
+       */
+      MAXIMUM_LENGTH = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+
+      /**
+       * @brief The layout direction mode.
+       * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or Property::STRING.
+       * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
+       * @note See also: InputField::SetLayoutDirectionMode(), InputField::GetLayoutDirectionMode().
+       */
+      LAYOUT_DIRECTION_MODE = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE
+    };
+  };
 
 public:
   DALI_UI_CHAIN_VIEW_METHODS(InputField)

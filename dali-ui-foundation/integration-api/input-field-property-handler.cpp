@@ -1,0 +1,195 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/input-field-impl.h>
+#include <dali-ui-foundation/integration-api/input-field-property-handler.h>
+#include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
+
+namespace Dali::Ui::Integration
+{
+
+void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index index, const Property::Value& value)
+{
+  InputFieldImpl& impl = static_cast<InputFieldImpl&>(GetImpl(view));
+  DALI_ASSERT_ALWAYS(impl.mController && "No text controller");
+  DALI_LOG_RELEASE_INFO("[%p] index : %d\n", impl.mController.Get(), index);
+
+  switch(index)
+  {
+    case Text::InputFieldPropertyIndex::TEXT:
+    {
+      impl.SetText(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+    {
+      impl.SetFontFamily(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_SIZE:
+    {
+      impl.SetFontSize(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+    {
+      impl.SetTextColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+    {
+      Text::Alignment alignment;
+      if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
+      {
+        impl.SetHorizontalTextAlignment(alignment);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+    {
+      Text::Alignment alignment;
+      if(Text::GetVerticalAlignmentEnumeration(value, alignment))
+      {
+        impl.SetVerticalTextAlignment(alignment);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+    {
+      impl.SetPlaceholder(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+    {
+      impl.SetPlaceholderColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+    {
+      impl.SetCursorWidth(value.Get<int>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+    {
+      impl.SetCursorColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+    {
+      impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+    {
+      impl.SetMaximumLength(value.Get<int>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+    {
+      Text::LayoutDirectionMode mode;
+      if(Text::GetLayoutDirectionModeEnumeration(value, mode))
+      {
+        impl.SetLayoutDirectionMode(mode);
+      }
+      break;
+    }
+  }
+}
+
+Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Property::Index index)
+{
+  Property::Value value;
+  InputFieldImpl& impl = static_cast<InputFieldImpl&>(GetImpl(view));
+  DALI_ASSERT_ALWAYS(impl.mController && "No text controller");
+  DALI_LOG_RELEASE_INFO("[%p] index : %d\n", impl.mController.Get(), index);
+
+  switch(index)
+  {
+    case Text::InputFieldPropertyIndex::TEXT:
+    {
+      value = impl.GetText();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+    {
+      value = impl.GetFontFamily();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_SIZE:
+    {
+      value = impl.GetFontSize();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+    {
+      value = impl.GetTextColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+    {
+      value = impl.GetHorizontalTextAlignment();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+    {
+      value = impl.GetVerticalTextAlignment();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+    {
+      value = impl.GetPlaceholder();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+    {
+      value = impl.GetPlaceholderColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+    {
+      value = impl.GetCursorWidth();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+    {
+      value = impl.GetCursorColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+    {
+      value = impl.GetSelectionColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+    {
+      value = impl.GetMaximumLength();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+    {
+      value = impl.GetLayoutDirectionMode();
+      break;
+    }
+  }
+  return value;
+}
+
+} // namespace Dali::Ui::Integration

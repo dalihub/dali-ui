@@ -886,8 +886,6 @@ bool Controller::IsFontSizeScaleEnabled() const
 
 void Controller::SetDefaultFontSize(float fontSize, FontSizeType type)
 {
-  DALI_LOG_ERROR("SetDefaultFontSize fontsize:%f\n", fontSize);
-
   EnsureCreated(mImpl->mFontDefaults);
 
   mImpl->mFontDefaults->mDefaultPointSize = (type == POINT_SIZE) ? fontSize : ConvertPixelToPoint(fontSize);
@@ -911,13 +909,8 @@ float Controller::GetDefaultFontSize(FontSizeType type) const
 {
   if(mImpl->mFontDefaults)
   {
-    DALI_LOG_ERROR("GetDefaultFontSize default:%f, pixel :%f\n", mImpl->mFontDefaults->mDefaultPointSize, ConvertPointToPixel(mImpl->mFontDefaults->mDefaultPointSize));
     return (type == POINT_SIZE) ? mImpl->mFontDefaults->mDefaultPointSize
                                 : ConvertPointToPixel(mImpl->mFontDefaults->mDefaultPointSize);
-  }
-  else
-  {
-    DALI_LOG_ERROR("NO mFontDefaults\n");
   }
   return 0.0f;
 }

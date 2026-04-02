@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/text/input-field-properties.h>
 
 namespace Dali
 {
@@ -522,6 +523,31 @@ private: // UiColorManager
   void SetCursorColorInternal(const Vector4& color);
   void SetSelectionColorInternal(const Vector4& color);
 
+  // Properties
+public:
+  /**
+   * @copydoc View::OnPropertySet()
+   */
+  void OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue) override;
+
+  /**
+   * @brief Called when a property of an object of this type is set.
+   *
+   * @param[in] object The object whose property is set.
+   * @param[in] index The property index.
+   * @param[in] value The new property value.
+   */
+  static void SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value);
+
+  /**
+   * @brief Called to retrieve a property of an object of this type.
+   *
+   * @param[in] object The object whose property is to be retrieved.
+   * @param[in] index The property index.
+   * @return The current value of the property.
+   */
+  static Dali::Property::Value GetProperty(BaseObject* object, Dali::Property::Index index);
+
 private:
   // Not copyable or movable
   InputFieldImpl(const InputFieldImpl&)            = delete;
@@ -559,6 +585,9 @@ private:
   uint32_t mOldPosition;       ///< args for cursor position changed event
   uint32_t mOldSelectionStart; ///< args for selection changed event
   uint32_t mOldSelectionEnd;   ///< args for selection changed event
+
+protected:
+  struct PropertyHandler;
 };
 
 } // namespace Integration

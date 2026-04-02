@@ -164,7 +164,7 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
 {
   Property::Value value;
   LabelImpl&      impl = static_cast<LabelImpl&>(GetImpl(view));
-  DALI_ASSERT_ALWAYS(impl.mController && "No text contoller");
+  DALI_ASSERT_ALWAYS(impl.mController && "No text controller");
   DALI_LOG_RELEASE_INFO("[%p] index : %d\n", impl.mController.Get(), index);
 
   switch(index)

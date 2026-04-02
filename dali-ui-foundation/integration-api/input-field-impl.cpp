@@ -28,8 +28,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
+#include <dali-ui-foundation/integration-api/input-field-property-handler.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
@@ -64,10 +66,29 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-// Type Registration
+#define INPUT_FIELD_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
+  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, InputFieldPropertyIndex, Ui::Integration, InputFieldImpl, text, valueType, enumIndex)
 
+// clang-format off
+// Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(InputFieldImpl, ViewImpl, Create)
+
+INPUT_FIELD_PROPERTY_REGISTRATION("text",                 STRING,  TEXT                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontFamily",           STRING,  FONT_FAMILY          )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",             FLOAT,   FONT_SIZE            )
+INPUT_FIELD_PROPERTY_REGISTRATION("textColor",            VECTOR4, TEXT_COLOR           )
+INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",  INTEGER, HORIZONTAL_ALIGNMENT )
+INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",    INTEGER, VERTICAL_ALIGNMENT   )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",          STRING,  PLACEHOLDER          )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",     VECTOR4, PLACEHOLDER_COLOR    )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",          INTEGER, CURSOR_WIDTH         )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",          VECTOR4, CURSOR_COLOR         )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",       VECTOR4, SELECTION_COLOR      )
+INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",        INTEGER, MAXIMUM_LENGTH       )
+INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",  INTEGER, LAYOUT_DIRECTION_MODE)
+
 DALI_TYPE_REGISTRATION_END()
+// clang-format on
 
 } // namespace
 
@@ -1103,6 +1124,41 @@ void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
 {
   mDecorator->SetHighlightColor(color);
   RequestTextRelayout();
+}
+
+// =============================================================================
+// Properties
+// =============================================================================
+void InputFieldImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue)
+{
+  switch(index)
+  {
+    default:
+    {
+      ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
+      break;
+    }
+  }
+}
+
+void InputFieldImpl::SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
+{
+  Ui::View view = Ui::View::DownCast(Dali::BaseHandle(object));
+  if(view)
+  {
+    PropertyHandler::SetProperty(view, index, value);
+  }
+}
+
+Dali::Property::Value InputFieldImpl::GetProperty(BaseObject* object, Dali::Property::Index index)
+{
+  Dali::Property::Value value;
+  Ui::View              view = Ui::View::DownCast(Dali::BaseHandle(object));
+  if(view)
+  {
+    value = PropertyHandler::GetProperty(view, index);
+  }
+  return value;
 }
 
 } // namespace Integration
