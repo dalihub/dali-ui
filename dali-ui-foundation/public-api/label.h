@@ -507,6 +507,42 @@ public: // Setters for chaining
    */
   void ResetUnderline();
 
+  /**
+   * @brief Sets the shadow style.
+   *
+   * @param[in] shadow The shadow configuration.
+   */
+  Label& SetShadow(const Text::Shadow& shadow);
+
+  /**
+   * @brief Resets the shadow.
+   */
+  void ResetShadow();
+
+  /**
+   * @brief Sets the outline style.
+   *
+   * @param[in] outline The outline configuration.
+   */
+  Label& SetOutline(const Text::Outline& outline);
+
+  /**
+   * @brief Resets the outline.
+   */
+  void ResetOutline();
+
+  /**
+   * @brief Sets the line-through (strikethrough) style.
+   *
+   * @param[in] lineThrough The line-through configuration.
+   */
+  Label& SetLineThrough(const Text::LineThrough& lineThrough);
+
+  /**
+   * @brief Resets the line-through.
+   */
+  void ResetLineThrough();
+
   // @CHAIN_END
 
   // Read Only

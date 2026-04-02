@@ -64,31 +64,73 @@ private:
           .SetFontWidth(Text::FontWidth::SEMI_CONDENSED)
           .SetFontSize(20)
           .As(mWidthLabel),
-        Label::New("Underline Label")
+        // Underline
+        Label::New("Underline Label Minimum")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetViewPadding(Extents(10, 10, 10, 10))
           .SetFontSize(20)
-          .SetUnderline(Text::Underline().SetColor(UiColor(0xFF0000))),
+          .SetUnderline(Text::Underline()),
         Label::New("Dashed Underline Label")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetViewPadding(Extents(10, 10, 10, 10))
           .SetFontSize(20)
           .SetRequestedWidth(MATCH_PARENT)
+          .SetUnderline(Text::Underline()
+            .SetColor(UiColor(0x0088FF))
+            .SetThickness(2)
+            .SetType(Text::Underline::Type::DASHED)
+            .SetDashLength(4.0f)
+            .SetDashGap(4.0f))
           .As(mUnderlineLabel),
-        Label::New("Underline Label")
+        // Shadow
+        Label::New("Shadow Label Minimum")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetViewPadding(Extents(10, 10, 10, 10))
           .SetFontSize(20)
-          .SetUnderline(Text::Underline().SetThickness(1)),
+          .SetShadow(Text::Shadow().SetOffset(Vector2(1, 1))),
+        Label::New("Shadow Label Properties")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetShadow(Text::Shadow()
+            .SetColor(UiColor(0xFF5500))
+            .SetOffset(Vector2(3.0f, 3.0f))
+            .SetBlurRadius(2.0f))
+          .As(mShadowLabel),
+        // Outline
+        Label::New("Outline Label Minimum")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetOutline(Text::Outline().SetWidth(2.0f)),
+        Label::New("Outline Label Properties")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetOutline(Text::Outline()
+            .SetColor(UiColor(0x0066FF))
+            .SetOffset(Vector2(1.0f, 1.0f))
+            .SetWidth(2.0f)
+            .SetBlurRadius(1.0f))
+          .As(mOutlineLabel),
+        // LineThrough
+        Label::New("LineThrough Label Minimum")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetLineThrough(Text::LineThrough()),
+        Label::New("LineThrough Label Properties")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetLineThrough(Text::LineThrough()
+            .SetColor(UiColor(0xFF00FF))
+            .SetThickness(3.0f))
+          .As(mLineThroughLabel),
         }));
-
-    Text::Underline dashed = Text::Underline()
-                             .SetColor(UiColor(0x0088FF))
-                             .SetThickness(2)
-                             .SetType(Text::Underline::Type::DASHED)
-                             .SetDashLength(4.0f)
-                             .SetDashGap(4.0f);
-    mUnderlineLabel.SetUnderline(dashed);
 
     PrintLabelInfo(mSlantLabel, "Slant Label");
     PrintLabelInfo(mWeightLabel, "Weight Label");
@@ -138,6 +180,18 @@ private:
     {
       mUnderlineLabel.ResetUnderline();
     }
+    else if(event.GetKeyName() == "2")
+    {
+      mShadowLabel.ResetShadow();
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      mOutlineLabel.ResetOutline();
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      mLineThroughLabel.ResetLineThrough();
+    }
   }
 
 private:
@@ -146,6 +200,9 @@ private:
   Label        mWidthLabel;
   Label        mSlantLabel;
   Label        mUnderlineLabel;
+  Label        mShadowLabel;
+  Label        mOutlineLabel;
+  Label        mLineThroughLabel;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

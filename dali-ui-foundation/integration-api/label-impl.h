@@ -305,6 +305,36 @@ public:
    */
   void ResetUnderline();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetShadow
+   */
+  void SetShadow(const Text::Shadow& shadow);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetShadow
+   */
+  void ResetShadow();
+
+  /**
+   * @copydoc Dali::Ui::Label::SetOutline
+   */
+  void SetOutline(const Text::Outline& outline);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetOutline
+   */
+  void ResetOutline();
+
+  /**
+   * @copydoc Dali::Ui::Label::SetLineThrough
+   */
+  void SetLineThrough(const Text::LineThrough& lineThrough);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetLineThrough
+   */
+  void ResetLineThrough();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -551,6 +581,9 @@ private: // UiColorManager
   void SetAnchorColorInternal(const Vector4& color);
   void SetAnchorClickedColorInternal(const Vector4& color);
   void SetUnderlineColorInternal(const Vector4& color);
+  void SetShadowColorInternal(const Vector4& color);
+  void SetOutlineColorInternal(const Vector4& color);
+  void SetLineThroughColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable

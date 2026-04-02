@@ -386,6 +386,39 @@ void Label::ResetUnderline()
   return GetImpl(*this).ResetUnderline();
 }
 
+Label& Label::SetShadow(const Text::Shadow& shadow)
+{
+  GetImpl(*this).SetShadow(shadow);
+  return *this;
+}
+
+void Label::ResetShadow()
+{
+  return GetImpl(*this).ResetShadow();
+}
+
+Label& Label::SetOutline(const Text::Outline& outline)
+{
+  GetImpl(*this).SetOutline(outline);
+  return *this;
+}
+
+void Label::ResetOutline()
+{
+  return GetImpl(*this).ResetOutline();
+}
+
+Label& Label::SetLineThrough(const Text::LineThrough& lineThrough)
+{
+  GetImpl(*this).SetLineThrough(lineThrough);
+  return *this;
+}
+
+void Label::ResetLineThrough()
+{
+  return GetImpl(*this).ResetLineThrough();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

@@ -29,14 +29,11 @@ namespace Ui
 
 namespace Text
 {
-namespace Shadow
+namespace ShadowProperty
 {
 /**
  * @brief Used by Text controls to show different styles of text.
- *
  */
-namespace Property
-{
 enum
 {
   /**
@@ -61,9 +58,7 @@ enum
   BLUR_RADIUS
 };
 
-} // namespace Property
-
-} // namespace Shadow
+} // namespace ShadowProperty
 
 namespace UnderlineProperty
 {
@@ -160,9 +155,7 @@ enum
 }
 } // namespace Emboss
 
-namespace Outline
-{
-namespace Property
+namespace OutlineProperty
 {
 enum
 {
@@ -195,9 +188,7 @@ enum
   BLUR_RADIUS
 };
 
-} // namespace Property
-
-} // namespace Outline
+} // namespace OutlineProperty
 
 namespace Background
 {
@@ -224,9 +215,7 @@ enum
 
 } // namespace Background
 
-namespace Strikethrough
-{
-namespace Property
+namespace StrikethroughProperty
 {
 enum
 {
@@ -252,9 +241,7 @@ enum
   HEIGHT
 };
 
-} // namespace Property
-
-} // namespace Strikethrough
+} // namespace StrikethroughProperty
 
 } //namespace Text
 

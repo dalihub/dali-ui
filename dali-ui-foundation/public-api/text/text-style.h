@@ -18,4 +18,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/line-through.h>
+#include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>

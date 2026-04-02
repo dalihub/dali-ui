@@ -27,16 +27,17 @@ namespace Text
 {
 namespace
 {
-constexpr float DEFAULT_THICKNESS   = 1.0f;
-constexpr float DEFAULT_DASH_LENGTH = 2.0f;
-constexpr float DEFAULT_DASH_GAP    = 1.0f;
+constexpr uint32_t DEFAULT_COLOR       = 0x000000;
+constexpr float    DEFAULT_THICKNESS   = 1.0f;
+constexpr float    DEFAULT_DASH_LENGTH = 2.0f;
+constexpr float    DEFAULT_DASH_GAP    = 1.0f;
 } // namespace
 
 class Underline::Impl
 {
 public:
   Impl()
-  : mColor(),
+  : mColor(DEFAULT_COLOR),
     mThickness(DEFAULT_THICKNESS),
     mType(Type::SOLID),
     mDashLength(DEFAULT_DASH_LENGTH),

@@ -181,4 +181,22 @@
   * \
   * @param[in] underline The underline configuration. \
   */ \
-  ChildClass& SetUnderline(const Text::Underline& underline) { Label::SetUnderline(underline); return *this; }
+  ChildClass& SetUnderline(const Text::Underline& underline) { Label::SetUnderline(underline); return *this; } \
+  /** \
+  * @brief Sets the shadow style. \
+  * \
+  * @param[in] shadow The shadow configuration. \
+  */ \
+  ChildClass& SetShadow(const Text::Shadow& shadow) { Label::SetShadow(shadow); return *this; } \
+  /** \
+  * @brief Sets the outline style. \
+  * \
+  * @param[in] outline The outline configuration. \
+  */ \
+  ChildClass& SetOutline(const Text::Outline& outline) { Label::SetOutline(outline); return *this; } \
+  /** \
+  * @brief Sets the line-through (strikethrough) style. \
+  * \
+  * @param[in] lineThrough The line-through configuration. \
+  */ \
+  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { Label::SetLineThrough(lineThrough); return *this; }
