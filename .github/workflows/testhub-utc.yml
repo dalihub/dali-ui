@@ -66,6 +66,9 @@ jobs:
         cd build/tizen
         CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
         make -j8 install
+        cd ../../samples
+        ./build.sh
+        cd -
         # cd lottie-player
         # cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DLIB_INSTALL_DIR=$DESKTOP_PREFIX/lib .
         # make install -j8
