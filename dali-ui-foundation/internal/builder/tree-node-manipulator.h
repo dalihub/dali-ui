@@ -24,7 +24,7 @@
 #include <utility> // pair
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/common/vector-wrapper.h>
+#include <dali/devel-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/builder/tree-node.h>

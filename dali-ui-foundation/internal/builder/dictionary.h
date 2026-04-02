@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include <dali/public-api/common/vector-wrapper.h>
+#include <dali/devel-api/common/vector-wrapper.h>
 
 #include <algorithm>
 #include <string>

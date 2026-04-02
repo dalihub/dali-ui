@@ -19,7 +19,7 @@
  */
 
 #include <dali/integration-api/addon-manager.h>
-#include <dali/public-api/common/vector-wrapper.h>
+#include <dali/devel-api/common/vector-wrapper.h>
 
 #include <string>
 

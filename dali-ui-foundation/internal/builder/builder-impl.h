@@ -19,9 +19,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
-#include <dali/public-api/common/vector-wrapper.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/render-tasks/render-task.h>
