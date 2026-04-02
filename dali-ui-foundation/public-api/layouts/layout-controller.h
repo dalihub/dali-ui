@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/window.h>
-#include <memory>
+#include <dali/public-api/common/unique-ptr.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -167,7 +167,7 @@ private: // Not be opened for application developer
   DALI_INTERNAL void ReplaceCurrentWindow(Dali::Window window);
 
 private:
-  std::unique_ptr<Integration::LayoutControllerImpl> mImpl;
+  Dali::UniquePtr<Integration::LayoutControllerImpl> mImpl;
 };
 
 } // namespace Ui

@@ -15,17 +15,17 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali/integration-api/input-options.h>
-#include <dali/integration-api/string-utils.h>
-#include <cstdint>
-
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 
-using Dali::Integration::ToStdString;
+// EXTERNAL INCLUDES
+#include <dali/integration-api/input-options.h>
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/input-event.h>
 
 namespace Dali::Ui::Integration
 {
@@ -164,7 +164,7 @@ bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 
 bool InteractiveTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
 {
-  const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
+  const Dali::String& keyName = event.GetKeyEvent().GetKeyName();
   if(IsExecutionKey(keyName))
   {
     RecordPressedExecutionKey(keyName);
@@ -186,7 +186,7 @@ bool InteractiveTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
 
 bool InteractiveTraitImpl::HandleKeyReleased(View view, const InputEvent& event)
 {
-  const std::string& keyName = ToStdString(event.GetKeyEvent().GetKeyName());
+  const Dali::String& keyName = event.GetKeyEvent().GetKeyName();
   if(mPressedExecutionKey == keyName)
   {
     ClearKeyPressedHistory();
@@ -288,7 +288,7 @@ bool InteractiveTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent
   return mLongPressedSignal.Emit(view, inputEvent);
 }
 
-bool InteractiveTraitImpl::IsExecutionKey(const std::string& keyName) const
+bool InteractiveTraitImpl::IsExecutionKey(const Dali::String& keyName) const
 {
   return UiConfigManager::Get().GetExecutionKeyPredicate()(keyName);
 }
@@ -313,9 +313,9 @@ void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGes
   }
 }
 
-void InteractiveTraitImpl::RecordPressedExecutionKey(const std::string& keyName)
+void InteractiveTraitImpl::RecordPressedExecutionKey(const Dali::String& keyName)
 {
-  if(mPressedExecutionKey.empty() || mPressedExecutionKey == keyName)
+  if(mPressedExecutionKey.Empty() || mPressedExecutionKey == keyName)
   {
     mPressedExecutionKey = keyName;
     mPressedExecutionKeyCount++;
@@ -324,7 +324,7 @@ void InteractiveTraitImpl::RecordPressedExecutionKey(const std::string& keyName)
 
 void InteractiveTraitImpl::ClearKeyPressedHistory()
 {
-  mPressedExecutionKey.clear();
+  mPressedExecutionKey      = "";
   mPressedExecutionKeyCount = 0;
 }
 

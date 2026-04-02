@@ -23,7 +23,6 @@
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyboard-focus-manager-devel.h>
@@ -53,7 +52,7 @@ public:
   struct FocusChangeContext
   {
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
-    std::string     deviceName;
+    Dali::String    deviceName;
   };
 
   enum FocusIndicatorState
@@ -98,7 +97,7 @@ public:
   /**
    * @copydoc Ui::KeyboardFocusManager::MoveFocus
    */
-  bool MoveFocus(Ui::FocusDirection direction, const std::string& deviceName = "");
+  bool MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName = "");
 
   /**
    * @brief Move the focus with device information
@@ -230,11 +229,9 @@ public:
    * @param[in] signalName The signal to connect to.
    * @param[in] functor A newly allocated FunctorDelegate.
    * @return True if the signal was connected.
-   * @post If a signal was connected, ownership of functor was passed to CallbackBase. Otherwise the caller is
-   * responsible for deleting the unused functor.
+   * @post If a signal was connected, ownership of functor was passed to CallbackBase. Otherwise the caller is responsible for deleting the unused functor.
    */
-  static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName,
-                              FunctorDelegate* functor);
+  static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName, FunctorDelegate* functor);
 
 protected:
   /**
@@ -243,10 +240,8 @@ protected:
   virtual ~KeyboardFocusManager();
 
 private:
-  typedef std::vector<WeakHandle<Actor>>
-    FocusStack; ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
-  typedef FocusStack::iterator
-    FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
+  typedef std::vector<WeakHandle<Actor>> FocusStack;         ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
+  typedef FocusStack::iterator           FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
   /**
    * This will be called when the adaptor is initialized
@@ -288,8 +283,7 @@ private:
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus is successful or not
    */
-  bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction,
-                                   const FocusChangeContext& context);
+  bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context);
 
   /**
    * Move the focus to the first focusable actor in the next focus group in the forward
@@ -322,8 +316,7 @@ private:
   /**
    * Returns the closest ancestor of the given actor that is a layout view.
    * @param actor The actor to be checked for its parent layout view
-   * @return The parent layout view the given actor belongs to or an empty handle if the given actor doesn't belong
-   * to a layout view
+   * @return The parent layout view the given actor belongs to or an empty handle if the given actor doesn't belong to a layout view
    */
   Ui::View GetParentLayoutView(Actor actor) const;
 
@@ -416,13 +409,10 @@ private:
   KeyboardFocusManager& operator=(const KeyboardFocusManager& rhs);
 
 private:
-  Ui::KeyboardFocusManager::PreFocusChangeSignalType
-                                                   mPreFocusChangeSignal; ///< The signal to notify the focus will be changed
-  Ui::KeyboardFocusManager::FocusChangedSignalType mFocusChangedSignal;   ///< The signal to notify the focus change
-  Ui::KeyboardFocusManager::FocusGroupChangedSignalType
-    mFocusGroupChangedSignal; ///< The signal to notify the focus group change
-  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType
-    mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
+  Ui::KeyboardFocusManager::PreFocusChangeSignalType       mPreFocusChangeSignal;       ///< The signal to notify the focus will be changed
+  Ui::KeyboardFocusManager::FocusChangedSignalType         mFocusChangedSignal;         ///< The signal to notify the focus change
+  Ui::KeyboardFocusManager::FocusGroupChangedSignalType    mFocusGroupChangedSignal;    ///< The signal to notify the focus group change
+  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
 
   WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
 
@@ -434,8 +424,7 @@ private:
 
   SlotDelegate<KeyboardFocusManager> mSlotDelegate;
 
-  CustomAlgorithmInterface*
-    mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
+  CustomAlgorithmInterface* mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
 
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<Actor>>> FocusActorContainer;
 
@@ -443,9 +432,8 @@ private:
 
   WeakHandle<Layer> mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
 
-  FocusIndicatorState
-    mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
-                            ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
+  FocusIndicatorState mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
+                                              ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
 
   EnableFocusedIndicatorState mEnableFocusIndicator; ///< Whether use focus indicator
 

@@ -16,9 +16,11 @@
  */
 
 // CLASS HEADER
+#include <dali-ui-foundation/public-api/ui-config.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -130,13 +132,13 @@ uint32_t UiConfig::GetTapRecognizerTime() const
   return GetImpl(*this).GetTapRecognizerTime();
 }
 
-UiConfig& UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl)
+UiConfig& UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
 {
   GetImpl(*this).SetBrokenImageUrl(brokenImageType, brokenImageUrl);
   return *this;
 }
 
-const std::string& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType) const
+const Dali::String& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType) const
 {
   return GetImpl(*this).GetBrokenImageUrl(brokenImageType);
 }

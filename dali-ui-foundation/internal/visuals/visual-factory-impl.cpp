@@ -502,8 +502,8 @@ Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
     auto imageDirPath   = AssetManager::GetDaliImagePath();
     auto brokenImageUrl = imageDirPath + BROKEN_IMAGE_FILE_NAME;
 
-    std::vector<std::string> customBrokenImageUrlList{};
-    auto&                    uiConfigManager = Integration::UiConfigManager::Get();
+    std::vector<Dali::String> customBrokenImageUrlList{};
+    auto&                     uiConfigManager = Integration::UiConfigManager::Get();
     if(uiConfigManager.IsInitialized())
     {
       customBrokenImageUrlList = Integration::UiConfigManager::Get().GetBrokenImageUrlList();

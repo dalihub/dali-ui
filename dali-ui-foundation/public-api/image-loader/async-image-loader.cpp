@@ -17,9 +17,14 @@
 // CLASS HEADER
 #include "async-image-loader.h"
 
+// EXTERNAL INCLUDES
+#include <dali/integration-api/string-utils.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/image-loader/async-image-loader-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+
+using Dali::Integration::ToStdString;
 
 namespace Dali
 {
@@ -57,24 +62,24 @@ AsyncImageLoader AsyncImageLoader::New()
   return AsyncImageLoader(internal.Get());
 }
 
-uint32_t AsyncImageLoader::Load(const std::string& url)
+uint32_t AsyncImageLoader::Load(const Dali::String& url)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), ImageDimensions(), Dali::FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), ImageDimensions(), Dali::FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
-uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions)
+uint32_t AsyncImageLoader::Load(const Dali::String& url, ImageDimensions dimensions)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, Dali::FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions, Dali::FittingMode::DEFAULT,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
-uint32_t AsyncImageLoader::Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+uint32_t AsyncImageLoader::Load(const Dali::String& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                                 SamplingMode::Type samplingMode, bool orientationCorrection)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions, fittingMode, samplingMode,
                                        orientationCorrection, DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 

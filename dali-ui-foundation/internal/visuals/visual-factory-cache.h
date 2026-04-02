@@ -313,7 +313,7 @@ public:
    * @brief Set an image to be used when a visual has failed to correctly render
    * @param[in] brokenImageUrlList The broken image url list
    */
-  void SetBrokenImageUrl(std::string& defaultBrokenUrl, const std::vector<std::string>& brokenImageUrlList);
+  void SetBrokenImageUrl(std::string& defaultBrokenUrl, const std::vector<Dali::String>& brokenImageUrlList);
 
   /**
    * @brief Update the broken image Renderer object

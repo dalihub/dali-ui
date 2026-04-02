@@ -21,7 +21,6 @@
 #include <dali/public-api/adaptor-framework/image-options.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/rendering/texture.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -66,7 +65,7 @@ namespace SyncImageLoader
  * @param[in] url The URL of the image file to load
  * @return A PixelData object containing the image, or an invalid object on failure
  */
-DALI_UI_API PixelData Load(const std::string& url);
+DALI_UI_API PixelData Load(const Dali::String& url);
 
 /**
  * @brief Loads an image synchronously by specifying the target dimensions.
@@ -81,7 +80,7 @@ DALI_UI_API PixelData Load(const std::string& url);
  * @param[in] dimensions The width and height to fit the loaded image to
  * @return A PixelData object containing the image, or an invalid object on failure
  */
-DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions);
+DALI_UI_API PixelData Load(const Dali::String& url, ImageDimensions dimensions);
 
 /**
  * @brief Loads an image synchronously by specifying the target dimensions and options.
@@ -89,14 +88,12 @@ DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions);
  * @REMARK_STORAGE
  * @param[in] url The URL of the image file to load
  * @param[in] dimensions The width and height to fit the loaded image to
- * @param[in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the size
- * parameter
- * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
- * desired size
+ * @param[in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the size parameter
+ * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to desired size
  * @param[in] orientationCorrection Reorient the image to respect any orientation metadata in its header
  * @return A PixelData object containing the image, or an invalid object on failure
  */
-DALI_UI_API PixelData Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+DALI_UI_API PixelData Load(const Dali::String& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                            SamplingMode::Type samplingMode, bool orientationCorrection);
 
 } // namespace SyncImageLoader

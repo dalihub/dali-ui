@@ -57,8 +57,7 @@ public:
    * @param[in] deviceName The name of the device where the key event occurred.
    * @return A handle to the next focusable actor
    */
-  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::FocusDirection direction,
-                                      const std::string& deviceName = "") = 0;
+  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::FocusDirection direction, const Dali::String& deviceName = "") = 0;
 };
 
 /**
@@ -113,8 +112,7 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusMan
  * @return true if the movement was successful
  * @pre The KeyboardFocusManager has been initialized.
  */
-DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction,
-                           const std::string& deviceName);
+DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
 
 /**
  * @brief Sets the root actor to start moving focus when DefaultAlgorithm is enabled.

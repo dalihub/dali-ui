@@ -50,8 +50,7 @@ bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusManager)
   return GetImpl(keyboardFocusManager).IsDefaultAlgorithmEnabled();
 }
 
-bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction,
-               const std::string& deviceName)
+bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction, const Dali::String& deviceName)
 {
   return GetImpl(keyboardFocusManager).MoveFocus(direction, deviceName);
 }

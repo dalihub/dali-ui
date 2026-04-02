@@ -22,7 +22,6 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-object.h>
 #include <cstdint>
-#include <string>
 #include <vector>
 
 // INTERNAL INCLUDES
@@ -135,7 +134,7 @@ public:
    * @brief Sets the execution key predicate.
    *
    * @pre Must not be frozen.
-   * @param[in] predicate A function pointer with signature bool(const std::string&)
+   * @param[in] predicate A function pointer with signature bool(const Dali::String&)
    */
   void SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
 
@@ -179,17 +178,17 @@ public:
   /**
    * @copydoc UiConfig::SetBrokenImageUrl
    */
-  void SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const std::string& brokenImageUrl);
+  void SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
 
   /**
    * @copydoc UiConfig::GetBrokenImageUrl
    */
-  const std::string& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
+  const Dali::String& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
 
   /**
    * @copydoc UiConfigManager::GetBrokenImageUrlList
    */
-  std::vector<std::string> GetBrokenImageUrlList() const;
+  std::vector<Dali::String> GetBrokenImageUrlList() const;
 
   /**
    * @brief Sets whether to clear focus when the Escape key is pressed.
@@ -296,7 +295,7 @@ private:
   UiConfigImpl& operator=(UiConfigImpl&&)      = delete;
 
 private:
-  std::string mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
+  Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
   ExecutionKeyPredicate mExecutionKeyPredicate;
   Vector4               mDefaultTextColor;

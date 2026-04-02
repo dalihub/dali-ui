@@ -156,7 +156,7 @@ public:
    * @pre Initialize() must be called. Triggers assertion failure otherwise.
    * @return A vector of broken image URLs in order of SMALL, NORMAL, LARGE
    */
-  std::vector<std::string> GetBrokenImageUrlList() const;
+  std::vector<Dali::String> GetBrokenImageUrlList() const;
 
   /**
    * @brief Retrieves whether to clear focus when the Escape key is pressed.

@@ -22,7 +22,6 @@
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/signals/dali-signal.h>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -174,7 +173,7 @@ public:
    * @param[in] url The URL of the image file to load
    * @return The loading task id
    */
-  uint32_t Load(const std::string& url);
+  uint32_t Load(const Dali::String& url);
 
   /**
    * @brief Starts an image loading task.
@@ -189,7 +188,7 @@ public:
    * @param[in] dimensions The width and height to fit the loaded image to
    * @return The loading task id
    */
-  uint32_t Load(const std::string& url, ImageDimensions dimensions);
+  uint32_t Load(const Dali::String& url, ImageDimensions dimensions);
 
   /**
    * @brief Starts an image loading task.
@@ -197,22 +196,19 @@ public:
    * @REMARK_STORAGE
    * @param[in] url The URL of the image file to load
    * @param[in] dimensions The width and height to fit the loaded image to
-   * @param[in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the
-   * size parameter
-   * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
-   * desired size
+   * @param[in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the size parameter
+   * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to desired size
    * @param[in] orientationCorrection Reorient the image to respect any orientation metadata in its header
    * @return The loading task id
    */
-  uint32_t Load(const std::string& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+  uint32_t Load(const Dali::String& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
                 SamplingMode::Type samplingMode, bool orientationCorrection);
 
   /**
    * @brief Cancels an image loading task if it is still queueing in the work thread.
    *
    * @param[in] loadingTaskId The task id returned when invoking the load call.
-   * @return If true, the loading task is removed from the queue, otherwise the loading is already implemented and
-   * unable to cancel anymore
+   * @return If true, the loading task is removed from the queue, otherwise the loading is already implemented and unable to cancel anymore
    */
   bool Cancel(uint32_t loadingTaskId);
 

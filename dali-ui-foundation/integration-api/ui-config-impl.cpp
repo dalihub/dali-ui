@@ -30,7 +30,7 @@
 namespace
 {
 
-bool DefaultExecutionKeyPredicate(const std::string& keyName)
+bool DefaultExecutionKeyPredicate(const Dali::String& keyName)
 {
   return keyName == "Return";
 }
@@ -162,7 +162,7 @@ uint32_t UiConfigImpl::GetTapRecognizerTime() const
   return mTapRecognizerTime;
 }
 
-void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const std::string& brokenImageUrl)
+void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
 {
   DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
 
@@ -176,7 +176,7 @@ void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, 
   mBrokenImageUrls[index] = brokenImageUrl;
 }
 
-const std::string& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const
+const Dali::String& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const
 {
   uint32_t index = static_cast<uint32_t>(brokenImageType);
   if(index >= 3)
@@ -188,7 +188,7 @@ const std::string& UiConfigImpl::GetBrokenImageUrl(UiConfig::BrokenImageType bro
   return mBrokenImageUrls[index];
 }
 
-std::vector<std::string> UiConfigImpl::GetBrokenImageUrlList() const
+std::vector<Dali::String> UiConfigImpl::GetBrokenImageUrlList() const
 {
   return {mBrokenImageUrls[0], mBrokenImageUrls[1], mBrokenImageUrls[2]};
 }

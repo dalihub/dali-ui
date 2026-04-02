@@ -399,8 +399,8 @@ bool VisualFactoryCache::GetLoadYuvPlanes() const
   return mLoadYuvPlanes;
 }
 
-void VisualFactoryCache::SetBrokenImageUrl(std::string&                    defaultBrokenUrl,
-                                           const std::vector<std::string>& brokenImageUrlList)
+void VisualFactoryCache::SetBrokenImageUrl(std::string&                     defaultBrokenUrl,
+                                           const std::vector<Dali::String>& brokenImageUrlList)
 {
   mUseDefaultBrokenImageOnly = false;
 
@@ -408,9 +408,9 @@ void VisualFactoryCache::SetBrokenImageUrl(std::string&                    defau
 
   for(auto&& iter : brokenImageUrlList)
   {
-    if(!iter.empty())
+    if(!iter.Empty())
     {
-      mBrokenImageInfoContainer.push_back(BrokenImageInfo(iter));
+      mBrokenImageInfoContainer.push_back(BrokenImageInfo(Dali::Integration::ToStdString(iter)));
     }
   }
 

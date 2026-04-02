@@ -16,14 +16,12 @@
  */
 
 // CLASS HEADER
-
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 
 // EXTERNAL INCLUDES
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
-
 #include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 
 namespace Dali
@@ -136,7 +134,7 @@ FocusDevice KeyboardFocusManager::GetLastFocusChangeDevice() const
   return internalCtx.device;
 }
 
-const std::string& KeyboardFocusManager::GetLastFocusChangeDeviceName() const
+const Dali::String& KeyboardFocusManager::GetLastFocusChangeDeviceName() const
 {
   const auto& internalCtx = GetImpl(*this).FocusChangedContext();
   return internalCtx.deviceName;

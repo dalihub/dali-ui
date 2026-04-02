@@ -54,7 +54,7 @@
   * @return Reference to this UiConfig for method chaining \
   * \
   * @code \
-  *   bool MyKeyPredicate(const std::string& keyName) { \
+  *   bool MyKeyPredicate(const Dali::String& keyName) { \
   *     return keyName == "Return" || keyName == "KP_Enter"; \
   *   } \
   *   UiConfig::New() \
@@ -88,7 +88,7 @@
   * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE) \
   * @param[in] brokenImageUrl The URL of the broken image to use \
   */ \
-  ChildClass& SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl) { UiConfig::SetBrokenImageUrl(brokenImageType, brokenImageUrl); return *this; } \
+  ChildClass& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl) { UiConfig::SetBrokenImageUrl(brokenImageType, brokenImageUrl); return *this; } \
   /** \
   * @brief Sets whether to clear focus when the Escape key is pressed. \
   * \

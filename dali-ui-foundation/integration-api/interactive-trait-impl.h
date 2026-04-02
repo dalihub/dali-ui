@@ -176,13 +176,13 @@ protected:
   /**
    * @brief Check if the key is for execution.
    */
-  virtual bool IsExecutionKey(const std::string& keyName) const;
+  virtual bool IsExecutionKey(const Dali::String& keyName) const;
 
 private:
   bool OnTouchInternal(Actor actor, const TouchEvent& touchEvent);
   void OnTapInternal(Actor actor, const TapGesture& event);
   void OnLongPressedInternal(Actor actor, const LongPressGesture& event);
-  void RecordPressedExecutionKey(const std::string& keyName);
+  void RecordPressedExecutionKey(const Dali::String& keyName);
   void ClearKeyPressedHistory();
   void SetPressedInternal(bool value, const InputEvent& event);
   bool ShouldTapTriggerClicked() const;
@@ -201,7 +201,7 @@ private:
   Signal<void(View, const InputEvent&)>       mClickedSignal;
   Signal<bool(View, const InputEvent&)>       mLongPressedSignal;
   KeyClickPolicy                              mKeyClickPolicy;
-  std::string                                 mPressedExecutionKey;
+  Dali::String                                mPressedExecutionKey;
   uint32_t                                    mPressedExecutionKeyCount;
   bool                                        mPseudoDisabled : 1;
   bool                                        mPressed : 1;

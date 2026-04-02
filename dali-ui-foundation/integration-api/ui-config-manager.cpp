@@ -136,7 +136,7 @@ uint32_t UiConfigManager::GetTapRecognizerTime() const
   return GetImpl(mConfig).GetTapRecognizerTime();
 }
 
-std::vector<std::string> UiConfigManager::GetBrokenImageUrlList() const
+std::vector<Dali::String> UiConfigManager::GetBrokenImageUrlList() const
 {
   DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
   return GetImpl(mConfig).GetBrokenImageUrlList();

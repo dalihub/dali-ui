@@ -21,7 +21,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
-#include <string>
 
 namespace Dali
 {
@@ -99,8 +98,7 @@ public:
    * @return Whether the focus is successful or not
    * @pre The KeyboardFocusManager has been initialized.
    * @pre The Actor has been initialized.
-   * @note If the parent of this actor has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be
-   * focused.
+   * @note If the parent of this actor has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be focused.
    */
   bool SetCurrentFocusActor(Actor actor);
 
@@ -228,7 +226,7 @@ public:
    * @return The device name that caused the last focus change
    * @pre The KeyboardFocusManager has been initialized.
    */
-  const std::string& GetLastFocusChangeDeviceName() const;
+  const Dali::String& GetLastFocusChangeDeviceName() const;
 
   /**
    * @brief Sets whether to clear focus when window loses focus.
@@ -262,8 +260,7 @@ public: // Signals
    *
    * A callback of the following type may be connected:
    * @code
-   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, FocusDirection::Direction
-   * direction);
+   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, FocusDirection::Direction direction);
    * @endcode
    * @return The signal to connect to
    * @pre The Object has been initialized.

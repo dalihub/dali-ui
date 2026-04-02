@@ -388,7 +388,7 @@ void LayoutController::UnregisterFromAll(Integration::ViewImpl* view)
 }
 
 LayoutController::LayoutController(Window window)
-: mImpl(std::make_unique<Integration::LayoutControllerImpl>(window))
+: mImpl(MakeUnique<Integration::LayoutControllerImpl>(window))
 {
 }
 

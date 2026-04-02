@@ -18,10 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -38,7 +38,7 @@ namespace Ui
  * @param[in] keyName The name of the key
  * @return True if the key should trigger click execution
  */
-using ExecutionKeyPredicate = bool (*)(const std::string& keyName);
+using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
 
 namespace Integration
 {
@@ -165,7 +165,6 @@ public: // Properties
    */
   void Apply();
 
-
   // @CHAIN_START(UiConfig)
   /**
    * @brief Sets the scaling factor applied to spx and sdp units.
@@ -251,7 +250,7 @@ public: // Properties
    * @return Reference to this UiConfig for method chaining
    *
    * @code
-   *   bool MyKeyPredicate(const std::string& keyName) {
+   *   bool MyKeyPredicate(const Dali::String& keyName) {
    *     return keyName == "Return" || keyName == "KP_Enter";
    *   }
    *   UiConfig::New()
@@ -309,7 +308,7 @@ public: // Properties
    * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
    * @param[in] brokenImageUrl The URL of the broken image to use
    */
-  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const std::string& brokenImageUrl);
+  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
 
   /**
    * @brief Gets the image URL to be displayed when image loading fails.
@@ -320,7 +319,7 @@ public: // Properties
    * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
    * @return A reference to the broken image URL string
    */
-  const std::string& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
+  const Dali::String& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
 
   // @CHAIN_MANUAL
   /**
