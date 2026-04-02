@@ -207,19 +207,28 @@ public: // Image
   Vector4 GetPixelArea() const;
 
   /**
-   * @brief Sets whether the view size is fitted to the image's natural aspect ratio.
+   * @brief Sets whether the view size is automatically adjusted to preserve the image's
+   *        natural aspect ratio.
    *
-   * When enabled, if one dimension is fixed (via layout params or MATCH_PARENT) and the
-   * other is unconstrained, the unconstrained dimension is automatically computed from
-   * the image's natural aspect ratio after the image has loaded.
+   * When enabled, after the image finishes loading, if one dimension is fixed
+   * (MATCH_PARENT or an explicit size) and the other is unconstrained (WRAP_CONTENT),
+   * the unconstrained dimension is recomputed from the image's natural aspect ratio.
+   * This triggers a second layout pass once the image is ready.
    *
-   * @param[in] enable True to fit the view size to the image
+   * Direction: image natural size → view size.
+   *
+   * @note Do NOT use together with SetSynchronousSizing(true) on the same ImageView.
+   *       SynchronousSizing loads the image at the current view size, so GetNaturalSize
+   *       returns the view dimensions rather than the true image dimensions, causing
+   *       FitSizeToImage to have no effect.
+   *
+   * @param[in] enable True to fit the view size to the image aspect ratio
    * @return Reference to this for fluent chaining
    */
   ImageView& SetFitSizeToImage(bool enable);
 
   /**
-   * @brief Returns whether the view size is fitted to the image's natural aspect ratio.
+   * @brief Returns whether the view size is automatically adjusted to the image aspect ratio.
    *
    * @return True if fit-size-to-image is enabled
    */
@@ -272,10 +281,18 @@ public: // Size & Fitting Control
   Ui::ImageDimensions GetDesiredSize() const;
 
   /**
-   * @brief Sets whether the view size is determined synchronously during image loading.
+   * @brief Sets whether the image is loaded synchronously at the current view size.
    *
-   * When enabled, the natural size is resolved synchronously so the layout
-   * does not need a second pass after the image loads.
+   * When enabled, the image is (re)loaded at the view's resolved layout size each time
+   * the view size changes. This avoids loading the full-resolution image when only a
+   * smaller display size is needed, saving memory and decode time.
+   *
+   * Direction: view size → image load size.
+   *
+   * @note Do NOT use together with SetFitSizeToImage(true) on the same ImageView.
+   *       FitSizeToImage relies on the image's natural dimensions to adjust the view size,
+   *       but SynchronousSizing causes GetNaturalSize to return the current view size
+   *       instead, making FitSizeToImage ineffective.
    *
    * @param[in] synchronous True to enable synchronous sizing
    * @return Reference to this for fluent chaining
