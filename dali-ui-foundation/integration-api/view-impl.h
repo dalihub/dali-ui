@@ -39,10 +39,13 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -982,6 +985,35 @@ public:
   /// @endcond
 
 protected: // For derived classes to call
+  /**
+   * @brief Registers a color binding (if not yet registered) and updates the tracked color,
+   *        or clears the binding if @a color has no color ID.
+   *
+   * @tparam T        Type of the instance (ViewImpl or a derived class)
+   * @param[in] bindingId  Caller-defined identifier for this binding (e.g. "BackgroundColor")
+   * @param[in] color      The UiColor to apply
+   * @param[in] inst       The object whose @a setter will be used as the theme-change callback
+   * @param[in] setter     Member function called both immediately and on theme change
+   */
+  template<typename T>
+  void SetColorBinding(StringView bindingId, const UiColor& color, T* inst, void (T::*setter)(const Vector4&))
+  {
+    auto manager = UiColorManager::Get();
+    if(color.HasColorId())
+    {
+      if(!manager.HasBinding(Self(), bindingId))
+      {
+        manager.RegisterBinding(Self(), bindingId, ColorCallback::New(inst, setter));
+      }
+      manager.SetBindingColor(Self(), bindingId, color);
+    }
+    else
+    {
+      manager.ClearBinding(Self(), bindingId);
+    }
+    (inst->*setter)(color.Resolve());
+  }
+
   /**
    * @brief Emits KeyInputFocusGained signal if true else emits KeyInputFocusLost signal.
    *

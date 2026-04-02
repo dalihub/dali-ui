@@ -19,6 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -275,9 +276,9 @@ int UtcDaliUiColorManagerGetColorDefaultColorsP(void)
   END_TEST;
 }
 
-// === UpdateBinding ===
+// === RegisterBinding / SetBindingColor ===
 
-int UtcDaliUiColorManagerUpdateBindingTokenP(void)
+int UtcDaliUiColorManagerRegisterBindingTokenP(void)
 {
   TestApplication application;
 
@@ -285,35 +286,38 @@ int UtcDaliUiColorManagerUpdateBindingTokenP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, TestApplyFunc);
+  manager.RegisterBinding(view, "TestColor", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor", color);
 
   // Verify binding was registered
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
+  bool found = manager.GetBindingColor(view, "TestColor", outColor);
   DALI_TEST_CHECK(found);
   DALI_TEST_EQUALS(outColor.GetColorId(), "Primary", TEST_LOCATION);
 
   END_TEST;
 }
 
-int UtcDaliUiColorManagerUpdateBindingRgbaRemovesP(void)
+int UtcDaliUiColorManagerSetBindingColorReplaceP(void)
 {
   TestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
 
-  // First register a token binding
+  // Register a token binding
   UiColor tokenColor("Primary");
-  manager.UpdateBinding(tokenColor, view, TestApplyFunc);
+  manager.RegisterBinding(view, "TestColor", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor", tokenColor);
 
-  // Now update with RGBA → should remove the binding
-  UiColor rgbaColor(1.0f, 0.0f, 0.0f, 1.0f);
-  manager.UpdateBinding(rgbaColor, view, TestApplyFunc);
+  // Update with a different token color
+  UiColor bgColor("Background");
+  manager.SetBindingColor(view, "TestColor", bgColor);
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
-  DALI_TEST_CHECK(!found);
+  bool found = manager.GetBindingColor(view, "TestColor", outColor);
+  DALI_TEST_CHECK(found);
+  DALI_TEST_EQUALS(outColor.GetColorId(), "Background", TEST_LOCATION);
 
   END_TEST;
 }
@@ -328,10 +332,11 @@ int UtcDaliUiColorManagerGetBindingColorP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, TestApplyFunc);
+  manager.RegisterBinding(view, "TestColor", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor", color);
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
+  bool found = manager.GetBindingColor(view, "TestColor", outColor);
 
   DALI_TEST_CHECK(found);
   DALI_TEST_EQUALS(outColor.GetColorId(), "Primary", TEST_LOCATION);
@@ -347,16 +352,16 @@ int UtcDaliUiColorManagerGetBindingColorN(void)
   View view = View::New();
 
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
+  bool found = manager.GetBindingColor(view, "TestColor", outColor);
 
   DALI_TEST_CHECK(!found);
 
   END_TEST;
 }
 
-// === RemoveBinding ===
+// === ClearBinding ===
 
-int UtcDaliUiColorManagerRemoveBindingP(void)
+int UtcDaliUiColorManagerClearBindingP(void)
 {
   TestApplication application;
 
@@ -364,21 +369,22 @@ int UtcDaliUiColorManagerRemoveBindingP(void)
   View view = View::New();
 
   UiColor color("Primary");
-  manager.UpdateBinding(color, view, TestApplyFunc);
+  manager.RegisterBinding(view, "TestColor", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor", color);
 
-  manager.RemoveBinding(view, TestApplyFunc);
+  manager.ClearBinding(view, "TestColor");
 
   // Verify binding was removed
   UiColor outColor;
-  bool found = manager.GetBindingColor(view, TestApplyFunc, outColor);
+  bool found = manager.GetBindingColor(view, "TestColor", outColor);
   DALI_TEST_CHECK(!found);
 
   END_TEST;
 }
 
-// === RemoveBindings ===
+// === ClearBindings ===
 
-int UtcDaliUiColorManagerRemoveBindingsP(void)
+int UtcDaliUiColorManagerClearBindingsP(void)
 {
   TestApplication application;
 
@@ -388,21 +394,23 @@ int UtcDaliUiColorManagerRemoveBindingsP(void)
   UiColor color1("Primary");
   UiColor color2("Background");
 
-  manager.UpdateBinding(color1, view, TestApplyFunc);
-  manager.UpdateBinding(color2, view, TestApplyFunc2);
+  manager.RegisterBinding(view, "TestColor1", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor1", color1);
+  manager.RegisterBinding(view, "TestColor2", ColorCallback::New(TestApplyFunc2));
+  manager.SetBindingColor(view, "TestColor2", color2);
 
   // Remove all bindings for this view
-  manager.RemoveBindings(view);
+  manager.ClearBindings(view);
 
   // Verify all bindings were removed
   UiColor outColor;
-  DALI_TEST_CHECK(!manager.GetBindingColor(view, TestApplyFunc, outColor));
-  DALI_TEST_CHECK(!manager.GetBindingColor(view, TestApplyFunc2, outColor));
+  DALI_TEST_CHECK(!manager.GetBindingColor(view, "TestColor1", outColor));
+  DALI_TEST_CHECK(!manager.GetBindingColor(view, "TestColor2", outColor));
 
   END_TEST;
 }
 
-int UtcDaliUiColorManagerRemoveBindingsNoBindingsN(void)
+int UtcDaliUiColorManagerClearBindingsNoBindingsN(void)
 {
   TestApplication application;
 
@@ -410,7 +418,7 @@ int UtcDaliUiColorManagerRemoveBindingsNoBindingsN(void)
   View view = View::New();
 
   // Should not throw even when no bindings exist
-  manager.RemoveBindings(view);
+  manager.ClearBindings(view);
 
   DALI_TEST_CHECK(true);
 
@@ -488,7 +496,8 @@ int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
   // Bind view to "Primary" token color
   UiColor color("Primary");
   gApplyCallCount = 0;
-  manager.UpdateBinding(color, view, TestApplyFunc);
+  manager.RegisterBinding(view, "TestColor", ColorCallback::New(TestApplyFunc));
+  manager.SetBindingColor(view, "TestColor", color);
   DALI_TEST_EQUALS(gApplyCallCount, 0, TEST_LOCATION);
 
   // Set override → should immediately refresh and call apply func

@@ -53,24 +53,34 @@ bool UiColorManager::GetColor(StringView colorId, Vector4& outColor) const
   return GetImpl(*this).GetColor(colorId, outColor);
 }
 
-void UiColorManager::UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc)
+void UiColorManager::RegisterBinding(BaseHandle view, StringView bindingId, ColorCallback callback)
 {
-  GetImpl(*this).UpdateBinding(color, view, applyFunc);
+  GetImpl(*this).RegisterBinding(view, bindingId, std::move(callback));
 }
 
-bool UiColorManager::GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const
+bool UiColorManager::GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const
 {
-  return GetImpl(*this).GetBindingColor(view, applyFunc, outColor);
+  return GetImpl(*this).GetBindingColor(view, bindingId, outColor);
 }
 
-void UiColorManager::RemoveBinding(View view, CallbackBase* applyFunc)
+bool UiColorManager::HasBinding(BaseHandle view, StringView bindingId) const
 {
-  GetImpl(*this).RemoveBinding(view, applyFunc);
+  return GetImpl(*this).HasBinding(view, bindingId);
 }
 
-void UiColorManager::RemoveBindings(View view)
+void UiColorManager::SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color)
 {
-  GetImpl(*this).RemoveBindings(view);
+  GetImpl(*this).SetBindingColor(view, bindingId, color);
+}
+
+void UiColorManager::ClearBinding(BaseHandle view, StringView bindingId)
+{
+  GetImpl(*this).ClearBinding(view, bindingId);
+}
+
+void UiColorManager::ClearBindings(BaseHandle view)
+{
+  GetImpl(*this).ClearBindings(view);
 }
 
 void UiColorManager::SetColorOverride(ColorOverrideFunc func)

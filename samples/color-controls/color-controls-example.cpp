@@ -45,13 +45,13 @@ public:
 
     window.Add(Layout::New() // Parent
       .SetBackgroundColor(UiColor::BACKGROUND)
-      .SetSizeWidth(200_spx)
-      .SetSizeHeight(200_spx)
+      .SetRequestedWidth(200_spx)
+      .SetRequestedHeight(200_spx)
       .Children({
         View::New() // Red child
           .SetBackgroundColor(UiColor::PRIMARY)
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
           .AsInteractive([this](InteractiveTrait& trait) {
             trait.ClickedSignal().Connect(this, [this](View view, const InputEvent& event) -> bool {
               mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
@@ -60,8 +60,8 @@ public:
           }),
         View::New() // Blue child
           .SetBackgroundColor(UiColor("ThemeColor2"))
-          .SetSizeWidth(100_spx)
-          .SetSizeHeight(100_spx)
+          .SetRequestedWidth(100_spx)
+          .SetRequestedHeight(100_spx)
           .SetPositionX(100_spx)
           .SetPositionY(100_spx)
           .As(mSecondChild),

@@ -176,14 +176,13 @@ Text::LineWrapMode LabelImpl::GetLineWrapMode() const
 
 void LabelImpl::SetTextColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetTextColorInternal);
-  SetTextColorInternal(color.Resolve());
+  SetColorBinding("TextColor", color, this, &LabelImpl::SetTextColorInternal);
 }
 
 UiColor LabelImpl::GetTextColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetTextColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "TextColor", outColor))
   {
     return outColor;
   }
@@ -271,14 +270,13 @@ bool LabelImpl::IsMarkupEnabled() const
 
 void LabelImpl::SetAnchorColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetAnchorColorInternal);
-  SetAnchorColorInternal(color.Resolve());
+  SetColorBinding("AnchorColor", color, this, &LabelImpl::SetAnchorColorInternal);
 }
 
 UiColor LabelImpl::GetAnchorColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetAnchorColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "AnchorColor", outColor))
   {
     return outColor;
   }
@@ -287,14 +285,13 @@ UiColor LabelImpl::GetAnchorColor()
 
 void LabelImpl::SetAnchorClickedColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetAnchorClickedColorInternal);
-  SetAnchorClickedColorInternal(color.Resolve());
+  SetColorBinding("AnchorClickedColor", color, this, &LabelImpl::SetAnchorClickedColorInternal);
 }
 
 UiColor LabelImpl::GetAnchorClickedColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &LabelImpl::SetAnchorClickedColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "AnchorClickedColor", outColor))
   {
     return outColor;
   }
@@ -434,8 +431,8 @@ Text::FontSlant LabelImpl::GetFontSlant() const
 void LabelImpl::SetUnderline(const Text::Underline& underline)
 {
   const UiColor& color = underline.GetColor();
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &LabelImpl::SetUnderlineColorInternal);
-  SetUnderlineColorInternal(color.Resolve());
+
+  SetColorBinding("UnderlineColor", color, this, &LabelImpl::SetUnderlineColorInternal);
 
   if(!mController->IsUnderlineEnabled())
   {
@@ -465,7 +462,7 @@ void LabelImpl::SetUnderline(const Text::Underline& underline)
 
 void LabelImpl::ResetUnderline()
 {
-  UiColorManager::Get().RemoveBinding(View::DownCast(Self()), this, &LabelImpl::SetUnderlineColorInternal);
+  UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
   if(mController->IsUnderlineEnabled())
   {
     mController->SetUnderlineEnabled(false);

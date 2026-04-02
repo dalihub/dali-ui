@@ -87,10 +87,8 @@ bool UiColorManagerImpl::GetColor(StringView colorId, Vector4& outColor) const
   return GetImpl(themeManager).GetLoader().GetColor(colorId, outColor);
 }
 
-void UiColorManagerImpl::UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc)
+void UiColorManagerImpl::RegisterBinding(BaseHandle view, StringView bindingId, ColorCallback callback)
 {
-  std::unique_ptr<CallbackBase> callback(applyFunc);
-
   if(mIsApplying)
   {
     return;
@@ -102,83 +100,95 @@ void UiColorManagerImpl::UpdateBinding(const UiColor& color, View view, Callback
     mConnected = true;
   }
 
-  void* viewPtr = static_cast<void*>(view.GetObjectPtr());
+  RefObject* viewPtr = view.GetObjectPtr();
 
-  if(color.HasColorId())
+  auto& viewBinding = mBindings[viewPtr];
+  if(!viewBinding.weakView.GetBaseHandle())
   {
-    // Register the binding even if the color was not found in the current theme.
-    // When the theme changes later, RefreshBindings() will resolve the color again.
-    auto& viewBinding = mBindings[viewPtr];
-    if(!viewBinding.weakView.GetBaseHandle())
+    viewBinding.weakView = WeakHandle<BaseHandle>(view);
+  }
+
+  auto& bindings = viewBinding.bindings;
+  for(auto& [key, info] : bindings)
+  {
+    if(key.size() == bindingId.Size() && key.compare(0, key.size(), bindingId.Data(), bindingId.Size()) == 0)
     {
-      viewBinding.weakView = WeakHandle<View>(view);
+      info.applyFunc = std::move(callback);
+      return;
     }
-
-    auto& bindings = viewBinding.bindings;
-    for(auto& info : bindings)
-    {
-      if(*info.applyFunc == *callback)
-      {
-        info.color = color;
-        return;
-      }
-    }
-    bindings.push_back({std::move(callback), color});
   }
-  else
-  {
-    EraseBinding(view, *callback);
-  }
+  bindings.emplace_back(std::string(bindingId.Data(), bindingId.Size()), BindingInfo{std::move(callback), UiColor{}});
 }
 
-bool UiColorManagerImpl::GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const
+bool UiColorManagerImpl::GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const
 {
-  std::unique_ptr<CallbackBase> callback(applyFunc);
-
-  const BindingInfo* info = FindBinding(view, *callback);
-  if(info)
-  {
-    outColor = info->color;
-    return true;
-  }
-  return false;
-}
-
-void UiColorManagerImpl::RemoveBinding(View view, CallbackBase* applyFunc)
-{
-  std::unique_ptr<CallbackBase> callback(applyFunc);
-  EraseBinding(view, *callback);
-}
-
-void UiColorManagerImpl::RemoveBindings(View view)
-{
-  void* viewPtr = static_cast<void*>(view.GetObjectPtr());
-  mBindings.erase(viewPtr);
-}
-
-const UiColorManagerImpl::BindingInfo* UiColorManagerImpl::FindBinding(View view, const CallbackBase& callback) const
-{
-  void* viewPtr = static_cast<void*>(view.GetObjectPtr());
+  RefObject* viewPtr = view.GetObjectPtr();
 
   auto it = mBindings.find(viewPtr);
   if(it == mBindings.end())
   {
-    return nullptr;
+    return false;
   }
 
-  for(const auto& info : it->second.bindings)
+  for(const auto& [key, info] : it->second.bindings)
   {
-    if(*info.applyFunc == callback)
+    if(key.size() == bindingId.Size() && key.compare(0, key.size(), bindingId.Data(), bindingId.Size()) == 0)
     {
-      return &info;
+      outColor = info.color;
+      return true;
     }
   }
-  return nullptr;
+  return false;
 }
 
-void UiColorManagerImpl::EraseBinding(View view, const CallbackBase& callback)
+bool UiColorManagerImpl::HasBinding(BaseHandle view, StringView bindingId) const
 {
-  void* viewPtr = static_cast<void*>(view.GetObjectPtr());
+  RefObject* viewPtr = view.GetObjectPtr();
+
+  auto it = mBindings.find(viewPtr);
+  if(it == mBindings.end())
+  {
+    return false;
+  }
+
+  for(const auto& [key, info] : it->second.bindings)
+  {
+    if(key.size() == bindingId.Size() && key.compare(0, key.size(), bindingId.Data(), bindingId.Size()) == 0)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void UiColorManagerImpl::SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color)
+{
+  if(mIsApplying)
+  {
+    return;
+  }
+
+  RefObject* viewPtr = view.GetObjectPtr();
+
+  auto it = mBindings.find(viewPtr);
+  if(it == mBindings.end())
+  {
+    return;
+  }
+
+  for(auto& [key, info] : it->second.bindings)
+  {
+    if(key.size() == bindingId.Size() && key.compare(0, key.size(), bindingId.Data(), bindingId.Size()) == 0)
+    {
+      info.color = color;
+      return;
+    }
+  }
+}
+
+void UiColorManagerImpl::ClearBinding(BaseHandle view, StringView bindingId)
+{
+  RefObject* viewPtr = view.GetObjectPtr();
 
   auto it = mBindings.find(viewPtr);
   if(it == mBindings.end())
@@ -188,14 +198,29 @@ void UiColorManagerImpl::EraseBinding(View view, const CallbackBase& callback)
 
   auto& bindings = it->second.bindings;
   bindings.erase(std::remove_if(bindings.begin(), bindings.end(),
-                                [&callback](const BindingInfo& info)
-  { return *info.applyFunc == callback; }),
+                                [&bindingId](const auto& entry)
+  {
+    const auto& key = entry.first;
+    return key.size() == bindingId.Size() &&
+           key.compare(0, key.size(), bindingId.Data(), bindingId.Size()) == 0;
+  }),
                  bindings.end());
 
   if(bindings.empty())
   {
     mBindings.erase(it);
   }
+}
+
+void UiColorManagerImpl::ClearBindings(BaseHandle view)
+{
+  RefObject* viewPtr = view.GetObjectPtr();
+  mBindings.erase(viewPtr);
+}
+
+void UiColorManagerImpl::ClearBindings(void* objectPtr)
+{
+  mBindings.erase(static_cast<RefObject*>(objectPtr));
 }
 
 void UiColorManagerImpl::SetColorOverride(ColorOverrideFunc func)
@@ -224,8 +249,6 @@ void UiColorManagerImpl::RefreshBindings()
 
   ApplyingGuard guard(mIsApplying);
 
-  UiThemeManager themeManager = UiThemeManager::Get();
-
   auto it = mBindings.begin();
   while(it != mBindings.end())
   {
@@ -237,10 +260,12 @@ void UiColorManagerImpl::RefreshBindings()
       continue;
     }
 
-    View view = View::DownCast(handle);
-    for(auto& info : viewBinding.bindings)
+    for(auto& [id, info] : viewBinding.bindings)
     {
-      CallbackBase::Execute<const Vector4&>(*info.applyFunc, info.color.Resolve());
+      if(info.color.HasColorId())
+      {
+        info.applyFunc.Invoke(info.color.Resolve());
+      }
     }
 
     ++it;

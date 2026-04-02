@@ -50,6 +50,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
@@ -183,6 +184,9 @@ ViewImpl::ViewImpl()
 
 ViewImpl::~ViewImpl()
 {
+  auto manager = UiColorManager::Get();
+  GetImpl(manager).ClearBindings(GetOwner());
+
   for(auto& iter : mTraits)
   {
     GetImpl(iter.second).OnViewDestroying(this);
@@ -543,7 +547,7 @@ void ViewImpl::SetPivotPoint(const Vector3& point)
 UiColor ViewImpl::GetBackgroundColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "BackgroundColor", outColor))
   {
     return outColor;
   }
@@ -552,8 +556,7 @@ UiColor ViewImpl::GetBackgroundColor()
 
 void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal);
-  SetBackgroundColorInternal(color.Resolve());
+  SetColorBinding("BackgroundColor", color, this, &ViewImpl::SetBackgroundColorInternal);
 }
 
 Vector4 ViewImpl::GetCornerRadius() const
@@ -1326,7 +1329,7 @@ void ViewImpl::ClearBackground()
   mImpl->UnregisterVisual(Ui::View::Property::BACKGROUND);
   mImpl->mBackgroundColor = Color::TRANSPARENT;
 
-  UiColorManager::Get().RemoveBinding(View::DownCast(Self()), this, &ViewImpl::SetBackgroundColorInternal);
+  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();

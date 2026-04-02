@@ -28,13 +28,14 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -75,22 +76,44 @@ public:
   /**
    * @copydoc Dali::Ui::UiColorManager::UpdateBinding
    */
-  void UpdateBinding(const UiColor& color, View view, CallbackBase* applyFunc);
+  void RegisterBinding(BaseHandle view, StringView bindingId, ColorCallback callback);
 
   /**
    * @copydoc Dali::Ui::UiColorManager::GetBindingColor
    */
-  bool GetBindingColor(View view, CallbackBase* applyFunc, UiColor& outColor) const;
+  [[nodiscard]] bool GetBindingColor(BaseHandle view, StringView bindingId, UiColor& outColor) const;
 
   /**
-   * @copydoc Dali::Ui::UiColorManager::RemoveBinding
+   * @copydoc Dali::Ui::UiColorManager::HasBinding
    */
-  void RemoveBinding(View view, CallbackBase* applyFunc);
+  [[nodiscard]] bool HasBinding(BaseHandle view, StringView bindingId) const;
 
   /**
-   * @copydoc Dali::Ui::UiColorManager::RemoveBindings
+   * @copydoc Dali::Ui::UiColorManager::SetBindingColor
    */
-  void RemoveBindings(View view);
+  void SetBindingColor(BaseHandle view, StringView bindingId, const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::UiColorManager::ClearBinding
+   */
+  void ClearBinding(BaseHandle view, StringView bindingId);
+
+  /**
+   * @copydoc Dali::Ui::UiColorManager::ClearBindings(BaseHandle)
+   */
+  void ClearBindings(BaseHandle view);
+
+  /**
+   * @brief Removes all bindings associated with a given object.
+   *
+   * This overload accepts a raw pointer, avoiding the ref-count increment
+   * that occurs when constructing a BaseHandle.
+   * Intended for use in impl-class destructors where Self() is unavailable.
+   * The pointer must be the same value as BaseHandle::GetObjectPtr() used at registration time.
+   *
+   * @param[in] objectPtr The target object pointer to unbind, or @c nullptr (no-op)
+   */
+  void ClearBindings(void* objectPtr);
 
   /**
    * @copydoc Dali::Ui::UiColorManager::SetColorOverride
@@ -115,26 +138,24 @@ private:
 private:
   struct BindingInfo
   {
-    std::unique_ptr<CallbackBase> applyFunc;
-    UiColor                       color;
+    ColorCallback applyFunc;
+    UiColor       color;
   };
 
   struct ViewBinding
   {
-    WeakHandle<View>         weakView;
-    std::vector<BindingInfo> bindings;
+    WeakHandle<BaseHandle>                           weakView;
+    std::vector<std::pair<std::string, BindingInfo>> bindings;
   };
 
-  void               OnThemeChanged();
-  void               RefreshBindings();
-  void               EraseBinding(View view, const CallbackBase& callback);
-  const BindingInfo* FindBinding(View view, const CallbackBase& callback) const;
+  void OnThemeChanged();
+  void RefreshBindings();
 
-  std::unordered_map<void*, ViewBinding> mBindings;
-  ColorOverrideFunc                      mColorOverride{nullptr};
-  SlotDelegate<UiColorManagerImpl>       mSlotDelegate{this};
-  bool                                   mIsApplying{false};
-  bool                                   mConnected{false};
+  std::unordered_map<RefObject*, ViewBinding> mBindings;
+  ColorOverrideFunc                           mColorOverride{nullptr};
+  SlotDelegate<UiColorManagerImpl>            mSlotDelegate{this};
+  bool                                        mIsApplying{false};
+  bool                                        mConnected{false};
 };
 
 } // namespace Internal

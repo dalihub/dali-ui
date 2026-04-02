@@ -142,14 +142,13 @@ float InputFieldImpl::GetFontSize() const
 
 void InputFieldImpl::SetTextColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetTextColorInternal);
-  SetTextColorInternal(color.Resolve());
+  SetColorBinding("TextColor", color, this, &InputFieldImpl::SetTextColorInternal);
 }
 
 UiColor InputFieldImpl::GetTextColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetTextColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "TextColor", outColor))
   {
     return outColor;
   }
@@ -198,14 +197,13 @@ Dali::String InputFieldImpl::GetPlaceholder() const
 
 void InputFieldImpl::SetPlaceholderColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetPlaceholderColorInternal);
-  SetPlaceholderColorInternal(color.Resolve());
+  SetColorBinding("PlaceholderColor", color, this, &InputFieldImpl::SetPlaceholderColorInternal);
 }
 
 UiColor InputFieldImpl::GetPlaceholderColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetPlaceholderColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "PlaceholderColor", outColor))
   {
     return outColor;
   }
@@ -227,14 +225,13 @@ int InputFieldImpl::GetCursorWidth() const
 
 void InputFieldImpl::SetCursorColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetCursorColorInternal);
-  SetCursorColorInternal(color.Resolve());
+  SetColorBinding("CursorColor", color, this, &InputFieldImpl::SetCursorColorInternal);
 }
 
 UiColor InputFieldImpl::GetCursorColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetCursorColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "CursorColor", outColor))
   {
     return outColor;
   }
@@ -243,14 +240,13 @@ UiColor InputFieldImpl::GetCursorColor()
 
 void InputFieldImpl::SetSelectionColor(const UiColor& color)
 {
-  UiColorManager::Get().UpdateBinding(color, View::DownCast(Self()), this, &InputFieldImpl::SetSelectionColorInternal);
-  SetSelectionColorInternal(color.Resolve());
+  SetColorBinding("SelectionColor", color, this, &InputFieldImpl::SetSelectionColorInternal);
 }
 
 UiColor InputFieldImpl::GetSelectionColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(View::DownCast(Self()), this, &InputFieldImpl::SetSelectionColorInternal, outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), "SelectionColor", outColor))
   {
     return outColor;
   }
