@@ -32,6 +32,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view.h>
 #include <algorithm>
 
 namespace Dali
@@ -60,13 +61,13 @@ public:
   /**
    * @brief Data for a tracked layout root.
    *
-   * Stores both a ref-counted handle (to prevent dangling) and the raw
-   * implementation pointer (for fast access during layout passes).
+   * Stores a weak handle (non-ref-counted) for validity checking and
+   * the raw implementation pointer for fast access during layout passes.
    */
   struct LayoutRootEntry
   {
-    BaseHandle             handle; ///< Ref-counted handle keeps the actor alive
-    Integration::ViewImpl* view;   ///< Raw pointer for direct access
+    WeakHandle<View>       weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
+    Integration::ViewImpl* view;       ///< Raw pointer for direct access
   };
 
   /**
@@ -118,9 +119,9 @@ public:
       return;
     }
 
-    // Track this layout root (ref-counted handle prevents dangling pointer)
-    BaseHandle handle(view->Self());
-    mAllLayoutRoots[view] = LayoutRootEntry{handle, view};
+    // Track this layout root (weak handle for validity checking without extending lifetime)
+    View handle           = View::DownCast(view->Self());
+    mAllLayoutRoots[view] = LayoutRootEntry{WeakHandle<View>(handle), view};
 
     // Add to pending (dirty) set
     mPendingViews.insert(view);
@@ -186,12 +187,23 @@ public:
     mWindowHeight = height;
 
     // Invalidate ALL known layout roots (not just pending ones)
+    // Collect dead entries to remove after iteration
+    std::vector<Integration::ViewImpl*> deadEntries;
     for(auto& pair : mAllLayoutRoots)
     {
-      if(pair.second.view)
+      if(pair.second.weakHandle.GetHandle())
       {
         pair.second.view->InvalidateMeasure();
       }
+      else
+      {
+        deadEntries.push_back(pair.first);
+      }
+    }
+    for(auto* dead : deadEntries)
+    {
+      mAllLayoutRoots.erase(dead);
+      mPendingViews.erase(dead);
     }
   }
   /**
@@ -257,10 +269,16 @@ private:
     // Process each layout root
     for(auto* view : viewsToProcess)
     {
-      // Verify the view is still tracked (not destroyed)
-      if(view && mAllLayoutRoots.count(view) > 0)
+      // Verify the view is still tracked and alive
+      auto it = mAllLayoutRoots.find(view);
+      if(view && it != mAllLayoutRoots.end() && it->second.weakHandle.GetHandle())
       {
         ProcessLayoutRoot(view, widthConstraint, heightConstraint);
+      }
+      else if(it != mAllLayoutRoots.end())
+      {
+        // Dead entry — clean up
+        mAllLayoutRoots.erase(it);
       }
     }
   }
@@ -330,7 +348,7 @@ private:
 
 private:
   Dali::WeakHandle<Window>                                    mWindow;
-  std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (ref-counted)
+  std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (weak-referenced)
   std::unordered_set<Integration::ViewImpl*>                  mPendingViews;   ///< Dirty layout roots needing processing
   int32_t                                                     mWindowWidth;
   int32_t                                                     mWindowHeight;
