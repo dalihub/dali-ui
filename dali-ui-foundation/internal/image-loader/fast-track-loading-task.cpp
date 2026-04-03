@@ -122,7 +122,7 @@ FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions
   mPixelData(),
   mOrientationCorrection(orientationCorrection),
   mLoadSuccess(false),
-  mLoadPlanesAvaliable(loadPlanes),
+  mLoadPlanesAvailable(loadPlanes),
   mPremultiplied(false),
   mPlanesLoaded(false),
   mHasAlpha(false)
@@ -137,7 +137,7 @@ FastTrackLoadingTask::~FastTrackLoadingTask()
 
 void FastTrackLoadingTask::PrepareTexture()
 {
-  const uint32_t requiredTexturesCount = mLoadPlanesAvaliable ? 4u : 1u;
+  const uint32_t requiredTexturesCount = mLoadPlanesAvailable ? 4u : 1u;
 
   mTextures.resize(requiredTexturesCount);
   mImageInformations.resize(requiredTexturesCount);
@@ -148,7 +148,7 @@ void FastTrackLoadingTask::PrepareTexture()
     mImageInformations[index].resourceId = Dali::Integration::GetTextureResourceId(mTextures[index]);
   }
 
-  if(mLoadPlanesAvaliable)
+  if(mLoadPlanesAvailable)
   {
     // Create static dummy chrominance pixel data now, for thread safety.
     [[maybe_unused]] auto pixelDataU = GetDummyChrominanceUPixelData();
@@ -171,7 +171,7 @@ void FastTrackLoadingTask::OnComplete(AsyncTaskPtr task)
       Dali::Integration::TextureUploadWithContent(mTextures[index], GetDummyPixelDataByFormat(mImageInformations[index].format), ToDaliString(mUrl.GetUrl() + "(" + ("YUVA"[index]) + ")"), Dali::Integration::TextureContextTypeHint::FAST_TRACK_IMAGE);
 #endif
     }
-    if(mLoadPlanesAvaliable && !mPlanesLoaded)
+    if(mLoadPlanesAvailable && !mPlanesLoaded)
     {
       // We will not use ChrominanceU and ChrominanceV texture anymore.
       mTextures.resize(1u);
@@ -215,7 +215,7 @@ void FastTrackLoadingTask::Load()
 
   if(mUrl.IsValid() && mUrl.IsLocalResource())
   {
-    if(mLoadPlanesAvaliable)
+    if(mLoadPlanesAvailable)
     {
       Dali::LoadImagePlanesFromFile(mUrl.GetUrl(), pixelBuffers, mDimensions, mFittingMode, mSamplingMode,
                                     mOrientationCorrection);
@@ -269,7 +269,7 @@ void FastTrackLoadingTask::Load()
       }
       mPlanesLoaded = true;
     }
-    else if(mLoadPlanesAvaliable && pixelBuffers.size() == 1u &&
+    else if(mLoadPlanesAvailable && pixelBuffers.size() == 1u &&
             mTextures.size() >=
               3u) ///< Case when we prepare three textures to render YUV, but loaded image is not YUV.
     {

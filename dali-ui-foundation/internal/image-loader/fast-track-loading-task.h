@@ -141,7 +141,7 @@ private:
 
 public:
   bool mLoadSuccess : 1;         ///< Whether image load successed or not.
-  bool mLoadPlanesAvaliable : 1; ///< If image valid to load as planes or not.
+  bool mLoadPlanesAvailable : 1; ///< If image valid to load as planes or not.
   bool mPremultiplied : 1;       ///< True if the image's color was multiplied by it's alpha
   bool mPlanesLoaded : 1;        ///< True if the image load as planes.
   bool mHasAlpha : 1;

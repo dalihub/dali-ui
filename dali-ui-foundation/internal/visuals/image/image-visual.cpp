@@ -758,7 +758,7 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
                                mFactoryCache.GetLoadYuvPlanes(), MakeCallback(this, &ImageVisual::FastLoadComplete));
 
     TextureSet textureSet = TextureSet::New();
-    if(!mFastTrackLoadingTask->mLoadPlanesAvaliable)
+    if(!mFastTrackLoadingTask->mLoadPlanesAvailable)
     {
       DALI_ASSERT_ALWAYS(mFastTrackLoadingTask->mTextures.size() >= 1u);
       textureSet.SetTexture(0u, mFastTrackLoadingTask->mTextures[0]);
@@ -1109,7 +1109,7 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
     // Change premultiplied alpha flag after change renderer.
     EnablePreMultipliedAlpha(mFastTrackLoadingTask->mPremultiplied);
 
-    if(mFastTrackLoadingTask->mLoadPlanesAvaliable)
+    if(mFastTrackLoadingTask->mLoadPlanesAvailable)
     {
       if(mFastTrackLoadingTask->mPlanesLoaded)
       {
