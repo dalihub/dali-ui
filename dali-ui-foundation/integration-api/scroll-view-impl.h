@@ -307,6 +307,24 @@ private:
   void OnChildRelayout(Actor actor);
 
   /**
+   * @brief Intercepts touch events before children receive them.
+   *
+   * Feeds the raw touch to the PanGestureDetector via HandleEvent and tracks
+   * cumulative displacement. Returns true (steals touch from children) once
+   * the displacement exceeds mPanThreshold, ensuring scroll works even when
+   * children consume touch events.
+   */
+  bool OnInterceptTouch(Actor actor, const TouchEvent& touch);
+
+  /**
+   * @brief Handles touch events on the ScrollView after interception.
+   *
+   * Called for subsequent events once OnInterceptTouch has returned true.
+   * Feeds each event to the PanGestureDetector via HandleEvent.
+   */
+  bool OnTouch(Actor actor, const TouchEvent& touch);
+
+  /**
    * @brief Callback for pan gesture detection.
    */
   void OnPanGesture(Actor actor, const PanGesture& gesture);
@@ -435,6 +453,10 @@ private:
   bool               mIsThresholdMet;     ///< Threshold met flag
   Vector2            mStartPanPosition;   ///< Start pan position
   Vector2            mLastPanPosition;    ///< Last pan position
+
+  // Intercept touch state
+  bool mIntercepting;    ///< True while this ScrollView owns the touch sequence
+  bool mJustIntercepted; ///< True for one cycle when interception first begins (prevents double HandleEvent feed)
 
   // Signals
   Ui::ScrollView::ScrollStartedSignalType  mScrollStartedSignal;

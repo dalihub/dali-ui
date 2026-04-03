@@ -24,6 +24,7 @@
 #include <dali/public-api/animation/alpha-function.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
+#include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/math/vector2.h>
 
 #include <dali/devel-api/object/type-registry.h>
@@ -95,7 +96,9 @@ ScrollViewImpl::ScrollViewImpl()
   mPanThreshold(5.0f),
   mIsThresholdMet(false),
   mStartPanPosition(0.0f, 0.0f),
-  mLastPanPosition(0.0f, 0.0f)
+  mLastPanPosition(0.0f, 0.0f),
+  mIntercepting(false),
+  mJustIntercepted(false)
 {
   // Set initial pan gesture directions for vertical scrolling
   mPanGestureDetector.AddDirection(PanGestureDetector::DIRECTION_VERTICAL);
@@ -113,11 +116,18 @@ void ScrollViewImpl::OnInitialize()
   // Enable clipping to bounds for scrollable content
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
 
-  // Configure pan gesture detector
+  // Configure pan gesture detector – DetectedSignal drives all scroll logic.
+  // We do NOT call Attach() here. Instead, raw touch events are fed manually
+  // via HandleEvent() from OnInterceptTouch / OnTouch so that the gesture
+  // detector sees every touch even when a child view consumes it.
   mPanGestureDetector.DetectedSignal().Connect(this, &ScrollViewImpl::OnPanGesture);
-  // Attach the pan gesture detector to this actor
-  // TODO: we need to subsribe the touch event and send gesture event!
-  mPanGestureDetector.Attach(Self());
+
+  // Intercept touch before children: lets us decide per-frame whether to steal
+  // the touch sequence (once the pan threshold is exceeded).
+  DevelActor::InterceptTouchedSignal(Self()).Connect(this, &ScrollViewImpl::OnInterceptTouch);
+
+  // After interception begins, subsequent events arrive here instead of children.
+  Self().TouchedSignal().Connect(this, &ScrollViewImpl::OnTouch);
 }
 
 void ScrollViewImpl::SetContent(View content)
@@ -614,6 +624,88 @@ Vector2 ScrollViewImpl::ContentPositionToScrollPosition(const Vector2& content) 
 Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) const
 {
   return Vector2(mScrollPosition.x - scrollPosition.x, mScrollPosition.y - scrollPosition.y);
+}
+
+bool ScrollViewImpl::OnInterceptTouch(Actor actor, const TouchEvent& touch)
+{
+  PointState::Type state = touch.GetState(0);
+
+  if(state == PointState::DOWN)
+  {
+    // Reset intercept state on every new touch sequence.
+    mIntercepting     = false;
+    mJustIntercepted  = false;
+    mStartPanPosition = touch.GetScreenPosition(0);
+  }
+
+  // Always feed to the gesture detector so it can build velocity / displacement
+  // history from the very beginning of the touch sequence.
+  TouchEvent& nonConstTouch = const_cast<TouchEvent&>(touch);
+  mPanGestureDetector.HandleEvent(actor, nonConstTouch);
+
+  if(state == PointState::MOTION && !mIntercepting)
+  {
+    // Check whether the cumulative displacement exceeds the pan threshold for
+    // the configured scroll direction.
+    Vector2 displacement = touch.GetScreenPosition(0) - mStartPanPosition;
+    bool    thresholdMet = false;
+    switch(mScrollDirection)
+    {
+      case ScrollDirection::Vertical:
+        thresholdMet = std::abs(displacement.y) > mPanThreshold;
+        break;
+      case ScrollDirection::Horizontal:
+        thresholdMet = std::abs(displacement.x) > mPanThreshold;
+        break;
+      case ScrollDirection::Both:
+        thresholdMet = displacement.Length() > mPanThreshold;
+        break;
+    }
+
+    if(thresholdMet)
+    {
+      DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnInterceptTouch] threshold met – intercepting touch\n");
+      mIntercepting = true;
+      // Mark that this exact event was already fed above; OnTouch must skip it
+      // to avoid a double HandleEvent call on the same touch point.
+      mJustIntercepted = true;
+      return true; // Steal touch: children receive INTERRUPTED, no further child events.
+    }
+  }
+  else if((state == PointState::UP || state == PointState::INTERRUPTED) && mIntercepting)
+  {
+    // Touch ended while we were intercepting – OnTouch will handle the reset.
+    return true;
+  }
+
+  return mIntercepting;
+}
+
+bool ScrollViewImpl::OnTouch(Actor actor, const TouchEvent& touch)
+{
+  if(!mIntercepting)
+  {
+    return false;
+  }
+
+  if(mJustIntercepted)
+  {
+    // This is the same event that was already fed to HandleEvent inside
+    // OnInterceptTouch. Skip to avoid double-feeding the gesture detector.
+    mJustIntercepted = false;
+    return true;
+  }
+
+  TouchEvent& nonConstTouch = const_cast<TouchEvent&>(touch);
+  mPanGestureDetector.HandleEvent(actor, nonConstTouch);
+
+  PointState::Type state = touch.GetState(0);
+  if(state == PointState::UP || state == PointState::INTERRUPTED)
+  {
+    mIntercepting = false;
+  }
+
+  return true;
 }
 
 void ScrollViewImpl::OnPanGesture(Actor actor, const PanGesture& gesture)
