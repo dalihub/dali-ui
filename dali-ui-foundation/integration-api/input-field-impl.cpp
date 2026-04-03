@@ -29,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
+#include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
@@ -150,7 +151,7 @@ void InputFieldImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
 
-  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
+  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
   }
@@ -337,29 +338,9 @@ void InputFieldImpl::SetUnderline(const Text::Underline& underline)
 
   SetColorBinding("UnderlineColor", color, this, &InputFieldImpl::SetUnderlineColorInternal);
 
-  if(!mController->IsUnderlineEnabled())
+  if(Text::ApplyUnderlineStyle(mController, underline))
   {
-    mController->SetUnderlineEnabled(true);
-  }
-
-  if(fabsf(mController->GetUnderlineHeight() - underline.GetThickness()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetUnderlineHeight(underline.GetThickness());
-  }
-
-  if(mController->GetUnderlineType() != underline.GetType())
-  {
-    mController->SetUnderlineType(underline.GetType());
-  }
-
-  if(fabsf(mController->GetDashedUnderlineWidth() - underline.GetDashLength()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetDashedUnderlineWidth(underline.GetDashLength());
-  }
-
-  if(fabsf(mController->GetDashedUnderlineGap() - underline.GetDashGap()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetDashedUnderlineGap(underline.GetDashGap());
+    mRenderer.Reset();
   }
 }
 
@@ -379,14 +360,9 @@ void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
 
   SetColorBinding("ShadowColor", color, this, &InputFieldImpl::SetShadowColorInternal);
 
-  if(mController->GetShadowOffset() != shadow.GetOffset())
+  if(Text::ApplyShadowStyle(mController, shadow))
   {
-    mController->SetShadowOffset(shadow.GetOffset());
-  }
-
-  if(!Dali::Equals(mController->GetShadowBlurRadius(), shadow.GetBlurRadius()))
-  {
-    mController->SetShadowBlurRadius(shadow.GetBlurRadius());
+    mRenderer.Reset();
   }
 }
 
@@ -406,19 +382,9 @@ void InputFieldImpl::SetOutline(const Text::Outline& outline)
 
   SetColorBinding("OutlineColor", color, this, &InputFieldImpl::SetOutlineColorInternal);
 
-  if(mController->GetOutlineWidth() != static_cast<uint16_t>(outline.GetWidth()))
+  if(Text::ApplyOutlineStyle(mController, outline))
   {
-    mController->SetOutlineWidth(static_cast<uint16_t>(outline.GetWidth()));
-  }
-
-  if(mController->GetOutlineOffset() != outline.GetOffset())
-  {
-    mController->SetOutlineOffset(outline.GetOffset());
-  }
-
-  if(!Dali::Equals(mController->GetOutlineBlurRadius(), outline.GetBlurRadius()))
-  {
-    mController->SetOutlineBlurRadius(outline.GetBlurRadius());
+    mRenderer.Reset();
   }
 }
 
@@ -438,14 +404,9 @@ void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
 
   SetColorBinding("LineThroughColor", color, this, &InputFieldImpl::SetLineThroughColorInternal);
 
-  if(!mController->IsStrikethroughEnabled())
+  if(Text::ApplyLineThroughStyle(mController, lineThrough))
   {
-    mController->SetStrikethroughEnabled(true);
-  }
-
-  if(fabsf(mController->GetStrikethroughHeight() - lineThrough.GetThickness()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetStrikethroughHeight(lineThrough.GetThickness());
+    mRenderer.Reset();
   }
 }
 
@@ -1259,6 +1220,7 @@ void InputFieldImpl::SetUnderlineColorInternal(const Vector4& color)
   if(mController->GetUnderlineColor() != color)
   {
     mController->SetUnderlineColor(color);
+    mRenderer.Reset();
   }
 }
 
@@ -1267,6 +1229,7 @@ void InputFieldImpl::SetShadowColorInternal(const Vector4& color)
   if(mController->GetShadowColor() != color)
   {
     mController->SetShadowColor(color);
+    mRenderer.Reset();
   }
 }
 
@@ -1275,6 +1238,7 @@ void InputFieldImpl::SetOutlineColorInternal(const Vector4& color)
   if(mController->GetOutlineColor() != color)
   {
     mController->SetOutlineColor(color);
+    mRenderer.Reset();
   }
 }
 
@@ -1283,6 +1247,7 @@ void InputFieldImpl::SetLineThroughColorInternal(const Vector4& color)
   if(mController->GetStrikethroughColor() != color)
   {
     mController->SetStrikethroughColor(color);
+    mRenderer.Reset();
   }
 }
 

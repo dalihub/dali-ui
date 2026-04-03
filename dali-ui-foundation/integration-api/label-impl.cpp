@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
+#include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
@@ -170,7 +171,7 @@ Dali::String LabelImpl::GetFontFamily() const
 void LabelImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
-  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
+  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
   }
@@ -463,30 +464,7 @@ void LabelImpl::SetUnderline(const Text::Underline& underline)
 
   SetColorBinding("UnderlineColor", color, this, &LabelImpl::SetUnderlineColorInternal);
 
-  if(!mController->IsUnderlineEnabled())
-  {
-    mController->SetUnderlineEnabled(true);
-  }
-
-  if(fabsf(mController->GetUnderlineHeight() - underline.GetThickness()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetUnderlineHeight(underline.GetThickness());
-  }
-
-  if(mController->GetUnderlineType() != underline.GetType())
-  {
-    mController->SetUnderlineType(underline.GetType());
-  }
-
-  if(fabsf(mController->GetDashedUnderlineWidth() - underline.GetDashLength()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetDashedUnderlineWidth(underline.GetDashLength());
-  }
-
-  if(fabsf(mController->GetDashedUnderlineGap() - underline.GetDashGap()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetDashedUnderlineGap(underline.GetDashGap());
-  }
+  Text::ApplyUnderlineStyle(mController, underline);
 }
 
 void LabelImpl::ResetUnderline()
@@ -504,15 +482,7 @@ void LabelImpl::SetShadow(const Text::Shadow& shadow)
 
   SetColorBinding("ShadowColor", color, this, &LabelImpl::SetShadowColorInternal);
 
-  if(mController->GetShadowOffset() != shadow.GetOffset())
-  {
-    mController->SetShadowOffset(shadow.GetOffset());
-  }
-
-  if(!Dali::Equals(mController->GetShadowBlurRadius(), shadow.GetBlurRadius()))
-  {
-    mController->SetShadowBlurRadius(shadow.GetBlurRadius());
-  }
+  Text::ApplyShadowStyle(mController, shadow);
 }
 
 void LabelImpl::ResetShadow()
@@ -530,20 +500,7 @@ void LabelImpl::SetOutline(const Text::Outline& outline)
 
   SetColorBinding("OutlineColor", color, this, &LabelImpl::SetOutlineColorInternal);
 
-  if(mController->GetOutlineWidth() != static_cast<uint16_t>(outline.GetWidth()))
-  {
-    mController->SetOutlineWidth(static_cast<uint16_t>(outline.GetWidth()));
-  }
-
-  if(mController->GetOutlineOffset() != outline.GetOffset())
-  {
-    mController->SetOutlineOffset(outline.GetOffset());
-  }
-
-  if(!Dali::Equals(mController->GetOutlineBlurRadius(), outline.GetBlurRadius()))
-  {
-    mController->SetOutlineBlurRadius(outline.GetBlurRadius());
-  }
+  Text::ApplyOutlineStyle(mController, outline);
 }
 
 void LabelImpl::ResetOutline()
@@ -561,15 +518,7 @@ void LabelImpl::SetLineThrough(const Text::LineThrough& lineThrough)
 
   SetColorBinding("LineThroughColor", color, this, &LabelImpl::SetLineThroughColorInternal);
 
-  if(!mController->IsStrikethroughEnabled())
-  {
-    mController->SetStrikethroughEnabled(true);
-  }
-
-  if(fabsf(mController->GetStrikethroughHeight() - lineThrough.GetThickness()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetStrikethroughHeight(lineThrough.GetThickness());
-  }
+  Text::ApplyLineThroughStyle(mController, lineThrough);
 }
 
 void LabelImpl::ResetLineThrough()
@@ -589,20 +538,7 @@ void LabelImpl::SetBevel(const Text::Bevel& bevel)
   SetColorBinding("BevelLightColor", lightColor, this, &LabelImpl::SetBevelLightColorInternal);
   SetColorBinding("BevelShadowColor", shadowColor, this, &LabelImpl::SetBevelShadowColorInternal);
 
-  if(!mController->IsEmbossEnabled())
-  {
-    mController->SetEmbossEnabled(true);
-  }
-
-  if(mController->GetEmbossDirection() != bevel.GetDirection())
-  {
-    mController->SetEmbossDirection(bevel.GetDirection());
-  }
-
-  if(fabsf(mController->GetEmbossStrength() - bevel.GetIntensity()) > Math::MACHINE_EPSILON_1000)
-  {
-    mController->SetEmbossStrength(bevel.GetIntensity());
-  }
+  Text::ApplyBevelStyle(mController, bevel);
 }
 
 void LabelImpl::ResetBevel()

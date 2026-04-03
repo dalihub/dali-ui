@@ -238,6 +238,57 @@ private:
       mLineThroughLabel.ResetLineThrough();
       mInputFieldLineThrough.ResetLineThrough();
     }
+    else if(event.GetKeyName() == "5")
+    {
+      // Change Label styles to different form
+      mUnderlineLabel.SetUnderline(Text::Underline()
+        .SetColor(UiColor(0xFF0000))
+        .SetThickness(4)
+        .SetType(Text::Underline::Type::DASHED)
+        .SetDashLength(8.0f)
+        .SetDashGap(2.0f));
+
+      mShadowLabel.SetShadow(Text::Shadow()
+        .SetColor(UiColor(0x00FF00))
+        .SetOffset(Vector2(-2.0f, -2.0f))
+        .SetBlurRadius(4.0f));
+
+      mOutlineLabel.SetOutline(Text::Outline()
+        .SetColor(UiColor(0xFF00FF))
+        .SetOffset(Vector2(-1.0f, -1.0f))
+        .SetWidth(3.0f)
+        .SetBlurRadius(2.0f));
+
+      mLineThroughLabel.SetLineThrough(Text::LineThrough()
+        .SetColor(UiColor(0x00FFFF))
+        .SetThickness(1.0f));
+
+      DALI_LOG_ERROR("Changed Label styles to alternate form\n");
+    }
+    else if(event.GetKeyName() == "6")
+    {
+      // Change InputField styles to different form
+      mInputFieldUnderline.SetUnderline(Text::Underline()
+        .SetColor(UiColor(0xFF0000))
+        .SetThickness(4)
+        .SetType(Text::Underline::Type::DASHED)
+        .SetDashLength(8.0f)
+        .SetDashGap(2.0f));
+
+      mInputFieldShadow.SetShadow(Text::Shadow()
+        .SetColor(UiColor(0x00FF00))
+        .SetOffset(Vector2(-2.0f, -2.0f)));
+
+      mInputFieldOutline.SetOutline(Text::Outline()
+        .SetColor(UiColor(0xFF00FF))
+        .SetWidth(3.0f));
+
+      mInputFieldLineThrough.SetLineThrough(Text::LineThrough()
+        .SetColor(UiColor(0x00FFFF))
+        .SetThickness(1.0f));
+
+      DALI_LOG_ERROR("Changed InputField styles to alternate form\n");
+    }
   }
 
 private:
