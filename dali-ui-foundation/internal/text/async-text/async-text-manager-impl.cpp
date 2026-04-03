@@ -317,7 +317,7 @@ void AsyncTextManager::RequestCancel(uint32_t taskId)
 #ifdef TRACE_ENABLED
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())
         {
-          DALI_LOG_RELEASE_INFO("RequestCancel -> ob : %p, remove wating task : %u\n", cancelledObserver, taskId);
+          DALI_LOG_RELEASE_INFO("RequestCancel -> ob : %p, remove waiting task : %u\n", cancelledObserver, taskId);
         }
 #endif
       }
@@ -505,8 +505,8 @@ void AsyncTextManager::SetLoaderToWaitingTask()
       if(element.mObserver)
       {
         // Puts it into the running map.
-        uint32_t watingTaskId       = element.mTask->GetId();
-        mRunningTasks[watingTaskId] = element;
+        uint32_t waitingTaskId       = element.mTask->GetId();
+        mRunningTasks[waitingTaskId] = element;
 
         // Set loader and ready to process.
         element.mTask->SetLoader(loader);
@@ -515,7 +515,7 @@ void AsyncTextManager::SetLoaderToWaitingTask()
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())
         {
           DALI_LOG_RELEASE_INFO("SetLoaderToWaitingTask new task -> ob : %p, add task : %u, waiting tasks : %zu\n",
-                                element.mObserver, watingTaskId, mWaitingTasks.size());
+                                element.mObserver, waitingTaskId, mWaitingTasks.size());
         }
 #endif
       }
