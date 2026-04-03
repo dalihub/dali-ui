@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -36,7 +36,7 @@ void utc_dali_flexlayout_cleanup(void)
 
 int UtcDaliFlexLayoutConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout;
   DALI_TEST_CHECK(!layout);
   END_TEST;
@@ -44,7 +44,7 @@ int UtcDaliFlexLayoutConstructorP(void)
 
 int UtcDaliFlexLayoutNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_CHECK(layout);
   END_TEST;
@@ -52,7 +52,7 @@ int UtcDaliFlexLayoutNewP(void)
 
 int UtcDaliFlexLayoutCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout copy(layout);
   DALI_TEST_CHECK(copy);
@@ -62,7 +62,7 @@ int UtcDaliFlexLayoutCopyConstructorP(void)
 
 int UtcDaliFlexLayoutMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout moved = std::move(layout);
   DALI_TEST_CHECK(moved);
@@ -72,7 +72,7 @@ int UtcDaliFlexLayoutMoveConstructor(void)
 
 int UtcDaliFlexLayoutAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout copy;
   copy = layout;
@@ -83,7 +83,7 @@ int UtcDaliFlexLayoutAssignmentOperatorP(void)
 
 int UtcDaliFlexLayoutDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout layout2 = FlexLayout::DownCast(layout);
   DALI_TEST_CHECK(layout2);
@@ -93,7 +93,7 @@ int UtcDaliFlexLayoutDownCastP(void)
 
 int UtcDaliFlexLayoutDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitialized;
   FlexLayout layout = FlexLayout::DownCast(unInitialized);
   DALI_TEST_CHECK(!layout);
@@ -102,7 +102,7 @@ int UtcDaliFlexLayoutDownCastN(void)
 
 int UtcDaliFlexLayoutSetDirectionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetDirection(FlexDirection::ROW);
   DALI_TEST_EQUALS(layout.GetDirection(), FlexDirection::ROW, TEST_LOCATION);
@@ -113,7 +113,7 @@ int UtcDaliFlexLayoutSetDirectionP(void)
 
 int UtcDaliFlexLayoutGetDirectionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_EQUALS(layout.GetDirection(), FlexDirection::ROW, TEST_LOCATION);
   END_TEST;
@@ -121,7 +121,7 @@ int UtcDaliFlexLayoutGetDirectionP(void)
 
 int UtcDaliFlexLayoutSetWrapP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetWrap(FlexWrap::WRAP);
   DALI_TEST_EQUALS(layout.GetWrap(), FlexWrap::WRAP, TEST_LOCATION);
@@ -130,7 +130,7 @@ int UtcDaliFlexLayoutSetWrapP(void)
 
 int UtcDaliFlexLayoutGetWrapP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_EQUALS(layout.GetWrap(), FlexWrap::NO_WRAP, TEST_LOCATION);
   END_TEST;
@@ -138,7 +138,7 @@ int UtcDaliFlexLayoutGetWrapP(void)
 
 int UtcDaliFlexLayoutSetJustifyContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
   DALI_TEST_EQUALS(layout.GetJustifyContent(), FlexJustify::SPACE_BETWEEN, TEST_LOCATION);
@@ -147,7 +147,7 @@ int UtcDaliFlexLayoutSetJustifyContentP(void)
 
 int UtcDaliFlexLayoutGetJustifyContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_EQUALS(layout.GetJustifyContent(), FlexJustify::FLEX_START, TEST_LOCATION);
   END_TEST;
@@ -155,7 +155,7 @@ int UtcDaliFlexLayoutGetJustifyContentP(void)
 
 int UtcDaliFlexLayoutSetAlignItemsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetAlignItems(FlexAlign::CENTER);
   DALI_TEST_EQUALS(layout.GetAlignItems(), FlexAlign::CENTER, TEST_LOCATION);
@@ -164,7 +164,7 @@ int UtcDaliFlexLayoutSetAlignItemsP(void)
 
 int UtcDaliFlexLayoutGetAlignItemsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_EQUALS(layout.GetAlignItems(), FlexAlign::STRETCH, TEST_LOCATION);
   END_TEST;
@@ -172,7 +172,7 @@ int UtcDaliFlexLayoutGetAlignItemsP(void)
 
 int UtcDaliFlexLayoutSetAlignContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetAlignContent(FlexAlign::FLEX_END);
   DALI_TEST_EQUALS(layout.GetAlignContent(), FlexAlign::FLEX_END, TEST_LOCATION);
@@ -181,7 +181,7 @@ int UtcDaliFlexLayoutSetAlignContentP(void)
 
 int UtcDaliFlexLayoutGetAlignContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   DALI_TEST_EQUALS(layout.GetAlignContent(), FlexAlign::STRETCH, TEST_LOCATION);
   END_TEST;
@@ -189,7 +189,7 @@ int UtcDaliFlexLayoutGetAlignContentP(void)
 
 int UtcDaliFlexLayoutSetFlexGrowP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -200,7 +200,7 @@ int UtcDaliFlexLayoutSetFlexGrowP(void)
 
 int UtcDaliFlexLayoutGetFlexGrowP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -211,7 +211,7 @@ int UtcDaliFlexLayoutGetFlexGrowP(void)
 
 int UtcDaliFlexLayoutSetFlexShrinkP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -222,7 +222,7 @@ int UtcDaliFlexLayoutSetFlexShrinkP(void)
 
 int UtcDaliFlexLayoutGetFlexShrinkP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -233,7 +233,7 @@ int UtcDaliFlexLayoutGetFlexShrinkP(void)
 
 int UtcDaliFlexLayoutSetFlexBasisP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -244,7 +244,7 @@ int UtcDaliFlexLayoutSetFlexBasisP(void)
 
 int UtcDaliFlexLayoutGetFlexBasisP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -255,7 +255,7 @@ int UtcDaliFlexLayoutGetFlexBasisP(void)
 
 int UtcDaliFlexLayoutSetAlignSelfP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -266,7 +266,7 @@ int UtcDaliFlexLayoutSetAlignSelfP(void)
 
 int UtcDaliFlexLayoutGetAlignSelfP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -277,7 +277,7 @@ int UtcDaliFlexLayoutGetAlignSelfP(void)
 
 int UtcDaliFlexLayoutDirectionChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout& result = layout.Direction(FlexDirection::COLUMN);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -287,7 +287,7 @@ int UtcDaliFlexLayoutDirectionChainingP(void)
 
 int UtcDaliFlexLayoutWrapChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout& result = layout.Wrap(FlexWrap::WRAP_REVERSE);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -297,7 +297,7 @@ int UtcDaliFlexLayoutWrapChainingP(void)
 
 int UtcDaliFlexLayoutJustifyContentChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout& result = layout.JustifyContent(FlexJustify::SPACE_EVENLY);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -307,7 +307,7 @@ int UtcDaliFlexLayoutJustifyContentChainingP(void)
 
 int UtcDaliFlexLayoutAlignItemsChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout& result = layout.AlignItems(FlexAlign::STRETCH);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -317,7 +317,7 @@ int UtcDaliFlexLayoutAlignItemsChainingP(void)
 
 int UtcDaliFlexLayoutAlignContentChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   FlexLayout& result = layout.AlignContent(FlexAlign::CENTER);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -327,7 +327,7 @@ int UtcDaliFlexLayoutAlignContentChainingP(void)
 
 int UtcDaliFlexLayoutAllDirectionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetDirection(FlexDirection::ROW);
   DALI_TEST_EQUALS(layout.GetDirection(), FlexDirection::ROW, TEST_LOCATION);
@@ -342,7 +342,7 @@ int UtcDaliFlexLayoutAllDirectionsP(void)
 
 int UtcDaliFlexLayoutAllJustifyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetJustifyContent(FlexJustify::FLEX_END);
   DALI_TEST_EQUALS(layout.GetJustifyContent(), FlexJustify::FLEX_END, TEST_LOCATION);
@@ -355,7 +355,7 @@ int UtcDaliFlexLayoutAllJustifyP(void)
 
 int UtcDaliFlexLayoutAllAlignItemsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetAlignItems(FlexAlign::FLEX_START);
   DALI_TEST_EQUALS(layout.GetAlignItems(), FlexAlign::FLEX_START, TEST_LOCATION);
@@ -368,7 +368,7 @@ int UtcDaliFlexLayoutAllAlignItemsP(void)
 
 int UtcDaliFlexLayoutMeasureArrangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View v1 = View::New();
   v1.SetRequestedWidth(60.0f);
@@ -391,7 +391,7 @@ int UtcDaliFlexLayoutMeasureArrangeP(void)
 
 int UtcDaliFlexLayoutJustifyContentVariantsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View v1 = View::New();
   v1.SetRequestedWidth(40.0f);
@@ -425,7 +425,7 @@ int UtcDaliFlexLayoutJustifyContentVariantsP(void)
 
 int UtcDaliFlexLayoutAlignItemsVariantsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   View v1 = View::New();
   v1.SetRequestedWidth(50.0f);
@@ -455,7 +455,7 @@ int UtcDaliFlexLayoutAlignItemsVariantsP(void)
 
 int UtcDaliFlexLayoutDirectionReverseP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetDirection(FlexDirection::ROW_REVERSE);
   View v1 = View::New();
@@ -480,7 +480,7 @@ int UtcDaliFlexLayoutDirectionReverseP(void)
 
 int UtcDaliFlexLayoutWrapP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetWrap(FlexWrap::WRAP);
   View v1 = View::New();
@@ -506,7 +506,7 @@ int UtcDaliFlexLayoutWrapP(void)
 
 int UtcDaliFlexLayoutWrapReverseP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
   layout.SetWrap(FlexWrap::WRAP_REVERSE);
   View v1 = View::New();

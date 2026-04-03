@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include <dali.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/ui-state.h>
 

@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -36,7 +36,7 @@ void utc_dali_gridlayout_cleanup(void)
 
 int UtcDaliGridLayoutConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout;
   DALI_TEST_CHECK(!layout);
   END_TEST;
@@ -44,7 +44,7 @@ int UtcDaliGridLayoutConstructorP(void)
 
 int UtcDaliGridLayoutNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   DALI_TEST_CHECK(layout);
   END_TEST;
@@ -52,7 +52,7 @@ int UtcDaliGridLayoutNewP(void)
 
 int UtcDaliGridLayoutCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout copy(layout);
   DALI_TEST_CHECK(copy);
@@ -62,7 +62,7 @@ int UtcDaliGridLayoutCopyConstructorP(void)
 
 int UtcDaliGridLayoutMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout moved = std::move(layout);
   DALI_TEST_CHECK(moved);
@@ -72,7 +72,7 @@ int UtcDaliGridLayoutMoveConstructor(void)
 
 int UtcDaliGridLayoutAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout copy;
   copy = layout;
@@ -83,7 +83,7 @@ int UtcDaliGridLayoutAssignmentOperatorP(void)
 
 int UtcDaliGridLayoutDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout layout2 = GridLayout::DownCast(layout);
   DALI_TEST_CHECK(layout2);
@@ -93,7 +93,7 @@ int UtcDaliGridLayoutDownCastP(void)
 
 int UtcDaliGridLayoutDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitialized;
   GridLayout layout = GridLayout::DownCast(unInitialized);
   DALI_TEST_CHECK(!layout);
@@ -102,7 +102,7 @@ int UtcDaliGridLayoutDownCastN(void)
 
 int UtcDaliGridLayoutAddRowDefinitionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(50.0f));
   layout.AddRowDefinition(GridLength::Star(2.0f));
@@ -118,7 +118,7 @@ int UtcDaliGridLayoutAddRowDefinitionP(void)
 
 int UtcDaliGridLayoutAddColumnDefinitionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Auto());
   layout.AddColumnDefinition(GridLength::Star(1.0f));
@@ -132,7 +132,7 @@ int UtcDaliGridLayoutAddColumnDefinitionP(void)
 
 int UtcDaliGridLayoutSetRowDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> rows;
   rows.PushBack(GridLength::Absolute(100.0f));
@@ -146,7 +146,7 @@ int UtcDaliGridLayoutSetRowDefinitionsP(void)
 
 int UtcDaliGridLayoutSetColumnDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> cols;
   cols.PushBack(GridLength::Star(1.0f));
@@ -157,7 +157,7 @@ int UtcDaliGridLayoutSetColumnDefinitionsP(void)
 
 int UtcDaliGridLayoutGetRowDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(30.0f));
   Dali::Vector<GridLength> rows = layout.GetRowDefinitions();
@@ -168,7 +168,7 @@ int UtcDaliGridLayoutGetRowDefinitionsP(void)
 
 int UtcDaliGridLayoutGetColumnDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Star(2.0f));
   Dali::Vector<GridLength> cols = layout.GetColumnDefinitions();
@@ -179,7 +179,7 @@ int UtcDaliGridLayoutGetColumnDefinitionsP(void)
 
 int UtcDaliGridLayoutGetRowCountP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   DALI_TEST_EQUALS(layout.GetRowCount(), 0u, TEST_LOCATION);
   layout.AddRowDefinition(GridLength::Absolute(10.0f));
@@ -189,7 +189,7 @@ int UtcDaliGridLayoutGetRowCountP(void)
 
 int UtcDaliGridLayoutGetColumnCountP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   DALI_TEST_EQUALS(layout.GetColumnCount(), 0u, TEST_LOCATION);
   layout.AddColumnDefinition(GridLength::Auto());
@@ -199,7 +199,7 @@ int UtcDaliGridLayoutGetColumnCountP(void)
 
 int UtcDaliGridLayoutClearRowDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(10.0f));
   layout.ClearRowDefinitions();
@@ -209,7 +209,7 @@ int UtcDaliGridLayoutClearRowDefinitionsP(void)
 
 int UtcDaliGridLayoutClearColumnDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Star(1.0f));
   layout.ClearColumnDefinitions();
@@ -219,7 +219,7 @@ int UtcDaliGridLayoutClearColumnDefinitionsP(void)
 
 int UtcDaliGridLayoutSetRowSpacingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   const float spacing = 8.0f;
   layout.SetRowSpacing(spacing);
@@ -229,7 +229,7 @@ int UtcDaliGridLayoutSetRowSpacingP(void)
 
 int UtcDaliGridLayoutGetRowSpacingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   DALI_TEST_EQUALS(layout.GetRowSpacing(), 0.0f, TEST_LOCATION);
   END_TEST;
@@ -237,7 +237,7 @@ int UtcDaliGridLayoutGetRowSpacingP(void)
 
 int UtcDaliGridLayoutSetColumnSpacingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   const float spacing = 12.0f;
   layout.SetColumnSpacing(spacing);
@@ -247,7 +247,7 @@ int UtcDaliGridLayoutSetColumnSpacingP(void)
 
 int UtcDaliGridLayoutGetColumnSpacingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   DALI_TEST_EQUALS(layout.GetColumnSpacing(), 0.0f, TEST_LOCATION);
   END_TEST;
@@ -255,7 +255,7 @@ int UtcDaliGridLayoutGetColumnSpacingP(void)
 
 int UtcDaliGridLayoutSetRowP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -266,7 +266,7 @@ int UtcDaliGridLayoutSetRowP(void)
 
 int UtcDaliGridLayoutGetRowP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -279,7 +279,7 @@ int UtcDaliGridLayoutGetRowP(void)
 
 int UtcDaliGridLayoutSetColumnP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -290,7 +290,7 @@ int UtcDaliGridLayoutSetColumnP(void)
 
 int UtcDaliGridLayoutGetColumnP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -301,7 +301,7 @@ int UtcDaliGridLayoutGetColumnP(void)
 
 int UtcDaliGridLayoutSetRowSpanP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -312,7 +312,7 @@ int UtcDaliGridLayoutSetRowSpanP(void)
 
 int UtcDaliGridLayoutGetRowSpanP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -323,7 +323,7 @@ int UtcDaliGridLayoutGetRowSpanP(void)
 
 int UtcDaliGridLayoutSetColumnSpanP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -334,7 +334,7 @@ int UtcDaliGridLayoutSetColumnSpanP(void)
 
 int UtcDaliGridLayoutGetColumnSpanP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -345,7 +345,7 @@ int UtcDaliGridLayoutGetColumnSpanP(void)
 
 int UtcDaliGridLayoutRowSpacingChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout& result = layout.RowSpacing(5.0f);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -355,7 +355,7 @@ int UtcDaliGridLayoutRowSpacingChainingP(void)
 
 int UtcDaliGridLayoutColumnSpacingChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   GridLayout& result = layout.ColumnSpacing(7.0f);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -365,7 +365,7 @@ int UtcDaliGridLayoutColumnSpacingChainingP(void)
 
 int UtcDaliGridLayoutRowsChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> rows;
   rows.PushBack(GridLength::Absolute(20.0f));
@@ -377,7 +377,7 @@ int UtcDaliGridLayoutRowsChainingP(void)
 
 int UtcDaliGridLayoutColumnsChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> cols;
   cols.PushBack(GridLength::Star(1.0f));
@@ -389,7 +389,7 @@ int UtcDaliGridLayoutColumnsChainingP(void)
 
 int UtcDaliGridLayoutEmptyRowDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> rows = layout.GetRowDefinitions();
   DALI_TEST_EQUALS(rows.Size(), 0u, TEST_LOCATION);
@@ -398,7 +398,7 @@ int UtcDaliGridLayoutEmptyRowDefinitionsP(void)
 
 int UtcDaliGridLayoutEmptyColumnDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> cols = layout.GetColumnDefinitions();
   DALI_TEST_EQUALS(cols.Size(), 0u, TEST_LOCATION);
@@ -407,7 +407,7 @@ int UtcDaliGridLayoutEmptyColumnDefinitionsP(void)
 
 int UtcDaliGridLayoutSetEmptyRowsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(10.0f));
   layout.SetRowDefinitions(Dali::Vector<GridLength>());
@@ -417,7 +417,7 @@ int UtcDaliGridLayoutSetEmptyRowsP(void)
 
 int UtcDaliGridLayoutSetEmptyColumnsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Star(1.0f));
   layout.SetColumnDefinitions(Dali::Vector<GridLength>());
@@ -427,7 +427,7 @@ int UtcDaliGridLayoutSetEmptyColumnsP(void)
 
 int UtcDaliGridLayoutMeasureArrangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(50.0f));
   layout.AddRowDefinition(GridLength::Absolute(50.0f));
@@ -452,7 +452,7 @@ int UtcDaliGridLayoutMeasureArrangeP(void)
 
 int UtcDaliGridLayoutStarDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Star(1.0f));
   layout.AddRowDefinition(GridLength::Star(1.0f));
@@ -472,7 +472,7 @@ int UtcDaliGridLayoutStarDefinitionsP(void)
 
 int UtcDaliGridLayoutAutoDefinitionsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Auto());
   layout.AddColumnDefinition(GridLength::Auto());
@@ -492,7 +492,7 @@ int UtcDaliGridLayoutAutoDefinitionsP(void)
 
 int UtcDaliGridLayoutRowColumnSpanP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(40.0f));
   layout.AddRowDefinition(GridLength::Absolute(40.0f));

@@ -1,444 +1,440 @@
-// /*
-//  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
-//  *
-//  * Licensed under the Apache License, Version 2.0 (the "License");
-//  * you may not use this file except in compliance with the License.
-//  * You may obtain a copy of the License at
-//  *
-//  * http://www.apache.org/licenses/LICENSE-2.0
-//  *
-//  * Unless required by applicable law or agreed to in writing, software
-//  * distributed under the License is distributed on an "AS IS" BASIS,
-//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  * See the License for the specific language governing permissions and
-//  * limitations under the License.
-//  *
-//  */
-
-// #include <stdlib.h>
-// #include <iostream>
-
-// #include <dali.h>
-// #include <dali-test-suite-utils.h>
-// #include <dali-ui-foundation/dali-ui-foundation.h>
-// #include <dali-ui-foundation/integration-api/view-impl.h>
-
-// using namespace Dali;
-// using namespace Dali::Ui;
-// using namespace Dali::Ui::Integration;
-
-// namespace
-// {
-
-// // ============================================================================
-// // Helpers
-// // ============================================================================
-
-// struct StateChangedData
-// {
-//   StateChangedData()
-//   : callCount(0)
-//   {
-//   }
-
-//   void Reset()
-//   {
-//     callCount = 0;
-//     view      = View();
-//     prev      = UiState::NORMAL;
-//     cur       = UiState::NORMAL;
-//   }
-
-//   int     callCount;
-//   View    view;
-//   UiState prev;
-//   UiState cur;
-// };
-
-// struct StateChangedFunctor
-// {
-//   StateChangedFunctor(StateChangedData& data)
-//   : mData(data)
-//   {
-//   }
-
-//   void operator()(View view, const StateEvent& e)
-//   {
-//     ++mData.callCount;
-//     mData.view = view;
-//     mData.prev = e.GetPrev();
-//     mData.cur  = e.GetCurrent();
-//   }
-
-//   StateChangedData& mData;
-// };
-
-// /**
-//  * @brief A helper class that implements ConnectionTracker for tracking signal lifetime.
-//  */
-// class StateHandlerTracker : public ConnectionTracker
-// {
-// public:
-//   StateHandlerTracker(StateChangedData& data)
-//   : mData(data)
-//   {
-//   }
-
-//   void HandleStateChanged(View view, const StateEvent& e)
-//   {
-//     ++mData.callCount;
-//     mData.view = view;
-//     mData.prev = e.GetPrev();
-//     mData.cur  = e.GetCurrent();
-//   }
-
-//   StateChangedData& mData;
-// };
-
-// View CreateView(TestApplication& application)
-// {
-//   View view = View::New();
-//   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
-//   application.GetScene().Add(view);
-//   application.SendNotification();
-//   application.Render();
-//   return view;
-// }
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+
+#include <dali.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Integration;
+
+namespace
+{
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+struct StateChangedData
+{
+  StateChangedData()
+  : callCount(0)
+  {
+  }
+
+  void Reset()
+  {
+    callCount = 0;
+    view      = View();
+    prev      = UiState::NORMAL;
+    cur       = UiState::NORMAL;
+  }
+
+  int     callCount;
+  View    view;
+  UiState prev;
+  UiState cur;
+};
+
+struct StateChangedFunctor
+{
+  StateChangedFunctor(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void operator()(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+/**
+ * @brief A helper class that implements ConnectionTracker for tracking signal lifetime.
+ */
+class StateHandlerTracker : public ConnectionTracker
+{
+public:
+  StateHandlerTracker(StateChangedData& data)
+  : mData(data)
+  {
+  }
+
+  void HandleStateChanged(View view, const StateEvent& e)
+  {
+    ++mData.callCount;
+    mData.view = view;
+    mData.prev = e.GetPrev();
+    mData.cur  = e.GetCurrent();
+  }
+
+  StateChangedData& mData;
+};
+
+View CreateView(UiTestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  return view;
+}
+
+} // namespace
+
+void utc_dali_viewstatehandler_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_viewstatehandler_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// ============================================================================
+// WhenStateChanged — basic registration and dispatch (member function, #2)
+// ============================================================================
+
+int UtcDaliViewWhenStateChangedMemberFunctionP(void)
+{
+  UiTestApplication    application;
+  View               view = CreateView(application);
+  StateChangedData   data;
+  StateHandlerTracker tracker(data);
 
-// } // namespace
+  GetImpl(view).WhenStateChanged("TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
 
-// void utc_dali_viewstatehandler_startup(void)
-// {
-//   test_return_value = TET_UNDEF;
-// }
+  // Trigger a state change
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-// void utc_dali_viewstatehandler_cleanup(void)
-// {
-//   test_return_value = TET_PASS;
-// }
+  DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
+
+  END_TEST;
+}
+
+// ============================================================================
+// WhenStateChanged — lambda form (#4)
+// ============================================================================
 
-// // ============================================================================
-// // WhenStateChanged — basic registration and dispatch (member function, #2)
-// // ============================================================================
-
-// int UtcDaliViewWhenStateChangedMemberFunctionP(void)
-// {
-//   TestApplication    application;
-//   View               view = CreateView(application);
-//   StateChangedData   data;
-//   StateHandlerTracker tracker(data);
+int UtcDaliViewWhenStateChangedLambdaP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  StateChangedData data;
+  ConnectionTracker tracker;
 
-//   View& result = GetImpl(view).WhenStateChanged("TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
-//   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  GetImpl(view).WhenStateChanged("TestHandler", &tracker, StateChangedFunctor(data));
 
-//   // Trigger a state change
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_CHECK(data.view == view);
-//   DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
+  DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
 
-//   END_TEST;
-// }
+  END_TEST;
+}
 
-// // ============================================================================
-// // WhenStateChanged — lambda form (#4)
-// // ============================================================================
+// ============================================================================
+// WhenStateChanged — method chaining returns *this
+// ============================================================================
 
-// int UtcDaliViewWhenStateChangedLambdaP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   StateChangedData data;
-//   ConnectionTracker tracker;
+int UtcDaliViewWhenStateChangedChainingP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
 
-//   GetImpl(view).WhenStateChanged("TestHandler", &tracker, StateChangedFunctor(data));
+  GetImpl(view).WhenStateChanged("Handler1", &tracker, StateChangedFunctor(data));
+  GetImpl(view).WhenStateChanged("Handler2", &tracker, StateChangedFunctor(data));
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  // Both handlers should fire
+  DALI_TEST_EQUALS(data.callCount, 2, TEST_LOCATION);
 
-//   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_CHECK(UiState::FOCUSED.WasAdded(data.prev, data.cur));
+  END_TEST;
+}
 
-//   END_TEST;
-// }
+// ============================================================================
+// WhenStateChanged — same ID replaces previous handler
+// ============================================================================
 
-// // ============================================================================
-// // WhenStateChanged — method chaining returns *this
-// // ============================================================================
+int UtcDaliViewWhenStateChangedReplaceP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data1, data2;
 
-// int UtcDaliViewWhenStateChangedChainingP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data;
+  GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data1));
+  // Register with the same ID — should replace the first
+  GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data2));
 
-//   View& result = view
-//     .WhenStateChanged("Handler1", &tracker, StateChangedFunctor(data))
-//     .WhenStateChanged("Handler2", &tracker, StateChangedFunctor(data));
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(data1.callCount, 0, TEST_LOCATION); // old handler NOT called
+  DALI_TEST_EQUALS(data2.callCount, 1, TEST_LOCATION); // new handler called
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  END_TEST;
+}
 
-//   // Both handlers should fire
-//   DALI_TEST_EQUALS(data.callCount, 2, TEST_LOCATION);
+// ============================================================================
+// WhenStateChanged — no dispatch when state does not change
+// ============================================================================
 
-//   END_TEST;
-// }
+int UtcDaliViewWhenStateChangedNoChangeN(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
 
-// // ============================================================================
-// // WhenStateChanged — same ID replaces previous handler
-// // ============================================================================
+  GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
-// int UtcDaliViewWhenStateChangedReplaceP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data1, data2;
+  // Set same state twice — second call should not dispatch
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data1));
-//   // Register with the same ID — should replace the first
-//   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data2));
+  DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  END_TEST;
+}
 
-//   DALI_TEST_EQUALS(data1.callCount, 0, TEST_LOCATION); // old handler NOT called
-//   DALI_TEST_EQUALS(data2.callCount, 1, TEST_LOCATION); // new handler called
+// ============================================================================
+// UnsetStateHandler — removes a handler by ID
+// ============================================================================
 
-//   END_TEST;
-// }
+int UtcDaliViewUnsetStateHandlerP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
 
-// // ============================================================================
-// // WhenStateChanged — no dispatch when state does not change
-// // ============================================================================
+  GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
-// int UtcDaliViewWhenStateChangedNoChangeN(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data;
+  bool removed = GetImpl(view).UnsetStateHandler("MyHandler");
+  DALI_TEST_CHECK(removed);
 
-//   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   // Set same state twice — second call should not dispatch
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION); // not called after removal
 
-//   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+  END_TEST;
+}
 
-//   END_TEST;
-// }
+int UtcDaliViewUnsetStateHandlerNotFoundN(void)
+{
+  UiTestApplication application;
+  View            view = CreateView(application);
 
-// // ============================================================================
-// // UnsetStateHandler — removes a handler by ID
-// // ============================================================================
+  // No handlers registered — should return false
+  bool removed = GetImpl(view).UnsetStateHandler("NonExistent");
+  DALI_TEST_CHECK(!removed);
 
-// int UtcDaliViewUnsetStateHandlerP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data;
+  END_TEST;
+}
 
-//   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
+// ============================================================================
+// UnsetStateHandler — only removes the specified ID, others intact
+// ============================================================================
 
-//   bool removed = GetImpl(view).UnsetStateHandler("MyHandler");
-//   DALI_TEST_CHECK(removed);
+int UtcDaliViewUnsetStateHandlerSeleciveP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData dataA, dataB;
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  GetImpl(view).WhenStateChanged("HandlerA", &tracker, StateChangedFunctor(dataA));
+  GetImpl(view).WhenStateChanged("HandlerB", &tracker, StateChangedFunctor(dataB));
 
-//   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION); // not called after removal
+  GetImpl(view).UnsetStateHandler("HandlerA");
 
-//   END_TEST;
-// }
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-// int UtcDaliViewUnsetStateHandlerNotFoundN(void)
-// {
-//   TestApplication application;
-//   View            view = CreateView(application);
+  DALI_TEST_EQUALS(dataA.callCount, 0, TEST_LOCATION); // removed
+  DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION); // still active
 
-//   // No handlers registered — should return false
-//   bool removed = GetImpl(view).UnsetStateHandler("NonExistent");
-//   DALI_TEST_CHECK(!removed);
+  END_TEST;
+}
 
-//   END_TEST;
-// }
+// ============================================================================
+// UnsetStateHandlerWhenNotProcessing — skip removal during own handler
+// ============================================================================
 
-// // ============================================================================
-// // UnsetStateHandler — only removes the specified ID, others intact
-// // ============================================================================
+int UtcDaliViewUnsetStateHandlerWhenNotProcessingSkipsP(void)
+{
+  UiTestApplication  application;
+  View             view    = CreateView(application);
+  ConnectionTracker tracker;
+  bool             handlerCalled = false;
+  bool             unsetResult   = true; // intentionally set to true to verify it becomes false
 
-// int UtcDaliViewUnsetStateHandlerSeleciveP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData dataA, dataB;
+  GetImpl(view).WhenStateChanged("BackgroundColor", &tracker, [&](View v, const StateEvent&) {
+    handlerCalled = true;
+    // Try to unset self during processing — should be skipped
+    unsetResult = GetImpl(v).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
+  });
 
-//   GetImpl(view).WhenStateChanged("HandlerA", &tracker, StateChangedFunctor(dataA));
-//   GetImpl(view).WhenStateChanged("HandlerB", &tracker, StateChangedFunctor(dataB));
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   GetImpl(view).UnsetStateHandler("HandlerA");
+  DALI_TEST_CHECK(handlerCalled);
+  DALI_TEST_CHECK(!unsetResult); // returns false because it is processing
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  // Handler should still be active after skipped removal
+  handlerCalled = false;
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+  DALI_TEST_CHECK(handlerCalled);
 
-//   DALI_TEST_EQUALS(dataA.callCount, 0, TEST_LOCATION); // removed
-//   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION); // still active
+  END_TEST;
+}
 
-//   END_TEST;
-// }
+int UtcDaliViewUnsetStateHandlerWhenNotProcessingSucceedsP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
 
-// // ============================================================================
-// // UnsetStateHandlerWhenNotProcessing — skip removal during own handler
-// // ============================================================================
+  GetImpl(view).WhenStateChanged("BackgroundColor", &tracker, StateChangedFunctor(data));
 
-// int UtcDaliViewUnsetStateHandlerWhenNotProcessingSkipsP(void)
-// {
-//   TestApplication  application;
-//   View             view    = CreateView(application);
-//   ConnectionTracker tracker;
-//   bool             handlerCalled = false;
-//   bool             unsetResult   = true; // intentionally set to true to verify it becomes false
+  // Called from outside a handler — should succeed
+  bool removed = GetImpl(view).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
+  DALI_TEST_CHECK(removed);
 
-//   GetImpl(view).WhenStateChanged("BackgroundColor", &tracker, [&](View v, const StateEvent&) {
-//     handlerCalled = true;
-//     // Try to unset self during processing — should be skipped
-//     unsetResult = GetImpl(v).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
-//   });
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  END_TEST;
+}
 
-//   DALI_TEST_CHECK(handlerCalled);
-//   DALI_TEST_CHECK(!unsetResult); // returns false because it is processing
+// ============================================================================
+// Auto-disconnect when tracker is destroyed
+// ============================================================================
 
-//   // Handler should still be active after skipped removal
-//   handlerCalled = false;
-//   GetImpl(view).SetViewState(UiState::PRESSED, true);
-//   DALI_TEST_CHECK(handlerCalled);
+int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
+{
+  UiTestApplication application;
+  View            view = CreateView(application);
+  StateChangedData data;
 
-//   END_TEST;
-// }
+  {
+    ConnectionTracker tracker;
+    GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
-// int UtcDaliViewUnsetStateHandlerWhenNotProcessingSucceedsP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data;
+    GetImpl(view).SetViewState(UiState::FOCUSED, true);
+    DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
+    data.Reset();
 
-//   GetImpl(view).WhenStateChanged("BackgroundColor", &tracker, StateChangedFunctor(data));
+    // tracker goes out of scope — auto-disconnect
+  }
 
-//   // Called from outside a handler — should succeed
-//   bool removed = GetImpl(view).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
-//   DALI_TEST_CHECK(removed);
+  // After tracker destroyed, handler should no longer fire
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+  DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
-//   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
+  END_TEST;
+}
 
-//   END_TEST;
-// }
+// ============================================================================
+// Multiple state changes — prev/cur correctness
+// ============================================================================
 
-// // ============================================================================
-// // Auto-disconnect when tracker is destroyed
-// // ============================================================================
+int UtcDaliViewWhenStateChangedPrevCurP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData data;
 
-// int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
-// {
-//   TestApplication application;
-//   View            view = CreateView(application);
-//   StateChangedData data;
+  GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(data));
 
-//   {
-//     ConnectionTracker tracker;
-//     GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  DALI_TEST_CHECK(!data.prev.Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
+  data.Reset();
 
-//     GetImpl(view).SetViewState(UiState::FOCUSED, true);
-//     DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
-//     data.Reset();
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+  DALI_TEST_CHECK(data.prev.Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(data.cur.Contains(UiState::PRESSED));
 
-//     // tracker goes out of scope — auto-disconnect
-//   }
+  END_TEST;
+}
 
-//   // After tracker destroyed, handler should no longer fire
-//   GetImpl(view).SetViewState(UiState::PRESSED, true);
-//   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
+// ============================================================================
+// Multiple handlers with different IDs all called on state change
+// ============================================================================
 
-//   END_TEST;
-// }
+int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData dataA, dataB, dataC;
 
-// // ============================================================================
-// // Multiple state changes — prev/cur correctness
-// // ============================================================================
+  GetImpl(view).WhenStateChanged("A", &tracker, StateChangedFunctor(dataA));
+  GetImpl(view).WhenStateChanged("B", &tracker, StateChangedFunctor(dataB));
+  GetImpl(view).WhenStateChanged("C", &tracker, StateChangedFunctor(dataC));
 
-// int UtcDaliViewWhenStateChangedPrevCurP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData data;
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(data));
+  DALI_TEST_EQUALS(dataA.callCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(dataC.callCount, 1, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
-//   DALI_TEST_CHECK(!data.prev.Contains(UiState::FOCUSED));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
-//   data.Reset();
+  END_TEST;
+}
 
-//   GetImpl(view).SetViewState(UiState::PRESSED, true);
-//   DALI_TEST_CHECK(data.prev.Contains(UiState::FOCUSED));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::FOCUSED));
-//   DALI_TEST_CHECK(data.cur.Contains(UiState::PRESSED));
+// ============================================================================
+// Named handlers and StateChangedSignal both fire
+// ============================================================================
 
-//   END_TEST;
-// }
+int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
+{
+  UiTestApplication  application;
+  View             view = CreateView(application);
+  ConnectionTracker tracker;
+  StateChangedData namedData, signalData;
 
-// // ============================================================================
-// // Multiple handlers with different IDs all called on state change
-// // ============================================================================
+  // Named handler
+  GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(namedData));
+  // Anonymous signal
+  view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
 
-// int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData dataA, dataB, dataC;
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   GetImpl(view).WhenStateChanged("A", &tracker, StateChangedFunctor(dataA));
-//   GetImpl(view).WhenStateChanged("B", &tracker, StateChangedFunctor(dataB));
-//   GetImpl(view).WhenStateChanged("C", &tracker, StateChangedFunctor(dataC));
+  DALI_TEST_EQUALS(namedData.callCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(signalData.callCount, 1, TEST_LOCATION);
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
-
-//   DALI_TEST_EQUALS(dataA.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_EQUALS(dataC.callCount, 1, TEST_LOCATION);
-
-//   END_TEST;
-// }
-
-// // ============================================================================
-// // Named handlers and StateChangedSignal both fire
-// // ============================================================================
-
-// int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
-// {
-//   TestApplication  application;
-//   View             view = CreateView(application);
-//   ConnectionTracker tracker;
-//   StateChangedData namedData, signalData;
-
-//   // Named handler
-//   GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(namedData));
-//   // Anonymous signal
-//   view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
-
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
-
-//   DALI_TEST_EQUALS(namedData.callCount, 1, TEST_LOCATION);
-//   DALI_TEST_EQUALS(signalData.callCount, 1, TEST_LOCATION);
-
-//   END_TEST;
-// }
+  END_TEST;
+}

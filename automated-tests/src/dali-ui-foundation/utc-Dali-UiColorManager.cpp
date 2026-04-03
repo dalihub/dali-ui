@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -68,7 +68,6 @@ void utc_dali_uicolormanager_startup(void)
   test_return_value = TET_UNDEF;
   gLastAppliedColor = Vector4::ZERO;
   gApplyCallCount   = 0;
-  UiConfig::New().Apply();
 }
 
 void utc_dali_uicolormanager_cleanup(void)
@@ -80,7 +79,7 @@ void utc_dali_uicolormanager_cleanup(void)
 
 int UtcDaliUiColorManagerConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager;
   DALI_TEST_CHECK(!manager);
@@ -92,7 +91,7 @@ int UtcDaliUiColorManagerConstructorP(void)
 
 int UtcDaliUiColorManagerGetP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   DALI_TEST_CHECK(manager);
@@ -102,7 +101,7 @@ int UtcDaliUiColorManagerGetP(void)
 
 int UtcDaliUiColorManagerGetSingletonP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager1 = UiColorManager::Get();
   UiColorManager manager2 = UiColorManager::Get();
@@ -118,7 +117,7 @@ int UtcDaliUiColorManagerGetSingletonP(void)
 
 int UtcDaliUiColorManagerCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   UiColorManager copy(manager);
@@ -131,7 +130,7 @@ int UtcDaliUiColorManagerCopyConstructorP(void)
 
 int UtcDaliUiColorManagerMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   DALI_TEST_EQUALS(2, manager.GetBaseObject().ReferenceCount(), TEST_LOCATION);
@@ -145,7 +144,7 @@ int UtcDaliUiColorManagerMoveConstructorP(void)
 
 int UtcDaliUiColorManagerCopyAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   UiColorManager copy;
@@ -159,7 +158,7 @@ int UtcDaliUiColorManagerCopyAssignmentP(void)
 
 int UtcDaliUiColorManagerMoveAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -176,7 +175,7 @@ int UtcDaliUiColorManagerMoveAssignmentP(void)
 
 int UtcDaliUiColorManagerDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   BaseHandle     handle(manager);
@@ -189,7 +188,7 @@ int UtcDaliUiColorManagerDownCastP(void)
 
 int UtcDaliUiColorManagerDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   BaseHandle handle;
   UiColorManager downCasted = UiColorManager::DownCast(handle);
@@ -202,7 +201,7 @@ int UtcDaliUiColorManagerDownCastN(void)
 
 int UtcDaliUiColorManagerGetColorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -215,7 +214,7 @@ int UtcDaliUiColorManagerGetColorP(void)
 
 int UtcDaliUiColorManagerGetColorNotFoundN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -227,7 +226,7 @@ int UtcDaliUiColorManagerGetColorNotFoundN(void)
 
 int UtcDaliUiColorManagerGetColorWithOutParamP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -242,7 +241,7 @@ int UtcDaliUiColorManagerGetColorWithOutParamP(void)
 
 int UtcDaliUiColorManagerGetColorWithOutParamN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -256,7 +255,7 @@ int UtcDaliUiColorManagerGetColorWithOutParamN(void)
 
 int UtcDaliUiColorManagerGetColorDefaultColorsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -280,7 +279,7 @@ int UtcDaliUiColorManagerGetColorDefaultColorsP(void)
 
 int UtcDaliUiColorManagerRegisterBindingTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -300,7 +299,7 @@ int UtcDaliUiColorManagerRegisterBindingTokenP(void)
 
 int UtcDaliUiColorManagerSetBindingColorReplaceP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -326,7 +325,7 @@ int UtcDaliUiColorManagerSetBindingColorReplaceP(void)
 
 int UtcDaliUiColorManagerGetBindingColorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -346,7 +345,7 @@ int UtcDaliUiColorManagerGetBindingColorP(void)
 
 int UtcDaliUiColorManagerGetBindingColorN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -363,7 +362,7 @@ int UtcDaliUiColorManagerGetBindingColorN(void)
 
 int UtcDaliUiColorManagerClearBindingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -386,7 +385,7 @@ int UtcDaliUiColorManagerClearBindingP(void)
 
 int UtcDaliUiColorManagerClearBindingsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -412,7 +411,7 @@ int UtcDaliUiColorManagerClearBindingsP(void)
 
 int UtcDaliUiColorManagerClearBindingsNoBindingsN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -429,7 +428,7 @@ int UtcDaliUiColorManagerClearBindingsNoBindingsN(void)
 
 int UtcDaliUiColorManagerSetColorOverrideP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -447,7 +446,7 @@ int UtcDaliUiColorManagerSetColorOverrideP(void)
 
 int UtcDaliUiColorManagerSetColorOverrideFallbackP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -468,7 +467,7 @@ int UtcDaliUiColorManagerSetColorOverrideFallbackP(void)
 
 int UtcDaliUiColorManagerClearColorOverrideP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -488,7 +487,7 @@ int UtcDaliUiColorManagerClearColorOverrideP(void)
 
 int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
   View view = View::New();
@@ -517,7 +516,7 @@ int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
 
 int UtcDaliUiColorManagerSetColorOverrideReplaceP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 
@@ -538,7 +537,7 @@ int UtcDaliUiColorManagerSetColorOverrideReplaceP(void)
 
 int UtcDaliUiColorManagerSetColorOverrideNullP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColorManager manager = UiColorManager::Get();
 

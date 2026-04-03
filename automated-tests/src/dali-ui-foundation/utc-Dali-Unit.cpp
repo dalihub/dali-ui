@@ -20,7 +20,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include "dali-ui-foundation/public-api/ui-config.h"
 
 using namespace Dali;
@@ -29,7 +29,6 @@ using namespace Dali::Ui;
 void utc_dali_unit_startup(void)
 {
   test_return_value = TET_UNDEF;
-  UiConfig::New().Apply();
 }
 
 void utc_dali_unit_cleanup(void)
@@ -39,7 +38,7 @@ void utc_dali_unit_cleanup(void)
 
 int UtcDaliUnitSpxUnsignedInt(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test unsigned long long int version
   float result = 100_spx;
@@ -56,7 +55,7 @@ int UtcDaliUnitSpxUnsignedInt(void)
 
 int UtcDaliUnitSpxLongDouble(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test long double version
   float result = 100.5_spx;
@@ -73,7 +72,7 @@ int UtcDaliUnitSpxLongDouble(void)
 
 int UtcDaliUnitDpUnsignedInt(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test unsigned long long int version
   float result = 100_dp;
@@ -90,7 +89,7 @@ int UtcDaliUnitDpUnsignedInt(void)
 
 int UtcDaliUnitDpLongDouble(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test long double version
   float result = 100.5_dp;
@@ -107,7 +106,7 @@ int UtcDaliUnitDpLongDouble(void)
 
 int UtcDaliUnitSdpUnsignedInt(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test unsigned long long int version
   float result = 100_sdp;
@@ -124,7 +123,7 @@ int UtcDaliUnitSdpUnsignedInt(void)
 
 int UtcDaliUnitSdpLongDouble(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // Test long double version
   float result = 100.5_sdp;

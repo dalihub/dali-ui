@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -36,7 +36,7 @@ void utc_dali_layoutcontroller_cleanup(void)
 
 // int UtcDaliLayoutControllerGetP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerTest", true);
 //   if (!window)
 //   {
@@ -50,7 +50,7 @@ void utc_dali_layoutcontroller_cleanup(void)
 
 // int UtcDaliLayoutControllerOnWindowResizeP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerResizeTest", true);
 //   if (!window)
 //   {
@@ -64,7 +64,7 @@ void utc_dali_layoutcontroller_cleanup(void)
 
 // int UtcDaliLayoutControllerProcessLayoutsP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerProcessTest", true);
 //   if (!window)
 //   {
@@ -78,7 +78,7 @@ void utc_dali_layoutcontroller_cleanup(void)
 
 // int UtcDaliLayoutControllerGetSameWindowReturnsSameInstanceP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 100, 100), "LayoutControllerSameTest", true);
 //   if (!window)
 //   {

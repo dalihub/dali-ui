@@ -22,7 +22,7 @@
 // #include <dali-ui-foundation/dali-ui-foundation.h>
 // #include <dali-ui-foundation/integration-api/selectable-trait-impl.h>
 // #include <dali-ui-foundation/integration-api/view-impl.h>
-// #include <dali-test-suite-utils.h>
+// #include <dali-ui-test-suite-utils.h>
 // #include <test-gesture-generator.h>
 // #include <dali/integration-api/events/key-event-integ.h>
 // #include <dali/integration-api/events/touch-event-integ.h>
@@ -80,13 +80,14 @@
 //  */
 // View CreateSelectableView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 // {
-//   View view = View::New();
-//   view.SetProperty(Actor::Property::SIZE, Vector2(width, height));
-//   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
-//   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-//   application.GetScene().Add(view);
-//   view.AsSelectable();
+//   View view = View::New()
+//   .SetRequestedWidth(width)
+//   .SetRequestedHeight(height)
+//   .SetPivotPoint(AnchorPoint::TOP_LEFT)
+//   .SetParentOrigin(ParentOrigin::TOP_LEFT)
+//   .AsSelectable();
 
+//   application.GetScene().Add(view);
 //   application.SendNotification();
 //   application.Render();
 
@@ -111,7 +112,7 @@
 
 // int UtcDaliSelectableTraitNewP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 //   DALI_TEST_CHECK(selectable);
 //   END_TEST;
@@ -119,7 +120,7 @@
 
 // int UtcDaliSelectableTraitCopyConstructorP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 //   SelectableTrait copy(selectable);
 //   DALI_TEST_CHECK(copy);
@@ -129,7 +130,7 @@
 
 // int UtcDaliSelectableTraitDownCastP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 //   BaseHandle         handle(selectable);
 //   SelectableTrait downcast = SelectableTrait::DownCast(handle);
@@ -139,7 +140,7 @@
 
 // int UtcDaliSelectableTraitDownCastN(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   BaseHandle         handle;
 //   SelectableTrait downcast = SelectableTrait::DownCast(handle);
 //   DALI_TEST_CHECK(!downcast);
@@ -152,7 +153,7 @@
 
 // int UtcDaliViewAsSelectableP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   View& result = view.AsSelectable();
@@ -164,7 +165,7 @@
 
 // int UtcDaliViewAsSelectableWithConfigureP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   bool configureCalled = false;
 
 //   View view = View::New();
@@ -183,7 +184,7 @@
 
 // int UtcDaliViewAsSelectableIdempotentP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   view.AsSelectable();
@@ -198,7 +199,7 @@
 
 // int UtcDaliViewIsSelectableWithoutAttachN(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   DALI_TEST_CHECK(!view.IsSelectable());
@@ -207,7 +208,7 @@
 
 // int UtcDaliViewEnsureSelectableTraitP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   SelectableTrait selectable = view.EnsureSelectableTrait();
@@ -225,7 +226,7 @@
 
 // int UtcDaliViewInteractiveAndSelectableCoexistP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   view.AsInteractive();
@@ -238,7 +239,7 @@
 
 // int UtcDaliViewSelectableBeforeInteractiveP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   // Selectable first, then clickable
@@ -256,7 +257,7 @@
 
 // int UtcDaliSelectableTraitIsSelectedDefaultP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 //   DALI_TEST_CHECK(!selectable.IsSelected());
 //   END_TEST;
@@ -264,7 +265,7 @@
 
 // int UtcDaliSelectableTraitSetSelectedP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = CreateSelectableView(application);
 //   SelectableTrait selectable = view.EnsureSelectableTrait();
 
@@ -278,7 +279,7 @@
 
 // int UtcDaliSelectableTraitSetSelectedNoChangeP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = CreateSelectableView(application);
 //   SelectableTrait selectable = view.EnsureSelectableTrait();
 
@@ -294,7 +295,7 @@
 
 // int UtcDaliSelectableTraitIsToggleByClickEnabledDefaultP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 //   DALI_TEST_CHECK(!selectable.IsToggleByClickEnabled());
 //   END_TEST;
@@ -302,7 +303,7 @@
 
 // int UtcDaliSelectableTraitEnableToggleByClickP(void)
 // {
-//   TestApplication    application;
+//   UiTestApplication    application;
 //   SelectableTrait selectable = SelectableTrait::New();
 
 //   selectable.EnableToggleByClick();
@@ -319,7 +320,7 @@
 
 // int UtcDaliSelectableTraitSelectionChangedSignalP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = CreateSelectableView(application);
 //   SelectableTrait selectable = view.EnsureSelectableTrait();
 
@@ -344,7 +345,7 @@
 
 // int UtcDaliViewAsSelectableWithSignalLambdaP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 
 //   bool signalCalled   = false;
 //   bool signalSelected = false;
@@ -352,7 +353,7 @@
 //   View view = View::New();
 //   view.AsSelectable([&application, &signalCalled, &signalSelected](SelectableTrait& trait) {
 //     trait.SelectionChangedSignal().Connect(&application,
-//       [&signalCalled, &signalSelected](View v, bool selected) {
+//       [&signalCalled, &signalSelected](View v, bool selected, const InputEvent& e) {
 //         signalCalled   = true;
 //         signalSelected = selected;
 //       });
@@ -379,7 +380,7 @@
 
 // int UtcDaliSelectableTraitToggleByClickP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -425,7 +426,7 @@
 
 // int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -450,7 +451,7 @@
 
 // int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -482,7 +483,7 @@
 
 // int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -520,7 +521,7 @@
 
 // int UtcDaliSelectableTraitToggleByKeyP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -561,7 +562,7 @@
 
 // int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -591,7 +592,7 @@
 
 // int UtcDaliSelectableTraitDisableToggleByClickP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 //   view.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
 //   view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
@@ -626,7 +627,7 @@
 
 // int UtcDaliViewAsInteractiveAsSelectableChainingP(void)
 // {
-//   TestApplication application;
+//   UiTestApplication application;
 //   View view = View::New();
 
 //   View& result = view.AsInteractive().AsSelectable();

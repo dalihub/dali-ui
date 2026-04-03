@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -35,7 +35,7 @@ void utc_dali_layout_cleanup(void)
 
 int UtcDaliLayoutConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout;
   DALI_TEST_CHECK(!layout);
   END_TEST;
@@ -43,7 +43,7 @@ int UtcDaliLayoutConstructorP(void)
 
 int UtcDaliLayoutNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   DALI_TEST_CHECK(layout);
   END_TEST;
@@ -51,7 +51,7 @@ int UtcDaliLayoutNewP(void)
 
 int UtcDaliLayoutCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   Layout copy(layout);
   DALI_TEST_CHECK(copy);
@@ -61,7 +61,7 @@ int UtcDaliLayoutCopyConstructorP(void)
 
 int UtcDaliLayoutMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   Layout moved = std::move(layout);
   DALI_TEST_CHECK(moved);
@@ -71,7 +71,7 @@ int UtcDaliLayoutMoveConstructor(void)
 
 int UtcDaliLayoutAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   Layout copy;
   copy = layout;
@@ -82,7 +82,7 @@ int UtcDaliLayoutAssignmentOperatorP(void)
 
 int UtcDaliLayoutDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   Layout layout2 = Layout::DownCast(layout);
   DALI_TEST_CHECK(layout2);
@@ -92,7 +92,7 @@ int UtcDaliLayoutDownCastP(void)
 
 int UtcDaliLayoutDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitialized;
   Layout layout = Layout::DownCast(unInitialized);
   DALI_TEST_CHECK(!layout);
@@ -101,7 +101,7 @@ int UtcDaliLayoutDownCastN(void)
 
 int UtcDaliLayoutAddP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -112,7 +112,7 @@ int UtcDaliLayoutAddP(void)
 
 int UtcDaliLayoutInsertAtIndexP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child0 = View::New();
   View child1 = View::New();
@@ -126,7 +126,7 @@ int UtcDaliLayoutInsertAtIndexP(void)
 
 int UtcDaliLayoutRemoveP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -138,7 +138,7 @@ int UtcDaliLayoutRemoveP(void)
 
 int UtcDaliLayoutRemoveAtP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -149,7 +149,7 @@ int UtcDaliLayoutRemoveAtP(void)
 
 int UtcDaliLayoutRemoveAllChildrenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
   layout.Add(View::New());
@@ -161,7 +161,7 @@ int UtcDaliLayoutRemoveAllChildrenP(void)
 
 int UtcDaliLayoutGetChildCountP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
   layout.Add(View::New());
@@ -171,7 +171,7 @@ int UtcDaliLayoutGetChildCountP(void)
 
 int UtcDaliLayoutGetChildAtP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -181,7 +181,7 @@ int UtcDaliLayoutGetChildAtP(void)
 
 int UtcDaliLayoutIndexOfChildP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -193,7 +193,7 @@ int UtcDaliLayoutIndexOfChildP(void)
 
 int UtcDaliLayoutContentsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View a = View::New();
   View b = View::New();
@@ -207,7 +207,7 @@ int UtcDaliLayoutContentsP(void)
 
 int UtcDaliLayoutContentsEmptyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   Layout& result = layout.Children({});
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
@@ -217,7 +217,7 @@ int UtcDaliLayoutContentsEmptyP(void)
 
 int UtcDaliLayoutRemoveNonChildP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
@@ -229,7 +229,7 @@ int UtcDaliLayoutRemoveNonChildP(void)
 
 int UtcDaliLayoutGetChildAtEmptyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View v = layout.GetChildAt(0);
   DALI_TEST_CHECK(!v);
@@ -238,7 +238,7 @@ int UtcDaliLayoutGetChildAtEmptyP(void)
 
 int UtcDaliLayoutInsertIndexClampP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View child = View::New();
   layout.Insert(99u, child);
@@ -249,7 +249,7 @@ int UtcDaliLayoutInsertIndexClampP(void)
 
 int UtcDaliLayoutRemoveAtInvalidIndexP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
   View invalid = layout.GetChildAt(5u);
@@ -260,7 +260,7 @@ int UtcDaliLayoutRemoveAtInvalidIndexP(void)
 
 int UtcDaliLayoutIndexOfChildNotInLayoutP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View outside = View::New();
   DALI_TEST_EQUALS(layout.IndexOfChild(outside), -1, TEST_LOCATION);
@@ -269,7 +269,7 @@ int UtcDaliLayoutIndexOfChildNotInLayoutP(void)
 
 int UtcDaliLayoutGetChildAtOutOfRangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
   View v = layout.GetChildAt(1);
@@ -279,7 +279,7 @@ int UtcDaliLayoutGetChildAtOutOfRangeP(void)
 
 int UtcDaliLayoutIndexOfChildEmptyHandleP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
   DALI_TEST_EQUALS(layout.IndexOfChild(View()), -1, TEST_LOCATION);
@@ -288,7 +288,7 @@ int UtcDaliLayoutIndexOfChildEmptyHandleP(void)
 
 int UtcDaliLayoutContentsChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Layout layout = Layout::New();
   View a = View::New();
   Layout& ref = layout.Children({a});

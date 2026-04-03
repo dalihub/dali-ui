@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view/lottie-animation-view.h>
@@ -37,7 +37,7 @@ void utc_dali_lottieanimationview_cleanup(void)
 
 int UtcDaliLottieAnimationViewConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view;
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -45,7 +45,7 @@ int UtcDaliLottieAnimationViewConstructorP(void)
 
 int UtcDaliLottieAnimationViewNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -53,7 +53,7 @@ int UtcDaliLottieAnimationViewNewP(void)
 
 int UtcDaliLottieAnimationViewNewWithUrlP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New("test.json");
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -61,7 +61,7 @@ int UtcDaliLottieAnimationViewNewWithUrlP(void)
 
 int UtcDaliLottieAnimationViewCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   LottieAnimationView copy(view);
   DALI_TEST_CHECK(copy);
@@ -71,7 +71,7 @@ int UtcDaliLottieAnimationViewCopyConstructorP(void)
 
 int UtcDaliLottieAnimationViewMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   LottieAnimationView moved(std::move(view));
   DALI_TEST_CHECK(moved);
@@ -80,7 +80,7 @@ int UtcDaliLottieAnimationViewMoveConstructorP(void)
 
 int UtcDaliLottieAnimationViewAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   LottieAnimationView copy;
   copy = view;
@@ -91,7 +91,7 @@ int UtcDaliLottieAnimationViewAssignmentOperatorP(void)
 
 int UtcDaliLottieAnimationViewMoveAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   LottieAnimationView moved;
   moved = std::move(view);
@@ -103,7 +103,7 @@ int UtcDaliLottieAnimationViewMoveAssignmentOperatorP(void)
 
 int UtcDaliLottieAnimationViewDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view     = LottieAnimationView::New();
   View                baseView = view;
   LottieAnimationView downcast = LottieAnimationView::DownCast(baseView);
@@ -113,7 +113,7 @@ int UtcDaliLottieAnimationViewDownCastP(void)
 
 int UtcDaliLottieAnimationViewDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View                baseView = View::New();
   LottieAnimationView downcast = LottieAnimationView::DownCast(baseView);
   DALI_TEST_CHECK(!downcast);
@@ -124,7 +124,7 @@ int UtcDaliLottieAnimationViewDownCastN(void)
 
 int UtcDaliLottieAnimationViewSetImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   view.SetResourceUrl("animation.json");
   DALI_TEST_CHECK(view);
@@ -135,7 +135,7 @@ int UtcDaliLottieAnimationViewSetImageP(void)
 
 int UtcDaliLottieAnimationViewPlayNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   view.Play();
   DALI_TEST_CHECK(view);
@@ -144,7 +144,7 @@ int UtcDaliLottieAnimationViewPlayNoVisualP(void)
 
 int UtcDaliLottieAnimationViewPauseNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   view.Pause();
   DALI_TEST_CHECK(view);
@@ -153,7 +153,7 @@ int UtcDaliLottieAnimationViewPauseNoVisualP(void)
 
 int UtcDaliLottieAnimationViewStopNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
   view.Stop();
   DALI_TEST_CHECK(view);
@@ -164,7 +164,7 @@ int UtcDaliLottieAnimationViewStopNoVisualP(void)
 
 int UtcDaliLottieAnimationViewPropertyImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX), // IMAGE

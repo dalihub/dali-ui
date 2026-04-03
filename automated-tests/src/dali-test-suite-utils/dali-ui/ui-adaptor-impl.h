@@ -1,0 +1,135 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <render-surface-interface.h>
+
+namespace Dali
+{
+class EglInterface;
+class DisplayConnection;
+class ThreadSynchronizationInterface;
+class Window;
+class TestApplication;
+
+namespace Integration
+{
+class Scene;
+}
+
+using WindowContainer = std::vector<Window>;
+
+namespace Internal
+{
+namespace Adaptor
+{
+class GraphicsInterface;
+class SceneHolder;
+
+} // namespace Adaptor
+
+} // namespace Internal
+
+namespace Integration
+{
+class GlAbstraction;
+
+} // namespace Integration
+
+namespace Internal
+{
+namespace Adaptor
+{
+class Adaptor
+{
+public:
+  static Dali::Adaptor& New();
+  static Dali::Adaptor& Get();
+  Adaptor();
+  ~Adaptor();
+
+  void Start(Dali::Window window);
+  void Stop();
+
+  bool AddIdle(CallbackBase* callback, bool hasReturnValue);
+  void RemoveIdle(CallbackBase* callback);
+  void RunIdles();
+
+  void RequestUpdateOnce();
+  void RequestProcessEventsOnIdle();
+
+  static Dali::Integration::Scene GetScene(Dali::Window window);
+
+  Dali::Integration::RenderSurfaceInterface& GetSurface();
+  Dali::WindowContainer                      GetWindows();
+  Dali::SceneHolderList                      GetSceneHolders();
+
+  Dali::Internal::Adaptor::SceneHolder* GetWindow(Dali::Actor& actor);
+  void                                  AddWindow(Internal::Adaptor::SceneHolder* window);
+  void                                  RemoveWindow(Internal::Adaptor::SceneHolder* window);
+
+  void RegisterProcessor(Dali::Integration::Processor& processor, bool postProcessor = false);
+  void UnregisterProcessor(Dali::Integration::Processor& processor, bool postProcessor = false);
+  void RegisterProcessorOnce(Dali::Integration::Processor& processor, bool postProcessor = false);
+  void UnregisterProcessorOnce(Dali::Integration::Processor& processor, bool postProcessor = false);
+
+  void SetApplication(Dali::TestApplication& testApplication);
+
+  bool IsStopped() const
+  {
+    return mStopped;
+  }
+
+  Dali::Adaptor::AdaptorSignalType&       ResizedSignal();
+  Dali::Adaptor::AdaptorSignalType&       LanguageChangedSignal();
+  Dali::Adaptor::WindowCreatedSignalType& WindowCreatedSignal();
+  Dali::Adaptor::LocaleChangedSignalType& LocaleChangedSignal();
+
+  static Adaptor& GetImpl(Dali::Adaptor& adaptor)
+  {
+    return *adaptor.mImpl;
+  }
+  static const Adaptor& GetImpl(const Dali::Adaptor& adaptor)
+  {
+    return *adaptor.mImpl;
+  }
+
+private:
+  Vector<CallbackBase*>                        mCallbacks;
+  Vector<CallbackBase*>                        mReturnCallbacks;
+  std::vector<Internal::Adaptor::SceneHolder*> mWindows;
+  Dali::Adaptor::AdaptorSignalType             mResizedSignal;
+  Dali::Adaptor::AdaptorSignalType             mLanguageChangedSignal;
+  Dali::Adaptor::WindowCreatedSignalType       mWindowCreatedSignal;
+  Dali::Adaptor::LocaleChangedSignalType       mLocaleChangedSignal;
+  TestApplication*                             mTestApplication;
+  bool                                         mStopped{false};
+};
+
+} // namespace Adaptor
+} // namespace Internal
+} // namespace Dali
+
+namespace Test::UiAdaptor
+{
+/**
+ * @brief To make Dali::Adaptor::IsAvailable() return false forcibly.
+ * @param[in] available False if we want to make Dali::Adaptor::IsAvailable() return false forcibly. True to restore.
+ */
+void SetAdaptorAvailableForce(bool available);
+} // namespace Test::UiAdaptor

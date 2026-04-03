@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
@@ -136,7 +136,7 @@ void utc_dali_view_trait_cleanup(void)
 
 int UtcDaliTraitConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Trait trait;
   DALI_TEST_CHECK(!trait);
   END_TEST;
@@ -144,7 +144,7 @@ int UtcDaliTraitConstructorP(void)
 
 int UtcDaliTraitNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   TestTrait trait = TestTrait::New();
   DALI_TEST_CHECK(trait);
   END_TEST;
@@ -152,7 +152,7 @@ int UtcDaliTraitNewP(void)
 
 int UtcDaliTraitCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   TestTrait trait = TestTrait::New();
   TestTrait copy(trait);
   DALI_TEST_CHECK(copy);
@@ -162,7 +162,7 @@ int UtcDaliTraitCopyConstructorP(void)
 
 int UtcDaliTraitMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   TestTrait trait = TestTrait::New();
   DALI_TEST_EQUALS(1, trait.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -175,7 +175,7 @@ int UtcDaliTraitMoveConstructor(void)
 
 int UtcDaliTraitAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   TestTrait trait = TestTrait::New();
   TestTrait copy;
   copy = trait;
@@ -186,7 +186,7 @@ int UtcDaliTraitAssignmentOperatorP(void)
 
 int UtcDaliTraitMoveAssignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   TestTrait trait = TestTrait::New();
   DALI_TEST_EQUALS(1, trait.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -200,7 +200,7 @@ int UtcDaliTraitMoveAssignment(void)
 
 int UtcDaliTraitOnBeforeAttachedP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();
@@ -216,7 +216,7 @@ int UtcDaliTraitOnBeforeAttachedP(void)
 
 int UtcDaliTraitOnAttachedP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();
@@ -232,7 +232,7 @@ int UtcDaliTraitOnAttachedP(void)
 
 int UtcDaliTraitOnDetachedP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();
@@ -251,7 +251,7 @@ int UtcDaliTraitOnDetachedP(void)
 
 int UtcDaliTraitOnViewDestroyingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();
@@ -269,7 +269,7 @@ int UtcDaliTraitOnViewDestroyingP(void)
 
 int UtcDaliTraitLifecycleOrderP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();
@@ -289,7 +289,7 @@ int UtcDaliTraitLifecycleOrderP(void)
 
 int UtcDaliTraitReservedIdP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   TestTrait trait = TestTrait::New();

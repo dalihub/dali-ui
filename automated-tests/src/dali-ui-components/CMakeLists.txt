@@ -37,6 +37,15 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/test-trace-call-stack.cpp
     ../dali-test-suite-utils/test-addon-manager.cpp
     ../dali-test-suite-utils/test-render-surface-if.cpp
+    ../dali-test-suite-utils/dali-ui/ui-adaptor.cpp
+    ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
+    ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
+    ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
+    ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
+    ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
+    ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
+    ../dali-test-suite-utils/dali-ui/ui-timer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-window.cpp
 )
 
 PKG_CHECK_MODULES(${CAPI_LIB} REQUIRED
@@ -59,6 +68,7 @@ INCLUDE_DIRECTORIES(
   .
   ${${CAPI_LIB}_INCLUDE_DIRS}
   ../dali-test-suite-utils
+  ../dali-test-suite-utils/dali-ui
 )
 
 ADD_DEFINITIONS( -DADDON_LIBS_PATH=\"${CMAKE_CURRENT_BINARY_DIR}\" )

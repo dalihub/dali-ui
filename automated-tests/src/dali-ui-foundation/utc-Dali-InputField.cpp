@@ -20,7 +20,7 @@
 #include <limits>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -56,7 +56,7 @@ void utc_dali_input_field_cleanup(void)
 
 int UtcDaliInputFieldConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField;
   DALI_TEST_CHECK(!inputField);
   END_TEST;
@@ -64,7 +64,7 @@ int UtcDaliInputFieldConstructorP(void)
 
 int UtcDaliInputFieldNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
   END_TEST;
@@ -72,7 +72,7 @@ int UtcDaliInputFieldNewP(void)
 
 int UtcDaliInputFieldCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   InputField copy(inputField);
   DALI_TEST_CHECK(copy);
@@ -82,7 +82,7 @@ int UtcDaliInputFieldCopyConstructorP(void)
 
 int UtcDaliInputFieldMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_EQUALS(1, inputField.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -95,7 +95,7 @@ int UtcDaliInputFieldMoveConstructor(void)
 
 int UtcDaliInputFieldAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   InputField copy;
   copy = inputField;
@@ -106,7 +106,7 @@ int UtcDaliInputFieldAssignmentOperatorP(void)
 
 int UtcDaliInputFieldMoveAssignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_EQUALS(1, inputField.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -120,7 +120,7 @@ int UtcDaliInputFieldMoveAssignment(void)
 
 int UtcDaliInputFieldDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   BaseHandle object(inputField);
   InputField inputField2 = InputField::DownCast(object);
@@ -132,7 +132,7 @@ int UtcDaliInputFieldDownCastP(void)
 
 int UtcDaliInputFieldDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitializedObject;
   InputField inputField1 = InputField::DownCast(unInitializedObject);
   InputField inputField2 = DownCast<InputField>(unInitializedObject);
@@ -145,7 +145,7 @@ int UtcDaliInputFieldDownCastN(void)
 
 int UtcDaliInputFieldText(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -160,7 +160,7 @@ int UtcDaliInputFieldText(void)
 
 int UtcDaliInputFieldFontFamily(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -175,7 +175,7 @@ int UtcDaliInputFieldFontFamily(void)
 
 int UtcDaliInputFieldFontSize(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -192,7 +192,7 @@ int UtcDaliInputFieldFontSize(void)
 
 int UtcDaliInputFieldTextColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -209,7 +209,7 @@ int UtcDaliInputFieldTextColor(void)
 
 int UtcDaliInputFieldHorizontalTextAlignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -224,7 +224,7 @@ int UtcDaliInputFieldHorizontalTextAlignment(void)
 
 int UtcDaliInputFieldVerticalTextAlignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -239,7 +239,7 @@ int UtcDaliInputFieldVerticalTextAlignment(void)
 
 int UtcDaliInputFieldPlaceholder(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -254,7 +254,7 @@ int UtcDaliInputFieldPlaceholder(void)
 
 int UtcDaliInputFieldPlaceholderColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -271,7 +271,7 @@ int UtcDaliInputFieldPlaceholderColor(void)
 
 int UtcDaliInputFieldCursorWidth(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -286,7 +286,7 @@ int UtcDaliInputFieldCursorWidth(void)
 
 int UtcDaliInputFieldCursorColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -303,7 +303,7 @@ int UtcDaliInputFieldCursorColor(void)
 
 int UtcDaliInputFieldSelectionColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -320,7 +320,7 @@ int UtcDaliInputFieldSelectionColor(void)
 
 int UtcDaliInputFieldMaximumLength(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -335,7 +335,7 @@ int UtcDaliInputFieldMaximumLength(void)
 
 int UtcDaliInputFieldLayoutDirectionMode(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -351,7 +351,7 @@ int UtcDaliInputFieldLayoutDirectionMode(void)
 // Property
 int UtcDaliInputFieldGetProperty(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
@@ -375,7 +375,7 @@ int UtcDaliInputFieldGetProperty(void)
 
 int UtcDaliInputFieldSetProperty(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 

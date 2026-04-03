@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -35,7 +35,7 @@ void utc_dali_absolutelayout_cleanup(void)
 
 int UtcDaliAbsoluteLayoutConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout;
   DALI_TEST_CHECK(!layout);
   END_TEST;
@@ -43,7 +43,7 @@ int UtcDaliAbsoluteLayoutConstructorP(void)
 
 int UtcDaliAbsoluteLayoutNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   DALI_TEST_CHECK(layout);
   END_TEST;
@@ -51,7 +51,7 @@ int UtcDaliAbsoluteLayoutNewP(void)
 
 int UtcDaliAbsoluteLayoutCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   AbsoluteLayout copy(layout);
   DALI_TEST_CHECK(copy);
@@ -61,7 +61,7 @@ int UtcDaliAbsoluteLayoutCopyConstructorP(void)
 
 int UtcDaliAbsoluteLayoutMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   AbsoluteLayout moved = std::move(layout);
   DALI_TEST_CHECK(moved);
@@ -71,7 +71,7 @@ int UtcDaliAbsoluteLayoutMoveConstructor(void)
 
 int UtcDaliAbsoluteLayoutAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   AbsoluteLayout copy;
   copy = layout;
@@ -82,7 +82,7 @@ int UtcDaliAbsoluteLayoutAssignmentOperatorP(void)
 
 int UtcDaliAbsoluteLayoutDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   AbsoluteLayout layout2 = AbsoluteLayout::DownCast(layout);
   DALI_TEST_CHECK(layout2);
@@ -92,7 +92,7 @@ int UtcDaliAbsoluteLayoutDownCastP(void)
 
 int UtcDaliAbsoluteLayoutDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitialized;
   AbsoluteLayout layout = AbsoluteLayout::DownCast(unInitialized);
   DALI_TEST_CHECK(!layout);
@@ -101,7 +101,7 @@ int UtcDaliAbsoluteLayoutDownCastN(void)
 
 int UtcDaliAbsoluteLayoutSetLayoutBoundsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -117,7 +117,7 @@ int UtcDaliAbsoluteLayoutSetLayoutBoundsP(void)
 
 int UtcDaliAbsoluteLayoutGetLayoutBoundsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -132,7 +132,7 @@ int UtcDaliAbsoluteLayoutGetLayoutBoundsP(void)
 
 int UtcDaliAbsoluteLayoutSetLayoutFlagsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -147,7 +147,7 @@ int UtcDaliAbsoluteLayoutSetLayoutFlagsP(void)
 
 int UtcDaliAbsoluteLayoutGetLayoutFlagsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -159,7 +159,7 @@ int UtcDaliAbsoluteLayoutGetLayoutFlagsP(void)
 
 int UtcDaliAbsoluteLayoutLayoutBoundsZeroP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -174,7 +174,7 @@ int UtcDaliAbsoluteLayoutLayoutBoundsZeroP(void)
 
 int UtcDaliAbsoluteLayoutSizeProportionalFlagP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -186,7 +186,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalFlagP(void)
 
 int UtcDaliAbsoluteLayoutMeasureArrangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -204,7 +204,7 @@ int UtcDaliAbsoluteLayoutMeasureArrangeP(void)
 
 int UtcDaliAbsoluteLayoutPositionProportionalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -221,7 +221,7 @@ int UtcDaliAbsoluteLayoutPositionProportionalP(void)
 
 int UtcDaliAbsoluteLayoutSizeProportionalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   layout.Add(child);
@@ -239,7 +239,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalP(void)
 
 int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AbsoluteLayout layout = AbsoluteLayout::New();
   View child = View::New();
   child.SetRequestedWidth(70.0f);

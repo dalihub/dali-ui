@@ -20,7 +20,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -45,7 +45,6 @@ void utc_dali_uithememanager_startup(void)
 {
   test_return_value    = TET_UNDEF;
   gThemeChangedCalled  = false;
-  UiConfig::New().Apply();
 }
 
 void utc_dali_uithememanager_cleanup(void)
@@ -57,7 +56,7 @@ void utc_dali_uithememanager_cleanup(void)
 
 int UtcDaliUiThemeManagerConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager;
   DALI_TEST_CHECK(!manager);
@@ -69,7 +68,7 @@ int UtcDaliUiThemeManagerConstructorP(void)
 
 int UtcDaliUiThemeManagerGetP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   DALI_TEST_CHECK(manager);
@@ -79,7 +78,7 @@ int UtcDaliUiThemeManagerGetP(void)
 
 int UtcDaliUiThemeManagerGetSingletonP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager1 = UiThemeManager::Get();
   UiThemeManager manager2 = UiThemeManager::Get();
@@ -95,7 +94,7 @@ int UtcDaliUiThemeManagerGetSingletonP(void)
 
 int UtcDaliUiThemeManagerCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   UiThemeManager copy(manager);
@@ -108,7 +107,7 @@ int UtcDaliUiThemeManagerCopyConstructorP(void)
 
 int UtcDaliUiThemeManagerMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   DALI_TEST_EQUALS(2, manager.GetBaseObject().ReferenceCount(), TEST_LOCATION);
@@ -122,7 +121,7 @@ int UtcDaliUiThemeManagerMoveConstructorP(void)
 
 int UtcDaliUiThemeManagerCopyAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   UiThemeManager copy;
@@ -136,7 +135,7 @@ int UtcDaliUiThemeManagerCopyAssignmentP(void)
 
 int UtcDaliUiThemeManagerMoveAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
 
@@ -153,7 +152,7 @@ int UtcDaliUiThemeManagerMoveAssignmentP(void)
 
 int UtcDaliUiThemeManagerDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   BaseHandle     handle(manager);
@@ -166,7 +165,7 @@ int UtcDaliUiThemeManagerDownCastP(void)
 
 int UtcDaliUiThemeManagerDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   BaseHandle handle;
   UiThemeManager downCasted = UiThemeManager::DownCast(handle);
@@ -179,7 +178,7 @@ int UtcDaliUiThemeManagerDownCastN(void)
 
 int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
   String themeId = manager.GetCurrentThemeId();
@@ -194,7 +193,7 @@ int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
 
 int UtcDaliUiThemeManagerThemeChangedSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiThemeManager manager = UiThemeManager::Get();
 

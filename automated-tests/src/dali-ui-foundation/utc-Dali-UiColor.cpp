@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -29,7 +29,6 @@ using namespace Dali::Ui;
 void utc_dali_uicolor_startup(void)
 {
   test_return_value = TET_UNDEF;
-  UiConfig::New().Apply();
 }
 
 void utc_dali_uicolor_cleanup(void)
@@ -41,7 +40,7 @@ void utc_dali_uicolor_cleanup(void)
 
 int UtcDaliUiColorDefaultConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color;
 
@@ -58,7 +57,7 @@ int UtcDaliUiColorDefaultConstructorP(void)
 
 int UtcDaliUiColorRgbaConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -76,7 +75,7 @@ int UtcDaliUiColorRgbaConstructorP(void)
 
 int UtcDaliUiColorRgbaConstructorDefaultAlphaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(0.5f, 0.5f, 0.5f);
 
@@ -90,7 +89,7 @@ int UtcDaliUiColorRgbaConstructorDefaultAlphaP(void)
 
 int UtcDaliUiColorVector4ConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   Vector4 input(0.2f, 0.4f, 0.6f, 0.8f);
   UiColor color(input);
@@ -107,7 +106,7 @@ int UtcDaliUiColorVector4ConstructorP(void)
 
 int UtcDaliUiColorStringIdConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   String id("TestColorId");
   UiColor color(id);
@@ -120,7 +119,7 @@ int UtcDaliUiColorStringIdConstructorP(void)
 
 int UtcDaliUiColorStringIdMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   String id("MovedColorId");
   UiColor color(std::move(id));
@@ -135,7 +134,7 @@ int UtcDaliUiColorStringIdMoveConstructorP(void)
 
 int UtcDaliUiColorHexConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // 0xFF0000 = pure red
   UiColor color(0xFF0000u);
@@ -153,7 +152,7 @@ int UtcDaliUiColorHexConstructorP(void)
 
 int UtcDaliUiColorHexConstructorWithAlphaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // 0x00FF00 = pure green, alpha 0.5
   UiColor color(0x00FF00u, 0.5f);
@@ -169,7 +168,7 @@ int UtcDaliUiColorHexConstructorWithAlphaP(void)
 
 int UtcDaliUiColorHexConstructorMixedP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // 0x387AFF = the default "Primary" color
   UiColor color(0x387AFFu);
@@ -187,7 +186,7 @@ int UtcDaliUiColorHexConstructorMixedP(void)
 
 int UtcDaliUiColorCopyConstructorRgbaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor original(1.0f, 0.5f, 0.25f, 0.75f);
   UiColor copy(original);
@@ -200,7 +199,7 @@ int UtcDaliUiColorCopyConstructorRgbaP(void)
 
 int UtcDaliUiColorCopyConstructorTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor original("CopyTestId");
   UiColor copy(original);
@@ -213,7 +212,7 @@ int UtcDaliUiColorCopyConstructorTokenP(void)
 
 int UtcDaliUiColorMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
   Vector4 originalResolved = original.Resolve();
@@ -227,7 +226,7 @@ int UtcDaliUiColorMoveConstructorP(void)
 
 int UtcDaliUiColorCopyAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor original(0.5f, 0.6f, 0.7f, 0.8f);
   UiColor copy;
@@ -240,7 +239,7 @@ int UtcDaliUiColorCopyAssignmentP(void)
 
 int UtcDaliUiColorMoveAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
   Vector4 originalResolved = original.Resolve();
@@ -257,7 +256,7 @@ int UtcDaliUiColorMoveAssignmentP(void)
 
 int UtcDaliUiColorHasColorIdRgbaN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f);
   DALI_TEST_CHECK(!color.HasColorId());
@@ -267,7 +266,7 @@ int UtcDaliUiColorHasColorIdRgbaN(void)
 
 int UtcDaliUiColorHasColorIdTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color("SomeToken");
   DALI_TEST_CHECK(color.HasColorId());
@@ -277,7 +276,7 @@ int UtcDaliUiColorHasColorIdTokenP(void)
 
 int UtcDaliUiColorGetColorIdRgbaN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f);
   DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
@@ -287,7 +286,7 @@ int UtcDaliUiColorGetColorIdRgbaN(void)
 
 int UtcDaliUiColorGetColorIdTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color("MyColorId");
   DALI_TEST_EQUALS(color.GetColorId(), "MyColorId", TEST_LOCATION);
@@ -299,7 +298,7 @@ int UtcDaliUiColorGetColorIdTokenP(void)
 
 int UtcDaliUiColorResolveRgbaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(0.1f, 0.2f, 0.3f, 0.4f);
   Vector4 resolved = color.Resolve();
@@ -311,7 +310,7 @@ int UtcDaliUiColorResolveRgbaP(void)
 
 int UtcDaliUiColorResolveTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // "Primary" is a known default theme color (0x387AFF)
   UiColor color = UiColor::PRIMARY;
@@ -325,7 +324,7 @@ int UtcDaliUiColorResolveTokenP(void)
 
 int UtcDaliUiColorResolveUnknownTokenN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color("NonExistentColorId12345");
   Vector4 resolved = color.Resolve();
@@ -340,7 +339,7 @@ int UtcDaliUiColorResolveUnknownTokenN(void)
 
 int UtcDaliUiColorImplicitConversionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(0.5f, 0.6f, 0.7f, 0.8f);
   Vector4 vec = color; // implicit conversion
@@ -354,7 +353,7 @@ int UtcDaliUiColorImplicitConversionP(void)
 
 int UtcDaliUiColorScaleAlphaRgbaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 0.8f);
   UiColor result = color.ScaleAlpha(0.5f);
@@ -370,7 +369,7 @@ int UtcDaliUiColorScaleAlphaRgbaP(void)
 
 int UtcDaliUiColorScaleAlphaTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color("Primary");
   UiColor result = color.ScaleAlpha(0.5f);
@@ -384,7 +383,7 @@ int UtcDaliUiColorScaleAlphaTokenP(void)
 
 int UtcDaliUiColorScaleAlphaDoesNotModifyOriginalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
   UiColor result = color.ScaleAlpha(0.5f);
@@ -399,7 +398,7 @@ int UtcDaliUiColorScaleAlphaDoesNotModifyOriginalP(void)
 
 int UtcDaliUiColorScaleAlphaClampP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
   UiColor result = color.ScaleAlpha(2.0f);
@@ -414,7 +413,7 @@ int UtcDaliUiColorScaleAlphaClampP(void)
 
 int UtcDaliUiColorWithAlphaRgbaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
   UiColor result = color.WithAlpha(0.3f);
@@ -430,7 +429,7 @@ int UtcDaliUiColorWithAlphaRgbaP(void)
 
 int UtcDaliUiColorWithAlphaTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color("Primary");
   UiColor result = color.WithAlpha(0.7f);
@@ -443,7 +442,7 @@ int UtcDaliUiColorWithAlphaTokenP(void)
 
 int UtcDaliUiColorWithAlphaDoesNotModifyOriginalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
   UiColor result = color.WithAlpha(0.2f);
@@ -458,7 +457,7 @@ int UtcDaliUiColorWithAlphaDoesNotModifyOriginalP(void)
 
 int UtcDaliUiColorWithAlphaClampP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -477,7 +476,7 @@ int UtcDaliUiColorWithAlphaClampP(void)
 
 int UtcDaliUiColorWithAlphaThenScaleAlphaTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // WithAlpha fixes alpha to 0.5, then ScaleAlpha multiplies that fixed value by 0.2
   // Expected: With mode preserved, final alpha = 0.5 * 0.2 = 0.1 (token's original alpha ignored)
@@ -494,7 +493,7 @@ int UtcDaliUiColorWithAlphaThenScaleAlphaTokenP(void)
 
 int UtcDaliUiColorWithAlphaThenScaleAlphaRgbaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // RGBA case: WithAlpha sets alpha to 0.5, ScaleAlpha multiplies by 0.2
   UiColor result = UiColor(1.0f, 0.0f, 0.0f, 1.0f).WithAlpha(0.5f).ScaleAlpha(0.2f);
@@ -508,7 +507,7 @@ int UtcDaliUiColorWithAlphaThenScaleAlphaRgbaP(void)
 
 int UtcDaliUiColorScaleAlphaChainTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // ScaleAlpha chaining: 1.0 * 0.5 * 0.2 = 0.1, then resolved.a = token_alpha * 0.1
   UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).ScaleAlpha(0.2f);
@@ -524,7 +523,7 @@ int UtcDaliUiColorScaleAlphaChainTokenP(void)
 
 int UtcDaliUiColorScaleAlphaThenWithAlphaTokenP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // ScaleAlpha then WithAlpha: WithAlpha should override to With mode
   UiColor result = UiColor::PRIMARY.ScaleAlpha(0.5f).WithAlpha(0.3f);
@@ -541,7 +540,7 @@ int UtcDaliUiColorScaleAlphaThenWithAlphaTokenP(void)
 
 int UtcDaliUiColorPredefinedPrimaryP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   DALI_TEST_CHECK(UiColor::PRIMARY.HasColorId());
   DALI_TEST_EQUALS(UiColor::PRIMARY.GetColorId(), "Primary", TEST_LOCATION);
@@ -551,7 +550,7 @@ int UtcDaliUiColorPredefinedPrimaryP(void)
 
 int UtcDaliUiColorPredefinedBackgroundP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   DALI_TEST_CHECK(UiColor::BACKGROUND.HasColorId());
   DALI_TEST_EQUALS(UiColor::BACKGROUND.GetColorId(), "Background", TEST_LOCATION);
@@ -561,7 +560,7 @@ int UtcDaliUiColorPredefinedBackgroundP(void)
 
 int UtcDaliUiColorPredefinedOutlineP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   DALI_TEST_CHECK(UiColor::OUTLINE.HasColorId());
   DALI_TEST_EQUALS(UiColor::OUTLINE.GetColorId(), "Outline", TEST_LOCATION);
@@ -573,7 +572,7 @@ int UtcDaliUiColorPredefinedOutlineP(void)
 
 int UtcDaliUiColorSizeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // UiColor should be exactly 24 bytes for ABI stability
   DALI_TEST_EQUALS(sizeof(UiColor), 24u, TEST_LOCATION);

@@ -20,7 +20,7 @@
 #include <limits>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -63,7 +63,7 @@ void utc_dali_label_cleanup(void)
 
 int UtcDaliLabelConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label;
   DALI_TEST_CHECK(!label);
   END_TEST;
@@ -71,7 +71,7 @@ int UtcDaliLabelConstructorP(void)
 
 int UtcDaliLabelNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
   END_TEST;
@@ -79,7 +79,7 @@ int UtcDaliLabelNewP(void)
 
 int UtcDaliLabelNewWithTextP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New("Hello world");
   DALI_TEST_CHECK(label);
   END_TEST;
@@ -87,7 +87,7 @@ int UtcDaliLabelNewWithTextP(void)
 
 int UtcDaliLabelCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   Label copy(label);
   DALI_TEST_CHECK(copy);
@@ -97,7 +97,7 @@ int UtcDaliLabelCopyConstructorP(void)
 
 int UtcDaliLabelMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_EQUALS(1, label.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -110,7 +110,7 @@ int UtcDaliLabelMoveConstructor(void)
 
 int UtcDaliLabelAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   Label copy;
   copy = label;
@@ -121,7 +121,7 @@ int UtcDaliLabelAssignmentOperatorP(void)
 
 int UtcDaliLabelMoveAssignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_EQUALS(1, label.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -135,7 +135,7 @@ int UtcDaliLabelMoveAssignment(void)
 
 int UtcDaliLabelDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   BaseHandle object(label);
   Label label2 = Label::DownCast(object);
@@ -147,7 +147,7 @@ int UtcDaliLabelDownCastP(void)
 
 int UtcDaliLabelDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitializedObject;
   Label label1 = Label::DownCast(unInitializedObject);
   Label label2 = DownCast<Label>(unInitializedObject);
@@ -160,7 +160,7 @@ int UtcDaliLabelDownCastN(void)
 
 int UtcDaliLabelText(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -175,7 +175,7 @@ int UtcDaliLabelText(void)
 
 int UtcDaliLabelFontFamily(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -190,7 +190,7 @@ int UtcDaliLabelFontFamily(void)
 
 int UtcDaliLabelFontSize(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -207,7 +207,7 @@ int UtcDaliLabelFontSize(void)
 
 int UtcDaliLabelMultiLine(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -222,7 +222,7 @@ int UtcDaliLabelMultiLine(void)
 
 int UtcDaliLabelLineWrapMode(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -237,7 +237,7 @@ int UtcDaliLabelLineWrapMode(void)
 
 int UtcDaliLabelHorizontalTextAlignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -252,7 +252,7 @@ int UtcDaliLabelHorizontalTextAlignment(void)
 
 int UtcDaliLabelVerticalTextAlignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -267,7 +267,7 @@ int UtcDaliLabelVerticalTextAlignment(void)
 
 int UtcDaliLabelLineHeight(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -282,7 +282,7 @@ int UtcDaliLabelLineHeight(void)
 
 int UtcDaliLabelLineHeightMode(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -297,7 +297,7 @@ int UtcDaliLabelLineHeightMode(void)
 
 int UtcDaliLabelLayoutDirectionMode(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -312,7 +312,7 @@ int UtcDaliLabelLayoutDirectionMode(void)
 
 int UtcDaliLabelMarkupEnabled(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -327,7 +327,7 @@ int UtcDaliLabelMarkupEnabled(void)
 
 int UtcDaliLabelAnchorColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -344,7 +344,7 @@ int UtcDaliLabelAnchorColor(void)
 
 int UtcDaliLabelAnchorClickedColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -361,7 +361,7 @@ int UtcDaliLabelAnchorClickedColor(void)
 
 int UtcDaliLabelMarqueeSpeed(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -376,7 +376,7 @@ int UtcDaliLabelMarqueeSpeed(void)
 
 int UtcDaliLabelMarqueeLoopCount(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -391,7 +391,7 @@ int UtcDaliLabelMarqueeLoopCount(void)
 
 int UtcDaliLabelMarqueeLoopDelay(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -406,7 +406,7 @@ int UtcDaliLabelMarqueeLoopDelay(void)
 
 int UtcDaliLabelMarqueeGap(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -421,7 +421,7 @@ int UtcDaliLabelMarqueeGap(void)
 
 int UtcDaliLabelMarqueeStopMode(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -436,7 +436,7 @@ int UtcDaliLabelMarqueeStopMode(void)
 
 int UtcDaliLabelMarqueeOrientation(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -451,7 +451,7 @@ int UtcDaliLabelMarqueeOrientation(void)
 
 int UtcDaliLabelTextColor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -469,7 +469,7 @@ int UtcDaliLabelTextColor(void)
 // Property
 int UtcDaliLabelGetProperty(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 
@@ -500,7 +500,7 @@ int UtcDaliLabelGetProperty(void)
 
 int UtcDaliLabelSetProperty(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   Label label = Label::New();
   DALI_TEST_CHECK(label);
 

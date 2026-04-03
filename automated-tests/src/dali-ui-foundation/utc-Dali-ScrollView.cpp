@@ -19,7 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -174,7 +174,7 @@ void utc_dali_scroll_view_cleanup(void)
 
 int UtcDaliScrollViewConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView;
   DALI_TEST_CHECK(!scrollView);
@@ -184,7 +184,7 @@ int UtcDaliScrollViewConstructorP(void)
 
 int UtcDaliScrollViewNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   DALI_TEST_CHECK(scrollView);
@@ -194,7 +194,7 @@ int UtcDaliScrollViewNewP(void)
 
 int UtcDaliScrollViewCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   ScrollView copy(scrollView);
@@ -207,7 +207,7 @@ int UtcDaliScrollViewCopyConstructorP(void)
 
 int UtcDaliScrollViewMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   DALI_TEST_EQUALS(1, scrollView.GetBaseObject().ReferenceCount(), TEST_LOCATION);
@@ -222,7 +222,7 @@ int UtcDaliScrollViewMoveConstructorP(void)
 
 int UtcDaliScrollViewCopyAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   ScrollView copy;
@@ -236,7 +236,7 @@ int UtcDaliScrollViewCopyAssignmentP(void)
 
 int UtcDaliScrollViewMoveAssignmentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   DALI_TEST_EQUALS(1, scrollView.GetBaseObject().ReferenceCount(), TEST_LOCATION);
@@ -255,7 +255,7 @@ int UtcDaliScrollViewMoveAssignmentP(void)
 
 int UtcDaliScrollViewDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   BaseHandle object(scrollView);
@@ -269,7 +269,7 @@ int UtcDaliScrollViewDownCastP(void)
 
 int UtcDaliScrollViewDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   BaseHandle uninitialized;
   ScrollView scrollView = ScrollView::DownCast(uninitialized);
@@ -280,7 +280,7 @@ int UtcDaliScrollViewDownCastN(void)
 
 int UtcDaliScrollViewDownCastFromViewN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   // A plain View should not downcast to ScrollView
   View view = View::New();
@@ -296,7 +296,7 @@ int UtcDaliScrollViewDownCastFromViewN(void)
 
 int UtcDaliScrollViewSetGetContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   View       content    = View::New();
@@ -312,7 +312,7 @@ int UtcDaliScrollViewSetGetContentP(void)
 
 int UtcDaliScrollViewSetContentChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   View       content    = View::New();
@@ -327,7 +327,7 @@ int UtcDaliScrollViewSetContentChainingP(void)
 
 int UtcDaliScrollViewSetGetScrollPositionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Both);
@@ -346,7 +346,7 @@ int UtcDaliScrollViewSetGetScrollPositionP(void)
 
 int UtcDaliScrollViewSetScrollPositionChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Both);
@@ -367,7 +367,7 @@ int UtcDaliScrollViewSetScrollPositionChainingP(void)
 
 int UtcDaliScrollViewSetGetScrollDirectionVerticalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Vertical);
@@ -379,7 +379,7 @@ int UtcDaliScrollViewSetGetScrollDirectionVerticalP(void)
 
 int UtcDaliScrollViewSetGetScrollDirectionHorizontalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Horizontal);
@@ -391,7 +391,7 @@ int UtcDaliScrollViewSetGetScrollDirectionHorizontalP(void)
 
 int UtcDaliScrollViewSetGetScrollDirectionBothP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Both);
@@ -403,7 +403,7 @@ int UtcDaliScrollViewSetGetScrollDirectionBothP(void)
 
 int UtcDaliScrollViewSetScrollDirectionChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetScrollDirection(ScrollDirection::Vertical);
@@ -417,7 +417,7 @@ int UtcDaliScrollViewSetScrollDirectionChainingP(void)
 
 int UtcDaliScrollViewSetGetMaxFlingDistanceP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView  = ScrollView::New();
   const float testDistance = 3000.0f;
@@ -430,7 +430,7 @@ int UtcDaliScrollViewSetGetMaxFlingDistanceP(void)
 
 int UtcDaliScrollViewSetMaxFlingDistanceChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetMaxFlingDistance(1000.0f);
@@ -444,7 +444,7 @@ int UtcDaliScrollViewSetMaxFlingDistanceChainingP(void)
 
 int UtcDaliScrollViewSetGetMinimumFlingDurationP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView   = ScrollView::New();
   const int  testDuration = 500;
@@ -457,7 +457,7 @@ int UtcDaliScrollViewSetGetMinimumFlingDurationP(void)
 
 int UtcDaliScrollViewSetMinimumFlingDurationChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetMinimumFlingDuration(500);
@@ -471,7 +471,7 @@ int UtcDaliScrollViewSetMinimumFlingDurationChainingP(void)
 
 int UtcDaliScrollViewSetGetMaximumFlingDurationP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView   = ScrollView::New();
   const int  testDuration = 3000;
@@ -484,7 +484,7 @@ int UtcDaliScrollViewSetGetMaximumFlingDurationP(void)
 
 int UtcDaliScrollViewSetMaximumFlingDurationChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetMaximumFlingDuration(3000);
@@ -498,7 +498,7 @@ int UtcDaliScrollViewSetMaximumFlingDurationChainingP(void)
 
 int UtcDaliScrollViewSetGetFlingSensitivityP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView      = ScrollView::New();
   const float testSensitivity = 2.0f;
@@ -511,7 +511,7 @@ int UtcDaliScrollViewSetGetFlingSensitivityP(void)
 
 int UtcDaliScrollViewSetFlingSensitivityChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetFlingSensitivity(1.5f);
@@ -525,7 +525,7 @@ int UtcDaliScrollViewSetFlingSensitivityChainingP(void)
 
 int UtcDaliScrollViewSetGetDecelerationRateP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   const float testRate   = 0.95f;
@@ -538,7 +538,7 @@ int UtcDaliScrollViewSetGetDecelerationRateP(void)
 
 int UtcDaliScrollViewSetDecelerationRateChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetDecelerationRate(0.95f);
@@ -552,7 +552,7 @@ int UtcDaliScrollViewSetDecelerationRateChainingP(void)
 
 int UtcDaliScrollViewSetGetOverScrollModeNeverP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetOverScrollMode(OverScrollMode::Never);
@@ -564,7 +564,7 @@ int UtcDaliScrollViewSetGetOverScrollModeNeverP(void)
 
 int UtcDaliScrollViewSetGetOverScrollModeAlwaysP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetOverScrollMode(OverScrollMode::Always);
@@ -576,7 +576,7 @@ int UtcDaliScrollViewSetGetOverScrollModeAlwaysP(void)
 
 int UtcDaliScrollViewSetGetOverScrollModeContentScrollsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
@@ -588,7 +588,7 @@ int UtcDaliScrollViewSetGetOverScrollModeContentScrollsP(void)
 
 int UtcDaliScrollViewSetOverScrollModeChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetOverScrollMode(OverScrollMode::Never);
@@ -602,7 +602,7 @@ int UtcDaliScrollViewSetOverScrollModeChainingP(void)
 
 int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Always);
@@ -614,7 +614,7 @@ int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityP(void)
 
 int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityNeverP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Never);
@@ -626,7 +626,7 @@ int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityNeverP(void)
 
 int UtcDaliScrollViewSetVerticalScrollBarVisibilityChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
@@ -638,7 +638,7 @@ int UtcDaliScrollViewSetVerticalScrollBarVisibilityChainingP(void)
 
 int UtcDaliScrollViewSetGetHorizontalScrollBarVisibilityP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Always);
@@ -650,7 +650,7 @@ int UtcDaliScrollViewSetGetHorizontalScrollBarVisibilityP(void)
 
 int UtcDaliScrollViewSetHorizontalScrollBarVisibilityChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView  scrollView = ScrollView::New();
   ScrollView& result     = scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
@@ -664,7 +664,7 @@ int UtcDaliScrollViewSetHorizontalScrollBarVisibilityChainingP(void)
 
 int UtcDaliScrollViewIsScrollingInitialP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   DALI_TEST_CHECK(!scrollView.IsScrolling());
@@ -676,7 +676,7 @@ int UtcDaliScrollViewIsScrollingInitialP(void)
 
 int UtcDaliScrollViewScrollToPositionNoAnimP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Both);
@@ -699,7 +699,7 @@ int UtcDaliScrollViewScrollToPositionNoAnimP(void)
 
 int UtcDaliScrollViewScrollToXNoAnimP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Horizontal);
@@ -721,7 +721,7 @@ int UtcDaliScrollViewScrollToXNoAnimP(void)
 
 int UtcDaliScrollViewScrollToYNoAnimP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   scrollView.SetScrollDirection(ScrollDirection::Vertical);
@@ -745,7 +745,7 @@ int UtcDaliScrollViewScrollToYNoAnimP(void)
 
 int UtcDaliScrollViewScrollStartedSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -760,7 +760,7 @@ int UtcDaliScrollViewScrollStartedSignalP(void)
 
 int UtcDaliScrollViewScrollFinishedSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -774,7 +774,7 @@ int UtcDaliScrollViewScrollFinishedSignalP(void)
 
 int UtcDaliScrollViewScrollingSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -788,7 +788,7 @@ int UtcDaliScrollViewScrollingSignalP(void)
 
 int UtcDaliScrollViewDragStartedSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -802,7 +802,7 @@ int UtcDaliScrollViewDragStartedSignalP(void)
 
 int UtcDaliScrollViewDragFinishedSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -816,7 +816,7 @@ int UtcDaliScrollViewDragFinishedSignalP(void)
 
 int UtcDaliScrollViewDraggingSignalP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 
@@ -832,7 +832,7 @@ int UtcDaliScrollViewDraggingSignalP(void)
 
 int UtcDaliScrollViewMethodChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   View       content    = View::New();
@@ -870,7 +870,7 @@ int UtcDaliScrollViewMethodChainingP(void)
 
 int UtcDaliScrollViewIsViewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
 

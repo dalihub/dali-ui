@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali/integration-api/events/key-event-integ.h>
 
 using namespace Dali;
@@ -130,7 +130,7 @@ void utc_dali_view_cleanup(void)
 
 int UtcDaliViewConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view;
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -138,7 +138,7 @@ int UtcDaliViewConstructorP(void)
 
 int UtcDaliViewNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -146,7 +146,7 @@ int UtcDaliViewNewP(void)
 
 int UtcDaliViewCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View copy(view);
   DALI_TEST_CHECK(copy);
@@ -156,7 +156,7 @@ int UtcDaliViewCopyConstructorP(void)
 
 int UtcDaliViewMoveConstructor(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -169,7 +169,7 @@ int UtcDaliViewMoveConstructor(void)
 
 int UtcDaliViewAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View copy;
   copy = view;
@@ -180,7 +180,7 @@ int UtcDaliViewAssignmentOperatorP(void)
 
 int UtcDaliViewMoveAssignment(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(1, view.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -194,7 +194,7 @@ int UtcDaliViewMoveAssignment(void)
 
 int UtcDaliViewDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   BaseHandle object(view);
   View view2 = View::DownCast(object);
@@ -206,7 +206,7 @@ int UtcDaliViewDownCastP(void)
 
 int UtcDaliViewDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   BaseHandle unInitializedObject;
   View view1 = View::DownCast(unInitializedObject);
   View view2 = DownCast<View>(unInitializedObject);
@@ -217,7 +217,7 @@ int UtcDaliViewDownCastN(void)
 
 int UtcDaliViewGetSizeWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testWidth = 100.0f;
 
@@ -228,7 +228,7 @@ int UtcDaliViewGetSizeWidthP(void)
 
 int UtcDaliViewGetSizeHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testHeight = 200.0f;
 
@@ -239,7 +239,7 @@ int UtcDaliViewGetSizeHeightP(void)
 
 int UtcDaliViewGetPositionXP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testX = 50.0f;
 
@@ -250,7 +250,7 @@ int UtcDaliViewGetPositionXP(void)
 
 int UtcDaliViewGetPositionYP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testY = 75.0f;
 
@@ -261,7 +261,7 @@ int UtcDaliViewGetPositionYP(void)
 
 int UtcDaliViewSizeWidthChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testWidth = 150.0f;
 
@@ -273,7 +273,7 @@ int UtcDaliViewSizeWidthChainingP(void)
 
 int UtcDaliViewSizeHeightChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testHeight = 250.0f;
 
@@ -285,7 +285,7 @@ int UtcDaliViewSizeHeightChainingP(void)
 
 int UtcDaliViewPositionXChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testX = 125.0f;
 
@@ -297,7 +297,7 @@ int UtcDaliViewPositionXChainingP(void)
 
 int UtcDaliViewPositionYChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testY = 175.0f;
 
@@ -309,7 +309,7 @@ int UtcDaliViewPositionYChainingP(void)
 
 int UtcDaliViewBackgroundColorChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const UiColor testColor(1.0f, 0.0f, 0.0f, 0.5f);
 
@@ -320,7 +320,7 @@ int UtcDaliViewBackgroundColorChainingP(void)
 
 int UtcDaliViewMultipleChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testWidth = 300.0f;
   const float testHeight = 200.0f;
@@ -344,7 +344,7 @@ int UtcDaliViewMultipleChainingP(void)
 
 int UtcDaliViewAsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View reference;
 
@@ -356,7 +356,7 @@ int UtcDaliViewAsP(void)
 
 int UtcDaliViewWithP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testWidth = 400.0f;
   bool actionCalled = false;
@@ -376,7 +376,7 @@ int UtcDaliViewWithP(void)
 
 int UtcDaliViewGetParentOriginP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   Vector3 parentOrigin = view.GetParentOrigin();
@@ -389,7 +389,7 @@ int UtcDaliViewGetParentOriginP(void)
 
 int UtcDaliViewSetParentOriginP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector3 testOrigin(0.0f, 1.0f, 0.5f);
 
@@ -406,7 +406,7 @@ int UtcDaliViewSetParentOriginP(void)
 
 int UtcDaliViewGetPivotPointP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   Vector3 pivotPoint = view.GetPivotPoint();
@@ -419,7 +419,7 @@ int UtcDaliViewGetPivotPointP(void)
 
 int UtcDaliViewSetPivotPointP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 0.0f, 0.5f);
 
@@ -436,7 +436,7 @@ int UtcDaliViewSetPivotPointP(void)
 
 int UtcDaliViewParentOriginChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector3 testOrigin(0.0f, 0.0f, 0.0f);
 
@@ -448,7 +448,7 @@ int UtcDaliViewParentOriginChainingP(void)
 
 int UtcDaliViewPivotPointChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 1.0f, 1.0f);
 
@@ -460,7 +460,7 @@ int UtcDaliViewPivotPointChainingP(void)
 
 int UtcDaliViewSetTraitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
@@ -476,7 +476,7 @@ int UtcDaliViewSetTraitP(void)
 
 int UtcDaliViewGetTraitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
@@ -493,7 +493,7 @@ int UtcDaliViewGetTraitP(void)
 
 int UtcDaliViewRemoveTraitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
@@ -513,7 +513,7 @@ int UtcDaliViewRemoveTraitP(void)
 
 int UtcDaliViewReplaceTraitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait1 = DummyTrait::New();
@@ -531,7 +531,7 @@ int UtcDaliViewReplaceTraitP(void)
 
 int UtcDaliViewSetSameTraitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
@@ -550,7 +550,7 @@ int UtcDaliViewSetSameTraitP(void)
 
 int UtcDaliTraitLifecycleP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
@@ -571,7 +571,7 @@ int UtcDaliTraitLifecycleP(void)
 
 int UtcDaliViewSetRequestedWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float width = 200.0f;
   view.SetRequestedWidth(width);
@@ -581,7 +581,7 @@ int UtcDaliViewSetRequestedWidthP(void)
 
 int UtcDaliViewGetRequestedWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetRequestedWidth(), WRAP_CONTENT, TEST_LOCATION);
   view.SetRequestedWidth(300.0f);
@@ -591,7 +591,7 @@ int UtcDaliViewGetRequestedWidthP(void)
 
 int UtcDaliViewSetRequestedHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float height = 100.0f;
   view.SetRequestedHeight(height);
@@ -601,7 +601,7 @@ int UtcDaliViewSetRequestedHeightP(void)
 
 int UtcDaliViewGetRequestedHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetRequestedHeight(), WRAP_CONTENT, TEST_LOCATION);
   view.SetRequestedHeight(250.0f);
@@ -611,7 +611,7 @@ int UtcDaliViewGetRequestedHeightP(void)
 
 int UtcDaliViewSetViewMarginP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents margin(10, 20, 30, 40);
   view.SetViewMargin(margin);
@@ -625,7 +625,7 @@ int UtcDaliViewSetViewMarginP(void)
 
 int UtcDaliViewGetViewMarginP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents got = view.GetViewMargin();
   DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
@@ -635,7 +635,7 @@ int UtcDaliViewGetViewMarginP(void)
 
 int UtcDaliViewSetViewPaddingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents padding(5, 15, 25, 35);
   view.SetViewPadding(padding);
@@ -649,7 +649,7 @@ int UtcDaliViewSetViewPaddingP(void)
 
 int UtcDaliViewGetViewPaddingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents got = view.GetViewPadding();
   DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
@@ -659,7 +659,7 @@ int UtcDaliViewGetViewPaddingP(void)
 
 int UtcDaliViewLayoutWidthChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetRequestedWidth(150.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -669,7 +669,7 @@ int UtcDaliViewLayoutWidthChainingP(void)
 
 int UtcDaliViewLayoutHeightChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetRequestedHeight(80.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -679,7 +679,7 @@ int UtcDaliViewLayoutHeightChainingP(void)
 
 int UtcDaliViewMeasureP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(50.0f);
@@ -691,7 +691,7 @@ int UtcDaliViewMeasureP(void)
 
 int UtcDaliViewArrangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   LayoutRect bounds(10.0f, 20.0f, 100.0f, 80.0f);
   MeasuredSize size = view.Arrange(bounds);
@@ -702,7 +702,7 @@ int UtcDaliViewArrangeP(void)
 
 int UtcDaliViewInvalidateMeasureP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.Measure(100.0f, 100.0f);
   DALI_TEST_CHECK(view.IsMeasureValid());
@@ -713,7 +713,7 @@ int UtcDaliViewInvalidateMeasureP(void)
 
 int UtcDaliViewInvalidateArrangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(0, 0, 100, 100));
@@ -725,7 +725,7 @@ int UtcDaliViewInvalidateArrangeP(void)
 
 int UtcDaliViewGetMeasuredSizeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   MeasuredSize desired = view.GetMeasuredSize();
   DALI_TEST_EQUALS(desired.GetWidth(), 0.0f, TEST_LOCATION);
@@ -735,7 +735,7 @@ int UtcDaliViewGetMeasuredSizeP(void)
 
 int UtcDaliViewIsMeasureValidP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.Measure(100.0f, 100.0f);
   DALI_TEST_CHECK(view.IsMeasureValid());
@@ -746,7 +746,7 @@ int UtcDaliViewIsMeasureValidP(void)
 
 int UtcDaliViewIsArrangeValidP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.Measure(100.0f, 100.0f);
   view.Arrange(LayoutRect(0, 0, 100, 100));
@@ -758,7 +758,7 @@ int UtcDaliViewIsArrangeValidP(void)
 
 int UtcDaliViewSetMinimumWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetMinimumWidth(50.0f);
   DALI_TEST_EQUALS(view.GetMinimumWidth(), 50.0f, TEST_LOCATION);
@@ -767,7 +767,7 @@ int UtcDaliViewSetMinimumWidthP(void)
 
 int UtcDaliViewGetMinimumWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetMinimumWidth(), 0.0f, TEST_LOCATION);
   END_TEST;
@@ -775,7 +775,7 @@ int UtcDaliViewGetMinimumWidthP(void)
 
 int UtcDaliViewSetMinimumHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetMinimumHeight(30.0f);
   DALI_TEST_EQUALS(view.GetMinimumHeight(), 30.0f, TEST_LOCATION);
@@ -784,7 +784,7 @@ int UtcDaliViewSetMinimumHeightP(void)
 
 int UtcDaliViewGetMinimumHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetMinimumHeight(), 0.0f, TEST_LOCATION);
   END_TEST;
@@ -792,7 +792,7 @@ int UtcDaliViewGetMinimumHeightP(void)
 
 int UtcDaliViewSetMaximumWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetMaximumWidth(500.0f);
   DALI_TEST_EQUALS(view.GetMaximumWidth(), 500.0f, TEST_LOCATION);
@@ -801,7 +801,7 @@ int UtcDaliViewSetMaximumWidthP(void)
 
 int UtcDaliViewGetMaximumWidthP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetMaximumWidth(), std::numeric_limits<float>::max(), TEST_LOCATION);
   END_TEST;
@@ -809,7 +809,7 @@ int UtcDaliViewGetMaximumWidthP(void)
 
 int UtcDaliViewSetMaximumHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetMaximumHeight(400.0f);
   DALI_TEST_EQUALS(view.GetMaximumHeight(), 400.0f, TEST_LOCATION);
@@ -818,7 +818,7 @@ int UtcDaliViewSetMaximumHeightP(void)
 
 int UtcDaliViewGetMaximumHeightP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_EQUALS(view.GetMaximumHeight(), std::numeric_limits<float>::max(), TEST_LOCATION);
   END_TEST;
@@ -826,7 +826,7 @@ int UtcDaliViewGetMaximumHeightP(void)
 
 int UtcDaliViewSetBackgroundColorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   DALI_TEST_CHECK(view);
   UiColor color(0.2f, 0.4f, 0.6f, 1.0f);
@@ -837,7 +837,7 @@ int UtcDaliViewSetBackgroundColorP(void)
 
 int UtcDaliViewViewMarginChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents margin(1, 2, 3, 4);
   View& result = view.SetViewMargin(margin);
@@ -848,7 +848,7 @@ int UtcDaliViewViewMarginChainingP(void)
 
 int UtcDaliViewViewPaddingChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Extents padding(5, 10, 15, 20);
   View& result = view.SetViewPadding(padding);
@@ -860,7 +860,7 @@ int UtcDaliViewViewPaddingChainingP(void)
 
 int UtcDaliViewMinimumWidthChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetMinimumWidth(25.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -870,7 +870,7 @@ int UtcDaliViewMinimumWidthChainingP(void)
 
 int UtcDaliViewMinimumHeightChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetMinimumHeight(35.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -880,7 +880,7 @@ int UtcDaliViewMinimumHeightChainingP(void)
 
 int UtcDaliViewMaximumWidthChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetMaximumWidth(300.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -890,7 +890,7 @@ int UtcDaliViewMaximumWidthChainingP(void)
 
 int UtcDaliViewMaximumHeightChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   View& result = view.SetMaximumHeight(400.0f);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
@@ -900,7 +900,7 @@ int UtcDaliViewMaximumHeightChainingP(void)
 
 int UtcDaliViewMeasureCacheHitP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(50.0f);
   view.SetRequestedHeight(50.0f);
@@ -913,7 +913,7 @@ int UtcDaliViewMeasureCacheHitP(void)
 
 int UtcDaliViewMeasureWithMarginP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetViewMargin(Extents(10, 10, 10, 10));
   view.SetRequestedWidth(50.0f);
@@ -926,7 +926,7 @@ int UtcDaliViewMeasureWithMarginP(void)
 
 int UtcDaliViewMeasureMatchParentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(MATCH_PARENT);
   view.SetRequestedHeight(MATCH_PARENT);
@@ -938,7 +938,7 @@ int UtcDaliViewMeasureMatchParentP(void)
 
 int UtcDaliViewInvalidateMeasureWithParentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
   layout.Add(child);
@@ -949,7 +949,7 @@ int UtcDaliViewInvalidateMeasureWithParentP(void)
 
 int UtcDaliViewApplyConstraintsMinMaxP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetMinimumWidth(80.0f);
   view.SetMaximumWidth(50.0f);
@@ -963,7 +963,7 @@ int UtcDaliViewApplyConstraintsMinMaxP(void)
 
 int UtcDaliViewLayoutWidthFixedNoManagerP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(120.0f);
   view.Measure(200.0f, 200.0f);
@@ -973,7 +973,7 @@ int UtcDaliViewLayoutWidthFixedNoManagerP(void)
 
 int UtcDaliViewLayoutHeightFixedNoManagerP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedHeight(80.0f);
   view.Measure(200.0f, 200.0f);
@@ -983,7 +983,7 @@ int UtcDaliViewLayoutHeightFixedNoManagerP(void)
 
 int UtcDaliViewArrangeWithLayoutP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View c1 = View::New();
   c1.SetRequestedWidth(100.0f);
@@ -1006,7 +1006,7 @@ int UtcDaliViewArrangeWithLayoutP(void)
 
 int UtcDaliViewMeasureWithPaddingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetViewPadding(Extents(5, 5, 5, 5));
   view.SetRequestedWidth(40.0f);
@@ -1020,7 +1020,7 @@ int UtcDaliViewMeasureWithPaddingP(void)
 
 int UtcDaliViewMeasureWrapContentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(WRAP_CONTENT);
   view.SetRequestedHeight(WRAP_CONTENT);
@@ -1032,7 +1032,7 @@ int UtcDaliViewMeasureWrapContentP(void)
 
 int UtcDaliViewLayoutMatchParentWithManagerP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   layout.SetRequestedWidth(MATCH_PARENT);
   layout.SetRequestedHeight(MATCH_PARENT);
@@ -1045,7 +1045,7 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
 
 int UtcDaliViewInvalidateArrangeWithParentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
   View child = View::New();
   layout.Add(child);
@@ -1058,7 +1058,7 @@ int UtcDaliViewInvalidateArrangeWithParentP(void)
 
 int UtcDaliViewArrangeP2(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(50.0f);
   view.SetRequestedHeight(50.0f);
@@ -1073,7 +1073,7 @@ int UtcDaliViewArrangeP2(void)
 
 int UtcDaliViewArrangeMatchParentP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(MATCH_PARENT);
   view.SetRequestedHeight(MATCH_PARENT);
@@ -1086,7 +1086,7 @@ int UtcDaliViewArrangeMatchParentP(void)
 
 int UtcDaliViewSetRequestedWidthNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   view.SetRequestedWidth(50.0f);
   view.SetRequestedHeight(50.0f);
@@ -1101,7 +1101,7 @@ int UtcDaliViewSetRequestedWidthNoChangeP(void)
 
 int UtcDaliViewGetCornerRadiusP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Vector4 radius = view.GetCornerRadius();
   DALI_TEST_EQUALS(radius.x, 0.0f, TEST_LOCATION);
@@ -1113,7 +1113,7 @@ int UtcDaliViewGetCornerRadiusP(void)
 
 int UtcDaliViewSetCornerRadiusUniformP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testRadius = 10.0f;
 
@@ -1130,7 +1130,7 @@ int UtcDaliViewSetCornerRadiusUniformP(void)
 
 int UtcDaliViewSetCornerRadiusIndividualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float topLeft = 5.0f;
   const float topRight = 10.0f;
@@ -1150,7 +1150,7 @@ int UtcDaliViewSetCornerRadiusIndividualP(void)
 
 int UtcDaliViewSetCornerRadiusVector4P(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector4 testRadius(8.0f, 12.0f, 16.0f, 20.0f);
 
@@ -1167,7 +1167,7 @@ int UtcDaliViewSetCornerRadiusVector4P(void)
 
 int UtcDaliViewGetCornerRadiusPolicyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   CornerRadiusPolicy policy = view.GetCornerRadiusPolicy();
   DALI_TEST_EQUALS(static_cast<int>(policy), static_cast<int>(CornerRadiusPolicy::ABSOLUTE), TEST_LOCATION);
@@ -1176,7 +1176,7 @@ int UtcDaliViewGetCornerRadiusPolicyP(void)
 
 int UtcDaliViewSetCornerRadiusPolicyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   View& result = view.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
@@ -1189,7 +1189,7 @@ int UtcDaliViewSetCornerRadiusPolicyP(void)
 
 int UtcDaliViewSetCornerRadiusPolicyRelativeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   View& result = view.SetCornerRadiusPolicyRelative();
@@ -1202,7 +1202,7 @@ int UtcDaliViewSetCornerRadiusPolicyRelativeP(void)
 
 int UtcDaliViewIsCornerRadiusPolicyRelativeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   DALI_TEST_CHECK(!view.IsCornerRadiusPolicyRelative());
@@ -1217,7 +1217,7 @@ int UtcDaliViewIsCornerRadiusPolicyRelativeP(void)
 
 int UtcDaliViewCornerRadiusChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   View& result = view.SetCornerRadius(10.0f)
@@ -1232,7 +1232,7 @@ int UtcDaliViewCornerRadiusChainingP(void)
 
 int UtcDaliViewGetCornerSquarenessP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   Vector4 squareness = view.GetCornerSquareness();
   DALI_TEST_EQUALS(squareness.x, 0.0f, TEST_LOCATION);
@@ -1244,7 +1244,7 @@ int UtcDaliViewGetCornerSquarenessP(void)
 
 int UtcDaliViewSetCornerSquarenessUniformP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float testSquareness = 0.5f;
 
@@ -1261,7 +1261,7 @@ int UtcDaliViewSetCornerSquarenessUniformP(void)
 
 int UtcDaliViewSetCornerSquarenessIndividualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const float topLeft = 0.2f;
   const float topRight = 0.4f;
@@ -1281,7 +1281,7 @@ int UtcDaliViewSetCornerSquarenessIndividualP(void)
 
 int UtcDaliViewSetCornerSquarenessVector4P(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
   const Vector4 testSquareness(0.1f, 0.3f, 0.5f, 0.7f);
 
@@ -1298,7 +1298,7 @@ int UtcDaliViewSetCornerSquarenessVector4P(void)
 
 int UtcDaliViewCornerSquarenessChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   View& result = view.SetCornerSquareness(0.5f);
@@ -1312,7 +1312,7 @@ int UtcDaliViewCornerSquarenessChainingP(void)
 
 int UtcDaliViewCornerRadiusAndSquarenessCombinedP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View view = View::New();
 
   View& result = view.SetCornerRadius(15.0f, 20.0f, 25.0f, 30.0f)

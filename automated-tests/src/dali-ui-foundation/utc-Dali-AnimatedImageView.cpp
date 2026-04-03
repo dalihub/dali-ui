@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view/animated-image-view.h>
@@ -37,7 +37,7 @@ void utc_dali_animatedimageview_cleanup(void)
 
 int UtcDaliAnimatedImageViewConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view;
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -45,7 +45,7 @@ int UtcDaliAnimatedImageViewConstructorP(void)
 
 int UtcDaliAnimatedImageViewNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -53,7 +53,7 @@ int UtcDaliAnimatedImageViewNewP(void)
 
 int UtcDaliAnimatedImageViewNewWithUrlP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New("test.gif");
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("test.gif"), TEST_LOCATION);
@@ -62,7 +62,7 @@ int UtcDaliAnimatedImageViewNewWithUrlP(void)
 
 int UtcDaliAnimatedImageViewCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   AnimatedImageView copy(view);
   DALI_TEST_CHECK(copy);
@@ -72,7 +72,7 @@ int UtcDaliAnimatedImageViewCopyConstructorP(void)
 
 int UtcDaliAnimatedImageViewMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   AnimatedImageView moved(std::move(view));
   DALI_TEST_CHECK(moved);
@@ -81,7 +81,7 @@ int UtcDaliAnimatedImageViewMoveConstructorP(void)
 
 int UtcDaliAnimatedImageViewAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   AnimatedImageView copy;
   copy = view;
@@ -92,7 +92,7 @@ int UtcDaliAnimatedImageViewAssignmentOperatorP(void)
 
 int UtcDaliAnimatedImageViewMoveAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   AnimatedImageView moved;
   moved = std::move(view);
@@ -104,7 +104,7 @@ int UtcDaliAnimatedImageViewMoveAssignmentOperatorP(void)
 
 int UtcDaliAnimatedImageViewDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view     = AnimatedImageView::New();
   View              baseView = view;
   AnimatedImageView downcast = AnimatedImageView::DownCast(baseView);
@@ -114,7 +114,7 @@ int UtcDaliAnimatedImageViewDownCastP(void)
 
 int UtcDaliAnimatedImageViewDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View              baseView = View::New();
   AnimatedImageView downcast = AnimatedImageView::DownCast(baseView);
   DALI_TEST_CHECK(!downcast);
@@ -125,7 +125,7 @@ int UtcDaliAnimatedImageViewDownCastN(void)
 
 int UtcDaliAnimatedImageViewSetGetImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   view.SetResourceUrl("animation.gif");
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.gif"), TEST_LOCATION);
@@ -134,7 +134,7 @@ int UtcDaliAnimatedImageViewSetGetImageP(void)
 
 int UtcDaliAnimatedImageViewSetImageNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New("animation.gif");
   view.SetResourceUrl("animation.gif"); // same url — no update
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.gif"), TEST_LOCATION);
@@ -145,7 +145,7 @@ int UtcDaliAnimatedImageViewSetImageNoChangeP(void)
 
 int UtcDaliAnimatedImageViewSetGetLoopCountP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   DALI_TEST_EQUALS(view.GetLoopCount(), -1, TEST_LOCATION); // default: infinite
 
@@ -159,7 +159,7 @@ int UtcDaliAnimatedImageViewSetGetLoopCountP(void)
 
 int UtcDaliAnimatedImageViewSetLoopCountNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   view.SetLoopCount(5);
   view.SetLoopCount(5); // same value — no update
@@ -171,7 +171,7 @@ int UtcDaliAnimatedImageViewSetLoopCountNoChangeP(void)
 
 int UtcDaliAnimatedImageViewSetGetImageColorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view  = AnimatedImageView::New();
   UiColor           color(1.0f, 0.5f, 0.5f, 1.0f);
   view.SetImageColor(color);
@@ -181,7 +181,7 @@ int UtcDaliAnimatedImageViewSetGetImageColorP(void)
 
 int UtcDaliAnimatedImageViewSetImageColorNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view  = AnimatedImageView::New();
   UiColor           white(Color::WHITE);
   view.SetImageColor(white); // same as default — no update
@@ -193,7 +193,7 @@ int UtcDaliAnimatedImageViewSetImageColorNoChangeP(void)
 
 int UtcDaliAnimatedImageViewPlayNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   view.Play();
   DALI_TEST_CHECK(view);
@@ -202,7 +202,7 @@ int UtcDaliAnimatedImageViewPlayNoVisualP(void)
 
 int UtcDaliAnimatedImageViewPauseNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   view.Pause();
   DALI_TEST_CHECK(view);
@@ -211,7 +211,7 @@ int UtcDaliAnimatedImageViewPauseNoVisualP(void)
 
 int UtcDaliAnimatedImageViewStopNoVisualP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   view.Stop();
   DALI_TEST_CHECK(view);
@@ -222,7 +222,7 @@ int UtcDaliAnimatedImageViewStopNoVisualP(void)
 
 int UtcDaliAnimatedImageViewGetLoadingStatusP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New("animation.gif");
   // Before scene add, status may be PREPARING, READY, or FAILED
   Ui::Visual::ResourceStatus status = view.GetLoadingStatus();
@@ -236,7 +236,7 @@ int UtcDaliAnimatedImageViewGetLoadingStatusP(void)
 
 int UtcDaliAnimatedImageViewSignalsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
   // ResourceReadySignal is inherited from View — just call, don't store
   view.ResourceReadySignal();
@@ -250,7 +250,7 @@ int UtcDaliAnimatedImageViewSignalsP(void)
 
 int UtcDaliAnimatedImageViewPropertyImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX), // IMAGE
@@ -264,7 +264,7 @@ int UtcDaliAnimatedImageViewPropertyImageP(void)
 
 int UtcDaliAnimatedImageViewChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New()
                              .SetResourceUrl("animation.gif")
                              .SetLoopCount(2)

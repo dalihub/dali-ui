@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// CLASS HEADER
+#include "ui-environment-variable.h"
+
+// EXTERNAL INCLUDE
+#include <map>
+#include <string>
+
+namespace Dali
+{
+namespace EnvironmentVariable
+{
+namespace
+{
+std::map<std::string, std::string> gEnvironmentVariables;
+} // namespace
+
+const char* GetEnvironmentVariable(const char* variable)
+{
+  auto value = gEnvironmentVariables.find(variable);
+  if(value != gEnvironmentVariables.end())
+  {
+    return value->second.c_str();
+  }
+  // Get http_proxy from real environment variables
+  if(std::string(variable) == std::string("http_proxy"))
+  {
+    auto* httpProxyResult = std::getenv("http_proxy");
+    return (gEnvironmentVariables[variable] = (httpProxyResult ? httpProxyResult : "")).c_str();
+  }
+  return nullptr;
+}
+
+void SetTestEnvironmentVariable(const char* variable, const char* value)
+{
+  gEnvironmentVariables[variable] = value ? value : "";
+}
+
+} // namespace EnvironmentVariable
+
+} // namespace Dali

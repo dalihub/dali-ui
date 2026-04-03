@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-test-suite-utils.h>
+#include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view/image-view.h>
@@ -38,7 +38,7 @@ void utc_dali_imageview_cleanup(void)
 
 int UtcDaliImageViewConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view;
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -46,7 +46,7 @@ int UtcDaliImageViewConstructorP(void)
 
 int UtcDaliImageViewNewP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -54,7 +54,7 @@ int UtcDaliImageViewNewP(void)
 
 int UtcDaliImageViewNewWithUrlP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New("test.jpg");
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("test.jpg"), TEST_LOCATION);
@@ -63,7 +63,7 @@ int UtcDaliImageViewNewWithUrlP(void)
 
 int UtcDaliImageViewCopyConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   ImageView copy(view);
   DALI_TEST_CHECK(copy);
@@ -73,7 +73,7 @@ int UtcDaliImageViewCopyConstructorP(void)
 
 int UtcDaliImageViewMoveConstructorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   ImageView moved(std::move(view));
   DALI_TEST_CHECK(moved);
@@ -82,7 +82,7 @@ int UtcDaliImageViewMoveConstructorP(void)
 
 int UtcDaliImageViewAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   ImageView copy;
   copy = view;
@@ -93,7 +93,7 @@ int UtcDaliImageViewAssignmentOperatorP(void)
 
 int UtcDaliImageViewMoveAssignmentOperatorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   ImageView moved;
   moved = std::move(view);
@@ -105,7 +105,7 @@ int UtcDaliImageViewMoveAssignmentOperatorP(void)
 
 int UtcDaliImageViewDownCastP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view    = ImageView::New();
   View      baseView = view;
   ImageView downcast = ImageView::DownCast(baseView);
@@ -115,7 +115,7 @@ int UtcDaliImageViewDownCastP(void)
 
 int UtcDaliImageViewDownCastN(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   View      baseView = View::New();
   ImageView downcast  = ImageView::DownCast(baseView);
   DALI_TEST_CHECK(!downcast);
@@ -126,7 +126,7 @@ int UtcDaliImageViewDownCastN(void)
 
 int UtcDaliImageViewSetGetImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetResourceUrl("image.jpg");
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
@@ -135,7 +135,7 @@ int UtcDaliImageViewSetGetImageP(void)
 
 int UtcDaliImageViewSetImageNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New("image.jpg");
   view.SetResourceUrl("image.jpg");
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
@@ -146,7 +146,7 @@ int UtcDaliImageViewSetImageNoChangeP(void)
 
 int UtcDaliImageViewSetGetPlaceholderUrlP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetPlaceholderUrl("placeholder.png");
   DALI_TEST_EQUALS(view.GetPlaceholderUrl(), Dali::String("placeholder.png"), TEST_LOCATION);
@@ -157,7 +157,7 @@ int UtcDaliImageViewSetGetPlaceholderUrlP(void)
 
 int UtcDaliImageViewSetGetFittingModeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
 
@@ -173,7 +173,7 @@ int UtcDaliImageViewSetGetFittingModeP(void)
 
 int UtcDaliImageViewSetGetDesiredSizeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetDesiredSize(ImageDimensions(100, 200));
   DALI_TEST_EQUALS(view.GetDesiredSize().GetWidth(), static_cast<uint16_t>(100), TEST_LOCATION);
@@ -185,7 +185,7 @@ int UtcDaliImageViewSetGetDesiredSizeP(void)
 
 int UtcDaliImageViewSetGetImageColorP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view  = ImageView::New();
   UiColor   color(1.0f, 0.5f, 0.5f, 1.0f);
   view.SetImageColor(color);
@@ -197,7 +197,7 @@ int UtcDaliImageViewSetGetImageColorP(void)
 
 int UtcDaliImageViewSetGetPixelAreaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   Vector4   area = Vector4(0.1f, 0.1f, 0.8f, 0.8f);
   view.SetPixelArea(area);
@@ -209,7 +209,7 @@ int UtcDaliImageViewSetGetPixelAreaP(void)
 
 int UtcDaliImageViewSetGetPreMultipliedAlphaP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetPreMultipliedAlpha(), false, TEST_LOCATION);
   view.SetPreMultipliedAlpha(true);
@@ -221,7 +221,7 @@ int UtcDaliImageViewSetGetPreMultipliedAlphaP(void)
 
 int UtcDaliImageViewSetGetSynchronousLoadingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetSynchronousLoading(), false, TEST_LOCATION);
   view.SetSynchronousLoading(true);
@@ -233,7 +233,7 @@ int UtcDaliImageViewSetGetSynchronousLoadingP(void)
 
 int UtcDaliImageViewSetGetBorderP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view   = ImageView::New();
   Vector4   border = Vector4(10.0f, 10.0f, 10.0f, 10.0f);
   view.SetBorder(border);
@@ -243,7 +243,7 @@ int UtcDaliImageViewSetGetBorderP(void)
 
 int UtcDaliImageViewSetGetBorderOnlyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetBorderOnly(), false, TEST_LOCATION);
   view.SetBorderOnly(true);
@@ -255,7 +255,7 @@ int UtcDaliImageViewSetGetBorderOnlyP(void)
 
 int UtcDaliImageViewReloadP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New("image.jpg");
   // Reload on a view with no visual (before scene add) should not crash
   view.Reload();
@@ -265,7 +265,7 @@ int UtcDaliImageViewReloadP(void)
 
 int UtcDaliImageViewReloadNoImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   // Reload without setting an image should not crash
   view.Reload();
@@ -277,7 +277,7 @@ int UtcDaliImageViewReloadNoImageP(void)
 
 int UtcDaliImageViewSetGetSamplingModeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::SamplingMode::BOX_THEN_LINEAR, TEST_LOCATION);
 
@@ -291,7 +291,7 @@ int UtcDaliImageViewSetGetSamplingModeP(void)
 
 int UtcDaliImageViewSetSamplingModeNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetSamplingMode(Ui::SamplingMode::NEAREST);
   view.SetSamplingMode(Ui::SamplingMode::NEAREST); // same value — should not dirty
@@ -303,7 +303,7 @@ int UtcDaliImageViewSetSamplingModeNoChangeP(void)
 
 int UtcDaliImageViewSetGetReleasePolicyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DETACHED, TEST_LOCATION);
 
@@ -317,7 +317,7 @@ int UtcDaliImageViewSetGetReleasePolicyP(void)
 
 int UtcDaliImageViewSetReleasePolicyNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED);
   view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED); // same value — should not dirty
@@ -329,7 +329,7 @@ int UtcDaliImageViewSetReleasePolicyNoChangeP(void)
 
 int UtcDaliImageViewPropertySamplingModeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 2), // SAMPLING_MODE
@@ -343,7 +343,7 @@ int UtcDaliImageViewPropertySamplingModeP(void)
 
 int UtcDaliImageViewPropertyReleasePolicyP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 12), // RELEASE_POLICY
@@ -359,7 +359,7 @@ int UtcDaliImageViewPropertyReleasePolicyP(void)
 
 int UtcDaliImageViewSetGetAlphaMaskUrlP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetAlphaMaskUrl("mask.png");
   DALI_TEST_EQUALS(view.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
@@ -368,7 +368,7 @@ int UtcDaliImageViewSetGetAlphaMaskUrlP(void)
 
 int UtcDaliImageViewSetGetCropToMaskP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetCropToMask(), false, TEST_LOCATION);
   view.SetCropToMask(true);
@@ -378,7 +378,7 @@ int UtcDaliImageViewSetGetCropToMaskP(void)
 
 int UtcDaliImageViewSetGetMaskingModeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetMaskingMode(Ui::MaskingType::MASKING_ON_LOADING);
   DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
@@ -391,7 +391,7 @@ int UtcDaliImageViewSetGetMaskingModeP(void)
 
 int UtcDaliImageViewSetGetSynchronousSizingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetSynchronousSizing(), false, TEST_LOCATION);
   view.SetSynchronousSizing(true);
@@ -403,7 +403,7 @@ int UtcDaliImageViewSetGetSynchronousSizingP(void)
 
 int UtcDaliImageViewSetGetFastTrackUploadingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetFastTrackUploading(), false, TEST_LOCATION);
   view.SetFastTrackUploading(true);
@@ -415,7 +415,7 @@ int UtcDaliImageViewSetGetFastTrackUploadingP(void)
 
 int UtcDaliImageViewSetGetOrientationCorrectionP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.GetOrientationCorrection(), true, TEST_LOCATION);
   view.SetOrientationCorrection(false);
@@ -427,7 +427,7 @@ int UtcDaliImageViewSetGetOrientationCorrectionP(void)
 
 int UtcDaliImageViewGetLoadingStatusP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New("image.jpg");
   Ui::Visual::ResourceStatus status = view.GetLoadingStatus();
   DALI_TEST_CHECK(status == Ui::Visual::ResourceStatus::PREPARING ||
@@ -438,7 +438,7 @@ int UtcDaliImageViewGetLoadingStatusP(void)
 
 int UtcDaliImageViewSignalsP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   // ResourceReadySignal is inherited from View — just call, don't store
   view.ResourceReadySignal();
@@ -450,7 +450,7 @@ int UtcDaliImageViewSignalsP(void)
 
 int UtcDaliImageViewChainingP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New()
                      .SetResourceUrl("image.jpg")
                      .SetFittingMode(Ui::FittingMode::FILL)
@@ -465,7 +465,7 @@ int UtcDaliImageViewChainingP(void)
 
 int UtcDaliImageViewSetIsFitSizeToImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   DALI_TEST_EQUALS(view.IsFitSizeToImage(), false, TEST_LOCATION); // default: disabled
 
@@ -479,7 +479,7 @@ int UtcDaliImageViewSetIsFitSizeToImageP(void)
 
 int UtcDaliImageViewSetFitSizeToImageNoChangeP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
   view.SetFitSizeToImage(true);
   view.SetFitSizeToImage(true); // same value — no update
@@ -489,7 +489,7 @@ int UtcDaliImageViewSetFitSizeToImageNoChangeP(void)
 
 int UtcDaliImageViewPropertyFitSizeToImageP(void)
 {
-  TestApplication application;
+  UiTestApplication application;
   ImageView view = ImageView::New();
 
   // ADJUST_VIEW_SIZE comes after BORDER_ONLY in the property enum
