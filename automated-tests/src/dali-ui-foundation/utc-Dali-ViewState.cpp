@@ -145,68 +145,68 @@ int UtcDaliViewStateNoDispatchUnchangedN(void)
 // which produces the wrong interleaved call order.
 // =============================================================================
 
-// int UtcDaliViewStateDeferredNotificationOrderP(void)
-// {
-//   UiTestApplication   application;
-//   View              view = CreateView(application);
-//   ConnectionTracker tracker;
+int UtcDaliViewStateDeferredNotificationOrderP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
 
-//   std::vector<CallRecord> log;
+  std::vector<CallRecord> log;
 
-//   GetImpl(view).WhenStateChanged("h1", &tracker, [&](View, const StateEvent& e) {
-//     log.push_back({"h1", e.GetPrev(), e.GetCurrent()});
-//   });
+  GetImpl(view).WhenStateChanged("h1", &tracker, [&](View, const StateEvent& e) {
+    log.push_back({"h1", e.GetPrev(), e.GetCurrent()});
+  });
 
-//   GetImpl(view).WhenStateChanged("h2", &tracker, [&](View v, const StateEvent& e) {
-//     log.push_back({"h2", e.GetPrev(), e.GetCurrent()});
-//     // Trigger a second state change from inside the handler
-//     if(e.Added(UiState::FOCUSED))
-//     {
-//       GetImpl(v).SetViewState(UiState::PRESSED, true);
-//     }
-//   });
+  GetImpl(view).WhenStateChanged("h2", &tracker, [&](View v, const StateEvent& e) {
+    log.push_back({"h2", e.GetPrev(), e.GetCurrent()});
+    // Trigger a second state change from inside the handler
+    if(e.Added(UiState::FOCUSED))
+    {
+      GetImpl(v).SetViewState(UiState::PRESSED, true);
+    }
+  });
 
-//   GetImpl(view).WhenStateChanged("h3", &tracker, [&](View, const StateEvent& e) {
-//     log.push_back({"h3", e.GetPrev(), e.GetCurrent()});
-//   });
+  GetImpl(view).WhenStateChanged("h3", &tracker, [&](View, const StateEvent& e) {
+    log.push_back({"h3", e.GetPrev(), e.GetCurrent()});
+  });
 
-//   const UiState stateA = UiState::NORMAL;
-//   const UiState stateB = UiState::FOCUSED;
-//   const UiState stateC = UiState::FOCUSED + UiState::PRESSED;
+  const UiState stateA = UiState::NORMAL;
+  const UiState stateB = UiState::FOCUSED;
+  const UiState stateC = UiState::FOCUSED + UiState::PRESSED;
 
-//   GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
 
-//   // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
-//   DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
+  // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
 
-//   // --- A→B batch: h1, h2, h3 each with (stateA, stateB) ---
-//   DALI_TEST_EQUALS(log[0].tag, std::string("h1"), TEST_LOCATION);
-//   DALI_TEST_CHECK(log[0].prev == stateA);
-//   DALI_TEST_CHECK(log[0].cur == stateB);
+  // --- A→B batch: h1, h2, h3 each with (stateA, stateB) ---
+  DALI_TEST_EQUALS(log[0].tag, std::string("h1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].prev == stateA);
+  DALI_TEST_CHECK(log[0].cur == stateB);
 
-//   DALI_TEST_EQUALS(log[1].tag, std::string("h2"), TEST_LOCATION);
-//   DALI_TEST_CHECK(log[1].prev == stateA);
-//   DALI_TEST_CHECK(log[1].cur == stateB);
+  DALI_TEST_EQUALS(log[1].tag, std::string("h2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[1].prev == stateA);
+  DALI_TEST_CHECK(log[1].cur == stateB);
 
-//   DALI_TEST_EQUALS(log[2].tag, std::string("h3"), TEST_LOCATION);  // h3 must NOT be skipped
-//   DALI_TEST_CHECK(log[2].prev == stateA);
-//   DALI_TEST_CHECK(log[2].cur == stateB);
+  DALI_TEST_EQUALS(log[2].tag, std::string("h3"), TEST_LOCATION);  // h3 must NOT be skipped
+  DALI_TEST_CHECK(log[2].prev == stateA);
+  DALI_TEST_CHECK(log[2].cur == stateB);
 
-//   // --- B→C batch: h1, h2, h3 each with (stateB, stateC) ---
-//   DALI_TEST_EQUALS(log[3].tag, std::string("h1"), TEST_LOCATION);
-//   DALI_TEST_CHECK(log[3].prev == stateB);
-//   DALI_TEST_CHECK(log[3].cur == stateC);
+  // --- B→C batch: h1, h2, h3 each with (stateB, stateC) ---
+  DALI_TEST_EQUALS(log[3].tag, std::string("h1"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[3].prev == stateB);
+  DALI_TEST_CHECK(log[3].cur == stateC);
 
-//   DALI_TEST_EQUALS(log[4].tag, std::string("h2"), TEST_LOCATION);
-//   DALI_TEST_CHECK(log[4].prev == stateB);
-//   DALI_TEST_CHECK(log[4].cur == stateC);
+  DALI_TEST_EQUALS(log[4].tag, std::string("h2"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[4].prev == stateB);
+  DALI_TEST_CHECK(log[4].cur == stateC);
 
-//   DALI_TEST_EQUALS(log[5].tag, std::string("h3"), TEST_LOCATION);
-//   DALI_TEST_CHECK(log[5].prev == stateB);
-//   DALI_TEST_CHECK(log[5].cur == stateC);
+  DALI_TEST_EQUALS(log[5].tag, std::string("h3"), TEST_LOCATION);
+  DALI_TEST_CHECK(log[5].prev == stateB);
+  DALI_TEST_CHECK(log[5].cur == stateC);
 
-//   END_TEST;
-// }
+  END_TEST;
+}
 
 // =============================================================================
 // Deferred notification: StateChangedSignal connections also participate

@@ -101,6 +101,7 @@ private:
 
   bool                             mNotifying{false};
   std::vector<PendingNotification> mPending;
+  std::vector<PendingNotification> mBatch; ///< Reusable dispatch buffer — swapped with mPending each iteration
 };
 
 } // namespace Internal

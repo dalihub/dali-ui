@@ -28,8 +28,9 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-state.h>
 
+#include <algorithm>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 namespace Dali
 {
@@ -149,16 +150,26 @@ protected:
 private:
   struct Handler
   {
-    CallbackBase*               callback; ///< Owned. Signature: void(View, UiState, UiState)
-    ConnectionTrackerInterface* tracker;  ///< Non-owning ref for auto-disconnect
+    CallbackBase*               callback;             ///< Owned. Signature: void(View, UiState, UiState)
+    ConnectionTrackerInterface* tracker;              ///< Non-owning ref for auto-disconnect
+    bool                        pendingRemove{false}; ///< Deferred removal when SlotDisconnected fires during Execute
+  };
+
+  struct HandlerEntry
+  {
+    std::string id;
+    Handler     handler;
   };
 
   void CleanupHandler(Handler& handler);
+  void ClearAllHandlers();
 
 private:
-  WeakHandle<View>                         mOwner;
-  std::unordered_map<std::string, Handler> mHandlers;
-  std::string                              mProcessingId;
+  WeakHandle<View>          mOwner;
+  std::vector<HandlerEntry> mHandlers; ///< Insertion-order-preserving handler list
+  std::vector<std::string>  mKeys;     ///< Reusable snapshot buffer for NotifyStateChanged
+  std::string               mProcessingId;
+  bool                      mNotifying{false}; ///< Re-entrancy guard for NotifyStateChanged
 };
 
 } // namespace Internal

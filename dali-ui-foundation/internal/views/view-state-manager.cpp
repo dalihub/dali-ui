@@ -71,11 +71,12 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
 
   while(!mPending.empty())
   {
-    // Move the current batch out so re-entrant calls append to the (now empty) mPending.
-    std::vector<PendingNotification> batch = std::move(mPending);
-    mPending.clear();
+    // Swap the current batch out so re-entrant calls append to the (now empty) mPending.
+    // Using swap instead of move preserves both buffers' capacity for reuse.
+    mBatch.clear();
+    mBatch.swap(mPending);
 
-    for(auto& n : batch)
+    for(auto& n : mBatch)
     {
       Integration::ViewImpl&      impl           = Integration::GetImpl(n.view);
       Internal::StateEventImplPtr stateEventImpl = Internal::StateEventImpl::New(n.prev, n.next, n.cause);

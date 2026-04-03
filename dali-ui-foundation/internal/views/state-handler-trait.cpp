@@ -60,11 +60,7 @@ StateHandlerTraitImpl::StateHandlerTraitImpl()
 
 StateHandlerTraitImpl::~StateHandlerTraitImpl()
 {
-  for(auto& [id, handler] : mHandlers)
-  {
-    CleanupHandler(handler);
-  }
-  mHandlers.clear();
+  ClearAllHandlers();
 }
 
 void StateHandlerTraitImpl::Set(const std::string& id, ConnectionTrackerInterface* tracker, CallbackBase* callback)
@@ -74,7 +70,7 @@ void StateHandlerTraitImpl::Set(const std::string& id, ConnectionTrackerInterfac
   if(tracker && callback)
   {
     tracker->SignalConnected(this, callback);
-    mHandlers[id] = Handler{callback, tracker};
+    mHandlers.push_back({id, {callback, tracker}});
   }
   else
   {
@@ -84,13 +80,14 @@ void StateHandlerTraitImpl::Set(const std::string& id, ConnectionTrackerInterfac
 
 bool StateHandlerTraitImpl::Unset(const std::string& id)
 {
-  auto it = mHandlers.find(id);
+  auto it = std::find_if(mHandlers.begin(), mHandlers.end(), [&](const HandlerEntry& e)
+  { return e.id == id; });
   if(it == mHandlers.end())
   {
     return false;
   }
 
-  CleanupHandler(it->second);
+  CleanupHandler(it->handler);
   mHandlers.erase(it);
   return true;
 }
@@ -106,37 +103,73 @@ bool StateHandlerTraitImpl::UnsetWhenNotProcessing(const std::string& id)
 
 void StateHandlerTraitImpl::NotifyStateChanged(View view, const StateEvent& event)
 {
-  // Snapshot keys since handlers may be removed during iteration
-  std::vector<std::string> keys;
-  keys.reserve(mHandlers.size());
-  for(const auto& [id, handler] : mHandlers)
+  if(mNotifying)
   {
-    keys.push_back(id);
+    // ViewStateManager defers re-entrant SetViewState calls via its own mPending queue.
+    // This guard provides a secondary safety net: if NotifyStateChanged is somehow called
+    // re-entrantly (e.g. a handler calls SetViewState and the deferred dispatch fires before
+    // the current batch completes), skip it to prevent out-of-order delivery.
+    return;
   }
 
-  for(const auto& id : keys)
+  mNotifying = true;
+
+  // Snapshot IDs since handlers may be removed during iteration.
+  // mKeys is a member to reuse the allocated buffer across calls.
+  mKeys.clear();
+  mKeys.reserve(mHandlers.size());
+  for(const auto& entry : mHandlers)
   {
-    auto it = mHandlers.find(id);
+    mKeys.push_back(entry.id);
+  }
+
+  for(const auto& id : mKeys)
+  {
+    auto it = std::find_if(mHandlers.begin(), mHandlers.end(), [&](const HandlerEntry& e)
+    { return e.id == id; });
     if(it == mHandlers.end())
     {
       continue; // removed during iteration
     }
 
     mProcessingId = id;
-    CallbackBase::Execute(*it->second.callback, view, event);
+    CallbackBase::Execute(*it->handler.callback, view, event);
+
+    // SlotDisconnected may have fired during Execute and deferred removal
+    // to avoid deleting the callback while it was still on the call stack.
+    auto afterIt = std::find_if(mHandlers.begin(), mHandlers.end(), [&](const HandlerEntry& e)
+    { return e.id == id; });
+    if(afterIt != mHandlers.end() && afterIt->handler.pendingRemove)
+    {
+      delete afterIt->handler.callback;
+      mHandlers.erase(afterIt);
+    }
   }
   mProcessingId.clear();
+
+  mNotifying = false;
 }
 
 void StateHandlerTraitImpl::SlotDisconnected(CallbackBase* callback)
 {
   for(auto it = mHandlers.begin(); it != mHandlers.end(); ++it)
   {
-    if(it->second.callback == callback)
+    if(it->handler.callback == callback)
     {
       // Tracker is already being destroyed — don't call SignalDisconnected on it.
-      delete it->second.callback;
-      mHandlers.erase(it);
+      it->handler.tracker = nullptr;
+
+      if(mNotifying && mProcessingId == it->id)
+      {
+        // This callback is currently on the Execute call stack.
+        // Deleting it now would be UB — defer removal until Execute returns.
+        it->handler.pendingRemove = true;
+      }
+      else
+      {
+        delete it->handler.callback;
+        mHandlers.erase(it);
+      }
       return;
     }
   }
@@ -153,22 +186,23 @@ void StateHandlerTraitImpl::OnAttached(Integration::TraitId /*id*/, View& /*view
 
 void StateHandlerTraitImpl::OnDetached(Integration::TraitId /*id*/, View& /*view*/)
 {
-  for(auto& [id, handler] : mHandlers)
-  {
-    CleanupHandler(handler);
-  }
-  mHandlers.clear();
+  ClearAllHandlers();
   mOwner.Reset();
 }
 
 void StateHandlerTraitImpl::OnViewDestroying(Integration::ViewImpl* /*viewImpl*/)
 {
-  for(auto& [id, handler] : mHandlers)
+  ClearAllHandlers();
+  mOwner.Reset();
+}
+
+void StateHandlerTraitImpl::ClearAllHandlers()
+{
+  for(auto& entry : mHandlers)
   {
-    CleanupHandler(handler);
+    CleanupHandler(entry.handler);
   }
   mHandlers.clear();
-  mOwner.Reset();
 }
 
 void StateHandlerTraitImpl::CleanupHandler(Handler& handler)
