@@ -130,6 +130,48 @@ private:
             .SetColor(UiColor(0xFF00FF))
             .SetThickness(3.0f))
           .As(mLineThroughLabel),
+        // InputField with text styles
+        Label::New("InputField with Styles:"),
+        InputField::New()
+          .SetText("InputField with Underline")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetUnderline(Text::Underline()
+            .SetColor(UiColor(0x0088FF))
+            .SetThickness(2))
+          .As(mInputFieldUnderline),
+        InputField::New()
+          .SetText("InputField with Shadow")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetShadow(Text::Shadow()
+            .SetColor(UiColor(0xFF5500))
+            .SetOffset(Vector2(2.0f, 2.0f)))
+          .As(mInputFieldShadow),
+        InputField::New()
+          .SetText("InputField with Outline")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetOutline(Text::Outline()
+            .SetColor(UiColor(0x0066FF))
+            .SetWidth(2.0f))
+          .As(mInputFieldOutline),
+        InputField::New()
+          .SetText("InputField with LineThrough")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetLineThrough(Text::LineThrough()
+            .SetColor(UiColor(0xFF00FF))
+            .SetThickness(2.0f))
+          .As(mInputFieldLineThrough),
         }));
 
     PrintLabelInfo(mSlantLabel, "Slant Label");
@@ -179,18 +221,22 @@ private:
     if(event.GetKeyName() == "1")
     {
       mUnderlineLabel.ResetUnderline();
+      mInputFieldUnderline.ResetUnderline();
     }
     else if(event.GetKeyName() == "2")
     {
       mShadowLabel.ResetShadow();
+      mInputFieldShadow.ResetShadow();
     }
     else if(event.GetKeyName() == "3")
     {
       mOutlineLabel.ResetOutline();
+      mInputFieldOutline.ResetOutline();
     }
     else if(event.GetKeyName() == "4")
     {
       mLineThroughLabel.ResetLineThrough();
+      mInputFieldLineThrough.ResetLineThrough();
     }
   }
 
@@ -203,6 +249,10 @@ private:
   Label        mShadowLabel;
   Label        mOutlineLabel;
   Label        mLineThroughLabel;
+  InputField   mInputFieldUnderline;
+  InputField   mInputFieldShadow;
+  InputField   mInputFieldOutline;
+  InputField   mInputFieldLineThrough;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

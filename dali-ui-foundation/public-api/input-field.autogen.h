@@ -120,4 +120,28 @@
   * \
   * @param[in] slant The font slant. \
   */ \
-  ChildClass& SetFontSlant(Text::FontSlant slant) { InputField::SetFontSlant(slant); return *this; }
+  ChildClass& SetFontSlant(Text::FontSlant slant) { InputField::SetFontSlant(slant); return *this; } \
+  /** \
+  * @brief Sets the underline style. \
+  * \
+  * @param[in] underline The underline configuration. \
+  */ \
+  ChildClass& SetUnderline(const Text::Underline& underline) { InputField::SetUnderline(underline); return *this; } \
+  /** \
+  * @brief Sets the shadow style. \
+  * \
+  * @param[in] shadow The shadow configuration. \
+  */ \
+  ChildClass& SetShadow(const Text::Shadow& shadow) { InputField::SetShadow(shadow); return *this; } \
+  /** \
+  * @brief Sets the outline style. \
+  * \
+  * @param[in] outline The outline configuration. \
+  */ \
+  ChildClass& SetOutline(const Text::Outline& outline) { InputField::SetOutline(outline); return *this; } \
+  /** \
+  * @brief Sets the line-through style. \
+  * \
+  * @param[in] lineThrough The line-through configuration. \
+  */ \
+  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { InputField::SetLineThrough(lineThrough); return *this; }

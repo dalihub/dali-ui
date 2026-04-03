@@ -286,6 +286,50 @@ Text::FontSlant InputField::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
+InputField& InputField::SetUnderline(const Text::Underline& underline)
+{
+  GetImpl(*this).SetUnderline(underline);
+  return *this;
+}
+
+void InputField::ResetUnderline()
+{
+  return GetImpl(*this).ResetUnderline();
+}
+
+InputField& InputField::SetShadow(const Text::Shadow& shadow)
+{
+  GetImpl(*this).SetShadow(shadow);
+  return *this;
+}
+
+void InputField::ResetShadow()
+{
+  return GetImpl(*this).ResetShadow();
+}
+
+InputField& InputField::SetOutline(const Text::Outline& outline)
+{
+  GetImpl(*this).SetOutline(outline);
+  return *this;
+}
+
+void InputField::ResetOutline()
+{
+  return GetImpl(*this).ResetOutline();
+}
+
+InputField& InputField::SetLineThrough(const Text::LineThrough& lineThrough)
+{
+  GetImpl(*this).SetLineThrough(lineThrough);
+  return *this;
+}
+
+void InputField::ResetLineThrough()
+{
+  return GetImpl(*this).ResetLineThrough();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

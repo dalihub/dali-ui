@@ -25,6 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 // None
@@ -368,6 +369,54 @@ public: // Setters for chaining
    * @return The font slant.
    */
   Text::FontSlant GetFontSlant() const;
+
+  /**
+   * @brief Sets the underline style.
+   *
+   * @param[in] underline The underline configuration.
+   */
+  InputField& SetUnderline(const Text::Underline& underline);
+
+  /**
+   * @brief Resets the underline.
+   */
+  void ResetUnderline();
+
+  /**
+   * @brief Sets the shadow style.
+   *
+   * @param[in] shadow The shadow configuration.
+   */
+  InputField& SetShadow(const Text::Shadow& shadow);
+
+  /**
+   * @brief Resets the shadow.
+   */
+  void ResetShadow();
+
+  /**
+   * @brief Sets the outline style.
+   *
+   * @param[in] outline The outline configuration.
+   */
+  InputField& SetOutline(const Text::Outline& outline);
+
+  /**
+   * @brief Resets the outline.
+   */
+  void ResetOutline();
+
+  /**
+   * @brief Sets the line-through style.
+   *
+   * @param[in] lineThrough The line-through configuration.
+   */
+  InputField& SetLineThrough(const Text::LineThrough& lineThrough);
+
+  /**
+   * @brief Resets the line-through.
+   */
+  void ResetLineThrough();
 
   // @CHAIN_END
 

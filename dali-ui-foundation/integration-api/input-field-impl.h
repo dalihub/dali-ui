@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
+#include <dali-ui-foundation/public-api/text/text-style.h>
 
 namespace Dali
 {
@@ -228,6 +229,46 @@ public:
    * @copydoc Dali::Ui::InputField::GetFontSlant
    */
   Text::FontSlant GetFontSlant() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetUnderline
+   */
+  void SetUnderline(const Text::Underline& underline);
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetUnderline
+   */
+  void ResetUnderline();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetShadow
+   */
+  void SetShadow(const Text::Shadow& shadow);
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetShadow
+   */
+  void ResetShadow();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetOutline
+   */
+  void SetOutline(const Text::Outline& outline);
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetOutline
+   */
+  void ResetOutline();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetLineThrough
+   */
+  void SetLineThrough(const Text::LineThrough& lineThrough);
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetLineThrough
+   */
+  void ResetLineThrough();
 
 public: // Signals
   /**
@@ -522,6 +563,10 @@ private: // UiColorManager
   void SetPlaceholderColorInternal(const Vector4& color);
   void SetCursorColorInternal(const Vector4& color);
   void SetSelectionColorInternal(const Vector4& color);
+  void SetUnderlineColorInternal(const Vector4& color);
+  void SetShadowColorInternal(const Vector4& color);
+  void SetOutlineColorInternal(const Vector4& color);
+  void SetLineThroughColorInternal(const Vector4& color);
 
   // Properties
 public:

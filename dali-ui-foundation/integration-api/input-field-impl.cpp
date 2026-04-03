@@ -331,6 +331,134 @@ Text::FontSlant InputFieldImpl::GetFontSlant() const
   return mController->GetDefaultFontSlant();
 }
 
+void InputFieldImpl::SetUnderline(const Text::Underline& underline)
+{
+  const UiColor& color = underline.GetColor();
+
+  SetColorBinding("UnderlineColor", color, this, &InputFieldImpl::SetUnderlineColorInternal);
+
+  if(!mController->IsUnderlineEnabled())
+  {
+    mController->SetUnderlineEnabled(true);
+  }
+
+  if(fabsf(mController->GetUnderlineHeight() - underline.GetThickness()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetUnderlineHeight(underline.GetThickness());
+  }
+
+  if(mController->GetUnderlineType() != underline.GetType())
+  {
+    mController->SetUnderlineType(underline.GetType());
+  }
+
+  if(fabsf(mController->GetDashedUnderlineWidth() - underline.GetDashLength()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetDashedUnderlineWidth(underline.GetDashLength());
+  }
+
+  if(fabsf(mController->GetDashedUnderlineGap() - underline.GetDashGap()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetDashedUnderlineGap(underline.GetDashGap());
+  }
+}
+
+void InputFieldImpl::ResetUnderline()
+{
+  UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
+  if(mController->IsUnderlineEnabled())
+  {
+    mController->SetUnderlineEnabled(false);
+    mRenderer.Reset();
+  }
+}
+
+void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
+{
+  const UiColor& color = shadow.GetColor();
+
+  SetColorBinding("ShadowColor", color, this, &InputFieldImpl::SetShadowColorInternal);
+
+  if(mController->GetShadowOffset() != shadow.GetOffset())
+  {
+    mController->SetShadowOffset(shadow.GetOffset());
+  }
+
+  if(!Dali::Equals(mController->GetShadowBlurRadius(), shadow.GetBlurRadius()))
+  {
+    mController->SetShadowBlurRadius(shadow.GetBlurRadius());
+  }
+}
+
+void InputFieldImpl::ResetShadow()
+{
+  UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
+  if(Vector2::ZERO != mController->GetShadowOffset())
+  {
+    mController->SetShadowOffset(Vector2::ZERO);
+    mRenderer.Reset();
+  }
+}
+
+void InputFieldImpl::SetOutline(const Text::Outline& outline)
+{
+  const UiColor& color = outline.GetColor();
+
+  SetColorBinding("OutlineColor", color, this, &InputFieldImpl::SetOutlineColorInternal);
+
+  if(mController->GetOutlineWidth() != static_cast<uint16_t>(outline.GetWidth()))
+  {
+    mController->SetOutlineWidth(static_cast<uint16_t>(outline.GetWidth()));
+  }
+
+  if(mController->GetOutlineOffset() != outline.GetOffset())
+  {
+    mController->SetOutlineOffset(outline.GetOffset());
+  }
+
+  if(!Dali::Equals(mController->GetOutlineBlurRadius(), outline.GetBlurRadius()))
+  {
+    mController->SetOutlineBlurRadius(outline.GetBlurRadius());
+  }
+}
+
+void InputFieldImpl::ResetOutline()
+{
+  UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
+  if(0u != mController->GetOutlineWidth())
+  {
+    mController->SetOutlineWidth(0u);
+    mRenderer.Reset();
+  }
+}
+
+void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
+{
+  const UiColor& color = lineThrough.GetColor();
+
+  SetColorBinding("LineThroughColor", color, this, &InputFieldImpl::SetLineThroughColorInternal);
+
+  if(!mController->IsStrikethroughEnabled())
+  {
+    mController->SetStrikethroughEnabled(true);
+  }
+
+  if(fabsf(mController->GetStrikethroughHeight() - lineThrough.GetThickness()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetStrikethroughHeight(lineThrough.GetThickness());
+  }
+}
+
+void InputFieldImpl::ResetLineThrough()
+{
+  UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
+  if(mController->IsStrikethroughEnabled())
+  {
+    mController->SetStrikethroughEnabled(false);
+    mRenderer.Reset();
+  }
+}
+
 // =============================================================================
 // Signals
 // =============================================================================
@@ -1124,6 +1252,38 @@ void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
 {
   mDecorator->SetHighlightColor(color);
   RequestTextRelayout();
+}
+
+void InputFieldImpl::SetUnderlineColorInternal(const Vector4& color)
+{
+  if(mController->GetUnderlineColor() != color)
+  {
+    mController->SetUnderlineColor(color);
+  }
+}
+
+void InputFieldImpl::SetShadowColorInternal(const Vector4& color)
+{
+  if(mController->GetShadowColor() != color)
+  {
+    mController->SetShadowColor(color);
+  }
+}
+
+void InputFieldImpl::SetOutlineColorInternal(const Vector4& color)
+{
+  if(mController->GetOutlineColor() != color)
+  {
+    mController->SetOutlineColor(color);
+  }
+}
+
+void InputFieldImpl::SetLineThroughColorInternal(const Vector4& color)
+{
+  if(mController->GetStrikethroughColor() != color)
+  {
+    mController->SetStrikethroughColor(color);
+  }
 }
 
 // =============================================================================
