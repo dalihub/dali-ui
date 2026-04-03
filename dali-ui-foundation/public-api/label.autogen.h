@@ -195,8 +195,14 @@
   */ \
   ChildClass& SetOutline(const Text::Outline& outline) { Label::SetOutline(outline); return *this; } \
   /** \
-  * @brief Sets the line-through (strikethrough) style. \
+  * @brief Sets the line-through style. \
   * \
   * @param[in] lineThrough The line-through configuration. \
   */ \
-  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { Label::SetLineThrough(lineThrough); return *this; }
+  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { Label::SetLineThrough(lineThrough); return *this; } \
+  /** \
+  * @brief Sets the bevel style. \
+  * \
+  * @param[in] bevel The bevel configuration. \
+  */ \
+  ChildClass& SetBevel(const Text::Bevel& bevel) { Label::SetBevel(bevel); return *this; }

@@ -1024,6 +1024,7 @@ bool Controller::IsEmbossEnabled() const
 void Controller::SetEmbossEnabled(const bool enable)
 {
   mImpl->mModel->mVisualModel->SetEmbossEnabled(enable);
+  mImpl->RequestRelayout();
 }
 
 const Vector2& Controller::GetEmbossDirection() const

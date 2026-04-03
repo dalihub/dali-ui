@@ -335,6 +335,16 @@ public:
    */
   void ResetLineThrough();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetBevel
+   */
+  void SetBevel(const Text::Bevel& bevel);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetBevel
+   */
+  void ResetBevel();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -584,6 +594,8 @@ private: // UiColorManager
   void SetShadowColorInternal(const Vector4& color);
   void SetOutlineColorInternal(const Vector4& color);
   void SetLineThroughColorInternal(const Vector4& color);
+  void SetBevelLightColorInternal(const Vector4& color);
+  void SetBevelShadowColorInternal(const Vector4& color);
 
 private:
   // Not copyable or movable

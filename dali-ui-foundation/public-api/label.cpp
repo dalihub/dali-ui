@@ -419,6 +419,17 @@ void Label::ResetLineThrough()
   return GetImpl(*this).ResetLineThrough();
 }
 
+Label& Label::SetBevel(const Text::Bevel& bevel)
+{
+  GetImpl(*this).SetBevel(bevel);
+  return *this;
+}
+
+void Label::ResetBevel()
+{
+  return GetImpl(*this).ResetBevel();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

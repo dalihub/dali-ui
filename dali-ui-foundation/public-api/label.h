@@ -532,7 +532,7 @@ public: // Setters for chaining
   void ResetOutline();
 
   /**
-   * @brief Sets the line-through (strikethrough) style.
+   * @brief Sets the line-through style.
    *
    * @param[in] lineThrough The line-through configuration.
    */
@@ -542,6 +542,18 @@ public: // Setters for chaining
    * @brief Resets the line-through.
    */
   void ResetLineThrough();
+
+  /**
+   * @brief Sets the bevel style.
+   *
+   * @param[in] bevel The bevel configuration.
+   */
+  Label& SetBevel(const Text::Bevel& bevel);
+
+  /**
+   * @brief Resets the bevel.
+   */
+  void ResetBevel();
 
   // @CHAIN_END
 

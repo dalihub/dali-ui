@@ -581,6 +581,40 @@ void LabelImpl::ResetLineThrough()
   }
 }
 
+void LabelImpl::SetBevel(const Text::Bevel& bevel)
+{
+  const UiColor& lightColor  = bevel.GetLightColor();
+  const UiColor& shadowColor = bevel.GetShadowColor();
+
+  SetColorBinding("BevelLightColor", lightColor, this, &LabelImpl::SetBevelLightColorInternal);
+  SetColorBinding("BevelShadowColor", shadowColor, this, &LabelImpl::SetBevelShadowColorInternal);
+
+  if(!mController->IsEmbossEnabled())
+  {
+    mController->SetEmbossEnabled(true);
+  }
+
+  if(mController->GetEmbossDirection() != bevel.GetDirection())
+  {
+    mController->SetEmbossDirection(bevel.GetDirection());
+  }
+
+  if(fabsf(mController->GetEmbossStrength() - bevel.GetIntensity()) > Math::MACHINE_EPSILON_1000)
+  {
+    mController->SetEmbossStrength(bevel.GetIntensity());
+  }
+}
+
+void LabelImpl::ResetBevel()
+{
+  UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
+  UiColorManager::Get().ClearBinding(Self(), "BevelShadowColor");
+  if(mController->IsEmbossEnabled())
+  {
+    mController->SetEmbossEnabled(false);
+  }
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -1373,6 +1407,22 @@ void LabelImpl::SetLineThroughColorInternal(const Vector4& color)
   if(mController->GetStrikethroughColor() != color)
   {
     mController->SetStrikethroughColor(color);
+  }
+}
+
+void LabelImpl::SetBevelLightColorInternal(const Vector4& color)
+{
+  if(mController->GetEmbossLightColor() != color)
+  {
+    mController->SetEmbossLightColor(color);
+  }
+}
+
+void LabelImpl::SetBevelShadowColorInternal(const Vector4& color)
+{
+  if(mController->GetEmbossShadowColor() != color)
+  {
+    mController->SetEmbossShadowColor(color);
   }
 }
 

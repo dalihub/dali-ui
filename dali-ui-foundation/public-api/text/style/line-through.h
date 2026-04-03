@@ -29,7 +29,7 @@ namespace Text
 {
 
 /**
- * @brief Describes line-through (strikethrough) styling for text.
+ * @brief Describes line-through styling for text.
  *
  * This is a value-type object used to configure line-through appearance.
  */
