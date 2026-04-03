@@ -204,6 +204,28 @@
   */ \
   ChildClass& SetCornerSquareness(const Vector4& squareness) { View::SetCornerSquareness(squareness); return *this; } \
   /** \
+  * @brief Sets the borderline width of the view. \
+  * \
+  * @param[in] width The borderline width to set \
+  */ \
+  ChildClass& SetBorderlineWidth(float width) { View::SetBorderlineWidth(width); return *this; } \
+  /** \
+  * @brief Sets the borderline color of the view. \
+  * \
+  * If the UiColor has a color ID, it is resolved from the current \
+  * theme and a binding is registered so the color is automatically \
+  * refreshed when the theme changes. \
+  * \
+  * @param[in] color The UiColor to apply \
+  */ \
+  ChildClass& SetBorderlineColor(const UiColor& color) { View::SetBorderlineColor(color); return *this; } \
+  /** \
+  * @brief Sets the borderline offset of the view. \
+  * \
+  * @param[in] offset The borderline offset to set \
+  */ \
+  ChildClass& SetBorderlineOffset(float offset) { View::SetBorderlineOffset(offset); return *this; } \
+  /** \
   * @brief Attaches the interaction trait to this View and optionally configures it. \
   * \
   * A View can have at most one interaction trait for its lifetime; attaching interactive \

@@ -589,6 +589,46 @@ void ViewImpl::SetCornerSquareness(const Vector4& squareness)
   Self().SetProperty(Ui::View::Property::CORNER_SQUARENESS, squareness);
 }
 
+float ViewImpl::GetBorderlineWidth() const
+{
+  return Self().GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH);
+}
+
+void ViewImpl::SetBorderlineWidth(float width)
+{
+  Self().SetProperty(Ui::View::Property::BORDERLINE_WIDTH, width);
+}
+
+UiColor ViewImpl::GetBorderlineColor()
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "BorderlineColor", outColor))
+  {
+    return outColor;
+  }
+  return Self().GetProperty<Vector4>(Ui::View::Property::BORDERLINE_COLOR);
+}
+
+void ViewImpl::SetBorderlineColor(const UiColor& color)
+{
+  SetColorBinding("BorderlineColor", color, this, &ViewImpl::SetBorderlineColorInternal);
+}
+
+void ViewImpl::SetBorderlineColorInternal(const Vector4& color)
+{
+  Self().SetProperty(Ui::View::Property::BORDERLINE_COLOR, color);
+}
+
+float ViewImpl::GetBorderlineOffset() const
+{
+  return Self().GetProperty<float>(Ui::View::Property::BORDERLINE_OFFSET);
+}
+
+void ViewImpl::SetBorderlineOffset(float offset)
+{
+  Self().SetProperty(Ui::View::Property::BORDERLINE_OFFSET, offset);
+}
+
 bool ViewImpl::IsFocusable() const
 {
   return Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);

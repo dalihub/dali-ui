@@ -649,6 +649,52 @@ public: // Properties
   View& SetCornerSquareness(const Vector4& squareness);
 
   /**
+   * @brief Gets the borderline width of the view.
+   *
+   * @return The borderline width
+   */
+  float GetBorderlineWidth() const;
+
+  /**
+   * @brief Sets the borderline width of the view.
+   *
+   * @param[in] width The borderline width to set
+   */
+  View& SetBorderlineWidth(float width);
+
+  /**
+   * @brief Gets the borderline color of the view.
+   *
+   * @return The borderline color
+   */
+  UiColor GetBorderlineColor();
+
+  /**
+   * @brief Sets the borderline color of the view.
+   *
+   * If the UiColor has a color ID, it is resolved from the current
+   * theme and a binding is registered so the color is automatically
+   * refreshed when the theme changes.
+   *
+   * @param[in] color The UiColor to apply
+   */
+  View& SetBorderlineColor(const UiColor& color);
+
+  /**
+   * @brief Gets the borderline offset of the view.
+   *
+   * @return The borderline offset
+   */
+  float GetBorderlineOffset() const;
+
+  /**
+   * @brief Sets the borderline offset of the view.
+   *
+   * @param[in] offset The borderline offset to set
+   */
+  View& SetBorderlineOffset(float offset);
+
+  /**
    * @brief Returns true if this view and all its View ancestors are enabled.
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method

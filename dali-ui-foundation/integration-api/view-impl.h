@@ -474,6 +474,36 @@ public: // State API
   void SetCornerSquareness(const Vector4& squareness);
 
   /**
+   * @copydoc Dali::Ui::View::GetBorderlineWidth
+   */
+  float GetBorderlineWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetBorderlineWidth
+   */
+  void SetBorderlineWidth(float width);
+
+  /**
+   * @copydoc Dali::Ui::View::GetBorderlineColor
+   */
+  UiColor GetBorderlineColor();
+
+  /**
+   * @copydoc Dali::Ui::View::SetBorderlineColor
+   */
+  void SetBorderlineColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::View::GetBorderlineOffset
+   */
+  float GetBorderlineOffset() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetBorderlineOffset
+   */
+  void SetBorderlineOffset(float offset);
+
+  /**
    * @brief Sets a trait to this View.
    *
    * The trait will share the lifecycle with this View.
@@ -708,6 +738,7 @@ private:
   ViewImpl& operator=(ViewImpl&&)      = delete;
 
   void SetBackgroundColorInternal(const Vector4& color);
+  void SetBorderlineColorInternal(const Vector4& color);
   void OnChildOrderChanged(Actor orderChangedChild);
 
   /**

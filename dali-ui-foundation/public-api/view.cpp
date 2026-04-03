@@ -465,6 +465,39 @@ View& View::SetCornerSquareness(const Vector4& squareness)
   return *this;
 }
 
+float View::GetBorderlineWidth() const
+{
+  return Integration::GetImpl(*this).GetBorderlineWidth();
+}
+
+View& View::SetBorderlineWidth(float width)
+{
+  Integration::GetImpl(*this).SetBorderlineWidth(width);
+  return *this;
+}
+
+UiColor View::GetBorderlineColor()
+{
+  return Integration::GetImpl(*this).GetBorderlineColor();
+}
+
+View& View::SetBorderlineColor(const UiColor& color)
+{
+  Integration::GetImpl(*this).SetBorderlineColor(color);
+  return *this;
+}
+
+float View::GetBorderlineOffset() const
+{
+  return Integration::GetImpl(*this).GetBorderlineOffset();
+}
+
+View& View::SetBorderlineOffset(float offset)
+{
+  Integration::GetImpl(*this).SetBorderlineOffset(offset);
+  return *this;
+}
+
 InteractiveTrait View::EnsureInteractiveTrait()
 {
   return Integration::GetImpl(*this).EnsureInteractiveTrait();
