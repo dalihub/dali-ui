@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <vector> // Used for row/column definitions; ABI considerations may apply across toolchain versions
+#include <dali/public-api/common/dali-vector.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -119,28 +119,28 @@ public: // Row/Column Definition API
    *
    * @param[in] rows Vector of row height specifications
    */
-  void SetRowDefinitions(const std::vector<GridLength>& rows);
+  void SetRowDefinitions(const Dali::Vector<GridLength>& rows);
 
   /**
    * @brief Sets all column definitions at once.
    *
    * @param[in] columns Vector of column width specifications
    */
-  void SetColumnDefinitions(const std::vector<GridLength>& columns);
+  void SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
 
   /**
    * @brief Gets the row definitions.
    *
    * @return Vector of row height specifications
    */
-  std::vector<GridLength> GetRowDefinitions() const;
+  Dali::Vector<GridLength> GetRowDefinitions() const;
 
   /**
    * @brief Gets the column definitions.
    *
    * @return Vector of column width specifications
    */
-  std::vector<GridLength> GetColumnDefinitions() const;
+  Dali::Vector<GridLength> GetColumnDefinitions() const;
 
   /**
    * @brief Gets the number of rows.
@@ -210,13 +210,13 @@ public: // Chaining methods
     return *this;
   }
 
-  GridLayout& Rows(const std::vector<GridLength>& rows)
+  GridLayout& Rows(const Dali::Vector<GridLength>& rows)
   {
     SetRowDefinitions(rows);
     return *this;
   }
 
-  GridLayout& Columns(const std::vector<GridLength>& columns)
+  GridLayout& Columns(const Dali::Vector<GridLength>& columns)
   {
     SetColumnDefinitions(columns);
     return *this;

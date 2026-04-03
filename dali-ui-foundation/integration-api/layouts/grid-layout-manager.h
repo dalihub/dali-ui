@@ -40,27 +40,27 @@ namespace Integration
 class DALI_UI_API GridLayoutManager : public LayoutManager
 {
 public:
-  GridLayoutManager(const std::vector<GridLength>& rows, const std::vector<GridLength>& columns, float rowSpacing,
+  GridLayoutManager(const Dali::Vector<GridLength>& rows, const Dali::Vector<GridLength>& columns, float rowSpacing,
                     float columnSpacing);
   ~GridLayoutManager() override;
 
-  void                           SetRowDefinitions(const std::vector<GridLength>& rows);
-  const std::vector<GridLength>& GetRowDefinitions() const;
-  void                           SetColumnDefinitions(const std::vector<GridLength>& columns);
-  const std::vector<GridLength>& GetColumnDefinitions() const;
-  void                           SetRowSpacing(float spacing);
-  float                          GetRowSpacing() const;
-  void                           SetColumnSpacing(float spacing);
-  float                          GetColumnSpacing() const;
+  void                            SetRowDefinitions(const Dali::Vector<GridLength>& rows);
+  const Dali::Vector<GridLength>& GetRowDefinitions() const;
+  void                            SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
+  const Dali::Vector<GridLength>& GetColumnDefinitions() const;
+  void                            SetRowSpacing(float spacing);
+  float                           GetRowSpacing() const;
+  void                            SetColumnSpacing(float spacing);
+  float                           GetColumnSpacing() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
   MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;
 
 protected:
-  std::vector<GridLength> mRowDefinitions;
-  std::vector<GridLength> mColumnDefinitions;
-  float                   mRowSpacing;
-  float                   mColumnSpacing;
+  Dali::Vector<GridLength> mRowDefinitions;
+  Dali::Vector<GridLength> mColumnDefinitions;
+  float                    mRowSpacing;
+  float                    mColumnSpacing;
 };
 
 } // namespace Integration

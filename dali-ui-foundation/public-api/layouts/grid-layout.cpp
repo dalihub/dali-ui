@@ -98,22 +98,22 @@ void GridLayout::AddColumnDefinition(GridLength width)
   Integration::GetImpl(*this).AddColumnDefinition(width);
 }
 
-void GridLayout::SetRowDefinitions(const std::vector<GridLength>& rows)
+void GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   Integration::GetImpl(*this).SetRowDefinitions(rows);
 }
 
-void GridLayout::SetColumnDefinitions(const std::vector<GridLength>& columns)
+void GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   Integration::GetImpl(*this).SetColumnDefinitions(columns);
 }
 
-std::vector<GridLength> GridLayout::GetRowDefinitions() const
+Dali::Vector<GridLength> GridLayout::GetRowDefinitions() const
 {
   return Integration::GetImpl(*this).GetRowDefinitions();
 }
 
-std::vector<GridLength> GridLayout::GetColumnDefinitions() const
+Dali::Vector<GridLength> GridLayout::GetColumnDefinitions() const
 {
   return Integration::GetImpl(*this).GetColumnDefinitions();
 }

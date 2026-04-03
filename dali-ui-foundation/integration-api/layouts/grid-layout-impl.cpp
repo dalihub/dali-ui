@@ -65,52 +65,52 @@ void GridLayoutImpl::OnInitialize()
 
 void GridLayoutImpl::AddRowDefinition(GridLength height)
 {
-  auto*                   manager = static_cast<GridLayoutManager*>(GetLayoutManager());
-  std::vector<GridLength> rows    = manager->GetRowDefinitions();
-  rows.push_back(height);
+  auto*                    manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  Dali::Vector<GridLength> rows    = manager->GetRowDefinitions();
+  rows.PushBack(height);
   manager->SetRowDefinitions(rows);
   InvalidateMeasure();
 }
 
 void GridLayoutImpl::AddColumnDefinition(GridLength width)
 {
-  auto*                   manager = static_cast<GridLayoutManager*>(GetLayoutManager());
-  std::vector<GridLength> cols    = manager->GetColumnDefinitions();
-  cols.push_back(width);
+  auto*                    manager = static_cast<GridLayoutManager*>(GetLayoutManager());
+  Dali::Vector<GridLength> cols    = manager->GetColumnDefinitions();
+  cols.PushBack(width);
   manager->SetColumnDefinitions(cols);
   InvalidateMeasure();
 }
 
-void GridLayoutImpl::SetRowDefinitions(const std::vector<GridLength>& rows)
+void GridLayoutImpl::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   static_cast<GridLayoutManager*>(GetLayoutManager())->SetRowDefinitions(rows);
   InvalidateMeasure();
 }
 
-void GridLayoutImpl::SetColumnDefinitions(const std::vector<GridLength>& columns)
+void GridLayoutImpl::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   static_cast<GridLayoutManager*>(GetLayoutManager())->SetColumnDefinitions(columns);
   InvalidateMeasure();
 }
 
-std::vector<GridLength> GridLayoutImpl::GetRowDefinitions() const
+Dali::Vector<GridLength> GridLayoutImpl::GetRowDefinitions() const
 {
   return static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowDefinitions();
 }
 
-std::vector<GridLength> GridLayoutImpl::GetColumnDefinitions() const
+Dali::Vector<GridLength> GridLayoutImpl::GetColumnDefinitions() const
 {
   return static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions();
 }
 
 uint32_t GridLayoutImpl::GetRowCount() const
 {
-  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowDefinitions().size());
+  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetRowDefinitions().Size());
 }
 
 uint32_t GridLayoutImpl::GetColumnCount() const
 {
-  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions().size());
+  return static_cast<uint32_t>(static_cast<GridLayoutManager*>(GetLayoutManager())->GetColumnDefinitions().Size());
 }
 
 void GridLayoutImpl::ClearRowDefinitions()

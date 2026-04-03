@@ -59,8 +59,18 @@ public:
     root.SetColumnSpacing(6.0f);
 
     // Use batch API: SetRowDefinitions / SetColumnDefinitions
-    root.SetRowDefinitions({GridLength::Auto(), GridLength::Star(1.0f), GridLength::Auto()});
-    root.SetColumnDefinitions({GridLength::Auto(), GridLength::Star(1.0f)});
+    Dali::Vector<GridLength> rowDefinition;
+    rowDefinition.Reserve(3);
+    rowDefinition.PushBack(GridLength::Auto());
+    rowDefinition.PushBack(GridLength::Star(1.0f));
+    rowDefinition.PushBack(GridLength::Auto());
+    root.SetRowDefinitions(rowDefinition);
+
+    Dali::Vector<GridLength> columnDefinition;
+    columnDefinition.Reserve(2);
+    columnDefinition.PushBack(GridLength::Auto());
+    columnDefinition.PushBack(GridLength::Star(1.0f));
+    root.SetColumnDefinitions(columnDefinition);
 
     // (0,0): Auto-width label - narrow fixed-size box simulating a label
     View label00 = View::New();

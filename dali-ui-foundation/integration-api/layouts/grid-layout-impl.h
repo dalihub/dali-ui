@@ -56,16 +56,16 @@ protected:
   GridLayoutImpl();
 
 public: // Row/Column Definition API
-  void                    AddRowDefinition(GridLength height);
-  void                    AddColumnDefinition(GridLength width);
-  void                    SetRowDefinitions(const std::vector<GridLength>& rows);
-  void                    SetColumnDefinitions(const std::vector<GridLength>& columns);
-  std::vector<GridLength> GetRowDefinitions() const;
-  std::vector<GridLength> GetColumnDefinitions() const;
-  uint32_t                GetRowCount() const;
-  uint32_t                GetColumnCount() const;
-  void                    ClearRowDefinitions();
-  void                    ClearColumnDefinitions();
+  void                     AddRowDefinition(GridLength height);
+  void                     AddColumnDefinition(GridLength width);
+  void                     SetRowDefinitions(const Dali::Vector<GridLength>& rows);
+  void                     SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
+  Dali::Vector<GridLength> GetRowDefinitions() const;
+  Dali::Vector<GridLength> GetColumnDefinitions() const;
+  uint32_t                 GetRowCount() const;
+  uint32_t                 GetColumnCount() const;
+  void                     ClearRowDefinitions();
+  void                     ClearColumnDefinitions();
 
 public: // Spacing API
   void  SetRowSpacing(float spacing);

@@ -75,8 +75,8 @@ LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
 }
 
 void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
-                                    uint32_t rowCount, uint32_t colCount, const std::vector<GridLength>& rowDefs,
-                                    const std::vector<GridLength>&            colDefs,
+                                    uint32_t rowCount, uint32_t colCount, const Dali::Vector<GridLength>& rowDefs,
+                                    const Dali::Vector<GridLength>&           colDefs,
                                     const std::function<ViewImpl&(Ui::View)>& getImpl, std::vector<float>& rowHeights,
                                     std::vector<float>& colWidths)
 {
@@ -100,11 +100,11 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize             = childSize;
 
-    if(rowSpan == 1 && row < rowDefs.size() && rowDefs[row].GetType() == GridLengthType::AUTO)
+    if(rowSpan == 1 && row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO)
     {
       rowHeights[row] = std::max(rowHeights[row], childSize.height + margin.top + margin.bottom);
     }
-    if(colSpan == 1 && col < colDefs.size() && colDefs[col].GetType() == GridLengthType::AUTO)
+    if(colSpan == 1 && col < colDefs.Size() && colDefs[col].GetType() == GridLengthType::AUTO)
     {
       colWidths[col] = std::max(colWidths[col], childSize.width + margin.start + margin.end);
     }
@@ -112,7 +112,7 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
 }
 
 void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& colWidths,
-                          const std::vector<GridLength>& rowDefs, const std::vector<GridLength>& colDefs,
+                          const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
                           float availableWidth, float availableHeight, float rowSpacing, float colSpacing,
                           uint32_t rowCount, uint32_t colCount, float& totalWidthOut, float& totalHeightOut)
 {
@@ -123,7 +123,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
 
   for(uint32_t i = 0; i < colCount; ++i)
   {
-    if(i < colDefs.size())
+    if(i < colDefs.Size())
     {
       const auto& def = colDefs[i];
       if(def.GetType() == GridLengthType::ABSOLUTE)
@@ -143,7 +143,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
   }
   for(uint32_t i = 0; i < rowCount; ++i)
   {
-    if(i < rowDefs.size())
+    if(i < rowDefs.Size())
     {
       const auto& def = rowDefs[i];
       if(def.GetType() == GridLengthType::ABSOLUTE)
@@ -169,7 +169,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
 
   for(uint32_t i = 0; i < colCount; ++i)
   {
-    if(i < colDefs.size() && colDefs[i].GetType() == GridLengthType::STAR)
+    if(i < colDefs.Size() && colDefs[i].GetType() == GridLengthType::STAR)
     {
       float starValue = colDefs[i].GetValue();
       colWidths[i]    = (totalStarWidth > 0) ? (starValue / totalStarWidth) * remainingWidth : 0.0f;
@@ -177,7 +177,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
   }
   for(uint32_t i = 0; i < rowCount; ++i)
   {
-    if(i < rowDefs.size() && rowDefs[i].GetType() == GridLengthType::STAR)
+    if(i < rowDefs.Size() && rowDefs[i].GetType() == GridLengthType::STAR)
     {
       float starValue = rowDefs[i].GetValue();
       rowHeights[i]   = (totalStarHeight > 0) ? (starValue / totalStarHeight) * remainingHeight : 0.0f;
@@ -298,7 +298,7 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
 
 } // namespace
 
-GridLayoutManager::GridLayoutManager(const std::vector<GridLength>& rows, const std::vector<GridLength>& columns,
+GridLayoutManager::GridLayoutManager(const Dali::Vector<GridLength>& rows, const Dali::Vector<GridLength>& columns,
                                      float rowSpacing, float columnSpacing)
 : LayoutManager(),
   mRowDefinitions(rows),
@@ -312,22 +312,22 @@ GridLayoutManager::~GridLayoutManager()
 {
 }
 
-void GridLayoutManager::SetRowDefinitions(const std::vector<GridLength>& rows)
+void GridLayoutManager::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   mRowDefinitions = rows;
 }
 
-const std::vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
+const Dali::Vector<GridLength>& GridLayoutManager::GetRowDefinitions() const
 {
   return mRowDefinitions;
 }
 
-void GridLayoutManager::SetColumnDefinitions(const std::vector<GridLength>& columns)
+void GridLayoutManager::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   mColumnDefinitions = columns;
 }
 
-const std::vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
+const Dali::Vector<GridLength>& GridLayoutManager::GetColumnDefinitions() const
 {
   return mColumnDefinitions;
 }
@@ -366,8 +366,8 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   availableWidth          = std::max(0.0f, availableWidth);
   availableHeight         = std::max(0.0f, availableHeight);
 
-  uint32_t           rowCount = std::max(1u, static_cast<uint32_t>(mRowDefinitions.size()));
-  uint32_t           colCount = std::max(1u, static_cast<uint32_t>(mColumnDefinitions.size()));
+  uint32_t           rowCount = std::max(1u, static_cast<uint32_t>(mRowDefinitions.Size()));
+  uint32_t           colCount = std::max(1u, static_cast<uint32_t>(mColumnDefinitions.Size()));
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
@@ -394,8 +394,8 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   auto&              children        = GetChildren(view);
   float              availableWidth  = bounds.width;
   float              availableHeight = bounds.height;
-  uint32_t           rowCount        = std::max(1u, static_cast<uint32_t>(mRowDefinitions.size()));
-  uint32_t           colCount        = std::max(1u, static_cast<uint32_t>(mColumnDefinitions.size()));
+  uint32_t           rowCount        = std::max(1u, static_cast<uint32_t>(mRowDefinitions.Size()));
+  uint32_t           colCount        = std::max(1u, static_cast<uint32_t>(mColumnDefinitions.Size()));
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 

@@ -107,8 +107,8 @@ int UtcDaliGridLayoutAddRowDefinitionP(void)
   layout.AddRowDefinition(GridLength::Absolute(50.0f));
   layout.AddRowDefinition(GridLength::Star(2.0f));
   DALI_TEST_EQUALS(layout.GetRowCount(), 2u, TEST_LOCATION);
-  std::vector<GridLength> rows = layout.GetRowDefinitions();
-  DALI_TEST_EQUALS(rows.size(), 2u, TEST_LOCATION);
+  Dali::Vector<GridLength> rows = layout.GetRowDefinitions();
+  DALI_TEST_EQUALS(rows.Size(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[0].GetType(), GridLengthType::ABSOLUTE, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[0].GetValue(), 50.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[1].GetType(), GridLengthType::STAR, TEST_LOCATION);
@@ -123,8 +123,8 @@ int UtcDaliGridLayoutAddColumnDefinitionP(void)
   layout.AddColumnDefinition(GridLength::Auto());
   layout.AddColumnDefinition(GridLength::Star(1.0f));
   DALI_TEST_EQUALS(layout.GetColumnCount(), 2u, TEST_LOCATION);
-  std::vector<GridLength> cols = layout.GetColumnDefinitions();
-  DALI_TEST_EQUALS(cols.size(), 2u, TEST_LOCATION);
+  Dali::Vector<GridLength> cols = layout.GetColumnDefinitions();
+  DALI_TEST_EQUALS(cols.Size(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(cols[0].GetType(), GridLengthType::AUTO, TEST_LOCATION);
   DALI_TEST_EQUALS(cols[1].GetType(), GridLengthType::STAR, TEST_LOCATION);
   END_TEST;
@@ -134,12 +134,12 @@ int UtcDaliGridLayoutSetRowDefinitionsP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> rows;
-  rows.push_back(GridLength::Absolute(100.0f));
-  rows.push_back(GridLength::Star(1.0f));
+  Dali::Vector<GridLength> rows;
+  rows.PushBack(GridLength::Absolute(100.0f));
+  rows.PushBack(GridLength::Star(1.0f));
   layout.SetRowDefinitions(rows);
   DALI_TEST_EQUALS(layout.GetRowCount(), 2u, TEST_LOCATION);
-  std::vector<GridLength> got = layout.GetRowDefinitions();
+  Dali::Vector<GridLength> got = layout.GetRowDefinitions();
   DALI_TEST_EQUALS(got[0].GetValue(), 100.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -148,8 +148,8 @@ int UtcDaliGridLayoutSetColumnDefinitionsP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> cols;
-  cols.push_back(GridLength::Star(1.0f));
+  Dali::Vector<GridLength> cols;
+  cols.PushBack(GridLength::Star(1.0f));
   layout.SetColumnDefinitions(cols);
   DALI_TEST_EQUALS(layout.GetColumnCount(), 1u, TEST_LOCATION);
   END_TEST;
@@ -160,8 +160,8 @@ int UtcDaliGridLayoutGetRowDefinitionsP(void)
   TestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(30.0f));
-  std::vector<GridLength> rows = layout.GetRowDefinitions();
-  DALI_TEST_EQUALS(rows.size(), 1u, TEST_LOCATION);
+  Dali::Vector<GridLength> rows = layout.GetRowDefinitions();
+  DALI_TEST_EQUALS(rows.Size(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(rows[0].GetValue(), 30.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -171,8 +171,8 @@ int UtcDaliGridLayoutGetColumnDefinitionsP(void)
   TestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Star(2.0f));
-  std::vector<GridLength> cols = layout.GetColumnDefinitions();
-  DALI_TEST_EQUALS(cols.size(), 1u, TEST_LOCATION);
+  Dali::Vector<GridLength> cols = layout.GetColumnDefinitions();
+  DALI_TEST_EQUALS(cols.Size(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(cols[0].GetValue(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -367,8 +367,8 @@ int UtcDaliGridLayoutRowsChainingP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> rows;
-  rows.push_back(GridLength::Absolute(20.0f));
+  Dali::Vector<GridLength> rows;
+  rows.PushBack(GridLength::Absolute(20.0f));
   GridLayout& result = layout.Rows(rows);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
   DALI_TEST_EQUALS(layout.GetRowCount(), 1u, TEST_LOCATION);
@@ -379,8 +379,8 @@ int UtcDaliGridLayoutColumnsChainingP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> cols;
-  cols.push_back(GridLength::Star(1.0f));
+  Dali::Vector<GridLength> cols;
+  cols.PushBack(GridLength::Star(1.0f));
   GridLayout& result = layout.Columns(cols);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
   DALI_TEST_EQUALS(layout.GetColumnCount(), 1u, TEST_LOCATION);
@@ -391,8 +391,8 @@ int UtcDaliGridLayoutEmptyRowDefinitionsP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> rows = layout.GetRowDefinitions();
-  DALI_TEST_EQUALS(rows.size(), 0u, TEST_LOCATION);
+  Dali::Vector<GridLength> rows = layout.GetRowDefinitions();
+  DALI_TEST_EQUALS(rows.Size(), 0u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -400,8 +400,8 @@ int UtcDaliGridLayoutEmptyColumnDefinitionsP(void)
 {
   TestApplication application;
   GridLayout layout = GridLayout::New();
-  std::vector<GridLength> cols = layout.GetColumnDefinitions();
-  DALI_TEST_EQUALS(cols.size(), 0u, TEST_LOCATION);
+  Dali::Vector<GridLength> cols = layout.GetColumnDefinitions();
+  DALI_TEST_EQUALS(cols.Size(), 0u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -410,7 +410,7 @@ int UtcDaliGridLayoutSetEmptyRowsP(void)
   TestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Absolute(10.0f));
-  layout.SetRowDefinitions(std::vector<GridLength>());
+  layout.SetRowDefinitions(Dali::Vector<GridLength>());
   DALI_TEST_EQUALS(layout.GetRowCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
@@ -420,7 +420,7 @@ int UtcDaliGridLayoutSetEmptyColumnsP(void)
   TestApplication application;
   GridLayout layout = GridLayout::New();
   layout.AddColumnDefinition(GridLength::Star(1.0f));
-  layout.SetColumnDefinitions(std::vector<GridLength>());
+  layout.SetColumnDefinitions(Dali::Vector<GridLength>());
   DALI_TEST_EQUALS(layout.GetColumnCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
