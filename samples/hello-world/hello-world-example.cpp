@@ -62,7 +62,7 @@ public:
           .SetRequestedHeight(100_spx)
           .SetPositionX(100_spx)
           .SetPositionY(100_spx)
-          .As(mSecondChild),
+          .As(mSecondChild)
       }));
   }
 

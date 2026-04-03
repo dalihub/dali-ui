@@ -495,7 +495,7 @@ private:
   {
     mSyncLoading = !mSyncLoading;
     mSyncLoadingImage.SetSynchronousLoading(mSyncLoading);
-    Label::DownCast(mSyncLoadingLabel).SetText(mSyncLoading ? "SYNC_LOAD: ON" : "SYNC_LOAD: OFF");
+    mSyncLoadingLabel.SetText(mSyncLoading ? "SYNC_LOAD: ON" : "SYNC_LOAD: OFF");
     mSyncLoadingInfoLabel.SetText(MakeSyncLoadingInfoText());
     DALI_LOG_ERROR("[SyncLoading] SynchronousLoading toggled → %s\n", mSyncLoading ? "ON" : "OFF");
   }
@@ -515,7 +515,7 @@ private:
     // Remove from scene first → DETACHED policy releases the texture from cache.
     // A short timer is needed before SetResourceUrl + Add so the texture release
     // actually completes before the next load starts (release is not immediate).
-    StackLayout::DownCast(mSyncLoadingContainer).Remove(mSyncLoadingImage);
+    mSyncLoadingContainer.Remove(mSyncLoadingImage);
 
     mSyncChangeTimer = Timer::New(100);
     mSyncChangeTimer.TickSignal().Connect(this, &ImageViewLoadingPolicyController::OnSyncChangeTimerTick);
@@ -528,7 +528,7 @@ private:
   {
     // Texture should be released by now (DETACHED). Set new URL and re-add.
     mSyncLoadingImage.SetResourceUrl(mSyncPendingUrl);
-    StackLayout::DownCast(mSyncLoadingContainer).Add(mSyncLoadingImage);
+    mSyncLoadingContainer.Add(mSyncLoadingImage);
 
     // SYNC ON : decoded on main thread → IsResourceReady() = true immediately
     // SYNC OFF: decoded on background thread → IsResourceReady() = false here,
@@ -555,7 +555,7 @@ private:
   {
     mFastTrack = !mFastTrack;
     mFastTrackImage.SetFastTrackUploading(mFastTrack);
-    Label::DownCast(mFastTrackLabel).SetText(mFastTrack ? "FAST_TRACK: ON" : "FAST_TRACK: OFF");
+    mFastTrackLabel.SetText(mFastTrack ? "FAST_TRACK: ON" : "FAST_TRACK: OFF");
     mFastTrackInfoLabel.SetText(MakeFastTrackInfoText());
     DALI_LOG_ERROR("[FastTrack] FastTrackUploading toggled → %s\n", mFastTrack ? "ON" : "OFF");
   }
@@ -602,7 +602,7 @@ private:
     mReleasePolicyReadyAfterReAdd = false;
     DALI_LOG_ERROR("[ReleasePolicy] Removing view from scene (policy=%s) — re-add in 1s\n",
                    POLICIES[mPolicyIndex].name);
-    StackLayout::DownCast(mReleasePolicyContainer).Remove(mReleasePolicyImage);
+    mReleasePolicyContainer.Remove(mReleasePolicyImage);
 
     mHideTimer = Timer::New(1000);
     mHideTimer.TickSignal().Connect(this, &ImageViewLoadingPolicyController::OnHideTimerTick);
@@ -613,7 +613,7 @@ private:
   {
     DALI_LOG_ERROR("[ReleasePolicy] Re-adding view to scene (policy=%s) — watch for ResourceReady\n",
                    POLICIES[mPolicyIndex].name);
-    StackLayout::DownCast(mReleasePolicyContainer).Add(mReleasePolicyImage);
+    mReleasePolicyContainer.Add(mReleasePolicyImage);
     mReleasePolicyInfoLabel.SetText(MakeReleasePolicyInfoText());
 
     // Post a one-shot check: if ResourceReady hasn't fired by next frame, texture was cached.
@@ -668,10 +668,9 @@ private:
     mLoadPolicyImage.Reset();
 
     // Clear the container so the placeholder is shown while loading.
-    StackLayout container = StackLayout::DownCast(mLoadPolicyContainer);
-    while(container.GetChildCount() > 0)
+    while(mLoadPolicyContainer.GetChildCount() > 0)
     {
-      container.Remove(container.GetChildAt(0));
+      mLoadPolicyContainer.Remove(mLoadPolicyContainer.GetChildAt(0));
     }
 
     // Create a new ImageView with the selected LoadPolicy but do NOT add it to the scene yet.
@@ -705,7 +704,7 @@ private:
                    LOAD_POLICIES[mLoadPolicyIndex].name);
 
     mLoadPolicyAddedToScene = true;
-    StackLayout::DownCast(mLoadPolicyContainer).Add(mLoadPolicyImage);
+    mLoadPolicyContainer.Add(mLoadPolicyImage);
     mLoadPolicyInfoLabel.SetText(MakeLoadPolicyInfoText());
 
     // Post a short check: if ResourceReady fires quickly it means the texture was pre-loaded (IMMEDIATE).
@@ -805,17 +804,17 @@ private:
   Application&    mApplication;
   Ui::ImageView   mSyncLoadingImage;
   Ui::ImageView   mFastTrackImage;
-  View            mSyncLoadingContainer;
+  StackLayout     mSyncLoadingContainer;
   Ui::ImageView   mReleasePolicyImage;
   Ui::ImageView   mLoadPolicyImage;
   Label           mSyncLoadingInfoLabel;
   Label           mFastTrackInfoLabel;
   Label           mReleasePolicyInfoLabel;
   Label           mLoadPolicyInfoLabel;
-  View            mSyncLoadingLabel;
-  View            mFastTrackLabel;
-  View            mReleasePolicyContainer;
-  View            mLoadPolicyContainer;
+  Label           mSyncLoadingLabel;
+  Label           mFastTrackLabel;
+  StackLayout     mReleasePolicyContainer;
+  StackLayout            mLoadPolicyContainer;
   View            mPolicyButtons[POLICY_COUNT];
   View            mLoadPolicyButtons[LOAD_POLICY_COUNT];
   Timer           mSyncChangeTimer;

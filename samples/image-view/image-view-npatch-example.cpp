@@ -188,7 +188,7 @@ private:
   {
     mNPatchBorderOnly = !mNPatchBorderOnly;
     mImage.SetNPatchBorderOnly(mNPatchBorderOnly);
-    Label::DownCast(mNPatchBorderOnlyLabel).SetText(mNPatchBorderOnly ? "BORDER ONLY: ON" : "BORDER ONLY: OFF");
+    mNPatchBorderOnlyLabel.SetText(mNPatchBorderOnly ? "BORDER ONLY: ON" : "BORDER ONLY: OFF");
     UpdateInfoLabel();
     DALI_LOG_RELEASE_INFO("[NPatch] BorderOnly=%d\n", mNPatchBorderOnly);
   }
@@ -225,7 +225,7 @@ private:
   Application&  mApplication;
   Ui::ImageView mImage;
   Label         mInfoLabel;
-  View          mNPatchBorderOnlyLabel;
+  Label         mNPatchBorderOnlyLabel;
   View          mSizeButtons[SIZE_COUNT];
   int           mSizeIndex;
   bool          mNPatchBorderOnly;

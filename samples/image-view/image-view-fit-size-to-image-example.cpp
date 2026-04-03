@@ -121,7 +121,7 @@ private:
                                .SetTextColor(UiColor(0xFFFFFF))
                                .SetHorizontalTextAlignment(Text::Alignment::CENTER)
                                .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mFitSizeLabel),
+                               .As(mFitSizeLabel)
                            });
 
     button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewFitSizeController::OnFitSizeToggleClicked);
@@ -143,7 +143,7 @@ private:
   {
     mFitSizeToImage = !mFitSizeToImage;
     mFitImage.SetFitSizeToImage(mFitSizeToImage);
-    Label::DownCast(mFitSizeLabel).SetText(mFitSizeToImage ? "FIT_SIZE: ON" : "FIT_SIZE: OFF");
+    mFitSizeLabel.SetText(mFitSizeToImage ? "FIT_SIZE: ON" : "FIT_SIZE: OFF");
     mFitSizeInfoLabel.SetText(MakeFitSizeInfoText());
     DALI_LOG_RELEASE_INFO("[FitSizeToImage] FitSizeToImage=%d\n", mFitSizeToImage);
   }
@@ -169,7 +169,7 @@ private:
   Application&  mApplication;
   Ui::ImageView mFitImage;
   Label         mFitSizeInfoLabel;
-  View          mFitSizeLabel;
+  Label         mFitSizeLabel;
   bool          mFitSizeToImage;
 };
 

@@ -232,7 +232,7 @@ private:
     mImageOn.SetMaskingMode(mode);
     mImageOn.Reload();
 
-    Label::DownCast(mModeLabel).SetText(mMaskingOnLoading ? "MODE: ON_LOADING" : "MODE: ON_RENDERING");
+    mModeLabel.SetText(mMaskingOnLoading ? "MODE: ON_LOADING" : "MODE: ON_RENDERING");
     mInfoLabel.SetText(MakeInfoText());
     DALI_LOG_RELEASE_INFO("[AlphaMask] MaskingMode=%s\n", mMaskingOnLoading ? "LOADING" : "RENDERING");
   }
@@ -263,7 +263,7 @@ private:
   Ui::ImageView mImageOff; // CropToMask=false
   Ui::ImageView mImageOn;  // CropToMask=true
   Label         mInfoLabel;
-  View          mModeLabel;
+  Label         mModeLabel;
   View          mMaskButtons[MASK_COUNT];
   int           mMaskIndex;
   bool          mMaskingOnLoading;
