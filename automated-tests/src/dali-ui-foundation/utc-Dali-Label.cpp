@@ -48,6 +48,9 @@ const char* const PROPERTY_NAME_MARQUEE_GAP            = "marqueeGap";
 const char* const PROPERTY_NAME_MARQUEE_STOP_MODE      = "marqueeStopMode";
 const char* const PROPERTY_NAME_MARQUEE_ORIENTATION    = "marqueeOrientation";
 const char* const PROPERTY_NAME_TEXT_COLOR             = "textColor";
+const char* const PROPERTY_NAME_FONT_WEIGHT            = "fontWeight";
+const char* const PROPERTY_NAME_FONT_WIDTH             = "fontWidth";
+const char* const PROPERTY_NAME_FONT_SLANT             = "fontSlant";
 
 } // namespace
 
@@ -466,6 +469,51 @@ int UtcDaliLabelTextColor(void)
   END_TEST;
 }
 
+int UtcDaliLabelFontWeight(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetFontWeight(Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(label.GetFontWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  label.SetFontWeight(Text::FontWeight::LIGHT);
+  DALI_TEST_EQUALS(label.GetFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelFontWidth(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetFontWidth(Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(label.GetFontWidth(), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  label.SetFontWidth(Text::FontWidth::CONDENSED);
+  DALI_TEST_EQUALS(label.GetFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelFontSlant(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetFontSlant(Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(label.GetFontSlant(), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  label.SetFontSlant(Text::FontSlant::OBLIQUE);
+  DALI_TEST_EQUALS(label.GetFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliLabelGetProperty(void)
 {
@@ -494,6 +542,9 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_STOP_MODE) == Label::Property::MARQUEE_STOP_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_ORIENTATION) == Label::Property::MARQUEE_ORIENTATION);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == Label::Property::FONT_WEIGHT);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == Label::Property::FONT_WIDTH);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == Label::Property::FONT_SLANT);
 
   END_TEST;
 }
@@ -608,6 +659,27 @@ int UtcDaliLabelSetProperty(void)
   // TEXT_COLOR
   label.SetProperty(Label::Property::TEXT_COLOR, Color::BLUE);
   DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
+
+  // FONT_WEIGHT
+  label.SetProperty(Label::Property::FONT_WEIGHT, Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontWeight>(Label::Property::FONT_WEIGHT), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::FONT_WEIGHT, "LIGHT");
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontWeight>(Label::Property::FONT_WEIGHT), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  // FONT_WIDTH
+  label.SetProperty(Label::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontWidth>(Label::Property::FONT_WIDTH), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::FONT_WIDTH, "CONDENSED");
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontWidth>(Label::Property::FONT_WIDTH), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  // FONT_SLANT
+  label.SetProperty(Label::Property::FONT_SLANT, Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontSlant>(Label::Property::FONT_SLANT), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::FONT_SLANT, "OBLIQUE");
+  DALI_TEST_EQUALS(label.GetProperty<Text::FontSlant>(Label::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
   END_TEST;
 }

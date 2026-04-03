@@ -442,6 +442,30 @@ FontSlant StringToSlant(const char* const slantStr)
   return slant;
 }
 
+bool GetFontWeightEnumeration(const Property::Value& propertyValue, FontWeight& fontWeight)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           FONT_WEIGHT_STRING_TABLE,
+                                           FONT_WEIGHT_STRING_TABLE_COUNT,
+                                           fontWeight);
+}
+
+bool GetFontWidthEnumeration(const Property::Value& propertyValue, FontWidth& fontWidth)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           FONT_WIDTH_STRING_TABLE,
+                                           FONT_WIDTH_STRING_TABLE_COUNT,
+                                           fontWidth);
+}
+
+bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fontSlant)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           FONT_SLANT_STRING_TABLE,
+                                           FONT_SLANT_STRING_TABLE_COUNT,
+                                           fontSlant);
+}
+
 } // namespace Text
 
 } // namespace Ui

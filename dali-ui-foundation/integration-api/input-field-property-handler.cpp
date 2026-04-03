@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
+#include <dali-ui-foundation/internal/text/text-font-style.h>
 
 namespace Dali::Ui::Integration
 {
@@ -111,6 +112,33 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
+    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+    {
+      Text::FontWeight weight;
+      if(Text::GetFontWeightEnumeration(value, weight))
+      {
+        impl.SetFontWeight(weight);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+    {
+      Text::FontWidth width;
+      if(Text::GetFontWidthEnumeration(value, width))
+      {
+        impl.SetFontWidth(width);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_SLANT:
+    {
+      Text::FontSlant slant;
+      if(Text::GetFontSlantEnumeration(value, slant))
+      {
+        impl.SetFontSlant(slant);
+      }
+      break;
+    }
   }
 }
 
@@ -186,6 +214,21 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+    {
+      value = impl.GetFontWeight();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+    {
+      value = impl.GetFontWidth();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_SLANT:
+    {
+      value = impl.GetFontSlant();
       break;
     }
   }

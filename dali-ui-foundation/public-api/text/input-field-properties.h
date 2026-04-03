@@ -139,6 +139,30 @@ struct InputFieldPropertyIndex
      * @note See also: InputField::SetLayoutDirectionMode(), InputField::GetLayoutDirectionMode().
      */
     LAYOUT_DIRECTION_MODE,
+
+    /**
+     * @brief The font weight.
+     * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWeight (Property::INTEGER).
+     * @note See also: InputField::SetFontWeight(), InputField::GetFontWeight().
+     */
+    FONT_WEIGHT,
+
+    /**
+     * @brief The font width.
+     * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWidth (Property::INTEGER).
+     * @note See also: InputField::SetFontWidth(), InputField::GetFontWidth().
+     */
+    FONT_WIDTH,
+
+    /**
+     * @brief The font slant.
+     * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontSlant (Property::INTEGER).
+     * @note See also: InputField::SetFontSlant(), InputField::GetFontSlant().
+     */
+    FONT_SLANT,
   };
 };
 

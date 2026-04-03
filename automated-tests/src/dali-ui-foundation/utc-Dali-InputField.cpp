@@ -41,6 +41,9 @@ const char* const PROPERTY_NAME_CURSOR_COLOR          = "cursorColor";
 const char* const PROPERTY_NAME_SELECTION_COLOR       = "selectionColor";
 const char* const PROPERTY_NAME_MAXIMUM_LENGTH        = "maximumLength";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE = "layoutDirectionMode";
+const char* const PROPERTY_NAME_FONT_WEIGHT           = "fontWeight";
+const char* const PROPERTY_NAME_FONT_WIDTH            = "fontWidth";
+const char* const PROPERTY_NAME_FONT_SLANT            = "fontSlant";
 
 } // namespace
 
@@ -348,6 +351,51 @@ int UtcDaliInputFieldLayoutDirectionMode(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldFontWeight(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetFontWeight(Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(inputField.GetFontWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  inputField.SetFontWeight(Text::FontWeight::LIGHT);
+  DALI_TEST_EQUALS(inputField.GetFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldFontWidth(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetFontWidth(Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(inputField.GetFontWidth(), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  inputField.SetFontWidth(Text::FontWidth::CONDENSED);
+  DALI_TEST_EQUALS(inputField.GetFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldFontSlant(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetFontSlant(Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(inputField.GetFontSlant(), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  inputField.SetFontSlant(Text::FontSlant::OBLIQUE);
+  DALI_TEST_EQUALS(inputField.GetFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliInputFieldGetProperty(void)
 {
@@ -369,6 +417,9 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_COLOR) == InputField::Property::SELECTION_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == InputField::Property::FONT_WEIGHT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputField::Property::FONT_WIDTH);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == InputField::Property::FONT_SLANT);
 
   END_TEST;
 }
@@ -443,6 +494,27 @@ int UtcDaliInputFieldSetProperty(void)
 
   inputField.SetProperty(InputField::Property::LAYOUT_DIRECTION_MODE, "INHERIT");
   DALI_TEST_EQUALS(inputField.GetProperty<Text::LayoutDirectionMode>(InputField::Property::LAYOUT_DIRECTION_MODE), Text::LayoutDirectionMode::INHERIT, TEST_LOCATION);
+
+  // FONT_WEIGHT
+  inputField.SetProperty(InputField::Property::FONT_WEIGHT, Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWeight>(InputField::Property::FONT_WEIGHT), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::FONT_WEIGHT, "LIGHT");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWeight>(InputField::Property::FONT_WEIGHT), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  // FONT_WIDTH
+  inputField.SetProperty(InputField::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWidth>(InputField::Property::FONT_WIDTH), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::FONT_WIDTH, "CONDENSED");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWidth>(InputField::Property::FONT_WIDTH), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  // FONT_SLANT
+  inputField.SetProperty(InputField::Property::FONT_SLANT, Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::FONT_SLANT), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::FONT_SLANT, "OBLIQUE");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
   END_TEST;
 }

@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
+#include <dali-ui-foundation/internal/text/text-font-style.h>
 
 namespace Dali::Ui::Integration
 {
@@ -157,6 +158,33 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       }
       break;
     }
+    case Text::LabelPropertyIndex::FONT_WEIGHT:
+    {
+      Text::FontWeight weight;
+      if(Text::GetFontWeightEnumeration(value, weight))
+      {
+        impl.SetFontWeight(weight);
+      }
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_WIDTH:
+    {
+      Text::FontWidth width;
+      if(Text::GetFontWidthEnumeration(value, width))
+      {
+        impl.SetFontWidth(width);
+      }
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_SLANT:
+    {
+      Text::FontSlant slant;
+      if(Text::GetFontSlantEnumeration(value, slant))
+      {
+        impl.SetFontSlant(slant);
+      }
+      break;
+    }
   }
 }
 
@@ -262,6 +290,21 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
       value = impl.GetMarqueeOrientation();
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_WEIGHT:
+    {
+      value = impl.GetFontWeight();
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_WIDTH:
+    {
+      value = impl.GetFontWidth();
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_SLANT:
+    {
+      value = impl.GetFontSlant();
       break;
     }
   }

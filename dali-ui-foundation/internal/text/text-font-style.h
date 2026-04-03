@@ -135,6 +135,30 @@ FontWidth StringToWidth(const char* const widthStr);
  * @return The @e FontSlant value corresponding to the string.
  */
 FontSlant StringToSlant(const char* const slantStr);
+
+/**
+ * @brief Get the font weight from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] fontWeight The resulting FontWeight from the given source
+ * @return true if the resulting fontWeight has been updated
+ */
+bool GetFontWeightEnumeration(const Property::Value& propertyValue, FontWeight& fontWeight);
+
+/**
+ * @brief Get the font width from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] fontWidth The resulting FontWidth from the given source
+ * @return true if the resulting fontWidth has been updated
+ */
+bool GetFontWidthEnumeration(const Property::Value& propertyValue, FontWidth& fontWidth);
+
+/**
+ * @brief Get the font slant from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] fontSlant The resulting FontSlant from the given source
+ * @return true if the resulting fontSlant has been updated
+ */
+bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fontSlant);
 } // namespace Text
 
 } // namespace Ui
