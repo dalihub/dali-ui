@@ -48,27 +48,28 @@ public:
     AbsoluteLayout root = AbsoluteLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    // Red box: proportional position, absolute size
+
+    // Red box: all proportional (position and size)
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.1f, 0.1f, 120.0f, 80.0f))
-      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+      .SetBounds(LayoutRect(0.5f, 0.5f, 0.5f, 0.5f))
+      .SetFlags(AbsoluteLayoutFlags::ALL));
     root.Add(redBox);
 
-    // Green box: all proportional (position and size)
+    // Green box: proportional position, absolute size
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.5f, 0.5f, 0.3f, 0.2f))
-      .SetFlags(AbsoluteLayoutFlags::ALL));
+      .SetBounds(LayoutRect(0.5f, 0.5f, 100.0f, 100.0f))
+      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
     root.Add(greenBox);
 
     // Blue box: proportional size, absolute position
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(10.0f, 400.0f, 0.8f, 0.1f))
+      .SetBounds(LayoutRect(0.0f, 400.0f, 0.25f, 0.25f))
       .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
     root.Add(blueBox);
 

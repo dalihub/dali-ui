@@ -54,8 +54,8 @@ public:
     StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
-    outer.SetSpacing(16.0f);
-    outer.SetViewPadding(Extents(16, 16, 16, 16));
+    outer.SetSpacing(50);
+    outer.SetViewPadding(Extents(50, 50, 50, 50));
 
     // Section 1: RowReverse
     FlexLayout rowReverse = FlexLayout::New();
@@ -63,54 +63,54 @@ public:
     rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
     rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
     rowReverse.SetAlignItems(FlexAlign::CENTER);
-    rowReverse.SetViewPadding(Extents(8, 8, 8, 8));
+    rowReverse.SetViewPadding(Extents(50, 50, 50, 50));
     rowReverse.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     View rrBox1 = View::New();
     rrBox1.SetBackgroundColor(Color::RED);
     rrBox1.SetRequestedWidth(100.0f);
-    rrBox1.SetRequestedHeight(80.0f);
+    rrBox1.SetRequestedHeight(50.0f);
     rowReverse.Add(rrBox1);
 
     View rrBox2 = View::New();
     rrBox2.SetBackgroundColor(Color::GREEN);
     rrBox2.SetRequestedWidth(100.0f);
-    rrBox2.SetRequestedHeight(60.0f);
+    rrBox2.SetRequestedHeight(100.0f);
     rowReverse.Add(rrBox2);
 
     View rrBox3 = View::New();
     rrBox3.SetBackgroundColor(Color::BLUE);
     rrBox3.SetRequestedWidth(100.0f);
-    rrBox3.SetRequestedHeight(100.0f);
+    rrBox3.SetRequestedHeight(200.0f);
     rowReverse.Add(rrBox3);
 
     outer.Add(rowReverse);
 
     // Section 2: ColumnReverse
     FlexLayout columnReverse = FlexLayout::New();
-    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f).SetAlignment(LayoutAlignment::FILL));
+    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
     columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
     columnReverse.SetAlignItems(FlexAlign::CENTER);
-    columnReverse.SetViewPadding(Extents(8, 8, 8, 8));
+    columnReverse.SetViewPadding(Extents(50, 50, 50, 50));
     columnReverse.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     View crBox1 = View::New();
     crBox1.SetBackgroundColor(Color::YELLOW);
-    crBox1.SetRequestedWidth(200.0f);
-    crBox1.SetRequestedHeight(60.0f);
+    crBox1.SetRequestedWidth(50.0f);
+    crBox1.SetRequestedHeight(100.0f);
     columnReverse.Add(crBox1);
 
     View crBox2 = View::New();
     crBox2.SetBackgroundColor(Color::CYAN);
-    crBox2.SetRequestedWidth(160.0f);
-    crBox2.SetRequestedHeight(60.0f);
+    crBox2.SetRequestedWidth(100.0f);
+    crBox2.SetRequestedHeight(100.0f);
     columnReverse.Add(crBox2);
 
     View crBox3 = View::New();
     crBox3.SetBackgroundColor(Color::MAGENTA);
-    crBox3.SetRequestedWidth(120.0f);
-    crBox3.SetRequestedHeight(60.0f);
+    crBox3.SetRequestedWidth(200.0f);
+    crBox3.SetRequestedHeight(100.0f);
     columnReverse.Add(crBox3);
 
     outer.Add(columnReverse);

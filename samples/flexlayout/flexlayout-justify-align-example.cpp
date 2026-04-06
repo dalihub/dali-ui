@@ -52,36 +52,53 @@ public:
     root.SetDirection(FlexDirection::ROW);
     root.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
     root.SetAlignItems(FlexAlign::CENTER);
-    root.SetViewPadding(Extents(20, 20, 20, 20));
+    root.SetViewPadding(Extents(50, 50, 50, 50));
 
-    // Red box: tall
+    // Red box
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
-    redBox.SetRequestedWidth(80.0f);
+    redBox.SetRequestedWidth(50.0f);
     redBox.SetRequestedHeight(200.0f);
     root.Add(redBox);
 
-    // Green box: medium height
+    // Green box
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
-    greenBox.SetRequestedWidth(80.0f);
-    greenBox.SetRequestedHeight(120.0f);
+    greenBox.SetRequestedWidth(50.0f);
+    greenBox.SetRequestedHeight(200.0f);
+    greenBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_START));
     root.Add(greenBox);
 
-    // Blue box: short, with AlignSelf override to FlexEnd
+    // Blue box
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetRequestedWidth(80.0f);
-    blueBox.SetRequestedHeight(60.0f);
-    blueBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_END));
+    blueBox.SetRequestedWidth(50.0f);
+    blueBox.SetRequestedHeight(200.0f);
+    blueBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::CENTER));
     root.Add(blueBox);
 
-    // Yellow box: medium
+    // Yellow box
     View yellowBox = View::New();
     yellowBox.SetBackgroundColor(Color::YELLOW);
-    yellowBox.SetRequestedWidth(80.0f);
-    yellowBox.SetRequestedHeight(140.0f);
+    yellowBox.SetRequestedWidth(50.0f);
+    yellowBox.SetRequestedHeight(200.0f);
+    yellowBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::FLEX_END));
     root.Add(yellowBox);
+
+    // Cyan box
+    View cyanBox = View::New();
+    cyanBox.SetBackgroundColor(Color::CYAN);
+    cyanBox.SetRequestedWidth(50.0f);
+    cyanBox.SetRequestedHeight(200.0f);
+    cyanBox.SetLayoutParams(FlexLayoutParams::New().SetAlignSelf(FlexAlign::BASELINE));
+    root.Add(cyanBox);
+
+    // Magenta box
+    View magentaBox = View::New();
+    magentaBox.SetBackgroundColor(Color::MAGENTA);
+    magentaBox.SetRequestedWidth(50.0f);
+    magentaBox.SetRequestedHeight(200.0f);
+    root.Add(magentaBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &FlexLayoutJustifyAlignController::OnKeyEvent);

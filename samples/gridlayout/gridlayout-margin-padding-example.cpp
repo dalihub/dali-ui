@@ -25,12 +25,12 @@ using namespace Dali::Ui;
  * All margin and padding values use a uniform 25px for easy visual verification.
  *
  * 1. Padding: root GridLayout has 25px padding (gray background visible as border).
- * 2. Margin: cells alternate between no margin and 25px uniform margin.
+ * 2. Margin: cells alternate between no margin and 50px uniform margin.
  *    - (0,0) Red: no margin (fills cell completely).
- *    - (0,1) Green: 25px margin all sides.
- *    - (1,0) Blue: 25px margin all sides.
+ *    - (0,1) Green: 50px margin all sides.
+ *    - (1,0) Blue: 50px margin all sides.
  *    - (1,1) Yellow: no margin.
- *    - (2,0~1) Cyan spanning 2 columns: 25px margin all sides.
+ *    - (2,0~1) Cyan spanning 2 columns: 50px margin all sides.
  * 3. Spacing is set to 0 so margin effects are clearly visible.
  *
  * Press Escape or Back to quit.
@@ -54,12 +54,12 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(Color::GRAY);
-    root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
+    root.SetViewPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // 3 rows x 2 columns, no spacing (margin only)
-    root.AddRowDefinition(GridLength::Absolute(120.0f));
-    root.AddRowDefinition(GridLength::Absolute(120.0f));
-    root.AddRowDefinition(GridLength::Absolute(120.0f));
+    root.AddRowDefinition(GridLength::Absolute(200.0f));
+    root.AddRowDefinition(GridLength::Absolute(200.0f));
+    root.AddRowDefinition(GridLength::Absolute(200.0f));
     root.AddColumnDefinition(GridLength::Star(1.0f));
     root.AddColumnDefinition(GridLength::Star(1.0f));
 
@@ -72,17 +72,17 @@ public:
     cell00.SetLayoutParams(GridLayoutParams::New());
     root.Add(cell00);
 
-    // Cell (0,1): Green - 25px margin all sides
+    // Cell (0,1): Green - 50px margin all sides
     View cell01 = View::New();
     cell01.SetBackgroundColor(Color::GREEN);
-    cell01.SetViewMargin(Extents(25, 25, 25, 25));
+    cell01.SetViewMargin(Extents(50, 50, 50, 50));
     cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
     root.Add(cell01);
 
-    // Cell (1,0): Blue - 25px margin all sides
+    // Cell (1,0): Blue - 50px margin all sides
     View cell10 = View::New();
     cell10.SetBackgroundColor(Color::BLUE);
-    cell10.SetViewMargin(Extents(25, 25, 25, 25));
+    cell10.SetViewMargin(Extents(50, 50, 50, 50));
     cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.Add(cell10);
 
@@ -92,10 +92,10 @@ public:
     cell11.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(1));
     root.Add(cell11);
 
-    // Cell (2,0~1): Cyan - spanning 2 columns with 25px margin
+    // Cell (2,0~1): Cyan - spanning 2 columns with 50px margin
     View cell20 = View::New();
     cell20.SetBackgroundColor(Color::CYAN);
-    cell20.SetViewMargin(Extents(25, 25, 25, 25));
+    cell20.SetViewMargin(Extents(50, 50, 50, 50));
     cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumnSpan(2));
     root.Add(cell20);
 

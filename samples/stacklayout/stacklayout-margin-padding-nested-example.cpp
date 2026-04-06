@@ -46,8 +46,7 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetSpacing(0.0f);
-    root.SetViewPadding(Extents(25, 25, 25, 25)); // start, end, top, bottom
+    root.SetViewPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Section 1: Padding (visible as gap around the red bar) ---
     View padLabel = View::New();
@@ -60,21 +59,21 @@ public:
     View marginA = View::New();
     marginA.SetBackgroundColor(Color::GREEN);
     marginA.SetRequestedHeight(50.0f);
-    marginA.SetViewMargin(Extents(25, 25, 0, 0));
+    marginA.SetViewMargin(Extents(50, 50, 0, 0));
     marginA.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginA);
 
     View marginB = View::New();
     marginB.SetBackgroundColor(Color::BLUE);
     marginB.SetRequestedHeight(50.0f);
-    marginB.SetViewMargin(Extents(0, 0, 25, 25)); // top and bottom margin only
+    marginB.SetViewMargin(Extents(0, 0, 50, 50)); // top and bottom margin only
     marginB.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginB);
 
     View marginC = View::New();
     marginC.SetBackgroundColor(Color::CYAN);
     marginC.SetRequestedHeight(50.0f);
-    marginC.SetViewMargin(Extents(25, 25, 25, 25));
+    marginC.SetViewMargin(Extents(50, 50, 50, 50));
     marginC.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginC);
 
@@ -82,26 +81,41 @@ public:
     StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
     horizontalRow.SetBackgroundColor(Color::GRAY);
     horizontalRow.SetSpacing(10.0f);
-    horizontalRow.SetViewMargin(Extents(25, 25, 25, 25));
-    horizontalRow.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+    horizontalRow.SetViewMargin(Extents(50, 50, 50, 50));
+    horizontalRow.SetLayoutParams(StackLayoutParams::New()
+      .SetAlignment(LayoutAlignment::FILL)
+      .SetWeight(1.0f));
 
     View box1 = View::New();
     box1.SetBackgroundColor(Color::MAGENTA);
-    box1.SetRequestedWidth(100.0f);
-    box1.SetRequestedHeight(100.0f);
+    box1.SetLayoutParams(StackLayoutParams::New()
+      .SetAlignment(LayoutAlignment::FILL)
+      .SetWeight(1.0f));
     horizontalRow.Add(box1);
 
     View box2 = View::New();
     box2.SetBackgroundColor(Color::YELLOW);
-    box2.SetRequestedWidth(200.0f);
-    box2.SetRequestedHeight(200.0f);
+    box2.SetRequestedHeight(50.0f);
+    box2.SetLayoutParams(StackLayoutParams::New()
+      .SetAlignment(LayoutAlignment::START)
+      .SetWeight(1.0f));
     horizontalRow.Add(box2);
 
     View box3 = View::New();
     box3.SetBackgroundColor(Color::RED);
-    box3.SetRequestedWidth(150.0f);
-    box3.SetRequestedHeight(150.0f);
+    box3.SetRequestedHeight(50.0f);
+    box3.SetLayoutParams(StackLayoutParams::New()
+      .SetAlignment(LayoutAlignment::CENTER)
+      .SetWeight(1.0f));
     horizontalRow.Add(box3);
+
+    View box4 = View::New();
+    box4.SetBackgroundColor(Color::GREEN);
+    box4.SetRequestedHeight(50.0f);
+    box4.SetLayoutParams(StackLayoutParams::New()
+      .SetAlignment(LayoutAlignment::END)
+      .SetWeight(1.0f));
+    horizontalRow.Add(box4);
 
     root.Add(horizontalRow);
 

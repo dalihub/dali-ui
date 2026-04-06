@@ -49,14 +49,14 @@ public:
     GridLayout root = GridLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetViewPadding(Extents(10, 10, 10, 10));
-    root.SetRowSpacing(8.0f);
-    root.SetColumnSpacing(8.0f);
+    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetRowSpacing(10.0f);
+    root.SetColumnSpacing(10.0f);
 
     // Rows: fixed header, flexible middle, fixed footer
-    root.AddRowDefinition(GridLength::Absolute(80.0f));
+    root.AddRowDefinition(GridLength::Absolute(100.0f));
     root.AddRowDefinition(GridLength::Star(1.0f));
-    root.AddRowDefinition(GridLength::Absolute(60.0f));
+    root.AddRowDefinition(GridLength::Absolute(50.0f));
 
     // Columns: fixed sidebar, Star(2) content, Star(1) panel
     root.AddColumnDefinition(GridLength::Absolute(100.0f));

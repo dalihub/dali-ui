@@ -50,21 +50,21 @@ public:
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(20.0f, 20.0f, 120.0f, 80.0f)));
+      .SetBounds(LayoutRect(50.0f, 50.0f, 50.0f, 50.0f)));
     root.Add(redBox);
 
     // Green box: center area
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(150.0f, 200.0f, 160.0f, 100.0f)));
+      .SetBounds(LayoutRect(100.0f, 100.0f, 100.0f, 100.0f)));
     root.Add(greenBox);
 
     // Blue box: lower-right area
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(280.0f, 400.0f, 100.0f, 60.0f)));
+      .SetBounds(LayoutRect(200.0f, 200.0f, 100.0f, 50.0f)));
     root.Add(blueBox);
 
     window.Add(root);

@@ -47,58 +47,80 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    FlexLayout root = FlexLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetDirection(FlexDirection::ROW);
-    root.SetWrap(FlexWrap::WRAP);
-    root.SetJustifyContent(FlexJustify::FLEX_START);
-    root.SetAlignContent(FlexAlign::CENTER);
-    root.SetViewPadding(Extents(15, 15, 15, 15));
+    // Outer vertical StackLayout to hold two sections
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
+    outer.SetViewPadding(Extents(50, 50, 50, 50));
 
-    // Box 1: Red, basis 150, grow 1
+    FlexLayout first = FlexLayout::New();
+    first.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    first.SetDirection(FlexDirection::ROW);
+    first.SetWrap(FlexWrap::WRAP);
+    first.SetJustifyContent(FlexJustify::FLEX_START);
+    first.SetAlignContent(FlexAlign::CENTER);
+
+    // Box 1: Red, basis 50, grow 1
     View box1 = View::New();
     box1.SetBackgroundColor(Color::RED);
-    box1.SetRequestedHeight(80.0f);
-    box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
-    root.Add(box1);
+    box1.SetRequestedHeight(100.0f);
+    box1.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    first.Add(box1);
 
-    // Box 2: Green, basis 150, grow 2
+    // Box 2: Green, basis 50, grow 1
     View box2 = View::New();
     box2.SetBackgroundColor(Color::GREEN);
-    box2.SetRequestedHeight(80.0f);
-    box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(2.0f));
-    root.Add(box2);
+    box2.SetRequestedHeight(100.0f);
+    box2.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    first.Add(box2);
 
-    // Box 3: Blue, basis 150, grow 1
+    // Box 3: Blue, basis 100, grow 2
     View box3 = View::New();
     box3.SetBackgroundColor(Color::BLUE);
-    box3.SetRequestedHeight(80.0f);
-    box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
-    root.Add(box3);
+    box3.SetRequestedHeight(100.0f);
+    box3.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(2.0f));
+    first.Add(box3);
 
-    // Box 4: Yellow, basis 150, grow 1
+    outer.Add(first);
+
+    FlexLayout second = FlexLayout::New();
+    second.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    second.SetDirection(FlexDirection::ROW);
+    second.SetWrap(FlexWrap::WRAP);
+    second.SetJustifyContent(FlexJustify::FLEX_START);
+    second.SetAlignContent(FlexAlign::CENTER);
+
+    // Box 4: Yellow, basis 100, grow 1
     View box4 = View::New();
     box4.SetBackgroundColor(Color::YELLOW);
-    box4.SetRequestedHeight(80.0f);
-    box4.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
-    root.Add(box4);
+    box4.SetRequestedHeight(100.0f);
+    box4.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(1.0f));
+    second.Add(box4);
 
-    // Box 5: Cyan, basis 150, grow 1
+    // Box 5: Cyan, basis 100, grow 1
     View box5 = View::New();
     box5.SetBackgroundColor(Color::CYAN);
-    box5.SetRequestedHeight(80.0f);
-    box5.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(1.0f));
-    root.Add(box5);
+    box5.SetRequestedHeight(100.0f);
+    box5.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(100.0f).SetFlexGrow(1.0f));
+    second.Add(box5);
 
-    // Box 6: Magenta, basis 150, grow 3
+    // Box 6: Magenta, basis 200, grow 2
     View box6 = View::New();
     box6.SetBackgroundColor(Color::MAGENTA);
-    box6.SetRequestedHeight(80.0f);
-    box6.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(150.0f).SetFlexGrow(3.0f));
-    root.Add(box6);
+    box6.SetRequestedHeight(100.0f);
+    box6.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(200.0f).SetFlexGrow(2.0f));
+    second.Add(box6);
 
-    window.Add(root);
+    outer.Add(second);
+
+    // // Box 5: Cyan, basis 100, grow 4
+    // View box8 = View::New();
+    // box8.SetBackgroundColor(Color::CYAN);
+    // box8.SetRequestedHeight(100.0f);
+    // box8.SetLayoutParams(FlexLayoutParams::New().SetFlexBasis(50.0f).SetFlexGrow(1.0f));
+    // root.Add(box8);
+
+    window.Add(outer);
     window.KeyEventSignal().Connect(this, &FlexLayoutWrapGrowController::OnKeyEvent);
   }
 

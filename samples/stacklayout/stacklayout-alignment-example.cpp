@@ -48,13 +48,13 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetSpacing(12.0f);
-    root.SetViewPadding(Extents(24, 24, 24, 24));
+    root.SetSpacing(50.0f);
+    root.SetViewPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Start (left-aligned narrow box)
     View rowStart = View::New();
     rowStart.SetBackgroundColor(Color::RED);
-    rowStart.SetRequestedWidth(80.0f);
+    rowStart.SetRequestedWidth(100.0f);
     rowStart.SetRequestedHeight(50.0f);
     rowStart.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
     root.Add(rowStart);
@@ -62,7 +62,7 @@ public:
     // Row 2: Center
     View rowCenter = View::New();
     rowCenter.SetBackgroundColor(Color::GREEN);
-    rowCenter.SetRequestedWidth(80.0f);
+    rowCenter.SetRequestedWidth(100.0f);
     rowCenter.SetRequestedHeight(50.0f);
     rowCenter.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
     root.Add(rowCenter);
@@ -70,7 +70,7 @@ public:
     // Row 3: End (right-aligned narrow box)
     View rowEnd = View::New();
     rowEnd.SetBackgroundColor(Color::BLUE);
-    rowEnd.SetRequestedWidth(80.0f);
+    rowEnd.SetRequestedWidth(100.0f);
     rowEnd.SetRequestedHeight(50.0f);
     rowEnd.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::END));
     root.Add(rowEnd);

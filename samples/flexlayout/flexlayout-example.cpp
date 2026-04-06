@@ -48,7 +48,7 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::ROW);
     root.SetAlignItems(FlexAlign::STRETCH);
-    root.SetViewPadding(Extents(20, 20, 20, 20));
+    root.SetViewPadding(Extents(50, 50, 50, 50));
 
     // Red box: fixed width
     View redBox = View::New();
@@ -66,7 +66,7 @@ public:
     // Blue box: fixed width
     View blueBox = View::New();
     blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetRequestedWidth(80.0f);
+    blueBox.SetRequestedWidth(100.0f);
     root.Add(blueBox);
 
     window.Add(root);

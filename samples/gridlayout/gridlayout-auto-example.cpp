@@ -54,9 +54,9 @@ public:
     GridLayout root = GridLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetViewPadding(Extents(12, 12, 12, 12));
-    root.SetRowSpacing(6.0f);
-    root.SetColumnSpacing(6.0f);
+    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetRowSpacing(10.0f);
+    root.SetColumnSpacing(10.0f);
 
     // Use batch API: SetRowDefinitions / SetColumnDefinitions
     Dali::Vector<GridLength> rowDefinition;
@@ -75,22 +75,22 @@ public:
     // (0,0): Auto-width label - narrow fixed-size box simulating a label
     View label00 = View::New();
     label00.SetBackgroundColor(Color::RED);
-    label00.SetRequestedWidth(80.0f);
-    label00.SetRequestedHeight(40.0f);
+    label00.SetRequestedWidth(100.0f);
+    label00.SetRequestedHeight(50.0f);
     label00.SetLayoutParams(GridLayoutParams::New());
     root.Add(label00);
 
     // (0,1): Header area in Auto row, Star column
     View header = View::New();
     header.SetBackgroundColor(Vector4(1.0f, 0.6f, 0.6f, 1.0f));
-    header.SetRequestedHeight(40.0f);
+    header.SetRequestedHeight(50.0f);
     header.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
     root.Add(header);
 
     // (1,0): Sidebar in Auto column, Star row
     View sidebar = View::New();
     sidebar.SetBackgroundColor(Color::GREEN);
-    sidebar.SetRequestedWidth(80.0f);
+    sidebar.SetRequestedWidth(100.0f);
     sidebar.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.Add(sidebar);
 
@@ -103,15 +103,15 @@ public:
     // (2,0): Footer label in Auto row, Auto column
     View label20 = View::New();
     label20.SetBackgroundColor(Color::YELLOW);
-    label20.SetRequestedWidth(80.0f);
-    label20.SetRequestedHeight(30.0f);
+    label20.SetRequestedWidth(100.0f);
+    label20.SetRequestedHeight(50.0f);
     label20.SetLayoutParams(GridLayoutParams::New().SetRow(2));
     root.Add(label20);
 
     // (2,1): Footer content spanning the Star column
     View footer = View::New();
     footer.SetBackgroundColor(Color::CYAN);
-    footer.SetRequestedHeight(30.0f);
+    footer.SetRequestedHeight(50.0f);
     footer.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumn(1));
     root.Add(footer);
 
