@@ -25,17 +25,60 @@ constexpr float STACK_SPACING = 12.0f;
 constexpr float STACK_PADDING = 20.0f;
 constexpr float LABEL_HEIGHT  = 66.0f;
 
-const char* SINGLE_LINE_TEXT = "TextFit single line example text";
-const char* MULTI_LINE_TEXT  = "This is a multi line TextFit example. The font size should be adjusted to fit the available space.";
+const char* SINGLE_LINE_TEXT = "TextFit candidate single line example";
+const char* MULTI_LINE_TEXT  = "This is a multi line TextFit candidate example. The font size and line height should be adjusted to fit the available space.";
+
+const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
+{
+  static Dali::Vector<Text::FitCandidate> candidates = [] {
+    Dali::Vector<Text::FitCandidate> values;
+    values.PushBack(Text::FitCandidate(16.0f, 32.0f));
+    values.PushBack(Text::FitCandidate(20.0f, 40.0f));
+    values.PushBack(Text::FitCandidate(24.0f, 48.0f));
+    values.PushBack(Text::FitCandidate(28.0f, 56.0f));
+    values.PushBack(Text::FitCandidate(32.0f, 64.0f));
+    return values;
+  }();
+  return candidates;
+}
+
+const Dali::Vector<Text::FitCandidate>& GetAlternativeCandidates()
+{
+  static Dali::Vector<Text::FitCandidate> candidates = [] {
+    Dali::Vector<Text::FitCandidate> values;
+    values.PushBack(Text::FitCandidate(16.0f, 30.0f));
+    values.PushBack(Text::FitCandidate(20.0f, 30.0f));
+    values.PushBack(Text::FitCandidate(24.0f, 40.0f));
+    values.PushBack(Text::FitCandidate(28.0f, 40.0f));
+    values.PushBack(Text::FitCandidate(32.0f, 60.0f));
+    return values;
+  }();
+  return candidates;
+}
+
+const Dali::Vector<Text::FitCandidate>& GetFontSizeCandidates()
+{
+  static Dali::Vector<Text::FitCandidate> candidates = [] {
+    Dali::Vector<Text::FitCandidate> values;
+    values.PushBack(Text::FitCandidate().SetFontSize(16.0f));
+    values.PushBack(Text::FitCandidate().SetFontSize(20.0f));
+    values.PushBack(Text::FitCandidate().SetFontSize(24.0f));
+    values.PushBack(Text::FitCandidate().SetFontSize(28.0f));
+    values.PushBack(Text::FitCandidate().SetFontSize(32.0f));
+    return values;
+  }();
+  return candidates;
+}
+
 } // namespace
 
-class TextFitController : public ConnectionTracker
+class TextFitCandidateController : public ConnectionTracker
 {
 public:
-  explicit TextFitController(Application& application)
+  explicit TextFitCandidateController(Application& application)
   : mApplication(application)
   {
-    mApplication.InitSignal().Connect(this, &TextFitController::OnInit);
+    mApplication.InitSignal().Connect(this, &TextFitCandidateController::OnInit);
   }
 
 private:
@@ -52,15 +95,15 @@ private:
         .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
 
-          Label::New("TextFit Example")
+          Label::New("TextFit Candidate Example")
             .SetFontSize(24.0f),
 
-          Label::New("Press '1' to reset TextFit, '2' to set TextFit")
+          Label::New("Press '1' to reset TextFit, '2' and '3' to set alternative candidates")
             .SetFontSize(14.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
             .SetViewPadding(Extents(10, 10, 10, 10)),
 
-          // 1. MATCH_PARENT  fixed height / single line
+          // 1. MATCH_PARENT + fixed height / single line
           Label::New("1. MATCH_PARENT + fixed height / single line")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
@@ -73,8 +116,8 @@ private:
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
             .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange())
-            .As(mMatchFixedSingleLine),
+            .SetTextFit(GetFitCandidates())
+            .As(mFixedSingleLineLabel),
 
           // 2. MATCH_PARENT + fixed height / multi line
           Label::New("2. MATCH_PARENT + fixed height / multi line")
@@ -89,8 +132,8 @@ private:
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
             .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
-            .As(mMatchFixedMultiLine),
+            .SetTextFit(GetFitCandidates())
+            .As(mFixedMultiLineLabel),
 
           // 3. WRAP_CONTENT + WRAP_CONTENT / single line
           Label::New("3. WRAP_CONTENT + WRAP_CONTENT / single line")
@@ -105,7 +148,7 @@ private:
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
             .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange())
+            .SetTextFit(GetFitCandidates())
             .As(mWrapWrapSingleLine),
 
           // 4. WRAP_CONTENT + WRAP_CONTENT / multi line
@@ -119,49 +162,14 @@ private:
             .SetRequestedHeight(WRAP_CONTENT)
             .SetMultiLine(true)
             .SetFontSize(20.0f)
+            .SetLineHeight(2.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
             .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
+            .SetTextFit(GetFitCandidates())
             .As(mWrapWrapMultiLine),
-
-          // 5. MATCH_PARENT + fixed height / multi line / relative line height
-          Label::New("5. MATCH_PARENT + fixed height / multi line / relative line height")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
-
-          Label::New(MULTI_LINE_TEXT)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(LABEL_HEIGHT * 2.0f)
-            .SetMultiLine(true)
-            .SetFontSize(20.0f)
-            .SetLineHeight(1.5f)
-            .SetLineHeightMode(Text::LineHeightMode::RELATIVE)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
-            .As(mFixedMultiLineRelativeLineHeight),
-
-          // 6. MATCH_PARENT + fixed height / multi line / absolute line height
-          Label::New("6. MATCH_PARENT + fixed height / multi line / absolute line height")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
-
-          Label::New(MULTI_LINE_TEXT)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(LABEL_HEIGHT * 2.0f)
-            .SetMultiLine(true)
-            .SetFontSize(20.0f)
-            .SetLineHeight(30.0f)
-            .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
-            .As(mFixedMultiLineAbsoluteLineHeight),
         }));
 
-    window.KeyEventSignal().Connect(this, &TextFitController::OnKeyEvent);
+    window.KeyEventSignal().Connect(this, &TextFitCandidateController::OnKeyEvent);
   }
 
   void OnKeyEvent(const KeyEvent& event)
@@ -179,34 +187,36 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mMatchFixedSingleLine.ResetTextFit();
-      mMatchFixedMultiLine.ResetTextFit();
+      mFixedSingleLineLabel.ResetTextFit();
+      mFixedMultiLineLabel.ResetTextFit();
       mWrapWrapSingleLine.ResetTextFit();
       mWrapWrapMultiLine.ResetTextFit();
-      mFixedMultiLineRelativeLineHeight.ResetTextFit();
-      mFixedMultiLineAbsoluteLineHeight.ResetTextFit();
       DALI_LOG_ERROR("Reset TextFit on all labels\n");
     }
     else if(event.GetKeyName() == "2")
     {
-      mMatchFixedSingleLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 8.0f));
-      mMatchFixedMultiLine.SetTextFit(Text::FitRange());
-      mWrapWrapSingleLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 8.0f));
-      mWrapWrapMultiLine.SetTextFit(Text::FitRange());
-      mFixedMultiLineRelativeLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
-      mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
-      DALI_LOG_ERROR("Set TextFit on all labels\n");
+      mFixedSingleLineLabel.SetTextFit(GetAlternativeCandidates());
+      mFixedMultiLineLabel.SetTextFit(GetAlternativeCandidates());
+      mWrapWrapSingleLine.SetTextFit(GetAlternativeCandidates());
+      mWrapWrapMultiLine.SetTextFit(GetAlternativeCandidates());
+      DALI_LOG_ERROR("Set alternative candidates on all labels\n");
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      mFixedSingleLineLabel.SetTextFit(GetFontSizeCandidates());
+      mFixedMultiLineLabel.SetTextFit(GetFontSizeCandidates());
+      mWrapWrapSingleLine.SetTextFit(GetFontSizeCandidates());
+      mWrapWrapMultiLine.SetTextFit(GetFontSizeCandidates());
+      DALI_LOG_ERROR("Set only font size candidates on all labels\n");
     }
   }
 
 private:
   Application& mApplication;
-  Label        mMatchFixedSingleLine;
-  Label        mMatchFixedMultiLine;
+  Label        mFixedSingleLineLabel;
+  Label        mFixedMultiLineLabel;
   Label        mWrapWrapSingleLine;
   Label        mWrapWrapMultiLine;
-  Label        mFixedMultiLineRelativeLineHeight;
-  Label        mFixedMultiLineAbsoluteLineHeight;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
@@ -214,7 +224,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
 
-  TextFitController controller(application);
+  TextFitCandidateController controller(application);
   application.MainLoop();
 
   return 0;

@@ -436,6 +436,12 @@ Label& Label::SetTextFit(const Text::FitRange& range)
   return *this;
 }
 
+Label& Label::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
+{
+  GetImpl(*this).SetTextFit(candidates);
+  return *this;
+}
+
 void Label::ResetTextFit()
 {
   GetImpl(*this).ResetTextFit();

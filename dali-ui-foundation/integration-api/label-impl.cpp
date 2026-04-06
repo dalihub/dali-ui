@@ -559,10 +559,9 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
   // If TextFitArray is enabled, this should be disabled.
   if(mController->IsTextFitArrayEnabled())
   {
-    mController->SetDefaultLineSize(mController->GetCurrentLineSize());
     mController->SetTextFitArrayEnabled(false);
+    mController->ClearTextFitArray();
   }
-
   mController->SetTextFitEnabled(true);
   // Use the current line size as the baseline for text fit.
   mController->SetTextFitLineSize(mController->GetDefaultLineSize());
@@ -570,13 +569,25 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
   mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitChanged(true);
-  RefreshText();
+}
+
+void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
+{
+  // If TextFit is enabled, this should be disabled.
+  if(mController->IsTextFitEnabled())
+  {
+    mController->SetTextFitEnabled(false);
+  }
+  mController->SetTextFitArrayEnabled(true);
+  mController->SetTextFitArray(candidates);
 }
 
 void LabelImpl::ResetTextFit()
 {
   mController->SetTextFitEnabled(false);
-  RefreshText();
+  mController->SetTextFitArrayEnabled(false);
+  mController->ClearTextFitArray();
+  UpdateLineHeight();
 }
 
 // =============================================================================
@@ -858,17 +869,21 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();
 
-  const float minWidth        = GetMinimumWidth();
-  const float maxWidth        = GetMaximumWidth();
-  const float minHeight       = GetMinimumHeight();
-  const float maxHeight       = GetMaximumHeight();
-  const bool  useBaseFontSize = mController->IsTextFitEnabled() && ((requestedWidth == WRAP_CONTENT) || requestedHeight == WRAP_CONTENT);
+  const float minWidth  = GetMinimumWidth();
+  const float maxWidth  = GetMaximumWidth();
+  const float minHeight = GetMinimumHeight();
+  const float maxHeight = GetMaximumHeight();
 
-  // Measure wrap-content size with the configured font size instead of text fit.
+  const bool useTextFitRange    = mController->IsTextFitEnabled();
+  const bool useFitCandidates   = mController->IsTextFitArrayEnabled();
+  const bool wrapContentMeasure = (requestedWidth == WRAP_CONTENT) || (requestedHeight == WRAP_CONTENT);
+  const bool useBaseFontSize    = (useTextFitRange || useFitCandidates) && wrapContentMeasure;
+
+  // Measure wrap-content size with the default font size instead of text fit.
   if(useBaseFontSize)
   {
     mController->SetTextFitEnabled(false);
-    RefreshText();
+    mController->SetTextFitArrayEnabled(false);
   }
 
   const Vector3 naturalSize = GetNaturalSize();
@@ -910,7 +925,8 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
 
   if(useBaseFontSize)
   {
-    mController->SetTextFitEnabled(true);
+    mController->SetTextFitEnabled(useTextFitRange);
+    mController->SetTextFitArrayEnabled(useFitCandidates);
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);
@@ -967,27 +983,17 @@ void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
 // =============================================================================
 // Implementation
 // =============================================================================
-void LabelImpl::SetMinimumLineHeight(float height)
-{
-  // If TextFitArray is enabled, do not update the default line size.
-  if(!mController->IsTextFitArrayEnabled())
-  {
-    mTextUpdateNeeded = mController->SetDefaultLineSize(height) || mTextUpdateNeeded;
-  }
-  mController->SetCurrentLineSize(height);
-}
-
 void LabelImpl::UpdateLineHeight()
 {
   if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
   {
-    SetMinimumLineHeight(0.0f);
-    mController->SetRelativeLineSize(mLineHeight);
+    mTextUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
+    mTextUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
   }
   else
   {
-    mController->SetRelativeLineSize(-1.0f);
-    SetMinimumLineHeight(mLineHeight);
+    mTextUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
+    mTextUpdateNeeded |= mController->SetDefaultLineSize(mLineHeight);
   }
   RequestTextRelayout();
 }
@@ -1330,13 +1336,6 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
       mController->SetAutoScrollEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
     }
   }
-}
-
-void LabelImpl::RefreshText()
-{
-  std::string text;
-  mController->GetRawText(text);
-  SetText(ToDaliString(text));
 }
 
 // =============================================================================

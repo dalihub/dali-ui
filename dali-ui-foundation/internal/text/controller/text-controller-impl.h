@@ -1122,7 +1122,7 @@ public:
   Vector2     mTextFitContentSize; ///< Size of Text fit content
   std::string mRawText;            ///< Raw text including markup tag.
 
-  std::vector<Ui::Text::FitOption> mTextFitArray; ///< List of FitOption for TextFitArray operation.
+  Dali::Vector<Text::FitCandidate> mTextFitArray; ///< List of FitCandidate for TextFitArray operation.
 
   bool mRecalculateNaturalSize : 1;         ///< Whether the natural size needs to be recalculated.
   bool mRecalculateLayoutSize : 1;          ///< Whether the layout size needs to be recalculated.

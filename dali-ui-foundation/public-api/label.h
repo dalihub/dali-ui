@@ -23,6 +23,7 @@
 #include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -568,6 +569,19 @@ public: // Setters for chaining
    * @param[in] range The text fit range configuration.
    */
   Label& SetTextFit(const Text::FitRange& range);
+
+  /**
+   * @brief Sets the text fit candidates.
+   *
+   * Text fit selects the largest candidate that fits into the available
+   * layout space. Each candidate defines a font size and line height.
+   *
+   * @note Text fit is intended for bounded layout sizes. When width or height is
+   * WRAP_CONTENT, measurement uses the configured font size instead.
+   *
+   * @param[in] candidates The vector of text fit candidates.
+   */
+  Label& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
    * @brief Resets the text fit.

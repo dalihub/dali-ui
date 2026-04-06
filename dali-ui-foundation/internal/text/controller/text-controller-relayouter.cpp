@@ -62,6 +62,11 @@ float GetDpi()
   return static_cast<float>(horizontalDpi);
 }
 
+float ConvertPixelToPoint(float pixel)
+{
+  return pixel * 72.0f / GetDpi();
+}
+
 float ConvertPointToPixel(float point)
 {
   // Pixel size = Point size * DPI / 72.f
@@ -275,62 +280,65 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
   if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_ARRAY_LAYOUT", "[%p]", static_cast<void*>(&controller));
-    std::vector<Ui::Text::FitOption> fitOptions         = impl.mTextFitArray;
-    int                              numberOfFitOptions = static_cast<int>(fitOptions.size());
-    if(numberOfFitOptions == 0)
+
+    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = impl.mTextFitArray;
+    const int                            candidateCount = static_cast<int>(fitCandidates.Count());
+
+    if(candidateCount == 0)
     {
-      DALI_LOG_ERROR("fitOptions is empty\n");
+      DALI_LOG_ERROR("fitCandidates is empty\n");
       return;
     }
 
     ModelPtr& model          = impl.mModel;
-    bool      actualellipsis = model->mElideEnabled;
+    bool      actualEllipsis = model->mElideEnabled;
     model->mElideEnabled     = false;
 
-    // Sort in ascending order by PointSize.
-    std::sort(fitOptions.begin(), fitOptions.end(), compareByPointSize);
+    // Sort in ascending order by font size.
+    std::sort(fitCandidates.Begin(), fitCandidates.End(), compareByPointSize);
 
     // Decide whether to use binary search.
-    // If MinLineSize is not sorted in ascending order,
+    // If lineHeight is not sorted in ascending order,
     // binary search cannot guarantee that it will always find the best value.
-    bool  binarySearch    = true;
-    float prevMinLineSize = 0.0f;
-    for(Ui::Text::FitOption& option : fitOptions)
+    bool  binarySearch   = true;
+    float prevLineHeight = 0.0f;
+
+    for(auto it = fitCandidates.Begin(); it != fitCandidates.End(); ++it)
     {
-      float optionMinLineSize = option.GetMinLineSize();
-      if(prevMinLineSize > optionMinLineSize)
+      const float candidateLineHeight = it->GetLineHeight();
+      if(prevLineHeight > candidateLineHeight)
       {
         binarySearch = false;
         break;
       }
-      prevMinLineSize = optionMinLineSize;
+      prevLineHeight = candidateLineHeight;
     }
 
-    // Set the first FitOption(Minimum PointSize) to the best value.
-    // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    Ui::Text::FitOption firstOption           = fitOptions.front();
-    bool                bestSizeUpdatedLatest = false;
-    float               bestPointSize         = firstOption.GetPointSize();
-    float               bestMinLineSize       = firstOption.GetMinLineSize();
+    // Set the first candidate (minimum font size) as the default best value.
+    // If the search does not find an optimal value, the minimum point size will be used.
+    const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
+    bool                          bestSizeUpdatedLatest = false;
+    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize());
+    float                         bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
-      int left  = 0u;
-      int right = numberOfFitOptions - 1;
+      int left  = 0;
+      int right = candidateCount - 1;
 
       while(left <= right)
       {
-        int                 mid             = left + (right - left) / 2;
-        Ui::Text::FitOption option          = fitOptions[mid];
-        float               testPointSize   = option.GetPointSize();
-        float               testMinLineSize = option.GetMinLineSize();
-        impl.SetDefaultLineSize(testMinLineSize);
+        const int                     mid            = left + (right - left) / 2;
+        const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
+        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize());
+        const float                   testLineHeight = candidate.GetLineHeight();
+        impl.SetDefaultLineSize(testLineHeight);
 
         if(CheckForTextFit(controller, testPointSize, layoutSize))
         {
           bestSizeUpdatedLatest = true;
           bestPointSize         = testPointSize;
-          bestMinLineSize       = testMinLineSize;
+          bestLineHeight        = testLineHeight;
           left                  = mid + 1;
         }
         else
@@ -342,19 +350,20 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
     }
     else
     {
-      // If binary search is not possible, search sequentially starting from the largest PointSize.
-      for(auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
+      // If binary search is not possible, search sequentially from the largest font size.
+      for(auto it = fitCandidates.End(); it != fitCandidates.Begin();)
       {
-        Ui::Text::FitOption option          = *it;
-        float               testPointSize   = option.GetPointSize();
-        float               testMinLineSize = option.GetMinLineSize();
-        impl.SetDefaultLineSize(testMinLineSize);
+        --it;
+
+        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize());
+        const float testLineHeight = it->GetLineHeight();
+        impl.SetDefaultLineSize(testLineHeight);
 
         if(CheckForTextFit(controller, testPointSize, layoutSize))
         {
           bestSizeUpdatedLatest = true;
           bestPointSize         = testPointSize;
-          bestMinLineSize       = testMinLineSize;
+          bestLineHeight        = testLineHeight;
           break;
         }
         else
@@ -364,14 +373,14 @@ void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, 
       }
     }
 
-    // Best point size was not updated. re-run so the TextFit should be fitted really.
+    // Best point size was not updated. Re-run so the text fit is really applied.
     if(!bestSizeUpdatedLatest)
     {
-      impl.SetDefaultLineSize(bestMinLineSize);
+      impl.SetDefaultLineSize(bestLineHeight);
       CheckForTextFit(controller, bestPointSize, layoutSize);
     }
 
-    model->mElideEnabled              = actualellipsis;
+    model->mElideEnabled              = actualEllipsis;
     impl.mFontDefaults->mFitPointSize = bestPointSize;
     impl.mFontDefaults->sizeDefined   = true;
     impl.ClearFontData();

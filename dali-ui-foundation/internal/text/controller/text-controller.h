@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali::Ui::Text
@@ -566,14 +567,21 @@ public: // Configure the text controller.
    *
    * @param[in] fitOptions The list of text fit options.
    */
-  void SetTextFitArray(std::vector<Ui::Text::FitOption>& fitOptions);
+  void SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
    * @brief Retrieve the text fit array.
    *
    * @return The list of text fit options.
    */
-  std::vector<Ui::Text::FitOption>& GetTextFitArray();
+  const Dali::Vector<Text::FitCandidate>& GetTextFitArray();
+
+  /**
+   * @brief Clears the text fit array.
+   *
+   * Removes all stored text fit candidates.
+   */
+  void ClearTextFitArray();
 
   /**
    * @brief Sets disabled color opacity.

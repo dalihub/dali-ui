@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
@@ -352,6 +353,11 @@ public:
   void SetTextFit(const Text::FitRange& range);
 
   /**
+   * @copydoc Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::FitCandidate>&)
+   */
+  void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
+
+  /**
    * @copydoc Dali::Ui::Label::ResetTextFit
    */
   void ResetTextFit();
@@ -466,11 +472,6 @@ public: // From AnchorControlInterface
 
 private: // Implementation
   /**
-   * @brief Sets the minimum line height used by the text controller.
-   */
-  void SetMinimumLineHeight(float height);
-
-  /**
    * @brief Updates the effective line height based on the current LineHeightMode.
    */
   void UpdateLineHeight();
@@ -571,11 +572,6 @@ private: // Implementation
    * @param[out] originSize The laid-out text size used to compute the initial scroll offset.
    */
   void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
-
-  /**
-   * @brief Refreshes the text to trigger an update.
-   */
-  void RefreshText();
 
   // Properties
 public:

@@ -462,6 +462,8 @@ bool Controller::IsTextElideEnabled() const
 void Controller::SetTextFitEnabled(bool enabled)
 {
   mImpl->mTextFitEnabled = enabled;
+  mImpl->ClearFontData();
+  mImpl->RequestRelayout();
 }
 
 bool Controller::IsTextFitEnabled() const
@@ -559,14 +561,22 @@ bool Controller::IsTextFitArrayEnabled() const
   return mImpl->mTextFitArrayEnabled;
 }
 
-void Controller::SetTextFitArray(std::vector<Ui::Text::FitOption>& fitOptions)
+void Controller::SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates)
 {
-  mImpl->mTextFitArray = fitOptions;
+  mImpl->mTextFitArray = candidates;
 }
 
-std::vector<Ui::Text::FitOption>& Controller::GetTextFitArray()
+const Dali::Vector<Text::FitCandidate>& Controller::GetTextFitArray()
 {
   return mImpl->mTextFitArray;
+}
+
+void Controller::ClearTextFitArray()
+{
+  if(!mImpl->mTextFitArray.Empty())
+  {
+    mImpl->mTextFitArray.Clear();
+  }
 }
 
 void Controller::SetPlaceholderTextElideEnabled(bool enabled)

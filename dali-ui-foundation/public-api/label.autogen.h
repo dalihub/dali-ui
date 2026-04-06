@@ -217,4 +217,16 @@
   * \
   * @param[in] range The text fit range configuration. \
   */ \
-  ChildClass& SetTextFit(const Text::FitRange& range) { Label::SetTextFit(range); return *this; }
+  ChildClass& SetTextFit(const Text::FitRange& range) { Label::SetTextFit(range); return *this; } \
+  /** \
+  * @brief Sets the text fit candidates. \
+  * \
+  * Text fit selects the largest candidate that fits into the available \
+  * layout space. Each candidate defines a font size and line height. \
+  * \
+  * @note Text fit is intended for bounded layout sizes. When width or height is \
+  * WRAP_CONTENT, measurement uses the configured font size instead. \
+  * \
+  * @param[in] candidates The vector of text fit candidates. \
+  */ \
+  ChildClass& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates) { Label::SetTextFit(candidates); return *this; }
