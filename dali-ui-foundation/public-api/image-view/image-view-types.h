@@ -63,23 +63,21 @@ enum Type
 } // namespace MaskingType
 
 /**
- * @brief WrapMode specifies how texture coordinates outside the range [0, 1] are handled.
- */
-namespace WrapMode
-{
-enum Type
-{
-  DEFAULT,        ///< The default wrap mode behavior
-  CLAMP_TO_EDGE,  ///< Clamps coordinates to the edge of the texture
-  REPEAT,         ///< Repeats the texture outside [0, 1]
-  MIRRORED_REPEAT ///< Repeats the texture with mirroring
-};
-} // namespace WrapMode
-
-/**
  * @brief SamplingMode is an alias for Dali::SamplingMode, configuring the filter applied when scaling the image.
  */
 namespace SamplingMode = Dali::SamplingMode;
+
+/**
+ * @brief LoadPolicy controls when the image is loaded.
+ */
+namespace LoadPolicy
+{
+enum Type
+{
+  IMMEDIATE = 0, ///< The image is loaded when the ImageView is created.
+  ATTACHED       ///< The image is loaded when the ImageView is attached to the scene.
+};
+} // namespace LoadPolicy
 
 /**
  * @brief ReleasePolicy controls when the image texture is released from the cache.

@@ -25,9 +25,9 @@ using namespace Dali::Ui;
 /**
  * ImageView Sizing sample — two independent sections:
  *
- * [Section 1: SynchronousSizing]
+ * [Section 1: ImageLoadWithViewSize]
  * - Direction: view size → image load size.
- * - Fixed-height container (200px). FitSizeToImage is always OFF.
+ * - Fixed-height container (200px).
  * - OFF: image decoded at full resolution once → ResourceReady fires 1 time.
  * - ON : image decoded at full resolution first, then OnSetTransform detects the view
  *        size and reloads at display dimensions → ResourceReady fires 2 times.
@@ -36,10 +36,9 @@ using namespace Dali::Ui;
  *   because mLastRequiredSize already holds the correct view size.
  * - The info label shows the ResourceReady call count to make this difference observable.
  *
- * WARNING: FitSizeToImage and SynchronousSizing must NOT be enabled together on the
- * same ImageView. They have opposing directions:
- *   FitSizeToImage    — image natural size → view size  (needs true image dimensions)
- *   SynchronousSizing — view size → image load size     (overrides GetNaturalSize with view size)
+ * NOTE: Do NOT use ImageLoadWithViewSize together with a WRAP_CONTENT axis expecting
+ * aspect-ratio adjustment. ImageLoadWithViewSize overrides GetNaturalSize with the view
+ * size, making aspect-ratio layout ineffective.
  *
  * [Section 2: OrientationCorrection]
  * - Corrects EXIF orientation metadata embedded in JPEG files.
@@ -53,7 +52,7 @@ class ImageViewSizingController : public ConnectionTracker
 public:
   explicit ImageViewSizingController(Application& application)
   : mApplication(application),
-    mSynchronousSizing(false),
+    mImageLoadWithViewSize(false),
     mOrientationCorrection(true),
     mSyncResourceReadyCount(0)
   {
@@ -77,7 +76,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .Children({
-        CreateSectionLabel("1. SynchronousSizing  (FitSizeToImage is always OFF)"),
+        CreateSectionLabel("1. ImageLoadWithViewSize  (view size → image load size)"),
         CreateSyncSizeContainer(),
         CreateSyncSizeInfoLabel(),
         CreateSyncSizeRow(),
@@ -88,13 +87,11 @@ private:
       });
   }
 
-  // ── Section 1: SynchronousSizing ───────────────────────────────────────
+  // ── Section 1: ImageLoadWithViewSize ───────────────────────────────────────
 
   View CreateSyncSizeContainer()
   {
     // Fixed-height container so the view size is stable and OnSetTransform gets a real size.
-    // FitSizeToImage is intentionally OFF — SynchronousSizing is shown without that interaction.
-    //
     // SYNC OFF: image decoded at original resolution once → ResourceReady fires 1 time.
     // SYNC ON : initial load fires ResourceReady, then OnSetTransform reloads at view
     //           dimensions → ResourceReady fires a 2nd time (texture size == view size).
@@ -104,8 +101,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetFitSizeToImage(false)
-      .SetSynchronousSizing(mSynchronousSizing)
+      .SetImageLoadWithViewSize(mImageLoadWithViewSize)
       .As(mSyncImage);
 
     mSyncImage.ResourceReadySignal().Connect(this, &ImageViewSizingController::OnSyncImageResourceReady);
@@ -247,19 +243,19 @@ private:
 
   void OnSyncSizeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
   {
-    mSynchronousSizing      = !mSynchronousSizing;
+    mImageLoadWithViewSize      = !mImageLoadWithViewSize;
     mSyncResourceReadyCount = 0;
-    mSyncImage.SetSynchronousSizing(mSynchronousSizing);
-    Label::DownCast(mSyncSizeLabel).SetText(mSynchronousSizing ? "SYNC_SIZE: ON" : "SYNC_SIZE: OFF");
+    mSyncImage.SetImageLoadWithViewSize(mImageLoadWithViewSize);
+    Label::DownCast(mSyncSizeLabel).SetText(mImageLoadWithViewSize ? "SYNC_SIZE: ON" : "SYNC_SIZE: OFF");
     mSyncSizeInfoLabel.SetText(MakeSyncSizeInfoText());
-    DALI_LOG_RELEASE_INFO("[SyncSizing] SynchronousSizing toggled → %s\n", mSynchronousSizing ? "ON" : "OFF");
+    DALI_LOG_RELEASE_INFO("[SyncSizing] ImageLoadWithViewSize toggled → %s\n", mImageLoadWithViewSize ? "ON" : "OFF");
   }
 
   void OnSyncReloadClicked(View /*clickedView*/, const InputEvent& /*event*/)
   {
     mSyncResourceReadyCount = 0;
-    DALI_LOG_RELEASE_INFO("[SyncSizing] Reload() (SynchronousSizing=%s) — expecting 1x ResourceReady (loads at current view size)\n",
-                          mSynchronousSizing ? "ON" : "OFF");
+    DALI_LOG_RELEASE_INFO("[SyncSizing] Reload() (ImageLoadWithViewSize=%s) — expecting 1x ResourceReady (loads at current view size)\n",
+                          mImageLoadWithViewSize ? "ON" : "OFF");
     mSyncImage.Reload();
   }
 
@@ -267,9 +263,9 @@ private:
   {
     ++mSyncResourceReadyCount;
     MeasuredSize size = mSyncImage.GetSize();
-    DALI_LOG_RELEASE_INFO("[SyncSizing] ResourceReady #%d (SynchronousSizing=%s) — viewSize=(%.0f,%.0f)\n",
+    DALI_LOG_RELEASE_INFO("[SyncSizing] ResourceReady #%d (ImageLoadWithViewSize=%s) — viewSize=(%.0f,%.0f)\n",
                           mSyncResourceReadyCount,
-                          mSynchronousSizing ? "ON" : "OFF",
+                          mImageLoadWithViewSize ? "ON" : "OFF",
                           size.GetWidth(),
                           size.GetHeight());
 
@@ -293,8 +289,8 @@ private:
   {
     char buf[128];
     snprintf(buf, sizeof(buf),
-             "SynchronousSizing: %s  — ResourceReady count: %d",
-             mSynchronousSizing ? "ON " : "OFF",
+             "ImageLoadWithViewSize: %s  — ResourceReady count: %d",
+             mImageLoadWithViewSize ? "ON " : "OFF",
              mSyncResourceReadyCount);
     return Dali::String(buf);
   }
@@ -323,7 +319,7 @@ private:
   Label         mOrientationInfoLabel;
   View          mSyncSizeLabel;
   View          mOrientationLabel;
-  bool          mSynchronousSizing;
+  bool          mImageLoadWithViewSize;
   bool          mOrientationCorrection;
   int           mSyncResourceReadyCount;
 };

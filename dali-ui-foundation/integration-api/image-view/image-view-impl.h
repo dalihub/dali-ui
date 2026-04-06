@@ -112,9 +112,9 @@ public: // Properties
 
       /**
        * @brief Whether the view size is resolved synchronously during loading.
-       * @details Name "synchronousSizing", type Property::BOOLEAN.
+       * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
        */
-      SYNCHRONOUS_SIZING,
+      IMAGE_LOAD_WITH_VIEW_SIZE,
 
       /**
        * @brief The URL of the alpha mask image.
@@ -133,6 +133,12 @@ public: // Properties
        * @details Name "maskingMode", type Property::INTEGER.
        */
       MASKING_MODE,
+
+      /**
+       * @brief The load policy for the image resource.
+       * @details Name "loadPolicy", type Property::INTEGER.
+       */
+      LOAD_POLICY,
 
       /**
        * @brief The release policy for the image resource.
@@ -160,21 +166,15 @@ public: // Properties
 
       /**
        * @brief The N-patch border insets as (left, top, right, bottom).
-       * @details Name "border", type Property::VECTOR4.
+       * @details Name "nPatchBorder", type Property::VECTOR4.
        */
-      BORDER,
+      N_PATCH_BORDER,
 
       /**
        * @brief Whether only the N-patch border regions are rendered.
-       * @details Name "borderOnly", type Property::BOOLEAN.
+       * @details Name "nPatchBorderOnly", type Property::BOOLEAN.
        */
-      BORDER_ONLY,
-
-      /**
-       * @brief Whether the view size is adjusted to match the image's aspect ratio.
-       * @details Name "adjustViewSize", type Property::BOOLEAN.
-       */
-      ADJUST_VIEW_SIZE,
+      N_PATCH_BORDER_ONLY,
 
       ///////////////////////////////////////////////////////////////////////////////
       // Animatable Properties
@@ -259,16 +259,6 @@ public: // API — Image
    */
   Vector4 GetPixelArea() const;
 
-  /**
-   * @copydoc Dali::Ui::ImageView::SetFitSizeToImage
-   */
-  void SetFitSizeToImage(bool enable);
-
-  /**
-   * @copydoc Dali::Ui::ImageView::IsFitSizeToImage
-   */
-  bool IsFitSizeToImage() const;
-
 public: // API — Size & Fitting Control
   /**
    * @copydoc Dali::Ui::ImageView::SetSamplingMode
@@ -301,14 +291,14 @@ public: // API — Size & Fitting Control
   Ui::ImageDimensions GetDesiredSize() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetSynchronousSizing
+   * @copydoc Dali::Ui::ImageView::SetImageLoadWithViewSize
    */
-  void SetSynchronousSizing(bool synchronous);
+  void SetImageLoadWithViewSize(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetSynchronousSizing
+   * @copydoc Dali::Ui::ImageView::GetImageLoadWithViewSize
    */
-  bool GetSynchronousSizing() const;
+  bool GetImageLoadWithViewSize() const;
 
 public: // API — Advanced Rendering & Masking
   /**
@@ -353,6 +343,16 @@ public: // API — Advanced Rendering & Masking
 
 public: // API — Loading Behavior
   /**
+   * @copydoc Dali::Ui::ImageView::SetLoadPolicy
+   */
+  void SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+
+  /**
+   * @copydoc Dali::Ui::ImageView::GetLoadPolicy
+   */
+  Ui::LoadPolicy::Type GetLoadPolicy() const;
+
+  /**
    * @copydoc Dali::Ui::ImageView::SetReleasePolicy
    */
   void SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
@@ -394,24 +394,24 @@ public: // API — Loading Behavior
 
 public: // API — N-Patch Border
   /**
-   * @copydoc Dali::Ui::ImageView::SetBorder
+   * @copydoc Dali::Ui::ImageView::SetNPatchBorder
    */
-  void SetBorder(const Vector4& border);
+  void SetNPatchBorder(const Vector4& border);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetBorder
+   * @copydoc Dali::Ui::ImageView::GetNPatchBorder
    */
-  Vector4 GetBorder() const;
+  Vector4 GetNPatchBorder() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetBorderOnly
+   * @copydoc Dali::Ui::ImageView::SetNPatchBorderOnly
    */
-  void SetBorderOnly(bool borderOnly);
+  void SetNPatchBorderOnly(bool borderOnly);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetBorderOnly
+   * @copydoc Dali::Ui::ImageView::GetNPatchBorderOnly
    */
-  bool GetBorderOnly() const;
+  bool GetNPatchBorderOnly() const;
 
 public: // Depth Index
   /**
@@ -481,26 +481,26 @@ private: // Data
   Dali::String mAlphaMaskUrl;
 
   Vector4 mPixelArea;
-  Vector4 mBorder;
+  Vector4 mNPatchBorder;
 
   UiColor mImageColor;
 
   Ui::SamplingMode::Type  mSamplingMode;
   Ui::FittingMode::Type   mFittingMode;
   Ui::MaskingType::Type   mMaskingMode;
+  Ui::LoadPolicy::Type    mLoadPolicy;
   Ui::ReleasePolicy::Type mReleasePolicy;
   Ui::ImageDimensions     mDesiredSize;
 
   int mDepthIndex;
 
   bool mPreMultipliedAlpha;
-  bool mSynchronousSizing;
+  bool mImageLoadWithViewSize;
   bool mCropToMask;
   bool mSynchronousLoading;
   bool mFastTrackUploading;
   bool mOrientationCorrection;
-  bool mBorderOnly;
-  bool mFitSizeToImage;
+  bool mNPatchBorderOnly;
   bool mVisualDirty;
 };
 

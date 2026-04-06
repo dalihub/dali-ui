@@ -23,7 +23,7 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 /**
- * ImageView Loading Policy sample — three independent sections, all verified via logs.
+ * ImageView Loading Policy sample — four independent sections, all verified via logs.
  *
  * [Section 1: SynchronousLoading]
  * - OFF (default): decoded on a background thread. IsResourceReady() returns false
@@ -52,11 +52,22 @@ using namespace Dali::Ui;
  *   DESTROYED → "ResourceReady did NOT fire after re-add (texture cached)"
  *   NEVER     → "ResourceReady did NOT fire after re-add (texture cached)"
  *
+ * [Section 4: LoadPolicy]
+ * - ATTACHED (default): loading starts only when the ImageView is added to the scene.
+ *   ResourceReady fires after some delay following scene add (loading begins then).
+ * - IMMEDIATE: loading starts as soon as the URL is set, before scene add.
+ *   ResourceReady fires quickly after scene add because the texture was pre-loaded.
+ *   Note: ResourceReady still requires the view to be on-scene; it cannot fire before add.
+ * - How to verify: select a policy, press [TEST], watch the log.
+ *   ATTACHED  → "ResourceReady fired [slow] AFTER scene add (loading started on add)"
+ *   IMMEDIATE → "ResourceReady fired [fast] AFTER scene add (texture was pre-loaded)"
+ *
  * Press Escape or Back to quit.
  */
 class ImageViewLoadingPolicyController : public ConnectionTracker
 {
-  static constexpr int POLICY_COUNT = 3;
+  static constexpr int POLICY_COUNT      = 3;
+  static constexpr int LOAD_POLICY_COUNT = 2;
 
   struct PolicyEntry
   {
@@ -64,7 +75,14 @@ class ImageViewLoadingPolicyController : public ConnectionTracker
     Ui::ReleasePolicy::Type policy;
   };
 
-  static const PolicyEntry POLICIES[POLICY_COUNT];
+  struct LoadPolicyEntry
+  {
+    const char*           name;
+    Ui::LoadPolicy::Type  policy;
+  };
+
+  static const PolicyEntry     POLICIES[POLICY_COUNT];
+  static const LoadPolicyEntry LOAD_POLICIES[LOAD_POLICY_COUNT];
 
 public:
   explicit ImageViewLoadingPolicyController(Application& application)
@@ -72,8 +90,11 @@ public:
     mSyncLoading(false),
     mFastTrack(false),
     mPolicyIndex(0),
+    mLoadPolicyIndex(0),
     mSyncImageIndex(0),
-    mReleasePolicyReadyAfterReAdd(false)
+    mReleasePolicyReadyAfterReAdd(false),
+    mLoadPolicyReadyFired(false),
+    mLoadPolicyAddedToScene(false)
   {
     mApplication.InitSignal().Connect(this, &ImageViewLoadingPolicyController::OnInit);
   }
@@ -107,6 +128,10 @@ private:
         CreateReleasePolicyArea(),
         CreateReleasePolicyInfoLabel(),
         CreateReleasePolicyRow(),
+        CreateSectionLabel("4. LoadPolicy  (log: ResourceReady fires before/after scene add)"),
+        CreateLoadPolicyArea(),
+        CreateLoadPolicyInfoLabel(),
+        CreateLoadPolicyRow(),
       });
   }
 
@@ -121,7 +146,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetFitSizeToImage(true)
+
       .SetReleasePolicy(Ui::ReleasePolicy::DETACHED)
       .SetSynchronousLoading(mSyncLoading)
       .As(mSyncLoadingImage);
@@ -203,7 +228,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetFitSizeToImage(true)
+
       .SetFastTrackUploading(mFastTrack)
       .As(mFastTrackImage);
 
@@ -283,7 +308,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetFitSizeToImage(true)
+
       .SetReleasePolicy(POLICIES[mPolicyIndex].policy)
       .As(mReleasePolicyImage);
 
@@ -361,6 +386,95 @@ private:
                            });
     button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewLoadingPolicyController::OnReleasePolicyButtonClicked);
     mPolicyButtons[index] = button;
+    return button;
+  }
+
+  // ── Section 4: LoadPolicy ───────────────────────────────────────────────
+
+  View CreateLoadPolicyArea()
+  {
+    // Placeholder shown while waiting for the test ImageView to be added.
+    // The actual mLoadPolicyImage is created fresh on each [TEST] press.
+    return StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .SetBackgroundColor(UiColor(0x1A2A1A))
+      .Children({
+        Label::New("Press [TEST] to create an ImageView (not yet added to scene)")
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(MATCH_PARENT)
+          .SetFontSize(12.0f)
+          .SetTextColor(UiColor(0x888888))
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER),
+      })
+      .As(mLoadPolicyContainer);
+  }
+
+  View CreateLoadPolicyInfoLabel()
+  {
+    return Label::New(MakeLoadPolicyInfoText())
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(32.0f)
+      .SetFontSize(13.0f)
+      .SetTextColor(UiColor(0xCCCCCC))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .As(mLoadPolicyInfoLabel);
+  }
+
+  View CreateLoadPolicyRow()
+  {
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+                        .Spacing(4.0f)
+                        .SetRequestedWidth(MATCH_PARENT)
+                        .SetRequestedHeight(56.0f)
+                        .SetViewPadding(Extents(4, 4, 4, 4));
+
+    for(int i = 0; i < LOAD_POLICY_COUNT; ++i)
+    {
+      row.Add(CreateLoadPolicyButton(i));
+    }
+
+    StackLayout testButton = StackLayout::New(StackOrientation::VERTICAL)
+                               .SetRequestedWidth(WRAP_CONTENT)
+                               .SetRequestedHeight(MATCH_PARENT)
+                               .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+                               .SetBackgroundColor(UiColor(0x2E7D32))
+                               .Children({
+                                 Label::New("TEST")
+                                   .SetRequestedWidth(MATCH_PARENT)
+                                   .SetRequestedHeight(MATCH_PARENT)
+                                   .SetFontSize(13.0f)
+                                   .SetTextColor(UiColor(0xFFFFFF))
+                                   .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                                   .SetVerticalTextAlignment(Text::Alignment::CENTER),
+                               });
+    testButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewLoadingPolicyController::OnLoadPolicyTestClicked);
+
+    row.Add(testButton);
+    return row;
+  }
+
+  View CreateLoadPolicyButton(int index)
+  {
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
+                           .SetRequestedWidth(WRAP_CONTENT)
+                           .SetRequestedHeight(MATCH_PARENT)
+                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+                           .SetBackgroundColor(index == mLoadPolicyIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
+                           .Children({
+                             Label::New(LOAD_POLICIES[index].name)
+                               .SetRequestedWidth(MATCH_PARENT)
+                               .SetRequestedHeight(MATCH_PARENT)
+                               .SetFontSize(11.0f)
+                               .SetTextColor(UiColor(0xFFFFFF))
+                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
+                           });
+    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewLoadingPolicyController::OnLoadPolicyButtonClicked);
+    mLoadPolicyButtons[index] = button;
     return button;
   }
 
@@ -530,6 +644,111 @@ private:
     }
   }
 
+  void OnLoadPolicyButtonClicked(View clickedView, const InputEvent& /*event*/)
+  {
+    for(int i = 0; i < LOAD_POLICY_COUNT; ++i)
+    {
+      if(mLoadPolicyButtons[i] == clickedView)
+      {
+        mLoadPolicyButtons[mLoadPolicyIndex].SetBackgroundColor(UiColor(0x333333));
+        mLoadPolicyIndex = i;
+        mLoadPolicyButtons[mLoadPolicyIndex].SetBackgroundColor(UiColor(0x4A90E2));
+        mLoadPolicyInfoLabel.SetText(MakeLoadPolicyInfoText());
+        DALI_LOG_ERROR("[LoadPolicy] Policy changed → %s\n", LOAD_POLICIES[mLoadPolicyIndex].name);
+        return;
+      }
+    }
+  }
+
+  void OnLoadPolicyTestClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  {
+    // Reset previous test state.
+    mLoadPolicyReadyFired   = false;
+    mLoadPolicyAddedToScene = false;
+    mLoadPolicyImage.Reset();
+
+    // Clear the container so the placeholder is shown while loading.
+    StackLayout container = StackLayout::DownCast(mLoadPolicyContainer);
+    while(container.GetChildCount() > 0)
+    {
+      container.Remove(container.GetChildAt(0));
+    }
+
+    // Create a new ImageView with the selected LoadPolicy but do NOT add it to the scene yet.
+    // To properly catch synchronous ResourceReady events (like when using IMMEDIATE),
+    // we MUST connect the signal BEFORE setting the URL and Policy.
+    mLoadPolicyImage = ImageView::New();
+    mLoadPolicyImage.SetRequestedWidth(MATCH_PARENT);
+    mLoadPolicyImage.SetRequestedHeight(WRAP_CONTENT);
+    mLoadPolicyImage.SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO);
+
+    mLoadPolicyImage.ResourceReadySignal().Connect(this, &ImageViewLoadingPolicyController::OnLoadPolicyResourceReady);
+
+    mLoadPolicyImage.SetLoadPolicy(LOAD_POLICIES[mLoadPolicyIndex].policy);
+    mLoadPolicyImage.SetResourceUrl(RESOURCES_DIR "gallery-large-3.jpg");
+
+    DALI_LOG_ERROR("[LoadPolicy] ImageView created with policy=%s — NOT yet added to scene. Waiting 800ms...\n",
+                   LOAD_POLICIES[mLoadPolicyIndex].name);
+    mLoadPolicyInfoLabel.SetText(MakeLoadPolicyInfoText());
+
+    // Add to scene after 800ms — enough time for IMMEDIATE to pre-load the texture.
+    mLoadPolicyReadyFired = false;
+    mLoadPolicyAddTimer   = Timer::New(800);
+    mLoadPolicyAddTimer.TickSignal().Connect(this, &ImageViewLoadingPolicyController::OnLoadPolicyAddTimerTick);
+    mLoadPolicyAddTimer.Start();
+  }
+
+  bool OnLoadPolicyAddTimerTick()
+  {
+    DALI_LOG_ERROR("[LoadPolicy] 800ms elapsed — adding ImageView to scene (policy=%s). "
+                   "Watch for ResourceReady timing...\n",
+                   LOAD_POLICIES[mLoadPolicyIndex].name);
+
+    mLoadPolicyAddedToScene = true;
+    StackLayout::DownCast(mLoadPolicyContainer).Add(mLoadPolicyImage);
+    mLoadPolicyInfoLabel.SetText(MakeLoadPolicyInfoText());
+
+    // Post a short check: if ResourceReady fires quickly it means the texture was pre-loaded (IMMEDIATE).
+    // If it fires slowly or only after this check, loading started on scene add (ATTACHED).
+    mLoadPolicyCheckTimer = Timer::New(200);
+    mLoadPolicyCheckTimer.TickSignal().Connect(this, &ImageViewLoadingPolicyController::OnLoadPolicyCheckTimerTick);
+    mLoadPolicyCheckTimer.Start();
+
+    return false; // one-shot
+  }
+
+  bool OnLoadPolicyCheckTimerTick()
+  {
+    if(mLoadPolicyReadyFired)
+    {
+      DALI_LOG_ERROR("[LoadPolicy] ✓ ResourceReady fired within 200ms of scene add (policy=%s) "
+                     "— texture was pre-loaded (IMMEDIATE behaviour confirmed)\n",
+                     LOAD_POLICIES[mLoadPolicyIndex].name);
+    }
+    else
+    {
+      DALI_LOG_ERROR("[LoadPolicy] ResourceReady NOT yet fired 200ms after scene add (policy=%s) "
+                     "— loading started on scene add (ATTACHED behaviour)\n",
+                     LOAD_POLICIES[mLoadPolicyIndex].name);
+    }
+    return false; // one-shot
+  }
+
+  void OnLoadPolicyResourceReady(View /*view*/)
+  {
+    mLoadPolicyReadyFired = true;
+
+    bool isImmediate = (LOAD_POLICIES[mLoadPolicyIndex].policy == Ui::LoadPolicy::IMMEDIATE);
+    DALI_LOG_ERROR("[LoadPolicy] ResourceReady fired (policy=%s) — %s scene add\n",
+                   LOAD_POLICIES[mLoadPolicyIndex].name,
+                   mLoadPolicyAddedToScene ? "AFTER" : (isImmediate ? "BEFORE (pre-loaded)" : "BEFORE (unexpected)"));
+
+    if(mLoadPolicyInfoLabel)
+    {
+      mLoadPolicyInfoLabel.SetText(MakeLoadPolicyInfoText());
+    }
+  }
+
   Dali::String MakeSyncLoadingInfoText() const
   {
     return Dali::String(mSyncLoading
@@ -558,6 +777,19 @@ private:
     return Dali::String(buf);
   }
 
+  Dali::String MakeLoadPolicyInfoText() const
+  {
+    char buf[128];
+    const char* desc = "";
+    switch(LOAD_POLICIES[mLoadPolicyIndex].policy)
+    {
+      case Ui::LoadPolicy::ATTACHED:  desc = "loading starts on scene add";          break;
+      case Ui::LoadPolicy::IMMEDIATE: desc = "loading starts on view creation";      break;
+    }
+    snprintf(buf, sizeof(buf), "LoadPolicy: %s  — %s", LOAD_POLICIES[mLoadPolicyIndex].name, desc);
+    return Dali::String(buf);
+  }
+
   void OnKeyEvent(const KeyEvent& event)
   {
     if(event.GetState() == KeyEvent::DOWN)
@@ -575,28 +807,42 @@ private:
   Ui::ImageView   mFastTrackImage;
   View            mSyncLoadingContainer;
   Ui::ImageView   mReleasePolicyImage;
+  Ui::ImageView   mLoadPolicyImage;
   Label           mSyncLoadingInfoLabel;
   Label           mFastTrackInfoLabel;
   Label           mReleasePolicyInfoLabel;
+  Label           mLoadPolicyInfoLabel;
   View            mSyncLoadingLabel;
   View            mFastTrackLabel;
   View            mReleasePolicyContainer;
+  View            mLoadPolicyContainer;
   View            mPolicyButtons[POLICY_COUNT];
+  View            mLoadPolicyButtons[LOAD_POLICY_COUNT];
   Timer           mSyncChangeTimer;
   Timer           mHideTimer;
   Timer           mCheckTimer;
+  Timer           mLoadPolicyAddTimer;
+  Timer           mLoadPolicyCheckTimer;
   Dali::String    mSyncPendingUrl;
   bool            mSyncLoading;
   bool            mFastTrack;
   int             mPolicyIndex;
+  int             mLoadPolicyIndex;
   int             mSyncImageIndex;
   bool            mReleasePolicyReadyAfterReAdd;
+  bool            mLoadPolicyReadyFired;
+  bool            mLoadPolicyAddedToScene;
 };
 
 const ImageViewLoadingPolicyController::PolicyEntry ImageViewLoadingPolicyController::POLICIES[ImageViewLoadingPolicyController::POLICY_COUNT] = {
   {"DETACHED",  Ui::ReleasePolicy::DETACHED},
   {"DESTROYED", Ui::ReleasePolicy::DESTROYED},
   {"NEVER",     Ui::ReleasePolicy::NEVER},
+};
+
+const ImageViewLoadingPolicyController::LoadPolicyEntry ImageViewLoadingPolicyController::LOAD_POLICIES[ImageViewLoadingPolicyController::LOAD_POLICY_COUNT] = {
+  {"ATTACHED",  Ui::LoadPolicy::ATTACHED},
+  {"IMMEDIATE", Ui::LoadPolicy::IMMEDIATE},
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

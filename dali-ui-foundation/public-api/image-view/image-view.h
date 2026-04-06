@@ -48,7 +48,6 @@ class ImageViewImpl;
  *
  * @code
  * ImageView view = ImageView::New("image.png");
- * view.SetFitSizeToImage(true);
  * view.ResourceReadySignal().Connect(...);
  * @endcode
  */
@@ -206,34 +205,6 @@ public: // Image
    */
   Vector4 GetPixelArea() const;
 
-  /**
-   * @brief Sets whether the view size is automatically adjusted to preserve the image's
-   *        natural aspect ratio.
-   *
-   * When enabled, after the image finishes loading, if one dimension is fixed
-   * (MATCH_PARENT or an explicit size) and the other is unconstrained (WRAP_CONTENT),
-   * the unconstrained dimension is recomputed from the image's natural aspect ratio.
-   * This triggers a second layout pass once the image is ready.
-   *
-   * Direction: image natural size → view size.
-   *
-   * @note Do NOT use together with SetSynchronousSizing(true) on the same ImageView.
-   *       SynchronousSizing loads the image at the current view size, so GetNaturalSize
-   *       returns the view dimensions rather than the true image dimensions, causing
-   *       FitSizeToImage to have no effect.
-   *
-   * @param[in] enable True to fit the view size to the image aspect ratio
-   * @return Reference to this for fluent chaining
-   */
-  ImageView& SetFitSizeToImage(bool enable);
-
-  /**
-   * @brief Returns whether the view size is automatically adjusted to the image aspect ratio.
-   *
-   * @return True if fit-size-to-image is enabled
-   */
-  bool IsFitSizeToImage() const;
-
 public: // Size & Fitting Control
   /**
    * @brief Sets the sampling mode used when scaling the image.
@@ -289,22 +260,21 @@ public: // Size & Fitting Control
    *
    * Direction: view size → image load size.
    *
-   * @note Do NOT use together with SetFitSizeToImage(true) on the same ImageView.
-   *       FitSizeToImage relies on the image's natural dimensions to adjust the view size,
-   *       but SynchronousSizing causes GetNaturalSize to return the current view size
-   *       instead, making FitSizeToImage ineffective.
+   * @note Do NOT use together with aspect-ratio layout on the same ImageView.
+   *       ImageLoadWithViewSize causes GetNaturalSize to return the current view size
+   *       instead of the true image dimensions, making aspect-ratio adjustment ineffective.
    *
-   * @param[in] synchronous True to enable synchronous sizing
+   * @param[in] enabled True to enable loading image with view size
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetSynchronousSizing(bool synchronous);
+  ImageView& SetImageLoadWithViewSize(bool enabled);
 
   /**
-   * @brief Gets whether synchronous sizing is enabled.
+   * @brief Gets whether the image is loaded with the view size.
    *
-   * @return True if synchronous sizing is enabled
+   * @return True if loading image with view size is enabled
    */
-  bool GetSynchronousSizing() const;
+  bool GetImageLoadWithViewSize() const;
 
 public: // Advanced Rendering & Masking
   /**
@@ -370,6 +340,24 @@ public: // Advanced Rendering & Masking
   Ui::MaskingType::Type GetMaskingMode() const;
 
 public: // Loading Behavior
+  /**
+   * @brief Sets the load policy for the image resource.
+   *
+   * Determines whether the image is loaded immediately when the view is created (IMMEDIATE),
+   * or deferred until the view is attached to the scene (ATTACHED).
+   *
+   * @param[in] loadPolicy The load policy to use
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+
+  /**
+   * @brief Gets the load policy.
+   *
+   * @return The current load policy
+   */
+  Ui::LoadPolicy::Type GetLoadPolicy() const;
+
   /**
    * @brief Sets the release policy for the image resource.
    *
@@ -445,14 +433,14 @@ public: // N-Patch Border
    * @param[in] border The border insets as (left, top, right, bottom)
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetBorder(const Vector4& border);
+  ImageView& SetNPatchBorder(const Vector4& border);
 
   /**
    * @brief Gets the N-patch border insets.
    *
    * @return The current border as (left, top, right, bottom)
    */
-  Vector4 GetBorder() const;
+  Vector4 GetNPatchBorder() const;
 
   /**
    * @brief Sets whether only the N-patch border regions are rendered.
@@ -462,14 +450,14 @@ public: // N-Patch Border
    * @param[in] borderOnly True to render only the border regions
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetBorderOnly(bool borderOnly);
+  ImageView& SetNPatchBorderOnly(bool borderOnly);
 
   /**
    * @brief Gets whether border-only rendering is enabled.
    *
    * @return True if only the border regions are rendered
    */
-  bool GetBorderOnly() const;
+  bool GetNPatchBorderOnly() const;
 
 public: // Depth Index
   /**

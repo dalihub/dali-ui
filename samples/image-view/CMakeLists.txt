@@ -59,6 +59,5 @@ add_image_view_sample(image-view-alpha-mask.example image-view-alpha-mask-exampl
 add_image_view_sample(image-view-npatch.example image-view-npatch-example.cpp)
 add_image_view_sample(image-view-image-color.example image-view-image-color-example.cpp)
 add_image_view_sample(image-view-sampling-desired-size.example image-view-sampling-desired-size-example.cpp)
-add_image_view_sample(image-view-fit-size-to-image.example image-view-fit-size-to-image-example.cpp)
 add_image_view_sample(image-view-sizing.example image-view-sizing-example.cpp)
 add_image_view_sample(image-view-loading-policy.example image-view-loading-policy-example.cpp)

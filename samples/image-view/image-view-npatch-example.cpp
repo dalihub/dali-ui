@@ -26,8 +26,8 @@ using namespace Dali::Ui;
  * ImageView N-Patch sample:
  * - Loads a .9.png image whose border regions are encoded in the file
  * - Shows the image stretched to various sizes to verify borders don't distort
- * - Toggle SetBorderOnly() to render only the border regions (hollow center)
- * - Manual border override row: shows SetBorder(Vector4) with explicit insets
+ * - Toggle SetNPatchBorderOnly() to render only the border regions (hollow center)
+ * - Manual border override row: shows SetNPatchBorder(Vector4) with explicit insets
  * - Press Escape or Back to quit
  */
 class ImageViewNPatchController : public ConnectionTracker
@@ -47,7 +47,7 @@ public:
   explicit ImageViewNPatchController(Application& application)
   : mApplication(application),
     mSizeIndex(1),
-    mBorderOnly(false)
+    mNPatchBorderOnly(false)
   {
     mApplication.InitSignal().Connect(this, &ImageViewNPatchController::OnInit);
   }
@@ -87,7 +87,7 @@ private:
         ImageView::New(RESOURCES_DIR "button-up-1.9.png")
           .SetRequestedWidth(SIZES[mSizeIndex].width)
           .SetRequestedHeight(SIZES[mSizeIndex].height)
-          .SetBorderOnly(mBorderOnly)
+          .SetNPatchBorderOnly(mNPatchBorderOnly)
           .As(mImage),
       });
   }
@@ -134,7 +134,7 @@ private:
                                .SetTextColor(UiColor(0xFFFFFF))
                                .SetHorizontalTextAlignment(Text::Alignment::CENTER)
                                .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mBorderOnlyLabel),
+                               .As(mNPatchBorderOnlyLabel),
                            });
 
     button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewNPatchController::OnBorderOnlyClicked);
@@ -186,11 +186,11 @@ private:
 
   void OnBorderOnlyClicked(View /*clickedView*/, const InputEvent& /*event*/)
   {
-    mBorderOnly = !mBorderOnly;
-    mImage.SetBorderOnly(mBorderOnly);
-    Label::DownCast(mBorderOnlyLabel).SetText(mBorderOnly ? "BORDER ONLY: ON" : "BORDER ONLY: OFF");
+    mNPatchBorderOnly = !mNPatchBorderOnly;
+    mImage.SetNPatchBorderOnly(mNPatchBorderOnly);
+    Label::DownCast(mNPatchBorderOnlyLabel).SetText(mNPatchBorderOnly ? "BORDER ONLY: ON" : "BORDER ONLY: OFF");
     UpdateInfoLabel();
-    DALI_LOG_RELEASE_INFO("[NPatch] BorderOnly=%d\n", mBorderOnly);
+    DALI_LOG_RELEASE_INFO("[NPatch] BorderOnly=%d\n", mNPatchBorderOnly);
   }
 
   void UpdateInfoLabel()
@@ -206,7 +206,7 @@ private:
              SIZES[mSizeIndex].label,
              SIZES[mSizeIndex].width,
              SIZES[mSizeIndex].height,
-             mBorderOnly ? "ON" : "OFF");
+             mNPatchBorderOnly ? "ON" : "OFF");
     return Dali::String(buf);
   }
 
@@ -225,10 +225,10 @@ private:
   Application&  mApplication;
   Ui::ImageView mImage;
   Label         mInfoLabel;
-  View          mBorderOnlyLabel;
+  View          mNPatchBorderOnlyLabel;
   View          mSizeButtons[SIZE_COUNT];
   int           mSizeIndex;
-  bool          mBorderOnly;
+  bool          mNPatchBorderOnly;
 };
 
 const ImageViewNPatchController::SizeEntry ImageViewNPatchController::SIZES[ImageViewNPatchController::SIZE_COUNT] = {

@@ -64,17 +64,17 @@ DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "desiredHeight", FLOA
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "imageColor", VECTOR4, IMAGE_COLOR)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "preMultipliedAlpha", BOOLEAN, PRE_MULTIPLIED_ALPHA)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "placeholderImage", STRING, PLACEHOLDER_IMAGE)
-DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "synchronousSizing", BOOLEAN, SYNCHRONOUS_SIZING)
+DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "imageLoadWithViewSize", BOOLEAN, IMAGE_LOAD_WITH_VIEW_SIZE)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "alphaMaskUrl", STRING, ALPHA_MASK_URL)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "cropToMask", BOOLEAN, CROP_TO_MASK)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "maskingMode", INTEGER, MASKING_MODE)
+DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "loadPolicy", INTEGER, LOAD_POLICY)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "releasePolicy", INTEGER, RELEASE_POLICY)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "synchronousLoading", BOOLEAN, SYNCHRONOUS_LOADING)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "fastTrackUploading", BOOLEAN, FAST_TRACK_UPLOADING)
 DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "orientationCorrection", BOOLEAN, ORIENTATION_CORRECTION)
-DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "border", VECTOR4, BORDER)
-DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "borderOnly", BOOLEAN, BORDER_ONLY)
-DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "adjustViewSize", BOOLEAN, ADJUST_VIEW_SIZE)
+DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "nPatchBorder", VECTOR4, N_PATCH_BORDER)
+DALI_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "nPatchBorderOnly", BOOLEAN, N_PATCH_BORDER_ONLY)
 DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, ImageViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
 
 DALI_TYPE_REGISTRATION_END()
@@ -87,22 +87,22 @@ ImageViewImpl::ImageViewImpl()
   mPlaceholderImageUrl(),
   mAlphaMaskUrl(),
   mPixelArea(0.0f, 0.0f, 1.0f, 1.0f),
-  mBorder(0.0f, 0.0f, 0.0f, 0.0f),
+  mNPatchBorder(0.0f, 0.0f, 0.0f, 0.0f),
   mImageColor(Color::WHITE),
   mSamplingMode(Ui::SamplingMode::BOX_THEN_LINEAR),
   mFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO),
   mMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING),
+  mLoadPolicy(Ui::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::ReleasePolicy::DETACHED),
   mDesiredSize(),
   mDepthIndex(0),
   mPreMultipliedAlpha(false),
-  mSynchronousSizing(false),
+  mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
   mFastTrackUploading(false),
   mOrientationCorrection(true),
-  mBorderOnly(false),
-  mFitSizeToImage(false),
+  mNPatchBorderOnly(false),
   mVisualDirty(false)
 {
 }
@@ -196,12 +196,12 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         }
         break;
       }
-      case Property::SYNCHRONOUS_SIZING:
+      case Property::IMAGE_LOAD_WITH_VIEW_SIZE:
       {
-        bool synchronousSizing;
-        if(value.Get(synchronousSizing))
+        bool imageLoadWithViewSize;
+        if(value.Get(imageLoadWithViewSize))
         {
-          impl.SetSynchronousSizing(synchronousSizing);
+          impl.SetImageLoadWithViewSize(imageLoadWithViewSize);
         }
         break;
       }
@@ -229,6 +229,15 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         if(value.Get(maskingMode))
         {
           impl.SetMaskingMode(static_cast<Ui::MaskingType::Type>(maskingMode));
+        }
+        break;
+      }
+      case Property::LOAD_POLICY:
+      {
+        int policy;
+        if(value.Get(policy))
+        {
+          impl.SetLoadPolicy(static_cast<Ui::LoadPolicy::Type>(policy));
         }
         break;
       }
@@ -268,30 +277,21 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         }
         break;
       }
-      case Property::BORDER:
+      case Property::N_PATCH_BORDER:
       {
         Vector4 border;
         if(value.Get(border))
         {
-          impl.SetBorder(border);
+          impl.SetNPatchBorder(border);
         }
         break;
       }
-      case Property::BORDER_ONLY:
+      case Property::N_PATCH_BORDER_ONLY:
       {
         bool borderOnly;
         if(value.Get(borderOnly))
         {
-          impl.SetBorderOnly(borderOnly);
-        }
-        break;
-      }
-      case Property::ADJUST_VIEW_SIZE:
-      {
-        bool adjustViewSize;
-        if(value.Get(adjustViewSize))
-        {
-          impl.SetFitSizeToImage(adjustViewSize);
+          impl.SetNPatchBorderOnly(borderOnly);
         }
         break;
       }
@@ -341,8 +341,8 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
       case Property::PLACEHOLDER_IMAGE:
         value = impl.GetPlaceholderUrl();
         break;
-      case Property::SYNCHRONOUS_SIZING:
-        value = impl.GetSynchronousSizing();
+      case Property::IMAGE_LOAD_WITH_VIEW_SIZE:
+        value = impl.GetImageLoadWithViewSize();
         break;
       case Property::ALPHA_MASK_URL:
         value = impl.GetAlphaMaskUrl();
@@ -352,6 +352,9 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
         break;
       case Property::MASKING_MODE:
         value = static_cast<int>(impl.GetMaskingMode());
+        break;
+      case Property::LOAD_POLICY:
+        value = static_cast<int>(impl.GetLoadPolicy());
         break;
       case Property::RELEASE_POLICY:
         value = static_cast<int>(impl.GetReleasePolicy());
@@ -365,14 +368,11 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
       case Property::ORIENTATION_CORRECTION:
         value = impl.GetOrientationCorrection();
         break;
-      case Property::BORDER:
-        value = impl.GetBorder();
+      case Property::N_PATCH_BORDER:
+        value = impl.GetNPatchBorder();
         break;
-      case Property::BORDER_ONLY:
-        value = impl.GetBorderOnly();
-        break;
-      case Property::ADJUST_VIEW_SIZE:
-        value = impl.IsFitSizeToImage();
+      case Property::N_PATCH_BORDER_ONLY:
+        value = impl.GetNPatchBorderOnly();
         break;
       case Property::PIXEL_AREA:
         value = impl.GetPixelArea();
@@ -395,11 +395,21 @@ void ImageViewImpl::SetResourceUrl(const Dali::String& url)
 {
   if(mUrl != url)
   {
-    mUrl         = url;
-    mVisualDirty = true;
-    InvalidateMeasure();
+    mUrl = url;
     // Re-show placeholder while new image loads
     UpdatePlaceholderVisual();
+
+    if(mLoadPolicy == Ui::LoadPolicy::IMMEDIATE)
+    {
+      // Start loading immediately regardless of scene attachment.
+      mVisualDirty = false;
+      UpdateVisual();
+    }
+    else
+    {
+      mVisualDirty = true;
+      InvalidateMeasure();
+    }
   }
 }
 
@@ -513,19 +523,19 @@ Ui::ImageDimensions ImageViewImpl::GetDesiredSize() const
   return mDesiredSize;
 }
 
-void ImageViewImpl::SetSynchronousSizing(bool synchronous)
+void ImageViewImpl::SetImageLoadWithViewSize(bool enabled)
 {
-  if(mSynchronousSizing != synchronous)
+  if(mImageLoadWithViewSize != enabled)
   {
-    mSynchronousSizing = synchronous;
-    mVisualDirty       = true;
+    mImageLoadWithViewSize = enabled;
+    mVisualDirty           = true;
     InvalidateMeasure();
   }
 }
 
-bool ImageViewImpl::GetSynchronousSizing() const
+bool ImageViewImpl::GetImageLoadWithViewSize() const
 {
-  return mSynchronousSizing;
+  return mImageLoadWithViewSize;
 }
 
 void ImageViewImpl::SetAlphaMaskUrl(const Dali::String& maskUrl)
@@ -593,6 +603,30 @@ UiColor ImageViewImpl::GetImageColor() const
   return mImageColor;
 }
 
+void ImageViewImpl::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
+{
+  if(mLoadPolicy != loadPolicy)
+  {
+    mLoadPolicy = loadPolicy;
+    if(mLoadPolicy == Ui::LoadPolicy::IMMEDIATE && !mUrl.Empty())
+    {
+      // URL already set — start loading immediately now that policy switched to IMMEDIATE.
+      mVisualDirty = false;
+      UpdateVisual();
+    }
+    else
+    {
+      mVisualDirty = true;
+      InvalidateMeasure();
+    }
+  }
+}
+
+Ui::LoadPolicy::Type ImageViewImpl::GetLoadPolicy() const
+{
+  return mLoadPolicy;
+}
+
 void ImageViewImpl::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
 {
   if(mReleasePolicy != releasePolicy)
@@ -653,48 +687,34 @@ bool ImageViewImpl::GetOrientationCorrection() const
   return mOrientationCorrection;
 }
 
-void ImageViewImpl::SetBorder(const Vector4& border)
+void ImageViewImpl::SetNPatchBorder(const Vector4& border)
 {
-  if(mBorder != border)
+  if(mNPatchBorder != border)
   {
-    mBorder      = border;
-    mVisualDirty = true;
+    mNPatchBorder = border;
+    mVisualDirty  = true;
     InvalidateMeasure();
   }
 }
 
-Vector4 ImageViewImpl::GetBorder() const
+Vector4 ImageViewImpl::GetNPatchBorder() const
 {
-  return mBorder;
+  return mNPatchBorder;
 }
 
-void ImageViewImpl::SetBorderOnly(bool borderOnly)
+void ImageViewImpl::SetNPatchBorderOnly(bool borderOnly)
 {
-  if(mBorderOnly != borderOnly)
+  if(mNPatchBorderOnly != borderOnly)
   {
-    mBorderOnly  = borderOnly;
-    mVisualDirty = true;
+    mNPatchBorderOnly = borderOnly;
+    mVisualDirty      = true;
     InvalidateMeasure();
   }
 }
 
-bool ImageViewImpl::GetBorderOnly() const
+bool ImageViewImpl::GetNPatchBorderOnly() const
 {
-  return mBorderOnly;
-}
-
-void ImageViewImpl::SetFitSizeToImage(bool enable)
-{
-  if(mFitSizeToImage != enable)
-  {
-    mFitSizeToImage = enable;
-    InvalidateMeasure();
-  }
-}
-
-bool ImageViewImpl::IsFitSizeToImage() const
-{
-  return mFitSizeToImage;
+  return mNPatchBorderOnly;
 }
 
 void ImageViewImpl::SetDepthIndex(int depthIndex)
@@ -724,7 +744,7 @@ void ImageViewImpl::OnInitialize()
   ViewImpl::OnInitialize();
   mDepthIndex = DepthIndex::CONTENT;
 
-  // Connect to View::ResourceReadySignal to handle placeholder removal and AdjustViewSize
+  // Connect to View::ResourceReadySignal to handle placeholder removal and aspect-ratio re-layout
   // when the main image visual becomes ready.
   Ui::View::DownCast(Self()).ResourceReadySignal().Connect(this, &ImageViewImpl::OnViewResourceReady);
 }
@@ -774,11 +794,8 @@ void ImageViewImpl::OnViewResourceReady(Ui::View view)
   // Main image is ready: remove placeholder
   viewData.UnregisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE);
 
-  // If AdjustViewSize is enabled, request a re-layout now that the natural size is known
-  if(mFitSizeToImage)
-  {
-    InvalidateMeasure();
-  }
+  // Request a re-layout now that the natural size is known, so aspect-ratio adjustment applies.
+  InvalidateMeasure();
 }
 
 MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
@@ -819,7 +836,7 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
     h = layoutH;
   }
 
-  if(mFitSizeToImage && naturalSize.width > 0.0f && naturalSize.height > 0.0f)
+  if(naturalSize.width > 0.0f && naturalSize.height > 0.0f)
   {
     float aspectRatio = naturalSize.height / naturalSize.width;
     bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
@@ -884,11 +901,12 @@ void ImageViewImpl::UpdateVisual()
       map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, static_cast<int>(mDesiredSize.GetHeight()));
     }
 
+    map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
     map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
     map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
     map.Insert(Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING, mFastTrackUploading);
     map.Insert(Ui::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
-    map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mSynchronousSizing);
+    map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
 
     if(!mAlphaMaskUrl.Empty())
     {
@@ -897,10 +915,10 @@ void ImageViewImpl::UpdateVisual()
       map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, static_cast<int>(mMaskingMode));
     }
 
-    if(mBorder != Vector4::ZERO)
+    if(mNPatchBorder != Vector4::ZERO)
     {
-      map.Insert(Ui::ImageVisual::Property::BORDER, mBorder);
-      map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mBorderOnly);
+      map.Insert(Ui::ImageVisual::Property::BORDER, mNPatchBorder);
+      map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
     }
 
     mVisual = visualFactory.CreateVisual(map);

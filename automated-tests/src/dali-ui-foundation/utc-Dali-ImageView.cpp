@@ -229,25 +229,25 @@ int UtcDaliImageViewSetGetSynchronousLoadingP(void)
   END_TEST;
 }
 
-// Border (N-Patch)
+// NPatchBorder (N-Patch)
 
-int UtcDaliImageViewSetGetBorderP(void)
+int UtcDaliImageViewSetGetNPatchBorderP(void)
 {
   UiTestApplication application;
   ImageView view   = ImageView::New();
   Vector4   border = Vector4(10.0f, 10.0f, 10.0f, 10.0f);
-  view.SetBorder(border);
-  DALI_TEST_EQUALS(view.GetBorder(), border, TEST_LOCATION);
+  view.SetNPatchBorder(border);
+  DALI_TEST_EQUALS(view.GetNPatchBorder(), border, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliImageViewSetGetBorderOnlyP(void)
+int UtcDaliImageViewSetGetNPatchBorderOnlyP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.GetBorderOnly(), false, TEST_LOCATION);
-  view.SetBorderOnly(true);
-  DALI_TEST_EQUALS(view.GetBorderOnly(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetNPatchBorderOnly(), false, TEST_LOCATION);
+  view.SetNPatchBorderOnly(true);
+  DALI_TEST_EQUALS(view.GetNPatchBorderOnly(), true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -387,15 +387,15 @@ int UtcDaliImageViewSetGetMaskingModeP(void)
   END_TEST;
 }
 
-// SynchronousSizing
+// ImageLoadWithViewSize
 
-int UtcDaliImageViewSetGetSynchronousSizingP(void)
+int UtcDaliImageViewSetGetImageLoadWithViewSizeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.GetSynchronousSizing(), false, TEST_LOCATION);
-  view.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(view.GetSynchronousSizing(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageLoadWithViewSize(), false, TEST_LOCATION);
+  view.SetImageLoadWithViewSize(true);
+  DALI_TEST_EQUALS(view.GetImageLoadWithViewSize(), true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -458,46 +458,5 @@ int UtcDaliImageViewChainingP(void)
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::FILL, TEST_LOCATION);
-  END_TEST;
-}
-
-// FitSizeToImage
-
-int UtcDaliImageViewSetIsFitSizeToImageP(void)
-{
-  UiTestApplication application;
-  ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.IsFitSizeToImage(), false, TEST_LOCATION); // default: disabled
-
-  view.SetFitSizeToImage(true);
-  DALI_TEST_EQUALS(view.IsFitSizeToImage(), true, TEST_LOCATION);
-
-  view.SetFitSizeToImage(false);
-  DALI_TEST_EQUALS(view.IsFitSizeToImage(), false, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliImageViewSetFitSizeToImageNoChangeP(void)
-{
-  UiTestApplication application;
-  ImageView view = ImageView::New();
-  view.SetFitSizeToImage(true);
-  view.SetFitSizeToImage(true); // same value — no update
-  DALI_TEST_EQUALS(view.IsFitSizeToImage(), true, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliImageViewPropertyFitSizeToImageP(void)
-{
-  UiTestApplication application;
-  ImageView view = ImageView::New();
-
-  // ADJUST_VIEW_SIZE comes after BORDER_ONLY in the property enum
-  const Dali::Property::Index adjustViewSizeIndex = Dali::PROPERTY_REGISTRATION_START_INDEX + 18; // ADJUST_VIEW_SIZE
-  view.SetProperty(adjustViewSizeIndex, true);
-  Dali::Property::Value value = view.GetProperty(adjustViewSizeIndex);
-  bool result                 = false;
-  DALI_TEST_CHECK(value.Get(result));
-  DALI_TEST_EQUALS(result, true, TEST_LOCATION);
   END_TEST;
 }

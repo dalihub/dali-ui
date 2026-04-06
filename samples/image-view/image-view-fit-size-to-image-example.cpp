@@ -34,8 +34,8 @@ using namespace Dali::Ui;
  *      match the image's aspect ratio via a second layout pass
  *      (ResourceReady → InvalidateMeasure).
  *
- * @note Do NOT use together with SetSynchronousSizing(true).
- *       SynchronousSizing causes GetNaturalSize to return the current view size
+ * @note Do NOT use together with SetImageLoadWithViewSize(true).
+ *       ImageLoadWithViewSize causes GetNaturalSize to return the current view size
  *       instead of the image's true dimensions, making FitSizeToImage ineffective.
  *
  * Press Escape or Back to quit.
@@ -65,7 +65,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .Children({
-        CreateSectionLabel("FitSizeToImage  (SynchronousSizing is always OFF)"),
+        CreateSectionLabel("FitSizeToImage  (ImageLoadWithViewSize is always OFF)"),
         CreateFitSizeContainer(),
         CreateFitSizeInfoLabel(),
         CreateFitSizeToggle(),
@@ -89,7 +89,7 @@ private:
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(WRAP_CONTENT)
           .SetFitSizeToImage(mFitSizeToImage)
-          .SetSynchronousSizing(false)
+          .SetImageLoadWithViewSize(false)
           .As(mFitImage),
       });
   }

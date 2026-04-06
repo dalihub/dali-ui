@@ -167,6 +167,17 @@ bool ImageView::GetCropToMask() const
   return Ui::GetImpl(*this).GetCropToMask();
 }
 
+ImageView& ImageView::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
+{
+  Ui::GetImpl(*this).SetLoadPolicy(loadPolicy);
+  return *this;
+}
+
+Ui::LoadPolicy::Type ImageView::GetLoadPolicy() const
+{
+  return Ui::GetImpl(*this).GetLoadPolicy();
+}
+
 ImageView& ImageView::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
@@ -200,15 +211,15 @@ Dali::String ImageView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-ImageView& ImageView::SetSynchronousSizing(bool synchronous)
+ImageView& ImageView::SetImageLoadWithViewSize(bool enabled)
 {
-  Ui::GetImpl(*this).SetSynchronousSizing(synchronous);
+  Ui::GetImpl(*this).SetImageLoadWithViewSize(enabled);
   return *this;
 }
 
-bool ImageView::GetSynchronousSizing() const
+bool ImageView::GetImageLoadWithViewSize() const
 {
-  return Ui::GetImpl(*this).GetSynchronousSizing();
+  return Ui::GetImpl(*this).GetImageLoadWithViewSize();
 }
 
 ImageView& ImageView::SetMaskingMode(Ui::MaskingType::Type maskingMode)
@@ -255,37 +266,26 @@ bool ImageView::GetOrientationCorrection() const
   return Ui::GetImpl(*this).GetOrientationCorrection();
 }
 
-ImageView& ImageView::SetBorder(const Vector4& border)
+ImageView& ImageView::SetNPatchBorder(const Vector4& border)
 {
-  Ui::GetImpl(*this).SetBorder(border);
+  Ui::GetImpl(*this).SetNPatchBorder(border);
   return *this;
 }
 
-Vector4 ImageView::GetBorder() const
+Vector4 ImageView::GetNPatchBorder() const
 {
-  return Ui::GetImpl(*this).GetBorder();
+  return Ui::GetImpl(*this).GetNPatchBorder();
 }
 
-ImageView& ImageView::SetBorderOnly(bool borderOnly)
+ImageView& ImageView::SetNPatchBorderOnly(bool borderOnly)
 {
-  Ui::GetImpl(*this).SetBorderOnly(borderOnly);
+  Ui::GetImpl(*this).SetNPatchBorderOnly(borderOnly);
   return *this;
 }
 
-bool ImageView::GetBorderOnly() const
+bool ImageView::GetNPatchBorderOnly() const
 {
-  return Ui::GetImpl(*this).GetBorderOnly();
-}
-
-ImageView& ImageView::SetFitSizeToImage(bool enable)
-{
-  Ui::GetImpl(*this).SetFitSizeToImage(enable);
-  return *this;
-}
-
-bool ImageView::IsFitSizeToImage() const
-{
-  return Ui::GetImpl(*this).IsFitSizeToImage();
+  return Ui::GetImpl(*this).GetNPatchBorderOnly();
 }
 
 ImageView& ImageView::SetDepthIndex(int depthIndex)
