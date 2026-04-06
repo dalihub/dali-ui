@@ -359,12 +359,9 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto&   children        = GetChildren(view);
-  Extents padding         = view->GetViewPadding();
-  float   availableWidth  = widthConstraint - static_cast<float>(padding.start + padding.end);
-  float   availableHeight = heightConstraint - static_cast<float>(padding.top + padding.bottom);
-  availableWidth          = std::max(0.0f, availableWidth);
-  availableHeight         = std::max(0.0f, availableHeight);
+  auto& children        = GetChildren(view);
+  float availableWidth  = widthConstraint;
+  float availableHeight = heightConstraint;
 
   uint32_t           rowCount = std::max(1u, static_cast<uint32_t>(mRowDefinitions.Size()));
   uint32_t           colCount = std::max(1u, static_cast<uint32_t>(mColumnDefinitions.Size()));

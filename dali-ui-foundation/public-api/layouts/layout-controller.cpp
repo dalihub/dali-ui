@@ -325,13 +325,20 @@ private:
       heightConstraint = layoutHeight;
     }
 
+    // Root view has no parent that subtracts margin, so do it here.
+    Extents margin   = view->GetViewMargin();
+    float   marginW  = static_cast<float>(margin.start + margin.end);
+    float   marginH  = static_cast<float>(margin.top + margin.bottom);
+    widthConstraint  = std::max(0.0f, widthConstraint - marginW);
+    heightConstraint = std::max(0.0f, heightConstraint - marginH);
+
     // Measure pass
     MeasuredSize measuredSize = view->Measure(widthConstraint, heightConstraint);
 
     // Arrange pass: use the user-set position (parent is not a layout)
     LayoutRect bounds;
-    bounds.x      = view->GetPositionX();
-    bounds.y      = view->GetPositionY();
+    bounds.x      = view->GetPositionX() + static_cast<float>(margin.start);
+    bounds.y      = view->GetPositionY() + static_cast<float>(margin.top);
     bounds.width  = measuredSize.width;
     bounds.height = measuredSize.height;
 

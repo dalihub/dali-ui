@@ -403,15 +403,9 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto&   children     = GetChildren(view);
-  Extents padding      = view->GetViewPadding();
-  float   paddingMain  = IsMainAxisHorizontal() ? static_cast<float>(padding.start + padding.end)
-                                                : static_cast<float>(padding.top + padding.bottom);
-  float   paddingCross = IsMainAxisHorizontal() ? static_cast<float>(padding.top + padding.bottom)
-                                                : static_cast<float>(padding.start + padding.end);
-
-  float availableMain  = (IsMainAxisHorizontal() ? widthConstraint : heightConstraint) - paddingMain;
-  float availableCross = (IsMainAxisHorizontal() ? heightConstraint : widthConstraint) - paddingCross;
+  auto& children       = GetChildren(view);
+  float availableMain  = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
+  float availableCross = IsMainAxisHorizontal() ? heightConstraint : widthConstraint;
 
   std::vector<FlexLine> lines;
   FlexLine              currentLine;

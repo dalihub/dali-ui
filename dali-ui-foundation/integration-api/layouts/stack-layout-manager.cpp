@@ -177,25 +177,20 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto&   children      = GetChildren(view);
-  Extents parentPadding = view->GetViewPadding();
-  float   contentWidth  = widthConstraint - static_cast<float>(parentPadding.start + parentPadding.end);
-  float   contentHeight = heightConstraint - static_cast<float>(parentPadding.top + parentPadding.bottom);
-  contentWidth          = std::max(0.0f, contentWidth);
-  contentHeight         = std::max(0.0f, contentHeight);
-  float contentMain     = (mOrientation == StackOrientation::VERTICAL) ? contentHeight : contentWidth;
+  auto& children    = GetChildren(view);
+  float contentMain = (mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
 
   auto getImpl = [this](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
   StackMeasureFirstPassResult first =
-    MeasureStackNonWeightChildren(children, contentWidth, contentHeight, mOrientation, getImpl);
+    MeasureStackNonWeightChildren(children, widthConstraint, heightConstraint, mOrientation, getImpl);
 
   float maxCrossAxis = first.maxCrossAxis;
   float mainAxisTotal;
 
   if(first.totalWeight > 0.0f && first.visibleChildCount > 0)
   {
-    MeasureStackWeightChildren(children, contentMain, contentWidth, contentHeight, first.mainAxisNonWeight,
+    MeasureStackWeightChildren(children, contentMain, widthConstraint, heightConstraint, first.mainAxisNonWeight,
                                first.totalWeight, first.visibleChildCount, mSpacing, mOrientation, maxCrossAxis,
                                getImpl);
     mainAxisTotal = contentMain;

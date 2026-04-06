@@ -737,12 +737,7 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
     return mMeasuredSize;
   }
 
-  float marginWidth           = static_cast<float>(mMargin.start + mMargin.end);
-  float marginHeight          = static_cast<float>(mMargin.top + mMargin.bottom);
-  float innerWidthConstraint  = std::max(0.0f, widthConstraint - marginWidth);
-  float innerHeightConstraint = std::max(0.0f, heightConstraint - marginHeight);
-
-  MeasuredSize measured          = OnMeasure(innerWidthConstraint, innerHeightConstraint);
+  MeasuredSize measured          = OnMeasure(widthConstraint, heightConstraint);
   measured                       = ApplyConstraints(measured);
   mMeasuredSize                  = measured;
   mLastMeasuredConstraint.width  = widthConstraint;
@@ -759,11 +754,11 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float effectiveWidth  = (mRequestedWidth > 0) ? mRequestedWidth : widthConstraint;
   float effectiveHeight = (mRequestedHeight > 0) ? mRequestedHeight : heightConstraint;
 
+  float contentWidth  = std::max(0.0f, effectiveWidth - pw);
+  float contentHeight = std::max(0.0f, effectiveHeight - ph);
+
   if(!mChildren.empty())
   {
-    float contentW = std::max(0.0f, effectiveWidth - pw);
-    float contentH = std::max(0.0f, effectiveHeight - ph);
-
     float maxRight  = 0.0f;
     float maxBottom = 0.0f;
     for(auto& childData : mChildren)
@@ -772,8 +767,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
       Extents      margin                = childImpl.GetViewMargin();
       float        marginW               = static_cast<float>(margin.start + margin.end);
       float        marginH               = static_cast<float>(margin.top + margin.bottom);
-      float        childWidthConstraint  = std::max(0.0f, contentW - marginW);
-      float        childHeightConstraint = std::max(0.0f, contentH - marginH);
+      float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
+      float        childHeightConstraint = std::max(0.0f, contentHeight - marginH);
       MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
       childData.measuredSize             = childSize;
 
@@ -862,22 +857,17 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
 
-  LayoutRect contentBounds;
-  contentBounds.x      = static_cast<float>(mPadding.start);
-  contentBounds.y      = static_cast<float>(mPadding.top);
-  contentBounds.width  = width - static_cast<float>(mPadding.start + mPadding.end);
-  contentBounds.height = height - static_cast<float>(mPadding.top + mPadding.bottom);
-
   if(!mChildren.empty())
   {
-    // Default arrange for views without LayoutManager:
-    // Place children at their requested position, using measured size.
-    // Padding is not applied here — only LayoutManagers consume padding.
+    float padX = static_cast<float>(mPadding.start);
+    float padY = static_cast<float>(mPadding.top);
+
     for(auto& childData : mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
-      float     childX    = childImpl.mRequestedPositionX;
-      float     childY    = childImpl.mRequestedPositionY;
+      Extents   margin    = childImpl.GetViewMargin();
+      float     childX    = padX + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
+      float     childY    = padY + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
       float     childW    = childData.measuredSize.width;
       float     childH    = childData.measuredSize.height;
 

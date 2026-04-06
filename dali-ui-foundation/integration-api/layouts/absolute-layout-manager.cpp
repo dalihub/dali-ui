@@ -72,12 +72,9 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto&   children      = GetChildren(view);
-  Extents padding       = view->GetViewPadding();
-  float   contentWidth  = widthConstraint - static_cast<float>(padding.start + padding.end);
-  float   contentHeight = heightConstraint - static_cast<float>(padding.top + padding.bottom);
-  contentWidth          = std::max(0.0f, contentWidth);
-  contentHeight         = std::max(0.0f, contentHeight);
+  auto& children      = GetChildren(view);
+  float contentWidth  = widthConstraint;
+  float contentHeight = heightConstraint;
 
   float maxRight  = 0.0f;
   float maxBottom = 0.0f;
