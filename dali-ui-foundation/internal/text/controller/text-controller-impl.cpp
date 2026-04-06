@@ -103,25 +103,25 @@ void SetDefaultInputStyle(InputStyle& inputStyle, const FontDefaults* const font
   {
     if(fontDefaults->familyDefined)
     {
-      inputStyle.familyName      = fontDefaults->mFontDescription.family;
+      inputStyle.familyName      = fontDefaults->GetFontDescription().family;
       inputStyle.isFamilyDefined = true;
     }
 
     if(fontDefaults->weightDefined)
     {
-      inputStyle.weight          = fontDefaults->mFontDescription.weight;
+      inputStyle.weight          = fontDefaults->GetFontDescription().weight;
       inputStyle.isWeightDefined = true;
     }
 
     if(fontDefaults->widthDefined)
     {
-      inputStyle.width          = fontDefaults->mFontDescription.width;
+      inputStyle.width          = fontDefaults->GetFontDescription().width;
       inputStyle.isWidthDefined = true;
     }
 
     if(fontDefaults->slantDefined)
     {
-      inputStyle.slant          = fontDefaults->mFontDescription.slant;
+      inputStyle.slant          = fontDefaults->GetFontDescription().slant;
       inputStyle.isSlantDefined = true;
     }
 
@@ -1048,7 +1048,7 @@ void Controller::Impl::UpdateAfterFontChange(const std::string& newDefaultFont)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Concise, "Controller::UpdateAfterFontChange newDefaultFont(%s)\n",
                   newDefaultFont.c_str());
-    mFontDefaults->mFontDescription.family = newDefaultFont;
+    mFontDefaults->GetFontDescription().family = newDefaultFont;
 
     ClearFontData();
 
