@@ -205,4 +205,16 @@
   * \
   * @param[in] bevel The bevel configuration. \
   */ \
-  ChildClass& SetBevel(const Text::Bevel& bevel) { Label::SetBevel(bevel); return *this; }
+  ChildClass& SetBevel(const Text::Bevel& bevel) { Label::SetBevel(bevel); return *this; } \
+  /** \
+  * @brief Sets the text fit range. \
+  * \
+  * Text fit selects the largest font size within the configured range \
+  * that fits into the available layout space. \
+  * \
+  * @note Text fit is intended for bounded layout sizes. When width or height is \
+  * WRAP_CONTENT, measurement uses the configured font size instead. \
+  * \
+  * @param[in] range The text fit range configuration. \
+  */ \
+  ChildClass& SetTextFit(const Text::FitRange& range) { Label::SetTextFit(range); return *this; }

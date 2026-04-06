@@ -430,6 +430,17 @@ void Label::ResetBevel()
   return GetImpl(*this).ResetBevel();
 }
 
+Label& Label::SetTextFit(const Text::FitRange& range)
+{
+  GetImpl(*this).SetTextFit(range);
+  return *this;
+}
+
+void Label::ResetTextFit()
+{
+  GetImpl(*this).ResetTextFit();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

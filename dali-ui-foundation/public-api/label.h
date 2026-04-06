@@ -23,6 +23,7 @@
 #include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
@@ -554,6 +555,24 @@ public: // Setters for chaining
    * @brief Resets the bevel.
    */
   void ResetBevel();
+
+  /**
+   * @brief Sets the text fit range.
+   *
+   * Text fit selects the largest font size within the configured range
+   * that fits into the available layout space.
+   *
+   * @note Text fit is intended for bounded layout sizes. When width or height is
+   * WRAP_CONTENT, measurement uses the configured font size instead.
+   *
+   * @param[in] range The text fit range configuration.
+   */
+  Label& SetTextFit(const Text::FitRange& range);
+
+  /**
+   * @brief Resets the text fit.
+   */
+  void ResetTextFit();
 
   // @CHAIN_END
 

@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
 
@@ -345,6 +346,16 @@ public:
    */
   void ResetBevel();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetTextFit
+   */
+  void SetTextFit(const Text::FitRange& range);
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetTextFit
+   */
+  void ResetTextFit();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -560,6 +571,11 @@ private: // Implementation
    * @param[out] originSize The laid-out text size used to compute the initial scroll offset.
    */
   void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
+
+  /**
+   * @brief Refreshes the text to trigger an update.
+   */
+  void RefreshText();
 
   // Properties
 public:

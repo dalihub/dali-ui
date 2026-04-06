@@ -554,6 +554,31 @@ void LabelImpl::ResetBevel()
   }
 }
 
+void LabelImpl::SetTextFit(const Text::FitRange& range)
+{
+  // If TextFitArray is enabled, this should be disabled.
+  if(mController->IsTextFitArrayEnabled())
+  {
+    mController->SetDefaultLineSize(mController->GetCurrentLineSize());
+    mController->SetTextFitArrayEnabled(false);
+  }
+
+  mController->SetTextFitEnabled(true);
+  // Use the current line size as the baseline for text fit.
+  mController->SetTextFitLineSize(mController->GetDefaultLineSize());
+  mController->SetTextFitMinSize(range.GetMinimumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitChanged(true);
+  RefreshText();
+}
+
+void LabelImpl::ResetTextFit()
+{
+  mController->SetTextFitEnabled(false);
+  RefreshText();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -676,6 +701,17 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     std::swap(padding.start, padding.end);
   }
 
+  if(mController->IsTextFitArrayEnabled())
+  {
+    mController->FitArrayPointSizeforLayout(contentSize);
+    mController->SetTextFitContentSize(contentSize);
+  }
+  else if(mController->IsTextFitEnabled())
+  {
+    mController->FitPointSizeforLayout(contentSize);
+    mController->SetTextFitContentSize(contentSize);
+  }
+
   const Text::MarqueeOrientation marqueeOrientation = mTextScroller ? mTextScroller->GetOrientation() : Text::MarqueeOrientation::HORIZONTAL;
   // TODO: This is only meaningful after marquee ellipsis mode is supported.
   EvaluateAndApplyMarquee(contentSize, marqueeOrientation);
@@ -748,6 +784,11 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     mTextUpdateNeeded = false;
   }
+
+  if(mController->IsTextFitChanged())
+  {
+    mController->SetTextFitChanged(false);
+  }
 }
 
 Vector3 LabelImpl::GetNaturalSize()
@@ -817,10 +858,18 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();
 
-  const float minWidth  = GetMinimumWidth();
-  const float maxWidth  = GetMaximumWidth();
-  const float minHeight = GetMinimumHeight();
-  const float maxHeight = GetMaximumHeight();
+  const float minWidth        = GetMinimumWidth();
+  const float maxWidth        = GetMaximumWidth();
+  const float minHeight       = GetMinimumHeight();
+  const float maxHeight       = GetMaximumHeight();
+  const bool  useBaseFontSize = mController->IsTextFitEnabled() && ((requestedWidth == WRAP_CONTENT) || requestedHeight == WRAP_CONTENT);
+
+  // Measure wrap-content size with the configured font size instead of text fit.
+  if(useBaseFontSize)
+  {
+    mController->SetTextFitEnabled(false);
+    RefreshText();
+  }
 
   const Vector3 naturalSize = GetNaturalSize();
 
@@ -857,6 +906,11 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
     const float height           = std::max(0.0f, GetHeightForWidth(measuredWidth));
     measuredHeight               = std::max(std::min(height, allowedMaxHeight), minHeight);
+  }
+
+  if(useBaseFontSize)
+  {
+    mController->SetTextFitEnabled(true);
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);
@@ -1276,6 +1330,13 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
       mController->SetAutoScrollEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
     }
   }
+}
+
+void LabelImpl::RefreshText()
+{
+  std::string text;
+  mController->GetRawText(text);
+  SetText(ToDaliString(text));
 }
 
 // =============================================================================
