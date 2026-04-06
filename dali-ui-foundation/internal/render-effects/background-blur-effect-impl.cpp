@@ -486,7 +486,7 @@ void BackgroundBlurEffectImpl::CreateFrameBuffers(const ImageDimensions downsamp
 
   // buffer to draw input texture
   mInputBackgroundFrameBuffer =
-    FrameBuffer::New(downsampledWidth, downsampledHeight, FrameBuffer::Attachment::DEPTH_STENCIL);
+    FrameBuffer::New(downsampledWidth, downsampledHeight, FrameBuffer::Attachment::AUTO);
   Texture inputBackgroundTexture =
     Texture::New(TextureType::TEXTURE_2D, Dali::Pixel::RGBA8888, downsampledWidth, downsampledHeight);
   mInputBackgroundFrameBuffer.AttachColorTexture(inputBackgroundTexture);
