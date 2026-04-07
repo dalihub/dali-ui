@@ -17,15 +17,10 @@
  *
  */
 
-// EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
-#include <dali/public-api/signals/dali-signal.h>
-
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
-#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -33,168 +28,183 @@ namespace Dali
 namespace Ui
 {
 
-// Forward declaration (view.h provides full definition when needed)
-class View;
-
-// Forward declarations
 namespace Integration
 {
-class InteractiveTraitImpl;
+class InteractiveViewImpl;
 }
 
+#include "interactive-view.autogen.h"
 /**
- * @brief InteractiveTrait is an interaction trait that provides clickable behavior to a View.
+ * @brief InteractiveView is a View subclass with interactive behavior built in.
  *
- * InteractiveTrait provides click, long-press, and pressed-state handling
- * functionality. It can be attached to any View to make it interactive.
+ * InteractiveView guarantees that an InteractiveTrait is attached for the
+ * lifetime of the view. It exposes the InteractiveTrait API directly, so
+ * callers do not need to go through EnsureInteractiveTrait().
  *
+ * InteractiveView is intended as a base class for clickable UI components
+ * such as Button and Checkbox. It can also be instantiated directly when
+ * a plain interactive container is needed.
+ *
+ * @see InteractiveTrait
  */
-class DALI_UI_API InteractiveTrait : public Trait
+class DALI_UI_API InteractiveView : public View
 {
-public:
-  // Typedefs
-
 public: // Creation & Destruction
   /**
-   * @brief Creates an uninitialized Trait handle.
+   * @brief Creates an uninitialized InteractiveView handle.
    */
-  InteractiveTrait();
+  InteractiveView();
 
   /**
-   * @brief Creates an initialized Trait.
+   * @brief Creates an initialized InteractiveView.
    *
-   * @return A handle to a newly allocated Dali resource
+   * @return A handle to a newly allocated InteractiveView
    */
-  static InteractiveTrait New();
+  static InteractiveView New();
 
   /**
-   * @brief Downcasts a handle to InteractiveTrait handle.
+   * @brief Downcasts a handle to an InteractiveView handle.
    *
-   * If the handle refers to a InteractiveTrait (e.g. a trait from GetTrait),
-   * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
+   * If the handle refers to an InteractiveView, the downcast produces a valid handle.
+   * Otherwise the returned handle is uninitialized.
    *
-   * @param[in] handle Handle to an object (e.g. Trait from View's interaction trait)
-   * @return A handle to InteractiveTrait or an uninitialized handle
+   * @param[in] handle Handle to an object
+   * @return A handle to an InteractiveView or an uninitialized handle
    */
-  static InteractiveTrait DownCast(BaseHandle handle);
+  static InteractiveView DownCast(BaseHandle handle);
 
   /**
    * @brief Copy constructor.
    *
-   * Creates another handle that points to the same real object.
-   * @param[in] interactiveTrait Handle to copy
+   * @param[in] view Handle to copy
    */
-  InteractiveTrait(const InteractiveTrait& interactiveTrait);
+  InteractiveView(const InteractiveView& view);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs Handle to move
+   */
+  InteractiveView(InteractiveView&& rhs) noexcept;
 
   /**
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
-  ~InteractiveTrait();
+  ~InteractiveView();
+
+public: // Operators
+  /**
+   * @brief Copy assignment operator.
+   *
+   * @param[in] handle Object to assign this to
+   * @return Reference to this
+   */
+  InteractiveView& operator=(const InteractiveView& handle) = default;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs Object to assign this to
+   * @return Reference to this
+   */
+  InteractiveView& operator=(InteractiveView&& rhs) noexcept = default;
 
 public: // Signals
   /**
    * @brief Emitted when the pressed state changes.
    *
-   * This signal is emitted when the view's pressed state changes due to touch or keyboard input.
-   * The pressed state is true when the user is interacting with the view (e.g., pressing down),
-   * and false when the interaction ends (e.g., releasing the touch or key).
-   *
    * @return The pressed changed signal
+   * @see InteractiveTrait::PressedChangedSignal
    */
   Signal<void(View, bool, const InputEvent&)>& PressedChangedSignal();
 
   /**
    * @brief Emitted when the pseudo disabled state changes.
    *
-   * This signal is emitted when the pseudo disabled state is changed via SetPseudoDisabled().
-   * The view is visually presented as disabled when in pseudo disabled state, but it still
-   * accepts user interaction to provide guidance or an alternative flow.
-   *
    * @return The pseudo disabled changed signal
+   * @see InteractiveTrait::PseudoDisabledChangedSignal
    */
   Signal<void(View, bool)>& PseudoDisabledChangedSignal();
 
   /**
    * @brief Emitted when the view is clicked.
    *
-   * This signal is emitted when the view receives a tap gesture, indicating a click action.
-   * The click action is triggered when the user taps on the view.
-   *
-   * @note This signal may not be emitted if the one of LongPressed signal handler consumes the event (returns true).
-   *
    * @return The clicked signal
+   * @see InteractiveTrait::ClickedSignal
    */
   Signal<void(View, const InputEvent&)>& ClickedSignal();
 
   /**
    * @brief Emitted when the view receives a long press gesture.
    *
-   * This signal is emitted when the user performs a long press on the view.
-   * A long press is detected when the user presses and holds on the view for a specified duration.
-   *
-   * @note If the handler returns true to consume the event, the Clicked signal will not be emitted.
-   * @note This signal is not emitted when ClickedKeyType is set to PRESS.
-   *
    * @return The long pressed signal
+   * @see InteractiveTrait::LongPressedSignal
    */
   Signal<bool(View, const InputEvent&)>& LongPressedSignal();
 
 public: // API
+  // @CHAIN_START(InteractiveView, View)
+
   /**
-   * @brief The boolean flag for pressed state.
+   * @brief Returns whether the view is currently in the pressed state.
    *
-   * @return True if the object is pressed
+   * @return True if pressed
+   * @see InteractiveTrait::IsPressed
    */
   bool IsPressed() const;
 
   /**
-   * @brief Checks if the view is pseudo disabled state.
-   * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
-   * an alternative flow.
+   * @brief Returns whether the view is in the pseudo disabled state.
    *
-   * @return True if the object is pseudo disabled
+   * @return True if pseudo disabled
+   * @see InteractiveTrait::IsPseudoDisabled
    */
   bool IsPseudoDisabled() const;
 
   /**
-   * @brief Sets the pseudo disabled state to the view.
-   * The view is visually presented as disabled, but it still accepts user interaction in order to provide guidance or
-   * an alternative flow.
+   * @brief Sets the pseudo disabled state.
    *
-   * @param[in] pseudoDisabled True if the object is pseudo disabled
+   * @param[in] pseudoDisabled True to set pseudo disabled
+   * @see InteractiveTrait::SetPseudoDisabled
    */
-  void SetPseudoDisabled(bool pseudoDisabled);
+  InteractiveView& SetPseudoDisabled(bool pseudoDisabled);
 
   /**
-   * @brief Checks if clicking is currently allowed (not blocked).
+   * @brief Returns whether clicking is currently allowed.
    *
-   * @return True if clicking is allowed, false if clicking is blocked
+   * @return True if clicking is allowed
+   * @see InteractiveTrait::IsClickable
    */
   bool IsClickable() const;
 
   /**
    * @brief Sets whether clicking is allowed.
    *
-   * @param[in] clickable True to allow clicking, false to block clicking
+   * @param[in] clickable True to allow clicking
+   * @see InteractiveTrait::SetClickable
    */
-  void SetClickable(bool clickable);
+  InteractiveView& SetClickable(bool clickable);
 
   /**
-   * @brief Retrieves the current key click policy.
+   * @brief Returns the current key click policy.
    *
-   * @return The active KeyClickPolicy for this button.
+   * @return The active KeyClickPolicy
+   * @see InteractiveTrait::GetKeyClickPolicy
    */
   KeyClickPolicy GetKeyClickPolicy() const;
 
   /**
-   * @brief Configures the trigger timing for key-driven click events.
+   * @brief Sets the key click policy.
    *
-   * @param policy The KeyClickPolicy to be applied (OnRelease, OnPress, or Disabled).
+   * @param[in] policy The KeyClickPolicy to apply
+   * @see InteractiveTrait::SetKeyClickPolicy
    */
-  void SetKeyClickPolicy(KeyClickPolicy policy);
+  InteractiveView& SetKeyClickPolicy(KeyClickPolicy policy);
 
+public: // Signal connection helpers
+  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to ClickedSignal.
    *
@@ -213,9 +223,10 @@ public: // API
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  void ConnectClickedSignal(T* obj, Func func)
+  InteractiveView& ConnectClickedSignal(T* obj, Func func)
   {
     ClickedSignal().Connect(obj, func);
+    return *this;
   }
 
   // @CHAIN_MANUAL
@@ -231,9 +242,10 @@ public: // API
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  void ConnectPressedChangedSignal(T* obj, Func func)
+  InteractiveView& ConnectPressedChangedSignal(T* obj, Func func)
   {
     PressedChangedSignal().Connect(obj, func);
+    return *this;
   }
 
   // @CHAIN_MANUAL
@@ -254,18 +266,33 @@ public: // API
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  void ConnectLongPressedSignal(T* obj, Func func)
+  InteractiveView& ConnectLongPressedSignal(T* obj, Func func)
   {
     LongPressedSignal().Connect(obj, func);
+    return *this;
   }
 
+  // @CHAIN_END
+
 public: // Not intended for application developers
+  /// @cond internal
   /**
    * @brief Creates a handle using the Internal implementation.
    *
-   * @param[in] implementation The implementation
+   * @param[in] implementation The InteractiveView implementation
    */
-  explicit InteractiveTrait(Integration::InteractiveTraitImpl* implementation);
+  explicit DALI_UI_API InteractiveView(Integration::InteractiveViewImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this InteractiveView from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API InteractiveView(Dali::Internal::CustomActor* internal);
+  /// @endcond
+
+public:
+  DALI_UI_CHAIN_VIEW_METHODS(InteractiveView)
 };
 
 } // namespace Ui

@@ -45,16 +45,13 @@ public:
       .SetRequestedWidth(200_spx)
       .SetRequestedHeight(200_spx)
       .Children({
-        View::New() // Red child
+        InteractiveView::New() // Red child
           .SetBackgroundColor(UiColor(0xFF0000))
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
-          .SetFocusable(true)
-          .AsInteractive([this](InteractiveTrait& trait) {
-            trait.ClickedSignal().Connect(this, [this](View view, const InputEvent& event) -> bool {
-              mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
-              return true;
-            });
+          .ConnectClickedSignal(this, [this](View view, const InputEvent& event) -> bool {
+            mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
+            return true;
           }),
         View::New() // Blue child
           .SetBackgroundColor(UiColor(0x0000FF))

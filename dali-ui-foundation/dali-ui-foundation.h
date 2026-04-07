@@ -22,6 +22,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-field.h>
+#include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-config.h>

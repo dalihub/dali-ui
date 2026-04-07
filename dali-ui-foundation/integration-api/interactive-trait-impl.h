@@ -24,6 +24,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/interactive-event-receiver.h>
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
@@ -208,6 +209,7 @@ private:
   bool                                        mClickable : 1;
   bool                                        mClickBlockedByTouch : 1;
   bool                                        mClickBlockedByKey : 1;
+  IInteractiveEventReceiver*                  mEventReceiver{nullptr}; ///< Cached interface pointer (set in OnAttached)
 };
 
 } // namespace Integration
