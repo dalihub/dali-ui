@@ -51,6 +51,15 @@ bool GetVerticalAlignmentEnumeration(const Property::Value& propertyValue,
                                      Alignment&             alignment);
 
 /**
+ * @brief Get the overflow mode from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] overflowMode The resulting OverflowMode from the given source
+ * @return true if the resulting overflowMode has been updated
+ */
+bool GetOverflowModeEnumeration(const Property::Value& propertyValue,
+                                OverflowMode&          overflowMode);
+
+/**
  * @brief Get the line-wrap-mode from the provided property value.
  * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
  * @param[out] alignment The resulting lineWrapMode from the given source

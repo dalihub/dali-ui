@@ -744,6 +744,14 @@ public:
       VERTICAL_ALIGNMENT = Text::LabelPropertyIndex::VERTICAL_ALIGNMENT,
 
       /**
+       * @brief The overflow mode.
+       * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or type Property::STRING.
+       * @note Return type is Text::OverflowMode (Property::INTEGER).
+       * @note See also: Label::SetOverflowMode(), Label::GetOverflowMode().
+       */
+      OVERFLOW_MODE = Text::LabelPropertyIndex::OVERFLOW_MODE,
+
+      /**
        * @brief The line height.
        * @details Name "lineHeight", type Property::FLOAT.
        * @note See also: Label::SetLineHeight(), Label::GetLineHeight().

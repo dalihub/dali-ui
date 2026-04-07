@@ -82,6 +82,15 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       }
       break;
     }
+    case Text::LabelPropertyIndex::OVERFLOW_MODE:
+    {
+      Text::OverflowMode mode;
+      if(Text::GetOverflowModeEnumeration(value, mode))
+      {
+        impl.SetOverflowMode(mode);
+      }
+      break;
+    }
     case Text::LabelPropertyIndex::LINE_HEIGHT:
     {
       impl.SetLineHeight(value.Get<float>());
@@ -230,6 +239,11 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
     {
       value = impl.GetVerticalTextAlignment();
+      break;
+    }
+    case Text::LabelPropertyIndex::OVERFLOW_MODE:
+    {
+      value = impl.GetOverflowMode();
       break;
     }
     case Text::LabelPropertyIndex::LINE_HEIGHT:

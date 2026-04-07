@@ -79,6 +79,12 @@ const Dali::Scripting::StringEnum MARQUEE_ORIENTATION_TABLE[] =
     {"VERTICAL", static_cast<int32_t>(MarqueeOrientation::VERTICAL)},
 };
 
+const Dali::Scripting::StringEnum OVERFLOW_MODE_TABLE[] =
+  {
+    {"CLIP", static_cast<int32_t>(OverflowMode::CLIP)},
+    {"ELLIPSIS", static_cast<int32_t>(OverflowMode::ELLIPSIS)},
+};
+
 const uint32_t TEXT_ALIGNMENT_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TABLE) / sizeof(TEXT_ALIGNMENT_TABLE[0]));
 const uint32_t LINE_WRAP_MODE_TABLE_COUNT =
@@ -93,6 +99,8 @@ const uint32_t MARQUEE_STOP_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(MARQUEE_STOP_MODE_TABLE) / sizeof(MARQUEE_STOP_MODE_TABLE[0]));
 const uint32_t MARQUEE_ORIENTATION_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(MARQUEE_ORIENTATION_TABLE) / sizeof(MARQUEE_ORIENTATION_TABLE[0]));
+const uint32_t OVERFLOW_MODE_TABLE_COUNT =
+  static_cast<uint32_t>(sizeof(OVERFLOW_MODE_TABLE) / sizeof(OVERFLOW_MODE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, END)
@@ -186,6 +194,14 @@ bool GetMarqueeOrientationEnumeration(const Property::Value& propertyValue, Marq
                                            MARQUEE_ORIENTATION_TABLE,
                                            MARQUEE_ORIENTATION_TABLE_COUNT,
                                            marqueeOrientation);
+}
+
+bool GetOverflowModeEnumeration(const Property::Value& propertyValue, OverflowMode& overflowMode)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           OVERFLOW_MODE_TABLE,
+                                           OVERFLOW_MODE_TABLE_COUNT,
+                                           overflowMode);
 }
 
 } // namespace Text

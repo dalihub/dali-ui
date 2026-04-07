@@ -35,6 +35,7 @@ const char* const PROPERTY_NAME_MULTI_LINE             = "multiLine";
 const char* const PROPERTY_NAME_LINE_WRAP_MODE         = "lineWrapMode";
 const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT   = "horizontalAlignment";
 const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT     = "verticalAlignment";
+const char* const PROPERTY_NAME_OVERFLOW_MODE          = "overflowMode";
 const char* const PROPERTY_NAME_LINE_HEIGHT            = "lineHeight";
 const char* const PROPERTY_NAME_LINE_HEIGHT_MODE       = "lineHeightMode";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE  = "layoutDirectionMode";
@@ -264,6 +265,21 @@ int UtcDaliLabelVerticalTextAlignment(void)
 
   label.SetVerticalTextAlignment(Text::Alignment::END);
   DALI_TEST_EQUALS(label.GetVerticalTextAlignment(), Text::Alignment::END, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelOverflowMode(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(label.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+
+  label.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(label.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
   END_TEST;
 }
@@ -529,6 +545,7 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LINE_WRAP_MODE) == Label::Property::LINE_WRAP_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_HORIZONTAL_ALIGNMENT) == Label::Property::HORIZONTAL_ALIGNMENT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_VERTICAL_ALIGNMENT) == Label::Property::VERTICAL_ALIGNMENT);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_OVERFLOW_MODE) == Label::Property::OVERFLOW_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT) == Label::Property::LINE_HEIGHT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT_MODE) == Label::Property::LINE_HEIGHT_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == Label::Property::LAYOUT_DIRECTION_MODE);
@@ -592,6 +609,13 @@ int UtcDaliLabelSetProperty(void)
 
   label.SetProperty(Label::Property::VERTICAL_ALIGNMENT, "END");
   DALI_TEST_EQUALS(label.GetProperty<Text::Alignment>(Label::Property::VERTICAL_ALIGNMENT), Text::Alignment::END, TEST_LOCATION);
+
+  // OVERFLOW_MODE
+  label.SetProperty(Label::Property::OVERFLOW_MODE, Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(label.GetProperty<Text::OverflowMode>(Label::Property::OVERFLOW_MODE), Text::OverflowMode::CLIP, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::OVERFLOW_MODE, "ELLIPSIS");
+  DALI_TEST_EQUALS(label.GetProperty<Text::OverflowMode>(Label::Property::OVERFLOW_MODE), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
   // LINE_HEIGHT
   label.SetProperty(Label::Property::LINE_HEIGHT, 1.5f);
