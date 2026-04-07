@@ -117,6 +117,7 @@ private:
           Label::New(MULTI_LINE_TEXT)
             .SetRequestedWidth(WRAP_CONTENT)
             .SetRequestedHeight(WRAP_CONTENT)
+            .SetMaximumHeight(200)
             .SetMultiLine(true)
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))

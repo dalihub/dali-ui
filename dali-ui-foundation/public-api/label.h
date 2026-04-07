@@ -563,8 +563,10 @@ public: // Setters for chaining
    * Text fit selects the largest font size within the configured range
    * that fits into the available layout space.
    *
-   * @note Text fit is intended for bounded layout sizes. When width or height is
-   * WRAP_CONTENT, measurement uses the configured font size instead.
+   * @note Text fit is designed for bounded layout sizes. It is recommended to
+   * explicitly specify width and height when using this feature.
+   * When width or height is WRAP_CONTENT, measurement is performed using the
+   * maximum font size in the configured range.
    *
    * @param[in] range The text fit range configuration.
    */
@@ -576,8 +578,11 @@ public: // Setters for chaining
    * Text fit selects the largest candidate that fits into the available
    * layout space. Each candidate defines a font size and line height.
    *
-   * @note Text fit is intended for bounded layout sizes. When width or height is
-   * WRAP_CONTENT, measurement uses the configured font size instead.
+   * @note Text fit is designed for bounded layout sizes. It is recommended to
+   * explicitly specify width and height when using this feature.
+   * When width or height is WRAP_CONTENT, measurement uses the maximum fit
+   * candidate to determine the size. The maximum candidate is selected by the
+   * largest font size, and if equal, by the larger line height.
    *
    * @param[in] candidates The vector of text fit candidates.
    */

@@ -348,12 +348,12 @@ public:
   void ResetBevel();
 
   /**
-   * @copydoc Dali::Ui::Label::SetTextFit
+   * @see Dali::Ui::Label::SetTextFit
    */
   void SetTextFit(const Text::FitRange& range);
 
   /**
-   * @copydoc Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::FitCandidate>&)
+   * @see Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::FitCandidate>&)
    */
   void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
 

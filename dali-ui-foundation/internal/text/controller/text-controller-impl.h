@@ -394,6 +394,7 @@ public:
     mTextFitContentSize(),
     mRawText(),
     mTextFitArray(),
+    mMaxFitCandidateIndex(-1),
     mRecalculateNaturalSize(true),
     mRecalculateLayoutSize(true),
     mMarkupProcessorEnabled(false),
@@ -1123,6 +1124,7 @@ public:
   std::string mRawText;            ///< Raw text including markup tag.
 
   Dali::Vector<Text::FitCandidate> mTextFitArray; ///< List of FitCandidate for TextFitArray operation.
+  int                              mMaxFitCandidateIndex;
 
   bool mRecalculateNaturalSize : 1;         ///< Whether the natural size needs to be recalculated.
   bool mRecalculateLayoutSize : 1;          ///< Whether the layout size needs to be recalculated.

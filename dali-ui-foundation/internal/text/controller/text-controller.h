@@ -563,6 +563,17 @@ public: // Configure the text controller.
   bool IsTextFitArrayEnabled() const;
 
   /**
+   * @brief Returns the maximum text fit candidate.
+   *
+   * The maximum candidate is selected based on the largest font size.
+   * If multiple candidates have the same font size, the one with the larger
+   * line height is returned.
+   *
+   * @return A pointer to the maximum fit candidate, or nullptr if no candidates exist.
+   */
+  const Text::FitCandidate* GetMaxFitCandidate() const;
+
+  /**
    * @brief Sets the text fit array.
    *
    * @param[in] fitOptions The list of text fit options.

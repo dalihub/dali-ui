@@ -569,6 +569,7 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
   mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitChanged(true);
+  InvalidateMeasure();
 }
 
 void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
@@ -580,6 +581,7 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   }
   mController->SetTextFitArrayEnabled(true);
   mController->SetTextFitArray(candidates);
+  InvalidateMeasure();
 }
 
 void LabelImpl::ResetTextFit()
@@ -588,6 +590,7 @@ void LabelImpl::ResetTextFit()
   mController->SetTextFitArrayEnabled(false);
   mController->ClearTextFitArray();
   UpdateLineHeight();
+  InvalidateMeasure();
 }
 
 // =============================================================================
@@ -873,17 +876,31 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float maxWidth  = GetMaximumWidth();
   const float minHeight = GetMinimumHeight();
   const float maxHeight = GetMaximumHeight();
+  const float fontSize  = GetFontSize();
 
   const bool useTextFitRange    = mController->IsTextFitEnabled();
   const bool useFitCandidates   = mController->IsTextFitArrayEnabled();
   const bool wrapContentMeasure = (requestedWidth == WRAP_CONTENT) || (requestedHeight == WRAP_CONTENT);
-  const bool useBaseFontSize    = (useTextFitRange || useFitCandidates) && wrapContentMeasure;
 
-  // Measure wrap-content size with the default font size instead of text fit.
-  if(useBaseFontSize)
+  // Measure wrap-content size using a representative maximum text fit configuration.
+  if(useTextFitRange && wrapContentMeasure)
   {
     mController->SetTextFitEnabled(false);
+    SetFontSize(mController->GetTextFitMaxSize());
+  }
+  else if(useFitCandidates && wrapContentMeasure)
+  {
     mController->SetTextFitArrayEnabled(false);
+    const Text::FitCandidate* fitCandidate = mController->GetMaxFitCandidate();
+    if(fitCandidate)
+    {
+      SetFontSize(fitCandidate->GetFontSize());
+      mController->SetDefaultLineSize(fitCandidate->GetLineHeight());
+    }
+    else
+    {
+      DALI_LOG_ERROR("TextFitArray is enabled but no fit candidate exists\n");
+    }
   }
 
   const Vector3 naturalSize = GetNaturalSize();
@@ -923,10 +940,17 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     measuredHeight               = std::max(std::min(height, allowedMaxHeight), minHeight);
   }
 
-  if(useBaseFontSize)
+  if(useTextFitRange && wrapContentMeasure)
   {
-    mController->SetTextFitEnabled(useTextFitRange);
-    mController->SetTextFitArrayEnabled(useFitCandidates);
+    mController->SetTextFitEnabled(true);
+    SetFontSize(fontSize);
+    UpdateLineHeight();
+  }
+  else if(useFitCandidates && wrapContentMeasure)
+  {
+    mController->SetTextFitArrayEnabled(true);
+    SetFontSize(fontSize);
+    UpdateLineHeight();
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);

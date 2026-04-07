@@ -498,7 +498,7 @@ void Controller::SetTextFitMinSize(float minSize, FontSizeType type)
 
 float Controller::GetTextFitMinSize() const
 {
-  return mImpl->mTextFitMinSize;
+  return ConvertPointToPixel(mImpl->mTextFitMinSize);
 }
 
 void Controller::SetTextFitMaxSize(float maxSize, FontSizeType type)
@@ -508,7 +508,7 @@ void Controller::SetTextFitMaxSize(float maxSize, FontSizeType type)
 
 float Controller::GetTextFitMaxSize() const
 {
-  return mImpl->mTextFitMaxSize;
+  return ConvertPointToPixel(mImpl->mTextFitMaxSize);
 }
 
 void Controller::SetTextFitStepSize(float step, FontSizeType type)
@@ -518,7 +518,7 @@ void Controller::SetTextFitStepSize(float step, FontSizeType type)
 
 float Controller::GetTextFitStepSize() const
 {
-  return mImpl->mTextFitStepSize;
+  return ConvertPointToPixel(mImpl->mTextFitStepSize);
 }
 
 void Controller::SetTextFitContentSize(Vector2 size)
@@ -561,9 +561,46 @@ bool Controller::IsTextFitArrayEnabled() const
   return mImpl->mTextFitArrayEnabled;
 }
 
+const Text::FitCandidate* Controller::GetMaxFitCandidate() const
+{
+  const int index = mImpl->mMaxFitCandidateIndex;
+  if(index < 0 || static_cast<uint32_t>(index) >= mImpl->mTextFitArray.Count())
+  {
+    return nullptr;
+  }
+
+  return &mImpl->mTextFitArray[static_cast<uint32_t>(index)];
+}
+
 void Controller::SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates)
 {
-  mImpl->mTextFitArray = candidates;
+  mImpl->mTextFitArray         = candidates;
+  mImpl->mMaxFitCandidateIndex = -1;
+
+  const uint32_t count = mImpl->mTextFitArray.Count();
+  if(count == 0u)
+  {
+    return;
+  }
+
+  uint32_t bestIndex = 0u;
+  for(uint32_t i = 1u; i < count; ++i)
+  {
+    const Text::FitCandidate& best = mImpl->mTextFitArray[bestIndex];
+    const Text::FitCandidate& cur  = mImpl->mTextFitArray[i];
+
+    const float bestFontSize = best.GetFontSize();
+    const float curFontSize  = cur.GetFontSize();
+
+    if((curFontSize > bestFontSize) ||
+       (Equals(curFontSize, bestFontSize, Math::MACHINE_EPSILON_1000) &&
+        cur.GetLineHeight() > best.GetLineHeight()))
+    {
+      bestIndex = i;
+    }
+  }
+
+  mImpl->mMaxFitCandidateIndex = static_cast<int>(bestIndex);
 }
 
 const Dali::Vector<Text::FitCandidate>& Controller::GetTextFitArray()
@@ -577,6 +614,7 @@ void Controller::ClearTextFitArray()
   {
     mImpl->mTextFitArray.Clear();
   }
+  mImpl->mMaxFitCandidateIndex = -1;
 }
 
 void Controller::SetPlaceholderTextElideEnabled(bool enabled)
