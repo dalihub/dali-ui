@@ -190,6 +190,25 @@ enum class MarqueeStopMode : uint8_t
   FINISH_LOOP = 1
 };
 
+/**
+ * @brief Enumeration for text overflow handling.
+ * Specifies how text is rendered when it exceeds the available layout bounds.
+ */
+enum class OverflowMode : uint8_t
+{
+  /**
+   * @brief Clips the overflowing text.
+   * Text outside the layout bounds is not rendered.
+   */
+  CLIP = 0,
+
+  /**
+   * @brief Truncates the text with an ellipsis.
+   * Displays "..." at the end of the visible text.
+   */
+  ELLIPSIS = 1
+};
+
 } // namespace Text
 
 } // namespace Ui

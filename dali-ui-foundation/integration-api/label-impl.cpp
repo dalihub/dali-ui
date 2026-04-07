@@ -127,6 +127,7 @@ LabelImpl::LabelImpl()
   mTouchPosition(),
   mLineHeight(-1.0f),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
+  mOverflowMode(Text::OverflowMode::ELLIPSIS),
   mTextColorAnimatedCount(0),
   mTextUpdateNeeded(false),
   mLastMarqueeEnabled(false),
@@ -242,6 +243,34 @@ void LabelImpl::SetVerticalTextAlignment(Text::Alignment alignment)
 Text::Alignment LabelImpl::GetVerticalTextAlignment() const
 {
   return mController->GetVerticalAlignment();
+}
+
+void LabelImpl::SetOverflowMode(Text::OverflowMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  if(mode != mOverflowMode)
+  {
+    mOverflowMode = mode;
+    switch(mode)
+    {
+      case Text::OverflowMode::CLIP:
+      {
+        mController->SetTextElideEnabled(false);
+        break;
+      }
+      case Text::OverflowMode::ELLIPSIS:
+      {
+        mController->SetTextElideEnabled(true);
+        break;
+      }
+    }
+    RequestTextRelayout();
+  }
+}
+
+Text::OverflowMode LabelImpl::GetOverflowMode() const
+{
+  return mOverflowMode;
 }
 
 void LabelImpl::SetLineHeight(float lineHeight)

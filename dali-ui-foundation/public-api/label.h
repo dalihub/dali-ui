@@ -247,6 +247,20 @@ public: // Setters for chaining
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
+   * @brief Sets the overflow mode.
+   *
+   * @param[in] mode The overflow mode to apply.
+   */
+  Label& SetOverflowMode(Text::OverflowMode mode);
+
+  /**
+   * @brief Gets the overflow mode.
+   *
+   * @return The current overflow mode.
+   */
+  Text::OverflowMode GetOverflowMode() const;
+
+  /**
    * @brief Sets the line height of the text.
    *
    * The interpretation of this value depends on the current LineHeightMode.

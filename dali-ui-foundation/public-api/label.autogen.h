@@ -52,6 +52,12 @@
   */ \
   ChildClass& SetVerticalTextAlignment(Text::Alignment alignment) { Label::SetVerticalTextAlignment(alignment); return *this; } \
   /** \
+  * @brief Sets the overflow mode. \
+  * \
+  * @param[in] mode The overflow mode to apply. \
+  */ \
+  ChildClass& SetOverflowMode(Text::OverflowMode mode) { Label::SetOverflowMode(mode); return *this; } \
+  /** \
   * @brief Sets the line height of the text. \
   * \
   * The interpretation of this value depends on the current LineHeightMode. \

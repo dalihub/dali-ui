@@ -137,7 +137,8 @@ private:
     return Label::New()
       .SetText(text)
       .SetFontFamily(fontFamily)
-      .SetFontSize(fontSize);
+      .SetFontSize(fontSize)
+      .SetOverflowMode(Text::OverflowMode::ELLIPSIS);
   }
 
   InputField CreateInputField()
@@ -244,6 +245,7 @@ private:
     DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
     DALI_LOG_ERROR("H Align         : %d\n", label.GetHorizontalTextAlignment());
     DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
+    DALI_LOG_ERROR("Overflow Mode   : %d\n", label.GetOverflowMode());
     DALI_LOG_ERROR("LineHeight      : %f\n", label.GetLineHeight());
     DALI_LOG_ERROR("LineHeight Mode : %d\n", label.GetLineHeightMode());
     DALI_LOG_ERROR("LayoutDir Mode  : %d\n", label.GetLayoutDirectionMode());
@@ -317,10 +319,12 @@ private:
     if(isLightColor)
     {
       ApplyDarkColor();
+      mLabel3.SetOverflowMode(Text::OverflowMode::CLIP);
     }
     else
     {
       ApplyLightColor();
+      mLabel3.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
     }
   }
 

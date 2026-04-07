@@ -148,6 +148,16 @@ public:
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
+   * @copydoc Dali::Ui::Label::SetOverflowMode
+   */
+  void SetOverflowMode(Text::OverflowMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetOverflowMode
+   */
+  Text::OverflowMode GetOverflowMode() const;
+
+  /**
    * @copydoc Dali::Ui::Label::SetLineHeight
    */
   void SetLineHeight(float lineHeight);
@@ -627,6 +637,7 @@ private:
   Vector2              mTouchPosition; ///< The initial touch down position.
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
+  Text::OverflowMode   mOverflowMode;
 
   int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;

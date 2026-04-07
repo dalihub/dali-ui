@@ -210,6 +210,17 @@ Text::Alignment Label::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
+Label& Label::SetOverflowMode(Text::OverflowMode mode)
+{
+  GetImpl(*this).SetOverflowMode(mode);
+  return *this;
+}
+
+Text::OverflowMode Label::GetOverflowMode() const
+{
+  return GetImpl(*this).GetOverflowMode();
+}
+
 Label& Label::SetLineHeight(float lineHeight)
 {
   GetImpl(*this).SetLineHeight(lineHeight);
