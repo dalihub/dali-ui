@@ -324,7 +324,7 @@ void InteractiveTraitImpl::RecordPressedExecutionKey(const Dali::String& keyName
 
 void InteractiveTraitImpl::ClearKeyPressedHistory()
 {
-  mPressedExecutionKey      = "";
+  mPressedExecutionKey.Clear();
   mPressedExecutionKeyCount = 0;
 }
 
