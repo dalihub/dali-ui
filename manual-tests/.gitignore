@@ -1,0 +1,5 @@
+# Compiled test binaries
+bin/
+
+# In-source CMake build directory (if cmake is run inside the app folder)
+build/
