@@ -226,6 +226,12 @@
   */ \
   ChildClass& SetBorderlineOffset(float offset) { View::SetBorderlineOffset(offset); return *this; } \
   /** \
+  * @brief Sets the name of this view. \
+  * \
+  * @param[in] name The name to set \
+  */ \
+  ChildClass& SetName(const Dali::String& name) { View::SetName(name); return *this; } \
+  /** \
   * @brief Attaches the interaction trait to this View. \
   * \
   * @return Reference to this View for fluent chaining \

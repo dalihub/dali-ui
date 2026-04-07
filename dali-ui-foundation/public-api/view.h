@@ -695,6 +695,20 @@ public: // Properties
   View& SetBorderlineOffset(float offset);
 
   /**
+   * @brief Gets the name of the view.
+   *
+   * @return The name
+   */
+  Dali::String GetName() const;
+
+  /**
+   * @brief Sets the name of this view.
+   *
+   * @param[in] name The name to set
+   */
+  View& SetName(const Dali::String& name);
+
+  /**
    * @brief Returns true if this view and all its View ancestors are enabled.
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method

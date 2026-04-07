@@ -629,6 +629,16 @@ void ViewImpl::SetBorderlineOffset(float offset)
   Self().SetProperty(Ui::View::Property::BORDERLINE_OFFSET, offset);
 }
 
+Dali::String ViewImpl::GetName() const
+{
+  return Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME);
+}
+
+void ViewImpl::SetName(const Dali::String& name)
+{
+  Self().SetProperty(Dali::Actor::Property::NAME, name);
+}
+
 bool ViewImpl::IsFocusable() const
 {
   return Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);

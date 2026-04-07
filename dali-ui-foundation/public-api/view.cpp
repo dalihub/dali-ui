@@ -498,6 +498,17 @@ View& View::SetBorderlineOffset(float offset)
   return *this;
 }
 
+Dali::String View::GetName() const
+{
+  return Integration::GetImpl(*this).GetName();
+}
+
+View& View::SetName(const Dali::String& name)
+{
+  Integration::GetImpl(*this).SetName(name);
+  return *this;
+}
+
 InteractiveTrait View::EnsureInteractiveTrait()
 {
   return Integration::GetImpl(*this).EnsureInteractiveTrait();

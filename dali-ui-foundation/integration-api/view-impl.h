@@ -504,6 +504,16 @@ public: // State API
   void SetBorderlineOffset(float offset);
 
   /**
+   * @copydoc Dali::Ui::View::GetName
+   */
+  Dali::String GetName() const;
+
+  /**
+   * @copydoc Dali::Ui::View::SetName
+   */
+  void SetName(const Dali::String& name);
+
+  /**
    * @brief Sets a trait to this View.
    *
    * The trait will share the lifecycle with this View.
