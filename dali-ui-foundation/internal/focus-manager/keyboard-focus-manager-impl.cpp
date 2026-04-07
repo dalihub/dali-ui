@@ -868,10 +868,6 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
     mFocusIndicatorActor.SetRequestedHeight(MATCH_PARENT);
   }
 
-  mFocusIndicatorActor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-  mFocusIndicatorActor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::CENTER);
-  mFocusIndicatorActor.SetProperty(Actor::Property::POSITION, Vector2(0.0f, 0.0f));
-
   return mFocusIndicatorActor;
 }
 
