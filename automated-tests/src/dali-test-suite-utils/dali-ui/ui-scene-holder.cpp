@@ -182,6 +182,16 @@ int32_t SceneHolder::GetNativeId() const
   return mScene.GetNativeId();
 }
 
+void SceneHolder::SetGeometryHittestEnabled(bool enabled)
+{
+  mScene.SetGeometryHittestEnabled(enabled);
+}
+
+bool SceneHolder::IsGeometryHittestEnabled()
+{
+  return mScene.IsGeometryHittestEnabled();
+}
+
 Dali::Integration::SceneHolder::FocusChangedGeneratedSignalType& SceneHolder::FocusChangedGeneratedSignal()
 {
   return mFocusChangedGeneratedSignal;
@@ -317,6 +327,16 @@ SceneHolder::WheelEventGeneratedSignalType& SceneHolder::WheelEventGeneratedSign
 SceneHolder::FocusChangedGeneratedSignalType& SceneHolder::FocusChangedGeneratedSignal()
 {
   return GetImplementation(*this).FocusChangedGeneratedSignal();
+}
+
+void SceneHolder::SetGeometryHittestEnabled(bool enabled)
+{
+  GetImplementation(*this).SetGeometryHittestEnabled(enabled);
+}
+
+bool SceneHolder::IsGeometryHittestEnabled()
+{
+  return GetImplementation(*this).IsGeometryHittestEnabled();
 }
 
 } // namespace Integration

@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/window-system-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/common/dali-common.h>
@@ -247,6 +248,7 @@ void UiConfigImpl::OnApplicationCreated()
   Dali::TextAbstraction::EnableDesignCompatibility();
   auto handle = KeyboardFocusManager::Get();
   GetImpl(handle).EnableDefaultAlgorithm(true);
+  Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
 }
 
 ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()

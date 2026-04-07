@@ -74,6 +74,9 @@ public:
 
   int32_t GetNativeId() const;
 
+  void SetGeometryHittestEnabled(bool enabled);
+  bool IsGeometryHittestEnabled();
+
   void FocusChanged(bool focusIn);
 
   class SceneHolderLifeCycleObserver;
