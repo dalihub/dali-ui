@@ -41,7 +41,7 @@
 #include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 

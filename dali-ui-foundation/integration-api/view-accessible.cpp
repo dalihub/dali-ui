@@ -38,7 +38,7 @@
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 using Dali::Integration::GetStdString;

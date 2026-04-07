@@ -23,7 +23,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/image-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>

@@ -18,8 +18,8 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
-#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/image-view-types.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

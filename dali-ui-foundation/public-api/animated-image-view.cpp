@@ -15,8 +15,8 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/image-view/animated-image-view-impl.h>
-#include <dali-ui-foundation/public-api/image-view/animated-image-view.h>
+#include <dali-ui-foundation/integration-api/animated-image-view-impl.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 namespace Dali

@@ -61,7 +61,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>

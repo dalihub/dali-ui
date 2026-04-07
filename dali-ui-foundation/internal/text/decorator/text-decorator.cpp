@@ -35,7 +35,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 

@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/image-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 
 #include <dali/public-api/common/dali-string.h>

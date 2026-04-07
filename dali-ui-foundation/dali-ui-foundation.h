@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/view.h>
 
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
 

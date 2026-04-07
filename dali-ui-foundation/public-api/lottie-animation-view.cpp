@@ -15,8 +15,8 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/image-view/lottie-animation-view-impl.h>
-#include <dali-ui-foundation/public-api/image-view/lottie-animation-view.h>
+#include <dali-ui-foundation/integration-api/lottie-animation-view-impl.h>
+#include <dali-ui-foundation/public-api/lottie-animation-view.h>
 
 namespace Dali
 {

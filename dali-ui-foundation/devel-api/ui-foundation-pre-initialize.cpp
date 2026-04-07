@@ -25,7 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/public-api/image-view/image-view.h>
+#include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
