@@ -426,7 +426,7 @@ public:
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
     mTextCutout(false),
-    mIsCursorInsetEnabled(true),
+    mIsCursorInsetEnabled(false),
     mRenderMode(Text::Render::SYNC),
     mEllipsisMode(Ellipsize::TRUNCATE)
   {

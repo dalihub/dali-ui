@@ -212,6 +212,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       event.p1.mInt  = keyCode;
       event.p2.mBool = keyEvent.IsShiftModifier();
       controller.mImpl->mEventData->mEventQueue.push_back(event);
+      controller.mImpl->mEventData->mDecorator->DelayCursorBlink();
 
       // Will request for relayout.
       relayoutNeeded = true;

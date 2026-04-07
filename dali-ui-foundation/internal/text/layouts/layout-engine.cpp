@@ -180,7 +180,7 @@ struct Engine::Impl
     mDefaultLineSize{MIN_LINE_SIZE},
     mRelativeLineSize{GetDefaultRelativeLineSize()},
     mPixelSize{DEFAULT_FONT_PIXEL_SIZE},
-    mIsCursorInsetEnabled{true}
+    mIsCursorInsetEnabled{false}
   {
   }
 
