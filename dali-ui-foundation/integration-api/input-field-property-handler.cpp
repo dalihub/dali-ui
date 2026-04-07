@@ -73,6 +73,15 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
+    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+    {
+      Text::OverflowMode mode;
+      if(Text::GetOverflowModeEnumeration(value, mode))
+      {
+        impl.SetOverflowMode(mode);
+      }
+      break;
+    }
     case Text::InputFieldPropertyIndex::PLACEHOLDER:
     {
       impl.SetPlaceholder(value.Get<Dali::String>());
@@ -179,6 +188,11 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
     {
       value = impl.GetVerticalTextAlignment();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+    {
+      value = impl.GetOverflowMode();
       break;
     }
     case Text::InputFieldPropertyIndex::PLACEHOLDER:

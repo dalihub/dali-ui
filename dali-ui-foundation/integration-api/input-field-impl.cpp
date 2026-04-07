@@ -80,6 +80,7 @@ INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",             FLOAT,   FONT_SIZE    
 INPUT_FIELD_PROPERTY_REGISTRATION("textColor",            VECTOR4, TEXT_COLOR           )
 INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",  INTEGER, HORIZONTAL_ALIGNMENT )
 INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",    INTEGER, VERTICAL_ALIGNMENT   )
+INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",         INTEGER, OVERFLOW_MODE        )
 INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",          STRING,  PLACEHOLDER          )
 INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",     VECTOR4, PLACEHOLDER_COLOR    )
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",          INTEGER, CURSOR_WIDTH         )
@@ -103,6 +104,7 @@ InputFieldImplPtr InputFieldImpl::New()
 
 InputFieldImpl::InputFieldImpl()
 : ViewImpl(),
+  mOverflowMode(Text::OverflowMode::CLIP),
   mAlignmentOffset(0.f),
   mHasBeenStaged(false),
   mTextChanged(false),
@@ -200,6 +202,34 @@ void InputFieldImpl::SetVerticalTextAlignment(Text::Alignment alignment)
 Text::Alignment InputFieldImpl::GetVerticalTextAlignment() const
 {
   return mController->GetVerticalAlignment();
+}
+
+void InputFieldImpl::SetOverflowMode(Text::OverflowMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  if(mode != mOverflowMode)
+  {
+    mOverflowMode = mode;
+    switch(mode)
+    {
+      case Text::OverflowMode::CLIP:
+      {
+        mController->SetTextElideEnabled(false);
+        break;
+      }
+      case Text::OverflowMode::ELLIPSIS:
+      {
+        mController->SetTextElideEnabled(true);
+        break;
+      }
+    }
+    mController->InvalidateFontData();
+  }
+}
+
+Text::OverflowMode InputFieldImpl::GetOverflowMode() const
+{
+  return mOverflowMode;
 }
 
 void InputFieldImpl::SetPlaceholder(const Dali::String& text)
@@ -465,6 +495,9 @@ void InputFieldImpl::OnInitialize()
 
   mController->SetNoTextDoubleTapAction(Text::Controller::NoTextTap::HIGHLIGHT);
   mController->SetNoTextLongPressAction(Text::Controller::NoTextTap::HIGHLIGHT);
+
+  // Disable the text ellipsis.
+  mController->SetTextElideEnabled(false);
 
   // Sets layoutDirection value
   Dali::Stage                 stage           = Dali::Stage::GetCurrent();

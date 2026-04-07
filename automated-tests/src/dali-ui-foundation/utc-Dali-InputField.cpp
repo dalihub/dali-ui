@@ -34,6 +34,7 @@ const char* const PROPERTY_NAME_FONT_SIZE             = "fontSize";
 const char* const PROPERTY_NAME_TEXT_COLOR            = "textColor";
 const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT  = "horizontalAlignment";
 const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT    = "verticalAlignment";
+const char* const PROPERTY_NAME_OVERFLOW_MODE         = "overflowMode";
 const char* const PROPERTY_NAME_PLACEHOLDER           = "placeholder";
 const char* const PROPERTY_NAME_PLACEHOLDER_COLOR     = "placeholderColor";
 const char* const PROPERTY_NAME_CURSOR_WIDTH          = "cursorWidth";
@@ -240,6 +241,21 @@ int UtcDaliInputFieldVerticalTextAlignment(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldOverflowMode(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(inputField.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+
+  inputField.SetOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(inputField.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldPlaceholder(void)
 {
   UiTestApplication application;
@@ -410,6 +426,7 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == InputField::Property::TEXT_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_HORIZONTAL_ALIGNMENT) == InputField::Property::HORIZONTAL_ALIGNMENT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_VERTICAL_ALIGNMENT) == InputField::Property::VERTICAL_ALIGNMENT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_OVERFLOW_MODE) == InputField::Property::OVERFLOW_MODE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER) == InputField::Property::PLACEHOLDER);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER_COLOR) == InputField::Property::PLACEHOLDER_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_WIDTH) == InputField::Property::CURSOR_WIDTH);
@@ -460,6 +477,13 @@ int UtcDaliInputFieldSetProperty(void)
 
   inputField.SetProperty(InputField::Property::VERTICAL_ALIGNMENT, "END");
   DALI_TEST_EQUALS(inputField.GetProperty<Text::Alignment>(InputField::Property::VERTICAL_ALIGNMENT), Text::Alignment::END, TEST_LOCATION);
+
+  // OVERFLOW_MODE
+  inputField.SetProperty(InputField::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::OverflowMode>(InputField::Property::OVERFLOW_MODE), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::OVERFLOW_MODE, "CLIP");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::OverflowMode>(InputField::Property::OVERFLOW_MODE), Text::OverflowMode::CLIP, TEST_LOCATION);
 
   // PLACEHOLDER
   inputField.SetProperty(InputField::Property::PLACEHOLDER, "Enter text");

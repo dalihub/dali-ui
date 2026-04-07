@@ -320,11 +320,13 @@ private:
     {
       ApplyDarkColor();
       mLabel3.SetOverflowMode(Text::OverflowMode::CLIP);
+      mField.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
     }
     else
     {
       ApplyLightColor();
       mLabel3.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+      mField.SetOverflowMode(Text::OverflowMode::CLIP);
     }
   }
 

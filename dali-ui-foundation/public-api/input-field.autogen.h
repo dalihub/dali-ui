@@ -40,6 +40,12 @@
   */ \
   ChildClass& SetVerticalTextAlignment(Text::Alignment alignment) { InputField::SetVerticalTextAlignment(alignment); return *this; } \
   /** \
+  * @brief Sets the overflow mode. \
+  * \
+  * @param[in] mode The overflow mode to apply. \
+  */ \
+  ChildClass& SetOverflowMode(Text::OverflowMode mode) { InputField::SetOverflowMode(mode); return *this; } \
+  /** \
   * @brief Sets the placeholder text displayed when the input field is empty. \
   * \
   * @param[in] text The placeholder text in UTF-8 encoding. \

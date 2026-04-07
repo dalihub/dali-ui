@@ -209,6 +209,20 @@ public: // Setters for chaining
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
+   * @brief Sets the overflow mode.
+   *
+   * @param[in] mode The overflow mode to apply.
+   */
+  InputField& SetOverflowMode(Text::OverflowMode mode);
+
+  /**
+   * @brief Gets the overflow mode.
+   *
+   * @return The current overflow mode.
+   */
+  Text::OverflowMode GetOverflowMode() const;
+
+  /**
    * @brief Sets the placeholder text displayed when the input field is empty.
    *
    * @param[in] text The placeholder text in UTF-8 encoding.
@@ -517,6 +531,14 @@ public:
        * @note See also: InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
        */
       VERTICAL_ALIGNMENT = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
+
+      /**
+       * @brief The overflow mode.
+       * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
+       * @note Return type is Text::OverflowMode (Property::INTEGER).
+       * @note See also: InputField::SetOverflowMode(), InputField::GetOverflowMode().
+       */
+      OVERFLOW_MODE = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
 
       /**
        * @brief The placeholder text displayed when the input field is empty.

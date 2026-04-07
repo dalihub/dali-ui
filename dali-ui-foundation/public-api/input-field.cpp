@@ -176,6 +176,17 @@ Text::Alignment InputField::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
+InputField& InputField::SetOverflowMode(Text::OverflowMode mode)
+{
+  GetImpl(*this).SetOverflowMode(mode);
+  return *this;
+}
+
+Text::OverflowMode InputField::GetOverflowMode() const
+{
+  return GetImpl(*this).GetOverflowMode();
+}
+
 InputField& InputField::SetPlaceholder(const Dali::String& text)
 {
   GetImpl(*this).SetPlaceholder(text);

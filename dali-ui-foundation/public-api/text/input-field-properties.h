@@ -91,6 +91,14 @@ struct InputFieldPropertyIndex
     VERTICAL_ALIGNMENT,
 
     /**
+     * @brief The overflow mode.
+     * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::OverflowMode (Property::INTEGER).
+     * @note See also: InputField::SetOverflowMode(), InputField::GetOverflowMode().
+     */
+    OVERFLOW_MODE,
+
+    /**
      * @brief The placeholder text displayed when the input field is empty.
      * @details Name "placeholder", type Property::STRING.
      * @note See also: InputField::SetPlaceholder(), InputField::GetPlaceholder().

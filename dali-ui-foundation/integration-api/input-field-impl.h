@@ -131,6 +131,16 @@ public:
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetOverflowMode
+   */
+  void SetOverflowMode(Text::OverflowMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetOverflowMode
+   */
+  Text::OverflowMode GetOverflowMode() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetPlaceholder
    */
   void SetPlaceholder(const Dali::String& text);
@@ -619,13 +629,14 @@ private:
   Actor mCursorLayer;
   Actor mBackgroundActor;
 
-  float mAlignmentOffset;
-  bool  mHasBeenStaged : 1;
-  bool  mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool  mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool  mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
-  bool  mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool  mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  Text::OverflowMode mOverflowMode;
+  float              mAlignmentOffset;
+  bool               mHasBeenStaged : 1;
+  bool               mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool               mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool               mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
+  bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
 
   uint32_t mOldPosition;       ///< args for cursor position changed event
   uint32_t mOldSelectionStart; ///< args for selection changed event
