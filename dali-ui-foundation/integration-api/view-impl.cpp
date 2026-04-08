@@ -46,6 +46,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
@@ -230,12 +231,12 @@ bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 
 void ViewImpl::OnKeyInputFocusGained()
 {
-  OnFocusChanged(true);
+  OnFocusChanged(true, GetImpl(Ui::KeyboardFocusManager::Get()).FocusChangedContext().inputEvent);
 }
 
 void ViewImpl::OnKeyInputFocusLost()
 {
-  OnFocusChanged(false);
+  OnFocusChanged(false, GetImpl(Ui::KeyboardFocusManager::Get()).FocusChangedContext().inputEvent);
 }
 
 // =============================================================================
@@ -395,13 +396,13 @@ void ViewImpl::SetViewState(UiState state, bool on, InputEvent cause)
 
   if(mState != prev)
   {
-    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mState, std::move(cause));
+    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mState, cause);
   }
 }
 
-void ViewImpl::OnFocusChanged(bool focused)
+void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
 {
-  SetViewState(UiState::FOCUSED, focused);
+  SetViewState(UiState::FOCUSED, focused, cause);
 
   if(mInteractiveTrait)
   {

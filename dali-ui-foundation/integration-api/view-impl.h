@@ -410,7 +410,7 @@ public: // State API
    * @param[in] on    True to add the state, false to remove it
    * @param[in] cause Input event that triggered the change; leave default if programmatic
    */
-  void SetViewState(UiState state, bool on, InputEvent cause = {});
+  void SetViewState(UiState state, bool on, InputEvent cause = InputEvent::None());
 
   /**
    * @brief Called when the view's focus state changes.
@@ -419,8 +419,9 @@ public: // State API
    * Updates the Focused state and forwards to the interaction trait if present.
    *
    * @param[in] focused True if the view gained focus
+   * @param[in] cause   The input event that triggered the focus change (empty if system-triggered)
    */
-  void OnFocusChanged(bool focused);
+  void OnFocusChanged(bool focused, InputEvent cause = InputEvent::None());
 
   /**
    * @brief Called when the view's enabled state changes externally.

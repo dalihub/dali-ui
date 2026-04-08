@@ -80,6 +80,8 @@ public:
    */
   InputEventImpl(const LongPressGesture& originEvent);
 
+  InputEventImpl(const WheelEvent& originEvent);
+
   /**
    * @brief Create a new InputEvent implementation.
    *
@@ -117,6 +119,8 @@ public:
    */
   static InputEventImplPtr New(const LongPressGesture& originEvent);
 
+  static InputEventImplPtr New(const WheelEvent& originEvent);
+
   /**
    * @copydoc Dali::Ui::InputEvent::GetInputEventType
    */
@@ -142,6 +146,8 @@ public:
    */
   const LongPressGesture& GetLongPressGesture() const;
 
+  const WheelEvent& GetWheelEvent() const;
+
 private:
   /**
    * @brief Destructor.
@@ -154,8 +160,8 @@ private:
   InputEventImpl& operator=(InputEventImpl&& rhs)      = delete; ///< Deleted move assignment operator
 
 private:
-  InputEventType                                                                   mEventType;
-  std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture> mEvent;
+  InputEventType                                                                               mEventType;
+  std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent> mEvent;
 };
 
 } // namespace Internal

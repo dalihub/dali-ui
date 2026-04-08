@@ -65,6 +65,13 @@ InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 {
 }
 
+InputEventImpl::InputEventImpl(const WheelEvent& originEvent)
+: BaseObject(),
+  mEventType(InputEventType::WHEEL_EVENT),
+  mEvent(originEvent)
+{
+}
+
 InputEventImpl::~InputEventImpl()
 {
 }
@@ -90,6 +97,11 @@ InputEventImplPtr InputEventImpl::New(const TapGesture& originEvent)
 }
 
 InputEventImplPtr InputEventImpl::New(const LongPressGesture& originEvent)
+{
+  return InputEventImplPtr(new InputEventImpl(originEvent));
+}
+
+InputEventImplPtr InputEventImpl::New(const WheelEvent& originEvent)
 {
   return InputEventImplPtr(new InputEventImpl(originEvent));
 }
@@ -121,6 +133,12 @@ const LongPressGesture& InputEventImpl::GetLongPressGesture() const
 {
   DALI_ASSERT_ALWAYS(mEventType == InputEventType::LONG_PRESS_GESTURE);
   return std::get<LongPressGesture>(mEvent);
+}
+
+const WheelEvent& InputEventImpl::GetWheelEvent() const
+{
+  DALI_ASSERT_ALWAYS(mEventType == InputEventType::WHEEL_EVENT);
+  return std::get<WheelEvent>(mEvent);
 }
 
 } // namespace Internal

@@ -69,11 +69,6 @@ public:
   const UiState& GetCurrent() const;
 
   /**
-   * @copydoc Dali::Ui::StateEvent::HasCause
-   */
-  bool HasCause() const;
-
-  /**
    * @copydoc Dali::Ui::StateEvent::GetCause
    */
   const InputEvent& GetCause() const;

@@ -33,6 +33,12 @@ InputEvent InputEvent::New()
   return InputEvent(impl.Get());
 }
 
+const InputEvent& InputEvent::None()
+{
+  static const InputEvent instance = InputEvent::New();
+  return instance;
+}
+
 InputEvent InputEvent::New(const TouchEvent& originEvent)
 {
   Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
@@ -58,6 +64,14 @@ InputEvent InputEvent::New(const TapGesture& originEvent)
 }
 
 InputEvent InputEvent::New(const LongPressGesture& originEvent)
+{
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
+InputEvent InputEvent::New(const WheelEvent& originEvent)
 {
   Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
 
@@ -93,6 +107,11 @@ const TapGesture& InputEvent::GetTapGesture() const
 const LongPressGesture& InputEvent::GetLongPressGesture() const
 {
   return GetImpl(*this).GetLongPressGesture();
+}
+
+const WheelEvent& InputEvent::GetWheelEvent() const
+{
+  return GetImpl(*this).GetWheelEvent();
 }
 
 } // namespace Ui

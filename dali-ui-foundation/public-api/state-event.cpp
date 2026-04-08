@@ -42,14 +42,39 @@ const UiState& StateEvent::GetCurrent() const
   return GetImpl(*this).GetCurrent();
 }
 
-bool StateEvent::HasCause() const
-{
-  return GetImpl(*this).HasCause();
-}
-
 const InputEvent& StateEvent::GetCause() const
 {
   return GetImpl(*this).GetCause();
+}
+
+InputEventType StateEvent::GetInputEventType() const
+{
+  return GetImpl(*this).GetCause().GetInputEventType();
+}
+
+const TouchEvent& StateEvent::GetTouchEvent() const
+{
+  return GetImpl(*this).GetCause().GetTouchEvent();
+}
+
+const KeyEvent& StateEvent::GetKeyEvent() const
+{
+  return GetImpl(*this).GetCause().GetKeyEvent();
+}
+
+const TapGesture& StateEvent::GetTapGesture() const
+{
+  return GetImpl(*this).GetCause().GetTapGesture();
+}
+
+const LongPressGesture& StateEvent::GetLongPressGesture() const
+{
+  return GetImpl(*this).GetCause().GetLongPressGesture();
+}
+
+const WheelEvent& StateEvent::GetWheelEvent() const
+{
+  return GetImpl(*this).GetCause().GetWheelEvent();
 }
 
 } // namespace Ui

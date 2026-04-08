@@ -736,6 +736,9 @@ void KeyboardFocusManager::DoKeyboardEnter(Actor actor)
 
 void KeyboardFocusManager::ClearFocus(Actor actor)
 {
+  // Reset context for this system-triggered focus loss.
+  mLastFocusChangeContext = {};
+
   if(actor)
   {
     DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", actor.GetProperty<int32_t>(Dali::Actor::Property::ID));
@@ -892,7 +895,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
   const Dali::String& keyName        = event.GetKeyName();
   const Dali::String& logicalKeyName = event.GetLogicalKey();
   Ui::FocusDevice     device         = Ui::FocusDevice::KEYBOARD;
-  FocusChangeContext  context        = {device, event.GetDeviceName()};
+  FocusChangeContext  context        = {device, event.GetDeviceName(), Ui::InputEvent::New(event)};
 
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
@@ -1116,7 +1119,7 @@ void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
     if(hitActor && hitActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
        hitActor.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE))
     {
-      DoSetCurrentFocusActor(hitActor, {device, touch.GetDeviceName(0)});
+      DoSetCurrentFocusActor(hitActor, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
     }
   }
 }
@@ -1127,7 +1130,7 @@ void KeyboardFocusManager::OnWheelEvent(const WheelEvent& event)
   {
     Ui::FocusDirection direction = (event.GetDelta() > 0) ? Ui::FocusDirection::CLOCKWISE : Ui::FocusDirection::COUNTER_CLOCKWISE;
     // Move the focus
-    MoveFocus(direction, {Ui::FocusDevice::WHEEL, ""});
+    MoveFocus(direction, {Ui::FocusDevice::WHEEL, "", Ui::InputEvent::New(event)});
   }
 }
 

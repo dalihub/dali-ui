@@ -27,6 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/focus-manager/keyboard-focus-manager-devel.h>
 #include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -53,6 +54,7 @@ public:
   {
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
     Dali::String    deviceName;
+    Ui::InputEvent  inputEvent;
   };
 
   enum FocusIndicatorState

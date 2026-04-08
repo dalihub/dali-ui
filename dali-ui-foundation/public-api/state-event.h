@@ -107,18 +107,55 @@ public:
   }
 
   /**
-   * @brief Returns true if this transition was triggered by a user input event.
-   *
-   * Programmatic state changes (e.g. SetEnabled()) return false.
-   */
-  bool HasCause() const;
-
-  /**
    * @brief Returns the input event that caused this transition.
    *
-   * @note Check HasCause() before calling. Returns an invalid handle if there is no cause.
+   * Always returns a valid InputEvent. Programmatic or system-triggered
+   * state changes return an InputEvent with InputEventType::NONE.
    */
   const InputEvent& GetCause() const;
+
+  /**
+   * @brief Returns the type of the input event that caused this transition.
+   *
+   * Convenience shortcut for GetCause().GetInputEventType().
+   * Returns InputEventType::NONE if the change was programmatic or system-triggered.
+   */
+  InputEventType GetInputEventType() const;
+
+  /**
+   * @brief Returns the touch event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TOUCH_EVENT
+   */
+  const TouchEvent& GetTouchEvent() const;
+
+  /**
+   * @brief Returns the key event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::KEY_EVENT
+   */
+  const KeyEvent& GetKeyEvent() const;
+
+  /**
+   * @brief Returns the tap gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::TAP_GESTURE
+   */
+  const TapGesture& GetTapGesture() const;
+
+  /**
+   * @brief Returns the long-press gesture that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::LONG_PRESS_GESTURE
+   */
+  const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief Returns the wheel event that caused this transition.
+   *
+   * @pre GetInputEventType() == InputEventType::WHEEL_EVENT
+   */
+  const WheelEvent& GetWheelEvent() const;
 
 public: // Not intended for application developers
   /**

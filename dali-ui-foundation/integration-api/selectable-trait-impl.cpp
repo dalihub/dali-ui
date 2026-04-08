@@ -52,7 +52,7 @@ bool SelectableTraitImpl::IsSelected() const
 
 void SelectableTraitImpl::SetSelected(bool selected)
 {
-  SetSelectedInternal(selected, InputEvent::New());
+  SetSelectedInternal(selected, InputEvent::None());
 }
 
 void SelectableTraitImpl::SetSelectedInternal(bool selected, const InputEvent& event)

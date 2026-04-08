@@ -52,6 +52,11 @@ enum class InputEventType : uint32_t
   LONG_PRESS_GESTURE = 4,
 
   /**
+   * @brief The input event is from wheel event.
+   */
+  WHEEL_EVENT = 5,
+
+  /**
    * @brief Reserved for future expansion.
    */
   RESERVED = 99

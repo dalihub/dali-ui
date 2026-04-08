@@ -22,6 +22,7 @@
 #include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/tap-gesture.h>
 #include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/events/wheel-event.h>
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
@@ -99,6 +100,16 @@ public:
   static InputEvent New();
 
   /**
+   * @brief Returns a shared NONE-type InputEvent instance.
+   *
+   * No heap allocation on each call. Use this wherever a valid InputEvent
+   * with InputEventType::NONE is needed without per-call cost.
+   *
+   * @return A const reference to the shared NONE InputEvent
+   */
+  static const InputEvent& None();
+
+  /**
    * @brief Creates a new InputEvent from a touch event.
    *
    * @param[in] originEvent The originating touch event
@@ -131,6 +142,14 @@ public:
   static InputEvent New(const LongPressGesture& originEvent);
 
   /**
+   * @brief Creates a new InputEvent from a wheel event.
+   *
+   * @param[in] originEvent The originating wheel event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const WheelEvent& originEvent);
+
+  /**
    * @brief Get the type of this event.
    *
    * @return The type of the input event
@@ -156,6 +175,11 @@ public:
    * @brief
    */
   const LongPressGesture& GetLongPressGesture() const;
+
+  /**
+   * @brief
+   */
+  const WheelEvent& GetWheelEvent() const;
 
 public: // Not intended for Application developers
   /**

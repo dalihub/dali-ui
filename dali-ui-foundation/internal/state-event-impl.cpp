@@ -31,7 +31,7 @@ StateEventImpl::StateEventImpl(UiState prev, UiState current, InputEvent cause)
 : BaseObject(),
   mPrev(prev),
   mCurrent(current),
-  mCause(std::move(cause))
+  mCause(cause)
 {
 }
 
@@ -41,7 +41,7 @@ StateEventImpl::~StateEventImpl()
 
 StateEventImplPtr StateEventImpl::New(UiState prev, UiState current, InputEvent cause)
 {
-  return StateEventImplPtr(new StateEventImpl(prev, current, std::move(cause)));
+  return StateEventImplPtr(new StateEventImpl(prev, current, cause));
 }
 
 const UiState& StateEventImpl::GetPrev() const
@@ -54,14 +54,9 @@ const UiState& StateEventImpl::GetCurrent() const
   return mCurrent;
 }
 
-bool StateEventImpl::HasCause() const
-{
-  return static_cast<bool>(mCause);
-}
-
 const InputEvent& StateEventImpl::GetCause() const
 {
-  return mCause;
+  return mCause ? mCause : InputEvent::None();
 }
 
 } // namespace Internal

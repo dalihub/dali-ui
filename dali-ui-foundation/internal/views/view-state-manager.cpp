@@ -45,7 +45,7 @@ ViewStateManager& ViewStateManager::Get()
 
 void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState next, InputEvent cause)
 {
-  mPending.push_back({view, prev, next, std::move(cause)});
+  mPending.push_back({view, prev, next, cause});
 
   if(mNotifying)
   {
@@ -78,19 +78,30 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
 
     for(auto& n : mBatch)
     {
-      Integration::ViewImpl&      impl           = Integration::GetImpl(n.view);
+      Integration::ViewImpl& impl               = Integration::GetImpl(n.view);
+      Trait                  stateHandlerTrait  = impl.GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+      bool                   hasSignalListeners = !impl.StateChangedSignal().Empty();
+
+      // Skip StateEvent creation entirely when nobody is listening
+      if(!stateHandlerTrait && !hasSignalListeners)
+      {
+        continue;
+      }
+
       Internal::StateEventImplPtr stateEventImpl = Internal::StateEventImpl::New(n.prev, n.next, n.cause);
       StateEvent                  stateEvent(stateEventImpl.Get());
 
       // Named state handlers (styling layer)
-      Trait stateHandlerTrait = impl.GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
       if(stateHandlerTrait)
       {
         static_cast<StateHandlerTrait&>(stateHandlerTrait).GetImpl().NotifyStateChanged(n.view, stateEvent);
       }
 
       // General signal (business logic layer)
-      impl.StateChangedSignal().Emit(n.view, stateEvent);
+      if(hasSignalListeners)
+      {
+        impl.StateChangedSignal().Emit(n.view, stateEvent);
+      }
     }
   }
 }
