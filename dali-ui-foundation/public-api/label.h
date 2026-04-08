@@ -607,6 +607,74 @@ public: // Setters for chaining
    */
   void ResetTextFit();
 
+  /**
+   * @brief Sets the font size scale.
+   *
+   * The scaled font size is calculated from the current font size
+   * multiplied by this scale value.
+   *
+   * @param[in] scale The font size scale.
+   */
+  Label& SetFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the font size scale.
+   *
+   * @return The font size scale.
+   */
+  float GetFontSizeScale() const;
+
+  /**
+   * @brief Sets the minimum font size scale.
+   *
+   * If this value is greater than the maximum font size scale,
+   * the adjusted font size scale follows this minimum value.
+   *
+   * @param[in] scale The minimum font size scale.
+   */
+  Label& SetMinimumFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the minimum font size scale.
+   *
+   * @return The minimum font size scale.
+   */
+  float GetMinimumFontSizeScale() const;
+
+  /**
+   * @brief Sets the maximum font size scale.
+   *
+   * If this value is less than the minimum font size scale,
+   * the adjusted font size scale follows the minimum font size scale.
+   *
+   * @param[in] scale The maximum font size scale.
+   */
+  Label& SetMaximumFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the maximum font size scale.
+   *
+   * @return The maximum font size scale.
+   */
+  float GetMaximumFontSizeScale() const;
+
+  /**
+   * @brief Sets whether the system font size scale is applied.
+   *
+   * When enabled, the system font size scale is combined with the current
+   * font size scale before applying the minimum and maximum constraints.
+   *
+   * @param[in] enabled True to apply the system font size scale, false otherwise.
+   */
+  Label& SetSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether the system font size scale is applied.
+   *
+   * @return True if the system font size scale is applied, otherwise false.
+   */
+  bool IsSystemFontSizeScaleEnabled() const;
+
   // @CHAIN_END
 
   // Read Only
@@ -635,6 +703,20 @@ public: // Setters for chaining
    * @return True if the marquee animation is running, false otherwise.
    */
   bool IsMarqueeRunning() const;
+
+  /**
+   * @brief Gets the adjusted font size scale used for rendering.
+   *
+   * The adjusted font size scale is resolved after applying the current
+   * minimum and maximum font size scale constraints and, if enabled,
+   * the system font size scale.
+   *
+   * If the minimum font size scale is greater than the maximum font size scale,
+   * the minimum font size scale takes precedence and is used as the adjusted scale.
+   *
+   * @return The adjusted font size scale used for rendering.
+   */
+  float GetAdjustedFontSizeScale() const;
 
   // Method
   /**

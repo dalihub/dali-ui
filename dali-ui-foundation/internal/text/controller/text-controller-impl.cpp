@@ -797,11 +797,11 @@ float Controller::Impl::GetDefaultFontLineHeight()
   {
     TextAbstraction::FontDescription fontDescription;
     defaultFontId = GetFontClient().GetFontId(fontDescription,
-                                              TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetFontSizeScale());
+                                              TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetAdjustedFontSizeScale());
   }
   else
   {
-    defaultFontId = mFontDefaults->GetFontId(GetFontClient(), mFontDefaults->mDefaultPointSize * GetFontSizeScale());
+    defaultFontId = mFontDefaults->GetFontId(GetFontClient(), mFontDefaults->mDefaultPointSize * GetAdjustedFontSizeScale());
   }
 
   Text::FontMetrics fontMetrics;
@@ -1573,6 +1573,14 @@ void Controller::Impl::RequestRelayout()
   }
 }
 
+void Controller::Impl::InvalidateMeasure()
+{
+  if(nullptr != mControlInterface)
+  {
+    mControlInterface->InvalidateTextMeasure();
+  }
+}
+
 void Controller::Impl::RelayoutAllCharacters()
 {
   // relayout all characters
@@ -2022,6 +2030,147 @@ void Controller::Impl::SetUserInteractionEnabled(bool enabled)
     mEventData->mDecoratorUpdated = true;
     RequestRelayout();
   }
+}
+
+void Controller::Impl::SetFontSizeScale(float scale)
+{
+  if(Dali::Equals(mFontSizeScale, scale) && !mSystemFontSizeScaleEnabled)
+  {
+    return;
+  }
+
+  mFontSizeScale              = scale;
+  mSystemFontSizeScaleEnabled = false;
+
+  ApplyAdjustedFontSizeScale();
+}
+
+float Controller::Impl::GetFontSizeScale() const
+{
+  return mFontSizeScale;
+}
+
+void Controller::Impl::SetMinimumFontSizeScale(float scale)
+{
+  if(Dali::Equals(mMinFontSizeScale, scale))
+  {
+    return;
+  }
+
+  mMinFontSizeScale = scale;
+  ApplyAdjustedFontSizeScale();
+}
+
+float Controller::Impl::GetMinimumFontSizeScale() const
+{
+  return mMinFontSizeScale;
+}
+
+void Controller::Impl::SetMaximumFontSizeScale(float scale)
+{
+  if(Dali::Equals(mMaxFontSizeScale, scale))
+  {
+    return;
+  }
+
+  mMaxFontSizeScale = scale;
+  ApplyAdjustedFontSizeScale();
+}
+
+float Controller::Impl::GetMaximumFontSizeScale() const
+{
+  return mMaxFontSizeScale;
+}
+
+void Controller::Impl::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  if(mSystemFontSizeScaleEnabled == enabled)
+  {
+    return;
+  }
+
+  mSystemFontSizeScaleEnabled = enabled;
+  ApplyAdjustedFontSizeScale();
+}
+
+bool Controller::Impl::IsSystemFontSizeScaleEnabled() const
+{
+  return mSystemFontSizeScaleEnabled;
+}
+
+// TODO: Update this from the system font size changed callback.
+void Controller::Impl::SetSystemFontSizeScale(float scale)
+{
+  if(Dali::Equals(mSystemFontSizeScale, scale))
+  {
+    return;
+  }
+
+  mSystemFontSizeScale = scale;
+  if(mSystemFontSizeScaleEnabled)
+  {
+    ApplyAdjustedFontSizeScale();
+  }
+}
+
+float Controller::Impl::GetAdjustedFontSizeScale() const
+{
+  return mAdjustedFontSizeScale;
+}
+
+float Controller::Impl::GetSystemFontSizeScale() const
+{
+  return mSystemFontSizeScale;
+}
+
+float Controller::Impl::GetCurrentFontSizeScale() const
+{
+  return mSystemFontSizeScaleEnabled ? GetSystemFontSizeScale() : mFontSizeScale;
+}
+
+float Controller::Impl::CalculateAdjustedFontSizeScale() const
+{
+  float minimumScale;
+  float maximumScale;
+
+  if(mMinFontSizeScale > mMaxFontSizeScale)
+  {
+    minimumScale = mMinFontSizeScale;
+    maximumScale = mMinFontSizeScale;
+  }
+  else
+  {
+    minimumScale = mMinFontSizeScale;
+    maximumScale = mMaxFontSizeScale;
+  }
+
+  const float currentScale = GetCurrentFontSizeScale();
+
+  return (currentScale < minimumScale) ? minimumScale : (currentScale > maximumScale) ? maximumScale
+                                                                                      : currentScale;
+}
+
+bool Controller::Impl::ApplyAdjustedFontSizeScale()
+{
+  const float adjustedScale = CalculateAdjustedFontSizeScale();
+  if(Dali::Equals(mAdjustedFontSizeScale, adjustedScale))
+  {
+    return false;
+  }
+
+  mAdjustedFontSizeScale = adjustedScale;
+
+  if(mEventData && EventData::IsEditingState(mEventData->mState))
+  {
+    mEventData->mDecoratorUpdated     = true;
+    mEventData->mUpdateCursorPosition = true; // Cursor position should be updated when the font size is updated.
+  }
+
+  ClearFontData();
+  RequestRelayout();
+  InvalidateMeasure();
+
+  return true;
 }
 
 void Controller::Impl::ClearFontData()

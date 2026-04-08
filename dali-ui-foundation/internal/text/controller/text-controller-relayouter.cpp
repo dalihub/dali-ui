@@ -913,7 +913,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     float fontPointSize =
       (impl.mTextFitEnabled || impl.mTextFitArrayEnabled)
         ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
-        : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetFontSizeScale();
+        : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetAdjustedFontSizeScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));
 
     // Update the ellipsis

@@ -1087,18 +1087,76 @@ public: // Default style & Input style
   float GetFontSizeScale() const;
 
   /**
-   * @brief Set the font size scale enabled flag.
+   * @brief Sets the minimum font size scale.
    *
-   * @param[in] enabled whether to enable the font size scale.
+   * If this value is greater than the maximum font size scale,
+   * the adjusted font size scale follows this minimum value.
+   *
+   * @param[in] scale The minimum font size scale.
    */
-  void SetFontSizeScaleEnabled(bool enabled);
+  void SetMinimumFontSizeScale(float scale);
 
   /**
-   * @brief Returns whether the font size scale is enabled or not.
+   * @brief Gets the minimum font size scale.
    *
-   * @return @e true if the font size scale is enabled, otherwise returns @e false.
+   * @return The minimum font size scale.
    */
-  bool IsFontSizeScaleEnabled() const;
+  float GetMinimumFontSizeScale() const;
+
+  /**
+   * @brief Sets the maximum font size scale.
+   *
+   * If this value is less than the minimum font size scale,
+   * the adjusted font size scale follows the minimum font size scale.
+   *
+   * @param[in] scale The maximum font size scale.
+   */
+  void SetMaximumFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the maximum font size scale.
+   *
+   * @return The maximum font size scale.
+   */
+  float GetMaximumFontSizeScale() const;
+
+  /**
+   * @brief Sets whether the system font size scale is applied.
+   *
+   * When enabled, the system font size scale is used instead of the user-defined font size scale
+   * before applying the minimum and maximum constraints.
+   *
+   * @param[in] enabled True to apply the system font size scale, false otherwise.
+   */
+  void SetSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether the system font size scale is applied.
+   *
+   * @return True if the system font size scale is applied, otherwise false.
+   */
+  bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @brief Sets the system font size scale.
+   *
+   * @param[in] scale The system font size scale.
+   */
+  void SetSystemFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the adjusted font size scale used for rendering.
+   *
+   * The adjusted font size scale is resolved after applying the current
+   * minimum and maximum font size scale constraints and, if enabled,
+   * the system font size scale.
+   *
+   * If the minimum font size scale is greater than the maximum font size scale,
+   * the minimum font size scale takes precedence and is used as the adjusted scale.
+   *
+   * @return The adjusted font size scale used for rendering.
+   */
+  float GetAdjustedFontSizeScale() const;
 
   /**
    * @brief Sets the Placeholder text font size.
@@ -2208,6 +2266,11 @@ public: // Relayout.
    * @brief Request a relayout using the ControlInterface.
    */
   void RequestRelayout();
+
+  /**
+   * @brief Invalidate the measured size using the ControlInterface.
+   */
+  void InvalidateMeasure();
 
 public: // Input style change signals.
   /**

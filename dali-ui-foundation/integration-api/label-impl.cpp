@@ -131,6 +131,7 @@ LabelImpl::LabelImpl()
   mOverflowMode(Text::OverflowMode::ELLIPSIS),
   mTextColorAnimatedCount(0),
   mTextUpdateNeeded(false),
+  mMeasureInvalidated(false),
   mLastMarqueeEnabled(false),
   mIsTouchDown(false),
   mHasAnchors(false),
@@ -599,7 +600,7 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
   mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitChanged(true);
-  InvalidateMeasure();
+  InvalidateTextMeasure();
 }
 
 void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
@@ -611,16 +612,59 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   }
   mController->SetTextFitArrayEnabled(true);
   mController->SetTextFitArray(candidates);
-  InvalidateMeasure();
+  InvalidateTextMeasure();
 }
 
 void LabelImpl::ResetTextFit()
 {
-  mController->SetTextFitEnabled(false);
-  mController->SetTextFitArrayEnabled(false);
-  mController->ClearTextFitArray();
-  UpdateLineHeight();
-  InvalidateMeasure();
+  if(mController->IsTextFitEnabled() || mController->IsTextFitArrayEnabled())
+  {
+    mController->SetTextFitEnabled(false);
+    mController->SetTextFitArrayEnabled(false);
+    mController->ClearTextFitArray();
+    UpdateLineHeight();
+    InvalidateTextMeasure();
+  }
+}
+
+void LabelImpl::SetFontSizeScale(float scale)
+{
+  mController->SetFontSizeScale(scale);
+}
+
+float LabelImpl::GetFontSizeScale() const
+{
+  return mController->GetFontSizeScale();
+}
+
+void LabelImpl::SetMinimumFontSizeScale(float scale)
+{
+  mController->SetMinimumFontSizeScale(scale);
+}
+
+float LabelImpl::GetMinimumFontSizeScale() const
+{
+  return mController->GetMinimumFontSizeScale();
+}
+
+void LabelImpl::SetMaximumFontSizeScale(float scale)
+{
+  mController->SetMaximumFontSizeScale(scale);
+}
+
+float LabelImpl::GetMaximumFontSizeScale() const
+{
+  return mController->GetMaximumFontSizeScale();
+}
+
+void LabelImpl::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  mController->SetSystemFontSizeScaleEnabled(enabled);
+}
+
+bool LabelImpl::IsSystemFontSizeScaleEnabled() const
+{
+  return mController->IsSystemFontSizeScaleEnabled();
 }
 
 // =============================================================================
@@ -647,6 +691,11 @@ bool LabelImpl::IsMarqueeRunning() const
     return mTextScroller->IsScrolling();
   }
   return false;
+}
+
+float LabelImpl::GetAdjustedFontSizeScale() const
+{
+  return mController->GetAdjustedFontSizeScale();
 }
 
 // =============================================================================
@@ -899,6 +948,8 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint,
                         heightConstraint);
 
+  mMeasureInvalidated = false;
+
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();
 
@@ -1007,6 +1058,15 @@ void LabelImpl::RequestTextRelayout()
 {
   // Signal that a Relayout may be needed
   RelayoutRequest();
+}
+
+void LabelImpl::InvalidateTextMeasure()
+{
+  if(!mMeasureInvalidated)
+  {
+    InvalidateMeasure();
+    mMeasureInvalidated = true;
+  }
 }
 
 // =============================================================================

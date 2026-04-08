@@ -373,6 +373,11 @@ public: // From ControlInterface
    */
   void RequestTextRelayout() override;
 
+  /**
+   * @copydoc Text::ControlInterface::InvalidateTextMeasure()
+   */
+  void InvalidateTextMeasure() override;
+
   // From EditableControlInterface
 
   /**
@@ -631,6 +636,7 @@ private:
 
   Text::OverflowMode mOverflowMode;
   float              mAlignmentOffset;
+  bool               mMeasureInvalidated : 1;
   bool               mHasBeenStaged : 1;
   bool               mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
   bool               mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().

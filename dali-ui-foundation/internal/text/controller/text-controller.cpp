@@ -892,44 +892,52 @@ FontSlant Controller::GetPlaceholderTextFontSlant() const
 
 void Controller::SetFontSizeScale(float scale)
 {
-  mImpl->mFontSizeScale = scale;
-
-  // No relayout is required
-  if(!mImpl->mFontSizeScaleEnabled)
-  {
-    return;
-  }
-
-  // Update the cursor position if it's in editing mode
-  UpdateCursorPosition(mImpl->mEventData);
-
-  // Clear the font-specific data
-  mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  mImpl->SetFontSizeScale(scale);
 }
 
 float Controller::GetFontSizeScale() const
 {
-  return mImpl->mFontDefaults ? mImpl->mFontSizeScale : 1.0f;
+  return mImpl->GetFontSizeScale();
 }
 
-void Controller::SetFontSizeScaleEnabled(bool enabled)
+void Controller::SetMinimumFontSizeScale(float scale)
 {
-  mImpl->mFontSizeScaleEnabled = enabled;
-
-  // Update the cursor position if it's in editing mode
-  UpdateCursorPosition(mImpl->mEventData);
-
-  // Clear the font-specific data
-  mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  mImpl->SetMinimumFontSizeScale(scale);
 }
 
-bool Controller::IsFontSizeScaleEnabled() const
+float Controller::GetMinimumFontSizeScale() const
 {
-  return mImpl->mFontSizeScaleEnabled;
+  return mImpl->GetMinimumFontSizeScale();
+}
+
+void Controller::SetMaximumFontSizeScale(float scale)
+{
+  mImpl->SetMaximumFontSizeScale(scale);
+}
+
+float Controller::GetMaximumFontSizeScale() const
+{
+  return mImpl->GetMaximumFontSizeScale();
+}
+
+void Controller::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  mImpl->SetSystemFontSizeScaleEnabled(enabled);
+}
+
+bool Controller::IsSystemFontSizeScaleEnabled() const
+{
+  return mImpl->IsSystemFontSizeScaleEnabled();
+}
+
+void Controller::SetSystemFontSizeScale(float scale)
+{
+  mImpl->SetSystemFontSizeScale(scale);
+}
+
+float Controller::GetAdjustedFontSizeScale() const
+{
+  return mImpl->GetAdjustedFontSizeScale();
 }
 
 void Controller::SetDefaultFontSize(float fontSize, FontSizeType type)
@@ -1790,6 +1798,11 @@ Controller::UpdateTextType Controller::Relayout(const Size& size, Dali::LayoutDi
 void Controller::RequestRelayout()
 {
   mImpl->RequestRelayout();
+}
+
+void Controller::InvalidateMeasure()
+{
+  mImpl->InvalidateMeasure();
 }
 
 Vector<Vector2> Controller::GetTextSize(CharacterIndex startIndex, CharacterIndex endIndex)

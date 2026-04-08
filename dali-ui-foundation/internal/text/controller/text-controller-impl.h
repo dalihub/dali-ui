@@ -40,6 +40,8 @@ const float DEFAULT_TEXTFIT_MIN            = 10.f;
 const float DEFAULT_TEXTFIT_MAX            = 100.f;
 const float DEFAULT_TEXTFIT_STEP           = 1.f;
 const float DEFAULT_FONT_SIZE_SCALE        = 1.f;
+const float DEFAULT_MIN_FONT_SIZE_SCALE    = 0.01f;
+const float DEFAULT_MAX_FONT_SIZE_SCALE    = 10.f;
 const float DEFAULT_DISABLED_COLOR_OPACITY = 0.3f;
 
 // Forward declarations
@@ -416,9 +418,13 @@ public:
     mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
     mTextFitLineSize(0.f),
     mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
+    mMinFontSizeScale(DEFAULT_MIN_FONT_SIZE_SCALE),
+    mMaxFontSizeScale(DEFAULT_MAX_FONT_SIZE_SCALE),
+    mAdjustedFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
+    mSystemFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
     mDisabledColorOpacity(DEFAULT_DISABLED_COLOR_OPACITY),
     mRenderScale(1.0f),
-    mFontSizeScaleEnabled(true),
+    mSystemFontSizeScaleEnabled(false),
     mTextFitEnabled(false),
     mTextFitChanged(false),
     mTextFitArrayEnabled(false),
@@ -479,6 +485,11 @@ public:
    * @copydoc Text::Controller::RequestRelayout()
    */
   void RequestRelayout();
+
+  /**
+   * @copydoc Text::Controller::InvalidateMeasure()
+   */
+  void InvalidateMeasure();
 
   /**
    * @brief Request a relayout using the ControlInterface.
@@ -572,11 +583,6 @@ public:
 
       ClearPreEditFlag();
     }
-  }
-
-  float GetFontSizeScale()
-  {
-    return mFontSizeScaleEnabled ? mFontSizeScale : 1.0f;
   }
 
   /**
@@ -1011,6 +1017,84 @@ public:
   void ClearFontData();
 
   /**
+   * @copydoc Controller::SetFontSizeScale()
+   */
+  void SetFontSizeScale(float scale);
+
+  /**
+   * @copydoc Controller::GetFontSizeScale()
+   */
+  float GetFontSizeScale() const;
+
+  /**
+   * @copydoc Controller::SetMinimumFontSizeScale()
+   */
+  void SetMinimumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Controller::GetMinimumFontSizeScale()
+   */
+  float GetMinimumFontSizeScale() const;
+
+  /**
+   * @copydoc Controller::SetMaximumFontSizeScale()
+   */
+  void SetMaximumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Controller::GetMaximumFontSizeScale()
+   */
+  float GetMaximumFontSizeScale() const;
+
+  /**
+   * @copydoc Controller::SetSystemFontSizeScaleEnabled()
+   */
+  void SetSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @copydoc Controller::IsSystemFontSizeScaleEnabled()
+   */
+  bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @copydoc Controller::SetSystemFontSizeScale()
+   */
+  void SetSystemFontSizeScale(float scale);
+
+  /**
+   * @copydoc Controller::GetAdjustedFontSizeScale()
+   */
+  float GetAdjustedFontSizeScale() const;
+
+  /**
+   * @brief Gets the system font size scale.
+   *
+   * @return The system font size scale.
+   */
+  float GetSystemFontSizeScale() const;
+
+  /**
+   * @brief Gets the current font size scale.
+   *
+   * @return The current font size scale.
+   */
+  float GetCurrentFontSizeScale() const;
+
+  /**
+   * @brief Calculates the adjusted font size scale.
+   *
+   * @return The adjusted font size scale.
+   */
+  float CalculateAdjustedFontSizeScale() const;
+
+  /**
+   * @brief Applies the adjusted font size scale.
+   *
+   * @return True if updated, otherwise false.
+   */
+  bool ApplyAdjustedFontSizeScale();
+
+  /**
    * @brief Helper to clear text's style data.
    */
   void ClearStyleData();
@@ -1150,23 +1234,27 @@ public:
 
   Shader mShaderBackground; ///< The shader for text background.
 
-  float mCurrentLineSize;              ///< Used to store the MinLineSize set by user when TextFitArray is enabled.
-  float mTextFitMinSize;               ///< Minimum Font Size for text fit. Default 10
-  float mTextFitMaxSize;               ///< Maximum Font Size for text fit. Default 100
-  float mTextFitStepSize;              ///< Step Size for font intervalse. Default 1
-  float mTextFitLineSize;              ///< This is the LineSize that is the standard when performing TextFit.
-  float mFontSizeScale;                ///< Scale value for Font Size. Default 1.0
-  float mDisabledColorOpacity;         ///< Color opacity when disabled.
-  float mRenderScale;                  ///< The render scale. Default 1.0
-  bool  mFontSizeScaleEnabled : 1;     ///< Whether the font size scale is enabled.
-  bool  mTextFitEnabled : 1;           ///< Whether the text's fit is enabled.
-  bool  mTextFitChanged : 1;           ///< Whether the text fit property has changed.
-  bool  mTextFitArrayEnabled : 1;      ///< Whether the text's fit array is enabled.
-  bool  mIsLayoutDirectionChanged : 1; ///< Whether the layout has changed.
-  bool  mIsUserInteractionEnabled : 1; ///< Whether the user interaction is enabled.
-  bool  mProcessorRegistered : 1;      ///< Whether the text controller registered into processor or not.
-  bool  mTextCutout : 1;               ///< Whether the text cutout enabled.
-  bool  mIsCursorInsetEnabled : 1;     ///< Whether the cursor inset is enabled.
+  float mCurrentLineSize;                ///< Used to store the MinLineSize set by user when TextFitArray is enabled.
+  float mTextFitMinSize;                 ///< Minimum Font Size for text fit. Default 10
+  float mTextFitMaxSize;                 ///< Maximum Font Size for text fit. Default 100
+  float mTextFitStepSize;                ///< Step Size for font intervalse. Default 1
+  float mTextFitLineSize;                ///< This is the LineSize that is the standard when performing TextFit.
+  float mFontSizeScale;                  ///< Scale value for Font Size. Default 1.0
+  float mMinFontSizeScale;               ///< Minimum scale value for Font Size. Default 0.01
+  float mMaxFontSizeScale;               ///< Maximum scale value for Font Size. Default 10.0
+  float mAdjustedFontSizeScale;          ///< The final font size scale applied after clamping and system scaling.
+  float mSystemFontSizeScale;            ///< System font size scale. Default 1.0
+  float mDisabledColorOpacity;           ///< Color opacity when disabled.
+  float mRenderScale;                    ///< The render scale. Default 1.0
+  bool  mSystemFontSizeScaleEnabled : 1; ///< Whether the system font size scale is applied.
+  bool  mTextFitEnabled : 1;             ///< Whether the text's fit is enabled.
+  bool  mTextFitChanged : 1;             ///< Whether the text fit property has changed.
+  bool  mTextFitArrayEnabled : 1;        ///< Whether the text's fit array is enabled.
+  bool  mIsLayoutDirectionChanged : 1;   ///< Whether the layout has changed.
+  bool  mIsUserInteractionEnabled : 1;   ///< Whether the user interaction is enabled.
+  bool  mProcessorRegistered : 1;        ///< Whether the text controller registered into processor or not.
+  bool  mTextCutout : 1;                 ///< Whether the text cutout enabled.
+  bool  mIsCursorInsetEnabled : 1;       ///< Whether the cursor inset is enabled.
 
   Text::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
   Ellipsize::Mode    mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)

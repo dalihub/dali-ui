@@ -240,4 +240,40 @@
   * \
   * @param[in] candidates The vector of text fit candidates. \
   */ \
-  ChildClass& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates) { Label::SetTextFit(candidates); return *this; }
+  ChildClass& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates) { Label::SetTextFit(candidates); return *this; } \
+  /** \
+  * @brief Sets the font size scale. \
+  * \
+  * The scaled font size is calculated from the current font size \
+  * multiplied by this scale value. \
+  * \
+  * @param[in] scale The font size scale. \
+  */ \
+  ChildClass& SetFontSizeScale(float scale) { Label::SetFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets the minimum font size scale. \
+  * \
+  * If this value is greater than the maximum font size scale, \
+  * the adjusted font size scale follows this minimum value. \
+  * \
+  * @param[in] scale The minimum font size scale. \
+  */ \
+  ChildClass& SetMinimumFontSizeScale(float scale) { Label::SetMinimumFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets the maximum font size scale. \
+  * \
+  * If this value is less than the minimum font size scale, \
+  * the adjusted font size scale follows the minimum font size scale. \
+  * \
+  * @param[in] scale The maximum font size scale. \
+  */ \
+  ChildClass& SetMaximumFontSizeScale(float scale) { Label::SetMaximumFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets whether the system font size scale is applied. \
+  * \
+  * When enabled, the system font size scale is combined with the current \
+  * font size scale before applying the minimum and maximum constraints. \
+  * \
+  * @param[in] enabled True to apply the system font size scale, false otherwise. \
+  */ \
+  ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { Label::SetSystemFontSizeScaleEnabled(enabled); return *this; }

@@ -372,6 +372,46 @@ public:
    */
   void ResetTextFit();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetFontSizeScale
+   */
+  void SetFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetFontSizeScale
+   */
+  float GetFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMinimumFontSizeScale
+   */
+  void SetMinimumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMinimumFontSizeScale
+   */
+  float GetMinimumFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMaximumFontSizeScale
+   */
+  void SetMaximumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMaximumFontSizeScale
+   */
+  float GetMaximumFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetSystemFontSizeScaleEnabled
+   */
+  void SetSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::Label::IsSystemFontSizeScaleEnabled
+   */
+  bool IsSystemFontSizeScaleEnabled() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -387,6 +427,11 @@ public:
    * @copydoc Dali::Ui::Label::IsMarqueeRunning
    */
   bool IsMarqueeRunning() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::GetAdjustedFontSizeScale
+   */
+  float GetAdjustedFontSizeScale() const;
 
   // Method
   /**
@@ -462,6 +507,11 @@ public: // From ControlInterface
    * @copydoc Text::ControlInterface::RequestTextRelayout()
    */
   void RequestTextRelayout() override;
+
+  /**
+   * @copydoc Text::ControlInterface::InvalidateTextMeasure()
+   */
+  void InvalidateTextMeasure() override;
 
 private: // from ScrollerInterface
   /**
@@ -641,6 +691,7 @@ private:
 
   int  mTextColorAnimatedCount;
   bool mTextUpdateNeeded : 1;
+  bool mMeasureInvalidated : 1;
   bool mLastMarqueeEnabled : 1;
   bool mIsTouchDown : 1;          // whether the currently intercepted touch is in the down state.
   bool mHasAnchors : 1;           // whether the text has anchors or not.

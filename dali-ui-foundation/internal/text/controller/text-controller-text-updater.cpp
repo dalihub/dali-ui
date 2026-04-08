@@ -414,7 +414,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
 
       if(addFontSizeRun)
       {
-        fontDescriptionRun.size        = static_cast<PointSize26Dot6>(inputStyle.size * impl.GetFontSizeScale() * 64.f);
+        fontDescriptionRun.size        = static_cast<PointSize26Dot6>(inputStyle.size * impl.GetAdjustedFontSizeScale() * 64.f);
         fontDescriptionRun.sizeDefined = true;
       }
 

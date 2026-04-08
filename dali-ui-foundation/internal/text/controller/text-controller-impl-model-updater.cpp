@@ -259,7 +259,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
       // Get the default font's description.
       TextAbstraction::FontDescription defaultFontDescription;
       TextAbstraction::PointSize26Dot6 defaultPointSize =
-        TextAbstraction::FontClient::DEFAULT_POINT_SIZE * impl.GetFontSizeScale();
+        TextAbstraction::FontClient::DEFAULT_POINT_SIZE * impl.GetAdjustedFontSizeScale();
 
       // Get the number of points per one unit of point-size
       uint32_t numberOfPointsPerOneUnitOfPointSize = impl.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
@@ -270,7 +270,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
         defaultFontDescription = impl.mEventData->mPlaceholderFont->GetFontDescription();
         if(impl.mEventData->mPlaceholderFont->sizeDefined)
         {
-          defaultPointSize = impl.mEventData->mPlaceholderFont->mDefaultPointSize * impl.GetFontSizeScale() *
+          defaultPointSize = impl.mEventData->mPlaceholderFont->mDefaultPointSize * impl.GetAdjustedFontSizeScale() *
                              numberOfPointsPerOneUnitOfPointSize;
         }
       }
@@ -286,7 +286,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
         else
         {
           defaultPointSize =
-            impl.mFontDefaults->mDefaultPointSize * impl.GetFontSizeScale() * numberOfPointsPerOneUnitOfPointSize;
+            impl.mFontDefaults->mDefaultPointSize * impl.GetAdjustedFontSizeScale() * numberOfPointsPerOneUnitOfPointSize;
         }
       }
 
@@ -299,7 +299,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
       // Validates the fonts. If there is a character with no assigned font it sets a default one.
       // After this call, fonts are validated.
       multilanguageSupport.ValidateFonts(impl.GetFontClient(), utf32Characters, scripts, fontDescriptionRuns,
-                                         defaultFontDescription, defaultPointSize, impl.GetFontSizeScale(), startIndex,
+                                         defaultFontDescription, defaultPointSize, impl.GetAdjustedFontSizeScale(), startIndex,
                                          requestedNumberOfCharacters, validFonts, variationsMapPtr);
     }
     updated = true;

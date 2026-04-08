@@ -458,6 +458,50 @@ void Label::ResetTextFit()
   GetImpl(*this).ResetTextFit();
 }
 
+Label& Label::SetFontSizeScale(float scale)
+{
+  GetImpl(*this).SetFontSizeScale(scale);
+  return *this;
+}
+
+float Label::GetFontSizeScale() const
+{
+  return GetImpl(*this).GetFontSizeScale();
+}
+
+Label& Label::SetMinimumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetMinimumFontSizeScale(scale);
+  return *this;
+}
+
+float Label::GetMinimumFontSizeScale() const
+{
+  return GetImpl(*this).GetMinimumFontSizeScale();
+}
+
+Label& Label::SetMaximumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetMaximumFontSizeScale(scale);
+  return *this;
+}
+
+float Label::GetMaximumFontSizeScale() const
+{
+  return GetImpl(*this).GetMaximumFontSizeScale();
+}
+
+Label& Label::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  GetImpl(*this).SetSystemFontSizeScaleEnabled(enabled);
+  return *this;
+}
+
+bool Label::IsSystemFontSizeScaleEnabled() const
+{
+  return GetImpl(*this).IsSystemFontSizeScaleEnabled();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -474,6 +518,11 @@ int Label::GetLineCount(float width)
 bool Label::IsMarqueeRunning() const
 {
   return GetImpl(*this).IsMarqueeRunning();
+}
+
+float Label::GetAdjustedFontSizeScale() const
+{
+  return GetImpl(*this).GetAdjustedFontSizeScale();
 }
 
 // =============================================================================

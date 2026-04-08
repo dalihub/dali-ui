@@ -106,6 +106,7 @@ InputFieldImpl::InputFieldImpl()
 : ViewImpl(),
   mOverflowMode(Text::OverflowMode::CLIP),
   mAlignmentOffset(0.f),
+  mMeasureInvalidated(false),
   mHasBeenStaged(false),
   mTextChanged(false),
   mCursorPositionChanged(false),
@@ -787,6 +788,8 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint, heightConstraint);
 
+  mMeasureInvalidated = false;
+
   const float layoutWidth  = GetRequestedWidth();
   const float layoutHeight = GetRequestedHeight();
 
@@ -868,6 +871,15 @@ void InputFieldImpl::RequestTextRelayout()
 {
   // Signal that a Relayout may be needed
   RelayoutRequest();
+}
+
+void InputFieldImpl::InvalidateTextMeasure()
+{
+  if(!mMeasureInvalidated)
+  {
+    InvalidateMeasure();
+    mMeasureInvalidated = true;
+  }
 }
 
 // =============================================================================

@@ -1,0 +1,257 @@
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali/integration-api/debug.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float STACK_SPACING       = 8.0f;
+constexpr float STACK_PADDING       = 16.0f;
+constexpr float BUTTON_HEIGHT       = 44.0f;
+constexpr float TARGET_LABEL_HEIGHT = 100.0f;
+
+const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
+
+Label CreateButton(const char* text, float fontSize = 14.0f)
+{
+  return Label::New(text)
+    .SetFontSize(fontSize)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(UiColor(0x4A90D9))
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(BUTTON_HEIGHT)
+    .SetViewPadding(Extents(10, 10, 10, 10));
+}
+} // namespace
+
+class TextScaleController : public ConnectionTracker
+{
+public:
+  explicit TextScaleController(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &TextScaleController::OnInit);
+  }
+
+private:
+  void OnInit(Application& application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xF5F5F5));
+
+    mTargetLabel = Label::New(TEST_TEXT)
+                     .SetRequestedWidth(MATCH_PARENT)
+                     .SetRequestedHeight(TARGET_LABEL_HEIGHT)
+                     .SetMultiLine(true)
+                     .SetFontSize(24.0f)
+                     .SetBackgroundColor(UiColor(0xFFFFFF))
+                     .SetViewPadding(Extents(16, 16, 16, 16));
+
+    mStatusLabel = Label::New()
+                     .SetRequestedWidth(MATCH_PARENT)
+                     .SetRequestedHeight(WRAP_CONTENT)
+                     .SetFontSize(12.0f)
+                     .SetMultiLine(true)
+                     .SetBackgroundColor(UiColor(0xE8E8E8))
+                     .SetViewPadding(Extents(16, 16, 16, 16));
+
+    UpdateStatus();
+
+    Label titleButton = CreateButton("Font Size Scale Test", 16.0f)
+                          .SetBackgroundColor(UiColor(0x2C3E50));
+
+    Label btn1 = CreateButton("1. Normal Scale (1.0, min=0.5, max=2.0)")
+                   .SetBackgroundColor(UiColor(0x3498DB));
+
+    Label btn2 = CreateButton("2. Increase Scale (1.5)")
+                   .SetBackgroundColor(UiColor(0x2ECC71));
+
+    Label btn3 = CreateButton("3. Clamp to Min (scale=0.8, min=1.2)")
+                   .SetBackgroundColor(UiColor(0xE74C3C));
+
+    Label btn4 = CreateButton("4. Clamp to Max (scale=1.8, max=1.3)")
+                   .SetBackgroundColor(UiColor(0xE67E22));
+
+    Label btn5 = CreateButton("5. Inverted Range (min=1.4 > max=1.0)")
+                   .SetBackgroundColor(UiColor(0x9B59B6));
+
+    Label btn6 = CreateButton("6. Enable System Scale")
+                   .SetBackgroundColor(UiColor(0x1ABC9C));
+
+    Label btn7 = CreateButton("7. Disable System Scale (scale=1.6)")
+                   .SetBackgroundColor(UiColor(0x7F8C8D));
+
+    window.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .Spacing(STACK_SPACING)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .Children({
+          titleButton,
+          Label::New("Target Label (observe font size changes):").SetFontSize(14.0f),
+          mTargetLabel,
+          Label::New("Current Status:").SetFontSize(14.0f),
+          mStatusLabel,
+          Label::New("Test Scenarios:").SetFontSize(14.0f),
+          btn1, btn2, btn3, btn4, btn5, btn6, btn7,
+        }));
+
+    btn1.TouchedSignal().Connect(this, &TextScaleController::OnButton1Touched);
+    btn2.TouchedSignal().Connect(this, &TextScaleController::OnButton2Touched);
+    btn3.TouchedSignal().Connect(this, &TextScaleController::OnButton3Touched);
+    btn4.TouchedSignal().Connect(this, &TextScaleController::OnButton4Touched);
+    btn5.TouchedSignal().Connect(this, &TextScaleController::OnButton5Touched);
+    btn6.TouchedSignal().Connect(this, &TextScaleController::OnButton6Touched);
+    btn7.TouchedSignal().Connect(this, &TextScaleController::OnButton7Touched);
+  }
+
+  void UpdateStatus()
+  {
+    float fontSizeScale    = mTargetLabel.GetFontSizeScale();
+    float minFontSizeScale = mTargetLabel.GetMinimumFontSizeScale();
+    float maxFontSizeScale = mTargetLabel.GetMaximumFontSizeScale();
+    bool  systemEnabled    = mTargetLabel.IsSystemFontSizeScaleEnabled();
+    float adjustedScale    = mTargetLabel.GetAdjustedFontSizeScale();
+
+    Dali::String status;
+
+    status += "FontSizeScale: ";
+    status += std::to_string(fontSizeScale).c_str();
+    status += "\nMinimumFontSizeScale: ";
+    status += std::to_string(minFontSizeScale).c_str();
+    status += "\nMaximumFontSizeScale: ";
+    status += std::to_string(maxFontSizeScale).c_str();
+    status += "\nSystemFontSizeScaleEnabled: ";
+    status += (systemEnabled ? "true" : "false");
+    status += "\nAdjustedFontSizeScale: ";
+    status += std::to_string(adjustedScale).c_str();
+    status += "\n\nNote: System font scale may return 1.0 if not connected.";
+
+    mStatusLabel.SetText(status);
+  }
+
+  bool OnButton1Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetFontSizeScale(1.0f)
+                  .SetMinimumFontSizeScale(0.5f)
+                  .SetMaximumFontSizeScale(2.0f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton2Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetFontSizeScale(1.5f)
+                  .SetMinimumFontSizeScale(0.5f)
+                  .SetMaximumFontSizeScale(2.0f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton3Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetMinimumFontSizeScale(1.2f)
+                  .SetMaximumFontSizeScale(2.0f)
+                  .SetFontSizeScale(0.8f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton4Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetMinimumFontSizeScale(0.5f)
+                  .SetMaximumFontSizeScale(1.3f)
+                  .SetFontSizeScale(1.8f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton5Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetMinimumFontSizeScale(1.4f)
+                  .SetMaximumFontSizeScale(1.0f)
+                  .SetFontSizeScale(0.7f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton6Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetFontSizeScale(1.8f)
+                  .SetMinimumFontSizeScale(0.8f)
+                  .SetMaximumFontSizeScale(1.3f)
+                  .SetSystemFontSizeScaleEnabled(true);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButton7Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mTargetLabel.SetFontSizeScale(1.6f)
+                  .SetMinimumFontSizeScale(0.5f)
+                  .SetMaximumFontSizeScale(2.0f)
+                  .SetSystemFontSizeScaleEnabled(false);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+private:
+  Application& mApplication;
+  Label        mTargetLabel;
+  Label        mStatusLabel;
+};
+
+int DALI_EXPORT_API main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
+
+  TextScaleController controller(application);
+  application.MainLoop();
+
+  return 0;
+}

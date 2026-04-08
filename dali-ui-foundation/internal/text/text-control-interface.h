@@ -41,6 +41,11 @@ public:
    * @brief Called to request a text relayout.
    */
   virtual void RequestTextRelayout() = 0;
+
+  /**
+   * @brief Invalidate measured size.
+   */
+  virtual void InvalidateTextMeasure() = 0;
 };
 
 } // namespace Text
