@@ -14,9 +14,12 @@
  * limitations under the License.
  *
  */
+// EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-registry-helper.h>
 
-// CLASS HEADER
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-view-impl.h>
+#include <dali-ui-foundation/public-api/interactive-view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
@@ -29,6 +32,20 @@ namespace Ui
 
 namespace Integration
 {
+
+namespace
+{
+
+BaseHandle Create()
+{
+  return InteractiveView::New();
+}
+
+// Type Registration
+DALI_TYPE_REGISTRATION_BEGIN(InteractiveViewImpl, ViewImpl, Create)
+DALI_TYPE_REGISTRATION_END()
+
+} // namespace
 
 InteractiveViewImplPtr InteractiveViewImpl::New()
 {
