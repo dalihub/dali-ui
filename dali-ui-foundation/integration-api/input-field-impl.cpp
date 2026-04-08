@@ -454,6 +454,54 @@ void InputFieldImpl::ResetLineThrough()
   }
 }
 
+void InputFieldImpl::SetFontSizeScale(float scale)
+{
+  mController->SetFontSizeScale(scale);
+}
+
+float InputFieldImpl::GetFontSizeScale() const
+{
+  return mController->GetFontSizeScale();
+}
+
+void InputFieldImpl::SetMinimumFontSizeScale(float scale)
+{
+  mController->SetMinimumFontSizeScale(scale);
+}
+
+float InputFieldImpl::GetMinimumFontSizeScale() const
+{
+  return mController->GetMinimumFontSizeScale();
+}
+
+void InputFieldImpl::SetMaximumFontSizeScale(float scale)
+{
+  mController->SetMaximumFontSizeScale(scale);
+}
+
+float InputFieldImpl::GetMaximumFontSizeScale() const
+{
+  return mController->GetMaximumFontSizeScale();
+}
+
+void InputFieldImpl::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  mController->SetSystemFontSizeScaleEnabled(enabled);
+}
+
+bool InputFieldImpl::IsSystemFontSizeScaleEnabled() const
+{
+  return mController->IsSystemFontSizeScaleEnabled();
+}
+
+// =============================================================================
+// Read Only
+// =============================================================================
+float InputFieldImpl::GetAdjustedFontSizeScale() const
+{
+  return mController->GetAdjustedFontSizeScale();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

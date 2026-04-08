@@ -341,6 +341,58 @@ void InputField::ResetLineThrough()
   return GetImpl(*this).ResetLineThrough();
 }
 
+InputField& InputField::SetFontSizeScale(float scale)
+{
+  GetImpl(*this).SetFontSizeScale(scale);
+  return *this;
+}
+
+float InputField::GetFontSizeScale() const
+{
+  return GetImpl(*this).GetFontSizeScale();
+}
+
+InputField& InputField::SetMinimumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetMinimumFontSizeScale(scale);
+  return *this;
+}
+
+float InputField::GetMinimumFontSizeScale() const
+{
+  return GetImpl(*this).GetMinimumFontSizeScale();
+}
+
+InputField& InputField::SetMaximumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetMaximumFontSizeScale(scale);
+  return *this;
+}
+
+float InputField::GetMaximumFontSizeScale() const
+{
+  return GetImpl(*this).GetMaximumFontSizeScale();
+}
+
+InputField& InputField::SetSystemFontSizeScaleEnabled(bool enabled)
+{
+  GetImpl(*this).SetSystemFontSizeScaleEnabled(enabled);
+  return *this;
+}
+
+bool InputField::IsSystemFontSizeScaleEnabled() const
+{
+  return GetImpl(*this).IsSystemFontSizeScaleEnabled();
+}
+
+// =============================================================================
+// Read Only
+// =============================================================================
+float InputField::GetAdjustedFontSizeScale() const
+{
+  return GetImpl(*this).GetAdjustedFontSizeScale();
+}
+
 // =============================================================================
 // Signals
 // =============================================================================

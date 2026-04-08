@@ -280,6 +280,52 @@ public:
    */
   void ResetLineThrough();
 
+  /**
+   * @copydoc Dali::Ui::InputField::SetFontSizeScale
+   */
+  void SetFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetFontSizeScale
+   */
+  float GetFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetMinimumFontSizeScale
+   */
+  void SetMinimumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetMinimumFontSizeScale
+   */
+  float GetMinimumFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetMaximumFontSizeScale
+   */
+  void SetMaximumFontSizeScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetMaximumFontSizeScale
+   */
+  float GetMaximumFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetSystemFontSizeScaleEnabled
+   */
+  void SetSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsSystemFontSizeScaleEnabled
+   */
+  bool IsSystemFontSizeScaleEnabled() const;
+
+  // Read Only
+  /**
+   * @copydoc Dali::Ui::InputField::GetAdjustedFontSizeScale
+   */
+  float GetAdjustedFontSizeScale() const;
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::InputField::TextChangedSignal()

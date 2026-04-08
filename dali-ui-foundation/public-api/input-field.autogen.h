@@ -150,4 +150,41 @@
   * \
   * @param[in] lineThrough The line-through configuration. \
   */ \
-  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { InputField::SetLineThrough(lineThrough); return *this; }
+  ChildClass& SetLineThrough(const Text::LineThrough& lineThrough) { InputField::SetLineThrough(lineThrough); return *this; } \
+  /** \
+  * @brief Sets the font size scale. \
+  * \
+  * The scaled font size is calculated from the current font size \
+  * multiplied by this scale value. \
+  * \
+  * @param[in] scale The font size scale. \
+  */ \
+  ChildClass& SetFontSizeScale(float scale) { InputField::SetFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets the minimum font size scale. \
+  * \
+  * If this value is greater than the maximum font size scale, \
+  * the adjusted font size scale follows this minimum value. \
+  * \
+  * @param[in] scale The minimum font size scale. \
+  */ \
+  ChildClass& SetMinimumFontSizeScale(float scale) { InputField::SetMinimumFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets the maximum font size scale. \
+  * \
+  * If this value is less than the minimum font size scale, \
+  * the adjusted font size scale follows the minimum font size scale. \
+  * \
+  * @param[in] scale The maximum font size scale. \
+  */ \
+  ChildClass& SetMaximumFontSizeScale(float scale) { InputField::SetMaximumFontSizeScale(scale); return *this; } \
+  /** \
+  * @brief Sets whether the system font size scale is applied. \
+  * \
+  * When enabled, the system font size scale is used instead of \
+  * the user-defined font size scale before applying the minimum \
+  * and maximum constraints. \
+  * \
+  * @param[in] enabled True to apply the system font size scale, false otherwise. \
+  */ \
+  ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { InputField::SetSystemFontSizeScaleEnabled(enabled); return *this; }

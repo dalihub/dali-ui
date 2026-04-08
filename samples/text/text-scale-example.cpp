@@ -24,7 +24,8 @@ namespace
 constexpr float STACK_SPACING       = 8.0f;
 constexpr float STACK_PADDING       = 16.0f;
 constexpr float BUTTON_HEIGHT       = 44.0f;
-constexpr float TARGET_LABEL_HEIGHT = 100.0f;
+constexpr float TARGET_LABEL_HEIGHT = 80.0f;
+constexpr float TARGET_INPUT_HEIGHT = 80.0f;
 
 const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
 
@@ -56,6 +57,7 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
 
+    // Target Label for visual testing
     mTargetLabel = Label::New(TEST_TEXT)
                      .SetRequestedWidth(MATCH_PARENT)
                      .SetRequestedHeight(TARGET_LABEL_HEIGHT)
@@ -63,6 +65,15 @@ private:
                      .SetFontSize(24.0f)
                      .SetBackgroundColor(UiColor(0xFFFFFF))
                      .SetViewPadding(Extents(16, 16, 16, 16));
+
+    // Target InputField for visual testing
+    mTargetInputField = InputField::New()
+                          .SetRequestedWidth(MATCH_PARENT)
+                          .SetRequestedHeight(TARGET_INPUT_HEIGHT)
+                          .SetFontSize(24.0f)
+                          .SetText("InputField test text")
+                          .SetBackgroundColor(UiColor(0xFFFFFF))
+                          .SetViewPadding(Extents(16, 16, 16, 16));
 
     mStatusLabel = Label::New()
                      .SetRequestedWidth(MATCH_PARENT)
@@ -106,8 +117,10 @@ private:
         .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
           titleButton,
-          Label::New("Target Label (observe font size changes):").SetFontSize(14.0f),
+          Label::New("Target Label:").SetFontSize(14.0f),
           mTargetLabel,
+          Label::New("Target InputField:").SetFontSize(14.0f),
+          mTargetInputField,
           Label::New("Current Status:").SetFontSize(14.0f),
           mStatusLabel,
           Label::New("Test Scenarios:").SetFontSize(14.0f),
@@ -125,38 +138,69 @@ private:
 
   void UpdateStatus()
   {
-    float fontSizeScale    = mTargetLabel.GetFontSizeScale();
-    float minFontSizeScale = mTargetLabel.GetMinimumFontSizeScale();
-    float maxFontSizeScale = mTargetLabel.GetMaximumFontSizeScale();
-    bool  systemEnabled    = mTargetLabel.IsSystemFontSizeScaleEnabled();
-    float adjustedScale    = mTargetLabel.GetAdjustedFontSizeScale();
+    // Get Label values
+    float labelFontSizeScale    = mTargetLabel.GetFontSizeScale();
+    float labelMinFontSizeScale = mTargetLabel.GetMinimumFontSizeScale();
+    float labelMaxFontSizeScale = mTargetLabel.GetMaximumFontSizeScale();
+    bool  labelSystemEnabled    = mTargetLabel.IsSystemFontSizeScaleEnabled();
+    float labelAdjustedScale    = mTargetLabel.GetAdjustedFontSizeScale();
+
+    // Get InputField values
+    float inputFontSizeScale    = mTargetInputField.GetFontSizeScale();
+    float inputMinFontSizeScale = mTargetInputField.GetMinimumFontSizeScale();
+    float inputMaxFontSizeScale = mTargetInputField.GetMaximumFontSizeScale();
+    bool  inputSystemEnabled    = mTargetInputField.IsSystemFontSizeScaleEnabled();
+    float inputAdjustedScale    = mTargetInputField.GetAdjustedFontSizeScale();
 
     Dali::String status;
 
-    status += "FontSizeScale: ";
-    status += std::to_string(fontSizeScale).c_str();
-    status += "\nMinimumFontSizeScale: ";
-    status += std::to_string(minFontSizeScale).c_str();
-    status += "\nMaximumFontSizeScale: ";
-    status += std::to_string(maxFontSizeScale).c_str();
-    status += "\nSystemFontSizeScaleEnabled: ";
-    status += (systemEnabled ? "true" : "false");
-    status += "\nAdjustedFontSizeScale: ";
-    status += std::to_string(adjustedScale).c_str();
-    status += "\n\nNote: System font scale may return 1.0 if not connected.";
+    status += "[Label]\n";
+    status += "Scale: ";
+    status += std::to_string(labelFontSizeScale).substr(0, 5).c_str();
+    status += ", Min: ";
+    status += std::to_string(labelMinFontSizeScale).substr(0, 5).c_str();
+    status += ", Max: ";
+    status += std::to_string(labelMaxFontSizeScale).substr(0, 5).c_str();
+    status += "\nSystem: ";
+    status += (labelSystemEnabled ? "ON" : "OFF");
+    status += ", Adjusted: ";
+    status += std::to_string(labelAdjustedScale).substr(0, 5).c_str();
+
+    status += "\n\n[InputField]\n";
+    status += "Scale: ";
+    status += std::to_string(inputFontSizeScale).substr(0, 5).c_str();
+    status += ", Min: ";
+    status += std::to_string(inputMinFontSizeScale).substr(0, 5).c_str();
+    status += ", Max: ";
+    status += std::to_string(inputMaxFontSizeScale).substr(0, 5).c_str();
+    status += "\nSystem: ";
+    status += (inputSystemEnabled ? "ON" : "OFF");
+    status += ", Adjusted: ";
+    status += std::to_string(inputAdjustedScale).substr(0, 5).c_str();
 
     mStatusLabel.SetText(status);
+  }
+
+  void ApplyScaleToBoth(float scale, float minScale, float maxScale, bool systemEnabled)
+  {
+    mTargetLabel.SetFontSizeScale(scale)
+                .SetMinimumFontSizeScale(minScale)
+                .SetMaximumFontSizeScale(maxScale)
+                .SetSystemFontSizeScaleEnabled(systemEnabled);
+
+    mTargetInputField.SetFontSizeScale(scale)
+                     .SetMinimumFontSizeScale(minScale)
+                     .SetMaximumFontSizeScale(maxScale)
+                     .SetSystemFontSizeScaleEnabled(systemEnabled);
+
+    UpdateStatus();
   }
 
   bool OnButton1Touched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetFontSizeScale(1.0f)
-                  .SetMinimumFontSizeScale(0.5f)
-                  .SetMaximumFontSizeScale(2.0f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(1.0f, 0.5f, 2.0f, false);
     }
     return true;
   }
@@ -165,11 +209,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetFontSizeScale(1.5f)
-                  .SetMinimumFontSizeScale(0.5f)
-                  .SetMaximumFontSizeScale(2.0f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(1.5f, 0.5f, 2.0f, false);
     }
     return true;
   }
@@ -178,11 +218,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetMinimumFontSizeScale(1.2f)
-                  .SetMaximumFontSizeScale(2.0f)
-                  .SetFontSizeScale(0.8f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(0.8f, 1.2f, 2.0f, false);
     }
     return true;
   }
@@ -191,11 +227,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetMinimumFontSizeScale(0.5f)
-                  .SetMaximumFontSizeScale(1.3f)
-                  .SetFontSizeScale(1.8f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(1.8f, 0.5f, 1.3f, false);
     }
     return true;
   }
@@ -204,11 +236,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetMinimumFontSizeScale(1.4f)
-                  .SetMaximumFontSizeScale(1.0f)
-                  .SetFontSizeScale(0.7f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(0.7f, 1.4f, 1.0f, false);
     }
     return true;
   }
@@ -217,11 +245,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetFontSizeScale(1.8f)
-                  .SetMinimumFontSizeScale(0.8f)
-                  .SetMaximumFontSizeScale(1.3f)
-                  .SetSystemFontSizeScaleEnabled(true);
-      UpdateStatus();
+      ApplyScaleToBoth(1.8f, 0.8f, 1.3f, true);
     }
     return true;
   }
@@ -230,11 +254,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mTargetLabel.SetFontSizeScale(1.6f)
-                  .SetMinimumFontSizeScale(0.5f)
-                  .SetMaximumFontSizeScale(2.0f)
-                  .SetSystemFontSizeScaleEnabled(false);
-      UpdateStatus();
+      ApplyScaleToBoth(1.6f, 0.5f, 2.0f, false);
     }
     return true;
   }
@@ -242,6 +262,7 @@ private:
 private:
   Application& mApplication;
   Label        mTargetLabel;
+  InputField   mTargetInputField;
   Label        mStatusLabel;
 };
 
