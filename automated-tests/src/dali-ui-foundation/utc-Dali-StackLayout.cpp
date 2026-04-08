@@ -580,3 +580,71 @@ int UtcDaliStackLayoutCrossAxisVerticalFillWithExplicitSizeP(void)
   DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION); // explicit size wins
   END_TEST;
 }
+
+int UtcDaliStackLayoutStandaloneExcludedFromAccumulationP(void)
+{
+  UiTestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetSpacing(10.0f);
+
+  View normal1 = View::New();
+  normal1.SetRequestedWidth(50.0f);
+  normal1.SetRequestedHeight(30.0f);
+  layout.Add(normal1);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetRequestedWidth(40.0f);
+  standalone.SetRequestedHeight(40.0f);
+  standalone.SetPositionX(80.0f);
+  standalone.SetPositionY(90.0f);
+  layout.Add(standalone);
+
+  View normal2 = View::New();
+  normal2.SetRequestedWidth(50.0f);
+  normal2.SetRequestedHeight(30.0f);
+  layout.Add(normal2);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(200.0f);
+  layout.Measure(200.0f, 200.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 200));
+
+  // Standalone child does not advance the stack cursor or contribute to spacing.
+  // normal1 at y=0 height=30, spacing=10, normal2 at y=40.
+  DALI_TEST_EQUALS(normal1.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(normal2.GetPositionY(), 40.0f, TEST_LOCATION);
+
+  // Standalone is at its requested position (parent padding ignored, no margin).
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutStandaloneIgnoresParentPaddingP(void)
+{
+  UiTestApplication application;
+  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetViewPadding(Extents(10, 10, 10, 10));
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetViewMargin(Extents(5, 5, 7, 7));
+  standalone.SetRequestedWidth(MATCH_PARENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  layout.Add(standalone);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Parent padding ignored: full parent inner size minus own margin.
+  DALI_TEST_EQUALS(standalone.GetSize().width, 200.0f - 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 150.0f - 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 7.0f, TEST_LOCATION);
+  END_TEST;
+}

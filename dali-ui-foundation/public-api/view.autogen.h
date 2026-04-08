@@ -116,6 +116,30 @@
   */ \
   ChildClass& SetViewPadding(const Extents& padding) { View::SetViewPadding(padding); return *this; } \
   /** \
+  * @brief Sets the layout mode of this View. \
+  * \
+  * LayoutMode::Default (default) lets the parent container's layout system manage \
+  * this View's size and position normally. \
+  * \
+  * LayoutMode::Standalone excludes this View from the parent's accumulation, \
+  * spacing and index calculations. The View's size is still measured normally \
+  * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
+  * but its position is taken from SetPositionX/SetPositionY instead of being \
+  * decided by the parent layout. This is useful for floating overlays, drag \
+  * previews, tooltips and absolute positioning inside any LayoutManager. \
+  * \
+  * Standalone children ignore the parent's padding entirely. Their measured \
+  * size is the parent's full inner size minus the child's own margin, and \
+  * their final position is SetPositionX/SetPositionY plus the child's own \
+  * margin in the parent's coordinate space. This keeps size and position \
+  * consistent: a Standalone child with MATCH_PARENT fills the parent edge \
+  * to edge regardless of parent padding, and any margin set on the child \
+  * shifts it inward in both axes. \
+  * \
+  * @param[in] mode The layout mode to set \
+  */ \
+  ChildClass& SetLayoutMode(LayoutMode mode) { View::SetLayoutMode(mode); return *this; } \
+  /** \
   * @brief Sets whether the actor should be focusable by keyboard navigation. \
   * \
   * @param[in] focusable True if it is focusable \

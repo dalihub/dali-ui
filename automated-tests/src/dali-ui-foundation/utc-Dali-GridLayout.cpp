@@ -509,3 +509,65 @@ int UtcDaliGridLayoutRowColumnSpanP(void)
   DALI_TEST_EQUALS(c1.GetLayoutParams<GridLayoutParams>().GetColumnSpan(), 1u, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliGridLayoutStandaloneIgnoresParentPaddingP(void)
+{
+  UiTestApplication application;
+  GridLayout layout = GridLayout::New();
+  layout.AddRowDefinition(GridLength::Star(1.0f));
+  layout.AddColumnDefinition(GridLength::Star(1.0f));
+  layout.SetViewPadding(Extents(10, 10, 10, 10));
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetViewMargin(Extents(5, 5, 7, 7));
+  standalone.SetRequestedWidth(MATCH_PARENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  layout.Add(standalone);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  DALI_TEST_EQUALS(standalone.GetSize().width, 200.0f - 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 150.0f - 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 7.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGridLayoutStandaloneExcludedFromCellsP(void)
+{
+  UiTestApplication application;
+  GridLayout layout = GridLayout::New();
+  layout.AddRowDefinition(GridLength::Absolute(50.0f));
+  layout.AddRowDefinition(GridLength::Absolute(50.0f));
+  layout.AddColumnDefinition(GridLength::Absolute(60.0f));
+
+  View cellChild = View::New();
+  cellChild.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(0));
+  layout.Add(cellChild);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetRequestedWidth(20.0f);
+  standalone.SetRequestedHeight(20.0f);
+  standalone.SetPositionX(70.0f);
+  standalone.SetPositionY(80.0f);
+  // Even with grid params set, Standalone takes precedence and bypasses cell placement.
+  standalone.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(0));
+  layout.Add(standalone);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Standalone child placed at requested position, not in row 1 col 0.
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().width, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 20.0f, TEST_LOCATION);
+  END_TEST;
+}

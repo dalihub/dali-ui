@@ -661,6 +661,28 @@ public: // Layout Properties API
   void    SetViewPadding(const Extents& padding);
   Extents GetViewPadding() const;
 
+  /**
+   * @brief Sets the layout mode of this View.
+   *
+   * @see Ui::LayoutMode
+   */
+  void SetLayoutMode(Ui::LayoutMode mode);
+
+  /**
+   * @brief Gets the layout mode of this View.
+   */
+  Ui::LayoutMode GetLayoutMode() const;
+
+  /**
+   * @brief Convenience: returns true if LayoutMode is Standalone.
+   *
+   * Standalone children are excluded from the parent layout's accumulation,
+   * spacing and index calculations. The parent still calls Measure() on them
+   * (so size resolution works normally) but during Arrange the parent passes
+   * bounds composed of the child's PositionX/Y and measuredSize.
+   */
+  bool IsLayoutModeStandalone() const;
+
 public: // Parent Layout API
   Ui::Layout   GetParentLayout() const;
   Ui::View     GetParentView() const;
@@ -784,8 +806,9 @@ private:
   float mMaximumHeight;
 
   // Layout Properties Data
-  Extents mMargin;
-  Extents mPadding;
+  Extents        mMargin;
+  Extents        mPadding;
+  Ui::LayoutMode mLayoutMode{Ui::LayoutMode::Default};
 
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache

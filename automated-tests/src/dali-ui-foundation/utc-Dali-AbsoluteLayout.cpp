@@ -254,3 +254,55 @@ int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
   DALI_TEST_EQUALS(m.GetHeight(), 150.0f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliAbsoluteLayoutStandaloneIgnoresParentPaddingP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout layout = AbsoluteLayout::New();
+  layout.SetViewPadding(Extents(10, 10, 10, 10));
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetViewMargin(Extents(5, 5, 7, 7));
+  standalone.SetRequestedWidth(MATCH_PARENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  layout.Add(standalone);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  DALI_TEST_EQUALS(standalone.GetSize().width, 200.0f - 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 150.0f - 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 7.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutStandaloneBypassesBoundsP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout layout = AbsoluteLayout::New();
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetRequestedWidth(30.0f);
+  standalone.SetRequestedHeight(20.0f);
+  standalone.SetPositionX(60.0f);
+  standalone.SetPositionY(70.0f);
+  // AbsoluteLayoutParams bounds should be ignored for Standalone children.
+  standalone.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 999, 999)));
+  layout.Add(standalone);
+
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().width, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 20.0f, TEST_LOCATION);
+  END_TEST;
+}

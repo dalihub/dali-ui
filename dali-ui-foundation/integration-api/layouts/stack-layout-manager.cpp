@@ -59,13 +59,30 @@ struct StackMeasureFirstPassResult
 };
 
 StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContainer& children, float contentWidth,
-                                                          float contentHeight, StackOrientation orientation,
+                                                          float contentHeight, float parentWidth,
+                                                          float parentHeight, StackOrientation orientation,
                                                           const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   StackMeasureFirstPassResult result;
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
+
+    // Standalone children: still measured (so MATCH_PARENT / WRAP_CONTENT resolve),
+    // but excluded from this layout's main-axis accumulation, cross-axis maximum,
+    // visible-child count and weight distribution. They also ignore the parent's
+    // padding entirely, so they are sized against the parent's full inner size.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      Extents margin         = childImpl.GetViewMargin();
+      float   marginW        = static_cast<float>(margin.start + margin.end);
+      float   marginH        = static_cast<float>(margin.top + margin.bottom);
+      float   childW         = std::max(0.0f, parentWidth - marginW);
+      float   childH         = std::max(0.0f, parentHeight - marginH);
+      childData.measuredSize = childImpl.Measure(childW, childH);
+      continue;
+    }
+
     result.visibleChildCount++;
     float weight = GetChildWeight(childImpl);
     if(weight > 0.0f)
@@ -106,7 +123,11 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    float     weight    = GetChildWeight(childImpl);
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      continue;
+    }
+    float weight = GetChildWeight(childImpl);
     if(weight <= 0.0f)
     {
       continue;
@@ -182,8 +203,13 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
 
   auto getImpl = [this](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
-  StackMeasureFirstPassResult first =
-    MeasureStackNonWeightChildren(children, widthConstraint, heightConstraint, mOrientation, getImpl);
+
+  Extents parentPadding = view->GetViewPadding();
+  float   parentWidth   = widthConstraint + static_cast<float>(parentPadding.start + parentPadding.end);
+  float   parentHeight  = heightConstraint + static_cast<float>(parentPadding.top + parentPadding.bottom);
+
+  StackMeasureFirstPassResult first = MeasureStackNonWeightChildren(
+    children, widthConstraint, heightConstraint, parentWidth, parentHeight, mOrientation, getImpl);
 
   float maxCrossAxis = first.maxCrossAxis;
   float mainAxisTotal;
@@ -234,10 +260,27 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
   for(auto& childData : children)
   {
-    ViewImpl&  childImpl = GetImpl(childData.view);
-    Extents    margin    = childImpl.GetViewMargin();
-    float      marginW   = static_cast<float>(margin.start + margin.end);
-    float      marginH   = static_cast<float>(margin.top + margin.bottom);
+    ViewImpl& childImpl = GetImpl(childData.view);
+
+    // Standalone children: place at their RequestedPositionX/Y in the parent's
+    // coordinate space (ignoring parent padding) plus the child's own margin,
+    // and use the size resolved during Measure. They do not advance the stack
+    // cursor and are excluded from spacing.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      Extents    standaloneMargin = childImpl.GetViewMargin();
+      LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
+                                  childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
+                                  childData.measuredSize.width,
+                                  childData.measuredSize.height);
+      childImpl.Arrange(standaloneBounds);
+      childData.arrangedBounds = standaloneBounds;
+      continue;
+    }
+
+    Extents    margin  = childImpl.GetViewMargin();
+    float      marginW = static_cast<float>(margin.start + margin.end);
+    float      marginH = static_cast<float>(margin.top + margin.bottom);
     LayoutRect childBounds;
 
     if(mOrientation == StackOrientation::VERTICAL)

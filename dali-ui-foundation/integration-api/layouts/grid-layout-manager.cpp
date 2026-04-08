@@ -75,7 +75,8 @@ LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
 }
 
 void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
-                                    uint32_t rowCount, uint32_t colCount, const Dali::Vector<GridLength>& rowDefs,
+                                    float parentWidth, float parentHeight, uint32_t rowCount, uint32_t colCount,
+                                    const Dali::Vector<GridLength>&           rowDefs,
                                     const Dali::Vector<GridLength>&           colDefs,
                                     const std::function<ViewImpl&(Ui::View)>& getImpl, std::vector<float>& rowHeights,
                                     std::vector<float>& colWidths)
@@ -83,14 +84,30 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    uint32_t  row       = GetChildRow(childImpl);
-    uint32_t  col       = GetChildColumn(childImpl);
-    uint32_t  rowSpan   = GetChildRowSpan(childImpl);
-    uint32_t  colSpan   = GetChildColumnSpan(childImpl);
-    row                 = std::min(row, rowCount - 1);
-    col                 = std::min(col, colCount - 1);
-    rowSpan             = std::min(rowSpan, rowCount - row);
-    colSpan             = std::min(colSpan, colCount - col);
+
+    // Standalone children are still measured (so MATCH_PARENT / WRAP_CONTENT
+    // resolve), but excluded from grid cell index/auto-size calculations.
+    // They also ignore parent padding, so they are sized against the parent's
+    // full inner size.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      Extents margin         = childImpl.GetViewMargin();
+      float   marginW        = static_cast<float>(margin.start + margin.end);
+      float   marginH        = static_cast<float>(margin.top + margin.bottom);
+      float   childW         = std::max(0.0f, parentWidth - marginW);
+      float   childH         = std::max(0.0f, parentHeight - marginH);
+      childData.measuredSize = childImpl.Measure(childW, childH);
+      continue;
+    }
+
+    uint32_t row     = GetChildRow(childImpl);
+    uint32_t col     = GetChildColumn(childImpl);
+    uint32_t rowSpan = GetChildRowSpan(childImpl);
+    uint32_t colSpan = GetChildColumnSpan(childImpl);
+    row              = std::min(row, rowCount - 1);
+    col              = std::min(col, colCount - 1);
+    rowSpan          = std::min(rowSpan, rowCount - row);
+    colSpan          = std::min(colSpan, colCount - col);
 
     Extents      margin                = childImpl.GetViewMargin();
     float        marginW               = static_cast<float>(margin.start + margin.end);
@@ -213,10 +230,18 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    uint32_t  row       = std::min(GetChildRow(childImpl), rowCount - 1);
-    uint32_t  col       = std::min(GetChildColumn(childImpl), colCount - 1);
-    uint32_t  rowSpan   = std::min(GetChildRowSpan(childImpl), rowCount - row);
-    uint32_t  colSpan   = std::min(GetChildColumnSpan(childImpl), colCount - col);
+
+    // Standalone children are placed in a separate pass after the grid cells
+    // have been arranged; skip them here.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      continue;
+    }
+
+    uint32_t row     = std::min(GetChildRow(childImpl), rowCount - 1);
+    uint32_t col     = std::min(GetChildColumn(childImpl), colCount - 1);
+    uint32_t rowSpan = std::min(GetChildRowSpan(childImpl), rowCount - row);
+    uint32_t colSpan = std::min(GetChildColumnSpan(childImpl), colCount - col);
 
     float      cellX = colPositions[col];
     float      cellY = rowPositions[row];
@@ -370,8 +395,13 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
   auto getImpl = [this](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
-  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount, colCount, mRowDefinitions,
-                                 mColumnDefinitions, getImpl, rowHeights, colWidths);
+
+  Extents parentPadding = view->GetViewPadding();
+  float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+  float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+
+  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, parentWidth, parentHeight, rowCount,
+                                 colCount, mRowDefinitions, mColumnDefinitions, getImpl, rowHeights, colWidths);
 
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
@@ -398,9 +428,14 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   auto getImpl = [this](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
+
+  Extents parentPadding = view->GetViewPadding();
+  float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+  float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+
   // Re-measure children to get fresh auto row/column sizes using actual arrange bounds
-  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount, colCount, mRowDefinitions,
-                                 mColumnDefinitions, getImpl, rowHeights, colWidths);
+  MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, parentWidth, parentHeight, rowCount,
+                                 colCount, mRowDefinitions, mColumnDefinitions, getImpl, rowHeights, colWidths);
 
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
@@ -414,6 +449,25 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, mRowSpacing, mColumnSpacing,
                              getImpl);
+
+  // Arrange standalone children: place at RequestedPositionX/Y plus the
+  // child's own margin in the parent's coordinate space (ignoring parent
+  // padding) using the size resolved during Measure.
+  for(auto& childData : children)
+  {
+    ViewImpl& childImpl = getImpl(childData.view);
+    if(!childImpl.IsLayoutModeStandalone())
+    {
+      continue;
+    }
+    Extents    standaloneMargin = childImpl.GetViewMargin();
+    LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
+                                childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
+                                childData.measuredSize.width,
+                                childData.measuredSize.height);
+    childImpl.Arrange(standaloneBounds);
+    childData.arrangedBounds = standaloneBounds;
+  }
 
   return MeasuredSize(bounds.width, bounds.height);
 }

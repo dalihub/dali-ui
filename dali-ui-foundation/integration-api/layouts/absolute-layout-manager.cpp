@@ -81,9 +81,28 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
 
   for(auto& childData : children)
   {
-    ViewImpl&           childImpl = GetImpl(childData.view);
-    LayoutRect          bounds    = GetChildBounds(childImpl);
-    AbsoluteLayoutFlags flags     = GetChildFlags(childImpl);
+    ViewImpl& childImpl = GetImpl(childData.view);
+
+    // Standalone children: ignore parent padding entirely; measure against
+    // the parent's full inner size minus the child's own margin (so
+    // MATCH_PARENT / WRAP_CONTENT still resolve sensibly). Excluded from
+    // this layout's accumulation.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      Extents parentPadding  = view->GetViewPadding();
+      float   parentWidth    = contentWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+      float   parentHeight   = contentHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+      Extents margin         = childImpl.GetViewMargin();
+      float   marginW        = static_cast<float>(margin.start + margin.end);
+      float   marginH        = static_cast<float>(margin.top + margin.bottom);
+      float   childW         = std::max(0.0f, parentWidth - marginW);
+      float   childH         = std::max(0.0f, parentHeight - marginH);
+      childData.measuredSize = childImpl.Measure(childW, childH);
+      continue;
+    }
+
+    LayoutRect          bounds = GetChildBounds(childImpl);
+    AbsoluteLayoutFlags flags  = GetChildFlags(childImpl);
 
     float x = bounds.x;
     float y = bounds.y;
@@ -157,7 +176,23 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
 
   for(auto& childData : children)
   {
-    ViewImpl&           childImpl       = GetImpl(childData.view);
+    ViewImpl& childImpl = GetImpl(childData.view);
+
+    // Standalone children: place at RequestedPositionX/Y plus the child's
+    // own margin in the parent's coordinate space (ignoring parent padding),
+    // with the size resolved during Measure.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      Extents    standaloneMargin = childImpl.GetViewMargin();
+      LayoutRect childBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
+                             childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
+                             childData.measuredSize.width,
+                             childData.measuredSize.height);
+      childImpl.Arrange(childBounds);
+      childData.arrangedBounds = childBounds;
+      continue;
+    }
+
     LayoutRect          childBoundsSpec = GetChildBounds(childImpl);
     AbsoluteLayoutFlags flags           = GetChildFlags(childImpl);
 

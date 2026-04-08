@@ -121,6 +121,32 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
+### LayoutMode::Standalone
+
+A child View can opt out of its parent's layout flow by calling
+`SetLayoutMode(LayoutMode::Standalone)`. Standalone children remain in the
+parent hierarchy (they are still measured, arranged and rendered) but are
+treated as floating elements rather than as participants in the parent's
+layout algorithm. This is useful for floating overlays, drag previews,
+tooltips and absolute positioning inside any LayoutManager.
+
+A Standalone child:
+
+- Is excluded from the parent's accumulation, spacing, line/cell building,
+  flex-grow / flex-shrink, weight distribution and visible-child counting,
+  in both `ViewImpl::OnMeasure` (plain View parent) and the Stack / Grid /
+  Flex / Absolute layout managers.
+- Is still measured normally so `MATCH_PARENT`, `WRAP_CONTENT` and explicit
+  `RequestedWidth` / `RequestedHeight` all resolve.
+- **Ignores the parent's padding entirely.** Its measured size is the
+  parent's full inner size minus the child's own margin, and its final
+  position is `PositionX` / `PositionY` plus the child's own margin in the
+  parent's coordinate space. Size and position therefore follow the same rule
+  (parent padding ignored, own margin honored), so a Standalone child with
+  `MATCH_PARENT` fills the parent edge to edge regardless of parent padding,
+  and any margin set on the Standalone child shifts it inward consistently in
+  both axes.
+
 ### Invalidation flow
 
 When layout must be recomputed (e.g. size or child change):  

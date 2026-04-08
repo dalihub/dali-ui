@@ -80,7 +80,12 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = getImpl(childData.view);
-    Extents   margin    = childImpl.GetViewMargin();
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      // Standalone children are excluded from flex line building.
+      continue;
+    }
+    Extents margin = childImpl.GetViewMargin();
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
@@ -403,28 +408,40 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children       = GetChildren(view);
-  float availableMain  = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
-  float availableCross = IsMainAxisHorizontal() ? heightConstraint : widthConstraint;
+  auto& children      = GetChildren(view);
+  float availableMain = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
+
+  Extents parentPadding = view->GetViewPadding();
+  float   parentWidth   = widthConstraint + static_cast<float>(parentPadding.start + parentPadding.end);
+  float   parentHeight  = heightConstraint + static_cast<float>(parentPadding.top + parentPadding.bottom);
 
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
 
   for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&        childData             = children[i];
-    ViewImpl&    childImpl             = GetImpl(childData.view);
-    Extents      margin                = childImpl.GetViewMargin();
-    float        marginMain            = IsMainAxisHorizontal() ? static_cast<float>(margin.start + margin.end)
-                                                                : static_cast<float>(margin.top + margin.bottom);
-    float        marginCross           = IsMainAxisHorizontal() ? static_cast<float>(margin.top + margin.bottom)
-                                                                : static_cast<float>(margin.start + margin.end);
-    float        childWidthConstraint  = IsMainAxisHorizontal() ? std::max(0.0f, availableMain - marginMain)
-                                                                : std::max(0.0f, availableCross - marginCross);
-    float        childHeightConstraint = IsMainAxisHorizontal() ? std::max(0.0f, availableCross - marginCross)
-                                                                : std::max(0.0f, availableMain - marginMain);
+    auto&     childData = children[i];
+    ViewImpl& childImpl = GetImpl(childData.view);
+    Extents   margin    = childImpl.GetViewMargin();
+
+    // Standalone children ignore parent padding entirely; they are sized
+    // against the parent's full inner size minus their own margin.
+    float        baseWidth             = childImpl.IsLayoutModeStandalone() ? parentWidth : widthConstraint;
+    float        baseHeight            = childImpl.IsLayoutModeStandalone() ? parentHeight : heightConstraint;
+    float        marginW               = static_cast<float>(margin.start + margin.end);
+    float        marginH               = static_cast<float>(margin.top + margin.bottom);
+    float        childWidthConstraint  = std::max(0.0f, baseWidth - marginW);
+    float        childHeightConstraint = std::max(0.0f, baseHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize             = childSize;
+
+    // Standalone children are still measured (so MATCH_PARENT / WRAP_CONTENT
+    // resolve), but excluded from this layout's line building, flex-grow/shrink,
+    // wrap and accumulation.
+    if(childImpl.IsLayoutModeStandalone())
+    {
+      continue;
+    }
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
@@ -589,6 +606,25 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   for(uint32_t i = 0; i < children.size(); ++i)
   {
     children[i].measuredSize = savedMeasuredSizes[i];
+  }
+
+  // Arrange standalone children: place at RequestedPositionX/Y plus the
+  // child's own margin in the parent's coordinate space (ignoring parent
+  // padding) using the size resolved during Measure.
+  for(auto& childData : children)
+  {
+    ViewImpl& childImpl = GetImpl(childData.view);
+    if(!childImpl.IsLayoutModeStandalone())
+    {
+      continue;
+    }
+    Extents    standaloneMargin = childImpl.GetViewMargin();
+    LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
+                                childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
+                                childData.measuredSize.width,
+                                childData.measuredSize.height);
+    childImpl.Arrange(standaloneBounds);
+    childData.arrangedBounds = standaloneBounds;
   }
 
   return MeasuredSize(bounds.width, bounds.height);

@@ -793,14 +793,25 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     float maxBottom = 0.0f;
     for(auto& childData : mChildren)
     {
-      ViewImpl&    childImpl             = Integration::GetImpl(childData.view);
-      Extents      margin                = childImpl.GetViewMargin();
-      float        marginW               = static_cast<float>(margin.start + margin.end);
-      float        marginH               = static_cast<float>(margin.top + margin.bottom);
-      float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
-      float        childHeightConstraint = std::max(0.0f, contentHeight - marginH);
+      ViewImpl& childImpl = Integration::GetImpl(childData.view);
+      Extents   margin    = childImpl.GetViewMargin();
+      float     marginW   = static_cast<float>(margin.start + margin.end);
+      float     marginH   = static_cast<float>(margin.top + margin.bottom);
+
+      // Standalone children ignore parent padding entirely; their available
+      // space is the parent's full size minus their own margin.
+      float        baseWidth             = childImpl.IsLayoutModeStandalone() ? effectiveWidth : contentWidth;
+      float        baseHeight            = childImpl.IsLayoutModeStandalone() ? effectiveHeight : contentHeight;
+      float        childWidthConstraint  = std::max(0.0f, baseWidth - marginW);
+      float        childHeightConstraint = std::max(0.0f, baseHeight - marginH);
       MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
       childData.measuredSize             = childSize;
+
+      // Standalone children are excluded from the parent's WRAP_CONTENT accumulation.
+      if(childImpl.IsLayoutModeStandalone())
+      {
+        continue;
+      }
 
       float childX = childImpl.GetPositionX();
       float childY = childImpl.GetPositionY();
@@ -895,11 +906,25 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
     for(auto& childData : mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
-      Extents   margin    = childImpl.GetViewMargin();
-      float     childX    = padX + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
-      float     childY    = padY + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
       float     childW    = childData.measuredSize.width;
       float     childH    = childData.measuredSize.height;
+      float     childX;
+      float     childY;
+
+      if(childImpl.IsLayoutModeStandalone())
+      {
+        // Standalone: position is in the parent's coordinate space ignoring
+        // parent padding, but the child's own margin still offsets it.
+        Extents margin = childImpl.GetViewMargin();
+        childX         = static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
+        childY         = static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
+      }
+      else
+      {
+        Extents margin = childImpl.GetViewMargin();
+        childX         = padX + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
+        childY         = padY + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
+      }
 
       LayoutRect childBounds(childX, childY, childW, childH);
       childImpl.Arrange(childBounds);
@@ -1129,6 +1154,25 @@ void ViewImpl::SetViewPadding(const Extents& padding)
 Extents ViewImpl::GetViewPadding() const
 {
   return mPadding;
+}
+
+void ViewImpl::SetLayoutMode(Ui::LayoutMode mode)
+{
+  if(mLayoutMode != mode)
+  {
+    mLayoutMode = mode;
+    InvalidateMeasure();
+  }
+}
+
+Ui::LayoutMode ViewImpl::GetLayoutMode() const
+{
+  return mLayoutMode;
+}
+
+bool ViewImpl::IsLayoutModeStandalone() const
+{
+  return mLayoutMode == Ui::LayoutMode::Standalone;
 }
 
 // =============================================================================

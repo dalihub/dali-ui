@@ -1519,3 +1519,121 @@ int UtcDaliViewBorderlineWithCornerRadiusCombinedP(void)
   DALI_TEST_EQUALS(resolved.g, 1.0f, TEST_LOCATION);
   END_TEST;
 }
+
+// LayoutMode::Standalone tests
+
+int UtcDaliViewSetLayoutModeP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Default), TEST_LOCATION);
+  View& result = view.SetLayoutMode(LayoutMode::Standalone);
+  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Standalone), TEST_LOCATION);
+  view.SetLayoutMode(LayoutMode::Default);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Default), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewStandaloneIgnoresParentPaddingMatchParentP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(150.0f);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetRequestedWidth(MATCH_PARENT);
+  child.SetRequestedHeight(MATCH_PARENT);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 150.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  // Standalone child ignores parent padding entirely:
+  // size fills the parent edge to edge, position is at (0,0).
+  DALI_TEST_EQUALS(child.GetSize().width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewStandaloneAppliesOwnMarginP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(150.0f);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetViewMargin(Extents(5, 5, 7, 7));
+  child.SetRequestedWidth(MATCH_PARENT);
+  child.SetRequestedHeight(MATCH_PARENT);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 150.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  // Parent padding is ignored; own margin shrinks the size and shifts the position.
+  DALI_TEST_EQUALS(child.GetSize().width, 200.0f - 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 150.0f - 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionX(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 7.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewStandaloneUsesPositionP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(150.0f);
+
+  View child = View::New();
+  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetRequestedWidth(40.0f);
+  child.SetRequestedHeight(30.0f);
+  child.SetPositionX(50.0f);
+  child.SetPositionY(60.0f);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 150.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  DALI_TEST_EQUALS(child.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionX(), 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 60.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
+{
+  UiTestApplication application;
+  // WRAP_CONTENT parent should ignore the Standalone child when accumulating size.
+  View parent = View::New();
+  View normal = View::New();
+  normal.SetRequestedWidth(40.0f);
+  normal.SetRequestedHeight(30.0f);
+  parent.Add(normal);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetRequestedWidth(500.0f);
+  standalone.SetRequestedHeight(500.0f);
+  standalone.SetPositionX(1000.0f);
+  standalone.SetPositionY(1000.0f);
+  parent.Add(standalone);
+
+  MeasuredSize size = parent.Measure(800.0f, 800.0f);
+  // Only the normal child contributes to WRAP_CONTENT accumulation.
+  DALI_TEST_EQUALS(size.GetWidth(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 30.0f, TEST_LOCATION);
+  END_TEST;
+}

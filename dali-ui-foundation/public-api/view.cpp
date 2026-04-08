@@ -329,6 +329,17 @@ Extents View::GetViewPadding() const
   return Integration::GetImpl(*this).GetViewPadding();
 }
 
+View& View::SetLayoutMode(LayoutMode mode)
+{
+  Integration::GetImpl(*this).SetLayoutMode(mode);
+  return *this;
+}
+
+LayoutMode View::GetLayoutMode() const
+{
+  return Integration::GetImpl(*this).GetLayoutMode();
+}
+
 bool View::IsFocusable() const
 {
   return Integration::GetImpl(*this).IsFocusable();
