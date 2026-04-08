@@ -285,7 +285,7 @@ Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
     // Apply interaction effect only if the user has not already set one explicitly.
     if(!GetTrait(ReservedTraitId::INTERACTION_EFFECT))
     {
-      Trait defaultEffect = UiConfigManager::Get().GetDefaultInteractionEffect();
+      Trait defaultEffect = UiConfigManager::Get().GetConfig().GetDefaultInteractionEffect();
       if(defaultEffect)
       {
         SetTrait(ReservedTraitId::INTERACTION_EFFECT, defaultEffect);

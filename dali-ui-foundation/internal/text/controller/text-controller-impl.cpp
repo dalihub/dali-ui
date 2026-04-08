@@ -1765,7 +1765,7 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
     auto& uiConfigManager = Integration::UiConfigManager::Get();
     if(uiConfigManager.IsInitialized())
     {
-      mShouldClearFocusOnEscape = uiConfigManager.IsFocusClearOnEscapeEnabled()
+      mShouldClearFocusOnEscape = uiConfigManager.GetConfig().IsFocusClearOnEscapeEnabled()
                                     ? ClearFocusOnEscapeState::ENABLE
                                     : ClearFocusOnEscapeState::DISABLE;
     }

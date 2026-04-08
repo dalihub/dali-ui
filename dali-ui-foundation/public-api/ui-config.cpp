@@ -66,6 +66,16 @@ float UiConfig::GetScalingFactor() const
   return GetImpl(*this).GetScalingFactor();
 }
 
+float UiConfig::GetDpiFactor() const
+{
+  return GetImpl(*this).GetDpiFactor();
+}
+
+float UiConfig::GetScaledDpiFactor() const
+{
+  return GetImpl(*this).GetScaledDpiFactor();
+}
+
 UiConfig& UiConfig::SetDpi(int dpi)
 {
   GetImpl(*this).SetDpi(dpi);

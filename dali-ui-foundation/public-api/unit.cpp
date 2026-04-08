@@ -27,32 +27,32 @@ namespace Ui
 
 float operator"" _spx(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScalingFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScalingFactor();
 }
 
 float operator"" _spx(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScalingFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScalingFactor();
 }
 
 float operator"" _dp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetDpiFactor();
 }
 
 float operator"" _dp(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetDpiFactor();
 }
 
 float operator"" _sdp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScaledDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScaledDpiFactor();
 }
 
 float operator"" _sdp(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetScaledDpiFactor();
+  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScaledDpiFactor();
 }
 
 } // namespace Ui

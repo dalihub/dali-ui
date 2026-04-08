@@ -72,6 +72,26 @@ public:
   bool IsFrozen() const;
 
   /**
+   * @brief Retrieves the DPI factor (dpi / baselineDpi).
+   *
+   * This value is cached when Freeze() is called.
+   *
+   * @pre Must be frozen.
+   * @return The computed DPI factor
+   */
+  float GetDpiFactor() const;
+
+  /**
+   * @brief Retrieves the scaled DPI factor (dpiFactor * scalingFactor).
+   *
+   * This value is cached when Freeze() is called.
+   *
+   * @pre Must be frozen.
+   * @return The computed scaled DPI factor
+   */
+  float GetScaledDpiFactor() const;
+
+  /**
    * @brief Sets the scaling factor.
    *
    * @pre Must not be frozen.
@@ -323,6 +343,8 @@ private:
   KeyClickPolicy        mKeyClickPolicy;
   uint32_t              mMinLongPressKeyCount;
   uint32_t              mTapRecognizerTime;
+  float                 mCachedDpiFactor{1.0f};
+  float                 mCachedScaledDpiFactor{1.0f};
   bool                  mClearFocusOnEscape;
   bool                  mAlwaysShowFocus;
   bool                  mFrozen;

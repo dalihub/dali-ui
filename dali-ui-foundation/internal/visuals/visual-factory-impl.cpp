@@ -506,7 +506,7 @@ Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
     auto&                     uiConfigManager = Integration::UiConfigManager::Get();
     if(uiConfigManager.IsInitialized())
     {
-      customBrokenImageUrlList = Integration::UiConfigManager::Get().GetBrokenImageUrlList();
+      customBrokenImageUrlList = GetImpl(uiConfigManager.GetConfig()).GetBrokenImageUrlList();
     }
 
     // Add default image

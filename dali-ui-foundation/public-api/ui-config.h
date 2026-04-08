@@ -183,6 +183,22 @@ public: // Properties
   float GetScalingFactor() const;
 
   /**
+   * @brief Retrieves the DPI factor (dpi / baselineDpi).
+   *
+   * @pre The config must be frozen (i.e. Apply() must have been called).
+   * @return The computed DPI factor
+   */
+  float GetDpiFactor() const;
+
+  /**
+   * @brief Retrieves the scaled DPI factor (dpiFactor * scalingFactor).
+   *
+   * @pre The config must be frozen (i.e. Apply() must have been called).
+   * @return The computed scaled DPI factor
+   */
+  float GetScaledDpiFactor() const;
+
+  /**
    * @brief Sets the screen DPI used for dp and sdp unit calculations.
    *
    * @pre The config must not be frozen.

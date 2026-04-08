@@ -78,12 +78,24 @@ UiConfigImplPtr UiConfigImpl::New()
 
 void UiConfigImpl::Freeze()
 {
-  mFrozen = true;
+  mFrozen                = true;
+  mCachedDpiFactor       = static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
+  mCachedScaledDpiFactor = mCachedDpiFactor * mScalingFactor;
 }
 
 bool UiConfigImpl::IsFrozen() const
 {
   return mFrozen;
+}
+
+float UiConfigImpl::GetDpiFactor() const
+{
+  return mCachedDpiFactor;
+}
+
+float UiConfigImpl::GetScaledDpiFactor() const
+{
+  return mCachedScaledDpiFactor;
 }
 
 void UiConfigImpl::SetScalingFactor(float scalingFactor)
