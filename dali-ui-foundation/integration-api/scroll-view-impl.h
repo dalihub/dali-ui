@@ -448,15 +448,14 @@ private:
 
   // Pan gesture
   PanGestureDetector mPanGestureDetector; ///< Pan gesture detector
-  Vector2            mTotalDisplacement;  ///< Total displacement
-  float              mPanThreshold;       ///< Pan gesture threshold
-  bool               mIsThresholdMet;     ///< Threshold met flag
-  Vector2            mStartPanPosition;   ///< Start pan position
+  float              mPanThreshold;       ///< Additional displacement threshold (px) after Pan is recognized
   Vector2            mLastPanPosition;    ///< Last pan position
 
   // Intercept touch state
-  bool mIntercepting;    ///< True while this ScrollView owns the touch sequence
-  bool mJustIntercepted; ///< True for one cycle when interception first begins (prevents double HandleEvent feed)
+  bool    mIntercepting;     ///< True while this ScrollView owns the touch sequence
+  bool    mJustIntercepted;  ///< True for one cycle when interception first begins (prevents double HandleEvent feed)
+  bool    mPanRecognized;    ///< True once PanGestureDetector fires STARTED; waiting for post-recognition threshold
+  Vector2 mPanStartPosition; ///< Screen position at Pan STARTED, used to measure post-recognition displacement
 
   // Signals
   Ui::ScrollView::ScrollStartedSignalType  mScrollStartedSignal;

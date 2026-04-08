@@ -92,13 +92,12 @@ ScrollViewImpl::ScrollViewImpl()
   mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mPanGestureDetector(PanGestureDetector::New()),
-  mTotalDisplacement(0.0f, 0.0f),
   mPanThreshold(5.0f),
-  mIsThresholdMet(false),
-  mStartPanPosition(0.0f, 0.0f),
   mLastPanPosition(0.0f, 0.0f),
   mIntercepting(false),
-  mJustIntercepted(false)
+  mJustIntercepted(false),
+  mPanRecognized(false),
+  mPanStartPosition(0.0f, 0.0f)
 {
   // Set initial pan gesture directions for vertical scrolling
   mPanGestureDetector.AddDirection(PanGestureDetector::DIRECTION_VERTICAL);
@@ -632,51 +631,20 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, const TouchEvent& touch)
 
   if(state == PointState::DOWN)
   {
-    // Reset intercept state on every new touch sequence.
-    mIntercepting     = false;
-    mJustIntercepted  = false;
-    mStartPanPosition = touch.GetScreenPosition(0);
+    // Reset all state on every new touch sequence.
+    mIntercepting    = false;
+    mJustIntercepted = false;
+    mPanRecognized   = false;
   }
 
-  // Always feed to the gesture detector so it can build velocity / displacement
+  // Always feed to the gesture detector so it can build velocity/displacement
   // history from the very beginning of the touch sequence.
+  // If Pan is recognized, OnPanGesture(STARTED) fires synchronously here,
+  // setting mPanRecognized = true.  Once the post-recognition threshold is
+  // exceeded in a subsequent CONTINUING event, mIntercepting is set to true
+  // and the touch sequence is stolen from children.
   TouchEvent& nonConstTouch = const_cast<TouchEvent&>(touch);
   mPanGestureDetector.HandleEvent(actor, nonConstTouch);
-
-  if(state == PointState::MOTION && !mIntercepting)
-  {
-    // Check whether the cumulative displacement exceeds the pan threshold for
-    // the configured scroll direction.
-    Vector2 displacement = touch.GetScreenPosition(0) - mStartPanPosition;
-    bool    thresholdMet = false;
-    switch(mScrollDirection)
-    {
-      case ScrollDirection::Vertical:
-        thresholdMet = std::abs(displacement.y) > mPanThreshold;
-        break;
-      case ScrollDirection::Horizontal:
-        thresholdMet = std::abs(displacement.x) > mPanThreshold;
-        break;
-      case ScrollDirection::Both:
-        thresholdMet = displacement.Length() > mPanThreshold;
-        break;
-    }
-
-    if(thresholdMet)
-    {
-      DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnInterceptTouch] threshold met – intercepting touch\n");
-      mIntercepting = true;
-      // Mark that this exact event was already fed above; OnTouch must skip it
-      // to avoid a double HandleEvent call on the same touch point.
-      mJustIntercepted = true;
-      return true; // Steal touch: children receive INTERRUPTED, no further child events.
-    }
-  }
-  else if((state == PointState::UP || state == PointState::INTERRUPTED) && mIntercepting)
-  {
-    // Touch ended while we were intercepting – OnTouch will handle the reset.
-    return true;
-  }
 
   return mIntercepting;
 }
@@ -710,21 +678,69 @@ bool ScrollViewImpl::OnTouch(Actor actor, const TouchEvent& touch)
 
 void ScrollViewImpl::OnPanGesture(Actor actor, const PanGesture& gesture)
 {
-  CancelScrollAnimation();
-
   switch(gesture.GetState())
   {
     case GestureState::STARTED:
-      OnDragStarted(gesture);
+    {
+      // Pan is recognized by the detector. Record the position so we can
+      // measure additional displacement before committing to scroll.
+      mPanRecognized    = true;
+      mPanStartPosition = gesture.GetScreenPosition();
       break;
+    }
     case GestureState::CONTINUING:
-      OnDragging(gesture);
+    {
+      if(!mIntercepting)
+      {
+        // Pan is recognized but we have not yet stolen the touch from children.
+        // Wait until the finger has moved mPanThreshold px further from the
+        // point where Pan was first detected before committing to scroll.
+        Vector2 displacement = gesture.GetScreenPosition() - mPanStartPosition;
+        bool    thresholdMet = false;
+        switch(mScrollDirection)
+        {
+          case ScrollDirection::Vertical:
+            thresholdMet = std::abs(displacement.y) > mPanThreshold;
+            break;
+          case ScrollDirection::Horizontal:
+            thresholdMet = std::abs(displacement.x) > mPanThreshold;
+            break;
+          case ScrollDirection::Both:
+            thresholdMet = displacement.Length() > mPanThreshold;
+            break;
+        }
+
+        if(!thresholdMet)
+        {
+          break;
+        }
+
+        // Threshold met: steal the touch sequence and start scrolling.
+        DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnPanGesture] post-recognition threshold met – intercepting\n");
+        CancelScrollAnimation();
+        mIntercepting    = true;
+        mJustIntercepted = true;
+        OnDragStarted(gesture);
+        OnDragging(gesture);
+      }
+      else
+      {
+        OnDragging(gesture);
+      }
       break;
+    }
     case GestureState::FINISHED:
       // Fall through
     case GestureState::CANCELLED:
-      OnDragFinished(gesture);
+    {
+      if(mIntercepting)
+      {
+        CancelScrollAnimation();
+        OnDragFinished(gesture);
+      }
+      mPanRecognized = false;
       break;
+    }
     default:
       break;
   }
@@ -736,81 +752,35 @@ void ScrollViewImpl::OnDragStarted(const PanGesture& gesture)
                 gesture.GetScreenPosition().x, gesture.GetScreenPosition().y,
                 mScrollPosition.x, mScrollPosition.y);
 
-  mTotalDisplacement = Vector2::ZERO;
-  mIsThresholdMet    = false;
-  mStartPanPosition  = gesture.GetScreenPosition();
-  mLastPanPosition   = mStartPanPosition;
+  mLastPanPosition = gesture.GetScreenPosition();
 }
 
 void ScrollViewImpl::OnDragging(const PanGesture& gesture)
 {
-  Vector2 movement = gesture.GetDisplacement();
+  // Threshold check is done in OnPanGesture before OnDragging is ever called,
+  // so here we unconditionally apply the displacement to the content position.
+  Vector2 delta = AdjustDelta(gesture.GetDisplacement(),
+                              Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
+                                      mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
 
-  if(!mIsThresholdMet)
+  if(delta.LengthSquared() < 0.0001f)
   {
-    mTotalDisplacement += movement;
-
-    switch(mScrollDirection)
-    {
-      case ScrollDirection::Horizontal:
-        mIsThresholdMet = std::abs(mTotalDisplacement.x) > mPanThreshold;
-        break;
-      case ScrollDirection::Vertical:
-        mIsThresholdMet = std::abs(mTotalDisplacement.y) > mPanThreshold;
-        break;
-      case ScrollDirection::Both:
-        mIsThresholdMet =
-          (std::abs(mTotalDisplacement.x) > mPanThreshold) || (std::abs(mTotalDisplacement.y) > mPanThreshold);
-        break;
-    }
-
-    if(!mIsThresholdMet)
-    {
-      return;
-    }
-
-    Vector2 delta = AdjustDelta(mTotalDisplacement, Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
-                                                            mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
-
-    if(delta.LengthSquared() > 0.0001f)
-    {
-      SendScrollStarted();
-      SendDragStarted();
-
-      float newX = mContent.GetProperty<float>(Actor::Property::POSITION_X) + delta.x;
-      float newY = mContent.GetProperty<float>(Actor::Property::POSITION_Y) + delta.y;
-      mContent.SetPositionX(newX);
-      mContent.SetPositionY(newY);
-
-      SendDragging(delta.x, delta.y);
-    }
-
-    mTotalDisplacement = Vector2::ZERO;
+    return;
   }
-  else
+
+  float newX = mContent.GetProperty<float>(Actor::Property::POSITION_X) + delta.x;
+  float newY = mContent.GetProperty<float>(Actor::Property::POSITION_Y) + delta.y;
+  mContent.SetPositionX(newX);
+  mContent.SetPositionY(newY);
+
+  if(!mIsScrolling)
   {
-    Vector2 delta = AdjustDelta(movement, Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
-                                                  mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
-
-    if(delta.LengthSquared() < 0.0001f)
-    {
-      return;
-    }
-
-    float newX = mContent.GetProperty<float>(Actor::Property::POSITION_X) + delta.x;
-    float newY = mContent.GetProperty<float>(Actor::Property::POSITION_Y) + delta.y;
-    mContent.SetPositionX(newX);
-    mContent.SetPositionY(newY);
-
-    if(!mIsScrolling)
-    {
-      SendDragStarted();
-      SendScrollStarted();
-    }
-
-    SendDragging(delta.x, delta.y);
-    mLastPanPosition = gesture.GetScreenPosition();
+    SendScrollStarted();
+    SendDragStarted();
   }
+
+  SendDragging(delta.x, delta.y);
+  mLastPanPosition = gesture.GetScreenPosition();
 }
 
 void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
