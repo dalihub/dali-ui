@@ -389,7 +389,7 @@ public: // Properties
    * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
    *
    * @pre The config must not be frozen.
-   * @param[in] effect A Trait implementing IInteractionEffect, or Trait{} to disable the default
+   * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to disable the default
    * @return Reference to this for method chaining
    */
   UiConfig& SetDefaultInteractionEffect(Trait effect);

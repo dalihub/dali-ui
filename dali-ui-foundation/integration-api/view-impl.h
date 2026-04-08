@@ -522,7 +522,7 @@ public: // State API
    * same id will replace the existing trait after calling OnDetached() on the old one.
    *
    * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT:
-   * - The trait must implement @c IInteractiveTrait.
+   * - The trait must implement @c InteractiveTraitInterface.
    * - It can be set only once for the lifetime of the View; attempting to replace or
    *   remove it is considered a programming error and will trigger an assertion.
    *
@@ -765,7 +765,7 @@ private:
 
 private:
   std::vector<std::pair<TraitId, Trait>> mTraits;
-  IInteractiveTrait*                     mInteractiveTrait;
+  InteractiveTraitInterface*             mInteractiveTrait;
 
   // State
   UiState                mState;

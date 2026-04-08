@@ -42,7 +42,7 @@ namespace Integration
  *
  * Typically implemented by InteractiveViewImpl and its subclasses.
  */
-class DALI_UI_API IInteractiveEventReceiver
+class DALI_UI_API InteractiveEventReceiverInterface
 {
 public:
   /**
@@ -72,7 +72,7 @@ public:
   virtual bool OnLongPressed(View view, const InputEvent& event) = 0;
 
 protected:
-  ~IInteractiveEventReceiver() = default;
+  ~InteractiveEventReceiverInterface() = default;
 };
 
 } // namespace Integration

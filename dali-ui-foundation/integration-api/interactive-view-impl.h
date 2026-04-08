@@ -18,7 +18,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-event-receiver.h>
+#include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
@@ -44,7 +44,7 @@ using InteractiveViewImplPtr = IntrusivePtr<InteractiveViewImpl>;
  *
  * @see Dali::Ui::InteractiveView
  */
-class DALI_UI_API InteractiveViewImpl : public ViewImpl, public IInteractiveEventReceiver
+class DALI_UI_API InteractiveViewImpl : public ViewImpl, public InteractiveEventReceiverInterface
 {
 public:
   /**
@@ -83,7 +83,7 @@ protected:
    */
   ~InteractiveViewImpl() override;
 
-  // --- IInteractiveEventReceiver ---
+  // --- InteractiveEventReceiverInterface ---
 
   /**
    * @brief Called when the view is clicked.

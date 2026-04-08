@@ -42,7 +42,7 @@ namespace Integration
  *
  * SelectableTraitImpl manages the selected state of a View and optionally
  * toggles selection on click by listening to the owner View's InteractiveTrait.
- * Unlike InteractiveTraitImpl, this does not implement IInteractiveTrait and
+ * Unlike InteractiveTraitImpl, this does not implement InteractiveTraitInterface and
  * uses a separate reserved trait slot (SELECTABLE_TRAIT).
  */
 class DALI_UI_API SelectableTraitImpl : public TraitImpl, public ConnectionTracker

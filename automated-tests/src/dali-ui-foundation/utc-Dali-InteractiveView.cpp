@@ -147,7 +147,7 @@ struct LongPressedSignalFunctor
 };
 
 // ============================================================================
-// IInteractiveEventReceiver test subclass
+// InteractiveEventReceiverInterface test subclass
 // ============================================================================
 
 class TestInteractiveViewImpl : public InteractiveViewImpl
@@ -553,7 +553,7 @@ int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
 }
 
 // ============================================================================
-// IInteractiveEventReceiver virtual dispatch tests
+// InteractiveEventReceiverInterface virtual dispatch tests
 // ============================================================================
 
 int UtcDaliInteractiveViewOnClickedVirtualP(void)

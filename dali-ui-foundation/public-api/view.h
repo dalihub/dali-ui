@@ -999,7 +999,7 @@ public: // Trait accessors (non-chaining)
    * If this method is called before AsInteractive(), the explicitly set effect
    * takes priority over the UiConfig default.
    *
-   * @param[in] effect A Trait implementing IInteractionEffect, or Trait{} to remove
+   * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to remove
    * @return Reference to this View for method chaining
    */
   View& SetInteractionEffect(Trait effect);

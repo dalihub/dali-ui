@@ -24,7 +24,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-event-receiver.h>
+#include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
@@ -42,7 +42,7 @@ namespace Integration
 /**
  * @brief Internal implementation of Interaction trait.
  */
-class DALI_UI_API InteractiveTraitImpl : public TraitImpl, public ConnectionTracker, public IInteractiveTrait
+class DALI_UI_API InteractiveTraitImpl : public TraitImpl, public ConnectionTracker, public InteractiveTraitInterface
 {
 public:
   /**
@@ -109,12 +109,12 @@ public: // API
 
 public: // InteractiveTrait
   /**
-   * @copydoc Dali::Ui::Integration::IInteractiveTrait::OnFocusedChanged
+   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnFocusedChanged
    */
   void OnFocusedChanged(View view, bool focused) override;
 
   /**
-   * @copydoc Dali::Ui::Integration::IInteractiveTrait::OnKeyEvent
+   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnKeyEvent
    */
   bool OnKeyEvent(View view, const KeyEvent& event) override;
 
@@ -209,7 +209,7 @@ private:
   bool                                        mClickable : 1;
   bool                                        mClickBlockedByTouch : 1;
   bool                                        mClickBlockedByKey : 1;
-  IInteractiveEventReceiver*                  mEventReceiver{nullptr}; ///< Cached interface pointer (set in OnAttached)
+  InteractiveEventReceiverInterface*          mEventReceiver{nullptr}; ///< Cached interface pointer (set in OnAttached)
 };
 
 } // namespace Integration

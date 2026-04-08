@@ -222,7 +222,7 @@ void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
   view.SetFocusable(true);
   view.SetTouchFocusable(true);
 
-  mEventReceiver = dynamic_cast<IInteractiveEventReceiver*>(&GetImpl(view));
+  mEventReceiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view));
 }
 
 void InteractiveTraitImpl::OnDetached(TraitId id, View& view)

@@ -691,9 +691,9 @@ void ViewImpl::SetTrait(TraitId id, Trait& trait)
       DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
       return;
     }
-    IInteractiveTrait* interactiveTrait = dynamic_cast<IInteractiveTrait*>(&traitImpl);
+    InteractiveTraitInterface* interactiveTrait = dynamic_cast<InteractiveTraitInterface*>(&traitImpl);
     DALI_ASSERT_ALWAYS(interactiveTrait &&
-                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement IInteractiveTrait");
+                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
     mInteractiveTrait = interactiveTrait;
   }
 

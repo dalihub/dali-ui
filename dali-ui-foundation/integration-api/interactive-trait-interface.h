@@ -36,7 +36,7 @@ class View;
  * A single interaction trait is attached to a View via the reserved
  * @c ReservedTraitId::INTERACTION_TRAIT identifier.
  */
-class DALI_UI_API IInteractiveTrait
+class DALI_UI_API InteractiveTraitInterface
 {
 public:
   /**
