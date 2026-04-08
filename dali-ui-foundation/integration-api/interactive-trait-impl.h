@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/dali-signal.h>
@@ -49,6 +50,15 @@ public:
    * @copydoc Dali::Ui::InteractiveTrait::InteractiveTrait
    */
   InteractiveTraitImpl();
+
+  /**
+   * @brief Enable touch-based long press detection.
+   *
+   * By default, the long press gesture detector is not created.
+   * Call this method to enable touch-based long press detection on demand.
+   * This is also called automatically when LongPressedSignal() is accessed.
+   */
+  void EnableLongPressDetection();
 
 public: // Signals
   /**
@@ -202,14 +212,13 @@ private:
   Signal<void(View, const InputEvent&)>       mClickedSignal;
   Signal<bool(View, const InputEvent&)>       mLongPressedSignal;
   KeyClickPolicy                              mKeyClickPolicy;
-  Dali::String                                mPressedExecutionKey;
+  UniquePtr<Dali::String>                     mPressedExecutionKey;
   uint32_t                                    mPressedExecutionKeyCount;
   bool                                        mPseudoDisabled : 1;
   bool                                        mPressed : 1;
   bool                                        mClickable : 1;
   bool                                        mClickBlockedByTouch : 1;
   bool                                        mClickBlockedByKey : 1;
-  InteractiveEventReceiverInterface*          mEventReceiver{nullptr}; ///< Cached interface pointer (set in OnAttached)
 };
 
 } // namespace Integration

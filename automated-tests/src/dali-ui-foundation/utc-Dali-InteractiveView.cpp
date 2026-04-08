@@ -172,6 +172,12 @@ public:
     longPressedCalled    = false;
   }
 
+  void OnInitialize() override
+  {
+    InteractiveViewImpl::OnInitialize();
+    EnableLongPressDetection();
+  }
+
 protected:
   void OnClicked(View view, const InputEvent& event) override
   {

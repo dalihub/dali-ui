@@ -33,7 +33,6 @@ namespace Dali::Ui::Integration
 InteractiveTraitImpl::InteractiveTraitImpl()
 : TraitImpl(),
   mTapGestureDetector(TapGestureDetector::New()),
-  mLongPressGestureDetector(LongPressGestureDetector::New()),
   mPressedChangedSignal(),
   mPseudoDisabledChangedSignal(),
   mKeyClickPolicy(UiConfigManager::Get().GetConfig().GetKeyClickPolicy()),
@@ -48,11 +47,24 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   Dali::Integration::SetTapRecognizerTime(UiConfigManager::Get().GetConfig().GetTapRecognizerTime());
 
   mTapGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnTapInternal);
-  mLongPressGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnLongPressedInternal);
 }
 
 InteractiveTraitImpl::~InteractiveTraitImpl()
 {
+}
+
+void InteractiveTraitImpl::EnableLongPressDetection()
+{
+  if(!mLongPressGestureDetector)
+  {
+    mLongPressGestureDetector = LongPressGestureDetector::New();
+    mLongPressGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnLongPressedInternal);
+    View owner = mOwner.GetHandle();
+    if(owner)
+    {
+      mLongPressGestureDetector.Attach(owner);
+    }
+  }
 }
 
 Signal<void(View, bool, const InputEvent&)>& InteractiveTraitImpl::PressedChangedSignal()
@@ -72,6 +84,7 @@ Signal<void(View, const InputEvent&)>& InteractiveTraitImpl::ClickedSignal()
 
 Signal<bool(View, const InputEvent&)>& InteractiveTraitImpl::LongPressedSignal()
 {
+  EnableLongPressDetection();
   return mLongPressedSignal;
 }
 
@@ -187,7 +200,7 @@ bool InteractiveTraitImpl::HandleKeyPressed(View view, const InputEvent& event)
 bool InteractiveTraitImpl::HandleKeyReleased(View view, const InputEvent& event)
 {
   const Dali::String& keyName = event.GetKeyEvent().GetKeyName();
-  if(mPressedExecutionKey == keyName)
+  if(mPressedExecutionKey && *mPressedExecutionKey == keyName)
   {
     ClearKeyPressedHistory();
     SetPressedInternal(false, event);
@@ -218,11 +231,13 @@ void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
 {
   view.TouchedSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
   mTapGestureDetector.Attach(view);
-  mLongPressGestureDetector.Attach(view);
   view.SetFocusable(true);
   view.SetTouchFocusable(true);
 
-  mEventReceiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view));
+  if(mLongPressGestureDetector)
+  {
+    mLongPressGestureDetector.Attach(view);
+  }
 }
 
 void InteractiveTraitImpl::OnDetached(TraitId id, View& view)
@@ -232,7 +247,6 @@ void InteractiveTraitImpl::OnDetached(TraitId id, View& view)
 
 void InteractiveTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
-  mEventReceiver = nullptr;
 }
 
 bool InteractiveTraitImpl::OnTouch(View view, const TouchEvent& touchEvent)
@@ -278,18 +292,18 @@ void InteractiveTraitImpl::OnTap(View view, const TapGesture& tap)
 
 void InteractiveTraitImpl::OnPressedChanged(View view, const InputEvent& inputEvent)
 {
-  if(mEventReceiver)
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
-    mEventReceiver->OnPressedChanged(view, mPressed, inputEvent);
+    receiver->OnPressedChanged(view, mPressed, inputEvent);
   }
   mPressedChangedSignal.Emit(view, mPressed, inputEvent);
 }
 
 void InteractiveTraitImpl::OnClicked(View view, const InputEvent& inputEvent)
 {
-  if(mEventReceiver)
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
-    mEventReceiver->OnClicked(view, inputEvent);
+    receiver->OnClicked(view, inputEvent);
   }
   mClickedSignal.Emit(view, inputEvent);
 }
@@ -297,9 +311,9 @@ void InteractiveTraitImpl::OnClicked(View view, const InputEvent& inputEvent)
 bool InteractiveTraitImpl::OnLongPressed(View view, const InputEvent& inputEvent)
 {
   bool consumed = false;
-  if(mEventReceiver)
+  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
-    consumed = mEventReceiver->OnLongPressed(view, inputEvent);
+    consumed = receiver->OnLongPressed(view, inputEvent);
   }
   bool signalResult = mLongPressedSignal.Emit(view, inputEvent);
   return consumed || signalResult;
@@ -332,16 +346,23 @@ void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, const LongPressGes
 
 void InteractiveTraitImpl::RecordPressedExecutionKey(const Dali::String& keyName)
 {
-  if(mPressedExecutionKey.Empty() || mPressedExecutionKey == keyName)
+  if(!mPressedExecutionKey || *mPressedExecutionKey == keyName)
   {
-    mPressedExecutionKey = keyName;
+    if(!mPressedExecutionKey)
+    {
+      mPressedExecutionKey = MakeUnique<Dali::String>(keyName);
+    }
+    else
+    {
+      *mPressedExecutionKey = keyName;
+    }
     mPressedExecutionKeyCount++;
   }
 }
 
 void InteractiveTraitImpl::ClearKeyPressedHistory()
 {
-  mPressedExecutionKey.Clear();
+  mPressedExecutionKey.Reset();
   mPressedExecutionKeyCount = 0;
 }
 

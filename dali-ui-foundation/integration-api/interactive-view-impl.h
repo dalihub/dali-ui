@@ -83,6 +83,14 @@ protected:
    */
   ~InteractiveViewImpl() override;
 
+  /**
+   * @brief Enable touch-based long press detection for this view.
+   *
+   * Call this in OnInitialize() of subclasses that need long press events.
+   * Without this call, OnLongPressed() will not be triggered by touch input.
+   */
+  void EnableLongPressDetection();
+
   // --- InteractiveEventReceiverInterface ---
 
   /**

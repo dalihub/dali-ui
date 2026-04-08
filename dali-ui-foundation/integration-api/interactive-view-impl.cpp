@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/interactive-view-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
+
 namespace Dali
 {
 
@@ -49,6 +52,11 @@ InteractiveViewImpl::InteractiveViewImpl()
 
 InteractiveViewImpl::~InteractiveViewImpl()
 {
+}
+
+void InteractiveViewImpl::EnableLongPressDetection()
+{
+  GetImpl(mCachedTrait).EnableLongPressDetection();
 }
 
 void InteractiveViewImpl::OnClicked(Ui::View /*view*/, const Ui::InputEvent& /*event*/)
