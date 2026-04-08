@@ -842,8 +842,8 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 
   mMeasureInvalidated = false;
 
-  const float layoutWidth  = GetRequestedWidth();
-  const float layoutHeight = GetRequestedHeight();
+  const float requestedWidth  = GetRequestedWidth();
+  const float requestedHeight = GetRequestedHeight();
 
   const float minWidth  = GetMinimumWidth();
   const float maxWidth  = GetMaximumWidth();
@@ -868,38 +868,38 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   float measuredHeight = 0.0f;
 
   // Width
-  if(layoutWidth > 0.0f)
+  if(requestedWidth >= 0.0f)
   {
-    measuredWidth = layoutWidth;
+    measuredWidth = std::max(std::min(requestedWidth, maxWidth), minWidth);
   }
-  else if(layoutWidth == MATCH_PARENT)
+  else if(requestedWidth == MATCH_PARENT)
   {
-    measuredWidth = std::max(0.0f, widthConstraint);
+    const float width = std::max(0.0f, widthConstraint);
+    measuredWidth     = std::max(std::min(width, maxWidth), minWidth);
   }
-  else
+  else // WRAP_CONTENT
   {
-    // If widthConstraint is valid, also respect it.
     const float allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
     measuredWidth               = std::max(std::min(naturalWidth, allowedMaxWidth), minWidth);
   }
 
   // Height
-  if(layoutHeight > 0.0f)
+  if(requestedHeight >= 0.0f)
   {
-    measuredHeight = layoutHeight;
+    measuredHeight = std::max(std::min(requestedHeight, maxHeight), minHeight);
   }
-  else if(layoutHeight == MATCH_PARENT)
+  else if(requestedHeight == MATCH_PARENT)
   {
-    measuredHeight = std::max(0.0f, heightConstraint);
+    const float height = std::max(0.0f, heightConstraint);
+    measuredHeight     = std::max(std::min(height, maxHeight), minHeight);
   }
-  else
+  else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
     measuredHeight               = std::max(std::min(naturalHeight, allowedMaxHeight), minHeight);
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);
-
   return MeasuredSize(measuredWidth, measuredHeight);
 }
 
@@ -929,8 +929,12 @@ void InputFieldImpl::InvalidateTextMeasure()
 {
   if(!mMeasureInvalidated)
   {
-    InvalidateMeasure();
-    mMeasureInvalidated = true;
+    // Only invalidate measure when size depends on content.
+    if(GetRequestedWidth() == WRAP_CONTENT || GetRequestedHeight() == WRAP_CONTENT)
+    {
+      InvalidateMeasure();
+      mMeasureInvalidated = true;
+    }
   }
 }
 

@@ -976,6 +976,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   else if(useFitCandidates && wrapContentMeasure)
   {
     mController->SetTextFitArrayEnabled(false);
+
     const Text::FitCandidate* fitCandidate = mController->GetMaxFitCandidate();
     if(fitCandidate)
     {
@@ -984,7 +985,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else
     {
-      DALI_LOG_ERROR("TextFitArray is enabled but no fit candidate exists\n");
+      DALI_LOG_ERROR("TextFit (FitCandidate) is enabled but no candidates are available\n");
     }
   }
 
@@ -994,15 +995,16 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float measuredHeight = 0.0f;
 
   // Width
-  if(requestedWidth > 0.0f)
+  if(requestedWidth >= 0.0f)
   {
-    measuredWidth = requestedWidth;
+    measuredWidth = std::max(std::min(requestedWidth, maxWidth), minWidth);
   }
   else if(requestedWidth == MATCH_PARENT)
   {
-    measuredWidth = std::max(0.0f, widthConstraint);
+    const float width = std::max(0.0f, widthConstraint);
+    measuredWidth     = std::max(std::min(width, maxWidth), minWidth);
   }
-  else
+  else // WRAP_CONTENT
   {
     const float width           = std::max(0.0f, naturalSize.width);
     const float allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
@@ -1010,18 +1012,19 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
 
   // Height
-  if(requestedHeight > 0.0f)
+  if(requestedHeight >= 0.0f)
   {
-    measuredHeight = requestedHeight;
+    measuredHeight = std::max(std::min(requestedHeight, maxHeight), minHeight);
   }
   else if(requestedHeight == MATCH_PARENT)
   {
-    measuredHeight = std::max(0.0f, heightConstraint);
+    const float height = std::max(0.0f, heightConstraint);
+    measuredHeight     = std::max(std::min(height, maxHeight), minHeight);
   }
-  else
+  else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    const float height           = std::max(0.0f, GetHeightForWidth(measuredWidth));
+    const float height           = (measuredWidth > 0.0f) ? std::max(0.0f, GetHeightForWidth(measuredWidth)) : 0.0f;
     measuredHeight               = std::max(std::min(height, allowedMaxHeight), minHeight);
   }
 
