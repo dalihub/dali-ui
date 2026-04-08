@@ -18,6 +18,7 @@ SET(TC_SOURCES
         utc-Dali-UiColorManager.cpp
         utc-Dali-UiThemeManager.cpp
         utc-Dali-InteractiveTrait.cpp
+        utc-Dali-InteractiveView.cpp
         utc-Dali-SelectableTrait.cpp
         utc-Dali-ViewState.cpp
         utc-Dali-ViewStateHandler.cpp

@@ -116,6 +116,10 @@ private:
   }
 };
 
+// Test-only trait IDs (allocated once, reused across tests)
+static const TraitId TEST_TRAIT_ID_0 = TraitId::Alloc();
+static const TraitId TEST_TRAIT_ID_1 = TraitId::Alloc();
+
 } // namespace
 
 void utc_dali_view_startup(void)
@@ -465,9 +469,9 @@ int UtcDaliViewSetTraitP(void)
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
 
-  viewImpl.SetTrait(0, trait);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
 
-  Trait retrievedTrait = viewImpl.GetTrait(0);
+  Trait retrievedTrait = viewImpl.GetTrait(TEST_TRAIT_ID_0);
   DALI_TEST_CHECK(retrievedTrait);
   DALI_TEST_CHECK(retrievedTrait == trait);
   DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
@@ -481,12 +485,12 @@ int UtcDaliViewGetTraitP(void)
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
 
-  viewImpl.SetTrait(0, trait);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
 
-  Trait retrievedTrait = viewImpl.GetTrait(0);
+  Trait retrievedTrait = viewImpl.GetTrait(TEST_TRAIT_ID_0);
   DALI_TEST_CHECK(retrievedTrait);
 
-  Trait nonExistentTrait = viewImpl.GetTrait(1);
+  Trait nonExistentTrait = viewImpl.GetTrait(TEST_TRAIT_ID_1);
   DALI_TEST_CHECK(!nonExistentTrait);
   END_TEST;
 }
@@ -498,15 +502,15 @@ int UtcDaliViewRemoveTraitP(void)
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
 
-  viewImpl.SetTrait(0, trait);
-  DALI_TEST_CHECK(viewImpl.GetTrait(0));
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
+  DALI_TEST_CHECK(viewImpl.GetTrait(TEST_TRAIT_ID_0));
 
-  bool removed = viewImpl.RemoveTrait(0);
+  bool removed = viewImpl.RemoveTrait(TEST_TRAIT_ID_0);
   DALI_TEST_CHECK(removed);
-  DALI_TEST_CHECK(!viewImpl.GetTrait(0));
+  DALI_TEST_CHECK(!viewImpl.GetTrait(TEST_TRAIT_ID_0));
   DALI_TEST_EQUALS(trait.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
 
-  removed = viewImpl.RemoveTrait(0);
+  removed = viewImpl.RemoveTrait(TEST_TRAIT_ID_0);
   DALI_TEST_CHECK(!removed);
   END_TEST;
 }
@@ -519,11 +523,11 @@ int UtcDaliViewReplaceTraitP(void)
   DummyTrait trait1 = DummyTrait::New();
   DummyTrait trait2 = DummyTrait::New();
 
-  viewImpl.SetTrait(0, trait1);
-  DALI_TEST_CHECK(viewImpl.GetTrait(0) == trait1);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait1);
+  DALI_TEST_CHECK(viewImpl.GetTrait(TEST_TRAIT_ID_0) == trait1);
 
-  viewImpl.SetTrait(0, trait2);
-  DALI_TEST_CHECK(viewImpl.GetTrait(0) == trait2);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait2);
+  DALI_TEST_CHECK(viewImpl.GetTrait(TEST_TRAIT_ID_0) == trait2);
   DALI_TEST_EQUALS(trait1.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(trait2.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
   END_TEST;
@@ -536,11 +540,11 @@ int UtcDaliViewSetSameTraitP(void)
   ViewImpl& viewImpl = GetImpl(view);
   DummyTrait trait = DummyTrait::New();
 
-  viewImpl.SetTrait(0, trait);
-  Trait retrieved1 = viewImpl.GetTrait(0);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
+  Trait retrieved1 = viewImpl.GetTrait(TEST_TRAIT_ID_0);
 
-  viewImpl.SetTrait(0, trait);
-  Trait retrieved2 = viewImpl.GetTrait(0);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
+  Trait retrieved2 = viewImpl.GetTrait(TEST_TRAIT_ID_0);
 
   DALI_TEST_CHECK(retrieved1 == retrieved2);
   DALI_TEST_CHECK(retrieved1 == trait);
@@ -558,12 +562,12 @@ int UtcDaliTraitLifecycleP(void)
   DALI_TEST_EQUALS(trait.GetImpl().GetBeforeAttachedCount(), 0, TEST_LOCATION);
   DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 0, TEST_LOCATION);
 
-  viewImpl.SetTrait(0, trait);
+  viewImpl.SetTrait(TEST_TRAIT_ID_0, trait);
 
   DALI_TEST_EQUALS(trait.GetImpl().GetBeforeAttachedCount(), 1, TEST_LOCATION);
   DALI_TEST_EQUALS(trait.GetImpl().GetAttachedCount(), 1, TEST_LOCATION);
 
-  viewImpl.RemoveTrait(0);
+  viewImpl.RemoveTrait(TEST_TRAIT_ID_0);
 
   DALI_TEST_EQUALS(trait.GetImpl().GetDetachedCount(), 1, TEST_LOCATION);
   END_TEST;
