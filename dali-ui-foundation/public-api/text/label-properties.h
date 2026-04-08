@@ -218,6 +218,34 @@ struct LabelPropertyIndex
      */
     FONT_SLANT,
 
+    /**
+     * @brief The font size scale.
+     * @details Name "fontSizeScale", type Property::FLOAT.
+     * @note See also: Label::SetFontSizeScale(), Label::GetFontSizeScale().
+     */
+    FONT_SIZE_SCALE,
+
+    /**
+     * @brief The minimum font size scale.
+     * @details Name "minimumFontSizeScale", type Property::FLOAT.
+     * @note See also: Label::SetMinimumFontSizeScale(), Label::GetMinimumFontSizeScale().
+     */
+    MINIMUM_FONT_SIZE_SCALE,
+
+    /**
+     * @brief The maximum font size scale.
+     * @details Name "maximumFontSizeScale", type Property::FLOAT.
+     * @note See also: Label::SetMaximumFontSizeScale(), Label::GetMaximumFontSizeScale().
+     */
+    MAXIMUM_FONT_SIZE_SCALE,
+
+    /**
+     * @brief Whether the system font size scale is applied.
+     * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
+     * @note See also: Label::SetSystemFontSizeScaleEnabled(), Label::IsSystemFontSizeScaleEnabled().
+     */
+    SYSTEM_FONT_SIZE_SCALE_ENABLED,
+
     ///////////////////////////////////////////////////////////////////////////////
     // Animatable Properties
     ///////////////////////////////////////////////////////////////////////////////

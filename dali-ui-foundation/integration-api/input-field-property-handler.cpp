@@ -148,6 +148,26 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
+    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
+    {
+      impl.SetFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    {
+      impl.SetMinimumFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    {
+      impl.SetMaximumFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    {
+      impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
+      break;
+    }
   }
 }
 
@@ -243,6 +263,26 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::FONT_SLANT:
     {
       value = impl.GetFontSlant();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
+    {
+      value = impl.GetFontSizeScale();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    {
+      value = impl.GetMinimumFontSizeScale();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    {
+      value = impl.GetMaximumFontSizeScale();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    {
+      value = impl.IsSystemFontSizeScaleEnabled();
       break;
     }
   }

@@ -45,6 +45,10 @@ const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE = "layoutDirectionMode";
 const char* const PROPERTY_NAME_FONT_WEIGHT           = "fontWeight";
 const char* const PROPERTY_NAME_FONT_WIDTH            = "fontWidth";
 const char* const PROPERTY_NAME_FONT_SLANT            = "fontSlant";
+const char* const PROPERTY_NAME_FONT_SIZE_SCALE        = "fontSizeScale";
+const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE = "minimumFontSizeScale";
+const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE = "maximumFontSizeScale";
+const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
 
 } // namespace
 
@@ -412,6 +416,90 @@ int UtcDaliInputFieldFontSlant(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldFontSizeScale(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(inputField.GetFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputField.SetFontSizeScale(2.0f);
+  DALI_TEST_EQUALS(inputField.GetFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldMinimumFontSizeScale(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetMinimumFontSizeScale(0.5f);
+  DALI_TEST_EQUALS(inputField.GetMinimumFontSizeScale(), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputField.SetMinimumFontSizeScale(0.8f);
+  DALI_TEST_EQUALS(inputField.GetMinimumFontSizeScale(), 0.8f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldMaximumFontSizeScale(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetMaximumFontSizeScale(2.0f);
+  DALI_TEST_EQUALS(inputField.GetMaximumFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputField.SetMaximumFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(inputField.GetMaximumFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldSystemFontSizeScaleEnabled(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetSystemFontSizeScaleEnabled(true);
+  DALI_TEST_EQUALS(inputField.IsSystemFontSizeScaleEnabled(), true, TEST_LOCATION);
+
+  inputField.SetSystemFontSizeScaleEnabled(false);
+  DALI_TEST_EQUALS(inputField.IsSystemFontSizeScaleEnabled(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldAdjustedFontSizeScale(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Test clamping to minimum
+  inputField.SetFontSizeScale(0.5f);
+  inputField.SetMinimumFontSizeScale(1.0f);
+  inputField.SetMaximumFontSizeScale(2.0f);
+  inputField.SetSystemFontSizeScaleEnabled(false);
+  DALI_TEST_EQUALS(inputField.GetAdjustedFontSizeScale(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test clamping to maximum
+  inputField.SetFontSizeScale(3.0f);
+  DALI_TEST_EQUALS(inputField.GetAdjustedFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test normal range
+  inputField.SetFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(inputField.GetAdjustedFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliInputFieldGetProperty(void)
 {
@@ -437,6 +525,10 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == InputField::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputField::Property::FONT_WIDTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == InputField::Property::FONT_SLANT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE_SCALE) == InputField::Property::FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == InputField::Property::MINIMUM_FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == InputField::Property::MAXIMUM_FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
 
   END_TEST;
 }
@@ -539,6 +631,22 @@ int UtcDaliInputFieldSetProperty(void)
 
   inputField.SetProperty(InputField::Property::FONT_SLANT, "OBLIQUE");
   DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  // FONT_SIZE_SCALE
+  inputField.SetProperty(InputField::Property::FONT_SIZE_SCALE, 1.5f);
+  DALI_TEST_EQUALS(inputField.GetProperty<float>(InputField::Property::FONT_SIZE_SCALE), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // MINIMUM_FONT_SIZE_SCALE
+  inputField.SetProperty(InputField::Property::MINIMUM_FONT_SIZE_SCALE, 0.5f);
+  DALI_TEST_EQUALS(inputField.GetProperty<float>(InputField::Property::MINIMUM_FONT_SIZE_SCALE), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // MAXIMUM_FONT_SIZE_SCALE
+  inputField.SetProperty(InputField::Property::MAXIMUM_FONT_SIZE_SCALE, 2.0f);
+  DALI_TEST_EQUALS(inputField.GetProperty<float>(InputField::Property::MAXIMUM_FONT_SIZE_SCALE), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // SYSTEM_FONT_SIZE_SCALE_ENABLED
+  inputField.SetProperty(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
 
   END_TEST;
 }

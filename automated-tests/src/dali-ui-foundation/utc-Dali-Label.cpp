@@ -52,6 +52,10 @@ const char* const PROPERTY_NAME_TEXT_COLOR             = "textColor";
 const char* const PROPERTY_NAME_FONT_WEIGHT            = "fontWeight";
 const char* const PROPERTY_NAME_FONT_WIDTH             = "fontWidth";
 const char* const PROPERTY_NAME_FONT_SLANT             = "fontSlant";
+const char* const PROPERTY_NAME_FONT_SIZE_SCALE        = "fontSizeScale";
+const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE = "minimumFontSizeScale";
+const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE = "maximumFontSizeScale";
+const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
 
 } // namespace
 
@@ -530,6 +534,90 @@ int UtcDaliLabelFontSlant(void)
   END_TEST;
 }
 
+int UtcDaliLabelFontSizeScale(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(label.GetFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  label.SetFontSizeScale(2.0f);
+  DALI_TEST_EQUALS(label.GetFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMinimumFontSizeScale(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetMinimumFontSizeScale(0.5f);
+  DALI_TEST_EQUALS(label.GetMinimumFontSizeScale(), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  label.SetMinimumFontSizeScale(0.8f);
+  DALI_TEST_EQUALS(label.GetMinimumFontSizeScale(), 0.8f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMaximumFontSizeScale(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetMaximumFontSizeScale(2.0f);
+  DALI_TEST_EQUALS(label.GetMaximumFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  label.SetMaximumFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(label.GetMaximumFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSystemFontSizeScaleEnabled(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetSystemFontSizeScaleEnabled(true);
+  DALI_TEST_EQUALS(label.IsSystemFontSizeScaleEnabled(), true, TEST_LOCATION);
+
+  label.SetSystemFontSizeScaleEnabled(false);
+  DALI_TEST_EQUALS(label.IsSystemFontSizeScaleEnabled(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelAdjustedFontSizeScale(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  // Test clamping to minimum
+  label.SetFontSizeScale(0.5f);
+  label.SetMinimumFontSizeScale(1.0f);
+  label.SetMaximumFontSizeScale(2.0f);
+  label.SetSystemFontSizeScaleEnabled(false);
+  DALI_TEST_EQUALS(label.GetAdjustedFontSizeScale(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test clamping to maximum
+  label.SetFontSizeScale(3.0f);
+  DALI_TEST_EQUALS(label.GetAdjustedFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test normal range
+  label.SetFontSizeScale(1.5f);
+  DALI_TEST_EQUALS(label.GetAdjustedFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliLabelGetProperty(void)
 {
@@ -562,6 +650,10 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == Label::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == Label::Property::FONT_WIDTH);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == Label::Property::FONT_SLANT);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE_SCALE) == Label::Property::FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == Label::Property::MINIMUM_FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == Label::Property::MAXIMUM_FONT_SIZE_SCALE);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
 
   END_TEST;
 }
@@ -704,6 +796,22 @@ int UtcDaliLabelSetProperty(void)
 
   label.SetProperty(Label::Property::FONT_SLANT, "OBLIQUE");
   DALI_TEST_EQUALS(label.GetProperty<Text::FontSlant>(Label::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  // FONT_SIZE_SCALE
+  label.SetProperty(Label::Property::FONT_SIZE_SCALE, 1.5f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::FONT_SIZE_SCALE), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // MINIMUM_FONT_SIZE_SCALE
+  label.SetProperty(Label::Property::MINIMUM_FONT_SIZE_SCALE, 0.5f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::MINIMUM_FONT_SIZE_SCALE), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // MAXIMUM_FONT_SIZE_SCALE
+  label.SetProperty(Label::Property::MAXIMUM_FONT_SIZE_SCALE, 2.0f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::MAXIMUM_FONT_SIZE_SCALE), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // SYSTEM_FONT_SIZE_SCALE_ENABLED
+  label.SetProperty(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
+  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
 
   END_TEST;
 }

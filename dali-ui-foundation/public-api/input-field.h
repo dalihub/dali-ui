@@ -696,7 +696,35 @@ public:
        * @note Return type is Text::FontSlant (Property::INTEGER).
        * @note See also: InputField::SetFontSlant(), InputField::GetFontSlant().
        */
-      FONT_SLANT = Text::InputFieldPropertyIndex::FONT_SLANT
+      FONT_SLANT = Text::InputFieldPropertyIndex::FONT_SLANT,
+
+      /**
+       * @brief The font size scale.
+       * @details Name "fontSizeScale", type Property::FLOAT.
+       * @note See also: InputField::SetFontSizeScale(), InputField::GetFontSizeScale().
+       */
+      FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
+
+      /**
+       * @brief The minimum font size scale.
+       * @details Name "minimumFontSizeScale", type Property::FLOAT.
+       * @note See also: InputField::SetMinimumFontSizeScale(), InputField::GetMinimumFontSizeScale().
+       */
+      MINIMUM_FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
+
+      /**
+       * @brief The maximum font size scale.
+       * @details Name "maximumFontSizeScale", type Property::FLOAT.
+       * @note See also: InputField::SetMaximumFontSizeScale(), InputField::GetMaximumFontSizeScale().
+       */
+      MAXIMUM_FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
+
+      /**
+       * @brief Whether the system font size scale is applied.
+       * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
+       * @note See also: InputField::SetSystemFontSizeScaleEnabled(), InputField::IsSystemFontSizeScaleEnabled().
+       */
+      SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
     };
   };
 

@@ -194,6 +194,26 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       }
       break;
     }
+    case Text::LabelPropertyIndex::FONT_SIZE_SCALE:
+    {
+      impl.SetFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    {
+      impl.SetMinimumFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    {
+      impl.SetMaximumFontSizeScale(value.Get<float>());
+      break;
+    }
+    case Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    {
+      impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
+      break;
+    }
   }
 }
 
@@ -319,6 +339,26 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::FONT_SLANT:
     {
       value = impl.GetFontSlant();
+      break;
+    }
+    case Text::LabelPropertyIndex::FONT_SIZE_SCALE:
+    {
+      value = impl.GetFontSizeScale();
+      break;
+    }
+    case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    {
+      value = impl.GetMinimumFontSizeScale();
+      break;
+    }
+    case Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    {
+      value = impl.GetMaximumFontSizeScale();
+      break;
+    }
+    case Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    {
+      value = impl.IsSystemFontSizeScaleEnabled();
       break;
     }
   }
