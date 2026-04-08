@@ -98,24 +98,10 @@
   */ \
   ChildClass& EnableFocusClearOnEscape(bool enable) { UiConfig::EnableFocusClearOnEscape(enable); return *this; } \
   /** \
-  * @brief Sets whether to always show the keyboard focus indicator. \
+  * @brief Sets the default interaction effect applied to views when AsInteractive() is called. \
   * \
   * @pre The config must not be frozen. \
-  * @param[in] alwaysShow True to always show focus indicator \
+  * @param[in] effect A Trait implementing IInteractionEffect, or Trait{} to disable the default \
   * @return Reference to this for method chaining \
   */ \
-  ChildClass& SetAlwaysShowFocus(bool alwaysShow) { UiConfig::SetAlwaysShowFocus(alwaysShow); return *this; } \
-  /** \
-  * @brief Sets the default font point-size for text elements. \
-  * \
-  * @pre The config must not be frozen. \
-  * @param[in] fontSize The default font size in points \
-  */ \
-  ChildClass& SetDefaultFontSize(float fontSize) { UiConfig::SetDefaultFontSize(fontSize); return *this; } \
-  /** \
-  * @brief Sets the default text color for text elements. \
-  * \
-  * @pre The config must not be frozen. \
-  * @param[in] color The default text color \
-  */ \
-  ChildClass& SetDefaultTextColor(const Vector4& color) { UiConfig::SetDefaultTextColor(color); return *this; }
+  ChildClass& SetDefaultInteractionEffect(Trait effect) { UiConfig::SetDefaultInteractionEffect(effect); return *this; }

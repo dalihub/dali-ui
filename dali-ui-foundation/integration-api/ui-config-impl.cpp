@@ -53,7 +53,8 @@ namespace Integration
 {
 
 UiConfigImpl::UiConfigImpl()
-: mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+: mDefaultInteractionEffect(Trait()),
+  mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
   mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
   mScalingFactor(1.0f),
   mDefaultFontSize(16.0f),
@@ -239,6 +240,17 @@ Vector4 UiConfigImpl::GetDefaultTextColor() const
   return mDefaultTextColor;
 }
 
+void UiConfigImpl::SetDefaultInteractionEffect(Trait effect)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mDefaultInteractionEffect = effect;
+}
+
+Trait UiConfigImpl::GetDefaultInteractionEffect() const
+{
+  return mDefaultInteractionEffect;
+}
+
 void UiConfigImpl::OnApplied()
 {
 }
@@ -246,8 +258,14 @@ void UiConfigImpl::OnApplied()
 void UiConfigImpl::OnApplicationCreated()
 {
   Dali::TextAbstraction::EnableDesignCompatibility();
-  auto handle = KeyboardFocusManager::Get();
-  GetImpl(handle).EnableDefaultAlgorithm(true);
+
+  auto  handle           = KeyboardFocusManager::Get();
+  auto& focusManagerImpl = GetImpl(handle);
+  focusManagerImpl.EnableDefaultAlgorithm(true);
+
+  // TODO Disable default focus ring when default interaction effect applied.
+  // focusManagerImpl.EnableFocusIndicator(false);
+
   Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
 }
 

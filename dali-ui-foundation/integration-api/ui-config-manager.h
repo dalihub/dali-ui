@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
@@ -200,6 +201,14 @@ public:
    * @return A new ThemeLoaderInterface instance. Caller takes ownership.
    */
   ThemeLoaderInterface* CreateThemeLoader();
+
+  /**
+   * @brief Returns the default interaction effect from the current config.
+   *
+   * @pre Initialize() must have been called.
+   * @return The default interaction effect Trait, or an uninitialized Trait if none is set
+   */
+  Trait GetDefaultInteractionEffect() const;
 
   /*
    * @brief Called when the adaptor is ready.

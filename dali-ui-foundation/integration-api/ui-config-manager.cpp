@@ -172,6 +172,12 @@ ThemeLoaderInterface* UiConfigManager::CreateThemeLoader()
   return GetImpl(mConfig).CreateThemeLoader();
 }
 
+Trait UiConfigManager::GetDefaultInteractionEffect() const
+{
+  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
+  return GetImpl(mConfig).GetDefaultInteractionEffect();
+}
+
 void UiConfigManager::OnApplicationCreated()
 {
   // FIXME This method is temporary solution to detect the ready state of the dali-adaptor

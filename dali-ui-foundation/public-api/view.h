@@ -987,6 +987,23 @@ public: // Trait accessors (non-chaining)
    */
   bool IsSelectable() const;
 
+  /**
+   * @brief Sets an interaction effect on this view.
+   *
+   * The effect is applied when the view becomes interactive (via AsInteractive()).
+   * If the view is already interactive, the effect is applied immediately.
+   *
+   * The effect is frozen at set time — subsequent modifications to the original
+   * handle do not affect this view. Pass Trait{} to remove the current effect.
+   *
+   * If this method is called before AsInteractive(), the explicitly set effect
+   * takes priority over the UiConfig default.
+   *
+   * @param[in] effect A Trait implementing IInteractionEffect, or Trait{} to remove
+   * @return Reference to this View for method chaining
+   */
+  View& SetInteractionEffect(Trait effect);
+
 public: // Not intended for application developers
   /// @cond internal
   /**

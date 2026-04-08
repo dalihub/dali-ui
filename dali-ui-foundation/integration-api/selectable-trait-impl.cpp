@@ -169,7 +169,7 @@ void SelectableTraitImpl::DisconnectClickable()
   }
 
   InteractiveTrait clickable = InteractiveTrait::DownCast(
-    GetImpl(owner).GetTrait(TraitId(ReservedTraitId::INTERACTION_TRAIT)));
+    GetImpl(owner).GetTrait(ReservedTraitId::INTERACTION_TRAIT));
   if(clickable)
   {
     clickable.ClickedSignal().Disconnect(this, &SelectableTraitImpl::OnClickedForToggle);

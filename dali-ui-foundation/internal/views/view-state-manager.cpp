@@ -83,7 +83,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
       StateEvent                  stateEvent(stateEventImpl.Get());
 
       // Named state handlers (styling layer)
-      Trait stateHandlerTrait = impl.GetTrait(Integration::TraitId(Integration::ReservedTraitId::STATE_HANDLER_TRAIT));
+      Trait stateHandlerTrait = impl.GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
       if(stateHandlerTrait)
       {
         static_cast<StateHandlerTrait&>(stateHandlerTrait).GetImpl().NotifyStateChanged(n.view, stateEvent);

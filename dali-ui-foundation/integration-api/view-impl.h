@@ -578,6 +578,11 @@ public: // State API
    */
   bool IsSelectable() const;
 
+  /**
+   * @copydoc Ui::View::SetInteractionEffect
+   */
+  void SetInteractionEffect(Trait effect);
+
 public: // Measure / Arrange API
   /**
    * @brief Measures the view with the given constraints.

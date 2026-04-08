@@ -529,6 +529,12 @@ bool View::IsSelectable() const
   return Integration::GetImpl(*this).IsSelectable();
 }
 
+View& View::SetInteractionEffect(Trait effect)
+{
+  Integration::GetImpl(*this).SetInteractionEffect(effect);
+  return *this;
+}
+
 BaseHandle View::GetLayoutParamsTrait(LayoutParamsType type) const
 {
   return Integration::GetImpl(*this).GetLayoutParamsTrait(type);
