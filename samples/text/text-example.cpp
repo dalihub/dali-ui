@@ -14,6 +14,7 @@
  */
 #include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -60,6 +61,8 @@ public:
 private:
   void OnInit(Application& application)
   {
+    DALI_LOG_ERROR("Application OnInit\n");
+
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_WHITE));
 
@@ -362,6 +365,10 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
+  DALI_LOG_ERROR("DaliUiFoundationPreInitialize START\n");
+  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
+  DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
+
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
 

@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -73,39 +74,39 @@ BaseHandle Create()
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(LabelImpl, ViewImpl, Create)
 
-LABEL_PROPERTY_REGISTRATION("text",                 STRING,  TEXT                 )
-LABEL_PROPERTY_REGISTRATION("fontFamily",           STRING,  FONT_FAMILY          )
-LABEL_PROPERTY_REGISTRATION("fontSize",             FLOAT,   FONT_SIZE            )
-LABEL_PROPERTY_REGISTRATION("multiLine",            BOOLEAN, MULTI_LINE           )
-LABEL_PROPERTY_REGISTRATION("lineWrapMode",         INTEGER, LINE_WRAP_MODE       )
-LABEL_PROPERTY_REGISTRATION("horizontalAlignment",  INTEGER, HORIZONTAL_ALIGNMENT )
-LABEL_PROPERTY_REGISTRATION("verticalAlignment",    INTEGER, VERTICAL_ALIGNMENT   )
-LABEL_PROPERTY_REGISTRATION("overflowMode",         INTEGER, OVERFLOW_MODE        )
-LABEL_PROPERTY_REGISTRATION("lineHeight",           FLOAT,   LINE_HEIGHT          )
-LABEL_PROPERTY_REGISTRATION("lineHeightMode",       INTEGER, LINE_HEIGHT_MODE     )
-LABEL_PROPERTY_REGISTRATION("layoutDirectionMode",  INTEGER, LAYOUT_DIRECTION_MODE)
-LABEL_PROPERTY_REGISTRATION("markupEnabled",        BOOLEAN, MARKUP_ENABLED       )
-LABEL_PROPERTY_REGISTRATION("anchorColor",          VECTOR4, ANCHOR_COLOR         )
-LABEL_PROPERTY_REGISTRATION("anchorClickedColor",   VECTOR4, ANCHOR_CLICKED_COLOR )
-LABEL_PROPERTY_REGISTRATION("marqueeSpeed",         INTEGER, MARQUEE_SPEED        )
-LABEL_PROPERTY_REGISTRATION("marqueeLoopCount",     INTEGER, MARQUEE_LOOP_COUNT   )
-LABEL_PROPERTY_REGISTRATION("marqueeLoopDelay",     FLOAT,   MARQUEE_LOOP_DELAY   )
-LABEL_PROPERTY_REGISTRATION("marqueeGap",           INTEGER, MARQUEE_GAP          )
-LABEL_PROPERTY_REGISTRATION("marqueeStopMode",      INTEGER, MARQUEE_STOP_MODE    )
-LABEL_PROPERTY_REGISTRATION("marqueeOrientation",   INTEGER, MARQUEE_ORIENTATION  )
-LABEL_PROPERTY_REGISTRATION("fontWeight",           INTEGER, FONT_WEIGHT          )
-LABEL_PROPERTY_REGISTRATION("fontWidth",            INTEGER, FONT_WIDTH           )
-LABEL_PROPERTY_REGISTRATION("fontSlant",            INTEGER, FONT_SLANT           )
-LABEL_PROPERTY_REGISTRATION("fontSizeScale",        FLOAT,   FONT_SIZE_SCALE      )
-LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale", FLOAT,   MINIMUM_FONT_SIZE_SCALE)
-LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale", FLOAT,   MAXIMUM_FONT_SIZE_SCALE)
+LABEL_PROPERTY_REGISTRATION("text",                       STRING,  TEXT                          )
+LABEL_PROPERTY_REGISTRATION("fontFamily",                 STRING,  FONT_FAMILY                   )
+LABEL_PROPERTY_REGISTRATION("fontSize",                   FLOAT,   FONT_SIZE                     )
+LABEL_PROPERTY_REGISTRATION("multiLine",                  BOOLEAN, MULTI_LINE                    )
+LABEL_PROPERTY_REGISTRATION("lineWrapMode",               INTEGER, LINE_WRAP_MODE                )
+LABEL_PROPERTY_REGISTRATION("horizontalAlignment",        INTEGER, HORIZONTAL_ALIGNMENT          )
+LABEL_PROPERTY_REGISTRATION("verticalAlignment",          INTEGER, VERTICAL_ALIGNMENT            )
+LABEL_PROPERTY_REGISTRATION("overflowMode",               INTEGER, OVERFLOW_MODE                 )
+LABEL_PROPERTY_REGISTRATION("lineHeight",                 FLOAT,   LINE_HEIGHT                   )
+LABEL_PROPERTY_REGISTRATION("lineHeightMode",             INTEGER, LINE_HEIGHT_MODE              )
+LABEL_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECTION_MODE         )
+LABEL_PROPERTY_REGISTRATION("markupEnabled",              BOOLEAN, MARKUP_ENABLED                )
+LABEL_PROPERTY_REGISTRATION("anchorColor",                VECTOR4, ANCHOR_COLOR                  )
+LABEL_PROPERTY_REGISTRATION("anchorClickedColor",         VECTOR4, ANCHOR_CLICKED_COLOR          )
+LABEL_PROPERTY_REGISTRATION("marqueeSpeed",               INTEGER, MARQUEE_SPEED                 )
+LABEL_PROPERTY_REGISTRATION("marqueeLoopCount",           INTEGER, MARQUEE_LOOP_COUNT            )
+LABEL_PROPERTY_REGISTRATION("marqueeLoopDelay",           FLOAT,   MARQUEE_LOOP_DELAY            )
+LABEL_PROPERTY_REGISTRATION("marqueeGap",                 INTEGER, MARQUEE_GAP                   )
+LABEL_PROPERTY_REGISTRATION("marqueeStopMode",            INTEGER, MARQUEE_STOP_MODE             )
+LABEL_PROPERTY_REGISTRATION("marqueeOrientation",         INTEGER, MARQUEE_ORIENTATION           )
+LABEL_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
+LABEL_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
+LABEL_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
+LABEL_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCALE               )
+LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
+LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED)
 
-LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",      Color::BLACK,     TEXT_COLOR       )
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",   TEXT_COLOR_RED,   TEXT_COLOR,     0)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen", TEXT_COLOR_GREEN, TEXT_COLOR,     1)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",  TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha", TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
+LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",      Color::BLACK,     TEXT_COLOR   )
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",   TEXT_COLOR_RED,   TEXT_COLOR, 0)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen", TEXT_COLOR_GREEN, TEXT_COLOR, 1)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",  TEXT_COLOR_BLUE,  TEXT_COLOR, 2)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha", TEXT_COLOR_ALPHA, TEXT_COLOR, 3)
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -723,6 +724,25 @@ Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
   return mAnchorClickedSignal;
 }
 
+// =============================================================================
+// Config
+// =============================================================================
+void LabelImpl::ApplyInitialConfig()
+{
+  // UiConfigManager may not be initialized during preload phase
+  if(!UiConfigManager::Get().IsInitialized())
+  {
+    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
+    return;
+  }
+
+  const auto& config = UiConfigManager::Get().GetConfig();
+  SetFontSize(config.GetDefaultFontSize());
+}
+
+// =============================================================================
+// ViewImpl
+// =============================================================================
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
@@ -770,6 +790,8 @@ void LabelImpl::OnInitialize()
   engine.SetCursorWidth(0u);
 
   mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
+
+  ApplyInitialConfig();
 }
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)

@@ -29,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -74,26 +75,26 @@ BaseHandle Create()
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(InputFieldImpl, ViewImpl, Create)
 
-INPUT_FIELD_PROPERTY_REGISTRATION("text",                 STRING,  TEXT                 )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontFamily",           STRING,  FONT_FAMILY          )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",             FLOAT,   FONT_SIZE            )
-INPUT_FIELD_PROPERTY_REGISTRATION("textColor",            VECTOR4, TEXT_COLOR           )
-INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",  INTEGER, HORIZONTAL_ALIGNMENT )
-INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",    INTEGER, VERTICAL_ALIGNMENT   )
-INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",         INTEGER, OVERFLOW_MODE        )
-INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",          STRING,  PLACEHOLDER          )
-INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",     VECTOR4, PLACEHOLDER_COLOR    )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",          INTEGER, CURSOR_WIDTH         )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",          VECTOR4, CURSOR_COLOR         )
-INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",       VECTOR4, SELECTION_COLOR      )
-INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",        INTEGER, MAXIMUM_LENGTH       )
-INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",  INTEGER, LAYOUT_DIRECTION_MODE)
-INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",           INTEGER, FONT_WEIGHT          )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",            INTEGER, FONT_WIDTH           )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",            INTEGER, FONT_SLANT           )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",        FLOAT,   FONT_SIZE_SCALE      )
-INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale", FLOAT,   MINIMUM_FONT_SIZE_SCALE)
-INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale", FLOAT,   MAXIMUM_FONT_SIZE_SCALE)
+INPUT_FIELD_PROPERTY_REGISTRATION("text",                       STRING,  TEXT                          )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontFamily",                 STRING,  FONT_FAMILY                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",                   FLOAT,   FONT_SIZE                     )
+INPUT_FIELD_PROPERTY_REGISTRATION("textColor",                  VECTOR4, TEXT_COLOR                    )
+INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",        INTEGER, HORIZONTAL_ALIGNMENT          )
+INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",          INTEGER, VERTICAL_ALIGNMENT            )
+INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",               INTEGER, OVERFLOW_MODE                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",                STRING,  PLACEHOLDER                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",           VECTOR4, PLACEHOLDER_COLOR             )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",                INTEGER, CURSOR_WIDTH                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",                VECTOR4, CURSOR_COLOR                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",             VECTOR4, SELECTION_COLOR               )
+INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",              INTEGER, MAXIMUM_LENGTH                )
+INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECTION_MODE         )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCALE               )
+INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
+INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
 INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED)
 
 DALI_TYPE_REGISTRATION_END()
@@ -519,6 +520,25 @@ Signal<void(View)>& InputFieldImpl::MaximumLengthReachedSignal()
   return mMaxLengthReachedSignal;
 }
 
+// =============================================================================
+// Config
+// =============================================================================
+void InputFieldImpl::ApplyInitialConfig()
+{
+  // UiConfigManager may not be initialized during preload phase
+  if(!UiConfigManager::Get().IsInitialized())
+  {
+    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
+    return;
+  }
+
+  const auto& config = UiConfigManager::Get().GetConfig();
+  SetFontSize(config.GetDefaultFontSize());
+}
+
+// =============================================================================
+// ViewImpl
+// =============================================================================
 void InputFieldImpl::OnInitialize()
 {
   // Call base class initialization
@@ -598,6 +618,8 @@ void InputFieldImpl::OnInitialize()
   // TODO: Re-enable when grab handle and popup support are fully implemented.
   mController->SetGrabHandleEnabled(false);
   mController->SetGrabHandlePopupEnabled(false);
+
+  ApplyInitialConfig();
 }
 
 void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)

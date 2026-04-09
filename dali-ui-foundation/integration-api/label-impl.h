@@ -458,6 +458,12 @@ protected:
    */
   LabelImpl();
 
+public: // Config
+  /**
+   * @brief Applies default values from UiConfigManager if initialized.
+   */
+  void ApplyInitialConfig();
+
 public: // From ViewImpl
   /**
    * @copydoc Integration::ViewImpl::OnInitialize
