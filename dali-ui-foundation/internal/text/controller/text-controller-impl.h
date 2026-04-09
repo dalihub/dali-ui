@@ -212,9 +212,6 @@ struct FontDefaults
     fontDescriptionGetted(false),
     mFontDescription()
   {
-    // Initially use the default platform font
-    TextAbstraction::FontClient fontClient = TextAbstraction::FontClient::Get();
-    fontClient.GetDefaultPlatformFontDescription(mFontDescription);
   }
 
   FontId GetFontId(TextAbstraction::FontClient& fontClient, float fontPointSize)
