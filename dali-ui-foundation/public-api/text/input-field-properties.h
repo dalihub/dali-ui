@@ -33,7 +33,7 @@ struct InputFieldPropertyIndex
    */
   enum PropertyRange
   {
-    PROPERTY_START_INDEX = PROPERTY_REGISTRATION_START_INDEX,
+    PROPERTY_START_INDEX = Ui::View::VIEW_PROPERTY_END_INDEX + 1,
     PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices.
   };
 
