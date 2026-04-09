@@ -29,6 +29,8 @@
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
+#include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
@@ -708,6 +710,16 @@ View::KeyEventSignalType& View::KeyEventSignal()
 View::FocusChangedSignalType& View::FocusChangedSignal()
 {
   return Integration::GetImpl(*this).FocusChangedSignal();
+}
+
+ViewAnimationBridge View::Animate(Animation animation)
+{
+  return ViewAnimationBridge(animation, *this);
+}
+
+ViewAnimationSpec View::NewAnimationSpec()
+{
+  return ViewAnimationSpec::New();
 }
 
 } // namespace Ui

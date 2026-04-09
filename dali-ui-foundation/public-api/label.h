@@ -44,6 +44,11 @@ namespace Ui
 {
 
 // Forward declarations
+class LabelAnimationBridge;
+class LabelAnimationSpec;
+
+// @ANIMATION_CONFIG(Label, View)
+
 namespace Integration
 {
 class LabelImpl;
@@ -256,6 +261,7 @@ public: // Setters for chaining
    */
   Text::LineWrapMode GetLineWrapMode() const;
 
+  // @ANIMATABLE(Label::Property::TEXT_COLOR, UiColor)
   /**
    * @brief Sets the color of the text.
    *
@@ -1055,6 +1061,37 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API Label(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+public: // Animation
+  /**
+   * @brief Creates a LabelAnimationBridge for this Label.
+   *
+   * @code
+   *   auto anim = Animation::New();
+   *   label.Animate(anim)
+   *     .TextColor(UiColor::PRIMARY, 500_ms)
+   *     .Opacity(0.0f, 300_ms);
+   *   anim.Play();
+   * @endcode
+   *
+   * @param[in] animation The Animation to apply to
+   * @return A LabelAnimationBridge
+   */
+  LabelAnimationBridge Animate(Animation animation);
+
+  /**
+   * @brief Creates a new LabelAnimationSpec.
+   *
+   * @code
+   *   auto spec = Label::NewAnimationSpec()
+   *     .TextColor(UiColor::PRIMARY, 500_ms)
+   *     .Opacity(1.0f, 300_ms);
+   *   spec.ApplyTo(anim, label);
+   * @endcode
+   *
+   * @return A new LabelAnimationSpec
+   */
+  static LabelAnimationSpec NewAnimationSpec();
 
 public:
   DALI_UI_CHAIN_VIEW_METHODS(Label)

@@ -20,6 +20,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/label.h>
 
 namespace Dali
@@ -656,6 +658,16 @@ Signal<void(View, float, float)>& Label::AsyncNaturalSizeComputedSignal()
 Signal<void(View, float, float)>& Label::AsyncHeightForWidthComputedSignal()
 {
   return GetImpl(*this).AsyncHeightForWidthComputedSignal();
+}
+
+LabelAnimationBridge Label::Animate(Animation animation)
+{
+  return LabelAnimationBridge(animation, *this);
+}
+
+LabelAnimationSpec Label::NewAnimationSpec()
+{
+  return LabelAnimationSpec::New();
 }
 
 } // namespace Ui

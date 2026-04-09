@@ -60,6 +60,11 @@ IF (NOT GBS_BUILD)
   DALI_UI_AUTOGEN_CHAINING_MACRO(${PROJECT_LIB_NAME} "${FOUNDATION_ROOT_SRC_DIR}/public-api")
 ENDIF()
 
+# Run animation autogen script
+IF (NOT GBS_BUILD)
+  DALI_UI_AUTOGEN_ANIMATION_SPEC(${PROJECT_LIB_NAME} "${FOUNDATION_ROOT_SRC_DIR}/public-api")
+ENDIF()
+
 
 # ---------------------------------------------------------
 # 4. Include directory configuration (add third-party and internal APIs, remove toolkit)

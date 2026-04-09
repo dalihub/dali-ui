@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor.h>
+#include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/common/dali-string.h>
@@ -64,6 +65,13 @@ class Base;
 
 // Forward declarations
 class UiColor;
+class ViewAnimationBridge;
+class ViewAnimationSpec;
+
+// @ANIMATION_CONFIG(View)
+// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+// @ANIMATABLE_MANUAL(SizeWidth, float)
+// @ANIMATABLE_MANUAL(SizeHeight, float)
 
 namespace Integration
 {
@@ -247,6 +255,7 @@ public: // Properties
    */
   float GetScaleX() const;
 
+  // @ANIMATABLE(Actor::Property::SCALE_X, float)
   /**
    * @brief Sets the x scale factor applied to the view.
    *
@@ -261,6 +270,7 @@ public: // Properties
    */
   float GetScaleY() const;
 
+  // @ANIMATABLE(Actor::Property::SCALE_Y, float)
   /**
    * @brief Sets the y scale factor applied to the view.
    *
@@ -298,6 +308,7 @@ public: // Properties
    */
   float GetOpacity() const;
 
+  // @ANIMATABLE(Actor::Property::OPACITY, float)
   /**
    * @brief Sets the opacity of the view.
    *
@@ -316,6 +327,7 @@ public: // Properties
    */
   MeasuredSize GetSize() const;
 
+  // @ANIMATABLE(Actor::Property::POSITION_X, float)
   /**
    * @brief Sets the X position of the View.
    *
@@ -330,6 +342,7 @@ public: // Properties
    */
   float GetPositionX() const;
 
+  // @ANIMATABLE(Actor::Property::POSITION_Y, float)
   /**
    * @brief Sets the Y position of the View.
    *
@@ -656,6 +669,7 @@ public: // Properties
    */
   View& SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
 
+  // @ANIMATABLE(View::Property::CORNER_RADIUS, Vector4)
   /**
    * @brief Sets corner radii from a Vector4.
    *
@@ -715,6 +729,7 @@ public: // Properties
    */
   View& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
 
+  // @ANIMATABLE(View::Property::CORNER_SQUARENESS, Vector4)
   /**
    * @brief Sets corner squareness from a Vector4.
    *
@@ -729,6 +744,7 @@ public: // Properties
    */
   float GetBorderlineWidth() const;
 
+  // @ANIMATABLE(View::Property::BORDERLINE_WIDTH, float)
   /**
    * @brief Sets the borderline width of the view.
    *
@@ -743,6 +759,7 @@ public: // Properties
    */
   UiColor GetBorderlineColor();
 
+  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
   /**
    * @brief Sets the borderline color of the view.
    *
@@ -761,6 +778,7 @@ public: // Properties
    */
   float GetBorderlineOffset() const;
 
+  // @ANIMATABLE(View::Property::BORDERLINE_OFFSET, float)
   /**
    * @brief Sets the borderline offset of the view.
    *
@@ -1660,6 +1678,37 @@ public:
    * @pre The View has been initialized.
    */
   FocusChangedSignalType& FocusChangedSignal();
+
+public: // Animation
+  /**
+   * @brief Creates a ViewAnimationBridge for this View.
+   *
+   * Returns a lightweight, stack-allocated proxy that applies animations
+   * directly to the given Animation for this View.
+   *
+   * @code
+   *   auto anim = Animation::New();
+   *   view.Animate(anim).Opacity(0.5f, 300_ms);
+   *   anim.Play();
+   * @endcode
+   *
+   * @param[in] animation The Animation to apply to
+   * @return A ViewAnimationBridge
+   */
+  ViewAnimationBridge Animate(Animation animation);
+
+  /**
+   * @brief Creates a new ViewAnimationSpec.
+   *
+   * @code
+   *   auto spec = View::NewAnimationSpec()
+   *     .Opacity(1.0f, 300_ms);
+   *   spec.ApplyTo(anim, view);
+   * @endcode
+   *
+   * @return A new ViewAnimationSpec
+   */
+  static ViewAnimationSpec NewAnimationSpec();
 
 public: // Templates for Deriving Classes
   /**

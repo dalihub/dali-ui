@@ -1,0 +1,81 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/animation/alpha-function.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/base-handle.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali-ui-foundation/public-api/ui-color.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+class {{VIEW_CLASS}};
+
+namespace Internal DALI_INTERNAL
+{
+class {{IMPL_CLASS}};
+}
+
+/**
+ * @brief Defines a reusable, typed animation specification for {{VIEW_CLASS}} properties.
+ *
+ * @code
+ *   auto spec = {{VIEW_CLASS}}::NewAnimationSpec()
+ *     .Opacity(1.0f, 300_ms);
+ *   spec.ApplyTo(anim, view);
+ * @endcode
+ */
+class DALI_UI_API {{SPEC_CLASS}} : public BaseHandle
+{
+public:
+  {{SPEC_CLASS}}();
+  static {{SPEC_CLASS}} New();
+
+  {{SPEC_CLASS}}(const {{SPEC_CLASS}}& other);
+  {{SPEC_CLASS}}({{SPEC_CLASS}}&& rhs) noexcept;
+  ~{{SPEC_CLASS}}();
+  {{SPEC_CLASS}}& operator=(const {{SPEC_CLASS}}& other);
+  {{SPEC_CLASS}}& operator=({{SPEC_CLASS}}&& rhs) noexcept;
+
+{{METHODS}}
+
+  /**
+   * @brief Applies all stored entries to the given Animation and {{VIEW_CLASS}}.
+   *
+   * @param[in] animation The Animation to apply to
+   * @param[in] view The target {{VIEW_CLASS}}
+   */
+  void ApplyTo(Animation animation, {{VIEW_CLASS}} view) const;
+
+public: // Not intended for application developers
+  /// @cond internal
+  DALI_INTERNAL explicit {{SPEC_CLASS}}(Internal::{{IMPL_CLASS}}* impl);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali

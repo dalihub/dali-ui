@@ -149,7 +149,7 @@ private:
             .SetTextBackgroundColor(UiColor(0x00FFFF))
             .As(mInputFieldTextBackgroundColor),
         }));
-    
+
 
     PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
     PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
@@ -186,8 +186,8 @@ private:
   {
     label.SetProperty(Label::Property::TEXT_COLOR, startColor);
 
-    Animation animation = Animation::New(1.0f);
-    animation.AnimateTo(Property(label, Label::Property::TEXT_COLOR), endColor, AlphaFunction::SIN);
+    Animation animation = Animation::New();
+    label.Animate(animation).TextColor(endColor, 1000_ms, AlphaFunction::SIN);
     animation.SetLoopCount(0);
     animation.Play();
   }

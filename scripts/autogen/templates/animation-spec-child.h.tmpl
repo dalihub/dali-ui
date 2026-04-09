@@ -1,0 +1,63 @@
+#pragma once
+
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+// INTERNAL INCLUDES
+{{PARENT_INCLUDE}}
+
+namespace Dali
+{
+namespace Ui
+{
+
+class {{VIEW_CLASS}};
+
+namespace Internal DALI_INTERNAL
+{
+class {{IMPL_CLASS}};
+}
+
+/**
+ * @brief Defines a reusable, typed animation specification for {{VIEW_CLASS}} properties.
+ *
+ * {{SPEC_CLASS}} extends {{PARENT_SPEC}} with {{VIEW_CLASS}}-specific
+ * animation properties. All parent properties are also available
+ * with proper return type for fluent chaining.
+ *
+ * @code
+ *   auto spec = {{VIEW_CLASS}}::NewAnimationSpec()
+ *     .Opacity(1.0f, 300_ms);
+ *   spec.ApplyTo(anim, {{VIEW_INSTANCE}});
+ * @endcode
+ */
+class DALI_UI_API {{SPEC_CLASS}} : public {{PARENT_SPEC}}
+{
+public:
+  {{SPEC_CLASS}}();
+  static {{SPEC_CLASS}} New();
+
+{{METHODS}}
+
+public: // Not intended for application developers
+  /// @cond internal
+  DALI_INTERNAL explicit {{SPEC_CLASS}}(Internal::{{IMPL_CLASS}}* impl);
+  /// @endcond
+};
+
+} // namespace Ui
+} // namespace Dali
