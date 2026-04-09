@@ -1,5 +1,8 @@
 find_package(Python3 REQUIRED)
 
+# Path to the code generator script (co-located with this cmake file)
+set(DALI_UI_CHAIN_GENERATOR "${CMAKE_CURRENT_LIST_DIR}/gen-chaining-macro.py")
+
 # @brief Registers headers for method chaining autogen.
 # @param TARGET_NAME The name of the target (e.g., dali-ui-components)
 # @param HEADER_DIR The root directory to scan headers from
@@ -18,9 +21,9 @@ function(dali_ui_autogen_chaining_macro TARGET_NAME HEADER_DIR)
     add_custom_command(
       OUTPUT "${STAMP_FILE}"
       COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/stamps"
-      COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/../../scripts/gen-chaining-macro.py" "${HEADER}"
+      COMMAND Python3::Interpreter "${DALI_UI_CHAIN_GENERATOR}" "${HEADER}"
       COMMAND ${CMAKE_COMMAND} -E touch "${STAMP_FILE}"
-      DEPENDS "${HEADER}" "${CMAKE_SOURCE_DIR}/../../scripts/gen-chaining-macro.py"
+      DEPENDS "${HEADER}" "${DALI_UI_CHAIN_GENERATOR}"
       COMMENT "Chaining Sync: ${HEADER_NAME} for ${TARGET_NAME}"
       VERBATIM
     )

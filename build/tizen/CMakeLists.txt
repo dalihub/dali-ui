@@ -173,7 +173,7 @@ ENDIF( NOT ${ENABLE_EXPORTALL} )
 
 # Include method chaining script
 IF (NOT GBS_BUILD)
-  INCLUDE(autogen.cmake)
+  INCLUDE(${ROOT_SRC_DIR}/scripts/autogen/autogen.cmake)
 ENDIF()
 
 # Add libraries
