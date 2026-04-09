@@ -32,6 +32,7 @@ SET(TC_SOURCES
         utc-Dali-LayoutController.cpp
         utc-Dali-LayoutTypes.cpp
         utc-Dali-FontVariation.cpp
+        utc-Dali-WebView.cpp
 )
 
 LIST(APPEND TC_SOURCES

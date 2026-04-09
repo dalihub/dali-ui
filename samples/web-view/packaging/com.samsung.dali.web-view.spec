@@ -1,4 +1,4 @@
-Name:       com.samsung.dali.hello-world
+Name:       com.samsung.dali.web-view
 Summary:    The DALi UI smaple
 Version:    2.0.0
 Release:    1
@@ -31,7 +31,7 @@ The DALi UI smaple
 %prep
 %setup -q
 
-%define app_root_dir     samples/hello-world/
+%define app_root_dir     samples/web-view/
 %define app_ro_dir       %TZ_SYS_RO_APP/%{name}/
 %define xml_file_dir     %TZ_SYS_RO_PACKAGES
 
@@ -104,7 +104,9 @@ exit 0
 %files
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
-%{app_exe_dir}/hello-world.example
+%{app_exe_dir}/web-view.example
+%{app_exe_dir}/web-view-js-bridge.example
+%{app_exe_dir}/web-view-scroll.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml
 #%license LICENSE
