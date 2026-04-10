@@ -207,7 +207,7 @@ KeyboardFocusManager::~KeyboardFocusManager()
 
 void KeyboardFocusManager::GetConfiguration()
 {
-  auto& uiConfigManager = Integration::UiConfigManager::Get();
+  auto uiConfigManager = Integration::UiConfigManager::Get();
   if(uiConfigManager.IsInitialized())
   {
     mAlwaysShowIndicator = uiConfigManager.GetConfig().IsFocusIndicatorAlwaysShown() ? ALWAYS_SHOW : NONE;

@@ -19,11 +19,11 @@
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/public-api/common/dali-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
-#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali-ui-foundation/integration-api/ui-config-manager-impl.h>
 
 namespace Dali
 {
@@ -34,71 +34,92 @@ namespace Ui
 namespace Integration
 {
 
-UiConfigManager& UiConfigManager::Get()
-{
-  static UiConfigManager instance;
-  return instance;
-}
-
 namespace
 {
-const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
-  "UiConfig has not been initialized. "
-  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
-  "UiConfig provides global settings for the entire dali-ui framework. "
-  "Do NOT access UiConfig-dependent features in static/global variable initializers.";
-} // unnamed namespace
+UiConfigManager gPreInitializedUiConfigManager;
+}
+
+UiConfigManager UiConfigManager::Get()
+{
+  UiConfigManager uiConfigManager;
+
+  // Check whether the UiConfigManager is already created
+  SingletonService singletonService(SingletonService::Get());
+  if(singletonService)
+  {
+    BaseHandle handle = singletonService.GetSingleton(typeid(UiConfigManager));
+    if(handle)
+    {
+      // If so, downcast the handle of singleton to UiConfigManager
+      uiConfigManager = UiConfigManager(dynamic_cast<UiConfigManagerImpl*>(handle.GetObjectPtr()));
+    }
+
+    if(!uiConfigManager) // If not, create the UiConfigManager and register it as a singleton
+    {
+      if(gPreInitializedUiConfigManager)
+      {
+        uiConfigManager = std::move(gPreInitializedUiConfigManager);
+        gPreInitializedUiConfigManager.Reset();
+
+        // Register lifecycle controller callback now for pre-initialized UiConfigManager use case.
+        GetImpl(uiConfigManager).RegisterLifecycleControllerCallback();
+      }
+      else
+      {
+        auto impl       = UiConfigManagerImpl::New();
+        uiConfigManager = UiConfigManager(impl.Get());
+      }
+      singletonService.Register(typeid(UiConfigManager), uiConfigManager);
+    }
+  }
+  else
+  {
+    if(!gPreInitializedUiConfigManager)
+    {
+      auto impl                      = UiConfigManagerImpl::New();
+      gPreInitializedUiConfigManager = UiConfigManager(impl.Get());
+    }
+    uiConfigManager = gPreInitializedUiConfigManager;
+  }
+
+  return uiConfigManager;
+}
+
+UiConfigManager::UiConfigManager() = default;
+
+UiConfigManager::~UiConfigManager() = default;
+
+UiConfigManager::UiConfigManager(const UiConfigManager& rhs) = default;
+
+UiConfigManager& UiConfigManager::operator=(const UiConfigManager& rhs) = default;
+
+UiConfigManager::UiConfigManager(UiConfigManager&& rhs) noexcept = default;
+
+UiConfigManager& UiConfigManager::operator=(UiConfigManager&& rhs) noexcept = default;
 
 void UiConfigManager::Initialize(const UiConfig& config)
 {
-  DALI_ASSERT_ALWAYS(!mUiConfigInitialized && "UiConfigManager::Initialize() must be called only once");
-  mConfig = config;
-  GetImpl(mConfig).Freeze();
-
-  mUiConfigInitialized = true;
-
-  UiThemeManager themeManager = UiThemeManager::Get();
-  GetImpl(themeManager).EnsureThemeLoader();
-
-  GetImpl(mConfig).OnApplied();
-
-  if(mApplicationCreated)
-  {
-    GetImpl(mConfig).OnApplicationCreated();
-  }
+  GetImpl(*this).Initialize(config);
 }
 
 bool UiConfigManager::IsInitialized() const
 {
-  return mUiConfigInitialized;
+  return GetImpl(*this).IsInitialized();
 }
 
 const UiConfig& UiConfigManager::GetConfig() const
 {
-  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
-  return mConfig;
+  return GetImpl(*this).GetConfig();
 }
 
 ThemeLoaderInterface* UiConfigManager::CreateThemeLoader()
 {
-  DALI_ASSERT_ALWAYS(mUiConfigInitialized && UICONFIG_NOT_INITIALIZED_MESSAGE);
-  return GetImpl(mConfig).CreateThemeLoader();
+  return GetImpl(*this).CreateThemeLoader();
 }
 
-void UiConfigManager::OnApplicationCreated()
+UiConfigManager::UiConfigManager(UiConfigManagerImpl* impl)
+: BaseHandle(impl)
 {
-  // FIXME This method is temporary solution to detect the ready state of the dali-adaptor
-  if(mApplicationCreated)
-  {
-    return;
-  }
-
-  mApplicationCreated = true;
-
-  if(mUiConfigInitialized)
-  {
-    GetImpl(mConfig).OnApplicationCreated();
-  }
 }
 
 } // namespace Integration

@@ -17,8 +17,12 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
@@ -29,6 +33,7 @@ namespace Ui
 
 namespace Integration
 {
+class UiConfigManagerImpl;
 
 /**
  * @brief Singleton manager that holds the global UiConfig instance.
@@ -39,7 +44,7 @@ namespace Integration
  *
  * Must be initialized exactly once before the application main loop starts.
  */
-class DALI_UI_API UiConfigManager
+class DALI_UI_API UiConfigManager : public BaseHandle
 {
 public:
   /**
@@ -47,7 +52,52 @@ public:
    *
    * @return The singleton instance
    */
-  static UiConfigManager& Get();
+  static UiConfigManager Get();
+
+  /**
+   * @brief Create a UiConfigManager handle.
+   *
+   * Calling member functions with an uninitialised handle is not allowed.
+   */
+  UiConfigManager();
+
+  /**
+   * @brief Destructor
+   *
+   * This is non-virtual since derived Handle types must not contain data or virtual methods.
+   */
+  ~UiConfigManager();
+
+  /**
+   * @brief This copy constructor is required for (smart) pointer semantics.
+   *
+   * @param[in] rhs A reference to the copied handle
+   */
+  UiConfigManager(const UiConfigManager& rhs);
+
+  /**
+   * @brief This assignment operator is required for (smart) pointer semantics.
+   *
+   * It makes this handle use the same BaseObject as the copied handle
+   * @param[in] rhs A reference to the copied handle
+   * @return A reference to this handle
+   */
+  UiConfigManager& operator=(const UiConfigManager& rhs);
+
+  /**
+   * @brief Move constructor.
+   *
+   * @param[in] rhs A reference to the moved handle
+   */
+  UiConfigManager(UiConfigManager&& rhs) noexcept;
+
+  /**
+   * @brief Move assignment operator.
+   *
+   * @param[in] rhs A reference to the moved handle
+   * @return A reference to this handle
+   */
+  UiConfigManager& operator=(UiConfigManager&& rhs) noexcept;
 
   /**
    * @brief Initializes the manager with the given UiConfig.
@@ -86,22 +136,8 @@ public:
    */
   ThemeLoaderInterface* CreateThemeLoader();
 
-  /*
-   * @brief Called when the adaptor is ready.
-   */
-  void OnApplicationCreated();
-
 private:
-  UiConfigManager()  = default;
-  ~UiConfigManager() = default;
-
-  UiConfigManager(const UiConfigManager&)            = delete;
-  UiConfigManager& operator=(const UiConfigManager&) = delete;
-
-private:
-  UiConfig mConfig;
-  bool     mUiConfigInitialized{false};
-  bool     mApplicationCreated{false};
+  explicit DALI_INTERNAL UiConfigManager(UiConfigManagerImpl* impl);
 };
 
 } // namespace Integration

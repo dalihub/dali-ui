@@ -1762,7 +1762,7 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
 {
   if(DALI_UNLIKELY(mShouldClearFocusOnEscape == ClearFocusOnEscapeState::UNKNOWN))
   {
-    auto& uiConfigManager = Integration::UiConfigManager::Get();
+    auto uiConfigManager = Integration::UiConfigManager::Get();
     if(uiConfigManager.IsInitialized())
     {
       mShouldClearFocusOnEscape = uiConfigManager.GetConfig().IsFocusClearOnEscapeEnabled()

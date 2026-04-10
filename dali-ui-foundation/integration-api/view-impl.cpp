@@ -178,9 +178,6 @@ ViewImpl::ViewImpl()
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION));
-
-  // FIXME This method is temporary solution to detect the ready state of the dali-adaptor
-  UiConfigManager::Get().OnApplicationCreated();
 }
 
 ViewImpl::~ViewImpl()

@@ -35,10 +35,10 @@ namespace Integration
 namespace
 {
 const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
-    "UiConfig has not been initialized. "
-    "Call UiConfig::New().Apply() in main() before the application main loop starts. "
-    "UiConfig provides global settings for the entire dali-ui framework. "
-    "Do NOT access UiConfig-dependent features in static/global variable initializers.";
+  "UiConfig has not been initialized. "
+  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+  "UiConfig provides global settings for the entire dali-ui framework. "
+  "Do NOT access UiConfig-dependent features in static/global variable initializers.";
 } // unnamed namespace
 
 UiThemeManagerImpl::UiThemeManagerImpl() = default;
@@ -64,7 +64,7 @@ void UiThemeManagerImpl::EnsureThemeLoader()
 {
   if(!mLoader)
   {
-    auto& configManager = UiConfigManager::Get();
+    auto configManager = UiConfigManager::Get();
     DALI_ASSERT_ALWAYS(configManager.IsInitialized() && UICONFIG_NOT_INITIALIZED_MESSAGE);
 
     mLoader = configManager.CreateThemeLoader();
