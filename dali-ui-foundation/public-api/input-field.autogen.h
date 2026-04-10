@@ -128,6 +128,16 @@
   */ \
   ChildClass& SetFontSlant(Text::FontSlant slant) { InputField::SetFontSlant(slant); return *this; } \
   /** \
+  * @brief Sets the background color behind the text. \
+  * \
+  * The background is rendered behind the glyphs of the text. \
+  * \
+  * @param[in] color The text background color. \
+  * \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTextBackgroundColor(const UiColor& color) { InputField::SetTextBackgroundColor(color); return *this; } \
+  /** \
   * @brief Sets the underline style. \
   * \
   * @param[in] underline The underline configuration. \

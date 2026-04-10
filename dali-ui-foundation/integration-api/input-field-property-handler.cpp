@@ -148,6 +148,11 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
+    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+    {
+      impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
     case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
     {
       impl.SetFontSizeScale(value.Get<float>());
@@ -263,6 +268,11 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::FONT_SLANT:
     {
       value = impl.GetFontSlant();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+    {
+      value = impl.GetTextBackgroundColor().Resolve();
       break;
     }
     case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:

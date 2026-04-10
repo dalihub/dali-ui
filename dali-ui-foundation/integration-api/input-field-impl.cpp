@@ -92,6 +92,7 @@ INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
+INPUT_FIELD_PROPERTY_REGISTRATION("textBackgroundColor",        VECTOR4, TEXT_BACKGROUND_COLOR         )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCALE               )
 INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
@@ -369,6 +370,36 @@ void InputFieldImpl::SetFontSlant(Text::FontSlant slant)
 Text::FontSlant InputFieldImpl::GetFontSlant() const
 {
   return mController->GetDefaultFontSlant();
+}
+
+void InputFieldImpl::SetTextBackgroundColor(const UiColor& color)
+{
+  SetColorBinding("TextBackgroundColor", color, this, &InputFieldImpl::SetTextBackgroundColorInternal);
+  if(!mController->IsBackgroundEnabled())
+  {
+    mController->SetBackgroundEnabled(true);
+  }
+}
+
+UiColor InputFieldImpl::GetTextBackgroundColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "TextBackgroundColor", outColor))
+  {
+    return outColor;
+  }
+  return mController->GetBackgroundColor();
+}
+
+void InputFieldImpl::ResetTextBackgroundColor()
+{
+  UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
+  if(mController->IsBackgroundEnabled())
+  {
+    mController->SetBackgroundEnabled(false);
+    mController->SetBackgroundColor(Color::TRANSPARENT);
+    mRenderer.Reset();
+  }
 }
 
 void InputFieldImpl::SetUnderline(const Text::Underline& underline)
@@ -1339,6 +1370,15 @@ void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
 {
   mDecorator->SetHighlightColor(color);
   RequestTextRelayout();
+}
+
+void InputFieldImpl::SetTextBackgroundColorInternal(const Vector4& color)
+{
+  if(mController->GetBackgroundColor() != color)
+  {
+    mController->SetBackgroundColor(color);
+    mRenderer.Reset();
+  }
 }
 
 void InputFieldImpl::SetUnderlineColorInternal(const Vector4& color)

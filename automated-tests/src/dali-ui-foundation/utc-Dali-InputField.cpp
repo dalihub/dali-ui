@@ -28,26 +28,27 @@ using namespace Dali::Ui::Integration;
 
 namespace
 {
-const char* const PROPERTY_NAME_TEXT                  = "text";
-const char* const PROPERTY_NAME_FONT_FAMILY           = "fontFamily";
-const char* const PROPERTY_NAME_FONT_SIZE             = "fontSize";
-const char* const PROPERTY_NAME_TEXT_COLOR            = "textColor";
-const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT  = "horizontalAlignment";
-const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT    = "verticalAlignment";
-const char* const PROPERTY_NAME_OVERFLOW_MODE         = "overflowMode";
-const char* const PROPERTY_NAME_PLACEHOLDER           = "placeholder";
-const char* const PROPERTY_NAME_PLACEHOLDER_COLOR     = "placeholderColor";
-const char* const PROPERTY_NAME_CURSOR_WIDTH          = "cursorWidth";
-const char* const PROPERTY_NAME_CURSOR_COLOR          = "cursorColor";
-const char* const PROPERTY_NAME_SELECTION_COLOR       = "selectionColor";
-const char* const PROPERTY_NAME_MAXIMUM_LENGTH        = "maximumLength";
-const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE = "layoutDirectionMode";
-const char* const PROPERTY_NAME_FONT_WEIGHT           = "fontWeight";
-const char* const PROPERTY_NAME_FONT_WIDTH            = "fontWidth";
-const char* const PROPERTY_NAME_FONT_SLANT            = "fontSlant";
-const char* const PROPERTY_NAME_FONT_SIZE_SCALE        = "fontSizeScale";
-const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE = "minimumFontSizeScale";
-const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE = "maximumFontSizeScale";
+const char* const PROPERTY_NAME_TEXT                           = "text";
+const char* const PROPERTY_NAME_FONT_FAMILY                    = "fontFamily";
+const char* const PROPERTY_NAME_FONT_SIZE                      = "fontSize";
+const char* const PROPERTY_NAME_TEXT_COLOR                     = "textColor";
+const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT           = "horizontalAlignment";
+const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT             = "verticalAlignment";
+const char* const PROPERTY_NAME_OVERFLOW_MODE                  = "overflowMode";
+const char* const PROPERTY_NAME_PLACEHOLDER                    = "placeholder";
+const char* const PROPERTY_NAME_PLACEHOLDER_COLOR              = "placeholderColor";
+const char* const PROPERTY_NAME_CURSOR_WIDTH                   = "cursorWidth";
+const char* const PROPERTY_NAME_CURSOR_COLOR                   = "cursorColor";
+const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
+const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
+const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
+const char* const PROPERTY_NAME_FONT_WEIGHT                    = "fontWeight";
+const char* const PROPERTY_NAME_FONT_WIDTH                     = "fontWidth";
+const char* const PROPERTY_NAME_FONT_SLANT                     = "fontSlant";
+const char* const PROPERTY_NAME_TEXT_BACKGROUND_COLOR          = "textBackgroundColor";
+const char* const PROPERTY_NAME_FONT_SIZE_SCALE                = "fontSizeScale";
+const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE        = "minimumFontSizeScale";
+const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE        = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
 
 } // namespace
@@ -416,6 +417,31 @@ int UtcDaliInputFieldFontSlant(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldTextBackgroundColor(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  UiColor color(Color::YELLOW);
+  inputField.SetTextBackgroundColor(color);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+
+  UiColor color2(Color::GREEN);
+  inputField.SetTextBackgroundColor(color2);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
+
+  // Reset the color
+  inputField.ResetTextBackgroundColor();
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
+
+  // Set again after reset
+  inputField.SetTextBackgroundColor(Color::BLUE);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldFontSizeScale(void)
 {
   UiTestApplication application;
@@ -525,6 +551,7 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == InputField::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputField::Property::FONT_WIDTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == InputField::Property::FONT_SLANT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TEXT_BACKGROUND_COLOR) == InputField::Property::TEXT_BACKGROUND_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE_SCALE) == InputField::Property::FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == InputField::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == InputField::Property::MAXIMUM_FONT_SIZE_SCALE);
@@ -631,6 +658,10 @@ int UtcDaliInputFieldSetProperty(void)
 
   inputField.SetProperty(InputField::Property::FONT_SLANT, "OBLIQUE");
   DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  // TEXT_BACKGROUND_COLOR
+  inputField.SetProperty(InputField::Property::TEXT_BACKGROUND_COLOR, Color::YELLOW);
+  DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::TEXT_BACKGROUND_COLOR), Color::YELLOW, TEST_LOCATION);
 
   // FONT_SIZE_SCALE
   inputField.SetProperty(InputField::Property::FONT_SIZE_SCALE, 1.5f);

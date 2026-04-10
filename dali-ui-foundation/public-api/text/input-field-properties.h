@@ -173,6 +173,14 @@ struct InputFieldPropertyIndex
     FONT_SLANT,
 
     /**
+     * @brief The background color behind the text.
+     * @details Name "textBackgroundColor", type Property::VECTOR4.
+     * @note The background is rendered behind the text glyphs.
+     * @note See also: InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ResetTextBackgroundColor().
+     */
+    TEXT_BACKGROUND_COLOR,
+
+    /**
      * @brief The font size scale.
      * @details Name "fontSizeScale", type Property::FLOAT.
      * @note See also: InputField::SetFontSizeScale(), InputField::GetFontSizeScale().

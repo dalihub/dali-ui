@@ -22,6 +22,10 @@ namespace
 {
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
+constexpr float ITEM_PADDING  = 10.0f;
+constexpr float FONT_SIZE     = 20.0f;
+
+const UiColor BACKGROUND_COLOR(0xefefef);
 } // namespace
 
 class TextController : public ConnectionTracker
@@ -39,153 +43,116 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(StackLayout::New(StackOrientation::VERTICAL)
-      .Spacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        Label::New("Text Style Example"),
-        Label::New("Italic Lorem ipsum dolor sit amet.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSlant(Text::FontSlant::ITALIC)
-          .SetFontSize(20)
-          .As(mSlantLabel),
-        Label::New("Bold Lorem ipsum dolor sit amet.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontWeight(Text::FontWeight::BOLD)
-          .SetFontSize(20)
-          .As(mWeightLabel),
-        Label::New("Semi condensed Lorem ipsum dolor sit amet.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontWidth(Text::FontWidth::SEMI_CONDENSED)
-          .SetFontSize(20)
-          .As(mWidthLabel),
-        // Underline
-        Label::New("Underline Label Minimum")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetUnderline(Text::Underline()),
-        Label::New("Dashed Underline Label")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetUnderline(Text::Underline()
-            .SetColor(UiColor(0x0088FF))
-            .SetThickness(2)
-            .SetType(Text::Underline::Type::DASHED)
-            .SetDashLength(4.0f)
-            .SetDashGap(4.0f))
-          .As(mUnderlineLabel),
-        // Shadow
-        Label::New("Shadow Label Minimum")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetShadow(Text::Shadow().SetOffset(Vector2(1, 1))),
-        Label::New("Shadow Label Properties")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetShadow(Text::Shadow()
-            .SetColor(UiColor(0xFF5500))
-            .SetOffset(Vector2(3.0f, 3.0f))
-            .SetBlurRadius(2.0f))
-          .As(mShadowLabel),
-        // Outline
-        Label::New("Outline Label Minimum")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetOutline(Text::Outline().SetWidth(2.0f)),
-        Label::New("Outline Label Properties")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetOutline(Text::Outline()
-            .SetColor(UiColor(0x0066FF))
-            .SetOffset(Vector2(1.0f, 1.0f))
-            .SetWidth(2.0f)
-            .SetBlurRadius(1.0f))
-          .As(mOutlineLabel),
-        // LineThrough
-        Label::New("LineThrough Label Minimum")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetLineThrough(Text::LineThrough()),
-        Label::New("LineThrough Label Properties")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetLineThrough(Text::LineThrough()
-            .SetColor(UiColor(0xFF00FF))
-            .SetThickness(3.0f))
-          .As(mLineThroughLabel),
-        // InputField with text styles
-        Label::New("InputField with Styles:"),
-        InputField::New()
-          .SetText("InputField with Underline")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetUnderline(Text::Underline()
-            .SetColor(UiColor(0x0088FF))
-            .SetThickness(2))
-          .As(mInputFieldUnderline),
-        InputField::New()
-          .SetText("InputField with Shadow")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetShadow(Text::Shadow()
-            .SetColor(UiColor(0xFF5500))
-            .SetOffset(Vector2(2.0f, 2.0f)))
-          .As(mInputFieldShadow),
-        InputField::New()
-          .SetText("InputField with Outline")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetOutline(Text::Outline()
-            .SetColor(UiColor(0x0066FF))
-            .SetWidth(2.0f))
-          .As(mInputFieldOutline),
-        InputField::New()
-          .SetText("InputField with LineThrough")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetLineThrough(Text::LineThrough()
-            .SetColor(UiColor(0xFF00FF))
-            .SetThickness(2.0f))
-          .As(mInputFieldLineThrough),
-        // TextBackgroundColor
-        Label::New("Text Background Color Label")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
-          .SetFontSize(20)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextBackgroundColor(UiColor(0xFFFF00))
-          .As(mTextBackgroundColorLabel),
-        }));
+    window.Add(
+      StackLayout::New(StackOrientation::VERTICAL)
+        .Spacing(STACK_SPACING)
+        .SetRequestedWidth(MATCH_PARENT)
+        .SetRequestedHeight(MATCH_PARENT)
+        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .Children({
+          Label::New("Text Style Example"),
 
-    // Test GetTextBackgroundColor
-    Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
-    DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
-                   textColor.r, textColor.g, textColor.b, textColor.a);
+          // Font styles
+          CreateBaseLabel("Italic Lorem ipsum dolor sit amet.")
+            .SetFontSlant(Text::FontSlant::ITALIC)
+            .As(mSlantLabel),
+          CreateBaseLabel("Bold Lorem ipsum dolor sit amet.")
+            .SetFontWeight(Text::FontWeight::BOLD)
+            .As(mWeightLabel),
+          CreateBaseLabel("Semi condensed Lorem ipsum dolor sit amet.")
+            .SetFontWidth(Text::FontWidth::SEMI_CONDENSED)
+            .As(mWidthLabel),
+
+          // Underline
+          CreateBaseLabel("Underline Label Minimum")
+            .SetUnderline(Text::Underline()),
+          CreateBaseLabel("Dashed Underline Label")
+            .SetUnderline(
+              Text::Underline()
+                .SetColor(UiColor(0x0088FF))
+                .SetThickness(2.0f)
+                .SetType(Text::Underline::Type::DASHED)
+                .SetDashLength(4.0f)
+                .SetDashGap(4.0f))
+            .As(mUnderlineLabel),
+
+          // Shadow
+          CreateBaseLabel("Shadow Label Minimum")
+            .SetShadow(
+              Text::Shadow()
+                .SetOffset(Vector2(1.0f, 1.0f))),
+          CreateBaseLabel("Shadow Label Properties")
+            .SetShadow(
+              Text::Shadow()
+                .SetColor(UiColor(0xFF5500))
+                .SetOffset(Vector2(3.0f, 3.0f))
+                .SetBlurRadius(2.0f))
+            .As(mShadowLabel),
+
+          // Outline
+          CreateBaseLabel("Outline Label Minimum")
+            .SetOutline(
+              Text::Outline()
+                .SetWidth(2.0f)),
+          CreateBaseLabel("Outline Label Properties")
+            .SetOutline(
+              Text::Outline()
+                .SetColor(UiColor(0x0066FF))
+                .SetOffset(Vector2(1.0f, 1.0f))
+                .SetWidth(2.0f)
+                .SetBlurRadius(1.0f))
+            .As(mOutlineLabel),
+
+          // LineThrough
+          CreateBaseLabel("LineThrough Label Minimum")
+            .SetLineThrough(Text::LineThrough()),
+          CreateBaseLabel("LineThrough Label Properties")
+            .SetLineThrough(
+              Text::LineThrough()
+                .SetColor(UiColor(0xFF00FF))
+                .SetThickness(3.0f))
+            .As(mLineThroughLabel),
+
+          // Text background color
+          CreateBaseLabel("Text Background Color Label")
+            .SetTextBackgroundColor(UiColor(0xFFFF00))
+            .As(mTextBackgroundColorLabel),
+
+          // InputField styles
+          Label::New("InputField with Styles:"),
+
+          CreateBaseInputField("InputField with Underline")
+            .SetUnderline(
+              Text::Underline()
+                .SetColor(UiColor(0x0088FF))
+                .SetThickness(2.0f))
+            .As(mInputFieldUnderline),
+          CreateBaseInputField("InputField with Shadow")
+            .SetShadow(
+              Text::Shadow()
+                .SetColor(UiColor(0xFF5500))
+                .SetOffset(Vector2(2.0f, 2.0f)))
+            .As(mInputFieldShadow),
+          CreateBaseInputField("InputField with Outline")
+            .SetOutline(
+              Text::Outline()
+                .SetColor(UiColor(0x0066FF))
+                .SetWidth(2.0f))
+            .As(mInputFieldOutline),
+          CreateBaseInputField("InputField with LineThrough")
+            .SetLineThrough(
+              Text::LineThrough()
+                .SetColor(UiColor(0xFF00FF))
+                .SetThickness(2.0f))
+            .As(mInputFieldLineThrough),
+          CreateBaseInputField("InputField Text Background Color")
+            .SetTextBackgroundColor(UiColor(0x00FFFF))
+            .As(mInputFieldTextBackgroundColor),
+        }));
+    
+
+    PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
+    PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
 
     PrintLabelInfo(mSlantLabel, "Slant Label");
     PrintLabelInfo(mWeightLabel, "Weight Label");
@@ -196,11 +163,30 @@ private:
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
 
+  Label CreateBaseLabel(const char* text)
+  {
+    return Label::New(text)
+      .SetBackgroundColor(BACKGROUND_COLOR)
+      .SetViewPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
+      .SetFontSize(FONT_SIZE)
+      .SetRequestedWidth(MATCH_PARENT);
+  }
+
+  InputField CreateBaseInputField(const char* text)
+  {
+    return InputField::New()
+      .SetText(text)
+      .SetBackgroundColor(BACKGROUND_COLOR)
+      .SetViewPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
+      .SetFontSize(FONT_SIZE)
+      .SetRequestedWidth(MATCH_PARENT);
+  }
+
   void PlayAnimation(Label label, Vector4 startColor, Vector4 endColor)
   {
     label.SetProperty(Label::Property::TEXT_COLOR, startColor);
 
-    Animation animation = Animation::New(1.f);
+    Animation animation = Animation::New(1.0f);
     animation.AnimateTo(Property(label, Label::Property::TEXT_COLOR), endColor, AlphaFunction::SIN);
     animation.SetLoopCount(0);
     animation.Play();
@@ -217,6 +203,18 @@ private:
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
+  void PrintTextBackgroundColorInfo(Label label, const char* title)
+  {
+    const Vector4 color = label.GetTextBackgroundColor().Resolve();
+    DALI_LOG_ERROR("%s - R:%f G:%f B:%f A:%f\n", title, color.r, color.g, color.b, color.a);
+  }
+
+  void PrintTextBackgroundColorInfo(InputField inputField, const char* title)
+  {
+    const Vector4 color = inputField.GetTextBackgroundColor().Resolve();
+    DALI_LOG_ERROR("%s - R:%f G:%f B:%f A:%f\n", title, color.r, color.g, color.b, color.a);
+  }
+
   void OnKeyEvent(const KeyEvent& event)
   {
     if(event.GetState() != KeyEvent::UP)
@@ -226,7 +224,9 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
+      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n",
+                     IsKey(event, Dali::DALI_KEY_ESCAPE),
+                     IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }
@@ -253,89 +253,97 @@ private:
     }
     else if(event.GetKeyName() == "5")
     {
-      // Change Label styles to different form
-      mUnderlineLabel.SetUnderline(Text::Underline()
-        .SetColor(UiColor(0xFF0000))
-        .SetThickness(4)
-        .SetType(Text::Underline::Type::DASHED)
-        .SetDashLength(8.0f)
-        .SetDashGap(2.0f));
+      mUnderlineLabel.SetUnderline(
+        Text::Underline()
+          .SetColor(UiColor(0xFF0000))
+          .SetThickness(4.0f)
+          .SetType(Text::Underline::Type::DASHED)
+          .SetDashLength(8.0f)
+          .SetDashGap(2.0f));
 
-      mShadowLabel.SetShadow(Text::Shadow()
-        .SetColor(UiColor(0x00FF00))
-        .SetOffset(Vector2(-2.0f, -2.0f))
-        .SetBlurRadius(4.0f));
+      mShadowLabel.SetShadow(
+        Text::Shadow()
+          .SetColor(UiColor(0x00FF00))
+          .SetOffset(Vector2(-2.0f, -2.0f))
+          .SetBlurRadius(4.0f));
 
-      mOutlineLabel.SetOutline(Text::Outline()
-        .SetColor(UiColor(0xFF00FF))
-        .SetOffset(Vector2(-1.0f, -1.0f))
-        .SetWidth(3.0f)
-        .SetBlurRadius(2.0f));
+      mOutlineLabel.SetOutline(
+        Text::Outline()
+          .SetColor(UiColor(0xFF00FF))
+          .SetOffset(Vector2(-1.0f, -1.0f))
+          .SetWidth(3.0f)
+          .SetBlurRadius(2.0f));
 
-      mLineThroughLabel.SetLineThrough(Text::LineThrough()
-        .SetColor(UiColor(0x00FFFF))
-        .SetThickness(1.0f));
+      mLineThroughLabel.SetLineThrough(
+        Text::LineThrough()
+          .SetColor(UiColor(0x00FFFF))
+          .SetThickness(1.0f));
 
       DALI_LOG_ERROR("Changed Label styles to alternate form\n");
     }
     else if(event.GetKeyName() == "6")
     {
-      // Change InputField styles to different form
-      mInputFieldUnderline.SetUnderline(Text::Underline()
-        .SetColor(UiColor(0xFF0000))
-        .SetThickness(4)
-        .SetType(Text::Underline::Type::DASHED)
-        .SetDashLength(8.0f)
-        .SetDashGap(2.0f));
+      mInputFieldUnderline.SetUnderline(
+        Text::Underline()
+          .SetColor(UiColor(0xFF0000))
+          .SetThickness(4.0f)
+          .SetType(Text::Underline::Type::DASHED)
+          .SetDashLength(8.0f)
+          .SetDashGap(2.0f));
 
-      mInputFieldShadow.SetShadow(Text::Shadow()
-        .SetColor(UiColor(0x00FF00))
-        .SetOffset(Vector2(-2.0f, -2.0f)));
+      mInputFieldShadow.SetShadow(
+        Text::Shadow()
+          .SetColor(UiColor(0x00FF00))
+          .SetOffset(Vector2(-2.0f, -2.0f)));
 
-      mInputFieldOutline.SetOutline(Text::Outline()
-        .SetColor(UiColor(0xFF00FF))
-        .SetWidth(3.0f));
+      mInputFieldOutline.SetOutline(
+        Text::Outline()
+          .SetColor(UiColor(0xFF00FF))
+          .SetWidth(3.0f));
 
-      mInputFieldLineThrough.SetLineThrough(Text::LineThrough()
-        .SetColor(UiColor(0x00FFFF))
-        .SetThickness(1.0f));
+      mInputFieldLineThrough.SetLineThrough(
+        Text::LineThrough()
+          .SetColor(UiColor(0x00FFFF))
+          .SetThickness(1.0f));
 
       DALI_LOG_ERROR("Changed InputField styles to alternate form\n");
     }
     else if(event.GetKeyName() == "7")
     {
-      // Reset TextBackgroundColor
       mTextBackgroundColorLabel.ResetTextBackgroundColor();
-      DALI_LOG_ERROR("Reset TextBackgroundColor\n");
-      Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
-      DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
-                    textColor.r, textColor.g, textColor.b, textColor.a);
+      mInputFieldTextBackgroundColor.ResetTextBackgroundColor();
 
+      DALI_LOG_ERROR("Reset TextBackgroundColor\n");
+      PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
+      PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
     }
     else if(event.GetKeyName() == "8")
     {
-      // Change TextBackgroundColor to different color
       mTextBackgroundColorLabel.SetTextBackgroundColor(UiColor(0x00FF00));
-      Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
-      DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
-                    textColor.r, textColor.g, textColor.b, textColor.a);
+      mInputFieldTextBackgroundColor.SetTextBackgroundColor(UiColor(0xFF00FF));
+
+      PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
+      PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
     }
   }
 
 private:
   Application& mApplication;
-  Label        mWeightLabel;
-  Label        mWidthLabel;
-  Label        mSlantLabel;
-  Label        mUnderlineLabel;
-  Label        mShadowLabel;
-  Label        mOutlineLabel;
-  Label        mLineThroughLabel;
-  Label        mTextBackgroundColorLabel;
-  InputField   mInputFieldUnderline;
-  InputField   mInputFieldShadow;
-  InputField   mInputFieldOutline;
-  InputField   mInputFieldLineThrough;
+
+  Label      mWeightLabel;
+  Label      mWidthLabel;
+  Label      mSlantLabel;
+  Label      mUnderlineLabel;
+  Label      mShadowLabel;
+  Label      mOutlineLabel;
+  Label      mLineThroughLabel;
+  Label      mTextBackgroundColorLabel;
+
+  InputField mInputFieldUnderline;
+  InputField mInputFieldShadow;
+  InputField mInputFieldOutline;
+  InputField mInputFieldLineThrough;
+  InputField mInputFieldTextBackgroundColor;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

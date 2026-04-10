@@ -241,6 +241,21 @@ public:
   Text::FontSlant GetFontSlant() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetTextBackgroundColor
+   */
+  void SetTextBackgroundColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTextBackgroundColor
+   */
+  UiColor GetTextBackgroundColor() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetTextBackgroundColor
+   */
+  void ResetTextBackgroundColor();
+
+  /**
    * @copydoc Dali::Ui::InputField::SetUnderline
    */
   void SetUnderline(const Text::Underline& underline);
@@ -630,6 +645,7 @@ private: // UiColorManager
   void SetPlaceholderColorInternal(const Vector4& color);
   void SetCursorColorInternal(const Vector4& color);
   void SetSelectionColorInternal(const Vector4& color);
+  void SetTextBackgroundColorInternal(const Vector4& color);
   void SetUnderlineColorInternal(const Vector4& color);
   void SetShadowColorInternal(const Vector4& color);
   void SetOutlineColorInternal(const Vector4& color);

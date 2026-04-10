@@ -385,6 +385,31 @@ public: // Setters for chaining
   Text::FontSlant GetFontSlant() const;
 
   /**
+   * @brief Sets the background color behind the text.
+   *
+   * The background is rendered behind the glyphs of the text.
+   *
+   * @param[in] color The text background color.
+   *
+   * @return This input field.
+   */
+  InputField& SetTextBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Gets the background color behind the text.
+   *
+   * @return The current text background color.
+   */
+  UiColor GetTextBackgroundColor() const;
+
+  /**
+   * @brief Resets the text background color.
+   *
+   * Disables the text background and restores the default state.
+   */
+  void ResetTextBackgroundColor();
+
+  /**
    * @brief Sets the underline style.
    *
    * @param[in] underline The underline configuration.
@@ -697,6 +722,14 @@ public:
        * @note See also: InputField::SetFontSlant(), InputField::GetFontSlant().
        */
       FONT_SLANT = Text::InputFieldPropertyIndex::FONT_SLANT,
+
+      /**
+       * @brief The background color behind the text.
+       * @details Name "textBackgroundColor", type Property::VECTOR4.
+       * @note The background is rendered behind the text glyphs.
+       * @note See also: InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ResetTextBackgroundColor().
+       */
+      TEXT_BACKGROUND_COLOR = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
 
       /**
        * @brief The font size scale.

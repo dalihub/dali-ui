@@ -297,6 +297,22 @@ Text::FontSlant InputField::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
+InputField& InputField::SetTextBackgroundColor(const UiColor& color)
+{
+  GetImpl(*this).SetTextBackgroundColor(color);
+  return *this;
+}
+
+UiColor InputField::GetTextBackgroundColor() const
+{
+  return GetImpl(*this).GetTextBackgroundColor();
+}
+
+void InputField::ResetTextBackgroundColor()
+{
+  GetImpl(*this).ResetTextBackgroundColor();
+}
+
 InputField& InputField::SetUnderline(const Text::Underline& underline)
 {
   GetImpl(*this).SetUnderline(underline);
