@@ -28,9 +28,9 @@
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
-
 namespace Dali
 {
 
@@ -426,6 +426,21 @@ public:
    * @copydoc Dali::Ui::Label::IsSystemFontSizeScaleEnabled
    */
   bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @see Dali::Ui::Label::SetFontVariation
+   */
+  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetFontVariation
+   */
+  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetFontVariation
+   */
+  void ResetFontVariation();
 
   // Read Only
   /**

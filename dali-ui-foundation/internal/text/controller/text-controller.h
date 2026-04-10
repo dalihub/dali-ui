@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali::Ui::Text
@@ -2115,16 +2116,27 @@ public: // Queries & retrieves.
   void SetTextCutout(bool cutout);
 
   /**
-   * @brief Retrieves variation value to model
-   * @param[out] map The value of cutout for the text
+   * @brief Retrieves variation values from the model
+   * @param[out] map The font variation map
    */
   void GetVariationsMap(Property::Map& map);
 
   /**
-   * @brief Sets variation value to model
-   * @param[in] map The value of cutout for the text
+   * @brief Sets variation values to the model
+   * @param[in] map The font variation map
    */
   void SetVariationsMap(const Property::Map& map);
+
+  /**
+   * @brief Sets font variation values from variation axes.
+   * @param[in] axes The font variation axes.
+   */
+  void SetVariations(const Dali::Vector<Text::FontVariationAxis>& axes);
+
+  /**
+   * @brief Clears variation values from the model
+   */
+  void ClearVariationsMap();
 
   /**
    * @brief Sets SetLayoutDirectionMode value to model

@@ -530,6 +530,38 @@ bool InputFieldImpl::IsSystemFontSizeScaleEnabled() const
   return mController->IsSystemFontSizeScaleEnabled();
 }
 
+void InputFieldImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+{
+  mController->SetVariations(axes);
+}
+
+Dali::Vector<Text::FontVariationAxis> InputFieldImpl::GetFontVariation() const
+{
+  Dali::Vector<Text::FontVariationAxis> axes;
+  Property::Map                         map;
+  mController->GetVariationsMap(map);
+
+  const std::size_t count = map.Count();
+  for(std::size_t i = 0u; i < count; i++)
+  {
+    const auto& keyValue = map.GetKeyValue(i);
+    if(keyValue.first.type == Property::Key::STRING)
+    {
+      float value = 0.0f;
+      if(keyValue.second.Get(value))
+      {
+        axes.PushBack(Text::FontVariationAxis(keyValue.first.stringKey, value));
+      }
+    }
+  }
+  return axes;
+}
+
+void InputFieldImpl::ResetFontVariation()
+{
+  mController->ClearVariationsMap();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

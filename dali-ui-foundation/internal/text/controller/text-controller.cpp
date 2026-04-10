@@ -388,6 +388,37 @@ void Controller::SetVariationsMap(const Property::Map& map)
   mImpl->RequestRelayout();
 }
 
+void Controller::SetVariations(const Dali::Vector<Text::FontVariationAxis>& axes)
+{
+  auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
+  variationsMap.Clear();
+
+  const std::size_t count = axes.Count();
+  for(std::size_t i = 0u; i < count; i++)
+  {
+    const auto& tag   = axes[i].GetTag();
+    const float value = axes[i].GetValue();
+    if(tag.Size() == 4u && std::isfinite(value))
+    {
+      variationsMap[tag] = value;
+    }
+  }
+
+  mImpl->ClearFontData();
+  mImpl->RequestRelayout();
+}
+
+void Controller::ClearVariationsMap()
+{
+  auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
+  if(!variationsMap.Empty())
+  {
+    variationsMap.Clear();
+    mImpl->ClearFontData();
+    mImpl->RequestRelayout();
+  }
+}
+
 void Controller::ChangedLayoutDirection()
 {
   mImpl->mIsLayoutDirectionChanged = true;

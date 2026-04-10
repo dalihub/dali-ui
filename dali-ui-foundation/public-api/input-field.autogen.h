@@ -197,4 +197,45 @@
   * \
   * @param[in] enabled True to apply the system font size scale, false otherwise. \
   */ \
-  ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { InputField::SetSystemFontSizeScaleEnabled(enabled); return *this; }
+  ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { InputField::SetSystemFontSizeScaleEnabled(enabled); return *this; } \
+  /** \
+  * @brief Sets the font variation axes. \
+  * \
+  * This replaces all previously set font variation axes. \
+  * \
+  * If duplicate axis tags are provided, the last value is used. \
+  * \
+  * Unsupported axis tags may be ignored depending on the selected font. \
+  * \
+  * @param[in] axes The font variation axes. \
+  * @return A reference to this input field. \
+  */ \
+  ChildClass& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes) { InputField::SetFontVariation(axes); return *this; } \
+  /** \
+  * @brief Sets the font variation from a settings string. \
+  * \
+  * The settings string consists of one or more pairs of axis tags and \
+  * numeric values separated by commas. \
+  * \
+  * Supported formats include: \
+  * - wght=700,wdth=90 (recommended) \
+  * - "wght" 700, "wdth" 90 \
+  * - 'wght' 700, 'wdth' 90 \
+  * \
+  * In quoted formats, the axis tag must be wrapped with single quotes \
+  * (U+0027) or double quotes (U+0022). \
+  * \
+  * Each axis tag must contain exactly four printable ASCII characters \
+  * in the range U+0020..U+007E. Space is allowed only as trailing \
+  * characters in the axis tag. \
+  * \
+  * If duplicate axis tags are specified, the last value is used. \
+  * \
+  * If the input string is invalid, the font variation is not changed. \
+  * \
+  * Unsupported axis tags may be ignored depending on the selected font. \
+  * \
+  * @param[in] settings The font variation settings string. \
+  * @return A reference to this input field. \
+  */ \
+  ChildClass& SetFontVariation(const Dali::String& settings) { InputField::SetFontVariation(settings); return *this; }

@@ -17,10 +17,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/public-api/input-field.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 
 namespace Dali
 {
@@ -399,6 +401,36 @@ InputField& InputField::SetSystemFontSizeScaleEnabled(bool enabled)
 bool InputField::IsSystemFontSizeScaleEnabled() const
 {
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
+}
+
+InputField& InputField::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+{
+  GetImpl(*this).SetFontVariation(axes);
+  return *this;
+}
+
+InputField& InputField::SetFontVariation(const Dali::String& settings)
+{
+  auto axes = Text::FontVariation::FromString(settings);
+  if(axes.Empty() && !settings.Empty())
+  {
+    DALI_LOG_WARNING("Invalid font variation string: %s\n", settings.CStr());
+    return *this;
+  }
+
+  GetImpl(*this).SetFontVariation(axes);
+  return *this;
+}
+
+Dali::Vector<Text::FontVariationAxis> InputField::GetFontVariation() const
+{
+  return GetImpl(*this).GetFontVariation();
+}
+
+InputField& InputField::ResetFontVariation()
+{
+  GetImpl(*this).ResetFontVariation();
+  return *this;
 }
 
 // =============================================================================

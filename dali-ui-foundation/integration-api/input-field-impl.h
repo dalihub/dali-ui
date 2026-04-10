@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
 
@@ -334,6 +335,21 @@ public:
    * @copydoc Dali::Ui::InputField::IsSystemFontSizeScaleEnabled
    */
   bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @see Dali::Ui::InputField::SetFontVariation
+   */
+  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetFontVariation
+   */
+  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::ResetFontVariation
+   */
+  void ResetFontVariation();
 
   // Read Only
   /**

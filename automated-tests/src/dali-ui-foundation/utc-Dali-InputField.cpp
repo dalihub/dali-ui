@@ -526,6 +526,47 @@ int UtcDaliInputFieldAdjustedFontSizeScale(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldFontVariation(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Set via axis API
+  Dali::Vector<Text::FontVariationAxis> axes;
+  axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
+  axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+
+  inputField.SetFontVariation(axes);
+
+  Dali::Vector<Text::FontVariationAxis> result = inputField.GetFontVariation();
+
+  DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetValue(), 700.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetValue(), 90.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Set via string API
+  inputField.SetFontVariation("wght=500,wdth=80");
+
+  result = inputField.GetFontVariation();
+
+  DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetValue(), 500.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetValue(), 80.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Reset
+  inputField.ResetFontVariation();
+
+  result = inputField.GetFontVariation();
+  DALI_TEST_EQUALS(result.Count(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliInputFieldGetProperty(void)
 {

@@ -30,6 +30,7 @@ SET(TC_SOURCES
         utc-Dali-AbsoluteLayout.cpp
         utc-Dali-LayoutController.cpp
         utc-Dali-LayoutTypes.cpp
+        utc-Dali-FontVariation.cpp
 )
 
 LIST(APPEND TC_SOURCES

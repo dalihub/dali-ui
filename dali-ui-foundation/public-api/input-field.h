@@ -23,6 +23,7 @@
 #include <functional>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-style.h>
@@ -525,6 +526,65 @@ public: // Setters for chaining
    * @return True if the system font size scale is applied, otherwise false.
    */
   bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @brief Sets the font variation axes.
+   *
+   * This replaces all previously set font variation axes.
+   *
+   * If duplicate axis tags are provided, the last value is used.
+   *
+   * Unsupported axis tags may be ignored depending on the selected font.
+   *
+   * @param[in] axes The font variation axes.
+   * @return A reference to this input field.
+   */
+  InputField& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+
+  /**
+   * @brief Sets the font variation from a settings string.
+   *
+   * The settings string consists of one or more pairs of axis tags and
+   * numeric values separated by commas.
+   *
+   * Supported formats include:
+   * - wght=700,wdth=90 (recommended)
+   * - "wght" 700, "wdth" 90
+   * - 'wght' 700, 'wdth' 90
+   *
+   * In quoted formats, the axis tag must be wrapped with single quotes
+   * (U+0027) or double quotes (U+0022).
+   *
+   * Each axis tag must contain exactly four printable ASCII characters
+   * in the range U+0020..U+007E. Space is allowed only as trailing
+   * characters in the axis tag.
+   *
+   * If duplicate axis tags are specified, the last value is used.
+   *
+   * If the input string is invalid, the font variation is not changed.
+   *
+   * Unsupported axis tags may be ignored depending on the selected font.
+   *
+   * @param[in] settings The font variation settings string.
+   * @return A reference to this input field.
+   */
+  InputField& SetFontVariation(const Dali::String& settings);
+
+  /**
+   * @brief Returns the font variation axes.
+   *
+   * @return The font variation axes.
+   */
+  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+
+  /**
+   * @brief Resets the font variation.
+   *
+   * This removes all previously set font variation axes.
+   *
+   * @return A reference to this input field.
+   */
+  InputField& ResetFontVariation();
 
   // @CHAIN_END
 
