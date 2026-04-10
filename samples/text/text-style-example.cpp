@@ -172,7 +172,20 @@ private:
             .SetColor(UiColor(0xFF00FF))
             .SetThickness(2.0f))
           .As(mInputFieldLineThrough),
+        // TextBackgroundColor
+        Label::New("Text Background Color Label")
+          .SetBackgroundColor(UiColor(0xefefef))
+          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetFontSize(20)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetTextBackgroundColor(UiColor(0xFFFF00))
+          .As(mTextBackgroundColorLabel),
         }));
+
+    // Test GetTextBackgroundColor
+    Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
+    DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
+                   textColor.r, textColor.g, textColor.b, textColor.a);
 
     PrintLabelInfo(mSlantLabel, "Slant Label");
     PrintLabelInfo(mWeightLabel, "Weight Label");
@@ -289,6 +302,24 @@ private:
 
       DALI_LOG_ERROR("Changed InputField styles to alternate form\n");
     }
+    else if(event.GetKeyName() == "7")
+    {
+      // Reset TextBackgroundColor
+      mTextBackgroundColorLabel.ResetTextBackgroundColor();
+      DALI_LOG_ERROR("Reset TextBackgroundColor\n");
+      Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
+      DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
+                    textColor.r, textColor.g, textColor.b, textColor.a);
+
+    }
+    else if(event.GetKeyName() == "8")
+    {
+      // Change TextBackgroundColor to different color
+      mTextBackgroundColorLabel.SetTextBackgroundColor(UiColor(0x00FF00));
+      Vector4 textColor = mTextBackgroundColorLabel.GetTextBackgroundColor().Resolve();
+      DALI_LOG_ERROR("TextBackgroundColor Label - R:%f G:%f B:%f A:%f\n",
+                    textColor.r, textColor.g, textColor.b, textColor.a);
+    }
   }
 
 private:
@@ -300,6 +331,7 @@ private:
   Label        mShadowLabel;
   Label        mOutlineLabel;
   Label        mLineThroughLabel;
+  Label        mTextBackgroundColorLabel;
   InputField   mInputFieldUnderline;
   InputField   mInputFieldShadow;
   InputField   mInputFieldOutline;

@@ -308,6 +308,21 @@ public:
   Text::FontSlant GetFontSlant() const;
 
   /**
+   * @copydoc Dali::Ui::Label::SetTextBackgroundColor
+   */
+  void SetTextBackgroundColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextBackgroundColor
+   */
+  UiColor GetTextBackgroundColor() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::ResetTextBackgroundColor
+   */
+  void ResetTextBackgroundColor();
+
+  /**
    * @copydoc Dali::Ui::Label::SetUnderline
    */
   void SetUnderline(const Text::Underline& underline);
@@ -668,6 +683,7 @@ private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetAnchorColorInternal(const Vector4& color);
   void SetAnchorClickedColorInternal(const Vector4& color);
+  void SetTextBackgroundColorInternal(const Vector4& color);
   void SetUnderlineColorInternal(const Vector4& color);
   void SetShadowColorInternal(const Vector4& color);
   void SetOutlineColorInternal(const Vector4& color);

@@ -386,6 +386,22 @@ Text::FontSlant Label::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
+Label& Label::SetTextBackgroundColor(const UiColor& color)
+{
+  GetImpl(*this).SetTextBackgroundColor(color);
+  return *this;
+}
+
+UiColor Label::GetTextBackgroundColor() const
+{
+  return GetImpl(*this).GetTextBackgroundColor();
+}
+
+void Label::ResetTextBackgroundColor()
+{
+  GetImpl(*this).ResetTextBackgroundColor();
+}
+
 Label& Label::SetUnderline(const Text::Underline& underline)
 {
   GetImpl(*this).SetUnderline(underline);

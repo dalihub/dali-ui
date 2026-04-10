@@ -183,6 +183,16 @@
   */ \
   ChildClass& SetFontSlant(Text::FontSlant slant) { Label::SetFontSlant(slant); return *this; } \
   /** \
+  * @brief Sets the background color behind the text. \
+  * \
+  * The background is rendered behind the glyphs of the text. \
+  * \
+  * @param[in] color The text background color. \
+  * \
+  * @return This label. \
+  */ \
+  ChildClass& SetTextBackgroundColor(const UiColor& color) { Label::SetTextBackgroundColor(color); return *this; } \
+  /** \
   * @brief Sets the underline style. \
   * \
   * @param[in] underline The underline configuration. \

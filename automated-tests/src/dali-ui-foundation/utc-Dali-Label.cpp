@@ -28,35 +28,37 @@ using namespace Dali::Ui::Integration;
 
 namespace
 {
-const char* const PROPERTY_NAME_TEXT                   = "text";
-const char* const PROPERTY_NAME_FONT_FAMILY            = "fontFamily";
-const char* const PROPERTY_NAME_FONT_SIZE              = "fontSize";
-const char* const PROPERTY_NAME_MULTI_LINE             = "multiLine";
-const char* const PROPERTY_NAME_LINE_WRAP_MODE         = "lineWrapMode";
-const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT   = "horizontalAlignment";
-const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT     = "verticalAlignment";
-const char* const PROPERTY_NAME_OVERFLOW_MODE          = "overflowMode";
-const char* const PROPERTY_NAME_LINE_HEIGHT            = "lineHeight";
-const char* const PROPERTY_NAME_LINE_HEIGHT_MODE       = "lineHeightMode";
-const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE  = "layoutDirectionMode";
-const char* const PROPERTY_NAME_MARKUP_ENABLED         = "markupEnabled";
-const char* const PROPERTY_NAME_ANCHOR_COLOR           = "anchorColor";
-const char* const PROPERTY_NAME_ANCHOR_CLICKED_COLOR   = "anchorClickedColor";
-const char* const PROPERTY_NAME_MARQUEE_SPEED          = "marqueeSpeed";
-const char* const PROPERTY_NAME_MARQUEE_LOOP_COUNT     = "marqueeLoopCount";
-const char* const PROPERTY_NAME_MARQUEE_LOOP_DELAY     = "marqueeLoopDelay";
-const char* const PROPERTY_NAME_MARQUEE_GAP            = "marqueeGap";
-const char* const PROPERTY_NAME_MARQUEE_STOP_MODE      = "marqueeStopMode";
-const char* const PROPERTY_NAME_MARQUEE_ORIENTATION    = "marqueeOrientation";
-const char* const PROPERTY_NAME_TEXT_COLOR             = "textColor";
-const char* const PROPERTY_NAME_FONT_WEIGHT            = "fontWeight";
-const char* const PROPERTY_NAME_FONT_WIDTH             = "fontWidth";
-const char* const PROPERTY_NAME_FONT_SLANT             = "fontSlant";
-const char* const PROPERTY_NAME_FONT_SIZE_SCALE        = "fontSizeScale";
-const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE = "minimumFontSizeScale";
-const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE = "maximumFontSizeScale";
+const char* const PROPERTY_NAME_TEXT                           = "text";
+const char* const PROPERTY_NAME_FONT_FAMILY                    = "fontFamily";
+const char* const PROPERTY_NAME_FONT_SIZE                      = "fontSize";
+const char* const PROPERTY_NAME_MULTI_LINE                     = "multiLine";
+const char* const PROPERTY_NAME_LINE_WRAP_MODE                 = "lineWrapMode";
+const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT           = "horizontalAlignment";
+const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT             = "verticalAlignment";
+const char* const PROPERTY_NAME_OVERFLOW_MODE                  = "overflowMode";
+const char* const PROPERTY_NAME_LINE_HEIGHT                    = "lineHeight";
+const char* const PROPERTY_NAME_LINE_HEIGHT_MODE               = "lineHeightMode";
+const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
+const char* const PROPERTY_NAME_MARKUP_ENABLED                 = "markupEnabled";
+const char* const PROPERTY_NAME_ANCHOR_COLOR                   = "anchorColor";
+const char* const PROPERTY_NAME_ANCHOR_CLICKED_COLOR           = "anchorClickedColor";
+const char* const PROPERTY_NAME_MARQUEE_SPEED                  = "marqueeSpeed";
+const char* const PROPERTY_NAME_MARQUEE_LOOP_COUNT             = "marqueeLoopCount";
+const char* const PROPERTY_NAME_MARQUEE_LOOP_DELAY             = "marqueeLoopDelay";
+const char* const PROPERTY_NAME_MARQUEE_GAP                    = "marqueeGap";
+const char* const PROPERTY_NAME_MARQUEE_STOP_MODE              = "marqueeStopMode";
+const char* const PROPERTY_NAME_MARQUEE_ORIENTATION            = "marqueeOrientation";
+const char* const PROPERTY_NAME_FONT_WEIGHT                    = "fontWeight";
+const char* const PROPERTY_NAME_FONT_WIDTH                     = "fontWidth";
+const char* const PROPERTY_NAME_FONT_SLANT                     = "fontSlant";
+const char* const PROPERTY_NAME_TEXT_BACKGROUND_COLOR          = "textBackgroundColor";
+const char* const PROPERTY_NAME_FONT_SIZE_SCALE                = "fontSizeScale";
+const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE        = "minimumFontSizeScale";
+const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE        = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
 
+// Animatable
+const char* const PROPERTY_NAME_TEXT_COLOR = "textColor";
 } // namespace
 
 void utc_dali_label_startup(void)
@@ -534,6 +536,31 @@ int UtcDaliLabelFontSlant(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextBackgroundColor(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  UiColor color(Color::YELLOW);
+  label.SetTextBackgroundColor(color);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+
+  UiColor color2(Color::GREEN);
+  label.SetTextBackgroundColor(color2);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
+
+  // Reset the color
+  label.ResetTextBackgroundColor();
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
+
+  // Set again after reset
+  label.SetTextBackgroundColor(Color::BLUE);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelFontSizeScale(void)
 {
   UiTestApplication application;
@@ -646,14 +673,17 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_GAP) == Label::Property::MARQUEE_GAP);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_STOP_MODE) == Label::Property::MARQUEE_STOP_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_ORIENTATION) == Label::Property::MARQUEE_ORIENTATION);
-  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == Label::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == Label::Property::FONT_WIDTH);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == Label::Property::FONT_SLANT);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_BACKGROUND_COLOR) == Label::Property::TEXT_BACKGROUND_COLOR);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE_SCALE) == Label::Property::FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == Label::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == Label::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
+
+  // Animatable
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
 
   END_TEST;
 }
@@ -772,10 +802,6 @@ int UtcDaliLabelSetProperty(void)
   label.SetProperty(Label::Property::MARQUEE_ORIENTATION, "HORIZONTAL");
   DALI_TEST_EQUALS(label.GetProperty<Text::MarqueeOrientation>(Label::Property::MARQUEE_ORIENTATION), Text::MarqueeOrientation::HORIZONTAL, TEST_LOCATION);
 
-  // TEXT_COLOR
-  label.SetProperty(Label::Property::TEXT_COLOR, Color::BLUE);
-  DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
-
   // FONT_WEIGHT
   label.SetProperty(Label::Property::FONT_WEIGHT, Text::FontWeight::BOLD);
   DALI_TEST_EQUALS(label.GetProperty<Text::FontWeight>(Label::Property::FONT_WEIGHT), Text::FontWeight::BOLD, TEST_LOCATION);
@@ -797,6 +823,10 @@ int UtcDaliLabelSetProperty(void)
   label.SetProperty(Label::Property::FONT_SLANT, "OBLIQUE");
   DALI_TEST_EQUALS(label.GetProperty<Text::FontSlant>(Label::Property::FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
+  // TEXT_BACKGROUND_COLOR
+  label.SetProperty(Label::Property::TEXT_BACKGROUND_COLOR, Color::YELLOW);
+  DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_BACKGROUND_COLOR), Color::YELLOW, TEST_LOCATION);
+
   // FONT_SIZE_SCALE
   label.SetProperty(Label::Property::FONT_SIZE_SCALE, 1.5f);
   DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::FONT_SIZE_SCALE), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
@@ -812,6 +842,11 @@ int UtcDaliLabelSetProperty(void)
   // SYSTEM_FONT_SIZE_SCALE_ENABLED
   label.SetProperty(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
   DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
+
+  // Animatable
+  // TEXT_COLOR
+  label.SetProperty(Label::Property::TEXT_COLOR, Color::BLUE);
+  DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }

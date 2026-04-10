@@ -97,6 +97,7 @@ LABEL_PROPERTY_REGISTRATION("marqueeOrientation",         INTEGER, MARQUEE_ORIEN
 LABEL_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
 LABEL_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
 LABEL_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
+LABEL_PROPERTY_REGISTRATION("textBackgroundColor",        VECTOR4, TEXT_BACKGROUND_COLOR         )
 LABEL_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCALE               )
 LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
@@ -495,6 +496,35 @@ void LabelImpl::SetFontSlant(Text::FontSlant slant)
 Text::FontSlant LabelImpl::GetFontSlant() const
 {
   return mController->GetDefaultFontSlant();
+}
+
+void LabelImpl::SetTextBackgroundColor(const UiColor& color)
+{
+  SetColorBinding("TextBackgroundColor", color, this, &LabelImpl::SetTextBackgroundColorInternal);
+  if(!mController->IsBackgroundEnabled())
+  {
+    mController->SetBackgroundEnabled(true);
+  }
+}
+
+UiColor LabelImpl::GetTextBackgroundColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "TextBackgroundColor", outColor))
+  {
+    return outColor;
+  }
+  return mController->GetBackgroundColor();
+}
+
+void LabelImpl::ResetTextBackgroundColor()
+{
+  UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
+  if(mController->IsBackgroundEnabled())
+  {
+    mController->SetBackgroundEnabled(false);
+    mController->SetBackgroundColor(Color::TRANSPARENT);
+  }
 }
 
 void LabelImpl::SetUnderline(const Text::Underline& underline)
@@ -1515,6 +1545,16 @@ void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
   if(mController->GetAnchorClickedColor() != color)
   {
     mController->SetAnchorClickedColor(color);
+    mTextUpdateNeeded = true;
+    RequestTextRelayout();
+  }
+}
+
+void LabelImpl::SetTextBackgroundColorInternal(const Vector4& color)
+{
+  if(mController->GetBackgroundColor() != color)
+  {
+    mController->SetBackgroundColor(color);
     mTextUpdateNeeded = true;
     RequestTextRelayout();
   }
