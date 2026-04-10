@@ -134,7 +134,9 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
   }
   else if(requestedWidth == MATCH_PARENT)
   {
-    resultWidth = widthConstraint;
+    // MATCH_PARENT: report minimum desired size; actual size is determined
+    // by the parent during the Arrange phase.
+    resultWidth = GetMinimumWidth();
   }
   else
   {
@@ -148,7 +150,7 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
   }
   else if(requestedHeight == MATCH_PARENT)
   {
-    resultHeight = heightConstraint;
+    resultHeight = GetMinimumHeight();
   }
   else
   {

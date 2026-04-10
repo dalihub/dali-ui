@@ -927,8 +927,9 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   }
   else if(requestedWidth == MATCH_PARENT)
   {
-    const float width = std::max(0.0f, widthConstraint);
-    measuredWidth     = std::max(std::min(width, maxWidth), minWidth);
+    // MATCH_PARENT: report minimum desired size; actual size is determined
+    // by the parent during the Arrange phase.
+    measuredWidth = minWidth;
   }
   else // WRAP_CONTENT
   {
@@ -943,8 +944,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   }
   else if(requestedHeight == MATCH_PARENT)
   {
-    const float height = std::max(0.0f, heightConstraint);
-    measuredHeight     = std::max(std::min(height, maxHeight), minHeight);
+    measuredHeight = minHeight;
   }
   else // WRAP_CONTENT
   {

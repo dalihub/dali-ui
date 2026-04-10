@@ -935,8 +935,10 @@ int UtcDaliViewMeasureMatchParentP(void)
   view.SetRequestedWidth(MATCH_PARENT);
   view.SetRequestedHeight(MATCH_PARENT);
   MeasuredSize size = view.Measure(200.0f, 150.0f);
-  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
+  // MATCH_PARENT reports minimum desired size (0 by default); actual size
+  // is determined by the parent during the Arrange phase.
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1042,8 +1044,10 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
   layout.SetRequestedHeight(MATCH_PARENT);
   layout.Add(View::New().SetRequestedWidth(50.0f).SetRequestedHeight(50.0f));
   MeasuredSize size = layout.Measure(200.0f, 150.0f);
-  DALI_TEST_EQUALS(size.GetWidth(), 200.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION);
+  // MATCH_PARENT layout reports minimum desired size (0 by default);
+  // actual size is determined by its parent during the Arrange phase.
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
   END_TEST;
 }
 

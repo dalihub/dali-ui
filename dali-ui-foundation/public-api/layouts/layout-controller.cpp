@@ -335,12 +335,14 @@ private:
     // Measure pass
     MeasuredSize measuredSize = view->Measure(widthConstraint, heightConstraint);
 
-    // Arrange pass: use the user-set position (parent is not a layout)
+    // Arrange pass: use the user-set position (parent is not a layout).
+    // MATCH_PARENT roots fill the available constraint rather than using
+    // their measured (minimum) size.
     LayoutRect bounds;
     bounds.x      = view->GetPositionX() + static_cast<float>(margin.start);
     bounds.y      = view->GetPositionY() + static_cast<float>(margin.top);
-    bounds.width  = measuredSize.width;
-    bounds.height = measuredSize.height;
+    bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
+    bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
 
     view->Arrange(bounds);
   }

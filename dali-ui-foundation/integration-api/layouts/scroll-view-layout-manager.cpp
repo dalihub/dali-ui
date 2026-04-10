@@ -91,9 +91,12 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
     childData.measuredSize = childSize;
 
-    // For ScrollView, the measured size represents the content size which can be larger than viewport
-    maxWidth  = std::max(maxWidth, childSize.width);
-    maxHeight = std::max(maxHeight, childSize.height);
+    // For ScrollView, the measured size represents the content size which can be larger than viewport.
+    // MATCH_PARENT children fill the viewport, so use the constraint as their contribution.
+    float effectiveWidth  = widthIsMatchParent ? widthConstraint : childSize.width;
+    float effectiveHeight = heightIsMatchParent ? heightConstraint : childSize.height;
+    maxWidth              = std::max(maxWidth, effectiveWidth);
+    maxHeight             = std::max(maxHeight, effectiveHeight);
   }
 
   return MeasuredSize(maxWidth, maxHeight);
@@ -127,6 +130,21 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
     childBounds.width  = childData.measuredSize.width;
     childBounds.height = childData.measuredSize.height;
 
+    // MATCH_PARENT: fill the viewport.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+    {
+      childBounds.width = bounds.width;
+    }
+    if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childBounds.height = bounds.height;
+    }
+
+    // Re-measure MATCH_PARENT children with their final size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(childBounds.width, childBounds.height);
+    }
     // Arrange the child
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;

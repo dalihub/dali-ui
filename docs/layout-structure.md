@@ -102,7 +102,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **MeasuredSize**: measured width and height.
 - **LayoutRect**: x, y, width, height (placement region).
 - **WRAP_CONTENT**: constant (-1.0f) indicating the view sizes to fit its content (natural size or children bounding box).
-- **MATCH_PARENT**: constant (-2.0f) indicating the view fills the parent container's available space.
+- **MATCH_PARENT**: constant (-2.0f) indicating the view fills the parent container's available space. See **MATCH_PARENT semantics** below.
 - **LayoutAlignment**: FILL, START, CENTER, END (used by GridLayoutParams and StackLayoutParams for cross-axis alignment).
 ---
 
@@ -121,6 +121,45 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
+### MATCH_PARENT semantics
+
+A `MATCH_PARENT` view acts as a **follower**: it fills the space assigned by
+its parent during Arrange, rather than influencing the parent's own size
+during Measure.
+
+**Measure phase:**
+- A `MATCH_PARENT` view reports its minimum size (`SetMinimumWidth` /
+  `SetMinimumHeight`, default 0) as its desired size, but its children
+  are still measured normally with the incoming constraint. Only the
+  view's own return value is minSize.
+- Because the desired size is 0 (or minimum), a `WRAP_CONTENT` parent
+  determines its own size exclusively from non-MATCH_PARENT children.
+- Example: parent is `WRAP_CONTENT`, child A is fixed 100px, child B is
+  `MATCH_PARENT` → parent's desired width = 100 (child B contributes 0).
+
+**Arrange phase:**
+- The parent assigns `MATCH_PARENT` children the full available content
+  area (parent size − parent padding − child margin).
+- Before arranging, the parent re-measures the `MATCH_PARENT` child with
+  the final bounds, so its internal state (text layout, nested children)
+  reflects the real available space. The Measure cache prevents redundant
+  work when the constraint has not changed.
+- Continuing the example: parent arranged at 100px → child B is
+  re-measured and arranged at 100px.
+
+**Per-LayoutManager behavior:**
+- **StackLayout**: cross-axis `MATCH_PARENT` fills the available cross-axis
+  space. Main-axis `MATCH_PARENT` fills the full available main-axis space
+  (use weight for proportional sharing).
+- **FlexLayout**: cross-axis `MATCH_PARENT` fills the flex line's cross
+  size. Main-axis `MATCH_PARENT` fills the available main axis; use
+  flex-grow for proportional distribution.
+- **GridLayout**: `MATCH_PARENT` children do not drive AUTO row/column
+  sizing. In Arrange, cells are filled by default (FILL alignment).
+- **AbsoluteLayout**: `MATCH_PARENT` children fill the available content
+  area (when no explicit bounds are set via AbsoluteLayoutParams).
+- **ScrollView**: `MATCH_PARENT` children fill the viewport in Arrange.
+
 ### LayoutMode::Standalone
 
 A child View can opt out of its parent's layout flow by calling
@@ -136,8 +175,10 @@ A Standalone child:
   flex-grow / flex-shrink, weight distribution and visible-child counting,
   in both `ViewImpl::OnMeasure` (plain View parent) and the Stack / Grid /
   Flex / Absolute layout managers.
-- Is still measured normally so `MATCH_PARENT`, `WRAP_CONTENT` and explicit
-  `RequestedWidth` / `RequestedHeight` all resolve.
+- Is still measured normally so `WRAP_CONTENT` and explicit
+  `RequestedWidth` / `RequestedHeight` all resolve. `MATCH_PARENT` reports
+  minimum desired in Measure and fills the parent's full size (minus own
+  margin) in Arrange.
 - **Ignores the parent's padding entirely.** Its measured size is the
   parent's full inner size minus the child's own margin, and its final
   position is `PositionX` / `PositionY` plus the child's own margin in the

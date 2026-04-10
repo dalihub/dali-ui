@@ -183,11 +183,31 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     // with the size resolved during Measure.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents    standaloneMargin = childImpl.GetViewMargin();
+      Extents standaloneMargin = childImpl.GetViewMargin();
+      float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
+      float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
+      Extents parentPadding    = view->GetViewPadding();
+      float   parentWidth      = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+      float   parentHeight     = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+      float   standaloneW      = childData.measuredSize.width;
+      float   standaloneH      = childData.measuredSize.height;
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        standaloneW = std::max(0.0f, parentWidth - marginW);
+      }
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        standaloneH = std::max(0.0f, parentHeight - marginH);
+      }
+      // Re-measure MATCH_PARENT standalone children with their final size.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childImpl.Measure(standaloneW, standaloneH);
+      }
       LayoutRect childBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
                              childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                             childData.measuredSize.width,
-                             childData.measuredSize.height);
+                             standaloneW,
+                             standaloneH);
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
       continue;
@@ -214,11 +234,29 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
 
     if(w < 0)
     {
-      w = childData.measuredSize.width;
+      // MATCH_PARENT: fill the available width minus own margin.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        Extents margin = childImpl.GetViewMargin();
+        w              = std::max(0.0f, availableWidth - static_cast<float>(margin.start + margin.end));
+      }
+      else
+      {
+        w = childData.measuredSize.width;
+      }
     }
     if(h < 0)
     {
-      h = childData.measuredSize.height;
+      // MATCH_PARENT: fill the available height minus own margin.
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        Extents margin = childImpl.GetViewMargin();
+        h              = std::max(0.0f, availableHeight - static_cast<float>(margin.top + margin.bottom));
+      }
+      else
+      {
+        h = childData.measuredSize.height;
+      }
     }
 
     // Proportional position: x = (available - childWidth) * proportion
@@ -236,6 +274,11 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     childBounds.width  = w;
     childBounds.height = h;
 
+    // Re-measure MATCH_PARENT children with their final size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(w, h);
+    }
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
   }

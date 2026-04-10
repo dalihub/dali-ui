@@ -216,10 +216,80 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
 
   if(first.totalWeight > 0.0f && first.visibleChildCount > 0)
   {
-    MeasureStackWeightChildren(children, contentMain, widthConstraint, heightConstraint, first.mainAxisNonWeight,
-                               first.totalWeight, first.visibleChildCount, mSpacing, mOrientation, maxCrossAxis,
-                               getImpl);
-    mainAxisTotal = contentMain;
+    float requestedMain  = (mOrientation == StackOrientation::VERTICAL) ? view->GetRequestedHeight() : view->GetRequestedWidth();
+    bool  isMainAxisWrap = (requestedMain != MATCH_PARENT && requestedMain <= 0.0f);
+
+    float spacingTotal = (first.visibleChildCount > 1) ? mSpacing * (first.visibleChildCount - 1) : 0.0f;
+    float wrappedMain  = first.mainAxisNonWeight + spacingTotal;
+
+    // Determine the target main-axis size for weight distribution.
+    float targetMain;
+    if(isMainAxisWrap)
+    {
+      // WRAP_CONTENT: the target is the larger of the wrapped content and
+      // the view's minimum size (converted to content area by subtracting
+      // padding). The full constraint is NOT used — only the minimum size
+      // can create extra space for weight children.
+      Extents padding        = view->GetViewPadding();
+      float   paddingMain    = (mOrientation == StackOrientation::VERTICAL)
+                                 ? static_cast<float>(padding.top + padding.bottom)
+                                 : static_cast<float>(padding.start + padding.end);
+      float   minMain        = (mOrientation == StackOrientation::VERTICAL) ? view->GetMinimumHeight() : view->GetMinimumWidth();
+      float   minMainContent = std::max(0.0f, minMain - paddingMain);
+      targetMain             = std::max(wrappedMain, minMainContent);
+    }
+    else
+    {
+      // Fixed or MATCH_PARENT: use the full constraint.
+      targetMain = contentMain;
+    }
+
+    if(targetMain > wrappedMain)
+    {
+      // Extra space available — distribute it among weight children.
+      MeasureStackWeightChildren(children, targetMain, widthConstraint, heightConstraint, first.mainAxisNonWeight,
+                                 first.totalWeight, first.visibleChildCount, mSpacing, mOrientation, maxCrossAxis,
+                                 getImpl);
+      mainAxisTotal = targetMain;
+    }
+    else
+    {
+      // No extra space: measure weight children at their natural size
+      // and accumulate normally, just like non-weight children.
+      for(auto& childData : children)
+      {
+        ViewImpl& childImpl = getImpl(childData.view);
+        if(childImpl.IsLayoutModeStandalone())
+        {
+          continue;
+        }
+        float weight = GetChildWeight(childImpl);
+        if(weight <= 0.0f)
+        {
+          continue;
+        }
+
+        Extents      margin                = childImpl.GetViewMargin();
+        float        marginW               = static_cast<float>(margin.start + margin.end);
+        float        marginH               = static_cast<float>(margin.top + margin.bottom);
+        float        childWidthConstraint  = std::max(0.0f, widthConstraint - marginW);
+        float        childHeightConstraint = std::max(0.0f, heightConstraint - marginH);
+        MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+        childData.measuredSize             = childSize;
+
+        if(mOrientation == StackOrientation::VERTICAL)
+        {
+          first.mainAxisNonWeight += childSize.height + marginH;
+          maxCrossAxis = std::max(maxCrossAxis, childSize.width + marginW);
+        }
+        else
+        {
+          first.mainAxisNonWeight += childSize.width + marginW;
+          maxCrossAxis = std::max(maxCrossAxis, childSize.height + marginH);
+        }
+      }
+      mainAxisTotal = first.mainAxisNonWeight + spacingTotal;
+    }
   }
   else
   {
@@ -258,6 +328,92 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   float currentX        = bounds.x;
   float currentY        = bounds.y;
 
+  // Re-distribute weight among weight children using actual arrange bounds.
+  // During Measure, weight distribution may have been skipped (e.g. WRAP_CONTENT
+  // parent with no minSize) or computed against a different constraint. The
+  // arrange bounds represent the real allocated space, so weight children must
+  // be resized accordingly.
+  {
+    float    totalWeight       = 0.0f;
+    float    nonWeightMain     = 0.0f;
+    uint32_t visibleChildCount = 0;
+
+    for(auto& childData : children)
+    {
+      ViewImpl& childImpl = GetImpl(childData.view);
+      if(childImpl.IsLayoutModeStandalone())
+      {
+        continue;
+      }
+      visibleChildCount++;
+      float weight = GetChildWeight(childImpl);
+      if(weight > 0.0f)
+      {
+        totalWeight += weight;
+      }
+      else
+      {
+        Extents margin   = childImpl.GetViewMargin();
+        float   marginM  = (mOrientation == StackOrientation::VERTICAL) ? static_cast<float>(margin.top + margin.bottom)
+                                                                        : static_cast<float>(margin.start + margin.end);
+        float   mainSize = (mOrientation == StackOrientation::VERTICAL) ? childData.measuredSize.height : childData.measuredSize.width;
+        nonWeightMain += mainSize + marginM;
+      }
+    }
+
+    if(totalWeight > 0.0f)
+    {
+      float availableMain = (mOrientation == StackOrientation::VERTICAL) ? availableHeight : availableWidth;
+      float spacingTotal  = (visibleChildCount > 1) ? mSpacing * (visibleChildCount - 1) : 0.0f;
+      float remainingMain = std::max(0.0f, availableMain - nonWeightMain - spacingTotal);
+
+      for(auto& childData : children)
+      {
+        ViewImpl& childImpl = GetImpl(childData.view);
+        if(childImpl.IsLayoutModeStandalone())
+        {
+          continue;
+        }
+        float weight = GetChildWeight(childImpl);
+        if(weight <= 0.0f)
+        {
+          continue;
+        }
+
+        float   share   = (weight / totalWeight) * remainingMain;
+        Extents margin  = childImpl.GetViewMargin();
+        float   marginW = static_cast<float>(margin.start + margin.end);
+        float   marginH = static_cast<float>(margin.top + margin.bottom);
+
+        float childWidthConstraint;
+        float childHeightConstraint;
+        if(mOrientation == StackOrientation::VERTICAL)
+        {
+          childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
+          childHeightConstraint = std::max(0.0f, share - marginH);
+        }
+        else
+        {
+          childWidthConstraint  = std::max(0.0f, share - marginW);
+          childHeightConstraint = std::max(0.0f, availableHeight - marginH);
+        }
+
+        MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+
+        if(mOrientation == StackOrientation::VERTICAL)
+        {
+          childData.measuredSize.width  = childSize.width;
+          childData.measuredSize.height = std::max(0.0f, share - marginH);
+        }
+        else
+        {
+          childData.measuredSize.width  = std::max(0.0f, share - marginW);
+          childData.measuredSize.height = childSize.height;
+        }
+      }
+    }
+  }
+
   for(auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
@@ -268,11 +424,32 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     // cursor and are excluded from spacing.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents    standaloneMargin = childImpl.GetViewMargin();
+      Extents standaloneMargin = childImpl.GetViewMargin();
+      float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
+      float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
+      // Standalone ignores parent padding; recover full parent size from content bounds.
+      Extents parentPadding = view->GetViewPadding();
+      float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+      float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+      float   standaloneW   = childData.measuredSize.width;
+      float   standaloneH   = childData.measuredSize.height;
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        standaloneW = std::max(0.0f, parentWidth - marginW);
+      }
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        standaloneH = std::max(0.0f, parentHeight - marginH);
+      }
+      // Re-measure MATCH_PARENT standalone children with their final size.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childImpl.Measure(standaloneW, standaloneH);
+      }
       LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
                                   childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                                  childData.measuredSize.width,
-                                  childData.measuredSize.height);
+                                  standaloneW,
+                                  standaloneH);
       childImpl.Arrange(standaloneBounds);
       childData.arrangedBounds = standaloneBounds;
       continue;
@@ -286,9 +463,19 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     if(mOrientation == StackOrientation::VERTICAL)
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
-      const float childHeight    = childData.measuredSize.height;
-      const float slotHeight     = childHeight + marginH;
-      const float childWidth     = childData.measuredSize.width;
+      // MATCH_PARENT on main axis: fill the available main-axis space.
+      float childHeight = childData.measuredSize.height;
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childHeight = std::max(0.0f, availableHeight - marginH);
+      }
+      const float slotHeight = childHeight + marginH;
+      float       childWidth = childData.measuredSize.width;
+      // MATCH_PARENT on cross axis: fill the available cross-axis space.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        childWidth = crossAvailable;
+      }
 
       // Cross-axis (horizontal) alignment from StackLayoutParams
       LayoutAlignment crossAlign = GetChildAlignment(childImpl);
@@ -318,6 +505,11 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childBounds.x      = crossX;
       childBounds.y      = currentY + static_cast<float>(margin.top);
 
+      // Re-measure MATCH_PARENT children with their final size.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childImpl.Measure(childBounds.width, childBounds.height);
+      }
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
 
@@ -326,9 +518,19 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     else
     {
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
-      const float childWidth     = childData.measuredSize.width;
-      const float slotWidth      = childWidth + marginW;
-      const float childHeight    = childData.measuredSize.height;
+      // MATCH_PARENT on main axis: fill the available main-axis space.
+      float childWidth = childData.measuredSize.width;
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        childWidth = std::max(0.0f, availableWidth - marginW);
+      }
+      const float slotWidth   = childWidth + marginW;
+      float       childHeight = childData.measuredSize.height;
+      // MATCH_PARENT on cross axis: fill the available cross-axis space.
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childHeight = crossAvailable;
+      }
 
       // Cross-axis (vertical) alignment from StackLayoutParams
       LayoutAlignment crossAlign  = GetChildAlignment(childImpl);
@@ -358,6 +560,11 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childBounds.x      = currentX + static_cast<float>(margin.start);
       childBounds.y      = crossY;
 
+      // Re-measure MATCH_PARENT children with their final size.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childImpl.Measure(childBounds.width, childBounds.height);
+      }
       childImpl.Arrange(childBounds);
       childData.arrangedBounds = childBounds;
 

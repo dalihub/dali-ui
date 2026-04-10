@@ -316,6 +316,11 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
       }
     }
 
+    // Re-measure MATCH_PARENT children with their final cell size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(childBounds.width, childBounds.height);
+    }
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
   }
@@ -403,9 +408,50 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, parentWidth, parentHeight, rowCount,
                                  colCount, mRowDefinitions, mColumnDefinitions, getImpl, rowHeights, colWidths);
 
+  // For WRAP_CONTENT parents, STAR columns/rows should only use the space
+  // up to max(auto+absolute content, minSize), not the full constraint.
+  float requestedWidth  = view->GetRequestedWidth();
+  float requestedHeight = view->GetRequestedHeight();
+
+  float starAvailableWidth  = availableWidth;
+  float starAvailableHeight = availableHeight;
+
+  if(requestedWidth != MATCH_PARENT && requestedWidth <= 0.0f)
+  {
+    // WRAP_CONTENT width: compute the non-star total, then cap at max(that, minSize content).
+    float nonStarWidth = 0.0f;
+    for(uint32_t i = 0; i < colCount; ++i)
+    {
+      if(i >= mColumnDefinitions.Size() || mColumnDefinitions[i].GetType() != GridLengthType::STAR)
+      {
+        nonStarWidth += colWidths[i];
+      }
+    }
+    nonStarWidth += mColumnSpacing * (colCount > 0 ? colCount - 1 : 0);
+    float pw              = static_cast<float>(parentPadding.start + parentPadding.end);
+    float minWidthContent = std::max(0.0f, view->GetMinimumWidth() - pw);
+    starAvailableWidth    = std::max(nonStarWidth, minWidthContent);
+  }
+
+  if(requestedHeight != MATCH_PARENT && requestedHeight <= 0.0f)
+  {
+    float nonStarHeight = 0.0f;
+    for(uint32_t i = 0; i < rowCount; ++i)
+    {
+      if(i >= mRowDefinitions.Size() || mRowDefinitions[i].GetType() != GridLengthType::STAR)
+      {
+        nonStarHeight += rowHeights[i];
+      }
+    }
+    nonStarHeight += mRowSpacing * (rowCount > 0 ? rowCount - 1 : 0);
+    float ph               = static_cast<float>(parentPadding.top + parentPadding.bottom);
+    float minHeightContent = std::max(0.0f, view->GetMinimumHeight() - ph);
+    starAvailableHeight    = std::max(nonStarHeight, minHeightContent);
+  }
+
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
-  ApplyGridDefinitions(rowHeights, colWidths, mRowDefinitions, mColumnDefinitions, availableWidth, availableHeight,
+  ApplyGridDefinitions(rowHeights, colWidths, mRowDefinitions, mColumnDefinitions, starAvailableWidth, starAvailableHeight,
                        mRowSpacing, mColumnSpacing, rowCount, colCount, totalWidth, totalHeight);
 
   return MeasuredSize(totalWidth, totalHeight);
@@ -452,7 +498,7 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   // Arrange standalone children: place at RequestedPositionX/Y plus the
   // child's own margin in the parent's coordinate space (ignoring parent
-  // padding) using the size resolved during Measure.
+  // padding). MATCH_PARENT fills the full parent size minus own margin.
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
@@ -460,11 +506,28 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     {
       continue;
     }
-    Extents    standaloneMargin = childImpl.GetViewMargin();
+    Extents standaloneMargin = childImpl.GetViewMargin();
+    float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
+    float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
+    float   standaloneW      = childData.measuredSize.width;
+    float   standaloneH      = childData.measuredSize.height;
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+    {
+      standaloneW = std::max(0.0f, parentWidth - marginW);
+    }
+    if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      standaloneH = std::max(0.0f, parentHeight - marginH);
+    }
+    // Re-measure MATCH_PARENT standalone children with their final size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(standaloneW, standaloneH);
+    }
     LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
                                 childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                                childData.measuredSize.width,
-                                childData.measuredSize.height);
+                                standaloneW,
+                                standaloneH);
     childImpl.Arrange(standaloneBounds);
     childData.arrangedBounds = standaloneBounds;
   }

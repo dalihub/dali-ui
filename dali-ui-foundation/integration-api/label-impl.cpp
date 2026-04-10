@@ -1053,8 +1053,9 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(requestedWidth == MATCH_PARENT)
   {
-    const float width = std::max(0.0f, widthConstraint);
-    measuredWidth     = std::max(std::min(width, maxWidth), minWidth);
+    // MATCH_PARENT: report minimum desired size; actual size is determined
+    // by the parent during the Arrange phase.
+    measuredWidth = minWidth;
   }
   else // WRAP_CONTENT
   {
@@ -1070,14 +1071,17 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(requestedHeight == MATCH_PARENT)
   {
-    const float height = std::max(0.0f, heightConstraint);
-    measuredHeight     = std::max(std::min(height, maxHeight), minHeight);
+    measuredHeight = minHeight;
   }
   else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    const float height           = (measuredWidth > 0.0f) ? std::max(0.0f, GetHeightForWidth(measuredWidth)) : 0.0f;
-    measuredHeight               = std::max(std::min(height, allowedMaxHeight), minHeight);
+    // When width is MATCH_PARENT, measuredWidth is minWidth (0 by default).
+    // Use widthConstraint for height calculation since that represents the
+    // actual available width the label will receive in Arrange.
+    const float widthForHeight = (requestedWidth == MATCH_PARENT) ? std::max(0.0f, widthConstraint) : measuredWidth;
+    const float height         = (widthForHeight > 0.0f) ? std::max(0.0f, GetHeightForWidth(widthForHeight)) : 0.0f;
+    measuredHeight             = std::max(std::min(height, allowedMaxHeight), minHeight);
   }
 
   if(useTextFitRange && wrapContentMeasure)

@@ -250,6 +250,23 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
     float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom)
                                                 : static_cast<float>(margin.start + margin.end);
 
+    // MATCH_PARENT on cross axis: fill the line's cross-axis space.
+    bool crossIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedHeight() == MATCH_PARENT)
+                                                   : (childImpl.GetRequestedWidth() == MATCH_PARENT);
+    if(crossIsMatchParent)
+    {
+      childCrossSize = line.crossSize - marginCross;
+    }
+
+    // MATCH_PARENT on main axis: fill the available main-axis space.
+    bool mainIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedWidth() == MATCH_PARENT)
+                                                  : (childImpl.GetRequestedHeight() == MATCH_PARENT);
+    if(mainIsMatchParent)
+    {
+      float availMain = isMainAxisHorizontal ? contentWidth : contentHeight;
+      childMainSize   = std::max(0.0f, availMain - marginMain);
+    }
+
     // Use align-self if set, otherwise fall back to align-items
     FlexAlign effectiveAlign = GetAlignSelf(childImpl);
     if(effectiveAlign == FlexAlign::AUTO)
@@ -319,6 +336,11 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
     childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
 
+    // Re-measure MATCH_PARENT children with their final size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(childBounds.width, childBounds.height);
+    }
     childImpl.Arrange(childBounds);
     childData.arrangedBounds = childBounds;
   }
@@ -610,7 +632,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   // Arrange standalone children: place at RequestedPositionX/Y plus the
   // child's own margin in the parent's coordinate space (ignoring parent
-  // padding) using the size resolved during Measure.
+  // padding). MATCH_PARENT fills the full parent size minus own margin.
   for(auto& childData : children)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
@@ -618,11 +640,31 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     {
       continue;
     }
-    Extents    standaloneMargin = childImpl.GetViewMargin();
+    Extents standaloneMargin = childImpl.GetViewMargin();
+    float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
+    float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
+    Extents parentPadding    = view->GetViewPadding();
+    float   parentWidth      = contentWidth + static_cast<float>(parentPadding.start + parentPadding.end);
+    float   parentHeight     = contentHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
+    float   standaloneW      = childData.measuredSize.width;
+    float   standaloneH      = childData.measuredSize.height;
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+    {
+      standaloneW = std::max(0.0f, parentWidth - marginW);
+    }
+    if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      standaloneH = std::max(0.0f, parentHeight - marginH);
+    }
+    // Re-measure MATCH_PARENT standalone children with their final size.
+    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+    {
+      childImpl.Measure(standaloneW, standaloneH);
+    }
     LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
                                 childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                                childData.measuredSize.width,
-                                childData.measuredSize.height);
+                                standaloneW,
+                                standaloneH);
     childImpl.Arrange(standaloneBounds);
     childData.arrangedBounds = standaloneBounds;
   }
