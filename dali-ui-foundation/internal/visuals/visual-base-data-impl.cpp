@@ -394,7 +394,7 @@ void Internal::Visual::Base::Impl::Transform::SetUniforms(Dali::VisualRenderer r
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE, mOffsetSizeMode);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_ORIGIN,
                        PointToVector2(mOrigin, direction) - Vector2(0.5, 0.5));
-  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_ANCHOR_POINT,
+  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_PIVOT,
                        Vector2(0.5, 0.5) - PointToVector2(mAnchorPoint, direction));
   renderer.SetProperty(VisualRenderer::Property::EXTRA_SIZE, mExtraSize);
 }

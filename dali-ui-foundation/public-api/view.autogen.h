@@ -54,11 +54,11 @@
   */ \
   ChildClass& SetParentOrigin(const Vector3& point) { View::SetParentOrigin(point); return *this; } \
   /** \
-  * @brief Sets the pivot point of the View. \
+  * @brief Sets the pivot of the View. \
   * \
-  * @param[in] point The pivot point to set \
+  * @param[in] point The pivot to set \
   */ \
-  ChildClass& SetPivotPoint(const Vector3& point) { View::SetPivotPoint(point); return *this; } \
+  ChildClass& SetPivot(const Vector3& point) { View::SetPivot(point); return *this; } \
   /** \
   * @brief Sets the requested width. \
   * \

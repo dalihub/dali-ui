@@ -33,7 +33,7 @@ namespace Ui
 namespace Align
 {
 /**
- * @brief Describes anchor point and parent origin of visuals
+ * @brief Describes pivot and parent origin of visuals
  */
 enum Type
 {

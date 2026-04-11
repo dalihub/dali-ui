@@ -201,9 +201,9 @@ ViewImpl::~ViewImpl()
 
 void ViewImpl::OnInitialize()
 {
-  Self().SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  Self().SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  Self().SetProperty(Actor::Property::POSITION_USES_ANCHOR_POINT, false);
+  Self().SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
 
   DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
 }
@@ -554,14 +554,14 @@ void ViewImpl::SetParentOrigin(const Vector3& point)
   Self().SetProperty(Actor::Property::PARENT_ORIGIN, point);
 }
 
-Vector3 ViewImpl::GetPivotPoint() const
+Vector3 ViewImpl::GetPivot() const
 {
-  return Self().GetProperty<Vector3>(Actor::Property::ANCHOR_POINT);
+  return Self().GetProperty<Vector3>(Actor::Property::PIVOT);
 }
 
-void ViewImpl::SetPivotPoint(const Vector3& point)
+void ViewImpl::SetPivot(const Vector3& point)
 {
-  Self().SetProperty(Actor::Property::ANCHOR_POINT, point);
+  Self().SetProperty(Actor::Property::PIVOT, point);
 }
 
 UiColor ViewImpl::GetBackgroundColor()

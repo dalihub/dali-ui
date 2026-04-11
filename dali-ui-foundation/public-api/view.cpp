@@ -226,15 +226,15 @@ Vector3 View::GetParentOrigin() const
   return Integration::GetImpl(*this).GetParentOrigin();
 }
 
-View& View::SetPivotPoint(const Vector3& point)
+View& View::SetPivot(const Vector3& point)
 {
-  Integration::GetImpl(*this).SetPivotPoint(point);
+  Integration::GetImpl(*this).SetPivot(point);
   return *this;
 }
 
-Vector3 View::GetPivotPoint() const
+Vector3 View::GetPivot() const
 {
-  return Integration::GetImpl(*this).GetPivotPoint();
+  return Integration::GetImpl(*this).GetPivot();
 }
 
 View& View::SetRequestedWidth(float width)

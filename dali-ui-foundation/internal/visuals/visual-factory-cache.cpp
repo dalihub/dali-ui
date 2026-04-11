@@ -281,8 +281,8 @@ Dali::UniformBlock& VisualFactoryCache::GetDefaultUniformBlock()
     mDefaultUniformBlock.RegisterUniqueProperty("offset", Vector2::ZERO);
     mDefaultUniformBlock.RegisterUniqueProperty("size", Vector2::ONE);
     mDefaultUniformBlock.RegisterUniqueProperty("offsetSizeMode", Vector4::ZERO);
-    mDefaultUniformBlock.RegisterUniqueProperty("origin", -Vector2(0.5f, 0.5f));     ///< TOP_BEGIN for LTR
-    mDefaultUniformBlock.RegisterUniqueProperty("anchorPoint", Vector2(0.5f, 0.5f)); ///< TOP_BEGIN for LTR
+    mDefaultUniformBlock.RegisterUniqueProperty("origin", -Vector2(0.5f, 0.5f)); ///< TOP_BEGIN for LTR
+    mDefaultUniformBlock.RegisterUniqueProperty("pivot", Vector2(0.5f, 0.5f));   ///< TOP_BEGIN for LTR
     mDefaultUniformBlock.RegisterUniqueProperty("extraSize", Vector2::ZERO);
   }
   return mDefaultUniformBlock;

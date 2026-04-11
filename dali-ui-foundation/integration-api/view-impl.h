@@ -245,14 +245,14 @@ public: // API (size, position, parent origin, pivot)
   void SetParentOrigin(const Vector3& point);
 
   /**
-   * @copydoc Dali::Ui::View::GetPivotPoint
+   * @copydoc Dali::Ui::View::GetPivot
    */
-  Vector3 GetPivotPoint() const;
+  Vector3 GetPivot() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetPivotPoint
+   * @copydoc Dali::Ui::View::SetPivot
    */
-  void SetPivotPoint(const Vector3& point);
+  void SetPivot(const Vector3& point);
 
   /**
    * @copydoc Dali::Ui::View::IsFocusable

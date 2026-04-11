@@ -1222,7 +1222,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     }
     case Dali::Ui::Visual::Transform::Property::ANCHOR_POINT:
     {
-      return VisualRenderer::Property::TRANSFORM_ANCHOR_POINT;
+      return VisualRenderer::Property::TRANSFORM_PIVOT;
     }
     case Dali::Ui::Visual::Property::MIX_COLOR:
     {

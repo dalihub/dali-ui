@@ -150,8 +150,8 @@ void DragAndDropDetector::OnPan(Dali::Actor actor, const PanGesture& gesture)
     mShadowView.SetBackgroundColor(UiColor(0.3f, 0.3f, 0.3f, 0.7f));
     mShadowView.SetProperty(Actor::Property::PARENT_ORIGIN,
                             view.GetCurrentProperty<Vector3>(Actor::Property::PARENT_ORIGIN));
-    mShadowView.SetProperty(Actor::Property::ANCHOR_POINT,
-                            view.GetCurrentProperty<Vector3>(Actor::Property::ANCHOR_POINT));
+    mShadowView.SetProperty(Actor::Property::PIVOT,
+                            view.GetCurrentProperty<Vector3>(Actor::Property::PIVOT));
     view.GetParent().Add(mShadowView);
     SetPosition(gesture.GetScreenPosition());
     EmitStartedSignal(view);
