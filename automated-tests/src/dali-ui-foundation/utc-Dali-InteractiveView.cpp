@@ -202,7 +202,7 @@ InteractiveView CreateTestInteractiveView(TestApplication& application, float wi
   InteractiveView view = InteractiveView::New();
   view.SetRequestedWidth(width);
   view.SetRequestedHeight(height);
-  view.SetPivotPoint(AnchorPoint::TOP_LEFT);
+  view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
@@ -220,7 +220,7 @@ InteractiveView CreateTestInteractiveViewFromImpl(TestApplication& application, 
 
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetPivotPoint(AnchorPoint::TOP_LEFT);
+  view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
@@ -457,7 +457,7 @@ int UtcDaliInteractiveViewConnectClickedSignalP(void)
   InteractiveView view = InteractiveView::New();
   view.SetRequestedWidth(100.0f)
       .SetRequestedHeight(100.0f)
-      .SetPivotPoint(AnchorPoint::TOP_LEFT)
+      .SetPivot(Pivot::TOP_LEFT)
       .SetParentOrigin(ParentOrigin::TOP_LEFT)
       .ConnectClickedSignal(&application, functor);
 
@@ -505,7 +505,7 @@ int UtcDaliInteractiveViewConnectPressedChangedSignalP(void)
   InteractiveView view = InteractiveView::New();
   view.SetRequestedWidth(100.0f)
       .SetRequestedHeight(100.0f)
-      .SetPivotPoint(AnchorPoint::TOP_LEFT)
+      .SetPivot(Pivot::TOP_LEFT)
       .SetParentOrigin(ParentOrigin::TOP_LEFT)
       .ConnectPressedChangedSignal(&application, functor);
 
@@ -544,7 +544,7 @@ int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
   InteractiveView view = InteractiveView::New();
   view.SetRequestedWidth(100.0f)
       .SetRequestedHeight(100.0f)
-      .SetPivotPoint(AnchorPoint::TOP_LEFT)
+      .SetPivot(Pivot::TOP_LEFT)
       .SetParentOrigin(ParentOrigin::TOP_LEFT)
       .ConnectLongPressedSignal(&application, functor);
 

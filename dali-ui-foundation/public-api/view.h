@@ -359,18 +359,18 @@ public: // Properties
   Vector3 GetParentOrigin() const;
 
   /**
-   * @brief Sets the pivot point of the View.
+   * @brief Sets the pivot of the View.
    *
-   * @param[in] point The pivot point to set
+   * @param[in] point The pivot to set
    */
-  View& SetPivotPoint(const Vector3& point);
+  View& SetPivot(const Vector3& point);
 
   /**
-   * @brief Gets the pivot point of the View.
+   * @brief Gets the pivot of the View.
    *
-   * @return The pivot point of the View
+   * @return The pivot of the View
    */
-  Vector3 GetPivotPoint() const;
+  Vector3 GetPivot() const;
 
   /**
    * @brief Sets the requested width.

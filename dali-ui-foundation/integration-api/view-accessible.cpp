@@ -557,7 +557,7 @@ bool ViewAccessible::GrabHighlight()
     SetHighlightActor(highlight);
   }
 
-  highlight.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  highlight.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   highlight.SetProperty(Actor::Property::POSITION_Z, 1.0f);
   highlight.SetProperty(Actor::Property::POSITION, Vector2(0.0f, 0.0f));
 

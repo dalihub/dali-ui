@@ -408,32 +408,32 @@ int UtcDaliViewSetParentOriginP(void)
   END_TEST;
 }
 
-int UtcDaliViewGetPivotPointP(void)
+int UtcDaliViewGetPivotP(void)
 {
   UiTestApplication application;
   View view = View::New();
 
-  Vector3 pivotPoint = view.GetPivotPoint();
-  DALI_TEST_EQUALS(pivotPoint.x, 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(pivotPoint.y, 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(pivotPoint.z, 0.5f, TEST_LOCATION);
+  Vector3 pivot = view.GetPivot();
+  DALI_TEST_EQUALS(pivot.x, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.z, 0.5f, TEST_LOCATION);
 
   END_TEST;
 }
 
-int UtcDaliViewSetPivotPointP(void)
+int UtcDaliViewSetPivotP(void)
 {
   UiTestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 0.0f, 0.5f);
 
-  View& result = view.SetPivotPoint(testPivot);
+  View& result = view.SetPivot(testPivot);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
-  Vector3 pivotPoint = view.GetPivotPoint();
-  DALI_TEST_EQUALS(pivotPoint.x, testPivot.x, TEST_LOCATION);
-  DALI_TEST_EQUALS(pivotPoint.y, testPivot.y, TEST_LOCATION);
-  DALI_TEST_EQUALS(pivotPoint.z, testPivot.z, TEST_LOCATION);
+  Vector3 pivot = view.GetPivot();
+  DALI_TEST_EQUALS(pivot.x, testPivot.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.y, testPivot.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.z, testPivot.z, TEST_LOCATION);
 
   END_TEST;
 }
@@ -450,13 +450,13 @@ int UtcDaliViewParentOriginChainingP(void)
   END_TEST;
 }
 
-int UtcDaliViewPivotPointChainingP(void)
+int UtcDaliViewPivotChainingP(void)
 {
   UiTestApplication application;
   View view = View::New();
   const Vector3 testPivot(1.0f, 1.0f, 1.0f);
 
-  View& result = view.SetPivotPoint(testPivot);
+  View& result = view.SetPivot(testPivot);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   END_TEST;

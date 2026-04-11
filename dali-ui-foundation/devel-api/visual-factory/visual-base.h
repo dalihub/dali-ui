@@ -70,8 +70,8 @@ namespace Visual
  * |-------------------------|-------------------|----------|------------------------|-----------------------------------------------------|
  * | offset                  | VECTOR2           | No       | (0,0)                  | Offset of visual from origin | |
  * size                    | VECTOR2           | No       | (1,1)                  | size of visual | | origin | INTEGER
- * or STRING | No       | CENTER                 | origin of the visual @sa Dali::Ui::Align       | | anchorPoint
- * | INTEGER or STRING | No       | CENTER                 | anchor point of the visual @sa Dali::Ui::Align | |
+ * or STRING | No       | CENTER                 | origin of the visual @sa Dali::Ui::Align       | | pivot
+ * | INTEGER or STRING | No       | CENTER                 | pivot of the visual @sa Dali::Ui::Align | |
  * offsetPolicy            | VECTOR2           | No       | ( RELATIVE, RELATIVE ) | @sa
  * Dali::Ui::Visual::Transform::Policy   | | sizePolicy              | VECTOR2           | No       | ( RELATIVE,
  * RELATIVE ) | @sa Dali::Ui::Visual::Transform::Policy   |

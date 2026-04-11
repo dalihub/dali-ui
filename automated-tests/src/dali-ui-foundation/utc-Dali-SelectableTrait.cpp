@@ -83,7 +83,7 @@ View CreateSelectableView(TestApplication& application, float width = 100.0f, fl
   View view = View::New()
   .SetRequestedWidth(width)
   .SetRequestedHeight(height)
-  .SetPivotPoint(AnchorPoint::TOP_LEFT)
+  .SetPivot(Pivot::TOP_LEFT)
   .SetParentOrigin(ParentOrigin::TOP_LEFT)
   .AsSelectable();
 
@@ -384,7 +384,7 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -431,7 +431,7 @@ int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -457,7 +457,7 @@ int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -490,7 +490,7 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -529,7 +529,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -571,7 +571,7 @@ int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
@@ -604,7 +604,7 @@ int UtcDaliSelectableTraitDisableToggleByClickP(void)
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
-  view.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 

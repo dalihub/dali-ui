@@ -159,7 +159,7 @@ View CreateInteractiveView(TestApplication& application, float width = 100.0f, f
   View view = View::New()
     .SetRequestedWidth(width)
     .SetRequestedHeight(height)
-    .SetPivotPoint(AnchorPoint::TOP_LEFT)
+    .SetPivot(Pivot::TOP_LEFT)
     .SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
@@ -606,7 +606,7 @@ int UtcDaliViewAsInteractiveWithLambdaP(void)
   View view = View::New()
     .SetRequestedWidth(100.0f)
     .SetRequestedHeight(100.0f)
-    .SetPivotPoint(AnchorPoint::TOP_LEFT)
+    .SetPivot(Pivot::TOP_LEFT)
     .SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);

@@ -173,7 +173,7 @@ enum Type
 
   /**
    * @brief The anchor-point of the visual
-   * @details Name "anchorPoint", type Align::Type (Property::INTEGER) or Property::STRING.
+   * @details Name "pivot", type Align::Type (Property::INTEGER) or Property::STRING.
    * @see Ui::Align
    * @note The default is Align::TOP_BEGIN.
    */

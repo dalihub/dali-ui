@@ -1263,7 +1263,7 @@ void InputFieldImpl::EnableClipping()
   {
     // Creates an extra actor to be used as stencil buffer.
     mStencil = Actor::New();
-    mStencil.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+    mStencil.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
     mStencil.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
 
     // Enable the clipping property.
@@ -1289,7 +1289,7 @@ void InputFieldImpl::ResizeActor(Actor& actor, const Vector2& size)
 void InputFieldImpl::AddLayer(Actor& layer, Actor& actor)
 {
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  actor.SetProperty(Actor::Property::ANCHOR_POINT, AnchorPoint::TOP_LEFT);
+  actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   Self().Add(actor);
   layer = actor;
 }
