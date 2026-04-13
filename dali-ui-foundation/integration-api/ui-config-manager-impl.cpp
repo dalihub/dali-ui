@@ -122,7 +122,6 @@ bool UiConfigManagerImpl::RegisterLifecycleControllerCallback()
 
 void UiConfigManagerImpl::OnApplicationCreated()
 {
-  // FIXME This method is temporary solution to detect the ready state of the dali-adaptor
   if(mApplicationCreated)
   {
     return;
