@@ -345,6 +345,11 @@ public:
   void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
   /**
+   * @see Dali::Ui::InputField::SetFontVariation(const Dali::String&)
+   */
+  void SetFontVariation(const Dali::String& settings);
+
+  /**
    * @copydoc Dali::Ui::InputField::GetFontVariation
    */
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;

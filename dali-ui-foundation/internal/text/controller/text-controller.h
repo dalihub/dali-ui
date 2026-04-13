@@ -2128,6 +2128,12 @@ public: // Queries & retrieves.
   void SetVariationsMap(const Property::Map& map);
 
   /**
+   * @brief Retrieves font variation values as variation axes.
+   * @return The font variation axes.
+   */
+  Dali::Vector<Text::FontVariationAxis> GetVariations() const;
+
+  /**
    * @brief Sets font variation values from variation axes.
    * @param[in] axes The font variation axes.
    */

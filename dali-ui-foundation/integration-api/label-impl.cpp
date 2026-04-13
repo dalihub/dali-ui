@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -707,26 +708,21 @@ void LabelImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& ax
   mController->SetVariations(axes);
 }
 
+void LabelImpl::SetFontVariation(const Dali::String& settings)
+{
+  auto axes = Text::FontVariation::FromString(settings);
+  if(axes.Empty() && !settings.Empty())
+  {
+    DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
+    return;
+  }
+
+  SetFontVariation(axes);
+}
+
 Dali::Vector<Text::FontVariationAxis> LabelImpl::GetFontVariation() const
 {
-  Dali::Vector<Text::FontVariationAxis> axes;
-  Property::Map                         map;
-  mController->GetVariationsMap(map);
-
-  const std::size_t count = map.Count();
-  for(std::size_t i = 0u; i < count; i++)
-  {
-    const auto& keyValue = map.GetKeyValue(i);
-    if(keyValue.first.type == Property::Key::STRING)
-    {
-      float value = 0.0f;
-      if(keyValue.second.Get(value))
-      {
-        axes.PushBack(Text::FontVariationAxis(keyValue.first.stringKey, value));
-      }
-    }
-  }
-  return axes;
+  return mController->GetVariations();
 }
 
 void LabelImpl::ClearFontVariation()

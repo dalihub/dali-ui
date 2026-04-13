@@ -17,12 +17,10 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
-#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/public-api/label.h>
-#include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 
 namespace Dali
 {
@@ -528,14 +526,7 @@ Label& Label::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes
 
 Label& Label::SetFontVariation(const Dali::String& settings)
 {
-  auto axes = Text::FontVariation::FromString(settings);
-  if(axes.Empty() && !settings.Empty())
-  {
-    DALI_LOG_WARNING("Invalid font variation string: %s\n", settings.CStr());
-    return *this;
-  }
-
-  GetImpl(*this).SetFontVariation(axes);
+  GetImpl(*this).SetFontVariation(settings);
   return *this;
 }
 

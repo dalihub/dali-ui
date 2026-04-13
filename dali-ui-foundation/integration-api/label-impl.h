@@ -440,6 +440,11 @@ public:
   void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
   /**
+   * @see Dali::Ui::Label::SetFontVariation(const Dali::String&)
+   */
+  void SetFontVariation(const Dali::String& settings);
+
+  /**
    * @copydoc Dali::Ui::Label::GetFontVariation
    */
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
