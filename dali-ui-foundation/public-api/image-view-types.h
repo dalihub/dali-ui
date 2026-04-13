@@ -25,14 +25,6 @@ namespace Dali
 {
 namespace Ui
 {
-
-/**
- * @brief ImageDimensions represents the width and height of an image in pixels.
- *
- * This is a UI-layer alias that decouples public API from the core adaptor headers.
- */
-using ImageDimensions = Dali::Uint16Pair;
-
 /**
  * @brief FittingMode configures how the image fits within the defined bounds.
  */
@@ -44,8 +36,6 @@ enum Type
   FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
   OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away
   CENTER,                     ///< The visual should keep original size of image
-  FIT_HEIGHT,                 ///< (Deprecated) Height is scaled proportionately
-  FIT_WIDTH,                  ///< (Deprecated) Width is scaled proportionately
   DONT_CARE                   ///< Process without specific fitting mode
 };
 } // namespace FittingMode

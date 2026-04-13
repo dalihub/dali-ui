@@ -23,6 +23,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/image-view-properties.h>
 #include <dali-ui-foundation/public-api/image-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -53,6 +54,39 @@ class ImageViewImpl;
  */
 class DALI_UI_API ImageView : public View
 {
+public:
+  /**
+   * @brief Property indices for ImageView.
+   *
+   * These can be used with Dali::Handle::GetProperty() and SetProperty().
+   */
+  struct Property
+  {
+    enum
+    {
+      IMAGE                     = ImageViewPropertyIndex::IMAGE,
+      FITTING_MODE              = ImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE             = ImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH             = ImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT            = ImageViewPropertyIndex::DESIRED_HEIGHT,
+      IMAGE_COLOR               = ImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLIED_ALPHA      = ImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      PLACEHOLDER_IMAGE         = ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      IMAGE_LOAD_WITH_VIEW_SIZE = ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL            = ImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK              = ImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_MODE              = ImageViewPropertyIndex::MASKING_MODE,
+      LOAD_POLICY               = ImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY            = ImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING       = ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      FAST_TRACK_UPLOADING      = ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
+      ORIENTATION_CORRECTION    = ImageViewPropertyIndex::ORIENTATION_CORRECTION,
+      N_PATCH_BORDER            = ImageViewPropertyIndex::N_PATCH_BORDER,
+      N_PATCH_BORDER_ONLY       = ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
+      PIXEL_AREA                = ImageViewPropertyIndex::PIXEL_AREA,
+    };
+  };
+
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized ImageView handle.
@@ -224,6 +258,8 @@ public: // Size & Fitting Control
   /**
    * @brief Sets how the image is fitted within the view bounds.
    *
+   * The default fitting mode is Ui::FittingMode::FILL (stretch to fill).
+   *
    * @param[in] fittingMode The fitting mode to use
    * @return Reference to this for fluent chaining
    */
@@ -232,24 +268,39 @@ public: // Size & Fitting Control
   /**
    * @brief Gets the fitting mode.
    *
-   * @return The current fitting mode
+   * @return The current fitting mode (default: FILL)
    */
   Ui::FittingMode::Type GetFittingMode() const;
 
   /**
-   * @brief Sets the desired image dimensions used as a hint for the image loader.
+   * @brief Sets the desired rasterization width as a hint for the image loader.
    *
-   * @param[in] size The desired width and height in pixels
+   * @param[in] width The desired width in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetDesiredSize(Ui::ImageDimensions size);
+  ImageView& SetDesiredWidth(int width);
 
   /**
-   * @brief Gets the desired image dimensions.
+   * @brief Gets the desired rasterization width hint.
    *
-   * @return The currently requested desired size
+   * @return The desired width in pixels, or 0 if not set
    */
-  Ui::ImageDimensions GetDesiredSize() const;
+  int GetDesiredWidth() const;
+
+  /**
+   * @brief Sets the desired rasterization height as a hint for the image loader.
+   *
+   * @param[in] height The desired height in pixels (0 to use natural size)
+   * @return Reference to this for fluent chaining
+   */
+  ImageView& SetDesiredHeight(int height);
+
+  /**
+   * @brief Gets the desired rasterization height hint.
+   *
+   * @return The desired height in pixels, or 0 if not set
+   */
+  int GetDesiredHeight() const;
 
   /**
    * @brief Sets whether the image is loaded synchronously at the current view size.
@@ -274,7 +325,7 @@ public: // Size & Fitting Control
    *
    * @return True if loading image with view size is enabled
    */
-  bool GetImageLoadWithViewSize() const;
+  bool IsImageLoadWithViewSizeEnabled() const;
 
 public: // Advanced Rendering & Masking
   /**
@@ -290,7 +341,7 @@ public: // Advanced Rendering & Masking
    *
    * @return True if pre-multiplied alpha is enabled
    */
-  bool GetPreMultipliedAlpha() const;
+  bool IsPreMultipliedAlpha() const;
 
   /**
    * @brief Sets the URL of an alpha mask image.
@@ -322,7 +373,7 @@ public: // Advanced Rendering & Masking
    *
    * @return True if crop-to-mask is enabled
    */
-  bool GetCropToMask() const;
+  bool IsCropToMask() const;
 
   /**
    * @brief Sets the masking mode.
@@ -388,7 +439,7 @@ public: // Loading Behavior
    *
    * @return True if synchronous loading is enabled
    */
-  bool GetSynchronousLoading() const;
+  bool IsSynchronousLoading() const;
 
   /**
    * @brief Sets whether fast-track uploading is enabled.
@@ -399,14 +450,14 @@ public: // Loading Behavior
    * @param[in] fastTrack True to enable fast-track uploading
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetFastTrackUploading(bool fastTrack);
+  ImageView& SetFastTrackUpload(bool fastTrack);
 
   /**
    * @brief Gets whether fast-track uploading is enabled.
    *
    * @return True if fast-track uploading is enabled
    */
-  bool GetFastTrackUploading() const;
+  bool IsFastTrackUploadEnabled() const;
 
   /**
    * @brief Sets whether EXIF orientation metadata is applied automatically.
@@ -421,7 +472,7 @@ public: // Loading Behavior
    *
    * @return True if orientation correction is enabled
    */
-  bool GetOrientationCorrection() const;
+  bool IsOrientationCorrectionEnabled() const;
 
 public: // N-Patch Border
   /**
@@ -457,7 +508,7 @@ public: // N-Patch Border
    *
    * @return True if only the border regions are rendered
    */
-  bool GetNPatchBorderOnly() const;
+  bool IsNPatchBorderOnly() const;
 
 public: // Depth Index
   /**
@@ -493,14 +544,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The ImageView implementation
    */
-  explicit DALI_INTERNAL ImageView(Integration::ImageViewImpl& implementation);
+  explicit DALI_UI_API ImageView(Integration::ImageViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this ImageView from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_INTERNAL ImageView(Dali::Internal::CustomActor* internal);
+  explicit DALI_UI_API ImageView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

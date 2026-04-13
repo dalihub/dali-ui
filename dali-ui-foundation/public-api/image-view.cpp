@@ -24,35 +24,31 @@ namespace Dali
 namespace Ui
 {
 
-inline Integration::ImageViewImpl& GetImpl(ImageView& obj)
+inline Integration::ImageViewImpl& GetImpl(ImageView& imageView)
 {
-  DALI_ASSERT_ALWAYS(obj);
-  return static_cast<Integration::ImageViewImpl&>(obj.GetImplementation());
+  DALI_ASSERT_ALWAYS(imageView);
+  return static_cast<Integration::ImageViewImpl&>(imageView.GetImplementation());
 }
 
-inline const Integration::ImageViewImpl& GetImpl(const ImageView& obj)
+inline const Integration::ImageViewImpl& GetImpl(const ImageView& imageView)
 {
-  DALI_ASSERT_ALWAYS(obj);
-  return static_cast<const Integration::ImageViewImpl&>(obj.GetImplementation());
+  DALI_ASSERT_ALWAYS(imageView);
+  return static_cast<const Integration::ImageViewImpl&>(imageView.GetImplementation());
 }
 
-ImageView::ImageView()
-{
-}
-
+ImageView::ImageView()                                      = default;
+ImageView::~ImageView()                                     = default;
 ImageView::ImageView(const ImageView& imageView)            = default;
 ImageView::ImageView(ImageView&& rhs) noexcept              = default;
 ImageView& ImageView::operator=(const ImageView& imageView) = default;
 ImageView& ImageView::operator=(ImageView&& rhs) noexcept   = default;
 
-ImageView::~ImageView()
-{
-}
-
 ImageView ImageView::New()
 {
   Integration::ImageViewImplPtr impl = Integration::ImageViewImpl::New();
   ImageView                     view(*impl);
+
+  // Second-phase initialization
   impl->Initialize();
   return view;
 }
@@ -61,6 +57,8 @@ ImageView ImageView::New(const Dali::String& url)
 {
   Integration::ImageViewImplPtr impl = Integration::ImageViewImpl::New();
   ImageView                     view(*impl);
+
+  // Second-phase initialization
   impl->Initialize();
   if(!url.Empty())
   {
@@ -107,9 +105,9 @@ ImageView& ImageView::SetPreMultipliedAlpha(bool preMultiplied)
   return *this;
 }
 
-bool ImageView::GetPreMultipliedAlpha() const
+bool ImageView::IsPreMultipliedAlpha() const
 {
-  return Ui::GetImpl(*this).GetPreMultipliedAlpha();
+  return Ui::GetImpl(*this).IsPreMultipliedAlpha();
 }
 
 ImageView& ImageView::SetSamplingMode(Ui::SamplingMode::Type samplingMode)
@@ -134,15 +132,26 @@ Ui::FittingMode::Type ImageView::GetFittingMode() const
   return Ui::GetImpl(*this).GetFittingMode();
 }
 
-ImageView& ImageView::SetDesiredSize(Ui::ImageDimensions size)
+ImageView& ImageView::SetDesiredWidth(int width)
 {
-  Ui::GetImpl(*this).SetDesiredSize(size);
+  Ui::GetImpl(*this).SetDesiredWidth(width);
   return *this;
 }
 
-Ui::ImageDimensions ImageView::GetDesiredSize() const
+int ImageView::GetDesiredWidth() const
 {
-  return Ui::GetImpl(*this).GetDesiredSize();
+  return Ui::GetImpl(*this).GetDesiredWidth();
+}
+
+ImageView& ImageView::SetDesiredHeight(int height)
+{
+  Ui::GetImpl(*this).SetDesiredHeight(height);
+  return *this;
+}
+
+int ImageView::GetDesiredHeight() const
+{
+  return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
 ImageView& ImageView::SetAlphaMaskUrl(const Dali::String& maskUrl)
@@ -162,9 +171,9 @@ ImageView& ImageView::SetCropToMask(bool cropToMask)
   return *this;
 }
 
-bool ImageView::GetCropToMask() const
+bool ImageView::IsCropToMask() const
 {
-  return Ui::GetImpl(*this).GetCropToMask();
+  return Ui::GetImpl(*this).IsCropToMask();
 }
 
 ImageView& ImageView::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
@@ -195,9 +204,9 @@ ImageView& ImageView::SetSynchronousLoading(bool synchronous)
   return *this;
 }
 
-bool ImageView::GetSynchronousLoading() const
+bool ImageView::IsSynchronousLoading() const
 {
-  return Ui::GetImpl(*this).GetSynchronousLoading();
+  return Ui::GetImpl(*this).IsSynchronousLoading();
 }
 
 ImageView& ImageView::SetPlaceholderUrl(const Dali::String& url)
@@ -217,9 +226,9 @@ ImageView& ImageView::SetImageLoadWithViewSize(bool enabled)
   return *this;
 }
 
-bool ImageView::GetImageLoadWithViewSize() const
+bool ImageView::IsImageLoadWithViewSizeEnabled() const
 {
-  return Ui::GetImpl(*this).GetImageLoadWithViewSize();
+  return Ui::GetImpl(*this).IsImageLoadWithViewSizeEnabled();
 }
 
 ImageView& ImageView::SetMaskingMode(Ui::MaskingType::Type maskingMode)
@@ -244,15 +253,15 @@ UiColor ImageView::GetImageColor() const
   return Ui::GetImpl(*this).GetImageColor();
 }
 
-ImageView& ImageView::SetFastTrackUploading(bool fastTrack)
+ImageView& ImageView::SetFastTrackUpload(bool fastTrack)
 {
-  Ui::GetImpl(*this).SetFastTrackUploading(fastTrack);
+  Ui::GetImpl(*this).SetFastTrackUpload(fastTrack);
   return *this;
 }
 
-bool ImageView::GetFastTrackUploading() const
+bool ImageView::IsFastTrackUploadEnabled() const
 {
-  return Ui::GetImpl(*this).GetFastTrackUploading();
+  return Ui::GetImpl(*this).IsFastTrackUploadEnabled();
 }
 
 ImageView& ImageView::SetOrientationCorrection(bool orientationCorrection)
@@ -261,9 +270,9 @@ ImageView& ImageView::SetOrientationCorrection(bool orientationCorrection)
   return *this;
 }
 
-bool ImageView::GetOrientationCorrection() const
+bool ImageView::IsOrientationCorrectionEnabled() const
 {
-  return Ui::GetImpl(*this).GetOrientationCorrection();
+  return Ui::GetImpl(*this).IsOrientationCorrectionEnabled();
 }
 
 ImageView& ImageView::SetNPatchBorder(const Vector4& border)
@@ -283,9 +292,9 @@ ImageView& ImageView::SetNPatchBorderOnly(bool borderOnly)
   return *this;
 }
 
-bool ImageView::GetNPatchBorderOnly() const
+bool ImageView::IsNPatchBorderOnly() const
 {
-  return Ui::GetImpl(*this).GetNPatchBorderOnly();
+  return Ui::GetImpl(*this).IsNPatchBorderOnly();
 }
 
 ImageView& ImageView::SetDepthIndex(int depthIndex)

@@ -17,9 +17,16 @@
  *
  */
 
+#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
+#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
+#include <dali-ui-foundation/public-api/lottie-animation-view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/object/property-map.h>
+#include <dali/public-api/signals/dali-signal.h>
 
 namespace Dali
 {
@@ -39,25 +46,41 @@ using LottieAnimationViewImplPtr = IntrusivePtr<LottieAnimationViewImpl>;
 class DALI_UI_API LottieAnimationViewImpl : public ViewImpl
 {
 public: // Properties
-  /// @brief The start and end property ranges for this impl.
-  enum
-  {
-    PROPERTY_START_INDEX = Dali::PROPERTY_REGISTRATION_START_INDEX,
-  };
-
   /**
-   * @brief Enumeration for the instance of properties belonging to the LottieAnimationViewImpl class.
+   * @brief Property indices — aliased from the shared LottieAnimationViewPropertyIndex.
    */
   struct Property
   {
     enum
     {
-      /**
-       * @brief The URL of the Lottie JSON file.
-       * @details Name "image", type Property::STRING.
-       */
-      IMAGE = PROPERTY_START_INDEX,
+      IMAGE                      = Ui::LottieAnimationViewPropertyIndex::IMAGE,
+      LOOP_COUNT                 = Ui::LottieAnimationViewPropertyIndex::LOOP_COUNT,
+      LOOPING_MODE               = Ui::LottieAnimationViewPropertyIndex::LOOPING_MODE,
+      STOP_BEHAVIOR              = Ui::LottieAnimationViewPropertyIndex::STOP_BEHAVIOR,
+      FRAME_SPEED_FACTOR         = Ui::LottieAnimationViewPropertyIndex::FRAME_SPEED_FACTOR,
+      IMAGE_COLOR                = Ui::LottieAnimationViewPropertyIndex::IMAGE_COLOR,
+      DESIRED_WIDTH              = Ui::LottieAnimationViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT             = Ui::LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
+      RELEASE_POLICY             = Ui::LottieAnimationViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING        = Ui::LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
+      PRE_MULTIPLIED_ALPHA       = Ui::LottieAnimationViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      REDRAW_IN_SCALING_DOWN     = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
+      REDRAW_IN_SCALING_UP       = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
+      ENABLE_FRAME_CACHE         = Ui::LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
+      NOTIFY_AFTER_RASTERIZATION = Ui::LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
+      RENDER_SCALE               = Ui::LottieAnimationViewPropertyIndex::RENDER_SCALE,
+      PLACEHOLDER_IMAGE          = Ui::LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
     };
+  };
+
+  /**
+   * @brief Internal enum for how the play range was set.
+   */
+  enum class PlayRangeType
+  {
+    NONE,  ///< No play range override
+    FRAME, ///< Range set via SetMinMaxFrame
+    MARKER ///< Range set via SetMinMaxFrameByMarker
   };
 
 protected: // Construction & Destruction
@@ -92,9 +115,7 @@ public: // API
   void SetResourceUrl(const Dali::String& url);
 
   /**
-   * @brief Gets the current Lottie animation file URL.
-   *
-   * @return The URL of the Lottie JSON file currently set on this view
+   * @copydoc Dali::Ui::LottieAnimationView::GetResourceUrl
    */
   Dali::String GetResourceUrl() const;
 
@@ -123,6 +144,216 @@ public: // API
    */
   int GetLoopCount() const;
 
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::JumpToFrame
+   */
+  void JumpToFrame(int frame);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrame
+   */
+  void SetMinMaxFrame(int minFrame, int maxFrame);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetMinMaxFrameByMarker
+   */
+  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetStopBehavior
+   */
+  void SetStopBehavior(LottieAnimationViewStopBehavior::Type behavior);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetStopBehavior
+   */
+  LottieAnimationViewStopBehavior::Type GetStopBehavior() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetLoopingMode
+   */
+  void SetLoopingMode(LottieAnimationViewLoopingMode::Type mode);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetLoopingMode
+   */
+  LottieAnimationViewLoopingMode::Type GetLoopingMode() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetFrameSpeedFactor
+   */
+  void SetFrameSpeedFactor(float factor);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetFrameSpeedFactor
+   */
+  float GetFrameSpeedFactor() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetPlayState
+   */
+  LottieAnimationViewPlayState::Type GetPlayState() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetCurrentFrame
+   */
+  int GetCurrentFrame() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetTotalFrame
+   */
+  int GetTotalFrame() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetRedrawOnScaleDown
+   */
+  void SetRedrawOnScaleDown(bool redraw);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsRedrawOnScaleDown
+   */
+  bool IsRedrawOnScaleDown() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetRedrawOnScaleUp
+   */
+  void SetRedrawOnScaleUp(bool redraw);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsRedrawOnScaleUp
+   */
+  bool IsRedrawOnScaleUp() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetEnableFrameCache
+   */
+  void SetEnableFrameCache(bool enable);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsFrameCacheEnabled
+   */
+  bool IsFrameCacheEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetNotifyAfterRasterization
+   */
+  void SetNotifyAfterRasterization(bool notify);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsNotifyAfterRasterizationEnabled
+   */
+  bool IsNotifyAfterRasterizationEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetRenderScale
+   */
+  void SetRenderScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetRenderScale
+   */
+  float GetRenderScale() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetContentInfo
+   */
+  Dali::Property::Map GetContentInfo();
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetMarkerInfo
+   */
+  Dali::Property::Map GetMarkerInfo();
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetDynamicProperty
+   */
+  void SetDynamicProperty(const LottieAnimationViewDynamicPropertyInfo& info);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetDesiredWidth
+   */
+  void SetDesiredWidth(int width);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetDesiredWidth
+   */
+  int GetDesiredWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetDesiredHeight
+   */
+  void SetDesiredHeight(int height);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetDesiredHeight
+   */
+  int GetDesiredHeight() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetReleasePolicy
+   */
+  void SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetReleasePolicy
+   */
+  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetSynchronousLoading
+   */
+  void SetSynchronousLoading(bool synchronous);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsSynchronousLoading
+   */
+  bool IsSynchronousLoading() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetPreMultipliedAlpha
+   */
+  void SetPreMultipliedAlpha(bool preMultiplied);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsPreMultipliedAlpha
+   */
+  bool IsPreMultipliedAlpha() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetImageColor
+   */
+  void SetImageColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetImageColor
+   */
+  UiColor GetImageColor() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetDepthIndex
+   */
+  void SetDepthIndex(int depthIndex);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetPlaceholderUrl
+   */
+  void SetPlaceholderUrl(const Dali::String& url);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetPlaceholderUrl
+   */
+  Dali::String GetPlaceholderUrl() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::AnimationFinishedSignal
+   */
+  Dali::Signal<void(Dali::Ui::LottieAnimationView)>& AnimationFinishedSignal();
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetLoadingStatus
+   */
+  Ui::Visual::ResourceStatus GetLoadingStatus() const;
+
 private: // From ViewImpl
   /**
    * @copydoc Integration::ViewImpl::OnInitialize
@@ -140,6 +371,21 @@ private: // Internal methods
    */
   void UpdateVisual();
 
+  /**
+   * @brief Called when a visual event signal is emitted.
+   */
+  void OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId);
+
+  /**
+   * @brief Rebuilds and re-registers the placeholder visual.
+   */
+  void UpdatePlaceholderVisual();
+
+  /**
+   * @brief Called when the view's ResourceReady signal is emitted.
+   */
+  void OnViewResourceReady(Ui::View view);
+
 private:
   // Not copyable or movable
   LottieAnimationViewImpl(const LottieAnimationViewImpl&)            = delete;
@@ -147,9 +393,38 @@ private:
   LottieAnimationViewImpl& operator=(const LottieAnimationViewImpl&) = delete;
   LottieAnimationViewImpl& operator=(LottieAnimationViewImpl&&)      = delete;
 
-private: // Data
+private:                    // Data
+  Ui::Visual::Base mVisual; ///< The registered Lottie visual; null when no URL is set
+
   Dali::String mUrl;
-  int          mLoopCount;
+  Dali::String mMinFrameMarker;
+  Dali::String mMaxFrameMarker;
+  Dali::String mPlaceholderUrl;
+
+  UiColor mImageColor;
+
+  LottieAnimationViewStopBehavior::Type mStopBehavior;
+  LottieAnimationViewLoopingMode::Type  mLoopingMode;
+  PlayRangeType                         mPlayRangeType;
+  Ui::ReleasePolicy::Type               mReleasePolicy;
+  int                                   mLoopCount;
+  int                                   mMinFrame;
+  int                                   mMaxFrame;
+  int                                   mDesiredWidth;
+  int                                   mDesiredHeight;
+  int                                   mDepthIndex;
+  float                                 mFrameSpeedFactor;
+  float                                 mRenderScale;
+
+  bool mRedrawInScalingDown;
+  bool mRedrawInScalingUp;
+  bool mEnableFrameCache;
+  bool mNotifyAfterRasterization;
+  bool mSynchronousLoading;
+  bool mPreMultipliedAlpha;
+  bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
+
+  Dali::Signal<void(Dali::Ui::LottieAnimationView)> mAnimationFinishedSignal;
 };
 
 } // namespace Integration

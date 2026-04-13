@@ -15,6 +15,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/animated-image-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
@@ -32,17 +33,24 @@ const char* const IMAGES[] = {
   RESOURCES_DIR "people-small-10.jpg",
 };
 constexpr int IMAGE_COUNT = 4;
+
+const char* const GIF_IMAGES[] = {
+  RESOURCES_DIR "dali-logo-anim.gif",
+  RESOURCES_DIR "animatedLoading.gif",
+};
+constexpr int GIF_IMAGE_COUNT = 2;
 } // namespace
 
 /**
  * ImageView FittingMode sample:
- * - Shows an image with the current FittingMode applied
+ * - Shows images with the current FittingMode applied
+ * - Tests: ImageView (JPG), ImageView (GIF), AnimatedImageView (GIF)
  * - 4 buttons at the bottom to select a FittingMode
  * - 1 button to cycle through images
  * - Active fitting mode button is highlighted
  * - Press Escape or Back to quit
  */
-class ImageViewFittingModeController : public ConnectionTracker
+class ImageFittingModeController : public ConnectionTracker
 {
   static constexpr int MODE_COUNT = 4;
 
@@ -60,12 +68,13 @@ class ImageViewFittingModeController : public ConnectionTracker
   };
 
 public:
-  explicit ImageViewFittingModeController(Application& application)
+  explicit ImageFittingModeController(Application& application)
   : mApplication(application),
     mActiveIndex(0),
-    mImageIndex(0)
+    mImageIndex(0),
+    mGifIndex(0)
   {
-    mApplication.InitSignal().Connect(this, &ImageViewFittingModeController::OnInit);
+    mApplication.InitSignal().Connect(this, &ImageFittingModeController::OnInit);
   }
 
 private:
@@ -76,22 +85,83 @@ private:
 
     window.Add(CreateContents());
 
-    window.KeyEventSignal().Connect(this, &ImageViewFittingModeController::OnKeyEvent);
+    window.KeyEventSignal().Connect(this, &ImageFittingModeController::OnKeyEvent);
   }
 
   View CreateContents()
   {
+    // ImageView (JPG)
+    ImageView::New(IMAGES[mImageIndex])
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFittingMode(MODES[mActiveIndex].mode)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .As(mImageView);
+
+    // ImageView (GIF)
+    ImageView::New(GIF_IMAGES[mGifIndex])
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFittingMode(MODES[mActiveIndex].mode)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .As(mGifImageView);
+
+    // AnimatedImageView (GIF)
+    AnimatedImageView::New(GIF_IMAGES[mGifIndex])
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetFittingMode(MODES[mActiveIndex].mode)
+      .SetLoopCount(-1)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .As(mAnimatedImageView);
+
+    mAnimatedImageView.Play();
+
     return StackLayout::New(StackOrientation::VERTICAL)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .Children({
-        ImageView::New(IMAGES[mImageIndex])
+        CreateImageRow(),
+        CreateButtonRow(),
+      });
+  }
+
+  View CreateImageRow()
+  {
+    return StackLayout::New(StackOrientation::HORIZONTAL)
+      .Spacing(4.0f)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .Children({
+        CreateImageContainer("ImageView\n(JPG)", mImageView),
+        CreateImageContainer("ImageView\n(GIF)", mGifImageView),
+        CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
+      });
+  }
+
+  View CreateImageContainer(const char* label, View imageView)
+  {
+    return StackLayout::New(StackOrientation::VERTICAL)
+      .Spacing(2.0f)
+      .SetRequestedWidth(WRAP_CONTENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .Children({
+        Label::New(label)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(32.0f)
+          .SetFontSize(10.0f)
+          .SetMultiLine(true)
+          .SetTextColor(UiColor(0xAAAAAA))
+          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+          .SetVerticalTextAlignment(Text::Alignment::CENTER),
+        StackLayout::New(StackOrientation::HORIZONTAL)
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(WRAP_CONTENT)
-          .SetFittingMode(MODES[mActiveIndex].mode)
           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .As(mImage),
-        CreateButtonRow(),
+          .SetBackgroundColor(UiColor(0x2A2A2A))
+          .Children({imageView}),
       });
   }
 
@@ -131,7 +201,7 @@ private:
                                .SetVerticalTextAlignment(Text::Alignment::CENTER),
                            });
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewFittingModeController::OnModeButtonClicked);
+    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnModeButtonClicked);
 
     mButtons[index] = button;
     return button;
@@ -155,7 +225,7 @@ private:
                                .SetVerticalTextAlignment(Text::Alignment::CENTER),
                            });
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewFittingModeController::OnSwapButtonClicked);
+    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnSwapButtonClicked);
 
     mSwapButton = button;
     return button;
@@ -176,8 +246,13 @@ private:
   void OnSwapButtonClicked(View /*clickedView*/, const InputEvent& /*event*/)
   {
     mImageIndex = (mImageIndex + 1) % IMAGE_COUNT;
-    mImage.SetResourceUrl(IMAGES[mImageIndex]);
-    DALI_LOG_RELEASE_INFO("Image changed to: %s\n", IMAGES[mImageIndex]);
+    mGifIndex = (mGifIndex + 1) % GIF_IMAGE_COUNT;
+
+    mImageView.SetResourceUrl(IMAGES[mImageIndex]);
+    mGifImageView.SetResourceUrl(GIF_IMAGES[mGifIndex]);
+    mAnimatedImageView.SetResourceUrl(GIF_IMAGES[mGifIndex]);
+
+    DALI_LOG_RELEASE_INFO("Images changed to: %s, %s\n", IMAGES[mImageIndex], GIF_IMAGES[mGifIndex]);
   }
 
   void SelectMode(int index)
@@ -185,7 +260,11 @@ private:
     mButtons[mActiveIndex].SetBackgroundColor(UiColor(0x333333));
     mActiveIndex = index;
     mButtons[mActiveIndex].SetBackgroundColor(UiColor(0x4A90E2));
-    mImage.SetFittingMode(MODES[mActiveIndex].mode);
+
+    // Apply FittingMode to all image views
+    mImageView.SetFittingMode(MODES[mActiveIndex].mode);
+    mGifImageView.SetFittingMode(MODES[mActiveIndex].mode);
+    mAnimatedImageView.SetFittingMode(MODES[mActiveIndex].mode);
 
     DALI_LOG_RELEASE_INFO("FittingMode changed to: %s\n", MODES[mActiveIndex].name);
   }
@@ -202,21 +281,24 @@ private:
   }
 
 private:
-  Application&  mApplication;
-  Ui::ImageView mImage;
-  View          mButtons[MODE_COUNT];
-  View          mSwapButton;
-  int           mActiveIndex;
-  int           mImageIndex;
+  Application&      mApplication;
+  Ui::ImageView     mImageView;
+  Ui::ImageView     mGifImageView;
+  AnimatedImageView mAnimatedImageView;
+  View              mButtons[MODE_COUNT];
+  View              mSwapButton;
+  int               mActiveIndex;
+  int               mImageIndex;
+  int               mGifIndex;
 };
 
-constexpr ImageViewFittingModeController::ModeEntry ImageViewFittingModeController::MODES[ImageViewFittingModeController::MODE_COUNT];
+constexpr ImageFittingModeController::ModeEntry ImageFittingModeController::MODES[ImageFittingModeController::MODE_COUNT];
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
-  ImageViewFittingModeController controller(application);
+  ImageFittingModeController controller(application);
   application.MainLoop();
   return 0;
 }

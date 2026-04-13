@@ -19,9 +19,9 @@
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/image-view-properties.h>
 #include <dali-ui-foundation/public-api/image-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector4.h>
@@ -45,146 +45,33 @@ using ImageViewImplPtr = IntrusivePtr<ImageViewImpl>;
 class DALI_UI_API ImageViewImpl : public ViewImpl
 {
 public: // Properties
-  /// @brief The start and end property ranges for this impl.
-  enum
-  {
-    PROPERTY_START_INDEX = Dali::PROPERTY_REGISTRATION_START_INDEX,
-  };
-
   /**
-   * @brief Enumeration for the instance of properties belonging to the ImageViewImpl class.
+   * @brief Property indices — aliased from the shared ImageViewPropertyIndex.
    */
   struct Property
   {
     enum
     {
-      ///////////////////////////////////////////////////////////////////////////////
-      // Event side (non-animatable) properties
-      ///////////////////////////////////////////////////////////////////////////////
-
-      /**
-       * @brief The URL of the image resource.
-       * @details Name "image", type Property::STRING.
-       */
-      IMAGE = PROPERTY_START_INDEX,
-
-      /**
-       * @brief The fitting mode used when scaling the image.
-       * @details Name "fittingMode", type Property::INTEGER.
-       */
-      FITTING_MODE,
-
-      /**
-       * @brief The sampling mode used when scaling the image.
-       * @details Name "samplingMode", type Property::INTEGER.
-       */
-      SAMPLING_MODE,
-
-      /**
-       * @brief The desired image width hint for the image loader.
-       * @details Name "desiredWidth", type Property::FLOAT.
-       */
-      DESIRED_WIDTH,
-
-      /**
-       * @brief The desired image height hint for the image loader.
-       * @details Name "desiredHeight", type Property::FLOAT.
-       */
-      DESIRED_HEIGHT,
-
-      /**
-       * @brief The color multiplier applied to the image.
-       * @details Name "imageColor", type Property::VECTOR4.
-       */
-      IMAGE_COLOR,
-
-      /**
-       * @brief Whether the image uses pre-multiplied alpha.
-       * @details Name "preMultipliedAlpha", type Property::BOOLEAN.
-       */
-      PRE_MULTIPLIED_ALPHA,
-
-      /**
-       * @brief The URL of the placeholder image shown while loading.
-       * @details Name "placeholderImage", type Property::STRING.
-       */
-      PLACEHOLDER_IMAGE,
-
-      /**
-       * @brief Whether the view size is resolved synchronously during loading.
-       * @details Name "imageLoadWithViewSize", type Property::BOOLEAN.
-       */
-      IMAGE_LOAD_WITH_VIEW_SIZE,
-
-      /**
-       * @brief The URL of the alpha mask image.
-       * @details Name "alphaMaskUrl", type Property::STRING.
-       */
-      ALPHA_MASK_URL,
-
-      /**
-       * @brief Whether the image is cropped to the mask bounds.
-       * @details Name "cropToMask", type Property::BOOLEAN.
-       */
-      CROP_TO_MASK,
-
-      /**
-       * @brief The masking mode.
-       * @details Name "maskingMode", type Property::INTEGER.
-       */
-      MASKING_MODE,
-
-      /**
-       * @brief The load policy for the image resource.
-       * @details Name "loadPolicy", type Property::INTEGER.
-       */
-      LOAD_POLICY,
-
-      /**
-       * @brief The release policy for the image resource.
-       * @details Name "releasePolicy", type Property::INTEGER.
-       */
-      RELEASE_POLICY,
-
-      /**
-       * @brief Whether the image is loaded synchronously on the main thread.
-       * @details Name "synchronousLoading", type Property::BOOLEAN.
-       */
-      SYNCHRONOUS_LOADING,
-
-      /**
-       * @brief Whether fast-track GPU uploading is enabled.
-       * @details Name "fastTrackUploading", type Property::BOOLEAN.
-       */
-      FAST_TRACK_UPLOADING,
-
-      /**
-       * @brief Whether EXIF orientation metadata is applied automatically.
-       * @details Name "orientationCorrection", type Property::BOOLEAN.
-       */
-      ORIENTATION_CORRECTION,
-
-      /**
-       * @brief The N-patch border insets as (left, top, right, bottom).
-       * @details Name "nPatchBorder", type Property::VECTOR4.
-       */
-      N_PATCH_BORDER,
-
-      /**
-       * @brief Whether only the N-patch border regions are rendered.
-       * @details Name "nPatchBorderOnly", type Property::BOOLEAN.
-       */
-      N_PATCH_BORDER_ONLY,
-
-      ///////////////////////////////////////////////////////////////////////////////
-      // Animatable Properties
-      ///////////////////////////////////////////////////////////////////////////////
-
-      /**
-       * @brief The normalized sub-region of the image to display.
-       * @details Name "pixelArea", type Property::VECTOR4.
-       */
-      PIXEL_AREA = ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
+      IMAGE                     = Ui::ImageViewPropertyIndex::IMAGE,
+      FITTING_MODE              = Ui::ImageViewPropertyIndex::FITTING_MODE,
+      SAMPLING_MODE             = Ui::ImageViewPropertyIndex::SAMPLING_MODE,
+      DESIRED_WIDTH             = Ui::ImageViewPropertyIndex::DESIRED_WIDTH,
+      DESIRED_HEIGHT            = Ui::ImageViewPropertyIndex::DESIRED_HEIGHT,
+      IMAGE_COLOR               = Ui::ImageViewPropertyIndex::IMAGE_COLOR,
+      PRE_MULTIPLIED_ALPHA      = Ui::ImageViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      PLACEHOLDER_IMAGE         = Ui::ImageViewPropertyIndex::PLACEHOLDER_IMAGE,
+      IMAGE_LOAD_WITH_VIEW_SIZE = Ui::ImageViewPropertyIndex::IMAGE_LOAD_WITH_VIEW_SIZE,
+      ALPHA_MASK_URL            = Ui::ImageViewPropertyIndex::ALPHA_MASK_URL,
+      CROP_TO_MASK              = Ui::ImageViewPropertyIndex::CROP_TO_MASK,
+      MASKING_MODE              = Ui::ImageViewPropertyIndex::MASKING_MODE,
+      LOAD_POLICY               = Ui::ImageViewPropertyIndex::LOAD_POLICY,
+      RELEASE_POLICY            = Ui::ImageViewPropertyIndex::RELEASE_POLICY,
+      SYNCHRONOUS_LOADING       = Ui::ImageViewPropertyIndex::SYNCHRONOUS_LOADING,
+      FAST_TRACK_UPLOADING      = Ui::ImageViewPropertyIndex::FAST_TRACK_UPLOADING,
+      ORIENTATION_CORRECTION    = Ui::ImageViewPropertyIndex::ORIENTATION_CORRECTION,
+      N_PATCH_BORDER            = Ui::ImageViewPropertyIndex::N_PATCH_BORDER,
+      N_PATCH_BORDER_ONLY       = Ui::ImageViewPropertyIndex::N_PATCH_BORDER_ONLY,
+      PIXEL_AREA                = Ui::ImageViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -281,14 +168,24 @@ public: // API — Size & Fitting Control
   Ui::FittingMode::Type GetFittingMode() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetDesiredSize
+   * @copydoc Dali::Ui::ImageView::SetDesiredWidth
    */
-  void SetDesiredSize(Ui::ImageDimensions size);
+  void SetDesiredWidth(int width);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetDesiredSize
+   * @copydoc Dali::Ui::ImageView::GetDesiredWidth
    */
-  Ui::ImageDimensions GetDesiredSize() const;
+  int GetDesiredWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::ImageView::SetDesiredHeight
+   */
+  void SetDesiredHeight(int height);
+
+  /**
+   * @copydoc Dali::Ui::ImageView::GetDesiredHeight
+   */
+  int GetDesiredHeight() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetImageLoadWithViewSize
@@ -296,9 +193,9 @@ public: // API — Size & Fitting Control
   void SetImageLoadWithViewSize(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetImageLoadWithViewSize
+   * @copydoc Dali::Ui::ImageView::IsImageLoadWithViewSizeEnabled
    */
-  bool GetImageLoadWithViewSize() const;
+  bool IsImageLoadWithViewSizeEnabled() const;
 
 public: // API — Advanced Rendering & Masking
   /**
@@ -307,9 +204,9 @@ public: // API — Advanced Rendering & Masking
   void SetPreMultipliedAlpha(bool preMultiplied);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetPreMultipliedAlpha
+   * @copydoc Dali::Ui::ImageView::IsPreMultipliedAlpha
    */
-  bool GetPreMultipliedAlpha() const;
+  bool IsPreMultipliedAlpha() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetAlphaMaskUrl
@@ -327,9 +224,9 @@ public: // API — Advanced Rendering & Masking
   void SetCropToMask(bool cropToMask);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetCropToMask
+   * @copydoc Dali::Ui::ImageView::IsCropToMask
    */
-  bool GetCropToMask() const;
+  bool IsCropToMask() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetMaskingMode
@@ -368,19 +265,19 @@ public: // API — Loading Behavior
   void SetSynchronousLoading(bool synchronous);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetSynchronousLoading
+   * @copydoc Dali::Ui::ImageView::IsSynchronousLoading
    */
-  bool GetSynchronousLoading() const;
+  bool IsSynchronousLoading() const;
 
   /**
-   * @copydoc Dali::Ui::ImageView::SetFastTrackUploading
+   * @copydoc Dali::Ui::ImageView::SetFastTrackUpload
    */
-  void SetFastTrackUploading(bool fastTrack);
+  void SetFastTrackUpload(bool fastTrack);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetFastTrackUploading
+   * @copydoc Dali::Ui::ImageView::IsFastTrackUploadEnabled
    */
-  bool GetFastTrackUploading() const;
+  bool IsFastTrackUploadEnabled() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetOrientationCorrection
@@ -388,9 +285,9 @@ public: // API — Loading Behavior
   void SetOrientationCorrection(bool orientationCorrection);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetOrientationCorrection
+   * @copydoc Dali::Ui::ImageView::IsOrientationCorrectionEnabled
    */
-  bool GetOrientationCorrection() const;
+  bool IsOrientationCorrectionEnabled() const;
 
 public: // API — N-Patch Border
   /**
@@ -409,9 +306,9 @@ public: // API — N-Patch Border
   void SetNPatchBorderOnly(bool borderOnly);
 
   /**
-   * @copydoc Dali::Ui::ImageView::GetNPatchBorderOnly
+   * @copydoc Dali::Ui::ImageView::IsNPatchBorderOnly
    */
-  bool GetNPatchBorderOnly() const;
+  bool IsNPatchBorderOnly() const;
 
 public: // Depth Index
   /**
@@ -477,7 +374,7 @@ private: // Data
   Ui::Visual::Base mVisual;
 
   Dali::String mUrl;
-  Dali::String mPlaceholderImageUrl;
+  Dali::String mPlaceholderUrl;
   Dali::String mAlphaMaskUrl;
 
   Vector4 mPixelArea;
@@ -490,9 +387,9 @@ private: // Data
   Ui::MaskingType::Type   mMaskingMode;
   Ui::LoadPolicy::Type    mLoadPolicy;
   Ui::ReleasePolicy::Type mReleasePolicy;
-  Ui::ImageDimensions     mDesiredSize;
-
-  int mDepthIndex;
+  int                     mDesiredWidth;
+  int                     mDesiredHeight;
+  int                     mDepthIndex;
 
   bool mPreMultipliedAlpha;
   bool mImageLoadWithViewSize;
