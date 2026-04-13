@@ -49,28 +49,28 @@ struct InputFieldPropertyIndex
     /**
      * @brief The text to display in UTF-8 format.
      * @details Name "text", type Property::STRING.
-     * @note See also: InputField::SetText(), InputField::GetText().
+     * @see InputField::SetText(), InputField::GetText().
      */
     TEXT = PROPERTY_START_INDEX,
 
     /**
      * @brief The font family of the text.
      * @details Name "fontFamily", type Property::STRING.
-     * @note See also: InputField::SetFontFamily(), InputField::GetFontFamily().
+     * @see InputField::SetFontFamily(), InputField::GetFontFamily().
      */
     FONT_FAMILY,
 
     /**
      * @brief The size of font in pixels.
      * @details Name "fontSize", type Property::FLOAT.
-     * @note See also: InputField::SetFontSize(), InputField::GetFontSize().
+     * @see InputField::SetFontSize(), InputField::GetFontSize().
      */
     FONT_SIZE,
 
     /**
      * @brief The color of the text.
      * @details Name "textColor", type Property::VECTOR4.
-     * @note See also: InputField::SetTextColor(), InputField::GetTextColor().
+     * @see InputField::SetTextColor(), InputField::GetTextColor().
      */
     TEXT_COLOR,
 
@@ -78,7 +78,7 @@ struct InputFieldPropertyIndex
      * @brief The horizontal alignment.
      * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::Alignment (Property::INTEGER).
-     * @note See also: InputField::SetHorizontalTextAlignment(), InputField::GetHorizontalTextAlignment().
+     * @see InputField::SetHorizontalTextAlignment(), InputField::GetHorizontalTextAlignment().
      */
     HORIZONTAL_ALIGNMENT,
 
@@ -86,7 +86,7 @@ struct InputFieldPropertyIndex
      * @brief The vertical alignment.
      * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::Alignment (Property::INTEGER).
-     * @note See also: InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
+     * @see InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
      */
     VERTICAL_ALIGNMENT,
 
@@ -94,49 +94,49 @@ struct InputFieldPropertyIndex
      * @brief The overflow mode.
      * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::OverflowMode (Property::INTEGER).
-     * @note See also: InputField::SetOverflowMode(), InputField::GetOverflowMode().
+     * @see InputField::SetOverflowMode(), InputField::GetOverflowMode().
      */
     OVERFLOW_MODE,
 
     /**
      * @brief The placeholder text displayed when the input field is empty.
      * @details Name "placeholder", type Property::STRING.
-     * @note See also: InputField::SetPlaceholder(), InputField::GetPlaceholder().
+     * @see InputField::SetPlaceholder(), InputField::GetPlaceholder().
      */
     PLACEHOLDER,
 
     /**
      * @brief The color of the placeholder text.
      * @details Name "placeholderColor", type Property::VECTOR4.
-     * @note See also: InputField::SetPlaceholderColor(), InputField::GetPlaceholderColor().
+     * @see InputField::SetPlaceholderColor(), InputField::GetPlaceholderColor().
      */
     PLACEHOLDER_COLOR,
 
     /**
      * @brief The width of the text cursor in pixels.
      * @details Name "cursorWidth", type Property::INTEGER.
-     * @note See also: InputField::SetCursorWidth(), InputField::GetCursorWidth().
+     * @see InputField::SetCursorWidth(), InputField::GetCursorWidth().
      */
     CURSOR_WIDTH,
 
     /**
      * @brief The color of the text cursor.
      * @details Name "cursorColor", type Property::VECTOR4.
-     * @note See also: InputField::SetCursorColor(), InputField::GetCursorColor().
+     * @see InputField::SetCursorColor(), InputField::GetCursorColor().
      */
     CURSOR_COLOR,
 
     /**
      * @brief The highlight color of the selected text region.
      * @details Name "selectionColor", type Property::VECTOR4.
-     * @note See also: InputField::SetSelectionColor(), InputField::GetSelectionColor().
+     * @see InputField::SetSelectionColor(), InputField::GetSelectionColor().
      */
     SELECTION_COLOR,
 
     /**
      * @brief The maximum number of characters that can be entered.
      * @details Name "maximumLength", type Property::INTEGER.
-     * @note See also: InputField::SetMaximumLength(), InputField::GetMaximumLength().
+     * @see InputField::SetMaximumLength(), InputField::GetMaximumLength().
      */
     MAXIMUM_LENGTH,
 
@@ -144,7 +144,7 @@ struct InputFieldPropertyIndex
      * @brief The layout direction mode.
      * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
-     * @note See also: InputField::SetLayoutDirectionMode(), InputField::GetLayoutDirectionMode().
+     * @see InputField::SetLayoutDirectionMode(), InputField::GetLayoutDirectionMode().
      */
     LAYOUT_DIRECTION_MODE,
 
@@ -152,7 +152,7 @@ struct InputFieldPropertyIndex
      * @brief The font weight.
      * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWeight (Property::INTEGER).
-     * @note See also: InputField::SetFontWeight(), InputField::GetFontWeight().
+     * @see InputField::SetFontWeight(), InputField::GetFontWeight().
      */
     FONT_WEIGHT,
 
@@ -160,7 +160,7 @@ struct InputFieldPropertyIndex
      * @brief The font width.
      * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWidth (Property::INTEGER).
-     * @note See also: InputField::SetFontWidth(), InputField::GetFontWidth().
+     * @see InputField::SetFontWidth(), InputField::GetFontWidth().
      */
     FONT_WIDTH,
 
@@ -168,7 +168,7 @@ struct InputFieldPropertyIndex
      * @brief The font slant.
      * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontSlant (Property::INTEGER).
-     * @note See also: InputField::SetFontSlant(), InputField::GetFontSlant().
+     * @see InputField::SetFontSlant(), InputField::GetFontSlant().
      */
     FONT_SLANT,
 
@@ -176,35 +176,35 @@ struct InputFieldPropertyIndex
      * @brief The background color behind the text.
      * @details Name "textBackgroundColor", type Property::VECTOR4.
      * @note The background is rendered behind the text glyphs.
-     * @note See also: InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ClearTextBackgroundColor().
+     * @see InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ClearTextBackgroundColor().
      */
     TEXT_BACKGROUND_COLOR,
 
     /**
      * @brief The font size scale.
      * @details Name "fontSizeScale", type Property::FLOAT.
-     * @note See also: InputField::SetFontSizeScale(), InputField::GetFontSizeScale().
+     * @see InputField::SetFontSizeScale(), InputField::GetFontSizeScale().
      */
     FONT_SIZE_SCALE,
 
     /**
      * @brief The minimum font size scale.
      * @details Name "minimumFontSizeScale", type Property::FLOAT.
-     * @note See also: InputField::SetMinimumFontSizeScale(), InputField::GetMinimumFontSizeScale().
+     * @see InputField::SetMinimumFontSizeScale(), InputField::GetMinimumFontSizeScale().
      */
     MINIMUM_FONT_SIZE_SCALE,
 
     /**
      * @brief The maximum font size scale.
      * @details Name "maximumFontSizeScale", type Property::FLOAT.
-     * @note See also: InputField::SetMaximumFontSizeScale(), InputField::GetMaximumFontSizeScale().
+     * @see InputField::SetMaximumFontSizeScale(), InputField::GetMaximumFontSizeScale().
      */
     MAXIMUM_FONT_SIZE_SCALE,
 
     /**
      * @brief Whether the system font size scale is applied.
      * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
-     * @note See also: InputField::SetSystemFontSizeScaleEnabled(), InputField::IsSystemFontSizeScaleEnabled().
+     * @see InputField::SetSystemFontSizeScaleEnabled(), InputField::IsSystemFontSizeScaleEnabled().
      */
     SYSTEM_FONT_SIZE_SCALE_ENABLED,
   };

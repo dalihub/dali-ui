@@ -865,28 +865,28 @@ public:
       /**
        * @brief The text to display in UTF-8 format.
        * @details Name "text", type Property::STRING.
-       * @note See also: Label::SetText(), Label::GetText().
+       * @see Label::SetText(), Label::GetText().
        */
       TEXT = Text::LabelPropertyIndex::TEXT,
 
       /**
        * @brief The font family of the text.
        * @details Name "fontFamily", type Property::STRING.
-       * @note See also: Label::SetFontFamily(), Label::GetFontFamily().
+       * @see Label::SetFontFamily(), Label::GetFontFamily().
        */
       FONT_FAMILY = Text::LabelPropertyIndex::FONT_FAMILY,
 
       /**
        * @brief The size of font in pixels.
        * @details Name "fontSize", type Property::FLOAT.
-       * @note See also: Label::SetFontSize(), Label::GetFontSize().
+       * @see Label::SetFontSize(), Label::GetFontSize().
        */
       FONT_SIZE = Text::LabelPropertyIndex::FONT_SIZE,
 
       /**
        * @brief The single-line or multi-line layout option.
        * @details Name "multiLine", type Property::BOOLEAN.
-       * @note See also: Label::SetMultiLine(), Label::IsMultiLine().
+       * @see Label::SetMultiLine(), Label::IsMultiLine().
        */
       MULTI_LINE = Text::LabelPropertyIndex::MULTI_LINE,
 
@@ -894,7 +894,7 @@ public:
        * @brief Line wrap mode when text lines are greater than the layout width.
        * @details Name "lineWrapMode", type Text::LineWrapMode (Property::INTEGER) or Property::STRING.
        * @note Return type is Text::LineWrapMode (Property::INTEGER).
-       * @note See also: Label::SetLineWrapMode(), Label::GetLineWrapMode().
+       * @see Label::SetLineWrapMode(), Label::GetLineWrapMode().
        */
       LINE_WRAP_MODE = Text::LabelPropertyIndex::LINE_WRAP_MODE,
 
@@ -902,7 +902,7 @@ public:
        * @brief The horizontal alignment.
        * @details Name "horizontalTextAlignment", type Text::Alignment (Property::INTEGER) or type Property::STRING.
        * @note Return type is Text::Alignment (Property::INTEGER).
-       * @note See also: Label::SetHorizontalTextAlignment(), Label::GetHorizontalTextAlignment().
+       * @see Label::SetHorizontalTextAlignment(), Label::GetHorizontalTextAlignment().
        */
       HORIZONTAL_ALIGNMENT = Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT,
 
@@ -910,7 +910,7 @@ public:
        * @brief The vertical alignment.
        * @details Name "verticalTextAlignment", type Text::Alignment (Property::INTEGER) or type Property::STRING.
        * @note Return type is Text::Alignment (Property::INTEGER).
-       * @note See also: Label::SetVerticalTextAlignment(), Label::GetVerticalTextAlignment().
+       * @see Label::SetVerticalTextAlignment(), Label::GetVerticalTextAlignment().
        */
       VERTICAL_ALIGNMENT = Text::LabelPropertyIndex::VERTICAL_ALIGNMENT,
 
@@ -918,14 +918,14 @@ public:
        * @brief The overflow mode.
        * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or type Property::STRING.
        * @note Return type is Text::OverflowMode (Property::INTEGER).
-       * @note See also: Label::SetOverflowMode(), Label::GetOverflowMode().
+       * @see Label::SetOverflowMode(), Label::GetOverflowMode().
        */
       OVERFLOW_MODE = Text::LabelPropertyIndex::OVERFLOW_MODE,
 
       /**
        * @brief The line height.
        * @details Name "lineHeight", type Property::FLOAT.
-       * @note See also: Label::SetLineHeight(), Label::GetLineHeight().
+       * @see Label::SetLineHeight(), Label::GetLineHeight().
        */
       LINE_HEIGHT = Text::LabelPropertyIndex::LINE_HEIGHT,
 
@@ -933,7 +933,7 @@ public:
        * @brief The line height mode.
        * @details Name "lineHeightMode", type Text::LineHeightMode (Property::INTEGER) or type Property::STRING.
        * @note Return type is Text::LineHeightMode (Property::INTEGER).
-       * @note See also: Label::SetLineHeightMode(), Label::GetLineHeightMode().
+       * @see Label::SetLineHeightMode(), Label::GetLineHeightMode().
        */
       LINE_HEIGHT_MODE = Text::LabelPropertyIndex::LINE_HEIGHT_MODE,
 
@@ -941,70 +941,70 @@ public:
        * @brief The layout direction mode.
        * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or type Property::STRING.
        * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
-       * @note See also: Label::SetLayoutDirectionMode(), Label::GetLayoutDirectionMode().
+       * @see Label::SetLayoutDirectionMode(), Label::GetLayoutDirectionMode().
        */
       LAYOUT_DIRECTION_MODE = Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE,
 
       /**
        * @brief Whether mark-up processing is enabled for the text.
        * @details Name "markupEnabled", type Property::BOOLEAN.
-       * @note See also: Label::SetMarkupEnabled(), Label::IsMarkupEnabled().
+       * @see Label::SetMarkupEnabled(), Label::IsMarkupEnabled().
        */
       MARKUP_ENABLED = Text::LabelPropertyIndex::MARKUP_ENABLED,
 
       /**
        * @brief The color of the anchor.
        * @details Name "anchorColor", type Property::VECTOR4.
-       * @note See also: Label::SetAnchorColor(), Label::GetAnchorColor().
+       * @see Label::SetAnchorColor(), Label::GetAnchorColor().
        */
       ANCHOR_COLOR = Text::LabelPropertyIndex::ANCHOR_COLOR,
 
       /**
        * @brief The color of anchors when they are clicked.
        * @details Name "anchorClickedColor", type Property::VECTOR4.
-       * @note See also: Label::SetAnchorClickedColor(), Label::GetAnchorClickedColor().
+       * @see Label::SetAnchorClickedColor(), Label::GetAnchorClickedColor().
        */
       ANCHOR_CLICKED_COLOR = Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR,
 
       /**
        * @brief Sets the marquee speed in pixels per second.
        * @details Name "marqueeSpeed", type Property::INTEGER.
-       * @note See also: Label::SetMarqueeSpeed(), Label::GetMarqueeSpeed().
+       * @see Label::SetMarqueeSpeed(), Label::GetMarqueeSpeed().
        */
       MARQUEE_SPEED = Text::LabelPropertyIndex::MARQUEE_SPEED,
 
       /**
        * @brief Number of complete loops for marquee.
        * @details Name "marqueeLoopCount", type Property::INTEGER.
-       * @note See also: Label::SetMarqueeLoopCount(), Label::GetMarqueeLoopCount().
+       * @see Label::SetMarqueeLoopCount(), Label::GetMarqueeLoopCount().
        */
       MARQUEE_LOOP_COUNT = Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT,
 
       /**
        * @brief The amount of time to delay the start of marquee and further loops.
        * @details Name "marqueeLoopDelay", type Property::FLOAT.
-       * @note See also: Label::SetMarqueeLoopDelay(), Label::GetMarqueeLoopDelay().
+       * @see Label::SetMarqueeLoopDelay(), Label::GetMarqueeLoopDelay().
        */
       MARQUEE_LOOP_DELAY = Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY,
 
       /**
        * @brief Gap before marquee wraps.
        * @details Name "marqueeGap", type Property::INTEGER.
-       * @note See also: Label::SetMarqueeGap(), Label::GetMarqueeGap().
+       * @see Label::SetMarqueeGap(), Label::GetMarqueeGap().
        */
       MARQUEE_GAP = Text::LabelPropertyIndex::MARQUEE_GAP,
 
       /**
        * @brief The marquee stop behaviour.
        * @details Name "marqueeStopMode", type Text::MarqueeStopMode (Property::INTEGER) or Property::STRING.
-       * @note See also: Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
+       * @see Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
        */
       MARQUEE_STOP_MODE = Text::LabelPropertyIndex::MARQUEE_STOP_MODE,
 
       /**
        * @brief The marquee orientation.
        * @details Name "marqueeOrientation", type Text::MarqueeOrientation (Property::INTEGER) or Property::STRING.
-       * @note See also: Label::SetMarqueeOrientation(), Label::GetMarqueeOrientation().
+       * @see Label::SetMarqueeOrientation(), Label::GetMarqueeOrientation().
        */
       MARQUEE_ORIENTATION = Text::LabelPropertyIndex::MARQUEE_ORIENTATION,
 
@@ -1012,7 +1012,7 @@ public:
        * @brief The font weight.
        * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
        * @note Return type is Text::FontWeight (Property::INTEGER).
-       * @note See also: Label::SetFontWeight(), Label::GetFontWeight().
+       * @see Label::SetFontWeight(), Label::GetFontWeight().
        */
       FONT_WEIGHT = Text::LabelPropertyIndex::FONT_WEIGHT,
 
@@ -1020,7 +1020,7 @@ public:
        * @brief The font width.
        * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
        * @note Return type is Text::FontWidth (Property::INTEGER).
-       * @note See also: Label::SetFontWidth(), Label::GetFontWidth().
+       * @see Label::SetFontWidth(), Label::GetFontWidth().
        */
       FONT_WIDTH = Text::LabelPropertyIndex::FONT_WIDTH,
 
@@ -1028,7 +1028,7 @@ public:
        * @brief The font slant.
        * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
        * @note Return type is Text::FontSlant (Property::INTEGER).
-       * @note See also: Label::SetFontSlant(), Label::GetFontSlant().
+       * @see Label::SetFontSlant(), Label::GetFontSlant().
        */
       FONT_SLANT = Text::LabelPropertyIndex::FONT_SLANT,
 
@@ -1036,35 +1036,35 @@ public:
        * @brief The background color behind the text.
        * @details Name "textBackgroundColor", type Property::VECTOR4.
        * @note The background is rendered behind the text glyphs.
-       * @note See also: Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ClearTextBackgroundColor().
+       * @see Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ClearTextBackgroundColor().
        */
       TEXT_BACKGROUND_COLOR = Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR,
 
       /**
        * @brief The font size scale.
        * @details Name "fontSizeScale", type Property::FLOAT.
-       * @note See also: Label::SetFontSizeScale(), Label::GetFontSizeScale().
+       * @see Label::SetFontSizeScale(), Label::GetFontSizeScale().
        */
       FONT_SIZE_SCALE = Text::LabelPropertyIndex::FONT_SIZE_SCALE,
 
       /**
        * @brief The minimum font size scale.
        * @details Name "minimumFontSizeScale", type Property::FLOAT.
-       * @note See also: Label::SetMinimumFontSizeScale(), Label::GetMinimumFontSizeScale().
+       * @see Label::SetMinimumFontSizeScale(), Label::GetMinimumFontSizeScale().
        */
       MINIMUM_FONT_SIZE_SCALE = Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
 
       /**
        * @brief The maximum font size scale.
        * @details Name "maximumFontSizeScale", type Property::FLOAT.
-       * @note See also: Label::SetMaximumFontSizeScale(), Label::GetMaximumFontSizeScale().
+       * @see Label::SetMaximumFontSizeScale(), Label::GetMaximumFontSizeScale().
        */
       MAXIMUM_FONT_SIZE_SCALE = Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
 
       /**
        * @brief Whether the system font size scale is applied.
        * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
-       * @note See also: Label::SetSystemFontSizeScaleEnabled(), Label::IsSystemFontSizeScaleEnabled().
+       * @see Label::SetSystemFontSizeScaleEnabled(), Label::IsSystemFontSizeScaleEnabled().
        */
       SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
 
