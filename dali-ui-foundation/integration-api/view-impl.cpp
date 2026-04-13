@@ -917,44 +917,30 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
     for(auto& childData : mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
-      Extents   margin    = childImpl.GetViewMargin();
-      float     marginW   = static_cast<float>(margin.start + margin.end);
-      float     marginH   = static_cast<float>(margin.top + margin.bottom);
-      float     childW    = childData.measuredSize.width;
-      float     childH    = childData.measuredSize.height;
-      float     childX;
-      float     childY;
 
       if(childImpl.IsLayoutModeStandalone())
       {
-        // Standalone: position is in the parent's coordinate space ignoring
-        // parent padding, but the child's own margin still offsets it.
-        // MATCH_PARENT fills parent edge to edge minus own margin.
-        if(childImpl.GetRequestedWidth() == MATCH_PARENT)
-        {
-          childW = std::max(0.0f, width - marginW);
-        }
-        if(childImpl.GetRequestedHeight() == MATCH_PARENT)
-        {
-          childH = std::max(0.0f, height - marginH);
-        }
-        childX = static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
-        childY = static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
+        ArrangeStandaloneChild(childImpl, childData, width, height);
+        continue;
       }
-      else
+
+      Extents margin  = childImpl.GetViewMargin();
+      float   marginW = static_cast<float>(margin.start + margin.end);
+      float   marginH = static_cast<float>(margin.top + margin.bottom);
+      float   childW  = childData.measuredSize.width;
+      float   childH  = childData.measuredSize.height;
+
+      // MATCH_PARENT: fills parent content area minus own margin.
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
       {
-        // MATCH_PARENT: fills parent content area minus own margin.
-        if(childImpl.GetRequestedWidth() == MATCH_PARENT)
-        {
-          childW = std::max(0.0f, width - padLeft - padRight - marginW);
-        }
-        if(childImpl.GetRequestedHeight() == MATCH_PARENT)
-        {
-          childH = std::max(0.0f, height - padTop - padBottom - marginH);
-        }
-        childX = padLeft + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
-        childY = padTop + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
+        childW = std::max(0.0f, width - padLeft - padRight - marginW);
       }
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childH = std::max(0.0f, height - padTop - padBottom - marginH);
+      }
+      float childX = padLeft + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
+      float childY = padTop + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
 
       // MATCH_PARENT children reported minSize during Measure, but their
       // subtree was measured with the original constraint. Re-measure with

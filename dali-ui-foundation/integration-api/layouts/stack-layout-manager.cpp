@@ -424,34 +424,10 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     // cursor and are excluded from spacing.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents standaloneMargin = childImpl.GetViewMargin();
-      float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
-      float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
-      // Standalone ignores parent padding; recover full parent size from content bounds.
       Extents parentPadding = view->GetViewPadding();
       float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
       float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
-      float   standaloneW   = childData.measuredSize.width;
-      float   standaloneH   = childData.measuredSize.height;
-      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
-      {
-        standaloneW = std::max(0.0f, parentWidth - marginW);
-      }
-      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
-      {
-        standaloneH = std::max(0.0f, parentHeight - marginH);
-      }
-      // Re-measure MATCH_PARENT standalone children with their final size.
-      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
-      {
-        childImpl.Measure(standaloneW, standaloneH);
-      }
-      LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
-                                  childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                                  standaloneW,
-                                  standaloneH);
-      childImpl.Arrange(standaloneBounds);
-      childData.arrangedBounds = standaloneBounds;
+      ArrangeStandaloneChild(childImpl, childData, parentWidth, parentHeight);
       continue;
     }
 
@@ -484,7 +460,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       switch(crossAlign)
       {
         case LayoutAlignment::FILL:
-          if(childImpl.GetRequestedWidth() <= 0.0f)
+          if(childImpl.GetRequestedWidth() == WRAP_CONTENT)
           {
             finalWidth = crossAvailable;
           }
@@ -539,7 +515,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       switch(crossAlign)
       {
         case LayoutAlignment::FILL:
-          if(childImpl.GetRequestedHeight() <= 0.0f)
+          if(childImpl.GetRequestedHeight() == WRAP_CONTENT)
           {
             finalHeight = crossAvailable;
           }

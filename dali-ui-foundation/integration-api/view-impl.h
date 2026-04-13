@@ -1445,6 +1445,47 @@ inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
   return static_cast<const Integration::ViewImpl&>(handle);
 }
 
+/**
+ * @brief Arranges a standalone MATCH_PARENT child within its parent.
+ *
+ * Standalone children ignore parent padding. MATCH_PARENT axes are
+ * expanded to the full parent size minus the child's own margin, then
+ * re-measured with the final size before arranging.
+ *
+ * @param[in] childImpl  The standalone child implementation
+ * @param[in,out] childData  Child data (measuredSize / arrangedBounds updated)
+ * @param[in] parentFullWidth  Parent's full width (content + padding)
+ * @param[in] parentFullHeight Parent's full height (content + padding)
+ */
+inline void ArrangeStandaloneChild(ViewImpl& childImpl, ViewImpl::ChildData& childData,
+                                   float parentFullWidth, float parentFullHeight)
+{
+  Extents margin  = childImpl.GetViewMargin();
+  float   marginW = static_cast<float>(margin.start + margin.end);
+  float   marginH = static_cast<float>(margin.top + margin.bottom);
+  float   childW  = childData.measuredSize.width;
+  float   childH  = childData.measuredSize.height;
+
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+  {
+    childW = std::max(0.0f, parentFullWidth - marginW);
+  }
+  if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childH = std::max(0.0f, parentFullHeight - marginH);
+  }
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childImpl.Measure(childW, childH);
+  }
+
+  LayoutRect bounds(childImpl.GetPositionX() + static_cast<float>(margin.start),
+                    childImpl.GetPositionY() + static_cast<float>(margin.top),
+                    childW, childH);
+  childImpl.Arrange(bounds);
+  childData.arrangedBounds = bounds;
+}
+
 } // namespace Integration
 
 } // namespace Ui

@@ -506,30 +506,7 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     {
       continue;
     }
-    Extents standaloneMargin = childImpl.GetViewMargin();
-    float   marginW          = static_cast<float>(standaloneMargin.start + standaloneMargin.end);
-    float   marginH          = static_cast<float>(standaloneMargin.top + standaloneMargin.bottom);
-    float   standaloneW      = childData.measuredSize.width;
-    float   standaloneH      = childData.measuredSize.height;
-    if(childImpl.GetRequestedWidth() == MATCH_PARENT)
-    {
-      standaloneW = std::max(0.0f, parentWidth - marginW);
-    }
-    if(childImpl.GetRequestedHeight() == MATCH_PARENT)
-    {
-      standaloneH = std::max(0.0f, parentHeight - marginH);
-    }
-    // Re-measure MATCH_PARENT standalone children with their final size.
-    if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
-    {
-      childImpl.Measure(standaloneW, standaloneH);
-    }
-    LayoutRect standaloneBounds(childImpl.GetPositionX() + static_cast<float>(standaloneMargin.start),
-                                childImpl.GetPositionY() + static_cast<float>(standaloneMargin.top),
-                                standaloneW,
-                                standaloneH);
-    childImpl.Arrange(standaloneBounds);
-    childData.arrangedBounds = standaloneBounds;
+    ArrangeStandaloneChild(childImpl, childData, parentWidth, parentHeight);
   }
 
   return MeasuredSize(bounds.width, bounds.height);
