@@ -864,11 +864,12 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
   {
     // Create the default if it hasn't been set and one that's shared by all the keyboard focusable actors
     const std::string imageDirPath = AssetManager::GetDaliImagePath();
-    mFocusIndicatorActor           = Ui::ImageView::New(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
-
-    // Apply size constraint to the focus indicator
-    mFocusIndicatorActor.SetRequestedWidth(MATCH_PARENT);
-    mFocusIndicatorActor.SetRequestedHeight(MATCH_PARENT);
+    mFocusIndicatorActor           = Ui::ImageView::New()
+                             .SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME))
+                             .SetFittingMode(FittingMode::FILL)
+                             .SetRequestedWidth(MATCH_PARENT)
+                             .SetRequestedHeight(MATCH_PARENT)
+                             .SetLayoutMode(LayoutMode::STANDALONE);
   }
 
   return mFocusIndicatorActor;
