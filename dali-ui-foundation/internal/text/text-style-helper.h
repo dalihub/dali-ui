@@ -19,7 +19,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/public-api/text/text-style.h>
+#include <dali-ui-foundation/public-api/text/style/bevel.h>
+#include <dali-ui-foundation/public-api/text/style/line-through.h>
+#include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/shadow.h>
+#include <dali-ui-foundation/public-api/text/style/underline.h>
 
 namespace Dali
 {

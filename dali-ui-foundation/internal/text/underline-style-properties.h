@@ -24,7 +24,7 @@
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/text/text-style.h>
+#include <dali-ui-foundation/public-api/text/style/underline.h>
 
 namespace Dali
 {

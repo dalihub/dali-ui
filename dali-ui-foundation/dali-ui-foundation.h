@@ -48,8 +48,12 @@
 #include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
+#include <dali-ui-foundation/public-api/text/style/bevel.h>
+#include <dali-ui-foundation/public-api/text/style/line-through.h>
+#include <dali-ui-foundation/public-api/text/style/outline.h>
+#include <dali-ui-foundation/public-api/text/style/shadow.h>
+#include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/text/text-style.h>
 
 #include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
