@@ -16,136 +16,136 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
 // EXTERNAL INCLUDES
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-KeyboardFocusManager::KeyboardFocusManager()
+FocusManager::FocusManager()
 {
 }
 
-KeyboardFocusManager::~KeyboardFocusManager()
+FocusManager::~FocusManager()
 {
 }
 
-KeyboardFocusManager KeyboardFocusManager::Get()
+FocusManager FocusManager::Get()
 {
-  return Internal::KeyboardFocusManager::Get();
+  return Internal::FocusManager::Get();
 }
 
-KeyboardFocusManager::KeyboardFocusManager(Internal::KeyboardFocusManager* impl)
+FocusManager::FocusManager(Internal::FocusManager* impl)
 : BaseHandle(impl)
 {
 }
 
-bool KeyboardFocusManager::SetCurrentFocusActor(Actor actor)
+bool FocusManager::SetCurrentFocusActor(Actor actor)
 {
   return GetImpl(*this).SetCurrentFocusActor(actor);
 }
 
-Actor KeyboardFocusManager::GetCurrentFocusActor()
+Actor FocusManager::GetCurrentFocusActor()
 {
   return GetImpl(*this).GetCurrentFocusActor();
 }
 
-bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction)
+bool FocusManager::MoveFocus(Ui::FocusDirection direction)
 {
   return GetImpl(*this).MoveFocus(direction);
 }
 
-void KeyboardFocusManager::ClearFocus()
+void FocusManager::ClearFocus()
 {
   GetImpl(*this).ClearFocus();
 }
 
-void KeyboardFocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
+void FocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
 {
   // deprecated method.
   GetImpl(*this).SetAsFocusGroup(actor, isFocusGroup);
 }
 
-bool KeyboardFocusManager::IsFocusGroup(Actor actor) const
+bool FocusManager::IsFocusGroup(Actor actor) const
 {
   // deprecated method.
   return GetImpl(*this).IsFocusGroup(actor);
 }
 
-Actor KeyboardFocusManager::GetFocusGroup(Actor actor)
+Actor FocusManager::GetFocusGroup(Actor actor)
 {
   return GetImpl(*this).GetFocusGroup(actor);
 }
 
-void KeyboardFocusManager::SetFocusGroupLoop(bool enabled)
+void FocusManager::SetFocusGroupLoop(bool enabled)
 {
   GetImpl(*this).SetFocusGroupLoop(enabled);
 }
 
-bool KeyboardFocusManager::GetFocusGroupLoop() const
+bool FocusManager::GetFocusGroupLoop() const
 {
   return GetImpl(*this).GetFocusGroupLoop();
 }
 
-void KeyboardFocusManager::SetFocusIndicatorActor(View indicator)
+void FocusManager::SetFocusIndicatorActor(View indicator)
 {
   GetImpl(*this).SetFocusIndicatorActor(indicator);
 }
 
-Actor KeyboardFocusManager::GetFocusIndicatorActor()
+Actor FocusManager::GetFocusIndicatorActor()
 {
   return GetImpl(*this).GetFocusIndicatorActor();
 }
 
-void KeyboardFocusManager::MoveFocusBackward()
+void FocusManager::MoveFocusBackward()
 {
   return GetImpl(*this).MoveFocusBackward();
 }
 
-KeyboardFocusManager::PreFocusChangeSignalType& KeyboardFocusManager::PreFocusChangeSignal()
+FocusManager::PreFocusChangeSignalType& FocusManager::PreFocusChangeSignal()
 {
   return GetImpl(*this).PreFocusChangeSignal();
 }
 
-KeyboardFocusManager::FocusChangedSignalType& KeyboardFocusManager::FocusChangedSignal()
+FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
 {
   return GetImpl(*this).FocusChangedSignal();
 }
 
-KeyboardFocusManager::FocusGroupChangedSignalType& KeyboardFocusManager::FocusGroupChangedSignal()
+FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal()
 {
   return GetImpl(*this).FocusGroupChangedSignal();
 }
 
-KeyboardFocusManager::FocusedActorEnterKeySignalType& KeyboardFocusManager::FocusedActorEnterKeySignal()
+FocusManager::FocusedActorEnterKeySignalType& FocusManager::FocusedActorEnterKeySignal()
 {
   return GetImpl(*this).FocusedActorEnterKeySignal();
 }
 
-FocusDevice KeyboardFocusManager::GetLastFocusChangeDevice() const
+FocusDevice FocusManager::GetLastFocusChangeDevice() const
 {
   const auto& internalCtx = GetImpl(*this).FocusChangedContext();
   return internalCtx.device;
 }
 
-const Dali::String& KeyboardFocusManager::GetLastFocusChangeDeviceName() const
+const Dali::String& FocusManager::GetLastFocusChangeDeviceName() const
 {
   const auto& internalCtx = GetImpl(*this).FocusChangedContext();
   return internalCtx.deviceName;
 }
 
-void KeyboardFocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
+void FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
 {
   GetImpl(*this).SetClearFocusOnWindowFocusLost(enabled);
 }
 
-bool KeyboardFocusManager::GetClearFocusOnWindowFocusLost() const
+bool FocusManager::GetClearFocusOnWindowFocusLost() const
 {
   return GetImpl(*this).GetClearFocusOnWindowFocusLost();
 }

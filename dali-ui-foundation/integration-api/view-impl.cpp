@@ -46,7 +46,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
@@ -61,7 +61,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
@@ -226,14 +226,14 @@ bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return false;
 }
 
-void ViewImpl::OnKeyInputFocusGained()
+void ViewImpl::OnFocusGained()
 {
-  OnFocusChanged(true, GetImpl(Ui::KeyboardFocusManager::Get()).FocusChangedContext().inputEvent);
+  OnFocusChanged(true, GetImpl(Ui::FocusManager::Get()).FocusChangedContext().inputEvent);
 }
 
-void ViewImpl::OnKeyInputFocusLost()
+void ViewImpl::OnFocusLost()
 {
-  OnFocusChanged(false, GetImpl(Ui::KeyboardFocusManager::Get()).FocusChangedContext().inputEvent);
+  OnFocusChanged(false, GetImpl(Ui::FocusManager::Get()).FocusChangedContext().inputEvent);
 }
 
 // =============================================================================
@@ -405,6 +405,8 @@ void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
   {
     mInteractiveTrait->OnFocusedChanged(View::DownCast(Self()), focused);
   }
+
+  EmitFocusChangedSignal(focused);
 }
 
 void ViewImpl::OnEnableChanged(bool enabled)
@@ -1686,13 +1688,13 @@ void ViewImpl::SetAsKeyboardFocusGroup(bool isFocusGroup)
 {
   mImpl->mIsKeyboardFocusGroup = isFocusGroup;
 
-  // The following line will be removed when the deprecated API in KeyboardFocusManager is deleted
-  Ui::KeyboardFocusManager::Get().SetAsFocusGroup(Self(), isFocusGroup);
+  // The following line will be removed when the deprecated API in FocusManager is deleted
+  Ui::FocusManager::Get().SetAsFocusGroup(Self(), isFocusGroup);
 }
 
 bool ViewImpl::IsKeyboardFocusGroup()
 {
-  return Ui::KeyboardFocusManager::Get().IsFocusGroup(Self());
+  return Ui::FocusManager::Get().IsFocusGroup(Self());
 }
 
 void ViewImpl::KeyboardEnter()
@@ -1703,7 +1705,7 @@ void ViewImpl::KeyboardEnter()
 
 bool ViewImpl::OnAccessibilityActivated()
 {
-  if(Ui::KeyboardFocusManager::Get().SetCurrentFocusActor(Self()))
+  if(Ui::FocusManager::Get().SetCurrentFocusActor(Self()))
   {
     return OnKeyboardEnter();
   }
@@ -1750,14 +1752,9 @@ Ui::View::KeyEventSignalType& ViewImpl::KeyEventSignal()
   return mImpl->mKeyEventSignal;
 }
 
-Ui::View::KeyInputFocusSignalType& ViewImpl::KeyInputFocusGainedSignal()
+Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
 {
-  return mImpl->mKeyInputFocusGainedSignal;
-}
-
-Ui::View::KeyInputFocusSignalType& ViewImpl::KeyInputFocusLostSignal()
-{
-  return mImpl->mKeyInputFocusLostSignal;
+  return mImpl->mFocusChangedSignal;
 }
 
 bool ViewImpl::EmitKeyEventSignal(const KeyEvent& event)
@@ -1795,7 +1792,7 @@ Dali::Texture ViewImpl::GetOffScreenRenderingOutput() const
   return mImpl->mOffScreenRenderingImpl->GetTexture();
 }
 
-void ViewImpl::EmitKeyInputFocusSignal(bool focusGained)
+void ViewImpl::EmitFocusChangedSignal(bool focusGained)
 {
   Dali::Ui::View handle(GetOwner());
 
@@ -1813,21 +1810,10 @@ void ViewImpl::EmitKeyInputFocusSignal(bool focusGained)
     }
   }
 
-  if(focusGained)
+  // signals are allocated dynamically when someone connects
+  if(!mImpl->mFocusChangedSignal.Empty())
   {
-    // signals are allocated dynamically when someone connects
-    if(!mImpl->mKeyInputFocusGainedSignal.Empty())
-    {
-      mImpl->mKeyInputFocusGainedSignal.Emit(handle);
-    }
-  }
-  else
-  {
-    // signals are allocated dynamically when someone connects
-    if(!mImpl->mKeyInputFocusLostSignal.Empty())
-    {
-      mImpl->mKeyInputFocusLostSignal.Emit(handle);
-    }
+    mImpl->mFocusChangedSignal.Emit(handle, focusGained);
   }
 }
 
@@ -1939,9 +1925,9 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
-      if(!enabled && Self() == Dali::Ui::KeyboardFocusManager::Get().GetCurrentFocusActor())
+      if(!enabled && Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusActor())
       {
-        Dali::Ui::KeyboardFocusManager::Get().ClearFocus();
+        Dali::Ui::FocusManager::Get().ClearFocus();
       }
       break;
     }

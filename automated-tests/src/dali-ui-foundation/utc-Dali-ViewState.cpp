@@ -453,7 +453,7 @@ int UtcDaliViewIsEffectivelyFocusedNoneN(void)
 }
 
 // =============================================================================
-// KeyboardFocusManager integration: SetCurrentFocusActor sets FOCUSED state
+// FocusManager integration: SetCurrentFocusActor sets FOCUSED state
 // =============================================================================
 
 int UtcDaliViewStateFocusedViaFocusManagerP(void)
@@ -470,7 +470,7 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
   });
 
   view.SetFocusable(true);
-  KeyboardFocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusActor(view);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::FOCUSED));
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
@@ -481,7 +481,7 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
 }
 
 // =============================================================================
-// KeyboardFocusManager integration: moving focus clears FOCUSED on old view
+// FocusManager integration: moving focus clears FOCUSED on old view
 // =============================================================================
 
 int UtcDaliViewStateFocusedViaFocusManagerClearOnMoveP(void)
@@ -492,11 +492,11 @@ int UtcDaliViewStateFocusedViaFocusManagerClearOnMoveP(void)
 
   view1.SetFocusable(true);
   view2.SetFocusable(true);
-  KeyboardFocusManager::Get().SetCurrentFocusActor(view1);
+  FocusManager::Get().SetCurrentFocusActor(view1);
   DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(UiState::FOCUSED));
   DALI_TEST_CHECK(!GetImpl(view2).GetState().Contains(UiState::FOCUSED));
 
-  KeyboardFocusManager::Get().SetCurrentFocusActor(view2);
+  FocusManager::Get().SetCurrentFocusActor(view2);
 
   DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(UiState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(UiState::FOCUSED));

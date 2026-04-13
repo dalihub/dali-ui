@@ -487,8 +487,7 @@ public:
   Extents                           mPadding;            ///< The padding values
   Vector2                           mSize;               ///< The size of the view
   Ui::View::KeyEventSignalType      mKeyEventSignal;
-  Ui::View::KeyInputFocusSignalType mKeyInputFocusGainedSignal;
-  Ui::View::KeyInputFocusSignalType mKeyInputFocusLostSignal;
+  Ui::View::FocusChangedSignalType  mFocusChangedSignal;
   Ui::View::ResourceReadySignalType mResourceReadySignal;
 
   // Gesture Detection

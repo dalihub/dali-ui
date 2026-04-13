@@ -32,7 +32,7 @@
 
 #include <dali-ui-foundation/public-api/image-view.h>
 
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>

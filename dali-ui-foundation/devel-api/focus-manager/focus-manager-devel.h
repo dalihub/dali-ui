@@ -1,5 +1,4 @@
-#ifndef DALI_UI_KEYBOARD_FOCUS_MANAGER_DEVEL_H
-#define DALI_UI_KEYBOARD_FOCUS_MANAGER_DEVEL_H
+#pragma once
 
 /*
  * Copyright (c) 2025 Samsung Electronics Co., Ltd.
@@ -22,23 +21,23 @@
 #include <dali-ui-foundation/public-api/view.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace DevelKeyboardFocusManager
+namespace DevelFocusManager
 {
 /**
- * @brief Interface used to provide custom keyboard focus algorithm for retrieving the next focusable actor.
+ * @brief Interface used to provide custom focus algorithm for retrieving the next focusable actor.
  *
- * The application / ui can implement the interface and override the keyboard focus behaviour.
+ * The application / ui can implement the interface and override the focus behaviour.
  * Upon providing an implementation of this interface, the PreFocusChangeSignal is no longer emitted.
  * If focus is changing within a layout container, then the layout container is queried first to provide
- * the next focusable actor. If this does not provide a valid actor, then the Keyboard FocusManager will
+ * the next focusable actor. If this does not provide a valid actor, then the FocusManager will
  * check focusable properties to determine next focusable actor. If focusable properties are not set,
- * then the Keyboard FocusManager calls the GetNextFocusableActor() method of this interface.
+ * then the FocusManager calls the GetNextFocusableActor() method of this interface.
  */
 class CustomAlgorithmInterface
 {
@@ -49,7 +48,7 @@ public:
   virtual ~CustomAlgorithmInterface() {};
 
   /**
-   * @brief Called by the KeyboardFocusManager to get the next focusable actor.
+   * @brief Called by the FocusManager to get the next focusable actor.
    *
    * @param[in] current The current focused actor
    * @param[in] proposed The proposed focused actor
@@ -63,77 +62,75 @@ public:
 /**
  * @brief Provide the implementation of custom Focus algorithm interface
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @param[in] interface The user's implementation of CustomAlgorithmInterface
- * @see DevelKeyboardFocusManager::CustomAlgorithmInterface
+ * @see DevelFocusManager::CustomAlgorithmInterface
  */
-DALI_UI_API void SetCustomAlgorithm(KeyboardFocusManager keyboardFocusManager, CustomAlgorithmInterface& interface);
+DALI_UI_API void SetCustomAlgorithm(FocusManager focusManager, CustomAlgorithmInterface& interface);
 
 /**
  * @brief Decide using focus indicator or not
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @param[in] enable Whether using focus indicator or not
  */
-DALI_UI_API void EnableFocusIndicator(KeyboardFocusManager keyboardFocusManager, bool enable);
+DALI_UI_API void EnableFocusIndicator(FocusManager focusManager, bool enable);
 
 /**
  * @brief Check focus indicator is enabled or not
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @return True when focus indicator is enabled
  */
-DALI_UI_API bool IsFocusIndicatorEnabled(KeyboardFocusManager keyboardFocusManager);
+DALI_UI_API bool IsFocusIndicatorEnabled(FocusManager focusManager);
 
 /**
  * @brief Decide using default focus algorithm or not
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @param[in] enable Whether using default focus algorithm or not
  */
-DALI_UI_API void EnableDefaultAlgorithm(KeyboardFocusManager keyboardFocusManager, bool enable);
+DALI_UI_API void EnableDefaultAlgorithm(FocusManager focusManager, bool enable);
 
 /**
  * @brief Check default focus algorithm is enabled or not
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @return True when default focus algorithm is enabled
  */
-DALI_UI_API bool IsDefaultAlgorithmEnabled(KeyboardFocusManager keyboardFocusManager);
+DALI_UI_API bool IsDefaultAlgorithmEnabled(FocusManager focusManager);
 
 /**
  * @brief Moves the focus to the next focusable actor in the focus
  * chain in the given direction (according to the focus traversal
  * order).
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @param direction The direction of focus movement
  * @param deviceName The device name
  * @return true if the movement was successful
- * @pre The KeyboardFocusManager has been initialized.
+ * @pre The FocusManager has been initialized.
  */
-DALI_UI_API bool MoveFocus(KeyboardFocusManager keyboardFocusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
+DALI_UI_API bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
 
 /**
  * @brief Sets the root actor to start moving focus when DefaultAlgorithm is enabled.
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  * @param[in] actor The root actor
  */
-DALI_UI_API void SetFocusFinderRootActor(KeyboardFocusManager keyboardFocusManager, Actor actor);
+DALI_UI_API void SetFocusFinderRootActor(FocusManager focusManager, Actor actor);
 
 /**
  * @brief Resets the root actor that starts moving focus when DefaultAlgorithm is enabled.
  * When reset, the window becomes root.
  *
- * @param[in] keyboardFocusManager The instance of KeyboardFocusManager
+ * @param[in] focusManager The instance of FocusManager
  */
-DALI_UI_API void ResetFocusFinderRootActor(KeyboardFocusManager keyboardFocusManager);
+DALI_UI_API void ResetFocusFinderRootActor(FocusManager focusManager);
 
-} // namespace DevelKeyboardFocusManager
+} // namespace DevelFocusManager
 
 } // namespace Ui
 
 } // namespace Dali
-
-#endif // DALI_UI_KEYBOARD_FOCUS_MANAGER_DEVEL_H

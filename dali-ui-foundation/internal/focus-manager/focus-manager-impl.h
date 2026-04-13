@@ -1,5 +1,4 @@
-#ifndef DALI_UI_INTERNAL_KEYBOARD_FOCUS_MANAGER_H
-#define DALI_UI_INTERNAL_KEYBOARD_FOCUS_MANAGER_H
+#pragma once
 
 /*
  * Copyright (c) 2025 Samsung Electronics Co., Ltd.
@@ -25,8 +24,8 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/focus-manager/keyboard-focus-manager-devel.h>
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -43,12 +42,12 @@ namespace Ui
 namespace Internal
 {
 /**
- * @copydoc Ui::KeyboardFocusManager
+ * @copydoc Ui::FocusManager
  */
-class KeyboardFocusManager : public Dali::BaseObject, public ConnectionTracker
+class FocusManager : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  typedef Ui::DevelKeyboardFocusManager::CustomAlgorithmInterface CustomAlgorithmInterface;
+  typedef Ui::DevelFocusManager::CustomAlgorithmInterface CustomAlgorithmInterface;
 
   struct FocusChangeContext
   {
@@ -77,27 +76,27 @@ public:
   };
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::Get
+   * @copydoc Ui::FocusManager::Get
    */
-  static Ui::KeyboardFocusManager Get();
+  static Ui::FocusManager Get();
 
   /**
-   * Construct a new KeyboardFocusManager.
+   * Construct a new FocusManager.
    */
-  KeyboardFocusManager();
+  FocusManager();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::SetCurrentFocusActor
+   * @copydoc Ui::FocusManager::SetCurrentFocusActor
    */
   bool SetCurrentFocusActor(Actor actor);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::GetCurrentFocusActor
+   * @copydoc Ui::FocusManager::GetCurrentFocusActor
    */
   Actor GetCurrentFocusActor();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::MoveFocus
+   * @copydoc Ui::FocusManager::MoveFocus
    */
   bool MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName = "");
 
@@ -107,42 +106,42 @@ public:
   bool MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::ClearFocus
+   * @copydoc Ui::FocusManager::ClearFocus
    */
   void ClearFocus();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::SetAsFocusGroup
+   * @copydoc Ui::FocusManager::SetAsFocusGroup
    */
   void SetAsFocusGroup(Actor actor, bool isFocusGroup);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::IsFocusGroup
+   * @copydoc Ui::FocusManager::IsFocusGroup
    */
   bool IsFocusGroup(Actor actor) const;
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::GetFocusGroup
+   * @copydoc Ui::FocusManager::GetFocusGroup
    */
   Actor GetFocusGroup(Actor actor);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::SetFocusGroupLoop
+   * @copydoc Ui::FocusManager::SetFocusGroupLoop
    */
   void SetFocusGroupLoop(bool enabled);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::GetFocusGroupLoop
+   * @copydoc Ui::FocusManager::GetFocusGroupLoop
    */
   bool GetFocusGroupLoop() const;
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::SetFocusIndicatorActor
+   * @copydoc Ui::FocusManager::SetFocusIndicatorActor
    */
   void SetFocusIndicatorActor(View indicator);
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::GetFocusIndicatorActor
+   * @copydoc Ui::FocusManager::GetFocusIndicatorActor
    */
   Actor GetFocusIndicatorActor();
 
@@ -152,37 +151,37 @@ public:
   void MoveFocusBackward();
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::SetCustomAlgorithm
+   * @copydoc Ui::DevelFocusManager::SetCustomAlgorithm
    */
   void SetCustomAlgorithm(CustomAlgorithmInterface& interface);
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::UseFocusIndicator
+   * @copydoc Ui::DevelFocusManager::UseFocusIndicator
    */
   void EnableFocusIndicator(bool enable);
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::UseFocusIndicator
+   * @copydoc Ui::DevelFocusManager::UseFocusIndicator
    */
   bool IsFocusIndicatorEnabled() const;
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::EnableDefaultAlgorithm
+   * @copydoc Ui::DevelFocusManager::EnableDefaultAlgorithm
    */
   void EnableDefaultAlgorithm(bool enable);
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::IsDefaultAlgorithmEnabled
+   * @copydoc Ui::DevelFocusManager::IsDefaultAlgorithmEnabled
    */
   bool IsDefaultAlgorithmEnabled() const;
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::SetFocusFinderRootActor
+   * @copydoc Ui::DevelFocusManager::SetFocusFinderRootActor
    */
   void SetFocusFinderRootActor(Actor actor);
 
   /**
-   * @copydoc Ui::DevelKeyboardFocusManager::ResetFocusFinderRootActor
+   * @copydoc Ui::DevelFocusManager::ResetFocusFinderRootActor
    */
   void ResetFocusFinderRootActor();
 
@@ -205,24 +204,24 @@ public:
 
 public:
   /**
-   * @copydoc Ui::KeyboardFocusManager::PreFocusChangeSignal()
+   * @copydoc Ui::FocusManager::PreFocusChangeSignal()
    */
-  Ui::KeyboardFocusManager::PreFocusChangeSignalType& PreFocusChangeSignal();
+  Ui::FocusManager::PreFocusChangeSignalType& PreFocusChangeSignal();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::FocusChangedSignal()
+   * @copydoc Ui::FocusManager::FocusChangedSignal()
    */
-  Ui::KeyboardFocusManager::FocusChangedSignalType& FocusChangedSignal();
+  Ui::FocusManager::FocusChangedSignalType& FocusChangedSignal();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::FocusGroupChangedSignal()
+   * @copydoc Ui::FocusManager::FocusGroupChangedSignal()
    */
-  Ui::KeyboardFocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
+  Ui::FocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   /**
-   * @copydoc Ui::KeyboardFocusManager::FocusedActorEnterKeySignal()
+   * @copydoc Ui::FocusManager::FocusedActorEnterKeySignal()
    */
-  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
+  Ui::FocusManager::FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -239,7 +238,7 @@ protected:
   /**
    * Destructor
    */
-  virtual ~KeyboardFocusManager();
+  virtual ~FocusManager();
 
 private:
   typedef std::vector<WeakHandle<Actor>> FocusStack;         ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
@@ -307,8 +306,8 @@ private:
   /**
    * Check whether the actor is a layout view that supports two dimensional keyboard navigation.
    * The layout view needs to internally set the focus order for the child actor and be able to
-   * tell KeyboardFocusmanager the next focusable actor in the given direction.
-   * @pre The KeyboardFocusManager has been initialized.
+   * tell FocusManager the next focusable actor in the given direction.
+   * @pre The FocusManager has been initialized.
    * @pre The Actor has been initialized.
    * @param actor The actor to be checked.
    * @return Whether the actor is a layout view or not.
@@ -367,9 +366,9 @@ private:
   Actor GetFocusActorFromCurrentWindow();
 
   /**
-   * Convert Device::Class to KeyboardFocus::Device
+   * Convert Device::Class to FocusDevice
    * @param deviceClass The device class from the touch event
-   * @return The corresponding KeyboardFocus::Device
+   * @return The corresponding FocusDevice
    */
   Ui::FocusDevice ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const;
 
@@ -406,15 +405,15 @@ private:
 
 private:
   // Undefined
-  KeyboardFocusManager(const KeyboardFocusManager&);
+  FocusManager(const FocusManager&);
 
-  KeyboardFocusManager& operator=(const KeyboardFocusManager& rhs);
+  FocusManager& operator=(const FocusManager& rhs);
 
 private:
-  Ui::KeyboardFocusManager::PreFocusChangeSignalType       mPreFocusChangeSignal;       ///< The signal to notify the focus will be changed
-  Ui::KeyboardFocusManager::FocusChangedSignalType         mFocusChangedSignal;         ///< The signal to notify the focus change
-  Ui::KeyboardFocusManager::FocusGroupChangedSignalType    mFocusGroupChangedSignal;    ///< The signal to notify the focus group change
-  Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
+  Ui::FocusManager::PreFocusChangeSignalType       mPreFocusChangeSignal;       ///< The signal to notify the focus will be changed
+  Ui::FocusManager::FocusChangedSignalType         mFocusChangedSignal;         ///< The signal to notify the focus change
+  Ui::FocusManager::FocusGroupChangedSignalType    mFocusGroupChangedSignal;    ///< The signal to notify the focus group change
+  Ui::FocusManager::FocusedActorEnterKeySignalType mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
 
   WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
 
@@ -424,7 +423,7 @@ private:
 
   FocusStack mFocusHistory; ///< Stack to contain pre-focused actor's BaseObject*
 
-  SlotDelegate<KeyboardFocusManager> mSlotDelegate;
+  SlotDelegate<FocusManager> mSlotDelegate;
 
   CustomAlgorithmInterface* mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
 
@@ -460,26 +459,24 @@ private:
 
 } // namespace Internal
 
-inline Internal::KeyboardFocusManager& GetImpl(Dali::Ui::KeyboardFocusManager& obj)
+inline Internal::FocusManager& GetImpl(Dali::Ui::FocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
   Dali::BaseObject& handle = obj.GetBaseObject();
 
-  return static_cast<Internal::KeyboardFocusManager&>(handle);
+  return static_cast<Internal::FocusManager&>(handle);
 }
 
-inline const Internal::KeyboardFocusManager& GetImpl(const Dali::Ui::KeyboardFocusManager& obj)
+inline const Internal::FocusManager& GetImpl(const Dali::Ui::FocusManager& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
   const Dali::BaseObject& handle = obj.GetBaseObject();
 
-  return static_cast<const Internal::KeyboardFocusManager&>(handle);
+  return static_cast<const Internal::FocusManager&>(handle);
 }
 
 } // namespace Ui
 
 } // namespace Dali
-
-#endif // DALI_UI_INTERNAL_KEYBOARD_FOCUS_MANAGER_H

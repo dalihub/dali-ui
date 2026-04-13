@@ -1,5 +1,4 @@
-#ifndef DALI_UI_KEYBOARD_FOCUS_MANAGER_H
-#define DALI_UI_KEYBOARD_FOCUS_MANAGER_H
+#pragma once
 
 /*
  * Copyright (c) 2025 Samsung Electronics Co., Ltd.
@@ -28,7 +27,7 @@ namespace Ui
 {
 namespace Internal DALI_INTERNAL
 {
-class KeyboardFocusManager;
+class FocusManager;
 }
 /**
  * @addtogroup dali_ui_managers
@@ -36,8 +35,8 @@ class KeyboardFocusManager;
  */
 
 /**
- * @brief Provides the functionality of handling keyboard navigation
- * and maintaining the two dimensional keyboard focus chain.
+ * @brief Provides the functionality of handling focus navigation
+ * and maintaining the two dimensional focus chain.
  *
  * It provides functionality of setting the focus and moving the focus
  * in four directions (i.e. Left, Right, Up and Down). It also draws a
@@ -45,14 +44,14 @@ class KeyboardFocusManager;
  * is changed.
  *
  * Signals
- * | %Signal Name                 | Method                             |
- * |------------------------------|------------------------------------|
- * | keyboardPreFocusChange       | @ref PreFocusChangeSignal()        |
- * | keyboardFocusChanged         | @ref FocusChangedSignal()          |
- * | keyboardFocusGroupChanged    | @ref FocusGroupChangedSignal()     |
- * | keyboardFocusedActorEnterKey | @ref FocusedActorEnterKeySignal()  |
+ * | %Signal Name            | Method                             |
+ * |-------------------------|------------------------------------|
+ * | preFocusChange          | @ref PreFocusChangeSignal()        |
+ * | focusChanged            | @ref FocusChangedSignal()          |
+ * | focusGroupChanged       | @ref FocusGroupChangedSignal()     |
+ * | focusedActorEnterKey    | @ref FocusedActorEnterKeySignal()  |
  */
-class DALI_UI_API KeyboardFocusManager : public BaseHandle
+class DALI_UI_API FocusManager : public BaseHandle
 {
 public:
   /// @brief Pre focus change signal
@@ -68,35 +67,35 @@ public:
   typedef Signal<void(Actor)> FocusedActorEnterKeySignalType;
 
   /**
-   * @brief Creates a KeyboardFocusManager handle; this can be initialized with KeyboardFocusManager::New().
+   * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
    *
    * Calling member functions with an uninitialized handle is not allowed.
    */
-  KeyboardFocusManager();
+  FocusManager();
 
   /**
    * @brief Destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
    */
-  ~KeyboardFocusManager();
+  ~FocusManager();
 
   /**
-   * @brief Gets the singleton of KeyboardFocusManager object.
+   * @brief Gets the singleton of FocusManager object.
    *
-   * @return A handle to the KeyboardFocusManager view
+   * @return A handle to the FocusManager view
    */
-  static KeyboardFocusManager Get();
+  static FocusManager Get();
 
   /**
-   * @brief Moves the keyboard focus to the given actor.
+   * @brief Moves the focus to the given actor.
    *
    * Only one actor can be focused at the same time.  The actor must
-   * be in the stage already and keyboard focusable.
+   * be in the stage already and focusable.
    *
    * @param actor The actor to be focused
    * @return Whether the focus is successful or not
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    * @pre The Actor has been initialized.
    * @note If the parent of this actor has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be focused.
    */
@@ -106,7 +105,7 @@ public:
    * @brief Gets the current focused actor.
    *
    * @return A handle to the current focused actor or an empty handle if no actor is focused
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   Actor GetCurrentFocusActor();
 
@@ -117,7 +116,7 @@ public:
    *
    * @param direction The direction of focus movement
    * @return true if the movement was successful
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   bool MoveFocus(FocusDirection direction);
 
@@ -126,7 +125,7 @@ public:
    * that no actor is focused in the focus chain.
    *
    * It will emit focus changed signal without current focused actor.
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   void ClearFocus();
 
@@ -135,7 +134,7 @@ public:
    *
    * The focus movement is not looped by default.
    * @param enabled Whether the focus movement should be looped
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   void SetFocusGroupLoop(bool enabled);
 
@@ -143,7 +142,7 @@ public:
    * @brief Gets whether the focus movement should be looped within the same focus group.
    *
    * @return Whether the focus movement should be looped
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   bool GetFocusGroupLoop() const;
 
@@ -155,7 +154,7 @@ public:
    *
    * @param actor The actor to be set as a focus group
    * @param isFocusGroup Whether to set the actor as a focus group or not
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    * @pre The Actor has been initialized.
    */
   void SetAsFocusGroup(Actor actor, bool isFocusGroup);
@@ -165,7 +164,7 @@ public:
    *
    * @param actor The actor to be checked
    * @return Whether the actor is set as a focus group
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    * @pre The Actor has been initialized.
    */
   bool IsFocusGroup(Actor actor) const;
@@ -183,11 +182,11 @@ public:
    * @brief Sets the focus indicator actor.
    *
    * This will replace the default focus indicator actor in
-   * KeyboardFocusManager and will be added to the focused actor as a
+   * FocusManager and will be added to the focused actor as a
    * highlight.
    *
    * @param indicator The indicator view to be added
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    * @pre The indicator view has been initialized.
    */
   void SetFocusIndicatorActor(View indicator);
@@ -196,7 +195,7 @@ public:
    * @brief Gets the focus indicator actor.
    *
    * @return A handle to the focus indicator actor
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   Actor GetFocusIndicatorActor();
 
@@ -212,7 +211,7 @@ public:
    * allowing applications to differentiate between different input methods.
    *
    * @return The device of the last focus change
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   FocusDevice GetLastFocusChangeDevice() const;
 
@@ -224,7 +223,7 @@ public:
    * focus changes), an empty string may be returned.
    *
    * @return The device name that caused the last focus change
-   * @pre The KeyboardFocusManager has been initialized.
+   * @pre The FocusManager has been initialized.
    */
   const Dali::String& GetLastFocusChangeDeviceName() const;
 
@@ -249,12 +248,12 @@ public: // Signals
   /**
    * @brief This signal is emitted before the focus is going to be changed.
    *
-   * KeyboardFocusManager makes the best guess for which actor to
+   * FocusManager makes the best guess for which actor to
    * focus towards the given direction, but applications might want to
    * change that. By connecting with this signal, they can check the
    * proposed actor to focus and return a different actor if they
    * wish. This signal is only emitted when the navigation key is
-   * pressed and KeyboardFocusManager tries to move the focus
+   * pressed and FocusManager tries to move the focus
    * automatically. It won't be emitted for focus movement by calling
    * SetCurrentFocusActor directly.
    *
@@ -283,7 +282,7 @@ public: // Signals
    * @brief This signal is emitted when the focus group has been changed.
    *
    * If the current focus group has a parent layout view,
-   * KeyboardFocusManager will make the best guess for the next focus
+   * FocusManager will make the best guess for the next focus
    * group to move the focus to in the given direction (forward or
    * backward). If not, the application has to set the new focus.
    *
@@ -316,10 +315,10 @@ public: // Signals
    *
    * @param[in] impl A pointer to the object
    */
-  explicit DALI_INTERNAL KeyboardFocusManager(Internal::KeyboardFocusManager* impl);
+  explicit DALI_INTERNAL FocusManager(Internal::FocusManager* impl);
   /// @endcond
 
-}; // class KeyboardFocusManager
+}; // class FocusManager
 
 /**
  * @}
@@ -327,5 +326,3 @@ public: // Signals
 } // namespace Ui
 
 } // namespace Dali
-
-#endif // DALI_UI_KEYBOARD_FOCUS_MANAGER_H

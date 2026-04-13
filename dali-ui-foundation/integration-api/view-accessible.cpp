@@ -37,7 +37,7 @@
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -373,7 +373,7 @@ Dali::Accessibility::States ViewAccessible::CalculateStates()
   Dali::Accessibility::States states;
 
   states[State::FOCUSABLE]   = self.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
-  states[State::FOCUSED]     = Ui::KeyboardFocusManager::Get().GetCurrentFocusActor() == self;
+  states[State::FOCUSED]     = Ui::FocusManager::Get().GetCurrentFocusActor() == self;
   states[State::HIGHLIGHTED] = IsHighlighted();
   states[State::SENSITIVE]   = (Dali::DevelActor::IsHittable(self) && Dali::DevelActor::GetTouchRequired(self));
   states[State::VISIBLE]     = self.GetProperty<bool>(Actor::Property::VISIBLE);
@@ -465,7 +465,7 @@ bool ViewAccessible::IsHidden() const
 
 bool ViewAccessible::GrabFocus()
 {
-  return Ui::KeyboardFocusManager::Get().SetCurrentFocusActor(Self());
+  return Ui::FocusManager::Get().SetCurrentFocusActor(Self());
 }
 
 void ViewAccessible::ScrollToSelf()

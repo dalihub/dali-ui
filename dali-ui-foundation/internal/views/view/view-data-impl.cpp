@@ -48,7 +48,7 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/focus-manager/keyboard-focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -340,16 +340,15 @@ bool DoLegacyAccessibilityAction(BaseObject* object, const Dali::String& actionN
   return PerformLegacyAccessibilityAction(view, actionName);
 }
 
-const char* SIGNAL_KEY_EVENT              = "keyEvent";
-const char* SIGNAL_KEY_INPUT_FOCUS_GAINED = "keyInputFocusGained";
-const char* SIGNAL_KEY_INPUT_FOCUS_LOST   = "keyInputFocusLost";
-const char* SIGNAL_TAPPED                 = "tapped";
-const char* SIGNAL_PANNED                 = "panned";
-const char* SIGNAL_PINCHED                = "pinched";
-const char* SIGNAL_LONG_PRESSED           = "longPressed";
-const char* SIGNAL_GET_NAME               = "getName";
-const char* SIGNAL_GET_DESCRIPTION        = "getDescription";
-const char* SIGNAL_DO_GESTURE             = "doGesture";
+const char* SIGNAL_KEY_EVENT       = "keyEvent";
+const char* SIGNAL_FOCUS_CHANGED   = "focusChanged";
+const char* SIGNAL_TAPPED          = "tapped";
+const char* SIGNAL_PANNED          = "panned";
+const char* SIGNAL_PINCHED         = "pinched";
+const char* SIGNAL_LONG_PRESSED    = "longPressed";
+const char* SIGNAL_GET_NAME        = "getName";
+const char* SIGNAL_GET_DESCRIPTION = "getDescription";
+const char* SIGNAL_DO_GESTURE      = "doGesture";
 
 /**
  * Connects a callback function with the object's signals.
@@ -378,13 +377,9 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
     {
       viewImpl.KeyEventSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_INPUT_FOCUS_GAINED))
+    else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_CHANGED))
     {
-      viewImpl.KeyInputFocusGainedSignal().Connect(tracker, functor);
-    }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_INPUT_FOCUS_LOST))
-    {
-      viewImpl.KeyInputFocusLostSignal().Connect(tracker, functor);
+      viewImpl.FocusChangedSignal().Connect(tracker, functor);
     }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_TAPPED))
     {
@@ -437,15 +432,14 @@ DALI_TYPE_REGISTRATION_BEGIN(View, CustomActor, Create);
 // Note: Properties are registered separately below.
 
 SignalConnectorType registerSignal1(typeRegistration, SIGNAL_KEY_EVENT, &DoConnectSignal);
-SignalConnectorType registerSignal2(typeRegistration, SIGNAL_KEY_INPUT_FOCUS_GAINED, &DoConnectSignal);
-SignalConnectorType registerSignal3(typeRegistration, SIGNAL_KEY_INPUT_FOCUS_LOST, &DoConnectSignal);
-SignalConnectorType registerSignal4(typeRegistration, SIGNAL_TAPPED, &DoConnectSignal);
-SignalConnectorType registerSignal5(typeRegistration, SIGNAL_PANNED, &DoConnectSignal);
-SignalConnectorType registerSignal6(typeRegistration, SIGNAL_PINCHED, &DoConnectSignal);
-SignalConnectorType registerSignal7(typeRegistration, SIGNAL_LONG_PRESSED, &DoConnectSignal);
-SignalConnectorType registerSignal8(typeRegistration, SIGNAL_GET_NAME, &DoConnectSignal);
-SignalConnectorType registerSignal9(typeRegistration, SIGNAL_GET_DESCRIPTION, &DoConnectSignal);
-SignalConnectorType registerSignal10(typeRegistration, SIGNAL_DO_GESTURE, &DoConnectSignal);
+SignalConnectorType registerSignal2(typeRegistration, SIGNAL_FOCUS_CHANGED, &DoConnectSignal);
+SignalConnectorType registerSignal3(typeRegistration, SIGNAL_TAPPED, &DoConnectSignal);
+SignalConnectorType registerSignal4(typeRegistration, SIGNAL_PANNED, &DoConnectSignal);
+SignalConnectorType registerSignal5(typeRegistration, SIGNAL_PINCHED, &DoConnectSignal);
+SignalConnectorType registerSignal6(typeRegistration, SIGNAL_LONG_PRESSED, &DoConnectSignal);
+SignalConnectorType registerSignal7(typeRegistration, SIGNAL_GET_NAME, &DoConnectSignal);
+SignalConnectorType registerSignal8(typeRegistration, SIGNAL_GET_DESCRIPTION, &DoConnectSignal);
+SignalConnectorType registerSignal9(typeRegistration, SIGNAL_DO_GESTURE, &DoConnectSignal);
 
 // === Accessibility Actions === START
 TypeAction registerAction1(typeRegistration, ACTION_ACCESSIBILITY_ACTIVATE, &DoAccessibilityAction);
@@ -468,10 +462,10 @@ DALI_TYPE_REGISTRATION_END()
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
-const PropertyRegistration ViewDataImpl::PROPERTY_4(typeRegistration,  "keyInputFocus",                  Ui::View::Property::KEY_INPUT_FOCUS,                       Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                            Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                                Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                               Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_4(typeRegistration,  "focused",                        Ui::View::Property::FOCUSED,                          Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                           Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                          Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_11(typeRegistration, "leftFocusableActorId",           Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFocusableActorId",          Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID,         Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableActorId",             Ui::View::Property::UP_FOCUSABLE_ACTOR_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -522,8 +516,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mPadding(0, 0, 0, 0),
   mSize(0, 0),
   mKeyEventSignal(),
-  mKeyInputFocusGainedSignal(),
-  mKeyInputFocusLostSignal(),
+  mFocusChangedSignal(),
   mResourceReadySignal(),
   mPinchGestureDetector(),
   mPanGestureDetector(),
@@ -821,7 +814,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       }
       break;
 
-      case Ui::View::Property::KEY_INPUT_FOCUS:
+      case Ui::View::Property::FOCUSED:
       {
         if(value.Get<bool>())
         {
@@ -1258,7 +1251,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::KEY_INPUT_FOCUS:
+      case Ui::View::Property::FOCUSED:
       {
         value = viewImpl.HasKeyInputFocus();
         break;

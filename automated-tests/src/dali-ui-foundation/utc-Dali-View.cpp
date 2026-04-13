@@ -1641,3 +1641,388 @@ int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
   DALI_TEST_EQUALS(size.GetHeight(), 30.0f, TEST_LOCATION);
   END_TEST;
 }
+
+// =============================================================================
+// KeyEventSignal
+// =============================================================================
+
+namespace
+{
+
+struct KeyEventSignalData
+{
+  KeyEventSignalData()
+  : called(false),
+    consumed(false)
+  {
+  }
+
+  void Reset()
+  {
+    called   = false;
+    consumed = false;
+    view     = View();
+  }
+
+  bool     called;
+  bool     consumed;
+  View     view;
+  KeyEvent event;
+};
+
+struct KeyEventSignalFunctor
+{
+  KeyEventSignalFunctor(KeyEventSignalData& data, bool consume = true)
+  : signalData(data),
+    mConsume(consume)
+  {
+  }
+
+  bool operator()(View view, const KeyEvent& event)
+  {
+    signalData.called = true;
+    signalData.view   = view;
+    signalData.event  = event;
+    return mConsume;
+  }
+
+  KeyEventSignalData& signalData;
+  bool                mConsume;
+};
+
+struct FocusChangedSignalData
+{
+  FocusChangedSignalData()
+  : called(false),
+    focused(false)
+  {
+  }
+
+  void Reset()
+  {
+    called  = false;
+    focused = false;
+    view    = View();
+  }
+
+  bool called;
+  bool focused;
+  View view;
+};
+
+struct FocusChangedSignalFunctor
+{
+  FocusChangedSignalFunctor(FocusChangedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, bool focused)
+  {
+    signalData.called  = true;
+    signalData.view    = view;
+    signalData.focused = focused;
+  }
+
+  FocusChangedSignalData& signalData;
+};
+
+View CreateFocusableView(UiTestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  return view;
+}
+
+} // namespace
+
+int UtcDaliViewKeyEventSignalP(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  KeyEventSignalData    data;
+  KeyEventSignalFunctor functor(data);
+  view.KeyEventSignal().Connect(&application, functor);
+
+  // Give focus to the view
+  FocusManager::Get().SetCurrentFocusActor(view);
+  application.SendNotification();
+  application.Render();
+
+  // Send key down event
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+
+  END_TEST;
+}
+
+int UtcDaliViewKeyEventSignalConsumedP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateFocusableView(application);
+  View              child  = CreateFocusableView(application);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render();
+
+  // Child consumes the event
+  KeyEventSignalData    childData;
+  KeyEventSignalFunctor childFunctor(childData, true);
+  child.KeyEventSignal().Connect(&application, childFunctor);
+
+  // Parent should NOT receive it
+  KeyEventSignalData    parentData;
+  KeyEventSignalFunctor parentFunctor(parentData);
+  parent.KeyEventSignal().Connect(&application, parentFunctor);
+
+  FocusManager::Get().SetCurrentFocusActor(child);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(childData.called);
+  DALI_TEST_CHECK(!parentData.called);
+
+  END_TEST;
+}
+
+int UtcDaliViewKeyEventSignalNotConsumedP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateFocusableView(application);
+  View              child  = CreateFocusableView(application);
+  parent.Add(child);
+  application.SendNotification();
+  application.Render();
+
+  // Child does NOT consume the event
+  KeyEventSignalData    childData;
+  KeyEventSignalFunctor childFunctor(childData, false);
+  child.KeyEventSignal().Connect(&application, childFunctor);
+
+  // Parent should receive it
+  KeyEventSignalData    parentData;
+  KeyEventSignalFunctor parentFunctor(parentData);
+  parent.KeyEventSignal().Connect(&application, parentFunctor);
+
+  FocusManager::Get().SetCurrentFocusActor(child);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(childData.called);
+  DALI_TEST_CHECK(parentData.called);
+
+  END_TEST;
+}
+
+int UtcDaliViewKeyEventSignalWithoutFocusN(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  KeyEventSignalData    data;
+  KeyEventSignalFunctor functor(data);
+  view.KeyEventSignal().Connect(&application, functor);
+
+  // Do NOT set focus — just send key event directly
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  // Key event should NOT reach the view without focus
+  DALI_TEST_CHECK(!data.called);
+
+  END_TEST;
+}
+
+int UtcDaliViewKeyEventSignalNotFocusableN(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  // SetFocusable(true) is NOT called
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  KeyEventSignalData    data;
+  KeyEventSignalFunctor functor(data);
+  view.KeyEventSignal().Connect(&application, functor);
+
+  // Attempt to set focus on a non-focusable view
+  FocusManager::Get().SetCurrentFocusActor(view);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  // Key event should NOT reach a non-focusable view
+  DALI_TEST_CHECK(!data.called);
+
+  END_TEST;
+}
+
+int UtcDaliViewKeyEventSignalNoConnectionN(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  // No signal connected — should not crash
+  FocusManager::Get().SetCurrentFocusActor(view);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  // Just verify no crash
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}
+
+// =============================================================================
+// FocusChangedSignal
+// =============================================================================
+
+int UtcDaliViewFocusChangedSignalGainedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  FocusChangedSignalData    data;
+  FocusChangedSignalFunctor functor(data);
+  view.FocusChangedSignal().Connect(&application, functor);
+
+  FocusManager::Get().SetCurrentFocusActor(view);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(data.focused == true);
+
+  END_TEST;
+}
+
+int UtcDaliViewFocusChangedSignalLostP(void)
+{
+  UiTestApplication application;
+  View              view1 = CreateFocusableView(application);
+  View              view2 = CreateFocusableView(application);
+
+  FocusChangedSignalData    data1;
+  FocusChangedSignalFunctor functor1(data1);
+  view1.FocusChangedSignal().Connect(&application, functor1);
+
+  // Give focus to view1
+  FocusManager::Get().SetCurrentFocusActor(view1);
+  DALI_TEST_CHECK(data1.called);
+  DALI_TEST_CHECK(data1.focused == true);
+
+  data1.Reset();
+
+  // Move focus to view2 — view1 should lose focus
+  FocusManager::Get().SetCurrentFocusActor(view2);
+
+  DALI_TEST_CHECK(data1.called);
+  DALI_TEST_CHECK(data1.view == view1);
+  DALI_TEST_CHECK(data1.focused == false);
+
+  END_TEST;
+}
+
+int UtcDaliViewFocusChangedSignalBothViewsP(void)
+{
+  UiTestApplication application;
+  View              view1 = CreateFocusableView(application);
+  View              view2 = CreateFocusableView(application);
+
+  FocusChangedSignalData    data1;
+  FocusChangedSignalFunctor functor1(data1);
+  view1.FocusChangedSignal().Connect(&application, functor1);
+
+  FocusChangedSignalData    data2;
+  FocusChangedSignalFunctor functor2(data2);
+  view2.FocusChangedSignal().Connect(&application, functor2);
+
+  // Focus view1
+  FocusManager::Get().SetCurrentFocusActor(view1);
+  DALI_TEST_CHECK(data1.called);
+  DALI_TEST_CHECK(data1.focused == true);
+  DALI_TEST_CHECK(!data2.called);
+
+  data1.Reset();
+  data2.Reset();
+
+  // Move focus to view2
+  FocusManager::Get().SetCurrentFocusActor(view2);
+
+  // view1 should have lost focus
+  DALI_TEST_CHECK(data1.called);
+  DALI_TEST_CHECK(data1.focused == false);
+
+  // view2 should have gained focus
+  DALI_TEST_CHECK(data2.called);
+  DALI_TEST_CHECK(data2.focused == true);
+
+  END_TEST;
+}
+
+int UtcDaliViewFocusChangedSignalClearFocusP(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  FocusChangedSignalData    data;
+  FocusChangedSignalFunctor functor(data);
+  view.FocusChangedSignal().Connect(&application, functor);
+
+  FocusManager::Get().SetCurrentFocusActor(view);
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.focused == true);
+
+  data.Reset();
+
+  // Clear focus
+  FocusManager::Get().ClearFocus();
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(data.focused == false);
+
+  END_TEST;
+}
+
+int UtcDaliViewFocusChangedSignalNoConnectionN(void)
+{
+  UiTestApplication application;
+  View              view = CreateFocusableView(application);
+
+  // No signal connected — should not crash
+  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().ClearFocus();
+
+  DALI_TEST_CHECK(true);
+
+  END_TEST;
+}

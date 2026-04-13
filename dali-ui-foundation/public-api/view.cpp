@@ -629,6 +629,16 @@ View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSign
   return viewDataImpl.mOffScreenRenderingFinishedSignal;
 }
 
+View::KeyEventSignalType& View::KeyEventSignal()
+{
+  return Integration::GetImpl(*this).KeyEventSignal();
+}
+
+View::FocusChangedSignalType& View::FocusChangedSignal()
+{
+  return Integration::GetImpl(*this).FocusChangedSignal();
+}
+
 } // namespace Ui
 
 } // namespace Dali

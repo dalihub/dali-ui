@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include "keyboard-focus-manager-impl.h"
+#include "focus-manager-impl.h"
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
@@ -86,14 +86,14 @@ constexpr const char* LOGICAL_KEY_NAME_KP_ENTER = "KP_Enter";
 
 BaseHandle Create()
 {
-  BaseHandle handle = KeyboardFocusManager::Get();
+  BaseHandle handle = FocusManager::Get();
 
   if(!handle)
   {
     SingletonService singletonService(SingletonService::Get());
     if(singletonService)
     {
-      Ui::KeyboardFocusManager manager = Ui::KeyboardFocusManager(new Internal::KeyboardFocusManager());
+      Ui::FocusManager manager = Ui::FocusManager(new Internal::FocusManager());
       singletonService.Register(typeid(manager), manager);
       handle = manager;
     }
@@ -102,12 +102,12 @@ BaseHandle Create()
   return handle;
 }
 
-DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::KeyboardFocusManager, Dali::BaseHandle, Create, true)
+DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, true)
 
-DALI_SIGNAL_REGISTRATION(Ui, KeyboardFocusManager, "keyboardPreFocusChange", SIGNAL_PRE_FOCUS_CHANGE)
-DALI_SIGNAL_REGISTRATION(Ui, KeyboardFocusManager, "keyboardFocusChanged", SIGNAL_FOCUS_CHANGED)
-DALI_SIGNAL_REGISTRATION(Ui, KeyboardFocusManager, "keyboardFocusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
-DALI_SIGNAL_REGISTRATION(Ui, KeyboardFocusManager, "keyboardFocusedActorEnterKey", SIGNAL_FOCUSED_ACTOR_ENTER_KEY)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "preFocusChange", SIGNAL_PRE_FOCUS_CHANGE)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusedActorEnterKey", SIGNAL_FOCUSED_ACTOR_ENTER_KEY)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -115,26 +115,26 @@ const unsigned int MAX_HISTORY_AMOUNT = 30; ///< Max length of focus history sta
 
 } // unnamed namespace
 
-Ui::KeyboardFocusManager KeyboardFocusManager::Get()
+Ui::FocusManager FocusManager::Get()
 {
-  Ui::KeyboardFocusManager manager;
+  Ui::FocusManager manager;
 
   SingletonService singletonService(SingletonService::Get());
   if(singletonService)
   {
     // Check whether the keyboard focus manager is already created
-    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(Ui::KeyboardFocusManager));
+    Dali::BaseHandle handle = singletonService.GetSingleton(typeid(Ui::FocusManager));
     if(handle)
     {
       // If so, downcast the handle of singleton to keyboard focus manager
-      manager = Ui::KeyboardFocusManager(dynamic_cast<KeyboardFocusManager*>(handle.GetObjectPtr()));
+      manager = Ui::FocusManager(dynamic_cast<FocusManager*>(handle.GetObjectPtr()));
     }
   }
 
   return manager;
 }
 
-KeyboardFocusManager::KeyboardFocusManager()
+FocusManager::FocusManager()
 : mPreFocusChangeSignal(),
   mFocusChangedSignal(),
   mFocusGroupChangedSignal(),
@@ -159,10 +159,10 @@ KeyboardFocusManager::KeyboardFocusManager()
 {
   // TODO: Get FocusIndicatorEnable constant from stylesheet to set mIsFocusIndicatorShown.
 
-  LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnAdaptorInit);
+  LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
 }
 
-void KeyboardFocusManager::OnAdaptorInit()
+void FocusManager::OnAdaptorInit()
 {
   if(Adaptor::IsAvailable())
   {
@@ -170,42 +170,42 @@ void KeyboardFocusManager::OnAdaptorInit()
     Dali::SceneHolderList sceneHolders = Adaptor::Get().GetSceneHolders();
     for(auto iter = sceneHolders.begin(); iter != sceneHolders.end(); ++iter)
     {
-      (*iter).KeyEventSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnKeyEvent);
-      (*iter).TouchedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnTouch);
-      (*iter).WheelEventGeneratedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnCustomWheelEvent);
-      (*iter).WheelEventSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnWheelEvent);
-      (*iter).FocusChangedGeneratedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnSceneHolderFocusChanged);
+      (*iter).KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
+      (*iter).TouchedSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
+      (*iter).WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
+      (*iter).WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
+      (*iter).FocusChangedGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneHolderFocusChanged);
       Window window = Window::DownCast(*iter);
       if(window)
       {
-        window.FocusChangeSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnWindowFocusChanged);
+        window.FocusChangeSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
       }
     }
 
     // Get notified when any new scene holder is created afterwards
-    Adaptor::Get().WindowCreatedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnSceneHolderCreated);
+    Adaptor::Get().WindowCreatedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneHolderCreated);
   }
 }
 
-void KeyboardFocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder)
+void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder)
 {
-  sceneHolder.KeyEventSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnKeyEvent);
-  sceneHolder.TouchedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnTouch);
-  sceneHolder.WheelEventGeneratedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnCustomWheelEvent);
-  sceneHolder.WheelEventSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnWheelEvent);
-  sceneHolder.FocusChangedGeneratedSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnSceneHolderFocusChanged);
+  sceneHolder.KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
+  sceneHolder.TouchedSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
+  sceneHolder.WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
+  sceneHolder.WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
+  sceneHolder.FocusChangedGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneHolderFocusChanged);
   Window window = Window::DownCast(sceneHolder);
   if(window)
   {
-    window.FocusChangeSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnWindowFocusChanged);
+    window.FocusChangeSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
   }
 }
 
-KeyboardFocusManager::~KeyboardFocusManager()
+FocusManager::~FocusManager()
 {
 }
 
-void KeyboardFocusManager::GetConfiguration()
+void FocusManager::GetConfiguration()
 {
   auto uiConfigManager = Integration::UiConfigManager::Get();
   if(uiConfigManager.IsInitialized())
@@ -217,14 +217,14 @@ void KeyboardFocusManager::GetConfiguration()
   mClearFocusOnTouch     = (mIsFocusIndicatorShown == SHOW) ? false : true;
 }
 
-bool KeyboardFocusManager::SetCurrentFocusActor(Actor actor)
+bool FocusManager::SetCurrentFocusActor(Actor actor)
 {
   DALI_ASSERT_DEBUG(!mIsWaitingKeyboardFocusChangeCommit && "Calling this function in the PreFocusChangeSignal callback?");
 
   return DoSetCurrentFocusActor(actor, {Ui::FocusDevice::PROGRAMMATIC, ""});
 }
 
-bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext& context)
+bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext& context)
 {
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
@@ -273,7 +273,7 @@ bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChange
       actor.Add(GetFocusIndicatorActor());
     }
 
-    actor.OffSceneSignal().Connect(mSlotDelegate, &KeyboardFocusManager::OnSceneDisconnection);
+    actor.OffSceneSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
     // Save the current focused actor
     mCurrentFocusActor = actor;
@@ -337,7 +337,7 @@ bool KeyboardFocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChange
   return success;
 }
 
-Actor KeyboardFocusManager::GetCurrentFocusActor()
+Actor FocusManager::GetCurrentFocusActor()
 {
   Actor actor = mCurrentFocusActor.GetHandle();
 
@@ -350,7 +350,7 @@ Actor KeyboardFocusManager::GetCurrentFocusActor()
   return actor;
 }
 
-Actor KeyboardFocusManager::GetFocusActorFromCurrentWindow()
+Actor FocusManager::GetFocusActorFromCurrentWindow()
 {
   Actor        actor;
   unsigned int index;
@@ -373,12 +373,12 @@ Actor KeyboardFocusManager::GetFocusActorFromCurrentWindow()
   return actor;
 }
 
-Actor KeyboardFocusManager::GetCurrentFocusGroup()
+Actor FocusManager::GetCurrentFocusGroup()
 {
   return GetFocusGroup(GetCurrentFocusActor());
 }
 
-void KeyboardFocusManager::MoveFocusBackward()
+void FocusManager::MoveFocusBackward()
 {
   // Find Pre Focused Actor when the list size is more than 1
   if(mFocusHistory.size() > 1)
@@ -416,13 +416,13 @@ void KeyboardFocusManager::MoveFocusBackward()
   }
 }
 
-bool KeyboardFocusManager::IsLayoutView(Actor actor) const
+bool FocusManager::IsLayoutView(Actor actor) const
 {
   Ui::View view = Ui::View::DownCast(actor);
   return view && Integration::GetImpl(view).IsKeyboardNavigationSupported();
 }
 
-Ui::View KeyboardFocusManager::GetParentLayoutView(Actor actor) const
+Ui::View FocusManager::GetParentLayoutView(Actor actor) const
 {
   // Get the actor's parent layout view that supports two dimensional keyboard navigation
   Actor rootActor;
@@ -446,7 +446,7 @@ Ui::View KeyboardFocusManager::GetParentLayoutView(Actor actor) const
   return Ui::View::DownCast(parent);
 }
 
-Ui::FocusDevice KeyboardFocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const
+Ui::FocusDevice FocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const
 {
   switch(deviceClass)
   {
@@ -467,12 +467,12 @@ Ui::FocusDevice KeyboardFocusManager::ConvertDeviceClassToKeyboardFocusDevice(De
   }
 }
 
-bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName)
+bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& deviceName)
 {
   return MoveFocus(direction, {Ui::FocusDevice::PROGRAMMATIC, deviceName});
 }
 
-bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
+bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   Actor currentFocusActor = GetCurrentFocusActor();
 
@@ -627,7 +627,7 @@ bool KeyboardFocusManager::MoveFocus(Ui::FocusDirection direction, const FocusCh
   return succeed;
 }
 
-bool KeyboardFocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context)
+bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   // Ask the view for the next actor to focus
   Actor nextFocusableActor = Integration::GetImpl(view).GetNextKeyboardFocusableActor(actor, direction, mFocusGroupLoopEnabled);
@@ -690,7 +690,7 @@ bool KeyboardFocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor acto
   }
 }
 
-bool KeyboardFocusManager::DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context)
+bool FocusManager::DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context)
 {
   bool succeed = false;
 
@@ -715,7 +715,7 @@ bool KeyboardFocusManager::DoMoveFocusToNextFocusGroup(bool forward, const Focus
   return succeed;
 }
 
-void KeyboardFocusManager::DoKeyboardEnter(Actor actor)
+void FocusManager::DoKeyboardEnter(Actor actor)
 {
   if(actor)
   {
@@ -734,7 +734,7 @@ void KeyboardFocusManager::DoKeyboardEnter(Actor actor)
   }
 }
 
-void KeyboardFocusManager::ClearFocus(Actor actor)
+void FocusManager::ClearFocus(Actor actor)
 {
   // Reset context for this system-triggered focus loss.
   mLastFocusChangeContext = {};
@@ -742,7 +742,7 @@ void KeyboardFocusManager::ClearFocus(Actor actor)
   if(actor)
   {
     DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", actor.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    actor.OffSceneSignal().Disconnect(mSlotDelegate, &KeyboardFocusManager::OnSceneDisconnection);
+    actor.OffSceneSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
     // Remove the actor from mCurrentFocusActors if present
     for(auto iter = mCurrentFocusActors.begin(); iter != mCurrentFocusActors.end(); ++iter)
@@ -769,7 +769,7 @@ void KeyboardFocusManager::ClearFocus(Actor actor)
   mCurrentFocusActor.Reset();
 }
 
-void KeyboardFocusManager::ClearFocusIndicator(Actor actor)
+void FocusManager::ClearFocusIndicator(Actor actor)
 {
   if(actor)
   {
@@ -781,24 +781,24 @@ void KeyboardFocusManager::ClearFocusIndicator(Actor actor)
   mIsFocusIndicatorShown = (mAlwaysShowIndicator == ALWAYS_SHOW) ? SHOW : HIDE;
 }
 
-void KeyboardFocusManager::ClearFocus()
+void FocusManager::ClearFocus()
 {
   Actor actor = GetCurrentFocusActor();
   ClearFocusIndicator(actor);
   ClearFocus(actor);
 }
 
-void KeyboardFocusManager::SetFocusGroupLoop(bool enabled)
+void FocusManager::SetFocusGroupLoop(bool enabled)
 {
   mFocusGroupLoopEnabled = enabled;
 }
 
-bool KeyboardFocusManager::GetFocusGroupLoop() const
+bool FocusManager::GetFocusGroupLoop() const
 {
   return mFocusGroupLoopEnabled;
 }
 
-void KeyboardFocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
+void FocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
 {
   if(actor)
   {
@@ -807,7 +807,7 @@ void KeyboardFocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
   }
 }
 
-bool KeyboardFocusManager::IsFocusGroup(Actor actor) const
+bool FocusManager::IsFocusGroup(Actor actor) const
 {
   // Check whether the actor is a focus group
   bool isFocusGroup = false;
@@ -824,7 +824,7 @@ bool KeyboardFocusManager::IsFocusGroup(Actor actor) const
   return isFocusGroup;
 }
 
-Actor KeyboardFocusManager::GetFocusGroup(Actor actor)
+Actor FocusManager::GetFocusGroup(Actor actor)
 {
   // Go through the actor's hierarchy to check which focus group the actor belongs to
   while(actor && !IsFocusGroup(actor))
@@ -835,7 +835,7 @@ Actor KeyboardFocusManager::GetFocusGroup(Actor actor)
   return actor;
 }
 
-void KeyboardFocusManager::SetFocusIndicatorActor(View indicator)
+void FocusManager::SetFocusIndicatorActor(View indicator)
 {
   if(mFocusIndicatorActor != indicator)
   {
@@ -858,7 +858,7 @@ void KeyboardFocusManager::SetFocusIndicatorActor(View indicator)
   }
 }
 
-Actor KeyboardFocusManager::GetFocusIndicatorActor()
+Actor FocusManager::GetFocusIndicatorActor()
 {
   if(!mFocusIndicatorActor)
   {
@@ -875,12 +875,12 @@ Actor KeyboardFocusManager::GetFocusIndicatorActor()
   return mFocusIndicatorActor;
 }
 
-uint32_t KeyboardFocusManager::GetCurrentWindowId() const
+uint32_t FocusManager::GetCurrentWindowId() const
 {
   return mCurrentWindowId;
 }
 
-void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
+void FocusManager::OnKeyEvent(const KeyEvent& event)
 {
   if(mCurrentFocusedWindow.GetHandle())
   {
@@ -1089,7 +1089,7 @@ void KeyboardFocusManager::OnKeyEvent(const KeyEvent& event)
   }
 }
 
-void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
+void FocusManager::OnTouch(const TouchEvent& touch)
 {
   // if mIsFocusIndicatorShown is UNKNOWN, it means Configuration is not loaded.
   // Try to load configuration.
@@ -1125,7 +1125,7 @@ void KeyboardFocusManager::OnTouch(const TouchEvent& touch)
   }
 }
 
-void KeyboardFocusManager::OnWheelEvent(const WheelEvent& event)
+void FocusManager::OnWheelEvent(const WheelEvent& event)
 {
   if(event.GetType() == Dali::WheelEvent::CUSTOM_WHEEL)
   {
@@ -1135,7 +1135,7 @@ void KeyboardFocusManager::OnWheelEvent(const WheelEvent& event)
   }
 }
 
-bool KeyboardFocusManager::OnCustomWheelEvent(const WheelEvent& event)
+bool FocusManager::OnCustomWheelEvent(const WheelEvent& event)
 {
   bool  consumed = false;
   Actor actor    = GetCurrentFocusActor();
@@ -1147,7 +1147,7 @@ bool KeyboardFocusManager::OnCustomWheelEvent(const WheelEvent& event)
   return consumed;
 }
 
-bool KeyboardFocusManager::EmitCustomWheelSignals(Actor actor, const WheelEvent& event)
+bool FocusManager::EmitCustomWheelSignals(Actor actor, const WheelEvent& event)
 {
   bool consumed = false;
 
@@ -1177,7 +1177,7 @@ bool KeyboardFocusManager::EmitCustomWheelSignals(Actor actor, const WheelEvent&
   return consumed;
 }
 
-void KeyboardFocusManager::OnWindowFocusChanged(Window window, bool focusIn)
+void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
 {
   if(focusIn && mCurrentFocusedWindow.GetHandle() != window.GetRootLayer())
   {
@@ -1202,7 +1202,7 @@ void KeyboardFocusManager::OnWindowFocusChanged(Window window, bool focusIn)
   }
 }
 
-void KeyboardFocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHolder sceneHolder, bool focusIn)
+void FocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHolder sceneHolder, bool focusIn)
 {
   Window window = Window::DownCast(sceneHolder);
   if(window)
@@ -1215,37 +1215,37 @@ void KeyboardFocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHol
   }
 }
 
-Ui::KeyboardFocusManager::PreFocusChangeSignalType& KeyboardFocusManager::PreFocusChangeSignal()
+Ui::FocusManager::PreFocusChangeSignalType& FocusManager::PreFocusChangeSignal()
 {
   return mPreFocusChangeSignal;
 }
 
-Ui::KeyboardFocusManager::FocusChangedSignalType& KeyboardFocusManager::FocusChangedSignal()
+Ui::FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
 {
   return mFocusChangedSignal;
 }
 
-Ui::KeyboardFocusManager::FocusGroupChangedSignalType& KeyboardFocusManager::FocusGroupChangedSignal()
+Ui::FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal()
 {
   return mFocusGroupChangedSignal;
 }
 
-Ui::KeyboardFocusManager::FocusedActorEnterKeySignalType& KeyboardFocusManager::FocusedActorEnterKeySignal()
+Ui::FocusManager::FocusedActorEnterKeySignalType& FocusManager::FocusedActorEnterKeySignal()
 {
   return mFocusedActorEnterKeySignal;
 }
 
-const KeyboardFocusManager::FocusChangeContext& KeyboardFocusManager::FocusChangedContext() const
+const FocusManager::FocusChangeContext& FocusManager::FocusChangedContext() const
 {
   return mLastFocusChangeContext;
 }
 
-bool KeyboardFocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName, FunctorDelegate* functor)
+bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* tracker, const Dali::String& signalName, FunctorDelegate* functor)
 {
   Dali::BaseHandle handle(object);
 
-  bool                  connected(true);
-  KeyboardFocusManager* manager = static_cast<KeyboardFocusManager*>(object); // TypeRegistry guarantees that this is the correct type.
+  bool          connected(true);
+  FocusManager* manager = static_cast<FocusManager*>(object); // TypeRegistry guarantees that this is the correct type.
 
   if(0 == strcmp(signalName.CStr(), SIGNAL_PRE_FOCUS_CHANGE))
   {
@@ -1272,12 +1272,12 @@ bool KeyboardFocusManager::DoConnectSignal(BaseObject* object, ConnectionTracker
   return connected;
 }
 
-void KeyboardFocusManager::SetCustomAlgorithm(CustomAlgorithmInterface& interface)
+void FocusManager::SetCustomAlgorithm(CustomAlgorithmInterface& interface)
 {
   mCustomAlgorithmInterface = &interface;
 }
 
-void KeyboardFocusManager::EnableFocusIndicator(bool enable)
+void FocusManager::EnableFocusIndicator(bool enable)
 {
   if(!enable && mFocusIndicatorActor)
   {
@@ -1287,42 +1287,42 @@ void KeyboardFocusManager::EnableFocusIndicator(bool enable)
   mEnableFocusIndicator = enable ? ENABLE : DISABLE;
 }
 
-bool KeyboardFocusManager::IsFocusIndicatorEnabled() const
+bool FocusManager::IsFocusIndicatorEnabled() const
 {
   return (mEnableFocusIndicator == ENABLE);
 }
 
-void KeyboardFocusManager::EnableDefaultAlgorithm(bool enable)
+void FocusManager::EnableDefaultAlgorithm(bool enable)
 {
   mEnableDefaultAlgorithm = enable;
 }
 
-bool KeyboardFocusManager::IsDefaultAlgorithmEnabled() const
+bool FocusManager::IsDefaultAlgorithmEnabled() const
 {
   return mEnableDefaultAlgorithm;
 }
 
-void KeyboardFocusManager::SetFocusFinderRootActor(Actor actor)
+void FocusManager::SetFocusFinderRootActor(Actor actor)
 {
   mFocusFinderRootActor = actor;
 }
 
-void KeyboardFocusManager::ResetFocusFinderRootActor()
+void FocusManager::ResetFocusFinderRootActor()
 {
   mFocusFinderRootActor.Reset();
 }
 
-void KeyboardFocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
+void FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
 {
   mClearFocusOnWindowFocusLost = enabled;
 }
 
-bool KeyboardFocusManager::GetClearFocusOnWindowFocusLost() const
+bool FocusManager::GetClearFocusOnWindowFocusLost() const
 {
   return mClearFocusOnWindowFocusLost;
 }
 
-void KeyboardFocusManager::OnSceneDisconnection(Dali::Actor actor)
+void FocusManager::OnSceneDisconnection(Dali::Actor actor)
 {
   if(actor && actor == mCurrentFocusActor.GetHandle())
   {

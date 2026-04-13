@@ -154,14 +154,14 @@ public: // From Ui::Internal::View
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc Ui::Internal::View::OnKeyInputFocusGained
+   * @copydoc Ui::Internal::View::OnFocusGained
    */
-  virtual void OnKeyInputFocusGained();
+  virtual void OnFocusGained();
 
   /**
-   * @copydoc Ui::Internal::View::OnKeyInputFocusLost
+   * @copydoc Ui::Internal::View::OnFocusLost
    */
-  virtual void OnKeyInputFocusLost();
+  virtual void OnFocusLost();
 
   /**
    * @copydoc Ui::Internal::View::OnKeyEvent
@@ -1036,7 +1036,7 @@ public:
 
   /// @cond internal
   /**
-   * @brief Called by the KeyboardFocusManager.
+   * @brief Called by the FocusManager.
    */
   DALI_INTERNAL void KeyboardEnter();
   /// @endcond
@@ -1049,14 +1049,9 @@ public:
   Ui::View::KeyEventSignalType& KeyEventSignal();
 
   /**
-   * @copydoc Dali::Ui::View::KeyInputFocusGainedSignal()
+   * @copydoc Dali::Ui::View::FocusChangedSignal()
    */
-  Ui::View::KeyInputFocusSignalType& KeyInputFocusGainedSignal();
-
-  /**
-   * @copydoc Dali::Ui::View::KeyInputFocusLostSignal()
-   */
-  Ui::View::KeyInputFocusSignalType& KeyInputFocusLostSignal();
+  Ui::View::FocusChangedSignalType& FocusChangedSignal();
 
   /// @cond internal
   /**
@@ -1099,13 +1094,13 @@ protected: // For derived classes to call
   }
 
   /**
-   * @brief Emits KeyInputFocusGained signal if true else emits KeyInputFocusLost signal.
+   * @brief Emits FocusChanged signal.
    *
    * Should be called last by the view after it acts on the Input Focus change.
    *
    * @param[in] focusGained True if gained, False if lost
    */
-  void EmitKeyInputFocusSignal(bool focusGained);
+  void EmitFocusChangedSignal(bool focusGained);
 
 protected: // From CustomActorImpl
   /**

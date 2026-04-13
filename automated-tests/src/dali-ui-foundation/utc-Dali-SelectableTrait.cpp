@@ -541,7 +541,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   application.SendNotification();
   application.Render();
 
-  KeyboardFocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusActor(view);
   application.SendNotification();
   application.Render();
 

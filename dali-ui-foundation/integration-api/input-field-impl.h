@@ -413,14 +413,14 @@ public: // From ViewImpl
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnKeyInputFocusGained()
+   * @copydoc Integration::ViewImpl::OnFocusGained()
    */
-  void OnKeyInputFocusGained() override;
+  void OnFocusGained() override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnKeyInputFocusLost()
+   * @copydoc Integration::ViewImpl::OnFocusLost()
    */
-  void OnKeyInputFocusLost() override;
+  void OnFocusLost() override;
 
   /**
    * @copydoc Integration::ViewImpl::OnSceneConnection()

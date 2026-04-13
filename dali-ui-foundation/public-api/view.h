@@ -1098,10 +1098,9 @@ public:
     {
       /**
        * @brief Receives key events to the View.
-       * @details Name "keyInputFocus", type Property::BOOLEAN.
-       * @see Ui::View::SetKeyInputFocus()
+       * @details Name "Focused", type Property::BOOLEAN.
        */
-      KEY_INPUT_FOCUS = PROPERTY_START_INDEX,
+      FOCUSED = PROPERTY_START_INDEX,
 
       /**
        * @brief The background of the View.
@@ -1334,8 +1333,8 @@ public:
   /// @brief Key Event signal type.
   typedef Signal<bool(View, const KeyEvent&)> KeyEventSignalType;
 
-  /// @brief Key InputFocusType signal type.
-  typedef Signal<void(View)> KeyInputFocusSignalType;
+  /// @brief Focus changed signal type.
+  typedef Signal<void(View, bool)> FocusChangedSignalType;
 
   /// @brief ResourceReady signal type.
   typedef Signal<void(View)> ResourceReadySignalType;
@@ -1459,6 +1458,32 @@ public:
    * @note This signal is only emitted when OffScreenRenderingType is set to RENDER_ONCE.
    */
   OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
+
+  /**
+   * @brief This signal is emitted when key event is received.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   bool YourCallbackName(View view, const KeyEvent& event);
+   * @endcode
+   * The return value of True, indicates that the event should be consumed.
+   * Otherwise the signal will be emitted on the next parent of the actor.
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   */
+  KeyEventSignalType& KeyEventSignal();
+
+  /**
+   * @brief This signal is emitted when the view gets or loses focus.
+   *
+   * A callback of the following type may be connected:
+   * @code
+   *   bool YourCallbackName(View view, bool focused);
+   * @endcode
+   * @return The signal to connect to
+   * @pre The View has been initialized.
+   */
+  FocusChangedSignalType& FocusChangedSignal();
 
 public: // Templates for Deriving Classes
   /**

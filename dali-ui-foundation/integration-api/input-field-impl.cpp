@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
-#include <dali-ui-foundation/internal/focus-manager/keyboard-focus-manager-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
@@ -785,7 +785,7 @@ float InputFieldImpl::GetHeightForWidth(float width)
   return mController->GetHeightForWidth(width - (padding.start + padding.end)) + padding.top + padding.bottom;
 }
 
-void InputFieldImpl::OnKeyInputFocusGained()
+void InputFieldImpl::OnFocusGained()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   if(mInputMethodContext && IsEditable())
@@ -810,10 +810,10 @@ void InputFieldImpl::OnKeyInputFocusGained()
     mController->KeyboardFocusGainEvent(); // Called in the case of no virtual keyboard to trigger this event
   }
 
-  EmitKeyInputFocusSignal(true); // Calls back into the Control hence done last.
+  EmitFocusChangedSignal(true); // Calls back into the Control hence done last.
 }
 
-void InputFieldImpl::OnKeyInputFocusLost()
+void InputFieldImpl::OnFocusLost()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   if(mInputMethodContext)
@@ -830,7 +830,7 @@ void InputFieldImpl::OnKeyInputFocusLost()
 
   mController->KeyboardFocusLostEvent();
 
-  EmitKeyInputFocusSignal(false); // Calls back into the Control hence done last.
+  EmitFocusChangedSignal(false); // Calls back into the Control hence done last.
 }
 
 void InputFieldImpl::OnSceneConnection(int depth)
@@ -853,10 +853,10 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
     // Make sure ClearKeyInputFocus when only key is up
     if(event.GetState() == KeyEvent::UP)
     {
-      Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
-      if(keyboardFocusManager)
+      Dali::Ui::FocusManager focusManager = Dali::Ui::FocusManager::Get();
+      if(focusManager)
       {
-        keyboardFocusManager.ClearFocus();
+        focusManager.ClearFocus();
       }
       ClearKeyInputFocus();
     }
@@ -883,7 +883,7 @@ void InputFieldImpl::OnTap(const TapGesture& gesture)
   mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - padding.start, localPoint.y - padding.top);
   mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
 
-  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
+  Dali::Ui::FocusManager keyboardFocusManager = Dali::Ui::FocusManager::Get();
   if(keyboardFocusManager)
   {
     keyboardFocusManager.SetCurrentFocusActor(Self());
@@ -1296,7 +1296,7 @@ void InputFieldImpl::OnKeyboardStatusChanged(bool keyboardShown)
 
   bool isFocused = false;
 
-  Dali::Ui::KeyboardFocusManager keyboardFocusManager = Dali::Ui::KeyboardFocusManager::Get();
+  Dali::Ui::FocusManager keyboardFocusManager = Dali::Ui::FocusManager::Get();
   if(keyboardFocusManager)
   {
     isFocused = keyboardFocusManager.GetCurrentFocusActor() == Self();
@@ -1312,7 +1312,7 @@ void InputFieldImpl::OnKeyboardStatusChanged(bool keyboardShown)
   }
   else
   {
-    mController->KeyboardFocusGainEvent(); // Initially called by OnKeyInputFocusGained
+    mController->KeyboardFocusGainEvent(); // Initially called by OnFocusGained
   }
 }
 
