@@ -201,28 +201,28 @@ IF( ENABLE_COVERAGE )
     # fastcov.py doesn't need version detection or complex rc options
     SET(FASTCOV_OPTS "--branch-coverage" "--lcov")
 
-    ADD_CUSTOM_TARGET( ${DALI_TOOLKIT_PREFIX}rename_cov_data ./rename-cov-data )
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}rename_cov_data ./rename-cov-data )
 
     # fastcov.py combines capture and exclude into a single operation
-    ADD_CUSTOM_TARGET( ${DALI_TOOLKIT_PREFIX}cov_data
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}cov_data
       COMMAND ${FASTCOV_BIN} ${FASTCOV_OPTS}
         -d .
         --exclude dali-env /usr/include /usr/local/include third-party
         -o dali.info )
 
     # genhtml works with fastcov.py output (lcov-compatible format)
-    ADD_CUSTOM_TARGET( ${DALI_TOOLKIT_PREFIX}coverage
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}coverage
       COMMAND genhtml --branch-coverage -o ${COVERAGE_OUTPUT_DIR} dali.info
       DEPENDS cov_data )
 
     # Reset coverage using fastcov.py's zerocounters option
-    ADD_CUSTOM_TARGET( ${DALI_TOOLKIT_PREFIX}reset_coverage
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}reset_coverage
       COMMAND ${FASTCOV_BIN} -z -d . )
 
     # Define custom rule for distclean
-    ADD_CUSTOM_TARGET( ${DALI_TOOLKIT_PREFIX}distclean @echo cleaning for source distribution )
+    ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}distclean @echo cleaning for source distribution )
     ADD_CUSTOM_COMMAND(
-          DEPENDS ${DALI_TOOLKIT_PREFIX}clean
+          DEPENDS ${DALI_UI_PREFIX}clean
           COMMENT "distribution clean"
           COMMAND find
           ARGS    .
@@ -248,7 +248,7 @@ IF( ENABLE_COVERAGE )
           -name *~ -or
           -name libdali*.so* \)
           | grep -v TC | xargs rm -rf
-          TARGET  ${DALI_TOOLKIT_PREFIX}distclean
+          TARGET  ${DALI_UI_PREFIX}distclean
           VERBATIM
           )
 
