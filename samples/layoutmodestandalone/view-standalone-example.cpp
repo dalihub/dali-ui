@@ -20,10 +20,10 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 /**
- * View sample (LayoutMode::Standalone): based on view-margin-example.
+ * View sample (LayoutMode::STANDALONE): based on view-margin-example.
  *
  * Same structure as view-margin-example, but the first child (Red) is set to
- * LayoutMode::Standalone with RequestedWidth/Height = (100, 100) and
+ * LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
  * SetPositionX/Y = (300, 300). It is excluded from the parent View's
  * WRAP_CONTENT accumulation and placed at (300, 300) in the parent's
  * coordinate space.
@@ -82,7 +82,7 @@ public:
     child3.SetRequestedHeight(100.0f);
     child3.SetPositionX(300.0f);
     child3.SetPositionY(300.0f);
-    child3.SetLayoutMode(LayoutMode::Standalone);
+    child3.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(child3);
 
     window.Add(root);

@@ -160,10 +160,10 @@ during Measure.
   area (when no explicit bounds are set via AbsoluteLayoutParams).
 - **ScrollView**: `MATCH_PARENT` children fill the viewport in Arrange.
 
-### LayoutMode::Standalone
+### LayoutMode::STANDALONE
 
 A child View can opt out of its parent's layout flow by calling
-`SetLayoutMode(LayoutMode::Standalone)`. Standalone children remain in the
+`SetLayoutMode(LayoutMode::STANDALONE)`. Standalone children remain in the
 parent hierarchy (they are still measured, arranged and rendered) but are
 treated as floating elements rather than as participants in the parent's
 layout algorithm. This is useful for floating overlays, drag previews,

@@ -593,7 +593,7 @@ int UtcDaliStackLayoutStandaloneExcludedFromAccumulationP(void)
   layout.Add(normal1);
 
   View standalone = View::New();
-  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(40.0f);
   standalone.SetRequestedHeight(40.0f);
   standalone.SetPositionX(80.0f);
@@ -630,7 +630,7 @@ int UtcDaliStackLayoutStandaloneIgnoresParentPaddingP(void)
   layout.SetViewPadding(Extents(10, 10, 10, 10));
 
   View standalone = View::New();
-  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetViewMargin(Extents(5, 5, 7, 7));
   standalone.SetRequestedWidth(MATCH_PARENT);
   standalone.SetRequestedHeight(MATCH_PARENT);

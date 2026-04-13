@@ -1524,18 +1524,18 @@ int UtcDaliViewBorderlineWithCornerRadiusCombinedP(void)
   END_TEST;
 }
 
-// LayoutMode::Standalone tests
+// LayoutMode::STANDALONE tests
 
 int UtcDaliViewSetLayoutModeP(void)
 {
   UiTestApplication application;
   View view = View::New();
-  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Default), TEST_LOCATION);
-  View& result = view.SetLayoutMode(LayoutMode::Standalone);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::DEFAULT), TEST_LOCATION);
+  View& result = view.SetLayoutMode(LayoutMode::STANDALONE);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Standalone), TEST_LOCATION);
-  view.SetLayoutMode(LayoutMode::Default);
-  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::Default), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::STANDALONE), TEST_LOCATION);
+  view.SetLayoutMode(LayoutMode::DEFAULT);
+  DALI_TEST_EQUALS(static_cast<int>(view.GetLayoutMode()), static_cast<int>(LayoutMode::DEFAULT), TEST_LOCATION);
   END_TEST;
 }
 
@@ -1548,7 +1548,7 @@ int UtcDaliViewStandaloneIgnoresParentPaddingMatchParentP(void)
   parent.SetRequestedHeight(150.0f);
 
   View child = View::New();
-  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetLayoutMode(LayoutMode::STANDALONE);
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(MATCH_PARENT);
   parent.Add(child);
@@ -1574,7 +1574,7 @@ int UtcDaliViewStandaloneAppliesOwnMarginP(void)
   parent.SetRequestedHeight(150.0f);
 
   View child = View::New();
-  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetLayoutMode(LayoutMode::STANDALONE);
   child.SetViewMargin(Extents(5, 5, 7, 7));
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(MATCH_PARENT);
@@ -1600,7 +1600,7 @@ int UtcDaliViewStandaloneUsesPositionP(void)
   parent.SetRequestedHeight(150.0f);
 
   View child = View::New();
-  child.SetLayoutMode(LayoutMode::Standalone);
+  child.SetLayoutMode(LayoutMode::STANDALONE);
   child.SetRequestedWidth(40.0f);
   child.SetRequestedHeight(30.0f);
   child.SetPositionX(50.0f);
@@ -1628,7 +1628,7 @@ int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
   parent.Add(normal);
 
   View standalone = View::New();
-  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(500.0f);
   standalone.SetRequestedHeight(500.0f);
   standalone.SetPositionX(1000.0f);

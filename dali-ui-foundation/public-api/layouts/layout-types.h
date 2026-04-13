@@ -85,8 +85,8 @@ constexpr float MATCH_PARENT = -2.0f;
  */
 enum class LayoutMode : uint8_t
 {
-  Default    = 0, ///< Managed by the parent container's layout (default).
-  Standalone = 1, ///< Excluded from parent's layout accumulation; uses SetPositionX/SetPositionY.
+  DEFAULT    = 0, ///< Managed by the parent container's layout (default).
+  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetPositionX/SetPositionY.
 };
 
 /**

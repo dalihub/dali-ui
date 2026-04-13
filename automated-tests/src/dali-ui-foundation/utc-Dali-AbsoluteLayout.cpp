@@ -262,7 +262,7 @@ int UtcDaliAbsoluteLayoutStandaloneIgnoresParentPaddingP(void)
   layout.SetViewPadding(Extents(10, 10, 10, 10));
 
   View standalone = View::New();
-  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetViewMargin(Extents(5, 5, 7, 7));
   standalone.SetRequestedWidth(MATCH_PARENT);
   standalone.SetRequestedHeight(MATCH_PARENT);
@@ -286,7 +286,7 @@ int UtcDaliAbsoluteLayoutStandaloneBypassesBoundsP(void)
   AbsoluteLayout layout = AbsoluteLayout::New();
 
   View standalone = View::New();
-  standalone.SetLayoutMode(LayoutMode::Standalone);
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(30.0f);
   standalone.SetRequestedHeight(20.0f);
   standalone.SetPositionX(60.0f);

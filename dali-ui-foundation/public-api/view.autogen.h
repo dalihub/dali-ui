@@ -118,10 +118,10 @@
   /** \
   * @brief Sets the layout mode of this View. \
   * \
-  * LayoutMode::Default (default) lets the parent container's layout system manage \
+  * LayoutMode::DEFAULT (default) lets the parent container's layout system manage \
   * this View's size and position normally. \
   * \
-  * LayoutMode::Standalone excludes this View from the parent's accumulation, \
+  * LayoutMode::STANDALONE excludes this View from the parent's accumulation, \
   * spacing and index calculations. The View's size is still measured normally \
   * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work), \
   * but its position is taken from SetPositionX/SetPositionY instead of being \

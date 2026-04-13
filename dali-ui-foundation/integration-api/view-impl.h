@@ -809,7 +809,7 @@ private:
   // Layout Properties Data
   Extents        mMargin;
   Extents        mPadding;
-  Ui::LayoutMode mLayoutMode{Ui::LayoutMode::Default};
+  Ui::LayoutMode mLayoutMode{Ui::LayoutMode::DEFAULT};
 
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache

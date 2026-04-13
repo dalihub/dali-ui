@@ -19,10 +19,10 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 /**
- * AbsoluteLayout sample (LayoutMode::Standalone): based on absolutelayout-example.
+ * AbsoluteLayout sample (LayoutMode::STANDALONE): based on absolutelayout-example.
  *
  * Same structure as absolutelayout-example, but the first child (Red) is set
- * to LayoutMode::Standalone with RequestedWidth/Height = (100, 100) and
+ * to LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
  * SetPositionX/Y = (300, 300). It is excluded from the AbsoluteLayout's
  * LayoutParams-driven placement and instead drawn at (300, 300) using its
  * own RequestedWidth/Height.
@@ -69,7 +69,7 @@ public:
     blueBox.SetRequestedHeight(100.0f);
     blueBox.SetPositionX(300.0f);
     blueBox.SetPositionY(300.0f);
-    blueBox.SetLayoutMode(LayoutMode::Standalone);
+    blueBox.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(blueBox);
 
     window.Add(root);

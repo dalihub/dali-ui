@@ -19,10 +19,10 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 /**
- * StackLayout sample (LayoutMode::Standalone): based on stacklayout-example.
+ * StackLayout sample (LayoutMode::STANDALONE): based on stacklayout-example.
  *
  * Same structure as stacklayout-example, but the first child (Red top bar) is
- * set to LayoutMode::Standalone with RequestedWidth/Height = (100, 100) and
+ * set to LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
  * SetPositionX/Y = (300, 300). It is excluded from the stack accumulation
  * (and from spacing) and instead drawn at (300, 300) in the parent's
  * coordinate space, while Green (weighted) and Blue (bottom bar) still stack
@@ -71,7 +71,7 @@ public:
     bottomBar.SetRequestedHeight(100.0f);
     bottomBar.SetPositionX(300.0f);
     bottomBar.SetPositionY(300.0f);
-    bottomBar.SetLayoutMode(LayoutMode::Standalone);
+    bottomBar.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(bottomBar);
 
     window.Add(root);

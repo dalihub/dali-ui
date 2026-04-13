@@ -1194,7 +1194,7 @@ Ui::LayoutMode ViewImpl::GetLayoutMode() const
 
 bool ViewImpl::IsLayoutModeStandalone() const
 {
-  return mLayoutMode == Ui::LayoutMode::Standalone;
+  return mLayoutMode == Ui::LayoutMode::STANDALONE;
 }
 
 // =============================================================================

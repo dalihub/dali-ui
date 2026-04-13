@@ -19,10 +19,10 @@ using namespace Dali;
 using namespace Dali::Ui;
 
 /**
- * GridLayout sample (LayoutMode::Standalone): based on gridlayout-example.
+ * GridLayout sample (LayoutMode::STANDALONE): based on gridlayout-example.
  *
  * Same structure as gridlayout-example, but the first child (Red, cell 0,0) is
- * set to LayoutMode::Standalone with RequestedWidth/Height = (100, 100) and
+ * set to LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
  * SetPositionX/Y = (300, 300). It is excluded from the grid cell placement
  * and instead drawn at (300, 300) in the parent's coordinate space, while the
  * other cells still occupy their grid positions.
@@ -78,7 +78,7 @@ public:
     cell10.SetRequestedHeight(100.0f);
     cell10.SetPositionX(300.0f);
     cell10.SetPositionY(300.0f);
-    cell10.SetLayoutMode(LayoutMode::Standalone);
+    cell10.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(cell10);
 
     // Cell (1,1): Yellow
