@@ -734,6 +734,38 @@ void LabelImpl::ResetFontVariation()
   mController->ClearVariationsMap();
 }
 
+// Integration-only implementation for now until public API support is introduced.
+Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::String& tag)
+{
+  if(tag.Size() != 4u) // Variation axis tag must be 4 characters.
+  {
+    DALI_LOG_ERROR("Font variation registration failed. The tag length is not 4.\n");
+    return Property::INVALID_INDEX;
+  }
+
+  Actor self = Self();
+
+  Property::Map variationsMap;
+  mController->GetVariationsMap(variationsMap);
+
+  float value = 0.0f;
+  if(const Property::Value* tagValue = variationsMap.Find(tag))
+  {
+    tagValue->Get(value);
+  }
+
+  const Dali::Property::Index index    = self.RegisterProperty(tag.CStr(), value);
+  const bool                  inserted = mVariationIndexMap.emplace(index, tag).second;
+  if(inserted)
+  {
+    PropertyNotification notification = self.AddPropertyNotification(index, StepCondition(1.0f));
+    // TODO: Make step value customizable by user.
+    notification.NotifySignal().Connect(this, &LabelImpl::OnVariationPropertyNotify);
+    // TODO: Support UnregisterProperty() and remove the tag from mVariationIndexMap.
+  }
+  return index;
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -1547,6 +1579,48 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
   }
 }
 
+void LabelImpl::OnVariationPropertyNotify(PropertyNotification& source)
+{
+  Actor self = Self();
+
+  Property::Map map;
+  mController->GetVariationsMap(map);
+
+  for(const auto& [index, tag] : mVariationIndexMap)
+  {
+    if(self.DoesCustomPropertyExist(index))
+    {
+      float value = 0.f;
+      self.GetCurrentProperty(index).Get(value);
+      map[tag] = value;
+    }
+  }
+
+  mController->SetVariationsMap(map);
+}
+
+bool LabelImpl::HandleVariationPropertySet(Property::Index index, const Property::Value& propertyValue)
+{
+  Actor self = Self();
+
+  auto iter = mVariationIndexMap.find(index);
+  if(!self.DoesCustomPropertyExist(index) || iter == mVariationIndexMap.end())
+  {
+    return false;
+  }
+
+  float value = 0.0f;
+  propertyValue.Get(value);
+
+  Property::Map map;
+  mController->GetVariationsMap(map);
+  map[iter->second] = value;
+
+  mController->SetVariationsMap(map);
+
+  return true;
+}
+
 // =============================================================================
 // UiColorManager
 // =============================================================================
@@ -1669,6 +1743,12 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
     }
     default:
     {
+      if(HandleVariationPropertySet(index, propertyValue))
+      {
+        // Handled as a font variation property.
+        break;
+      }
+
       ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
       break;
     }

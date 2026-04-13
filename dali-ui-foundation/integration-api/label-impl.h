@@ -36,6 +36,8 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 
+#include <unordered_map>
+
 namespace Dali
 {
 
@@ -447,6 +449,18 @@ public:
    */
   void ResetFontVariation();
 
+  /**
+   * @brief Registers or retrieves a font variation property for the given axis tag.
+   *
+   * If a property with the same tag is already registered, the existing property
+   * is reused and its current value is updated.
+   *
+   * @param[in] tag A 4-character OpenType variation axis tag.
+   * @return The property index associated with the variation tag,
+   *         or Property::INVALID_INDEX on failure.
+   */
+  Dali::Property::Index RegisterFontVariationProperty(const Dali::String& tag);
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -674,6 +688,20 @@ private: // Implementation
    */
   void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
 
+  /**
+   * @brief Called when a font variation property changes.
+   */
+  void OnVariationPropertyNotify(PropertyNotification& source);
+
+  /**
+   * @brief Handles font variation property updates.
+   *
+   * @param[in] index The property index being set.
+   * @param[in] propertyValue The property value.
+   * @return true if handled, false otherwise.
+   */
+  bool HandleVariationPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue);
+
   // Properties
 public:
   /**
@@ -721,6 +749,8 @@ private:
 private:
   // Data
   Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
+
+  std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;
