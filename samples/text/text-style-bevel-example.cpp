@@ -141,31 +141,31 @@ private:
       return;
     }
 
-    // Reset bevel styles with number keys
+    // Clears bevel styles with number keys
     if(event.GetKeyName() == "1")
     {
-      mEmbossedLabel.ResetBevel();
-      DALI_LOG_ERROR("Reset Embossed Label Bevel\n");
+      mEmbossedLabel.ClearBevel();
+      DALI_LOG_ERROR("Cleared Embossed Label Bevel\n");
     }
     else if(event.GetKeyName() == "2")
     {
-      mEngravedLabel.ResetBevel();
-      DALI_LOG_ERROR("Reset Engraved Label Bevel\n");
+      mEngravedLabel.ClearBevel();
+      DALI_LOG_ERROR("Cleared Engraved Label Bevel\n");
     }
     else if(event.GetKeyName() == "3")
     {
-      mGlassLabel.ResetBevel();
-      DALI_LOG_ERROR("Reset Glass Label Bevel\n");
+      mGlassLabel.ClearBevel();
+      DALI_LOG_ERROR("Cleared Glass Label Bevel\n");
     }
     else if(event.GetKeyName() == "4")
     {
-      mSameColorLabel.ResetBevel();
-      DALI_LOG_ERROR("Reset Same Color Label Bevel\n");
+      mSameColorLabel.ClearBevel();
+      DALI_LOG_ERROR("Cleared Same Color Label Bevel\n");
     }
     else if(event.GetKeyName() == "5")
     {
-      mBronzeColorLabel.ResetBevel();
-      DALI_LOG_ERROR("Reset Bronze Color Label Bevel\n");
+      mBronzeColorLabel.ClearBevel();
+      DALI_LOG_ERROR("Cleared Bronze Color Label Bevel\n");
     }
   }
 

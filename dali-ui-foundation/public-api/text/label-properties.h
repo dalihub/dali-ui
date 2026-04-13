@@ -222,7 +222,7 @@ struct LabelPropertyIndex
      * @brief The background color behind the text.
      * @details Name "textBackgroundColor", type Property::VECTOR4.
      * @note The background is rendered behind the text glyphs.
-     * @note See also: Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ResetTextBackgroundColor().
+     * @note See also: Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ClearTextBackgroundColor().
      */
     TEXT_BACKGROUND_COLOR,
 

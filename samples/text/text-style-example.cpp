@@ -233,23 +233,23 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mUnderlineLabel.ResetUnderline();
-      mInputFieldUnderline.ResetUnderline();
+      mUnderlineLabel.ClearUnderline();
+      mInputFieldUnderline.ClearUnderline();
     }
     else if(event.GetKeyName() == "2")
     {
-      mShadowLabel.ResetShadow();
-      mInputFieldShadow.ResetShadow();
+      mShadowLabel.ClearShadow();
+      mInputFieldShadow.ClearShadow();
     }
     else if(event.GetKeyName() == "3")
     {
-      mOutlineLabel.ResetOutline();
-      mInputFieldOutline.ResetOutline();
+      mOutlineLabel.ClearOutline();
+      mInputFieldOutline.ClearOutline();
     }
     else if(event.GetKeyName() == "4")
     {
-      mLineThroughLabel.ResetLineThrough();
-      mInputFieldLineThrough.ResetLineThrough();
+      mLineThroughLabel.ClearLineThrough();
+      mInputFieldLineThrough.ClearLineThrough();
     }
     else if(event.GetKeyName() == "5")
     {
@@ -310,10 +310,10 @@ private:
     }
     else if(event.GetKeyName() == "7")
     {
-      mTextBackgroundColorLabel.ResetTextBackgroundColor();
-      mInputFieldTextBackgroundColor.ResetTextBackgroundColor();
+      mTextBackgroundColorLabel.ClearTextBackgroundColor();
+      mInputFieldTextBackgroundColor.ClearTextBackgroundColor();
+      DALI_LOG_ERROR("Cleared TextBackgroundColor\n");
 
-      DALI_LOG_ERROR("Reset TextBackgroundColor\n");
       PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
       PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
     }

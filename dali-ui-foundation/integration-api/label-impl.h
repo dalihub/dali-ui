@@ -325,9 +325,9 @@ public:
   UiColor GetTextBackgroundColor() const;
 
   /**
-   * @copydoc Dali::Ui::Label::ResetTextBackgroundColor
+   * @copydoc Dali::Ui::Label::ClearTextBackgroundColor
    */
-  void ResetTextBackgroundColor();
+  void ClearTextBackgroundColor();
 
   /**
    * @copydoc Dali::Ui::Label::SetUnderline
@@ -335,9 +335,9 @@ public:
   void SetUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetUnderline
+   * @copydoc Dali::Ui::Label::ClearUnderline
    */
-  void ResetUnderline();
+  void ClearUnderline();
 
   /**
    * @copydoc Dali::Ui::Label::SetShadow
@@ -345,9 +345,9 @@ public:
   void SetShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetShadow
+   * @copydoc Dali::Ui::Label::ClearShadow
    */
-  void ResetShadow();
+  void ClearShadow();
 
   /**
    * @copydoc Dali::Ui::Label::SetOutline
@@ -355,9 +355,9 @@ public:
   void SetOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetOutline
+   * @copydoc Dali::Ui::Label::ClearOutline
    */
-  void ResetOutline();
+  void ClearOutline();
 
   /**
    * @copydoc Dali::Ui::Label::SetLineThrough
@@ -365,9 +365,9 @@ public:
   void SetLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetLineThrough
+   * @copydoc Dali::Ui::Label::ClearLineThrough
    */
-  void ResetLineThrough();
+  void ClearLineThrough();
 
   /**
    * @copydoc Dali::Ui::Label::SetBevel
@@ -375,9 +375,9 @@ public:
   void SetBevel(const Text::Bevel& bevel);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetBevel
+   * @copydoc Dali::Ui::Label::ClearBevel
    */
-  void ResetBevel();
+  void ClearBevel();
 
   /**
    * @see Dali::Ui::Label::SetTextFit
@@ -390,9 +390,9 @@ public:
   void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
-   * @copydoc Dali::Ui::Label::ResetTextFit
+   * @copydoc Dali::Ui::Label::ClearTextFit
    */
-  void ResetTextFit();
+  void ClearTextFit();
 
   /**
    * @copydoc Dali::Ui::Label::SetFontSizeScale
@@ -445,9 +445,9 @@ public:
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
 
   /**
-   * @copydoc Dali::Ui::Label::ResetFontVariation
+   * @copydoc Dali::Ui::Label::ClearFontVariation
    */
-  void ResetFontVariation();
+  void ClearFontVariation();
 
   /**
    * @brief Registers or retrieves a font variation property for the given axis tag.

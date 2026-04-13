@@ -255,9 +255,9 @@ public:
   UiColor GetTextBackgroundColor() const;
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetTextBackgroundColor
+   * @copydoc Dali::Ui::InputField::ClearTextBackgroundColor
    */
-  void ResetTextBackgroundColor();
+  void ClearTextBackgroundColor();
 
   /**
    * @copydoc Dali::Ui::InputField::SetUnderline
@@ -265,9 +265,9 @@ public:
   void SetUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetUnderline
+   * @copydoc Dali::Ui::InputField::ClearUnderline
    */
-  void ResetUnderline();
+  void ClearUnderline();
 
   /**
    * @copydoc Dali::Ui::InputField::SetShadow
@@ -275,9 +275,9 @@ public:
   void SetShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetShadow
+   * @copydoc Dali::Ui::InputField::ClearShadow
    */
-  void ResetShadow();
+  void ClearShadow();
 
   /**
    * @copydoc Dali::Ui::InputField::SetOutline
@@ -285,9 +285,9 @@ public:
   void SetOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetOutline
+   * @copydoc Dali::Ui::InputField::ClearOutline
    */
-  void ResetOutline();
+  void ClearOutline();
 
   /**
    * @copydoc Dali::Ui::InputField::SetLineThrough
@@ -295,9 +295,9 @@ public:
   void SetLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetLineThrough
+   * @copydoc Dali::Ui::InputField::ClearLineThrough
    */
-  void ResetLineThrough();
+  void ClearLineThrough();
 
   /**
    * @copydoc Dali::Ui::InputField::SetFontSizeScale
@@ -350,9 +350,9 @@ public:
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
 
   /**
-   * @copydoc Dali::Ui::InputField::ResetFontVariation
+   * @copydoc Dali::Ui::InputField::ClearFontVariation
    */
-  void ResetFontVariation();
+  void ClearFontVariation();
 
   // Read Only
   /**

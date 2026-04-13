@@ -310,9 +310,9 @@ UiColor InputField::GetTextBackgroundColor() const
   return GetImpl(*this).GetTextBackgroundColor();
 }
 
-void InputField::ResetTextBackgroundColor()
+void InputField::ClearTextBackgroundColor()
 {
-  GetImpl(*this).ResetTextBackgroundColor();
+  GetImpl(*this).ClearTextBackgroundColor();
 }
 
 InputField& InputField::SetUnderline(const Text::Underline& underline)
@@ -321,9 +321,9 @@ InputField& InputField::SetUnderline(const Text::Underline& underline)
   return *this;
 }
 
-void InputField::ResetUnderline()
+void InputField::ClearUnderline()
 {
-  return GetImpl(*this).ResetUnderline();
+  return GetImpl(*this).ClearUnderline();
 }
 
 InputField& InputField::SetShadow(const Text::Shadow& shadow)
@@ -332,9 +332,9 @@ InputField& InputField::SetShadow(const Text::Shadow& shadow)
   return *this;
 }
 
-void InputField::ResetShadow()
+void InputField::ClearShadow()
 {
-  return GetImpl(*this).ResetShadow();
+  return GetImpl(*this).ClearShadow();
 }
 
 InputField& InputField::SetOutline(const Text::Outline& outline)
@@ -343,9 +343,9 @@ InputField& InputField::SetOutline(const Text::Outline& outline)
   return *this;
 }
 
-void InputField::ResetOutline()
+void InputField::ClearOutline()
 {
-  return GetImpl(*this).ResetOutline();
+  return GetImpl(*this).ClearOutline();
 }
 
 InputField& InputField::SetLineThrough(const Text::LineThrough& lineThrough)
@@ -354,9 +354,9 @@ InputField& InputField::SetLineThrough(const Text::LineThrough& lineThrough)
   return *this;
 }
 
-void InputField::ResetLineThrough()
+void InputField::ClearLineThrough()
 {
-  return GetImpl(*this).ResetLineThrough();
+  return GetImpl(*this).ClearLineThrough();
 }
 
 InputField& InputField::SetFontSizeScale(float scale)
@@ -427,9 +427,9 @@ Dali::Vector<Text::FontVariationAxis> InputField::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-InputField& InputField::ResetFontVariation()
+InputField& InputField::ClearFontVariation()
 {
-  GetImpl(*this).ResetFontVariation();
+  GetImpl(*this).ClearFontVariation();
   return *this;
 }
 

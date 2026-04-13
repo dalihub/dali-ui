@@ -391,7 +391,7 @@ UiColor InputFieldImpl::GetTextBackgroundColor() const
   return mController->GetBackgroundColor();
 }
 
-void InputFieldImpl::ResetTextBackgroundColor()
+void InputFieldImpl::ClearTextBackgroundColor()
 {
   UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
   if(mController->IsBackgroundEnabled())
@@ -414,7 +414,7 @@ void InputFieldImpl::SetUnderline(const Text::Underline& underline)
   }
 }
 
-void InputFieldImpl::ResetUnderline()
+void InputFieldImpl::ClearUnderline()
 {
   UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
   if(mController->IsUnderlineEnabled())
@@ -436,7 +436,7 @@ void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
   }
 }
 
-void InputFieldImpl::ResetShadow()
+void InputFieldImpl::ClearShadow()
 {
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
   if(Vector2::ZERO != mController->GetShadowOffset())
@@ -458,7 +458,7 @@ void InputFieldImpl::SetOutline(const Text::Outline& outline)
   }
 }
 
-void InputFieldImpl::ResetOutline()
+void InputFieldImpl::ClearOutline()
 {
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
   if(0u != mController->GetOutlineWidth())
@@ -480,7 +480,7 @@ void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
   }
 }
 
-void InputFieldImpl::ResetLineThrough()
+void InputFieldImpl::ClearLineThrough()
 {
   UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
   if(mController->IsStrikethroughEnabled())
@@ -557,7 +557,7 @@ Dali::Vector<Text::FontVariationAxis> InputFieldImpl::GetFontVariation() const
   return axes;
 }
 
-void InputFieldImpl::ResetFontVariation()
+void InputFieldImpl::ClearFontVariation()
 {
   mController->ClearVariationsMap();
 }

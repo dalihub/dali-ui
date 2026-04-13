@@ -176,7 +176,7 @@ struct InputFieldPropertyIndex
      * @brief The background color behind the text.
      * @details Name "textBackgroundColor", type Property::VECTOR4.
      * @note The background is rendered behind the text glyphs.
-     * @note See also: InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ResetTextBackgroundColor().
+     * @note See also: InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ClearTextBackgroundColor().
      */
     TEXT_BACKGROUND_COLOR,
 

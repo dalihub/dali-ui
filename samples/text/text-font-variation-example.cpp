@@ -51,7 +51,7 @@ private:
         Label::New("Font Variation Example")
           .SetFontSize(20.0f),
 
-        Label::New("Press '1' to reset, '2' to change variation, '3' to set via string")
+        Label::New("Press '1' to clear, '2' to change variation, '3' to set via string")
           .SetFontSize(14.0f)
           .SetBackgroundColor(UiColor(0xE0E0E0))
           .SetViewPadding(Extents(10, 10, 10, 10)),
@@ -232,17 +232,17 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      // Reset font variation
-      mLabel200.ResetFontVariation();
-      mLabel300.ResetFontVariation();
-      mLabel400.ResetFontVariation();
-      mLabel500.ResetFontVariation();
-      mLabel600.ResetFontVariation();
-      mLabel700.ResetFontVariation();
-      mField.ResetFontVariation();
+      // Clears font variation
+      mLabel200.ClearFontVariation();
+      mLabel300.ClearFontVariation();
+      mLabel400.ClearFontVariation();
+      mLabel500.ClearFontVariation();
+      mLabel600.ClearFontVariation();
+      mLabel700.ClearFontVariation();
+      mField.ClearFontVariation();
       SetFontFamily(DEFAULT_FONT_FAMILY);
 
-      DALI_LOG_ERROR("Reset all font variations\n");
+      DALI_LOG_ERROR("Cleared all font variations\n");
     }
     else if(event.GetKeyName() == "2")
     {

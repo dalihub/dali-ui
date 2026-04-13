@@ -550,11 +550,11 @@ int UtcDaliLabelTextBackgroundColor(void)
   label.SetTextBackgroundColor(color2);
   DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
 
-  // Reset the color
-  label.ResetTextBackgroundColor();
+  // Clear text background color
+  label.ClearTextBackgroundColor();
   DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
 
-  // Set again after reset
+  // Set again after clear
   label.SetTextBackgroundColor(Color::BLUE);
   DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
 
@@ -677,8 +677,8 @@ int UtcDaliLabelFontVariation(void)
   DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[1].GetValue(), 80.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  // Reset
-  label.ResetFontVariation();
+  // Clear
+  label.ClearFontVariation();
 
   result = label.GetFontVariation();
   DALI_TEST_EQUALS(result.Count(), 0u, TEST_LOCATION);

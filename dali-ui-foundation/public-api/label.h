@@ -535,11 +535,11 @@ public: // Setters for chaining
   UiColor GetTextBackgroundColor() const;
 
   /**
-   * @brief Resets the text background color.
+   * @brief Clears the text background color.
    *
-   * Disables the text background and restores the default state.
+   * Disables the text background and removes the previously set color.
    */
-  void ResetTextBackgroundColor();
+  void ClearTextBackgroundColor();
 
   /**
    * @brief Sets the underline style.
@@ -549,9 +549,9 @@ public: // Setters for chaining
   Label& SetUnderline(const Text::Underline& underline);
 
   /**
-   * @brief Resets the underline.
+   * @brief Clears the underline style.
    */
-  void ResetUnderline();
+  void ClearUnderline();
 
   /**
    * @brief Sets the shadow style.
@@ -561,9 +561,9 @@ public: // Setters for chaining
   Label& SetShadow(const Text::Shadow& shadow);
 
   /**
-   * @brief Resets the shadow.
+   * @brief Clears the shadow style.
    */
-  void ResetShadow();
+  void ClearShadow();
 
   /**
    * @brief Sets the outline style.
@@ -573,9 +573,9 @@ public: // Setters for chaining
   Label& SetOutline(const Text::Outline& outline);
 
   /**
-   * @brief Resets the outline.
+   * @brief Clears the outline style.
    */
-  void ResetOutline();
+  void ClearOutline();
 
   /**
    * @brief Sets the line-through style.
@@ -585,9 +585,9 @@ public: // Setters for chaining
   Label& SetLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @brief Resets the line-through.
+   * @brief Clears the line-through style.
    */
-  void ResetLineThrough();
+  void ClearLineThrough();
 
   /**
    * @brief Sets the bevel style.
@@ -597,9 +597,9 @@ public: // Setters for chaining
   Label& SetBevel(const Text::Bevel& bevel);
 
   /**
-   * @brief Resets the bevel.
+   * @brief Clears the bevel style.
    */
-  void ResetBevel();
+  void ClearBevel();
 
   /**
    * @brief Sets the text fit range.
@@ -633,9 +633,9 @@ public: // Setters for chaining
   Label& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
-   * @brief Resets the text fit.
+   * @brief Clears the text fit configuration.
    */
-  void ResetTextFit();
+  void ClearTextFit();
 
   /**
    * @brief Sets the font size scale.
@@ -756,13 +756,13 @@ public: // Setters for chaining
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
 
   /**
-   * @brief Resets the font variation.
+   * @brief Clears the font variation.
    *
    * This removes all previously set font variation axes.
    *
    * @return A reference to this label.
    */
-  Label& ResetFontVariation();
+  Label& ClearFontVariation();
 
   // @CHAIN_END
 
@@ -1036,7 +1036,7 @@ public:
        * @brief The background color behind the text.
        * @details Name "textBackgroundColor", type Property::VECTOR4.
        * @note The background is rendered behind the text glyphs.
-       * @note See also: Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ResetTextBackgroundColor().
+       * @note See also: Label::SetTextBackgroundColor(), Label::GetTextBackgroundColor(), Label::ClearTextBackgroundColor().
        */
       TEXT_BACKGROUND_COLOR = Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR,
 

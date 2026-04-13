@@ -55,7 +55,7 @@ private:
           Label::New("TextFit Example")
             .SetFontSize(24.0f),
 
-          Label::New("Press '1' to reset TextFit, '2' to set TextFit")
+          Label::New("Press '1' to clear TextFit, '2' to set TextFit")
             .SetFontSize(14.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
             .SetViewPadding(Extents(10, 10, 10, 10)),
@@ -180,13 +180,13 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mMatchFixedSingleLine.ResetTextFit();
-      mMatchFixedMultiLine.ResetTextFit();
-      mWrapWrapSingleLine.ResetTextFit();
-      mWrapWrapMultiLine.ResetTextFit();
-      mFixedMultiLineRelativeLineHeight.ResetTextFit();
-      mFixedMultiLineAbsoluteLineHeight.ResetTextFit();
-      DALI_LOG_ERROR("Reset TextFit on all labels\n");
+      mMatchFixedSingleLine.ClearTextFit();
+      mMatchFixedMultiLine.ClearTextFit();
+      mWrapWrapSingleLine.ClearTextFit();
+      mWrapWrapMultiLine.ClearTextFit();
+      mFixedMultiLineRelativeLineHeight.ClearTextFit();
+      mFixedMultiLineAbsoluteLineHeight.ClearTextFit();
+      DALI_LOG_ERROR("Cleared TextFit on all labels\n");
     }
     else if(event.GetKeyName() == "2")
     {

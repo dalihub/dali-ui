@@ -517,7 +517,7 @@ UiColor LabelImpl::GetTextBackgroundColor() const
   return mController->GetBackgroundColor();
 }
 
-void LabelImpl::ResetTextBackgroundColor()
+void LabelImpl::ClearTextBackgroundColor()
 {
   UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
   if(mController->IsBackgroundEnabled())
@@ -536,7 +536,7 @@ void LabelImpl::SetUnderline(const Text::Underline& underline)
   Text::ApplyUnderlineStyle(mController, underline);
 }
 
-void LabelImpl::ResetUnderline()
+void LabelImpl::ClearUnderline()
 {
   UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
   if(mController->IsUnderlineEnabled())
@@ -554,7 +554,7 @@ void LabelImpl::SetShadow(const Text::Shadow& shadow)
   Text::ApplyShadowStyle(mController, shadow);
 }
 
-void LabelImpl::ResetShadow()
+void LabelImpl::ClearShadow()
 {
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
   if(Vector2::ZERO != mController->GetShadowOffset())
@@ -572,7 +572,7 @@ void LabelImpl::SetOutline(const Text::Outline& outline)
   Text::ApplyOutlineStyle(mController, outline);
 }
 
-void LabelImpl::ResetOutline()
+void LabelImpl::ClearOutline()
 {
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
   if(0u != mController->GetOutlineWidth())
@@ -590,7 +590,7 @@ void LabelImpl::SetLineThrough(const Text::LineThrough& lineThrough)
   Text::ApplyLineThroughStyle(mController, lineThrough);
 }
 
-void LabelImpl::ResetLineThrough()
+void LabelImpl::ClearLineThrough()
 {
   UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
   if(mController->IsStrikethroughEnabled())
@@ -610,7 +610,7 @@ void LabelImpl::SetBevel(const Text::Bevel& bevel)
   Text::ApplyBevelStyle(mController, bevel);
 }
 
-void LabelImpl::ResetBevel()
+void LabelImpl::ClearBevel()
 {
   UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
   UiColorManager::Get().ClearBinding(Self(), "BevelShadowColor");
@@ -650,7 +650,7 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   InvalidateTextMeasure();
 }
 
-void LabelImpl::ResetTextFit()
+void LabelImpl::ClearTextFit()
 {
   if(mController->IsTextFitEnabled() || mController->IsTextFitArrayEnabled())
   {
@@ -729,7 +729,7 @@ Dali::Vector<Text::FontVariationAxis> LabelImpl::GetFontVariation() const
   return axes;
 }
 
-void LabelImpl::ResetFontVariation()
+void LabelImpl::ClearFontVariation()
 {
   mController->ClearVariationsMap();
 }

@@ -431,11 +431,11 @@ int UtcDaliInputFieldTextBackgroundColor(void)
   inputField.SetTextBackgroundColor(color2);
   DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
 
-  // Reset the color
-  inputField.ResetTextBackgroundColor();
+  // Clear text background color
+  inputField.ClearTextBackgroundColor();
   DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
 
-  // Set again after reset
+  // Set again after clear
   inputField.SetTextBackgroundColor(Color::BLUE);
   DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
 
@@ -558,8 +558,8 @@ int UtcDaliInputFieldFontVariation(void)
   DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[1].GetValue(), 80.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  // Reset
-  inputField.ResetFontVariation();
+  // Clear
+  inputField.ClearFontVariation();
 
   result = inputField.GetFontVariation();
   DALI_TEST_EQUALS(result.Count(), 0u, TEST_LOCATION);

@@ -399,9 +399,9 @@ UiColor Label::GetTextBackgroundColor() const
   return GetImpl(*this).GetTextBackgroundColor();
 }
 
-void Label::ResetTextBackgroundColor()
+void Label::ClearTextBackgroundColor()
 {
-  GetImpl(*this).ResetTextBackgroundColor();
+  GetImpl(*this).ClearTextBackgroundColor();
 }
 
 Label& Label::SetUnderline(const Text::Underline& underline)
@@ -410,9 +410,9 @@ Label& Label::SetUnderline(const Text::Underline& underline)
   return *this;
 }
 
-void Label::ResetUnderline()
+void Label::ClearUnderline()
 {
-  return GetImpl(*this).ResetUnderline();
+  return GetImpl(*this).ClearUnderline();
 }
 
 Label& Label::SetShadow(const Text::Shadow& shadow)
@@ -421,9 +421,9 @@ Label& Label::SetShadow(const Text::Shadow& shadow)
   return *this;
 }
 
-void Label::ResetShadow()
+void Label::ClearShadow()
 {
-  return GetImpl(*this).ResetShadow();
+  return GetImpl(*this).ClearShadow();
 }
 
 Label& Label::SetOutline(const Text::Outline& outline)
@@ -432,9 +432,9 @@ Label& Label::SetOutline(const Text::Outline& outline)
   return *this;
 }
 
-void Label::ResetOutline()
+void Label::ClearOutline()
 {
-  return GetImpl(*this).ResetOutline();
+  return GetImpl(*this).ClearOutline();
 }
 
 Label& Label::SetLineThrough(const Text::LineThrough& lineThrough)
@@ -443,9 +443,9 @@ Label& Label::SetLineThrough(const Text::LineThrough& lineThrough)
   return *this;
 }
 
-void Label::ResetLineThrough()
+void Label::ClearLineThrough()
 {
-  return GetImpl(*this).ResetLineThrough();
+  return GetImpl(*this).ClearLineThrough();
 }
 
 Label& Label::SetBevel(const Text::Bevel& bevel)
@@ -454,9 +454,9 @@ Label& Label::SetBevel(const Text::Bevel& bevel)
   return *this;
 }
 
-void Label::ResetBevel()
+void Label::ClearBevel()
 {
-  return GetImpl(*this).ResetBevel();
+  return GetImpl(*this).ClearBevel();
 }
 
 Label& Label::SetTextFit(const Text::FitRange& range)
@@ -471,9 +471,9 @@ Label& Label::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   return *this;
 }
 
-void Label::ResetTextFit()
+void Label::ClearTextFit()
 {
-  GetImpl(*this).ResetTextFit();
+  GetImpl(*this).ClearTextFit();
 }
 
 Label& Label::SetFontSizeScale(float scale)
@@ -544,9 +544,9 @@ Dali::Vector<Text::FontVariationAxis> Label::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-Label& Label::ResetFontVariation()
+Label& Label::ClearFontVariation()
 {
-  GetImpl(*this).ResetFontVariation();
+  GetImpl(*this).ClearFontVariation();
   return *this;
 }
 
