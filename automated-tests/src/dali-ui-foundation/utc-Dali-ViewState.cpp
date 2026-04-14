@@ -257,7 +257,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
 }
 
 // =============================================================================
-// Orthogonal state: becoming Disabled immediately clears Focused
+// Orthogonal state: SetEnabled(false) clears Focused (via FocusManager)
 // =============================================================================
 
 int UtcDaliViewStateDisabledClearsFocusedP(void)
@@ -265,10 +265,11 @@ int UtcDaliViewStateDisabledClearsFocusedP(void)
   UiTestApplication application;
   View            view = CreateView(application);
 
-  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusActor(view);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::FOCUSED));
 
-  GetImpl(view).SetViewState(UiState::DISABLED, true);
+  view.SetEnabled(false);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::DISABLED));
   DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(UiState::FOCUSED));
@@ -297,8 +298,8 @@ int UtcDaliViewStateDisabledClearsPressedP(void)
 }
 
 // =============================================================================
-// Orthogonal state: StateChangedSignal reflects the corrected (post-clear) state
-// i.e. the signal shows Disabled without Focused, not the intermediate state.
+// Orthogonal state: SetEnabled(false) results in a state with Disabled
+// but without Focused or Pressed.
 // =============================================================================
 
 int UtcDaliViewStateDisabledOrthogonalSignalP(void)
@@ -307,21 +308,162 @@ int UtcDaliViewStateDisabledOrthogonalSignalP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusActor(view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::FOCUSED));
 
-  UiState signalPrev, signalCur;
+  view.SetEnabled(false);
+
+  // Final state: Disabled only — Focused and Pressed must not be present
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::DISABLED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(UiState::PRESSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: PRESSED is cleared atomically with DISABLED — single event
+// =============================================================================
+
+int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+
+  std::vector<CallRecord> log;
   GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent& e) {
-    signalPrev = e.GetPrev();
-    signalCur  = e.GetCurrent();
+    log.push_back({"observer", e.GetPrev(), e.GetCurrent()});
   });
 
   GetImpl(view).SetViewState(UiState::DISABLED, true);
 
-  // prev should contain Focused (state before Disabled was applied)
-  DALI_TEST_CHECK(signalPrev.Contains(UiState::FOCUSED));
-  // cur should contain Disabled but NOT Focused (cleared atomically)
-  DALI_TEST_CHECK(signalCur.Contains(UiState::DISABLED));
-  DALI_TEST_CHECK(!signalCur.Contains(UiState::FOCUSED));
+  // Exactly one notification: [Pressed] -> [Disabled]
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].prev.Contains(UiState::PRESSED));
+  DALI_TEST_CHECK(!log[0].prev.Contains(UiState::DISABLED));
+  DALI_TEST_CHECK(log[0].cur.Contains(UiState::DISABLED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(UiState::PRESSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: SetEnabled(false) clears both FOCUSED and PRESSED
+// =============================================================================
+
+int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  view.EnsureInteractiveTrait();
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusActor(view);
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::PRESSED));
+
+  view.SetEnabled(false);
+
+  // Final state: Disabled only
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::DISABLED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(UiState::PRESSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: InteractiveTrait.IsPressed() is false after disabling
+// =============================================================================
+
+int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  view.SetEnabled(false);
+
+  // PRESSED must be cleared in the DISABLED transition, not in a follow-up event
+  DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
+  DALI_TEST_CHECK(log[0].cur.Contains(UiState::DISABLED));
+  DALI_TEST_CHECK(!log[0].cur.Contains(UiState::PRESSED));
+
+  // InteractiveTrait internal state must also be cleaned up
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: PseudoDisabled clears PRESSED but keeps FOCUSED
+// =============================================================================
+
+int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
+{
+  UiTestApplication   application;
+  View              view = CreateView(application);
+  ConnectionTracker tracker;
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+  GetImpl(view).SetViewState(UiState::PRESSED, true);
+
+  std::vector<CallRecord> log;
+  view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
+    log.push_back({"signal", e.GetPrev(), e.GetCurrent()});
+  });
+
+  trait.SetPseudoDisabled(true);
+
+  const UiState& finalState = GetImpl(view).GetState();
+
+  // PRESSED must be cleared
+  DALI_TEST_CHECK(!finalState.Contains(UiState::PRESSED));
+  DALI_TEST_CHECK(!trait.IsPressed());
+
+  // FOCUSED must be kept
+  DALI_TEST_CHECK(finalState.Contains(UiState::FOCUSED));
+
+  // PSEUDO_DISABLED must be set
+  DALI_TEST_CHECK(finalState.Contains(UiState::PSEUDO_DISABLED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// Orthogonal state: PseudoDisabled does NOT clear FOCUSED (unlike DISABLED)
+// =============================================================================
+
+int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
+{
+  UiTestApplication application;
+  View            view = CreateView(application);
+
+  view.EnsureInteractiveTrait();
+  GetImpl(view).SetViewState(UiState::FOCUSED, true);
+
+  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  trait.SetPseudoDisabled(true);
+
+  // FOCUSED must still be present
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(UiState::PSEUDO_DISABLED));
 
   END_TEST;
 }

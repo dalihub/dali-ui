@@ -55,6 +55,17 @@ public:
    * @param[in] focused True if it gained focus
    */
   virtual void OnFocusedChanged(View view, bool focused) = 0;
+
+  /**
+   * @brief Called when the control becomes enabled or disabled.
+   *
+   * Allows the trait to clean up interaction state (e.g. releasing pressed
+   * state when the view becomes disabled).
+   *
+   * @param[in] view The sender view
+   * @param[in] enabled True if enabled, false if disabled
+   */
+  virtual void OnEnabledChanged(View view, bool enabled) = 0;
 };
 
 } // namespace Ui

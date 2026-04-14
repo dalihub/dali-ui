@@ -125,6 +125,16 @@ public:
   }
 
   /**
+   * @brief Checks if this state contains DISABLED or PSEUDO_DISABLED.
+   *
+   * @return True if either DISABLED or PSEUDO_DISABLED is set
+   */
+  bool IsAnyDisabled() const
+  {
+    return Contains(DISABLED) || Contains(PSEUDO_DISABLED);
+  }
+
+  /**
    * @brief Returns a human-readable string representation for debugging.
    *
    * @return A string like "Focused, Pressed" or "Normal"

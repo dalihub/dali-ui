@@ -401,10 +401,14 @@ public: // State API
   bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
 
   /**
-   * @brief Sets or clears a specific state bit.
+   * @brief Updates a state bit in the view's UiState and emits StateChangedSignal.
    *
-   * This is called by traits (e.g. InteractiveTrait) to update the view's state.
-   * It emits StateChangedSignal if the state actually changed.
+   * This is a low-level state-bit updater. It does **not** trigger the
+   * higher-level logic associated with the state. For example, calling
+   * @c SetViewState(DISABLED, true) only sets the DISABLED bit — it does
+   * not clear focus or disable touch processing.
+   * Use the corresponding public API (e.g. @c SetEnabled()) to perform
+   * the full state transition including all side effects.
    *
    * @param[in] state The state to set or clear
    * @param[in] on    True to add the state, false to remove it

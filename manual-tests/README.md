@@ -57,6 +57,9 @@ manual-tests/dali-ui-foundation/bin/manual-test-dali-ui-foundation
 `manual-tests/dali-ui-foundation/tc/` 디렉터리에 `tc-<기능명>.cpp` 파일을 추가합니다.
 CMakeLists.txt는 `tc/*.cpp`를 자동으로 빌드에 포함하므로 **빌드 파일 수정이 필요 없습니다.**
 
+동일 디렉터리에 **`tc-<기능명>.md`** 파일을 함께 작성하여 테스트 시나리오를 기록합니다.
+화면 구성, 조작 순서, 기대 결과, 통과 기준을 포함합니다.
+
 ### 2. TC 클래스 작성
 
 ```cpp
@@ -125,4 +128,5 @@ REGISTER_MANUAL_TEST(TcMyFeature)
 | 항목 | 규칙 | 예시 |
 |---|---|---|
 | TC 파일명 | `tc-<기능명>.cpp` (소문자, 하이픈) | `tc-scroll-view.cpp` |
+| TC 시나리오 | `tc-<기능명>.md` (TC 파일과 동일 이름) | `tc-scroll-view.md` |
 | TC 클래스명 | `Tc<기능명>` (PascalCase) | `TcScrollView` |

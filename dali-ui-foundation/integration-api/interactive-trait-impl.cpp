@@ -112,6 +112,11 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
     GetImpl(owner).SetViewState(UiState::PSEUDO_DISABLED, pseudoDisabled);
   }
 
+  if(mPseudoDisabled && mPressed)
+  {
+    SetPressedInternal(false, InputEvent::None());
+  }
+
   mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
 }
 
@@ -143,16 +148,23 @@ void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
   {
     ClearKeyPressedHistory();
     mClickBlockedByKey = false;
+
+    // NOTE This is for the case that,
+    // when holding key pressed and the focus moved to the other object before release,
+    // the key release event never come to this view.
+    if(mPressed)
+    {
+      SetPressedInternal(false, InputEvent::None());
+    }
   }
-#if false
-  //FIXME: This is a workaround for the issue that the component is not released
-  //       when the component is pressed and the focus is changed.
-  if (mPressed)
+}
+
+void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
+{
+  if(!enabled && mPressed)
   {
-      mPressed = false;
-      OnReleased(/* */);
+    SetPressedInternal(false, InputEvent::None());
   }
-#endif
 }
 
 bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)

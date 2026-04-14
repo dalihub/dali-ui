@@ -128,6 +128,11 @@ public: // InteractiveTrait
    */
   bool OnKeyEvent(View view, const KeyEvent& event) override;
 
+  /**
+   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnEnabledChanged
+   */
+  void OnEnabledChanged(View view, bool enabled) override;
+
 protected:
   /**
    * @copydoc Dali::Ui::InteractiveTrait::~InteractiveTrait
