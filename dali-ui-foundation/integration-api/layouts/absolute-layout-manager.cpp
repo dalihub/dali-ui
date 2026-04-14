@@ -83,21 +83,10 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   {
     ViewImpl& childImpl = GetImpl(childData.view);
 
-    // Standalone children: ignore parent padding entirely; measure against
-    // the parent's full inner size minus the child's own margin (so
-    // MATCH_PARENT / WRAP_CONTENT still resolve sensibly). Excluded from
-    // this layout's accumulation.
+    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
+    // at the base level; skip them in the layout manager.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents parentPadding  = view->GetViewPadding();
-      float   parentWidth    = contentWidth + static_cast<float>(parentPadding.start + parentPadding.end);
-      float   parentHeight   = contentHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
-      Extents margin         = childImpl.GetViewMargin();
-      float   marginW        = static_cast<float>(margin.start + margin.end);
-      float   marginH        = static_cast<float>(margin.top + margin.bottom);
-      float   childW         = std::max(0.0f, parentWidth - marginW);
-      float   childH         = std::max(0.0f, parentHeight - marginH);
-      childData.measuredSize = childImpl.Measure(childW, childH);
       continue;
     }
 
@@ -178,15 +167,10 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
   {
     ViewImpl& childImpl = GetImpl(childData.view);
 
-    // Standalone children: place at RequestedPositionX/Y plus the child's
-    // own margin in the parent's coordinate space (ignoring parent padding),
-    // with the size resolved during Measure.
+    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
+    // at the base level; skip them in the layout manager.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents parentPadding = view->GetViewPadding();
-      float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
-      float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
-      ArrangeStandaloneChild(childImpl, childData, parentWidth, parentHeight);
       continue;
     }
 

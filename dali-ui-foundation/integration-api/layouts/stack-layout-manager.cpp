@@ -59,8 +59,7 @@ struct StackMeasureFirstPassResult
 };
 
 StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContainer& children, float contentWidth,
-                                                          float contentHeight, float parentWidth,
-                                                          float parentHeight, StackOrientation orientation,
+                                                          float contentHeight, StackOrientation orientation,
                                                           const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   StackMeasureFirstPassResult result;
@@ -68,18 +67,10 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
   {
     ViewImpl& childImpl = getImpl(childData.view);
 
-    // Standalone children: still measured (so MATCH_PARENT / WRAP_CONTENT resolve),
-    // but excluded from this layout's main-axis accumulation, cross-axis maximum,
-    // visible-child count and weight distribution. They also ignore the parent's
-    // padding entirely, so they are sized against the parent's full inner size.
+    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
+    // at the base level; skip them in the layout manager.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents margin         = childImpl.GetViewMargin();
-      float   marginW        = static_cast<float>(margin.start + margin.end);
-      float   marginH        = static_cast<float>(margin.top + margin.bottom);
-      float   childW         = std::max(0.0f, parentWidth - marginW);
-      float   childH         = std::max(0.0f, parentHeight - marginH);
-      childData.measuredSize = childImpl.Measure(childW, childH);
       continue;
     }
 
@@ -204,12 +195,8 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   auto getImpl = [this](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
 
-  Extents parentPadding = view->GetViewPadding();
-  float   parentWidth   = widthConstraint + static_cast<float>(parentPadding.start + parentPadding.end);
-  float   parentHeight  = heightConstraint + static_cast<float>(parentPadding.top + parentPadding.bottom);
-
   StackMeasureFirstPassResult first = MeasureStackNonWeightChildren(
-    children, widthConstraint, heightConstraint, parentWidth, parentHeight, mOrientation, getImpl);
+    children, widthConstraint, heightConstraint, mOrientation, getImpl);
 
   float maxCrossAxis = first.maxCrossAxis;
   float mainAxisTotal;
@@ -217,7 +204,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   if(first.totalWeight > 0.0f && first.visibleChildCount > 0)
   {
     float requestedMain  = (mOrientation == StackOrientation::VERTICAL) ? view->GetRequestedHeight() : view->GetRequestedWidth();
-    bool  isMainAxisWrap = (requestedMain != MATCH_PARENT && requestedMain <= 0.0f);
+    bool  isMainAxisWrap = (requestedMain != MATCH_PARENT && requestedMain < 0.0f);
 
     float spacingTotal = (first.visibleChildCount > 1) ? mSpacing * (first.visibleChildCount - 1) : 0.0f;
     float wrappedMain  = first.mainAxisNonWeight + spacingTotal;
@@ -418,16 +405,10 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   {
     ViewImpl& childImpl = GetImpl(childData.view);
 
-    // Standalone children: place at their RequestedPositionX/Y in the parent's
-    // coordinate space (ignoring parent padding) plus the child's own margin,
-    // and use the size resolved during Measure. They do not advance the stack
-    // cursor and are excluded from spacing.
+    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
+    // at the base level; skip them in the layout manager.
     if(childImpl.IsLayoutModeStandalone())
     {
-      Extents parentPadding = view->GetViewPadding();
-      float   parentWidth   = availableWidth + static_cast<float>(parentPadding.start + parentPadding.end);
-      float   parentHeight  = availableHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
-      ArrangeStandaloneChild(childImpl, childData, parentWidth, parentHeight);
       continue;
     }
 

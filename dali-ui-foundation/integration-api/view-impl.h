@@ -596,6 +596,20 @@ public: // Measure / Arrange API
   MeasuredSize Arrange(const LayoutRect& bounds);
 
   /**
+   * @brief Measures standalone children that may not have been measured by
+   * OnMeasure (e.g. leaf views like Label). The measure cache prevents
+   * redundant work when OnMeasure already measured them.
+   */
+  void MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+
+  /**
+   * @brief Arranges standalone children that may not have been arranged by
+   * OnArrange (e.g. leaf views like Label). Uses ArrangeStandaloneChild
+   * helper; the arrange-valid flag prevents redundant work.
+   */
+  void ArrangeStandaloneChildren(const LayoutRect& bounds);
+
+  /**
    * @brief Invalidates the measure of this view and propagates up.
    */
   void InvalidateMeasure();

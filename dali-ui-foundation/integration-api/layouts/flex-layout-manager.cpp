@@ -433,10 +433,6 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   auto& children      = GetChildren(view);
   float availableMain = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
 
-  Extents parentPadding = view->GetViewPadding();
-  float   parentWidth   = widthConstraint + static_cast<float>(parentPadding.start + parentPadding.end);
-  float   parentHeight  = heightConstraint + static_cast<float>(parentPadding.top + parentPadding.bottom);
-
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
 
@@ -446,24 +442,19 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     ViewImpl& childImpl = GetImpl(childData.view);
     Extents   margin    = childImpl.GetViewMargin();
 
-    // Standalone children ignore parent padding entirely; they are sized
-    // against the parent's full inner size minus their own margin.
-    float        baseWidth             = childImpl.IsLayoutModeStandalone() ? parentWidth : widthConstraint;
-    float        baseHeight            = childImpl.IsLayoutModeStandalone() ? parentHeight : heightConstraint;
-    float        marginW               = static_cast<float>(margin.start + margin.end);
-    float        marginH               = static_cast<float>(margin.top + margin.bottom);
-    float        childWidthConstraint  = std::max(0.0f, baseWidth - marginW);
-    float        childHeightConstraint = std::max(0.0f, baseHeight - marginH);
-    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    childData.measuredSize             = childSize;
-
-    // Standalone children are still measured (so MATCH_PARENT / WRAP_CONTENT
-    // resolve), but excluded from this layout's line building, flex-grow/shrink,
-    // wrap and accumulation.
+    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
+    // at the base level; skip them in the layout manager.
     if(childImpl.IsLayoutModeStandalone())
     {
       continue;
     }
+
+    float        marginW               = static_cast<float>(margin.start + margin.end);
+    float        marginH               = static_cast<float>(margin.top + margin.bottom);
+    float        childWidthConstraint  = std::max(0.0f, widthConstraint - marginW);
+    float        childHeightConstraint = std::max(0.0f, heightConstraint - marginH);
+    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childData.measuredSize             = childSize;
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
@@ -628,22 +619,6 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   for(uint32_t i = 0; i < children.size(); ++i)
   {
     children[i].measuredSize = savedMeasuredSizes[i];
-  }
-
-  // Arrange standalone children: place at RequestedPositionX/Y plus the
-  // child's own margin in the parent's coordinate space (ignoring parent
-  // padding). MATCH_PARENT fills the full parent size minus own margin.
-  for(auto& childData : children)
-  {
-    ViewImpl& childImpl = GetImpl(childData.view);
-    if(!childImpl.IsLayoutModeStandalone())
-    {
-      continue;
-    }
-    Extents parentPadding = view->GetViewPadding();
-    float   parentWidth   = contentWidth + static_cast<float>(parentPadding.start + parentPadding.end);
-    float   parentHeight  = contentHeight + static_cast<float>(parentPadding.top + parentPadding.bottom);
-    ArrangeStandaloneChild(childImpl, childData, parentWidth, parentHeight);
   }
 
   return MeasuredSize(bounds.width, bounds.height);
