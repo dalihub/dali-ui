@@ -104,8 +104,19 @@ public: // Chaining methods
 
 public: // Not intended for application developers
   /// @cond internal
-  DALI_INTERNAL          AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
-  explicit DALI_INTERNAL AbsoluteLayout(Dali::Internal::CustomActor* internal);
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API AbsoluteLayout(Integration::AbsoluteLayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API AbsoluteLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
 

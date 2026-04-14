@@ -173,16 +173,16 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle using the Internal implementation.
    *
-   * @param[in] implementation The Control implementation
+   * @param[in] implementation The Layout implementation
    */
-  DALI_INTERNAL StackLayout(Integration::StackLayoutImpl& implementation);
+  explicit DALI_UI_API StackLayout(Integration::StackLayoutImpl& implementation);
 
   /**
-   * @brief Allows the creation of this Control from an Integration::CustomActor pointer.
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_INTERNAL StackLayout(Dali::Internal::CustomActor* internal);
+  explicit DALI_UI_API StackLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
 

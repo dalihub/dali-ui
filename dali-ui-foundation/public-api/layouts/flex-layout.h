@@ -210,8 +210,19 @@ public: // Chaining methods
 
 public: // Not intended for application developers
   /// @cond internal
-  DALI_INTERNAL          FlexLayout(Integration::FlexLayoutImpl& implementation);
-  explicit DALI_INTERNAL FlexLayout(Dali::Internal::CustomActor* internal);
+  /**
+   * @brief Creates a handle using the Internal implementation.
+   *
+   * @param[in] implementation The Layout implementation
+   */
+  explicit DALI_UI_API FlexLayout(Integration::FlexLayoutImpl& implementation);
+
+  /**
+   * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
+   *
+   * @param[in] internal A pointer to the internal CustomActor
+   */
+  explicit DALI_UI_API FlexLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
 
