@@ -42,7 +42,7 @@
  */
 #define DALI_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)                                                             \
   Dali::PropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, Dali::Property::valueType, &objectNamespace::objectType::SetProperty, &objectType::GetProperty); \
-  static_assert((indexNamespace::indexType::enumIndex - indexNamespace::indexType::PROPERTY_START_INDEX) == count, "External property index must match registration order.");
+  static_assert((static_cast<int>(indexNamespace::indexType::enumIndex) - static_cast<int>(indexNamespace::indexType::PROPERTY_START_INDEX)) == count, "External property index must match registration order.");
 
 /**
  * @brief Registers an animatable property with a default value using an external property index definition.
