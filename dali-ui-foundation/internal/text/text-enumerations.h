@@ -18,6 +18,8 @@
  *
  */
 
+#include <cstdint>
+
 namespace Dali
 {
 namespace Ui
@@ -102,6 +104,21 @@ struct FitOption
 private:
   float mPointSize   = 0.0f;
   float mMinLineSize = 0.0f;
+};
+
+/**
+ * @brief Enumeration for text layout direction.
+ */
+enum class Direction : uint8_t
+{
+  /**
+   * @brief Left-to-right text direction.
+   */
+  LEFT_TO_RIGHT = 0,
+  /**
+   * @brief Right-to-left text direction.
+   */
+  RIGHT_TO_LEFT = 1
 };
 
 } // namespace Text

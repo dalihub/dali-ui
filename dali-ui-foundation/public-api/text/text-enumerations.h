@@ -102,21 +102,6 @@ enum class LineWrapMode : uint8_t
 };
 
 /**
- * @brief Enumeration for text layout direction.
- */
-enum class Direction : uint8_t
-{
-  /**
-   * @brief Left-to-right text direction.
-   */
-  LEFT_TO_RIGHT = 0,
-  /**
-   * @brief Right-to-left text direction.
-   */
-  RIGHT_TO_LEFT = 1
-};
-
-/**
  * @brief Enumeration for determining how the text layout direction is resolved.
  */
 enum class LayoutDirectionMode : uint8_t

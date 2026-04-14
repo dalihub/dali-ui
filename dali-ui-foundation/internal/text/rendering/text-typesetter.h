@@ -19,7 +19,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
