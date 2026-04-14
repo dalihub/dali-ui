@@ -254,6 +254,13 @@ struct LabelPropertyIndex
      */
     SYSTEM_FONT_SIZE_SCALE_ENABLED,
 
+    /**
+     * @brief Whether cutout rendering is enabled for the text.
+     * @details Name "cutoutEnabled", type Property::BOOLEAN.
+     * @see Label::SetCutoutEnabled(), Label::IsCutoutEnabled().
+     */
+    CUTOUT_ENABLED,
+
     ///////////////////////////////////////////////////////////////////////////////
     // Animatable Properties
     ///////////////////////////////////////////////////////////////////////////////

@@ -759,10 +759,25 @@ public: // Setters for chaining
    * @brief Clears the font variation.
    *
    * This removes all previously set font variation axes.
-   *
-   * @return A reference to this label.
    */
-  Label& ClearFontVariation();
+  void ClearFontVariation();
+
+  /**
+   * @brief Sets whether the text is rendered as a cutout.
+   *
+   * When enabled, the glyph shapes are cut out from the rendered content
+   * instead of being filled with the text color.
+   *
+   * @param[in] enabled True to render the text as a cutout, false to render it normally.
+   */
+  Label& SetCutoutEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether the text is rendered as a cutout.
+   *
+   * @return True if the text is rendered as a cutout, otherwise false.
+   */
+  bool IsCutoutEnabled() const;
 
   // @CHAIN_END
 
@@ -1067,6 +1082,13 @@ public:
        * @see Label::SetSystemFontSizeScaleEnabled(), Label::IsSystemFontSizeScaleEnabled().
        */
       SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
+
+      /**
+       * @brief Whether cutout rendering is enabled for the text.
+       * @details Name "cutoutEnabled", type Property::BOOLEAN.
+       * @see Label::SetCutoutEnabled(), Label::IsCutoutEnabled().
+       */
+      CUTOUT_ENABLED = Text::LabelPropertyIndex::CUTOUT_ENABLED,
 
       ///////////////////////////////////////////////////////////////////////////////
       // Animatable Properties

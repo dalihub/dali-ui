@@ -466,6 +466,16 @@ public:
    */
   Dali::Property::Index RegisterFontVariationProperty(const Dali::String& tag);
 
+  /**
+   * @copydoc Dali::Ui::Label::SetCutoutEnabled
+   */
+  void SetCutoutEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::Label::IsCutoutEnabled
+   */
+  bool IsCutoutEnabled() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -707,6 +717,48 @@ private: // Implementation
    */
   bool HandleVariationPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue);
 
+  /**
+   * @brief Applies the cutout enabled state internally.
+   *
+   * This updates the internal rendering state and synchronizes any
+   * dependent background or visual configuration required for cutout rendering.
+   *
+   * @param[in] enabled True to enable cutout rendering, false otherwise.
+   */
+  void SetCutoutEnabledInternal(bool enabled);
+
+  /**
+   * @brief Sets whether the background of the view is enabled.
+   *
+   * @param[in] enabled True to enable the view background, false to disable it.
+   */
+  void SetViewBackgroundEnabled(bool enabled);
+
+  /**
+   * @brief Gets the current background color of the view.
+   *
+   * Extracts the color from the view's background visual if available.
+   *
+   * @param[out] backgroundColor The extracted background color.
+   * @return True if a background color was successfully retrieved, false otherwise.
+   */
+  bool GetViewBackgroundColor(Vector4& backgroundColor) const;
+
+  /**
+   * @brief Handles background property changes related to cutout rendering.
+   */
+  void OnBackgroundPropertyChanged();
+
+  /**
+   * @brief Updates dependent rendering state for cutout rendering.
+   *
+   * This synchronizes background and visual state after the cutout property
+   * has been applied through the property handler.
+   *
+   * @param[in] enabled True if cutout rendering is enabled, false otherwise.
+   */
+  void UpdateCutoutState(bool enabled);
+
   // Properties
 public:
   /**
@@ -774,6 +826,7 @@ private:
   bool mHasAnchors : 1;           // whether the text has anchors or not.
   bool mIsVisible : 1;            // cached result of IsEffectivelyVisible().
   bool mIsVisibleInitialized : 1; // whether mIsVisible has been initialized.
+  bool mIsViewBackgroundEnabled : 1;
 
 protected:
   struct PropertyHandler;

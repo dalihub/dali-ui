@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -103,6 +104,7 @@ LABEL_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCA
 LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED)
+LABEL_PROPERTY_REGISTRATION("cutoutEnabled",              BOOLEAN, CUTOUT_ENABLED                )
 
 LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",      Color::BLACK,     TEXT_COLOR   )
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",   TEXT_COLOR_RED,   TEXT_COLOR, 0)
@@ -143,7 +145,8 @@ LabelImpl::LabelImpl()
   mIsTouchDown(false),
   mHasAnchors(false),
   mIsVisible(false),
-  mIsVisibleInitialized(false)
+  mIsVisibleInitialized(false),
+  mIsViewBackgroundEnabled(true)
 {
 }
 
@@ -762,6 +765,18 @@ Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::Strin
   return index;
 }
 
+void LabelImpl::SetCutoutEnabled(bool enabled)
+{
+  // Set through the property system so that dependent background and rendering
+  // state can be updated consistently in OnPropertySet().
+  Self().SetProperty(Text::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
+}
+
+bool LabelImpl::IsCutoutEnabled() const
+{
+  return mController->IsTextCutout();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -845,9 +860,8 @@ void LabelImpl::OnInitialize()
 
   mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
 
-  // TODO: Since the TEXT property is not available yet, this is a temporary index.
   View view = Ui::View::DownCast(self);
-  Internal::ViewDataImpl::Get(Integration::GetImpl(view)).RegisterVisual(PROPERTY_REGISTRATION_START_INDEX, mVisual, DepthIndex::CONTENT);
+  Internal::ViewDataImpl::Get(Integration::GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, DepthIndex::CONTENT);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 
@@ -1617,6 +1631,91 @@ bool LabelImpl::HandleVariationPropertySet(Property::Index index, const Property
   return true;
 }
 
+void LabelImpl::SetCutoutEnabledInternal(bool enabled)
+{
+  mController->SetTextCutout(enabled);
+}
+
+void LabelImpl::SetViewBackgroundEnabled(bool enabled)
+{
+  View view = Ui::View::DownCast(Self());
+  // Avoid unnecessary updates when no background visual exists.
+  if(!Internal::ViewDataImpl::Get(Integration::GetImpl(view)).GetVisual(Ui::View::Property::BACKGROUND))
+  {
+    return;
+  }
+
+  if(mIsViewBackgroundEnabled != enabled)
+  {
+    mIsViewBackgroundEnabled = enabled;
+    Internal::ViewDataImpl::Get(Integration::GetImpl(view)).EnableVisual(Ui::View::Property::BACKGROUND, enabled);
+  }
+}
+
+bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
+{
+  const Property::Value backgroundValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
+
+  if(backgroundValue.GetType() == Property::VECTOR4)
+  {
+    backgroundColor = backgroundValue.Get<Vector4>();
+    return true;
+  }
+
+  if(backgroundValue.GetType() == Property::MAP)
+  {
+    const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
+    Property::Value*     mixColorValue = backgroundMap.Find(Ui::ColorVisual::Property::MIX_COLOR);
+    if(mixColorValue)
+    {
+      backgroundColor = mixColorValue->Get<Vector4>();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void LabelImpl::OnBackgroundPropertyChanged()
+{
+  if(!mController->IsTextCutout())
+  {
+    return;
+  }
+
+  Vector4 backgroundColor = Vector4::ZERO;
+  if(GetViewBackgroundColor(backgroundColor))
+  {
+    mController->SetBackgroundColorWithCutout(backgroundColor);
+    mController->SetBackgroundWithCutoutEnabled(true);
+
+    if(mController->GetRenderMode() == Text::Render::SYNC)
+    {
+      SetViewBackgroundEnabled(false);
+    }
+  }
+}
+
+void LabelImpl::UpdateCutoutState(bool enabled)
+{
+  mController->SetBackgroundWithCutoutEnabled(enabled);
+
+  if(enabled)
+  {
+    Vector4 backgroundColor = Vector4::ZERO;
+    if(GetViewBackgroundColor(backgroundColor))
+    {
+      mController->SetBackgroundColorWithCutout(backgroundColor);
+    }
+  }
+
+  if(mController->GetRenderMode() == Text::Render::SYNC)
+  {
+    SetViewBackgroundEnabled(!enabled);
+    Internal::TextVisual::SetRequireRender(mVisual, enabled);
+  }
+}
+
 // =============================================================================
 // UiColorManager
 // =============================================================================
@@ -1735,6 +1834,16 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
           Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
         }
       }
+      break;
+    }
+    case Ui::View::Property::BACKGROUND:
+    {
+      OnBackgroundPropertyChanged();
+      break;
+    }
+    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    {
+      UpdateCutoutState(propertyValue.Get<bool>());
       break;
     }
     default:

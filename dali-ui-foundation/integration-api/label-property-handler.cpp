@@ -219,6 +219,11 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
       break;
     }
+    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    {
+      impl.SetCutoutEnabledInternal(value.Get<bool>());
+      break;
+    }
   }
 }
 
@@ -369,6 +374,11 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       value = impl.IsSystemFontSizeScaleEnabled();
+      break;
+    }
+    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    {
+      value = impl.IsCutoutEnabled();
       break;
     }
   }

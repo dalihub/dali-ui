@@ -56,6 +56,7 @@ const char* const PROPERTY_NAME_FONT_SIZE_SCALE                = "fontSizeScale"
 const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE        = "minimumFontSizeScale";
 const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE        = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
+const char* const PROPERTY_NAME_CUTOUT_ENABLED                 = "cutoutEnabled";
 
 // Animatable
 const char* const PROPERTY_NAME_TEXT_COLOR = "textColor";
@@ -645,6 +646,21 @@ int UtcDaliLabelAdjustedFontSizeScale(void)
   END_TEST;
 }
 
+int UtcDaliLabelCutoutEnabled(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetCutoutEnabled(true);
+  DALI_TEST_EQUALS(label.IsCutoutEnabled(), true, TEST_LOCATION);
+
+  label.SetCutoutEnabled(false);
+  DALI_TEST_EQUALS(label.IsCutoutEnabled(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelFontVariation(void)
 {
   UiTestApplication application;
@@ -722,6 +738,7 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == Label::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == Label::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_CUTOUT_ENABLED) == Label::Property::CUTOUT_ENABLED);
 
   // Animatable
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
@@ -883,6 +900,13 @@ int UtcDaliLabelSetProperty(void)
   // SYSTEM_FONT_SIZE_SCALE_ENABLED
   label.SetProperty(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
   DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
+
+  // CUTOUT_ENABLED
+  label.SetProperty(Label::Property::CUTOUT_ENABLED, true);
+  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::CUTOUT_ENABLED), true, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::CUTOUT_ENABLED, false);
+  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::CUTOUT_ENABLED), false, TEST_LOCATION);
 
   // Animatable
   // TEXT_COLOR
