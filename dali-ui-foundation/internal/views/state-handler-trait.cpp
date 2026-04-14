@@ -178,6 +178,7 @@ void StateHandlerTraitImpl::SlotDisconnected(CallbackBase* callback)
 void StateHandlerTraitImpl::OnBeforeAttached(Integration::TraitId /*id*/, View& view)
 {
   mOwner = view;
+  Integration::GetImpl(view).StateChangedSignal().Connect(this, &StateHandlerTraitImpl::NotifyStateChanged);
 }
 
 void StateHandlerTraitImpl::OnAttached(Integration::TraitId /*id*/, View& /*view*/)
@@ -186,12 +187,14 @@ void StateHandlerTraitImpl::OnAttached(Integration::TraitId /*id*/, View& /*view
 
 void StateHandlerTraitImpl::OnDetached(Integration::TraitId /*id*/, View& /*view*/)
 {
+  DisconnectAll();
   ClearAllHandlers();
   mOwner.Reset();
 }
 
 void StateHandlerTraitImpl::OnViewDestroying(Integration::ViewImpl* /*viewImpl*/)
 {
+  DisconnectAll();
   ClearAllHandlers();
   mOwner.Reset();
 }

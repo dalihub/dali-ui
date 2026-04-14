@@ -22,10 +22,8 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/state-event-impl.h>
-#include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 
 namespace Dali
@@ -78,12 +76,9 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
 
     for(auto& n : mBatch)
     {
-      Integration::ViewImpl& impl               = Integration::GetImpl(n.view);
-      Trait                  stateHandlerTrait  = impl.GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
-      bool                   hasSignalListeners = !impl.StateChangedSignal().Empty();
+      Integration::ViewImpl& impl = Integration::GetImpl(n.view);
 
-      // Skip StateEvent creation entirely when nobody is listening
-      if(!stateHandlerTrait && !hasSignalListeners)
+      if(impl.StateChangedSignal().Empty())
       {
         continue;
       }
@@ -91,17 +86,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, UiState prev, UiState n
       Internal::StateEventImplPtr stateEventImpl = Internal::StateEventImpl::New(n.prev, n.next, n.cause);
       StateEvent                  stateEvent(stateEventImpl.Get());
 
-      // Named state handlers (styling layer)
-      if(stateHandlerTrait)
-      {
-        static_cast<StateHandlerTrait&>(stateHandlerTrait).GetImpl().NotifyStateChanged(n.view, stateEvent);
-      }
-
-      // General signal (business logic layer)
-      if(hasSignalListeners)
-      {
-        impl.StateChangedSignal().Emit(n.view, stateEvent);
-      }
+      impl.StateChangedSignal().Emit(n.view, stateEvent);
     }
   }
 }

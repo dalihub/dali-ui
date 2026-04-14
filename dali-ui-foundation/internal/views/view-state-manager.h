@@ -61,9 +61,10 @@ public:
   /**
    * @brief Schedules a state-change notification for @p view.
    *
-   * Notification (StateHandlerTrait + StateChangedSignal) is deferred if a
-   * dispatch is already in progress, guaranteeing that all handlers for the
-   * current transition finish before the next transition is dispatched.
+   * Notification is deferred if a dispatch is already in progress, guaranteeing
+   * that all handlers for the current transition finish before the next
+   * transition is dispatched. All subscribers (including StateHandlerTrait)
+   * receive the notification through the view's StateChangedSignal.
    *
    * @param[in] view   The View whose state changed (handle kept alive during dispatch)
    * @param[in] prev   State before the change

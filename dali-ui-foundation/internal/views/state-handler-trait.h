@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/callback.h>
+#include <dali/public-api/signals/connection-tracker.h>
 #include <dali/public-api/signals/signal-slot-observers.h>
 
 // INTERNAL INCLUDES
@@ -89,7 +90,7 @@ private:
  * connection tracking protocol via SlotObserver so handlers are automatically
  * removed when their associated ConnectionTrackerInterface is destroyed.
  */
-class StateHandlerTraitImpl : public Integration::TraitImpl, public SlotObserver
+class StateHandlerTraitImpl : public Integration::TraitImpl, public SlotObserver, public ConnectionTracker
 {
 public:
   StateHandlerTraitImpl();
