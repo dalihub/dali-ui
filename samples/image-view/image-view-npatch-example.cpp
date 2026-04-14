@@ -82,7 +82,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetViewPadding(Extents(16, 16, 16, 16))
+      .SetPadding(Extents(16, 16, 16, 16))
       .Children({
         ImageView::New(RESOURCES_DIR "button-up-1.9.png")
           .SetRequestedWidth(SIZES[mSizeIndex].width)
@@ -110,7 +110,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(80.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < SIZE_COUNT; ++i)
     {
@@ -124,7 +124,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
                            .SetRequestedWidth(MATCH_PARENT)
                            .SetRequestedHeight(80.0f)
-                           .SetViewPadding(Extents(4, 4, 4, 4))
+                           .SetPadding(Extents(4, 4, 4, 4))
                            .SetBackgroundColor(UiColor(0x444444))
                            .Children({
                              Label::New("BORDER ONLY: OFF")

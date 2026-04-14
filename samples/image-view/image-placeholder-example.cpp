@@ -58,7 +58,7 @@ private:
     window.Add(
       StackLayout::New(StackOrientation::VERTICAL)
         .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT)
-        .Spacing(8.0f).SetViewPadding(Extents(10, 10, 10, 10))
+        .Spacing(8.0f).SetPadding(Extents(10, 10, 10, 10))
         .Children({
           Label::New("Image Placeholder Sample").SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(40.0f).SetFontSize(16.0f).SetTextColor(UiColor(0xFFFFFF)).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER),
           mContainer = StackLayout::New(StackOrientation::VERTICAL).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)).SetBackgroundColor(UiColor(0x2A2A2A)),

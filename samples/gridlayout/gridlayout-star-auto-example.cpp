@@ -49,7 +49,7 @@ public:
     GridLayout root = GridLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetPadding(Extents(50, 50, 50, 50));
     root.SetRowSpacing(10.0f);
     root.SetColumnSpacing(10.0f);
 

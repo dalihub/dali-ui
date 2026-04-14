@@ -627,11 +627,11 @@ int UtcDaliStackLayoutStandaloneIgnoresParentPaddingP(void)
 {
   UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
-  layout.SetViewPadding(Extents(10, 10, 10, 10));
+  layout.SetPadding(Extents(10, 10, 10, 10));
 
   View standalone = View::New();
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
-  standalone.SetViewMargin(Extents(5, 5, 7, 7));
+  standalone.SetMargin(Extents(5, 5, 7, 7));
   standalone.SetRequestedWidth(MATCH_PARENT);
   standalone.SetRequestedHeight(MATCH_PARENT);
   layout.Add(standalone);

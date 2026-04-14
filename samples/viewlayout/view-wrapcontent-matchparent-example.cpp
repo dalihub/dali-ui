@@ -60,7 +60,7 @@ public:
     child1.SetBackgroundColor(Color::RED);
     child1.SetRequestedWidth(300.0f);
     child1.SetRequestedHeight(300.0f);
-    child1.SetViewMargin(Extents(50, 50, 50, 50));
+    child1.SetMargin(Extents(50, 50, 50, 50));
     root.Add(child1);
 
     // Child 2: MATCH_PARENT — follows the parent size (which is driven by child 1).
@@ -68,14 +68,14 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(MATCH_PARENT);
     child2.SetRequestedHeight(MATCH_PARENT);
-    child2.SetViewMargin(Extents(100, 100, 100, 100));
+    child2.SetMargin(Extents(100, 100, 100, 100));
     root.Add(child2);
 
     View grandChild1 = View::New();
     grandChild1.SetBackgroundColor(Color::BLUE);
     grandChild1.SetRequestedWidth(MATCH_PARENT);
     grandChild1.SetRequestedHeight(MATCH_PARENT);
-    grandChild1.SetViewMargin(Extents(50, 50, 50, 50));
+    grandChild1.SetMargin(Extents(50, 50, 50, 50));
     child2.Add(grandChild1);
 
     window.Add(root);

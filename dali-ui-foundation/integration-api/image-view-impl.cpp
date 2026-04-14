@@ -981,7 +981,7 @@ void ImageViewImpl::ApplyFittingMode(const Vector2& size)
     return;
   }
 
-  Extents padding = GetViewPadding();
+  Extents padding = GetPadding();
 
   // Reset PIXEL_AREA after using OVER_FIT_KEEP_ASPECT_RATIO
   if(visualImpl.IsPixelAreaSetForFittingMode())

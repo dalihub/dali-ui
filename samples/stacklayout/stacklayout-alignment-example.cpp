@@ -49,7 +49,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(50.0f);
-    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Start (left-aligned narrow box)
     View rowStart = View::New();

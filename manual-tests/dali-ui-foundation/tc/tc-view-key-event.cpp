@@ -60,7 +60,7 @@ public:
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
         .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetViewPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD))
+        .SetPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD))
         .Children({
           CreateLabel(0),
           CreateLabel(1),
@@ -76,7 +76,7 @@ public:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(LABEL_HEIGHT)
       .SetBackgroundColor(UiColor(LABEL_COLORS[index]))
-      .SetViewMargin(Extents(0, 0, 0, LABEL_MARGIN))
+      .SetMargin(Extents(0, 0, 0, LABEL_MARGIN))
       .SetMultiLine(true)
       .SetHorizontalTextAlignment(Text::Alignment::CENTER)
       .SetVerticalTextAlignment(Text::Alignment::CENTER)

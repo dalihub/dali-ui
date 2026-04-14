@@ -111,7 +111,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
                            .SetRequestedWidth(MATCH_PARENT)
                            .SetRequestedHeight(56.0f)
-                           .SetViewPadding(Extents(4, 4, 4, 4))
+                           .SetPadding(Extents(4, 4, 4, 4))
                            .SetBackgroundColor(UiColor(0x444444))
                            .Children({
                              Label::New("FIT_SIZE: OFF")

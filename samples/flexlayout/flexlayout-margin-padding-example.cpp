@@ -53,7 +53,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetDirection(FlexDirection::COLUMN);
-    root.SetViewPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Red box: no margin (flush with padding edge) ---
     View redBox = View::New();
@@ -65,7 +65,7 @@ public:
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetRequestedHeight(50.0f);
-    greenBox.SetViewMargin(Extents(50, 50, 50, 50));
+    greenBox.SetMargin(Extents(50, 50, 50, 50));
     root.Add(greenBox);
 
     // --- Blue box: no margin ---
@@ -80,8 +80,8 @@ public:
     nestedRow.SetRequestedHeight(400.0f);
     nestedRow.SetDirection(FlexDirection::ROW);
     nestedRow.SetAlignItems(FlexAlign::STRETCH);
-    nestedRow.SetViewPadding(Extents(50, 50, 50, 50));
-    nestedRow.SetViewMargin(Extents(50, 50, 50, 50));
+    nestedRow.SetPadding(Extents(50, 50, 50, 50));
+    nestedRow.SetMargin(Extents(50, 50, 50, 50));
 
     View childA = View::New();
     childA.SetBackgroundColor(Color::MAGENTA);
@@ -90,7 +90,7 @@ public:
 
     View childB = View::New();
     childB.SetBackgroundColor(Color::YELLOW);
-    childB.SetViewMargin(Extents(50, 50, 50, 50));
+    childB.SetMargin(Extents(50, 50, 50, 50));
     childB.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     nestedRow.Add(childB);
 

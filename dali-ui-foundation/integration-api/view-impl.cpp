@@ -815,7 +815,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
         continue;
       }
 
-      Extents      margin                = childImpl.GetViewMargin();
+      Extents      margin                = childImpl.GetMargin();
       float        marginW               = static_cast<float>(margin.start + margin.end);
       float        marginH               = static_cast<float>(margin.top + margin.bottom);
       float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
@@ -932,7 +932,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
         continue;
       }
 
-      Extents margin  = childImpl.GetViewMargin();
+      Extents margin  = childImpl.GetMargin();
       float   marginW = static_cast<float>(margin.start + margin.end);
       float   marginH = static_cast<float>(margin.top + margin.bottom);
       float   childW  = childData.measuredSize.width;
@@ -977,7 +977,7 @@ void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHe
     {
       continue;
     }
-    Extents margin                = childImpl.GetViewMargin();
+    Extents margin                = childImpl.GetMargin();
     float   marginW               = static_cast<float>(margin.start + margin.end);
     float   marginH               = static_cast<float>(margin.top + margin.bottom);
     float   childWidthConstraint  = std::max(0.0f, effectiveWidth - marginW);
@@ -1184,7 +1184,7 @@ float ViewImpl::GetMaximumHeight() const
 // Layout Properties API
 // =============================================================================
 
-void ViewImpl::SetViewMargin(const Extents& margin)
+void ViewImpl::SetMargin(const Extents& margin)
 {
   if(mMargin != margin)
   {
@@ -1193,12 +1193,12 @@ void ViewImpl::SetViewMargin(const Extents& margin)
   }
 }
 
-Extents ViewImpl::GetViewMargin() const
+Extents ViewImpl::GetMargin() const
 {
   return mMargin;
 }
 
-void ViewImpl::SetViewPadding(const Extents& padding)
+void ViewImpl::SetPadding(const Extents& padding)
 {
   if(mPadding != padding)
   {
@@ -1207,7 +1207,7 @@ void ViewImpl::SetViewPadding(const Extents& padding)
   }
 }
 
-Extents ViewImpl::GetViewPadding() const
+Extents ViewImpl::GetPadding() const
 {
   return mPadding;
 }

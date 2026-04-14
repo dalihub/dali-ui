@@ -126,7 +126,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(36.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     StackLayout typeButton = StackLayout::New(StackOrientation::VERTICAL)
                                .SetRequestedWidth(MATCH_PARENT)
@@ -214,7 +214,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(72.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < SAMPLING_COUNT; ++i)
     {
@@ -254,7 +254,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(36.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     StackLayout typeButton = StackLayout::New(StackOrientation::VERTICAL)
                                .SetRequestedWidth(MATCH_PARENT)
@@ -353,7 +353,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(72.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < SIZE_COUNT; ++i)
     {

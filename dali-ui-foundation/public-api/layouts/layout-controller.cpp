@@ -326,7 +326,7 @@ private:
     }
 
     // Root view has no parent that subtracts margin, so do it here.
-    Extents margin   = view->GetViewMargin();
+    Extents margin   = view->GetMargin();
     float   marginW  = static_cast<float>(margin.start + margin.end);
     float   marginH  = static_cast<float>(margin.top + margin.bottom);
     widthConstraint  = std::max(0.0f, widthConstraint - marginW);

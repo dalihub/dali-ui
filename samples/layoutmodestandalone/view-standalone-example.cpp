@@ -55,7 +55,7 @@ public:
     child1.SetBackgroundColor(Color::RED);
     child1.SetRequestedWidth(MATCH_PARENT);
     child1.SetRequestedHeight(200.0f);
-    child1.SetViewMargin(Extents(50, 50, 50, 50));
+    child1.SetMargin(Extents(50, 50, 50, 50));
     root.Add(child1);
 
     // Child 2: Green, width=WRAP_CONTENT, height=200, pos=(0,300), margin=50
@@ -64,7 +64,7 @@ public:
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
     child2.SetPositionY(300.0f);
-    child2.SetViewMargin(Extents(50, 50, 50, 50));
+    child2.SetMargin(Extents(50, 50, 50, 50));
 
     // Child 2's child: Yellow, 100x100
     View grandchild = View::New();

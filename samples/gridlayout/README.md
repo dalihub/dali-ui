@@ -54,8 +54,8 @@ Run:
 ./bin/gridlayout-margin-padding.example
 ```
 
-- SetViewPadding: 그리드 컨테이너 안쪽 여백.
-- SetViewMargin: 셀별 바깥 간격 (없음, 10px, 20px, 비대칭 비교).
+- SetPadding: 그리드 컨테이너 안쪽 여백.
+- SetMargin: 셀별 바깥 간격 (없음, 10px, 20px, 비대칭 비교).
 - ColumnSpan 셀에도 margin 적용.
 - Spacing을 0으로 설정하여 margin 효과만 확인.
 

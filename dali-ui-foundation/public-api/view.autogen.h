@@ -108,13 +108,13 @@
   * \
   * @param[in] margin The margin to set \
   */ \
-  ChildClass& SetViewMargin(const Extents& margin) { View::SetViewMargin(margin); return *this; } \
+  ChildClass& SetMargin(const Extents& margin) { View::SetMargin(margin); return *this; } \
   /** \
   * @brief Sets the view padding. \
   * \
   * @param[in] padding The padding to set \
   */ \
-  ChildClass& SetViewPadding(const Extents& padding) { View::SetViewPadding(padding); return *this; } \
+  ChildClass& SetPadding(const Extents& padding) { View::SetPadding(padding); return *this; } \
   /** \
   * @brief Sets the layout mode of this View. \
   * \

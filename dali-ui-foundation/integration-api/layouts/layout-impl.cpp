@@ -112,7 +112,7 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
     return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
   }
 
-  Extents padding = GetViewPadding();
+  Extents padding = GetPadding();
   float   pw      = static_cast<float>(padding.start + padding.end);
   float   ph      = static_cast<float>(padding.top + padding.bottom);
 
@@ -189,7 +189,7 @@ MeasuredSize LayoutImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
 
-  Extents    padding = GetViewPadding();
+  Extents    padding = GetPadding();
   LayoutRect contentBounds;
   contentBounds.x      = static_cast<float>(padding.start);
   contentBounds.y      = static_cast<float>(padding.top);

@@ -105,7 +105,7 @@ private:
           .SetFontSize(FONT_TC_NAME)
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(WRAP_CONTENT)
-          .SetViewPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2)));
+          .SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2)));
     }
 
     for(std::size_t i = 0; i < mTestCases.size(); ++i)
@@ -128,7 +128,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(HEADER_HEIGHT)
       .SetBackgroundColor(UiColor(COLOR_HEADER_BG))
-      .SetViewPadding(Extents(PADDING_H, PADDING_H, 0, 0))
+      .SetPadding(Extents(PADDING_H, PADDING_H, 0, 0))
       .Children({
         Label::New(title)
           .SetTextColor(UiColor(COLOR_HEADER_TEXT))
@@ -147,7 +147,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetBackgroundColor(UiColor(COLOR_ITEM_BG))
-      .SetViewPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V))
+      .SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V))
       .SetFocusable(true)
       .AsInteractive([this, index](InteractiveTrait& trait)
     {
@@ -196,7 +196,7 @@ private:
             .SetFontSize(FONT_HEADER)
             .SetRequestedWidth(WRAP_CONTENT)
             .SetRequestedHeight(MATCH_PARENT)
-            .SetViewPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0))
+            .SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0))
             .SetVerticalTextAlignment(Text::Alignment::CENTER)
             .SetFocusable(true)
             .AsInteractive([this](InteractiveTrait& trait)

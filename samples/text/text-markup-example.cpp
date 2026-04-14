@@ -43,7 +43,7 @@ private:
       .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Children({
         Label::New("Text Markup Example"),
         CreateMarkupLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),

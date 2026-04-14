@@ -516,11 +516,11 @@ int UtcDaliGridLayoutStandaloneIgnoresParentPaddingP(void)
   GridLayout layout = GridLayout::New();
   layout.AddRowDefinition(GridLength::Star(1.0f));
   layout.AddColumnDefinition(GridLength::Star(1.0f));
-  layout.SetViewPadding(Extents(10, 10, 10, 10));
+  layout.SetPadding(Extents(10, 10, 10, 10));
 
   View standalone = View::New();
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
-  standalone.SetViewMargin(Extents(5, 5, 7, 7));
+  standalone.SetMargin(Extents(5, 5, 7, 7));
   standalone.SetRequestedWidth(MATCH_PARENT);
   standalone.SetRequestedHeight(MATCH_PARENT);
   layout.Add(standalone);

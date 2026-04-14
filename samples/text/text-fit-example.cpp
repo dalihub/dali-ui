@@ -49,7 +49,7 @@ private:
         .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
 
           Label::New("TextFit Example")
@@ -58,13 +58,13 @@ private:
           Label::New("Press '1' to clear TextFit, '2' to set TextFit")
             .SetFontSize(14.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           // 1. MATCH_PARENT  fixed height / single line
           Label::New("1. MATCH_PARENT + fixed height / single line")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(SINGLE_LINE_TEXT)
             .SetRequestedWidth(MATCH_PARENT)
@@ -72,7 +72,7 @@ private:
             .SetMultiLine(false)
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange())
             .As(mMatchFixedSingleLine),
 
@@ -80,7 +80,7 @@ private:
           Label::New("2. MATCH_PARENT + fixed height / multi line")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(MULTI_LINE_TEXT)
             .SetRequestedWidth(MATCH_PARENT)
@@ -88,7 +88,7 @@ private:
             .SetMultiLine(true)
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
             .As(mMatchFixedMultiLine),
 
@@ -96,7 +96,7 @@ private:
           Label::New("3. WRAP_CONTENT + WRAP_CONTENT / single line")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(SINGLE_LINE_TEXT)
             .SetRequestedWidth(WRAP_CONTENT)
@@ -104,7 +104,7 @@ private:
             .SetMultiLine(false)
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange())
             .As(mWrapWrapSingleLine),
 
@@ -112,7 +112,7 @@ private:
           Label::New("4. WRAP_CONTENT + WRAP_CONTENT / multi line")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(MULTI_LINE_TEXT)
             .SetRequestedWidth(WRAP_CONTENT)
@@ -121,7 +121,7 @@ private:
             .SetMultiLine(true)
             .SetFontSize(20.0f)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
             .As(mWrapWrapMultiLine),
 
@@ -129,7 +129,7 @@ private:
           Label::New("5. MATCH_PARENT + fixed height / multi line / relative line height")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(MULTI_LINE_TEXT)
             .SetRequestedWidth(MATCH_PARENT)
@@ -139,7 +139,7 @@ private:
             .SetLineHeight(1.5f)
             .SetLineHeightMode(Text::LineHeightMode::RELATIVE)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
             .As(mFixedMultiLineRelativeLineHeight),
 
@@ -147,7 +147,7 @@ private:
           Label::New("6. MATCH_PARENT + fixed height / multi line / absolute line height")
             .SetFontSize(16.0f)
             .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetViewPadding(Extents(10, 10, 10, 10)),
+            .SetPadding(Extents(10, 10, 10, 10)),
 
           Label::New(MULTI_LINE_TEXT)
             .SetRequestedWidth(MATCH_PARENT)
@@ -157,7 +157,7 @@ private:
             .SetLineHeight(30.0f)
             .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
             .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetViewPadding(Extents(10, 10, 10, 10))
+            .SetPadding(Extents(10, 10, 10, 10))
             .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f))
             .As(mFixedMultiLineAbsoluteLineHeight),
         }));

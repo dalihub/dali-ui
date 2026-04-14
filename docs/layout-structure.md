@@ -13,7 +13,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 ### 1. Public API (Handles)
 
 - **View**  
-  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetViewMargin` / `SetViewPadding`, alignment, visibility, etc.
+  - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetMargin` / `SetPadding`, alignment, visibility, etc.
   - `GetSize()` returns the actual rendered size (read-only).
   - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.
   - Child add/remove uses inherited Actor `Add`/`Remove`. `Insert(index, View)` and `RemoveAllChildren()` are available for index-based insertion and bulk removal.

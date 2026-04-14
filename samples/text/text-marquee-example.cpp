@@ -44,7 +44,7 @@ private:
       .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Children({
         Label::New("Text Marquee Example\n"
                    "Test options:\n"
@@ -55,7 +55,7 @@ private:
         Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetRequestedWidth(400)
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetMarqueeSpeed(100)
           .SetMarqueeLoopCount(2)
           .SetMarqueeLoopDelay(1.0f)
@@ -66,7 +66,7 @@ private:
         Label::New("שלום עולם, נעים מאוד,ומקווה שיהיה לנו שיחה נעימה וטובה יחד")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetRequestedWidth(400)
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetMarqueeSpeed(100)
           .SetMarqueeLoopCount(2)
           .SetMarqueeLoopDelay(1.0f)
@@ -78,7 +78,7 @@ private:
         Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
           .SetBackgroundColor(UiColor(0xefefef))
           .SetRequestedWidth(200)
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetMultiLine(true)
           .SetMarqueeSpeed(100)
           .SetMarqueeLoopCount(2)
@@ -90,7 +90,7 @@ private:
         Label::New("TODO: When focused, the marquee runs if the text is too long"),
           Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
           .SetBackgroundColor(UiColor(0xefefef))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetMarqueeSpeed(100)
           .SetMarqueeLoopCount(0)
           .SetMarqueeLoopDelay(1.0f)

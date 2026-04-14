@@ -789,7 +789,7 @@ int LabelImpl::GetLineCount()
 
 int LabelImpl::GetLineCount(float width)
 {
-  Extents padding      = GetViewPadding();
+  Extents padding      = GetPadding();
   float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetLineCount(contentWidth);
 }
@@ -908,7 +908,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   Actor self = Self();
 
-  Extents padding = GetViewPadding();
+  Extents padding = GetPadding();
   float   width   = std::max(size.x - (padding.start + padding.end), 0.0f);
   float   height  = std::max(size.y - (padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
@@ -1016,7 +1016,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
 Vector3 LabelImpl::GetNaturalSize()
 {
-  Extents padding     = GetViewPadding();
+  Extents padding     = GetPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += (padding.start + padding.end);
   naturalSize.height += (padding.top + padding.bottom);
@@ -1026,7 +1026,7 @@ Vector3 LabelImpl::GetNaturalSize()
 
 float LabelImpl::GetHeightForWidth(float width)
 {
-  Extents padding      = GetViewPadding();
+  Extents padding      = GetPadding();
   float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
@@ -1280,7 +1280,7 @@ bool LabelImpl::OnInterceptTouched(Actor actor, const TouchEvent& touch)
 
       if(deltaX < 20.0f && deltaY < 20.0f)
       {
-        Extents       padding    = GetViewPadding();
+        Extents       padding    = GetPadding();
         const Vector2 localPoint = touch.GetLocalPosition(0);
         mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
       }

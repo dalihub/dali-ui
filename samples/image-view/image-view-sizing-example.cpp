@@ -131,7 +131,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(56.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     StackLayout toggleButton = StackLayout::New(StackOrientation::VERTICAL)
                                  .SetRequestedWidth(WRAP_CONTENT)
@@ -211,7 +211,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
                            .SetRequestedWidth(MATCH_PARENT)
                            .SetRequestedHeight(56.0f)
-                           .SetViewPadding(Extents(4, 4, 4, 4))
+                           .SetPadding(Extents(4, 4, 4, 4))
                            .SetBackgroundColor(UiColor(0x555555))
                            .Children({
                              Label::New("ORIENTATION CORRECTION: ON")

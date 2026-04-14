@@ -87,7 +87,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(48.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4))
+                        .SetPadding(Extents(4, 4, 4, 4))
                         .SetBackgroundColor(UiColor(0x111111));
 
     for(int i = 0; i < (int)ViewType::COUNT; ++i)

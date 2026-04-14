@@ -48,7 +48,7 @@ private:
         .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
           Label::New("Text Style Example"),
 
@@ -167,7 +167,7 @@ private:
   {
     return Label::New(text)
       .SetBackgroundColor(BACKGROUND_COLOR)
-      .SetViewPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
+      .SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
       .SetFontSize(FONT_SIZE)
       .SetRequestedWidth(MATCH_PARENT);
   }
@@ -177,7 +177,7 @@ private:
     return InputField::New()
       .SetText(text)
       .SetBackgroundColor(BACKGROUND_COLOR)
-      .SetViewPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
+      .SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
       .SetFontSize(FONT_SIZE)
       .SetRequestedWidth(MATCH_PARENT);
   }

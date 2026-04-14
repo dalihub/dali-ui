@@ -469,28 +469,28 @@ public: // Properties
    *
    * @param[in] margin The margin to set
    */
-  View& SetViewMargin(const Extents& margin);
+  View& SetMargin(const Extents& margin);
 
   /**
    * @brief Gets the view margin.
    *
    * @return The view margin
    */
-  Extents GetViewMargin() const;
+  Extents GetMargin() const;
 
   /**
    * @brief Sets the view padding.
    *
    * @param[in] padding The padding to set
    */
-  View& SetViewPadding(const Extents& padding);
+  View& SetPadding(const Extents& padding);
 
   /**
    * @brief Gets the view padding.
    *
    * @return The view padding
    */
-  Extents GetViewPadding() const;
+  Extents GetPadding() const;
 
   /**
    * @brief Sets the layout mode of this View.

@@ -657,10 +657,10 @@ public: // Layout Params API
   BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
 
 public: // Layout Properties API
-  void    SetViewMargin(const Extents& margin);
-  Extents GetViewMargin() const;
-  void    SetViewPadding(const Extents& padding);
-  Extents GetViewPadding() const;
+  void    SetMargin(const Extents& margin);
+  Extents GetMargin() const;
+  void    SetPadding(const Extents& padding);
+  Extents GetPadding() const;
 
   /**
    * @brief Sets the layout mode of this View.
@@ -1469,7 +1469,7 @@ inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
 inline void ArrangeStandaloneChild(ViewImpl& childImpl, ViewImpl::ChildData& childData,
                                    float parentFullWidth, float parentFullHeight)
 {
-  Extents margin  = childImpl.GetViewMargin();
+  Extents margin  = childImpl.GetMargin();
   float   marginW = static_cast<float>(margin.start + margin.end);
   float   marginH = static_cast<float>(margin.top + margin.bottom);
   float   childW  = childData.measuredSize.width;

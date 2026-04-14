@@ -22,8 +22,8 @@ using namespace Dali::Ui;
 /**
  * StackLayout sample: margin, padding, and nested StackLayout.
  *
- * 1. Padding: root stack has SetViewPadding so content is inset from edges.
- * 2. Margin: child views use SetViewMargin (different values) so gaps are visible.
+ * 1. Padding: root stack has SetPadding so content is inset from edges.
+ * 2. Margin: child views use SetMargin (different values) so gaps are visible.
  * 3. Nested: one row is a horizontal StackLayout (row of boxes) inside the vertical stack.
  *
  * Press Escape or Back to quit.
@@ -46,7 +46,7 @@ public:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetViewPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Section 1: Padding (visible as gap around the red bar) ---
     View padLabel = View::New();
@@ -59,21 +59,21 @@ public:
     View marginA = View::New();
     marginA.SetBackgroundColor(Color::GREEN);
     marginA.SetRequestedHeight(50.0f);
-    marginA.SetViewMargin(Extents(50, 50, 0, 0));
+    marginA.SetMargin(Extents(50, 50, 0, 0));
     marginA.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginA);
 
     View marginB = View::New();
     marginB.SetBackgroundColor(Color::BLUE);
     marginB.SetRequestedHeight(50.0f);
-    marginB.SetViewMargin(Extents(0, 0, 50, 50)); // top and bottom margin only
+    marginB.SetMargin(Extents(0, 0, 50, 50)); // top and bottom margin only
     marginB.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginB);
 
     View marginC = View::New();
     marginC.SetBackgroundColor(Color::CYAN);
     marginC.SetRequestedHeight(50.0f);
-    marginC.SetViewMargin(Extents(50, 50, 50, 50));
+    marginC.SetMargin(Extents(50, 50, 50, 50));
     marginC.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     root.Add(marginC);
 
@@ -81,7 +81,7 @@ public:
     StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
     horizontalRow.SetBackgroundColor(Color::GRAY);
     horizontalRow.SetSpacing(10.0f);
-    horizontalRow.SetViewMargin(Extents(50, 50, 50, 50));
+    horizontalRow.SetMargin(Extents(50, 50, 50, 50));
     horizontalRow.SetLayoutParams(StackLayoutParams::New()
       .SetAlignment(LayoutAlignment::FILL)
       .SetWeight(1.0f));

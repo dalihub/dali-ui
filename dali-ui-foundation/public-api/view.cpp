@@ -307,26 +307,26 @@ float View::GetMaximumHeight() const
 // Layout Properties API
 // =============================================================================
 
-View& View::SetViewMargin(const Extents& margin)
+View& View::SetMargin(const Extents& margin)
 {
-  Integration::GetImpl(*this).SetViewMargin(margin);
+  Integration::GetImpl(*this).SetMargin(margin);
   return *this;
 }
 
-Extents View::GetViewMargin() const
+Extents View::GetMargin() const
 {
-  return Integration::GetImpl(*this).GetViewMargin();
+  return Integration::GetImpl(*this).GetMargin();
 }
 
-View& View::SetViewPadding(const Extents& padding)
+View& View::SetPadding(const Extents& padding)
 {
-  Integration::GetImpl(*this).SetViewPadding(padding);
+  Integration::GetImpl(*this).SetPadding(padding);
   return *this;
 }
 
-Extents View::GetViewPadding() const
+Extents View::GetPadding() const
 {
-  return Integration::GetImpl(*this).GetViewPadding();
+  return Integration::GetImpl(*this).GetPadding();
 }
 
 View& View::SetLayoutMode(LayoutMode mode)

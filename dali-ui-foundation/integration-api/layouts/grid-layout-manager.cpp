@@ -101,7 +101,7 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
     rowSpan          = std::min(rowSpan, rowCount - row);
     colSpan          = std::min(colSpan, colCount - col);
 
-    Extents      margin                = childImpl.GetViewMargin();
+    Extents      margin                = childImpl.GetMargin();
     float        marginW               = static_cast<float>(margin.start + margin.end);
     float        marginH               = static_cast<float>(margin.top + margin.bottom);
     float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
@@ -252,7 +252,7 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
       childBounds.height -= rowSpacing;
     }
 
-    Extents margin = childImpl.GetViewMargin();
+    Extents margin = childImpl.GetMargin();
     childBounds.x += static_cast<float>(margin.start);
     childBounds.y += static_cast<float>(margin.top);
     childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
@@ -398,7 +398,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
   // For WRAP_CONTENT parents, STAR columns/rows should only use the space
   // up to max(auto+absolute content, minSize), not the full constraint.
-  Extents parentPadding   = view->GetViewPadding();
+  Extents parentPadding   = view->GetPadding();
   float   requestedWidth  = view->GetRequestedWidth();
   float   requestedHeight = view->GetRequestedHeight();
 

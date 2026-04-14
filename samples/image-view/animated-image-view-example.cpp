@@ -75,7 +75,7 @@ private:
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
         .Spacing(4.0f)
-        .SetViewPadding(Extents(8, 8, 8, 8))
+        .SetPadding(Extents(8, 8, 8, 8))
         .Children({
           CreateImageSourceLabel(),
           CreateAnimationArea(),

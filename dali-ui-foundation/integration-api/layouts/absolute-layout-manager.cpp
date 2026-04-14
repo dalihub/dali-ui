@@ -111,7 +111,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
 
     if(w < 0 || h < 0)
     {
-      Extents      margin    = childImpl.GetViewMargin();
+      Extents      margin    = childImpl.GetMargin();
       float        marginW   = static_cast<float>(margin.start + margin.end);
       float        marginH   = static_cast<float>(margin.top + margin.bottom);
       float        measureW  = w >= 0.0f ? w : std::max(0.0f, contentWidth - marginW);
@@ -143,7 +143,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       y = (contentHeight - h) * bounds.y;
     }
 
-    Extents margin = childImpl.GetViewMargin();
+    Extents margin = childImpl.GetMargin();
     maxRight       = std::max(maxRight, x + w + margin.start + margin.end);
     maxBottom      = std::max(maxBottom, y + h + margin.top + margin.bottom);
   }
@@ -198,7 +198,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       // MATCH_PARENT: fill the available width minus own margin.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT)
       {
-        Extents margin = childImpl.GetViewMargin();
+        Extents margin = childImpl.GetMargin();
         w              = std::max(0.0f, availableWidth - static_cast<float>(margin.start + margin.end));
       }
       else
@@ -211,7 +211,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       // MATCH_PARENT: fill the available height minus own margin.
       if(childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        Extents margin = childImpl.GetViewMargin();
+        Extents margin = childImpl.GetMargin();
         h              = std::max(0.0f, availableHeight - static_cast<float>(margin.top + margin.bottom));
       }
       else
@@ -227,7 +227,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       y = (availableHeight - h) * childBoundsSpec.y;
     }
 
-    Extents margin = childImpl.GetViewMargin();
+    Extents margin = childImpl.GetMargin();
 
     LayoutRect childBounds;
     childBounds.x      = bounds.x + x + static_cast<float>(margin.start);

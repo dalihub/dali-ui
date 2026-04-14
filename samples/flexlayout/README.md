@@ -54,8 +54,8 @@ Run:
 ./bin/flexlayout-margin-padding.example
 ```
 
-- SetViewPadding: 플렉스 컨테이너 안쪽 여백 (자식이 가장자리로부터 밀림).
-- SetViewMargin: 자식 뷰 바깥 간격 (없음, 균등 15px, 비대칭 비교).
+- SetPadding: 플렉스 컨테이너 안쪽 여백 (자식이 가장자리로부터 밀림).
+- SetMargin: 자식 뷰 바깥 간격 (없음, 균등 15px, 비대칭 비교).
 - 중첩 FlexLayout(Row)에 별도 padding 적용, 내부 자식에 개별 margin.
 
 ### GBS build (Tizen)

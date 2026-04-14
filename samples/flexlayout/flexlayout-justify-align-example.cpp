@@ -52,7 +52,7 @@ public:
     root.SetDirection(FlexDirection::ROW);
     root.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
     root.SetAlignItems(FlexAlign::CENTER);
-    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Red box
     View redBox = View::New();

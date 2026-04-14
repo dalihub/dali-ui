@@ -54,7 +54,7 @@ public:
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(10.0f);
-    outer.SetViewPadding(Extents(50, 50, 50, 50));
+    outer.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Horizontal stack, children aligned to Start (top)
     StackLayout row1 = StackLayout::New(StackOrientation::HORIZONTAL);

@@ -45,7 +45,7 @@ private:
         .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
           Label::New("Text Cutout Example"),
 

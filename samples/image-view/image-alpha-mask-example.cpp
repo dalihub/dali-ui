@@ -98,7 +98,7 @@ private:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .Spacing(8.0f)
-      .SetViewPadding(Extents(8, 8, 8, 8))
+      .SetPadding(Extents(8, 8, 8, 8))
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
       .Children({
         CreatePanel("CROP: OFF", false, PANEL_CROP_OFF),
@@ -174,7 +174,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(60.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
     for(int i = 0; i < MASK_COUNT; ++i)
     {
       row.Add(CreateMaskButton(i));
@@ -209,7 +209,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
                            .SetRequestedWidth(MATCH_PARENT)
                            .SetRequestedHeight(60.0f)
-                           .SetViewPadding(Extents(4, 4, 4, 4))
+                           .SetPadding(Extents(4, 4, 4, 4))
                            .SetBackgroundColor(UiColor(0x2E7D32))
                            .Children({
                              Label::New(MakeImageTypeText())
@@ -231,7 +231,7 @@ private:
     StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
                            .SetRequestedWidth(MATCH_PARENT)
                            .SetRequestedHeight(60.0f)
-                           .SetViewPadding(Extents(4, 4, 4, 4))
+                           .SetPadding(Extents(4, 4, 4, 4))
                            .SetBackgroundColor(UiColor(0x444444))
                            .Children({
                              Label::New("MODE: ON_RENDERING")

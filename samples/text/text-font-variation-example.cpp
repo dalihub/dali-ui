@@ -46,7 +46,7 @@ private:
       .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Children({
         Label::New("Font Variation Example")
           .SetFontSize(20.0f),
@@ -54,12 +54,12 @@ private:
         Label::New("Press '1' to clear, '2' to change variation, '3' to set via string")
           .SetFontSize(14.0f)
           .SetBackgroundColor(UiColor(0xE0E0E0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New("Weight 200 + Width 62.5")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
@@ -67,13 +67,13 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel200),
 
         Label::New("Weight 300 + Width 65")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
@@ -81,13 +81,13 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel300),
 
         Label::New("Weight 400 + Width 70")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
@@ -95,14 +95,14 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel400),
 
         // Width variation
         Label::New("Weight 500 + Width 80")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
@@ -110,13 +110,13 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel500),
 
         Label::New("Weight 600 + Width 90")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
@@ -124,21 +124,21 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel600),
 
         // Using FontVariationAxis API
         Label::New("Weight 700 + Width 100")
           .SetFontSize(16.0f)
           .SetBackgroundColor(UiColor(0xF0F0F0))
-          .SetViewPadding(Extents(10, 10, 10, 10)),
+          .SetPadding(Extents(10, 10, 10, 10)),
 
         Label::New(SAMPLE_TEXT)
           .SetFontFamily(VARIABLE_FONT_FAMILY)
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mLabel700),
 
         InputField::New()
@@ -147,7 +147,7 @@ private:
           .SetFontSize(20.0f)
           .SetRequestedWidth(MATCH_PARENT)
           .SetBackgroundColor(UiColor(0xEFEFEF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .As(mField)
         }));
 

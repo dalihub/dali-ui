@@ -122,7 +122,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(80.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < AREA_COUNT; ++i)
     {
@@ -138,7 +138,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(80.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     // GIF toggle button
     StackLayout gifButton = StackLayout::New(StackOrientation::VERTICAL)

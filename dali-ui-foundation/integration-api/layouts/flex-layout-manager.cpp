@@ -85,7 +85,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
       // Standalone children are excluded from flex line building.
       continue;
     }
-    Extents margin = childImpl.GetViewMargin();
+    Extents margin = childImpl.GetMargin();
 
     // Apply flex-basis: override the main-axis measured size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
@@ -241,7 +241,7 @@ void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, cons
   {
     auto&     childData = children[idx];
     ViewImpl& childImpl = getImpl(childData.view);
-    Extents   margin    = childImpl.GetViewMargin();
+    Extents   margin    = childImpl.GetMargin();
 
     float childMainSize  = isMainAxisHorizontal ? childData.measuredSize.width : childData.measuredSize.height;
     float childCrossSize = isMainAxisHorizontal ? childData.measuredSize.height : childData.measuredSize.width;
@@ -440,7 +440,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = GetImpl(childData.view);
-    Extents   margin    = childImpl.GetViewMargin();
+    Extents   margin    = childImpl.GetMargin();
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.

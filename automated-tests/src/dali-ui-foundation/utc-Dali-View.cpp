@@ -613,13 +613,13 @@ int UtcDaliViewGetRequestedHeightP(void)
   END_TEST;
 }
 
-int UtcDaliViewSetViewMarginP(void)
+int UtcDaliViewSetMarginP(void)
 {
   UiTestApplication application;
   View view = View::New();
   Extents margin(10, 20, 30, 40);
-  view.SetViewMargin(margin);
-  Extents got = view.GetViewMargin();
+  view.SetMargin(margin);
+  Extents got = view.GetMargin();
   DALI_TEST_EQUALS(got.start, 10u, TEST_LOCATION);
   DALI_TEST_EQUALS(got.end, 20u, TEST_LOCATION);
   DALI_TEST_EQUALS(got.top, 30u, TEST_LOCATION);
@@ -627,23 +627,23 @@ int UtcDaliViewSetViewMarginP(void)
   END_TEST;
 }
 
-int UtcDaliViewGetViewMarginP(void)
+int UtcDaliViewGetMarginP(void)
 {
   UiTestApplication application;
   View view = View::New();
-  Extents got = view.GetViewMargin();
+  Extents got = view.GetMargin();
   DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(got.end, 0u, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewSetViewPaddingP(void)
+int UtcDaliViewSetPaddingP(void)
 {
   UiTestApplication application;
   View view = View::New();
   Extents padding(5, 15, 25, 35);
-  view.SetViewPadding(padding);
-  Extents got = view.GetViewPadding();
+  view.SetPadding(padding);
+  Extents got = view.GetPadding();
   DALI_TEST_EQUALS(got.start, 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(got.end, 15u, TEST_LOCATION);
   DALI_TEST_EQUALS(got.top, 25u, TEST_LOCATION);
@@ -651,11 +651,11 @@ int UtcDaliViewSetViewPaddingP(void)
   END_TEST;
 }
 
-int UtcDaliViewGetViewPaddingP(void)
+int UtcDaliViewGetPaddingP(void)
 {
   UiTestApplication application;
   View view = View::New();
-  Extents got = view.GetViewPadding();
+  Extents got = view.GetPadding();
   DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
   END_TEST;
 }
@@ -839,25 +839,25 @@ int UtcDaliViewSetBackgroundColorP(void)
   END_TEST;
 }
 
-int UtcDaliViewViewMarginChainingP(void)
+int UtcDaliViewMarginChainingP(void)
 {
   UiTestApplication application;
   View view = View::New();
   Extents margin(1, 2, 3, 4);
-  View& result = view.SetViewMargin(margin);
+  View& result = view.SetMargin(margin);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetViewMargin().start, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMargin().start, 1u, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliViewViewPaddingChainingP(void)
+int UtcDaliViewPaddingChainingP(void)
 {
   UiTestApplication application;
   View view = View::New();
   Extents padding(5, 10, 15, 20);
-  View& result = view.SetViewPadding(padding);
+  View& result = view.SetPadding(padding);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetViewPadding().start, 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding().start, 5u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -919,7 +919,7 @@ int UtcDaliViewMeasureWithMarginP(void)
 {
   UiTestApplication application;
   View view = View::New();
-  view.SetViewMargin(Extents(10, 10, 10, 10));
+  view.SetMargin(Extents(10, 10, 10, 10));
   view.SetRequestedWidth(50.0f);
   view.SetRequestedHeight(50.0f);
   MeasuredSize size = view.Measure(100.0f, 100.0f);
@@ -1014,7 +1014,7 @@ int UtcDaliViewMeasureWithPaddingP(void)
 {
   UiTestApplication application;
   View view = View::New();
-  view.SetViewPadding(Extents(5, 5, 5, 5));
+  view.SetPadding(Extents(5, 5, 5, 5));
   view.SetRequestedWidth(40.0f);
   view.SetRequestedHeight(30.0f);
   MeasuredSize size = view.Measure(100.0f, 100.0f);
@@ -1543,7 +1543,7 @@ int UtcDaliViewStandaloneIgnoresParentPaddingMatchParentP(void)
 {
   UiTestApplication application;
   View parent = View::New();
-  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetPadding(Extents(10, 10, 10, 10));
   parent.SetRequestedWidth(200.0f);
   parent.SetRequestedHeight(150.0f);
 
@@ -1569,13 +1569,13 @@ int UtcDaliViewStandaloneAppliesOwnMarginP(void)
 {
   UiTestApplication application;
   View parent = View::New();
-  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetPadding(Extents(10, 10, 10, 10));
   parent.SetRequestedWidth(200.0f);
   parent.SetRequestedHeight(150.0f);
 
   View child = View::New();
   child.SetLayoutMode(LayoutMode::STANDALONE);
-  child.SetViewMargin(Extents(5, 5, 7, 7));
+  child.SetMargin(Extents(5, 5, 7, 7));
   child.SetRequestedWidth(MATCH_PARENT);
   child.SetRequestedHeight(MATCH_PARENT);
   parent.Add(child);
@@ -1595,7 +1595,7 @@ int UtcDaliViewStandaloneUsesPositionP(void)
 {
   UiTestApplication application;
   View parent = View::New();
-  parent.SetViewPadding(Extents(10, 10, 10, 10));
+  parent.SetPadding(Extents(10, 10, 10, 10));
   parent.SetRequestedWidth(200.0f);
   parent.SetRequestedHeight(150.0f);
 

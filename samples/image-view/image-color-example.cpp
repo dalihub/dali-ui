@@ -87,7 +87,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(44.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     StackLayout typeButton = StackLayout::New(StackOrientation::VERTICAL)
                                .SetRequestedWidth(MATCH_PARENT)
@@ -185,7 +185,7 @@ private:
                         .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(100.0f)
-                        .SetViewPadding(Extents(4, 4, 4, 4));
+                        .SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < COLOR_COUNT; ++i)
     {

@@ -38,7 +38,7 @@ Label CreateButton(const char* text, float fontSize = 14.0f)
     .SetBackgroundColor(UiColor(0x4A90D9))
     .SetRequestedWidth(MATCH_PARENT)
     .SetRequestedHeight(BUTTON_HEIGHT)
-    .SetViewPadding(Extents(10, 10, 10, 10));
+    .SetPadding(Extents(10, 10, 10, 10));
 }
 } // namespace
 
@@ -64,7 +64,7 @@ private:
                      .SetMultiLine(true)
                      .SetFontSize(24.0f)
                      .SetBackgroundColor(UiColor(0xFFFFFF))
-                     .SetViewPadding(Extents(16, 16, 16, 16));
+                     .SetPadding(Extents(16, 16, 16, 16));
 
     // Target InputField for visual testing
     mTargetInputField = InputField::New()
@@ -73,7 +73,7 @@ private:
                           .SetFontSize(24.0f)
                           .SetText("InputField test text")
                           .SetBackgroundColor(UiColor(0xFFFFFF))
-                          .SetViewPadding(Extents(16, 16, 16, 16));
+                          .SetPadding(Extents(16, 16, 16, 16));
 
     mStatusLabel = Label::New()
                      .SetRequestedWidth(MATCH_PARENT)
@@ -81,7 +81,7 @@ private:
                      .SetFontSize(12.0f)
                      .SetMultiLine(true)
                      .SetBackgroundColor(UiColor(0xE8E8E8))
-                     .SetViewPadding(Extents(16, 16, 16, 16));
+                     .SetPadding(Extents(16, 16, 16, 16));
 
     UpdateStatus();
 
@@ -114,7 +114,7 @@ private:
         .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetViewPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
         .Children({
           titleButton,
           Label::New("Target Label:").SetFontSize(14.0f),

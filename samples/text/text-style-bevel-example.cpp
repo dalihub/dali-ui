@@ -46,7 +46,7 @@ private:
         // Embossed Style - Light from top-left creates raised effect
         Label::New("Embossed")
           .SetBackgroundColor(UiColor(0x212121))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetFontFamily("SamsungOneUI_700")
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetFontSize(FONT_SIZE)
@@ -62,7 +62,7 @@ private:
         // Engraved Style - Light from top-left creates sunken effect
         Label::New("Engraved")
           .SetBackgroundColor(UiColor(0x333333))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetFontFamily("SamsungOneUI_700")
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetFontSize(FONT_SIZE)
@@ -78,7 +78,7 @@ private:
         // Glass Style - Subtle bevel effect
         Label::New("Glass")
           .SetBackgroundColor(UiColor(0xFFFFFF))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetFontFamily("SamsungOneUI_700")
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetFontSize(FONT_SIZE)
@@ -94,7 +94,7 @@ private:
         // Same Color Style - Text matches background
         Label::New("Same Color")
           .SetBackgroundColor(UiColor(0xEEF3F9))
-          .SetViewPadding(Extents(10, 10, 10, 10))
+          .SetPadding(Extents(10, 10, 10, 10))
           .SetFontFamily("SamsungOneUI_700")
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetFontSize(FONT_SIZE)
@@ -110,7 +110,7 @@ private:
         // Bronze Style - Decorative warm-toned metallic bevel
         Label::New("Bronze")
           .SetBackgroundColor(UiColor(0x6B4A34))
-          .SetViewPadding(Extents(20, 20, 20, 20))
+          .SetPadding(Extents(20, 20, 20, 20))
           .SetFontFamily("SamsungOneUI_700")
           .SetHorizontalTextAlignment(Text::Alignment::CENTER)
           .SetFontSize(FONT_SIZE)

@@ -54,7 +54,7 @@ public:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(Color::GRAY);
-    root.SetViewPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // 3 rows x 2 columns, no spacing (margin only)
     root.AddRowDefinition(GridLength::Absolute(200.0f));
@@ -75,14 +75,14 @@ public:
     // Cell (0,1): Green - 50px margin all sides
     View cell01 = View::New();
     cell01.SetBackgroundColor(Color::GREEN);
-    cell01.SetViewMargin(Extents(50, 50, 50, 50));
+    cell01.SetMargin(Extents(50, 50, 50, 50));
     cell01.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
     root.Add(cell01);
 
     // Cell (1,0): Blue - 50px margin all sides
     View cell10 = View::New();
     cell10.SetBackgroundColor(Color::BLUE);
-    cell10.SetViewMargin(Extents(50, 50, 50, 50));
+    cell10.SetMargin(Extents(50, 50, 50, 50));
     cell10.SetLayoutParams(GridLayoutParams::New().SetRow(1));
     root.Add(cell10);
 
@@ -95,7 +95,7 @@ public:
     // Cell (2,0~1): Cyan - spanning 2 columns with 50px margin
     View cell20 = View::New();
     cell20.SetBackgroundColor(Color::CYAN);
-    cell20.SetViewMargin(Extents(50, 50, 50, 50));
+    cell20.SetMargin(Extents(50, 50, 50, 50));
     cell20.SetLayoutParams(GridLayoutParams::New().SetRow(2).SetColumnSpan(2));
     root.Add(cell20);
 

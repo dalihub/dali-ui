@@ -81,7 +81,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
       result.totalWeight += weight;
       continue;
     }
-    Extents      margin                = childImpl.GetViewMargin();
+    Extents      margin                = childImpl.GetMargin();
     float        marginW               = static_cast<float>(margin.start + margin.end);
     float        marginH               = static_cast<float>(margin.top + margin.bottom);
     float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
@@ -125,7 +125,7 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
     }
 
     float   share              = (weight / totalWeight) * remainingMain;
-    Extents margin             = childImpl.GetViewMargin();
+    Extents margin             = childImpl.GetMargin();
     float   marginH            = static_cast<float>(margin.top + margin.bottom);
     float   marginW            = static_cast<float>(margin.start + margin.end);
     float   mainAxisConstraint = std::max(0.0f, share - (orientation == StackOrientation::VERTICAL ? marginH : marginW));
@@ -217,7 +217,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
       // the view's minimum size (converted to content area by subtracting
       // padding). The full constraint is NOT used — only the minimum size
       // can create extra space for weight children.
-      Extents padding        = view->GetViewPadding();
+      Extents padding        = view->GetPadding();
       float   paddingMain    = (mOrientation == StackOrientation::VERTICAL)
                                  ? static_cast<float>(padding.top + padding.bottom)
                                  : static_cast<float>(padding.start + padding.end);
@@ -256,7 +256,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
           continue;
         }
 
-        Extents      margin                = childImpl.GetViewMargin();
+        Extents      margin                = childImpl.GetMargin();
         float        marginW               = static_cast<float>(margin.start + margin.end);
         float        marginH               = static_cast<float>(margin.top + margin.bottom);
         float        childWidthConstraint  = std::max(0.0f, widthConstraint - marginW);
@@ -340,7 +340,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       }
       else
       {
-        Extents margin   = childImpl.GetViewMargin();
+        Extents margin   = childImpl.GetMargin();
         float   marginM  = (mOrientation == StackOrientation::VERTICAL) ? static_cast<float>(margin.top + margin.bottom)
                                                                         : static_cast<float>(margin.start + margin.end);
         float   mainSize = (mOrientation == StackOrientation::VERTICAL) ? childData.measuredSize.height : childData.measuredSize.width;
@@ -368,7 +368,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
         }
 
         float   share   = (weight / totalWeight) * remainingMain;
-        Extents margin  = childImpl.GetViewMargin();
+        Extents margin  = childImpl.GetMargin();
         float   marginW = static_cast<float>(margin.start + margin.end);
         float   marginH = static_cast<float>(margin.top + margin.bottom);
 
@@ -412,7 +412,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       continue;
     }
 
-    Extents    margin  = childImpl.GetViewMargin();
+    Extents    margin  = childImpl.GetMargin();
     float      marginW = static_cast<float>(margin.start + margin.end);
     float      marginH = static_cast<float>(margin.top + margin.bottom);
     LayoutRect childBounds;

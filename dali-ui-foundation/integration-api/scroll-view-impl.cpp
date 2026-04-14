@@ -614,8 +614,8 @@ Vector2 ScrollViewImpl::ContentPositionToScrollPosition(const Vector2& content) 
 {
   float marginStart     = 0.0f;
   float marginStartTop  = 0.0f;
-  float paddingStart    = GetViewPadding().start;
-  float paddingStartTop = GetViewPadding().top;
+  float paddingStart    = GetPadding().start;
+  float paddingStartTop = GetPadding().top;
 
   return Vector2(-(content.x - paddingStart - marginStart), -(content.y - paddingStartTop - marginStartTop));
 }
@@ -888,7 +888,7 @@ void ScrollViewImpl::UpdateScrollingProperties()
     return;
   }
 
-  Extents padding = GetViewPadding();
+  Extents padding = GetPadding();
 
   mMaximumStartX = padding.start;
   mMaximumStartY = padding.top;

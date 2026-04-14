@@ -47,7 +47,7 @@ public:
     GridLayout root = GridLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetViewPadding(Extents(50, 50, 50, 50));
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Define 3 rows and 2 columns with absolute sizes
     root.AddRowDefinition(GridLength::Absolute(50.0f));

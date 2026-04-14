@@ -57,7 +57,7 @@ public:
     outer.SetRequestedWidth(MATCH_PARENT);
     outer.SetRequestedHeight(MATCH_PARENT);
     outer.SetSpacing(16.0f);
-    outer.SetViewPadding(Extents(50, 50, 50, 50));
+    outer.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Default shrink - all items shrink equally
     FlexLayout row1 = FlexLayout::New();
@@ -65,7 +65,7 @@ public:
     row1.SetDirection(FlexDirection::ROW);
     row1.SetWrap(FlexWrap::NO_WRAP);
     row1.SetAlignItems(FlexAlign::STRETCH);
-    row1.SetViewPadding(Extents(50, 50, 50, 50));
+    row1.SetPadding(Extents(50, 50, 50, 50));
     row1.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     // All three items: basis 250, default shrink (1.0)
@@ -95,7 +95,7 @@ public:
     row2.SetDirection(FlexDirection::ROW);
     row2.SetWrap(FlexWrap::NO_WRAP);
     row2.SetAlignItems(FlexAlign::STRETCH);
-    row2.SetViewPadding(Extents(50, 50, 50, 50));
+    row2.SetPadding(Extents(50, 50, 50, 50));
     row2.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     // Item 1: shrink 0 (will not shrink)

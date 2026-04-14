@@ -47,7 +47,7 @@ public:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(2400.0f);
     content.SetSpacing(10.0f);
-    content.SetViewPadding(Extents(20, 20, 20, 20));
+    content.SetPadding(Extents(20, 20, 20, 20));
 
     View top = View::New();
     top.SetBackgroundColor(Color::RED);
