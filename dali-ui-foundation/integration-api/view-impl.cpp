@@ -421,16 +421,16 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     return;
   }
 
-  if((mImpl->mPadding.start != 0) || (mImpl->mPadding.end != 0) || (mImpl->mPadding.top != 0) ||
-     (mImpl->mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
-     (mImpl->mMargin.top != 0) || (mImpl->mMargin.bottom != 0))
+  if((mPadding.start != 0) || (mPadding.end != 0) || (mPadding.top != 0) ||
+     (mPadding.bottom != 0) || (mMargin.start != 0) || (mMargin.end != 0) ||
+     (mMargin.top != 0) || (mMargin.bottom != 0))
   {
     for(unsigned int i = 0, numChildren = Self().GetChildCount(); i < numChildren; ++i)
     {
       Actor   child = Self().GetChildAt(i);
       Vector2 newChildSize(size);
 
-      Extents padding = mImpl->mPadding;
+      Extents padding = mPadding;
 
       Dali::CustomActor           ownerActor(GetOwner());
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
@@ -445,8 +445,8 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       newChildSize.height = size.height - (padding.top + padding.bottom);
 
       Vector2 childOffset(0.f, 0.f);
-      childOffset.x += (mImpl->mMargin.start + padding.start);
-      childOffset.y += (mImpl->mMargin.top + padding.top);
+      childOffset.x += (mMargin.start + padding.start);
+      childOffset.y += (mMargin.top + padding.top);
 
       child.SetProperty(Actor::Property::POSITION, Vector2(childOffset.x, childOffset.y));
 
@@ -2050,8 +2050,8 @@ Vector3 ViewImpl::GetNaturalSize()
   {
     Vector2 naturalSize;
     visualImplPtr->GetNaturalSize(naturalSize);
-    naturalSize.width += (mImpl->mPadding.start + mImpl->mPadding.end);
-    naturalSize.height += (mImpl->mPadding.top + mImpl->mPadding.bottom);
+    naturalSize.width += (mPadding.start + mPadding.end);
+    naturalSize.height += (mPadding.top + mPadding.bottom);
     return Vector3(naturalSize);
   }
   return Vector3::ZERO;

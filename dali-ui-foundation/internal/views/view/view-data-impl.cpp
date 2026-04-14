@@ -512,8 +512,6 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mBackgroundColor(Color::TRANSPARENT),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
-  mMargin(0, 0, 0, 0),
-  mPadding(0, 0, 0, 0),
   mSize(0, 0),
   mKeyEventSignal(),
   mFocusChangedSignal(),
@@ -867,7 +865,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Extents margin;
         if(value.Get(margin))
         {
-          viewImpl.GetViewDataImpl().SetMargin(margin);
+          viewImpl.SetMargin(margin);
         }
         break;
       }
@@ -877,7 +875,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Extents padding;
         if(value.Get(padding))
         {
-          viewImpl.GetViewDataImpl().SetPadding(padding);
+          viewImpl.SetPadding(padding);
         }
         break;
       }
@@ -1277,13 +1275,13 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
       case Ui::View::Property::MARGIN:
       {
-        value = viewImpl.GetViewDataImpl().GetMargin();
+        value = viewImpl.GetMargin();
         break;
       }
 
       case Ui::View::Property::PADDING:
       {
-        value = viewImpl.GetViewDataImpl().GetPadding();
+        value = viewImpl.GetPadding();
         break;
       }
 
@@ -1460,32 +1458,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
   }
 
   return value;
-}
-
-void ViewDataImpl::SetMargin(Extents margin)
-{
-  mViewImpl.GetViewDataImpl().mMargin = margin;
-
-  // Trigger a size negotiation request that may be needed when setting a margin.
-  mViewImpl.RelayoutRequestToView();
-}
-
-Extents ViewDataImpl::GetMargin() const
-{
-  return mViewImpl.GetViewDataImpl().mMargin;
-}
-
-void ViewDataImpl::SetPadding(Extents padding)
-{
-  mViewImpl.GetViewDataImpl().mPadding = padding;
-
-  // Trigger a size negotiation request that may be needed when setting a padding.
-  mViewImpl.RelayoutRequestToView();
-}
-
-Extents ViewDataImpl::GetPadding() const
-{
-  return mViewImpl.GetViewDataImpl().mPadding;
 }
 
 Ui::View::VisualEventSignalType& ViewDataImpl::VisualEventSignal()

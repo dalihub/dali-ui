@@ -235,30 +235,6 @@ public:
   void OnSceneDisconnection();
 
   /**
-   * @brief Sets the margin.
-   * @param[in] margin Margin is a collections of extent ( start, end, top, bottom )
-   */
-  void SetMargin(Extents margin);
-
-  /**
-   * @brief Returns the value of margin
-   * @return The value of margin
-   */
-  Extents GetMargin() const;
-
-  /**
-   * @brief Sets the padding.
-   * @param[in] padding Padding is a collections of extent ( start, end, top, bottom ).
-   */
-  void SetPadding(Extents padding);
-
-  /**
-   * @brief Returns the value of padding
-   * @return The value of padding
-   */
-  Extents GetPadding() const;
-
-  /**
    * @brief Set the input method context.
    * @param[in] inputMethodContext The input method context.
    */
@@ -483,8 +459,6 @@ public:
   Vector4                           mBackgroundColor;    ///< The color of the background visual
   RenderEffectImplPtr               mRenderEffect;       ///< The render effect on this view
   Vector3*                          mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this
-  Extents                           mMargin;             ///< The margin values
-  Extents                           mPadding;            ///< The padding values
   Vector2                           mSize;               ///< The size of the view
   Ui::View::KeyEventSignalType      mKeyEventSignal;
   Ui::View::FocusChangedSignalType  mFocusChangedSignal;
