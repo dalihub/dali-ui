@@ -2012,6 +2012,11 @@ bool ViewImpl::IsResourceReady() const
   return viewDataImpl.IsResourceReady();
 }
 
+bool ViewImpl::IsOnScene() const
+{
+  return Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
+}
+
 void ViewImpl::OnPinch(const PinchGesture& pinch)
 {
   if(!(mImpl->mStartingPinchScale))

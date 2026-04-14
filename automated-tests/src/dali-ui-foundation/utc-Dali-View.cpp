@@ -2080,3 +2080,25 @@ int UtcDaliViewFocusChangedSignalNoConnectionN(void)
 
   END_TEST;
 }
+
+int UtcDaliViewIsOnSceneP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+
+  DALI_TEST_CHECK(!view.IsOnScene());
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(view.IsOnScene());
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(!view.IsOnScene());
+
+  END_TEST;
+}

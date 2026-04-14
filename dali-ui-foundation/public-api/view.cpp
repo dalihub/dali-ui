@@ -613,6 +613,11 @@ bool View::IsResourceReady() const
   return Integration::GetImpl(*this).IsResourceReady();
 }
 
+bool View::IsOnScene() const
+{
+  return Integration::GetImpl(*this).IsOnScene();
+}
+
 View::ResourceReadySignalType& View::ResourceReadySignal()
 {
   Integration::ViewImpl&  viewImpl     = Ui::Integration::GetImpl(*this);
