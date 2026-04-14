@@ -119,8 +119,8 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
   float requestedWidth  = GetRequestedWidth();
   float requestedHeight = GetRequestedHeight();
 
-  float effectiveWidth  = (requestedWidth > 0) ? requestedWidth : widthConstraint;
-  float effectiveHeight = (requestedHeight > 0) ? requestedHeight : heightConstraint;
+  float effectiveWidth  = (requestedWidth >= 0) ? requestedWidth : widthConstraint;
+  float effectiveHeight = (requestedHeight >= 0) ? requestedHeight : heightConstraint;
 
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
@@ -128,7 +128,7 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
   MeasuredSize content = layoutManager->Measure(this, contentWidth, contentHeight);
 
   float resultWidth;
-  if(requestedWidth > 0)
+  if(requestedWidth >= 0)
   {
     resultWidth = requestedWidth;
   }
@@ -144,7 +144,7 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
   }
 
   float resultHeight;
-  if(requestedHeight > 0)
+  if(requestedHeight >= 0)
   {
     resultHeight = requestedHeight;
   }

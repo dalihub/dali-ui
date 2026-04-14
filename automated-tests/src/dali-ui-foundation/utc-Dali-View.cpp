@@ -1105,6 +1105,60 @@ int UtcDaliViewSetRequestedWidthNoChangeP(void)
   END_TEST;
 }
 
+int UtcDaliViewSetRequestedWidthZeroP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(0.0f);
+  DALI_TEST_EQUALS(view.GetRequestedWidth(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedHeightZeroP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedHeight(0.0f);
+  DALI_TEST_EQUALS(view.GetRequestedHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureZeroWidthP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(0.0f);
+  view.SetRequestedHeight(100.0f);
+  MeasuredSize size = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureZeroHeightP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(0.0f);
+  MeasuredSize size = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewMeasureZeroBothP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetRequestedWidth(0.0f);
+  view.SetRequestedHeight(0.0f);
+  MeasuredSize size = view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 // Corner Radius API tests (lines 561-632)
 
 int UtcDaliViewGetCornerRadiusP(void)

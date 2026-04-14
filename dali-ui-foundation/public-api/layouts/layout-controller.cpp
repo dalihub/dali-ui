@@ -316,11 +316,11 @@ private:
       }
     }
 
-    if(layoutWidth > 0)
+    if(layoutWidth >= 0)
     {
       widthConstraint = layoutWidth;
     }
-    if(layoutHeight > 0)
+    if(layoutHeight >= 0)
     {
       heightConstraint = layoutHeight;
     }

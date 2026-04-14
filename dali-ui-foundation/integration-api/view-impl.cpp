@@ -794,8 +794,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float pw = static_cast<float>(mPadding.start + mPadding.end);
   float ph = static_cast<float>(mPadding.top + mPadding.bottom);
 
-  float effectiveWidth  = (mRequestedWidth > 0) ? mRequestedWidth : widthConstraint;
-  float effectiveHeight = (mRequestedHeight > 0) ? mRequestedHeight : heightConstraint;
+  float effectiveWidth  = (mRequestedWidth >= 0) ? mRequestedWidth : widthConstraint;
+  float effectiveHeight = (mRequestedHeight >= 0) ? mRequestedHeight : heightConstraint;
 
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
@@ -830,7 +830,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
 
     MeasuredSize size;
-    if(mRequestedWidth > 0)
+    if(mRequestedWidth >= 0)
     {
       size.width = mRequestedWidth;
     }
@@ -842,7 +842,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     {
       size.width = maxRight + pw;
     }
-    if(mRequestedHeight > 0)
+    if(mRequestedHeight >= 0)
     {
       size.height = mRequestedHeight;
     }
@@ -858,7 +858,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
 
   MeasuredSize size;
-  if(mRequestedWidth > 0)
+  if(mRequestedWidth >= 0)
   {
     size.width = mRequestedWidth;
   }
@@ -871,7 +871,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     Vector3 naturalSize = Self().GetNaturalSize();
     size.width          = ((naturalSize.width > 0) ? naturalSize.width : 0.0f) + pw;
   }
-  if(mRequestedHeight > 0)
+  if(mRequestedHeight >= 0)
   {
     size.height = mRequestedHeight;
   }
@@ -1094,7 +1094,7 @@ void ViewImpl::SetRequestedWidth(float width)
   {
     mRequestedWidth = width;
     InvalidateMeasure();
-    if(width > 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
+    if(width >= 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
     }
@@ -1112,7 +1112,7 @@ void ViewImpl::SetRequestedHeight(float height)
   {
     mRequestedHeight = height;
     InvalidateMeasure();
-    if(height > 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
+    if(height >= 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
     {
       Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
     }
