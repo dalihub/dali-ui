@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/style/outline.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_OUTLINE(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Outline object")
 
 namespace Dali
 {
@@ -28,7 +34,7 @@ namespace Text
 namespace
 {
 constexpr uint32_t DEFAULT_COLOR       = 0xFFFFFF;
-constexpr float    DEFAULT_WIDTH       = 0.0f;
+constexpr float    DEFAULT_WIDTH       = 1.0f;
 constexpr float    DEFAULT_BLUR_RADIUS = 0.0f;
 } // namespace
 
@@ -63,8 +69,10 @@ Outline::Outline()
 }
 
 Outline::Outline(const Outline& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_OUTLINE(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 Outline::Outline(Outline&& rhs) noexcept
@@ -77,6 +85,7 @@ Outline& Outline::operator=(const Outline& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_OUTLINE(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -102,48 +111,58 @@ Outline::~Outline()
 
 Outline& Outline::SetColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mColor = color;
   return *this;
 }
 
 const UiColor& Outline::GetColor() const
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   return mImpl->mColor;
 }
 
 Outline& Outline::SetOffset(const Vector2& offset)
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mOffset = offset;
   return *this;
 }
 
 const Vector2& Outline::GetOffset() const
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   return mImpl->mOffset;
 }
 
 Outline& Outline::SetWidth(float width)
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mWidth = std::max(0.0f, width);
   return *this;
 }
 
 float Outline::GetWidth() const
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   return mImpl->mWidth;
 }
 
 Outline& Outline::SetBlurRadius(float blurRadius)
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
   return *this;
 }
 
 float Outline::GetBlurRadius() const
 {
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
   return mImpl->mBlurRadius;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_OUTLINE

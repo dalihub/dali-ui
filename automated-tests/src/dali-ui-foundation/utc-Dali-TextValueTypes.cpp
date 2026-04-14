@@ -1,0 +1,1456 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <stdlib.h>
+#include <iostream>
+#include <dali.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+} // namespace
+
+void utc_dali_text_value_types_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_text_value_types_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+// Underline Tests
+
+int UtcDaliTextUnderlineColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline;
+
+  UiColor color(Color::RED);
+  underline.SetColor(color);
+  DALI_TEST_EQUALS(underline.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  UiColor color2(Color::BLUE);
+  underline.SetColor(color2);
+  DALI_TEST_EQUALS(underline.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineThicknessP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline;
+
+  underline.SetThickness(2.5f);
+  DALI_TEST_EQUALS(underline.GetThickness(), 2.5f, TEST_LOCATION);
+
+  underline.SetThickness(5.0f);
+  DALI_TEST_EQUALS(underline.GetThickness(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineTypeP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline;
+
+  underline.SetType(Text::Underline::Type::DASHED);
+  DALI_TEST_EQUALS(underline.GetType(), Text::Underline::Type::DASHED, TEST_LOCATION);
+
+  underline.SetType(Text::Underline::Type::DOUBLE);
+  DALI_TEST_EQUALS(underline.GetType(), Text::Underline::Type::DOUBLE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineDashLengthP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline;
+
+  underline.SetDashLength(4.0f);
+  DALI_TEST_EQUALS(underline.GetDashLength(), 4.0f, TEST_LOCATION);
+
+  underline.SetDashLength(8.0f);
+  DALI_TEST_EQUALS(underline.GetDashLength(), 8.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineDashGapP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline;
+
+  underline.SetDashGap(3.0f);
+  DALI_TEST_EQUALS(underline.GetDashGap(), 3.0f, TEST_LOCATION);
+
+  underline.SetDashGap(6.0f);
+  DALI_TEST_EQUALS(underline.GetDashGap(), 6.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  original.SetColor(UiColor(Color::RED));
+  original.SetThickness(3.0f);
+  original.SetType(Text::Underline::Type::DASHED);
+  original.SetDashLength(5.0f);
+  original.SetDashGap(2.0f);
+
+  Text::Underline copy(original);
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetThickness(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetType(), Text::Underline::Type::DASHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDashLength(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDashGap(), 2.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetThickness(), 3.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  original.SetColor(UiColor(Color::GREEN));
+  original.SetThickness(4.0f);
+  original.SetType(Text::Underline::Type::DOUBLE);
+  original.SetDashLength(6.0f);
+  original.SetDashGap(3.0f);
+
+  Text::Underline copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetThickness(), 4.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetType(), Text::Underline::Type::DOUBLE, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDashLength(), 6.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDashGap(), 3.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetThickness(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  original.SetColor(UiColor(Color::BLUE));
+  original.SetThickness(2.5f);
+  original.SetType(Text::Underline::Type::DASHED);
+  original.SetDashLength(4.0f);
+  original.SetDashGap(1.5f);
+
+  Text::Underline moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetThickness(), 2.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetType(), Text::Underline::Type::DASHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDashLength(), 4.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDashGap(), 1.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  original.SetColor(UiColor(Color::YELLOW));
+  original.SetThickness(3.5f);
+  original.SetType(Text::Underline::Type::DOUBLE);
+  original.SetDashLength(7.0f);
+  original.SetDashGap(2.5f);
+
+  Text::Underline moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetThickness(), 3.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetType(), Text::Underline::Type::DOUBLE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDashLength(), 7.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDashGap(), 2.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  Text::Underline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetColor(), "Cannot use a moved-from Underline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  Text::Underline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetColor(UiColor(Color::RED)), "Cannot use a moved-from Underline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  Text::Underline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::Underline copy(original), "Cannot use a moved-from Underline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextUnderlineCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Underline original;
+  Text::Underline moved(std::move(original));
+  (void)moved;
+
+  Text::Underline copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Underline object");
+
+  END_TEST;
+}
+
+// Shadow Tests
+
+int UtcDaliTextShadowColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow shadow;
+
+  shadow.SetColor(UiColor(Color::RED));
+  DALI_TEST_EQUALS(shadow.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  shadow.SetColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(shadow.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowOffsetP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow shadow;
+
+  shadow.SetOffset(Vector2(1.0f, 2.0f));
+  DALI_TEST_EQUALS(shadow.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
+
+  shadow.SetOffset(Vector2(3.0f, 4.0f));
+  DALI_TEST_EQUALS(shadow.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowBlurRadiusP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow shadow;
+
+  shadow.SetBlurRadius(2.5f);
+  DALI_TEST_EQUALS(shadow.GetBlurRadius(), 2.5f, TEST_LOCATION);
+
+  shadow.SetBlurRadius(5.0f);
+  DALI_TEST_EQUALS(shadow.GetBlurRadius(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  original.SetColor(UiColor(Color::RED));
+  original.SetOffset(Vector2(1.0f, 2.0f));
+  original.SetBlurRadius(3.0f);
+
+  Text::Shadow copy(original);
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetBlurRadius(), 3.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  original.SetColor(UiColor(Color::BLUE));
+  original.SetOffset(Vector2(2.0f, 3.0f));
+  original.SetBlurRadius(4.0f);
+
+  Text::Shadow moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetOffset(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetBlurRadius(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  Text::Shadow moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetColor(), "Cannot use a moved-from Shadow object");
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  Text::Shadow moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetColor(UiColor(Color::RED)), "Cannot use a moved-from Shadow object");
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  Text::Shadow moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::Shadow copy(original), "Cannot use a moved-from Shadow object");
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  original.SetColor(UiColor(Color::GREEN));
+  original.SetOffset(Vector2(3.0f, 4.0f));
+  original.SetBlurRadius(5.0f);
+
+  Text::Shadow copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetBlurRadius(), 5.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  original.SetColor(UiColor(Color::YELLOW));
+  original.SetOffset(Vector2(4.0f, 5.0f));
+  original.SetBlurRadius(6.0f);
+
+  Text::Shadow moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetOffset(), Vector2(4.0f, 5.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetBlurRadius(), 6.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextShadowCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Shadow original;
+  Text::Shadow moved(std::move(original));
+  (void)moved;
+
+  Text::Shadow copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Shadow object");
+
+  END_TEST;
+}
+
+// Outline Tests
+
+int UtcDaliTextOutlineColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline outline;
+
+  outline.SetColor(UiColor(Color::RED));
+  DALI_TEST_EQUALS(outline.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  outline.SetColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(outline.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineWidthP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline outline;
+
+  outline.SetWidth(2.5f);
+  DALI_TEST_EQUALS(outline.GetWidth(), 2.5f, TEST_LOCATION);
+
+  outline.SetWidth(5.0f);
+  DALI_TEST_EQUALS(outline.GetWidth(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  original.SetColor(UiColor(Color::RED));
+  original.SetOffset(Vector2(1.0f, 2.0f));
+  original.SetWidth(3.0f);
+
+  Text::Outline copy(original);
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetWidth(), 3.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  original.SetColor(UiColor(Color::BLUE));
+  original.SetOffset(Vector2(2.0f, 3.0f));
+  original.SetWidth(4.0f);
+
+  Text::Outline moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetOffset(), Vector2(2.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetWidth(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  Text::Outline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetColor(), "Cannot use a moved-from Outline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  Text::Outline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::Outline copy(original), "Cannot use a moved-from Outline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineOffsetP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline outline;
+
+  outline.SetOffset(Vector2(1.0f, 2.0f));
+  DALI_TEST_EQUALS(outline.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
+
+  outline.SetOffset(Vector2(3.0f, 4.0f));
+  DALI_TEST_EQUALS(outline.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineBlurRadiusP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline outline;
+
+  outline.SetBlurRadius(2.5f);
+  DALI_TEST_EQUALS(outline.GetBlurRadius(), 2.5f, TEST_LOCATION);
+
+  outline.SetBlurRadius(5.0f);
+  DALI_TEST_EQUALS(outline.GetBlurRadius(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  original.SetColor(UiColor(Color::GREEN));
+  original.SetOffset(Vector2(3.0f, 4.0f));
+  original.SetWidth(5.0f);
+
+  Text::Outline copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetWidth(), 5.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  original.SetColor(UiColor(Color::YELLOW));
+  original.SetOffset(Vector2(4.0f, 5.0f));
+  original.SetWidth(6.0f);
+
+  Text::Outline moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetOffset(), Vector2(4.0f, 5.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetWidth(), 6.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  Text::Outline moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetColor(UiColor(Color::RED)), "Cannot use a moved-from Outline object");
+
+  END_TEST;
+}
+
+int UtcDaliTextOutlineCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Outline original;
+  Text::Outline moved(std::move(original));
+  (void)moved;
+
+  Text::Outline copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Outline object");
+
+  END_TEST;
+}
+
+// LineThrough Tests
+
+int UtcDaliTextLineThroughColorP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough lineThrough;
+
+  lineThrough.SetColor(UiColor(Color::RED));
+  DALI_TEST_EQUALS(lineThrough.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  lineThrough.SetColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(lineThrough.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughThicknessP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough lineThrough;
+
+  lineThrough.SetThickness(2.5f);
+  DALI_TEST_EQUALS(lineThrough.GetThickness(), 2.5f, TEST_LOCATION);
+
+  lineThrough.SetThickness(5.0f);
+  DALI_TEST_EQUALS(lineThrough.GetThickness(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  original.SetColor(UiColor(Color::RED));
+  original.SetThickness(3.0f);
+
+  Text::LineThrough copy(original);
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetThickness(), 3.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  original.SetColor(UiColor(Color::BLUE));
+  original.SetThickness(4.0f);
+
+  Text::LineThrough moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetThickness(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  Text::LineThrough moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetColor(), "Cannot use a moved-from LineThrough object");
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  Text::LineThrough moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::LineThrough copy(original), "Cannot use a moved-from LineThrough object");
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  original.SetColor(UiColor(Color::GREEN));
+  original.SetThickness(4.0f);
+
+  Text::LineThrough copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetThickness(), 4.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetThickness(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  original.SetColor(UiColor(Color::YELLOW));
+  original.SetThickness(5.0f);
+
+  Text::LineThrough moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetThickness(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  Text::LineThrough moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetColor(UiColor(Color::RED)), "Cannot use a moved-from LineThrough object");
+
+  END_TEST;
+}
+
+int UtcDaliTextLineThroughCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::LineThrough original;
+  Text::LineThrough moved(std::move(original));
+  (void)moved;
+
+  Text::LineThrough copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from LineThrough object");
+
+  END_TEST;
+}
+
+// Bevel Tests
+
+int UtcDaliTextBevelDirectionP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel bevel;
+
+  bevel.SetDirection(Vector2(1.0f, 1.0f));
+  DALI_TEST_EQUALS(bevel.GetDirection(), Vector2(1.0f, 1.0f), TEST_LOCATION);
+
+  bevel.SetDirection(Vector2(-1.0f, -1.0f));
+  DALI_TEST_EQUALS(bevel.GetDirection(), Vector2(-1.0f, -1.0f), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelIntensityP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel bevel;
+
+  bevel.SetIntensity(2.5f);
+  DALI_TEST_EQUALS(bevel.GetIntensity(), 2.5f, TEST_LOCATION);
+
+  bevel.SetIntensity(5.0f);
+  DALI_TEST_EQUALS(bevel.GetIntensity(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  original.SetDirection(Vector2(1.0f, 1.0f));
+  original.SetIntensity(3.0f);
+  original.SetLightColor(UiColor(Color::RED));
+  original.SetShadowColor(UiColor(Color::BLUE));
+
+  Text::Bevel copy(original);
+
+  DALI_TEST_EQUALS(copy.GetDirection(), Vector2(1.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetIntensity(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLightColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetShadowColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  original.SetDirection(Vector2(2.0f, 2.0f));
+  original.SetIntensity(4.0f);
+  original.SetLightColor(UiColor(Color::GREEN));
+  original.SetShadowColor(UiColor(Color::YELLOW));
+
+  Text::Bevel moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetIntensity(), 4.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLightColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetShadowColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  Text::Bevel moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetDirection(), "Cannot use a moved-from Bevel object");
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  Text::Bevel moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::Bevel copy(original), "Cannot use a moved-from Bevel object");
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelLightColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel bevel;
+
+  bevel.SetLightColor(UiColor(Color::RED));
+  DALI_TEST_EQUALS(bevel.GetLightColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  bevel.SetLightColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(bevel.GetLightColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelShadowColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel bevel;
+
+  bevel.SetShadowColor(UiColor(Color::RED));
+  DALI_TEST_EQUALS(bevel.GetShadowColor().Resolve(), Color::RED, TEST_LOCATION);
+
+  bevel.SetShadowColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(bevel.GetShadowColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  original.SetDirection(Vector2(2.0f, 2.0f));
+  original.SetIntensity(4.0f);
+  original.SetLightColor(UiColor(Color::GREEN));
+  original.SetShadowColor(UiColor(Color::YELLOW));
+
+  Text::Bevel copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetIntensity(), 4.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLightColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetShadowColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetIntensity(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  original.SetDirection(Vector2(3.0f, 3.0f));
+  original.SetIntensity(5.0f);
+  original.SetLightColor(UiColor(Color::CYAN));
+  original.SetShadowColor(UiColor(Color::MAGENTA));
+
+  Text::Bevel moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetDirection(), Vector2(3.0f, 3.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetIntensity(), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLightColor().Resolve(), Color::CYAN, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetShadowColor().Resolve(), Color::MAGENTA, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  Text::Bevel moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetDirection(Vector2(1.0f, 1.0f)), "Cannot use a moved-from Bevel object");
+
+  END_TEST;
+}
+
+int UtcDaliTextBevelCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::Bevel original;
+  Text::Bevel moved(std::move(original));
+  (void)moved;
+
+  Text::Bevel copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Bevel object");
+
+  END_TEST;
+}
+
+// FontVariationAxis Tests
+
+int UtcDaliTextFontVariationAxisTagP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis axis;
+
+  axis.SetTag("wght");
+  DALI_TEST_EQUALS(axis.GetTag(), Dali::String("wght"), TEST_LOCATION);
+
+  axis.SetTag("wdth");
+  DALI_TEST_EQUALS(axis.GetTag(), Dali::String("wdth"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisValueP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis axis;
+
+  axis.SetValue(700.0f);
+  DALI_TEST_EQUALS(axis.GetValue(), 700.0f, TEST_LOCATION);
+
+  axis.SetValue(400.0f);
+  DALI_TEST_EQUALS(axis.GetValue(), 400.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  original.SetTag("wght");
+  original.SetValue(700.0f);
+
+  Text::FontVariationAxis copy(original);
+
+  DALI_TEST_EQUALS(copy.GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetValue(), 700.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  original.SetTag("wdth");
+  original.SetValue(90.0f);
+
+  Text::FontVariationAxis moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetTag(), Dali::String("wdth"), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetValue(), 90.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  Text::FontVariationAxis moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetTag(), "Cannot use a moved-from FontVariationAxis object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  Text::FontVariationAxis moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::FontVariationAxis copy(original), "Cannot use a moved-from FontVariationAxis object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  original.SetTag("wght");
+  original.SetValue(600.0f);
+
+  Text::FontVariationAxis copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetValue(), 600.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetValue(), 600.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  original.SetTag("slnt");
+  original.SetValue(100.0f);
+
+  Text::FontVariationAxis moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetTag(), Dali::String("slnt"), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetValue(), 100.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  Text::FontVariationAxis moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetTag("wght"), "Cannot use a moved-from FontVariationAxis object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFontVariationAxisCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FontVariationAxis original;
+  Text::FontVariationAxis moved(std::move(original));
+  (void)moved;
+
+  Text::FontVariationAxis copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FontVariationAxis object");
+
+  END_TEST;
+}
+
+// FitRange Tests
+
+int UtcDaliTextFitRangeFontSizeP(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange fitRange;
+
+  fitRange.SetMinimumFontSize(10.0f);
+  DALI_TEST_EQUALS(fitRange.GetMinimumFontSize(), 10.0f, TEST_LOCATION);
+
+  fitRange.SetMaximumFontSize(30.0f);
+  DALI_TEST_EQUALS(fitRange.GetMaximumFontSize(), 30.0f, TEST_LOCATION);
+
+  fitRange.SetFontSizeStep(5.0f);
+  DALI_TEST_EQUALS(fitRange.GetFontSizeStep(), 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  original.SetMinimumFontSize(12.0f);
+  original.SetMaximumFontSize(24.0f);
+  original.SetFontSizeStep(4.0f);
+
+  Text::FitRange copy(original);
+
+  DALI_TEST_EQUALS(copy.GetMinimumFontSize(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetMaximumFontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetFontSizeStep(), 4.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  original.SetMinimumFontSize(14.0f);
+  original.SetMaximumFontSize(28.0f);
+  original.SetFontSizeStep(2.0f);
+
+  Text::FitRange moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetMinimumFontSize(), 14.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetMaximumFontSize(), 28.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetFontSizeStep(), 2.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  Text::FitRange moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetMinimumFontSize(), "Cannot use a moved-from FitRange object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  Text::FitRange moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::FitRange copy(original), "Cannot use a moved-from FitRange object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  original.SetMinimumFontSize(10.0f);
+  original.SetMaximumFontSize(20.0f);
+  original.SetFontSizeStep(2.0f);
+
+  Text::FitRange copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetMinimumFontSize(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetMaximumFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetFontSizeStep(), 2.0f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetMinimumFontSize(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetMaximumFontSize(), 20.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  original.SetMinimumFontSize(12.0f);
+  original.SetMaximumFontSize(24.0f);
+  original.SetFontSizeStep(3.0f);
+
+  Text::FitRange moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetMinimumFontSize(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetMaximumFontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetFontSizeStep(), 3.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  Text::FitRange moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetMinimumFontSize(10.0f), "Cannot use a moved-from FitRange object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitRangeCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FitRange original;
+  Text::FitRange moved(std::move(original));
+  (void)moved;
+
+  Text::FitRange copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FitRange object");
+
+  END_TEST;
+}
+
+// FitCandidate Tests
+
+int UtcDaliTextFitCandidateFontSizeP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate candidate;
+
+  candidate.SetFontSize(18.0f);
+  DALI_TEST_EQUALS(candidate.GetFontSize(), 18.0f, TEST_LOCATION);
+
+  candidate.SetFontSize(24.0f);
+  DALI_TEST_EQUALS(candidate.GetFontSize(), 24.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateLineHeightP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate candidate;
+
+  candidate.SetLineHeight(1.5f);
+  DALI_TEST_EQUALS(candidate.GetLineHeight(), 1.5f, TEST_LOCATION);
+
+  candidate.SetLineHeight(2.0f);
+  DALI_TEST_EQUALS(candidate.GetLineHeight(), 2.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  original.SetFontSize(20.0f);
+  original.SetLineHeight(1.5f);
+
+  Text::FitCandidate copy(original);
+
+  DALI_TEST_EQUALS(copy.GetFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLineHeight(), 1.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  original.SetFontSize(22.0f);
+  original.SetLineHeight(1.8f);
+
+  Text::FitCandidate moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetFontSize(), 22.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLineHeight(), 1.8f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  Text::FitCandidate moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetFontSize(), "Cannot use a moved-from FitCandidate object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateCopyFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  Text::FitCandidate moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(Text::FitCandidate copy(original), "Cannot use a moved-from FitCandidate object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  original.SetFontSize(18.0f);
+  original.SetLineHeight(1.5f);
+
+  Text::FitCandidate copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLineHeight(), 1.5f, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetLineHeight(), 1.5f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  original.SetFontSize(20.0f);
+  original.SetLineHeight(2.0f);
+
+  Text::FitCandidate moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLineHeight(), 2.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateMovedFromSetN(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  Text::FitCandidate moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.SetFontSize(16.0f), "Cannot use a moved-from FitCandidate object");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCandidateCopyAssignFromMovedN(void)
+{
+  UiTestApplication application;
+
+  Text::FitCandidate original;
+  Text::FitCandidate moved(std::move(original));
+  (void)moved;
+
+  Text::FitCandidate copy;
+
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FitCandidate object");
+
+  END_TEST;
+}

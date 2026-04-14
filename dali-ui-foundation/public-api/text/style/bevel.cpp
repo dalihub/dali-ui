@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/style/bevel.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/bevel.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_BEVEL(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Bevel object")
 
 namespace Dali
 {
@@ -28,7 +34,7 @@ namespace Text
 namespace
 {
 constexpr Vector2  DEFAULT_DIRECTION(-1.0f, -1.0f);
-constexpr float    DEFAULT_INTENSITY    = 2.0f;
+constexpr float    DEFAULT_INTENSITY    = 1.0f;
 constexpr uint32_t DEFAULT_LIGHT_COLOR  = 0x808080; // Grey
 constexpr uint32_t DEFAULT_SHADOW_COLOR = 0x0D0D0D; // Dark grey
 } // namespace
@@ -64,8 +70,10 @@ Bevel::Bevel()
 }
 
 Bevel::Bevel(const Bevel& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_BEVEL(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 Bevel::Bevel(Bevel&& rhs) noexcept
@@ -78,6 +86,7 @@ Bevel& Bevel::operator=(const Bevel& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_BEVEL(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -103,48 +112,58 @@ Bevel::~Bevel()
 
 Bevel& Bevel::SetDirection(const Vector2& direction)
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mDirection = direction;
   return *this;
 }
 
 const Vector2& Bevel::GetDirection() const
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   return mImpl->mDirection;
 }
 
 Bevel& Bevel::SetIntensity(float intensity)
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mIntensity = std::max(0.0f, intensity);
   return *this;
 }
 
 float Bevel::GetIntensity() const
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   return mImpl->mIntensity;
 }
 
 Bevel& Bevel::SetLightColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mLightColor = color;
   return *this;
 }
 
 const UiColor& Bevel::GetLightColor() const
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   return mImpl->mLightColor;
 }
 
 Bevel& Bevel::SetShadowColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mShadowColor = color;
   return *this;
 }
 
 const UiColor& Bevel::GetShadowColor() const
 {
+  DALI_ASSERT_VALID_BEVEL(mImpl);
   return mImpl->mShadowColor;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_BEVEL

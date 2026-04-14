@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_FIT_RANGE(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FitRange object")
 
 namespace Dali
 {
@@ -72,8 +78,10 @@ FitRange::FitRange(float minimumFontSize, float maximumFontSize, float fontSizeS
 }
 
 FitRange::FitRange(const FitRange& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_FIT_RANGE(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 FitRange::FitRange(FitRange&& rhs) noexcept
@@ -86,6 +94,7 @@ FitRange& FitRange::operator=(const FitRange& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_FIT_RANGE(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -111,37 +120,45 @@ FitRange::~FitRange()
 
 FitRange& FitRange::SetMinimumFontSize(float size)
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mMinimumFontSize = std::max(1.0f, size);
   return *this;
 }
 
 float FitRange::GetMinimumFontSize() const
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   return mImpl->mMinimumFontSize;
 }
 
 FitRange& FitRange::SetMaximumFontSize(float size)
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mMaximumFontSize = std::max(1.0f, size);
   return *this;
 }
 
 float FitRange::GetMaximumFontSize() const
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   return mImpl->mMaximumFontSize;
 }
 
 FitRange& FitRange::SetFontSizeStep(float step)
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mFontSizeStep = std::max(1.0f, step);
   return *this;
 }
 
 float FitRange::GetFontSizeStep() const
 {
+  DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   return mImpl->mFontSizeStep;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_FIT_RANGE

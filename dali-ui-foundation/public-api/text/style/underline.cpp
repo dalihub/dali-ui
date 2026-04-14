@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/style/underline.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_UNDERLINE(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Underline object")
 
 namespace Dali
 {
@@ -67,8 +73,10 @@ Underline::Underline()
 }
 
 Underline::Underline(const Underline& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_UNDERLINE(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 Underline::Underline(Underline&& rhs) noexcept
@@ -81,6 +89,7 @@ Underline& Underline::operator=(const Underline& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_UNDERLINE(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -106,59 +115,71 @@ Underline::~Underline()
 
 Underline& Underline::SetColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mColor = color;
   return *this;
 }
 
 const UiColor& Underline::GetColor() const
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   return mImpl->mColor;
 }
 
 Underline& Underline::SetThickness(float thickness)
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mThickness = std::max(0.0f, thickness);
   return *this;
 }
 
 float Underline::GetThickness() const
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   return mImpl->mThickness;
 }
 
 Underline& Underline::SetType(Type type)
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mType = type;
   return *this;
 }
 
 Underline::Type Underline::GetType() const
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   return mImpl->mType;
 }
 
 Underline& Underline::SetDashLength(float length)
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mDashLength = std::max(0.0f, length);
   return *this;
 }
 
 float Underline::GetDashLength() const
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   return mImpl->mDashLength;
 }
 
 Underline& Underline::SetDashGap(float gap)
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mDashGap = std::max(0.0f, gap);
   return *this;
 }
 
 float Underline::GetDashGap() const
 {
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
   return mImpl->mDashGap;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_UNDERLINE

@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/style/shadow.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_SHADOW(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Shadow object")
 
 namespace Dali
 {
@@ -36,7 +42,7 @@ class Shadow::Impl
 public:
   Impl()
   : mColor(DEFAULT_COLOR),
-    mOffset(Vector2::ZERO),
+    mOffset(Vector2::ONE),
     mBlurRadius(DEFAULT_BLUR_RADIUS)
   {
   }
@@ -59,8 +65,10 @@ Shadow::Shadow()
 }
 
 Shadow::Shadow(const Shadow& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_SHADOW(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 Shadow::Shadow(Shadow&& rhs) noexcept
@@ -73,6 +81,7 @@ Shadow& Shadow::operator=(const Shadow& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_SHADOW(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -98,37 +107,45 @@ Shadow::~Shadow()
 
 Shadow& Shadow::SetColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mColor = color;
   return *this;
 }
 
 const UiColor& Shadow::GetColor() const
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   return mImpl->mColor;
 }
 
 Shadow& Shadow::SetOffset(const Vector2& offset)
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mOffset = offset;
   return *this;
 }
 
 const Vector2& Shadow::GetOffset() const
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   return mImpl->mOffset;
 }
 
 Shadow& Shadow::SetBlurRadius(float blurRadius)
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
   return *this;
 }
 
 float Shadow::GetBlurRadius() const
 {
+  DALI_ASSERT_VALID_SHADOW(mImpl);
   return mImpl->mBlurRadius;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_SHADOW

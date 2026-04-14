@@ -11,6 +11,7 @@ SET(TC_SOURCES
         utc-Dali-View.cpp
         utc-Dali-Label.cpp
         utc-Dali-InputField.cpp
+        utc-Dali-TextValueTypes.cpp
         utc-Dali-ImageView.cpp
         utc-Dali-AnimatedImageView.cpp
         utc-Dali-LottieAnimationView.cpp

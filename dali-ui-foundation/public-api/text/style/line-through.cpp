@@ -15,9 +15,15 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/text/style/line-through.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-common.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <algorithm>
+
+#define DALI_ASSERT_VALID_LINETHROUGH(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from LineThrough object")
 
 namespace Dali
 {
@@ -56,8 +62,10 @@ LineThrough::LineThrough()
 }
 
 LineThrough::LineThrough(const LineThrough& rhs)
-: mImpl(new Impl(*rhs.mImpl))
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_LINETHROUGH(rhs.mImpl);
+  mImpl = new Impl(*rhs.mImpl);
 }
 
 LineThrough::LineThrough(LineThrough&& rhs) noexcept
@@ -70,6 +78,7 @@ LineThrough& LineThrough::operator=(const LineThrough& rhs)
 {
   if(this != &rhs)
   {
+    DALI_ASSERT_VALID_LINETHROUGH(rhs.mImpl);
     Impl* newImpl = new Impl(*rhs.mImpl);
     delete mImpl;
     mImpl = newImpl;
@@ -95,26 +104,32 @@ LineThrough::~LineThrough()
 
 LineThrough& LineThrough::SetColor(const UiColor& color)
 {
+  DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   mImpl->mColor = color;
   return *this;
 }
 
 const UiColor& LineThrough::GetColor() const
 {
+  DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   return mImpl->mColor;
 }
 
 LineThrough& LineThrough::SetThickness(float thickness)
 {
+  DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   mImpl->mThickness = std::max(0.0f, thickness);
   return *this;
 }
 
 float LineThrough::GetThickness() const
 {
+  DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   return mImpl->mThickness;
 }
 
 } // namespace Text
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_LINETHROUGH
