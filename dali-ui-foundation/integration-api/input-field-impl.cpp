@@ -558,6 +558,17 @@ void InputFieldImpl::ClearFontVariation()
   mController->ClearVariationsMap();
 }
 
+// Integration-only implementation for now until public API support is introduced.
+void InputFieldImpl::SetLetterSpacing(float spacing)
+{
+  mController->SetCharacterSpacing(spacing);
+}
+
+float InputFieldImpl::GetLetterSpacing() const
+{
+  return mController->GetCharacterSpacing();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

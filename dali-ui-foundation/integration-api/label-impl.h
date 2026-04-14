@@ -476,6 +476,22 @@ public:
    */
   bool IsCutoutEnabled() const;
 
+  /**
+   * @brief Sets the additional spacing between letters in pixels.
+   *
+   * Positive values increase the spacing, while negative values reduce it.
+   *
+   * @param[in] spacing The additional letter spacing in pixels.
+   */
+  void SetLetterSpacing(float spacing);
+
+  /**
+   * @brief Gets the additional spacing between letters in pixels.
+   *
+   * @return The additional letter spacing in pixels.
+   */
+  float GetLetterSpacing() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount

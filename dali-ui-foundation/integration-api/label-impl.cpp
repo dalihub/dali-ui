@@ -777,6 +777,17 @@ bool LabelImpl::IsCutoutEnabled() const
   return mController->IsTextCutout();
 }
 
+// Integration-only implementation for now until public API support is introduced.
+void LabelImpl::SetLetterSpacing(float spacing)
+{
+  mController->SetCharacterSpacing(spacing);
+}
+
+float LabelImpl::GetLetterSpacing() const
+{
+  return mController->GetCharacterSpacing();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
