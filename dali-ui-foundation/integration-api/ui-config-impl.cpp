@@ -61,7 +61,7 @@ UiConfigImpl::UiConfigImpl()
   mDpi(160),
   mBaselineDpi(160),
   mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
-  mMinLongPressKeyCount(3),
+  mKeyLongPressThreshold(3),
   mTapRecognizerTime(UINT32_MAX),
   mClearFocusOnEscape(true),
   mAlwaysShowFocus(true),
@@ -155,15 +155,15 @@ ExecutionKeyPredicate UiConfigImpl::GetExecutionKeyPredicate() const
   return mExecutionKeyPredicate;
 }
 
-void UiConfigImpl::SetMinLongPressKeyCount(uint32_t count)
+void UiConfigImpl::SetKeyLongPressThreshold(uint32_t count)
 {
   DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mMinLongPressKeyCount = count;
+  mKeyLongPressThreshold = count;
 }
 
-uint32_t UiConfigImpl::GetMinLongPressKeyCount() const
+uint32_t UiConfigImpl::GetKeyLongPressThreshold() const
 {
-  return mMinLongPressKeyCount;
+  return mKeyLongPressThreshold;
 }
 
 void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)

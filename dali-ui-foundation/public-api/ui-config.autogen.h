@@ -64,12 +64,17 @@
   */ \
   ChildClass& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate) { UiConfig::SetExecutionKeyPredicate(predicate); return *this; } \
   /** \
-  * @brief Sets the minimum key repeat count to trigger a long-press via key input. \
+  * @brief Sets the threshold for recognizing a key long-press. \
+  * \
+  * When a key is held down, the system generates repeated key press events. \
+  * This threshold defines how many consecutive key press events must be \
+  * received before the input is recognized as a long-press action. \
   * \
   * @pre The config must not be frozen. \
-  * @param[in] count The minimum repeat count \
+  * @param[in] threshold The minimum number of consecutive key press events \
+  *                      required to trigger a long-press \
   */ \
-  ChildClass& SetMinLongPressKeyCount(uint32_t count) { UiConfig::SetMinLongPressKeyCount(count); return *this; } \
+  ChildClass& SetKeyLongPressThreshold(uint32_t threshold) { UiConfig::SetKeyLongPressThreshold(threshold); return *this; } \
   /** \
   * @brief Sets the tap recognizer time limit in milliseconds. \
   * \

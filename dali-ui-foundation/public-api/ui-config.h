@@ -285,19 +285,25 @@ public: // Properties
   ExecutionKeyPredicate GetExecutionKeyPredicate() const;
 
   /**
-   * @brief Sets the minimum key repeat count to trigger a long-press via key input.
+   * @brief Sets the threshold for recognizing a key long-press.
+   *
+   * When a key is held down, the system generates repeated key press events.
+   * This threshold defines how many consecutive key press events must be
+   * received before the input is recognized as a long-press action.
    *
    * @pre The config must not be frozen.
-   * @param[in] count The minimum repeat count
+   * @param[in] threshold The minimum number of consecutive key press events
+   *                      required to trigger a long-press
    */
-  UiConfig& SetMinLongPressKeyCount(uint32_t count);
+  UiConfig& SetKeyLongPressThreshold(uint32_t threshold);
 
   /**
-   * @brief Retrieves the minimum key repeat count for long-press.
+   * @brief Retrieves the threshold for recognizing a key long-press.
    *
-   * @return The minimum repeat count
+   * @return The minimum number of consecutive key press events required
+   *         to trigger a long-press
    */
-  uint32_t GetMinLongPressKeyCount() const;
+  uint32_t GetKeyLongPressThreshold() const;
 
   /**
    * @brief Sets the tap recognizer time limit in milliseconds.

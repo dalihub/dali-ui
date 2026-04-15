@@ -120,15 +120,15 @@ ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
   return GetImpl(*this).GetExecutionKeyPredicate();
 }
 
-UiConfig& UiConfig::SetMinLongPressKeyCount(uint32_t count)
+UiConfig& UiConfig::SetKeyLongPressThreshold(uint32_t count)
 {
-  GetImpl(*this).SetMinLongPressKeyCount(count);
+  GetImpl(*this).SetKeyLongPressThreshold(count);
   return *this;
 }
 
-uint32_t UiConfig::GetMinLongPressKeyCount() const
+uint32_t UiConfig::GetKeyLongPressThreshold() const
 {
-  return GetImpl(*this).GetMinLongPressKeyCount();
+  return GetImpl(*this).GetKeyLongPressThreshold();
 }
 
 UiConfig& UiConfig::SetTapRecognizerTime(uint32_t timeMs)

@@ -172,14 +172,14 @@ public:
    * @pre Must not be frozen.
    * @param[in] count The minimum repeat count
    */
-  void SetMinLongPressKeyCount(uint32_t count);
+  void SetKeyLongPressThreshold(uint32_t count);
 
   /**
    * @brief Retrieves the minimum key repeat count for long-press.
    *
    * @return The minimum repeat count
    */
-  uint32_t GetMinLongPressKeyCount() const;
+  uint32_t GetKeyLongPressThreshold() const;
 
   /**
    * @brief Sets the tap recognizer time limit in milliseconds.
@@ -341,7 +341,7 @@ private:
   int                   mDpi;
   int                   mBaselineDpi;
   KeyClickPolicy        mKeyClickPolicy;
-  uint32_t              mMinLongPressKeyCount;
+  uint32_t              mKeyLongPressThreshold;
   uint32_t              mTapRecognizerTime;
   float                 mCachedDpiFactor{1.0f};
   float                 mCachedScaledDpiFactor{1.0f};
