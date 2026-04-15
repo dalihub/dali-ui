@@ -37,29 +37,27 @@ namespace FocusFinder
 {
 namespace
 {
-static constexpr float FULLY_TRANSPARENT(
-  0.01f); ///< Alpha values must rise above this, before an object is considered to be visible.
+static constexpr float FULLY_TRANSPARENT(0.01f); ///< Alpha values must rise above this, before an object is considered to be visible.
 
-static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Rect<float> source,
-                                Dali::Rect<float> dest)
+static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
 {
   switch(direction)
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return source.left - dest.right;
+      return source.Left() - dest.Right();
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return dest.left - source.right;
+      return dest.Left() - source.Right();
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return source.top - dest.bottom;
+      return source.Top() - dest.Bottom();
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return dest.top - source.bottom;
+      return dest.Top() - source.Bottom();
     }
     default:
     {
@@ -73,32 +71,30 @@ static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Rect<f
  *   of source to the edge nearest in the given direction of dest.
  *   If the dest is not in the direction from source, return 0.
  */
-static int MajorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source,
-                             Dali::Rect<float> dest)
+static int MajorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
 {
   return std::max(0, MajorAxisDistanceRaw(direction, source, dest));
 }
 
-static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction,
-                                         Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
 {
   switch(direction)
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return source.left - dest.left;
+      return source.Left() - dest.Left();
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return dest.right - source.right;
+      return dest.Right() - source.Right();
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return source.top - dest.top;
+      return source.Top() - dest.Top();
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return dest.bottom - source.bottom;
+      return dest.Bottom() - source.Bottom();
     }
     default:
     {
@@ -112,8 +108,7 @@ static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction,
  *   edge of source to the far edge of dest.
  *   If the dest is not in the direction from source, return 1
  */
-static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::Rect<float> source,
-                                      Dali::Rect<float> dest)
+static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
 {
   return std::max(1, MajorAxisDistanceToFarEdgeRaw(direction, source, dest));
 }
@@ -126,8 +121,7 @@ static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::
  * @param dest The destination rect.
  * @return The distance.
  */
-static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source,
-                             Dali::Rect<float> dest)
+static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
 {
   switch(direction)
   {
@@ -135,15 +129,15 @@ static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<floa
     case Dali::Ui::FocusDirection::RIGHT:
     {
       // the distance between the center verticals
-      return std::abs((source.top + (source.bottom - source.top) * 0.5f) -
-                      (dest.top + (dest.bottom - dest.top) * 0.5f));
+      return std::abs((source.Top() + (source.Bottom() - source.Top()) * 0.5f) -
+                      (dest.Top() + (dest.Bottom() - dest.Top()) * 0.5f));
     }
     case Dali::Ui::FocusDirection::UP:
     case Dali::Ui::FocusDirection::DOWN:
     {
       // the distance between the center horizontals
-      return std::abs((source.left + (source.right - source.left) * 0.5f) -
-                      (dest.left + (dest.right - dest.left) * 0.5f));
+      return std::abs((source.Left() + (source.Right() - source.Left()) * 0.5f) -
+                      (dest.Left() + (dest.Right() - dest.Left()) * 0.5f));
     }
     default:
     {
@@ -160,26 +154,7 @@ static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<floa
  */
 static uint64_t GetWeightedDistanceFor(int majorAxisDistance, int minorAxisDistance)
 {
-  return 13 * static_cast<int64_t>(majorAxisDistance) * static_cast<int64_t>(majorAxisDistance) +
-         static_cast<int64_t>(minorAxisDistance) * static_cast<int64_t>(minorAxisDistance);
-}
-
-/**
- * Convert x,y,width,height coordinates into left, right, bottom, top coordinates.
- * @param[in,out] rect The rect
- */
-static void ConvertCoordinate(Dali::Rect<float>& rect)
-{
-  // convert x, y, width, height -> left, right, bottom, top
-  float left   = rect.x;
-  float right  = rect.x + rect.width;
-  float bottom = rect.y + rect.height;
-  float top    = rect.y;
-
-  rect.left   = left;
-  rect.right  = right;
-  rect.bottom = bottom;
-  rect.top    = top;
+  return 13 * static_cast<int64_t>(majorAxisDistance) * static_cast<int64_t>(majorAxisDistance) + static_cast<int64_t>(minorAxisDistance) * static_cast<int64_t>(minorAxisDistance);
 }
 
 /**
@@ -189,26 +164,25 @@ static void ConvertCoordinate(Dali::Rect<float>& rect)
  * @param direction The direction (up, down, left, right)
  * @return Whether destRect is a candidate.
  */
-static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect,
-                        Dali::Ui::FocusDirection direction)
+static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect, Dali::Ui::FocusDirection direction)
 {
   switch(direction)
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return (srcRect.right > destRect.right || srcRect.left >= destRect.right) && srcRect.left > destRect.left;
+      return (srcRect.Right() > destRect.Right() || srcRect.Left() >= destRect.Right()) && srcRect.Left() > destRect.Left();
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return (srcRect.left < destRect.left || srcRect.right <= destRect.left) && srcRect.right < destRect.right;
+      return (srcRect.Left() < destRect.Left() || srcRect.Right() <= destRect.Left()) && srcRect.Right() < destRect.Right();
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return (srcRect.bottom > destRect.bottom || srcRect.top >= destRect.bottom) && srcRect.top > destRect.top;
+      return (srcRect.Bottom() > destRect.Bottom() || srcRect.Top() >= destRect.Bottom()) && srcRect.Top() > destRect.Top();
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return (srcRect.top < destRect.top || srcRect.bottom <= destRect.top) && srcRect.bottom < destRect.bottom;
+      return (srcRect.Top() < destRect.Top() || srcRect.Bottom() <= destRect.Top()) && srcRect.Bottom() < destRect.Bottom();
     }
     default:
     {
@@ -224,26 +198,25 @@ static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect,
  * @param src The source rect
  * @param dest The dest rect
  */
-static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Rect<float> src,
-                            Dali::Rect<float> dest)
+static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Rect<float> src, Dali::Rect<float> dest)
 {
   switch(direction)
   {
     case Dali::Ui::FocusDirection::LEFT:
     {
-      return src.left >= dest.right;
+      return src.Left() >= dest.Right();
     }
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return src.right <= dest.left;
+      return src.Right() <= dest.Left();
     }
     case Dali::Ui::FocusDirection::UP:
     {
-      return src.top >= dest.bottom;
+      return src.Top() >= dest.Bottom();
     }
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return src.bottom <= dest.top;
+      return src.Bottom() <= dest.Top();
     }
     default:
     {
@@ -259,20 +232,19 @@ static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Rect<float
  * @param rect2 The second rect
  * @return whether the beams overlap
  */
-static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Rect<float> rect1,
-                         Dali::Rect<float> rect2)
+static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Rect<float> rect1, Dali::Rect<float> rect2)
 {
   switch(direction)
   {
     case Dali::Ui::FocusDirection::LEFT:
     case Dali::Ui::FocusDirection::RIGHT:
     {
-      return (rect2.bottom >= rect1.top) && (rect2.top <= rect1.bottom);
+      return (rect2.Bottom() >= rect1.Top()) && (rect2.Top() <= rect1.Bottom());
     }
     case Dali::Ui::FocusDirection::UP:
     case Dali::Ui::FocusDirection::DOWN:
     {
-      return (rect2.right >= rect1.left) && (rect2.left <= rect1.right);
+      return (rect2.Right() >= rect1.Left()) && (rect2.Left() <= rect1.Right());
     }
     default:
     {
@@ -289,8 +261,7 @@ static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Rect<float> r
  * @param rect2 The second rect
  * @return Whether rect1 is a better candidate than rect2 by virtue of it being in src's beam
  */
-static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Rect<float> source,
-                      Dali::Rect<float> rect1, Dali::Rect<float> rect2)
+static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> rect1, Dali::Rect<float> rect2)
 {
   const bool rect1InSrcBeam = BeamsOverlap(direction, source, rect1);
   const bool rect2InSrcBeam = BeamsOverlap(direction, source, rect2);
@@ -320,8 +291,7 @@ static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Rect<float> sour
   return (MajorAxisDistance(direction, source, rect1) < MajorAxisDistanceToFarEdge(direction, source, rect2));
 }
 
-bool IsBetterCandidate(Ui::FocusDirection direction, Rect<float>& focusedRect,
-                       Rect<float>& candidateRect, Rect<float>& bestCandidateRect)
+bool IsBetterCandidate(Ui::FocusDirection direction, Rect<float>& focusedRect, Rect<float>& candidateRect, Rect<float>& bestCandidateRect)
 {
   // to be a better candidate, need to at least be a candidate in the first place
   if(!IsCandidate(focusedRect, candidateRect, direction))
@@ -346,10 +316,10 @@ bool IsBetterCandidate(Ui::FocusDirection direction, Rect<float>& focusedRect,
   }
 
   // otherwise, do fudge-tastic comparison of the major and minor axis
-  return (GetWeightedDistanceFor(MajorAxisDistance(direction, focusedRect, candidateRect),
-                                 MinorAxisDistance(direction, focusedRect, candidateRect)) <
-          GetWeightedDistanceFor(MajorAxisDistance(direction, focusedRect, bestCandidateRect),
-                                 MinorAxisDistance(direction, focusedRect, bestCandidateRect)));
+  return (GetWeightedDistanceFor(
+            MajorAxisDistance(direction, focusedRect, candidateRect),
+            MinorAxisDistance(direction, focusedRect, candidateRect)) < GetWeightedDistanceFor(MajorAxisDistance(direction, focusedRect, bestCandidateRect),
+                                                                                               MinorAxisDistance(direction, focusedRect, bestCandidateRect)));
 }
 
 bool IsFocusable(Actor& actor)
@@ -361,11 +331,11 @@ bool IsFocusable(Actor& actor)
           actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR).a > FULLY_TRANSPARENT);
 }
 
-Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect, Rect<float>& bestCandidateRect,
-                    Ui::FocusDirection direction)
+Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect, Rect<float>& bestCandidateRect, Ui::FocusDirection direction)
 {
   Actor nearestActor;
-  if(actor && actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
+  if(actor &&
+     actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
      !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
      actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
   {
@@ -377,9 +347,6 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
       if(child && child != focusedActor && IsFocusable(child))
       {
         Rect<float> candidateRect = DevelActor::CalculateCurrentScreenExtents(child);
-
-        // convert x, y, width, height -> left, right, bottom, top
-        ConvertCoordinate(candidateRect);
 
         if(IsBetterCandidate(direction, focusedRect, candidateRect, bestCandidateRect))
         {
@@ -450,9 +417,6 @@ Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::FocusDir
     }
   }
 
-  ConvertCoordinate(bestCandidateRect);
-
-  ConvertCoordinate(focusedRect);
   nearestActor = FindNextFocus(rootActor, focusedActor, focusedRect, bestCandidateRect, direction);
   return nearestActor;
 }

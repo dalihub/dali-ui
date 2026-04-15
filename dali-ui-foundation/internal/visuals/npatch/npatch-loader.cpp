@@ -66,7 +66,7 @@ NPatchData::NPatchDataId NPatchLoader::GenerateUniqueNPatchDataId()
 }
 
 NPatchData::NPatchDataId NPatchLoader::Load(TextureManager& textureManager, TextureUploadObserver* textureObserver,
-                                            const VisualUrl& url, const Rect<int>& border, bool& preMultiplyOnLoad,
+                                            const VisualUrl& url, const Dali::Extents& border, bool& preMultiplyOnLoad,
                                             bool synchronousLoading)
 {
   NPatchDataPtr data = GetNPatchData(url, border, preMultiplyOnLoad);
@@ -203,7 +203,7 @@ void NPatchLoader::Process(bool postProcessor)
   DALI_TRACE_END(gTraceFilter, "DALI_NPATCH_LOADER_PROCESS_REMOVE_QUEUE");
 }
 
-NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Rect<int>& border, bool& preMultiplyOnLoad)
+NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Extents& border, bool& preMultiplyOnLoad)
 {
   std::size_t                              hash  = url.GetUrlHash();
   std::vector<NPatchInfo>::size_type       index = UNINITIALIZED_ID;
@@ -281,7 +281,7 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Rect<int>&
     NPatchUtility::StretchRanges stretchRangesX;
     NPatchUtility::StretchRanges stretchRangesY;
     stretchRangesX.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
-      info.mData->GetCroppedWidth(), static_cast<uint32_t>(border.left), static_cast<uint32_t>(border.right)));
+      info.mData->GetCroppedWidth(), static_cast<uint32_t>(border.start), static_cast<uint32_t>(border.end)));
     stretchRangesY.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
       info.mData->GetCroppedHeight(), static_cast<uint32_t>(border.top), static_cast<uint32_t>(border.bottom)));
 
