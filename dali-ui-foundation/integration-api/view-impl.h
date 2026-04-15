@@ -750,6 +750,50 @@ public: // Child Management API
   int32_t IndexOfChild(Ui::View view) const;
 
   /**
+   * @brief Raises this view one step above its next sibling.
+   *
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void Raise(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Lowers this view one step below its previous sibling.
+   *
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void Lower(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Raises this view to the top of its sibling list.
+   *
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void RaiseToTop(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Lowers this view to the bottom of its sibling list.
+   *
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void LowerToBottom(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Raises this view above the given target sibling.
+   *
+   * @param[in] target The target sibling view.
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Lowers this view below the given target sibling.
+   *
+   * @param[in] target The target sibling view.
+   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
+   */
+  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
+
+  /**
    * @brief Adds a list of children (method chaining).
    *
    * @param[in] children The initializer list of View handles to add
@@ -850,7 +894,14 @@ private:
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
   ChildContainer mChildren;
-  bool           mUpdatingChildren{false}; ///< Guard to prevent redundant mChildren updates in OnChildAdd/OnChildRemove
+  /// Shared guard: when true, OnChildAdd / OnChildRemove / OnChildOrderChanged
+  /// skip mutating mChildren. Used whenever the caller is already managing the
+  /// list (Insert, RemoveAllChildren) or deliberately wants to keep the layout
+  /// children order even though Actor sibling order changes
+  /// (Raise/Lower/RaiseAbove/LowerBelow with LayoutOrderPolicy::PRESERVE).
+  /// Prefer toggling via ScopedSkipChildrenUpdate for nesting- and
+  /// exception-safety.
+  bool mSkipChildrenUpdate{false};
 
   // From control-impl.h
 

@@ -622,6 +622,36 @@ int32_t View::IndexOfChild(View view) const
   return Integration::GetImpl(*this).IndexOfChild(view);
 }
 
+void View::Raise(LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).Raise(policy);
+}
+
+void View::Lower(LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).Lower(policy);
+}
+
+void View::RaiseToTop(LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).RaiseToTop(policy);
+}
+
+void View::LowerToBottom(LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).LowerToBottom(policy);
+}
+
+void View::RaiseAbove(View target, LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).RaiseAbove(target, policy);
+}
+
+void View::LowerBelow(View target, LayoutOrderPolicy policy)
+{
+  Integration::GetImpl(*this).LowerBelow(target, policy);
+}
+
 // From control.cpp
 
 void View::ClearBackground()

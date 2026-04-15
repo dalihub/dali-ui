@@ -92,6 +92,31 @@ namespace
 /// OnChildAdd synchronously on the same (event) thread.
 thread_local bool gAllowNonViewChild = false;
 
+/// RAII guard for ViewImpl::mSkipChildrenUpdate. Saves and restores the
+/// previous value, so nested scopes (e.g. a signal handler re-entering Insert
+/// while an outer PRESERVE Raise is active) cannot prematurely unguard the
+/// outer scope.
+class ScopedSkipChildrenUpdate
+{
+public:
+  explicit ScopedSkipChildrenUpdate(bool& flag)
+  : mFlag(flag),
+    mPrev(flag)
+  {
+    mFlag = true;
+  }
+  ~ScopedSkipChildrenUpdate()
+  {
+    mFlag = mPrev;
+  }
+  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
+  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
+
+private:
+  bool& mFlag;
+  bool  mPrev;
+};
+
 BaseHandle Create()
 {
   return View::New();
@@ -1333,9 +1358,10 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
   mChildren.insert(mChildren.begin() + index, childData);
 
-  mUpdatingChildren = true;
-  Self().Add(child);
-  mUpdatingChildren = false;
+  {
+    ScopedSkipChildrenUpdate guard(mSkipChildrenUpdate);
+    Self().Add(child);
+  }
 
   // Invalidate the child's measure cache — its previous cache was computed
   // under a different parent's constraints and is no longer reliable.
@@ -1344,15 +1370,16 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 
 void ViewImpl::RemoveAllChildren()
 {
-  mUpdatingChildren = true;
-  for(auto& childData : mChildren)
   {
-    // Invalidate each child's measure cache so that re-parented children
-    // are re-measured under the new parent's constraints.
-    Integration::GetImpl(childData.view).InvalidateMeasure();
-    Self().Remove(childData.view);
+    ScopedSkipChildrenUpdate guard(mSkipChildrenUpdate);
+    for(auto& childData : mChildren)
+    {
+      // Invalidate each child's measure cache so that re-parented children
+      // are re-measured under the new parent's constraints.
+      Integration::GetImpl(childData.view).InvalidateMeasure();
+      Self().Remove(childData.view);
+    }
   }
-  mUpdatingChildren = false;
 
   mChildren.clear();
   InvalidateMeasure();
@@ -1386,6 +1413,110 @@ int32_t ViewImpl::IndexOfChild(Ui::View view) const
     }
   }
   return -1;
+}
+
+void ViewImpl::Raise(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.Raise();
+      return;
+    }
+  }
+  self.Raise();
+}
+
+void ViewImpl::Lower(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.Lower();
+      return;
+    }
+  }
+  self.Lower();
+}
+
+void ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.RaiseToTop();
+      return;
+    }
+  }
+  self.RaiseToTop();
+}
+
+void ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.LowerToBottom();
+      return;
+    }
+  }
+  self.LowerToBottom();
+}
+
+void ViewImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
+{
+  if(!target)
+  {
+    return;
+  }
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.RaiseAbove(target);
+      return;
+    }
+  }
+  self.RaiseAbove(target);
+}
+
+void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
+{
+  if(!target)
+  {
+    return;
+  }
+  Actor self = Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      self.LowerBelow(target);
+      return;
+    }
+  }
+  self.LowerBelow(target);
 }
 
 Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<Ui::View> children)
@@ -1855,7 +1986,7 @@ void ViewImpl::OnSceneDisconnection()
 
 void ViewImpl::OnChildAdd(Actor& child)
 {
-  if(mUpdatingChildren)
+  if(mSkipChildrenUpdate)
   {
     return;
   }
@@ -1887,7 +2018,7 @@ void ViewImpl::OnChildAdd(Actor& child)
 
 void ViewImpl::OnChildRemove(Actor& child)
 {
-  if(mUpdatingChildren)
+  if(mSkipChildrenUpdate)
   {
     return;
   }
@@ -1914,7 +2045,7 @@ void ViewImpl::OnChildRemove(Actor& child)
 
 void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
 {
-  if(mUpdatingChildren)
+  if(mSkipChildrenUpdate)
   {
     return;
   }
