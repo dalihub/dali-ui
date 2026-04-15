@@ -393,7 +393,7 @@ void BackgroundBlurEffectImpl::OnActivate()
   ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(renderer, mBlurredOutputFrameBuffer);
 
-  ownerView.Add(mInternalRoot);
+  Integration::AddActorChild(ownerView, mInternalRoot);
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
@@ -455,7 +455,7 @@ void BackgroundBlurEffectImpl::OnRefresh()
   if(!mSourceRenderTask)
   {
     Ui::View ownerView = GetOwnerView();
-    ownerView.Add(mInternalRoot);
+    Integration::AddActorChild(ownerView, mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerView);
     Integration::GetImpl(ownerView).RequestRenderTaskReorder();
   }

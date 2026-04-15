@@ -391,7 +391,7 @@ void GaussianBlurEffectImpl::OnActivate()
   ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(targetRenderer, mBlurredOutputFrameBuffer);
 
-  ownerView.Add(mInternalRoot);
+  Integration::AddActorChild(ownerView, mInternalRoot);
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
@@ -454,7 +454,7 @@ void GaussianBlurEffectImpl::OnRefresh()
   if(!mSourceRenderTask)
   {
     Ui::View ownerView = GetOwnerView();
-    ownerView.Add(mInternalRoot);
+    Integration::AddActorChild(ownerView, mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerView);
     Integration::GetImpl(ownerView).RequestRenderTaskReorder();
   }

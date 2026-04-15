@@ -1460,6 +1460,23 @@ inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
 }
 
 /**
+ * @brief Adds a raw (non-View) Actor as a child of the given View.
+ *
+ * View::OnChildAdd normally asserts when the added child cannot be DownCast to
+ * Ui::View. This Integration helper bypasses that check so internal modules can
+ * attach supporting Actors (clipping stencils, render-effect roots, decoration
+ * layers, etc.) without violating the View-only invariant for application code.
+ *
+ * The added Actor is NOT tracked in the View's child container and therefore is
+ * excluded from the View's measure/arrange layout pass. The caller is fully
+ * responsible for the Actor's size, position, and lifecycle.
+ *
+ * @param[in] view  The parent View to add to.
+ * @param[in] actor The raw Actor to attach as a child.
+ */
+DALI_UI_API void AddActorChild(Ui::View view, Dali::Actor actor);
+
+/**
  * @brief Arranges a standalone MATCH_PARENT child within its parent.
  *
  * Standalone children ignore parent padding. MATCH_PARENT axes are

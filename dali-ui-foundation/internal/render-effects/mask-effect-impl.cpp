@@ -229,7 +229,7 @@ void MaskEffectImpl::OnActivate()
   Ui::View ownerView = GetOwnerView();
   DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
-  ownerView.Add(mCamera);
+  Integration::AddActorChild(ownerView, mCamera);
 
   Renderer maskRenderer = GetTargetRenderer();
   ownerView.AddCacheRenderer(maskRenderer);

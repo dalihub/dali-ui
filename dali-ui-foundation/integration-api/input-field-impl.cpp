@@ -1258,15 +1258,6 @@ void InputFieldImpl::EmitAnchorClickedSignal(const std::string& href)
 }
 
 // =============================================================================
-// CustomActorImpl
-// =============================================================================
-void InputFieldImpl::OnChildAdd(Actor& child)
-{
-  // InputField internally uses non-View actors (e.g., layers, stencil, decorations).
-  // Override to bypass ViewImpl's restriction that only allows View children.
-}
-
-// =============================================================================
 // Implementation
 // =============================================================================
 InputMethodContext::CallbackData InputFieldImpl::OnInputMethodContextEvent(Dali::InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
@@ -1340,7 +1331,7 @@ void InputFieldImpl::EnableClipping()
     mStencil.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
     mStencil.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-    Self().Add(mStencil);
+    Integration::AddActorChild(Ui::View::DownCast(Self()), mStencil);
     if(mCursorLayer)
     {
       mStencil.Add(mCursorLayer);
@@ -1360,7 +1351,7 @@ void InputFieldImpl::AddLayer(Actor& layer, Actor& actor)
 {
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-  Self().Add(actor);
+  Integration::AddActorChild(Ui::View::DownCast(Self()), actor);
   layer = actor;
 }
 

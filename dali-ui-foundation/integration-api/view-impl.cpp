@@ -87,6 +87,11 @@ namespace Integration
 namespace
 {
 
+/// Scoped guard that lets View::OnChildAdd accept a non-View Actor as a child.
+/// Used by Integration::AddActorChild. Thread-local because Actor::Add invokes
+/// OnChildAdd synchronously on the same (event) thread.
+thread_local bool gAllowNonViewChild = false;
+
 BaseHandle Create()
 {
   return View::New();
@@ -1844,9 +1849,13 @@ void ViewImpl::OnChildAdd(Actor& child)
   }
   else
   {
-    // FIXME: MaskEffect for View currently requires an internal CameraActor child.
-    // Temporarily allow it here until a better architectural solution is available.
-    DALI_ASSERT_ALWAYS(CameraActor::DownCast(child) && "View could only have child as View class!");
+    if(gAllowNonViewChild)
+    {
+      // Permitted via Integration::AddActorChild: skip the View-only check
+      // and do not record this child in mChildren (it is excluded from layout).
+      return;
+    }
+    DALI_ASSERT_ALWAYS(false && "View could only have child as View class!");
   }
 }
 
@@ -2127,6 +2136,35 @@ std::vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
   }
 
   return result;
+}
+
+void AddActorChild(Ui::View view, Dali::Actor actor)
+{
+  if(!view || !actor)
+  {
+    return;
+  }
+
+  // RAII guard: restores the previous flag value on any exit path (including
+  // exceptions from view.Add()), and stays correct under nesting.
+  struct AllowNonViewChildScope
+  {
+    const bool previous;
+    AllowNonViewChildScope()
+    : previous(gAllowNonViewChild)
+    {
+      gAllowNonViewChild = true;
+    }
+    ~AllowNonViewChildScope()
+    {
+      gAllowNonViewChild = previous;
+    }
+
+    AllowNonViewChildScope(const AllowNonViewChildScope&)            = delete;
+    AllowNonViewChildScope& operator=(const AllowNonViewChildScope&) = delete;
+  } scope;
+
+  view.Add(actor);
 }
 
 } // namespace Integration

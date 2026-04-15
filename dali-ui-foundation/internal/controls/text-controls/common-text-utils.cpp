@@ -21,6 +21,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
@@ -174,15 +175,30 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
     renderableActor.SetProperty(Actor::Property::POSITION, Vector2(renderableActorPositionX, renderableActorPositionY));
 
-    // Make sure the actors are parented correctly with/without clipping
+    // Make sure the actors are parented correctly with/without clipping.
+    // When stencil is null, `self` is the text View itself; use the Integration
+    // helper so the View-only OnChildAdd assert is bypassed for these internal
+    // text-rendering Actors.
     Actor self = stencil ? stencil : textActor;
+
+    auto addChild = [&](Actor child)
+    {
+      if(stencil)
+      {
+        self.Add(child);
+      }
+      else
+      {
+        Integration::AddActorChild(Ui::View::DownCast(self), child);
+      }
+    };
 
     Actor highlightActor;
 
     for(std::vector<Actor>::iterator it = clippingDecorationActors.begin(), endIt = clippingDecorationActors.end();
         it != endIt; ++it)
     {
-      self.Add(*it);
+      addChild(*it);
       it->LowerToBottom();
 
       if(it->GetProperty(Dali::Actor::Property::NAME) == Dali::String("HighlightActor"))
@@ -192,13 +208,13 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
     }
     clippingDecorationActors.clear();
 
-    self.Add(renderableActor);
+    addChild(renderableActor);
 
     if(backgroundActor)
     {
       if(decorator && decorator->IsHighlightVisible())
       {
-        self.Add(backgroundActor);
+        addChild(backgroundActor);
         backgroundActor.SetProperty(
           Actor::Property::POSITION,
           Vector2(renderableActorPositionX, renderableActorPositionY)); // In text field's coords.

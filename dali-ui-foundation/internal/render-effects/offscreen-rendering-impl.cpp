@@ -97,7 +97,7 @@ void OffScreenRenderingImpl::OnActivate()
     mCamera.SetType(Dali::Camera::FREE_LOOK);
   }
   mCamera.SetPerspectiveProjection(GetTargetSize());
-  ownerView.Add(mCamera);
+  Integration::AddActorChild(ownerView, mCamera);
 
   CreateFrameBuffer();
   CreateRenderTask();
