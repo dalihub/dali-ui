@@ -1233,6 +1233,7 @@ void ViewImpl::SetPadding(const Extents& padding)
   if(mPadding != padding)
   {
     mPadding = padding;
+    OnPaddingSet(mPadding);
     InvalidateMeasure();
   }
 }
