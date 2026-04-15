@@ -553,6 +553,48 @@ public: // Properties
   View& SetTouchFocusable(bool touchFocusable);
 
   /**
+   * @brief Sets the left focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating left
+   */
+  View& SetLeftFocusableView(View view);
+
+  /**
+   * @brief Sets the right focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating right
+   */
+  View& SetRightFocusableView(View view);
+
+  /**
+   * @brief Sets the up focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating up
+   */
+  View& SetUpFocusableView(View view);
+
+  /**
+   * @brief Sets the down focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating down
+   */
+  View& SetDownFocusableView(View view);
+
+  /**
+   * @brief Sets the clockwise focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating clockwise
+   */
+  View& SetClockwiseFocusableView(View view);
+
+  /**
+   * @brief Sets the counter-clockwise focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating counter-clockwise
+   */
+  View& SetCounterClockwiseFocusableView(View view);
+
+  /**
    * @brief Gets the background color.
    *
    * @return The background color

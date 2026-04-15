@@ -152,6 +152,42 @@
   */ \
   ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
   /** \
+  * @brief Sets the left focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating left \
+  */ \
+  ChildClass& SetLeftFocusableView(View view) { View::SetLeftFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the right focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating right \
+  */ \
+  ChildClass& SetRightFocusableView(View view) { View::SetRightFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the up focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating up \
+  */ \
+  ChildClass& SetUpFocusableView(View view) { View::SetUpFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the down focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating down \
+  */ \
+  ChildClass& SetDownFocusableView(View view) { View::SetDownFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the clockwise focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating clockwise \
+  */ \
+  ChildClass& SetClockwiseFocusableView(View view) { View::SetClockwiseFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the counter-clockwise focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating counter-clockwise \
+  */ \
+  ChildClass& SetCounterClockwiseFocusableView(View view) { View::SetCounterClockwiseFocusableView(view); return *this; } \
+  /** \
   * @brief Sets the background color. \
   * \
   * If the UiColor has a color ID, it is resolved from the current \

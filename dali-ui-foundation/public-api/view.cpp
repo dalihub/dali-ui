@@ -362,6 +362,42 @@ View& View::SetTouchFocusable(bool touchFocusable)
   return *this;
 }
 
+View& View::SetLeftFocusableView(View view)
+{
+  SetProperty(Property::LEFT_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetRightFocusableView(View view)
+{
+  SetProperty(Property::RIGHT_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetUpFocusableView(View view)
+{
+  SetProperty(Property::UP_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetDownFocusableView(View view)
+{
+  SetProperty(Property::DOWN_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetClockwiseFocusableView(View view)
+{
+  SetProperty(Property::CLOCKWISE_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetCounterClockwiseFocusableView(View view)
+{
+  SetProperty(Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
 UiColor View::GetBackgroundColor()
 {
   return Integration::GetImpl(*this).GetBackgroundColor();

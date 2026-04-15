@@ -2102,3 +2102,174 @@ int UtcDaliViewIsOnSceneP(void)
 
   END_TEST;
 }
+
+// =============================================================================
+// SetLeftFocusableView: MoveFocus(LEFT) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetLeftFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  View& ret = viewA.SetLeftFocusableView(viewB);
+  DALI_TEST_CHECK(&ret == &viewA);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewA);
+
+  mgr.MoveFocus(FocusDirection::LEFT);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// SetRightFocusableView: MoveFocus(RIGHT) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetRightFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  viewA.SetRightFocusableView(viewB);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+
+  mgr.MoveFocus(FocusDirection::RIGHT);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// SetUpFocusableView: MoveFocus(UP) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetUpFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  viewA.SetUpFocusableView(viewB);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+
+  mgr.MoveFocus(FocusDirection::UP);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// SetDownFocusableView: MoveFocus(DOWN) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetDownFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  viewA.SetDownFocusableView(viewB);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+
+  mgr.MoveFocus(FocusDirection::DOWN);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// SetClockwiseFocusableView: MoveFocus(CLOCKWISE) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetClockwiseFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  viewA.SetClockwiseFocusableView(viewB);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+
+  mgr.MoveFocus(FocusDirection::CLOCKWISE);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// SetCounterClockwiseFocusableView: MoveFocus(COUNTER_CLOCKWISE) moves to the designated view
+// =============================================================================
+
+int UtcDaliViewSetCounterClockwiseFocusableViewP(void)
+{
+  UiTestApplication application;
+  View              viewA = CreateFocusableView(application);
+  View              viewB = CreateFocusableView(application);
+
+  viewA.SetCounterClockwiseFocusableView(viewB);
+
+  FocusManager mgr = FocusManager::Get();
+  mgr.SetCurrentFocusActor(viewA);
+
+  mgr.MoveFocus(FocusDirection::COUNTER_CLOCKWISE);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+
+  END_TEST;
+}
+
+// =============================================================================
+// Chaining: set all four directions and verify focus movement for each
+// =============================================================================
+
+int UtcDaliViewSetFocusableViewChainingP(void)
+{
+  UiTestApplication application;
+  View              center = CreateFocusableView(application);
+  View              left   = CreateFocusableView(application);
+  View              right  = CreateFocusableView(application);
+  View              up     = CreateFocusableView(application);
+  View              down   = CreateFocusableView(application);
+
+  center.SetLeftFocusableView(left)
+        .SetRightFocusableView(right)
+        .SetUpFocusableView(up)
+        .SetDownFocusableView(down);
+
+  FocusManager mgr = FocusManager::Get();
+
+  // LEFT
+  mgr.SetCurrentFocusActor(center);
+  mgr.MoveFocus(FocusDirection::LEFT);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == left);
+
+  // RIGHT
+  mgr.SetCurrentFocusActor(center);
+  mgr.MoveFocus(FocusDirection::RIGHT);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == right);
+
+  // UP
+  mgr.SetCurrentFocusActor(center);
+  mgr.MoveFocus(FocusDirection::UP);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == up);
+
+  // DOWN
+  mgr.SetCurrentFocusActor(center);
+  mgr.MoveFocus(FocusDirection::DOWN);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == down);
+
+  END_TEST;
+}
