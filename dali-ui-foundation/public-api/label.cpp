@@ -551,6 +551,17 @@ bool Label::IsCutoutEnabled() const
   return GetImpl(*this).IsCutoutEnabled();
 }
 
+Label& Label::SetMaskEffect(View view)
+{
+  GetImpl(*this).SetMaskEffect(view);
+  return *this;
+}
+
+void Label::ClearMaskEffect()
+{
+  GetImpl(*this).ClearMaskEffect();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

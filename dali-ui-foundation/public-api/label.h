@@ -779,6 +779,34 @@ public: // Setters for chaining
    */
   bool IsCutoutEnabled() const;
 
+  /**
+   * @brief Applies a mask effect using the given view.
+   *
+   * This helper creates a MaskEffect using the rendered output
+   * of the view as the mask source and applies it to the label.
+   *
+   * The given view is added as a child of the label and retained internally
+   * until ClearMaskEffect() is called.
+   *
+   * @note Any existing RenderEffect on the label will be replaced.
+   *
+   * @param[in] view The view used as the mask source.
+   *
+   * @see Dali::Ui::MaskEffect
+   * @see Dali::Ui::View::SetRenderEffect()
+   */
+  Label& SetMaskEffect(View view);
+
+  /**
+   * @brief Clears the mask effect applied to the label.
+   *
+   * Removes the internally retained mask view from the label and clears
+   * the applied RenderEffect.
+   *
+   * @see Dali::Ui::View::ClearRenderEffect()
+   */
+  void ClearMaskEffect();
+
   // @CHAIN_END
 
   // Read Only

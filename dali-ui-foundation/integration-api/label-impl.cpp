@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -38,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -786,6 +788,40 @@ void LabelImpl::SetLetterSpacing(float spacing)
 float LabelImpl::GetLetterSpacing() const
 {
   return mController->GetCharacterSpacing();
+}
+
+void LabelImpl::SetMaskEffect(View view)
+{
+  if(!view)
+  {
+    DALI_LOG_WARNING("[%p] SetMaskEffect called with invalid view\n", mController.Get());
+    return;
+  }
+
+  ClearMaskEffect();
+
+  View selfView = Ui::View::DownCast(Self());
+
+  Self().Add(view);
+  mMaskSourceView = view;
+
+  MaskEffect maskEffect = MaskEffect::New(view);
+  GetImplementation(maskEffect).SetReverseMaskDirection(true);
+  selfView.SetRenderEffect(maskEffect);
+}
+
+void LabelImpl::ClearMaskEffect()
+{
+  View selfView = Ui::View::DownCast(Self());
+
+  View view = mMaskSourceView.GetHandle();
+  if(view)
+  {
+    Self().Remove(view);
+  }
+
+  mMaskSourceView.Reset();
+  selfView.ClearRenderEffect();
 }
 
 // =============================================================================

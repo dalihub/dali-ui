@@ -1844,7 +1844,9 @@ void ViewImpl::OnChildAdd(Actor& child)
   }
   else
   {
-    DALI_ASSERT_ALWAYS(false && "View could only have child as View class!");
+    // FIXME: MaskEffect for View currently requires an internal CameraActor child.
+    // Temporarily allow it here until a better architectural solution is available.
+    DALI_ASSERT_ALWAYS(CameraActor::DownCast(child) && "View could only have child as View class!");
   }
 }
 

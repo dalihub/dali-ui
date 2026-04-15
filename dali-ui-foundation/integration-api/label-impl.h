@@ -492,6 +492,16 @@ public:
    */
   float GetLetterSpacing() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetMaskEffect
+   */
+  void SetMaskEffect(View view);
+
+  /**
+   * @copydoc Dali::Ui::Label::ClearMaskEffect
+   */
+  void ClearMaskEffect();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -824,6 +834,7 @@ private:
   Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
 
   std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
+  WeakHandle<Ui::View>                                    mMaskSourceView;
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;
