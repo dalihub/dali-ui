@@ -46,8 +46,8 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/public-api/signals/callback.h>
 
@@ -280,9 +280,9 @@ public: // State API
   /**
    * @brief Gets the current state of this View.
    *
-   * @return The current UiState
+   * @return The current ViewState
    */
-  const UiState& GetState() const;
+  const ViewState& GetState() const;
 
   /**
    * @brief Checks if the view is enabled.
@@ -308,7 +308,7 @@ public: // State API
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method
    * walks up the scene hierarchy and returns false if any ancestor View carries
-   * UiState::DISABLED.
+   * ViewState::DISABLED.
    *
    * @return True if neither the view nor any ancestor is disabled
    */
@@ -319,7 +319,7 @@ public: // State API
    *
    * Unlike IsFocused() (which only reflects the view's own state), this method
    * walks up the scene hierarchy and returns true if any ancestor View carries
-   * UiState::FOCUSED.
+   * ViewState::FOCUSED.
    *
    * @return True if the view itself or at least one ancestor is focused
    */
@@ -328,7 +328,7 @@ public: // State API
   /**
    * @brief Returns the state changed signal.
    *
-   * Emitted whenever the view's UiState changes. The signal passes
+   * Emitted whenever the view's ViewState changes. The signal passes
    * the previous state and the new (current) state.
    *
    * @return The StateChangedSignal
@@ -364,7 +364,7 @@ public: // State API
    *
    * @code
    * WhenStateChanged("default_bg", this, [](View v, const StateEvent& e) {
-   *   if(e.Changed(UiState::FOCUSED)) { ... }
+   *   if(e.Changed(ViewState::FOCUSED)) { ... }
    * });
    * @endcode
    *
@@ -401,7 +401,7 @@ public: // State API
   bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
 
   /**
-   * @brief Updates a state bit in the view's UiState and emits StateChangedSignal.
+   * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
    *
    * This is a low-level state-bit updater. It does **not** trigger the
    * higher-level logic associated with the state. For example, calling
@@ -414,7 +414,7 @@ public: // State API
    * @param[in] on    True to add the state, false to remove it
    * @param[in] cause Input event that triggered the change; leave default if programmatic
    */
-  void SetViewState(UiState state, bool on, InputEvent cause = InputEvent::None());
+  void SetViewState(ViewState state, bool on, InputEvent cause = InputEvent::None());
 
   /**
    * @brief Called when the view's focus state changes.
@@ -865,7 +865,7 @@ private:
   InteractiveTraitInterface*             mInteractiveTrait;
 
   // State
-  UiState                mState;
+  ViewState              mState;
   StateChangedSignalType mStateChangedSignal;
 
   // Requested size (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)

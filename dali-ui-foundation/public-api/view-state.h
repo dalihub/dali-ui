@@ -32,7 +32,7 @@ namespace Ui
 {
 
 /**
- * @brief UiState is a value type representing one or more view states as a bitmask.
+ * @brief ViewState is a value type representing one or more view states as a bitmask.
  *
  * Predefined states (Focused, Pressed, Disabled, etc.) are registered at static
  * initialization time. Custom states can be created at runtime via Create().
@@ -42,41 +42,41 @@ namespace Ui
  *
  * @code
  * // Single state check
- * if(state.Contains(UiState::PRESSED)) { ... }
+ * if(state.Contains(ViewState::PRESSED)) { ... }
  *
  * // Composite state
- * auto selectedPressed = UiState::SELECTED + UiState::PRESSED;
+ * auto selectedPressed = ViewState::SELECTED + ViewState::PRESSED;
  *
  * // Custom state
- * static const UiState Loading = UiState::Create("Loading");
+ * static const ViewState Loading = ViewState::Create("Loading");
  * @endcode
  */
-class DALI_UI_API UiState
+class DALI_UI_API ViewState
 {
 public:
   /**
    * @brief Creates a Normal state (no bits set).
    */
-  constexpr UiState()
+  constexpr ViewState()
   : mBits(0ULL)
   {
   }
 
   // --- Predefined States ---
 
-  static const UiState ALL;             ///< Represents all possible states
-  static const UiState NORMAL;          ///< No state (0)
-  static const UiState FOCUSED;         ///< View has keyboard focus
-  static const UiState PRESSED;         ///< View is being pressed (touch or key)
-  static const UiState DISABLED;        ///< View is disabled
-  static const UiState PSEUDO_DISABLED; ///< View appears disabled but still interactive
-  static const UiState SELECTED;        ///< View is selected
+  static const ViewState ALL;             ///< Represents all possible states
+  static const ViewState NORMAL;          ///< No state (0)
+  static const ViewState FOCUSED;         ///< View has keyboard focus
+  static const ViewState PRESSED;         ///< View is being pressed (touch or key)
+  static const ViewState DISABLED;        ///< View is disabled
+  static const ViewState PSEUDO_DISABLED; ///< View appears disabled but still interactive
+  static const ViewState SELECTED;        ///< View is selected
 
   // --- Predefined Composite States ---
 
-  static const UiState SELECTED_PRESSED;  ///< SELECTED + PRESSED
-  static const UiState DISABLED_SELECTED; ///< DISABLED + SELECTED
-  static const UiState SELECTED_FOCUSED;  ///< SELECTED + FOCUSED
+  static const ViewState SELECTED_PRESSED;  ///< SELECTED + PRESSED
+  static const ViewState DISABLED_SELECTED; ///< DISABLED + SELECTED
+  static const ViewState SELECTED_FOCUSED;  ///< SELECTED + FOCUSED
 
   /**
    * @brief Registers and creates a custom state with the given name.
@@ -85,10 +85,10 @@ public:
    * "Normal" always returns zero, "All" always returns full mask.
    *
    * @param[in] name The unique name for the state
-   * @return The UiState with the assigned bitmask
+   * @return The ViewState with the assigned bitmask
    * @throws DaliException if no more bits are available (max 62 custom states)
    */
-  static UiState Create(StringView name);
+  static ViewState Create(StringView name);
 
   // --- Query ---
 
@@ -98,7 +98,7 @@ public:
    * @param[in] other The state to check for
    * @return True if all bits of @p other are set in this state
    */
-  bool Contains(const UiState& other) const
+  bool Contains(const ViewState& other) const
   {
     return (mBits & other.mBits) == other.mBits;
   }
@@ -109,7 +109,7 @@ public:
    * @param[in] other The state to check against
    * @return True if any common bit is set
    */
-  bool HasIntersectionWith(const UiState& other) const
+  bool HasIntersectionWith(const ViewState& other) const
   {
     return (mBits & other.mBits) != 0ULL;
   }
@@ -147,7 +147,7 @@ public:
   /**
    * @brief Checks if this state was newly added (not in prev, present in cur).
    */
-  bool WasAdded(const UiState& prev, const UiState& cur) const
+  bool WasAdded(const ViewState& prev, const ViewState& cur) const
   {
     return !prev.Contains(*this) && cur.Contains(*this);
   }
@@ -155,7 +155,7 @@ public:
   /**
    * @brief Checks if this state was removed (present in prev, not in cur).
    */
-  bool WasRemoved(const UiState& prev, const UiState& cur) const
+  bool WasRemoved(const ViewState& prev, const ViewState& cur) const
   {
     return prev.Contains(*this) && !cur.Contains(*this);
   }
@@ -163,7 +163,7 @@ public:
   /**
    * @brief Checks if this state was either added or removed.
    */
-  bool WasChanged(const UiState& prev, const UiState& cur) const
+  bool WasChanged(const ViewState& prev, const ViewState& cur) const
   {
     return WasAdded(prev, cur) || WasRemoved(prev, cur);
   }
@@ -174,49 +174,49 @@ public:
    * Unlike WasChanged(), this works with composite states — it returns true
    * if any constituent bit was toggled.
    */
-  bool AnyChanged(const UiState& prev, const UiState& cur) const
+  bool AnyChanged(const ViewState& prev, const ViewState& cur) const
   {
     return ((prev ^ cur) & *this).mBits != 0ULL;
   }
 
   // --- Operators ---
 
-  UiState operator+(const UiState& rhs) const
+  ViewState operator+(const ViewState& rhs) const
   {
-    return UiState(mBits | rhs.mBits);
+    return ViewState(mBits | rhs.mBits);
   }
 
-  UiState operator-(const UiState& rhs) const
+  ViewState operator-(const ViewState& rhs) const
   {
-    return UiState(mBits & ~rhs.mBits);
+    return ViewState(mBits & ~rhs.mBits);
   }
 
-  UiState operator|(const UiState& rhs) const
+  ViewState operator|(const ViewState& rhs) const
   {
-    return UiState(mBits | rhs.mBits);
+    return ViewState(mBits | rhs.mBits);
   }
 
-  UiState operator&(const UiState& rhs) const
+  ViewState operator&(const ViewState& rhs) const
   {
-    return UiState(mBits & rhs.mBits);
+    return ViewState(mBits & rhs.mBits);
   }
 
-  UiState operator^(const UiState& rhs) const
+  ViewState operator^(const ViewState& rhs) const
   {
-    return UiState(mBits ^ rhs.mBits);
+    return ViewState(mBits ^ rhs.mBits);
   }
 
-  UiState operator~() const
+  ViewState operator~() const
   {
-    return UiState(~mBits);
+    return ViewState(~mBits);
   }
 
-  bool operator==(const UiState& rhs) const
+  bool operator==(const ViewState& rhs) const
   {
     return mBits == rhs.mBits;
   }
 
-  bool operator!=(const UiState& rhs) const
+  bool operator!=(const ViewState& rhs) const
   {
     return mBits != rhs.mBits;
   }
@@ -227,7 +227,7 @@ public:
   }
 
 private:
-  explicit constexpr UiState(uint64_t bits)
+  explicit constexpr ViewState(uint64_t bits)
   : mBits(bits)
   {
   }

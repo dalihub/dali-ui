@@ -27,7 +27,7 @@ namespace Ui
 namespace Internal
 {
 
-StateEventImpl::StateEventImpl(UiState prev, UiState current, InputEvent cause)
+StateEventImpl::StateEventImpl(ViewState prev, ViewState current, InputEvent cause)
 : BaseObject(),
   mPrev(prev),
   mCurrent(current),
@@ -39,17 +39,17 @@ StateEventImpl::~StateEventImpl()
 {
 }
 
-StateEventImplPtr StateEventImpl::New(UiState prev, UiState current, InputEvent cause)
+StateEventImplPtr StateEventImpl::New(ViewState prev, ViewState current, InputEvent cause)
 {
   return StateEventImplPtr(new StateEventImpl(prev, current, cause));
 }
 
-const UiState& StateEventImpl::GetPrev() const
+const ViewState& StateEventImpl::GetPrev() const
 {
   return mPrev;
 }
 
-const UiState& StateEventImpl::GetCurrent() const
+const ViewState& StateEventImpl::GetCurrent() const
 {
   return mCurrent;
 }

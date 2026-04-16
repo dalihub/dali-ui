@@ -23,7 +23,7 @@ SET(TC_SOURCES
         utc-Dali-SelectableTrait.cpp
         utc-Dali-ViewState.cpp
         utc-Dali-ViewStateHandler.cpp
-        utc-Dali-UiState.cpp
+        utc-Dali-ViewState.cpp
         utc-Dali-Layout.cpp
         utc-Dali-StackLayout.cpp
         utc-Dali-FlexLayout.cpp

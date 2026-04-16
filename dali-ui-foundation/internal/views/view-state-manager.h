@@ -22,7 +22,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -71,13 +71,13 @@ public:
    * @param[in] next   State after the change
    * @param[in] cause  Input event that triggered the change, or invalid handle if programmatic
    */
-  void NotifyStateChanged(Ui::View view, UiState prev, UiState next, InputEvent cause = InputEvent::None());
+  void NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause = InputEvent::None());
 
   /**
    * @brief Returns true if the view and all its View ancestors are enabled.
    *
    * @param[in] viewImpl  The ViewImpl to test
-   * @return True if neither the view itself nor any ancestor carries UiState::DISABLED
+   * @return True if neither the view itself nor any ancestor carries ViewState::DISABLED
    */
   bool IsEffectivelyEnabled(const Integration::ViewImpl& viewImpl) const;
 
@@ -85,7 +85,7 @@ public:
    * @brief Returns true if the view or any of its View ancestors is focused.
    *
    * @param[in] viewImpl  The ViewImpl to test
-   * @return True if the view itself or at least one ancestor carries UiState::FOCUSED
+   * @return True if the view itself or at least one ancestor carries ViewState::FOCUSED
    */
   bool IsEffectivelyFocused(const Integration::ViewImpl& viewImpl) const;
 
@@ -95,8 +95,8 @@ private:
   struct PendingNotification
   {
     Ui::View   view; ///< Public handle keeps impl alive during dispatch
-    UiState    prev;
-    UiState    next;
+    ViewState  prev;
+    ViewState  next;
     InputEvent cause; ///< Invalid handle if not triggered by user input
   };
 

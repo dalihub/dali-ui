@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 
 #include <algorithm>
 #include <string>
@@ -86,7 +86,7 @@ private:
  * @brief Internal implementation of the named state-change handler trait.
  *
  * Manages a set of named callbacks (identified by string keys) that are
- * invoked when the owner View's UiState changes. Participates in the DALi
+ * invoked when the owner View's ViewState changes. Participates in the DALi
  * connection tracking protocol via SlotObserver so handlers are automatically
  * removed when their associated ConnectionTrackerInterface is destroyed.
  */
@@ -103,7 +103,7 @@ public:
    * @param[in] id       Unique string identifier for this handler
    * @param[in] tracker  ConnectionTrackerInterface for automatic lifetime management
    * @param[in] callback Callback to invoke. Ownership is taken.
-   *                     Signature: void(View, UiState, UiState)
+   *                     Signature: void(View, ViewState, ViewState)
    */
   void Set(const std::string& id, ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
@@ -129,11 +129,11 @@ public:
   /**
    * @brief Invokes all registered handlers.
    *
-   * Called by ViewImpl::SetViewState when the view's UiState changes.
+   * Called by ViewImpl::SetViewState when the view's ViewState changes.
    *
    * @param[in] view The owner view
-   * @param[in] prev The previous UiState
-   * @param[in] cur  The current UiState
+   * @param[in] prev The previous ViewState
+   * @param[in] cur  The current ViewState
    */
   void NotifyStateChanged(View view, const StateEvent& event);
 
@@ -151,7 +151,7 @@ protected:
 private:
   struct Handler
   {
-    CallbackBase*               callback;             ///< Owned. Signature: void(View, UiState, UiState)
+    CallbackBase*               callback;             ///< Owned. Signature: void(View, ViewState, ViewState)
     ConnectionTrackerInterface* tracker;              ///< Non-owning ref for auto-disconnect
     bool                        pendingRemove{false}; ///< Deferred removal when SlotDisconnected fires during Execute
   };

@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 
 namespace Dali
 {
@@ -51,22 +51,22 @@ public:
    * @param[in] current State after the transition
    * @param[in] cause   Input event that caused the transition (may be NONE)
    */
-  StateEventImpl(UiState prev, UiState current, InputEvent cause);
+  StateEventImpl(ViewState prev, ViewState current, InputEvent cause);
 
   /**
    * @brief Creates a new StateEventImpl.
    */
-  static StateEventImplPtr New(UiState prev, UiState current, InputEvent cause);
+  static StateEventImplPtr New(ViewState prev, ViewState current, InputEvent cause);
 
   /**
    * @copydoc Dali::Ui::StateEvent::GetPrev
    */
-  const UiState& GetPrev() const;
+  const ViewState& GetPrev() const;
 
   /**
    * @copydoc Dali::Ui::StateEvent::GetCurrent
    */
-  const UiState& GetCurrent() const;
+  const ViewState& GetCurrent() const;
 
   /**
    * @copydoc Dali::Ui::StateEvent::GetCause
@@ -82,8 +82,8 @@ private:
   StateEventImpl& operator=(StateEventImpl&&)      = delete;
 
 private:
-  UiState    mPrev;
-  UiState    mCurrent;
+  ViewState  mPrev;
+  ViewState  mCurrent;
   InputEvent mCause;
 };
 

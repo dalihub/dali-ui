@@ -113,7 +113,7 @@ private:
     String line = "[" + e.GetPrev().ToString() + "] -> [" + e.GetCurrent().ToString() + "]\n";
     AppendLog(line);
 
-    if(e.Removed(UiState::PRESSED) && e.Added(UiState::DISABLED))
+    if(e.Removed(ViewState::PRESSED) && e.Added(ViewState::DISABLED))
     {
       mTarget.SetBackgroundColor(UiColor(COLOR_FAIL));
       AppendLog("  => PRESSED cleared by DISABLED!\n");

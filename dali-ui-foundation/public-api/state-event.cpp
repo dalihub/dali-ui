@@ -32,12 +32,12 @@ StateEvent::StateEvent(Internal::StateEventImpl* implementation)
 {
 }
 
-const UiState& StateEvent::GetPrev() const
+const ViewState& StateEvent::GetPrev() const
 {
   return GetImpl(*this).GetPrev();
 }
 
-const UiState& StateEvent::GetCurrent() const
+const ViewState& StateEvent::GetCurrent() const
 {
   return GetImpl(*this).GetCurrent();
 }

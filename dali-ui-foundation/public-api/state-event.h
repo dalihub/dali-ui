@@ -23,7 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 
 namespace Dali
 {
@@ -39,14 +39,14 @@ class StateEventImpl;
 /**
  * @brief Describes a single View state transition, passed to StateChangedSignal handlers.
  *
- * Provides the previous and current UiState together with ergonomic helpers for
+ * Provides the previous and current ViewState together with ergonomic helpers for
  * detecting specific transitions, and optional information about the input event
  * that caused the state change.
  *
  * @code
  * view.StateChangedSignal.Connect(this, [](View, const StateEvent& e) {
- *   if(e.Added(UiState::FOCUSED))   { ... } // gained focus
- *   if(e.Removed(UiState::PRESSED)) { ... } // released
+ *   if(e.Added(ViewState::FOCUSED))   { ... } // gained focus
+ *   if(e.Removed(ViewState::PRESSED)) { ... } // released
  * });
  * @endcode
  */
@@ -71,19 +71,19 @@ public:
   /**
    * @brief Returns the state before this transition.
    */
-  const UiState& GetPrev() const;
+  const ViewState& GetPrev() const;
 
   /**
    * @brief Returns the state after this transition (the current state).
    */
-  const UiState& GetCurrent() const;
+  const ViewState& GetCurrent() const;
 
   /**
    * @brief Returns true if @a state was newly added in this transition.
    *
    * Equivalent to: !GetPrev().Contains(state) && GetCurrent().Contains(state)
    */
-  bool Added(const UiState& state) const
+  bool Added(const ViewState& state) const
   {
     return !GetPrev().Contains(state) && GetCurrent().Contains(state);
   }
@@ -93,7 +93,7 @@ public:
    *
    * Equivalent to: GetPrev().Contains(state) && !GetCurrent().Contains(state)
    */
-  bool Removed(const UiState& state) const
+  bool Removed(const ViewState& state) const
   {
     return GetPrev().Contains(state) && !GetCurrent().Contains(state);
   }
@@ -101,7 +101,7 @@ public:
   /**
    * @brief Returns true if @a state was either added or removed in this transition.
    */
-  bool Changed(const UiState& state) const
+  bool Changed(const ViewState& state) const
   {
     return Added(state) || Removed(state);
   }

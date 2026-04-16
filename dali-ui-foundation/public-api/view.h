@@ -42,8 +42,8 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/ui-state.h>
 #include <dali-ui-foundation/public-api/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -787,7 +787,7 @@ public: // Properties
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method
    * walks up the scene hierarchy and returns false if any ancestor View carries
-   * UiState::DISABLED.
+   * ViewState::DISABLED.
    *
    * @return True if neither the view nor any ancestor is disabled
    */
@@ -797,7 +797,7 @@ public: // Properties
    * @brief Returns true if this view or any of its View ancestors is focused.
    *
    * Unlike the Focused bit in GetState(), this method walks up the scene
-   * hierarchy and returns true if any ancestor View carries UiState::FOCUSED.
+   * hierarchy and returns true if any ancestor View carries ViewState::FOCUSED.
    *
    * @return True if the view itself or at least one ancestor is focused
    */
@@ -1076,18 +1076,18 @@ public: // State API (non-chaining)
   /**
    * @brief Gets the current state of this View.
    *
-   * @return The current UiState (may contain multiple combined states)
+   * @return The current ViewState (may contain multiple combined states)
    */
-  const UiState& GetState() const;
+  const ViewState& GetState() const;
 
   /**
    * @brief Returns the state changed signal.
    *
-   * Emitted whenever the view's UiState changes.
+   * Emitted whenever the view's ViewState changes.
    *
    * @code
    * view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
-   *   if(e.Added(UiState::FOCUSED)) { ... }
+   *   if(e.Added(ViewState::FOCUSED)) { ... }
    * });
    * @endcode
    *

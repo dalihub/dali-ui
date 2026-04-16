@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/ui-state.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
@@ -48,7 +48,7 @@ StateRegistry& GetRegistry()
 
 } // unnamed namespace
 
-uint64_t UiState::Register(StringView name)
+uint64_t ViewState::Register(StringView name)
 {
   auto&       reg = GetRegistry();
   std::string key(name.Data(), name.Size());
@@ -69,7 +69,7 @@ uint64_t UiState::Register(StringView name)
     return it->second;
   }
 
-  DALI_ASSERT_ALWAYS(reg.nextBit < MAX_BITS && "No more room to register a new UiState");
+  DALI_ASSERT_ALWAYS(reg.nextBit < MAX_BITS && "No more room to register a new ViewState");
 
   uint64_t bit = 1ULL << reg.nextBit;
   reg.states.emplace(std::move(key), bit);
@@ -77,12 +77,12 @@ uint64_t UiState::Register(StringView name)
   return bit;
 }
 
-UiState UiState::Create(StringView name)
+ViewState ViewState::Create(StringView name)
 {
-  return UiState(Register(name));
+  return ViewState(Register(name));
 }
 
-String UiState::ToString() const
+String ViewState::ToString() const
 {
   if(mBits == 0ULL)
   {
@@ -115,20 +115,20 @@ String UiState::ToString() const
 
 // --- Predefined States ---
 
-const UiState UiState::NORMAL{};
-const UiState UiState::ALL{(1ULL << MAX_BITS) - 1ULL};
-const UiState UiState::FOCUSED         = UiState::Create("Focused");
-const UiState UiState::PRESSED         = UiState::Create("Pressed");
-const UiState UiState::DISABLED        = UiState::Create("Disabled");
-const UiState UiState::PSEUDO_DISABLED = UiState::Create("PseudoDisabled");
-const UiState UiState::SELECTED        = UiState::Create("Selected");
+const ViewState ViewState::NORMAL{};
+const ViewState ViewState::ALL{(1ULL << MAX_BITS) - 1ULL};
+const ViewState ViewState::FOCUSED         = ViewState::Create("Focused");
+const ViewState ViewState::PRESSED         = ViewState::Create("Pressed");
+const ViewState ViewState::DISABLED        = ViewState::Create("Disabled");
+const ViewState ViewState::PSEUDO_DISABLED = ViewState::Create("PseudoDisabled");
+const ViewState ViewState::SELECTED        = ViewState::Create("Selected");
 
 // --- Predefined Composite States ---
 
-const UiState UiState::SELECTED_PRESSED  = UiState::SELECTED + UiState::PRESSED;
-const UiState UiState::DISABLED_SELECTED = UiState::DISABLED + UiState::SELECTED;
+const ViewState ViewState::SELECTED_PRESSED  = ViewState::SELECTED + ViewState::PRESSED;
+const ViewState ViewState::DISABLED_SELECTED = ViewState::DISABLED + ViewState::SELECTED;
 
-const UiState UiState::SELECTED_FOCUSED = UiState::SELECTED + UiState::FOCUSED;
+const ViewState ViewState::SELECTED_FOCUSED = ViewState::SELECTED + ViewState::FOCUSED;
 
 } // namespace Ui
 

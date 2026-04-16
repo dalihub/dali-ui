@@ -428,7 +428,7 @@ bool View::IsEffectivelyFocused() const
 // State API
 // =============================================================================
 
-const UiState& View::GetState() const
+const ViewState& View::GetState() const
 {
   return Integration::GetImpl(*this).GetState();
 }
