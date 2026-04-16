@@ -17,6 +17,57 @@
 
 geometry Z 축으로 hittest 및 이벤트가 전파됩니다.
 
+### 터치 이벤트 수신 방법
+
+View는 `TouchedSignal`을 통해 터치 이벤트를 수신합니다. 콜백에서는 `View`가 아닌 `Actor`를 받기 때문에 View 전용 API를 사용하려면 다운캐스트가 필요합니다.
+
+멤버 함수를 사용하는 방법:
+
+```cpp
+class MyController : public ConnectionTracker
+{
+public:
+  void SetupTouchHandler(View view)
+  {
+    view.TouchedSignal().Connect(this, &MyController::OnTouched);
+  }
+
+private:
+  bool OnTouched(Actor actor, const TouchEvent& touch)
+  {
+    // Actor를 View로 다운캐스트
+    View view = View::DownCast(actor);
+
+    if(touch.GetState(0) == PointState::DOWN)
+    {
+      // 터치 다운 처리
+      return true;  // consume — 이후 터치 이벤트를 이 View가 계속 수신
+    }
+    return false;  // 하위 뷰로 이벤트 전파
+  }
+};
+```
+
+람다를 사용하면 간결하게 작성할 수 있습니다:
+
+```cpp
+view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
+  View view = View::DownCast(actor);
+
+  if(touch.GetState(0) == PointState::DOWN)
+  {
+    // 터치 다운 처리
+    return true;  // consumed
+  }
+  return false;  // 하위 뷰로 이벤트 전파
+});
+```
+
+> [!NOTE]
+> `true`(consume)를 반환하면 이 View에서 이후 터치 이벤트(Motion, Finished)를 계속 수신합니다. `false`를 반환하면 geometry Z축 순서로 다음 뷰에 이벤트가 전파되며, 이 터치 시퀀스의 후속 이벤트를 **받을 수 없습니다**.
+
+<br/>
+
 ### 이벤트 전파 방식
 
 아래 그림과 같이 4개의 뷰가 겹쳐 있을 때 터치를 하게 되면 터치된 좌표 기준으로 geometry 방향으로 hittest가 진행됩니다.

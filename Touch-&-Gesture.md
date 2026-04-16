@@ -18,6 +18,57 @@
 
 Hit testing and event propagation occur along the geometry Z-axis.
 
+### Handling Touch Events
+
+A View receives touch events via `TouchedSignal`. Note that the callback receives an `Actor` (not a `View`), so you need to downcast it if you want to use View-specific APIs.
+
+Using a member function:
+
+```cpp
+class MyController : public ConnectionTracker
+{
+public:
+  void SetupTouchHandler(View view)
+  {
+    view.TouchedSignal().Connect(this, &MyController::OnTouched);
+  }
+
+private:
+  bool OnTouched(Actor actor, const TouchEvent& touch)
+  {
+    // Downcast Actor to View
+    View view = View::DownCast(actor);
+
+    if(touch.GetState(0) == PointState::DOWN)
+    {
+      // Handle touch down
+      return true;  // consumed — this View will receive subsequent touch events
+    }
+    return false;  // let the event propagate to views below
+  }
+};
+```
+
+The same can be written concisely with a lambda:
+
+```cpp
+view.TouchedSignal().Connect(&tracker, [](Actor actor, const TouchEvent& touch) -> bool {
+  View view = View::DownCast(actor);
+
+  if(touch.GetState(0) == PointState::DOWN)
+  {
+    // Handle touch down
+    return true;  // consumed
+  }
+  return false;  // let the event propagate
+});
+```
+
+> [!NOTE]
+> Return `true` (consume) to continue receiving subsequent touch events (Motion, Finished) on this View. If you return `false`, the event propagates to the next View in the geometry Z-order, and you will **not** receive follow-up events for this touch sequence.
+
+<br/>
+
 ### Event Propagation Method
 
 When touching the screen with 4 views overlapping as shown in the figure below, hit testing is performed along the geometry direction based on the touched coordinates.
