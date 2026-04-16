@@ -197,7 +197,6 @@ ViewImpl::ViewImpl()
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
-  mMargin(),
   mPadding(),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
@@ -477,8 +476,8 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   }
 
   if((mPadding.start != 0) || (mPadding.end != 0) || (mPadding.top != 0) ||
-     (mPadding.bottom != 0) || (mMargin.start != 0) || (mMargin.end != 0) ||
-     (mMargin.top != 0) || (mMargin.bottom != 0))
+     (mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
+     (mImpl->mMargin.top != 0) || (mImpl->mMargin.bottom != 0))
   {
     for(unsigned int i = 0, numChildren = Self().GetChildCount(); i < numChildren; ++i)
     {
@@ -500,8 +499,8 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       newChildSize.height = size.height - (padding.top + padding.bottom);
 
       Vector2 childOffset(0.f, 0.f);
-      childOffset.x += (mMargin.start + padding.start);
-      childOffset.y += (mMargin.top + padding.top);
+      childOffset.x += (mImpl->mMargin.start + padding.start);
+      childOffset.y += (mImpl->mMargin.top + padding.top);
 
       child.SetProperty(Actor::Property::POSITION, Vector2(childOffset.x, childOffset.y));
 
@@ -1241,16 +1240,12 @@ float ViewImpl::GetMaximumHeight() const
 
 void ViewImpl::SetMargin(const Extents& margin)
 {
-  if(mMargin != margin)
-  {
-    mMargin = margin;
-    InvalidateMeasure();
-  }
+  Self().SetProperty(Ui::View::Property::MARGIN, margin);
 }
 
 Extents ViewImpl::GetMargin() const
 {
-  return mMargin;
+  return mImpl->mMargin;
 }
 
 void ViewImpl::SetPadding(const Extents& padding)
@@ -1587,7 +1582,6 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
-  mMargin(),
   mPadding(),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},

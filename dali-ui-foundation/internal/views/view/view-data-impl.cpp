@@ -510,6 +510,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mClockwiseFocusableActorId(-1),
   mCounterClockwiseFocusableActorId(-1),
   mBackgroundColor(Color::TRANSPARENT),
+  mMargin(),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
   mSize(0, 0),
@@ -865,7 +866,12 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Extents margin;
         if(value.Get(margin))
         {
-          viewImpl.SetMargin(margin);
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(dataImpl.mMargin != margin)
+          {
+            dataImpl.mMargin = margin;
+            viewImpl.InvalidateMeasure();
+          }
         }
         break;
       }

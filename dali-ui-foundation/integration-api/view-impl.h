@@ -881,7 +881,6 @@ private:
   float mMaximumHeight;
 
   // Layout Properties Data
-  Extents        mMargin;
   Extents        mPadding;
   Ui::LayoutMode mLayoutMode{Ui::LayoutMode::DEFAULT};
 
