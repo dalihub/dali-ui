@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <memory>
 #include <unordered_map>
+#include <atomic>
 
 // INTERNAL INCLUDE
 #include <dali-ui/ui-environment-variable.h>
