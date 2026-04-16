@@ -408,6 +408,22 @@ public: // Properties
   Vector4 GetDefaultTextColor() const;
 
   /**
+   * @brief Sets whether Label uses asynchronous text rendering by default.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] asyncRendering True to enable asynchronous rendering for Label by default,
+   * false to use synchronous rendering.
+   */
+  UiConfig& SetLabelAsyncRendering(bool asyncRendering);
+
+  /**
+   * @brief Retrieves whether Label uses asynchronous text rendering by default.
+   *
+   * @return True if asynchronous rendering is enabled for Label by default
+   */
+  bool IsLabelAsyncRendering() const;
+
+  /**
    * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
    *
    * @pre The config must not be frozen.

@@ -485,6 +485,11 @@ public: // From ControlInterface
    */
   void InvalidateTextMeasure() override;
 
+  /**
+   * @copydoc Text::ControlInterface::RequestAsyncRender()
+   */
+  void RequestAsyncRender();
+
   // From EditableControlInterface
 
   /**

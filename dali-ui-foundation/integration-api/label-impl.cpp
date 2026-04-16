@@ -127,6 +127,19 @@ const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1]
   1.0f  // Text::Alignment::END
 };
 
+/**
+ * @brief Discard the given visual into VisualFactory. The visual will be destroyed at next idle time.
+ * @param[in,out] visual Visual to be discarded. It will be reset to an empty handle.
+ */
+void DiscardLabelVisual(Dali::Ui::Visual::Base& visual)
+{
+  if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && visual))
+  {
+    Dali::Ui::VisualFactory::Get().DiscardVisual(visual);
+  }
+  visual.Reset();
+}
+
 } // namespace
 
 LabelImplPtr LabelImpl::New()
@@ -140,9 +153,12 @@ LabelImpl::LabelImpl()
   mLineHeight(-1.0f),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::ELLIPSIS),
+  mAsyncLineCount(0),
   mTextColorAnimatedCount(0),
-  mTextUpdateNeeded(false),
+  mRendererUpdateNeeded(false),
   mMeasureInvalidated(false),
+  mIsAsyncRenderRequested(false),
+  mIsSizeChanged(false),
   mLastMarqueeEnabled(false),
   mIsTouchDown(false),
   mHasAnchors(false),
@@ -154,6 +170,9 @@ LabelImpl::LabelImpl()
 
 LabelImpl::~LabelImpl()
 {
+  // This prevents access to the async text interface until the visual is actually destroyed.
+  Internal::TextVisual::SetAsyncTextInterface(mVisual, nullptr);
+  DiscardLabelVisual(mVisual);
 }
 
 // =============================================================================
@@ -164,8 +183,7 @@ void LabelImpl::SetText(const Dali::String& text)
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
-  mTextUpdateNeeded = true;
-  RequestTextRelayout();
+  InvalidateTextMeasure();
 }
 
 Dali::String LabelImpl::GetText() const
@@ -177,6 +195,7 @@ Dali::String LabelImpl::GetText() const
 
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.CStr());
   mController->SetDefaultFontFamily(ToStdString(fontFamily));
 }
@@ -192,6 +211,7 @@ void LabelImpl::SetFontSize(float fontSize)
   if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+    InvalidateTextMeasure();
   }
 }
 
@@ -204,6 +224,7 @@ void LabelImpl::SetMultiLine(bool multiLine)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), multiLine);
   mController->SetMultiLineEnabled(multiLine);
+  UpdateMarqueeState();
 }
 
 bool LabelImpl::IsMultiLine() const
@@ -279,6 +300,7 @@ void LabelImpl::SetOverflowMode(Text::OverflowMode mode)
       }
     }
     RequestTextRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -294,6 +316,7 @@ void LabelImpl::SetLineHeight(float lineHeight)
   {
     mLineHeight = lineHeight;
     UpdateLineHeight();
+    InvalidateTextMeasure();
   }
 }
 
@@ -309,6 +332,7 @@ void LabelImpl::SetLineHeightMode(Text::LineHeightMode mode)
   {
     mLineHeightMode = mode;
     UpdateLineHeight();
+    InvalidateTextMeasure();
   }
 }
 
@@ -323,7 +347,6 @@ void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
   if(mController->GetLayoutDirectionMode() != mode)
   {
     mController->SetLayoutDirectionMode(mode);
-    RequestTextRelayout();
   }
 }
 
@@ -473,6 +496,7 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
 
 void LabelImpl::SetFontWeight(Text::FontWeight weight)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
   mController->SetDefaultFontWeight(weight);
 }
@@ -484,6 +508,7 @@ Text::FontWeight LabelImpl::GetFontWeight() const
 
 void LabelImpl::SetFontWidth(Text::FontWidth width)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
   mController->SetDefaultFontWidth(width);
 }
@@ -495,6 +520,7 @@ Text::FontWidth LabelImpl::GetFontWidth() const
 
 void LabelImpl::SetFontSlant(Text::FontSlant slant)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
   mController->SetDefaultFontSlant(slant);
 }
@@ -539,7 +565,11 @@ void LabelImpl::SetUnderline(const Text::Underline& underline)
 
   SetColorBinding("UnderlineColor", color, this, &LabelImpl::SetUnderlineColorInternal);
 
-  Text::ApplyUnderlineStyle(mController, underline);
+  if(Text::ApplyUnderlineStyle(mController, underline))
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
 }
 
 void LabelImpl::ClearUnderline()
@@ -557,7 +587,11 @@ void LabelImpl::SetShadow(const Text::Shadow& shadow)
 
   SetColorBinding("ShadowColor", color, this, &LabelImpl::SetShadowColorInternal);
 
-  Text::ApplyShadowStyle(mController, shadow);
+  if(Text::ApplyShadowStyle(mController, shadow))
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
 }
 
 void LabelImpl::ClearShadow()
@@ -575,7 +609,11 @@ void LabelImpl::SetOutline(const Text::Outline& outline)
 
   SetColorBinding("OutlineColor", color, this, &LabelImpl::SetOutlineColorInternal);
 
-  Text::ApplyOutlineStyle(mController, outline);
+  if(Text::ApplyOutlineStyle(mController, outline))
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
 }
 
 void LabelImpl::ClearOutline()
@@ -593,7 +631,11 @@ void LabelImpl::SetLineThrough(const Text::LineThrough& lineThrough)
 
   SetColorBinding("LineThroughColor", color, this, &LabelImpl::SetLineThroughColorInternal);
 
-  Text::ApplyLineThroughStyle(mController, lineThrough);
+  if(Text::ApplyLineThroughStyle(mController, lineThrough))
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
 }
 
 void LabelImpl::ClearLineThrough()
@@ -613,7 +655,11 @@ void LabelImpl::SetBevel(const Text::Bevel& bevel)
   SetColorBinding("BevelLightColor", lightColor, this, &LabelImpl::SetBevelLightColorInternal);
   SetColorBinding("BevelShadowColor", shadowColor, this, &LabelImpl::SetBevelShadowColorInternal);
 
-  Text::ApplyBevelStyle(mController, bevel);
+  if(Text::ApplyBevelStyle(mController, bevel))
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
 }
 
 void LabelImpl::ClearBevel()
@@ -670,6 +716,7 @@ void LabelImpl::ClearTextFit()
 
 void LabelImpl::SetFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetFontSizeScale(scale);
 }
 
@@ -680,6 +727,7 @@ float LabelImpl::GetFontSizeScale() const
 
 void LabelImpl::SetMinimumFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetMinimumFontSizeScale(scale);
 }
 
@@ -690,6 +738,7 @@ float LabelImpl::GetMinimumFontSizeScale() const
 
 void LabelImpl::SetMaximumFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetMaximumFontSizeScale(scale);
 }
 
@@ -700,6 +749,7 @@ float LabelImpl::GetMaximumFontSizeScale() const
 
 void LabelImpl::SetSystemFontSizeScaleEnabled(bool enabled)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetSystemFontSizeScaleEnabled(enabled);
 }
 
@@ -710,13 +760,20 @@ bool LabelImpl::IsSystemFontSizeScaleEnabled() const
 
 void LabelImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetVariations(axes);
 }
 
 void LabelImpl::SetFontVariation(const Dali::String& settings)
 {
+  if(settings.Empty())
+  {
+    DALI_LOG_WARNING("[%p] Empty font variation string is not allowed. Use ClearFontVariation() instead.\n", mController.Get());
+    return;
+  }
+
   auto axes = Text::FontVariation::FromString(settings);
-  if(axes.Empty() && !settings.Empty())
+  if(axes.Empty())
   {
     DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
     return;
@@ -732,6 +789,7 @@ Dali::Vector<Text::FontVariationAxis> LabelImpl::GetFontVariation() const
 
 void LabelImpl::ClearFontVariation()
 {
+  // InvalidateMeasure() may be called if needed.
   mController->ClearVariationsMap();
 }
 
@@ -824,6 +882,16 @@ void LabelImpl::ClearMaskEffect()
   selfView.ClearRenderEffect();
 }
 
+void LabelImpl::SetAsyncRendering(bool asyncRendering)
+{
+  mController->SetAsyncRendering(asyncRendering);
+}
+
+bool LabelImpl::IsAsyncRendering() const
+{
+  return mController->IsAsyncRendering();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -839,6 +907,11 @@ int LabelImpl::GetLineCount(float width)
   Extents padding      = GetPadding();
   float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetLineCount(contentWidth);
+}
+
+int LabelImpl::GetAsyncLineCount() const
+{
+  return mAsyncLineCount;
 }
 
 bool LabelImpl::IsMarqueeRunning() const
@@ -890,6 +963,8 @@ void LabelImpl::ApplyInitialConfig()
 
   const auto& config = UiConfigManager::Get().GetConfig();
   SetFontSize(config.GetDefaultFontSize());
+  SetTextColor(config.GetDefaultTextColor());
+  SetAsyncRendering(config.IsLabelAsyncRendering());
 }
 
 // =============================================================================
@@ -909,12 +984,12 @@ void LabelImpl::OnInitialize()
 
   View view = Ui::View::DownCast(self);
   Internal::ViewDataImpl::Get(Integration::GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, DepthIndex::CONTENT);
+  Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 
   mController = Internal::TextVisual::GetController(mVisual);
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
-
   mController->SetControlInterface(this);
   mController->SetAnchorControlInterface(this);
 
@@ -947,6 +1022,9 @@ void LabelImpl::OnInitialize()
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
+  const bool sizeChanged = mIsSizeChanged;
+  mIsSizeChanged         = false;
+
   if(mTextScroller && mTextScroller->IsStopRequested())
   {
     // When marquee stop is requested in FINISH_LOOP mode, defer relayout until scrolling finishes.
@@ -971,6 +1049,29 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     std::swap(padding.start, padding.end);
   }
 
+  if(mController->IsAsyncRendering())
+  {
+    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || sizeChanged))
+    {
+      // When auto scroll is playing, a text load request is made only if a text update is absolutely necessary.
+      return;
+    }
+
+    if(!(sizeChanged || mIsAsyncRenderRequested))
+    {
+      // Do not request async render if there are no size or property updates.
+      return;
+    }
+
+    DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f [%s] \n", mController.Get(), contentSize.width, contentSize.height, GetText().CStr());
+
+    Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
+    Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+    mRendererUpdateNeeded   = false;
+    mIsAsyncRenderRequested = false;
+    return;
+  }
+
   if(mController->IsTextFitArrayEnabled())
   {
     mController->FitArrayPointSizeforLayout(contentSize);
@@ -991,7 +1092,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
 
-  if((Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType)) || mTextUpdateNeeded)
+  if((Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType)) || mRendererUpdateNeeded)
   {
     // Update the visual
     Internal::TextVisual::EnableRendererUpdate(mVisual);
@@ -1052,12 +1153,13 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       InitializeMarquee(contentSize, originSize);
     }
 
-    mTextUpdateNeeded = false;
+    mRendererUpdateNeeded = false;
   }
 
   if(mController->IsTextFitChanged())
   {
     mController->SetTextFitChanged(false);
+    EmitTextFitChanged();
   }
 }
 
@@ -1076,48 +1178,6 @@ float LabelImpl::GetHeightForWidth(float width)
   Extents padding      = GetPadding();
   float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
-}
-
-void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
-{
-  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
-  {
-    if(state == Animation::State::PLAYING)
-    {
-      ++mTextColorAnimatedCount;
-    }
-    else if(state == Animation::State::STOPPED)
-    {
-      if(mTextColorAnimatedCount)
-      {
-        --mTextColorAnimatedCount;
-      }
-    }
-
-    Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
-  }
-  Integration::ViewImpl::OnAnimateAnimatableProperty(animation, index, state);
-}
-
-void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
-{
-  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
-  {
-    if(applied)
-    {
-      ++mTextColorAnimatedCount;
-    }
-    else
-    {
-      if(mTextColorAnimatedCount)
-      {
-        --mTextColorAnimatedCount;
-      }
-    }
-
-    Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
-  }
-  Integration::ViewImpl::OnConstraintAnimatableProperty(constraint, index, applied);
 }
 
 MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
@@ -1144,7 +1204,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   if(useTextFitRange && wrapContentMeasure)
   {
     mController->SetTextFitEnabled(false);
-    SetFontSize(mController->GetTextFitMaxSize());
+    mController->SetDefaultFontSize(mController->GetTextFitMaxSize(Text::Controller::PIXEL_SIZE), Text::Controller::PIXEL_SIZE);
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
@@ -1153,7 +1213,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     const Text::FitCandidate* fitCandidate = mController->GetMaxFitCandidate();
     if(fitCandidate)
     {
-      SetFontSize(fitCandidate->GetFontSize());
+      mController->SetDefaultFontSize(fitCandidate->GetFontSize(), Text::Controller::PIXEL_SIZE);
       mController->SetDefaultLineSize(fitCandidate->GetLineHeight());
     }
     else
@@ -1208,13 +1268,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   if(useTextFitRange && wrapContentMeasure)
   {
     mController->SetTextFitEnabled(true);
-    SetFontSize(fontSize);
+    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
     UpdateLineHeight();
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
     mController->SetTextFitArrayEnabled(true);
-    SetFontSize(fontSize);
+    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
     UpdateLineHeight();
   }
 
@@ -1235,6 +1295,59 @@ MeasuredSize LabelImpl::OnArrange(const LayoutRect& bounds)
   return {bounds.width, bounds.height};
 }
 
+void LabelImpl::OnPaddingSet(const Extents& padding)
+{
+  mIsSizeChanged = true;
+}
+
+void LabelImpl::OnSizeSet(const Vector3& targetSize)
+{
+  mIsSizeChanged = true;
+  ViewImpl::OnSizeSet(targetSize);
+}
+
+void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
+{
+  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
+  {
+    if(state == Animation::State::PLAYING)
+    {
+      ++mTextColorAnimatedCount;
+    }
+    else if(state == Animation::State::STOPPED)
+    {
+      if(mTextColorAnimatedCount)
+      {
+        --mTextColorAnimatedCount;
+      }
+    }
+
+    Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
+  }
+  Integration::ViewImpl::OnAnimateAnimatableProperty(animation, index, state);
+}
+
+void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
+{
+  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
+  {
+    if(applied)
+    {
+      ++mTextColorAnimatedCount;
+    }
+    else
+    {
+      if(mTextColorAnimatedCount)
+      {
+        --mTextColorAnimatedCount;
+      }
+    }
+
+    Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
+  }
+  Integration::ViewImpl::OnConstraintAnimatableProperty(constraint, index, applied);
+}
+
 // =============================================================================
 // ControlInterface
 // =============================================================================
@@ -1253,12 +1366,16 @@ void LabelImpl::InvalidateTextMeasure()
   }
 }
 
+void LabelImpl::RequestAsyncRender()
+{
+  mIsAsyncRenderRequested = true;
+}
+
 // =============================================================================
 // ScrollerInterface
 // =============================================================================
 void LabelImpl::ScrollingFinished()
 {
-  // Pure Virtual from TextScroller Interface
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   mController->SetAutoScrollEnabled(false);
   RequestTextRelayout();
@@ -1279,21 +1396,150 @@ void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
 }
 
 // =============================================================================
-// Implementation
+// AsyncTextInterface
 // =============================================================================
-void LabelImpl::UpdateLineHeight()
+void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
 {
-  if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  // Check current state to prevent starting scroll when ENABLE_AUTO_SCROLL was set to false.
+  if(!mController->IsAutoScrollEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::TRUNCATE)
   {
-    mTextUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
-    mTextUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
+    if(!mIsAsyncRenderRequested)
+    {
+      DALI_LOG_ERROR("[%p] AsyncInitializeMarquee was called, but marquee was disabled and no next render was requested.\n", mController.Get());
+    }
+    // Marquee has been disabled since the async render was requested.
+    // Do not start scrolling even though the render was completed with marquee enabled.
+    // This issue occurs when ScrollingFinished and TextScroller::StartScrolling are called in the same loop.
+    RequestAsyncRender();
+    return;
+  }
+
+  Size      verifiedSize = renderInfo.size;
+  Size      controlSize  = renderInfo.controlSize;
+  float     wrapGap      = renderInfo.autoScrollWrapGap;
+  PixelData data         = renderInfo.autoScrollPixelData;
+  Texture   texture      = Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
+
+#if defined(GPU_MEMORY_PROFILE_ENABLED)
+  {
+    std::string text;
+    mController->GetText(text);
+    Dali::Integration::TextureUploadWithContent(texture, data, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SCROLL);
+  }
+#else
+  texture.Upload(data);
+#endif
+
+  TextureSet textureSet = TextureSet::New();
+  textureSet.SetTexture(0u, texture);
+
+  // Filter mode needs to be set to linear to produce better quality while scaling.
+  Sampler sampler = Sampler::New();
+  sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
+
+  bool isHorizontal = mTextScroller->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
+  if(isHorizontal)
+  {
+    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT, Dali::WrapMode::DEFAULT); // Wrap the texture in the x direction
   }
   else
   {
-    mTextUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
-    mTextUpdateNeeded |= mController->SetDefaultLineSize(mLineHeight);
+    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT); // Wrap the texture in the y direction
   }
-  RequestTextRelayout();
+  textureSet.SetSampler(0u, sampler);
+
+  // Set parameters for scrolling
+  Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
+  mTextScroller->SetParameters(Self(), renderer, textureSet, controlSize, verifiedSize, wrapGap, renderInfo.isTextDirectionRTL, mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(), true);
+}
+
+void LabelImpl::AsyncTextFitChanged(float pointSize)
+{
+  DALI_LOG_RELEASE_INFO("[%p] point size:%f\n", mController.Get(), pointSize);
+  if(mController->IsTextFitEnabled())
+  {
+    mController->SetTextFitPointSize(pointSize);
+    EmitTextFitChanged();
+  }
+}
+
+void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
+{
+  DALI_LOG_RELEASE_INFO("[%p] rendered size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+
+  // To avoid flickering issues, enable/disable the background visual when async load is completed.
+  SetViewBackgroundEnabled(!mController->IsTextCutout());
+
+  mAsyncLineCount = renderInfo.lineCount;
+
+  float width  = renderInfo.renderedSize.width;
+  float height = renderInfo.renderedSize.height;
+
+  // Padding is already included in renderedSize when cutout is enabled.
+  if(!renderInfo.isCutoutEnabled)
+  {
+    Extents padding = GetPadding();
+    width += padding.start + padding.end;
+    height += padding.top + padding.bottom;
+  }
+
+  EmitAsyncRenderFinished(width, height);
+}
+
+void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
+{
+  switch(renderInfo.requestType)
+  {
+    case Text::Async::COMPUTE_NATURAL_SIZE:
+    {
+      DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+      mAsyncLineCount = renderInfo.lineCount;
+      EmitAsyncNaturalSizeComputed(renderInfo.renderedSize.width, renderInfo.renderedSize.height);
+      break;
+    }
+    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    {
+      DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+      mAsyncLineCount = renderInfo.lineCount;
+      EmitAsyncHeightForWidthComputed(renderInfo.renderedSize.width, renderInfo.renderedSize.height);
+      break;
+    }
+    default:
+    {
+      DALI_LOG_ERROR("Unexpected request type recieved : %d\n", renderInfo.requestType);
+      break;
+    }
+  }
+}
+
+// =============================================================================
+// Implementation
+// =============================================================================
+void LabelImpl::RequestRendererUpdate()
+{
+  mRendererUpdateNeeded = true;
+}
+
+void LabelImpl::UpdateLineHeight()
+{
+  bool rendererUpdateNeeded = false;
+  if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  {
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
+  }
+  else
+  {
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(mLineHeight);
+  }
+
+  if(rendererUpdateNeeded)
+  {
+    RequestTextRelayout();
+    RequestAsyncRender();
+    RequestRendererUpdate();
+  }
 }
 
 void LabelImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type)
@@ -1454,7 +1700,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
-  mTextScroller->SetParameters(Self(), renderer, textureSet, controlSize, verifiedSize, wrapGap, direction, mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(), mTextUpdateNeeded);
+  mTextScroller->SetParameters(Self(), renderer, textureSet, controlSize, verifiedSize, wrapGap, direction, mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(), mRendererUpdateNeeded);
   mController->SetTextElideEnabled(actualellipsis);
   mController->SetAutoScrollMaxTextureExceeded(false);
 }
@@ -1560,6 +1806,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
       {
         mController->SetAutoScrollEnabled(enabled, true, GetTextScroller()->GetOrientation());
       }
+      RequestAsyncRender();
     }
   }
 }
@@ -1736,7 +1983,7 @@ void LabelImpl::OnBackgroundPropertyChanged()
     mController->SetBackgroundColorWithCutout(backgroundColor);
     mController->SetBackgroundWithCutoutEnabled(true);
 
-    if(mController->GetRenderMode() == Text::Render::SYNC)
+    if(!mController->IsAsyncRendering())
     {
       SetViewBackgroundEnabled(false);
     }
@@ -1756,11 +2003,118 @@ void LabelImpl::UpdateCutoutState(bool enabled)
     }
   }
 
-  if(mController->GetRenderMode() == Text::Render::SYNC)
+  if(!mController->IsAsyncRendering())
   {
     SetViewBackgroundEnabled(!enabled);
     Internal::TextVisual::SetRequireRender(mVisual, enabled);
   }
+}
+
+Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType requestType, const Vector2& contentSize, const Extents& padding, const Dali::LayoutDirection::Type layoutDirection)
+{
+  // Logically, all properties of the label should be passed.
+
+  std::string text;
+  mController->GetRawText(text);
+
+  Text::AsyncTextParameters parameters;
+  parameters.requestType     = requestType;
+  parameters.textWidth       = contentSize.width;
+  parameters.textHeight      = contentSize.height;
+  parameters.padding         = padding;
+  parameters.layoutDirection = layoutDirection;
+  parameters.text            = text;
+
+  parameters.maxTextureSize             = Dali::GetMaxTextureSize();
+  parameters.fontSize                   = mController->GetDefaultFontSize(Text::Controller::POINT_SIZE);
+  parameters.textColor                  = mController->GetDefaultColor();
+  parameters.fontFamily                 = mController->GetDefaultFontFamily();
+  parameters.fontWeight                 = mController->GetDefaultFontWeight();
+  parameters.fontWidth                  = mController->GetDefaultFontWidth();
+  parameters.fontSlant                  = mController->GetDefaultFontSlant();
+  parameters.isMultiLine                = mController->IsMultiLineEnabled();
+  parameters.ellipsis                   = mController->IsTextElideEnabled();
+  parameters.enableMarkup               = mController->IsMarkupProcessorEnabled();
+  parameters.minLineSize                = mController->GetDefaultLineSize();
+  parameters.relativeLineSize           = mController->GetRelativeLineSize();
+  parameters.characterSpacing           = mController->GetCharacterSpacing();
+  parameters.fontSizeScale              = mController->GetAdjustedFontSizeScale();
+  parameters.horizontalAlignment        = mController->GetHorizontalAlignment();
+  parameters.verticalAlignment          = mController->GetVerticalAlignment();
+  parameters.verticalLineAlignment      = mController->GetVerticalLineAlignment();
+  parameters.lineWrapMode               = mController->GetLineWrapMode();
+  parameters.layoutDirectionPolicy      = mController->GetLayoutDirectionMode();
+  parameters.ellipsisPosition           = mController->GetEllipsisPosition();
+  parameters.isUnderlineEnabled         = mController->IsUnderlineEnabled();
+  parameters.underlineType              = mController->GetUnderlineType();
+  parameters.underlineColor             = mController->GetUnderlineColor();
+  parameters.underlineHeight            = mController->GetUnderlineHeight();
+  parameters.dashedUnderlineWidth       = mController->GetDashedUnderlineWidth();
+  parameters.dashedUnderlineGap         = mController->GetDashedUnderlineGap();
+  parameters.isStrikethroughEnabled     = mController->IsStrikethroughEnabled();
+  parameters.strikethroughColor         = mController->GetStrikethroughColor();
+  parameters.strikethroughHeight        = mController->GetStrikethroughHeight();
+  parameters.isTextBackgroundEnabled    = mController->IsBackgroundEnabled();
+  parameters.textBackgroundColor        = mController->GetBackgroundColor();
+  parameters.shadowBlurRadius           = mController->GetShadowBlurRadius();
+  parameters.shadowColor                = mController->GetShadowColor();
+  parameters.shadowOffset               = mController->GetShadowOffset();
+  parameters.outlineWidth               = mController->GetOutlineWidth();
+  parameters.outlineColor               = mController->GetOutlineColor();
+  parameters.outlineBlurRadius          = mController->GetOutlineBlurRadius();
+  parameters.outlineOffset              = mController->GetOutlineOffset();
+  parameters.isTextFitEnabled           = mController->IsTextFitEnabled();
+  parameters.textFitMinSize             = mController->GetTextFitMinSize(Text::Controller::POINT_SIZE);
+  parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Text::Controller::POINT_SIZE);
+  parameters.textFitStepSize            = mController->GetTextFitStepSize(Text::Controller::POINT_SIZE);
+  parameters.isTextFitCandidatesEnabled = mController->IsTextFitArrayEnabled();
+  parameters.textFitCandidates          = mController->GetTextFitArray();
+  parameters.isAutoScrollEnabled        = mController->IsAutoScrollEnabled();
+  parameters.ellipsisMode               = mController->GetEllipsisMode();
+  if(parameters.isAutoScrollEnabled || parameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
+  {
+    parameters.autoScrollStopMode  = GetTextScroller()->GetStopMode();
+    parameters.autoScrollSpeed     = GetTextScroller()->GetSpeed();
+    parameters.autoScrollLoopCount = GetTextScroller()->GetLoopCount();
+    parameters.autoScrollLoopDelay = GetTextScroller()->GetLoopDelay();
+    parameters.autoScrollGap       = GetTextScroller()->GetGap();
+    parameters.autoScrollDirection = GetTextScroller()->GetOrientation();
+  }
+  parameters.isCutoutEnabled               = mController->IsTextCutout();
+  parameters.isBackgroundWithCutoutEnabled = mController->IsBackgroundWithCutoutEnabled();
+  parameters.backgroundColorWithCutout     = mController->GetBackgroundColorWithCutout();
+  Property::Map variationsMap;
+  mController->GetVariationsMap(variationsMap);
+  parameters.variationsMap     = variationsMap;
+  parameters.renderScale       = mController->GetRenderScale();
+  parameters.isEmbossEnabled   = mController->IsEmbossEnabled();
+  parameters.embossDirection   = mController->GetEmbossDirection();
+  parameters.embossStrength    = mController->GetEmbossStrength();
+  parameters.embossLightColor  = mController->GetEmbossLightColor();
+  parameters.embossShadowColor = mController->GetEmbossShadowColor();
+
+  return parameters;
+}
+
+void LabelImpl::EmitTextFitChanged()
+{
+  // Intentionally not emitted for now.
+  // Revisit when the public TextFitChanged API direction is finalized.
+}
+
+void LabelImpl::EmitAsyncRenderFinished(float width, float height)
+{
+  // TODO
+}
+
+void LabelImpl::EmitAsyncNaturalSizeComputed(float width, float height)
+{
+  // TODO
+}
+
+void LabelImpl::EmitAsyncHeightForWidthComputed(float width, float height)
+{
+  // TODO
 }
 
 // =============================================================================
@@ -1772,7 +2126,7 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
   {
     Self().SetProperty(Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
-    mTextUpdateNeeded = true;
+    RequestRendererUpdate();
 
     // Trigger constraint always.
     if(DALI_LIKELY(mVisual))
@@ -1787,8 +2141,7 @@ void LabelImpl::SetAnchorColorInternal(const Vector4& color)
   if(mController->GetAnchorColor() != color)
   {
     mController->SetAnchorColor(color);
-    mTextUpdateNeeded = true;
-    RequestTextRelayout();
+    RequestRendererUpdate();
   }
 }
 
@@ -1797,8 +2150,7 @@ void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
   if(mController->GetAnchorClickedColor() != color)
   {
     mController->SetAnchorClickedColor(color);
-    mTextUpdateNeeded = true;
-    RequestTextRelayout();
+    RequestRendererUpdate();
   }
 }
 
@@ -1807,8 +2159,7 @@ void LabelImpl::SetTextBackgroundColorInternal(const Vector4& color)
   if(mController->GetBackgroundColor() != color)
   {
     mController->SetBackgroundColor(color);
-    mTextUpdateNeeded = true;
-    RequestTextRelayout();
+    RequestRendererUpdate();
   }
 }
 
@@ -1873,7 +2224,7 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       if(mController->GetDefaultColor() != textColor)
       {
         mController->SetDefaultColor(textColor);
-        mTextUpdateNeeded = true;
+        RequestRendererUpdate();
 
         // Trigger constraint always.
         if(DALI_LIKELY(mVisual))

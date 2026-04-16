@@ -430,7 +430,7 @@ public:
     mProcessorRegistered(false),
     mTextCutout(false),
     mIsCursorInsetEnabled(false),
-    mRenderMode(Text::Render::SYNC),
+    mIsAsyncRendering(false),
     mEllipsisMode(Ellipsize::TRUNCATE)
   {
     mModel = Model::New();
@@ -487,6 +487,11 @@ public:
    * @copydoc Text::Controller::InvalidateMeasure()
    */
   void InvalidateMeasure();
+
+  /**
+   * @copydoc Text::Controller::RequestAsyncRender()
+   */
+  void RequestAsyncRender();
 
   /**
    * @brief Request a relayout using the ControlInterface.
@@ -1252,9 +1257,9 @@ public:
   bool  mProcessorRegistered : 1;        ///< Whether the text controller registered into processor or not.
   bool  mTextCutout : 1;                 ///< Whether the text cutout enabled.
   bool  mIsCursorInsetEnabled : 1;       ///< Whether the cursor inset is enabled.
+  bool  mIsAsyncRendering : 1;           ///< whether asynchronous text rendering is enabled.
 
-  Text::Render::Mode mRenderMode;   ///< Render mode of the text. (SYNC, ASYNC_AUTO, ASYNC_MANUAL)
-  Ellipsize::Mode    mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
+  Ellipsize::Mode mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
 
 private:
   friend ControllerImplEventHandler;

@@ -465,10 +465,10 @@ public: // Configure the text controller.
 
   /**
    * @brief Retrieves the minimum point size valid for text fit.
-   *
+   * @param[in] type The font size type is point size or pixel size
    * @return The minimum point size valid for text fit
    */
-  float GetTextFitMinSize() const;
+  float GetTextFitMinSize(FontSizeType type) const;
 
   /**
    * @brief Sets maximum size valid for text fit.
@@ -480,10 +480,10 @@ public: // Configure the text controller.
 
   /**
    * @brief Retrieves the maximum point size valid for text fit.
-   *
+   * @param[in] type The font size type is point size or pixel size
    * @return The maximum point size valid for text fit
    */
-  float GetTextFitMaxSize() const;
+  float GetTextFitMaxSize(FontSizeType type) const;
 
   /**
    * @brief Sets step size for font increase valid for text fit.
@@ -495,10 +495,10 @@ public: // Configure the text controller.
 
   /**
    * @brief Retrieves the step point size valid for text fit.
-   *
+   * @param[in] type The font size type is point size or pixel size
    * @return The step point size valid for text fit
    */
-  float GetTextFitStepSize() const;
+  float GetTextFitStepSize(FontSizeType type) const;
 
   /**
    * @brief Sets content size valid for text fit.
@@ -577,7 +577,7 @@ public: // Configure the text controller.
   /**
    * @brief Sets the text fit array.
    *
-   * @param[in] fitOptions The list of text fit options.
+   * @param[in] candidates The list of text fit candidates.
    */
   void SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates);
 
@@ -2253,19 +2253,18 @@ public: // Queries & retrieves.
   bool IsShowingRealText() const;
 
   /**
-   * @brief Sets the render mode of the text.
+   * @brief Sets whether text is rendered asynchronously.
    *
-   * By default is Text::Render::Sync.
-   *
-   * @param[in] renderMode Render mode of the text.
+   * @param[in] asyncRendering True to render text asynchronously, false to render it synchronously.
    */
-  void SetRenderMode(Ui::Text::Render::Mode renderMode);
+  void SetAsyncRendering(bool asyncRendering);
 
   /**
-   * @brief Gets the render mode of the text.
-   * @return The value of render mode of the text.
+   * @brief Gets whether text is rendered asynchronously.
+   *
+   * @return True if text is rendered asynchronously, otherwise false.
    */
-  Ui::Text::Render::Mode GetRenderMode();
+  bool IsAsyncRendering() const;
 
 public: // Relayout.
   /**
@@ -2289,6 +2288,11 @@ public: // Relayout.
    * @brief Invalidate the measured size using the ControlInterface.
    */
   void InvalidateMeasure();
+
+  /**
+   * @brief Requests asynchronous text rendering.
+   */
+  void RequestAsyncRender();
 
 public: // Input style change signals.
   /**

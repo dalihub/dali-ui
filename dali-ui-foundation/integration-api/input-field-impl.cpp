@@ -342,6 +342,7 @@ Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
 
 void InputFieldImpl::SetFontWeight(Text::FontWeight weight)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
   mController->SetDefaultFontWeight(weight);
 }
@@ -353,6 +354,7 @@ Text::FontWeight InputFieldImpl::GetFontWeight() const
 
 void InputFieldImpl::SetFontWidth(Text::FontWidth width)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
   mController->SetDefaultFontWidth(width);
 }
@@ -364,6 +366,7 @@ Text::FontWidth InputFieldImpl::GetFontWidth() const
 
 void InputFieldImpl::SetFontSlant(Text::FontSlant slant)
 {
+  // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
   mController->SetDefaultFontSlant(slant);
 }
@@ -493,6 +496,7 @@ void InputFieldImpl::ClearLineThrough()
 
 void InputFieldImpl::SetFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetFontSizeScale(scale);
 }
 
@@ -503,6 +507,7 @@ float InputFieldImpl::GetFontSizeScale() const
 
 void InputFieldImpl::SetMinimumFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetMinimumFontSizeScale(scale);
 }
 
@@ -513,6 +518,7 @@ float InputFieldImpl::GetMinimumFontSizeScale() const
 
 void InputFieldImpl::SetMaximumFontSizeScale(float scale)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetMaximumFontSizeScale(scale);
 }
 
@@ -523,6 +529,7 @@ float InputFieldImpl::GetMaximumFontSizeScale() const
 
 void InputFieldImpl::SetSystemFontSizeScaleEnabled(bool enabled)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetSystemFontSizeScaleEnabled(enabled);
 }
 
@@ -533,13 +540,20 @@ bool InputFieldImpl::IsSystemFontSizeScaleEnabled() const
 
 void InputFieldImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
+  // InvalidateMeasure() may be called if needed.
   mController->SetVariations(axes);
 }
 
 void InputFieldImpl::SetFontVariation(const Dali::String& settings)
 {
+  if(settings.Empty())
+  {
+    DALI_LOG_WARNING("[%p] Empty font variation string is not allowed. Use ClearFontVariation() instead.\n", mController.Get());
+    return;
+  }
+
   auto axes = Text::FontVariation::FromString(settings);
-  if(axes.Empty() && !settings.Empty())
+  if(axes.Empty())
   {
     DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
     return;
@@ -555,6 +569,7 @@ Dali::Vector<Text::FontVariationAxis> InputFieldImpl::GetFontVariation() const
 
 void InputFieldImpl::ClearFontVariation()
 {
+  // InvalidateMeasure() may be called if needed.
   mController->ClearVariationsMap();
 }
 
@@ -1028,6 +1043,10 @@ void InputFieldImpl::InvalidateTextMeasure()
       mMeasureInvalidated = true;
     }
   }
+}
+
+void InputFieldImpl::RequestAsyncRender()
+{
 }
 
 // =============================================================================

@@ -144,10 +144,9 @@ void Controller::SetGlyphType(TextAbstraction::GlyphType glyphType)
   // Metrics for bitmap & vector based glyphs are different
   mImpl->mMetrics->SetGlyphType(glyphType);
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
 
-  mImpl->RequestRelayout();
+  RequestRelayout();
 }
 
 void Controller::SetMarkupProcessorEnabled(bool enable)
@@ -352,7 +351,8 @@ void Controller::SetTextCutout(bool cutout)
   {
     mImpl->mModel->mVisualModel->SetCutoutEnabled(cutout);
     mImpl->mTextCutout = cutout;
-    mImpl->RequestRelayout();
+    RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -382,10 +382,10 @@ void Controller::SetVariationsMap(const Property::Map& map)
     }
   }
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 Dali::Vector<Text::FontVariationAxis> Controller::GetVariations() const
@@ -426,7 +426,9 @@ void Controller::SetVariations(const Dali::Vector<Text::FontVariationAxis>& axes
   }
 
   mImpl->ClearFontData();
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 void Controller::ClearVariationsMap()
@@ -436,7 +438,9 @@ void Controller::ClearVariationsMap()
   {
     variationsMap.Clear();
     mImpl->ClearFontData();
-    mImpl->RequestRelayout();
+    RequestRelayout();
+    RequestAsyncRender();
+    InvalidateMeasure();
   }
 }
 
@@ -481,14 +485,19 @@ bool Controller::IsShowingRealText() const
   return mImpl->IsShowingRealText();
 }
 
-void Controller::SetRenderMode(Text::Render::Mode renderMode)
+void Controller::SetAsyncRendering(bool asyncRendering)
 {
-  mImpl->mRenderMode = renderMode;
+  if(mImpl->mIsAsyncRendering != asyncRendering)
+  {
+    mImpl->mIsAsyncRendering = asyncRendering;
+    RequestRelayout();
+    RequestAsyncRender();
+  }
 }
 
-Text::Render::Mode Controller::GetRenderMode()
+bool Controller::IsAsyncRendering() const
 {
-  return mImpl->mRenderMode;
+  return mImpl->mIsAsyncRendering;
 }
 
 void Controller::SetLineWrapMode(LineWrapMode lineWrapMode)
@@ -516,7 +525,8 @@ void Controller::SetTextFitEnabled(bool enabled)
 {
   mImpl->mTextFitEnabled = enabled;
   mImpl->ClearFontData();
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsTextFitEnabled() const
@@ -549,9 +559,9 @@ void Controller::SetTextFitMinSize(float minSize, FontSizeType type)
   mImpl->mTextFitMinSize = (type == POINT_SIZE) ? minSize : ConvertPixelToPoint(minSize);
 }
 
-float Controller::GetTextFitMinSize() const
+float Controller::GetTextFitMinSize(FontSizeType type) const
 {
-  return ConvertPointToPixel(mImpl->mTextFitMinSize);
+  return type == POINT_SIZE ? mImpl->mTextFitMinSize : ConvertPointToPixel(mImpl->mTextFitMinSize);
 }
 
 void Controller::SetTextFitMaxSize(float maxSize, FontSizeType type)
@@ -559,9 +569,9 @@ void Controller::SetTextFitMaxSize(float maxSize, FontSizeType type)
   mImpl->mTextFitMaxSize = (type == POINT_SIZE) ? maxSize : ConvertPixelToPoint(maxSize);
 }
 
-float Controller::GetTextFitMaxSize() const
+float Controller::GetTextFitMaxSize(FontSizeType type) const
 {
-  return ConvertPointToPixel(mImpl->mTextFitMaxSize);
+  return type == POINT_SIZE ? mImpl->mTextFitMaxSize : ConvertPointToPixel(mImpl->mTextFitMaxSize);
 }
 
 void Controller::SetTextFitStepSize(float step, FontSizeType type)
@@ -569,9 +579,9 @@ void Controller::SetTextFitStepSize(float step, FontSizeType type)
   mImpl->mTextFitStepSize = (type == POINT_SIZE) ? step : ConvertPixelToPoint(step);
 }
 
-float Controller::GetTextFitStepSize() const
+float Controller::GetTextFitStepSize(FontSizeType type) const
 {
-  return ConvertPointToPixel(mImpl->mTextFitStepSize);
+  return type == POINT_SIZE ? mImpl->mTextFitStepSize : ConvertPointToPixel(mImpl->mTextFitStepSize);
 }
 
 void Controller::SetTextFitContentSize(Vector2 size)
@@ -606,7 +616,8 @@ void Controller::SetTextFitArrayEnabled(bool enabled)
 {
   mImpl->mTextFitArrayEnabled = enabled;
   mImpl->ClearFontData();
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsTextFitArrayEnabled() const
@@ -798,10 +809,10 @@ void Controller::SetDefaultFontFamily(const std::string& defaultFontFamily)
     // Update the cursor position if it's in editing mode
     UpdateCursorPosition(mImpl->mEventData);
 
-    // Clear the font-specific data
     mImpl->ClearFontData();
-
-    mImpl->RequestRelayout();
+    RequestRelayout();
+    RequestAsyncRender();
+    InvalidateMeasure();
   }
 }
 
@@ -830,10 +841,10 @@ void Controller::SetDefaultFontWeight(FontWeight weight)
   // Update the cursor position if it's in editing mode
   UpdateCursorPosition(mImpl->mEventData);
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 bool Controller::IsDefaultFontWeightDefined() const
@@ -871,10 +882,10 @@ void Controller::SetDefaultFontWidth(FontWidth width)
   // Update the cursor position if it's in editing mode
   UpdateCursorPosition(mImpl->mEventData);
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 bool Controller::IsDefaultFontWidthDefined() const
@@ -912,10 +923,10 @@ void Controller::SetDefaultFontSlant(FontSlant slant)
   // Update the cursor position if it's in editing mode
   UpdateCursorPosition(mImpl->mEventData);
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
+  InvalidateMeasure();
 }
 
 bool Controller::IsDefaultFontSlantDefined() const
@@ -1003,10 +1014,9 @@ void Controller::SetDefaultFontSize(float fontSize, FontSizeType type)
   // Update the cursor position if it's in editing mode
   UpdateCursorPosition(mImpl->mEventData);
 
-  // Clear the font-specific data
   mImpl->ClearFontData();
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 
   if(mImpl->mEventData && EventData::INACTIVE != mImpl->mEventData->mState)
   {
@@ -1097,7 +1107,8 @@ const Vector4& Controller::GetPlaceholderTextColor() const
 void Controller::SetShadowOffset(const Vector2& shadowOffset)
 {
   mImpl->mModel->mVisualModel->SetShadowOffset(shadowOffset);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector2& Controller::GetShadowOffset() const
@@ -1108,7 +1119,8 @@ const Vector2& Controller::GetShadowOffset() const
 void Controller::SetShadowColor(const Vector4& shadowColor)
 {
   mImpl->mModel->mVisualModel->SetShadowColor(shadowColor);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetShadowColor() const
@@ -1121,7 +1133,6 @@ void Controller::SetShadowBlurRadius(const float& shadowBlurRadius)
   if(fabsf(GetShadowBlurRadius() - shadowBlurRadius) > Math::MACHINE_EPSILON_1)
   {
     mImpl->mModel->mVisualModel->SetShadowBlurRadius(shadowBlurRadius);
-    mImpl->RequestRelayout();
   }
 }
 
@@ -1133,7 +1144,8 @@ bool Controller::IsEmbossEnabled() const
 void Controller::SetEmbossEnabled(const bool enable)
 {
   mImpl->mModel->mVisualModel->SetEmbossEnabled(enable);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector2& Controller::GetEmbossDirection() const
@@ -1164,6 +1176,8 @@ const Vector4& Controller::GetEmbossLightColor() const
 void Controller::SetEmbossLightColor(const Vector4& lightColor)
 {
   mImpl->mModel->mVisualModel->SetEmbossLightColor(lightColor);
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetEmbossShadowColor() const
@@ -1174,6 +1188,8 @@ const Vector4& Controller::GetEmbossShadowColor() const
 void Controller::SetEmbossShadowColor(const Vector4& shadowColor)
 {
   mImpl->mModel->mVisualModel->SetEmbossShadowColor(shadowColor);
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const float& Controller::GetShadowBlurRadius() const
@@ -1184,7 +1200,8 @@ const float& Controller::GetShadowBlurRadius() const
 void Controller::SetUnderlineColor(const Vector4& color)
 {
   mImpl->mModel->mVisualModel->SetUnderlineColor(color);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetUnderlineColor() const
@@ -1195,7 +1212,8 @@ const Vector4& Controller::GetUnderlineColor() const
 void Controller::SetUnderlineEnabled(bool enabled)
 {
   mImpl->mModel->mVisualModel->SetUnderlineEnabled(enabled);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsUnderlineEnabled() const
@@ -1206,7 +1224,6 @@ bool Controller::IsUnderlineEnabled() const
 void Controller::SetUnderlineHeight(float height)
 {
   mImpl->mModel->mVisualModel->SetUnderlineHeight(height);
-  mImpl->RequestRelayout();
 }
 
 float Controller::GetUnderlineHeight() const
@@ -1217,8 +1234,6 @@ float Controller::GetUnderlineHeight() const
 void Controller::SetUnderlineType(Text::Underline::Type type)
 {
   mImpl->mModel->mVisualModel->SetUnderlineType(type);
-
-  mImpl->RequestRelayout();
 }
 
 Text::Underline::Type Controller::GetUnderlineType() const
@@ -1229,8 +1244,6 @@ Text::Underline::Type Controller::GetUnderlineType() const
 void Controller::SetDashedUnderlineWidth(float width)
 {
   mImpl->mModel->mVisualModel->SetDashedUnderlineWidth(width);
-
-  mImpl->RequestRelayout();
 }
 
 float Controller::GetDashedUnderlineWidth() const
@@ -1241,8 +1254,6 @@ float Controller::GetDashedUnderlineWidth() const
 void Controller::SetDashedUnderlineGap(float gap)
 {
   mImpl->mModel->mVisualModel->SetDashedUnderlineGap(gap);
-
-  mImpl->RequestRelayout();
 }
 
 float Controller::GetDashedUnderlineGap() const
@@ -1253,7 +1264,6 @@ float Controller::GetDashedUnderlineGap() const
 void Controller::SetOutlineOffset(const Vector2& outlineOffset)
 {
   mImpl->mModel->mVisualModel->SetOutlineOffset(outlineOffset);
-  mImpl->RequestRelayout();
 }
 
 const Vector2& Controller::GetOutlineOffset() const
@@ -1264,7 +1274,8 @@ const Vector2& Controller::GetOutlineOffset() const
 void Controller::SetOutlineColor(const Vector4& color)
 {
   mImpl->mModel->mVisualModel->SetOutlineColor(color);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetOutlineColor() const
@@ -1275,7 +1286,8 @@ const Vector4& Controller::GetOutlineColor() const
 void Controller::SetOutlineWidth(uint16_t width)
 {
   mImpl->mModel->mVisualModel->SetOutlineWidth(width);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 uint16_t Controller::GetOutlineWidth() const
@@ -1288,7 +1300,6 @@ void Controller::SetOutlineBlurRadius(const float& outlineBlurRadius)
   if(fabsf(GetOutlineBlurRadius() - outlineBlurRadius) > Math::MACHINE_EPSILON_1)
   {
     mImpl->mModel->mVisualModel->SetOutlineBlurRadius(outlineBlurRadius);
-    mImpl->RequestRelayout();
   }
 }
 
@@ -1300,7 +1311,8 @@ const float& Controller::GetOutlineBlurRadius() const
 void Controller::SetBackgroundColor(const Vector4& color)
 {
   mImpl->mModel->mVisualModel->SetBackgroundColor(color);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetBackgroundColor() const
@@ -1311,7 +1323,8 @@ const Vector4& Controller::GetBackgroundColor() const
 void Controller::SetBackgroundEnabled(bool enabled)
 {
   mImpl->mModel->mVisualModel->SetBackgroundEnabled(enabled);
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsBackgroundEnabled() const
@@ -1575,8 +1588,6 @@ void Controller::FontStyleSetByString(bool setByString)
 void Controller::SetStrikethroughHeight(float height)
 {
   mImpl->mModel->mVisualModel->SetStrikethroughHeight(height);
-
-  mImpl->RequestRelayout();
 }
 
 float Controller::GetStrikethroughHeight() const
@@ -1587,8 +1598,8 @@ float Controller::GetStrikethroughHeight() const
 void Controller::SetStrikethroughColor(const Vector4& color)
 {
   mImpl->mModel->mVisualModel->SetStrikethroughColor(color);
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const Vector4& Controller::GetStrikethroughColor() const
@@ -1599,8 +1610,8 @@ const Vector4& Controller::GetStrikethroughColor() const
 void Controller::SetStrikethroughEnabled(bool enabled)
 {
   mImpl->mModel->mVisualModel->SetStrikethroughEnabled(enabled);
-
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsStrikethroughEnabled() const
@@ -1796,9 +1807,9 @@ float Controller::GetRenderScale() const
 void Controller::SetCharacterSpacing(float characterSpacing)
 {
   mImpl->mModel->mVisualModel->SetCharacterSpacing(characterSpacing);
-
   mImpl->RelayoutAllCharacters();
-  mImpl->RequestRelayout();
+  RequestRelayout();
+  RequestAsyncRender();
 }
 
 const float Controller::GetCharacterSpacing() const
@@ -1820,6 +1831,7 @@ void Controller::SetBackgroundWithCutoutEnabled(bool cutout)
 {
   mImpl->mModel->mVisualModel->SetBackgroundWithCutoutEnabled(cutout);
   RequestRelayout();
+  RequestAsyncRender();
 }
 
 bool Controller::IsBackgroundWithCutoutEnabled() const
@@ -1830,7 +1842,7 @@ bool Controller::IsBackgroundWithCutoutEnabled() const
 void Controller::SetBackgroundColorWithCutout(const Vector4& color)
 {
   mImpl->mModel->mVisualModel->SetBackgroundColorWithCutout(color);
-  mImpl->RequestRelayout();
+  RequestRelayout();
 }
 
 const Vector4 Controller::GetBackgroundColorWithCutout() const
@@ -1856,6 +1868,11 @@ void Controller::RequestRelayout()
 void Controller::InvalidateMeasure()
 {
   mImpl->InvalidateMeasure();
+}
+
+void Controller::RequestAsyncRender()
+{
+  mImpl->RequestAsyncRender();
 }
 
 Vector<Vector2> Controller::GetTextSize(CharacterIndex startIndex, CharacterIndex endIndex)
@@ -1973,7 +1990,7 @@ void Controller::SetTextSelectionRange(const uint32_t* start, const uint32_t* en
     mImpl->mEventData->mIsLeftHandleSelected  = true;
     mImpl->mEventData->mIsRightHandleSelected = true;
     mImpl->SetTextSelectionRange(start, end);
-    mImpl->RequestRelayout();
+    RequestRelayout();
     EventHandler::KeyboardFocusGainEvent(*this);
   }
 }
@@ -2151,7 +2168,7 @@ void Controller::DisplayTimeExpired()
   // Apply modifications to the model
   mImpl->mOperationsPending = ALL_OPERATIONS;
 
-  mImpl->RequestRelayout();
+  RequestRelayout();
 }
 
 void Controller::ResetCursorPosition(CharacterIndex cursorIndex)

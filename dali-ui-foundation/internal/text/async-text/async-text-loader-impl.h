@@ -239,9 +239,9 @@ private:
   Mutex mMutex;
 }; // class AsyncTextLoader
 
-inline bool compareByPointSize(Ui::Text::FitOption& lhs, Ui::Text::FitOption& rhs)
+inline bool compareByPointSize(Ui::Text::FitCandidate& lhs, Ui::Text::FitCandidate& rhs)
 {
-  return lhs.GetPointSize() < rhs.GetPointSize();
+  return lhs.GetFontSize() < rhs.GetFontSize();
 }
 
 } // namespace Internal

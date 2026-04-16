@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/integration-api/view-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
@@ -55,7 +56,7 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  *
  * @see Dali::Ui::LabelImpl
  */
-class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface
+class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface, public Text::AsyncTextInterface
 {
 public:
   // Creation & Destruction
@@ -502,6 +503,16 @@ public:
    */
   void ClearMaskEffect();
 
+  /**
+   * @copydoc Dali::Ui::Label::SetAsyncRendering
+   */
+  void SetAsyncRendering(bool asyncRendering);
+
+  /**
+   * @copydoc Dali::Ui::Label::IsAsyncRendering
+   */
+  bool IsAsyncRendering() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -512,6 +523,11 @@ public:
    * @see Dali::Ui::Label::GetLineCount(float)
    */
   int GetLineCount(float width);
+
+  /**
+   * @see Dali::Ui::Label::GetAsyncLineCount
+   */
+  int GetAsyncLineCount() const;
 
   /**
    * @copydoc Dali::Ui::Label::IsMarqueeRunning
@@ -575,18 +591,6 @@ public: // From ViewImpl
    */
   float GetHeightForWidth(float width) override;
 
-public: // From CustomActorImpl
-  /**
-   * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
-   */
-  void OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index,
-                                   Dali::Animation::State state) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnConstraintAnimatableProperty()
-   */
-  void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
-
 protected: // From ViewImpl
   /**
    * @copydoc Integration::ViewImpl::OnMeasure
@@ -598,6 +602,28 @@ protected: // From ViewImpl
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 
+  /**
+   * @copydoc Integration::ViewImpl::OnPaddingSet()
+   */
+  void OnPaddingSet(const Extents& padding) override;
+
+public: // From CustomActorImpl
+  /**
+   * @copydoc CustomActorImpl::OnSizeSet()
+   */
+  void OnSizeSet(const Vector3& targetSize) override;
+
+  /**
+   * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
+   */
+  void OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index,
+                                   Dali::Animation::State state) override;
+
+  /**
+   * @copydoc CustomActorImpl::OnConstraintAnimatableProperty()
+   */
+  void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
+
 public: // From ControlInterface
   /**
    * @copydoc Text::ControlInterface::RequestTextRelayout()
@@ -608,6 +634,11 @@ public: // From ControlInterface
    * @copydoc Text::ControlInterface::InvalidateTextMeasure()
    */
   void InvalidateTextMeasure() override;
+
+  /**
+   * @copydoc Text::ControlInterface::RequestAsyncRender()
+   */
+  void RequestAsyncRender();
 
 private: // from ScrollerInterface
   /**
@@ -626,7 +657,33 @@ public: // From AnchorControlInterface
    */
   void EmitAnchorClickedSignal(const std::string& href) override;
 
+public: // From AsyncTextInterface
+  /**
+   * @copydoc Text::AsyncTextInterface::AsyncInitializeMarquee()
+   */
+  void AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo) override;
+
+  /**
+   * @copydoc Text::AsyncTextInterface::AsyncTextFitChanged()
+   */
+  void AsyncTextFitChanged(float pointSize) override;
+
+  /**
+   * @copydoc Text::AsyncTextInterface::AsyncRenderFinished()
+   */
+  void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo);
+
+  /**
+   * @copydoc Text::AsyncTextInterface::AsyncSizeComputed()
+   */
+  void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo);
+
 private: // Implementation
+  /**
+   * @brief Marks that the text renderer needs to be updated on the next relayout.
+   */
+  void RequestRendererUpdate();
+
   /**
    * @brief Updates the effective line height based on the current LineHeightMode.
    */
@@ -785,6 +842,40 @@ private: // Implementation
    */
   void UpdateCutoutState(bool enabled);
 
+  /**
+   * @brief Returns the parameters used for asynchronous text processing.
+   *
+   * Collects and returns the text label properties required to perform
+   * asynchronous text rendering or size computation.
+   *
+   * @param[in] requestType The type of asynchronous request.
+   * @param[in] contentSize The content size requested by relayout, excluding padding.
+   * @param[in] padding The label padding.
+   * @param[in] layoutDirection The layout direction.
+   * @return The parameters for asynchronous text processing.
+   */
+  Text::AsyncTextParameters GetAsyncTextParameters(Text::Async::RequestType requestType, const Vector2& contentSize, const Extents& padding, Dali::LayoutDirection::Type layoutDirection);
+
+  /**
+   * @brief Emits TextFitChanged signal.
+   */
+  void EmitTextFitChanged();
+
+  /**
+   * @brief Emits AsyncRenderFinished signal.
+   */
+  void EmitAsyncRenderFinished(float width, float height);
+
+  /**
+   * @brief Emits AsyncNaturalSizeComputed signal.
+   */
+  void EmitAsyncNaturalSizeComputed(float width, float height);
+
+  /**
+   * @brief Emits AsyncHeightForWidthComputed signal.
+   */
+  void EmitAsyncHeightForWidthComputed(float width, float height);
+
   // Properties
 public:
   /**
@@ -845,15 +936,18 @@ private:
   Text::LineHeightMode mLineHeightMode;
   Text::OverflowMode   mOverflowMode;
 
+  int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
-  bool mTextUpdateNeeded : 1;
-  bool mMeasureInvalidated : 1;
-  bool mLastMarqueeEnabled : 1;
-  bool mIsTouchDown : 1;          // whether the currently intercepted touch is in the down state.
-  bool mHasAnchors : 1;           // whether the text has anchors or not.
-  bool mIsVisible : 1;            // cached result of IsEffectivelyVisible().
-  bool mIsVisibleInitialized : 1; // whether mIsVisible has been initialized.
-  bool mIsViewBackgroundEnabled : 1;
+  bool mRendererUpdateNeeded : 1;    // Whether the text renderer needs to be updated.
+  bool mMeasureInvalidated : 1;      // whether measurement has been invalidated.
+  bool mIsAsyncRenderRequested : 1;  // whether an async render has been requested.
+  bool mIsSizeChanged : 1;           // whether the size has changed.
+  bool mLastMarqueeEnabled : 1;      // whether marquee was enabled in the previous state.
+  bool mIsTouchDown : 1;             // whether the currently intercepted touch is in the down state.
+  bool mHasAnchors : 1;              // whether the text has anchors.
+  bool mIsVisible : 1;               // cached result of IsEffectivelyVisible().
+  bool mIsVisibleInitialized : 1;    // whether mIsVisible has been initialized.
+  bool mIsViewBackgroundEnabled : 1; // whether the view background is enabled.
 
 protected:
   struct PropertyHandler;

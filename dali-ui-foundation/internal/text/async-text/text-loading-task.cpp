@@ -182,7 +182,7 @@ void TextLoadingTask::Load()
 #endif
         mRenderInfo = mLoader.RenderAutoScroll(mParameters, cachedNaturalSize, naturalSize);
       }
-      else if(mParameters.isTextFitEnabled || mParameters.isTextFitArrayEnabled)
+      else if(mParameters.isTextFitEnabled || mParameters.isTextFitCandidatesEnabled)
       {
 #ifdef TRACE_ENABLED
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())

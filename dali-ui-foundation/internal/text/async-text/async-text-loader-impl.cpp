@@ -66,6 +66,11 @@ float GetDpi(TextAbstraction::FontClient& fontClient)
   return static_cast<float>(horizontalDpi);
 }
 
+float ConvertPixelToPoint(float pixel, TextAbstraction::FontClient& fontClient)
+{
+  return pixel * 72.0f / GetDpi(fontClient);
+}
+
 float ConvertPointToPixel(float point, TextAbstraction::FontClient& fontClient)
 {
   // Pixel size = Point size * DPI / 72.f
@@ -188,6 +193,7 @@ void AsyncTextLoader::Initialize()
   mTextModel->mVisualModel->SetShadowOffset(Vector2(0.0f, 0.0f));
   mTextModel->mVisualModel->SetStrikethroughEnabled(false);
   mTextModel->mVisualModel->SetStrikethroughHeight(0.0f);
+  mTextModel->mVisualModel->SetBackgroundEnabled(false);
 }
 
 void AsyncTextLoader::ClearTextModelData()
@@ -305,6 +311,12 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mVisualModel->SetStrikethroughHeight(parameters.strikethroughHeight);
   }
 
+  if(parameters.isTextBackgroundEnabled)
+  {
+    mTextModel->mVisualModel->SetBackgroundEnabled(parameters.isTextBackgroundEnabled);
+    mTextModel->mVisualModel->SetBackgroundColor(parameters.textBackgroundColor);
+  }
+
   const Vector2& shadowOffset = parameters.shadowOffset;
   const float    shadowAlpha  = parameters.shadowColor.a;
   if(fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
@@ -325,12 +337,12 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mVisualModel->SetOutlineOffset(parameters.outlineOffset);
   }
 
-  mTextModel->mVisualModel->SetCutoutEnabled(parameters.cutout);
-  mTextModel->mVisualModel->SetBackgroundWithCutoutEnabled(parameters.backgroundWithCutoutEnabled);
+  mTextModel->mVisualModel->SetCutoutEnabled(parameters.isCutoutEnabled);
+  mTextModel->mVisualModel->SetBackgroundWithCutoutEnabled(parameters.isBackgroundWithCutoutEnabled);
   mTextModel->mVisualModel->SetBackgroundColorWithCutout(parameters.backgroundColorWithCutout);
 
-  mTextModel->mRemoveFrontInset = parameters.removeFrontInset;
-  mTextModel->mRemoveBackInset  = parameters.removeBackInset;
+  mTextModel->mRemoveFrontInset = false;
+  mTextModel->mRemoveBackInset  = false;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Process the markup string if the mark-up processor is enabled.
@@ -723,10 +735,10 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 
   // Set minimun line size, line spacing, relative line size.
   mLayoutEngine.SetDefaultLineSize(parameters.minLineSize);
-  mLayoutEngine.SetDefaultLineSpacing(parameters.lineSpacing);
+  mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
-  float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitArrayEnabled)
+  float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
                           ? parameters.fontSize
                           : parameters.fontSize * parameters.fontSizeScale;
   mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize, mModule.GetFontClient()));
@@ -891,7 +903,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool styleEnabled                = (shadowEnabled || outlineEnabled || backgroundEnabled || markupEnabled ||
                              backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
   const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
-  const bool embossEnabled               = parameters.embossEnabled;
+  const bool embossEnabled               = parameters.isEmbossEnabled;
 
   // Create RGBA texture if the text contains emojis or multiple text colors, otherwise L8 texture
   Pixel::Format textPixelFormat =
@@ -970,7 +982,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.textPixelData  = Devel::PixelBuffer::Convert(buffer);
 
     // Set the flag of cutout.
-    renderInfo.isCutout = cutoutEnabled && (cutoutData != nullptr);
+    renderInfo.isCutoutEnabled = cutoutEnabled && (cutoutData != nullptr);
   }
   else
   {
@@ -981,7 +993,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   if(styleEnabled)
   {
-    if(renderInfo.isCutout)
+    if(renderInfo.isCutoutEnabled)
     {
       float cutoutAlpha         = mTextModel->GetDefaultColor().a;
       renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
@@ -1019,9 +1031,8 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.containsColorGlyph    = containsColorGlyph;
   renderInfo.styleEnabled          = styleEnabled;
   renderInfo.isOverlayStyle        = isOverlayStyle;
-  renderInfo.manualRendered        = parameters.manualRender;
   renderInfo.lineCount             = mTextModel->GetNumberOfLines();
-  renderInfo.embossEnabled         = embossEnabled;
+  renderInfo.isEmbossEnabled       = embossEnabled;
 
   if(cutoutEnabled)
   {
@@ -1140,7 +1151,7 @@ Size AsyncTextLoader::ComputeLayoutSize(AsyncTextParameters& parameters, float w
 
 Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& cachedNaturalSize)
 {
-  if(parameters.isTextFitEnabled || parameters.isTextFitArrayEnabled)
+  if(parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
   {
     // If text fit, only update the scaled size.
     parameters.renderScaleWidth  = parameters.textWidth;
@@ -1519,7 +1530,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
                         parameters.textHeight);
   }
 
-  if(parameters.isTextFitArrayEnabled)
+  if(parameters.isTextFitCandidatesEnabled)
   {
 #ifdef TRACE_ENABLED
     if(gTraceFilter && gTraceFilter->IsTraceEnabled())
@@ -1528,14 +1539,15 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
 #endif
 
-    std::vector<Ui::Text::FitOption> fitOptions         = parameters.textFitArray;
-    int                              numberOfFitOptions = static_cast<int>(fitOptions.size());
-    if(numberOfFitOptions == 0)
+    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = parameters.textFitCandidates;
+    int                                  candidateCount = static_cast<int>(fitCandidates.Count());
+
+    if(candidateCount == 0)
     {
-      DALI_LOG_ERROR("fitOptions is empty, render with default value, point size:%f, min line size:%f\n",
+      DALI_LOG_ERROR("fitCandidates is empty, render with default value, point size:%f, line height:%f\n",
                      parameters.fontSize, parameters.minLineSize);
-      fitOptions.push_back(Ui::Text::FitOption(parameters.fontSize, parameters.minLineSize));
-      numberOfFitOptions = 1;
+      fitCandidates.PushBack(Ui::Text::FitCandidate(ConvertPointToPixel(parameters.fontSize, mModule.GetFontClient()), parameters.minLineSize));
+      candidateCount = 1;
     }
 
     mFitActualEllipsis  = parameters.ellipsis;
@@ -1543,50 +1555,50 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     Size allowedSize(parameters.textWidth, parameters.textHeight);
 
-    // Sort in ascending order by PointSize.
-    std::sort(fitOptions.begin(), fitOptions.end(), compareByPointSize);
+    // Sort in ascending order by font size.
+    std::sort(fitCandidates.Begin(), fitCandidates.End(), compareByPointSize);
 
     // Decide whether to use binary search.
-    // If MinLineSize is not sorted in ascending order,
+    // If lineHeight is not sorted in ascending order,
     // binary search cannot guarantee that it will always find the best value.
-    bool  binarySearch    = true;
-    float prevMinLineSize = 0.0f;
-    for(Ui::Text::FitOption& option : fitOptions)
+    bool  binarySearch   = true;
+    float prevLineHeight = 0.0f;
+    for(auto it = fitCandidates.Begin(); it != fitCandidates.End(); ++it)
     {
-      float optionMinLineSize = option.GetMinLineSize();
-      if(prevMinLineSize > optionMinLineSize)
+      const float candidateLineHeight = it->GetLineHeight();
+      if(prevLineHeight > candidateLineHeight)
       {
         binarySearch = false;
         break;
       }
-      prevMinLineSize = optionMinLineSize;
+      prevLineHeight = candidateLineHeight;
     }
 
-    // Set the first FitOption(Minimum PointSize) to the best value.
-    // If the search does not find an optimal value, the minimum PointSize will be used to text fit.
-    Ui::Text::FitOption firstOption           = fitOptions.front();
-    bool                bestSizeUpdatedLatest = false;
-    float               bestPointSize         = firstOption.GetPointSize();
-    float               bestMinLineSize       = firstOption.GetMinLineSize();
+    // Set the first candidate (minimum font size) as the default best value.
+    // If the search does not find an optimal value, the minimum point size will be used to text fit.
+    const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
+    bool                          bestSizeUpdatedLatest = false;
+    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient());
+    float                         bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
-      int left  = 0u;
-      int right = numberOfFitOptions - 1;
+      int left  = 0;
+      int right = candidateCount - 1;
 
       while(left <= right)
       {
-        int                 mid             = left + (right - left) / 2;
-        Ui::Text::FitOption option          = fitOptions[mid];
-        float               testPointSize   = option.GetPointSize();
-        float               testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize              = testMinLineSize;
+        const int                     mid            = left + (right - left) / 2;
+        const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
+        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize(), mModule.GetFontClient());
+        const float                   testLineHeight = candidate.GetLineHeight();
+        parameters.minLineSize                       = testLineHeight;
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
           bestSizeUpdatedLatest = true;
           bestPointSize         = testPointSize;
-          bestMinLineSize       = testMinLineSize;
+          bestLineHeight        = testLineHeight;
           left                  = mid + 1;
         }
         else
@@ -1598,19 +1610,20 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
     else
     {
-      // If binary search is not possible, search sequentially starting from the largest PointSize.
-      for(auto it = fitOptions.rbegin(); it != fitOptions.rend(); ++it)
+      // If binary search is not possible, search sequentially from the largest font size.
+      for(auto it = fitCandidates.End(); it != fitCandidates.Begin();)
       {
-        Ui::Text::FitOption option          = *it;
-        float               testPointSize   = option.GetPointSize();
-        float               testMinLineSize = option.GetMinLineSize();
-        parameters.minLineSize              = testMinLineSize;
+        --it;
+
+        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize(), mModule.GetFontClient());
+        const float testLineHeight = it->GetLineHeight();
+        parameters.minLineSize     = testLineHeight;
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {
           bestSizeUpdatedLatest = true;
           bestPointSize         = testPointSize;
-          bestMinLineSize       = testMinLineSize;
+          bestLineHeight        = testLineHeight;
           break;
         }
         else
@@ -1620,11 +1633,11 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
       }
     }
 
-    // Best point size was not updated. re-run so the TextFit should be fitted really.
+    // Best point size was not updated. Re-run so the text fit is really applied.
     if(!bestSizeUpdatedLatest)
     {
       parameters.ellipsis    = mFitActualEllipsis;
-      parameters.minLineSize = bestMinLineSize;
+      parameters.minLineSize = bestLineHeight;
       CheckForTextFit(parameters, bestPointSize, allowedSize);
     }
 
@@ -1657,7 +1670,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     uint32_t pointSizeRange = static_cast<uint32_t>(ceil((maxPointSize - minPointSize) / pointInterval));
 
-    // Ensure minPointSize + pointSizeRange * pointInverval >= maxPointSize
+    // Ensure minPointSize + pointSizeRange * pointInterval >= maxPointSize
     while(minPointSize + static_cast<float>(pointSizeRange) * pointInterval < maxPointSize)
     {
       ++pointSizeRange;
@@ -1670,16 +1683,16 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     bool bestSizeUpdatedLatest = false;
     // Find best size as binary search.
     // Range format as [l r). (left closed, right opened)
-    // It mean, we already check all i < l is valid, and r <= i is invalid.
+    // It means, we already checked all i < l are valid, and r <= i are invalid.
     // Below binary search will check m = (l+r)/2 point.
-    // Search area sperate as [l m) or [m+1 r)
+    // Search area separates as [l m) or [m+1 r)
     //
     // Basically, we can assume that 0 (minPointSize) is always valid.
-    // Now, we will check [1 pointSizeRange] range s.t. pointSizeRange mean the maxPointSize
+    // Now, we will check [1 pointSizeRange] range where pointSizeRange means the maxPointSize.
     while(minIndex < maxIndex)
     {
-      uint32_t    testIndex     = minIndex + ((maxIndex - minIndex) >> 1u);
-      const float testPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(testIndex) * pointInterval);
+      const uint32_t testIndex     = minIndex + ((maxIndex - minIndex) >> 1u);
+      const float    testPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(testIndex) * pointInterval);
 
       if(CheckForTextFit(parameters, testPointSize, allowedSize))
       {
@@ -1696,7 +1709,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
     bestPointSize = std::min(maxPointSize, minPointSize + static_cast<float>(bestSizeIndex) * pointInterval);
 
-    // Best point size was not updated. re-run so the TextFit should be fitted really.
+    // Best point size was not updated. Re-run so the text fit is really applied.
     if(!bestSizeUpdatedLatest)
     {
       parameters.ellipsis = mFitActualEllipsis;

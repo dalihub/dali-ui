@@ -46,6 +46,11 @@ public:
    * @brief Invalidate measured size.
    */
   virtual void InvalidateTextMeasure() = 0;
+
+  /**
+   * @brief Requests asynchronous text rendering.
+   */
+  virtual void RequestAsyncRender() = 0;
 };
 
 } // namespace Text

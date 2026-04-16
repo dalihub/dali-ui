@@ -188,8 +188,6 @@
   * The background is rendered behind the glyphs of the text. \
   * \
   * @param[in] color The text background color. \
-  * \
-  * @return This label. \
   */ \
   ChildClass& SetTextBackgroundColor(const UiColor& color) { Label::SetTextBackgroundColor(color); return *this; } \
   /** \
@@ -297,7 +295,6 @@
   * Unsupported axis tags may be ignored depending on the selected font. \
   * \
   * @param[in] axes The font variation axes. \
-  * @return A reference to this label. \
   */ \
   ChildClass& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes) { Label::SetFontVariation(axes); return *this; } \
   /** \
@@ -325,7 +322,6 @@
   * Unsupported axis tags may be ignored depending on the selected font. \
   * \
   * @param[in] settings The font variation settings string. \
-  * @return A reference to this label. \
   */ \
   ChildClass& SetFontVariation(const Dali::String& settings) { Label::SetFontVariation(settings); return *this; } \
   /** \
@@ -353,4 +349,16 @@
   * @see Dali::Ui::MaskEffect \
   * @see Dali::Ui::View::SetRenderEffect() \
   */ \
-  ChildClass& SetMaskEffect(View view) { Label::SetMaskEffect(view); return *this; }
+  ChildClass& SetMaskEffect(View view) { Label::SetMaskEffect(view); return *this; } \
+  /** \
+  * @brief Sets whether the text is rendered asynchronously. \
+  * \
+  * When enabled, the label automatically requests asynchronous text rendering \
+  * during relayout as needed. \
+  * \
+  * By default, text is rendered synchronously. \
+  * \
+  * @param[in] asyncRendering True to enable asynchronous text rendering, \
+  * false to render text synchronously. \
+  */ \
+  ChildClass& SetAsyncRendering(bool asyncRendering) { Label::SetAsyncRendering(asyncRendering); return *this; }

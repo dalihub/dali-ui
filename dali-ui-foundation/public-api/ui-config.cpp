@@ -197,6 +197,17 @@ Vector4 UiConfig::GetDefaultTextColor() const
   return GetImpl(*this).GetDefaultTextColor();
 }
 
+UiConfig& UiConfig::SetLabelAsyncRendering(bool asyncRendering)
+{
+  GetImpl(*this).SetLabelAsyncRendering(asyncRendering);
+  return *this;
+}
+
+bool UiConfig::IsLabelAsyncRendering() const
+{
+  return GetImpl(*this).IsLabelAsyncRendering();
+}
+
 UiConfig& UiConfig::SetDefaultInteractionEffect(Trait effect)
 {
   GetImpl(*this).SetDefaultInteractionEffect(effect);

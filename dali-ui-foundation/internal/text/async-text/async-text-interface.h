@@ -2,7 +2,7 @@
 #define DALI_UI_TEXT_ASYNC_TEXT_INTERFACE_H
 
 /*
- * Copyright (c) 2024 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ namespace Ui
 namespace Text
 {
 /**
- * @brief An interface used by the text-controls which implement async text.
+ * @brief An interface used by the text component which implement async text.
  */
 class AsyncTextInterface
 {
@@ -41,24 +41,30 @@ public:
   virtual ~AsyncTextInterface() = default;
 
   /**
-   * @brief Setup auto scrolling.
+   * @brief Initializes marquee using asynchronous text render information.
    *
-   * Passes the render info generated in the worker thread to the text-control.
+   * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncSetupAutoScroll(Text::AsyncTextRenderInfo renderInfo) = 0;
+  virtual void AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo) = 0;
 
   /**
-   * @brief Called when the text fit changed.
+   * @brief Called when the text fit point size has changed asynchronously.
+   *
+   * @param[in] pointSize The fitted point size.
    */
   virtual void AsyncTextFitChanged(float pointSize) = 0;
 
   /**
-   * @brief Called when the async load complete.
+   * @brief Called when asynchronous text rendering has finished.
+   *
+   * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncLoadComplete(Text::AsyncTextRenderInfo renderInfo) = 0;
+  virtual void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo) = 0;
 
   /**
-   * @brief Called when the async size computed.
+   * @brief Called when asynchronous size computation has finished.
+   *
+   * @param[in] renderInfo The asynchronous text render information.
    */
   virtual void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo) = 0;
 };

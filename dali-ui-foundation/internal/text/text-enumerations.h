@@ -61,51 +61,6 @@ enum Mode
 
 } // namespace Ellipsize
 
-// TextLabel enum
-namespace Render
-{
-/**
- * @brief Enumerations specifying the render mode of text.
- */
-enum Mode
-{
-  SYNC = 0,    ///< default, synchronous text loading.
-  ASYNC_AUTO,  ///< automatically requests an asynchronous text load in OnRelayout.
-  ASYNC_MANUAL ///< users should manually request rendering using the async text method.
-};
-
-} // namespace Render
-
-struct FitOption
-{
-  FitOption(float pointSize = 0.0f, float minLineSize = 0.0f)
-  : mPointSize(pointSize),
-    mMinLineSize(minLineSize)
-  {
-  }
-
-  float GetPointSize() const
-  {
-    return mPointSize;
-  }
-  float GetMinLineSize() const
-  {
-    return mMinLineSize;
-  }
-  void SetPointSize(float pointSize)
-  {
-    mPointSize = pointSize;
-  }
-  void SetMinLineSize(float minLineSize)
-  {
-    mMinLineSize = minLineSize;
-  }
-
-private:
-  float mPointSize   = 0.0f;
-  float mMinLineSize = 0.0f;
-};
-
 /**
  * @brief Enumeration for text layout direction.
  */

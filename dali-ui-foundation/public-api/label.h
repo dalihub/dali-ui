@@ -522,8 +522,6 @@ public: // Setters for chaining
    * The background is rendered behind the glyphs of the text.
    *
    * @param[in] color The text background color.
-   *
-   * @return This label.
    */
   Label& SetTextBackgroundColor(const UiColor& color);
 
@@ -715,7 +713,6 @@ public: // Setters for chaining
    * Unsupported axis tags may be ignored depending on the selected font.
    *
    * @param[in] axes The font variation axes.
-   * @return A reference to this label.
    */
   Label& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
@@ -744,7 +741,6 @@ public: // Setters for chaining
    * Unsupported axis tags may be ignored depending on the selected font.
    *
    * @param[in] settings The font variation settings string.
-   * @return A reference to this label.
    */
   Label& SetFontVariation(const Dali::String& settings);
 
@@ -807,6 +803,26 @@ public: // Setters for chaining
    */
   void ClearMaskEffect();
 
+  /**
+   * @brief Sets whether the text is rendered asynchronously.
+   *
+   * When enabled, the label automatically requests asynchronous text rendering
+   * during relayout as needed.
+   *
+   * By default, text is rendered synchronously.
+   *
+   * @param[in] asyncRendering True to enable asynchronous text rendering,
+   * false to render text synchronously.
+   */
+  Label& SetAsyncRendering(bool asyncRendering);
+
+  /**
+   * @brief Gets whether asynchronous text rendering is enabled.
+   *
+   * @return True if asynchronous text rendering is enabled, otherwise false.
+   */
+  bool IsAsyncRendering() const;
+
   // @CHAIN_END
 
   // Read Only
@@ -828,6 +844,16 @@ public: // Setters for chaining
    * @return The number of lines.
    */
   int GetLineCount(float width);
+
+  /**
+   * @brief Gets the line count from the most recent asynchronous result.
+   *
+   * @note This value is updated when an asynchronous render or asynchronous size
+   * computation completes.
+   *
+   * @return The number of lines from the most recent asynchronous result.
+   */
+  int GetAsyncLineCount() const;
 
   /**
    * @brief Returns whether the marquee animation is currently running.

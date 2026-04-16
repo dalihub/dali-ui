@@ -191,6 +191,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
   impl.ResetScrollPosition();
 
   impl.RequestRelayout();
+  impl.RequestAsyncRender();
 
   if(nullptr != eventData)
   {

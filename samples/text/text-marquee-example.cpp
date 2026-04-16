@@ -198,6 +198,22 @@ private:
     {
       mFocusLabel.StopMarquee();
     }
+    else if(event.GetKeyName() == "5")
+    {
+      mMarqueeLabel.SetAsyncRendering(true);
+      mRtlLabel.SetAsyncRendering(true);
+      mVerticalLabel.SetAsyncRendering(true);
+      mFocusLabel.SetAsyncRendering(true);
+      DALI_LOG_ERROR("AsyncRendering\n");
+    }
+    else if(event.GetKeyName() == "6")
+    {
+      mMarqueeLabel.SetAsyncRendering(false);
+      mRtlLabel.SetAsyncRendering(false);
+      mVerticalLabel.SetAsyncRendering(false);
+      mFocusLabel.SetAsyncRendering(false);
+      DALI_LOG_ERROR("SyncRendering\n");
+    }
   }
 
 private:

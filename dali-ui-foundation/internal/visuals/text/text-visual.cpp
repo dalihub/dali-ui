@@ -454,7 +454,7 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
 
 void TextVisual::DoSetOffScene(Actor& actor)
 {
-  if(mController->GetRenderMode() != Text::Render::SYNC && mIsTextLoadingTaskRunning)
+  if(mController->IsAsyncRendering() && mIsTextLoadingTaskRunning)
   {
     Text::AsyncTextManager::Get().RequestCancel(mTextLoadingTaskId);
     mIsTextLoadingTaskRunning = false;
@@ -582,7 +582,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 
 void TextVisual::UpdateRenderer()
 {
-  if(mController->GetRenderMode() != Text::Render::SYNC)
+  if(mController->IsAsyncRendering())
   {
     return;
   }
@@ -904,7 +904,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
                                              VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)];
 
     Vector2 visualTransformOffset;
-    if(renderInfo.isCutout)
+    if(renderInfo.isCutoutEnabled)
     {
       // When Cutout Enabled, the current visual must draw the entire control.
       // so set the size to controlSize and offset to 0.
@@ -925,7 +925,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
           : roundf(parameters.padding.top + alignmentOffset.y);
     }
 
-    SetRequireRender(renderInfo.isCutout);
+    SetRequireRender(renderInfo.isCutoutEnabled);
 
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
@@ -945,7 +945,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
                                                    .EnableEmoji(renderInfo.containsColorGlyph)
                                                    .EnableStyle(renderInfo.styleEnabled)
                                                    .EnableOverlay(renderInfo.isOverlayStyle)
-                                                   .EnableEmboss(renderInfo.embossEnabled));
+                                                   .EnableEmboss(renderInfo.isEmbossEnabled));
     mImpl->mRenderer.SetShader(shader);
 
     // Remove the texture set and any renderer previously set.
@@ -1072,7 +1072,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       {
         control.AddRenderer(renderer);
 
-        if(renderInfo.embossEnabled)
+        if(renderInfo.isEmbossEnabled)
         {
           float          sizeX             = std::max(layoutSize.x, Math::MACHINE_EPSILON_100);
           float          sizeY             = std::max(std::min((float)maxTextureSize, layoutSize.y), Math::MACHINE_EPSILON_100);
@@ -1129,7 +1129,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     if(mAsyncTextInterface && parameters.isAutoScrollEnabled)
     {
-      mAsyncTextInterface->AsyncSetupAutoScroll(renderInfo);
+      mAsyncTextInterface->AsyncInitializeMarquee(renderInfo);
     }
 
     if(mAsyncTextInterface && parameters.isTextFitEnabled)
@@ -1139,7 +1139,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     if(mAsyncTextInterface)
     {
-      mAsyncTextInterface->AsyncLoadComplete(renderInfo);
+      mAsyncTextInterface->AsyncRenderFinished(renderInfo);
     }
 
     // Ignore current result when user re-request async load during load complete callback.
@@ -1286,8 +1286,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
         renderInfo.renderedSize = Size::ZERO;
       }
 
-      renderInfo.manualRendered = parameters.manualRender;
-      mAsyncTextInterface->AsyncLoadComplete(renderInfo);
+      mAsyncTextInterface->AsyncRenderFinished(renderInfo);
     }
 
     return true;

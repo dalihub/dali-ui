@@ -351,6 +351,39 @@ private:
     {
       ToggleColor();
     }
+    else if(event.GetKeyName() == "2")
+    {
+      mLabel.SetAsyncRendering(true);
+      mLabel2.SetAsyncRendering(true);
+      mLabel3.SetAsyncRendering(true);
+      mLineHeightLabel.SetAsyncRendering(true);
+      mLineHeightLabel2.SetAsyncRendering(true);
+      DALI_LOG_ERROR("AsyncRendering\n");
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      mLabel.SetAsyncRendering(false);
+      mLabel2.SetAsyncRendering(false);
+      mLabel3.SetAsyncRendering(false);
+      mLineHeightLabel.SetAsyncRendering(false);
+      mLineHeightLabel2.SetAsyncRendering(false);
+      DALI_LOG_ERROR("SyncRendering\n");
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      mLabel.SetPadding(Extents(0, 0, 20, 20));
+      // mLabel.SetText("1");
+      // mLabel.SetFontSize(10);
+    }
+    else if(event.GetKeyName() == "5")
+    {
+      mLabel.SetPadding(Extents(10, 10, 10, 10));
+      // mLabel.SetFontSize(30);
+    }
+    else if(event.GetKeyName() == "6")
+    {
+      mLabel.SetPadding(Extents(0, 0, 0, 0));
+    }
   }
 
 private:
@@ -370,7 +403,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
 
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig::New().SetLabelAsyncRendering(true).Apply();
 
   TextController controller(application);
   application.MainLoop();

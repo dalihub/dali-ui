@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 // EXTERNAL INCLUDES
@@ -67,18 +68,17 @@ struct AsyncTextParameters
     shadowColor{Color::BLACK},
     outlineColor{Color::WHITE},
     backgroundColorWithCutout{Color::TRANSPARENT},
-    shadowOffset{},
-    outlineOffset{},
-    padding{0u, 0u, 0u, 0u},
-    variationsMap{},
-    textFitArray{},
-    embossDirection{},
-    embossStrength{0.f},
+    textBackgroundColor{Color::TRANSPARENT},
     embossLightColor{Color::TRANSPARENT},
     embossShadowColor{Color::TRANSPARENT},
+    shadowOffset{},
+    outlineOffset{},
+    embossDirection{},
+    padding{0u, 0u, 0u, 0u},
+    variationsMap{},
+    textFitCandidates{},
     fontSize{0.f},
     minLineSize{0.f},
-    lineSpacing{0.f},
     relativeLineSize{1.f},
     characterSpacing{0.f},
     fontSizeScale{1.f},
@@ -92,6 +92,7 @@ struct AsyncTextParameters
     strikethroughHeight{0.f},
     shadowBlurRadius{0.f},
     outlineBlurRadius{0.f},
+    embossStrength{0.f},
     textFitMinSize{10.f},
     textFitMaxSize{100.f},
     textFitStepSize{1.f},
@@ -119,27 +120,23 @@ struct AsyncTextParameters
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
     fontSlant{FontSlant::NONE},
-    manualRender{false},
     isMultiLine{false},
     ellipsis{true},
     enableMarkup{false},
-    removeFrontInset{true},
-    removeBackInset{true},
     isUnderlineEnabled{false},
     isStrikethroughEnabled{false},
+    isTextBackgroundEnabled{false},
     isTextFitEnabled{false},
-    isTextFitArrayEnabled{false},
+    isTextFitCandidatesEnabled{false},
     isAutoScrollEnabled{false},
     isAutoScrollMaxTextureExceeded{false},
-    cutout{false},
-    backgroundWithCutoutEnabled{false},
-    embossEnabled{false}
+    isCutoutEnabled{false},
+    isBackgroundWithCutoutEnabled{false},
+    isEmbossEnabled{false}
   {
   }
 
-  ~AsyncTextParameters()
-  {
-  }
+  ~AsyncTextParameters() = default;
 
   std::string text;       ///< The text to be rendered encoded in utf8.
   std::string fontFamily; ///< The font's family.
@@ -150,23 +147,21 @@ struct AsyncTextParameters
   Vector4 shadowColor;
   Vector4 outlineColor;
   Vector4 backgroundColorWithCutout; ///< Background color with cutout.
-
-  Vector2 shadowOffset;
-  Vector2 outlineOffset;
-
-  Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
-
-  Property::Map          variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
-  std::vector<FitOption> textFitArray;
-
-  Vector2 embossDirection;
-  float   embossStrength;
+  Vector4 textBackgroundColor;
   Vector4 embossLightColor;
   Vector4 embossShadowColor;
 
-  float fontSize;         ///< The font's size (in points).
+  Vector2 shadowOffset;
+  Vector2 outlineOffset;
+  Vector2 embossDirection;
+
+  Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
+
+  Property::Map                    variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  Dali::Vector<Text::FitCandidate> textFitCandidates;
+
+  float fontSize;         ///< The font's size (in pixels).
   float minLineSize;      ///< The line's minimum size (in pixels).
-  float lineSpacing;      ///< The default extra space between lines in points. (in pixels).
   float relativeLineSize; ///< The relative height of the line (a factor that will be multiplied by text height).
   float characterSpacing; ///< The space between characters.
   float fontSizeScale;    ///< The font's size scale.
@@ -180,6 +175,7 @@ struct AsyncTextParameters
   float strikethroughHeight;
   float shadowBlurRadius;
   float outlineBlurRadius;
+  float embossStrength;
   float textFitMinSize;
   float textFitMaxSize;
   float textFitStepSize;
@@ -201,7 +197,7 @@ struct AsyncTextParameters
   LineWrapMode                lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
   Text::Underline::Type       underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
   Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
-  Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {TOP, MIDDLE, BOTTOM}.
+  Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
   LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   Text::EllipsisPosition::Type
                            ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
@@ -212,21 +208,19 @@ struct AsyncTextParameters
   FontWidth                fontWidth;           ///< The font's width.
   FontSlant                fontSlant;           ///< The font's slant.
 
-  bool manualRender : 1;                   ///< Whether the manual rendered or not.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
   bool ellipsis : 1;                       ///< Whether the ellipsis layout option is enabled.
   bool enableMarkup : 1;                   ///< Whether the mark-up processor is enabled.
-  bool removeFrontInset : 1;               ///< Whether to ignore xBearing of the first glyph. Default is true.
-  bool removeBackInset : 1;                ///< Whether to ignore advance of the last glyph. Default is true.
   bool isUnderlineEnabled : 1;             ///< Underline enabeld flag.
   bool isStrikethroughEnabled : 1;         ///< Strikethrough enabeld flag.
+  bool isTextBackgroundEnabled : 1;        ///< Text background flag.
   bool isTextFitEnabled : 1;               ///< TextFit enabeld flag.
-  bool isTextFitArrayEnabled : 1;          ///< TextFitArray enabeld flag.
+  bool isTextFitCandidatesEnabled : 1;     ///< TextFit Candidates enabeld flag.
   bool isAutoScrollEnabled : 1;            ///< Auto scroll enabeld flag.
   bool isAutoScrollMaxTextureExceeded : 1; ///< Whether the auto scroll texture size exceeds the maximum texture width.
-  bool cutout : 1;                         ///< Cutout enabled flag.
-  bool backgroundWithCutoutEnabled : 1;    ///< Background with cutout enabled flag.
-  bool embossEnabled : 1;                  ///< Emboss enabled flag.
+  bool isCutoutEnabled : 1;                ///< Cutout enabled flag.
+  bool isBackgroundWithCutoutEnabled : 1;  ///< Background with cutout enabled flag.
+  bool isEmbossEnabled : 1;                ///< Emboss enabled flag.
 };
 
 struct AsyncTextRenderInfo
@@ -248,9 +242,8 @@ struct AsyncTextRenderInfo
     styleEnabled(false),
     isOverlayStyle(false),
     isTextDirectionRTL(false),
-    isCutout(false),
-    manualRendered(false),
-    embossEnabled(false)
+    isCutoutEnabled(false),
+    isEmbossEnabled(false)
   {
   }
 
@@ -263,9 +256,9 @@ struct AsyncTextRenderInfo
   PixelData          overlayStylePixelData;
   PixelData          maskPixelData;
   PixelData          autoScrollPixelData;
-  Size               size;
-  Size               controlSize;
-  Size               renderedSize;
+  Size               size;         ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Size               controlSize;  ///< View size used to display the rendered text.
+  Size               renderedSize; ///< Final displayed size reported back to the caller.
   int                lineCount;
   float              autoScrollWrapGap;
   bool               hasMultipleTextColors : 1;
@@ -273,9 +266,8 @@ struct AsyncTextRenderInfo
   bool               styleEnabled : 1;
   bool               isOverlayStyle : 1;
   bool               isTextDirectionRTL : 1;
-  bool               isCutout : 1;
-  bool               manualRendered : 1;
-  bool               embossEnabled : 1;
+  bool               isCutoutEnabled : 1;
+  bool               isEmbossEnabled : 1;
 };
 
 /**

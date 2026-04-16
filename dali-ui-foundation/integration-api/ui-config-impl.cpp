@@ -65,6 +65,7 @@ UiConfigImpl::UiConfigImpl()
   mTapRecognizerTime(UINT32_MAX),
   mClearFocusOnEscape(true),
   mAlwaysShowFocus(true),
+  mLabelAsyncRendering(false),
   mFrozen(false)
 {
 }
@@ -250,6 +251,17 @@ void UiConfigImpl::SetDefaultTextColor(const Vector4& color)
 Vector4 UiConfigImpl::GetDefaultTextColor() const
 {
   return mDefaultTextColor;
+}
+
+void UiConfigImpl::SetLabelAsyncRendering(bool asyncRendering)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mLabelAsyncRendering = asyncRendering;
+}
+
+bool UiConfigImpl::IsLabelAsyncRendering() const
+{
+  return mLabelAsyncRendering;
 }
 
 void UiConfigImpl::SetDefaultInteractionEffect(Trait effect)

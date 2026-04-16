@@ -522,6 +522,7 @@ void Controller::Impl::UpdateAnchorColor()
     ClearFontData();
     mOperationsPending = static_cast<OperationsMask>(mOperationsPending | COLOR);
     RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -530,6 +531,7 @@ void Controller::Impl::InvalidateFontData()
   ClearFontData();
   UpdateAnchorColor();
   RequestRelayout();
+  RequestAsyncRender();
 }
 
 void Controller::Impl::NotifyInputMethodContext()
@@ -1581,6 +1583,14 @@ void Controller::Impl::InvalidateMeasure()
   }
 }
 
+void Controller::Impl::RequestAsyncRender()
+{
+  if(nullptr != mControlInterface)
+  {
+    mControlInterface->RequestAsyncRender();
+  }
+}
+
 void Controller::Impl::RelayoutAllCharacters()
 {
   // relayout all characters
@@ -1954,6 +1964,7 @@ void Controller::Impl::SetMultiLineEnabled(bool enable)
     mRecalculateLayoutSize  = true;
 
     RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -1965,6 +1976,7 @@ void Controller::Impl::SetHorizontalAlignment(Alignment alignment)
     mModel->mHorizontalAlignment = alignment;
     UpdateCursorPositionForAlignment(*this, true);
     RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -1976,6 +1988,7 @@ void Controller::Impl::SetVerticalAlignment(Alignment alignment)
     mModel->mVerticalAlignment = alignment;
     UpdateCursorPositionForAlignment(*this, false);
     RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -2004,6 +2017,7 @@ void Controller::Impl::SetLineWrapMode(LineWrapMode lineWrapMode)
 
     // Request relayout
     RequestRelayout();
+    RequestAsyncRender();
   }
 }
 
@@ -2130,24 +2144,17 @@ float Controller::Impl::GetCurrentFontSizeScale() const
 
 float Controller::Impl::CalculateAdjustedFontSizeScale() const
 {
-  float minimumScale;
-  float maximumScale;
+  float minimumScale = mMinFontSizeScale;
+  float maximumScale = mMaxFontSizeScale;
 
-  if(mMinFontSizeScale > mMaxFontSizeScale)
+  if(minimumScale > maximumScale)
   {
-    minimumScale = mMinFontSizeScale;
-    maximumScale = mMinFontSizeScale;
-  }
-  else
-  {
-    minimumScale = mMinFontSizeScale;
-    maximumScale = mMaxFontSizeScale;
+    maximumScale = minimumScale;
   }
 
   const float currentScale = GetCurrentFontSizeScale();
 
-  return (currentScale < minimumScale) ? minimumScale : (currentScale > maximumScale) ? maximumScale
-                                                                                      : currentScale;
+  return std::clamp(currentScale, minimumScale, maximumScale);
 }
 
 bool Controller::Impl::ApplyAdjustedFontSizeScale()
@@ -2168,6 +2175,7 @@ bool Controller::Impl::ApplyAdjustedFontSizeScale()
 
   ClearFontData();
   RequestRelayout();
+  RequestAsyncRender();
   InvalidateMeasure();
 
   return true;

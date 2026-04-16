@@ -562,6 +562,17 @@ void Label::ClearMaskEffect()
   GetImpl(*this).ClearMaskEffect();
 }
 
+Label& Label::SetAsyncRendering(bool asyncRendering)
+{
+  GetImpl(*this).SetAsyncRendering(asyncRendering);
+  return *this;
+}
+
+bool Label::IsAsyncRendering() const
+{
+  return GetImpl(*this).IsAsyncRendering();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -573,6 +584,11 @@ int Label::GetLineCount()
 int Label::GetLineCount(float width)
 {
   return GetImpl(*this).GetLineCount(width);
+}
+
+int Label::GetAsyncLineCount() const
+{
+  return GetImpl(*this).GetAsyncLineCount();
 }
 
 bool Label::IsMarqueeRunning() const
