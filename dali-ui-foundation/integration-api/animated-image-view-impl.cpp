@@ -23,6 +23,7 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/property-array.h>
+#include <algorithm>
 
 #include <dali/integration-api/debug.h>
 
@@ -38,10 +39,8 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/animated-image-view.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
-#include <algorithm>
 
 namespace Dali
 {
@@ -507,9 +506,9 @@ MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heigh
 
   if(naturalSize.width > 0.0f && naturalSize.height > 0.0f)
   {
-    float aspectRatio = naturalSize.height / naturalSize.width;
-    bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
-    bool  heightFixed = (layoutH == MATCH_PARENT || layoutH > 0);
+    const float aspectRatio = naturalSize.height / naturalSize.width;
+    const bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
+    const bool  heightFixed = (layoutH == MATCH_PARENT || layoutH > 0);
     if(widthFixed && !heightFixed)
     {
       h = w * aspectRatio;
@@ -536,6 +535,8 @@ void AnimatedImageViewImpl::SetResourceUrl(const Dali::String& url)
   {
     mUrl = url;
     mUrls.Clear();
+    // Re-show placeholder while new image loads
+    UpdatePlaceholderVisual();
     mVisualDirty = true;
     InvalidateMeasure();
   }
@@ -549,9 +550,9 @@ void AnimatedImageViewImpl::Play()
     mVisualDirty = false;
     UpdateVisual();
   }
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-  if(viewData.GetVisual(AnimatedImageViewImpl::Property::IMAGE))
+  if(mVisual)
   {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
     viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PLAY, Dali::Property::Map());
   }
 }
@@ -563,9 +564,9 @@ void AnimatedImageViewImpl::Pause()
     mVisualDirty = false;
     UpdateVisual();
   }
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-  if(viewData.GetVisual(AnimatedImageViewImpl::Property::IMAGE))
+  if(mVisual)
   {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
     viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PAUSE, Dali::Property::Map());
   }
 }
@@ -577,9 +578,9 @@ void AnimatedImageViewImpl::Stop()
     mVisualDirty = false;
     UpdateVisual();
   }
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-  if(viewData.GetVisual(AnimatedImageViewImpl::Property::IMAGE))
+  if(mVisual)
   {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
     viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::STOP, Dali::Property::Map());
   }
 }
@@ -591,9 +592,9 @@ void AnimatedImageViewImpl::JumpToFrame(int frame)
     mVisualDirty = false;
     UpdateVisual();
   }
-  auto& viewData = Internal::ViewDataImpl::Get(*this);
-  if(viewData.GetVisual(AnimatedImageViewImpl::Property::IMAGE))
+  if(mVisual)
   {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
     viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::JUMP_TO, frame);
   }
 }
@@ -715,7 +716,7 @@ int AnimatedImageViewImpl::GetTotalFrame() const
   return 0;
 }
 
-Dali::Signal<void(Dali::Ui::AnimatedImageView)>& AnimatedImageViewImpl::AnimationFinishedSignal()
+Dali::Signal<void(Dali::Ui::View)>& AnimatedImageViewImpl::AnimationFinishedSignal()
 {
   return mAnimationFinishedSignal;
 }
@@ -725,7 +726,7 @@ void AnimatedImageViewImpl::OnVisualEvent(View view, Dali::Property::Index visua
   if(visualIndex == AnimatedImageViewImpl::Property::IMAGE &&
      signalId == Ui::DevelAnimatedImageVisual::Signal::ANIMATION_FINISHED)
   {
-    AnimatedImageView handle = AnimatedImageView::DownCast(view);
+    Ui::View handle(GetOwner());
     mAnimationFinishedSignal.Emit(handle);
   }
 }
@@ -752,10 +753,9 @@ void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
     mImageColor = color;
     if(mVisual)
     {
-      // Update MIX_COLOR directly on the existing visual without rebuilding it,
-      // so the animation continues uninterrupted.
+      // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Ui::Visual::Property::MIX_COLOR, mImageColor.Resolve());
+      map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -773,7 +773,6 @@ UiColor AnimatedImageViewImpl::GetImageColor() const
 
 void AnimatedImageViewImpl::SetPixelArea(const Vector4& pixelArea)
 {
-  static const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
   if(mPixelArea != pixelArea)
   {
     mPixelArea = pixelArea;
@@ -1020,8 +1019,10 @@ Dali::String AnimatedImageViewImpl::GetPlaceholderUrl() const
 
 void AnimatedImageViewImpl::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
 {
-  mUrls        = urls;
-  mUrl         = Dali::String();
+  mUrls = urls;
+  mUrl  = Dali::String();
+  // Re-show placeholder while new images load
+  UpdatePlaceholderVisual();
   mVisualDirty = true;
   InvalidateMeasure();
 }
@@ -1039,7 +1040,11 @@ Ui::Visual::ResourceStatus AnimatedImageViewImpl::GetLoadingStatus() const
 void AnimatedImageViewImpl::UpdateVisual()
 {
   auto& viewData = Internal::ViewDataImpl::Get(*this);
-  viewData.UnregisterVisual(AnimatedImageViewImpl::Property::IMAGE);
+  if(mVisual)
+  {
+    viewData.UnregisterVisual(AnimatedImageViewImpl::Property::IMAGE);
+    mVisual.Reset();
+  }
 
   const bool hasUrlArray = !mUrls.Empty();
   if(!hasUrlArray && mUrl.Empty())
@@ -1065,10 +1070,7 @@ void AnimatedImageViewImpl::UpdateVisual()
     map.Insert(Ui::ImageVisual::Property::URL, mUrl);
   }
 
-  if(mLoopCount != -1)
-  {
-    map.Insert(Ui::DevelImageVisual::Property::LOOP_COUNT, mLoopCount);
-  }
+  map.Insert(Ui::DevelImageVisual::Property::LOOP_COUNT, mLoopCount);
 
   map.Insert(Ui::DevelImageVisual::Property::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
   map.Insert(Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR, mFrameSpeedFactor);

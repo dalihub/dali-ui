@@ -407,7 +407,7 @@ private:
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] ContentInfo: %zu layers\n", contentInfo.Count());
   }
 
-  void OnAnimationFinished(LottieAnimationView view)
+  void OnAnimationFinished(View view)
   {
     UpdateStatus("Animation Finished!");
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] AnimationFinishedSignal fired\n");

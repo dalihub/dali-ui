@@ -35,7 +35,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view.h>
+#include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -398,14 +398,73 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
     h = layoutH;
   }
 
+  // Maintain aspect ratio when only one dimension is constrained.
+  if(naturalSize.width > 0.0f && naturalSize.height > 0.0f)
+  {
+    const float aspectRatio = naturalSize.height / naturalSize.width;
+    const bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
+    const bool  heightFixed = (layoutH == MATCH_PARENT || layoutH > 0);
+    if(widthFixed && !heightFixed)
+    {
+      h = w * aspectRatio;
+    }
+    else if(!widthFixed && heightFixed)
+    {
+      w = h / aspectRatio;
+    }
+  }
+
   return MeasuredSize(w, h);
+}
+
+MeasuredSize LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
+{
+  MeasuredSize result = ViewImpl::OnArrange(bounds);
+  ApplyLayout(Vector2(bounds.width, bounds.height));
+  return result;
+}
+
+void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
+{
+  if(!mVisual)
+  {
+    return;
+  }
+
+  Extents padding = GetPadding();
+
+  // Only apply a transform when there is actual padding; otherwise the visual
+  // already fills the full actor area by default (equivalent to FILL mode).
+  if(padding == Extents())
+  {
+    mVisual.SetTransformAndSize(Dali::Property::Map(), size);
+    return;
+  }
+
+  const Vector2 finalSize(size.width - (padding.start + padding.end),
+                          size.height - (padding.top + padding.bottom));
+  const Vector2 finalOffset(padding.start, padding.top);
+
+  Dali::Property::Map transformMap;
+  transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
+    .Add(Visual::Transform::Property::SIZE, finalSize)
+    .Add(Visual::Transform::Property::OFFSET_POLICY,
+         Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
+    .Add(Visual::Transform::Property::SIZE_POLICY,
+         Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
+    .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
+    .Add(Visual::Transform::Property::ANCHOR_POINT, Align::TOP_BEGIN);
+
+  mVisual.SetTransformAndSize(transformMap, size);
 }
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
 {
   if(mUrl != url)
   {
-    mUrl         = url;
+    mUrl = url;
+    // Re-show placeholder while new animation loads
+    UpdatePlaceholderVisual();
     mVisualDirty = true;
     InvalidateMeasure();
   }
@@ -492,6 +551,10 @@ void LottieAnimationViewImpl::JumpToFrame(int frame)
 
 void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
 {
+  if(mPlayRangeType == PlayRangeType::FRAME && mMinFrame == minFrame && mMaxFrame == maxFrame)
+  {
+    return;
+  }
   mPlayRangeType = PlayRangeType::FRAME;
   mMinFrame      = minFrame;
   mMaxFrame      = maxFrame;
@@ -501,6 +564,10 @@ void LottieAnimationViewImpl::SetMinMaxFrame(int minFrame, int maxFrame)
 
 void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
+  if(mPlayRangeType == PlayRangeType::MARKER && mMinFrameMarker == minMarker && mMaxFrameMarker == maxMarker)
+  {
+    return;
+  }
   mPlayRangeType  = PlayRangeType::MARKER;
   mMinFrameMarker = minMarker;
   mMaxFrameMarker = maxMarker;
@@ -722,7 +789,7 @@ void LottieAnimationViewImpl::SetDynamicProperty(const LottieAnimationViewDynami
   }
 }
 
-Dali::Signal<void(Dali::Ui::LottieAnimationView)>& LottieAnimationViewImpl::AnimationFinishedSignal()
+Dali::Signal<void(Dali::Ui::View)>& LottieAnimationViewImpl::AnimationFinishedSignal()
 {
   return mAnimationFinishedSignal;
 }
@@ -737,7 +804,7 @@ void LottieAnimationViewImpl::OnVisualEvent(View view, Dali::Property::Index vis
   if(visualIndex == LottieAnimationViewImpl::Property::IMAGE &&
      signalId == static_cast<Dali::Property::Index>(Ui::DevelAnimatedVectorImageVisual::Signal::ANIMATION_FINISHED))
   {
-    LottieAnimationView handle = LottieAnimationView::DownCast(view);
+    Ui::View handle(GetOwner());
     mAnimationFinishedSignal.Emit(handle);
   }
 }
@@ -745,8 +812,13 @@ void LottieAnimationViewImpl::OnVisualEvent(View view, Dali::Property::Index vis
 void LottieAnimationViewImpl::UpdateVisual()
 {
   auto& viewData = Internal::ViewDataImpl::Get(*this);
-  viewData.UnregisterVisual(LottieAnimationViewImpl::Property::IMAGE);
-  mVisual.Reset();
+
+  if(mVisual)
+  {
+    viewData.UnregisterVisual(LottieAnimationViewImpl::Property::IMAGE);
+    mVisual.Reset();
+  }
+
   if(mUrl.Empty())
   {
     DALI_LOG_ERROR("LottieAnimationView must be supplied with a valid URL.\n");
@@ -894,8 +966,7 @@ void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
     mImageColor = color;
     if(mVisual)
     {
-      // Update MIX_COLOR directly on the existing visual without rebuilding it,
-      // so the animation continues uninterrupted.
+      // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
       map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
@@ -985,6 +1056,9 @@ void LottieAnimationViewImpl::OnViewResourceReady(Ui::View view)
 
   // Main image is ready: remove placeholder
   viewData.UnregisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE);
+
+  // Request a re-layout now that the natural size is known, so aspect-ratio adjustment applies.
+  InvalidateMeasure();
 }
 
 } // namespace Integration

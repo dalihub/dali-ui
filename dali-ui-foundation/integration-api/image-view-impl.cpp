@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/image-visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
+#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -113,9 +114,7 @@ ImageViewImpl::ImageViewImpl()
 {
 }
 
-ImageViewImpl::~ImageViewImpl()
-{
-}
+ImageViewImpl::~ImageViewImpl() = default;
 
 ImageViewImplPtr ImageViewImpl::New()
 {
@@ -614,7 +613,13 @@ void ImageViewImpl::SetImageColor(const UiColor& color)
     {
       Dali::Property::Map map;
       map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
-      mVisual.SetProperties(map);
+      mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+    }
+    else
+    {
+      // Visual not yet created: defer to next OnMeasure pass
+      mVisualDirty = true;
+      InvalidateMeasure();
     }
   }
 }
@@ -746,18 +751,14 @@ void ImageViewImpl::SetDepthIndex(int depthIndex)
     if(mVisual)
     {
       Internal::ViewDataImpl::Get(*this).RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+      UpdatePlaceholderVisual();
     }
   }
 }
 
 Ui::Visual::ResourceStatus ImageViewImpl::GetLoadingStatus() const
 {
-  if(mVisual)
-  {
-    auto& visualImpl = Ui::GetImplementation(mVisual);
-    return visualImpl.GetResourceStatus();
-  }
-  return Ui::Visual::ResourceStatus::PREPARING;
+  return Internal::ViewDataImpl::Get(*this).GetVisualResourceStatus(ImageViewImpl::Property::IMAGE);
 }
 
 void ImageViewImpl::OnInitialize()
@@ -858,9 +859,9 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
 
   if(naturalSize.width > 0.0f && naturalSize.height > 0.0f)
   {
-    float aspectRatio = naturalSize.height / naturalSize.width;
-    bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
-    bool  heightFixed = (layoutH == MATCH_PARENT || layoutH > 0);
+    const float aspectRatio = naturalSize.height / naturalSize.width;
+    const bool  widthFixed  = (layoutW == MATCH_PARENT || layoutW > 0);
+    const bool  heightFixed = (layoutH == MATCH_PARENT || layoutH > 0);
     if(widthFixed && !heightFixed)
     {
       h = w * aspectRatio;

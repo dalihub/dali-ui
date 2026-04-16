@@ -110,7 +110,7 @@ public:
   using DynamicPropertyInfo = LottieAnimationViewDynamicPropertyInfo;
 
   /// @brief Animation finished signal type. Emitted when the animation completes all loops.
-  typedef Signal<void(LottieAnimationView)> AnimationFinishedSignalType;
+  typedef Signal<void(View)> AnimationFinishedSignalType;
 
 public: // Creation & Destruction
   /**

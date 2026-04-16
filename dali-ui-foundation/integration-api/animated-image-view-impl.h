@@ -388,7 +388,7 @@ public: // Loading Status & Signals
   /**
    * @copydoc Dali::Ui::AnimatedImageView::AnimationFinishedSignal
    */
-  Dali::Signal<void(Dali::Ui::AnimatedImageView)>& AnimationFinishedSignal();
+  Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
 
 private: // From ViewImpl
   /**
@@ -478,7 +478,7 @@ private:                    // Data
   bool mSynchronousLoading;
   bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
 
-  Dali::Signal<void(Dali::Ui::AnimatedImageView)> mAnimationFinishedSignal;
+  Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
 };
 
 } // namespace Integration

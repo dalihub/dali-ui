@@ -412,7 +412,7 @@ private:
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] ResourceReady — totalFrame=%d\n", total);
   }
 
-  void OnAnimationFinished(AnimatedImageView view)
+  void OnAnimationFinished(View view)
   {
     UpdateStatus("Animation Finished!");
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] AnimationFinishedSignal fired\n");

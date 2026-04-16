@@ -347,7 +347,7 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::AnimationFinishedSignal
    */
-  Dali::Signal<void(Dali::Ui::LottieAnimationView)>& AnimationFinishedSignal();
+  Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetLoadingStatus
@@ -365,11 +365,27 @@ private: // From ViewImpl
    */
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
 
+  /**
+   * @copydoc Integration::ViewImpl::OnArrange
+   */
+  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+
 private: // Internal methods
   /**
    * @brief Rebuilds and re-registers the Lottie visual from current property values.
    */
   void UpdateVisual();
+
+  /**
+   * @brief Applies padding-aware transform to the visual for the given size.
+   *
+   * When padding is set, the visual is confined to the inner content area.
+   * This is the Lottie equivalent of ImageViewImpl::ApplyFittingMode, but
+   * without FittingMode support (always FILL within the padded area).
+   *
+   * @param[in] size The allocated size of the view
+   */
+  void ApplyLayout(const Vector2& size);
 
   /**
    * @brief Called when a visual event signal is emitted.
@@ -424,7 +440,7 @@ private:                    // Data
   bool mPreMultipliedAlpha;
   bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
 
-  Dali::Signal<void(Dali::Ui::LottieAnimationView)> mAnimationFinishedSignal;
+  Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;
 };
 
 } // namespace Integration

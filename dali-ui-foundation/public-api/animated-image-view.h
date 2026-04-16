@@ -98,7 +98,7 @@ public:
   using StopBehavior = AnimatedImageViewStopBehavior;
 
   /// @brief Animation finished signal type. Emitted when the animation completes all loops.
-  typedef Signal<void(AnimatedImageView)> AnimationFinishedSignalType;
+  typedef Signal<void(View)> AnimationFinishedSignalType;
 
 public: // Creation & Destruction
   AnimatedImageView();
