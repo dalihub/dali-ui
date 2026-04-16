@@ -1359,8 +1359,6 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
   }
 
-  const Vector3 naturalSize = GetNaturalSize();
-
   float measuredWidth  = 0.0f;
   float measuredHeight = 0.0f;
 
@@ -1377,9 +1375,10 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else // WRAP_CONTENT
   {
-    const float width           = std::max(0.0f, naturalSize.width);
-    const float allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
-    measuredWidth               = std::max(std::min(width, allowedMaxWidth), minWidth);
+    const Vector3 naturalSize     = GetNaturalSize();
+    const float   width           = std::max(0.0f, naturalSize.width);
+    const float   allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
+    measuredWidth                 = std::max(std::min(width, allowedMaxWidth), minWidth);
   }
 
   // Height
