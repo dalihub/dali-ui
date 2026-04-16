@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="-100 0 600 400">
+  <!-- Ghost Image (짤린 영역 포함 전체 이미지 표시) -->
+  <g opacity="0.3">
+    <rect width="600" height="400" fill="#4b6b7a"/>
+    <circle cx="150" cy="100" r="50" fill="#b39700"/>
+    <path d="M0,400 L200,150 L400,350 L600,100 L600,400 Z" fill="#1b4d6e"/>
+  </g>
+  
+  <!-- 클립 영역 (가운데 400x400) -->
+  <rect width="400" height="400" x="100" y="0" fill="#ecf0f1"/>
+  <clipPath id="cbox"><rect x="100" y="0" width="400" height="400"/></clipPath>
+  <g clip-path="url(#cbox)">
+    <rect width="600" height="400" fill="#87CEEB"/>
+    <circle cx="150" cy="100" r="50" fill="#FFD700"/>
+    <path d="M0,400 L200,150 L400,350 L600,100 L600,400 Z" fill="#2E86C1"/>
+  </g>
+  
+  <!-- 클립 영역 테두리 -->
+  <rect width="394" height="394" x="103" y="3" fill="none" stroke="#e74c3c" stroke-width="4" stroke-dasharray="10 10"/>
+</svg>

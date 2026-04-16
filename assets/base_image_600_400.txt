@@ -1,0 +1,4 @@
+<rect width="600" height="400" fill="#87CEEB"/>
+<circle cx="150" cy="100" r="50" fill="#FFD700"/>
+<path d="M0,400 L200,150 L400,350 L600,100 L600,400 Z" fill="#2E86C1"/>
+<text x="300" y="360" font-family="sans-serif" font-size="40" fill="white" font-weight="bold" text-anchor="middle">ORIGINAL 600x400</text>

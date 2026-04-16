@@ -1,0 +1,290 @@
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-(kr))
+
+# Layout
+
+dali-ui's layout system operates in two phases: **Measure** then **Arrange**.
+When layout is invalidated, the LayoutController processes the layout root in both phases within the same frame.
+
+For a detailed look at the layout calculation mechanism, see [Layout Structures](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Structures).
+
+<br/>
+
+## Size Specification
+
+Every View specifies its desired size via `SetRequestedWidth` / `SetRequestedHeight`.
+
+| Value | Meaning |
+|---|---|
+| `WRAP_CONTENT` (`-1`) | Size to fit content or children (default) |
+| `MATCH_PARENT` (`-2`) | Fill the parent container |
+| Positive number (e.g. `100.0f`) | Fixed size |
+
+<br/>
+
+## Margin & Padding
+
+Margin is the **outer spacing** around a View — it creates space between the View and its
+neighboring Views or the edges of its parent container.
+Padding is the **inner spacing** inside a View — it creates space between the View's
+background boundary and its child content.
+
+![layout-margin-padding](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/b0fa6f35-d006-4109-9261-0e3479e52808)
+
+The `Extents` argument order is **(top, right, bottom, left)**.
+
+```cpp
+view.SetViewMargin(Extents(8_spx, 16_spx, 8_spx, 16_spx));    // 8spx top/bottom, 16spx left/right
+view.SetViewPadding(Extents(12_spx, 12_spx, 12_spx, 12_spx)); // 12spx on all sides
+```
+
+<br/>
+
+## Visibility
+
+```cpp
+view.SetVisibility(true);   // visible
+view.SetVisibility(false);  // hidden (layout space is not preserved)
+```
+
+To control transparency, use `SetOpacity(float)`.
+
+<br/>
+
+## StackLayout
+
+Stacks children sequentially in a single direction.
+
+![layout-stack](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/796f7d76-440e-4efe-9d49-8085b9cc4089)
+
+**When to use**: Simple vertical or horizontal lists — button rows, menu items, form fields.
+
+```cpp
+StackLayout::New(StackOrientation::VERTICAL)
+  .Spacing(8_spx)
+  .SetRequestedWidth(MATCH_PARENT)
+  .SetRequestedHeight(WRAP_CONTENT)
+  .Children({
+    label,
+    button,
+    input,
+  });
+```
+
+**Per-child options** (`StackLayoutParams`):
+
+| Option | Description |
+|---|---|
+| `SetWeight(float)` | Distributes remaining space proportionally. If weight > 0, RequestedSize on the main axis is ignored |
+| `SetAlignment(LayoutAlignment)` | Cross-axis alignment: FILL / START / CENTER / END |
+
+```cpp
+// Distribute remaining space 2:1
+viewA.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
+viewB.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+```
+
+Sample: [stacklayout](https://github.com/dalihub/dali-ui/tree/devel/samples/stacklayout)
+
+<br/>
+
+## AbsoluteLayout
+
+Positions children at explicit coordinates.
+
+![layout-absolute](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/7be0b741-8c9c-404b-940d-ffbfeea99f06)
+
+**When to use**: Overlays, floating UI elements, or any layout requiring pixel-precise positioning.
+
+```cpp
+AbsoluteLayout::New()
+  .SetRequestedWidth(MATCH_PARENT)
+  .SetRequestedHeight(MATCH_PARENT)
+  .Children({
+    icon.SetLayoutParams(
+      AbsoluteLayoutParams::New()
+        .SetX(20_spx).SetY(20_spx)
+        .SetWidth(48_spx).SetHeight(48_spx)),
+
+    badge.SetLayoutParams(
+      AbsoluteLayoutParams::New()
+        .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
+        .SetFlags(AbsoluteLayoutFlags::ALL)),  // proportional
+  });
+```
+
+**AbsoluteLayoutFlags**:
+
+| Flag | Meaning |
+|---|---|
+| `NONE` | Absolute pixel values |
+| `POSITION_PROPORTIONAL` | x, y interpreted as a ratio (0.0–1.0) relative to parent size |
+| `SIZE_PROPORTIONAL` | width, height interpreted as a ratio relative to parent size |
+| `ALL` | Both position and size are proportional |
+
+Sample: [absolutelayout](https://github.com/dalihub/dali-ui/tree/devel/samples/absolutelayout)
+
+<br/>
+
+## FlexLayout
+
+Uses the CSS Flexbox algorithm.
+
+![layout-flex](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/f66017e6-2f92-4df9-b60b-124b217a8be4)
+
+**When to use**: Complex one-dimensional layouts requiring direction control, wrapping, or fine-grained alignment.
+
+```cpp
+FlexLayout::New()
+  .Direction(FlexDirection::ROW)
+  .Wrap(FlexWrap::WRAP)
+  .JustifyContent(FlexJustify::SPACE_BETWEEN)
+  .AlignItems(FlexAlign::CENTER)
+  .Children({ itemA, itemB, itemC });
+```
+
+**Per-child options** (`FlexLayoutParams`):
+
+| Option | Description |
+|---|---|
+| `SetFlexGrow(float)` | Grows to fill remaining space proportionally |
+| `SetFlexShrink(float)` | Shrinks proportionally when space is insufficient |
+| `SetFlexBasis(float)` | Initial size before grow/shrink (`WRAP_CONTENT` for auto) |
+| `SetAlignSelf(FlexAlign)` | Per-child cross-axis alignment (overrides parent's AlignItems) |
+
+Sample: [flexlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/flexlayout)
+
+<br/>
+
+## GridLayout
+
+Positions children in a grid of defined rows and columns.
+
+![layout-grid](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/cd3ef92e-d819-4760-90b0-6a398f4e84ae)
+
+**When to use**: App grids, settings screens, dashboards — any two-dimensional arrangement.
+
+```cpp
+GridLayout::New()
+  .Rows({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)})
+  .Columns({GridLength::Star(), GridLength::Star(2.0f)})
+  .RowSpacing(4_spx)
+  .ColumnSpacing(4_spx)
+  .Children({ header, sideBar, main, footer });
+```
+
+**GridLength types**:
+
+| Type | Constructor | Meaning |
+|---|---|---|
+| Absolute | `GridLength::Absolute(100_spx)` | Fixed pixel size |
+| Star | `GridLength::Star(1.0f)` | Proportional share of remaining space |
+| Auto | `GridLength::Auto()` | Sizes to child's natural size |
+
+**Per-child options** (`GridLayoutParams`):
+
+| Option | Description |
+|---|---|
+| `SetRow(uint32_t)` | Zero-based row index |
+| `SetColumn(uint32_t)` | Zero-based column index |
+| `SetRowSpan(uint32_t)` | Number of rows to span |
+| `SetColumnSpan(uint32_t)` | Number of columns to span |
+| `SetHorizontalAlignment(LayoutAlignment)` | Horizontal alignment within the cell |
+| `SetVerticalAlignment(LayoutAlignment)` | Vertical alignment within the cell |
+
+```cpp
+// Copy base params to reuse across multiple children
+auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
+viewA.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(0));
+viewB.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(2));
+```
+
+> **Caution**: `SetLayoutParams()` stores the handle as-is. Passing the same params handle to
+> multiple Views causes them to share state. Always use `New(other)` to create an independent copy.
+
+Sample: [gridlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/gridlayout)
+
+<br/>
+
+## Custom Layout: For App Developers
+
+Inject custom layout logic into any `Layout` using `SetMeasureCallback` / `SetArrangeCallback`.
+
+```cpp
+// Custom layout that places children diagonally
+struct DiagonalLayout
+{
+  static MeasuredSize OnMeasure(View self, float wConstraint, float hConstraint)
+  {
+    float totalW = 0, totalH = 0;
+    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    {
+      auto sz = self.GetChildAt(i).Measure(wConstraint - totalW, hConstraint - totalH);
+      totalW += sz.width;
+      totalH += sz.height;
+    }
+    return {totalW, totalH};
+  }
+
+  static MeasuredSize OnArrange(View self, const LayoutRect& bounds)
+  {
+    float x = bounds.x, y = bounds.y;
+    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    {
+      auto sz = self.GetChildAt(i).GetMeasuredSize();
+      self.GetChildAt(i).Arrange({x, y, sz.width, sz.height});
+      x += sz.width;
+      y += sz.height;
+    }
+    return {bounds.width, bounds.height};
+  }
+};
+
+Layout root = Layout::New();
+root.SetMeasureCallback(LayoutMeasureCallback::New(&DiagonalLayout::OnMeasure));
+root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
+```
+
+Sample: [customlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/customlayout)
+
+<br/>
+
+## Component development: For Framework Developers
+
+Framework developers can override `OnMeasure` / `OnArrange` in `ViewImpl` to define a new component without inheriting layout directly.
+The predefined layout manager modules (`StackLayoutManager`, `GridLayoutManager`, etc.) available in
+the integration-api can be composed or subclassed to build on existing algorithms.
+
+```cpp
+// integration-api level
+class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
+{
+public:
+  MyButtonImpl()
+  : ViewImpl()
+  {
+    mLayoutManager = new Dali::Ui::Integration::StackLayoutManager(StackOrientation::VERTICAL, 0.0f); // reuse existing manager
+  }
+
+protected:
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  {
+    // Delegate to StackLayoutManager, or write fully custom logic
+    return mLayoutManager->Measure(this, widthConstraint, heightConstraint);
+  }
+
+  MeasuredSize OnArrange(const LayoutRect& bounds) override
+  {
+    return mLayoutManager->ArrangeChildren(this, bounds);
+  }
+};
+```
+
+<br/>
+
+## Custom Layout: For Framework Developers
+
+(TBD: Customize LayoutManager)
+
+<br/>
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)

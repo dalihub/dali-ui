@@ -1,0 +1,286 @@
+# Layout
+
+dali-ui의 레이아웃 시스템은 **Measure → Arrange** 두 단계로 동작합니다.
+레이아웃 재계산이 필요하다고 선언되면 해당 프레임에 `LayoutController`가 루트부터 두 단계를 순서대로 수행합니다.
+
+레이아웃 계산 메커니즘을 자세히 확인하고 싶다면, [여기](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Structures)를 참고하세요.
+
+<br/>
+
+## 크기 지정
+
+모든 View는 `SetRequestedWidth` / `SetRequestedHeight`로 원하는 크기를 지정합니다.
+
+| 값 | 의미 |
+|---|---|
+| `WRAP_CONTENT` (`-1`) | 콘텐츠(자식) 크기에 맞춤 (기본값) |
+| `MATCH_PARENT` (`-2`) | 부모 컨테이너를 가득 채움 |
+| `100.0f` 등 양수 | 고정 크기 |
+
+<br/>
+
+## Margin & Padding
+
+Margin은 View의 **바깥 여백**으로, 부모 레이아웃 안에서 이웃 View 또는 컨테이너 경계와의 간격을 만듭니다.
+Padding은 View의 **안쪽 여백**으로, View의 배경 영역과 자식 콘텐츠 사이의 공간을 만듭니다.
+
+![layout-margin-padding](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/b0fa6f35-d006-4109-9261-0e3479e52808)
+
+`Extents`의 인자 순서는 **(top, right, bottom, left)** 입니다.
+
+```cpp
+view.SetViewMargin(Extents(8_spx, 16_spx, 8_spx, 16_spx));   // 상하 8spx, 좌우 16spx
+view.SetViewPadding(Extents(12_spx, 12_spx, 12_spx, 12_spx)); // 사방 12spx
+```
+
+<br/>
+
+## Visibility
+
+```cpp
+view.SetVisibility(true);   // 보임
+view.SetVisibility(false);  // 숨김 (레이아웃 공간에서 빠짐)
+```
+
+불투명도 조절은 `SetOpacity(float)`를 사용합니다.
+
+<br/>
+
+## StackLayout
+
+자식 View들을 한 방향으로 순서대로 쌓습니다.
+
+![layout-stack](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/796f7d76-440e-4efe-9d49-8085b9cc4089)
+
+**언제 사용하면 좋은가**: 버튼 목록, 메뉴 항목, 폼 필드처럼 단순히 세로 또는 가로로 나열할 때.
+
+```cpp
+StackLayout::New(StackOrientation::VERTICAL)
+  .Spacing(8_spx)
+  .SetRequestedWidth(MATCH_PARENT)
+  .SetRequestedHeight(WRAP_CONTENT)
+  .Children({
+    label,
+    button,
+    input,
+  });
+```
+
+**Per-child 옵션** (`StackLayoutParams`):
+
+| 옵션 | 설명 |
+|---|---|
+| `SetWeight(float)` | 남은 공간을 비율대로 분배. weight > 0이면 RequestedSize 무시 |
+| `SetAlignment(LayoutAlignment)` | 교차축 정렬 (FILL / START / CENTER / END) |
+
+```cpp
+// 남은 공간을 2:1로 분배
+viewA.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
+viewB.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+```
+
+샘플: [stacklayout](https://github.com/dalihub/dali-ui/tree/devel/samples/stacklayout)
+
+<br/>
+
+## AbsoluteLayout
+
+자식을 명시적인 좌표에 배치합니다.
+
+![layout-absolute](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/7be0b741-8c9c-404b-940d-ffbfeea99f06)
+
+**언제 사용하면 좋은가**: 자유로운 오버레이, 떠있는 UI 요소, 또는 픽셀 단위 정밀 제어가 필요할 때.
+
+```cpp
+AbsoluteLayout::New()
+  .SetRequestedWidth(MATCH_PARENT)
+  .SetRequestedHeight(MATCH_PARENT)
+  .Children({
+    icon.SetLayoutParams(
+      AbsoluteLayoutParams::New()
+        .SetX(20_spx).SetY(20_spx)
+        .SetWidth(48_spx).SetHeight(48_spx)),
+
+    badge.SetLayoutParams(
+      AbsoluteLayoutParams::New()
+        .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
+        .SetFlags(AbsoluteLayoutFlags::ALL)),  // 비율 기반
+  });
+```
+
+**AbsoluteLayoutFlags**:
+
+| 플래그 | 의미 |
+|---|---|
+| `NONE` | 픽셀 절대값 |
+| `POSITION_PROPORTIONAL` | x, y를 부모 크기 대비 비율(0.0~1.0)로 해석 |
+| `SIZE_PROPORTIONAL` | width, height를 부모 크기 대비 비율로 해석 |
+| `ALL` | 위치와 크기 모두 비율 |
+
+샘플: [absolutelayout](https://github.com/dalihub/dali-ui/tree/devel/samples/absolutelayout)
+
+<br/>
+
+## FlexLayout
+
+CSS Flexbox 알고리즘을 사용합니다.
+
+![layout-flex](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/f66017e6-2f92-4df9-b60b-124b217a8be4)
+
+**언제 사용하면 좋은가**: 방향 전환, 줄바꿈, 정렬 제어가 필요한 복잡한 1차원 레이아웃.
+
+```cpp
+FlexLayout::New()
+  .Direction(FlexDirection::ROW)
+  .Wrap(FlexWrap::WRAP)
+  .JustifyContent(FlexJustify::SPACE_BETWEEN)
+  .AlignItems(FlexAlign::CENTER)
+  .Children({ itemA, itemB, itemC });
+```
+
+**Per-child 옵션** (`FlexLayoutParams`):
+
+| 옵션 | 설명 |
+|---|---|
+| `SetFlexGrow(float)` | 남은 공간을 비율대로 늘림 |
+| `SetFlexShrink(float)` | 공간 부족 시 비율대로 줄임 |
+| `SetFlexBasis(float)` | grow/shrink 전 기본 크기 (`WRAP_CONTENT`로 auto) |
+| `SetAlignSelf(FlexAlign)` | 개별 교차축 정렬 (부모의 AlignItems 오버라이드) |
+
+샘플: [flexlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/flexlayout)
+
+<br/>
+
+## GridLayout
+
+행과 열을 정의하고 자식을 셀에 배치합니다.
+
+![layout-grid](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/cd3ef92e-d819-4760-90b0-6a398f4e84ae)
+
+**언제 사용하면 좋은가**: 앱 그리드, 설정 화면, 대시보드처럼 2차원 격자가 필요할 때.
+
+```cpp
+GridLayout::New()
+  .Rows({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)})
+  .Columns({GridLength::Star(), GridLength::Star(2.0f)})
+  .RowSpacing(4_spx)
+  .ColumnSpacing(4_spx)
+  .Children({ header, sideBar, main, footer });
+```
+
+**GridLength 타입**:
+
+| 타입 | 생성 | 의미 |
+|---|---|---|
+| Absolute | `GridLength::Absolute(100_spx)` | 고정 크기 |
+| Star | `GridLength::Star(1.0f)` | 남은 공간 비율 분배 |
+| Auto | `GridLength::Auto()` | 자식의 자연 크기에 맞춤 |
+
+**Per-child 옵션** (`GridLayoutParams`):
+
+| 옵션 | 설명 |
+|---|---|
+| `SetRow(uint32_t)` | 배치할 행 인덱스 (0-based) |
+| `SetColumn(uint32_t)` | 배치할 열 인덱스 (0-based) |
+| `SetRowSpan(uint32_t)` | 점유할 행 수 |
+| `SetColumnSpan(uint32_t)` | 점유할 열 수 |
+| `SetHorizontalAlignment(LayoutAlignment)` | 셀 내 수평 정렬 |
+| `SetVerticalAlignment(LayoutAlignment)` | 셀 내 수직 정렬 |
+
+```cpp
+// 동일한 base params를 복사해서 여러 자식에 사용
+auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
+viewA.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(0));
+viewB.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(2));
+```
+
+> **주의**: `SetLayoutParams()`는 핸들을 그대로 저장합니다. 동일한 params 핸들을 여러 View에 전달하면
+> 상태를 공유하게 됩니다. 여러 View에 재사용할 때는 반드시 `New(other)`로 복사하세요.
+
+샘플: [gridlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/gridlayout)
+
+<br/>
+
+## 커스텀 레이아웃: 앱 개발자용
+
+`SetMeasureCallback` / `SetArrangeCallback`으로 임의의 레이아웃 로직을 주입할 수 있습니다.
+
+```cpp
+// 자식들을 대각선으로 배치하는 커스텀 레이아웃
+struct DiagonalLayout
+{
+  static MeasuredSize OnMeasure(View self, float wConstraint, float hConstraint)
+  {
+    float totalW = 0, totalH = 0;
+    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    {
+      auto sz = self.GetChildAt(i).Measure(wConstraint - totalW, hConstraint - totalH);
+      totalW += sz.width;
+      totalH += sz.height;
+    }
+    return {totalW, totalH};
+  }
+
+  static MeasuredSize OnArrange(View self, const LayoutRect& bounds)
+  {
+    float x = bounds.x, y = bounds.y;
+    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    {
+      auto sz = self.GetChildAt(i).GetMeasuredSize();
+      self.GetChildAt(i).Arrange({x, y, sz.width, sz.height});
+      x += sz.width;
+      y += sz.height;
+    }
+    return {bounds.width, bounds.height};
+  }
+};
+
+Layout root = Layout::New();
+root.SetMeasureCallback(LayoutMeasureCallback::New(&DiagonalLayout::OnMeasure));
+root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
+```
+
+샘플: [customlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/customlayout)
+
+<br/>
+
+## 컴포넌트 개발: Framework 개발자용
+
+Framework 개발자는 `ViewImpl`의 `OnMeasure` / `OnArrange`를 오버라이드하여 레이아웃을 직접 상속하지 않고 레이아웃 로직을 붙일 수 있습니다.
+이때 `StackLayoutManager`, `GridLayoutManager` 등 integration-api에서 제공하는 레이아웃 매니저 모듈을 활용할 수 있습니다.
+
+```cpp
+// integration-api 레벨
+class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
+{
+public:
+  MyButtonImpl()
+  : ViewImpl()
+  {
+    mLayoutManager = new Dali::Ui::Integration::StackLayoutManager(StackOrientation::VERTICAL, 0.0f); // 기존 매니저 활용
+  }
+
+protected:
+  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  {
+    // 필요한 경우 StackLayoutManager의 Measure를 호출하거나
+    // 완전히 커스텀 로직을 작성
+    return mLayoutManager->Measure(this, widthConstraint, heightConstraint);
+  }
+
+  MeasuredSize OnArrange(const LayoutRect& bounds) override
+  {
+    return mLayoutManager->ArrangeChildren(this, bounds);
+  }
+};
+```
+
+<br/>
+
+## 커스텀 레이아웃: Framework 개발자용
+
+(TBD: Customize LayoutManager)
+
+<br/>
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
