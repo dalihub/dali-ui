@@ -1,0 +1,21 @@
+name: Sync wiki branch to Wiki Git
+
+on:
+  push:
+    branches:
+      - wiki
+
+jobs:
+  sync-wiki:
+    runs-on: [ code-large, code-linux ]
+    steps:
+      - name: Checkout wiki branch
+        uses: code-actions/checkout@v4
+        with:
+          ref: wiki
+          fetch-depth: 0
+
+      - name: Push to wiki git
+        run: |
+          git remote add wiki https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.sec.samsung.net/NUI/dali-ui.wiki.git
+          git push wiki wiki:master --force
