@@ -58,7 +58,13 @@ jobs:
               echo "Failed to push dalihub repo"
               exit 1
             fi
-      
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: wiki
+          fetch-depth: 0
+
       - name: Sync wiki
         env:
           PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
