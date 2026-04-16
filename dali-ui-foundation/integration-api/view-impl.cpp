@@ -1794,10 +1794,7 @@ bool ViewImpl::IsKeyboardNavigationSupported()
 
 void ViewImpl::SetKeyInputFocus()
 {
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Internal::KeyInputFocusManager::Get().SetFocus(Ui::View::DownCast(Self()));
-  }
+  Self().SetProperty(Ui::View::Property::FOCUSED, true);
 }
 
 bool ViewImpl::HasKeyInputFocus()
@@ -1816,10 +1813,7 @@ bool ViewImpl::HasKeyInputFocus()
 
 void ViewImpl::ClearKeyInputFocus()
 {
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Internal::KeyInputFocusManager::Get().RemoveFocus(Ui::View::DownCast(Self()));
-  }
+  Self().SetProperty(Ui::View::Property::FOCUSED, false);
 }
 
 void ViewImpl::SetAsKeyboardFocusGroup(bool isFocusGroup)

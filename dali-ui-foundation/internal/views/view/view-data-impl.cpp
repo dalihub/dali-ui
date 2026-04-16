@@ -47,6 +47,7 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -816,13 +817,16 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case Ui::View::Property::FOCUSED:
       {
-        if(value.Get<bool>())
+        if(viewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
         {
-          viewImpl.SetKeyInputFocus();
-        }
-        else
-        {
-          viewImpl.ClearKeyInputFocus();
+          if(value.Get<bool>())
+          {
+            KeyInputFocusManager::Get().SetFocus(Ui::View::DownCast(viewImpl.Self()));
+          }
+          else
+          {
+            KeyInputFocusManager::Get().RemoveFocus(Ui::View::DownCast(viewImpl.Self()));
+          }
         }
         break;
       }
