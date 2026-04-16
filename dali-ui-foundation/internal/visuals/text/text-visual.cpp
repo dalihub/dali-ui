@@ -259,7 +259,7 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::TextVisual::Property::BACKGROUND, value);
 
   GetStrikethroughProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::STRIKETHROUGH, value);
+  map.Insert(Ui::TextVisual::Property::LINE_THROUGH, value);
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -567,14 +567,14 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       SetOutlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
+    case Ui::TextVisual::Property::LINE_THROUGH:
+    {
+      SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
+      break;
+    }
     case Ui::TextVisual::Property::BACKGROUND:
     {
       SetBackgroundProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisual::Property::STRIKETHROUGH:
-    {
-      SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
   }
@@ -880,12 +880,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
                             parameters.textHeight + (parameters.padding.top + parameters.padding.bottom));
 
     bool isVerticalScroll = false;
-    if(parameters.isAutoScrollEnabled)
+    if(parameters.isMarqueeEnabled)
     {
-      // In case of auto scroll, the layout width (renderInfo's width) is the natural size of the text.
+      // In case of marquee, the layout width (renderInfo's width) is the natural size of the text.
       // Since the layout size is the size of the visual transform, it should be reset to the text area excluding
       // padding.
-      if(parameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL)
+      if(parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
       {
         layoutSize.width = parameters.textWidth;
       }
@@ -1127,7 +1127,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       }
     }
 
-    if(mAsyncTextInterface && parameters.isAutoScrollEnabled)
+    if(mAsyncTextInterface && parameters.isMarqueeEnabled)
     {
       mAsyncTextInterface->AsyncInitializeMarquee(renderInfo);
     }

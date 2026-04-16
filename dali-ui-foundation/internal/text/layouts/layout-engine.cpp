@@ -1289,8 +1289,8 @@ struct Engine::Impl
    * @param[in,out] numberOfLines The number of laid-out lines.
    * @param[in] penY The vertical layout position.
    * @param[in] currentParagraphDirection The current paragraph's direction.
-   * @param[in,out] isAutoScrollEnabled If the isAutoScrollEnabled is true and the height of the text exceeds the
-   * boundaries of the control the text is elided and the isAutoScrollEnabled is set to false to disable the autoscroll
+   * @param[in,out] isMarqueeEnabled If the isMarqueeEnabled is true and the height of the text exceeds the
+   * boundaries of the control the text is elided and the isMarqueeEnabled is set to false to disable the marquee
    * @param[in] isHiddenInputEnabled Whether the hidden input is enabled.
    * @param[in] ellipsisPosition Where is the location the text elide
    *
@@ -1298,14 +1298,14 @@ struct Engine::Impl
    */
   bool EllipsisLine(const Parameters& layoutParameters, LayoutBidiParameters& layoutBidiParameters,
                     const LineLayout& layout, Size& layoutSize, LineRun* linesBuffer, Vector2* glyphPositionsBuffer,
-                    Length& numberOfLines, float penY, bool& isAutoScrollEnabled, bool isAutoScrollMaxTextureExceeded,
+                    Length& numberOfLines, float penY, bool& isMarqueeEnabled, bool isMarqueeMaxTextureExceeded,
                     bool isHiddenInputEnabled, Text::EllipsisPosition::Type ellipsisPosition,
                     bool enforceEllipsisInSingleLine)
   {
     const bool ellipsis =
       enforceEllipsisInSingleLine ||
-      (isAutoScrollEnabled
-         ? isAutoScrollMaxTextureExceeded
+      (isMarqueeEnabled
+         ? isMarqueeMaxTextureExceeded
          : (((mLayout == MULTI_LINE_BOX) &&
              !((numberOfLines == 0) && (layout.length <= layoutParameters.boundingBox.width)) &&
              (penY - layout.descender +
@@ -1318,9 +1318,9 @@ struct Engine::Impl
     {
       if(penY - layout.descender > layoutParameters.boundingBox.height)
       {
-        // Even if auto scroll is enabled and text is bigger than max texture size,
-        // if the the height is small, auto scroll should not work.
-        isAutoScrollEnabled = false;
+        // Even if marquee is enabled and text is bigger than max texture size,
+        // if the the height is small, marquee should not work.
+        isMarqueeEnabled = false;
       }
 
       // Do not layout more lines if ellipsis is enabled.
@@ -1635,8 +1635,8 @@ struct Engine::Impl
     return false;
   }
 
-  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isAutoScrollEnabled,
-                  bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
+  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isMarqueeEnabled,
+                  bool isMarqueeMaxTextureExceeded, bool isHiddenInputEnabled,
                   Text::EllipsisPosition::Type ellipsisPosition)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->LayoutText\n");
@@ -1870,8 +1870,8 @@ struct Engine::Impl
 
         // Does the ellipsis of the last line.
         ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
-                                glyphPositionsBuffer, numberOfLines, penY, isAutoScrollEnabled,
-                                isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
+                                glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
+                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, false);
       }
 
       if(ellipsis && ((ellipsisPosition == Text::EllipsisPosition::END) || (numberOfLines == 1u)))
@@ -1880,8 +1880,8 @@ struct Engine::Impl
         if(isMultiline && ellipsisPosition != Text::EllipsisPosition::END)
         {
           ellipsis = EllipsisLine(layoutParameters, layoutBidiParameters, layout, layoutSize, linesBuffer,
-                                  glyphPositionsBuffer, numberOfLines, penY, isAutoScrollEnabled,
-                                  isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true);
+                                  glyphPositionsBuffer, numberOfLines, penY, isMarqueeEnabled,
+                                  isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition, true);
         }
 
         // clear hyphen from ellipsis line
@@ -2260,11 +2260,11 @@ void Engine::SetCursorInsetEnabled(bool enable)
 }
 
 bool Engine::LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled,
-                        bool& isAutoScrollEnabled, bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
+                        bool& isMarqueeEnabled, bool isMarqueeMaxTextureExceeded, bool isHiddenInputEnabled,
                         Text::EllipsisPosition::Type ellipsisPosition)
 {
-  return mImpl->LayoutText(layoutParameters, layoutSize, elideTextEnabled, isAutoScrollEnabled,
-                           isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+  return mImpl->LayoutText(layoutParameters, layoutSize, elideTextEnabled, isMarqueeEnabled,
+                           isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
 }
 
 void Engine::Align(const Size& size, CharacterIndex startIndex, Length numberOfCharacters,

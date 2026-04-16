@@ -125,10 +125,10 @@ public:
                                     const Size& naturalSize);
 
   /**
-   * @copydoc Dali::AsyncTextLoader::RenderAutoScroll()
+   * @copydoc Dali::AsyncTextLoader::RenderMarquee()
    */
-  AsyncTextRenderInfo RenderAutoScroll(AsyncTextParameters& parameters, bool useCachedNaturalSize,
-                                       const Size& naturalSize);
+  AsyncTextRenderInfo RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                    const Size& naturalSize);
 
   /**
    * @copydoc Dali::AsyncTextLoader::GetNaturalSize()

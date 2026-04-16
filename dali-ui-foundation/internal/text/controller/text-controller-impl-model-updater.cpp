@@ -279,7 +279,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
         // Set the normal font and the placeholder font.
         defaultFontDescription = impl.mFontDefaults->GetFontDescription();
 
-        if(impl.mTextFitEnabled || impl.mTextFitArrayEnabled)
+        if(impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
         {
           defaultPointSize = impl.mFontDefaults->mFitPointSize * numberOfPointsPerOneUnitOfPointSize;
         }

@@ -66,12 +66,12 @@ struct Controller::Relayouter
   static void FitPointSizeforLayout(Controller& controller, const Size& layoutSize);
 
   /**
-   * @brief Calculates the point size for text for given layout() using text fit array.
+   * @brief Calculates the point size for text for given layout() using text fit candidates.
    *
    * @param[in] controller A reference to the controller class
    * @param[in] layoutSize The layout size
    */
-  static void FitArrayPointSizeforLayout(Controller& controller, const Size& layoutSize);
+  static void FitCandidatesPointSizeForLayout(Controller& controller, const Size& layoutSize);
 
   /**
    * @brief Called by the Controller to get the height for a particular width.

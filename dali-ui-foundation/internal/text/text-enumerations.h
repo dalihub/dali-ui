@@ -56,7 +56,7 @@ namespace Ellipsize
 enum Mode
 {
   TRUNCATE = 0, ///< If the text exceeds the layout, it will be truncated with an ellipsis.
-  AUTO_SCROLL   ///< If the text exceeds the layout, it will be auto scroll animated.
+  MARQUEE       ///< If the text exceeds the layout, it will be marquee animated.
 };
 
 } // namespace Ellipsize

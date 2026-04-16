@@ -272,16 +272,16 @@ bool Controller::Relayouter::CheckForTextFit(Controller& controller, float point
   return true;
 }
 
-void Controller::Relayouter::FitArrayPointSizeforLayout(Controller& controller, const Size& layoutSize)
+void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& controller, const Size& layoutSize)
 {
   Controller::Impl& impl = *controller.mImpl;
 
   const OperationsMask operations = impl.mOperationsPending;
   if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations) || impl.mTextFitContentSize != layoutSize)
   {
-    DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_ARRAY_LAYOUT", "[%p]", static_cast<void*>(&controller));
+    DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_CANDIDATES_LAYOUT", "[%p]", static_cast<void*>(&controller));
 
-    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = impl.mTextFitArray;
+    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = impl.mTextFitCandidates;
     const int                            candidateCount = static_cast<int>(fitCandidates.Count());
 
     if(candidateCount == 0)
@@ -640,8 +640,8 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   VisualModelPtr&   visualModel    = model->mVisualModel;
   TextUpdateInfo&   textUpdateInfo = impl.mTextUpdateInfo;
 
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayout %p size %f,%f, autoScroll[%s]\n", &controller,
-                size.width, size.height, impl.mIsAutoScrollEnabled ? "true" : "false");
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::Relayout %p size %f,%f, marquee[%s]\n", &controller,
+                size.width, size.height, impl.mIsMarqueeEnabled ? "true" : "false");
   DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_RELAYOUT", "[%p]", static_cast<void*>(&controller));
 
   UpdateTextType updateTextType = NONE_UPDATED;
@@ -911,7 +911,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     layoutParameters.estimatedNumberOfLines = textUpdateInfo.mEstimatedNumberOfLines;
 
     float fontPointSize =
-      (impl.mTextFitEnabled || impl.mTextFitArrayEnabled)
+      (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
         ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
         : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetAdjustedFontSizeScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));
@@ -940,9 +940,9 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     }
 
     // Update the visual model.
-    bool isAutoScrollEnabled            = impl.mIsAutoScrollEnabled;
-    bool isAutoScrollMaxTextureExceeded = impl.mIsAutoScrollMaxTextureExceeded;
-    bool isHiddenInputEnabled           = false;
+    bool isMarqueeEnabled            = impl.mIsMarqueeEnabled;
+    bool isMarqueeMaxTextureExceeded = impl.mIsMarqueeMaxTextureExceeded;
+    bool isHiddenInputEnabled        = false;
     if(impl.mHiddenInput && impl.mEventData != nullptr &&
        impl.mHiddenInput->GetHideMode() != Ui::HiddenInput::Mode::HIDE_NONE)
     {
@@ -950,11 +950,11 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     }
 
     Size newLayoutSize;
-    viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isAutoScrollEnabled,
-                                                isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+    viewUpdated = impl.mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, elideTextEnabled, isMarqueeEnabled,
+                                                isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
 
-    impl.mIsAutoScrollEnabled = isAutoScrollEnabled;
-    layoutTooSmall            = !viewUpdated;
+    impl.mIsMarqueeEnabled = isMarqueeEnabled;
+    layoutTooSmall         = !viewUpdated;
 
     viewUpdated = viewUpdated || (newLayoutSize != layoutSize);
 

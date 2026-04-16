@@ -56,7 +56,39 @@ class InputFieldImpl;
 class DALI_UI_API InputField : public View
 {
 public:
-  // Typedefs
+  /**
+   * @brief Property indices for InbputField.
+   *
+   * @note See Dali::Ui::Text::InputFieldPropertyIndex for the underlying property definitions.
+   */
+  struct Property
+  {
+    enum
+    {
+      TEXT                           = Text::InputFieldPropertyIndex::TEXT,
+      FONT_FAMILY                    = Text::InputFieldPropertyIndex::FONT_FAMILY,
+      FONT_SIZE                      = Text::InputFieldPropertyIndex::FONT_SIZE,
+      TEXT_COLOR                     = Text::InputFieldPropertyIndex::TEXT_COLOR,
+      HORIZONTAL_ALIGNMENT           = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
+      VERTICAL_ALIGNMENT             = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
+      OVERFLOW_MODE                  = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
+      PLACEHOLDER                    = Text::InputFieldPropertyIndex::PLACEHOLDER,
+      PLACEHOLDER_COLOR              = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
+      CURSOR_WIDTH                   = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
+      CURSOR_COLOR                   = Text::InputFieldPropertyIndex::CURSOR_COLOR,
+      SELECTION_COLOR                = Text::InputFieldPropertyIndex::SELECTION_COLOR,
+      MAXIMUM_LENGTH                 = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+      LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
+      FONT_WEIGHT                    = Text::InputFieldPropertyIndex::FONT_WEIGHT,
+      FONT_WIDTH                     = Text::InputFieldPropertyIndex::FONT_WIDTH,
+      FONT_SLANT                     = Text::InputFieldPropertyIndex::FONT_SLANT,
+      TEXT_BACKGROUND_COLOR          = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
+      FONT_SIZE_SCALE                = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
+      MINIMUM_FONT_SIZE_SCALE        = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
+      MAXIMUM_FONT_SIZE_SCALE        = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
+      SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
+    };
+  };
 
 public: // Creation & Destruction
   /**
@@ -647,182 +679,6 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API InputField(Dali::Internal::CustomActor* internal);
   /// @endcond
-
-public:
-  // Property
-  struct Property
-  {
-    /**
-     * @brief Enumeration for the instance of properties belonging to the InputField class.
-     */
-    enum
-    {
-      ///////////////////////////////////////////////////////////////////////////////
-      // Event side (non-animatable) properties
-      ///////////////////////////////////////////////////////////////////////////////
-      /**
-       * @brief The text to display in UTF-8 format.
-       * @details Name "text", type Property::STRING.
-       * @see InputField::SetText(), InputField::GetText().
-       */
-      TEXT = Text::InputFieldPropertyIndex::TEXT,
-
-      /**
-       * @brief The font family of the text.
-       * @details Name "fontFamily", type Property::STRING.
-       * @see InputField::SetFontFamily(), InputField::GetFontFamily().
-       */
-      FONT_FAMILY = Text::InputFieldPropertyIndex::FONT_FAMILY,
-
-      /**
-       * @brief The size of font in pixels.
-       * @details Name "fontSize", type Property::FLOAT.
-       * @see InputField::SetFontSize(), InputField::GetFontSize().
-       */
-      FONT_SIZE = Text::InputFieldPropertyIndex::FONT_SIZE,
-
-      /**
-       * @brief The color of the text.
-       * @details Name "textColor", type Property::VECTOR4.
-       * @see InputField::SetTextColor(), InputField::GetTextColor().
-       */
-      TEXT_COLOR = Text::InputFieldPropertyIndex::TEXT_COLOR,
-
-      /**
-       * @brief The horizontal alignment.
-       * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::Alignment (Property::INTEGER).
-       * @see InputField::SetHorizontalTextAlignment(), InputField::GetHorizontalTextAlignment().
-       */
-      HORIZONTAL_ALIGNMENT = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
-
-      /**
-       * @brief The vertical alignment.
-       * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::Alignment (Property::INTEGER).
-       * @see InputField::SetVerticalTextAlignment(), InputField::GetVerticalTextAlignment().
-       */
-      VERTICAL_ALIGNMENT = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
-
-      /**
-       * @brief The overflow mode.
-       * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::OverflowMode (Property::INTEGER).
-       * @see InputField::SetOverflowMode(), InputField::GetOverflowMode().
-       */
-      OVERFLOW_MODE = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
-
-      /**
-       * @brief The placeholder text displayed when the input field is empty.
-       * @details Name "placeholder", type Property::STRING.
-       * @see InputField::SetPlaceholder(), InputField::GetPlaceholder().
-       */
-      PLACEHOLDER = Text::InputFieldPropertyIndex::PLACEHOLDER,
-
-      /**
-       * @brief The color of the placeholder text.
-       * @details Name "placeholderColor", type Property::VECTOR4.
-       * @see InputField::SetPlaceholderColor(), InputField::GetPlaceholderColor().
-       */
-      PLACEHOLDER_COLOR = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
-
-      /**
-       * @brief The width of the text cursor in pixels.
-       * @details Name "cursorWidth", type Property::INTEGER.
-       * @see InputField::SetCursorWidth(), InputField::GetCursorWidth().
-       */
-      CURSOR_WIDTH = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
-
-      /**
-       * @brief The color of the text cursor.
-       * @details Name "cursorColor", type Property::VECTOR4.
-       * @see InputField::SetCursorColor(), InputField::GetCursorColor().
-       */
-      CURSOR_COLOR = Text::InputFieldPropertyIndex::CURSOR_COLOR,
-
-      /**
-       * @brief The highlight color of the selected text region.
-       * @details Name "selectionColor", type Property::VECTOR4.
-       * @see InputField::SetSelectionColor(), InputField::GetSelectionColor().
-       */
-      SELECTION_COLOR = Text::InputFieldPropertyIndex::SELECTION_COLOR,
-
-      /**
-       * @brief The maximum number of characters that can be entered.
-       * @details Name "maximumLength", type Property::INTEGER.
-       * @see InputField::SetMaximumLength(), InputField::GetMaximumLength().
-       */
-      MAXIMUM_LENGTH = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
-
-      /**
-       * @brief The layout direction mode.
-       * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).
-       * @see InputField::SetLayoutDirectionMode(), InputField::GetLayoutDirectionMode().
-       */
-      LAYOUT_DIRECTION_MODE = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
-
-      /**
-       * @brief The font weight.
-       * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::FontWeight (Property::INTEGER).
-       * @see InputField::SetFontWeight(), InputField::GetFontWeight().
-       */
-      FONT_WEIGHT = Text::InputFieldPropertyIndex::FONT_WEIGHT,
-
-      /**
-       * @brief The font width.
-       * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::FontWidth (Property::INTEGER).
-       * @see InputField::SetFontWidth(), InputField::GetFontWidth().
-       */
-      FONT_WIDTH = Text::InputFieldPropertyIndex::FONT_WIDTH,
-
-      /**
-       * @brief The font slant.
-       * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
-       * @note Return type is Text::FontSlant (Property::INTEGER).
-       * @see InputField::SetFontSlant(), InputField::GetFontSlant().
-       */
-      FONT_SLANT = Text::InputFieldPropertyIndex::FONT_SLANT,
-
-      /**
-       * @brief The background color behind the text.
-       * @details Name "textBackgroundColor", type Property::VECTOR4.
-       * @note The background is rendered behind the text glyphs.
-       * @see InputField::SetTextBackgroundColor(), InputField::GetTextBackgroundColor(), InputField::ClearTextBackgroundColor().
-       */
-      TEXT_BACKGROUND_COLOR = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
-
-      /**
-       * @brief The font size scale.
-       * @details Name "fontSizeScale", type Property::FLOAT.
-       * @see InputField::SetFontSizeScale(), InputField::GetFontSizeScale().
-       */
-      FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
-
-      /**
-       * @brief The minimum font size scale.
-       * @details Name "minimumFontSizeScale", type Property::FLOAT.
-       * @see InputField::SetMinimumFontSizeScale(), InputField::GetMinimumFontSizeScale().
-       */
-      MINIMUM_FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
-
-      /**
-       * @brief The maximum font size scale.
-       * @details Name "maximumFontSizeScale", type Property::FLOAT.
-       * @see InputField::SetMaximumFontSizeScale(), InputField::GetMaximumFontSizeScale().
-       */
-      MAXIMUM_FONT_SIZE_SCALE = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
-
-      /**
-       * @brief Whether the system font size scale is applied.
-       * @details Name "systemFontSizeScaleEnabled", type Property::BOOLEAN.
-       * @see InputField::SetSystemFontSizeScaleEnabled(), InputField::IsSystemFontSizeScaleEnabled().
-       */
-      SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
-    };
-  };
 
 public:
   DALI_UI_CHAIN_VIEW_METHODS(InputField)

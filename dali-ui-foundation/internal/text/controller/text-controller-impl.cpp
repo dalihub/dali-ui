@@ -1899,7 +1899,7 @@ void Controller::Impl::CopyCharacterSpacingFromLogicalToVisualModels()
   }
 }
 
-void Controller::Impl::SetAutoScrollEnabled(bool enable, bool requestRelayout, MarqueeOrientation orientation)
+void Controller::Impl::SetMarqueeEnabled(bool enable, bool requestRelayout, MarqueeOrientation orientation)
 {
   if((mLayoutEngine.GetLayout() == Layout::Engine::SINGLE_LINE_BOX && orientation == MarqueeOrientation::HORIZONTAL) ||
      (mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX && orientation == MarqueeOrientation::VERTICAL))
@@ -1908,15 +1908,15 @@ void Controller::Impl::SetAutoScrollEnabled(bool enable, bool requestRelayout, M
 
     if(enable)
     {
-      DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetAutoScrollEnabled\n");
+      DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetMarqueeEnabled\n");
       mOperationsPending = static_cast<OperationsMask>(mOperationsPending | UPDATE_DIRECTION);
     }
     else
     {
-      DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetAutoScrollEnabled Disabling autoscroll\n");
+      DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetMarqueeEnabled Disabling marquee\n");
     }
 
-    mIsAutoScrollEnabled = enable;
+    mIsMarqueeEnabled = enable;
     if(requestRelayout)
     {
       RequestRelayout();
@@ -1924,8 +1924,8 @@ void Controller::Impl::SetAutoScrollEnabled(bool enable, bool requestRelayout, M
   }
   else
   {
-    DALI_LOG_DEBUG_INFO("Attempted AutoScrolling, request ignored\n");
-    mIsAutoScrollEnabled = false;
+    DALI_LOG_DEBUG_INFO("Attempted Marqueeing, request ignored\n");
+    mIsMarqueeEnabled = false;
   }
 }
 

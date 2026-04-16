@@ -399,7 +399,6 @@ Model::Model()
   mLineWrapMode(LineWrapMode::WORD),
   mAlignmentOffset(0.0f),
   mElideEnabled(false),
-  mIgnoreSpacesAfterText(true),
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
   mLayoutDirectionMode(LayoutDirectionMode::CONTENTS),

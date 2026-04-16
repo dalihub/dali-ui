@@ -114,10 +114,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
   return GetImplementation(*this).RenderTextFit(parameters, useCachedNaturalSize, naturalSize);
 }
 
-AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& parameters, bool useCachedNaturalSize,
-                                                      const Size& naturalSize)
+AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                                   const Size& naturalSize)
 {
-  return GetImplementation(*this).RenderAutoScroll(parameters, useCachedNaturalSize, naturalSize);
+  return GetImplementation(*this).RenderMarquee(parameters, useCachedNaturalSize, naturalSize);
 }
 
 AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& parameters)

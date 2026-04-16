@@ -674,11 +674,11 @@ void LabelImpl::ClearBevel()
 
 void LabelImpl::SetTextFit(const Text::FitRange& range)
 {
-  // If TextFitArray is enabled, this should be disabled.
-  if(mController->IsTextFitArrayEnabled())
+  // If TextFitCandidates is enabled, this should be disabled.
+  if(mController->IsTextFitCandidatesEnabled())
   {
-    mController->SetTextFitArrayEnabled(false);
-    mController->ClearTextFitArray();
+    mController->SetTextFitCandidatesEnabled(false);
+    mController->ClearTextFitCandidates();
   }
   mController->SetTextFitEnabled(true);
   // Use the current line size as the baseline for text fit.
@@ -697,18 +697,18 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   {
     mController->SetTextFitEnabled(false);
   }
-  mController->SetTextFitArrayEnabled(true);
-  mController->SetTextFitArray(candidates);
+  mController->SetTextFitCandidatesEnabled(true);
+  mController->SetTextFitCandidates(candidates);
   InvalidateTextMeasure();
 }
 
 void LabelImpl::ClearTextFit()
 {
-  if(mController->IsTextFitEnabled() || mController->IsTextFitArrayEnabled())
+  if(mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled())
   {
     mController->SetTextFitEnabled(false);
-    mController->SetTextFitArrayEnabled(false);
-    mController->ClearTextFitArray();
+    mController->SetTextFitCandidatesEnabled(false);
+    mController->ClearTextFitCandidates();
     UpdateLineHeight();
     InvalidateTextMeasure();
   }
@@ -1053,7 +1053,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || sizeChanged))
     {
-      // When auto scroll is playing, a text load request is made only if a text update is absolutely necessary.
+      // When marquee is playing, a text load request is made only if a text update is absolutely necessary.
       return;
     }
 
@@ -1072,9 +1072,9 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     return;
   }
 
-  if(mController->IsTextFitArrayEnabled())
+  if(mController->IsTextFitCandidatesEnabled())
   {
-    mController->FitArrayPointSizeforLayout(contentSize);
+    mController->FitCandidatesPointSizeForLayout(contentSize);
     mController->SetTextFitContentSize(contentSize);
   }
   else if(mController->IsTextFitEnabled())
@@ -1148,7 +1148,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
     mVisual.SetTransformAndSize(visualTransform, size);
 
-    if(mController->IsAutoScrollEnabled())
+    if(mController->IsMarqueeEnabled())
     {
       InitializeMarquee(contentSize, originSize);
     }
@@ -1197,7 +1197,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   const float fontSize  = GetFontSize();
 
   const bool useTextFitRange    = mController->IsTextFitEnabled();
-  const bool useFitCandidates   = mController->IsTextFitArrayEnabled();
+  const bool useFitCandidates   = mController->IsTextFitCandidatesEnabled();
   const bool wrapContentMeasure = (requestedWidth == WRAP_CONTENT) || (requestedHeight == WRAP_CONTENT);
 
   // Measure wrap-content size using a representative maximum text fit configuration.
@@ -1208,7 +1208,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
-    mController->SetTextFitArrayEnabled(false);
+    mController->SetTextFitCandidatesEnabled(false);
 
     const Text::FitCandidate* fitCandidate = mController->GetMaxFitCandidate();
     if(fitCandidate)
@@ -1273,7 +1273,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
-    mController->SetTextFitArrayEnabled(true);
+    mController->SetTextFitCandidatesEnabled(true);
     mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
     UpdateLineHeight();
   }
@@ -1377,7 +1377,7 @@ void LabelImpl::RequestAsyncRender()
 void LabelImpl::ScrollingFinished()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  mController->SetAutoScrollEnabled(false);
+  mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
 }
 
@@ -1400,8 +1400,8 @@ void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
 // =============================================================================
 void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
 {
-  // Check current state to prevent starting scroll when ENABLE_AUTO_SCROLL was set to false.
-  if(!mController->IsAutoScrollEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::TRUNCATE)
+  // Check current state to prevent starting scroll when ENABLE_MARQUEE was set to false.
+  if(!mController->IsMarqueeEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::TRUNCATE)
   {
     if(!mIsAsyncRenderRequested)
     {
@@ -1416,8 +1416,8 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
 
   Size      verifiedSize = renderInfo.size;
   Size      controlSize  = renderInfo.controlSize;
-  float     wrapGap      = renderInfo.autoScrollWrapGap;
-  PixelData data         = renderInfo.autoScrollPixelData;
+  float     wrapGap      = renderInfo.marqueeWrapGap;
+  PixelData data         = renderInfo.marqueePixelData;
   Texture   texture      = Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
 
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
@@ -1599,7 +1599,7 @@ void LabelImpl::UpdateAnchorTouchInterception()
 
 void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSize)
 {
-  const Text::CharacterDirection direction = mController->GetAutoScrollTextDirection();
+  const Text::CharacterDirection direction = mController->GetMarqueeTextDirection();
 
   float wrapGap        = 0.0f;
   Size  verifiedSize   = Size::ZERO;
@@ -1629,7 +1629,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
       if(textNaturalSize.width > maxTextureSize)
       {
         mController->SetTextElideEnabled(true);
-        mController->SetAutoScrollMaxTextureExceeded(true);
+        mController->SetMarqueeMaxTextureExceeded(true);
       }
       float gap = static_cast<float>(mTextScroller->GetGap());
       mController->CalculateLayoutSize(verifiedSize.width - gap, controlSize.height, true);
@@ -1654,15 +1654,15 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
       verifiedSize.height = maxTextureSize;
       if(textHeight > maxTextureSize)
       {
-        mController->SetAutoScrollEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
+        mController->SetMarqueeEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
         mController->SetTextElideEnabled(true);
       }
 
       mController->CalculateLayoutSize(controlSize.width, maxTextureSize, true);
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
-      if(!mController->IsAutoScrollEnabled())
+      if(!mController->IsMarqueeEnabled())
       {
-        mController->SetAutoScrollEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
+        mController->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
       }
     }
   }
@@ -1702,18 +1702,18 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
   mTextScroller->SetParameters(Self(), renderer, textureSet, controlSize, verifiedSize, wrapGap, direction, mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(), mRendererUpdateNeeded);
   mController->SetTextElideEnabled(actualellipsis);
-  mController->SetAutoScrollMaxTextureExceeded(false);
+  mController->SetMarqueeMaxTextureExceeded(false);
 }
 
 void LabelImpl::UpdateMarqueeState()
 {
-  if(mController->IsAutoScrollEnabled())
+  if(mController->IsMarqueeEnabled())
   {
     const Text::MarqueeStopMode stopMode = GetTextScroller()->GetStopMode();
     mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
     mTextScroller->StopScrolling();
     mTextScroller->SetStopMode(stopMode);
-    mController->SetAutoScrollEnabled(true, true, mTextScroller->GetOrientation());
+    mController->SetMarqueeEnabled(true, true, mTextScroller->GetOrientation());
   }
 }
 
@@ -1723,8 +1723,8 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
   {
     if(visible)
     {
-      // TODO: Handle AUTO_SCROLL ellipsis on visibility change (disable when hidden, restore when visible)
-      // if(mLastEllipsisMode == Text::Ellipsize::AUTO_SCROLL)
+      // TODO: Handle MARQUEE ellipsis on visibility change (disable when hidden, restore when visible)
+      // if(mLastEllipsisMode == Text::Ellipsize::MARQUEE)
       // {
       //   mController->SetEllipsisMode(mLastEllipsisMode);
       //   if(mTextScroller)
@@ -1735,18 +1735,18 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
       // }
       // else
       {
-        if(mController->IsAutoScrollEnabled() || mLastMarqueeEnabled)
+        if(mController->IsMarqueeEnabled() || mLastMarqueeEnabled)
         {
-          mController->SetAutoScrollEnabled(true, true, GetTextScroller()->GetOrientation());
+          mController->SetMarqueeEnabled(true, true, GetTextScroller()->GetOrientation());
         }
       }
     }
     else
     {
-      // TODO: Handle AUTO_SCROLL ellipsis on visibility change (disable when hidden, restore when visible)
-      // if(mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
+      // TODO: Handle MARQUEE ellipsis on visibility change (disable when hidden, restore when visible)
+      // if(mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
       // {
-      //   mLastEllipsisMode = Text::Ellipsize::AUTO_SCROLL;
+      //   mLastEllipsisMode = Text::Ellipsize::MARQUEE;
       //   mController->SetEllipsisMode(Text::Ellipsize::TRUNCATE);
       //   if(mTextScroller)
       //   {
@@ -1756,7 +1756,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
       // }
       // else
       {
-        if(mLastMarqueeEnabled && !mController->IsAutoScrollEnabled())
+        if(mLastMarqueeEnabled && !mController->IsMarqueeEnabled())
         {
           mLastMarqueeEnabled = false;
         }
@@ -1783,17 +1783,17 @@ Text::TextScrollerPtr LabelImpl::GetTextScroller()
 
 void LabelImpl::SetMarqueeEnabled(bool enabled)
 {
-  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
+  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
   {
-    DALI_LOG_DEBUG_INFO("Tried to autoscroll while in ellipsize auto scroll mode, request ignored.\n");
+    DALI_LOG_DEBUG_INFO("Tried to marquee while in ellipsize marquee mode, request ignored.\n");
   }
   else
   {
     mLastMarqueeEnabled = enabled;
-    // If request to auto scroll is the same as current state then do nothing.
-    if(enabled != mController->IsAutoScrollEnabled())
+    // If request to marquee is the same as current state then do nothing.
+    if(enabled != mController->IsMarqueeEnabled())
     {
-      // If request is disable (false) and auto scrolling is enabled then need to stop it
+      // If request is disable (false) and marqueeing is enabled then need to stop it
       if(enabled == false)
       {
         if(mTextScroller)
@@ -1801,10 +1801,10 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
           mTextScroller->StopScrolling();
         }
       }
-      // If request is enable (true) then start autoscroll as not already running
+      // If request is enable (true) then start marquee as not already running
       else
       {
-        mController->SetAutoScrollEnabled(enabled, true, GetTextScroller()->GetOrientation());
+        mController->SetMarqueeEnabled(enabled, true, GetTextScroller()->GetOrientation());
       }
       RequestAsyncRender();
     }
@@ -1830,7 +1830,7 @@ bool LabelImpl::IsVisible()
 
 void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation)
 {
-  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::AUTO_SCROLL)
+  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
   {
     if(IsVisible())
     {
@@ -1840,7 +1840,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
       {
         if(mController->IsMultiLineEnabled())
         {
-          DALI_LOG_DEBUG_INFO("Attempted ellipsize auto scroll on a non SINGLE_LINE_BOX, request ignored\n");
+          DALI_LOG_DEBUG_INFO("Attempted ellipsize marquee on a non SINGLE_LINE_BOX, request ignored\n");
           marqueeEnabled = false;
         }
         else
@@ -1855,9 +1855,9 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
         marqueeEnabled         = contentSize.height < textHeight;
       }
 
-      if(marqueeEnabled != mController->IsAutoScrollEnabled())
+      if(marqueeEnabled != mController->IsMarqueeEnabled())
       {
-        mController->SetAutoScrollEnabled(marqueeEnabled, false, orientation);
+        mController->SetMarqueeEnabled(marqueeEnabled, false, orientation);
       }
     }
   }
@@ -1867,7 +1867,7 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
 {
   originSize = Size::ZERO;
 
-  if(mController->IsAutoScrollEnabled())
+  if(mController->IsMarqueeEnabled())
   {
     const bool isVerticalScroll = (orientation == Text::MarqueeOrientation::VERTICAL);
 
@@ -1876,9 +1876,9 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
 
     if(needLayoutSizeCalculation)
     {
-      mController->SetAutoScrollEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
+      mController->SetMarqueeEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
       originSize = mController->CalculateLayoutSize(contentSize.x, contentSize.y, true);
-      mController->SetAutoScrollEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
+      mController->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
     }
   }
 }
@@ -2067,18 +2067,18 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.textFitMinSize             = mController->GetTextFitMinSize(Text::Controller::POINT_SIZE);
   parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Text::Controller::POINT_SIZE);
   parameters.textFitStepSize            = mController->GetTextFitStepSize(Text::Controller::POINT_SIZE);
-  parameters.isTextFitCandidatesEnabled = mController->IsTextFitArrayEnabled();
-  parameters.textFitCandidates          = mController->GetTextFitArray();
-  parameters.isAutoScrollEnabled        = mController->IsAutoScrollEnabled();
+  parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
+  parameters.textFitCandidates          = mController->GetTextFitCandidates();
+  parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
   parameters.ellipsisMode               = mController->GetEllipsisMode();
-  if(parameters.isAutoScrollEnabled || parameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
+  if(parameters.isMarqueeEnabled || parameters.ellipsisMode == Text::Ellipsize::MARQUEE)
   {
-    parameters.autoScrollStopMode  = GetTextScroller()->GetStopMode();
-    parameters.autoScrollSpeed     = GetTextScroller()->GetSpeed();
-    parameters.autoScrollLoopCount = GetTextScroller()->GetLoopCount();
-    parameters.autoScrollLoopDelay = GetTextScroller()->GetLoopDelay();
-    parameters.autoScrollGap       = GetTextScroller()->GetGap();
-    parameters.autoScrollDirection = GetTextScroller()->GetOrientation();
+    parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();
+    parameters.marqueeSpeed       = GetTextScroller()->GetSpeed();
+    parameters.marqueeLoopCount   = GetTextScroller()->GetLoopCount();
+    parameters.marqueeLoopDelay   = GetTextScroller()->GetLoopDelay();
+    parameters.marqueeGap         = GetTextScroller()->GetGap();
+    parameters.marqueeOrientation = GetTextScroller()->GetOrientation();
   }
   parameters.isCutoutEnabled               = mController->IsTextCutout();
   parameters.isBackgroundWithCutoutEnabled = mController->IsBackgroundWithCutoutEnabled();
@@ -2100,6 +2100,7 @@ void LabelImpl::EmitTextFitChanged()
 {
   // Intentionally not emitted for now.
   // Revisit when the public TextFitChanged API direction is finalized.
+  // mController->GetTextFitFontSize(Text::Controller::PIXEL_SIZE);
 }
 
 void LabelImpl::EmitAsyncRenderFinished(float width, float height)

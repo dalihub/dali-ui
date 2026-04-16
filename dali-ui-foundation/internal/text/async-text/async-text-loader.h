@@ -96,14 +96,14 @@ struct AsyncTextParameters
     textFitMinSize{10.f},
     textFitMaxSize{100.f},
     textFitStepSize{1.f},
-    autoScrollLoopDelay{0.0f},
+    marqueeLoopDelay{0.0f},
     renderScale{1.0f},
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
     maxTextureSize{0},
-    autoScrollSpeed{1},
-    autoScrollLoopCount{1},
-    autoScrollGap{0},
+    marqueeSpeed{1},
+    marqueeLoopCount{1},
+    marqueeGap{0},
     outlineWidth{0u},
     requestType{Async::RENDER_FIXED_SIZE},
     horizontalAlignment{Alignment::START},
@@ -115,8 +115,8 @@ struct AsyncTextParameters
     layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},
     ellipsisPosition{Text::EllipsisPosition::END},
     ellipsisMode{Text::Ellipsize::TRUNCATE},
-    autoScrollDirection{Text::MarqueeOrientation::HORIZONTAL},
-    autoScrollStopMode{Text::MarqueeStopMode::FINISH_LOOP},
+    marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL},
+    marqueeStopMode{Text::MarqueeStopMode::FINISH_LOOP},
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
     fontSlant{FontSlant::NONE},
@@ -128,8 +128,8 @@ struct AsyncTextParameters
     isTextBackgroundEnabled{false},
     isTextFitEnabled{false},
     isTextFitCandidatesEnabled{false},
-    isAutoScrollEnabled{false},
-    isAutoScrollMaxTextureExceeded{false},
+    isMarqueeEnabled{false},
+    isMarqueeMaxTextureExceeded{false},
     isCutoutEnabled{false},
     isBackgroundWithCutoutEnabled{false},
     isEmbossEnabled{false}
@@ -179,15 +179,15 @@ struct AsyncTextParameters
   float textFitMinSize;
   float textFitMaxSize;
   float textFitStepSize;
-  float autoScrollLoopDelay;
+  float marqueeLoopDelay;
   float renderScale;       ///< The render scale.
   float renderScaleWidth;  ///< The requested original textWidth when using render scale.
   float renderScaleHeight; ///< The requested original textHeight when using render scale.
 
-  int maxTextureSize;  ///< The maximum size of texture.
-  int autoScrollSpeed; ///< auto scroll properties.
-  int autoScrollLoopCount;
-  int autoScrollGap;
+  int maxTextureSize; ///< The maximum size of texture.
+  int marqueeSpeed;   ///< marquee properties.
+  int marqueeLoopCount;
+  int marqueeGap;
 
   uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
 
@@ -200,27 +200,27 @@ struct AsyncTextParameters
   Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
   LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
   Text::EllipsisPosition::Type
-                           ellipsisPosition;    ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  Text::Ellipsize::Mode    ellipsisMode;        ///< The mode of the ellipsis: one of {TRUNCATE, AUTO_SCROLL}.
-  Text::MarqueeOrientation autoScrollDirection; ///< The direction of the auto scroll {HORIZONTAL, VERTICAL}.
-  Text::MarqueeStopMode    autoScrollStopMode;  ///< The auto scroll stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight               fontWeight;          ///< The font's weight.
-  FontWidth                fontWidth;           ///< The font's width.
-  FontSlant                fontSlant;           ///< The font's slant.
+                           ellipsisPosition;   ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  Text::Ellipsize::Mode    ellipsisMode;       ///< The mode of the ellipsis: one of {TRUNCATE, MARQUEE}.
+  Text::MarqueeOrientation marqueeOrientation; ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
+  Text::MarqueeStopMode    marqueeStopMode;    ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeight               fontWeight;         ///< The font's weight.
+  FontWidth                fontWidth;          ///< The font's width.
+  FontSlant                fontSlant;          ///< The font's slant.
 
-  bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
-  bool ellipsis : 1;                       ///< Whether the ellipsis layout option is enabled.
-  bool enableMarkup : 1;                   ///< Whether the mark-up processor is enabled.
-  bool isUnderlineEnabled : 1;             ///< Underline enabeld flag.
-  bool isStrikethroughEnabled : 1;         ///< Strikethrough enabeld flag.
-  bool isTextBackgroundEnabled : 1;        ///< Text background flag.
-  bool isTextFitEnabled : 1;               ///< TextFit enabeld flag.
-  bool isTextFitCandidatesEnabled : 1;     ///< TextFit Candidates enabeld flag.
-  bool isAutoScrollEnabled : 1;            ///< Auto scroll enabeld flag.
-  bool isAutoScrollMaxTextureExceeded : 1; ///< Whether the auto scroll texture size exceeds the maximum texture width.
-  bool isCutoutEnabled : 1;                ///< Cutout enabled flag.
-  bool isBackgroundWithCutoutEnabled : 1;  ///< Background with cutout enabled flag.
-  bool isEmbossEnabled : 1;                ///< Emboss enabled flag.
+  bool isMultiLine : 1;                   ///< Whether the multi-line layout is enabled.
+  bool ellipsis : 1;                      ///< Whether the ellipsis layout option is enabled.
+  bool enableMarkup : 1;                  ///< Whether the mark-up processor is enabled.
+  bool isUnderlineEnabled : 1;            ///< Underline enabeld flag.
+  bool isStrikethroughEnabled : 1;        ///< Strikethrough enabeld flag.
+  bool isTextBackgroundEnabled : 1;       ///< Text background flag.
+  bool isTextFitEnabled : 1;              ///< TextFit enabeld flag.
+  bool isTextFitCandidatesEnabled : 1;    ///< TextFit Candidates enabeld flag.
+  bool isMarqueeEnabled : 1;              ///< Marquee enabeld flag.
+  bool isMarqueeMaxTextureExceeded : 1;   ///< Whether the marquee texture size exceeds the maximum texture width.
+  bool isCutoutEnabled : 1;               ///< Cutout enabled flag.
+  bool isBackgroundWithCutoutEnabled : 1; ///< Background with cutout enabled flag.
+  bool isEmbossEnabled : 1;               ///< Emboss enabled flag.
 };
 
 struct AsyncTextRenderInfo
@@ -231,12 +231,12 @@ struct AsyncTextRenderInfo
     stylePixelData(),
     overlayStylePixelData(),
     maskPixelData(),
-    autoScrollPixelData(),
+    marqueePixelData(),
     size(),
     controlSize(),
     renderedSize(),
     lineCount(0),
-    autoScrollWrapGap(0.f),
+    marqueeWrapGap(0.f),
     hasMultipleTextColors(false),
     containsColorGlyph(false),
     styleEnabled(false),
@@ -255,12 +255,12 @@ struct AsyncTextRenderInfo
   PixelData          stylePixelData;
   PixelData          overlayStylePixelData;
   PixelData          maskPixelData;
-  PixelData          autoScrollPixelData;
+  PixelData          marqueePixelData;
   Size               size;         ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
   Size               controlSize;  ///< View size used to display the rendered text.
   Size               renderedSize; ///< Final displayed size reported back to the caller.
   int                lineCount;
-  float              autoScrollWrapGap;
+  float              marqueeWrapGap;
   bool               hasMultipleTextColors : 1;
   bool               containsColorGlyph : 1;
   bool               styleEnabled : 1;
@@ -433,8 +433,8 @@ public:
    *
    * @return An AsyncTextRenderInfo.
    */
-  AsyncTextRenderInfo RenderAutoScroll(AsyncTextParameters& parameters, bool useCachedNaturalSize,
-                                       const Size& naturalSize);
+  AsyncTextRenderInfo RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                    const Size& naturalSize);
 
   /**
    * @brief Gets the natural size of text.

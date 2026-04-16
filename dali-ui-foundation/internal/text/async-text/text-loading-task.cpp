@@ -122,14 +122,14 @@ void TextLoadingTask::Load()
         naturalSize = mLoader.SetupRenderScale(mParameters, cachedNaturalSize);
       }
 
-      if(mParameters.ellipsis && mParameters.ellipsisMode == Text::Ellipsize::AUTO_SCROLL)
+      if(mParameters.ellipsis && mParameters.ellipsisMode == Text::Ellipsize::MARQUEE)
       {
-        if(mParameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL)
+        if(mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
         {
           if(mParameters.isMultiLine)
           {
             DALI_LOG_DEBUG_INFO(
-              "Attempted ellipsize auto scroll horizontal on a non SINGLE_LINE_BOX, request ignored\n");
+              "Attempted ellipsize marquee horizontal on a non SINGLE_LINE_BOX, request ignored\n");
             mRenderInfo = mLoader.RenderText(mParameters, cachedNaturalSize, naturalSize);
           }
           else
@@ -144,11 +144,11 @@ void TextLoadingTask::Load()
 #ifdef TRACE_ENABLED
               if(gTraceFilter && gTraceFilter->IsTraceEnabled())
               {
-                DALI_LOG_RELEASE_INFO("RenderAutoScroll, Ellipsize::AUTO_SCROLL\n");
+                DALI_LOG_RELEASE_INFO("RenderMarquee, Ellipsize::MARQUEE\n");
               }
 #endif
-              mParameters.isAutoScrollEnabled = true;
-              mRenderInfo                     = mLoader.RenderAutoScroll(mParameters, cachedNaturalSize, naturalSize);
+              mParameters.isMarqueeEnabled = true;
+              mRenderInfo                  = mLoader.RenderMarquee(mParameters, cachedNaturalSize, naturalSize);
             }
             else
             {
@@ -156,13 +156,13 @@ void TextLoadingTask::Load()
             }
           }
         }
-        else // AutoScroll::VERTICAL
+        else // Marquee::VERTICAL
         {
           const float textHeight = mLoader.ComputeHeightForWidth(mParameters, mParameters.textWidth, cachedNaturalSize);
           if(mParameters.textHeight < textHeight)
           {
-            mParameters.isAutoScrollEnabled = true;
-            mRenderInfo                     = mLoader.RenderAutoScroll(mParameters, true, naturalSize);
+            mParameters.isMarqueeEnabled = true;
+            mRenderInfo                  = mLoader.RenderMarquee(mParameters, true, naturalSize);
           }
           else
           {
@@ -170,17 +170,17 @@ void TextLoadingTask::Load()
           }
         }
       }
-      else if(mParameters.isAutoScrollEnabled &&
-              ((!mParameters.isMultiLine && mParameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL) ||
-               (mParameters.isMultiLine && mParameters.autoScrollDirection == Text::MarqueeOrientation::VERTICAL)))
+      else if(mParameters.isMarqueeEnabled &&
+              ((!mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL) ||
+               (mParameters.isMultiLine && mParameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL)))
       {
 #ifdef TRACE_ENABLED
         if(gTraceFilter && gTraceFilter->IsTraceEnabled())
         {
-          DALI_LOG_RELEASE_INFO("RenderAutoScroll\n");
+          DALI_LOG_RELEASE_INFO("RenderMarquee\n");
         }
 #endif
-        mRenderInfo = mLoader.RenderAutoScroll(mParameters, cachedNaturalSize, naturalSize);
+        mRenderInfo = mLoader.RenderMarquee(mParameters, cachedNaturalSize, naturalSize);
       }
       else if(mParameters.isTextFitEnabled || mParameters.isTextFitCandidatesEnabled)
       {

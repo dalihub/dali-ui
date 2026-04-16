@@ -182,7 +182,7 @@ void TextScroller::StopScrolling()
       }
       default:
       {
-        DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Undifined AutoScrollStopMode\n");
+        DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Undifined MarqueeStopMode\n");
       }
     }
   }
@@ -313,9 +313,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   mScrollAnimation.SetCurrentProgress(animationProgress);
 }
 
-void TextScroller::AutoScrollAnimationFinished(Dali::Animation& animation)
+void TextScroller::MarqueeAnimationFinished(Dali::Animation& animation)
 {
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::AutoScrollAnimationFinished\n");
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::MarqueeAnimationFinished\n");
   mIsStopRequested = false;
   if(!mIsStoppedImmediately.load())
   {
@@ -335,7 +335,7 @@ void TextScroller::StartScrolling(Actor scrollingTextActor, float scrollAmount, 
   mScrollAnimation.AnimateTo(Property(shader, mScrollDeltaIndex), scrollAmount, TimePeriod(mLoopDelay, scrollDuration));
   mScrollAnimation.SetEndAction(Animation::DISCARD);
   mScrollAnimation.SetLoopCount(loopCount);
-  mScrollAnimation.FinishedSignal().Connect(this, &TextScroller::AutoScrollAnimationFinished);
+  mScrollAnimation.FinishedSignal().Connect(this, &TextScroller::MarqueeAnimationFinished);
   mScrollAnimation.Play();
 
   mIsStopRequested = false;

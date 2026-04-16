@@ -430,21 +430,20 @@ public:
    * 0,0 means that the top-left corner of the layout matches the top-left corner of the UI control.
    * Typically this will have a negative value with scrolling occurs.
    */
-  Vector2                      mScrollPosition;            ///< The text is offset by this position when scrolling.
-  Vector2                      mScrollPositionLast;        ///< The last offset value of mScrollPosition
-  Vector2                      mLayoutAlignmentOffset;     ///< The offset of the layout based on the controller due to alignment.
-  Vector2                      mLayoutOffsetWithPadding;   ///< The offset that includes padding in the layout alignment offset.
-  Alignment                    mHorizontalAlignment;       ///< The layout's horizontal alignment.
-  Alignment                    mVerticalAlignment;         ///< The layout's vertical alignment.
-  Alignment                    mVerticalLineAlignment;     ///< The layout's vertical line alignment.
-  LineWrapMode                 mLineWrapMode;              ///< The text wrap mode
-  float                        mAlignmentOffset;           ///< The alignment offset.
-  bool                         mElideEnabled : 1;          ///< Whether the text's elide is enabled.
-  bool                         mIgnoreSpacesAfterText : 1; ///< Whether ignoring spaces after text or not. Default is true.
-  bool                         mRemoveFrontInset : 1;      ///< Whether to ignore xBearing of the first glyph. Default is true.
-  bool                         mRemoveBackInset : 1;       ///< Whether to ignore advance of the last glyph. Default is true.
-  LayoutDirectionMode          mLayoutDirectionMode;       ///< Mode used to resolve the layout direction (contents, inherit, locale).
-  Text::EllipsisPosition::Type mEllipsisPosition;          ///< Where is the location the text elide
+  Vector2                      mScrollPosition;          ///< The text is offset by this position when scrolling.
+  Vector2                      mScrollPositionLast;      ///< The last offset value of mScrollPosition
+  Vector2                      mLayoutAlignmentOffset;   ///< The offset of the layout based on the controller due to alignment.
+  Vector2                      mLayoutOffsetWithPadding; ///< The offset that includes padding in the layout alignment offset.
+  Alignment                    mHorizontalAlignment;     ///< The layout's horizontal alignment.
+  Alignment                    mVerticalAlignment;       ///< The layout's vertical alignment.
+  Alignment                    mVerticalLineAlignment;   ///< The layout's vertical line alignment.
+  LineWrapMode                 mLineWrapMode;            ///< The text wrap mode
+  float                        mAlignmentOffset;         ///< The alignment offset.
+  bool                         mElideEnabled : 1;        ///< Whether the text's elide is enabled.
+  bool                         mRemoveFrontInset : 1;    ///< Whether to ignore xBearing of the first glyph. Default is true.
+  bool                         mRemoveBackInset : 1;     ///< Whether to ignore advance of the last glyph. Default is true.
+  LayoutDirectionMode          mLayoutDirectionMode;     ///< Mode used to resolve the layout direction (contents, inherit, locale).
+  Text::EllipsisPosition::Type mEllipsisPosition;        ///< Where is the location the text elide
 };
 
 } // namespace Text

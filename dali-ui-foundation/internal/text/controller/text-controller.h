@@ -158,18 +158,6 @@ public: // Enumerated types.
     };
   };
 
-  struct TextFitInfo
-  {
-    enum Property
-    {
-      TEXT_FIT_ENABLE,
-      TEXT_FIT_MIN_SIZE,
-      TEXT_FIT_MAX_SIZE,
-      TEXT_FIT_STEP_SIZE,
-      TEXT_FIT_FONT_SIZE_TYPE
-    };
-  };
-
 public: // Constructor.
   /**
    * @brief Create a new instance of a Controller.
@@ -258,43 +246,43 @@ public: // Configure the text controller.
    *
    * By default is disabled.
    *
-   * @param[in] enable Whether to enable the auto scrolling
+   * @param[in] enable Whether to enable the marqueeing
    * @param[in] requestRelayout Whether to request the relayout
-   * @param[in] direction Direction of the auto scroll.
+   * @param[in] direction Direction of the marquee.
    */
-  void SetAutoScrollEnabled(bool enable, bool requestRelayout = true,
-                            Text::MarqueeOrientation orientation = Text::MarqueeOrientation::HORIZONTAL);
+  void SetMarqueeEnabled(bool enable, bool requestRelayout = true,
+                         Text::MarqueeOrientation orientation = Text::MarqueeOrientation::HORIZONTAL);
 
   /**
-   * @brief Whether the auto scrolling texture exceed max texture.
+   * @brief Whether the marqueeing texture exceed max texture.
    *
    * By default is false.
    *
-   * @param[in] exceed Whether the auto scrolling texture exceed max texture.
+   * @param[in] exceed Whether the marqueeing texture exceed max texture.
    */
-  void SetAutoScrollMaxTextureExceeded(bool exceed);
+  void SetMarqueeMaxTextureExceeded(bool exceed);
 
   /**
    * @brief Retrieves whether auto text scrolling is enabled.
    *
    * By default is disabled.
    *
-   * @return @e true if auto scrolling is enabled, otherwise returns @e false.
+   * @return @e true if marqueeing is enabled, otherwise returns @e false.
    */
-  bool IsAutoScrollEnabled() const;
+  bool IsMarqueeEnabled() const;
 
   /**
    * @brief Get direction of the text from the first line of text,
    * @return bool rtl (right to left) is true
    */
-  CharacterDirection GetAutoScrollTextDirection() const;
+  CharacterDirection GetMarqueeTextDirection() const;
 
   /**
    * @brief Get the alignment offset of the first line of text.
    *
    * @return The alignment offset.
    */
-  float GetAutoScrollLineAlignment() const;
+  float GetMarqueeLineAlignment() const;
 
   /**
    * @brief Enables the horizontal scrolling.
@@ -444,7 +432,7 @@ public: // Configure the text controller.
   /**
    * @brief Sets current line size.
    *
-   * @param[in] lineSize line size value to store the MinLineSize set by user when TextFitArray is enabled.
+   * @param[in] lineSize line size value to store the MinLineSize set by user when TextFitCandidates is enabled.
    */
   void SetCurrentLineSize(float lineSize);
 
@@ -515,11 +503,11 @@ public: // Configure the text controller.
   Vector2 GetTextFitContentSize() const;
 
   /**
-   * @brief Retrieve the fited point size.
-   *
-   * @return The fited point size.
+   * @brief Retrieve the fited font size.
+   * @param[in] type The font size type is point size or pixel size
+   * @return The fited font size.
    */
-  float GetTextFitPointSize() const;
+  float GetTextFitFontSize(FontSizeType type) const;
 
   /**
    * @brief Sets the text fit point size.
@@ -550,18 +538,18 @@ public: // Configure the text controller.
   void SetTextFitLineSize(float lineSize);
 
   /**
-   * @brief Enable or disable the text fit array.
+   * @brief Enable or disable the text fit candidates.
    *
-   * @param[in] enabled Whether to enable the text fit array.
+   * @param[in] enabled Whether to enable the text fit candidates.
    */
-  void SetTextFitArrayEnabled(bool enabled);
+  void SetTextFitCandidatesEnabled(bool enabled);
 
   /**
-   * @brief Whether the text fit array is enabled or not.
+   * @brief Whether the text fit candidates are enabled or not.
    *
-   * @return True if the text fit array is enabled.
+   * @return True if the text fit candidates are enabled.
    */
-  bool IsTextFitArrayEnabled() const;
+  bool IsTextFitCandidatesEnabled() const;
 
   /**
    * @brief Returns the maximum text fit candidate.
@@ -575,25 +563,23 @@ public: // Configure the text controller.
   const Text::FitCandidate* GetMaxFitCandidate() const;
 
   /**
-   * @brief Sets the text fit array.
+   * @brief Sets the text fit candidates.
    *
    * @param[in] candidates The list of text fit candidates.
    */
-  void SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates);
+  void SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
-   * @brief Retrieve the text fit array.
+   * @brief Retrieves the text fit candidates.
    *
-   * @return The list of text fit options.
+   * @return The list of text fit candidates.
    */
-  const Dali::Vector<Text::FitCandidate>& GetTextFitArray();
+  const Dali::Vector<Text::FitCandidate>& GetTextFitCandidates();
 
   /**
-   * @brief Clears the text fit array.
-   *
-   * Removes all stored text fit candidates.
+   * @brief Clears the text fit candidates.
    */
-  void ClearTextFitArray();
+  void ClearTextFitCandidates();
 
   /**
    * @brief Sets disabled color opacity.
@@ -1923,9 +1909,9 @@ public: // Queries & retrieves.
   void FitPointSizeforLayout(Size layoutSize);
 
   /**
-   * @brief Calculates the point size for text for given layout() using fit array.
+   * @brief Calculates the point size for text for the given layout using text fit candidates.
    */
-  void FitArrayPointSizeforLayout(Size layoutSize);
+  void FitCandidatesPointSizeForLayout(Size layoutSize);
 
   /**
    * @brief Checks if the point size fits within the layout size.
@@ -2054,18 +2040,6 @@ public: // Queries & retrieves.
    * @return The value of the render scale
    */
   float GetRenderScale() const;
-
-  /**
-   * @brief Retrieves ignoreSpaceAfterText value from model
-   * @return The value of ignoreSpaceAfterText
-   */
-  bool IsIgnoreSpacesAfterText() const;
-
-  /**
-   * @brief Sets ignoreSpaceAfterText value to model
-   * @param[in] ignore The value of ignoreSpacesAfterText for the text
-   */
-  void SetIgnoreSpacesAfterText(bool ignore);
 
   /**
    * @brief Retrieves removeFrontInset value from model

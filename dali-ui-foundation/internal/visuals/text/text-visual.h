@@ -48,7 +48,6 @@ typedef IntrusivePtr<TextVisual> TextVisualPtr;
  *
  * | %Property Name      | Type    |
  * |---------------------|---------|
- * | renderingBackend    | INTEGER |
  * | text                | STRING  |
  * | fontFamily          | STRING  |
  * | fontStyle           | STRING  |
@@ -58,14 +57,11 @@ typedef IntrusivePtr<TextVisual> TextVisualPtr;
  * | verticalAlignment   | STRING  |
  * | textColor           | VECTOR4 |
  * | enableMarkup        | BOOLEAN |
- * | enableAutoScroll    | BOOLEAN |
- * | autoScrollSpeed     | INTEGER |
- * | autoScrollLoopCount | INTEGER |
- * | autoScrollGap       | INTEGER |
- * | lineSpacing         | FLOAT   |
- * | underline           | STRING  |
  * | shadow              | STRING  |
+ * | underline           | STRING  |
  * | outline             | STRING  |
+ * | lineThrough         | STRING  |
+ * | background          | STRING  |
  *
  */
 class TextVisual : public Visual::Base, public TextLoadObserver

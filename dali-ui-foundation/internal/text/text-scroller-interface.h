@@ -27,7 +27,7 @@ namespace Ui
 namespace Text
 {
 /**
- * @brief An interface used by the text-controls which implement auto-scrolling
+ * @brief An interface used by the text-controls which implement marqueeing
  */
 class ScrollerInterface
 {

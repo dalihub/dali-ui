@@ -111,9 +111,9 @@ public:
    * @param[in,out] layoutParameters The parameters needed to layout the text.
    * @param[out] layoutSize The size of the text after it has been laid-out.
    * @param[in] elideTextEnabled Whether the text elide is enabled.
-   * @param[in,out] isAutoScrollEnabled If the isAutoScrollEnabled is true and the height of the text exceeds the
-   * boundaries of the control the text is elided and the isAutoScrollEnabled is set to false to disable the autoscroll
-   * @param[in] isAutoScrollMaxTextureExceeded If isAutoScrollMaxTextureExceeded is true, enable ellipsis during auro
+   * @param[in,out] isMarqueeEnabled If the isMarqueeEnabled is true and the height of the text exceeds the
+   * boundaries of the control the text is elided and the isMarqueeEnabled is set to false to disable the marquee
+   * @param[in] isMarqueeMaxTextureExceeded If isMarqueeMaxTextureExceeded is true, enable ellipsis during auro
    * scroll.
    * @param[in] isHiddenInputEnabled if isHiddenInputEnabled is true, hidden input feature is enabled.
    * @param[in] ellipsisPosition The location of the text ellipsis
@@ -121,8 +121,8 @@ public:
    * @return \e true if the text has been re-laid-out. \e false means the given width is too small to layout even a
    * single character.
    */
-  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isAutoScrollEnabled,
-                  bool isAutoScrollMaxTextureExceeded, bool isHiddenInputEnabled,
+  bool LayoutText(Parameters& layoutParameters, Size& layoutSize, bool elideTextEnabled, bool& isMarqueeEnabled,
+                  bool isMarqueeMaxTextureExceeded, bool isHiddenInputEnabled,
                   Text::EllipsisPosition::Type ellipsisPosition);
 
   /**

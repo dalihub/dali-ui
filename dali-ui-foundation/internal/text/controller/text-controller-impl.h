@@ -392,14 +392,14 @@ public:
     mInputFilter(nullptr),
     mTextFitContentSize(),
     mRawText(),
-    mTextFitArray(),
+    mTextFitCandidates(),
     mMaxFitCandidateIndex(-1),
     mRecalculateNaturalSize(true),
     mRecalculateLayoutSize(true),
     mMarkupProcessorEnabled(false),
     mClipboardHideEnabled(true),
-    mIsAutoScrollEnabled(false),
-    mIsAutoScrollMaxTextureExceeded(false),
+    mIsMarqueeEnabled(false),
+    mIsMarqueeMaxTextureExceeded(false),
     mUpdateTextDirection(true),
     mIsTextDirectionRTL(false),
     mUnderlineSetByString(false),
@@ -424,7 +424,7 @@ public:
     mSystemFontSizeScaleEnabled(false),
     mTextFitEnabled(false),
     mTextFitChanged(false),
-    mTextFitArrayEnabled(false),
+    mTextFitCandidatesEnabled(false),
     mIsLayoutDirectionChanged(false),
     mIsUserInteractionEnabled(true),
     mProcessorRegistered(false),
@@ -974,9 +974,9 @@ public:
   float GetVerticalScrollPosition();
 
   /**
-   * @copydoc Controller::SetAutoScrollEnabled()
+   * @copydoc Controller::SetMarqueeEnabled()
    */
-  void SetAutoScrollEnabled(bool enable, bool requestRelayout, MarqueeOrientation orientation);
+  void SetMarqueeEnabled(bool enable, bool requestRelayout, MarqueeOrientation orientation);
 
   /**
    * @copydoc Controller::SetEnableCursorBlink()
@@ -1209,16 +1209,16 @@ public:
   Vector2     mTextFitContentSize; ///< Size of Text fit content
   std::string mRawText;            ///< Raw text including markup tag.
 
-  Dali::Vector<Text::FitCandidate> mTextFitArray; ///< List of FitCandidate for TextFitArray operation.
+  Dali::Vector<Text::FitCandidate> mTextFitCandidates; ///< List of FitCandidate for TextFitCandidates operation.
   int                              mMaxFitCandidateIndex;
 
-  bool mRecalculateNaturalSize : 1;         ///< Whether the natural size needs to be recalculated.
-  bool mRecalculateLayoutSize : 1;          ///< Whether the layout size needs to be recalculated.
-  bool mMarkupProcessorEnabled : 1;         ///< Whether the mark-up procesor is enabled.
-  bool mClipboardHideEnabled : 1;           ///< Whether the ClipboardHide function work or not
-  bool mIsAutoScrollEnabled : 1;            ///< Whether auto text scrolling is enabled.
-  bool mIsAutoScrollMaxTextureExceeded : 1; ///< Whether auto text scrolling is exceed max texture size.
-  bool mUpdateTextDirection : 1;            ///< Whether the text direction needs to be updated.
+  bool mRecalculateNaturalSize : 1;      ///< Whether the natural size needs to be recalculated.
+  bool mRecalculateLayoutSize : 1;       ///< Whether the layout size needs to be recalculated.
+  bool mMarkupProcessorEnabled : 1;      ///< Whether the mark-up procesor is enabled.
+  bool mClipboardHideEnabled : 1;        ///< Whether the ClipboardHide function work or not
+  bool mIsMarqueeEnabled : 1;            ///< Whether auto text scrolling is enabled.
+  bool mIsMarqueeMaxTextureExceeded : 1; ///< Whether auto text scrolling is exceed max texture size.
+  bool mUpdateTextDirection : 1;         ///< Whether the text direction needs to be updated.
 
   CharacterDirection mIsTextDirectionRTL : 1; ///< Whether the text direction is right to left or not
 
@@ -1236,7 +1236,7 @@ public:
 
   Shader mShaderBackground; ///< The shader for text background.
 
-  float mCurrentLineSize;                ///< Used to store the MinLineSize set by user when TextFitArray is enabled.
+  float mCurrentLineSize;                ///< Used to store the MinLineSize set by user when TextFitCandidates is enabled.
   float mTextFitMinSize;                 ///< Minimum Font Size for text fit. Default 10
   float mTextFitMaxSize;                 ///< Maximum Font Size for text fit. Default 100
   float mTextFitStepSize;                ///< Step Size for font intervalse. Default 1
@@ -1251,7 +1251,7 @@ public:
   bool  mSystemFontSizeScaleEnabled : 1; ///< Whether the system font size scale is applied.
   bool  mTextFitEnabled : 1;             ///< Whether the text's fit is enabled.
   bool  mTextFitChanged : 1;             ///< Whether the text fit property has changed.
-  bool  mTextFitArrayEnabled : 1;        ///< Whether the text's fit array is enabled.
+  bool  mTextFitCandidatesEnabled : 1;   ///< Whether the text's fit Candidates is enabled.
   bool  mIsLayoutDirectionChanged : 1;   ///< Whether the layout has changed.
   bool  mIsUserInteractionEnabled : 1;   ///< Whether the user interaction is enabled.
   bool  mProcessorRegistered : 1;        ///< Whether the text controller registered into processor or not.
@@ -1259,7 +1259,7 @@ public:
   bool  mIsCursorInsetEnabled : 1;       ///< Whether the cursor inset is enabled.
   bool  mIsAsyncRendering : 1;           ///< whether asynchronous text rendering is enabled.
 
-  Ellipsize::Mode mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, AUTO_SCROLL)
+  Ellipsize::Mode mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, MARQUEE)
 
 private:
   friend ControllerImplEventHandler;

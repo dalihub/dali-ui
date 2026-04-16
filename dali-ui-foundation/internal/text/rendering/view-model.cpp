@@ -565,7 +565,7 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
               actualAdvance -= glyphToRemove.advance;
               float calculatedWidth = actualAdvance + ellipsisGlyphWidth;
 
-              // For AutoScroll, there are cases where the layout is larger than the control.
+              // For Marquee, there are cases where the layout is larger than the control.
               // If the layout is larger than the max texture, it should be ellipsised.
               const float controlWidth = std::max(mModel->GetControlSize().width, mModel->GetLayoutSize().width);
 

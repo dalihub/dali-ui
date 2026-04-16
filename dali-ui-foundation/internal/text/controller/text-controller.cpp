@@ -174,32 +174,32 @@ bool Controller::HasAnchors() const
           mImpl->IsShowingRealText());
 }
 
-void Controller::SetAutoScrollEnabled(bool enable, bool requestRelayout, Text::MarqueeOrientation orientation)
+void Controller::SetMarqueeEnabled(bool enable, bool requestRelayout, Text::MarqueeOrientation orientation)
 {
-  DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetAutoScrollEnabled[%s] SingleBox[%s]-> [%p]\n",
+  DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::SetMarqueeEnabled[%s] SingleBox[%s]-> [%p]\n",
                 (enable) ? "true" : "false",
                 (mImpl->mLayoutEngine.GetLayout() == Layout::Engine::SINGLE_LINE_BOX) ? "true" : "false", this);
-  mImpl->SetAutoScrollEnabled(enable, requestRelayout, orientation);
+  mImpl->SetMarqueeEnabled(enable, requestRelayout, orientation);
 }
 
-void Controller::SetAutoScrollMaxTextureExceeded(bool exceed)
+void Controller::SetMarqueeMaxTextureExceeded(bool exceed)
 {
-  mImpl->mIsAutoScrollMaxTextureExceeded = exceed;
+  mImpl->mIsMarqueeMaxTextureExceeded = exceed;
 }
 
-bool Controller::IsAutoScrollEnabled() const
+bool Controller::IsMarqueeEnabled() const
 {
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::IsAutoScrollEnabled[%s]\n",
-                mImpl->mIsAutoScrollEnabled ? "true" : "false");
-  return mImpl->mIsAutoScrollEnabled;
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::IsMarqueeEnabled[%s]\n",
+                mImpl->mIsMarqueeEnabled ? "true" : "false");
+  return mImpl->mIsMarqueeEnabled;
 }
 
-CharacterDirection Controller::GetAutoScrollTextDirection() const
+CharacterDirection Controller::GetMarqueeTextDirection() const
 {
   return mImpl->mIsTextDirectionRTL;
 }
 
-float Controller::GetAutoScrollLineAlignment() const
+float Controller::GetMarqueeLineAlignment() const
 {
   float offset = 0.f;
   if(mImpl->mModel->mVisualModel && (0u != mImpl->mModel->mVisualModel->mLines.Count()))
@@ -298,16 +298,6 @@ void Controller::SetVerticalAlignment(Alignment alignment)
 Alignment Controller::GetVerticalAlignment() const
 {
   return mImpl->mModel->mVerticalAlignment;
-}
-
-bool Controller::IsIgnoreSpacesAfterText() const
-{
-  return mImpl->mModel->mIgnoreSpacesAfterText;
-}
-
-void Controller::SetIgnoreSpacesAfterText(bool ignore)
-{
-  mImpl->mModel->mIgnoreSpacesAfterText = ignore;
 }
 
 bool Controller::IsRemoveFrontInset() const
@@ -594,9 +584,13 @@ Vector2 Controller::GetTextFitContentSize() const
   return mImpl->mTextFitContentSize;
 }
 
-float Controller::GetTextFitPointSize() const
+float Controller::GetTextFitFontSize(FontSizeType type) const
 {
-  return mImpl->mFontDefaults ? mImpl->mFontDefaults->mFitPointSize : 0.0f;
+  if(mImpl->mFontDefaults)
+  {
+    return type == POINT_SIZE ? mImpl->mFontDefaults->mFitPointSize : ConvertPointToPixel(mImpl->mFontDefaults->mFitPointSize);
+  }
+  return 0.0f;
 }
 
 void Controller::SetTextFitPointSize(float pointSize)
@@ -612,36 +606,36 @@ void Controller::SetTextFitLineSize(float lineSize)
   mImpl->mTextFitLineSize = lineSize;
 }
 
-void Controller::SetTextFitArrayEnabled(bool enabled)
+void Controller::SetTextFitCandidatesEnabled(bool enabled)
 {
-  mImpl->mTextFitArrayEnabled = enabled;
+  mImpl->mTextFitCandidatesEnabled = enabled;
   mImpl->ClearFontData();
   RequestRelayout();
   RequestAsyncRender();
 }
 
-bool Controller::IsTextFitArrayEnabled() const
+bool Controller::IsTextFitCandidatesEnabled() const
 {
-  return mImpl->mTextFitArrayEnabled;
+  return mImpl->mTextFitCandidatesEnabled;
 }
 
 const Text::FitCandidate* Controller::GetMaxFitCandidate() const
 {
   const int index = mImpl->mMaxFitCandidateIndex;
-  if(index < 0 || static_cast<uint32_t>(index) >= mImpl->mTextFitArray.Count())
+  if(index < 0 || static_cast<uint32_t>(index) >= mImpl->mTextFitCandidates.Count())
   {
     return nullptr;
   }
 
-  return &mImpl->mTextFitArray[static_cast<uint32_t>(index)];
+  return &mImpl->mTextFitCandidates[static_cast<uint32_t>(index)];
 }
 
-void Controller::SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candidates)
+void Controller::SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& candidates)
 {
-  mImpl->mTextFitArray         = candidates;
+  mImpl->mTextFitCandidates    = candidates;
   mImpl->mMaxFitCandidateIndex = -1;
 
-  const uint32_t count = mImpl->mTextFitArray.Count();
+  const uint32_t count = mImpl->mTextFitCandidates.Count();
   if(count == 0u)
   {
     return;
@@ -650,8 +644,8 @@ void Controller::SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candida
   uint32_t bestIndex = 0u;
   for(uint32_t i = 1u; i < count; ++i)
   {
-    const Text::FitCandidate& best = mImpl->mTextFitArray[bestIndex];
-    const Text::FitCandidate& cur  = mImpl->mTextFitArray[i];
+    const Text::FitCandidate& best = mImpl->mTextFitCandidates[bestIndex];
+    const Text::FitCandidate& cur  = mImpl->mTextFitCandidates[i];
 
     const float bestFontSize = best.GetFontSize();
     const float curFontSize  = cur.GetFontSize();
@@ -667,16 +661,16 @@ void Controller::SetTextFitArray(const Dali::Vector<Text::FitCandidate>& candida
   mImpl->mMaxFitCandidateIndex = static_cast<int>(bestIndex);
 }
 
-const Dali::Vector<Text::FitCandidate>& Controller::GetTextFitArray()
+const Dali::Vector<Text::FitCandidate>& Controller::GetTextFitCandidates()
 {
-  return mImpl->mTextFitArray;
+  return mImpl->mTextFitCandidates;
 }
 
-void Controller::ClearTextFitArray()
+void Controller::ClearTextFitCandidates()
 {
-  if(!mImpl->mTextFitArray.Empty())
+  if(!mImpl->mTextFitCandidates.Empty())
   {
-    mImpl->mTextFitArray.Clear();
+    mImpl->mTextFitCandidates.Clear();
   }
   mImpl->mMaxFitCandidateIndex = -1;
 }
@@ -1667,9 +1661,9 @@ void Controller::FitPointSizeforLayout(Size layoutSize)
   Relayouter::FitPointSizeforLayout(*this, layoutSize);
 }
 
-void Controller::FitArrayPointSizeforLayout(Size layoutSize)
+void Controller::FitCandidatesPointSizeForLayout(Size layoutSize)
 {
-  Relayouter::FitArrayPointSizeforLayout(*this, layoutSize);
+  Relayouter::FitCandidatesPointSizeForLayout(*this, layoutSize);
 }
 
 float Controller::GetHeightForWidth(float width)

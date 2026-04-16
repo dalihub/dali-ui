@@ -267,7 +267,7 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
     }
   }
 
-  // Consider the case where pen y needs to be calculated based on the original size when rendering auto scroll texture.
+  // Consider the case where pen y needs to be calculated based on the original size when rendering marquee texture.
   bool  isOriginHeight = originSize.height > 0.0f ? true : false;
   float controlHeight  = isOriginHeight ? viewModel.GetControlSize().height : size.height;
   float layoutHeight   = isOriginHeight ? originSize.height : layoutSize.height;

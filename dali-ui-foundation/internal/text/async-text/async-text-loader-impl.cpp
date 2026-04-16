@@ -752,8 +752,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   // Set the layout parameters.
   Size textLayoutArea(parameters.textWidth, parameters.textHeight);
 
-  mTextModel->mLineWrapMode          = parameters.lineWrapMode;
-  mTextModel->mIgnoreSpacesAfterText = false;
+  mTextModel->mLineWrapMode = parameters.lineWrapMode;
 
   // Set the layout parameters.
   Layout::Parameters layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
@@ -786,12 +785,12 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 
   // Update the visual model.
   Size newLayoutSize; // The size of the text after it has been laid-out.
-  bool isAutoScrollEnabled            = parameters.isAutoScrollEnabled;
-  bool isAutoScrollMaxTextureExceeded = parameters.isAutoScrollMaxTextureExceeded;
-  bool isHiddenInputEnabled           = false;
+  bool isMarqueeEnabled            = parameters.isMarqueeEnabled;
+  bool isMarqueeMaxTextureExceeded = parameters.isMarqueeMaxTextureExceeded;
+  bool isHiddenInputEnabled        = false;
 
-  updated = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isAutoScrollEnabled,
-                                     isAutoScrollMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+  updated = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isMarqueeEnabled,
+                                     isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
 
   mIsTextDirectionRTL = false;
 
@@ -914,7 +913,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
   layoutSize.x    = parameters.textWidth;
 
-  if(parameters.isAutoScrollEnabled && parameters.autoScrollDirection == Text::MarqueeOrientation::VERTICAL)
+  if(parameters.isMarqueeEnabled && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL)
   {
     layoutSize.y = parameters.textHeight;
   }
@@ -1018,12 +1017,12 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.maskPixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
   }
-  if(parameters.isAutoScrollEnabled)
+  if(parameters.isMarqueeEnabled)
   {
-    // This will be uploaded in async text interface's setup auto scroll.
-    renderInfo.autoScrollPixelData =
+    // This will be uploaded in async text interface's setup marquee.
+    renderInfo.marqueePixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_TEXT_AND_STYLES,
-                          parameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL, Pixel::RGBA8888,
+                          parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL, Pixel::RGBA8888,
                           Size(parameters.originWidth, parameters.originHeight));
   }
 
@@ -1159,7 +1158,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
     parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
     parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
     parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-    parameters.autoScrollGap     = parameters.autoScrollGap * parameters.renderScale;
+    parameters.marqueeGap        = parameters.marqueeGap * parameters.renderScale;
     cachedNaturalSize            = false;
     return Size::ZERO;
   }
@@ -1209,7 +1208,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
   parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
   parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
   parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-  parameters.autoScrollGap     = parameters.autoScrollGap * parameters.renderScale;
+  parameters.marqueeGap        = parameters.marqueeGap * parameters.renderScale;
 
   // The texture in RenderScale needs to be resized because it exceeds the control size.
   if(!widthEllipsized && naturalSize.width > parameters.textWidth)
@@ -1325,15 +1324,15 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
   return renderInfo;
 }
 
-AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& parameters, bool useCachedNaturalSize,
-                                                      const Size& naturalSize)
+AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& parameters, bool useCachedNaturalSize,
+                                                   const Size& naturalSize)
 {
-  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_AUTO_SCROLL");
+  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER_MARQUEE");
 
   Size      controlSize(parameters.textWidth, parameters.textHeight);
   Size      verifiedSize;
   float     wrapGap        = 0.0f;
-  bool      isHorizontal   = parameters.autoScrollDirection == Text::MarqueeOrientation::HORIZONTAL;
+  bool      isHorizontal   = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
   const int maxTextureSize = parameters.maxTextureSize;
 
   if(isHorizontal)
@@ -1359,7 +1358,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap             = std::max(parameters.autoScrollGap, textPadding);
+    wrapGap             = std::max(parameters.marqueeGap, textPadding);
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture.
 
     // Calculate a size of texture for text scrolling
@@ -1374,9 +1373,9 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
         float actualWidth  = parameters.textWidth;
         float actualHeight = parameters.textHeight;
 
-        parameters.textWidth                      = verifiedSize.width - static_cast<float>(parameters.autoScrollGap);
-        parameters.textHeight                     = textNaturalSize.height;
-        parameters.isAutoScrollMaxTextureExceeded = true;
+        parameters.textWidth                   = verifiedSize.width - static_cast<float>(parameters.marqueeGap);
+        parameters.textHeight                  = textNaturalSize.height;
+        parameters.isMarqueeMaxTextureExceeded = true;
 
         bool layoutUpdated = false;
 
@@ -1386,10 +1385,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
         parameters.textWidth  = actualWidth;
         parameters.textHeight = actualHeight;
       }
-      wrapGap = std::max(maxTextureSize - textNaturalSize.width, static_cast<float>(parameters.autoScrollGap));
+      wrapGap = std::max(maxTextureSize - textNaturalSize.width, static_cast<float>(parameters.marqueeGap));
     }
   }
-  else // AutoScroll::VERTICAL
+  else // Marquee::VERTICAL
   {
     bool  layoutOnly      = useCachedNaturalSize;
     bool  useCachedHeight = false;
@@ -1413,19 +1412,19 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
     bool needLayoutSizeCalculation = parameters.verticalAlignment != Text::Alignment::START ? true : false;
     if(needLayoutSizeCalculation)
     {
-      parameters.isAutoScrollEnabled = false;
-      originSize                     = ComputeLayoutSize(parameters, parameters.textWidth, parameters.textHeight, layoutOnly);
-      parameters.isAutoScrollEnabled = true;
-      parameters.originWidth         = originSize.width;
-      parameters.originHeight        = originSize.height;
-      layoutOnly                     = true;
+      parameters.isMarqueeEnabled = false;
+      originSize                  = ComputeLayoutSize(parameters, parameters.textWidth, parameters.textHeight, layoutOnly);
+      parameters.isMarqueeEnabled = true;
+      parameters.originWidth      = originSize.width;
+      parameters.originHeight     = originSize.height;
+      layoutOnly                  = true;
     }
 
     textHeight = useCachedHeight ? textHeight : ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding = std::max(controlSize.y - textHeight, 0.0f);
-    wrapGap         = std::max(parameters.autoScrollGap, textPadding);
+    wrapGap         = std::max(parameters.marqueeGap, textPadding);
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Calculate a size of texture for text scrolling
@@ -1440,18 +1439,18 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
         float actualWidth  = parameters.textWidth;
         float actualHeight = parameters.textHeight;
 
-        parameters.textWidth           = verifiedSize.width;
-        parameters.textHeight          = verifiedSize.height;
-        parameters.isAutoScrollEnabled = false;
+        parameters.textWidth        = verifiedSize.width;
+        parameters.textHeight       = verifiedSize.height;
+        parameters.isMarqueeEnabled = false;
 
         bool layoutUpdated = false;
 
         // Re-layout is required to apply ellipsis.
         Layout(parameters, layoutUpdated);
 
-        parameters.textWidth           = actualWidth;
-        parameters.textHeight          = actualHeight;
-        parameters.isAutoScrollEnabled = true;
+        parameters.textWidth        = actualWidth;
+        parameters.textHeight       = actualHeight;
+        parameters.isMarqueeEnabled = true;
       }
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
     }
@@ -1468,12 +1467,12 @@ AsyncTextRenderInfo AsyncTextLoader::RenderAutoScroll(AsyncTextParameters& param
   parameters.textHeight = actualHeight;
 
   // Store the control size and calculated wrap gap in render info.
-  bool  isRenderScale          = parameters.renderScale > 1.0f ? true : false;
-  float renderedWidth          = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
-  float renderedHeight         = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
-  renderInfo.controlSize       = Size(renderedWidth, renderedHeight);
-  renderInfo.renderedSize      = Size(renderedWidth, renderedHeight);
-  renderInfo.autoScrollWrapGap = wrapGap;
+  bool  isRenderScale       = parameters.renderScale > 1.0f ? true : false;
+  float renderedWidth       = isRenderScale ? parameters.renderScaleWidth : controlSize.width;
+  float renderedHeight      = isRenderScale ? parameters.renderScaleHeight : controlSize.height;
+  renderInfo.controlSize    = Size(renderedWidth, renderedHeight);
+  renderInfo.renderedSize   = Size(renderedWidth, renderedHeight);
+  renderInfo.marqueeWrapGap = wrapGap;
   return renderInfo;
 }
 
@@ -1535,7 +1534,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 #ifdef TRACE_ENABLED
     if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
-      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFitArray\n");
+      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFitCandidate\n");
     }
 #endif
 

@@ -415,7 +415,7 @@ void MultilanguageSupport::SetScripts(const Vector<Character>& text, CharacterIn
   bool isParagraphRTL = false;
 
   // Whether there is an RTL marker in the invalid script.
-  // This variable was added to solve the problem that autoscroll does not work properly when there are only RTL Marker
+  // This variable was added to solve the problem that marquee does not work properly when there are only RTL Marker
   // and LTR Text.
   bool hasRTLMarker = false;
 

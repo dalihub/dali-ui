@@ -122,16 +122,16 @@ enum
   OUTLINE,
 
   /**
+   * @brief The default lineThrough parameters.
+   * @details name "lineThrough", type Property::MAP.
+   */
+  LINE_THROUGH,
+
+  /**
    * @brief The default background parameters.
    * @details name "background", type Property::MAP.
    */
-  BACKGROUND,
-
-  /**
-   * @brief The default strikethrough parameters.
-   * @details name "strikethrough", type Property::MAP.
-   */
-  STRIKETHROUGH
+  BACKGROUND
 };
 
 } // namespace Property
