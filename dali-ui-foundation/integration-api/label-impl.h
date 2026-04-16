@@ -670,11 +670,6 @@ protected: // From ViewImpl
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 
-  /**
-   * @copydoc Integration::ViewImpl::OnPaddingSet()
-   */
-  void OnPaddingSet(const Extents& padding) override;
-
 public: // From CustomActorImpl
   /**
    * @copydoc CustomActorImpl::OnSizeSet()

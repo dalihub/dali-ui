@@ -1449,11 +1449,6 @@ MeasuredSize LabelImpl::OnArrange(const LayoutRect& bounds)
   return {bounds.width, bounds.height};
 }
 
-void LabelImpl::OnPaddingSet(const Extents& padding)
-{
-  mIsSizeChanged = true;
-}
-
 void LabelImpl::OnSizeSet(const Vector3& targetSize)
 {
   mIsSizeChanged = true;
@@ -2426,6 +2421,11 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
     case Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       UpdateCutoutState(propertyValue.Get<bool>());
+      break;
+    }
+    case Ui::View::Property::PADDING:
+    {
+      mIsSizeChanged = true;
       break;
     }
     default:

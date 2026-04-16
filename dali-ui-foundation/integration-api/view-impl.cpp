@@ -197,7 +197,6 @@ ViewImpl::ViewImpl()
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
-  mPadding(),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
@@ -475,8 +474,8 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     return;
   }
 
-  if((mPadding.start != 0) || (mPadding.end != 0) || (mPadding.top != 0) ||
-     (mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
+  if((mImpl->mPadding.start != 0) || (mImpl->mPadding.end != 0) || (mImpl->mPadding.top != 0) ||
+     (mImpl->mPadding.bottom != 0) || (mImpl->mMargin.start != 0) || (mImpl->mMargin.end != 0) ||
      (mImpl->mMargin.top != 0) || (mImpl->mMargin.bottom != 0))
   {
     for(unsigned int i = 0, numChildren = Self().GetChildCount(); i < numChildren; ++i)
@@ -484,7 +483,7 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       Actor   child = Self().GetChildAt(i);
       Vector2 newChildSize(size);
 
-      Extents padding = mPadding;
+      Extents padding = mImpl->mPadding;
 
       Dali::CustomActor           ownerActor(GetOwner());
       Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
@@ -845,8 +844,8 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
 
 MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  float pw = static_cast<float>(mPadding.start + mPadding.end);
-  float ph = static_cast<float>(mPadding.top + mPadding.bottom);
+  float pw = static_cast<float>(mImpl->mPadding.start + mImpl->mPadding.end);
+  float ph = static_cast<float>(mImpl->mPadding.top + mImpl->mPadding.bottom);
 
   float effectiveWidth  = (mRequestedWidth >= 0) ? mRequestedWidth : widthConstraint;
   float effectiveHeight = (mRequestedHeight >= 0) ? mRequestedHeight : heightConstraint;
@@ -970,10 +969,10 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 
   if(!mChildren.empty())
   {
-    float padLeft   = static_cast<float>(mPadding.start);
-    float padRight  = static_cast<float>(mPadding.end);
-    float padTop    = static_cast<float>(mPadding.top);
-    float padBottom = static_cast<float>(mPadding.bottom);
+    float padLeft   = static_cast<float>(mImpl->mPadding.start);
+    float padRight  = static_cast<float>(mImpl->mPadding.end);
+    float padTop    = static_cast<float>(mImpl->mPadding.top);
+    float padBottom = static_cast<float>(mImpl->mPadding.bottom);
 
     for(auto& childData : mChildren)
     {
@@ -1250,17 +1249,12 @@ Extents ViewImpl::GetMargin() const
 
 void ViewImpl::SetPadding(const Extents& padding)
 {
-  if(mPadding != padding)
-  {
-    mPadding = padding;
-    OnPaddingSet(mPadding);
-    InvalidateMeasure();
-  }
+  Self().SetProperty(Ui::View::Property::PADDING, padding);
 }
 
 Extents ViewImpl::GetPadding() const
 {
-  return mPadding;
+  return mImpl->mPadding;
 }
 
 void ViewImpl::SetLayoutMode(Ui::LayoutMode mode)
@@ -1582,7 +1576,6 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
-  mPadding(),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
@@ -2217,8 +2210,8 @@ Vector3 ViewImpl::GetNaturalSize()
   {
     Vector2 naturalSize;
     visualImplPtr->GetNaturalSize(naturalSize);
-    naturalSize.width += (mPadding.start + mPadding.end);
-    naturalSize.height += (mPadding.top + mPadding.bottom);
+    naturalSize.width += (mImpl->mPadding.start + mImpl->mPadding.end);
+    naturalSize.height += (mImpl->mPadding.top + mImpl->mPadding.bottom);
     return Vector3(naturalSize);
   }
   return Vector3::ZERO;

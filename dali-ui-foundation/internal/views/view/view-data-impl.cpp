@@ -511,6 +511,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mCounterClockwiseFocusableActorId(-1),
   mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
+  mPadding(),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
   mSize(0, 0),
@@ -881,7 +882,12 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         Extents padding;
         if(value.Get(padding))
         {
-          viewImpl.SetPadding(padding);
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(dataImpl.mPadding != padding)
+          {
+            dataImpl.mPadding = padding;
+            viewImpl.InvalidateMeasure();
+          }
         }
         break;
       }

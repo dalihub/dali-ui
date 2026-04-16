@@ -635,18 +635,6 @@ protected: // Virtual methods for derived classes (Template Method pattern)
    */
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
-  /**
-   * @brief Called when the padding is set on this View, after the new value has
-   * been stored and before InvalidateMeasure() is called.
-   *
-   * Only invoked when the padding actually changes.
-   *
-   * @param[in] padding The new padding value.
-   */
-  virtual void OnPaddingSet(const Extents& padding)
-  {
-  }
-
 public: // Requested size API
   void  SetRequestedWidth(float width);
   float GetRequestedWidth() const;
@@ -881,7 +869,6 @@ private:
   float mMaximumHeight;
 
   // Layout Properties Data
-  Extents        mPadding;
   Ui::LayoutMode mLayoutMode{Ui::LayoutMode::DEFAULT};
 
   // Measure/Arrange State (cache-based)
