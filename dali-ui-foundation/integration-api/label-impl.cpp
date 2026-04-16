@@ -1654,7 +1654,7 @@ void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
     }
     default:
     {
-      DALI_LOG_ERROR("Unexpected request type recieved : %d\n", renderInfo.requestType);
+      DALI_LOG_ERROR("Unexpected request type received : %d\n", renderInfo.requestType);
       break;
     }
   }
