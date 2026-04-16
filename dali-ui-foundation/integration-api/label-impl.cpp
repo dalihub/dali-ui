@@ -164,7 +164,9 @@ LabelImpl::LabelImpl()
   mHasAnchors(false),
   mIsVisible(false),
   mIsVisibleInitialized(false),
-  mIsViewBackgroundEnabled(true)
+  mIsViewBackgroundEnabled(true),
+  mIsManualRenderInProgress(false),
+  mIsManualRenderFinished(false)
 {
 }
 
@@ -941,12 +943,136 @@ void LabelImpl::StopMarquee()
   SetMarqueeEnabled(false);
 }
 
+void LabelImpl::RequestAsyncNaturalSize()
+{
+  Actor                             self            = Self();
+  const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
+  Text::AsyncTextParameters         parameters      = GetAsyncTextParameters(Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetPadding(), layoutDirection);
+  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+}
+
+void LabelImpl::RequestAsyncHeightForWidth(float width)
+{
+  Actor                             self            = Self();
+  Extents                           padding         = GetPadding();
+  float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
+  Text::AsyncTextParameters         parameters      = GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
+  Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
+}
+
+// =============================================================================
+// Integration-only
+// =============================================================================
+void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
+{
+  DALI_LOG_RELEASE_INFO("[%p] Request fixed size render: %f, %f\n", mController.Get(), width, height);
+  if(!mController->IsAsyncRendering())
+  {
+    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    return;
+  }
+
+  Actor                             self            = Self();
+  Extents                           padding         = GetPadding();
+  float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  float                             contentHeight   = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
+  const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
+
+  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
+
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mRendererUpdateNeeded     = false;
+  mIsAsyncRenderRequested   = false;
+}
+
+void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstraint)
+{
+  DALI_LOG_RELEASE_INFO("[%p] Request fixed width render: width=%f, heightConstraint=%f\n", mController.Get(), width, heightConstraint);
+  if(!mController->IsAsyncRendering())
+  {
+    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    return;
+  }
+
+  Actor                             self                    = Self();
+  Extents                           padding                 = GetPadding();
+  float                             contentWidth            = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
+  const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
+
+  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
+
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mRendererUpdateNeeded     = false;
+  mIsAsyncRenderRequested   = false;
+}
+
+void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float height)
+{
+  DALI_LOG_RELEASE_INFO("[%p] Request fixed height render: widthConstraint=%f, height=%f\n", mController.Get(), widthConstraint, height);
+  if(!mController->IsAsyncRendering())
+  {
+    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    return;
+  }
+
+  Actor                             self                   = Self();
+  Extents                           padding                = GetPadding();
+  float                             contentWidthConstraint = std::max(widthConstraint - static_cast<float>(padding.start + padding.end), 0.0f);
+  float                             contentHeight          = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
+  const Dali::LayoutDirection::Type layoutDirection        = mController->GetLayoutDirection(self);
+
+  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
+
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mRendererUpdateNeeded     = false;
+  mIsAsyncRenderRequested   = false;
+}
+
+void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float heightConstraint)
+{
+  DALI_LOG_RELEASE_INFO("[%p] Request constrained render: %f, %f\n", mController.Get(), widthConstraint, heightConstraint);
+  if(!mController->IsAsyncRendering())
+  {
+    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    return;
+  }
+
+  Actor                             self                    = Self();
+  Extents                           padding                 = GetPadding();
+  float                             contentWidthConstraint  = std::max(widthConstraint - static_cast<float>(padding.start + padding.end), 0.0f);
+  float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
+  const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
+
+  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
+
+  mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
+  mRendererUpdateNeeded     = false;
+  mIsAsyncRenderRequested   = false;
+}
+
 // =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View, const Dali::String&)>& LabelImpl::AnchorClickedSignal()
 {
   return mAnchorClickedSignal;
+}
+
+Signal<void(View, float, float)>& LabelImpl::AsyncRenderFinishedSignal()
+{
+  return mAsyncRenderFinishedSignal;
+}
+
+Signal<void(View, float, float)>& LabelImpl::AsyncNaturalSizeComputedSignal()
+{
+  return mAsyncNaturalSizeComputedSignal;
+}
+
+Signal<void(View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
+{
+  return mAsyncHeightForWidthComputedSignal;
 }
 
 // =============================================================================
@@ -1022,8 +1148,10 @@ void LabelImpl::OnInitialize()
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  const bool sizeChanged = mIsSizeChanged;
-  mIsSizeChanged         = false;
+  const bool sizeChanged          = mIsSizeChanged;
+  const bool manualRenderFinished = mIsManualRenderFinished;
+  mIsSizeChanged                  = false;
+  mIsManualRenderFinished         = false;
 
   if(mTextScroller && mTextScroller->IsStopRequested())
   {
@@ -1034,8 +1162,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   Actor self = Self();
 
   Extents padding = GetPadding();
-  float   width   = std::max(size.x - (padding.start + padding.end), 0.0f);
-  float   height  = std::max(size.y - (padding.top + padding.bottom), 0.0f);
+  float   width   = std::max(size.x - static_cast<float>(padding.start + padding.end), 0.0f);
+  float   height  = std::max(size.y - static_cast<float>(padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
   DALI_LOG_RELEASE_INFO("[%p] size:%f,%f, contentSize:%f,%f\n", mController.Get(), size.x, size.y, contentSize.x,
                         contentSize.y);
@@ -1057,9 +1185,18 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       return;
     }
 
-    if(!(sizeChanged || mIsAsyncRenderRequested))
+    if(mIsManualRenderInProgress || !(sizeChanged || mIsAsyncRenderRequested))
     {
-      // Do not request async render if there are no size or property updates.
+      // Do not request async render while a manual render is in progress,
+      // or when there are no size or property updates.
+      return;
+    }
+
+    if(manualRenderFinished && sizeChanged && !mIsAsyncRenderRequested)
+    {
+      // Skip async render when only the size changed immediately after manual render completion.
+      // This avoids redundant recomputation when users resize the label in the completion callback.
+      // Note: This behavior may have limitations in some edge cases.
       return;
     }
 
@@ -1167,8 +1304,8 @@ Vector3 LabelImpl::GetNaturalSize()
 {
   Extents padding     = GetPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
-  naturalSize.width += (padding.start + padding.end);
-  naturalSize.height += (padding.top + padding.bottom);
+  naturalSize.width += static_cast<float>(padding.start + padding.end);
+  naturalSize.height += static_cast<float>(padding.top + padding.bottom);
 
   return naturalSize;
 }
@@ -1479,8 +1616,14 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
   if(!renderInfo.isCutoutEnabled)
   {
     Extents padding = GetPadding();
-    width += padding.start + padding.end;
-    height += padding.top + padding.bottom;
+    width += static_cast<float>(padding.start + padding.end);
+    height += static_cast<float>(padding.top + padding.bottom);
+  }
+
+  if(mIsManualRenderInProgress)
+  {
+    mIsManualRenderInProgress = false;
+    mIsManualRenderFinished   = true;
   }
 
   EmitAsyncRenderFinished(width, height);
@@ -1493,15 +1636,21 @@ void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
     case Text::Async::COMPUTE_NATURAL_SIZE:
     {
       DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
-      mAsyncLineCount = renderInfo.lineCount;
-      EmitAsyncNaturalSizeComputed(renderInfo.renderedSize.width, renderInfo.renderedSize.height);
+      mAsyncLineCount     = renderInfo.lineCount;
+      Extents     padding = GetPadding();
+      const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
+      const float height  = renderInfo.renderedSize.height + static_cast<float>(padding.top + padding.bottom);
+      EmitAsyncNaturalSizeComputed(width, height);
       break;
     }
     case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
       DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
-      mAsyncLineCount = renderInfo.lineCount;
-      EmitAsyncHeightForWidthComputed(renderInfo.renderedSize.width, renderInfo.renderedSize.height);
+      mAsyncLineCount     = renderInfo.lineCount;
+      Extents     padding = GetPadding();
+      const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
+      const float height  = renderInfo.renderedSize.height + static_cast<float>(padding.top + padding.bottom);
+      EmitAsyncHeightForWidthComputed(width, height);
       break;
     }
     default:
@@ -1575,7 +1724,7 @@ bool LabelImpl::OnInterceptTouched(Actor actor, const TouchEvent& touch)
       {
         Extents       padding    = GetPadding();
         const Vector2 localPoint = touch.GetLocalPosition(0);
-        mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
+        mController->AnchorEvent(localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
       }
     }
     mIsTouchDown = false;
@@ -1815,6 +1964,20 @@ void LabelImpl::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
 {
   mIsVisible            = visible;
   mIsVisibleInitialized = true;
+  if(visible)
+  {
+    if(mController->IsAsyncRendering())
+    {
+      RequestTextRelayout();
+      RequestAsyncRender();
+    }
+  }
+  else
+  {
+    mIsSizeChanged            = false;
+    mIsManualRenderInProgress = false;
+    mIsManualRenderFinished   = false;
+  }
   OnMarqueeVisibilityChanged(visible);
 }
 
@@ -2105,17 +2268,20 @@ void LabelImpl::EmitTextFitChanged()
 
 void LabelImpl::EmitAsyncRenderFinished(float width, float height)
 {
-  // TODO
+  Ui::View handle(GetOwner());
+  mAsyncRenderFinishedSignal.Emit(handle, width, height);
 }
 
 void LabelImpl::EmitAsyncNaturalSizeComputed(float width, float height)
 {
-  // TODO
+  Ui::View handle(GetOwner());
+  mAsyncNaturalSizeComputedSignal.Emit(handle, width, height);
 }
 
 void LabelImpl::EmitAsyncHeightForWidthComputed(float width, float height)
 {
-  // TODO
+  Ui::View handle(GetOwner());
+  mAsyncHeightForWidthComputedSignal.Emit(handle, width, height);
 }
 
 // =============================================================================

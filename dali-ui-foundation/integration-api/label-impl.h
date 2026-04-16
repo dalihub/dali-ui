@@ -550,11 +550,69 @@ public:
    */
   void StopMarquee();
 
+  /**
+   * @copydoc Dali::Ui::Label::RequestAsyncNaturalSize
+   */
+  void RequestAsyncNaturalSize();
+
+  /**
+   * @copydoc Dali::Ui::Label::RequestAsyncHeightForWidth
+   */
+  void RequestAsyncHeightForWidth(float width);
+
+  // Integration-only
+  /**
+   * @brief Requests asynchronous text rendering with a fixed size.
+   *
+   * @param[in] width The width used for rendering.
+   * @param[in] height The height used for rendering.
+   */
+  void RequestAsyncRenderWithFixedSize(float width, float height);
+
+  /**
+   * @brief Requests asynchronous text rendering with a fixed width.
+   *
+   * @param[in] width The width used for rendering.
+   * @param[in] heightConstraint The maximum available height.
+   */
+  void RequestAsyncRenderWithFixedWidth(float width, float heightConstraint);
+
+  /**
+   * @brief Requests asynchronous text rendering with a fixed height.
+   *
+   * @param[in] widthConstraint The maximum available width.
+   * @param[in] height The height used for rendering.
+   */
+  void RequestAsyncRenderWithFixedHeight(float widthConstraint, float height);
+
+  /**
+   * @brief Requests asynchronous text rendering within the given constraints.
+   *
+   * @param[in] widthConstraint The maximum available width.
+   * @param[in] heightConstraint The maximum available height.
+   */
+  void RequestAsyncRenderWithConstraints(float widthConstraint, float heightConstraint);
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::Label::AnchorClickedSignal()
    */
   Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+
+  /**
+   * @copydoc Dali::Ui::Label::AsyncRenderFinishedSignal()
+   */
+  Signal<void(View, float, float)>& AsyncRenderFinishedSignal();
+
+  /**
+   * @copydoc Dali::Ui::Label::AsyncNaturalSizeComputedSignal()
+   */
+  Signal<void(View, float, float)>& AsyncNaturalSizeComputedSignal();
+
+  /**
+   * @copydoc Dali::Ui::Label::AsyncHeightForWidthComputedSignal()
+   */
+  Signal<void(View, float, float)>& AsyncHeightForWidthComputedSignal();
 
 protected:
   // Construction
@@ -923,6 +981,9 @@ private:
 private:
   // Data
   Signal<void(View, const Dali::String&)> mAnchorClickedSignal;
+  Signal<void(View, float, float)>        mAsyncRenderFinishedSignal;
+  Signal<void(View, float, float)>        mAsyncNaturalSizeComputedSignal;
+  Signal<void(View, float, float)>        mAsyncHeightForWidthComputedSignal;
 
   std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
   WeakHandle<Ui::View>                                    mMaskSourceView;
@@ -938,16 +999,18 @@ private:
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
-  bool mRendererUpdateNeeded : 1;    // Whether the text renderer needs to be updated.
-  bool mMeasureInvalidated : 1;      // whether measurement has been invalidated.
-  bool mIsAsyncRenderRequested : 1;  // whether an async render has been requested.
-  bool mIsSizeChanged : 1;           // whether the size has changed.
-  bool mLastMarqueeEnabled : 1;      // whether marquee was enabled in the previous state.
-  bool mIsTouchDown : 1;             // whether the currently intercepted touch is in the down state.
-  bool mHasAnchors : 1;              // whether the text has anchors.
-  bool mIsVisible : 1;               // cached result of IsEffectivelyVisible().
-  bool mIsVisibleInitialized : 1;    // whether mIsVisible has been initialized.
-  bool mIsViewBackgroundEnabled : 1; // whether the view background is enabled.
+  bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
+  bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
+  bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.
+  bool mIsSizeChanged : 1;            // whether the size has changed.
+  bool mLastMarqueeEnabled : 1;       // whether marquee was enabled in the previous state.
+  bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
+  bool mHasAnchors : 1;               // whether the text has anchors.
+  bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().
+  bool mIsVisibleInitialized : 1;     // whether mIsVisible has been initialized.
+  bool mIsViewBackgroundEnabled : 1;  // whether the view background is enabled.
+  bool mIsManualRenderInProgress : 1; // True while an async manual render request is in progress. Reset to false when completed.
+  bool mIsManualRenderFinished : 1;   // True when an async manual render has completed. Reset to false on the next relayout.
 
 protected:
   struct PropertyHandler;

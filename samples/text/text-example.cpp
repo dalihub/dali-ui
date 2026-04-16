@@ -76,16 +76,57 @@ private:
     PrintInputFieldInfo(mField, "InputField");
 
 
-    mLabel2.OnRelayoutSignal().Connect(this, &TextController::OnLabelRelayoutSignal);
-    mLabel3.OnRelayoutSignal().Connect(this, &TextController::OnLabelRelayoutSignal);
+    mLabel2.OnRelayoutSignal().Connect(this, &TextController::OnRelayout);
+    mLabel3.OnRelayoutSignal().Connect(this, &TextController::OnRelayout);
 
     mField.TextChangedSignal().Connect(this, &TextController::OnTextChanged);
     mField.SetMaximumLength(20);
     mField.MaximumLengthReachedSignal().Connect(this, &TextController::OnMaximumLengthReached);
+
+    mLabel.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+    mLabel2.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+    mLabel3.AsyncRenderFinishedSignal().Connect(this, &TextController::OnAsyncRenderFinished);
+
+    mLabel2.AsyncNaturalSizeComputedSignal().Connect(this, &TextController::OnAsyncNaturalSize);
+    mLabel3.AsyncNaturalSizeComputedSignal().Connect(this, &TextController::OnAsyncNaturalSize);
+
+    mLabel2.AsyncHeightForWidthComputedSignal().Connect(this, &TextController::OnAsyncHeightForWidth);
+    mLabel3.AsyncHeightForWidthComputedSignal().Connect(this, &TextController::OnAsyncHeightForWidth);
+
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
 
-  void OnLabelRelayoutSignal(Actor actor)
+  void OnAsyncRenderFinished(View view, float width, float height)
+  {
+    Label label = Label::DownCast(view);
+    if(label)
+    {
+      DALI_LOG_ERROR("OnAsyncRenderFinished: %s\n", label.GetText().CStr());
+      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
+    }
+  }
+
+  void OnAsyncNaturalSize(View view, float width, float height)
+  {
+    Label label = Label::DownCast(view);
+    if(label)
+    {
+      DALI_LOG_ERROR("OnAsyncNaturalSize: %s\n", label.GetText().CStr());
+      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
+    }
+  }
+
+  void OnAsyncHeightForWidth(View view, float width, float height)
+  {
+    Label label = Label::DownCast(view);
+    if(label)
+    {
+      DALI_LOG_ERROR("OnAsyncHeightForWidth: %s\n", label.GetText().CStr());
+      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
+    }
+  }
+
+  void OnRelayout(Actor actor)
   {
     Label label = Label::DownCast(actor);
     if(label)
@@ -371,18 +412,18 @@ private:
     }
     else if(event.GetKeyName() == "4")
     {
-      mLabel.SetPadding(Extents(0, 0, 20, 20));
-      // mLabel.SetText("1");
-      // mLabel.SetFontSize(10);
+      mLabel2.RequestAsyncNaturalSize();
+      mLabel3.RequestAsyncNaturalSize();
     }
     else if(event.GetKeyName() == "5")
     {
-      mLabel.SetPadding(Extents(10, 10, 10, 10));
-      // mLabel.SetFontSize(30);
+      mLabel2.RequestAsyncHeightForWidth(220);
+      mLabel3.RequestAsyncHeightForWidth(220);
     }
     else if(event.GetKeyName() == "6")
     {
-      mLabel.SetPadding(Extents(0, 0, 0, 0));
+      mLabel2.RequestAsyncHeightForWidth(440);
+      mLabel3.RequestAsyncHeightForWidth(440);
     }
   }
 

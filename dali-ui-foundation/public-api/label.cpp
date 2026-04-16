@@ -614,12 +614,37 @@ void Label::StopMarquee()
   GetImpl(*this).StopMarquee();
 }
 
+void Label::RequestAsyncNaturalSize()
+{
+  GetImpl(*this).RequestAsyncNaturalSize();
+}
+
+void Label::RequestAsyncHeightForWidth(float width)
+{
+  GetImpl(*this).RequestAsyncHeightForWidth(width);
+}
+
 // =============================================================================
 // Signals
 // =============================================================================
 Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()
 {
   return GetImpl(*this).AnchorClickedSignal();
+}
+
+Signal<void(View, float, float)>& Label::AsyncRenderFinishedSignal()
+{
+  return GetImpl(*this).AsyncRenderFinishedSignal();
+}
+
+Signal<void(View, float, float)>& Label::AsyncNaturalSizeComputedSignal()
+{
+  return GetImpl(*this).AsyncNaturalSizeComputedSignal();
+}
+
+Signal<void(View, float, float)>& Label::AsyncHeightForWidthComputedSignal()
+{
+  return GetImpl(*this).AsyncHeightForWidthComputedSignal();
 }
 
 } // namespace Ui

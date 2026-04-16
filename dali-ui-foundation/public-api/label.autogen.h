@@ -360,5 +360,7 @@
   * \
   * @param[in] asyncRendering True to enable asynchronous text rendering, \
   * false to render text synchronously. \
+  * \
+  * @note The render result is delivered through Label::AsyncRenderFinishedSignal(). \
   */ \
   ChildClass& SetAsyncRendering(bool asyncRendering) { Label::SetAsyncRendering(asyncRendering); return *this; }

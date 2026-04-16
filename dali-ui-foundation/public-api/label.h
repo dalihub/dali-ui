@@ -857,6 +857,8 @@ public: // Setters for chaining
    *
    * @param[in] asyncRendering True to enable asynchronous text rendering,
    * false to render text synchronously.
+   *
+   * @note The render result is delivered through Label::AsyncRenderFinishedSignal().
    */
   Label& SetAsyncRendering(bool asyncRendering);
 
@@ -931,6 +933,30 @@ public: // Setters for chaining
    */
   void StopMarquee();
 
+  /**
+   * @brief Requests asynchronous natural size computation.
+   *
+   * This method can be used regardless of whether asynchronous rendering is enabled.
+   *
+   * The computed natural size includes the label padding.
+   *
+   * @note The computed result is delivered through Label::AsyncNaturalSizeComputedSignal().
+   */
+  void RequestAsyncNaturalSize();
+
+  /**
+   * @brief Requests asynchronous height-for-width computation.
+   *
+   * This method can be used regardless of whether asynchronous rendering is enabled.
+   *
+   * The given width must be the total label width including padding.
+   *
+   * @param[in] width The total width used for the computation, including padding.
+   *
+   * @note The computed result is delivered through Label::AsyncHeightForWidthComputedSignal().
+   */
+  void RequestAsyncHeightForWidth(float width);
+
 public: // Signals
   /**
    * @brief This signal is emitted when an anchor in the text is clicked.
@@ -945,6 +971,51 @@ public: // Signals
    * @return The signal to connect to.
    */
   Signal<void(View, const Dali::String&)>& AnchorClickedSignal();
+
+  /**
+   * @brief This signal is emitted when asynchronous text rendering is finished.
+   *
+   * @code
+   *   void OnAsyncRenderFinished(View view, float width, float height);
+   * @endcode
+   *
+   * @param[in] view The view whose async text rendering has completed.
+   * @param[in] width The rendered text width, including padding.
+   * @param[in] height The rendered text height, including padding.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, float, float)>& AsyncRenderFinishedSignal();
+
+  /**
+   * @brief This signal is emitted when asynchronous natural size computation is finished.
+   *
+   * @code
+   *   void OnAsyncNaturalSizeComputed(View view, float width, float height);
+   * @endcode
+   *
+   * @param[in] view The view whose async natural size computation has completed.
+   * @param[in] width The computed natural width, including padding.
+   * @param[in] height The computed natural height, including padding.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, float, float)>& AsyncNaturalSizeComputedSignal();
+
+  /**
+   * @brief This signal is emitted when asynchronous height-for-width computation is finished.
+   *
+   * @code
+   *   void OnAsyncHeightForWidthComputed(View view, float width, float height);
+   * @endcode
+   *
+   * @param[in] view The view whose async height-for-width computation has completed.
+   * @param[in] width The total width used for the computation, including padding.
+   * @param[in] height The computed height for the given width, including padding.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, float, float)>& AsyncHeightForWidthComputedSignal();
 
 public: // Not intended for application developers
   /// @cond internal
