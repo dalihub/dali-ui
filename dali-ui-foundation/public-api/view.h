@@ -1384,6 +1384,13 @@ public:
       BORDERLINE,
 
       /**
+       * @brief The width requested by the View for measurement.
+       * @details Name "requestedWidth", type Property::FLOAT.
+       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+       */
+      REQUESTED_WIDTH,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

@@ -50,6 +50,7 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -94,6 +95,11 @@ constexpr const char* ACTION_ACCESSIBILITY_READING_STOPPED   = "ReadingStopped";
 
 constexpr int INNER_SHADOW_DEPTH_INDEX = DepthIndex::DECORATION - 1;
 constexpr int BORDERLINE_DEPTH_INDEX   = DepthIndex::FOREGROUND_EFFECT - 1;
+
+inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
+{
+  return std::abs(a - b) < epsilon;
+}
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
   Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
@@ -490,6 +496,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_30(typeRegistration, "accessib
 const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -513,6 +520,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
   mPadding(),
+  mRequestedWidth(WRAP_CONTENT),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
   mSize(0, 0),
@@ -1238,6 +1246,26 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         break;
       }
+
+      case Ui::View::Property::REQUESTED_WIDTH:
+      {
+        float width;
+        if(value.Get(width))
+        {
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(!FloatEqual(dataImpl.mRequestedWidth, width))
+          {
+            dataImpl.mRequestedWidth = width;
+            viewImpl.InvalidateMeasure();
+            if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
+               !viewImpl.IsLayout() && viewImpl.GetChildCount() == 0)
+            {
+              viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
+            }
+          }
+        }
+        break;
+      }
     }
   }
 }
@@ -1471,6 +1499,12 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         }
 
         value = map;
+        break;
+      }
+
+      case Ui::View::Property::REQUESTED_WIDTH:
+      {
+        value = viewImpl.GetViewDataImpl().mRequestedWidth;
         break;
       }
 

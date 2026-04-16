@@ -459,6 +459,7 @@ public:
   Vector4                           mBackgroundColor;    ///< The color of the background visual
   Extents                           mMargin;             ///< Layout margin
   Extents                           mPadding;            ///< Layout padding
+  float                             mRequestedWidth;     ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   RenderEffectImplPtr               mRenderEffect;       ///< The render effect on this view
   Vector3*                          mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this
   Vector2                           mSize;               ///< The size of the view
@@ -530,6 +531,7 @@ public:
   static const PropertyRegistration PROPERTY_31;
   static const PropertyRegistration PROPERTY_32;
   static const PropertyRegistration PROPERTY_33;
+  static const PropertyRegistration PROPERTY_34;
 
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_1;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_2;

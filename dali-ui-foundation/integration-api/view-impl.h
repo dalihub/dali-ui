@@ -857,7 +857,6 @@ private:
   StateChangedSignalType mStateChangedSignal;
 
   // Requested size (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float mRequestedWidth;
   float mRequestedHeight;
 
   // Requested position (used when parent is not a layout)
