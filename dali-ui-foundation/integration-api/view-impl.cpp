@@ -1624,18 +1624,7 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 
 void ViewImpl::SetBackground(const Property::Map& map)
 {
-  Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
-  visual.SetName("background");
-  if(visual)
-  {
-    // Ignore corner radius for offscreen case.
-    Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-    mImpl->RegisterVisual(Ui::View::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
-    mImpl->EnableCornerPropertiesOverridden(visual, true);
-
-    // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
-    RelayoutRequest();
-  }
+  Self().SetProperty(Ui::View::Property::BACKGROUND, map);
 }
 
 void ViewImpl::ClearBackground()

@@ -834,7 +834,22 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         const Property::Map* map = value.GetMap();
         if(map && !map->Empty())
         {
-          viewImpl.SetBackground(*map);
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(DALI_LIKELY(dataImpl.mVisualData))
+          {
+            Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(*map);
+            visual.SetName("background");
+            if(visual)
+            {
+              // Ignore corner radius for offscreen case.
+              Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
+              dataImpl.mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
+              dataImpl.EnableCornerPropertiesOverridden(visual, true);
+
+              // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
+              viewImpl.RelayoutRequestToView();
+            }
+          }
         }
         else if(GetStdString(value, url))
         {
