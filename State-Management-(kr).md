@@ -2,7 +2,7 @@
 
 ## Overview
 
-dali-ui의 View는 현재 상태를 **`UiState`** 라는 bitmask 값으로 관리합니다. 여러 상태가 동시에 활성화될 수 있으며, `+` / `-` 연산자로 상태를 조합하거나 제거할 수 있습니다.
+dali-ui의 View는 현재 상태를 **`ViewState`** 라는 bitmask 값으로 관리합니다. 여러 상태가 동시에 활성화될 수 있으며, `+` / `-` 연산자로 상태를 조합하거나 제거할 수 있습니다.
 
 상태가 바뀔 때마다 `StateChangedSignal`이 발생하고, `StateEvent`를 통해 변경 전후의 상태와 원인 입력 이벤트를 확인할 수 있습니다.
 
@@ -12,20 +12,20 @@ dali-ui의 View는 현재 상태를 **`UiState`** 라는 bitmask 값으로 관�
 
 | 상태 | 설명 |
 |------|------|
-| `UiState::NORMAL` | 아무 상태도 활성화되지 않은 기본 상태 (비트 없음) |
-| `UiState::FOCUSED` | 키보드 포커스를 가진 상태 |
-| `UiState::PRESSED` | 터치 또는 키 입력으로 눌린 상태 |
-| `UiState::DISABLED` | 비활성화된 상태 |
-| `UiState::PSEUDO_DISABLED` | 시각적으로는 비활성화처럼 보이지만 실제로는 상호작용 가능한 상태 |
-| `UiState::SELECTED` | 선택된 상태 |
+| `ViewState::NORMAL` | 아무 상태도 활성화되지 않은 기본 상태 (비트 없음) |
+| `ViewState::FOCUSED` | 키보드 포커스를 가진 상태 |
+| `ViewState::PRESSED` | 터치 또는 키 입력으로 눌린 상태 |
+| `ViewState::DISABLED` | 비활성화된 상태 |
+| `ViewState::PSEUDO_DISABLED` | 시각적으로는 비활성화처럼 보이지만 실제로는 상호작용 가능한 상태 |
+| `ViewState::SELECTED` | 선택된 상태 |
 
 자주 쓰이는 복합 상태도 미리 정의되어 있습니다.
 
 | 복합 상태 | 구성 |
 |-----------|------|
-| `UiState::SELECTED_PRESSED` | `SELECTED + PRESSED` |
-| `UiState::SELECTED_FOCUSED` | `SELECTED + FOCUSED` |
-| `UiState::DISABLED_SELECTED` | `DISABLED + SELECTED` |
+| `ViewState::SELECTED_PRESSED` | `SELECTED + PRESSED` |
+| `ViewState::SELECTED_FOCUSED` | `SELECTED + FOCUSED` |
+| `ViewState::DISABLED_SELECTED` | `DISABLED + SELECTED` |
 
 <br/>
 
@@ -45,13 +45,13 @@ dali-ui의 View는 현재 상태를 **`UiState`** 라는 bitmask 값으로 관�
 ## Querying State
 
 ```cpp
-UiState state = view.GetState();
+ViewState state = view.GetState();
 
 // 특정 상태 포함 여부 (모든 비트가 설정되어 있어야 true)
-if(state.Contains(UiState::PRESSED)) { ... }
+if(state.Contains(ViewState::PRESSED)) { ... }
 
 // 복합 상태와의 교집합 여부 (하나 이상의 비트가 겹치면 true)
-if(state.HasIntersectionWith(UiState::DISABLED + UiState::PSEUDO_DISABLED)) { ... }
+if(state.HasIntersectionWith(ViewState::DISABLED + ViewState::PSEUDO_DISABLED)) { ... }
 
 // NORMAL 상태 여부
 if(state.IsNormal()) { ... }
@@ -60,20 +60,20 @@ if(state.IsNormal()) { ... }
 Dali::String str = state.ToString(); // e.g. "Focused, Pressed"
 ```
 
-`StateChangedSignal`의 `prev`/`cur` 인자를 직접 다룰 때는 `UiState`의 상태 변화 헬퍼를 사용할 수 있습니다.
+`StateChangedSignal`의 `prev`/`cur` 인자를 직접 다룰 때는 `ViewState`의 상태 변화 헬퍼를 사용할 수 있습니다.
 
 ```cpp
 // state가 이번 전환에서 새로 추가되었는가?
-bool added = UiState::FOCUSED.WasAdded(prev, cur);
+bool added = ViewState::FOCUSED.WasAdded(prev, cur);
 
 // state가 이번 전환에서 제거되었는가?
-bool removed = UiState::FOCUSED.WasRemoved(prev, cur);
+bool removed = ViewState::FOCUSED.WasRemoved(prev, cur);
 
 // 추가 또는 제거되었는가?
-bool changed = UiState::FOCUSED.WasChanged(prev, cur);
+bool changed = ViewState::FOCUSED.WasChanged(prev, cur);
 
 // 복합 상태의 비트 중 하나라도 변경되었는가?
-bool anyChanged = (UiState::PRESSED + UiState::FOCUSED).AnyChanged(prev, cur);
+bool anyChanged = (ViewState::PRESSED + ViewState::FOCUSED).AnyChanged(prev, cur);
 ```
 
 <br/>
@@ -84,13 +84,13 @@ bool anyChanged = (UiState::PRESSED + UiState::FOCUSED).AnyChanged(prev, cur);
 
 ```cpp
 view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
-  if(e.Added(UiState::FOCUSED))   { /* 포커스 획득 */ }
-  if(e.Removed(UiState::PRESSED)) { /* 눌림 해제 */ }
-  if(e.Changed(UiState::DISABLED)) { /* 활성화/비활성화 전환 */ }
+  if(e.Added(ViewState::FOCUSED))   { /* 포커스 획득 */ }
+  if(e.Removed(ViewState::PRESSED)) { /* 눌림 해제 */ }
+  if(e.Changed(ViewState::DISABLED)) { /* 활성화/비활성화 전환 */ }
 
   // 변경 전/후 상태 직접 조회
-  UiState prev = e.GetPrev();
-  UiState cur  = e.GetCurrent();
+  ViewState prev = e.GetPrev();
+  ViewState cur  = e.GetCurrent();
 
   // 입력 이벤트가 원인인 경우
   if(e.HasCause()) {
@@ -135,11 +135,11 @@ view.AsSelectable([](SelectableTrait& t) {
 
 ## Custom States
 
-`UiState::Create()`로 최대 62개의 커스텀 상태를 등록할 수 있습니다. 같은 이름으로 다시 호출하면 동일한 비트마스크를 반환합니다.
+`ViewState::Create()`로 최대 62개의 커스텀 상태를 등록할 수 있습니다. 같은 이름으로 다시 호출하면 동일한 비트마스크를 반환합니다.
 
 ```cpp
-static const UiState Loading = UiState::Create("Loading");
-static const UiState Error   = UiState::Create("Error");
+static const ViewState Loading = ViewState::Create("Loading");
+static const ViewState Error   = ViewState::Create("Error");
 
 // 상태 조합
 auto loadingOrError = Loading + Error;

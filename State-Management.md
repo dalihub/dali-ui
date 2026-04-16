@@ -4,7 +4,7 @@
 
 ## Overview
 
-A View in dali-ui tracks its current condition as a **`UiState`** bitmask. Multiple states can be active simultaneously. States can be combined with `+` and removed with `-`.
+A View in dali-ui tracks its current condition as a **`ViewState`** bitmask. Multiple states can be active simultaneously. States can be combined with `+` and removed with `-`.
 
 Whenever the state changes, `StateChangedSignal` fires and delivers a `StateEvent` that carries the previous and current states along with the optional input event that caused the transition.
 
@@ -14,20 +14,20 @@ Whenever the state changes, `StateChangedSignal` fires and delivers a `StateEven
 
 | State | Description |
 |-------|-------------|
-| `UiState::NORMAL` | Default state — no bits set |
-| `UiState::FOCUSED` | View has keyboard focus |
-| `UiState::PRESSED` | View is pressed via touch or key |
-| `UiState::DISABLED` | View is disabled |
-| `UiState::PSEUDO_DISABLED` | Appears disabled visually but remains interactive |
-| `UiState::SELECTED` | View is selected |
+| `ViewState::NORMAL` | Default state — no bits set |
+| `ViewState::FOCUSED` | View has keyboard focus |
+| `ViewState::PRESSED` | View is pressed via touch or key |
+| `ViewState::DISABLED` | View is disabled |
+| `ViewState::PSEUDO_DISABLED` | Appears disabled visually but remains interactive |
+| `ViewState::SELECTED` | View is selected |
 
 Commonly used composite states are also predefined:
 
 | Composite State | Composition |
 |----------------|-------------|
-| `UiState::SELECTED_PRESSED` | `SELECTED + PRESSED` |
-| `UiState::SELECTED_FOCUSED` | `SELECTED + FOCUSED` |
-| `UiState::DISABLED_SELECTED` | `DISABLED + SELECTED` |
+| `ViewState::SELECTED_PRESSED` | `SELECTED + PRESSED` |
+| `ViewState::SELECTED_FOCUSED` | `SELECTED + FOCUSED` |
+| `ViewState::DISABLED_SELECTED` | `DISABLED + SELECTED` |
 
 <br/>
 
@@ -47,13 +47,13 @@ Commonly used composite states are also predefined:
 ## Querying State
 
 ```cpp
-UiState state = view.GetState();
+ViewState state = view.GetState();
 
 // All bits of the argument must be set
-if(state.Contains(UiState::PRESSED)) { ... }
+if(state.Contains(ViewState::PRESSED)) { ... }
 
 // At least one bit in common
-if(state.HasIntersectionWith(UiState::DISABLED + UiState::PSEUDO_DISABLED)) { ... }
+if(state.HasIntersectionWith(ViewState::DISABLED + ViewState::PSEUDO_DISABLED)) { ... }
 
 // Check for NORMAL
 if(state.IsNormal()) { ... }
@@ -62,15 +62,15 @@ if(state.IsNormal()) { ... }
 Dali::String str = state.ToString(); // e.g. "Focused, Pressed"
 ```
 
-When working with raw `prev`/`cur` arguments you can use helpers on `UiState` itself:
+When working with raw `prev`/`cur` arguments you can use helpers on `ViewState` itself:
 
 ```cpp
-bool added      = UiState::FOCUSED.WasAdded(prev, cur);
-bool removed    = UiState::FOCUSED.WasRemoved(prev, cur);
-bool changed    = UiState::FOCUSED.WasChanged(prev, cur);
+bool added      = ViewState::FOCUSED.WasAdded(prev, cur);
+bool removed    = ViewState::FOCUSED.WasRemoved(prev, cur);
+bool changed    = ViewState::FOCUSED.WasChanged(prev, cur);
 
 // True if any constituent bit of the composite state changed
-bool anyChanged = (UiState::PRESSED + UiState::FOCUSED).AnyChanged(prev, cur);
+bool anyChanged = (ViewState::PRESSED + ViewState::FOCUSED).AnyChanged(prev, cur);
 ```
 
 <br/>
@@ -81,12 +81,12 @@ Connect to `View::StateChangedSignal()` to receive a `StateEvent` on every trans
 
 ```cpp
 view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
-  if(e.Added(UiState::FOCUSED))    { /* focus gained */ }
-  if(e.Removed(UiState::PRESSED))  { /* released */ }
-  if(e.Changed(UiState::DISABLED)) { /* enabled/disabled toggled */ }
+  if(e.Added(ViewState::FOCUSED))    { /* focus gained */ }
+  if(e.Removed(ViewState::PRESSED))  { /* released */ }
+  if(e.Changed(ViewState::DISABLED)) { /* enabled/disabled toggled */ }
 
-  UiState prev = e.GetPrev();
-  UiState cur  = e.GetCurrent();
+  ViewState prev = e.GetPrev();
+  ViewState cur  = e.GetCurrent();
 
   if(e.HasCause()) {
     const InputEvent& cause = e.GetCause();
@@ -130,11 +130,11 @@ view.AsSelectable([](SelectableTrait& t) {
 
 ## Custom States
 
-Up to 62 custom states can be registered with `UiState::Create()`. Calling `Create()` with the same name again returns the same bitmask.
+Up to 62 custom states can be registered with `ViewState::Create()`. Calling `Create()` with the same name again returns the same bitmask.
 
 ```cpp
-static const UiState Loading = UiState::Create("Loading");
-static const UiState Error   = UiState::Create("Error");
+static const ViewState Loading = ViewState::Create("Loading");
+static const ViewState Error   = ViewState::Create("Error");
 
 auto loadingOrError = Loading + Error;
 ```

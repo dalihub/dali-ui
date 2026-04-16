@@ -68,7 +68,7 @@ protected:
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
   // 상태 변경 (traits에서 호출)
-  void SetViewState(UiState state, bool on, InputEvent cause = {});
+  void SetViewState(ViewState state, bool on, InputEvent cause = {});
 };
 ```
 
@@ -87,7 +87,7 @@ const Integration::ViewImpl& GetImpl(const Ui::View& view);
 void MyFunction(Ui::View& view)
 {
   Integration::ViewImpl& impl = Integration::GetImpl(view);
-  impl.SetViewState(UiState::FOCUSED, true);
+  impl.SetViewState(ViewState::FOCUSED, true);
 }
 ```
 
