@@ -544,6 +544,7 @@ public:
   static const PropertyRegistration PROPERTY_38;
   static const PropertyRegistration PROPERTY_39;
   static const PropertyRegistration PROPERTY_40;
+  static const PropertyRegistration PROPERTY_41;
 
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_1;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_2;

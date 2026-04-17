@@ -1736,7 +1736,7 @@ LongPressGestureDetector ViewImpl::GetLongPressGestureDetector() const
 
 void ViewImpl::SetKeyboardNavigationSupport(bool isSupported)
 {
-  mImpl->mIsKeyboardNavigationSupported = isSupported;
+  Self().SetProperty(Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT, isSupported);
 }
 
 bool ViewImpl::IsKeyboardNavigationSupported()

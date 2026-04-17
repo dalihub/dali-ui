@@ -1428,6 +1428,12 @@ public:
       LAYOUT_MODE,
 
       /**
+       * @brief Whether the View supports keyboard navigation.
+       * @details Name "keyboardNavigationSupport", type Property::BOOLEAN.
+       */
+      KEYBOARD_NAVIGATION_SUPPORT,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

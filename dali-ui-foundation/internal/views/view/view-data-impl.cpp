@@ -503,6 +503,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_37(typeRegistration, "minimumH
 const PropertyRegistration ViewDataImpl::PROPERTY_38(typeRegistration, "maximumWidth",                   Ui::View::Property::MAXIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_39(typeRegistration, "maximumHeight",                  Ui::View::Property::MAXIMUM_HEIGHT,                   Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_40(typeRegistration, "layoutMode",                     Ui::View::Property::LAYOUT_MODE,                      Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_41(typeRegistration, "keyboardNavigationSupport",      Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -1373,6 +1374,16 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         break;
       }
+
+      case Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT:
+      {
+        bool supported;
+        if(value.Get(supported))
+        {
+          viewImpl.GetViewDataImpl().mIsKeyboardNavigationSupported = supported;
+        }
+        break;
+      }
     }
   }
 }
@@ -1648,6 +1659,12 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::LAYOUT_MODE:
       {
         value = static_cast<int>(viewImpl.GetViewDataImpl().mLayoutMode);
+        break;
+      }
+
+      case Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT:
+      {
+        value = viewImpl.GetViewDataImpl().mIsKeyboardNavigationSupported;
         break;
       }
 
