@@ -190,6 +190,17 @@ Dali::LayoutDirection::Type View::GetEffectiveLayoutDirection() const
   return GetImpl(*this).GetEffectiveLayoutDirection();
 }
 
+View& View::SetUiScalePolicy(UiScalePolicy policy)
+{
+  GetImpl(*this).SetUiScalePolicy(policy);
+  return *this;
+}
+
+UiScalePolicy View::GetUiScalePolicy() const
+{
+  return GetImpl(*this).GetUiScalePolicy();
+}
+
 bool View::IsVisible() const
 {
   return GetImpl(*this).IsVisible();

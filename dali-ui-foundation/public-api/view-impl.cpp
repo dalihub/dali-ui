@@ -67,6 +67,7 @@
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -244,12 +245,13 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
 void ArrangeStandaloneChild(ViewImpl& childImpl,
                             float parentFullWidth, float parentFullHeight)
 {
-  Extents      margin   = childImpl.GetMargin();
-  float        marginW  = static_cast<float>(margin.start + margin.end);
-  float        marginH  = static_cast<float>(margin.top + margin.bottom);
-  MeasuredSize measured = childImpl.GetMeasuredSize();
-  float        childW   = measured.width;
-  float        childH   = measured.height;
+  float        childScale = childImpl.GetEffectiveScale();
+  Extents      margin     = childImpl.GetMargin();
+  float        marginW    = static_cast<float>(margin.start + margin.end) * childScale;
+  float        marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
+  MeasuredSize measured   = childImpl.GetMeasuredSize();
+  float        childW     = measured.width;
+  float        childH     = measured.height;
 
   if(childImpl.GetRequestedWidth() == MATCH_PARENT)
   {
@@ -264,8 +266,8 @@ void ArrangeStandaloneChild(ViewImpl& childImpl,
     childImpl.Measure(childW, childH);
   }
 
-  LayoutRect bounds(childImpl.GetRequestedPositionX() + static_cast<float>(margin.start),
-                    childImpl.GetRequestedPositionY() + static_cast<float>(margin.top),
+  LayoutRect bounds(childImpl.GetRequestedPositionX() * childScale + static_cast<float>(margin.start) * childScale,
+                    childImpl.GetRequestedPositionY() * childScale + static_cast<float>(margin.top) * childScale,
                     childW, childH);
   childImpl.Arrange(bounds);
 }
@@ -341,6 +343,18 @@ void ViewImpl::OnSceneConnection(int depth)
   if(!GetParentView() || (IntegrationView::IsLayoutModeStandalone(*this) && isDirty))
   {
     RegisterWithLayoutController();
+  }
+  else if(IntegrationView::IsLayoutModeStandalone(*this))
+  {
+    // Standalone but clean: no layout pass needed, but must be tracked by
+    // UiScaleManager so future scale changes reach this view. This covers the
+    // case where a standalone view was unregistered on scene-disconnection and
+    // reconnects without any pending dirty work.
+    Window window = DevelWindow::Get(Self());
+    if(window)
+    {
+      UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(Self()));
+    }
   }
 }
 
@@ -832,43 +846,57 @@ void ViewImpl::SetTouchFocusable(bool touchFocusable)
 // Measure / Arrange API
 // =============================================================================
 
-MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
+MeasuredSize ViewImpl::Measure(float visualW, float visualH)
 {
+  float s    = GetEffectiveScale();
+  float natW = (visualW > 0.f) ? visualW / s : visualW;
+  float natH = (visualH > 0.f) ? visualH / s : visualH;
+
   // Ensure constraints respect this view's min/max bounds so that
   // OnMeasure (and therefore child measurements) see the effective
   // available space. Without this, children would be measured against
   // the original (smaller) constraint, then ApplyConstraints would
   // enlarge the result — leaving children incorrectly sized.
-  float effectiveWidth  = std::min(std::max(widthConstraint, mImpl->mMinimumWidth), mImpl->mMaximumWidth);
-  float effectiveHeight = std::min(std::max(heightConstraint, mImpl->mMinimumHeight), mImpl->mMaximumHeight);
+  float effNatW = std::min(std::max(natW, mImpl->mMinimumWidth), mImpl->mMaximumWidth);
+  float effNatH = std::min(std::max(natH, mImpl->mMinimumHeight), mImpl->mMaximumHeight);
 
-  if(mImpl->mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mImpl->mLastMeasuredConstraint.width, effectiveWidth) &&
-     FloatEqual(mImpl->mLastMeasuredConstraint.height, effectiveHeight))
+  if(mImpl->mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mImpl->mLastMeasuredConstraint.width, effNatW) &&
+     FloatEqual(mImpl->mLastMeasuredConstraint.height, effNatH))
   {
     return mImpl->mMeasuredSize;
   }
 
-  MeasuredSize measured                 = OnMeasure(effectiveWidth, effectiveHeight);
-  measured                              = ApplyConstraints(measured);
-  mImpl->mMeasuredSize                  = measured;
-  mImpl->mLastMeasuredConstraint.width  = effectiveWidth;
-  mImpl->mLastMeasuredConstraint.height = effectiveHeight;
+  // OnMeasure receives and returns visual (scale-applied) sizes, consistent with OnArrange.
+  float        effVisW                  = (effNatW >= 0.f) ? effNatW * s : effNatW;
+  float        effVisH                  = (effNatH >= 0.f) ? effNatH * s : effNatH;
+  MeasuredSize visual                   = OnMeasure(effVisW, effVisH);
+  visual                                = ApplyConstraints(visual);
+  mImpl->mMeasuredSize.width            = visual.width;
+  mImpl->mMeasuredSize.height           = visual.height;
+  mImpl->mLastMeasuredConstraint.width  = effNatW;
+  mImpl->mLastMeasuredConstraint.height = effNatH;
 
   // Ensure standalone children are measured even when OnMeasure (e.g. in
   // leaf views like Label) does not iterate children. The measure cache
   // prevents redundant work when OnMeasure already measured them.
-  MeasureStandaloneChildren(effectiveWidth, effectiveHeight);
+  MeasureStandaloneChildren(effVisW, effVisH);
 
   return mImpl->mMeasuredSize;
 }
 
 MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
+  // widthConstraint/heightConstraint are visual (scale-applied) sizes.
+  // Convert to natural for internal computation; return visual at the end.
+  float s    = GetEffectiveScale();
+  float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
+  float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
+
   float pw = static_cast<float>(mImpl->mPadding.start + mImpl->mPadding.end);
   float ph = static_cast<float>(mImpl->mPadding.top + mImpl->mPadding.bottom);
 
-  float effectiveWidth  = (mImpl->mRequestedWidth >= 0) ? mImpl->mRequestedWidth : widthConstraint;
-  float effectiveHeight = (mImpl->mRequestedHeight >= 0) ? mImpl->mRequestedHeight : heightConstraint;
+  float effectiveWidth  = (mImpl->mRequestedWidth >= 0) ? mImpl->mRequestedWidth : natW;
+  float effectiveHeight = (mImpl->mRequestedHeight >= 0) ? mImpl->mRequestedHeight : natH;
 
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
@@ -888,17 +916,22 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
         continue;
       }
 
+      float        childScale            = childImpl.GetEffectiveScale();
       Extents      margin                = childImpl.GetMargin();
-      float        marginW               = static_cast<float>(margin.start + margin.end);
-      float        marginH               = static_cast<float>(margin.top + margin.bottom);
-      float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
-      float        childHeightConstraint = std::max(0.0f, contentHeight - marginH);
+      float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+      float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+      float        childWidthConstraint  = std::max(0.0f, contentWidth * s - marginW);
+      float        childHeightConstraint = std::max(0.0f, contentHeight * s - marginH);
       MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-      float childX = childImpl.GetRequestedPositionX();
-      float childY = childImpl.GetRequestedPositionY();
-      maxRight     = std::max(maxRight, childX + marginW + childSize.width);
-      maxBottom    = std::max(maxBottom, childY + marginH + childSize.height);
+      float childNatW  = (s > 0.0f) ? childSize.width / s : childSize.width;
+      float childNatH  = (s > 0.0f) ? childSize.height / s : childSize.height;
+      float childX     = childImpl.GetRequestedPositionX();
+      float childY     = childImpl.GetRequestedPositionY();
+      float natMarginW = (s > 0.0f) ? marginW / s : marginW;
+      float natMarginH = (s > 0.0f) ? marginH / s : marginH;
+      maxRight         = std::max(maxRight, childX + natMarginW + childNatW);
+      maxBottom        = std::max(maxBottom, childY + natMarginH + childNatH);
     }
 
     MeasuredSize size;
@@ -926,7 +959,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     {
       size.height = maxBottom + ph;
     }
-    return size;
+    return {size.width * s, size.height * s};
   }
 
   MeasuredSize size;
@@ -956,7 +989,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     Vector3 naturalSize = Self().GetNaturalSize();
     size.height         = ((naturalSize.height > 0) ? naturalSize.height : 0.0f) + ph;
   }
-  return size;
+  return {size.width * s, size.height * s};
 }
 
 MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
@@ -993,10 +1026,11 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 
   if(!mImpl->mChildren.Empty())
   {
-    float padLeft   = static_cast<float>(mImpl->mPadding.start);
-    float padRight  = static_cast<float>(mImpl->mPadding.end);
-    float padTop    = static_cast<float>(mImpl->mPadding.top);
-    float padBottom = static_cast<float>(mImpl->mPadding.bottom);
+    float s            = GetEffectiveScale();
+    float visPadLeft   = static_cast<float>(mImpl->mPadding.start) * s;
+    float visPadRight  = static_cast<float>(mImpl->mPadding.end) * s;
+    float visPadTop    = static_cast<float>(mImpl->mPadding.top) * s;
+    float visPadBottom = static_cast<float>(mImpl->mPadding.bottom) * s;
 
     for(auto& childView : mImpl->mChildren)
     {
@@ -1009,30 +1043,32 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
         continue;
       }
 
-      Extents margin  = childImpl.GetMargin();
-      float   marginW = static_cast<float>(margin.start + margin.end);
-      float   marginH = static_cast<float>(margin.top + margin.bottom);
+      float   childScale      = childImpl.GetEffectiveScale();
+      Extents margin          = childImpl.GetMargin();
+      float   visMarginStart  = static_cast<float>(margin.start) * childScale;
+      float   visMarginEnd    = static_cast<float>(margin.end) * childScale;
+      float   visMarginTop    = static_cast<float>(margin.top) * childScale;
+      float   visMarginBottom = static_cast<float>(margin.bottom) * childScale;
+      float   visMarginW      = visMarginStart + visMarginEnd;
+      float   visMarginH      = visMarginTop + visMarginBottom;
       // Read measured size directly from the child (set during OnMeasure).
       MeasuredSize childMeasured = childImpl.GetMeasuredSize();
       float        childW        = childMeasured.width;
       float        childH        = childMeasured.height;
 
-      // MATCH_PARENT: fills parent content area minus own margin.
+      // MATCH_PARENT: fills parent content area minus own margin (in visual units).
       if(childImpl.GetRequestedWidth() == MATCH_PARENT)
       {
-        childW = std::max(0.0f, width - padLeft - padRight - marginW);
+        childW = std::max(0.0f, width - visPadLeft - visPadRight - visMarginW);
       }
       if(childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        childH = std::max(0.0f, height - padTop - padBottom - marginH);
+        childH = std::max(0.0f, height - visPadTop - visPadBottom - visMarginH);
       }
-      float childX = padLeft + static_cast<float>(margin.start) + childImpl.GetRequestedPositionX();
-      float childY = padTop + static_cast<float>(margin.top) + childImpl.GetRequestedPositionY();
+      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedPositionX() * s;
+      float childY = visPadTop + visMarginTop + childImpl.GetRequestedPositionY() * s;
 
-      // MATCH_PARENT children reported minSize during Measure, but their
-      // subtree was measured with the original constraint. Re-measure with
-      // the actual final size so internal state (e.g. text layout, nested
-      // children) reflects the real available space.
+      // MATCH_PARENT children: re-measure with the actual final visual size.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
         childImpl.Measure(childW, childH);
@@ -1046,7 +1082,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   return {width, height};
 }
 
-void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight)
+void ViewImpl::MeasureStandaloneChildren(float visEffW, float visEffH)
 {
   for(auto& childView : mImpl->mChildren)
   {
@@ -1055,12 +1091,13 @@ void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHe
     {
       continue;
     }
-    Extents margin                = childImpl.GetMargin();
-    float   marginW               = static_cast<float>(margin.start + margin.end);
-    float   marginH               = static_cast<float>(margin.top + margin.bottom);
-    float   childWidthConstraint  = std::max(0.0f, effectiveWidth - marginW);
-    float   childHeightConstraint = std::max(0.0f, effectiveHeight - marginH);
-    childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    float   childScale = childImpl.GetEffectiveScale();
+    Extents margin     = childImpl.GetMargin();
+    float   visMarginW = static_cast<float>(margin.start + margin.end) * childScale;
+    float   visMarginH = static_cast<float>(margin.top + margin.bottom) * childScale;
+    float   childVisW  = std::max(0.0f, visEffW - visMarginW);
+    float   childVisH  = std::max(0.0f, visEffH - visMarginH);
+    childImpl.Measure(childVisW, childVisH);
   }
 }
 
@@ -1099,6 +1136,84 @@ void ViewImpl::ApplyLayoutDirection(float parentWidth)
   }
 }
 
+// =============================================================================
+// UiScale API
+// =============================================================================
+
+void ViewImpl::SetUiScalePolicy(UiScalePolicy policy)
+{
+  if(mScalePolicy != policy)
+  {
+    mScalePolicy = policy;
+    ResetEffectiveScaleRecursive();
+    InvalidateMeasure();
+  }
+}
+
+UiScalePolicy ViewImpl::GetUiScalePolicy() const
+{
+  return mScalePolicy;
+}
+
+float ViewImpl::GetEffectiveScale() const
+{
+  if(mEffectiveScale < 0.0f)
+  {
+    mEffectiveScale = ComputeEffectiveScale();
+  }
+  return mEffectiveScale;
+}
+
+float ViewImpl::ComputeEffectiveScale() const
+{
+  if(mScalePolicy == UiScalePolicy::DISABLED)
+  {
+    return 1.0f;
+  }
+  if(mScalePolicy == UiScalePolicy::ENABLED)
+  {
+    return UiScaleManager::Get().GetScale();
+  }
+
+  // INHERIT: walk up the parent chain (Layout first, consistent with InvalidateMeasure)
+  Ui::Layout parentLayout = GetParentLayout();
+  if(parentLayout)
+  {
+    return GetImpl(parentLayout).GetEffectiveScale();
+  }
+
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    return GetImpl(parentView).GetEffectiveScale();
+  }
+
+  // Root: inherit from UiScaleManager
+  return UiScaleManager::Get().GetScale();
+}
+
+void ViewImpl::ResetEffectiveScaleRecursive()
+{
+  mEffectiveScale = -1.0f;
+
+  // Reset measure cache to the NaN "never measured" initial state (not to
+  // MEASURE_CACHE_DIRTY = -1.0f). This forces a cache miss in Measure() so
+  // every node re-measures with the new scale.
+  //
+  // NaN is required here (not DIRTY) because the caller follows this with
+  // InvalidateMeasure() on the root. DIRTY would trigger InvalidateMeasure's
+  // early-exit guard on the root and skip RegisterWithLayoutController().
+  // NaN != DIRTY, so the guard does not fire; Dali::Equals(NaN, DIRTY) is
+  // false per IEEE 754.
+  mImpl->mLastMeasuredConstraint.width  = std::numeric_limits<float>::quiet_NaN();
+  mImpl->mLastMeasuredConstraint.height = std::numeric_limits<float>::quiet_NaN();
+
+  for(auto& childView : mImpl->mChildren)
+  {
+    GetImpl(childView).ResetEffectiveScaleRecursive();
+  }
+}
+
 void ViewImpl::InvalidateMeasure()
 {
   // Early-exit guard: if already dirty, the ancestor chain has already been
@@ -1116,6 +1231,7 @@ void ViewImpl::InvalidateMeasure()
     return;
   }
 
+  mEffectiveScale                       = -1.0f;
   mImpl->mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
   mImpl->mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
   mImpl->mArrangeDirty                  = true;
@@ -1198,6 +1314,10 @@ void ViewImpl::RegisterWithLayoutController()
   {
     LayoutController& controller = LayoutController::Get(window);
     controller.RequestLayout(this);
+
+    // Register as a layout root in UiScaleManager so it gets invalidated when
+    // the system scale changes. Duplicate registration is silently ignored.
+    UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(self));
   }
 }
 
@@ -1208,11 +1328,13 @@ MeasuredSize ViewImpl::GetMeasuredSize() const
 
 MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
 {
+  // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
+  float        s           = GetEffectiveScale();
   MeasuredSize constrained = size;
-  constrained.width        = std::max(constrained.width, mImpl->mMinimumWidth);
-  constrained.height       = std::max(constrained.height, mImpl->mMinimumHeight);
-  constrained.width        = std::min(constrained.width, mImpl->mMaximumWidth);
-  constrained.height       = std::min(constrained.height, mImpl->mMaximumHeight);
+  constrained.width        = std::max(constrained.width, mImpl->mMinimumWidth * s);
+  constrained.height       = std::max(constrained.height, mImpl->mMinimumHeight * s);
+  constrained.width        = std::min(constrained.width, mImpl->mMaximumWidth * s);
+  constrained.height       = std::min(constrained.height, mImpl->mMaximumHeight * s);
   return constrained;
 }
 
@@ -1941,6 +2063,15 @@ void ViewImpl::OnSceneDisconnection()
   }
 
   mImpl->OnSceneDisconnection();
+
+  // Remove from UiScaleManager if this view was registered as a layout root.
+  // Two cases match the registration paths in RegisterWithLayoutController:
+  //   (a) tree root: no parent view and no parent layout
+  //   (b) standalone: boundary views self-register regardless of their parent
+  if((!GetParentView() && !GetParentLayout()) || IntegrationView::IsLayoutModeStandalone(*this))
+  {
+    UiScaleManager::Get().UnregisterLayoutRoot(Ui::View::DownCast(Self()));
+  }
 }
 
 void ViewImpl::OnChildAdd(Actor& child)

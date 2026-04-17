@@ -86,7 +86,8 @@ std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& 
       // Standalone children are excluded from flex line building.
       continue;
     }
-    Extents margin = childImpl.GetMargin();
+    float   childScale = childImpl.GetEffectiveScale();
+    Extents margin     = childImpl.GetMargin();
 
     // Apply flex-basis: override the main-axis working size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
@@ -94,17 +95,19 @@ std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& 
     {
       if(isMainAxisHorizontal)
       {
-        workingSizes[i].width = basis;
+        workingSizes[i].width = basis * childScale;
       }
       else
       {
-        workingSizes[i].height = basis;
+        workingSizes[i].height = basis * childScale;
       }
     }
 
-    float childMainSize = isMainAxisHorizontal ? workingSizes[i].width + margin.start + margin.end
-                                               : workingSizes[i].height + margin.top + margin.bottom;
-    bool  shouldWrap    = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
+    float visMarginMainH = static_cast<float>(margin.top + margin.bottom) * childScale;
+    float visMarginMainW = static_cast<float>(margin.start + margin.end) * childScale;
+    float childMainSize  = isMainAxisHorizontal ? workingSizes[i].width + visMarginMainW
+                                                : workingSizes[i].height + visMarginMainH;
+    bool  shouldWrap     = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
     if(shouldWrap)
     {
@@ -115,8 +118,8 @@ std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& 
     currentLine.mainSize += childMainSize;
     currentLine.totalFlexGrow += GetFlexGrow(childImpl);
     currentLine.totalFlexShrink += GetFlexShrink(childImpl);
-    float childCrossSize  = isMainAxisHorizontal ? workingSizes[i].height + margin.top + margin.bottom
-                                                 : workingSizes[i].width + margin.start + margin.end;
+    float childCrossSize  = isMainAxisHorizontal ? workingSizes[i].height + visMarginMainH
+                                                 : workingSizes[i].width + visMarginMainW;
     currentLine.crossSize = std::max(currentLine.crossSize, childCrossSize);
   }
   if(!currentLine.childIndices.empty())
@@ -242,16 +245,17 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
 {
   for(uint32_t idx : line.childIndices)
   {
-    auto&     childData = children[idx];
-    ViewImpl& childImpl = getImpl(childData);
-    Extents   margin    = childImpl.GetMargin();
+    auto&     childData  = children[idx];
+    ViewImpl& childImpl  = getImpl(childData);
+    float     childScale = childImpl.GetEffectiveScale();
+    Extents   margin     = childImpl.GetMargin();
 
     float childMainSize  = isMainAxisHorizontal ? workingSizes[idx].width : workingSizes[idx].height;
     float childCrossSize = isMainAxisHorizontal ? workingSizes[idx].height : workingSizes[idx].width;
-    float marginMain     = isMainAxisHorizontal ? static_cast<float>(margin.start + margin.end)
-                                                : static_cast<float>(margin.top + margin.bottom);
-    float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom)
-                                                : static_cast<float>(margin.start + margin.end);
+    float marginMain     = isMainAxisHorizontal ? static_cast<float>(margin.start + margin.end) * childScale
+                                                : static_cast<float>(margin.top + margin.bottom) * childScale;
+    float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom) * childScale
+                                                : static_cast<float>(margin.start + margin.end) * childScale;
 
     // MATCH_PARENT on cross axis: fill the line's cross-axis space.
     bool crossIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedHeight() == MATCH_PARENT)
@@ -334,12 +338,12 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
       childBounds.width  = allocCross;
       childBounds.height = allocMain;
     }
-    childBounds.x += static_cast<float>(margin.start);
-    childBounds.y += static_cast<float>(margin.top);
-    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
-    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
+    childBounds.x += static_cast<float>(margin.start) * childScale;
+    childBounds.y += static_cast<float>(margin.top) * childScale;
+    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end) * childScale);
+    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom) * childScale);
 
-    // Re-measure MATCH_PARENT children with their final size.
+    // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(childBounds.width, childBounds.height);
@@ -442,7 +446,6 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = GetImpl(childData);
-    Extents   margin    = childImpl.GetMargin();
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
@@ -451,8 +454,10 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
       continue;
     }
 
-    float        marginW               = static_cast<float>(margin.start + margin.end);
-    float        marginH               = static_cast<float>(margin.top + margin.bottom);
+    float        childScale            = childImpl.GetEffectiveScale();
+    Extents      margin                = childImpl.GetMargin();
+    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
     float        childWidthConstraint  = std::max(0.0f, widthConstraint - marginW);
     float        childHeightConstraint = std::max(0.0f, heightConstraint - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
@@ -466,18 +471,18 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     {
       if(IsMainAxisHorizontal())
       {
-        workingSize.width = basis;
+        workingSize.width = basis * childScale;
       }
       else
       {
-        workingSize.height = basis;
+        workingSize.height = basis * childScale;
       }
     }
 
-    float childMainSize  = IsMainAxisHorizontal() ? workingSize.width + margin.start + margin.end
-                                                  : workingSize.height + margin.top + margin.bottom;
-    float childCrossSize = IsMainAxisHorizontal() ? workingSize.height + margin.top + margin.bottom
-                                                  : workingSize.width + margin.start + margin.end;
+    float childMainSize  = IsMainAxisHorizontal() ? workingSize.width + marginW
+                                                  : workingSize.height + marginH;
+    float childCrossSize = IsMainAxisHorizontal() ? workingSize.height + marginH
+                                                  : workingSize.width + marginW;
 
     bool shouldWrap = (mWrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);

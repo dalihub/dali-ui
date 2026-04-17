@@ -122,6 +122,9 @@ bool LayoutImpl::HasLayoutManager() const
 
 MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
+  // widthConstraint/heightConstraint are visual (scale-applied) sizes,
+  // consistent with OnArrange. Callback and return value are also visual.
+
   // Callback takes priority over LayoutManager
   auto* measureCallback = GetMeasureCallback();
   if(measureCallback)
@@ -132,97 +135,82 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
 
   LayoutManager* layoutManager = GetLayoutManager();
   if(!layoutManager)
-  {
     return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
-  }
+
+  float s = GetEffectiveScale();
 
   Extents padding = GetPadding();
-  float   pw      = static_cast<float>(padding.start + padding.end);
-  float   ph      = static_cast<float>(padding.top + padding.bottom);
+  float   visPadW = static_cast<float>(padding.start + padding.end) * s;
+  float   visPadH = static_cast<float>(padding.top + padding.bottom) * s;
 
   float requestedWidth  = GetRequestedWidth();
   float requestedHeight = GetRequestedHeight();
 
-  float effectiveWidth  = (requestedWidth >= 0) ? requestedWidth : widthConstraint;
-  float effectiveHeight = (requestedHeight >= 0) ? requestedHeight : heightConstraint;
+  float requestedVisW = (requestedWidth >= 0.f) ? requestedWidth * s : requestedWidth;
+  float requestedVisH = (requestedHeight >= 0.f) ? requestedHeight * s : requestedHeight;
+  float effectiveVisW = (requestedVisW >= 0.f) ? requestedVisW : widthConstraint;
+  float effectiveVisH = (requestedVisH >= 0.f) ? requestedVisH : heightConstraint;
+  float contentVisW   = std::max(0.0f, effectiveVisW - visPadW);
+  float contentVisH   = std::max(0.0f, effectiveVisH - visPadH);
 
-  float contentWidth  = std::max(0.0f, effectiveWidth - pw);
-  float contentHeight = std::max(0.0f, effectiveHeight - ph);
+  MeasuredSize visContent = layoutManager->Measure(this, contentVisW, contentVisH);
 
-  MeasuredSize content = layoutManager->Measure(this, contentWidth, contentHeight);
-
-  float resultWidth;
-  if(requestedWidth >= 0)
-  {
-    resultWidth = requestedWidth;
-  }
+  float resultVisW;
+  if(requestedVisW >= 0.f)
+    resultVisW = requestedVisW;
   else if(requestedWidth == MATCH_PARENT)
-  {
-    // MATCH_PARENT: report minimum desired size; actual size is determined
-    // by the parent during the Arrange phase.
-    resultWidth = GetMinimumWidth();
-  }
+    resultVisW = GetMinimumWidth() * s;
   else
-  {
-    resultWidth = content.width + pw;
-  }
+    resultVisW = visContent.width + visPadW;
 
-  float resultHeight;
-  if(requestedHeight >= 0)
-  {
-    resultHeight = requestedHeight;
-  }
+  float resultVisH;
+  if(requestedVisH >= 0.f)
+    resultVisH = requestedVisH;
   else if(requestedHeight == MATCH_PARENT)
-  {
-    resultHeight = GetMinimumHeight();
-  }
+    resultVisH = GetMinimumHeight() * s;
   else
-  {
-    resultHeight = content.height + ph;
-  }
+    resultVisH = visContent.height + visPadH;
 
-  return MeasuredSize(resultWidth, resultHeight);
+  return MeasuredSize(resultVisW, resultVisH);
 }
 
-MeasuredSize LayoutImpl::OnArrange(const LayoutRect& bounds)
+MeasuredSize LayoutImpl::OnArrange(const LayoutRect& visualBounds)
 {
   // Callback takes priority over LayoutManager
   auto* arrangeCallback = GetArrangeCallback();
   if(arrangeCallback)
   {
-    // Set self position/size before invoking callback
     Actor self = Self();
-    self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-    self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-    self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-    self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
-
+    self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
+    self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
+    self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
+    self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
     Ui::View view = Ui::View::DownCast(self);
-    return arrangeCallback->Invoke(view, bounds);
+    return arrangeCallback->Invoke(view, visualBounds);
   }
 
   LayoutManager* layoutManager = GetLayoutManager();
   if(!layoutManager)
-  {
-    return ViewImpl::OnArrange(bounds);
-  }
+    return ViewImpl::OnArrange(visualBounds);
 
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
+  self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
+  self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
+  self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
 
-  Extents    padding = GetPadding();
-  LayoutRect contentBounds;
-  contentBounds.x      = static_cast<float>(padding.start);
-  contentBounds.y      = static_cast<float>(padding.top);
-  contentBounds.width  = bounds.width - static_cast<float>(padding.start + padding.end);
-  contentBounds.height = bounds.height - static_cast<float>(padding.top + padding.bottom);
+  float   s       = GetEffectiveScale();
+  Extents padding = GetPadding();
 
-  layoutManager->ArrangeChildren(this, contentBounds);
+  LayoutRect visContentBounds;
+  visContentBounds.x      = static_cast<float>(padding.start) * s;
+  visContentBounds.y      = static_cast<float>(padding.top) * s;
+  visContentBounds.width  = visualBounds.width - static_cast<float>(padding.start + padding.end) * s;
+  visContentBounds.height = visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s;
 
-  return {bounds.width, bounds.height};
+  layoutManager->ArrangeChildren(this, visContentBounds);
+
+  return {visualBounds.width, visualBounds.height};
 }
 
 } // namespace Integration

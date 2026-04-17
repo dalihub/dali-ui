@@ -100,10 +100,8 @@ protected:
   /**
    * @brief Arranges a child view within the given bounds.
    *
-   * Helper method for derived classes to arrange a child view.
-   *
-   * @param[in] child The child to arrange
-   * @param[in] bounds The bounds for the child
+   * @param[in] child  The child to arrange
+   * @param[in] bounds The visual bounds for the child
    * @return The final arranged size
    */
   MeasuredSize ArrangeChild(ViewImpl* child, const LayoutRect& bounds);

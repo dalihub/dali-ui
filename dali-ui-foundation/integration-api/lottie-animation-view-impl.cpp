@@ -385,6 +385,11 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
     UpdateVisual();
   }
 
+  // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
+  float s    = GetEffectiveScale();
+  float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
+  float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
+
   Vector2 naturalSize;
   if(mVisual)
   {
@@ -399,7 +404,7 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
 
   if(layoutW == MATCH_PARENT)
   {
-    w = widthConstraint;
+    w = natW;
   }
   else if(layoutW > 0)
   {
@@ -408,7 +413,7 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
 
   if(layoutH == MATCH_PARENT)
   {
-    h = heightConstraint;
+    h = natH;
   }
   else if(layoutH > 0)
   {
@@ -431,7 +436,7 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
     }
   }
 
-  return MeasuredSize(w, h);
+  return MeasuredSize(w * s, h * s);
 }
 
 MeasuredSize LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)

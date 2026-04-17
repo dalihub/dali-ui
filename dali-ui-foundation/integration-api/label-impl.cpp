@@ -1395,11 +1395,11 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
                         heightConstraint);
 
   mMeasureInvalidated = false;
-  // TODO: Enable this when the UI scale feature is applied.
-  // if(SetTextUiScale(GetEffectiveScale()))
-  // {
-  //   mController->InvalidateFontData();
-  // }
+  // Enable this when the UI scale feature is applied.
+  if(SetTextUiScale(GetEffectiveScale()))
+  {
+    mController->InvalidateFontData();
+  }
 
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();

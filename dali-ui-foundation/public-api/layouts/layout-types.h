@@ -301,6 +301,8 @@ public:
  * @endcode
  *
  * @note Signature: MeasuredSize(View view, float widthConstraint, float heightConstraint)
+ *       Both widthConstraint and heightConstraint are visual (scale-applied) sizes,
+ *       consistent with ArrangeCallback. The return value must also be visual.
  */
 using MeasureCallback = Callback<MeasuredSize(View, float, float)>;
 

@@ -9,6 +9,13 @@
   */ \
   ChildClass& SetScaleX(float scaleX) { View::SetScaleX(scaleX); return *this; } \
   /** \
+  * @brief Sets the UiScale participation policy for this view. \
+  * \
+  * @param[in] policy The UiScalePolicy to apply \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetUiScalePolicy(UiScalePolicy policy) { View::SetUiScalePolicy(policy); return *this; } \
+  /** \
   * @brief Sets the y scale factor applied to the view. \
   * \
   * @param[in] scaleY The Y scale factor to set \

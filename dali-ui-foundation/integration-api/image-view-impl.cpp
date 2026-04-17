@@ -834,6 +834,11 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
     UpdateVisual();
   }
 
+  // widthConstraint/heightConstraint are visual sizes; convert to natural for image measurement.
+  float s    = GetEffectiveScale();
+  float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
+  float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
+
   Vector2 naturalSize;
   if(mVisual)
   {
@@ -848,7 +853,7 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
 
   if(layoutW == MATCH_PARENT)
   {
-    w = widthConstraint;
+    w = natW;
   }
   else if(layoutW > 0)
   {
@@ -857,7 +862,7 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
 
   if(layoutH == MATCH_PARENT)
   {
-    h = heightConstraint;
+    h = natH;
   }
   else if(layoutH > 0)
   {
@@ -883,7 +888,7 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
                       widthConstraint, heightConstraint, layoutW, layoutH,
                       naturalSize.width, naturalSize.height, w, h, mVisual ? 1 : 0);
 
-  return MeasuredSize(w, h);
+  return MeasuredSize(w * s, h * s);
 }
 
 MeasuredSize ImageViewImpl::OnArrange(const LayoutRect& bounds)

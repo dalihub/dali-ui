@@ -332,6 +332,11 @@ MeasuredSize TextVisualizerImpl::OnMeasure(float widthConstraint, float heightCo
     Prepare();
   }
 
+  // widthConstraint/heightConstraint are visual sizes; convert to natural for text measurement.
+  float s    = GetEffectiveScale();
+  float natW = (widthConstraint > 0.0f && s > 0.f) ? widthConstraint / s : widthConstraint;
+  float natH = (heightConstraint > 0.0f && s > 0.f) ? heightConstraint / s : heightConstraint;
+
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();
   const float minWidth        = GetMinimumWidth();
@@ -349,12 +354,12 @@ MeasuredSize TextVisualizerImpl::OnMeasure(float widthConstraint, float heightCo
   }
   else if(requestedWidth == MATCH_PARENT)
   {
-    measuredWidth = (widthConstraint > 0.0f) ? widthConstraint : minWidth;
+    measuredWidth = (natW > 0.0f) ? natW : minWidth;
     measuredWidth = std::max(std::min(measuredWidth, maxWidth), minWidth);
   }
   else
   {
-    const float allowedMaxWidth = (widthConstraint > 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
+    const float allowedMaxWidth = (natW > 0.0f) ? std::min(maxWidth, natW) : maxWidth;
     measuredWidth               = std::max(std::min(naturalWidth, allowedMaxWidth), minWidth);
   }
 
@@ -364,18 +369,18 @@ MeasuredSize TextVisualizerImpl::OnMeasure(float widthConstraint, float heightCo
   }
   else if(requestedHeight == MATCH_PARENT)
   {
-    measuredHeight = (heightConstraint > 0.0f) ? heightConstraint : minHeight;
+    measuredHeight = (natH > 0.0f) ? natH : minHeight;
     measuredHeight = std::max(std::min(measuredHeight, maxHeight), minHeight);
   }
   else
   {
-    const float allowedMaxHeight = (heightConstraint > 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    const float layoutWidth      = (requestedWidth == MATCH_PARENT && widthConstraint > 0.0f) ? widthConstraint : measuredWidth;
+    const float allowedMaxHeight = (natH > 0.0f) ? std::min(maxHeight, natH) : maxHeight;
+    const float layoutWidth      = (requestedWidth == MATCH_PARENT && natW > 0.0f) ? natW : measuredWidth;
     const float naturalHeight    = MeasureNaturalTextHeightForWidth(layoutWidth);
     measuredHeight               = std::max(std::min(naturalHeight, allowedMaxHeight), minHeight);
   }
 
-  return MeasuredSize(measuredWidth, measuredHeight);
+  return MeasuredSize(measuredWidth * s, measuredHeight * s);
 }
 
 void TextVisualizerImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue)

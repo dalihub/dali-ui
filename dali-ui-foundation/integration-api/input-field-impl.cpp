@@ -1473,11 +1473,11 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint, heightConstraint);
 
   mMeasureInvalidated = false;
-  // TODO: Enable this when the UI scale feature is applied.
-  // if(SetTextUiScale(GetEffectiveScale()))
-  // {
-  //   mController->InvalidateFontData();
-  // }
+  // Enable this when the UI scale feature is applied.
+  if(SetTextUiScale(GetEffectiveScale()))
+  {
+    mController->InvalidateFontData();
+  }
 
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();

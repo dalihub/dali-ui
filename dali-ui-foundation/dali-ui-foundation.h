@@ -30,8 +30,11 @@
 #include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/unit.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view-types.h>

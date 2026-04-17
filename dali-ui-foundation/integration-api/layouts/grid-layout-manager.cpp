@@ -101,20 +101,21 @@ void MeasureGridChildrenAndFillAuto(IntegrationView::ChildContainer& children, f
     rowSpan          = std::min(rowSpan, rowCount - row);
     colSpan          = std::min(colSpan, colCount - col);
 
+    float        childScale            = childImpl.GetEffectiveScale();
     Extents      margin                = childImpl.GetMargin();
-    float        marginW               = static_cast<float>(margin.start + margin.end);
-    float        marginH               = static_cast<float>(margin.top + margin.bottom);
+    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
     float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
     if(rowSpan == 1 && row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO)
     {
-      rowHeights[row] = std::max(rowHeights[row], childSize.height + margin.top + margin.bottom);
+      rowHeights[row] = std::max(rowHeights[row], childSize.height + marginH);
     }
     if(colSpan == 1 && col < colDefs.Size() && colDefs[col].GetType() == GridLengthType::AUTO)
     {
-      colWidths[col] = std::max(colWidths[col], childSize.width + margin.start + margin.end);
+      colWidths[col] = std::max(colWidths[col], childSize.width + marginW);
     }
   }
 }
@@ -122,7 +123,8 @@ void MeasureGridChildrenAndFillAuto(IntegrationView::ChildContainer& children, f
 void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& colWidths,
                           const Dali::Vector<GridLength>& rowDefs, const Dali::Vector<GridLength>& colDefs,
                           float availableWidth, float availableHeight, float rowSpacing, float colSpacing,
-                          uint32_t rowCount, uint32_t colCount, float& totalWidthOut, float& totalHeightOut)
+                          uint32_t rowCount, uint32_t colCount, float& totalWidthOut, float& totalHeightOut,
+                          float scale)
 {
   float totalAbsoluteWidth  = 0.0f;
   float totalAbsoluteHeight = 0.0f;
@@ -136,7 +138,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
       const auto& def = colDefs[i];
       if(def.GetType() == GridLengthType::ABSOLUTE)
       {
-        colWidths[i] = def.GetValue();
+        colWidths[i] = def.GetValue() * scale;
         totalAbsoluteWidth += colWidths[i];
       }
       else if(def.GetType() == GridLengthType::STAR)
@@ -156,7 +158,7 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
       const auto& def = rowDefs[i];
       if(def.GetType() == GridLengthType::ABSOLUTE)
       {
-        rowHeights[i] = def.GetValue();
+        rowHeights[i] = def.GetValue() * scale;
         totalAbsoluteHeight += rowHeights[i];
       }
       else if(def.GetType() == GridLengthType::STAR)
@@ -216,7 +218,8 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
 
 void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
-                                float rowSpacing, float colSpacing, const std::function<ViewImpl&(Ui::View)>& getImpl)
+                                float rowSpacing, float colSpacing,
+                                const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   for(auto& childData : children)
   {
@@ -251,11 +254,12 @@ void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const
       childBounds.height -= rowSpacing;
     }
 
-    Extents margin = childImpl.GetMargin();
-    childBounds.x += static_cast<float>(margin.start);
-    childBounds.y += static_cast<float>(margin.top);
-    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end));
-    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
+    float   childScale = childImpl.GetEffectiveScale();
+    Extents margin     = childImpl.GetMargin();
+    childBounds.x += static_cast<float>(margin.start) * childScale;
+    childBounds.y += static_cast<float>(margin.top) * childScale;
+    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end) * childScale);
+    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom) * childScale);
 
     // Apply child alignment within the cell (from GridLayoutParams)
     float cellWidth  = childBounds.width;
@@ -309,7 +313,7 @@ void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const
       }
     }
 
-    // Re-measure MATCH_PARENT children with their final cell size.
+    // Re-measure MATCH_PARENT children with their final (scaled) cell size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(childBounds.width, childBounds.height);
@@ -381,6 +385,9 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     return MeasuredSize(0.0f, 0.0f);
   }
 
+  float s               = view->GetEffectiveScale();
+  float visRowSpacing   = mRowSpacing * s;
+  float visColSpacing   = mColumnSpacing * s;
   auto& children        = GetChildren(view);
   float availableWidth  = widthConstraint;
   float availableHeight = heightConstraint;
@@ -416,9 +423,9 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
         nonStarWidth += colWidths[i];
       }
     }
-    nonStarWidth += mColumnSpacing * (colCount > 0 ? colCount - 1 : 0);
-    float pw              = static_cast<float>(parentPadding.start + parentPadding.end);
-    float minWidthContent = std::max(0.0f, view->GetMinimumWidth() - pw);
+    nonStarWidth += visColSpacing * (colCount > 0 ? colCount - 1 : 0);
+    float pw              = static_cast<float>(parentPadding.start + parentPadding.end) * s;
+    float minWidthContent = std::max(0.0f, view->GetMinimumWidth() * s - pw);
     starAvailableWidth    = std::max(nonStarWidth, minWidthContent);
   }
 
@@ -432,16 +439,16 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
         nonStarHeight += rowHeights[i];
       }
     }
-    nonStarHeight += mRowSpacing * (rowCount > 0 ? rowCount - 1 : 0);
-    float ph               = static_cast<float>(parentPadding.top + parentPadding.bottom);
-    float minHeightContent = std::max(0.0f, view->GetMinimumHeight() - ph);
+    nonStarHeight += visRowSpacing * (rowCount > 0 ? rowCount - 1 : 0);
+    float ph               = static_cast<float>(parentPadding.top + parentPadding.bottom) * s;
+    float minHeightContent = std::max(0.0f, view->GetMinimumHeight() * s - ph);
     starAvailableHeight    = std::max(nonStarHeight, minHeightContent);
   }
 
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
   ApplyGridDefinitions(rowHeights, colWidths, mRowDefinitions, mColumnDefinitions, starAvailableWidth, starAvailableHeight,
-                       mRowSpacing, mColumnSpacing, rowCount, colCount, totalWidth, totalHeight);
+                       visRowSpacing, visColSpacing, rowCount, colCount, totalWidth, totalHeight, s);
 
   return MeasuredSize(totalWidth, totalHeight);
 }
@@ -453,6 +460,9 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
     return MeasuredSize(0.0f, 0.0f);
   }
 
+  float              s               = view->GetEffectiveScale();
+  float              visRowSpacing   = mRowSpacing * s;
+  float              visColSpacing   = mColumnSpacing * s;
   auto&              children        = GetChildren(view);
   float              availableWidth  = bounds.width;
   float              availableHeight = bounds.height;
@@ -471,14 +481,14 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;
   ApplyGridDefinitions(rowHeights, colWidths, mRowDefinitions, mColumnDefinitions, availableWidth, availableHeight,
-                       mRowSpacing, mColumnSpacing, rowCount, colCount, totalWidth, totalHeight);
+                       visRowSpacing, visColSpacing, rowCount, colCount, totalWidth, totalHeight, s);
 
   std::vector<float> rowPositions;
   std::vector<float> colPositions;
-  ComputeGridPositions(rowHeights, colWidths, bounds, mRowSpacing, mColumnSpacing, rowCount, colCount, rowPositions,
+  ComputeGridPositions(rowHeights, colWidths, bounds, visRowSpacing, visColSpacing, rowCount, colCount, rowPositions,
                        colPositions);
 
-  ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, mRowSpacing, mColumnSpacing,
+  ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing,
                              getImpl);
 
   return MeasuredSize(bounds.width, bounds.height);

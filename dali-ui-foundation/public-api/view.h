@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
@@ -286,6 +287,21 @@ public: // Properties
    * @return The current y scale factor
    */
   float GetCurrentScaleY() const;
+
+  /**
+   * @brief Sets the UiScale participation policy for this view.
+   *
+   * @param[in] policy The UiScalePolicy to apply
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetUiScalePolicy(UiScalePolicy policy);
+
+  /**
+   * @brief Gets the UiScale participation policy of this view.
+   *
+   * @return The current UiScalePolicy
+   */
+  UiScalePolicy GetUiScalePolicy() const;
 
   // @ANIMATABLE(Actor::Property::SCALE_Y, float)
   /**

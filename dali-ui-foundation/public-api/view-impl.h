@@ -41,6 +41,8 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -554,6 +556,27 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void InvalidateMeasure();
 
+  // UiScale API
+
+  /**
+   * @brief Sets the UiScale participation policy for this view.
+   * @param[in] policy The UiScalePolicy to apply
+   */
+  void SetUiScalePolicy(UiScalePolicy policy);
+
+  /**
+   * @brief Gets the UiScale participation policy of this view.
+   * @return The current UiScalePolicy
+   */
+  UiScalePolicy GetUiScalePolicy() const;
+
+  /**
+   * @brief Gets the effective scale for this view.
+   * Lazily computed on first call after invalidation; valid after first Measure.
+   * @return The effective scale factor
+   */
+  float GetEffectiveScale() const;
+
   /**
    * @copydoc Ui::View::InvalidateArrange()
    */
@@ -816,6 +839,9 @@ protected:
 
   /**
    * @brief Called during measure pass. Override to implement custom measurement.
+   * @param[in] widthConstraint  Available visual (scale-applied) width, or WRAP_CONTENT / MATCH_PARENT.
+   * @param[in] heightConstraint Available visual (scale-applied) height, or WRAP_CONTENT / MATCH_PARENT.
+   * @return Measured visual (scale-applied) size.
    */
   virtual MeasuredSize OnMeasure(float widthConstraint, float heightConstraint);
 
@@ -1059,7 +1085,27 @@ private:
   void                    MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
   void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
   void                    ApplyLayoutDirection(float parentWidth);
+  float                   ComputeEffectiveScale() const;
 
+public:
+  /**
+   * @brief Recursively resets the effective-scale cache and measure cache for
+   *        this view and all its descendants.
+   * Called by UiScaleManagerImpl::SetScale() so that the entire subtree
+   * re-evaluates its effective scale on the next Measure pass.
+   */
+  void ResetEffectiveScaleRecursive();
+
+  /**
+   * @brief Called when the effective scale changes.
+   * Subclasses (Label, InputField) override this to update font size scale.
+   * @param[in] newScale The new effective scale factor
+   */
+  virtual void OnEffectiveScaleChanged(float newScale)
+  {
+  }
+
+private:
   ViewImpl(const ViewImpl&)            = delete;
   ViewImpl(ViewImpl&&)                 = delete;
   ViewImpl& operator=(const ViewImpl&) = delete;
@@ -1069,6 +1115,10 @@ private:
   void SetBorderlineColorInternal(const Vector4& color);
   void SetColorInternal(const Vector4& color);
   void OnChildOrderChanged(Actor orderChangedChild);
+
+  // UiScale
+  UiScalePolicy mScalePolicy{UiScalePolicy::INHERIT}; // 1 byte
+  mutable float mEffectiveScale{-1.0f};               // -1 = uncomputed sentinel
 
   Internal::ViewDataImpl* mImpl;
 };

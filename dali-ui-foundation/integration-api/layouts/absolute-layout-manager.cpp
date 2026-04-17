@@ -88,9 +88,10 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       continue;
     }
 
-    auto*               params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
-    LayoutRect          bounds = GetChildBounds(params);
-    AbsoluteLayoutFlags flags  = GetChildFlags(params);
+    float               childScale = childImpl.GetEffectiveScale();
+    auto*               params     = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
+    LayoutRect          bounds     = GetChildBounds(params);
+    AbsoluteLayoutFlags flags      = GetChildFlags(params);
 
     float x = bounds.x;
     float y = bounds.y;
@@ -111,14 +112,22 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     {
       w *= contentWidth;
     }
+    else if(w > 0.0f)
+    {
+      w *= childScale;
+    }
     if(heightProportional)
     {
       h *= contentHeight;
     }
+    else if(h > 0.0f)
+    {
+      h *= childScale;
+    }
 
     Extents margin  = childImpl.GetMargin();
-    float   marginW = static_cast<float>(margin.start + margin.end);
-    float   marginH = static_cast<float>(margin.top + margin.bottom);
+    float   marginW = static_cast<float>(margin.start + margin.end) * childScale;
+    float   marginH = static_cast<float>(margin.top + margin.bottom) * childScale;
 
     // Always measure children. For negative axes (WRAP_CONTENT / MATCH_PARENT)
     // the constraint is the available content space; for explicit positive
@@ -144,9 +153,17 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     {
       x = (contentWidth - w) * bounds.x;
     }
+    else
+    {
+      x *= childScale;
+    }
     if(yProportional)
     {
       y = (contentHeight - h) * bounds.y;
+    }
+    else
+    {
+      y *= childScale;
     }
 
     maxRight  = std::max(maxRight, x + w + marginW);
@@ -179,6 +196,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       continue;
     }
 
+    float               childScale      = childImpl.GetEffectiveScale();
     auto*               params          = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
     LayoutRect          childBoundsSpec = GetChildBounds(params);
     AbsoluteLayoutFlags flags           = GetChildFlags(params);
@@ -202,9 +220,17 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     {
       w *= availableWidth;
     }
+    else if(w > 0.0f)
+    {
+      w *= childScale;
+    }
     if(heightProportional)
     {
       h *= availableHeight;
+    }
+    else if(h > 0.0f)
+    {
+      h *= childScale;
     }
 
     if(w < 0 || h < 0)
@@ -218,7 +244,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
         if(childImpl.GetRequestedWidth() == MATCH_PARENT)
         {
           Extents margin = childImpl.GetMargin();
-          w              = std::max(0.0f, availableWidth - static_cast<float>(margin.start + margin.end));
+          w              = std::max(0.0f, availableWidth - static_cast<float>(margin.start + margin.end) * childScale);
         }
         else
         {
@@ -230,7 +256,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
         if(childImpl.GetRequestedHeight() == MATCH_PARENT)
         {
           Extents margin = childImpl.GetMargin();
-          h              = std::max(0.0f, availableHeight - static_cast<float>(margin.top + margin.bottom));
+          h              = std::max(0.0f, availableHeight - static_cast<float>(margin.top + margin.bottom) * childScale);
         }
         else
         {
@@ -244,25 +270,33 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     {
       x = (availableWidth - w) * childBoundsSpec.x;
     }
+    else
+    {
+      x *= childScale;
+    }
     if(yProportional)
     {
       y = (availableHeight - h) * childBoundsSpec.y;
+    }
+    else
+    {
+      y *= childScale;
     }
 
     Extents margin = childImpl.GetMargin();
 
     LayoutRect childBounds;
-    childBounds.x      = bounds.x + x + static_cast<float>(margin.start);
-    childBounds.y      = bounds.y + y + static_cast<float>(margin.top);
+    childBounds.x      = bounds.x + x + static_cast<float>(margin.start) * childScale;
+    childBounds.y      = bounds.y + y + static_cast<float>(margin.top) * childScale;
     childBounds.width  = w;
     childBounds.height = h;
 
-    // Re-measure MATCH_PARENT children with their final size.
+    // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(w, h);
     }
-    childImpl.Arrange(childBounds);
+    ArrangeChild(&childImpl, childBounds);
   }
 
   return MeasuredSize(bounds.width, bounds.height);

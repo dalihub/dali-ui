@@ -414,8 +414,11 @@ void WebViewImpl::OnInitialize()
 
 MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
+  // widthConstraint/heightConstraint are visual sizes.
   // WebView fills whatever size the parent provides.
-  // If constraints are unconstrained (INFINITY), fall back to the initial stage size.
+  // If constraints are unconstrained (INFINITY), fall back to mWebViewSize which is always in
+  // visual units: initialized to stage size (visual at scale 1.0) and updated to the actor's
+  // visual SIZE via SetDisplayArea after each OnArrange. No further scaling is needed.
   float w = std::isinf(widthConstraint) ? mWebViewSize.width : widthConstraint;
   float h = std::isinf(heightConstraint) ? mWebViewSize.height : heightConstraint;
 

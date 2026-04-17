@@ -59,7 +59,6 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
-
   for(auto& childData : children)
   {
     if(!childData)
@@ -114,6 +113,7 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
 
   ScrollViewImpl* scrollImpl = dynamic_cast<ScrollViewImpl*>(view);
   auto&           children   = GetChildren(view);
+  float           s          = view->GetEffectiveScale();
 
   // In ScrollView, children are arranged at position (0,0) with their measured size
   // The ScrollView will handle the scrolling/positioning of the content
@@ -140,12 +140,11 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
       continue;
     }
 
-    // content인 경우만
-    // Read measured size directly from the child (set during MeasureChildren).
+    // Positions are stored as natural values; convert to visual coordinates.
     MeasuredSize childMeasured = childImpl.GetMeasuredSize();
     LayoutRect   childBounds;
-    childBounds.x      = childData.GetPositionX();
-    childBounds.y      = childData.GetPositionY();
+    childBounds.x      = childData.GetPositionX() * s;
+    childBounds.y      = childData.GetPositionY() * s;
     childBounds.width  = childMeasured.width;
     childBounds.height = childMeasured.height;
 
@@ -159,13 +158,13 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
       childBounds.height = bounds.height;
     }
 
-    // Re-measure MATCH_PARENT children with their final size.
+    // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     // Arrange the child
-    childImpl.Arrange(childBounds);
+    ArrangeChild(&childImpl, childBounds);
 
     // Only update scrollable dimensions from the content child, not from ScrollBar
     if(scrollImpl != nullptr && childData == scrollImpl->GetContent())
