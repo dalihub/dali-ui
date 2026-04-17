@@ -470,7 +470,7 @@ private:
   View CreateContainerView(int width, int height, bool horizontal)
   {
     return StackLayout::New(horizontal ? StackOrientation::HORIZONTAL : StackOrientation::VERTICAL)
-      .Spacing(1)
+      .SetSpacing(1)
       .SetRequestedWidth(width)
       .SetRequestedHeight(height)
       .SetBackgroundColor(UiColor(COLOR_BLACK));

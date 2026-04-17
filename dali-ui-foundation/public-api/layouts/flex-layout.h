@@ -34,6 +34,7 @@ namespace Integration
 class FlexLayoutImpl;
 }
 
+#include "flex-layout.autogen.h"
 /**
  * @brief FlexLayout arranges its children using the CSS Flexbox algorithm.
  *
@@ -110,7 +111,7 @@ public: // API
    *
    * @param[in] direction The flex direction
    */
-  void SetDirection(FlexDirection direction);
+  FlexLayout& SetDirection(FlexDirection direction);
 
   /**
    * @brief Gets the flex direction.
@@ -124,7 +125,7 @@ public: // API
    *
    * @param[in] wrap The wrap behavior
    */
-  void SetWrap(FlexWrap wrap);
+  FlexLayout& SetWrap(FlexWrap wrap);
 
   /**
    * @brief Gets the wrap behavior.
@@ -138,7 +139,7 @@ public: // API
    *
    * @param[in] justify The justify content value
    */
-  void SetJustifyContent(FlexJustify justify);
+  FlexLayout& SetJustifyContent(FlexJustify justify);
 
   /**
    * @brief Gets the justify content alignment.
@@ -152,7 +153,7 @@ public: // API
    *
    * @param[in] align The align items value
    */
-  void SetAlignItems(FlexAlign align);
+  FlexLayout& SetAlignItems(FlexAlign align);
 
   /**
    * @brief Gets the align items value.
@@ -166,7 +167,7 @@ public: // API
    *
    * @param[in] align The align content value
    */
-  void SetAlignContent(FlexAlign align);
+  FlexLayout& SetAlignContent(FlexAlign align);
 
   /**
    * @brief Gets the align content value.
@@ -177,36 +178,6 @@ public: // API
 
 public: // Chaining methods
   DALI_UI_CHAIN_LAYOUT_METHODS(FlexLayout)
-
-  FlexLayout& Direction(FlexDirection direction)
-  {
-    SetDirection(direction);
-    return *this;
-  }
-
-  FlexLayout& Wrap(FlexWrap wrap)
-  {
-    SetWrap(wrap);
-    return *this;
-  }
-
-  FlexLayout& JustifyContent(FlexJustify justify)
-  {
-    SetJustifyContent(justify);
-    return *this;
-  }
-
-  FlexLayout& AlignItems(FlexAlign align)
-  {
-    SetAlignItems(align);
-    return *this;
-  }
-
-  FlexLayout& AlignContent(FlexAlign align)
-  {
-    SetAlignContent(align);
-    return *this;
-  }
 
 public: // Not intended for application developers
   /// @cond internal

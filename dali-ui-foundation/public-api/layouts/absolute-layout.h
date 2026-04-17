@@ -33,6 +33,7 @@ namespace Integration
 class AbsoluteLayoutImpl;
 }
 
+#include "absolute-layout.autogen.h"
 /**
  * @brief AbsoluteLayout positions its children at explicit coordinates.
  *

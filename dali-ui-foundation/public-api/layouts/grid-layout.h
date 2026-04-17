@@ -35,6 +35,7 @@ namespace Integration
 class GridLayoutImpl;
 }
 
+#include "grid-layout.autogen.h"
 /**
  * @brief GridLayout arranges its children in a grid of rows and columns.
  *
@@ -119,14 +120,14 @@ public: // Row/Column Definition API
    *
    * @param[in] rows Vector of row height specifications
    */
-  void SetRowDefinitions(const Dali::Vector<GridLength>& rows);
+  GridLayout& SetRowDefinitions(const Dali::Vector<GridLength>& rows);
 
   /**
    * @brief Sets all column definitions at once.
    *
    * @param[in] columns Vector of column width specifications
    */
-  void SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
+  GridLayout& SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
 
   /**
    * @brief Gets the row definitions.
@@ -172,7 +173,7 @@ public: // Spacing API
    *
    * @param[in] spacing The spacing between rows
    */
-  void SetRowSpacing(float spacing);
+  GridLayout& SetRowSpacing(float spacing);
 
   /**
    * @brief Gets the row spacing.
@@ -186,7 +187,7 @@ public: // Spacing API
    *
    * @param[in] spacing The spacing between columns
    */
-  void SetColumnSpacing(float spacing);
+  GridLayout& SetColumnSpacing(float spacing);
 
   /**
    * @brief Gets the column spacing.
@@ -197,30 +198,6 @@ public: // Spacing API
 
 public: // Chaining methods
   DALI_UI_CHAIN_LAYOUT_METHODS(GridLayout)
-
-  GridLayout& RowSpacing(float spacing)
-  {
-    SetRowSpacing(spacing);
-    return *this;
-  }
-
-  GridLayout& ColumnSpacing(float spacing)
-  {
-    SetColumnSpacing(spacing);
-    return *this;
-  }
-
-  GridLayout& Rows(const Dali::Vector<GridLength>& rows)
-  {
-    SetRowDefinitions(rows);
-    return *this;
-  }
-
-  GridLayout& Columns(const Dali::Vector<GridLength>& columns)
-  {
-    SetColumnDefinitions(columns);
-    return *this;
-  }
 
 public: // Not intended for application developers
   /// @cond internal

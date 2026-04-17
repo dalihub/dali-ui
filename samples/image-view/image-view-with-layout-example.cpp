@@ -76,7 +76,7 @@ private:
   View CreateContents()
   {
     return StackLayout::New(StackOrientation::VERTICAL)
-      .Spacing(8.0f)
+      .SetSpacing(8.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .Children({
@@ -88,7 +88,7 @@ private:
   StackLayout CreateRow(int startIndex)
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .Spacing(8.0f)
+      .SetSpacing(8.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))

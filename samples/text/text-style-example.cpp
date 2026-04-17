@@ -45,7 +45,7 @@ private:
 
     window.Add(
       StackLayout::New(StackOrientation::VERTICAL)
-        .Spacing(STACK_SPACING)
+        .SetSpacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
         .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))

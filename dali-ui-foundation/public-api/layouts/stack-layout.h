@@ -34,6 +34,7 @@ namespace Integration
 class StackLayoutImpl;
 }
 
+#include "stack-layout.autogen.h"
 /**
  * @brief StackLayout arranges its children in a single row or column.
  *
@@ -124,7 +125,7 @@ public: // API
    *
    * @param[in] orientation The orientation to set
    */
-  void SetOrientation(StackOrientation orientation);
+  StackLayout& SetOrientation(StackOrientation orientation);
 
   /**
    * @brief Gets the orientation of the stack layout.
@@ -138,7 +139,7 @@ public: // API
    *
    * @param[in] spacing The spacing to set (in pixels)
    */
-  void SetSpacing(float spacing);
+  StackLayout& SetSpacing(float spacing);
 
   /**
    * @brief Gets the spacing between children in the stack.
@@ -149,24 +150,6 @@ public: // API
 
 public: // Chaining methods
   DALI_UI_CHAIN_LAYOUT_METHODS(StackLayout)
-
-  /**
-   * @brief Sets the orientation (chaining).
-   */
-  StackLayout& Orientation(StackOrientation orientation)
-  {
-    SetOrientation(orientation);
-    return *this;
-  }
-
-  /**
-   * @brief Sets the spacing (chaining).
-   */
-  StackLayout& Spacing(float spacing)
-  {
-    SetSpacing(spacing);
-    return *this;
-  }
 
 public: // Not intended for application developers
   /// @cond internal
