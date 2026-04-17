@@ -109,7 +109,7 @@ public:
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
       .SetRequestedWidth(WINDOW_WIDTH)
       .SetRequestedHeight(contentHeight)
-      .Spacing(ITEM_SPACING)
+      .SetSpacing(ITEM_SPACING)
       .SetPadding(Extents(0, 0, ITEM_SPACING, ITEM_SPACING));
     mContent = content;
 

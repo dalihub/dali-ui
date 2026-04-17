@@ -119,7 +119,7 @@ private:
       StackLayout::New(StackOrientation::VERTICAL)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .Spacing(SECTION_SPACING)
+        .SetSpacing(SECTION_SPACING)
         .Children({
           CreateScaleControlSection(),
           CreateCardSection("RenderScale", true),

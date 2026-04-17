@@ -98,14 +98,16 @@ void GridLayout::AddColumnDefinition(GridLength width)
   Integration::GetImpl(*this).AddColumnDefinition(width);
 }
 
-void GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
+GridLayout& GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   Integration::GetImpl(*this).SetRowDefinitions(rows);
+  return *this;
 }
 
-void GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
+GridLayout& GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   Integration::GetImpl(*this).SetColumnDefinitions(columns);
+  return *this;
 }
 
 Dali::Vector<GridLength> GridLayout::GetRowDefinitions() const
@@ -138,9 +140,10 @@ void GridLayout::ClearColumnDefinitions()
   Integration::GetImpl(*this).ClearColumnDefinitions();
 }
 
-void GridLayout::SetRowSpacing(float spacing)
+GridLayout& GridLayout::SetRowSpacing(float spacing)
 {
   Integration::GetImpl(*this).SetRowSpacing(spacing);
+  return *this;
 }
 
 float GridLayout::GetRowSpacing() const
@@ -148,9 +151,10 @@ float GridLayout::GetRowSpacing() const
   return Integration::GetImpl(*this).GetRowSpacing();
 }
 
-void GridLayout::SetColumnSpacing(float spacing)
+GridLayout& GridLayout::SetColumnSpacing(float spacing)
 {
   Integration::GetImpl(*this).SetColumnSpacing(spacing);
+  return *this;
 }
 
 float GridLayout::GetColumnSpacing() const

@@ -84,7 +84,7 @@ private:
   {
     static const char* TYPE_NAMES[] = {"IMAGE", "ANIMATED", "LOTTIE"};
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .Spacing(4.0f)
+                        .SetSpacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(48.0f)
                         .SetPadding(Extents(4, 4, 4, 4))
@@ -234,7 +234,7 @@ private:
   typedef void (ImageLoadingPolicyController::*ClickCallback)(View, const InputEvent&);
   View CreateControlRow(std::vector<const char*> labels, std::vector<ClickCallback> callbacks)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL).Spacing(4.0f).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(40.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL).SetSpacing(4.0f).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(40.0f);
     for(size_t i=0; i<labels.size(); ++i) {
       View btn = Label::New(labels[i]).SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(MATCH_PARENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)).SetBackgroundColor(UiColor(0x444444)).SetFontSize(10.0f).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER);
       btn.EnsureInteractiveTrait().ClickedSignal().Connect(this, callbacks[i]);

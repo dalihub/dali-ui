@@ -88,9 +88,10 @@ StackLayout::StackLayout(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::StackLayoutImpl>(internal);
 }
 
-void StackLayout::SetOrientation(StackOrientation orientation)
+StackLayout& StackLayout::SetOrientation(StackOrientation orientation)
 {
   Integration::GetImpl(*this).SetOrientation(orientation);
+  return *this;
 }
 
 StackOrientation StackLayout::GetOrientation() const
@@ -98,9 +99,10 @@ StackOrientation StackLayout::GetOrientation() const
   return Integration::GetImpl(*this).GetOrientation();
 }
 
-void StackLayout::SetSpacing(float spacing)
+StackLayout& StackLayout::SetSpacing(float spacing)
 {
   Integration::GetImpl(*this).SetSpacing(spacing);
+  return *this;
 }
 
 float StackLayout::GetSpacing() const

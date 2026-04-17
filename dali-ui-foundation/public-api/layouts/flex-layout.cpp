@@ -88,9 +88,10 @@ FlexLayout::FlexLayout(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::FlexLayoutImpl>(internal);
 }
 
-void FlexLayout::SetDirection(FlexDirection direction)
+FlexLayout& FlexLayout::SetDirection(FlexDirection direction)
 {
   Integration::GetImpl(*this).SetDirection(direction);
+  return *this;
 }
 
 FlexDirection FlexLayout::GetDirection() const
@@ -98,9 +99,10 @@ FlexDirection FlexLayout::GetDirection() const
   return Integration::GetImpl(*this).GetDirection();
 }
 
-void FlexLayout::SetWrap(FlexWrap wrap)
+FlexLayout& FlexLayout::SetWrap(FlexWrap wrap)
 {
   Integration::GetImpl(*this).SetWrap(wrap);
+  return *this;
 }
 
 FlexWrap FlexLayout::GetWrap() const
@@ -108,9 +110,10 @@ FlexWrap FlexLayout::GetWrap() const
   return Integration::GetImpl(*this).GetWrap();
 }
 
-void FlexLayout::SetJustifyContent(FlexJustify justify)
+FlexLayout& FlexLayout::SetJustifyContent(FlexJustify justify)
 {
   Integration::GetImpl(*this).SetJustifyContent(justify);
+  return *this;
 }
 
 FlexJustify FlexLayout::GetJustifyContent() const
@@ -118,9 +121,10 @@ FlexJustify FlexLayout::GetJustifyContent() const
   return Integration::GetImpl(*this).GetJustifyContent();
 }
 
-void FlexLayout::SetAlignItems(FlexAlign align)
+FlexLayout& FlexLayout::SetAlignItems(FlexAlign align)
 {
   Integration::GetImpl(*this).SetAlignItems(align);
+  return *this;
 }
 
 FlexAlign FlexLayout::GetAlignItems() const
@@ -128,9 +132,10 @@ FlexAlign FlexLayout::GetAlignItems() const
   return Integration::GetImpl(*this).GetAlignItems();
 }
 
-void FlexLayout::SetAlignContent(FlexAlign align)
+FlexLayout& FlexLayout::SetAlignContent(FlexAlign align)
 {
   Integration::GetImpl(*this).SetAlignContent(align);
+  return *this;
 }
 
 FlexAlign FlexLayout::GetAlignContent() const
