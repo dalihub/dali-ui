@@ -1149,6 +1149,23 @@ void ImageVisual::FastLoadComplete(FastTrackLoadingTaskPtr task)
     resourceStatus = Ui::Visual::ResourceStatus::FAILED;
     mLoadState     = TextureManager::LoadState::LOAD_FAILED;
 
+    if(mNeedUnifiedYuvAndRgb || mNeedYuvToRgb || mNeedYuva)
+    {
+      // Update shader as regular image cases before show broken image.
+      auto textureSet = mImpl->mRenderer.GetTextures();
+      DALI_ASSERT_ALWAYS(textureSet && textureSet.GetTextureCount() > 0u && "Previous texture set must exist!");
+
+      Dali::TextureSet newTextureSet = TextureSet::New();
+      newTextureSet.SetTexture(0u, textureSet.GetTexture(0u));
+      mImpl->mRenderer.SetTextures(newTextureSet);
+
+      mNeedYuvToRgb         = false;
+      mNeedYuva             = false;
+      mNeedUnifiedYuvAndRgb = false;
+
+      UpdateShader();
+    }
+
     // Change renderer as broken.
     ShowBrokenImage();
   }
