@@ -1422,6 +1422,12 @@ public:
       MAXIMUM_HEIGHT,
 
       /**
+       * @brief The layout mode that controls how the View participates in its parent's layout.
+       * @details Name "layoutMode", type Property::INTEGER (Ui::LayoutMode enum).
+       */
+      LAYOUT_MODE,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

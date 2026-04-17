@@ -860,9 +860,6 @@ private:
   float mRequestedPositionX;
   float mRequestedPositionY;
 
-  // Layout Properties Data
-  Ui::LayoutMode mLayoutMode{Ui::LayoutMode::DEFAULT};
-
   // Measure/Arrange State (cache-based)
   // mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize mMeasuredSize;

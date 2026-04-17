@@ -1221,21 +1221,17 @@ Extents ViewImpl::GetPadding() const
 
 void ViewImpl::SetLayoutMode(Ui::LayoutMode mode)
 {
-  if(mLayoutMode != mode)
-  {
-    mLayoutMode = mode;
-    InvalidateMeasure();
-  }
+  Self().SetProperty(Ui::View::Property::LAYOUT_MODE, static_cast<int>(mode));
 }
 
 Ui::LayoutMode ViewImpl::GetLayoutMode() const
 {
-  return mLayoutMode;
+  return mImpl->mLayoutMode;
 }
 
 bool ViewImpl::IsLayoutModeStandalone() const
 {
-  return mLayoutMode == Ui::LayoutMode::STANDALONE;
+  return mImpl->mLayoutMode == Ui::LayoutMode::STANDALONE;
 }
 
 // =============================================================================
