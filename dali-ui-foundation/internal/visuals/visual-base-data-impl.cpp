@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali/devel-api/object/property-map-devel.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/debug.h>
@@ -408,7 +409,7 @@ Vector2 Internal::Visual::Base::Impl::Transform::GetVisualSize(const Vector2& co
 
 const Property::Map& Internal::Visual::Base::Impl::Transform::GetDefaultTransformMap()
 {
-  static const Property::Map sDefaultTransformMap{
+  static const Property::Map sDefaultTransformMap = Dali::CreatePropertyMap({
     {Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO},
     {Ui::Visual::Transform::Property::SIZE, Vector2::ONE},
     {Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
@@ -416,7 +417,7 @@ const Property::Map& Internal::Visual::Base::Impl::Transform::GetDefaultTransfor
     {Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
     {Ui::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
     {Ui::DevelVisual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},
-  };
+  });
 
   return sDefaultTransformMap;
 }

@@ -21,6 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/common/stage.h>
+#include <dali/devel-api/object/property-map-devel.h>
+#include <dali/devel-api/object/property-value-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
@@ -542,7 +544,7 @@ void WebViewImpl::SetDisplayArea(const Dali::Rect<int32_t>& displayArea)
       Dali::Property::Map updateMap;
       updateMap.Insert(Dali::Ui::ImageVisual::Property::PIXEL_AREA, pixelArea);
       updateMap.Insert(Dali::Ui::Visual::Property::TRANSFORM,
-                       Dali::Property::Map{{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}});
+                       Dali::CreatePropertyMap({{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}}));
 
       auto& viewData = Internal::ViewDataImpl::Get(*this);
       viewData.DoAction(WebViewImpl::Property::URL, DevelVisual::Action::UPDATE_PROPERTY, updateMap);
