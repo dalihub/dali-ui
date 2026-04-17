@@ -1434,6 +1434,12 @@ public:
       KEYBOARD_NAVIGATION_SUPPORT,
 
       /**
+       * @brief Whether the View acts as a keyboard focus group boundary.
+       * @details Name "keyboardFocusGroup", type Property::BOOLEAN.
+       */
+      KEYBOARD_FOCUS_GROUP,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

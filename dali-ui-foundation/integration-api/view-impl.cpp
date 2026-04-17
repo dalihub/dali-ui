@@ -1770,10 +1770,7 @@ void ViewImpl::ClearKeyInputFocus()
 
 void ViewImpl::SetAsKeyboardFocusGroup(bool isFocusGroup)
 {
-  mImpl->mIsKeyboardFocusGroup = isFocusGroup;
-
-  // The following line will be removed when the deprecated API in FocusManager is deleted
-  Ui::FocusManager::Get().SetAsFocusGroup(Self(), isFocusGroup);
+  Self().SetProperty(Ui::View::Property::KEYBOARD_FOCUS_GROUP, isFocusGroup);
 }
 
 bool ViewImpl::IsKeyboardFocusGroup()
