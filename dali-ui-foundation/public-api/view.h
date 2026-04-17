@@ -1391,6 +1391,13 @@ public:
       REQUESTED_WIDTH,
 
       /**
+       * @brief The height requested by the View for measurement.
+       * @details Name "requestedHeight", type Property::FLOAT.
+       * @note WRAP_CONTENT (-1.0f) and MATCH_PARENT (-2.0f) are valid special values.
+       */
+      REQUESTED_HEIGHT,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

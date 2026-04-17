@@ -497,6 +497,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScree
 const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_35(typeRegistration, "requestedHeight",                Ui::View::Property::REQUESTED_HEIGHT,                 Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -521,6 +522,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mMargin(),
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),
+  mRequestedHeight(WRAP_CONTENT),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
   mSize(0, 0),
@@ -1155,7 +1157,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         break;
       }
-
       case Ui::View::Property::CORNER_RADIUS:
       {
         float radiusFloat = 0.0f;
@@ -1261,6 +1262,26 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
                !viewImpl.IsLayout() && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
+            }
+          }
+        }
+        break;
+      }
+
+      case Ui::View::Property::REQUESTED_HEIGHT:
+      {
+        float height;
+        if(value.Get(height))
+        {
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(!FloatEqual(dataImpl.mRequestedHeight, height))
+          {
+            dataImpl.mRequestedHeight = height;
+            viewImpl.InvalidateMeasure();
+            if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
+               !viewImpl.IsLayout() && viewImpl.GetChildCount() == 0)
+            {
+              viewImpl.Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
             }
           }
         }
@@ -1505,6 +1526,12 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::REQUESTED_WIDTH:
       {
         value = viewImpl.GetViewDataImpl().mRequestedWidth;
+        break;
+      }
+
+      case Ui::View::Property::REQUESTED_HEIGHT:
+      {
+        value = viewImpl.GetViewDataImpl().mRequestedHeight;
         break;
       }
 

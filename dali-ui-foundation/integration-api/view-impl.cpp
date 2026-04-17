@@ -189,7 +189,6 @@ ViewImpl::ViewImpl()
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
   mInteractiveTrait(nullptr),
-  mRequestedHeight(WRAP_CONTENT),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMinimumWidth(0.0f),
@@ -847,7 +846,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float ph = static_cast<float>(mImpl->mPadding.top + mImpl->mPadding.bottom);
 
   float effectiveWidth  = (mImpl->mRequestedWidth >= 0) ? mImpl->mRequestedWidth : widthConstraint;
-  float effectiveHeight = (mRequestedHeight >= 0) ? mRequestedHeight : heightConstraint;
+  float effectiveHeight = (mImpl->mRequestedHeight >= 0) ? mImpl->mRequestedHeight : heightConstraint;
 
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
@@ -894,11 +893,11 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     {
       size.width = maxRight + pw;
     }
-    if(mRequestedHeight >= 0)
+    if(mImpl->mRequestedHeight >= 0)
     {
-      size.height = mRequestedHeight;
+      size.height = mImpl->mRequestedHeight;
     }
-    else if(mRequestedHeight == MATCH_PARENT)
+    else if(mImpl->mRequestedHeight == MATCH_PARENT)
     {
       size.height = mMinimumHeight;
     }
@@ -923,11 +922,11 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     Vector3 naturalSize = Self().GetNaturalSize();
     size.width          = ((naturalSize.width > 0) ? naturalSize.width : 0.0f) + pw;
   }
-  if(mRequestedHeight >= 0)
+  if(mImpl->mRequestedHeight >= 0)
   {
-    size.height = mRequestedHeight;
+    size.height = mImpl->mRequestedHeight;
   }
-  else if(mRequestedHeight == MATCH_PARENT)
+  else if(mImpl->mRequestedHeight == MATCH_PARENT)
   {
     size.height = mMinimumHeight;
   }
@@ -1152,20 +1151,12 @@ float ViewImpl::GetRequestedWidth() const
 
 void ViewImpl::SetRequestedHeight(float height)
 {
-  if(!FloatEqual(mRequestedHeight, height))
-  {
-    mRequestedHeight = height;
-    InvalidateMeasure();
-    if(height >= 0 && !GetParentLayout() && !GetParentView() && !IsLayout() && mChildren.empty())
-    {
-      Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
-    }
-  }
+  Self().SetProperty(Ui::View::Property::REQUESTED_HEIGHT, height);
 }
 
 float ViewImpl::GetRequestedHeight() const
 {
-  return mRequestedHeight;
+  return mImpl->mRequestedHeight;
 }
 
 void ViewImpl::SetMinimumWidth(float width)
@@ -1559,7 +1550,6 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
   mInteractiveTrait(nullptr),
-  mRequestedHeight(WRAP_CONTENT),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMinimumWidth(0.0f),

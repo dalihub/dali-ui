@@ -856,9 +856,6 @@ private:
   ViewState              mState;
   StateChangedSignalType mStateChangedSignal;
 
-  // Requested size (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float mRequestedHeight;
-
   // Requested position (used when parent is not a layout)
   float mRequestedPositionX;
   float mRequestedPositionY;
