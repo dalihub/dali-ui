@@ -296,8 +296,8 @@ private:
   {
     TrackedLabel info;
     info.label          = label;
-    info.updateWidth    = true;
-    info.updateHeight   = true;
+    info.updateWidth    = false;
+    info.updateHeight   = false;
     info.updateFontSize = true;
     info.fontSizeScale  = 1.0f / 3.0f;
     mTrackedOverlayLabels.push_back(info);
@@ -414,14 +414,6 @@ private:
     {
       if(info.label)
       {
-        if(info.updateWidth)
-        {
-          info.label.SetRequestedWidth(mWidth);
-        }
-        if(info.updateHeight)
-        {
-          info.label.SetRequestedHeight(mHeight);
-        }
         if(info.updateFontSize)
         {
           info.label.SetFontSize(mPixelSize / 3);
@@ -523,6 +515,9 @@ private:
     return Label::New()
       .SetText(Dali::String(text ? text : ""))
       .SetFontSize(mPixelSize / 3)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetLayoutMode(LayoutMode::STANDALONE)
       .SetOverflowMode(Text::OverflowMode::CLIP)
       .SetHorizontalTextAlignment(Text::Alignment::CENTER)
       .SetVerticalTextAlignment(Text::Alignment::CENTER)
