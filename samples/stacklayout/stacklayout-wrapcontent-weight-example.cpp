@@ -49,10 +49,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: Horizontal StackLayout, minWidth=400, height=200.
-    StackLayout root = StackLayout::New(StackOrientation::HORIZONTAL);
-    root.SetBackgroundColor(Color::GAINSBORO);
-    root.SetMinimumWidth(400.0f);
-    root.SetRequestedHeight(200.0f);
+    StackLayout root = StackLayout::New(StackOrientation::HORIZONTAL)
+      .SetBackgroundColor(Color::GAINSBORO)
+      .SetMinimumWidth(400.0f)
+      .SetRequestedHeight(200.0f);
 
     // Child 1: fixed width 200, MATCH_PARENT height (fills cross-axis = 200).
     View child1 = View::New();
@@ -64,10 +64,10 @@ public:
     // Child 2: MATCH_PARENT width and height.
     // Main axis (width): fills the full available width.
     // Cross axis (height): fills the parent height (200).
-    StackLayout child2 = StackLayout::New(StackOrientation::HORIZONTAL);
-    child2.SetBackgroundColor(Color::GREEN);
-    child2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    child2.SetRequestedHeight(MATCH_PARENT);
+    StackLayout child2 = StackLayout::New(StackOrientation::HORIZONTAL)
+      .SetBackgroundColor(Color::GREEN)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .SetRequestedHeight(MATCH_PARENT);
     root.Add(child2);
 
     View grandChild1 = View::New();

@@ -46,13 +46,13 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    FlexLayout root = FlexLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetDirection(FlexDirection::ROW);
-    root.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
-    root.SetAlignItems(FlexAlign::CENTER);
-    root.SetPadding(Extents(50, 50, 50, 50));
+    FlexLayout root = FlexLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetDirection(FlexDirection::ROW)
+      .SetJustifyContent(FlexJustify::SPACE_BETWEEN)
+      .SetAlignItems(FlexAlign::CENTER)
+      .SetPadding(Extents(50, 50, 50, 50));
 
     // Red box
     View redBox = View::New();

@@ -49,11 +49,11 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical flex layout with padding
-    FlexLayout root = FlexLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetDirection(FlexDirection::COLUMN);
-    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    FlexLayout root = FlexLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetDirection(FlexDirection::COLUMN)
+      .SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Red box: no margin (flush with padding edge) ---
     View redBox = View::New();
@@ -75,13 +75,13 @@ public:
     root.Add(blueBox);
 
     // --- Nested: horizontal FlexLayout with padding + children with margins ---
-    FlexLayout nestedRow = FlexLayout::New();
-    nestedRow.SetBackgroundColor(Color::GRAY);
-    nestedRow.SetRequestedHeight(400.0f);
-    nestedRow.SetDirection(FlexDirection::ROW);
-    nestedRow.SetAlignItems(FlexAlign::STRETCH);
-    nestedRow.SetPadding(Extents(50, 50, 50, 50));
-    nestedRow.SetMargin(Extents(50, 50, 50, 50));
+    FlexLayout nestedRow = FlexLayout::New()
+      .SetBackgroundColor(Color::GRAY)
+      .SetRequestedHeight(400.0f)
+      .SetDirection(FlexDirection::ROW)
+      .SetAlignItems(FlexAlign::STRETCH)
+      .SetPadding(Extents(50, 50, 50, 50))
+      .SetMargin(Extents(50, 50, 50, 50));
 
     View childA = View::New();
     childA.SetBackgroundColor(Color::MAGENTA);

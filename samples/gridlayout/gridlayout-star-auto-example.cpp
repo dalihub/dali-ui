@@ -46,12 +46,12 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    GridLayout root = GridLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(50, 50, 50, 50));
-    root.SetRowSpacing(10.0f);
-    root.SetColumnSpacing(10.0f);
+    GridLayout root = GridLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(50, 50, 50, 50))
+      .SetRowSpacing(10.0f)
+      .SetColumnSpacing(10.0f);
 
     // Rows: fixed header, flexible middle, fixed footer
     root.AddRowDefinition(GridLength::Absolute(100.0f));

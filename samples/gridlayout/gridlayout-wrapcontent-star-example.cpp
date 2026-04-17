@@ -56,13 +56,13 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Columns: AUTO, 1*STAR.  Row: 1*STAR.
-    GridLayout root = GridLayout::New();
+    GridLayout root = GridLayout::New()
+      .SetBackgroundColor(Color::GAINSBORO)
+      .SetMinimumWidth(400.0f)
+      .SetRequestedHeight(200.0f);
     root.AddColumnDefinition(GridLength::Auto());
     root.AddColumnDefinition(GridLength::Star(1.0f));
     root.AddRowDefinition(GridLength::Star(1.0f));
-    root.SetBackgroundColor(Color::GAINSBORO);
-    root.SetMinimumWidth(400.0f);
-    root.SetRequestedHeight(200.0f);
 
     // Child 1: col 0 (AUTO) — fixed 200 wide, drives the AUTO column size.
     View child1 = View::New();
@@ -73,12 +73,12 @@ public:
 
     // Child 2: col 1 (STAR) — GridLayout that fills the remaining 200px (400 - 200).
     // Contains two grandchildren in 1*STAR columns, each getting 100px.
-    GridLayout child2 = GridLayout::New();
+    GridLayout child2 = GridLayout::New()
+      .SetBackgroundColor(Color::GREEN)
+      .SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
     child2.AddColumnDefinition(GridLength::Star(1.0f));
     child2.AddColumnDefinition(GridLength::Star(1.0f));
     child2.AddRowDefinition(GridLength::Star(1.0f));
-    child2.SetBackgroundColor(Color::GREEN);
-    child2.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
     root.Add(child2);
 
     View grandChild1 = View::New();

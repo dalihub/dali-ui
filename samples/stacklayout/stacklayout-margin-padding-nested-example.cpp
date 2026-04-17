@@ -43,10 +43,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical stack with padding (content inset from window edges)
-    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Section 1: Padding (visible as gap around the red bar) ---
     View padLabel = View::New();
@@ -78,13 +78,13 @@ public:
     root.Add(marginC);
 
     // --- Section 3: Nested StackLayout (horizontal stack inside vertical) ---
-    StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL);
-    horizontalRow.SetBackgroundColor(Color::GRAY);
-    horizontalRow.SetSpacing(10.0f);
-    horizontalRow.SetMargin(Extents(50, 50, 50, 50));
-    horizontalRow.SetLayoutParams(StackLayoutParams::New()
-      .SetAlignment(LayoutAlignment::FILL)
-      .SetWeight(1.0f));
+    StackLayout horizontalRow = StackLayout::New(StackOrientation::HORIZONTAL)
+      .SetBackgroundColor(Color::GRAY)
+      .SetSpacing(10.0f)
+      .SetMargin(Extents(50, 50, 50, 50))
+      .SetLayoutParams(StackLayoutParams::New()
+        .SetAlignment(LayoutAlignment::FILL)
+        .SetWeight(1.0f));
 
     View box1 = View::New();
     box1.SetBackgroundColor(Color::MAGENTA);
