@@ -191,7 +191,6 @@ ViewImpl::ViewImpl()
   mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
-  mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
@@ -815,7 +814,7 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
   // available space. Without this, children would be measured against
   // the original (smaller) constraint, then ApplyConstraints would
   // enlarge the result — leaving children incorrectly sized.
-  float effectiveWidth  = std::min(std::max(widthConstraint, mImpl->mMinimumWidth), mMaximumWidth);
+  float effectiveWidth  = std::min(std::max(widthConstraint, mImpl->mMinimumWidth), mImpl->mMaximumWidth);
   float effectiveHeight = std::min(std::max(heightConstraint, mImpl->mMinimumHeight), mMaximumHeight);
 
   if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, effectiveWidth) &&
@@ -1128,7 +1127,7 @@ MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
   MeasuredSize constrained = size;
   constrained.width        = std::max(constrained.width, mImpl->mMinimumWidth);
   constrained.height       = std::max(constrained.height, mImpl->mMinimumHeight);
-  constrained.width        = std::min(constrained.width, mMaximumWidth);
+  constrained.width        = std::min(constrained.width, mImpl->mMaximumWidth);
   constrained.height       = std::min(constrained.height, mMaximumHeight);
   return constrained;
 }
@@ -1179,16 +1178,12 @@ float ViewImpl::GetMinimumHeight() const
 
 void ViewImpl::SetMaximumWidth(float width)
 {
-  if(!FloatEqual(mMaximumWidth, width))
-  {
-    mMaximumWidth = width;
-    InvalidateMeasure();
-  }
+  Self().SetProperty(Ui::View::Property::MAXIMUM_WIDTH, width);
 }
 
 float ViewImpl::GetMaximumWidth() const
 {
-  return mMaximumWidth;
+  return mImpl->mMaximumWidth;
 }
 
 void ViewImpl::SetMaximumHeight(float height)
@@ -1542,7 +1537,6 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
-  mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},

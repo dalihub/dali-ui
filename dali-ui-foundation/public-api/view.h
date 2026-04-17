@@ -1410,6 +1410,12 @@ public:
       MINIMUM_HEIGHT,
 
       /**
+       * @brief The maximum width applied during measurement.
+       * @details Name "maximumWidth", type Property::FLOAT.
+       */
+      MAXIMUM_WIDTH,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.

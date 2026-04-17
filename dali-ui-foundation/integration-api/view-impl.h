@@ -859,7 +859,6 @@ private:
   // Requested position (used when parent is not a layout)
   float mRequestedPositionX;
   float mRequestedPositionY;
-  float mMaximumWidth;
   float mMaximumHeight;
 
   // Layout Properties Data
