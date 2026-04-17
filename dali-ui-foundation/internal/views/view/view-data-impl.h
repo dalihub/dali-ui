@@ -464,6 +464,7 @@ public:
   float                             mMinimumWidth;       ///< Minimum width applied during measurement
   float                             mMinimumHeight;      ///< Minimum height applied during measurement
   float                             mMaximumWidth;       ///< Maximum width applied during measurement
+  float                             mMaximumHeight;      ///< Maximum height applied during measurement
   RenderEffectImplPtr               mRenderEffect;       ///< The render effect on this view
   Vector3*                          mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this
   Vector2                           mSize;               ///< The size of the view
@@ -540,6 +541,7 @@ public:
   static const PropertyRegistration PROPERTY_36;
   static const PropertyRegistration PROPERTY_37;
   static const PropertyRegistration PROPERTY_38;
+  static const PropertyRegistration PROPERTY_39;
 
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_1;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_2;

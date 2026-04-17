@@ -859,7 +859,6 @@ private:
   // Requested position (used when parent is not a layout)
   float mRequestedPositionX;
   float mRequestedPositionY;
-  float mMaximumHeight;
 
   // Layout Properties Data
   Ui::LayoutMode mLayoutMode{Ui::LayoutMode::DEFAULT};
