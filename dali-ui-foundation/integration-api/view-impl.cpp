@@ -191,7 +191,6 @@ ViewImpl::ViewImpl()
   mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
-  mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMeasuredSize{0.0f, 0.0f},
@@ -817,7 +816,7 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
   // the original (smaller) constraint, then ApplyConstraints would
   // enlarge the result — leaving children incorrectly sized.
   float effectiveWidth  = std::min(std::max(widthConstraint, mImpl->mMinimumWidth), mMaximumWidth);
-  float effectiveHeight = std::min(std::max(heightConstraint, mMinimumHeight), mMaximumHeight);
+  float effectiveHeight = std::min(std::max(heightConstraint, mImpl->mMinimumHeight), mMaximumHeight);
 
   if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, effectiveWidth) &&
      FloatEqual(mLastMeasuredConstraint.height, effectiveHeight))
@@ -898,7 +897,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else if(mImpl->mRequestedHeight == MATCH_PARENT)
     {
-      size.height = mMinimumHeight;
+      size.height = mImpl->mMinimumHeight;
     }
     else
     {
@@ -927,7 +926,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(mImpl->mRequestedHeight == MATCH_PARENT)
   {
-    size.height = mMinimumHeight;
+    size.height = mImpl->mMinimumHeight;
   }
   else
   {
@@ -1128,7 +1127,7 @@ MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
 {
   MeasuredSize constrained = size;
   constrained.width        = std::max(constrained.width, mImpl->mMinimumWidth);
-  constrained.height       = std::max(constrained.height, mMinimumHeight);
+  constrained.height       = std::max(constrained.height, mImpl->mMinimumHeight);
   constrained.width        = std::min(constrained.width, mMaximumWidth);
   constrained.height       = std::min(constrained.height, mMaximumHeight);
   return constrained;
@@ -1170,16 +1169,12 @@ float ViewImpl::GetMinimumWidth() const
 
 void ViewImpl::SetMinimumHeight(float height)
 {
-  if(!FloatEqual(mMinimumHeight, height))
-  {
-    mMinimumHeight = height;
-    InvalidateMeasure();
-  }
+  Self().SetProperty(Ui::View::Property::MINIMUM_HEIGHT, height);
 }
 
 float ViewImpl::GetMinimumHeight() const
 {
-  return mMinimumHeight;
+  return mImpl->mMinimumHeight;
 }
 
 void ViewImpl::SetMaximumWidth(float width)
@@ -1547,7 +1542,6 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
   mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
-  mMinimumHeight(0.0f),
   mMaximumWidth(std::numeric_limits<float>::max()),
   mMaximumHeight(std::numeric_limits<float>::max()),
   mMeasuredSize{0.0f, 0.0f},

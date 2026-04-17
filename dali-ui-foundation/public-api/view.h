@@ -1404,6 +1404,12 @@ public:
       MINIMUM_WIDTH,
 
       /**
+       * @brief The minimum height applied during measurement.
+       * @details Name "minimumHeight", type Property::FLOAT.
+       */
+      MINIMUM_HEIGHT,
+
+      /**
        * @brief The radius for the rounded corners of the View.
        * @details Name "viewCornerRadius", type Property::VECTOR4 or Property::FLOAT
        * @note By default, it is Vector::ZERO.
