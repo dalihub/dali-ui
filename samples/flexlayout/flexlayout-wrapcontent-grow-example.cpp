@@ -53,11 +53,11 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    FlexLayout root = FlexLayout::New();
-    root.SetDirection(FlexDirection::ROW);
-    root.SetBackgroundColor(Color::GAINSBORO);
-    root.SetMinimumWidth(400.0f);
-    root.SetRequestedHeight(200.0f);
+    FlexLayout root = FlexLayout::New()
+      .SetDirection(FlexDirection::ROW)
+      .SetBackgroundColor(Color::GAINSBORO)
+      .SetMinimumWidth(400.0f)
+      .SetRequestedHeight(200.0f);
 
     // Child 1: fixed 200x200 — drives the WRAP_CONTENT parent's content size.
     View child1 = View::New();
@@ -68,11 +68,11 @@ public:
 
     // Child 2: FlexLayout with flex-grow=1 — fills the remaining 200px (400 - 200).
     // Contains two grandchildren that each take 100px via flex-grow.
-    FlexLayout child2 = FlexLayout::New();
-    child2.SetDirection(FlexDirection::ROW);
-    child2.SetBackgroundColor(Color::GREEN);
-    child2.SetRequestedHeight(200.0f);
-    child2.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
+    FlexLayout child2 = FlexLayout::New()
+      .SetDirection(FlexDirection::ROW)
+      .SetBackgroundColor(Color::GREEN)
+      .SetRequestedHeight(200.0f)
+      .SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f));
     root.Add(child2);
 
     View grandChild1 = View::New();

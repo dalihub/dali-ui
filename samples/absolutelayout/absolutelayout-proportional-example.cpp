@@ -45,9 +45,9 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    AbsoluteLayout root = AbsoluteLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
+    AbsoluteLayout root = AbsoluteLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT);
 
     // Red box: all proportional (position and size)
     View redBox = View::New();

@@ -50,11 +50,13 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: GridLayout with padding
-    GridLayout root = GridLayout::New();
-    root.SetRequestedWidth(MATCH_PARENT);
-    root.SetRequestedHeight(MATCH_PARENT);
-    root.SetBackgroundColor(Color::GRAY);
-    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    GridLayout root = GridLayout::New()
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetBackgroundColor(Color::GRAY)
+      .SetPadding(Extents(50, 50, 50, 50)) // start, end, top, bottom
+      .SetRowSpacing(0.0f)
+      .SetColumnSpacing(0.0f);
 
     // 3 rows x 2 columns, no spacing (margin only)
     root.AddRowDefinition(GridLength::Absolute(200.0f));
@@ -62,9 +64,6 @@ public:
     root.AddRowDefinition(GridLength::Absolute(200.0f));
     root.AddColumnDefinition(GridLength::Star(1.0f));
     root.AddColumnDefinition(GridLength::Star(1.0f));
-
-    root.SetRowSpacing(0.0f);
-    root.SetColumnSpacing(0.0f);
 
     // Cell (0,0): Red - no margin (flush with grid padding edge)
     View cell00 = View::New();

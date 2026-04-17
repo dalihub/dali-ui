@@ -48,17 +48,17 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Outer vertical StackLayout to hold two sections
-    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
-    outer.SetRequestedWidth(MATCH_PARENT);
-    outer.SetRequestedHeight(MATCH_PARENT);
-    outer.SetPadding(Extents(50, 50, 50, 50));
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(50, 50, 50, 50));
 
-    FlexLayout first = FlexLayout::New();
-    first.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    first.SetDirection(FlexDirection::ROW);
-    first.SetWrap(FlexWrap::WRAP);
-    first.SetJustifyContent(FlexJustify::FLEX_START);
-    first.SetAlignContent(FlexAlign::CENTER);
+    FlexLayout first = FlexLayout::New()
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetDirection(FlexDirection::ROW)
+      .SetWrap(FlexWrap::WRAP)
+      .SetJustifyContent(FlexJustify::FLEX_START)
+      .SetAlignContent(FlexAlign::CENTER);
 
     // Box 1: Red, basis 50, grow 1
     View box1 = View::New();
@@ -83,12 +83,12 @@ public:
 
     outer.Add(first);
 
-    FlexLayout second = FlexLayout::New();
-    second.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    second.SetDirection(FlexDirection::ROW);
-    second.SetWrap(FlexWrap::WRAP);
-    second.SetJustifyContent(FlexJustify::FLEX_START);
-    second.SetAlignContent(FlexAlign::CENTER);
+    FlexLayout second = FlexLayout::New()
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetDirection(FlexDirection::ROW)
+      .SetWrap(FlexWrap::WRAP)
+      .SetJustifyContent(FlexJustify::FLEX_START)
+      .SetAlignContent(FlexAlign::CENTER);
 
     // Box 4: Yellow, basis 100, grow 1
     View box4 = View::New();
