@@ -16,8 +16,10 @@
  */
 
 #include <stdlib.h>
+#include <algorithm>
 #include <iostream>
 #include <limits>
+#include <vector>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -2477,5 +2479,133 @@ int UtcDaliViewLowerBelowPreserveP(void)
   DALI_TEST_EQUALS(VisualIndexOf(f.parent, f.c), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(f.parent.IndexOfChild(f.c), 2, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// =============================================================================
+// PropertySetSignal: typed setters that delegate to SetProperty must fire the
+// PropertySetSignal exactly like SetProperty does. This is the canonical
+// guarantee of the property-system refactor.
+// =============================================================================
+
+namespace
+{
+struct PropertySetRecorder : public Dali::ConnectionTracker
+{
+  std::vector<Dali::Property::Index> indices;
+  std::vector<Dali::Property::Value> values;
+
+  void Connect(Ui::View view)
+  {
+    Dali::Handle handle = view;
+    handle.PropertySetSignal().Connect(this, &PropertySetRecorder::OnSet);
+  }
+
+  void OnSet(Dali::Handle& /*handle*/, Dali::Property::Index index, const Dali::Property::Value& value)
+  {
+    indices.push_back(index);
+    values.push_back(value);
+  }
+
+  bool Saw(Dali::Property::Index index) const
+  {
+    return std::find(indices.begin(), indices.end(), index) != indices.end();
+  }
+};
+} // namespace
+
+int UtcDaliViewSetMarginFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  view.SetMargin(Extents(1, 2, 3, 4));
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::MARGIN));
+  END_TEST;
+}
+
+int UtcDaliViewSetPaddingFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::Integration::GetImpl(view).SetPadding(Extents(5, 6, 7, 8));
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::PADDING));
+  END_TEST;
+}
+
+int UtcDaliViewSetRequestedWidthFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::Integration::GetImpl(view).SetRequestedWidth(120.0f);
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::REQUESTED_WIDTH));
+  END_TEST;
+}
+
+int UtcDaliViewSetMinimumWidthFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::Integration::GetImpl(view).SetMinimumWidth(10.0f);
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::MINIMUM_WIDTH));
+  END_TEST;
+}
+
+int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::Integration::GetImpl(view).SetLayoutMode(Ui::LayoutMode::STANDALONE);
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::LAYOUT_MODE));
+  END_TEST;
+}
+
+int UtcDaliViewSetKeyboardNavigationSupportFiresPropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Ui::Integration::GetImpl(view).SetKeyboardNavigationSupport(true);
+
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT));
+  END_TEST;
+}
+
+int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
+{
+  // Both entry points must reach the same final state.
+  UiTestApplication application;
+
+  Ui::View viewA = Ui::View::New();
+  viewA.SetMargin(Extents(7, 8, 9, 10));
+
+  Ui::View viewB = Ui::View::New();
+  Dali::Handle(viewB).SetProperty(Ui::View::Property::MARGIN, Extents(7, 8, 9, 10));
+
+  DALI_TEST_EQUALS(viewA.GetMargin(), viewB.GetMargin(), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Handle(viewA).GetProperty<Extents>(Ui::View::Property::MARGIN),
+                   Dali::Handle(viewB).GetProperty<Extents>(Ui::View::Property::MARGIN),
+                   TEST_LOCATION);
   END_TEST;
 }
