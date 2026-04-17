@@ -498,6 +498,7 @@ const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerSha
 const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_34(typeRegistration, "requestedWidth",                 Ui::View::Property::REQUESTED_WIDTH,                  Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_35(typeRegistration, "requestedHeight",                Ui::View::Property::REQUESTED_HEIGHT,                 Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_36(typeRegistration, "minimumWidth",                   Ui::View::Property::MINIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -523,6 +524,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
+  mMinimumWidth(0.0f),
   mRenderEffect(nullptr),
   mStartingPinchScale(nullptr),
   mSize(0, 0),
@@ -1287,6 +1289,21 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         break;
       }
+
+      case Ui::View::Property::MINIMUM_WIDTH:
+      {
+        float width;
+        if(value.Get(width))
+        {
+          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
+          if(!FloatEqual(dataImpl.mMinimumWidth, width))
+          {
+            dataImpl.mMinimumWidth = width;
+            viewImpl.InvalidateMeasure();
+          }
+        }
+        break;
+      }
     }
   }
 }
@@ -1532,6 +1549,12 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::REQUESTED_HEIGHT:
       {
         value = viewImpl.GetViewDataImpl().mRequestedHeight;
+        break;
+      }
+
+      case Ui::View::Property::MINIMUM_WIDTH:
+      {
+        value = viewImpl.GetViewDataImpl().mMinimumWidth;
         break;
       }
 
