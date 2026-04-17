@@ -363,4 +363,15 @@
   * \
   * @note The render result is delivered through Label::AsyncRenderFinishedSignal(). \
   */ \
-  ChildClass& SetAsyncRendering(bool asyncRendering) { Label::SetAsyncRendering(asyncRendering); return *this; }
+  ChildClass& SetAsyncRendering(bool asyncRendering) { Label::SetAsyncRendering(asyncRendering); return *this; } \
+  /** \
+  * @brief Sets the render scale of the text. \
+  * @details Renders text by rasterizing glyphs at a larger scale and downscaling the result. \
+  * This improves rendering quality when the view is visually scaled, by reducing \
+  * quality loss caused by texture upscaling. \
+  * The layout size of the view is not affected. \
+  * Valid only when async rendering is enabled, and the value must be 1.0f or greater. \
+  * \
+  * @param[in] scale The render scale. \
+  */ \
+  ChildClass& SetRenderScale(float scale) { Label::SetRenderScale(scale); return *this; }

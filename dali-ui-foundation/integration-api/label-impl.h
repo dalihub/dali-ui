@@ -513,6 +513,16 @@ public:
    */
   bool IsAsyncRendering() const;
 
+  /**
+   * @copydoc Dali::Ui::Label::SetRenderScale
+   */
+  void SetRenderScale(float scale);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetRenderScale
+   */
+  float GetRenderScale() const;
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount

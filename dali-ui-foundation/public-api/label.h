@@ -97,11 +97,13 @@ public:
       MAXIMUM_FONT_SIZE_SCALE        = Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
       SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
       CUTOUT_ENABLED                 = Text::LabelPropertyIndex::CUTOUT_ENABLED,
+      RENDER_SCALE                   = Text::LabelPropertyIndex::RENDER_SCALE,
       TEXT_COLOR                     = Text::LabelPropertyIndex::TEXT_COLOR,
       TEXT_COLOR_RED                 = Text::LabelPropertyIndex::TEXT_COLOR_RED,
       TEXT_COLOR_GREEN               = Text::LabelPropertyIndex::TEXT_COLOR_GREEN,
       TEXT_COLOR_BLUE                = Text::LabelPropertyIndex::TEXT_COLOR_BLUE,
-      TEXT_COLOR_ALPHA               = Text::LabelPropertyIndex::TEXT_COLOR_ALPHA
+      TEXT_COLOR_ALPHA               = Text::LabelPropertyIndex::TEXT_COLOR_ALPHA,
+      PIXEL_SNAP_FACTOR              = Text::LabelPropertyIndex::PIXEL_SNAP_FACTOR
     };
   };
 
@@ -868,6 +870,25 @@ public: // Setters for chaining
    * @return True if asynchronous text rendering is enabled, otherwise false.
    */
   bool IsAsyncRendering() const;
+
+  /**
+   * @brief Sets the render scale of the text.
+   * @details Renders text by rasterizing glyphs at a larger scale and downscaling the result.
+   * This improves rendering quality when the view is visually scaled, by reducing
+   * quality loss caused by texture upscaling.
+   * The layout size of the view is not affected.
+   * Valid only when async rendering is enabled, and the value must be 1.0f or greater.
+   *
+   * @param[in] scale The render scale.
+   */
+  Label& SetRenderScale(float scale);
+
+  /**
+   * @brief Gets the render scale of the text.
+   *
+   * @return The current render scale.
+   */
+  float GetRenderScale() const;
 
   // @CHAIN_END
 

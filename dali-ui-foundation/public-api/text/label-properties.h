@@ -261,6 +261,18 @@ struct LabelPropertyIndex
      */
     CUTOUT_ENABLED,
 
+    /**
+     * @brief The render scale of the text.
+     * @details Name "renderScale", type Property::FLOAT.
+     * Renders text by rasterizing glyphs at a larger scale and downscaling the result.
+     * This improves rendering quality when the view is visually scaled, by reducing
+     * quality loss caused by texture upscaling.
+     * The layout size of the view is not affected.
+     * Valid only when async rendering is enabled, and the value must be 1.0f or greater.
+     * @see Label::SetRenderScale(), Label::GetRenderScale().
+     */
+    RENDER_SCALE,
+
     ///////////////////////////////////////////////////////////////////////////////
     // Animatable Properties
     ///////////////////////////////////////////////////////////////////////////////
@@ -293,7 +305,23 @@ struct LabelPropertyIndex
      * @brief The alpha component of the text color.
      * @details Name "textColorAlpha", type Property::FLOAT.
      */
-    TEXT_COLOR_ALPHA
+    TEXT_COLOR_ALPHA,
+
+    /**
+     * @brief The pixel snap factor.
+     * @details Name "pixelSnapFactor", type Property::FLOAT.
+     * Controls the degree of pixel snapping applied to the visual position.
+     * A value of 0.0f disables snapping (original position is preserved),
+     * while 1.0f applies full pixel alignment. Intermediate values blend
+     * smoothly between the original and snapped positions.
+     *
+     * This property is typically animated to balance smooth motion and
+     * crisp alignment. Use 0.0f during animations to avoid snapping artifacts,
+     * and gradually increase to 1.0f as the animation settles for sharp rendering.
+     *
+     * The value must be in the range [0.0f, 1.0f].
+     */
+    PIXEL_SNAP_FACTOR
   };
 };
 } // namespace Text

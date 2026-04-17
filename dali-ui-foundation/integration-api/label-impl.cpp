@@ -74,6 +74,9 @@ BaseHandle Create()
 #define LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(text, enumIndex, baseEnumIndex, componentIndex) \
   DALI_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, text, enumIndex, baseEnumIndex, componentIndex)
 
+#define LABEL_ANIMATABLE_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
+  DALI_ANIMATABLE_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, LabelPropertyIndex, Ui::Integration, LabelImpl, text, valueType, enumIndex)
+
 // clang-format off
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(LabelImpl, ViewImpl, Create)
@@ -107,12 +110,14 @@ LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_
 LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED)
 LABEL_PROPERTY_REGISTRATION("cutoutEnabled",              BOOLEAN, CUTOUT_ENABLED                )
+LABEL_PROPERTY_REGISTRATION("renderScale",                FLOAT,   RENDER_SCALE                  )
 
-LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",      Color::BLACK,     TEXT_COLOR   )
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",   TEXT_COLOR_RED,   TEXT_COLOR, 0)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen", TEXT_COLOR_GREEN, TEXT_COLOR, 1)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",  TEXT_COLOR_BLUE,  TEXT_COLOR, 2)
-LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha", TEXT_COLOR_ALPHA, TEXT_COLOR, 3)
+LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",       Color::BLACK,     TEXT_COLOR       )
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",    TEXT_COLOR_RED,   TEXT_COLOR,     0)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen",  TEXT_COLOR_GREEN, TEXT_COLOR,     1)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",   TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
+LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha",  TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
+LABEL_ANIMATABLE_PROPERTY_REGISTRATION          (   "pixelSnapFactor", FLOAT,            PIXEL_SNAP_FACTOR)
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -894,6 +899,16 @@ bool LabelImpl::IsAsyncRendering() const
   return mController->IsAsyncRendering();
 }
 
+void LabelImpl::SetRenderScale(float scale)
+{
+  mController->SetRenderScale(scale);
+}
+
+float LabelImpl::GetRenderScale() const
+{
+  return mController->GetRenderScale();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
@@ -1106,10 +1121,10 @@ void LabelImpl::OnInitialize()
   Dali::Property::Map propertyMap;
   propertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
 
-  mVisual = Ui::VisualFactory::Get().CreateVisual(propertyMap);
-
+  mVisual   = Ui::VisualFactory::Get().CreateVisual(propertyMap);
   View view = Ui::View::DownCast(self);
   Internal::ViewDataImpl::Get(Integration::GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, DepthIndex::CONTENT);
+
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
@@ -1118,6 +1133,8 @@ void LabelImpl::OnInitialize()
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
   mController->SetControlInterface(this);
   mController->SetAnchorControlInterface(this);
+
+  self.SetProperty(Text::LabelPropertyIndex::PIXEL_SNAP_FACTOR, 0.0f);
 
   // Use height-for-width negotiation by default
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);

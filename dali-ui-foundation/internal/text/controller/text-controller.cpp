@@ -1790,7 +1790,19 @@ void Controller::SetEllipsisMode(Text::Ellipsize::Mode ellipsisMode)
 
 void Controller::SetRenderScale(const float renderScale)
 {
-  mImpl->mRenderScale = renderScale;
+  float scale = renderScale;
+  if(scale < 1.0f)
+  {
+    DALI_LOG_DEBUG_INFO("RenderScale must be greater than or equal to 1.0f. It will change as follows:%f -> 1.0\n", scale);
+    scale = 1.0f;
+  }
+
+  if(!Equals(scale, mImpl->mRenderScale, Math::MACHINE_EPSILON_1000))
+  {
+    mImpl->mRenderScale = scale;
+    RequestRelayout();
+    RequestAsyncRender();
+  }
 }
 
 float Controller::GetRenderScale() const

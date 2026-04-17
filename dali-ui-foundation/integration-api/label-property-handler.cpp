@@ -224,6 +224,11 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       impl.SetCutoutEnabledInternal(value.Get<bool>());
       break;
     }
+    case Text::LabelPropertyIndex::RENDER_SCALE:
+    {
+      impl.SetRenderScale(value.Get<float>());
+      break;
+    }
   }
 }
 
@@ -379,6 +384,11 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       value = impl.IsCutoutEnabled();
+      break;
+    }
+    case Text::LabelPropertyIndex::RENDER_SCALE:
+    {
+      value = impl.GetRenderScale();
       break;
     }
   }

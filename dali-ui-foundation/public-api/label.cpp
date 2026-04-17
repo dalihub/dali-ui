@@ -573,6 +573,17 @@ bool Label::IsAsyncRendering() const
   return GetImpl(*this).IsAsyncRendering();
 }
 
+Label& Label::SetRenderScale(float scale)
+{
+  GetImpl(*this).SetRenderScale(scale);
+  return *this;
+}
+
+float Label::GetRenderScale() const
+{
+  return GetImpl(*this).GetRenderScale();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
