@@ -74,7 +74,7 @@ private:
       StackLayout::New(StackOrientation::VERTICAL)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetSpacing(4.0f)
+        .Spacing(4.0f)
         .SetPadding(Extents(8, 8, 8, 8))
         .Children({
           CreateImageSourceLabel(),
@@ -162,7 +162,7 @@ private:
   View CreateLoopRow()
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
+      .Spacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(44.0f)
       .Children({
@@ -179,7 +179,7 @@ private:
   View CreateSpeedRow()
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
+      .Spacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(44.0f)
       .Children({
@@ -196,7 +196,7 @@ private:
   View CreateStopBehaviorRow()
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
+      .Spacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(44.0f)
       .Children({
@@ -213,7 +213,7 @@ private:
   View CreateFrameDelayRow()
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
+      .Spacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(44.0f)
       .Children({
@@ -234,7 +234,7 @@ private:
   View CreateButtonRow(std::initializer_list<View> buttons)
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(52.0f);
     for(auto& btn : buttons)

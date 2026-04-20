@@ -84,7 +84,7 @@ private:
   View CreateImageTypeRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(44.0f)
                         .SetPadding(Extents(4, 4, 4, 4));
@@ -182,7 +182,7 @@ private:
   View CreateColorButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(100.0f)
                         .SetPadding(Extents(4, 4, 4, 4));

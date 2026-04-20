@@ -123,7 +123,7 @@ private:
   View CreateSamplingImageTypeRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(36.0f)
                         .SetPadding(Extents(4, 4, 4, 4));
@@ -211,7 +211,7 @@ private:
   View CreateSamplingButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(72.0f)
                         .SetPadding(Extents(4, 4, 4, 4));
@@ -251,7 +251,7 @@ private:
   View CreateDesiredSizeImageTypeRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(36.0f)
                         .SetPadding(Extents(4, 4, 4, 4));
@@ -350,7 +350,7 @@ private:
   View CreateDesiredSizeButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(72.0f)
                         .SetPadding(Extents(4, 4, 4, 4));

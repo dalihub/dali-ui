@@ -107,7 +107,7 @@ private:
   View CreateSizeButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(80.0f)
                         .SetPadding(Extents(4, 4, 4, 4));

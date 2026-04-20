@@ -181,7 +181,7 @@ int UtcDaliStackLayoutOrientationChainingP(void)
 {
   UiTestApplication application;
   StackLayout layout = StackLayout::New();
-  StackLayout& result = layout.SetOrientation(StackOrientation::HORIZONTAL);
+  StackLayout& result = layout.Orientation(StackOrientation::HORIZONTAL);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
   DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
@@ -192,7 +192,7 @@ int UtcDaliStackLayoutSpacingChainingP(void)
   UiTestApplication application;
   StackLayout layout = StackLayout::New();
   const float spacing = 5.0f;
-  StackLayout& result = layout.SetSpacing(spacing);
+  StackLayout& result = layout.Spacing(spacing);
   DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
   DALI_TEST_EQUALS(layout.GetSpacing(), spacing, TEST_LOCATION);
   END_TEST;

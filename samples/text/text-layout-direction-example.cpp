@@ -40,14 +40,14 @@ private:
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
     window.Add(StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
+      .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
       .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
       .Children({
         Label::New("Text Layout Direction Mode Example"),
         StackLayout::New(StackOrientation::HORIZONTAL)
-        .SetSpacing(STACK_SPACING)
+        .Spacing(STACK_SPACING)
         .SetRequestedWidth(MATCH_PARENT)
         .Children({
           Label::New("Dir")
@@ -74,7 +74,7 @@ private:
   View CreateLayoutDirection(Dali::String textTypeDesc, Dali::String layoutModeDesc, Dali::String text, Text::LayoutDirectionMode mode)
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(STACK_SPACING)
+      .Spacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .Children({
         Label::New(textTypeDesc)

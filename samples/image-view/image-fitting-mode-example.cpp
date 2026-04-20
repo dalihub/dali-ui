@@ -129,7 +129,7 @@ private:
   View CreateImageRow()
   {
     return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
+      .Spacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
@@ -143,7 +143,7 @@ private:
   View CreateImageContainer(const char* label, View imageView)
   {
     return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(2.0f)
+      .Spacing(2.0f)
       .SetRequestedWidth(WRAP_CONTENT)
       .SetRequestedHeight(MATCH_PARENT)
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
@@ -168,7 +168,7 @@ private:
   View CreateButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(100.0f)
                         .SetPadding(Extents(4, 4, 4, 4));

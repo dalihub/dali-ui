@@ -97,7 +97,7 @@ private:
     return StackLayout::New(StackOrientation::HORIZONTAL)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
-      .SetSpacing(8.0f)
+      .Spacing(8.0f)
       .SetPadding(Extents(8, 8, 8, 8))
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
       .Children({
@@ -171,7 +171,7 @@ private:
   View CreateMaskButtonRow()
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
+                        .Spacing(4.0f)
                         .SetRequestedWidth(MATCH_PARENT)
                         .SetRequestedHeight(60.0f)
                         .SetPadding(Extents(4, 4, 4, 4));

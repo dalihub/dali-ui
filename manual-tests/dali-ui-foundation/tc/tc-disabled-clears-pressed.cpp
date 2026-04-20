@@ -96,7 +96,7 @@ public:
     mDisableTimer.TickSignal().Connect(this, &TcDisabledClearsPressed::OnDisableTimerTick);
 
     contentArea.Add(StackLayout::New()
-      .SetSpacing(SPACING)
+      .Spacing(SPACING)
       .SetRequestedWidth(MATCH_PARENT)
       .SetPadding(Extents(PAD, PAD, PAD, PAD))
       .Children({mTarget, mResetButton, mLog}));

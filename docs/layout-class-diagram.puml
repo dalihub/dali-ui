@@ -48,8 +48,8 @@ package "Dali::Ui (Public API)" as public_api {
 
   class "StackLayout" as StackLayout <<handle>> {
     + New(StackOrientation) : StackLayout
-    + SetOrientation(StackOrientation) : StackLayout&
-    + SetSpacing(float) : StackLayout&
+    + SetOrientation(StackOrientation)
+    + SetSpacing(float)
     + {static} GetParams(View) : StackLayoutParams
     + {static} GetOrCreateParams(View) : StackLayoutParams
     + {static} SetLayoutWeight(View, float)
@@ -57,11 +57,11 @@ package "Dali::Ui (Public API)" as public_api {
 
   class "FlexLayout" as FlexLayout <<handle>> {
     + New() : FlexLayout
-    + SetDirection(FlexDirection) : FlexLayout&
-    + SetWrap(FlexWrap) : FlexLayout&
-    + SetJustifyContent(FlexJustify) : FlexLayout&
-    + SetAlignItems(FlexAlign) : FlexLayout&
-    + SetAlignContent(FlexAlign) : FlexLayout&
+    + SetDirection(FlexDirection)
+    + SetWrap(FlexWrap)
+    + SetJustifyContent(FlexJustify)
+    + SetAlignItems(FlexAlign)
+    + SetAlignContent(FlexAlign)
     + {static} GetParams(View) : FlexLayoutParams
     + {static} GetOrCreateParams(View) : FlexLayoutParams
     + {static} SetFlexGrow(View, float)
@@ -74,8 +74,8 @@ package "Dali::Ui (Public API)" as public_api {
     + New() : GridLayout
     + AddRowDefinition(GridLength)
     + AddColumnDefinition(GridLength)
-    + SetRowSpacing(float) : GridLayout&
-    + SetColumnSpacing(float) : GridLayout&
+    + SetRowSpacing(float)
+    + SetColumnSpacing(float)
     + {static} GetParams(View) : GridLayoutParams
     + {static} GetOrCreateParams(View) : GridLayoutParams
     + {static} SetRow(View, uint32_t)
