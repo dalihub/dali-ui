@@ -1297,10 +1297,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)
     {
-      DALI_LOG_DEBUG_INFO(
-        "layoutSize(%f) > maxTextureSize(%d): To guarantee the behavior of Texture::New, layoutSize must not be "
-        "bigger than maxTextureSize\n",
-        layoutSize.width, maxTextureSize);
+      DALI_LOG_DEBUG_INFO("[%p] layout width (%.2f) exceeds max texture size (%d), clamped to %d\n", mController.Get(), layoutSize.width, maxTextureSize, maxTextureSize);
       layoutSize.width = maxTextureSize;
     }
 
@@ -1313,7 +1310,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     mController->SetLayoutAlignmentOffset(alignmentOffset);
     mController->SetLayoutOffsetWithPadding(visualTransformOffset);
 
-    Vector2 visualTransformSize = layoutSize;
+    Vector2 visualTransformSize = (marqueeOrientation == Text::MarqueeOrientation::VERTICAL) ? contentSize : layoutSize;
 
     Dali::Property::Map visualTransform;
     visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
@@ -1551,6 +1548,7 @@ void LabelImpl::ScrollingFinished()
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
+  RequestAsyncRender();
 }
 
 // =============================================================================
