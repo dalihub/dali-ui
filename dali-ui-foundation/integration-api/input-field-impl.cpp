@@ -318,6 +318,7 @@ UiColor InputFieldImpl::GetSelectionColor()
 
 void InputFieldImpl::SetMaximumLength(int length)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), length);
   mController->SetMaximumNumberOfCharacters(static_cast<uint32_t>(length));
 }
 
@@ -328,6 +329,7 @@ int InputFieldImpl::GetMaximumLength() const
 
 void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mController->GetLayoutDirectionMode() != mode)
   {
     mController->SetLayoutDirectionMode(mode);
@@ -397,6 +399,7 @@ UiColor InputFieldImpl::GetTextBackgroundColor() const
 
 void InputFieldImpl::ClearTextBackgroundColor()
 {
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
   if(mController->IsBackgroundEnabled())
   {
@@ -420,6 +423,7 @@ void InputFieldImpl::SetUnderline(const Text::Underline& underline)
 
 void InputFieldImpl::ClearUnderline()
 {
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
   if(mController->IsUnderlineEnabled())
   {
@@ -442,6 +446,7 @@ void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
 
 void InputFieldImpl::ClearShadow()
 {
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
   if(Vector2::ZERO != mController->GetShadowOffset())
   {
@@ -464,6 +469,7 @@ void InputFieldImpl::SetOutline(const Text::Outline& outline)
 
 void InputFieldImpl::ClearOutline()
 {
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
   if(0u != mController->GetOutlineWidth())
   {
@@ -486,6 +492,7 @@ void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
 
 void InputFieldImpl::ClearLineThrough()
 {
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
   if(mController->IsStrikethroughEnabled())
   {
@@ -497,6 +504,7 @@ void InputFieldImpl::ClearLineThrough()
 void InputFieldImpl::SetFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetFontSizeScale(scale);
 }
 
@@ -508,6 +516,7 @@ float InputFieldImpl::GetFontSizeScale() const
 void InputFieldImpl::SetMinimumFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetMinimumFontSizeScale(scale);
 }
 
@@ -519,6 +528,7 @@ float InputFieldImpl::GetMinimumFontSizeScale() const
 void InputFieldImpl::SetMaximumFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetMaximumFontSizeScale(scale);
 }
 
@@ -530,6 +540,7 @@ float InputFieldImpl::GetMaximumFontSizeScale() const
 void InputFieldImpl::SetSystemFontSizeScaleEnabled(bool enabled)
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
   mController->SetSystemFontSizeScaleEnabled(enabled);
 }
 
@@ -541,6 +552,7 @@ bool InputFieldImpl::IsSystemFontSizeScaleEnabled() const
 void InputFieldImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
   mController->SetVariations(axes);
 }
 
@@ -559,6 +571,7 @@ void InputFieldImpl::SetFontVariation(const Dali::String& settings)
     return;
   }
 
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), settings.CStr());
   SetFontVariation(axes);
 }
 
@@ -570,12 +583,14 @@ Dali::Vector<Text::FontVariationAxis> InputFieldImpl::GetFontVariation() const
 void InputFieldImpl::ClearFontVariation()
 {
   // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   mController->ClearVariationsMap();
 }
 
 // Integration-only implementation for now until public API support is introduced.
 void InputFieldImpl::SetLetterSpacing(float spacing)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), spacing);
   mController->SetCharacterSpacing(spacing);
 }
 
@@ -1393,6 +1408,7 @@ void InputFieldImpl::SetTextColorInternal(const Vector4& color)
 {
   if(mController->GetDefaultColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetDefaultColor(color);
     mController->SetInputColor(color);
     mRenderer.Reset();
@@ -1403,6 +1419,7 @@ void InputFieldImpl::SetPlaceholderColorInternal(const Vector4& color)
 {
   if(mController->GetPlaceholderTextColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetPlaceholderTextColor(color);
     mRenderer.Reset();
   }
@@ -1410,6 +1427,7 @@ void InputFieldImpl::SetPlaceholderColorInternal(const Vector4& color)
 
 void InputFieldImpl::SetCursorColorInternal(const Vector4& color)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
   mDecorator->SetCursorColor(Text::PRIMARY_CURSOR, color);
   mDecorator->SetCursorColor(Text::SECONDARY_CURSOR, color);
   RequestTextRelayout();
@@ -1417,6 +1435,7 @@ void InputFieldImpl::SetCursorColorInternal(const Vector4& color)
 
 void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
   mDecorator->SetHighlightColor(color);
   RequestTextRelayout();
 }
@@ -1425,6 +1444,7 @@ void InputFieldImpl::SetTextBackgroundColorInternal(const Vector4& color)
 {
   if(mController->GetBackgroundColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetBackgroundColor(color);
     mRenderer.Reset();
   }
@@ -1434,6 +1454,7 @@ void InputFieldImpl::SetUnderlineColorInternal(const Vector4& color)
 {
   if(mController->GetUnderlineColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetUnderlineColor(color);
     mRenderer.Reset();
   }
@@ -1443,6 +1464,7 @@ void InputFieldImpl::SetShadowColorInternal(const Vector4& color)
 {
   if(mController->GetShadowColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetShadowColor(color);
     mRenderer.Reset();
   }
@@ -1452,6 +1474,7 @@ void InputFieldImpl::SetOutlineColorInternal(const Vector4& color)
 {
   if(mController->GetOutlineColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetOutlineColor(color);
     mRenderer.Reset();
   }
@@ -1461,6 +1484,7 @@ void InputFieldImpl::SetLineThroughColorInternal(const Vector4& color)
 {
   if(mController->GetStrikethroughColor() != color)
   {
+    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetStrikethroughColor(color);
     mRenderer.Reset();
   }
