@@ -332,9 +332,10 @@ public: // Setters for chaining
    * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as
    *   an absolute line height in pixels.
    *
-   * Setting lineHeight to -1.0f ensures enough vertical space to display
-   * the full font metrics (NaturalSize). This behavior is similar to the
-   * "Auto" line height option in design tools such as Figma.
+   * Setting lineHeight to LINE_HEIGHT_AUTO uses the natural line height
+   * derived from the font metrics, regardless of the current LineHeightMode.
+   * This behavior is similar to the "Auto" line height option in design tools
+   * such as Figma.
    *
    * @note The final line height is clamped to be no smaller than
    *       the natural line height derived from the font metrics.

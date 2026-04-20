@@ -156,7 +156,7 @@ LabelImplPtr LabelImpl::New()
 LabelImpl::LabelImpl()
 : ViewImpl(),
   mTouchPosition(),
-  mLineHeight(-1.0f),
+  mLineHeight(Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::ELLIPSIS),
   mAsyncLineCount(0),
@@ -1705,12 +1705,18 @@ void LabelImpl::RequestRendererUpdate()
 void LabelImpl::UpdateLineHeight()
 {
   bool rendererUpdateNeeded = false;
-  if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  if(Equals(mLineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  {
+    // clear explicit line height and use the natural line height.
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
+  }
+  else if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
   {
     rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
     rendererUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
   }
-  else
+  else // LineHeightMode::ABSOLUTE
   {
     rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
     rendererUpdateNeeded |= mController->SetDefaultLineSize(mLineHeight);

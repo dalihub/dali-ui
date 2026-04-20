@@ -138,6 +138,14 @@ enum class LineHeightMode : uint8_t
 };
 
 /**
+ * @brief Special value for automatic line height.
+ *
+ * When used with SetLineHeight(), it uses the natural line height
+ * derived from font metrics.
+ */
+constexpr float LINE_HEIGHT_AUTO = -1.0f;
+
+/**
  * @brief Enumeration for selecting the orientation of the marquee animation.
  * Defines whether the marquee scrolls horizontally or vertically.
  */
