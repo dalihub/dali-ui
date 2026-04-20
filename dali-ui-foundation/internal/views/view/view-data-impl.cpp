@@ -21,6 +21,7 @@
 #include "view-visual-data.h"
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -515,6 +516,7 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_6(typeReg
 
 ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
+  mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),
   mLeftFocusableActorId(-1),
@@ -585,6 +587,96 @@ ViewDataImpl::~ViewDataImpl()
 void ViewDataImpl::InitializeVisualData()
 {
   mVisualData = std::make_unique<ViewDataImpl::VisualData>(*this);
+}
+
+// =============================================================================
+// Trait Management
+// =============================================================================
+
+void ViewDataImpl::NotifyTraitsViewDestroying()
+{
+  for(auto& iter : mTraits)
+  {
+    Ui::GetImpl(iter.second).OnViewDestroying(&mViewImpl);
+  }
+}
+
+void ViewDataImpl::SetTrait(Integration::TraitId id, Ui::Trait& trait)
+{
+  Ui::View self      = Ui::View::DownCast(mViewImpl.Self());
+  auto&    traitImpl = Ui::GetImpl(trait);
+
+  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+  {
+    if(mInteractiveTrait)
+    {
+      DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
+      return;
+    }
+    Ui::InteractiveTraitInterface* interactiveTrait = dynamic_cast<Ui::InteractiveTraitInterface*>(&traitImpl);
+    DALI_ASSERT_ALWAYS(interactiveTrait &&
+                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
+    mInteractiveTrait = interactiveTrait;
+  }
+
+  for(auto& entry : mTraits)
+  {
+    if(entry.first == id)
+    {
+      auto& oldTrait = entry.second;
+      if(oldTrait == trait)
+      {
+        return;
+      }
+      Ui::GetImpl(oldTrait).OnDetached(id, self);
+      traitImpl.OnBeforeAttached(id, self);
+      entry.second = trait;
+      traitImpl.OnAttached(id, self);
+      return;
+    }
+  }
+
+  traitImpl.OnBeforeAttached(id, self);
+  mTraits.emplace_back(id, trait);
+  traitImpl.OnAttached(id, self);
+}
+
+Ui::Trait ViewDataImpl::GetTrait(Integration::TraitId id) const
+{
+  for(auto& entry : mTraits)
+  {
+    if(entry.first == id)
+    {
+      return entry.second;
+    }
+  }
+  return Ui::Trait();
+}
+
+bool ViewDataImpl::RemoveTrait(Integration::TraitId id)
+{
+  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+  {
+    DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be removed once set");
+    return false;
+  }
+
+  for(auto it = mTraits.begin(); it != mTraits.end(); ++it)
+  {
+    if(it->first == id)
+    {
+      Ui::View self = Ui::View::DownCast(mViewImpl.Self());
+      Ui::GetImpl(it->second).OnDetached(id, self);
+      mTraits.erase(it);
+      return true;
+    }
+  }
+  return false;
+}
+
+Ui::InteractiveTraitInterface* ViewDataImpl::GetInteractiveTrait() const
+{
+  return mInteractiveTrait;
 }
 
 ViewDataImpl& ViewDataImpl::Get(Integration::ViewImpl& viewImpl)

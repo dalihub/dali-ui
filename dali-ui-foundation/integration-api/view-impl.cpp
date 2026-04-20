@@ -188,7 +188,6 @@ ViewImpl::ViewImpl()
 : CustomActorImpl(static_cast<ActorFlags>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
-  mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
@@ -210,10 +209,7 @@ ViewImpl::~ViewImpl()
     GetImpl(manager).ClearBindings(GetOwner());
   }
 
-  for(auto& iter : mTraits)
-  {
-    GetImpl(iter.second).OnViewDestroying(this);
-  }
+  mImpl->NotifyTraitsViewDestroying();
 
   LayoutController::UnregisterFromAll(this);
 
@@ -244,9 +240,9 @@ void ViewImpl::OnSceneConnection(int depth)
 
 bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
-  if(mInteractiveTrait)
+  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {
-    return mInteractiveTrait->OnKeyEvent(View::DownCast(Self()), event);
+    return interactiveTrait->OnKeyEvent(View::DownCast(Self()), event);
   }
   return false;
 }
@@ -446,9 +442,9 @@ void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
 {
   SetViewState(ViewState::FOCUSED, focused, cause);
 
-  if(mInteractiveTrait)
+  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {
-    mInteractiveTrait->OnFocusedChanged(View::DownCast(Self()), focused);
+    interactiveTrait->OnFocusedChanged(View::DownCast(Self()), focused);
   }
 
   EmitFocusChangedSignal(focused);
@@ -458,9 +454,9 @@ void ViewImpl::OnEnableChanged(bool enabled)
 {
   SetViewState(ViewState::DISABLED, !enabled);
 
-  if(mInteractiveTrait)
+  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {
-    mInteractiveTrait->OnEnabledChanged(View::DownCast(Self()), enabled);
+    interactiveTrait->OnEnabledChanged(View::DownCast(Self()), enabled);
   }
 }
 
@@ -731,78 +727,17 @@ void ViewImpl::SetTouchFocusable(bool touchFocusable)
 
 void ViewImpl::SetTrait(TraitId id, Trait& trait)
 {
-  View  self      = View::DownCast(Self());
-  auto& traitImpl = GetImpl(trait);
-
-  if(id == ReservedTraitId::INTERACTION_TRAIT)
-  {
-    if(mInteractiveTrait)
-    {
-      DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
-      return;
-    }
-    InteractiveTraitInterface* interactiveTrait = dynamic_cast<InteractiveTraitInterface*>(&traitImpl);
-    DALI_ASSERT_ALWAYS(interactiveTrait &&
-                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
-    mInteractiveTrait = interactiveTrait;
-  }
-
-  for(auto& entry : mTraits)
-  {
-    if(entry.first == id)
-    {
-      auto& oldTrait = entry.second;
-      if(oldTrait == trait)
-      {
-        return;
-      }
-      GetImpl(oldTrait).OnDetached(id, self);
-      traitImpl.OnBeforeAttached(id, self);
-      entry.second = trait;
-      traitImpl.OnAttached(id, self);
-      return;
-    }
-  }
-
-  traitImpl.OnBeforeAttached(id, self);
-  mTraits.emplace_back(id, trait);
-  traitImpl.OnAttached(id, self);
+  mImpl->SetTrait(id, trait);
 }
 
 Trait ViewImpl::GetTrait(TraitId id) const
 {
-  if(!mTraits.empty())
-  {
-    for(auto& entry : mTraits)
-    {
-      if(entry.first == id)
-      {
-        return entry.second;
-      }
-    }
-  }
-  return Trait();
+  return mImpl->GetTrait(id);
 }
 
 bool ViewImpl::RemoveTrait(TraitId id)
 {
-  if(id == ReservedTraitId::INTERACTION_TRAIT)
-  {
-    DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be removed once set");
-    return false;
-  }
-
-  for(auto it = mTraits.begin(); it != mTraits.end(); ++it)
-  {
-    if(it->first == id)
-    {
-      View self = View::DownCast(Self());
-      GetImpl(it->second).OnDetached(id, self);
-      mTraits.erase(it);
-      return true;
-    }
-  }
-  return false;
+  return mImpl->RemoveTrait(id);
 }
 
 // =============================================================================
@@ -1528,7 +1463,6 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
-  mInteractiveTrait(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},

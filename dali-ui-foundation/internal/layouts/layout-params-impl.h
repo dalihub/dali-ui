@@ -23,6 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/integration-api/view-impl.h>
 
 namespace Dali
 {

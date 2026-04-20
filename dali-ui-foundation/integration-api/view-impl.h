@@ -37,7 +37,6 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -849,9 +848,6 @@ private:
   void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
 private:
-  std::vector<std::pair<TraitId, Trait>> mTraits;
-  InteractiveTraitInterface*             mInteractiveTrait;
-
   // State
   ViewState              mState;
   StateChangedSignalType mStateChangedSignal;

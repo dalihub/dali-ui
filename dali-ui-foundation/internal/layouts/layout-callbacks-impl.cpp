@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/view.h>
+
 namespace Dali
 {
 namespace Ui

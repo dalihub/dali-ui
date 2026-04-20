@@ -28,10 +28,13 @@
 #include <string>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
+#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/public-api/trait.h>
 #include <dali/integration-api/debug.h>
 #include <map>
 #include <memory>
@@ -92,6 +95,36 @@ public:
    * @brief Initialize private VisualData context for this impl.
    */
   void InitializeVisualData();
+
+  // Trait management (delegated from ViewImpl)
+
+  /**
+   * @brief Notifies all traits that the owning View is being destroyed.
+   *
+   * Must be called while ViewImpl members are still valid (i.e. inside ViewImpl::~ViewImpl body,
+   * before `delete mImpl`).
+   */
+  void NotifyTraitsViewDestroying();
+
+  /**
+   * @brief Sets a trait to the owning View.
+   */
+  void SetTrait(Integration::TraitId id, Ui::Trait& trait);
+
+  /**
+   * @brief Gets a trait from the owning View.
+   */
+  Ui::Trait GetTrait(Integration::TraitId id) const;
+
+  /**
+   * @brief Removes a trait from the owning View.
+   */
+  bool RemoveTrait(Integration::TraitId id);
+
+  /**
+   * @brief Returns the interactive trait pointer (may be null).
+   */
+  Ui::InteractiveTraitInterface* GetInteractiveTrait() const;
 
   /**
    * @brief Called when a pinch is detected.
@@ -445,6 +478,10 @@ private:
 
 public:
   Integration::ViewImpl& mViewImpl;
+
+  // Trait storage
+  std::vector<std::pair<Integration::TraitId, Ui::Trait>> mTraits;
+  Ui::InteractiveTraitInterface*                          mInteractiveTrait;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData>        mVisualData;

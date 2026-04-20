@@ -20,6 +20,8 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/events/long-press-gesture-detector.h>
+#include <dali/public-api/events/tap-gesture-detector.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/dali-signal.h>

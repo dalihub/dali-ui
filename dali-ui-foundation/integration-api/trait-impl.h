@@ -22,7 +22,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/trait-id.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -30,15 +30,25 @@ namespace Dali
 namespace Ui
 {
 
+class View;
+
+namespace Internal
+{
+class ViewDataImpl;
+} // namespace Internal
+
 namespace Integration
 {
+
+class ViewImpl;
+
 /**
  * @brief Internal implementation of Trait.
  */
 class DALI_UI_API TraitImpl : public BaseObject
 {
 public:
-  friend class ViewImpl;
+  friend class Internal::ViewDataImpl;
 
 protected:
   /**

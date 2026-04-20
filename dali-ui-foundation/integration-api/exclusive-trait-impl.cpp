@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/integration-api/exclusive-trait-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-impl.h>
+
 namespace Dali
 {
 
