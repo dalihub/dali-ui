@@ -97,6 +97,7 @@ public:
       MAXIMUM_FONT_SIZE_SCALE        = Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
       SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
       CUTOUT_ENABLED                 = Text::LabelPropertyIndex::CUTOUT_ENABLED,
+      ASYNC_RENDERING                = Text::LabelPropertyIndex::ASYNC_RENDERING,
       RENDER_SCALE                   = Text::LabelPropertyIndex::RENDER_SCALE,
       TEXT_COLOR                     = Text::LabelPropertyIndex::TEXT_COLOR,
       TEXT_COLOR_RED                 = Text::LabelPropertyIndex::TEXT_COLOR_RED,

@@ -57,9 +57,12 @@ const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE        = "minimumFontSiz
 const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE        = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
 const char* const PROPERTY_NAME_CUTOUT_ENABLED                 = "cutoutEnabled";
+const char* const PROPERTY_NAME_ASYNC_RENDERING                = "asyncRendering";
+const char* const PROPERTY_NAME_RENDER_SCALE                   = "renderScale";
 
 // Animatable
-const char* const PROPERTY_NAME_TEXT_COLOR = "textColor";
+const char* const PROPERTY_NAME_TEXT_COLOR        = "textColor";
+const char* const PROPERTY_NAME_PIXEL_SNAP_FACTOR = "pixelSnapFactor";
 } // namespace
 
 void utc_dali_label_startup(void)
@@ -702,6 +705,36 @@ int UtcDaliLabelFontVariation(void)
   END_TEST;
 }
 
+int UtcDaliLabelAsyncRendering(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetAsyncRendering(true);
+  DALI_TEST_EQUALS(label.IsAsyncRendering(), true, TEST_LOCATION);
+
+  label.SetAsyncRendering(false);
+  DALI_TEST_EQUALS(label.IsAsyncRendering(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelRenderScale(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetRenderScale(2.0f);
+  DALI_TEST_EQUALS(label.GetRenderScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  label.SetRenderScale(1.5f);
+  DALI_TEST_EQUALS(label.GetRenderScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Property
 int UtcDaliLabelGetProperty(void)
 {
@@ -739,9 +772,12 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == Label::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == Label::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_CUTOUT_ENABLED) == Label::Property::CUTOUT_ENABLED);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_ASYNC_RENDERING) == Label::Property::ASYNC_RENDERING);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_RENDER_SCALE) == Label::Property::RENDER_SCALE);
 
   // Animatable
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR) == Label::Property::PIXEL_SNAP_FACTOR);
 
   END_TEST;
 }
@@ -907,6 +943,21 @@ int UtcDaliLabelSetProperty(void)
 
   label.SetProperty(Label::Property::CUTOUT_ENABLED, false);
   DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::CUTOUT_ENABLED), false, TEST_LOCATION);
+
+  // ASYNC_RENDERING
+  label.SetProperty(Label::Property::ASYNC_RENDERING, true);
+  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::ASYNC_RENDERING), true, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::ASYNC_RENDERING, false);
+  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::ASYNC_RENDERING), false, TEST_LOCATION);
+
+  // RENDER_SCALE
+  label.SetProperty(Label::Property::RENDER_SCALE, 2.0f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::RENDER_SCALE), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // PIXEL_SNAP_FACTOR
+  label.SetProperty(Label::Property::PIXEL_SNAP_FACTOR, 0.5f);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::PIXEL_SNAP_FACTOR), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   // Animatable
   // TEXT_COLOR

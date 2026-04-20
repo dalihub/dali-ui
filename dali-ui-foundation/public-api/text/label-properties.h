@@ -262,6 +262,13 @@ struct LabelPropertyIndex
     CUTOUT_ENABLED,
 
     /**
+     * @brief Whether asynchronous text rendering is enabled.
+     * @details Name "asyncRendering", type Property::BOOLEAN.
+     * @see Label::SetAsyncRendering(), Label::IsAsyncRendering().
+     */
+    ASYNC_RENDERING,
+
+    /**
      * @brief The render scale of the text.
      * @details Name "renderScale", type Property::FLOAT.
      * Renders text by rasterizing glyphs at a larger scale and downscaling the result.
