@@ -479,6 +479,25 @@ private:
 public:
   Integration::ViewImpl& mViewImpl;
 
+  // State
+  Ui::ViewState                                 mState;
+  Integration::ViewImpl::StateChangedSignalType mStateChangedSignal;
+
+  // Requested position (used when parent is not a layout)
+  float mRequestedPositionX;
+  float mRequestedPositionY;
+
+  // Measure/Arrange State (cache-based)
+  // mLastMeasuredConstraint.width < 0 means no valid measure cache
+  MeasuredSize mMeasuredSize;
+  MeasuredSize mLastMeasuredConstraint;
+  LayoutRect   mArrangedBounds;
+  bool         mArrangeValid;
+
+  // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
+  Integration::ViewImpl::ChildContainer mChildren;
+  bool                                  mSkipChildrenUpdate;
+
   // Trait storage
   std::vector<std::pair<Integration::TraitId, Ui::Trait>> mTraits;
   Ui::InteractiveTraitInterface*                          mInteractiveTrait;

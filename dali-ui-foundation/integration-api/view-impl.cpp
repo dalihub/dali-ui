@@ -188,12 +188,6 @@ ViewImpl::ViewImpl()
 : CustomActorImpl(static_cast<ActorFlags>(
     static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
     static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
-  mRequestedPositionX(0.0f),
-  mRequestedPositionY(0.0f),
-  mMeasuredSize{0.0f, 0.0f},
-  mLastMeasuredConstraint{-1.0f, -1.0f},
-  mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-  mArrangeValid(false),
   mImpl(new Internal::ViewDataImpl(*this))
 {
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(
@@ -263,7 +257,7 @@ void ViewImpl::OnFocusLost()
 
 const ViewState& ViewImpl::GetState() const
 {
-  return mState;
+  return mImpl->mState;
 }
 
 bool ViewImpl::IsEnabled() const
@@ -288,7 +282,7 @@ bool ViewImpl::IsEffectivelyFocused() const
 
 ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 {
-  return mStateChangedSignal;
+  return mImpl->mStateChangedSignal;
 }
 
 Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
@@ -400,26 +394,26 @@ void ViewImpl::SetViewState(ViewState state, bool on, InputEvent cause)
   // NOTE that when the view is focused and user sets `view.SetEnabled(false)`,
   // the event squence will be: "Focused out" -> "Enabled changed".
 
-  ViewState prev = mState;
+  ViewState prev = mImpl->mState;
   if(on)
   {
-    mState = mState + state;
+    mImpl->mState = mImpl->mState + state;
 
     // NOTE Handle orthogonal state constraint
     // When DISABLED added,
     // - PRESSED needs to be cleaned immediately
-    // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
+    // - FOCUSED should have gone already (ASSERT(!mImpl->mState.Contains(FOCUSED)))
     // When PSUEDO_DISABLED added,
     // - PRESSED needs to be cleaned immediately
     // - FOCUSED can exist
     if(state.IsAnyDisabled())
     {
-      mState = mState - ViewState::PRESSED;
+      mImpl->mState = mImpl->mState - ViewState::PRESSED;
     }
   }
   else
   {
-    mState = mState - state;
+    mImpl->mState = mImpl->mState - state;
 
     // NOTE Handle orthogonal state constraint
     // This is the case that the focus has gone because it turned disabled.
@@ -427,13 +421,13 @@ void ViewImpl::SetViewState(ViewState state, bool on, InputEvent cause)
     // -> Immediately update states at once.
     if(state == ViewState::FOCUSED && !IsEnabled())
     {
-      mState = mState - ViewState::PRESSED + ViewState::DISABLED;
+      mImpl->mState = mImpl->mState - ViewState::PRESSED + ViewState::DISABLED;
     }
   }
 
-  if(mState != prev)
+  if(mImpl->mState != prev)
   {
-    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mState, cause);
+    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mImpl->mState, cause);
   }
 }
 
@@ -564,7 +558,7 @@ float ViewImpl::GetPositionX() const
 
 void ViewImpl::SetPositionX(float x)
 {
-  mRequestedPositionX = x;
+  mImpl->mRequestedPositionX = x;
   Self().SetProperty(Actor::Property::POSITION_X, x);
 }
 
@@ -575,7 +569,7 @@ float ViewImpl::GetPositionY() const
 
 void ViewImpl::SetPositionY(float y)
 {
-  mRequestedPositionY = y;
+  mImpl->mRequestedPositionY = y;
   Self().SetProperty(Actor::Property::POSITION_Y, y);
 }
 
@@ -743,24 +737,24 @@ MeasuredSize ViewImpl::Measure(float widthConstraint, float heightConstraint)
   float effectiveWidth  = std::min(std::max(widthConstraint, mImpl->mMinimumWidth), mImpl->mMaximumWidth);
   float effectiveHeight = std::min(std::max(heightConstraint, mImpl->mMinimumHeight), mImpl->mMaximumHeight);
 
-  if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, effectiveWidth) &&
-     FloatEqual(mLastMeasuredConstraint.height, effectiveHeight))
+  if(mImpl->mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mImpl->mLastMeasuredConstraint.width, effectiveWidth) &&
+     FloatEqual(mImpl->mLastMeasuredConstraint.height, effectiveHeight))
   {
-    return mMeasuredSize;
+    return mImpl->mMeasuredSize;
   }
 
-  MeasuredSize measured          = OnMeasure(effectiveWidth, effectiveHeight);
-  measured                       = ApplyConstraints(measured);
-  mMeasuredSize                  = measured;
-  mLastMeasuredConstraint.width  = effectiveWidth;
-  mLastMeasuredConstraint.height = effectiveHeight;
+  MeasuredSize measured                 = OnMeasure(effectiveWidth, effectiveHeight);
+  measured                              = ApplyConstraints(measured);
+  mImpl->mMeasuredSize                  = measured;
+  mImpl->mLastMeasuredConstraint.width  = effectiveWidth;
+  mImpl->mLastMeasuredConstraint.height = effectiveHeight;
 
   // Ensure standalone children are measured even when OnMeasure (e.g. in
   // leaf views like Label) does not iterate children. The measure cache
   // prevents redundant work when OnMeasure already measured them.
   MeasureStandaloneChildren(effectiveWidth, effectiveHeight);
 
-  return mMeasuredSize;
+  return mImpl->mMeasuredSize;
 }
 
 MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
@@ -774,11 +768,11 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
 
-  if(!mChildren.empty())
+  if(!mImpl->mChildren.empty())
   {
     float maxRight  = 0.0f;
     float maxBottom = 0.0f;
-    for(auto& childData : mChildren)
+    for(auto& childData : mImpl->mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
 
@@ -864,8 +858,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 {
   MeasuredSize arrangedSize = OnArrange(bounds);
-  mArrangedBounds           = bounds;
-  mArrangeValid             = true;
+  mImpl->mArrangedBounds    = bounds;
+  mImpl->mArrangeValid      = true;
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children. The arrange-valid
@@ -888,14 +882,14 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
 
-  if(!mChildren.empty())
+  if(!mImpl->mChildren.empty())
   {
     float padLeft   = static_cast<float>(mImpl->mPadding.start);
     float padRight  = static_cast<float>(mImpl->mPadding.end);
     float padTop    = static_cast<float>(mImpl->mPadding.top);
     float padBottom = static_cast<float>(mImpl->mPadding.bottom);
 
-    for(auto& childData : mChildren)
+    for(auto& childData : mImpl->mChildren)
     {
       ViewImpl& childImpl = Integration::GetImpl(childData.view);
 
@@ -921,8 +915,8 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
       {
         childH = std::max(0.0f, height - padTop - padBottom - marginH);
       }
-      float childX = padLeft + static_cast<float>(margin.start) + childImpl.mRequestedPositionX;
-      float childY = padTop + static_cast<float>(margin.top) + childImpl.mRequestedPositionY;
+      float childX = padLeft + static_cast<float>(margin.start) + childImpl.mImpl->mRequestedPositionX;
+      float childY = padTop + static_cast<float>(margin.top) + childImpl.mImpl->mRequestedPositionY;
 
       // MATCH_PARENT children reported minSize during Measure, but their
       // subtree was measured with the original constraint. Re-measure with
@@ -944,7 +938,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 
 void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight)
 {
-  for(auto& childData : mChildren)
+  for(auto& childData : mImpl->mChildren)
   {
     ViewImpl& childImpl = Integration::GetImpl(childData.view);
     if(!childImpl.IsLayoutModeStandalone())
@@ -962,7 +956,7 @@ void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHe
 
 void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 {
-  for(auto& childData : mChildren)
+  for(auto& childData : mImpl->mChildren)
   {
     ViewImpl& childImpl = Integration::GetImpl(childData.view);
     if(!childImpl.IsLayoutModeStandalone())
@@ -975,9 +969,9 @@ void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 
 void ViewImpl::InvalidateMeasure()
 {
-  mLastMeasuredConstraint.width  = -1.0f;
-  mLastMeasuredConstraint.height = -1.0f;
-  mArrangeValid                  = false;
+  mImpl->mLastMeasuredConstraint.width  = -1.0f;
+  mImpl->mLastMeasuredConstraint.height = -1.0f;
+  mImpl->mArrangeValid                  = false;
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -998,7 +992,7 @@ void ViewImpl::InvalidateMeasure()
 
 void ViewImpl::InvalidateArrange()
 {
-  mArrangeValid = false;
+  mImpl->mArrangeValid = false;
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1035,17 +1029,17 @@ void ViewImpl::RegisterWithLayoutController()
 
 MeasuredSize ViewImpl::GetMeasuredSize() const
 {
-  return mMeasuredSize;
+  return mImpl->mMeasuredSize;
 }
 
 bool ViewImpl::IsMeasureValid() const
 {
-  return mLastMeasuredConstraint.width >= 0.0f;
+  return mImpl->mLastMeasuredConstraint.width >= 0.0f;
 }
 
 bool ViewImpl::IsArrangeValid() const
 {
-  return mArrangeValid;
+  return mImpl->mArrangeValid;
 }
 
 MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
@@ -1222,18 +1216,18 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   {
     return;
   }
-  if(index > mChildren.size())
+  if(index > mImpl->mChildren.size())
   {
-    index = static_cast<uint32_t>(mChildren.size());
+    index = static_cast<uint32_t>(mImpl->mChildren.size());
   }
   ChildData childData;
   childData.view           = child;
   childData.measuredSize   = {0.0f, 0.0f};
   childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-  mChildren.insert(mChildren.begin() + index, childData);
+  mImpl->mChildren.insert(mImpl->mChildren.begin() + index, childData);
 
   {
-    ScopedSkipChildrenUpdate guard(mSkipChildrenUpdate);
+    ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
     Self().Add(child);
   }
 
@@ -1245,8 +1239,8 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 void ViewImpl::RemoveAllChildren()
 {
   {
-    ScopedSkipChildrenUpdate guard(mSkipChildrenUpdate);
-    for(auto& childData : mChildren)
+    ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
+    for(auto& childData : mImpl->mChildren)
     {
       // Invalidate each child's measure cache so that re-parented children
       // are re-measured under the new parent's constraints.
@@ -1255,20 +1249,20 @@ void ViewImpl::RemoveAllChildren()
     }
   }
 
-  mChildren.clear();
+  mImpl->mChildren.clear();
   InvalidateMeasure();
 }
 
 uint32_t ViewImpl::GetChildCount() const
 {
-  return static_cast<uint32_t>(mChildren.size());
+  return static_cast<uint32_t>(mImpl->mChildren.size());
 }
 
 Ui::View ViewImpl::GetChildAt(uint32_t index) const
 {
-  if(index < mChildren.size())
+  if(index < mImpl->mChildren.size())
   {
-    return mChildren[index].view;
+    return mImpl->mChildren[index].view;
   }
   return Ui::View();
 }
@@ -1279,9 +1273,9 @@ int32_t ViewImpl::IndexOfChild(Ui::View view) const
   {
     return -1;
   }
-  for(size_t i = 0; i < mChildren.size(); ++i)
+  for(size_t i = 0; i < mImpl->mChildren.size(); ++i)
   {
-    if(mChildren[i].view == view)
+    if(mImpl->mChildren[i].view == view)
     {
       return static_cast<int32_t>(i);
     }
@@ -1297,7 +1291,7 @@ void ViewImpl::Raise(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.Raise();
       return;
     }
@@ -1313,7 +1307,7 @@ void ViewImpl::Lower(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.Lower();
       return;
     }
@@ -1329,7 +1323,7 @@ void ViewImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.RaiseToTop();
       return;
     }
@@ -1345,7 +1339,7 @@ void ViewImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.LowerToBottom();
       return;
     }
@@ -1365,7 +1359,7 @@ void ViewImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.RaiseAbove(target);
       return;
     }
@@ -1385,7 +1379,7 @@ void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(Integration::GetImpl(parent).mImpl->mSkipChildrenUpdate);
       self.LowerBelow(target);
       return;
     }
@@ -1404,12 +1398,12 @@ Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<Ui::View> childr
 
 ViewImpl::ChildContainer& ViewImpl::GetChildren()
 {
-  return mChildren;
+  return mImpl->mChildren;
 }
 
 const ViewImpl::ChildContainer& ViewImpl::GetChildren() const
 {
-  return mChildren;
+  return mImpl->mChildren;
 }
 
 namespace
@@ -1452,12 +1446,6 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 : CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
-  mRequestedPositionX(0.0f),
-  mRequestedPositionY(0.0f),
-  mMeasuredSize{0.0f, 0.0f},
-  mLastMeasuredConstraint{-1.0f, -1.0f},
-  mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-  mArrangeValid(false),
   mImpl(new Internal::ViewDataImpl(*this))
 {
   mImpl->mFlags = static_cast<Ui::Integration::ViewImpl::ViewBehaviour>(behaviourFlags);
@@ -1837,7 +1825,7 @@ void ViewImpl::OnSceneDisconnection()
 
 void ViewImpl::OnChildAdd(Actor& child)
 {
-  if(mSkipChildrenUpdate)
+  if(mImpl->mSkipChildrenUpdate)
   {
     return;
   }
@@ -1849,7 +1837,7 @@ void ViewImpl::OnChildAdd(Actor& child)
     childData.view           = view;
     childData.measuredSize   = {0.0f, 0.0f};
     childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-    mChildren.push_back(childData);
+    mImpl->mChildren.push_back(childData);
     // Invalidate the child's measure cache — its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
     // This also propagates to the parent (this) via InvalidateMeasure chain.
@@ -1860,7 +1848,7 @@ void ViewImpl::OnChildAdd(Actor& child)
     if(gAllowNonViewChild)
     {
       // Permitted via Integration::AddActorChild: skip the View-only check
-      // and do not record this child in mChildren (it is excluded from layout).
+      // and do not record this child in mImpl->mChildren (it is excluded from layout).
       return;
     }
     DALI_ASSERT_ALWAYS(false && "View could only have child as View class!");
@@ -1869,7 +1857,7 @@ void ViewImpl::OnChildAdd(Actor& child)
 
 void ViewImpl::OnChildRemove(Actor& child)
 {
-  if(mSkipChildrenUpdate)
+  if(mImpl->mSkipChildrenUpdate)
   {
     return;
   }
@@ -1877,18 +1865,18 @@ void ViewImpl::OnChildRemove(Actor& child)
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    auto it = std::find_if(mChildren.begin(), mChildren.end(), [&view](const ChildData& data)
+    auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const ChildData& data)
     {
       return data.view == view;
     });
-    if(it != mChildren.end())
+    if(it != mImpl->mChildren.end())
     {
       // Invalidate the removed child's measure cache so that it gets
       // re-measured when re-parented to a different container.
       // Note: Actor parent-child relationship is already severed at this
       // point, so child's InvalidateMeasure cannot propagate to us.
       Integration::GetImpl(view).InvalidateMeasure();
-      mChildren.erase(it);
+      mImpl->mChildren.erase(it);
       InvalidateMeasure();
     }
   }
@@ -1896,7 +1884,7 @@ void ViewImpl::OnChildRemove(Actor& child)
 
 void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
 {
-  if(mSkipChildrenUpdate)
+  if(mImpl->mSkipChildrenUpdate)
   {
     return;
   }
@@ -1911,18 +1899,18 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
     Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
     if(view)
     {
-      auto it = std::find_if(mChildren.begin(), mChildren.end(), [&view](const ChildData& data)
+      auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const ChildData& data)
       {
         return data.view == view;
       });
-      if(it != mChildren.end())
+      if(it != mImpl->mChildren.end())
       {
         newChildren.push_back(std::move(*it));
       }
     }
   }
 
-  mChildren = std::move(newChildren);
+  mImpl->mChildren = std::move(newChildren);
   InvalidateArrange();
 }
 

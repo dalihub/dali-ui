@@ -516,6 +516,13 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_6(typeReg
 
 ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
+  mRequestedPositionX(0.0f),
+  mRequestedPositionY(0.0f),
+  mMeasuredSize{0.0f, 0.0f},
+  mLastMeasuredConstraint{-1.0f, -1.0f},
+  mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
+  mArrangeValid(false),
+  mSkipChildrenUpdate(false),
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),

@@ -824,32 +824,6 @@ private:
   void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
 private:
-  // State
-  ViewState              mState;
-  StateChangedSignalType mStateChangedSignal;
-
-  // Requested position (used when parent is not a layout)
-  float mRequestedPositionX;
-  float mRequestedPositionY;
-
-  // Measure/Arrange State (cache-based)
-  // mLastMeasuredConstraint.width < 0 means no valid measure cache
-  MeasuredSize mMeasuredSize;
-  MeasuredSize mLastMeasuredConstraint;
-  LayoutRect   mArrangedBounds;
-  bool         mArrangeValid;
-
-  // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
-  ChildContainer mChildren;
-  /// Shared guard: when true, OnChildAdd / OnChildRemove / OnChildOrderChanged
-  /// skip mutating mChildren. Used whenever the caller is already managing the
-  /// list (Insert, RemoveAllChildren) or deliberately wants to keep the layout
-  /// children order even though Actor sibling order changes
-  /// (Raise/Lower/RaiseAbove/LowerBelow with LayoutOrderPolicy::PRESERVE).
-  /// Prefer toggling via ScopedSkipChildrenUpdate for nesting- and
-  /// exception-safety.
-  bool mSkipChildrenUpdate{false};
-
   // From control-impl.h
 
 public:
