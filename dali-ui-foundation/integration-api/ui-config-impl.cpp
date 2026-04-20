@@ -60,6 +60,12 @@ UiConfigImpl::UiConfigImpl()
   mDefaultFontSize(16.0f),
   mDpi(160),
   mBaselineDpi(160),
+  mMarqueeSpeed(80),
+  mMarqueeLoopCount(2),
+  mMarqueeLoopDelay(1.0f),
+  mMarqueeGap(50.0f),
+  mMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE),
+  mMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL),
   mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
   mKeyLongPressThreshold(3),
   mTapRecognizerTime(UINT32_MAX),
@@ -251,6 +257,72 @@ void UiConfigImpl::SetDefaultTextColor(const Vector4& color)
 Vector4 UiConfigImpl::GetDefaultTextColor() const
 {
   return mDefaultTextColor;
+}
+
+void UiConfigImpl::SetMarqueeSpeed(int speed)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeSpeed = speed;
+}
+
+int UiConfigImpl::GetMarqueeSpeed() const
+{
+  return mMarqueeSpeed;
+}
+
+void UiConfigImpl::SetMarqueeLoopCount(int loopCount)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeLoopCount = loopCount;
+}
+
+int UiConfigImpl::GetMarqueeLoopCount() const
+{
+  return mMarqueeLoopCount;
+}
+
+void UiConfigImpl::SetMarqueeLoopDelay(float delay)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeLoopDelay = delay;
+}
+
+float UiConfigImpl::GetMarqueeLoopDelay() const
+{
+  return mMarqueeLoopDelay;
+}
+
+void UiConfigImpl::SetMarqueeGap(float gap)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeGap = gap;
+}
+
+float UiConfigImpl::GetMarqueeGap() const
+{
+  return mMarqueeGap;
+}
+
+void UiConfigImpl::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeStopMode = stopMode;
+}
+
+Text::MarqueeStopMode UiConfigImpl::GetMarqueeStopMode() const
+{
+  return mMarqueeStopMode;
+}
+
+void UiConfigImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mMarqueeOrientation = orientation;
+}
+
+Text::MarqueeOrientation UiConfigImpl::GetMarqueeOrientation() const
+{
+  return mMarqueeOrientation;
 }
 
 void UiConfigImpl::SetLabelAsyncRendering(bool asyncRendering)

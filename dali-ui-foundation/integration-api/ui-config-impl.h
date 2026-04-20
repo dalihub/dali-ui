@@ -272,6 +272,96 @@ public:
   Vector4 GetDefaultTextColor() const;
 
   /**
+   * @brief Sets the marquee speed in pixels per second.
+   *
+   * @pre Must not be frozen.
+   * @param[in] speed The marquee speed in pixels per second
+   */
+  void SetMarqueeSpeed(int speed);
+
+  /**
+   * @brief Retrieves the marquee speed.
+   *
+   * @return The marquee speed in pixels per second
+   */
+  int GetMarqueeSpeed() const;
+
+  /**
+   * @brief Sets the number of complete loops for marquee.
+   *
+   * @pre Must not be frozen.
+   * @param[in] loopCount The number of loops
+   */
+  void SetMarqueeLoopCount(int loopCount);
+
+  /**
+   * @brief Retrieves the number of complete loops for marquee.
+   *
+   * @return The number of loops
+   */
+  int GetMarqueeLoopCount() const;
+
+  /**
+   * @brief Sets the amount of time to delay the start of marquee and further loops.
+   *
+   * @pre Must not be frozen.
+   * @param[in] delay The delay time in seconds
+   */
+  void SetMarqueeLoopDelay(float delay);
+
+  /**
+   * @brief Retrieves the amount of time to delay the start of marquee and further loops.
+   *
+   * @return The delay time in seconds
+   */
+  float GetMarqueeLoopDelay() const;
+
+  /**
+   * @brief Sets the gap before marquee wraps.
+   *
+   * @pre Must not be frozen.
+   * @param[in] gap The gap in pixels
+   */
+  void SetMarqueeGap(float gap);
+
+  /**
+   * @brief Retrieves the gap before marquee wraps.
+   *
+   * @return The gap in pixels
+   */
+  float GetMarqueeGap() const;
+
+  /**
+   * @brief Sets the marquee stop behaviour.
+   *
+   * @pre Must not be frozen.
+   * @param[in] stopMode The marquee stop mode
+   */
+  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @brief Retrieves the marquee stop behaviour.
+   *
+   * @return The marquee stop mode
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
+
+  /**
+   * @brief Sets the marquee orientation.
+   *
+   * @pre Must not be frozen.
+   * @param[in] orientation The marquee orientation
+   */
+  void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+
+  /**
+   * @brief Retrieves the marquee orientation.
+   *
+   * @return The marquee orientation
+   */
+  Text::MarqueeOrientation GetMarqueeOrientation() const;
+
+  /**
    * @brief Sets whether Label uses asynchronous text rendering by default.
    *
    * @pre The config must not be frozen.
@@ -349,22 +439,28 @@ private:
 private:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
-  Trait                 mDefaultInteractionEffect; ///< Default effect for interactive views
-  ExecutionKeyPredicate mExecutionKeyPredicate;
-  Vector4               mDefaultTextColor;
-  float                 mScalingFactor;
-  float                 mDefaultFontSize;
-  int                   mDpi;
-  int                   mBaselineDpi;
-  KeyClickPolicy        mKeyClickPolicy;
-  uint32_t              mKeyLongPressThreshold;
-  uint32_t              mTapRecognizerTime;
-  float                 mCachedDpiFactor{1.0f};
-  float                 mCachedScaledDpiFactor{1.0f};
-  bool                  mClearFocusOnEscape;
-  bool                  mAlwaysShowFocus;
-  bool                  mLabelAsyncRendering;
-  bool                  mFrozen;
+  Trait                    mDefaultInteractionEffect; ///< Default effect for interactive views
+  ExecutionKeyPredicate    mExecutionKeyPredicate;
+  Vector4                  mDefaultTextColor;
+  float                    mScalingFactor;
+  float                    mDefaultFontSize;
+  int                      mDpi;
+  int                      mBaselineDpi;
+  int                      mMarqueeSpeed;
+  int                      mMarqueeLoopCount;
+  float                    mMarqueeLoopDelay;
+  float                    mMarqueeGap;
+  Text::MarqueeStopMode    mMarqueeStopMode;
+  Text::MarqueeOrientation mMarqueeOrientation;
+  KeyClickPolicy           mKeyClickPolicy;
+  uint32_t                 mKeyLongPressThreshold;
+  uint32_t                 mTapRecognizerTime;
+  float                    mCachedDpiFactor{1.0f};
+  float                    mCachedScaledDpiFactor{1.0f};
+  bool                     mClearFocusOnEscape;
+  bool                     mAlwaysShowFocus;
+  bool                     mLabelAsyncRendering;
+  bool                     mFrozen;
 };
 
 } // namespace Integration

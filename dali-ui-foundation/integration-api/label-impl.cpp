@@ -417,8 +417,7 @@ int LabelImpl::GetMarqueeSpeed() const
   {
     return mTextScroller->GetSpeed();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return 0;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeSpeed();
 }
 
 void LabelImpl::SetMarqueeLoopCount(int loopCount)
@@ -433,8 +432,7 @@ int LabelImpl::GetMarqueeLoopCount() const
   {
     return mTextScroller->GetLoopCount();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return 0;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeLoopCount();
 }
 
 void LabelImpl::SetMarqueeLoopDelay(float delay)
@@ -449,8 +447,7 @@ float LabelImpl::GetMarqueeLoopDelay() const
   {
     return mTextScroller->GetLoopDelay();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return 0.0f;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeLoopDelay();
 }
 
 void LabelImpl::SetMarqueeGap(int gap)
@@ -465,8 +462,7 @@ int LabelImpl::GetMarqueeGap() const
   {
     return mTextScroller->GetGap();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return 0;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeGap();
 }
 
 void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
@@ -481,8 +477,7 @@ Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
   {
     return mTextScroller->GetStopMode();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return Text::MarqueeStopMode::IMMEDIATE;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeStopMode();
 }
 
 void LabelImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
@@ -498,8 +493,7 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
   {
     return mTextScroller->GetOrientation();
   }
-  // TODO: Return the default value from UI config when the text scroller is not created.
-  return Text::MarqueeOrientation::HORIZONTAL;
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeOrientation();
 }
 
 void LabelImpl::SetFontWeight(Text::FontWeight weight)

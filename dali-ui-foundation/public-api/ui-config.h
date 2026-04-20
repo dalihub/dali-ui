@@ -26,6 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
@@ -406,6 +407,96 @@ public: // Properties
    * @return The default text color
    */
   Vector4 GetDefaultTextColor() const;
+
+  /**
+   * @brief Sets the marquee speed in pixels per second.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] speed The marquee speed in pixels per second
+   */
+  UiConfig& SetMarqueeSpeed(int speed);
+
+  /**
+   * @brief Retrieves the marquee speed.
+   *
+   * @return The marquee speed in pixels per second
+   */
+  int GetMarqueeSpeed() const;
+
+  /**
+   * @brief Sets the number of complete loops for marquee.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] loopCount The number of loops
+   */
+  UiConfig& SetMarqueeLoopCount(int loopCount);
+
+  /**
+   * @brief Retrieves the number of complete loops for marquee.
+   *
+   * @return The number of loops
+   */
+  int GetMarqueeLoopCount() const;
+
+  /**
+   * @brief Sets the amount of time to delay the start of marquee and further loops.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] delay The delay time in seconds
+   */
+  UiConfig& SetMarqueeLoopDelay(float delay);
+
+  /**
+   * @brief Retrieves the amount of time to delay the start of marquee and further loops.
+   *
+   * @return The delay time in seconds
+   */
+  float GetMarqueeLoopDelay() const;
+
+  /**
+   * @brief Sets the gap before marquee wraps.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] gap The gap in pixels
+   */
+  UiConfig& SetMarqueeGap(float gap);
+
+  /**
+   * @brief Retrieves the gap before marquee wraps.
+   *
+   * @return The gap in pixels
+   */
+  float GetMarqueeGap() const;
+
+  /**
+   * @brief Sets the marquee stop behaviour.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] stopMode The marquee stop mode
+   */
+  UiConfig& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @brief Retrieves the marquee stop behaviour.
+   *
+   * @return The marquee stop mode
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
+
+  /**
+   * @brief Sets the marquee orientation.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] orientation The marquee orientation
+   */
+  UiConfig& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+
+  /**
+   * @brief Retrieves the marquee orientation.
+   *
+   * @return The marquee orientation
+   */
+  Text::MarqueeOrientation GetMarqueeOrientation() const;
 
   /**
    * @brief Sets whether Label uses asynchronous text rendering by default.

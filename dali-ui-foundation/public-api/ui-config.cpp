@@ -197,6 +197,72 @@ Vector4 UiConfig::GetDefaultTextColor() const
   return GetImpl(*this).GetDefaultTextColor();
 }
 
+UiConfig& UiConfig::SetMarqueeSpeed(int speed)
+{
+  GetImpl(*this).SetMarqueeSpeed(speed);
+  return *this;
+}
+
+int UiConfig::GetMarqueeSpeed() const
+{
+  return GetImpl(*this).GetMarqueeSpeed();
+}
+
+UiConfig& UiConfig::SetMarqueeLoopCount(int loopCount)
+{
+  GetImpl(*this).SetMarqueeLoopCount(loopCount);
+  return *this;
+}
+
+int UiConfig::GetMarqueeLoopCount() const
+{
+  return GetImpl(*this).GetMarqueeLoopCount();
+}
+
+UiConfig& UiConfig::SetMarqueeLoopDelay(float delay)
+{
+  GetImpl(*this).SetMarqueeLoopDelay(delay);
+  return *this;
+}
+
+float UiConfig::GetMarqueeLoopDelay() const
+{
+  return GetImpl(*this).GetMarqueeLoopDelay();
+}
+
+UiConfig& UiConfig::SetMarqueeGap(float gap)
+{
+  GetImpl(*this).SetMarqueeGap(gap);
+  return *this;
+}
+
+float UiConfig::GetMarqueeGap() const
+{
+  return GetImpl(*this).GetMarqueeGap();
+}
+
+UiConfig& UiConfig::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+{
+  GetImpl(*this).SetMarqueeStopMode(stopMode);
+  return *this;
+}
+
+Text::MarqueeStopMode UiConfig::GetMarqueeStopMode() const
+{
+  return GetImpl(*this).GetMarqueeStopMode();
+}
+
+UiConfig& UiConfig::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+{
+  GetImpl(*this).SetMarqueeOrientation(orientation);
+  return *this;
+}
+
+Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
+{
+  return GetImpl(*this).GetMarqueeOrientation();
+}
+
 UiConfig& UiConfig::SetLabelAsyncRendering(bool asyncRendering)
 {
   GetImpl(*this).SetLabelAsyncRendering(asyncRendering);
