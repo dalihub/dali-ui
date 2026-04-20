@@ -672,11 +672,6 @@ protected: // From ViewImpl
 
 public: // From CustomActorImpl
   /**
-   * @copydoc CustomActorImpl::OnSizeSet()
-   */
-  void OnSizeSet(const Vector3& targetSize) override;
-
-  /**
    * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
    */
   void OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index,
@@ -997,6 +992,7 @@ private:
   Text::ControllerPtr   mController;
   Text::TextScrollerPtr mTextScroller;
 
+  Vector2              mSize;
   Vector2              mTouchPosition; ///< The initial touch down position.
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
@@ -1007,7 +1003,7 @@ private:
   bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.
-  bool mIsSizeChanged : 1;            // whether the size has changed.
+  bool mIsAsyncRenderLayoutDirty : 1; // Whether layout affecting async render has changed.
   bool mLastMarqueeEnabled : 1;       // whether marquee was enabled in the previous state.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasAnchors : 1;               // whether the text has anchors.

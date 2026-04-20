@@ -425,6 +425,16 @@ private:
       mLabel2.RequestAsyncHeightForWidth(440);
       mLabel3.RequestAsyncHeightForWidth(440);
     }
+    else if(event.GetKeyName() == "7")
+    {
+      mLabel2.SetPadding(Extents(0, 0, 0, 0));
+      mLabel3.SetPadding(Extents(0, 0, 0, 0));
+    }
+    else if(event.GetKeyName() == "8")
+    {
+      mLabel2.SetPadding(Extents(20, 20, 20, 20));
+      mLabel3.SetPadding(Extents(20, 20, 20, 20));
+    }
   }
 
 private:

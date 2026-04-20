@@ -155,6 +155,7 @@ LabelImplPtr LabelImpl::New()
 
 LabelImpl::LabelImpl()
 : ViewImpl(),
+  mSize(),
   mTouchPosition(),
   mLineHeight(Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
@@ -164,7 +165,7 @@ LabelImpl::LabelImpl()
   mRendererUpdateNeeded(false),
   mMeasureInvalidated(false),
   mIsAsyncRenderRequested(false),
-  mIsSizeChanged(false),
+  mIsAsyncRenderLayoutDirty(false),
   mLastMarqueeEnabled(false),
   mIsTouchDown(false),
   mHasAnchors(false),
@@ -1189,10 +1190,10 @@ void LabelImpl::OnInitialize()
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  const bool sizeChanged          = mIsSizeChanged;
-  const bool manualRenderFinished = mIsManualRenderFinished;
-  mIsSizeChanged                  = false;
-  mIsManualRenderFinished         = false;
+  const bool asyncRenderLayoutDirty = mIsAsyncRenderLayoutDirty;
+  const bool manualRenderFinished   = mIsManualRenderFinished;
+  mIsAsyncRenderLayoutDirty         = false;
+  mIsManualRenderFinished           = false;
 
   if(mTextScroller && mTextScroller->IsStopRequested())
   {
@@ -1220,20 +1221,20 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   if(mController->IsAsyncRendering())
   {
-    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || sizeChanged))
+    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || asyncRenderLayoutDirty))
     {
       // When marquee is playing, a text load request is made only if a text update is absolutely necessary.
       return;
     }
 
-    if(mIsManualRenderInProgress || !(sizeChanged || mIsAsyncRenderRequested))
+    if(mIsManualRenderInProgress || !(asyncRenderLayoutDirty || mIsAsyncRenderRequested))
     {
       // Do not request async render while a manual render is in progress,
       // or when there are no size or property updates.
       return;
     }
 
-    if(manualRenderFinished && sizeChanged && !mIsAsyncRenderRequested)
+    if(manualRenderFinished && asyncRenderLayoutDirty && !mIsAsyncRenderRequested)
     {
       // Skip async render when only the size changed immediately after manual render completion.
       // This avoids redundant recomputation when users resize the label in the completion callback.
@@ -1467,12 +1468,6 @@ MeasuredSize LabelImpl::OnArrange(const LayoutRect& bounds)
   DALI_LOG_RELEASE_INFO("[%p] pos:%f,%f, size:%f,%f\n", mController.Get(), bounds.x, bounds.y, bounds.width,
                         bounds.height);
   return {bounds.width, bounds.height};
-}
-
-void LabelImpl::OnSizeSet(const Vector3& targetSize)
-{
-  mIsSizeChanged = true;
-  ViewImpl::OnSizeSet(targetSize);
 }
 
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
@@ -2013,7 +2008,7 @@ void LabelImpl::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
   }
   else
   {
-    mIsSizeChanged            = false;
+    mIsAsyncRenderLayoutDirty = false;
     mIsManualRenderInProgress = false;
     mIsManualRenderFinished   = false;
   }
@@ -2434,6 +2429,46 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
 {
   switch(index)
   {
+    case Dali::Actor::Property::SIZE:
+    {
+      const Vector2& size = propertyValue.Get<Vector2>();
+      if(size != mSize)
+      {
+        mSize                     = size;
+        mIsAsyncRenderLayoutDirty = true;
+      }
+      break;
+    }
+    case Dali::Actor::Property::SIZE_WIDTH:
+    {
+      const float width = propertyValue.Get<float>();
+      if(width != mSize.width)
+      {
+        mSize.width               = width;
+        mIsAsyncRenderLayoutDirty = true;
+      }
+      break;
+    }
+    case Dali::Actor::Property::SIZE_HEIGHT:
+    {
+      const float height = propertyValue.Get<float>();
+      if(height != mSize.height)
+      {
+        mSize.height              = height;
+        mIsAsyncRenderLayoutDirty = true;
+      }
+      break;
+    }
+    case Ui::View::Property::PADDING:
+    {
+      mIsAsyncRenderLayoutDirty = true;
+      break;
+    }
+    case Ui::View::Property::BACKGROUND:
+    {
+      OnBackgroundPropertyChanged();
+      break;
+    }
     case Text::LabelPropertyIndex::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
@@ -2450,19 +2485,9 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       }
       break;
     }
-    case Ui::View::Property::BACKGROUND:
-    {
-      OnBackgroundPropertyChanged();
-      break;
-    }
     case Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       UpdateCutoutState(propertyValue.Get<bool>());
-      break;
-    }
-    case Ui::View::Property::PADDING:
-    {
-      mIsSizeChanged = true;
       break;
     }
     default:
