@@ -44,9 +44,9 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: AbsoluteLayout filling the window
-    AbsoluteLayout root = AbsoluteLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT);
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
 
     // Red box: top-left corner, absolute position and size
     View redBox = View::New();

@@ -44,12 +44,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: GridLayout filling the window
-    GridLayout root = GridLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetRowSpacing(10.0f)
-      .SetColumnSpacing(10.0f);
+    GridLayout root = GridLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Define 3 rows and 2 columns with absolute sizes
     root.AddRowDefinition(GridLength::Absolute(50.0f));
@@ -57,6 +55,9 @@ public:
     root.AddRowDefinition(GridLength::Absolute(200.0f));
     root.AddColumnDefinition(GridLength::Absolute(50.0f));
     root.AddColumnDefinition(GridLength::Absolute(100.0f));
+
+    root.SetRowSpacing(10.0f);
+    root.SetColumnSpacing(10.0f);
 
     // Cell (0,0): Red
     View cell00 = View::New();

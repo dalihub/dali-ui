@@ -39,11 +39,11 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical StackLayout filling the window
-    StackLayout root = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(10.0f)
-      .SetPadding(Extents(50, 50, 50, 50));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(10.0f);
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Top bar: fixed height, fill cross-axis
     View topBar = View::New();

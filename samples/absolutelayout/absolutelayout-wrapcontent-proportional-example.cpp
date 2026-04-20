@@ -55,10 +55,10 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    AbsoluteLayout root = AbsoluteLayout::New()
-      .SetBackgroundColor(Color::GAINSBORO)
-      .SetMinimumWidth(400.0f)
-      .SetRequestedHeight(200.0f);
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetBackgroundColor(Color::GAINSBORO);
+    root.SetMinimumWidth(400.0f);
+    root.SetRequestedHeight(200.0f);
 
     // Child 1: fixed 200x200 at (0, 0).
     View child1 = View::New();
@@ -69,11 +69,11 @@ public:
 
     // Child 2: AbsoluteLayout with proportional size (0.5 width, 1.0 height) at x=200.
     // Contains two grandchildren: one fixed, one proportional (0.5 of child2).
-    AbsoluteLayout child2 = AbsoluteLayout::New()
-      .SetBackgroundColor(Color::GREEN)
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetBounds(LayoutRect(200.0f, 0.0f, 0.5f, 1.0f))
-        .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
+    AbsoluteLayout child2 = AbsoluteLayout::New();
+    child2.SetBackgroundColor(Color::GREEN);
+    child2.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(200.0f, 0.0f, 0.5f, 1.0f))
+      .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
     root.Add(child2);
 
     View grandChild1 = View::New();

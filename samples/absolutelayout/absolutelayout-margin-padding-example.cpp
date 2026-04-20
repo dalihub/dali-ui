@@ -49,10 +49,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: AbsoluteLayout with padding (content inset from window edges)
-    AbsoluteLayout root = AbsoluteLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
 
     // --- Red box: no margin (positioned at padding edge) ---
     View redBox = View::New();
@@ -78,12 +78,12 @@ public:
     root.Add(blueBox);
 
     // --- Nested AbsoluteLayout with its own padding ---
-    AbsoluteLayout nested = AbsoluteLayout::New()
-      .SetBackgroundColor(Color::GRAY)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetMargin(Extents(50, 50, 50, 50))
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetY(300.0f).SetWidth(200.0f).SetHeight(200.0f));
+    AbsoluteLayout nested = AbsoluteLayout::New();
+    nested.SetBackgroundColor(Color::GRAY);
+    nested.SetPadding(Extents(50, 50, 50, 50));
+    nested.SetMargin(Extents(50, 50, 50, 50));
+    nested.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetY(300.0f).SetWidth(200.0f).SetHeight(200.0f));
 
     View innerA = View::New();
     innerA.SetBackgroundColor(Color::MAGENTA);

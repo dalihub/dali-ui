@@ -51,20 +51,20 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Outer vertical StackLayout to hold two sections
-    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(50)
-      .SetPadding(Extents(50, 50, 50, 50));
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
+    outer.SetSpacing(50);
+    outer.SetPadding(Extents(50, 50, 50, 50));
 
     // Section 1: RowReverse
-    FlexLayout rowReverse = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW_REVERSE)
-      .SetJustifyContent(FlexJustify::FLEX_START)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
+    FlexLayout rowReverse = FlexLayout::New();
+    rowReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    rowReverse.SetDirection(FlexDirection::ROW_REVERSE);
+    rowReverse.SetJustifyContent(FlexJustify::FLEX_START);
+    rowReverse.SetAlignItems(FlexAlign::CENTER);
+    rowReverse.SetPadding(Extents(50, 50, 50, 50));
+    rowReverse.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     View rrBox1 = View::New();
     rrBox1.SetBackgroundColor(Color::RED);
@@ -87,13 +87,13 @@ public:
     outer.Add(rowReverse);
 
     // Section 2: ColumnReverse
-    FlexLayout columnReverse = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::COLUMN_REVERSE)
-      .SetJustifyContent(FlexJustify::FLEX_START)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+    FlexLayout columnReverse = FlexLayout::New();
+    columnReverse.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    columnReverse.SetDirection(FlexDirection::COLUMN_REVERSE);
+    columnReverse.SetJustifyContent(FlexJustify::FLEX_START);
+    columnReverse.SetAlignItems(FlexAlign::CENTER);
+    columnReverse.SetPadding(Extents(50, 50, 50, 50));
+    columnReverse.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     View crBox1 = View::New();
     crBox1.SetBackgroundColor(Color::YELLOW);
