@@ -507,7 +507,6 @@ public:
   static const PropertyRegistration PROPERTY_1;
   static const PropertyRegistration PROPERTY_2;
   static const PropertyRegistration PROPERTY_3;
-  static const PropertyRegistration PROPERTY_4;
   static const PropertyRegistration PROPERTY_5;
   static const PropertyRegistration PROPERTY_6;
   static const PropertyRegistration PROPERTY_7;

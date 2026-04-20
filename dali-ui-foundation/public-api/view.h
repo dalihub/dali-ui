@@ -1228,17 +1228,11 @@ public:
     enum
     {
       /**
-       * @brief Receives key events to the View.
-       * @details Name "Focused", type Property::BOOLEAN.
-       */
-      FOCUSED = PROPERTY_START_INDEX,
-
-      /**
        * @brief The background of the View.
        *
        * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
        */
-      BACKGROUND,
+      BACKGROUND = PROPERTY_START_INDEX + 1,
 
       /**
        * @brief The outer space around the View.

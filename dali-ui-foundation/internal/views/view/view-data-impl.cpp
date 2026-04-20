@@ -468,7 +468,6 @@ DALI_TYPE_REGISTRATION_END()
 
 // clang-format off
 // Properties registered without macro to use specific member variables.
-const PropertyRegistration ViewDataImpl::PROPERTY_4(typeRegistration,  "focused",                        Ui::View::Property::FOCUSED,                          Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                           Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                          Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -835,19 +834,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
       }
       break;
-
-      case Ui::View::Property::FOCUSED:
-      {
-        if(value.Get<bool>())
-        {
-          viewImpl.SetKeyInputFocus();
-        }
-        else
-        {
-          viewImpl.ClearKeyInputFocus();
-        }
-        break;
-      }
 
       case Ui::View::Property::BACKGROUND:
       {
@@ -1433,12 +1419,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID:
       {
         value = viewImpl.GetViewDataImpl().mDownFocusableActorId;
-        break;
-      }
-
-      case Ui::View::Property::FOCUSED:
-      {
-        value = viewImpl.HasKeyInputFocus();
         break;
       }
 
