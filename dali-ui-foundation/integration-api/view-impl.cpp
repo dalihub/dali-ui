@@ -274,7 +274,6 @@ bool ViewImpl::IsEnabled() const
 void ViewImpl::SetEnabled(bool enabled)
 {
   Self().SetProperty(DevelActor::Property::USER_INTERACTION_ENABLED, enabled);
-  OnEnableChanged(enabled);
 }
 
 bool ViewImpl::IsEffectivelyEnabled() const
@@ -448,16 +447,6 @@ void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
   }
 
   EmitFocusChangedSignal(focused);
-}
-
-void ViewImpl::OnEnableChanged(bool enabled)
-{
-  SetViewState(ViewState::DISABLED, !enabled);
-
-  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
-  {
-    interactiveTrait->OnEnabledChanged(View::DownCast(Self()), enabled);
-  }
 }
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -1958,6 +1947,13 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
       if(!enabled && Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusActor())
       {
         Dali::Ui::FocusManager::Get().ClearFocus();
+      }
+
+      SetViewState(ViewState::DISABLED, !enabled);
+
+      if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+      {
+        interactiveTrait->OnEnabledChanged(View::DownCast(Self()), enabled);
       }
       break;
     }

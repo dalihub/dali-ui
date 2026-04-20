@@ -427,17 +427,6 @@ public: // State API
   void OnFocusChanged(bool focused, InputEvent cause = InputEvent::None());
 
   /**
-   * @brief Called when the view's enabled state changes externally.
-   *
-   * The caller is responsible for invoking this method when
-   * USER_INTERACTION_ENABLED property changes.
-   * Updates the Disabled state accordingly.
-   *
-   * @param[in] enabled True if the view became enabled
-   */
-  void OnEnableChanged(bool enabled);
-
-  /**
    * @copydoc Dali::Ui::View::GetBackgroundColor()
    */
   UiColor GetBackgroundColor();
