@@ -138,21 +138,6 @@ public: // Lifecycle & event callbacks
   virtual void OnInitialize();
 
   /**
-   * @copydoc Dali::CustomActorImpl::OnSceneConnection()
-   * When this View is a layout root and is connected to a window, registers
-   * with LayoutController so that measure/arrange runs even if invalidation
-   * occurred before the view was added to the window.
-   */
-  void OnSceneConnection(int depth) override;
-
-  /**
-   * @brief Override to separate dali-ui layout from DALi size negotiation.
-   * When this View has a LayoutManager, size/position are driven by dali-ui
-   * LayoutController; we no-op. Otherwise delegate to View.
-   */
-  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
-
-  /**
    * @brief Called when the view gains focus.
    */
   virtual void OnFocusGained();
@@ -1133,10 +1118,27 @@ protected: // For derived classes to call
 
 protected: // From CustomActorImpl
   /**
+   * @copydoc Dali::CustomActorImpl::OnSceneConnection()
+   * When this View is a layout root and is connected to a window, registers
+   * with LayoutController so that measure/arrange runs even if invalidation
+   * occurred before the view was added to the window.
+   * @note If overridden, then an up-call to ViewImpl::OnSceneConnection MUST be made at the end.
+   */
+  void OnSceneConnection(int depth) override;
+
+  /**
    * @copydoc CustomActorImpl::OnSceneDisconnection()
    * @note If overridden, then an up-call to ViewImpl::OnSceneDisconnection MUST be made at the end.
    */
   void OnSceneDisconnection() override;
+
+  /**
+   * @brief Override to separate dali-ui layout from DALi size negotiation.
+   * When this View has a LayoutManager, size/position are driven by dali-ui
+   * LayoutController; we no-op. Otherwise delegate to View.
+   * @note If overridden, then an up-call to ViewImpl::OnRelayout MUST be made at the end.
+   */
+  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
    * @copydoc CustomActorImpl::OnChildAdd()
