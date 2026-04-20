@@ -22,6 +22,7 @@
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/any.h>
 #include <dali/public-api/object/base-handle.h>
+#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
