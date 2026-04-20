@@ -57,7 +57,7 @@ namespace // Unnamed namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEYBOARD_FOCUS_MANAGER");
 #endif
 
-const char* const IS_FOCUS_GROUP_PROPERTY_NAME = "isKeyboardFocusGroup"; // This property will be replaced by a flag in View.
+const char* const IS_FOCUS_GROUP_PROPERTY_NAME = "isFocusGroup"; // This property will be replaced by a flag in View.
 
 const char* const FOCUS_BORDER_IMAGE_FILE_NAME = "keyboard_focus.9.png";
 
@@ -419,7 +419,7 @@ void FocusManager::MoveFocusBackward()
 bool FocusManager::IsLayoutView(Actor actor) const
 {
   Ui::View view = Ui::View::DownCast(actor);
-  return view && Integration::GetImpl(view).IsKeyboardNavigationSupported();
+  return view && Integration::GetImpl(view).IsKeyNavigationSupported();
 }
 
 Ui::View FocusManager::GetParentLayoutView(Actor actor) const
@@ -630,7 +630,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
 bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   // Ask the view for the next actor to focus
-  Actor nextFocusableActor = Integration::GetImpl(view).GetNextKeyboardFocusableActor(actor, direction, mFocusGroupLoopEnabled);
+  Actor nextFocusableActor = Integration::GetImpl(view).GetNextFocusableActor(actor, direction, mFocusGroupLoopEnabled);
   if(nextFocusableActor)
   {
     if(!(nextFocusableActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
@@ -671,7 +671,7 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::F
             // If the application hasn't changed our proposed actor, we informs the layout view we will
             // move the focus to what the view returns. The view might wish to perform some actions
             // before the focus is actually moved.
-            Integration::GetImpl(view).OnKeyboardFocusChangeCommitted(committedFocusActor);
+            Integration::GetImpl(view).OnFocusChangeCommitted(committedFocusActor);
           }
 
           return DoSetCurrentFocusActor(committedFocusActor, context);

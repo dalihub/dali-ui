@@ -2579,16 +2579,16 @@ int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
   END_TEST;
 }
 
-int UtcDaliViewSetKeyboardNavigationSupportFiresPropertySetSignalP(void)
+int UtcDaliViewSetKeyNavigationSupportFiresPropertySetSignalP(void)
 {
   UiTestApplication   application;
   Ui::View            view = Ui::View::New();
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetKeyboardNavigationSupport(true);
+  Ui::Integration::GetImpl(view).SetKeyNavigationSupport(true);
 
-  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT));
+  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::KEY_NAVIGATION_SUPPORT));
   END_TEST;
 }
 

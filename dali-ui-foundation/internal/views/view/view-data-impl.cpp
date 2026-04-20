@@ -502,8 +502,8 @@ const PropertyRegistration ViewDataImpl::PROPERTY_37(typeRegistration, "minimumH
 const PropertyRegistration ViewDataImpl::PROPERTY_38(typeRegistration, "maximumWidth",                   Ui::View::Property::MAXIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_39(typeRegistration, "maximumHeight",                  Ui::View::Property::MAXIMUM_HEIGHT,                   Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_40(typeRegistration, "layoutMode",                     Ui::View::Property::LAYOUT_MODE,                      Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_41(typeRegistration, "keyboardNavigationSupport",      Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_42(typeRegistration, "keyboardFocusGroup",             Ui::View::Property::KEYBOARD_FOCUS_GROUP,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_41(typeRegistration, "keyNavigationSupport",      Ui::View::Property::KEY_NAVIGATION_SUPPORT,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_42(typeRegistration, "focusGroup",             Ui::View::Property::FOCUS_GROUP,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -551,8 +551,8 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mIdleCallback(nullptr),
   mFlags(Integration::ViewImpl::ViewBehaviour(Integration::ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
   mAccessibilityRole{static_cast<int32_t>(AccessibilityRole::NONE)},
-  mIsKeyboardNavigationSupported(false),
-  mIsKeyboardFocusGroup(false),
+  mIsKeyNavigationSupported(false),
+  mIsFocusGroup(false),
   mIsEmittingResourceReadySignal(false),
   mIdleCallbackRegistered(false),
   mDispatchKeyEvents(true),
@@ -1450,22 +1450,22 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT:
+      case Ui::View::Property::KEY_NAVIGATION_SUPPORT:
       {
         bool supported;
         if(value.Get(supported))
         {
-          viewImpl.GetViewDataImpl().mIsKeyboardNavigationSupported = supported;
+          viewImpl.GetViewDataImpl().mIsKeyNavigationSupported = supported;
         }
         break;
       }
 
-      case Ui::View::Property::KEYBOARD_FOCUS_GROUP:
+      case Ui::View::Property::FOCUS_GROUP:
       {
         bool isFocusGroup;
         if(value.Get(isFocusGroup))
         {
-          viewImpl.GetViewDataImpl().mIsKeyboardFocusGroup = isFocusGroup;
+          viewImpl.GetViewDataImpl().mIsFocusGroup = isFocusGroup;
 
           // The following line will be removed when the deprecated API in FocusManager is deleted
           Ui::FocusManager::Get().SetAsFocusGroup(viewImpl.Self(), isFocusGroup);
@@ -1744,15 +1744,15 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT:
+      case Ui::View::Property::KEY_NAVIGATION_SUPPORT:
       {
-        value = viewImpl.GetViewDataImpl().mIsKeyboardNavigationSupported;
+        value = viewImpl.GetViewDataImpl().mIsKeyNavigationSupported;
         break;
       }
 
-      case Ui::View::Property::KEYBOARD_FOCUS_GROUP:
+      case Ui::View::Property::FOCUS_GROUP:
       {
-        value = viewImpl.GetViewDataImpl().mIsKeyboardFocusGroup;
+        value = viewImpl.GetViewDataImpl().mIsFocusGroup;
         break;
       }
 

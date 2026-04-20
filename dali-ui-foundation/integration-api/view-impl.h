@@ -131,14 +131,14 @@ protected:
    */
   ViewImpl();
 
-public: // From Ui::Internal::View
+public: // Lifecycle & event callbacks
   /**
-   * @copydoc Ui::Internal::View::OnInitialize
+   * @brief Called after the actor has been initialized.
    */
   virtual void OnInitialize();
 
   /**
-   * @copydoc Ui::Internal::View::OnSceneConnection
+   * @copydoc Dali::CustomActorImpl::OnSceneConnection()
    * When this View is a layout root and is connected to a window, registers
    * with LayoutController so that measure/arrange runs even if invalidation
    * occurred before the view was added to the window.
@@ -153,17 +153,19 @@ public: // From Ui::Internal::View
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc Ui::Internal::View::OnFocusGained
+   * @brief Called when the view gains focus.
    */
   virtual void OnFocusGained();
 
   /**
-   * @copydoc Ui::Internal::View::OnFocusLost
+   * @brief Called when the view loses focus.
    */
   virtual void OnFocusLost();
 
   /**
-   * @copydoc Ui::Internal::View::OnKeyEvent
+   * @brief Called when a key event is received.
+   * @param[in] event The key event
+   * @return True if the event is consumed
    */
   virtual bool OnKeyEvent(const Dali::KeyEvent& event);
 
@@ -1000,24 +1002,24 @@ public:
    */
   LongPressGestureDetector GetLongPressGestureDetector() const;
 
-  // Keyboard Navigation
+  // Key Navigation
 
   /**
    * @brief Sets whether this view supports two dimensional
-   * keyboard navigation (i.e. whether it knows how to handle the
-   * keyboard focus movement between its child actors).
+   * key navigation (i.e. whether it knows how to handle the
+   * key focus movement between its child actors).
    *
    * The view doesn't support it by default.
-   * @param[in] isSupported Whether this view supports two dimensional keyboard navigation
+   * @param[in] isSupported Whether this view supports two dimensional key navigation
    */
-  void SetKeyboardNavigationSupport(bool isSupported);
+  void SetKeyNavigationSupport(bool isSupported);
 
   /**
-   * @brief Gets whether this view supports two dimensional keyboard navigation.
+   * @brief Gets whether this view supports two dimensional key navigation.
    *
-   * @return true if this view supports two dimensional keyboard navigation
+   * @return true if this view supports two dimensional key navigation
    */
-  bool IsKeyboardNavigationSupported();
+  bool IsKeyNavigationSupported();
 
   // Key Input
 
@@ -1036,23 +1038,23 @@ public:
    */
   void ClearKeyInputFocus();
 
-  // Keyboard Focus
+  // Focus Group
 
   /**
-   * @brief Sets whether this view is a focus group for keyboard navigation.
+   * @brief Sets whether this view is a focus group for key navigation.
    *
-   * (i.e. the scope of keyboard focus movement
+   * (i.e. the scope of key focus movement
    * can be limited to its child actors). The view is not a focus group by default.
-   * @param[in] isFocusGroup Whether this view is set as a focus group for keyboard navigation
+   * @param[in] isFocusGroup Whether this view is set as a focus group for key navigation
    */
-  void SetAsKeyboardFocusGroup(bool isFocusGroup);
+  void SetAsFocusGroup(bool isFocusGroup);
 
   /**
-   * @brief Gets whether this view is a focus group for keyboard navigation.
+   * @brief Gets whether this view is a focus group for key navigation.
    *
-   * @return true if this view is set as a focus group for keyboard navigation
+   * @return true if this view is set as a focus group for key navigation
    */
-  bool IsKeyboardFocusGroup();
+  bool IsFocusGroup();
 
   /**
    * @brief Get texture output of offscreen rendering.
@@ -1235,8 +1237,8 @@ public: // Helpers for deriving classes
     VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
                                 ///< but doesn't receive event callbacks.
     NOT_IN_USE_1 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
-    REQUIRES_KEYBOARD_NAVIGATION_SUPPORT =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support keyboard navigation
+    REQUIRES_KEY_NAVIGATION_SUPPORT =
+      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
     DISABLE_STYLE_CHANGE_SIGNALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT +
                                          2), ///< True if view should not monitor style change signals
     DISABLE_VISUALS =
@@ -1330,19 +1332,19 @@ public: // API for derived classes to override
    */
   virtual ViewAccessible* CreateAccessibleObject();
 
-  // Keyboard focus
+  // Key focus
 
   /**
-   * @brief Gets the next keyboard focusable actor in this view towards the given direction.
+   * @brief Gets the next focusable actor in this view towards the given direction.
    *
-   * A view needs to override this function in order to support two dimensional keyboard navigation.
+   * A view needs to override this function in order to support two dimensional key navigation.
    * @param[in] currentFocusedActor The current focused actor
    * @param[in] direction The direction to move the focus towards
    * @param[in] loopEnabled Whether the focus movement should be looped within the view
-   * @return The next keyboard focusable actor in this view or an empty handle if no actor can be focused
+   * @return The next focusable actor in this view or an empty handle if no actor can be focused
    */
-  virtual Actor GetNextKeyboardFocusableActor(Actor              currentFocusedActor,
-                                              Ui::FocusDirection direction, bool loopEnabled);
+  virtual Actor GetNextFocusableActor(Actor              currentFocusedActor,
+                                      Ui::FocusDirection direction, bool loopEnabled);
 
   /**
    * @brief Informs this view that its chosen focusable actor will be focused.
@@ -1352,7 +1354,7 @@ public: // API for derived classes to override
    *
    * @param[in] committedFocusableActor The committed focusable actor
    */
-  virtual void OnKeyboardFocusChangeCommitted(Actor committedFocusableActor);
+  virtual void OnFocusChangeCommitted(Actor committedFocusableActor);
 
   /**
    * @brief This method is called when the view has enter pressed on it.

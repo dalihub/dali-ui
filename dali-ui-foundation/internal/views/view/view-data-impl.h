@@ -531,8 +531,8 @@ public:
   // Keep it on ViewDataImpl to avoid AccessibilityData creation.
   int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(AccessibilityRole::MAX_COUNT)>::value + 2;
 
-  bool mIsKeyboardNavigationSupported : 1; ///< Stores whether keyboard navigation is supported by the view.
-  bool mIsKeyboardFocusGroup : 1;          ///< Stores whether the view is a focus group.
+  bool mIsKeyNavigationSupported : 1;      ///< Stores whether keyboard navigation is supported by the view.
+  bool mIsFocusGroup : 1;                  ///< Stores whether the view is a focus group.
   bool mIsEmittingResourceReadySignal : 1; ///< True during ResourceReady().
   bool mIdleCallbackRegistered : 1;        ///< True if need to emit the resource ready signal again.
   bool mDispatchKeyEvents : 1;             ///< Whether the actor emits key event signals

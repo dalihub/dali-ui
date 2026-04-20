@@ -1475,9 +1475,9 @@ void ViewImpl::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  if(mImpl->mFlags & Ui::Integration::ViewImpl::ViewBehaviour::REQUIRES_KEYBOARD_NAVIGATION_SUPPORT)
+  if(mImpl->mFlags & Ui::Integration::ViewImpl::ViewBehaviour::REQUIRES_KEY_NAVIGATION_SUPPORT)
   {
-    SetKeyboardNavigationSupport(true);
+    SetKeyNavigationSupport(true);
   }
 }
 
@@ -1660,14 +1660,14 @@ LongPressGestureDetector ViewImpl::GetLongPressGestureDetector() const
   return mImpl->mLongPressGestureDetector;
 }
 
-void ViewImpl::SetKeyboardNavigationSupport(bool isSupported)
+void ViewImpl::SetKeyNavigationSupport(bool isSupported)
 {
-  Self().SetProperty(Ui::View::Property::KEYBOARD_NAVIGATION_SUPPORT, isSupported);
+  Self().SetProperty(Ui::View::Property::KEY_NAVIGATION_SUPPORT, isSupported);
 }
 
-bool ViewImpl::IsKeyboardNavigationSupported()
+bool ViewImpl::IsKeyNavigationSupported()
 {
-  return mImpl->mIsKeyboardNavigationSupported;
+  return mImpl->mIsKeyNavigationSupported;
 }
 
 void ViewImpl::SetKeyInputFocus()
@@ -1700,12 +1700,12 @@ void ViewImpl::ClearKeyInputFocus()
   }
 }
 
-void ViewImpl::SetAsKeyboardFocusGroup(bool isFocusGroup)
+void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
 {
-  Self().SetProperty(Ui::View::Property::KEYBOARD_FOCUS_GROUP, isFocusGroup);
+  Self().SetProperty(Ui::View::Property::FOCUS_GROUP, isFocusGroup);
 }
 
-bool ViewImpl::IsKeyboardFocusGroup()
+bool ViewImpl::IsFocusGroup()
 {
   return Ui::FocusManager::Get().IsFocusGroup(Self());
 }
@@ -1750,13 +1750,13 @@ ViewAccessible* ViewImpl::CreateAccessibleObject()
   return new ViewAccessible(Self());
 }
 
-Actor ViewImpl::GetNextKeyboardFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction,
-                                              bool loopEnabled)
+Actor ViewImpl::GetNextFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction,
+                                      bool loopEnabled)
 {
   return Actor();
 }
 
-void ViewImpl::OnKeyboardFocusChangeCommitted(Actor committedFocusableActor)
+void ViewImpl::OnFocusChangeCommitted(Actor committedFocusableActor)
 {
 }
 

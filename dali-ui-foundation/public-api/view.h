@@ -1440,16 +1440,16 @@ public:
       LAYOUT_MODE,
 
       /**
-       * @brief Whether the View supports keyboard navigation.
-       * @details Name "keyboardNavigationSupport", type Property::BOOLEAN.
+       * @brief Whether the View supports key navigation.
+       * @details Name "keyNavigationSupport", type Property::BOOLEAN.
        */
-      KEYBOARD_NAVIGATION_SUPPORT,
+      KEY_NAVIGATION_SUPPORT,
 
       /**
-       * @brief Whether the View acts as a keyboard focus group boundary.
-       * @details Name "keyboardFocusGroup", type Property::BOOLEAN.
+       * @brief Whether the View acts as a focus group boundary.
+       * @details Name "focusGroup", type Property::BOOLEAN.
        */
-      KEYBOARD_FOCUS_GROUP,
+      FOCUS_GROUP,
 
       /**
        * @brief The radius for the rounded corners of the View.
