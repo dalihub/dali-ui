@@ -370,6 +370,7 @@ private:
   {
     // Change card background to white
     info.card.SetBackgroundColor(CARD_BG_FOCUSED_COLOR);
+    info.card.RaiseToTop(LayoutOrderPolicy::PRESERVE);
 
     // Change text color to dark
     info.titleLabel.SetTextColor(TEXT_FOCUSED_COLOR);
