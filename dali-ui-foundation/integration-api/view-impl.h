@@ -122,25 +122,18 @@ public:
   {
     VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
                                 ///< but doesn't receive event callbacks.
-    NOT_IN_USE_1 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
-    REQUIRES_KEY_NAVIGATION_SUPPORT =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
-    DISABLE_STYLE_CHANGE_SIGNALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT +
-                                         2), ///< True if view should not monitor style change signals
-    DISABLE_VISUALS =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 3), ///< True if view should not use visuals
+    NOT_IN_USE_1                    = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
+    REQUIRES_KEY_NAVIGATION_SUPPORT = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
+    DISABLE_VISUALS                 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 2), ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
 
-  static const int VIEW_BEHAVIOUR_FLAG_COUNT =
-    Log<LAST_VIEW_BEHAVIOUR_FLAG - 1>::value + 1; ///< Total count of flags
+  static const int VIEW_BEHAVIOUR_FLAG_COUNT = Log<LAST_VIEW_BEHAVIOUR_FLAG - 1>::value + 1; ///< Total count of flags
 
 public: // ABI-frozen virtual API
   // ============================================================
-  // WARNING: Do NOT reorder, remove, or change signatures.
-  //          New virtual methods must be appended at the END of
-  //          this section (or the protected ABI-frozen section).
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
   // ============================================================
 
   /**
@@ -233,31 +226,6 @@ public: // ABI-frozen virtual API
    * @return true if this view supported this action
    */
   virtual bool OnKeyboardEnter();
-
-  /**
-   * @brief Called whenever a pinch gesture is detected on this view.
-   * @param[in] pinch The pinch gesture
-   * @note If overridden, then the default pinch-to-zoom behavior will not occur.
-   */
-  virtual void OnPinch(const PinchGesture& pinch);
-
-  /**
-   * @brief Called whenever a pan gesture is detected on this view.
-   * @param[in] pan The pan gesture
-   */
-  virtual void OnPan(const PanGesture& pan);
-
-  /**
-   * @brief Called whenever a tap gesture is detected on this view.
-   * @param[in] tap The tap gesture
-   */
-  virtual void OnTap(const TapGesture& tap);
-
-  /**
-   * @brief Called whenever a long press gesture is detected on this view.
-   * @param[in] longPress The long press gesture
-   */
-  virtual void OnLongPress(const LongPressGesture& longPress);
 
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
@@ -908,48 +876,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   std::vector<Accessibility::Relation> GetAccessibilityRelations();
 
-  // Gesture Detection
-
-  /**
-   * @brief Enables gesture detection for the given type(s).
-   * @param[in] type The gesture type(s) to enable (can be bitwise OR'd)
-   */
-  void EnableGestureDetection(GestureType::Value type);
-
-  /**
-   * @brief Disables gesture detection for the given type(s).
-   * @param[in] type The gesture type(s) to disable (can be bitwise OR'd)
-   */
-  void DisableGestureDetection(GestureType::Value type);
-
-  /**
-   * @brief Gets the pinch gesture detector.
-   * @return The pinch gesture detector
-   * @pre Pinch detection should have been enabled via EnableGestureDetection().
-   */
-  PinchGestureDetector GetPinchGestureDetector() const;
-
-  /**
-   * @brief Gets the pan gesture detector.
-   * @return The pan gesture detector
-   * @pre Pan detection should have been enabled via EnableGestureDetection().
-   */
-  PanGestureDetector GetPanGestureDetector() const;
-
-  /**
-   * @brief Gets the tap gesture detector.
-   * @return The tap gesture detector
-   * @pre Tap detection should have been enabled via EnableGestureDetection().
-   */
-  TapGestureDetector GetTapGestureDetector() const;
-
-  /**
-   * @brief Gets the long press gesture detector.
-   * @return The long press gesture detector
-   * @pre Long press detection should have been enabled via EnableGestureDetection().
-   */
-  LongPressGestureDetector GetLongPressGestureDetector() const;
-
   // Key Navigation & Focus
 
   /**
@@ -1046,7 +972,7 @@ public: // Non-virtual API (safe to reorder / extend)
 protected:
   // ============================================================
   // protected: ABI-frozen virtual API
-  // WARNING: Do NOT reorder, remove, or change signatures.
+  // WARNING: Do NOT add, reorder, remove, or change signatures.
   // ============================================================
 
   /**

@@ -127,34 +127,6 @@ public:
   Ui::InteractiveTraitInterface* GetInteractiveTrait() const;
 
   /**
-   * @brief Called when a pinch is detected.
-   * @param[in] actor The actor the pinch occurred on
-   * @param[in] pinch The pinch gesture details
-   */
-  void PinchDetected(Actor actor, const PinchGesture& pinch);
-
-  /**
-   * @brief Called when a pan is detected.
-   * @param[in] actor The actor the pan occurred on
-   * @param[in] pinch The pan gesture details
-   */
-  void PanDetected(Actor actor, const PanGesture& pan);
-
-  /**
-   * @brief Called when a tap is detected.
-   * @param[in] actor The actor the tap occurred on
-   * @param[in] pinch The tap gesture details
-   */
-  void TapDetected(Actor actor, const TapGesture& tap);
-
-  /**
-   * @brief Called when a long-press is detected.
-   * @param[in] actor The actor the long-press occurred on
-   * @param[in] pinch The long-press gesture details
-   */
-  void LongPressDetected(Actor actor, const LongPressGesture& longPress);
-
-  /**
    * @brief Called when resources of view are ready.
    */
   void ResourceReady();
@@ -512,28 +484,21 @@ public:
   int mClockwiseFocusableActorId;        ///< Actor ID of Clockwise focusable view.
   int mCounterClockwiseFocusableActorId; ///< Actor ID of Counter clockwise focusable view.
 
-  Vector4                           mBackgroundColor;    ///< The color of the background visual
-  Extents                           mMargin;             ///< Layout margin
-  Extents                           mPadding;            ///< Layout padding
-  float                             mRequestedWidth;     ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                             mRequestedHeight;    ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                             mMinimumWidth;       ///< Minimum width applied during measurement
-  float                             mMinimumHeight;      ///< Minimum height applied during measurement
-  float                             mMaximumWidth;       ///< Maximum width applied during measurement
-  float                             mMaximumHeight;      ///< Maximum height applied during measurement
-  Ui::LayoutMode                    mLayoutMode;         ///< Layout mode of the view
-  RenderEffectImplPtr               mRenderEffect;       ///< The render effect on this view
-  Vector3*                          mStartingPinchScale; ///< The scale when a pinch gesture starts, TODO: consider removing this
-  Vector2                           mSize;               ///< The size of the view
+  Vector4                           mBackgroundColor; ///< The color of the background visual
+  Extents                           mMargin;          ///< Layout margin
+  Extents                           mPadding;         ///< Layout padding
+  float                             mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float                             mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float                             mMinimumWidth;    ///< Minimum width applied during measurement
+  float                             mMinimumHeight;   ///< Minimum height applied during measurement
+  float                             mMaximumWidth;    ///< Maximum width applied during measurement
+  float                             mMaximumHeight;   ///< Maximum height applied during measurement
+  Ui::LayoutMode                    mLayoutMode;      ///< Layout mode of the view
+  RenderEffectImplPtr               mRenderEffect;    ///< The render effect on this view
+  Vector2                           mSize;            ///< The size of the view
   Ui::View::KeyEventSignalType      mKeyEventSignal;
   Ui::View::FocusChangedSignalType  mFocusChangedSignal;
   Ui::View::ResourceReadySignalType mResourceReadySignal;
-
-  // Gesture Detection
-  PinchGestureDetector     mPinchGestureDetector;
-  PanGestureDetector       mPanGestureDetector;
-  TapGestureDetector       mTapGestureDetector;
-  LongPressGestureDetector mLongPressGestureDetector;
 
   // Off screen rendering context
   std::unique_ptr<OffScreenRenderingImpl> mOffScreenRenderingImpl;

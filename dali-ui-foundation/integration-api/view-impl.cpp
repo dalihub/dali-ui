@@ -1569,85 +1569,6 @@ std::shared_ptr<Ui::ViewAccessible> ViewImpl::GetAccessibleObject()
   return mImpl->GetAccessibleObject();
 }
 
-void ViewImpl::EnableGestureDetection(GestureType::Value type)
-{
-  if((type & GestureType::PINCH) && !mImpl->mPinchGestureDetector)
-  {
-    mImpl->mPinchGestureDetector = PinchGestureDetector::New();
-    mImpl->mPinchGestureDetector.DetectedSignal().Connect(mImpl, &Internal::ViewDataImpl::PinchDetected);
-    mImpl->mPinchGestureDetector.Attach(Self());
-  }
-
-  if((type & GestureType::PAN) && !mImpl->mPanGestureDetector)
-  {
-    mImpl->mPanGestureDetector = PanGestureDetector::New();
-    mImpl->mPanGestureDetector.SetMaximumTouchesRequired(2);
-    mImpl->mPanGestureDetector.DetectedSignal().Connect(mImpl, &Internal::ViewDataImpl::PanDetected);
-    mImpl->mPanGestureDetector.Attach(Self());
-  }
-
-  if((type & GestureType::TAP) && !mImpl->mTapGestureDetector)
-  {
-    mImpl->mTapGestureDetector = TapGestureDetector::New();
-    mImpl->mTapGestureDetector.DetectedSignal().Connect(mImpl, &Internal::ViewDataImpl::TapDetected);
-    mImpl->mTapGestureDetector.Attach(Self());
-  }
-
-  if((type & GestureType::LONG_PRESS) && !mImpl->mLongPressGestureDetector)
-  {
-    mImpl->mLongPressGestureDetector = LongPressGestureDetector::New();
-    mImpl->mLongPressGestureDetector.DetectedSignal().Connect(mImpl, &Internal::ViewDataImpl::LongPressDetected);
-    mImpl->mLongPressGestureDetector.Attach(Self());
-  }
-}
-
-void ViewImpl::DisableGestureDetection(GestureType::Value type)
-{
-  if((type & GestureType::PINCH) && mImpl->mPinchGestureDetector)
-  {
-    mImpl->mPinchGestureDetector.Detach(Self());
-    mImpl->mPinchGestureDetector.Reset();
-  }
-
-  if((type & GestureType::PAN) && mImpl->mPanGestureDetector)
-  {
-    mImpl->mPanGestureDetector.Detach(Self());
-    mImpl->mPanGestureDetector.Reset();
-  }
-
-  if((type & GestureType::TAP) && mImpl->mTapGestureDetector)
-  {
-    mImpl->mTapGestureDetector.Detach(Self());
-    mImpl->mTapGestureDetector.Reset();
-  }
-
-  if((type & GestureType::LONG_PRESS) && mImpl->mLongPressGestureDetector)
-  {
-    mImpl->mLongPressGestureDetector.Detach(Self());
-    mImpl->mLongPressGestureDetector.Reset();
-  }
-}
-
-PinchGestureDetector ViewImpl::GetPinchGestureDetector() const
-{
-  return mImpl->mPinchGestureDetector;
-}
-
-PanGestureDetector ViewImpl::GetPanGestureDetector() const
-{
-  return mImpl->mPanGestureDetector;
-}
-
-TapGestureDetector ViewImpl::GetTapGestureDetector() const
-{
-  return mImpl->mTapGestureDetector;
-}
-
-LongPressGestureDetector ViewImpl::GetLongPressGestureDetector() const
-{
-  return mImpl->mLongPressGestureDetector;
-}
-
 void ViewImpl::SetKeyNavigationSupport(bool isSupported)
 {
   Self().SetProperty(Ui::View::Property::KEY_NAVIGATION_SUPPORT, isSupported);
@@ -2027,33 +1948,6 @@ bool ViewImpl::IsResourceReady() const
 bool ViewImpl::IsOnScene() const
 {
   return Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
-}
-
-void ViewImpl::OnPinch(const PinchGesture& pinch)
-{
-  if(!(mImpl->mStartingPinchScale))
-  {
-    // lazy allocate
-    mImpl->mStartingPinchScale = new Vector3;
-  }
-
-  if(pinch.GetState() == GestureState::STARTED)
-  {
-    *(mImpl->mStartingPinchScale) = Self().GetCurrentProperty<Vector3>(Actor::Property::SCALE);
-  }
-  Self().SetProperty(Actor::Property::SCALE, *(mImpl->mStartingPinchScale) * pinch.GetScale());
-}
-
-void ViewImpl::OnPan(const PanGesture& pan)
-{
-}
-
-void ViewImpl::OnTap(const TapGesture& tap)
-{
-}
-
-void ViewImpl::OnLongPress(const LongPressGesture& longPress)
-{
 }
 
 void ViewImpl::OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension)

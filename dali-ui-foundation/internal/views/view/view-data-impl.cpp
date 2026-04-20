@@ -349,10 +349,6 @@ bool DoLegacyAccessibilityAction(BaseObject* object, const Dali::String& actionN
 
 const char* SIGNAL_KEY_EVENT       = "keyEvent";
 const char* SIGNAL_FOCUS_CHANGED   = "focusChanged";
-const char* SIGNAL_TAPPED          = "tapped";
-const char* SIGNAL_PANNED          = "panned";
-const char* SIGNAL_PINCHED         = "pinched";
-const char* SIGNAL_LONG_PRESSED    = "longPressed";
 const char* SIGNAL_GET_NAME        = "getName";
 const char* SIGNAL_GET_DESCRIPTION = "getDescription";
 const char* SIGNAL_DO_GESTURE      = "doGesture";
@@ -388,26 +384,6 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
     {
       viewImpl.FocusChangedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_TAPPED))
-    {
-      viewImpl.EnableGestureDetection(GestureType::TAP);
-      viewImpl.GetTapGestureDetector().DetectedSignal().Connect(tracker, functor);
-    }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_PANNED))
-    {
-      viewImpl.EnableGestureDetection(GestureType::PAN);
-      viewImpl.GetPanGestureDetector().DetectedSignal().Connect(tracker, functor);
-    }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_PINCHED))
-    {
-      viewImpl.EnableGestureDetection(GestureType::PINCH);
-      viewImpl.GetPinchGestureDetector().DetectedSignal().Connect(tracker, functor);
-    }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_LONG_PRESSED))
-    {
-      viewImpl.EnableGestureDetection(GestureType::LONG_PRESS);
-      viewImpl.GetLongPressGestureDetector().DetectedSignal().Connect(tracker, functor);
-    }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_NAME))
     {
       viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityGetNameSignal.Connect(tracker, functor);
@@ -440,10 +416,6 @@ DALI_TYPE_REGISTRATION_BEGIN(View, CustomActor, Create);
 
 SignalConnectorType registerSignal1(typeRegistration, SIGNAL_KEY_EVENT, &DoConnectSignal);
 SignalConnectorType registerSignal2(typeRegistration, SIGNAL_FOCUS_CHANGED, &DoConnectSignal);
-SignalConnectorType registerSignal3(typeRegistration, SIGNAL_TAPPED, &DoConnectSignal);
-SignalConnectorType registerSignal4(typeRegistration, SIGNAL_PANNED, &DoConnectSignal);
-SignalConnectorType registerSignal5(typeRegistration, SIGNAL_PINCHED, &DoConnectSignal);
-SignalConnectorType registerSignal6(typeRegistration, SIGNAL_LONG_PRESSED, &DoConnectSignal);
 SignalConnectorType registerSignal7(typeRegistration, SIGNAL_GET_NAME, &DoConnectSignal);
 SignalConnectorType registerSignal8(typeRegistration, SIGNAL_GET_DESCRIPTION, &DoConnectSignal);
 SignalConnectorType registerSignal9(typeRegistration, SIGNAL_DO_GESTURE, &DoConnectSignal);
@@ -543,15 +515,10 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mMaximumHeight(std::numeric_limits<float>::max()),
   mLayoutMode(Ui::LayoutMode::DEFAULT),
   mRenderEffect(nullptr),
-  mStartingPinchScale(nullptr),
   mSize(0, 0),
   mKeyEventSignal(),
   mFocusChangedSignal(),
   mResourceReadySignal(),
-  mPinchGestureDetector(),
-  mPanGestureDetector(),
-  mTapGestureDetector(),
-  mLongPressGestureDetector(),
   mOffScreenRenderingImpl(nullptr),
   mOffScreenRenderingType(Ui::View::OffScreenRenderingType::NONE),
   mInputMethodContext(),
@@ -574,9 +541,6 @@ ViewDataImpl::~ViewDataImpl()
   {
     mVisualData->ClearVisuals();
   }
-
-  // All gesture detectors will be destroyed so no need to disconnect.
-  delete mStartingPinchScale;
 
   if(mProcessorRegistered && Adaptor::IsAvailable())
   {
@@ -698,27 +662,6 @@ const ViewDataImpl& ViewDataImpl::Get(const Integration::ViewImpl& viewImpl)
   DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
 
   return viewImpl.GetViewDataImpl();
-}
-
-// Gesture Detection Methods
-void ViewDataImpl::PinchDetected(Actor actor, const PinchGesture& pinch)
-{
-  mViewImpl.OnPinch(pinch);
-}
-
-void ViewDataImpl::PanDetected(Actor actor, const PanGesture& pan)
-{
-  mViewImpl.OnPan(pan);
-}
-
-void ViewDataImpl::TapDetected(Actor actor, const TapGesture& tap)
-{
-  mViewImpl.OnTap(tap);
-}
-
-void ViewDataImpl::LongPressDetected(Actor actor, const LongPressGesture& longPress)
-{
-  mViewImpl.OnLongPress(longPress);
 }
 
 void ViewDataImpl::ResourceReady()

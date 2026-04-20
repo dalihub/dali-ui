@@ -685,9 +685,20 @@ void InputFieldImpl::OnInitialize()
   }
 
   // Forward input events to controller
-  EnableGestureDetection(static_cast<GestureType::Value>(GestureType::TAP | GestureType::PAN | GestureType::LONG_PRESS));
-  GetTapGestureDetector().SetMaximumTapsRequired(2);
-  GetTapGestureDetector().ReceiveAllTapEvents(true);
+  mTapGestureDetector = TapGestureDetector::New();
+  mTapGestureDetector.SetMaximumTapsRequired(2);
+  mTapGestureDetector.ReceiveAllTapEvents(true);
+  mTapGestureDetector.DetectedSignal().Connect(this, &InputFieldImpl::OnTapDetected);
+  mTapGestureDetector.Attach(self);
+
+  mPanGestureDetector = PanGestureDetector::New();
+  mPanGestureDetector.SetMaximumTouchesRequired(2);
+  mPanGestureDetector.DetectedSignal().Connect(this, &InputFieldImpl::OnPanDetected);
+  mPanGestureDetector.Attach(self);
+
+  mLongPressGestureDetector = LongPressGestureDetector::New();
+  mLongPressGestureDetector.DetectedSignal().Connect(this, &InputFieldImpl::OnLongPressDetected);
+  mLongPressGestureDetector.Attach(self);
 
   self.TouchedSignal().Connect(this, &InputFieldImpl::OnTouched);
 
@@ -914,7 +925,7 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
   return mController->KeyEvent(event);
 }
 
-void InputFieldImpl::OnTap(const TapGesture& gesture)
+void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
 
@@ -932,7 +943,7 @@ void InputFieldImpl::OnTap(const TapGesture& gesture)
   SetKeyInputFocus();
 }
 
-void InputFieldImpl::OnPan(const PanGesture& gesture)
+void InputFieldImpl::OnPanDetected(Actor actor, const PanGesture& gesture)
 {
   if(!mController->IsScrollable(gesture.GetDisplacement()))
   {
@@ -945,7 +956,7 @@ void InputFieldImpl::OnPan(const PanGesture& gesture)
   mController->PanEvent(gesture.GetState(), gesture.GetDisplacement());
 }
 
-void InputFieldImpl::OnLongPress(const LongPressGesture& gesture)
+void InputFieldImpl::OnLongPressDetected(Actor actor, const LongPressGesture& gesture)
 {
   if(mInputMethodContext && IsEditable())
   {

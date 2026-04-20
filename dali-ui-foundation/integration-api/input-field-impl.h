@@ -448,21 +448,6 @@ private: // From ViewImpl
    */
   bool OnKeyEvent(const KeyEvent& event) override;
 
-  /**
-   * @copydoc Integration::ViewImpl::OnTap()
-   */
-  void OnTap(const TapGesture& tap) override;
-
-  /**
-   * @copydoc Integration::ViewImpl::OnPan()
-   */
-  void OnPan(const PanGesture& gesture) override;
-
-  /**
-   * @copydoc Integration::ViewImpl::OnLongPress()
-   */
-  void OnLongPress(const LongPressGesture& gesture) override;
-
 protected: // From ViewImpl
   /**
    * @copydoc Integration::ViewImpl::OnMeasure
@@ -623,6 +608,21 @@ private: // Implementation
   void OnSceneConnect(Dali::Actor actor);
 
   /**
+   * @brief Callback when a tap gesture is detected.
+   */
+  void OnTapDetected(Actor actor, const TapGesture& tap);
+
+  /**
+   * @brief Callback when a pan gesture is detected.
+   */
+  void OnPanDetected(Actor actor, const PanGesture& pan);
+
+  /**
+   * @brief Callback when a long press gesture is detected.
+   */
+  void OnLongPressDetected(Actor actor, const LongPressGesture& longPress);
+
+  /**
    * @brief Callback when InputField is touched
    *
    * @param[in] actor InputField touched
@@ -728,6 +728,9 @@ private:
   Signal<void(View)> mMaxLengthReachedSignal;
 
   InputMethodContext          mInputMethodContext;
+  TapGestureDetector          mTapGestureDetector;
+  PanGestureDetector          mPanGestureDetector;
+  LongPressGestureDetector    mLongPressGestureDetector;
   Text::ControllerPtr         mController;
   Text::RendererPtr           mRenderer;
   Text::DecoratorPtr          mDecorator;
