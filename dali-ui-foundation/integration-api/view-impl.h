@@ -90,15 +90,14 @@ using ViewImplPtr = IntrusivePtr<ViewImpl>;
 class DALI_UI_API ViewImpl : public CustomActorImpl, public ConnectionTrackerInterface
 {
 public:
-  class Extension; ///< Forward declare future extension interface
+  // ============================================================
+  // Types
+  // ============================================================
 
-  // Creation & Destruction
+  class Extension; ///< Forward declare future extension interface
 
   /**
    * @brief Child data structure for layout calculations.
-   *
-   * Stores information about each child including the View handle,
-   * measured size, and arranged bounds.
    */
   struct ChildData
   {
@@ -107,31 +106,43 @@ public:
     LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
   };
 
-  /**
-   * @brief Container type for children.
-   */
-  using ChildContainer = std::vector<ChildData>;
+  using ChildContainer         = std::vector<ChildData>;
+  using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
+
+  /// @brief AccessibilityDoGesture signal type.
+  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+
+  /// @brief AccessibilityAction signal type.
+  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
 
   /**
-   * @brief Creates a new View.
+   * @brief Flags for the constructor.
    */
-  static ViewImplPtr New();
+  enum ViewBehaviour
+  {
+    VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
+                                ///< but doesn't receive event callbacks.
+    NOT_IN_USE_1 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
+    REQUIRES_KEY_NAVIGATION_SUPPORT =
+      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
+    DISABLE_STYLE_CHANGE_SIGNALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT +
+                                         2), ///< True if view should not monitor style change signals
+    DISABLE_VISUALS =
+      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 3), ///< True if view should not use visuals
 
-protected:
-  /**
-   * @brief Destructor.
-   * A reference counted object may only be deleted by calling Unreference()
-   */
-  virtual ~ViewImpl();
+    LAST_VIEW_BEHAVIOUR_FLAG
+  };
 
-  // Construction
+  static const int VIEW_BEHAVIOUR_FLAG_COUNT =
+    Log<LAST_VIEW_BEHAVIOUR_FLAG - 1>::value + 1; ///< Total count of flags
 
-  /**
-   * @brief View constructor.
-   */
-  ViewImpl();
+public: // ABI-frozen virtual API
+  // ============================================================
+  // WARNING: Do NOT reorder, remove, or change signatures.
+  //          New virtual methods must be appended at the END of
+  //          this section (or the protected ABI-frozen section).
+  // ============================================================
 
-public: // Lifecycle & event callbacks
   /**
    * @brief Called after the actor has been initialized.
    */
@@ -154,182 +165,174 @@ public: // Lifecycle & event callbacks
    */
   virtual bool OnKeyEvent(const Dali::KeyEvent& event);
 
-public: // API (size, position, parent origin, pivot)
   /**
-   * @copydoc Dali::Ui::View::GetScaleX
+   * @copydoc Dali::Ui::View::IsResourceReady
    */
-  float GetScaleX() const;
+  virtual bool IsResourceReady() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetScaleX
+   * @brief Returns whether this view acts as a layout container.
+   * @return True if this view has a LayoutManager attached
    */
-  void SetScaleX(float scaleX);
+  virtual bool IsLayout() const;
 
   /**
-   * @copydoc Dali::Ui::View::GetScaleY
+   * @brief This method is called when the view is accessibility activated.
+   * @return true if this view can perform accessibility activation
    */
-  float GetScaleY() const;
+  virtual bool OnAccessibilityActivated();
 
   /**
-   * @copydoc Dali::Ui::View::SetScaleY
+   * @brief Called when accessibility pan gesture is received.
+   * @param[in] gesture The pan gesture
+   * @return true if the pan gesture has been consumed by this view
    */
-  void SetScaleY(float scaleY);
+  virtual bool OnAccessibilityPan(PanGesture gesture);
 
   /**
-   * @copydoc Dali::Ui::View::IsVisible
+   * @brief Called for accessibility value change (e.g. slider up/down).
+   * @param[in] isIncrease Whether the value should be increased or decreased
+   * @return true if the value changed action has been consumed by this view
    */
-  bool IsVisible() const;
+  virtual bool OnAccessibilityValueChange(bool isIncrease);
 
   /**
-   * @copydoc Dali::Ui::View::SetVisibility
+   * @brief Called for accessibility zoom action.
+   * @return true if the zoom action has been consumed by this view
    */
-  void SetVisibility(bool visibility);
+  virtual bool OnAccessibilityZoom();
 
   /**
-   * @copydoc Dali::Ui::View::GetOpacity
-   */
-  float GetOpacity() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetOpacity
-   */
-  void SetOpacity(float opacity);
-
-  /**
-   * @copydoc Dali::Ui::View::GetSize
-   */
-  MeasuredSize GetSize() const;
-
-  /**
-   * @copydoc Dali::Ui::View::GetPositionX
-   */
-  float GetPositionX() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetPositionX
-   */
-  void SetPositionX(float x);
-
-  /**
-   * @copydoc Dali::Ui::View::GetPositionY
-   */
-  float GetPositionY() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetPositionY
-   */
-  void SetPositionY(float y);
-
-  /**
-   * @copydoc Dali::Ui::View::GetParentOrigin
-   */
-  Vector3 GetParentOrigin() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetParentOrigin
-   */
-  void SetParentOrigin(const Vector3& point);
-
-  /**
-   * @copydoc Dali::Ui::View::GetPivot
-   */
-  Vector3 GetPivot() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetPivot
-   */
-  void SetPivot(const Vector3& point);
-
-  /**
-   * @copydoc Dali::Ui::View::IsFocusable
-   */
-  bool IsFocusable() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetFocusable
-   */
-  void SetFocusable(bool focusable);
-
-  /**
-   * @copydoc Dali::Ui::View::IsTouchFocusable
-   */
-  bool IsTouchFocusable() const;
-
-  /**
-   * @copydoc Dali::Ui::View::SetTouchFocusable
-   */
-  void SetTouchFocusable(bool touchFocusable);
-
-public: // State API
-  using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
-
-  /**
-   * @brief Gets the current state of this View.
+   * @brief Creates a custom Accessible object for this view.
    *
-   * @return The current ViewState
+   * The AT-SPI infrastructure is responsible for destroying the returned object.
+   * @return The newly created Accessible object
+   * @see GetAccessibleObject()
+   */
+  virtual ViewAccessible* CreateAccessibleObject();
+
+  /**
+   * @brief Gets the next focusable actor in this view towards the given direction.
+   *
+   * A view needs to override this function in order to support two dimensional key navigation.
+   * @param[in] currentFocusedActor The current focused actor
+   * @param[in] direction The direction to move the focus towards
+   * @param[in] loopEnabled Whether the focus movement should be looped within the view
+   * @return The next focusable actor in this view or an empty handle if no actor can be focused
+   */
+  virtual Actor GetNextFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction, bool loopEnabled);
+
+  /**
+   * @brief Informs this view that its chosen focusable actor will be focused.
+   * @param[in] committedFocusableActor The committed focusable actor
+   */
+  virtual void OnFocusChangeCommitted(Actor committedFocusableActor);
+
+  /**
+   * @brief Called when the view has enter pressed on it.
+   * @return true if this view supported this action
+   */
+  virtual bool OnKeyboardEnter();
+
+  /**
+   * @brief Called whenever a pinch gesture is detected on this view.
+   * @param[in] pinch The pinch gesture
+   * @note If overridden, then the default pinch-to-zoom behavior will not occur.
+   */
+  virtual void OnPinch(const PinchGesture& pinch);
+
+  /**
+   * @brief Called whenever a pan gesture is detected on this view.
+   * @param[in] pan The pan gesture
+   */
+  virtual void OnPan(const PanGesture& pan);
+
+  /**
+   * @brief Called whenever a tap gesture is detected on this view.
+   * @param[in] tap The tap gesture
+   */
+  virtual void OnTap(const TapGesture& tap);
+
+  /**
+   * @brief Called whenever a long press gesture is detected on this view.
+   * @param[in] longPress The long press gesture
+   */
+  virtual void OnLongPress(const LongPressGesture& longPress);
+
+  /**
+   * @brief Retrieves SourceActor of the OffScreenRenderable.
+   * @return SourceActor of the OffScreenRenderable.
+   */
+  virtual Dali::Actor GetOffScreenRenderableSourceActor();
+
+  /**
+   * @brief Retrieves whether the OffScreen RenderTasks is exclusive or not.
+   * @return True if the RenderTask is exclusive.
+   */
+  virtual bool IsOffScreenRenderTaskExclusive();
+
+  /**
+   * @brief Retrieves the extension for this view.
+   * @return The extension if available, NULL otherwise
+   */
+  virtual Extension* GetViewExtension()
+  {
+    return NULL;
+  }
+
+  /**
+   * @brief Update visual properties.
+   * @param[in] properties Property list to be used to update visual properties of this View.
+   */
+  virtual void OnUpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
+  {
+  }
+
+public: // Non-virtual API (safe to reorder / extend)
+  /**
+   * @brief Creates a new View.
+   */
+  static ViewImplPtr New();
+
+  /**
+   * @brief Second phase initialization.
+   */
+  void Initialize();
+
+  /**
+   * @copydoc Ui::View::GetState()
    */
   const ViewState& GetState() const;
 
   /**
-   * @brief Checks if the view is enabled.
-   *
-   * Enabled is the default state. A disabled view does not receive user interaction.
-   *
-   * @return True if enabled
+   * @copydoc Ui::View::IsEnabled()
    */
   bool IsEnabled() const;
 
   /**
-   * @brief Sets the enabled state of the view.
-   *
-   * When disabled, the Disabled state is added and the underlying
-   * USER_INTERACTION_ENABLED property is set to false.
-   *
-   * @param[in] enabled True to enable, false to disable
+   * @copydoc Ui::View::SetEnabled()
    */
   void SetEnabled(bool enabled);
 
   /**
-   * @brief Returns true if this view and all its View ancestors are enabled.
-   *
-   * Unlike IsEnabled(), which only reflects the view's own state, this method
-   * walks up the scene hierarchy and returns false if any ancestor View carries
-   * ViewState::DISABLED.
-   *
-   * @return True if neither the view nor any ancestor is disabled
+   * @copydoc Ui::View::IsEffectivelyEnabled()
    */
   bool IsEffectivelyEnabled() const;
 
   /**
-   * @brief Returns true if this view or any of its View ancestors is focused.
-   *
-   * Unlike IsFocused() (which only reflects the view's own state), this method
-   * walks up the scene hierarchy and returns true if any ancestor View carries
-   * ViewState::FOCUSED.
-   *
-   * @return True if the view itself or at least one ancestor is focused
+   * @copydoc Ui::View::IsEffectivelyFocused()
    */
   bool IsEffectivelyFocused() const;
 
   /**
-   * @brief Returns the state changed signal.
-   *
-   * Emitted whenever the view's ViewState changes. The signal passes
-   * the previous state and the new (current) state.
-   *
-   * @return The StateChangedSignal
+   * @copydoc Ui::View::StateChangedSignal()
    */
   StateChangedSignalType& StateChangedSignal();
 
   /**
    * @brief Registers a named state-change handler using a member function.
-   *
-   * The handler is identified by @a id. If a handler with the same id already
-   * exists, it is replaced. The handler is automatically removed when @a obj
-   * is destroyed.
-   *
    * @param[in] id   Unique identifier for this handler
-   * @param[in] obj  Object whose member function will be called (must implement ConnectionTrackerInterface)
+   * @param[in] obj  Object whose member function will be called
    * @param[in] func Member function with signature void(View, const StateEvent&)
    */
   template<class X>
@@ -343,17 +346,6 @@ public: // State API
 
   /**
    * @brief Registers a named state-change handler using a callable (e.g. lambda).
-   *
-   * The handler is identified by @a id. If a handler with the same id already
-   * exists, it is replaced. The handler is automatically removed when @a tracker
-   * is destroyed.
-   *
-   * @code
-   * WhenStateChanged("default_bg", this, [](View v, const StateEvent& e) {
-   *   if(e.Changed(ViewState::FOCUSED)) { ... }
-   * });
-   * @endcode
-   *
    * @param[in] id      Unique identifier for this handler
    * @param[in] tracker ConnectionTrackerInterface for automatic lifetime management
    * @param[in] func    Callable with signature void(View, const StateEvent&)
@@ -369,7 +361,6 @@ public: // State API
 
   /**
    * @brief Removes a named state-change handler.
-   *
    * @param[in] id The handler identifier to remove
    * @return True if a handler was found and removed
    */
@@ -377,10 +368,6 @@ public: // State API
 
   /**
    * @brief Removes a named state-change handler only if it is not currently being processed.
-   *
-   * Safe to call from within the handler itself: if the call originates from the handler
-   * identified by @a id, removal is deferred until after that handler returns.
-   *
    * @param[in] id The handler identifier to remove
    * @return True if removed, false if currently processing or not found
    */
@@ -388,14 +375,6 @@ public: // State API
 
   /**
    * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
-   *
-   * This is a low-level state-bit updater. It does **not** trigger the
-   * higher-level logic associated with the state. For example, calling
-   * @c SetViewState(DISABLED, true) only sets the DISABLED bit — it does
-   * not clear focus or disable touch processing.
-   * Use the corresponding public API (e.g. @c SetEnabled()) to perform
-   * the full state transition including all side effects.
-   *
    * @param[in] state The state to set or clear
    * @param[in] on    True to add the state, false to remove it
    * @param[in] cause Input event that triggered the change; leave default if programmatic
@@ -404,662 +383,818 @@ public: // State API
 
   /**
    * @brief Called when the view's focus state changes.
-   *
-   * The caller (e.g. focus manager) is responsible for invoking this method.
-   * Updates the Focused state and forwards to the interaction trait if present.
-   *
    * @param[in] focused True if the view gained focus
-   * @param[in] cause   The input event that triggered the focus change (empty if system-triggered)
+   * @param[in] cause   The input event that triggered the focus change
    */
   void OnFocusChanged(bool focused, InputEvent cause = InputEvent::None());
 
   /**
-   * @copydoc Dali::Ui::View::GetBackgroundColor()
+   * @copydoc Ui::View::GetScaleX()
+   */
+  float GetScaleX() const;
+
+  /**
+   * @copydoc Ui::View::SetScaleX()
+   */
+  void SetScaleX(float scaleX);
+
+  /**
+   * @copydoc Ui::View::GetScaleY()
+   */
+  float GetScaleY() const;
+
+  /**
+   * @copydoc Ui::View::SetScaleY()
+   */
+  void SetScaleY(float scaleY);
+
+  /**
+   * @copydoc Ui::View::IsVisible()
+   */
+  bool IsVisible() const;
+
+  /**
+   * @copydoc Ui::View::SetVisibility()
+   */
+  void SetVisibility(bool visibility);
+
+  /**
+   * @copydoc Ui::View::GetOpacity()
+   */
+  float GetOpacity() const;
+
+  /**
+   * @copydoc Ui::View::SetOpacity()
+   */
+  void SetOpacity(float opacity);
+
+  /**
+   * @copydoc Ui::View::GetSize()
+   */
+  MeasuredSize GetSize() const;
+
+  /**
+   * @copydoc Ui::View::GetPositionX()
+   */
+  float GetPositionX() const;
+
+  /**
+   * @copydoc Ui::View::SetPositionX()
+   */
+  void SetPositionX(float x);
+
+  /**
+   * @copydoc Ui::View::GetPositionY()
+   */
+  float GetPositionY() const;
+
+  /**
+   * @copydoc Ui::View::SetPositionY()
+   */
+  void SetPositionY(float y);
+
+  /**
+   * @copydoc Ui::View::GetParentOrigin()
+   */
+  Vector3 GetParentOrigin() const;
+
+  /**
+   * @copydoc Ui::View::SetParentOrigin()
+   */
+  void SetParentOrigin(const Vector3& point);
+
+  /**
+   * @copydoc Ui::View::GetPivot()
+   */
+  Vector3 GetPivot() const;
+
+  /**
+   * @copydoc Ui::View::SetPivot()
+   */
+  void SetPivot(const Vector3& point);
+
+  /**
+   * @copydoc Ui::View::IsFocusable()
+   */
+  bool IsFocusable() const;
+
+  /**
+   * @copydoc Ui::View::SetFocusable()
+   */
+  void SetFocusable(bool focusable);
+
+  /**
+   * @copydoc Ui::View::IsTouchFocusable()
+   */
+  bool IsTouchFocusable() const;
+
+  /**
+   * @copydoc Ui::View::SetTouchFocusable()
+   */
+  void SetTouchFocusable(bool touchFocusable);
+
+  /**
+   * @copydoc Ui::View::GetBackgroundColor()
    */
   UiColor GetBackgroundColor();
 
   /**
-   * @copydoc Dali::Ui::View::SetBackgroundColor(const UiColor&)
+   * @copydoc Ui::View::SetBackgroundColor()
    */
   void SetBackgroundColor(const UiColor& color);
 
   /**
-   * @copydoc Dali::Ui::View::GetCornerRadius
+   * @copydoc Ui::View::GetCornerRadius()
    */
   Vector4 GetCornerRadius() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetCornerRadius(const Vector4&)
+   * @copydoc Ui::View::SetCornerRadius()
    */
   void SetCornerRadius(const Vector4& radius);
 
   /**
-   * @copydoc Dali::Ui::View::GetCornerRadiusPolicy
+   * @copydoc Ui::View::GetCornerRadiusPolicy()
    */
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetCornerRadiusPolicy
+   * @copydoc Ui::View::SetCornerRadiusPolicy()
    */
   void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
 
   /**
-   * @copydoc Dali::Ui::View::GetCornerSquareness
+   * @copydoc Ui::View::GetCornerSquareness()
    */
   Vector4 GetCornerSquareness() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetCornerSquareness(const Vector4&)
+   * @copydoc Ui::View::SetCornerSquareness()
    */
   void SetCornerSquareness(const Vector4& squareness);
 
   /**
-   * @copydoc Dali::Ui::View::GetBorderlineWidth
+   * @copydoc Ui::View::GetBorderlineWidth()
    */
   float GetBorderlineWidth() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetBorderlineWidth
+   * @copydoc Ui::View::SetBorderlineWidth()
    */
   void SetBorderlineWidth(float width);
 
   /**
-   * @copydoc Dali::Ui::View::GetBorderlineColor
+   * @copydoc Ui::View::GetBorderlineColor()
    */
   UiColor GetBorderlineColor();
 
   /**
-   * @copydoc Dali::Ui::View::SetBorderlineColor
+   * @copydoc Ui::View::SetBorderlineColor()
    */
   void SetBorderlineColor(const UiColor& color);
 
   /**
-   * @copydoc Dali::Ui::View::GetBorderlineOffset
+   * @copydoc Ui::View::GetBorderlineOffset()
    */
   float GetBorderlineOffset() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetBorderlineOffset
+   * @copydoc Ui::View::SetBorderlineOffset()
    */
   void SetBorderlineOffset(float offset);
 
   /**
-   * @copydoc Dali::Ui::View::GetName
+   * @copydoc Ui::View::GetName()
    */
   Dali::String GetName() const;
 
   /**
-   * @copydoc Dali::Ui::View::SetName
+   * @copydoc Ui::View::SetName()
    */
   void SetName(const Dali::String& name);
 
   /**
-   * @brief Sets a trait to this View.
-   *
-   * The trait will share the lifecycle with this View.
-   *
-   * For traits identified by a user-defined @p TraitId, calling this method with the
-   * same id will replace the existing trait after calling OnDetached() on the old one.
-   *
-   * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT:
-   * - The trait must implement @c InteractiveTraitInterface.
-   * - It can be set only once for the lifetime of the View; attempting to replace or
-   *   remove it is considered a programming error and will trigger an assertion.
-   *
-   * @throws DaliException If the trait already has an owner
-   * @throws DaliException If the id is already registered with other trait
-   *
-   * @note **Strong Reference**
-   * The view will hold the strong reference to the trait after attached.
-   *
-   * @param[in] id The unique key to identify the trait
-   * @param[in] trait The trait object to attach
-   */
-  void SetTrait(TraitId id, Trait& trait);
-
-  /**
-   * @brief Gets a trait from this View.
-   * @param[in] id The unique key to identify the trait
-   * @return The trait handle
-   */
-  Trait GetTrait(TraitId id) const;
-
-  /**
-   * @brief Removes a trait from this View.
-   *
-   * For traits identified by a user-defined @p TraitId, this detaches the trait,
-   * calls its OnDetached(), and returns true on success.
-   *
-   * For the reserved id @c ReservedTraitId::INTERACTION_TRAIT, removal is not allowed; an assertion
-   * will be triggered and the method will always return false.
-   *
-   * @param[in] id The unique key to identify the trait
-   * @return True if succeeded, false otherwise
-   */
-  bool RemoveTrait(TraitId id);
-
-  /**
-   * @copydoc Ui::View::EnsureInteractiveTrait
-   */
-  Ui::InteractiveTrait EnsureInteractiveTrait();
-
-  /**
-   * @copydoc Ui::View::IsInteractive
-   */
-  bool IsInteractive() const;
-
-  /**
-   * @copydoc Ui::View::EnsureSelectableTrait
-   */
-  Ui::SelectableTrait EnsureSelectableTrait();
-
-  /**
-   * @copydoc Ui::View::IsSelectable
-   */
-  bool IsSelectable() const;
-
-  /**
-   * @copydoc Ui::View::SetInteractionEffect
-   */
-  void SetInteractionEffect(Trait effect);
-
-public: // Measure / Arrange API
-  /**
-   * @brief Measures the view with the given constraints.
-   */
-  MeasuredSize Measure(float widthConstraint, float heightConstraint);
-
-  /**
-   * @brief Arranges the view within the given bounds.
-   */
-  MeasuredSize Arrange(const LayoutRect& bounds);
-
-  /**
-   * @brief Invalidates the measure of this view and propagates up.
-   */
-  void InvalidateMeasure();
-
-  /**
-   * @brief Invalidates the arrange of this view.
-   */
-  void InvalidateArrange();
-
-  /**
-   * @brief Gets the measured size from the last Measure() pass.
-   */
-  MeasuredSize GetMeasuredSize() const;
-
-  /**
-   * @brief Checks if the measure is valid.
-   */
-  bool IsMeasureValid() const;
-
-  /**
-   * @brief Checks if the arrange is valid.
-   */
-  bool IsArrangeValid() const;
-
-protected: // Virtual methods for derived classes (Template Method pattern)
-  /**
-   * @brief Called during measure pass.
-   */
-  virtual MeasuredSize OnMeasure(float widthConstraint, float heightConstraint);
-
-  /**
-   * @brief Called during arrange pass.
-   */
-  virtual MeasuredSize OnArrange(const LayoutRect& bounds);
-
-public: // Requested size API
-  void  SetRequestedWidth(float width);
-  float GetRequestedWidth() const;
-  void  SetRequestedHeight(float height);
-  float GetRequestedHeight() const;
-  void  SetMinimumWidth(float width);
-  float GetMinimumWidth() const;
-  void  SetMinimumHeight(float height);
-  float GetMinimumHeight() const;
-  void  SetMaximumWidth(float width);
-  float GetMaximumWidth() const;
-  void  SetMaximumHeight(float height);
-  float GetMaximumHeight() const;
-
-public: // Layout Params API
-  /**
-   * @copydoc Dali::Ui::View::SetLayoutParams
-   */
-  void SetLayoutParams(Ui::LayoutParams params);
-
-  /**
-   * @brief Retrieves a layout params trait by LayoutParamsType.
-   */
-  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
-
-public: // Layout Properties API
-  void    SetMargin(const Extents& margin);
-  Extents GetMargin() const;
-  void    SetPadding(const Extents& padding);
-  Extents GetPadding() const;
-
-  /**
-   * @brief Sets the layout mode of this View.
-   *
-   * @see Ui::LayoutMode
-   */
-  void SetLayoutMode(Ui::LayoutMode mode);
-
-  /**
-   * @brief Gets the layout mode of this View.
-   */
-  Ui::LayoutMode GetLayoutMode() const;
-
-  /**
-   * @brief Convenience: returns true if LayoutMode is Standalone.
-   *
-   * Standalone children are excluded from the parent layout's accumulation,
-   * spacing and index calculations. The parent still calls Measure() on them
-   * (so size resolution works normally) but during Arrange the parent passes
-   * bounds composed of the child's PositionX/Y and measuredSize.
-   */
-  bool IsLayoutModeStandalone() const;
-
-public: // Parent Layout API
-  Ui::Layout   GetParentLayout() const;
-  Ui::View     GetParentView() const;
-  virtual bool IsLayout() const;
-
-public: // Layout Callback API
-  Internal::LayoutCallbacksImpl* GetLayoutCallbacks() const;
-  Internal::LayoutCallbacksImpl* EnsureLayoutCallbacks();
-
-public: // Child Management API
-  /**
-   * @brief Inserts a child at the specified index.
-   *
-   * Use Actor::Add() to append a child at the end.
-   * This method inserts at a specific position in the children list.
-   *
-   * @param[in] index The index where to insert
-   * @param[in] child The child to insert
-   */
-  void Insert(uint32_t index, Ui::View child);
-
-  /**
-   * @brief Removes all children from this view.
-   */
-  void RemoveAllChildren();
-
-  /**
-   * @brief Gets the number of child views.
-   *
-   * @return The child count
-   */
-  uint32_t GetChildCount() const;
-
-  /**
-   * @brief Gets the child view at the specified index.
-   *
-   * @param[in] index The child index
-   * @return The child view at the index
-   */
-  Ui::View GetChildAt(uint32_t index) const;
-
-  /**
-   * @brief Returns the index of the given child view, or -1 if not found.
-   *
-   * @param[in] view The child view to find
-   * @return Index of the view, or -1 if not a child
-   */
-  int32_t IndexOfChild(Ui::View view) const;
-
-  /**
-   * @brief Raises this view one step above its next sibling.
-   *
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void Raise(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view one step below its previous sibling.
-   *
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void Lower(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view to the top of its sibling list.
-   *
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void RaiseToTop(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view to the bottom of its sibling list.
-   *
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void LowerToBottom(Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Raises this view above the given target sibling.
-   *
-   * @param[in] target The target sibling view.
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Lowers this view below the given target sibling.
-   *
-   * @param[in] target The target sibling view.
-   * @param[in] policy UPDATE also reorders layout children; PRESERVE keeps layout order.
-   */
-  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
-
-  /**
-   * @brief Adds a list of children (method chaining).
-   *
-   * @param[in] children The initializer list of View handles to add
-   * @return Reference to this for method chaining
-   */
-  ViewImpl& Contents(std::initializer_list<Ui::View> children);
-
-  /**
-   * @brief Gets the children container for layout manager access.
-   *
-   * @return Reference to the children container
-   */
-  ChildContainer& GetChildren();
-
-  /**
-   * @brief Gets the children container (const version).
-   *
-   * @return Const reference to the children container
-   */
-  const ChildContainer& GetChildren() const;
-
-protected:
-  /**
-   * @brief Applies min/max constraints to the size.
-   */
-  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
-
-  /**
-   * @brief Registers this layout with the LayoutController for processing.
-   *
-   * Called when this view is a Layout Root (top of layout hierarchy).
-   */
-  void RegisterWithLayoutController();
-
-private:
-  /**
-   * @brief Measures standalone children that may not have been measured by
-   * OnMeasure (e.g. leaf views like Label). The measure cache prevents
-   * redundant work when OnMeasure already measured them.
-   */
-  void MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
-
-  /**
-   * @brief Arranges standalone children that may not have been arranged by
-   * OnArrange (e.g. leaf views like Label). Uses ArrangeStandaloneChild
-   * helper; the arrange-valid flag prevents redundant work.
-   */
-  void ArrangeStandaloneChildren(const LayoutRect& bounds);
-
-  // Not copyable or movable
-  ViewImpl(const ViewImpl&)            = delete;
-  ViewImpl(ViewImpl&&)                 = delete;
-  ViewImpl& operator=(const ViewImpl&) = delete;
-  ViewImpl& operator=(ViewImpl&&)      = delete;
-
-  void SetBackgroundColorInternal(const Vector4& color);
-  void SetBorderlineColorInternal(const Vector4& color);
-  void OnChildOrderChanged(Actor orderChangedChild);
-
-  /**
-   * @brief Internal helper to register a named state handler via StateHandlerTrait.
-   *
-   * Lazily creates the StateHandlerTrait on first call.
-   */
-  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
-
-private:
-  // From control-impl.h
-
-public:
-  /**
    * @brief Sets the background with a property map.
-   *
    * @param[in] map The background property map
    */
   void SetBackground(const Property::Map& map);
 
   /**
-   * @copydoc Dali::Ui::View::ClearBackground
+   * @copydoc Ui::View::ClearBackground()
    */
   void ClearBackground();
 
   /**
-   * @copydoc Dali::Ui::View::SetRenderEffect
+   * @copydoc Ui::View::SetRenderEffect()
    */
   void SetRenderEffect(Ui::RenderEffect effect);
 
   /**
-   * @copydoc Dali::Ui::View::GetRenderEffect
+   * @copydoc Ui::View::GetRenderEffect()
    */
   RenderEffect GetRenderEffect() const;
 
   /**
-   * @copydoc Dali::Ui::View::ClearRenderEffect
+   * @copydoc Ui::View::ClearRenderEffect()
    */
   void ClearRenderEffect();
 
   /**
-   * @brief Called when resources of view are ready. this api does not request relayout.
+   * @copydoc Ui::View::SetTrait()
    */
-  void SetResourceReady();
+  void SetTrait(TraitId id, Trait& trait);
 
   /**
-   * @brief Retrieves the internal data implementation of the view.
-   *
-   * @return Reference to the internal data implementation
+   * @copydoc Ui::View::GetTrait()
    */
-  Internal::ViewDataImpl& GetViewDataImpl() const;
+  Trait GetTrait(TraitId id) const;
 
   /**
-   * @brief Retrieves SourceActor of the OffScreenRenderable.
-   *
-   * @return SourceActor of the OffScreenRenderable.
+   * @copydoc Ui::View::RemoveTrait()
    */
-  virtual Dali::Actor GetOffScreenRenderableSourceActor();
+  bool RemoveTrait(TraitId id);
 
   /**
-   * @brief Retrieves whether the OffScreen RenderTasks is exclusive or not.
-   * The SourceActor of an OffScreen RenderTask can also become the SourceActor of another Actor's OffScreen RenderTask.
-   * To draw the SourceActor multitimes, the exclusive information is required.
-   *
-   * @return True if the RenderTask is exclusive.
+   * @copydoc Ui::View::EnsureInteractiveTrait()
    */
-  virtual bool IsOffScreenRenderTaskExclusive();
+  Ui::InteractiveTrait EnsureInteractiveTrait();
+
+  /**
+   * @copydoc Ui::View::IsInteractive()
+   */
+  bool IsInteractive() const;
+
+  /**
+   * @copydoc Ui::View::EnsureSelectableTrait()
+   */
+  Ui::SelectableTrait EnsureSelectableTrait();
+
+  /**
+   * @copydoc Ui::View::IsSelectable()
+   */
+  bool IsSelectable() const;
+
+  /**
+   * @copydoc Ui::View::SetInteractionEffect()
+   */
+  void SetInteractionEffect(Trait effect);
+
+  // Measure / Arrange
+
+  /**
+   * @copydoc Ui::View::Measure()
+   */
+  MeasuredSize Measure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @copydoc Ui::View::Arrange()
+   */
+  MeasuredSize Arrange(const LayoutRect& bounds);
+
+  /**
+   * @copydoc Ui::View::InvalidateMeasure()
+   */
+  void InvalidateMeasure();
+
+  /**
+   * @copydoc Ui::View::InvalidateArrange()
+   */
+  void InvalidateArrange();
+
+  /**
+   * @copydoc Ui::View::GetMeasuredSize()
+   */
+  MeasuredSize GetMeasuredSize() const;
+
+  /**
+   * @copydoc Ui::View::IsMeasureValid()
+   */
+  bool IsMeasureValid() const;
+
+  /**
+   * @copydoc Ui::View::IsArrangeValid()
+   */
+  bool IsArrangeValid() const;
+
+  // Requested Size
+
+  /**
+   * @copydoc Ui::View::SetRequestedWidth()
+   */
+  void SetRequestedWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetRequestedWidth()
+   */
+  float GetRequestedWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetRequestedHeight()
+   */
+  void SetRequestedHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetRequestedHeight()
+   */
+  float GetRequestedHeight() const;
+
+  /**
+   * @copydoc Ui::View::SetMinimumWidth()
+   */
+  void SetMinimumWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetMinimumWidth()
+   */
+  float GetMinimumWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetMinimumHeight()
+   */
+  void SetMinimumHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetMinimumHeight()
+   */
+  float GetMinimumHeight() const;
+
+  /**
+   * @copydoc Ui::View::SetMaximumWidth()
+   */
+  void SetMaximumWidth(float width);
+
+  /**
+   * @copydoc Ui::View::GetMaximumWidth()
+   */
+  float GetMaximumWidth() const;
+
+  /**
+   * @copydoc Ui::View::SetMaximumHeight()
+   */
+  void SetMaximumHeight(float height);
+
+  /**
+   * @copydoc Ui::View::GetMaximumHeight()
+   */
+  float GetMaximumHeight() const;
+
+  // Layout Params
+
+  /**
+   * @copydoc Ui::View::SetLayoutParams()
+   */
+  void SetLayoutParams(Ui::LayoutParams params);
+
+  /**
+   * @brief Retrieves a layout params trait by LayoutParamsType.
+   * @param[in] type The layout params type
+   * @return The layout params handle
+   */
+  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
+
+  // Layout Properties
+
+  /**
+   * @copydoc Ui::View::SetMargin()
+   */
+  void SetMargin(const Extents& margin);
+
+  /**
+   * @copydoc Ui::View::GetMargin()
+   */
+  Extents GetMargin() const;
+
+  /**
+   * @copydoc Ui::View::SetPadding()
+   */
+  void SetPadding(const Extents& padding);
+
+  /**
+   * @copydoc Ui::View::GetPadding()
+   */
+  Extents GetPadding() const;
+
+  /**
+   * @copydoc Ui::View::SetLayoutMode()
+   */
+  void SetLayoutMode(Ui::LayoutMode mode);
+
+  /**
+   * @copydoc Ui::View::GetLayoutMode()
+   */
+  Ui::LayoutMode GetLayoutMode() const;
+
+  /**
+   * @brief Convenience: returns true if LayoutMode is Standalone.
+   * @return True if the view's layout mode is Standalone
+   */
+  bool IsLayoutModeStandalone() const;
+
+  // Parent Layout
+
+  /**
+   * @brief Gets the parent layout of this view, if any.
+   * @return The parent Layout handle, or empty if none
+   */
+  Ui::Layout GetParentLayout() const;
+
+  /**
+   * @brief Gets the parent view in the layout hierarchy.
+   * @return The parent View handle, or empty if none
+   */
+  Ui::View GetParentView() const;
+
+  // Layout Callbacks
+
+  /**
+   * @brief Gets the layout callbacks implementation, if set.
+   * @return Pointer to the layout callbacks, or nullptr
+   */
+  Internal::LayoutCallbacksImpl* GetLayoutCallbacks() const;
+
+  /**
+   * @brief Gets or creates the layout callbacks implementation.
+   * @return Pointer to the layout callbacks (never nullptr)
+   */
+  Internal::LayoutCallbacksImpl* EnsureLayoutCallbacks();
+
+  // Child Management
+
+  /**
+   * @copydoc Ui::View::Insert()
+   */
+  void Insert(uint32_t index, Ui::View child);
+
+  /**
+   * @copydoc Ui::View::RemoveAllChildren()
+   */
+  void RemoveAllChildren();
+
+  /**
+   * @copydoc Ui::View::GetChildCount()
+   */
+  uint32_t GetChildCount() const;
+
+  /**
+   * @copydoc Ui::View::GetChildAt()
+   */
+  Ui::View GetChildAt(uint32_t index) const;
+
+  /**
+   * @copydoc Ui::View::IndexOfChild()
+   */
+  int32_t IndexOfChild(Ui::View view) const;
+
+  /**
+   * @copydoc Ui::View::Raise()
+   */
+  void Raise(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::Lower()
+   */
+  void Lower(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::RaiseToTop()
+   */
+  void RaiseToTop(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::LowerToBottom()
+   */
+  void LowerToBottom(Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::RaiseAbove()
+   */
+  void RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @copydoc Ui::View::LowerBelow()
+   */
+  void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
+
+  /**
+   * @brief Adds a list of children via initializer list (for method chaining).
+   * @param[in] children The initializer list of View handles to add
+   * @return Reference to this ViewImpl for method chaining
+   */
+  ViewImpl& Contents(std::initializer_list<Ui::View> children);
+
+  /**
+   * @brief Gets the children container for layout manager access.
+   * @return Reference to the children container
+   */
+  ChildContainer& GetChildren();
+
+  /**
+   * @copydoc GetChildren()
+   */
+  const ChildContainer& GetChildren() const;
 
   // Accessibility
 
   /**
    * @brief Gets the Accessible object that represents this view.
-   *
-   * This method calls CreateAccessibleObject() if CreateAccessible is true.
-   *
    * @return The Accessible object
-   *
    * @see CreateAccessibleObject()
    */
   std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
 
+  /**
+   * @brief Gets the accessibility relations of this view.
+   * @return The list of accessibility relations
+   */
+  std::vector<Accessibility::Relation> GetAccessibilityRelations();
+
   // Gesture Detection
 
   /**
-   * @brief Allows deriving classes to enable any of the gesture detectors that are available.
-   *
-   * Gesture detection can be enabled one at a time or in bitwise format as shown:
-   * @code
-   * EnableGestureDetection(GestureType::Value(GestureType::PINCH | GestureType::TAP | GestureType::PAN));
-   * @endcode
-   * @param[in] type The gesture type(s) to enable
+   * @brief Enables gesture detection for the given type(s).
+   * @param[in] type The gesture type(s) to enable (can be bitwise OR'd)
    */
   void EnableGestureDetection(GestureType::Value type);
 
   /**
-   * @brief Allows deriving classes to disable any of the gesture detectors.
-   *
-   * Like EnableGestureDetection, this can also be called using bitwise or.
-   * @param[in] type The gesture type(s) to disable
-   * @see EnableGetureDetection
+   * @brief Disables gesture detection for the given type(s).
+   * @param[in] type The gesture type(s) to disable (can be bitwise OR'd)
    */
   void DisableGestureDetection(GestureType::Value type);
 
   /**
-   * @brief If deriving classes wish to fine tune pinch gesture
-   * detection, then they can access the gesture detector through this
-   * API and modify the detection.
-   *
+   * @brief Gets the pinch gesture detector.
    * @return The pinch gesture detector
    * @pre Pinch detection should have been enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
    */
   PinchGestureDetector GetPinchGestureDetector() const;
 
   /**
-   * @brief If deriving classes wish to fine tune pan gesture
-   * detection, then they can access the gesture detector through this
-   * API and modify the detection.
-   *
+   * @brief Gets the pan gesture detector.
    * @return The pan gesture detector
    * @pre Pan detection should have been enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
    */
   PanGestureDetector GetPanGestureDetector() const;
 
   /**
-   * @brief If deriving classes wish to fine tune tap gesture
-   * detection, then they can access the gesture detector through this
-   * API and modify the detection.
-   *
+   * @brief Gets the tap gesture detector.
    * @return The tap gesture detector
    * @pre Tap detection should have been enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
    */
   TapGestureDetector GetTapGestureDetector() const;
 
   /**
-   * @brief If deriving classes wish to fine tune long press gesture
-   * detection, then they can access the gesture detector through this
-   * API and modify the detection.
-   *
+   * @brief Gets the long press gesture detector.
    * @return The long press gesture detector
    * @pre Long press detection should have been enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
    */
   LongPressGestureDetector GetLongPressGestureDetector() const;
 
-  // Key Navigation
+  // Key Navigation & Focus
 
   /**
-   * @brief Sets whether this view supports two dimensional
-   * key navigation (i.e. whether it knows how to handle the
-   * key focus movement between its child actors).
-   *
-   * The view doesn't support it by default.
-   * @param[in] isSupported Whether this view supports two dimensional key navigation
+   * @brief Sets whether this view supports two dimensional key navigation.
+   * @param[in] isSupported True to support key navigation
    */
   void SetKeyNavigationSupport(bool isSupported);
 
   /**
    * @brief Gets whether this view supports two dimensional key navigation.
-   *
-   * @return true if this view supports two dimensional key navigation
+   * @return True if key navigation is supported
    */
   bool IsKeyNavigationSupported();
 
-  // Key Input
-
   /**
-   * @copydoc Ui::View::SetKeyInputFocus()
+   * @brief Sets this view to receive key input focus.
    */
   void SetKeyInputFocus();
 
   /**
-   * @copydoc Ui::View::HasKeyInputFocus()
+   * @brief Checks whether this view has key input focus.
+   * @return True if the view has key input focus
    */
   bool HasKeyInputFocus();
 
   /**
-   * @copydoc Ui::View::ClearKeyInputFocus()
+   * @brief Clears key input focus from this view.
    */
   void ClearKeyInputFocus();
 
-  // Focus Group
-
   /**
-   * @brief Sets whether this view is a focus group for key navigation.
-   *
-   * (i.e. the scope of key focus movement
-   * can be limited to its child actors). The view is not a focus group by default.
-   * @param[in] isFocusGroup Whether this view is set as a focus group for key navigation
+   * @brief Sets whether this view acts as a focus group boundary.
+   * @param[in] isFocusGroup True to set as focus group
    */
   void SetAsFocusGroup(bool isFocusGroup);
 
   /**
-   * @brief Gets whether this view is a focus group for key navigation.
-   *
-   * @return true if this view is set as a focus group for key navigation
+   * @brief Gets whether this view acts as a focus group boundary.
+   * @return True if the view is a focus group
    */
   bool IsFocusGroup();
 
+  // Off-Screen Rendering
+
   /**
-   * @brief Get texture output of offscreen rendering.
-   * @note Valid only if call this API inside of OffScreenRenderingFinishedSignal()
-   *       signal, and OffScreenRenderingType::RENDER_ONCE
+   * @brief Gets texture output of offscreen rendering.
+   * @return The offscreen rendering output texture
+   * @note Valid only inside OffScreenRenderingFinishedSignal() with RENDER_ONCE type.
    */
   Dali::Texture GetOffScreenRenderingOutput() const;
-
-  /// @cond internal
-  /**
-   * @brief Called by the FocusManager.
-   */
-  DALI_INTERNAL void KeyboardEnter();
-  /// @endcond
 
   // Signals
 
   /**
-   * @copydoc Dali::Ui::View::KeyEventSignal()
+   * @copydoc Ui::View::KeyEventSignal()
    */
   Ui::View::KeyEventSignalType& KeyEventSignal();
 
   /**
-   * @copydoc Dali::Ui::View::FocusChangedSignal()
+   * @copydoc Ui::View::FocusChangedSignal()
    */
   Ui::View::FocusChangedSignalType& FocusChangedSignal();
 
-  /// @cond internal
+  // Resource
+
   /**
-   * @brief Called by the KeyInputFocusManager to emit key event signals.
-   *
-   * @param[in] event The key event
-   * @return True if the event was consumed
+   * @brief Marks this view's resources as ready (does not request relayout).
    */
+  void SetResourceReady();
+
+  /**
+   * @copydoc Ui::View::IsOnScene()
+   */
+  bool IsOnScene() const;
+
+  // Internal data access
+
+  /**
+   * @brief Retrieves the internal data implementation of the view.
+   * @return Reference to the internal data implementation
+   */
+  Internal::ViewDataImpl& GetViewDataImpl() const;
+
+  /**
+   * @brief Requests relayout for this view.
+   */
+  void RelayoutRequestToView();
+
+  /// @cond internal
+  DALI_INTERNAL void KeyboardEnter();
   DALI_INTERNAL bool EmitKeyEventSignal(const KeyEvent& event);
   /// @endcond
 
-protected: // For derived classes to call
+protected:
+  // ============================================================
+  // protected: ABI-frozen virtual API
+  // WARNING: Do NOT reorder, remove, or change signatures.
+  // ============================================================
+
   /**
-   * @brief Registers a color binding (if not yet registered) and updates the tracked color,
-   *        or clears the binding if @a color has no color ID.
+   * @brief Destructor. A reference counted object may only be deleted by calling Unreference().
+   */
+  virtual ~ViewImpl();
+
+  /**
+   * @brief Called during measure pass. Override to implement custom measurement.
+   */
+  virtual MeasuredSize OnMeasure(float widthConstraint, float heightConstraint);
+
+  /**
+   * @brief Called during arrange pass. Override to implement custom arrangement.
+   */
+  virtual MeasuredSize OnArrange(const LayoutRect& bounds);
+
+  // ============================================================
+  // protected: Framework overrides (CustomActorImpl)
+  // ============================================================
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnSceneConnection()
+   */
+  void OnSceneConnection(int depth) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnSceneDisconnection()
+   */
+  void OnSceneDisconnection() override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnRelayout()
+   */
+  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnChildAdd()
+   */
+  void OnChildAdd(Actor& child) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnChildRemove()
+   */
+  void OnChildRemove(Actor& child) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnPropertySet()
+   */
+  void OnPropertySet(Property::Index index, const Property::Value& propertyValue) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnSizeSet()
+   */
+  void OnSizeSet(const Vector3& targetSize) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnSizeAnimation()
+   */
+  void OnSizeAnimation(Animation& animation, const Vector3& targetSize) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnAnimateAnimatableProperty()
+   */
+  void OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Dali::Animation::State state) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnConstraintAnimatableProperty()
+   */
+  void OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::GetOffScreenRenderTasks()
+   */
+  void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnSetResizePolicy()
+   */
+  void OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::GetNaturalSize()
+   */
+  Vector3 GetNaturalSize() override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::CalculateChildSize()
+   */
+  float CalculateChildSize(const Dali::Actor& child, Dimension::Type dimension) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::GetHeightForWidth()
+   */
+  float GetHeightForWidth(float width) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::GetWidthForHeight()
+   */
+  float GetWidthForHeight(float height) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::RelayoutDependentOnChildren()
+   */
+  bool RelayoutDependentOnChildren(Dimension::Type dimension = Dimension::ALL_DIMENSIONS) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnCalculateRelayoutSize()
+   */
+  void OnCalculateRelayoutSize(Dimension::Type dimension) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnLayoutNegotiated()
+   */
+  void OnLayoutNegotiated(float size, Dimension::Type dimension) override;
+
+  /**
+   * @copydoc Dali::ConnectionTrackerInterface::SignalConnected()
+   */
+  void SignalConnected(SlotObserver* slotObserver, CallbackBase* callback) override;
+
+  /**
+   * @copydoc Dali::ConnectionTrackerInterface::SignalDisconnected()
+   */
+  void SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback) override;
+
+  // ============================================================
+  // protected: Construction & helpers
+  // ============================================================
+
+  /**
+   * @brief Default constructor.
+   */
+  ViewImpl();
+
+  /**
+   * @brief Constructor with behaviour flags.
+   * @param[in] behaviourFlags Behavioural flags from ViewBehaviour enum
+   */
+  ViewImpl(ViewBehaviour behaviourFlags);
+
+  /**
+   * @brief Registers a color binding for theme-aware color updates.
    *
    * @tparam T        Type of the instance (ViewImpl or a derived class)
-   * @param[in] bindingId  Caller-defined identifier for this binding (e.g. "BackgroundColor")
+   * @param[in] bindingId  Caller-defined identifier for this binding
    * @param[in] color      The UiColor to apply
-   * @param[in] inst       The object whose @a setter will be used as the theme-change callback
+   * @param[in] inst       The object whose @a setter will be used as the callback
    * @param[in] setter     Member function called both immediately and on theme change
    */
   template<typename T>
@@ -1083,365 +1218,41 @@ protected: // For derived classes to call
 
   /**
    * @brief Emits FocusChanged signal.
-   *
-   * Should be called last by the view after it acts on the Input Focus change.
-   *
    * @param[in] focusGained True if gained, False if lost
    */
   void EmitFocusChangedSignal(bool focusGained);
 
-protected: // From CustomActorImpl
   /**
-   * @copydoc Dali::CustomActorImpl::OnSceneConnection()
-   * When this View is a layout root and is connected to a window, registers
-   * with LayoutController so that measure/arrange runs even if invalidation
-   * occurred before the view was added to the window.
-   * @note If overridden, then an up-call to ViewImpl::OnSceneConnection MUST be made at the end.
+   * @brief Applies min/max constraints to the given size.
+   * @param[in] size The size to constrain
+   * @return The constrained size
    */
-  void OnSceneConnection(int depth) override;
+  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
 
   /**
-   * @copydoc CustomActorImpl::OnSceneDisconnection()
-   * @note If overridden, then an up-call to ViewImpl::OnSceneDisconnection MUST be made at the end.
+   * @brief Registers this view with the LayoutController for processing.
    */
-  void OnSceneDisconnection() override;
+  void RegisterWithLayoutController();
 
-  /**
-   * @brief Override to separate dali-ui layout from DALi size negotiation.
-   * When this View has a LayoutManager, size/position are driven by dali-ui
-   * LayoutController; we no-op. Otherwise delegate to View.
-   * @note If overridden, then an up-call to ViewImpl::OnRelayout MUST be made at the end.
-   */
-  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnChildAdd()
-   * @note If overridden, then an up-call to ViewImpl::OnChildAdd MUST be made at the end.
-   */
-  void OnChildAdd(Actor& child) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnChildRemove()
-   * @note If overridden, then an up-call to ViewImpl::OnChildRemove MUST be made at the end.
-   */
-  void OnChildRemove(Actor& child) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnPropertySet()
-   * @note If overridden, then an up-call to ViewImpl::OnPropertySet MUST be made at the end.
-   */
-  void OnPropertySet(Property::Index index, const Property::Value& propertyValue) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnSizeSet()
-   * @note If overridden, then an up-call to ViewImpl::OnSizeSet MUST be made at the end.
-   */
-  void OnSizeSet(const Vector3& targetSize) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnSizeAnimation()
-   * @note If overridden, then an up-call to ViewImpl::OnSizeAnimation MUST be made at the end.
-   */
-  void OnSizeAnimation(Animation& animation, const Vector3& targetSize) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
-   * @note If overridden, then an up-call to ViewImpl::OnAnimateAnimatableProperty MUST be made at the end.
-   */
-  void OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Dali::Animation::State state) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnConstraintAnimatableProperty()
-   * @note If overridden, then an up-call to ViewImpl::OnConstraintAnimatableProperty MUST be made at the end.
-   */
-  void OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied) override;
-
-  /**
-   * @copydoc CustomActorImpl::GetOffScreenRenderTasks()
-   */
-  void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnSetResizePolicy()
-   */
-  void OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension) override;
-
-  /**
-   * @copydoc CustomActorImpl::GetNaturalSize()
-   */
-  Vector3 GetNaturalSize() override;
-
-  /**
-   * @copydoc CustomActorImpl::CalculateChildSize()
-   */
-  float CalculateChildSize(const Dali::Actor& child, Dimension::Type dimension) override;
-
-  /**
-   * @copydoc CustomActorImpl::GetHeightForWidth()
-   */
-  float GetHeightForWidth(float width) override;
-
-  /**
-   * @copydoc CustomActorImpl::GetWidthForHeight()
-   */
-  float GetWidthForHeight(float height) override;
-
-  /**
-   * @copydoc CustomActorImpl::RelayoutDependentOnChildren()
-   */
-  bool RelayoutDependentOnChildren(Dimension::Type dimension = Dimension::ALL_DIMENSIONS) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnCalculateRelayoutSize()
-   */
-  void OnCalculateRelayoutSize(Dimension::Type dimension) override;
-
-  /**
-   * @copydoc CustomActorImpl::OnLayoutNegotiated()
-   */
-  void OnLayoutNegotiated(float size, Dimension::Type dimension) override;
-
-public:
-  void RelayoutRequestToView();
-
-public: // Helpers for deriving classes
-  /**
-   * @brief Flags for the constructor.
-   */
-  enum ViewBehaviour
-  {
-    VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                ///< but doesn't receive event callbacks.
-    NOT_IN_USE_1 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
-    REQUIRES_KEY_NAVIGATION_SUPPORT =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
-    DISABLE_STYLE_CHANGE_SIGNALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT +
-                                         2), ///< True if view should not monitor style change signals
-    DISABLE_VISUALS =
-      1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 3), ///< True if view should not use visuals
-
-    LAST_VIEW_BEHAVIOUR_FLAG
-  };
-
-  static const int VIEW_BEHAVIOUR_FLAG_COUNT =
-    Log<LAST_VIEW_BEHAVIOUR_FLAG - 1>::value + 1; ///< Total count of flags
-
-protected:
-  // Construction
-
-  /**
-   * @brief View constructor.
-   *
-   * @param[in] behaviourFlags Behavioural flags from ViewBehaviour enum
-   */
-  ViewImpl(ViewBehaviour behaviourFlags);
-
-public: // API for derived classes to override
-  // Lifecycle
-
-  /**
-   * @brief Second phase initialization.
-   */
-  void Initialize();
-
-  /**
-   * @copydoc Dali::Ui::View::IsResourceReady
-   */
-  virtual bool IsResourceReady() const;
-
-  /**
-   * @copydoc Dali::Ui::View::IsOnScene
-   */
-  bool IsOnScene() const;
-
-  // Accessibility
-
-  /**
-   * @brief This method is called when the view is accessibility activated.
-   *
-   * Derived classes should override this to perform custom accessibility activation.
-   * @return true if this view can perform accessibility activation
-   */
-  virtual bool OnAccessibilityActivated();
-
-  /**
-   * @brief This method should be overridden by deriving classes when they wish to respond the accessibility
-   * pan gesture.
-   *
-   * @param[in] gesture The pan gesture
-   * @return true if the pan gesture has been consumed by this view
-   */
-  virtual bool OnAccessibilityPan(PanGesture gesture);
-
-  /**
-   * @brief This method should be overridden by deriving classes when they wish to respond
-   * the accessibility up and down action (i.e. value change of slider control).
-   *
-   * @param[in] isIncrease Whether the value should be increased or decreased
-   * @return true if the value changed action has been consumed by this view
-   */
-  virtual bool OnAccessibilityValueChange(bool isIncrease);
-
-  /**
-   * @brief This method should be overridden by deriving classes when they wish to respond
-   * the accessibility zoom action.
-   *
-   * @return true if the zoom action has been consumed by this view
-   */
-  virtual bool OnAccessibilityZoom();
-
-  /**
-   * @brief This method should be overridden by deriving classes when they wish to be
-   * represented by a custom Accessible object implementation.
-   *
-   * The AT-SPI infrastructure is responsible for destroying the returned object.
-   *
-   * Currently, this method is called at most once in a given View's lifetime, when
-   * GetAccessibleObject() is called for the first time. A future version of the
-   * AT-SPI infrastructure, however, may delete the Accessible object and request a new
-   * one to be created (by calling this method) multiple times, for example during
-   * scene connection and disconnection.
-   *
-   * @return The newly created Accessible object
-   *
-   * @see GetAccessibleObject()
-   */
-  virtual ViewAccessible* CreateAccessibleObject();
-
-  // Key focus
-
-  /**
-   * @brief Gets the next focusable actor in this view towards the given direction.
-   *
-   * A view needs to override this function in order to support two dimensional key navigation.
-   * @param[in] currentFocusedActor The current focused actor
-   * @param[in] direction The direction to move the focus towards
-   * @param[in] loopEnabled Whether the focus movement should be looped within the view
-   * @return The next focusable actor in this view or an empty handle if no actor can be focused
-   */
-  virtual Actor GetNextFocusableActor(Actor              currentFocusedActor,
-                                      Ui::FocusDirection direction, bool loopEnabled);
-
-  /**
-   * @brief Informs this view that its chosen focusable actor will be focused.
-   *
-   * This allows the application to perform any actions if wishes
-   * before the focus is actually moved to the chosen actor.
-   *
-   * @param[in] committedFocusableActor The committed focusable actor
-   */
-  virtual void OnFocusChangeCommitted(Actor committedFocusableActor);
-
-  /**
-   * @brief This method is called when the view has enter pressed on it.
-   *
-   * Derived classes should override this to perform custom actions.
-   * @return true if this view supported this action
-   */
-  virtual bool OnKeyboardEnter();
-
-  // Gestures
-
-  /**
-   * @brief Called whenever a pinch gesture is detected on this view.
-   *
-   * This can be overridden by deriving classes when pinch detection
-   * is enabled.  The default behaviour is to scale the view by the
-   * pinch scale.
-   *
-   * @param[in] pinch The pinch gesture
-   * @note If overridden, then the default behavior will not occur.
-   * @note Pinch detection should be enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
-   */
-  virtual void OnPinch(const PinchGesture& pinch);
-
-  /**
-   * @brief Called whenever a pan gesture is detected on this view.
-   *
-   * This should be overridden by deriving classes when pan detection
-   * is enabled.
-   *
-   * @param[in] pan The pan gesture
-   * @note There is no default behavior with panning.
-   * @note Pan detection should be enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
-   */
-  virtual void OnPan(const PanGesture& pan);
-
-  /**
-   * @brief Called whenever a tap gesture is detected on this view.
-   *
-   * This should be overridden by deriving classes when tap detection
-   * is enabled.
-   *
-   * @param[in] tap The tap gesture
-   * @note There is no default behavior with a tap.
-   * @note Tap detection should be enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
-   */
-  virtual void OnTap(const TapGesture& tap);
-
-  /**
-   * @brief Called whenever a long press gesture is detected on this view.
-   *
-   * This should be overridden by deriving classes when long press
-   * detection is enabled.
-   *
-   * @param[in] longPress The long press gesture
-   * @note There is no default behaviour associated with a long press.
-   * @note Long press detection should be enabled via EnableGestureDetection().
-   * @see EnableGestureDetection
-   */
-  virtual void OnLongPress(const LongPressGesture& longPress);
-
-  // From ConnectionTrackerInterface
-
-  /**
-   * @copydoc ConnectionTrackerInterface::SignalConnected
-   */
-  void SignalConnected(SlotObserver* slotObserver, CallbackBase* callback) override;
-
-  /**
-   * @copydoc ConnectionTrackerInterface::SignalDisconnected
-   */
-  void SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback) override;
-
-  /**
-   * @brief Retrieves the extension for this view.
-   *
-   * @return The extension if available, NULL otherwise
-   */
-  virtual Extension* GetViewExtension()
-  {
-    return NULL;
-  }
-
-  /**
-   * @brief Update visual properties.
-   * @param[in] properties Property list to be used to update visual properties of this View.
-   */
-  virtual void OnUpdateVisualProperties(
-    const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
-  {
-  }
-
-public:
-  class DALI_INTERNAL ViewDataImpl; // Class declaration is public so we can internally add devel API's to the Views Impl
+  // ============================================================
+  // private
+  // ============================================================
 
 private:
+  void MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+  void ArrangeStandaloneChildren(const LayoutRect& bounds);
+
+  ViewImpl(const ViewImpl&)            = delete;
+  ViewImpl(ViewImpl&&)                 = delete;
+  ViewImpl& operator=(const ViewImpl&) = delete;
+  ViewImpl& operator=(ViewImpl&&)      = delete;
+
+  void SetBackgroundColorInternal(const Vector4& color);
+  void SetBorderlineColorInternal(const Vector4& color);
+  void OnChildOrderChanged(Actor orderChangedChild);
+  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
   Internal::ViewDataImpl* mImpl;
-
-  // From view.h
-
-public:
-  /// @brief AccessibilityDoGesture signal type.
-  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
-
-  /// @brief AccessibilityAction signal type.
-  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
-
-  std::vector<Accessibility::Relation> GetAccessibilityRelations();
 };
 
 // Helpers for public-api forwarding methods
