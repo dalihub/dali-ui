@@ -139,7 +139,7 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> Activating and deactivating custom states is done via the integration-api (`ViewImpl::SetViewState()`), which targets Framework developers.
+> Activating and deactivating custom states is done via the `ViewImpl::SetState()`, which targets Framework developers.
 
 > Registering more than 62 custom states throws a `DaliException`.
 
@@ -153,12 +153,11 @@ auto loadingOrError = Loading + Error;
 
 ## Framework Developer Notes
 
-Use `ViewImpl::SetViewState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
+Use `ViewImpl::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
 
 ```cpp
-// integration-api (view-impl.h)
-SetViewState(Loading, true);   // activate Loading state
-SetViewState(Loading, false);  // deactivate Loading state
+SetState(Loading, true);   // activate Loading state
+SetState(Loading, false);  // deactivate Loading state
 ```
 
 For theme/color integration based on state, refer to the Framework Developer Notes in the Color & Theme document.

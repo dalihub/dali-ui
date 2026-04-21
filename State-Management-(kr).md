@@ -145,7 +145,7 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> 커스텀 상태의 설정은 integration-api(`ViewImpl::SetViewState()`)를 통해 이루어지며, Framework 개발자 대상입니다.
+> 커스텀 상태의 설정은 `ViewImpl::SetState()`를 통해 이루어지며, Framework 개발자 대상입니다.
 
 > 최대 62개를 초과하면 `DaliException`이 발생합니다.
 
@@ -159,12 +159,11 @@ auto loadingOrError = Loading + Error;
 
 ## Framework Developer Notes
 
-커스텀 상태를 만든 경우, `ViewImpl::SetViewState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
+커스텀 상태를 만든 경우, `ViewImpl::SetState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
 
 ```cpp
-// integration-api (view-impl.h)
-SetViewState(Loading, true);   // Loading 상태 활성화
-SetViewState(Loading, false);  // Loading 상태 해제
+SetState(Loading, true);   // Loading 상태 활성화
+SetState(Loading, false);  // Loading 상태 해제
 ```
 
 테마/색상 연동이 필요하다면 Color & Theme 문서의 Framework Developer Notes를 참고하세요.
