@@ -456,6 +456,11 @@ public:
   MeasuredSize mMeasuredSize;
   MeasuredSize mLastMeasuredConstraint;
   LayoutRect   mArrangedBounds;
+  // true = invalidated since the last arrange, false = NeverArranged or Valid.
+  // Used by InvalidateArrange's early-exit guard so repeated invalidations
+  // within a frame collapse to one parent-chain walk. Set by InvalidateMeasure
+  // too (measure invalidation implies arrange invalidation).
+  bool mArrangeDirty;
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
   ViewImpl::ChildContainer mChildren;

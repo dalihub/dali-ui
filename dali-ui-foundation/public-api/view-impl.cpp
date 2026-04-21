@@ -931,6 +931,7 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 {
   MeasuredSize arrangedSize = OnArrange(bounds);
   mImpl->mArrangedBounds    = bounds;
+  mImpl->mArrangeDirty      = false;
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children.
@@ -1056,6 +1057,7 @@ void ViewImpl::InvalidateMeasure()
 
   mImpl->mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
   mImpl->mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
+  mImpl->mArrangeDirty                  = true;
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1076,6 +1078,17 @@ void ViewImpl::InvalidateMeasure()
 
 void ViewImpl::InvalidateArrange()
 {
+  // Early-exit guard mirrors InvalidateMeasure: if already dirty, the
+  // ancestor chain has already been invalidated. Only the Dirty state
+  // short-circuits; NeverArranged (mArrangeDirty=false, but never arranged)
+  // still propagates on its first invalidation.
+  if(mImpl->mArrangeDirty)
+  {
+    return;
+  }
+
+  mImpl->mArrangeDirty = true;
+
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
   {

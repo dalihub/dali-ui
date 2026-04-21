@@ -496,6 +496,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   // InvalidateMeasure still propagates. See view-impl.cpp for details.
   mLastMeasuredConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
+  mArrangeDirty(false),
   mSkipChildrenUpdate(false),
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
