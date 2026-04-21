@@ -360,14 +360,6 @@ public:
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @brief Update visual properties.
-   * @param[in] properties Property list to be used to update visual properties of this View.
-   *
-   * @note This method triggers View::OnUpdateVisualProperties().
-   */
-  void UpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties);
-
-  /**
    * @copydoc Dali::Ui::Integration::ViewImpl::GetAccessibleObject()
    */
   std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();

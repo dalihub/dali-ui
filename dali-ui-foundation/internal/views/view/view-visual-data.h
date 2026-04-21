@@ -288,11 +288,6 @@ public:
   void StartObservingVisual(Ui::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::UpdateVisualProperties()
-   */
-  void UpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties);
-
-  /**
    * @copydoc Dali::Ui::Integration::ViewImpl::Impl::CreateAnimationConstraints()
    */
   void CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);

@@ -1107,23 +1107,6 @@ void ViewDataImpl::VisualData::StartObservingVisual(Ui::Visual::Base& visual)
   visualImpl.AddConstraintObserver(*this);
 }
 
-void ViewDataImpl::VisualData::UpdateVisualProperties(
-  const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
-{
-  for(auto&& data : properties)
-  {
-    if(data.first == Ui::View::Property::BACKGROUND)
-    {
-      DoAction(Ui::View::Property::BACKGROUND, DevelVisual::Action::UPDATE_PROPERTY, data.second);
-    }
-    else if(data.first == Ui::View::Property::SHADOW)
-    {
-      DoAction(Ui::View::Property::SHADOW, DevelVisual::Action::UPDATE_PROPERTY, data.second);
-    }
-  }
-  mOuter.mViewImpl.OnUpdateVisualProperties(properties);
-}
-
 void ViewDataImpl::VisualData::CreateAnimationConstraints(const Dali::BaseObject& animationObject,
                                                           Property::Index         index)
 {

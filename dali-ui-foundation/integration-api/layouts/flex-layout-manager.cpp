@@ -76,7 +76,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
 {
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
-  for(uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.Count(); ++i)
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = getImpl(childData.view);
@@ -436,7 +436,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
 
-  for(uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.Count(); ++i)
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = GetImpl(childData.view);
@@ -535,8 +535,8 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   // Save original measured sizes: BuildFlexLinesForArrange and ApplyFlexGrowShrink
   // modify childData.measuredSize in-place (flex-basis, grow, shrink). Without
   // restoring afterwards, repeated layout passes accumulate these adjustments.
-  std::vector<MeasuredSize> savedMeasuredSizes(children.size());
-  for(uint32_t i = 0; i < children.size(); ++i)
+  std::vector<MeasuredSize> savedMeasuredSizes(children.Count());
+  for(uint32_t i = 0; i < children.Count(); ++i)
   {
     savedMeasuredSizes[i] = children[i].measuredSize;
   }
@@ -616,7 +616,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   }
 
   // Restore original measured sizes so repeated layout passes start clean.
-  for(uint32_t i = 0; i < children.size(); ++i)
+  for(uint32_t i = 0; i < children.Count(); ++i)
   {
     children[i].measuredSize = savedMeasuredSizes[i];
   }

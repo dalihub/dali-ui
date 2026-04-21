@@ -22,6 +22,7 @@
 #include <dali/devel-api/object/type-info.h>
 #include <dali/public-api/animation/alpha-function.h>
 #include <dali/public-api/animation/time-period.h>
+#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -106,7 +107,7 @@ public:
     LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
   };
 
-  using ChildContainer         = std::vector<ChildData>;
+  using ChildContainer         = Dali::Vector<ChildData>;
   using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
 
   /// @brief AccessibilityDoGesture signal type.
@@ -246,14 +247,6 @@ public: // ABI-frozen virtual API
   virtual Extension* GetViewExtension()
   {
     return NULL;
-  }
-
-  /**
-   * @brief Update visual properties.
-   * @param[in] properties Property list to be used to update visual properties of this View.
-   */
-  virtual void OnUpdateVisualProperties(const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
-  {
   }
 
 public: // Non-virtual API (safe to reorder / extend)
@@ -874,7 +867,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * @brief Gets the accessibility relations of this view.
    * @return The list of accessibility relations
    */
-  std::vector<Accessibility::Relation> GetAccessibilityRelations();
+  Dali::Vector<Accessibility::Relation> GetAccessibilityRelations();
 
   // Key Navigation & Focus
 

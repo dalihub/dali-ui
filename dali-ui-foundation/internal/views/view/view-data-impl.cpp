@@ -2058,15 +2058,6 @@ Dali::Property ViewDataImpl::GetVisualProperty(Dali::Property::Index index, Dali
   return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
-void ViewDataImpl::UpdateVisualProperties(
-  const std::vector<std::pair<Dali::Property::Index, Dali::Property::Map>>& properties)
-{
-  if(DALI_LIKELY(mVisualData))
-  {
-    mVisualData->UpdateVisualProperties(properties);
-  }
-}
-
 void ViewDataImpl::EmitResourceReadySignal()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable())) ///< Avoid resource ready callback during shutting down

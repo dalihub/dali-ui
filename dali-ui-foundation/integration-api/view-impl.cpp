@@ -768,7 +768,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   float contentWidth  = std::max(0.0f, effectiveWidth - pw);
   float contentHeight = std::max(0.0f, effectiveHeight - ph);
 
-  if(!mImpl->mChildren.empty())
+  if(!mImpl->mChildren.Empty())
   {
     float maxRight  = 0.0f;
     float maxBottom = 0.0f;
@@ -882,7 +882,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
 
-  if(!mImpl->mChildren.empty())
+  if(!mImpl->mChildren.Empty())
   {
     float padLeft   = static_cast<float>(mImpl->mPadding.start);
     float padRight  = static_cast<float>(mImpl->mPadding.end);
@@ -1216,15 +1216,15 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   {
     return;
   }
-  if(index > mImpl->mChildren.size())
+  if(index > mImpl->mChildren.Count())
   {
-    index = static_cast<uint32_t>(mImpl->mChildren.size());
+    index = static_cast<uint32_t>(mImpl->mChildren.Count());
   }
   ChildData childData;
   childData.view           = child;
   childData.measuredSize   = {0.0f, 0.0f};
   childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-  mImpl->mChildren.insert(mImpl->mChildren.begin() + index, childData);
+  mImpl->mChildren.Insert(mImpl->mChildren.begin() + index, childData);
 
   {
     ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
@@ -1249,18 +1249,18 @@ void ViewImpl::RemoveAllChildren()
     }
   }
 
-  mImpl->mChildren.clear();
+  mImpl->mChildren.Clear();
   InvalidateMeasure();
 }
 
 uint32_t ViewImpl::GetChildCount() const
 {
-  return static_cast<uint32_t>(mImpl->mChildren.size());
+  return static_cast<uint32_t>(mImpl->mChildren.Count());
 }
 
 Ui::View ViewImpl::GetChildAt(uint32_t index) const
 {
-  if(index < mImpl->mChildren.size())
+  if(index < mImpl->mChildren.Count())
   {
     return mImpl->mChildren[index].view;
   }
@@ -1273,7 +1273,7 @@ int32_t ViewImpl::IndexOfChild(Ui::View view) const
   {
     return -1;
   }
-  for(size_t i = 0; i < mImpl->mChildren.size(); ++i)
+  for(size_t i = 0; i < mImpl->mChildren.Count(); ++i)
   {
     if(mImpl->mChildren[i].view == view)
     {
@@ -1758,7 +1758,7 @@ void ViewImpl::OnChildAdd(Actor& child)
     childData.view           = view;
     childData.measuredSize   = {0.0f, 0.0f};
     childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-    mImpl->mChildren.push_back(childData);
+    mImpl->mChildren.PushBack(childData);
     // Invalidate the child's measure cache — its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
     // This also propagates to the parent (this) via InvalidateMeasure chain.
@@ -1797,7 +1797,7 @@ void ViewImpl::OnChildRemove(Actor& child)
       // Note: Actor parent-child relationship is already severed at this
       // point, so child's InvalidateMeasure cannot propagate to us.
       Integration::GetImpl(view).InvalidateMeasure();
-      mImpl->mChildren.erase(it);
+      mImpl->mChildren.Erase(it);
       InvalidateMeasure();
     }
   }
@@ -1813,7 +1813,7 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
   Actor          self            = Self();
   uint32_t       actorChildCount = self.GetChildCount();
   ChildContainer newChildren;
-  newChildren.reserve(actorChildCount);
+  newChildren.Reserve(actorChildCount);
 
   for(uint32_t i = 0; i < actorChildCount; ++i)
   {
@@ -1826,7 +1826,7 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
       });
       if(it != mImpl->mChildren.end())
       {
-        newChildren.push_back(std::move(*it));
+        newChildren.PushBack(std::move(*it));
       }
     }
   }
@@ -2015,9 +2015,9 @@ void ViewImpl::SignalDisconnected(SlotObserver* slotObserver, CallbackBase* call
 
 // From view.cpp
 
-std::vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
+Dali::Vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
 {
-  std::vector<Accessibility::Relation> result;
+  Dali::Vector<Accessibility::Relation> result;
 
   const auto* accessibilityData = mImpl->GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData))
@@ -2027,8 +2027,9 @@ std::vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
     {
       const auto& targets = relation.second;
 
-      result.emplace_back(Accessibility::Relation{relation.first, {}});
-      std::copy(targets.begin(), targets.end(), std::back_inserter(result.back().mTargets));
+      Accessibility::Relation rel{relation.first, {}};
+      std::copy(targets.begin(), targets.end(), std::back_inserter(rel.mTargets));
+      result.PushBack(std::move(rel));
     }
   }
 
