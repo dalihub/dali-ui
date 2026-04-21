@@ -162,6 +162,9 @@
   /** \
   * @brief Sets the marquee orientation. \
   * \
+  * Horizontal is applied only for single-line text, and vertical only for multi-line text. \
+  * The setting is ignored if the text layout does not match the required condition. \
+  * \
   * @param[in] orientation The marquee orientation. \
   */ \
   ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; } \

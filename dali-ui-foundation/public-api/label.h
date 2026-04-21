@@ -517,6 +517,9 @@ public: // Setters for chaining
   /**
    * @brief Sets the marquee orientation.
    *
+   * Horizontal is applied only for single-line text, and vertical only for multi-line text.
+   * The setting is ignored if the text layout does not match the required condition.
+   *
    * @param[in] orientation The marquee orientation.
    */
   Label& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
@@ -954,6 +957,10 @@ public: // Setters for chaining
   // Method
   /**
    * @brief Starts the marquee animation using the current marquee settings.
+   *
+   * The marquee starts only when the orientation matches the current text layout:
+   * horizontal for single-line text, and vertical for multi-line text.
+   * If the condition is not met, this call has no effect.
    */
   void StartMarquee();
 
