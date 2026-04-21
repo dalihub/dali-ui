@@ -48,7 +48,7 @@
 #include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
-#include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
@@ -174,6 +174,28 @@ void RegisterViewAccessibleGetter()
       return {nullptr, false};
     });
   }
+}
+
+Internal::LayoutCallbacksTraitImpl* GetLayoutCallbacksTrait(ViewImpl* self)
+{
+  Trait trait = self->GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  if(trait)
+  {
+    return static_cast<Internal::LayoutCallbacksTraitImpl*>(&Ui::GetImpl(trait));
+  }
+  return nullptr;
+}
+
+Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
+{
+  auto* impl = GetLayoutCallbacksTrait(self);
+  if(!impl)
+  {
+    impl                                  = new Internal::LayoutCallbacksTraitImpl();
+    Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(impl);
+    self->SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+  }
+  return impl;
 }
 
 } // namespace
@@ -1184,26 +1206,26 @@ bool ViewImpl::IsLayout() const
   return false;
 }
 
-Internal::LayoutCallbacksImpl* ViewImpl::GetLayoutCallbacks() const
+void ViewImpl::SetMeasureCallback(MeasureCallback callback)
 {
-  Trait trait = const_cast<ViewImpl*>(this)->GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
-  if(trait)
-  {
-    return static_cast<Internal::LayoutCallbacksImpl*>(&Ui::GetImpl(trait));
-  }
-  return nullptr;
+  EnsureLayoutCallbacksTrait(this)->SetMeasureCallback(std::move(callback));
 }
 
-Internal::LayoutCallbacksImpl* ViewImpl::EnsureLayoutCallbacks()
+void ViewImpl::SetArrangeCallback(ArrangeCallback callback)
 {
-  Internal::LayoutCallbacksImpl* callbacks = GetLayoutCallbacks();
-  if(!callbacks)
-  {
-    callbacks                             = new Internal::LayoutCallbacksImpl();
-    Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(callbacks);
-    SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
-  }
-  return callbacks;
+  EnsureLayoutCallbacksTrait(this)->SetArrangeCallback(std::move(callback));
+}
+
+MeasureCallback* ViewImpl::GetMeasureCallback()
+{
+  auto* impl = GetLayoutCallbacksTrait(this);
+  return impl ? impl->GetMeasureCallback() : nullptr;
+}
+
+ArrangeCallback* ViewImpl::GetArrangeCallback()
+{
+  auto* impl = GetLayoutCallbacksTrait(this);
+  return impl ? impl->GetArrangeCallback() : nullptr;
 }
 
 // =============================================================================

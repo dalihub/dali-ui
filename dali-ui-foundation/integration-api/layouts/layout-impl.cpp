@@ -25,7 +25,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
-#include <dali-ui-foundation/internal/layouts/layout-callbacks-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h>
 
 namespace Dali
@@ -99,11 +98,11 @@ bool LayoutImpl::IsLayout() const
 MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // Callback takes priority over LayoutManager
-  Internal::LayoutCallbacksImpl* callbacks = GetLayoutCallbacks();
-  if(callbacks && callbacks->HasMeasureCallback())
+  auto* measureCallback = GetMeasureCallback();
+  if(measureCallback)
   {
     Ui::View view = Ui::View::DownCast(Self());
-    return callbacks->InvokeMeasure(view, widthConstraint, heightConstraint);
+    return measureCallback->Invoke(view, widthConstraint, heightConstraint);
   }
 
   LayoutManager* layoutManager = GetLayoutManager();
@@ -163,8 +162,8 @@ MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint
 MeasuredSize LayoutImpl::OnArrange(const LayoutRect& bounds)
 {
   // Callback takes priority over LayoutManager
-  Internal::LayoutCallbacksImpl* callbacks = GetLayoutCallbacks();
-  if(callbacks && callbacks->HasArrangeCallback())
+  auto* arrangeCallback = GetArrangeCallback();
+  if(arrangeCallback)
   {
     // Set self position/size before invoking callback
     Actor self = Self();
@@ -174,7 +173,7 @@ MeasuredSize LayoutImpl::OnArrange(const LayoutRect& bounds)
     self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
 
     Ui::View view = Ui::View::DownCast(self);
-    return callbacks->InvokeArrange(view, bounds);
+    return arrangeCallback->Invoke(view, bounds);
   }
 
   LayoutManager* layoutManager = GetLayoutManager();

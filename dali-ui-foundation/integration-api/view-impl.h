@@ -65,7 +65,6 @@ class ViewAccessible;
 
 namespace Internal
 {
-class LayoutCallbacksImpl;
 class ViewDataImpl;
 } //namespace Internal
 
@@ -768,16 +767,14 @@ public: // Non-virtual API (safe to reorder / extend)
   // Layout Callbacks
 
   /**
-   * @brief Gets the layout callbacks implementation, if set.
-   * @return Pointer to the layout callbacks, or nullptr
+   * @copydoc Ui::View::SetMeasureCallback()
    */
-  Internal::LayoutCallbacksImpl* GetLayoutCallbacks() const;
+  void SetMeasureCallback(MeasureCallback callback);
 
   /**
-   * @brief Gets or creates the layout callbacks implementation.
-   * @return Pointer to the layout callbacks (never nullptr)
+   * @copydoc Ui::View::SetArrangeCallback()
    */
-  Internal::LayoutCallbacksImpl* EnsureLayoutCallbacks();
+  void SetArrangeCallback(ArrangeCallback callback);
 
   // Child Management
 
@@ -1152,6 +1149,18 @@ protected:
    * @brief Registers this view with the LayoutController for processing.
    */
   void RegisterWithLayoutController();
+
+  /**
+   * @brief Gets the measure callback, if set.
+   * @return Pointer to the MeasureCallback, or nullptr if not set
+   */
+  MeasureCallback* GetMeasureCallback();
+
+  /**
+   * @brief Gets the arrange callback, if set.
+   * @return Pointer to the ArrangeCallback, or nullptr if not set
+   */
+  ArrangeCallback* GetArrangeCallback();
 
   // ============================================================
   // private

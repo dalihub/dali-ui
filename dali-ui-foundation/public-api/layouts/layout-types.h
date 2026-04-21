@@ -23,12 +23,15 @@
 #include <cstdint>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
 namespace Dali
 {
 namespace Ui
 {
+
+class View;
 
 /**
  * @brief Enumeration for layout alignment options.
@@ -285,6 +288,32 @@ public:
   float width;  ///< Width
   float height; ///< Height
 };
+
+// ============================================================================
+// Layout Callback types
+// ============================================================================
+
+/**
+ * @brief Move-only callback for custom layout measurement.
+ *
+ * @code
+ * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+ * @endcode
+ *
+ * @note Signature: MeasuredSize(View view, float widthConstraint, float heightConstraint)
+ */
+using MeasureCallback = Callback<MeasuredSize(View, float, float)>;
+
+/**
+ * @brief Move-only callback for custom layout arrangement.
+ *
+ * @code
+ * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
+ * @endcode
+ *
+ * @note Signature: MeasuredSize(View view, const LayoutRect& bounds)
+ */
+using ArrangeCallback = Callback<MeasuredSize(View, const LayoutRect&)>;
 
 /**
  * @brief Enumeration for stack layout orientation.

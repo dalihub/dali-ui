@@ -17,10 +17,6 @@
  *
  */
 
-// EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-common.h>
-#include <dali/public-api/signals/callback.h>
-
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -28,50 +24,56 @@
 
 namespace Dali
 {
-
 namespace Ui
 {
-
 namespace Internal
 {
 
-class LayoutCallbacksImpl;
+class LayoutCallbacksTraitImpl;
+
+// ============================================================================
+// LayoutCallbacksTrait — internal handle
+// ============================================================================
 
 /**
- * @brief Internal handle for LayoutCallbacks trait.
+ * @brief Internal handle for LayoutCallbacksTrait.
+ *
+ * Wraps LayoutCallbacksTraitImpl as a Trait so it can be stored in
+ * ViewImpl's trait slot. Not exposed to applications.
  */
 class LayoutCallbacksTrait : public Trait
 {
 public:
   LayoutCallbacksTrait() = default;
 
-  static LayoutCallbacksTrait New(LayoutCallbacksImpl* impl);
+  static LayoutCallbacksTrait New(LayoutCallbacksTraitImpl* impl);
 
 private:
-  explicit LayoutCallbacksTrait(LayoutCallbacksImpl* impl);
+  explicit LayoutCallbacksTrait(LayoutCallbacksTraitImpl* impl);
 };
+
+// ============================================================================
+// LayoutCallbacksTraitImpl — implementation
+// ============================================================================
 
 /**
  * @brief Internal implementation of LayoutCallbacks trait.
  *
- * Stores measure/arrange callbacks as CallbackBase pointers.
+ * Stores measure/arrange callbacks as typed Callback objects.
  */
-class LayoutCallbacksImpl : public Integration::TraitImpl
+class LayoutCallbacksTraitImpl : public Integration::TraitImpl
 {
 public:
-  LayoutCallbacksImpl();
+  LayoutCallbacksTraitImpl();
 
-  void SetMeasureCallback(CallbackBase* callback);
-  void SetArrangeCallback(CallbackBase* callback);
+  void SetMeasureCallback(MeasureCallback callback);
+  void SetArrangeCallback(ArrangeCallback callback);
 
-  bool HasMeasureCallback() const;
-  bool HasArrangeCallback() const;
-
-  MeasuredSize InvokeMeasure(View view, float widthConstraint, float heightConstraint);
-  MeasuredSize InvokeArrange(View view, const LayoutRect& bounds);
+  MeasureCallback* GetMeasureCallback();
+  ArrangeCallback* GetArrangeCallback();
 
 protected:
-  ~LayoutCallbacksImpl() override;
+  ~LayoutCallbacksTraitImpl() override;
 
   void OnBeforeAttached(Integration::TraitId id, View& view) override;
   void OnAttached(Integration::TraitId id, View& view) override;
@@ -79,8 +81,8 @@ protected:
   void OnViewDestroying(Integration::ViewImpl* viewImpl) override;
 
 private:
-  UniquePtr<CallbackBase> mOnMeasure;
-  UniquePtr<CallbackBase> mOnArrange;
+  MeasureCallback mOnMeasure;
+  ArrangeCallback mOnArrange;
 };
 
 } // namespace Internal

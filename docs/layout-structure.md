@@ -23,15 +23,15 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Always has a LayoutManager stored as a Trait (`ReservedTraitId::LAYOUT_MANAGER`); derived classes attach Stack/Flex/Grid/Absolute algorithms in `OnInitialize()`.
 
 - **Custom Layout Callbacks**
-  - `View::SetMeasureCallback(UniquePtr<LayoutMeasureCallback>)` and `View::SetArrangeCallback(UniquePtr<LayoutArrangeCallback>)` allow applications to customize measure/arrange behavior on any View or Layout subclass.
-  - `LayoutMeasureCallback` and `LayoutArrangeCallback` follow the DALi `RenderCallback`/`VertexBufferUpdateCallback` pattern, using `CallbackBase` internally.
+  - `View::SetMeasureCallback(MeasureCallback)` and `View::SetArrangeCallback(ArrangeCallback)` allow applications to customize measure/arrange behavior on any View or Layout subclass.
+  - `MeasureCallback` and `ArrangeCallback` are move-only typed callbacks (aliases for `Callback<Sig>`), using `CallbackBase` internally.
   - Callbacks are stored as a `LayoutCallbacks` Trait (`ReservedTraitId::LAYOUT_SIGNALS`), created lazily on first use. When set, callbacks take priority over the default LayoutManager.
     ```cpp
     Layout layout = Layout::New();
-    layout.SetMeasureCallback(LayoutMeasureCallback::New(&MyMeasure));   // free function
-    layout.SetArrangeCallback(LayoutArrangeCallback::New(&MyArrange));   // free function
-    // For member functions, pass the object instance:
-    // layout.SetMeasureCallback(LayoutMeasureCallback::New(this, &MyClass::OnMeasure));
+    layout.SetMeasureCallback(MeasureCallback::New(&MyMeasure));                    // static function
+    layout.SetArrangeCallback(ArrangeCallback::New(&MyArrange));                    // static function
+    layout.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));     // member function
+    layout.SetMeasureCallback({});                                                  // remove callback
     ```
 
 - **StackLayout, FlexLayout, GridLayout, AbsoluteLayout**

@@ -37,7 +37,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
-#include <dali-ui-foundation/public-api/layouts/layout-callbacks.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
@@ -221,29 +220,43 @@ public: // Measure / Arrange API
    * @brief Sets a custom measure callback for this View.
    *
    * When set, the callback replaces the default measurement behavior
-   * during the layout pass. Pass nullptr to remove the callback.
+   * during the layout pass. Pass a default-constructed callback to remove.
    *
    * @param[in] callback The measure callback (ownership transferred)
    *
    * @code
-   * view.SetMeasureCallback(LayoutMeasureCallback::New(&MyClass::OnMeasure));
+   * // Member function
+   * view.SetMeasureCallback(MeasureCallback::New(this, &MyClass::OnMeasure));
+   *
+   * // Static function
+   * view.SetMeasureCallback(MeasureCallback::New(&MyMeasure));
+   *
+   * // Remove callback
+   * view.SetMeasureCallback({});
    * @endcode
    */
-  void SetMeasureCallback(::Dali::UniquePtr<LayoutMeasureCallback> callback);
+  void SetMeasureCallback(MeasureCallback callback);
 
   /**
    * @brief Sets a custom arrange callback for this View.
    *
    * When set, the callback replaces the default arrangement behavior
-   * during the layout pass. Pass nullptr to remove the callback.
+   * during the layout pass. Pass a default-constructed callback to remove.
    *
    * @param[in] callback The arrange callback (ownership transferred)
    *
    * @code
-   * view.SetArrangeCallback(LayoutArrangeCallback::New(&MyClass::OnArrange));
+   * // Member function
+   * view.SetArrangeCallback(ArrangeCallback::New(this, &MyClass::OnArrange));
+   *
+   * // Static function
+   * view.SetArrangeCallback(ArrangeCallback::New(&MyArrange));
+   *
+   * // Remove callback
+   * view.SetArrangeCallback({});
    * @endcode
    */
-  void SetArrangeCallback(::Dali::UniquePtr<LayoutArrangeCallback> callback);
+  void SetArrangeCallback(ArrangeCallback callback);
 
 public: // Properties
   // @CHAIN_START(View)

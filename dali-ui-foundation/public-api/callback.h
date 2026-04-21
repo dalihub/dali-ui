@@ -30,7 +30,9 @@ namespace Ui
 {
 
 /**
- * @brief Primary template — not defined; use one of the specialisations below.
+ * @brief Move-only typed callback wrapper (similar to std::move_only_function).
+ *
+ * Primary template — not defined; use one of the specialisations below.
  *
  * Supported forms:
  *   Callback<void()>
@@ -53,11 +55,18 @@ template<>
 class DALI_UI_API Callback<void()>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<void()> New(void (*func)())
   {
@@ -102,11 +111,18 @@ template<typename Ret>
 class DALI_UI_API Callback<Ret()>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<Ret()> New(Ret (*func)())
   {
@@ -151,11 +167,18 @@ template<typename Arg0>
 class DALI_UI_API Callback<void(Arg0)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<void(Arg0)> New(void (*func)(Arg0))
   {
@@ -200,11 +223,18 @@ template<typename Ret, typename Arg0>
 class DALI_UI_API Callback<Ret(Arg0)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<Ret(Arg0)> New(Ret (*func)(Arg0))
   {
@@ -249,11 +279,18 @@ template<typename Arg0, typename Arg1>
 class DALI_UI_API Callback<void(Arg0, Arg1)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<void(Arg0, Arg1)> New(void (*func)(Arg0, Arg1))
   {
@@ -298,11 +335,18 @@ template<typename Ret, typename Arg0, typename Arg1>
 class DALI_UI_API Callback<Ret(Arg0, Arg1)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<Ret(Arg0, Arg1)> New(Ret (*func)(Arg0, Arg1))
   {
@@ -347,11 +391,18 @@ template<typename Arg0, typename Arg1, typename Arg2>
 class DALI_UI_API Callback<void(Arg0, Arg1, Arg2)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<void(Arg0, Arg1, Arg2)> New(void (*func)(Arg0, Arg1, Arg2))
   {
@@ -396,11 +447,18 @@ template<typename Ret, typename Arg0, typename Arg1, typename Arg2>
 class DALI_UI_API Callback<Ret(Arg0, Arg1, Arg2)>
 {
 public:
+  Callback() = default;
+
   Callback(Callback&&) noexcept            = default;
   Callback& operator=(Callback&&) noexcept = default;
 
   Callback(const Callback&)            = delete;
   Callback& operator=(const Callback&) = delete;
+
+  explicit operator bool() const
+  {
+    return static_cast<bool>(mCallback);
+  }
 
   static Callback<Ret(Arg0, Arg1, Arg2)> New(Ret (*func)(Arg0, Arg1, Arg2))
   {

@@ -87,8 +87,8 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     Layout root = Layout::New();
-    root.SetMeasureCallback(LayoutMeasureCallback::New(&DiagonalLayout::OnMeasure));
-    root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
+    root.SetMeasureCallback(MeasureCallback::New(&DiagonalLayout::OnMeasure));
+    root.SetArrangeCallback(ArrangeCallback::New(&DiagonalLayout::OnArrange));
 
     View child1 = View::New();
     child1.SetRequestedWidth(50.0f);
