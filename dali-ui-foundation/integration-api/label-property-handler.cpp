@@ -129,6 +129,15 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       impl.SetAnchorClickedColor(UiColor(value.Get<Vector4>()));
       break;
     }
+    case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
+    {
+      Text::MarqueeTriggerPolicy policy;
+      if(Text::GetMarqueeTriggerPolicyEnumeration(value, policy))
+      {
+        impl.SetMarqueeTriggerPolicy(policy);
+      }
+      break;
+    }
     case Text::LabelPropertyIndex::MARQUEE_SPEED:
     {
       impl.SetMarqueeSpeed(value.Get<int>());
@@ -314,6 +323,11 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
     {
       value = impl.GetAnchorClickedColor().Resolve();
+      break;
+    }
+    case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
+    {
+      value = impl.GetMarqueeTriggerPolicy();
       break;
     }
     case Text::LabelPropertyIndex::MARQUEE_SPEED:

@@ -67,6 +67,12 @@ const Dali::Scripting::StringEnum LAYOUT_DIRECTION_MODE_TABLE[] =
     {"LOCALE", static_cast<int32_t>(LayoutDirectionMode::LOCALE)},
 };
 
+const Dali::Scripting::StringEnum MARQUEE_TRIGGER_POLICY_TABLE[] =
+  {
+    {"MANUAL", static_cast<int32_t>(MarqueeTriggerPolicy::MANUAL)},
+    {"ON_OVERFLOW", static_cast<int32_t>(MarqueeTriggerPolicy::ON_OVERFLOW)},
+};
+
 const Dali::Scripting::StringEnum MARQUEE_STOP_MODE_TABLE[] =
   {
     {"IMMEDIATE", static_cast<int32_t>(MarqueeStopMode::IMMEDIATE)},
@@ -95,6 +101,8 @@ const uint32_t LINE_HEIGHT_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(LINE_HEIGHT_MODE_TABLE) / sizeof(LINE_HEIGHT_MODE_TABLE[0]));
 const uint32_t LAYOUT_DIRECTION_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(LAYOUT_DIRECTION_MODE_TABLE) / sizeof(LAYOUT_DIRECTION_MODE_TABLE[0]));
+const uint32_t MARQUEE_TRIGGER_POLICY_TABLE_COUNT =
+  static_cast<uint32_t>(sizeof(MARQUEE_TRIGGER_POLICY_TABLE) / sizeof(MARQUEE_TRIGGER_POLICY_TABLE[0]));
 const uint32_t MARQUEE_STOP_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(MARQUEE_STOP_MODE_TABLE) / sizeof(MARQUEE_STOP_MODE_TABLE[0]));
 const uint32_t MARQUEE_ORIENTATION_TABLE_COUNT =
@@ -178,6 +186,14 @@ bool GetLayoutDirectionModeEnumeration(const Property::Value& propertyValue, Lay
                                            LAYOUT_DIRECTION_MODE_TABLE,
                                            LAYOUT_DIRECTION_MODE_TABLE_COUNT,
                                            layoutDirectionMode);
+}
+
+bool GetMarqueeTriggerPolicyEnumeration(const Property::Value& propertyValue, MarqueeTriggerPolicy& marqueeTriggerPolicy)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           MARQUEE_TRIGGER_POLICY_TABLE,
+                                           MARQUEE_TRIGGER_POLICY_TABLE_COUNT,
+                                           marqueeTriggerPolicy);
 }
 
 bool GetMarqueeStopModeEnumeration(const Property::Value& propertyValue, MarqueeStopMode& marqueeStopMode)

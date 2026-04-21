@@ -109,6 +109,15 @@ bool GetLayoutDirectionModeEnumeration(const Property::Value& propertyValue,
                                        LayoutDirectionMode&   layoutDirectionMode);
 
 /**
+ * @brief Get the marquee trigger policy from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] marqueeTriggerPolicy The resulting MarqueeTriggerPolicy from the given source
+ * @return true if the resulting marqueeTriggerPolicy has been updated
+ */
+bool GetMarqueeTriggerPolicyEnumeration(const Property::Value& propertyValue,
+                                        MarqueeTriggerPolicy&  marqueeTriggerPolicy);
+
+/**
  * @brief Get the marquee stop mode from the provided property value.
  * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
  * @param[out] marqueeStopMode The resulting MarqueeStopMode from the given source

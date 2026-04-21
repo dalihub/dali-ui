@@ -153,6 +153,13 @@ struct LabelPropertyIndex
     ANCHOR_CLICKED_COLOR,
 
     /**
+     * @brief Defines when the marquee animation is triggered.
+     * @details Name "marqueeTriggerPolicy", type Text::MarqueeTriggerPolicy (Property::INTEGER) or Property::STRING.
+     * @see Label::SetMarqueeTriggerPolicy(), Label::GetMarqueeTriggerPolicy().
+     */
+    MARQUEE_TRIGGER_POLICY,
+
+    /**
      * @brief Sets the marquee speed in pixels per second.
      * @details Name "marqueeSpeed", type Property::INTEGER.
      * @see Label::SetMarqueeSpeed(), Label::GetMarqueeSpeed().

@@ -95,6 +95,7 @@ LABEL_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECT
 LABEL_PROPERTY_REGISTRATION("markupEnabled",              BOOLEAN, MARKUP_ENABLED                )
 LABEL_PROPERTY_REGISTRATION("anchorColor",                VECTOR4, ANCHOR_COLOR                  )
 LABEL_PROPERTY_REGISTRATION("anchorClickedColor",         VECTOR4, ANCHOR_CLICKED_COLOR          )
+LABEL_PROPERTY_REGISTRATION("marqueeTriggerPolicy",       INTEGER, MARQUEE_TRIGGER_POLICY        )
 LABEL_PROPERTY_REGISTRATION("marqueeSpeed",               INTEGER, MARQUEE_SPEED                 )
 LABEL_PROPERTY_REGISTRATION("marqueeLoopCount",           INTEGER, MARQUEE_LOOP_COUNT            )
 LABEL_PROPERTY_REGISTRATION("marqueeLoopDelay",           FLOAT,   MARQUEE_LOOP_DELAY            )

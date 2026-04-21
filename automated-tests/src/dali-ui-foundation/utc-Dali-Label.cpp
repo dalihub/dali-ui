@@ -42,6 +42,7 @@ const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectio
 const char* const PROPERTY_NAME_MARKUP_ENABLED                 = "markupEnabled";
 const char* const PROPERTY_NAME_ANCHOR_COLOR                   = "anchorColor";
 const char* const PROPERTY_NAME_ANCHOR_CLICKED_COLOR           = "anchorClickedColor";
+const char* const PROPERTY_NAME_MARQUEE_TRIGGER_POLICY         = "marqueeTriggerPolicy";
 const char* const PROPERTY_NAME_MARQUEE_SPEED                  = "marqueeSpeed";
 const char* const PROPERTY_NAME_MARQUEE_LOOP_COUNT             = "marqueeLoopCount";
 const char* const PROPERTY_NAME_MARQUEE_LOOP_DELAY             = "marqueeLoopDelay";
@@ -384,6 +385,21 @@ int UtcDaliLabelAnchorClickedColor(void)
   UiColor color2(Color::YELLOW);
   label.SetAnchorClickedColor(color2);
   DALI_TEST_EQUALS(label.GetAnchorClickedColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelMarqueeTriggerPolicy(void)
+{
+  UiTestApplication application;
+  Label label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+  DALI_TEST_EQUALS(label.GetMarqueeTriggerPolicy(), Text::MarqueeTriggerPolicy::ON_OVERFLOW, TEST_LOCATION);
+
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  DALI_TEST_EQUALS(label.GetMarqueeTriggerPolicy(), Text::MarqueeTriggerPolicy::MANUAL, TEST_LOCATION);
 
   END_TEST;
 }
@@ -757,6 +773,7 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARKUP_ENABLED) == Label::Property::MARKUP_ENABLED);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_ANCHOR_COLOR) == Label::Property::ANCHOR_COLOR);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_ANCHOR_CLICKED_COLOR) == Label::Property::ANCHOR_CLICKED_COLOR);
+  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_TRIGGER_POLICY) == Label::Property::MARQUEE_TRIGGER_POLICY);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_SPEED) == Label::Property::MARQUEE_SPEED);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_LOOP_COUNT) == Label::Property::MARQUEE_LOOP_COUNT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_LOOP_DELAY) == Label::Property::MARQUEE_LOOP_DELAY);
@@ -865,6 +882,13 @@ int UtcDaliLabelSetProperty(void)
   // ANCHOR_CLICKED_COLOR
   label.SetProperty(Label::Property::ANCHOR_CLICKED_COLOR, Color::RED);
   DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::ANCHOR_CLICKED_COLOR), Color::RED, TEST_LOCATION);
+
+  // MARQUEE_TRIGGER_POLICY
+  label.SetProperty(Label::Property::MARQUEE_TRIGGER_POLICY, Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+  DALI_TEST_EQUALS(label.GetProperty<Text::MarqueeTriggerPolicy>(Label::Property::MARQUEE_TRIGGER_POLICY), Text::MarqueeTriggerPolicy::ON_OVERFLOW, TEST_LOCATION);
+
+  label.SetProperty(Label::Property::MARQUEE_TRIGGER_POLICY, "MANUAL");
+  DALI_TEST_EQUALS(label.GetProperty<Text::MarqueeTriggerPolicy>(Label::Property::MARQUEE_TRIGGER_POLICY), Text::MarqueeTriggerPolicy::MANUAL, TEST_LOCATION);
 
   // MARQUEE_SPEED
   label.SetProperty(Label::Property::MARQUEE_SPEED, 100);

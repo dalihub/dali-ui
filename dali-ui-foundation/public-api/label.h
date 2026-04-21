@@ -87,6 +87,7 @@ public:
       MARKUP_ENABLED                 = Text::LabelPropertyIndex::MARKUP_ENABLED,
       ANCHOR_COLOR                   = Text::LabelPropertyIndex::ANCHOR_COLOR,
       ANCHOR_CLICKED_COLOR           = Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR,
+      MARQUEE_TRIGGER_POLICY         = Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY,
       MARQUEE_SPEED                  = Text::LabelPropertyIndex::MARQUEE_SPEED,
       MARQUEE_LOOP_COUNT             = Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT,
       MARQUEE_LOOP_DELAY             = Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY,
