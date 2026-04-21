@@ -28,8 +28,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace
 {
@@ -396,7 +396,7 @@ void GaussianBlurEffectImpl::OnActivate()
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
-  Integration::GetImpl(ownerView).RequestRenderTaskReorder();
+  GetImpl(ownerView).RequestRenderTaskReorder();
 }
 
 void GaussianBlurEffectImpl::OnDeactivate()
@@ -457,7 +457,7 @@ void GaussianBlurEffectImpl::OnRefresh()
     Ui::View ownerView = GetOwnerView();
     IntegrationView::AddActorChild(ownerView, mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerView);
-    Integration::GetImpl(ownerView).RequestRenderTaskReorder();
+    GetImpl(ownerView).RequestRenderTaskReorder();
   }
   else
   {

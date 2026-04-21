@@ -97,7 +97,7 @@ static constexpr uint32_t DEFAULT_DEVEL_VIEW_ACCESSIBILITY_STATES_RAW_DATA =
 
 } // unnamed namespace
 
-ViewDataImpl::AccessibilityData::AccessibilityData(Integration::ViewImpl& viewImpl)
+ViewDataImpl::AccessibilityData::AccessibilityData(ViewImpl& viewImpl)
 : mAccessibilityGetNameSignal(),
   mAccessibilityGetDescriptionSignal(),
   mAccessibilityDoGestureSignal(),

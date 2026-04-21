@@ -90,24 +90,24 @@ StackLayout::StackLayout(Dali::Internal::CustomActor* internal)
 
 StackLayout& StackLayout::SetOrientation(StackOrientation orientation)
 {
-  Integration::GetImpl(*this).SetOrientation(orientation);
+  GetImpl(*this).SetOrientation(orientation);
   return *this;
 }
 
 StackOrientation StackLayout::GetOrientation() const
 {
-  return Integration::GetImpl(*this).GetOrientation();
+  return GetImpl(*this).GetOrientation();
 }
 
 StackLayout& StackLayout::SetSpacing(float spacing)
 {
-  Integration::GetImpl(*this).SetSpacing(spacing);
+  GetImpl(*this).SetSpacing(spacing);
   return *this;
 }
 
 float StackLayout::GetSpacing() const
 {
-  return Integration::GetImpl(*this).GetSpacing();
+  return GetImpl(*this).GetSpacing();
 }
 
 } // namespace Ui

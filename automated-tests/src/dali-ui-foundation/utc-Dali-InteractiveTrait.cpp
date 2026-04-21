@@ -21,7 +21,6 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
 #include <dali/integration-api/events/key-event-integ.h>

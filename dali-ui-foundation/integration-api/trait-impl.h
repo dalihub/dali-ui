@@ -21,7 +21,7 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
@@ -31,6 +31,7 @@ namespace Ui
 {
 
 class View;
+class ViewImpl;
 
 namespace Internal
 {
@@ -39,8 +40,6 @@ class ViewDataImpl;
 
 namespace Integration
 {
-
-class ViewImpl;
 
 /**
  * @brief Internal implementation of Trait.
@@ -117,13 +116,13 @@ protected:
 
 } // namespace Integration
 
-inline Integration::TraitImpl& GetImpl(Trait& obj)
+inline DALI_UI_API Integration::TraitImpl& GetImpl(Trait& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<Integration::TraitImpl&>(handle);
 }
 
-inline const Integration::TraitImpl& GetImpl(const Trait& obj)
+inline DALI_UI_API const Integration::TraitImpl& GetImpl(const Trait& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const Integration::TraitImpl&>(handle);

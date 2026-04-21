@@ -16,43 +16,21 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/exclusive-trait-impl.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/view-impl.h>
+// EXTERNAL INCLUDES
+#include <atomic>
 
 namespace Dali
 {
-
 namespace Ui
 {
 
-namespace Integration
+TraitId TraitId::Alloc()
 {
-
-ExclusiveTraitImpl::ExclusiveTraitImpl()
-: TraitImpl()
-{
+  static std::atomic<uint32_t> counter{0};
+  return TraitId{counter.fetch_add(1u, std::memory_order_relaxed)};
 }
-
-ExclusiveTraitImpl::~ExclusiveTraitImpl()
-{
-}
-
-void ExclusiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
-{
-  auto oldOwner = mOwner.GetHandle();
-  DALI_ASSERT_DEBUG(oldOwner != view);
-
-  if(oldOwner)
-  {
-    GetImpl(oldOwner).RemoveTrait(id);
-  }
-  mOwner = view;
-}
-
-} // namespace Integration
 
 } // namespace Ui
-
 } // namespace Dali

@@ -68,30 +68,30 @@ public:
   typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
 
   // Constructor
-  AccessibilityData(Integration::ViewImpl& viewImpl);
+  AccessibilityData(ViewImpl& viewImpl);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::AppendAccessibilityAttribute()
+   * @copydoc Dali::Ui::ViewImpl::Impl::AppendAccessibilityAttribute()
    */
   void AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::RemoveAccessibilityAttribute()
+   * @copydoc Dali::Ui::ViewImpl::Impl::RemoveAccessibilityAttribute()
    */
   void RemoveAccessibilityAttribute(const Dali::String& key);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::ClearAccessibilityAttributes()
+   * @copydoc Dali::Ui::ViewImpl::Impl::ClearAccessibilityAttributes()
    */
   void ClearAccessibilityAttributes();
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::SetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::ViewImpl::Impl::SetAccessibilityReadingInfoType()
    */
   void SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::ViewImpl::Impl::GetAccessibilityReadingInfoType()
    */
   Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const;
 
@@ -132,7 +132,7 @@ public:
                                   const Dali::Property::Value& value);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::Impl::GetAccessibleObject()
+   * @copydoc Dali::Ui::ViewImpl::Impl::GetAccessibleObject()
    */
   std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
 
@@ -196,7 +196,7 @@ private:
   Dali::Accessibility::ScreenRelativeMoveType mAccessibilityLastScreenRelativeMoveType{
     Accessibility::ScreenRelativeMoveType::OUTSIDE};
 
-  Integration::ViewImpl& mViewImpl;
+  ViewImpl& mViewImpl;
 
   bool mIsAccessibilityPositionPropertyNotificationSet : 1;
   bool mIsAccessibilityPropertySetSignalRegistered : 1;

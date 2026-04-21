@@ -24,7 +24,6 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
@@ -34,6 +33,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -47,7 +47,7 @@ View::View()
 
 View View::New()
 {
-  Integration::ViewImplPtr impl = Integration::ViewImpl::New();
+  ViewImplPtr impl = ViewImpl::New();
 
   // Pass ownership to handle
   View handle(*impl);
@@ -67,10 +67,10 @@ View::~View()
 
 View View::DownCast(BaseHandle handle)
 {
-  return Ui::View::DownCast<View, Integration::ViewImpl>(handle);
+  return Ui::View::DownCast<View, ViewImpl>(handle);
 }
 
-View::View(Integration::ViewImpl& implementation)
+View::View(ViewImpl& implementation)
 : CustomActor(implementation)
 {
 }
@@ -78,7 +78,7 @@ View::View(Integration::ViewImpl& implementation)
 View::View(Dali::Internal::CustomActor* internal)
 : CustomActor(internal)
 {
-  VerifyCustomActorPointer<Integration::ViewImpl>(internal);
+  VerifyCustomActorPointer<ViewImpl>(internal);
 }
 
 // =============================================================================
@@ -87,47 +87,47 @@ View::View(Dali::Internal::CustomActor* internal)
 
 MeasuredSize View::Measure(float widthConstraint, float heightConstraint)
 {
-  return Integration::GetImpl(*this).Measure(widthConstraint, heightConstraint);
+  return GetImpl(*this).Measure(widthConstraint, heightConstraint);
 }
 
 MeasuredSize View::Arrange(const LayoutRect& bounds)
 {
-  return Integration::GetImpl(*this).Arrange(bounds);
+  return GetImpl(*this).Arrange(bounds);
 }
 
 void View::InvalidateMeasure()
 {
-  Integration::GetImpl(*this).InvalidateMeasure();
+  GetImpl(*this).InvalidateMeasure();
 }
 
 void View::InvalidateArrange()
 {
-  Integration::GetImpl(*this).InvalidateArrange();
+  GetImpl(*this).InvalidateArrange();
 }
 
 MeasuredSize View::GetMeasuredSize() const
 {
-  return Integration::GetImpl(*this).GetMeasuredSize();
+  return GetImpl(*this).GetMeasuredSize();
 }
 
 bool View::IsMeasureValid() const
 {
-  return Integration::GetImpl(*this).IsMeasureValid();
+  return GetImpl(*this).IsMeasureValid();
 }
 
 bool View::IsArrangeValid() const
 {
-  return Integration::GetImpl(*this).IsArrangeValid();
+  return GetImpl(*this).IsArrangeValid();
 }
 
 void View::SetMeasureCallback(MeasureCallback callback)
 {
-  Integration::GetImpl(*this).SetMeasureCallback(std::move(callback));
+  GetImpl(*this).SetMeasureCallback(std::move(callback));
 }
 
 void View::SetArrangeCallback(ArrangeCallback callback)
 {
-  Integration::GetImpl(*this).SetArrangeCallback(std::move(callback));
+  GetImpl(*this).SetArrangeCallback(std::move(callback));
 }
 
 // =============================================================================
@@ -136,23 +136,23 @@ void View::SetArrangeCallback(ArrangeCallback callback)
 
 float View::GetScaleX() const
 {
-  return Integration::GetImpl(*this).GetScaleX();
+  return GetImpl(*this).GetScaleX();
 }
 
 View& View::SetScaleX(float scaleX)
 {
-  Integration::GetImpl(*this).SetScaleX(scaleX);
+  GetImpl(*this).SetScaleX(scaleX);
   return *this;
 }
 
 float View::GetScaleY() const
 {
-  return Integration::GetImpl(*this).GetScaleY();
+  return GetImpl(*this).GetScaleY();
 }
 
 View& View::SetScaleY(float scaleY)
 {
-  Integration::GetImpl(*this).SetScaleY(scaleY);
+  GetImpl(*this).SetScaleY(scaleY);
   return *this;
 }
 
@@ -165,139 +165,139 @@ View& View::SetScale(float scaleX, float scaleY)
 
 bool View::IsVisible() const
 {
-  return Integration::GetImpl(*this).IsVisible();
+  return GetImpl(*this).IsVisible();
 }
 
 View& View::SetVisibility(bool visibility)
 {
-  Integration::GetImpl(*this).SetVisibility(visibility);
+  GetImpl(*this).SetVisibility(visibility);
   return *this;
 }
 
 float View::GetOpacity() const
 {
-  return Integration::GetImpl(*this).GetOpacity();
+  return GetImpl(*this).GetOpacity();
 }
 
 View& View::SetOpacity(float opacity)
 {
-  Integration::GetImpl(*this).SetOpacity(opacity);
+  GetImpl(*this).SetOpacity(opacity);
   return *this;
 }
 
 MeasuredSize View::GetSize() const
 {
-  return Integration::GetImpl(*this).GetSize();
+  return GetImpl(*this).GetSize();
 }
 
 View& View::SetPositionX(float x)
 {
-  Integration::GetImpl(*this).SetPositionX(x);
+  GetImpl(*this).SetPositionX(x);
   return *this;
 }
 
 float View::GetPositionX() const
 {
-  return Integration::GetImpl(*this).GetPositionX();
+  return GetImpl(*this).GetPositionX();
 }
 
 View& View::SetPositionY(float y)
 {
-  Integration::GetImpl(*this).SetPositionY(y);
+  GetImpl(*this).SetPositionY(y);
   return *this;
 }
 
 float View::GetPositionY() const
 {
-  return Integration::GetImpl(*this).GetPositionY();
+  return GetImpl(*this).GetPositionY();
 }
 
 View& View::SetParentOrigin(const Vector3& point)
 {
-  Integration::GetImpl(*this).SetParentOrigin(point);
+  GetImpl(*this).SetParentOrigin(point);
   return *this;
 }
 
 Vector3 View::GetParentOrigin() const
 {
-  return Integration::GetImpl(*this).GetParentOrigin();
+  return GetImpl(*this).GetParentOrigin();
 }
 
 View& View::SetPivot(const Vector3& point)
 {
-  Integration::GetImpl(*this).SetPivot(point);
+  GetImpl(*this).SetPivot(point);
   return *this;
 }
 
 Vector3 View::GetPivot() const
 {
-  return Integration::GetImpl(*this).GetPivot();
+  return GetImpl(*this).GetPivot();
 }
 
 View& View::SetRequestedWidth(float width)
 {
-  Integration::GetImpl(*this).SetRequestedWidth(width);
+  GetImpl(*this).SetRequestedWidth(width);
   return *this;
 }
 
 float View::GetRequestedWidth() const
 {
-  return Integration::GetImpl(*this).GetRequestedWidth();
+  return GetImpl(*this).GetRequestedWidth();
 }
 
 View& View::SetRequestedHeight(float height)
 {
-  Integration::GetImpl(*this).SetRequestedHeight(height);
+  GetImpl(*this).SetRequestedHeight(height);
   return *this;
 }
 
 float View::GetRequestedHeight() const
 {
-  return Integration::GetImpl(*this).GetRequestedHeight();
+  return GetImpl(*this).GetRequestedHeight();
 }
 
 View& View::SetMinimumWidth(float width)
 {
-  Integration::GetImpl(*this).SetMinimumWidth(width);
+  GetImpl(*this).SetMinimumWidth(width);
   return *this;
 }
 
 float View::GetMinimumWidth() const
 {
-  return Integration::GetImpl(*this).GetMinimumWidth();
+  return GetImpl(*this).GetMinimumWidth();
 }
 
 View& View::SetMinimumHeight(float height)
 {
-  Integration::GetImpl(*this).SetMinimumHeight(height);
+  GetImpl(*this).SetMinimumHeight(height);
   return *this;
 }
 
 float View::GetMinimumHeight() const
 {
-  return Integration::GetImpl(*this).GetMinimumHeight();
+  return GetImpl(*this).GetMinimumHeight();
 }
 
 View& View::SetMaximumWidth(float width)
 {
-  Integration::GetImpl(*this).SetMaximumWidth(width);
+  GetImpl(*this).SetMaximumWidth(width);
   return *this;
 }
 
 float View::GetMaximumWidth() const
 {
-  return Integration::GetImpl(*this).GetMaximumWidth();
+  return GetImpl(*this).GetMaximumWidth();
 }
 
 View& View::SetMaximumHeight(float height)
 {
-  Integration::GetImpl(*this).SetMaximumHeight(height);
+  GetImpl(*this).SetMaximumHeight(height);
   return *this;
 }
 
 float View::GetMaximumHeight() const
 {
-  return Integration::GetImpl(*this).GetMaximumHeight();
+  return GetImpl(*this).GetMaximumHeight();
 }
 
 // =============================================================================
@@ -306,56 +306,56 @@ float View::GetMaximumHeight() const
 
 View& View::SetMargin(const Extents& margin)
 {
-  Integration::GetImpl(*this).SetMargin(margin);
+  GetImpl(*this).SetMargin(margin);
   return *this;
 }
 
 Extents View::GetMargin() const
 {
-  return Integration::GetImpl(*this).GetMargin();
+  return GetImpl(*this).GetMargin();
 }
 
 View& View::SetPadding(const Extents& padding)
 {
-  Integration::GetImpl(*this).SetPadding(padding);
+  GetImpl(*this).SetPadding(padding);
   return *this;
 }
 
 Extents View::GetPadding() const
 {
-  return Integration::GetImpl(*this).GetPadding();
+  return GetImpl(*this).GetPadding();
 }
 
 View& View::SetLayoutMode(LayoutMode mode)
 {
-  Integration::GetImpl(*this).SetLayoutMode(mode);
+  GetImpl(*this).SetLayoutMode(mode);
   return *this;
 }
 
 LayoutMode View::GetLayoutMode() const
 {
-  return Integration::GetImpl(*this).GetLayoutMode();
+  return GetImpl(*this).GetLayoutMode();
 }
 
 bool View::IsFocusable() const
 {
-  return Integration::GetImpl(*this).IsFocusable();
+  return GetImpl(*this).IsFocusable();
 }
 
 View& View::SetFocusable(bool focusable)
 {
-  Integration::GetImpl(*this).SetFocusable(focusable);
+  GetImpl(*this).SetFocusable(focusable);
   return *this;
 }
 
 bool View::IsTouchFocusable() const
 {
-  return Integration::GetImpl(*this).IsTouchFocusable();
+  return GetImpl(*this).IsTouchFocusable();
 }
 
 View& View::SetTouchFocusable(bool touchFocusable)
 {
-  Integration::GetImpl(*this).SetTouchFocusable(touchFocusable);
+  GetImpl(*this).SetTouchFocusable(touchFocusable);
   return *this;
 }
 
@@ -397,28 +397,28 @@ View& View::SetCounterClockwiseFocusableView(View view)
 
 UiColor View::GetBackgroundColor()
 {
-  return Integration::GetImpl(*this).GetBackgroundColor();
+  return GetImpl(*this).GetBackgroundColor();
 }
 
 bool View::IsEnabled() const
 {
-  return Integration::GetImpl(*this).IsEnabled();
+  return GetImpl(*this).IsEnabled();
 }
 
 View& View::SetEnabled(bool enabled)
 {
-  Integration::GetImpl(*this).SetEnabled(enabled);
+  GetImpl(*this).SetEnabled(enabled);
   return *this;
 }
 
 bool View::IsEffectivelyEnabled() const
 {
-  return Integration::GetImpl(*this).IsEffectivelyEnabled();
+  return GetImpl(*this).IsEffectivelyEnabled();
 }
 
 bool View::IsEffectivelyFocused() const
 {
-  return Integration::GetImpl(*this).IsEffectivelyFocused();
+  return GetImpl(*this).IsEffectivelyFocused();
 }
 
 // =============================================================================
@@ -427,166 +427,166 @@ bool View::IsEffectivelyFocused() const
 
 const ViewState& View::GetState() const
 {
-  return Integration::GetImpl(*this).GetState();
+  return GetImpl(*this).GetState();
 }
 
 View::StateChangedSignalType& View::StateChangedSignal()
 {
-  return Integration::GetImpl(*this).StateChangedSignal();
+  return GetImpl(*this).StateChangedSignal();
 }
 
 View& View::SetBackgroundColor(const UiColor& color)
 {
-  Integration::GetImpl(*this).SetBackgroundColor(color);
+  GetImpl(*this).SetBackgroundColor(color);
   return *this;
 }
 
 Vector4 View::GetCornerRadius() const
 {
-  return Integration::GetImpl(*this).GetCornerRadius();
+  return GetImpl(*this).GetCornerRadius();
 }
 
 View& View::SetCornerRadius(float radius)
 {
-  Integration::GetImpl(*this).SetCornerRadius(Vector4(radius, radius, radius, radius));
+  GetImpl(*this).SetCornerRadius(Vector4(radius, radius, radius, radius));
   return *this;
 }
 
 View& View::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
-  Integration::GetImpl(*this).SetCornerRadius(Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  GetImpl(*this).SetCornerRadius(Vector4(topLeft, topRight, bottomRight, bottomLeft));
   return *this;
 }
 
 View& View::SetCornerRadius(const Vector4& radius)
 {
-  Integration::GetImpl(*this).SetCornerRadius(radius);
+  GetImpl(*this).SetCornerRadius(radius);
   return *this;
 }
 
 CornerRadiusPolicy View::GetCornerRadiusPolicy() const
 {
-  return Integration::GetImpl(*this).GetCornerRadiusPolicy();
+  return GetImpl(*this).GetCornerRadiusPolicy();
 }
 
 View& View::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
 {
-  Integration::GetImpl(*this).SetCornerRadiusPolicy(policy);
+  GetImpl(*this).SetCornerRadiusPolicy(policy);
   return *this;
 }
 
 View& View::SetCornerRadiusPolicyRelative()
 {
-  Integration::GetImpl(*this).SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+  GetImpl(*this).SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
   return *this;
 }
 
 bool View::IsCornerRadiusPolicyRelative() const
 {
-  return Integration::GetImpl(*this).GetCornerRadiusPolicy() == CornerRadiusPolicy::RELATIVE;
+  return GetImpl(*this).GetCornerRadiusPolicy() == CornerRadiusPolicy::RELATIVE;
 }
 
 Vector4 View::GetCornerSquareness() const
 {
-  return Integration::GetImpl(*this).GetCornerSquareness();
+  return GetImpl(*this).GetCornerSquareness();
 }
 
 View& View::SetCornerSquareness(float squareness)
 {
-  Integration::GetImpl(*this).SetCornerSquareness(Vector4(squareness, squareness, squareness, squareness));
+  GetImpl(*this).SetCornerSquareness(Vector4(squareness, squareness, squareness, squareness));
   return *this;
 }
 
 View& View::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
-  Integration::GetImpl(*this).SetCornerSquareness(Vector4(topLeft, topRight, bottomRight, bottomLeft));
+  GetImpl(*this).SetCornerSquareness(Vector4(topLeft, topRight, bottomRight, bottomLeft));
   return *this;
 }
 
 View& View::SetCornerSquareness(const Vector4& squareness)
 {
-  Integration::GetImpl(*this).SetCornerSquareness(squareness);
+  GetImpl(*this).SetCornerSquareness(squareness);
   return *this;
 }
 
 float View::GetBorderlineWidth() const
 {
-  return Integration::GetImpl(*this).GetBorderlineWidth();
+  return GetImpl(*this).GetBorderlineWidth();
 }
 
 View& View::SetBorderlineWidth(float width)
 {
-  Integration::GetImpl(*this).SetBorderlineWidth(width);
+  GetImpl(*this).SetBorderlineWidth(width);
   return *this;
 }
 
 UiColor View::GetBorderlineColor()
 {
-  return Integration::GetImpl(*this).GetBorderlineColor();
+  return GetImpl(*this).GetBorderlineColor();
 }
 
 View& View::SetBorderlineColor(const UiColor& color)
 {
-  Integration::GetImpl(*this).SetBorderlineColor(color);
+  GetImpl(*this).SetBorderlineColor(color);
   return *this;
 }
 
 float View::GetBorderlineOffset() const
 {
-  return Integration::GetImpl(*this).GetBorderlineOffset();
+  return GetImpl(*this).GetBorderlineOffset();
 }
 
 View& View::SetBorderlineOffset(float offset)
 {
-  Integration::GetImpl(*this).SetBorderlineOffset(offset);
+  GetImpl(*this).SetBorderlineOffset(offset);
   return *this;
 }
 
 Dali::String View::GetName() const
 {
-  return Integration::GetImpl(*this).GetName();
+  return GetImpl(*this).GetName();
 }
 
 View& View::SetName(const Dali::String& name)
 {
-  Integration::GetImpl(*this).SetName(name);
+  GetImpl(*this).SetName(name);
   return *this;
 }
 
 InteractiveTrait View::EnsureInteractiveTrait()
 {
-  return Integration::GetImpl(*this).EnsureInteractiveTrait();
+  return GetImpl(*this).EnsureInteractiveTrait();
 }
 
 bool View::IsInteractive() const
 {
-  return Integration::GetImpl(*this).IsInteractive();
+  return GetImpl(*this).IsInteractive();
 }
 
 SelectableTrait View::EnsureSelectableTrait()
 {
-  return Integration::GetImpl(*this).EnsureSelectableTrait();
+  return GetImpl(*this).EnsureSelectableTrait();
 }
 
 bool View::IsSelectable() const
 {
-  return Integration::GetImpl(*this).IsSelectable();
+  return GetImpl(*this).IsSelectable();
 }
 
 View& View::SetInteractionEffect(Trait effect)
 {
-  Integration::GetImpl(*this).SetInteractionEffect(effect);
+  GetImpl(*this).SetInteractionEffect(effect);
   return *this;
 }
 
 BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
 {
-  return Integration::GetImpl(*this).GetLayoutParams(type);
+  return GetImpl(*this).GetLayoutParams(type);
 }
 
 View& View::SetLayoutParams(LayoutParams params)
 {
-  Integration::GetImpl(*this).SetLayoutParams(params);
+  GetImpl(*this).SetLayoutParams(params);
   return *this;
 }
 
@@ -596,94 +596,94 @@ View& View::SetLayoutParams(LayoutParams params)
 
 void View::Insert(uint32_t index, View child)
 {
-  Integration::GetImpl(*this).Insert(index, child);
+  GetImpl(*this).Insert(index, child);
 }
 
 void View::RemoveAllChildren()
 {
-  Integration::GetImpl(*this).RemoveAllChildren();
+  GetImpl(*this).RemoveAllChildren();
 }
 
 uint32_t View::GetChildCount() const
 {
-  return Integration::GetImpl(*this).GetChildCount();
+  return GetImpl(*this).GetChildCount();
 }
 
 View View::GetChildAt(uint32_t index) const
 {
-  return Integration::GetImpl(*this).GetChildAt(index);
+  return GetImpl(*this).GetChildAt(index);
 }
 
 int32_t View::IndexOfChild(View view) const
 {
-  return Integration::GetImpl(*this).IndexOfChild(view);
+  return GetImpl(*this).IndexOfChild(view);
 }
 
 void View::Raise(LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).Raise(policy);
+  GetImpl(*this).Raise(policy);
 }
 
 void View::Lower(LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).Lower(policy);
+  GetImpl(*this).Lower(policy);
 }
 
 void View::RaiseToTop(LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).RaiseToTop(policy);
+  GetImpl(*this).RaiseToTop(policy);
 }
 
 void View::LowerToBottom(LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).LowerToBottom(policy);
+  GetImpl(*this).LowerToBottom(policy);
 }
 
 void View::RaiseAbove(View target, LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).RaiseAbove(target, policy);
+  GetImpl(*this).RaiseAbove(target, policy);
 }
 
 void View::LowerBelow(View target, LayoutOrderPolicy policy)
 {
-  Integration::GetImpl(*this).LowerBelow(target, policy);
+  GetImpl(*this).LowerBelow(target, policy);
 }
 
 // From control.cpp
 
 void View::ClearBackground()
 {
-  Integration::GetImpl(*this).ClearBackground();
+  GetImpl(*this).ClearBackground();
 }
 
 void View::SetRenderEffect(Ui::RenderEffect effect)
 {
-  Integration::GetImpl(*this).SetRenderEffect(effect);
+  GetImpl(*this).SetRenderEffect(effect);
 }
 
 Ui::RenderEffect View::GetRenderEffect() const
 {
-  return Integration::GetImpl(*this).GetRenderEffect();
+  return GetImpl(*this).GetRenderEffect();
 }
 
 void View::ClearRenderEffect()
 {
-  Integration::GetImpl(*this).ClearRenderEffect();
+  GetImpl(*this).ClearRenderEffect();
 }
 
 bool View::IsResourceReady() const
 {
-  return Integration::GetImpl(*this).IsResourceReady();
+  return GetImpl(*this).IsResourceReady();
 }
 
 bool View::IsOnScene() const
 {
-  return Integration::GetImpl(*this).IsOnScene();
+  return GetImpl(*this).IsOnScene();
 }
 
 View::ResourceReadySignalType& View::ResourceReadySignal()
 {
-  Integration::ViewImpl&  viewImpl     = Ui::Integration::GetImpl(*this);
+  ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
   return viewDataImpl.mResourceReadySignal;
@@ -691,7 +691,7 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
 
 View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
 {
-  Integration::ViewImpl&  viewImpl     = Ui::Integration::GetImpl(*this);
+  ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
   return viewDataImpl.mOffScreenRenderingFinishedSignal;
@@ -699,12 +699,12 @@ View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSign
 
 View::KeyEventSignalType& View::KeyEventSignal()
 {
-  return Integration::GetImpl(*this).KeyEventSignal();
+  return GetImpl(*this).KeyEventSignal();
 }
 
 View::FocusChangedSignalType& View::FocusChangedSignal()
 {
-  return Integration::GetImpl(*this).FocusChangedSignal();
+  return GetImpl(*this).FocusChangedSignal();
 }
 
 ViewAnimationBridge View::Animate(Animation animation)

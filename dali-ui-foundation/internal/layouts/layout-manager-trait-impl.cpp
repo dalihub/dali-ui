@@ -67,19 +67,19 @@ LayoutManager* LayoutManagerTraitImpl::GetLayoutManager() const
   return mLayoutManager.get();
 }
 
-void LayoutManagerTraitImpl::OnBeforeAttached(Integration::TraitId id, View& view)
+void LayoutManagerTraitImpl::OnBeforeAttached(TraitId id, View& view)
 {
 }
 
-void LayoutManagerTraitImpl::OnAttached(Integration::TraitId id, View& view)
+void LayoutManagerTraitImpl::OnAttached(TraitId id, View& view)
 {
 }
 
-void LayoutManagerTraitImpl::OnDetached(Integration::TraitId id, View& view)
+void LayoutManagerTraitImpl::OnDetached(TraitId id, View& view)
 {
 }
 
-void LayoutManagerTraitImpl::OnViewDestroying(Integration::ViewImpl* viewImpl)
+void LayoutManagerTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
 }
 

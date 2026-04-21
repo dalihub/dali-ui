@@ -90,76 +90,76 @@ GridLayout::GridLayout(Dali::Internal::CustomActor* internal)
 
 void GridLayout::AddRowDefinition(GridLength height)
 {
-  Integration::GetImpl(*this).AddRowDefinition(height);
+  GetImpl(*this).AddRowDefinition(height);
 }
 
 void GridLayout::AddColumnDefinition(GridLength width)
 {
-  Integration::GetImpl(*this).AddColumnDefinition(width);
+  GetImpl(*this).AddColumnDefinition(width);
 }
 
 GridLayout& GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
-  Integration::GetImpl(*this).SetRowDefinitions(rows);
+  GetImpl(*this).SetRowDefinitions(rows);
   return *this;
 }
 
 GridLayout& GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
-  Integration::GetImpl(*this).SetColumnDefinitions(columns);
+  GetImpl(*this).SetColumnDefinitions(columns);
   return *this;
 }
 
 Dali::Vector<GridLength> GridLayout::GetRowDefinitions() const
 {
-  return Integration::GetImpl(*this).GetRowDefinitions();
+  return GetImpl(*this).GetRowDefinitions();
 }
 
 Dali::Vector<GridLength> GridLayout::GetColumnDefinitions() const
 {
-  return Integration::GetImpl(*this).GetColumnDefinitions();
+  return GetImpl(*this).GetColumnDefinitions();
 }
 
 uint32_t GridLayout::GetRowCount() const
 {
-  return Integration::GetImpl(*this).GetRowCount();
+  return GetImpl(*this).GetRowCount();
 }
 
 uint32_t GridLayout::GetColumnCount() const
 {
-  return Integration::GetImpl(*this).GetColumnCount();
+  return GetImpl(*this).GetColumnCount();
 }
 
 void GridLayout::ClearRowDefinitions()
 {
-  Integration::GetImpl(*this).ClearRowDefinitions();
+  GetImpl(*this).ClearRowDefinitions();
 }
 
 void GridLayout::ClearColumnDefinitions()
 {
-  Integration::GetImpl(*this).ClearColumnDefinitions();
+  GetImpl(*this).ClearColumnDefinitions();
 }
 
 GridLayout& GridLayout::SetRowSpacing(float spacing)
 {
-  Integration::GetImpl(*this).SetRowSpacing(spacing);
+  GetImpl(*this).SetRowSpacing(spacing);
   return *this;
 }
 
 float GridLayout::GetRowSpacing() const
 {
-  return Integration::GetImpl(*this).GetRowSpacing();
+  return GetImpl(*this).GetRowSpacing();
 }
 
 GridLayout& GridLayout::SetColumnSpacing(float spacing)
 {
-  Integration::GetImpl(*this).SetColumnSpacing(spacing);
+  GetImpl(*this).SetColumnSpacing(spacing);
   return *this;
 }
 
 float GridLayout::GetColumnSpacing() const
 {
-  return Integration::GetImpl(*this).GetColumnSpacing();
+  return GetImpl(*this).GetColumnSpacing();
 }
 
 } // namespace Ui

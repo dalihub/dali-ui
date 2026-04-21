@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -175,24 +175,24 @@ void StateHandlerTraitImpl::SlotDisconnected(CallbackBase* callback)
   }
 }
 
-void StateHandlerTraitImpl::OnBeforeAttached(Integration::TraitId /*id*/, View& view)
+void StateHandlerTraitImpl::OnBeforeAttached(TraitId /*id*/, View& view)
 {
   mOwner = view;
-  Integration::GetImpl(view).StateChangedSignal().Connect(this, &StateHandlerTraitImpl::NotifyStateChanged);
+  GetImpl(view).StateChangedSignal().Connect(this, &StateHandlerTraitImpl::NotifyStateChanged);
 }
 
-void StateHandlerTraitImpl::OnAttached(Integration::TraitId /*id*/, View& /*view*/)
+void StateHandlerTraitImpl::OnAttached(TraitId /*id*/, View& /*view*/)
 {
 }
 
-void StateHandlerTraitImpl::OnDetached(Integration::TraitId /*id*/, View& /*view*/)
+void StateHandlerTraitImpl::OnDetached(TraitId /*id*/, View& /*view*/)
 {
   DisconnectAll();
   ClearAllHandlers();
   mOwner.Reset();
 }
 
-void StateHandlerTraitImpl::OnViewDestroying(Integration::ViewImpl* /*viewImpl*/)
+void StateHandlerTraitImpl::OnViewDestroying(ViewImpl* /*viewImpl*/)
 {
   DisconnectAll();
   ClearAllHandlers();

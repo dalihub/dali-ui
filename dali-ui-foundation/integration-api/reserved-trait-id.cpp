@@ -16,25 +16,14 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/trait-id.h>
-
-// EXTERNAL INCLUDES
-#include <atomic>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 
 namespace Dali
 {
-
 namespace Ui
 {
-
 namespace Integration
 {
-
-TraitId TraitId::Alloc()
-{
-  static std::atomic<uint32_t> counter{0};
-  return TraitId{counter.fetch_add(1u, std::memory_order_relaxed)};
-}
 
 // --- ReservedTraitId definitions ---
 // Defined in a single TU so initialisation order is top-to-bottom guaranteed.
@@ -61,7 +50,5 @@ const TraitId INTERACTION_EFFECT_DATA = TraitId::Alloc();
 } // namespace ReservedTraitId
 
 } // namespace Integration
-
 } // namespace Ui
-
 } // namespace Dali

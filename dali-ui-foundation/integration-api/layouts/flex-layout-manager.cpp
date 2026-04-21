@@ -24,8 +24,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {

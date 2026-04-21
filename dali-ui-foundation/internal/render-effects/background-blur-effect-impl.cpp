@@ -28,8 +28,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace
 {
@@ -398,7 +398,7 @@ void BackgroundBlurEffectImpl::OnActivate()
 
   // Reorder render task
   // TODO : Can we remove this GetImplementation?
-  Integration::GetImpl(ownerView).RequestRenderTaskReorder();
+  GetImpl(ownerView).RequestRenderTaskReorder();
 }
 
 void BackgroundBlurEffectImpl::OnDeactivate()
@@ -458,7 +458,7 @@ void BackgroundBlurEffectImpl::OnRefresh()
     Ui::View ownerView = GetOwnerView();
     IntegrationView::AddActorChild(ownerView, mInternalRoot);
     CreateRenderTasks(GetSceneHolder(), ownerView);
-    Integration::GetImpl(ownerView).RequestRenderTaskReorder();
+    GetImpl(ownerView).RequestRenderTaskReorder();
   }
   else
   {
@@ -653,11 +653,11 @@ void BackgroundBlurEffectImpl::ApplyRenderTaskSourceActor(RenderTask sourceRende
     }
 
     Ui::View view = Ui::View::DownCast(sourceActor);
-    if(view && (((Integration::GetImpl(view).GetOffScreenRenderableType() & OffScreenRenderable::Type::FORWARD)) ==
+    if(view && (((GetImpl(view).GetOffScreenRenderableType() & OffScreenRenderable::Type::FORWARD)) ==
                 OffScreenRenderable::Type::FORWARD))
     {
-      sourceActor         = Integration::GetImpl(view).GetOffScreenRenderableSourceActor();
-      isExclusiveRequired = Integration::GetImpl(view).IsOffScreenRenderTaskExclusive();
+      sourceActor         = GetImpl(view).GetOffScreenRenderableSourceActor();
+      isExclusiveRequired = GetImpl(view).IsOffScreenRenderTaskExclusive();
       break;
     }
   }

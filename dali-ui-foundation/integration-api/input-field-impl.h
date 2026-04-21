@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/devel-api/adaptor-framework/input-method-context.h>
 
 // INTERNAL INCLUDES
@@ -408,49 +408,49 @@ public: // Config
 
 public: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnInitialize
+   * @copydoc ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnRelayout()
+   * @copydoc ViewImpl::OnRelayout()
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
-   * @copydoc Integration::ViewImpl::GetNaturalSize()
+   * @copydoc ViewImpl::GetNaturalSize()
    */
   Vector3 GetNaturalSize() override;
 
   /**
-   * @copydoc Integration::ViewImpl::GetHeightForWidth()
+   * @copydoc ViewImpl::GetHeightForWidth()
    */
   float GetHeightForWidth(float width) override;
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnFocusChanged()
+   * @copydoc ViewImpl::OnFocusChanged()
    */
   void OnFocusChanged(bool focused) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnSceneConnection()
+   * @copydoc ViewImpl::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnKeyEvent()
+   * @copydoc ViewImpl::OnKeyEvent()
    */
   bool OnKeyEvent(const KeyEvent& event) override;
 
 protected: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnMeasure
+   * @copydoc ViewImpl::OnMeasure
    */
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnArrange
+   * @copydoc ViewImpl::OnArrange
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 

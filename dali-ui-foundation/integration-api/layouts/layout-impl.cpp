@@ -25,6 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h>
 
 namespace Dali
@@ -43,7 +44,7 @@ BaseHandle Create()
 }
 
 // Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::LayoutImpl, Ui::Integration::ViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::LayoutImpl, Ui::ViewImpl, Create)
 DALI_TYPE_REGISTRATION_END()
 
 } // namespace

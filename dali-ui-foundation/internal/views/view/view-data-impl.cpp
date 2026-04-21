@@ -22,8 +22,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/trait-impl.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
@@ -48,6 +48,7 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
@@ -215,7 +216,7 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, c
   using Dali::Accessibility::ActionType;
   DALI_ASSERT_DEBUG(view);
 
-  auto& viewImpl     = Integration::GetImpl(view);
+  auto& viewImpl     = GetImpl(view);
   auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
   DALI_ASSERT_DEBUG(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty());
 
@@ -250,7 +251,7 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, c
 
 bool PerformLegacyAccessibilityAction(Ui::View view, const Dali::String& actionName)
 {
-  auto& viewImpl     = Integration::GetImpl(view);
+  auto& viewImpl     = GetImpl(view);
   auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
   bool  ret          = true;
   if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_ACTIVATE))
@@ -262,7 +263,7 @@ bool PerformLegacyAccessibilityAction(Ui::View view, const Dali::String& actionN
     }
     else
     {
-      ret = Integration::GetImpl(view).OnAccessibilityActivated();
+      ret = GetImpl(view).OnAccessibilityActivated();
     }
   }
   else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_SKIPPED))
@@ -322,7 +323,7 @@ bool DoAccessibilityAction(BaseObject* object, const Dali::String& actionName, c
   Dali::BaseHandle handle(object);
 
   Ui::View view         = Ui::View::DownCast(handle);
-  auto&    viewImpl     = Integration::GetImpl(view);
+  auto&    viewImpl     = GetImpl(view);
   auto&    viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
 
   DALI_ASSERT_ALWAYS(view);
@@ -372,9 +373,9 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
   Ui::View view = Ui::View::DownCast(handle);
   if(view)
   {
-    Integration::ViewImpl& viewImpl(Integration::GetImpl(view));
-    auto&                  viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
-    connected                           = true;
+    ViewImpl& viewImpl(GetImpl(view));
+    auto&     viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
+    connected              = true;
 
     if(0 == strcmp(signalName.CStr(), SIGNAL_KEY_EVENT))
     {
@@ -405,8 +406,8 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
  */
 BaseHandle Create()
 {
-  Integration::ViewImplPtr impl = Integration::ViewImpl::New();
-  View                     handle(*impl);
+  ViewImplPtr impl = ViewImpl::New();
+  View        handle(*impl);
   return handle;
 }
 // Setup signals and actions using the type-registry.
@@ -486,7 +487,7 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_6(typeReg
 
 // clang-format on
 
-ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
+ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
@@ -523,7 +524,7 @@ ViewDataImpl::ViewDataImpl(Integration::ViewImpl& viewImpl)
   mOffScreenRenderingType(Ui::View::OffScreenRenderingType::NONE),
   mInputMethodContext(),
   mIdleCallback(nullptr),
-  mFlags(Integration::ViewImpl::ViewBehaviour(Integration::ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
+  mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
   mAccessibilityRole{static_cast<int32_t>(AccessibilityRole::NONE)},
   mIsKeyNavigationSupported(false),
   mIsFocusGroup(false),
@@ -572,7 +573,7 @@ void ViewDataImpl::NotifyTraitsViewDestroying()
   }
 }
 
-void ViewDataImpl::SetTrait(Integration::TraitId id, Ui::Trait& trait)
+void ViewDataImpl::SetTrait(TraitId id, Ui::Trait& trait)
 {
   Ui::View self      = Ui::View::DownCast(mViewImpl.Self());
   auto&    traitImpl = Ui::GetImpl(trait);
@@ -612,7 +613,7 @@ void ViewDataImpl::SetTrait(Integration::TraitId id, Ui::Trait& trait)
   traitImpl.OnAttached(id, self);
 }
 
-Ui::Trait ViewDataImpl::GetTrait(Integration::TraitId id) const
+Ui::Trait ViewDataImpl::GetTrait(TraitId id) const
 {
   for(auto& entry : mTraits)
   {
@@ -624,7 +625,7 @@ Ui::Trait ViewDataImpl::GetTrait(Integration::TraitId id) const
   return Ui::Trait();
 }
 
-bool ViewDataImpl::RemoveTrait(Integration::TraitId id)
+bool ViewDataImpl::RemoveTrait(TraitId id)
 {
   if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
   {
@@ -650,14 +651,14 @@ Ui::InteractiveTraitInterface* ViewDataImpl::GetInteractiveTrait() const
   return mInteractiveTrait;
 }
 
-ViewDataImpl& ViewDataImpl::Get(Integration::ViewImpl& viewImpl)
+ViewDataImpl& ViewDataImpl::Get(ViewImpl& viewImpl)
 {
   DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
 
   return viewImpl.GetViewDataImpl();
 }
 
-const ViewDataImpl& ViewDataImpl::Get(const Integration::ViewImpl& viewImpl)
+const ViewDataImpl& ViewDataImpl::Get(const ViewImpl& viewImpl)
 {
   DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
 
@@ -833,7 +834,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
   if(view)
   {
-    Integration::ViewImpl& viewImpl(Integration::GetImpl(view));
+    ViewImpl& viewImpl(GetImpl(view));
 
     switch(index)
     {
@@ -1436,7 +1437,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
   if(view)
   {
-    Integration::ViewImpl& viewImpl(Integration::GetImpl(view));
+    ViewImpl& viewImpl(GetImpl(view));
 
     switch(index)
     {

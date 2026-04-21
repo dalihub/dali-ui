@@ -61,20 +61,20 @@ private:
   AbsoluteLayoutImpl& operator=(AbsoluteLayoutImpl&&)      = delete;
 };
 
-inline Integration::AbsoluteLayoutImpl& GetImpl(Ui::AbsoluteLayout& layout)
+} // namespace Integration
+
+inline DALI_UI_API Integration::AbsoluteLayoutImpl& GetImpl(AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::AbsoluteLayoutImpl&>(handle);
 }
 
-inline const Integration::AbsoluteLayoutImpl& GetImpl(const Ui::AbsoluteLayout& layout)
+inline const DALI_UI_API Integration::AbsoluteLayoutImpl& GetImpl(const AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<const Integration::AbsoluteLayoutImpl&>(handle);
 }
-
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

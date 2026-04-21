@@ -21,9 +21,10 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -49,7 +50,7 @@ public:
    *
    * @return The TraitId for this layout params type
    */
-  virtual Integration::TraitId GetTraitId() const = 0;
+  virtual TraitId GetTraitId() const = 0;
 
 protected:
   LayoutParamsImpl()
@@ -59,19 +60,19 @@ protected:
 
   ~LayoutParamsImpl() override = default;
 
-  void OnBeforeAttached(Integration::TraitId, View&) override
+  void OnBeforeAttached(TraitId, View&) override
   {
   }
 
-  void OnAttached(Integration::TraitId, View&) override
+  void OnAttached(TraitId, View&) override
   {
   }
 
-  void OnDetached(Integration::TraitId, View&) override
+  void OnDetached(TraitId, View&) override
   {
   }
 
-  void OnViewDestroying(Integration::ViewImpl*) override
+  void OnViewDestroying(ViewImpl*) override
   {
   }
 };

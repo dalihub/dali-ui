@@ -234,7 +234,7 @@ void DiscardVisual(RegisteredVisualContainer::Iterator sourceIter, RegisteredVis
  * or FOREGROUND_EFFECT) should swap its renderer to cache renderers. So changing visual's depth index may not apply
  * instantaneously. Turn offscreen rendering off and on again.
  */
-void SetVisualOnScene(Internal::Visual::Base& visualImpl, Integration::ViewImpl& viewImpl)
+void SetVisualOnScene(Internal::Visual::Base& visualImpl, ViewImpl& viewImpl)
 {
   Actor self = viewImpl.Self();
   visualImpl.SetOnScene(self);
@@ -258,7 +258,7 @@ void SetVisualOnScene(Internal::Visual::Base& visualImpl, Integration::ViewImpl&
  * @param[in] visualImpl The visual
  * @param[in] viewImpl Actor with renderers
  */
-void SetVisualOffScene(Internal::Visual::Base& visualImpl, Integration::ViewImpl& viewImpl)
+void SetVisualOffScene(Internal::Visual::Base& visualImpl, ViewImpl& viewImpl)
 {
   Actor self = viewImpl.Self();
 
@@ -284,7 +284,7 @@ void SetVisualOffScene(Internal::Visual::Base& visualImpl, Integration::ViewImpl
  * @param[in] container Container of visuals
  * @param[in] viewImpl Actor to remove visuals from
  */
-void SetVisualsOffScene(const RegisteredVisualContainer& container, Integration::ViewImpl& viewImpl)
+void SetVisualsOffScene(const RegisteredVisualContainer& container, ViewImpl& viewImpl)
 {
   for(auto iter = container.Begin(), end = container.End(); iter != end; iter++)
   {

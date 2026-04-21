@@ -72,22 +72,22 @@ InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
 
 Signal<void(View, bool, const InputEvent&)>& InteractiveView::PressedChangedSignal()
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
+  return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
 }
 
 Signal<void(View, bool)>& InteractiveView::PseudoDisabledChangedSignal()
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().PseudoDisabledChangedSignal();
+  return GetImpl(*this).GetInteractiveTrait().PseudoDisabledChangedSignal();
 }
 
 Signal<void(View, const InputEvent&)>& InteractiveView::ClickedSignal()
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().ClickedSignal();
+  return GetImpl(*this).GetInteractiveTrait().ClickedSignal();
 }
 
 Signal<bool(View, const InputEvent&)>& InteractiveView::LongPressedSignal()
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
+  return GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
 }
 
 // =============================================================================
@@ -96,39 +96,39 @@ Signal<bool(View, const InputEvent&)>& InteractiveView::LongPressedSignal()
 
 bool InteractiveView::IsPressed() const
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().IsPressed();
+  return GetImpl(*this).GetInteractiveTrait().IsPressed();
 }
 
 bool InteractiveView::IsPseudoDisabled() const
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().IsPseudoDisabled();
+  return GetImpl(*this).GetInteractiveTrait().IsPseudoDisabled();
 }
 
 InteractiveView& InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
 {
-  Integration::GetImpl(*this).GetInteractiveTrait().SetPseudoDisabled(pseudoDisabled);
+  GetImpl(*this).GetInteractiveTrait().SetPseudoDisabled(pseudoDisabled);
   return *this;
 }
 
 bool InteractiveView::IsClickable() const
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().IsClickable();
+  return GetImpl(*this).GetInteractiveTrait().IsClickable();
 }
 
 InteractiveView& InteractiveView::SetClickable(bool clickable)
 {
-  Integration::GetImpl(*this).GetInteractiveTrait().SetClickable(clickable);
+  GetImpl(*this).GetInteractiveTrait().SetClickable(clickable);
   return *this;
 }
 
 KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
 {
-  return Integration::GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
+  return GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
 }
 
 InteractiveView& InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
 {
-  Integration::GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
+  GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
   return *this;
 }
 

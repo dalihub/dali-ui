@@ -31,9 +31,9 @@ namespace Ui
 {
 
 // Forward declarations
+class ViewImpl;
 namespace Integration
 {
-class ViewImpl;
 class LayoutControllerImpl;
 } // namespace Integration
 
@@ -76,7 +76,7 @@ public:
    *
    * @param[in] view The view with layout capability to schedule
    */
-  void RequestLayout(Integration::ViewImpl* view);
+  void RequestLayout(ViewImpl* view);
 
   /**
    * @brief Removes the layout controller for the given window.
@@ -96,7 +96,7 @@ public:
    *
    * @param[in] view The view to unregister
    */
-  void UnregisterView(Integration::ViewImpl* view);
+  void UnregisterView(ViewImpl* view);
 
   /**
    * @brief Unregisters a view from all known layout controllers.
@@ -106,7 +106,7 @@ public:
    *
    * @param[in] view The view to unregister
    */
-  static void UnregisterFromAll(Integration::ViewImpl* view);
+  static void UnregisterFromAll(ViewImpl* view);
 
   /**
    * @brief Called when the window is resized.

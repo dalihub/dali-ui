@@ -21,7 +21,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
@@ -29,6 +28,7 @@
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali::Ui::Internal
 {

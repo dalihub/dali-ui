@@ -40,8 +40,8 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 
@@ -307,13 +307,13 @@ bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext&
     if(currentlyFocusedView)
     {
       // Do we need it to remember if it was previously DISABLED?
-      Integration::GetImpl(currentlyFocusedView).ClearKeyInputFocus();
+      GetImpl(currentlyFocusedView).ClearKeyInputFocus();
     }
 
     Ui::View newlyFocusedView = Ui::View::DownCast(actor);
     if(newlyFocusedView)
     {
-      Integration::GetImpl(newlyFocusedView).SetKeyInputFocus();
+      GetImpl(newlyFocusedView).SetKeyInputFocus();
     }
 
     // Push Current Focused Actor to FocusHistory
@@ -419,7 +419,7 @@ void FocusManager::MoveFocusBackward()
 bool FocusManager::IsLayoutView(Actor actor) const
 {
   Ui::View view = Ui::View::DownCast(actor);
-  return view && Integration::GetImpl(view).IsKeyNavigationSupported();
+  return view && GetImpl(view).IsKeyNavigationSupported();
 }
 
 Ui::View FocusManager::GetParentLayoutView(Actor actor) const
@@ -630,7 +630,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
 bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   // Ask the view for the next actor to focus
-  Actor nextFocusableActor = Integration::GetImpl(view).GetNextFocusableActor(actor, direction, mFocusGroupLoopEnabled);
+  Actor nextFocusableActor = GetImpl(view).GetNextFocusableActor(actor, direction, mFocusGroupLoopEnabled);
   if(nextFocusableActor)
   {
     if(!(nextFocusableActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
@@ -671,7 +671,7 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::F
             // If the application hasn't changed our proposed actor, we informs the layout view we will
             // move the focus to what the view returns. The view might wish to perform some actions
             // before the focus is actually moved.
-            Integration::GetImpl(view).OnFocusChangeCommitted(committedFocusActor);
+            GetImpl(view).OnFocusChangeCommitted(committedFocusActor);
           }
 
           return DoSetCurrentFocusActor(committedFocusActor, context);
@@ -723,7 +723,7 @@ void FocusManager::DoKeyboardEnter(Actor actor)
     if(view)
     {
       // Notify the view that enter has been pressed on it.
-      Integration::GetImpl(view).KeyboardEnter();
+      GetImpl(view).KeyboardEnter();
     }
 
     // Send a notification for the actor.
@@ -763,7 +763,7 @@ void FocusManager::ClearFocus(Actor actor)
     Ui::View currentlyFocusedView = Ui::View::DownCast(actor);
     if(currentlyFocusedView)
     {
-      Integration::GetImpl(currentlyFocusedView).ClearKeyInputFocus();
+      GetImpl(currentlyFocusedView).ClearKeyInputFocus();
     }
   }
   mCurrentFocusActor.Reset();

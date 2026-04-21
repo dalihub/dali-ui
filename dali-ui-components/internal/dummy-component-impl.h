@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dummy-component.h>
@@ -41,7 +41,7 @@ namespace Internal
  *
  * @see Dali::Ui::DummyImpl
  */
-class DummyComponentImpl : public Integration::ViewImpl
+class DummyComponentImpl : public ViewImpl
 {
 public:
   // Creation & Destruction
@@ -80,6 +80,8 @@ private:
   // Data
 };
 
+} // namespace Internal
+
 // Helpers for public-api forwarding methods
 
 inline Internal::DummyComponentImpl& GetImpl(Ui::DummyComponent& dummyElement)
@@ -99,8 +101,6 @@ inline const Internal::DummyComponentImpl& GetImpl(const Ui::DummyComponent& dum
 
   return static_cast<const Internal::DummyComponentImpl&>(handle);
 }
-
-} // namespace Internal
 
 } // namespace Ui
 

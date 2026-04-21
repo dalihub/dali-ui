@@ -34,7 +34,6 @@
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
@@ -44,6 +43,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -721,8 +721,8 @@ void InputFieldImpl::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.OnSceneSignal().Connect(this, &InputFieldImpl::OnSceneConnect);
 
-  View                   view         = Dali::Ui::View::DownCast(self);
-  Integration::ViewImpl& viewInternal = Ui::Integration::GetImpl(view);
+  View      view         = Dali::Ui::View::DownCast(self);
+  ViewImpl& viewInternal = Ui::GetImpl(view);
   Internal::ViewDataImpl::Get(viewInternal).SetInputMethodContext(mInputMethodContext);
 
   EnableClipping();

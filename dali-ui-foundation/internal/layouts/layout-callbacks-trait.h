@@ -75,10 +75,10 @@ public:
 protected:
   ~LayoutCallbacksTraitImpl() override;
 
-  void OnBeforeAttached(Integration::TraitId id, View& view) override;
-  void OnAttached(Integration::TraitId id, View& view) override;
-  void OnDetached(Integration::TraitId id, View& view) override;
-  void OnViewDestroying(Integration::ViewImpl* viewImpl) override;
+  void OnBeforeAttached(TraitId id, View& view) override;
+  void OnAttached(TraitId id, View& view) override;
+  void OnDetached(TraitId id, View& view) override;
+  void OnViewDestroying(ViewImpl* viewImpl) override;
 
 private:
   MeasureCallback mOnMeasure;

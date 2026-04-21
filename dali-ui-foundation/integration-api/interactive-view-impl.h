@@ -19,10 +19,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -133,27 +133,27 @@ private:
   Ui::InteractiveTrait mCachedTrait; ///< Cached handle to the attached InteractiveTrait
 };
 
+} // namespace Integration
+
 // Helpers for forwarding methods
 
-inline InteractiveViewImpl& GetImpl(Ui::InteractiveView& view)
+inline DALI_UI_API Integration::InteractiveViewImpl& GetImpl(InteractiveView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<InteractiveViewImpl&>(handle);
+  return static_cast<Integration::InteractiveViewImpl&>(handle);
 }
 
-inline const InteractiveViewImpl& GetImpl(const Ui::InteractiveView& view)
+inline DALI_UI_API const Integration::InteractiveViewImpl& GetImpl(const InteractiveView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   const Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<const InteractiveViewImpl&>(handle);
+  return static_cast<const Integration::InteractiveViewImpl&>(handle);
 }
-
-} // namespace Integration
 
 } // namespace Ui
 

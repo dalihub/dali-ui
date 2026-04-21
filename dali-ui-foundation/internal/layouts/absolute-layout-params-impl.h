@@ -21,9 +21,10 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
@@ -56,7 +57,7 @@ public:
   {
   }
 
-  Integration::TraitId GetTraitId() const override
+  TraitId GetTraitId() const override
   {
     return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
   }
@@ -122,7 +123,7 @@ public:
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
    */
-  static AbsoluteLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
+  static AbsoluteLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
     if(trait)
@@ -137,7 +138,7 @@ public:
    * @param[in] viewImpl The view implementation.
    * @return Reference to the params (newly created if not already attached).
    */
-  static AbsoluteLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
+  static AbsoluteLayoutParamsImpl& GetOrCreate(ViewImpl& viewImpl)
   {
     AbsoluteLayoutParamsImpl* existing = Get(viewImpl);
     if(existing)

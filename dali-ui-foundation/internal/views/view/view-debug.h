@@ -18,7 +18,7 @@
 
 #if defined(DEBUG_ENABLED)
 
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/object/handle.h>
 #include <iostream>
 #include <string>
@@ -40,7 +40,7 @@ std::ostream& DumpProperties(std::ostream& outputStream, Handle handle);
 /**
  * Dumps view internals, visuals and properties to a string in JSON format
  */
-std::string DumpView(const Integration::ViewImpl& view);
+std::string DumpView(const ViewImpl& view);
 
 /**
  * Dumps actor internals and properties to a string in JSON format

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-debug.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
 #include <dali/integration-api/string-utils.h>
@@ -291,7 +291,7 @@ std::ostream& DumpProperties(std::ostream& o, Handle handle)
   return o;
 }
 
-std::string DumpView(const Integration::ViewImpl& view)
+std::string DumpView(const ViewImpl& view)
 {
   auto& viewData = view.GetViewDataImpl();
 
@@ -340,7 +340,7 @@ void DumpViewHierarchy(std::ostream& o, Actor actor)
   o << "{\n";
   if(view)
   {
-    o << "\"View\":" << DumpView(Ui::Integration::GetImpl(view));
+    o << "\"View\":" << DumpView(Ui::GetImpl(view));
   }
   else
   {

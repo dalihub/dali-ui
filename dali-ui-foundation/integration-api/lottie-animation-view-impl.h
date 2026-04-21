@@ -20,9 +20,9 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
 #include <dali-ui-foundation/public-api/lottie-animation-view-types.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-map.h>
@@ -356,17 +356,17 @@ public: // API
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnInitialize
+   * @copydoc ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnMeasure
+   * @copydoc ViewImpl::OnMeasure
    */
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnArrange
+   * @copydoc ViewImpl::OnArrange
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 

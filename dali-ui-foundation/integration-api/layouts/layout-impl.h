@@ -18,8 +18,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -120,21 +120,21 @@ private:
   LayoutImpl& operator=(LayoutImpl&&)      = delete;
 };
 
+} // namespace Integration
+
 // Helpers for public-api forwarding methods
-inline Integration::LayoutImpl& GetImpl(Ui::Layout& layout)
+inline DALI_UI_API Integration::LayoutImpl& GetImpl(Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::LayoutImpl&>(handle);
 }
 
-inline const Integration::LayoutImpl& GetImpl(const Ui::Layout& layout)
+inline DALI_UI_API const Integration::LayoutImpl& GetImpl(const Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<const Integration::LayoutImpl&>(handle);
 }
-
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

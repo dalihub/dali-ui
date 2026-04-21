@@ -18,10 +18,10 @@
  */
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/image-view-properties.h>
 #include <dali-ui-foundation/public-api/image-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector4.h>
@@ -324,17 +324,17 @@ public: // Loading Status
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnInitialize
+   * @copydoc ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnMeasure
+   * @copydoc ViewImpl::OnMeasure
    */
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnArrange
+   * @copydoc ViewImpl::OnArrange
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 

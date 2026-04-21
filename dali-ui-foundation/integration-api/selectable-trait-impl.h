@@ -139,13 +139,13 @@ private:
 
 } // namespace Integration
 
-inline Integration::SelectableTraitImpl& GetImpl(SelectableTrait& obj)
+inline DALI_UI_API Integration::SelectableTraitImpl& GetImpl(SelectableTrait& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<Integration::SelectableTraitImpl&>(handle);
 }
 
-inline const Integration::SelectableTraitImpl& GetImpl(const SelectableTrait& obj)
+inline DALI_UI_API const Integration::SelectableTraitImpl& GetImpl(const SelectableTrait& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const Integration::SelectableTraitImpl&>(handle);

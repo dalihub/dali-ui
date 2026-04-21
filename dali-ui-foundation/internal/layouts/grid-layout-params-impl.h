@@ -21,9 +21,10 @@
 #include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
+#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
@@ -64,7 +65,7 @@ public:
   {
   }
 
-  Integration::TraitId GetTraitId() const override
+  TraitId GetTraitId() const override
   {
     return Integration::ReservedTraitId::GRID_LAYOUT_PARAMS;
   }
@@ -166,7 +167,7 @@ public:
    * @param[in] viewImpl The view implementation to query.
    * @return Pointer to the params, or nullptr if not attached.
    */
-  static GridLayoutParamsImpl* Get(Integration::ViewImpl& viewImpl)
+  static GridLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
     Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
     if(trait)
@@ -181,7 +182,7 @@ public:
    * @param[in] viewImpl The view implementation.
    * @return Reference to the params (newly created if not already attached).
    */
-  static GridLayoutParamsImpl& GetOrCreate(Integration::ViewImpl& viewImpl)
+  static GridLayoutParamsImpl& GetOrCreate(ViewImpl& viewImpl)
   {
     GridLayoutParamsImpl* existing = Get(viewImpl);
     if(existing)

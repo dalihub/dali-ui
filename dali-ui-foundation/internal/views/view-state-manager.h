@@ -31,10 +31,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
-{
 class ViewImpl;
-} // namespace Integration
 
 namespace Internal
 {
@@ -79,7 +76,7 @@ public:
    * @param[in] viewImpl  The ViewImpl to test
    * @return True if neither the view itself nor any ancestor carries ViewState::DISABLED
    */
-  bool IsEffectivelyEnabled(const Integration::ViewImpl& viewImpl) const;
+  bool IsEffectivelyEnabled(const ViewImpl& viewImpl) const;
 
   /**
    * @brief Returns true if the view or any of its View ancestors is focused.
@@ -87,7 +84,7 @@ public:
    * @param[in] viewImpl  The ViewImpl to test
    * @return True if the view itself or at least one ancestor carries ViewState::FOCUSED
    */
-  bool IsEffectivelyFocused(const Integration::ViewImpl& viewImpl) const;
+  bool IsEffectivelyFocused(const ViewImpl& viewImpl) const;
 
 private:
   ViewStateManager() = default;

@@ -31,9 +31,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/web-view.h>
 
 namespace Dali
@@ -510,17 +510,17 @@ public: // Signal emission helpers (called by WebView to emit signals)
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnInitialize
+   * @copydoc ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnMeasure
+   * @copydoc ViewImpl::OnMeasure
    */
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
 
   /**
-   * @copydoc Integration::ViewImpl::OnArrange
+   * @copydoc ViewImpl::OnArrange
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 

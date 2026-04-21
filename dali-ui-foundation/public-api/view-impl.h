@@ -37,11 +37,11 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -66,9 +66,6 @@ namespace Internal
 {
 class ViewDataImpl;
 } //namespace Internal
-
-namespace Integration
-{
 
 class ViewImpl;
 using ViewImplPtr = IntrusivePtr<ViewImpl>;
@@ -1156,25 +1153,23 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Integration::ViewImpl& GetImpl(Ui::View& view)
+inline DALI_UI_API ViewImpl& GetImpl(Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<Integration::ViewImpl&>(handle);
+  return static_cast<ViewImpl&>(handle);
 }
 
-inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
+inline DALI_UI_API const ViewImpl& GetImpl(const Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
   const Dali::RefObject& handle = view.GetImplementation();
 
-  return static_cast<const Integration::ViewImpl&>(handle);
+  return static_cast<const ViewImpl&>(handle);
 }
-
-} // namespace Integration
 
 } // namespace Ui
 

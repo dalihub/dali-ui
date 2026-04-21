@@ -22,9 +22,9 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/state-event-impl.h>
 #include <dali-ui-foundation/public-api/state-event.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -76,7 +76,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewSta
 
     for(auto& n : mBatch)
     {
-      Integration::ViewImpl& impl = Integration::GetImpl(n.view);
+      ViewImpl& impl = GetImpl(n.view);
 
       if(impl.StateChangedSignal().Empty())
       {
@@ -91,7 +91,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewSta
   }
 }
 
-bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImpl) const
+bool ViewStateManager::IsEffectivelyEnabled(const ViewImpl& viewImpl) const
 {
   if(viewImpl.GetState().Contains(ViewState::DISABLED))
   {
@@ -104,7 +104,7 @@ bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImp
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      if(Integration::GetImpl(parentView).GetState().Contains(ViewState::DISABLED))
+      if(GetImpl(parentView).GetState().Contains(ViewState::DISABLED))
       {
         return false;
       }
@@ -115,7 +115,7 @@ bool ViewStateManager::IsEffectivelyEnabled(const Integration::ViewImpl& viewImp
   return true;
 }
 
-bool ViewStateManager::IsEffectivelyFocused(const Integration::ViewImpl& viewImpl) const
+bool ViewStateManager::IsEffectivelyFocused(const ViewImpl& viewImpl) const
 {
   if(viewImpl.GetState().Contains(ViewState::FOCUSED))
   {
@@ -128,7 +128,7 @@ bool ViewStateManager::IsEffectivelyFocused(const Integration::ViewImpl& viewImp
     View parentView = View::DownCast(parent);
     if(parentView)
     {
-      if(Integration::GetImpl(parentView).GetState().Contains(ViewState::FOCUSED))
+      if(GetImpl(parentView).GetState().Contains(ViewState::FOCUSED))
       {
         return true;
       }

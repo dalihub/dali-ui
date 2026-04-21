@@ -29,12 +29,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
-#include <dali-ui-foundation/integration-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 #include <map>
 #include <memory>
@@ -73,18 +73,18 @@ public:
    * @param[in] viewImpl A ref to the view whose internal implementation is required
    * @return The internal implementation
    */
-  static ViewDataImpl& Get(Integration::ViewImpl& viewImpl);
+  static ViewDataImpl& Get(ViewImpl& viewImpl);
 
   /**
-   * @copydoc Get( Integration::ViewImpl& )
+   * @copydoc Get( ViewImpl& )
    */
-  static const ViewDataImpl& Get(const Integration::ViewImpl& viewImpl);
+  static const ViewDataImpl& Get(const ViewImpl& viewImpl);
 
   /**
    * @brief Constructor.
    * @param[in] viewImpl The view which owns this implementation
    */
-  ViewDataImpl(Integration::ViewImpl& viewImpl);
+  ViewDataImpl(ViewImpl& viewImpl);
 
   /**
    * @brief Destructor.
@@ -109,17 +109,17 @@ public:
   /**
    * @brief Sets a trait to the owning View.
    */
-  void SetTrait(Integration::TraitId id, Ui::Trait& trait);
+  void SetTrait(TraitId id, Ui::Trait& trait);
 
   /**
    * @brief Gets a trait from the owning View.
    */
-  Ui::Trait GetTrait(Integration::TraitId id) const;
+  Ui::Trait GetTrait(TraitId id) const;
 
   /**
    * @brief Removes a trait from the owning View.
    */
-  bool RemoveTrait(Integration::TraitId id);
+  bool RemoveTrait(TraitId id);
 
   /**
    * @brief Returns the interactive trait pointer (may be null).
@@ -360,7 +360,7 @@ public:
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::Integration::ViewImpl::GetAccessibleObject()
+   * @copydoc Dali::Ui::ViewImpl::GetAccessibleObject()
    */
   std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
 
@@ -441,11 +441,11 @@ private:
   void UpdateBorderline();
 
 public:
-  Integration::ViewImpl& mViewImpl;
+  ViewImpl& mViewImpl;
 
   // State
-  Ui::ViewState                                 mState;
-  Integration::ViewImpl::StateChangedSignalType mStateChangedSignal;
+  Ui::ViewState                    mState;
+  ViewImpl::StateChangedSignalType mStateChangedSignal;
 
   // Requested position (used when parent is not a layout)
   float mRequestedPositionX;
@@ -459,12 +459,12 @@ public:
   bool         mArrangeValid;
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
-  Integration::ViewImpl::ChildContainer mChildren;
-  bool                                  mSkipChildrenUpdate;
+  ViewImpl::ChildContainer mChildren;
+  bool                     mSkipChildrenUpdate;
 
   // Trait storage
-  std::vector<std::pair<Integration::TraitId, Ui::Trait>> mTraits;
-  Ui::InteractiveTraitInterface*                          mInteractiveTrait;
+  std::vector<std::pair<TraitId, Ui::Trait>> mTraits;
+  Ui::InteractiveTraitInterface*             mInteractiveTrait;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData>        mVisualData;
@@ -501,7 +501,7 @@ public:
   InputMethodContext mInputMethodContext;
   CallbackBase*      mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
-  Integration::ViewImpl::ViewBehaviour mFlags : Integration::ViewImpl::VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
+  ViewImpl::ViewBehaviour mFlags : ViewImpl::VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
 
   // Frequencly touched accessibility relative values.
   // Keep it on ViewDataImpl to avoid AccessibilityData creation.
@@ -516,7 +516,7 @@ public:
   bool mProcessorRegistered : 1;           ///< Whether the processor is registered.
 
   // Properties - these need to be members of Internal::ViewDataImpl as they access private methods/data of
-  // Integration::ViewImpl and Internal::ViewDataImpl.
+  // ViewImpl and Internal::ViewDataImpl.
   static const PropertyRegistration PROPERTY_1;
   static const PropertyRegistration PROPERTY_2;
   static const PropertyRegistration PROPERTY_3;

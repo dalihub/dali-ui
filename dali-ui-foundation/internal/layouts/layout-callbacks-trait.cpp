@@ -75,19 +75,19 @@ ArrangeCallback* LayoutCallbacksTraitImpl::GetArrangeCallback()
   return mOnArrange ? &mOnArrange : nullptr;
 }
 
-void LayoutCallbacksTraitImpl::OnBeforeAttached(Integration::TraitId id, View& view)
+void LayoutCallbacksTraitImpl::OnBeforeAttached(TraitId id, View& view)
 {
 }
 
-void LayoutCallbacksTraitImpl::OnAttached(Integration::TraitId id, View& view)
+void LayoutCallbacksTraitImpl::OnAttached(TraitId id, View& view)
 {
 }
 
-void LayoutCallbacksTraitImpl::OnDetached(Integration::TraitId id, View& view)
+void LayoutCallbacksTraitImpl::OnDetached(TraitId id, View& view)
 {
 }
 
-void LayoutCallbacksTraitImpl::OnViewDestroying(Integration::ViewImpl* viewImpl)
+void LayoutCallbacksTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
 }
 

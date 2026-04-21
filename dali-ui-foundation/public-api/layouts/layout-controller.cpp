@@ -31,7 +31,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <algorithm>
 
@@ -66,8 +66,8 @@ public:
    */
   struct LayoutRootEntry
   {
-    WeakHandle<View>       weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
-    Integration::ViewImpl* view;       ///< Raw pointer for direct access
+    WeakHandle<View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
+    ViewImpl*        view;       ///< Raw pointer for direct access
   };
 
   /**
@@ -112,7 +112,7 @@ public:
    *
    * Any View that is a layout root (has LayoutManager or children) can be registered.
    */
-  void RequestLayout(Integration::ViewImpl* view)
+  void RequestLayout(ViewImpl* view)
   {
     if(!view)
     {
@@ -136,7 +136,7 @@ public:
   /**
    * @brief Removes a view from tracking (called when view is destroyed).
    */
-  void UnregisterView(Integration::ViewImpl* view)
+  void UnregisterView(ViewImpl* view)
   {
     mAllLayoutRoots.erase(view);
     mPendingViews.erase(view);
@@ -188,7 +188,7 @@ public:
 
     // Invalidate ALL known layout roots (not just pending ones)
     // Collect dead entries to remove after iteration
-    std::vector<Integration::ViewImpl*> deadEntries;
+    std::vector<ViewImpl*> deadEntries;
     for(auto& pair : mAllLayoutRoots)
     {
       if(pair.second.weakHandle.GetHandle())
@@ -292,7 +292,7 @@ private:
    * - WRAP_CONTENT: layout measures with constraint as maximum and returns wrapped size.
    * - Fixed (> 0): constraint for that dimension is the fixed value.
    */
-  void ProcessLayoutRoot(Integration::ViewImpl* view, float widthConstraint, float heightConstraint)
+  void ProcessLayoutRoot(ViewImpl* view, float widthConstraint, float heightConstraint)
   {
     if(!view)
     {
@@ -356,13 +356,13 @@ private:
   }
 
 private:
-  Dali::WeakHandle<Window>                                    mWindow;
-  std::unordered_map<Integration::ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (weak-referenced)
-  std::unordered_set<Integration::ViewImpl*>                  mPendingViews;   ///< Dirty layout roots needing processing
-  int32_t                                                     mWindowWidth;
-  int32_t                                                     mWindowHeight;
-  void*                                                       mWindowObjectPtr; ///< For self-destruct case.
-  bool                                                        mProcessingScheduled;
+  Dali::WeakHandle<Window>                       mWindow;
+  std::unordered_map<ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (weak-referenced)
+  std::unordered_set<ViewImpl*>                  mPendingViews;   ///< Dirty layout roots needing processing
+  int32_t                                        mWindowWidth;
+  int32_t                                        mWindowHeight;
+  void*                                          mWindowObjectPtr; ///< For self-destruct case.
+  bool                                           mProcessingScheduled;
 };
 
 } // namespace Integration
@@ -403,7 +403,7 @@ void LayoutController::Remove(Window window)
   }
 }
 
-void LayoutController::UnregisterFromAll(Integration::ViewImpl* view)
+void LayoutController::UnregisterFromAll(ViewImpl* view)
 {
   if(DALI_LIKELY(Adaptor::IsAvailable()))
   {
@@ -423,12 +423,12 @@ LayoutController::~LayoutController()
 {
 }
 
-void LayoutController::RequestLayout(Integration::ViewImpl* view)
+void LayoutController::RequestLayout(ViewImpl* view)
 {
   mImpl->RequestLayout(view);
 }
 
-void LayoutController::UnregisterView(Integration::ViewImpl* view)
+void LayoutController::UnregisterView(ViewImpl* view)
 {
   mImpl->UnregisterView(view);
 }

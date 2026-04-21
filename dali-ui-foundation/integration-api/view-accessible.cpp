@@ -34,11 +34,11 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/property-bridge/property-bridge.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 using Dali::Integration::GetStdString;
@@ -51,7 +51,7 @@ namespace
 {
 Dali::Ui::Internal::ViewDataImpl& GetViewImplementation(Dali::Ui::View view)
 {
-  auto& internalView = Dali::Ui::Integration::GetImpl(view);
+  auto& internalView = Dali::Ui::GetImpl(view);
 
   return Dali::Ui::Internal::ViewDataImpl::Get(internalView);
 }
@@ -233,7 +233,7 @@ std::string ViewAccessible::GetName() const
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
   Dali::String            name;
 
@@ -267,7 +267,7 @@ std::string ViewAccessible::GetDescription() const
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
   Dali::String            description;
 
@@ -326,7 +326,7 @@ void ViewAccessible::ApplyAccessibilityProps(Dali::Accessibility::States& states
   using Dali::Accessibility::State;
   auto view = Dali::Ui::View::DownCast(Self());
 
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   AccessibilityStates viewStates;
@@ -456,7 +456,7 @@ bool ViewAccessible::IsHidden() const
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   const auto* accessibilityData = viewImpl.GetAccessibilityData();
@@ -487,7 +487,7 @@ void ViewAccessible::ScrollToSelf()
 void ViewAccessible::RegisterPositionPropertyNotification()
 {
   auto                    view         = Dali::Ui::View::DownCast(Self());
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   viewImpl.GetOrCreateAccessibilityData().RegisterAccessibilityPositionPropertyNotification();
@@ -496,7 +496,7 @@ void ViewAccessible::RegisterPositionPropertyNotification()
 void ViewAccessible::UnregisterPositionPropertyNotification()
 {
   auto                    view         = Dali::Ui::View::DownCast(Self());
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   viewImpl.GetOrCreateAccessibilityData().UnregisterAccessibilityPositionPropertyNotification();
@@ -505,7 +505,7 @@ void ViewAccessible::UnregisterPositionPropertyNotification()
 void ViewAccessible::RegisterPropertySetSignal()
 {
   auto                    view         = Dali::Ui::View::DownCast(Self());
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   auto& accessibilityData = viewImpl.GetOrCreateAccessibilityData();
@@ -517,7 +517,7 @@ void ViewAccessible::RegisterPropertySetSignal()
 void ViewAccessible::UnregisterPropertySetSignal()
 {
   auto                    view         = Dali::Ui::View::DownCast(Self());
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   viewImpl.GetOrCreateAccessibilityData().UnregisterAccessibilityPropertySetSignal();
@@ -665,7 +665,7 @@ bool ViewAccessible::DoGesture(const Dali::Accessibility::GestureInfo& gestureIn
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  Integration::ViewImpl&  internalView = Ui::Integration::GetImpl(view);
+  ViewImpl&               internalView = Ui::GetImpl(view);
   Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
@@ -683,7 +683,7 @@ std::vector<Dali::Accessibility::Relation> ViewAccessible::GetRelationSet()
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  auto relations = Integration::GetImpl(view).GetAccessibilityRelations();
+  auto relations = GetImpl(view).GetAccessibilityRelations();
 
   std::vector<Dali::Accessibility::Relation> result;
   result.reserve(relations.Count());

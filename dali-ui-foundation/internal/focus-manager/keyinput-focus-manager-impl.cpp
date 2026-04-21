@@ -19,7 +19,7 @@
 #include "keyinput-focus-manager-impl.h"
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
@@ -92,11 +92,11 @@ void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
   if(previousFocusView)
   {
     // Notify the view that it has lost key input focus
-    Integration::GetImpl(previousFocusView).NotifyFocusChanged(false);
+    GetImpl(previousFocusView).NotifyFocusChanged(false);
   }
 
   // Tell the new actor that it has gained focus.
-  Integration::GetImpl(view).NotifyFocusChanged(true);
+  GetImpl(view).NotifyFocusChanged(true);
 
   // Emit the signal to inform focus change to the application.
   if(!mKeyInputFocusChangedSignal.Empty())
@@ -116,7 +116,7 @@ void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
     mCurrentWindowId = 0;
 
     // Notify the view that it has lost key input focus
-    Integration::GetImpl(view).NotifyFocusChanged(false);
+    GetImpl(view).NotifyFocusChanged(false);
   }
 }
 
@@ -176,7 +176,7 @@ bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent&
 
   if(view)
   {
-    consumed = Integration::GetImpl(view).EmitKeyEventSignal(event);
+    consumed = GetImpl(view).EmitKeyEventSignal(event);
 
     // if view doesn't consume KeyEvent, give KeyEvent to its parent.
     if(!consumed)

@@ -21,10 +21,10 @@
 #include <dali/devel-api/atspi-interfaces/hyperlink.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -39,7 +39,7 @@ using TextAnchorImplPtr = IntrusivePtr<TextAnchorImpl>;
 /**
  * @brief A control which renders anchor (hyperlink) in hypertext.
  */
-class TextAnchorImpl : public Integration::ViewImpl
+class TextAnchorImpl : public ViewImpl
 {
 public:
   /**
@@ -76,7 +76,7 @@ public:
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnInitialize
+   * @copydoc ViewImpl::OnInitialize
    */
   void OnInitialize() override;
 

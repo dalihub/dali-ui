@@ -18,9 +18,9 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -29,11 +29,7 @@ namespace Ui
 
 // Forward declarations
 class View;
-
-namespace Integration
-{
 class ViewImpl;
-}
 
 /**
  * @brief Abstract base class for layout managers.
@@ -42,7 +38,7 @@ class ViewImpl;
  * within a container. They implement the specific layout algorithms
  * for different layout types (stack, grid, flex, etc.).
  *
- * LayoutManager works with Integration::ViewImpl for direct access to
+ * LayoutManager works with ViewImpl for direct access to
  * implementation details during layout calculations. This allows any View
  * (or derived class) to have layout capability.
  *
@@ -73,7 +69,7 @@ public:
    * @param[in] heightConstraint The available height constraint
    * @return The measured size
    */
-  virtual MeasuredSize Measure(Integration::ViewImpl* view, float widthConstraint, float heightConstraint) = 0;
+  virtual MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) = 0;
 
   /**
    * @brief Arranges the children within the view bounds.
@@ -85,7 +81,7 @@ public:
    * @param[in] bounds The available bounds for arranging children
    * @return The final arranged size
    */
-  virtual MeasuredSize ArrangeChildren(Integration::ViewImpl* view, const LayoutRect& bounds) = 0;
+  virtual MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) = 0;
 
 protected:
   /**
@@ -98,7 +94,7 @@ protected:
    * @param[in] heightConstraint The height constraint for the child
    * @return The measured size of the child
    */
-  MeasuredSize MeasureChild(Integration::ViewImpl* child, float widthConstraint, float heightConstraint);
+  MeasuredSize MeasureChild(ViewImpl* child, float widthConstraint, float heightConstraint);
 
   /**
    * @brief Arranges a child view within the given bounds.
@@ -109,7 +105,7 @@ protected:
    * @param[in] bounds The bounds for the child
    * @return The final arranged size
    */
-  MeasuredSize ArrangeChild(Integration::ViewImpl* child, const LayoutRect& bounds);
+  MeasuredSize ArrangeChild(ViewImpl* child, const LayoutRect& bounds);
 
   /**
    * @brief Gets the children container from a view.
@@ -119,7 +115,7 @@ protected:
    * @param[in] view The view to get children from
    * @return Reference to the children container
    */
-  Integration::ViewImpl::ChildContainer& GetChildren(Integration::ViewImpl* view);
+  ViewImpl::ChildContainer& GetChildren(ViewImpl* view);
 
 private:
   // Not copyable or movable

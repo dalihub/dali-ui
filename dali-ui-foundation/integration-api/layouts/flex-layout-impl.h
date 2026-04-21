@@ -77,20 +77,20 @@ private:
   FlexLayoutImpl& operator=(FlexLayoutImpl&&)      = delete;
 };
 
-inline Integration::FlexLayoutImpl& GetImpl(Ui::FlexLayout& layout)
+} // namespace Integration
+
+inline DALI_UI_API Integration::FlexLayoutImpl& GetImpl(FlexLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::FlexLayoutImpl&>(handle);
 }
 
-inline const Integration::FlexLayoutImpl& GetImpl(const Ui::FlexLayout& layout)
+inline DALI_UI_API const Integration::FlexLayoutImpl& GetImpl(const FlexLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<const Integration::FlexLayoutImpl&>(handle);
 }
-
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

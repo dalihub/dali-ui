@@ -22,10 +22,7 @@
 #include <vector>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
-#include <dali-ui-foundation/integration-api/trait-id.h>
-#include <dali-ui-foundation/integration-api/view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/integration-api/events/key-event-integ.h>
 
@@ -2534,7 +2531,7 @@ int UtcDaliViewSetPaddingFiresPropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetPadding(Extents(5, 6, 7, 8));
+  Ui::GetImpl(view).SetPadding(Extents(5, 6, 7, 8));
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::PADDING));
   END_TEST;
@@ -2547,7 +2544,7 @@ int UtcDaliViewSetRequestedWidthFiresPropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetRequestedWidth(120.0f);
+  Ui::GetImpl(view).SetRequestedWidth(120.0f);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::REQUESTED_WIDTH));
   END_TEST;
@@ -2560,7 +2557,7 @@ int UtcDaliViewSetMinimumWidthFiresPropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetMinimumWidth(10.0f);
+  Ui::GetImpl(view).SetMinimumWidth(10.0f);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::MINIMUM_WIDTH));
   END_TEST;
@@ -2573,7 +2570,7 @@ int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetLayoutMode(Ui::LayoutMode::STANDALONE);
+  Ui::GetImpl(view).SetLayoutMode(Ui::LayoutMode::STANDALONE);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::LAYOUT_MODE));
   END_TEST;
@@ -2586,7 +2583,7 @@ int UtcDaliViewSetKeyNavigationSupportFiresPropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Ui::Integration::GetImpl(view).SetKeyNavigationSupport(true);
+  Ui::GetImpl(view).SetKeyNavigationSupport(true);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::KEY_NAVIGATION_SUPPORT));
   END_TEST;
