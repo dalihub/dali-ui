@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
@@ -229,7 +230,7 @@ void MaskEffectImpl::OnActivate()
   Ui::View ownerView = GetOwnerView();
   DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
-  Integration::AddActorChild(ownerView, mCamera);
+  IntegrationView::AddActorChild(ownerView, mCamera);
 
   Renderer maskRenderer = GetTargetRenderer();
   ownerView.AddCacheRenderer(maskRenderer);

@@ -81,16 +81,21 @@ namespace Dali
 namespace Ui
 {
 
+namespace
+{
+
+/// Scoped guard that lets View::OnChildAdd accept a non-View Actor as a child.
+/// Used by IntegrationView::AddActorChild. Thread-local because Actor::Add invokes
+/// OnChildAdd synchronously on the same (event) thread.
+thread_local bool gAllowNonViewChild = false;
+
+} // namespace
+
 namespace Integration
 {
 
 namespace
 {
-
-/// Scoped guard that lets View::OnChildAdd accept a non-View Actor as a child.
-/// Used by Integration::AddActorChild. Thread-local because Actor::Add invokes
-/// OnChildAdd synchronously on the same (event) thread.
-thread_local bool gAllowNonViewChild = false;
 
 /// RAII guard for ViewImpl::mSkipChildrenUpdate. Saves and restores the
 /// previous value, so nested scopes (e.g. a signal handler re-entering Insert
@@ -1814,7 +1819,7 @@ void ViewImpl::OnChildAdd(Actor& child)
   {
     if(gAllowNonViewChild)
     {
-      // Permitted via Integration::AddActorChild: skip the View-only check
+      // Permitted via IntegrationView::AddActorChild: skip the View-only check
       // and do not record this child in mImpl->mChildren (it is excluded from layout).
       return;
     }
@@ -2077,6 +2082,11 @@ Dali::Vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
   return result;
 }
 
+} // namespace Integration
+
+namespace IntegrationView
+{
+
 void AddActorChild(Ui::View view, Dali::Actor actor)
 {
   if(!view || !actor)
@@ -2106,6 +2116,6 @@ void AddActorChild(Ui::View view, Dali::Actor actor)
   view.Add(actor);
 }
 
-} // namespace Integration
+} // namespace IntegrationView
 } // namespace Ui
 } // namespace Dali

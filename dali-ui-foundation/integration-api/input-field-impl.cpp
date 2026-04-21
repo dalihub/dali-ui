@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
@@ -1380,7 +1381,7 @@ void InputFieldImpl::EnableClipping()
     mStencil.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
     mStencil.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-    Integration::AddActorChild(Ui::View::DownCast(Self()), mStencil);
+    IntegrationView::AddActorChild(Ui::View::DownCast(Self()), mStencil);
     if(mCursorLayer)
     {
       mStencil.Add(mCursorLayer);
@@ -1400,7 +1401,7 @@ void InputFieldImpl::AddLayer(Actor& layer, Actor& actor)
 {
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-  Integration::AddActorChild(Ui::View::DownCast(Self()), actor);
+  IntegrationView::AddActorChild(Ui::View::DownCast(Self()), actor);
   layer = actor;
 }
 

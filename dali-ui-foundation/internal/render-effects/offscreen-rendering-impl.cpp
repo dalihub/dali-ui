@@ -23,6 +23,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-impl.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali/integration-api/debug.h>
 
 namespace Dali
@@ -97,7 +98,7 @@ void OffScreenRenderingImpl::OnActivate()
     mCamera.SetType(Dali::Camera::FREE_LOOK);
   }
   mCamera.SetPerspectiveProjection(GetTargetSize());
-  Integration::AddActorChild(ownerView, mCamera);
+  IntegrationView::AddActorChild(ownerView, mCamera);
 
   CreateFrameBuffer();
   CreateRenderTask();
