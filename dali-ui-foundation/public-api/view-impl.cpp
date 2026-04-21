@@ -41,7 +41,6 @@
 #include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
@@ -526,11 +525,14 @@ void ViewImpl::SetScaleY(float scaleY)
 void ViewImpl::SetLayoutDirection(Dali::LayoutDirection::Type direction)
 {
   Self().SetProperty(Actor::Property::LAYOUT_DIRECTION, direction);
+  // Direction only affects child placement, not measured sizes.
+  InvalidateArrange();
 }
 
 void ViewImpl::ClearLayoutDirection()
 {
   Self().SetProperty(Actor::Property::INHERIT_LAYOUT_DIRECTION, true);
+  InvalidateArrange();
 }
 
 bool ViewImpl::IsLayoutDirectionInherited() const
@@ -887,6 +889,12 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
   // leaf views like Label) does not iterate children.
   ArrangeStandaloneChildren(bounds);
 
+  // Mirror direct children when the effective layout direction resolves to
+  // RIGHT_TO_LEFT. Runs once per Arrange after every OnArrange variant
+  // (LayoutManager / ArrangeCallback / default), keeping layout managers
+  // direction-agnostic.
+  ApplyLayoutDirection(bounds.width);
+
   return arrangedSize;
 }
 
@@ -986,6 +994,28 @@ void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
       continue;
     }
     ArrangeStandaloneChild(childImpl, bounds.width, bounds.height);
+  }
+}
+
+void ViewImpl::ApplyLayoutDirection(float parentWidth)
+{
+  if(GetEffectiveLayoutDirection() != Dali::LayoutDirection::RIGHT_TO_LEFT)
+  {
+    return;
+  }
+
+  for(auto& childView : mImpl->mChildren)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
+
+    Actor child  = childImpl.Self();
+    float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
+    float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+    child.SetProperty(Actor::Property::POSITION_X, parentWidth - oldX - childW);
   }
 }
 

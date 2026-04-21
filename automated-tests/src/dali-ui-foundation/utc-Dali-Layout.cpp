@@ -296,3 +296,91 @@ int UtcDaliLayoutContentsChainingP(void)
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
   END_TEST;
 }
+
+namespace
+{
+MeasuredSize HorizontalLineMeasure(View self, float widthConstraint, float heightConstraint)
+{
+  float maxHeight = 0.0f;
+  for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+  {
+    View         child = self.GetChildAt(i);
+    MeasuredSize sz    = child.Measure(widthConstraint, heightConstraint);
+    maxHeight          = std::max(maxHeight, sz.height);
+  }
+  return {widthConstraint, maxHeight};
+}
+
+MeasuredSize HorizontalLineArrange(View self, const LayoutRect& bounds)
+{
+  float x = bounds.x;
+  for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+  {
+    View         child = self.GetChildAt(i);
+    MeasuredSize sz    = child.GetMeasuredSize();
+    child.Arrange({x, bounds.y, sz.width, sz.height});
+    x += sz.width;
+  }
+  return {bounds.width, bounds.height};
+}
+} // namespace
+
+int UtcDaliLayoutCallbackDirectionLtrP(void)
+{
+  UiTestApplication application;
+  Layout layout = Layout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.SetMeasureCallback(MeasureCallback::New(&HorizontalLineMeasure));
+  layout.SetArrangeCallback(ArrangeCallback::New(&HorizontalLineArrange));
+  application.GetScene().Add(layout);
+
+  View a = View::New();
+  a.SetRequestedWidth(40.0f);
+  a.SetRequestedHeight(30.0f);
+  layout.Add(a);
+  View b = View::New();
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(30.0f);
+  layout.Add(b);
+
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(a.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(a.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetPositionX(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetSize().width, 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutCallbackDirectionRtlP(void)
+{
+  UiTestApplication application;
+  Layout layout = Layout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  layout.SetMeasureCallback(MeasureCallback::New(&HorizontalLineMeasure));
+  layout.SetArrangeCallback(ArrangeCallback::New(&HorizontalLineArrange));
+  application.GetScene().Add(layout);
+
+  View a = View::New();
+  a.SetRequestedWidth(40.0f);
+  a.SetRequestedHeight(30.0f);
+  layout.Add(a);
+  View b = View::New();
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(30.0f);
+  layout.Add(b);
+
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  // Callback arranges in LTR (0, 40); framework mirrors after callback.
+  DALI_TEST_EQUALS(a.GetPositionX(), 200.0f - 0.0f - 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(a.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetPositionX(), 200.0f - 40.0f - 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetSize().width, 50.0f, TEST_LOCATION);
+  END_TEST;
+}

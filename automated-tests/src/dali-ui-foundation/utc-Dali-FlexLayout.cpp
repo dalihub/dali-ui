@@ -589,3 +589,74 @@ int UtcDaliFlexLayoutStandaloneExcludedFromLineP(void)
   END_TEST;
 }
 
+int UtcDaliFlexLayoutDirectionLtrP(void)
+{
+  UiTestApplication application;
+  FlexLayout layout = FlexLayout::New();
+  layout.SetDirection(FlexDirection::ROW);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  application.GetScene().Add(layout);
+
+  View a = View::New();
+  a.SetRequestedWidth(40.0f);
+  a.SetRequestedHeight(30.0f);
+  layout.Add(a);
+  View b = View::New();
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(30.0f);
+  layout.Add(b);
+  View c = View::New();
+  c.SetRequestedWidth(60.0f);
+  c.SetRequestedHeight(30.0f);
+  layout.Add(c);
+
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  // Row direction in LTR: a at 0, b at 40, c at 90.
+  DALI_TEST_EQUALS(a.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(a.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetPositionX(), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetPositionX(), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetSize().width, 60.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliFlexLayoutDirectionRtlP(void)
+{
+  UiTestApplication application;
+  FlexLayout layout = FlexLayout::New();
+  layout.SetDirection(FlexDirection::ROW);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  layout.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(layout);
+
+  View a = View::New();
+  a.SetRequestedWidth(40.0f);
+  a.SetRequestedHeight(30.0f);
+  layout.Add(a);
+  View b = View::New();
+  b.SetRequestedWidth(50.0f);
+  b.SetRequestedHeight(30.0f);
+  layout.Add(b);
+  View c = View::New();
+  c.SetRequestedWidth(60.0f);
+  c.SetRequestedHeight(30.0f);
+  layout.Add(c);
+
+  layout.Measure(200.0f, 100.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  // Mirrored from LTR positions (0, 40, 90); sizes unchanged.
+  DALI_TEST_EQUALS(a.GetPositionX(), 200.0f - 0.0f - 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(a.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetPositionX(), 200.0f - 40.0f - 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(b.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetPositionX(), 200.0f - 90.0f - 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetSize().width, 60.0f, TEST_LOCATION);
+  END_TEST;
+}
+

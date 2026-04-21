@@ -980,6 +980,7 @@ private:
   void                    RegisterWithLayoutController();
   void                    MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
   void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
+  void                    ApplyLayoutDirection(float parentWidth);
 
   ViewImpl(const ViewImpl&)            = delete;
   ViewImpl(ViewImpl&&)                 = delete;

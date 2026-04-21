@@ -571,3 +571,66 @@ int UtcDaliGridLayoutStandaloneExcludedFromCellsP(void)
   DALI_TEST_EQUALS(standalone.GetSize().height, 20.0f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliGridLayoutDirectionLtrP(void)
+{
+  UiTestApplication application;
+  GridLayout layout = GridLayout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  application.GetScene().Add(layout);
+  // 1 row x 2 columns of 100 each.
+  layout.AddRowDefinition(GridLength::Absolute(100.0f));
+  layout.AddColumnDefinition(GridLength::Absolute(100.0f));
+  layout.AddColumnDefinition(GridLength::Absolute(100.0f));
+
+  View left = View::New();
+  left.SetLayoutParams(GridLayoutParams::New().SetColumn(0));
+  layout.Add(left);
+  View right = View::New();
+  right.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
+  layout.Add(right);
+
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  DALI_TEST_EQUALS(left.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetSize().width, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetSize().height, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetPositionX(), 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().width, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliGridLayoutDirectionRtlP(void)
+{
+  UiTestApplication application;
+  GridLayout layout = GridLayout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(layout);
+  layout.AddRowDefinition(GridLength::Absolute(100.0f));
+  layout.AddColumnDefinition(GridLength::Absolute(100.0f));
+  layout.AddColumnDefinition(GridLength::Absolute(100.0f));
+
+  View left = View::New();
+  left.SetLayoutParams(GridLayoutParams::New().SetColumn(0));
+  layout.Add(left);
+  View right = View::New();
+  right.SetLayoutParams(GridLayoutParams::New().SetColumn(1));
+  layout.Add(right);
+
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  // LTR: left at 0, right at 100. Mirrored: cells swap physical x.
+  DALI_TEST_EQUALS(left.GetPositionX(), 200.0f - 0.0f - 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetSize().width, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(left.GetSize().height, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetPositionX(), 200.0f - 100.0f - 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().width, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(right.GetSize().height, 100.0f, TEST_LOCATION);
+  END_TEST;
+}

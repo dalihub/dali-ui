@@ -2629,3 +2629,147 @@ int UtcDaliViewLayoutDirectionChainingP(void)
   DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliViewLayoutDirectionRtlMirrorsChildP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedPositionX(20.0f);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  // newX = parentWidth(200) - oldX(20) - childWidth(50) = 130
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  // Size is unchanged by RTL.
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionLtrLeavesChildP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  // Default direction is LEFT_TO_RIGHT.
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedPositionX(20.0f);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionRtlSkipsStandaloneChildP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(50.0f);
+  standalone.SetRequestedHeight(30.0f);
+  standalone.SetRequestedPositionX(10.0f);
+  standalone.SetRequestedPositionY(15.0f);
+  parent.Add(standalone);
+
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  // Standalone child is excluded from mirroring; stays at requested position.
+  DALI_TEST_EQUALS(standalone.GetPositionX(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetPositionY(), 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetSize().height, 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionRtlMirrorsRecursivelyP(void)
+{
+  UiTestApplication application;
+  View grandParent = View::New();
+  grandParent.SetRequestedWidth(300.0f);
+  grandParent.SetRequestedHeight(200.0f);
+  grandParent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(grandParent);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(150.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetRequestedPositionX(0.0f);
+  grandParent.Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetRequestedPositionX(10.0f);
+  parent.Add(child);
+
+  grandParent.Measure(300.0f, 200.0f);
+  grandParent.Arrange(LayoutRect(0.0f, 0.0f, 300.0f, 200.0f));
+
+  // Parent mirrored at grandParent level: 300 - 0 - 150 = 150.
+  DALI_TEST_EQUALS(parent.GetPositionX(), 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetSize().width, 150.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.GetSize().height, 100.0f, TEST_LOCATION);
+  // Child mirrored at parent level (parent inherits RTL): 150 - 10 - 50 = 90.
+  DALI_TEST_EQUALS(child.GetPositionX(), 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionSetReArrangesP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedPositionX(20.0f);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
+
+  // SetLayoutDirection invalidates arrange so the next pass mirrors.
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  parent.ClearLayoutDirection();
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
+  END_TEST;
+}

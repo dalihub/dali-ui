@@ -208,6 +208,13 @@ public: // Measure / Arrange API
    * When set, the callback replaces the default arrangement behavior
    * during the layout pass. Pass a default-constructed callback to remove.
    *
+   * The callback should arrange children in a LEFT_TO_RIGHT frame by calling
+   * View::Arrange() on each non-standalone child, which writes the child's
+   * POSITION_X / SIZE_WIDTH onto its Actor. The framework then mirrors
+   * direct children horizontally when the View's effective layout direction
+   * resolves to RIGHT_TO_LEFT, so callbacks must not apply RTL mirroring
+   * themselves.
+   *
    * @param[in] callback The arrange callback (ownership transferred)
    *
    * @code
