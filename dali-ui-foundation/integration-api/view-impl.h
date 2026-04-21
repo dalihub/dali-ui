@@ -32,7 +32,6 @@
 #include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
-#include <initializer_list>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -339,7 +338,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * @param[in] on    True to add the state, false to remove it
    * @param[in] cause Input event that triggered the change; leave default if programmatic
    */
-  void SetViewState(ViewState state, bool on, InputEvent cause = InputEvent::None());
+  void SetState(ViewState state, bool on, InputEvent cause = InputEvent::None());
 
   /**
    * @brief Called when the view's focus state changes.
@@ -710,7 +709,7 @@ public: // Non-virtual API (safe to reorder / extend)
    * @param[in] type The layout params type
    * @return The layout params handle
    */
-  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
+  BaseHandle GetLayoutParams(LayoutParamsType type) const;
 
   // Layout Properties
 
@@ -834,13 +833,6 @@ public: // Non-virtual API (safe to reorder / extend)
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
   /**
-   * @brief Adds a list of children via initializer list (for method chaining).
-   * @param[in] children The initializer list of View handles to add
-   * @return Reference to this ViewImpl for method chaining
-   */
-  ViewImpl& Contents(std::initializer_list<Ui::View> children);
-
-  /**
    * @brief Gets the children container for layout manager access.
    * @return Reference to the children container
    */
@@ -908,15 +900,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   bool IsFocusGroup();
 
-  // Off-Screen Rendering
-
-  /**
-   * @brief Gets texture output of offscreen rendering.
-   * @return The offscreen rendering output texture
-   * @note Valid only inside OffScreenRenderingFinishedSignal() with RENDER_ONCE type.
-   */
-  Dali::Texture GetOffScreenRenderingOutput() const;
-
   // Signals
 
   /**
@@ -928,13 +911,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::FocusChangedSignal()
    */
   Ui::View::FocusChangedSignalType& FocusChangedSignal();
-
-  // Resource
-
-  /**
-   * @brief Marks this view's resources as ready (does not request relayout).
-   */
-  void SetResourceReady();
 
   /**
    * @copydoc Ui::View::IsOnScene()
@@ -948,11 +924,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @return Reference to the internal data implementation
    */
   Internal::ViewDataImpl& GetViewDataImpl() const;
-
-  /**
-   * @brief Requests relayout for this view.
-   */
-  void RelayoutRequestToView();
 
   /// @cond internal
   DALI_INTERNAL void KeyboardEnter();
@@ -1105,6 +1076,18 @@ protected:
   ViewImpl(ViewBehaviour behaviourFlags);
 
   /**
+   * @brief Gets texture output of offscreen rendering.
+   * @return The offscreen rendering output texture
+   * @note Valid only inside OffScreenRenderingFinishedSignal() with RENDER_ONCE type.
+   */
+  Dali::Texture GetOffScreenRenderingOutput() const;
+
+  /**
+   * @brief Marks this view's resources as ready (does not request relayout).
+   */
+  void SetResourceReady();
+
+  /**
    * @brief Registers a color binding for theme-aware color updates.
    *
    * @tparam T        Type of the instance (ViewImpl or a derived class)
@@ -1133,24 +1116,6 @@ protected:
   }
 
   /**
-   * @brief Emits FocusChanged signal.
-   * @param[in] focusGained True if gained, False if lost
-   */
-  void EmitFocusChangedSignal(bool focusGained);
-
-  /**
-   * @brief Applies min/max constraints to the given size.
-   * @param[in] size The size to constrain
-   * @return The constrained size
-   */
-  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
-
-  /**
-   * @brief Registers this view with the LayoutController for processing.
-   */
-  void RegisterWithLayoutController();
-
-  /**
    * @brief Gets the measure callback, if set.
    * @return Pointer to the MeasureCallback, or nullptr if not set
    */
@@ -1167,8 +1132,13 @@ protected:
   // ============================================================
 
 private:
-  void MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
-  void ArrangeStandaloneChildren(const LayoutRect& bounds);
+  friend class Internal::ViewDataImpl; ///< Pimpl body
+
+  void         EmitFocusChangedSignal(bool focusGained);
+  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
+  void         RegisterWithLayoutController();
+  void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+  void         ArrangeStandaloneChildren(const LayoutRect& bounds);
 
   ViewImpl(const ViewImpl&)            = delete;
   ViewImpl(ViewImpl&&)                 = delete;
@@ -1219,47 +1189,6 @@ inline const Integration::ViewImpl& GetImpl(const Ui::View& view)
  * @param[in] actor The raw Actor to attach as a child.
  */
 DALI_UI_API void AddActorChild(Ui::View view, Dali::Actor actor);
-
-/**
- * @brief Arranges a standalone MATCH_PARENT child within its parent.
- *
- * Standalone children ignore parent padding. MATCH_PARENT axes are
- * expanded to the full parent size minus the child's own margin, then
- * re-measured with the final size before arranging.
- *
- * @param[in] childImpl  The standalone child implementation
- * @param[in,out] childData  Child data (measuredSize / arrangedBounds updated)
- * @param[in] parentFullWidth  Parent's full width (content + padding)
- * @param[in] parentFullHeight Parent's full height (content + padding)
- */
-inline void ArrangeStandaloneChild(ViewImpl& childImpl, ViewImpl::ChildData& childData,
-                                   float parentFullWidth, float parentFullHeight)
-{
-  Extents margin  = childImpl.GetMargin();
-  float   marginW = static_cast<float>(margin.start + margin.end);
-  float   marginH = static_cast<float>(margin.top + margin.bottom);
-  float   childW  = childData.measuredSize.width;
-  float   childH  = childData.measuredSize.height;
-
-  if(childImpl.GetRequestedWidth() == MATCH_PARENT)
-  {
-    childW = std::max(0.0f, parentFullWidth - marginW);
-  }
-  if(childImpl.GetRequestedHeight() == MATCH_PARENT)
-  {
-    childH = std::max(0.0f, parentFullHeight - marginH);
-  }
-  if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
-  {
-    childImpl.Measure(childW, childH);
-  }
-
-  LayoutRect bounds(childImpl.GetPositionX() + static_cast<float>(margin.start),
-                    childImpl.GetPositionY() + static_cast<float>(margin.top),
-                    childW, childH);
-  childImpl.Arrange(bounds);
-  childData.arrangedBounds = bounds;
-}
 
 } // namespace Integration
 

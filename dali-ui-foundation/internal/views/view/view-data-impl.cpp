@@ -897,7 +897,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
               dataImpl.EnableCornerPropertiesOverridden(visual, true);
 
               // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
-              viewImpl.RelayoutRequestToView();
+              viewImpl.RelayoutRequest();
             }
           }
         }
@@ -1872,7 +1872,7 @@ void ViewDataImpl::SetShadow(const Property::Map& map)
       mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
-      mViewImpl.RelayoutRequestToView();
+      mViewImpl.RelayoutRequest();
     }
   }
 }
@@ -1884,7 +1884,7 @@ void ViewDataImpl::ClearShadow()
     mVisualData->UnregisterVisual(Ui::View::Property::SHADOW);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
-    mViewImpl.RelayoutRequestToView();
+    mViewImpl.RelayoutRequest();
   }
 }
 
@@ -1927,7 +1927,7 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
         EnableCornerPropertiesOverridden(visual, true, innerShadowCornerRadiusConstraint);
       }
 
-      mViewImpl.RelayoutRequestToView();
+      mViewImpl.RelayoutRequest();
     }
   }
 }
@@ -1939,7 +1939,7 @@ void ViewDataImpl::ClearInnerShadow()
     mVisualData->UnregisterVisual(Ui::View::Property::INNER_SHADOW);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
-    mViewImpl.RelayoutRequestToView();
+    mViewImpl.RelayoutRequest();
   }
 }
 
@@ -2032,7 +2032,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
         }
       }
 
-      mViewImpl.RelayoutRequestToView();
+      mViewImpl.RelayoutRequest();
     }
   }
 }
@@ -2044,7 +2044,7 @@ void ViewDataImpl::ClearBorderline()
     mVisualData->UnregisterVisual(Ui::View::Property::BORDERLINE);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
-    mViewImpl.RelayoutRequestToView();
+    mViewImpl.RelayoutRequest();
   }
 }
 
@@ -2106,7 +2106,7 @@ bool ViewDataImpl::OnIdleCallback()
   // A visual is ready so view may need relayouting if staged
   if(mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    mViewImpl.RelayoutRequestToView();
+    mViewImpl.RelayoutRequest();
   }
 
   EmitResourceReadySignal();

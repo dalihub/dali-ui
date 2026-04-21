@@ -1098,7 +1098,7 @@ public: // Properties
   template<typename T>
   T GetLayoutParams() const
   {
-    return T::DownCast(GetLayoutParamsTrait(T::GetLayoutParamsType()));
+    return T::DownCast(GetLayoutParamsInternal(T::GetLayoutParamsType()));
   }
 
 public: // State API (non-chaining)
@@ -1204,7 +1204,7 @@ private:
    * @param[in] type The layout params type identifier
    * @return The trait as a BaseHandle, or an empty handle if not found
    */
-  BaseHandle GetLayoutParamsTrait(LayoutParamsType type) const;
+  BaseHandle GetLayoutParamsInternal(LayoutParamsType type) const;
 
   // From Control.h
   // TODO: Refactoring

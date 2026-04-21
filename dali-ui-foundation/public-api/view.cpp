@@ -579,9 +579,9 @@ View& View::SetInteractionEffect(Trait effect)
   return *this;
 }
 
-BaseHandle View::GetLayoutParamsTrait(LayoutParamsType type) const
+BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
 {
-  return Integration::GetImpl(*this).GetLayoutParamsTrait(type);
+  return Integration::GetImpl(*this).GetLayoutParams(type);
 }
 
 View& View::SetLayoutParams(LayoutParams params)

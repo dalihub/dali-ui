@@ -26,7 +26,7 @@ void Create(Application& application) {
       .SetBackgroundColor(Color::YELLOW)
       .SetRequestedWidth(200_spx)
       .SetRequestedHeight(200_spx)
-      .Contents({
+      .Children({
         View::New()
           .SetBackgroundColor(Color::RED)
           .SetRequestedWidth(100_spx)

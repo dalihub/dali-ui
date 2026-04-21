@@ -105,9 +105,9 @@ void StateHandlerTraitImpl::NotifyStateChanged(View view, const StateEvent& even
 {
   if(mNotifying)
   {
-    // ViewStateManager defers re-entrant SetViewState calls via its own mPending queue.
+    // ViewStateManager defers re-entrant SetState calls via its own mPending queue.
     // This guard provides a secondary safety net: if NotifyStateChanged is somehow called
-    // re-entrantly (e.g. a handler calls SetViewState and the deferred dispatch fires before
+    // re-entrantly (e.g. a handler calls SetState and the deferred dispatch fires before
     // the current batch completes), skip it to prevent out-of-order delivery.
     return;
   }

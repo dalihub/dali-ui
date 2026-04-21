@@ -129,7 +129,7 @@ public:
   /**
    * @brief Invokes all registered handlers.
    *
-   * Called by ViewImpl::SetViewState when the view's ViewState changes.
+   * Called by ViewImpl::SetState when the view's ViewState changes.
    *
    * @param[in] view The owner view
    * @param[in] prev The previous ViewState

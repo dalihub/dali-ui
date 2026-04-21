@@ -407,7 +407,7 @@ void ViewDataImpl::VisualData::RelayoutRequest(Visual::Base& object)
 {
   if(mOuter.mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    mOuter.mViewImpl.RelayoutRequestToView();
+    mOuter.mViewImpl.RelayoutRequest();
   }
 }
 

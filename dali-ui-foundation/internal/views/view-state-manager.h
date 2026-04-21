@@ -45,7 +45,7 @@ namespace Internal
  * Because all Views run on a single thread, one global pending queue is sufficient
  * and avoids per-View overhead.
  *
- * When SetViewState() is called re-entrantly (e.g. a StateChangedSignal handler
+ * When SetState() is called re-entrantly (e.g. a StateChangedSignal handler
  * triggers another state change), the new notification is queued instead of being
  * dispatched immediately.  The outermost caller drains the queue after its own
  * notifications complete, guaranteeing that:

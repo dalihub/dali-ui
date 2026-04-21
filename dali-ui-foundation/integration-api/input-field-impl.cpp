@@ -862,7 +862,9 @@ void InputFieldImpl::OnFocusGained()
     mController->KeyboardFocusGainEvent(); // Called in the case of no virtual keyboard to trigger this event
   }
 
+#if 0 // TODO Call ViewImpl::OnFocusChanged here to update state and emit signal
   EmitFocusChangedSignal(true); // Calls back into the Control hence done last.
+#endif
 }
 
 void InputFieldImpl::OnFocusLost()
@@ -882,7 +884,9 @@ void InputFieldImpl::OnFocusLost()
 
   mController->KeyboardFocusLostEvent();
 
+#if 0 // TODO Call ViewImpl::OnFocusChanged here to update state and emit signal
   EmitFocusChangedSignal(false); // Calls back into the Control hence done last.
+#endif
 }
 
 void InputFieldImpl::OnSceneConnection(int depth)

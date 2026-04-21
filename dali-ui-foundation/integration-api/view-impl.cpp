@@ -198,6 +198,39 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
   return impl;
 }
 
+// Arranges a standalone MATCH_PARENT child within its parent.
+// Standalone children ignore parent padding. MATCH_PARENT axes are
+// expanded to the full parent size minus the child's own margin, then
+// re-measured with the final size before arranging.
+void ArrangeStandaloneChild(ViewImpl& childImpl, ViewImpl::ChildData& childData,
+                            float parentFullWidth, float parentFullHeight)
+{
+  Extents margin  = childImpl.GetMargin();
+  float   marginW = static_cast<float>(margin.start + margin.end);
+  float   marginH = static_cast<float>(margin.top + margin.bottom);
+  float   childW  = childData.measuredSize.width;
+  float   childH  = childData.measuredSize.height;
+
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+  {
+    childW = std::max(0.0f, parentFullWidth - marginW);
+  }
+  if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childH = std::max(0.0f, parentFullHeight - marginH);
+  }
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childImpl.Measure(childW, childH);
+  }
+
+  LayoutRect bounds(childImpl.GetPositionX() + static_cast<float>(margin.start),
+                    childImpl.GetPositionY() + static_cast<float>(margin.top),
+                    childW, childH);
+  childImpl.Arrange(bounds);
+  childData.arrangedBounds = bounds;
+}
+
 } // namespace
 
 ViewImplPtr ViewImpl::New()
@@ -408,7 +441,7 @@ bool ViewImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
   return static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().UnsetWhenNotProcessing(id.CStr());
 }
 
-void ViewImpl::SetViewState(ViewState state, bool on, InputEvent cause)
+void ViewImpl::SetState(ViewState state, bool on, InputEvent cause)
 {
   // NOTE Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
   // Clear them immediately rather than waiting for potentially late system events.
@@ -455,7 +488,7 @@ void ViewImpl::SetViewState(ViewState state, bool on, InputEvent cause)
 
 void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
 {
-  SetViewState(ViewState::FOCUSED, focused, cause);
+  SetState(ViewState::FOCUSED, focused, cause);
 
   if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {
@@ -1409,15 +1442,6 @@ void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
   self.LowerBelow(target);
 }
 
-Integration::ViewImpl& ViewImpl::Contents(std::initializer_list<Ui::View> children)
-{
-  for(const auto& child : children)
-  {
-    Self().Add(child);
-  }
-  return *this;
-}
-
 ViewImpl::ChildContainer& ViewImpl::GetChildren()
 {
   return mImpl->mChildren;
@@ -1450,7 +1474,7 @@ TraitId ToTraitId(LayoutParamsType type)
 
 } // unnamed namespace
 
-BaseHandle ViewImpl::GetLayoutParamsTrait(LayoutParamsType type) const
+BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
 {
   return GetTrait(ToTraitId(type));
 }
@@ -1880,7 +1904,7 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
         Dali::Ui::FocusManager::Get().ClearFocus();
       }
 
-      SetViewState(ViewState::DISABLED, !enabled);
+      SetState(ViewState::DISABLED, !enabled);
 
       if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
       {
@@ -2018,11 +2042,6 @@ void ViewImpl::OnCalculateRelayoutSize(Dimension::Type dimension)
 
 void ViewImpl::OnLayoutNegotiated(float size, Dimension::Type dimension)
 {
-}
-
-void ViewImpl::RelayoutRequestToView()
-{
-  RelayoutRequest();
 }
 
 void ViewImpl::SignalConnected(SlotObserver* slotObserver, CallbackBase* callback)

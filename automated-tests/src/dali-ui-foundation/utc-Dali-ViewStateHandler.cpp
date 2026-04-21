@@ -132,7 +132,7 @@ int UtcDaliViewWhenStateChangedMemberFunctionP(void)
   GetImpl(view).WhenStateChanged("TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
 
   // Trigger a state change
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(data.view == view);
@@ -154,7 +154,7 @@ int UtcDaliViewWhenStateChangedLambdaP(void)
 
   GetImpl(view).WhenStateChanged("TestHandler", &tracker, StateChangedFunctor(data));
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
@@ -175,7 +175,7 @@ int UtcDaliViewWhenStateChangedChainingP(void)
 
   GetImpl(view).WhenStateChanged("Handler1", &tracker, StateChangedFunctor(data));
   GetImpl(view).WhenStateChanged("Handler2", &tracker, StateChangedFunctor(data));
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   // Both handlers should fire
   DALI_TEST_EQUALS(data.callCount, 2, TEST_LOCATION);
@@ -198,7 +198,7 @@ int UtcDaliViewWhenStateChangedReplaceP(void)
   // Register with the same ID — should replace the first
   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data2));
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data1.callCount, 0, TEST_LOCATION); // old handler NOT called
   DALI_TEST_EQUALS(data2.callCount, 1, TEST_LOCATION); // new handler called
@@ -220,8 +220,8 @@ int UtcDaliViewWhenStateChangedNoChangeN(void)
   GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
   // Set same state twice — second call should not dispatch
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 
@@ -244,7 +244,7 @@ int UtcDaliViewUnsetStateHandlerP(void)
   bool removed = GetImpl(view).UnsetStateHandler("MyHandler");
   DALI_TEST_CHECK(removed);
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION); // not called after removal
 
@@ -279,7 +279,7 @@ int UtcDaliViewUnsetStateHandlerSeleciveP(void)
 
   GetImpl(view).UnsetStateHandler("HandlerA");
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(dataA.callCount, 0, TEST_LOCATION); // removed
   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION); // still active
@@ -305,14 +305,14 @@ int UtcDaliViewUnsetStateHandlerWhenNotProcessingSkipsP(void)
     unsetResult = GetImpl(v).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
   });
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(handlerCalled);
   DALI_TEST_CHECK(!unsetResult); // returns false because it is processing
 
   // Handler should still be active after skipped removal
   handlerCalled = false;
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
   DALI_TEST_CHECK(handlerCalled);
 
   END_TEST;
@@ -331,7 +331,7 @@ int UtcDaliViewUnsetStateHandlerWhenNotProcessingSucceedsP(void)
   bool removed = GetImpl(view).UnsetStateHandlerWhenNotProcessing("BackgroundColor");
   DALI_TEST_CHECK(removed);
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
   END_TEST;
@@ -351,7 +351,7 @@ int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
     ConnectionTracker tracker;
     GetImpl(view).WhenStateChanged("MyHandler", &tracker, StateChangedFunctor(data));
 
-    GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+    GetImpl(view).SetState(ViewState::FOCUSED, true);
     DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
     data.Reset();
 
@@ -359,7 +359,7 @@ int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
   }
 
   // After tracker destroyed, handler should no longer fire
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
   END_TEST;
@@ -378,12 +378,12 @@ int UtcDaliViewWhenStateChangedPrevCurP(void)
 
   GetImpl(view).WhenStateChanged("Observer", &tracker, StateChangedFunctor(data));
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
   DALI_TEST_CHECK(!data.prev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
   data.Reset();
 
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
   DALI_TEST_CHECK(data.prev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::PRESSED));
@@ -406,7 +406,7 @@ int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
   GetImpl(view).WhenStateChanged("B", &tracker, StateChangedFunctor(dataB));
   GetImpl(view).WhenStateChanged("C", &tracker, StateChangedFunctor(dataC));
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(dataA.callCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION);
@@ -431,7 +431,7 @@ int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
   // Anonymous signal
   view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(namedData.callCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(signalData.callCount, 1, TEST_LOCATION);

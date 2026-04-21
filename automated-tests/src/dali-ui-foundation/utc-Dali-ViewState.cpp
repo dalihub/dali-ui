@@ -93,7 +93,7 @@ int UtcDaliViewStateBasicDispatchP(void)
     receivedCur  = e.GetCurrent();
   });
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
@@ -117,11 +117,11 @@ int UtcDaliViewStateNoDispatchUnchangedN(void)
     ++callCount;
   });
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   // Setting the same state again must not dispatch
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   END_TEST;
@@ -133,9 +133,9 @@ int UtcDaliViewStateNoDispatchUnchangedN(void)
 //
 // Scenario (3 handlers registered: "h1", "h2", "h3"):
 //   - Initial state A (Normal)
-//   - SetViewState(Focused, true)  →  A→B (B = Focused)
+//   - SetState(Focused, true)  →  A→B (B = Focused)
 //     - h1 receives (A, B)  ← ok
-//     - h2 receives (A, B), then calls SetViewState(Pressed, true)  →  B→C
+//     - h2 receives (A, B), then calls SetState(Pressed, true)  →  B→C
 //     - h3 must still receive (A, B), NOT (B, C)   ← deferred guarantee
 //   - After A→B dispatch completes, B→C is dispatched:
 //     - h1, h2, h3 all receive (B, C)
@@ -162,7 +162,7 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
     // Trigger a second state change from inside the handler
     if(e.Added(ViewState::FOCUSED))
     {
-      GetImpl(v).SetViewState(ViewState::PRESSED, true);
+      GetImpl(v).SetState(ViewState::PRESSED, true);
     }
   });
 
@@ -174,7 +174,7 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
   const ViewState stateB = ViewState::FOCUSED;
   const ViewState stateC = ViewState::FOCUSED + ViewState::PRESSED;
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
@@ -226,7 +226,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-1", e.GetPrev(), e.GetCurrent()});
     if(e.Added(ViewState::FOCUSED))
     {
-      GetImpl(v).SetViewState(ViewState::PRESSED, true);
+      GetImpl(v).SetState(ViewState::PRESSED, true);
     }
   });
 
@@ -234,7 +234,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-2", e.GetPrev(), e.GetCurrent()});
   });
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   // signal-1(A→B) → signal-2(A→B) → signal-1(B→C) → signal-2(B→C)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 4, TEST_LOCATION);
@@ -286,10 +286,10 @@ int UtcDaliViewStateDisabledClearsPressedP(void)
   UiTestApplication application;
   View            view = CreateView(application);
 
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
 
-  GetImpl(view).SetViewState(ViewState::DISABLED, true);
+  GetImpl(view).SetState(ViewState::DISABLED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -332,14 +332,14 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"observer", e.GetPrev(), e.GetCurrent()});
   });
 
-  GetImpl(view).SetViewState(ViewState::DISABLED, true);
+  GetImpl(view).SetState(ViewState::DISABLED, true);
 
   // Exactly one notification: [Pressed] -> [Disabled]
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
@@ -364,7 +364,7 @@ int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
   view.EnsureInteractiveTrait();
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusActor(view);
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -390,7 +390,7 @@ int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -421,8 +421,8 @@ int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
-  GetImpl(view).SetViewState(ViewState::PRESSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -456,7 +456,7 @@ int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
   View            view = CreateView(application);
 
   view.EnsureInteractiveTrait();
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
   trait.SetPseudoDisabled(true);
@@ -551,7 +551,7 @@ int UtcDaliViewIsEffectivelyFocusedSelfP(void)
 
   DALI_TEST_CHECK(!view.IsEffectivelyFocused());
 
-  GetImpl(view).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(view).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
 
@@ -570,7 +570,7 @@ int UtcDaliViewIsEffectivelyFocusedAncestorP(void)
 
   DALI_TEST_CHECK(!child.IsEffectivelyFocused());
 
-  GetImpl(parent).SetViewState(ViewState::FOCUSED, true);
+  GetImpl(parent).SetState(ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(child.IsEffectivelyFocused());
   DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUSED)); // own state unchanged
