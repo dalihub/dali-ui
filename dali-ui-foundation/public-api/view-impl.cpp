@@ -918,11 +918,9 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 {
   MeasuredSize arrangedSize = OnArrange(bounds);
   mImpl->mArrangedBounds    = bounds;
-  mImpl->mArrangeValid      = true;
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
-  // leaf views like Label) does not iterate children. The arrange-valid
-  // flag prevents redundant work when OnArrange already arranged them.
+  // leaf views like Label) does not iterate children.
   ArrangeStandaloneChildren(bounds);
 
   return arrangedSize;
@@ -1030,7 +1028,6 @@ void ViewImpl::InvalidateMeasure()
 {
   mImpl->mLastMeasuredConstraint.width  = -1.0f;
   mImpl->mLastMeasuredConstraint.height = -1.0f;
-  mImpl->mArrangeValid                  = false;
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1051,8 +1048,6 @@ void ViewImpl::InvalidateMeasure()
 
 void ViewImpl::InvalidateArrange()
 {
-  mImpl->mArrangeValid = false;
-
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
   {
@@ -1089,16 +1084,6 @@ void ViewImpl::RegisterWithLayoutController()
 MeasuredSize ViewImpl::GetMeasuredSize() const
 {
   return mImpl->mMeasuredSize;
-}
-
-bool ViewImpl::IsMeasureValid() const
-{
-  return mImpl->mLastMeasuredConstraint.width >= 0.0f;
-}
-
-bool ViewImpl::IsArrangeValid() const
-{
-  return mImpl->mArrangeValid;
 }
 
 MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const

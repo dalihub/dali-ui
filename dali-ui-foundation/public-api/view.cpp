@@ -110,16 +110,6 @@ MeasuredSize View::GetMeasuredSize() const
   return GetImpl(*this).GetMeasuredSize();
 }
 
-bool View::IsMeasureValid() const
-{
-  return GetImpl(*this).IsMeasureValid();
-}
-
-bool View::IsArrangeValid() const
-{
-  return GetImpl(*this).IsArrangeValid();
-}
-
 void View::SetMeasureCallback(MeasureCallback callback)
 {
   GetImpl(*this).SetMeasureCallback(std::move(callback));

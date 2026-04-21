@@ -614,16 +614,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   MeasuredSize GetMeasuredSize() const;
 
-  /**
-   * @copydoc Ui::View::IsMeasureValid()
-   */
-  bool IsMeasureValid() const;
-
-  /**
-   * @copydoc Ui::View::IsArrangeValid()
-   */
-  bool IsArrangeValid() const;
-
   // Requested Size
 
   /**

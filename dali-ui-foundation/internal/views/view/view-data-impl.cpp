@@ -494,7 +494,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mMeasuredSize{0.0f, 0.0f},
   mLastMeasuredConstraint{-1.0f, -1.0f},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-  mArrangeValid(false),
   mSkipChildrenUpdate(false),
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),

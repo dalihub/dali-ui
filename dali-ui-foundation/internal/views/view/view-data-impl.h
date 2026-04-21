@@ -456,7 +456,6 @@ public:
   MeasuredSize mMeasuredSize;
   MeasuredSize mLastMeasuredConstraint;
   LayoutRect   mArrangedBounds;
-  bool         mArrangeValid;
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
   ViewImpl::ChildContainer mChildren;

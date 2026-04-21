@@ -200,20 +200,6 @@ public: // Measure / Arrange API
   MeasuredSize GetMeasuredSize() const;
 
   /**
-   * @brief Checks if the measure is valid.
-   *
-   * @return True if measure is valid
-   */
-  bool IsMeasureValid() const;
-
-  /**
-   * @brief Checks if the arrange is valid.
-   *
-   * @return True if arrange is valid
-   */
-  bool IsArrangeValid() const;
-
-  /**
    * @brief Sets a custom measure callback for this View.
    *
    * When set, the callback replaces the default measurement behavior

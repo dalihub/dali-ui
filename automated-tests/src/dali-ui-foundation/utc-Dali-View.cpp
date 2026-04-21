@@ -703,29 +703,6 @@ int UtcDaliViewArrangeP(void)
   END_TEST;
 }
 
-int UtcDaliViewInvalidateMeasureP(void)
-{
-  UiTestApplication application;
-  View view = View::New();
-  view.Measure(100.0f, 100.0f);
-  DALI_TEST_CHECK(view.IsMeasureValid());
-  view.InvalidateMeasure();
-  DALI_TEST_CHECK(!view.IsMeasureValid());
-  END_TEST;
-}
-
-int UtcDaliViewInvalidateArrangeP(void)
-{
-  UiTestApplication application;
-  View view = View::New();
-  view.Measure(100.0f, 100.0f);
-  view.Arrange(LayoutRect(0, 0, 100, 100));
-  DALI_TEST_CHECK(view.IsArrangeValid());
-  view.InvalidateArrange();
-  DALI_TEST_CHECK(!view.IsArrangeValid());
-  END_TEST;
-}
-
 int UtcDaliViewGetMeasuredSizeP(void)
 {
   UiTestApplication application;
@@ -733,29 +710,6 @@ int UtcDaliViewGetMeasuredSizeP(void)
   MeasuredSize desired = view.GetMeasuredSize();
   DALI_TEST_EQUALS(desired.GetWidth(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(desired.GetHeight(), 0.0f, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliViewIsMeasureValidP(void)
-{
-  UiTestApplication application;
-  View view = View::New();
-  view.Measure(100.0f, 100.0f);
-  DALI_TEST_CHECK(view.IsMeasureValid());
-  view.InvalidateMeasure();
-  DALI_TEST_CHECK(!view.IsMeasureValid());
-  END_TEST;
-}
-
-int UtcDaliViewIsArrangeValidP(void)
-{
-  UiTestApplication application;
-  View view = View::New();
-  view.Measure(100.0f, 100.0f);
-  view.Arrange(LayoutRect(0, 0, 100, 100));
-  DALI_TEST_CHECK(view.IsArrangeValid());
-  view.InvalidateArrange();
-  DALI_TEST_CHECK(!view.IsArrangeValid());
   END_TEST;
 }
 
@@ -941,17 +895,6 @@ int UtcDaliViewMeasureMatchParentP(void)
   END_TEST;
 }
 
-int UtcDaliViewInvalidateMeasureWithParentP(void)
-{
-  UiTestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
-  View child = View::New();
-  layout.Add(child);
-  child.InvalidateMeasure();
-  DALI_TEST_CHECK(!child.IsMeasureValid());
-  END_TEST;
-}
-
 int UtcDaliViewApplyConstraintsMinMaxP(void)
 {
   UiTestApplication application;
@@ -1047,19 +990,6 @@ int UtcDaliViewLayoutMatchParentWithManagerP(void)
   // actual size is determined by its parent during the Arrange phase.
   DALI_TEST_EQUALS(size.GetWidth(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.GetHeight(), 0.0f, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliViewInvalidateArrangeWithParentP(void)
-{
-  UiTestApplication application;
-  StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
-  View child = View::New();
-  layout.Add(child);
-  child.Measure(100.0f, 100.0f);
-  child.Arrange(LayoutRect(0, 0, 100, 100));
-  child.InvalidateArrange();
-  DALI_TEST_CHECK(!child.IsArrangeValid());
   END_TEST;
 }
 
