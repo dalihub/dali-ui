@@ -2536,3 +2536,30 @@ int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
                    TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliViewInsertReordersMChildrenP(void)
+{
+  // Insert of an existing child to a different index must reorder mChildren
+  // so that order-sensitive layouts iterate children in the requested order.
+  // Self().Add is a no-op in dali-core when the child is already under this
+  // parent, so the reorder happens entirely inside Insert's reorder path.
+  UiTestApplication application;
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  View        a      = View::New();
+  View        b      = View::New();
+  View        c      = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+  DALI_TEST_EQUALS(parent.IndexOfChild(a), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.IndexOfChild(b), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.IndexOfChild(c), 2, TEST_LOCATION);
+
+  parent.Insert(0, c); // move c from index 2 to index 0
+
+  DALI_TEST_EQUALS(parent.IndexOfChild(c), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.IndexOfChild(a), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(parent.IndexOfChild(b), 2, TEST_LOCATION);
+  END_TEST;
+}

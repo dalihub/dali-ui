@@ -90,15 +90,28 @@ namespace
 /// OnChildAdd synchronously on the same (event) thread.
 thread_local bool gAllowNonViewChild = false;
 
+// mLastMeasuredConstraint encodes three states:
+//   NaN                        : initial state before any measure
+//   MEASURE_CACHE_DIRTY (-1.0f): was measured, then invalidated
+//   positive values            : last effective constraint (cache hit check)
+//
+// InvalidateMeasure's early-exit guard skips propagation when the view
+// is already DIRTY — the ancestor chain has already been invalidated
+// and the layout root already registered. A view in the initial state
+// must still propagate on its first invalidation; this works because
+// Dali::Equals returns false for any NaN comparison (IEEE 754), so
+// the guard naturally bypasses it without a special-case check.
+constexpr float MEASURE_CACHE_DIRTY = -1.0f;
+
 } // namespace
 
 namespace
 {
 
 /// RAII guard for ViewImpl::mSkipChildrenUpdate. Saves and restores the
-/// previous value, so nested scopes (e.g. a signal handler re-entering Insert
-/// while an outer PRESERVE Raise is active) cannot prematurely unguard the
-/// outer scope.
+/// previous value, so nested scopes (e.g. a signal handler re-entering a
+/// child-list-managing call while an outer PRESERVE Raise is active) cannot
+/// prematurely unguard the outer scope.
 class ScopedSkipChildrenUpdate
 {
 public:
@@ -1026,8 +1039,23 @@ void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 
 void ViewImpl::InvalidateMeasure()
 {
-  mImpl->mLastMeasuredConstraint.width  = -1.0f;
-  mImpl->mLastMeasuredConstraint.height = -1.0f;
+  // Early-exit guard: if already dirty, the ancestor chain has already been
+  // invalidated and the layout root has been registered, so re-propagation is
+  // redundant. "Never measured" state (NaN) still requires propagation because
+  // the chain has never been walked from this view.
+  //
+  // NOTE: Callers that change the view's ancestor-chain structure
+  // (e.g. reparenting) must not rely on this view's InvalidateMeasure to reach
+  // the new parent chain — the guard may skip propagation. Instead, the
+  // reparenting site should invalidate the new parent directly. See
+  // OnChildAdd / OnChildRemove where this is done.
+  if(Dali::Equals(mImpl->mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY))
+  {
+    return;
+  }
+
+  mImpl->mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
+  mImpl->mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1260,24 +1288,57 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   {
     return;
   }
-  if(index > mImpl->mChildren.Count())
-  {
-    index = static_cast<uint32_t>(mImpl->mChildren.Count());
-  }
-  ChildData childData;
-  childData.view           = child;
-  childData.measuredSize   = {0.0f, 0.0f};
-  childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-  mImpl->mChildren.Insert(mImpl->mChildren.begin() + index, childData);
 
+  // Adding to the Actor tree triggers OnChildAdd on this ViewImpl, which is
+  // the single source of truth for registering the child in mChildren and
+  // for invalidating the new parent chain. Insert only takes additional
+  // responsibility for positioning the child at the requested index.
+  Self().Add(child);
+
+  if(index >= mImpl->mChildren.Count())
   {
-    ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
-    Self().Add(child);
+    // OnChildAdd push_back'd the child at the end; target index is end.
+    return;
   }
 
-  // Invalidate the child's measure cache — its previous cache was computed
-  // under a different parent's constraints and is no longer reliable.
-  GetImpl(child).InvalidateMeasure();
+  // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
+  // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
+  ChildContainer::Iterator it;
+  if(mImpl->mChildren.Count() > 0 && (mImpl->mChildren.End() - 1)->view == child)
+  {
+    it = mImpl->mChildren.End() - 1;
+  }
+  else
+  {
+    it = std::find_if(mImpl->mChildren.Begin(), mImpl->mChildren.End(), [&child](const ChildData& data)
+    {
+      return data.view == child;
+    });
+    if(it == mImpl->mChildren.End())
+    {
+      // OnChildAdd did not register this child (e.g. non-View actor). Nothing
+      // to reorder.
+      return;
+    }
+  }
+
+  const size_t currentIdx = static_cast<size_t>(std::distance(mImpl->mChildren.Begin(), it));
+  if(currentIdx == index)
+  {
+    return;
+  }
+
+  ChildData data = std::move(*it);
+  mImpl->mChildren.Erase(it);
+  mImpl->mChildren.Insert(mImpl->mChildren.Begin() + index, std::move(data));
+
+  // mChildren order affects layout output (e.g. LinearLayout visual order,
+  // GridLayout cell assignment). When the child was already under this view
+  // (Self().Add is a no-op in that case), OnChildAdd does not fire, so this
+  // is the only invalidation point for the reorder. When the child was a
+  // fresh add, self is already dirty from OnChildAdd and the guard makes
+  // this a no-op.
+  InvalidateMeasure();
 }
 
 void ViewImpl::RemoveAllChildren()
@@ -1794,10 +1855,18 @@ void ViewImpl::OnChildAdd(Actor& child)
     childData.measuredSize   = {0.0f, 0.0f};
     childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
     mImpl->mChildren.PushBack(childData);
+
     // Invalidate the child's measure cache — its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
-    // This also propagates to the parent (this) via InvalidateMeasure chain.
     GetImpl(view).InvalidateMeasure();
+
+    // Also invalidate this view's chain directly. The child's InvalidateMeasure
+    // may early-exit via the dirty guard if the child was already invalidated
+    // under its previous parent (reparenting of a dirty child), in which case
+    // the new parent chain would not be reached. Calling InvalidateMeasure on
+    // self guarantees the new ancestor chain is marked and the new layout root
+    // is registered. If self is already dirty, the guard makes this a no-op.
+    InvalidateMeasure();
   }
   else
   {

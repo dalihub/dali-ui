@@ -492,7 +492,9 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
-  mLastMeasuredConstraint{-1.0f, -1.0f},
+  // NaN is distinct from MEASURE_CACHE_DIRTY (-1.0f), so the first
+  // InvalidateMeasure still propagates. See view-impl.cpp for details.
+  mLastMeasuredConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mSkipChildrenUpdate(false),
   mInteractiveTrait(nullptr),
