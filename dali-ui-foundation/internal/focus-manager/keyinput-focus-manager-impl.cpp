@@ -92,11 +92,11 @@ void KeyInputFocusManagerImpl::SetFocus(Ui::View view)
   if(previousFocusView)
   {
     // Notify the view that it has lost key input focus
-    Integration::GetImpl(previousFocusView).OnFocusLost();
+    Integration::GetImpl(previousFocusView).NotifyFocusChanged(false);
   }
 
   // Tell the new actor that it has gained focus.
-  Integration::GetImpl(view).OnFocusGained();
+  Integration::GetImpl(view).NotifyFocusChanged(true);
 
   // Emit the signal to inform focus change to the application.
   if(!mKeyInputFocusChangedSignal.Empty())
@@ -116,7 +116,7 @@ void KeyInputFocusManagerImpl::RemoveFocus(Ui::View view)
     mCurrentWindowId = 0;
 
     // Notify the view that it has lost key input focus
-    Integration::GetImpl(view).OnFocusLost();
+    Integration::GetImpl(view).NotifyFocusChanged(false);
   }
 }
 

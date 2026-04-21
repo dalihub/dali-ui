@@ -429,14 +429,9 @@ public: // From ViewImpl
 
 private: // From ViewImpl
   /**
-   * @copydoc Integration::ViewImpl::OnFocusGained()
+   * @copydoc Integration::ViewImpl::OnFocusChanged()
    */
-  void OnFocusGained() override;
-
-  /**
-   * @copydoc Integration::ViewImpl::OnFocusLost()
-   */
-  void OnFocusLost() override;
+  void OnFocusChanged(bool focused) override;
 
   /**
    * @copydoc Integration::ViewImpl::OnSceneConnection()
@@ -597,6 +592,16 @@ public:
   void EmitAnchorClickedSignal(const std::string& href) override;
 
 private: // Implementation
+  /**
+   * @brief Handles focus gain (IME activation, controller notification).
+   */
+  void OnFocusGained();
+
+  /**
+   * @brief Handles focus loss (IME deactivation, controller notification).
+   */
+  void OnFocusLost();
+
   /**
    * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
    */

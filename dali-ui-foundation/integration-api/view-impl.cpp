@@ -301,16 +301,6 @@ bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return false;
 }
 
-void ViewImpl::OnFocusGained()
-{
-  OnFocusChanged(true, GetImpl(Ui::FocusManager::Get()).FocusChangedContext().inputEvent);
-}
-
-void ViewImpl::OnFocusLost()
-{
-  OnFocusChanged(false, GetImpl(Ui::FocusManager::Get()).FocusChangedContext().inputEvent);
-}
-
 // =============================================================================
 // State API
 // =============================================================================
@@ -491,8 +481,14 @@ void ViewImpl::SetState(ViewState state, bool on, InputEvent cause)
   }
 }
 
-void ViewImpl::OnFocusChanged(bool focused, InputEvent cause)
+void ViewImpl::NotifyFocusChanged(bool focused)
 {
+  OnFocusChanged(focused);
+}
+
+void ViewImpl::OnFocusChanged(bool focused)
+{
+  InputEvent cause = GetImpl(Ui::FocusManager::Get()).FocusChangedContext().inputEvent;
   SetState(ViewState::FOCUSED, focused, cause);
 
   if(auto* interactiveTrait = mImpl->GetInteractiveTrait())

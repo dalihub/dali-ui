@@ -141,16 +141,6 @@ public: // ABI-frozen virtual API
   virtual void OnInitialize();
 
   /**
-   * @brief Called when the view gains focus.
-   */
-  virtual void OnFocusGained();
-
-  /**
-   * @brief Called when the view loses focus.
-   */
-  virtual void OnFocusLost();
-
-  /**
    * @brief Called when a key event is received.
    * @param[in] event The key event
    * @return True if the event is consumed
@@ -341,11 +331,14 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetState(ViewState state, bool on, InputEvent cause = InputEvent::None());
 
   /**
-   * @brief Called when the view's focus state changes.
-   * @param[in] focused True if the view gained focus
-   * @param[in] cause   The input event that triggered the focus change
+   * @brief Notifies this view that its focus state has changed.
+   *
+   * Called by focus managers. Invokes the protected virtual OnFocusChanged()
+   * and emits the FocusChanged signal.
+   *
+   * @param[in] focused True if the view gained focus, false if lost
    */
-  void OnFocusChanged(bool focused, InputEvent cause = InputEvent::None());
+  void NotifyFocusChanged(bool focused);
 
   /**
    * @copydoc Ui::View::GetScaleX()
@@ -950,6 +943,14 @@ protected:
    * @brief Called during arrange pass. Override to implement custom arrangement.
    */
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
+
+  /**
+   * @brief Called when the view's focus state changes. Override to add
+   *        custom focus handling. Call the base class at the end of the
+   *        override to preserve default state management.
+   * @param[in] focused True if the view gained focus, false if lost
+   */
+  virtual void OnFocusChanged(bool focused);
 
   // ============================================================
   // protected: Framework overrides (CustomActorImpl)
