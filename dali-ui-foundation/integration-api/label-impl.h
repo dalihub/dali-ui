@@ -226,6 +226,16 @@ public:
   UiColor GetAnchorClickedColor();
 
   /**
+   * @copydoc Dali::Ui::Label::SetMarqueeTriggerPolicy
+   */
+  void SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeTriggerPolicy
+   */
+  Text::MarqueeTriggerPolicy GetMarqueeTriggerPolicy() const;
+
+  /**
    * @copydoc Dali::Ui::Label::SetMarqueeSpeed
    */
   void SetMarqueeSpeed(int speed);
@@ -266,16 +276,6 @@ public:
   int GetMarqueeGap() const;
 
   /**
-   * @copydoc Dali::Ui::Label::SetMarqueeStopMode
-   */
-  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
-
-  /**
-   * @copydoc Dali::Ui::Label::GetMarqueeStopMode
-   */
-  Text::MarqueeStopMode GetMarqueeStopMode() const;
-
-  /**
    * @copydoc Dali::Ui::Label::SetMarqueeOrientation
    */
   void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
@@ -284,6 +284,16 @@ public:
    * @copydoc Dali::Ui::Label::GetMarqueeOrientation
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetMarqueeStopMode
+   */
+  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetMarqueeStopMode
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontWeight
@@ -816,7 +826,7 @@ private: // Implementation
   /**
    * @brief Callback when the visibility of the actor is changed.
    */
-  void OnControlInheritedVisibilityChanged(Actor actor, bool visible);
+  void OnViewInheritedVisibilityChanged(Actor actor, bool visible);
 
   /**
    * @brief Returns the cached effective visibility of the label.
@@ -992,11 +1002,12 @@ private:
   Text::ControllerPtr   mController;
   Text::TextScrollerPtr mTextScroller;
 
-  Vector2              mSize;
-  Vector2              mTouchPosition; ///< The initial touch down position.
-  float                mLineHeight;
-  Text::LineHeightMode mLineHeightMode;
-  Text::OverflowMode   mOverflowMode;
+  Vector2                    mSize;
+  Vector2                    mTouchPosition; ///< The initial touch down position.
+  float                      mLineHeight;
+  Text::LineHeightMode       mLineHeightMode;
+  Text::OverflowMode         mOverflowMode;
+  Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
@@ -1004,7 +1015,8 @@ private:
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.
   bool mIsAsyncRenderLayoutDirty : 1; // Whether layout affecting async render has changed.
-  bool mLastMarqueeEnabled : 1;       // whether marquee was enabled in the previous state.
+  bool mSuppressAutoMarquee : 1;      // whether automatic marquee evaluation is suppressed.
+  bool mLastMarqueeEnabled : 1;       // whether manual marquee was enabled in the previous state.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasAnchors : 1;               // whether the text has anchors.
   bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().

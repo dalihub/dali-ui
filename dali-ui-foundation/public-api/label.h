@@ -91,8 +91,8 @@ public:
       MARQUEE_LOOP_COUNT             = Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT,
       MARQUEE_LOOP_DELAY             = Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY,
       MARQUEE_GAP                    = Text::LabelPropertyIndex::MARQUEE_GAP,
-      MARQUEE_STOP_MODE              = Text::LabelPropertyIndex::MARQUEE_STOP_MODE,
       MARQUEE_ORIENTATION            = Text::LabelPropertyIndex::MARQUEE_ORIENTATION,
+      MARQUEE_STOP_MODE              = Text::LabelPropertyIndex::MARQUEE_STOP_MODE,
       FONT_WEIGHT                    = Text::LabelPropertyIndex::FONT_WEIGHT,
       FONT_WIDTH                     = Text::LabelPropertyIndex::FONT_WIDTH,
       FONT_SLANT                     = Text::LabelPropertyIndex::FONT_SLANT,
@@ -445,6 +445,29 @@ public: // Setters for chaining
   UiColor GetAnchorClickedColor();
 
   /**
+   * @brief Sets how the marquee animation is triggered.
+   *
+   * - MarqueeTriggerPolicy::MANUAL:
+   *   The marquee starts only when StartMarquee() is explicitly called.
+   *
+   * - MarqueeTriggerPolicy::ON_OVERFLOW:
+   *   The marquee starts automatically during layout when the text
+   *   exceeds the available space.
+   *
+   * The default policy is MarqueeTriggerPolicy::MANUAL.
+   *
+   * @param[in] policy The marquee trigger policy.
+   */
+  Label& SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
+
+  /**
+   * @brief Returns when the marquee animation is triggered.
+   *
+   * @return The current marquee trigger policy.
+   */
+  Text::MarqueeTriggerPolicy GetMarqueeTriggerPolicy() const;
+
+  /**
    * @brief Sets the marquee speed.
    *
    * @param[in] speed The marquee speed in pixels per second.
@@ -501,20 +524,6 @@ public: // Setters for chaining
   int GetMarqueeGap() const;
 
   /**
-   * @brief Sets how the marquee stops.
-   *
-   * @param[in] stopMode The marquee stop mode.
-   */
-  Label& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
-
-  /**
-   * @brief Returns how the marquee stops.
-   *
-   * @return The marquee stop mode.
-   */
-  Text::MarqueeStopMode GetMarqueeStopMode() const;
-
-  /**
    * @brief Sets the marquee orientation.
    *
    * Horizontal is applied only for single-line text, and vertical only for multi-line text.
@@ -530,6 +539,20 @@ public: // Setters for chaining
    * @return The marquee orientation.
    */
   Text::MarqueeOrientation GetMarqueeOrientation() const;
+
+  /**
+   * @brief Sets how the marquee stops.
+   *
+   * @param[in] stopMode The marquee stop mode.
+   */
+  Label& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+
+  /**
+   * @brief Returns how the marquee stops.
+   *
+   * @return The marquee stop mode.
+   */
+  Text::MarqueeStopMode GetMarqueeStopMode() const;
 
   /**
    * @brief Sets the font weight.
@@ -961,11 +984,24 @@ public: // Setters for chaining
    * The marquee starts only when the orientation matches the current text layout:
    * horizontal for single-line text, and vertical for multi-line text.
    * If the condition is not met, this call has no effect.
+   *
+   * @note If the trigger policy is MarqueeTriggerPolicy::ON_OVERFLOW,
+   *       the marquee starts only when the text exceeds the available space.
    */
   void StartMarquee();
 
   /**
    * @brief Stops the marquee animation.
+   *
+   * The stopping behavior follows the current MarqueeStopMode:
+   * - MarqueeStopMode::IMMEDIATE:
+   *   Stops the marquee immediately.
+   *
+   * - MarqueeStopMode::FINISH_LOOP:
+   *   Continues the animation until the current loop finishes, then stops.
+   *
+   * This method works regardless of the current MarqueeTriggerPolicy.
+   * It stops the marquee even if the policy is MANUAL or ON_OVERFLOW.
    */
   void StopMarquee();
 

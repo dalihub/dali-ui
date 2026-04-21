@@ -1388,7 +1388,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
       wrapGap = std::max(maxTextureSize - textNaturalSize.width, static_cast<float>(parameters.marqueeGap));
     }
   }
-  else // Marquee::VERTICAL
+  else // MarqueeOrientation::VERTICAL
   {
     bool  layoutOnly      = useCachedNaturalSize;
     bool  useCachedHeight = false;

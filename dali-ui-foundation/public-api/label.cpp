@@ -289,6 +289,17 @@ UiColor Label::GetAnchorClickedColor()
   return GetImpl(*this).GetAnchorClickedColor();
 }
 
+Label& Label::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
+{
+  GetImpl(*this).SetMarqueeTriggerPolicy(policy);
+  return *this;
+}
+
+Text::MarqueeTriggerPolicy Label::GetMarqueeTriggerPolicy() const
+{
+  return GetImpl(*this).GetMarqueeTriggerPolicy();
+}
+
 Label& Label::SetMarqueeSpeed(int speed)
 {
   GetImpl(*this).SetMarqueeSpeed(speed);
@@ -333,17 +344,6 @@ int Label::GetMarqueeGap() const
   return GetImpl(*this).GetMarqueeGap();
 }
 
-Label& Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
-{
-  GetImpl(*this).SetMarqueeStopMode(stopMode);
-  return *this;
-}
-
-Text::MarqueeStopMode Label::GetMarqueeStopMode() const
-{
-  return GetImpl(*this).GetMarqueeStopMode();
-}
-
 Label& Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
 {
   GetImpl(*this).SetMarqueeOrientation(orientation);
@@ -353,6 +353,17 @@ Label& Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
 Text::MarqueeOrientation Label::GetMarqueeOrientation() const
 {
   return GetImpl(*this).GetMarqueeOrientation();
+}
+
+Label& Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+{
+  GetImpl(*this).SetMarqueeStopMode(stopMode);
+  return *this;
+}
+
+Text::MarqueeStopMode Label::GetMarqueeStopMode() const
+{
+  return GetImpl(*this).GetMarqueeStopMode();
 }
 
 Label& Label::SetFontWeight(Text::FontWeight weight)

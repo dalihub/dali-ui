@@ -130,6 +130,21 @@
   */ \
   ChildClass& SetAnchorClickedColor(const UiColor& color) { Label::SetAnchorClickedColor(color); return *this; } \
   /** \
+  * @brief Sets how the marquee animation is triggered. \
+  * \
+  * - MarqueeTriggerPolicy::MANUAL: \
+  *   The marquee starts only when StartMarquee() is explicitly called. \
+  * \
+  * - MarqueeTriggerPolicy::ON_OVERFLOW: \
+  *   The marquee starts automatically during layout when the text \
+  *   exceeds the available space. \
+  * \
+  * The default policy is MarqueeTriggerPolicy::MANUAL. \
+  * \
+  * @param[in] policy The marquee trigger policy. \
+  */ \
+  ChildClass& SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy) { Label::SetMarqueeTriggerPolicy(policy); return *this; } \
+  /** \
   * @brief Sets the marquee speed. \
   * \
   * @param[in] speed The marquee speed in pixels per second. \
@@ -154,12 +169,6 @@
   */ \
   ChildClass& SetMarqueeGap(int gap) { Label::SetMarqueeGap(gap); return *this; } \
   /** \
-  * @brief Sets how the marquee stops. \
-  * \
-  * @param[in] stopMode The marquee stop mode. \
-  */ \
-  ChildClass& SetMarqueeStopMode(Text::MarqueeStopMode stopMode) { Label::SetMarqueeStopMode(stopMode); return *this; } \
-  /** \
   * @brief Sets the marquee orientation. \
   * \
   * Horizontal is applied only for single-line text, and vertical only for multi-line text. \
@@ -168,6 +177,12 @@
   * @param[in] orientation The marquee orientation. \
   */ \
   ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { Label::SetMarqueeOrientation(orientation); return *this; } \
+  /** \
+  * @brief Sets how the marquee stops. \
+  * \
+  * @param[in] stopMode The marquee stop mode. \
+  */ \
+  ChildClass& SetMarqueeStopMode(Text::MarqueeStopMode stopMode) { Label::SetMarqueeStopMode(stopMode); return *this; } \
   /** \
   * @brief Sets the font weight. \
   * \

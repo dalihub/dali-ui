@@ -122,14 +122,13 @@ void TextLoadingTask::Load()
         naturalSize = mLoader.SetupRenderScale(mParameters, cachedNaturalSize);
       }
 
-      if(mParameters.ellipsis && mParameters.ellipsisMode == Text::Ellipsize::MARQUEE)
+      if(!mParameters.suppressAutoMarquee && mParameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
       {
         if(mParameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL)
         {
           if(mParameters.isMultiLine)
           {
-            DALI_LOG_DEBUG_INFO(
-              "Attempted ellipsize marquee horizontal on a non SINGLE_LINE_BOX, request ignored\n");
+            DALI_LOG_DEBUG_INFO("Marquee Horizontal: valid only for single-line text\n");
             mRenderInfo = mLoader.RenderText(mParameters, cachedNaturalSize, naturalSize);
           }
           else
@@ -144,7 +143,7 @@ void TextLoadingTask::Load()
 #ifdef TRACE_ENABLED
               if(gTraceFilter && gTraceFilter->IsTraceEnabled())
               {
-                DALI_LOG_RELEASE_INFO("RenderMarquee, Ellipsize::MARQUEE\n");
+                DALI_LOG_RELEASE_INFO("RenderMarquee, MarqueeTriggerPolicy::ON_OVERFLOW\n");
               }
 #endif
               mParameters.isMarqueeEnabled = true;
@@ -156,17 +155,31 @@ void TextLoadingTask::Load()
             }
           }
         }
-        else // Marquee::VERTICAL
+        else // MarqueeOrientation::VERTICAL
         {
-          const float textHeight = mLoader.ComputeHeightForWidth(mParameters, mParameters.textWidth, cachedNaturalSize);
-          if(mParameters.textHeight < textHeight)
+          if(!mParameters.isMultiLine)
           {
-            mParameters.isMarqueeEnabled = true;
-            mRenderInfo                  = mLoader.RenderMarquee(mParameters, true, naturalSize);
+            DALI_LOG_DEBUG_INFO("Marquee Vertical: valid only for multi-line text\n");
+            mRenderInfo = mLoader.RenderText(mParameters, cachedNaturalSize, naturalSize);
           }
           else
           {
-            mRenderInfo = mLoader.RenderText(mParameters, cachedNaturalSize, naturalSize);
+            const float textHeight = mLoader.ComputeHeightForWidth(mParameters, mParameters.textWidth, cachedNaturalSize);
+            if(mParameters.textHeight < textHeight)
+            {
+#ifdef TRACE_ENABLED
+              if(gTraceFilter && gTraceFilter->IsTraceEnabled())
+              {
+                DALI_LOG_RELEASE_INFO("RenderMarquee, MarqueeTriggerPolicy::ON_OVERFLOW\n");
+              }
+#endif
+              mParameters.isMarqueeEnabled = true;
+              mRenderInfo                  = mLoader.RenderMarquee(mParameters, true, naturalSize);
+            }
+            else
+            {
+              mRenderInfo = mLoader.RenderText(mParameters, cachedNaturalSize, naturalSize);
+            }
           }
         }
       }

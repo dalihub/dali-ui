@@ -114,12 +114,13 @@ struct AsyncTextParameters
     verticalLineAlignment{Alignment::START},
     layoutDirectionPolicy{LayoutDirectionMode::CONTENTS},
     ellipsisPosition{Text::EllipsisPosition::END},
-    ellipsisMode{Text::Ellipsize::TRUNCATE},
+    marqueeTriggerPolicy{Text::MarqueeTriggerPolicy::MANUAL},
     marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL},
     marqueeStopMode{Text::MarqueeStopMode::FINISH_LOOP},
     fontWeight{FontWeight::NONE},
     fontWidth{FontWidth::NONE},
     fontSlant{FontSlant::NONE},
+    suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
     enableMarkup{false},
@@ -191,23 +192,23 @@ struct AsyncTextParameters
 
   uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
 
-  Async::RequestType          requestType;
-  Alignment                   horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
-  Alignment                   verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
-  LineWrapMode                lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
-  Text::Underline::Type       underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
-  Dali::LayoutDirection::Type layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
-  Alignment                   verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
-  LayoutDirectionMode         layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
-  Text::EllipsisPosition::Type
-                           ellipsisPosition;   ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  Text::Ellipsize::Mode    ellipsisMode;       ///< The mode of the ellipsis: one of {TRUNCATE, MARQUEE}.
-  Text::MarqueeOrientation marqueeOrientation; ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
-  Text::MarqueeStopMode    marqueeStopMode;    ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight               fontWeight;         ///< The font's weight.
-  FontWidth                fontWidth;          ///< The font's width.
-  FontSlant                fontSlant;          ///< The font's slant.
+  Async::RequestType           requestType;
+  Alignment                    horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
+  Alignment                    verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
+  LineWrapMode                 lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  Text::Underline::Type        underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
+  Dali::LayoutDirection::Type  layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
+  Alignment                    verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
+  LayoutDirectionMode          layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
+  Text::EllipsisPosition::Type ellipsisPosition;      ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  Text::MarqueeTriggerPolicy   marqueeTriggerPolicy;  ///< policy that determines when marquee is triggered : one of {MANUAL, ON_OVERFLOW}.
+  Text::MarqueeOrientation     marqueeOrientation;    ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
+  Text::MarqueeStopMode        marqueeStopMode;       ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeight                   fontWeight;            ///< The font's weight.
+  FontWidth                    fontWidth;             ///< The font's width.
+  FontSlant                    fontSlant;             ///< The font's slant.
 
+  bool suppressAutoMarquee : 1;           ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                   ///< Whether the multi-line layout is enabled.
   bool ellipsis : 1;                      ///< Whether the ellipsis layout option is enabled.
   bool enableMarkup : 1;                  ///< Whether the mark-up processor is enabled.

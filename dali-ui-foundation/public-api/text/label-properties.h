@@ -181,18 +181,18 @@ struct LabelPropertyIndex
     MARQUEE_GAP,
 
     /**
-     * @brief The marquee stop behaviour.
-     * @details Name "marqueeStopMode", type Text::MarqueeStopMode (Property::INTEGER) or Property::STRING.
-     * @see Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
-     */
-    MARQUEE_STOP_MODE,
-
-    /**
      * @brief The marquee orientation.
      * @details Name "marqueeOrientation", type Text::MarqueeOrientation (Property::INTEGER) or Property::STRING.
      * @see Label::SetMarqueeOrientation(), Label::GetMarqueeOrientation().
      */
     MARQUEE_ORIENTATION,
+
+    /**
+     * @brief The marquee stop behaviour.
+     * @details Name "marqueeStopMode", type Text::MarqueeStopMode (Property::INTEGER) or Property::STRING.
+     * @see Label::SetMarqueeStopMode(), Label::GetMarqueeStopMode().
+     */
+    MARQUEE_STOP_MODE,
 
     /**
      * @brief The font weight.

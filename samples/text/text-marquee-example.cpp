@@ -21,8 +21,11 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING = 10.0f;
-constexpr float STACK_PADDING = 20.0f;
+constexpr float STACK_SPACING = 5.0f;
+constexpr float STACK_PADDING = 10.0f;
+const char* TEXT_LTR = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.";
+const char* TEXT_RTL = "שלום עולם, נעים מאוד,ומקווה שיהיה לנו שיחה נעימה וטובה יחד";
+
 } // namespace
 
 class TextController : public ConnectionTracker
@@ -50,92 +53,129 @@ private:
                    "Test options:\n"
                    "[1] Start Marquee, [2] Stop Marquee, [i] Information\n"
                    "Text::MarqueeOrientation::HORIZONTAL")
+          .SetFontSize(14.0f)
           .SetMultiLine(true)
-          .SetLineHeight(1.6f),
-        Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetRequestedWidth(400)
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetMarqueeSpeed(100)
-          .SetMarqueeLoopCount(2)
-          .SetMarqueeLoopDelay(1.0f)
-          .SetMarqueeGap(50)
-          .SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
-          .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
-          .As(mMarqueeLabel),
-        Label::New("שלום עולם, נעים מאוד,ומקווה שיהיה לנו שיחה נעימה וטובה יחד")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetRequestedWidth(400)
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetMarqueeSpeed(100)
-          .SetMarqueeLoopCount(2)
-          .SetMarqueeLoopDelay(1.0f)
-          .SetMarqueeGap(50)
-          .SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
-          .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
-          .As(mRtlLabel),
-        Label::New("Text::MarqueeOrientation::VERTICAL"),
-        Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetRequestedWidth(200)
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetMultiLine(true)
-          .SetMarqueeSpeed(100)
-          .SetMarqueeLoopCount(2)
-          .SetMarqueeLoopDelay(1.0f)
-          .SetMarqueeGap(50)
-          .SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
-          .SetMarqueeOrientation(Text::MarqueeOrientation::VERTICAL)
-          .As(mVerticalLabel),
-        Label::New("TODO: When focused, the marquee runs if the text is too long"),
-          Label::New("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id congue odio.")
-          .SetBackgroundColor(UiColor(0xefefef))
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetMarqueeSpeed(100)
-          .SetMarqueeLoopCount(0)
-          .SetMarqueeLoopDelay(1.0f)
-          .SetMarqueeGap(50)
-          .SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
-          .SetMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL)
-          .As(mFocusLabel),
-      }));
+          .SetLineHeight(1.6f)
+          .SetFocusable(true)
+          .SetTouchFocusable(true),
 
-    // TODO: Add focus signals to View so marquee can react to focus gained/lost.
-    // mFocusLabel.KeyInputFocusGainedSignal().Connect(this, &TextController::OnFocusGained);
-    // mFocusLabel.KeyInputFocusLostSignal().Connect(this, &TextController::OnFocusLost);
+        StackLayout::New(StackOrientation::VERTICAL)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetSpacing(STACK_SPACING)
+          .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+          .SetBackgroundColor(UiColor(0xEFEFEF))
+          .Children({
+            Label::New("MarqueeTriggerPolicy::MANUAL")
+              .SetFontSize(14.0f),
+
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL)
+              .As(mLabelLtr),
+
+            CreateMarqueeLabel(TEXT_RTL, /* multiline */false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL)
+              .As(mLabelRtl),
+
+            Label::New("Text::MarqueeOrientation::VERTICAL")
+              .SetFontSize(14.0f),
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL)
+              .As(mLabelMultiline),
+
+            Label::New("When focused, the marquee runs if the text is long")
+              .SetFontSize(14.0f),
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL)
+              .SetFocusable(true)
+              .SetTouchFocusable(true)
+              .As(mLabelFocus),
+          }),
+
+        StackLayout::New(StackOrientation::VERTICAL)
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetSpacing(STACK_SPACING)
+          .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+          .SetBackgroundColor(UiColor(0xEFEFEF))
+          .Children({
+            Label::New("MarqueeTriggerPolicy::ON_OVERFLOW")
+              .SetFontSize(14.0f),
+
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */false, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::HORIZONTAL)
+              .As(mOverflowLabel),
+
+            CreateMarqueeLabel(TEXT_RTL, /* multiline */false, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::HORIZONTAL)
+              .As(mOverflowLabelRtl),
+              
+            Label::New("Text::MarqueeOrientation::VERTICAL")
+              .SetFontSize(14.0f),
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */true, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::VERTICAL)
+              .As(mOverflowLabelMultiline),
+
+            Label::New("When focused, the marquee runs if the text is long")
+              .SetFontSize(14.0f),
+            CreateMarqueeLabel(TEXT_LTR, /* multiline */false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL)
+              .SetFocusable(true)
+              .SetTouchFocusable(true)
+              .As(mOverflowLabelFocus),
+          }),
+        }));
+
+    mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
+    mOverflowLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnOverflowFocusChanged);
 
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
-
-    PrintLabelInfo(mMarqueeLabel, "Horizontal Marquee");
   }
 
-  void OnFocusGained(View view)
+  Label CreateMarqueeLabel(Dali::String text, bool multiLine, Text::MarqueeTriggerPolicy policy, Text::MarqueeOrientation orientation)
+  {
+    auto label = Label::New(text)
+      .SetTextColor(UiColor(0xFFFFFF))
+      .SetBackgroundColor(UiColor(0x000000))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetPadding(Extents(10, 10, 10, 10))
+      .SetMultiLine(multiLine)
+      .SetMarqueeTriggerPolicy(policy)
+      .SetMarqueeOrientation(orientation);
+
+    if(multiLine)
+    {
+      // for overflow test.
+      label.SetRequestedWidth(WRAP_CONTENT);
+      label.SetMaximumWidth(200);
+      label.SetMaximumHeight(100);
+    }
+    return label;
+  }
+
+  void OnFocusChanged(View view, bool focused)
   {
     Label label = Label::DownCast(view);
     if(label)
     {
-      if(label.GetNaturalSize().width > label.GetSize().GetWidth())
+      if(focused)
       {
-        label.StartMarquee();
+        if(label.GetNaturalSize().width > label.GetSize().GetWidth())
+        {
+          label.StartMarquee();
+        }
+      }
+      else
+      {
+        label.StopMarquee();
       }
     }
   }
 
-  void OnFocusLost(View view)
+  void OnOverflowFocusChanged(View view, bool focused)
   {
     Label label = Label::DownCast(view);
     if(label)
     {
-      label.StopMarquee();
-    }
-  }
-
-  void OnAnchorClicked(View view, const Dali::String& href)
-  {
-    Label label = Label::DownCast(view);
-    if(label)
-    {
-      DALI_LOG_ERROR("OnAnchorClicked, href: %s, length: %zu\n", href.CStr(), href.Size());
+      if(focused)
+      {
+        label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+      }
+      else
+      {
+        label.StopMarquee();
+        label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+      }
     }
   }
 
@@ -143,14 +183,16 @@ private:
   {
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
     DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text        : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("IsRunning   : %d\n", label.IsMarqueeRunning());
-    DALI_LOG_ERROR("Speed       : %d\n", label.GetMarqueeSpeed());
-    DALI_LOG_ERROR("LoopCount   : %d\n", label.GetMarqueeLoopCount());
-    DALI_LOG_ERROR("LoopDelay   : %f\n", label.GetMarqueeLoopDelay());
-    DALI_LOG_ERROR("Gap         : %f\n", label.GetMarqueeGap());
-    DALI_LOG_ERROR("StopMode    : %d\n", label.GetMarqueeStopMode());
-    DALI_LOG_ERROR("Orientation : %d\n", label.GetMarqueeOrientation());
+    DALI_LOG_ERROR("Text           : %s\n", label.GetText().CStr());
+    DALI_LOG_ERROR("IsRunning      : %d\n", label.IsMarqueeRunning());
+    DALI_LOG_ERROR("Trigger Policy : %d\n", label.GetMarqueeTriggerPolicy());
+    DALI_LOG_ERROR("Speed          : %d\n", label.GetMarqueeSpeed());
+    DALI_LOG_ERROR("LoopCount      : %d\n", label.GetMarqueeLoopCount());
+    DALI_LOG_ERROR("LoopDelay      : %f\n", label.GetMarqueeLoopDelay());
+    DALI_LOG_ERROR("Gap            : %d\n", label.GetMarqueeGap());
+    DALI_LOG_ERROR("Orientation    : %d\n", label.GetMarqueeOrientation());
+    DALI_LOG_ERROR("StopMode       : %d\n", label.GetMarqueeStopMode());
+    DALI_LOG_ERROR("Async          : %d\n", label.IsAsyncRendering());
     DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
@@ -170,64 +212,106 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mMarqueeLabel.StartMarquee();
-      mRtlLabel.StartMarquee();
-      mVerticalLabel.StartMarquee();
+      mLabelLtr.StartMarquee();
+      mLabelRtl.StartMarquee();
+      mLabelMultiline.StartMarquee();
+      mOverflowLabel.StartMarquee();
+      mOverflowLabelRtl.StartMarquee();
+      mOverflowLabelMultiline.StartMarquee();
     }
     else if(event.GetKeyName() == "2")
     {
-      mMarqueeLabel.StopMarquee();
-      mRtlLabel.StopMarquee();
-      mVerticalLabel.StopMarquee();
+      mLabelLtr.StopMarquee();
+      mLabelRtl.StopMarquee();
+      mLabelMultiline.StopMarquee();
+      mOverflowLabel.StopMarquee();
+      mOverflowLabelRtl.StopMarquee();
+      mOverflowLabelMultiline.StopMarquee();
     }
-    else if(event.GetKeyName() == "i")
+    else if(event.GetKeyName() == "3")
     {
-      PrintLabelInfo(mMarqueeLabel, "Horizontal Marquee");
-      PrintLabelInfo(mRtlLabel, "RTL Marquee");
-      PrintLabelInfo(mVerticalLabel, "Vertical Marquee");
-    }
-    // Temporary test.
-    if(event.GetKeyName() == "3")
-    {
-      if(mFocusLabel.GetNaturalSize().width > mFocusLabel.GetSize().GetWidth())
-      {
-        mFocusLabel.StartMarquee();
-      }
+      mLabelLtr.SetAsyncRendering(true);
+      mLabelRtl.SetAsyncRendering(true);
+      mLabelMultiline.SetAsyncRendering(true);
+      mLabelFocus.SetAsyncRendering(true);
+      mOverflowLabel.SetAsyncRendering(true);
+      mOverflowLabelRtl.SetAsyncRendering(true);
+      mOverflowLabelMultiline.SetAsyncRendering(true);
+      mOverflowLabelFocus.SetAsyncRendering(true);
+      DALI_LOG_ERROR("AsyncRendering\n");
     }
     else if(event.GetKeyName() == "4")
     {
-      mFocusLabel.StopMarquee();
-    }
-    else if(event.GetKeyName() == "5")
-    {
-      mMarqueeLabel.SetAsyncRendering(true);
-      mRtlLabel.SetAsyncRendering(true);
-      mVerticalLabel.SetAsyncRendering(true);
-      mFocusLabel.SetAsyncRendering(true);
-      DALI_LOG_ERROR("AsyncRendering\n");
-    }
-    else if(event.GetKeyName() == "6")
-    {
-      mMarqueeLabel.SetAsyncRendering(false);
-      mRtlLabel.SetAsyncRendering(false);
-      mVerticalLabel.SetAsyncRendering(false);
-      mFocusLabel.SetAsyncRendering(false);
+      mLabelLtr.SetAsyncRendering(false);
+      mLabelRtl.SetAsyncRendering(false);
+      mLabelMultiline.SetAsyncRendering(false);
+      mLabelFocus.SetAsyncRendering(false);
+      mOverflowLabel.SetAsyncRendering(false);
+      mOverflowLabelRtl.SetAsyncRendering(false);
+      mOverflowLabelMultiline.SetAsyncRendering(false);
+      mOverflowLabelFocus.SetAsyncRendering(false);
       DALI_LOG_ERROR("SyncRendering\n");
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      mOverflowLabel.SetFontSizeScale(1.5f);
+      mOverflowLabelRtl.SetFontSizeScale(1.5f);
+      mOverflowLabelMultiline.SetFontSizeScale(1.5f);
+      mOverflowLabelFocus.SetFontSizeScale(1.5f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      mOverflowLabel.SetFontSizeScale(1.0f);
+      mOverflowLabelRtl.SetFontSizeScale(1.0f);
+      mOverflowLabelMultiline.SetFontSizeScale(1.0f);
+      mOverflowLabelFocus.SetFontSizeScale(1.0f);
+    }
+    else if(event.GetKeyName() == "a")
+    {
+      mOverflowLabel.SetVisibility(false);
+      mOverflowLabelRtl.SetVisibility(false);
+      mOverflowLabelMultiline.SetVisibility(false);
+      mOverflowLabelFocus.SetVisibility(false);
+    }
+    else if(event.GetKeyName() == "s")
+    {
+      mOverflowLabel.SetVisibility(true);
+      mOverflowLabelRtl.SetVisibility(true);
+      mOverflowLabelMultiline.SetVisibility(true);
+      mOverflowLabelFocus.SetVisibility(true);
+    }
+    else if(event.GetKeyName() == "i")
+    {
+      PrintLabelInfo(mLabelLtr, "LTR Marquee");
+      PrintLabelInfo(mLabelRtl, "RTL Marquee");
+      PrintLabelInfo(mLabelMultiline, "Multiline Marquee");
+      PrintLabelInfo(mLabelFocus, "Focus Marquee");
+      PrintLabelInfo(mOverflowLabel, "LTR Marquee Overflow");
+      PrintLabelInfo(mOverflowLabelRtl, "RTL Marquee Overflow");
+      PrintLabelInfo(mOverflowLabelMultiline, "Multiline Marquee Overflow");
+      PrintLabelInfo(mOverflowLabelFocus, "Focus Marquee Overflow");
     }
   }
 
 private:
   Application& mApplication;
-  Label        mMarqueeLabel;
-  Label        mRtlLabel;
-  Label        mVerticalLabel;
-  Label        mFocusLabel;
+  Label        mLabelLtr;
+  Label        mLabelRtl;
+  Label        mLabelMultiline;
+  Label        mLabelFocus;
+  Label        mOverflowLabel;
+  Label        mOverflowLabelRtl;
+  Label        mOverflowLabelMultiline;
+  Label        mOverflowLabelFocus;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig::New()
+  .SetLabelAsyncRendering(true)
+  .SetMarqueeLoopCount(1)
+  .Apply();
 
   TextController controller(application);
   application.MainLoop();

@@ -99,8 +99,8 @@ LABEL_PROPERTY_REGISTRATION("marqueeSpeed",               INTEGER, MARQUEE_SPEED
 LABEL_PROPERTY_REGISTRATION("marqueeLoopCount",           INTEGER, MARQUEE_LOOP_COUNT            )
 LABEL_PROPERTY_REGISTRATION("marqueeLoopDelay",           FLOAT,   MARQUEE_LOOP_DELAY            )
 LABEL_PROPERTY_REGISTRATION("marqueeGap",                 INTEGER, MARQUEE_GAP                   )
-LABEL_PROPERTY_REGISTRATION("marqueeStopMode",            INTEGER, MARQUEE_STOP_MODE             )
 LABEL_PROPERTY_REGISTRATION("marqueeOrientation",         INTEGER, MARQUEE_ORIENTATION           )
+LABEL_PROPERTY_REGISTRATION("marqueeStopMode",            INTEGER, MARQUEE_STOP_MODE             )
 LABEL_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
 LABEL_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
 LABEL_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
@@ -160,12 +160,14 @@ LabelImpl::LabelImpl()
   mLineHeight(Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::ELLIPSIS),
+  mMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL),
   mAsyncLineCount(0),
   mTextColorAnimatedCount(0),
   mRendererUpdateNeeded(false),
   mMeasureInvalidated(false),
   mIsAsyncRenderRequested(false),
   mIsAsyncRenderLayoutDirty(false),
+  mSuppressAutoMarquee(false),
   mLastMarqueeEnabled(false),
   mIsTouchDown(false),
   mHasAnchors(false),
@@ -406,6 +408,22 @@ UiColor LabelImpl::GetAnchorClickedColor()
   return mController->GetAnchorClickedColor();
 }
 
+void LabelImpl::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
+{
+  if(policy != mMarqueeTriggerPolicy)
+  {
+    mMarqueeTriggerPolicy = policy;
+    mSuppressAutoMarquee  = false;
+    RequestTextRelayout();
+    RequestAsyncRender();
+  }
+}
+
+Text::MarqueeTriggerPolicy LabelImpl::GetMarqueeTriggerPolicy() const
+{
+  return mMarqueeTriggerPolicy;
+}
+
 void LabelImpl::SetMarqueeSpeed(int speed)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), speed);
@@ -453,7 +471,7 @@ float LabelImpl::GetMarqueeLoopDelay() const
 
 void LabelImpl::SetMarqueeGap(int gap)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), gap);
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), gap);
   GetTextScroller()->SetGap(gap);
 }
 
@@ -464,21 +482,6 @@ int LabelImpl::GetMarqueeGap() const
     return mTextScroller->GetGap();
   }
   return Integration::UiConfigManager::Get().GetConfig().GetMarqueeGap();
-}
-
-void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
-{
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
-  GetTextScroller()->SetStopMode(mode);
-}
-
-Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
-{
-  if(mTextScroller)
-  {
-    return mTextScroller->GetStopMode();
-  }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeStopMode();
 }
 
 void LabelImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
@@ -495,6 +498,21 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
     return mTextScroller->GetOrientation();
   }
   return Integration::UiConfigManager::Get().GetConfig().GetMarqueeOrientation();
+}
+
+void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  GetTextScroller()->SetStopMode(mode);
+}
+
+Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
+{
+  if(mTextScroller)
+  {
+    return mTextScroller->GetStopMode();
+  }
+  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeStopMode();
 }
 
 void LabelImpl::SetFontWeight(Text::FontWeight weight)
@@ -1173,6 +1191,7 @@ void LabelImpl::OnInitialize()
   Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
   mController->SetLayoutDirection(layoutDirection);
 
+  self.InheritedVisibilityChangedSignal().Connect(this, &LabelImpl::OnViewInheritedVisibilityChanged);
   self.LayoutDirectionChangedSignal().Connect(this, &LabelImpl::OnLayoutDirectionChanged);
 
   if(Dali::Adaptor::IsAvailable())
@@ -1263,7 +1282,6 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   }
 
   const Text::MarqueeOrientation marqueeOrientation = mTextScroller ? mTextScroller->GetOrientation() : Text::MarqueeOrientation::HORIZONTAL;
-  // TODO: This is only meaningful after marquee ellipsis mode is supported.
   EvaluateAndApplyMarquee(contentSize, marqueeOrientation);
 
   Size originSize = Size::ZERO;
@@ -1526,7 +1544,8 @@ void LabelImpl::InvalidateTextMeasure()
   if(!mMeasureInvalidated)
   {
     InvalidateMeasure();
-    mMeasureInvalidated = true;
+    mMeasureInvalidated  = true;
+    mSuppressAutoMarquee = false;
   }
 }
 
@@ -1541,6 +1560,7 @@ void LabelImpl::RequestAsyncRender()
 void LabelImpl::ScrollingFinished()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+  mSuppressAutoMarquee = true;
   mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
   RequestAsyncRender();
@@ -1565,12 +1585,12 @@ void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
 // =============================================================================
 void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
 {
-  // Check current state to prevent starting scroll when ENABLE_MARQUEE was set to false.
-  if(!mController->IsMarqueeEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::TRUNCATE)
+  // Prevent restarting marquee after StopMarquee().
+  if(!mController->IsMarqueeEnabled() && mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::MANUAL)
   {
     if(!mIsAsyncRenderRequested)
     {
-      DALI_LOG_ERROR("[%p] AsyncInitializeMarquee was called, but marquee was disabled and no next render was requested.\n", mController.Get());
+      DALI_LOG_WARNING("[%p] AsyncInitializeMarquee was called, but marquee was disabled and no next render was requested.\n", mController.Get());
     }
     // Marquee has been disabled since the async render was requested.
     // Do not start scrolling even though the render was completed with marquee enabled.
@@ -1890,6 +1910,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
 void LabelImpl::UpdateMarqueeState()
 {
+  // Re-enable marquee re-evaluation when marquee-related layout conditions change.
+  mSuppressAutoMarquee = false;
   if(mController->IsMarqueeEnabled())
   {
     const Text::MarqueeStopMode stopMode = GetTextScroller()->GetStopMode();
@@ -1902,55 +1924,42 @@ void LabelImpl::UpdateMarqueeState()
 
 void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
 {
-  if(mTextScroller)
+  if(!mTextScroller)
   {
-    if(visible)
+    return;
+  }
+
+  if(visible)
+  {
+    if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
     {
-      // TODO: Handle MARQUEE ellipsis on visibility change (disable when hidden, restore when visible)
-      // if(mLastEllipsisMode == Text::Ellipsize::MARQUEE)
-      // {
-      //   mController->SetEllipsisMode(mLastEllipsisMode);
-      //   if(mTextScroller)
-      //   {
-      //     mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
-      //     mTextScroller->StopScrolling();
-      //   }
-      // }
-      // else
-      {
-        if(mController->IsMarqueeEnabled() || mLastMarqueeEnabled)
-        {
-          mController->SetMarqueeEnabled(true, true, GetTextScroller()->GetOrientation());
-        }
-      }
+      mSuppressAutoMarquee = false;
+      RequestTextRelayout();
     }
     else
     {
-      // TODO: Handle MARQUEE ellipsis on visibility change (disable when hidden, restore when visible)
-      // if(mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
-      // {
-      //   mLastEllipsisMode = Text::Ellipsize::MARQUEE;
-      //   mController->SetEllipsisMode(Text::Ellipsize::TRUNCATE);
-      //   if(mTextScroller)
-      //   {
-      //     mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
-      //     mTextScroller->StopScrolling();
-      //   }
-      // }
-      // else
+      if(mController->IsMarqueeEnabled() || mLastMarqueeEnabled)
       {
-        if(mLastMarqueeEnabled && !mController->IsMarqueeEnabled())
-        {
-          mLastMarqueeEnabled = false;
-        }
-        if(mTextScroller->IsScrolling())
-        {
-          const Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
-          mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
-          mTextScroller->StopScrolling();
-          mTextScroller->SetStopMode(stopMode);
-        }
+        mController->SetMarqueeEnabled(true, true, GetTextScroller()->GetOrientation());
       }
+    }
+  }
+  else
+  {
+    if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+    {
+      mSuppressAutoMarquee = true;
+    }
+    if(mLastMarqueeEnabled && !mController->IsMarqueeEnabled())
+    {
+      mLastMarqueeEnabled = false;
+    }
+    if(mTextScroller->IsScrolling())
+    {
+      const Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
+      mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
+      mTextScroller->StopScrolling();
+      mTextScroller->SetStopMode(stopMode);
     }
   }
 }
@@ -1966,9 +1975,22 @@ Text::TextScrollerPtr LabelImpl::GetTextScroller()
 
 void LabelImpl::SetMarqueeEnabled(bool enabled)
 {
-  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
+  if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
-    DALI_LOG_DEBUG_INFO("Tried to marquee while in ellipsize marquee mode, request ignored.\n");
+    if(enabled)
+    {
+      mSuppressAutoMarquee = false;
+      RequestTextRelayout();
+    }
+    else
+    {
+      mSuppressAutoMarquee = true;
+      if(mTextScroller)
+      {
+        mTextScroller->StopScrolling();
+      }
+    }
+    RequestAsyncRender();
   }
   else
   {
@@ -1994,7 +2016,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
   }
 }
 
-void LabelImpl::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
+void LabelImpl::OnViewInheritedVisibilityChanged(Actor actor, bool visible)
 {
   mIsVisible            = visible;
   mIsVisibleInitialized = true;
@@ -2027,36 +2049,44 @@ bool LabelImpl::IsVisible()
 
 void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation)
 {
-  if(mController->IsTextElideEnabled() && mController->GetEllipsisMode() == Text::Ellipsize::MARQUEE)
+  if(mMarqueeTriggerPolicy != Text::MarqueeTriggerPolicy::ON_OVERFLOW || mSuppressAutoMarquee || !IsVisible())
   {
-    if(IsVisible())
+    return;
+  }
+
+  bool       marqueeEnabled   = false;
+  const bool multiLineEnabled = mController->IsMultiLineEnabled();
+
+  if(orientation == Text::MarqueeOrientation::HORIZONTAL)
+  {
+    if(multiLineEnabled)
     {
-      bool marqueeEnabled = false;
-
-      if(orientation == Text::MarqueeOrientation::HORIZONTAL)
-      {
-        if(mController->IsMultiLineEnabled())
-        {
-          DALI_LOG_DEBUG_INFO("Attempted ellipsize marquee on a non SINGLE_LINE_BOX, request ignored\n");
-          marqueeEnabled = false;
-        }
-        else
-        {
-          const Size naturalSize = mController->GetNaturalSize(false).GetVectorXY();
-          marqueeEnabled         = contentSize.width < naturalSize.width;
-        }
-      }
-      else
-      {
-        const float textHeight = mController->GetHeightForWidth(contentSize.width);
-        marqueeEnabled         = contentSize.height < textHeight;
-      }
-
-      if(marqueeEnabled != mController->IsMarqueeEnabled())
-      {
-        mController->SetMarqueeEnabled(marqueeEnabled, false, orientation);
-      }
+      DALI_LOG_DEBUG_INFO("Marquee Horizontal: valid only for single-line text\n");
+      marqueeEnabled = false;
     }
+    else
+    {
+      const Size naturalSize = mController->GetNaturalSize(false).GetVectorXY();
+      marqueeEnabled         = contentSize.width < naturalSize.width;
+    }
+  }
+  else // MarqueeOrientation::VERTICAL
+  {
+    if(!multiLineEnabled)
+    {
+      DALI_LOG_DEBUG_INFO("Marquee Vertical: valid only for multi-line text\n");
+      marqueeEnabled = false;
+    }
+    else
+    {
+      const float textHeight = mController->GetHeightForWidth(contentSize.width);
+      marqueeEnabled         = contentSize.height < textHeight;
+    }
+  }
+
+  if(marqueeEnabled != mController->IsMarqueeEnabled())
+  {
+    mController->SetMarqueeEnabled(marqueeEnabled, false, orientation);
   }
 }
 
@@ -2267,8 +2297,9 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
   parameters.textFitCandidates          = mController->GetTextFitCandidates();
   parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
-  parameters.ellipsisMode               = mController->GetEllipsisMode();
-  if(parameters.isMarqueeEnabled || parameters.ellipsisMode == Text::Ellipsize::MARQUEE)
+  parameters.marqueeTriggerPolicy       = mMarqueeTriggerPolicy;
+  parameters.suppressAutoMarquee        = mSuppressAutoMarquee;
+  if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();
     parameters.marqueeSpeed       = GetTextScroller()->GetSpeed();
@@ -2436,6 +2467,7 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize                     = size;
         mIsAsyncRenderLayoutDirty = true;
+        mSuppressAutoMarquee      = false;
       }
       break;
     }
@@ -2446,6 +2478,7 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize.width               = width;
         mIsAsyncRenderLayoutDirty = true;
+        mSuppressAutoMarquee      = false;
       }
       break;
     }
@@ -2456,12 +2489,14 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize.height              = height;
         mIsAsyncRenderLayoutDirty = true;
+        mSuppressAutoMarquee      = false;
       }
       break;
     }
     case Ui::View::Property::PADDING:
     {
       mIsAsyncRenderLayoutDirty = true;
+      mSuppressAutoMarquee      = false;
       break;
     }
     case Ui::View::Property::BACKGROUND:

@@ -146,6 +146,25 @@ enum class LineHeightMode : uint8_t
 constexpr float LINE_HEIGHT_AUTO = -1.0f;
 
 /**
+ * @brief Enumeration for defining when the marquee animation is triggered.
+ * Specifies the condition under which the marquee starts.
+ */
+enum class MarqueeTriggerPolicy : uint8_t
+{
+  /**
+   * @brief Starts the marquee only when explicitly requested.
+   * The animation is triggered by calling StartMarquee().
+   */
+  MANUAL = 0,
+  /**
+   * @brief Starts the marquee automatically when the text overflows.
+   * The animation is triggered during layout if the content exceeds
+   * the available space.
+   */
+  ON_OVERFLOW = 1
+};
+
+/**
  * @brief Enumeration for selecting the orientation of the marquee animation.
  * Defines whether the marquee scrolls horizontally or vertically.
  */
@@ -194,7 +213,6 @@ enum class OverflowMode : uint8_t
    * Text outside the layout bounds is not rendered.
    */
   CLIP = 0,
-
   /**
    * @brief Truncates the text with an ellipsis.
    * Displays "..." at the end of the visible text.

@@ -149,21 +149,21 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       impl.SetMarqueeGap(value.Get<int>());
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
-    {
-      Text::MarqueeStopMode mode;
-      if(Text::GetMarqueeStopModeEnumeration(value, mode))
-      {
-        impl.SetMarqueeStopMode(mode);
-      }
-      break;
-    }
     case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
       Text::MarqueeOrientation orientation;
       if(Text::GetMarqueeOrientationEnumeration(value, orientation))
       {
         impl.SetMarqueeOrientation(orientation);
+      }
+      break;
+    }
+    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
+    {
+      Text::MarqueeStopMode mode;
+      if(Text::GetMarqueeStopModeEnumeration(value, mode))
+      {
+        impl.SetMarqueeStopMode(mode);
       }
       break;
     }
@@ -336,14 +336,14 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
       value = impl.GetMarqueeGap();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
-    {
-      value = impl.GetMarqueeStopMode();
-      break;
-    }
     case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
       value = impl.GetMarqueeOrientation();
+      break;
+    }
+    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
+    {
+      value = impl.GetMarqueeStopMode();
       break;
     }
     case Text::LabelPropertyIndex::FONT_WEIGHT:
