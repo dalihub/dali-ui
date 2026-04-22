@@ -277,8 +277,6 @@ public: // Setters for chaining
    * @brief Sets the color of the placeholder text.
    *
    * @param[in] color The placeholder text color as a UiColor.
-   *
-   * @return A reference to this InputField for method chaining.
    */
   InputField& SetPlaceholderColor(const UiColor& color);
 
@@ -307,8 +305,6 @@ public: // Setters for chaining
    * @brief Sets the width of the text cursor.
    *
    * @param[in] width The cursor width in pixels.
-   *
-   * @return A reference to this InputField for method chaining.
    */
   InputField& SetCursorWidth(int width);
 
@@ -326,8 +322,6 @@ public: // Setters for chaining
    * when a split cursor is shown in bidirectional text.
    *
    * @param[in] color The cursor color as a UiColor.
-   *
-   * @return A reference to this InputField for method chaining.
    */
   InputField& SetCursorColor(const UiColor& color);
 
@@ -339,11 +333,55 @@ public: // Setters for chaining
   UiColor GetCursorColor();
 
   /**
+   * @brief Sets whether the cursor should blink.
+   *
+   * @param[in] enabled True to enable cursor blinking, false otherwise.
+   */
+  InputField& SetCursorBlinkEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether the cursor is set to blink.
+   *
+   * @return True if cursor blinking is enabled, false otherwise.
+   */
+  bool IsCursorBlinkEnabled() const;
+
+  /**
+   * @brief Sets the time interval in seconds between cursor on and off states.
+   *
+   * @param[in] interval The cursor blink interval in seconds.
+   */
+  InputField& SetCursorBlinkInterval(float interval);
+
+  /**
+   * @brief Returns the time interval in seconds between cursor on and off states.
+   *
+   * @return The cursor blink interval in seconds.
+   */
+  float GetCursorBlinkInterval() const;
+
+  /**
+   * @brief Sets the cursor position.
+   *
+   * The position is specified as a character index in the current text.
+   *
+   * @param[in] position The cursor position.
+   */
+  InputField& SetCursorPosition(uint32_t position);
+
+  /**
+   * @brief Returns the current cursor position.
+   *
+   * The returned value is the character index in the current text.
+   *
+   * @return The current cursor position.
+   */
+  uint32_t GetCursorPosition() const;
+
+  /**
    * @brief Sets the highlight color of the selected text region.
    *
    * @param[in] color The selection highlight color as a UiColor).
-   *
-   * @return A reference to this InputField for method chaining.
    */
   InputField& SetSelectionColor(const UiColor& color);
 
@@ -587,7 +625,6 @@ public: // Setters for chaining
    * Unsupported axis tags may be ignored depending on the selected font.
    *
    * @param[in] axes The font variation axes.
-   * @return A reference to this input field.
    */
   InputField& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
@@ -616,7 +653,6 @@ public: // Setters for chaining
    * Unsupported axis tags may be ignored depending on the selected font.
    *
    * @param[in] settings The font variation settings string.
-   * @return A reference to this input field.
    */
   InputField& SetFontVariation(const Dali::String& settings);
 
@@ -631,8 +667,6 @@ public: // Setters for chaining
    * @brief Clears the font variation.
    *
    * This removes all previously set font variation axes.
-   *
-   * @return A reference to this input field.
    */
   InputField& ClearFontVariation();
 

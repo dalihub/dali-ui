@@ -55,8 +55,6 @@
   * @brief Sets the color of the placeholder text. \
   * \
   * @param[in] color The placeholder text color as a UiColor. \
-  * \
-  * @return A reference to this InputField for method chaining. \
   */ \
   ChildClass& SetPlaceholderColor(const UiColor& color) { InputField::SetPlaceholderColor(color); return *this; } \
   /** \
@@ -69,8 +67,6 @@
   * @brief Sets the width of the text cursor. \
   * \
   * @param[in] width The cursor width in pixels. \
-  * \
-  * @return A reference to this InputField for method chaining. \
   */ \
   ChildClass& SetCursorWidth(int width) { InputField::SetCursorWidth(width); return *this; } \
   /** \
@@ -80,16 +76,32 @@
   * when a split cursor is shown in bidirectional text. \
   * \
   * @param[in] color The cursor color as a UiColor. \
-  * \
-  * @return A reference to this InputField for method chaining. \
   */ \
   ChildClass& SetCursorColor(const UiColor& color) { InputField::SetCursorColor(color); return *this; } \
+  /** \
+  * @brief Sets whether the cursor should blink. \
+  * \
+  * @param[in] enabled True to enable cursor blinking, false otherwise. \
+  */ \
+  ChildClass& SetCursorBlinkEnabled(bool enabled) { InputField::SetCursorBlinkEnabled(enabled); return *this; } \
+  /** \
+  * @brief Sets the time interval in seconds between cursor on and off states. \
+  * \
+  * @param[in] interval The cursor blink interval in seconds. \
+  */ \
+  ChildClass& SetCursorBlinkInterval(float interval) { InputField::SetCursorBlinkInterval(interval); return *this; } \
+  /** \
+  * @brief Sets the cursor position. \
+  * \
+  * The position is specified as a character index in the current text. \
+  * \
+  * @param[in] position The cursor position. \
+  */ \
+  ChildClass& SetCursorPosition(uint32_t position) { InputField::SetCursorPosition(position); return *this; } \
   /** \
   * @brief Sets the highlight color of the selected text region. \
   * \
   * @param[in] color The selection highlight color as a UiColor). \
-  * \
-  * @return A reference to this InputField for method chaining. \
   */ \
   ChildClass& SetSelectionColor(const UiColor& color) { InputField::SetSelectionColor(color); return *this; } \
   /** \
@@ -214,7 +226,6 @@
   * Unsupported axis tags may be ignored depending on the selected font. \
   * \
   * @param[in] axes The font variation axes. \
-  * @return A reference to this input field. \
   */ \
   ChildClass& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes) { InputField::SetFontVariation(axes); return *this; } \
   /** \
@@ -242,6 +253,5 @@
   * Unsupported axis tags may be ignored depending on the selected font. \
   * \
   * @param[in] settings The font variation settings string. \
-  * @return A reference to this input field. \
   */ \
   ChildClass& SetFontVariation(const Dali::String& settings) { InputField::SetFontVariation(settings); return *this; }

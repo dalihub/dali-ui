@@ -242,6 +242,39 @@ UiColor InputField::GetCursorColor()
   return GetImpl(*this).GetCursorColor();
 }
 
+InputField& InputField::SetCursorBlinkEnabled(bool enabled)
+{
+  GetImpl(*this).SetCursorBlinkEnabled(enabled);
+  return *this;
+}
+
+bool InputField::IsCursorBlinkEnabled() const
+{
+  return GetImpl(*this).IsCursorBlinkEnabled();
+}
+
+InputField& InputField::SetCursorBlinkInterval(float interval)
+{
+  GetImpl(*this).SetCursorBlinkInterval(interval);
+  return *this;
+}
+
+float InputField::GetCursorBlinkInterval() const
+{
+  return GetImpl(*this).GetCursorBlinkInterval();
+}
+
+InputField& InputField::SetCursorPosition(uint32_t position)
+{
+  GetImpl(*this).SetCursorPosition(position);
+  return *this;
+}
+
+uint32_t InputField::GetCursorPosition() const
+{
+  return GetImpl(*this).GetCursorPosition();
+}
+
 InputField& InputField::SetSelectionColor(const UiColor& color)
 {
   GetImpl(*this).SetSelectionColor(color);

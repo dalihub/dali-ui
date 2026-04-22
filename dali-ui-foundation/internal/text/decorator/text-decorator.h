@@ -287,7 +287,7 @@ public:
   const Dali::Vector4& GetColor(Cursor cursor) const;
 
   /**
-   * @brief Start blinking the cursor; see also SetCursorBlinkDuration().
+   * @brief Start blinking the cursor.
    */
   void StartCursorBlink();
 
@@ -314,20 +314,6 @@ public:
    * @return The cursor blink-interval in seconds.
    */
   float GetCursorBlinkInterval() const;
-
-  /**
-   * @brief The cursor will stop blinking after this duration.
-   *
-   * @param[in] seconds The duration in seconds.
-   */
-  void SetCursorBlinkDuration(float seconds);
-
-  /**
-   * @brief Retrieves the blink-duration for a cursor.
-   *
-   * @return The cursor blink-duration in seconds.
-   */
-  float GetCursorBlinkDuration() const;
 
   /**
    * @brief Sets the width of the cursors.

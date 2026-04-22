@@ -313,6 +313,43 @@ UiColor InputFieldImpl::GetCursorColor()
   return mDecorator->GetColor(Text::PRIMARY_CURSOR);
 }
 
+void InputFieldImpl::SetCursorBlinkEnabled(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  mController->SetEnableCursorBlink(enabled);
+  RequestTextRelayout();
+}
+
+bool InputFieldImpl::IsCursorBlinkEnabled() const
+{
+  return mController->GetEnableCursorBlink();
+}
+
+void InputFieldImpl::SetCursorBlinkInterval(float interval)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), interval);
+  mDecorator->SetCursorBlinkInterval(interval);
+}
+
+float InputFieldImpl::GetCursorBlinkInterval() const
+{
+  return mDecorator->GetCursorBlinkInterval();
+}
+
+void InputFieldImpl::SetCursorPosition(uint32_t position)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), position);
+  if(mController->SetPrimaryCursorPosition(position, HasKeyInputFocus()))
+  {
+    SetKeyInputFocus();
+  }
+}
+
+uint32_t InputFieldImpl::GetCursorPosition() const
+{
+  return mController->GetPrimaryCursorPosition();
+}
+
 void InputFieldImpl::SetSelectionColor(const UiColor& color)
 {
   SetColorBinding("SelectionColor", color, this, &InputFieldImpl::SetSelectionColorInternal);

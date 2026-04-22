@@ -222,7 +222,6 @@ struct Decorator::Impl : public ConnectionTracker
     mHighlightOutlineOffset(0.f),
     mActiveCursor(ACTIVE_CURSOR_NONE),
     mCursorBlinkInterval(CURSOR_BLINK_INTERVAL),
-    mCursorBlinkDuration(0.0f),
     mCursorWidth(CURSOR_WIDTH),
     mHandleScrolling(HANDLE_TYPE_COUNT),
     mHandleReleased(HANDLE_TYPE_COUNT),
@@ -2028,7 +2027,6 @@ struct Decorator::Impl : public ConnectionTracker
 
   unsigned int    mActiveCursor;
   unsigned int    mCursorBlinkInterval;
-  float           mCursorBlinkDuration;
   float           mCursorWidth;     ///< The width of the cursors in pixels.
   HandleType      mHandleScrolling; ///< The handle which is scrolling.
   HandleType      mHandleReleased;  ///< The last handle released.
@@ -2186,22 +2184,22 @@ void Decorator::DelayCursorBlink()
 
 void Decorator::SetCursorBlinkInterval(float seconds)
 {
-  mImpl->mCursorBlinkInterval = static_cast<unsigned int>(seconds * TO_MILLISECONDS); // Convert to milliseconds
+  const unsigned int interval = static_cast<unsigned int>(seconds * TO_MILLISECONDS); // Convert to milliseconds
+  if(mImpl->mCursorBlinkInterval == interval)
+  {
+    return;
+  }
+
+  mImpl->mCursorBlinkInterval = interval;
+  if(mImpl->mCursorBlinkTimer)
+  {
+    mImpl->mCursorBlinkTimer.SetInterval(interval, mImpl->mCursorBlinkTimer.IsRunning());
+  }
 }
 
 float Decorator::GetCursorBlinkInterval() const
 {
   return static_cast<float>(mImpl->mCursorBlinkInterval) * TO_SECONDS;
-}
-
-void Decorator::SetCursorBlinkDuration(float seconds)
-{
-  mImpl->mCursorBlinkDuration = seconds;
-}
-
-float Decorator::GetCursorBlinkDuration() const
-{
-  return mImpl->mCursorBlinkDuration;
 }
 
 void Decorator::SetCursorWidth(int width)

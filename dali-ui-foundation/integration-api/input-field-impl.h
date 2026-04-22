@@ -195,6 +195,36 @@ public:
   UiColor GetCursorColor();
 
   /**
+   * @copydoc Dali::Ui::InputField::SetCursorBlinkEnabled
+   */
+  void SetCursorBlinkEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsCursorBlinkEnabled
+   */
+  bool IsCursorBlinkEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetCursorBlinkInterval
+   */
+  void SetCursorBlinkInterval(float interval);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetCursorBlinkInterval
+   */
+  float GetCursorBlinkInterval() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetCursorPosition
+   */
+  void SetCursorPosition(uint32_t position);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetCursorPosition
+   */
+  uint32_t GetCursorPosition() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetSelectionColor
    */
   void SetSelectionColor(const UiColor& color);
