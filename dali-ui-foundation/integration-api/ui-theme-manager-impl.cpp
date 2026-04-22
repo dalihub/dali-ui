@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/public-api/common/dali-common.h>
 
 // INTERNAL INCLUDES
@@ -39,6 +40,8 @@ const char* const UICONFIG_NOT_INITIALIZED_MESSAGE =
   "Call UiConfig::New().Apply() in main() before the application main loop starts. "
   "UiConfig provides global settings for the entire dali-ui framework. "
   "Do NOT access UiConfig-dependent features in static/global variable initializers.";
+
+UiThemeManager gPreInitializedUiThemeManager;
 } // unnamed namespace
 
 UiThemeManagerImpl::UiThemeManagerImpl() = default;
@@ -50,14 +53,46 @@ UiThemeManagerImpl::~UiThemeManagerImpl()
 
 UiThemeManager UiThemeManagerImpl::Get()
 {
-  static IntrusivePtr<UiThemeManagerImpl> impl;
+  UiThemeManager manager;
 
-  if(!impl)
+  SingletonService service(SingletonService::Get());
+  if(service)
   {
-    impl = new UiThemeManagerImpl();
+    // Check whether the singleton is already created
+    BaseHandle handle = service.GetSingleton(typeid(UiThemeManager));
+    if(handle)
+    {
+      // If so, downcast the handle
+      manager = UiThemeManager(dynamic_cast<UiThemeManagerImpl*>(handle.GetObjectPtr()));
+    }
+
+    if(!manager) // If not, create the UiThemeManager and register it as a singleton
+    {
+      if(gPreInitializedUiThemeManager)
+      {
+        // Promote the pre-initialized instance into the singleton service
+        manager = std::move(gPreInitializedUiThemeManager);
+        gPreInitializedUiThemeManager.Reset();
+      }
+      else
+      {
+        manager = UiThemeManager(new UiThemeManagerImpl());
+      }
+      service.Register(typeid(manager), manager);
+    }
+  }
+  else
+  {
+    // SingletonService is not yet available (pre-initialization phase).
+    // Keep the instance in a global handle so it survives until the service starts.
+    if(!gPreInitializedUiThemeManager)
+    {
+      gPreInitializedUiThemeManager = UiThemeManager(new UiThemeManagerImpl());
+    }
+    manager = gPreInitializedUiThemeManager;
   }
 
-  return UiThemeManager(impl.Get());
+  return manager;
 }
 
 void UiThemeManagerImpl::EnsureThemeLoader()
