@@ -377,37 +377,23 @@ public:
     mOutlineDefaults(NULL),
     mEventData(NULL),
     mIdleCallback(NULL),
+    mHiddenInput(NULL),
+    mInputFilter(nullptr),
+    mMetrics(),
     mFontClient(),
     mClipboard(),
     mView(),
-    mMetrics(),
     mModifyEvents(),
+    mTextFitCandidates(),
+    mRawText(),
+    mTextUpdateInfo(),
     mTextColor(Color::BLACK),
     mAnchorColor(Color::MEDIUM_BLUE),
     mAnchorClickedColor(Color::DARK_MAGENTA),
-    mTextUpdateInfo(),
+    mTextFitContentSize(),
     mOperationsPending(NO_OPERATION),
     mMaximumNumberOfCharacters(50u),
-    mHiddenInput(NULL),
-    mInputFilter(nullptr),
-    mTextFitContentSize(),
-    mRawText(),
-    mTextFitCandidates(),
     mMaxFitCandidateIndex(-1),
-    mRecalculateNaturalSize(true),
-    mRecalculateLayoutSize(true),
-    mMarkupProcessorEnabled(false),
-    mClipboardHideEnabled(true),
-    mIsMarqueeEnabled(false),
-    mIsMarqueeMaxTextureExceeded(false),
-    mUpdateTextDirection(true),
-    mIsTextDirectionRTL(false),
-    mUnderlineSetByString(false),
-    mShadowSetByString(false),
-    mOutlineSetByString(false),
-    mFontStyleSetByString(false),
-    mStrikethroughSetByString(false),
-    mShouldClearFocusOnEscape(ClearFocusOnEscapeState::UNKNOWN),
     mLayoutDirection(LayoutDirection::LEFT_TO_RIGHT),
     mCurrentLineSize(0.f),
     mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
@@ -421,6 +407,20 @@ public:
     mSystemFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
     mDisabledColorOpacity(DEFAULT_DISABLED_COLOR_OPACITY),
     mRenderScale(1.0f),
+    mShouldClearFocusOnEscape(ClearFocusOnEscapeState::UNKNOWN),
+    mIsTextDirectionRTL(false),
+    mRecalculateNaturalSize(true),
+    mRecalculateLayoutSize(true),
+    mMarkupProcessorEnabled(false),
+    mClipboardHideEnabled(true),
+    mIsMarqueeEnabled(false),
+    mIsMarqueeMaxTextureExceeded(false),
+    mUpdateTextDirection(true),
+    mUnderlineSetByString(false),
+    mShadowSetByString(false),
+    mOutlineSetByString(false),
+    mFontStyleSetByString(false),
+    mStrikethroughSetByString(false),
     mSystemFontSizeScaleEnabled(false),
     mTextFitEnabled(false),
     mTextFitChanged(false),
@@ -430,8 +430,7 @@ public:
     mProcessorRegistered(false),
     mTextCutout(false),
     mIsCursorInsetEnabled(false),
-    mIsAsyncRendering(false),
-    mEllipsisMode(Ellipsize::TRUNCATE)
+    mIsAsyncRendering(false)
   {
     mModel = Model::New();
 
@@ -1179,87 +1178,89 @@ private:
   void CopyCharacterSpacingFromLogicalToVisualModels();
 
 public:
-  ControlInterface*           mControlInterface;           ///< Reference to the text controller.
-  EditableControlInterface*   mEditableControlInterface;   ///< Reference to the editable text controller.
-  SelectableControlInterface* mSelectableControlInterface; ///< Reference to the selectable text controller.
-  AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
-  ModelPtr                    mModel;                      ///< Pointer to the text's model.
-  FontDefaults*               mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults*          mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults*             mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
-  EmbossDefaults*             mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
-  OutlineDefaults*            mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
-  EventData*                  mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
-  CallbackBase*               mIdleCallback;               ///< Callback what would be called at idler
-  TextAbstraction::FontClient mFontClient;                 ///< Handle to the font client.
-  Clipboard                   mClipboard;                  ///< Handle to the system clipboard
-  View                        mView;                       ///< The view interface to the rendering back-end.
-  MetricsPtr                  mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
-  Layout::Engine              mLayoutEngine;               ///< The layout engine.
-  Vector<ModifyEvent>         mModifyEvents;               ///< Temporary stores the text set until the next relayout.
-  Vector4                     mTextColor;                  ///< The regular text color
-  Vector4                     mAnchorColor;                ///< The anchor color
-  Vector4                     mAnchorClickedColor;         ///< The anchor clicked color
-  TextUpdateInfo              mTextUpdateInfo;             ///< Info of the characters updated.
-  OperationsMask              mOperationsPending;          ///< Operations pending to be done to layout the text.
-  Length                      mMaximumNumberOfCharacters;  ///< Maximum number of characters that can be inserted.
-  HiddenText*                 mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
-  std::unique_ptr<InputFilter>
-              mInputFilter;        ///< Avoid allocating this when the user does not specify input filter mode.
-  Vector2     mTextFitContentSize; ///< Size of Text fit content
-  std::string mRawText;            ///< Raw text including markup tag.
+  // Core references / owned helpers
+  ControlInterface*            mControlInterface;           ///< Reference to the text controller.
+  EditableControlInterface*    mEditableControlInterface;   ///< Reference to the editable text controller.
+  SelectableControlInterface*  mSelectableControlInterface; ///< Reference to the selectable text controller.
+  AnchorControlInterface*      mAnchorControlInterface;     ///< Reference to the anchor controller.
+  ModelPtr                     mModel;                      ///< Pointer to the text's model.
+  FontDefaults*                mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
+  UnderlineDefaults*           mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
+  ShadowDefaults*              mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
+  EmbossDefaults*              mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  OutlineDefaults*             mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
+  EventData*                   mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
+  CallbackBase*                mIdleCallback;               ///< Callback what would be called at idler
+  HiddenText*                  mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
+  std::unique_ptr<InputFilter> mInputFilter;                ///< Avoid allocating this when the user does not specify input filter mode.
+  MetricsPtr                   mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
 
+  // Main runtime objects
+  TextAbstraction::FontClient mFontClient;       ///< Handle to the font client.
+  Clipboard                   mClipboard;        ///< Handle to the system clipboard
+  View                        mView;             ///< The view interface to the rendering back-end.
+  Layout::Engine              mLayoutEngine;     ///< The layout engine.
+  Shader                      mShaderBackground; ///< The shader for text background.
+
+  // Containers / complex values
+  Vector<ModifyEvent>              mModifyEvents;      ///< Temporary stores the text set until the next relayout.
   Dali::Vector<Text::FitCandidate> mTextFitCandidates; ///< List of FitCandidate for TextFitCandidates operation.
-  int                              mMaxFitCandidateIndex;
+  std::string                      mRawText;           ///< Raw text including markup tag.
+  TextUpdateInfo                   mTextUpdateInfo;    ///< Info of the characters updated.
 
-  bool mRecalculateNaturalSize : 1;      ///< Whether the natural size needs to be recalculated.
-  bool mRecalculateLayoutSize : 1;       ///< Whether the layout size needs to be recalculated.
-  bool mMarkupProcessorEnabled : 1;      ///< Whether the mark-up procesor is enabled.
-  bool mClipboardHideEnabled : 1;        ///< Whether the ClipboardHide function work or not
-  bool mIsMarqueeEnabled : 1;            ///< Whether auto text scrolling is enabled.
-  bool mIsMarqueeMaxTextureExceeded : 1; ///< Whether auto text scrolling is exceed max texture size.
-  bool mUpdateTextDirection : 1;         ///< Whether the text direction needs to be updated.
+  // Geometry / colors
+  Vector4 mTextColor;          ///< The regular text color
+  Vector4 mAnchorColor;        ///< The anchor color
+  Vector4 mAnchorClickedColor; ///< The anchor clicked color
+  Vector2 mTextFitContentSize; ///< Size of Text fit content
 
-  CharacterDirection mIsTextDirectionRTL : 1; ///< Whether the text direction is right to left or not
+  // Integer / enum-like values
+  OperationsMask        mOperationsPending;         ///< Operations pending to be done to layout the text.
+  Length                mMaximumNumberOfCharacters; ///< Maximum number of characters that can be inserted.
+  int                   mMaxFitCandidateIndex;
+  LayoutDirection::Type mLayoutDirection; ///< Current system language direction
 
-  bool mUnderlineSetByString : 1;     ///< Set when underline is set by string (legacy) instead of map
-  bool mShadowSetByString : 1;        ///< Set when shadow is set by string (legacy) instead of map
-  bool mOutlineSetByString : 1;       ///< Set when outline is set by string (legacy) instead of map
-  bool mFontStyleSetByString : 1;     ///< Set when font style is set by string (legacy) instead of map
-  bool mStrikethroughSetByString : 1; ///< Set when strikethrough is set by string (legacy) instead of map
+  // Floating-point values
+  float mCurrentLineSize;       ///< Used to store the MinLineSize set by user when TextFitCandidates is enabled.
+  float mTextFitMinSize;        ///< Minimum Font Size for text fit. Default 10
+  float mTextFitMaxSize;        ///< Maximum Font Size for text fit. Default 100
+  float mTextFitStepSize;       ///< Step Size for font intervalse. Default 1
+  float mTextFitLineSize;       ///< This is the LineSize that is the standard when performing TextFit.
+  float mFontSizeScale;         ///< Scale value for Font Size. Default 1.0
+  float mMinFontSizeScale;      ///< Minimum scale value for Font Size. Default 0.01
+  float mMaxFontSizeScale;      ///< Maximum scale value for Font Size. Default 10.0
+  float mAdjustedFontSizeScale; ///< The final font size scale applied after clamping and system scaling.
+  float mSystemFontSizeScale;   ///< System font size scale. Default 1.0
+  float mDisabledColorOpacity;  ///< Color opacity when disabled.
+  float mRenderScale;           ///< The render scale. Default 1.0
 
   mutable ClearFocusOnEscapeState
     mShouldClearFocusOnEscape : 3; ///< Whether text control should clear key input focus.
                                    ///< Make it mutable so we can update it at const method.
 
-  LayoutDirection::Type mLayoutDirection; ///< Current system language direction
-
-  Shader mShaderBackground; ///< The shader for text background.
-
-  float mCurrentLineSize;                ///< Used to store the MinLineSize set by user when TextFitCandidates is enabled.
-  float mTextFitMinSize;                 ///< Minimum Font Size for text fit. Default 10
-  float mTextFitMaxSize;                 ///< Maximum Font Size for text fit. Default 100
-  float mTextFitStepSize;                ///< Step Size for font intervalse. Default 1
-  float mTextFitLineSize;                ///< This is the LineSize that is the standard when performing TextFit.
-  float mFontSizeScale;                  ///< Scale value for Font Size. Default 1.0
-  float mMinFontSizeScale;               ///< Minimum scale value for Font Size. Default 0.01
-  float mMaxFontSizeScale;               ///< Maximum scale value for Font Size. Default 10.0
-  float mAdjustedFontSizeScale;          ///< The final font size scale applied after clamping and system scaling.
-  float mSystemFontSizeScale;            ///< System font size scale. Default 1.0
-  float mDisabledColorOpacity;           ///< Color opacity when disabled.
-  float mRenderScale;                    ///< The render scale. Default 1.0
-  bool  mSystemFontSizeScaleEnabled : 1; ///< Whether the system font size scale is applied.
-  bool  mTextFitEnabled : 1;             ///< Whether the text's fit is enabled.
-  bool  mTextFitChanged : 1;             ///< Whether the text fit property has changed.
-  bool  mTextFitCandidatesEnabled : 1;   ///< Whether the text's fit Candidates is enabled.
-  bool  mIsLayoutDirectionChanged : 1;   ///< Whether the layout has changed.
-  bool  mIsUserInteractionEnabled : 1;   ///< Whether the user interaction is enabled.
-  bool  mProcessorRegistered : 1;        ///< Whether the text controller registered into processor or not.
-  bool  mTextCutout : 1;                 ///< Whether the text cutout enabled.
-  bool  mIsCursorInsetEnabled : 1;       ///< Whether the cursor inset is enabled.
-  bool  mIsAsyncRendering : 1;           ///< whether asynchronous text rendering is enabled.
-
-  Ellipsize::Mode mEllipsisMode; ///< Ellipsis mode of the text. (TRUNCATE, MARQUEE)
+  CharacterDirection mIsTextDirectionRTL : 1;          ///< Whether the text direction is right to left or not
+  bool               mRecalculateNaturalSize : 1;      ///< Whether the natural size needs to be recalculated.
+  bool               mRecalculateLayoutSize : 1;       ///< Whether the layout size needs to be recalculated.
+  bool               mMarkupProcessorEnabled : 1;      ///< Whether the mark-up procesor is enabled.
+  bool               mClipboardHideEnabled : 1;        ///< Whether the ClipboardHide function work or not
+  bool               mIsMarqueeEnabled : 1;            ///< Whether auto text scrolling is enabled.
+  bool               mIsMarqueeMaxTextureExceeded : 1; ///< Whether auto text scrolling is exceed max texture size.
+  bool               mUpdateTextDirection : 1;         ///< Whether the text direction needs to be updated.
+  bool               mUnderlineSetByString : 1;        ///< Set when underline is set by string (legacy) instead of map
+  bool               mShadowSetByString : 1;           ///< Set when shadow is set by string (legacy) instead of map
+  bool               mOutlineSetByString : 1;          ///< Set when outline is set by string (legacy) instead of map
+  bool               mFontStyleSetByString : 1;        ///< Set when font style is set by string (legacy) instead of map
+  bool               mStrikethroughSetByString : 1;    ///< Set when strikethrough is set by string (legacy) instead of map
+  bool               mSystemFontSizeScaleEnabled : 1;  ///< Whether the system font size scale is applied.
+  bool               mTextFitEnabled : 1;              ///< Whether the text's fit is enabled.
+  bool               mTextFitChanged : 1;              ///< Whether the text fit property has changed.
+  bool               mTextFitCandidatesEnabled : 1;    ///< Whether the text's fit Candidates is enabled.
+  bool               mIsLayoutDirectionChanged : 1;    ///< Whether the layout has changed.
+  bool               mIsUserInteractionEnabled : 1;    ///< Whether the user interaction is enabled.
+  bool               mProcessorRegistered : 1;         ///< Whether the text controller registered into processor or not.
+  bool               mTextCutout : 1;                  ///< Whether the text cutout enabled.
+  bool               mIsCursorInsetEnabled : 1;        ///< Whether the cursor inset is enabled.
+  bool               mIsAsyncRendering : 1;            ///< whether asynchronous text rendering is enabled.
 
 private:
   friend ControllerImplEventHandler;
@@ -1273,4 +1274,4 @@ private:
 
 } // namespace Dali
 
-#endif // DALI_UI_TEXT_CONTROLLER_H
+#endif // DALI_UI_TEXT_CONTROLLER_IMPL_H

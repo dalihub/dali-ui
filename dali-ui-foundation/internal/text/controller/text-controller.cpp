@@ -1778,16 +1778,6 @@ void Controller::SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPositi
   mImpl->mModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 }
 
-Text::Ellipsize::Mode Controller::GetEllipsisMode() const
-{
-  return mImpl->mEllipsisMode;
-}
-
-void Controller::SetEllipsisMode(Text::Ellipsize::Mode ellipsisMode)
-{
-  mImpl->mEllipsisMode = ellipsisMode;
-}
-
 void Controller::SetRenderScale(const float renderScale)
 {
   float scale = renderScale;

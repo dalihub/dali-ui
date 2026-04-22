@@ -47,20 +47,6 @@ enum Type
 
 } // namespace EllipsisPosition
 
-namespace Ellipsize
-{
-/**
- * @brief Enumerations specifying ellipsize mode.
- * @see EllipsisMode.
- */
-enum Mode
-{
-  TRUNCATE = 0, ///< If the text exceeds the layout, it will be truncated with an ellipsis.
-  MARQUEE       ///< If the text exceeds the layout, it will be marquee animated.
-};
-
-} // namespace Ellipsize
-
 /**
  * @brief Enumeration for text layout direction.
  */

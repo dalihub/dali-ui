@@ -2018,18 +2018,6 @@ public: // Queries & retrieves.
   void SetEllipsisPosition(Text::EllipsisPosition::Type ellipsisPosition);
 
   /**
-   * @brief Retrieves ellipsis mode
-   * @return The ellipsis mode
-   */
-  Text::Ellipsize::Mode GetEllipsisMode() const;
-
-  /**
-   * @brief Sets ellipsis mode
-   * @param[in] ellipsisMode The ellipsis mode for the text
-   */
-  void SetEllipsisMode(Text::Ellipsize::Mode ellipsisMode);
-
-  /**
    * @brief Sets the render scale
    * @param[in] renderScale The render scale
    */
