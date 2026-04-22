@@ -24,6 +24,8 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali/devel-api/common/singleton-service.h>
+#include <dali/integration-api/debug.h>
 
 namespace Dali
 {
@@ -57,14 +59,26 @@ UiColorManagerImpl::~UiColorManagerImpl() = default;
 
 UiColorManager UiColorManagerImpl::Get()
 {
-  static IntrusivePtr<UiColorManagerImpl> impl;
+  UiColorManager manager;
 
-  if(!impl)
+  SingletonService service(SingletonService::Get());
+  if(service)
   {
-    impl = new UiColorManagerImpl();
+    // Check whether the singleton is already created
+    BaseHandle handle = service.GetSingleton(typeid(UiColorManager));
+    if(handle)
+    {
+      // If so, downcast the handle
+      manager = UiColorManager(dynamic_cast<UiColorManagerImpl*>(handle.GetObjectPtr()));
+    }
+    else
+    {
+      manager = UiColorManager(new UiColorManagerImpl());
+      service.Register(typeid(manager), manager);
+    }
   }
 
-  return UiColorManager(impl.Get());
+  return manager;
 }
 
 Vector4 UiColorManagerImpl::GetColor(StringView colorId) const

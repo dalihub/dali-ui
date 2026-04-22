@@ -205,7 +205,10 @@ ViewImpl::ViewImpl()
 ViewImpl::~ViewImpl()
 {
   auto manager = UiColorManager::Get();
-  GetImpl(manager).ClearBindings(GetOwner());
+  if(manager)
+  {
+    GetImpl(manager).ClearBindings(GetOwner());
+  }
 
   for(auto& iter : mTraits)
   {

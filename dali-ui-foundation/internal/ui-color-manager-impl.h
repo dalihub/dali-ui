@@ -57,7 +57,8 @@ public:
   /**
    * @brief Returns the singleton UiColorManager handle.
    *
-   * Creates the implementation on first call.
+   * Creates the implementation on first call. Returns an uninitialized
+   * handle if called after the SingletonService has been destroyed.
    *
    * @return A UiColorManager handle wrapping the singleton impl
    */
@@ -126,7 +127,14 @@ public:
   void ClearColorOverride();
 
 protected:
+  /**
+   * @brief Constructs a new UiColorManagerImpl.
+   */
   UiColorManagerImpl();
+
+  /**
+   * @brief Destructor.
+   */
   ~UiColorManagerImpl() override;
 
 private:
