@@ -601,7 +601,7 @@ void VisualFactoryCache::UpdateBrokenImageRenderer(VisualRenderer& renderer, con
         shader = GenerateAndSaveShader(IMAGE_SHADER, SHADER_IMAGE_VISUAL_SHADER_VERT.data(),
                                        SHADER_IMAGE_VISUAL_SHADER_FRAG.data());
         shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);
-        shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
+        shader.RegisterProperty(PRE_MULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
       }
       renderer.SetGeometry(geometry);
       renderer.SetShader(shader);

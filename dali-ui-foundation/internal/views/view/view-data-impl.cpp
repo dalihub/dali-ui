@@ -918,6 +918,41 @@ void ViewDataImpl::DoActionExtension(Dali::Property::Index visualIndex, Dali::Pr
   }
 }
 
+bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+{
+  if(DALI_LIKELY(mVisualData))
+  {
+    return mVisualData->AddVisualObject(visualBase, internalContainerRangeType);
+  }
+  return false;
+}
+
+void ViewDataImpl::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
+{
+  if(DALI_LIKELY(mVisualData))
+  {
+    mVisualData->RemoveVisualObject(visualBase);
+  }
+}
+
+uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const
+{
+  if(DALI_LIKELY(mVisualData))
+  {
+    return mVisualData->GetVisualObjectCount(internalContainerRangeType);
+  }
+  return 0u;
+}
+
+Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+{
+  if(DALI_LIKELY(mVisualData))
+  {
+    return mVisualData->GetVisualObjectAt(internalContainerRangeType, siblingOrder);
+  }
+  return Dali::Ui::VisualBase();
+}
+
 void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
   DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
@@ -2342,7 +2377,7 @@ void ViewDataImpl::UpdateBorderline()
 
   Property::Map map;
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::Type::COLOR);
-  map.Insert(Ui::ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_COLOR,

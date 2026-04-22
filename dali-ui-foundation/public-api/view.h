@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -1078,6 +1079,28 @@ public: // Properties
     return *this;
   }
 
+  // @CHAIN_MANUAL
+  /**
+   * @brief Adds a list of visuals to this View in a declarative way.
+   * This method allows for append visuals construction by passing
+   * a brace-enclosed initializer list of VisualBase objects.
+   *
+   * Assert if too many visuals are added, or duplicated VisualBase added.
+   * Please use AddVisual() API if you need to control error cases.
+   *
+   * @param[in] containerRangeType The range of visuals to be added.
+   * @param[in] visuals The initializer list containing VisualBase handles to be added.
+   */
+  View& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  {
+    for(const auto& visual : visuals)
+    {
+      bool added = AddVisual(visual, containerRangeType);
+      DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
+    }
+    return *this;
+  }
+
   // @CHAIN_END
 
   /**
@@ -1291,6 +1314,50 @@ public: // Trait accessors (non-chaining)
    * @return Reference to this View for method chaining
    */
   View& SetInteractionEffect(Trait effect);
+
+public: // VisualBase (non-chaining)
+  /**
+   * @brief Add a Dali::Ui::VisualBase to the view.
+   *
+   * The visual is added to the top of the visuals.
+   * If the container cannot add more than maximum count of visuals
+   * or the visual is already added, return false and it will be ignored.
+   *
+   * If input visual already added to another view,
+   * visual will be detached from old view and added to this view.
+   *
+   * @param[in] visualBase The visual to add.
+   * @param[in] containerRangeType The range of visuals to be added.
+   * @return True if the visual was added successfully, false otherwise.
+   */
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+
+  /**
+   * @brief Remove a Dali::Ui::VisualBase from the view.
+   *
+   * @note The VisualBase's SiblingOrder value of all other Dali::Ui::VisualBase
+   * who were added at same container with removed visual will be changed automatically.
+   *
+   * @param[in] visualBase The visual to remove.
+   */
+  void RemoveVisual(Dali::Ui::VisualBase visualBase);
+
+  /**
+   * @brief Get total number of Dali::Ui::VisualBase which we added using AddVisual().
+   *
+   * @param[in] containerRangeType The range of visuals to get.
+   * @return Get the number of visual base.
+   */
+  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+
+  /**
+   * @brief Get a Dali::Ui::VisualBase by sibling order.
+   *
+   * @param[in] containerRangeType The range of visuals to get.
+   * @param[in] siblingOrder The sibling order to get.
+   * @return Get visual base by sibling order. Empty handle if not exist.
+   */
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
 
 public: // Not intended for application developers
   /// @cond internal

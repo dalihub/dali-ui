@@ -162,11 +162,6 @@ public: // from Visual
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
 
   /**
-   * @copydoc Visual::Base::EnablePreMultipliedAlpha
-   */
-  void EnablePreMultipliedAlpha(bool preMultiplied) override;
-
-  /**
    * @copydoc Visual::Base::OnDoAction
    */
   void OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes) override;
@@ -338,6 +333,13 @@ private:
    * @brief Update the informations whether this visual using native texture or not.
    */
   void UpdateNativeTextureInfomation(TextureSet textureSet);
+
+  /**
+   * @brief Set whether the Pre-multiplied Alpha Blending is required
+   *
+   * @param[in] preMultiplied whether alpha is pre-multiplied.
+   */
+  void EnablePreMultipliedAlpha(bool preMultiplied);
 
 private:
   Vector4         mPixelArea;

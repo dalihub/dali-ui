@@ -41,7 +41,7 @@ enum Type
   WRAP_MODE_U            = Dali::Ui::ImageVisual::Property::WRAP_MODE_U,
   WRAP_MODE_V            = Dali::Ui::ImageVisual::Property::WRAP_MODE_V,
   BORDER                 = Dali::Ui::ImageVisual::Property::BORDER,
-  REMOVED_PROPERTY_01    = Dali::Ui::ImageVisual::Property::REMOVED_PROPERTY_01,
+  PRE_MULTIPLIED_ALPHA   = Dali::Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA,
   ALPHA_MASK_URL         = Dali::Ui::ImageVisual::Property::ALPHA_MASK_URL,
   BATCH_SIZE             = Dali::Ui::ImageVisual::Property::BATCH_SIZE,
   CACHE_SIZE             = Dali::Ui::ImageVisual::Property::CACHE_SIZE,

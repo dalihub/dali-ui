@@ -132,11 +132,6 @@ public: // from Visual
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
 
   /**
-   * @copydoc Visual::Base::EnablePreMultipliedAlpha
-   */
-  void EnablePreMultipliedAlpha(bool preMultiplied) override;
-
-  /**
    * @copydoc Visual::Base::OnDoAction
    */
   void OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes) override;
@@ -288,6 +283,13 @@ private:
    * @param[in] textureSet The texture set to set.
    */
   void SetTexturesToRenderer(TextureSet& textureSet);
+
+  /**
+   * @brief Set whether the Pre-multiplied Alpha Blending is required
+   *
+   * @param[in] preMultiplied whether alpha is pre-multiplied.
+   */
+  void EnablePreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Callback when the inherited visibility of the actor is changed.

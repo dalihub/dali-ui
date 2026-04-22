@@ -31,14 +31,9 @@ namespace Ui
  */
 
 /**
- * @brief ColorVisual is to render a solid color to the control's quad.
- */
-namespace ColorVisual
-{
-/**
  * @brief ColorVisual Property.
  */
-namespace Property
+namespace ColorVisualPropertyIndex
 {
 /**
  * @brief Enumeration for the instance of properties belonging to the ColorVisual.
@@ -46,16 +41,38 @@ namespace Property
 enum
 {
   /**
-   * @brief The solid color required.
-   * @details Name "mixColor", type Property::VECTOR4.
-   * @note Mandatory.
+   * @brief The blur radius of the visual.
+   * @details Name "blurRadius", type Property::FLOAT, animatable.
+   *          If the value is 0, the edge is sharp. Otherwise, the larger the value, the more the edge is blurred.
+   * @note Optional.
+   * @note The default is 0.
+   * @note The visual size increases by the blur radius.
+   * @note If squareness is not zero, the width of blur radius might not equal with it's real value.
    */
-  MIX_COLOR = VISUAL_PROPERTY_START_INDEX,
+  BLUR_RADIUS = MUTABLE_VISUAL_PROPERTY_START_INDEX,
+
+  /**
+   * @brief Policy of cutout the color render result.
+   * @details Name "cutoutPolicy", type Property::INTEGER.
+   * @note Optional.
+   * @note The default is CutoutPolicy::NONE.
+   */
+  CUTOUT_POLICY = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
 };
 
-} // namespace Property
+} // namespace ColorVisualPropertyIndex
 
-} // namespace ColorVisual
+/**
+ * @brief Enumeration for cutout policy.
+ */
+enum class CutoutPolicy
+{
+  NONE,                              ///< Fully render the visual area (Default)
+  CUTOUT_VIEW,                       ///< Cutout the area of the view.
+  CUTOUT_VIEW_WITH_CORNER_RADIUS,    ///< Cutout the area of the view include view's corner radius.
+  CUTOUT_OUTSIDE,                    ///< Cutout the outside area of the view.
+  CUTOUT_OUTSIDE_WITH_CORNER_RADIUS, ///< Cutout the outside area of the view include view's corner radius.
+};
 
 /**
  * @}

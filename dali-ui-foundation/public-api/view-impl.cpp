@@ -38,7 +38,6 @@
 #include <stack>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
@@ -1577,6 +1576,30 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 }
 
 // =============================================================================
+// VisualBase API
+// =============================================================================
+
+bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+{
+  return mImpl->AddVisualObject(visualBase, static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType));
+}
+
+void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
+{
+  mImpl->RemoveVisualObject(visualBase);
+}
+
+uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+{
+  return mImpl->GetVisualObjectCount(static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType));
+}
+
+Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+{
+  return mImpl->GetVisualObjectAt(static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType), siblingOrder);
+}
+
+// =============================================================================
 // From control-impl.cpp
 // =============================================================================
 
@@ -1611,7 +1634,7 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 
   Property::Map map;
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
-  map.Insert(Ui::ColorVisual::Property::MIX_COLOR, color);
+  map.Insert(Ui::Visual::Property::MIX_COLOR, color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
   if(visualImplPtr && visualImplPtr->GetType() == Ui::Visual::COLOR)

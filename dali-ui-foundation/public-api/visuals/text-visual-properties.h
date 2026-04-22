@@ -49,7 +49,7 @@ enum
    * @brief The text to display in UTF-8 format.
    * @details name "text", type Property::STRING.
    */
-  TEXT = VISUAL_PROPERTY_START_INDEX,
+  TEXT = MUTABLE_VISUAL_PROPERTY_START_INDEX,
 
   /**
    * @brief The requested font family to use.

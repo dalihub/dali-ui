@@ -255,13 +255,14 @@ const char* const CUSTOM_SHADER_NAME("name");
 const char* const TRANSFORM("transform");
 const char* const SIZE("size");
 const char* const OFFSET("offset");
-const char* const OFFSET_SIZE_MODE("offsetSizeMode");
+const char* const OFFSET_POLICY("offsetPolicy");
+const char* const SIZE_POLICY("sizePolicy");
 const char* const ORIGIN("origin");
-const char* const ANCHOR_POINT("pivot");
+const char* const PIVOT("pivot");
 const char* const EXTRA_SIZE("extraSize");
 
 // Premultipled alpha
-const char* const PREMULTIPLIED_ALPHA("premultipliedAlpha");
+const char* const PRE_MULTIPLIED_ALPHA("premultipliedAlpha");
 
 // Mix color
 const char* const MIX_COLOR("mixColor");

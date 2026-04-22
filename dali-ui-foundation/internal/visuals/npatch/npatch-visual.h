@@ -103,11 +103,6 @@ public: // from Visual
    */
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
 
-  /**
-   * @copydoc Visual::Base::EnablePreMultipliedAlpha
-   */
-  void EnablePreMultipliedAlpha(bool preMultiplied) override;
-
 protected:
   /**
    * @brief Constructor.
@@ -187,6 +182,13 @@ private:
    * @brief Creates a renderer by using loaded resource.
    */
   void SetResource();
+
+  /**
+   * @brief Set whether the Pre-multiplied Alpha Blending is required
+   *
+   * @param[in] preMultiplied whether alpha is pre-multiplied.
+   */
+  void EnablePreMultipliedAlpha(bool preMultiplied);
 
 private:
   /**

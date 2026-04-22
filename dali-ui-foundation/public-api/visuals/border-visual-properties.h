@@ -50,7 +50,7 @@ enum
    * @details Name "borderColor", type Property::VECTOR4.
    * @note Mandatory.
    */
-  COLOR = VISUAL_PROPERTY_START_INDEX,
+  COLOR = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
 
   /**
    * @brief The width of the border (in pixels).

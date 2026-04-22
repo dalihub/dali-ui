@@ -527,6 +527,28 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void SetInteractionEffect(Trait effect);
 
+  // VisualBase
+
+  /**
+   * @copydoc Ui::View::AddVisual()
+   */
+  bool AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType);
+
+  /**
+   * @copydoc Ui::View::RemoveVisual()
+   */
+  void RemoveVisual(Dali::Ui::VisualBase visualBase);
+
+  /**
+   * @copydoc Ui::View::GetVisualCount()
+   */
+  uint32_t GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const;
+
+  /**
+   * @copydoc Ui::View::GetVisualAt()
+   */
+  Dali::Ui::VisualBase GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const;
+
   // Measure / Arrange
 
   /**

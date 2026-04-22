@@ -35,11 +35,17 @@ namespace Ui
  */
 enum PropertyRanges
 {
-  VISUAL_PROPERTY_BASE_START_INDEX = CORE_PROPERTY_MAX_INDEX + 1, ///< Visual Property Base Start Index.
-  VISUAL_PROPERTY_BASE_END_INDEX =
-    VISUAL_PROPERTY_BASE_START_INDEX + 100,                           ///< Visual Property Base End Index.
-  VISUAL_PROPERTY_START_INDEX = VISUAL_PROPERTY_BASE_END_INDEX + 1,   ///< Visual Property Start Index.
-  VISUAL_PROPERTY_END_INDEX   = VISUAL_PROPERTY_START_INDEX + 100000, ///< Visual Property End Index.
+  VISUAL_PROPERTY_BASE_START_INDEX = CORE_PROPERTY_MAX_INDEX + 1,            ///< VisualBase Property Base Start Index.
+  VISUAL_PROPERTY_BASE_END_INDEX   = VISUAL_PROPERTY_BASE_START_INDEX + 100, ///< VisualBase Property Base End Index.
+
+  MUTABLE_VISUAL_PROPERTY_START_INDEX = VISUAL_PROPERTY_BASE_END_INDEX + 1,          ///< Mutable Visual Property Start Index. (Could be changed without create new visual)
+  MUTABLE_VISUAL_PROPERTY_END_INDEX   = MUTABLE_VISUAL_PROPERTY_START_INDEX + 10000, ///< Mutable Visual Property End Index.
+
+  IMMUTABLE_VISUAL_PROPERTY_START_INDEX = MUTABLE_VISUAL_PROPERTY_END_INDEX + 1,         ///< Immutable Visual Property Start Index. (Must create new visual)
+  IMMUTABLE_VISUAL_PROPERTY_END_INDEX   = IMMUTABLE_VISUAL_PROPERTY_START_INDEX + 10000, ///< Immutable Visual Property End Index.
+
+  READ_ONLY_VISUAL_PROPERTY_START_INDEX = IMMUTABLE_VISUAL_PROPERTY_END_INDEX + 1,       ///< Read-only Visual Property Start Index.
+  READ_ONLY_VISUAL_PROPERTY_END_INDEX   = READ_ONLY_VISUAL_PROPERTY_START_INDEX + 10000, ///< Read-only Visual Property End Index.
 };
 
 /**

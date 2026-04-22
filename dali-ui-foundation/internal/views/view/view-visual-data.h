@@ -24,6 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/internal/builder/dictionary.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
@@ -310,6 +311,27 @@ public:
    */
   void OffscreenRenderingEnabled(bool enabled);
 
+public:
+  /**
+   * @copydoc Ui::View::AddVisual()
+   */
+  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+
+  /**
+   * @copydoc Ui::View::RemoveVisual()
+   */
+  void RemoveVisualObject(Dali::Ui::VisualBase visualBase);
+
+  /**
+   * @copydoc Ui::View::GetVisualCount()
+   */
+  uint32_t GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const;
+
+  /**
+   * @copydoc Ui::View::GetVisualAt()
+   */
+  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t index) const;
+
 private:
   /**
    * Used as an alternative to boolean so that it is obvious whether a visual is enabled/disabled.
@@ -360,6 +382,9 @@ public:
   Ui::View::VisualEventSignalType mVisualEventSignal;
   RegisteredVisualContainer       mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
+public:
+  Ui::VisualsContainer mVisualObjectsContainer[static_cast<uint32_t>(Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT)]; ///< The containers for VisualBase class.
+
 private:
   ViewDataImpl& mOuter;
 
@@ -369,9 +394,8 @@ private:
   PropertyOnAnimationContainer
     mPropertyOnAnimation; ///< Properties that are currently on animation or constraint applied
 
-  bool mOffscreenRenderingEnabled : 1; ///< True if offscreen rendering is enabled.
-  bool
-       mCornerRadiusValueAdded : 1;     ///< True if corner radius value setted at least 1 time. Could not be reset to false.
+  bool mOffscreenRenderingEnabled : 1;  ///< True if offscreen rendering is enabled.
+  bool mCornerRadiusValueAdded : 1;     ///< True if corner radius value setted at least 1 time. Could not be reset to false.
   bool mCornerSquarenessValueAdded : 1; ///< True if corner squareness value setted at least 1 time. Could not be reset
                                         ///< to false.
 };

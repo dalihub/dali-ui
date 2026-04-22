@@ -116,6 +116,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {PIXEL_AREA_UNIFORM_NAME, Ui::ImageVisual::Property::PIXEL_AREA},
   {IMAGE_WRAP_MODE_U, Ui::ImageVisual::Property::WRAP_MODE_U},
   {IMAGE_WRAP_MODE_V, Ui::ImageVisual::Property::WRAP_MODE_V},
+  {PRE_MULTIPLIED_ALPHA, Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA},
   {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
   {ALPHA_MASK_URL, Ui::ImageVisual::Property::ALPHA_MASK_URL},
   {MASK_CONTENT_SCALE_NAME, Ui::ImageVisual::Property::MASK_CONTENT_SCALE},
@@ -352,6 +353,16 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       int wrapMode = 0;
       Scripting::GetEnumerationProperty(value, WRAP_MODE_TABLE, WRAP_MODE_TABLE_COUNT, wrapMode);
       mWrapModeV = Dali::WrapMode::Type(wrapMode);
+      break;
+    }
+
+    case Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA:
+    {
+      bool premultipliedAlpha = false;
+      if(value.Get(premultipliedAlpha))
+      {
+        EnablePreMultipliedAlpha(premultipliedAlpha);
+      }
       break;
     }
 
@@ -935,6 +946,8 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
     map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, size.GetHeight());
   }
 
+  map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
+
   map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
 
   if(mImpl->mRenderer && mPixelAreaIndex != Property::INVALID_INDEX)
@@ -991,14 +1004,23 @@ void ImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
     }
     else if(!preMultiplied)
     {
-      // Register PREMULTIPLIED_ALPHA only if it become false.
-      // Default PREMULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
+      // Register PRE_MULTIPLIED_ALPHA only if it become false.
+      // Default PRE_MULTIPLIED_ALPHA value is 1.0f, at image-visual-shader-factory.cpp
       mPreMultipliedAlphaIndex =
-        mImpl->mRenderer.RegisterProperty(Ui::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, 0.0f);
+        mImpl->mRenderer.RegisterProperty(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, 0.0f);
     }
+
+    mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, preMultiplied);
   }
 
-  Visual::Base::EnablePreMultipliedAlpha(preMultiplied);
+  if(preMultiplied)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
+  }
+  else
+  {
+    mImpl->mFlags &= ~Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
+  }
 }
 
 void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes)
@@ -1396,7 +1418,7 @@ Shader ImageVisual::GenerateShader() const
 
     // Most of image visual shader user (like svg, animated vector image visual) use pre-multiplied alpha.
     // If the visual dont want to using pre-multiplied alpha, it should be set as 0.0f as renderer side.
-    shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
+    shader.RegisterProperty(PRE_MULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
   }
 
   return shader;

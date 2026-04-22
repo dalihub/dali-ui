@@ -76,7 +76,7 @@ NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualS
 void NPatchVisual::LoadImages()
 {
   TextureManager& textureManager     = mFactoryCache.GetTextureManager();
-  bool            synchronousLoading = mImpl->mFlags & Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
+  bool            synchronousLoading = mImpl->mFlags & Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
 
   if(mId == NPatchData::INVALID_NPATCH_DATA_ID)
   {
@@ -102,9 +102,9 @@ void NPatchVisual::LoadImages()
     }
     else
     {
-      // Register PREMULTIPLIED_ALPHA here.
+      // Register PRE_MULTIPLIED_ALPHA here.
       mPreMultipliedAlphaIndex = mImpl->mRenderer.RegisterProperty(
-        Ui::Visual::Property::PREMULTIPLIED_ALPHA, PREMULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled() ? 1.0f : 0.0f);
+        Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled() ? 1.0f : 0.0f);
     }
 
     TextureManager::MaskingDataPointer maskingDataPtr = nullptr;
@@ -215,11 +215,11 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     synchronousLoading->Get(sync);
     if(sync)
     {
-      mImpl->mFlags |= Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
+      mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
     }
     else
     {
-      mImpl->mFlags &= ~Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
+      mImpl->mFlags &= ~Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
     }
   }
 
@@ -227,6 +227,16 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
   if(releasePolicy)
   {
     releasePolicy->Get(mReleasePolicy);
+  }
+
+  Property::Value* preMultiplied = propertyMap.Find(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA);
+  if(preMultiplied)
+  {
+    bool premultipliedAlpha = false;
+    if(preMultiplied->Get(premultipliedAlpha))
+    {
+      EnablePreMultipliedAlpha(premultipliedAlpha);
+    }
   }
 }
 
@@ -305,6 +315,7 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisual::Property::BORDER, mBorder);
   map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
 
   if(mAuxiliaryUrl.IsValid())
   {
@@ -329,7 +340,14 @@ void NPatchVisual::EnablePreMultipliedAlpha(bool preMultiplied)
     mImpl->mRenderer.SetProperty(mPreMultipliedAlphaIndex, preMultiplied ? 1.0f : 0.0f);
   }
 
-  Visual::Base::EnablePreMultipliedAlpha(preMultiplied);
+  if(preMultiplied)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
+  }
+  else
+  {
+    mImpl->mFlags &= ~Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
+  }
 }
 
 NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory)

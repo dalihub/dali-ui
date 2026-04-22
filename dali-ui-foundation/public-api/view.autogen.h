@@ -404,4 +404,16 @@
   * a brace-enclosed initializer list of View objects. \
   * @param[in] children The initializer list containing child View handles to be added. \
   */ \
-  ChildClass& Children(std::initializer_list<View> children) { View::Children(children); return *this; }
+  ChildClass& Children(std::initializer_list<View> children) { View::Children(children); return *this; } \
+  /** \
+  * @brief Adds a list of visuals to this View in a declarative way. \
+  * This method allows for append visuals construction by passing \
+  * a brace-enclosed initializer list of VisualBase objects. \
+  * \
+  * Assert if too many visuals are added, or duplicated VisualBase added. \
+  * Please use AddVisual() API if you need to control error cases. \
+  * \
+  * @param[in] containerRangeType The range of visuals to be added. \
+  * @param[in] visuals The initializer list containing VisualBase handles to be added. \
+  */ \
+  ChildClass& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals) { View::Visuals(containerRangeType, visuals); return *this; }

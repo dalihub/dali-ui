@@ -30,9 +30,6 @@ namespace Ui
  * @{
  */
 
-/**
- * @brief All the visual types.
- */
 namespace Visual
 {
 /**
@@ -40,7 +37,9 @@ namespace Visual
  */
 enum Type
 {
-  BORDER,         ///< Renders a solid color as an internal border to the control's quad.
+  INVALID = -1,
+
+  BORDER = 0,     ///< Renders a solid color as an internal border to the control's quad.
   COLOR,          ///< Renders a solid color to the control's quad.
   GRADIENT,       ///< Renders a smooth transition of colors to the control's quad.
   IMAGE,          ///< Renders an image into the control's quad.
@@ -89,15 +88,6 @@ enum
   TRANSFORM,
 
   /**
-   * @brief Enables/disables premultiplied alpha.
-   * @details Name "premultipliedAlpha", type Property::BOOLEAN.
-   * @note Optional.
-   * @note The premultiplied alpha is false by default unless this behaviour is modified
-   * by the derived Visual type.
-   */
-  PREMULTIPLIED_ALPHA,
-
-  /**
    * @brief Mix color is a blend color for any visual.
    * @details Name "mixColor", type Property::VECTOR3 or Property::VECTOR4, animatable
    * @note Optional
@@ -120,6 +110,68 @@ enum
  */
 namespace Transform
 {
+/**
+ * @brief Enumeration for transform proportional flags.
+ */
+enum class ProportionFlags : uint8_t
+{
+  /**
+   * @brief No flags set
+   */
+  NONE = 0x0,
+
+  /**
+   * @brief Offset X is proportional to attached view size
+   */
+  X_PROPORTIONAL = 0x1,
+
+  /**
+   * @brief Offset Y is proportional to attached view size
+   */
+  Y_PROPORTIONAL = 0x2,
+
+  /**
+   * @brief Offset is proportional to attached view size
+   */
+  OFFSET_PROPORTIONAL = X_PROPORTIONAL | Y_PROPORTIONAL,
+
+  /**
+   * @brief Width is proportional to attached view size
+   */
+  WIDTH_PROPORTIONAL = 0x4,
+
+  /**
+   * @brief Height is proportional to attached view size
+   */
+  HEIGHT_PROPORTIONAL = 0x8,
+
+  /**
+   * @brief Size is proportional to attached view size
+   */
+  SIZE_PROPORTIONAL = WIDTH_PROPORTIONAL | HEIGHT_PROPORTIONAL,
+
+  /**
+   * @brief All bits set (all current and future proportional axes)
+   */
+  ALL = static_cast<uint8_t>(~0)
+};
+
+/**
+ * @brief Bitwise OR operator for ProportionFlags.
+ */
+inline ProportionFlags operator|(ProportionFlags lhs, ProportionFlags rhs)
+{
+  return static_cast<ProportionFlags>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+}
+
+/**
+ * @brief Bitwise AND operator for ProportionFlags.
+ */
+inline ProportionFlags operator&(ProportionFlags lhs, ProportionFlags rhs)
+{
+  return static_cast<ProportionFlags>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+}
+
 /**
  * @brief Policies used by the transform for the offset or size.
  */
@@ -172,12 +224,12 @@ enum Type
   ORIGIN,
 
   /**
-   * @brief The anchor-point of the visual
+   * @brief The pivot of the visual
    * @details Name "pivot", type Align::Type (Property::INTEGER) or Property::STRING.
    * @see Ui::Align
    * @note The default is Align::TOP_BEGIN.
    */
-  ANCHOR_POINT,
+  PIVOT,
 
   /**
    * @brief Whether the x or y OFFSET values are relative (percentage [0.0f to 1.0f] of the control) or absolute (in
@@ -320,6 +372,24 @@ enum class ResourceStatus
   PREPARING, /// Resource is prepared.
   READY,     /// Resource is ready.
   FAILED     /// Resource is fail to load
+};
+
+/**
+ * @brief Enumeration for the visual range when attached to the View.
+ * It will be used when we determine the visual's depth index.
+ */
+enum class ContainerRangeType
+{
+  UNDER_BACKGROUND_EFFECT,                  ///< The visual object exist under Dali::Ui::DepthIndex::Ranges::BACKGROUND_EFFECT
+  BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::BACKGROUND_EFFECT and Dali::Ui::DepthIndex::Ranges::BACKGROUND
+  BETWEEN_BACKGROUND_AND_CONTENT,           ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::BACKGROUND and Dali::Ui::DepthIndex::Ranges::CONTENT
+  BETWEEN_CONTENT_AND_DECORATION,           ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::CONTENT and Dali::Ui::DepthIndex::Ranges::DECORATION
+  BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::DECORATION and Dali::Ui::DepthIndex::Ranges::FOREGROUND_EFFECT
+  OVER_FOREGROUND_EFFECT,                   ///< The visual object exist over Dali::Ui::DepthIndex::Ranges::FOREGROUND_EFFECT
+
+  MAX_COUNT,
+
+  INVALID = -1,
 };
 
 } // namespace Visual

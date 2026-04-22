@@ -1,5 +1,5 @@
-#ifndef DALI_UI_VISUAL_BASE_H
-#define DALI_UI_VISUAL_BASE_H
+#ifndef DALI_UI_INTERNAL_VISUAL_BASE_H
+#define DALI_UI_INTERNAL_VISUAL_BASE_H
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -259,4 +259,4 @@ public: // Not intended for application developers
 
 } // namespace Dali
 
-#endif /*DALI_UI_VISUAL_BASE_H*/
+#endif /*DALI_UI_INTERNAL_VISUAL_BASE_H*/

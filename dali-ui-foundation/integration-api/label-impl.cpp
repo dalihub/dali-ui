@@ -1342,7 +1342,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     mVisual.SetTransformAndSize(visualTransform, size);
 
     if(mController->IsMarqueeEnabled())
@@ -2202,7 +2202,7 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
   if(backgroundValue.GetType() == Property::MAP)
   {
     const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::ColorVisual::Property::MIX_COLOR);
+    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Visual::Property::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();

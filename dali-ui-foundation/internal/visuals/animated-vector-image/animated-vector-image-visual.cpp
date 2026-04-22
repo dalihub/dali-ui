@@ -168,7 +168,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       f
   mNotifyAfterRasterization(false)
 {
   // the rasterized image is with pre-multiplied alpha format
-  mImpl->mFlags |= Visual::Base::Impl::IS_PREMULTIPLIED_ALPHA;
+  mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
 
   // By default, load a file synchronously
   mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
@@ -289,15 +289,6 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void AnimatedVectorImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   // Do nothing
-}
-
-void AnimatedVectorImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if(!preMultiplied)
-  {
-    DALI_LOG_WARNING("Note : AnimatedVectorVisual cannot disable PreMultipliedAlpha\n");
-  }
 }
 
 void AnimatedVectorImageVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -1051,7 +1042,7 @@ Shader AnimatedVectorImageVisual::GenerateShader() const
 
     // Most of image visual shader user (like svg, animated vector image visual) use pre-multiplied alpha.
     // If the visual dont want to using pre-multiplied alpha, it should be set as 0.0f as renderer side.
-    shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
+    shader.RegisterProperty(PRE_MULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
   }
   else
   {

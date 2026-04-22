@@ -42,7 +42,7 @@ enum
    * @details Name "thickness", type Property::FLOAT, animatable.
    * @note Mandatory.
    */
-  THICKNESS = VISUAL_PROPERTY_START_INDEX,
+  THICKNESS = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
 
   /**
    * @brief The start angle where the arc begins in degrees.

@@ -54,7 +54,7 @@ enum
    *       The default values are 4 threads for local image loading and 8 threads for remote image loading.
    * @note Mandatory.
    */
-  URL = VISUAL_PROPERTY_START_INDEX,
+  URL = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
 
   /**
    * @brief Filtering options, used when resizing images to sample original pixels.
@@ -136,9 +136,13 @@ enum
   BORDER,
 
   /**
-   * @note Removed property. But keep it not to change enum values.
+   * @brief Enables/disables premultiplied alpha.
+   * @details Name "premultipliedAlpha", type Property::BOOLEAN.
+   * @note Optional.
+   * @note The premultiplied alpha is false by default unless this behaviour is modified
+   * by the derived Visual type.
    */
-  REMOVED_PROPERTY_01,
+  PRE_MULTIPLIED_ALPHA,
 
   /**
    * @brief URL of a masking image

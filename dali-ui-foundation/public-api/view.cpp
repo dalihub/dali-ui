@@ -723,6 +723,30 @@ void View::LowerBelow(View target, LayoutOrderPolicy policy)
   GetImpl(*this).LowerBelow(target, policy);
 }
 
+// =============================================================================
+// VisualBase API
+// =============================================================================
+
+bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
+{
+  return GetImpl(*this).AddVisual(visualBase, containerRangeType);
+}
+
+void View::RemoveVisual(Dali::Ui::VisualBase visualBase)
+{
+  GetImpl(*this).RemoveVisual(visualBase);
+}
+
+uint32_t View::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
+{
+  return GetImpl(*this).GetVisualCount(containerRangeType);
+}
+
+Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
+{
+  return GetImpl(*this).GetVisualAt(containerRangeType, siblingOrder);
+}
+
 // From control.cpp
 
 void View::ClearBackground()

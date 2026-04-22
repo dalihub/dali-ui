@@ -117,7 +117,7 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mRasterizeForcibly(true)
 {
   // the rasterized image is with pre-multiplied alpha format
-  mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
+  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 SvgVisual::~SvgVisual()
@@ -389,15 +389,6 @@ void SvgVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   // Do nothing
 }
 
-void SvgVisual::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if(!preMultiplied)
-  {
-    DALI_LOG_WARNING("Note : SvgVisual cannot disable PreMultipliedAlpha\n");
-  }
-}
-
 void SvgVisual::EmitResourceReady(Ui::Visual::ResourceStatus resourceStatus)
 {
   SvgVisualPtr self = this; // Keep reference until this API finished
@@ -592,7 +583,7 @@ Shader SvgVisual::GenerateShader() const
 
     // Most of image visual shader user (like svg, animated vector image visual) use pre-multiplied alpha.
     // If the visual dont want to using pre-multiplied alpha, it should be set as 0.0f as renderer side.
-    shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
+    shader.RegisterProperty(PRE_MULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
   }
   return shader;
 }

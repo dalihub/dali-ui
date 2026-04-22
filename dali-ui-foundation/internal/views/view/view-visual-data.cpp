@@ -32,6 +32,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
@@ -1393,6 +1394,66 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
   mCornerRadiusValueAdded = true;
 }
 
+bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+{
+  int containerIndex = static_cast<int>(internalContainerRangeType);
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+
+  if(!mVisualObjectsContainer[containerIndex])
+  {
+    Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
+    mVisualObjectsContainer[containerIndex] = Dali::Ui::VisualsContainer::New(handle, internalContainerRangeType);
+  }
+
+  return mVisualObjectsContainer[containerIndex].AddVisualBase(visualBase);
+}
+
+void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
+{
+  if(DALI_UNLIKELY(!visualBase))
+  {
+    return;
+  }
+
+  auto container = GetImplementation(visualBase).GetContainer();
+  if(DALI_UNLIKELY(!container))
+  {
+    return;
+  }
+
+  int containerIndex = static_cast<int>(container.GetContainerRangeType());
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+
+  if(DALI_LIKELY(mVisualObjectsContainer[containerIndex] == container))
+  {
+    mVisualObjectsContainer[containerIndex].RemoveVisualBase(visualBase);
+  }
+}
+
+uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const
+{
+  int containerIndex = static_cast<int>(internalContainerRangeType);
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+
+  if(mVisualObjectsContainer[containerIndex])
+  {
+    return mVisualObjectsContainer[containerIndex].GetVisualBasesCount();
+  }
+  return 0u;
+}
+
+Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+{
+  int containerIndex = static_cast<int>(internalContainerRangeType);
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+
+  if(mVisualObjectsContainer[containerIndex])
+  {
+    return mVisualObjectsContainer[containerIndex].GetVisualBaseAt(siblingOrder);
+  }
+  return Dali::Ui::VisualBase();
+}
+
 void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 {
   Actor self;
@@ -1576,7 +1637,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
           .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
                Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
           .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-          .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN)
+          .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN)
           .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
                Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE));
       }

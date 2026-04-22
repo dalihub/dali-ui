@@ -163,7 +163,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache&                  
 
   // Most of image visual shader user (like svg, animated vector image visual) use pre-multiplied alpha.
   // If the visual dont want to using pre-multiplied alpha, it should be set as 0.0f as renderer side.
-  shader.RegisterProperty(PREMULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
+  shader.RegisterProperty(PRE_MULTIPLIED_ALPHA, ALPHA_VALUE_PREMULTIPLIED);
 
   if(featureBuilder.IsEnabledAlphaMaskingOnRendering())
   {

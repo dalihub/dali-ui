@@ -29,6 +29,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/devel-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-decoration-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
@@ -61,7 +62,7 @@ struct Base::Impl
   enum Flags
   {
     IS_ON_SCENE                     = 1,
-    IS_PREMULTIPLIED_ALPHA          = 1 << 2,
+    IS_PRE_MULTIPLIED_ALPHA         = 1 << 2,
     IS_SYNCHRONOUS_RESOURCE_LOADING = 1 << 3,
   };
 
@@ -77,54 +78,6 @@ struct Base::Impl
     Dali::Shader::Hint::Value mHints; //(bitfield) values from enum Shader::Hint
     int32_t                   mRenderPassTag;
     std::string               mName;
-  };
-
-  struct Transform
-  {
-    /**
-     * Default constructor ensures the visual fills the control
-     */
-    Transform();
-
-    /**
-     * Use the property map to set zero or more of the transform
-     * attributes, and sets the remaining attributes to their default
-     * values.
-     */
-    void SetPropertyMap(const Property::Map& map);
-
-    /**
-     * Add the transform attributes to the map (using integer keys)
-     */
-    void GetPropertyMap(Property::Map& map) const;
-
-    /**
-     * Update zero or more attributes from the property map.
-     */
-    void UpdatePropertyMap(const Property::Map& map);
-
-    /**
-     * Set the uniform properties onto the renderer
-     */
-    void SetUniforms(VisualRenderer renderer, Ui::Direction::Type direction);
-
-    /**
-     * Convert the control size and the transform attributes into the actual
-     * size of the visual.
-     */
-    Vector2 GetVisualSize(const Vector2& controlSize);
-
-    /**
-     * Get property maps for the default transform.
-     */
-    static const Property::Map& GetDefaultTransformMap();
-
-    Vector2         mOffset;
-    Vector2         mSize;
-    Vector2         mExtraSize;
-    Vector4         mOffsetSizeMode;
-    Ui::Align::Type mOrigin;
-    Ui::Align::Type mAnchorPoint;
   };
 
   struct ConstraintFeature
@@ -403,7 +356,7 @@ struct Base::Impl
   {
     if(!mTransformMapUsingDefault || direction != Ui::Direction::LEFT_TO_RIGHT)
     {
-      GetOrCreateTransform().SetUniforms(renderer, direction);
+      SetTransformUniformsInternal(GetOrCreateTransform(), renderer, direction);
     }
   }
 
@@ -540,6 +493,10 @@ struct Base::Impl
     DecorationData::SetCornerSquareness(mDecorationData, value);
   }
 
+private:
+  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer, Ui::Direction::Type direction);
+
+public:
   VisualRenderer                             mRenderer;
   std::vector<std::unique_ptr<CustomShader>> mCustomShaders;
   EventObserver*                             mEventObserver; ///< Allows controls to observe when the visual has events to notify

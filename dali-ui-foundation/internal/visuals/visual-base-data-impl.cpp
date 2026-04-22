@@ -49,23 +49,6 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_HINT)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, MODIFIES_GEOMETRY)
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_HINT)
 
-DALI_ENUM_TO_STRING_TABLE_BEGIN(ALIGN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, TOP_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, CENTER_END)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_BEGIN)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Align, BOTTOM_END)
-DALI_ENUM_TO_STRING_TABLE_END(ALIGN)
-
-DALI_ENUM_TO_STRING_TABLE_BEGIN(POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, RELATIVE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Visual::Transform::Policy, ABSOLUTE)
-DALI_ENUM_TO_STRING_TABLE_END(POLICY)
-
 Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type direction)
 {
   // clang-format off
@@ -88,37 +71,6 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
   }
 
   return result;
-}
-
-bool GetPolicyFromValue(const Property::Value& value, Vector2& policy)
-{
-  bool success = false;
-  if(value.Get(policy))
-  {
-    success = true;
-  }
-  else
-  {
-    const Property::Array* array = value.GetArray();
-    if(array && array->Size() == 2)
-    {
-      Ui::Visual::Transform::Policy::Type xPolicy =
-        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
-      Ui::Visual::Transform::Policy::Type yPolicy =
-        static_cast<Ui::Visual::Transform::Policy::Type>(-1); // Assign an invalid value so definitely changes
-
-      if(Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(0), POLICY_TABLE,
-                                                                                POLICY_TABLE_COUNT, xPolicy) &&
-         Scripting::GetEnumerationProperty<Ui::Visual::Transform::Policy::Type>(array->GetElementAt(1), POLICY_TABLE,
-                                                                                POLICY_TABLE_COUNT, yPolicy))
-      {
-        policy.x = xPolicy;
-        policy.y = yPolicy;
-        success  = true;
-      }
-    }
-  }
-  return success;
 }
 
 } // unnamed namespace
@@ -295,131 +247,17 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
   return customShader;
 }
 
-Internal::Visual::Base::Impl::Transform::Transform()
-: mOffset(0.0f, 0.0f),
-  mSize(1.0f, 1.0f),
-  mExtraSize(0.0f, 0.0f),
-  mOffsetSizeMode(0.0f, 0.0f, 0.0f, 0.0f),
-  mOrigin(Ui::Align::TOP_BEGIN),
-  mAnchorPoint(Ui::Align::TOP_BEGIN)
+void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform& transform, Dali::VisualRenderer renderer, Ui::Direction::Type direction)
 {
-}
-
-void Internal::Visual::Base::Impl::Transform::SetPropertyMap(const Property::Map& map)
-{
-  // Set default values
-  mOffset         = Vector2(0.0f, 0.0f);
-  mSize           = Vector2(1.0f, 1.0f);
-  mExtraSize      = Vector2(0.0f, 0.0f);
-  mOffsetSizeMode = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-  mOrigin         = Ui::Align::TOP_BEGIN;
-  mAnchorPoint    = Ui::Align::TOP_BEGIN;
-
-  UpdatePropertyMap(map);
-}
-
-void Internal::Visual::Base::Impl::Transform::UpdatePropertyMap(const Property::Map& map)
-{
-  for(Property::Map::SizeType i(0); i < map.Count(); ++i)
-  {
-    KeyValuePair keyValue = map.GetKeyValue(i);
-    switch(Visual::Base::GetIntKey(keyValue.first))
-    {
-      case Ui::Visual::Transform::Property::OFFSET:
-      {
-        keyValue.second.Get(mOffset);
-        break;
-      }
-      case Ui::Visual::Transform::Property::SIZE:
-      {
-        keyValue.second.Get(mSize);
-        break;
-      }
-      case Ui::Visual::Transform::Property::ORIGIN:
-      {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT, mOrigin);
-        break;
-      }
-      case Ui::Visual::Transform::Property::ANCHOR_POINT:
-      {
-        Scripting::GetEnumerationProperty<Ui::Align::Type>(keyValue.second, ALIGN_TABLE, ALIGN_TABLE_COUNT,
-                                                           mAnchorPoint);
-        break;
-      }
-      case Ui::Visual::Transform::Property::OFFSET_POLICY:
-      {
-        Vector2 policy;
-        if(GetPolicyFromValue(keyValue.second, policy))
-        {
-          mOffsetSizeMode.x = policy.x;
-          mOffsetSizeMode.y = policy.y;
-        }
-        break;
-      }
-      case Ui::Visual::Transform::Property::SIZE_POLICY:
-      {
-        Vector2 policy;
-        if(GetPolicyFromValue(keyValue.second, policy))
-        {
-          mOffsetSizeMode.z = policy.x;
-          mOffsetSizeMode.w = policy.y;
-        }
-        break;
-      }
-      case Ui::DevelVisual::Transform::Property::EXTRA_SIZE:
-      {
-        keyValue.second.Get(mExtraSize);
-        break;
-      }
-    }
-  }
-}
-
-void Internal::Visual::Base::Impl::Transform::GetPropertyMap(Property::Map& map) const
-{
-  map.Clear();
-  map.Add(Ui::Visual::Transform::Property::OFFSET, mOffset)
-    .Add(Ui::Visual::Transform::Property::SIZE, mSize)
-    .Add(Ui::Visual::Transform::Property::ORIGIN, mOrigin)
-    .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, mAnchorPoint)
-    .Add(Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2(mOffsetSizeMode.x, mOffsetSizeMode.y))
-    .Add(Ui::Visual::Transform::Property::SIZE_POLICY, Vector2(mOffsetSizeMode.z, mOffsetSizeMode.w))
-    .Add(Ui::DevelVisual::Transform::Property::EXTRA_SIZE, mExtraSize);
-}
-
-void Internal::Visual::Base::Impl::Transform::SetUniforms(Dali::VisualRenderer renderer, Ui::Direction::Type direction)
-{
-  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE, mSize);
+  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE, transform.mSize);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET,
-                       direction == Ui::Direction::LEFT_TO_RIGHT ? mOffset : mOffset * Vector2(-1.0f, 1.0f));
-  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE, mOffsetSizeMode);
+                       direction == Ui::Direction::LEFT_TO_RIGHT ? transform.mOffset : transform.mOffset * Vector2(-1.0f, 1.0f));
+  renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE, transform.mOffsetSizeMode);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_ORIGIN,
-                       PointToVector2(mOrigin, direction) - Vector2(0.5, 0.5));
+                       PointToVector2(transform.mOrigin, direction) - Vector2(0.5, 0.5));
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_PIVOT,
-                       Vector2(0.5, 0.5) - PointToVector2(mAnchorPoint, direction));
-  renderer.SetProperty(VisualRenderer::Property::EXTRA_SIZE, mExtraSize);
-}
-
-Vector2 Internal::Visual::Base::Impl::Transform::GetVisualSize(const Vector2& controlSize)
-{
-  return Vector2(Lerp(mOffsetSizeMode.z, mSize.x * controlSize.x, mSize.x),
-                 Lerp(mOffsetSizeMode.w, mSize.y * controlSize.y, mSize.y)) +
-         mExtraSize;
-}
-
-const Property::Map& Internal::Visual::Base::Impl::Transform::GetDefaultTransformMap()
-{
-  static const Property::Map sDefaultTransformMap = Dali::CreatePropertyMap({
-    {Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO},
-    {Ui::Visual::Transform::Property::SIZE, Vector2::ONE},
-    {Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN},
-    {Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN},
-    {Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2::ZERO},
-    {Ui::Visual::Transform::Property::SIZE_POLICY, Vector2::ZERO},
-    {Ui::DevelVisual::Transform::Property::EXTRA_SIZE, Vector2::ZERO},
-  });
-
-  return sDefaultTransformMap;
+                       Vector2(0.5, 0.5) - PointToVector2(transform.mPivot, direction));
+  renderer.SetProperty(VisualRenderer::Property::EXTRA_SIZE, transform.mExtraSize);
 }
 
 } // namespace Internal

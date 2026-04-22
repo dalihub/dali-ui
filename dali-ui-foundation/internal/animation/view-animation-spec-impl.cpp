@@ -101,7 +101,7 @@ void ViewAnimationSpecImpl::ApplyAnimateBy(Animation& animation, View view, cons
 
 void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry)
 {
-  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, ColorVisual::Property::MIX_COLOR);
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Visual::Property::MIX_COLOR);
   if(visualProperty.propertyIndex != Property::INVALID_INDEX)
   {
     TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
@@ -111,7 +111,7 @@ void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View vi
 
 void ViewAnimationSpecImpl::ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry)
 {
-  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, ColorVisual::Property::MIX_COLOR);
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Visual::Property::MIX_COLOR);
   if(visualProperty.propertyIndex != Property::INVALID_INDEX)
   {
     TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());

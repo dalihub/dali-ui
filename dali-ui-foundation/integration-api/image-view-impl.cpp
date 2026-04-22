@@ -914,7 +914,7 @@ void ImageViewImpl::UpdateVisual()
     map.Insert(Ui::ImageVisual::Property::URL, mUrl);
     map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
     map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
-    map.Insert(Visual::Property::PREMULTIPLIED_ALPHA, mPreMultipliedAlpha);
+    map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)
     {
@@ -1086,7 +1086,7 @@ void ImageViewImpl::ApplyFittingMode(const Vector2& size)
     transformMap.Add(Visual::Transform::Property::OFFSET_POLICY,
                      Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
       .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-      .Add(Visual::Transform::Property::ANCHOR_POINT, Align::TOP_BEGIN)
+      .Add(Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
       .Add(Visual::Transform::Property::SIZE_POLICY,
            Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE));
   }

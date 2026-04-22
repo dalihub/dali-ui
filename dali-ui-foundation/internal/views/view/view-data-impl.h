@@ -28,6 +28,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
@@ -36,6 +37,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali/integration-api/debug.h>
 #include <map>
 #include <memory>
@@ -253,6 +255,26 @@ public:
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
+
+  /**
+   * @copydoc Ui::View::AddVisual()
+   */
+  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+
+  /**
+   * @copydoc Ui::View::RemoveVisual()
+   */
+  void RemoveVisualObject(Dali::Ui::VisualBase visualBase);
+
+  /**
+   * @copydoc Ui::View::GetVisualCount()
+   */
+  uint32_t GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const;
+
+  /**
+   * @copydoc Ui::View::GetVisualAt()
+   */
+  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
 
   /**
    * @brief Function used to set view properties.

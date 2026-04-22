@@ -30,13 +30,13 @@
 
 // INTERNAL HEARDER
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/primitive-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -45,11 +45,6 @@ namespace
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
-
-// visual string constants contains OFFSET_SIZE_MODE instead
-const char* const OFFSET_POLICY("offsetPolicy");
-const char* const SIZE_POLICY("sizePolicy");
-
 } // namespace
 
 namespace Dali
@@ -130,7 +125,6 @@ struct StringProperty
 StringProperty PROPERTY_NAME_INDEX_TABLE[] = {
   {CUSTOM_SHADER, Ui::Visual::Property::SHADER},
   {TRANSFORM, Ui::Visual::Property::TRANSFORM},
-  {PREMULTIPLIED_ALPHA, Ui::Visual::Property::PREMULTIPLIED_ALPHA},
   {MIX_COLOR, Ui::Visual::Property::MIX_COLOR},
   {OPACITY, Ui::Visual::Property::OPACITY},
   {VISUAL_FITTING_MODE, Ui::DevelVisual::Property::VISUAL_FITTING_MODE},
@@ -278,8 +272,8 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         if(value.Get(map))
         {
           if(!map.Empty() && (!mImpl->mTransformMapUsingDefault ||
-                              map.GetHash() != Impl::Transform::GetDefaultTransformMap().GetHash() ||
-                              DALI_UNLIKELY(map != Impl::Transform::GetDefaultTransformMap())))
+                              map.GetHash() != Transform::GetDefaultTransformMap().GetHash() ||
+                              DALI_UNLIKELY(map != Transform::GetDefaultTransformMap())))
           {
             if(DALI_UNLIKELY(mImpl->mRenderer))
             {
@@ -308,16 +302,6 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
               mImpl->GetOrCreateTransform().SetPropertyMap(map);
             }
           }
-        }
-        break;
-      }
-
-      case Ui::Visual::Property::PREMULTIPLIED_ALPHA:
-      {
-        bool premultipliedAlpha = false;
-        if(value.Get(premultipliedAlpha))
-        {
-          EnablePreMultipliedAlpha(premultipliedAlpha);
         }
         break;
       }
@@ -787,12 +771,9 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
   }
   else
   {
-    transform = Impl::Transform::GetDefaultTransformMap();
+    transform = Transform::GetDefaultTransformMap();
   }
   map.Insert(Ui::Visual::Property::TRANSFORM, transform);
-
-  bool premultipliedAlpha(IsPreMultipliedAlphaEnabled());
-  map.Insert(Ui::Visual::Property::PREMULTIPLIED_ALPHA, premultipliedAlpha);
 
   // Note, Color and Primitive will also insert their own mix color into the map
   // which is ok, because they have a different key value range, but uses same cached value anyway.
@@ -828,26 +809,9 @@ void Visual::Base::CreateInstancePropertyMap(Property::Map& map) const
   }
 }
 
-void Visual::Base::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  if(preMultiplied)
-  {
-    mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
-  }
-  else
-  {
-    mImpl->mFlags &= ~Impl::IS_PREMULTIPLIED_ALPHA;
-  }
-
-  if(mImpl->mRenderer)
-  {
-    mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, preMultiplied);
-  }
-}
-
 bool Visual::Base::IsPreMultipliedAlphaEnabled() const
 {
-  return mImpl->mFlags & Impl::IS_PREMULTIPLIED_ALPHA;
+  return mImpl->mFlags & Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 void Visual::Base::DoSetOffScene(Actor& actor)
@@ -1124,15 +1088,14 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
     return key.indexKey;
   }
 
-  if(key.stringKey == ANCHOR_POINT)
+  Property::Index index = Internal::Visual::Transform::GetIntKey(key);
+
+  if(index != Property::INVALID_INDEX)
   {
-    return Ui::Visual::Transform::Property::ANCHOR_POINT;
+    return index;
   }
-  else if(key.stringKey == EXTRA_SIZE)
-  {
-    return Ui::DevelVisual::Transform::Property::EXTRA_SIZE;
-  }
-  else if(key.stringKey == MIX_COLOR)
+
+  if(key.stringKey == MIX_COLOR)
   {
     return Ui::Visual::Property::MIX_COLOR;
   }
@@ -1140,33 +1103,9 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
   {
     return Ui::Visual::Property::OPACITY;
   }
-  else if(key.stringKey == OFFSET)
-  {
-    return Ui::Visual::Transform::Property::OFFSET;
-  }
-  else if(key.stringKey == OFFSET_POLICY)
-  {
-    return Ui::Visual::Transform::Property::OFFSET_POLICY;
-  }
-  else if(key.stringKey == ORIGIN)
-  {
-    return Ui::Visual::Transform::Property::ORIGIN;
-  }
-  else if(key.stringKey == PREMULTIPLIED_ALPHA)
-  {
-    return Ui::Visual::Property::PREMULTIPLIED_ALPHA;
-  }
   else if(key.stringKey == CUSTOM_SHADER)
   {
     return Ui::Visual::Property::SHADER;
-  }
-  else if(key.stringKey == SIZE)
-  {
-    return Ui::Visual::Transform::Property::SIZE;
-  }
-  else if(key.stringKey == SIZE_POLICY)
-  {
-    return Ui::Visual::Transform::Property::SIZE_POLICY;
   }
   else if(key.stringKey == TRANSFORM)
   {
@@ -1220,7 +1159,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     {
       return VisualRenderer::Property::TRANSFORM_ORIGIN;
     }
-    case Dali::Ui::Visual::Transform::Property::ANCHOR_POINT:
+    case Dali::Ui::Visual::Transform::Property::PIVOT:
     {
       return VisualRenderer::Property::TRANSFORM_PIVOT;
     }
@@ -1231,10 +1170,6 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     case Dali::Ui::Visual::Property::OPACITY:
     {
       return Renderer::Property::OPACITY;
-    }
-    case Dali::Ui::Visual::Property::PREMULTIPLIED_ALPHA:
-    {
-      return Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA;
     }
     case Dali::Ui::DevelVisual::Property::CORNER_RADIUS:
     {
@@ -1470,15 +1405,22 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     {
       // Special case for MIX_COLOR
       if(key.type == Property::Key::INDEX &&
-         ((mImpl->mType == Ui::Visual::COLOR && key.indexKey == ColorVisual::Property::MIX_COLOR) ||
-          (mImpl->mType == Ui::Visual::PRIMITIVE && key.indexKey == PrimitiveVisual::Property::MIX_COLOR)))
+         ((mImpl->mType == Ui::Visual::PRIMITIVE && key.indexKey == PrimitiveVisual::Property::MIX_COLOR)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
       }
 
+      // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
+      if((mImpl->mType == Ui::Visual::IMAGE || mImpl->mType == Ui::Visual::ANIMATED_IMAGE || mImpl->mType == Ui::Visual::N_PATCH) &&
+         ((key.type == Property::Key::INDEX && key.indexKey == ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
+          (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
+      {
+        return Dali::Property(mImpl->mRenderer, Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA);
+      }
+
       // Special case for BLUR_RADIUS
       if(mImpl->mType == Ui::Visual::COLOR &&
-         ((key.type == Property::Key::INDEX && key.indexKey == DevelColorVisual::Property::BLUR_RADIUS) ||
+         ((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
           (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
       {
         // Request to color-visual class

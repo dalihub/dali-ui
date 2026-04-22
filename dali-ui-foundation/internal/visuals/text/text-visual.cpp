@@ -271,15 +271,6 @@ void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));
 }
 
-void TextVisual::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if(!preMultiplied)
-  {
-    DALI_LOG_WARNING("Note : TextVisual cannot disable PreMultipliedAlpha\n");
-  }
-}
-
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
 : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::TEXT),
   mController(Text::Controller::New()),
@@ -302,7 +293,7 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mIsHeightForWidthTaskRunning(false)
 {
   // Enable the pre-multiplied alpha to improve the text quality
-  mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
+  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 TextVisual::~TextVisual()
@@ -935,7 +926,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
            Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-      .Add(Ui::Visual::Transform::Property::ANCHOR_POINT, Ui::Align::TOP_BEGIN);
+      .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     SetTransformAndSize(visualTransform, textControlSize);
 
     Shader shader = GetTextShader(mFactoryCache, TextVisualShaderFeature::FeatureBuilder()

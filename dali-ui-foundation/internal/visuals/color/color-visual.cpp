@@ -52,11 +52,11 @@ namespace
 {
 // cutout policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(CUTOUT_POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, NONE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_VIEW_WITH_CORNER_RADIUS)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelColorVisual::CutoutPolicy, CUTOUT_OUTSIDE_WITH_CORNER_RADIUS)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, NONE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, CUTOUT_VIEW)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, CUTOUT_VIEW_WITH_CORNER_RADIUS)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, CUTOUT_OUTSIDE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::CutoutPolicy, CUTOUT_OUTSIDE_WITH_CORNER_RADIUS)
 DALI_ENUM_TO_STRING_TABLE_END(CUTOUT_POLICY)
 
 static constexpr uint32_t CUTOUT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
@@ -168,12 +168,12 @@ ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFact
 : Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::COLOR),
   mBlurRadius(0.0f),
   mCutoutCornerContext(nullptr),
-  mCutoutPolicy(DevelColorVisual::CutoutPolicy::NONE),
+  mCutoutPolicy(Dali::Ui::CutoutPolicy::NONE),
   mAlwaysUsingBlurRadius(false),
   mColorVisualShaderFactory(shaderFactory)
 {
   // Make we always use premultiplied alpha.
-  mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
+  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 ColorVisual::~ColorVisual()
@@ -185,7 +185,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // By virtue of DoSetProperties being called last, this will override
   // anything set by Ui::Visual::Property::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(Ui::ColorVisual::Property::MIX_COLOR, MIX_COLOR);
+  Property::Value* colorValue = propertyMap.Find(Ui::Visual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
     Vector4 color;
@@ -208,7 +208,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* blurRadiusValue = propertyMap.Find(Ui::DevelColorVisual::Property::BLUR_RADIUS, BLUR_RADIUS_NAME);
+  Property::Value* blurRadiusValue = propertyMap.Find(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, BLUR_RADIUS_NAME);
   if(blurRadiusValue)
   {
     if(!blurRadiusValue->Get(mBlurRadius))
@@ -246,10 +246,10 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   Property::Value* cutoutPolicyValue =
-    propertyMap.Find(Ui::DevelColorVisual::Property::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
+    propertyMap.Find(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, CUTOUT_POLICY_NAME);
   if(cutoutPolicyValue)
   {
-    int cutoutPolicy = static_cast<int>(DevelColorVisual::CutoutPolicy::NONE) - 1; ///< Make always invalid
+    int cutoutPolicy = static_cast<int>(Dali::Ui::CutoutPolicy::NONE) - 1; ///< Make always invalid
     if(DALI_UNLIKELY(!Scripting::GetEnumerationProperty(*cutoutPolicyValue, CUTOUT_POLICY_TABLE,
                                                         CUTOUT_POLICY_TABLE_COUNT, cutoutPolicy)))
     {
@@ -260,7 +260,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
     }
     else
     {
-      mCutoutPolicy = static_cast<DevelColorVisual::CutoutPolicy::Type>(cutoutPolicy);
+      mCutoutPolicy = static_cast<Dali::Ui::CutoutPolicy>(cutoutPolicy);
     }
   }
 }
@@ -296,33 +296,24 @@ void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
-  map.Insert(Ui::ColorVisual::Property::MIX_COLOR, mImpl->mMixColor);
-  map.Insert(Ui::DevelColorVisual::Property::CUTOUT_POLICY, mCutoutPolicy);
+  map.Insert(Ui::Visual::Property::MIX_COLOR, mImpl->mMixColor);
+  map.Insert(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, mCutoutPolicy);
 
   if(mImpl->mRenderer)
   {
     // Update values from Renderer
     float blurRadius = mImpl->mRenderer.GetProperty<float>(DecoratedVisualRenderer::Property::BLUR_RADIUS);
-    map.Insert(Ui::DevelColorVisual::Property::BLUR_RADIUS, blurRadius);
+    map.Insert(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, blurRadius);
   }
   else
   {
-    map.Insert(Ui::DevelColorVisual::Property::BLUR_RADIUS, mBlurRadius);
+    map.Insert(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, mBlurRadius);
   }
 }
 
 void ColorVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   // Do nothing
-}
-
-void ColorVisual::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if(!preMultiplied)
-  {
-    DALI_LOG_WARNING("Note : ColorVisual cannot disable PreMultipliedAlpha\n");
-  }
 }
 
 void ColorVisual::OnSetTransform()
@@ -358,10 +349,10 @@ void ColorVisual::OnInitialize()
 
   if(IsCutoutRequired())
   {
-    int cutoutWithCornerRadius = ((mCutoutPolicy == DevelColorVisual::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS) ||
-                                  (mCutoutPolicy == DevelColorVisual::CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS));
-    int cutoutOutside          = ((mCutoutPolicy == DevelColorVisual::CutoutPolicy::CUTOUT_OUTSIDE) ||
-                         (mCutoutPolicy == DevelColorVisual::CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS));
+    int cutoutWithCornerRadius = ((mCutoutPolicy == Dali::Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS) ||
+                                  (mCutoutPolicy == Dali::Ui::CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS));
+    int cutoutOutside          = ((mCutoutPolicy == Dali::Ui::CutoutPolicy::CUTOUT_OUTSIDE) ||
+                         (mCutoutPolicy == Dali::Ui::CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS));
 
     mImpl->mRenderer.ReserveCustomProperties(CUSTOM_CUTOUT_PROPERTY_COUNT + cutoutWithCornerRadius * CUSTOM_CUTOUT_CORNER_PROPERTY_COUNT);
     mImpl->mRenderer.RegisterUniqueProperty("uCutoutWithCornerRadius", cutoutWithCornerRadius);
@@ -454,7 +445,7 @@ Dali::Property ColorVisual::OnGetPropertyObject(Dali::Property::Key key, bool ch
     return Dali::Property(handle, Property::INVALID_INDEX);
   }
 
-  if((key.type == Property::Key::INDEX && key.indexKey == DevelColorVisual::Property::BLUR_RADIUS) ||
+  if((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
      (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME))
   {
     if(changeProperties)
@@ -498,7 +489,7 @@ bool ColorVisual::IsBlurRequired() const
 
 bool ColorVisual::IsCutoutRequired() const
 {
-  return (mCutoutPolicy != DevelColorVisual::CutoutPolicy::NONE);
+  return (mCutoutPolicy != Dali::Ui::CutoutPolicy::NONE);
 }
 
 } // namespace Internal

@@ -99,7 +99,7 @@ Dali::Property::Map CreateTransparentColorVisualProperties()
 {
   Dali::Property::Map map;
   map.Insert(Dali::Ui::Visual::Property::TYPE, Dali::Ui::Visual::Type::COLOR);
-  map.Insert(Dali::Ui::ColorVisual::Property::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Dali::Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   return map;
 }
 

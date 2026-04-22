@@ -23,9 +23,9 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/color-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
 namespace Dali
 {
@@ -69,11 +69,6 @@ public: // from Visual
    * @copydoc Visual::Base::CreateInstancePropertyMap
    */
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
-
-  /**
-   * @copydoc Visual::Base::EnablePreMultipliedAlpha
-   */
-  void EnablePreMultipliedAlpha(bool preMultiplied) override;
 
 protected:
   /**
@@ -157,9 +152,9 @@ private:
   struct CutoutCornerContext;
   std::unique_ptr<CutoutCornerContext> mCutoutCornerContext; ///< The infomations relative about cutout with corner radius.
 
-  DevelColorVisual::CutoutPolicy::Type mCutoutPolicy : 3;          ///< The policy of cutout
-  bool                                 mAlwaysUsingBlurRadius : 1; ///< Whether we need the blur radius in shader always.
-  ColorVisualShaderFactory&            mColorVisualShaderFactory;  ///< The shader factory for color visual.
+  Dali::Ui::CutoutPolicy    mCutoutPolicy : 4;          ///< The policy of cutout
+  bool                      mAlwaysUsingBlurRadius : 1; ///< Whether we need the blur radius in shader always.
+  ColorVisualShaderFactory& mColorVisualShaderFactory;  ///< The shader factory for color visual.
 };
 
 } // namespace Internal

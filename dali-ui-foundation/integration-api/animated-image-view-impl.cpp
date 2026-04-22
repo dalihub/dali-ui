@@ -1098,7 +1098,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
   map.Insert(Ui::DevelImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
-  map.Insert(Visual::Property::PREMULTIPLIED_ALPHA, mPreMultipliedAlpha);
+  map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
   map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
   map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
 
@@ -1283,7 +1283,7 @@ void AnimatedImageViewImpl::ApplyFittingMode(const Vector2& size)
     transformMap.Add(Visual::Transform::Property::OFFSET_POLICY,
                      Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
       .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-      .Add(Visual::Transform::Property::ANCHOR_POINT, Align::TOP_BEGIN)
+      .Add(Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
       .Add(Visual::Transform::Property::SIZE_POLICY,
            Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE));
   }

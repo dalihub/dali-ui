@@ -51,7 +51,7 @@ enum
    * @note Optional. If not specified, the default is Shape::SPHERE.
    * @see Shape::Type
    */
-  SHAPE = VISUAL_PROPERTY_START_INDEX,
+  SHAPE = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
 
   /**
    * @brief The color of the shape.

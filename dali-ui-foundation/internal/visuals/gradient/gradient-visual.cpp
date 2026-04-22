@@ -167,7 +167,7 @@ GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
   mStartOffsetIndex(Property::INVALID_INDEX),
   mIsOpaque(true)
 {
-  mImpl->mFlags |= Impl::IS_PREMULTIPLIED_ALPHA;
+  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 GradientVisual::~GradientVisual()
@@ -293,15 +293,6 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
 void GradientVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   // Do nothing
-}
-
-void GradientVisual::EnablePreMultipliedAlpha(bool preMultiplied)
-{
-  // Make always enable pre multiplied alpha whether preMultiplied value is false.
-  if(!preMultiplied)
-  {
-    DALI_LOG_WARNING("Note : GradientVisual cannot disable PreMultipliedAlpha\n");
-  }
 }
 
 void GradientVisual::OnInitialize()

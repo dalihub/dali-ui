@@ -1,5 +1,5 @@
-#ifndef DALI_UI_INTERNAL_VISUAL_H
-#define DALI_UI_INTERNAL_VISUAL_H
+#ifndef DALI_UI_INTERNAL_VISUAL_BASE_IMPL_H
+#define DALI_UI_INTERNAL_VISUAL_BASE_IMPL_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -160,13 +160,6 @@ public:
    * @param[in] map The property map into which to write
    */
   void CreateInstancePropertyMap(Property::Map& map) const;
-
-  /**
-   * @brief Set whether the Pre-multiplied Alpha Blending is required
-   *
-   * @param[in] preMultiplied whether alpha is pre-multiplied.
-   */
-  virtual void EnablePreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Query whether alpha is pre-multiplied.
@@ -606,4 +599,4 @@ inline Internal::Visual::Base& GetImplementation(Ui::Visual::Base& visualBase)
 
 } // namespace Dali
 
-#endif // DALI_UI_INTERNAL_VISUAL_H
+#endif // DALI_UI_INTERNAL_VISUAL_BASE_IMPL_H
