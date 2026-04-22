@@ -1734,7 +1734,7 @@ int UtcDaliViewKeyEventSignalP(void)
   view.KeyEventSignal().Connect(&application, functor);
 
   // Give focus to the view
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 
@@ -1768,7 +1768,7 @@ int UtcDaliViewKeyEventSignalConsumedP(void)
   KeyEventSignalFunctor parentFunctor(parentData);
   parent.KeyEventSignal().Connect(&application, parentFunctor);
 
-  FocusManager::Get().SetCurrentFocusActor(child);
+  FocusManager::Get().SetCurrentFocusView(child);
   application.SendNotification();
   application.Render();
 
@@ -1801,7 +1801,7 @@ int UtcDaliViewKeyEventSignalNotConsumedP(void)
   KeyEventSignalFunctor parentFunctor(parentData);
   parent.KeyEventSignal().Connect(&application, parentFunctor);
 
-  FocusManager::Get().SetCurrentFocusActor(child);
+  FocusManager::Get().SetCurrentFocusView(child);
   application.SendNotification();
   application.Render();
 
@@ -1851,7 +1851,7 @@ int UtcDaliViewKeyEventSignalNotFocusableN(void)
   view.KeyEventSignal().Connect(&application, functor);
 
   // Attempt to set focus on a non-focusable view
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 
@@ -1871,7 +1871,7 @@ int UtcDaliViewKeyEventSignalNoConnectionN(void)
   View              view = CreateFocusableView(application);
 
   // No signal connected — should not crash
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 
@@ -1898,7 +1898,7 @@ int UtcDaliViewFocusChangedSignalGainedP(void)
   FocusChangedSignalFunctor functor(data);
   view.FocusChangedSignal().Connect(&application, functor);
 
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.view == view);
@@ -1918,14 +1918,14 @@ int UtcDaliViewFocusChangedSignalLostP(void)
   view1.FocusChangedSignal().Connect(&application, functor1);
 
   // Give focus to view1
-  FocusManager::Get().SetCurrentFocusActor(view1);
+  FocusManager::Get().SetCurrentFocusView(view1);
   DALI_TEST_CHECK(data1.called);
   DALI_TEST_CHECK(data1.focused == true);
 
   data1.Reset();
 
   // Move focus to view2 — view1 should lose focus
-  FocusManager::Get().SetCurrentFocusActor(view2);
+  FocusManager::Get().SetCurrentFocusView(view2);
 
   DALI_TEST_CHECK(data1.called);
   DALI_TEST_CHECK(data1.view == view1);
@@ -1949,7 +1949,7 @@ int UtcDaliViewFocusChangedSignalBothViewsP(void)
   view2.FocusChangedSignal().Connect(&application, functor2);
 
   // Focus view1
-  FocusManager::Get().SetCurrentFocusActor(view1);
+  FocusManager::Get().SetCurrentFocusView(view1);
   DALI_TEST_CHECK(data1.called);
   DALI_TEST_CHECK(data1.focused == true);
   DALI_TEST_CHECK(!data2.called);
@@ -1958,7 +1958,7 @@ int UtcDaliViewFocusChangedSignalBothViewsP(void)
   data2.Reset();
 
   // Move focus to view2
-  FocusManager::Get().SetCurrentFocusActor(view2);
+  FocusManager::Get().SetCurrentFocusView(view2);
 
   // view1 should have lost focus
   DALI_TEST_CHECK(data1.called);
@@ -1980,7 +1980,7 @@ int UtcDaliViewFocusChangedSignalClearFocusP(void)
   FocusChangedSignalFunctor functor(data);
   view.FocusChangedSignal().Connect(&application, functor);
 
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.focused == true);
 
@@ -2002,7 +2002,7 @@ int UtcDaliViewFocusChangedSignalNoConnectionN(void)
   View              view = CreateFocusableView(application);
 
   // No signal connected — should not crash
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   FocusManager::Get().ClearFocus();
 
   DALI_TEST_CHECK(true);
@@ -2046,11 +2046,11 @@ int UtcDaliViewSetLeftFocusableViewP(void)
   DALI_TEST_CHECK(&ret == &viewA);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewA);
+  mgr.SetCurrentFocusView(viewA);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewA);
 
   mgr.MoveFocus(FocusDirection::LEFT);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2068,10 +2068,10 @@ int UtcDaliViewSetRightFocusableViewP(void)
   viewA.SetRightFocusableView(viewB);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
+  mgr.SetCurrentFocusView(viewA);
 
   mgr.MoveFocus(FocusDirection::RIGHT);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2089,10 +2089,10 @@ int UtcDaliViewSetUpFocusableViewP(void)
   viewA.SetUpFocusableView(viewB);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
+  mgr.SetCurrentFocusView(viewA);
 
   mgr.MoveFocus(FocusDirection::UP);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2110,10 +2110,10 @@ int UtcDaliViewSetDownFocusableViewP(void)
   viewA.SetDownFocusableView(viewB);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
+  mgr.SetCurrentFocusView(viewA);
 
   mgr.MoveFocus(FocusDirection::DOWN);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2131,10 +2131,10 @@ int UtcDaliViewSetClockwiseFocusableViewP(void)
   viewA.SetClockwiseFocusableView(viewB);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
+  mgr.SetCurrentFocusView(viewA);
 
   mgr.MoveFocus(FocusDirection::CLOCKWISE);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2152,10 +2152,10 @@ int UtcDaliViewSetCounterClockwiseFocusableViewP(void)
   viewA.SetCounterClockwiseFocusableView(viewB);
 
   FocusManager mgr = FocusManager::Get();
-  mgr.SetCurrentFocusActor(viewA);
+  mgr.SetCurrentFocusView(viewA);
 
   mgr.MoveFocus(FocusDirection::COUNTER_CLOCKWISE);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == viewB);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == viewB);
 
   END_TEST;
 }
@@ -2181,24 +2181,24 @@ int UtcDaliViewSetFocusableViewChainingP(void)
   FocusManager mgr = FocusManager::Get();
 
   // LEFT
-  mgr.SetCurrentFocusActor(center);
+  mgr.SetCurrentFocusView(center);
   mgr.MoveFocus(FocusDirection::LEFT);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == left);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == left);
 
   // RIGHT
-  mgr.SetCurrentFocusActor(center);
+  mgr.SetCurrentFocusView(center);
   mgr.MoveFocus(FocusDirection::RIGHT);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == right);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == right);
 
   // UP
-  mgr.SetCurrentFocusActor(center);
+  mgr.SetCurrentFocusView(center);
   mgr.MoveFocus(FocusDirection::UP);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == up);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == up);
 
   // DOWN
-  mgr.SetCurrentFocusActor(center);
+  mgr.SetCurrentFocusView(center);
   mgr.MoveFocus(FocusDirection::DOWN);
-  DALI_TEST_CHECK(mgr.GetCurrentFocusActor() == down);
+  DALI_TEST_CHECK(mgr.GetCurrentFocusView() == down);
 
   END_TEST;
 }

@@ -1244,28 +1244,28 @@ public:
       PADDING,
 
       /**
-       * @brief The actor ID of the left focusable View.
-       * @details Name "leftFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the left focusable View.
+       * @details Name "leftFocusableViewId", type Property::INTEGER.
        */
-      LEFT_FOCUSABLE_ACTOR_ID,
+      LEFT_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The actor ID of the right focusable View.
-       * @details Name "rightFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the right focusable View.
+       * @details Name "rightFocusableViewId", type Property::INTEGER.
        */
-      RIGHT_FOCUSABLE_ACTOR_ID,
+      RIGHT_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The actor ID of the up focusable View.
-       * @details Name "upFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the up focusable View.
+       * @details Name "upFocusableViewId", type Property::INTEGER.
        */
-      UP_FOCUSABLE_ACTOR_ID,
+      UP_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The actor ID of the down focusable View.
-       * @details Name "downFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the down focusable View.
+       * @details Name "downFocusableViewId", type Property::INTEGER.
        */
-      DOWN_FOCUSABLE_ACTOR_ID,
+      DOWN_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The shadow of the View.
@@ -1329,16 +1329,16 @@ public:
       ACCESSIBILITY_HIDDEN,
 
       /**
-       * @brief The actor ID of the clockwise focusable View.
-       * @details Name "clockwiseFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the clockwise focusable View.
+       * @details Name "clockwiseFocusableViewId", type Property::INTEGER.
        */
-      CLOCKWISE_FOCUSABLE_ACTOR_ID,
+      CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
-       * @brief The actor ID of the conter-clockwise focusable View.
-       * @details Name "counterClockwiseFocusableActorId", type Property::INTEGER.
+       * @brief The ID of the counter-clockwise focusable View.
+       * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
        */
-      COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID,
+      COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief Identifier that allows the automation framework to find and interact with this element.

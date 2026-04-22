@@ -484,7 +484,7 @@ int UtcDaliInteractiveTraitKeyEventClickedOnReleaseP(void)
   view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
 
   // Give focus to the view
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 
@@ -515,7 +515,7 @@ int UtcDaliInteractiveTraitKeyEventClickedOnPressP(void)
   ClickedSignalFunctor functor(data);
   view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
 
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 
@@ -538,7 +538,7 @@ int UtcDaliInteractiveTraitKeyEventDisabledPolicyP(void)
   ClickedSignalFunctor functor(data);
   view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
 
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 

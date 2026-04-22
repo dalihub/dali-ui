@@ -190,21 +190,21 @@ public: // ABI-frozen virtual API
   virtual ViewAccessible* CreateAccessibleObject();
 
   /**
-   * @brief Gets the next focusable actor in this view towards the given direction.
+   * @brief Gets the next focusable view in this view towards the given direction.
    *
    * A view needs to override this function in order to support two dimensional key navigation.
-   * @param[in] currentFocusedActor The current focused actor
+   * @param[in] currentFocusedView The current focused view
    * @param[in] direction The direction to move the focus towards
    * @param[in] loopEnabled Whether the focus movement should be looped within the view
-   * @return The next focusable actor in this view or an empty handle if no actor can be focused
+   * @return The next focusable view in this view or an empty handle if no view can be focused
    */
-  virtual Actor GetNextFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction, bool loopEnabled);
+  virtual Ui::View GetNextFocusableView(Ui::View currentFocusedView, Ui::FocusDirection direction, bool loopEnabled);
 
   /**
-   * @brief Informs this view that its chosen focusable actor will be focused.
-   * @param[in] committedFocusableActor The committed focusable actor
+   * @brief Informs this view that its chosen focusable view will be focused.
+   * @param[in] committedFocusableView The committed focusable view
    */
-  virtual void OnFocusChangeCommitted(Actor committedFocusableActor);
+  virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
 
   /**
    * @brief Called when the view has enter pressed on it.

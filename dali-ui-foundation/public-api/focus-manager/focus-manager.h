@@ -40,7 +40,7 @@ class FocusManager;
  *
  * It provides functionality of setting the focus and moving the focus
  * in four directions (i.e. Left, Right, Up and Down). It also draws a
- * highlight for the focused actor and emits a signal when the focus
+ * highlight for the focused view and emits a signal when the focus
  * is changed.
  *
  * Signals
@@ -49,22 +49,22 @@ class FocusManager;
  * | preFocusChange          | @ref PreFocusChangeSignal()        |
  * | focusChanged            | @ref FocusChangedSignal()          |
  * | focusGroupChanged       | @ref FocusGroupChangedSignal()     |
- * | focusedActorEnterKey    | @ref FocusedActorEnterKeySignal()  |
+ * | focusedViewEnterKey     | @ref FocusedViewEnterKeySignal()   |
  */
 class DALI_UI_API FocusManager : public BaseHandle
 {
 public:
   /// @brief Pre focus change signal
-  typedef Signal<Actor(Actor, Actor, Ui::FocusDirection)> PreFocusChangeSignalType;
+  typedef Signal<View(View, View, Ui::FocusDirection)> PreFocusChangeSignalType;
 
   /// @brief Focus changed signal
-  typedef Signal<void(Actor, Actor)> FocusChangedSignalType;
+  typedef Signal<void(View, View)> FocusChangedSignalType;
 
   /// @brief Focus group changed signal
-  typedef Signal<void(Actor, bool)> FocusGroupChangedSignalType;
+  typedef Signal<void(View, bool)> FocusGroupChangedSignalType;
 
-  /// @brief Focused actor has the enter key pressed signal
-  typedef Signal<void(Actor)> FocusedActorEnterKeySignalType;
+  /// @brief Focused view has the enter key pressed signal
+  typedef Signal<void(View)> FocusedViewEnterKeySignalType;
 
   /**
    * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
@@ -88,26 +88,26 @@ public:
   static FocusManager Get();
 
   /**
-   * @brief Moves the focus to the given actor.
+   * @brief Moves the focus to the given view.
    *
-   * Only one actor can be focused at the same time.  The actor must
+   * Only one view can be focused at the same time.  The view must
    * be in the stage already and focusable.
    *
-   * @param actor The actor to be focused
+   * @param view The view to be focused
    * @return Whether the focus is successful or not
    * @pre The FocusManager has been initialized.
-   * @pre The Actor has been initialized.
-   * @note If the parent of this actor has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be focused.
+   * @pre The View has been initialized.
+   * @note If the parent of this view has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be focused.
    */
-  bool SetCurrentFocusActor(Actor actor);
+  bool SetCurrentFocusView(View view);
 
   /**
-   * @brief Gets the current focused actor.
+   * @brief Gets the current focused view.
    *
-   * @return A handle to the current focused actor or an empty handle if no actor is focused
+   * @return A handle to the current focused view or an empty handle if no view is focused
    * @pre The FocusManager has been initialized.
    */
-  Actor GetCurrentFocusActor();
+  View GetCurrentFocusView();
 
   /**
    * @brief Moves the focus to the next focusable actor in the focus
@@ -147,36 +147,36 @@ public:
   bool GetFocusGroupLoop() const;
 
   /**
-   * @brief Sets whether an actor is a focus group that can limit the
-   * scope of focus movement to its child actors in the focus chain.
+   * @brief Sets whether a view is a focus group that can limit the
+   * scope of focus movement to its child views in the focus chain.
    *
    * Layout views set themselves as focus groups by default.
    *
-   * @param actor The actor to be set as a focus group
-   * @param isFocusGroup Whether to set the actor as a focus group or not
+   * @param view The view to be set as a focus group
+   * @param isFocusGroup Whether to set the view as a focus group or not
    * @pre The FocusManager has been initialized.
-   * @pre The Actor has been initialized.
+   * @pre The View has been initialized.
    */
-  void SetAsFocusGroup(Actor actor, bool isFocusGroup);
+  void SetAsFocusGroup(View view, bool isFocusGroup);
 
   /**
-   * @brief Checks whether the actor is set as a focus group or not.
+   * @brief Checks whether the view is set as a focus group or not.
    *
-   * @param actor The actor to be checked
-   * @return Whether the actor is set as a focus group
+   * @param view The view to be checked
+   * @return Whether the view is set as a focus group
    * @pre The FocusManager has been initialized.
-   * @pre The Actor has been initialized.
+   * @pre The View has been initialized.
    */
-  bool IsFocusGroup(Actor actor) const;
+  bool IsFocusGroup(View view) const;
 
   /**
-   * @brief Returns the closest ancestor of the given actor that is a focus group.
+   * @brief Returns the closest ancestor of the given view that is a focus group.
    *
-   * @param actor The actor to be checked for its focus group
-   * @return The focus group the given actor belongs to or an empty handle if the given actor
+   * @param view The view to be checked for its focus group
+   * @return The focus group the given view belongs to or an empty handle if the given view
    * doesn't belong to any focus group
    */
-  Actor GetFocusGroup(Actor actor);
+  View GetFocusGroup(View view);
 
   /**
    * @brief Sets the focus indicator actor.
@@ -192,12 +192,12 @@ public:
   void SetFocusIndicatorActor(View indicator);
 
   /**
-   * @brief Gets the focus indicator actor.
+   * @brief Gets the focus indicator view.
    *
-   * @return A handle to the focus indicator actor
+   * @return A handle to the focus indicator view
    * @pre The FocusManager has been initialized.
    */
-  Actor GetFocusIndicatorActor();
+  View GetFocusIndicatorView();
 
   /**
    * @brief Move the focus to prev focused actor
@@ -248,18 +248,18 @@ public: // Signals
   /**
    * @brief This signal is emitted before the focus is going to be changed.
    *
-   * FocusManager makes the best guess for which actor to
+   * FocusManager makes the best guess for which view to
    * focus towards the given direction, but applications might want to
    * change that. By connecting with this signal, they can check the
-   * proposed actor to focus and return a different actor if they
+   * proposed view to focus and return a different view if they
    * wish. This signal is only emitted when the navigation key is
    * pressed and FocusManager tries to move the focus
    * automatically. It won't be emitted for focus movement by calling
-   * SetCurrentFocusActor directly.
+   * SetCurrentFocusView directly.
    *
    * A callback of the following type may be connected:
    * @code
-   *   Actor YourCallbackName(Actor currentFocusedActor, Actor proposedActorToFocus, FocusDirection::Direction direction);
+   *   View YourCallbackName(View currentFocusedView, View proposedViewToFocus, FocusDirection::Direction direction);
    * @endcode
    * @return The signal to connect to
    * @pre The Object has been initialized.
@@ -267,11 +267,11 @@ public: // Signals
   PreFocusChangeSignalType& PreFocusChangeSignal();
 
   /**
-   * @brief This signal is emitted after the current focused actor has been changed.
+   * @brief This signal is emitted after the current focused view has been changed.
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallbackName(Actor originalFocusedActor, Actor currentFocusedActor);
+   *   void YourCallbackName(View originalFocusedView, View currentFocusedView);
    * @endcode
    * @return The signal to connect to
    * @pre The Object has been initialized.
@@ -288,7 +288,7 @@ public: // Signals
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallbackName(Actor currentFocusedActor, bool forward);
+   *   void YourCallbackName(View currentFocusedView, bool forward);
    * @endcode
    * @return The signal to connect to
    * @pre The Object has been initialized.
@@ -296,16 +296,16 @@ public: // Signals
   FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   /**
-   * @brief This signal is emitted when the current focused actor has the enter key pressed on it.
+   * @brief This signal is emitted when the current focused view has the enter key pressed on it.
    *
    * A callback of the following type may be connected:
    * @code
-   *   void YourCallbackName(Actor enterPressedActor);
+   *   void YourCallbackName(View enterPressedView);
    * @endcode
    * @return The signal to connect to
    * @pre The Object has been initialized.
    */
-  FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
+  FocusedViewEnterKeySignalType& FocusedViewEnterKeySignal();
 
   // Not intended for application developers
 

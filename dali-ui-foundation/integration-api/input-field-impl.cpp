@@ -1007,7 +1007,7 @@ void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
   Dali::Ui::FocusManager keyboardFocusManager = Dali::Ui::FocusManager::Get();
   if(keyboardFocusManager)
   {
-    keyboardFocusManager.SetCurrentFocusActor(Self());
+    keyboardFocusManager.SetCurrentFocusView(Ui::View::DownCast(Self()));
   }
   SetKeyInputFocus();
 }
@@ -1415,7 +1415,7 @@ void InputFieldImpl::OnKeyboardStatusChanged(bool keyboardShown)
   Dali::Ui::FocusManager keyboardFocusManager = Dali::Ui::FocusManager::Get();
   if(keyboardFocusManager)
   {
-    isFocused = keyboardFocusManager.GetCurrentFocusActor() == Self();
+    isFocused = keyboardFocusManager.GetCurrentFocusView() == Self();
   }
 
   // Just hide the grab handle when keyboard is hidden.

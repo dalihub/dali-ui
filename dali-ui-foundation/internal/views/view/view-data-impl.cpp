@@ -445,10 +445,10 @@ DALI_TYPE_REGISTRATION_END()
 const PropertyRegistration ViewDataImpl::PROPERTY_5(typeRegistration,  "background",                     Ui::View::Property::BACKGROUND,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_6(typeRegistration,  "margin",                         Ui::View::Property::MARGIN,                           Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_7(typeRegistration,  "padding",                        Ui::View::Property::PADDING,                          Property::EXTENTS, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_11(typeRegistration, "leftFocusableActorId",           Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFocusableActorId",          Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID,         Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableActorId",             Ui::View::Property::UP_FOCUSABLE_ACTOR_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_14(typeRegistration, "downFocusableActorId",           Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_11(typeRegistration, "leftFocusableViewId",           Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFocusableViewId",          Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID,         Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableViewId",             Ui::View::Property::UP_FOCUSABLE_VIEW_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_14(typeRegistration, "downFocusableViewId",           Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_16(typeRegistration, "accessibilityName",              Ui::View::Property::ACCESSIBILITY_NAME,               Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_17(typeRegistration, "accessibilityDescription",       Ui::View::Property::ACCESSIBILITY_DESCRIPTION,        Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -458,8 +458,8 @@ const PropertyRegistration ViewDataImpl::PROPERTY_20(typeRegistration, "accessib
 const PropertyRegistration ViewDataImpl::PROPERTY_21(typeRegistration, "accessibilityAttributes",        Ui::View::Property::ACCESSIBILITY_ATTRIBUTES,         Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_22(typeRegistration, "dispatchKeyEvents",              Ui::View::Property::DISPATCH_KEY_EVENTS,              Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_23(typeRegistration, "accessibilityHidden",            Ui::View::Property::ACCESSIBILITY_HIDDEN,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableActorId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableActorId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableViewId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableViewId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_26(typeRegistration, "automationId",                   Ui::View::Property::AUTOMATION_ID,                    Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_27(typeRegistration, "accessibilityValue",             Ui::View::Property::ACCESSIBILITY_VALUE,              Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_28(typeRegistration, "accessibilityScrollable",        Ui::View::Property::ACCESSIBILITY_SCROLLABLE,         Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -501,12 +501,12 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),
-  mLeftFocusableActorId(-1),
-  mRightFocusableActorId(-1),
-  mUpFocusableActorId(-1),
-  mDownFocusableActorId(-1),
-  mClockwiseFocusableActorId(-1),
-  mCounterClockwiseFocusableActorId(-1),
+  mLeftFocusableViewId(-1),
+  mRightFocusableViewId(-1),
+  mUpFocusableViewId(-1),
+  mDownFocusableViewId(-1),
+  mClockwiseFocusableViewId(-1),
+  mCounterClockwiseFocusableViewId(-1),
   mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
   mPadding(),
@@ -840,42 +840,42 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
     switch(index)
     {
-      case Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mLeftFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mLeftFocusableViewId = focusId;
         }
       }
       break;
 
-      case Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mRightFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mRightFocusableViewId = focusId;
         }
       }
       break;
 
-      case Ui::View::Property::UP_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::UP_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mUpFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mUpFocusableViewId = focusId;
         }
       }
       break;
 
-      case Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mDownFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mDownFocusableViewId = focusId;
         }
       }
       break;
@@ -1070,21 +1070,21 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         }
         break;
       }
-      case Ui::View::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mClockwiseFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mClockwiseFocusableViewId = focusId;
         }
         break;
       }
-      case Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mCounterClockwiseFocusableActorId = focusId;
+          viewImpl.GetViewDataImpl().mCounterClockwiseFocusableViewId = focusId;
         }
         break;
       }
@@ -1421,7 +1421,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           viewImpl.GetViewDataImpl().mIsFocusGroup = isFocusGroup;
 
           // The following line will be removed when the deprecated API in FocusManager is deleted
-          Ui::FocusManager::Get().SetAsFocusGroup(viewImpl.Self(), isFocusGroup);
+          Ui::FocusManager::Get().SetAsFocusGroup(View::DownCast(viewImpl.Self()), isFocusGroup);
         }
         break;
       }
@@ -1443,27 +1443,27 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
     switch(index)
     {
-      case Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mLeftFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mLeftFocusableViewId;
         break;
       }
 
-      case Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mRightFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mRightFocusableViewId;
         break;
       }
 
-      case Ui::View::Property::UP_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::UP_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mUpFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mUpFocusableViewId;
         break;
       }
 
-      case Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mDownFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mDownFocusableViewId;
         break;
       }
 
@@ -1565,15 +1565,15 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mClockwiseFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mClockwiseFocusableViewId;
         break;
       }
 
-      case Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID:
+      case Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mCounterClockwiseFocusableActorId;
+        value = viewImpl.GetViewDataImpl().mCounterClockwiseFocusableViewId;
         break;
       }
 

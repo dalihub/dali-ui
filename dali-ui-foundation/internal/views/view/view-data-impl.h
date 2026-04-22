@@ -473,12 +473,12 @@ public:
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData>        mVisualData;
 
-  int mLeftFocusableActorId;             ///< Actor ID of Left focusable view.
-  int mRightFocusableActorId;            ///< Actor ID of Right focusable view.
-  int mUpFocusableActorId;               ///< Actor ID of Up focusable view.
-  int mDownFocusableActorId;             ///< Actor ID of Down focusable view.
-  int mClockwiseFocusableActorId;        ///< Actor ID of Clockwise focusable view.
-  int mCounterClockwiseFocusableActorId; ///< Actor ID of Counter clockwise focusable view.
+  int mLeftFocusableViewId;             ///< ID of Left focusable view.
+  int mRightFocusableViewId;            ///< ID of Right focusable view.
+  int mUpFocusableViewId;               ///< ID of Up focusable view.
+  int mDownFocusableViewId;             ///< ID of Down focusable view.
+  int mClockwiseFocusableViewId;        ///< ID of Clockwise focusable view.
+  int mCounterClockwiseFocusableViewId; ///< ID of Counter clockwise focusable view.
 
   Vector4                           mBackgroundColor; ///< The color of the background visual
   Extents                           mMargin;          ///< Layout margin

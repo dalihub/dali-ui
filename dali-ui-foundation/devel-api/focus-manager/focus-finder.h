@@ -30,14 +30,14 @@ namespace FocusFinder
 {
 
 /**
- * Get the nearest focusable actor.
- * @param [in] rootActor The root actor.
- * @param [in] focusedActor The current focused actor.
+ * Get the nearest focusable view.
+ * @param [in] root The root actor to search within (may be a Layer or any Actor).
+ * @param [in] focusedView The current focused view.
  * @param [in] direction The direction.
- * @return The nearest focusable actor, or an empty handle if none exists.
+ * @return The nearest focusable view, or an empty handle if none exists.
  */
-DALI_UI_API Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor,
-                                           Ui::FocusDirection direction);
+DALI_UI_API View GetNearestFocusableView(Actor root, View focusedView,
+                                         Ui::FocusDirection direction);
 
 } // namespace FocusFinder
 

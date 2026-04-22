@@ -1725,7 +1725,7 @@ void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
 
 bool ViewImpl::IsFocusGroup()
 {
-  return Ui::FocusManager::Get().IsFocusGroup(Self());
+  return Ui::FocusManager::Get().IsFocusGroup(Ui::View::DownCast(Self()));
 }
 
 void ViewImpl::KeyboardEnter()
@@ -1736,7 +1736,7 @@ void ViewImpl::KeyboardEnter()
 
 bool ViewImpl::OnAccessibilityActivated()
 {
-  if(Ui::FocusManager::Get().SetCurrentFocusActor(Self()))
+  if(Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self())))
   {
     return OnKeyboardEnter();
   }
@@ -1768,13 +1768,13 @@ ViewAccessible* ViewImpl::CreateAccessibleObject()
   return new ViewAccessible(Self());
 }
 
-Actor ViewImpl::GetNextFocusableActor(Actor currentFocusedActor, Ui::FocusDirection direction,
-                                      bool loopEnabled)
+Ui::View ViewImpl::GetNextFocusableView(Ui::View currentFocusedView, Ui::FocusDirection direction,
+                                        bool loopEnabled)
 {
-  return Actor();
+  return Ui::View();
 }
 
-void ViewImpl::OnFocusChangeCommitted(Actor committedFocusableActor)
+void ViewImpl::OnFocusChangeCommitted(Ui::View committedFocusableView)
 {
 }
 
@@ -1970,7 +1970,7 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
-      if(!enabled && Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusActor())
+      if(!enabled && Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
       {
         Dali::Ui::FocusManager::Get().ClearFocus();
       }

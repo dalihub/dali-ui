@@ -86,14 +86,14 @@ public:
   FocusManager();
 
   /**
-   * @copydoc Ui::FocusManager::SetCurrentFocusActor
+   * @copydoc Ui::FocusManager::SetCurrentFocusView
    */
-  bool SetCurrentFocusActor(Actor actor);
+  bool SetCurrentFocusView(View view);
 
   /**
-   * @copydoc Ui::FocusManager::GetCurrentFocusActor
+   * @copydoc Ui::FocusManager::GetCurrentFocusView
    */
-  Actor GetCurrentFocusActor();
+  View GetCurrentFocusView();
 
   /**
    * @copydoc Ui::FocusManager::MoveFocus
@@ -113,17 +113,17 @@ public:
   /**
    * @copydoc Ui::FocusManager::SetAsFocusGroup
    */
-  void SetAsFocusGroup(Actor actor, bool isFocusGroup);
+  void SetAsFocusGroup(View view, bool isFocusGroup);
 
   /**
    * @copydoc Ui::FocusManager::IsFocusGroup
    */
-  bool IsFocusGroup(Actor actor) const;
+  bool IsFocusGroup(View view) const;
 
   /**
    * @copydoc Ui::FocusManager::GetFocusGroup
    */
-  Actor GetFocusGroup(Actor actor);
+  View GetFocusGroup(View view);
 
   /**
    * @copydoc Ui::FocusManager::SetFocusGroupLoop
@@ -141,9 +141,9 @@ public:
   void SetFocusIndicatorActor(View indicator);
 
   /**
-   * @copydoc Ui::FocusManager::GetFocusIndicatorActor
+   * @copydoc Ui::FocusManager::GetFocusIndicatorView
    */
-  Actor GetFocusIndicatorActor();
+  View GetFocusIndicatorView();
 
   /**
    * Move current focus to backward
@@ -176,14 +176,14 @@ public:
   bool IsDefaultAlgorithmEnabled() const;
 
   /**
-   * @copydoc Ui::DevelFocusManager::SetFocusFinderRootActor
+   * @copydoc Ui::DevelFocusManager::SetFocusFinderRootView
    */
-  void SetFocusFinderRootActor(Actor actor);
+  void SetFocusFinderRootView(View view);
 
   /**
-   * @copydoc Ui::DevelFocusManager::ResetFocusFinderRootActor
+   * @copydoc Ui::DevelFocusManager::ResetFocusFinderRootView
    */
-  void ResetFocusFinderRootActor();
+  void ResetFocusFinderRootView();
 
   /**
    * Returns the last focus change context (device and optional device name).
@@ -219,9 +219,9 @@ public:
   Ui::FocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   /**
-   * @copydoc Ui::FocusManager::FocusedActorEnterKeySignal()
+   * @copydoc Ui::FocusManager::FocusedViewEnterKeySignal()
    */
-  Ui::FocusManager::FocusedActorEnterKeySignalType& FocusedActorEnterKeySignal();
+  Ui::FocusManager::FocusedViewEnterKeySignalType& FocusedViewEnterKeySignal();
 
   /**
    * Connects a callback function with the object's signals.
@@ -241,8 +241,8 @@ protected:
   virtual ~FocusManager();
 
 private:
-  typedef std::vector<WeakHandle<Actor>> FocusStack;         ///< Define Dali::Vector< Dali::BaseObject* > as FocusStack to contain focus history
-  typedef FocusStack::iterator           FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
+  typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack
+  typedef FocusStack::iterator          FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
   /**
    * This will be called when the adaptor is initialized
@@ -261,30 +261,30 @@ private:
   void GetConfiguration();
 
   /**
-   * Get the focus group of current focused actor.
+   * Get the focus group of current focused view.
    * @pre The FocusManager has been initialized.
-   * @return A handle to the parent of the current focused actor which is a focus group,
-   * or an empty handle if no actor is focused.
+   * @return A handle to the parent of the current focused view which is a focus group,
+   * or an empty handle if no view is focused.
    */
-  Actor GetCurrentFocusGroup();
+  View GetCurrentFocusGroup();
 
   /**
-   * Move the focus to the specified actor and send notification for the focus change.
-   * @param actor The actor to be queried
+   * Move the focus to the specified view and send notification for the focus change.
+   * @param view The view to be focused
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus is successful or not
    */
-  bool DoSetCurrentFocusActor(Actor actor, const FocusChangeContext& context);
+  bool DoSetCurrentFocusView(View view, const FocusChangeContext& context);
 
   /**
-   * Move the focus to the next actor towards the specified direction within the layout view
-   * @param view The layout view to move the focus in
-   * @param actor The current focused actor
+   * Move the focus to the next view towards the specified direction within the layout view
+   * @param layoutView The layout view to move the focus in
+   * @param view The current focused view
    * @param direction The direction of focus movement
    * @param context The context that caused the focus change (device, name)
    * @return Whether the focus is successful or not
    */
-  bool DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context);
+  bool DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context);
 
   /**
    * Move the focus to the first focusable actor in the next focus group in the forward
@@ -297,29 +297,26 @@ private:
   bool DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context);
 
   /**
-   * Enter has been pressed on the actor. If the actor is view, call the OnKeybaordEnter virtual function.
-   * This function will emit FocusedActorEnterKeySignal.
-   * @param actor The actor to notify
+   * Enter has been pressed on the view. If the view is valid, call the OnKeyboardEnter virtual function.
+   * This function will emit FocusedViewEnterKeySignal.
+   * @param view The view to notify
    */
-  void DoKeyboardEnter(Actor actor);
+  void DoKeyboardEnter(View view);
 
   /**
-   * Check whether the actor is a layout view that supports two dimensional keyboard navigation.
-   * The layout view needs to internally set the focus order for the child actor and be able to
-   * tell FocusManager the next focusable actor in the given direction.
+   * Check whether the view is a layout view that supports two dimensional keyboard navigation.
    * @pre The FocusManager has been initialized.
-   * @pre The Actor has been initialized.
-   * @param actor The actor to be checked.
-   * @return Whether the actor is a layout view or not.
+   * @param view The view to be checked.
+   * @return Whether the view is a layout view or not.
    */
-  bool IsLayoutView(Actor actor) const;
+  bool IsLayoutView(View view) const;
 
   /**
-   * Returns the closest ancestor of the given actor that is a layout view.
-   * @param actor The actor to be checked for its parent layout view
-   * @return The parent layout view the given actor belongs to or an empty handle if the given actor doesn't belong to a layout view
+   * Returns the closest ancestor of the given view that is a layout view.
+   * @param view The view to be checked for its parent layout view
+   * @return The parent layout view the given view belongs to or an empty handle if the given view doesn't belong to a layout view
    */
-  Ui::View GetParentLayoutView(Actor actor) const;
+  Ui::View GetParentLayoutView(View view) const;
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus
@@ -361,9 +358,9 @@ private:
   void OnSceneHolderFocusChanged(Dali::Integration::SceneHolder sceneHolder, bool focusIn);
 
   /**
-   * Get the focus Actor from current window
+   * Get the focus View from current window
    */
-  Actor GetFocusActorFromCurrentWindow();
+  View GetFocusViewFromCurrentWindow();
 
   /**
    * Convert Device::Class to FocusDevice
@@ -374,23 +371,23 @@ private:
 
   /**
    * Recursively deliver events to the view and its parents, until the event is consumed or the stage is reached.
-   * @param[in]  actor  The actor got WheelEvent.
+   * @param[in]  view  The view got WheelEvent.
    * @param[in]  event  The WheelEvent.
    * @return True if WheelEvent is consumed.
    */
-  bool EmitCustomWheelSignals(Actor actor, const WheelEvent& event);
+  bool EmitCustomWheelSignals(View view, const WheelEvent& event);
 
   /**
-   * Clear the focus actor
-   * @param[in] actor Actor to be cleared of focus
+   * Clear the focus view
+   * @param[in] view View to be cleared of focus
    */
-  void ClearFocus(Actor actor);
+  void ClearFocus(View view);
 
   /**
-   * Clear the focus indicator actor.
-   * @param[in] actor Actor to be cleared of focus indicator.
+   * Clear the focus indicator view.
+   * @param[in] view View to be cleared of focus indicator.
    */
-  void ClearFocusIndicator(Actor actor);
+  void ClearFocusIndicator(View view);
 
   /**
    * Gets the current native window id
@@ -410,26 +407,26 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
-  Ui::FocusManager::PreFocusChangeSignalType       mPreFocusChangeSignal;       ///< The signal to notify the focus will be changed
-  Ui::FocusManager::FocusChangedSignalType         mFocusChangedSignal;         ///< The signal to notify the focus change
-  Ui::FocusManager::FocusGroupChangedSignalType    mFocusGroupChangedSignal;    ///< The signal to notify the focus group change
-  Ui::FocusManager::FocusedActorEnterKeySignalType mFocusedActorEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused actor
+  Ui::FocusManager::PreFocusChangeSignalType      mPreFocusChangeSignal;      ///< The signal to notify the focus will be changed
+  Ui::FocusManager::FocusChangedSignalType        mFocusChangedSignal;        ///< The signal to notify the focus change
+  Ui::FocusManager::FocusGroupChangedSignalType   mFocusGroupChangedSignal;   ///< The signal to notify the focus group change
+  Ui::FocusManager::FocusedViewEnterKeySignalType mFocusedViewEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused view
 
-  WeakHandle<Actor> mCurrentFocusActor; ///< A weak handle to the current focused actor
+  WeakHandle<View> mCurrentFocusView; ///< A weak handle to the current focused view
 
-  View mFocusIndicatorActor; ///< The focus indicator actor shared by all the keyboard focusable actors for highlight
+  View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
-  WeakHandle<Actor> mFocusFinderRootActor; ///< The root actor from which the focus finder is started.
+  WeakHandle<View> mFocusFinderRootView; ///< The root view from which the focus finder is started.
 
-  FocusStack mFocusHistory; ///< Stack to contain pre-focused actor's BaseObject*
+  FocusStack mFocusHistory; ///< Stack to contain pre-focused view history
 
   SlotDelegate<FocusManager> mSlotDelegate;
 
   CustomAlgorithmInterface* mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
 
-  typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<Actor>>> FocusActorContainer;
+  typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
 
-  FocusActorContainer mCurrentFocusActors; ///< A container of focused actors
+  FocusViewContainer mCurrentFocusViews; ///< A container of focused views per window
 
   WeakHandle<Layer> mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
 

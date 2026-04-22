@@ -540,7 +540,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   application.SendNotification();
   application.Render();
 
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
   application.Render();
 

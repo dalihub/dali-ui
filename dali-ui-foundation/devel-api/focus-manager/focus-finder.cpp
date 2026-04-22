@@ -366,18 +366,20 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
 
 } // unnamed namespace
 
-Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::FocusDirection direction)
+View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirection direction)
 {
+  Actor focusedActor = focusedView;
+
   Actor nearestActor;
   if(!rootActor)
   {
-    return nearestActor;
+    return View();
   }
 
   Rect<float> focusedRect;
   if(!focusedActor)
   {
-    // If there is no currently focused actor, it is searched based on the upper left corner of the current window.
+    // If there is no currently focused view, it is searched based on the upper left corner of the current window.
     Rect<float> rootRect = DevelActor::CalculateCurrentScreenExtents(rootActor);
     focusedRect          = Rect<float>(rootRect.x, rootRect.y, 0.f, 0.f);
   }
@@ -387,7 +389,7 @@ Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::FocusDir
   }
 
   // initialize the best candidate to something impossible
-  // (so the first plausible actor will become the best choice)
+  // (so the first plausible view will become the best choice)
   Rect<float> bestCandidateRect = focusedRect;
   switch(direction)
   {
@@ -418,7 +420,7 @@ Actor GetNearestFocusableActor(Actor rootActor, Actor focusedActor, Ui::FocusDir
   }
 
   nearestActor = FindNextFocus(rootActor, focusedActor, focusedRect, bestCandidateRect, direction);
-  return nearestActor;
+  return View::DownCast(nearestActor);
 }
 
 } // namespace FocusFinder

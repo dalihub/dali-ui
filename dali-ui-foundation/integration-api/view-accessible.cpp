@@ -373,7 +373,7 @@ Dali::Accessibility::States ViewAccessible::CalculateStates()
   Dali::Accessibility::States states;
 
   states[State::FOCUSABLE]   = self.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
-  states[State::FOCUSED]     = Ui::FocusManager::Get().GetCurrentFocusActor() == self;
+  states[State::FOCUSED]     = Ui::FocusManager::Get().GetCurrentFocusView() == self;
   states[State::HIGHLIGHTED] = IsHighlighted();
   states[State::SENSITIVE]   = (Dali::DevelActor::IsHittable(self) && Dali::DevelActor::GetTouchRequired(self));
   states[State::VISIBLE]     = self.GetProperty<bool>(Actor::Property::VISIBLE);
@@ -465,7 +465,7 @@ bool ViewAccessible::IsHidden() const
 
 bool ViewAccessible::GrabFocus()
 {
-  return Ui::FocusManager::Get().SetCurrentFocusActor(Self());
+  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self()));
 }
 
 void ViewAccessible::ScrollToSelf()

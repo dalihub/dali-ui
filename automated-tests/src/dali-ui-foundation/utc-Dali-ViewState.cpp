@@ -265,7 +265,7 @@ int UtcDaliViewStateDisabledClearsFocusedP(void)
   View            view = CreateView(application);
 
   view.SetFocusable(true);
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
 
   view.SetEnabled(false);
@@ -308,7 +308,7 @@ int UtcDaliViewStateDisabledOrthogonalSignalP(void)
   ConnectionTracker tracker;
 
   view.SetFocusable(true);
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
 
   view.SetEnabled(false);
@@ -362,7 +362,7 @@ int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
 
   view.EnsureInteractiveTrait();
   view.SetFocusable(true);
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
   GetImpl(view).SetState(ViewState::PRESSED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
@@ -594,7 +594,7 @@ int UtcDaliViewIsEffectivelyFocusedNoneN(void)
 }
 
 // =============================================================================
-// FocusManager integration: SetCurrentFocusActor sets FOCUSED state
+// FocusManager integration: SetCurrentFocusView sets FOCUSED state
 // =============================================================================
 
 int UtcDaliViewStateFocusedViaFocusManagerP(void)
@@ -611,7 +611,7 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
   });
 
   view.SetFocusable(true);
-  FocusManager::Get().SetCurrentFocusActor(view);
+  FocusManager::Get().SetCurrentFocusView(view);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
@@ -633,11 +633,11 @@ int UtcDaliViewStateFocusedViaFocusManagerClearOnMoveP(void)
 
   view1.SetFocusable(true);
   view2.SetFocusable(true);
-  FocusManager::Get().SetCurrentFocusActor(view1);
+  FocusManager::Get().SetCurrentFocusView(view1);
   DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(!GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
 
-  FocusManager::Get().SetCurrentFocusActor(view2);
+  FocusManager::Get().SetCurrentFocusView(view2);
 
   DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(ViewState::FOCUSED));

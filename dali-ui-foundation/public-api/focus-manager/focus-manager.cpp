@@ -46,14 +46,14 @@ FocusManager::FocusManager(Internal::FocusManager* impl)
 {
 }
 
-bool FocusManager::SetCurrentFocusActor(Actor actor)
+bool FocusManager::SetCurrentFocusView(View view)
 {
-  return GetImpl(*this).SetCurrentFocusActor(actor);
+  return GetImpl(*this).SetCurrentFocusView(view);
 }
 
-Actor FocusManager::GetCurrentFocusActor()
+View FocusManager::GetCurrentFocusView()
 {
-  return GetImpl(*this).GetCurrentFocusActor();
+  return GetImpl(*this).GetCurrentFocusView();
 }
 
 bool FocusManager::MoveFocus(Ui::FocusDirection direction)
@@ -66,21 +66,21 @@ void FocusManager::ClearFocus()
   GetImpl(*this).ClearFocus();
 }
 
-void FocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
+void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
   // deprecated method.
-  GetImpl(*this).SetAsFocusGroup(actor, isFocusGroup);
+  GetImpl(*this).SetAsFocusGroup(view, isFocusGroup);
 }
 
-bool FocusManager::IsFocusGroup(Actor actor) const
+bool FocusManager::IsFocusGroup(View view) const
 {
   // deprecated method.
-  return GetImpl(*this).IsFocusGroup(actor);
+  return GetImpl(*this).IsFocusGroup(view);
 }
 
-Actor FocusManager::GetFocusGroup(Actor actor)
+View FocusManager::GetFocusGroup(View view)
 {
-  return GetImpl(*this).GetFocusGroup(actor);
+  return GetImpl(*this).GetFocusGroup(view);
 }
 
 void FocusManager::SetFocusGroupLoop(bool enabled)
@@ -98,9 +98,9 @@ void FocusManager::SetFocusIndicatorActor(View indicator)
   GetImpl(*this).SetFocusIndicatorActor(indicator);
 }
 
-Actor FocusManager::GetFocusIndicatorActor()
+View FocusManager::GetFocusIndicatorView()
 {
-  return GetImpl(*this).GetFocusIndicatorActor();
+  return GetImpl(*this).GetFocusIndicatorView();
 }
 
 void FocusManager::MoveFocusBackward()
@@ -123,9 +123,9 @@ FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal
   return GetImpl(*this).FocusGroupChangedSignal();
 }
 
-FocusManager::FocusedActorEnterKeySignalType& FocusManager::FocusedActorEnterKeySignal()
+FocusManager::FocusedViewEnterKeySignalType& FocusManager::FocusedViewEnterKeySignal()
 {
-  return GetImpl(*this).FocusedActorEnterKeySignal();
+  return GetImpl(*this).FocusedViewEnterKeySignal();
 }
 
 FocusDevice FocusManager::GetLastFocusChangeDevice() const

@@ -107,7 +107,7 @@ DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, 
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "preFocusChange", SIGNAL_PRE_FOCUS_CHANGE)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
-DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusedActorEnterKey", SIGNAL_FOCUSED_ACTOR_ENTER_KEY)
+DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusedViewEnterKey", SIGNAL_FOCUSED_VIEW_ENTER_KEY)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -138,10 +138,10 @@ FocusManager::FocusManager()
 : mPreFocusChangeSignal(),
   mFocusChangedSignal(),
   mFocusGroupChangedSignal(),
-  mFocusedActorEnterKeySignal(),
-  mCurrentFocusActor(),
-  mFocusIndicatorActor(),
-  mFocusFinderRootActor(),
+  mFocusedViewEnterKeySignal(),
+  mCurrentFocusView(),
+  mFocusIndicatorView(),
+  mFocusFinderRootView(),
   mFocusHistory(),
   mSlotDelegate(this),
   mCustomAlgorithmInterface(NULL),
@@ -217,14 +217,14 @@ void FocusManager::GetConfiguration()
   mClearFocusOnTouch     = (mIsFocusIndicatorShown == SHOW) ? false : true;
 }
 
-bool FocusManager::SetCurrentFocusActor(Actor actor)
+bool FocusManager::SetCurrentFocusView(View view)
 {
   DALI_ASSERT_DEBUG(!mIsWaitingKeyboardFocusChangeCommit && "Calling this function in the PreFocusChangeSignal callback?");
 
-  return DoSetCurrentFocusActor(actor, {Ui::FocusDevice::PROGRAMMATIC, ""});
+  return DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
 }
 
-bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext& context)
+bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& context)
 {
   if(mIsFocusIndicatorShown == UNKNOWN)
   {
@@ -234,29 +234,29 @@ bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext&
   bool                           success = false;
   Dali::Integration::SceneHolder currentWindow;
 
-  // Check whether the actor is in the stage and is keyboard focusable.
-  if(actor && actor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-     actor.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED) &&
-     actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) &&
-     (currentWindow = Dali::Integration::SceneHolder::Get(actor))) ///< Note : SceneHolder might not be valid even if actor is connected to scene.
-                                                                   ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
+  // Check whether the view is in the stage and is keyboard focusable.
+  if(view && view.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+     view.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED) &&
+     view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) &&
+     (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
+                                                                  ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
   {
     // If the parent's KEYBOARD_FOCUSABLE_CHILDREN is false, it cannot have focus.
-    Actor parent = actor.GetParent();
+    Actor parent = view.GetParent();
     while(parent)
     {
       if(!parent.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
       {
-        DALI_LOG_DEBUG_INFO("Parent Actor has KEYBOARD_FOCUSABLE_CHILDREN false\n");
+        DALI_LOG_DEBUG_INFO("Parent has KEYBOARD_FOCUSABLE_CHILDREN false\n");
         return false;
       }
       parent = parent.GetParent();
     }
 
-    // If developer set focus on same actor, doing nothing
-    Actor currentFocusedActor = GetCurrentFocusActor();
-    DALI_LOG_DEBUG_INFO("current focused actor : [%p] new focused actor : [%p]\n", currentFocusedActor.GetObjectPtr(), actor.GetObjectPtr());
-    if(actor == currentFocusedActor)
+    // If developer set focus on same view, doing nothing
+    View currentFocusedView = GetCurrentFocusView();
+    DALI_LOG_DEBUG_INFO("current focused view : [%p] new focused view : [%p]\n", currentFocusedView.GetObjectPtr(), view.GetObjectPtr());
+    if(view == currentFocusedView)
     {
       return true;
     }
@@ -270,54 +270,51 @@ bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext&
 
     if((mIsFocusIndicatorShown == SHOW) && (mEnableFocusIndicator == ENABLE))
     {
-      actor.Add(GetFocusIndicatorActor());
+      view.Add(GetFocusIndicatorView());
     }
 
-    actor.OffSceneSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+    view.OffSceneSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
-    // Save the current focused actor
-    mCurrentFocusActor = actor;
+    // Save the current focused view
+    mCurrentFocusView = view;
 
     // Save the last focus change context
     mLastFocusChangeContext = context;
 
     bool focusedWindowFound = false;
-    for(unsigned int i = 0; i < mCurrentFocusActors.size(); i++)
+    for(unsigned int i = 0; i < mCurrentFocusViews.size(); i++)
     {
-      if(mCurrentFocusActors[i].first == mCurrentFocusedWindow)
+      if(mCurrentFocusViews[i].first == mCurrentFocusedWindow)
       {
-        mCurrentFocusActors[i].second = actor;
-        focusedWindowFound            = true;
+        mCurrentFocusViews[i].second = view;
+        focusedWindowFound           = true;
         break;
       }
     }
     if(!focusedWindowFound)
     {
-      // A new window gains the focus, so store the focused actor in that window.
-      mCurrentFocusActors.push_back(std::pair<WeakHandle<Layer>, WeakHandle<Actor>>(mCurrentFocusedWindow, actor));
+      // A new window gains the focus, so store the focused view in that window.
+      mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(mCurrentFocusedWindow, view));
     }
 
-    // Send notification for the change of focus actor
+    // Send notification for the change of focus view
     if(!mFocusChangedSignal.Empty())
     {
-      mFocusChangedSignal.Emit(currentFocusedActor, actor);
+      mFocusChangedSignal.Emit(currentFocusedView, view);
     }
 
-    Ui::View currentlyFocusedView = Ui::View::DownCast(currentFocusedActor);
-    if(currentlyFocusedView)
+    if(currentFocusedView)
     {
-      // Do we need it to remember if it was previously DISABLED?
-      GetImpl(currentlyFocusedView).ClearKeyInputFocus();
+      GetImpl(currentFocusedView).ClearKeyInputFocus();
     }
 
-    Ui::View newlyFocusedView = Ui::View::DownCast(actor);
-    if(newlyFocusedView)
+    if(view)
     {
-      GetImpl(newlyFocusedView).SetKeyInputFocus();
+      GetImpl(view).SetKeyInputFocus();
     }
 
-    // Push Current Focused Actor to FocusHistory
-    mFocusHistory.push_back(actor);
+    // Push Current Focused View to FocusHistory
+    mFocusHistory.push_back(view);
 
     // Delete first element before add new element when Stack is full.
     if(mFocusHistory.size() > MAX_HISTORY_AMOUNT)
@@ -337,67 +334,66 @@ bool FocusManager::DoSetCurrentFocusActor(Actor actor, const FocusChangeContext&
   return success;
 }
 
-Actor FocusManager::GetCurrentFocusActor()
+View FocusManager::GetCurrentFocusView()
 {
-  Actor actor = mCurrentFocusActor.GetHandle();
+  View view = mCurrentFocusView.GetHandle();
 
-  if(actor && !actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(view && !view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    // If the actor has been removed from the stage, then it should not be focused
-    actor.Reset();
-    mCurrentFocusActor.Reset();
+    // If the view has been removed from the stage, then it should not be focused
+    view.Reset();
+    mCurrentFocusView.Reset();
   }
-  return actor;
+  return view;
 }
 
-Actor FocusManager::GetFocusActorFromCurrentWindow()
+View FocusManager::GetFocusViewFromCurrentWindow()
 {
-  Actor        actor;
+  View         view;
   unsigned int index;
-  for(index = 0; index < mCurrentFocusActors.size(); index++)
+  for(index = 0; index < mCurrentFocusViews.size(); index++)
   {
-    if(mCurrentFocusActors[index].first == mCurrentFocusedWindow)
+    if(mCurrentFocusViews[index].first == mCurrentFocusedWindow)
     {
-      actor = mCurrentFocusActors[index].second.GetHandle();
+      view = mCurrentFocusViews[index].second.GetHandle();
       break;
     }
   }
 
-  if(actor && !actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(view && !view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    // If the actor has been removed from the window, then the window doesn't have any focused actor
-    actor.Reset();
-    mCurrentFocusActors.erase(mCurrentFocusActors.begin() + index);
+    // If the view has been removed from the window, then the window doesn't have any focused view
+    view.Reset();
+    mCurrentFocusViews.erase(mCurrentFocusViews.begin() + index);
   }
 
-  return actor;
+  return view;
 }
 
-Actor FocusManager::GetCurrentFocusGroup()
+View FocusManager::GetCurrentFocusGroup()
 {
-  return GetFocusGroup(GetCurrentFocusActor());
+  return GetFocusGroup(GetCurrentFocusView());
 }
 
 void FocusManager::MoveFocusBackward()
 {
-  // Find Pre Focused Actor when the list size is more than 1
+  // Find Pre Focused View when the list size is more than 1
   if(mFocusHistory.size() > 1)
   {
-    // Delete current focused actor in history
+    // Delete current focused view in history
     mFocusHistory.pop_back();
 
-    // If pre-focused actors are not on stage or deleted, remove them in stack
+    // If pre-focused views are not on stage or deleted, remove them in stack
     while(mFocusHistory.size() > 0)
     {
-      // Get pre focused actor
-      Actor target = mFocusHistory[mFocusHistory.size() - 1].GetHandle();
+      // Get pre focused view
+      View target = mFocusHistory[mFocusHistory.size() - 1].GetHandle();
 
-      // Impl of Actor is not null
       if(target && target.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
       {
-        // Delete pre focused actor in history because it will pushed again by SetCurrentFocusActor()
+        // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
         mFocusHistory.pop_back();
-        SetCurrentFocusActor(target);
+        SetCurrentFocusView(target);
         break;
       }
       else
@@ -407,43 +403,42 @@ void FocusManager::MoveFocusBackward()
       }
     }
 
-    // if there is no actor which can get focus, then push current focus actor in stack again
+    // if there is no view which can get focus, then push current focus view in stack again
     if(mFocusHistory.size() == 0)
     {
-      Actor currentFocusedActor = GetCurrentFocusActor();
-      mFocusHistory.push_back(currentFocusedActor);
+      View currentFocusedView = GetCurrentFocusView();
+      mFocusHistory.push_back(currentFocusedView);
     }
   }
 }
 
-bool FocusManager::IsLayoutView(Actor actor) const
+bool FocusManager::IsLayoutView(View view) const
 {
-  Ui::View view = Ui::View::DownCast(actor);
   return view && GetImpl(view).IsKeyNavigationSupported();
 }
 
-Ui::View FocusManager::GetParentLayoutView(Actor actor) const
+Ui::View FocusManager::GetParentLayoutView(View view) const
 {
-  // Get the actor's parent layout view that supports two dimensional keyboard navigation
+  // Get the view's parent layout view that supports two dimensional keyboard navigation
   Actor rootActor;
   Actor parent;
-  if(actor)
+  if(view)
   {
-    Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(actor);
+    Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(view);
     if(window)
     {
       rootActor = window.GetRootLayer();
     }
 
-    parent = actor.GetParent();
+    parent = view.GetParent();
   }
 
-  while(parent && !IsLayoutView(parent) && parent != rootActor)
+  while(parent && !IsLayoutView(View::DownCast(parent)) && parent != rootActor)
   {
     parent = parent.GetParent();
   }
 
-  return Ui::View::DownCast(parent);
+  return View::DownCast(parent);
 }
 
 Ui::FocusDevice FocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const
@@ -474,29 +469,27 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const Dali::String& d
 
 bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeContext& context)
 {
-  Actor currentFocusActor = GetCurrentFocusActor();
+  View currentFocusView = GetCurrentFocusView();
 
   bool succeed = false;
 
-  // Go through the actor's hierarchy until we find a layout view that knows how to move the focus
-  Ui::View layoutView = IsLayoutView(currentFocusActor) ? Ui::View::DownCast(currentFocusActor) : GetParentLayoutView(currentFocusActor);
+  // Go through the view's hierarchy until we find a layout view that knows how to move the focus
+  Ui::View layoutView = IsLayoutView(currentFocusView) ? currentFocusView : GetParentLayoutView(currentFocusView);
   while(layoutView && !succeed)
   {
-    succeed    = DoMoveFocusWithinLayoutView(layoutView, currentFocusActor, direction, context);
+    succeed    = DoMoveFocusWithinLayoutView(layoutView, currentFocusView, direction, context);
     layoutView = GetParentLayoutView(layoutView);
   }
 
   if(!succeed)
   {
-    Actor nextFocusableActor;
+    View nextFocusableView;
 
-    Ui::View currentFocusView = Ui::View::DownCast(currentFocusActor);
-
-    // If the current focused actor is a view, then find the next focusable actor via the focusable properties.
+    // If the current focused view is valid, then find the next focusable view via the focusable properties.
     if(currentFocusView)
     {
-      int             actorId = -1;
-      Property::Index index   = Property::INVALID_INDEX;
+      int             viewId = -1;
+      Property::Index index  = Property::INVALID_INDEX;
       Property::Value value;
 
       // Find property index based upon focus direction
@@ -504,89 +497,89 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
       {
         case Ui::FocusDirection::LEFT:
         {
-          index = Ui::View::Property::LEFT_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID;
           break;
         }
         case Ui::FocusDirection::RIGHT:
         {
-          index = Ui::View::Property::RIGHT_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID;
           break;
         }
         case Ui::FocusDirection::UP:
         {
-          index = Ui::View::Property::UP_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::UP_FOCUSABLE_VIEW_ID;
           break;
         }
         case Ui::FocusDirection::DOWN:
         {
-          index = Ui::View::Property::DOWN_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID;
           break;
         }
         case Ui::FocusDirection::CLOCKWISE:
         {
-          index = Ui::View::Property::CLOCKWISE_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID;
           break;
         }
         case Ui::FocusDirection::COUNTER_CLOCKWISE:
         {
-          index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_ACTOR_ID;
+          index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID;
           break;
         }
         default:
           break;
       }
 
-      // If the focusable property is set then determine next focusable actor
+      // If the focusable property is set then determine next focusable view
       if(index != Property::INVALID_INDEX)
       {
-        value   = currentFocusActor.GetProperty(index);
-        actorId = value.Get<int>();
+        value  = currentFocusView.GetProperty(index);
+        viewId = value.Get<int>();
 
-        // If actor's id is valid then find actor form actor's id. The actor should be on the stage.
-        if(actorId != -1)
+        // If view's id is valid then find view from id. The view should be on the stage.
+        if(viewId != -1)
         {
-          if(currentFocusActor.GetParent())
+          if(currentFocusView.GetParent())
           {
-            nextFocusableActor = currentFocusActor.GetParent().FindChildById(actorId);
+            nextFocusableView = View::DownCast(currentFocusView.GetParent().FindChildById(viewId));
           }
 
-          if(!nextFocusableActor)
+          if(!nextFocusableView)
           {
-            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusActor);
+            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
             if(window)
             {
-              nextFocusableActor = window.GetRootLayer().FindChildById(actorId);
+              nextFocusableView = View::DownCast(window.GetRootLayer().FindChildById(viewId));
             }
           }
         }
       }
     }
 
-    if(!nextFocusableActor)
+    if(!nextFocusableView)
     {
       // If the implementation of CustomAlgorithmInterface is provided then the PreFocusChangeSignal is no longer emitted.
       if(mCustomAlgorithmInterface)
       {
         mIsWaitingKeyboardFocusChangeCommit = true;
-        nextFocusableActor                  = mCustomAlgorithmInterface->GetNextFocusableActor(currentFocusActor, Actor(), direction, context.deviceName);
+        nextFocusableView                   = mCustomAlgorithmInterface->GetNextFocusableView(currentFocusView, Ui::View(), direction, context.deviceName);
         mIsWaitingKeyboardFocusChangeCommit = false;
       }
       else if(!mPreFocusChangeSignal.Empty())
       {
-        // Don't know how to move the focus further. The application needs to tell us which actor to move the focus to
+        // Don't know how to move the focus further. The application needs to tell us which view to move the focus to
         mIsWaitingKeyboardFocusChangeCommit = true;
-        nextFocusableActor                  = mPreFocusChangeSignal.Emit(currentFocusActor, Actor(), direction);
+        nextFocusableView                   = mPreFocusChangeSignal.Emit(currentFocusView, Ui::View(), direction);
         mIsWaitingKeyboardFocusChangeCommit = false;
       }
       else if(mEnableDefaultAlgorithm)
       {
-        Actor rootActor = mFocusFinderRootActor.GetHandle();
+        Actor rootActor = mFocusFinderRootView.GetHandle();
         if(!rootActor)
         {
-          if(currentFocusActor)
+          if(currentFocusView)
           {
-            // Find the window of the focused actor.
-            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusActor);
+            // Find the window of the focused view.
+            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
             if(window)
             {
               rootActor = window.GetRootLayer();
@@ -600,26 +593,25 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
         }
         if(rootActor)
         {
-          // We should find it among the actors nearby.
-          nextFocusableActor = Ui::FocusFinder::GetNearestFocusableActor(rootActor, currentFocusActor, direction);
+          // We should find it among the views nearby.
+          nextFocusableView = Ui::FocusFinder::GetNearestFocusableView(rootActor, currentFocusView, direction);
         }
       }
     }
 
-    if(nextFocusableActor && nextFocusableActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-       nextFocusableActor.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
+    if(nextFocusableView && nextFocusableView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+       nextFocusableView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
     {
-      // Whether the next focusable actor is a layout view
-      if(IsLayoutView(nextFocusableActor))
+      // Whether the next focusable view is a layout view
+      if(IsLayoutView(nextFocusableView))
       {
         // If so, move the focus inside it.
-        Ui::View layoutView = Ui::View::DownCast(nextFocusableActor);
-        succeed             = DoMoveFocusWithinLayoutView(layoutView, currentFocusActor, direction, context);
+        succeed = DoMoveFocusWithinLayoutView(nextFocusableView, currentFocusView, direction, context);
       }
       if(!succeed)
       {
-        // Just set focus to the next focusable actor
-        succeed = DoSetCurrentFocusActor(nextFocusableActor, context);
+        // Just set focus to the next focusable view
+        succeed = DoSetCurrentFocusView(nextFocusableView, context);
       }
     }
   }
@@ -627,54 +619,53 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
   return succeed;
 }
 
-bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::FocusDirection direction, const FocusChangeContext& context)
+bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
-  // Ask the view for the next actor to focus
-  Actor nextFocusableActor = GetImpl(view).GetNextFocusableActor(actor, direction, mFocusGroupLoopEnabled);
-  if(nextFocusableActor)
+  // Ask the layout view for the next view to focus
+  View nextFocusableView = GetImpl(layoutView).GetNextFocusableView(view, direction, mFocusGroupLoopEnabled);
+  if(nextFocusableView)
   {
-    if(!(nextFocusableActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
-         nextFocusableActor.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED)))
+    if(!(nextFocusableView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
+         nextFocusableView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED)))
     {
-      // If the actor is not focusable, ask the same layout view for the next actor to focus
-      return DoMoveFocusWithinLayoutView(view, nextFocusableActor, direction, context);
+      // If the view is not focusable, ask the same layout view for the next view to focus
+      return DoMoveFocusWithinLayoutView(layoutView, nextFocusableView, direction, context);
     }
     else
     {
-      Actor currentFocusActor   = GetCurrentFocusActor();
-      Actor committedFocusActor = nextFocusableActor;
+      View currentFocusView   = GetCurrentFocusView();
+      View committedFocusView = nextFocusableView;
 
-      // We will try to move the focus to the actor. Emit a signal to notify the proposed actor to focus
-      // Signal handler can check the proposed actor and return a different actor if it wishes.
+      // We will try to move the focus to the view. Emit a signal to notify the proposed view to focus
+      // Signal handler can check the proposed view and return a different view if it wishes.
       if(!mPreFocusChangeSignal.Empty())
       {
         mIsWaitingKeyboardFocusChangeCommit = true;
-        committedFocusActor                 = mPreFocusChangeSignal.Emit(currentFocusActor, nextFocusableActor, direction);
+        committedFocusView                  = mPreFocusChangeSignal.Emit(currentFocusView, nextFocusableView, direction);
         mIsWaitingKeyboardFocusChangeCommit = false;
       }
 
-      if(committedFocusActor && committedFocusActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-         committedFocusActor.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
+      if(committedFocusView && committedFocusView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+         committedFocusView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
       {
-        // Whether the committed focusable actor is a layout view
-        if(IsLayoutView(committedFocusActor) && committedFocusActor != view)
+        // Whether the committed focusable view is a layout view
+        if(IsLayoutView(committedFocusView) && committedFocusView != layoutView)
         {
           // If so, move the focus inside it.
-          Ui::View layoutView = Ui::View::DownCast(committedFocusActor);
-          return DoMoveFocusWithinLayoutView(layoutView, currentFocusActor, direction, context);
+          return DoMoveFocusWithinLayoutView(committedFocusView, currentFocusView, direction, context);
         }
         else
         {
-          // Otherwise, just set focus to the next focusable actor
-          if(committedFocusActor == nextFocusableActor)
+          // Otherwise, just set focus to the next focusable view
+          if(committedFocusView == nextFocusableView)
           {
-            // If the application hasn't changed our proposed actor, we informs the layout view we will
+            // If the application hasn't changed our proposed view, we inform the layout view we will
             // move the focus to what the view returns. The view might wish to perform some actions
             // before the focus is actually moved.
-            GetImpl(view).OnFocusChangeCommitted(committedFocusActor);
+            GetImpl(layoutView).OnFocusChangeCommitted(committedFocusView);
           }
 
-          return DoSetCurrentFocusActor(committedFocusActor, context);
+          return DoSetCurrentFocusView(committedFocusView, context);
         }
       }
       else
@@ -685,7 +676,7 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View view, Actor actor, Ui::F
   }
   else
   {
-    // No more actor can be focused in the given direction within the same layout view.
+    // No more view can be focused in the given direction within the same layout view.
     return false;
   }
 }
@@ -702,80 +693,72 @@ bool FocusManager::DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeCo
     // If the current focus group has a parent layout view, we can probably automatically
     // move the focus to the next focus group in the forward or backward direction.
     Ui::FocusDirection direction = forward ? Ui::FocusDirection::RIGHT : Ui::FocusDirection::LEFT;
-    succeed                      = DoMoveFocusWithinLayoutView(parentLayoutView, GetCurrentFocusActor(), direction, context);
+    succeed                      = DoMoveFocusWithinLayoutView(parentLayoutView, GetCurrentFocusView(), direction, context);
     parentLayoutView             = GetParentLayoutView(parentLayoutView);
   }
 
   if(!mFocusGroupChangedSignal.Empty())
   {
     // Emit a focus group changed signal. The applicaton can move the focus to a new focus group
-    mFocusGroupChangedSignal.Emit(GetCurrentFocusActor(), forward);
+    mFocusGroupChangedSignal.Emit(GetCurrentFocusView(), forward);
   }
 
   return succeed;
 }
 
-void FocusManager::DoKeyboardEnter(Actor actor)
+void FocusManager::DoKeyboardEnter(View view)
 {
-  if(actor)
+  if(view)
   {
-    Ui::View view = Ui::View::DownCast(actor);
-    if(view)
-    {
-      // Notify the view that enter has been pressed on it.
-      GetImpl(view).KeyboardEnter();
-    }
+    // Notify the view that enter has been pressed on it.
+    GetImpl(view).KeyboardEnter();
 
-    // Send a notification for the actor.
-    if(!mFocusedActorEnterKeySignal.Empty())
+    // Send a notification for the view.
+    if(!mFocusedViewEnterKeySignal.Empty())
     {
-      mFocusedActorEnterKeySignal.Emit(actor);
+      mFocusedViewEnterKeySignal.Emit(view);
     }
   }
 }
 
-void FocusManager::ClearFocus(Actor actor)
+void FocusManager::ClearFocus(View view)
 {
   // Reset context for this system-triggered focus loss.
   mLastFocusChangeContext = {};
 
-  if(actor)
+  if(view)
   {
-    DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", actor.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    actor.OffSceneSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+    DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
+    view.OffSceneSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
-    // Remove the actor from mCurrentFocusActors if present
-    for(auto iter = mCurrentFocusActors.begin(); iter != mCurrentFocusActors.end(); ++iter)
+    // Remove the view from mCurrentFocusViews if present
+    for(auto iter = mCurrentFocusViews.begin(); iter != mCurrentFocusViews.end(); ++iter)
     {
-      if(iter->first == mCurrentFocusedWindow && iter->second.GetHandle() == actor)
+      if(iter->first == mCurrentFocusedWindow && iter->second.GetHandle() == view)
       {
-        mCurrentFocusActors.erase(iter);
+        mCurrentFocusViews.erase(iter);
         break;
       }
     }
 
-    // Send notification for the change of focus actor
+    // Send notification for the change of focus view
     if(!mFocusChangedSignal.Empty())
     {
-      mFocusChangedSignal.Emit(actor, Actor());
+      mFocusChangedSignal.Emit(view, Ui::View());
     }
 
-    Ui::View currentlyFocusedView = Ui::View::DownCast(actor);
-    if(currentlyFocusedView)
-    {
-      GetImpl(currentlyFocusedView).ClearKeyInputFocus();
-    }
+    GetImpl(view).ClearKeyInputFocus();
   }
-  mCurrentFocusActor.Reset();
+  mCurrentFocusView.Reset();
 }
 
-void FocusManager::ClearFocusIndicator(Actor actor)
+void FocusManager::ClearFocusIndicator(View view)
 {
-  if(actor)
+  if(view)
   {
-    if(mFocusIndicatorActor)
+    if(mFocusIndicatorView)
     {
-      actor.Remove(mFocusIndicatorActor);
+      view.Remove(mFocusIndicatorView);
     }
   }
   mIsFocusIndicatorShown = (mAlwaysShowIndicator == ALWAYS_SHOW) ? SHOW : HIDE;
@@ -783,9 +766,9 @@ void FocusManager::ClearFocusIndicator(Actor actor)
 
 void FocusManager::ClearFocus()
 {
-  Actor actor = GetCurrentFocusActor();
-  ClearFocusIndicator(actor);
-  ClearFocus(actor);
+  View view = GetCurrentFocusView();
+  ClearFocusIndicator(view);
+  ClearFocus(view);
 }
 
 void FocusManager::SetFocusGroupLoop(bool enabled)
@@ -798,81 +781,82 @@ bool FocusManager::GetFocusGroupLoop() const
   return mFocusGroupLoopEnabled;
 }
 
-void FocusManager::SetAsFocusGroup(Actor actor, bool isFocusGroup)
+void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
-  if(actor)
+  if(view)
   {
     // Create/Set focus group property.
-    actor.RegisterProperty(IS_FOCUS_GROUP_PROPERTY_NAME, isFocusGroup, Property::READ_WRITE);
+    view.RegisterProperty(IS_FOCUS_GROUP_PROPERTY_NAME, isFocusGroup, Property::READ_WRITE);
   }
 }
 
-bool FocusManager::IsFocusGroup(Actor actor) const
+bool FocusManager::IsFocusGroup(View view) const
 {
-  // Check whether the actor is a focus group
+  // Check whether the view is a focus group
   bool isFocusGroup = false;
 
-  if(actor)
+  if(view)
   {
-    Property::Index propertyIsFocusGroup = actor.GetPropertyIndex(IS_FOCUS_GROUP_PROPERTY_NAME);
+    Property::Index propertyIsFocusGroup = view.GetPropertyIndex(IS_FOCUS_GROUP_PROPERTY_NAME);
     if(propertyIsFocusGroup != Property::INVALID_INDEX)
     {
-      isFocusGroup = actor.GetProperty<bool>(propertyIsFocusGroup);
+      isFocusGroup = view.GetProperty<bool>(propertyIsFocusGroup);
     }
   }
 
   return isFocusGroup;
 }
 
-Actor FocusManager::GetFocusGroup(Actor actor)
+View FocusManager::GetFocusGroup(View view)
 {
-  // Go through the actor's hierarchy to check which focus group the actor belongs to
-  while(actor && !IsFocusGroup(actor))
+  // Go through the view's hierarchy to check which focus group the view belongs to
+  Actor actor = view;
+  while(actor && !IsFocusGroup(View::DownCast(actor)))
   {
     actor = actor.GetParent();
   }
 
-  return actor;
+  return View::DownCast(actor);
 }
 
 void FocusManager::SetFocusIndicatorActor(View indicator)
 {
-  if(mFocusIndicatorActor != indicator)
+  if(mFocusIndicatorView != indicator)
   {
-    Actor currentFocusActor = GetCurrentFocusActor();
-    if(currentFocusActor)
+    View currentFocusView = GetCurrentFocusView();
+    if(currentFocusView)
     {
-      // The new focus indicator should be added to the current focused actor immediately
-      if(mFocusIndicatorActor)
+      // The new focus indicator should be added to the current focused view immediately
+      if(mFocusIndicatorView)
       {
-        currentFocusActor.Remove(mFocusIndicatorActor);
+        currentFocusView.Remove(mFocusIndicatorView);
       }
 
       if(indicator)
       {
-        currentFocusActor.Add(indicator);
+        currentFocusView.Add(indicator);
       }
     }
 
-    mFocusIndicatorActor = indicator;
+    mFocusIndicatorView = indicator;
   }
 }
 
-Actor FocusManager::GetFocusIndicatorActor()
+View FocusManager::GetFocusIndicatorView()
 {
-  if(!mFocusIndicatorActor)
+  if(!mFocusIndicatorView)
   {
-    // Create the default if it hasn't been set and one that's shared by all the keyboard focusable actors
+    // Create the default if it hasn't been set and one that's shared by all the keyboard focusable views
     const std::string imageDirPath = AssetManager::GetDaliImagePath();
-    mFocusIndicatorActor           = Ui::ImageView::New()
-                             .SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME))
-                             .SetFittingMode(FittingMode::FILL)
-                             .SetRequestedWidth(MATCH_PARENT)
-                             .SetRequestedHeight(MATCH_PARENT)
-                             .SetLayoutMode(LayoutMode::STANDALONE);
+    mFocusIndicatorView            = Ui::ImageView::New()
+                            .SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME))
+                            .SetFittingMode(FittingMode::FILL)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(MATCH_PARENT)
+                            .SetLayoutMode(LayoutMode::STANDALONE);
   }
 
-  return mFocusIndicatorActor;
+  return mFocusIndicatorView;
 }
 
 uint32_t FocusManager::GetCurrentWindowId() const
@@ -1057,11 +1041,11 @@ void FocusManager::OnKeyEvent(const KeyEvent& event)
       }
       else
       {
-        // The focused actor has enter pressed on it
-        Actor actor = GetCurrentFocusActor();
-        if(actor)
+        // The focused view has enter pressed on it
+        View focusedView = GetCurrentFocusView();
+        if(focusedView)
         {
-          DoKeyboardEnter(actor);
+          DoKeyboardEnter(focusedView);
         }
       }
 
@@ -1071,18 +1055,18 @@ void FocusManager::OnKeyEvent(const KeyEvent& event)
 
   if(isFocusStartableKey && mIsFocusIndicatorShown == SHOW)
   {
-    Actor actor = GetCurrentFocusActor();
-    if(actor)
+    View focusedView = GetCurrentFocusView();
+    if(focusedView)
     {
       if(mEnableFocusIndicator == ENABLE)
       {
-        // Make sure the focused actor is highlighted
-        actor.Add(GetFocusIndicatorActor());
+        // Make sure the focused view is highlighted
+        focusedView.Add(GetFocusIndicatorView());
       }
     }
     else if(!mEnableDefaultAlgorithm)
     {
-      // No actor is focused but keyboard focus is activated by the key press
+      // No view is focused but keyboard focus is activated by the key press
       // Let's try to move the initial focus
       MoveFocus(Ui::FocusDirection::RIGHT, context);
     }
@@ -1104,23 +1088,23 @@ void FocusManager::OnTouch(const TouchEvent& touch)
   {
     Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
 
-    // If you touch the currently focused actor again, you don't need to do SetCurrentFocusActor again.
-    Actor hitActor = touch.GetHitActor(0);
-    if(hitActor && hitActor == GetCurrentFocusActor())
+    // If you touch the currently focused view again, you don't need to do SetCurrentFocusView again.
+    View hitView = View::DownCast(touch.GetHitActor(0));
+    if(hitView && hitView == GetCurrentFocusView())
     {
       return;
     }
     // If mClearFocusOnTouch is false, do not clear the focus indicator even if user touch the screen.
     if(mClearFocusOnTouch)
     {
-      ClearFocusIndicator(GetCurrentFocusActor());
+      ClearFocusIndicator(GetCurrentFocusView());
     }
 
-    // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus actor
-    if(hitActor && hitActor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-       hitActor.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE))
+    // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus view
+    if(hitView && hitView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+       hitView.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE))
     {
-      DoSetCurrentFocusActor(hitActor, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
+      DoSetCurrentFocusView(hitView, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
     }
   }
 }
@@ -1137,39 +1121,39 @@ void FocusManager::OnWheelEvent(const WheelEvent& event)
 
 bool FocusManager::OnCustomWheelEvent(const WheelEvent& event)
 {
-  bool  consumed = false;
-  Actor actor    = GetCurrentFocusActor();
-  if(actor)
+  bool consumed = false;
+  View view     = GetCurrentFocusView();
+  if(view)
   {
-    // Notify the actor about the wheel event
-    consumed = EmitCustomWheelSignals(actor, event);
+    // Notify the view about the wheel event
+    consumed = EmitCustomWheelSignals(view, event);
   }
   return consumed;
 }
 
-bool FocusManager::EmitCustomWheelSignals(Actor actor, const WheelEvent& event)
+bool FocusManager::EmitCustomWheelSignals(View view, const WheelEvent& event)
 {
   bool consumed = false;
 
-  if(actor)
+  if(view)
   {
-    Dali::Actor oldParent(actor.GetParent());
+    Dali::Actor oldParent(view.GetParent());
 
-    // Only do the conversion and emit the signal if the actor's wheel signal has connections.
-    if(!actor.WheelEventSignal().Empty())
+    // Only do the conversion and emit the signal if the view's wheel signal has connections.
+    if(!view.WheelEventSignal().Empty())
     {
       // Emit the signal to the parent
-      consumed = actor.WheelEventSignal().Emit(actor, event);
+      consumed = view.WheelEventSignal().Emit(view, event);
     }
-    // if actor doesn't consume WheelEvent, give WheelEvent to its parent.
+    // if view doesn't consume WheelEvent, give WheelEvent to its parent.
     if(!consumed)
     {
-      // The actor may have been removed/reparented during the signal callbacks.
-      Dali::Actor parent = actor.GetParent();
+      // The view may have been removed/reparented during the signal callbacks.
+      Dali::Actor parent = view.GetParent();
 
       if(parent && (parent == oldParent))
       {
-        consumed = EmitCustomWheelSignals(parent, event);
+        consumed = EmitCustomWheelSignals(View::DownCast(parent), event);
       }
     }
   }
@@ -1186,16 +1170,16 @@ void FocusManager::OnWindowFocusChanged(Window window, bool focusIn)
     mCurrentFocusedWindow = rootLayer;
     mCurrentWindowId      = static_cast<uint32_t>(Dali::Integration::SceneHolder::Get(rootLayer).GetNativeId());
 
-    // Get Current Focused Actor from window
-    Actor currentFocusedActor = GetFocusActorFromCurrentWindow();
-    if(currentFocusedActor)
+    // Get Current Focused View from window
+    View currentFocusedView = GetFocusViewFromCurrentWindow();
+    if(currentFocusedView)
     {
-      SetCurrentFocusActor(currentFocusedActor);
+      SetCurrentFocusView(currentFocusedView);
 
       if(mEnableFocusIndicator == ENABLE)
       {
-        // Make sure the focused actor is highlighted
-        currentFocusedActor.Add(GetFocusIndicatorActor());
+        // Make sure the focused view is highlighted
+        currentFocusedView.Add(GetFocusIndicatorView());
         mIsFocusIndicatorShown = SHOW;
       }
     }
@@ -1230,9 +1214,9 @@ Ui::FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSi
   return mFocusGroupChangedSignal;
 }
 
-Ui::FocusManager::FocusedActorEnterKeySignalType& FocusManager::FocusedActorEnterKeySignal()
+Ui::FocusManager::FocusedViewEnterKeySignalType& FocusManager::FocusedViewEnterKeySignal()
 {
-  return mFocusedActorEnterKeySignal;
+  return mFocusedViewEnterKeySignal;
 }
 
 const FocusManager::FocusChangeContext& FocusManager::FocusChangedContext() const
@@ -1259,9 +1243,9 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   {
     manager->FocusGroupChangedSignal().Connect(tracker, functor);
   }
-  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUSED_ACTOR_ENTER_KEY))
+  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUSED_VIEW_ENTER_KEY))
   {
-    manager->FocusedActorEnterKeySignal().Connect(tracker, functor);
+    manager->FocusedViewEnterKeySignal().Connect(tracker, functor);
   }
   else
   {
@@ -1279,9 +1263,9 @@ void FocusManager::SetCustomAlgorithm(CustomAlgorithmInterface& interface)
 
 void FocusManager::EnableFocusIndicator(bool enable)
 {
-  if(!enable && mFocusIndicatorActor)
+  if(!enable && mFocusIndicatorView)
   {
-    mFocusIndicatorActor.Unparent();
+    mFocusIndicatorView.Unparent();
   }
 
   mEnableFocusIndicator = enable ? ENABLE : DISABLE;
@@ -1302,14 +1286,14 @@ bool FocusManager::IsDefaultAlgorithmEnabled() const
   return mEnableDefaultAlgorithm;
 }
 
-void FocusManager::SetFocusFinderRootActor(Actor actor)
+void FocusManager::SetFocusFinderRootView(View view)
 {
-  mFocusFinderRootActor = actor;
+  mFocusFinderRootView = view;
 }
 
-void FocusManager::ResetFocusFinderRootActor()
+void FocusManager::ResetFocusFinderRootView()
 {
-  mFocusFinderRootActor.Reset();
+  mFocusFinderRootView.Reset();
 }
 
 void FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
@@ -1324,11 +1308,12 @@ bool FocusManager::GetClearFocusOnWindowFocusLost() const
 
 void FocusManager::OnSceneDisconnection(Dali::Actor actor)
 {
-  if(actor && actor == mCurrentFocusActor.GetHandle())
+  View view = View::DownCast(actor);
+  if(view && view == mCurrentFocusView.GetHandle())
   {
-    DALI_LOG_RELEASE_INFO("ClearFocus due to actor id:(%d) removed from scene\n", actor.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    ClearFocusIndicator(actor);
-    ClearFocus(actor);
+    DALI_LOG_RELEASE_INFO("ClearFocus due to view id:(%d) removed from scene\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
+    ClearFocusIndicator(view);
+    ClearFocus(view);
   }
 }
 

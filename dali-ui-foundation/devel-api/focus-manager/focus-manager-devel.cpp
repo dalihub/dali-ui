@@ -55,14 +55,14 @@ bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Da
   return GetImpl(focusManager).MoveFocus(direction, deviceName);
 }
 
-void SetFocusFinderRootActor(FocusManager focusManager, Actor actor)
+void SetFocusFinderRootView(FocusManager focusManager, View view)
 {
-  GetImpl(focusManager).SetFocusFinderRootActor(actor);
+  GetImpl(focusManager).SetFocusFinderRootView(view);
 }
 
-void ResetFocusFinderRootActor(FocusManager focusManager)
+void ResetFocusFinderRootView(FocusManager focusManager)
 {
-  GetImpl(focusManager).ResetFocusFinderRootActor();
+  GetImpl(focusManager).ResetFocusFinderRootView();
 }
 
 } // namespace DevelFocusManager

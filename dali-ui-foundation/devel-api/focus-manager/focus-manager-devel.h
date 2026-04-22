@@ -30,14 +30,14 @@ namespace Ui
 namespace DevelFocusManager
 {
 /**
- * @brief Interface used to provide custom focus algorithm for retrieving the next focusable actor.
+ * @brief Interface used to provide custom focus algorithm for retrieving the next focusable view.
  *
  * The application / ui can implement the interface and override the focus behaviour.
  * Upon providing an implementation of this interface, the PreFocusChangeSignal is no longer emitted.
  * If focus is changing within a layout container, then the layout container is queried first to provide
- * the next focusable actor. If this does not provide a valid actor, then the FocusManager will
- * check focusable properties to determine next focusable actor. If focusable properties are not set,
- * then the FocusManager calls the GetNextFocusableActor() method of this interface.
+ * the next focusable view. If this does not provide a valid view, then the FocusManager will
+ * check focusable properties to determine next focusable view. If focusable properties are not set,
+ * then the FocusManager calls the GetNextFocusableView() method of this interface.
  */
 class CustomAlgorithmInterface
 {
@@ -48,15 +48,15 @@ public:
   virtual ~CustomAlgorithmInterface() {};
 
   /**
-   * @brief Called by the FocusManager to get the next focusable actor.
+   * @brief Called by the FocusManager to get the next focusable view.
    *
-   * @param[in] current The current focused actor
-   * @param[in] proposed The proposed focused actor
+   * @param[in] current The current focused view
+   * @param[in] proposed The proposed focused view
    * @param[in] direction The direction of focus movement
    * @param[in] deviceName The name of the device where the key event occurred.
-   * @return A handle to the next focusable actor
+   * @return A handle to the next focusable view
    */
-  virtual Actor GetNextFocusableActor(Actor current, Actor proposed, Ui::FocusDirection direction, const Dali::String& deviceName = "") = 0;
+  virtual View GetNextFocusableView(View current, View proposed, Ui::FocusDirection direction, const Dali::String& deviceName = "") = 0;
 };
 
 /**
@@ -114,20 +114,20 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(FocusManager focusManager);
 DALI_UI_API bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
 
 /**
- * @brief Sets the root actor to start moving focus when DefaultAlgorithm is enabled.
+ * @brief Sets the root view to start moving focus when DefaultAlgorithm is enabled.
  *
  * @param[in] focusManager The instance of FocusManager
- * @param[in] actor The root actor
+ * @param[in] view The root view
  */
-DALI_UI_API void SetFocusFinderRootActor(FocusManager focusManager, Actor actor);
+DALI_UI_API void SetFocusFinderRootView(FocusManager focusManager, View view);
 
 /**
- * @brief Resets the root actor that starts moving focus when DefaultAlgorithm is enabled.
+ * @brief Resets the root view that starts moving focus when DefaultAlgorithm is enabled.
  * When reset, the window becomes root.
  *
  * @param[in] focusManager The instance of FocusManager
  */
-DALI_UI_API void ResetFocusFinderRootActor(FocusManager focusManager);
+DALI_UI_API void ResetFocusFinderRootView(FocusManager focusManager);
 
 } // namespace DevelFocusManager
 
