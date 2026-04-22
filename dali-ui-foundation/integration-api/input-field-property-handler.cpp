@@ -92,6 +92,11 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetPlaceholderColor(UiColor(value.Get<Vector4>()));
       break;
     }
+    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+    {
+      impl.SetShowPlaceholderOnFocus(value.Get<bool>());
+      break;
+    }
     case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
     {
       impl.SetCursorWidth(value.Get<int>());
@@ -228,6 +233,11 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
     {
       value = impl.GetPlaceholderColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+    {
+      value = impl.IsPlaceholderShownOnFocus();
       break;
     }
     case Text::InputFieldPropertyIndex::CURSOR_WIDTH:

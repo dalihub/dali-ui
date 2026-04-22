@@ -113,6 +113,13 @@ struct InputFieldPropertyIndex
     PLACEHOLDER_COLOR,
 
     /**
+     * @brief Whether the placeholder text is shown when the input field has focus.
+     * @details Name "showPlaceholderOnFocus", type Property::BOOLEAN.
+     * @see InputField::SetShowPlaceholderOnFocus(), InputField::IsPlaceholderShownOnFocus().
+     */
+    SHOW_PLACEHOLDER_ON_FOCUS,
+
+    /**
      * @brief The width of the text cursor in pixels.
      * @details Name "cursorWidth", type Property::INTEGER.
      * @see InputField::SetCursorWidth(), InputField::GetCursorWidth().

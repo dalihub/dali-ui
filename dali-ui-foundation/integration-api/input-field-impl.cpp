@@ -86,6 +86,7 @@ INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",          INTEGER, VERTICA
 INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",               INTEGER, OVERFLOW_MODE                 )
 INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",                STRING,  PLACEHOLDER                   )
 INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",           VECTOR4, PLACEHOLDER_COLOR             )
+INPUT_FIELD_PROPERTY_REGISTRATION("showPlaceholderOnFocus",     BOOLEAN, SHOW_PLACEHOLDER_ON_FOCUS     )
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",                INTEGER, CURSOR_WIDTH                  )
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",                VECTOR4, CURSOR_COLOR                  )
 INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",             VECTOR4, SELECTION_COLOR               )

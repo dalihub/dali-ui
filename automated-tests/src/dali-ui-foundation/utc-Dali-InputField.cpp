@@ -37,6 +37,7 @@ const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT             = "verticalAlignm
 const char* const PROPERTY_NAME_OVERFLOW_MODE                  = "overflowMode";
 const char* const PROPERTY_NAME_PLACEHOLDER                    = "placeholder";
 const char* const PROPERTY_NAME_PLACEHOLDER_COLOR              = "placeholderColor";
+const char* const PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS      = "showPlaceholderOnFocus";
 const char* const PROPERTY_NAME_CURSOR_WIDTH                   = "cursorWidth";
 const char* const PROPERTY_NAME_CURSOR_COLOR                   = "cursorColor";
 const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
@@ -289,6 +290,21 @@ int UtcDaliInputFieldPlaceholderColor(void)
   UiColor color2(Color::BLUE);
   inputField.SetPlaceholderColor(color2);
   DALI_TEST_EQUALS(inputField.GetPlaceholderColor().Resolve(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldShowPlaceholderOnFocus(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetShowPlaceholderOnFocus(true);
+  DALI_TEST_EQUALS(inputField.IsPlaceholderShownOnFocus(), true, TEST_LOCATION);
+
+  inputField.SetShowPlaceholderOnFocus(false);
+  DALI_TEST_EQUALS(inputField.IsPlaceholderShownOnFocus(), false, TEST_LOCATION);
 
   END_TEST;
 }
@@ -584,6 +600,7 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_OVERFLOW_MODE) == InputField::Property::OVERFLOW_MODE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER) == InputField::Property::PLACEHOLDER);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER_COLOR) == InputField::Property::PLACEHOLDER_COLOR);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS) == InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_WIDTH) == InputField::Property::CURSOR_WIDTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_COLOR) == InputField::Property::CURSOR_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_COLOR) == InputField::Property::SELECTION_COLOR);
@@ -652,6 +669,10 @@ int UtcDaliInputFieldSetProperty(void)
   // PLACEHOLDER_COLOR
   inputField.SetProperty(InputField::Property::PLACEHOLDER_COLOR, Color::GRAY);
   DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::PLACEHOLDER_COLOR), Color::GRAY, TEST_LOCATION);
+
+  // SHOW_PLACEHOLDER_ON_FOCUS
+  inputField.SetProperty(InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS), true, TEST_LOCATION);
 
   // CURSOR_WIDTH
   inputField.SetProperty(InputField::Property::CURSOR_WIDTH, 2);

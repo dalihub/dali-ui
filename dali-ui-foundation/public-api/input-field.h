@@ -74,6 +74,7 @@ public:
       OVERFLOW_MODE                  = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
       PLACEHOLDER                    = Text::InputFieldPropertyIndex::PLACEHOLDER,
       PLACEHOLDER_COLOR              = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
+      SHOW_PLACEHOLDER_ON_FOCUS      = Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS,
       CURSOR_WIDTH                   = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
       CURSOR_COLOR                   = Text::InputFieldPropertyIndex::CURSOR_COLOR,
       SELECTION_COLOR                = Text::InputFieldPropertyIndex::SELECTION_COLOR,
