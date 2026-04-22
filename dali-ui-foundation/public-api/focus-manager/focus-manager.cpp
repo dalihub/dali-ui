@@ -123,11 +123,6 @@ FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal
   return GetImpl(*this).FocusGroupChangedSignal();
 }
 
-FocusManager::FocusedViewEnterKeySignalType& FocusManager::FocusedViewEnterKeySignal()
-{
-  return GetImpl(*this).FocusedViewEnterKeySignal();
-}
-
 FocusDevice FocusManager::GetLastFocusChangeDevice() const
 {
   const auto& internalCtx = GetImpl(*this).FocusChangedContext();

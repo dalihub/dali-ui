@@ -107,7 +107,6 @@ DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, 
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "preFocusChange", SIGNAL_PRE_FOCUS_CHANGE)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
-DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusedViewEnterKey", SIGNAL_FOCUSED_VIEW_ENTER_KEY)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -138,7 +137,6 @@ FocusManager::FocusManager()
 : mPreFocusChangeSignal(),
   mFocusChangedSignal(),
   mFocusGroupChangedSignal(),
-  mFocusedViewEnterKeySignal(),
   mCurrentFocusView(),
   mFocusIndicatorView(),
   mFocusFinderRootView(),
@@ -706,21 +704,6 @@ bool FocusManager::DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeCo
   return succeed;
 }
 
-void FocusManager::DoKeyboardEnter(View view)
-{
-  if(view)
-  {
-    // Notify the view that enter has been pressed on it.
-    GetImpl(view).KeyboardEnter();
-
-    // Send a notification for the view.
-    if(!mFocusedViewEnterKeySignal.Empty())
-    {
-      mFocusedViewEnterKeySignal.Emit(view);
-    }
-  }
-}
-
 void FocusManager::ClearFocus(View view)
 {
   // Reset context for this system-triggered focus loss.
@@ -1041,12 +1024,7 @@ void FocusManager::OnKeyEvent(const KeyEvent& event)
       }
       else
       {
-        // The focused view has enter pressed on it
-        View focusedView = GetCurrentFocusView();
-        if(focusedView)
-        {
-          DoKeyboardEnter(focusedView);
-        }
+        // Enter key press on focused view is handled by the key event signal, not by FocusManager.
       }
 
       isFocusStartableKey = true;
@@ -1214,11 +1192,6 @@ Ui::FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSi
   return mFocusGroupChangedSignal;
 }
 
-Ui::FocusManager::FocusedViewEnterKeySignalType& FocusManager::FocusedViewEnterKeySignal()
-{
-  return mFocusedViewEnterKeySignal;
-}
-
 const FocusManager::FocusChangeContext& FocusManager::FocusChangedContext() const
 {
   return mLastFocusChangeContext;
@@ -1242,10 +1215,6 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_GROUP_CHANGED))
   {
     manager->FocusGroupChangedSignal().Connect(tracker, functor);
-  }
-  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUSED_VIEW_ENTER_KEY))
-  {
-    manager->FocusedViewEnterKeySignal().Connect(tracker, functor);
   }
   else
   {

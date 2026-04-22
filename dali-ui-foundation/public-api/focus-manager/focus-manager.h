@@ -49,7 +49,6 @@ class FocusManager;
  * | preFocusChange          | @ref PreFocusChangeSignal()        |
  * | focusChanged            | @ref FocusChangedSignal()          |
  * | focusGroupChanged       | @ref FocusGroupChangedSignal()     |
- * | focusedViewEnterKey     | @ref FocusedViewEnterKeySignal()   |
  */
 class DALI_UI_API FocusManager : public BaseHandle
 {
@@ -62,9 +61,6 @@ public:
 
   /// @brief Focus group changed signal
   typedef Signal<void(View, bool)> FocusGroupChangedSignalType;
-
-  /// @brief Focused view has the enter key pressed signal
-  typedef Signal<void(View)> FocusedViewEnterKeySignalType;
 
   /**
    * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
@@ -294,18 +290,6 @@ public: // Signals
    * @pre The Object has been initialized.
    */
   FocusGroupChangedSignalType& FocusGroupChangedSignal();
-
-  /**
-   * @brief This signal is emitted when the current focused view has the enter key pressed on it.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   void YourCallbackName(View enterPressedView);
-   * @endcode
-   * @return The signal to connect to
-   * @pre The Object has been initialized.
-   */
-  FocusedViewEnterKeySignalType& FocusedViewEnterKeySignal();
 
   // Not intended for application developers
 

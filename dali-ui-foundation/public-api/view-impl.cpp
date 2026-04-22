@@ -1728,24 +1728,9 @@ bool ViewImpl::IsFocusGroup()
   return Ui::FocusManager::Get().IsFocusGroup(Ui::View::DownCast(Self()));
 }
 
-void ViewImpl::KeyboardEnter()
-{
-  // Inform deriving classes
-  OnKeyboardEnter();
-}
-
 bool ViewImpl::OnAccessibilityActivated()
 {
-  if(Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self())))
-  {
-    return OnKeyboardEnter();
-  }
-  return false;
-}
-
-bool ViewImpl::OnKeyboardEnter()
-{
-  return false; // Keyboard enter is not handled by default
+  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(Self()));
 }
 
 bool ViewImpl::OnAccessibilityPan(PanGesture gesture)

@@ -207,12 +207,6 @@ public: // ABI-frozen virtual API
   virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
 
   /**
-   * @brief Called when the view has enter pressed on it.
-   * @return true if this view supported this action
-   */
-  virtual bool OnKeyboardEnter();
-
-  /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
    * @return SourceActor of the OffScreenRenderable.
    */
@@ -905,7 +899,6 @@ public: // Non-virtual API (safe to reorder / extend)
   Internal::ViewDataImpl& GetViewDataImpl() const;
 
   /// @cond internal
-  DALI_INTERNAL void KeyboardEnter();
   DALI_INTERNAL bool EmitKeyEventSignal(const KeyEvent& event);
   /// @endcond
 

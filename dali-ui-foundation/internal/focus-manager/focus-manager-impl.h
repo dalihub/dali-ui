@@ -219,11 +219,6 @@ public:
   Ui::FocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   /**
-   * @copydoc Ui::FocusManager::FocusedViewEnterKeySignal()
-   */
-  Ui::FocusManager::FocusedViewEnterKeySignalType& FocusedViewEnterKeySignal();
-
-  /**
    * Connects a callback function with the object's signals.
    * @param[in] object The object providing the signal.
    * @param[in] tracker Used to disconnect the signal.
@@ -297,14 +292,9 @@ private:
   bool DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context);
 
   /**
-   * Enter has been pressed on the view. If the view is valid, call the OnKeyboardEnter virtual function.
-   * This function will emit FocusedViewEnterKeySignal.
-   * @param view The view to notify
-   */
-  void DoKeyboardEnter(View view);
-
-  /**
    * Check whether the view is a layout view that supports two dimensional keyboard navigation.
+   * The layout view needs to internally set the focus order for the child view and be able to
+   * tell FocusManager the next focusable view in the given direction.
    * @pre The FocusManager has been initialized.
    * @param view The view to be checked.
    * @return Whether the view is a layout view or not.
@@ -410,8 +400,6 @@ private:
   Ui::FocusManager::PreFocusChangeSignalType      mPreFocusChangeSignal;      ///< The signal to notify the focus will be changed
   Ui::FocusManager::FocusChangedSignalType        mFocusChangedSignal;        ///< The signal to notify the focus change
   Ui::FocusManager::FocusGroupChangedSignalType   mFocusGroupChangedSignal;   ///< The signal to notify the focus group change
-  Ui::FocusManager::FocusedViewEnterKeySignalType mFocusedViewEnterKeySignal; ///< The signal to notify that enter has been pressed on the focused view
-
   WeakHandle<View> mCurrentFocusView; ///< A weak handle to the current focused view
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
