@@ -1544,8 +1544,12 @@ void LabelImpl::InvalidateTextMeasure()
 {
   if(!mMeasureInvalidated)
   {
-    InvalidateMeasure();
-    mMeasureInvalidated = true;
+    // Invalidate measure only when the label size depends on text measurement.
+    if((GetRequestedWidth() == WRAP_CONTENT) || (GetRequestedHeight() == WRAP_CONTENT))
+    {
+      InvalidateMeasure();
+      mMeasureInvalidated = true;
+    }
     EnableAutoMarqueeEvaluation();
   }
 }
