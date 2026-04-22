@@ -1,8 +1,8 @@
-#ifndef DALI_UI_FOCUS_FINDER_H
-#define DALI_UI_FOCUS_FINDER_H
+#ifndef DALI_UI_INTERNAL_FOCUS_FINDER_H
+#define DALI_UI_INTERNAL_FOCUS_FINDER_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Internal
+{
 namespace FocusFinder
 {
 
@@ -36,13 +38,11 @@ namespace FocusFinder
  * @param [in] direction The direction.
  * @return The nearest focusable view, or an empty handle if none exists.
  */
-DALI_UI_API View GetNearestFocusableView(Actor root, View focusedView,
-                                         Ui::FocusDirection direction);
+View GetNearestFocusableView(Actor root, View focusedView, Ui::FocusDirection direction);
 
 } // namespace FocusFinder
-
+} // namespace Internal
 } // namespace Ui
-
 } // namespace Dali
 
-#endif // DALI_UI_FOCUS_FINDER_H
+#endif // DALI_UI_INTERNAL_FOCUS_FINDER_H

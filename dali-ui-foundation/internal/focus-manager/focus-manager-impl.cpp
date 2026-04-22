@@ -38,8 +38,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -594,7 +594,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
         if(rootActor)
         {
           // We should find it among the views nearby.
-          nextFocusableView = Ui::FocusFinder::GetNearestFocusableView(rootActor, currentFocusView, direction);
+          nextFocusableView = FocusFinder::GetNearestFocusableView(rootActor, currentFocusView, direction);
         }
       }
     }
