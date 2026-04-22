@@ -1,4 +1,4 @@
-name: Repo sync to Tizen
+name: Repo sync to Tizen samsung github
 
 on:
   schedule:
@@ -28,13 +28,19 @@ jobs:
       - name: Configure git
         run: git config --global user.name "github-action[bot]"
 
+      - name: Setup SSH private keys
+        uses: code-actions/webfactory-ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add internal GitHub to known_hosts
+        run: ssh-keyscan github.sec.samsung.net >> ~/.ssh/known_hosts 2>/dev/null
+
       - name: Force push to tizen github
-        env:
-          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           SRC="${{ github.event.inputs.source_branch || 'devel' }}"
           DEST="${{ github.event.inputs.destination_branch || 'tizen' }}"
-          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.sec.samsung.net/tizen/dali-ui.git"
+          REMOTE_URL="git@github.sec.samsung.net:tizen/dali-ui.git"
           MAX_RETRIES=3
           RETRY_COUNT=0
           SUCCESS=false
@@ -66,8 +72,6 @@ jobs:
           fetch-depth: 0
 
       - name: Sync wiki
-        env:
-          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           SRC="wiki"
           DEST="wiki"
@@ -94,8 +98,6 @@ jobs:
             fi
 
       - name: Sync tags
-        env:
-          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
-          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.sec.samsung.net/tizen/dali-ui.git"
+          REMOTE_URL="git@github.sec.samsung.net:tizen/dali-ui.git"
           git push "$REMOTE_URL" --tags --force
