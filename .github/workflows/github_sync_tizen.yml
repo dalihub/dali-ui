@@ -1,0 +1,101 @@
+name: Repo sync to Tizen
+
+on:
+  schedule:
+    # 매일 오후 5시 30분 (KST) = 8:30 UTC
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to sync from'
+        required: true
+        default: 'devel'
+      destination_branch:
+        description: 'Destination branch to sync to'
+        required: true
+        default: 'tizen'
+
+jobs:
+  repo-sync:
+    runs-on: [ code-linux, code-large ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.source_branch || 'devel' }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: git config --global user.name "github-action[bot]"
+
+      - name: Force push to tizen github
+        env:
+          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          SRC="${{ github.event.inputs.source_branch || 'devel' }}"
+          DEST="${{ github.event.inputs.destination_branch || 'tizen' }}"
+          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.sec.samsung.net/tizen/dali-ui.git"
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          git remote add tizen "$REMOTE_URL"
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if git push tizen "$SRC:$DEST" --force; then
+              echo "Succeed"
+              SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              echo "Retry after 5 sec..."
+              sleep 5
+              fi
+            done
+
+            if [ "$SUCCESS" = false ]; then
+              echo "Failed to push tizen repo"
+              exit 1
+            fi
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: wiki
+          fetch-depth: 0
+
+      - name: Sync wiki
+        env:
+          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          SRC="wiki"
+          DEST="wiki"
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if git push tizen "$SRC:$DEST" --force; then
+              echo "Succeed"
+              SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              echo "Retry after 5 sec..."
+              sleep 5
+              fi
+            done
+
+            if [ "$SUCCESS" = false ]; then
+              echo "Failed to push tizen repo"
+              exit 1
+            fi
+
+      - name: Sync tags
+        env:
+          PUBLIC_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          REMOTE_URL="https://rabbitfor:${{ secrets.PAT_TOKEN }}@github.sec.samsung.net/tizen/dali-ui.git"
+          git push "$REMOTE_URL" --tags --force
