@@ -846,22 +846,6 @@ public: // Non-virtual API (safe to reorder / extend)
   bool IsKeyNavigationSupported();
 
   /**
-   * @brief Sets this view to receive key input focus.
-   */
-  void SetKeyInputFocus();
-
-  /**
-   * @brief Checks whether this view has key input focus.
-   * @return True if the view has key input focus
-   */
-  bool HasKeyInputFocus();
-
-  /**
-   * @brief Clears key input focus from this view.
-   */
-  void ClearKeyInputFocus();
-
-  /**
    * @brief Sets whether this view acts as a focus group boundary.
    * @param[in] isFocusGroup True to set as focus group
    */

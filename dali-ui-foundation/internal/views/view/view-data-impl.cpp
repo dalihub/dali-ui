@@ -50,7 +50,6 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
@@ -1419,9 +1418,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(isFocusGroup))
         {
           viewImpl.GetViewDataImpl().mIsFocusGroup = isFocusGroup;
-
-          // The following line will be removed when the deprecated API in FocusManager is deleted
-          Ui::FocusManager::Get().SetAsFocusGroup(View::DownCast(viewImpl.Self()), isFocusGroup);
         }
         break;
       }

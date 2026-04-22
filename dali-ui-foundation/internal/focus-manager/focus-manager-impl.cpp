@@ -40,6 +40,7 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -56,8 +57,6 @@ namespace // Unnamed namespace
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEYBOARD_FOCUS_MANAGER");
 #endif
-
-const char* const IS_FOCUS_GROUP_PROPERTY_NAME = "isFocusGroup"; // This property will be replaced by a flag in View.
 
 const char* const FOCUS_BORDER_IMAGE_FILE_NAME = "keyboard_focus.9.png";
 
@@ -301,14 +300,14 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mFocusChangedSignal.Emit(currentFocusedView, view);
     }
 
-    if(currentFocusedView)
+    if(currentFocusedView && currentFocusedView.IsOnScene())
     {
-      GetImpl(currentFocusedView).ClearKeyInputFocus();
+      Internal::KeyInputFocusManager::Get().RemoveFocus(currentFocusedView);
     }
 
-    if(view)
+    if(view && view.IsOnScene())
     {
-      GetImpl(view).SetKeyInputFocus();
+      Internal::KeyInputFocusManager::Get().SetFocus(view);
     }
 
     // Push Current Focused View to FocusHistory
@@ -730,7 +729,10 @@ void FocusManager::ClearFocus(View view)
       mFocusChangedSignal.Emit(view, Ui::View());
     }
 
-    GetImpl(view).ClearKeyInputFocus();
+    if(view.IsOnScene())
+    {
+      Internal::KeyInputFocusManager::Get().RemoveFocus(view);
+    }
   }
   mCurrentFocusView.Reset();
 }
@@ -768,26 +770,17 @@ void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
   if(view)
   {
-    // Create/Set focus group property.
-    view.RegisterProperty(IS_FOCUS_GROUP_PROPERTY_NAME, isFocusGroup, Property::READ_WRITE);
+    GetImpl(view).SetAsFocusGroup(isFocusGroup);
   }
 }
 
 bool FocusManager::IsFocusGroup(View view) const
 {
-  // Check whether the view is a focus group
-  bool isFocusGroup = false;
-
   if(view)
   {
-    Property::Index propertyIsFocusGroup = view.GetPropertyIndex(IS_FOCUS_GROUP_PROPERTY_NAME);
-    if(propertyIsFocusGroup != Property::INVALID_INDEX)
-    {
-      isFocusGroup = view.GetProperty<bool>(propertyIsFocusGroup);
-    }
+    return GetImpl(view).IsFocusGroup();
   }
-
-  return isFocusGroup;
+  return false;
 }
 
 View FocusManager::GetFocusGroup(View view)

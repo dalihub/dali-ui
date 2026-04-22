@@ -46,7 +46,6 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
-#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
@@ -1688,36 +1687,6 @@ bool ViewImpl::IsKeyNavigationSupported()
   return mImpl->mIsKeyNavigationSupported;
 }
 
-void ViewImpl::SetKeyInputFocus()
-{
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Internal::KeyInputFocusManager::Get().SetFocus(Ui::View::DownCast(Self()));
-  }
-}
-
-bool ViewImpl::HasKeyInputFocus()
-{
-  bool result = false;
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Ui::View view = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
-    if(Self() == view)
-    {
-      result = true;
-    }
-  }
-  return result;
-}
-
-void ViewImpl::ClearKeyInputFocus()
-{
-  if(Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
-  {
-    Internal::KeyInputFocusManager::Get().RemoveFocus(Ui::View::DownCast(Self()));
-  }
-}
-
 void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
 {
   Self().SetProperty(Ui::View::Property::FOCUS_GROUP, isFocusGroup);
@@ -1725,7 +1694,7 @@ void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
 
 bool ViewImpl::IsFocusGroup()
 {
-  return Ui::FocusManager::Get().IsFocusGroup(Ui::View::DownCast(Self()));
+  return mImpl->mIsFocusGroup;
 }
 
 bool ViewImpl::OnAccessibilityActivated()

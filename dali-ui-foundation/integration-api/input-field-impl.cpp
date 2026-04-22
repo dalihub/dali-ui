@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
@@ -106,6 +107,38 @@ INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
+
+/**
+ * @brief Helper method moved from ViewImpl::SetKeyInputFocus().
+ *
+ * Sets key input focus via KeyInputFocusManager directly, bypassing FocusManager.
+ * FocusManager's current focus state is NOT updated by this call.
+ *
+ * @param[in] view The view to set key input focus on
+ */
+void SetKeyInputFocus(Dali::Ui::View view)
+{
+  if(view && view.IsOnScene())
+  {
+    Dali::Ui::Internal::KeyInputFocusManager::Get().SetFocus(view);
+  }
+}
+
+/**
+ * @brief Helper method moved from ViewImpl::ClearKeyInputFocus().
+ *
+ * Clears key input focus via KeyInputFocusManager directly, bypassing FocusManager.
+ * Same caveat as SetKeyInputFocus() — FocusManager state is not affected.
+ *
+ * @param[in] view The view to clear key input focus from
+ */
+void ClearKeyInputFocus(Dali::Ui::View view)
+{
+  if(view && view.IsOnScene())
+  {
+    Dali::Ui::Internal::KeyInputFocusManager::Get().RemoveFocus(view);
+  }
+}
 
 } // namespace
 
@@ -979,7 +1012,7 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
       {
         focusManager.ClearFocus();
       }
-      ClearKeyInputFocus();
+      ClearKeyInputFocus(Ui::View::DownCast(Self()));
     }
 
     return true;
@@ -1009,7 +1042,7 @@ void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
   {
     keyboardFocusManager.SetCurrentFocusView(Ui::View::DownCast(Self()));
   }
-  SetKeyInputFocus();
+  SetKeyInputFocus(Ui::View::DownCast(Self()));
 }
 
 void InputFieldImpl::OnPanDetected(Actor actor, const PanGesture& gesture)
@@ -1035,7 +1068,7 @@ void InputFieldImpl::OnLongPressDetected(Actor actor, const LongPressGesture& ge
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
 
-  SetKeyInputFocus();
+  SetKeyInputFocus(Ui::View::DownCast(Self()));
 }
 
 MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstraint)
@@ -1265,7 +1298,7 @@ void InputFieldImpl::SetTextSelectionRange(const uint32_t* start, const uint32_t
   if(mController && mController->IsShowingRealText())
   {
     mController->SetTextSelectionRange(start, end);
-    SetKeyInputFocus();
+    SetKeyInputFocus(Ui::View::DownCast(Self()));
   }
 }
 
@@ -1284,7 +1317,7 @@ void InputFieldImpl::SelectWholeText()
   if(mController && mController->IsShowingRealText())
   {
     mController->SelectWholeText();
-    SetKeyInputFocus();
+    SetKeyInputFocus(Ui::View::DownCast(Self()));
   }
 }
 
@@ -1301,7 +1334,7 @@ void InputFieldImpl::SelectText(const uint32_t start, const uint32_t end)
   if(mController && mController->IsShowingRealText())
   {
     mController->SelectText(start, end);
-    SetKeyInputFocus();
+    SetKeyInputFocus(Ui::View::DownCast(Self()));
   }
 }
 
@@ -1353,7 +1386,7 @@ void InputFieldImpl::PasteText()
 {
   if(mController)
   {
-    SetKeyInputFocus(); //Giving focus to the field that was passed to the PasteText in case the passed field (current field) doesn't have focus.
+    SetKeyInputFocus(Ui::View::DownCast(Self())); //Giving focus to the field that was passed to the PasteText in case the passed field (current field) doesn't have focus.
     mController->PasteText();
   }
 }
