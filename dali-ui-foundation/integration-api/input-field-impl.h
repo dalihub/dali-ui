@@ -432,6 +432,11 @@ public: // Signals
    */
   Signal<void(View)>& MaximumLengthReachedSignal();
 
+  /**
+   * @copydoc Dali::Ui::InputField::CursorPositionChangedSignal()
+   */
+  Signal<void(View, uint32_t)>& CursorPositionChangedSignal();
+
 protected:
   // Construction
 
@@ -722,7 +727,12 @@ private: // Implementation
   /**
    * @brief Emits TextChanged signal.
    */
-  void EmitTextChangedSignal();
+  void EmitTextChanged();
+
+  /**
+   * @brief Emits CursorPositionChanged signal.
+   */
+  void EmitCursorPositionChanged();
 
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
@@ -769,8 +779,9 @@ private:
 
 private:
   // Data
-  Signal<void(View)> mTextChangedSignal;
-  Signal<void(View)> mMaxLengthReachedSignal;
+  Signal<void(View)>           mTextChangedSignal;
+  Signal<void(View)>           mMaxLengthReachedSignal;
+  Signal<void(View, uint32_t)> mCursorPositionChangedSignal;
 
   InputMethodContext          mInputMethodContext;
   TapGestureDetector          mTapGestureDetector;

@@ -489,6 +489,11 @@ Signal<void(View)>& InputField::MaximumLengthReachedSignal()
   return GetImpl(*this).MaximumLengthReachedSignal();
 }
 
+Signal<void(View, uint32_t)>& InputField::CursorPositionChangedSignal()
+{
+  return GetImpl(*this).CursorPositionChangedSignal();
+}
+
 } // namespace Ui
 
 } // namespace Dali

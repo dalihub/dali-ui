@@ -672,6 +672,11 @@ Signal<void(View)>& InputFieldImpl::MaximumLengthReachedSignal()
   return mMaxLengthReachedSignal;
 }
 
+Signal<void(View, uint32_t)>& InputFieldImpl::CursorPositionChangedSignal()
+{
+  return mCursorPositionChangedSignal;
+}
+
 // =============================================================================
 // Config
 // =============================================================================
@@ -831,7 +836,7 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
   // If there is text changed, callback is called.
   if(mTextChanged)
   {
-    EmitTextChangedSignal();
+    EmitTextChanged();
   }
 
   Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
@@ -857,7 +862,7 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 
   if(mCursorPositionChanged)
   {
-    // TODO
+    EmitCursorPositionChanged();
   }
 
   if(mSelectionStarted)
@@ -1163,9 +1168,9 @@ void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned in
 
 void InputFieldImpl::TextChanged(bool immediate)
 {
-  if(immediate) // Emits TextChangedSignal immediately
+  if(immediate) // Emits TextChanged signal immediately
   {
-    EmitTextChangedSignal();
+    EmitTextChanged();
   }
   else
   {
@@ -1469,11 +1474,18 @@ void InputFieldImpl::RenderText(Text::Controller::UpdateTextType updateTextType)
   Ui::Internal::CommonTextUtils::RenderText(Self(), mRenderer, mController, mDecorator, mAlignmentOffset, mRenderableActor, mBackgroundActor, mCursorLayer, mStencil, mClippingDecorationActors, mAnchorActors, updateTextType);
 }
 
-void InputFieldImpl::EmitTextChangedSignal()
+void InputFieldImpl::EmitTextChanged()
 {
   Ui::View handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
+}
+
+void InputFieldImpl::EmitCursorPositionChanged()
+{
+  Ui::View handle(GetOwner());
+  mCursorPositionChangedSignal.Emit(handle, mOldPosition);
+  mCursorPositionChanged = false;
 }
 
 // =============================================================================

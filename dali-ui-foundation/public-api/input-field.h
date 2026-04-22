@@ -715,6 +715,20 @@ public: // Signals
    */
   Signal<void(View)>& MaximumLengthReachedSignal();
 
+  /**
+   * @brief This signal is emitted when the cursor position changes.
+   *
+   * @code
+   *   void OnCursorPositionChanged(View view, uint32_t oldPosition);
+   * @endcode
+   *
+   * @param[in] view The view whose cursor position changed.
+   * @param[in] oldPosition The previous cursor position.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, uint32_t)>& CursorPositionChangedSignal();
+
 public: // Not intended for application developers
   /// @cond internal
   /**
