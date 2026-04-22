@@ -1366,7 +1366,7 @@ bool InputFieldImpl::AnchorClicked(uint32_t cursorPosition, std::string& href)
   return mController->AnchorClickEvent(cursorPosition, href);
 }
 
-void InputFieldImpl::EmitAnchorClickedSignal(const std::string& href)
+void InputFieldImpl::EmitAnchorClicked(const std::string& href)
 {
   // TODO
 }

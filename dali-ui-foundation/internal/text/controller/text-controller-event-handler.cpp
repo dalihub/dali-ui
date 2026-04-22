@@ -401,7 +401,7 @@ void Controller::EventHandler::AnchorEvent(Controller& controller, float x, floa
   std::string href;
   if(AnchorClickEvent(controller, cursorPosition, href))
   {
-    controller.mImpl->mAnchorControlInterface->EmitAnchorClickedSignal(href);
+    controller.mImpl->mAnchorControlInterface->EmitAnchorClicked(href);
   }
 }
 

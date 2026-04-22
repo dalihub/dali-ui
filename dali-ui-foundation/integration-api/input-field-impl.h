@@ -632,9 +632,9 @@ public:
   bool AnchorClicked(uint32_t cursorPosition, std::string& href) override;
 
   /**
-   * @copydoc Text::AnchorControlInterface::EmitAnchorClickedSignal()
+   * @copydoc Text::AnchorControlInterface::EmitAnchorClicked()
    */
-  void EmitAnchorClickedSignal(const std::string& href) override;
+  void EmitAnchorClicked(const std::string& href) override;
 
 private: // Implementation
   /**

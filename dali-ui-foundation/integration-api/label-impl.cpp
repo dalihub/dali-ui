@@ -1575,7 +1575,7 @@ bool LabelImpl::AnchorClicked(uint32_t cursorPosition, std::string& href)
   return mController->AnchorClickEvent(cursorPosition, href);
 }
 
-void LabelImpl::EmitAnchorClickedSignal(const std::string& href)
+void LabelImpl::EmitAnchorClicked(const std::string& href)
 {
   Ui::View handle(GetOwner());
   mAnchorClickedSignal.Emit(handle, ToDaliString(href));

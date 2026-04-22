@@ -229,7 +229,7 @@ bool TextAnchorImpl::OnAccessibilityActivated()
     std::string href;
     std::string uri = ToStdString(Self().GetProperty(Ui::TextAnchor::Property::URI));
     parentImplementationAnchorInterface->AnchorClicked(mStartCharacterIndex, href);
-    parentImplementationAnchorInterface->EmitAnchorClickedSignal(uri);
+    parentImplementationAnchorInterface->EmitAnchorClicked(uri);
     return true;
   }
 

@@ -46,7 +46,7 @@ public:
   /**
    * @brief Called to emit an anchor clicked signal.
    */
-  virtual void EmitAnchorClickedSignal(const std::string& href) = 0;
+  virtual void EmitAnchorClicked(const std::string& href) = 0;
 };
 
 } // namespace Text
