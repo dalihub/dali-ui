@@ -414,7 +414,7 @@ void LabelImpl::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
   if(policy != mMarqueeTriggerPolicy)
   {
     mMarqueeTriggerPolicy = policy;
-    mSuppressAutoMarquee  = false;
+    EnableAutoMarqueeEvaluation();
     RequestTextRelayout();
     RequestAsyncRender();
   }
@@ -1545,8 +1545,8 @@ void LabelImpl::InvalidateTextMeasure()
   if(!mMeasureInvalidated)
   {
     InvalidateMeasure();
-    mMeasureInvalidated  = true;
-    mSuppressAutoMarquee = false;
+    mMeasureInvalidated = true;
+    EnableAutoMarqueeEvaluation();
   }
 }
 
@@ -1561,7 +1561,7 @@ void LabelImpl::RequestAsyncRender()
 void LabelImpl::ScrollingFinished()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  mSuppressAutoMarquee = true;
+  SuppressAutoMarqueeEvaluation();
   mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
   RequestAsyncRender();
@@ -1911,8 +1911,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
 void LabelImpl::UpdateMarqueeState()
 {
-  // Re-enable marquee re-evaluation when marquee-related layout conditions change.
-  mSuppressAutoMarquee = false;
+  EnableAutoMarqueeEvaluation();
   if(mController->IsMarqueeEnabled())
   {
     const Text::MarqueeStopMode stopMode = GetTextScroller()->GetStopMode();
@@ -1921,6 +1920,16 @@ void LabelImpl::UpdateMarqueeState()
     mTextScroller->SetStopMode(stopMode);
     mController->SetMarqueeEnabled(true, true, mTextScroller->GetOrientation());
   }
+}
+
+void LabelImpl::EnableAutoMarqueeEvaluation()
+{
+  mSuppressAutoMarquee = false;
+}
+
+void LabelImpl::SuppressAutoMarqueeEvaluation()
+{
+  mSuppressAutoMarquee = true;
 }
 
 void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
@@ -1934,7 +1943,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
   {
     if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
     {
-      mSuppressAutoMarquee = false;
+      EnableAutoMarqueeEvaluation();
       RequestTextRelayout();
     }
     else
@@ -1949,7 +1958,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
   {
     if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
     {
-      mSuppressAutoMarquee = true;
+      SuppressAutoMarqueeEvaluation();
     }
     if(mLastMarqueeEnabled && !mController->IsMarqueeEnabled())
     {
@@ -1980,12 +1989,12 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
   {
     if(enabled)
     {
-      mSuppressAutoMarquee = false;
+      EnableAutoMarqueeEvaluation();
       RequestTextRelayout();
     }
     else
     {
-      mSuppressAutoMarquee = true;
+      SuppressAutoMarqueeEvaluation();
       if(mTextScroller)
       {
         mTextScroller->StopScrolling();
@@ -2468,7 +2477,6 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize                     = size;
         mIsAsyncRenderLayoutDirty = true;
-        mSuppressAutoMarquee      = false;
       }
       break;
     }
@@ -2479,7 +2487,6 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize.width               = width;
         mIsAsyncRenderLayoutDirty = true;
-        mSuppressAutoMarquee      = false;
       }
       break;
     }
@@ -2490,14 +2497,12 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       {
         mSize.height              = height;
         mIsAsyncRenderLayoutDirty = true;
-        mSuppressAutoMarquee      = false;
       }
       break;
     }
     case Ui::View::Property::PADDING:
     {
       mIsAsyncRenderLayoutDirty = true;
-      mSuppressAutoMarquee      = false;
       break;
     }
     case Ui::View::Property::BACKGROUND:
@@ -2537,6 +2542,11 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
       break;
     }
+  }
+
+  if(mIsAsyncRenderLayoutDirty)
+  {
+    EnableAutoMarqueeEvaluation();
   }
 }
 

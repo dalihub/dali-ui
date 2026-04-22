@@ -800,6 +800,22 @@ private: // Implementation
   void UpdateMarqueeState();
 
   /**
+   * @brief Enables automatic marquee evaluation.
+   *
+   * Clears the suppression state so that marquee can be re-evaluated
+   * based on the current layout conditions (e.g., overflow, visibility).
+   */
+  void EnableAutoMarqueeEvaluation();
+
+  /**
+   * @brief Suppresses automatic marquee evaluation.
+   *
+   * Prevents marquee from being automatically enabled even if
+   * layout conditions (e.g., overflow) are satisfied.
+   */
+  void SuppressAutoMarqueeEvaluation();
+
+  /**
    * @brief Handles marquee behavior when visibility changes.
    *
    * @param[in] visible True to restore the previous marquee state,
