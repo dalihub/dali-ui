@@ -107,6 +107,21 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetCursorColor(UiColor(value.Get<Vector4>()));
       break;
     }
+    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+    {
+      impl.SetCursorBlinkEnabled(value.Get<bool>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+    {
+      impl.SetCursorBlinkInterval(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+    {
+      impl.SetCursorPosition(static_cast<uint32_t>(value.Get<int>()));
+      break;
+    }
     case Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
       impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
@@ -248,6 +263,21 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::CURSOR_COLOR:
     {
       value = impl.GetCursorColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+    {
+      value = impl.IsCursorBlinkEnabled();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+    {
+      value = impl.GetCursorBlinkInterval();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+    {
+      value = static_cast<int>(impl.GetCursorPosition());
       break;
     }
     case Text::InputFieldPropertyIndex::SELECTION_COLOR:

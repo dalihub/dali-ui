@@ -134,6 +134,27 @@ struct InputFieldPropertyIndex
     CURSOR_COLOR,
 
     /**
+     * @brief Whether the cursor should blink.
+     * @details Name "cursorBlinkEnabled", type Property::BOOLEAN.
+     * @see InputField::SetCursorBlinkEnabled(), InputField::IsCursorBlinkEnabled().
+     */
+    CURSOR_BLINK_ENABLED,
+
+    /**
+     * @brief The time interval in seconds between cursor on and off states.
+     * @details Name "cursorBlinkInterval", type Property::FLOAT.
+     * @see InputField::SetCursorBlinkInterval(), InputField::GetCursorBlinkInterval().
+     */
+    CURSOR_BLINK_INTERVAL,
+
+    /**
+     * @brief The current cursor position.
+     * @details Name "cursorPosition", type Property::INTEGER.
+     * @see InputField::SetCursorPosition(), InputField::GetCursorPosition().
+     */
+    CURSOR_POSITION,
+
+    /**
      * @brief The highlight color of the selected text region.
      * @details Name "selectionColor", type Property::VECTOR4.
      * @see InputField::SetSelectionColor(), InputField::GetSelectionColor().

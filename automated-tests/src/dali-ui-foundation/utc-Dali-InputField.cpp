@@ -40,6 +40,9 @@ const char* const PROPERTY_NAME_PLACEHOLDER_COLOR              = "placeholderCol
 const char* const PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS      = "showPlaceholderOnFocus";
 const char* const PROPERTY_NAME_CURSOR_WIDTH                   = "cursorWidth";
 const char* const PROPERTY_NAME_CURSOR_COLOR                   = "cursorColor";
+const char* const PROPERTY_NAME_CURSOR_BLINK_ENABLED           = "cursorBlinkEnabled";
+const char* const PROPERTY_NAME_CURSOR_BLINK_INTERVAL          = "cursorBlinkInterval";
+const char* const PROPERTY_NAME_CURSOR_POSITION                = "cursorPosition";
 const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
 const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
@@ -341,6 +344,65 @@ int UtcDaliInputFieldCursorColor(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldCursorBlinkEnabled(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetCursorBlinkEnabled(true);
+  DALI_TEST_EQUALS(inputField.IsCursorBlinkEnabled(), true, TEST_LOCATION);
+
+  inputField.SetCursorBlinkEnabled(false);
+  DALI_TEST_EQUALS(inputField.IsCursorBlinkEnabled(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldCursorBlinkInterval(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetCursorBlinkInterval(0.5f);
+  DALI_TEST_EQUALS(inputField.GetCursorBlinkInterval(), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputField.SetCursorBlinkInterval(1.0f);
+  DALI_TEST_EQUALS(inputField.GetCursorBlinkInterval(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldCursorPosition(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Empty text: cursor position should be clamped to 0.
+  inputField.SetCursorPosition(5u);
+  DALI_TEST_EQUALS(inputField.GetCursorPosition(), 0u, TEST_LOCATION);
+
+  Dali::String text = "Hello world";
+  inputField.SetText(text);
+
+  // Clamp to the end when the requested position exceeds text length.
+  inputField.SetCursorPosition(50u);
+  DALI_TEST_EQUALS(inputField.GetCursorPosition(), text.Size(), TEST_LOCATION);
+
+  inputField.SetCursorPosition(text.Size());
+  DALI_TEST_EQUALS(inputField.GetCursorPosition(), text.Size(), TEST_LOCATION);
+
+  inputField.SetCursorPosition(5u);
+  DALI_TEST_EQUALS(inputField.GetCursorPosition(), 5u, TEST_LOCATION);
+
+  inputField.SetCursorPosition(0u);
+  DALI_TEST_EQUALS(inputField.GetCursorPosition(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldSelectionColor(void)
 {
   UiTestApplication application;
@@ -603,6 +665,9 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS) == InputField::Property::SHOW_PLACEHOLDER_ON_FOCUS);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_WIDTH) == InputField::Property::CURSOR_WIDTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_COLOR) == InputField::Property::CURSOR_COLOR);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_BLINK_ENABLED) == InputField::Property::CURSOR_BLINK_ENABLED);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_BLINK_INTERVAL) == InputField::Property::CURSOR_BLINK_INTERVAL);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_POSITION) == InputField::Property::CURSOR_POSITION);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_COLOR) == InputField::Property::SELECTION_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
@@ -681,6 +746,18 @@ int UtcDaliInputFieldSetProperty(void)
   // CURSOR_COLOR
   inputField.SetProperty(InputField::Property::CURSOR_COLOR, Color::BLUE);
   DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::CURSOR_COLOR), Color::BLUE, TEST_LOCATION);
+
+  // CURSOR_BLINK_ENABLED
+  inputField.SetProperty(InputField::Property::CURSOR_BLINK_ENABLED, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::CURSOR_BLINK_ENABLED), true, TEST_LOCATION);
+
+  // CURSOR_BLINK_INTERVAL
+  inputField.SetProperty(InputField::Property::CURSOR_BLINK_INTERVAL, 0.5f);
+  DALI_TEST_EQUALS(inputField.GetProperty<float>(InputField::Property::CURSOR_BLINK_INTERVAL), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // CURSOR_POSITION
+  inputField.SetProperty(InputField::Property::CURSOR_POSITION, 5);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::CURSOR_POSITION), 5, TEST_LOCATION);
 
   // SELECTION_COLOR
   inputField.SetProperty(InputField::Property::SELECTION_COLOR, Color::CYAN);
