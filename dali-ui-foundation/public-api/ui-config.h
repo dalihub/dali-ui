@@ -409,6 +409,36 @@ public: // Properties
   Vector4 GetDefaultTextColor() const;
 
   /**
+   * @brief Sets the default placeholder text color.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] color The default placeholder text color.
+   */
+  UiConfig& SetDefaultPlaceholderTextColor(const Vector4& color);
+
+  /**
+   * @brief Returns the default placeholder text color.
+   *
+   * @return The default placeholder text color.
+   */
+  Vector4 GetDefaultPlaceholderTextColor() const;
+
+  /**
+   * @brief Sets whether the placeholder text is shown when the control has focus.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enabled True to show the placeholder text when focused, false otherwise.
+   */
+  UiConfig& SetShowPlaceholderTextOnFocus(bool enabled);
+
+  /**
+   * @brief Returns whether the placeholder text is shown when the control has focus.
+   *
+   * @return True if the placeholder text is shown when focused, false otherwise.
+   */
+  bool IsPlaceholderTextShownOnFocus() const;
+
+  /**
    * @brief Sets the marquee speed in pixels per second.
    *
    * @pre The config must not be frozen.

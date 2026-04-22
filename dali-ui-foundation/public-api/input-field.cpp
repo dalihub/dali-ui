@@ -209,6 +209,17 @@ UiColor InputField::GetPlaceholderColor()
   return GetImpl(*this).GetPlaceholderColor();
 }
 
+InputField& InputField::SetShowPlaceholderOnFocus(bool enabled)
+{
+  GetImpl(*this).SetShowPlaceholderOnFocus(enabled);
+  return *this;
+}
+
+bool InputField::IsPlaceholderShownOnFocus() const
+{
+  return GetImpl(*this).IsPlaceholderShownOnFocus();
+}
+
 InputField& InputField::SetCursorWidth(int width)
 {
   GetImpl(*this).SetCursorWidth(width);

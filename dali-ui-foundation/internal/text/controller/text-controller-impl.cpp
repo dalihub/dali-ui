@@ -399,8 +399,7 @@ EventData::EventData(DecoratorPtr decorator, InputMethodContext& inputMethodCont
   mPlaceholderFont(nullptr),
   mPlaceholderTextActive(),
   mPlaceholderTextInactive(),
-  mPlaceholderTextColor(0.8f, 0.8f, 0.8f,
-                        0.8f), // This color has been published in the Public API (placeholder-properties.h).
+  mPlaceholderTextColor(0.8f, 0.8f, 0.8f, 0.8f),
   mEventQueue(),
   mInputStyleChangedQueue(),
   mPreviousState(INACTIVE),
@@ -437,6 +436,7 @@ EventData::EventData(DecoratorPtr decorator, InputMethodContext& inputMethodCont
   mIsPlaceholderPixelSize(false),
   mIsPlaceholderElideEnabled(false),
   mPlaceholderEllipsisFlag(false),
+  mShowPlaceholderOnFocus(true),
   mShiftSelectionFlag(true),
   mUpdateAlignment(false),
   mEditingEnabled(true)

@@ -853,6 +853,23 @@ public: // Update.
   void GetPlaceholderText(PlaceholderType type, std::string& text) const;
 
   /**
+   * @brief Sets whether the placeholder text is shown when the input field has focus.
+   *
+   * When enabled, the placeholder text may remain visible while the input field
+   * is focused, depending on the current text state.
+   *
+   * @param[in] enabled True to show the placeholder text when focused, false otherwise.
+   */
+  void SetShowPlaceholderOnFocus(bool enabled);
+
+  /**
+   * @brief Returns whether the placeholder text is shown when the input field has focus.
+   *
+   * @return True if the placeholder text is shown when focused, false otherwise.
+   */
+  bool IsPlaceholderShownOnFocus() const;
+
+  /**
    * @ brief Update the text after a font change
    * @param[in] newDefaultFont The new font to change to
    */

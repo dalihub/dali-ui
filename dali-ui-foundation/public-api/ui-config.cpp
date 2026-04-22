@@ -197,6 +197,28 @@ Vector4 UiConfig::GetDefaultTextColor() const
   return GetImpl(*this).GetDefaultTextColor();
 }
 
+UiConfig& UiConfig::SetDefaultPlaceholderTextColor(const Vector4& color)
+{
+  GetImpl(*this).SetDefaultPlaceholderTextColor(color);
+  return *this;
+}
+
+Vector4 UiConfig::GetDefaultPlaceholderTextColor() const
+{
+  return GetImpl(*this).GetDefaultPlaceholderTextColor();
+}
+
+UiConfig& UiConfig::SetShowPlaceholderTextOnFocus(bool enabled)
+{
+  GetImpl(*this).SetShowPlaceholderTextOnFocus(enabled);
+  return *this;
+}
+
+bool UiConfig::IsPlaceholderTextShownOnFocus() const
+{
+  return GetImpl(*this).IsPlaceholderTextShownOnFocus();
+}
+
 UiConfig& UiConfig::SetMarqueeSpeed(int speed)
 {
   GetImpl(*this).SetMarqueeSpeed(speed);

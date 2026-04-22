@@ -755,6 +755,16 @@ void Controller::GetPlaceholderText(PlaceholderType type, std::string& text) con
   PlaceholderHandler::GetPlaceholderText(*this, type, text);
 }
 
+void Controller::SetShowPlaceholderOnFocus(bool enabled)
+{
+  PlaceholderHandler::SetShowPlaceholderOnFocus(*this, enabled);
+}
+
+bool Controller::IsPlaceholderShownOnFocus() const
+{
+  return PlaceholderHandler::IsPlaceholderShownOnFocus(*this);
+}
+
 void Controller::UpdateAfterFontChange(const std::string& newDefaultFont)
 {
   mImpl->UpdateAfterFontChange(newDefaultFont);

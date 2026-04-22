@@ -454,7 +454,11 @@ int DALI_EXPORT_API main(int argc, char** argv)
   DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
 
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().SetLabelAsyncRendering(true).Apply();
+  UiConfig::New()
+    .SetLabelAsyncRendering(true)
+    .SetDefaultPlaceholderTextColor(Color::DARK_GRAY)
+    .SetShowPlaceholderTextOnFocus(false)
+    .Apply();
 
   TextController controller(application);
   application.MainLoop();

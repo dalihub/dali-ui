@@ -248,8 +248,6 @@ void InputFieldImpl::SetPlaceholder(const Dali::String& text)
   const std::string placeholder = ToStdString(text);
   mController->SetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_INACTIVE, placeholder);
   mController->SetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_ACTIVE, placeholder);
-  // TODO: Add configuration option to control whether the placeholder
-  //       should be visible when the input field is focused.
 }
 
 Dali::String InputFieldImpl::GetPlaceholder() const
@@ -272,6 +270,18 @@ UiColor InputFieldImpl::GetPlaceholderColor()
     return outColor;
   }
   return mController->GetPlaceholderTextColor();
+}
+
+void InputFieldImpl::SetShowPlaceholderOnFocus(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+
+  mController->SetShowPlaceholderOnFocus(enabled);
+}
+
+bool InputFieldImpl::IsPlaceholderShownOnFocus() const
+{
+  return mController->IsPlaceholderShownOnFocus();
 }
 
 void InputFieldImpl::SetCursorWidth(int width)
@@ -635,6 +645,9 @@ void InputFieldImpl::ApplyInitialConfig()
 
   const auto& config = UiConfigManager::Get().GetConfig();
   SetFontSize(config.GetDefaultFontSize());
+  SetTextColor(config.GetDefaultTextColor());
+  SetPlaceholderColor(config.GetDefaultPlaceholderTextColor());
+  SetShowPlaceholderOnFocus(config.IsPlaceholderTextShownOnFocus());
 }
 
 // =============================================================================

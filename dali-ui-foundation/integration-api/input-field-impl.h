@@ -165,6 +165,16 @@ public:
   UiColor GetPlaceholderColor();
 
   /**
+   * @copydoc Dali::Ui::InputField::SetShowPlaceholderOnFocus
+   */
+  void SetShowPlaceholderOnFocus(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsPlaceholderShownOnFocus
+   */
+  bool IsPlaceholderShownOnFocus() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetCursorWidth
    */
   void SetCursorWidth(int width);

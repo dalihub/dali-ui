@@ -57,6 +57,8 @@ struct Controller::PlaceholderHandler
   static void           GetPlaceholderProperty(Controller& controller, Property::Map& map);
   static void           ShowPlaceholderText(Controller::Impl& impl);
   static void           CreatePlaceholderFont(Controller& controller);
+  static void           SetShowPlaceholderOnFocus(Controller& controller, bool enabled);
+  static bool           IsPlaceholderShownOnFocus(const Controller& controller);
 };
 
 } // namespace Text

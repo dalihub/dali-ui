@@ -289,6 +289,20 @@ public: // Setters for chaining
   UiColor GetPlaceholderColor();
 
   /**
+   * @brief Sets whether the placeholder text is shown when the input field has focus.
+   *
+   * @param[in] enabled True to show the placeholder text when focused, false otherwise.
+   */
+  InputField& SetShowPlaceholderOnFocus(bool enabled);
+
+  /**
+   * @brief Returns whether the placeholder text is shown when the input field has focus.
+   *
+   * @return True if the placeholder text is shown when focused, false otherwise.
+   */
+  bool IsPlaceholderShownOnFocus() const;
+
+  /**
    * @brief Sets the width of the text cursor.
    *
    * @param[in] width The cursor width in pixels.

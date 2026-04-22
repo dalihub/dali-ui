@@ -56,6 +56,7 @@ UiConfigImpl::UiConfigImpl()
 : mDefaultInteractionEffect(Trait()),
   mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
   mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
+  mDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f)),
   mScalingFactor(1.0f),
   mDefaultFontSize(16.0f),
   mDpi(160),
@@ -71,6 +72,7 @@ UiConfigImpl::UiConfigImpl()
   mTapRecognizerTime(UINT32_MAX),
   mClearFocusOnEscape(true),
   mAlwaysShowFocus(true),
+  mShowPlaceholderTextOnFocus(true),
   mLabelAsyncRendering(false),
   mFrozen(false)
 {
@@ -257,6 +259,28 @@ void UiConfigImpl::SetDefaultTextColor(const Vector4& color)
 Vector4 UiConfigImpl::GetDefaultTextColor() const
 {
   return mDefaultTextColor;
+}
+
+void UiConfigImpl::SetDefaultPlaceholderTextColor(const Vector4& color)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDefaultPlaceholderTextColor = color;
+}
+
+Vector4 UiConfigImpl::GetDefaultPlaceholderTextColor() const
+{
+  return mDefaultPlaceholderTextColor;
+}
+
+void UiConfigImpl::SetShowPlaceholderTextOnFocus(bool enabled)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mShowPlaceholderTextOnFocus = enabled;
+}
+
+bool UiConfigImpl::IsPlaceholderTextShownOnFocus() const
+{
+  return mShowPlaceholderTextOnFocus;
 }
 
 void UiConfigImpl::SetMarqueeSpeed(int speed)

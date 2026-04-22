@@ -272,6 +272,36 @@ public:
   Vector4 GetDefaultTextColor() const;
 
   /**
+   * @brief Sets the default placeholder text color.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] color The default placeholder text color.
+   */
+  void SetDefaultPlaceholderTextColor(const Vector4& color);
+
+  /**
+   * @brief Returns the default placeholder text color.
+   *
+   * @return The default placeholder text color.
+   */
+  Vector4 GetDefaultPlaceholderTextColor() const;
+
+  /**
+   * @brief Sets whether the placeholder text is shown when the control has focus.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enabled True to show the placeholder text when focused, false otherwise.
+   */
+  void SetShowPlaceholderTextOnFocus(bool enabled);
+
+  /**
+   * @brief Returns whether the placeholder text is shown when the control has focus.
+   *
+   * @return True if the placeholder text is shown when focused, false otherwise.
+   */
+  bool IsPlaceholderTextShownOnFocus() const;
+
+  /**
    * @brief Sets the marquee speed in pixels per second.
    *
    * @pre Must not be frozen.
@@ -442,6 +472,7 @@ private:
   Trait                    mDefaultInteractionEffect; ///< Default effect for interactive views
   ExecutionKeyPredicate    mExecutionKeyPredicate;
   Vector4                  mDefaultTextColor;
+  Vector4                  mDefaultPlaceholderTextColor;
   float                    mScalingFactor;
   float                    mDefaultFontSize;
   int                      mDpi;
@@ -459,6 +490,7 @@ private:
   float                    mCachedScaledDpiFactor{1.0f};
   bool                     mClearFocusOnEscape;
   bool                     mAlwaysShowFocus;
+  bool                     mShowPlaceholderTextOnFocus;
   bool                     mLabelAsyncRendering;
   bool                     mFrozen;
 };

@@ -60,6 +60,12 @@
   */ \
   ChildClass& SetPlaceholderColor(const UiColor& color) { InputField::SetPlaceholderColor(color); return *this; } \
   /** \
+  * @brief Sets whether the placeholder text is shown when the input field has focus. \
+  * \
+  * @param[in] enabled True to show the placeholder text when focused, false otherwise. \
+  */ \
+  ChildClass& SetShowPlaceholderOnFocus(bool enabled) { InputField::SetShowPlaceholderOnFocus(enabled); return *this; } \
+  /** \
   * @brief Sets the width of the text cursor. \
   * \
   * @param[in] width The cursor width in pixels. \

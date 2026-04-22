@@ -537,21 +537,21 @@ void Controller::PlaceholderHandler::ShowPlaceholderText(Controller::Impl& impl)
     decorator->SetHandleActive(LEFT_SELECTION_HANDLE, false);
     decorator->SetHandleActive(RIGHT_SELECTION_HANDLE, false);
 
-    const char* text(NULL);
-    size_t      size(0);
+    const char* text(EMPTY_STRING);
+    size_t      size(0u);
 
-    // TODO - Switch Placeholder text when changing state
-    std::string& placeholderTextActive = eventData->mPlaceholderTextActive;
-    if((EventData::INACTIVE != eventData->mState) && (0u != placeholderTextActive.c_str()))
+    if((EventData::INACTIVE != eventData->mState))
     {
-      text = placeholderTextActive.c_str();
-      size = placeholderTextActive.size();
+      if(eventData->mShowPlaceholderOnFocus)
+      {
+        text = eventData->mPlaceholderTextActive.c_str();
+        size = eventData->mPlaceholderTextActive.size();
+      }
     }
     else
     {
-      std::string& placeholderTextInactive = eventData->mPlaceholderTextInactive;
-      text                                 = placeholderTextInactive.c_str();
-      size                                 = placeholderTextInactive.size();
+      text = eventData->mPlaceholderTextInactive.c_str();
+      size = eventData->mPlaceholderTextInactive.size();
     }
 
     TextUpdateInfo& textUpdateInfo             = impl.mTextUpdateInfo;
@@ -603,6 +603,23 @@ void Controller::PlaceholderHandler::CreatePlaceholderFont(Controller& controlle
   {
     controller.mImpl->mEventData->mPlaceholderFont = std::unique_ptr<FontDefaults>(new FontDefaults());
   }
+}
+
+void Controller::PlaceholderHandler::SetShowPlaceholderOnFocus(Controller& controller, bool enabled)
+{
+  if(nullptr != controller.mImpl->mEventData)
+  {
+    controller.mImpl->mEventData->mShowPlaceholderOnFocus = enabled;
+  }
+}
+
+bool Controller::PlaceholderHandler::IsPlaceholderShownOnFocus(const Controller& controller)
+{
+  if(nullptr != controller.mImpl->mEventData)
+  {
+    return controller.mImpl->mEventData->mShowPlaceholderOnFocus;
+  }
+  return true;
 }
 
 } // namespace Text
