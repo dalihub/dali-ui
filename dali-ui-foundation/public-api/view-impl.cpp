@@ -533,9 +533,7 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
       Extents padding = mImpl->mPadding;
 
-      Dali::CustomActor           ownerActor(GetOwner());
-      Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-        ownerActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+      Dali::LayoutDirection::Type layoutDirection = GetEffectiveLayoutDirection();
 
       if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
       {
@@ -595,6 +593,26 @@ float ViewImpl::GetScaleY() const
 void ViewImpl::SetScaleY(float scaleY)
 {
   Self().SetProperty(Actor::Property::SCALE_Y, scaleY);
+}
+
+void ViewImpl::SetLayoutDirection(Dali::LayoutDirection::Type direction)
+{
+  Self().SetProperty(Actor::Property::LAYOUT_DIRECTION, direction);
+}
+
+void ViewImpl::ClearLayoutDirection()
+{
+  Self().SetProperty(Actor::Property::INHERIT_LAYOUT_DIRECTION, true);
+}
+
+bool ViewImpl::IsLayoutDirectionInherited() const
+{
+  return Self().GetProperty<bool>(Actor::Property::INHERIT_LAYOUT_DIRECTION);
+}
+
+Dali::LayoutDirection::Type ViewImpl::GetEffectiveLayoutDirection() const
+{
+  return static_cast<Dali::LayoutDirection::Type>(Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION));
 }
 
 bool ViewImpl::IsVisible() const

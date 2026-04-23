@@ -153,6 +153,27 @@ View& View::SetScale(float scaleX, float scaleY)
   return *this;
 }
 
+View& View::SetLayoutDirection(Dali::LayoutDirection::Type direction)
+{
+  GetImpl(*this).SetLayoutDirection(direction);
+  return *this;
+}
+
+void View::ClearLayoutDirection()
+{
+  GetImpl(*this).ClearLayoutDirection();
+}
+
+bool View::IsLayoutDirectionInherited() const
+{
+  return GetImpl(*this).IsLayoutDirectionInherited();
+}
+
+Dali::LayoutDirection::Type View::GetEffectiveLayoutDirection() const
+{
+  return GetImpl(*this).GetEffectiveLayoutDirection();
+}
+
 bool View::IsVisible() const
 {
   return GetImpl(*this).IsVisible();

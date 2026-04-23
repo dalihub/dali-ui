@@ -777,6 +777,44 @@ public: // Properties
   View& SetName(const Dali::String& name);
 
   /**
+   * @brief Sets the layout direction of this view explicitly.
+   *
+   * Overrides inherited direction from the parent. To revert to inheritance,
+   * use ClearLayoutDirection().
+   *
+   * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT)
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetLayoutDirection(Dali::LayoutDirection::Type direction);
+
+  /**
+   * @brief Clears the explicitly set layout direction.
+   *
+   * After calling this, the view inherits its layout direction from the parent.
+   */
+  void ClearLayoutDirection();
+
+  /**
+   * @brief Returns true if this view is inheriting layout direction from its parent.
+   *
+   * This is true by default. It becomes false only when SetLayoutDirection() has been
+   * called to set an explicit direction, and is restored to true by ClearLayoutDirection().
+   *
+   * @return True if inheriting, false if an explicit direction has been set
+   */
+  bool IsLayoutDirectionInherited() const;
+
+  /**
+   * @brief Returns the effective layout direction applied to this view.
+   *
+   * Always returns the resolved direction (LEFT_TO_RIGHT or RIGHT_TO_LEFT),
+   * taking inheritance into account.
+   *
+   * @return The effective layout direction
+   */
+  Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
+
+  /**
    * @brief Returns true if this view and all its View ancestors are enabled.
    *
    * Unlike IsEnabled(), which only reflects the view's own state, this method

@@ -1430,8 +1430,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 
       bool zeroPadding = (padding == Extents());
 
-      Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-        self.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+      Dali::LayoutDirection::Type layoutDirection = mOuter.mViewImpl.GetEffectiveLayoutDirection();
       if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
       {
         std::swap(padding.start, padding.end);

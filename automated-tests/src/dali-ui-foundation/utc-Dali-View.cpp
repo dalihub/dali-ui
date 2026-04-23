@@ -2563,3 +2563,68 @@ int UtcDaliViewInsertReordersMChildrenP(void)
   DALI_TEST_EQUALS(parent.IndexOfChild(b), 2, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliViewSetLayoutDirectionP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  application.GetScene().Add(view);
+
+  view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
+
+  view.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
+  DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::LEFT_TO_RIGHT, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewClearLayoutDirectionP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  application.GetScene().Add(view);
+
+  view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
+
+  view.ClearLayoutDirection();
+  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewIsLayoutDirectionInheritedDefaultP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+
+  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewGetEffectiveLayoutDirectionInheritedP(void)
+{
+  UiTestApplication application;
+  View parent = View::New();
+  View child  = View::New();
+  application.GetScene().Add(parent);
+  parent.Add(child);
+
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(child.IsLayoutDirectionInherited(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionChainingP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  application.GetScene().Add(view);
+
+  View& ref = view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(&ref, &view, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
+  END_TEST;
+}

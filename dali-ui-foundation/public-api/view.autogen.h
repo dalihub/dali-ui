@@ -292,6 +292,16 @@
   */ \
   ChildClass& SetName(const Dali::String& name) { View::SetName(name); return *this; } \
   /** \
+  * @brief Sets the layout direction of this view explicitly. \
+  * \
+  * Overrides inherited direction from the parent. To revert to inheritance, \
+  * use ClearLayoutDirection(). \
+  * \
+  * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT) \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetLayoutDirection(Dali::LayoutDirection::Type direction) { View::SetLayoutDirection(direction); return *this; } \
+  /** \
   * @brief Attaches the interaction trait to this View. \
   * \
   * @return Reference to this View for fluent chaining \
