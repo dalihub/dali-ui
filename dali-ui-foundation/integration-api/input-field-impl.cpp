@@ -772,6 +772,10 @@ void InputFieldImpl::OnInitialize()
 
   self.LayoutDirectionChangedSignal().Connect(this, &InputFieldImpl::OnLayoutDirectionChanged);
 
+  auto viewHandle = View::DownCast(self);
+  viewHandle.SetFocusable(true);
+  viewHandle.SetTouchFocusable(true);
+
   if(Dali::Adaptor::IsAvailable())
   {
     Dali::Adaptor::Get().LocaleChangedSignal().Connect(this, &InputFieldImpl::OnLocaleChanged);
