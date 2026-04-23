@@ -683,7 +683,8 @@ std::vector<Dali::Accessibility::Relation> ViewAccessible::GetRelationSet()
 {
   auto view = Dali::Ui::View::DownCast(Self());
 
-  auto relations = GetImpl(view).GetAccessibilityRelations();
+  Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(GetImpl(view));
+  auto                    relations    = viewDataImpl.GetAccessibilityRelations();
 
   std::vector<Dali::Accessibility::Relation> result;
   result.reserve(relations.Count());

@@ -20,6 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/devel-api/adaptor-framework/input-method-context.h>
+#include <dali/public-api/events/long-press-gesture-detector.h>
+#include <dali/public-api/events/pan-gesture-detector.h>
+#include <dali/public-api/events/tap-gesture-detector.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>

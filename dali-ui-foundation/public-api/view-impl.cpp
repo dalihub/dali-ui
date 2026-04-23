@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
@@ -556,7 +557,7 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   if(Accessibility::IsUp())
   {
-    auto accessible = GetAccessibleObject();
+    auto accessible = GetViewDataImpl().GetAccessibleObject();
     if(DALI_LIKELY(accessible))
     {
       auto highlightFrame = accessible->GetHighlightActor();
@@ -1672,11 +1673,6 @@ bool ViewImpl::IsOffScreenRenderTaskExclusive()
   return false;
 }
 
-std::shared_ptr<Ui::ViewAccessible> ViewImpl::GetAccessibleObject()
-{
-  return mImpl->GetAccessibleObject();
-}
-
 void ViewImpl::SetKeyNavigationSupport(bool isSupported)
 {
   Self().SetProperty(Ui::View::Property::KEY_NAVIGATION_SUPPORT, isSupported);
@@ -1783,7 +1779,7 @@ void ViewImpl::EmitFocusChangedSignal(bool focusGained)
 
   if(Accessibility::IsUp())
   {
-    auto accessible = GetAccessibleObject();
+    auto accessible = GetViewDataImpl().GetAccessibleObject();
     if(DALI_LIKELY(accessible))
     {
       accessible->EmitFocused(focusGained);
@@ -2077,29 +2073,6 @@ void ViewImpl::SignalConnected(SlotObserver* slotObserver, CallbackBase* callbac
 void ViewImpl::SignalDisconnected(SlotObserver* slotObserver, CallbackBase* callback)
 {
   mImpl->SignalDisconnected(slotObserver, callback);
-}
-
-// From view.cpp
-
-Dali::Vector<Accessibility::Relation> ViewImpl::GetAccessibilityRelations()
-{
-  Dali::Vector<Accessibility::Relation> result;
-
-  const auto* accessibilityData = mImpl->GetAccessibilityData();
-  if(DALI_LIKELY(accessibilityData))
-  {
-    const auto& relations = accessibilityData->mAccessibilityProps.relations;
-    for(const auto& relation : relations)
-    {
-      const auto& targets = relation.second;
-
-      Accessibility::Relation rel{relation.first, {}};
-      std::copy(targets.begin(), targets.end(), std::back_inserter(rel.mTargets));
-      result.PushBack(std::move(rel));
-    }
-  }
-
-  return result;
 }
 
 namespace IntegrationView

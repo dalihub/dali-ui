@@ -18,19 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/animation.h>
-#include <dali/public-api/animation/constraint.h>
-#include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/dali-utility.h>
-#include <dali/public-api/events/long-press-gesture-detector.h>
-#include <dali/public-api/events/pan-gesture-detector.h>
-#include <dali/public-api/events/pinch-gesture-detector.h>
-#include <dali/public-api/events/tap-gesture-detector.h>
-#include <dali/public-api/signals/callback.h>
-#include <dali/public-api/signals/connection-tracker-interface.h>
 #include <functional>
 #include <initializer_list>
 
@@ -42,27 +32,17 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
-#include <dali-ui-foundation/public-api/view-accessibility-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
 {
-class Actor;
-class Any;
-class Constraint;
-
 namespace Ui
 {
-class RenderEffect;
-
-namespace Visual
-{
-class Base;
-}
 
 // Forward declarations
+class RenderEffect;
 class UiColor;
 class ViewAnimationBridge;
 class ViewAnimationSpec;
@@ -624,7 +604,7 @@ public: // Properties
    */
   View& SetBackgroundColor(const UiColor& color);
 
-  /*
+  /**
    * @brief Checks if the view is enabled.
    *
    * @return True if the view is enabled (default), false if disabled

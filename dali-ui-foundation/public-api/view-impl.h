@@ -18,9 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility.h>
-#include <dali/public-api/animation/alpha-function.h>
-#include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/events/long-press-gesture.h>
@@ -29,11 +26,11 @@
 #include <dali/public-api/events/tap-gesture.h>
 #include <dali/public-api/object/property-index-ranges.h>
 #include <dali/public-api/rendering/texture.h>
+#include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/callback.h>
@@ -47,7 +44,6 @@
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
-#include <dali/public-api/signals/callback.h>
 
 namespace Dali
 {
@@ -57,8 +53,6 @@ namespace Ui
 
 // Forward declarations
 class Layout;
-class LayoutManager; // Used by LayoutImpl
-class UiColor;
 class ViewAccessible;
 
 namespace Internal
@@ -104,22 +98,15 @@ public:
   using ChildContainer         = Dali::Vector<ChildData>;
   using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
 
-  /// @brief AccessibilityDoGesture signal type.
-  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
-
-  /// @brief AccessibilityAction signal type.
-  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
-
   /**
    * @brief Flags for the constructor.
    */
   enum ViewBehaviour
   {
-    VIEW_BEHAVIOUR_DEFAULT = 0, ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                ///< but doesn't receive event callbacks.
-    NOT_IN_USE_1                    = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0),
-    REQUIRES_KEY_NAVIGATION_SUPPORT = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if needs to support key navigation
-    DISABLE_VISUALS                 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 2), ///< True if view should not use visuals
+    VIEW_BEHAVIOUR_DEFAULT = 0,                                                     ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
+                                                                                    ///< but doesn't receive event callbacks.
+    REQUIRES_KEY_NAVIGATION_SUPPORT = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0), ///< True if needs to support key navigation
+    DISABLE_VISUALS                 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
@@ -815,21 +802,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc GetChildren()
    */
   const ChildContainer& GetChildren() const;
-
-  // Accessibility
-
-  /**
-   * @brief Gets the Accessible object that represents this view.
-   * @return The Accessible object
-   * @see CreateAccessibleObject()
-   */
-  std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
-
-  /**
-   * @brief Gets the accessibility relations of this view.
-   * @return The list of accessibility relations
-   */
-  Dali::Vector<Accessibility::Relation> GetAccessibilityRelations();
 
   // Key Navigation & Focus
 

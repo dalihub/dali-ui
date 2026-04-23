@@ -49,7 +49,6 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
@@ -1056,7 +1055,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           {
             viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.isHidden = hidden;
 
-            auto accessible = viewImpl.GetAccessibleObject();
+            auto accessible = viewImpl.GetViewDataImpl().GetAccessibleObject();
             if(DALI_LIKELY(accessible))
             {
               auto* parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
@@ -2123,6 +2122,27 @@ bool ViewDataImpl::OnIdleCallback()
 std::shared_ptr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
 {
   return GetOrCreateAccessibilityData().GetAccessibleObject();
+}
+
+Dali::Vector<Accessibility::Relation> ViewDataImpl::GetAccessibilityRelations()
+{
+  Dali::Vector<Accessibility::Relation> result;
+
+  const auto* accessibilityData = GetAccessibilityData();
+  if(DALI_LIKELY(accessibilityData))
+  {
+    const auto& relations = accessibilityData->mAccessibilityProps.relations;
+    for(const auto& relation : relations)
+    {
+      const auto& targets = relation.second;
+
+      Accessibility::Relation rel{relation.first, {}};
+      std::copy(targets.begin(), targets.end(), std::back_inserter(rel.mTargets));
+      result.PushBack(std::move(rel));
+    }
+  }
+
+  return result;
 }
 
 void ViewDataImpl::RegisterProcessorOnce()

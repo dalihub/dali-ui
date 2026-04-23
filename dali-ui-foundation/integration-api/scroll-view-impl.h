@@ -19,10 +19,10 @@
 
 // EXTERNAL INCLUDES
 // #include <dali/public-api/adaptor-framework/pan-gesture-detector.h>
-#include <dali/public-api/animation/animation.h>
-#include <dali/public-api/math/vector2.h>
-// #include <dali/public-api/signals/signal.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/events/pan-gesture-detector.h>
+#include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>

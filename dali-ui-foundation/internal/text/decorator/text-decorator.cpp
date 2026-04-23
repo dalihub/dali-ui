@@ -25,7 +25,10 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/adaptor-framework/timer.h>
+#include <dali/public-api/events/long-press-gesture-detector.h>
+#include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
+#include <dali/public-api/events/tap-gesture-detector.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/object/property-notification.h>
 #include <dali/public-api/rendering/geometry.h>

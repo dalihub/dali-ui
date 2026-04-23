@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -363,6 +364,11 @@ public:
    * @copydoc Dali::Ui::ViewImpl::GetAccessibleObject()
    */
   std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
+
+  /**
+   * @copydoc Dali::Ui::ViewImpl::GetAccessibilityRelations()
+   */
+  Dali::Vector<Accessibility::Relation> GetAccessibilityRelations();
 
   /**
    * @copydoc Dali::Ui::View::IsAccessibleCreated()
