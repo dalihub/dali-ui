@@ -109,35 +109,57 @@ DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
 /**
- * @brief Helper method moved from ViewImpl::SetKeyInputFocus().
+ * @brief Sets key input focus via KeyInputFocusManager directly, bypassing FocusManager.
  *
- * Sets key input focus via KeyInputFocusManager directly, bypassing FocusManager.
- * FocusManager's current focus state is NOT updated by this call.
+ * Originally from ViewImpl::SetKeyInputFocus(). FocusManager's navigation focus
+ * state is NOT updated by this call.
  *
- * @param[in] view The view to set key input focus on
+ * @param[in] impl The ViewImpl whose handle should receive key input focus.
  */
-void SetKeyInputFocus(Dali::Ui::View view)
+void SetKeyInputFocus(ViewImpl& impl)
 {
+  Ui::View view = View::DownCast(impl.Self());
   if(view && view.IsOnScene())
   {
-    Dali::Ui::Internal::KeyInputFocusManager::Get().SetFocus(view);
+    Internal::KeyInputFocusManager::Get().SetFocus(view);
   }
 }
 
 /**
- * @brief Helper method moved from ViewImpl::ClearKeyInputFocus().
+ * @brief Clears key input focus via KeyInputFocusManager directly, bypassing FocusManager.
  *
- * Clears key input focus via KeyInputFocusManager directly, bypassing FocusManager.
- * Same caveat as SetKeyInputFocus() — FocusManager state is not affected.
+ * Originally from ViewImpl::ClearKeyInputFocus(). FocusManager's navigation focus
+ * state is NOT affected.
  *
- * @param[in] view The view to clear key input focus from
+ * @param[in] impl The ViewImpl whose handle should lose key input focus.
  */
-void ClearKeyInputFocus(Dali::Ui::View view)
+void ClearKeyInputFocus(ViewImpl& impl)
 {
+  Ui::View view = View::DownCast(impl.Self());
   if(view && view.IsOnScene())
   {
-    Dali::Ui::Internal::KeyInputFocusManager::Get().RemoveFocus(view);
+    Internal::KeyInputFocusManager::Get().RemoveFocus(view);
   }
+}
+
+/**
+ * @brief Returns whether the given ViewImpl currently holds key input focus.
+ *
+ * Queries KeyInputFocusManager directly, independently of FocusManager's
+ * navigation focus state.
+ *
+ * @param[in] impl The ViewImpl to check.
+ * @return true if @p impl is the current key input focus owner, false otherwise.
+ */
+bool HasKeyInputFocus(ViewImpl& impl)
+{
+  bool result = false;
+  if(impl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  {
+    Ui::View currentFocusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
+    result                    = (impl.Self() == currentFocusView);
+  }
+  return result;
 }
 
 } // namespace
@@ -375,9 +397,9 @@ float InputFieldImpl::GetCursorBlinkInterval() const
 void InputFieldImpl::SetCursorPosition(uint32_t position)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), position);
-  if(mController->SetPrimaryCursorPosition(position, HasKeyInputFocus()))
+  if(mController->SetPrimaryCursorPosition(position, HasKeyInputFocus(*this)))
   {
-    SetKeyInputFocus();
+    SetKeyInputFocus(*this);
   }
 }
 
@@ -1016,7 +1038,7 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
       {
         focusManager.ClearFocus();
       }
-      ClearKeyInputFocus(Ui::View::DownCast(Self()));
+      ClearKeyInputFocus(*this);
     }
 
     return true;
@@ -1046,7 +1068,7 @@ void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
   {
     keyboardFocusManager.SetCurrentFocusView(Ui::View::DownCast(Self()));
   }
-  SetKeyInputFocus(Ui::View::DownCast(Self()));
+  SetKeyInputFocus(*this);
 }
 
 void InputFieldImpl::OnPanDetected(Actor actor, const PanGesture& gesture)
@@ -1072,7 +1094,7 @@ void InputFieldImpl::OnLongPressDetected(Actor actor, const LongPressGesture& ge
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
 
-  SetKeyInputFocus(Ui::View::DownCast(Self()));
+  SetKeyInputFocus(*this);
 }
 
 MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstraint)
@@ -1302,7 +1324,7 @@ void InputFieldImpl::SetTextSelectionRange(const uint32_t* start, const uint32_t
   if(mController && mController->IsShowingRealText())
   {
     mController->SetTextSelectionRange(start, end);
-    SetKeyInputFocus(Ui::View::DownCast(Self()));
+    SetKeyInputFocus(*this);
   }
 }
 
@@ -1321,7 +1343,7 @@ void InputFieldImpl::SelectWholeText()
   if(mController && mController->IsShowingRealText())
   {
     mController->SelectWholeText();
-    SetKeyInputFocus(Ui::View::DownCast(Self()));
+    SetKeyInputFocus(*this);
   }
 }
 
@@ -1338,7 +1360,7 @@ void InputFieldImpl::SelectText(const uint32_t start, const uint32_t end)
   if(mController && mController->IsShowingRealText())
   {
     mController->SelectText(start, end);
-    SetKeyInputFocus(Ui::View::DownCast(Self()));
+    SetKeyInputFocus(*this);
   }
 }
 
@@ -1390,7 +1412,7 @@ void InputFieldImpl::PasteText()
 {
   if(mController)
   {
-    SetKeyInputFocus(Ui::View::DownCast(Self())); //Giving focus to the field that was passed to the PasteText in case the passed field (current field) doesn't have focus.
+    SetKeyInputFocus(*this); //Giving focus to the field that was passed to the PasteText in case the passed field (current field) doesn't have focus.
     mController->PasteText();
   }
 }
