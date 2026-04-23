@@ -344,6 +344,12 @@ private:
     bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
     bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
 
+    // Root has no parent layout to clamp against, so enforce the view's
+    // own min/max here. For MATCH_PARENT axes, the measured value was
+    // discarded above, so this is the only place min/max is applied.
+    bounds.width  = std::min(std::max(bounds.width, view->GetMinimumWidth()), view->GetMaximumWidth());
+    bounds.height = std::min(std::max(bounds.height, view->GetMinimumHeight()), view->GetMaximumHeight());
+
     view->Arrange(bounds);
   }
 
