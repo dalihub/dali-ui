@@ -35,9 +35,8 @@ namespace Integration
 namespace
 {
 
-LayoutRect GetChildBounds(ViewImpl& childImpl)
+LayoutRect GetChildBounds(Internal::AbsoluteLayoutParamsImpl* params)
 {
-  auto* params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
   if(params)
   {
     return params->GetBounds();
@@ -45,9 +44,8 @@ LayoutRect GetChildBounds(ViewImpl& childImpl)
   return LayoutRect(0.0f, 0.0f, -1.0f, -1.0f);
 }
 
-AbsoluteLayoutFlags GetChildFlags(ViewImpl& childImpl)
+AbsoluteLayoutFlags GetChildFlags(Internal::AbsoluteLayoutParamsImpl* params)
 {
-  auto* params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
   if(params)
   {
     return params->GetFlags();
@@ -90,8 +88,9 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       continue;
     }
 
-    LayoutRect          bounds = GetChildBounds(childImpl);
-    AbsoluteLayoutFlags flags  = GetChildFlags(childImpl);
+    auto*               params = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
+    LayoutRect          bounds = GetChildBounds(params);
+    AbsoluteLayoutFlags flags  = GetChildFlags(params);
 
     float x = bounds.x;
     float y = bounds.y;
@@ -185,8 +184,9 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       continue;
     }
 
-    LayoutRect          childBoundsSpec = GetChildBounds(childImpl);
-    AbsoluteLayoutFlags flags           = GetChildFlags(childImpl);
+    auto*               params          = Internal::AbsoluteLayoutParamsImpl::Get(childImpl);
+    LayoutRect          childBoundsSpec = GetChildBounds(params);
+    AbsoluteLayoutFlags flags           = GetChildFlags(params);
 
     float x = childBoundsSpec.x;
     float y = childBoundsSpec.y;
