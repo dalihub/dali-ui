@@ -22,12 +22,15 @@ using namespace Dali::Ui;
 /**
  * AbsoluteLayout proportional positioning and sizing sample.
  *
- * Demonstrates the use of AbsoluteLayoutFlags to position and size children
- * as a proportion (0.0 - 1.0) of the parent layout area.
+ * Demonstrates the composite AbsoluteLayoutFlags values
+ * (SIZE_PROPORTIONAL, ALL, POSITION_PROPORTIONAL) stacked in add order:
  *
- * - Red box: position proportional (top-left 10%), size absolute (120x80 px)
- * - Green box: all proportional (centered at 50%, size 30% x 20%)
- * - Blue box: size proportional only (position absolute at 10,400, size 80% x 10%)
+ *   - Blue  : SIZE_PROPORTIONAL     bounds(  0,   0, 1.0, 1.0)
+ *             → fills the entire root (w = parent*1.0, h = parent*1.0)
+ *   - Red   : ALL                   bounds(0.5, 0.5, 0.5, 0.5)
+ *             → centered, half-size (drawn on top of blue)
+ *   - Green : POSITION_PROPORTIONAL bounds(0.5, 0.5, 100, 100)
+ *             → centered 100x100 box (drawn on top of red)
  *
  * Press Escape or Back to quit.
  */
@@ -49,7 +52,15 @@ public:
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT);
 
-    // Red box: all proportional (position and size)
+    // Blue box: SIZE_PROPORTIONAL fills the entire root.
+    View blueBox = View::New();
+    blueBox.SetBackgroundColor(Color::BLUE);
+    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(0.0f, 0.0f, 1.0f, 1.0f))
+      .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
+    root.Add(blueBox);
+
+    // Red box: ALL centers a half-size child.
     View redBox = View::New();
     redBox.SetBackgroundColor(Color::RED);
     redBox.SetLayoutParams(AbsoluteLayoutParams::New()
@@ -57,21 +68,13 @@ public:
       .SetFlags(AbsoluteLayoutFlags::ALL));
     root.Add(redBox);
 
-    // Green box: proportional position, absolute size
+    // Green box: POSITION_PROPORTIONAL centers a fixed 100x100 box.
     View greenBox = View::New();
     greenBox.SetBackgroundColor(Color::GREEN);
     greenBox.SetLayoutParams(AbsoluteLayoutParams::New()
       .SetBounds(LayoutRect(0.5f, 0.5f, 100.0f, 100.0f))
       .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
     root.Add(greenBox);
-
-    // Blue box: proportional size, absolute position
-    View blueBox = View::New();
-    blueBox.SetBackgroundColor(Color::BLUE);
-    blueBox.SetLayoutParams(AbsoluteLayoutParams::New()
-      .SetBounds(LayoutRect(0.0f, 400.0f, 0.25f, 0.25f))
-      .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
-    root.Add(blueBox);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutProportionalController::OnKeyEvent);

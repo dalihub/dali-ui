@@ -98,14 +98,22 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     float w = bounds.width;
     float h = bounds.height;
 
-    bool positionProportional =
-      (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)) != 0;
-    bool sizeProportional =
-      (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL)) != 0;
+    const uint8_t rawFlags = static_cast<uint8_t>(flags);
+    const bool    xProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::X_PROPORTIONAL)) != 0;
+    const bool yProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::Y_PROPORTIONAL)) != 0;
+    const bool widthProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL)) != 0;
+    const bool heightProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL)) != 0;
 
-    if(sizeProportional)
+    if(widthProportional)
     {
       w *= contentWidth;
+    }
+    if(heightProportional)
+    {
       h *= contentHeight;
     }
 
@@ -136,10 +144,13 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
 
     childData.measuredSize = MeasuredSize(w, h);
 
-    // Proportional position: x = (available - childWidth) * proportion
-    if(positionProportional)
+    // Proportional position: axis = (available - childExtent) * proportion
+    if(xProportional)
     {
       x = (contentWidth - w) * bounds.x;
+    }
+    if(yProportional)
+    {
       y = (contentHeight - h) * bounds.y;
     }
 
@@ -182,14 +193,22 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     float w = childBoundsSpec.width;
     float h = childBoundsSpec.height;
 
-    bool positionProportional =
-      (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)) != 0;
-    bool sizeProportional =
-      (static_cast<uint8_t>(flags) & static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL)) != 0;
+    const uint8_t rawFlags = static_cast<uint8_t>(flags);
+    const bool    xProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::X_PROPORTIONAL)) != 0;
+    const bool yProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::Y_PROPORTIONAL)) != 0;
+    const bool widthProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL)) != 0;
+    const bool heightProportional =
+      (rawFlags & static_cast<uint8_t>(AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL)) != 0;
 
-    if(sizeProportional)
+    if(widthProportional)
     {
       w *= availableWidth;
+    }
+    if(heightProportional)
+    {
       h *= availableHeight;
     }
 
@@ -220,10 +239,13 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
       }
     }
 
-    // Proportional position: x = (available - childWidth) * proportion
-    if(positionProportional)
+    // Proportional position: axis = (available - childExtent) * proportion
+    if(xProportional)
     {
       x = (availableWidth - w) * childBoundsSpec.x;
+    }
+    if(yProportional)
+    {
       y = (availableHeight - h) * childBoundsSpec.y;
     }
 

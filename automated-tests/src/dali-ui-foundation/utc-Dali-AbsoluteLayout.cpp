@@ -255,6 +255,146 @@ int UtcDaliAbsoluteLayoutNegativeSizeMeasureP(void)
   END_TEST;
 }
 
+int UtcDaliAbsoluteLayoutXProportionalOnlyP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // X is proportional (0.25), Y and size are absolute.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(0.25f, 20.0f, 100.0f, 50.0f))
+                          .SetFlags(AbsoluteLayoutFlags::X_PROPORTIONAL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // X = (200 - 100) * 0.25 = 25; Y stays at 20; size unchanged.
+  DALI_TEST_EQUALS(child.GetPositionX(), 25.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 100.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 50.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutYProportionalOnlyP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // Y is proportional (0.5), X and size are absolute.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(30.0f, 0.5f, 80.0f, 40.0f))
+                          .SetFlags(AbsoluteLayoutFlags::Y_PROPORTIONAL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Y = (150 - 40) * 0.5 = 55; X stays at 30; size unchanged.
+  DALI_TEST_EQUALS(child.GetPositionX(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 55.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutWidthProportionalOnlyP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // Width is proportional (0.4), others absolute.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(10.0f, 20.0f, 0.4f, 60.0f))
+                          .SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Width = 0.4 * 200 = 80; height stays at 60; position absolute.
+  DALI_TEST_EQUALS(child.GetPositionX(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 60.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutHeightProportionalOnlyP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // Height is proportional (0.6), others absolute.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(10.0f, 20.0f, 50.0f, 0.6f))
+                          .SetFlags(AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Height = 0.6 * 150 = 90; width stays at 50; position absolute.
+  DALI_TEST_EQUALS(child.GetPositionX(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 90.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutMixedProportionalP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // X proportional + Height proportional; Y and Width absolute.
+  child.SetLayoutParams(
+    AbsoluteLayoutParams::New()
+      .SetBounds(LayoutRect(0.5f, 10.0f, 40.0f, 0.5f))
+      .SetFlags(AbsoluteLayoutFlags::X_PROPORTIONAL | AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Height = 0.5 * 150 = 75; Width = 40; X = (200 - 40) * 0.5 = 80; Y = 10.
+  DALI_TEST_EQUALS(child.GetPositionX(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 75.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutAllFlagBitsP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  View              child  = View::New();
+  layout.Add(child);
+  // ALL should enable proportional behavior on every axis.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(0.5f, 0.5f, 0.25f, 0.2f))
+                          .SetFlags(AbsoluteLayoutFlags::ALL));
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 150));
+
+  // Width = 0.25 * 200 = 50; Height = 0.2 * 150 = 30.
+  // X = (200 - 50) * 0.5 = 75; Y = (150 - 30) * 0.5 = 60.
+  DALI_TEST_EQUALS(child.GetPositionX(), 75.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliAbsoluteLayoutStandaloneIgnoresParentPaddingP(void)
 {
   UiTestApplication application;

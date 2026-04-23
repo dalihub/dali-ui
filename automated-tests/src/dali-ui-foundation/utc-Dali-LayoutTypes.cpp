@@ -185,11 +185,24 @@ int UtcDaliStackOrientationValuesP(void)
 int UtcDaliAbsoluteLayoutFlagsValuesP(void)
 {
   DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::NONE), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), 2u, TEST_LOCATION);
-  AbsoluteLayoutFlags all = AbsoluteLayoutFlags::POSITION_PROPORTIONAL | AbsoluteLayoutFlags::SIZE_PROPORTIONAL;
-  DALI_TEST_EQUALS(static_cast<uint8_t>(all), 3u, TEST_LOCATION);
-  DALI_TEST_CHECK((all & AbsoluteLayoutFlags::POSITION_PROPORTIONAL) == AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::X_PROPORTIONAL), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::Y_PROPORTIONAL), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL), 8u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), 12u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(AbsoluteLayoutFlags::ALL), 255u, TEST_LOCATION);
+
+  AbsoluteLayoutFlags combined =
+    AbsoluteLayoutFlags::POSITION_PROPORTIONAL | AbsoluteLayoutFlags::SIZE_PROPORTIONAL;
+  DALI_TEST_EQUALS(static_cast<uint8_t>(combined), 15u, TEST_LOCATION);
+  DALI_TEST_CHECK((combined & AbsoluteLayoutFlags::X_PROPORTIONAL) == AbsoluteLayoutFlags::X_PROPORTIONAL);
+  DALI_TEST_CHECK((combined & AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL) == AbsoluteLayoutFlags::HEIGHT_PROPORTIONAL);
+
+  // Per-axis mix: X proportional + absolute Y/size
+  AbsoluteLayoutFlags xOnly = AbsoluteLayoutFlags::X_PROPORTIONAL;
+  DALI_TEST_CHECK((xOnly & AbsoluteLayoutFlags::X_PROPORTIONAL) == AbsoluteLayoutFlags::X_PROPORTIONAL);
+  DALI_TEST_CHECK((xOnly & AbsoluteLayoutFlags::Y_PROPORTIONAL) == AbsoluteLayoutFlags::NONE);
   END_TEST;
 }
 

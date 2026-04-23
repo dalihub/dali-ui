@@ -532,6 +532,11 @@ private:
 
 /**
  * @brief Enumeration for absolute layout flags.
+ *
+ * Flags can be combined per-axis, allowing X/Y positions and Width/Height sizes
+ * to be independently specified as either absolute values or proportions of the
+ * parent's content area. The composite values POSITION_PROPORTIONAL and
+ * SIZE_PROPORTIONAL are provided for convenience.
  */
 enum class AbsoluteLayoutFlags : uint8_t
 {
@@ -540,17 +545,33 @@ enum class AbsoluteLayoutFlags : uint8_t
    */
   NONE = 0x0,
   /**
-   * @brief Position is proportional to parent size
+   * @brief X position is proportional to parent size
    */
-  POSITION_PROPORTIONAL = 0x1,
+  X_PROPORTIONAL = 1 << 0,
   /**
-   * @brief Size is proportional to parent size
+   * @brief Y position is proportional to parent size
    */
-  SIZE_PROPORTIONAL = 0x2,
+  Y_PROPORTIONAL = 1 << 1,
   /**
-   * @brief All flags set
+   * @brief Width is proportional to parent size
    */
-  ALL = POSITION_PROPORTIONAL | SIZE_PROPORTIONAL
+  WIDTH_PROPORTIONAL = 1 << 2,
+  /**
+   * @brief Height is proportional to parent size
+   */
+  HEIGHT_PROPORTIONAL = 1 << 3,
+  /**
+   * @brief Both X and Y positions are proportional to parent size
+   */
+  POSITION_PROPORTIONAL = X_PROPORTIONAL | Y_PROPORTIONAL,
+  /**
+   * @brief Both width and height are proportional to parent size
+   */
+  SIZE_PROPORTIONAL = WIDTH_PROPORTIONAL | HEIGHT_PROPORTIONAL,
+  /**
+   * @brief All bits set (all current and future proportional axes)
+   */
+  ALL = static_cast<uint8_t>(~0)
 };
 
 /**
