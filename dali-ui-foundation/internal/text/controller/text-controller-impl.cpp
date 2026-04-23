@@ -1616,7 +1616,7 @@ void Controller::Impl::RelayoutAllCharacters()
 
 bool Controller::Impl::IsInputStyleChangedSignalsQueueEmpty()
 {
-  return (NULL == mEventData) || (0u == mEventData->mInputStyleChangedQueue.Count());
+  return (nullptr == mEventData) || (0u == mEventData->mInputStyleChangedQueue.Count());
 }
 
 void Controller::Impl::ProcessInputStyleChangedSignals()
@@ -1931,15 +1931,36 @@ void Controller::Impl::SetMarqueeEnabled(bool enable, bool requestRelayout, Marq
 
 void Controller::Impl::SetEnableCursorBlink(bool enable)
 {
-  DALI_ASSERT_DEBUG(NULL != mEventData && "TextInput disabled");
+  DALI_ASSERT_DEBUG(nullptr != mEventData && "TextInput disabled");
 
   if(mEventData)
   {
     mEventData->mCursorBlinkEnabled = enable;
-
-    if(!enable && mEventData->mDecorator)
+    if(mEventData->mDecorator)
     {
-      mEventData->mDecorator->StopCursorBlink();
+      if(enable)
+      {
+        switch(mEventData->mState)
+        {
+          case EventData::EDITING:
+          case EventData::EDITING_WITH_POPUP:
+          case EventData::EDITING_WITH_GRAB_HANDLE:
+          case EventData::GRAB_HANDLE_PANNING:
+          case EventData::EDITING_WITH_PASTE_POPUP:
+          {
+            mEventData->mDecorator->StartCursorBlink();
+            break;
+          }
+          default:
+          {
+            break;
+          }
+        }
+      }
+      else
+      {
+        mEventData->mDecorator->StopCursorBlink();
+      }
     }
   }
 }

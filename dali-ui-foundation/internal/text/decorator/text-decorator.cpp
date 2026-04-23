@@ -2174,6 +2174,17 @@ void Decorator::StopCursorBlink()
   }
 
   mImpl->mCursorBlinkStatus = true; // Keep cursor permanently shown
+  mImpl->mDelayCursorBlink  = false;
+
+  if(mImpl->mPrimaryCursor)
+  {
+    mImpl->mPrimaryCursor.SetProperty(Actor::Property::VISIBLE, mImpl->mPrimaryCursorVisible);
+  }
+
+  if(mImpl->mSecondaryCursor)
+  {
+    mImpl->mSecondaryCursor.SetProperty(Actor::Property::VISIBLE, mImpl->mSecondaryCursorVisible);
+  }
 }
 
 void Decorator::DelayCursorBlink()

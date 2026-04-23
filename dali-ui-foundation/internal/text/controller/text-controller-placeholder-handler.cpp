@@ -609,7 +609,18 @@ void Controller::PlaceholderHandler::SetShowPlaceholderOnFocus(Controller& contr
 {
   if(nullptr != controller.mImpl->mEventData)
   {
+    if(controller.mImpl->mEventData->mShowPlaceholderOnFocus == enabled)
+    {
+      return;
+    }
+
     controller.mImpl->mEventData->mShowPlaceholderOnFocus = enabled;
+
+    // Update placeholder if there is no text
+    if(controller.mImpl->IsShowingPlaceholderText() || (0u == controller.mImpl->mModel->mLogicalModel->mText.Count()))
+    {
+      ShowPlaceholderText(*controller.mImpl);
+    }
   }
 }
 
