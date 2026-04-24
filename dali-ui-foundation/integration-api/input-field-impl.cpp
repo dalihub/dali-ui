@@ -185,10 +185,7 @@ InputFieldImpl::InputFieldImpl()
   mSelectionStarted(false),
   mSelectionChanged(false),
   mSelectionCleared(false),
-  mSelectionEnabled(true),
-  mOldPosition(0u),
-  mOldSelectionStart(0u),
-  mOldSelectionEnd(0u)
+  mSelectionEnabled(true)
 {
 }
 
@@ -1340,7 +1337,6 @@ void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned in
   if((oldPosition != newPosition) && !mCursorPositionChanged)
   {
     mCursorPositionChanged = true;
-    mOldPosition           = oldPosition;
   }
 }
 
@@ -1438,17 +1434,7 @@ void InputFieldImpl::SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32
       }
     }
 
-    mSelectionChanged  = true;
-    mOldSelectionStart = oldStart;
-    mOldSelectionEnd   = oldEnd;
-
-    if(mOldSelectionStart > mOldSelectionEnd)
-    {
-      //swap
-      uint32_t temp      = mOldSelectionStart;
-      mOldSelectionStart = mOldSelectionEnd;
-      mOldSelectionEnd   = temp;
-    }
+    mSelectionChanged = true;
   }
 }
 
@@ -1578,7 +1564,7 @@ void InputFieldImpl::EmitTextChanged()
 void InputFieldImpl::EmitCursorPositionChanged()
 {
   Ui::View handle(GetOwner());
-  mCursorPositionChangedSignal.Emit(handle, mOldPosition);
+  mCursorPositionChangedSignal.Emit(handle, mController->GetPrimaryCursorPosition());
   mCursorPositionChanged = false;
 }
 

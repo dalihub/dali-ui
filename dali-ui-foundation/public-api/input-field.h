@@ -797,11 +797,11 @@ public: // Signals
    * @brief This signal is emitted when the cursor position changes.
    *
    * @code
-   *   void OnCursorPositionChanged(View view, uint32_t oldPosition);
+   *   void OnCursorPositionChanged(View view, uint32_t position);
    * @endcode
    *
    * @param[in] view The view whose cursor position changed.
-   * @param[in] oldPosition The previous cursor position.
+   * @param[in] position The current cursor position.
    *
    * @return The signal to connect to.
    */

@@ -836,10 +836,6 @@ private:
   bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
   bool               mSelectionEnabled : 1;      ///< Whether text selection is enabled.
 
-  uint32_t mOldPosition;       ///< args for cursor position changed event
-  uint32_t mOldSelectionStart; ///< args for selection changed event
-  uint32_t mOldSelectionEnd;   ///< args for selection changed event
-
 protected:
   struct PropertyHandler;
 };
