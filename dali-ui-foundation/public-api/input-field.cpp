@@ -275,6 +275,17 @@ uint32_t InputField::GetCursorPosition() const
   return GetImpl(*this).GetCursorPosition();
 }
 
+InputField& InputField::SetSelectionEnabled(bool enabled)
+{
+  GetImpl(*this).SetSelectionEnabled(enabled);
+  return *this;
+}
+
+bool InputField::IsSelectionEnabled() const
+{
+  return GetImpl(*this).IsSelectionEnabled();
+}
+
 InputField& InputField::SetSelectionColor(const UiColor& color)
 {
   GetImpl(*this).SetSelectionColor(color);
@@ -485,6 +496,42 @@ InputField& InputField::ClearFontVariation()
 float InputField::GetAdjustedFontSizeScale() const
 {
   return GetImpl(*this).GetAdjustedFontSizeScale();
+}
+
+Dali::String InputField::GetSelectedText() const
+{
+  return GetImpl(*this).GetSelectedText();
+}
+
+uint32_t InputField::GetSelectedTextStart() const
+{
+  return GetImpl(*this).GetSelectedTextStart();
+}
+
+uint32_t InputField::GetSelectedTextEnd() const
+{
+  return GetImpl(*this).GetSelectedTextEnd();
+}
+
+// =============================================================================
+// Method
+// =============================================================================
+InputField& InputField::SelectText(uint32_t startIndex, uint32_t endIndex)
+{
+  GetImpl(*this).SelectText(startIndex, endIndex);
+  return *this;
+}
+
+InputField& InputField::SelectWholeText()
+{
+  GetImpl(*this).SelectWholeText();
+  return *this;
+}
+
+InputField& InputField::ClearSelection()
+{
+  GetImpl(*this).ClearSelection();
+  return *this;
 }
 
 // =============================================================================

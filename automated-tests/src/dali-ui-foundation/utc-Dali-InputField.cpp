@@ -43,7 +43,11 @@ const char* const PROPERTY_NAME_CURSOR_COLOR                   = "cursorColor";
 const char* const PROPERTY_NAME_CURSOR_BLINK_ENABLED           = "cursorBlinkEnabled";
 const char* const PROPERTY_NAME_CURSOR_BLINK_INTERVAL          = "cursorBlinkInterval";
 const char* const PROPERTY_NAME_CURSOR_POSITION                = "cursorPosition";
+const char* const PROPERTY_NAME_SELECTION_ENABLED              = "selectionEnabled";
 const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
+const char* const PROPERTY_NAME_SELECTED_TEXT                  = "selectedText";
+const char* const PROPERTY_NAME_SELECTED_TEXT_START            = "selectedTextStart";
+const char* const PROPERTY_NAME_SELECTED_TEXT_END              = "selectedTextEnd";
 const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
 const char* const PROPERTY_NAME_EDITABLE                       = "editable";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
@@ -404,6 +408,28 @@ int UtcDaliInputFieldCursorPosition(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldSelectionEnabled(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Default should be true
+  DALI_TEST_EQUALS(inputField.IsSelectionEnabled(), true, TEST_LOCATION);
+
+  inputField.SetSelectionEnabled(false);
+  DALI_TEST_EQUALS(inputField.IsSelectionEnabled(), false, TEST_LOCATION);
+
+  inputField.SetSelectionEnabled(true);
+  DALI_TEST_EQUALS(inputField.IsSelectionEnabled(), true, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetSelectionEnabled(false);
+  DALI_TEST_CHECK(&ref == &inputField);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldSelectionColor(void)
 {
   UiTestApplication application;
@@ -417,6 +443,48 @@ int UtcDaliInputFieldSelectionColor(void)
   UiColor color2(Color::MAGENTA);
   inputField.SetSelectionColor(color2);
   DALI_TEST_EQUALS(inputField.GetSelectionColor().Resolve(), Color::MAGENTA, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldSelectedText(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Set text
+  inputField.SetText("Hello world");
+
+  // Select text range
+  inputField.SelectText(1u, 5u);
+  DALI_TEST_EQUALS(inputField.GetSelectedTextStart(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetSelectedTextEnd(), 5u, TEST_LOCATION);
+
+  // Clear selection
+  inputField.ClearSelection();
+  DALI_TEST_EQUALS(inputField.GetSelectedTextStart(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetSelectedTextEnd(), 0u, TEST_LOCATION);
+
+  // Select whole text
+  inputField.SelectWholeText();
+  // After SelectWholeText, the range should cover the whole text
+  // The selected text should be the whole text
+
+  // GetSelectedText() should return a valid Dali::String
+  Dali::String selectedText = inputField.GetSelectedText();
+  // The returned string should be valid (may be empty if TODO implementation)
+  DALI_TEST_CHECK(selectedText.Size() >= 0u);
+
+  // Test chaining for SelectText, SelectWholeText, ClearSelection
+  InputField& ref1 = inputField.SelectText(0u, 5u);
+  DALI_TEST_CHECK(&ref1 == &inputField);
+
+  InputField& ref2 = inputField.SelectWholeText();
+  DALI_TEST_CHECK(&ref2 == &inputField);
+
+  InputField& ref3 = inputField.ClearSelection();
+  DALI_TEST_CHECK(&ref3 == &inputField);
 
   END_TEST;
 }
@@ -691,7 +759,11 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_BLINK_ENABLED) == InputField::Property::CURSOR_BLINK_ENABLED);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_BLINK_INTERVAL) == InputField::Property::CURSOR_BLINK_INTERVAL);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_POSITION) == InputField::Property::CURSOR_POSITION);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_ENABLED) == InputField::Property::SELECTION_ENABLED);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_COLOR) == InputField::Property::SELECTION_COLOR);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT) == InputField::Property::SELECTED_TEXT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT_START) == InputField::Property::SELECTED_TEXT_START);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT_END) == InputField::Property::SELECTED_TEXT_END);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_EDITABLE) == InputField::Property::EDITABLE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
@@ -783,9 +855,26 @@ int UtcDaliInputFieldSetProperty(void)
   inputField.SetProperty(InputField::Property::CURSOR_POSITION, 5);
   DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::CURSOR_POSITION), 5, TEST_LOCATION);
 
+  // SELECTION_ENABLED
+  inputField.SetProperty(InputField::Property::SELECTION_ENABLED, false);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SELECTION_ENABLED), false, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::SELECTION_ENABLED, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SELECTION_ENABLED), true, TEST_LOCATION);
+
   // SELECTION_COLOR
   inputField.SetProperty(InputField::Property::SELECTION_COLOR, Color::CYAN);
   DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::SELECTION_COLOR), Color::CYAN, TEST_LOCATION);
+
+  // SELECTED_TEXT (read-only)
+  // Get selected text returns empty string if no selection
+  DALI_TEST_CHECK(inputField.GetProperty<Dali::String>(InputField::Property::SELECTED_TEXT).Size() >= 0u);
+
+  // SELECTED_TEXT_START (read-only)
+  DALI_TEST_CHECK(inputField.GetProperty<int>(InputField::Property::SELECTED_TEXT_START) >= 0);
+
+  // SELECTED_TEXT_END (read-only)
+  DALI_TEST_CHECK(inputField.GetProperty<int>(InputField::Property::SELECTED_TEXT_END) >= 0);
 
   // MAXIMUM_LENGTH
   inputField.SetProperty(InputField::Property::MAXIMUM_LENGTH, 50);

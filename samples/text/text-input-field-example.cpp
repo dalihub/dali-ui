@@ -134,6 +134,18 @@ private:
     Label btn10 = CreateButton("10. Print Info (log)")
                     .SetBackgroundColor(UiColor(0x34495E));
 
+    Label btn11 = CreateButton("11. Toggle Selection Enabled")
+                    .SetBackgroundColor(UiColor(0x8E44AD));
+
+    Label btn12 = CreateButton("12. Select Text Range")
+                    .SetBackgroundColor(UiColor(0x27AE60));
+
+    Label btn13 = CreateButton("13. Select Whole Text")
+                    .SetBackgroundColor(UiColor(0xE74C3C));
+
+    Label btn14 = CreateButton("14. Clear Selection")
+                    .SetBackgroundColor(UiColor(0x95A5A6));
+
     window.Add(
       StackLayout::New(StackOrientation::VERTICAL)
         .SetSpacing(STACK_SPACING)
@@ -148,6 +160,7 @@ private:
           mStatusLabel,
           Label::New("Test Actions:").SetFontSize(14.0f),
           btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10,
+          btn11, btn12, btn13, btn14,
         }));
 
     // Connect button touch signals
@@ -161,6 +174,10 @@ private:
     btn8.TouchedSignal().Connect(this, &InputFieldController::OnButton8Touched);
     btn9.TouchedSignal().Connect(this, &InputFieldController::OnButton9Touched);
     btn10.TouchedSignal().Connect(this, &InputFieldController::OnButton10Touched);
+    btn11.TouchedSignal().Connect(this, &InputFieldController::OnButton11Touched);
+    btn12.TouchedSignal().Connect(this, &InputFieldController::OnButton12Touched);
+    btn13.TouchedSignal().Connect(this, &InputFieldController::OnButton13Touched);
+    btn14.TouchedSignal().Connect(this, &InputFieldController::OnButton14Touched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputFieldController::OnKeyEvent);
@@ -328,6 +345,49 @@ private:
     UpdateStatus();
   }
 
+  void ActionToggleSelectionEnabled()
+  {
+    bool enabled = mInputField.IsSelectionEnabled();
+    mInputField.SetSelectionEnabled(!enabled);
+    DALI_LOG_ERROR("SelectionEnabled: %d -> %d\n", enabled, !enabled);
+    UpdateStatus();
+  }
+
+  void ActionSelectTextRange()
+  {
+    // Select a range of text (e.g., characters 1-5)
+    uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
+    if(textLength > 0)
+    {
+      uint32_t start = 0u;
+      uint32_t end = std::min(5u, textLength);
+      mInputField.SelectText(start, end);
+      DALI_LOG_ERROR("SelectText: %u-%u (textLength: %u)\n", start, end, textLength);
+      DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
+    }
+    else
+    {
+      DALI_LOG_ERROR("No text to select\n");
+    }
+    UpdateStatus();
+  }
+
+  void ActionSelectWholeText()
+  {
+    mInputField.SelectWholeText();
+    DALI_LOG_ERROR("SelectWholeText: textLength=%zu\n", mInputField.GetText().Size());
+    DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
+    UpdateStatus();
+  }
+
+  void ActionClearSelection()
+  {
+    mInputField.ClearSelection();
+    DALI_LOG_ERROR("ClearSelection\n");
+    DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
+    UpdateStatus();
+  }
+
   // --- Button handlers ---
 
   bool OnButton1Touched(Actor, const TouchEvent& touch)
@@ -420,6 +480,42 @@ private:
     return true;
   }
 
+  bool OnButton11Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      ActionToggleSelectionEnabled();
+    }
+    return true;
+  }
+
+  bool OnButton12Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      ActionSelectTextRange();
+    }
+    return true;
+  }
+
+  bool OnButton13Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      ActionSelectWholeText();
+    }
+    return true;
+  }
+
+  bool OnButton14Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      ActionClearSelection();
+    }
+    return true;
+  }
+
   // --- Key events ---
 
   void OnKeyEvent(const KeyEvent& event)
@@ -496,6 +592,10 @@ private:
     DALI_LOG_ERROR("CursorPosition        : %u\n", mInputField.GetCursorPosition());
     DALI_LOG_ERROR("CursorColor           : %.2f, %.2f, %.2f, %.2f\n", cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a);
     DALI_LOG_ERROR("SelectionColor        : %.2f, %.2f, %.2f, %.2f\n", selectionColor.r, selectionColor.g, selectionColor.b, selectionColor.a);
+    DALI_LOG_ERROR("SelectionEnabled      : %d\n", mInputField.IsSelectionEnabled());
+    DALI_LOG_ERROR("SelectedText          : %s\n", mInputField.GetSelectedText().CStr());
+    DALI_LOG_ERROR("SelectedTextStart     : %u\n", mInputField.GetSelectedTextStart());
+    DALI_LOG_ERROR("SelectedTextEnd       : %u\n", mInputField.GetSelectedTextEnd());
     DALI_LOG_ERROR("MaximumLength         : %d\n", mInputField.GetMaximumLength());
     DALI_LOG_ERROR("Editable              : %d\n", mInputField.IsEditable());
     DALI_LOG_ERROR("TextColor             : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);

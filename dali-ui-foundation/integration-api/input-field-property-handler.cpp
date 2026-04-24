@@ -122,9 +122,29 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetCursorPosition(static_cast<uint32_t>(value.Get<int>()));
       break;
     }
+    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+    {
+      impl.SetSelectionEnabled(value.Get<bool>());
+      break;
+    }
     case Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
       impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT:
+    {
+      // Read-only property, ignore set.
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
+    {
+      // Read-only property, ignore set.
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
+    {
+      // Read-only property, ignore set.
       break;
     }
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
@@ -285,9 +305,29 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
       value = static_cast<int>(impl.GetCursorPosition());
       break;
     }
+    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+    {
+      value = impl.IsSelectionEnabled();
+      break;
+    }
     case Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
       value = impl.GetSelectionColor().Resolve();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT:
+    {
+      value = impl.GetSelectedText();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
+    {
+      value = static_cast<int>(impl.GetSelectedTextStart());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
+    {
+      value = static_cast<int>(impl.GetSelectedTextEnd());
       break;
     }
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:

@@ -155,11 +155,42 @@ struct InputFieldPropertyIndex
     CURSOR_POSITION,
 
     /**
+     * @brief Whether text selection is enabled.
+     * @details Name "selectionEnabled", type Property::BOOLEAN.
+     * @see InputField::SetSelectionEnabled(), InputField::IsSelectionEnabled().
+     */
+    SELECTION_ENABLED,
+
+    /**
      * @brief The highlight color of the selected text region.
      * @details Name "selectionColor", type Property::VECTOR4.
      * @see InputField::SetSelectionColor(), InputField::GetSelectionColor().
      */
     SELECTION_COLOR,
+
+    /**
+     * @brief The currently selected text.
+     * @details Name "selectedText", type Property::STRING.
+     * @note This property is read-only.
+     * @see InputField::GetSelectedText().
+     */
+    SELECTED_TEXT,
+
+    /**
+     * @brief The start position of the selected text range.
+     * @details Name "selectedTextStart", type Property::INTEGER.
+     * @note This property is read-only.
+     * @see InputField::GetSelectedTextStart().
+     */
+    SELECTED_TEXT_START,
+
+    /**
+     * @brief The end position of the selected text range.
+     * @details Name "selectedTextEnd", type Property::INTEGER.
+     * @note This property is read-only.
+     * @see InputField::GetSelectedTextEnd().
+     */
+    SELECTED_TEXT_END,
 
     /**
      * @brief The maximum number of characters that can be entered.

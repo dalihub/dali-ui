@@ -99,6 +99,12 @@
   */ \
   ChildClass& SetCursorPosition(uint32_t position) { InputField::SetCursorPosition(position); return *this; } \
   /** \
+  * @brief Sets whether text selection is enabled. \
+  * \
+  * @param[in] enabled True to enable text selection, false otherwise. \
+  */ \
+  ChildClass& SetSelectionEnabled(bool enabled) { InputField::SetSelectionEnabled(enabled); return *this; } \
+  /** \
   * @brief Sets the highlight color of the selected text region. \
   * \
   * @param[in] color The selection highlight color as a UiColor). \

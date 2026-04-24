@@ -24,10 +24,15 @@ namespace Ui
 {
 using Uint32Pair = std::pair<uint32_t, uint32_t>;
 using string     = std::string;
+
 namespace Text
 {
 /**
- * @brief An interface that the Text::Controller used for text selection functionality.
+ * @brief Interface used by Text::Controller to notify and control text selection.
+ *
+ * A selectable control implements this interface when it wants to expose
+ * selection operations such as selecting a range, selecting all text, clearing
+ * selection, querying selected text, and receiving selection change callbacks.
  */
 class SelectableControlInterface
 {
@@ -38,56 +43,63 @@ public:
   virtual ~SelectableControlInterface() = default;
 
   /**
-   * @brief Called to set the selection postions in the texts.
-   * @param start start selection position (pass NULL to ignore).
-   * @param end end selection position (pass NULL to ignore).
+   * @brief Selects the text in the specified range.
+   *
+   * The range is specified by character indices in the current text.
+   *
+   * @param[in] start The start index of the selection.
+   * @param[in] end The end index of the selection.
    */
-  virtual void SetTextSelectionRange(const uint32_t* start, const uint32_t* end) = 0;
+  virtual void SelectText(uint32_t start, uint32_t end) = 0;
 
   /**
-   * @brief Called to return the selection postions in the texts.
-   * @return pair contains start and end positions.
-   */
-  virtual Uint32Pair GetTextSelectionRange() const = 0;
-
-  /**
-   * @brief Called to select the whole texts.
+   * @brief Selects the whole text.
    */
   virtual void SelectWholeText() = 0;
 
   /**
-   * @brief Called to unselect the whole texts.
+   * @brief Clears the current text selection.
    */
-  virtual void SelectNone() = 0;
+  virtual void ClearSelection() = 0;
 
   /**
-   * @brief Called to set the selection postions in the texts.
-   * @param start start selection position.
-   * @param end end selection position.
-   */
-  virtual void SelectText(const uint32_t start, const uint32_t end) = 0;
-
-  /**
-   * @brief Retrive Selected text.
-   * @return The seletced text.
-   */
-  virtual string GetSelectedText() const = 0;
-
-  /**
-   * @brief Called when the selection has been changed.
+   * @brief Gets the currently selected text.
    *
-   * @param oldStart the selection handles start position before the change.
-   * @param oldEnd   the selection handles end position before the change.
-   * @param newStart the selection handles start position after the change.
-   * @param newEnd   the selection handles end position after the change.
+   * @return The selected text.
+   */
+  virtual Dali::String GetSelectedText() const = 0;
+
+  /**
+   * @brief Sets the current text selection range.
+   *
+   * Either @p start or @p end may be nullptr to keep the corresponding
+   * selection position unchanged.
+   *
+   * @param[in] start The start index of the selection, or nullptr to ignore.
+   * @param[in] end The end index of the selection, or nullptr to ignore.
+   */
+  virtual void SetTextSelectionRange(const uint32_t* start, const uint32_t* end) = 0;
+
+  /**
+   * @brief Gets the current text selection range.
+   *
+   * @return A pair containing the start and end indices of the selection.
+   */
+  virtual Uint32Pair GetTextSelectionRange() const = 0;
+
+  /**
+   * @brief Called when the text selection range has changed.
+   *
+   * @param[in] oldStart The previous start index of the selection.
+   * @param[in] oldEnd The previous end index of the selection.
+   * @param[in] newStart The new start index of the selection.
+   * @param[in] newEnd The new end index of the selection.
    */
   virtual void SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd) = 0;
 };
 
 } // namespace Text
-
 } // namespace Ui
-
 } // namespace Dali
 
 #endif // DALI_UI_TEXT_SELECTABLE_CONTROL_INTERFACE_H

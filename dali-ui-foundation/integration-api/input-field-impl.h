@@ -228,6 +228,16 @@ public:
   uint32_t GetCursorPosition() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetSelectionEnabled
+   */
+  void SetSelectionEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsSelectionEnabled
+   */
+  bool IsSelectionEnabled() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetSelectionColor
    */
   void SetSelectionColor(const UiColor& color);
@@ -409,6 +419,16 @@ public:
   float GetAdjustedFontSizeScale() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::GetSelectedTextStart
+   */
+  uint32_t GetSelectedTextStart() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectedTextEnd
+   */
+  uint32_t GetSelectedTextEnd() const;
+
+  /**
    * @brief Sets the additional spacing between letters in pixels.
    *
    * Positive values increase the spacing, while negative values reduce it.
@@ -423,6 +443,8 @@ public:
    * @return The additional letter spacing in pixels.
    */
   float GetLetterSpacing() const;
+
+  // Method
 
 public: // Signals
   /**
@@ -521,86 +543,14 @@ public: // From ControlInterface
   // From EditableControlInterface
 
   /**
-   * @copydoc Text::EditableControlInterface::TextChanged()
-   */
-  void TextInserted(unsigned int position, unsigned int length, const std::string& content) override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::TextDeleted()
-   */
-  void TextDeleted(unsigned int position, unsigned int length, const std::string& content) override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::CursorPositionChanged()
-   */
-  void CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition) override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::TextChanged()
-   */
-  void TextChanged(bool immediate) override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::MaxLengthReached()
-   */
-  void MaxLengthReached() override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::InputStyleChanged()
-   */
-  void InputStyleChanged(Text::InputStyle::Mask inputStyleMask) override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::SelectionChanged()
-   */
-  void SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd) override;
-
-  /**
    * @copydoc Text::EditableControlInterface::AddDecoration()
    */
   void AddDecoration(Actor& actor, Ui::Text::DecorationType type, bool needsClipping) override;
 
   /**
-   * @copydoc Text::EditableControlInterface::InputFiltered()
-   */
-  void InputFiltered(Ui::InputFilter::Property::Type type) override;
-
-  /**
    * @copydoc Text::EditableControlInterface::GetControlBackgroundColor()
    */
   void GetControlBackgroundColor(Vector4& color) const override;
-
-  // From SelectableControlInterface
-public:
-  /**
-   * @copydoc Text::SelectableControlInterface::SetTextSelectionRange()
-   */
-  void SetTextSelectionRange(const uint32_t* start, const uint32_t* end) override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::GetTextSelectionRange()
-   */
-  Uint32Pair GetTextSelectionRange() const override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::SelectWholeText()
-   */
-  void SelectWholeText() override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::SelectNone()
-   */
-  void SelectNone() override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::SelectText()
-   */
-  void SelectText(const uint32_t start, const uint32_t end) override;
-
-  /**
-   * @copydoc Text::SelectableControlInterface::GetSelectedText()
-   */
-  string GetSelectedText() const override;
 
   /**
    * @copydoc Text::EditableControlInterface::IsEditable()
@@ -626,6 +576,78 @@ public:
    * @copydoc Text::EditableControlInterface::PasteText()
    */
   void PasteText() override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::TextChanged()
+   */
+  void TextChanged(bool immediate) override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::MaxLengthReached()
+   */
+  void MaxLengthReached() override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::CursorPositionChanged()
+   */
+  void CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition) override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::InputStyleChanged()
+   */
+  void InputStyleChanged(Text::InputStyle::Mask inputStyleMask) override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::InputFiltered()
+   */
+  void InputFiltered(Ui::InputFilter::Property::Type type) override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::TextChanged()
+   */
+  void TextInserted(unsigned int position, unsigned int length, const std::string& content) override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::TextDeleted()
+   */
+  void TextDeleted(unsigned int position, unsigned int length, const std::string& content) override;
+
+  // From SelectableControlInterface
+public:
+  /**
+   * @copydoc Text::SelectableControlInterface::SelectText()
+   */
+  void SelectText(const uint32_t start, const uint32_t end) override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::SelectWholeText()
+   */
+  void SelectWholeText() override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::ClearSelection()
+   */
+  void ClearSelection() override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::GetSelectedText()
+   */
+  Dali::String GetSelectedText() const override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::SetTextSelectionRange()
+   */
+  void SetTextSelectionRange(const uint32_t* start, const uint32_t* end) override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::GetTextSelectionRange()
+   */
+  Uint32Pair GetTextSelectionRange() const override;
+
+  /**
+   * @copydoc Text::SelectableControlInterface::SelectionChanged()
+   */
+  void SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd) override;
 
   // From AnchorControlInterface
 public:
@@ -812,6 +834,7 @@ private:
   bool               mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
   bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
   bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  bool               mSelectionEnabled : 1;      ///< Whether text selection is enabled.
 
   uint32_t mOldPosition;       ///< args for cursor position changed event
   uint32_t mOldSelectionStart; ///< args for selection changed event

@@ -80,7 +80,11 @@ public:
       CURSOR_BLINK_ENABLED           = Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED,
       CURSOR_BLINK_INTERVAL          = Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL,
       CURSOR_POSITION                = Text::InputFieldPropertyIndex::CURSOR_POSITION,
+      SELECTION_ENABLED              = Text::InputFieldPropertyIndex::SELECTION_ENABLED,
       SELECTION_COLOR                = Text::InputFieldPropertyIndex::SELECTION_COLOR,
+      SELECTED_TEXT                  = Text::InputFieldPropertyIndex::SELECTED_TEXT,
+      SELECTED_TEXT_START            = Text::InputFieldPropertyIndex::SELECTED_TEXT_START,
+      SELECTED_TEXT_END              = Text::InputFieldPropertyIndex::SELECTED_TEXT_END,
       MAXIMUM_LENGTH                 = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
       EDITABLE                       = Text::InputFieldPropertyIndex::EDITABLE,
       LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
@@ -381,6 +385,20 @@ public: // Setters for chaining
    * @return The current cursor position.
    */
   uint32_t GetCursorPosition() const;
+
+  /**
+   * @brief Sets whether text selection is enabled.
+   *
+   * @param[in] enabled True to enable text selection, false otherwise.
+   */
+  InputField& SetSelectionEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether text selection is enabled.
+   *
+   * @return True if text selection is enabled, false otherwise.
+   */
+  bool IsSelectionEnabled() const;
 
   /**
    * @brief Sets the highlight color of the selected text region.
@@ -704,6 +722,51 @@ public: // Setters for chaining
    * @return The adjusted font size scale used for rendering.
    */
   float GetAdjustedFontSizeScale() const;
+
+  /**
+   * @brief Gets the currently selected text.
+   *
+   * @return The selected text in UTF-8 format.
+   */
+  Dali::String GetSelectedText() const;
+
+  /**
+   * @brief Gets the start index of the currently selected text.
+   *
+   * @return The start index of the selected text.
+   */
+  uint32_t GetSelectedTextStart() const;
+
+  /**
+   * @brief Gets the end index of the currently selected text.
+   *
+   * @return The end index of the selected text.
+   */
+  uint32_t GetSelectedTextEnd() const;
+
+  // Method
+  /**
+   * @brief Selects the text within the specified index range.
+   *
+   * @param[in] startIndex The start index of the selection.
+   * @param[in] endIndex The end index of the selection.
+   * @return This input field.
+   */
+  InputField& SelectText(uint32_t startIndex, uint32_t endIndex);
+
+  /**
+   * @brief Selects the whole text.
+   *
+   * @return This input field.
+   */
+  InputField& SelectWholeText();
+
+  /**
+   * @brief Clears the current selection.
+   *
+   * @return This input field.
+   */
+  InputField& ClearSelection();
 
 public: // Signals
   /**

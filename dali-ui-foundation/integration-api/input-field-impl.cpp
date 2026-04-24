@@ -93,7 +93,11 @@ INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",                VECTOR4, CURSOR_
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkEnabled",         BOOLEAN, CURSOR_BLINK_ENABLED          )
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkInterval",        FLOAT,   CURSOR_BLINK_INTERVAL         )
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorPosition",             INTEGER, CURSOR_POSITION               )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionEnabled",           BOOLEAN, SELECTION_ENABLED             )
 INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",             VECTOR4, SELECTION_COLOR               )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectedText",               STRING,  SELECTED_TEXT                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectedTextStart",          INTEGER, SELECTED_TEXT_START           )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectedTextEnd",            INTEGER, SELECTED_TEXT_END             )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",              INTEGER, MAXIMUM_LENGTH                )
 INPUT_FIELD_PROPERTY_REGISTRATION("editable",                   BOOLEAN, EDITABLE                      )
 INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECTION_MODE         )
@@ -181,6 +185,7 @@ InputFieldImpl::InputFieldImpl()
   mSelectionStarted(false),
   mSelectionChanged(false),
   mSelectionCleared(false),
+  mSelectionEnabled(true),
   mOldPosition(0u),
   mOldSelectionStart(0u),
   mOldSelectionEnd(0u)
@@ -407,6 +412,18 @@ void InputFieldImpl::SetCursorPosition(uint32_t position)
 uint32_t InputFieldImpl::GetCursorPosition() const
 {
   return mController->GetPrimaryCursorPosition();
+}
+
+void InputFieldImpl::SetSelectionEnabled(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  mController->SetSelectionEnabled(enabled);
+  mController->SetShiftSelectionEnabled(enabled);
+}
+
+bool InputFieldImpl::IsSelectionEnabled() const
+{
+  return mController->IsSelectionEnabled();
 }
 
 void InputFieldImpl::SetSelectionColor(const UiColor& color)
@@ -714,6 +731,22 @@ float InputFieldImpl::GetAdjustedFontSizeScale() const
 {
   return mController->GetAdjustedFontSizeScale();
 }
+
+uint32_t InputFieldImpl::GetSelectedTextStart() const
+{
+  Uint32Pair range = mController->GetTextSelectionRange();
+  return range.first;
+}
+
+uint32_t InputFieldImpl::GetSelectedTextEnd() const
+{
+  Uint32Pair range = mController->GetTextSelectionRange();
+  return range.second;
+}
+
+// =============================================================================
+// Method
+// =============================================================================
 
 // =============================================================================
 // Signals
@@ -1207,78 +1240,6 @@ void InputFieldImpl::RequestAsyncRender()
 // =============================================================================
 // EditableControlInterface
 // =============================================================================
-void InputFieldImpl::TextInserted(unsigned int position, unsigned int length, const std::string& content)
-{
-  // TODO: Accessible
-}
-
-void InputFieldImpl::TextDeleted(unsigned int position, unsigned int length, const std::string& content)
-{
-  // TODO: Accessible
-}
-
-void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition)
-{
-  if((oldPosition != newPosition) && !mCursorPositionChanged)
-  {
-    mCursorPositionChanged = true;
-    mOldPosition           = oldPosition;
-  }
-}
-
-void InputFieldImpl::TextChanged(bool immediate)
-{
-  if(immediate) // Emits TextChanged signal immediately
-  {
-    EmitTextChanged();
-  }
-  else
-  {
-    mTextChanged = true;
-  }
-}
-
-void InputFieldImpl::MaxLengthReached()
-{
-  Ui::View handle(GetOwner());
-  mMaxLengthReachedSignal.Emit(handle);
-}
-
-void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
-{
-  // TODO
-}
-
-void InputFieldImpl::SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd)
-{
-  if(((oldStart != newStart) || (oldEnd != newEnd)) && !mSelectionChanged)
-  {
-    if(newStart == newEnd)
-    {
-      mSelectionCleared = true;
-    }
-    else
-    {
-      if(oldStart == oldEnd)
-      {
-        mSelectionStarted = true;
-      }
-    }
-
-    mSelectionChanged  = true;
-    mOldSelectionStart = oldStart;
-    mOldSelectionEnd   = oldEnd;
-
-    if(mOldSelectionStart > mOldSelectionEnd)
-    {
-      //swap
-      uint32_t temp      = mOldSelectionStart;
-      mOldSelectionStart = mOldSelectionEnd;
-      mOldSelectionEnd   = temp;
-    }
-  }
-}
-
 void InputFieldImpl::AddDecoration(Actor& actor, Text::DecorationType type, bool needsClipping)
 {
   if(actor)
@@ -1300,11 +1261,6 @@ void InputFieldImpl::AddDecoration(Actor& actor, Text::DecorationType type, bool
   }
 }
 
-void InputFieldImpl::InputFiltered(Ui::InputFilter::Property::Type type)
-{
-  // TODO
-}
-
 void InputFieldImpl::GetControlBackgroundColor(Vector4& color) const
 {
   Property::Value propValue = Self().GetProperty(Ui::View::Property::BACKGROUND);
@@ -1315,64 +1271,6 @@ void InputFieldImpl::GetControlBackgroundColor(Vector4& color) const
   {
     colorValue->Get(color);
   }
-}
-
-// =============================================================================
-// SelectableControlInterface
-// =============================================================================
-void InputFieldImpl::SetTextSelectionRange(const uint32_t* start, const uint32_t* end)
-{
-  if(mController && mController->IsShowingRealText())
-  {
-    mController->SetTextSelectionRange(start, end);
-    SetKeyInputFocus(*this);
-  }
-}
-
-Uint32Pair InputFieldImpl::GetTextSelectionRange() const
-{
-  Uint32Pair range;
-  if(mController && mController->IsShowingRealText())
-  {
-    range = mController->GetTextSelectionRange();
-  }
-  return range;
-}
-
-void InputFieldImpl::SelectWholeText()
-{
-  if(mController && mController->IsShowingRealText())
-  {
-    mController->SelectWholeText();
-    SetKeyInputFocus(*this);
-  }
-}
-
-void InputFieldImpl::SelectNone()
-{
-  if(mController && mController->IsShowingRealText())
-  {
-    mController->SelectNone();
-  }
-}
-
-void InputFieldImpl::SelectText(const uint32_t start, const uint32_t end)
-{
-  if(mController && mController->IsShowingRealText())
-  {
-    mController->SelectText(start, end);
-    SetKeyInputFocus(*this);
-  }
-}
-
-std::string InputFieldImpl::GetSelectedText() const
-{
-  std::string selectedText = "";
-  if(mController && mController->IsShowingRealText())
-  {
-    selectedText = mController->GetSelectedText();
-  }
-  return selectedText;
 }
 
 bool InputFieldImpl::IsEditable() const
@@ -1416,6 +1314,141 @@ void InputFieldImpl::PasteText()
   {
     SetKeyInputFocus(*this); //Giving focus to the field that was passed to the PasteText in case the passed field (current field) doesn't have focus.
     mController->PasteText();
+  }
+}
+
+void InputFieldImpl::TextChanged(bool immediate)
+{
+  if(immediate) // Emits TextChanged signal immediately
+  {
+    EmitTextChanged();
+  }
+  else
+  {
+    mTextChanged = true;
+  }
+}
+
+void InputFieldImpl::MaxLengthReached()
+{
+  Ui::View handle(GetOwner());
+  mMaxLengthReachedSignal.Emit(handle);
+}
+
+void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition)
+{
+  if((oldPosition != newPosition) && !mCursorPositionChanged)
+  {
+    mCursorPositionChanged = true;
+    mOldPosition           = oldPosition;
+  }
+}
+
+void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
+{
+  // TODO
+}
+
+void InputFieldImpl::InputFiltered(Ui::InputFilter::Property::Type type)
+{
+  // TODO
+}
+
+void InputFieldImpl::TextInserted(unsigned int position, unsigned int length, const std::string& content)
+{
+  // TODO: Accessible
+}
+
+void InputFieldImpl::TextDeleted(unsigned int position, unsigned int length, const std::string& content)
+{
+  // TODO: Accessible
+}
+
+// =============================================================================
+// SelectableControlInterface
+// =============================================================================
+void InputFieldImpl::SelectText(const uint32_t start, const uint32_t end)
+{
+  if(mController && mController->IsShowingRealText())
+  {
+    mController->SelectText(start, end);
+    SetKeyInputFocus(*this);
+  }
+}
+
+void InputFieldImpl::SelectWholeText()
+{
+  if(mController && mController->IsShowingRealText())
+  {
+    mController->SelectWholeText();
+    SetKeyInputFocus(*this);
+  }
+}
+
+void InputFieldImpl::ClearSelection()
+{
+  if(mController && mController->IsShowingRealText())
+  {
+    mController->SelectNone();
+  }
+}
+
+Dali::String InputFieldImpl::GetSelectedText() const
+{
+  Dali::String selectedText = "";
+  if(mController && mController->IsShowingRealText())
+  {
+    selectedText = ToDaliString(mController->GetSelectedText());
+  }
+  return selectedText;
+}
+
+void InputFieldImpl::SetTextSelectionRange(const uint32_t* start, const uint32_t* end)
+{
+  if(mController && mController->IsShowingRealText())
+  {
+    mController->SetTextSelectionRange(start, end);
+    SetKeyInputFocus(*this);
+  }
+}
+
+Uint32Pair InputFieldImpl::GetTextSelectionRange() const
+{
+  Uint32Pair range;
+  if(mController && mController->IsShowingRealText())
+  {
+    range = mController->GetTextSelectionRange();
+  }
+  return range;
+}
+
+void InputFieldImpl::SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd)
+{
+  if(((oldStart != newStart) || (oldEnd != newEnd)) && !mSelectionChanged)
+  {
+    if(newStart == newEnd)
+    {
+      mSelectionCleared = true;
+    }
+    else
+    {
+      if(oldStart == oldEnd)
+      {
+        mSelectionStarted = true;
+      }
+    }
+
+    mSelectionChanged  = true;
+    mOldSelectionStart = oldStart;
+    mOldSelectionEnd   = oldEnd;
+
+    if(mOldSelectionStart > mOldSelectionEnd)
+    {
+      //swap
+      uint32_t temp      = mOldSelectionStart;
+      mOldSelectionStart = mOldSelectionEnd;
+      mOldSelectionEnd   = temp;
+    }
   }
 }
 
