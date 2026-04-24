@@ -169,6 +169,13 @@ struct InputFieldPropertyIndex
     MAXIMUM_LENGTH,
 
     /**
+     * @brief Whether the input field can be edited by user interaction.
+     * @details Name "editable", type Property::BOOLEAN.
+     * @see InputField::SetEditable(), InputField::IsEditable().
+     */
+    EDITABLE,
+
+    /**
      * @brief The layout direction mode.
      * @details Name "layoutDirectionMode", type Text::LayoutDirectionMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::LayoutDirectionMode (Property::INTEGER).

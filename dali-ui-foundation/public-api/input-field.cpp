@@ -297,6 +297,17 @@ int InputField::GetMaximumLength() const
   return GetImpl(*this).GetMaximumLength();
 }
 
+InputField& InputField::SetEditable(bool editable)
+{
+  GetImpl(*this).SetEditable(editable);
+  return *this;
+}
+
+bool InputField::IsEditable() const
+{
+  return GetImpl(*this).IsEditable();
+}
+
 InputField& InputField::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   GetImpl(*this).SetLayoutDirectionMode(mode);

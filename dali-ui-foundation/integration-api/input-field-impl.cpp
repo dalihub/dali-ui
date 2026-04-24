@@ -95,6 +95,7 @@ INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkInterval",        FLOAT,   CURSOR_
 INPUT_FIELD_PROPERTY_REGISTRATION("cursorPosition",             INTEGER, CURSOR_POSITION               )
 INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",             VECTOR4, SELECTION_COLOR               )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",              INTEGER, MAXIMUM_LENGTH                )
+INPUT_FIELD_PROPERTY_REGISTRATION("editable",                   BOOLEAN, EDITABLE                      )
 INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECTION_MODE         )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT                   )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
@@ -1381,6 +1382,7 @@ bool InputFieldImpl::IsEditable() const
 
 void InputFieldImpl::SetEditable(bool editable)
 {
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), editable);
   mController->SetEditable(editable);
   if(mInputMethodContext && !editable)
   {

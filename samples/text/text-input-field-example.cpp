@@ -128,8 +128,11 @@ private:
     Label btn8 = CreateButton("8. Change Maximum Length")
                    .SetBackgroundColor(UiColor(0xD35400));
 
-    Label btn9 = CreateButton("9. Print Info (log)")
-                   .SetBackgroundColor(UiColor(0x34495E));
+    Label btn9 = CreateButton("9. Toggle Editable")
+                   .SetBackgroundColor(UiColor(0x16A085));
+
+    Label btn10 = CreateButton("10. Print Info (log)")
+                    .SetBackgroundColor(UiColor(0x34495E));
 
     window.Add(
       StackLayout::New(StackOrientation::VERTICAL)
@@ -144,7 +147,7 @@ private:
           Label::New("Current Status:").SetFontSize(14.0f),
           mStatusLabel,
           Label::New("Test Actions:").SetFontSize(14.0f),
-          btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9,
+          btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10,
         }));
 
     // Connect button touch signals
@@ -157,6 +160,7 @@ private:
     btn7.TouchedSignal().Connect(this, &InputFieldController::OnButton7Touched);
     btn8.TouchedSignal().Connect(this, &InputFieldController::OnButton8Touched);
     btn9.TouchedSignal().Connect(this, &InputFieldController::OnButton9Touched);
+    btn10.TouchedSignal().Connect(this, &InputFieldController::OnButton10Touched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputFieldController::OnKeyEvent);
@@ -170,6 +174,7 @@ private:
     bool  showPlaceholderOnFocus = mInputField.IsPlaceholderShownOnFocus();
     int   cursorWidth           = mInputField.GetCursorWidth();
     int   maximumLength         = mInputField.GetMaximumLength();
+    bool  editable              = mInputField.IsEditable();
 
     Dali::String status;
 
@@ -185,6 +190,8 @@ private:
     status += (showPlaceholderOnFocus ? "ON" : "OFF");
     status += ", MaxLength: ";
     status += std::to_string(maximumLength).c_str();
+    status += "\nEditable: ";
+    status += (editable ? "ON" : "OFF");
 
     mStatusLabel.SetText(status);
   }
@@ -313,6 +320,14 @@ private:
     UpdateStatus();
   }
 
+  void ActionToggleEditable()
+  {
+    bool editable = mInputField.IsEditable();
+    mInputField.SetEditable(!editable);
+    DALI_LOG_ERROR("Editable: %d -> %d\n", editable, !editable);
+    UpdateStatus();
+  }
+
   // --- Button handlers ---
 
   bool OnButton1Touched(Actor, const TouchEvent& touch)
@@ -391,6 +406,15 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
+      ActionToggleEditable();
+    }
+    return true;
+  }
+
+  bool OnButton10Touched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
       PrintInputFieldInfo();
     }
     return true;
@@ -445,6 +469,10 @@ private:
     }
     else if(event.GetKeyName() == "9")
     {
+      ActionToggleEditable();
+    }
+    else if(event.GetKeyName() == "0")
+    {
       PrintInputFieldInfo();
     }
   }
@@ -469,6 +497,7 @@ private:
     DALI_LOG_ERROR("CursorColor           : %.2f, %.2f, %.2f, %.2f\n", cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a);
     DALI_LOG_ERROR("SelectionColor        : %.2f, %.2f, %.2f, %.2f\n", selectionColor.r, selectionColor.g, selectionColor.b, selectionColor.a);
     DALI_LOG_ERROR("MaximumLength         : %d\n", mInputField.GetMaximumLength());
+    DALI_LOG_ERROR("Editable              : %d\n", mInputField.IsEditable());
     DALI_LOG_ERROR("TextColor             : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
     DALI_LOG_ERROR("FontSize              : %f\n", mInputField.GetFontSize());
     DALI_LOG_ERROR("----------------------------------------------------------------\n");

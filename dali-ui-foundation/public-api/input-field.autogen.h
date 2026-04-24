@@ -111,6 +111,12 @@
   */ \
   ChildClass& SetMaximumLength(int length) { InputField::SetMaximumLength(length); return *this; } \
   /** \
+  * @brief Sets whether the InputField can be edited by user interaction. \
+  * \
+  * @param[in] editable True to allow editing, false otherwise. \
+  */ \
+  ChildClass& SetEditable(bool editable) { InputField::SetEditable(editable); return *this; } \
+  /** \
   * @brief Sets how the layout direction of the text is resolved. \
   * \
   * - LayoutDirectionMode::CONTENTS: \

@@ -82,6 +82,7 @@ public:
       CURSOR_POSITION                = Text::InputFieldPropertyIndex::CURSOR_POSITION,
       SELECTION_COLOR                = Text::InputFieldPropertyIndex::SELECTION_COLOR,
       MAXIMUM_LENGTH                 = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+      EDITABLE                       = Text::InputFieldPropertyIndex::EDITABLE,
       LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
       FONT_WEIGHT                    = Text::InputFieldPropertyIndex::FONT_WEIGHT,
       FONT_WIDTH                     = Text::InputFieldPropertyIndex::FONT_WIDTH,
@@ -408,6 +409,20 @@ public: // Setters for chaining
    * @return The maximum character count.
    */
   int GetMaximumLength() const;
+
+  /**
+   * @brief Sets whether the InputField can be edited by user interaction.
+   *
+   * @param[in] editable True to allow editing, false otherwise.
+   */
+  InputField& SetEditable(bool editable);
+
+  /**
+   * @brief Returns whether the InputField can be edited by user interaction.
+   *
+   * @return True if the InputField is editable, false otherwise.
+   */
+  bool IsEditable() const;
 
   /**
    * @brief Sets how the layout direction of the text is resolved.

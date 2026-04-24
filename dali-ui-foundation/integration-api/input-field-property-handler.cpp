@@ -132,6 +132,11 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetMaximumLength(value.Get<int>());
       break;
     }
+    case Text::InputFieldPropertyIndex::EDITABLE:
+    {
+      impl.SetEditable(value.Get<bool>());
+      break;
+    }
     case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       Text::LayoutDirectionMode mode;
@@ -288,6 +293,11 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       value = impl.GetMaximumLength();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::EDITABLE:
+    {
+      value = impl.IsEditable();
       break;
     }
     case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:

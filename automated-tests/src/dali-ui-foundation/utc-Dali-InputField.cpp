@@ -45,6 +45,7 @@ const char* const PROPERTY_NAME_CURSOR_BLINK_INTERVAL          = "cursorBlinkInt
 const char* const PROPERTY_NAME_CURSOR_POSITION                = "cursorPosition";
 const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
 const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
+const char* const PROPERTY_NAME_EDITABLE                       = "editable";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
 const char* const PROPERTY_NAME_FONT_WEIGHT                    = "fontWeight";
 const char* const PROPERTY_NAME_FONT_WIDTH                     = "fontWidth";
@@ -435,6 +436,28 @@ int UtcDaliInputFieldMaximumLength(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldEditable(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Default should be true
+  DALI_TEST_CHECK(inputField.IsEditable());
+
+  inputField.SetEditable(false);
+  DALI_TEST_EQUALS(inputField.IsEditable(), false, TEST_LOCATION);
+
+  inputField.SetEditable(true);
+  DALI_TEST_EQUALS(inputField.IsEditable(), true, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetEditable(false);
+  DALI_TEST_CHECK(&ref == &inputField);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldLayoutDirectionMode(void)
 {
   UiTestApplication application;
@@ -670,6 +693,7 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_POSITION) == InputField::Property::CURSOR_POSITION);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_COLOR) == InputField::Property::SELECTION_COLOR);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_EDITABLE) == InputField::Property::EDITABLE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == InputField::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputField::Property::FONT_WIDTH);
@@ -766,6 +790,13 @@ int UtcDaliInputFieldSetProperty(void)
   // MAXIMUM_LENGTH
   inputField.SetProperty(InputField::Property::MAXIMUM_LENGTH, 50);
   DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::MAXIMUM_LENGTH), 50, TEST_LOCATION);
+
+  // EDITABLE
+  inputField.SetProperty(InputField::Property::EDITABLE, false);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::EDITABLE), false, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::EDITABLE, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::EDITABLE), true, TEST_LOCATION);
 
   // LAYOUT_DIRECTION_MODE
   inputField.SetProperty(InputField::Property::LAYOUT_DIRECTION_MODE, Text::LayoutDirectionMode::LOCALE);
