@@ -90,11 +90,6 @@ bool LayoutImpl::HasLayoutManager() const
   return GetLayoutManager() != nullptr;
 }
 
-bool LayoutImpl::IsLayout() const
-{
-  return true;
-}
-
 MeasuredSize LayoutImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   // Callback takes priority over LayoutManager

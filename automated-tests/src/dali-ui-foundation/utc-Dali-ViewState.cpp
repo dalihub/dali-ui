@@ -23,6 +23,7 @@
 #include <dali.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -86,13 +87,13 @@ int UtcDaliViewStateBasicDispatchP(void)
   ViewState receivedPrev, receivedCur;
   int     callCount = 0;
 
-  GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     ++callCount;
     receivedPrev = e.GetPrev();
     receivedCur  = e.GetCurrent();
   });
 
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
@@ -112,15 +113,15 @@ int UtcDaliViewStateNoDispatchUnchangedN(void)
   ConnectionTracker tracker;
   int               callCount = 0;
 
-  GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent&) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
     ++callCount;
   });
 
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   // Setting the same state again must not dispatch
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   END_TEST;
@@ -152,20 +153,20 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
 
   std::vector<CallRecord> log;
 
-  GetImpl(view).WhenStateChanged("h1", &tracker, [&](View, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"h1", e.GetPrev(), e.GetCurrent()});
   });
 
-  GetImpl(view).WhenStateChanged("h2", &tracker, [&](View v, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
     log.push_back({"h2", e.GetPrev(), e.GetCurrent()});
     // Trigger a second state change from inside the handler
     if(e.Added(ViewState::FOCUSED))
     {
-      GetImpl(v).SetState(ViewState::PRESSED, true);
+      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
     }
   });
 
-  GetImpl(view).WhenStateChanged("h3", &tracker, [&](View, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"h3", e.GetPrev(), e.GetCurrent()});
   });
 
@@ -173,7 +174,7 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
   const ViewState stateB = ViewState::FOCUSED;
   const ViewState stateC = ViewState::FOCUSED + ViewState::PRESSED;
 
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
@@ -225,7 +226,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-1", e.GetPrev(), e.GetCurrent()});
     if(e.Added(ViewState::FOCUSED))
     {
-      GetImpl(v).SetState(ViewState::PRESSED, true);
+      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
     }
   });
 
@@ -233,7 +234,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-2", e.GetPrev(), e.GetCurrent()});
   });
 
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   // signal-1(A→B) → signal-2(A→B) → signal-1(B→C) → signal-2(B→C)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 4, TEST_LOCATION);
@@ -285,10 +286,10 @@ int UtcDaliViewStateDisabledClearsPressedP(void)
   UiTestApplication application;
   View            view = CreateView(application);
 
-  GetImpl(view).SetState(ViewState::PRESSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
 
-  GetImpl(view).SetState(ViewState::DISABLED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -331,14 +332,14 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  GetImpl(view).SetState(ViewState::PRESSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
-  GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"observer", e.GetPrev(), e.GetCurrent()});
   });
 
-  GetImpl(view).SetState(ViewState::DISABLED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
 
   // Exactly one notification: [Pressed] -> [Disabled]
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
@@ -363,7 +364,7 @@ int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
   view.EnsureInteractiveTrait();
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  GetImpl(view).SetState(ViewState::PRESSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -389,7 +390,7 @@ int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
-  GetImpl(view).SetState(ViewState::PRESSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -420,8 +421,8 @@ int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
-  GetImpl(view).SetState(ViewState::PRESSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -455,7 +456,7 @@ int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
   View            view = CreateView(application);
 
   view.EnsureInteractiveTrait();
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   InteractiveTrait trait = view.EnsureInteractiveTrait();
   trait.SetPseudoDisabled(true);
@@ -550,7 +551,7 @@ int UtcDaliViewIsEffectivelyFocusedSelfP(void)
 
   DALI_TEST_CHECK(!view.IsEffectivelyFocused());
 
-  GetImpl(view).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
 
@@ -569,7 +570,7 @@ int UtcDaliViewIsEffectivelyFocusedAncestorP(void)
 
   DALI_TEST_CHECK(!child.IsEffectivelyFocused());
 
-  GetImpl(parent).SetState(ViewState::FOCUSED, true);
+  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(child.IsEffectivelyFocused());
   DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUSED)); // own state unchanged
@@ -605,7 +606,7 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
 
   ViewState receivedCur;
   int     callCount = 0;
-  GetImpl(view).WhenStateChanged("observer", &tracker, [&](View, const StateEvent& e) {
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     ++callCount;
     receivedCur = e.GetCurrent();
   });

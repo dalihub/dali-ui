@@ -117,7 +117,7 @@ private:
    * @param[in]  event    The KeyEvent.
    * @return True if KeyEvent is consumed.
    */
-  bool EmitKeyEventSignal(Ui::View view, const KeyEvent& event);
+  bool NotifyKeyEvent(Ui::View view, const KeyEvent& event);
 
   /**
    * Gets the current native window id

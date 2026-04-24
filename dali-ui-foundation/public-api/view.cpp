@@ -407,6 +407,17 @@ View& View::SetCounterClockwiseFocusableView(View view)
   return *this;
 }
 
+View& View::SetKeyNavigationSupport(bool isSupported)
+{
+  GetImpl(*this).SetKeyNavigationSupport(isSupported);
+  return *this;
+}
+
+bool View::IsKeyNavigationSupported() const
+{
+  return GetImpl(*this).IsKeyNavigationSupported();
+}
+
 UiColor View::GetBackgroundColor()
 {
   return GetImpl(*this).GetBackgroundColor();

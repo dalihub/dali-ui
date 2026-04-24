@@ -188,6 +188,11 @@
   */ \
   ChildClass& SetCounterClockwiseFocusableView(View view) { View::SetCounterClockwiseFocusableView(view); return *this; } \
   /** \
+  * @brief Sets whether this view supports two dimensional key navigation. \
+  * @param[in] isSupported True to support key navigation \
+  */ \
+  ChildClass& SetKeyNavigationSupport(bool isSupported) { View::SetKeyNavigationSupport(isSupported); return *this; } \
+  /** \
   * @brief Sets the background color. \
   * \
   * If the UiColor has a color ID, it is resolved from the current \

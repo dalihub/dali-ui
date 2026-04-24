@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
@@ -109,7 +110,7 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    GetImpl(owner).SetState(ViewState::PSEUDO_DISABLED, pseudoDisabled);
+    IntegrationView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
   }
 
   if(mPseudoDisabled && mPressed)
@@ -390,7 +391,7 @@ void InteractiveTraitImpl::SetPressedInternal(bool value, const InputEvent& even
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    GetImpl(owner).SetState(ViewState::PRESSED, value, event);
+    IntegrationView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
   }
 
   OnPressedChanged(owner, event);

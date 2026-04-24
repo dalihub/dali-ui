@@ -19,11 +19,17 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -35,6 +41,18 @@ class ViewImpl;
 
 namespace IntegrationView
 {
+
+/**
+ * @brief Child data structure for layout calculations.
+ */
+struct ChildData
+{
+  Ui::View     view;           ///< Handle to the child view
+  MeasuredSize measuredSize;   ///< Size from Measure pass
+  LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
+};
+
+using ChildContainer = Dali::Vector<ChildData>;
 
 /**
  * @brief Adds a raw (non-View) Actor as a child of the given View.
@@ -97,6 +115,152 @@ HandleType GetTrait(const ViewImpl& viewImpl, TraitId id)
  * @return true if the trait was found and removed
  */
 DALI_UI_API bool RemoveTrait(ViewImpl& viewImpl, TraitId id);
+
+// State management
+
+/**
+ * @brief Internal helper for WhenStateChanged templates.
+ */
+DALI_UI_API void SetNamedStateHandler(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
+/**
+ * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
+ * @param[in] viewImpl The view implementation
+ * @param[in] state The state to set or clear
+ * @param[in] on    True to add the state, false to remove it
+ * @param[in] cause Input event that triggered the change; leave default if programmatic
+ */
+DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::None());
+
+/**
+ * @brief Registers a named state-change handler using a member function.
+ * @param[in] viewImpl The view implementation
+ * @param[in] id   Unique identifier for this handler
+ * @param[in] obj  Object whose member function will be called
+ * @param[in] func Member function with signature void(View, const StateEvent&)
+ */
+template<class X>
+void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+{
+  if(obj && func)
+  {
+    SetNamedStateHandler(viewImpl, id, obj, MakeCallback(obj, func));
+  }
+}
+
+/**
+ * @brief Registers a named state-change handler using a callable (e.g. lambda).
+ * @param[in] viewImpl The view implementation
+ * @param[in] id      Unique identifier for this handler
+ * @param[in] tracker ConnectionTrackerInterface for automatic lifetime management
+ * @param[in] func    Callable with signature void(View, const StateEvent&)
+ */
+template<typename F>
+void WhenStateChanged(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
+{
+  if(tracker)
+  {
+    SetNamedStateHandler(viewImpl, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+  }
+}
+
+/**
+ * @brief Removes a named state-change handler.
+ * @param[in] viewImpl The view implementation
+ * @param[in] id The handler identifier to remove
+ * @return True if a handler was found and removed
+ */
+DALI_UI_API bool UnsetStateHandler(ViewImpl& viewImpl, const Dali::String& id);
+
+/**
+ * @brief Removes a named state-change handler only if it is not currently being processed.
+ * @param[in] viewImpl The view implementation
+ * @param[in] id The handler identifier to remove
+ * @return True if removed, false if currently processing or not found
+ */
+DALI_UI_API bool UnsetStateHandlerWhenNotProcessing(ViewImpl& viewImpl, const Dali::String& id);
+
+// View-handle overloads for state management
+
+/**
+ * @copydoc SetState(ViewImpl&, ViewState, bool, InputEvent)
+ */
+DALI_UI_API void SetState(Ui::View view, ViewState state, bool on, InputEvent cause = InputEvent::None());
+
+/**
+ * @brief Internal helper for WhenStateChanged templates (View overload).
+ */
+DALI_UI_API void SetNamedStateHandler(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
+/**
+ * @brief Registers a named state-change handler using a member function.
+ * @param[in] view The view handle
+ * @param[in] id   Unique identifier for this handler
+ * @param[in] obj  Object whose member function will be called
+ * @param[in] func Member function with signature void(View, const StateEvent&)
+ */
+template<class X>
+void WhenStateChanged(Ui::View view, const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
+{
+  if(obj && func)
+  {
+    SetNamedStateHandler(view, id, obj, MakeCallback(obj, func));
+  }
+}
+
+/**
+ * @brief Registers a named state-change handler using a callable (e.g. lambda).
+ * @param[in] view    The view handle
+ * @param[in] id      Unique identifier for this handler
+ * @param[in] tracker ConnectionTrackerInterface for automatic lifetime management
+ * @param[in] func    Callable with signature void(View, const StateEvent&)
+ */
+template<typename F>
+void WhenStateChanged(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
+{
+  if(tracker)
+  {
+    SetNamedStateHandler(view, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
+  }
+}
+
+/**
+ * @copydoc UnsetStateHandler(ViewImpl&, const Dali::String&)
+ */
+DALI_UI_API bool UnsetStateHandler(Ui::View view, const Dali::String& id);
+
+/**
+ * @copydoc UnsetStateHandlerWhenNotProcessing(ViewImpl&, const Dali::String&)
+ */
+DALI_UI_API bool UnsetStateHandlerWhenNotProcessing(Ui::View view, const Dali::String& id);
+
+// Layout helpers
+
+/**
+ * @brief Convenience: returns true if LayoutMode is Standalone.
+ * @param[in] viewImpl The view implementation to query
+ * @return True if the view's layout mode is Standalone
+ */
+DALI_UI_API bool IsLayoutModeStandalone(const ViewImpl& viewImpl);
+
+/**
+ * @brief Gets the children container from a view.
+ * @param[in] viewImpl The view implementation
+ * @return Reference to the children container
+ */
+DALI_UI_API ChildContainer& GetChildren(ViewImpl& viewImpl);
+
+/**
+ * @copydoc GetChildren(ViewImpl&)
+ */
+DALI_UI_API const ChildContainer& GetChildren(const ViewImpl& viewImpl);
+
+/**
+ * @brief Returns whether this view is a Layout container.
+ * @param[in] viewImpl The view implementation to query
+ * @return True if the view is a Layout (i.e. Ui::Layout::DownCast succeeds)
+ */
+DALI_UI_API bool IsLayout(ViewImpl& viewImpl);
 
 } // namespace IntegrationView
 } // namespace Ui

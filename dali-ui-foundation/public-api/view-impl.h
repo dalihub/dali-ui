@@ -85,17 +85,6 @@ public:
 
   class Extension; ///< Forward declare future extension interface
 
-  /**
-   * @brief Child data structure for layout calculations.
-   */
-  struct ChildData
-  {
-    Ui::View     view;           ///< Handle to the child view
-    MeasuredSize measuredSize;   ///< Size from Measure pass
-    LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
-  };
-
-  using ChildContainer         = Dali::Vector<ChildData>;
   using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
 
   /**
@@ -119,27 +108,9 @@ public: // ABI-frozen virtual API
   // ============================================================
 
   /**
-   * @brief Called after the actor has been initialized.
-   */
-  virtual void OnInitialize();
-
-  /**
-   * @brief Called when a key event is received.
-   * @param[in] event The key event
-   * @return True if the event is consumed
-   */
-  virtual bool OnKeyEvent(const Dali::KeyEvent& event);
-
-  /**
    * @copydoc Dali::Ui::View::IsResourceReady
    */
   virtual bool IsResourceReady() const;
-
-  /**
-   * @brief Returns whether this view acts as a layout container.
-   * @return True if this view has a LayoutManager attached
-   */
-  virtual bool IsLayout() const;
 
   /**
    * @brief This method is called when the view is accessibility activated.
@@ -186,12 +157,6 @@ public: // ABI-frozen virtual API
    * @return The next focusable view in this view or an empty handle if no view can be focused
    */
   virtual Ui::View GetNextFocusableView(Ui::View currentFocusedView, Ui::FocusDirection direction, bool loopEnabled);
-
-  /**
-   * @brief Informs this view that its chosen focusable view will be focused.
-   * @param[in] committedFocusableView The committed focusable view
-   */
-  virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
 
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
@@ -254,68 +219,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::StateChangedSignal()
    */
   StateChangedSignalType& StateChangedSignal();
-
-  /**
-   * @brief Registers a named state-change handler using a member function.
-   * @param[in] id   Unique identifier for this handler
-   * @param[in] obj  Object whose member function will be called
-   * @param[in] func Member function with signature void(View, const StateEvent&)
-   */
-  template<class X>
-  void WhenStateChanged(const Dali::String& id, X* obj, void (X::*func)(Ui::View, const StateEvent&))
-  {
-    if(obj && func)
-    {
-      SetNamedStateHandler(id, obj, MakeCallback(obj, func));
-    }
-  }
-
-  /**
-   * @brief Registers a named state-change handler using a callable (e.g. lambda).
-   * @param[in] id      Unique identifier for this handler
-   * @param[in] tracker ConnectionTrackerInterface for automatic lifetime management
-   * @param[in] func    Callable with signature void(View, const StateEvent&)
-   */
-  template<typename F>
-  void WhenStateChanged(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& func)
-  {
-    if(tracker)
-    {
-      SetNamedStateHandler(id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(func)));
-    }
-  }
-
-  /**
-   * @brief Removes a named state-change handler.
-   * @param[in] id The handler identifier to remove
-   * @return True if a handler was found and removed
-   */
-  bool UnsetStateHandler(const Dali::String& id);
-
-  /**
-   * @brief Removes a named state-change handler only if it is not currently being processed.
-   * @param[in] id The handler identifier to remove
-   * @return True if removed, false if currently processing or not found
-   */
-  bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
-
-  /**
-   * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
-   * @param[in] state The state to set or clear
-   * @param[in] on    True to add the state, false to remove it
-   * @param[in] cause Input event that triggered the change; leave default if programmatic
-   */
-  void SetState(ViewState state, bool on, InputEvent cause = InputEvent::None());
-
-  /**
-   * @brief Notifies this view that its focus state has changed.
-   *
-   * Called by focus managers. Invokes the protected virtual OnFocusChanged()
-   * and emits the FocusChanged signal.
-   *
-   * @param[in] focused True if the view gained focus, false if lost
-   */
-  void NotifyFocusChanged(bool focused);
 
   /**
    * @copydoc Ui::View::GetScaleX()
@@ -525,6 +428,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @brief Sets the background with a property map.
    * @param[in] map The background property map
+   * @note WIP: Property::Map will be replaced by Visual in a future version.
    */
   void SetBackground(const Property::Map& map);
 
@@ -708,26 +612,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   Ui::LayoutMode GetLayoutMode() const;
 
-  /**
-   * @brief Convenience: returns true if LayoutMode is Standalone.
-   * @return True if the view's layout mode is Standalone
-   */
-  bool IsLayoutModeStandalone() const;
-
-  // Parent Layout
-
-  /**
-   * @brief Gets the parent layout of this view, if any.
-   * @return The parent Layout handle, or empty if none
-   */
-  Ui::Layout GetParentLayout() const;
-
-  /**
-   * @brief Gets the parent view in the layout hierarchy.
-   * @return The parent View handle, or empty if none
-   */
-  Ui::View GetParentView() const;
-
   // Layout Callbacks
 
   /**
@@ -797,17 +681,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
-  /**
-   * @brief Gets the children container for layout manager access.
-   * @return Reference to the children container
-   */
-  ChildContainer& GetChildren();
-
-  /**
-   * @copydoc GetChildren()
-   */
-  const ChildContainer& GetChildren() const;
-
   // Key Navigation & Focus
 
   /**
@@ -820,17 +693,19 @@ public: // Non-virtual API (safe to reorder / extend)
    * @brief Gets whether this view supports two dimensional key navigation.
    * @return True if key navigation is supported
    */
-  bool IsKeyNavigationSupported();
+  bool IsKeyNavigationSupported() const;
 
   /**
    * @brief Sets whether this view acts as a focus group boundary.
    * @param[in] isFocusGroup True to set as focus group
+   * @note Legacy API not covered by API description. Subject to removal or redesign.
    */
   void SetAsFocusGroup(bool isFocusGroup);
 
   /**
    * @brief Gets whether this view acts as a focus group boundary.
    * @return True if the view is a focus group
+   * @note Legacy API not covered by API description. Subject to removal or redesign.
    */
   bool IsFocusGroup();
 
@@ -851,16 +726,10 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   bool IsOnScene() const;
 
-  // Internal data access
-
-  /**
-   * @brief Retrieves the internal data implementation of the view.
-   * @return Reference to the internal data implementation
-   */
-  Internal::ViewDataImpl& GetViewDataImpl() const;
-
   /// @cond internal
-  DALI_INTERNAL bool EmitKeyEventSignal(const KeyEvent& event);
+  DALI_INTERNAL bool NotifyKeyEvent(const KeyEvent& event);
+  DALI_INTERNAL void NotifyFocusChanged(bool focused);
+  DALI_INTERNAL void NotifyFocusChangeCommitted(Ui::View committedFocusableView);
   /// @endcond
 
 protected:
@@ -875,6 +744,11 @@ protected:
   virtual ~ViewImpl();
 
   /**
+   * @brief Called after the actor has been initialized.
+   */
+  virtual void OnInitialize();
+
+  /**
    * @brief Called during measure pass. Override to implement custom measurement.
    */
   virtual MeasuredSize OnMeasure(float widthConstraint, float heightConstraint);
@@ -885,12 +759,25 @@ protected:
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
   /**
+   * @brief Called when a key event is received.
+   * @param[in] event The key event
+   * @return True if the event is consumed
+   */
+  virtual bool OnKeyEvent(const Dali::KeyEvent& event);
+
+  /**
    * @brief Called when the view's focus state changes. Override to add
    *        custom focus handling. Call the base class at the end of the
    *        override to preserve default state management.
    * @param[in] focused True if the view gained focus, false if lost
    */
   virtual void OnFocusChanged(bool focused);
+
+  /**
+   * @brief Called when this view's chosen focusable view will be focused.
+   * @param[in] committedFocusableView The committed focusable view
+   */
+  virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
 
   // ============================================================
   // protected: Framework overrides (CustomActorImpl)
@@ -1075,11 +962,14 @@ protected:
 private:
   friend class Internal::ViewDataImpl; ///< Pimpl body
 
-  void         EmitFocusChangedSignal(bool focusGained);
-  MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
-  void         RegisterWithLayoutController();
-  void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
-  void         ArrangeStandaloneChildren(const LayoutRect& bounds);
+  Internal::ViewDataImpl& GetViewDataImpl() const;
+  Ui::Layout              GetParentLayout() const;
+  Ui::View                GetParentView() const;
+  void                    EmitFocusChangedSignal(bool focusGained);
+  MeasuredSize            ApplyConstraints(const MeasuredSize& size) const;
+  void                    RegisterWithLayoutController();
+  void                    MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
+  void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
 
   ViewImpl(const ViewImpl&)            = delete;
   ViewImpl(ViewImpl&&)                 = delete;
@@ -1089,7 +979,6 @@ private:
   void SetBackgroundColorInternal(const Vector4& color);
   void SetBorderlineColorInternal(const Vector4& color);
   void OnChildOrderChanged(Actor orderChangedChild);
-  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
   Internal::ViewDataImpl* mImpl;
 };

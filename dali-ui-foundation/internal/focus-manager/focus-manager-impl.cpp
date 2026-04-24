@@ -659,7 +659,7 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, U
             // If the application hasn't changed our proposed view, we inform the layout view we will
             // move the focus to what the view returns. The view might wish to perform some actions
             // before the focus is actually moved.
-            GetImpl(layoutView).OnFocusChangeCommitted(committedFocusView);
+            GetImpl(layoutView).NotifyFocusChangeCommitted(committedFocusView);
           }
 
           return DoSetCurrentFocusView(committedFocusView, context);

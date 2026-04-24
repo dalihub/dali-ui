@@ -83,7 +83,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -134,7 +134,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
         h = childSize.height;
       }
     }
-    else if(childImpl.IsLayout())
+    else if(IntegrationView::IsLayout(childImpl))
     {
       // Nested layout containers need Measure even with explicit size,
       // so their own children get measured.
@@ -179,7 +179,7 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }

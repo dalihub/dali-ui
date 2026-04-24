@@ -293,7 +293,7 @@ std::ostream& DumpProperties(std::ostream& o, Handle handle)
 
 std::string DumpView(const ViewImpl& view)
 {
-  auto& viewData = view.GetViewDataImpl();
+  auto& viewData = ViewDataImpl::Get(view);
 
   std::ostringstream oss;
   oss << "{\n  ";

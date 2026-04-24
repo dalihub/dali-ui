@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -134,6 +135,38 @@ public:
    * @brief Removes a trait from the owning View.
    */
   bool RemoveTrait(TraitId id);
+
+  // State management
+
+  /**
+   * @brief Updates a state bit and notifies ViewStateManager if the state changed.
+   * @param[in] state The state to set or clear
+   * @param[in] on    True to add the state, false to remove it
+   * @param[in] cause Input event that triggered the change
+   */
+  void SetState(ViewState state, bool on, InputEvent cause);
+
+  /**
+   * @brief Registers a named state-change handler.
+   * @param[in] id       Unique identifier for this handler
+   * @param[in] tracker  ConnectionTrackerInterface for lifetime management
+   * @param[in] callback Callback with signature void(View, const StateEvent&)
+   */
+  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+
+  /**
+   * @brief Removes a named state-change handler.
+   * @param[in] id The handler identifier to remove
+   * @return True if a handler was found and removed
+   */
+  bool UnsetStateHandler(const Dali::String& id);
+
+  /**
+   * @brief Removes a named state-change handler only if it is not currently being processed.
+   * @param[in] id The handler identifier to remove
+   * @return True if removed, false if currently processing or not found
+   */
+  bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
 
   /**
    * @brief Returns the interactive trait pointer (may be null).
@@ -482,8 +515,8 @@ public:
   bool mArrangeDirty;
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
-  ViewImpl::ChildContainer mChildren;
-  bool                     mSkipChildrenUpdate;
+  IntegrationView::ChildContainer mChildren;
+  bool                            mSkipChildrenUpdate;
 
   // Trait storage
   std::vector<std::pair<TraitId, Dali::BaseHandle>> mTraits;

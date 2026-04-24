@@ -70,7 +70,7 @@ struct FlexLine
   float                 totalFlexShrink{0.0f};
 };
 
-std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& children, float availableMain,
+std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& children, float availableMain,
                                                bool isMainAxisHorizontal, FlexWrap wrap,
                                                const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
@@ -80,7 +80,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
   {
     auto&     childData = children[i];
     ViewImpl& childImpl = getImpl(childData.view);
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       // Standalone children are excluded from flex line building.
       continue;
@@ -131,7 +131,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(ViewImpl::ChildContainer& childre
  * When there is free space and totalFlexGrow > 0, distribute extra space.
  * When there is overflow and totalFlexShrink > 0, shrink children proportionally.
  */
-void ApplyFlexGrowShrink(FlexLine& line, ViewImpl::ChildContainer& children, float availableMain,
+void ApplyFlexGrowShrink(FlexLine& line, IntegrationView::ChildContainer& children, float availableMain,
                          bool isMainAxisHorizontal, const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
   float freeSpace = availableMain - line.mainSize;
@@ -232,7 +232,7 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
   return out;
 }
 
-void ArrangeOneFlexLine(FlexLine& line, ViewImpl::ChildContainer& children, const LayoutRect& bounds,
+void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& children, const LayoutRect& bounds,
                         float contentWidth, float contentHeight, float& crossOffsetInOut, float& mainOffsetInOut,
                         float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed,
                         const std::function<ViewImpl&(Ui::View)>& getImpl)
@@ -444,7 +444,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }

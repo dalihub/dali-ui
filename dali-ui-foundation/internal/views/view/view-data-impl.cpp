@@ -49,6 +49,8 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/internal/views/state-handler-trait.h>
+#include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
@@ -653,6 +655,87 @@ bool ViewDataImpl::RemoveTrait(TraitId id)
     }
   }
   return false;
+}
+
+void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
+{
+  // NOTE Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
+  // Clear them immediately rather than waiting for potentially late system events.
+
+  // NOTE that when the view is focused and user sets `view.SetEnabled(false)`,
+  // the event squence will be: "Focused out" -> "Enabled changed".
+
+  ViewState prev = mState;
+  if(on)
+  {
+    mState = mState + state;
+
+    // NOTE Handle orthogonal state constraint
+    // When DISABLED added,
+    // - PRESSED needs to be cleaned immediately
+    // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
+    // When PSUEDO_DISABLED added,
+    // - PRESSED needs to be cleaned immediately
+    // - FOCUSED can exist
+    if(state.IsAnyDisabled())
+    {
+      mState = mState - ViewState::PRESSED;
+    }
+  }
+  else
+  {
+    // NOTE Handle orthogonal state constraint
+    // This is the case that the focus has gone because it turned disabled.
+    // (but disabled state hasn't dispatched yet)
+    // -> Immediately update states at once.
+    mState = mState - state;
+
+    if(state == ViewState::FOCUSED && !mViewImpl.IsEnabled())
+    {
+      mState = mState - ViewState::PRESSED + ViewState::DISABLED;
+    }
+  }
+
+  if(mState != prev)
+  {
+    ViewStateManager::Get().NotifyStateChanged(View::DownCast(mViewImpl.Self()), prev, mState, cause);
+  }
+}
+
+void ViewDataImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+{
+  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+
+  if(!existing)
+  {
+    StateHandlerTrait stateHandlerTrait = StateHandlerTrait::New();
+    SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
+    existing = stateHandlerTrait;
+  }
+
+  static_cast<StateHandlerTrait&>(existing).GetImpl().Set(id.CStr(), tracker, callback);
+}
+
+bool ViewDataImpl::UnsetStateHandler(const Dali::String& id)
+{
+  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  if(!existing)
+  {
+    return false;
+  }
+
+  return static_cast<StateHandlerTrait&>(existing).GetImpl().Unset(id.CStr());
+}
+
+bool ViewDataImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
+{
+  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  if(!existing)
+  {
+    return false;
+  }
+
+  return static_cast<StateHandlerTrait&>(existing).GetImpl().UnsetWhenNotProcessing(id.CStr());
 }
 
 Ui::InteractiveTraitInterface* ViewDataImpl::GetInteractiveTrait() const
@@ -1305,7 +1388,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedWidth = width;
             viewImpl.InvalidateMeasure();
             if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !viewImpl.IsLayout() && viewImpl.GetChildCount() == 0)
+               !IntegrationView::IsLayout(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
             }
@@ -1325,7 +1408,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedHeight = height;
             viewImpl.InvalidateMeasure();
             if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !viewImpl.IsLayout() && viewImpl.GetChildCount() == 0)
+               !IntegrationView::IsLayout(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
             }

@@ -18,6 +18,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -115,7 +116,7 @@ protected:
    * @param[in] view The view to get children from
    * @return Reference to the children container
    */
-  ViewImpl::ChildContainer& GetChildren(ViewImpl* view);
+  IntegrationView::ChildContainer& GetChildren(ViewImpl* view);
 
 private:
   // Not copyable or movable

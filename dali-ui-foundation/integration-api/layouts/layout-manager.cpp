@@ -53,9 +53,9 @@ MeasuredSize LayoutManager::ArrangeChild(ViewImpl* child, const LayoutRect& boun
   return MeasuredSize(0.0f, 0.0f);
 }
 
-ViewImpl::ChildContainer& LayoutManager::GetChildren(ViewImpl* view)
+IntegrationView::ChildContainer& LayoutManager::GetChildren(ViewImpl* view)
 {
-  return view->GetChildren();
+  return IntegrationView::GetChildren(*view);
 }
 
 } // namespace Ui

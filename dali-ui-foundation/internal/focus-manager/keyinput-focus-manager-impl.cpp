@@ -164,19 +164,19 @@ bool KeyInputFocusManagerImpl::OnKeyEvent(const KeyEvent& event)
     }
 
     // Notify the view about the key event
-    consumed = EmitKeyEventSignal(view, event);
+    consumed = NotifyKeyEvent(view, event);
   }
 
   return consumed;
 }
 
-bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent& event)
+bool KeyInputFocusManagerImpl::NotifyKeyEvent(Ui::View view, const KeyEvent& event)
 {
   bool consumed = false;
 
   if(view)
   {
-    consumed = GetImpl(view).EmitKeyEventSignal(event);
+    consumed = GetImpl(view).NotifyKeyEvent(event);
 
     // if view doesn't consume KeyEvent, give KeyEvent to its parent.
     if(!consumed)
@@ -185,7 +185,7 @@ bool KeyInputFocusManagerImpl::EmitKeyEventSignal(Ui::View view, const KeyEvent&
 
       if(parent)
       {
-        consumed = EmitKeyEventSignal(parent, event);
+        consumed = NotifyKeyEvent(parent, event);
       }
     }
   }

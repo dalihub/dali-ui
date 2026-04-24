@@ -195,7 +195,7 @@ void RegisterViewAccessibleGetter()
 
 Internal::LayoutCallbacksTraitImpl* GetLayoutCallbacksTrait(ViewImpl* self)
 {
-  Dali::BaseHandle handle = self->GetViewDataImpl().GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  Dali::BaseHandle handle = Internal::ViewDataImpl::Get(*self).GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
   if(handle)
   {
     return static_cast<Internal::LayoutCallbacksTraitImpl*>(&handle.GetBaseObject());
@@ -210,7 +210,7 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
   {
     impl                                  = new Internal::LayoutCallbacksTraitImpl();
     Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(impl);
-    self->GetViewDataImpl().SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+    Internal::ViewDataImpl::Get(*self).SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
   }
   return impl;
 }
@@ -219,7 +219,7 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
 // Standalone children ignore parent padding. MATCH_PARENT axes are
 // expanded to the full parent size minus the child's own margin, then
 // re-measured with the final size before arranging.
-void ArrangeStandaloneChild(ViewImpl& childImpl, ViewImpl::ChildData& childData,
+void ArrangeStandaloneChild(ViewImpl& childImpl, IntegrationView::ChildData& childData,
                             float parentFullWidth, float parentFullHeight)
 {
   Extents margin  = childImpl.GetMargin();
@@ -408,87 +408,6 @@ bool ViewImpl::IsSelectable() const
   return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
 }
 
-void ViewImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
-{
-  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
-
-  if(!existing)
-  {
-    Internal::StateHandlerTrait stateHandlerTrait = Internal::StateHandlerTrait::New();
-    mImpl->SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
-    existing = stateHandlerTrait;
-  }
-
-  static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().Set(id.CStr(), tracker, callback);
-}
-
-bool ViewImpl::UnsetStateHandler(const Dali::String& id)
-{
-  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
-  if(!existing)
-  {
-    return false;
-  }
-
-  return static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().Unset(id.CStr());
-}
-
-bool ViewImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
-{
-  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
-  if(!existing)
-  {
-    return false;
-  }
-
-  return static_cast<Internal::StateHandlerTrait&>(existing).GetImpl().UnsetWhenNotProcessing(id.CStr());
-}
-
-void ViewImpl::SetState(ViewState state, bool on, InputEvent cause)
-{
-  // NOTE Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
-  // Clear them immediately rather than waiting for potentially late system events.
-
-  // NOTE that when the view is focused and user sets `view.SetEnabled(false)`,
-  // the event squence will be: "Focused out" -> "Enabled changed".
-
-  ViewState prev = mImpl->mState;
-  if(on)
-  {
-    mImpl->mState = mImpl->mState + state;
-
-    // NOTE Handle orthogonal state constraint
-    // When DISABLED added,
-    // - PRESSED needs to be cleaned immediately
-    // - FOCUSED should have gone already (ASSERT(!mImpl->mState.Contains(FOCUSED)))
-    // When PSUEDO_DISABLED added,
-    // - PRESSED needs to be cleaned immediately
-    // - FOCUSED can exist
-    if(state.IsAnyDisabled())
-    {
-      mImpl->mState = mImpl->mState - ViewState::PRESSED;
-    }
-  }
-  else
-  {
-    mImpl->mState = mImpl->mState - state;
-
-    // NOTE Handle orthogonal state constraint
-    // This is the case that the focus has gone because it turned disabled.
-    // (but disabled state hasn't dispatched yet)
-    // -> Immediately update states at once.
-    if(state == ViewState::FOCUSED && !IsEnabled())
-    {
-      mImpl->mState = mImpl->mState - ViewState::PRESSED + ViewState::DISABLED;
-    }
-  }
-
-  if(mImpl->mState != prev)
-  {
-    Internal::ViewStateManager::Get().NotifyStateChanged(View::DownCast(Self()), prev, mImpl->mState, cause);
-  }
-}
-
 void ViewImpl::NotifyFocusChanged(bool focused)
 {
   OnFocusChanged(focused);
@@ -502,7 +421,7 @@ void ViewImpl::OnFocusChanged(bool focused)
   {
     cause = GetImpl(focusManager).FocusChangedContext().inputEvent;
   }
-  SetState(ViewState::FOCUSED, focused, cause);
+  IntegrationView::SetState(*this, ViewState::FOCUSED, focused, cause);
 
   if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {
@@ -514,7 +433,7 @@ void ViewImpl::OnFocusChanged(bool focused)
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  if(IsLayout() || GetParentLayout() || GetParentView())
+  if(IntegrationView::IsLayout(*this) || GetParentLayout() || GetParentView())
   {
     return;
   }
@@ -850,7 +769,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 
       // Standalone children are measured by MeasureStandaloneChildren()
       // in ViewImpl::Measure() after OnMeasure returns.
-      if(childImpl.IsLayoutModeStandalone())
+      if(IntegrationView::IsLayoutModeStandalone(childImpl))
       {
         continue;
       }
@@ -966,7 +885,7 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 
       // Standalone children are handled by ArrangeStandaloneChildren()
       // in ViewImpl::Arrange() after OnArrange returns.
-      if(childImpl.IsLayoutModeStandalone())
+      if(IntegrationView::IsLayoutModeStandalone(childImpl))
       {
         continue;
       }
@@ -1012,7 +931,7 @@ void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHe
   for(auto& childData : mImpl->mChildren)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-    if(!childImpl.IsLayoutModeStandalone())
+    if(!IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -1030,7 +949,7 @@ void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
   for(auto& childData : mImpl->mChildren)
   {
     ViewImpl& childImpl = GetImpl(childData.view);
-    if(!childImpl.IsLayoutModeStandalone())
+    if(!IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -1235,11 +1154,6 @@ Ui::LayoutMode ViewImpl::GetLayoutMode() const
   return mImpl->mLayoutMode;
 }
 
-bool ViewImpl::IsLayoutModeStandalone() const
-{
-  return mImpl->mLayoutMode == Ui::LayoutMode::STANDALONE;
-}
-
 // =============================================================================
 // Parent Layout API
 // =============================================================================
@@ -1262,11 +1176,6 @@ Ui::View ViewImpl::GetParentView() const
     return Ui::View::DownCast(parent);
   }
   return Ui::View();
-}
-
-bool ViewImpl::IsLayout() const
-{
-  return false;
 }
 
 void ViewImpl::SetMeasureCallback(MeasureCallback callback)
@@ -1316,14 +1225,14 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 
   // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
   // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
-  ChildContainer::Iterator it;
+  IntegrationView::ChildContainer::Iterator it;
   if(mImpl->mChildren.Count() > 0 && (mImpl->mChildren.End() - 1)->view == child)
   {
     it = mImpl->mChildren.End() - 1;
   }
   else
   {
-    it = std::find_if(mImpl->mChildren.Begin(), mImpl->mChildren.End(), [&child](const ChildData& data)
+    it = std::find_if(mImpl->mChildren.Begin(), mImpl->mChildren.End(), [&child](const IntegrationView::ChildData& data)
     {
       return data.view == child;
     });
@@ -1341,7 +1250,7 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
     return;
   }
 
-  ChildData data = std::move(*it);
+  IntegrationView::ChildData data = std::move(*it);
   mImpl->mChildren.Erase(it);
   mImpl->mChildren.Insert(mImpl->mChildren.Begin() + index, std::move(data));
 
@@ -1503,16 +1412,6 @@ void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
     }
   }
   self.LowerBelow(target);
-}
-
-ViewImpl::ChildContainer& ViewImpl::GetChildren()
-{
-  return mImpl->mChildren;
-}
-
-const ViewImpl::ChildContainer& ViewImpl::GetChildren() const
-{
-  return mImpl->mChildren;
 }
 
 namespace
@@ -1678,7 +1577,7 @@ void ViewImpl::SetKeyNavigationSupport(bool isSupported)
   Self().SetProperty(Ui::View::Property::KEY_NAVIGATION_SUPPORT, isSupported);
 }
 
-bool ViewImpl::IsKeyNavigationSupported()
+bool ViewImpl::IsKeyNavigationSupported() const
 {
   return mImpl->mIsKeyNavigationSupported;
 }
@@ -1728,6 +1627,11 @@ void ViewImpl::OnFocusChangeCommitted(Ui::View committedFocusableView)
 {
 }
 
+void ViewImpl::NotifyFocusChangeCommitted(Ui::View committedFocusableView)
+{
+  OnFocusChangeCommitted(committedFocusableView);
+}
+
 Ui::View::KeyEventSignalType& ViewImpl::KeyEventSignal()
 {
   return mImpl->mKeyEventSignal;
@@ -1738,7 +1642,7 @@ Ui::View::FocusChangedSignalType& ViewImpl::FocusChangedSignal()
   return mImpl->mFocusChangedSignal;
 }
 
-bool ViewImpl::EmitKeyEventSignal(const KeyEvent& event)
+bool ViewImpl::NotifyKeyEvent(const KeyEvent& event)
 {
   // Guard against destruction during signal emission
   Dali::Ui::View handle(GetOwner());
@@ -1813,7 +1717,7 @@ void ViewImpl::OnChildAdd(Actor& child)
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    ChildData childData;
+    IntegrationView::ChildData childData;
     childData.view           = view;
     childData.measuredSize   = {0.0f, 0.0f};
     childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -1853,7 +1757,7 @@ void ViewImpl::OnChildRemove(Actor& child)
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const ChildData& data)
+    auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const IntegrationView::ChildData& data)
     {
       return data.view == view;
     });
@@ -1877,9 +1781,9 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
     return;
   }
 
-  Actor          self            = Self();
-  uint32_t       actorChildCount = self.GetChildCount();
-  ChildContainer newChildren;
+  Actor                           self            = Self();
+  uint32_t                        actorChildCount = self.GetChildCount();
+  IntegrationView::ChildContainer newChildren;
   newChildren.Reserve(actorChildCount);
 
   for(uint32_t i = 0; i < actorChildCount; ++i)
@@ -1887,7 +1791,7 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
     Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
     if(view)
     {
-      auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const ChildData& data)
+      auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const IntegrationView::ChildData& data)
       {
         return data.view == view;
       });
@@ -1925,7 +1829,7 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
         Dali::Ui::FocusManager::Get().ClearFocus();
       }
 
-      SetState(ViewState::DISABLED, !enabled);
+      IntegrationView::SetState(*this, ViewState::DISABLED, !enabled);
 
       if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
       {

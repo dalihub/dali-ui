@@ -74,7 +74,7 @@ LayoutAlignment GetChildVerticalAlignment(ViewImpl& childImpl)
   return params ? params->GetVerticalAlignment() : LayoutAlignment::FILL;
 }
 
-void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float availableWidth, float availableHeight,
+void MeasureGridChildrenAndFillAuto(IntegrationView::ChildContainer& children, float availableWidth, float availableHeight,
                                     uint32_t rowCount, uint32_t colCount,
                                     const Dali::Vector<GridLength>&           rowDefs,
                                     const Dali::Vector<GridLength>&           colDefs,
@@ -87,7 +87,7 @@ void MeasureGridChildrenAndFillAuto(ViewImpl::ChildContainer& children, float av
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -215,7 +215,7 @@ void ComputeGridPositions(const std::vector<float>& rowHeights, const std::vecto
   }
 }
 
-void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::vector<float>& rowPositions,
+void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const std::vector<float>& rowPositions,
                                 const std::vector<float>& colPositions, uint32_t rowCount, uint32_t colCount,
                                 float rowSpacing, float colSpacing, const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
@@ -225,7 +225,7 @@ void ArrangeGridChildrenToCells(ViewImpl::ChildContainer& children, const std::v
 
     // Standalone children are placed in a separate pass after the grid cells
     // have been arranged; skip them here.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }

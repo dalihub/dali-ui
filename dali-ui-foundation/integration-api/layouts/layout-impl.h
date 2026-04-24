@@ -84,11 +84,6 @@ protected: // From ViewImpl
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 
-  /**
-   * @copydoc ViewImpl::IsLayout
-   */
-  bool IsLayout() const override;
-
 protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()

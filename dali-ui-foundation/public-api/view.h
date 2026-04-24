@@ -584,6 +584,18 @@ public: // Properties
   View& SetCounterClockwiseFocusableView(View view);
 
   /**
+   * @brief Sets whether this view supports two dimensional key navigation.
+   * @param[in] isSupported True to support key navigation
+   */
+  View& SetKeyNavigationSupport(bool isSupported);
+
+  /**
+   * @brief Gets whether this view supports two dimensional key navigation.
+   * @return True if key navigation is supported
+   */
+  bool IsKeyNavigationSupported() const;
+
+  /**
    * @brief Gets the background color.
    *
    * @return The background color

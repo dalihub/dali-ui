@@ -58,7 +58,7 @@ struct StackMeasureFirstPassResult
   uint32_t visibleChildCount{0};
 };
 
-StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContainer& children, float contentWidth,
+StackMeasureFirstPassResult MeasureStackNonWeightChildren(IntegrationView::ChildContainer& children, float contentWidth,
                                                           float contentHeight, StackOrientation orientation,
                                                           const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
@@ -69,7 +69,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -102,7 +102,7 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(ViewImpl::ChildContain
   return result;
 }
 
-void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float contentMain, float contentWidth,
+void MeasureStackWeightChildren(IntegrationView::ChildContainer& children, float contentMain, float contentWidth,
                                 float contentHeight, float mainAxisNonWeight, float totalWeight,
                                 uint32_t visibleChildCount, float spacing, StackOrientation orientation,
                                 float& maxCrossAxisInOut, const std::function<ViewImpl&(Ui::View)>& getImpl)
@@ -114,7 +114,7 @@ void MeasureStackWeightChildren(ViewImpl::ChildContainer& children, float conten
   for(auto& childData : children)
   {
     ViewImpl& childImpl = getImpl(childData.view);
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
@@ -246,7 +246,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
       for(auto& childData : children)
       {
         ViewImpl& childImpl = getImpl(childData.view);
-        if(childImpl.IsLayoutModeStandalone())
+        if(IntegrationView::IsLayoutModeStandalone(childImpl))
         {
           continue;
         }
@@ -328,7 +328,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     for(auto& childData : children)
     {
       ViewImpl& childImpl = GetImpl(childData.view);
-      if(childImpl.IsLayoutModeStandalone())
+      if(IntegrationView::IsLayoutModeStandalone(childImpl))
       {
         continue;
       }
@@ -357,7 +357,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       for(auto& childData : children)
       {
         ViewImpl& childImpl = GetImpl(childData.view);
-        if(childImpl.IsLayoutModeStandalone())
+        if(IntegrationView::IsLayoutModeStandalone(childImpl))
         {
           continue;
         }
@@ -407,7 +407,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
-    if(childImpl.IsLayoutModeStandalone())
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }

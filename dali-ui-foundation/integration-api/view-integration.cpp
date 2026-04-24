@@ -20,28 +20,111 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
+
+namespace
+{
+
+Internal::ViewDataImpl& GetViewImplData(ViewImpl& viewImpl)
+{
+  return Internal::ViewDataImpl::Get(viewImpl);
+}
+
+const Internal::ViewDataImpl& GetViewImplData(const ViewImpl& viewImpl)
+{
+  return Internal::ViewDataImpl::Get(viewImpl);
+}
+
+} // namespace
+
 namespace IntegrationView
 {
 
 void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle)
 {
-  viewImpl.GetViewDataImpl().SetTrait(id, handle);
+  GetViewImplData(viewImpl).SetTrait(id, handle);
 }
 
 Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id)
 {
-  return viewImpl.GetViewDataImpl().GetTrait(id);
+  return GetViewImplData(viewImpl).GetTrait(id);
 }
 
 bool RemoveTrait(ViewImpl& viewImpl, TraitId id)
 {
-  return viewImpl.GetViewDataImpl().RemoveTrait(id);
+  return GetViewImplData(viewImpl).RemoveTrait(id);
+}
+
+// State management
+
+void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause)
+{
+  GetViewImplData(viewImpl).SetState(state, on, cause);
+}
+
+void SetNamedStateHandler(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+{
+  GetViewImplData(viewImpl).SetNamedStateHandler(id, tracker, callback);
+}
+
+bool UnsetStateHandler(ViewImpl& viewImpl, const Dali::String& id)
+{
+  return GetViewImplData(viewImpl).UnsetStateHandler(id);
+}
+
+bool UnsetStateHandlerWhenNotProcessing(ViewImpl& viewImpl, const Dali::String& id)
+{
+  return GetViewImplData(viewImpl).UnsetStateHandlerWhenNotProcessing(id);
+}
+
+// View-handle overloads
+
+void SetState(Ui::View view, ViewState state, bool on, InputEvent cause)
+{
+  GetViewImplData(GetImpl(view)).SetState(state, on, cause);
+}
+
+void SetNamedStateHandler(Ui::View view, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+{
+  GetViewImplData(GetImpl(view)).SetNamedStateHandler(id, tracker, callback);
+}
+
+bool UnsetStateHandler(Ui::View view, const Dali::String& id)
+{
+  return GetViewImplData(GetImpl(view)).UnsetStateHandler(id);
+}
+
+bool UnsetStateHandlerWhenNotProcessing(Ui::View view, const Dali::String& id)
+{
+  return GetViewImplData(GetImpl(view)).UnsetStateHandlerWhenNotProcessing(id);
+}
+
+// Layout helpers
+
+bool IsLayoutModeStandalone(const ViewImpl& viewImpl)
+{
+  return viewImpl.GetLayoutMode() == Ui::LayoutMode::STANDALONE;
+}
+
+ChildContainer& GetChildren(ViewImpl& viewImpl)
+{
+  return GetViewImplData(viewImpl).mChildren;
+}
+
+const ChildContainer& GetChildren(const ViewImpl& viewImpl)
+{
+  return GetViewImplData(viewImpl).mChildren;
+}
+
+bool IsLayout(ViewImpl& viewImpl)
+{
+  return !!Ui::Layout::DownCast(viewImpl.Self());
 }
 
 } // namespace IntegrationView
