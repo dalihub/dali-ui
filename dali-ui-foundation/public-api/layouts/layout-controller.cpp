@@ -286,11 +286,20 @@ private:
   /**
    * @brief Processes a single view with layout capability (layout root).
    *
-   * Constraint for the root view:
-   * - If the view's Actor has a parent (e.g. Layout under an Actor), use parent Actor's size.
-   * - If no parent or parent size is zero, use window size.
-   * - WRAP_CONTENT: layout measures with constraint as maximum and returns wrapped size.
-   * - Fixed (> 0): constraint for that dimension is the fixed value.
+   * Constraint priority chain (per-dimension):
+   *   1. Explicit RequestedWidth/Height (>= 0): use that value.
+   *   2. Else if the view's Actor has a parent: use parent.Actor.SIZE (as-is,
+   *      including 0). When this view is a standalone (boundary) child, a
+   *      parent size of 0 means the parent has not been arranged yet —
+   *      measuring with 0 is correct because the parent's subsequent
+   *      Measure/Arrange pass will re-measure this child via
+   *      MeasureStandaloneChildren/ArrangeStandaloneChildren with the real
+   *      size.
+   *   3. Else (no parent actor): use the window-size constraint passed in.
+   *
+   * - WRAP_CONTENT / MATCH_PARENT: RequestedWidth/Height < 0 → fall through
+   *   to parent/window path.
+   * - Fixed (>= 0): takes precedence over parent/window.
    */
   void ProcessLayoutRoot(ViewImpl* view, float widthConstraint, float heightConstraint)
   {
@@ -302,27 +311,25 @@ private:
     float layoutWidth  = view->GetRequestedWidth();
     float layoutHeight = view->GetRequestedHeight();
 
-    // If root view has a parent Actor (e.g. Actor -> Layout -> View), use parent's size as constraint.
     Actor self   = view->Self();
     Actor parent = self.GetParent();
-    if(parent)
-    {
-      float parentW = parent.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-      float parentH = parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-      if(parentW > 0.0f && parentH > 0.0f)
-      {
-        widthConstraint  = parentW;
-        heightConstraint = parentH;
-      }
-    }
 
-    if(layoutWidth >= 0)
+    if(layoutWidth >= 0.0f)
     {
       widthConstraint = layoutWidth;
     }
-    if(layoutHeight >= 0)
+    else if(parent)
+    {
+      widthConstraint = parent.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+    }
+
+    if(layoutHeight >= 0.0f)
     {
       heightConstraint = layoutHeight;
+    }
+    else if(parent)
+    {
+      heightConstraint = parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
     }
 
     // Root view has no parent that subtracts margin, so do it here.
