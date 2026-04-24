@@ -867,7 +867,6 @@ private:
   bool               mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
   bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
   bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
-  bool               mSelectionEnabled : 1;      ///< Whether text selection is enabled.
 
 protected:
   struct PropertyHandler;

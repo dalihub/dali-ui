@@ -187,8 +187,7 @@ InputFieldImpl::InputFieldImpl()
   mCursorPositionChanged(false),
   mSelectionStarted(false),
   mSelectionChanged(false),
-  mSelectionCleared(false),
-  mSelectionEnabled(true)
+  mSelectionCleared(false)
 {
 }
 
