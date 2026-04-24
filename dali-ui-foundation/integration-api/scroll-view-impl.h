@@ -23,10 +23,14 @@
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/math/vector2.h>
+#include <dali/public-api/object/property-notification.h>
+// #include <dali/public-api/signals/signal.h>
+#include <dali-ui-foundation/public-api/scroll-view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/public-api/scroll-bar.h>
 
 namespace Dali
 {
@@ -278,7 +282,7 @@ protected:
   /**
    * @brief Adjusts delta to stay within bounds.
    */
-  Vector2 AdjustDelta(const Vector2& movement, const Vector2& currentPosition = Vector2::ZERO);
+  Vector2 AdjustDelta(const Vector2& movement, const Vector2& currentPosition);
 
   /**
    * @brief Adjusts scroll position to valid range.
@@ -409,6 +413,20 @@ private:
    */
   void OnContentRelayout();
 
+  /**
+   * @brief Callback for content position change (during animation).
+   */
+  void OnContentPositionChanged(PropertyNotification source);
+
+  /**
+   * @brief Callback for layout direction changes.
+   *
+   * Manually propagates the new direction to the ScrollBar, which is a
+   * STANDALONE child and therefore excluded from the automatic
+   * ApplyLayoutDirection traversal.
+   */
+  void OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type);
+
 private:
   // Not copyable or movable
   ScrollViewImpl(const ScrollViewImpl&)            = delete;
@@ -456,6 +474,12 @@ private:
   bool    mJustIntercepted;  ///< True for one cycle when interception first begins (prevents double HandleEvent feed)
   bool    mPanRecognized;    ///< True once PanGestureDetector fires STARTED; waiting for post-recognition threshold
   Vector2 mPanStartPosition; ///< Screen position at Pan STARTED, used to measure post-recognition displacement
+
+  // Scroll bar
+  ScrollBar mScrollBar; ///< Scroll bar for visual indication of scroll position
+
+  // Property notification for content position changes during animation
+  PropertyNotification mContentPositionNotification; ///< Notifies when content position changes
 
   // Signals
   Ui::ScrollView::ScrollStartedSignalType  mScrollStartedSignal;

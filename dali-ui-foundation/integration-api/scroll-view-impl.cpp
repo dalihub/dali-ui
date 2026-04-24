@@ -47,7 +47,7 @@ namespace Integration
 
 namespace
 {
-#ifdef DEBUG_ENABLED
+#if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
 #endif
 
@@ -97,7 +97,8 @@ ScrollViewImpl::ScrollViewImpl()
   mIntercepting(false),
   mJustIntercepted(false),
   mPanRecognized(false),
-  mPanStartPosition(0.0f, 0.0f)
+  mPanStartPosition(0.0f, 0.0f),
+  mScrollBar(ScrollBar::New())
 {
   // Set initial pan gesture directions for vertical scrolling
   mPanGestureDetector.AddDirection(PanGestureDetector::DIRECTION_VERTICAL);
@@ -114,6 +115,29 @@ void ScrollViewImpl::OnInitialize()
 
   // Enable clipping to bounds for scrollable content
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
+
+  // Add scroll bar to the view.
+  // ScrollBar is set STANDALONE internally (in ScrollBarImpl::OnInitialize)
+  // so that position updates of its internal thumb actor do not propagate
+  // InvalidateMeasure up to the ScrollView and interfere with scroll
+  // animations on the content.  Size tracking (MATCH_PARENT) is handled
+  // by ArrangeStandaloneChildren instead.
+  Self().Add(mScrollBar);
+  // ScrollBar should always be on top of content
+  mScrollBar.RaiseToTop();
+
+  // Initialize scroll bar visibility
+  mScrollBar.SetVerticalScrollBarVisibility(mVerticalScrollBarVisibility);
+  mScrollBar.SetHorizontalScrollBarVisibility(mHorizontalScrollBarVisibility);
+
+  // STANDALONE children are excluded from the automatic ApplyLayoutDirection
+  // traversal, so propagate the current direction immediately and then track
+  // future changes via signal.
+  mScrollBar.SetLayoutDirection(
+    static_cast<LayoutDirection::Type>(Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION)));
+  Self().LayoutDirectionChangedSignal().Connect(this, &ScrollViewImpl::OnLayoutDirectionChanged);
+
+  // Connect to relayout signal to update scroll bar when sizes change
 
   // Configure pan gesture detector – DetectedSignal drives all scroll logic.
   // We do NOT call Attach() here. Instead, raw touch events are fed manually
@@ -134,7 +158,10 @@ void ScrollViewImpl::SetContent(View content)
   // Remove old content if exists
   if(mContent)
   {
+    CancelScrollAnimation();
+    mContent.OnRelayoutSignal().Disconnect(this, &ScrollViewImpl::OnChildRelayout);
     Self().Remove(mContent);
+    mContentPositionNotification.Reset();
   }
 
   mContent = content;
@@ -144,6 +171,20 @@ void ScrollViewImpl::SetContent(View content)
   {
     Self().Add(mContent);
     mContent.LowerToBottom();
+
+    // Ensure ScrollBar stays on top of content
+    mScrollBar.RaiseToTop();
+
+    // Connect to content's relayout signal to update scroll bar when content size changes
+    mContent.OnRelayoutSignal().Connect(this, &ScrollViewImpl::OnChildRelayout);
+
+    // Set up property notification to track content position changes during animation.
+    // In DALi C++, POSITION property is updated every frame during animation,
+    // so PropertyNotification fires as the content scrolls.
+    mContentPositionNotification = mContent.AddPropertyNotification(Actor::Property::POSITION,
+                                                                    StepCondition(1.0f, 0.0f));
+    mContentPositionNotification.NotifySignal().Connect(this, &ScrollViewImpl::OnContentPositionChanged);
+
     UpdateScrollingProperties();
   }
 }
@@ -175,6 +216,10 @@ float ScrollViewImpl::GetScrollableWidth() const
 
 void ScrollViewImpl::SetScrollableWidth(float width)
 {
+  if(std::abs(mScrollableWidth - width) < 0.01f)
+  {
+    return;
+  }
   mScrollableWidth = width;
   UpdateScrollingProperties();
 }
@@ -186,6 +231,10 @@ float ScrollViewImpl::GetScrollableHeight() const
 
 void ScrollViewImpl::SetScrollableHeight(float height)
 {
+  if(std::abs(mScrollableHeight - height) < 0.01f)
+  {
+    return;
+  }
   mScrollableHeight = height;
   UpdateScrollingProperties();
 }
@@ -328,10 +377,10 @@ void ScrollViewImpl::ScrollTo(const Vector2& position, bool animation)
     float distX = std::abs(targetPosX - currentPosX);
     float distY = std::abs(targetPosY - currentPosY);
     float dist  = std::sqrt(distX * distX + distY * distY);
-
+#ifdef DEBUG_SCROLL
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::ScrollTo] animate from contentPos=[%.2f, %.2f] to [%.2f, %.2f], dist=%.2f\n",
                   currentPosX, currentPosY, targetPosX, targetPosY, dist);
-
+#endif
     if(dist < 0.5f)
     {
       SendScrollFinished();
@@ -343,9 +392,9 @@ void ScrollViewImpl::ScrollTo(const Vector2& position, bool animation)
     float ratio         = std::min(1.0f, dist / maxScrollDist);
     float durationMs    = mMinimumFlingDuration + ratio * (mMaximumFlingDuration - mMinimumFlingDuration);
     float durationSec   = durationMs / 1000.0f;
-
+#ifdef DEBUG_SCROLL
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::ScrollTo] animation duration=%.3f sec (ratio=%.3f)\n", durationSec, ratio);
-
+#endif
     SendScrollStarted();
 
     mScrollAnimation = Animation::New(durationSec);
@@ -454,6 +503,7 @@ ScrollBarVisibility ScrollViewImpl::GetVerticalScrollBarVisibility() const
 void ScrollViewImpl::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
 {
   mVerticalScrollBarVisibility = visibility;
+  mScrollBar.SetVerticalScrollBarVisibility(visibility);
 }
 
 ScrollBarVisibility ScrollViewImpl::GetHorizontalScrollBarVisibility() const
@@ -464,6 +514,7 @@ ScrollBarVisibility ScrollViewImpl::GetHorizontalScrollBarVisibility() const
 void ScrollViewImpl::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
 {
   mHorizontalScrollBarVisibility = visibility;
+  mScrollBar.SetHorizontalScrollBarVisibility(visibility);
 }
 
 Ui::ScrollView::ScrollStartedSignalType& ScrollViewImpl::ScrollStartedSignal()
@@ -505,10 +556,10 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   // Updated formula based on OneUIComponents commit
   float movementX = -1.0f * mFlingSensitivity * velocity.x * screenSize.width / (mMaximumFlingDuration * decelerationFactor);
   float movementY = -1.0f * mFlingSensitivity * velocity.y * screenSize.height / (mMaximumFlingDuration * decelerationFactor);
-
+#ifdef DBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] velocity=[%.2f, %.2f], screenSize=[%.0f, %.0f], decelerationFactor=%.6f, maxFlingDuration=%d, raw movement=[%.2f, %.2f]\n",
                 velocity.x, velocity.y, screenSize.width, screenSize.height, decelerationFactor, mMaximumFlingDuration, movementX, movementY);
-
+#endif
   if(std::abs(movementX) > mMaxFlingDistance)
   {
     movementX = mMaxFlingDistance * (movementX > 0.0f ? 1.0f : -1.0f);
@@ -517,10 +568,10 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   {
     movementY = mMaxFlingDistance * (movementY > 0.0f ? 1.0f : -1.0f);
   }
-
+#ifdef DBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] clamped movement=[%.2f, %.2f], maxFlingDistance=%.0f\n",
                 movementX, movementY, mMaxFlingDistance);
-
+#endif
   return Vector2(movementX, movementY);
 }
 
@@ -558,8 +609,8 @@ Vector2 ScrollViewImpl::AdjustDelta(const Vector2& movement, const Vector2& curr
 {
   Vector2 adjusted = AdjustMovement(movement);
 
-  float curX = (currentPosition.x != 0.0f) ? currentPosition.x : mCurrentPosition.x;
-  float curY = (currentPosition.y != 0.0f) ? currentPosition.y : mCurrentPosition.y;
+  float curX = currentPosition.x;
+  float curY = currentPosition.y;
 
   float targetY = curY + adjusted.y;
   targetY       = std::max(targetY, mMinimumStartY);
@@ -577,8 +628,17 @@ Vector2 ScrollViewImpl::AdjustScrollPosition(const Vector2& position) const
   float posX = std::max(0.0f, position.x);
   float posY = std::max(0.0f, position.y);
 
-  float maxScrollY = std::max(0.0f, mScrollableHeight - mViewportHeight);
-  float maxScrollX = std::max(0.0f, mScrollableWidth - mViewportWidth);
+  // If layout hasn't run yet, fall back to requested sizes so that
+  // SetScrollPosition / ScrollTo work correctly before the first layout pass.
+  float scrollableW = (mScrollableWidth > 0.0f) ? mScrollableWidth
+                                                : (mContent ? mContent.GetRequestedWidth() : 0.0f);
+  float scrollableH = (mScrollableHeight > 0.0f) ? mScrollableHeight
+                                                 : (mContent ? mContent.GetRequestedHeight() : 0.0f);
+  float viewportW   = (mViewportWidth > 0.0f) ? mViewportWidth : std::max(0.0f, GetRequestedWidth());
+  float viewportH   = (mViewportHeight > 0.0f) ? mViewportHeight : std::max(0.0f, GetRequestedHeight());
+
+  float maxScrollY = std::max(0.0f, scrollableH - viewportH);
+  float maxScrollX = std::max(0.0f, scrollableW - viewportW);
 
   posX = std::min(posX, maxScrollX);
   posY = std::min(posY, maxScrollY);
@@ -776,6 +836,10 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
   mContent.SetProperty(Actor::Property::POSITION_X, newX);
   mContent.SetProperty(Actor::Property::POSITION_Y, newY);
 
+  // Update scroll position from the actual content position
+  mCurrentPosition = Vector2(newX, newY);
+  mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+
   if(!mIsScrolling)
   {
     SendScrollStarted();
@@ -784,6 +848,9 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
 
   SendDragging(delta.x, delta.y);
   mLastPanPosition = gesture.GetScreenPosition();
+
+  // Update scroll bar position with the updated scroll position
+  mScrollBar.UpdateScrollPosition(mScrollPosition);
 }
 
 void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
@@ -811,14 +878,16 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
     movement = Vector2(0.0f, movement.y);
   }
 
-  Vector2 delta = AdjustDelta(movement);
+  Vector2 delta = AdjustDelta(movement, mCurrentPosition);
 
+#ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] velocity=[%.2f, %.2f], movement=[%.2f, %.2f], contentPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f], delta=[%.2f, %.2f], bounds=[minY=%.2f, maxY=%.2f]\n",
                 velocity.x, velocity.y, movement.x, movement.y,
                 mCurrentPosition.x, mCurrentPosition.y,
                 mScrollPosition.x, mScrollPosition.y,
                 delta.x, delta.y,
                 mMinimumStartY, mMaximumStartY);
+#endif
 
   if(delta.LengthSquared() < 0.0001f)
   {
@@ -863,6 +932,8 @@ void ScrollViewImpl::SendScrollFinished()
     mIsScrolling              = false;
     Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
     mScrollFinishedSignal.Emit(scrollView);
+    // Auto-visibility bars fade out 2 seconds after the last scroll position
+    // update, handled by the hide timer inside ScrollBarImpl::ShowBar().
   }
 }
 
@@ -899,8 +970,8 @@ void ScrollViewImpl::UpdateScrollingProperties()
   mViewportWidth  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   mViewportHeight = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
 
-  mScrollableWidth  = mContent.GetProperty<float>(Actor::Property::SIZE_WIDTH) + padding.start + padding.end;
-  mScrollableHeight = mContent.GetProperty<float>(Actor::Property::SIZE_HEIGHT) + padding.top + padding.bottom;
+  // mScrollableWidth/mScrollableHeight are set by ArrangeChildren via SetScrollableWidth/SetScrollableHeight
+  // Do not override them here.
 
   mMinimumStartY = -std::max(0.0f, mScrollableHeight - mViewportHeight);
   mMinimumStartX = -std::max(0.0f, mScrollableWidth - mViewportWidth);
@@ -911,17 +982,25 @@ void ScrollViewImpl::UpdateScrollingProperties()
   mHasScrollableArea = (CanScrollHorizontally(mScrollDirection) && mScrollableWidth > mViewportWidth) ||
                        (CanScrollVertically(mScrollDirection) && mScrollableHeight > mViewportHeight);
 
+#ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::UpdateScrollingProperties] viewport=[%.0f, %.0f], scrollable=[%.0f, %.0f], bounds=[minY=%.2f, maxY=%.2f, minX=%.2f, maxX=%.2f], hasScrollableArea=%d\n",
                 mViewportWidth, mViewportHeight, mScrollableWidth, mScrollableHeight,
                 mMinimumStartY, mMaximumStartY, mMinimumStartX, mMaximumStartX, mHasScrollableArea);
-
-  if(mScrollPosition.x < -0.5f)
-  {
-    float posX      = 0.0f;
-    mScrollPosition = Vector2(posX, mScrollPosition.y);
-  }
+#endif
+  // Clamp scroll position to valid bounds based on scroll direction and scrollable area
+  mScrollPosition = AdjustScrollPosition(mScrollPosition);
 
   ApplyScrollPosition(mScrollPosition);
+
+#ifdef DEBUG_SCROLL
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::UpdateScrollingProperties] Updating scroll bar: viewport=[%.0f, %.0f], scrollable=[%.0f, %.0f]\n",
+                mViewportWidth, mViewportHeight, mScrollableWidth, mScrollableHeight);
+#endif
+  // Update scroll bar
+  mScrollBar.SetVerticalScrollBarVisibility(mVerticalScrollBarVisibility);
+  mScrollBar.SetHorizontalScrollBarVisibility(mHorizontalScrollBarVisibility);
+  mScrollBar.UpdateBarSize(mScrollableWidth, mScrollableHeight, mViewportWidth, mViewportHeight);
+  mScrollBar.UpdateScrollPosition(mScrollPosition);
 }
 
 void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
@@ -930,10 +1009,14 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
   {
     float posX = mMaximumStartX - position.x;
     float posY = mMaximumStartY - position.y;
+
     // See note in ApplyScrollPosition delta path: scroll offsets drive the
     // rendered position directly without feeding back into layout.
     mContent.SetProperty(Actor::Property::POSITION_X, posX);
     mContent.SetProperty(Actor::Property::POSITION_Y, posY);
+
+    // Update scroll bar position
+    mScrollBar.UpdateScrollPosition(position);
   }
 }
 
@@ -949,8 +1032,8 @@ void ScrollViewImpl::CancelScrollAnimation()
     // Update positions from actual content state
     if(mContent)
     {
-      mCurrentPosition = Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
-                                 mContent.GetProperty<float>(Actor::Property::POSITION_Y));
+      mCurrentPosition = Vector2(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X),
+                                 mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y));
       mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
     }
     SendScrollFinished();
@@ -959,18 +1042,16 @@ void ScrollViewImpl::CancelScrollAnimation()
 
 void ScrollViewImpl::OnScrollAnimationFinished(Animation animation)
 {
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnScrollAnimationFinished]\n");
-
   mScrollAnimation.Reset();
 
   if(mContent)
   {
-    mCurrentPosition = Vector2(std::round(mContent.GetProperty<float>(Actor::Property::POSITION_X)),
-                               std::round(mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
+    mCurrentPosition = Vector2(std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X)),
+                               std::round(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y)));
     mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
 
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnScrollAnimationFinished] final contentPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f]\n",
-                  mCurrentPosition.x, mCurrentPosition.y, mScrollPosition.x, mScrollPosition.y);
+    // Update scroll bar position
+    mScrollBar.UpdateScrollPosition(mScrollPosition);
   }
 
   SendScrollFinished();
@@ -984,6 +1065,39 @@ bool ScrollViewImpl::CanScrollHorizontally(ScrollDirection direction)
 bool ScrollViewImpl::CanScrollVertically(ScrollDirection direction)
 {
   return direction == ScrollDirection::Vertical || direction == ScrollDirection::Both;
+}
+
+void ScrollViewImpl::OnChildRelayout(Actor actor)
+{
+  UpdateScrollingProperties();
+}
+
+void ScrollViewImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type type)
+{
+  mScrollBar.SetLayoutDirection(type);
+}
+
+void ScrollViewImpl::OnContentPositionChanged(PropertyNotification source)
+{
+  if(!mContent)
+  {
+    return;
+  }
+
+  // Read the current (animated) position of the content
+  Vector3 currentPos = mContent.GetCurrentProperty<Vector3>(Actor::Property::POSITION);
+  mCurrentPosition   = Vector2(currentPos.x, currentPos.y);
+  mScrollPosition    = ContentPositionToScrollPosition(mCurrentPosition);
+
+#ifdef DEBUG_SCROLL
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Content position changed! [%.1f, %.1f]", mScrollPosition.x, mScrollPosition.y);
+#endif
+
+  // Emit scrolling signal during animation
+  SendScrolling();
+
+  // Update scroll bar position
+  mScrollBar.UpdateScrollPosition(mScrollPosition);
 }
 
 } // namespace Integration

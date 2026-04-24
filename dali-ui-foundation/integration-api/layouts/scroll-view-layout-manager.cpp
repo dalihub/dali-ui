@@ -25,6 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/scroll-bar.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 
@@ -58,10 +59,6 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
-  auto getImpl = [](Ui::View v) -> ViewImpl&
-  {
-    return GetImpl(v);
-  };
 
   for(auto& childData : children)
   {
@@ -76,7 +73,14 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
       continue;
     }
 
-    ViewImpl& childImpl = getImpl(childData);
+    ViewImpl& childImpl = GetImpl(childData);
+
+    // STANDALONE children (e.g. ScrollBar) are measured by
+    // ViewImpl::MeasureStandaloneChildren; skip them here.
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
 
     // Check if child is using MatchParent for width or height
     bool widthIsMatchParent  = (childImpl.GetRequestedWidth() == MATCH_PARENT);
@@ -119,17 +123,31 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
     {
       continue;
     }
+
+    // Check if the view handle is valid
+    if(!childData.GetObjectPtr())
+    {
+      continue;
+    }
+
     ViewImpl& childImpl = GetImpl(childData);
 
-    LayoutRect childBounds;
+    // STANDALONE children (e.g. ScrollBar) are arranged by
+    // ViewImpl::ArrangeStandaloneChildren; skip them here so their internal
+    // InvalidateMeasure cycle never re-positions the scroll content.
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
 
     // content인 경우만
     // Read measured size directly from the child (set during MeasureChildren).
     MeasuredSize childMeasured = childImpl.GetMeasuredSize();
-    childBounds.x              = childData.GetPositionX();
-    childBounds.y              = childData.GetPositionY();
-    childBounds.width          = childMeasured.width;
-    childBounds.height         = childMeasured.height;
+    LayoutRect   childBounds;
+    childBounds.x      = childData.GetPositionX();
+    childBounds.y      = childData.GetPositionY();
+    childBounds.width  = childMeasured.width;
+    childBounds.height = childMeasured.height;
 
     // MATCH_PARENT: fill the viewport.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT)
@@ -149,7 +167,8 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
     // Arrange the child
     childImpl.Arrange(childBounds);
 
-    if(scrollImpl != nullptr)
+    // Only update scrollable dimensions from the content child, not from ScrollBar
+    if(scrollImpl != nullptr && childData == scrollImpl->GetContent())
     {
       scrollImpl->SetScrollableWidth(childBounds.width);
       scrollImpl->SetScrollableHeight(childBounds.height);

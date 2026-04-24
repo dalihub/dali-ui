@@ -99,5 +99,7 @@
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
+#include <dali-ui-foundation/public-api/i-scroll-bar.h>
+#include <dali-ui-foundation/public-api/scroll-bar.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>

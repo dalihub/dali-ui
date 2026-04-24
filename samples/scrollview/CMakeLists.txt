@@ -19,8 +19,11 @@ ADD_EXECUTABLE(${EXE_NAME} scrollview-example.cpp)
 SET(EXE_INTERACTIVE scrollview-interactive-children)
 ADD_EXECUTABLE(${EXE_INTERACTIVE} scrollview-interactive-children.cpp)
 
+SET(EXE_SCROLLBAR scrollview-scrollbar-example)
+ADD_EXECUTABLE(${EXE_SCROLLBAR} scrollbar-example.cpp)
+
 # Set output directory
-FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE})
+FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE} ${EXE_SCROLLBAR})
   SET_TARGET_PROPERTIES(${TARGET_EXE} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
