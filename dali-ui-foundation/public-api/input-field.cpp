@@ -552,6 +552,21 @@ Signal<void(View, uint32_t)>& InputField::CursorPositionChangedSignal()
   return GetImpl(*this).CursorPositionChangedSignal();
 }
 
+Signal<void(View)>& InputField::SelectionStartedSignal()
+{
+  return GetImpl(*this).SelectionStartedSignal();
+}
+
+Signal<void(View, uint32_t, uint32_t)>& InputField::SelectionChangedSignal()
+{
+  return GetImpl(*this).SelectionChangedSignal();
+}
+
+Signal<void(View)>& InputField::SelectionClearedSignal()
+{
+  return GetImpl(*this).SelectionClearedSignal();
+}
+
 } // namespace Ui
 
 } // namespace Dali

@@ -462,6 +462,21 @@ public: // Signals
    */
   Signal<void(View, uint32_t)>& CursorPositionChangedSignal();
 
+  /**
+   * @copydoc Dali::Ui::InputField::SelectionStartedSignal()
+   */
+  Signal<void(View)>& SelectionStartedSignal();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SelectionChangedSignal()
+   */
+  Signal<void(View, uint32_t, uint32_t)>& SelectionChangedSignal();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SelectionClearedSignal()
+   */
+  Signal<void(View)>& SelectionClearedSignal();
+
 protected:
   // Construction
 
@@ -759,6 +774,21 @@ private: // Implementation
    */
   void EmitCursorPositionChanged();
 
+  /**
+   * @brief Emits SelectionStarted signal.
+   */
+  void EmitSelectionStarted();
+
+  /**
+   * @brief Emits SelectionChanged signal.
+   */
+  void EmitSelectionChanged();
+
+  /**
+   * @brief Emits SelectionCleared signal.
+   */
+  void EmitSelectionCleared();
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetPlaceholderColorInternal(const Vector4& color);
@@ -804,9 +834,12 @@ private:
 
 private:
   // Data
-  Signal<void(View)>           mTextChangedSignal;
-  Signal<void(View)>           mMaxLengthReachedSignal;
-  Signal<void(View, uint32_t)> mCursorPositionChangedSignal;
+  Signal<void(View)>                     mTextChangedSignal;
+  Signal<void(View)>                     mMaxLengthReachedSignal;
+  Signal<void(View, uint32_t)>           mCursorPositionChangedSignal;
+  Signal<void(View)>                     mSelectionStartedSignal;
+  Signal<void(View, uint32_t, uint32_t)> mSelectionChangedSignal;
+  Signal<void(View)>                     mSelectionClearedSignal;
 
   InputMethodContext          mInputMethodContext;
   TapGestureDetector          mTapGestureDetector;

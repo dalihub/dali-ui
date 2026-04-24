@@ -763,6 +763,21 @@ Signal<void(View, uint32_t)>& InputFieldImpl::CursorPositionChangedSignal()
   return mCursorPositionChangedSignal;
 }
 
+Signal<void(View)>& InputFieldImpl::SelectionStartedSignal()
+{
+  return mSelectionStartedSignal;
+}
+
+Signal<void(View, uint32_t, uint32_t)>& InputFieldImpl::SelectionChangedSignal()
+{
+  return mSelectionChangedSignal;
+}
+
+Signal<void(View)>& InputFieldImpl::SelectionClearedSignal()
+{
+  return mSelectionClearedSignal;
+}
+
 // =============================================================================
 // Config
 // =============================================================================
@@ -957,17 +972,17 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 
   if(mSelectionStarted)
   {
-    // TODO
+    EmitSelectionStarted();
   }
 
   if(mSelectionChanged)
   {
-    // TODO
+    EmitSelectionChanged();
   }
 
   if(mSelectionCleared)
   {
-    // TODO
+    EmitSelectionCleared();
   }
 }
 
@@ -1566,6 +1581,28 @@ void InputFieldImpl::EmitCursorPositionChanged()
   Ui::View handle(GetOwner());
   mCursorPositionChangedSignal.Emit(handle, mController->GetPrimaryCursorPosition());
   mCursorPositionChanged = false;
+}
+
+void InputFieldImpl::EmitSelectionStarted()
+{
+  Ui::View handle(GetOwner());
+  mSelectionStartedSignal.Emit(handle);
+  mSelectionStarted = false;
+}
+
+void InputFieldImpl::EmitSelectionChanged()
+{
+  Ui::View   handle(GetOwner());
+  Uint32Pair range = mController->GetTextSelectionRange();
+  mSelectionChangedSignal.Emit(handle, range.first, range.second);
+  mSelectionChanged = false;
+}
+
+void InputFieldImpl::EmitSelectionCleared()
+{
+  Ui::View handle(GetOwner());
+  mSelectionClearedSignal.Emit(handle);
+  mSelectionCleared = false;
 }
 
 // =============================================================================

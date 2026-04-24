@@ -807,6 +807,43 @@ public: // Signals
    */
   Signal<void(View, uint32_t)>& CursorPositionChangedSignal();
 
+  /**
+   * @brief This signal is emitted when text selection starts.
+   *
+   * @code
+   *   void OnSelectionStarted(View view);
+   * @endcode
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View)>& SelectionStartedSignal();
+
+  /**
+   * @brief This signal is emitted when the text selection changes.
+   *
+   * @code
+   *   void OnSelectionChanged(View view, uint32_t start, uint32_t end);
+   * @endcode
+   *
+   * @param[in] view The view whose selection changed.
+   * @param[in] start The current selection start index.
+   * @param[in] end The current selection end index.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, uint32_t, uint32_t)>& SelectionChangedSignal();
+
+  /**
+   * @brief This signal is emitted when the text selection is cleared.
+   *
+   * @code
+   *   void OnSelectionCleared(View view);
+   * @endcode
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View)>& SelectionClearedSignal();
+
 public: // Not intended for application developers
   /// @cond internal
   /**
