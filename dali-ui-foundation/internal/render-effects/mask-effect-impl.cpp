@@ -29,7 +29,7 @@
 #include <dali/public-api/rendering/shader.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 #include <dali-ui-foundation/public-api/view-impl.h>

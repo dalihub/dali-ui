@@ -23,7 +23,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/trait-impl.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/integration-api/events/key-event-integ.h>
 

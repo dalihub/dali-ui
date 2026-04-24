@@ -46,7 +46,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>

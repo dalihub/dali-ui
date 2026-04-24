@@ -28,7 +28,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace

@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 

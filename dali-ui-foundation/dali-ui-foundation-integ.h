@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 
 // Impl
 #include <dali-ui-foundation/integration-api/trait-impl.h>

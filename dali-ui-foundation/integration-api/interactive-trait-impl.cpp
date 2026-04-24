@@ -24,7 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 

@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/actors/actor.h>
 #include <typeinfo>

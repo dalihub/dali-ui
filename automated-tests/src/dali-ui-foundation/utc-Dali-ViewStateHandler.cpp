@@ -21,7 +21,7 @@
 #include <dali.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

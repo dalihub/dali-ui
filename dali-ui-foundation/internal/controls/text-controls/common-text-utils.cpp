@@ -21,7 +21,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>

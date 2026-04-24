@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>

@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/view-impl.h>

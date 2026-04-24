@@ -30,7 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
