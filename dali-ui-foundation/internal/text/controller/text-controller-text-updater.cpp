@@ -255,27 +255,24 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
   Vector<Character> utf32Characters;
   Length            characterCount = 0u;
 
-  if(!text.empty())
+  std::string redefinedText = text;
+  if(!redefinedText.empty())
   {
-    std::string redefinedText = text;
-
-    if(controller.mImpl->mInputFilter != NULL)
+    if(impl.mInputFilterProcessor != nullptr)
     {
-      bool accepted = false;
-      bool rejected = false;
-
-      accepted = impl.mInputFilter->Filter(Ui::InputFilter::Property::ACCEPTED, redefinedText);
-      rejected = impl.mInputFilter->Filter(Ui::InputFilter::Property::REJECTED, redefinedText);
-
-      if(accepted)
+      const bool filteredByAllow = impl.mInputFilterProcessor->ApplyAllowPattern(redefinedText);
+      if(filteredByAllow && impl.mEditableControlInterface != nullptr)
       {
-        // Signal emits when the string to be inserted is filtered by the accepted filter.
-        controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
+        // Signal emits when the string to be inserted is filtered by the allow pattern.
+        impl.mEditableControlInterface->InputRejected(Text::InputFilter::RejectReason::NOT_ALLOWED);
       }
-      if(rejected)
+
+      const bool filteredByDeny = impl.mInputFilterProcessor->ApplyDenyPattern(redefinedText);
+
+      if(filteredByDeny && impl.mEditableControlInterface != nullptr)
       {
-        // Signal emits when the string to be inserted is filtered by the rejected filter.
-        controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::REJECTED);
+        // Signal emits when the string to be inserted is filtered by the deny pattern.
+        impl.mEditableControlInterface->InputRejected(Text::InputFilter::RejectReason::DENIED);
       }
     }
 
@@ -436,7 +433,9 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
 
     if(NULL != impl.mEditableControlInterface)
     {
-      impl.mEditableControlInterface->TextInserted(realPos, maxSizeOfNewText, text);
+      std::string insertedText;
+      Utf32ToUtf8(utf32Characters.Begin(), maxSizeOfNewText, insertedText);
+      impl.mEditableControlInterface->TextInserted(realPos, maxSizeOfNewText, insertedText);
     }
 
     TextUpdateInfo& textUpdateInfo = impl.mTextUpdateInfo;
@@ -504,7 +503,7 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     if(NULL != impl.mEditableControlInterface)
     {
       // Do this last since it provides callbacks into application code
-      impl.mEditableControlInterface->MaxLengthReached();
+      impl.mEditableControlInterface->MaximumLengthReached();
     }
   }
 }

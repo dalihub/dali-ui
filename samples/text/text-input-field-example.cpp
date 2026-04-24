@@ -151,6 +151,11 @@ private:
     Label btnClearSelection = CreateButton("Clear Selection", 0x95A5A6);
     View selectionRow3 = CreateButtonRow({btnClearSelection});
 
+    // Input filter buttons row
+    Label btnSetInputFilter = CreateButton("Set InputFilter", 0x2980B9);
+    Label btnClearInputFilter = CreateButton("Clear InputFilter", 0x7F8C8D);
+    View inputFilterRow = CreateButtonRow({btnSetInputFilter, btnClearInputFilter});
+
     // Other buttons row
     Label btnMaxLen = CreateButton("Max Length", 0xD35400);
     Label btnEditable = CreateButton("Editable", 0x16A085);
@@ -187,6 +192,8 @@ private:
         selectionRow1,
         selectionRow2,
         selectionRow3,
+        // Input filter controls
+        inputFilterRow,
         // Other controls
         otherRow,
         infoRow,
@@ -230,6 +237,10 @@ private:
     btnSelectWhole.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectWholeTouched);
     btnClearSelection.TouchedSignal().Connect(this, &InputFieldController::OnButtonClearSelectionTouched);
 
+    // Connect button touch signals - Input filter
+    btnSetInputFilter.TouchedSignal().Connect(this, &InputFieldController::OnButtonSetInputFilterTouched);
+    btnClearInputFilter.TouchedSignal().Connect(this, &InputFieldController::OnButtonClearInputFilterTouched);
+
     // Connect button touch signals - Other
     btnMaxLen.TouchedSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
     btnEditable.TouchedSignal().Connect(this, &InputFieldController::OnButtonEditableTouched);
@@ -271,6 +282,10 @@ private:
     status += "-";
     status += std::to_string(selEnd).c_str();
     status += "]";
+    if(mInputFilterSet)
+    {
+      status += "\nFilter: allow=[\\d] deny=[0-5]";
+    }
 
     mStatusLabel.SetText(status);
   }
@@ -318,6 +333,12 @@ private:
   {
     DALI_LOG_ERROR("OnSelectionCleared\n");
     UpdateStatus();
+  }
+
+  void OnInputRejected(View view, Text::InputFilter::RejectReason reason)
+  {
+    const char* reasonStr = (reason == Text::InputFilter::RejectReason::NOT_ALLOWED) ? "NOT_ALLOWED" : "DENIED";
+    DALI_LOG_ERROR("OnInputRejected: reason=%s\n", reasonStr);
   }
 
   void UpdateStatusWithSelection()
@@ -611,6 +632,34 @@ private:
     return true;
   }
 
+  bool OnButtonSetInputFilterTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      Text::InputFilter inputFilter;
+      inputFilter.SetAllowPattern("[\\d]").SetDenyPattern("[0-5]");
+      mInputField.SetInputFilter(inputFilter);
+      mInputFilterSet = true;
+      mInputField.InputRejectedSignal().Connect(this, &InputFieldController::OnInputRejected);
+      DALI_LOG_ERROR("SetInputFilter: allow=[\\d], deny=[0-5] (only 6,7,8,9 allowed)\n");
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonClearInputFilterTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.ClearInputFilter();
+      mInputFilterSet = false;
+      mInputField.InputRejectedSignal().Disconnect(this, &InputFieldController::OnInputRejected);
+      DALI_LOG_ERROR("ClearInputFilter\n");
+      UpdateStatus();
+    }
+    return true;
+  }
+
   bool OnButtonInfoTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
@@ -671,6 +720,7 @@ private:
   InputField   mInputField;
   Label        mStatusLabel;
   uint32_t     mSelectRangeIndex = 0;  // For cycling through selection ranges
+  bool         mInputFilterSet = false;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

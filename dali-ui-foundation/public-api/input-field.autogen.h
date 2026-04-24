@@ -117,6 +117,26 @@
   */ \
   ChildClass& SetMaximumLength(int length) { InputField::SetMaximumLength(length); return *this; } \
   /** \
+  * @brief Sets the input filter. \
+  * \
+  * The input filter defines allow and deny patterns used to filter text \
+  * before it is inserted. \
+  * \
+  * If an allow pattern is set, input that does not match the pattern is rejected. \
+  * If a deny pattern is set, input that matches the pattern is rejected. \
+  * \
+  * If both patterns are set, input must match the allow pattern and must not \
+  * match the deny pattern. \
+  * \
+  * @note This filter is applied to inserted input, such as user input, input \
+  * method commits, and paste operations. It is not applied when text is set \
+  * directly with SetText(). \
+  * \
+  * @param[in] inputFilter The input filter to apply. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetInputFilter(const Text::InputFilter& inputFilter) { InputField::SetInputFilter(inputFilter); return *this; } \
+  /** \
   * @brief Sets whether the InputField can be edited by user interaction. \
   * \
   * @param[in] editable True to allow editing, false otherwise. \

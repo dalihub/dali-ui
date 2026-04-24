@@ -19,8 +19,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/text-controls/input-filter-properties.h>
 #include <dali-ui-foundation/internal/text/input-style.h>
+#include <dali-ui-foundation/public-api/text/input-filter.h>
 
 namespace Dali
 {
@@ -100,9 +100,16 @@ public:
   virtual void TextChanged(bool immediate) = 0;
 
   /**
-   * @brief Called when the number of characters to be inserted exceeds the maximum limit
+   * @brief Called when the number of characters to be inserted exceeds the maximum limit.
    */
-  virtual void MaxLengthReached() = 0;
+  virtual void MaximumLengthReached() = 0;
+
+  /**
+   * @brief Called when the input is rejected by the input filter.
+   *
+   * @param[in] reason The reason why the input was rejected.
+   */
+  virtual void InputRejected(Text::InputFilter::RejectReason reason) = 0;
 
   /**
    * @brief Called to signal that caret (cursor position) has been moved.
@@ -115,13 +122,6 @@ public:
    * @param[in] inputStyleMask Mask with the bits of the input style that has changed.
    */
   virtual void InputStyleChanged(InputStyle::Mask inputStyleMask) = 0;
-
-  /**
-   * @brief Called when the character to be inserted is filtered by the input filter.
-   *
-   * @param[in] type The filter type is ACCEPTED or REJECTED.
-   */
-  virtual void InputFiltered(Ui::InputFilter::Property::Type type) = 0;
 
   /**
    * @brief Called to signal that text has been inserted.

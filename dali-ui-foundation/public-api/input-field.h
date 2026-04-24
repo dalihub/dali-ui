@@ -25,6 +25,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
+#include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
@@ -429,6 +430,37 @@ public: // Setters for chaining
   int GetMaximumLength() const;
 
   /**
+   * @brief Sets the input filter.
+   *
+   * The input filter defines allow and deny patterns used to filter text
+   * before it is inserted.
+   *
+   * If an allow pattern is set, input that does not match the pattern is rejected.
+   * If a deny pattern is set, input that matches the pattern is rejected.
+   *
+   * If both patterns are set, input must match the allow pattern and must not
+   * match the deny pattern.
+   *
+   * @note This filter is applied to inserted input, such as user input, input
+   * method commits, and paste operations. It is not applied when text is set
+   * directly with SetText().
+   *
+   * @param[in] inputFilter The input filter to apply.
+   * @return This input field.
+   */
+  InputField& SetInputFilter(const Text::InputFilter& inputFilter);
+
+  /**
+   * @brief Clears the input filter.
+   *
+   * After clearing the input filter, all input is allowed unless another input
+   * filter is set.
+   *
+   * @return This input field.
+   */
+  InputField& ClearInputFilter();
+
+  /**
    * @brief Sets whether the InputField can be edited by user interaction.
    *
    * @param[in] editable True to allow editing, false otherwise.
@@ -792,6 +824,23 @@ public: // Signals
    * @return The signal to connect to.
    */
   Signal<void(View)>& MaximumLengthReachedSignal();
+
+  /**
+   * @brief This signal is emitted when input is rejected by the input filter.
+   *
+   * The signal is triggered when an attempt is made to insert text that does
+   * not match the allow pattern, or matches the deny pattern.
+   *
+   * @code
+   *   void OnInputRejected(View view, Text::InputFilter::RejectReason reason);
+   * @endcode
+   *
+   * The reason indicates whether the input did not match the allow pattern,
+   * or matched the deny pattern.
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, Text::InputFilter::RejectReason)>& InputRejectedSignal();
 
   /**
    * @brief This signal is emitted when the cursor position changes.

@@ -258,6 +258,16 @@ public:
   int GetMaximumLength() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetInputFilter
+   */
+  void SetInputFilter(const Text::InputFilter& inputFilter);
+
+  /**
+   * @copydoc Dali::Ui::InputField::ClearInputFilter
+   */
+  void ClearInputFilter();
+
+  /**
    * @copydoc Dali::Ui::InputField::SetLayoutDirectionMode
    */
   void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
@@ -412,22 +422,6 @@ public:
    */
   void ClearFontVariation();
 
-  // Read Only
-  /**
-   * @copydoc Dali::Ui::InputField::GetAdjustedFontSizeScale
-   */
-  float GetAdjustedFontSizeScale() const;
-
-  /**
-   * @copydoc Dali::Ui::InputField::GetSelectedTextStart
-   */
-  uint32_t GetSelectedTextStart() const;
-
-  /**
-   * @copydoc Dali::Ui::InputField::GetSelectedTextEnd
-   */
-  uint32_t GetSelectedTextEnd() const;
-
   /**
    * @brief Sets the additional spacing between letters in pixels.
    *
@@ -444,6 +438,22 @@ public:
    */
   float GetLetterSpacing() const;
 
+  // Read Only
+  /**
+   * @copydoc Dali::Ui::InputField::GetAdjustedFontSizeScale
+   */
+  float GetAdjustedFontSizeScale() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectedTextStart
+   */
+  uint32_t GetSelectedTextStart() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectedTextEnd
+   */
+  uint32_t GetSelectedTextEnd() const;
+
   // Method
 
 public: // Signals
@@ -456,6 +466,11 @@ public: // Signals
    * @copydoc Dali::Ui::InputField::MaximumLengthReachedSignal()
    */
   Signal<void(View)>& MaximumLengthReachedSignal();
+
+  /**
+   * @copydoc Dali::Ui::InputField::InputRejectedSignal()
+   */
+  Signal<void(View, Text::InputFilter::RejectReason)>& InputRejectedSignal();
 
   /**
    * @copydoc Dali::Ui::InputField::CursorPositionChangedSignal()
@@ -598,9 +613,14 @@ public: // From ControlInterface
   void TextChanged(bool immediate) override;
 
   /**
-   * @copydoc Text::EditableControlInterface::MaxLengthReached()
+   * @copydoc Text::EditableControlInterface::MaximumLengthReached()
    */
-  void MaxLengthReached() override;
+  void MaximumLengthReached() override;
+
+  /**
+   * @copydoc Text::EditableControlInterface::InputRejected()
+   */
+  void InputRejected(Text::InputFilter::RejectReason reason) override;
 
   /**
    * @copydoc Text::EditableControlInterface::CursorPositionChanged()
@@ -611,11 +631,6 @@ public: // From ControlInterface
    * @copydoc Text::EditableControlInterface::InputStyleChanged()
    */
   void InputStyleChanged(Text::InputStyle::Mask inputStyleMask) override;
-
-  /**
-   * @copydoc Text::EditableControlInterface::InputFiltered()
-   */
-  void InputFiltered(Ui::InputFilter::Property::Type type) override;
 
   /**
    * @copydoc Text::EditableControlInterface::TextChanged()
@@ -770,6 +785,16 @@ private: // Implementation
   void EmitTextChanged();
 
   /**
+   * @brief Emits MaximumLengthReached signal.
+   */
+  void EmitMaximumLengthReached();
+
+  /**
+   * @brief Emits InputRejected signal.
+   */
+  void EmitInputRejected(Text::InputFilter::RejectReason reason);
+
+  /**
    * @brief Emits CursorPositionChanged signal.
    */
   void EmitCursorPositionChanged();
@@ -834,12 +859,13 @@ private:
 
 private:
   // Data
-  Signal<void(View)>                     mTextChangedSignal;
-  Signal<void(View)>                     mMaxLengthReachedSignal;
-  Signal<void(View, uint32_t)>           mCursorPositionChangedSignal;
-  Signal<void(View)>                     mSelectionStartedSignal;
-  Signal<void(View, uint32_t, uint32_t)> mSelectionChangedSignal;
-  Signal<void(View)>                     mSelectionClearedSignal;
+  Signal<void(View)>                                  mTextChangedSignal;
+  Signal<void(View)>                                  mMaxLengthReachedSignal;
+  Signal<void(View, Text::InputFilter::RejectReason)> mInputRejectedSignal;
+  Signal<void(View, uint32_t)>                        mCursorPositionChangedSignal;
+  Signal<void(View)>                                  mSelectionStartedSignal;
+  Signal<void(View, uint32_t, uint32_t)>              mSelectionChangedSignal;
+  Signal<void(View)>                                  mSelectionClearedSignal;
 
   InputMethodContext          mInputMethodContext;
   TapGestureDetector          mTapGestureDetector;

@@ -300,26 +300,26 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
       }
 
       std::string refinedKey = keyString;
-      if(controller.mImpl->mInputFilter != NULL && !refinedKey.empty())
+      if(controller.mImpl->mInputFilterProcessor != nullptr && !refinedKey.empty())
       {
-        bool accepted = false;
-        bool rejected = false;
-        accepted      = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::ACCEPTED, keyString);
-        rejected      = controller.mImpl->mInputFilter->Contains(Ui::InputFilter::Property::REJECTED, keyString);
-
-        if(!accepted)
+        const bool allowed = controller.mImpl->mInputFilterProcessor->IsAllowed(keyString);
+        if(!allowed)
         {
-          // The filtered key is set to empty.
           refinedKey = "";
-          // Signal emits when the character to be inserted is filtered by the accepted filter.
-          controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::ACCEPTED);
+          if(controller.mImpl->mEditableControlInterface != nullptr)
+          {
+            controller.mImpl->mEditableControlInterface->InputRejected(Text::InputFilter::RejectReason::NOT_ALLOWED);
+          }
         }
-        if(rejected)
+
+        const bool denied = controller.mImpl->mInputFilterProcessor->IsDenied(keyString);
+        if(denied)
         {
-          // The filtered key is set to empty.
           refinedKey = "";
-          // Signal emits when the character to be inserted is filtered by the rejected filter.
-          controller.mImpl->mEditableControlInterface->InputFiltered(Ui::InputFilter::Property::REJECTED);
+          if(controller.mImpl->mEditableControlInterface != nullptr)
+          {
+            controller.mImpl->mEditableControlInterface->InputRejected(Text::InputFilter::RejectReason::DENIED);
+          }
         }
       }
 

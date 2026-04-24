@@ -451,6 +451,17 @@ int InputFieldImpl::GetMaximumLength() const
   return static_cast<int>(mController->GetMaximumNumberOfCharacters());
 }
 
+void InputFieldImpl::SetInputFilter(const Text::InputFilter& inputFilter)
+{
+  DALI_LOG_RELEASE_INFO("[%p] pattern allow:%s, deny:%s\n", mController.Get(), inputFilter.GetAllowPattern().CStr(), inputFilter.GetDenyPattern().CStr());
+  mController->SetInputFilter(inputFilter);
+}
+
+void InputFieldImpl::ClearInputFilter()
+{
+  mController->ClearInputFilter();
+}
+
 void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
@@ -758,6 +769,11 @@ Signal<void(View)>& InputFieldImpl::TextChangedSignal()
 Signal<void(View)>& InputFieldImpl::MaximumLengthReachedSignal()
 {
   return mMaxLengthReachedSignal;
+}
+
+Signal<void(View, Text::InputFilter::RejectReason)>& InputFieldImpl::InputRejectedSignal()
+{
+  return mInputRejectedSignal;
 }
 
 Signal<void(View, uint32_t)>& InputFieldImpl::CursorPositionChangedSignal()
@@ -1343,10 +1359,9 @@ void InputFieldImpl::TextChanged(bool immediate)
   }
 }
 
-void InputFieldImpl::MaxLengthReached()
+void InputFieldImpl::MaximumLengthReached()
 {
-  Ui::View handle(GetOwner());
-  mMaxLengthReachedSignal.Emit(handle);
+  EmitMaximumLengthReached();
 }
 
 void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition)
@@ -1362,9 +1377,9 @@ void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
   // TODO
 }
 
-void InputFieldImpl::InputFiltered(Ui::InputFilter::Property::Type type)
+void InputFieldImpl::InputRejected(Text::InputFilter::RejectReason reason)
 {
-  // TODO
+  EmitInputRejected(reason);
 }
 
 void InputFieldImpl::TextInserted(unsigned int position, unsigned int length, const std::string& content)
@@ -1576,6 +1591,18 @@ void InputFieldImpl::EmitTextChanged()
   Ui::View handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
+}
+
+void InputFieldImpl::EmitMaximumLengthReached()
+{
+  Ui::View handle(GetOwner());
+  mMaxLengthReachedSignal.Emit(handle);
+}
+
+void InputFieldImpl::EmitInputRejected(Text::InputFilter::RejectReason reason)
+{
+  Ui::View handle(GetOwner());
+  mInputRejectedSignal.Emit(handle, reason);
 }
 
 void InputFieldImpl::EmitCursorPositionChanged()

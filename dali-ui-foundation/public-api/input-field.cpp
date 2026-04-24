@@ -308,6 +308,18 @@ int InputField::GetMaximumLength() const
   return GetImpl(*this).GetMaximumLength();
 }
 
+InputField& InputField::SetInputFilter(const Text::InputFilter& inputFilter)
+{
+  GetImpl(*this).SetInputFilter(inputFilter);
+  return *this;
+}
+
+InputField& InputField::ClearInputFilter()
+{
+  GetImpl(*this).ClearInputFilter();
+  return *this;
+}
+
 InputField& InputField::SetEditable(bool editable)
 {
   GetImpl(*this).SetEditable(editable);
@@ -545,6 +557,11 @@ Signal<void(View)>& InputField::TextChangedSignal()
 Signal<void(View)>& InputField::MaximumLengthReachedSignal()
 {
   return GetImpl(*this).MaximumLengthReachedSignal();
+}
+
+Signal<void(View, Text::InputFilter::RejectReason)>& InputField::InputRejectedSignal()
+{
+  return GetImpl(*this).InputRejectedSignal();
 }
 
 Signal<void(View, uint32_t)>& InputField::CursorPositionChangedSignal()

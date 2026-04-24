@@ -29,7 +29,6 @@
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
-#include <dali-ui-foundation/internal/text/input-filter.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
@@ -37,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
+#include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali::Ui::Text
@@ -1981,14 +1981,16 @@ public: // Queries & retrieves.
   void GetHiddenInputOption(Property::Map& options);
 
   /**
-   * @brief Used to set the input filter option
+   * @brief Sets the input filter.
+   *
+   * @param[in] inputFilter The input filter to apply.
    */
-  void SetInputFilterOption(const Property::Map& options);
+  void SetInputFilter(const Ui::Text::InputFilter& inputFilter);
 
   /**
-   * @brief Used to get the input filter option
+   * @brief Clears the input filter.
    */
-  void GetInputFilterOption(Property::Map& options);
+  void ClearInputFilter();
 
   /**
    * @brief Sets the Placeholder Properties.

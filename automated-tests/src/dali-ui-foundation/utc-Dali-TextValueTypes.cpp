@@ -1454,3 +1454,98 @@ int UtcDaliTextFitCandidateCopyAssignFromMovedN(void)
 
   END_TEST;
 }
+
+// InputFilter Tests
+
+int UtcDaliTextInputFilterP(void)
+{
+  UiTestApplication application;
+
+  // Default construction: allow and deny patterns should be empty
+  Text::InputFilter filter;
+  DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_EQUALS(filter.GetDenyPattern(), Dali::String(""), TEST_LOCATION);
+
+  // SetAllowPattern and chain return
+  Text::InputFilter& result = filter.SetAllowPattern("[\\d]");
+  DALI_TEST_CHECK(&result == &filter);
+  DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+
+  // SetDenyPattern
+  filter.SetDenyPattern("[0-5]");
+  DALI_TEST_EQUALS(filter.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextInputFilterCopyCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::InputFilter original;
+  original.SetAllowPattern("[\\d]");
+  original.SetDenyPattern("[0-5]");
+
+  Text::InputFilter copy(original);
+
+  DALI_TEST_EQUALS(copy.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextInputFilterCopyAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::InputFilter original;
+  original.SetAllowPattern("[a-z]");
+  original.SetDenyPattern("[aeiou]");
+
+  Text::InputFilter copy;
+  copy = original;
+
+  DALI_TEST_EQUALS(copy.GetAllowPattern(), Dali::String("[a-z]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetDenyPattern(), Dali::String("[aeiou]"), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(original.GetAllowPattern(), Dali::String("[a-z]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetDenyPattern(), Dali::String("[aeiou]"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextInputFilterMoveCtorP(void)
+{
+  UiTestApplication application;
+
+  Text::InputFilter original;
+  original.SetAllowPattern("[\\d]");
+  original.SetDenyPattern("[0-5]");
+
+  Text::InputFilter moved(std::move(original));
+
+  DALI_TEST_EQUALS(moved.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextInputFilterMoveAssignP(void)
+{
+  UiTestApplication application;
+
+  Text::InputFilter original;
+  original.SetAllowPattern("[A-Z]");
+  original.SetDenyPattern("[AEIOU]");
+
+  Text::InputFilter moved;
+  moved = std::move(original);
+
+  DALI_TEST_EQUALS(moved.GetAllowPattern(), Dali::String("[A-Z]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetDenyPattern(), Dali::String("[AEIOU]"), TEST_LOCATION);
+
+  END_TEST;
+}

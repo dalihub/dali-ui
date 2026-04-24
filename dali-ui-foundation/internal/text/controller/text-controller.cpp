@@ -22,9 +22,11 @@
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/string-utils.h>
 #include <memory.h>
 #include <cmath>
 #include <limits>
+#include <regex>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
@@ -1735,17 +1737,26 @@ void Controller::GetHiddenInputOption(Property::Map& options)
   }
 }
 
-void Controller::SetInputFilterOption(const Property::Map& options)
+void Controller::SetInputFilter(const Ui::Text::InputFilter& inputFilter)
 {
-  EnsureCreated(mImpl->mInputFilter);
-  mImpl->mInputFilter->SetProperties(options);
+  EnsureCreated(mImpl->mInputFilterProcessor);
+
+  std::string allowPattern;
+  std::string denyPattern;
+
+  Dali::Integration::GetStdString(inputFilter.GetAllowPattern(), allowPattern);
+  Dali::Integration::GetStdString(inputFilter.GetDenyPattern(), denyPattern);
+
+  mImpl->mInputFilterProcessor->SetAllowPattern(allowPattern);
+  mImpl->mInputFilterProcessor->SetDenyPattern(denyPattern);
 }
 
-void Controller::GetInputFilterOption(Property::Map& options)
+void Controller::ClearInputFilter()
 {
-  if(mImpl->mInputFilter)
+  if(mImpl->mInputFilterProcessor)
   {
-    mImpl->mInputFilter->GetProperties(options);
+    mImpl->mInputFilterProcessor->SetAllowPattern("");
+    mImpl->mInputFilterProcessor->SetDenyPattern("");
   }
 }
 

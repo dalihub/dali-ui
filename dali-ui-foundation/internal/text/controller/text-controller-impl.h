@@ -25,6 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/input-filter-processor.h>
 #include <dali-ui-foundation/internal/text/input-style.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
@@ -379,7 +380,7 @@ public:
     mEventData(NULL),
     mIdleCallback(NULL),
     mHiddenInput(NULL),
-    mInputFilter(nullptr),
+    mInputFilterProcessor(nullptr),
     mMetrics(),
     mFontClient(),
     mClipboard(),
@@ -1180,21 +1181,21 @@ private:
 
 public:
   // Core references / owned helpers
-  ControlInterface*            mControlInterface;           ///< Reference to the text controller.
-  EditableControlInterface*    mEditableControlInterface;   ///< Reference to the editable text controller.
-  SelectableControlInterface*  mSelectableControlInterface; ///< Reference to the selectable text controller.
-  AnchorControlInterface*      mAnchorControlInterface;     ///< Reference to the anchor controller.
-  ModelPtr                     mModel;                      ///< Pointer to the text's model.
-  FontDefaults*                mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults*           mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults*              mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
-  EmbossDefaults*              mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
-  OutlineDefaults*             mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
-  EventData*                   mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
-  CallbackBase*                mIdleCallback;               ///< Callback what would be called at idler
-  HiddenText*                  mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
-  std::unique_ptr<InputFilter> mInputFilter;                ///< Avoid allocating this when the user does not specify input filter mode.
-  MetricsPtr                   mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
+  ControlInterface*                     mControlInterface;           ///< Reference to the text controller.
+  EditableControlInterface*             mEditableControlInterface;   ///< Reference to the editable text controller.
+  SelectableControlInterface*           mSelectableControlInterface; ///< Reference to the selectable text controller.
+  AnchorControlInterface*               mAnchorControlInterface;     ///< Reference to the anchor controller.
+  ModelPtr                              mModel;                      ///< Pointer to the text's model.
+  FontDefaults*                         mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
+  UnderlineDefaults*                    mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
+  ShadowDefaults*                       mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
+  EmbossDefaults*                       mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  OutlineDefaults*                      mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
+  EventData*                            mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
+  CallbackBase*                         mIdleCallback;               ///< Callback what would be called at idler
+  HiddenText*                           mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
+  std::unique_ptr<InputFilterProcessor> mInputFilterProcessor;       ///< Avoid allocating this when the user does not specify input filter mode.
+  MetricsPtr                            mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
 
   // Main runtime objects
   TextAbstraction::FontClient mFontClient;       ///< Handle to the font client.
