@@ -219,14 +219,15 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
 // Standalone children ignore parent padding. MATCH_PARENT axes are
 // expanded to the full parent size minus the child's own margin, then
 // re-measured with the final size before arranging.
-void ArrangeStandaloneChild(ViewImpl& childImpl, IntegrationView::ChildData& childData,
+void ArrangeStandaloneChild(ViewImpl& childImpl,
                             float parentFullWidth, float parentFullHeight)
 {
-  Extents margin  = childImpl.GetMargin();
-  float   marginW = static_cast<float>(margin.start + margin.end);
-  float   marginH = static_cast<float>(margin.top + margin.bottom);
-  float   childW  = childData.measuredSize.width;
-  float   childH  = childData.measuredSize.height;
+  Extents      margin   = childImpl.GetMargin();
+  float        marginW  = static_cast<float>(margin.start + margin.end);
+  float        marginH  = static_cast<float>(margin.top + margin.bottom);
+  MeasuredSize measured = childImpl.GetMeasuredSize();
+  float        childW   = measured.width;
+  float        childH   = measured.height;
 
   if(childImpl.GetRequestedWidth() == MATCH_PARENT)
   {
@@ -245,7 +246,6 @@ void ArrangeStandaloneChild(ViewImpl& childImpl, IntegrationView::ChildData& chi
                     childImpl.GetPositionY() + static_cast<float>(margin.top),
                     childW, childH);
   childImpl.Arrange(bounds);
-  childData.arrangedBounds = bounds;
 }
 
 } // namespace
@@ -298,7 +298,19 @@ void ViewImpl::OnSceneConnection(int depth)
   mImpl->OnSceneConnection();
   CreateClippingRenderer(*this);
 
-  if(!GetParentView())
+  // Register as a layout root if this view is:
+  //   (a) the top of the view tree (no parent view), OR
+  //   (b) a standalone (boundary) view whose invalidation does not propagate
+  //       to its parent. Such a view must self-register so its pending layout
+  //       work is processed by the LayoutController on the current window.
+  //
+  // The boundary case matters when a view becomes dirty while off-scene
+  // (RegisterWithLayoutController silently no-ops without a window). Once
+  // connected to a scene here, it must register so the pending state is
+  // picked up in the new window's controller.
+  const bool isDirty = Dali::Equals(mImpl->mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY) ||
+                       mImpl->mArrangeDirty;
+  if(!GetParentView() || (IntegrationView::IsLayoutModeStandalone(*this) && isDirty))
   {
     RegisterWithLayoutController();
   }
@@ -763,9 +775,9 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   {
     float maxRight  = 0.0f;
     float maxBottom = 0.0f;
-    for(auto& childData : mImpl->mChildren)
+    for(auto& childView : mImpl->mChildren)
     {
-      ViewImpl& childImpl = GetImpl(childData.view);
+      ViewImpl& childImpl = GetImpl(childView);
 
       // Standalone children are measured by MeasureStandaloneChildren()
       // in ViewImpl::Measure() after OnMeasure returns.
@@ -780,7 +792,6 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
       float        childWidthConstraint  = std::max(0.0f, contentWidth - marginW);
       float        childHeightConstraint = std::max(0.0f, contentHeight - marginH);
       MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-      childData.measuredSize             = childSize;
 
       float childX = childImpl.GetPositionX();
       float childY = childImpl.GetPositionY();
@@ -879,9 +890,9 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
     float padTop    = static_cast<float>(mImpl->mPadding.top);
     float padBottom = static_cast<float>(mImpl->mPadding.bottom);
 
-    for(auto& childData : mImpl->mChildren)
+    for(auto& childView : mImpl->mChildren)
     {
-      ViewImpl& childImpl = GetImpl(childData.view);
+      ViewImpl& childImpl = GetImpl(childView);
 
       // Standalone children are handled by ArrangeStandaloneChildren()
       // in ViewImpl::Arrange() after OnArrange returns.
@@ -893,8 +904,10 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
       Extents margin  = childImpl.GetMargin();
       float   marginW = static_cast<float>(margin.start + margin.end);
       float   marginH = static_cast<float>(margin.top + margin.bottom);
-      float   childW  = childData.measuredSize.width;
-      float   childH  = childData.measuredSize.height;
+      // Read measured size directly from the child (set during OnMeasure).
+      MeasuredSize childMeasured = childImpl.GetMeasuredSize();
+      float        childW        = childMeasured.width;
+      float        childH        = childMeasured.height;
 
       // MATCH_PARENT: fills parent content area minus own margin.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT)
@@ -914,12 +927,11 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
       // children) reflects the real available space.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
-        childData.measuredSize = childImpl.Measure(childW, childH);
+        childImpl.Measure(childW, childH);
       }
 
       LayoutRect childBounds(childX, childY, childW, childH);
       childImpl.Arrange(childBounds);
-      childData.arrangedBounds = childBounds;
     }
   }
 
@@ -928,9 +940,9 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
 
 void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight)
 {
-  for(auto& childData : mImpl->mChildren)
+  for(auto& childView : mImpl->mChildren)
   {
-    ViewImpl& childImpl = GetImpl(childData.view);
+    ViewImpl& childImpl = GetImpl(childView);
     if(!IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
@@ -940,20 +952,20 @@ void ViewImpl::MeasureStandaloneChildren(float effectiveWidth, float effectiveHe
     float   marginH               = static_cast<float>(margin.top + margin.bottom);
     float   childWidthConstraint  = std::max(0.0f, effectiveWidth - marginW);
     float   childHeightConstraint = std::max(0.0f, effectiveHeight - marginH);
-    childData.measuredSize        = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+    childImpl.Measure(childWidthConstraint, childHeightConstraint);
   }
 }
 
 void ViewImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 {
-  for(auto& childData : mImpl->mChildren)
+  for(auto& childView : mImpl->mChildren)
   {
-    ViewImpl& childImpl = GetImpl(childData.view);
+    ViewImpl& childImpl = GetImpl(childView);
     if(!IntegrationView::IsLayoutModeStandalone(childImpl))
     {
       continue;
     }
-    ArrangeStandaloneChild(childImpl, childData, bounds.width, bounds.height);
+    ArrangeStandaloneChild(childImpl, bounds.width, bounds.height);
   }
 }
 
@@ -977,6 +989,16 @@ void ViewImpl::InvalidateMeasure()
   mImpl->mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
   mImpl->mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
   mImpl->mArrangeDirty                  = true;
+
+  // Layout boundary: a standalone view is excluded from its parent's
+  // OnMeasure/OnArrange accumulation, so its measure result cannot change
+  // the parent's measured size. Stop propagation here and register this view
+  // as its own layout root.
+  if(IntegrationView::IsLayoutModeStandalone(*this))
+  {
+    RegisterWithLayoutController();
+    return;
+  }
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1007,6 +1029,14 @@ void ViewImpl::InvalidateArrange()
   }
 
   mImpl->mArrangeDirty = true;
+
+  // Layout boundary: standalone child's arrange result does not feed back
+  // into the parent's arrangement — stop here and self-register.
+  if(IntegrationView::IsLayoutModeStandalone(*this))
+  {
+    RegisterWithLayoutController();
+    return;
+  }
 
   Ui::Layout parentLayout = GetParentLayout();
   if(parentLayout)
@@ -1226,16 +1256,13 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
   // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
   IntegrationView::ChildContainer::Iterator it;
-  if(mImpl->mChildren.Count() > 0 && (mImpl->mChildren.End() - 1)->view == child)
+  if(mImpl->mChildren.Count() > 0 && *(mImpl->mChildren.End() - 1) == child)
   {
     it = mImpl->mChildren.End() - 1;
   }
   else
   {
-    it = std::find_if(mImpl->mChildren.Begin(), mImpl->mChildren.End(), [&child](const IntegrationView::ChildData& data)
-    {
-      return data.view == child;
-    });
+    it = std::find(mImpl->mChildren.Begin(), mImpl->mChildren.End(), child);
     if(it == mImpl->mChildren.End())
     {
       // OnChildAdd did not register this child (e.g. non-View actor). Nothing
@@ -1250,9 +1277,9 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
     return;
   }
 
-  IntegrationView::ChildData data = std::move(*it);
+  Ui::View moved = std::move(*it);
   mImpl->mChildren.Erase(it);
-  mImpl->mChildren.Insert(mImpl->mChildren.Begin() + index, std::move(data));
+  mImpl->mChildren.Insert(mImpl->mChildren.Begin() + index, std::move(moved));
 
   // mChildren order affects layout output (e.g. LinearLayout visual order,
   // GridLayout cell assignment). When the child was already under this view
@@ -1267,12 +1294,12 @@ void ViewImpl::RemoveAllChildren()
 {
   {
     ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
-    for(auto& childData : mImpl->mChildren)
+    for(auto& childView : mImpl->mChildren)
     {
       // Invalidate each child's measure cache so that re-parented children
       // are re-measured under the new parent's constraints.
-      GetImpl(childData.view).InvalidateMeasure();
-      Self().Remove(childData.view);
+      GetImpl(childView).InvalidateMeasure();
+      Self().Remove(childView);
     }
   }
 
@@ -1289,7 +1316,7 @@ Ui::View ViewImpl::GetChildAt(uint32_t index) const
 {
   if(index < mImpl->mChildren.Count())
   {
-    return mImpl->mChildren[index].view;
+    return mImpl->mChildren[index];
   }
   return Ui::View();
 }
@@ -1302,7 +1329,7 @@ int32_t ViewImpl::IndexOfChild(Ui::View view) const
   }
   for(size_t i = 0; i < mImpl->mChildren.Count(); ++i)
   {
-    if(mImpl->mChildren[i].view == view)
+    if(mImpl->mChildren[i] == view)
     {
       return static_cast<int32_t>(i);
     }
@@ -1704,6 +1731,15 @@ void ViewImpl::EmitFocusChangedSignal(bool focusGained)
 
 void ViewImpl::OnSceneDisconnection()
 {
+  // When a view leaves the scene (including being removed from a parent or
+  // when its window is destroyed), remove any pending LayoutController
+  // registration. Otherwise the controller would carry a stale entry whose
+  // parent-chain is no longer in this window, and the next layout pass
+  // would process a view that is effectively orphaned. The view's destructor
+  // already calls UnregisterFromAll as a last resort, but doing it here
+  // avoids stale pending work between disconnect and destruction.
+  LayoutController::UnregisterFromAll(this);
+
   mImpl->OnSceneDisconnection();
 }
 
@@ -1717,23 +1753,35 @@ void ViewImpl::OnChildAdd(Actor& child)
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    IntegrationView::ChildData childData;
-    childData.view           = view;
-    childData.measuredSize   = {0.0f, 0.0f};
-    childData.arrangedBounds = {0.0f, 0.0f, 0.0f, 0.0f};
-    mImpl->mChildren.PushBack(childData);
+    mImpl->mChildren.PushBack(view);
+
+    ViewImpl& childImpl = GetImpl(view);
+
+    // Standalone children do not contribute to this view's OnMeasure/OnArrange
+    // accumulation, so adding one does not invalidate this view's cached
+    // measured size or arranged bounds. Skip self-invalidation in that case.
+    const bool childAffectsSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
 
     // Invalidate the child's measure cache — its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
-    GetImpl(view).InvalidateMeasure();
+    childImpl.InvalidateMeasure();
 
-    // Also invalidate this view's chain directly. The child's InvalidateMeasure
-    // may early-exit via the dirty guard if the child was already invalidated
-    // under its previous parent (reparenting of a dirty child), in which case
-    // the new parent chain would not be reached. Calling InvalidateMeasure on
-    // self guarantees the new ancestor chain is marked and the new layout root
-    // is registered. If self is already dirty, the guard makes this a no-op.
-    InvalidateMeasure();
+    if(childAffectsSelf)
+    {
+      // Also invalidate this view's chain directly. The child's
+      // InvalidateMeasure may early-exit via the dirty guard if the child was
+      // already invalidated under its previous parent (reparenting of a dirty
+      // child), in which case the new parent chain would not be reached.
+      // Calling InvalidateMeasure on self guarantees the new ancestor chain
+      // is marked and the new layout root is registered. If self is already
+      // dirty, the guard makes this a no-op.
+      //
+      // For standalone (boundary) children, this fallback is unnecessary: the
+      // child's own InvalidateMeasure registers it as a layout root (Phase 2
+      // boundary rule), and OnSceneConnection re-registers dirty boundaries
+      // that were already dirty when reparented.
+      InvalidateMeasure();
+    }
   }
   else
   {
@@ -1757,19 +1805,28 @@ void ViewImpl::OnChildRemove(Actor& child)
   Ui::View view = Ui::View::DownCast(child);
   if(view)
   {
-    auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const IntegrationView::ChildData& data)
-    {
-      return data.view == view;
-    });
+    auto it = std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), view);
     if(it != mImpl->mChildren.end())
     {
+      ViewImpl& childImpl = GetImpl(view);
+
+      // Standalone children are excluded from this view's OnMeasure/OnArrange
+      // accumulation, so removing one does not change this view's measured
+      // size or arranged bounds. Skip self-invalidation in that case to avoid
+      // an unnecessary parent chain walk.
+      const bool childWasAffectingSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
+
       // Invalidate the removed child's measure cache so that it gets
       // re-measured when re-parented to a different container.
       // Note: Actor parent-child relationship is already severed at this
       // point, so child's InvalidateMeasure cannot propagate to us.
-      GetImpl(view).InvalidateMeasure();
+      childImpl.InvalidateMeasure();
       mImpl->mChildren.Erase(it);
-      InvalidateMeasure();
+
+      if(childWasAffectingSelf)
+      {
+        InvalidateMeasure();
+      }
     }
   }
 }
@@ -1791,10 +1848,7 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
     Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
     if(view)
     {
-      auto it = std::find_if(mImpl->mChildren.begin(), mImpl->mChildren.end(), [&view](const IntegrationView::ChildData& data)
-      {
-        return data.view == view;
-      });
+      auto it = std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), view);
       if(it != mImpl->mChildren.end())
       {
         newChildren.PushBack(std::move(*it));

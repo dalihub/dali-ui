@@ -83,7 +83,7 @@ void MeasureGridChildrenAndFillAuto(IntegrationView::ChildContainer& children, f
 {
   for(auto& childData : children)
   {
-    ViewImpl& childImpl = getImpl(childData.view);
+    ViewImpl& childImpl = getImpl(childData);
 
     // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
     // at the base level; skip them in the layout manager.
@@ -107,7 +107,6 @@ void MeasureGridChildrenAndFillAuto(IntegrationView::ChildContainer& children, f
     float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    childData.measuredSize             = childSize;
 
     if(rowSpan == 1 && row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO)
     {
@@ -221,7 +220,7 @@ void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const
 {
   for(auto& childData : children)
   {
-    ViewImpl& childImpl = getImpl(childData.view);
+    ViewImpl& childImpl = getImpl(childData);
 
     // Standalone children are placed in a separate pass after the grid cells
     // have been arranged; skip them here.
@@ -259,10 +258,12 @@ void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom));
 
     // Apply child alignment within the cell (from GridLayoutParams)
-    float cellWidth   = childBounds.width;
-    float cellHeight  = childBounds.height;
-    float childWidth  = childData.measuredSize.width;
-    float childHeight = childData.measuredSize.height;
+    float cellWidth  = childBounds.width;
+    float cellHeight = childBounds.height;
+    // Read measured size directly from the child (set during the Measure pass).
+    MeasuredSize childMeasured = childImpl.GetMeasuredSize();
+    float        childWidth    = childMeasured.width;
+    float        childHeight   = childMeasured.height;
 
     LayoutAlignment hAlign = GetChildHorizontalAlignment(childImpl);
     if(childWidth > 0.0f && childWidth < cellWidth)
@@ -314,7 +315,6 @@ void ArrangeGridChildrenToCells(IntegrationView::ChildContainer& children, const
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);
-    childData.arrangedBounds = childBounds;
   }
 }
 

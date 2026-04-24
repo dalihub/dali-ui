@@ -1488,6 +1488,19 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           {
             dataImpl.mLayoutMode = mode;
             viewImpl.InvalidateMeasure();
+
+            // A layout-mode transition (DEFAULT <-> STANDALONE) changes
+            // whether this view contributes to the parent's measure/arrange.
+            // The parent's cached result is now stale in either direction,
+            // so explicitly invalidate the parent. This is needed because
+            // the self.InvalidateMeasure() above may no longer propagate
+            // (e.g. after transitioning to STANDALONE this view becomes a
+            // layout boundary and stops propagation).
+            Ui::View parentView = viewImpl.GetParentView();
+            if(parentView)
+            {
+              GetImpl(parentView).InvalidateMeasure();
+            }
           }
         }
         break;

@@ -65,18 +65,18 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
 
   for(auto& childData : children)
   {
-    if(!childData.view)
+    if(!childData)
     {
       continue;
     }
 
     // Check if the view handle is valid
-    if(!childData.view.GetObjectPtr())
+    if(!childData.GetObjectPtr())
     {
       continue;
     }
 
-    ViewImpl& childImpl = getImpl(childData.view);
+    ViewImpl& childImpl = getImpl(childData);
 
     // Check if child is using MatchParent for width or height
     bool widthIsMatchParent  = (childImpl.GetRequestedWidth() == MATCH_PARENT);
@@ -89,7 +89,6 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
 
     // Measure the child with appropriate constraints
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
-    childData.measuredSize = childSize;
 
     // For ScrollView, the measured size represents the content size which can be larger than viewport.
     // MATCH_PARENT children fill the viewport, so use the constraint as their contribution.
@@ -116,19 +115,21 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
   // The ScrollView will handle the scrolling/positioning of the content
   for(auto& childData : children)
   {
-    if(!childData.view)
+    if(!childData)
     {
       continue;
     }
-    ViewImpl& childImpl = GetImpl(childData.view);
+    ViewImpl& childImpl = GetImpl(childData);
 
     LayoutRect childBounds;
 
     // content인 경우만
-    childBounds.x      = childData.view.GetPositionX();
-    childBounds.y      = childData.view.GetPositionY();
-    childBounds.width  = childData.measuredSize.width;
-    childBounds.height = childData.measuredSize.height;
+    // Read measured size directly from the child (set during MeasureChildren).
+    MeasuredSize childMeasured = childImpl.GetMeasuredSize();
+    childBounds.x              = childData.GetPositionX();
+    childBounds.y              = childData.GetPositionY();
+    childBounds.width          = childMeasured.width;
+    childBounds.height         = childMeasured.height;
 
     // MATCH_PARENT: fill the viewport.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT)
@@ -147,7 +148,6 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
     }
     // Arrange the child
     childImpl.Arrange(childBounds);
-    childData.arrangedBounds = childBounds;
 
     if(scrollImpl != nullptr)
     {

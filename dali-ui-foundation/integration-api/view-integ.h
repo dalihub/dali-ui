@@ -43,16 +43,14 @@ namespace IntegrationView
 {
 
 /**
- * @brief Child data structure for layout calculations.
+ * @brief Container of child view handles (in add order).
+ *
+ * Per-child layout state (measured size, arranged bounds) is owned by the
+ * child view itself (ViewImpl). Layout managers that need a mutable working
+ * buffer (flex-basis/grow/shrink, stack weight distribution, etc.) allocate
+ * one locally per Measure/Arrange call.
  */
-struct ChildData
-{
-  Ui::View     view;           ///< Handle to the child view
-  MeasuredSize measuredSize;   ///< Size from Measure pass
-  LayoutRect   arrangedBounds; ///< Bounds from Arrange pass
-};
-
-using ChildContainer = Dali::Vector<ChildData>;
+using ChildContainer = Dali::Vector<Ui::View>;
 
 /**
  * @brief Adds a raw (non-View) Actor as a child of the given View.
