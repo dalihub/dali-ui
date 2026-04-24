@@ -22,10 +22,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -145,12 +145,8 @@ public:
    */
   static FlexLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
-    if(trait)
-    {
-      return static_cast<FlexLayoutParamsImpl*>(&Ui::GetImpl(trait));
-    }
-    return nullptr;
+    FlexLayoutParams params = IntegrationView::GetTrait<FlexLayoutParams>(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
+    return params ? static_cast<FlexLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
   }
 
   /**
@@ -165,10 +161,9 @@ public:
     {
       return *existing;
     }
-    IntrusivePtr<FlexLayoutParamsImpl> impl(new FlexLayoutParamsImpl());
-    Trait                              trait = Trait::DownCast(BaseHandle(impl.Get()));
-    viewImpl.SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, trait);
-    return *impl;
+    FlexLayoutParams params = FlexLayoutParams::New();
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, params);
+    return static_cast<FlexLayoutParamsImpl&>(params.GetBaseObject());
   }
 
 protected:

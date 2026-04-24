@@ -19,15 +19,20 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
 namespace Ui
 {
+
+class ViewImpl;
+
 namespace IntegrationView
 {
 
@@ -47,6 +52,51 @@ namespace IntegrationView
  * @param[in] actor The raw Actor to attach as a child.
  */
 DALI_UI_API void AddActorChild(Ui::View view, Dali::Actor actor);
+
+/**
+ * @brief Sets trait data on a View.
+ *
+ * If the stored object implements TraitInterface, lifecycle callbacks
+ * (OnBeforeAttached, OnAttached, OnDetached, OnViewDestroying) are invoked.
+ * Otherwise the object is stored without callbacks.
+ *
+ * @param[in] viewImpl The view implementation to attach to
+ * @param[in] id The key to identify the trait
+ * @param[in] handle The object to store
+ */
+DALI_UI_API void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle);
+
+/**
+ * @brief Gets trait data from a View.
+ *
+ * @param[in] viewImpl The view implementation to query
+ * @param[in] id The key to identify the trait
+ * @return The stored handle, or an empty handle if not found
+ */
+DALI_UI_API Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id);
+
+/**
+ * @brief Gets trait data from a View and DownCasts to the specified handle type.
+ *
+ * @tparam HandleType A handle class that provides a static DownCast(BaseHandle) method
+ * @param[in] viewImpl The view implementation to query
+ * @param[in] id The key to identify the trait
+ * @return The DownCast handle, or an empty handle if not found or cast fails
+ */
+template<typename HandleType>
+HandleType GetTrait(const ViewImpl& viewImpl, TraitId id)
+{
+  return HandleType::DownCast(GetTrait(viewImpl, id));
+}
+
+/**
+ * @brief Removes trait data from a View.
+ *
+ * @param[in] viewImpl The view implementation to modify
+ * @param[in] id The key to identify the trait
+ * @return true if the trait was found and removed
+ */
+DALI_UI_API bool RemoveTrait(ViewImpl& viewImpl, TraitId id);
 
 } // namespace IntegrationView
 } // namespace Ui

@@ -21,7 +21,7 @@
 #include "view-visual-data.h"
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/integration-api/trait-interface.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -436,6 +436,13 @@ TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUME
 
 DALI_TYPE_REGISTRATION_END()
 
+// === Trait lifecycle helpers ===
+
+Integration::TraitInterface* GetTraitInterface(Dali::BaseHandle& handle)
+{
+  return handle ? dynamic_cast<Integration::TraitInterface*>(&handle.GetBaseObject()) : nullptr;
+}
+
 } // unnamed namespace
 
 // clang-format off
@@ -569,14 +576,15 @@ void ViewDataImpl::NotifyTraitsViewDestroying()
 {
   for(auto& iter : mTraits)
   {
-    Ui::GetImpl(iter.second).OnViewDestroying(&mViewImpl);
+    auto* iface = GetTraitInterface(iter.second);
+    if(iface) iface->OnViewDestroying(&mViewImpl);
   }
 }
 
-void ViewDataImpl::SetTrait(TraitId id, Ui::Trait& trait)
+void ViewDataImpl::SetTrait(TraitId id, Dali::BaseHandle handle)
 {
-  Ui::View self      = Ui::View::DownCast(mViewImpl.Self());
-  auto&    traitImpl = Ui::GetImpl(trait);
+  auto*    iface = GetTraitInterface(handle);
+  Ui::View self  = Ui::View::DownCast(mViewImpl.Self());
 
   if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
   {
@@ -585,35 +593,35 @@ void ViewDataImpl::SetTrait(TraitId id, Ui::Trait& trait)
       DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
       return;
     }
-    Ui::InteractiveTraitInterface* interactiveTrait = dynamic_cast<Ui::InteractiveTraitInterface*>(&traitImpl);
-    DALI_ASSERT_ALWAYS(interactiveTrait &&
+    auto* interactive = dynamic_cast<Ui::InteractiveTraitInterface*>(&handle.GetBaseObject());
+    DALI_ASSERT_ALWAYS(interactive &&
                        "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
-    mInteractiveTrait = interactiveTrait;
+    mInteractiveTrait = interactive;
   }
 
   for(auto& entry : mTraits)
   {
     if(entry.first == id)
     {
-      auto& oldTrait = entry.second;
-      if(oldTrait == trait)
+      if(entry.second == handle)
       {
         return;
       }
-      Ui::GetImpl(oldTrait).OnDetached(id, self);
-      traitImpl.OnBeforeAttached(id, self);
-      entry.second = trait;
-      traitImpl.OnAttached(id, self);
+      auto* oldIface = GetTraitInterface(entry.second);
+      if(oldIface) oldIface->OnDetached(id, self);
+      if(iface) iface->OnBeforeAttached(id, self);
+      entry.second = handle;
+      if(iface) iface->OnAttached(id, self);
       return;
     }
   }
 
-  traitImpl.OnBeforeAttached(id, self);
-  mTraits.emplace_back(id, trait);
-  traitImpl.OnAttached(id, self);
+  if(iface) iface->OnBeforeAttached(id, self);
+  mTraits.emplace_back(id, handle);
+  if(iface) iface->OnAttached(id, self);
 }
 
-Ui::Trait ViewDataImpl::GetTrait(TraitId id) const
+Dali::BaseHandle ViewDataImpl::GetTrait(TraitId id) const
 {
   for(auto& entry : mTraits)
   {
@@ -622,7 +630,7 @@ Ui::Trait ViewDataImpl::GetTrait(TraitId id) const
       return entry.second;
     }
   }
-  return Ui::Trait();
+  return Dali::BaseHandle();
 }
 
 bool ViewDataImpl::RemoveTrait(TraitId id)
@@ -637,8 +645,9 @@ bool ViewDataImpl::RemoveTrait(TraitId id)
   {
     if(it->first == id)
     {
-      Ui::View self = Ui::View::DownCast(mViewImpl.Self());
-      Ui::GetImpl(it->second).OnDetached(id, self);
+      Ui::View self  = Ui::View::DownCast(mViewImpl.Self());
+      auto*    iface = GetTraitInterface(it->second);
+      if(iface) iface->OnDetached(id, self);
       mTraits.erase(it);
       return true;
     }

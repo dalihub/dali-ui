@@ -17,9 +17,11 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/object/base-handle.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -38,7 +40,7 @@ class LayoutParamsImpl;
  * GridLayoutParams, and StackLayoutParams. Use with
  * View::SetLayoutParams() and View::GetLayoutParams().
  */
-class DALI_UI_API LayoutParams : public Trait
+class DALI_UI_API LayoutParams : public BaseHandle
 {
 public:
   /**

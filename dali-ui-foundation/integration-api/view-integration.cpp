@@ -16,38 +16,34 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-
-LayoutParams::LayoutParams()
+namespace IntegrationView
 {
+
+void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle)
+{
+  viewImpl.GetViewDataImpl().SetTrait(id, handle);
 }
 
-LayoutParams::LayoutParams(const LayoutParams& handle)
-: BaseHandle(handle)
+Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id)
 {
+  return viewImpl.GetViewDataImpl().GetTrait(id);
 }
 
-LayoutParams::~LayoutParams()
+bool RemoveTrait(ViewImpl& viewImpl, TraitId id)
 {
+  return viewImpl.GetViewDataImpl().RemoveTrait(id);
 }
 
-LayoutParams::LayoutParams(Internal::LayoutParamsImpl* implementation)
-: BaseHandle(implementation)
-{
-}
-
-LayoutParams LayoutParams::DownCast(BaseHandle handle)
-{
-  return LayoutParams(dynamic_cast<Internal::LayoutParamsImpl*>(handle.GetObjectPtr()));
-}
-
+} // namespace IntegrationView
 } // namespace Ui
 } // namespace Dali

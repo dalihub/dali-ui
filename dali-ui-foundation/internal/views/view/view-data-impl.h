@@ -34,7 +34,6 @@
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 #include <map>
@@ -108,14 +107,28 @@ public:
   void NotifyTraitsViewDestroying();
 
   /**
-   * @brief Sets a trait to the owning View.
+   * @brief Sets a trait data to the owning View.
+   *
+   * If the stored object implements TraitInterface, lifecycle callbacks
+   * (OnBeforeAttached, OnAttached, OnDetached, OnViewDestroying) are invoked
+   * automatically. Otherwise the object is stored without callbacks.
+   *
+   * @warning Do not store Actor-derived objects as trait data. Actors are owned by
+   * the scene graph and have their own parent-child lifecycle. Storing them here
+   * causes ownership conflicts and potential dangling references.
+   *
+   * @param[in] id The key to identify the trait
+   * @param[in] handle The object to store
    */
-  void SetTrait(TraitId id, Ui::Trait& trait);
+  void SetTrait(TraitId id, Dali::BaseHandle handle);
 
   /**
-   * @brief Gets a trait from the owning View.
+   * @brief Gets a trait data from the owning View.
+   *
+   * @param[in] id The key to identify the trait
+   * @return The stored handle, or an empty handle if not found
    */
-  Ui::Trait GetTrait(TraitId id) const;
+  Dali::BaseHandle GetTrait(TraitId id) const;
 
   /**
    * @brief Removes a trait from the owning View.
@@ -473,8 +486,8 @@ public:
   bool                     mSkipChildrenUpdate;
 
   // Trait storage
-  std::vector<std::pair<TraitId, Ui::Trait>> mTraits;
-  Ui::InteractiveTraitInterface*             mInteractiveTrait;
+  std::vector<std::pair<TraitId, Dali::BaseHandle>> mTraits;
+  Ui::InteractiveTraitInterface*                    mInteractiveTrait;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData>        mVisualData;

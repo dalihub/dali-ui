@@ -22,10 +22,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -97,12 +97,8 @@ public:
    */
   static StackLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
-    if(trait)
-    {
-      return static_cast<StackLayoutParamsImpl*>(&Ui::GetImpl(trait));
-    }
-    return nullptr;
+    StackLayoutParams params = IntegrationView::GetTrait<StackLayoutParams>(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
+    return params ? static_cast<StackLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
   }
 
   /**
@@ -117,10 +113,9 @@ public:
     {
       return *existing;
     }
-    IntrusivePtr<StackLayoutParamsImpl> impl(new StackLayoutParamsImpl());
-    Trait                               trait = Trait::DownCast(BaseHandle(impl.Get()));
-    viewImpl.SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, trait);
-    return *impl;
+    StackLayoutParams params = StackLayoutParams::New();
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, params);
+    return static_cast<StackLayoutParamsImpl&>(params.GetBaseObject());
   }
 
 protected:

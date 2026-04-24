@@ -21,6 +21,7 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/trait-interface.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait.h>
 
@@ -30,25 +31,18 @@ namespace Dali
 namespace Ui
 {
 
-class View;
-class ViewImpl;
-
-namespace Internal
-{
-class ViewDataImpl;
-} // namespace Internal
-
 namespace Integration
 {
 
 /**
- * @brief Internal implementation of Trait.
+ * @brief Base implementation class for traits that need lifecycle callbacks.
+ *
+ * Inherits from BaseObject (for reference counting / BaseHandle storage)
+ * and TraitInterface (for lifecycle callbacks). All lifecycle methods have
+ * default empty implementations; subclasses override only what they need.
  */
-class DALI_UI_API TraitImpl : public BaseObject
+class DALI_UI_API TraitImpl : public BaseObject, public TraitInterface
 {
-public:
-  friend class Internal::ViewDataImpl;
-
 protected:
   /**
    * @copydoc Dali::Ui::Trait::Trait
@@ -60,53 +54,18 @@ protected:
    */
   virtual ~TraitImpl() override;
 
-  /**
-   * @brief Called when the trait is about to being attached to a host view.
-   *
-   * This method is invoked right before the trait is added to the view's internal storage.
-   *
-   * @param id The key to identify the trait
-   * @param view The host view this trait is being attached to.
-   */
-  virtual void OnBeforeAttached(TraitId id, View& view) = 0;
-
-  /**
-   * @brief Called when the trait is attached to a host view.
-   *
-   * This method is invoked after the trait is added to the view's internal storage.
-   *
-   * @param id The id to identify the trait
-   * @param view The host view this trait is being attached to.
-   */
-  virtual void OnAttached(TraitId id, View& view) = 0;
-
-  /**
-   * @brief Called when the trait is being detached from the host view.
-   *
-   * This method is invoked before the trait is removed from the view's storage
-   * or when the host view is being destroyed.
-   * Use this to release the strong reference and perform cleanup, such as
-   * disconnecting from signals to prevent dangling pointers or leaks.
-   *
-   * @note This will not be called if the attached view is being destroyed.
-   * OnViewDestroying is called instead.
-   *
-   * @param id The key to identify the trait
-   * @param view The host view this trait is being detached from.
-   */
-  virtual void OnDetached(TraitId id, View& view) = 0;
-
-  /**
-   * @brief Called when the attached View is in the process of being destroyed.
-   * At this point, member variables of ViewImpl are still accessible,
-   * but the object may no longer function as a derived type (vtable shifting).
-   *
-   * @note Do not create the View handle with the passed object, as it may interfere
-   * with the ongoing destruction process.
-   *
-   * @param viewImpl The implementation object being destroyed.
-   */
-  virtual void OnViewDestroying(ViewImpl* viewImpl) = 0;
+  void OnBeforeAttached(TraitId id, View& view) override
+  {
+  }
+  void OnAttached(TraitId id, View& view) override
+  {
+  }
+  void OnDetached(TraitId id, View& view) override
+  {
+  }
+  void OnViewDestroying(ViewImpl* viewImpl) override
+  {
+  }
 
   TraitImpl(const TraitImpl&)            = delete;
   TraitImpl(TraitImpl&&)                 = delete;

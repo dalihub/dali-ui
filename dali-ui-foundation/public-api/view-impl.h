@@ -549,21 +549,6 @@ public: // Non-virtual API (safe to reorder / extend)
   void ClearRenderEffect();
 
   /**
-   * @copydoc Ui::View::SetTrait()
-   */
-  void SetTrait(TraitId id, Trait& trait);
-
-  /**
-   * @copydoc Ui::View::GetTrait()
-   */
-  Trait GetTrait(TraitId id) const;
-
-  /**
-   * @copydoc Ui::View::RemoveTrait()
-   */
-  bool RemoveTrait(TraitId id);
-
-  /**
    * @copydoc Ui::View::EnsureInteractiveTrait()
    */
   Ui::InteractiveTrait EnsureInteractiveTrait();

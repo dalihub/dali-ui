@@ -22,10 +22,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -125,12 +125,8 @@ public:
    */
   static AbsoluteLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
-    if(trait)
-    {
-      return static_cast<AbsoluteLayoutParamsImpl*>(&Ui::GetImpl(trait));
-    }
-    return nullptr;
+    AbsoluteLayoutParams params = IntegrationView::GetTrait<AbsoluteLayoutParams>(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
+    return params ? static_cast<AbsoluteLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
   }
 
   /**
@@ -145,10 +141,9 @@ public:
     {
       return *existing;
     }
-    IntrusivePtr<AbsoluteLayoutParamsImpl> impl(new AbsoluteLayoutParamsImpl());
-    Trait                                  trait = Trait::DownCast(BaseHandle(impl.Get()));
-    viewImpl.SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, trait);
-    return *impl;
+    AbsoluteLayoutParams params = AbsoluteLayoutParams::New();
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, params);
+    return static_cast<AbsoluteLayoutParamsImpl&>(params.GetBaseObject());
   }
 
 protected:

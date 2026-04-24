@@ -54,6 +54,8 @@ public:
 
   static LayoutManagerTrait New(LayoutManager* layoutManager);
 
+  static LayoutManagerTrait DownCast(BaseHandle handle);
+
   LayoutManagerTraitImpl& GetImpl();
 
 private:

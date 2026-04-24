@@ -38,6 +38,12 @@ LayoutManagerTrait LayoutManagerTrait::New(LayoutManager* layoutManager)
   return LayoutManagerTrait(impl.Get());
 }
 
+LayoutManagerTrait LayoutManagerTrait::DownCast(BaseHandle handle)
+{
+  LayoutManagerTraitImpl* impl = dynamic_cast<LayoutManagerTraitImpl*>(handle.GetObjectPtr());
+  return impl ? LayoutManagerTrait(impl) : LayoutManagerTrait();
+}
+
 LayoutManagerTrait::LayoutManagerTrait(LayoutManagerTraitImpl* impl)
 : Trait(impl)
 {

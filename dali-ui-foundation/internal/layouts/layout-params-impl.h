@@ -19,10 +19,10 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
@@ -42,7 +42,7 @@ namespace Internal
  * Use View::SetLayoutParams() to attach params to a View
  * (which also invalidates the View's measure cache).
  */
-class LayoutParamsImpl : public Integration::TraitImpl
+class LayoutParamsImpl : public BaseObject
 {
 public:
   /**
@@ -53,28 +53,8 @@ public:
   virtual TraitId GetTraitId() const = 0;
 
 protected:
-  LayoutParamsImpl()
-  : Integration::TraitImpl()
-  {
-  }
-
+  LayoutParamsImpl()           = default;
   ~LayoutParamsImpl() override = default;
-
-  void OnBeforeAttached(TraitId, View&) override
-  {
-  }
-
-  void OnAttached(TraitId, View&) override
-  {
-  }
-
-  void OnDetached(TraitId, View&) override
-  {
-  }
-
-  void OnViewDestroying(ViewImpl*) override
-  {
-  }
 };
 
 } // namespace Internal

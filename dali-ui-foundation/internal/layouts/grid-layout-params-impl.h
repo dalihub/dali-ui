@@ -22,10 +22,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait.h>
 
 namespace Dali
 {
@@ -169,12 +169,8 @@ public:
    */
   static GridLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    Trait trait = viewImpl.GetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
-    if(trait)
-    {
-      return static_cast<GridLayoutParamsImpl*>(&Ui::GetImpl(trait));
-    }
-    return nullptr;
+    GridLayoutParams params = IntegrationView::GetTrait<GridLayoutParams>(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
+    return params ? static_cast<GridLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
   }
 
   /**
@@ -189,10 +185,9 @@ public:
     {
       return *existing;
     }
-    IntrusivePtr<GridLayoutParamsImpl> impl(new GridLayoutParamsImpl());
-    Trait                              trait = Trait::DownCast(BaseHandle(impl.Get()));
-    viewImpl.SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, trait);
-    return *impl;
+    GridLayoutParams params = GridLayoutParams::New();
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, params);
+    return static_cast<GridLayoutParamsImpl&>(params.GetBaseObject());
   }
 
 protected:

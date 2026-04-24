@@ -46,6 +46,7 @@
 #include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
@@ -194,10 +195,10 @@ void RegisterViewAccessibleGetter()
 
 Internal::LayoutCallbacksTraitImpl* GetLayoutCallbacksTrait(ViewImpl* self)
 {
-  Trait trait = self->GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
-  if(trait)
+  Dali::BaseHandle handle = self->GetViewDataImpl().GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  if(handle)
   {
-    return static_cast<Internal::LayoutCallbacksTraitImpl*>(&Ui::GetImpl(trait));
+    return static_cast<Internal::LayoutCallbacksTraitImpl*>(&handle.GetBaseObject());
   }
   return nullptr;
 }
@@ -209,7 +210,7 @@ Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
   {
     impl                                  = new Internal::LayoutCallbacksTraitImpl();
     Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(impl);
-    self->SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+    self->GetViewDataImpl().SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
   }
   return impl;
 }
@@ -348,77 +349,73 @@ ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 
 Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
 {
-  Trait existing = GetTrait(Integration::ReservedTraitId::INTERACTION_TRAIT);
+  Ui::InteractiveTrait existing = IntegrationView::GetTrait<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
 
   if(!existing)
   {
     Ui::InteractiveTrait interaction = Ui::InteractiveTrait::New();
-    SetTrait(Integration::ReservedTraitId::INTERACTION_TRAIT, interaction);
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, interaction);
 
     // Apply interaction effect only if the user has not already set one explicitly.
-    if(!GetTrait(Integration::ReservedTraitId::INTERACTION_EFFECT))
+    if(!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT))
     {
       Trait defaultEffect = Integration::UiConfigManager::Get().GetConfig().GetDefaultInteractionEffect();
       if(defaultEffect)
       {
-        SetTrait(Integration::ReservedTraitId::INTERACTION_EFFECT, defaultEffect);
+        IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, defaultEffect);
       }
     }
 
     return interaction;
   }
 
-  Ui::InteractiveTrait interaction = Ui::InteractiveTrait::DownCast(existing);
-  DALI_ASSERT_ALWAYS(interaction && "View already has a different interaction trait; cannot attach InteractiveTrait");
-  return interaction;
+  return existing;
 }
 
 void ViewImpl::SetInteractionEffect(Trait effect)
 {
   if(effect)
   {
-    SetTrait(Integration::ReservedTraitId::INTERACTION_EFFECT, effect);
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, effect);
   }
   else
   {
-    RemoveTrait(Integration::ReservedTraitId::INTERACTION_EFFECT);
+    IntegrationView::RemoveTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT);
   }
 }
 
 bool ViewImpl::IsInteractive() const
 {
-  return !!GetTrait(Integration::ReservedTraitId::INTERACTION_TRAIT);
+  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
 }
 
 Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
 {
-  Trait existing = GetTrait(Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  Ui::SelectableTrait existing = IntegrationView::GetTrait<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
 
   if(!existing)
   {
     Ui::SelectableTrait selectable = Ui::SelectableTrait::New();
-    SetTrait(Integration::ReservedTraitId::SELECTABLE_TRAIT, selectable);
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, selectable);
     return selectable;
   }
 
-  Ui::SelectableTrait selectable = Ui::SelectableTrait::DownCast(existing);
-  DALI_ASSERT_ALWAYS(selectable && "View already has a different selectable trait; cannot attach SelectableTrait");
-  return selectable;
+  return existing;
 }
 
 bool ViewImpl::IsSelectable() const
 {
-  return !!GetTrait(Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
 }
 
 void ViewImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
 {
-  Trait existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
 
   if(!existing)
   {
     Internal::StateHandlerTrait stateHandlerTrait = Internal::StateHandlerTrait::New();
-    SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
+    mImpl->SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
     existing = stateHandlerTrait;
   }
 
@@ -427,7 +424,7 @@ void ViewImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrac
 
 bool ViewImpl::UnsetStateHandler(const Dali::String& id)
 {
-  Trait existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
   if(!existing)
   {
     return false;
@@ -438,7 +435,7 @@ bool ViewImpl::UnsetStateHandler(const Dali::String& id)
 
 bool ViewImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
 {
-  Trait existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  Dali::BaseHandle existing = mImpl->GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
   if(!existing)
   {
     return false;
@@ -796,21 +793,6 @@ bool ViewImpl::IsTouchFocusable() const
 void ViewImpl::SetTouchFocusable(bool touchFocusable)
 {
   Self().SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, touchFocusable);
-}
-
-void ViewImpl::SetTrait(TraitId id, Trait& trait)
-{
-  mImpl->SetTrait(id, trait);
-}
-
-Trait ViewImpl::GetTrait(TraitId id) const
-{
-  return mImpl->GetTrait(id);
-}
-
-bool ViewImpl::RemoveTrait(TraitId id)
-{
-  return mImpl->RemoveTrait(id);
 }
 
 // =============================================================================
@@ -1557,13 +1539,13 @@ TraitId ToTraitId(LayoutParamsType type)
 
 BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
 {
-  return GetTrait(ToTraitId(type));
+  return mImpl->GetTrait(ToTraitId(type));
 }
 
 void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 {
-  auto& paramsImpl = static_cast<Internal::LayoutParamsImpl&>(Ui::GetImpl(params));
-  SetTrait(paramsImpl.GetTraitId(), params);
+  auto& paramsImpl = static_cast<Internal::LayoutParamsImpl&>(params.GetBaseObject());
+  mImpl->SetTrait(paramsImpl.GetTraitId(), params);
   InvalidateMeasure();
 }
 

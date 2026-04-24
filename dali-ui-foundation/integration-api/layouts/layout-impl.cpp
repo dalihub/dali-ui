@@ -24,6 +24,9 @@
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-integration.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h>
@@ -67,17 +70,13 @@ void LayoutImpl::SetLayoutManager(LayoutManager* layoutManager)
 {
   DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
   Internal::LayoutManagerTrait trait = Internal::LayoutManagerTrait::New(layoutManager);
-  SetTrait(ReservedTraitId::LAYOUT_MANAGER, trait);
+  IntegrationView::SetTrait(*this, ReservedTraitId::LAYOUT_MANAGER, trait);
 }
 
 Internal::LayoutManagerTraitImpl* LayoutImpl::GetLayoutManagerTrait() const
 {
-  Trait trait = const_cast<LayoutImpl*>(this)->GetTrait(ReservedTraitId::LAYOUT_MANAGER);
-  if(trait)
-  {
-    return static_cast<Internal::LayoutManagerTraitImpl*>(&Ui::GetImpl(trait));
-  }
-  return nullptr;
+  Internal::LayoutManagerTrait trait = IntegrationView::GetTrait<Internal::LayoutManagerTrait>(const_cast<LayoutImpl&>(*this), ReservedTraitId::LAYOUT_MANAGER);
+  return trait ? &trait.GetImpl() : nullptr;
 }
 
 LayoutManager* LayoutImpl::GetLayoutManager() const

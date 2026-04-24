@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/view-integration.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -169,8 +170,7 @@ void SelectableTraitImpl::DisconnectClickable()
     return;
   }
 
-  InteractiveTrait clickable = InteractiveTrait::DownCast(
-    GetImpl(owner).GetTrait(ReservedTraitId::INTERACTION_TRAIT));
+  InteractiveTrait clickable = IntegrationView::GetTrait<InteractiveTrait>(GetImpl(owner), ReservedTraitId::INTERACTION_TRAIT);
   if(clickable)
   {
     clickable.ClickedSignal().Disconnect(this, &SelectableTraitImpl::OnClickedForToggle);
