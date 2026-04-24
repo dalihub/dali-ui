@@ -22,29 +22,44 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr float STACK_SPACING   = 8.0f;
-constexpr float STACK_PADDING   = 16.0f;
-constexpr float BUTTON_HEIGHT   = 44.0f;
-constexpr float INPUT_HEIGHT    = 80.0f;
+constexpr float STACK_SPACING   = 6.0f;
+constexpr float STACK_PADDING   = 12.0f;
+constexpr float BUTTON_HEIGHT   = 36.0f;
+constexpr float INPUT_HEIGHT    = 60.0f;
+constexpr float BUTTON_SPACING  = 4.0f;
 
 constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
 constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
-constexpr uint32_t COLOR_LIGHT_BG     = 0xF2F2F2;
 constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
 constexpr uint32_t COLOR_YELLOW       = 0xFFFF00;
 constexpr uint32_t COLOR_CYAN         = 0x00FFFF;
 constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
 
-Label CreateButton(const char* text, float fontSize = 14.0f)
+Label CreateButton(const char* text, uint32_t bgColor)
 {
   return Label::New(text)
-    .SetFontSize(fontSize)
+    .SetFontSize(11.0f)
     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
     .SetVerticalTextAlignment(Text::Alignment::CENTER)
-    .SetBackgroundColor(UiColor(0x4A90D9))
-    .SetRequestedWidth(MATCH_PARENT)
+    .SetBackgroundColor(UiColor(bgColor))
+    .SetRequestedWidth(0.0f)
     .SetRequestedHeight(BUTTON_HEIGHT)
-    .SetPadding(Extents(10, 10, 10, 10));
+    .SetPadding(Extents(4, 4, 4, 4))
+    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+}
+
+View CreateButtonRow(std::initializer_list<Label> buttons)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(BUTTON_SPACING);
+
+  for(auto& btn : buttons)
+  {
+    row.Add(btn);
+  }
+  return row;
 }
 } // namespace
 
@@ -69,7 +84,7 @@ private:
     mInputField = InputField::New()
       .SetPlaceholder("Type here")
       .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))
-      .SetFontSize(24.0f)
+      .SetFontSize(20.0f)
       .SetCursorWidth(2)
       .SetCursorColor(UiColor(COLOR_DARK_TEXT))
       .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
@@ -78,7 +93,7 @@ private:
       .SetRequestedHeight(INPUT_HEIGHT)
       .SetBackgroundColor(UiColor(0xFFFFFF))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetPadding(Extents(16, 16, 16, 16))
+      .SetPadding(Extents(12, 12, 12, 12))
       .SetVerticalTextAlignment(Text::Alignment::CENTER)
       .SetFocusable(true);
 
@@ -86,98 +101,139 @@ private:
     mInputField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);
     mInputField.MaximumLengthReachedSignal().Connect(this, &InputFieldController::OnMaximumLengthReached);
     mInputField.CursorPositionChangedSignal().Connect(this, &InputFieldController::OnCursorPositionChanged);
+    mInputField.SelectionStartedSignal().Connect(this, &InputFieldController::OnSelectionStarted);
+    mInputField.SelectionChangedSignal().Connect(this, &InputFieldController::OnSelectionChanged);
+    mInputField.SelectionClearedSignal().Connect(this, &InputFieldController::OnSelectionCleared);
 
     // Status label
     mStatusLabel = Label::New()
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(80)
-      .SetFontSize(12.0f)
+      .SetRequestedHeight(60)
+      .SetFontSize(10.0f)
       .SetMultiLine(true)
       .SetBackgroundColor(UiColor(0xE8E8E8))
-      .SetPadding(Extents(16, 16, 16, 16));
+      .SetPadding(Extents(8, 8, 8, 8));
 
     UpdateStatus();
 
-    // Title button
-    Label titleButton = CreateButton("InputField Test", 16.0f)
+    // Title
+    Label titleLabel = Label::New("InputField Test")
+      .SetFontSize(14.0f)
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetTextColor(UiColor(0xFFFFFF))
       .SetBackgroundColor(UiColor(0x2C3E50))
-      .SetFocusable(true);
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(32);
 
-    // Test buttons
-    Label btn1 = CreateButton("1. Toggle Cursor Blink")
-                   .SetBackgroundColor(UiColor(0x3498DB));
+    // Cursor buttons row
+    Label btnCursorBlink = CreateButton("Cursor Blink", 0x3498DB);
+    Label btnCursorInterval = CreateButton("Blink Interval", 0x2ECC71);
+    Label btnCursorPos = CreateButton("Cursor Pos", 0xE74C3C);
+    Label btnCursorWidth = CreateButton("Cursor Width", 0x1ABC9C);
+    View cursorRow1 = CreateButtonRow({btnCursorBlink, btnCursorInterval});
+    View cursorRow2 = CreateButtonRow({btnCursorPos, btnCursorWidth});
 
-    Label btn2 = CreateButton("2. Change Cursor Blink Interval")
-                   .SetBackgroundColor(UiColor(0x2ECC71));
+    // Placeholder buttons row
+    Label btnPlaceholderFocus = CreateButton("Placeholder Focus", 0xE67E22);
+    Label btnPlaceholderColor = CreateButton("Placeholder Color", 0x9B59B6);
+    View placeholderRow = CreateButtonRow({btnPlaceholderFocus, btnPlaceholderColor});
 
-    Label btn3 = CreateButton("3. Move Cursor Position")
-                   .SetBackgroundColor(UiColor(0xE74C3C));
+    // Selection buttons row
+    Label btnSelectionColor = CreateButton("Selection Color", 0x7F8C8D);
+    Label btnSelectionEnabled = CreateButton("Selection Enable", 0x8E44AD);
+    View selectionRow1 = CreateButtonRow({btnSelectionColor, btnSelectionEnabled});
 
-    Label btn4 = CreateButton("4. Toggle Show Placeholder On Focus")
-                   .SetBackgroundColor(UiColor(0xE67E22));
+    Label btnSelectRange = CreateButton("Select Range", 0x27AE60);
+    Label btnSelectWhole = CreateButton("Select Whole", 0xE74C3C);
+    View selectionRow2 = CreateButtonRow({btnSelectRange, btnSelectWhole});
 
-    Label btn5 = CreateButton("5. Change Placeholder Color")
-                   .SetBackgroundColor(UiColor(0x9B59B6));
+    Label btnClearSelection = CreateButton("Clear Selection", 0x95A5A6);
+    View selectionRow3 = CreateButtonRow({btnClearSelection});
 
-    Label btn6 = CreateButton("6. Change Cursor Width")
-                   .SetBackgroundColor(UiColor(0x1ABC9C));
+    // Other buttons row
+    Label btnMaxLen = CreateButton("Max Length", 0xD35400);
+    Label btnEditable = CreateButton("Editable", 0x16A085);
+    View otherRow = CreateButtonRow({btnMaxLen, btnEditable});
 
-    Label btn7 = CreateButton("7. Change Selection Color")
-                   .SetBackgroundColor(UiColor(0x7F8C8D));
+    // Info button
+    Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
+    View infoRow = CreateButtonRow({btnInfo});
 
-    Label btn8 = CreateButton("8. Change Maximum Length")
-                   .SetBackgroundColor(UiColor(0xD35400));
+    // Fixed header area (title, input field, status label)
+    StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL)
+      .SetSpacing(STACK_SPACING)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .Children({
+        titleLabel,
+        mInputField,
+        mStatusLabel,
+      });
 
-    Label btn9 = CreateButton("9. Toggle Editable")
-                   .SetBackgroundColor(UiColor(0x16A085));
+    // Scrollable content area (all test buttons)
+    StackLayout scrollContent = StackLayout::New(StackOrientation::VERTICAL)
+      .SetSpacing(STACK_SPACING)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetPadding(Extents(0, 0, 0, STACK_PADDING))
+      .Children({
+        // Cursor controls
+        cursorRow1,
+        cursorRow2,
+        // Placeholder controls
+        placeholderRow,
+        // Selection controls
+        selectionRow1,
+        selectionRow2,
+        selectionRow3,
+        // Other controls
+        otherRow,
+        infoRow,
+      });
 
-    Label btn10 = CreateButton("10. Print Info (log)")
-                    .SetBackgroundColor(UiColor(0x34495E));
+    // ScrollView for test buttons
+    ScrollView scrollView = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(0.0f)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetContent(scrollContent);
 
-    Label btn11 = CreateButton("11. Toggle Selection Enabled")
-                    .SetBackgroundColor(UiColor(0x8E44AD));
+    // Root layout
+    StackLayout rootLayout = StackLayout::New(StackOrientation::VERTICAL)
+      .SetSpacing(STACK_SPACING)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .Children({
+        fixedHeader,
+        scrollView,
+      });
 
-    Label btn12 = CreateButton("12. Select Text Range")
-                    .SetBackgroundColor(UiColor(0x27AE60));
+    window.Add(rootLayout);
 
-    Label btn13 = CreateButton("13. Select Whole Text")
-                    .SetBackgroundColor(UiColor(0xE74C3C));
+    // Connect button touch signals - Cursor
+    btnCursorBlink.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorBlinkTouched);
+    btnCursorInterval.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorIntervalTouched);
+    btnCursorPos.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorPosTouched);
+    btnCursorWidth.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorWidthTouched);
 
-    Label btn14 = CreateButton("14. Clear Selection")
-                    .SetBackgroundColor(UiColor(0x95A5A6));
+    // Connect button touch signals - Placeholder
+    btnPlaceholderFocus.TouchedSignal().Connect(this, &InputFieldController::OnButtonPlaceholderFocusTouched);
+    btnPlaceholderColor.TouchedSignal().Connect(this, &InputFieldController::OnButtonPlaceholderColorTouched);
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
-          titleButton,
-          Label::New("Target InputField:").SetFontSize(14.0f),
-          mInputField,
-          Label::New("Current Status:").SetFontSize(14.0f),
-          mStatusLabel,
-          Label::New("Test Actions:").SetFontSize(14.0f),
-          btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10,
-          btn11, btn12, btn13, btn14,
-        }));
+    // Connect button touch signals - Selection
+    btnSelectionColor.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectionColorTouched);
+    btnSelectionEnabled.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectionEnabledTouched);
+    btnSelectRange.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectRangeTouched);
+    btnSelectWhole.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectWholeTouched);
+    btnClearSelection.TouchedSignal().Connect(this, &InputFieldController::OnButtonClearSelectionTouched);
 
-    // Connect button touch signals
-    btn1.TouchedSignal().Connect(this, &InputFieldController::OnButton1Touched);
-    btn2.TouchedSignal().Connect(this, &InputFieldController::OnButton2Touched);
-    btn3.TouchedSignal().Connect(this, &InputFieldController::OnButton3Touched);
-    btn4.TouchedSignal().Connect(this, &InputFieldController::OnButton4Touched);
-    btn5.TouchedSignal().Connect(this, &InputFieldController::OnButton5Touched);
-    btn6.TouchedSignal().Connect(this, &InputFieldController::OnButton6Touched);
-    btn7.TouchedSignal().Connect(this, &InputFieldController::OnButton7Touched);
-    btn8.TouchedSignal().Connect(this, &InputFieldController::OnButton8Touched);
-    btn9.TouchedSignal().Connect(this, &InputFieldController::OnButton9Touched);
-    btn10.TouchedSignal().Connect(this, &InputFieldController::OnButton10Touched);
-    btn11.TouchedSignal().Connect(this, &InputFieldController::OnButton11Touched);
-    btn12.TouchedSignal().Connect(this, &InputFieldController::OnButton12Touched);
-    btn13.TouchedSignal().Connect(this, &InputFieldController::OnButton13Touched);
-    btn14.TouchedSignal().Connect(this, &InputFieldController::OnButton14Touched);
+    // Connect button touch signals - Other
+    btnMaxLen.TouchedSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
+    btnEditable.TouchedSignal().Connect(this, &InputFieldController::OnButtonEditableTouched);
+    btnInfo.TouchedSignal().Connect(this, &InputFieldController::OnButtonInfoTouched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputFieldController::OnKeyEvent);
@@ -188,27 +244,33 @@ private:
     bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
     float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
     uint32_t cursorPosition     = mInputField.GetCursorPosition();
-    bool  showPlaceholderOnFocus = mInputField.IsPlaceholderShownOnFocus();
     int   cursorWidth           = mInputField.GetCursorWidth();
     int   maximumLength         = mInputField.GetMaximumLength();
     bool  editable              = mInputField.IsEditable();
+    bool  selectionEnabled      = mInputField.IsSelectionEnabled();
+    uint32_t selStart           = mInputField.GetSelectedTextStart();
+    uint32_t selEnd             = mInputField.GetSelectedTextEnd();
 
     Dali::String status;
-
-    status += "CursorBlink: ";
+    status += "Blink:";
     status += (cursorBlinkEnabled ? "ON" : "OFF");
-    status += ", Interval: ";
-    status += std::to_string(cursorBlinkInterval).substr(0, 5).c_str();
-    status += "\nCursorPos: ";
+    status += "(";
+    status += std::to_string(cursorBlinkInterval).substr(0, 4).c_str();
+    status += "s) Pos:";
     status += std::to_string(cursorPosition).c_str();
-    status += ", CursorWidth: ";
+    status += " W:";
     status += std::to_string(cursorWidth).c_str();
-    status += "\nShowPlaceholderOnFocus: ";
-    status += (showPlaceholderOnFocus ? "ON" : "OFF");
-    status += ", MaxLength: ";
+    status += "\nMax:";
     status += std::to_string(maximumLength).c_str();
-    status += "\nEditable: ";
+    status += " Edit:";
     status += (editable ? "ON" : "OFF");
+    status += " Sel:";
+    status += (selectionEnabled ? "ON" : "OFF");
+    status += " [";
+    status += std::to_string(selStart).c_str();
+    status += "-";
+    status += std::to_string(selEnd).c_str();
+    status += "]";
 
     mStatusLabel.SetText(status);
   }
@@ -240,278 +302,320 @@ private:
     UpdateStatus();
   }
 
-  // --- Action functions ---
-
-  void ActionToggleCursorBlink()
+  void OnSelectionStarted(View view)
   {
-    bool enabled = mInputField.IsCursorBlinkEnabled();
-    mInputField.SetCursorBlinkEnabled(!enabled);
-    DALI_LOG_ERROR("CursorBlinkEnabled: %d -> %d\n", enabled, !enabled);
+    DALI_LOG_ERROR("OnSelectionStarted\n");
+    UpdateStatusWithSelection();
+  }
+
+  void OnSelectionChanged(View view, uint32_t start, uint32_t end)
+  {
+    DALI_LOG_ERROR("OnSelectionChanged: %u-%u\n", start, end);
+    UpdateStatusWithSelection();
+  }
+
+  void OnSelectionCleared(View view)
+  {
+    DALI_LOG_ERROR("OnSelectionCleared\n");
     UpdateStatus();
   }
 
-  void ActionChangeCursorBlinkInterval()
+  void UpdateStatusWithSelection()
   {
-    float interval = mInputField.GetCursorBlinkInterval();
-    float newInterval = (interval < 0.8f) ? interval + 0.2f : 0.2f;
-    mInputField.SetCursorBlinkInterval(newInterval);
-    DALI_LOG_ERROR("CursorBlinkInterval: %f -> %f\n", interval, newInterval);
-    UpdateStatus();
-  }
+    // Get selected text and show it in status
+    Dali::String selectedText = mInputField.GetSelectedText();
+    
+    bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
+    float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
+    uint32_t cursorPosition     = mInputField.GetCursorPosition();
+    int   cursorWidth           = mInputField.GetCursorWidth();
+    int   maximumLength         = mInputField.GetMaximumLength();
+    bool  editable              = mInputField.IsEditable();
+    bool  selectionEnabled      = mInputField.IsSelectionEnabled();
+    uint32_t selStart           = mInputField.GetSelectedTextStart();
+    uint32_t selEnd             = mInputField.GetSelectedTextEnd();
 
-  void ActionMoveCursorPosition()
-  {
-    uint32_t position = mInputField.GetCursorPosition();
-    uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
-    uint32_t newPosition = (position < textLength) ? position + 1u : 0u;
-    mInputField.SetCursorPosition(newPosition);
-    DALI_LOG_ERROR("CursorPosition: %u -> %u (textLength: %u)\n", position, newPosition, textLength);
-    UpdateStatus();
-  }
-
-  void ActionToggleShowPlaceholderOnFocus()
-  {
-    bool shown = mInputField.IsPlaceholderShownOnFocus();
-    mInputField.SetShowPlaceholderOnFocus(!shown);
-    DALI_LOG_ERROR("ShowPlaceholderOnFocus: %d -> %d\n", shown, !shown);
-    UpdateStatus();
-  }
-
-  void ActionChangePlaceholderColor()
-  {
-    Vector4 currentColor = mInputField.GetPlaceholderColor().Resolve();
-    if(currentColor == UiColor(COLOR_DARK_GRAY))
+    Dali::String status;
+    status += "Blink:";
+    status += (cursorBlinkEnabled ? "ON" : "OFF");
+    status += "(";
+    status += std::to_string(cursorBlinkInterval).substr(0, 4).c_str();
+    status += "s) Pos:";
+    status += std::to_string(cursorPosition).c_str();
+    status += " W:";
+    status += std::to_string(cursorWidth).c_str();
+    status += "\nMax:";
+    status += std::to_string(maximumLength).c_str();
+    status += " Edit:";
+    status += (editable ? "ON" : "OFF");
+    status += " Sel:";
+    status += (selectionEnabled ? "ON" : "OFF");
+    status += " [";
+    status += std::to_string(selStart).c_str();
+    status += "-";
+    status += std::to_string(selEnd).c_str();
+    status += "]";
+    
+    // Add selected text if any
+    if(selectedText.Size() > 0)
     {
-      mInputField.SetPlaceholderColor(UiColor(COLOR_LIGHT_BLUE));
-      DALI_LOG_ERROR("PlaceholderColor: DARK_GRAY -> LIGHT_BLUE\n");
+      status += "\nSelected: \"";
+      status += selectedText.CStr();
+      status += "\"";
     }
-    else if(currentColor == UiColor(COLOR_LIGHT_BLUE))
-    {
-      mInputField.SetPlaceholderColor(UiColor(COLOR_YELLOW));
-      DALI_LOG_ERROR("PlaceholderColor: LIGHT_BLUE -> YELLOW\n");
-    }
-    else
-    {
-      mInputField.SetPlaceholderColor(UiColor(COLOR_DARK_GRAY));
-      DALI_LOG_ERROR("PlaceholderColor: -> DARK_GRAY\n");
-    }
-    UpdateStatus();
-  }
 
-  void ActionChangeCursorWidth()
-  {
-    int width = mInputField.GetCursorWidth();
-    int newWidth = (width < 6) ? width + 1 : 1;
-    mInputField.SetCursorWidth(newWidth);
-    DALI_LOG_ERROR("CursorWidth: %d -> %d\n", width, newWidth);
-    UpdateStatus();
-  }
-
-  void ActionChangeSelectionColor()
-  {
-    Vector4 currentColor = mInputField.GetSelectionColor().Resolve();
-    if(currentColor == UiColor(COLOR_LIGHT_BLUE))
-    {
-      mInputField.SetSelectionColor(UiColor(COLOR_CYAN));
-      DALI_LOG_ERROR("SelectionColor: LIGHT_BLUE -> CYAN\n");
-    }
-    else if(currentColor == UiColor(COLOR_CYAN))
-    {
-      mInputField.SetSelectionColor(UiColor(COLOR_MAGENTA));
-      DALI_LOG_ERROR("SelectionColor: CYAN -> MAGENTA\n");
-    }
-    else
-    {
-      mInputField.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
-      DALI_LOG_ERROR("SelectionColor: -> LIGHT_BLUE\n");
-    }
-    UpdateStatus();
-  }
-
-  void ActionChangeMaximumLength()
-  {
-    int maxLength = mInputField.GetMaximumLength();
-    int newMaxLength = (maxLength <= 10) ? 20 : (maxLength <= 20) ? 50 : 10;
-    mInputField.SetMaximumLength(newMaxLength);
-    DALI_LOG_ERROR("MaximumLength: %d -> %d\n", maxLength, newMaxLength);
-    UpdateStatus();
-  }
-
-  void ActionToggleEditable()
-  {
-    bool editable = mInputField.IsEditable();
-    mInputField.SetEditable(!editable);
-    DALI_LOG_ERROR("Editable: %d -> %d\n", editable, !editable);
-    UpdateStatus();
-  }
-
-  void ActionToggleSelectionEnabled()
-  {
-    bool enabled = mInputField.IsSelectionEnabled();
-    mInputField.SetSelectionEnabled(!enabled);
-    DALI_LOG_ERROR("SelectionEnabled: %d -> %d\n", enabled, !enabled);
-    UpdateStatus();
-  }
-
-  void ActionSelectTextRange()
-  {
-    // Select a range of text (e.g., characters 1-5)
-    uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
-    if(textLength > 0)
-    {
-      uint32_t start = 0u;
-      uint32_t end = std::min(5u, textLength);
-      mInputField.SelectText(start, end);
-      DALI_LOG_ERROR("SelectText: %u-%u (textLength: %u)\n", start, end, textLength);
-      DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
-    }
-    else
-    {
-      DALI_LOG_ERROR("No text to select\n");
-    }
-    UpdateStatus();
-  }
-
-  void ActionSelectWholeText()
-  {
-    mInputField.SelectWholeText();
-    DALI_LOG_ERROR("SelectWholeText: textLength=%zu\n", mInputField.GetText().Size());
-    DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
-    UpdateStatus();
-  }
-
-  void ActionClearSelection()
-  {
-    mInputField.ClearSelection();
-    DALI_LOG_ERROR("ClearSelection\n");
-    DALI_LOG_ERROR("SelectedTextStart: %u, SelectedTextEnd: %u\n", mInputField.GetSelectedTextStart(), mInputField.GetSelectedTextEnd());
-    UpdateStatus();
+    mStatusLabel.SetText(status);
   }
 
   // --- Button handlers ---
 
-  bool OnButton1Touched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorBlinkTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionToggleCursorBlink();
+      bool enabled = mInputField.IsCursorBlinkEnabled();
+      mInputField.SetCursorBlinkEnabled(!enabled);
+      DALI_LOG_ERROR("CursorBlinkEnabled: %d -> %d\n", enabled, !enabled);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton2Touched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorIntervalTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionChangeCursorBlinkInterval();
+      float interval = mInputField.GetCursorBlinkInterval();
+      float newInterval = (interval < 0.8f) ? interval + 0.2f : 0.2f;
+      mInputField.SetCursorBlinkInterval(newInterval);
+      DALI_LOG_ERROR("CursorBlinkInterval: %f -> %f\n", interval, newInterval);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton3Touched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorPosTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionMoveCursorPosition();
+      uint32_t position = mInputField.GetCursorPosition();
+      uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
+      uint32_t newPosition = (position < textLength) ? position + 1u : 0u;
+      mInputField.SetCursorPosition(newPosition);
+      DALI_LOG_ERROR("CursorPosition: %u -> %u\n", position, newPosition);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton4Touched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorWidthTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionToggleShowPlaceholderOnFocus();
+      int width = mInputField.GetCursorWidth();
+      int newWidth = (width < 6) ? width + 1 : 1;
+      mInputField.SetCursorWidth(newWidth);
+      DALI_LOG_ERROR("CursorWidth: %d -> %d\n", width, newWidth);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton5Touched(Actor, const TouchEvent& touch)
+  bool OnButtonPlaceholderFocusTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionChangePlaceholderColor();
+      bool shown = mInputField.IsPlaceholderShownOnFocus();
+      mInputField.SetShowPlaceholderOnFocus(!shown);
+      DALI_LOG_ERROR("ShowPlaceholderOnFocus: %d -> %d\n", shown, !shown);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton6Touched(Actor, const TouchEvent& touch)
+  bool OnButtonPlaceholderColorTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionChangeCursorWidth();
+      Vector4 currentColor = mInputField.GetPlaceholderColor().Resolve();
+      if(currentColor == UiColor(COLOR_DARK_GRAY))
+      {
+        mInputField.SetPlaceholderColor(UiColor(COLOR_LIGHT_BLUE));
+      }
+      else if(currentColor == UiColor(COLOR_LIGHT_BLUE))
+      {
+        mInputField.SetPlaceholderColor(UiColor(COLOR_YELLOW));
+      }
+      else
+      {
+        mInputField.SetPlaceholderColor(UiColor(COLOR_DARK_GRAY));
+      }
+      DALI_LOG_ERROR("PlaceholderColor changed\n");
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton7Touched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectionColorTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionChangeSelectionColor();
+      Vector4 currentColor = mInputField.GetSelectionColor().Resolve();
+      if(currentColor == UiColor(COLOR_LIGHT_BLUE))
+      {
+        mInputField.SetSelectionColor(UiColor(COLOR_CYAN));
+      }
+      else if(currentColor == UiColor(COLOR_CYAN))
+      {
+        mInputField.SetSelectionColor(UiColor(COLOR_MAGENTA));
+      }
+      else
+      {
+        mInputField.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
+      }
+      DALI_LOG_ERROR("SelectionColor changed\n");
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton8Touched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectionEnabledTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionChangeMaximumLength();
+      bool enabled = mInputField.IsSelectionEnabled();
+      mInputField.SetSelectionEnabled(!enabled);
+      DALI_LOG_ERROR("SelectionEnabled: %d -> %d\n", enabled, !enabled);
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton9Touched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectRangeTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ActionToggleEditable();
+      uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
+      if(textLength > 0)
+      {
+        uint32_t start = 0u;
+        uint32_t end = 0u;
+
+        // Cycle through different selection patterns:
+        // 0: [0, min(3, len)]       - first 3 chars
+        // 1: [0, min(5, len)]       - first 5 chars
+        // 2: [2, min(7, len)]       - middle section
+        // 3: [min(3, len), 0]       - REVERSED: end > start (first 3 chars reversed)
+        // 4: [min(5, len), min(2, len)] - REVERSED: end > start (chars 2-5 reversed)
+        // 5: [0, len]               - whole text
+        // Then cycle back to 0
+
+        switch(mSelectRangeIndex)
+        {
+          case 0:
+            start = 0u;
+            end = std::min(3u, textLength);
+            DALI_LOG_ERROR("SelectText [0-3]: %u-%u\n", start, end);
+            break;
+          case 1:
+            start = 0u;
+            end = std::min(5u, textLength);
+            DALI_LOG_ERROR("SelectText [0-5]: %u-%u\n", start, end);
+            break;
+          case 2:
+            start = std::min(2u, textLength);
+            end = std::min(7u, textLength);
+            DALI_LOG_ERROR("SelectText [2-7]: %u-%u\n", start, end);
+            break;
+          case 3:
+            // REVERSED case: end > start
+            start = std::min(3u, textLength);
+            end = 0u;
+            DALI_LOG_ERROR("SelectText REVERSED [3-0]: %u-%u (end < start)\n", start, end);
+            break;
+          case 4:
+            // REVERSED case: end > start
+            start = std::min(5u, textLength);
+            end = std::min(2u, textLength);
+            DALI_LOG_ERROR("SelectText REVERSED [5-2]: %u-%u (end < start)\n", start, end);
+            break;
+          case 5:
+            start = 0u;
+            end = textLength;
+            DALI_LOG_ERROR("SelectText [0-len]: %u-%u (whole text)\n", start, end);
+            break;
+          default:
+            mSelectRangeIndex = 0;
+            start = 0u;
+            end = std::min(3u, textLength);
+            DALI_LOG_ERROR("SelectText [0-3]: %u-%u\n", start, end);
+            break;
+        }
+
+        mInputField.SelectText(start, end);
+        mSelectRangeIndex = (mSelectRangeIndex + 1) % 6;
+      }
+      else
+      {
+        DALI_LOG_ERROR("No text to select\n");
+      }
+      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButton10Touched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectWholeTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SelectWholeText();
+      DALI_LOG_ERROR("SelectWholeText\n");
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonClearSelectionTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.ClearSelection();
+      DALI_LOG_ERROR("ClearSelection\n");
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonMaxLenTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      int maxLength = mInputField.GetMaximumLength();
+      int newMaxLength = (maxLength <= 10) ? 20 : (maxLength <= 20) ? 50 : 10;
+      mInputField.SetMaximumLength(newMaxLength);
+      DALI_LOG_ERROR("MaximumLength: %d -> %d\n", maxLength, newMaxLength);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonEditableTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      bool editable = mInputField.IsEditable();
+      mInputField.SetEditable(!editable);
+      DALI_LOG_ERROR("Editable: %d -> %d\n", editable, !editable);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonInfoTouched(Actor, const TouchEvent& touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
       PrintInputFieldInfo();
-    }
-    return true;
-  }
-
-  bool OnButton11Touched(Actor, const TouchEvent& touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      ActionToggleSelectionEnabled();
-    }
-    return true;
-  }
-
-  bool OnButton12Touched(Actor, const TouchEvent& touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      ActionSelectTextRange();
-    }
-    return true;
-  }
-
-  bool OnButton13Touched(Actor, const TouchEvent& touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      ActionSelectWholeText();
-    }
-    return true;
-  }
-
-  bool OnButton14Touched(Actor, const TouchEvent& touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      ActionClearSelection();
     }
     return true;
   }
@@ -529,47 +633,6 @@ private:
     {
       mApplication.Quit();
       return;
-    }
-
-    if(event.GetKeyName() == "1")
-    {
-      ActionToggleCursorBlink();
-    }
-    else if(event.GetKeyName() == "2")
-    {
-      ActionChangeCursorBlinkInterval();
-    }
-    else if(event.GetKeyName() == "3")
-    {
-      ActionMoveCursorPosition();
-    }
-    else if(event.GetKeyName() == "4")
-    {
-      ActionToggleShowPlaceholderOnFocus();
-    }
-    else if(event.GetKeyName() == "5")
-    {
-      ActionChangePlaceholderColor();
-    }
-    else if(event.GetKeyName() == "6")
-    {
-      ActionChangeCursorWidth();
-    }
-    else if(event.GetKeyName() == "7")
-    {
-      ActionChangeSelectionColor();
-    }
-    else if(event.GetKeyName() == "8")
-    {
-      ActionChangeMaximumLength();
-    }
-    else if(event.GetKeyName() == "9")
-    {
-      ActionToggleEditable();
-    }
-    else if(event.GetKeyName() == "0")
-    {
-      PrintInputFieldInfo();
     }
   }
 
@@ -607,6 +670,7 @@ private:
   Application& mApplication;
   InputField   mInputField;
   Label        mStatusLabel;
+  uint32_t     mSelectRangeIndex = 0;  // For cycling through selection ranges
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
