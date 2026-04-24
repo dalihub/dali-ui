@@ -45,6 +45,13 @@
   static_assert((static_cast<int>(indexNamespace::indexType::enumIndex) - static_cast<int>(indexNamespace::indexType::PROPERTY_START_INDEX)) == count, "External property index must match registration order.");
 
 /**
+ * @brief Registers a read-only property using an external property index definition.
+ */
+#define DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)                 \
+  Dali::PropertyRegistration DALI_TOKEN_PASTE(property, count)(typeRegistrationObject, text, indexNamespace::indexType::enumIndex, Dali::Property::valueType, nullptr, &objectType::GetProperty); \
+  static_assert((static_cast<int>(indexNamespace::indexType::enumIndex) - static_cast<int>(indexNamespace::indexType::PROPERTY_START_INDEX)) == count, "External property index must match registration order.");
+
+/**
  * @brief Registers an animatable property with a default value using an external property index definition.
  */
 #define DALI_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT_EXTERNAL_INTERNAL(count, typeRegistrationObject, indexNamespace, indexType, objectNamespace, objectType, text, value, enumIndex) \
@@ -70,6 +77,15 @@
  */
 #define DALI_PROPERTY_REGISTRATION_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)
+
+/**
+ * @brief Registers a read-only property using an external property index definition.
+ *
+ * This macro expects a local variable named @c typeRegistration to be available
+ * in the current scope.
+ */
+#define DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL(indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex) \
+  DALI_PROPERTY_REGISTRATION_READ_ONLY_EXTERNAL_INTERNAL(__COUNTER__, typeRegistration, indexNamespace, indexType, objectNamespace, objectType, text, valueType, enumIndex)
 
 /**
  * @brief Registers an animatable property with a default value using an external property index definition.

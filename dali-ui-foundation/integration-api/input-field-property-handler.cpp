@@ -132,21 +132,6 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT:
-    {
-      // Read-only property, ignore set.
-      break;
-    }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
-    {
-      // Read-only property, ignore set.
-      break;
-    }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
-    {
-      // Read-only property, ignore set.
-      break;
-    }
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       impl.SetMaximumLength(value.Get<int>());

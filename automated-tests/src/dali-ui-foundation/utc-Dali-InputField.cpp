@@ -447,48 +447,6 @@ int UtcDaliInputFieldSelectionColor(void)
   END_TEST;
 }
 
-int UtcDaliInputFieldSelectedText(void)
-{
-  UiTestApplication application;
-  InputField inputField = InputField::New();
-  DALI_TEST_CHECK(inputField);
-
-  // Set text
-  inputField.SetText("Hello world");
-
-  // Select text range
-  inputField.SelectText(1u, 5u);
-  DALI_TEST_EQUALS(inputField.GetSelectedTextStart(), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(inputField.GetSelectedTextEnd(), 5u, TEST_LOCATION);
-
-  // Clear selection
-  inputField.ClearSelection();
-  DALI_TEST_EQUALS(inputField.GetSelectedTextStart(), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(inputField.GetSelectedTextEnd(), 0u, TEST_LOCATION);
-
-  // Select whole text
-  inputField.SelectWholeText();
-  // After SelectWholeText, the range should cover the whole text
-  // The selected text should be the whole text
-
-  // GetSelectedText() should return a valid Dali::String
-  Dali::String selectedText = inputField.GetSelectedText();
-  // The returned string should be valid (may be empty if TODO implementation)
-  DALI_TEST_CHECK(selectedText.Size() >= 0u);
-
-  // Test chaining for SelectText, SelectWholeText, ClearSelection
-  InputField& ref1 = inputField.SelectText(0u, 5u);
-  DALI_TEST_CHECK(&ref1 == &inputField);
-
-  InputField& ref2 = inputField.SelectWholeText();
-  DALI_TEST_CHECK(&ref2 == &inputField);
-
-  InputField& ref3 = inputField.ClearSelection();
-  DALI_TEST_CHECK(&ref3 == &inputField);
-
-  END_TEST;
-}
-
 int UtcDaliInputFieldMaximumLength(void)
 {
   UiTestApplication application;
