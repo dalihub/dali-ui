@@ -9,6 +9,7 @@ SET(TC_SOURCES
         utc-Dali-ScrollView.cpp
         utc-Dali-Unit.cpp
         utc-Dali-View.cpp
+        utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp
         utc-Dali-InputField.cpp
         utc-Dali-TextValueTypes.cpp
