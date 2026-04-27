@@ -566,8 +566,8 @@ int UtcDaliFlexLayoutStandaloneExcludedFromLineP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(20.0f);
   standalone.SetRequestedHeight(20.0f);
-  standalone.SetPositionX(80.0f);
-  standalone.SetPositionY(60.0f);
+  standalone.SetRequestedPositionX(80.0f);
+  standalone.SetRequestedPositionY(60.0f);
   layout.Add(standalone);
 
   View v2 = View::New();

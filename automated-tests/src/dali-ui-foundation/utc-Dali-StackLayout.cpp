@@ -596,8 +596,8 @@ int UtcDaliStackLayoutStandaloneExcludedFromAccumulationP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(40.0f);
   standalone.SetRequestedHeight(40.0f);
-  standalone.SetPositionX(80.0f);
-  standalone.SetPositionY(90.0f);
+  standalone.SetRequestedPositionX(80.0f);
+  standalone.SetRequestedPositionY(90.0f);
   layout.Add(standalone);
 
   View normal2 = View::New();

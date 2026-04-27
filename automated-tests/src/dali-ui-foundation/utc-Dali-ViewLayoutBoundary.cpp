@@ -968,3 +968,96 @@ int UtcDaliViewLayoutBoundary_FixJUsesParentActorSize_P(void)
 
   END_TEST;
 }
+
+// T4.4: WRAP_CONTENT parent with padding does not accumulate the child's
+// arranged offset on repeated measure passes.
+//
+// Before fix: OnMeasure read childImpl.GetPositionX() which had been
+// overwritten by the previous Arrange to padLeft + margin + requested,
+// so the next WRAP_CONTENT computation added padLeft a second time.
+// After fix: OnMeasure reads GetRequestedPositionX (raw user intent),
+// so size stays stable across resizes.
+int UtcDaliViewLayoutBoundary_WrapContentPaddingNoAccumulation_P(void)
+{
+  UiTestApplication application;
+
+  // child2: WRAP_CONTENT, padding=50/50/50/50
+  // grandchild2: width=100
+  // Expected child2 width = 100 + 50 + 50 = 200, stable across passes.
+  View parent = View::New();
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+
+  View child = View::New();
+  child.SetRequestedWidth(WRAP_CONTENT);
+  child.SetRequestedHeight(200.0f);
+  child.SetPadding(Extents(50, 50, 50, 50));
+  parent.Add(child);
+
+  View grandchild = View::New();
+  grandchild.SetRequestedWidth(100.0f);
+  grandchild.SetRequestedHeight(100.0f);
+  child.Add(grandchild);
+
+  // First pass at 480-wide window
+  parent.Measure(480.0f, 800.0f);
+  parent.Arrange(LayoutRect(0, 0, 480, 800));
+  MeasuredSize firstSize = child.GetMeasuredSize();
+  DALI_TEST_EQUALS(firstSize.width, 200.0f, TEST_LOCATION);
+
+  // Simulate window resize: invalidate root and re-measure with new size
+  parent.InvalidateMeasure();
+  parent.Measure(600.0f, 800.0f);
+  parent.Arrange(LayoutRect(0, 0, 600, 800));
+  MeasuredSize secondSize = child.GetMeasuredSize();
+  DALI_TEST_EQUALS(secondSize.width, 200.0f, TEST_LOCATION);
+
+  // Third resize for good measure — should remain stable.
+  parent.InvalidateMeasure();
+  parent.Measure(720.0f, 800.0f);
+  parent.Arrange(LayoutRect(0, 0, 720, 800));
+  MeasuredSize thirdSize = child.GetMeasuredSize();
+  DALI_TEST_EQUALS(thirdSize.width, 200.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// T4.5: SetRequestedPositionX on a default-mode child must invalidate the
+// parent's measure cache. A WRAP_CONTENT parent without a LayoutManager
+// computes its size from each child's RequestedPosition + measured width
+// (maxRight). Without invalidation, repeated Measure calls would return
+// the stale cached size.
+int UtcDaliViewLayoutBoundary_SetRequestedPositionInvalidatesParentMeasure_P(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(WRAP_CONTENT);
+  parent.SetRequestedHeight(WRAP_CONTENT);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedPositionX(0.0f);
+  child.SetRequestedPositionY(0.0f);
+  parent.Add(child);
+
+  parent.Measure(1000.0f, 1000.0f);
+  parent.Arrange(LayoutRect(0, 0, 0, 0));
+  MeasuredSize firstSize = parent.GetMeasuredSize();
+  DALI_TEST_EQUALS(firstSize.width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstSize.height, 50.0f, TEST_LOCATION);
+
+  // Move child further to the right/bottom; parent's WRAP_CONTENT size must
+  // grow to include the new extent (250, 250) without an explicit
+  // InvalidateMeasure on the parent.
+  child.SetRequestedPositionX(200.0f);
+  child.SetRequestedPositionY(200.0f);
+
+  parent.Measure(1000.0f, 1000.0f);
+  MeasuredSize secondSize = parent.GetMeasuredSize();
+  DALI_TEST_EQUALS(secondSize.width, 250.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondSize.height, 250.0f, TEST_LOCATION);
+
+  END_TEST;
+}

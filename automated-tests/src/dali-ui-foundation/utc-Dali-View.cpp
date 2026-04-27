@@ -247,8 +247,8 @@ int UtcDaliViewGetPositionXP(void)
   View view = View::New();
   const float testX = 50.0f;
 
-  view.SetPositionX(testX);
-  DALI_TEST_EQUALS(view.GetPositionX(), testX, TEST_LOCATION);
+  view.SetRequestedPositionX(testX);
+  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
   END_TEST;
 }
 
@@ -258,8 +258,8 @@ int UtcDaliViewGetPositionYP(void)
   View view = View::New();
   const float testY = 75.0f;
 
-  view.SetPositionY(testY);
-  DALI_TEST_EQUALS(view.GetPositionY(), testY, TEST_LOCATION);
+  view.SetRequestedPositionY(testY);
+  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -293,9 +293,9 @@ int UtcDaliViewPositionXChainingP(void)
   View view = View::New();
   const float testX = 125.0f;
 
-  View& result = view.SetPositionX(testX);
+  View& result = view.SetRequestedPositionX(testX);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetPositionX(), testX, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
   END_TEST;
 }
 
@@ -305,9 +305,9 @@ int UtcDaliViewPositionYChainingP(void)
   View view = View::New();
   const float testY = 175.0f;
 
-  View& result = view.SetPositionY(testY);
+  View& result = view.SetRequestedPositionY(testY);
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetPositionY(), testY, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -334,15 +334,15 @@ int UtcDaliViewMultipleChainingP(void)
 
   View& result = view.SetRequestedWidth(testWidth)
                      .SetRequestedHeight(testHeight)
-                     .SetPositionX(testX)
-                     .SetPositionY(testY)
+                     .SetRequestedPositionX(testX)
+                     .SetRequestedPositionY(testY)
                      .SetBackgroundColor(testColor);
 
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetRequestedWidth(), testWidth, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetRequestedHeight(), testHeight, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetPositionX(), testX, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetPositionY(), testY, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1587,8 +1587,8 @@ int UtcDaliViewStandaloneUsesPositionP(void)
   child.SetLayoutMode(LayoutMode::STANDALONE);
   child.SetRequestedWidth(40.0f);
   child.SetRequestedHeight(30.0f);
-  child.SetPositionX(50.0f);
-  child.SetPositionY(60.0f);
+  child.SetRequestedPositionX(50.0f);
+  child.SetRequestedPositionY(60.0f);
   parent.Add(child);
 
   parent.Measure(200.0f, 150.0f);
@@ -1615,8 +1615,8 @@ int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(500.0f);
   standalone.SetRequestedHeight(500.0f);
-  standalone.SetPositionX(1000.0f);
-  standalone.SetPositionY(1000.0f);
+  standalone.SetRequestedPositionX(1000.0f);
+  standalone.SetRequestedPositionY(1000.0f);
   parent.Add(standalone);
 
   MeasuredSize size = parent.Measure(800.0f, 800.0f);
