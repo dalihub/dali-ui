@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
+#include <dali-ui-foundation/internal/ui-color-cache.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/integration-api/debug.h>
@@ -31,6 +32,7 @@ namespace Dali
 {
 namespace Ui
 {
+
 namespace Internal
 {
 
@@ -240,17 +242,36 @@ void UiColorManagerImpl::ClearBindings(void* objectPtr)
 void UiColorManagerImpl::SetColorOverride(ColorOverrideFunc func)
 {
   mColorOverride = func;
+  UiColorCache::Get().InvalidateAll();
   RefreshBindings();
 }
 
 void UiColorManagerImpl::ClearColorOverride()
 {
   mColorOverride = nullptr;
+  UiColorCache::Get().InvalidateAll();
   RefreshBindings();
+}
+
+void UiColorManagerImpl::InvalidateCache()
+{
+  UiColorCache::Get().InvalidateAll();
+}
+
+void UiColorManagerImpl::InvalidateCache(const UiColor& color)
+{
+  if(color.HasColorId())
+  {
+    // UiColor stores tokenId internally but it's private.
+    // Resolve via GetRgba() would re-populate the cache, defeating the purpose.
+    // Instead, invalidate all — this is a rare manual call, not the hot path.
+    UiColorCache::Get().InvalidateAll();
+  }
 }
 
 void UiColorManagerImpl::OnThemeChanged()
 {
+  UiColorCache::Get().InvalidateAll();
   RefreshBindings();
 }
 

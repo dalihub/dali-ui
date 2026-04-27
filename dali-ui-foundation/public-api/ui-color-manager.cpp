@@ -93,5 +93,15 @@ void UiColorManager::ClearColorOverride()
   GetImpl(*this).ClearColorOverride();
 }
 
+void UiColorManager::InvalidateCache()
+{
+  GetImpl(*this).InvalidateCache();
+}
+
+void UiColorManager::InvalidateCache(const UiColor& color)
+{
+  GetImpl(*this).InvalidateCache(color);
+}
+
 } // namespace Ui
 } // namespace Dali

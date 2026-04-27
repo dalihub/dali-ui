@@ -126,6 +126,16 @@ public:
    */
   void ClearColorOverride();
 
+  /**
+   * @copydoc Dali::Ui::UiColorManager::InvalidateCache()
+   */
+  void InvalidateCache();
+
+  /**
+   * @copydoc Dali::Ui::UiColorManager::InvalidateCache(const UiColor&)
+   */
+  void InvalidateCache(const UiColor& color);
+
 protected:
   /**
    * @brief Constructs a new UiColorManagerImpl.

@@ -260,6 +260,26 @@ public:
    */
   void ClearColorOverride();
 
+  /**
+   * @brief Invalidates all cached resolved colors.
+   *
+   * Call this when a color override function changes its internal state
+   * so that subsequent UiColor::GetRgba() calls re-resolve from the
+   * theme/override.
+   */
+  void InvalidateCache();
+
+  /**
+   * @brief Invalidates the cached resolved color for a specific UiColor.
+   *
+   * If the given UiColor holds a token, its cached value is cleared so
+   * the next GetRgba() call re-resolves from the theme/override.
+   * No-op if the UiColor holds a direct RGBA value.
+   *
+   * @param[in] color The UiColor whose cache entry should be invalidated
+   */
+  void InvalidateCache(const UiColor& color);
+
 public: // Not intended for Application developers
   /// @cond internal
   explicit UiColorManager(Internal::UiColorManagerImpl* impl);

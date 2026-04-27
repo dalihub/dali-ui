@@ -26,6 +26,7 @@
 #include <unordered_map>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/ui-color-cache.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 
 namespace Dali
@@ -39,24 +40,18 @@ const UiColor UiColor::OUTLINE("Outline");
 
 namespace
 {
+
 using TokenId = uint32_t;
 
 /**
  * @brief Registry for mapping between string color names and compact token IDs.
  *
- * UiColor stores theme color references as:
- *   - tokenId (uint32_t) + alphaMode + tokenAlpha
- * instead of embedding the original string inside the UiColor instance.
+ * Maintains bidirectional mapping:
+ *   - string color name  -> tokenId  (nameToId)
+ *   - tokenId            -> string*  (idToName, deque for pointer stability)
  *
- * This registry maintains:
- *   - string color name  -> tokenId        (nameToId)
- *   - tokenId            -> string name    (idToName)
- *
- * Notes:
- * - tokenId 0 is reserved as "invalid / not set".
- * - This helper is intentionally internal (not part of public API/ABI); it
- *   allows UiColor to use a fixed-size in-memory representation.
- * - UiColor is only used on the UI thread, so no synchronization is needed.
+ * tokenId 0 is reserved as "invalid / not set".
+ * UiColor is only used on the UI thread, so no synchronization is needed.
  */
 struct TokenRegistry
 {
@@ -70,9 +65,10 @@ struct TokenRegistry
     {
       return it->second;
     }
-    TokenId id = static_cast<TokenId>(idToName.size() + 1u); // 0 reserved for "invalid"
+    TokenId id = static_cast<TokenId>(idToName.size() + 1u);
     idToName.push_back(name);
     nameToId.emplace(name, id);
+
     return id;
   }
 
@@ -83,9 +79,10 @@ struct TokenRegistry
     {
       return it->second;
     }
-    TokenId id = static_cast<TokenId>(idToName.size() + 1u); // 0 reserved for "invalid"
+    TokenId id = static_cast<TokenId>(idToName.size() + 1u);
     nameToId.emplace(name, id);
     idToName.push_back(std::move(name));
+
     return id;
   }
 
@@ -236,25 +233,28 @@ Vector4 UiColor::GetRgba() const
 {
   if(GetType() == Type::Token)
   {
-    TokenRegistry& registry = GetTokenRegistry();
-    const String*  namePtr  = registry.TryGetName(GetTokenId());
+    const uint32_t          tokenId = GetTokenId();
+    Internal::UiColorCache& cache   = Internal::UiColorCache::Get();
 
+    // Cache hit — return cached base color with alpha applied
+    Vector4 resolved;
+    if(cache.TryGet(tokenId, resolved))
+    {
+      const float tokenAlpha = std::clamp(GetTokenAlpha(), 0.0f, 1.0f);
+      resolved.a             = std::clamp((GetAlphaMode() == AlphaMode::Multiply) ? resolved.a * tokenAlpha : tokenAlpha, 0.0f, 1.0f);
+      return resolved;
+    }
+
+    // Cache miss — full lookup via UiColorManager
+    const String* namePtr = GetTokenRegistry().TryGetName(tokenId);
     if(namePtr)
     {
-      Vector4 resolved;
       if(UiColorManager::Get().GetColor(*namePtr, resolved))
       {
+        cache.Store(tokenId, resolved);
+
         const float tokenAlpha = std::clamp(GetTokenAlpha(), 0.0f, 1.0f);
-        float       outAlpha   = resolved.a;
-        if(GetAlphaMode() == AlphaMode::Multiply)
-        {
-          outAlpha *= tokenAlpha;
-        }
-        else
-        {
-          outAlpha = tokenAlpha;
-        }
-        resolved.a = std::clamp(outAlpha, 0.0f, 1.0f);
+        resolved.a             = std::clamp((GetAlphaMode() == AlphaMode::Multiply) ? resolved.a * tokenAlpha : tokenAlpha, 0.0f, 1.0f);
         return resolved;
       }
     }
