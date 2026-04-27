@@ -57,7 +57,7 @@ Dali::Ui::PropertyBridge PropertyBridge::Get()
     if(handle)
     {
       // If so, downcast the handle
-      PropertyBridge* impl = dynamic_cast<Dali::Ui::Internal::PropertyBridge*>(handle.GetObjectPtr());
+      PropertyBridge* impl = static_cast<Dali::Ui::Internal::PropertyBridge*>(handle.GetObjectPtr());
       bridgeHandle         = Dali::Ui::PropertyBridge(impl);
     }
     else // create and register the object

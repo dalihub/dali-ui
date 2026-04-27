@@ -48,7 +48,7 @@ AtlasGlyphManager AtlasGlyphManager::Get()
     if(handle)
     {
       // If so, downcast the handle of singleton to AtlasGlyphManager
-      manager = AtlasGlyphManager(dynamic_cast<Internal::AtlasGlyphManager*>(handle.GetObjectPtr()));
+      manager = AtlasGlyphManager(static_cast<Internal::AtlasGlyphManager*>(handle.GetObjectPtr()));
     }
 
     if(!manager)

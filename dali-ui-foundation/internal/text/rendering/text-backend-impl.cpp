@@ -61,7 +61,7 @@ Dali::Ui::Text::Backend Backend::Get()
     if(handle)
     {
       // If so, downcast the handle
-      Backend* impl = dynamic_cast<Dali::Ui::Text::Internal::Backend*>(handle.GetObjectPtr());
+      Backend* impl = static_cast<Dali::Ui::Text::Internal::Backend*>(handle.GetObjectPtr());
       backendHandle = Dali::Ui::Text::Backend(impl);
     }
     else // create and register the object

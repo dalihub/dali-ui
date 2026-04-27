@@ -69,7 +69,7 @@ UiColorManager UiColorManagerImpl::Get()
     if(handle)
     {
       // If so, downcast the handle
-      manager = UiColorManager(dynamic_cast<UiColorManagerImpl*>(handle.GetObjectPtr()));
+      manager = UiColorManager(static_cast<UiColorManagerImpl*>(handle.GetObjectPtr()));
     }
     else
     {

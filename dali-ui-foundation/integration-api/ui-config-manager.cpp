@@ -51,7 +51,7 @@ UiConfigManager UiConfigManager::Get()
     if(handle)
     {
       // If so, downcast the handle of singleton to UiConfigManager
-      uiConfigManager = UiConfigManager(dynamic_cast<UiConfigManagerImpl*>(handle.GetObjectPtr()));
+      uiConfigManager = UiConfigManager(static_cast<UiConfigManagerImpl*>(handle.GetObjectPtr()));
     }
 
     if(!uiConfigManager) // If not, create the UiConfigManager and register it as a singleton

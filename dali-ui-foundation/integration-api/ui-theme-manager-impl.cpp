@@ -63,7 +63,7 @@ UiThemeManager UiThemeManagerImpl::Get()
     if(handle)
     {
       // If so, downcast the handle
-      manager = UiThemeManager(dynamic_cast<UiThemeManagerImpl*>(handle.GetObjectPtr()));
+      manager = UiThemeManager(static_cast<UiThemeManagerImpl*>(handle.GetObjectPtr()));
     }
 
     if(!manager) // If not, create the UiThemeManager and register it as a singleton

@@ -125,7 +125,7 @@ Ui::FocusManager FocusManager::Get()
     if(handle)
     {
       // If so, downcast the handle of singleton to keyboard focus manager
-      manager = Ui::FocusManager(dynamic_cast<FocusManager*>(handle.GetObjectPtr()));
+      manager = Ui::FocusManager(static_cast<FocusManager*>(handle.GetObjectPtr()));
     }
   }
 

@@ -362,7 +362,7 @@ Text::MultilanguageSupport MultilanguageSupport::Get()
     if(handle)
     {
       // If so, downcast the handle
-      MultilanguageSupport* impl = dynamic_cast<Internal::MultilanguageSupport*>(handle.GetObjectPtr());
+      MultilanguageSupport* impl = static_cast<Internal::MultilanguageSupport*>(handle.GetObjectPtr());
       multilanguageSupportHandle = Text::MultilanguageSupport(impl);
     }
     else // create and register the object
