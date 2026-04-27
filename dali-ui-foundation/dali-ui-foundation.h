@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/public-api/input-field.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/text-visualizer.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
