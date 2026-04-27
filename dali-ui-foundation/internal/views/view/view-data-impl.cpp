@@ -674,7 +674,7 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
     // When DISABLED added,
     // - PRESSED needs to be cleaned immediately
     // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
-    // When PSUEDO_DISABLED added,
+    // When PSEUDO_DISABLED added,
     // - PRESSED needs to be cleaned immediately
     // - FOCUSED can exist
     if(state.IsAnyDisabled())
