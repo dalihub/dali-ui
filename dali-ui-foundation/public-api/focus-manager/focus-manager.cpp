@@ -108,11 +108,6 @@ void FocusManager::MoveFocusBackward()
   return GetImpl(*this).MoveFocusBackward();
 }
 
-FocusManager::PreFocusChangeSignalType& FocusManager::PreFocusChangeSignal()
-{
-  return GetImpl(*this).PreFocusChangeSignal();
-}
-
 FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
 {
   return GetImpl(*this).FocusChangedSignal();

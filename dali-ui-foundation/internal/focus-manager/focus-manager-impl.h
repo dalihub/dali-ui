@@ -47,8 +47,6 @@ namespace Internal
 class FocusManager : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  typedef Ui::DevelFocusManager::CustomAlgorithmInterface CustomAlgorithmInterface;
-
   struct FocusChangeContext
   {
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
@@ -151,11 +149,6 @@ public:
   void MoveFocusBackward();
 
   /**
-   * @copydoc Ui::DevelFocusManager::SetCustomAlgorithm
-   */
-  void SetCustomAlgorithm(CustomAlgorithmInterface& interface);
-
-  /**
    * @copydoc Ui::DevelFocusManager::UseFocusIndicator
    */
   void EnableFocusIndicator(bool enable);
@@ -203,11 +196,6 @@ public:
   bool GetClearFocusOnWindowFocusLost() const;
 
 public:
-  /**
-   * @copydoc Ui::FocusManager::PreFocusChangeSignal()
-   */
-  Ui::FocusManager::PreFocusChangeSignalType& PreFocusChangeSignal();
-
   /**
    * @copydoc Ui::FocusManager::FocusChangedSignal()
    */
@@ -397,10 +385,9 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
-  Ui::FocusManager::PreFocusChangeSignalType      mPreFocusChangeSignal;      ///< The signal to notify the focus will be changed
-  Ui::FocusManager::FocusChangedSignalType        mFocusChangedSignal;        ///< The signal to notify the focus change
-  Ui::FocusManager::FocusGroupChangedSignalType   mFocusGroupChangedSignal;   ///< The signal to notify the focus group change
-  WeakHandle<View> mCurrentFocusView; ///< A weak handle to the current focused view
+  Ui::FocusManager::FocusChangedSignalType      mFocusChangedSignal;      ///< The signal to notify the focus change
+  Ui::FocusManager::FocusGroupChangedSignalType mFocusGroupChangedSignal; ///< The signal to notify the focus group change
+  WeakHandle<View>                              mCurrentFocusView;        ///< A weak handle to the current focused view
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
@@ -409,8 +396,6 @@ private:
   FocusStack mFocusHistory; ///< Stack to contain pre-focused view history
 
   SlotDelegate<FocusManager> mSlotDelegate;
-
-  CustomAlgorithmInterface* mCustomAlgorithmInterface; ///< The user's (application / ui) implementation of CustomAlgorithmInterface
 
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
 
@@ -427,9 +412,6 @@ private:
                                                   ///< directly shown when focused
 
   bool mFocusGroupLoopEnabled : 1; ///< Whether the focus movement is looped within the same focus group
-
-  bool mIsWaitingKeyboardFocusChangeCommit : 1; /// A flag to indicate PreFocusChangeSignal emitted but the proposed
-                                                /// focus actor is not committed by the application yet.
 
   bool mClearFocusOnTouch : 1; ///< Whether clear focus on touch.
 

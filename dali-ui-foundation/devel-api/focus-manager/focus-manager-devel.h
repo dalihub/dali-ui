@@ -30,45 +30,6 @@ namespace Ui
 namespace DevelFocusManager
 {
 /**
- * @brief Interface used to provide custom focus algorithm for retrieving the next focusable view.
- *
- * The application / ui can implement the interface and override the focus behaviour.
- * Upon providing an implementation of this interface, the PreFocusChangeSignal is no longer emitted.
- * If focus is changing within a layout container, then the layout container is queried first to provide
- * the next focusable view. If this does not provide a valid view, then the FocusManager will
- * check focusable properties to determine next focusable view. If focusable properties are not set,
- * then the FocusManager calls the GetNextFocusableView() method of this interface.
- */
-class CustomAlgorithmInterface
-{
-public:
-  /**
-   * @brief Virtual destructor.
-   */
-  virtual ~CustomAlgorithmInterface() {};
-
-  /**
-   * @brief Called by the FocusManager to get the next focusable view.
-   *
-   * @param[in] current The current focused view
-   * @param[in] proposed The proposed focused view
-   * @param[in] direction The direction of focus movement
-   * @param[in] deviceName The name of the device where the key event occurred.
-   * @return A handle to the next focusable view
-   */
-  virtual View GetNextFocusableView(View current, View proposed, Ui::FocusDirection direction, const Dali::String& deviceName = "") = 0;
-};
-
-/**
- * @brief Provide the implementation of custom Focus algorithm interface
- *
- * @param[in] focusManager The instance of FocusManager
- * @param[in] interface The user's implementation of CustomAlgorithmInterface
- * @see DevelFocusManager::CustomAlgorithmInterface
- */
-DALI_UI_API void SetCustomAlgorithm(FocusManager focusManager, CustomAlgorithmInterface& interface);
-
-/**
  * @brief Decide using focus indicator or not
  *
  * @param[in] focusManager The instance of FocusManager

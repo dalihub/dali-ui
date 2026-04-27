@@ -103,7 +103,6 @@ BaseHandle Create()
 
 DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, true)
 
-DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "preFocusChange", SIGNAL_PRE_FOCUS_CHANGE)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
 
@@ -133,21 +132,18 @@ Ui::FocusManager FocusManager::Get()
 }
 
 FocusManager::FocusManager()
-: mPreFocusChangeSignal(),
-  mFocusChangedSignal(),
+: mFocusChangedSignal(),
   mFocusGroupChangedSignal(),
   mCurrentFocusView(),
   mFocusIndicatorView(),
   mFocusFinderRootView(),
   mFocusHistory(),
   mSlotDelegate(this),
-  mCustomAlgorithmInterface(NULL),
   mCurrentFocusedWindow(),
   mIsFocusIndicatorShown(UNKNOWN),
   mEnableFocusIndicator(ENABLE),
   mAlwaysShowIndicator(ALWAYS_SHOW),
   mFocusGroupLoopEnabled(false),
-  mIsWaitingKeyboardFocusChangeCommit(false),
   mClearFocusOnTouch(true),
   mEnableDefaultAlgorithm(false),
   mClearFocusOnWindowFocusLost(true),
@@ -216,8 +212,6 @@ void FocusManager::GetConfiguration()
 
 bool FocusManager::SetCurrentFocusView(View view)
 {
-  DALI_ASSERT_DEBUG(!mIsWaitingKeyboardFocusChangeCommit && "Calling this function in the PreFocusChangeSignal callback?");
-
   return DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
 }
 
@@ -554,21 +548,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
 
     if(!nextFocusableView)
     {
-      // If the implementation of CustomAlgorithmInterface is provided then the PreFocusChangeSignal is no longer emitted.
-      if(mCustomAlgorithmInterface)
-      {
-        mIsWaitingKeyboardFocusChangeCommit = true;
-        nextFocusableView                   = mCustomAlgorithmInterface->GetNextFocusableView(currentFocusView, Ui::View(), direction, context.deviceName);
-        mIsWaitingKeyboardFocusChangeCommit = false;
-      }
-      else if(!mPreFocusChangeSignal.Empty())
-      {
-        // Don't know how to move the focus further. The application needs to tell us which view to move the focus to
-        mIsWaitingKeyboardFocusChangeCommit = true;
-        nextFocusableView                   = mPreFocusChangeSignal.Emit(currentFocusView, Ui::View(), direction);
-        mIsWaitingKeyboardFocusChangeCommit = false;
-      }
-      else if(mEnableDefaultAlgorithm)
+      if(mEnableDefaultAlgorithm)
       {
         Actor rootActor = mFocusFinderRootView.GetHandle();
         if(!rootActor)
@@ -630,44 +610,17 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, U
     }
     else
     {
-      View currentFocusView   = GetCurrentFocusView();
-      View committedFocusView = nextFocusableView;
-
-      // We will try to move the focus to the view. Emit a signal to notify the proposed view to focus
-      // Signal handler can check the proposed view and return a different view if it wishes.
-      if(!mPreFocusChangeSignal.Empty())
+      // Whether the next focusable view is a layout view
+      if(IsLayoutView(nextFocusableView) && nextFocusableView != layoutView)
       {
-        mIsWaitingKeyboardFocusChangeCommit = true;
-        committedFocusView                  = mPreFocusChangeSignal.Emit(currentFocusView, nextFocusableView, direction);
-        mIsWaitingKeyboardFocusChangeCommit = false;
-      }
-
-      if(committedFocusView && committedFocusView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-         committedFocusView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
-      {
-        // Whether the committed focusable view is a layout view
-        if(IsLayoutView(committedFocusView) && committedFocusView != layoutView)
-        {
-          // If so, move the focus inside it.
-          return DoMoveFocusWithinLayoutView(committedFocusView, currentFocusView, direction, context);
-        }
-        else
-        {
-          // Otherwise, just set focus to the next focusable view
-          if(committedFocusView == nextFocusableView)
-          {
-            // If the application hasn't changed our proposed view, we inform the layout view we will
-            // move the focus to what the view returns. The view might wish to perform some actions
-            // before the focus is actually moved.
-            GetImpl(layoutView).NotifyFocusChangeCommitted(committedFocusView);
-          }
-
-          return DoSetCurrentFocusView(committedFocusView, context);
-        }
+        // If so, move the focus inside it.
+        return DoMoveFocusWithinLayoutView(nextFocusableView, GetCurrentFocusView(), direction, context);
       }
       else
       {
-        return false;
+        // Inform the layout view we will move the focus to what the view returns.
+        GetImpl(layoutView).NotifyFocusChangeCommitted(nextFocusableView);
+        return DoSetCurrentFocusView(nextFocusableView, context);
       }
     }
   }
@@ -1170,11 +1123,6 @@ void FocusManager::OnSceneHolderFocusChanged(Dali::Integration::SceneHolder scen
   }
 }
 
-Ui::FocusManager::PreFocusChangeSignalType& FocusManager::PreFocusChangeSignal()
-{
-  return mPreFocusChangeSignal;
-}
-
 Ui::FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
 {
   return mFocusChangedSignal;
@@ -1197,11 +1145,7 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   bool          connected(true);
   FocusManager* manager = static_cast<FocusManager*>(object); // TypeRegistry guarantees that this is the correct type.
 
-  if(0 == strcmp(signalName.CStr(), SIGNAL_PRE_FOCUS_CHANGE))
-  {
-    manager->PreFocusChangeSignal().Connect(tracker, functor);
-  }
-  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_CHANGED))
+  if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_CHANGED))
   {
     manager->FocusChangedSignal().Connect(tracker, functor);
   }
@@ -1216,11 +1160,6 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   }
 
   return connected;
-}
-
-void FocusManager::SetCustomAlgorithm(CustomAlgorithmInterface& interface)
-{
-  mCustomAlgorithmInterface = &interface;
 }
 
 void FocusManager::EnableFocusIndicator(bool enable)

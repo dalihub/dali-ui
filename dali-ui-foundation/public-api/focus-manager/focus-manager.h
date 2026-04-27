@@ -46,16 +46,12 @@ class FocusManager;
  * Signals
  * | %Signal Name            | Method                             |
  * |-------------------------|------------------------------------|
- * | preFocusChange          | @ref PreFocusChangeSignal()        |
  * | focusChanged            | @ref FocusChangedSignal()          |
  * | focusGroupChanged       | @ref FocusGroupChangedSignal()     |
  */
 class DALI_UI_API FocusManager : public BaseHandle
 {
 public:
-  /// @brief Pre focus change signal
-  typedef Signal<View(View, View, Ui::FocusDirection)> PreFocusChangeSignalType;
-
   /// @brief Focus changed signal
   typedef Signal<void(View, View)> FocusChangedSignalType;
 
@@ -241,27 +237,6 @@ public:
   bool GetClearFocusOnWindowFocusLost() const;
 
 public: // Signals
-  /**
-   * @brief This signal is emitted before the focus is going to be changed.
-   *
-   * FocusManager makes the best guess for which view to
-   * focus towards the given direction, but applications might want to
-   * change that. By connecting with this signal, they can check the
-   * proposed view to focus and return a different view if they
-   * wish. This signal is only emitted when the navigation key is
-   * pressed and FocusManager tries to move the focus
-   * automatically. It won't be emitted for focus movement by calling
-   * SetCurrentFocusView directly.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   View YourCallbackName(View currentFocusedView, View proposedViewToFocus, FocusDirection::Direction direction);
-   * @endcode
-   * @return The signal to connect to
-   * @pre The Object has been initialized.
-   */
-  PreFocusChangeSignalType& PreFocusChangeSignal();
-
   /**
    * @brief This signal is emitted after the current focused view has been changed.
    *

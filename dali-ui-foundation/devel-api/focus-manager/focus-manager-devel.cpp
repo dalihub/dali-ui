@@ -25,11 +25,6 @@ namespace Ui
 {
 namespace DevelFocusManager
 {
-void SetCustomAlgorithm(FocusManager focusManager, CustomAlgorithmInterface& interface)
-{
-  GetImpl(focusManager).SetCustomAlgorithm(interface);
-}
-
 void EnableFocusIndicator(FocusManager focusManager, bool enable)
 {
   GetImpl(focusManager).EnableFocusIndicator(enable);
