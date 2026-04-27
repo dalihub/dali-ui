@@ -76,7 +76,7 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
-    child2.SetPositionY(200.0f);
+    child2.SetRequestedPositionY(200.0f);
     child2.SetPadding(Extents(50, 50, 50, 50));
 
     // Child 2's child: Cyan, width=100, height=100 (NOT MATCH_PARENT)
@@ -93,7 +93,7 @@ public:
     child3.SetBackgroundColor(Color::BLUE);
     child3.SetRequestedWidth(200.0f);
     child3.SetRequestedHeight(200.0f);
-    child3.SetPositionY(400.0f);
+    child3.SetRequestedPositionY(400.0f);
     child3.SetPadding(Extents(50, 50, 50, 50));
 
     // Child 3's child: Magenta, width=MATCH_PARENT, height=100

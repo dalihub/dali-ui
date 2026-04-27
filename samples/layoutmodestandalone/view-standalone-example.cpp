@@ -24,7 +24,7 @@ using namespace Dali::Ui;
  *
  * Same structure as view-margin-example, but the first child (Red) is set to
  * LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
- * SetPositionX/Y = (300, 300). It is excluded from the parent View's
+ * SetRequestedPositionX/Y = (300, 300). It is excluded from the parent View's
  * WRAP_CONTENT accumulation and placed at (300, 300) in the parent's
  * coordinate space.
  *
@@ -63,7 +63,7 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
-    child2.SetPositionY(300.0f);
+    child2.SetRequestedPositionY(300.0f);
     child2.SetMargin(Extents(50, 50, 50, 50));
 
     // Child 2's child: Yellow, 100x100
@@ -80,8 +80,8 @@ public:
     child3.SetBackgroundColor(Color::BLUE);
     child3.SetRequestedWidth(100.0f);
     child3.SetRequestedHeight(100.0f);
-    child3.SetPositionX(300.0f);
-    child3.SetPositionY(300.0f);
+    child3.SetRequestedPositionX(300.0f);
+    child3.SetRequestedPositionY(300.0f);
     child3.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(child3);
 

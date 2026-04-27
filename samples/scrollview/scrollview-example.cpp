@@ -81,8 +81,8 @@ public:
       .SetOverScrollMode(OverScrollMode::ContentScrolls)
       .SetRequestedWidth(600.0f)
       .SetRequestedHeight(1200.0f)
-      .SetPositionX(0.0f)
-      .SetPositionY(0.0f)
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(0.0f)
       .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
       .SetContent(content);
 

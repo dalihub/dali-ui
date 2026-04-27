@@ -86,8 +86,8 @@ private:
     mWebView
       .SetRequestedWidth(static_cast<float>(windowSize.GetWidth()))
       .SetRequestedHeight(static_cast<float>(windowSize.GetHeight()))
-      .SetPositionX(0.0f)
-      .SetPositionY(0.0f);
+      .SetRequestedPositionX(0.0f)
+      .SetRequestedPositionY(0.0f);
 
     window.Add(mWebView);
 

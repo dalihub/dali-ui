@@ -63,7 +63,7 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
-    child2.SetPositionY(300.0f);
+    child2.SetRequestedPositionY(300.0f);
     child2.SetMargin(Extents(50, 50, 50, 50));
 
     // Child 2's child: Yellow, 100x100
@@ -80,7 +80,7 @@ public:
     child3.SetBackgroundColor(Color::BLUE);
     child3.SetRequestedWidth(200.0f);
     child3.SetRequestedHeight(MATCH_PARENT);
-    child3.SetPositionY(600.0f);
+    child3.SetRequestedPositionY(600.0f);
     child3.SetMargin(Extents(50, 50, 50, 50));
     root.Add(child3);
 

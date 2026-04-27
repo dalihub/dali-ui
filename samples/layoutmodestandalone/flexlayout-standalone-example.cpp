@@ -23,7 +23,7 @@ using namespace Dali::Ui;
  *
  * Same structure as flexlayout-example, but the first child (Red) is set to
  * LayoutMode::STANDALONE with RequestedWidth/Height = (100, 100) and
- * SetPositionX/Y = (300, 300). It is excluded from the flex line and placed
+ * SetRequestedPositionX/Y = (300, 300). It is excluded from the flex line and placed
  * at (300, 300) in the parent's coordinate space, while Green and Blue still
  * participate in the flex row layout.
  *
@@ -69,8 +69,8 @@ public:
     blueBox.SetBackgroundColor(Color::BLUE);
     blueBox.SetRequestedWidth(100.0f);
     blueBox.SetRequestedHeight(100.0f);
-    blueBox.SetPositionX(300.0f);
-    blueBox.SetPositionY(300.0f);
+    blueBox.SetRequestedPositionX(300.0f);
+    blueBox.SetRequestedPositionY(300.0f);
     blueBox.SetLayoutMode(LayoutMode::STANDALONE);
     root.Add(blueBox);
 

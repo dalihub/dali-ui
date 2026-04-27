@@ -62,8 +62,8 @@ public:
           .SetBackgroundColor(UiColor("ThemeColor2"))
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
-          .SetPositionX(100_spx)
-          .SetPositionY(100_spx)
+          .SetRequestedPositionX(100_spx)
+          .SetRequestedPositionY(100_spx)
           .As(mSecondChild),
       }));
   }

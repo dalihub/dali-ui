@@ -58,7 +58,7 @@ public:
           .SetOpacity(0.3f)
           .SetRequestedWidth(200_spx)
           .SetRequestedHeight(200_spx)
-          .SetPositionX(220_spx)
+          .SetRequestedPositionX(220_spx)
           .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
           .As(mBlueBox),
       }));

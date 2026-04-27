@@ -62,8 +62,8 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(100.0f);
     child2.SetRequestedHeight(100.0f);
-    child2.SetPositionX(100.0f);
-    child2.SetPositionY(100.0f);
+    child2.SetRequestedPositionX(100.0f);
+    child2.SetRequestedPositionY(100.0f);
     root.Add(child2);
 
     window.Add(root);
