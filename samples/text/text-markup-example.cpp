@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -68,7 +67,6 @@ private:
     Label label = Label::DownCast(view);
     if(label)
     {
-      DALI_LOG_ERROR("OnAnchorClicked, href: %s, length: %zu\n", href.CStr(), href.Size());
     }
   }
 
@@ -82,16 +80,6 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
-    Vector4 anchorColor = label.GetAnchorColor().Resolve();
-    Vector4 anchorClickedColor = label.GetAnchorClickedColor().Resolve();
-
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("MarkupEnabled   : %d\n", label.IsMarkupEnabled());
-    DALI_LOG_ERROR("AnchorColor     : %.2f, %.2f, %.2f, %.2f\n", anchorColor.r, anchorColor.g, anchorColor.b, anchorColor.a);
-    DALI_LOG_ERROR("AnchorClicked   : %.2f, %.2f, %.2f, %.2f\n", anchorClickedColor.r, anchorClickedColor.g, anchorClickedColor.b, anchorClickedColor.a);
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void OnKeyEvent(const KeyEvent& event)
@@ -103,7 +91,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }

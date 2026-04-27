@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -172,38 +171,10 @@ private:
 
   void PrintFontVariationInfo(Label label, const char* title)
   {
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
-
-    Dali::Vector<Text::FontVariationAxis> axes = label.GetFontVariation();
-    Dali::String                          variationString = Text::FontVariation::ToString(axes);
-    DALI_LOG_ERROR("FontVariation   : %s\n", variationString.CStr());
-
-    for(std::size_t i = 0u; i < axes.Count(); i++)
-    {
-      DALI_LOG_ERROR("  Axis[%d]       : tag='%s', value=%.1f\n",
-                     i, axes[i].GetTag().CStr(), axes[i].GetValue());
-    }
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void PrintFontVariationInfo(InputField field, const char* title)
   {
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text            : %s\n", field.GetText().CStr());
-
-    Dali::Vector<Text::FontVariationAxis> axes = field.GetFontVariation();
-    Dali::String                          variationString = Text::FontVariation::ToString(axes);
-    DALI_LOG_ERROR("FontVariation   : %s\n", variationString.CStr());
-
-    for(std::size_t i = 0u; i < axes.Count(); i++)
-    {
-      DALI_LOG_ERROR("  Axis[%d]       : tag='%s', value=%.1f\n",
-                     i, axes[i].GetTag().CStr(), axes[i].GetValue());
-    }
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void SetFontFamily(Dali::String family)
@@ -241,8 +212,6 @@ private:
       mLabel700.ClearFontVariation();
       mField.ClearFontVariation();
       SetFontFamily(DEFAULT_FONT_FAMILY);
-
-      DALI_LOG_ERROR("Cleared all font variations\n");
     }
     else if(event.GetKeyName() == "2")
     {
@@ -259,8 +228,6 @@ private:
       mLabel700.SetFontVariation(axes);
       mField.SetFontVariation(axes);
       SetFontFamily(VARIABLE_FONT_FAMILY);
-
-      DALI_LOG_ERROR("Changed all font variations to wght=300, wdth=100\n");
     }
     else if(event.GetKeyName() == "3")
     {
@@ -273,8 +240,6 @@ private:
       mLabel700.SetFontVariation("wght=700,wdth=100");
       mField.SetFontVariation("wght=700,wdth=100");
       SetFontFamily(VARIABLE_FONT_FAMILY);
-
-      DALI_LOG_ERROR("Changed all font variations via string API\n");
     }
   }
 

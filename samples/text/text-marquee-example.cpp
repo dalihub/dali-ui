@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
@@ -207,19 +206,7 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text           : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("IsRunning      : %d\n", label.IsMarqueeRunning());
-    DALI_LOG_ERROR("Trigger Policy : %d\n", label.GetMarqueeTriggerPolicy());
-    DALI_LOG_ERROR("Speed          : %d\n", label.GetMarqueeSpeed());
-    DALI_LOG_ERROR("LoopCount      : %d\n", label.GetMarqueeLoopCount());
-    DALI_LOG_ERROR("LoopDelay      : %f\n", label.GetMarqueeLoopDelay());
-    DALI_LOG_ERROR("Gap            : %d\n", label.GetMarqueeGap());
-    DALI_LOG_ERROR("Orientation    : %d\n", label.GetMarqueeOrientation());
-    DALI_LOG_ERROR("StopMode       : %d\n", label.GetMarqueeStopMode());
-    DALI_LOG_ERROR("Async          : %d\n", label.IsAsyncRendering());
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
+
   }
 
   void OnKeyEvent(const KeyEvent& event)
@@ -231,7 +218,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }
@@ -247,12 +233,10 @@ private:
     else if(event.GetKeyName() == "3")
     {
       SetAsyncRenderingForAll(true);
-      DALI_LOG_ERROR("AsyncRendering\n");
     }
     else if(event.GetKeyName() == "4")
     {
       SetAsyncRenderingForAll(false);
-      DALI_LOG_ERROR("SyncRendering\n");
     }
     else if(event.GetKeyName() == "q")
     {

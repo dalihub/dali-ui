@@ -28,9 +28,7 @@
  * - Scale test timer
  */
 
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
 
 #include <array>
 #include <map>
@@ -203,7 +201,6 @@ private:
   void SetAsyncRenderingMode(bool enabled)
   {
     mAsyncRendering = enabled;
-    DALI_LOG_ERROR("[%s] %s rendering\n", TAG, enabled ? "Async" : "Sync");
 
     // Update all existing labels
     for(auto& info : mTrackedEmojiLabels)
@@ -243,8 +240,6 @@ private:
 
   void OnInit(Application& application)
   {
-    DALI_LOG_ERROR("[%s] Application OnInit\n", TAG);
-
     SetConfig();
     GenerateUI();
     GenerateEmoji();
@@ -459,8 +454,6 @@ private:
         info.descLabel.SetFontSize(mPixelSize / 3 - 1);
       }
     }
-
-    DALI_LOG_ERROR("[%s] Scale: %f\n", TAG, mScale);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1456,8 +1449,6 @@ private:
       description = "[" + emoji + "] : " + it->second;
     }
 
-    DALI_LOG_ERROR("[%s] %s\n", TAG, description.c_str());
-
     AddLog(emoji);
 
     std::string currentText = mWorkBench.GetText().CStr();
@@ -1483,7 +1474,6 @@ private:
       return false;
     }
 
-    DALI_LOG_ERROR("[%s] Clear\n", TAG);
     mWorkBench.SetText(Dali::String(""));
     return true;
   }
@@ -1495,7 +1485,6 @@ private:
       return false;
     }
 
-    DALI_LOG_ERROR("[%s] Clear Log\n", TAG);
     ClearLog(mLogView.GetChildCount() / 2);
     return true;
   }
@@ -1548,7 +1537,6 @@ private:
     {
       ClearAll();
       ScaleUpdate();
-      DALI_LOG_ERROR("[%s] Refresh\n", TAG);
     }
     else if(keyName == "Escape")
     {
@@ -1556,38 +1544,32 @@ private:
       {
         mScaleTestTimer.Stop();
         mScaleTestRunning = false;
-        DALI_LOG_ERROR("[%s] Scale Test Stop\n", TAG);
       }
       else
       {
         mScaleTestTimer.Start();
         mScaleTestRunning = true;
-        DALI_LOG_ERROR("[%s] Scale Test Start\n", TAG);
       }
     }
     else if(keyName == "1")
     {
       mScale = 1.0f;
       UpdateScaleInPlace();
-      DALI_LOG_ERROR("[%s] Scale set: 1.0\n", TAG);
     }
     else if(keyName == "2")
     {
       mScale = 2.0f;
       UpdateScaleInPlace();
-      DALI_LOG_ERROR("[%s] Scale set: 2.0\n", TAG);
     }
     else if(keyName == "3")
     {
       DecreaseScale();
       UpdateScaleInPlace();
-      DALI_LOG_ERROR("[%s] Scale down: %f\n", TAG, mScale);
     }
     else if(keyName == "4")
     {
       IncreaseScale();
       UpdateScaleInPlace();
-      DALI_LOG_ERROR("[%s] Scale up: %f\n", TAG, mScale);
     }
     else if(keyName == "9")
     {
@@ -1597,13 +1579,11 @@ private:
         mScaleTestInterval = 100;
       }
       mScaleTestTimer.SetInterval(mScaleTestInterval);
-      DALI_LOG_ERROR("[%s] Scale Test Interval Down: %d\n", TAG, mScaleTestInterval);
     }
     else if(keyName == "0")
     {
       mScaleTestInterval += 100;
       mScaleTestTimer.SetInterval(mScaleTestInterval);
-      DALI_LOG_ERROR("[%s] Scale Test Interval Up: %d\n", TAG, mScaleTestInterval);
     }
     else if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
@@ -1708,24 +1688,10 @@ private:
     {
       AddLog(item);
     }
-
-    DALI_LOG_ERROR("[%s] Scale: %f\n", TAG, mScale);
   }
 
   void PrintShortcut()
   {
-    DALI_LOG_ERROR("[%s] EMOJI TEST HELP                  \n", TAG);
-    DALI_LOG_ERROR("[%s] F1    : Help                     \n", TAG);
-    DALI_LOG_ERROR("[%s] F2    : Sync  rendering          \n", TAG);
-    DALI_LOG_ERROR("[%s] F3    : Async rendering          \n", TAG);
-    DALI_LOG_ERROR("[%s] F5    : Refresh                  \n", TAG);
-    DALI_LOG_ERROR("[%s] ESC   : Scale Test Start/Stop    \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 1 : Scale 1.0                \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 2 : Scale 2.0                \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 3 : Scale Down               \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 4 : Scale Up                 \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 9 : Scale Test Interval Down \n", TAG);
-    DALI_LOG_ERROR("[%s] Num 0 : Scale Test Interval Up   \n", TAG);
   }
 
 private:
@@ -1769,10 +1735,6 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize START\n");
-  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
-
   Application application = Application::New(&argc, &argv);
   UiConfig::New().SetLabelAsyncRendering(true).Apply();
 

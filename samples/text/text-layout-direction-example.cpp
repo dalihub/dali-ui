@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -98,7 +97,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }

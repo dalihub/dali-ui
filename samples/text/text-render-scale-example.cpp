@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 #include <algorithm>
@@ -462,7 +461,6 @@ private:
     // ESC or BACK to quit
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("ESC/BACK key pressed. Quitting.\n");
       mApplication.Quit();
       return;
     }
@@ -472,13 +470,11 @@ private:
     {
       mCurrentScale = std::max(1.0f, mCurrentScale - 0.05f);
       UpdateScaleDisplay();
-      DALI_LOG_ERROR("Scale decreased to: %.3f\n", mCurrentScale);
     }
     else if(event.GetKeyName() == "2")
     {
       mCurrentScale = std::min(2.5f, mCurrentScale + 0.05f);
       UpdateScaleDisplay();
-      DALI_LOG_ERROR("Scale increased to: %.3f\n", mCurrentScale);
     }
   }
 

@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -75,8 +73,6 @@ public:
 private:
   void OnInit(Application& application)
   {
-    DALI_LOG_ERROR("Application OnInit\n");
-
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
 
@@ -297,7 +293,6 @@ private:
     InputField field = InputField::DownCast(view);
     if(field)
     {
-      DALI_LOG_ERROR("OnTextChanged: %s\n", field.GetText().CStr());
       UpdateStatus();
     }
   }
@@ -307,38 +302,32 @@ private:
     InputField field = InputField::DownCast(view);
     if(field)
     {
-      DALI_LOG_ERROR("OnMaximumLengthReached, length: %zu\n", field.GetText().Size());
     }
   }
 
   void OnCursorPositionChanged(View view, uint32_t position)
   {
-    DALI_LOG_ERROR("OnCursorPositionChanged: %u\n", position);
     UpdateStatus();
   }
 
   void OnSelectionStarted(View view)
   {
-    DALI_LOG_ERROR("OnSelectionStarted\n");
     UpdateStatusWithSelection();
   }
 
   void OnSelectionChanged(View view, uint32_t start, uint32_t end)
   {
-    DALI_LOG_ERROR("OnSelectionChanged: %u-%u\n", start, end);
     UpdateStatusWithSelection();
   }
 
   void OnSelectionCleared(View view)
   {
-    DALI_LOG_ERROR("OnSelectionCleared\n");
     UpdateStatus();
   }
 
   void OnInputRejected(View view, Text::InputFilter::RejectReason reason)
   {
     const char* reasonStr = (reason == Text::InputFilter::RejectReason::NOT_ALLOWED) ? "NOT_ALLOWED" : "DENIED";
-    DALI_LOG_ERROR("OnInputRejected: reason=%s\n", reasonStr);
   }
 
   void UpdateStatusWithSelection()
@@ -396,7 +385,6 @@ private:
     {
       bool enabled = mInputField.IsCursorBlinkEnabled();
       mInputField.SetCursorBlinkEnabled(!enabled);
-      DALI_LOG_ERROR("CursorBlinkEnabled: %d -> %d\n", enabled, !enabled);
       UpdateStatus();
     }
     return true;
@@ -409,7 +397,6 @@ private:
       float interval = mInputField.GetCursorBlinkInterval();
       float newInterval = (interval < 0.8f) ? interval + 0.2f : 0.2f;
       mInputField.SetCursorBlinkInterval(newInterval);
-      DALI_LOG_ERROR("CursorBlinkInterval: %f -> %f\n", interval, newInterval);
       UpdateStatus();
     }
     return true;
@@ -423,7 +410,6 @@ private:
       uint32_t textLength = static_cast<uint32_t>(mInputField.GetText().Size());
       uint32_t newPosition = (position < textLength) ? position + 1u : 0u;
       mInputField.SetCursorPosition(newPosition);
-      DALI_LOG_ERROR("CursorPosition: %u -> %u\n", position, newPosition);
       UpdateStatus();
     }
     return true;
@@ -436,7 +422,6 @@ private:
       int width = mInputField.GetCursorWidth();
       int newWidth = (width < 6) ? width + 1 : 1;
       mInputField.SetCursorWidth(newWidth);
-      DALI_LOG_ERROR("CursorWidth: %d -> %d\n", width, newWidth);
       UpdateStatus();
     }
     return true;
@@ -448,7 +433,6 @@ private:
     {
       bool shown = mInputField.IsPlaceholderShownOnFocus();
       mInputField.SetShowPlaceholderOnFocus(!shown);
-      DALI_LOG_ERROR("ShowPlaceholderOnFocus: %d -> %d\n", shown, !shown);
       UpdateStatus();
     }
     return true;
@@ -471,7 +455,6 @@ private:
       {
         mInputField.SetPlaceholderColor(UiColor(COLOR_DARK_GRAY));
       }
-      DALI_LOG_ERROR("PlaceholderColor changed\n");
       UpdateStatus();
     }
     return true;
@@ -494,7 +477,6 @@ private:
       {
         mInputField.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
       }
-      DALI_LOG_ERROR("SelectionColor changed\n");
       UpdateStatus();
     }
     return true;
@@ -506,7 +488,6 @@ private:
     {
       bool enabled = mInputField.IsSelectionEnabled();
       mInputField.SetSelectionEnabled(!enabled);
-      DALI_LOG_ERROR("SelectionEnabled: %d -> %d\n", enabled, !enabled);
       UpdateStatus();
     }
     return true;
@@ -536,40 +517,33 @@ private:
           case 0:
             start = 0u;
             end = std::min(3u, textLength);
-            DALI_LOG_ERROR("SelectText [0-3]: %u-%u\n", start, end);
             break;
           case 1:
             start = 0u;
             end = std::min(5u, textLength);
-            DALI_LOG_ERROR("SelectText [0-5]: %u-%u\n", start, end);
             break;
           case 2:
             start = std::min(2u, textLength);
             end = std::min(7u, textLength);
-            DALI_LOG_ERROR("SelectText [2-7]: %u-%u\n", start, end);
             break;
           case 3:
             // REVERSED case: end > start
             start = std::min(3u, textLength);
             end = 0u;
-            DALI_LOG_ERROR("SelectText REVERSED [3-0]: %u-%u (end < start)\n", start, end);
             break;
           case 4:
             // REVERSED case: end > start
             start = std::min(5u, textLength);
             end = std::min(2u, textLength);
-            DALI_LOG_ERROR("SelectText REVERSED [5-2]: %u-%u (end < start)\n", start, end);
             break;
           case 5:
             start = 0u;
             end = textLength;
-            DALI_LOG_ERROR("SelectText [0-len]: %u-%u (whole text)\n", start, end);
             break;
           default:
             mSelectRangeIndex = 0;
             start = 0u;
             end = std::min(3u, textLength);
-            DALI_LOG_ERROR("SelectText [0-3]: %u-%u\n", start, end);
             break;
         }
 
@@ -578,7 +552,6 @@ private:
       }
       else
       {
-        DALI_LOG_ERROR("No text to select\n");
       }
       UpdateStatus();
     }
@@ -590,7 +563,6 @@ private:
     if(touch.GetState(0) == PointState::UP)
     {
       mInputField.SelectWholeText();
-      DALI_LOG_ERROR("SelectWholeText\n");
       UpdateStatus();
     }
     return true;
@@ -601,7 +573,6 @@ private:
     if(touch.GetState(0) == PointState::UP)
     {
       mInputField.ClearSelection();
-      DALI_LOG_ERROR("ClearSelection\n");
       UpdateStatus();
     }
     return true;
@@ -614,7 +585,6 @@ private:
       int maxLength = mInputField.GetMaximumLength();
       int newMaxLength = (maxLength <= 10) ? 20 : (maxLength <= 20) ? 50 : 10;
       mInputField.SetMaximumLength(newMaxLength);
-      DALI_LOG_ERROR("MaximumLength: %d -> %d\n", maxLength, newMaxLength);
       UpdateStatus();
     }
     return true;
@@ -626,7 +596,6 @@ private:
     {
       bool editable = mInputField.IsEditable();
       mInputField.SetEditable(!editable);
-      DALI_LOG_ERROR("Editable: %d -> %d\n", editable, !editable);
       UpdateStatus();
     }
     return true;
@@ -641,7 +610,6 @@ private:
       mInputField.SetInputFilter(inputFilter);
       mInputFilterSet = true;
       mInputField.InputRejectedSignal().Connect(this, &InputFieldController::OnInputRejected);
-      DALI_LOG_ERROR("SetInputFilter: allow=[\\d], deny=[0-5] (only 6,7,8,9 allowed)\n");
       UpdateStatus();
     }
     return true;
@@ -654,7 +622,6 @@ private:
       mInputField.ClearInputFilter();
       mInputFilterSet = false;
       mInputField.InputRejectedSignal().Disconnect(this, &InputFieldController::OnInputRejected);
-      DALI_LOG_ERROR("ClearInputFilter\n");
       UpdateStatus();
     }
     return true;
@@ -687,32 +654,6 @@ private:
 
   void PrintInputFieldInfo()
   {
-    Vector4 textColor        = mInputField.GetTextColor().Resolve();
-    Vector4 placeholderColor = mInputField.GetPlaceholderColor().Resolve();
-    Vector4 cursorColor      = mInputField.GetCursorColor().Resolve();
-    Vector4 selectionColor   = mInputField.GetSelectionColor().Resolve();
-
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("InputField Info\n");
-    DALI_LOG_ERROR("Text                  : %s\n", mInputField.GetText().CStr());
-    DALI_LOG_ERROR("Placeholder           : %s\n", mInputField.GetPlaceholder().CStr());
-    DALI_LOG_ERROR("PlaceholderColor      : %.2f, %.2f, %.2f, %.2f\n", placeholderColor.r, placeholderColor.g, placeholderColor.b, placeholderColor.a);
-    DALI_LOG_ERROR("ShowPlaceholderOnFocus: %d\n", mInputField.IsPlaceholderShownOnFocus());
-    DALI_LOG_ERROR("CursorWidth           : %d\n", mInputField.GetCursorWidth());
-    DALI_LOG_ERROR("CursorBlinkEnabled    : %d\n", mInputField.IsCursorBlinkEnabled());
-    DALI_LOG_ERROR("CursorBlinkInterval   : %f\n", mInputField.GetCursorBlinkInterval());
-    DALI_LOG_ERROR("CursorPosition        : %u\n", mInputField.GetCursorPosition());
-    DALI_LOG_ERROR("CursorColor           : %.2f, %.2f, %.2f, %.2f\n", cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a);
-    DALI_LOG_ERROR("SelectionColor        : %.2f, %.2f, %.2f, %.2f\n", selectionColor.r, selectionColor.g, selectionColor.b, selectionColor.a);
-    DALI_LOG_ERROR("SelectionEnabled      : %d\n", mInputField.IsSelectionEnabled());
-    DALI_LOG_ERROR("SelectedText          : %s\n", mInputField.GetSelectedText().CStr());
-    DALI_LOG_ERROR("SelectedTextStart     : %u\n", mInputField.GetSelectedTextStart());
-    DALI_LOG_ERROR("SelectedTextEnd       : %u\n", mInputField.GetSelectedTextEnd());
-    DALI_LOG_ERROR("MaximumLength         : %d\n", mInputField.GetMaximumLength());
-    DALI_LOG_ERROR("Editable              : %d\n", mInputField.IsEditable());
-    DALI_LOG_ERROR("TextColor             : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
-    DALI_LOG_ERROR("FontSize              : %f\n", mInputField.GetFontSize());
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
 private:
@@ -725,10 +666,6 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize START\n");
-  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
-
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
 

@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -61,8 +59,6 @@ public:
 private:
   void OnInit(Application& application)
   {
-    DALI_LOG_ERROR("Application OnInit\n");
-
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_WHITE));
 
@@ -101,8 +97,6 @@ private:
     Label label = Label::DownCast(view);
     if(label)
     {
-      DALI_LOG_ERROR("OnAsyncRenderFinished: %s\n", label.GetText().CStr());
-      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
     }
   }
 
@@ -111,8 +105,6 @@ private:
     Label label = Label::DownCast(view);
     if(label)
     {
-      DALI_LOG_ERROR("OnAsyncNaturalSize: %s\n", label.GetText().CStr());
-      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
     }
   }
 
@@ -121,8 +113,6 @@ private:
     Label label = Label::DownCast(view);
     if(label)
     {
-      DALI_LOG_ERROR("OnAsyncHeightForWidth: %s\n", label.GetText().CStr());
-      DALI_LOG_ERROR("size:%f, %f, line count:%d\n", width, height, label.GetAsyncLineCount());
     }
   }
 
@@ -131,8 +121,6 @@ private:
     Label label = Label::DownCast(actor);
     if(label)
     {
-      DALI_LOG_ERROR("[%s]\n", label.GetText().CStr());
-      DALI_LOG_ERROR("  -> LineCount: %d, Width: %.2f, Min width: %.2f, Max width: %.2f\n", label.GetLineCount(), label.GetSize().GetWidth(), label.GetMinimumWidth(), label.GetMaximumWidth());
     }
   }
 
@@ -141,7 +129,6 @@ private:
     InputField field = InputField::DownCast(view);
     if(field)
     {
-      DALI_LOG_ERROR("OnTextChanged: %s\n", field.GetText().CStr());
     }
   }
 
@@ -150,7 +137,6 @@ private:
     InputField field = InputField::DownCast(view);
     if(field)
     {
-      DALI_LOG_ERROR("OnMaximumLengthReached, length: %zu\n", field.GetText().Size());
     }
   }
 
@@ -277,50 +263,10 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
-    Vector4 textColor = label.GetTextColor().Resolve();
-
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text            : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("FontFamily      : %s\n", label.GetFontFamily().CStr());
-    DALI_LOG_ERROR("FontSize        : %f\n", label.GetFontSize());
-    DALI_LOG_ERROR("MultiLine       : %d\n", label.IsMultiLine());
-    DALI_LOG_ERROR("LineWrapMode    : %d\n", label.GetLineWrapMode());
-    DALI_LOG_ERROR("TextColor       : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
-    DALI_LOG_ERROR("H Align         : %d\n", label.GetHorizontalTextAlignment());
-    DALI_LOG_ERROR("V Align         : %d\n", label.GetVerticalTextAlignment());
-    DALI_LOG_ERROR("Overflow Mode   : %d\n", label.GetOverflowMode());
-    DALI_LOG_ERROR("LineHeight      : %f\n", label.GetLineHeight());
-    DALI_LOG_ERROR("LineHeight Mode : %d\n", label.GetLineHeightMode());
-    DALI_LOG_ERROR("LayoutDir Mode  : %d\n", label.GetLayoutDirectionMode());
-    DALI_LOG_ERROR("Natural         : %f, %f\n", label.GetNaturalSize().x, label.GetNaturalSize().y);
-    DALI_LOG_ERROR("H for W         : 100, %f\n", label.GetHeightForWidth(100));
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void PrintInputFieldInfo(InputField field, const char* title)
   {
-    Vector4 textColor = field.GetTextColor().Resolve();
-    Vector4 placeholderColor = field.GetPlaceholderColor().Resolve();
-    Vector4 cursorColor = field.GetCursorColor().Resolve();
-    Vector4 selectionColor = field.GetSelectionColor().Resolve();
-
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text             : %s\n", field.GetText().CStr());
-    DALI_LOG_ERROR("FontFamily       : %s\n", field.GetFontFamily().CStr());
-    DALI_LOG_ERROR("FontSize         : %f\n", field.GetFontSize());
-    DALI_LOG_ERROR("TextColor        : %.2f, %.2f, %.2f, %.2f\n", textColor.r, textColor.g, textColor.b, textColor.a);
-    DALI_LOG_ERROR("H Align          : %d\n", field.GetHorizontalTextAlignment());
-    DALI_LOG_ERROR("V Align          : %d\n", field.GetVerticalTextAlignment());
-    DALI_LOG_ERROR("Placeholder      : %s\n", field.GetPlaceholder().CStr());
-    DALI_LOG_ERROR("PlaceholderColor : %.2f, %.2f, %.2f, %.2f\n", placeholderColor.r, placeholderColor.g, placeholderColor.b, placeholderColor.a);
-    DALI_LOG_ERROR("CursorWidth      : %d\n", field.GetCursorWidth());
-    DALI_LOG_ERROR("CursorColor      : %.2f, %.2f, %.2f, %.2f\n", cursorColor.r, cursorColor.g, cursorColor.b, cursorColor.a);
-    DALI_LOG_ERROR("SelectionColor   : %.2f, %.2f, %.2f, %.2f\n", selectionColor.r, selectionColor.g, selectionColor.b, selectionColor.a);
-    DALI_LOG_ERROR("MaximumLength    : %d\n", field.GetMaximumLength());
-    DALI_LOG_ERROR("Natural          : %f, %f\n", field.GetNaturalSize().x, field.GetNaturalSize().y);
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void ApplyDarkColor()
@@ -383,7 +329,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }
@@ -399,7 +344,6 @@ private:
       mLabel3.SetAsyncRendering(true);
       mLineHeightLabel.SetAsyncRendering(true);
       mLineHeightLabel2.SetAsyncRendering(true);
-      DALI_LOG_ERROR("AsyncRendering\n");
     }
     else if(event.GetKeyName() == "3")
     {
@@ -408,7 +352,6 @@ private:
       mLabel3.SetAsyncRendering(false);
       mLineHeightLabel.SetAsyncRendering(false);
       mLineHeightLabel2.SetAsyncRendering(false);
-      DALI_LOG_ERROR("SyncRendering\n");
     }
     else if(event.GetKeyName() == "4")
     {
@@ -449,10 +392,6 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize START\n");
-  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
-  DALI_LOG_ERROR("DaliUiFoundationPreInitialize END\n");
-
   Application application = Application::New(&argc, &argv);
   UiConfig::New()
     .SetLabelAsyncRendering(true)

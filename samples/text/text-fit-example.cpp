@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -186,7 +185,6 @@ private:
       mWrapWrapMultiLine.ClearTextFit();
       mFixedMultiLineRelativeLineHeight.ClearTextFit();
       mFixedMultiLineAbsoluteLineHeight.ClearTextFit();
-      DALI_LOG_ERROR("Cleared TextFit on all labels\n");
     }
     else if(event.GetKeyName() == "2")
     {
@@ -196,7 +194,6 @@ private:
       mWrapWrapMultiLine.SetTextFit(Text::FitRange());
       mFixedMultiLineRelativeLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
       mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
-      DALI_LOG_ERROR("Set TextFit on all labels\n");
     }
   }
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;

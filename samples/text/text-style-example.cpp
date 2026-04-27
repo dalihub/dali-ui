@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -194,25 +193,14 @@ private:
 
   void PrintLabelInfo(Label label, const char* title)
   {
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
-    DALI_LOG_ERROR("%s\n", title);
-    DALI_LOG_ERROR("Text       : %s\n", label.GetText().CStr());
-    DALI_LOG_ERROR("FontWeight : %s\n", TextAbstraction::FontWeight::Name[label.GetFontWeight()]);
-    DALI_LOG_ERROR("FontWidth  : %s\n", TextAbstraction::FontWidth::Name[label.GetFontWidth()]);
-    DALI_LOG_ERROR("FontSlant  : %s\n", TextAbstraction::FontSlant::Name[label.GetFontSlant()]);
-    DALI_LOG_ERROR("----------------------------------------------------------------\n");
   }
 
   void PrintTextBackgroundColorInfo(Label label, const char* title)
   {
-    const Vector4 color = label.GetTextBackgroundColor().Resolve();
-    DALI_LOG_ERROR("%s - R:%f G:%f B:%f A:%f\n", title, color.r, color.g, color.b, color.a);
   }
 
   void PrintTextBackgroundColorInfo(InputField inputField, const char* title)
   {
-    const Vector4 color = inputField.GetTextBackgroundColor().Resolve();
-    DALI_LOG_ERROR("%s - R:%f G:%f B:%f A:%f\n", title, color.r, color.g, color.b, color.a);
   }
 
   void OnKeyEvent(const KeyEvent& event)
@@ -224,9 +212,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n",
-                     IsKey(event, Dali::DALI_KEY_ESCAPE),
-                     IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }
@@ -278,8 +263,6 @@ private:
         Text::LineThrough()
           .SetColor(UiColor(0x00FFFF))
           .SetThickness(1.0f));
-
-      DALI_LOG_ERROR("Changed Label styles to alternate form\n");
     }
     else if(event.GetKeyName() == "6")
     {
@@ -305,17 +288,11 @@ private:
         Text::LineThrough()
           .SetColor(UiColor(0x00FFFF))
           .SetThickness(1.0f));
-
-      DALI_LOG_ERROR("Changed InputField styles to alternate form\n");
     }
     else if(event.GetKeyName() == "7")
     {
       mTextBackgroundColorLabel.ClearTextBackgroundColor();
       mInputFieldTextBackgroundColor.ClearTextBackgroundColor();
-      DALI_LOG_ERROR("Cleared TextBackgroundColor\n");
-
-      PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
-      PrintTextBackgroundColorInfo(mInputFieldTextBackgroundColor, "TextBackgroundColor InputField");
     }
     else if(event.GetKeyName() == "8")
     {

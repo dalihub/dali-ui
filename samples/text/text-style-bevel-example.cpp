@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dali/integration-api/debug.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
@@ -136,7 +135,6 @@ private:
 
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
-      DALI_LOG_ERROR("DALI_KEY_ESCAPE:%d, DALI_KEY_BACK:%d\n", IsKey(event, Dali::DALI_KEY_ESCAPE), IsKey(event, Dali::DALI_KEY_BACK));
       mApplication.Quit();
       return;
     }
@@ -145,27 +143,22 @@ private:
     if(event.GetKeyName() == "1")
     {
       mEmbossedLabel.ClearBevel();
-      DALI_LOG_ERROR("Cleared Embossed Label Bevel\n");
     }
     else if(event.GetKeyName() == "2")
     {
       mEngravedLabel.ClearBevel();
-      DALI_LOG_ERROR("Cleared Engraved Label Bevel\n");
     }
     else if(event.GetKeyName() == "3")
     {
       mGlassLabel.ClearBevel();
-      DALI_LOG_ERROR("Cleared Glass Label Bevel\n");
     }
     else if(event.GetKeyName() == "4")
     {
       mSameColorLabel.ClearBevel();
-      DALI_LOG_ERROR("Cleared Same Color Label Bevel\n");
     }
     else if(event.GetKeyName() == "5")
     {
       mBronzeColorLabel.ClearBevel();
-      DALI_LOG_ERROR("Cleared Bronze Color Label Bevel\n");
     }
   }
 
