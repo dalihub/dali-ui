@@ -145,7 +145,7 @@ FocusManager::FocusManager()
   mAlwaysShowIndicator(ALWAYS_SHOW),
   mFocusGroupLoopEnabled(false),
   mClearFocusOnTouch(true),
-  mEnableDefaultAlgorithm(false),
+  mEnableDefaultAlgorithm(true),
   mClearFocusOnWindowFocusLost(true),
   mCurrentWindowId(0),
   mLastFocusChangeContext()

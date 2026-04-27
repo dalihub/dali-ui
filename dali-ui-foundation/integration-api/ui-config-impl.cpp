@@ -27,7 +27,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/default-theme-loader.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
-#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 
 namespace
 {
@@ -379,11 +378,9 @@ void UiConfigImpl::OnApplicationCreated()
 {
   Dali::TextAbstraction::EnableDesignCompatibility();
 
-  auto  handle           = FocusManager::Get();
-  auto& focusManagerImpl = GetImpl(handle);
-  focusManagerImpl.EnableDefaultAlgorithm(true);
-
   // TODO Disable default focus ring when default interaction effect applied.
+  // auto  handle           = FocusManager::Get();
+  // auto& focusManagerImpl = GetImpl(handle);
   // focusManagerImpl.EnableFocusIndicator(false);
 
   Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
