@@ -86,6 +86,10 @@ public:
   static void ApplySizeWidthBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeHeightTo(Animation& animation, View view, const Entry& entry);
   static void ApplySizeHeightBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionXTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionXBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionYTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionYBy(Animation& animation, View view, const Entry& entry);
 
 protected:
   ViewAnimationSpecImpl();

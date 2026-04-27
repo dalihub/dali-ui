@@ -202,21 +202,31 @@ MeasuredSize View::GetSize() const
   return GetImpl(*this).GetSize();
 }
 
-View& View::SetPositionX(float x)
+View& View::SetRequestedPositionX(float x)
 {
-  GetImpl(*this).SetPositionX(x);
+  GetImpl(*this).SetRequestedPositionX(x);
   return *this;
+}
+
+float View::GetRequestedPositionX() const
+{
+  return GetImpl(*this).GetRequestedPositionX();
+}
+
+View& View::SetRequestedPositionY(float y)
+{
+  GetImpl(*this).SetRequestedPositionY(y);
+  return *this;
+}
+
+float View::GetRequestedPositionY() const
+{
+  return GetImpl(*this).GetRequestedPositionY();
 }
 
 float View::GetPositionX() const
 {
   return GetImpl(*this).GetPositionX();
-}
-
-View& View::SetPositionY(float y)
-{
-  GetImpl(*this).SetPositionY(y);
-  return *this;
 }
 
 float View::GetPositionY() const

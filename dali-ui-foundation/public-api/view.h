@@ -51,6 +51,8 @@ class ViewAnimationSpec;
 // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
 // @ANIMATABLE_MANUAL(SizeWidth, float)
 // @ANIMATABLE_MANUAL(SizeHeight, float)
+// @ANIMATABLE_MANUAL(PositionX, float)
+// @ANIMATABLE_MANUAL(PositionY, float)
 
 class ViewImpl;
 
@@ -303,33 +305,65 @@ public: // Properties
    */
   MeasuredSize GetSize() const;
 
-  // @ANIMATABLE(Actor::Property::POSITION_X, float)
   /**
-   * @brief Sets the X position of the View.
+   * @brief Sets the X position requested by the user.
    *
-   * @param[in] x The X position to set
+   * This value is the layout input. The parent's Arrange pass uses it
+   * (offset by the parent's left padding and this view's left margin) to
+   * compute the final rendered position. The Actor::Property::POSITION_X
+   * property is updated only by the next Arrange.
+   *
+   * To drive the rendered position without affecting the layout request
+   * (e.g. for scrolling or animation that should not feed back into
+   * layout), set Actor::Property::POSITION_X via SetProperty directly.
+   *
+   * @param[in] x The requested X position
    */
-  View& SetPositionX(float x);
+  View& SetRequestedPositionX(float x);
 
   /**
-   * @brief Gets the X position of the View.
+   * @brief Returns the user-requested X position.
    *
-   * @return The X position of the View
+   * Independent of layout passes; returns the last value set via
+   * SetRequestedPositionX. To read the current rendered X position
+   * (Actor::Property::POSITION_X) instead, use GetPositionX().
+   *
+   * @return The requested X position
+   */
+  float GetRequestedPositionX() const;
+
+  /**
+   * @brief Sets the Y position requested by the user.
+   *
+   * @param[in] y The requested Y position
+   * @see SetRequestedPositionX
+   */
+  View& SetRequestedPositionY(float y);
+
+  /**
+   * @brief Returns the user-requested Y position.
+   *
+   * @return The requested Y position
+   * @see GetRequestedPositionX
+   */
+  float GetRequestedPositionY() const;
+
+  /**
+   * @brief Returns the current rendered X position (Actor::Property::POSITION_X).
+   *
+   * After a layout pass, this is the requested X plus the parent's left
+   * padding plus this view's left margin. Direct property writes (e.g.
+   * scroll offset animations) may also modify it.
+   *
+   * @return The current rendered X position
    */
   float GetPositionX() const;
 
-  // @ANIMATABLE(Actor::Property::POSITION_Y, float)
   /**
-   * @brief Sets the Y position of the View.
+   * @brief Returns the current rendered Y position (Actor::Property::POSITION_Y).
    *
-   * @param[in] y The Y position to set
-   */
-  View& SetPositionY(float y);
-
-  /**
-   * @brief Gets the Y position of the View.
-   *
-   * @return The Y position of the View
+   * @return The current rendered Y position
+   * @see GetPositionX
    */
   float GetPositionY() const;
 

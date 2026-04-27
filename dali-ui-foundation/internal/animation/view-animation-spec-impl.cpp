@@ -131,6 +131,30 @@ void ViewAnimationSpecImpl::ApplySizeHeightBy(Animation& animation, View view, c
   animation.AnimateBy(Property(view, Actor::Property::SIZE_HEIGHT), entry.value, entry.alpha, period);
 }
 
+void ViewAnimationSpecImpl::ApplyPositionXTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::POSITION_X), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyPositionXBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::POSITION_X), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyPositionYTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::POSITION_Y), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyPositionYBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::POSITION_Y), entry.value, entry.alpha, period);
+}
+
 } // namespace Internal
 } // namespace Ui
 } // namespace Dali

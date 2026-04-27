@@ -242,8 +242,8 @@ void ArrangeStandaloneChild(ViewImpl& childImpl,
     childImpl.Measure(childW, childH);
   }
 
-  LayoutRect bounds(childImpl.GetPositionX() + static_cast<float>(margin.start),
-                    childImpl.GetPositionY() + static_cast<float>(margin.top),
+  LayoutRect bounds(childImpl.GetRequestedPositionX() + static_cast<float>(margin.start),
+                    childImpl.GetRequestedPositionY() + static_cast<float>(margin.top),
                     childW, childH);
   childImpl.Arrange(bounds);
 }
@@ -574,21 +574,41 @@ float ViewImpl::GetPositionX() const
   return Self().GetProperty<float>(Actor::Property::POSITION_X);
 }
 
-void ViewImpl::SetPositionX(float x)
-{
-  mImpl->mRequestedPositionX = x;
-  Self().SetProperty(Actor::Property::POSITION_X, x);
-}
-
 float ViewImpl::GetPositionY() const
 {
   return Self().GetProperty<float>(Actor::Property::POSITION_Y);
 }
 
-void ViewImpl::SetPositionY(float y)
+void ViewImpl::SetRequestedPositionX(float x)
 {
-  mImpl->mRequestedPositionY = y;
-  Self().SetProperty(Actor::Property::POSITION_Y, y);
+  if(!Dali::Equals(mImpl->mRequestedPositionX, x))
+  {
+    mImpl->mRequestedPositionX = x;
+    // InvalidateMeasure (not InvalidateArrange): a WRAP_CONTENT parent's
+    // OnMeasure reads the child's RequestedPosition into maxRight/maxBottom,
+    // so a position change can affect the parent's measured size. Measure
+    // invalidation also marks the chain dirty for Arrange.
+    InvalidateMeasure();
+  }
+}
+
+void ViewImpl::SetRequestedPositionY(float y)
+{
+  if(!Dali::Equals(mImpl->mRequestedPositionY, y))
+  {
+    mImpl->mRequestedPositionY = y;
+    InvalidateMeasure();
+  }
+}
+
+float ViewImpl::GetRequestedPositionX() const
+{
+  return mImpl->mRequestedPositionX;
+}
+
+float ViewImpl::GetRequestedPositionY() const
+{
+  return mImpl->mRequestedPositionY;
 }
 
 Vector3 ViewImpl::GetParentOrigin() const
@@ -793,8 +813,8 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
       float        childHeightConstraint = std::max(0.0f, contentHeight - marginH);
       MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-      float childX = childImpl.GetPositionX();
-      float childY = childImpl.GetPositionY();
+      float childX = childImpl.GetRequestedPositionX();
+      float childY = childImpl.GetRequestedPositionY();
       maxRight     = std::max(maxRight, childX + marginW + childSize.width);
       maxBottom    = std::max(maxBottom, childY + marginH + childSize.height);
     }
@@ -918,8 +938,8 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
       {
         childH = std::max(0.0f, height - padTop - padBottom - marginH);
       }
-      float childX = padLeft + static_cast<float>(margin.start) + childImpl.mImpl->mRequestedPositionX;
-      float childY = padTop + static_cast<float>(margin.top) + childImpl.mImpl->mRequestedPositionY;
+      float childX = padLeft + static_cast<float>(margin.start) + childImpl.GetRequestedPositionX();
+      float childY = padTop + static_cast<float>(margin.top) + childImpl.GetRequestedPositionY();
 
       // MATCH_PARENT children reported minSize during Measure, but their
       // subtree was measured with the original constraint. Re-measure with

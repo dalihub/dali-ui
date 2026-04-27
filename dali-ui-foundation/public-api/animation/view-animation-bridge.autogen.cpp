@@ -79,6 +79,34 @@ ViewAnimationBridge& ViewAnimationBridge::SizeHeightBy(float relative, Duration 
   return *this;
 }
 
+ViewAnimationBridge& ViewAnimationBridge::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionXTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionXBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionYTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionYBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
@@ -118,34 +146,6 @@ ViewAnimationBridge& ViewAnimationBridge::OpacityBy(float relative, Duration dur
 {
   ExtendIfNeeded(delay, duration);
   mAnimation.AnimateBy(Property(mView, Actor::Property::OPACITY), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Actor::Property::POSITION_X), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Actor::Property::POSITION_X), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Actor::Property::POSITION_Y), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
-  return *this;
-}
-
-ViewAnimationBridge& ViewAnimationBridge::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Actor::Property::POSITION_Y), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 

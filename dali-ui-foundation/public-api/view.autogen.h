@@ -36,17 +36,27 @@
   */ \
   ChildClass& SetOpacity(float opacity) { View::SetOpacity(opacity); return *this; } \
   /** \
-  * @brief Sets the X position of the View. \
+  * @brief Sets the X position requested by the user. \
   * \
-  * @param[in] x The X position to set \
+  * This value is the layout input. The parent's Arrange pass uses it \
+  * (offset by the parent's left padding and this view's left margin) to \
+  * compute the final rendered position. The Actor::Property::POSITION_X \
+  * property is updated only by the next Arrange. \
+  * \
+  * To drive the rendered position without affecting the layout request \
+  * (e.g. for scrolling or animation that should not feed back into \
+  * layout), set Actor::Property::POSITION_X via SetProperty directly. \
+  * \
+  * @param[in] x The requested X position \
   */ \
-  ChildClass& SetPositionX(float x) { View::SetPositionX(x); return *this; } \
+  ChildClass& SetRequestedPositionX(float x) { View::SetRequestedPositionX(x); return *this; } \
   /** \
-  * @brief Sets the Y position of the View. \
+  * @brief Sets the Y position requested by the user. \
   * \
-  * @param[in] y The Y position to set \
+  * @param[in] y The requested Y position \
+  * @see SetRequestedPositionX \
   */ \
-  ChildClass& SetPositionY(float y) { View::SetPositionY(y); return *this; } \
+  ChildClass& SetRequestedPositionY(float y) { View::SetRequestedPositionY(y); return *this; } \
   /** \
   * @brief Sets the parent origin of the View. \
   * \

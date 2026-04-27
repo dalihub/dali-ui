@@ -291,19 +291,29 @@ public: // Non-virtual API (safe to reorder / extend)
   float GetPositionX() const;
 
   /**
-   * @copydoc Ui::View::SetPositionX()
-   */
-  void SetPositionX(float x);
-
-  /**
    * @copydoc Ui::View::GetPositionY()
    */
   float GetPositionY() const;
 
   /**
-   * @copydoc Ui::View::SetPositionY()
+   * @copydoc Ui::View::SetRequestedPositionX()
    */
-  void SetPositionY(float y);
+  void SetRequestedPositionX(float x);
+
+  /**
+   * @copydoc Ui::View::SetRequestedPositionY()
+   */
+  void SetRequestedPositionY(float y);
+
+  /**
+   * @copydoc Ui::View::GetRequestedPositionX()
+   */
+  float GetRequestedPositionX() const;
+
+  /**
+   * @copydoc Ui::View::GetRequestedPositionY()
+   */
+  float GetRequestedPositionY() const;
 
   /**
    * @copydoc Ui::View::GetParentOrigin()

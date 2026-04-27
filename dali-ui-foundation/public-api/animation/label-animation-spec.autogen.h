@@ -113,6 +113,44 @@ public:
   LabelAnimationSpec& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
+   * @brief Animates the position x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
    * @brief Animates the scale x.
    *
    * @param[in] target The target value
@@ -168,44 +206,6 @@ public:
    * @param[in] delay The delay before starting (default: 0)
    */
   LabelAnimationSpec& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the position x.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationSpec& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the position x by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationSpec& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the position y.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationSpec& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the position y by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  LabelAnimationSpec& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
    * @brief Animates the corner radius.

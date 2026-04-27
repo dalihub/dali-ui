@@ -80,6 +80,30 @@ LabelAnimationSpec& LabelAnimationSpec::SizeHeightBy(float relative, Duration du
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::PositionX(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::PositionXBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::PositionY(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::PositionYBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::ScaleX(target, duration, alpha, delay);
@@ -113,30 +137,6 @@ LabelAnimationSpec& LabelAnimationSpec::Opacity(float target, Duration duration,
 LabelAnimationSpec& LabelAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::PositionX(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::PositionXBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::PositionY(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationSpec& LabelAnimationSpec::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationSpec::PositionYBy(relative, duration, alpha, delay);
   return *this;
 }
 

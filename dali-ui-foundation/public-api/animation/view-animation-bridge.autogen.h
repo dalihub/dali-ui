@@ -112,6 +112,44 @@ public:
   ViewAnimationBridge& SizeHeightBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
+   * @brief Animates the position x.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position x by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
+   * @brief Animates the position y.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the position y by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  ViewAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
+  /**
    * @brief Animates the scale x.
    *
    * @param[in] target The target value
@@ -167,44 +205,6 @@ public:
    * @param[in] delay The delay before starting (default: 0)
    */
   ViewAnimationBridge& OpacityBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the position x.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& PositionX(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the position x by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& PositionXBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-
-  /**
-   * @brief Animates the position y.
-   *
-   * @param[in] target The target value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& PositionY(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
-  /**
-   * @brief Animates the position y by a relative amount.
-   *
-   * @param[in] relative The relative value
-   * @param[in] duration The animation duration
-   * @param[in] alpha The alpha function (default: linear)
-   * @param[in] delay The delay before starting (default: 0)
-   */
-  ViewAnimationBridge& PositionYBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
   /**
    * @brief Animates the corner radius.

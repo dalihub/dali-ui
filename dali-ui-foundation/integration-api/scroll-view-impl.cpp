@@ -770,8 +770,11 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
 
   float newX = mContent.GetProperty<float>(Actor::Property::POSITION_X) + delta.x;
   float newY = mContent.GetProperty<float>(Actor::Property::POSITION_Y) + delta.y;
-  mContent.SetPositionX(newX);
-  mContent.SetPositionY(newY);
+  // Scroll offset drives the rendered position directly. Setting the
+  // Actor property bypasses layout so this does not feed back into the
+  // requested layout position.
+  mContent.SetProperty(Actor::Property::POSITION_X, newX);
+  mContent.SetProperty(Actor::Property::POSITION_Y, newY);
 
   if(!mIsScrolling)
   {
@@ -927,8 +930,10 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
   {
     float posX = mMaximumStartX - position.x;
     float posY = mMaximumStartY - position.y;
-    mContent.SetPositionX(posX);
-    mContent.SetPositionY(posY);
+    // See note in ApplyScrollPosition delta path: scroll offsets drive the
+    // rendered position directly without feeding back into layout.
+    mContent.SetProperty(Actor::Property::POSITION_X, posX);
+    mContent.SetProperty(Actor::Property::POSITION_Y, posY);
   }
 }
 

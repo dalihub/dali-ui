@@ -82,14 +82,14 @@ constexpr float MATCH_PARENT = -2.0f;
  * Standalone: the parent container excludes this View from its accumulation/spacing/
  * index calculations. The View's size is still measured normally (so MATCH_PARENT,
  * WRAP_CONTENT and explicit RequestedWidth/Height work as usual), but its position is
- * taken from the View's own SetPositionX/SetPositionY (RequestedPositionX/Y) instead
- * of being decided by the parent's layout. Useful for floating overlays, drag previews,
+ * taken from the View's own SetRequestedPositionX/SetRequestedPositionY instead of
+ * being decided by the parent's layout. Useful for floating overlays, drag previews,
  * tooltips and absolute positioning within an arbitrary LayoutManager.
  */
 enum class LayoutMode : uint8_t
 {
   DEFAULT    = 0, ///< Managed by the parent container's layout (default).
-  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetPositionX/SetPositionY.
+  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetRequestedPositionX/SetRequestedPositionY.
 };
 
 /**

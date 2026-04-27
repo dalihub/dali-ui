@@ -98,6 +98,30 @@ ViewAnimationSpec& ViewAnimationSpec::SizeHeightBy(float relative, Duration dura
   return *this;
 }
 
+ViewAnimationSpec& ViewAnimationSpec::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionXTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionXBy);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionYTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionYBy);
+  return *this;
+}
+
 ViewAnimationSpec& ViewAnimationSpec::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::SCALE_X, target, duration, alpha, delay);
@@ -131,30 +155,6 @@ ViewAnimationSpec& ViewAnimationSpec::Opacity(float target, Duration duration, A
 ViewAnimationSpec& ViewAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::OPACITY, relative, duration, alpha, delay);
-  return *this;
-}
-
-ViewAnimationSpec& ViewAnimationSpec::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::POSITION_X, target, duration, alpha, delay);
-  return *this;
-}
-
-ViewAnimationSpec& ViewAnimationSpec::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::POSITION_X, relative, duration, alpha, delay);
-  return *this;
-}
-
-ViewAnimationSpec& ViewAnimationSpec::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::POSITION_Y, target, duration, alpha, delay);
-  return *this;
-}
-
-ViewAnimationSpec& ViewAnimationSpec::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::POSITION_Y, relative, duration, alpha, delay);
   return *this;
 }
 

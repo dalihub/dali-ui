@@ -72,6 +72,30 @@ LabelAnimationBridge& LabelAnimationBridge::SizeHeightBy(float relative, Duratio
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::PositionX(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::PositionXBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::PositionY(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::PositionYBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ScaleX(target, duration, alpha, delay);
@@ -105,30 +129,6 @@ LabelAnimationBridge& LabelAnimationBridge::Opacity(float target, Duration durat
 LabelAnimationBridge& LabelAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::OpacityBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::PositionX(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::PositionX(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::PositionXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::PositionXBy(relative, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::PositionY(float target, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::PositionY(target, duration, alpha, delay);
-  return *this;
-}
-
-LabelAnimationBridge& LabelAnimationBridge::PositionYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
-{
-  ViewAnimationBridge::PositionYBy(relative, duration, alpha, delay);
   return *this;
 }
 
