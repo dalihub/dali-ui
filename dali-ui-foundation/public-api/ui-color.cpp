@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <cstring>
 #include <deque>
-#include <mutex>
 #include <unordered_map>
 
 // INTERNAL INCLUDES
@@ -57,12 +56,10 @@ using TokenId = uint32_t;
  * - tokenId 0 is reserved as "invalid / not set".
  * - This helper is intentionally internal (not part of public API/ABI); it
  *   allows UiColor to use a fixed-size in-memory representation.
- * - Thread-safety: access is guarded by a mutex since UiColor instances may
- *   be created and resolved from multiple threads.
+ * - UiColor is only used on the UI thread, so no synchronization is needed.
  */
 struct TokenRegistry
 {
-  std::mutex                          mutex;
   std::unordered_map<String, TokenId> nameToId;
   std::deque<String>                  idToName;
 
@@ -192,12 +189,7 @@ UiColor::UiColor(const String& colorId)
   SetAlphaMode(AlphaMode::With);
 
   TokenRegistry& registry = GetTokenRegistry();
-  TokenId        id;
-  {
-    std::lock_guard<std::mutex> lock(registry.mutex);
-    id = registry.GetOrCreateId(colorId);
-  }
-  SetTokenId(id);
+  SetTokenId(registry.GetOrCreateId(colorId));
   SetTokenAlpha(1.0f);
 }
 
@@ -208,12 +200,7 @@ UiColor::UiColor(String&& colorId)
   SetAlphaMode(AlphaMode::With);
 
   TokenRegistry& registry = GetTokenRegistry();
-  TokenId        id;
-  {
-    std::lock_guard<std::mutex> lock(registry.mutex);
-    id = registry.GetOrCreateId(std::move(colorId));
-  }
-  SetTokenId(id);
+  SetTokenId(registry.GetOrCreateId(std::move(colorId)));
   SetTokenAlpha(1.0f);
 }
 
@@ -240,9 +227,8 @@ String UiColor::GetColorId() const
     return {};
   }
 
-  TokenRegistry&              registry = GetTokenRegistry();
-  std::lock_guard<std::mutex> lock(registry.mutex);
-  const String*               name = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
+  TokenRegistry& registry = GetTokenRegistry();
+  const String*  name     = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
   return name ? *name : String{};
 }
 
@@ -250,15 +236,8 @@ Vector4 UiColor::GetRgba() const
 {
   if(GetType() == Type::Token)
   {
-    // Get a stable reference from the deque-backed registry.
-    // deque guarantees that existing elements are never relocated on push_back,
-    // so the pointer remains valid after releasing the mutex.
-    const String* namePtr;
-    {
-      TokenRegistry&              registry = GetTokenRegistry();
-      std::lock_guard<std::mutex> lock(registry.mutex);
-      namePtr = registry.TryGetName(GetTokenId());
-    }
+    TokenRegistry& registry = GetTokenRegistry();
+    const String*  namePtr  = registry.TryGetName(GetTokenId());
 
     if(namePtr)
     {

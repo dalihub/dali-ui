@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/string-utils.h>
+#include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <unordered_map>
@@ -76,8 +77,45 @@ public:
   ThemeChangedSignalType& ThemeChangedSignal() override;
 
 private:
-  std::unordered_map<String, Vector4> mColors;
-  ThemeChangedSignalType mThemeChangedSignal;
+  /**
+   * @brief Transparent hasher that accepts both String and StringView
+   * without requiring a temporary String allocation.
+   */
+  struct TransparentHash
+  {
+    using is_transparent = void;
+    std::size_t operator()(const String& s) const noexcept
+    {
+      return std::hash<String>()(s);
+    }
+    std::size_t operator()(StringView sv) const noexcept
+    {
+      return std::hash<StringView>()(sv);
+    }
+  };
+
+  /**
+   * @brief Transparent equality that accepts both String and StringView.
+   */
+  struct TransparentEqual
+  {
+    using is_transparent = void;
+    bool operator()(const String& a, const String& b) const
+    {
+      return a == b;
+    }
+    bool operator()(const String& a, StringView b) const
+    {
+      return a == b;
+    }
+    bool operator()(StringView a, const String& b) const
+    {
+      return b == a;
+    }
+  };
+
+  std::unordered_map<String, Vector4, TransparentHash, TransparentEqual> mColors;
+  ThemeChangedSignalType                                                 mThemeChangedSignal;
 };
 
 } // namespace Integration

@@ -50,7 +50,7 @@ DefaultThemeLoader::~DefaultThemeLoader() = default;
 
 bool DefaultThemeLoader::GetColor(StringView colorId, Vector4& outColor)
 {
-  auto it = mColors.find(String(colorId));
+  auto it = mColors.find(colorId);
   if(it != mColors.end())
   {
     outColor = it->second;
