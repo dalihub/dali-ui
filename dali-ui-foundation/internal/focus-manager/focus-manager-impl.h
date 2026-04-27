@@ -124,16 +124,6 @@ public:
   View GetFocusGroup(View view);
 
   /**
-   * @copydoc Ui::FocusManager::SetFocusGroupLoop
-   */
-  void SetFocusGroupLoop(bool enabled);
-
-  /**
-   * @copydoc Ui::FocusManager::GetFocusGroupLoop
-   */
-  bool GetFocusGroupLoop() const;
-
-  /**
    * @copydoc Ui::FocusManager::SetFocusIndicatorActor
    */
   void SetFocusIndicatorActor(View indicator);
@@ -202,11 +192,6 @@ public:
   Ui::FocusManager::FocusChangedSignalType& FocusChangedSignal();
 
   /**
-   * @copydoc Ui::FocusManager::FocusGroupChangedSignal()
-   */
-  Ui::FocusManager::FocusGroupChangedSignalType& FocusGroupChangedSignal();
-
-  /**
    * Connects a callback function with the object's signals.
    * @param[in] object The object providing the signal.
    * @param[in] tracker Used to disconnect the signal.
@@ -244,14 +229,6 @@ private:
   void GetConfiguration();
 
   /**
-   * Get the focus group of current focused view.
-   * @pre The FocusManager has been initialized.
-   * @return A handle to the parent of the current focused view which is a focus group,
-   * or an empty handle if no view is focused.
-   */
-  View GetCurrentFocusGroup();
-
-  /**
    * Move the focus to the specified view and send notification for the focus change.
    * @param view The view to be focused
    * @param context The context that caused the focus change (device, name)
@@ -268,16 +245,6 @@ private:
    * @return Whether the focus is successful or not
    */
   bool DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context);
-
-  /**
-   * Move the focus to the first focusable actor in the next focus group in the forward
-   * or backward direction. The "Tab" key changes the focus group in the forward direction
-   * and the "Shift-Tab" key changes it in the backward direction.
-   * @param forward Whether the direction of focus group change is forward or backward
-   * @param context The context that caused the focus change (device, name)
-   * @return Whether the focus group change is successful or not
-   */
-  bool DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context);
 
   /**
    * Check whether the view is a layout view that supports two dimensional keyboard navigation.
@@ -385,9 +352,8 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
-  Ui::FocusManager::FocusChangedSignalType      mFocusChangedSignal;      ///< The signal to notify the focus change
-  Ui::FocusManager::FocusGroupChangedSignalType mFocusGroupChangedSignal; ///< The signal to notify the focus group change
-  WeakHandle<View>                              mCurrentFocusView;        ///< A weak handle to the current focused view
+  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
+  WeakHandle<View>                         mCurrentFocusView;   ///< A weak handle to the current focused view
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
@@ -410,8 +376,6 @@ private:
 
   FocusedIndicatorModeState mAlwaysShowIndicator; ///< Whether always show indicator. If true, the indicator would be
                                                   ///< directly shown when focused
-
-  bool mFocusGroupLoopEnabled : 1; ///< Whether the focus movement is looped within the same focus group
 
   bool mClearFocusOnTouch : 1; ///< Whether clear focus on touch.
 

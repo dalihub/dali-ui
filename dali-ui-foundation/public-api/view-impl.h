@@ -767,20 +767,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   bool IsKeyNavigationSupported() const;
 
-  /**
-   * @brief Sets whether this view acts as a focus group boundary.
-   * @param[in] isFocusGroup True to set as focus group
-   * @note Legacy API not covered by API description. Subject to removal or redesign.
-   */
-  void SetAsFocusGroup(bool isFocusGroup);
-
-  /**
-   * @brief Gets whether this view acts as a focus group boundary.
-   * @return True if the view is a focus group
-   * @note Legacy API not covered by API description. Subject to removal or redesign.
-   */
-  bool IsFocusGroup();
-
   // Signals
 
   /**
@@ -799,6 +785,8 @@ public: // Non-virtual API (safe to reorder / extend)
   bool IsOnScene() const;
 
   /// @cond internal
+  DALI_INTERNAL void SetAsFocusGroup(bool isFocusGroup);
+  DALI_INTERNAL bool IsFocusGroup() const;
   DALI_INTERNAL bool NotifyKeyEvent(const KeyEvent& event);
   DALI_INTERNAL void NotifyFocusChanged(bool focused);
   DALI_INTERNAL void NotifyFocusChangeCommitted(Ui::View committedFocusableView);

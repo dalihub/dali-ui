@@ -60,6 +60,20 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEY
 
 const char* const FOCUS_BORDER_IMAGE_FILE_NAME = "keyboard_focus.9.png";
 
+bool IsDescendantOf(Actor target, Actor ancestor)
+{
+  Actor current = target;
+  while(current)
+  {
+    if(current == ancestor)
+    {
+      return true;
+    }
+    current = current.GetParent();
+  }
+  return false;
+}
+
 // Key name constants for OnKeyEvent
 constexpr const char* KEY_NAME_LEFT      = "Left";
 constexpr const char* KEY_NAME_RIGHT     = "Right";
@@ -104,7 +118,6 @@ BaseHandle Create()
 DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::FocusManager, Dali::BaseHandle, Create, true)
 
 DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusChanged", SIGNAL_FOCUS_CHANGED)
-DALI_SIGNAL_REGISTRATION(Ui, FocusManager, "focusGroupChanged", SIGNAL_FOCUS_GROUP_CHANGED)
 
 DALI_TYPE_REGISTRATION_END()
 
@@ -133,7 +146,6 @@ Ui::FocusManager FocusManager::Get()
 
 FocusManager::FocusManager()
 : mFocusChangedSignal(),
-  mFocusGroupChangedSignal(),
   mCurrentFocusView(),
   mFocusIndicatorView(),
   mFocusFinderRootView(),
@@ -143,7 +155,6 @@ FocusManager::FocusManager()
   mIsFocusIndicatorShown(UNKNOWN),
   mEnableFocusIndicator(ENABLE),
   mAlwaysShowIndicator(ALWAYS_SHOW),
-  mFocusGroupLoopEnabled(false),
   mClearFocusOnTouch(true),
   mEnableDefaultAlgorithm(true),
   mClearFocusOnWindowFocusLost(true),
@@ -242,6 +253,18 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
         return false;
       }
       parent = parent.GetParent();
+    }
+
+    // Focus containment: if current focus is inside a FocusGroup, reject moves outside it.
+    View currentFocus = GetCurrentFocusView();
+    if(currentFocus)
+    {
+      View focusGroup = GetFocusGroup(currentFocus);
+      if(focusGroup && !IsDescendantOf(view, focusGroup))
+      {
+        DALI_LOG_DEBUG_INFO("Focus change rejected: target is outside the active focus group\n");
+        return false;
+      }
     }
 
     // If developer set focus on same view, doing nothing
@@ -359,11 +382,6 @@ View FocusManager::GetFocusViewFromCurrentWindow()
   }
 
   return view;
-}
-
-View FocusManager::GetCurrentFocusGroup()
-{
-  return GetFocusGroup(GetCurrentFocusView());
 }
 
 void FocusManager::MoveFocusBackward()
@@ -609,7 +627,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
 bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context)
 {
   // Ask the layout view for the next view to focus
-  View nextFocusableView = GetImpl(layoutView).GetNextFocusableView(view, direction, mFocusGroupLoopEnabled);
+  View nextFocusableView = GetImpl(layoutView).GetNextFocusableView(view, direction, false /*loopEnabled*/);
   if(nextFocusableView)
   {
     if(!(nextFocusableView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
@@ -1099,11 +1117,6 @@ Ui::FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
   return mFocusChangedSignal;
 }
 
-Ui::FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal()
-{
-  return mFocusGroupChangedSignal;
-}
-
 const FocusManager::FocusChangeContext& FocusManager::FocusChangedContext() const
 {
   return mLastFocusChangeContext;
@@ -1119,10 +1132,6 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
   if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_CHANGED))
   {
     manager->FocusChangedSignal().Connect(tracker, functor);
-  }
-  else if(0 == strcmp(signalName.CStr(), SIGNAL_FOCUS_GROUP_CHANGED))
-  {
-    manager->FocusGroupChangedSignal().Connect(tracker, functor);
   }
   else
   {

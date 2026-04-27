@@ -1738,7 +1738,7 @@ void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
   Self().SetProperty(Ui::View::Property::FOCUS_GROUP, isFocusGroup);
 }
 
-bool ViewImpl::IsFocusGroup()
+bool ViewImpl::IsFocusGroup() const
 {
   return mImpl->mIsFocusGroup;
 }

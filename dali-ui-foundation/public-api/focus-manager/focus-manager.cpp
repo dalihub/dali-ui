@@ -68,29 +68,17 @@ void FocusManager::ClearFocus()
 
 void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
-  // deprecated method.
   GetImpl(*this).SetAsFocusGroup(view, isFocusGroup);
 }
 
 bool FocusManager::IsFocusGroup(View view) const
 {
-  // deprecated method.
   return GetImpl(*this).IsFocusGroup(view);
 }
 
 View FocusManager::GetFocusGroup(View view)
 {
   return GetImpl(*this).GetFocusGroup(view);
-}
-
-void FocusManager::SetFocusGroupLoop(bool enabled)
-{
-  GetImpl(*this).SetFocusGroupLoop(enabled);
-}
-
-bool FocusManager::GetFocusGroupLoop() const
-{
-  return GetImpl(*this).GetFocusGroupLoop();
 }
 
 void FocusManager::SetFocusIndicatorActor(View indicator)
@@ -111,11 +99,6 @@ void FocusManager::MoveFocusBackward()
 FocusManager::FocusChangedSignalType& FocusManager::FocusChangedSignal()
 {
   return GetImpl(*this).FocusChangedSignal();
-}
-
-FocusManager::FocusGroupChangedSignalType& FocusManager::FocusGroupChangedSignal()
-{
-  return GetImpl(*this).FocusGroupChangedSignal();
 }
 
 FocusDevice FocusManager::GetLastFocusChangeDevice() const

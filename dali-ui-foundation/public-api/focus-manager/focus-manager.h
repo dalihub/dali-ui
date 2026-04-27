@@ -47,16 +47,12 @@ class FocusManager;
  * | %Signal Name            | Method                             |
  * |-------------------------|------------------------------------|
  * | focusChanged            | @ref FocusChangedSignal()          |
- * | focusGroupChanged       | @ref FocusGroupChangedSignal()     |
  */
 class DALI_UI_API FocusManager : public BaseHandle
 {
 public:
   /// @brief Focus changed signal
   typedef Signal<void(View, View)> FocusChangedSignalType;
-
-  /// @brief Focus group changed signal
-  typedef Signal<void(View, bool)> FocusGroupChangedSignalType;
 
   /**
    * @brief Creates a FocusManager handle; this can be initialized with FocusManager::New().
@@ -122,27 +118,11 @@ public:
   void ClearFocus();
 
   /**
-   * @brief Sets whether the focus movement should be looped within the same focus group.
+   * @brief Sets whether a view is a focus group (focus trap).
    *
-   * The focus movement is not looped by default.
-   * @param enabled Whether the focus movement should be looped
-   * @pre The FocusManager has been initialized.
-   */
-  void SetFocusGroupLoop(bool enabled);
-
-  /**
-   * @brief Gets whether the focus movement should be looped within the same focus group.
-   *
-   * @return Whether the focus movement should be looped
-   * @pre The FocusManager has been initialized.
-   */
-  bool GetFocusGroupLoop() const;
-
-  /**
-   * @brief Sets whether a view is a focus group that can limit the
-   * scope of focus movement to its child views in the focus chain.
-   *
-   * Layout views set themselves as focus groups by default.
+   * When a view is set as a focus group, keyboard focus cannot leave
+   * the view's subtree. All focus movement (arrow keys, Tab, programmatic)
+   * is contained within the focus group boundary.
    *
    * @param view The view to be set as a focus group
    * @param isFocusGroup Whether to set the view as a focus group or not
@@ -248,23 +228,6 @@ public: // Signals
    * @pre The Object has been initialized.
    */
   FocusChangedSignalType& FocusChangedSignal();
-
-  /**
-   * @brief This signal is emitted when the focus group has been changed.
-   *
-   * If the current focus group has a parent layout view,
-   * FocusManager will make the best guess for the next focus
-   * group to move the focus to in the given direction (forward or
-   * backward). If not, the application has to set the new focus.
-   *
-   * A callback of the following type may be connected:
-   * @code
-   *   void YourCallbackName(View currentFocusedView, bool forward);
-   * @endcode
-   * @return The signal to connect to
-   * @pre The Object has been initialized.
-   */
-  FocusGroupChangedSignalType& FocusGroupChangedSignal();
 
   // Not intended for application developers
 
