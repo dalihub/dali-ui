@@ -105,6 +105,13 @@ bool UnsetStateHandlerWhenNotProcessing(Ui::View view, const Dali::String& id)
   return GetViewImplData(GetImpl(view)).UnsetStateHandlerWhenNotProcessing(id);
 }
 
+// Visual property helpers
+
+Dali::Property GetVisualProperty(Ui::View view, Dali::Property::Index index, Dali::Property::Key visualPropertyKey)
+{
+  return GetViewImplData(GetImpl(view)).GetVisualProperty(index, visualPropertyKey);
+}
+
 // Layout helpers
 
 bool IsLayoutModeStandalone(const ViewImpl& viewImpl)

@@ -69,7 +69,7 @@ public:
     // View-first: Bridge pattern (stack-allocated, zero heap)
     auto anim = Animation::New();
     view.Animate(anim)
-      .Opacity(0.0f, 300_ms, AlphaFunction::EASE_OUT)
+      .BackgroundColor(UiColor::PRIMARY, 500_ms)
       .PositionY(50.0f, 300_ms, AlphaFunction::EASE_OUT);
 
     anim.Play();

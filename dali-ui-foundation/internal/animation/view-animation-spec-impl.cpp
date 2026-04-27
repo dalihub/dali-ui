@@ -24,7 +24,9 @@
 #include <dali/public-api/object/property.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
 namespace Dali
 {
@@ -99,12 +101,22 @@ void ViewAnimationSpecImpl::ApplyAnimateBy(Animation& animation, View view, cons
 
 void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry)
 {
-  // TODO: Implement background color AnimateTo
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, ColorVisual::Property::MIX_COLOR);
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(visualProperty, entry.value, entry.alpha, period);
+  }
 }
 
 void ViewAnimationSpecImpl::ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry)
 {
-  // TODO: Implement background color AnimateBy
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, ColorVisual::Property::MIX_COLOR);
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(visualProperty, entry.value, entry.alpha, period);
+  }
 }
 
 void ViewAnimationSpecImpl::ApplySizeWidthTo(Animation& animation, View view, const Entry& entry)
