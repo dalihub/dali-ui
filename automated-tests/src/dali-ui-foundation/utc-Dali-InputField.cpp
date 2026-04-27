@@ -216,11 +216,11 @@ int UtcDaliInputFieldTextColor(void)
 
   UiColor color(Color::BLUE);
   inputField.SetTextColor(color);
-  DALI_TEST_EQUALS(inputField.GetTextColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   UiColor color2(Color::RED);
   inputField.SetTextColor(color2);
-  DALI_TEST_EQUALS(inputField.GetTextColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -293,11 +293,11 @@ int UtcDaliInputFieldPlaceholderColor(void)
 
   UiColor color(Color::GRAY);
   inputField.SetPlaceholderColor(color);
-  DALI_TEST_EQUALS(inputField.GetPlaceholderColor().Resolve(), Color::GRAY, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetPlaceholderColor().GetRgba(), Color::GRAY, TEST_LOCATION);
 
   UiColor color2(Color::BLUE);
   inputField.SetPlaceholderColor(color2);
-  DALI_TEST_EQUALS(inputField.GetPlaceholderColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetPlaceholderColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -340,11 +340,11 @@ int UtcDaliInputFieldCursorColor(void)
 
   UiColor color(Color::BLUE);
   inputField.SetCursorColor(color);
-  DALI_TEST_EQUALS(inputField.GetCursorColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetCursorColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   UiColor color2(Color::RED);
   inputField.SetCursorColor(color2);
-  DALI_TEST_EQUALS(inputField.GetCursorColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetCursorColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -438,11 +438,11 @@ int UtcDaliInputFieldSelectionColor(void)
 
   UiColor color(Color::CYAN);
   inputField.SetSelectionColor(color);
-  DALI_TEST_EQUALS(inputField.GetSelectionColor().Resolve(), Color::CYAN, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetSelectionColor().GetRgba(), Color::CYAN, TEST_LOCATION);
 
   UiColor color2(Color::MAGENTA);
   inputField.SetSelectionColor(color2);
-  DALI_TEST_EQUALS(inputField.GetSelectionColor().Resolve(), Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetSelectionColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
 
   END_TEST;
 }
@@ -552,19 +552,19 @@ int UtcDaliInputFieldTextBackgroundColor(void)
 
   UiColor color(Color::YELLOW);
   inputField.SetTextBackgroundColor(color);
-  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
 
   UiColor color2(Color::GREEN);
   inputField.SetTextBackgroundColor(color2);
-  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   // Clear text background color
   inputField.ClearTextBackgroundColor();
-  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().GetRgba(), Color::TRANSPARENT, TEST_LOCATION);
 
   // Set again after clear
   inputField.SetTextBackgroundColor(Color::BLUE);
-  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetTextBackgroundColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }

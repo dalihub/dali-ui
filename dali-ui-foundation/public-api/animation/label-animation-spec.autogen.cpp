@@ -202,13 +202,13 @@ LabelAnimationSpec& LabelAnimationSpec::BorderlineOffsetBy(float relative, Durat
 
 LabelAnimationSpec& LabelAnimationSpec::TextColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Label::Property::TEXT_COLOR, target.Resolve(), duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateToEntry(Label::Property::TEXT_COLOR, target.GetRgba(), duration, alpha, delay);
   return *this;
 }
 
 LabelAnimationSpec& LabelAnimationSpec::TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Label::Property::TEXT_COLOR, relative.Resolve(), duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateByEntry(Label::Property::TEXT_COLOR, relative.GetRgba(), duration, alpha, delay);
   return *this;
 }
 

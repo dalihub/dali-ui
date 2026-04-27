@@ -363,11 +363,11 @@ int UtcDaliLabelAnchorColor(void)
 
   UiColor color(Color::BLUE);
   label.SetAnchorColor(color);
-  DALI_TEST_EQUALS(label.GetAnchorColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAnchorColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   UiColor color2(Color::RED);
   label.SetAnchorColor(color2);
-  DALI_TEST_EQUALS(label.GetAnchorColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAnchorColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -380,11 +380,11 @@ int UtcDaliLabelAnchorClickedColor(void)
 
   UiColor color(Color::GREEN);
   label.SetAnchorClickedColor(color);
-  DALI_TEST_EQUALS(label.GetAnchorClickedColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAnchorClickedColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   UiColor color2(Color::YELLOW);
   label.SetAnchorClickedColor(color2);
-  DALI_TEST_EQUALS(label.GetAnchorClickedColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetAnchorClickedColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
 
   END_TEST;
 }
@@ -502,11 +502,11 @@ int UtcDaliLabelTextColor(void)
 
   UiColor color(Color::BLUE);
   label.SetTextColor(color);
-  DALI_TEST_EQUALS(label.GetTextColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   UiColor color2(Color::RED);
   label.SetTextColor(color2);
-  DALI_TEST_EQUALS(label.GetTextColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -564,19 +564,19 @@ int UtcDaliLabelTextBackgroundColor(void)
 
   UiColor color(Color::YELLOW);
   label.SetTextBackgroundColor(color);
-  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
 
   UiColor color2(Color::GREEN);
   label.SetTextBackgroundColor(color2);
-  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   // Clear text background color
   label.ClearTextBackgroundColor();
-  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::TRANSPARENT, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().GetRgba(), Color::TRANSPARENT, TEST_LOCATION);
 
   // Set again after clear
   label.SetTextBackgroundColor(Color::BLUE);
-  DALI_TEST_EQUALS(label.GetTextBackgroundColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextBackgroundColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }

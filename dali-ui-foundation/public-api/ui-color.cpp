@@ -62,9 +62,9 @@ using TokenId = uint32_t;
  */
 struct TokenRegistry
 {
-  std::mutex                            mutex;
-  std::unordered_map<String, TokenId>   nameToId;
-  std::deque<String>                    idToName;
+  std::mutex                          mutex;
+  std::unordered_map<String, TokenId> nameToId;
+  std::deque<String>                  idToName;
 
   TokenId GetOrCreateId(const String& name)
   {
@@ -192,7 +192,7 @@ UiColor::UiColor(const String& colorId)
   SetAlphaMode(AlphaMode::With);
 
   TokenRegistry& registry = GetTokenRegistry();
-  TokenId id;
+  TokenId        id;
   {
     std::lock_guard<std::mutex> lock(registry.mutex);
     id = registry.GetOrCreateId(colorId);
@@ -208,7 +208,7 @@ UiColor::UiColor(String&& colorId)
   SetAlphaMode(AlphaMode::With);
 
   TokenRegistry& registry = GetTokenRegistry();
-  TokenId id;
+  TokenId        id;
   {
     std::lock_guard<std::mutex> lock(registry.mutex);
     id = registry.GetOrCreateId(std::move(colorId));
@@ -240,13 +240,13 @@ String UiColor::GetColorId() const
     return {};
   }
 
-  TokenRegistry& registry = GetTokenRegistry();
+  TokenRegistry&              registry = GetTokenRegistry();
   std::lock_guard<std::mutex> lock(registry.mutex);
-  const String* name = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
+  const String*               name = registry.TryGetName(static_cast<TokenId>(GetTokenId()));
   return name ? *name : String{};
 }
 
-Vector4 UiColor::Resolve() const
+Vector4 UiColor::GetRgba() const
 {
   if(GetType() == Type::Token)
   {
@@ -255,7 +255,7 @@ Vector4 UiColor::Resolve() const
     // so the pointer remains valid after releasing the mutex.
     const String* namePtr;
     {
-      TokenRegistry& registry = GetTokenRegistry();
+      TokenRegistry&              registry = GetTokenRegistry();
       std::lock_guard<std::mutex> lock(registry.mutex);
       namePtr = registry.TryGetName(GetTokenId());
     }
@@ -281,12 +281,12 @@ Vector4 UiColor::Resolve() const
     }
     return Vector4::ZERO;
   }
-  return GetRgba();
+  return ReadRgbaPayload();
 }
 
 UiColor::operator Vector4() const
 {
-  return Resolve();
+  return GetRgba();
 }
 
 UiColor UiColor::ScaleAlpha(float factor) const
@@ -294,7 +294,7 @@ UiColor UiColor::ScaleAlpha(float factor) const
   UiColor out(*this);
   if(GetType() == Type::Rgba)
   {
-    Vector4 c = GetRgba();
+    Vector4 c = ReadRgbaPayload();
     c.a *= factor;
     c.a = std::clamp(c.a, 0.0f, 1.0f);
     out.SetRgba(c);
@@ -320,7 +320,7 @@ UiColor UiColor::WithAlpha(float alpha) const
   alpha = std::clamp(alpha, 0.0f, 1.0f);
   if(GetType() == Type::Rgba)
   {
-    Vector4 c = GetRgba();
+    Vector4 c = ReadRgbaPayload();
     c.a       = alpha;
     out.SetRgba(c);
   }
@@ -352,7 +352,7 @@ void UiColor::SetAlphaMode(AlphaMode mode)
   mData[OFFSET_ALPHA_MODE] = static_cast<uint8_t>(mode);
 }
 
-Vector4 UiColor::GetRgba() const
+Vector4 UiColor::ReadRgbaPayload() const
 {
   return Vector4(ReadFloat(mData, OFFSET_RGBA_R),
                  ReadFloat(mData, OFFSET_RGBA_G),

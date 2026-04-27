@@ -950,7 +950,7 @@ protected:
     {
       manager.ClearBinding(Self(), bindingId);
     }
-    (inst->*setter)(color.Resolve());
+    (inst->*setter)(color.GetRgba());
   }
 
   /**

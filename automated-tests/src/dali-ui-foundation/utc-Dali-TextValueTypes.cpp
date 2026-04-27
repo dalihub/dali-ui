@@ -48,11 +48,11 @@ int UtcDaliTextUnderlineColorP(void)
 
   UiColor color(Color::RED);
   underline.SetColor(color);
-  DALI_TEST_EQUALS(underline.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   UiColor color2(Color::BLUE);
   underline.SetColor(color2);
-  DALI_TEST_EQUALS(underline.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -130,13 +130,13 @@ int UtcDaliTextUnderlineCopyCtorP(void)
 
   Text::Underline copy(original);
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetThickness(), 3.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetType(), Text::Underline::Type::DASHED, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetDashLength(), 5.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetDashGap(), 2.0f, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetThickness(), 3.0f, TEST_LOCATION);
 
   END_TEST;
@@ -156,13 +156,13 @@ int UtcDaliTextUnderlineCopyAssignP(void)
   Text::Underline copy;
   copy = original;
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetThickness(), 4.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetType(), Text::Underline::Type::DOUBLE, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetDashLength(), 6.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetDashGap(), 3.0f, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetThickness(), 4.0f, TEST_LOCATION);
 
   END_TEST;
@@ -181,7 +181,7 @@ int UtcDaliTextUnderlineMoveCtorP(void)
 
   Text::Underline moved(std::move(original));
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetThickness(), 2.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetType(), Text::Underline::Type::DASHED, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetDashLength(), 4.0f, TEST_LOCATION);
@@ -204,7 +204,7 @@ int UtcDaliTextUnderlineMoveAssignP(void)
   Text::Underline moved;
   moved = std::move(original);
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetThickness(), 3.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetType(), Text::Underline::Type::DOUBLE, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetDashLength(), 7.0f, TEST_LOCATION);
@@ -276,10 +276,10 @@ int UtcDaliTextShadowColorP(void)
   Text::Shadow shadow;
 
   shadow.SetColor(UiColor(Color::RED));
-  DALI_TEST_EQUALS(shadow.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(shadow.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   shadow.SetColor(UiColor(Color::BLUE));
-  DALI_TEST_EQUALS(shadow.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(shadow.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -325,7 +325,7 @@ int UtcDaliTextShadowCopyCtorP(void)
 
   Text::Shadow copy(original);
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetBlurRadius(), 3.0f, TEST_LOCATION);
 
@@ -343,7 +343,7 @@ int UtcDaliTextShadowMoveCtorP(void)
 
   Text::Shadow moved(std::move(original));
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetOffset(), Vector2(2.0f, 3.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetBlurRadius(), 4.0f, TEST_LOCATION);
 
@@ -401,11 +401,11 @@ int UtcDaliTextShadowCopyAssignP(void)
   Text::Shadow copy;
   copy = original;
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetBlurRadius(), 5.0f, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
 
   END_TEST;
@@ -423,7 +423,7 @@ int UtcDaliTextShadowMoveAssignP(void)
   Text::Shadow moved;
   moved = std::move(original);
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetOffset(), Vector2(4.0f, 5.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetBlurRadius(), 6.0f, TEST_LOCATION);
 
@@ -454,10 +454,10 @@ int UtcDaliTextOutlineColorP(void)
   Text::Outline outline;
 
   outline.SetColor(UiColor(Color::RED));
-  DALI_TEST_EQUALS(outline.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(outline.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   outline.SetColor(UiColor(Color::BLUE));
-  DALI_TEST_EQUALS(outline.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(outline.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -488,7 +488,7 @@ int UtcDaliTextOutlineCopyCtorP(void)
 
   Text::Outline copy(original);
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetOffset(), Vector2(1.0f, 2.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetWidth(), 3.0f, TEST_LOCATION);
 
@@ -506,7 +506,7 @@ int UtcDaliTextOutlineMoveCtorP(void)
 
   Text::Outline moved(std::move(original));
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetOffset(), Vector2(2.0f, 3.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetWidth(), 4.0f, TEST_LOCATION);
 
@@ -581,11 +581,11 @@ int UtcDaliTextOutlineCopyAssignP(void)
   Text::Outline copy;
   copy = original;
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetWidth(), 5.0f, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
 
   END_TEST;
@@ -603,7 +603,7 @@ int UtcDaliTextOutlineMoveAssignP(void)
   Text::Outline moved;
   moved = std::move(original);
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetOffset(), Vector2(4.0f, 5.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetWidth(), 6.0f, TEST_LOCATION);
 
@@ -647,10 +647,10 @@ int UtcDaliTextLineThroughColorP(void)
   Text::LineThrough lineThrough;
 
   lineThrough.SetColor(UiColor(Color::RED));
-  DALI_TEST_EQUALS(lineThrough.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(lineThrough.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   lineThrough.SetColor(UiColor(Color::BLUE));
-  DALI_TEST_EQUALS(lineThrough.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(lineThrough.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -680,7 +680,7 @@ int UtcDaliTextLineThroughCopyCtorP(void)
 
   Text::LineThrough copy(original);
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetThickness(), 3.0f, TEST_LOCATION);
 
   END_TEST;
@@ -696,7 +696,7 @@ int UtcDaliTextLineThroughMoveCtorP(void)
 
   Text::LineThrough moved(std::move(original));
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetThickness(), 4.0f, TEST_LOCATION);
 
   END_TEST;
@@ -739,10 +739,10 @@ int UtcDaliTextLineThroughCopyAssignP(void)
   Text::LineThrough copy;
   copy = original;
 
-  DALI_TEST_EQUALS(copy.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetThickness(), 4.0f, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(original.GetColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(original.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetThickness(), 4.0f, TEST_LOCATION);
 
   END_TEST;
@@ -759,7 +759,7 @@ int UtcDaliTextLineThroughMoveAssignP(void)
   Text::LineThrough moved;
   moved = std::move(original);
 
-  DALI_TEST_EQUALS(moved.GetColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetThickness(), 5.0f, TEST_LOCATION);
 
   END_TEST;
@@ -839,8 +839,8 @@ int UtcDaliTextBevelCopyCtorP(void)
 
   DALI_TEST_EQUALS(copy.GetDirection(), Vector2(1.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetIntensity(), 3.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetLightColor().Resolve(), Color::RED, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetShadowColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLightColor().GetRgba(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetShadowColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -859,8 +859,8 @@ int UtcDaliTextBevelMoveCtorP(void)
 
   DALI_TEST_EQUALS(moved.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetIntensity(), 4.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetLightColor().Resolve(), Color::GREEN, TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetShadowColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLightColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetShadowColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
 
   END_TEST;
 }
@@ -898,10 +898,10 @@ int UtcDaliTextBevelLightColorP(void)
   Text::Bevel bevel;
 
   bevel.SetLightColor(UiColor(Color::RED));
-  DALI_TEST_EQUALS(bevel.GetLightColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(bevel.GetLightColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   bevel.SetLightColor(UiColor(Color::BLUE));
-  DALI_TEST_EQUALS(bevel.GetLightColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(bevel.GetLightColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -913,10 +913,10 @@ int UtcDaliTextBevelShadowColorP(void)
   Text::Bevel bevel;
 
   bevel.SetShadowColor(UiColor(Color::RED));
-  DALI_TEST_EQUALS(bevel.GetShadowColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(bevel.GetShadowColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   bevel.SetShadowColor(UiColor(Color::BLUE));
-  DALI_TEST_EQUALS(bevel.GetShadowColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(bevel.GetShadowColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -936,8 +936,8 @@ int UtcDaliTextBevelCopyAssignP(void)
 
   DALI_TEST_EQUALS(copy.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetIntensity(), 4.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetLightColor().Resolve(), Color::GREEN, TEST_LOCATION);
-  DALI_TEST_EQUALS(copy.GetShadowColor().Resolve(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetLightColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetShadowColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
 
   DALI_TEST_EQUALS(original.GetDirection(), Vector2(2.0f, 2.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(original.GetIntensity(), 4.0f, TEST_LOCATION);
@@ -960,8 +960,8 @@ int UtcDaliTextBevelMoveAssignP(void)
 
   DALI_TEST_EQUALS(moved.GetDirection(), Vector2(3.0f, 3.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetIntensity(), 5.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetLightColor().Resolve(), Color::CYAN, TEST_LOCATION);
-  DALI_TEST_EQUALS(moved.GetShadowColor().Resolve(), Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetLightColor().GetRgba(), Color::CYAN, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetShadowColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
 
   END_TEST;
 }

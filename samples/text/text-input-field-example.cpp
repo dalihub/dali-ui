@@ -334,7 +334,7 @@ private:
   {
     // Get selected text and show it in status
     Dali::String selectedText = mInputField.GetSelectedText();
-    
+
     bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
     float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
     uint32_t cursorPosition     = mInputField.GetCursorPosition();
@@ -365,7 +365,7 @@ private:
     status += "-";
     status += std::to_string(selEnd).c_str();
     status += "]";
-    
+
     // Add selected text if any
     if(selectedText.Size() > 0)
     {
@@ -442,7 +442,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      Vector4 currentColor = mInputField.GetPlaceholderColor().Resolve();
+      Vector4 currentColor = mInputField.GetPlaceholderColor().GetRgba();
       if(currentColor == UiColor(COLOR_DARK_GRAY))
       {
         mInputField.SetPlaceholderColor(UiColor(COLOR_LIGHT_BLUE));
@@ -464,7 +464,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      Vector4 currentColor = mInputField.GetSelectionColor().Resolve();
+      Vector4 currentColor = mInputField.GetSelectionColor().GetRgba();
       if(currentColor == UiColor(COLOR_LIGHT_BLUE))
       {
         mInputField.SetSelectionColor(UiColor(COLOR_CYAN));

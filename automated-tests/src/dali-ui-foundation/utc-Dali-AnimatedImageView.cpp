@@ -198,7 +198,7 @@ int UtcDaliAnimatedImageViewSetGetImageColorP(void)
   AnimatedImageView view  = AnimatedImageView::New();
   UiColor           color(1.0f, 0.5f, 0.5f, 1.0f);
   view.SetImageColor(color);
-  DALI_TEST_EQUALS(view.GetImageColor().Resolve(), color.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageColor().GetRgba(), color.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 
@@ -208,7 +208,7 @@ int UtcDaliAnimatedImageViewSetImageColorNoChangeP(void)
   AnimatedImageView view  = AnimatedImageView::New();
   UiColor           white(Color::WHITE);
   view.SetImageColor(white); // same as default — no update
-  DALI_TEST_EQUALS(view.GetImageColor().Resolve(), white.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageColor().GetRgba(), white.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 

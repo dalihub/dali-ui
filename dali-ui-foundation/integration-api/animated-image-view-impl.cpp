@@ -382,7 +382,7 @@ Dali::Property::Value AnimatedImageViewImpl::GetProperty(Dali::BaseObject* objec
         value = impl.GetLoopCount();
         break;
       case AnimatedImageViewImpl::Property::IMAGE_COLOR:
-        value = impl.GetImageColor().Resolve();
+        value = impl.GetImageColor().GetRgba();
         break;
       case AnimatedImageViewImpl::Property::STOP_BEHAVIOR:
         value = static_cast<int>(impl.GetStopBehavior());
@@ -748,14 +748,14 @@ int AnimatedImageViewImpl::GetLoopCount() const
 
 void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
 {
-  if(mImageColor.Resolve() != color.Resolve())
+  if(mImageColor.GetRgba() != color.GetRgba())
   {
     mImageColor = color;
     if(mVisual)
     {
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -1083,7 +1083,7 @@ void AnimatedImageViewImpl::UpdateVisual()
     map.Insert(Ui::ImageVisual::Property::FRAME_DELAY, mFrameDelay);
   }
 
-  map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+  map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
 
   if(mDesiredWidth > 0)
   {

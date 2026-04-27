@@ -190,7 +190,7 @@ int UtcDaliImageViewSetGetImageColorP(void)
   ImageView view  = ImageView::New();
   UiColor   color(1.0f, 0.5f, 0.5f, 1.0f);
   view.SetImageColor(color);
-  DALI_TEST_EQUALS(view.GetImageColor().Resolve(), color.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageColor().GetRgba(), color.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 

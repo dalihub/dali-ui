@@ -311,7 +311,7 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
         value = impl.GetFrameSpeedFactor();
         break;
       case LottieAnimationViewImpl::Property::IMAGE_COLOR:
-        value = impl.GetImageColor().Resolve();
+        value = impl.GetImageColor().GetRgba();
         break;
       case LottieAnimationViewImpl::Property::DESIRED_WIDTH:
         value = impl.GetDesiredWidth();
@@ -871,7 +871,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::DevelImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Visual::Property::PREMULTIPLIED_ALPHA, mPreMultipliedAlpha);
-  map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+  map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
 
   auto visualFactory = Ui::VisualFactory::Get();
   if(visualFactory)
@@ -961,14 +961,14 @@ bool LottieAnimationViewImpl::IsPreMultipliedAlpha() const
 
 void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
 {
-  if(mImageColor.Resolve() != color.Resolve())
+  if(mImageColor.GetRgba() != color.GetRgba())
   {
     mImageColor = color;
     if(mVisual)
     {
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else

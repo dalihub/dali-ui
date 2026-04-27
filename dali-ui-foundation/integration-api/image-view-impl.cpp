@@ -338,7 +338,7 @@ Dali::Property::Value ImageViewImpl::GetProperty(Dali::BaseObject* object, Dali:
         value = impl.GetDesiredHeight();
         break;
       case Property::IMAGE_COLOR:
-        value = impl.GetImageColor().Resolve();
+        value = impl.GetImageColor().GetRgba();
         break;
       case Property::PRE_MULTIPLIED_ALPHA:
         value = impl.IsPreMultipliedAlpha();
@@ -605,14 +605,14 @@ Ui::MaskingType::Type ImageViewImpl::GetMaskingMode() const
 
 void ImageViewImpl::SetImageColor(const UiColor& color)
 {
-  if(mImageColor.Resolve() != color.Resolve())
+  if(mImageColor.GetRgba() != color.GetRgba())
   {
     mImageColor = color;
     // Update the mix color directly on the existing visual without a full rebuild.
     if(mVisual)
     {
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -913,7 +913,7 @@ void ImageViewImpl::UpdateVisual()
     map.Insert(Visual::Property::TYPE, Visual::IMAGE);
     map.Insert(Ui::ImageVisual::Property::URL, mUrl);
     map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
-    map.Insert(Visual::Property::MIX_COLOR, mImageColor.Resolve());
+    map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
     map.Insert(Visual::Property::PREMULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)

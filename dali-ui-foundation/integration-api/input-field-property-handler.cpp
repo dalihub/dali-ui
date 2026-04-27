@@ -232,7 +232,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::TEXT_COLOR:
     {
-      value = impl.GetTextColor().Resolve();
+      value = impl.GetTextColor().GetRgba();
       break;
     }
     case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
@@ -257,7 +257,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
     {
-      value = impl.GetPlaceholderColor().Resolve();
+      value = impl.GetPlaceholderColor().GetRgba();
       break;
     }
     case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
@@ -272,7 +272,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::CURSOR_COLOR:
     {
-      value = impl.GetCursorColor().Resolve();
+      value = impl.GetCursorColor().GetRgba();
       break;
     }
     case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
@@ -297,7 +297,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
-      value = impl.GetSelectionColor().Resolve();
+      value = impl.GetSelectionColor().GetRgba();
       break;
     }
     case Text::InputFieldPropertyIndex::SELECTED_TEXT:
@@ -347,7 +347,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
-      value = impl.GetTextBackgroundColor().Resolve();
+      value = impl.GetTextBackgroundColor().GetRgba();
       break;
     }
     case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:

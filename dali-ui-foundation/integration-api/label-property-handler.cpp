@@ -317,12 +317,12 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     }
     case Text::LabelPropertyIndex::ANCHOR_COLOR:
     {
-      value = impl.GetAnchorColor().Resolve();
+      value = impl.GetAnchorColor().GetRgba();
       break;
     }
     case Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
     {
-      value = impl.GetAnchorClickedColor().Resolve();
+      value = impl.GetAnchorClickedColor().GetRgba();
       break;
     }
     case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
@@ -377,7 +377,7 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     }
     case Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
-      value = impl.GetTextBackgroundColor().Resolve();
+      value = impl.GetTextBackgroundColor().GetRgba();
       break;
     }
     case Text::LabelPropertyIndex::FONT_SIZE_SCALE:

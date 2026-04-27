@@ -40,14 +40,14 @@ ViewAnimationBridge::ViewAnimationBridge(Animation animation, View view)
 ViewAnimationBridge& ViewAnimationBridge::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target.Resolve(), duration, alpha, delay, nullptr});
+  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target.GetRgba(), duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative.Resolve(), duration, alpha, delay, nullptr});
+  Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative.GetRgba(), duration, alpha, delay, nullptr});
   return *this;
 }
 
@@ -194,14 +194,14 @@ ViewAnimationBridge& ViewAnimationBridge::BorderlineWidthBy(float relative, Dura
 ViewAnimationBridge& ViewAnimationBridge::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_COLOR), target.Resolve(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  mAnimation.AnimateTo(Property(mView, View::Property::BORDERLINE_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_COLOR), relative.Resolve(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  mAnimation.AnimateBy(Property(mView, View::Property::BORDERLINE_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 

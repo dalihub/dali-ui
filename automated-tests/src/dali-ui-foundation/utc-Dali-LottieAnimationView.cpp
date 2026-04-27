@@ -273,11 +273,11 @@ int UtcDaliLottieAnimationViewSetGetImageColorP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Default should be WHITE
-  DALI_TEST_EQUALS(view.GetImageColor().Resolve(), Color::WHITE, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageColor().GetRgba(), Color::WHITE, TEST_LOCATION);
 
   UiColor red(1.0f, 0.0f, 0.0f, 1.0f);
   view.SetImageColor(red);
-  DALI_TEST_EQUALS(view.GetImageColor().Resolve(), red.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetImageColor().GetRgba(), red.GetRgba(), TEST_LOCATION);
   END_TEST;
 }
 

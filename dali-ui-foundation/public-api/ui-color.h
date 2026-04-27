@@ -132,7 +132,7 @@ public:
   String GetColorId() const;
 
   /**
-   * @brief Resolves and returns the RGBA value as a Vector4.
+   * @brief Returns the RGBA value as a Vector4.
    *
    * If this UiColor has a color ID, the value is looked up from the
    * current theme. If the ID is not found, returns the fallback
@@ -141,7 +141,7 @@ public:
    *
    * @return The resolved RGBA color
    */
-  Vector4 Resolve() const;
+  Vector4 GetRgba() const;
 
   /**
    * @brief Implicit conversion to Vector4.
@@ -184,7 +184,7 @@ private:
   AlphaMode GetAlphaMode() const;
   void      SetAlphaMode(AlphaMode mode);
 
-  Vector4 GetRgba() const;
+  Vector4 ReadRgbaPayload() const;
   void    SetRgba(const Vector4& rgba);
 
   uint32_t GetTokenId() const;

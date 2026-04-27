@@ -47,7 +47,7 @@ int UtcDaliUiColorDefaultConstructorP(void)
   DALI_TEST_CHECK(!color.HasColorId());
   DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
 
   END_TEST;
@@ -64,7 +64,7 @@ int UtcDaliUiColorRgbaConstructorP(void)
   DALI_TEST_CHECK(!color.HasColorId());
   DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -79,7 +79,7 @@ int UtcDaliUiColorRgbaConstructorDefaultAlphaP(void)
 
   UiColor color(0.5f, 0.5f, 0.5f);
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.a, 1.0f, TEST_LOCATION);
 
   END_TEST;
@@ -96,7 +96,7 @@ int UtcDaliUiColorVector4ConstructorP(void)
 
   DALI_TEST_CHECK(!color.HasColorId());
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved, input, TEST_LOCATION);
 
   END_TEST;
@@ -141,7 +141,7 @@ int UtcDaliUiColorHexConstructorP(void)
 
   DALI_TEST_CHECK(!color.HasColorId());
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -157,7 +157,7 @@ int UtcDaliUiColorHexConstructorWithAlphaP(void)
   // 0x00FF00 = pure green, alpha 0.5
   UiColor color(0x00FF00u, 0.5f);
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -173,7 +173,7 @@ int UtcDaliUiColorHexConstructorMixedP(void)
   // 0x387AFF = the default "Primary" color
   UiColor color(0x387AFFu);
 
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 0x38 / 255.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0x7A / 255.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0xFF / 255.0f, 0.001f, TEST_LOCATION);
@@ -192,7 +192,7 @@ int UtcDaliUiColorCopyConstructorRgbaP(void)
   UiColor copy(original);
 
   DALI_TEST_CHECK(!copy.HasColorId());
-  DALI_TEST_EQUALS(copy.Resolve(), original.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetRgba(), original.GetRgba(), TEST_LOCATION);
 
   END_TEST;
 }
@@ -215,11 +215,11 @@ int UtcDaliUiColorMoveConstructorP(void)
   UiTestApplication application;
 
   UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
-  Vector4 originalResolved = original.Resolve();
+  Vector4 originalResolved = original.GetRgba();
 
   UiColor moved(std::move(original));
 
-  DALI_TEST_EQUALS(moved.Resolve(), originalResolved, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetRgba(), originalResolved, TEST_LOCATION);
 
   END_TEST;
 }
@@ -232,7 +232,7 @@ int UtcDaliUiColorCopyAssignmentP(void)
   UiColor copy;
   copy = original;
 
-  DALI_TEST_EQUALS(copy.Resolve(), original.Resolve(), TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetRgba(), original.GetRgba(), TEST_LOCATION);
 
   END_TEST;
 }
@@ -242,12 +242,12 @@ int UtcDaliUiColorMoveAssignmentP(void)
   UiTestApplication application;
 
   UiColor original(0.1f, 0.2f, 0.3f, 0.4f);
-  Vector4 originalResolved = original.Resolve();
+  Vector4 originalResolved = original.GetRgba();
 
   UiColor moved;
   moved = std::move(original);
 
-  DALI_TEST_EQUALS(moved.Resolve(), originalResolved, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetRgba(), originalResolved, TEST_LOCATION);
 
   END_TEST;
 }
@@ -301,7 +301,7 @@ int UtcDaliUiColorResolveRgbaP(void)
   UiTestApplication application;
 
   UiColor color(0.1f, 0.2f, 0.3f, 0.4f);
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
 
   DALI_TEST_EQUALS(resolved, Vector4(0.1f, 0.2f, 0.3f, 0.4f), TEST_LOCATION);
 
@@ -314,7 +314,7 @@ int UtcDaliUiColorResolveTokenP(void)
 
   // "Primary" is a known default theme color (0x387AFF)
   UiColor color = UiColor::PRIMARY;
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
 
   // Should resolve to non-zero (the default theme provides "Primary")
   DALI_TEST_CHECK(resolved != Vector4::ZERO);
@@ -327,7 +327,7 @@ int UtcDaliUiColorResolveUnknownTokenN(void)
   UiTestApplication application;
 
   UiColor color("NonExistentColorId12345");
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
 
   // Unknown token should fallback to ZERO
   DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
@@ -358,7 +358,7 @@ int UtcDaliUiColorScaleAlphaRgbaP(void)
   UiColor color(1.0f, 0.0f, 0.0f, 0.8f);
   UiColor result = color.ScaleAlpha(0.5f);
 
-  Vector4 resolved = result.Resolve();
+  Vector4 resolved = result.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -389,9 +389,9 @@ int UtcDaliUiColorScaleAlphaDoesNotModifyOriginalP(void)
   UiColor result = color.ScaleAlpha(0.5f);
 
   // Original should be unchanged
-  DALI_TEST_EQUALS(color.Resolve().a, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetRgba().a, 1.0f, TEST_LOCATION);
   // Result should have new alpha
-  DALI_TEST_EQUALS(result.Resolve().a, 0.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.5f, 0.001f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -404,7 +404,7 @@ int UtcDaliUiColorScaleAlphaClampP(void)
   UiColor result = color.ScaleAlpha(2.0f);
 
   // Should clamp to 1.0
-  DALI_TEST_CHECK(result.Resolve().a <= 1.0f);
+  DALI_TEST_CHECK(result.GetRgba().a <= 1.0f);
 
   END_TEST;
 }
@@ -418,7 +418,7 @@ int UtcDaliUiColorWithAlphaRgbaP(void)
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
   UiColor result = color.WithAlpha(0.3f);
 
-  Vector4 resolved = result.Resolve();
+  Vector4 resolved = result.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -448,9 +448,9 @@ int UtcDaliUiColorWithAlphaDoesNotModifyOriginalP(void)
   UiColor result = color.WithAlpha(0.2f);
 
   // Original unchanged
-  DALI_TEST_EQUALS(color.Resolve().a, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetRgba().a, 1.0f, TEST_LOCATION);
   // Result has new alpha
-  DALI_TEST_EQUALS(result.Resolve().a, 0.2f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.2f, 0.001f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -463,11 +463,11 @@ int UtcDaliUiColorWithAlphaClampP(void)
 
   // Negative should clamp to 0
   UiColor result = color.WithAlpha(-1.0f);
-  DALI_TEST_EQUALS(result.Resolve().a, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetRgba().a, 0.0f, TEST_LOCATION);
 
   // Over 1 should clamp to 1
   result = color.WithAlpha(5.0f);
-  DALI_TEST_EQUALS(result.Resolve().a, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetRgba().a, 1.0f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -484,7 +484,7 @@ int UtcDaliUiColorWithAlphaThenScaleAlphaTokenP(void)
 
   DALI_TEST_CHECK(result.HasColorId());
 
-  Vector4 resolved = result.Resolve();
+  Vector4 resolved = result.GetRgba();
   DALI_TEST_CHECK(resolved != Vector4::ZERO);
   DALI_TEST_EQUALS(resolved.a, 0.1f, 0.001f, TEST_LOCATION);
 
@@ -498,7 +498,7 @@ int UtcDaliUiColorWithAlphaThenScaleAlphaRgbaP(void)
   // RGBA case: WithAlpha sets alpha to 0.5, ScaleAlpha multiplies by 0.2
   UiColor result = UiColor(1.0f, 0.0f, 0.0f, 1.0f).WithAlpha(0.5f).ScaleAlpha(0.2f);
 
-  Vector4 resolved = result.Resolve();
+  Vector4 resolved = result.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.a, 0.1f, 0.001f, TEST_LOCATION);
 
@@ -514,8 +514,8 @@ int UtcDaliUiColorScaleAlphaChainTokenP(void)
 
   DALI_TEST_CHECK(result.HasColorId());
 
-  Vector4 primaryResolved = UiColor::PRIMARY.Resolve();
-  Vector4 resolved        = result.Resolve();
+  Vector4 primaryResolved = UiColor::PRIMARY.GetRgba();
+  Vector4 resolved        = result.GetRgba();
   DALI_TEST_EQUALS(resolved.a, primaryResolved.a * 0.5f * 0.2f, 0.001f, TEST_LOCATION);
 
   END_TEST;
@@ -530,7 +530,7 @@ int UtcDaliUiColorScaleAlphaThenWithAlphaTokenP(void)
 
   DALI_TEST_CHECK(result.HasColorId());
 
-  Vector4 resolved = result.Resolve();
+  Vector4 resolved = result.GetRgba();
   DALI_TEST_EQUALS(resolved.a, 0.3f, 0.001f, TEST_LOCATION);
 
   END_TEST;

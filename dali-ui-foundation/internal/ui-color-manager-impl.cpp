@@ -278,7 +278,7 @@ void UiColorManagerImpl::RefreshBindings()
     {
       if(info.color.HasColorId())
       {
-        info.applyFunc.Invoke(info.color.Resolve());
+        info.applyFunc.Invoke(info.color.GetRgba());
       }
     }
 

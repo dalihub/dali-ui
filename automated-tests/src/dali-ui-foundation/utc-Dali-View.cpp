@@ -1373,7 +1373,7 @@ int UtcDaliViewGetBorderlineColorP(void)
   UiTestApplication application;
   View view = View::New();
   UiColor color = view.GetBorderlineColor();
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   // Default color should be black/transparent
   DALI_TEST_EQUALS(resolved.r, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
@@ -1391,7 +1391,7 @@ int UtcDaliViewSetBorderlineColorP(void)
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   UiColor color = view.GetBorderlineColor();
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.25f, TEST_LOCATION);
@@ -1410,7 +1410,7 @@ int UtcDaliViewBorderlineColorChainingP(void)
   DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
 
   UiColor color = view.GetBorderlineColor();
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 0.2f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.4f, TEST_LOCATION);
   END_TEST;
@@ -1471,7 +1471,7 @@ int UtcDaliViewBorderlineCombinedP(void)
   DALI_TEST_EQUALS(view.GetBorderlineOffset(), 1.5f, TEST_LOCATION);
 
   UiColor color = view.GetBorderlineColor();
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.r, 1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.g, 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(resolved.b, 0.0f, TEST_LOCATION);
@@ -1503,7 +1503,7 @@ int UtcDaliViewBorderlineWithCornerRadiusCombinedP(void)
   DALI_TEST_EQUALS(view.GetBorderlineOffset(), 0.5f, TEST_LOCATION);
 
   UiColor color = view.GetBorderlineColor();
-  Vector4 resolved = color.Resolve();
+  Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved.g, 1.0f, TEST_LOCATION);
   END_TEST;
 }

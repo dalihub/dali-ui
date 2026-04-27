@@ -305,7 +305,7 @@ private:
 
   void ToggleColor()
   {
-    const bool isLightColor = (mLabel.GetTextColor().Resolve() == UiColor(COLOR_DARK_TEXT));
+    const bool isLightColor = (mLabel.GetTextColor().GetRgba() == UiColor(COLOR_DARK_TEXT));
     if(isLightColor)
     {
       ApplyDarkColor();

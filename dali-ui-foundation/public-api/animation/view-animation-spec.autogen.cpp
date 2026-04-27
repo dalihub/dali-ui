@@ -64,13 +64,13 @@ void ViewAnimationSpec::ApplyTo(Animation animation, View view) const
 
 ViewAnimationSpec& ViewAnimationSpec::BackgroundColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target.Resolve(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo);
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target.GetRgba(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorTo);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::BackgroundColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative.Resolve(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy);
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative.GetRgba(), duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyBackgroundColorBy);
   return *this;
 }
 
@@ -196,13 +196,13 @@ ViewAnimationSpec& ViewAnimationSpec::BorderlineWidthBy(float relative, Duration
 
 ViewAnimationSpec& ViewAnimationSpec::BorderlineColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(View::Property::BORDERLINE_COLOR, target.Resolve(), duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateToEntry(View::Property::BORDERLINE_COLOR, target.GetRgba(), duration, alpha, delay);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::BorderlineColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(View::Property::BORDERLINE_COLOR, relative.Resolve(), duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateByEntry(View::Property::BORDERLINE_COLOR, relative.GetRgba(), duration, alpha, delay);
   return *this;
 }
 

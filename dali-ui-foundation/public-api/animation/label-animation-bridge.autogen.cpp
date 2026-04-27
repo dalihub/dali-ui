@@ -195,14 +195,14 @@ LabelAnimationBridge& LabelAnimationBridge::BorderlineOffsetBy(float relative, D
 LabelAnimationBridge& LabelAnimationBridge::TextColor(const UiColor& target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Label::Property::TEXT_COLOR), target.Resolve(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  mAnimation.AnimateTo(Property(mView, Label::Property::TEXT_COLOR), target.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 
 LabelAnimationBridge& LabelAnimationBridge::TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Label::Property::TEXT_COLOR), relative.Resolve(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  mAnimation.AnimateBy(Property(mView, Label::Property::TEXT_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
   return *this;
 }
 

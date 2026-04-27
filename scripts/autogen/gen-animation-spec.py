@@ -168,7 +168,7 @@ def _value_expr(entry, is_by):
     """C++ expression for the value passed to AddEntry/AnimateTo."""
     val = 'relative' if is_by else 'target'
     if entry['type'] == 'UiColor':
-        return f'{val}.Resolve()'
+        return f'{val}.GetRgba()'
     return val
 
 
