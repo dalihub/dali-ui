@@ -26,7 +26,7 @@ namespace Dali::Ui::Internal::TextVisualizer
 {
 namespace
 {
-constexpr bool ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER = false;
+constexpr bool ENABLE_TEXT_VISUALIZER_LIGHTWEIGHT_RENDERER = true;
 
 uint32_t CountDescendants(const Actor& actor)
 {
