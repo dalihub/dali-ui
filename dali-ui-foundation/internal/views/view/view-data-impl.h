@@ -547,12 +547,32 @@ public:
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   std::unique_ptr<VisualData>        mVisualData;
 
-  int mLeftFocusableViewId;             ///< ID of Left focusable view.
-  int mRightFocusableViewId;            ///< ID of Right focusable view.
-  int mUpFocusableViewId;               ///< ID of Up focusable view.
-  int mDownFocusableViewId;             ///< ID of Down focusable view.
-  int mClockwiseFocusableViewId;        ///< ID of Clockwise focusable view.
-  int mCounterClockwiseFocusableViewId; ///< ID of Counter clockwise focusable view.
+  struct FocusNavigationData
+  {
+    int leftId             = -1;
+    int rightId            = -1;
+    int upId               = -1;
+    int downId             = -1;
+    int clockwiseId        = -1;
+    int counterClockwiseId = -1;
+    int forwardId          = -1;
+    int backwardId         = -1;
+  };
+  std::unique_ptr<FocusNavigationData> mFocusNavigationData; ///< Lazy-allocated directional focus IDs.
+
+  FocusNavigationData& EnsureFocusNavigationData()
+  {
+    if(!mFocusNavigationData)
+    {
+      mFocusNavigationData = std::make_unique<FocusNavigationData>();
+    }
+    return *mFocusNavigationData;
+  }
+
+  int GetFocusNavigationId(int FocusNavigationData::* field) const
+  {
+    return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
+  }
 
   Vector4                           mBackgroundColor; ///< The color of the background visual
   Extents                           mMargin;          ///< Layout margin
@@ -636,6 +656,8 @@ public:
   static const PropertyRegistration PROPERTY_40;
   static const PropertyRegistration PROPERTY_41;
   static const PropertyRegistration PROPERTY_42;
+  static const PropertyRegistration PROPERTY_43;
+  static const PropertyRegistration PROPERTY_44;
 
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_1;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_2;

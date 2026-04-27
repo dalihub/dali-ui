@@ -198,6 +198,18 @@
   */ \
   ChildClass& SetCounterClockwiseFocusableView(View view) { View::SetCounterClockwiseFocusableView(view); return *this; } \
   /** \
+  * @brief Sets the forward focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating forward \
+  */ \
+  ChildClass& SetForwardFocusableView(View view) { View::SetForwardFocusableView(view); return *this; } \
+  /** \
+  * @brief Sets the backward focusable View for keyboard navigation. \
+  * \
+  * @param[in] view The View to focus when navigating backward \
+  */ \
+  ChildClass& SetBackwardFocusableView(View view) { View::SetBackwardFocusableView(view); return *this; } \
+  /** \
   * @brief Sets whether this view supports two dimensional key navigation. \
   * @param[in] isSupported True to support key navigation \
   */ \

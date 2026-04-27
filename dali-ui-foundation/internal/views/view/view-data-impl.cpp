@@ -484,6 +484,8 @@ const PropertyRegistration ViewDataImpl::PROPERTY_39(typeRegistration, "maximumH
 const PropertyRegistration ViewDataImpl::PROPERTY_40(typeRegistration, "layoutMode",                     Ui::View::Property::LAYOUT_MODE,                      Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_41(typeRegistration, "keyNavigationSupport",      Ui::View::Property::KEY_NAVIGATION_SUPPORT,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_42(typeRegistration, "focusGroup",             Ui::View::Property::FOCUS_GROUP,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_43(typeRegistration, "forwardFocusableViewId",  Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID,  Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
+const PropertyRegistration ViewDataImpl::PROPERTY_44(typeRegistration, "backwardFocusableViewId", Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
@@ -508,12 +510,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),
-  mLeftFocusableViewId(-1),
-  mRightFocusableViewId(-1),
-  mUpFocusableViewId(-1),
-  mDownFocusableViewId(-1),
-  mClockwiseFocusableViewId(-1),
-  mCounterClockwiseFocusableViewId(-1),
+  mFocusNavigationData(nullptr),
   mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
   mPadding(),
@@ -970,7 +967,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mLeftFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().leftId = focusId;
         }
       }
       break;
@@ -980,7 +977,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mRightFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().rightId = focusId;
         }
       }
       break;
@@ -990,7 +987,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mUpFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().upId = focusId;
         }
       }
       break;
@@ -1000,7 +997,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mDownFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().downId = focusId;
         }
       }
       break;
@@ -1200,7 +1197,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mClockwiseFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().clockwiseId = focusId;
         }
         break;
       }
@@ -1209,7 +1206,25 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         int focusId;
         if(value.Get(focusId))
         {
-          viewImpl.GetViewDataImpl().mCounterClockwiseFocusableViewId = focusId;
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().counterClockwiseId = focusId;
+        }
+        break;
+      }
+      case Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID:
+      {
+        int focusId;
+        if(value.Get(focusId))
+        {
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().forwardId = focusId;
+        }
+        break;
+      }
+      case Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID:
+      {
+        int focusId;
+        if(value.Get(focusId))
+        {
+          viewImpl.GetViewDataImpl().EnsureFocusNavigationData().backwardId = focusId;
         }
         break;
       }
@@ -1580,25 +1595,25 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
     {
       case Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mLeftFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::leftId);
         break;
       }
 
       case Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mRightFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::rightId);
         break;
       }
 
       case Ui::View::Property::UP_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mUpFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::upId);
         break;
       }
 
       case Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mDownFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::downId);
         break;
       }
 
@@ -1702,13 +1717,25 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
       case Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mClockwiseFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::clockwiseId);
         break;
       }
 
       case Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
-        value = viewImpl.GetViewDataImpl().mCounterClockwiseFocusableViewId;
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::counterClockwiseId);
+        break;
+      }
+
+      case Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID:
+      {
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::forwardId);
+        break;
+      }
+
+      case Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID:
+      {
+        value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::backwardId);
         break;
       }
 

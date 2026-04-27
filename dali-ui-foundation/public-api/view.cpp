@@ -442,6 +442,18 @@ View& View::SetCounterClockwiseFocusableView(View view)
   return *this;
 }
 
+View& View::SetForwardFocusableView(View view)
+{
+  SetProperty(Property::FORWARD_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
+View& View::SetBackwardFocusableView(View view)
+{
+  SetProperty(Property::BACKWARD_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
+  return *this;
+}
+
 View& View::SetKeyNavigationSupport(bool isSupported)
 {
   GetImpl(*this).SetKeyNavigationSupport(isSupported);

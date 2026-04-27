@@ -516,6 +516,16 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
           index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID;
           break;
         }
+        case Ui::FocusDirection::FORWARD:
+        {
+          index = Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID;
+          break;
+        }
+        case Ui::FocusDirection::BACKWARD:
+        {
+          index = Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID;
+          break;
+        }
         default:
           break;
       }
@@ -631,31 +641,6 @@ bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, U
   }
 }
 
-bool FocusManager::DoMoveFocusToNextFocusGroup(bool forward, const FocusChangeContext& context)
-{
-  bool succeed = false;
-
-  // Get the parent layout view of the current focus group
-  Ui::View parentLayoutView = GetParentLayoutView(GetCurrentFocusGroup());
-
-  while(parentLayoutView && !succeed)
-  {
-    // If the current focus group has a parent layout view, we can probably automatically
-    // move the focus to the next focus group in the forward or backward direction.
-    Ui::FocusDirection direction = forward ? Ui::FocusDirection::RIGHT : Ui::FocusDirection::LEFT;
-    succeed                      = DoMoveFocusWithinLayoutView(parentLayoutView, GetCurrentFocusView(), direction, context);
-    parentLayoutView             = GetParentLayoutView(parentLayoutView);
-  }
-
-  if(!mFocusGroupChangedSignal.Empty())
-  {
-    // Emit a focus group changed signal. The applicaton can move the focus to a new focus group
-    mFocusGroupChangedSignal.Emit(GetCurrentFocusView(), forward);
-  }
-
-  return succeed;
-}
-
 void FocusManager::ClearFocus(View view)
 {
   // Reset context for this system-triggered focus loss.
@@ -707,16 +692,6 @@ void FocusManager::ClearFocus()
   View view = GetCurrentFocusView();
   ClearFocusIndicator(view);
   ClearFocus(view);
-}
-
-void FocusManager::SetFocusGroupLoop(bool enabled)
-{
-  mFocusGroupLoopEnabled = enabled;
-}
-
-bool FocusManager::GetFocusGroupLoop() const
-{
-  return mFocusGroupLoopEnabled;
 }
 
 void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
@@ -919,13 +894,9 @@ void FocusManager::OnKeyEvent(const KeyEvent& event)
       }
       else
       {
-        // "Tab" key changes the focus group in the forward direction and
-        // "Shift-Tab" key changes it in the backward direction.
-        if(!DoMoveFocusToNextFocusGroup(!event.IsShiftModifier(), context))
-        {
-          // If the focus group is not changed, Move the focus towards forward, "Shift-Tap" key moves the focus towards backward.
-          MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
-        }
+        // "Tab" key moves the focus in the forward direction,
+        // "Shift-Tab" key moves it in the backward direction.
+        MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
       }
 
       isFocusStartableKey = true;

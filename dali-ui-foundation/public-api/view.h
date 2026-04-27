@@ -662,6 +662,20 @@ public: // Properties
   View& SetCounterClockwiseFocusableView(View view);
 
   /**
+   * @brief Sets the forward focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating forward
+   */
+  View& SetForwardFocusableView(View view);
+
+  /**
+   * @brief Sets the backward focusable View for keyboard navigation.
+   *
+   * @param[in] view The View to focus when navigating backward
+   */
+  View& SetBackwardFocusableView(View view);
+
+  /**
    * @brief Sets whether this view supports two dimensional key navigation.
    * @param[in] isSupported True to support key navigation
    */
@@ -1642,6 +1656,18 @@ public:
        * @details Name "focusGroup", type Property::BOOLEAN.
        */
       FOCUS_GROUP,
+
+      /**
+       * @brief The ID of the forward focusable View (used for Tab key navigation).
+       * @details Name "forwardFocusableViewId", type Property::INTEGER.
+       */
+      FORWARD_FOCUSABLE_VIEW_ID,
+
+      /**
+       * @brief The ID of the backward focusable View (used for Shift+Tab key navigation).
+       * @details Name "backwardFocusableViewId", type Property::INTEGER.
+       */
+      BACKWARD_FOCUSABLE_VIEW_ID,
 
       /**
        * @brief The radius for the rounded corners of the View.
