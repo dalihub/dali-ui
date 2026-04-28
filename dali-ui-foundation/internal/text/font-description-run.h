@@ -43,9 +43,9 @@ struct FontDescriptionRun : public AbstractStyleCharacterRun
   : AbstractStyleCharacterRun(),
     familyName{nullptr},
     familyLength{0u},
-    weight{FontWeight::NONE},
-    width{FontWidth::NONE},
-    slant{FontSlant::NONE},
+    weight{TextAbstraction::FontWeight::NONE},
+    width{TextAbstraction::FontWidth::NONE},
+    slant{TextAbstraction::FontSlant::NONE},
     size{0u},
     familyDefined{false},
     weightDefined{false},
@@ -55,8 +55,8 @@ struct FontDescriptionRun : public AbstractStyleCharacterRun
   {
   }
 
-  FontDescriptionRun(const CharacterRun& characterRun, char* familyName, Length familyLength, FontWeight weight,
-                     FontWidth width, FontSlant slant, PointSize26Dot6 size, bool familyDefined, bool weightDefined,
+  FontDescriptionRun(const CharacterRun& characterRun, char* familyName, Length familyLength, FontWeightType weight,
+                     FontWidthType width, FontSlantType slant, PointSize26Dot6 size, bool familyDefined, bool weightDefined,
                      bool widthDefined, bool slantDefined, bool sizeDefined)
   : AbstractStyleCharacterRun(characterRun),
     familyName{familyName},
@@ -75,9 +75,9 @@ struct FontDescriptionRun : public AbstractStyleCharacterRun
 
   char*           familyName;   ///< The font's family name.
   Length          familyLength; ///< The length of the font's family name.
-  FontWeight      weight;       ///< The font's weight.
-  FontWidth       width;        ///< The font's width.
-  FontSlant       slant;        ///< The font's slant.
+  FontWeightType  weight;       ///< The font's weight.
+  FontWidthType   width;        ///< The font's width.
+  FontSlantType   slant;        ///< The font's slant.
   PointSize26Dot6 size;         ///< The font's size.
 
   bool familyDefined : 1; ///< Whether the font's family is defined.

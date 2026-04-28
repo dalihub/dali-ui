@@ -33,19 +33,19 @@ namespace Text
 {
 struct Controller::InputFontHandler
 {
-  static void        SetInputFontFamily(Controller& controller, const std::string& fontFamily);
-  static std::string GetInputFontFamily(const Controller& controller);
-  static void        SetInputFontWeight(const Controller& controller, FontWeight weight);
-  static bool        IsInputFontWeightDefined(const Controller& controller);
-  static FontWeight  GetInputFontWeight(const Controller& controller);
-  static void        SetInputFontWidth(Controller& controller, FontWidth width);
-  static bool        IsInputFontWidthDefined(const Controller& controller);
-  static FontWidth   GetInputFontWidth(const Controller& controller);
-  static void        SetInputFontSlant(Controller& controller, FontSlant slant);
-  static bool        IsInputFontSlantDefined(const Controller& controller);
-  static FontSlant   GetInputFontSlant(const Controller& controller);
-  static void        SetInputFontPointSize(Controller& controller, float size, bool defaultFontSizeUpdated);
-  static float       GetInputFontPointSize(const Controller& controller);
+  static void           SetInputFontFamily(Controller& controller, const std::string& fontFamily);
+  static std::string    GetInputFontFamily(const Controller& controller);
+  static void           SetInputFontWeight(const Controller& controller, FontWeightType weight);
+  static bool           IsInputFontWeightDefined(const Controller& controller);
+  static FontWeightType GetInputFontWeight(const Controller& controller);
+  static void           SetInputFontWidth(Controller& controller, FontWidthType width);
+  static bool           IsInputFontWidthDefined(const Controller& controller);
+  static FontWidthType  GetInputFontWidth(const Controller& controller);
+  static void           SetInputFontSlant(Controller& controller, FontSlantType slant);
+  static bool           IsInputFontSlantDefined(const Controller& controller);
+  static FontSlantType  GetInputFontSlant(const Controller& controller);
+  static void           SetInputFontPointSize(Controller& controller, float size, bool defaultFontSizeUpdated);
+  static float          GetInputFontPointSize(const Controller& controller);
 };
 
 } // namespace Text

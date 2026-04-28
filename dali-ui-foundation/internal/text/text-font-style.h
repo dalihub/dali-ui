@@ -2,7 +2,7 @@
 #define DALI_UI_INTERNAL_TEXT_FONT_STYLE_H
 
 /*
- * Copyright (c) 2022 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/scripting/scripting.h>
+#include <dali/devel-api/text-abstraction/font-list.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali
 {
@@ -30,45 +32,60 @@ namespace Ui
 {
 namespace Text
 {
-const Scripting::StringEnum FONT_WEIGHT_STRING_TABLE[] = {{"thin", TextAbstraction::FontWeight::THIN},
-                                                          {"ultraLight", TextAbstraction::FontWeight::ULTRA_LIGHT},
-                                                          {"extraLight", TextAbstraction::FontWeight::EXTRA_LIGHT},
-                                                          {"light", TextAbstraction::FontWeight::LIGHT},
-                                                          {"demiLight", TextAbstraction::FontWeight::DEMI_LIGHT},
-                                                          {"semiLight", TextAbstraction::FontWeight::SEMI_LIGHT},
-                                                          {"book", TextAbstraction::FontWeight::BOOK},
-                                                          {"normal", TextAbstraction::FontWeight::NORMAL},
-                                                          {"regular", TextAbstraction::FontWeight::REGULAR},
-                                                          {"medium", TextAbstraction::FontWeight::MEDIUM},
-                                                          {"demiBold", TextAbstraction::FontWeight::DEMI_BOLD},
-                                                          {"semiBold", TextAbstraction::FontWeight::SEMI_BOLD},
-                                                          {"bold", TextAbstraction::FontWeight::BOLD},
-                                                          {"ultraBold", TextAbstraction::FontWeight::ULTRA_BOLD},
-                                                          {"extraBold", TextAbstraction::FontWeight::EXTRA_BOLD},
-                                                          {"black", TextAbstraction::FontWeight::BLACK},
-                                                          {"heavy", TextAbstraction::FontWeight::HEAVY},
-                                                          {"extraBlack", TextAbstraction::FontWeight::EXTRA_BLACK}};
-const unsigned int          FONT_WEIGHT_STRING_TABLE_COUNT =
+const Scripting::StringEnum FONT_WEIGHT_STRING_TABLE[] =
+  {
+    {"thin", static_cast<int>(FontWeight::THIN)},
+
+    {"extraLight", static_cast<int>(FontWeight::EXTRA_LIGHT)},
+    {"ultraLight", static_cast<int>(FontWeight::ULTRA_LIGHT)},
+
+    {"light", static_cast<int>(FontWeight::LIGHT)},
+
+    {"demiLight", static_cast<int>(FontWeight::DEMI_LIGHT)},
+    {"semiLight", static_cast<int>(FontWeight::SEMI_LIGHT)},
+
+    {"book", static_cast<int>(FontWeight::BOOK)},
+
+    {"normal", static_cast<int>(FontWeight::NORMAL)},
+    {"regular", static_cast<int>(FontWeight::REGULAR)},
+
+    {"medium", static_cast<int>(FontWeight::MEDIUM)},
+
+    {"semiBold", static_cast<int>(FontWeight::SEMI_BOLD)},
+    {"demiBold", static_cast<int>(FontWeight::DEMI_BOLD)},
+
+    {"bold", static_cast<int>(FontWeight::BOLD)},
+
+    {"extraBold", static_cast<int>(FontWeight::EXTRA_BOLD)},
+    {"ultraBold", static_cast<int>(FontWeight::ULTRA_BOLD)},
+
+    {"black", static_cast<int>(FontWeight::BLACK)},
+    {"heavy", static_cast<int>(FontWeight::HEAVY)}};
+const unsigned int FONT_WEIGHT_STRING_TABLE_COUNT =
   sizeof(FONT_WEIGHT_STRING_TABLE) / sizeof(FONT_WEIGHT_STRING_TABLE[0]);
 
-const Scripting::StringEnum FONT_WIDTH_STRING_TABLE[] = {
-  {"ultraCondensed", TextAbstraction::FontWidth::ULTRA_CONDENSED},
-  {"extraCondensed", TextAbstraction::FontWidth::EXTRA_CONDENSED},
-  {"condensed", TextAbstraction::FontWidth::CONDENSED},
-  {"semiCondensed", TextAbstraction::FontWidth::SEMI_CONDENSED},
-  {"normal", TextAbstraction::FontWidth::NORMAL},
-  {"semiExpanded", TextAbstraction::FontWidth::SEMI_EXPANDED},
-  {"expanded", TextAbstraction::FontWidth::EXPANDED},
-  {"extraExpanded", TextAbstraction::FontWidth::EXTRA_EXPANDED},
-  {"ultraExpanded", TextAbstraction::FontWidth::ULTRA_EXPANDED},
-};
-const unsigned int FONT_WIDTH_STRING_TABLE_COUNT = sizeof(FONT_WIDTH_STRING_TABLE) / sizeof(FONT_WIDTH_STRING_TABLE[0]);
+const Scripting::StringEnum FONT_WIDTH_STRING_TABLE[] =
+  {
+    {"ultraCondensed", static_cast<int>(FontWidth::ULTRA_CONDENSED)},
+    {"extraCondensed", static_cast<int>(FontWidth::EXTRA_CONDENSED)},
+    {"condensed", static_cast<int>(FontWidth::CONDENSED)},
+    {"semiCondensed", static_cast<int>(FontWidth::SEMI_CONDENSED)},
+    {"normal", static_cast<int>(FontWidth::NORMAL)},
+    {"semiExpanded", static_cast<int>(FontWidth::SEMI_EXPANDED)},
+    {"expanded", static_cast<int>(FontWidth::EXPANDED)},
+    {"extraExpanded", static_cast<int>(FontWidth::EXTRA_EXPANDED)},
+    {"ultraExpanded", static_cast<int>(FontWidth::ULTRA_EXPANDED)}};
+const unsigned int FONT_WIDTH_STRING_TABLE_COUNT =
+  sizeof(FONT_WIDTH_STRING_TABLE) / sizeof(FONT_WIDTH_STRING_TABLE[0]);
 
-const Scripting::StringEnum FONT_SLANT_STRING_TABLE[]     = {{"normal", TextAbstraction::FontSlant::NORMAL},
-                                                             {"roman", TextAbstraction::FontSlant::ROMAN},
-                                                             {"italic", TextAbstraction::FontSlant::ITALIC},
-                                                             {"oblique", TextAbstraction::FontSlant::OBLIQUE}};
-const unsigned int          FONT_SLANT_STRING_TABLE_COUNT = sizeof(FONT_SLANT_STRING_TABLE) / sizeof(FONT_SLANT_STRING_TABLE[0]);
+const Scripting::StringEnum FONT_SLANT_STRING_TABLE[] =
+  {
+    {"normal", static_cast<int>(FontSlant::NORMAL)},
+    {"roman", static_cast<int>(FontSlant::ROMAN)},
+    {"italic", static_cast<int>(FontSlant::ITALIC)},
+    {"oblique", static_cast<int>(FontSlant::OBLIQUE)}};
+const unsigned int FONT_SLANT_STRING_TABLE_COUNT =
+  sizeof(FONT_SLANT_STRING_TABLE) / sizeof(FONT_SLANT_STRING_TABLE[0]);
 
 namespace FontStyle
 {
@@ -78,7 +95,79 @@ enum Type
   INPUT,      ///< The input font's style.
   PLACEHOLDER ///< The placeholder text font's style.
 };
-};
+} // namespace FontStyle
+
+/**
+ * @brief Gets the string name of the font weight.
+ *
+ * @param[in] weight The font weight.
+ * @return The string name of the font weight.
+ */
+const char* GetFontWeightName(FontWeight weight);
+
+/**
+ * @brief Gets the string name of the font width.
+ *
+ * @param[in] width The font width.
+ * @return The string name of the font width.
+ */
+const char* GetFontWidthName(FontWidth width);
+
+/**
+ * @brief Gets the string name of the font slant.
+ *
+ * @param[in] slant The font slant.
+ * @return The string name of the font slant.
+ */
+const char* GetFontSlantName(FontSlant slant);
+
+/**
+ * @brief Converts a font width enum to a TextAbstraction font width enum.
+ *
+ * @param[in] width The font width.
+ * @return The corresponding TextAbstraction font width.
+ */
+TextAbstraction::FontWidth::Type ToTextAbstractionFontWidth(FontWidth width);
+
+/**
+ * @brief Converts a TextAbstraction font width enum to a font width enum.
+ *
+ * @param[in] width The TextAbstraction font width.
+ * @return The corresponding font width.
+ */
+FontWidth ToFontWidth(TextAbstraction::FontWidth::Type width);
+
+/**
+ * @brief Converts a font weight enum to a TextAbstraction font weight enum.
+ *
+ * @param[in] weight The font weight.
+ * @return The corresponding TextAbstraction font weight.
+ */
+TextAbstraction::FontWeight::Type ToTextAbstractionFontWeight(FontWeight weight);
+
+/**
+ * @brief Converts a TextAbstraction font weight enum to a font weight enum.
+ *
+ * @param[in] weight The TextAbstraction font weight.
+ * @return The corresponding font weight.
+ */
+FontWeight ToFontWeight(TextAbstraction::FontWeight::Type weight);
+
+/**
+ * @brief Converts a font slant enum to a TextAbstraction font slant enum.
+ *
+ * @param[in] slant The font slant.
+ * @return The corresponding TextAbstraction font slant.
+ */
+TextAbstraction::FontSlant::Type ToTextAbstractionFontSlant(FontSlant slant);
+
+/**
+ * @brief Converts a TextAbstraction font slant enum to a font slant enum.
+ *
+ * @param[in] slant The TextAbstraction font slant.
+ * @return The corresponding font slant.
+ */
+FontSlant ToFontSlant(TextAbstraction::FontSlant::Type slant);
 
 /**
  * @brief Sets the font family property.
@@ -95,7 +184,6 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
  * @param[in] value The value of the font's style.
  * @param[in] type Whether the property is for the default font's style, the input font's style or the placeholder
  * font's style.
- *
  */
 void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value, FontStyle::Type type);
 
@@ -137,32 +225,34 @@ FontWidth StringToWidth(const char* const widthStr);
 FontSlant StringToSlant(const char* const slantStr);
 
 /**
- * @brief Get the font weight from the provided property value.
- * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
- * @param[out] fontWeight The resulting FontWeight from the given source
- * @return true if the resulting fontWeight has been updated
+ * @brief Gets the font weight from the provided property value.
+ *
+ * @param[in] propertyValue The source value, which can be Property::INTEGER or Property::STRING.
+ * @param[out] fontWeight The resulting FontWeight from the given source.
+ * @return true if the resulting fontWeight has been updated.
  */
 bool GetFontWeightEnumeration(const Property::Value& propertyValue, FontWeight& fontWeight);
 
 /**
- * @brief Get the font width from the provided property value.
- * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
- * @param[out] fontWidth The resulting FontWidth from the given source
- * @return true if the resulting fontWidth has been updated
+ * @brief Gets the font width from the provided property value.
+ *
+ * @param[in] propertyValue The source value, which can be Property::INTEGER or Property::STRING.
+ * @param[out] fontWidth The resulting FontWidth from the given source.
+ * @return true if the resulting fontWidth has been updated.
  */
 bool GetFontWidthEnumeration(const Property::Value& propertyValue, FontWidth& fontWidth);
 
 /**
- * @brief Get the font slant from the provided property value.
- * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
- * @param[out] fontSlant The resulting FontSlant from the given source
- * @return true if the resulting fontSlant has been updated
+ * @brief Gets the font slant from the provided property value.
+ *
+ * @param[in] propertyValue The source value, which can be Property::INTEGER or Property::STRING.
+ * @param[out] fontSlant The resulting FontSlant from the given source.
+ * @return true if the resulting fontSlant has been updated.
  */
 bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fontSlant);
+
 } // namespace Text
-
 } // namespace Ui
-
 } // namespace Dali
 
 #endif // DALI_UI_INTERNAL_TEXT_FONT_STYLE_H

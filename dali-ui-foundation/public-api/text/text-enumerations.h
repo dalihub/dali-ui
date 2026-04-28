@@ -18,7 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/text-abstraction/font-list.h>
 #include <cstdint>
 
 namespace Dali
@@ -29,33 +28,6 @@ namespace Ui
 
 namespace Text
 {
-/**
- * @brief Alias for font weight enumeration.
- *
- * Provides access to font weight values such as REGULAR, MEDIUM, BOLD, etc.
- *
- * @see Dali::TextAbstraction::FontWeight::Type
- */
-using FontWeight = Dali::TextAbstraction::FontWeight::Type;
-
-/**
- * @brief Alias for font width enumeration.
- *
- * Provides access to font width values such as CONDENSED, NORMAL, EXPANDED, etc.
- *
- * @see Dali::TextAbstraction::FontWidth::Type
- */
-using FontWidth = Dali::TextAbstraction::FontWidth::Type;
-
-/**
- * @brief Alias for font slant enumeration.
- *
- * Provides access to font slant values such as NORMAL, ITALIC, etc.
- *
- * @see Dali::TextAbstraction::FontSlant::Type
- */
-using FontSlant = Dali::TextAbstraction::FontSlant::Type;
-
 /**
  * @brief Enumeration for text alignment options.
  */
@@ -218,6 +190,147 @@ enum class OverflowMode : uint8_t
    * Displays "..." at the end of the visible text.
    */
   ELLIPSIS = 1
+};
+
+/**
+ * @brief Enumeration for font weight.
+ */
+enum class FontWeight : uint8_t
+{
+  /**
+   * @brief Thin font weight. Equivalent to weight 100.
+   */
+  THIN = 0,
+  /**
+   * @brief Extra light font weight. Equivalent to weight 200.
+   */
+  EXTRA_LIGHT = 1,
+  /**
+   * @brief Ultra light font weight. Alias of EXTRA_LIGHT.
+   */
+  ULTRA_LIGHT = EXTRA_LIGHT,
+  /**
+   * @brief Light font weight. Equivalent to weight 300.
+   */
+  LIGHT = 2,
+  /**
+   * @brief Demi light font weight.
+   */
+  DEMI_LIGHT = 3,
+  /**
+   * @brief Semi light font weight. Alias of DEMI_LIGHT.
+   */
+  SEMI_LIGHT = DEMI_LIGHT,
+  /**
+   * @brief Book font weight.
+   */
+  BOOK = 4,
+  /**
+   * @brief Normal font weight. Equivalent to weight 400.
+   */
+  NORMAL = 5,
+  /**
+   * @brief Regular font weight. Alias of NORMAL.
+   */
+  REGULAR = NORMAL,
+  /**
+   * @brief Medium font weight. Equivalent to weight 500.
+   */
+  MEDIUM = 6,
+  /**
+   * @brief Semi bold font weight. Equivalent to weight 600.
+   */
+  SEMI_BOLD = 7,
+  /**
+   * @brief Demi bold font weight. Alias of SEMI_BOLD.
+   */
+  DEMI_BOLD = SEMI_BOLD,
+  /**
+   * @brief Bold font weight. Equivalent to weight 700.
+   */
+  BOLD = 8,
+  /**
+   * @brief Extra bold font weight. Equivalent to weight 800.
+   */
+  EXTRA_BOLD = 9,
+  /**
+   * @brief Ultra bold font weight. Alias of EXTRA_BOLD.
+   */
+  ULTRA_BOLD = EXTRA_BOLD,
+  /**
+   * @brief Black font weight. Equivalent to weight 900.
+   */
+  BLACK = 10,
+  /**
+   * @brief Heavy font weight. Alias of BLACK.
+   */
+  HEAVY = BLACK
+};
+
+/**
+ * @brief Enumeration for font width.
+ */
+enum class FontWidth : uint8_t
+{
+  /**
+   * @brief Ultra condensed font width.
+   */
+  ULTRA_CONDENSED = 0,
+  /**
+   * @brief Extra condensed font width.
+   */
+  EXTRA_CONDENSED = 1,
+  /**
+   * @brief Condensed font width.
+   */
+  CONDENSED = 2,
+  /**
+   * @brief Semi condensed font width.
+   */
+  SEMI_CONDENSED = 3,
+  /**
+   * @brief Normal font width.
+   */
+  NORMAL = 4,
+  /**
+   * @brief Semi expanded font width.
+   */
+  SEMI_EXPANDED = 5,
+  /**
+   * @brief Expanded font width.
+   */
+  EXPANDED = 6,
+  /**
+   * @brief Extra expanded font width.
+   */
+  EXTRA_EXPANDED = 7,
+  /**
+   * @brief Ultra expanded font width.
+   */
+  ULTRA_EXPANDED = 8
+};
+
+/**
+ * @brief Enumeration for font slant.
+ */
+enum class FontSlant : uint8_t
+{
+  /**
+   * @brief Normal upright font style.
+   */
+  NORMAL = 0,
+  /**
+   * @brief Roman upright font style. Alias of NORMAL.
+   */
+  ROMAN = NORMAL,
+  /**
+   * @brief Italic font style.
+   */
+  ITALIC = 1,
+  /**
+   * @brief Oblique font style.
+   */
+  OBLIQUE = 2
 };
 
 } // namespace Text

@@ -209,12 +209,12 @@ struct InputStyle
     return mask;
   }
 
-  Vector4     textColor;  ///< The text's color.
-  std::string familyName; ///< The font's family name.
-  FontWeight  weight;     ///< The font's weight.
-  FontWidth   width;      ///< The font's width.
-  FontSlant   slant;      ///< The font's slant.
-  float       size;       ///< The font's size.
+  Vector4        textColor;  ///< The text's color.
+  std::string    familyName; ///< The font's family name.
+  FontWeightType weight;     ///< The font's weight.
+  FontWidthType  width;      ///< The font's width.
+  FontSlantType  slant;      ///< The font's slant.
+  float          size;       ///< The font's size.
 
   float lineSpacing; ///< The line's spacing.
 

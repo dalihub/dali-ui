@@ -837,7 +837,7 @@ std::string Controller::GetPlaceholderFontFamily() const
   return PlaceholderHandler::GetPlaceholderFontFamily(*this);
 }
 
-void Controller::SetDefaultFontWeight(FontWeight weight)
+void Controller::SetDefaultFontWeight(FontWeightType weight)
 {
   EnsureCreated(mImpl->mFontDefaults);
 
@@ -858,12 +858,12 @@ bool Controller::IsDefaultFontWeightDefined() const
   return mImpl->mFontDefaults && mImpl->mFontDefaults->weightDefined;
 }
 
-FontWeight Controller::GetDefaultFontWeight() const
+FontWeightType Controller::GetDefaultFontWeight() const
 {
   return mImpl->mFontDefaults ? mImpl->mFontDefaults->GetFontDescription().weight : TextAbstraction::FontWeight::NORMAL;
 }
 
-void Controller::SetPlaceholderTextFontWeight(FontWeight weight)
+void Controller::SetPlaceholderTextFontWeight(FontWeightType weight)
 {
   PlaceholderHandler::SetPlaceholderTextFontWeight(*this, weight);
 }
@@ -873,12 +873,12 @@ bool Controller::IsPlaceholderTextFontWeightDefined() const
   return PlaceholderHandler::IsPlaceholderTextFontWeightDefined(*this);
 }
 
-FontWeight Controller::GetPlaceholderTextFontWeight() const
+FontWeightType Controller::GetPlaceholderTextFontWeight() const
 {
   return PlaceholderHandler::GetPlaceholderTextFontWeight(*this);
 }
 
-void Controller::SetDefaultFontWidth(FontWidth width)
+void Controller::SetDefaultFontWidth(FontWidthType width)
 {
   EnsureCreated(mImpl->mFontDefaults);
 
@@ -899,12 +899,12 @@ bool Controller::IsDefaultFontWidthDefined() const
   return mImpl->mFontDefaults && mImpl->mFontDefaults->widthDefined;
 }
 
-FontWidth Controller::GetDefaultFontWidth() const
+FontWidthType Controller::GetDefaultFontWidth() const
 {
   return mImpl->mFontDefaults ? mImpl->mFontDefaults->GetFontDescription().width : TextAbstraction::FontWidth::NORMAL;
 }
 
-void Controller::SetPlaceholderTextFontWidth(FontWidth width)
+void Controller::SetPlaceholderTextFontWidth(FontWidthType width)
 {
   PlaceholderHandler::SetPlaceholderTextFontWidth(*this, width);
 }
@@ -914,12 +914,12 @@ bool Controller::IsPlaceholderTextFontWidthDefined() const
   return PlaceholderHandler::IsPlaceholderTextFontWidthDefined(*this);
 }
 
-FontWidth Controller::GetPlaceholderTextFontWidth() const
+FontWidthType Controller::GetPlaceholderTextFontWidth() const
 {
   return PlaceholderHandler::GetPlaceholderTextFontWidth(*this);
 }
 
-void Controller::SetDefaultFontSlant(FontSlant slant)
+void Controller::SetDefaultFontSlant(FontSlantType slant)
 {
   EnsureCreated(mImpl->mFontDefaults);
 
@@ -940,12 +940,12 @@ bool Controller::IsDefaultFontSlantDefined() const
   return mImpl->mFontDefaults && mImpl->mFontDefaults->slantDefined;
 }
 
-FontSlant Controller::GetDefaultFontSlant() const
+FontSlantType Controller::GetDefaultFontSlant() const
 {
   return mImpl->mFontDefaults ? mImpl->mFontDefaults->GetFontDescription().slant : TextAbstraction::FontSlant::NORMAL;
 }
 
-void Controller::SetPlaceholderTextFontSlant(FontSlant slant)
+void Controller::SetPlaceholderTextFontSlant(FontSlantType slant)
 {
   PlaceholderHandler::SetPlaceholderTextFontSlant(*this, slant);
 }
@@ -955,7 +955,7 @@ bool Controller::IsPlaceholderTextFontSlantDefined() const
   return PlaceholderHandler::IsPlaceholderTextFontSlantDefined(*this);
 }
 
-FontSlant Controller::GetPlaceholderTextFontSlant() const
+FontSlantType Controller::GetPlaceholderTextFontSlant() const
 {
   return PlaceholderHandler::GetPlaceholderTextFontSlant(*this);
 }
@@ -1410,7 +1410,7 @@ std::string Controller::GetInputFontFamily() const
   return InputFontHandler::GetInputFontFamily(*this);
 }
 
-void Controller::SetInputFontWeight(FontWeight weight)
+void Controller::SetInputFontWeight(FontWeightType weight)
 {
   InputFontHandler::SetInputFontWeight(*this, weight);
 }
@@ -1420,12 +1420,12 @@ bool Controller::IsInputFontWeightDefined() const
   return InputFontHandler::IsInputFontWeightDefined(*this);
 }
 
-FontWeight Controller::GetInputFontWeight() const
+FontWeightType Controller::GetInputFontWeight() const
 {
   return InputFontHandler::GetInputFontWeight(*this);
 }
 
-void Controller::SetInputFontWidth(FontWidth width)
+void Controller::SetInputFontWidth(FontWidthType width)
 {
   InputFontHandler::SetInputFontWidth(*this, width);
 }
@@ -1435,12 +1435,12 @@ bool Controller::IsInputFontWidthDefined() const
   return InputFontHandler::IsInputFontWidthDefined(*this);
 }
 
-FontWidth Controller::GetInputFontWidth() const
+FontWidthType Controller::GetInputFontWidth() const
 {
   return InputFontHandler::GetInputFontWidth(*this);
 }
 
-void Controller::SetInputFontSlant(FontSlant slant)
+void Controller::SetInputFontSlant(FontSlantType slant)
 {
   InputFontHandler::SetInputFontSlant(*this, slant);
 }
@@ -1450,7 +1450,7 @@ bool Controller::IsInputFontSlantDefined() const
   return InputFontHandler::IsInputFontSlantDefined(*this);
 }
 
-FontSlant Controller::GetInputFontSlant() const
+FontSlantType Controller::GetInputFontSlant() const
 {
   return InputFontHandler::GetInputFontSlant(*this);
 }

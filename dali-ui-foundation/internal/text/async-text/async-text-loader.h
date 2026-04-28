@@ -117,9 +117,9 @@ struct AsyncTextParameters
     marqueeTriggerPolicy{Text::MarqueeTriggerPolicy::MANUAL},
     marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL},
     marqueeStopMode{Text::MarqueeStopMode::FINISH_LOOP},
-    fontWeight{FontWeight::NONE},
-    fontWidth{FontWidth::NONE},
-    fontSlant{FontSlant::NONE},
+    fontWeight{TextAbstraction::FontWeight::NONE},
+    fontWidth{TextAbstraction::FontWidth::NONE},
+    fontSlant{TextAbstraction::FontSlant::NONE},
     suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
@@ -204,9 +204,9 @@ struct AsyncTextParameters
   Text::MarqueeTriggerPolicy   marqueeTriggerPolicy;  ///< policy that determines when marquee is triggered : one of {MANUAL, ON_OVERFLOW}.
   Text::MarqueeOrientation     marqueeOrientation;    ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
   Text::MarqueeStopMode        marqueeStopMode;       ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeight                   fontWeight;            ///< The font's weight.
-  FontWidth                    fontWidth;             ///< The font's width.
-  FontSlant                    fontSlant;             ///< The font's slant.
+  FontWeightType               fontWeight;            ///< The font's weight.
+  FontWidthType                fontWidth;             ///< The font's width.
+  FontSlantType                fontSlant;             ///< The font's slant.
 
   bool suppressAutoMarquee : 1;           ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                   ///< Whether the multi-line layout is enabled.

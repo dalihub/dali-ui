@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,262 @@ const char* SYSTEM_TOKEN = "system";
 
 } // namespace
 
+const char* GetFontWeightName(FontWeight weight)
+{
+  return GetEnumerationName(static_cast<int>(weight), FONT_WEIGHT_STRING_TABLE, FONT_WEIGHT_STRING_TABLE_COUNT);
+}
+
+const char* GetFontWidthName(FontWidth width)
+{
+  return GetEnumerationName(static_cast<int>(width), FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT);
+}
+
+const char* GetFontSlantName(FontSlant slant)
+{
+  return GetEnumerationName(static_cast<int>(slant), FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT);
+}
+
+TextAbstraction::FontWidth::Type ToTextAbstractionFontWidth(FontWidth width)
+{
+  switch(width)
+  {
+    case FontWidth::ULTRA_CONDENSED:
+    {
+      return TextAbstraction::FontWidth::ULTRA_CONDENSED;
+    }
+    case FontWidth::EXTRA_CONDENSED:
+    {
+      return TextAbstraction::FontWidth::EXTRA_CONDENSED;
+    }
+    case FontWidth::CONDENSED:
+    {
+      return TextAbstraction::FontWidth::CONDENSED;
+    }
+    case FontWidth::SEMI_CONDENSED:
+    {
+      return TextAbstraction::FontWidth::SEMI_CONDENSED;
+    }
+    case FontWidth::NORMAL:
+    {
+      return TextAbstraction::FontWidth::NORMAL;
+    }
+    case FontWidth::SEMI_EXPANDED:
+    {
+      return TextAbstraction::FontWidth::SEMI_EXPANDED;
+    }
+    case FontWidth::EXPANDED:
+    {
+      return TextAbstraction::FontWidth::EXPANDED;
+    }
+    case FontWidth::EXTRA_EXPANDED:
+    {
+      return TextAbstraction::FontWidth::EXTRA_EXPANDED;
+    }
+    case FontWidth::ULTRA_EXPANDED:
+    {
+      return TextAbstraction::FontWidth::ULTRA_EXPANDED;
+    }
+  }
+
+  return TextAbstraction::FontWidth::NORMAL;
+}
+
+FontWidth ToFontWidth(TextAbstraction::FontWidth::Type width)
+{
+  switch(width)
+  {
+    case TextAbstraction::FontWidth::ULTRA_CONDENSED:
+    {
+      return FontWidth::ULTRA_CONDENSED;
+    }
+    case TextAbstraction::FontWidth::EXTRA_CONDENSED:
+    {
+      return FontWidth::EXTRA_CONDENSED;
+    }
+    case TextAbstraction::FontWidth::CONDENSED:
+    {
+      return FontWidth::CONDENSED;
+    }
+    case TextAbstraction::FontWidth::SEMI_CONDENSED:
+    {
+      return FontWidth::SEMI_CONDENSED;
+    }
+    case TextAbstraction::FontWidth::NORMAL:
+    case TextAbstraction::FontWidth::NONE:
+    {
+      return FontWidth::NORMAL;
+    }
+    case TextAbstraction::FontWidth::SEMI_EXPANDED:
+    {
+      return FontWidth::SEMI_EXPANDED;
+    }
+    case TextAbstraction::FontWidth::EXPANDED:
+    {
+      return FontWidth::EXPANDED;
+    }
+    case TextAbstraction::FontWidth::EXTRA_EXPANDED:
+    {
+      return FontWidth::EXTRA_EXPANDED;
+    }
+    case TextAbstraction::FontWidth::ULTRA_EXPANDED:
+    {
+      return FontWidth::ULTRA_EXPANDED;
+    }
+  }
+
+  return FontWidth::NORMAL;
+}
+
+TextAbstraction::FontWeight::Type ToTextAbstractionFontWeight(FontWeight weight)
+{
+  switch(weight)
+  {
+    case FontWeight::THIN:
+    {
+      return TextAbstraction::FontWeight::THIN;
+    }
+    case FontWeight::EXTRA_LIGHT:
+    {
+      return TextAbstraction::FontWeight::ULTRA_LIGHT;
+    }
+    case FontWeight::LIGHT:
+    {
+      return TextAbstraction::FontWeight::LIGHT;
+    }
+    case FontWeight::DEMI_LIGHT:
+    {
+      return TextAbstraction::FontWeight::DEMI_LIGHT;
+    }
+    case FontWeight::BOOK:
+    {
+      return TextAbstraction::FontWeight::BOOK;
+    }
+    case FontWeight::NORMAL:
+    {
+      return TextAbstraction::FontWeight::NORMAL;
+    }
+    case FontWeight::MEDIUM:
+    {
+      return TextAbstraction::FontWeight::MEDIUM;
+    }
+    case FontWeight::SEMI_BOLD:
+    {
+      return TextAbstraction::FontWeight::DEMI_BOLD;
+    }
+    case FontWeight::BOLD:
+    {
+      return TextAbstraction::FontWeight::BOLD;
+    }
+    case FontWeight::EXTRA_BOLD:
+    {
+      return TextAbstraction::FontWeight::ULTRA_BOLD;
+    }
+    case FontWeight::BLACK:
+    {
+      return TextAbstraction::FontWeight::BLACK;
+    }
+  }
+
+  return TextAbstraction::FontWeight::NORMAL;
+}
+
+FontWeight ToFontWeight(TextAbstraction::FontWeight::Type weight)
+{
+  switch(weight)
+  {
+    case TextAbstraction::FontWeight::THIN:
+    {
+      return FontWeight::THIN;
+    }
+    case TextAbstraction::FontWeight::ULTRA_LIGHT:
+    {
+      return FontWeight::EXTRA_LIGHT;
+    }
+    case TextAbstraction::FontWeight::LIGHT:
+    {
+      return FontWeight::LIGHT;
+    }
+    case TextAbstraction::FontWeight::DEMI_LIGHT:
+    {
+      return FontWeight::DEMI_LIGHT;
+    }
+    case TextAbstraction::FontWeight::BOOK:
+    {
+      return FontWeight::BOOK;
+    }
+    case TextAbstraction::FontWeight::NORMAL:
+    case TextAbstraction::FontWeight::NONE:
+    {
+      return FontWeight::NORMAL;
+    }
+    case TextAbstraction::FontWeight::MEDIUM:
+    {
+      return FontWeight::MEDIUM;
+    }
+    case TextAbstraction::FontWeight::DEMI_BOLD:
+    {
+      return FontWeight::SEMI_BOLD;
+    }
+    case TextAbstraction::FontWeight::BOLD:
+    {
+      return FontWeight::BOLD;
+    }
+    case TextAbstraction::FontWeight::ULTRA_BOLD:
+    {
+      return FontWeight::EXTRA_BOLD;
+    }
+    case TextAbstraction::FontWeight::BLACK:
+    {
+      return FontWeight::BLACK;
+    }
+  }
+
+  return FontWeight::NORMAL;
+}
+
+TextAbstraction::FontSlant::Type ToTextAbstractionFontSlant(FontSlant slant)
+{
+  switch(slant)
+  {
+    case FontSlant::NORMAL:
+    {
+      return TextAbstraction::FontSlant::NORMAL;
+    }
+    case FontSlant::ITALIC:
+    {
+      return TextAbstraction::FontSlant::ITALIC;
+    }
+    case FontSlant::OBLIQUE:
+    {
+      return TextAbstraction::FontSlant::OBLIQUE;
+    }
+  }
+
+  return TextAbstraction::FontSlant::NORMAL;
+}
+
+FontSlant ToFontSlant(TextAbstraction::FontSlant::Type slant)
+{
+  switch(slant)
+  {
+    case TextAbstraction::FontSlant::NORMAL:
+    case TextAbstraction::FontSlant::NONE:
+    {
+      return FontSlant::NORMAL;
+    }
+    case TextAbstraction::FontSlant::ITALIC:
+    {
+      return FontSlant::ITALIC;
+    }
+    case TextAbstraction::FontSlant::OBLIQUE:
+    {
+      return FontSlant::OBLIQUE;
+    }
+  }
+
+  return FontSlant::NORMAL;
+}
+
 void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& value)
 {
   if(controller)
@@ -71,7 +327,6 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
     }
     else
     {
-      /// Family key
       Property::Value* familyValue = map.Find(FAMILY_KEY);
 
       std::string fontFamilyName;
@@ -80,7 +335,6 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
         fontFamilyName = ToStdString(*familyValue);
       }
 
-      /// Type key
       Property::Value* typeValue = map.Find(TYPE_KEY);
 
       std::string typeStr;
@@ -121,50 +375,40 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
 
     if(!map.Empty())
     {
-      /// Weight key
       Property::Value* weightValue = map.Find(WEIGHT_KEY);
 
-      FontWeight weight        = TextAbstraction::FontWeight::NONE;
-      const bool weightDefined = weightValue != NULL;
+      TextAbstraction::FontWeight::Type weight        = TextAbstraction::FontWeight::NONE;
+      const bool                        weightDefined = weightValue != NULL;
       if(weightDefined)
       {
         const std::string weightStr = ToStdString(*weightValue);
-
-        Scripting::GetEnumeration<FontWeight>(weightStr.c_str(), FONT_WEIGHT_STRING_TABLE,
-                                              FONT_WEIGHT_STRING_TABLE_COUNT, weight);
+        weight                      = ToTextAbstractionFontWeight(StringToWeight(weightStr.c_str()));
       }
 
-      /// Width key
       Property::Value* widthValue = map.Find(WIDTH_KEY);
 
-      FontWidth  width        = TextAbstraction::FontWidth::NONE;
-      const bool widthDefined = widthValue != NULL;
+      TextAbstraction::FontWidth::Type width        = TextAbstraction::FontWidth::NONE;
+      const bool                       widthDefined = widthValue != NULL;
       if(widthDefined)
       {
         const std::string widthStr = ToStdString(*widthValue);
-
-        Scripting::GetEnumeration<FontWidth>(widthStr.c_str(), FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT,
-                                             width);
+        width                      = ToTextAbstractionFontWidth(StringToWidth(widthStr.c_str()));
       }
 
-      /// Slant key
       Property::Value* slantValue = map.Find(SLANT_KEY);
 
-      FontSlant  slant        = TextAbstraction::FontSlant::NONE;
-      const bool slantDefined = slantValue != NULL;
+      TextAbstraction::FontSlant::Type slant        = TextAbstraction::FontSlant::NONE;
+      const bool                       slantDefined = slantValue != NULL;
       if(slantDefined)
       {
         const std::string slantStr = ToStdString(*slantValue);
-
-        Scripting::GetEnumeration<FontSlant>(slantStr.c_str(), FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT,
-                                             slant);
+        slant                      = ToTextAbstractionFontSlant(StringToSlant(slantStr.c_str()));
       }
 
       switch(type)
       {
         case FontStyle::DEFAULT:
         {
-          // Sets the default font's style values.
           if(!weightDefined || (weightDefined && (controller->GetDefaultFontWeight() != weight)))
           {
             controller->SetDefaultFontWeight(weight);
@@ -183,7 +427,6 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
         }
         case FontStyle::INPUT:
         {
-          // Sets the input font's style values.
           if(!weightDefined || (weightDefined && (controller->GetInputFontWeight() != weight)))
           {
             controller->SetInputFontWeight(weight);
@@ -202,7 +445,6 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
         }
         case FontStyle::PLACEHOLDER:
         {
-          // Sets the placeholder text font's style values.
           if(!weightDefined || (weightDefined && (controller->GetPlaceholderTextFontWeight() != weight)))
           {
             controller->SetPlaceholderTextFontWeight(weight);
@@ -219,8 +461,8 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
           }
           break;
         }
-      } // switch
-    } // map not empty
+      }
+    }
     else
     {
       switch(type)
@@ -246,9 +488,9 @@ void SetFontStyleProperty(ControllerPtr controller, const Property::Value& value
           controller->SetPlaceholderTextFontSlant(TextAbstraction::FontSlant::NONE);
           break;
         }
-      } // switch
-    } // map.Empty()
-  } // controller
+      }
+    }
+  }
 }
 
 void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, FontStyle::Type type)
@@ -257,12 +499,12 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
   {
     const bool isSetbyString = controller->IsFontStyleSetByString();
 
-    bool       weightDefined = false;
-    bool       widthDefined  = false;
-    bool       slantDefined  = false;
-    FontWeight weight        = TextAbstraction::FontWeight::NONE;
-    FontWidth  width         = TextAbstraction::FontWidth::NONE;
-    FontSlant  slant         = TextAbstraction::FontSlant::NONE;
+    bool                              weightDefined = false;
+    bool                              widthDefined  = false;
+    bool                              slantDefined  = false;
+    TextAbstraction::FontWeight::Type weight        = TextAbstraction::FontWeight::NONE;
+    TextAbstraction::FontWidth::Type  width         = TextAbstraction::FontWidth::NONE;
+    TextAbstraction::FontSlant::Type  slant         = TextAbstraction::FontSlant::NONE;
 
     switch(type)
     {
@@ -312,7 +554,6 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
       }
       case FontStyle::PLACEHOLDER:
       {
-        // The type is FontStyle::PLACEHOLDER
         weightDefined = controller->IsPlaceholderTextFontWeightDefined();
         widthDefined  = controller->IsPlaceholderTextFontWidthDefined();
         slantDefined  = controller->IsPlaceholderTextFontSlantDefined();
@@ -339,88 +580,63 @@ void GetFontStyleProperty(ControllerPtr controller, Property::Value& value, Font
     {
       Property::Map map;
 
-      if(weightDefined)
+      if(weightDefined && (TextAbstraction::FontWeight::NONE != weight))
       {
-        if(TextAbstraction::FontWeight::NONE != weight)
-        {
-          const std::string weightStr(
-            GetEnumerationName(weight, FONT_WEIGHT_STRING_TABLE, FONT_WEIGHT_STRING_TABLE_COUNT));
-
-          map.Insert(WEIGHT_KEY, ToDaliString(weightStr));
-        }
+        const std::string weightStr(GetFontWeightName(ToFontWeight(weight)));
+        map.Insert(WEIGHT_KEY, ToDaliString(weightStr));
       }
 
-      if(widthDefined)
+      if(widthDefined && (TextAbstraction::FontWidth::NONE != width))
       {
-        if(TextAbstraction::FontWidth::NONE != width)
-        {
-          const std::string widthStr(GetEnumerationName(width, FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT));
-
-          map.Insert(WIDTH_KEY, ToDaliString(widthStr));
-        }
+        const std::string widthStr(GetFontWidthName(ToFontWidth(width)));
+        map.Insert(WIDTH_KEY, ToDaliString(widthStr));
       }
 
-      if(slantDefined)
+      if(slantDefined && (TextAbstraction::FontSlant::NONE != slant))
       {
-        if(TextAbstraction::FontSlant::NONE != slant)
-        {
-          const std::string slantStr(GetEnumerationName(slant, FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT));
-
-          map.Insert(SLANT_KEY, ToDaliString(slantStr));
-        }
+        const std::string slantStr(GetFontSlantName(ToFontSlant(slant)));
+        map.Insert(SLANT_KEY, ToDaliString(slantStr));
       }
 
       value = map;
-    } // SetbyMAP
+    }
     else
     {
       std::string fontStyleProperties = "{";
 
-      if(weightDefined)
+      if(weightDefined && (TextAbstraction::FontWeight::NONE != weight))
       {
-        if(TextAbstraction::FontWeight::NONE != weight)
-        {
-          const std::string weightStr(
-            GetEnumerationName(weight, FONT_WEIGHT_STRING_TABLE, FONT_WEIGHT_STRING_TABLE_COUNT));
-
-          fontStyleProperties += "\"weight\":\"" + weightStr + "\",";
-        }
+        const std::string weightStr(GetFontWeightName(ToFontWeight(weight)));
+        fontStyleProperties += "\"weight\":\"" + weightStr + "\",";
       }
 
-      if(widthDefined)
+      if(widthDefined && (TextAbstraction::FontWidth::NONE != width))
       {
-        if(TextAbstraction::FontWidth::NONE != width)
-        {
-          const std::string widthStr(GetEnumerationName(width, FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT));
-          fontStyleProperties += "\"width\":\"" + widthStr + "\",";
-        }
+        const std::string widthStr(GetFontWidthName(ToFontWidth(width)));
+        fontStyleProperties += "\"width\":\"" + widthStr + "\",";
       }
 
-      if(slantDefined)
+      if(slantDefined && (TextAbstraction::FontSlant::NONE != slant))
       {
-        if(TextAbstraction::FontSlant::NONE != slant)
-        {
-          const std::string slantStr(GetEnumerationName(slant, FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT));
-
-          fontStyleProperties += "\"slant\":\"" + slantStr + "\"";
-        }
+        const std::string slantStr(GetFontSlantName(ToFontSlant(slant)));
+        fontStyleProperties += "\"slant\":\"" + slantStr + "\"";
       }
 
-      // If last character is comma, it will be removed.
       if((*fontStyleProperties.rbegin()) == ',')
       {
         fontStyleProperties = fontStyleProperties.substr(0, fontStyleProperties.size() - 1);
       }
+
       fontStyleProperties += "}";
 
       value = ToPropertyValue(fontStyleProperties);
-    } // SetbyString
-  } // controller
+    }
+  }
 }
 
 FontWeight StringToWeight(const char* const weightStr)
 {
-  FontWeight weight = TextAbstraction::FontWeight::NORMAL;
+  FontWeight weight = FontWeight::NORMAL;
   Scripting::GetEnumeration<FontWeight>(weightStr, FONT_WEIGHT_STRING_TABLE, FONT_WEIGHT_STRING_TABLE_COUNT, weight);
 
   return weight;
@@ -428,7 +644,7 @@ FontWeight StringToWeight(const char* const weightStr)
 
 FontWidth StringToWidth(const char* const widthStr)
 {
-  FontWidth width = TextAbstraction::FontWidth::NORMAL;
+  FontWidth width = FontWidth::NORMAL;
   Scripting::GetEnumeration<FontWidth>(widthStr, FONT_WIDTH_STRING_TABLE, FONT_WIDTH_STRING_TABLE_COUNT, width);
 
   return width;
@@ -436,7 +652,7 @@ FontWidth StringToWidth(const char* const widthStr)
 
 FontSlant StringToSlant(const char* const slantStr)
 {
-  FontSlant slant = TextAbstraction::FontSlant::NORMAL;
+  FontSlant slant = FontSlant::NORMAL;
   Scripting::GetEnumeration<FontSlant>(slantStr, FONT_SLANT_STRING_TABLE, FONT_SLANT_STRING_TABLE_COUNT, slant);
 
   return slant;
@@ -467,7 +683,5 @@ bool GetFontSlantEnumeration(const Property::Value& propertyValue, FontSlant& fo
 }
 
 } // namespace Text
-
 } // namespace Ui
-
 } // namespace Dali

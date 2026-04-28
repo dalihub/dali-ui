@@ -186,7 +186,7 @@ std::string Controller::PlaceholderHandler::GetPlaceholderFontFamily(const Contr
   return EMPTY_STRING;
 }
 
-void Controller::PlaceholderHandler::SetPlaceholderTextFontWeight(Controller& controller, FontWeight weight)
+void Controller::PlaceholderHandler::SetPlaceholderTextFontWeight(Controller& controller, FontWeightType weight)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -209,7 +209,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontWeightDefined(const Co
   return false;
 }
 
-FontWeight Controller::PlaceholderHandler::GetPlaceholderTextFontWeight(const Controller& controller)
+FontWeightType Controller::PlaceholderHandler::GetPlaceholderTextFontWeight(const Controller& controller)
 {
   if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
@@ -219,7 +219,7 @@ FontWeight Controller::PlaceholderHandler::GetPlaceholderTextFontWeight(const Co
   return TextAbstraction::FontWeight::NORMAL;
 }
 
-void Controller::PlaceholderHandler::SetPlaceholderTextFontWidth(Controller& controller, FontWidth width)
+void Controller::PlaceholderHandler::SetPlaceholderTextFontWidth(Controller& controller, FontWidthType width)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -242,7 +242,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontWidthDefined(const Con
   return false;
 }
 
-FontWidth Controller::PlaceholderHandler::GetPlaceholderTextFontWidth(const Controller& controller)
+FontWidthType Controller::PlaceholderHandler::GetPlaceholderTextFontWidth(const Controller& controller)
 {
   if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {
@@ -252,7 +252,7 @@ FontWidth Controller::PlaceholderHandler::GetPlaceholderTextFontWidth(const Cont
   return TextAbstraction::FontWidth::NORMAL;
 }
 
-void Controller::PlaceholderHandler::SetPlaceholderTextFontSlant(Controller& controller, FontSlant slant)
+void Controller::PlaceholderHandler::SetPlaceholderTextFontSlant(Controller& controller, FontSlantType slant)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -275,7 +275,7 @@ bool Controller::PlaceholderHandler::IsPlaceholderTextFontSlantDefined(const Con
   return false;
 }
 
-FontSlant Controller::PlaceholderHandler::GetPlaceholderTextFontSlant(const Controller& controller)
+FontSlantType Controller::PlaceholderHandler::GetPlaceholderTextFontSlant(const Controller& controller)
 {
   if((NULL != controller.mImpl->mEventData) && (NULL != controller.mImpl->mEventData->mPlaceholderFont))
   {

@@ -36,6 +36,7 @@
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
+#include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
@@ -519,37 +520,37 @@ Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
 void LabelImpl::SetFontWeight(Text::FontWeight weight)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
-  mController->SetDefaultFontWeight(weight);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
+  mController->SetDefaultFontWeight(Text::ToTextAbstractionFontWeight(weight));
 }
 
 Text::FontWeight LabelImpl::GetFontWeight() const
 {
-  return mController->GetDefaultFontWeight();
+  return Text::ToFontWeight(mController->GetDefaultFontWeight());
 }
 
 void LabelImpl::SetFontWidth(Text::FontWidth width)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
-  mController->SetDefaultFontWidth(width);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
+  mController->SetDefaultFontWidth(Text::ToTextAbstractionFontWidth(width));
 }
 
 Text::FontWidth LabelImpl::GetFontWidth() const
 {
-  return mController->GetDefaultFontWidth();
+  return Text::ToFontWidth(mController->GetDefaultFontWidth());
 }
 
 void LabelImpl::SetFontSlant(Text::FontSlant slant)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
-  mController->SetDefaultFontSlant(slant);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
+  mController->SetDefaultFontSlant(Text::ToTextAbstractionFontSlant(slant));
 }
 
 Text::FontSlant LabelImpl::GetFontSlant() const
 {
-  return mController->GetDefaultFontSlant();
+  return Text::ToFontSlant(mController->GetDefaultFontSlant());
 }
 
 void LabelImpl::SetTextBackgroundColor(const UiColor& color)

@@ -142,7 +142,7 @@ std::string Controller::InputFontHandler::GetInputFontFamily(const Controller& c
   return controller.GetDefaultFontFamily();
 }
 
-void Controller::InputFontHandler::SetInputFontWeight(const Controller& controller, FontWeight weight)
+void Controller::InputFontHandler::SetInputFontWeight(const Controller& controller, FontWeightType weight)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -208,7 +208,7 @@ bool Controller::InputFontHandler::IsInputFontWeightDefined(const Controller& co
   return defined;
 }
 
-FontWeight Controller::InputFontHandler::GetInputFontWeight(const Controller& controller)
+FontWeightType Controller::InputFontHandler::GetInputFontWeight(const Controller& controller)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -218,7 +218,7 @@ FontWeight Controller::InputFontHandler::GetInputFontWeight(const Controller& co
   return controller.GetDefaultFontWeight();
 }
 
-void Controller::InputFontHandler::SetInputFontWidth(Controller& controller, FontWidth width)
+void Controller::InputFontHandler::SetInputFontWidth(Controller& controller, FontWidthType width)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -284,7 +284,7 @@ bool Controller::InputFontHandler::IsInputFontWidthDefined(const Controller& con
   return defined;
 }
 
-FontWidth Controller::InputFontHandler::GetInputFontWidth(const Controller& controller)
+FontWidthType Controller::InputFontHandler::GetInputFontWidth(const Controller& controller)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -294,7 +294,7 @@ FontWidth Controller::InputFontHandler::GetInputFontWidth(const Controller& cont
   return controller.GetDefaultFontWidth();
 }
 
-void Controller::InputFontHandler::SetInputFontSlant(Controller& controller, FontSlant slant)
+void Controller::InputFontHandler::SetInputFontSlant(Controller& controller, FontSlantType slant)
 {
   if(NULL != controller.mImpl->mEventData)
   {
@@ -360,7 +360,7 @@ bool Controller::InputFontHandler::IsInputFontSlantDefined(const Controller& con
   return defined;
 }
 
-FontSlant Controller::InputFontHandler::GetInputFontSlant(const Controller& controller)
+FontSlantType Controller::InputFontHandler::GetInputFontSlant(const Controller& controller)
 {
   if(NULL != controller.mImpl->mEventData)
   {

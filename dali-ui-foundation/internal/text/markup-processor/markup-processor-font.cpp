@@ -40,6 +40,21 @@ namespace
 const unsigned int MAX_FONT_ATTRIBUTE_SIZE =
   15u;                                     ///< The maximum length of any of the possible 'weight', 'width' or 'slant' values.
 const float PIXEL_FORMAT_64_FACTOR = 64.f; ///< 64.f is used to convert from point size to 26.6 pixel format.
+
+TextAbstraction::FontWeight::Type StringToTextAbstractionWeight(const char* const weightStr)
+{
+  return ToTextAbstractionFontWeight(StringToWeight(weightStr));
+}
+
+TextAbstraction::FontWidth::Type StringToTextAbstractionWidth(const char* const widthStr)
+{
+  return ToTextAbstractionFontWidth(StringToWidth(widthStr));
+}
+
+TextAbstraction::FontSlant::Type StringToTextAbstractionSlant(const char* const slantStr)
+{
+  return ToTextAbstractionFontSlant(StringToSlant(slantStr));
+}
 } // namespace
 
 void processFontAttributeValue(char value[], const Attribute& attribute)
@@ -76,19 +91,19 @@ void ProcessFontSize(const Attribute& attribute, float dpi, FontDescriptionRun& 
 void ProcessFontWeight(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.weightDefined =
-    ProcessEnumerationAttribute<FontWeight>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWeight, fontRun.weight);
+    ProcessEnumerationAttribute<FontWeightType>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToTextAbstractionWeight, fontRun.weight);
 }
 
 void ProcessFontWidth(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.widthDefined =
-    ProcessEnumerationAttribute<FontWidth>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToWidth, fontRun.width);
+    ProcessEnumerationAttribute<FontWidthType>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToTextAbstractionWidth, fontRun.width);
 }
 
 void ProcessFontSlant(const Attribute& attribute, FontDescriptionRun& fontRun)
 {
   fontRun.slantDefined =
-    ProcessEnumerationAttribute<FontSlant>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToSlant, fontRun.slant);
+    ProcessEnumerationAttribute<FontSlantType>(attribute, MAX_FONT_ATTRIBUTE_SIZE, &StringToTextAbstractionSlant, fontRun.slant);
 }
 
 void ProcessFontTag(const Tag& tag, float dpi, FontDescriptionRun& fontRun)

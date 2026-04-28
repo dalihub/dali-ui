@@ -945,7 +945,7 @@ public: // Default style & Input style
    *
    * @param[in] weight The font weight.
    */
-  void SetDefaultFontWeight(FontWeight weight);
+  void SetDefaultFontWeight(FontWeightType weight);
 
   /**
    * @brief Whether the font's weight has been defined.
@@ -957,14 +957,14 @@ public: // Default style & Input style
    *
    * @return The default font weight.
    */
-  FontWeight GetDefaultFontWeight() const;
+  FontWeightType GetDefaultFontWeight() const;
 
   /**
    * @brief Sets the placeholder text font weight.
    *
    * @param[in] weight The font weight
    */
-  void SetPlaceholderTextFontWeight(FontWeight weight);
+  void SetPlaceholderTextFontWeight(FontWeightType weight);
 
   /**
    * @brief Whether the font's weight has been defined.
@@ -978,14 +978,14 @@ public: // Default style & Input style
    *
    * @return The placeholder text font weight
    */
-  FontWeight GetPlaceholderTextFontWeight() const;
+  FontWeightType GetPlaceholderTextFontWeight() const;
 
   /**
    * @brief Sets the default font width.
    *
    * @param[in] width The font width.
    */
-  void SetDefaultFontWidth(FontWidth width);
+  void SetDefaultFontWidth(FontWidthType width);
 
   /**
    * @brief Whether the font's width has been defined.
@@ -997,14 +997,14 @@ public: // Default style & Input style
    *
    * @return The default font width.
    */
-  FontWidth GetDefaultFontWidth() const;
+  FontWidthType GetDefaultFontWidth() const;
 
   /**
    * @brief Sets the placeholder text font width.
    *
    * @param[in] width The font width
    */
-  void SetPlaceholderTextFontWidth(FontWidth width);
+  void SetPlaceholderTextFontWidth(FontWidthType width);
 
   /**
    * @brief Whether the font's width has been defined.
@@ -1018,14 +1018,14 @@ public: // Default style & Input style
    *
    * @return The placeholder text font width
    */
-  FontWidth GetPlaceholderTextFontWidth() const;
+  FontWidthType GetPlaceholderTextFontWidth() const;
 
   /**
    * @brief Sets the default font slant.
    *
    * @param[in] slant The font slant.
    */
-  void SetDefaultFontSlant(FontSlant slant);
+  void SetDefaultFontSlant(FontSlantType slant);
 
   /**
    * @brief Whether the font's slant has been defined.
@@ -1037,14 +1037,14 @@ public: // Default style & Input style
    *
    * @return The default font slant.
    */
-  FontSlant GetDefaultFontSlant() const;
+  FontSlantType GetDefaultFontSlant() const;
 
   /**
    * @brief Sets the placeholder text font slant.
    *
    * @param[in] slant The font slant
    */
-  void SetPlaceholderTextFontSlant(FontSlant slant);
+  void SetPlaceholderTextFontSlant(FontSlantType slant);
 
   /**
    * @brief Whether the font's slant has been defined.
@@ -1058,7 +1058,7 @@ public: // Default style & Input style
    *
    * @return The placeholder text font slant
    */
-  FontSlant GetPlaceholderTextFontSlant() const;
+  FontSlantType GetPlaceholderTextFontSlant() const;
 
   /**
    * @brief Set the default font size.
@@ -1637,7 +1637,7 @@ public: // Default style & Input style
    *
    * @param[in] weight The input font's weight.
    */
-  void SetInputFontWeight(FontWeight weight);
+  void SetInputFontWeight(FontWeightType weight);
 
   /**
    * @return Whether the font's weight has been defined.
@@ -1649,14 +1649,14 @@ public: // Default style & Input style
    *
    * @return The input font's weight.
    */
-  FontWeight GetInputFontWeight() const;
+  FontWeightType GetInputFontWeight() const;
 
   /**
    * @brief Sets the input font's width.
    *
    * @param[in] width The input font's width.
    */
-  void SetInputFontWidth(FontWidth width);
+  void SetInputFontWidth(FontWidthType width);
 
   /**
    * @return Whether the font's width has been defined.
@@ -1668,14 +1668,14 @@ public: // Default style & Input style
    *
    * @return The input font's width.
    */
-  FontWidth GetInputFontWidth() const;
+  FontWidthType GetInputFontWidth() const;
 
   /**
    * @brief Sets the input font's slant.
    *
    * @param[in] slant The input font's slant.
    */
-  void SetInputFontSlant(FontSlant slant);
+  void SetInputFontSlant(FontSlantType slant);
 
   /**
    * @return Whether the font's slant has been defined.
@@ -1687,7 +1687,7 @@ public: // Default style & Input style
    *
    * @return The input font's slant.
    */
-  FontSlant GetInputFontSlant() const;
+  FontSlantType GetInputFontSlant() const;
 
   /**
    * @brief Sets the input font's point size.

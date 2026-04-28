@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
+#include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
@@ -480,37 +481,37 @@ Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
 void InputFieldImpl::SetFontWeight(Text::FontWeight weight)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWeight::Name[weight]);
-  mController->SetDefaultFontWeight(weight);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
+  mController->SetDefaultFontWeight(Text::ToTextAbstractionFontWeight(weight));
 }
 
 Text::FontWeight InputFieldImpl::GetFontWeight() const
 {
-  return mController->GetDefaultFontWeight();
+  return Text::ToFontWeight(mController->GetDefaultFontWeight());
 }
 
 void InputFieldImpl::SetFontWidth(Text::FontWidth width)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontWidth::Name[width]);
-  mController->SetDefaultFontWidth(width);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
+  mController->SetDefaultFontWidth(Text::ToTextAbstractionFontWidth(width));
 }
 
 Text::FontWidth InputFieldImpl::GetFontWidth() const
 {
-  return mController->GetDefaultFontWidth();
+  return Text::ToFontWidth(mController->GetDefaultFontWidth());
 }
 
 void InputFieldImpl::SetFontSlant(Text::FontSlant slant)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), TextAbstraction::FontSlant::Name[slant]);
-  mController->SetDefaultFontSlant(slant);
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
+  mController->SetDefaultFontSlant(Text::ToTextAbstractionFontSlant(slant));
 }
 
 Text::FontSlant InputFieldImpl::GetFontSlant() const
 {
-  return mController->GetDefaultFontSlant();
+  return Text::ToFontSlant(mController->GetDefaultFontSlant());
 }
 
 void InputFieldImpl::SetTextBackgroundColor(const UiColor& color)
