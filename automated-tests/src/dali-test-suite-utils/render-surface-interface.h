@@ -20,7 +20,7 @@
 #include <dali/public-api/common/dali-common.h>
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/public-api/math/rect.h>
-#include <dali/public-api/math/uint-16-pair.h>
+#include <dali/public-api/math/int-pair.h>
 
 namespace Dali
 {

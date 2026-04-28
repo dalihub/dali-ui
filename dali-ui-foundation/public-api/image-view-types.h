@@ -19,7 +19,7 @@
 
 #include <dali/public-api/adaptor-framework/image-options.h>
 #include <dali/public-api/common/dali-common.h>
-#include <dali/public-api/math/uint-16-pair.h>
+#include <dali/public-api/math/int-pair.h>
 
 namespace Dali
 {
