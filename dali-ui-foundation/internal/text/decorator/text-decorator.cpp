@@ -290,6 +290,7 @@ struct Decorator::Impl : public ConnectionTracker
         mPrimaryCursor.SetRequestedHeight(cursor.cursorHeight);
         mPrimaryCursor.SetRequestedPositionX(cursor.position.x);
         mPrimaryCursor.SetRequestedPositionY(cursor.position.y);
+        mPrimaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
 
         container.Add(mPrimaryCursor, Size(mCursorWidth, cursor.cursorHeight));
       }
@@ -309,6 +310,7 @@ struct Decorator::Impl : public ConnectionTracker
         mSecondaryCursor.SetRequestedHeight(cursor.cursorHeight);
         mSecondaryCursor.SetRequestedPositionX(cursor.position.x);
         mSecondaryCursor.SetRequestedPositionY(cursor.position.y);
+        mSecondaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
 
         container.Add(mSecondaryCursor, Size(mCursorWidth, cursor.cursorHeight));
       }
@@ -1169,6 +1171,9 @@ struct Decorator::Impl : public ConnectionTracker
       }
       handle.actor.SetRequestedPositionX(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX);
       handle.actor.SetRequestedPositionY(yLocalPosition + adjustedDisplacementY);
+      handle.actor.SetProperty(Actor::Property::POSITION,
+                               Vector2(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX,
+                                       yLocalPosition + adjustedDisplacementY));
     }
   }
 
