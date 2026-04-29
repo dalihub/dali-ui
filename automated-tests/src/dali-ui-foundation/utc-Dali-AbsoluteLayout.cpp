@@ -510,3 +510,79 @@ int UtcDaliAbsoluteLayoutDirectionRtlP(void)
   DALI_TEST_EQUALS(blue.GetSize().height, 30.0f, TEST_LOCATION);
   END_TEST;
 }
+
+int UtcDaliAbsoluteLayoutBoundsUpdateAfterArrangeP(void)
+{
+  // After an initial layout pass, mutating bounds on the existing
+  // AbsoluteLayoutParams handle and calling InvalidateMeasure must propagate
+  // through the layout root and produce a re-arrange that picks up the new
+  // bounds. Regression: the early-exit guard in InvalidateMeasure used to
+  // drop the second invalidation because the layout manager skipped
+  // child.Measure for explicit-bounds children, leaving the child's measure
+  // cache stuck in the DIRTY state.
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(150.0f);
+
+  View child = View::New();
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(10.0f, 20.0f, 50.0f, 40.0f)));
+  layout.Add(child);
+
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  DALI_TEST_EQUALS(child.GetPositionX(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION);
+
+  // Mutate the existing params and request a remeasure.
+  child.GetLayoutParams<AbsoluteLayoutParams>().SetBounds(LayoutRect(70.0f, 80.0f, 90.0f, 30.0f));
+  child.InvalidateMeasure();
+
+  layout.Measure(200.0f, 150.0f);
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
+
+  DALI_TEST_EQUALS(child.GetPositionX(), 70.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionY(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().width, 90.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutBoundsRepeatedUpdateP(void)
+{
+  // Multiple successive bounds mutations followed by InvalidateMeasure must
+  // each take effect — verifies that the measure cache transitions back to a
+  // clean state on every layout pass, not just the first one.
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  layout.SetRequestedWidth(300.0f);
+  layout.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 40.0f, 40.0f)));
+  layout.Add(child);
+
+  const LayoutRect updates[] = {
+    LayoutRect(15.0f, 25.0f, 60.0f, 35.0f),
+    LayoutRect(120.0f, 10.0f, 80.0f, 20.0f),
+    LayoutRect(0.0f, 0.0f, 100.0f, 100.0f),
+  };
+
+  for(const auto& rect : updates)
+  {
+    child.GetLayoutParams<AbsoluteLayoutParams>().SetBounds(rect);
+    child.InvalidateMeasure();
+
+    layout.Measure(300.0f, 200.0f);
+    layout.Arrange(LayoutRect(0.0f, 0.0f, 300.0f, 200.0f));
+
+    DALI_TEST_EQUALS(child.GetPositionX(), rect.GetX(), TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetPositionY(), rect.GetY(), TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetSize().width, rect.GetWidth(), TEST_LOCATION);
+    DALI_TEST_EQUALS(child.GetSize().height, rect.GetHeight(), TEST_LOCATION);
+  }
+  END_TEST;
+}

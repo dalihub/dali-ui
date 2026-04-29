@@ -116,29 +116,27 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       h *= contentHeight;
     }
 
-    if(w < 0 || h < 0)
-    {
-      Extents      margin    = childImpl.GetMargin();
-      float        marginW   = static_cast<float>(margin.start + margin.end);
-      float        marginH   = static_cast<float>(margin.top + margin.bottom);
-      float        measureW  = w >= 0.0f ? w : std::max(0.0f, contentWidth - marginW);
-      float        measureH  = h >= 0.0f ? h : std::max(0.0f, contentHeight - marginH);
-      MeasuredSize childSize = childImpl.Measure(measureW, measureH);
+    Extents margin  = childImpl.GetMargin();
+    float   marginW = static_cast<float>(margin.start + margin.end);
+    float   marginH = static_cast<float>(margin.top + margin.bottom);
 
-      if(w < 0)
-      {
-        w = childSize.width;
-      }
-      if(h < 0)
-      {
-        h = childSize.height;
-      }
-    }
-    else if(IntegrationView::IsLayout(childImpl))
+    // Always measure children. For negative axes (WRAP_CONTENT / MATCH_PARENT)
+    // the constraint is the available content space; for explicit positive
+    // bounds the constraint is the bounds value itself. Calling Measure
+    // unconditionally keeps the child's measure cache and dirty state coherent
+    // with the layout pass — required so a later InvalidateMeasure can
+    // propagate. The child's own cache no-ops when constraints repeat.
+    float        measureW  = w >= 0.0f ? w : std::max(0.0f, contentWidth - marginW);
+    float        measureH  = h >= 0.0f ? h : std::max(0.0f, contentHeight - marginH);
+    MeasuredSize childSize = childImpl.Measure(measureW, measureH);
+
+    if(w < 0)
     {
-      // Nested layout containers need Measure even with explicit size,
-      // so their own children get measured.
-      childImpl.Measure(w, h);
+      w = childSize.width;
+    }
+    if(h < 0)
+    {
+      h = childSize.height;
     }
 
     // Proportional position: axis = (available - childExtent) * proportion
@@ -151,9 +149,8 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       y = (contentHeight - h) * bounds.y;
     }
 
-    Extents margin = childImpl.GetMargin();
-    maxRight       = std::max(maxRight, x + w + margin.start + margin.end);
-    maxBottom      = std::max(maxBottom, y + h + margin.top + margin.bottom);
+    maxRight  = std::max(maxRight, x + w + marginW);
+    maxBottom = std::max(maxBottom, y + h + marginH);
   }
 
   return MeasuredSize(maxRight, maxBottom);
