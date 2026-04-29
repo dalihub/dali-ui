@@ -226,6 +226,11 @@ public: // Non-virtual API (safe to reorder / extend)
   float GetScaleX() const;
 
   /**
+   * @copydoc Ui::View::GetCurrentScaleX()
+   */
+  float GetCurrentScaleX() const;
+
+  /**
    * @copydoc Ui::View::SetScaleX()
    */
   void SetScaleX(float scaleX);
@@ -234,6 +239,11 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::GetScaleY()
    */
   float GetScaleY() const;
+
+  /**
+   * @copydoc Ui::View::GetCurrentScaleY()
+   */
+  float GetCurrentScaleY() const;
 
   /**
    * @copydoc Ui::View::SetScaleY()
@@ -286,14 +296,29 @@ public: // Non-virtual API (safe to reorder / extend)
   MeasuredSize GetSize() const;
 
   /**
+   * @copydoc Ui::View::GetCurrentSize()
+   */
+  MeasuredSize GetCurrentSize() const;
+
+  /**
    * @copydoc Ui::View::GetPositionX()
    */
   float GetPositionX() const;
 
   /**
+   * @copydoc Ui::View::GetCurrentPositionX()
+   */
+  float GetCurrentPositionX() const;
+
+  /**
    * @copydoc Ui::View::GetPositionY()
    */
   float GetPositionY() const;
+
+  /**
+   * @copydoc Ui::View::GetCurrentPositionY()
+   */
+  float GetCurrentPositionY() const;
 
   /**
    * @copydoc Ui::View::SetRequestedPositionX()

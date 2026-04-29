@@ -240,6 +240,13 @@ public: // Properties
    */
   float GetScaleX() const;
 
+  /**
+   * @brief Gets the current x scale factor applied to the view.
+   *
+   * @return The current x scale factor
+   */
+  float GetCurrentScaleX() const;
+
   // @ANIMATABLE(Actor::Property::SCALE_X, float)
   /**
    * @brief Sets the x scale factor applied to the view.
@@ -254,6 +261,13 @@ public: // Properties
    * @return The y scale factor
    */
   float GetScaleY() const;
+
+  /**
+   * @brief Gets the current y scale factor applied to the view.
+   *
+   * @return The current y scale factor
+   */
+  float GetCurrentScaleY() const;
 
   // @ANIMATABLE(Actor::Property::SCALE_Y, float)
   /**
@@ -270,6 +284,13 @@ public: // Properties
    * @param[in] scaleY The Y scale factor to set
    */
   View& SetScale(float scaleX, float scaleY);
+
+  /**
+   * @brief Gets the current scale factor applied to the view.
+   *
+   * @return The current scale factor
+   */
+  Vector2 GetCurrentScale() const;
 
   /**
    * @brief Checks if the view is visible.
@@ -311,6 +332,13 @@ public: // Properties
    * @return The actual size (width, height) as set by the layout system
    */
   MeasuredSize GetSize() const;
+
+  /**
+   * @brief Gets the current rendered size of this View.
+   *
+   * @return The current rendered size (width, height)
+   */
+  MeasuredSize GetCurrentSize() const;
 
   /**
    * @brief Sets the X position requested by the user.
@@ -373,6 +401,14 @@ public: // Properties
    * @see GetPositionX
    */
   float GetPositionY() const;
+
+  /**
+   * @brief Returns the current rendered position (Actor::Property::POSITION).
+   *
+   * @return The current rendered position
+   * @see GetPositionX, GetPositionY
+   */
+  Vector2 GetCurrentPosition() const;
 
   /**
    * @brief Sets the parent origin of the View.

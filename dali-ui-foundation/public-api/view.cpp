@@ -130,6 +130,11 @@ float View::GetScaleX() const
   return GetImpl(*this).GetScaleX();
 }
 
+float View::GetCurrentScaleX() const
+{
+  return GetImpl(*this).GetCurrentScaleX();
+}
+
 View& View::SetScaleX(float scaleX)
 {
   GetImpl(*this).SetScaleX(scaleX);
@@ -139,6 +144,11 @@ View& View::SetScaleX(float scaleX)
 float View::GetScaleY() const
 {
   return GetImpl(*this).GetScaleY();
+}
+
+float View::GetCurrentScaleY() const
+{
+  return GetImpl(*this).GetCurrentScaleY();
 }
 
 View& View::SetScaleY(float scaleY)
@@ -152,6 +162,11 @@ View& View::SetScale(float scaleX, float scaleY)
   SetScaleX(scaleX);
   SetScaleY(scaleY);
   return *this;
+}
+
+Vector2 View::GetCurrentScale() const
+{
+  return Vector2(GetCurrentScaleX(), GetCurrentScaleY());
 }
 
 View& View::SetLayoutDirection(Dali::LayoutDirection::Type direction)
@@ -202,6 +217,11 @@ MeasuredSize View::GetSize() const
   return GetImpl(*this).GetSize();
 }
 
+MeasuredSize View::GetCurrentSize() const
+{
+  return GetImpl(*this).GetCurrentSize();
+}
+
 View& View::SetRequestedPositionX(float x)
 {
   GetImpl(*this).SetRequestedPositionX(x);
@@ -232,6 +252,11 @@ float View::GetPositionX() const
 float View::GetPositionY() const
 {
   return GetImpl(*this).GetPositionY();
+}
+
+Vector2 View::GetCurrentPosition() const
+{
+  return Vector2(GetImpl(*this).GetCurrentPositionX(), GetImpl(*this).GetCurrentPositionY());
 }
 
 View& View::SetParentOrigin(const Vector3& point)

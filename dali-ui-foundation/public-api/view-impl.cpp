@@ -507,6 +507,11 @@ float ViewImpl::GetScaleX() const
   return Self().GetProperty<float>(Actor::Property::SCALE_X);
 }
 
+float ViewImpl::GetCurrentScaleX() const
+{
+  return Self().GetCurrentProperty<float>(Actor::Property::SCALE_X);
+}
+
 void ViewImpl::SetScaleX(float scaleX)
 {
   Self().SetProperty(Actor::Property::SCALE_X, scaleX);
@@ -515,6 +520,11 @@ void ViewImpl::SetScaleX(float scaleX)
 float ViewImpl::GetScaleY() const
 {
   return Self().GetProperty<float>(Actor::Property::SCALE_Y);
+}
+
+float ViewImpl::GetCurrentScaleY() const
+{
+  return Self().GetCurrentProperty<float>(Actor::Property::SCALE_Y);
 }
 
 void ViewImpl::SetScaleY(float scaleY)
@@ -571,14 +581,30 @@ MeasuredSize ViewImpl::GetSize() const
                       Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT));
 }
 
+MeasuredSize ViewImpl::GetCurrentSize() const
+{
+  return MeasuredSize(Self().GetCurrentProperty<float>(Actor::Property::SIZE_WIDTH),
+                      Self().GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT));
+}
+
 float ViewImpl::GetPositionX() const
 {
   return Self().GetProperty<float>(Actor::Property::POSITION_X);
 }
 
+float ViewImpl::GetCurrentPositionX() const
+{
+  return Self().GetCurrentProperty<float>(Actor::Property::POSITION_X);
+}
+
 float ViewImpl::GetPositionY() const
 {
   return Self().GetProperty<float>(Actor::Property::POSITION_Y);
+}
+
+float ViewImpl::GetCurrentPositionY() const
+{
+  return Self().GetCurrentProperty<float>(Actor::Property::POSITION_Y);
 }
 
 void ViewImpl::SetRequestedPositionX(float x)
