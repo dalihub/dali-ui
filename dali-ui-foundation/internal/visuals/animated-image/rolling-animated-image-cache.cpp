@@ -73,7 +73,6 @@ RollingAnimatedImageCache::RollingAnimatedImageCache(
   mImageUrl(animatedImageLoading.GetUrl()),
   mAnimatedImageLoading(animatedImageLoading),
   mFrameCount(SINGLE_IMAGE_COUNT),
-  mFrameIndex(FIRST_FRAME_INDEX),
   mCacheSize(cacheSize),
   mQueue(cacheSize),
   mWrapModeU(wrapModeU),

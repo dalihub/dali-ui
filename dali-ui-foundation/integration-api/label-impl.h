@@ -706,7 +706,7 @@ public: // From ControlInterface
   /**
    * @copydoc Text::ControlInterface::RequestAsyncRender()
    */
-  void RequestAsyncRender();
+  void RequestAsyncRender() override;
 
 private: // from ScrollerInterface
   /**
@@ -739,12 +739,12 @@ public: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncRenderFinished()
    */
-  void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo);
+  void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo) override;
 
   /**
    * @copydoc Text::AsyncTextInterface::AsyncSizeComputed()
    */
-  void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo);
+  void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo) override;
 
 private: // Implementation
   /**

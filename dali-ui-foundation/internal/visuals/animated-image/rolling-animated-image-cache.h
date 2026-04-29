@@ -193,7 +193,6 @@ private:
   VisualUrl                  mImageUrl;
   Dali::AnimatedImageLoading mAnimatedImageLoading;
   uint32_t                   mFrameCount;
-  uint32_t                   mFrameIndex;
   uint32_t                   mCacheSize;
   std::vector<int32_t>       mIntervals;
   std::vector<uint32_t>      mLoadWaitingQueue;

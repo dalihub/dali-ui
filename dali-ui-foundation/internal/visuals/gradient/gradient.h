@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/matrix3.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/ref-object.h>
 #include <dali/public-api/rendering/texture.h>
 
@@ -29,8 +30,6 @@
 
 namespace Dali
 {
-class Vector4;
-
 namespace Ui
 {
 namespace Internal

@@ -32,9 +32,6 @@
 namespace Dali
 {
 
-struct TouchEvent;
-struct KeyEvent;
-
 namespace Ui
 {
 

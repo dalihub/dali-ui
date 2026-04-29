@@ -58,7 +58,7 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
-  auto getImpl = [this](Ui::View v) -> ViewImpl&
+  auto getImpl = [](Ui::View v) -> ViewImpl&
   {
     return GetImpl(v);
   };

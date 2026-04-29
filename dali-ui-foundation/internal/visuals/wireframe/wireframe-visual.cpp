@@ -35,7 +35,6 @@ namespace Internal
 namespace
 {
 const char* const POSITION_ATTRIBUTE_NAME("aPosition");
-const char* const INDEX_NAME("indices");
 } // namespace
 
 WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, const Property::Map& properties)

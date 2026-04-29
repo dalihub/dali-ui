@@ -390,7 +390,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
-  auto getImpl = [this](Ui::View v) -> ViewImpl&
+  auto getImpl = [](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
 
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
@@ -461,7 +461,7 @@ MeasuredSize GridLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   std::vector<float> rowHeights(rowCount, 0.0f);
   std::vector<float> colWidths(colCount, 0.0f);
 
-  auto getImpl = [this](Ui::View v) -> ViewImpl&
+  auto getImpl = [](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
 
   // Re-measure children to get fresh auto row/column sizes using actual arrange bounds

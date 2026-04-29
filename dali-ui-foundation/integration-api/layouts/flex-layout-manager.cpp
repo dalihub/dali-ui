@@ -71,7 +71,7 @@ struct FlexLine
 };
 
 std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& children,
-                                               std::vector<MeasuredSize>&       workingSizes, float availableMain,
+                                               std::vector<MeasuredSize>& workingSizes, float availableMain,
                                                bool isMainAxisHorizontal, FlexWrap wrap,
                                                const std::function<ViewImpl&(Ui::View)>& getImpl)
 {
@@ -533,7 +533,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   float contentWidth  = bounds.width;
   float contentHeight = bounds.height;
   float availableMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
-  auto  getImpl       = [this](Ui::View v) -> ViewImpl&
+  auto  getImpl       = [](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
 
   // Local working buffer: seeded from each child's current measured size.

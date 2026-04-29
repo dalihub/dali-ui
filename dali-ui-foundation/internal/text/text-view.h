@@ -82,7 +82,7 @@ public:
    * @copydoc Dali::Ui::Text::ViewInterface::GetGlyphs()
    */
   virtual Length GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLineOffset, GlyphIndex glyphIndex,
-                           Length numberOfGlyphs) const;
+                           Length numberOfGlyphs) const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetColors()
@@ -107,7 +107,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupBackgroundColorSet()
    */
-  bool IsMarkupBackgroundColorSet() const;
+  bool IsMarkupBackgroundColorSet() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetTextColor()
@@ -137,7 +137,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupUnderlineSet()
    */
-  bool IsMarkupUnderlineSet() const;
+  bool IsMarkupUnderlineSet() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetHyphens()
@@ -182,7 +182,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetUnderlineRuns()
    */
-  virtual void GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index, Length numberOfRuns) const;
+  virtual void GetUnderlineRuns(UnderlinedGlyphRun* underlineRuns, UnderlineRunIndex index, Length numberOfRuns) const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetOutlineOffset()
@@ -242,7 +242,7 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::IsMarkupStrikethroughSet()
    */
-  bool IsMarkupStrikethroughSet() const;
+  bool IsMarkupStrikethroughSet() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughHeight()
@@ -252,23 +252,23 @@ public:
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfStrikethroughRuns()
    */
-  Length GetNumberOfStrikethroughRuns() const;
+  Length GetNumberOfStrikethroughRuns() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetStrikethroughRuns()
    */
   void GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns, StrikethroughRunIndex index,
-                            Length numberOfRuns) const;
+                            Length numberOfRuns) const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetNumberOfBoundedParagraphRuns()
    */
-  virtual Length GetNumberOfBoundedParagraphRuns() const;
+  virtual Length GetNumberOfBoundedParagraphRuns() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetBoundedParagraphRuns()
    */
-  virtual const Vector<BoundedParagraphRun>& GetBoundedParagraphRuns() const;
+  virtual const Vector<BoundedParagraphRun>& GetBoundedParagraphRuns() const override;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetCharacterSpacing()

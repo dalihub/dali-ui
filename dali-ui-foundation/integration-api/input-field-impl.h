@@ -598,7 +598,7 @@ public: // From ControlInterface
   /**
    * @copydoc Text::ControlInterface::RequestAsyncRender()
    */
-  void RequestAsyncRender();
+  void RequestAsyncRender() override;
 
   // From EditableControlInterface
 

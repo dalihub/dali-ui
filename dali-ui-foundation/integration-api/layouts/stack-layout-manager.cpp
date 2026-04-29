@@ -197,7 +197,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   auto& children    = GetChildren(view);
   float contentMain = (mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
 
-  auto getImpl = [this](Ui::View v) -> ViewImpl&
+  auto getImpl = [](Ui::View v) -> ViewImpl&
   { return GetImpl(v); };
 
   // Local working buffer (seed later from child measurements): weight

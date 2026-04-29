@@ -137,7 +137,7 @@ public: // Implementation of AsyncTask
   /**
    * @copydoc Dali::AsyncTask::Process()
    */
-  void Process();
+  void Process() override;
 
   /**
    * @copydoc Dali::AsyncTask::GetTaskName()
@@ -216,12 +216,12 @@ public: // Implementation of AsyncTask
   /**
    * @copydoc Dali::AsyncTask::Process()
    */
-  void Process();
+  void Process() override;
 
   /**
    * @copydoc Dali::AsyncTask::IsReady()
    */
-  bool IsReady();
+  bool IsReady() override;
 
   /**
    * @copydoc Dali::AsyncTask::GetTaskName()

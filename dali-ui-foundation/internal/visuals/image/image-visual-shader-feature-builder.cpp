@@ -78,7 +78,9 @@ VisualFactoryCache::ShaderType SHADER_TYPE_TABLE[] = {
   VisualFactoryCache::IMAGE_SHADER_ROUNDED_BORDERLINE_YUV_AND_RGB,
   VisualFactoryCache::IMAGE_SHADER_SQUIRCLE_BORDERLINE_YUV_AND_RGB,
 };
+#if defined(DEBUG_ENABLED)
 constexpr uint32_t SHADER_TYPE_TABLE_COUNT = sizeof(SHADER_TYPE_TABLE) / sizeof(SHADER_TYPE_TABLE[0]);
+#endif
 } // unnamed namespace
 
 namespace ImageVisualShaderFeature

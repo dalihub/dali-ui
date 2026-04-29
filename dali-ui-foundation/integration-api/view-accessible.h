@@ -49,7 +49,7 @@ using AccessibilityStates = Accessibility::EnumBitSet<AccessibilityState, Access
  * @see Dali::Accessibility::Text
  * @see Dali::Accessibility::EditableText
  */
-struct DALI_UI_API ViewAccessible : public Dali::Accessibility::ActorAccessible, public Dali::Accessibility::Action
+class DALI_UI_API ViewAccessible : public Dali::Accessibility::ActorAccessible, public Dali::Accessibility::Action
 {
 protected:
   Vector2                       mLastPosition{0.0f, 0.0f};

@@ -158,13 +158,26 @@ IF( NOT BIN_DIR )
 ENDIF()
 
 INCLUDE(CheckCXXCompilerFlag)
+
 # Set up compiler flags and warnings
 ADD_COMPILE_OPTIONS( -Wno-ignored-qualifiers )
 ADD_COMPILE_OPTIONS( -Wall -Wno-unused-parameter -Wno-float-equal )
+
 CHECK_CXX_COMPILER_FLAG( -Wno-dangling-reference HAVE_NO_DANGLING_REFERENCE )
 IF (HAVE_NO_DANGLING_REFERENCE)
   ADD_COMPILE_OPTIONS( $<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> )
 ENDIF()
+
+CHECK_CXX_COMPILER_FLAG(-Wno-class-memaccess HAVE_NO_CLASS_MEMACCESS)
+IF (HAVE_NO_CLASS_MEMACCESS)
+  ADD_COMPILE_OPTIONS(-Wno-class-memaccess)
+ENDIF()
+
+CHECK_CXX_COMPILER_FLAG(-Wno-enum-compare-switch HAVE_NO_ENUM_COMPARE_SWITCH)
+IF (HAVE_NO_ENUM_COMPARE_SWITCH)
+  ADD_COMPILE_OPTIONS(-Wno-enum-compare-switch)
+ENDIF()
+
 IF( ENABLE_COVERAGE OR "$ENV{CXXFLAGS}" MATCHES --coverage )
   ADD_COMPILE_OPTIONS( --coverage )
   SET(ENABLE_COVERAGE ON)
@@ -190,10 +203,6 @@ ADD_SUBDIRECTORY(dali-ui-components)
 
 SET(CUSTOM_COMPILE_OPTIONS "")
 
-CHECK_CXX_COMPILER_FLAG(-Wno-class-memaccess HAVE_NO_CLASS_MEMACCESS)
-IF (HAVE_NO_CLASS_MEMACCESS)
-  ADD_COMPILE_OPTIONS(-Wno-class-memaccess)
-ENDIF()
 
 # From the top-level CMake script using ADD_SUBDIRECTORY() to avoid
 # target names duplication with other DALi modules.

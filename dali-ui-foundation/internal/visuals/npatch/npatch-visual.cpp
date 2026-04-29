@@ -51,10 +51,6 @@ namespace Ui
 {
 namespace Internal
 {
-namespace
-{
-const int CUSTOM_PROPERTY_COUNT(6); // fixed(3),stretch,aux,pre-muliplied alpha
-}
 
 /////////////////NPatchVisual////////////////
 
@@ -387,7 +383,6 @@ void NPatchVisual::OnInitialize()
   Shader   shader                          = mImageVisualShaderFactory.GetShader(mFactoryCache, imageVisualShaderFeatureBuilder);
 
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
-  mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
 
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);

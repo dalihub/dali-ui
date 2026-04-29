@@ -43,7 +43,6 @@ const int CUSTOM_PROPERTY_COUNT(2); // color,size
 
 const char* const POSITION_ATTRIBUTE_NAME("aPosition");
 const char* const DRIFT_ATTRIBUTE_NAME("aDrift");
-const char* const INDEX_NAME("indices");
 } // namespace
 
 BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Property::Map& properties)

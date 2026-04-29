@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/gradient/gradient.h>
@@ -27,8 +28,6 @@
 
 namespace Dali
 {
-class Vector2;
-
 namespace Ui
 {
 namespace Internal
