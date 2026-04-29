@@ -46,12 +46,12 @@ class Window;
 
 class Window;
 typedef Signal<void(Window, bool)>       FocusChangeSignalType;
-typedef Signal<void(Window, Uint16Pair)> ResizeSignalType;
+typedef Signal<void(Window, Int32Pair)> ResizeSignalType;
 
 class Window : public BaseHandle
 {
 public:
-  using WindowSize     = Uint16Pair;
+  using WindowSize     = Int32Pair;
   using WindowPosition = Int32Pair;
 
   using KeyEventSignalType   = Signal<void(const KeyEvent&)>;
