@@ -37,7 +37,7 @@ namespace Ui
  * When constructed with RGBA values, UiColor behaves like a lightweight
  * wrapper around Vector4. When constructed with a string color ID, the
  * actual RGBA values are looked up from the current ThemeLoaderInterface
- * at the point of Resolve().
+ * at the point of GetRgba().
  *
  * @code
  *   // Direct RGBA
@@ -83,7 +83,7 @@ public:
    * @brief Creates a UiColor with a string identifier.
    *
    * The actual RGBA value is resolved from the current theme when
-   * Resolve() is called.
+   * GetRgba() is called.
    *
    * @param[in] colorId The color identifier string
    */
@@ -93,7 +93,7 @@ public:
    * @brief Creates a UiColor with a string identifier (rvalue overload).
    *
    * The actual RGBA value is resolved from the current theme when
-   * Resolve() is called.
+   * GetRgba() is called.
    *
    * This overload enables moving the string into the internal token registry
    * to avoid an extra copy when the caller provides an rvalue.
@@ -146,7 +146,7 @@ public:
   /**
    * @brief Implicit conversion to Vector4.
    *
-   * Equivalent to calling Resolve().
+   * Equivalent to calling GetRgba().
    */
   operator Vector4() const;
 
