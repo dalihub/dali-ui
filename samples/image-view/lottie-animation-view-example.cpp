@@ -423,7 +423,7 @@ private:
 
   bool OnMonitorTimerTick()
   {
-    if(mLottieView && mLottieView.GetPlayState() == LottieAnimationView::PlayState::PLAYING)
+    if(mLottieView && mLottieView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       DALI_LOG_RELEASE_INFO("[LottieAnimationView] Monitor — frame=%d/%d state=%d\n",
                             mLottieView.GetCurrentFrame(),
@@ -454,8 +454,8 @@ private:
   static const char*     STOP_BEHAVIOR_LABELS[3];
   static const char*     FRAME_RANGE_LABELS[3];
   static const char*     RENDER_SCALE_LABELS[3];
-  static const LottieAnimationView::LoopingMode::Type  LOOPING_MODES[2];
-  static const LottieAnimationView::StopBehavior::Type STOP_BEHAVIORS[3];
+  static const Ui::LottieAnimation::LoopingMode  LOOPING_MODES[2];
+  static const Ui::AnimatedImage::StopBehavior STOP_BEHAVIORS[3];
 
   Application&        mApplication;
   LottieAnimationView mLottieView;
@@ -487,15 +487,15 @@ const char* LottieAnimationViewSampleController::STOP_BEHAVIOR_LABELS[] = {"Stop
 const char* LottieAnimationViewSampleController::FRAME_RANGE_LABELS[]   = {"Range: FULL", "Range: 1st HALF", "Range: 2nd HALF"};
 const char* LottieAnimationViewSampleController::RENDER_SCALE_LABELS[]  = {"Scale: 0.5×", "Scale: 1.0×", "Scale: 2.0×"};
 
-const LottieAnimationView::LoopingMode::Type LottieAnimationViewSampleController::LOOPING_MODES[] = {
-  LottieAnimationView::LoopingMode::RESTART,
-  LottieAnimationView::LoopingMode::AUTO_REVERSE,
+const Ui::LottieAnimation::LoopingMode LottieAnimationViewSampleController::LOOPING_MODES[] = {
+  Ui::LottieAnimation::LoopingMode::RESTART,
+  Ui::LottieAnimation::LoopingMode::AUTO_REVERSE,
 };
 
-const LottieAnimationView::StopBehavior::Type LottieAnimationViewSampleController::STOP_BEHAVIORS[] = {
-  LottieAnimationView::StopBehavior::CURRENT_FRAME,
-  LottieAnimationView::StopBehavior::FIRST_FRAME,
-  LottieAnimationView::StopBehavior::LAST_FRAME,
+const Ui::AnimatedImage::StopBehavior LottieAnimationViewSampleController::STOP_BEHAVIORS[] = {
+  Ui::AnimatedImage::StopBehavior::CURRENT_FRAME,
+  Ui::AnimatedImage::StopBehavior::FIRST_FRAME,
+  Ui::AnimatedImage::StopBehavior::LAST_FRAME,
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

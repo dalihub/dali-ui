@@ -35,23 +35,23 @@ constexpr uint32_t C_STATUS_BG   = 0x222222;
 constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 
-const char* StopBehaviorName(LottieAnimationView::StopBehavior::Type b)
+const char* StopBehaviorName(Ui::AnimatedImage::StopBehavior b)
 {
   switch(b)
   {
-    case LottieAnimationView::StopBehavior::CURRENT_FRAME: return "CURRENT_FRAME";
-    case LottieAnimationView::StopBehavior::FIRST_FRAME:   return "FIRST_FRAME";
-    case LottieAnimationView::StopBehavior::LAST_FRAME:    return "LAST_FRAME";
+    case Ui::AnimatedImage::StopBehavior::CURRENT_FRAME: return "CURRENT_FRAME";
+    case Ui::AnimatedImage::StopBehavior::FIRST_FRAME:   return "FIRST_FRAME";
+    case Ui::AnimatedImage::StopBehavior::LAST_FRAME:    return "LAST_FRAME";
     default:                                               return "?";
   }
 }
 
-const char* LoopingModeName(LottieAnimationView::LoopingMode::Type m)
+const char* LoopingModeName(Ui::LottieAnimation::LoopingMode m)
 {
   switch(m)
   {
-    case LottieAnimationView::LoopingMode::RESTART:      return "RESTART";
-    case LottieAnimationView::LoopingMode::AUTO_REVERSE: return "AUTO_REVERSE";
+    case Ui::LottieAnimation::LoopingMode::RESTART:      return "RESTART";
+    case Ui::LottieAnimation::LoopingMode::AUTO_REVERSE: return "AUTO_REVERSE";
     default:                                             return "?";
   }
 }
@@ -132,13 +132,13 @@ public:
       MakeButton("Loop: 3",         [this] { mView.SetLoopCount(3);  UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("LoopMode:\nRESTART",      [this] { mView.SetLoopingMode(LottieAnimationView::LoopingMode::RESTART);      UpdateLabel(); }),
-      MakeButton("LoopMode:\nAUTO_REVERSE", [this] { mView.SetLoopingMode(LottieAnimationView::LoopingMode::AUTO_REVERSE); UpdateLabel(); }),
+      MakeButton("LoopMode:\nRESTART",      [this] { mView.SetLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART);      UpdateLabel(); }),
+      MakeButton("LoopMode:\nAUTO_REVERSE", [this] { mView.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Stop:\nCURRENT", [this] { mView.SetStopBehavior(LottieAnimationView::StopBehavior::CURRENT_FRAME); UpdateLabel(); }),
-      MakeButton("Stop:\nFIRST",   [this] { mView.SetStopBehavior(LottieAnimationView::StopBehavior::FIRST_FRAME);   UpdateLabel(); }),
-      MakeButton("Stop:\nLAST",    [this] { mView.SetStopBehavior(LottieAnimationView::StopBehavior::LAST_FRAME);    UpdateLabel(); }),
+      MakeButton("Stop:\nCURRENT", [this] { mView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME); UpdateLabel(); }),
+      MakeButton("Stop:\nFIRST",   [this] { mView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);   UpdateLabel(); }),
+      MakeButton("Stop:\nLAST",    [this] { mView.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);    UpdateLabel(); }),
     }));
 
     contentArea.Add(content);

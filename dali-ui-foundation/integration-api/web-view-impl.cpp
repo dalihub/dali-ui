@@ -35,7 +35,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -481,10 +480,10 @@ void WebViewImpl::OnFrameRendered()
 
   Dali::Property::Map imageVisualMap;
   imageVisualMap.Insert(Dali::Ui::Visual::Property::TYPE, static_cast<int>(Dali::Ui::Visual::Type::IMAGE));
-  imageVisualMap.Insert(Dali::Ui::ImageVisual::Property::URL, nativeImageUrl.GetUrl());
-  imageVisualMap.Insert(Dali::Ui::ImageVisual::Property::PIXEL_AREA, FULL_TEXTURE_RECT);
-  imageVisualMap.Insert(Dali::Ui::ImageVisual::Property::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
-  imageVisualMap.Insert(Dali::Ui::ImageVisual::Property::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
+  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::URL, nativeImageUrl.GetUrl());
+  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, FULL_TEXTURE_RECT);
+  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
+  imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
   mVisual = Ui::VisualFactory::Get().CreateVisual(imageVisualMap);
   if(mVisual)
@@ -542,7 +541,7 @@ void WebViewImpl::SetDisplayArea(const Dali::Rect<int32_t>& displayArea)
         Dali::EqualsZero(textureRatio.y) ? 1.0f : std::min(1.0f, 1.0f / textureRatio.y));
 
       Dali::Property::Map updateMap;
-      updateMap.Insert(Dali::Ui::ImageVisual::Property::PIXEL_AREA, pixelArea);
+      updateMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, pixelArea);
       updateMap.Insert(Dali::Ui::Visual::Property::TRANSFORM,
                        Dali::CreatePropertyMap({{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}}));
 

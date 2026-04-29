@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 namespace Dali
@@ -213,8 +214,7 @@ private:
   bool                       mBorderOnly;              ///< if only border is desired
   Extents                    mBorder;                  ///< The size of the border
   float                      mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
-  Ui::ImageVisual::ReleasePolicy::Type
-    mReleasePolicy; ///< The release policy to determine when an image should no longer be cached.
+  Ui::Image::ReleasePolicy   mReleasePolicy;           ///< The release policy to determine when an image should no longer be cached.
 };
 
 } // namespace Internal

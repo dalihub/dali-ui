@@ -101,8 +101,8 @@ public:
       MakeButton("CropToMask\nOFF", [this] { mView.SetCropToMask(false); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Masking:\nON_RENDERING", [this] { mView.SetMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING); UpdateLabel(); }),
-      MakeButton("Masking:\nON_LOADING",   [this] { mView.SetMaskingMode(Ui::MaskingType::MASKING_ON_LOADING);   UpdateLabel(); }),
+      MakeButton("Masking:\nON_RENDERING", [this] { mView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING); UpdateLabel(); }),
+      MakeButton("Masking:\nON_LOADING",   [this] { mView.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);   UpdateLabel(); }),
     }));
 
     contentArea.Add(content);
@@ -119,7 +119,7 @@ private:
   void UpdateLabel()
   {
     auto mode = mView.GetMaskingMode();
-    Dali::String modeStr = (mode == Ui::MaskingType::MASKING_ON_LOADING) ? "ON_LOADING" : "ON_RENDERING";
+    Dali::String modeStr = (mode == Ui::Image::MaskingType::MASKING_ON_LOADING) ? "ON_LOADING" : "ON_RENDERING";
     mStatusLabel.SetText(
       Dali::String("Mask: ") + Dali::String(mMaskName.c_str()) +
       Dali::String("\nCropToMask: ") + Dali::String(mView.IsCropToMask() ? "ON" : "OFF") +

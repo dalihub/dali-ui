@@ -66,16 +66,16 @@ window.Add(imageView);
 
 ```cpp
 // Scale to fit while preserving aspect ratio (default)
-imageView.SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO);
+imageView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
 // Stretch to fill the entire view (may distort)
-imageView.SetFittingMode(FittingMode::FILL);
+imageView.SetFittingMode(Image::FittingMode::FILL);
 
 // Scale to fill, cropping overflow (preserves aspect ratio)
-imageView.SetFittingMode(FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+imageView.SetFittingMode(Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
 
 // Keep original image size, centered
-imageView.SetFittingMode(FittingMode::CENTER);
+imageView.SetFittingMode(Image::FittingMode::CENTER);
 ```
 
 | Value | Behavior |
@@ -115,24 +115,24 @@ Assuming: **Image 600x400** inside a **View 800x800** (View is larger than image
 
 ## 3. Sampling Mode
 
-`SamplingMode` controls the filter applied when scaling the image. It is defined in `dali-ui-foundation/public-api/image-view/image-view-types.h` as an alias to `Dali::SamplingMode`.
+`SamplingMode` controls the filter applied when scaling the image. It is defined in `dali-ui-foundation/public-api/image/image-enumerations.h` as an alias to `Dali::SamplingMode`.
 
 ```cpp
-#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
 using namespace Dali::Ui;
 
 // Nearest-neighbor (pixelated, fast)
-imageView.SetSamplingMode(SamplingMode::NEAREST);
+imageView.SetSamplingMode(Image::SamplingMode::NEAREST);
 
 // Linear filtering (smooth, default)
-imageView.SetSamplingMode(SamplingMode::LINEAR);
+imageView.SetSamplingMode(Image::SamplingMode::LINEAR);
 
 // Box filtering (for downscaling)
-imageView.SetSamplingMode(SamplingMode::BOX);
+imageView.SetSamplingMode(Image::SamplingMode::BOX);
 
 // No filtering
-imageView.SetSamplingMode(SamplingMode::DONT_CARE);
+imageView.SetSamplingMode(Image::SamplingMode::DONT_CARE);
 ```
 
 | Value | Use Case |
@@ -272,12 +272,12 @@ Control when masking is applied.
 
 ```cpp
 // Apply mask during rendering (default)
-imageView.SetMaskingMode(MaskingType::MASKING_ON_RENDERING);
+imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_RENDERING);
 
 // Apply mask during image loading
-imageView.SetMaskingMode(MaskingType::MASKING_ON_LOADING);
+imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_LOADING);
 
-MaskingType::Type mode = imageView.GetMaskingMode();
+Image::MaskingType mode = imageView.GetMaskingMode();
 ```
 
 | Value | Behavior |
@@ -321,15 +321,15 @@ Control when the image texture is released from memory.
 
 ```cpp
 // Release when visual is detached from scene (default)
-imageView.SetReleasePolicy(ReleasePolicy::DETACHED);
+imageView.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 
 // Release when visual is destroyed
-imageView.SetReleasePolicy(ReleasePolicy::DESTROYED);
+imageView.SetReleasePolicy(Image::ReleasePolicy::DESTROYED);
 
 // Never release from cache
-imageView.SetReleasePolicy(ReleasePolicy::NEVER);
+imageView.SetReleasePolicy(Image::ReleasePolicy::NEVER);
 
-ReleasePolicy::Type policy = imageView.GetReleasePolicy();
+Image::ReleasePolicy policy = imageView.GetReleasePolicy();
 ```
 
 | Value | Behavior |
@@ -449,13 +449,13 @@ All setters return `ImageView&`, enabling fluent configuration:
 ImageView imageView = ImageView::New("photo.jpg");
 
 imageView
-    .SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO)
-    .SetSamplingMode(SamplingMode::LINEAR)
+    .SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+    .SetSamplingMode(Image::SamplingMode::LINEAR)
     .SetImageColor(UiColor(0xFFFFFFFF))
     .SetSynchronousLoading(false)
     .SetFastTrackUploading(true)
     .SetOrientationCorrection(true)
-    .SetReleasePolicy(ReleasePolicy::DETACHED);
+    .SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 ```
 
 ---

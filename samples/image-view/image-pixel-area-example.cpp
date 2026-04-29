@@ -97,7 +97,7 @@ private:
     mImage = ImageView::New(JPG_URL)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
       .SetPixelArea(AREAS[mActiveIndex].area);
 
     mImageContainer.Add(mImage);
@@ -233,7 +233,7 @@ private:
       mImage = AnimatedImageView::New(GIF_URL)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+        .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
         .SetPixelArea(AREAS[mActiveIndex].area);
       AnimatedImageView::DownCast(mImage).Play();
     }
@@ -242,7 +242,7 @@ private:
       mImage = ImageView::New(JPG_URL)
         .SetRequestedWidth(MATCH_PARENT)
         .SetRequestedHeight(MATCH_PARENT)
-        .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+        .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
         .SetPixelArea(AREAS[mActiveIndex].area);
     }
 

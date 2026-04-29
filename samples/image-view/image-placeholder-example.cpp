@@ -108,7 +108,7 @@ private:
       {
         AnimatedImageView view = AnimatedImageView::New();
         view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
-        view.SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO);
+        view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
         view.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
         view.SetLoopCount(-1);
         view.ResourceReadySignal().Connect(this, &ImagePlaceholderController::OnResourceReady);
@@ -129,7 +129,7 @@ private:
       {
         ImageView view = ImageView::New();
         view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
-        view.SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO);
+        view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
         view.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
         view.ResourceReadySignal().Connect(this, &ImagePlaceholderController::OnResourceReady);
         mImage = view;

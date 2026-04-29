@@ -68,7 +68,7 @@ public:
   void OnEnter(View contentArea) override
   {
     mMaskUrl     = "";
-    mMaskingMode = Ui::MaskingType::MASKING_ON_RENDERING;
+    mMaskingMode = Ui::Image::MaskingType::MASKING_ON_RENDERING;
 
     // Left: CropToMask OFF
     mImageLeft = ImageView::New(IMG_A)
@@ -150,8 +150,8 @@ public:
 
     // Row 2: MaskingMode
     content.Add(MakeButtonRow({
-      MakeButton("MaskingMode\nON_RENDERING", [this] { OnMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING); }),
-      MakeButton("MaskingMode\nON_LOADING",   [this] { OnMaskingMode(Ui::MaskingType::MASKING_ON_LOADING); }),
+      MakeButton("MaskingMode\nON_RENDERING", [this] { OnMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING); }),
+      MakeButton("MaskingMode\nON_LOADING",   [this] { OnMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING); }),
     }));
 
     contentArea.Add(
@@ -173,7 +173,7 @@ private:
     UpdateStatus(displayName);
   }
 
-  void OnMaskingMode(Ui::MaskingType::Type mode)
+  void OnMaskingMode(Ui::Image::MaskingType mode)
   {
     mMaskingMode = mode;
     mImageLeft.SetMaskingMode(mode);
@@ -184,13 +184,13 @@ private:
       mImageLeft.SetAlphaMaskUrl(mMaskUrl);
       mImageRight.SetAlphaMaskUrl(mMaskUrl);
     }
-    Dali::String modeStr = (mode == Ui::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
+    Dali::String modeStr = (mode == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
     UpdateStatus(modeStr.CStr());
   }
 
   void UpdateStatus(const char* maskName)
   {
-    Dali::String modeStr = (mMaskingMode == Ui::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
+    Dali::String modeStr = (mMaskingMode == Ui::Image::MaskingType::MASKING_ON_RENDERING) ? "ON_RENDERING" : "ON_LOADING";
     Dali::String maskStr = mImageLeft.GetAlphaMaskUrl().Empty() ? "none" : Dali::String(maskName);
 
     mStatusLabel.SetText(
@@ -263,7 +263,7 @@ private:
   ImageView             mImageRight;
   Label                 mStatusLabel;
   Dali::String          mMaskUrl;
-  Ui::MaskingType::Type mMaskingMode{Ui::MaskingType::MASKING_ON_RENDERING};
+  Ui::Image::MaskingType mMaskingMode{Ui::Image::MaskingType::MASKING_ON_RENDERING};
 };
 
 REGISTER_MANUAL_TEST(TcImageViewMasking)

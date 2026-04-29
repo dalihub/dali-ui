@@ -32,22 +32,22 @@ namespace DevelVisual
  */
 enum Type
 {
-  INVALID        = Dali::Ui::Visual::INVALID,
-  BORDER         = Dali::Ui::Visual::BORDER,
-  COLOR          = Dali::Ui::Visual::COLOR,
-  GRADIENT       = Dali::Ui::Visual::GRADIENT,
-  IMAGE          = Dali::Ui::Visual::IMAGE,
-  MESH           = Dali::Ui::Visual::MESH,
-  PRIMITIVE      = Dali::Ui::Visual::PRIMITIVE,
-  WIREFRAME      = Dali::Ui::Visual::WIREFRAME,
-  TEXT           = Dali::Ui::Visual::TEXT,
-  N_PATCH        = Dali::Ui::Visual::N_PATCH,
-  SVG            = Dali::Ui::Visual::SVG,
-  ANIMATED_IMAGE = Dali::Ui::Visual::ANIMATED_IMAGE,
+  INVALID               = Dali::Ui::Visual::INVALID,
+  BORDER                = Dali::Ui::Visual::BORDER,
+  COLOR                 = Dali::Ui::Visual::COLOR,
+  GRADIENT              = Dali::Ui::Visual::GRADIENT,
+  IMAGE                 = Dali::Ui::Visual::IMAGE,
+  MESH                  = Dali::Ui::Visual::MESH,
+  PRIMITIVE             = Dali::Ui::Visual::PRIMITIVE,
+  WIREFRAME             = Dali::Ui::Visual::WIREFRAME,
+  TEXT                  = Dali::Ui::Visual::TEXT,
+  N_PATCH               = Dali::Ui::Visual::N_PATCH,
+  SVG                   = Dali::Ui::Visual::SVG,
+  ANIMATED_IMAGE        = Dali::Ui::Visual::ANIMATED_IMAGE,
+  ANIMATED_VECTOR_IMAGE = Dali::Ui::Visual::ANIMATED_VECTOR_IMAGE,
 
-  NOT_IN_USE_1          = ANIMATED_IMAGE + 1,
-  ANIMATED_VECTOR_IMAGE = ANIMATED_IMAGE + 2, ///< Renders an animated vector image.
-  ARC                   = ANIMATED_IMAGE + 3, ///< Renders an arc.
+  NOT_IN_USE_1 = ANIMATED_VECTOR_IMAGE + 1,
+  ARC          = ANIMATED_IMAGE + 3, ///< Renders an arc.
 };
 
 /**

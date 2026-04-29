@@ -66,14 +66,14 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The fitting mode used when scaling the image.
-     * @details Name "fittingMode", type Ui::FittingMode (Property::INTEGER).
+     * @details Name "fittingMode", type Ui::Image::FittingMode (Property::INTEGER).
      * @note See also: ImageView::SetFittingMode(), ImageView::GetFittingMode().
      */
     FITTING_MODE,
 
     /**
      * @brief The sampling mode used when scaling the image.
-     * @details Name "samplingMode", type Ui::SamplingMode (Property::INTEGER).
+     * @details Name "samplingMode", type Ui::Image::SamplingMode (Property::INTEGER).
      * @note See also: ImageView::SetSamplingMode(), ImageView::GetSamplingMode().
      */
     SAMPLING_MODE,
@@ -127,7 +127,7 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::MaskingType (Property::INTEGER).
+     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
      * @note See also: ImageView::SetMaskingMode(), ImageView::GetMaskingMode().
      */
     MASKING_MODE,
@@ -152,14 +152,14 @@ struct ImageViewPropertyIndex
 
     /**
      * @brief The load policy for the image resource.
-     * @details Name "loadPolicy", type Ui::LoadPolicy (Property::INTEGER).
+     * @details Name "loadPolicy", type Ui::Image::LoadPolicy (Property::INTEGER).
      * @note See also: ImageView::SetLoadPolicy(), ImageView::GetLoadPolicy().
      */
     LOAD_POLICY,
 
     /**
      * @brief The release policy for the image resource.
-     * @details Name "releasePolicy", type Ui::ReleasePolicy (Property::INTEGER).
+     * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: ImageView::SetReleasePolicy(), ImageView::GetReleasePolicy().
      */
     RELEASE_POLICY,

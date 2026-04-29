@@ -19,7 +19,8 @@
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/animated-image-view-properties.h>
-#include <dali-ui-foundation/public-api/animated-image-view-types.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
@@ -167,22 +168,22 @@ public: // API
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetFittingMode
    */
-  void SetFittingMode(Ui::FittingMode::Type fittingMode);
+  void SetFittingMode(Ui::Image::FittingMode fittingMode);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetFittingMode
    */
-  Ui::FittingMode::Type GetFittingMode() const;
+  Ui::Image::FittingMode GetFittingMode() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetSamplingMode
    */
-  void SetSamplingMode(Ui::SamplingMode::Type samplingMode);
+  void SetSamplingMode(Ui::Image::SamplingMode samplingMode);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetSamplingMode
    */
-  Ui::SamplingMode::Type GetSamplingMode() const;
+  Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetImageLoadWithViewSize
@@ -217,12 +218,12 @@ public: // API
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetMaskingMode
    */
-  void SetMaskingMode(Ui::MaskingType::Type maskingMode);
+  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetMaskingMode
    */
-  Ui::MaskingType::Type GetMaskingMode() const;
+  Ui::Image::MaskingType GetMaskingMode() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetPlaceholderUrl
@@ -242,12 +243,12 @@ public: // API
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetStopBehavior
    */
-  void SetStopBehavior(AnimatedImageViewStopBehavior::Type behavior);
+  void SetStopBehavior(Ui::AnimatedImage::StopBehavior behavior);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetStopBehavior
    */
-  AnimatedImageViewStopBehavior::Type GetStopBehavior() const;
+  Ui::AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetFrameSpeedFactor
@@ -302,7 +303,7 @@ public: // API
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetPlayState
    */
-  AnimatedImageViewPlayState::Type GetPlayState() const;
+  Ui::AnimatedImage::PlayState GetPlayState() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetCurrentFrame
@@ -337,22 +338,22 @@ public: // API
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetLoadPolicy
    */
-  void SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+  void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetLoadPolicy
    */
-  Ui::LoadPolicy::Type GetLoadPolicy() const;
+  Ui::Image::LoadPolicy GetLoadPolicy() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetReleasePolicy
    */
-  void SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetReleasePolicy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Ui::Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @copydoc Dali::Ui::AnimatedImageView::SetSynchronousLoading
@@ -450,20 +451,20 @@ private:                    // Data
 
   UiColor mImageColor;
 
-  AnimatedImageViewStopBehavior::Type mStopBehavior;
-  Ui::FittingMode::Type               mFittingMode;
-  Ui::SamplingMode::Type              mSamplingMode;
-  Ui::MaskingType::Type               mMaskingMode;
-  Ui::LoadPolicy::Type                mLoadPolicy;
-  Ui::ReleasePolicy::Type             mReleasePolicy;
-  int                                 mLoopCount;
-  int                                 mBatchSize;
-  int                                 mCacheSize;
-  int                                 mFrameDelay;
-  int                                 mDesiredWidth;
-  int                                 mDesiredHeight;
-  int                                 mDepthIndex;
-  float                               mFrameSpeedFactor;
+  Ui::AnimatedImage::StopBehavior mStopBehavior;
+  Ui::Image::FittingMode          mFittingMode;
+  Ui::Image::SamplingMode         mSamplingMode;
+  Ui::Image::MaskingType          mMaskingMode;
+  Ui::Image::LoadPolicy           mLoadPolicy;
+  Ui::Image::ReleasePolicy        mReleasePolicy;
+  int                             mLoopCount;
+  int                             mBatchSize;
+  int                             mCacheSize;
+  int                             mFrameDelay;
+  int                             mDesiredWidth;
+  int                             mDesiredHeight;
+  int                             mDepthIndex;
+  float                           mFrameSpeedFactor;
 
   bool mPreMultipliedAlpha;
   bool mImageLoadWithViewSize;

@@ -73,14 +73,14 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief The looping mode (RESTART or AUTO_REVERSE).
-     * @details Name "loopingMode", type LottieAnimationView::LoopingMode (Property::INTEGER).
+     * @details Name "loopingMode", type Ui::LottieAnimation::LoopingMode (Property::INTEGER).
      * @note See also: LottieAnimationView::SetLoopingMode(), LottieAnimationView::GetLoopingMode().
      */
     LOOPING_MODE,
 
     /**
      * @brief The behavior when the animation is stopped.
-     * @details Name "stopBehavior", type LottieAnimationView::StopBehavior (Property::INTEGER).
+     * @details Name "stopBehavior", type Ui::AnimatedImage::StopBehavior (Property::INTEGER).
      * @note See also: LottieAnimationView::SetStopBehavior(), LottieAnimationView::GetStopBehavior().
      */
     STOP_BEHAVIOR,
@@ -123,7 +123,7 @@ struct LottieAnimationViewPropertyIndex
 
     /**
      * @brief Controls when the visual's texture resources are released.
-     * @details Name "releasePolicy", type Ui::ReleasePolicy (Property::INTEGER).
+     * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: LottieAnimationView::SetReleasePolicy(), LottieAnimationView::GetReleasePolicy().
      */
     RELEASE_POLICY,

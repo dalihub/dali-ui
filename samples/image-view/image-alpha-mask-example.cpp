@@ -119,10 +119,10 @@ private:
     ImageView::New(STATIC_URL)
       .SetRequestedWidth(cropToMask ? WRAP_CONTENT : MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
-      .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
       .SetAlphaMaskUrl(MASKS[mMaskIndex].url)
       .SetCropToMask(cropToMask)
-      .SetMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING)
+      .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING)
       .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER))
       .As(mStaticImages[panelIdx]);
 
@@ -131,7 +131,7 @@ private:
       .SetRequestedHeight(WRAP_CONTENT)
       .SetAlphaMaskUrl(MASKS[mMaskIndex].url)
       .SetCropToMask(cropToMask)
-      .SetMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING)
+      .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING)
       .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER))
       .SetVisibility(false)
       .As(mAnimatedImages[panelIdx]);
@@ -295,7 +295,7 @@ private:
   void OnModeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
   {
     mMaskingOnLoading = !mMaskingOnLoading;
-    const auto mode   = mMaskingOnLoading ? Ui::MaskingType::MASKING_ON_LOADING : Ui::MaskingType::MASKING_ON_RENDERING;
+    const auto mode   = mMaskingOnLoading ? Ui::Image::MaskingType::MASKING_ON_LOADING : Ui::Image::MaskingType::MASKING_ON_RENDERING;
 
     for(int i = 0; i < PANEL_COUNT; ++i)
     {

@@ -119,13 +119,13 @@ AnimatedImageView& AnimatedImageView::JumpToFrame(int frame)
   return *this;
 }
 
-AnimatedImageView& AnimatedImageView::SetStopBehavior(StopBehavior::Type behavior)
+AnimatedImageView& AnimatedImageView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
 {
   Ui::GetImpl(*this).SetStopBehavior(behavior);
   return *this;
 }
 
-AnimatedImageView::StopBehavior::Type AnimatedImageView::GetStopBehavior() const
+AnimatedImage::StopBehavior AnimatedImageView::GetStopBehavior() const
 {
   return Ui::GetImpl(*this).GetStopBehavior();
 }
@@ -174,7 +174,7 @@ int AnimatedImageView::GetFrameDelay() const
   return Ui::GetImpl(*this).GetFrameDelay();
 }
 
-AnimatedImageView::PlayState::Type AnimatedImageView::GetPlayState() const
+Ui::AnimatedImage::PlayState AnimatedImageView::GetPlayState() const
 {
   return Ui::GetImpl(*this).GetPlayState();
 }
@@ -211,24 +211,24 @@ int AnimatedImageView::GetDesiredHeight() const
   return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
-AnimatedImageView& AnimatedImageView::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
+AnimatedImageView& AnimatedImageView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
 {
   Ui::GetImpl(*this).SetLoadPolicy(loadPolicy);
   return *this;
 }
 
-Ui::LoadPolicy::Type AnimatedImageView::GetLoadPolicy() const
+Ui::Image::LoadPolicy AnimatedImageView::GetLoadPolicy() const
 {
   return Ui::GetImpl(*this).GetLoadPolicy();
 }
 
-AnimatedImageView& AnimatedImageView::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
+AnimatedImageView& AnimatedImageView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
   return *this;
 }
 
-Ui::ReleasePolicy::Type AnimatedImageView::GetReleasePolicy() const
+Ui::Image::ReleasePolicy AnimatedImageView::GetReleasePolicy() const
 {
   return Ui::GetImpl(*this).GetReleasePolicy();
 }
@@ -255,24 +255,24 @@ bool AnimatedImageView::IsPreMultipliedAlpha() const
   return Ui::GetImpl(*this).IsPreMultipliedAlpha();
 }
 
-AnimatedImageView& AnimatedImageView::SetFittingMode(Ui::FittingMode::Type fittingMode)
+AnimatedImageView& AnimatedImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
 {
   Ui::GetImpl(*this).SetFittingMode(fittingMode);
   return *this;
 }
 
-Ui::FittingMode::Type AnimatedImageView::GetFittingMode() const
+Ui::Image::FittingMode AnimatedImageView::GetFittingMode() const
 {
   return Ui::GetImpl(*this).GetFittingMode();
 }
 
-AnimatedImageView& AnimatedImageView::SetSamplingMode(Ui::SamplingMode::Type samplingMode)
+AnimatedImageView& AnimatedImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
 {
   Ui::GetImpl(*this).SetSamplingMode(samplingMode);
   return *this;
 }
 
-Ui::SamplingMode::Type AnimatedImageView::GetSamplingMode() const
+Ui::Image::SamplingMode AnimatedImageView::GetSamplingMode() const
 {
   return Ui::GetImpl(*this).GetSamplingMode();
 }
@@ -310,13 +310,13 @@ bool AnimatedImageView::IsCropToMask() const
   return Ui::GetImpl(*this).IsCropToMask();
 }
 
-AnimatedImageView& AnimatedImageView::SetMaskingMode(Ui::MaskingType::Type maskingMode)
+AnimatedImageView& AnimatedImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
 {
   Ui::GetImpl(*this).SetMaskingMode(maskingMode);
   return *this;
 }
 
-Ui::MaskingType::Type AnimatedImageView::GetMaskingMode() const
+Ui::Image::MaskingType AnimatedImageView::GetMaskingMode() const
 {
   return Ui::GetImpl(*this).GetMaskingMode();
 }

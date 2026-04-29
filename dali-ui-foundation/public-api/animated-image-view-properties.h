@@ -80,7 +80,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The behavior when the animation is stopped.
-     * @details Name "stopBehavior", type AnimatedImageView::StopBehavior (Property::INTEGER).
+     * @details Name "stopBehavior", type Ui::AnimatedImage::StopBehavior (Property::INTEGER).
      * @note See also: AnimatedImageView::SetStopBehavior(), AnimatedImageView::GetStopBehavior().
      */
     STOP_BEHAVIOR,
@@ -137,14 +137,14 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief How the image is fitted within the view bounds.
-     * @details Name "fittingMode", type Ui::FittingMode (Property::INTEGER).
+     * @details Name "fittingMode", type Ui::Image::FittingMode (Property::INTEGER).
      * @note See also: AnimatedImageView::SetFittingMode(), AnimatedImageView::GetFittingMode().
      */
     FITTING_MODE,
 
     /**
      * @brief The sampling mode used when scaling the image.
-     * @details Name "samplingMode", type Ui::SamplingMode (Property::INTEGER).
+     * @details Name "samplingMode", type Ui::Image::SamplingMode (Property::INTEGER).
      * @note See also: AnimatedImageView::SetSamplingMode(), AnimatedImageView::GetSamplingMode().
      */
     SAMPLING_MODE,
@@ -169,14 +169,14 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The load policy for the image resource.
-     * @details Name "loadPolicy", type Ui::LoadPolicy (Property::INTEGER).
+     * @details Name "loadPolicy", type Ui::Image::LoadPolicy (Property::INTEGER).
      * @note See also: AnimatedImageView::SetLoadPolicy(), AnimatedImageView::GetLoadPolicy().
      */
     LOAD_POLICY,
 
     /**
      * @brief Controls when the visual's texture resources are released.
-     * @details Name "releasePolicy", type Ui::ReleasePolicy (Property::INTEGER).
+     * @details Name "releasePolicy", type Ui::Image::ReleasePolicy (Property::INTEGER).
      * @note See also: AnimatedImageView::SetReleasePolicy(), AnimatedImageView::GetReleasePolicy().
      */
     RELEASE_POLICY,
@@ -215,7 +215,7 @@ struct AnimatedImageViewPropertyIndex
 
     /**
      * @brief The masking mode.
-     * @details Name "maskingMode", type Ui::MaskingType (Property::INTEGER).
+     * @details Name "maskingMode", type Ui::Image::MaskingType (Property::INTEGER).
      * @note See also: AnimatedImageView::SetMaskingMode(), AnimatedImageView::GetMaskingMode().
      */
     MASKING_MODE,

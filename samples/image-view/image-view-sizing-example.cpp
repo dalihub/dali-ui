@@ -100,7 +100,7 @@ private:
     ImageView::New(RESOURCES_DIR "gallery-medium-49.jpg")
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
       .SetImageLoadWithViewSize(mImageLoadWithViewSize)
       .As(mSyncImage);
 
@@ -183,7 +183,7 @@ private:
     ImageView::New(RESOURCES_DIR "exif-rotated.jpg")
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
       .SetOrientationCorrection(mOrientationCorrection)
       .As(mOrientationImage);
 

@@ -35,13 +35,13 @@ constexpr uint32_t C_STATUS_BG   = 0x222222;
 constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 
-const char* PlayStateName(LottieAnimationView::PlayState::Type state)
+const char* PlayStateName(Ui::AnimatedImage::PlayState state)
 {
   switch(state)
   {
-    case LottieAnimationView::PlayState::PLAYING: return "PLAYING";
-    case LottieAnimationView::PlayState::PAUSED:  return "PAUSED";
-    case LottieAnimationView::PlayState::STOPPED: return "STOPPED";
+    case Ui::AnimatedImage::PlayState::PLAYING: return "PLAYING";
+    case Ui::AnimatedImage::PlayState::PAUSED:  return "PAUSED";
+    case Ui::AnimatedImage::PlayState::STOPPED: return "STOPPED";
     default:                                      return "?";
   }
 }

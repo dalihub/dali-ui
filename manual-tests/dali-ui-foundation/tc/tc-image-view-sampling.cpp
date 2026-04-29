@@ -68,7 +68,7 @@ public:
     mImage = ImageView::New(IMG)
                .SetRequestedWidth(PREVIEW_SIZE)
                .SetRequestedHeight(PREVIEW_SIZE)
-               .SetFittingMode(Ui::FittingMode::FILL);
+               .SetFittingMode(Ui::Image::FittingMode::FILL);
 
     mSamplingLabel = MakeStatusLabel("SamplingMode: BOX");
     mSizeLabel     = MakeStatusLabel("DesiredSize: 0x0 | LoadWithViewSize: OFF");
@@ -83,10 +83,10 @@ public:
     content.Add(mSamplingLabel);
     content.Add(mSizeLabel);
     content.Add(MakeButtonRow({
-      MakeButton("BOX",     [this] { OnSampling(Ui::SamplingMode::BOX,            "BOX"); }),
-      MakeButton("NEAREST", [this] { OnSampling(Ui::SamplingMode::NEAREST,        "NEAREST"); }),
-      MakeButton("LINEAR",  [this] { OnSampling(Ui::SamplingMode::LINEAR,         "LINEAR"); }),
-      MakeButton("BOX_LIN", [this] { OnSampling(Ui::SamplingMode::BOX_THEN_LINEAR,"BOX_LIN"); }),
+      MakeButton("BOX",     [this] { OnSampling(Ui::Image::SamplingMode::BOX,            "BOX"); }),
+      MakeButton("NEAREST", [this] { OnSampling(Ui::Image::SamplingMode::NEAREST,        "NEAREST"); }),
+      MakeButton("LINEAR",  [this] { OnSampling(Ui::Image::SamplingMode::LINEAR,         "LINEAR"); }),
+      MakeButton("BOX_LIN", [this] { OnSampling(Ui::Image::SamplingMode::BOX_THEN_LINEAR,"BOX_LIN"); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Desired\n0x0",   [this] { OnDesiredSize(0,  0); }),
@@ -102,7 +102,7 @@ public:
   }
 
 private:
-  void OnSampling(Ui::SamplingMode::Type mode, const char* name)
+  void OnSampling(Ui::Image::SamplingMode mode, const char* name)
   {
     mImage.SetSamplingMode(mode);
     mImage.Reload();

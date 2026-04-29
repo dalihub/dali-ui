@@ -40,8 +40,8 @@ class ImageLoadingPolicyController : public ConnectionTracker
     COUNT
   };
 
-  struct PolicyEntry { const char* name; Ui::ReleasePolicy::Type policy; };
-  struct LoadPolicyEntry { const char* name; Ui::LoadPolicy::Type policy; };
+  struct PolicyEntry { const char* name; Ui::Image::ReleasePolicy policy; };
+  struct LoadPolicyEntry { const char* name; Ui::Image::LoadPolicy policy; };
 
   static const PolicyEntry     POLICIES[POLICY_COUNT];
   static const LoadPolicyEntry LOAD_POLICIES[LOAD_POLICY_COUNT];
@@ -177,7 +177,7 @@ private:
     else if(mViewType == ViewType::LOTTIE_ANIMATION_VIEW) view = LottieAnimationView::New(imageUrl);
     else view = ImageView::New(imageUrl);
     view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT);
-    ApplyProperty(view, ImageView::Property::FITTING_MODE, (int)Ui::FittingMode::FIT_KEEP_ASPECT_RATIO);
+    ApplyProperty(view, ImageView::Property::FITTING_MODE, (int)Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
     return view;
   }
 
@@ -324,8 +324,8 @@ private:
   ViewType      mViewType;
 };
 
-const ImageLoadingPolicyController::PolicyEntry ImageLoadingPolicyController::POLICIES[POLICY_COUNT] = { {"DETACHED", Ui::ReleasePolicy::DETACHED}, {"DESTROYED", Ui::ReleasePolicy::DESTROYED}, {"NEVER", Ui::ReleasePolicy::NEVER} };
-const ImageLoadingPolicyController::LoadPolicyEntry ImageLoadingPolicyController::LOAD_POLICIES[LOAD_POLICY_COUNT] = { {"ATTACHED", Ui::LoadPolicy::ATTACHED}, {"IMMEDIATE", Ui::LoadPolicy::IMMEDIATE} };
+const ImageLoadingPolicyController::PolicyEntry ImageLoadingPolicyController::POLICIES[POLICY_COUNT] = { {"DETACHED", Ui::Image::ReleasePolicy::DETACHED}, {"DESTROYED", Ui::Image::ReleasePolicy::DESTROYED}, {"NEVER", Ui::Image::ReleasePolicy::NEVER} };
+const ImageLoadingPolicyController::LoadPolicyEntry ImageLoadingPolicyController::LOAD_POLICIES[LOAD_POLICY_COUNT] = { {"ATTACHED", Ui::Image::LoadPolicy::ATTACHED}, {"IMMEDIATE", Ui::Image::LoadPolicy::IMMEDIATE} };
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {

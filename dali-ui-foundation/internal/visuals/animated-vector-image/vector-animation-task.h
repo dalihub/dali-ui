@@ -30,8 +30,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
 namespace Dali
 {
@@ -90,8 +90,8 @@ public:
       playRange(),
       dynamicProperties(),
       playState(),
-      stopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-      loopingMode(DevelImageVisual::LoopingMode::RESTART),
+      stopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
+      loopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
       currentFrame(0),
       width(0),
       height(0),
@@ -121,19 +121,19 @@ public:
       return *this;
     }
 
-    uint32_t                             resendFlag;
-    Property::Array                      playRange;
-    DynamicPropertyType                  dynamicProperties;
-    DevelImageVisual::PlayState::Type    playState;
-    DevelImageVisual::StopBehavior::Type stopBehavior;
-    DevelImageVisual::LoopingMode::Type  loopingMode;
-    uint32_t                             currentFrame;
-    uint32_t                             width;
-    uint32_t                             height;
-    int32_t                              loopCount;
-    uint32_t                             playStateId;
-    float                                frameSpeedFactor;
-    bool                                 notifyAfterRasterization;
+    uint32_t                         resendFlag;
+    Property::Array                  playRange;
+    DynamicPropertyType              dynamicProperties;
+    Ui::AnimatedImage::PlayState     playState;
+    Ui::AnimatedImage::StopBehavior  stopBehavior;
+    Ui::LottieAnimation::LoopingMode loopingMode;
+    uint32_t                         currentFrame;
+    uint32_t                         width;
+    uint32_t                         height;
+    int32_t                          loopCount;
+    uint32_t                         playStateId;
+    float                            frameSpeedFactor;
+    bool                             notifyAfterRasterization;
   };
 
   /**
@@ -346,14 +346,14 @@ private:
    * @brief Sets the stop behavior of the animation. This is performed when the animation is stopped.
    * @param[in] stopBehavior The stop behavior
    */
-  void SetStopBehavior(DevelImageVisual::StopBehavior::Type stopBehavior);
+  void SetStopBehavior(Ui::AnimatedImage::StopBehavior stopBehavior);
 
   /**
    * @brief Sets the looping mode.
    * Animation plays forwards and then restarts from the beginning or runs backwards again.
    * @param[in] loopingMode The looping mode
    */
-  void SetLoopingMode(DevelImageVisual::LoopingMode::Type loopingMode);
+  void SetLoopingMode(Ui::LottieAnimation::LoopingMode loopingMode);
 
   /**
    * @brief Gets the frame number when the animation is stopped according to the stop behavior.
@@ -390,50 +390,50 @@ private:
     PAUSED    ///< The animation is paused
   };
 
-  VisualUrl                            mImageUrl;
-  EncodedImageBuffer                   mEncodedImageBuffer;
-  VectorAnimationRenderer              mVectorRenderer;
-  std::vector<AnimationData>           mAnimationData[2];
-  VectorAnimationThread&               mVectorAnimationThread;
-  Mutex                                mMutex;
-  ResourceReadySignalType              mResourceReadySignal;
-  std::unique_ptr<CallbackBase>        mAnimationFinishedCallback{};
-  std::unique_ptr<CallbackBase>        mLoadCompletedCallback{};
-  mutable Property::Map                mCachedLayerInfo;
-  mutable Property::Map                mCachedMarkerInfo;
-  PlayState                            mPlayState;
-  DevelImageVisual::StopBehavior::Type mStopBehavior;
-  DevelImageVisual::LoopingMode::Type  mLoopingMode;
-  TimePoint                            mNextFrameStartTime;
-  int64_t                              mFrameDurationMicroSeconds;
-  float                                mFrameRate;
-  float                                mFrameSpeedFactor;
-  uint32_t                             mCurrentFrame;
-  uint32_t                             mTotalFrame;
-  uint32_t                             mStartFrame;
-  uint32_t                             mEndFrame;
-  uint32_t                             mDroppedFrames;
-  uint32_t                             mWidth;
-  uint32_t                             mHeight;
-  uint32_t                             mAnimationDataIndex;
-  uint32_t                             mAppliedPlayStateId;
-  int32_t                              mLoopCount;
-  int32_t                              mCurrentLoop;
-  bool                                 mForward : 1;
-  bool                                 mUpdateFrameNumber : 1;
-  bool                                 mNeedAnimationFinishedTrigger : 1;
-  bool                                 mNeedForceRenderOnceTrigger : 1;
-  bool                                 mAnimationDataUpdated : 1;
-  bool                                 mDestroyTask : 1;
-  bool                                 mLoadRequest : 1;
-  bool                                 mLoadFailed : 1;
-  bool                                 mRasterized : 1;
-  bool                                 mKeepAnimation : 1;
-  mutable bool                         mLayerInfoCached : 1;
-  mutable bool                         mMarkerInfoCached : 1;
-  bool                                 mEnableFrameCache : 1;
-  bool                                 mNotifyAfterRasterization : 1;
-  bool                                 mSizeUpdated : 1;
+  VisualUrl                        mImageUrl;
+  EncodedImageBuffer               mEncodedImageBuffer;
+  VectorAnimationRenderer          mVectorRenderer;
+  std::vector<AnimationData>       mAnimationData[2];
+  VectorAnimationThread&           mVectorAnimationThread;
+  Mutex                            mMutex;
+  ResourceReadySignalType          mResourceReadySignal;
+  std::unique_ptr<CallbackBase>    mAnimationFinishedCallback{};
+  std::unique_ptr<CallbackBase>    mLoadCompletedCallback{};
+  mutable Property::Map            mCachedLayerInfo;
+  mutable Property::Map            mCachedMarkerInfo;
+  PlayState                        mPlayState;
+  Ui::AnimatedImage::StopBehavior  mStopBehavior;
+  Ui::LottieAnimation::LoopingMode mLoopingMode;
+  TimePoint                        mNextFrameStartTime;
+  int64_t                          mFrameDurationMicroSeconds;
+  float                            mFrameRate;
+  float                            mFrameSpeedFactor;
+  uint32_t                         mCurrentFrame;
+  uint32_t                         mTotalFrame;
+  uint32_t                         mStartFrame;
+  uint32_t                         mEndFrame;
+  uint32_t                         mDroppedFrames;
+  uint32_t                         mWidth;
+  uint32_t                         mHeight;
+  uint32_t                         mAnimationDataIndex;
+  uint32_t                         mAppliedPlayStateId;
+  int32_t                          mLoopCount;
+  int32_t                          mCurrentLoop;
+  bool                             mForward : 1;
+  bool                             mUpdateFrameNumber : 1;
+  bool                             mNeedAnimationFinishedTrigger : 1;
+  bool                             mNeedForceRenderOnceTrigger : 1;
+  bool                             mAnimationDataUpdated : 1;
+  bool                             mDestroyTask : 1;
+  bool                             mLoadRequest : 1;
+  bool                             mLoadFailed : 1;
+  bool                             mRasterized : 1;
+  bool                             mKeepAnimation : 1;
+  mutable bool                     mLayerInfoCached : 1;
+  mutable bool                     mMarkerInfoCached : 1;
+  bool                             mEnableFrameCache : 1;
+  bool                             mNotifyAfterRasterization : 1;
+  bool                             mSizeUpdated : 1;
 };
 
 } // namespace Internal

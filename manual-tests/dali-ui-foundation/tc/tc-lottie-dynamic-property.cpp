@@ -122,10 +122,10 @@ public:
 private:
   void OnDynamicFill(int32_t propId, const char* colorName)
   {
-    LottieAnimationView::DynamicPropertyInfo info;
+    Ui::LottieAnimation::DynamicPropertyInfo info;
     info.id       = propId;
     info.keyPath  = "**";
-    info.property = LottieAnimationView::VectorProperty::FILL_COLOR;
+    info.property = Ui::LottieAnimation::VectorProperty::FILL_COLOR;
     info.callback = MakeCallback(&OnGetFillColor);
     mView.SetDynamicProperty(info);
 

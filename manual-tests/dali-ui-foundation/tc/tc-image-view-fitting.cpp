@@ -38,14 +38,14 @@ constexpr uint32_t C_BOX_BORDER = 0xFF4444; // box boundary indicator
 struct FittingEntry
 {
   const char*           name;
-  Ui::FittingMode::Type mode;
+  Ui::Image::FittingMode mode;
 };
 
 const FittingEntry FITTING[] = {
-  {"FIT_KEEP",  Ui::FittingMode::FIT_KEEP_ASPECT_RATIO},
-  {"FILL",      Ui::FittingMode::FILL},
-  {"OVER_FIT",  Ui::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO},
-  {"CENTER",    Ui::FittingMode::CENTER},
+  {"FIT_KEEP",  Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO},
+  {"FILL",      Ui::Image::FittingMode::FILL},
+  {"OVER_FIT",  Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO},
+  {"CENTER",    Ui::Image::FittingMode::CENTER},
 };
 constexpr int FITTING_COUNT = 4;
 } // namespace

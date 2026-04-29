@@ -26,11 +26,11 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/image-loader/fast-track-loading-task.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-upload-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 namespace Dali
@@ -120,13 +120,11 @@ public:
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] properties A Property::Map containing settings for this visual
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] samplingMode The SamplingMode of the resource to load
    * @return A smart-pointer to the newly allocated visual.
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, const Property::Map& properties,
-                            ImageDimensions          size         = ImageDimensions(),
-                            Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
+                            ImageDimensions size = ImageDimensions());
 
   /**
    * @brief Create a new image visual with a URL.
@@ -138,12 +136,10 @@ public:
    * @param[in] shaderFactory The ImageVisualShaderFactory object
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] samplingMode The SamplingMode of the resource to load
    * @return A smart-pointer to the newly allocated visual.
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
-                            const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions(),
-                            Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
+                            const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
   /**
@@ -182,10 +178,9 @@ protected:
    * @param[in] shaderFactory The ImageVisualShaderFactory object
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] samplingMode The SamplingMode of the resource to load
    */
   ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-              ImageDimensions size, Dali::SamplingMode::Type samplingMode);
+              ImageDimensions size);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -367,12 +362,12 @@ private:
 
   ImageVisualShaderFactory& mImageVisualShaderFactory;
 
-  Dali::SamplingMode::Type                   mSamplingMode : 5;
-  Dali::WrapMode::Type                       mWrapModeU : 3;
-  Dali::WrapMode::Type                       mWrapModeV : 3;
-  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
-  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
-  TextureManager::LoadState                  mLoadState; ///< The texture loading state
+  Dali::Ui::Image::SamplingMode  mSamplingMode : 5;
+  Dali::WrapMode::Type           mWrapModeU : 3;
+  Dali::WrapMode::Type           mWrapModeV : 3;
+  Dali::Ui::Image::LoadPolicy    mLoadPolicy;
+  Dali::Ui::Image::ReleasePolicy mReleasePolicy;
+  TextureManager::LoadState      mLoadState; ///< The texture loading state
 
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.

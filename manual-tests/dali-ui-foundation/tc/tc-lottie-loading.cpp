@@ -108,9 +108,9 @@ public:
     content.Add(mReadyLabel);
 
     content.Add(MakeButtonRow({
-      MakeButton("Release:\nDETACHED",  [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::DETACHED);  UpdateLabel(); }),
-      MakeButton("Release:\nDESTROYED", [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED); UpdateLabel(); }),
-      MakeButton("Release:\nNEVER",     [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::NEVER);     UpdateLabel(); }),
+      MakeButton("Release:\nDETACHED",  [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);  UpdateLabel(); }),
+      MakeButton("Release:\nDESTROYED", [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED); UpdateLabel(); }),
+      MakeButton("Release:\nNEVER",     [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);     UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Sync\nON",  [this] { mView.SetSynchronousLoading(true);  UpdateLabel(); }),
@@ -157,9 +157,9 @@ private:
     Dali::String rpStr;
     switch(rp)
     {
-      case Ui::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
-      case Ui::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
-      case Ui::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
+      case Ui::Image::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
+      case Ui::Image::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
+      case Ui::Image::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
       default:                           rpStr = "?";         break;
     }
 

@@ -119,24 +119,24 @@ LottieAnimationView& LottieAnimationView::SetMinMaxFrameByMarker(const Dali::Str
   return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetStopBehavior(StopBehavior::Type behavior)
+LottieAnimationView& LottieAnimationView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
 {
   Ui::GetImpl(*this).SetStopBehavior(behavior);
   return *this;
 }
 
-LottieAnimationView::StopBehavior::Type LottieAnimationView::GetStopBehavior() const
+AnimatedImage::StopBehavior LottieAnimationView::GetStopBehavior() const
 {
   return Ui::GetImpl(*this).GetStopBehavior();
 }
 
-LottieAnimationView& LottieAnimationView::SetLoopingMode(LoopingMode::Type mode)
+LottieAnimationView& LottieAnimationView::SetLoopingMode(LottieAnimation::LoopingMode mode)
 {
   Ui::GetImpl(*this).SetLoopingMode(mode);
   return *this;
 }
 
-LottieAnimationView::LoopingMode::Type LottieAnimationView::GetLoopingMode() const
+LottieAnimation::LoopingMode LottieAnimationView::GetLoopingMode() const
 {
   return Ui::GetImpl(*this).GetLoopingMode();
 }
@@ -152,7 +152,7 @@ float LottieAnimationView::GetFrameSpeedFactor() const
   return Ui::GetImpl(*this).GetFrameSpeedFactor();
 }
 
-LottieAnimationView::PlayState::Type LottieAnimationView::GetPlayState() const
+AnimatedImage::PlayState LottieAnimationView::GetPlayState() const
 {
   return Ui::GetImpl(*this).GetPlayState();
 }
@@ -232,7 +232,7 @@ Dali::Property::Map LottieAnimationView::GetMarkerInfo()
   return Ui::GetImpl(*this).GetMarkerInfo();
 }
 
-LottieAnimationView& LottieAnimationView::SetDynamicProperty(const DynamicPropertyInfo& info)
+LottieAnimationView& LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
 {
   Ui::GetImpl(*this).SetDynamicProperty(info);
   return *this;
@@ -260,13 +260,13 @@ int LottieAnimationView::GetDesiredHeight() const
   return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
-LottieAnimationView& LottieAnimationView::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
+LottieAnimationView& LottieAnimationView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
   return *this;
 }
 
-Ui::ReleasePolicy::Type LottieAnimationView::GetReleasePolicy() const
+Ui::Image::ReleasePolicy LottieAnimationView::GetReleasePolicy() const
 {
   return Ui::GetImpl(*this).GetReleasePolicy();
 }

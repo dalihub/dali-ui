@@ -85,7 +85,7 @@ public:
                    .SetRequestedHeight(PREVIEW_SIZE);
     mContainer.Add(mView);
 
-    mStatusLabel = MakeStatusLabel("LoadPolicy: IMMEDIATE | ReleasePolicy: DETACHED | Sync: OFF | View: in scene");
+    mStatusLabel = MakeStatusLabel("LoadPolicy IMMEDIATE | ReleasePolicy: DETACHED | Sync: OFF | View: in scene");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
                             .SetRequestedWidth(MATCH_PARENT)
@@ -97,13 +97,13 @@ public:
     content.Add(mStatusLabel);
 
     content.Add(MakeButtonRow({
-      MakeButton("Load:\nIMMEDIATE", [this] { mView.SetLoadPolicy(Ui::LoadPolicy::IMMEDIATE);  UpdateLabel(); }),
-      MakeButton("Load:\nATTACHED",  [this] { mView.SetLoadPolicy(Ui::LoadPolicy::ATTACHED);   UpdateLabel(); }),
+      MakeButton("Load:\nIMMEDIATE", [this] { mView.SetLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE);  UpdateLabel(); }),
+      MakeButton("Load:\nATTACHED",  [this] { mView.SetLoadPolicy(Ui::Image::LoadPolicy::ATTACHED);   UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Release:\nDETACHED",  [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::DETACHED);  UpdateLabel(); }),
-      MakeButton("Release:\nDESTROYED", [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED); UpdateLabel(); }),
-      MakeButton("Release:\nNEVER",     [this] { mView.SetReleasePolicy(Ui::ReleasePolicy::NEVER);     UpdateLabel(); }),
+      MakeButton("Release:\nDETACHED",  [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);  UpdateLabel(); }),
+      MakeButton("Release:\nDESTROYED", [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED); UpdateLabel(); }),
+      MakeButton("Release:\nNEVER",     [this] { mView.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);     UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Sync ON",  [this] { mView.SetSynchronousLoading(true);  UpdateLabel(); }),
@@ -143,19 +143,19 @@ private:
     auto lp = mView.GetLoadPolicy();
     auto rp = mView.GetReleasePolicy();
 
-    Dali::String lpStr = (lp == Ui::LoadPolicy::IMMEDIATE) ? "IMMEDIATE" : "ATTACHED";
+    Dali::String lpStr = (lp == Ui::Image::LoadPolicy::IMMEDIATE) ? "IMMEDIATE" : "ATTACHED";
     Dali::String rpStr;
     switch(rp)
     {
-      case Ui::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
-      case Ui::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
-      case Ui::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
+      case Ui::Image::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
+      case Ui::Image::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
+      case Ui::Image::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
       default:                           rpStr = "?";         break;
     }
 
     Dali::String inScene = mView.GetParent() ? "in scene" : "REMOVED";
     mStatusLabel.SetText(
-      Dali::String("LoadPolicy: ") + lpStr +
+      Dali::String("LoadPolicy ") + lpStr +
       Dali::String(" | Release: ") + rpStr +
       Dali::String("\nSync: ") + Dali::String(mView.IsSynchronousLoading() ? "ON" : "OFF") +
       Dali::String(" | View: ") + inScene);

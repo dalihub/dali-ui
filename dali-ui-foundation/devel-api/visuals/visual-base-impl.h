@@ -382,10 +382,24 @@ public: ///< Called from other internal class
 
   /**
    * @brief Remove cached data of given index.
+   * @note We can call this function at const case since cache is mutable.
    *
    * @param[in] index The index want to remove cache.
    */
-  void RemoveCache(Dali::Property::Index index);
+  void RemoveCache(Dali::Property::Index index) const;
+
+  /**
+   * @brief Update properties manually
+   */
+  void UpdateProperty();
+
+  /**
+   * @brief Performs an action on the visual with the given action id and attributes.
+   *
+   * @param[in] actionId The id of the action to perform this API only takes an Index
+   * @param[in] attributes The list of attributes for the action. ( optional for this data structure to have content )
+   */
+  void DoActionExtension(Dali::Property::Index actionId, const Dali::Any& attributes);
 
 protected: // From processor-interface
   /**
@@ -450,6 +464,11 @@ private:
    * @brief Register processor
    */
   void RegisterProcessorOnce();
+
+  /**
+   * @brief Update properties for visual
+   */
+  void UpdatePropertyInternal();
 
 protected:
   /**

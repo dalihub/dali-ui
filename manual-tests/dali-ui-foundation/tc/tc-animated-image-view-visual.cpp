@@ -106,9 +106,9 @@ public:
       MakeButton("PA: Center",  [this] { OnPixelArea(Vector4(0.25f, 0.25f, 0.5f,  0.5f)); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("FIT_KEEP", [this] { OnFitting(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO); }),
-      MakeButton("FILL",     [this] { OnFitting(Ui::FittingMode::FILL); }),
-      MakeButton("OVER_FIT", [this] { OnFitting(Ui::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO); }),
+      MakeButton("FIT_KEEP", [this] { OnFitting(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO); }),
+      MakeButton("FILL",     [this] { OnFitting(Ui::Image::FittingMode::FILL); }),
+      MakeButton("OVER_FIT", [this] { OnFitting(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO); }),
     }));
 
     contentArea.Add(content);
@@ -138,11 +138,11 @@ private:
       Dali::String(std::to_string((int)(v.w * 100)).c_str()) + Dali::String(")%"));
   }
 
-  void OnFitting(Ui::FittingMode::Type mode)
+  void OnFitting(Ui::Image::FittingMode mode)
   {
     mView.SetFittingMode(mode);
-    const char* name = (mode == Ui::FittingMode::FILL)                       ? "FILL" :
-                       (mode == Ui::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO) ? "OVER_FIT" :
+    const char* name = (mode == Ui::Image::FittingMode::FILL)                       ? "FILL" :
+                       (mode == Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO) ? "OVER_FIT" :
                                                                                "FIT_KEEP";
     bool match = (mView.GetFittingMode() == mode);
     mFittingLabel.SetText(

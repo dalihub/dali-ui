@@ -310,17 +310,17 @@ int UtcDaliAnimatedImageViewSetGetStopBehaviorP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Default should be CURRENT_FRAME
-  DALI_TEST_EQUALS(view.GetStopBehavior(), AnimatedImageView::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
 
-  view.SetStopBehavior(AnimatedImageView::StopBehavior::FIRST_FRAME);
-  DALI_TEST_EQUALS(view.GetStopBehavior(), AnimatedImageView::StopBehavior::FIRST_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::FIRST_FRAME, TEST_LOCATION);
 
-  view.SetStopBehavior(AnimatedImageView::StopBehavior::LAST_FRAME);
-  DALI_TEST_EQUALS(view.GetStopBehavior(), AnimatedImageView::StopBehavior::LAST_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::LAST_FRAME, TEST_LOCATION);
 
   // Set back to default
-  view.SetStopBehavior(AnimatedImageView::StopBehavior::CURRENT_FRAME);
-  DALI_TEST_EQUALS(view.GetStopBehavior(), AnimatedImageView::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
   END_TEST;
 }
 
@@ -328,9 +328,9 @@ int UtcDaliAnimatedImageViewSetStopBehaviorNoChangeP(void)
 {
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
-  view.SetStopBehavior(AnimatedImageView::StopBehavior::LAST_FRAME);
-  view.SetStopBehavior(AnimatedImageView::StopBehavior::LAST_FRAME); // same value
-  DALI_TEST_EQUALS(view.GetStopBehavior(), AnimatedImageView::StopBehavior::LAST_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME); // same value
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::LAST_FRAME, TEST_LOCATION);
   END_TEST;
 }
 
@@ -496,17 +496,17 @@ int UtcDaliAnimatedImageViewSetGetReleasePolicyP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Default should be DETACHED
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DETACHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::NEVER);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::NEVER, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::NEVER, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DESTROYED, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DESTROYED, TEST_LOCATION);
 
   // Reset to default
-  view.SetReleasePolicy(Ui::ReleasePolicy::DETACHED);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DETACHED, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DETACHED);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DETACHED, TEST_LOCATION);
   END_TEST;
 }
 
@@ -573,7 +573,7 @@ int UtcDaliAnimatedImageViewGetPlayStateP(void)
   AnimatedImageView view = AnimatedImageView::New();
 
   // Without visual, should return STOPPED
-  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImageView::PlayState::STOPPED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
 
   view.Play();
   DALI_TEST_CHECK(view);
@@ -582,7 +582,7 @@ int UtcDaliAnimatedImageViewGetPlayStateP(void)
   DALI_TEST_CHECK(view);
 
   view.Stop();
-  DALI_TEST_EQUALS(view.GetPlayState(), AnimatedImageView::PlayState::STOPPED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
   END_TEST;
 }
 
@@ -645,9 +645,9 @@ int UtcDaliAnimatedImageViewPropertyStopBehaviorP(void)
 
   const int index = AnimatedImageView::Property::STOP_BEHAVIOR;
 
-  view.SetProperty(index, static_cast<int>(AnimatedImageView::StopBehavior::LAST_FRAME));
+  view.SetProperty(index, static_cast<int>(Ui::AnimatedImage::StopBehavior::LAST_FRAME));
   DALI_TEST_EQUALS(view.GetProperty(index).Get<int>(),
-                   static_cast<int>(AnimatedImageView::StopBehavior::LAST_FRAME), TEST_LOCATION);
+                   static_cast<int>(Ui::AnimatedImage::StopBehavior::LAST_FRAME), TEST_LOCATION);
   END_TEST;
 }
 
@@ -733,9 +733,9 @@ int UtcDaliAnimatedImageViewPropertyReleasePolicyP(void)
 
   const int index = AnimatedImageView::Property::RELEASE_POLICY;
 
-  view.SetProperty(index, static_cast<int>(Ui::ReleasePolicy::NEVER));
+  view.SetProperty(index, static_cast<int>(Ui::Image::ReleasePolicy::NEVER));
   DALI_TEST_EQUALS(view.GetProperty(index).Get<int>(),
-                   static_cast<int>(Ui::ReleasePolicy::NEVER), TEST_LOCATION);
+                   static_cast<int>(Ui::Image::ReleasePolicy::NEVER), TEST_LOCATION);
   END_TEST;
 }
 
@@ -836,11 +836,11 @@ int UtcDaliAnimatedImageViewSetGetMaskingModeP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  view.SetMaskingMode(Ui::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
+  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
 
-  view.SetMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 

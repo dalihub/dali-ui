@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 namespace Dali
@@ -204,8 +205,8 @@ private:
   Dali::ImageDimensions mDesiredSize{};
   Dali::ImageDimensions mLastRequiredSize{};
 
-  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
-  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::Image::LoadPolicy    mLoadPolicy;
+  Dali::Ui::Image::ReleasePolicy mReleasePolicy;
 
   bool mLoadCompleted : 1;
   bool mRasterizeCompleted : 1;

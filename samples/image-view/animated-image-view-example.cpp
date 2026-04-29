@@ -428,7 +428,7 @@ private:
 
   bool OnMonitorTimerTick()
   {
-    if(mAnimatedImageView && mAnimatedImageView.GetPlayState() == AnimatedImageView::PlayState::PLAYING)
+    if(mAnimatedImageView && mAnimatedImageView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       DALI_LOG_RELEASE_INFO("[AnimatedImageView] Monitor — frame=%d/%d state=%d\n",
                             mAnimatedImageView.GetCurrentFrame(),
@@ -462,7 +462,7 @@ private:
   static const char* SPEED_LABELS[3];
   static const char* STOP_BEHAVIOR_LABELS[3];
   static const char* FRAME_DELAY_LABELS[4];
-  static const AnimatedImageView::StopBehavior::Type STOP_BEHAVIORS[3];
+  static const Ui::AnimatedImage::StopBehavior STOP_BEHAVIORS[3];
 
   Application&      mApplication;
   AnimatedImageView mAnimatedImageView;
@@ -508,10 +508,10 @@ const char* AnimatedImageViewSampleController::SPEED_LABELS[]         = {"Speed:
 const char* AnimatedImageViewSampleController::STOP_BEHAVIOR_LABELS[] = {"StopAt: CURRENT", "StopAt: FIRST", "StopAt: LAST"};
 const char* AnimatedImageViewSampleController::FRAME_DELAY_LABELS[]   = {"Delay: 200ms", "Delay: 500ms", "Delay: 1000ms", "Delay: 2000ms"};
 
-const AnimatedImageView::StopBehavior::Type AnimatedImageViewSampleController::STOP_BEHAVIORS[] = {
-  AnimatedImageView::StopBehavior::CURRENT_FRAME,
-  AnimatedImageView::StopBehavior::FIRST_FRAME,
-  AnimatedImageView::StopBehavior::LAST_FRAME,
+const Ui::AnimatedImage::StopBehavior AnimatedImageViewSampleController::STOP_BEHAVIORS[] = {
+  Ui::AnimatedImage::StopBehavior::CURRENT_FRAME,
+  Ui::AnimatedImage::StopBehavior::FIRST_FRAME,
+  Ui::AnimatedImage::StopBehavior::LAST_FRAME,
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

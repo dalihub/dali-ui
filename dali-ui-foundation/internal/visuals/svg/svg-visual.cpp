@@ -52,15 +52,15 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 
 // load policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOAD_POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, IMMEDIATE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::LoadPolicy, ATTACHED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::LoadPolicy, IMMEDIATE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::LoadPolicy, ATTACHED)
 DALI_ENUM_TO_STRING_TABLE_END(LOAD_POLICY)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, DETACHED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, DESTROYED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 struct NameIndexMatch
@@ -70,11 +70,11 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
-  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
-  {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
-  {LOAD_POLICY_NAME, Ui::ImageVisual::Property::LOAD_POLICY},
-  {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
+  {IMAGE_DESIRED_WIDTH, Ui::ImageVisualPropertyIndex::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT},
+  {SYNCHRONOUS_LOADING, Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING},
+  {LOAD_POLICY_NAME, Ui::ImageVisualPropertyIndex::LOAD_POLICY},
+  {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -109,8 +109,8 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mDefaultHeight(0),
   mPlacementActor(),
   mDesiredSize(size),
-  mLoadPolicy(Ui::ImageVisual::LoadPolicy::ATTACHED),
-  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
+  mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mLoadCompleted(false),
   mRasterizeCompleted(false),
   mLoadFailed(false),
@@ -124,12 +124,12 @@ SvgVisual::~SvgVisual()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER && mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
+    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER && mSvgLoadId != SvgLoader::INVALID_SVG_LOAD_ID)
     {
       mSvgLoader.RequestLoadRemove(mSvgLoadId, this);
       mSvgLoadId = SvgLoader::INVALID_SVG_LOAD_ID;
     }
-    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER &&
+    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER &&
        mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
     {
       // We don't need to remove task synchronously.
@@ -188,7 +188,7 @@ void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   // Load image immediately if LOAD_POLICY requires it
-  if(mLoadPolicy == Ui::ImageVisual::LoadPolicy::IMMEDIATE)
+  if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
   {
     const Vector2 dpi     = Stage::GetCurrent().GetDpi();
     const float   meanDpi = (dpi.height + dpi.width) * 0.5f;
@@ -207,7 +207,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
 {
   switch(index)
   {
-    case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
+    case Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
       if(value.Get(sync))
@@ -227,7 +227,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisual::Property::DESIRED_WIDTH:
+    case Ui::ImageVisualPropertyIndex::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
       if(value.Get(desiredWidth))
@@ -236,7 +236,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisual::Property::DESIRED_HEIGHT:
+    case Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
       if(value.Get(desiredHeight))
@@ -245,22 +245,22 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
-    case Ui::ImageVisual::Property::RELEASE_POLICY:
+    case Ui::ImageVisualPropertyIndex::RELEASE_POLICY:
     {
       int releasePolicy = static_cast<int>(mReleasePolicy);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
                                                        releasePolicy)))
       {
-        mReleasePolicy = Ui::ImageVisual::ReleasePolicy::Type(releasePolicy);
+        mReleasePolicy = Ui::Image::ReleasePolicy(releasePolicy);
       }
       break;
     }
-    case Ui::ImageVisual::Property::LOAD_POLICY:
+    case Ui::ImageVisualPropertyIndex::LOAD_POLICY:
     {
       int loadPolicy = static_cast<int>(mLoadPolicy);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy)))
       {
-        mLoadPolicy = Ui::ImageVisual::LoadPolicy::Type(loadPolicy);
+        mLoadPolicy = Ui::Image::LoadPolicy(loadPolicy);
       }
       break;
     }
@@ -318,7 +318,7 @@ void SvgVisual::DoSetOnScene(Actor& actor)
 void SvgVisual::DoSetOffScene(Actor& actor)
 {
   // Remove rasterizing task
-  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED &&
+  if(mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED &&
      mSvgRasterizeId != SvgLoader::INVALID_SVG_RASTERIZE_ID)
   {
     // When adding the actor back to stage the SVG rasterization should be forced again. (To emit ResourceReady signal
@@ -374,14 +374,14 @@ void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::SVG);
   if(mImageUrl.IsValid())
   {
-    map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
+    map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
   }
 
-  map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
-  map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth());
-  map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight());
-  map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
-  map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredSize.GetWidth());
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
+  map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, mLoadPolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
 }
 
 void SvgVisual::DoCreateInstancePropertyMap(Property::Map& map) const

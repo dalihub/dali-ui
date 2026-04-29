@@ -31,7 +31,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-signals-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
@@ -61,22 +60,22 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 
 // stop behavior
 DALI_ENUM_TO_STRING_TABLE_BEGIN(STOP_BEHAVIOR)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, CURRENT_FRAME)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, FIRST_FRAME)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::StopBehavior, LAST_FRAME)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::AnimatedImage::StopBehavior, CURRENT_FRAME)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::AnimatedImage::StopBehavior, FIRST_FRAME)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::AnimatedImage::StopBehavior, LAST_FRAME)
 DALI_ENUM_TO_STRING_TABLE_END(STOP_BEHAVIOR)
 
 // looping mode
 DALI_ENUM_TO_STRING_TABLE_BEGIN(LOOPING_MODE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, RESTART)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::DevelImageVisual::LoopingMode, AUTO_REVERSE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::LottieAnimation::LoopingMode, RESTART)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::LottieAnimation::LoopingMode, AUTO_REVERSE)
 DALI_ENUM_TO_STRING_TABLE_END(LOOPING_MODE)
 
 // release policies
 DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DETACHED)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, DESTROYED)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::ImageVisual::ReleasePolicy, NEVER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, DETACHED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, DESTROYED)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
 constexpr float MINIMUM_FRAME_SPEED_FACTOR(0.01f);
@@ -89,20 +88,20 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {SYNCHRONOUS_LOADING, Ui::ImageVisual::Property::SYNCHRONOUS_LOADING},
-  {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
-  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
-  {RELEASE_POLICY_NAME, Ui::ImageVisual::Property::RELEASE_POLICY},
-  {LOOP_COUNT_NAME, Ui::DevelImageVisual::Property::LOOP_COUNT},
-  {PLAY_RANGE_NAME, Ui::DevelImageVisual::Property::PLAY_RANGE},
-  {STOP_BEHAVIOR_NAME, Ui::DevelImageVisual::Property::STOP_BEHAVIOR},
-  {LOOPING_MODE_NAME, Ui::DevelImageVisual::Property::LOOPING_MODE},
-  {REDRAW_IN_SCALING_DOWN_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN},
-  {REDRAW_IN_SCALING_UP_NAME, Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP},
-  {ENABLE_FRAME_CACHE, Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE},
-  {NOTIFY_AFTER_RASTERIZATION, Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION},
-  {FRAME_SPEED_FACTOR, Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR},
-  {RENDER_SCALE_NAME, Ui::DevelImageVisual::Property::RENDER_SCALE},
+  {SYNCHRONOUS_LOADING, Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING},
+  {IMAGE_DESIRED_WIDTH, Ui::ImageVisualPropertyIndex::DESIRED_WIDTH},
+  {IMAGE_DESIRED_HEIGHT, Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT},
+  {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
+  {LOOP_COUNT_NAME, Ui::ImageVisualPropertyIndex::LOOP_COUNT},
+  {PLAY_RANGE_NAME, Ui::ImageVisualPropertyIndex::PLAY_RANGE},
+  {STOP_BEHAVIOR_NAME, Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR},
+  {LOOPING_MODE_NAME, Ui::ImageVisualPropertyIndex::LOOPING_MODE},
+  {REDRAW_IN_SCALING_DOWN_NAME, Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN},
+  {REDRAW_IN_SCALING_UP_NAME, Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP},
+  {ENABLE_FRAME_CACHE, Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE},
+  {NOTIFY_AFTER_RASTERIZATION, Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION},
+  {FRAME_SPEED_FACTOR, Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR},
+  {RENDER_SCALE_NAME, Ui::ImageVisualPropertyIndex::RENDER_SCALE},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -151,11 +150,11 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       f
   mVisualScale(Vector2::ONE),
   mDesiredSize(size),
   mPlacementActor(),
-  mPlayState(DevelImageVisual::PlayState::STOPPED),
   mEventCallback(nullptr),
   mFrameSpeedFactor(1.0f),
   mRenderScale(1.0f),
-  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED),
+  mPlayState(Ui::AnimatedImage::PlayState::STOPPED),
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mLastSentPlayStateId(0u),
   mRasterizeCompleted(false),
   mLoadFailed(false),
@@ -243,9 +242,9 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Visual::Property::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
   if(mImageUrl.IsValid())
   {
-    map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
+    map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
   }
-  map.Insert(Ui::DevelImageVisual::Property::LOOP_COUNT, mAnimationData.loopCount);
+  map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mAnimationData.loopCount);
 
   uint32_t startFrame, endFrame;
   mVectorAnimationTask->GetPlayRange(startFrame, endFrame);
@@ -253,36 +252,36 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Array playRange;
   playRange.PushBack(static_cast<int32_t>(startFrame));
   playRange.PushBack(static_cast<int32_t>(endFrame));
-  map.Insert(Ui::DevelImageVisual::Property::PLAY_RANGE, playRange);
+  map.Insert(Ui::ImageVisualPropertyIndex::PLAY_RANGE, playRange);
 
-  map.Insert(Ui::DevelImageVisual::Property::PLAY_STATE, static_cast<int32_t>(mPlayState));
-  map.Insert(Ui::DevelImageVisual::Property::CURRENT_FRAME_NUMBER,
+  map.Insert(Ui::ImageVisualPropertyIndex::PLAY_STATE, static_cast<int32_t>(mPlayState));
+  map.Insert(Ui::ImageVisualPropertyIndex::CURRENT_FRAME_NUMBER,
              static_cast<int32_t>(mVectorAnimationTask->GetCurrentFrameNumber()));
-  map.Insert(Ui::DevelImageVisual::Property::TOTAL_FRAME_NUMBER,
+  map.Insert(Ui::ImageVisualPropertyIndex::TOTAL_FRAME_NUMBER,
              static_cast<int32_t>(mVectorAnimationTask->GetTotalFrameNumber()));
 
-  map.Insert(Ui::DevelImageVisual::Property::STOP_BEHAVIOR, mAnimationData.stopBehavior);
-  map.Insert(Ui::DevelImageVisual::Property::LOOPING_MODE, mAnimationData.loopingMode);
-  map.Insert(Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
-  map.Insert(Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
+  map.Insert(Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR, mAnimationData.stopBehavior);
+  map.Insert(Ui::ImageVisualPropertyIndex::LOOPING_MODE, mAnimationData.loopingMode);
+  map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
+  map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
 
   Property::Map layerInfo;
   mVectorAnimationTask->GetLayerInfo(layerInfo);
-  map.Insert(Ui::DevelImageVisual::Property::CONTENT_INFO, layerInfo);
+  map.Insert(Ui::ImageVisualPropertyIndex::CONTENT_INFO, layerInfo);
 
   Property::Map markerInfo;
   mVectorAnimationTask->GetMarkerInfo(markerInfo);
-  map.Insert(Ui::DevelImageVisual::Property::MARKER_INFO, markerInfo);
+  map.Insert(Ui::ImageVisualPropertyIndex::MARKER_INFO, markerInfo);
 
-  map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
-  map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, mDesiredSize.GetWidth());
-  map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, mDesiredSize.GetHeight());
-  map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, IsSynchronousLoadingRequired());
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredSize.GetWidth());
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
+  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
 
-  map.Insert(Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE, mEnableFrameCache);
-  map.Insert(Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
-  map.Insert(Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
-  map.Insert(Ui::DevelImageVisual::Property::RENDER_SCALE, mRenderScale);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
+  map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
+  map.Insert(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
+  map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
 }
 
 void AnimatedVectorImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -320,7 +319,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
 {
   switch(index)
   {
-    case Ui::DevelImageVisual::Property::LOOP_COUNT:
+    case Ui::ImageVisualPropertyIndex::LOOP_COUNT:
     {
       int32_t loopCount;
       if(value.Get(loopCount))
@@ -330,7 +329,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
-    case Ui::DevelImageVisual::Property::PLAY_RANGE:
+    case Ui::ImageVisualPropertyIndex::PLAY_RANGE:
     {
       const Property::Array* array = value.GetArray();
       if(array)
@@ -351,27 +350,27 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
-    case Ui::DevelImageVisual::Property::STOP_BEHAVIOR:
+    case Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR:
     {
-      int32_t stopBehavior = mAnimationData.stopBehavior;
+      int32_t stopBehavior = static_cast<int32_t>(mAnimationData.stopBehavior);
       if(Scripting::GetEnumerationProperty(value, STOP_BEHAVIOR_TABLE, STOP_BEHAVIOR_TABLE_COUNT, stopBehavior))
       {
-        mAnimationData.stopBehavior = DevelImageVisual::StopBehavior::Type(stopBehavior);
+        mAnimationData.stopBehavior = static_cast<Ui::AnimatedImage::StopBehavior>(stopBehavior);
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_STOP_BEHAVIOR;
       }
       break;
     }
-    case Ui::DevelImageVisual::Property::LOOPING_MODE:
+    case Ui::ImageVisualPropertyIndex::LOOPING_MODE:
     {
-      int32_t loopingMode = mAnimationData.loopingMode;
+      int32_t loopingMode = static_cast<int32_t>(mAnimationData.loopingMode);
       if(Scripting::GetEnumerationProperty(value, LOOPING_MODE_TABLE, LOOPING_MODE_TABLE_COUNT, loopingMode))
       {
-        mAnimationData.loopingMode = DevelImageVisual::LoopingMode::Type(loopingMode);
+        mAnimationData.loopingMode = static_cast<Ui::LottieAnimation::LoopingMode>(loopingMode);
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_LOOPING_MODE;
       }
       break;
     }
-    case Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN:
+    case Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN:
     {
       bool redraw;
       if(value.Get(redraw))
@@ -380,7 +379,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
-    case Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP:
+    case Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP:
     {
       bool redraw;
       if(value.Get(redraw))
@@ -389,7 +388,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
-    case Ui::ImageVisual::Property::SYNCHRONOUS_LOADING:
+    case Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING:
     {
       bool sync = false;
       if(value.Get(sync))
@@ -405,7 +404,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
-    case Ui::ImageVisual::Property::DESIRED_WIDTH:
+    case Ui::ImageVisualPropertyIndex::DESIRED_WIDTH:
     {
       int32_t desiredWidth = 0;
       if(value.Get(desiredWidth))
@@ -415,7 +414,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::ImageVisual::Property::DESIRED_HEIGHT:
+    case Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT:
     {
       int32_t desiredHeight = 0;
       if(value.Get(desiredHeight))
@@ -425,18 +424,18 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::ImageVisual::Property::RELEASE_POLICY:
+    case Ui::ImageVisualPropertyIndex::RELEASE_POLICY:
     {
-      int releasePolicy = static_cast<int>(mReleasePolicy);
+      int32_t releasePolicy = static_cast<int32_t>(mReleasePolicy);
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, RELEASE_POLICY_TABLE, RELEASE_POLICY_TABLE_COUNT,
                                                        releasePolicy)))
       {
-        mReleasePolicy = Ui::ImageVisual::ReleasePolicy::Type(releasePolicy);
+        mReleasePolicy = static_cast<Ui::Image::ReleasePolicy>(releasePolicy);
       }
       break;
     }
 
-    case Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE:
+    case Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE:
     {
       bool enableFrameCache = false;
       if(value.Get(enableFrameCache))
@@ -450,7 +449,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION:
+    case Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION:
     {
       bool notifyAfterRasterization = false;
       if(value.Get(notifyAfterRasterization))
@@ -466,7 +465,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR:
+    case Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR:
     {
       float frameSpeedFactor = 1.0f;
       if(value.Get(frameSpeedFactor))
@@ -485,7 +484,7 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::DevelImageVisual::Property::RENDER_SCALE:
+    case Ui::ImageVisualPropertyIndex::RENDER_SCALE:
     {
       float renderScale = 1.0f;
       if(value.Get(renderScale))
@@ -569,7 +568,7 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
     }
 
     // Check whether we can re-use latest frame.
-    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::DETACHED && mRasterizeCompleted)
+    if(mReleasePolicy != Ui::Image::ReleasePolicy::DETACHED && mRasterizeCompleted)
     {
       DALI_LOG_DEBUG_INFO("[%p] Reuse cached texture (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
 
@@ -606,7 +605,7 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
 
   mPlacementActor.Reset();
 
-  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
+  if(mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED)
   {
     mImpl->mResourceStatus = Ui::Visual::ResourceStatus::PREPARING;
 
@@ -646,10 +645,10 @@ void AnimatedVectorImageVisual::OnSetTransform()
 
       SetVectorImageSize();
 
-      if(mPlayState == DevelImageVisual::PlayState::PLAYING &&
-         mAnimationData.playState != DevelImageVisual::PlayState::PLAYING)
+      if(mPlayState == Ui::AnimatedImage::PlayState::PLAYING &&
+         mAnimationData.playState != Ui::AnimatedImage::PlayState::PLAYING)
       {
-        mAnimationData.playState = DevelImageVisual::PlayState::PLAYING;
+        mAnimationData.playState = Ui::AnimatedImage::PlayState::PLAYING;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
       }
 
@@ -677,33 +676,33 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
       if(IsOnScene() && mVisualSize != Vector2::ZERO)
       {
         // Always resend Playing state. If task is already playing, it will be ignored at Rasterize time.
-        mAnimationData.playState = DevelImageVisual::PlayState::PLAYING;
+        mAnimationData.playState = Ui::AnimatedImage::PlayState::PLAYING;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
       }
       DALI_LOG_DEBUG_INFO("[%p] Play request (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
-      mPlayState = DevelImageVisual::PlayState::PLAYING;
+      mPlayState = Ui::AnimatedImage::PlayState::PLAYING;
       break;
     }
     case DevelAnimatedVectorImageVisual::Action::PAUSE:
     {
-      if(mAnimationData.playState == DevelImageVisual::PlayState::PLAYING)
+      if(mAnimationData.playState == Ui::AnimatedImage::PlayState::PLAYING)
       {
-        mAnimationData.playState = DevelImageVisual::PlayState::PAUSED;
+        mAnimationData.playState = Ui::AnimatedImage::PlayState::PAUSED;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
       }
       DALI_LOG_DEBUG_INFO("[%p] Pause request (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
-      mPlayState = DevelImageVisual::PlayState::PAUSED;
+      mPlayState = Ui::AnimatedImage::PlayState::PAUSED;
       break;
     }
     case DevelAnimatedVectorImageVisual::Action::STOP:
     {
-      if(mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
+      if(mAnimationData.playState != Ui::AnimatedImage::PlayState::STOPPED)
       {
-        mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
+        mAnimationData.playState = Ui::AnimatedImage::PlayState::STOPPED;
         mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
       }
       DALI_LOG_DEBUG_INFO("[%p] Stop request (url:%s)\n", this, mImageUrl.GetEllipsedUrl().c_str());
-      mPlayState = DevelImageVisual::PlayState::STOPPED;
+      mPlayState = Ui::AnimatedImage::PlayState::STOPPED;
       break;
     }
     case DevelAnimatedVectorImageVisual::Action::JUMP_TO:
@@ -840,11 +839,11 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                 "AnimatedVectorImageVisual::OnAnimationFinished: action state = %d [%p]\n", mPlayState, this);
 
-  if(mPlayState != DevelImageVisual::PlayState::STOPPED)
+  if(mPlayState != Ui::AnimatedImage::PlayState::STOPPED)
   {
-    mPlayState = DevelImageVisual::PlayState::STOPPED;
+    mPlayState = Ui::AnimatedImage::PlayState::STOPPED;
 
-    mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
+    mAnimationData.playState = Ui::AnimatedImage::PlayState::STOPPED;
 
     if(mImpl->mEventObserver)
     {
@@ -883,7 +882,7 @@ void AnimatedVectorImageVisual::SendAnimationData()
     if(mImpl->mRenderer && ((mAnimationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE) ||
                             (mAnimationData.resendFlag & VectorAnimationTask::RESEND_NOTIFY_AFTER_RASTERIZATION)))
     {
-      if(!mNotifyAfterRasterization && mPlayState == DevelImageVisual::PlayState::PLAYING)
+      if(!mNotifyAfterRasterization && mPlayState == Ui::AnimatedImage::PlayState::PLAYING)
       {
         // Make rendering behaviour if we don't notify after rasterization, but animation playing.
         mImpl->mRenderer.SetProperty(DevelRenderer::Property::RENDERING_BEHAVIOR,
@@ -925,12 +924,12 @@ void AnimatedVectorImageVisual::SetVectorImageSize()
 
 void AnimatedVectorImageVisual::StopAnimation()
 {
-  if(mAnimationData.playState != DevelImageVisual::PlayState::STOPPED)
+  if(mAnimationData.playState != Ui::AnimatedImage::PlayState::STOPPED)
   {
-    mAnimationData.playState = DevelImageVisual::PlayState::STOPPED;
+    mAnimationData.playState = Ui::AnimatedImage::PlayState::STOPPED;
     mAnimationData.resendFlag |= VectorAnimationTask::RESEND_PLAY_STATE;
 
-    mPlayState = DevelImageVisual::PlayState::STOPPED;
+    mPlayState = Ui::AnimatedImage::PlayState::STOPPED;
   }
 }
 

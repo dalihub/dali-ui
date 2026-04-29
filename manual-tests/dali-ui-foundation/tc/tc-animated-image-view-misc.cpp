@@ -38,17 +38,17 @@ constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 constexpr uint32_t C_IMG_BG      = 0xCC3333;
 
-const char* SamplingModeName(Ui::SamplingMode::Type m)
+const char* SamplingModeName(Ui::Image::SamplingMode m)
 {
   switch(m)
   {
-    case Ui::SamplingMode::BOX:              return "BOX";
-    case Ui::SamplingMode::NEAREST:          return "NEAREST";
-    case Ui::SamplingMode::LINEAR:           return "LINEAR";
-    case Ui::SamplingMode::BOX_THEN_NEAREST: return "BOX_THEN_NEAREST";
-    case Ui::SamplingMode::BOX_THEN_LINEAR:  return "BOX_THEN_LINEAR";
-    case Ui::SamplingMode::NO_FILTER:        return "NO_FILTER";
-    case Ui::SamplingMode::DONT_CARE:        return "DONT_CARE";
+    case Ui::Image::SamplingMode::BOX:              return "BOX";
+    case Ui::Image::SamplingMode::NEAREST:          return "NEAREST";
+    case Ui::Image::SamplingMode::LINEAR:           return "LINEAR";
+    case Ui::Image::SamplingMode::BOX_THEN_NEAREST: return "BOX_THEN_NEAREST";
+    case Ui::Image::SamplingMode::BOX_THEN_LINEAR:  return "BOX_THEN_LINEAR";
+    case Ui::Image::SamplingMode::NO_FILTER:        return "NO_FILTER";
+    case Ui::Image::SamplingMode::DONT_CARE:        return "DONT_CARE";
     default:                                 return "?";
   }
 }
@@ -130,9 +130,9 @@ public:
       MakeButton("Desired\n200x200",[this] { OnDesired(200, 200); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Sampling\nBOX",     [this] { mView.SetSamplingMode(Ui::SamplingMode::BOX);     UpdateLabels(); }),
-      MakeButton("Sampling\nNEAREST", [this] { mView.SetSamplingMode(Ui::SamplingMode::NEAREST); UpdateLabels(); }),
-      MakeButton("Sampling\nLINEAR",  [this] { mView.SetSamplingMode(Ui::SamplingMode::LINEAR);  UpdateLabels(); }),
+      MakeButton("Sampling\nBOX",     [this] { mView.SetSamplingMode(Ui::Image::SamplingMode::BOX);     UpdateLabels(); }),
+      MakeButton("Sampling\nNEAREST", [this] { mView.SetSamplingMode(Ui::Image::SamplingMode::NEAREST); UpdateLabels(); }),
+      MakeButton("Sampling\nLINEAR",  [this] { mView.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);  UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("PreMult\nON",  [this] { mView.SetPreMultipliedAlpha(true);  UpdateLabels(); }),

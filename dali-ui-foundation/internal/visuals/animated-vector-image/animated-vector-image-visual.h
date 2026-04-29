@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
 namespace Dali
 {
@@ -236,12 +237,12 @@ private:
   Vector2                            mVisualScale;
   Dali::ImageDimensions              mDesiredSize{};
   WeakHandle<Actor>                  mPlacementActor;
-  DevelImageVisual::PlayState::Type  mPlayState;
   CallbackBase*                      mEventCallback; // Not owned
   float                              mFrameSpeedFactor;
   float                              mRenderScale;
 
-  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
+  Dali::Ui::AnimatedImage::PlayState mPlayState;
+  Dali::Ui::Image::ReleasePolicy     mReleasePolicy;
 
   uint32_t mLastSentPlayStateId;
 

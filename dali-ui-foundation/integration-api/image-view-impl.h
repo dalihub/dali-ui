@@ -19,7 +19,7 @@
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/image-view-properties.h>
-#include <dali-ui-foundation/public-api/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
@@ -150,22 +150,22 @@ public: // API — Size & Fitting Control
   /**
    * @copydoc Dali::Ui::ImageView::SetSamplingMode
    */
-  void SetSamplingMode(Ui::SamplingMode::Type samplingMode);
+  void SetSamplingMode(Ui::Image::SamplingMode samplingMode);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetSamplingMode
    */
-  Ui::SamplingMode::Type GetSamplingMode() const;
+  Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetFittingMode
    */
-  void SetFittingMode(Ui::FittingMode::Type fittingMode);
+  void SetFittingMode(Ui::Image::FittingMode fittingMode);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetFittingMode
    */
-  Ui::FittingMode::Type GetFittingMode() const;
+  Ui::Image::FittingMode GetFittingMode() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetDesiredWidth
@@ -231,33 +231,33 @@ public: // API — Advanced Rendering & Masking
   /**
    * @copydoc Dali::Ui::ImageView::SetMaskingMode
    */
-  void SetMaskingMode(Ui::MaskingType::Type maskingMode);
+  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetMaskingMode
    */
-  Ui::MaskingType::Type GetMaskingMode() const;
+  Ui::Image::MaskingType GetMaskingMode() const;
 
 public: // API — Loading Behavior
   /**
    * @copydoc Dali::Ui::ImageView::SetLoadPolicy
    */
-  void SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+  void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetLoadPolicy
    */
-  Ui::LoadPolicy::Type GetLoadPolicy() const;
+  Ui::Image::LoadPolicy GetLoadPolicy() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetReleasePolicy
    */
-  void SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @copydoc Dali::Ui::ImageView::GetReleasePolicy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Ui::Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @copydoc Dali::Ui::ImageView::SetSynchronousLoading
@@ -375,14 +375,14 @@ private: // Data
 
   UiColor mImageColor;
 
-  Ui::SamplingMode::Type  mSamplingMode;
-  Ui::FittingMode::Type   mFittingMode;
-  Ui::MaskingType::Type   mMaskingMode;
-  Ui::LoadPolicy::Type    mLoadPolicy;
-  Ui::ReleasePolicy::Type mReleasePolicy;
-  int                     mDesiredWidth;
-  int                     mDesiredHeight;
-  int                     mDepthIndex;
+  Ui::Image::SamplingMode  mSamplingMode;
+  Ui::Image::FittingMode   mFittingMode;
+  Ui::Image::MaskingType   mMaskingMode;
+  Ui::Image::LoadPolicy    mLoadPolicy;
+  Ui::Image::ReleasePolicy mReleasePolicy;
+  int                      mDesiredWidth;
+  int                      mDesiredHeight;
+  int                      mDepthIndex;
 
   bool mPreMultipliedAlpha;
   bool mImageLoadWithViewSize;

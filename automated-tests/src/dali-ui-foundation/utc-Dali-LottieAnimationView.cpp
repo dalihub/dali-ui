@@ -219,13 +219,13 @@ int UtcDaliLottieAnimationViewSetGetStopBehaviorP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Default should be CURRENT_FRAME
-  DALI_TEST_EQUALS(view.GetStopBehavior(), LottieAnimationView::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::CURRENT_FRAME, TEST_LOCATION);
 
-  view.SetStopBehavior(LottieAnimationView::StopBehavior::FIRST_FRAME);
-  DALI_TEST_EQUALS(view.GetStopBehavior(), LottieAnimationView::StopBehavior::FIRST_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::FIRST_FRAME, TEST_LOCATION);
 
-  view.SetStopBehavior(LottieAnimationView::StopBehavior::LAST_FRAME);
-  DALI_TEST_EQUALS(view.GetStopBehavior(), LottieAnimationView::StopBehavior::LAST_FRAME, TEST_LOCATION);
+  view.SetStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME);
+  DALI_TEST_EQUALS(view.GetStopBehavior(), Ui::AnimatedImage::StopBehavior::LAST_FRAME, TEST_LOCATION);
   END_TEST;
 }
 
@@ -237,13 +237,13 @@ int UtcDaliLottieAnimationViewSetGetLoopingModeP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Default should be RESTART
-  DALI_TEST_EQUALS(view.GetLoopingMode(), LottieAnimationView::LoopingMode::RESTART, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetLoopingMode(), Ui::LottieAnimation::LoopingMode::RESTART, TEST_LOCATION);
 
-  view.SetLoopingMode(LottieAnimationView::LoopingMode::AUTO_REVERSE);
-  DALI_TEST_EQUALS(view.GetLoopingMode(), LottieAnimationView::LoopingMode::AUTO_REVERSE, TEST_LOCATION);
+  view.SetLoopingMode(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE);
+  DALI_TEST_EQUALS(view.GetLoopingMode(), Ui::LottieAnimation::LoopingMode::AUTO_REVERSE, TEST_LOCATION);
 
-  view.SetLoopingMode(LottieAnimationView::LoopingMode::RESTART);
-  DALI_TEST_EQUALS(view.GetLoopingMode(), LottieAnimationView::LoopingMode::RESTART, TEST_LOCATION);
+  view.SetLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART);
+  DALI_TEST_EQUALS(view.GetLoopingMode(), Ui::LottieAnimation::LoopingMode::RESTART, TEST_LOCATION);
   END_TEST;
 }
 
@@ -323,13 +323,13 @@ int UtcDaliLottieAnimationViewSetGetReleasePolicyP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Default should be DETACHED
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DETACHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::NEVER);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::NEVER, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::NEVER, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DESTROYED, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DESTROYED, TEST_LOCATION);
   END_TEST;
 }
 
@@ -431,7 +431,7 @@ int UtcDaliLottieAnimationViewGetPlayStateP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   // Without visual, should return STOPPED
-  DALI_TEST_EQUALS(view.GetPlayState(), LottieAnimationView::PlayState::STOPPED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
 
   view.Play();
   DALI_TEST_CHECK(view);
@@ -440,7 +440,7 @@ int UtcDaliLottieAnimationViewGetPlayStateP(void)
   DALI_TEST_CHECK(view);
 
   view.Stop();
-  DALI_TEST_EQUALS(view.GetPlayState(), LottieAnimationView::PlayState::STOPPED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPlayState(), Ui::AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
   END_TEST;
 }
 
@@ -617,9 +617,9 @@ int UtcDaliLottieAnimationViewPropertyLoopingModeP(void)
 
   const int index = LottieAnimationView::Property::LOOPING_MODE;
 
-  view.SetProperty(index, static_cast<int>(LottieAnimationView::LoopingMode::AUTO_REVERSE));
+  view.SetProperty(index, static_cast<int>(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE));
   DALI_TEST_EQUALS(view.GetProperty(index).Get<int>(),
-                   static_cast<int>(LottieAnimationView::LoopingMode::AUTO_REVERSE), TEST_LOCATION);
+                   static_cast<int>(Ui::LottieAnimation::LoopingMode::AUTO_REVERSE), TEST_LOCATION);
   END_TEST;
 }
 
@@ -630,9 +630,9 @@ int UtcDaliLottieAnimationViewPropertyStopBehaviorP(void)
 
   const int index = LottieAnimationView::Property::STOP_BEHAVIOR;
 
-  view.SetProperty(index, static_cast<int>(LottieAnimationView::StopBehavior::LAST_FRAME));
+  view.SetProperty(index, static_cast<int>(Ui::AnimatedImage::StopBehavior::LAST_FRAME));
   DALI_TEST_EQUALS(view.GetProperty(index).Get<int>(),
-                   static_cast<int>(LottieAnimationView::StopBehavior::LAST_FRAME), TEST_LOCATION);
+                   static_cast<int>(Ui::AnimatedImage::StopBehavior::LAST_FRAME), TEST_LOCATION);
   END_TEST;
 }
 
@@ -691,9 +691,9 @@ int UtcDaliLottieAnimationViewPropertyReleasePolicyP(void)
 
   const int index = LottieAnimationView::Property::RELEASE_POLICY;
 
-  view.SetProperty(index, static_cast<int>(Ui::ReleasePolicy::NEVER));
+  view.SetProperty(index, static_cast<int>(Ui::Image::ReleasePolicy::NEVER));
   DALI_TEST_EQUALS(view.GetProperty(index).Get<int>(),
-                   static_cast<int>(Ui::ReleasePolicy::NEVER), TEST_LOCATION);
+                   static_cast<int>(Ui::Image::ReleasePolicy::NEVER), TEST_LOCATION);
   END_TEST;
 }
 

@@ -56,15 +56,15 @@ class ImageFittingModeController : public ConnectionTracker
 
   struct ModeEntry
   {
-    Ui::FittingMode::Type mode;
+    Ui::Image::FittingMode mode;
     const char*           name;
   };
 
   static constexpr ModeEntry MODES[MODE_COUNT] = {
-    {Ui::FittingMode::FIT_KEEP_ASPECT_RATIO, "FIT\nKEEP\nASPECT"},
-    {Ui::FittingMode::FILL, "FILL"},
-    {Ui::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, "OVER\nFIT"},
-    {Ui::FittingMode::CENTER, "CENTER"},
+    {Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO, "FIT\nKEEP\nASPECT"},
+    {Ui::Image::FittingMode::FILL, "FILL"},
+    {Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, "OVER\nFIT"},
+    {Ui::Image::FittingMode::CENTER, "CENTER"},
   };
 
 public:

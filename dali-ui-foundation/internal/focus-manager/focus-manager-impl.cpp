@@ -696,7 +696,7 @@ View FocusManager::GetFocusIndicatorView()
     const std::string imageDirPath = AssetManager::GetDaliImagePath();
     mFocusIndicatorView            = Ui::ImageView::New()
                             .SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME))
-                            .SetFittingMode(FittingMode::FILL)
+                            .SetFittingMode(Ui::Image::FittingMode::FILL)
                             .SetRequestedWidth(MATCH_PARENT)
                             .SetRequestedHeight(MATCH_PARENT)
                             .SetLayoutMode(LayoutMode::STANDALONE);

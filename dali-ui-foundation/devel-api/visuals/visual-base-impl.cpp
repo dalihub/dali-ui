@@ -50,6 +50,11 @@ inline bool IsMutableVisualPropertyIndex(Dali::Property::Index index)
   return (index >= Dali::Ui::PropertyRanges::VISUAL_PROPERTY_BASE_START_INDEX && index <= Dali::Ui::PropertyRanges::MUTABLE_VISUAL_PROPERTY_END_INDEX);
 }
 
+inline bool IsReadOnlyVisualPropertyIndex(Dali::Property::Index index)
+{
+  return (index >= Dali::Ui::PropertyRanges::READ_ONLY_VISUAL_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::READ_ONLY_VISUAL_PROPERTY_END_INDEX);
+}
+
 inline Vector4 ConvertProportionFlagsToOffsetSizeMode(Dali::Ui::Visual::Transform::ProportionFlags flags)
 {
   // fast-out for standard cases
@@ -209,6 +214,12 @@ void VisualBaseImpl::SetProperty(Dali::Property::Index index, Dali::Property::Va
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) Status(%d) SetProperty(%d, %s) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), index, oss.str().c_str(), mVisual.GetObjectPtr());
   }
 #endif
+
+  if(DALI_UNLIKELY(IsReadOnlyVisualPropertyIndex(index)))
+  {
+    DALI_LOG_ERROR("PropertyIndex(%d) is read-only. Ignore setter\n", index);
+    return;
+  }
 
   // TODO : Check if value is really changed. Is it overhead?
   if(mPropertyUpdatedStatus == PropertyUpdatedStatus::IDLE)
@@ -633,13 +644,23 @@ Dali::Property VisualBaseImpl::GetPropertyObject(Dali::Property::Key visualPrope
   return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
-void VisualBaseImpl::RemoveCache(Dali::Property::Index index)
+void VisualBaseImpl::RemoveCache(Dali::Property::Index index) const
 {
-  if(mPropertyUpdatedStatus == PropertyUpdatedStatus::MUTABLE_PROPERTY_CHANGED)
-  {
-    mUpdatedMutableVisualProperties.Remove(index);
-  }
   mCachedVisualPropertyMap.Remove(index);
+}
+
+void VisualBaseImpl::UpdateProperty()
+{
+  UpdatePropertyInternal();
+}
+
+void VisualBaseImpl::DoActionExtension(Dali::Property::Index actionId, const Dali::Any& attributes)
+{
+  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) DoActionExtension(%d) (Visual::Base[%p])\n", this, GetName().CStr(), actionId, mVisual.GetObjectPtr());
+  if(mVisual)
+  {
+    mVisual.DoActionExtension(actionId, attributes);
+  }
 }
 
 Dali::Ui::VisualsContainer VisualBaseImpl::GetContainer() const
@@ -770,13 +791,27 @@ void VisualBaseImpl::ApplyTransfromToPropertyMap()
 void VisualBaseImpl::Process(bool postProcessor)
 {
   mProcessorRegistered = false;
+  UpdatePropertyInternal();
+}
 
+void VisualBaseImpl::RegisterProcessorOnce()
+{
+  if(!mProcessorRegistered)
+  {
+    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterProcessorOnce. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+    Adaptor::Get().RegisterProcessorOnce(*this, false);
+    mProcessorRegistered = true;
+  }
+}
+
+void VisualBaseImpl::UpdatePropertyInternal()
+{
   ApplyTransfromToPropertyMap();
 
   auto previousUpdatedStatus = mPropertyUpdatedStatus;
   mPropertyUpdatedStatus     = PropertyUpdatedStatus::IDLE;
 
-  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) Process(%d) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), postProcessor, static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
+  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) UpdatePropertyInternal() Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
 
   switch(previousUpdatedStatus)
   {
@@ -813,17 +848,7 @@ void VisualBaseImpl::Process(bool postProcessor)
       break;
     }
   }
-  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) Process(%d) Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), postProcessor, static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
-}
-
-void VisualBaseImpl::RegisterProcessorOnce()
-{
-  if(!mProcessorRegistered)
-  {
-    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterProcessorOnce. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
-    Adaptor::Get().RegisterProcessorOnce(*this, false);
-    mProcessorRegistered = true;
-  }
+  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) UpdatePropertyInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
 }
 
 VisualBaseImpl::VisualBaseImpl(Dali::Ui::Visual::Type type)

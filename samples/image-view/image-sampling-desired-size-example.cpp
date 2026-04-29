@@ -50,7 +50,7 @@ class ImageSamplingController : public ConnectionTracker
   struct SamplingEntry
   {
     const char*            name;
-    Ui::SamplingMode::Type mode;
+    Ui::Image::SamplingMode mode;
   };
 
   struct DesiredSizeEntry
@@ -170,7 +170,7 @@ private:
         ImageView::New(IMAGE_TYPE_URLS_SAMPLING[mImageTypeIndexSampling])
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::FittingMode::FILL)
+          .SetFittingMode(Ui::Image::FittingMode::FILL)
           .SetDesiredWidth(64)
           .SetDesiredHeight(64)
           .SetSamplingMode(SAMPLINGS[mSamplingIndex].mode)
@@ -183,7 +183,7 @@ private:
         AnimatedImageView::New(IMAGE_TYPE_URLS_SAMPLING[mImageTypeIndexSampling])
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::FittingMode::FILL)
+          .SetFittingMode(Ui::Image::FittingMode::FILL)
           .SetDesiredWidth(64)
           .SetDesiredHeight(64)
           .SetSamplingMode(SAMPLINGS[mSamplingIndex].mode)
@@ -298,7 +298,7 @@ private:
         ImageView::New(IMAGE_TYPE_URLS_DESIRED[mImageTypeIndexDesired])
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+          .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
           .SetDesiredWidth(SIZES[mSizeIndex].size.GetWidth())
           .SetDesiredHeight(SIZES[mSizeIndex].size.GetHeight())
           .As(mDesiredSizeImage);
@@ -310,7 +310,7 @@ private:
         AnimatedImageView::New(IMAGE_TYPE_URLS_DESIRED[mImageTypeIndexDesired])
           .SetRequestedWidth(MATCH_PARENT)
           .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO)
+          .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
           .SetDesiredWidth(SIZES[mSizeIndex].size.GetWidth())
           .SetDesiredHeight(SIZES[mSizeIndex].size.GetHeight())
           .SetLoopCount(-1)
@@ -556,10 +556,10 @@ private:
 };
 
 const ImageSamplingController::SamplingEntry ImageSamplingController::SAMPLINGS[ImageSamplingController::SAMPLING_COUNT] = {
-  {"NEAREST",         Ui::SamplingMode::NEAREST},
-  {"BOX_THEN\nNEAREST", Ui::SamplingMode::BOX_THEN_NEAREST},
-  {"BOX_THEN\nLINEAR",  Ui::SamplingMode::BOX_THEN_LINEAR},
-  {"LINEAR",          Ui::SamplingMode::LINEAR},
+  {"NEAREST",         Ui::Image::SamplingMode::NEAREST},
+  {"BOX_THEN\nNEAREST", Ui::Image::SamplingMode::BOX_THEN_NEAREST},
+  {"BOX_THEN\nLINEAR",  Ui::Image::SamplingMode::BOX_THEN_LINEAR},
+  {"LINEAR",          Ui::Image::SamplingMode::LINEAR},
 };
 
 const ImageSamplingController::DesiredSizeEntry ImageSamplingController::SIZES[ImageSamplingController::SIZE_COUNT] = {

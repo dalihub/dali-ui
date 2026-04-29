@@ -82,7 +82,7 @@ public:
                    .SetRequestedHeight(PREVIEW_SIZE);
     mContainer.Add(mImage);
 
-    mLabel = MakeStatusLabel("LoadPolicy: IMMEDIATE | ReleasePolicy: DETACHED | ResourceReady: 0");
+    mLabel = MakeStatusLabel("LoadPolicy IMMEDIATE | ReleasePolicy: DETACHED | ResourceReady: 0");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
                             .SetRequestedWidth(MATCH_PARENT)
@@ -93,13 +93,13 @@ public:
     content.Add(MakeCentered(mContainer));
     content.Add(mLabel);
     content.Add(MakeButtonRow({
-      MakeButton("Load:\nIMMEDIATE", [this] { OnLoadPolicy(Ui::LoadPolicy::IMMEDIATE); }),
-      MakeButton("Load:\nATTACHED",  [this] { OnLoadPolicy(Ui::LoadPolicy::ATTACHED); }),
+      MakeButton("Load:\nIMMEDIATE", [this] { OnLoadPolicy(Ui::Image::LoadPolicy::IMMEDIATE); }),
+      MakeButton("Load:\nATTACHED",  [this] { OnLoadPolicy(Ui::Image::LoadPolicy::ATTACHED); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Release:\nDETACHED",  [this] { OnReleasePolicy(Ui::ReleasePolicy::DETACHED); }),
-      MakeButton("Release:\nDESTROYED", [this] { OnReleasePolicy(Ui::ReleasePolicy::DESTROYED); }),
-      MakeButton("Release:\nNEVER",     [this] { OnReleasePolicy(Ui::ReleasePolicy::NEVER); }),
+      MakeButton("Release:\nDETACHED",  [this] { OnReleasePolicy(Ui::Image::ReleasePolicy::DETACHED); }),
+      MakeButton("Release:\nDESTROYED", [this] { OnReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED); }),
+      MakeButton("Release:\nNEVER",     [this] { OnReleasePolicy(Ui::Image::ReleasePolicy::NEVER); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Remove\nView",  [this] { OnRemove(); }),
@@ -110,13 +110,13 @@ public:
   }
 
 private:
-  void OnLoadPolicy(Ui::LoadPolicy::Type p)
+  void OnLoadPolicy(Ui::Image::LoadPolicy p)
   {
     mImage.SetLoadPolicy(p);
     UpdateLabel();
   }
 
-  void OnReleasePolicy(Ui::ReleasePolicy::Type p)
+  void OnReleasePolicy(Ui::Image::ReleasePolicy p)
   {
     mImage.SetReleasePolicy(p);
     UpdateLabel();
@@ -142,18 +142,18 @@ private:
 
   void UpdateLabel()
   {
-    Dali::String lpStr = (mImage.GetLoadPolicy() == Ui::LoadPolicy::IMMEDIATE) ? "IMMEDIATE" : "ATTACHED";
+    Dali::String lpStr = (mImage.GetLoadPolicy() == Ui::Image::LoadPolicy::IMMEDIATE) ? "IMMEDIATE" : "ATTACHED";
     Dali::String rpStr;
     switch(mImage.GetReleasePolicy())
     {
-      case Ui::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
-      case Ui::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
-      case Ui::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
+      case Ui::Image::ReleasePolicy::DETACHED:  rpStr = "DETACHED";  break;
+      case Ui::Image::ReleasePolicy::DESTROYED: rpStr = "DESTROYED"; break;
+      case Ui::Image::ReleasePolicy::NEVER:     rpStr = "NEVER";     break;
       default:                           rpStr = "?";         break;
     }
     Dali::String inScene = mImage.GetParent() ? "in scene" : "REMOVED";
     mLabel.SetText(
-      Dali::String("LoadPolicy: ") + lpStr +
+      Dali::String("LoadPolicy ") + lpStr +
       Dali::String(" | ReleasePolicy: ") + rpStr +
       Dali::String("\nView: ") + inScene +
       Dali::String(" | ResourceReadySignal: ") +

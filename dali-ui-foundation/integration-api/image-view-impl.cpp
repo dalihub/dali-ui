@@ -27,7 +27,6 @@
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
@@ -94,11 +93,11 @@ ImageViewImpl::ImageViewImpl()
   mPixelArea(0.0f, 0.0f, 1.0f, 1.0f),
   mNPatchBorder(0.0f, 0.0f, 0.0f, 0.0f),
   mImageColor(Color::WHITE),
-  mSamplingMode(Ui::SamplingMode::BOX_THEN_LINEAR),
-  mFittingMode(Ui::FittingMode::FILL),
-  mMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING),
-  mLoadPolicy(Ui::LoadPolicy::ATTACHED),
-  mReleasePolicy(Ui::ReleasePolicy::DETACHED),
+  mSamplingMode(Ui::Image::SamplingMode::BOX_THEN_LINEAR),
+  mFittingMode(Ui::Image::FittingMode::FILL),
+  mMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING),
+  mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mDesiredWidth(0),
   mDesiredHeight(0),
   mDepthIndex(DepthIndex::CONTENT),
@@ -142,7 +141,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         int mode;
         if(value.Get(mode))
         {
-          impl.SetFittingMode(static_cast<Ui::FittingMode::Type>(mode));
+          impl.SetFittingMode(static_cast<Ui::Image::FittingMode>(mode));
         }
         break;
       }
@@ -151,7 +150,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         int mode;
         if(value.Get(mode))
         {
-          impl.SetSamplingMode(static_cast<Ui::SamplingMode::Type>(mode));
+          impl.SetSamplingMode(static_cast<Ui::Image::SamplingMode>(mode));
         }
         break;
       }
@@ -232,7 +231,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         int maskingMode;
         if(value.Get(maskingMode))
         {
-          impl.SetMaskingMode(static_cast<Ui::MaskingType::Type>(maskingMode));
+          impl.SetMaskingMode(static_cast<Ui::Image::MaskingType>(maskingMode));
         }
         break;
       }
@@ -241,7 +240,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         int policy;
         if(value.Get(policy))
         {
-          impl.SetLoadPolicy(static_cast<Ui::LoadPolicy::Type>(policy));
+          impl.SetLoadPolicy(static_cast<Ui::Image::LoadPolicy>(policy));
         }
         break;
       }
@@ -250,7 +249,7 @@ void ImageViewImpl::SetProperty(Dali::BaseObject* object, Dali::Property::Index 
         int policy;
         if(value.Get(policy))
         {
-          impl.SetReleasePolicy(static_cast<Ui::ReleasePolicy::Type>(policy));
+          impl.SetReleasePolicy(static_cast<Ui::Image::ReleasePolicy>(policy));
         }
         break;
       }
@@ -403,7 +402,7 @@ void ImageViewImpl::SetResourceUrl(const Dali::String& url)
     // Re-show placeholder while new image loads
     UpdatePlaceholderVisual();
 
-    if(mLoadPolicy == Ui::LoadPolicy::IMMEDIATE)
+    if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
     {
       // Start loading immediately regardless of scene attachment.
       mVisualDirty = false;
@@ -470,7 +469,7 @@ Dali::String ImageViewImpl::GetPlaceholderUrl() const
   return mPlaceholderUrl;
 }
 
-void ImageViewImpl::SetSamplingMode(Ui::SamplingMode::Type samplingMode)
+void ImageViewImpl::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
 {
   if(mSamplingMode != samplingMode)
   {
@@ -480,12 +479,12 @@ void ImageViewImpl::SetSamplingMode(Ui::SamplingMode::Type samplingMode)
   }
 }
 
-Ui::SamplingMode::Type ImageViewImpl::GetSamplingMode() const
+Ui::Image::SamplingMode ImageViewImpl::GetSamplingMode() const
 {
   return mSamplingMode;
 }
 
-void ImageViewImpl::SetFittingMode(Ui::FittingMode::Type fittingMode)
+void ImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
 {
   if(mFittingMode != fittingMode)
   {
@@ -511,7 +510,7 @@ void ImageViewImpl::SetFittingMode(Ui::FittingMode::Type fittingMode)
   }
 }
 
-Ui::FittingMode::Type ImageViewImpl::GetFittingMode() const
+Ui::Image::FittingMode ImageViewImpl::GetFittingMode() const
 {
   return mFittingMode;
 }
@@ -591,7 +590,7 @@ bool ImageViewImpl::IsCropToMask() const
   return mCropToMask;
 }
 
-void ImageViewImpl::SetMaskingMode(Ui::MaskingType::Type maskingMode)
+void ImageViewImpl::SetMaskingMode(Ui::Image::MaskingType maskingMode)
 {
   if(mMaskingMode != maskingMode)
   {
@@ -601,7 +600,7 @@ void ImageViewImpl::SetMaskingMode(Ui::MaskingType::Type maskingMode)
   }
 }
 
-Ui::MaskingType::Type ImageViewImpl::GetMaskingMode() const
+Ui::Image::MaskingType ImageViewImpl::GetMaskingMode() const
 {
   return mMaskingMode;
 }
@@ -632,12 +631,12 @@ UiColor ImageViewImpl::GetImageColor() const
   return mImageColor;
 }
 
-void ImageViewImpl::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
+void ImageViewImpl::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
 {
   if(mLoadPolicy != loadPolicy)
   {
     mLoadPolicy = loadPolicy;
-    if(mLoadPolicy == Ui::LoadPolicy::IMMEDIATE && !mUrl.Empty())
+    if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE && !mUrl.Empty())
     {
       // URL already set — start loading immediately now that policy switched to IMMEDIATE.
       mVisualDirty = false;
@@ -651,12 +650,12 @@ void ImageViewImpl::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
   }
 }
 
-Ui::LoadPolicy::Type ImageViewImpl::GetLoadPolicy() const
+Ui::Image::LoadPolicy ImageViewImpl::GetLoadPolicy() const
 {
   return mLoadPolicy;
 }
 
-void ImageViewImpl::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
+void ImageViewImpl::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   if(mReleasePolicy != releasePolicy)
   {
@@ -666,7 +665,7 @@ void ImageViewImpl::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
   }
 }
 
-Ui::ReleasePolicy::Type ImageViewImpl::GetReleasePolicy() const
+Ui::Image::ReleasePolicy ImageViewImpl::GetReleasePolicy() const
 {
   return mReleasePolicy;
 }
@@ -797,7 +796,7 @@ void ImageViewImpl::UpdatePlaceholderVisual()
 
   Dali::Property::Map map;
   map.Insert(Visual::Property::TYPE, Visual::IMAGE);
-  map.Insert(Ui::ImageVisual::Property::URL, mPlaceholderUrl);
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
@@ -912,36 +911,37 @@ void ImageViewImpl::UpdateVisual()
   {
     Dali::Property::Map map;
     map.Insert(Visual::Property::TYPE, Visual::IMAGE);
-    map.Insert(Ui::ImageVisual::Property::URL, mUrl);
-    map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
+    map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
+    map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
     map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
-    map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+    map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)
     {
-      map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, mDesiredWidth);
-      map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, mDesiredHeight);
+      map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
+      map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredHeight);
     }
 
-    map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, static_cast<int>(mLoadPolicy));
-    map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
-    map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
-    map.Insert(Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING, mFastTrackUploading);
-    map.Insert(Ui::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
-    map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
+    map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, static_cast<int>(mLoadPolicy));
+    map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
+    map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
+    map.Insert(Ui::ImageVisualPropertyIndex::FAST_TRACK_UPLOADING, mFastTrackUploading);
+    map.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, mOrientationCorrection);
+    map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
+
     map.Insert(Ui::DevelVisual::Property::VISUAL_FITTING_MODE, static_cast<int>(mFittingMode));
 
     if(!mAlphaMaskUrl.Empty())
     {
-      map.Insert(Ui::ImageVisual::Property::ALPHA_MASK_URL, mAlphaMaskUrl);
-      map.Insert(Ui::ImageVisual::Property::CROP_TO_MASK, mCropToMask);
-      map.Insert(Ui::DevelImageVisual::Property::MASKING_TYPE, static_cast<int>(mMaskingMode));
+      map.Insert(Ui::ImageVisualPropertyIndex::ALPHA_MASK_URL, mAlphaMaskUrl);
+      map.Insert(Ui::ImageVisualPropertyIndex::CROP_TO_MASK, mCropToMask);
+      map.Insert(Ui::ImageVisualPropertyIndex::MASKING_TYPE, static_cast<int>(mMaskingMode));
     }
 
     if(mNPatchBorder != Vector4::ZERO)
     {
-      map.Insert(Ui::ImageVisual::Property::BORDER, mNPatchBorder);
-      map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mNPatchBorderOnly);
+      map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mNPatchBorder);
+      map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mNPatchBorderOnly);
     }
 
     // ImageView is a static image widget: always use ImageVisual (or NPatchVisual)

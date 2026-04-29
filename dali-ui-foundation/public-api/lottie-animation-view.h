@@ -17,9 +17,11 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 #include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view-types.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/public-api/common/dali-string.h>
@@ -79,35 +81,6 @@ public:
       PLACEHOLDER_IMAGE          = LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
     };
   };
-
-  /**
-   * @brief Enumeration for the current playback state.
-   */
-  using PlayState = LottieAnimationViewPlayState;
-
-  /**
-   * @brief Enumeration for what to do when the animation is stopped.
-   */
-  using StopBehavior = LottieAnimationViewStopBehavior;
-
-  /**
-   * @brief Enumeration for the looping mode.
-   */
-  using LoopingMode = LottieAnimationViewLoopingMode;
-
-  /**
-   * @brief Enumeration for animatable vector properties used with SetDynamicProperty.
-   */
-  using VectorProperty = LottieAnimationViewVectorProperty;
-
-  /**
-   * @brief Information for setting a dynamic (per-frame callback) property.
-   *
-   * Ownership of @p callback is transferred to the visual after SetDynamicProperty() is called.
-   *
-   * @note The callback is invoked on a worker thread. Do NOT call DALi APIs from it.
-   */
-  using DynamicPropertyInfo = LottieAnimationViewDynamicPropertyInfo;
 
   /// @brief Animation finished signal type. Emitted when the animation completes all loops.
   typedef Signal<void(View)> AnimationFinishedSignalType;
@@ -263,14 +236,14 @@ public: // Playback Options
    * @param[in] behavior The stop behavior
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetStopBehavior(StopBehavior::Type behavior);
+  LottieAnimationView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
   /**
    * @brief Gets the current stop behavior.
    *
    * @return The current stop behavior
    */
-  StopBehavior::Type GetStopBehavior() const;
+  AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
    * @brief Sets the looping mode.
@@ -278,14 +251,14 @@ public: // Playback Options
    * @param[in] mode RESTART or AUTO_REVERSE
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetLoopingMode(LoopingMode::Type mode);
+  LottieAnimationView& SetLoopingMode(LottieAnimation::LoopingMode mode);
 
   /**
    * @brief Gets the current looping mode.
    *
    * @return The current looping mode
    */
-  LoopingMode::Type GetLoopingMode() const;
+  LottieAnimation::LoopingMode GetLoopingMode() const;
 
   /**
    * @brief Sets the speed factor for animation playback.
@@ -311,7 +284,7 @@ public: // State Queries (read-only, requires live visual)
    *
    * @return The current PlayState
    */
-  PlayState::Type GetPlayState() const;
+  AnimatedImage::PlayState GetPlayState() const;
 
   /**
    * @brief Gets the current frame number being displayed.
@@ -443,7 +416,7 @@ public: // Advanced
    * @param[in] info The dynamic property info
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetDynamicProperty(const DynamicPropertyInfo& info);
+  LottieAnimationView& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
 
 public: // Visual Appearance
   /**
@@ -508,14 +481,14 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  LottieAnimationView& SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
    *
    * @return The current release policy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Ui::Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @brief Sets whether the animation JSON is loaded synchronously.

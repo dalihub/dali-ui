@@ -24,7 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image-view-properties.h>
-#include <dali-ui-foundation/public-api/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -246,31 +246,31 @@ public: // Size & Fitting Control
    * @param[in] samplingMode The sampling mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetSamplingMode(Ui::SamplingMode::Type samplingMode);
+  ImageView& SetSamplingMode(Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the sampling mode.
    *
    * @return The current sampling mode
    */
-  Ui::SamplingMode::Type GetSamplingMode() const;
+  Image::SamplingMode GetSamplingMode() const;
 
   /**
    * @brief Sets how the image is fitted within the view bounds.
    *
-   * The default fitting mode is Ui::FittingMode::FILL (stretch to fill).
+   * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
    * @param[in] fittingMode The fitting mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetFittingMode(Ui::FittingMode::Type fittingMode);
+  ImageView& SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets the fitting mode.
    *
    * @return The current fitting mode (default: FILL)
    */
-  Ui::FittingMode::Type GetFittingMode() const;
+  Image::FittingMode GetFittingMode() const;
 
   /**
    * @brief Sets the desired rasterization width as a hint for the image loader.
@@ -381,14 +381,14 @@ public: // Advanced Rendering & Masking
    * @param[in] maskingMode The masking mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetMaskingMode(Ui::MaskingType::Type maskingMode);
+  ImageView& SetMaskingMode(Image::MaskingType maskingMode);
 
   /**
    * @brief Gets the masking mode.
    *
    * @return The current masking mode
    */
-  Ui::MaskingType::Type GetMaskingMode() const;
+  Image::MaskingType GetMaskingMode() const;
 
 public: // Loading Behavior
   /**
@@ -400,14 +400,14 @@ public: // Loading Behavior
    * @param[in] loadPolicy The load policy to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+  ImageView& SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the load policy.
    *
    * @return The current load policy
    */
-  Ui::LoadPolicy::Type GetLoadPolicy() const;
+  Image::LoadPolicy GetLoadPolicy() const;
 
   /**
    * @brief Sets the release policy for the image resource.
@@ -417,14 +417,14 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  ImageView& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
    *
    * @return The current release policy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @brief Sets whether the image is loaded synchronously.

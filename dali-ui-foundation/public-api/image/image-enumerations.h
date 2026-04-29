@@ -17,69 +17,77 @@
  *
  */
 
+// EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/image-options.h>
-#include <dali/public-api/common/dali-common.h>
-#include <dali/public-api/math/int-pair.h>
+#include <cstdint>
 
 namespace Dali
 {
+
 namespace Ui
+{
+
+namespace Image
 {
 /**
  * @brief FittingMode configures how the image fits within the defined bounds.
  */
-namespace FittingMode
-{
-enum Type
+enum class FittingMode : uint8_t
 {
   FIT_KEEP_ASPECT_RATIO,      ///< The visual should be scaled to fit, preserving aspect ratio
   FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
   OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away
   CENTER,                     ///< The visual should keep original size of image
 };
-} // namespace FittingMode
 
 /**
  * @brief MaskingType configures the alpha clipping structure of the image.
  */
-namespace MaskingType
-{
-enum Type
+enum class MaskingType : uint8_t
 {
   MASKING_ON_RENDERING, ///< Masking is applied to rendering phase.
   MASKING_ON_LOADING    ///< Masking is applied to loading phase.
 };
-} // namespace MaskingType
 
 /**
  * @brief SamplingMode is an alias for Dali::SamplingMode, configuring the filter applied when scaling the image.
  */
-namespace SamplingMode = Dali::SamplingMode;
+enum class SamplingMode : uint8_t
+{
+  BOX              = Dali::SamplingMode::BOX,
+  NEAREST          = Dali::SamplingMode::NEAREST,
+  LINEAR           = Dali::SamplingMode::LINEAR,
+  BOX_THEN_NEAREST = Dali::SamplingMode::BOX_THEN_NEAREST,
+  BOX_THEN_LINEAR  = Dali::SamplingMode::BOX_THEN_LINEAR,
+  NO_FILTER        = Dali::SamplingMode::NO_FILTER,
+  DONT_CARE        = Dali::SamplingMode::DONT_CARE,
+  LANCZOS          = Dali::SamplingMode::LANCZOS,
+  BOX_THEN_LANCZOS = Dali::SamplingMode::BOX_THEN_LANCZOS,
+
+  DEFAULT = Dali::SamplingMode::DEFAULT,
+};
 
 /**
  * @brief LoadPolicy controls when the image is loaded.
  */
-namespace LoadPolicy
-{
-enum Type
+enum class LoadPolicy : uint8_t
 {
   IMMEDIATE = 0, ///< The image is loaded when the ImageView is created.
-  ATTACHED       ///< The image is loaded when the ImageView is attached to the scene.
+  ATTACHED,      ///< The image is loaded when the ImageView is attached to the scene.
 };
-} // namespace LoadPolicy
 
 /**
  * @brief ReleasePolicy controls when the image texture is released from the cache.
  */
-namespace ReleasePolicy
-{
-enum Type
+enum class ReleasePolicy : uint8_t
 {
   DETACHED = 0, ///< Image released from cache when the visual is detached from the scene.
   DESTROYED,    ///< Image released from cache when the visual is destroyed.
-  NEVER         ///< Image is never released from cache.
+  NEVER,        ///< Image is never released from cache.
 };
-} // namespace ReleasePolicy
+
+} // namespace Image
 
 } // namespace Ui
+
 } // namespace Dali

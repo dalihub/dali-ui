@@ -41,6 +41,11 @@
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
+
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
@@ -72,7 +77,10 @@
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
+#include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>

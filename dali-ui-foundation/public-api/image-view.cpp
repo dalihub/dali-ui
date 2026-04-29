@@ -110,24 +110,24 @@ bool ImageView::IsPreMultipliedAlpha() const
   return Ui::GetImpl(*this).IsPreMultipliedAlpha();
 }
 
-ImageView& ImageView::SetSamplingMode(Ui::SamplingMode::Type samplingMode)
+ImageView& ImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
 {
   Ui::GetImpl(*this).SetSamplingMode(samplingMode);
   return *this;
 }
 
-Ui::SamplingMode::Type ImageView::GetSamplingMode() const
+Ui::Image::SamplingMode ImageView::GetSamplingMode() const
 {
   return Ui::GetImpl(*this).GetSamplingMode();
 }
 
-ImageView& ImageView::SetFittingMode(Ui::FittingMode::Type fittingMode)
+ImageView& ImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
 {
   Ui::GetImpl(*this).SetFittingMode(fittingMode);
   return *this;
 }
 
-Ui::FittingMode::Type ImageView::GetFittingMode() const
+Ui::Image::FittingMode ImageView::GetFittingMode() const
 {
   return Ui::GetImpl(*this).GetFittingMode();
 }
@@ -176,24 +176,24 @@ bool ImageView::IsCropToMask() const
   return Ui::GetImpl(*this).IsCropToMask();
 }
 
-ImageView& ImageView::SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy)
+ImageView& ImageView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
 {
   Ui::GetImpl(*this).SetLoadPolicy(loadPolicy);
   return *this;
 }
 
-Ui::LoadPolicy::Type ImageView::GetLoadPolicy() const
+Ui::Image::LoadPolicy ImageView::GetLoadPolicy() const
 {
   return Ui::GetImpl(*this).GetLoadPolicy();
 }
 
-ImageView& ImageView::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
+ImageView& ImageView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
   return *this;
 }
 
-Ui::ReleasePolicy::Type ImageView::GetReleasePolicy() const
+Ui::Image::ReleasePolicy ImageView::GetReleasePolicy() const
 {
   return Ui::GetImpl(*this).GetReleasePolicy();
 }
@@ -231,13 +231,13 @@ bool ImageView::IsImageLoadWithViewSizeEnabled() const
   return Ui::GetImpl(*this).IsImageLoadWithViewSizeEnabled();
 }
 
-ImageView& ImageView::SetMaskingMode(Ui::MaskingType::Type maskingMode)
+ImageView& ImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
 {
   Ui::GetImpl(*this).SetMaskingMode(maskingMode);
   return *this;
 }
 
-Ui::MaskingType::Type ImageView::GetMaskingMode() const
+Ui::Image::MaskingType ImageView::GetMaskingMode() const
 {
   return Ui::GetImpl(*this).GetMaskingMode();
 }

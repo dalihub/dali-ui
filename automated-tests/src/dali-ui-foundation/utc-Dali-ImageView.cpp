@@ -19,7 +19,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -159,13 +159,13 @@ int UtcDaliImageViewSetGetFittingModeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::FILL, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::FILL, TEST_LOCATION);
 
-  view.SetFittingMode(Ui::FittingMode::FIT_KEEP_ASPECT_RATIO);
-  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
+  view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
 
-  view.SetFittingMode(Ui::FittingMode::CENTER);
-  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::CENTER, TEST_LOCATION);
+  view.SetFittingMode(Ui::Image::FittingMode::CENTER);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::CENTER, TEST_LOCATION);
   END_TEST;
 }
 
@@ -280,13 +280,13 @@ int UtcDaliImageViewSetGetSamplingModeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::SamplingMode::BOX_THEN_LINEAR, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::Image::SamplingMode::BOX_THEN_LINEAR, TEST_LOCATION);
 
-  view.SetSamplingMode(Ui::SamplingMode::NEAREST);
-  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::SamplingMode::NEAREST, TEST_LOCATION);
+  view.SetSamplingMode(Ui::Image::SamplingMode::NEAREST);
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::Image::SamplingMode::NEAREST, TEST_LOCATION);
 
-  view.SetSamplingMode(Ui::SamplingMode::LINEAR);
-  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::SamplingMode::LINEAR, TEST_LOCATION);
+  view.SetSamplingMode(Ui::Image::SamplingMode::LINEAR);
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::Image::SamplingMode::LINEAR, TEST_LOCATION);
   END_TEST;
 }
 
@@ -294,9 +294,9 @@ int UtcDaliImageViewSetSamplingModeNoChangeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  view.SetSamplingMode(Ui::SamplingMode::NEAREST);
-  view.SetSamplingMode(Ui::SamplingMode::NEAREST); // same value — should not dirty
-  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::SamplingMode::NEAREST, TEST_LOCATION);
+  view.SetSamplingMode(Ui::Image::SamplingMode::NEAREST);
+  view.SetSamplingMode(Ui::Image::SamplingMode::NEAREST); // same value — should not dirty
+  DALI_TEST_EQUALS(view.GetSamplingMode(), Ui::Image::SamplingMode::NEAREST, TEST_LOCATION);
   END_TEST;
 }
 
@@ -306,13 +306,13 @@ int UtcDaliImageViewSetGetReleasePolicyP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DETACHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DESTROYED, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DESTROYED, TEST_LOCATION);
 
-  view.SetReleasePolicy(Ui::ReleasePolicy::NEVER);
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::NEVER, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::NEVER);
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::NEVER, TEST_LOCATION);
   END_TEST;
 }
 
@@ -320,9 +320,9 @@ int UtcDaliImageViewSetReleasePolicyNoChangeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED);
-  view.SetReleasePolicy(Ui::ReleasePolicy::DESTROYED); // same value — should not dirty
-  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::ReleasePolicy::DESTROYED, TEST_LOCATION);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED);
+  view.SetReleasePolicy(Ui::Image::ReleasePolicy::DESTROYED); // same value — should not dirty
+  DALI_TEST_EQUALS(view.GetReleasePolicy(), Ui::Image::ReleasePolicy::DESTROYED, TEST_LOCATION);
   END_TEST;
 }
 
@@ -334,11 +334,11 @@ int UtcDaliImageViewPropertySamplingModeP(void)
   ImageView view = ImageView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 2), // SAMPLING_MODE
-                   static_cast<int>(Ui::SamplingMode::NO_FILTER));
+                   static_cast<int>(Ui::Image::SamplingMode::NO_FILTER));
   Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 2));
   int mode = 0;
   DALI_TEST_CHECK(value.Get(mode));
-  DALI_TEST_EQUALS(static_cast<Ui::SamplingMode::Type>(mode), Ui::SamplingMode::NO_FILTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<Ui::Image::SamplingMode>(mode), Ui::Image::SamplingMode::NO_FILTER, TEST_LOCATION);
   END_TEST;
 }
 
@@ -348,11 +348,11 @@ int UtcDaliImageViewPropertyReleasePolicyP(void)
   ImageView view = ImageView::New();
 
   view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 12), // RELEASE_POLICY
-                   static_cast<int>(Ui::ReleasePolicy::NEVER));
+                   static_cast<int>(Ui::Image::ReleasePolicy::NEVER));
   Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 12));
   int policy = 0;
   DALI_TEST_CHECK(value.Get(policy));
-  DALI_TEST_EQUALS(static_cast<Ui::ReleasePolicy::Type>(policy), Ui::ReleasePolicy::NEVER, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<Ui::Image::ReleasePolicy>(policy), Ui::Image::ReleasePolicy::NEVER, TEST_LOCATION);
   END_TEST;
 }
 
@@ -381,10 +381,10 @@ int UtcDaliImageViewSetGetMaskingModeP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
-  view.SetMaskingMode(Ui::MaskingType::MASKING_ON_LOADING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
-  view.SetMaskingMode(Ui::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
+  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING);
+  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_LOADING, TEST_LOCATION);
+  view.SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+  DALI_TEST_EQUALS(view.GetMaskingMode(), Ui::Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
   END_TEST;
 }
 
@@ -454,10 +454,10 @@ int UtcDaliImageViewChainingP(void)
   UiTestApplication application;
   ImageView view = ImageView::New()
                      .SetResourceUrl("image.jpg")
-                     .SetFittingMode(Ui::FittingMode::FILL)
+                     .SetFittingMode(Ui::Image::FittingMode::FILL)
                      .SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::FittingMode::FILL, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::FILL, TEST_LOCATION);
   END_TEST;
 }

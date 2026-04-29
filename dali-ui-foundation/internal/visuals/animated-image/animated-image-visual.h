@@ -30,10 +30,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/animated-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 
 namespace Dali
 {
@@ -335,12 +335,12 @@ private:
   int16_t              mCurrentLoopIndex;
 
   // Variables for image visual properties.
-  Dali::Ui::ImageVisual::LoadPolicy::Type    mLoadPolicy;
-  Dali::Ui::ImageVisual::ReleasePolicy::Type mReleasePolicy;
-  TextureManager::MaskingDataPointer         mMaskingData;
-  Dali::ImageDimensions                      mDesiredSize;
-  Dali::ImageDimensions                      mLastRequiredSize;
-  float                                      mFrameSpeedFactor;
+  Dali::Ui::Image::LoadPolicy        mLoadPolicy;
+  Dali::Ui::Image::ReleasePolicy     mReleasePolicy;
+  TextureManager::MaskingDataPointer mMaskingData;
+  Dali::ImageDimensions              mDesiredSize;
+  Dali::ImageDimensions              mLastRequiredSize;
+  float                              mFrameSpeedFactor;
 
   // Shared variables
   uint32_t        mFrameCount; // Number of frames
@@ -348,10 +348,10 @@ private:
 
   DevelAnimatedImageVisual::Action::Type mActionStatus;
 
-  Dali::WrapMode::Type                 mWrapModeU : 3;
-  Dali::WrapMode::Type                 mWrapModeV : 3;
-  DevelImageVisual::StopBehavior::Type mStopBehavior : 2;
-  Dali::SamplingMode::Type             mSamplingMode : 5;
+  Dali::WrapMode::Type                  mWrapModeU : 3;
+  Dali::WrapMode::Type                  mWrapModeV : 3;
+  Dali::Ui::AnimatedImage::StopBehavior mStopBehavior : 2;
+  Dali::Ui::Image::SamplingMode         mSamplingMode : 5;
 
   bool mStartFirstFrame : 1;
   bool mIsJumpTo : 1;

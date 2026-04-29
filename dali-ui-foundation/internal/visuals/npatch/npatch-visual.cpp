@@ -28,7 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/utility/npatch-helper.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -104,7 +103,7 @@ void NPatchVisual::LoadImages()
     {
       // Register PRE_MULTIPLIED_ALPHA here.
       mPreMultipliedAlphaIndex = mImpl->mRenderer.RegisterProperty(
-        Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled() ? 1.0f : 0.0f);
+        Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled() ? 1.0f : 0.0f);
     }
 
     TextureManager::MaskingDataPointer maskingDataPtr = nullptr;
@@ -162,13 +161,13 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // URL is already passed in via constructor
 
-  Property::Value* borderOnlyValue = propertyMap.Find(Ui::ImageVisual::Property::BORDER_ONLY, BORDER_ONLY);
+  Property::Value* borderOnlyValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::BORDER_ONLY, BORDER_ONLY);
   if(borderOnlyValue)
   {
     borderOnlyValue->Get(mBorderOnly);
   }
 
-  Property::Value* borderValue = propertyMap.Find(Ui::ImageVisual::Property::BORDER, BORDER);
+  Property::Value* borderValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::BORDER, BORDER);
   if(borderValue)
   {
     if(!borderValue->Get(mBorder)) // If value exists and is Extents (or Vector4), just set mBorder
@@ -190,7 +189,7 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     Dali::ClampInPlace(mBorder.bottom, static_cast<int16_t>(0), static_cast<int16_t>(0x7FFF));
   }
 
-  Property::Value* auxImage = propertyMap.Find(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, AUXILIARY_IMAGE_NAME);
+  Property::Value* auxImage = propertyMap.Find(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE, AUXILIARY_IMAGE_NAME);
   if(auxImage)
   {
     std::string url;
@@ -201,14 +200,14 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
   }
 
   Property::Value* auxImageAlpha =
-    propertyMap.Find(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, AUXILIARY_IMAGE_ALPHA_NAME);
+    propertyMap.Find(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE_ALPHA, AUXILIARY_IMAGE_ALPHA_NAME);
   if(auxImageAlpha)
   {
     auxImageAlpha->Get(mAuxiliaryImageAlpha);
   }
 
   Property::Value* synchronousLoading =
-    propertyMap.Find(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, SYNCHRONOUS_LOADING);
+    propertyMap.Find(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, SYNCHRONOUS_LOADING);
   if(synchronousLoading)
   {
     bool sync = false;
@@ -223,13 +222,13 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* releasePolicy = propertyMap.Find(Ui::ImageVisual::Property::RELEASE_POLICY, RELEASE_POLICY_NAME);
+  Property::Value* releasePolicy = propertyMap.Find(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, RELEASE_POLICY_NAME);
   if(releasePolicy)
   {
     releasePolicy->Get(mReleasePolicy);
   }
 
-  Property::Value* preMultiplied = propertyMap.Find(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA);
+  Property::Value* preMultiplied = propertyMap.Find(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, PRE_MULTIPLIED_ALPHA);
   if(preMultiplied)
   {
     bool premultipliedAlpha = false;
@@ -263,7 +262,7 @@ void NPatchVisual::DoSetOnScene(Actor& actor)
 
 void NPatchVisual::DoSetOffScene(Actor& actor)
 {
-  if(mReleasePolicy == Ui::ImageVisual::ReleasePolicy::DETACHED)
+  if(mReleasePolicy == Ui::Image::ReleasePolicy::DETACHED)
   {
     if(mId != NPatchData::INVALID_NPATCH_DATA_ID)
     {
@@ -309,18 +308,18 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   bool sync = IsSynchronousLoadingRequired();
-  map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, sync);
+  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::N_PATCH);
-  map.Insert(Ui::ImageVisual::Property::URL, ToPropertyValue(mImageUrl.GetUrl()));
-  map.Insert(Ui::ImageVisual::Property::BORDER_ONLY, mBorderOnly);
-  map.Insert(Ui::ImageVisual::Property::BORDER, mBorder);
-  map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
-  map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
+  map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mBorderOnly);
+  map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mBorder);
+  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
 
   if(mAuxiliaryUrl.IsValid())
   {
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
+    map.Insert(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
+    map.Insert(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
   }
 }
 
@@ -328,8 +327,8 @@ void NPatchVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   if(mAuxiliaryUrl.IsValid())
   {
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
-    map.Insert(Ui::DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
+    map.Insert(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE, ToPropertyValue(mAuxiliaryUrl.GetUrl()));
+    map.Insert(Ui::ImageVisualPropertyIndex::AUXILIARY_IMAGE_ALPHA, mAuxiliaryImageAlpha);
   }
 }
 
@@ -365,7 +364,7 @@ NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFa
   mBorderOnly(false),
   mBorder(),
   mAuxiliaryImageAlpha(0.0f),
-  mReleasePolicy(Ui::ImageVisual::ReleasePolicy::DETACHED)
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
 }
@@ -374,7 +373,7 @@ NPatchVisual::~NPatchVisual()
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    if(mReleasePolicy != Ui::ImageVisual::ReleasePolicy::NEVER)
+    if(mReleasePolicy != Ui::Image::ReleasePolicy::NEVER)
     {
       if(mId != NPatchData::INVALID_NPATCH_DATA_ID)
       {
@@ -571,7 +570,7 @@ void NPatchVisual::ApplyTextureAndUniforms()
       tempTextureSet.SetTexture(0, textureSet.GetTexture(0));
       textureSet = tempTextureSet;
 
-      mImpl->mRenderer.RegisterProperty(DevelImageVisual::Property::AUXILIARY_IMAGE_ALPHA, AUXILIARY_IMAGE_ALPHA_NAME,
+      mImpl->mRenderer.RegisterProperty(ImageVisualPropertyIndex::AUXILIARY_IMAGE_ALPHA, AUXILIARY_IMAGE_ALPHA_NAME,
                                         mAuxiliaryImageAlpha);
     }
     mImpl->mRenderer.SetTextures(textureSet);

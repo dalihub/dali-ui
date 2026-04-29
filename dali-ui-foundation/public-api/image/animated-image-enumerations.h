@@ -16,40 +16,43 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/public-api/image-view-types.h>
-#include <dali/public-api/common/dali-vector.h>
+
+// EXTERNAL INCLUDES
+#include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
 namespace Dali
 {
+
 namespace Ui
 {
-class AnimatedImageView;
 
-/**
- * @brief Enumeration for the current playback state.
- */
-struct AnimatedImageViewPlayState
+namespace AnimatedImage
 {
-  enum Type
-  {
-    STOPPED, ///< Animation has stopped
-    PLAYING, ///< The animation is playing
-    PAUSED   ///< The animation is paused
-  };
+/**
+ * @brief Enumeration for what state the animation is in.
+ */
+enum class PlayState : uint8_t
+{
+  STOPPED, ///< Animation has stopped
+  PLAYING, ///< The animation is playing
+  PAUSED   ///< The animation is paused
 };
 
 /**
  * @brief Enumeration for what to do when the animation is stopped.
  */
-struct AnimatedImageViewStopBehavior
+enum class StopBehavior : uint8_t
 {
-  enum Type
-  {
-    CURRENT_FRAME, ///< Show the current frame when stopped
-    FIRST_FRAME,   ///< Show the first frame when stopped
-    LAST_FRAME     ///< Show the last frame when stopped
-  };
+  CURRENT_FRAME, ///< When the animation is stopped, the current frame is shown.
+  FIRST_FRAME,   ///< When the animation is stopped, the first frame is shown.
+  LAST_FRAME     ///< When the animation is stopped, the last frame is shown.
 };
 
+} // namespace AnimatedImage
+
 } // namespace Ui
+
 } // namespace Dali

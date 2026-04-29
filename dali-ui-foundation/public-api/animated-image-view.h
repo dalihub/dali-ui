@@ -18,8 +18,8 @@
  */
 
 #include <dali-ui-foundation/public-api/animated-image-view-properties.h>
-#include <dali-ui-foundation/public-api/animated-image-view-types.h>
-#include <dali-ui-foundation/public-api/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -86,16 +86,6 @@ public:
       PIXEL_AREA                = AnimatedImageViewPropertyIndex::PIXEL_AREA,
     };
   };
-
-  /**
-   * @brief Enumeration for the current playback state.
-   */
-  using PlayState = AnimatedImageViewPlayState;
-
-  /**
-   * @brief Enumeration for what to do when the animation is stopped.
-   */
-  using StopBehavior = AnimatedImageViewStopBehavior;
 
   /// @brief Animation finished signal type. Emitted when the animation completes all loops.
   typedef Signal<void(View)> AnimationFinishedSignalType;
@@ -228,14 +218,14 @@ public: // Frame Control
    * @param[in] behavior The stop behavior (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetStopBehavior(StopBehavior::Type behavior);
+  AnimatedImageView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
   /**
    * @brief Gets the current stop behavior.
    *
    * @return The current stop behavior
    */
-  StopBehavior::Type GetStopBehavior() const;
+  AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
    * @brief Sets the speed factor for animation playback.
@@ -307,7 +297,7 @@ public: // Frame Control
    *
    * @return The current PlayState
    */
-  PlayState::Type GetPlayState() const;
+  Ui::AnimatedImage::PlayState GetPlayState() const;
 
   /**
    * @brief Gets the current frame number being displayed.
@@ -342,19 +332,19 @@ public: // Visual Appearance
   /**
    * @brief Sets how the image is fitted within the view bounds.
    *
-   * The default fitting mode is Ui::FittingMode::FILL (stretch to fill).
+   * The default fitting mode is Ui::Image::FittingMode::FILL (stretch to fill).
    *
    * @param[in] fittingMode The fitting mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetFittingMode(Ui::FittingMode::Type fittingMode);
+  AnimatedImageView& SetFittingMode(Ui::Image::FittingMode fittingMode);
 
   /**
    * @brief Gets the fitting mode.
    *
    * @return The current fitting mode (default: FILL)
    */
-  Ui::FittingMode::Type GetFittingMode() const;
+  Ui::Image::FittingMode GetFittingMode() const;
 
   /**
    * @brief Sets the sampling mode used when scaling the image.
@@ -362,14 +352,14 @@ public: // Visual Appearance
    * @param[in] samplingMode The sampling mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetSamplingMode(Ui::SamplingMode::Type samplingMode);
+  AnimatedImageView& SetSamplingMode(Ui::Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the sampling mode.
    *
    * @return The current sampling mode
    */
-  Ui::SamplingMode::Type GetSamplingMode() const;
+  Ui::Image::SamplingMode GetSamplingMode() const;
 
   /**
    * @brief Sets whether the image uses pre-multiplied alpha.
@@ -431,14 +421,14 @@ public: // Loading Behavior
    * @param[in] loadPolicy The load policy to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetLoadPolicy(Ui::LoadPolicy::Type loadPolicy);
+  AnimatedImageView& SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the load policy.
    *
    * @return The current load policy
    */
-  Ui::LoadPolicy::Type GetLoadPolicy() const;
+  Ui::Image::LoadPolicy GetLoadPolicy() const;
 
   /**
    * @brief Sets the release policy for the image resource.
@@ -446,14 +436,14 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  AnimatedImageView& SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
    *
    * @return The current release policy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Ui::Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @brief Sets whether the image is loaded synchronously.
@@ -507,14 +497,14 @@ public: // Advanced Rendering & Masking
    * @param[in] maskingMode The masking mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetMaskingMode(Ui::MaskingType::Type maskingMode);
+  AnimatedImageView& SetMaskingMode(Ui::Image::MaskingType maskingMode);
 
   /**
    * @brief Gets the masking mode.
    *
    * @return The current masking mode
    */
-  Ui::MaskingType::Type GetMaskingMode() const;
+  Ui::Image::MaskingType GetMaskingMode() const;
 
   /**
    * @brief Sets the URL of a placeholder image shown while loading.

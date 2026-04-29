@@ -1538,7 +1538,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
       if((mImpl->mType == Ui::Visual::IMAGE || mImpl->mType == Ui::Visual::ANIMATED_IMAGE || mImpl->mType == Ui::Visual::N_PATCH) &&
-         ((key.type == Property::Key::INDEX && key.indexKey == ImageVisual::Property::PRE_MULTIPLIED_ALPHA) ||
+         ((key.type == Property::Key::INDEX && key.indexKey == ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA) ||
           (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA);

@@ -30,13 +30,13 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-signals-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -91,10 +91,10 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mMaxFrameMarker(),
   mPlaceholderUrl(),
   mImageColor(Color::WHITE),
-  mStopBehavior(LottieAnimationViewStopBehavior::CURRENT_FRAME),
-  mLoopingMode(LottieAnimationViewLoopingMode::RESTART),
+  mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
+  mLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
   mPlayRangeType(PlayRangeType::NONE),
-  mReleasePolicy(Ui::ReleasePolicy::DETACHED),
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mLoopCount(-1),
   mMinFrame(0),
   mMaxFrame(0),
@@ -152,7 +152,7 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         int mode;
         if(value.Get(mode))
         {
-          impl.SetLoopingMode(static_cast<LottieAnimationViewLoopingMode::Type>(mode));
+          impl.SetLoopingMode(static_cast<Ui::LottieAnimation::LoopingMode>(mode));
         }
         break;
       }
@@ -161,7 +161,7 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         int behavior;
         if(value.Get(behavior))
         {
-          impl.SetStopBehavior(static_cast<LottieAnimationViewStopBehavior::Type>(behavior));
+          impl.SetStopBehavior(static_cast<Ui::AnimatedImage::StopBehavior>(behavior));
         }
         break;
       }
@@ -206,7 +206,7 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         int policy;
         if(value.Get(policy))
         {
-          impl.SetReleasePolicy(static_cast<Ui::ReleasePolicy::Type>(policy));
+          impl.SetReleasePolicy(static_cast<Ui::Image::ReleasePolicy>(policy));
         }
         break;
       }
@@ -575,7 +575,7 @@ void LottieAnimationViewImpl::SetMinMaxFrameByMarker(const Dali::String& minMark
   InvalidateMeasure();
 }
 
-void LottieAnimationViewImpl::SetStopBehavior(LottieAnimationViewStopBehavior::Type behavior)
+void LottieAnimationViewImpl::SetStopBehavior(Ui::AnimatedImage::StopBehavior behavior)
 {
   if(mStopBehavior != behavior)
   {
@@ -585,12 +585,12 @@ void LottieAnimationViewImpl::SetStopBehavior(LottieAnimationViewStopBehavior::T
   }
 }
 
-LottieAnimationViewStopBehavior::Type LottieAnimationViewImpl::GetStopBehavior() const
+Ui::AnimatedImage::StopBehavior LottieAnimationViewImpl::GetStopBehavior() const
 {
   return mStopBehavior;
 }
 
-void LottieAnimationViewImpl::SetLoopingMode(LottieAnimationViewLoopingMode::Type mode)
+void LottieAnimationViewImpl::SetLoopingMode(Ui::LottieAnimation::LoopingMode mode)
 {
   if(mLoopingMode != mode)
   {
@@ -600,7 +600,7 @@ void LottieAnimationViewImpl::SetLoopingMode(LottieAnimationViewLoopingMode::Typ
   }
 }
 
-LottieAnimationViewLoopingMode::Type LottieAnimationViewImpl::GetLoopingMode() const
+Ui::LottieAnimation::LoopingMode LottieAnimationViewImpl::GetLoopingMode() const
 {
   return mLoopingMode;
 }
@@ -620,18 +620,18 @@ float LottieAnimationViewImpl::GetFrameSpeedFactor() const
   return mFrameSpeedFactor;
 }
 
-LottieAnimationViewPlayState::Type LottieAnimationViewImpl::GetPlayState() const
+Dali::Ui::AnimatedImage::PlayState LottieAnimationViewImpl::GetPlayState() const
 {
   if(mVisual)
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::DevelImageVisual::Property::PLAY_STATE))
+    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::PLAY_STATE))
     {
-      return static_cast<LottieAnimationViewPlayState::Type>(value->Get<int>());
+      return static_cast<Dali::Ui::AnimatedImage::PlayState>(value->Get<int>());
     }
   }
-  return LottieAnimationViewPlayState::STOPPED;
+  return Dali::Ui::AnimatedImage::PlayState::STOPPED;
 }
 
 int LottieAnimationViewImpl::GetCurrentFrame() const
@@ -640,7 +640,7 @@ int LottieAnimationViewImpl::GetCurrentFrame() const
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::DevelImageVisual::Property::CURRENT_FRAME_NUMBER))
+    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::CURRENT_FRAME_NUMBER))
     {
       return value->Get<int>();
     }
@@ -654,7 +654,7 @@ int LottieAnimationViewImpl::GetTotalFrame() const
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::DevelImageVisual::Property::TOTAL_FRAME_NUMBER))
+    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::TOTAL_FRAME_NUMBER))
     {
       return value->Get<int>();
     }
@@ -744,7 +744,7 @@ Dali::Property::Map LottieAnimationViewImpl::GetContentInfo()
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::DevelImageVisual::Property::CONTENT_INFO))
+    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::CONTENT_INFO))
     {
       value->Get(result);
     }
@@ -759,7 +759,7 @@ Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo()
   {
     Dali::Property::Map map;
     mVisual.CreatePropertyMap(map);
-    if(auto* value = map.Find(Ui::DevelImageVisual::Property::MARKER_INFO))
+    if(auto* value = map.Find(Ui::ImageVisualPropertyIndex::MARKER_INFO))
     {
       value->Get(result);
     }
@@ -767,7 +767,7 @@ Dali::Property::Map LottieAnimationViewImpl::GetMarkerInfo()
   return result;
 }
 
-void LottieAnimationViewImpl::SetDynamicProperty(const LottieAnimationViewDynamicPropertyInfo& info)
+void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info)
 {
   if(mVisualDirty)
   {
@@ -780,7 +780,7 @@ void LottieAnimationViewImpl::SetDynamicProperty(const LottieAnimationViewDynami
     Ui::DevelAnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
     dynamicInfo.id       = info.id;
     dynamicInfo.keyPath  = info.keyPath.CStr();
-    dynamicInfo.property = info.property;
+    dynamicInfo.property = static_cast<int32_t>(info.property);
     dynamicInfo.callback = info.callback;
     auto& viewData       = Internal::ViewDataImpl::Get(*this);
     viewData.DoActionExtension(LottieAnimationViewImpl::Property::IMAGE,
@@ -827,19 +827,19 @@ void LottieAnimationViewImpl::UpdateVisual()
 
   Dali::Property::Map map;
   map.Insert(Visual::Property::TYPE, static_cast<int>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE));
-  map.Insert(Ui::ImageVisual::Property::URL, mUrl);
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
 
-  map.Insert(Ui::DevelImageVisual::Property::LOOP_COUNT, mLoopCount);
-  map.Insert(Ui::DevelImageVisual::Property::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
-  map.Insert(Ui::DevelImageVisual::Property::LOOPING_MODE, static_cast<int>(mLoopingMode));
-  map.Insert(Ui::DevelImageVisual::Property::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
+  map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
+  map.Insert(Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR, static_cast<int>(mStopBehavior));
+  map.Insert(Ui::ImageVisualPropertyIndex::LOOPING_MODE, static_cast<int>(mLoopingMode));
+  map.Insert(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
 
   if(mPlayRangeType == PlayRangeType::FRAME)
   {
     Dali::Property::Array range;
     range.PushBack(mMinFrame);
     range.PushBack(mMaxFrame);
-    map.Insert(Ui::DevelImageVisual::Property::PLAY_RANGE, range);
+    map.Insert(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
   }
   else if(mPlayRangeType == PlayRangeType::MARKER)
   {
@@ -849,28 +849,27 @@ void LottieAnimationViewImpl::UpdateVisual()
     {
       range.PushBack(mMaxFrameMarker);
     }
-    map.Insert(Ui::DevelImageVisual::Property::PLAY_RANGE, range);
+    map.Insert(Ui::ImageVisualPropertyIndex::PLAY_RANGE, range);
   }
 
-  map.Insert(Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
-  map.Insert(Ui::DevelImageVisual::Property::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
-  map.Insert(Ui::DevelImageVisual::Property::ENABLE_FRAME_CACHE, mEnableFrameCache);
-  map.Insert(Ui::DevelImageVisual::Property::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
-  map.Insert(Ui::DevelImageVisual::Property::RENDER_SCALE, mRenderScale);
+  map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
+  map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
+  map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
+  map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
 
   if(mDesiredWidth > 0)
   {
-    map.Insert(Ui::ImageVisual::Property::DESIRED_WIDTH, mDesiredWidth);
+    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
   }
 
   if(mDesiredHeight > 0)
   {
-    map.Insert(Ui::ImageVisual::Property::DESIRED_HEIGHT, mDesiredHeight);
+    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredHeight);
   }
 
-  map.Insert(Ui::DevelImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
-  map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
-  map.Insert(Ui::ImageVisual::Property::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
+  map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
+  map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
 
   auto visualFactory = Ui::VisualFactory::Get();
@@ -914,7 +913,7 @@ int LottieAnimationViewImpl::GetDesiredHeight() const
   return mDesiredHeight;
 }
 
-void LottieAnimationViewImpl::SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy)
+void LottieAnimationViewImpl::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   if(mReleasePolicy != releasePolicy)
   {
@@ -924,7 +923,7 @@ void LottieAnimationViewImpl::SetReleasePolicy(Ui::ReleasePolicy::Type releasePo
   }
 }
 
-Ui::ReleasePolicy::Type LottieAnimationViewImpl::GetReleasePolicy() const
+Ui::Image::ReleasePolicy LottieAnimationViewImpl::GetReleasePolicy() const
 {
   return mReleasePolicy;
 }
@@ -1037,7 +1036,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
 
   Dali::Property::Map map;
   map.Insert(Visual::Property::TYPE, Visual::IMAGE);
-  map.Insert(Ui::ImageVisual::Property::URL, mPlaceholderUrl);
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)

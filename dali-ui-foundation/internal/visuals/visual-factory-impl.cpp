@@ -160,7 +160,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     case Ui::Visual::IMAGE:
     case Ui::Visual::ANIMATED_IMAGE:
     {
-      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
+      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
       if(imageURLValue)
       {
@@ -203,7 +203,15 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
               }
               case VisualUrl::REGULAR_IMAGE:
               {
-                visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                Property::Value* borderValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::BORDER, BORDER);
+                if(DALI_UNLIKELY(borderValue && borderValue->Get<Dali::Extents>() != Dali::Extents()))
+                {
+                  visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                }
+                else
+                {
+                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                }
                 break;
               }
             }
@@ -247,7 +255,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
     case Ui::Visual::N_PATCH:
     {
-      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
+      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
       if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
@@ -261,7 +269,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
     case Ui::Visual::SVG:
     {
-      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
+      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
       if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
@@ -275,7 +283,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
     case Ui::DevelVisual::ANIMATED_VECTOR_IMAGE:
     {
-      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
+      Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
       if(imageURLValue && GetStdString(*imageURLValue, imageUrl))
       {
@@ -310,7 +318,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
   {
     // Return URL if present in PropertyMap else return "not
     // found message"
-    Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisual::Property::URL, IMAGE_URL_NAME);
+    Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
     return (imageURLValue) ? ToStdString(*imageURLValue)
                            : std::string("url not found in PropertyMap");
   })())

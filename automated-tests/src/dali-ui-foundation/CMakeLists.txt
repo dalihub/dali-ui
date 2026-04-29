@@ -7,6 +7,7 @@ SET(CAPI_LIB "dali-ui-foundation")
 
 SET(TC_SOURCES
         utc-Dali-ScrollView.cpp
+        utc-Dali-AnimatedImageVisual.cpp
         utc-Dali-Unit.cpp
         utc-Dali-FocusManager.cpp
         utc-Dali-View.cpp
@@ -15,8 +16,10 @@ SET(TC_SOURCES
         utc-Dali-InputField.cpp
         utc-Dali-TextValueTypes.cpp
         utc-Dali-ImageView.cpp
+        utc-Dali-ImageVisual.cpp
         utc-Dali-AnimatedImageView.cpp
         utc-Dali-LottieAnimationView.cpp
+        utc-Dali-LottieAnimationVisual.cpp
         utc-Dali-UiColor.cpp
         utc-Dali-UiColorManager.cpp
         utc-Dali-UiThemeManager.cpp

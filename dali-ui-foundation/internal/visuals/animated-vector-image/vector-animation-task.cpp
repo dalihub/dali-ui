@@ -89,8 +89,8 @@ VectorAnimationTask::VectorAnimationTask(VisualFactoryCache& factoryCache)
   mCachedLayerInfo(),
   mCachedMarkerInfo(),
   mPlayState(PlayState::STOPPED),
-  mStopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-  mLoopingMode(DevelImageVisual::LoopingMode::RESTART),
+  mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
+  mLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
   mNextFrameStartTime(),
   mFrameDurationMicroSeconds(MICROSECONDS_PER_SECOND / 60.0f),
   mFrameRate(60.0f),
@@ -556,20 +556,20 @@ void VectorAnimationTask::GetDefaultSize(uint32_t& width, uint32_t& height) cons
   mVectorRenderer.GetDefaultSize(width, height);
 }
 
-void VectorAnimationTask::SetStopBehavior(DevelImageVisual::StopBehavior::Type stopBehavior)
+void VectorAnimationTask::SetStopBehavior(Ui::AnimatedImage::StopBehavior stopBehavior)
 {
   mStopBehavior = stopBehavior;
 
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
-                "VectorAnimationTask::SetStopBehavior: stop behavor = %d [%p]\n", mStopBehavior, this);
+                "VectorAnimationTask::SetStopBehavior: stop behavor = %d [%p]\n", static_cast<int>(mStopBehavior), this);
 }
 
-void VectorAnimationTask::SetLoopingMode(DevelImageVisual::LoopingMode::Type loopingMode)
+void VectorAnimationTask::SetLoopingMode(Ui::LottieAnimation::LoopingMode loopingMode)
 {
   mLoopingMode = loopingMode;
 
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
-                "VectorAnimationTask::SetLoopingMode: looping mode = %d [%p]\n", mLoopingMode, this);
+                "VectorAnimationTask::SetLoopingMode: looping mode = %d [%p]\n", static_cast<int>(mLoopingMode), this);
 }
 
 void VectorAnimationTask::GetLayerInfo(Property::Map& map) const
@@ -675,7 +675,7 @@ bool VectorAnimationTask::Rasterize()
 
     if(currentFrame >= mEndFrame) // last frame
     {
-      if(mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
+      if(mLoopingMode == Ui::LottieAnimation::LoopingMode::AUTO_REVERSE)
       {
         mForward = false;
       }
@@ -706,7 +706,7 @@ bool VectorAnimationTask::Rasterize()
 
     if(animationFinished)
     {
-      if(mStopBehavior == DevelImageVisual::StopBehavior::CURRENT_FRAME)
+      if(mStopBehavior == Ui::AnimatedImage::StopBehavior::CURRENT_FRAME)
       {
         stopped = true;
       }
@@ -802,14 +802,14 @@ uint32_t VectorAnimationTask::GetStoppedFrame(uint32_t startFrame, uint32_t endF
 
   switch(mStopBehavior)
   {
-    case DevelImageVisual::StopBehavior::FIRST_FRAME:
+    case Ui::AnimatedImage::StopBehavior::FIRST_FRAME:
     {
       frame = startFrame;
       break;
     }
-    case DevelImageVisual::StopBehavior::LAST_FRAME:
+    case Ui::AnimatedImage::StopBehavior::LAST_FRAME:
     {
-      if(mLoopingMode == DevelImageVisual::LoopingMode::AUTO_REVERSE)
+      if(mLoopingMode == Ui::LottieAnimation::LoopingMode::AUTO_REVERSE)
       {
         frame = startFrame;
       }
@@ -819,7 +819,7 @@ uint32_t VectorAnimationTask::GetStoppedFrame(uint32_t startFrame, uint32_t endF
       }
       break;
     }
-    case DevelImageVisual::StopBehavior::CURRENT_FRAME:
+    case Ui::AnimatedImage::StopBehavior::CURRENT_FRAME:
     {
       frame = currentFrame;
       break;
@@ -947,15 +947,15 @@ void VectorAnimationTask::ApplyAnimationData()
     if(animationData.resendFlag & VectorAnimationTask::RESEND_PLAY_STATE)
     {
       mAppliedPlayStateId = animationData.playStateId;
-      if(animationData.playState == DevelImageVisual::PlayState::PLAYING)
+      if(animationData.playState == Ui::AnimatedImage::PlayState::PLAYING)
       {
         PlayAnimation();
       }
-      else if(animationData.playState == DevelImageVisual::PlayState::PAUSED)
+      else if(animationData.playState == Ui::AnimatedImage::PlayState::PAUSED)
       {
         PauseAnimation();
       }
-      else if(animationData.playState == DevelImageVisual::PlayState::STOPPED)
+      else if(animationData.playState == Ui::AnimatedImage::PlayState::STOPPED)
       {
         StopAnimation();
       }

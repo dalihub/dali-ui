@@ -457,6 +457,8 @@ int UtcDaliVisualBaseRecreateVisual01(void)
 
   view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 
+  application.GetScene().Add(view);
+
   application.SendNotification();
   application.Render();
 

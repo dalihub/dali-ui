@@ -19,9 +19,11 @@
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-properties-devel.h>
+#include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
+#include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
 #include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view-types.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
@@ -162,22 +164,22 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetStopBehavior
    */
-  void SetStopBehavior(LottieAnimationViewStopBehavior::Type behavior);
+  void SetStopBehavior(Ui::AnimatedImage::StopBehavior behavior);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetStopBehavior
    */
-  LottieAnimationViewStopBehavior::Type GetStopBehavior() const;
+  Ui::AnimatedImage::StopBehavior GetStopBehavior() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetLoopingMode
    */
-  void SetLoopingMode(LottieAnimationViewLoopingMode::Type mode);
+  void SetLoopingMode(Ui::LottieAnimation::LoopingMode mode);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetLoopingMode
    */
-  LottieAnimationViewLoopingMode::Type GetLoopingMode() const;
+  Ui::LottieAnimation::LoopingMode GetLoopingMode() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetFrameSpeedFactor
@@ -192,7 +194,7 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetPlayState
    */
-  LottieAnimationViewPlayState::Type GetPlayState() const;
+  Ui::AnimatedImage::PlayState GetPlayState() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetCurrentFrame
@@ -267,7 +269,7 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetDynamicProperty
    */
-  void SetDynamicProperty(const LottieAnimationViewDynamicPropertyInfo& info);
+  void SetDynamicProperty(const Ui::LottieAnimation::DynamicPropertyInfo& info);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetDesiredWidth
@@ -292,12 +294,12 @@ public: // API
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetReleasePolicy
    */
-  void SetReleasePolicy(Ui::ReleasePolicy::Type releasePolicy);
+  void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetReleasePolicy
    */
-  Ui::ReleasePolicy::Type GetReleasePolicy() const;
+  Ui::Image::ReleasePolicy GetReleasePolicy() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetSynchronousLoading
@@ -419,18 +421,18 @@ private:                    // Data
 
   UiColor mImageColor;
 
-  LottieAnimationViewStopBehavior::Type mStopBehavior;
-  LottieAnimationViewLoopingMode::Type  mLoopingMode;
-  PlayRangeType                         mPlayRangeType;
-  Ui::ReleasePolicy::Type               mReleasePolicy;
-  int                                   mLoopCount;
-  int                                   mMinFrame;
-  int                                   mMaxFrame;
-  int                                   mDesiredWidth;
-  int                                   mDesiredHeight;
-  int                                   mDepthIndex;
-  float                                 mFrameSpeedFactor;
-  float                                 mRenderScale;
+  Ui::AnimatedImage::StopBehavior  mStopBehavior;
+  Ui::LottieAnimation::LoopingMode mLoopingMode;
+  PlayRangeType                    mPlayRangeType;
+  Ui::Image::ReleasePolicy         mReleasePolicy;
+  int                              mLoopCount;
+  int                              mMinFrame;
+  int                              mMaxFrame;
+  int                              mDesiredWidth;
+  int                              mDesiredHeight;
+  int                              mDepthIndex;
+  float                            mFrameSpeedFactor;
+  float                            mRenderScale;
 
   bool mRedrawInScalingDown;
   bool mRedrawInScalingUp;

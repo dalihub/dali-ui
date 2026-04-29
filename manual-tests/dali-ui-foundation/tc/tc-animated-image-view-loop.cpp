@@ -36,13 +36,13 @@ constexpr uint32_t C_STATUS_BG   = 0x222222;
 constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
 constexpr uint32_t C_BG          = 0x1A1A1A;
 
-const char* StopBehaviorName(AnimatedImageView::StopBehavior::Type b)
+const char* StopBehaviorName(Ui::AnimatedImage::StopBehavior b)
 {
   switch(b)
   {
-    case AnimatedImageView::StopBehavior::CURRENT_FRAME: return "CURRENT_FRAME";
-    case AnimatedImageView::StopBehavior::FIRST_FRAME:   return "FIRST_FRAME";
-    case AnimatedImageView::StopBehavior::LAST_FRAME:    return "LAST_FRAME";
+    case Ui::AnimatedImage::StopBehavior::CURRENT_FRAME: return "CURRENT_FRAME";
+    case Ui::AnimatedImage::StopBehavior::FIRST_FRAME:   return "FIRST_FRAME";
+    case Ui::AnimatedImage::StopBehavior::LAST_FRAME:    return "LAST_FRAME";
     default:                                             return "?";
   }
 }
@@ -120,9 +120,9 @@ public:
       MakeButton("Loop: 5",         [this] { OnLoopCount(5); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("Stop:\nCURRENT", [this] { OnStopBehavior(AnimatedImageView::StopBehavior::CURRENT_FRAME); }),
-      MakeButton("Stop:\nFIRST",   [this] { OnStopBehavior(AnimatedImageView::StopBehavior::FIRST_FRAME); }),
-      MakeButton("Stop:\nLAST",    [this] { OnStopBehavior(AnimatedImageView::StopBehavior::LAST_FRAME); }),
+      MakeButton("Stop:\nCURRENT", [this] { OnStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME); }),
+      MakeButton("Stop:\nFIRST",   [this] { OnStopBehavior(Ui::AnimatedImage::StopBehavior::FIRST_FRAME); }),
+      MakeButton("Stop:\nLAST",    [this] { OnStopBehavior(Ui::AnimatedImage::StopBehavior::LAST_FRAME); }),
     }));
 
     contentArea.Add(content);
@@ -150,7 +150,7 @@ private:
     UpdateLabel();
   }
 
-  void OnStopBehavior(AnimatedImageView::StopBehavior::Type b)
+  void OnStopBehavior(Ui::AnimatedImage::StopBehavior b)
   {
     mView.SetStopBehavior(b);
     UpdateLabel();
