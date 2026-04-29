@@ -458,6 +458,28 @@ UiColor View::GetBackgroundColor()
   return GetImpl(*this).GetBackgroundColor();
 }
 
+View& View::SetBackgroundColor(const UiColor& color)
+{
+  GetImpl(*this).SetBackgroundColor(color);
+  return *this;
+}
+
+UiColor View::GetColor() const
+{
+  return GetImpl(*this).GetColor();
+}
+
+View& View::SetColor(const UiColor& color)
+{
+  GetImpl(*this).SetColor(color);
+  return *this;
+}
+
+UiColor View::GetCurrentColor() const
+{
+  return GetImpl(*this).GetCurrentColor();
+}
+
 bool View::IsEnabled() const
 {
   return GetImpl(*this).IsEnabled();
@@ -491,12 +513,6 @@ const ViewState& View::GetState() const
 View::StateChangedSignalType& View::StateChangedSignal()
 {
   return GetImpl(*this).StateChangedSignal();
-}
-
-View& View::SetBackgroundColor(const UiColor& color)
-{
-  GetImpl(*this).SetBackgroundColor(color);
-  return *this;
 }
 
 Vector4 View::GetCornerRadius() const

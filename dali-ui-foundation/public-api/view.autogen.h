@@ -216,6 +216,13 @@
   */ \
   ChildClass& SetBackgroundColor(const UiColor& color) { View::SetBackgroundColor(color); return *this; } \
   /** \
+  * @brief Sets the color. \
+  * \
+  * @param[in] color The color to set \
+  * @return Reference to this View for fluent chaining \
+  */ \
+  ChildClass& SetColor(const UiColor& color) { View::SetColor(color); return *this; } \
+  /** \
   * @brief Sets whether the view is enabled. \
   * \
   * A disabled view does not receive user interaction. Setting this to false \

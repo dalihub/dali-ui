@@ -694,6 +694,28 @@ public: // Properties
   View& SetBackgroundColor(const UiColor& color);
 
   /**
+   * @brief Gets the color.
+   *
+   * @return The color
+   */
+  UiColor GetColor() const;
+
+  /**
+   * @brief Sets the color.
+   *
+   * @param[in] color The color to set
+   * @return Reference to this View for fluent chaining
+   */
+  View& SetColor(const UiColor& color);
+
+  /**
+   * @brief Gets the current color.
+   *
+   * @return The current color
+   */
+  UiColor GetCurrentColor() const;
+
+  /**
    * @brief Checks if the view is enabled.
    *
    * @return True if the view is enabled (default), false if disabled

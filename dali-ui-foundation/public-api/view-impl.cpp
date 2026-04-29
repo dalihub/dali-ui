@@ -674,6 +674,31 @@ void ViewImpl::SetBackgroundColor(const UiColor& color)
   SetColorBinding("BackgroundColor", color, this, &ViewImpl::SetBackgroundColorInternal);
 }
 
+UiColor ViewImpl::GetColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "Color", outColor))
+  {
+    return outColor;
+  }
+  return UiColor(Self().GetProperty<Vector4>(Actor::Property::COLOR));
+}
+
+void ViewImpl::SetColor(const UiColor& color)
+{
+  SetColorBinding("Color", color, this, &ViewImpl::SetColorInternal);
+}
+
+UiColor ViewImpl::GetCurrentColor() const
+{
+  return UiColor(Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR));
+}
+
+void ViewImpl::SetColorInternal(const Vector4& color)
+{
+  Self().SetProperty(Actor::Property::COLOR, color);
+}
+
 Vector4 ViewImpl::GetCornerRadius() const
 {
   return Self().GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);

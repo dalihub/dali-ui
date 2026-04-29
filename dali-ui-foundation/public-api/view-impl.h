@@ -391,6 +391,21 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetBackgroundColor(const UiColor& color);
 
   /**
+   * @copydoc Ui::View::GetColor()
+   */
+  UiColor GetColor() const;
+
+  /**
+   * @copydoc Ui::View::SetColor()
+   */
+  void SetColor(const UiColor& color);
+
+  /**
+   * @copydoc Ui::View::GetCurrentColor()
+   */
+  UiColor GetCurrentColor() const;
+
+  /**
    * @copydoc Ui::View::GetCornerRadius()
    */
   Vector4 GetCornerRadius() const;
@@ -1014,6 +1029,7 @@ private:
 
   void SetBackgroundColorInternal(const Vector4& color);
   void SetBorderlineColorInternal(const Vector4& color);
+  void SetColorInternal(const Vector4& color);
   void OnChildOrderChanged(Actor orderChangedChild);
 
   Internal::ViewDataImpl* mImpl;
