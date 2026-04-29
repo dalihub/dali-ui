@@ -30,11 +30,11 @@ uint32_t LoadAnimatedImage(AsyncImageLoader asyncImageLoader, Dali::AnimatedImag
 }
 
 uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDimensions dimensions,
-              Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+              SamplingMode::Type samplingMode, bool orientationCorrection,
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   return GetImplementation(asyncImageLoader)
-    .Load(Ui::Internal::VisualUrl(url), dimensions, fittingMode, samplingMode, orientationCorrection,
+    .Load(Ui::Internal::VisualUrl(url), dimensions, samplingMode, orientationCorrection,
           preMultiplyOnLoad, false);
 }
 

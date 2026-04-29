@@ -103,7 +103,7 @@ Dali::PixelData GetDummyPixelDataByFormat(Pixel::Format format)
 } // namespace
 
 FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
-                                           Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode,
+                                           SamplingMode::Type                       samplingMode,
                                            bool                                     orientationCorrection,
                                            DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                                            CallbackBase* callback)
@@ -113,7 +113,6 @@ FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions
   mUrl(url),
   mTextures(),
   mDimensions(dimensions),
-  mFittingMode(fittingMode),
   mSamplingMode(samplingMode),
   mPreMultiplyOnLoad(preMultiplyOnLoad),
   mCallback(),
@@ -217,18 +216,18 @@ void FastTrackLoadingTask::Load()
   {
     if(mLoadPlanesAvailable)
     {
-      Dali::LoadImagePlanesFromFile(mUrl.GetUrl(), pixelBuffers, mDimensions, mFittingMode, mSamplingMode,
+      Dali::LoadImagePlanesFromFile(mUrl.GetUrl(), pixelBuffers, mDimensions, mSamplingMode,
                                     mOrientationCorrection);
     }
     else
     {
       pixelBuffer =
-        Dali::LoadImageFromFile(mUrl.GetUrl(), mDimensions, mFittingMode, mSamplingMode, mOrientationCorrection);
+        Dali::LoadImageFromFile(mUrl.GetUrl(), mDimensions, mSamplingMode, mOrientationCorrection);
     }
   }
   else if(mUrl.IsValid())
   {
-    pixelBuffer = Dali::DownloadImageSynchronously(mUrl.GetUrl(), mDimensions, mFittingMode, mSamplingMode,
+    pixelBuffer = Dali::DownloadImageSynchronously(mUrl.GetUrl(), mDimensions, mSamplingMode,
                                                    mOrientationCorrection);
   }
 

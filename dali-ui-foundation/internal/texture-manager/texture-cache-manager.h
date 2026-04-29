@@ -204,7 +204,6 @@ public:
    * @return                     A hash of the provided data for caching.
    */
   TextureCacheManager::TextureHash GenerateHash(const VisualUrl& url, const Dali::ImageDimensions& size,
-                                                const Dali::FittingMode::Type        fittingMode,
                                                 const Dali::SamplingMode::Type       samplingMode,
                                                 const TextureCacheManager::TextureId maskTextureId,
                                                 const bool cropToMask, const bool orientationCorrection,
@@ -229,7 +228,6 @@ public:
    */
   TextureCacheManager::TextureCacheIndex FindCachedTexture(const TextureCacheManager::TextureHash hash,
                                                            const VisualUrl& url, const Dali::ImageDimensions& size,
-                                                           const Dali::FittingMode::Type          fittingMode,
                                                            const Dali::SamplingMode::Type         samplingMode,
                                                            const TextureCacheManager::StorageType storageType,
                                                            const TextureCacheManager::TextureId   maskTextureId,

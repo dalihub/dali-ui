@@ -106,7 +106,6 @@ extern const char* const TOTAL_FRAME_NUMBER_NAME;
 extern const char* const STOP_BEHAVIOR_NAME;
 extern const char* const LOOPING_MODE_NAME;
 extern const char* const SYNCHRONOUS_LOADING;
-extern const char* const IMAGE_FITTING_MODE;
 extern const char* const IMAGE_SAMPLING_MODE;
 extern const char* const IMAGE_DESIRED_WIDTH;
 extern const char* const IMAGE_DESIRED_HEIGHT;

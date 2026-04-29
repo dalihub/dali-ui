@@ -39,7 +39,6 @@ public:
    * Constructor.
    * @param[in] textureManager    The texture manager
    * @param[in] size              The width and height to fit the loaded image to.
-   * @param[in] fittingMode       The FittingMode of the resource to load
    * @param[in] samplingMode      The SamplingMode of the resource to load
    * @param[in] urlList           List of urls to cache
    * @param[in] maskingData       Masking data to be applied.
@@ -52,7 +51,7 @@ public:
    * This will start loading textures immediately, according to the
    * batch and cache sizes.
    */
-  RollingImageCache(TextureManager& textureManager, ImageDimensions size, Dali::FittingMode::Type fittingMode,
+  RollingImageCache(TextureManager& textureManager, ImageDimensions size,
                     Dali::SamplingMode::Type samplingMode, UrlList& urlList,
                     TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
                     uint16_t cacheSize, uint16_t batchSize, uint32_t interval, bool preMultiplyOnLoad);

@@ -58,16 +58,6 @@ namespace
 {
 const int CUSTOM_PROPERTY_COUNT(6); // ltr, wrap, pixel area, crop to mask, mask texture ratio, pre-multiplied alph
 
-// fitting modes
-DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SHRINK_TO_FIT)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, SCALE_TO_FILL)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_WIDTH)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, FIT_HEIGHT)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, VISUAL_FITTING)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::FittingMode, DEFAULT)
-DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
-
 // sampling modes
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SAMPLING_MODE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::SamplingMode, BOX)
@@ -132,7 +122,6 @@ struct NameIndexMatch
 };
 
 const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
-  {IMAGE_FITTING_MODE, Ui::ImageVisual::Property::FITTING_MODE},
   {IMAGE_SAMPLING_MODE, Ui::ImageVisual::Property::SAMPLING_MODE},
   {IMAGE_DESIRED_WIDTH, Ui::ImageVisual::Property::DESIRED_WIDTH},
   {IMAGE_DESIRED_HEIGHT, Ui::ImageVisual::Property::DESIRED_HEIGHT},
@@ -298,7 +287,7 @@ void AnimatedImageVisual::CreateImageCache()
   if(mAnimatedImageLoading)
   {
     mImageCache = new RollingAnimatedImageCache(
-      textureManager, mDesiredSize, mFittingMode, mSamplingMode, mAnimatedImageLoading, mMaskingData, *this,
+      textureManager, mDesiredSize, mSamplingMode, mAnimatedImageLoading, mMaskingData, *this,
       mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), IsPreMultipliedAlphaEnabled());
   }
   else if(mImageUrls)
@@ -312,12 +301,12 @@ void AnimatedImageVisual::CreateImageCache()
     if(cacheSize < numUrls)
     {
       mImageCache =
-        new RollingImageCache(textureManager, mDesiredSize, mFittingMode, mSamplingMode, *mImageUrls, mMaskingData,
+        new RollingImageCache(textureManager, mDesiredSize, mSamplingMode, *mImageUrls, mMaskingData,
                               *this, cacheSize, batchSize, mFrameDelay, IsPreMultipliedAlphaEnabled());
     }
     else
     {
-      mImageCache = new FixedImageCache(textureManager, mDesiredSize, mFittingMode, mSamplingMode, *mImageUrls,
+      mImageCache = new FixedImageCache(textureManager, mDesiredSize, mSamplingMode, *mImageUrls,
                                         mMaskingData, *this, batchSize, mFrameDelay, IsPreMultipliedAlphaEnabled());
     }
   }
@@ -364,7 +353,6 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mWrapModeU(WrapMode::DEFAULT),
   mWrapModeV(WrapMode::DEFAULT),
   mStopBehavior(DevelImageVisual::StopBehavior::CURRENT_FRAME),
-  mFittingMode(Dali::FittingMode::VISUAL_FITTING),
   mSamplingMode(SamplingMode::BOX_THEN_LINEAR),
   mStartFirstFrame(false),
   mIsJumpTo(false),
@@ -572,7 +560,6 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   map.Insert(Ui::ImageVisual::Property::LOAD_POLICY, mLoadPolicy);
   map.Insert(Ui::ImageVisual::Property::RELEASE_POLICY, mReleasePolicy);
-  map.Insert(Ui::ImageVisual::Property::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, mSamplingMode);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
@@ -956,14 +943,6 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       int loadPolicy = 0;
       Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy);
       mLoadPolicy = Ui::ImageVisual::LoadPolicy::Type(loadPolicy);
-      break;
-    }
-
-    case Ui::ImageVisual::Property::FITTING_MODE:
-    {
-      int fittingMode = 0;
-      Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode);
-      mFittingMode = Dali::FittingMode::Type(fittingMode);
       break;
     }
 

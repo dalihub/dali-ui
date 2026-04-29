@@ -57,7 +57,7 @@ public:
    */
   void LoadAnimatedImage(const TextureManager::TextureId textureId, Dali::AnimatedImageLoading animatedImageLoading,
                          const uint32_t frameIndex, const Dali::ImageDimensions& desiredSize,
-                         const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+                         const Dali::SamplingMode::Type                 samplingMode,
                          const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, const bool loadYuvPlanes);
 
   /**
@@ -75,7 +75,7 @@ public:
    * @param[in] loadYuvPlanes         True if the image should be loaded as yuv planes
    */
   void Load(const TextureManager::TextureId textureId, const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
-            const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+            const Dali::SamplingMode::Type samplingMode,
             const bool orientationCorrection, const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
             const bool loadYuvPlanes);
 

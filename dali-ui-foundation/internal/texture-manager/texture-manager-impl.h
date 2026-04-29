@@ -121,7 +121,6 @@ public:
   TextureSet LoadAnimatedImageTexture(const VisualUrl& url, Dali::AnimatedImageLoading animatedImageLoading,
                                       const uint32_t frameIndex, TextureManager::TextureId& textureId,
                                       MaskingDataPointer& maskInfo, const Dali::ImageDimensions& desiredSize,
-                                      const Dali::FittingMode::Type  fittingMode,
                                       const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
                                       TextureUploadObserver*          textureObserver,
                                       TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
@@ -146,7 +145,6 @@ public:
    * @return                          The pixel buffer containing the image, or empty if still loading.
    */
   Devel::PixelBuffer LoadPixelBuffer(const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
-                                     const Dali::FittingMode::Type  fittingMode,
                                      const Dali::SamplingMode::Type samplingMode, const bool synchronousLoading,
                                      TextureUploadObserver* textureObserver, const bool orientationCorrection,
                                      TextureManager::MultiplyOnLoad& preMultiplyOnLoad);
@@ -178,7 +176,7 @@ public:
    * @return                          The texture set containing the image, or empty if still loading.
    */
   TextureSet LoadTexture(const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
-                         const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+                         const Dali::SamplingMode::Type samplingMode,
                          MaskingDataPointer& maskInfo, const bool synchronousLoading,
                          TextureManager::TextureId& textureId, bool& loadingStatus,
                          TextureUploadObserver* textureObserver, const bool orientationCorrection,
@@ -301,7 +299,7 @@ public: // Load Request API
    * @return                          A TextureId to use as a handle to reference this Texture
    */
   TextureId RequestLoad(const VisualUrl& url, const ImageDimensions& desiredSize,
-                        const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+                        const Dali::SamplingMode::Type samplingMode,
                         TextureUploadObserver* observer, const bool orientationCorrection,
                         const TextureManager::ReloadPolicy reloadPolicy,
                         TextureManager::MultiplyOnLoad& preMultiplyOnLoad, const bool synchronousLoading = false);
@@ -340,8 +338,8 @@ private: // Internal Load Request API
    */
   TextureId RequestLoad(const VisualUrl& url, const TextureManager::TextureId maskTextureId,
                         const TextureManager::TextureId previousTextureId, const float contentScale,
-                        const ImageDimensions& desiredSize, const Dali::FittingMode::Type fittingMode,
-                        const Dali::SamplingMode::Type samplingMode, const bool cropToMask,
+                        const ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
+                        const bool             cropToMask,
                         TextureUploadObserver* observer, const bool orientationCorrection,
                         const TextureManager::ReloadPolicy reloadPolicy,
                         TextureManager::MultiplyOnLoad& preMultiplyOnLoad, const bool synchronousLoading = false);
@@ -395,8 +393,8 @@ private: // Internal Load Request API
    */
   TextureId RequestLoadInternal(const VisualUrl& url, const TextureManager::TextureId maskTextureId,
                                 const TextureManager::TextureId previousTextureId, const float contentScale,
-                                const Dali::ImageDimensions& desiredSize, const Dali::FittingMode::Type fittingMode,
-                                const Dali::SamplingMode::Type samplingMode, const bool cropToMask,
+                                const Dali::ImageDimensions& desiredSize, const Dali::SamplingMode::Type samplingMode,
+                                const bool                        cropToMask,
                                 const TextureManager::StorageType storageType, TextureUploadObserver* observer,
                                 const bool orientationCorrection, const TextureManager::ReloadPolicy reloadPolicy,
                                 TextureManager::MultiplyOnLoad& preMultiplyOnLoad,
@@ -417,7 +415,7 @@ private: // Internal Load Request API
    * @return PixelBuffer of loaded image.
    */
   void LoadImageSynchronously(const VisualUrl& url, const Dali::ImageDimensions& desiredSize,
-                              const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+                              const Dali::SamplingMode::Type samplingMode,
                               const bool orientationCorrection, const bool loadYuvPlanes,
                               std::vector<Devel::PixelBuffer>& pixelBuffers);
 

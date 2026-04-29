@@ -23,7 +23,7 @@ namespace Ui
 {
 namespace Internal
 {
-ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size, Dali::FittingMode::Type fittingMode,
+ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size,
                        Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer& maskingData,
                        ImageCache::FrameReadyObserver& observer, uint32_t batchSize, uint32_t interval,
                        bool preMultiplyOnLoad)
@@ -34,7 +34,6 @@ ImageCache::ImageCache(TextureManager& textureManager, ImageDimensions size, Dal
   mBatchSize(batchSize),
   mInterval(interval),
   mLoadState(TextureManager::LoadState::NOT_STARTED),
-  mFittingMode(fittingMode),
   mSamplingMode(samplingMode),
   mRequestingLoad(false),
   mPreMultiplyOnLoad(preMultiplyOnLoad)

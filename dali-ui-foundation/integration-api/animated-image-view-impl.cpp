@@ -1099,7 +1099,6 @@ void AnimatedImageViewImpl::UpdateVisual()
   map.Insert(Ui::DevelImageVisual::Property::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::ImageVisual::Property::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Visual::Property::PREMULTIPLIED_ALPHA, mPreMultipliedAlpha);
-  map.Insert(Ui::ImageVisual::Property::FITTING_MODE, static_cast<int>(mFittingMode));
   map.Insert(Ui::ImageVisual::Property::SAMPLING_MODE, static_cast<int>(mSamplingMode));
   map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
 

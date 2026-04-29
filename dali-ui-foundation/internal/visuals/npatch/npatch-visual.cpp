@@ -115,7 +115,7 @@ void NPatchVisual::LoadImages()
     bool                               loadingStatus  = false;
 
     // Load the auxiliary image
-    mAuxiliaryTextureSet = textureManager.LoadTexture(mAuxiliaryUrl, Dali::ImageDimensions(), Dali::FittingMode::DEFAULT,
+    mAuxiliaryTextureSet = textureManager.LoadTexture(mAuxiliaryUrl, Dali::ImageDimensions(),
                                                       SamplingMode::BOX_THEN_LINEAR, maskingDataPtr, synchronousLoading,
                                                       mAuxiliaryTextureId, loadingStatus, this, true,
                                                       TextureManager::ReloadPolicy::CACHED, preMultiplyOnLoad);

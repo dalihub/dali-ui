@@ -120,14 +120,12 @@ public:
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] properties A Property::Map containing settings for this visual
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] fittingMode The FittingMode of the resource to load
    * @param[in] samplingMode The SamplingMode of the resource to load
    * @return A smart-pointer to the newly allocated visual.
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, const Property::Map& properties,
                             ImageDimensions          size         = ImageDimensions(),
-                            Dali::FittingMode::Type  fittingMode  = Dali::FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
   /**
@@ -140,13 +138,11 @@ public:
    * @param[in] shaderFactory The ImageVisualShaderFactory object
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] fittingMode The FittingMode of the resource to load
    * @param[in] samplingMode The SamplingMode of the resource to load
    * @return A smart-pointer to the newly allocated visual.
    */
   static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                             const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions(),
-                            Dali::FittingMode::Type  fittingMode  = Dali::FittingMode::VISUAL_FITTING,
                             Dali::SamplingMode::Type samplingMode = SamplingMode::BOX_THEN_LINEAR);
 
 public: // from Visual
@@ -186,11 +182,10 @@ protected:
    * @param[in] shaderFactory The ImageVisualShaderFactory object
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
-   * @param[in] fittingMode The FittingMode of the resource to load
    * @param[in] samplingMode The SamplingMode of the resource to load
    */
   ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-              ImageDimensions size, Dali::FittingMode::Type fittingMode, Dali::SamplingMode::Type samplingMode);
+              ImageDimensions size, Dali::SamplingMode::Type samplingMode);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -365,7 +360,6 @@ private:
 
   ImageVisualShaderFactory& mImageVisualShaderFactory;
 
-  Dali::FittingMode::Type                    mFittingMode : 4;
   Dali::SamplingMode::Type                   mSamplingMode : 5;
   Dali::WrapMode::Type                       mWrapModeU : 3;
   Dali::WrapMode::Type                       mWrapModeV : 3;

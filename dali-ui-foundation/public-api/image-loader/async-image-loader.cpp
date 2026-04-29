@@ -64,22 +64,22 @@ AsyncImageLoader AsyncImageLoader::New()
 
 uint32_t AsyncImageLoader::Load(const Dali::String& url)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), ImageDimensions(), Dali::FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), ImageDimensions(),
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
 uint32_t AsyncImageLoader::Load(const Dali::String& url, ImageDimensions dimensions)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions, Dali::FittingMode::DEFAULT,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions,
                                        SamplingMode::BOX_THEN_LINEAR, true,
                                        DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 
-uint32_t AsyncImageLoader::Load(const Dali::String& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+uint32_t AsyncImageLoader::Load(const Dali::String& url, ImageDimensions dimensions,
                                 SamplingMode::Type samplingMode, bool orientationCorrection)
 {
-  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions, fittingMode, samplingMode,
+  return GetImplementation(*this).Load(Ui::Internal::VisualUrl(ToStdString(url)), dimensions, samplingMode,
                                        orientationCorrection, DevelAsyncImageLoader::PreMultiplyOnLoad::OFF, false);
 }
 

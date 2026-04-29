@@ -65,8 +65,6 @@ public:
    * @param [in] animatedImageLoading The AnimatedImageLoading to load animated image
    * @param [in] frameIndex The frame index of a frame to be loaded frame
    * @param [in] dimensions The width and height to fit the loaded image to
-   * @param [in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the
-   * size parameter
    * @param [in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
    * desired size
    * @param [in] preMultiplyOnLoad ON if the image's color should be multiplied by it's alpha. Set to OFF if there is no
@@ -75,8 +73,8 @@ public:
    * @param [in] callback The callback that is called when the operation is completed.
    */
   LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-              Dali::ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
-              Dali::SamplingMode::Type samplingMode, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
+              Dali::ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
+              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
               bool loadPlanes, CallbackBase* callback);
 
   /**
@@ -84,8 +82,6 @@ public:
    * @param [in] id of the task
    * @param [in] url The URL of the image file to load.
    * @param [in] size The width and height to fit the loaded image to, 0.0 means whole image
-   * @param [in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the
-   * size parameter.
    * @param [in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
    * desired size.
    * @param [in] orientationCorrection Reorient the image to respect any orientation metadata in its header.
@@ -94,7 +90,7 @@ public:
    * @param [in] loadPlanes true to load image planes or false to load bitmap image.
    * @param [in] callback The callback that is called when the operation is completed.
    */
-  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+  LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
               SamplingMode::Type samplingMode, bool orientationCorrection,
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
 
@@ -103,8 +99,6 @@ public:
    * @param [in] id of the task
    * @param [in] encodedImageBuffer The encoded buffer of the image to load.
    * @param [in] size The width and height to fit the loaded image to, 0.0 means whole image
-   * @param [in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the
-   * size parameter.
    * @param [in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
    * desired size.
    * @param [in] orientationCorrection Reorient the image to respect any orientation metadata in its header.
@@ -113,7 +107,7 @@ public:
    * @param [in] callback The callback that is called when the operation is completed.
    */
   LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
-              Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+              SamplingMode::Type samplingMode, bool orientationCorrection,
               DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
@@ -184,7 +178,6 @@ public:
   uint32_t                      id;                 ///< The unique id associated with this task.
   TextureManagerType::TextureId textureId;          ///< textureId for loading
   ImageDimensions               dimensions;         ///< dimensions to load
-  Dali::FittingMode::Type       fittingMode;        ///< fitting options
   SamplingMode::Type            samplingMode;       ///< sampling options
   DevelAsyncImageLoader::PreMultiplyOnLoad
     preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha

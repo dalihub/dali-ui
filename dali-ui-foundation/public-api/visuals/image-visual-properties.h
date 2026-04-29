@@ -57,15 +57,6 @@ enum
   URL = VISUAL_PROPERTY_START_INDEX,
 
   /**
-   * @brief Fitting options, used when resizing images to fit desired dimensions.
-   * @details Name "fittingMode", type Dali::FittingMode (Property::INTEGER) or Property::STRING.
-   * @note Optional. If not supplied, default is Dali::FittingMode::SHRINK_TO_FIT.
-   * @note For Normal Quad images only.
-   * @see Dali::FittingMode
-   */
-  FITTING_MODE,
-
-  /**
    * @brief Filtering options, used when resizing images to sample original pixels.
    * @details Name "samplingMode", type Dali::SamplingMode (Property::INTEGER) or Property::STRING.
    * @note Optional. If not supplied, default is SamplingMode::BOX.

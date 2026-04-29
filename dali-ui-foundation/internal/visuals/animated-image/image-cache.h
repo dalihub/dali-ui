@@ -61,7 +61,6 @@ public:
    * @brief Constructor.
    * @param[in] textureManager    The texture manager
    * @param[in] size              The width and height to fit the loaded image to.
-   * @param[in] fittingMode       The FittingMode of the resource to load
    * @param[in] samplingMode      The SamplingMode of the resource to load
    * @param[in] observer          FrameReady observer
    * @param[in] maskingData       Masking data to be applied.
@@ -72,7 +71,7 @@ public:
    * This will start loading textures immediately, according to the
    * batch and cache sizes. The cache is as large as the number of urls.
    */
-  ImageCache(TextureManager& textureManager, ImageDimensions size, Dali::FittingMode::Type fittingMode,
+  ImageCache(TextureManager& textureManager, ImageDimensions size,
              Dali::SamplingMode::Type samplingMode, TextureManager::MaskingDataPointer& maskingData,
              ImageCache::FrameReadyObserver& observer, uint32_t batchSize, uint32_t interval, bool preMultiplyOnLoad);
 
@@ -148,7 +147,6 @@ protected:
   uint32_t                            mBatchSize;
   uint32_t                            mInterval;
   TextureManager::LoadState           mLoadState;
-  Dali::FittingMode::Type             mFittingMode : 4;
   Dali::SamplingMode::Type            mSamplingMode : 5;
   bool                                mRequestingLoad : 1;
   bool                                mPreMultiplyOnLoad : 1;

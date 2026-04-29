@@ -311,7 +311,6 @@ const char* const TOTAL_FRAME_NUMBER_NAME("totalFrameNumber");
 const char* const STOP_BEHAVIOR_NAME("stopBehavior");
 const char* const LOOPING_MODE_NAME("loopingMode");
 const char* const SYNCHRONOUS_LOADING("synchronousLoading");
-const char* const IMAGE_FITTING_MODE("fittingMode");
 const char* const IMAGE_SAMPLING_MODE("samplingMode");
 const char* const IMAGE_DESIRED_WIDTH("desiredWidth");
 const char* const IMAGE_DESIRED_HEIGHT("desiredHeight");

@@ -64,8 +64,6 @@ DALI_UI_API uint32_t LoadAnimatedImage(AsyncImageLoader           asyncImageLoad
  * @param[in] asyncImageLoader The ayncImageLoader
  * @param[in] url The URL of the image file to load
  * @param[in] dimensions The width and height to fit the loaded image to
- * @param[in] fittingMode The method used to fit the shape of the image before loading to the shape defined by the size
- * parameter
  * @param[in] samplingMode The filtering method used when sampling pixels from the input image while fitting it to
  * desired size
  * @param[in] orientationCorrection Reorient the image to respect any orientation metadata in its header
@@ -74,7 +72,7 @@ DALI_UI_API uint32_t LoadAnimatedImage(AsyncImageLoader           asyncImageLoad
  * @return The loading task id
  */
 DALI_UI_API uint32_t Load(AsyncImageLoader asyncImageLoader, const std::string& url, ImageDimensions dimensions,
-                          Dali::FittingMode::Type fittingMode, SamplingMode::Type samplingMode, bool orientationCorrection,
+                          SamplingMode::Type samplingMode, bool orientationCorrection,
                           DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
 
 /**

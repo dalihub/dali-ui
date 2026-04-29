@@ -550,7 +550,7 @@ TextureCacheManager::TextureCacheIndex TextureCacheManager::FindCachedEncodedIma
 }
 
 TextureCacheManager::TextureHash TextureCacheManager::GenerateHash(
-  const VisualUrl& url, const Dali::ImageDimensions& size, const Dali::FittingMode::Type fittingMode,
+  const VisualUrl& url, const Dali::ImageDimensions& size,
   const Dali::SamplingMode::Type samplingMode, const TextureCacheManager::TextureId maskTextureId,
   const bool cropToMask, const bool orientationCorrection, const uint32_t frameIndex)
 {
@@ -571,9 +571,8 @@ TextureCacheManager::TextureHash TextureCacheManager::GenerateHash(
     *hashTargetPtr++ = size.GetHeight() & 0xff;
     *hashTargetPtr++ = (size.GetHeight() >> 8u) & 0xff;
 
-    // Bit-pack the FittingMode, SamplingMode.
-    // FittingMode=3bits, SamplingMode=4bits
-    *hashTargetPtr = (fittingMode << 4u) | (samplingMode);
+    // Bit-pack the SamplingMode (4 bits).
+    *hashTargetPtr = samplingMode & 0x0f;
   }
 
   // Append whether we will not correction orientation. We don't do additional job when it is true, the general cases.
@@ -624,7 +623,7 @@ TextureCacheManager::TextureHash TextureCacheManager::GenerateHash(
 
 TextureCacheManager::TextureCacheIndex TextureCacheManager::FindCachedTexture(
   const TextureCacheManager::TextureHash hash, const VisualUrl& url, const Dali::ImageDimensions& size,
-  const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+  const Dali::SamplingMode::Type         samplingMode,
   const TextureCacheManager::StorageType storageType, const TextureCacheManager::TextureId maskTextureId,
   const bool cropToMask, const bool orientationCorrection,
   const TextureCacheManager::MultiplyOnLoad preMultiplyOnLoad, const bool isAnimatedImage, const uint32_t frameIndex)
@@ -646,7 +645,7 @@ TextureCacheManager::TextureCacheIndex TextureCacheManager::FindCachedTexture(
            (isAnimatedImage == textureInfo.isAnimatedImageFormat) && (storageType == textureInfo.storageType) &&
            (frameIndex == textureInfo.frameIndex) && (orientationCorrection == textureInfo.orientationCorrection) &&
            ((size.GetWidth() == 0 && size.GetHeight() == 0) ||
-            (fittingMode == textureInfo.fittingMode && samplingMode == textureInfo.samplingMode)))
+            (samplingMode == textureInfo.samplingMode)))
         {
           // 1. If preMultiplyOnLoad is MULTIPLY_ON_LOAD, then textureInfo.preMultiplyOnLoad should be true. The
           // premultiplication result can be different.

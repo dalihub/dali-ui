@@ -218,7 +218,7 @@ struct TextureInfo
 {
   TextureInfo(const TextureId textureId, const TextureId maskTextureId, const VisualUrl& url,
               const Dali::ImageDimensions& desiredSize, const float scaleFactor,
-              const Dali::FittingMode::Type fittingMode, const Dali::SamplingMode::Type samplingMode,
+              const Dali::SamplingMode::Type samplingMode,
               const bool loadSynchronously, const bool cropToMask, const TextureHash hash,
               const bool orientationCorrection, const bool preMultiplyOnLoad,
               const Dali::AnimatedImageLoading& animatedImageLoading, const uint32_t frameIndex,
@@ -232,7 +232,6 @@ struct TextureInfo
     scaleFactor(scaleFactor),
     referenceCount(1),
     loadState(LoadState::NOT_STARTED),
-    fittingMode(fittingMode),
     samplingMode(samplingMode),
     storageType(StorageType::UPLOAD_TO_TEXTURE),
     animatedImageLoading(animatedImageLoading),
@@ -266,7 +265,6 @@ struct TextureInfo
   float                      scaleFactor;          ///< The scale factor to apply to the Texture when masking
   int32_t                    referenceCount;       ///< The reference count of clients using this Texture
   LoadState                  loadState;            ///< The load state showing the load progress of the Texture
-  Dali::FittingMode::Type    fittingMode : 4;      ///< The requested FittingMode
   Dali::SamplingMode::Type   samplingMode : 5;     ///< The requested SamplingMode
   StorageType                storageType;          ///< CPU storage / GPU upload;
   Dali::AnimatedImageLoading animatedImageLoading; ///< AnimatedImageLoading that contains animated image information.

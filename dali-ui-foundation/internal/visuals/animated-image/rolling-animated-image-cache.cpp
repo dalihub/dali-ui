@@ -63,12 +63,12 @@ static constexpr uint32_t FIRST_FRAME_INDEX  = 0u;
 } // namespace
 
 RollingAnimatedImageCache::RollingAnimatedImageCache(
-  TextureManager& textureManager, ImageDimensions size, Dali::FittingMode::Type fittingMode,
+  TextureManager& textureManager, ImageDimensions size,
   Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
   TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer, uint16_t cacheSize,
   uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU, const Dali::WrapMode::Type& wrapModeV,
   bool isSynchronousLoading, bool preMultiplyOnLoad)
-: ImageCache(textureManager, size, fittingMode, samplingMode, maskingData, observer, batchSize, 0u,
+: ImageCache(textureManager, size, samplingMode, maskingData, observer, batchSize, 0u,
              preMultiplyOnLoad),
   mImageUrl(animatedImageLoading.GetUrl()),
   mAnimatedImageLoading(animatedImageLoading),
@@ -213,7 +213,7 @@ TextureSet RollingAnimatedImageCache::RequestFrameLoading(uint32_t frameIndex, b
 
   TextureManager::TextureId loadTextureId = TextureManager::INVALID_TEXTURE_ID;
   TextureSet                textureSet    = mTextureManager.LoadAnimatedImageTexture(
-    mImageUrl, mAnimatedImageLoading, frameIndex, loadTextureId, mMaskingData, mDesiredSize, mFittingMode,
+    mImageUrl, mAnimatedImageLoading, frameIndex, loadTextureId, mMaskingData, mDesiredSize,
     mSamplingMode, synchronousLoading, this, preMultiplyOnLoading);
   if(textureSet && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
   {

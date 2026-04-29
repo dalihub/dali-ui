@@ -32,7 +32,6 @@ namespace Property
 enum Type
 {
   URL                    = Dali::Ui::ImageVisual::Property::URL,
-  FITTING_MODE           = Dali::Ui::ImageVisual::Property::FITTING_MODE,
   SAMPLING_MODE          = Dali::Ui::ImageVisual::Property::SAMPLING_MODE,
   DESIRED_WIDTH          = Dali::Ui::ImageVisual::Property::DESIRED_WIDTH,
   DESIRED_HEIGHT         = Dali::Ui::ImageVisual::Property::DESIRED_HEIGHT,

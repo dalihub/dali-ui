@@ -55,24 +55,23 @@ uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animated
 }
 
 uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-                                             Dali::ImageDimensions desiredSize, Dali::FittingMode::Type fittingMode,
-                                             Dali::SamplingMode::Type                 samplingMode,
+                                             Dali::ImageDimensions desiredSize, Dali::SamplingMode::Type samplingMode,
                                              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
                                              bool                                     loadPlanes)
 {
   LoadingTaskPtr loadingTask =
-    new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize, fittingMode, samplingMode,
+    new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize, samplingMode,
                     preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
   return mLoadTaskId;
 }
 
-uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions,
                                 SamplingMode::Type samplingMode, bool orientationCorrection,
                                 DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes)
 {
   LoadingTaskPtr loadingTask =
-    new LoadingTask(++mLoadTaskId, url, dimensions, fittingMode, samplingMode, orientationCorrection,
+    new LoadingTask(++mLoadTaskId, url, dimensions, samplingMode, orientationCorrection,
                     preMultiplyOnLoad, loadPlanes, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   AsyncTaskManager::Get().AddTask(loadingTask);
   mLoadingTasks.push_back(AsyncImageLoadingInfo(loadingTask, mLoadTaskId));
@@ -80,12 +79,12 @@ uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions
 }
 
 uint32_t AsyncImageLoader::LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer,
-                                                  ImageDimensions dimensions, Dali::FittingMode::Type fittingMode,
+                                                  ImageDimensions           dimensions,
                                                   SamplingMode::Type samplingMode, bool orientationCorrection,
                                                   DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
-    new LoadingTask(++mLoadTaskId, encodedImageBuffer, dimensions, fittingMode, samplingMode, orientationCorrection,
+    new LoadingTask(++mLoadTaskId, encodedImageBuffer, dimensions, samplingMode, orientationCorrection,
                     preMultiplyOnLoad, MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
   Dali::AsyncTaskManager::Get().AddTask(loadingTask);
   mLoadingTasks.push_back(AsyncImageLoadingInfo(loadingTask, mLoadTaskId));
