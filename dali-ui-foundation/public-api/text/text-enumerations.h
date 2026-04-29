@@ -193,6 +193,31 @@ enum class OverflowMode : uint8_t
 };
 
 /**
+ * @brief Enumeration for password text display modes.
+ * Specifies how input text is displayed when password-style masking is used.
+ */
+enum class PasswordMode : uint8_t
+{
+  /**
+   * @brief Displays the input text without password masking.
+   */
+  NONE = 0,
+
+  /**
+   * @brief Masks all input text.
+   * Each input character is displayed using the password mask character.
+   */
+  HIDE_ALL = 1,
+
+  /**
+   * @brief Temporarily reveals the last entered character before masking it.
+   * The character remains visible for the password reveal duration,
+   * then is displayed using the password mask character.
+   */
+  REVEAL_LAST_CHARACTER = 2
+};
+
+/**
  * @brief Enumeration for font weight.
  */
 enum class FontWeight : uint8_t

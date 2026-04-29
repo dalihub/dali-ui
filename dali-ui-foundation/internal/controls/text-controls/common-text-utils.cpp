@@ -494,7 +494,7 @@ std::string TextControlAccessible::GetCurrentPlaceholderText() const
 
 std::uint32_t TextControlAccessible::GetSubstituteCharacter() const
 {
-  return Ui::Text::STAR;
+  return Ui::Text::DEFAULT_PASSWORD_MASK_CHARACTER;
 }
 
 bool TextControlAccessible::IsHiddenInput() const

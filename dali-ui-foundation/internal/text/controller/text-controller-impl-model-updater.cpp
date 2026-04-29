@@ -88,13 +88,14 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   Vector<Character>& srcCharacters = impl.mModel->mLogicalModel->mText;
   Vector<Character>  displayCharacters;
   bool               useHiddenText = false;
+
   if(impl.mHiddenInput && impl.mEventData != nullptr)
   {
     if(impl.mEventData->mIsShowingPlaceholderText)
     {
       impl.mHiddenInput->InitPreviousTextCount();
     }
-    else
+    else if(impl.mHiddenInput->GetMode() != HiddenText::Mode::NONE)
     {
       impl.mHiddenInput->Substitute(srcCharacters, displayCharacters, impl.mEventData->mPrimaryCursorPosition);
       useHiddenText = true;

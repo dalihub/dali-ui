@@ -49,6 +49,9 @@ const char* const PROPERTY_NAME_SELECTED_TEXT                  = "selectedText";
 const char* const PROPERTY_NAME_SELECTED_TEXT_START            = "selectedTextStart";
 const char* const PROPERTY_NAME_SELECTED_TEXT_END              = "selectedTextEnd";
 const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
+const char* const PROPERTY_NAME_PASSWORD_MODE                  = "passwordMode";
+const char* const PROPERTY_NAME_PASSWORD_MASK_CHARACTER        = "passwordMaskCharacter";
+const char* const PROPERTY_NAME_PASSWORD_REVEAL_DURATION       = "passwordRevealDuration";
 const char* const PROPERTY_NAME_EDITABLE                       = "editable";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
 const char* const PROPERTY_NAME_FONT_WEIGHT                    = "fontWeight";
@@ -895,6 +898,123 @@ int UtcDaliInputFieldSetProperty(void)
   // SYSTEM_FONT_SIZE_SCALE_ENABLED
   inputField.SetProperty(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
   DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Password API tests
+int UtcDaliInputFieldPasswordMode(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Default should be NONE
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::NONE, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
+  DALI_TEST_CHECK(&ref == &inputField);
+
+  inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::HIDE_ALL, TEST_LOCATION);
+
+  inputField.SetPasswordMode(Text::PasswordMode::REVEAL_LAST_CHARACTER);
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::REVEAL_LAST_CHARACTER, TEST_LOCATION);
+
+  inputField.SetPasswordMode(Text::PasswordMode::NONE);
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::NONE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldPasswordMaskCharacter(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Test with '*' (U+002A)
+  InputField& ref = inputField.SetPasswordMaskCharacter(0x2A);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetPasswordMaskCharacter(), 0x2Au, TEST_LOCATION);
+
+  // Test with '•' (U+2022)
+  inputField.SetPasswordMaskCharacter(0x2022);
+  DALI_TEST_EQUALS(inputField.GetPasswordMaskCharacter(), 0x2022u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldPasswordRevealDuration(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Test with 0
+  InputField& ref = inputField.SetPasswordRevealDuration(0u);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 0u, TEST_LOCATION);
+
+  // Test with 1000ms
+  inputField.SetPasswordRevealDuration(1000u);
+  DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 1000u, TEST_LOCATION);
+
+  // Test with 500ms
+  inputField.SetPasswordRevealDuration(500u);
+  DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 500u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldPasswordProperties(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Check Property Indices are correct
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PASSWORD_MODE) == InputField::Property::PASSWORD_MODE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PASSWORD_MASK_CHARACTER) == InputField::Property::PASSWORD_MASK_CHARACTER);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_PASSWORD_REVEAL_DURATION) == InputField::Property::PASSWORD_REVEAL_DURATION);
+
+  // PASSWORD_MODE property
+  inputField.SetProperty(InputField::Property::PASSWORD_MODE, static_cast<int>(Text::PasswordMode::HIDE_ALL));
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::HIDE_ALL, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_MODE), static_cast<int>(Text::PasswordMode::HIDE_ALL), TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::PASSWORD_MODE, static_cast<int>(Text::PasswordMode::REVEAL_LAST_CHARACTER));
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::REVEAL_LAST_CHARACTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_MODE), static_cast<int>(Text::PasswordMode::REVEAL_LAST_CHARACTER), TEST_LOCATION);
+
+  // PASSWORD_MODE property with string values
+  inputField.SetProperty(InputField::Property::PASSWORD_MODE, "NONE");
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::NONE, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::PASSWORD_MODE, "HIDE_ALL");
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::HIDE_ALL, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::PASSWORD_MODE, "REVEAL_LAST_CHARACTER");
+  DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::REVEAL_LAST_CHARACTER, TEST_LOCATION);
+
+  // PASSWORD_MASK_CHARACTER property
+  inputField.SetProperty(InputField::Property::PASSWORD_MASK_CHARACTER, 0x2022);
+  DALI_TEST_EQUALS(inputField.GetPasswordMaskCharacter(), 0x2022u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_MASK_CHARACTER), 0x2022, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::PASSWORD_MASK_CHARACTER, 0x2A);
+  DALI_TEST_EQUALS(inputField.GetPasswordMaskCharacter(), 0x2Au, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_MASK_CHARACTER), 0x2A, TEST_LOCATION);
+
+  // PASSWORD_REVEAL_DURATION property
+  inputField.SetProperty(InputField::Property::PASSWORD_REVEAL_DURATION, 1000);
+  DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 1000u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_REVEAL_DURATION), 1000, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::PASSWORD_REVEAL_DURATION, 500);
+  DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 500u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputField.GetProperty<int>(InputField::Property::PASSWORD_REVEAL_DURATION), 500, TEST_LOCATION);
 
   END_TEST;
 }

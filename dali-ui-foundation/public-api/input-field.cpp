@@ -320,6 +320,39 @@ InputField& InputField::ClearInputFilter()
   return *this;
 }
 
+InputField& InputField::SetPasswordMode(Text::PasswordMode mode)
+{
+  GetImpl(*this).SetPasswordMode(mode);
+  return *this;
+}
+
+Text::PasswordMode InputField::GetPasswordMode() const
+{
+  return GetImpl(*this).GetPasswordMode();
+}
+
+InputField& InputField::SetPasswordMaskCharacter(uint32_t character)
+{
+  GetImpl(*this).SetPasswordMaskCharacter(character);
+  return *this;
+}
+
+uint32_t InputField::GetPasswordMaskCharacter() const
+{
+  return GetImpl(*this).GetPasswordMaskCharacter();
+}
+
+InputField& InputField::SetPasswordRevealDuration(uint32_t duration)
+{
+  GetImpl(*this).SetPasswordRevealDuration(duration);
+  return *this;
+}
+
+uint32_t InputField::GetPasswordRevealDuration() const
+{
+  return GetImpl(*this).GetPasswordRevealDuration();
+}
+
 InputField& InputField::SetEditable(bool editable)
 {
   GetImpl(*this).SetEditable(editable);

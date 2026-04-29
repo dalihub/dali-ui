@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 
-// INTERNAL INCLUDES
-
-using namespace Dali::Ui;
-
-const int DEFAULT_SHOW_DURATION = 1000;
+// EXTERNAL INCLUDES
+#include <algorithm>
 
 namespace Dali
 {
@@ -30,59 +27,85 @@ namespace Ui
 {
 namespace Text
 {
-const char* const PROPERTY_MODE                 = "mode";
-const char* const PROPERTY_SUBSTITUTE_CHARACTER = "substituteCharacter";
-const char* const PROPERTY_SUBSTITUTE_COUNT     = "substituteCount";
-const char* const PROPERTY_SHOW_DURATION        = "showDuration";
 
 HiddenText::HiddenText(Observer* observer)
 : mObserver(observer),
-  mHideMode(static_cast<int>(Ui::HiddenInput::Mode::HIDE_NONE)),
-  mSubstituteText(STAR),
-  mDisplayDuration(DEFAULT_SHOW_DURATION),
-  mSubstituteCount(0),
+  mMode(Mode::NONE),
+  mPasswordMaskCharacter(DEFAULT_PASSWORD_MASK_CHARACTER),
+  mPasswordRevealDuration(DEFAULT_PASSWORD_REVEAL_DURATION),
+  mSubstituteCount(0u),
   mPreviousTextCount(0u),
-  mIsLastCharacterShow(false)
+  mIsLastCharacterRevealed(false)
 {
-  mTimer = Timer::New(mDisplayDuration);
+  mTimer = Timer::New(mPasswordRevealDuration);
   mTimer.TickSignal().Connect(this, &HiddenText::OnTick);
 }
 
-void HiddenText::SetProperties(const Property::Map& map)
+void HiddenText::SetPasswordMode(PasswordMode mode)
 {
-  const Property::Map::SizeType count = map.Count();
-
-  for(Property::Map::SizeType position = 0; position < count; ++position)
-  {
-    KeyValuePair     keyValue = map.GetKeyValue(position);
-    Property::Key&   key      = keyValue.first;
-    Property::Value& value    = keyValue.second;
-
-    if(key == Ui::HiddenInput::Property::MODE || key == PROPERTY_MODE)
-    {
-      value.Get(mHideMode);
-    }
-    else if(key == Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER || key == PROPERTY_SUBSTITUTE_CHARACTER)
-    {
-      value.Get(mSubstituteText);
-    }
-    else if(key == Ui::HiddenInput::Property::SUBSTITUTE_COUNT || key == PROPERTY_SUBSTITUTE_COUNT)
-    {
-      value.Get(mSubstituteCount);
-    }
-    else if(key == Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION || key == PROPERTY_SHOW_DURATION)
-    {
-      value.Get(mDisplayDuration);
-    }
-  }
+  mMode = ToHiddenTextMode(mode);
 }
 
-void HiddenText::GetProperties(Property::Map& map)
+PasswordMode HiddenText::GetPasswordMode() const
 {
-  map[Ui::HiddenInput::Property::MODE]                         = mHideMode;
-  map[Ui::HiddenInput::Property::SUBSTITUTE_CHARACTER]         = mSubstituteText;
-  map[Ui::HiddenInput::Property::SUBSTITUTE_COUNT]             = mSubstituteCount;
-  map[Ui::HiddenInput::Property::SHOW_LAST_CHARACTER_DURATION] = mDisplayDuration;
+  return ToPasswordMode(mMode);
+}
+
+void HiddenText::SetPasswordMaskCharacter(uint32_t character)
+{
+  mPasswordMaskCharacter = character;
+}
+
+uint32_t HiddenText::GetPasswordMaskCharacter() const
+{
+  return mPasswordMaskCharacter;
+}
+
+void HiddenText::SetPasswordRevealDuration(int duration)
+{
+  mPasswordRevealDuration = duration;
+}
+
+int HiddenText::GetPasswordRevealDuration() const
+{
+  return mPasswordRevealDuration;
+}
+
+void HiddenText::ClearHiddenText()
+{
+  mMode = Mode::NONE;
+}
+
+void HiddenText::HideAll()
+{
+  mMode = Mode::HIDE_ALL;
+}
+
+void HiddenText::HideFirstCharacters(uint32_t count)
+{
+  mMode            = Mode::HIDE_COUNT;
+  mSubstituteCount = count;
+}
+
+void HiddenText::ShowFirstCharacters(uint32_t count)
+{
+  mMode            = Mode::SHOW_COUNT;
+  mSubstituteCount = count;
+}
+
+void HiddenText::RevealLastCharacter()
+{
+  mMode = Mode::REVEAL_LAST_CHARACTER;
+}
+
+HiddenText::Mode HiddenText::GetMode() const
+{
+  return mMode;
+}
+
+uint32_t HiddenText::GetSubstituteCount() const
+{
+  return mSubstituteCount;
 }
 
 void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& destination, Length cursorPos)
@@ -93,47 +116,54 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
 
   uint32_t* begin     = destination.Begin();
   uint32_t* end       = begin + characterCount;
-  uint32_t* hideStart = NULL;
-  uint32_t* hideEnd   = NULL;
+  uint32_t* hideStart = nullptr;
+  uint32_t* hideEnd   = nullptr;
   uint32_t* sourcePos = source.Begin();
 
-  switch(mHideMode)
+  switch(mMode)
   {
-    case Ui::HiddenInput::Mode::HIDE_NONE:
+    case Mode::NONE:
     {
-      hideStart = NULL;
-      hideEnd   = NULL;
+      hideStart = nullptr;
+      hideEnd   = nullptr;
       break;
     }
-    case Ui::HiddenInput::Mode::HIDE_ALL:
+
+    case Mode::HIDE_ALL:
     {
       hideStart = begin;
       hideEnd   = end;
       break;
     }
-    case Ui::HiddenInput::Mode::HIDE_COUNT:
+
+    case Mode::HIDE_COUNT:
     {
-      hideStart = begin;
-      hideEnd   = begin + mSubstituteCount;
+      const Length count = std::min<Length>(static_cast<Length>(mSubstituteCount), characterCount);
+      hideStart          = begin;
+      hideEnd            = begin + count;
       break;
     }
-    case Ui::HiddenInput::Mode::SHOW_COUNT:
+
+    case Mode::SHOW_COUNT:
     {
-      hideStart = begin + mSubstituteCount;
-      hideEnd   = end;
+      const Length count = std::min<Length>(static_cast<Length>(mSubstituteCount), characterCount);
+      hideStart          = begin + count;
+      hideEnd            = end;
       break;
     }
-    case Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER:
+
+    case Mode::REVEAL_LAST_CHARACTER:
     {
       hideStart = begin;
       hideEnd   = end;
+
       if(mPreviousTextCount < characterCount)
       {
-        if(mDisplayDuration > 0)
+        if(mPasswordRevealDuration > 0)
         {
-          mTimer.SetInterval(mDisplayDuration);
+          mTimer.SetInterval(mPasswordRevealDuration);
           mTimer.Start();
-          mIsLastCharacterShow = true;
+          mIsLastCharacterRevealed = true;
         }
         else
         {
@@ -142,25 +172,27 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
       }
       else
       {
-        mIsLastCharacterShow = false;
+        mIsLastCharacterRevealed = false;
       }
       break;
     }
   }
 
-  if(mHideMode == Ui::HiddenInput::Mode::SHOW_LAST_CHARACTER)
+  if(mMode == Mode::REVEAL_LAST_CHARACTER)
   {
     Length currentPos = 0u;
+
     for(; begin < end; ++begin)
     {
       if(begin >= hideStart && begin < hideEnd && cursorPos > 0u && currentPos != cursorPos - 1u)
       {
-        *begin = static_cast<uint32_t>(mSubstituteText);
+        *begin = mPasswordMaskCharacter;
       }
       else
       {
-        *begin = mIsLastCharacterShow ? *sourcePos : static_cast<uint32_t>(mSubstituteText);
+        *begin = mIsLastCharacterRevealed ? *sourcePos : mPasswordMaskCharacter;
       }
+
       sourcePos++;
       currentPos++;
     }
@@ -171,7 +203,7 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
     {
       if(begin >= hideStart && begin < hideEnd)
       {
-        *begin = static_cast<uint32_t>(mSubstituteText);
+        *begin = mPasswordMaskCharacter;
         sourcePos++;
       }
       else
@@ -180,6 +212,7 @@ void HiddenText::Substitute(const Vector<Character>& source, Vector<Character>& 
       }
     }
   }
+
   mPreviousTextCount = characterCount;
 }
 
@@ -188,23 +221,71 @@ void HiddenText::InitPreviousTextCount()
   mPreviousTextCount = 0u;
 }
 
-int HiddenText::GetHideMode()
-{
-  return mHideMode;
-}
-
 bool HiddenText::OnTick()
 {
-  if(mObserver != NULL)
+  if(mObserver != nullptr)
   {
     mObserver->DisplayTimeExpired();
   }
-  mIsLastCharacterShow = false;
+
+  mIsLastCharacterRevealed = false;
   return false;
 }
 
+HiddenText::Mode HiddenText::ToHiddenTextMode(PasswordMode mode) const
+{
+  switch(mode)
+  {
+    case PasswordMode::NONE:
+    {
+      return Mode::NONE;
+    }
+
+    case PasswordMode::HIDE_ALL:
+    {
+      return Mode::HIDE_ALL;
+    }
+
+    case PasswordMode::REVEAL_LAST_CHARACTER:
+    {
+      return Mode::REVEAL_LAST_CHARACTER;
+    }
+  }
+
+  return Mode::NONE;
+}
+
+PasswordMode HiddenText::ToPasswordMode(Mode mode) const
+{
+  switch(mode)
+  {
+    case Mode::NONE:
+    {
+      return PasswordMode::NONE;
+    }
+
+    case Mode::HIDE_ALL:
+    {
+      return PasswordMode::HIDE_ALL;
+    }
+
+    case Mode::REVEAL_LAST_CHARACTER:
+    {
+      return PasswordMode::REVEAL_LAST_CHARACTER;
+    }
+
+    case Mode::HIDE_COUNT:
+    case Mode::SHOW_COUNT:
+    {
+      // These modes are preserved internally, but cannot be represented by
+      // the public PasswordMode enum.
+      return PasswordMode::NONE;
+    }
+  }
+
+  return PasswordMode::NONE;
+}
+
 } // namespace Text
-
 } // namespace Ui
-
 } // namespace Dali

@@ -268,6 +268,36 @@ public:
   void ClearInputFilter();
 
   /**
+   * @copydoc Dali::Ui::InputField::SetPasswordMode
+   */
+  void SetPasswordMode(Text::PasswordMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetPasswordMode
+   */
+  Text::PasswordMode GetPasswordMode() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetPasswordMaskCharacter
+   */
+  void SetPasswordMaskCharacter(uint32_t character);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetPasswordMaskCharacter
+   */
+  uint32_t GetPasswordMaskCharacter() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetPasswordRevealDuration
+   */
+  void SetPasswordRevealDuration(uint32_t duration);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetPasswordRevealDuration
+   */
+  uint32_t GetPasswordRevealDuration() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetLayoutDirectionMode
    */
   void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);

@@ -1971,21 +1971,95 @@ public: // Queries & retrieves.
   bool GetTextScrollInfo(float& scrollPosition, float& controlHeight, float& layoutHeight);
 
   /**
-   * @brief Used to set the hidden input option
+   * @brief Sets the password display mode.
+   *
+   * @param[in] mode The password display mode.
    */
-  void SetHiddenInputOption(const Property::Map& options);
+  void SetPasswordMode(PasswordMode mode);
 
   /**
-   * @brief Used to get the hidden input option
+   * @brief Gets the password display mode.
+   *
+   * @return The password display mode.
    */
-  void GetHiddenInputOption(Property::Map& options);
+  PasswordMode GetPasswordMode() const;
+
+  /**
+   * @brief Sets the character used to mask password text.
+   *
+   * @param[in] character The Unicode code point used as the password mask character.
+   */
+  void SetPasswordMaskCharacter(uint32_t character);
+
+  /**
+   * @brief Gets the character used to mask password text.
+   *
+   * @return The Unicode code point used as the password mask character.
+   */
+  uint32_t GetPasswordMaskCharacter() const;
+
+  /**
+   * @brief Sets the duration for which the last entered password character remains visible.
+   *
+   * This value is used when PasswordMode is REVEAL_LAST_CHARACTER.
+   *
+   * @param[in] duration The duration in milliseconds.
+   */
+  void SetPasswordRevealDuration(int duration);
+
+  /**
+   * @brief Gets the duration for which the last entered password character remains visible.
+   *
+   * @return The duration in milliseconds.
+   */
+  int GetPasswordRevealDuration() const;
+
+  /**
+   * @brief Clears hidden text substitution.
+   */
+  void ClearHiddenText();
+
+  /**
+   * @brief Masks all characters.
+   */
+  void HideAllText();
+
+  /**
+   * @brief Masks the first count characters.
+   *
+   * Characters after count remain visible.
+   *
+   * @param[in] count The number of characters to mask from the start.
+   */
+  void HideFirstCharacters(uint32_t count);
+
+  /**
+   * @brief Shows the first count characters and masks the remaining characters.
+   *
+   * @param[in] count The number of characters to show from the start.
+   */
+  void ShowFirstCharacters(uint32_t count);
+
+  /**
+   * @brief Gets the current hidden text mode.
+   *
+   * @return The current hidden text mode.
+   */
+  HiddenText::Mode GetHiddenTextMode() const;
+
+  /**
+   * @brief Gets the character count used by HIDE_COUNT and SHOW_COUNT modes.
+   *
+   * @return The configured character count.
+   */
+  uint32_t GetHiddenTextSubstituteCount() const;
 
   /**
    * @brief Sets the input filter.
    *
    * @param[in] inputFilter The input filter to apply.
    */
-  void SetInputFilter(const Ui::Text::InputFilter& inputFilter);
+  void SetInputFilter(const InputFilter& inputFilter);
 
   /**
    * @brief Clears the input filter.

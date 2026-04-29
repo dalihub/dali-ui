@@ -1723,21 +1723,101 @@ bool Controller::GetTextScrollInfo(float& scrollPosition, float& controlHeight, 
   return isScrolled;
 }
 
-void Controller::SetHiddenInputOption(const Property::Map& options)
+void Controller::SetPasswordMode(PasswordMode mode)
 {
   EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
-  mImpl->mHiddenInput->SetProperties(options);
-}
-
-void Controller::GetHiddenInputOption(Property::Map& options)
-{
-  if(mImpl->mHiddenInput)
+  if(mImpl->mHiddenInput->GetPasswordMode() != mode)
   {
-    mImpl->mHiddenInput->GetProperties(options);
+    mImpl->mHiddenInput->SetPasswordMode(mode);
+    if(mImpl->mEventData)
+    {
+      mImpl->mEventData->mDecoratorUpdated     = true;
+      mImpl->mEventData->mUpdateCursorPosition = true;
+    }
+    InvalidateFontData();
+
+    // TODO: Update the accessibility role when password mode changes.
   }
 }
 
-void Controller::SetInputFilter(const Ui::Text::InputFilter& inputFilter)
+PasswordMode Controller::GetPasswordMode() const
+{
+  return mImpl->mHiddenInput ? mImpl->mHiddenInput->GetPasswordMode() : PasswordMode::NONE;
+}
+
+void Controller::SetPasswordMaskCharacter(uint32_t character)
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+
+  if(mImpl->mHiddenInput->GetPasswordMaskCharacter() != character)
+  {
+    mImpl->mHiddenInput->SetPasswordMaskCharacter(character);
+    if(mImpl->mEventData)
+    {
+      mImpl->mEventData->mDecoratorUpdated     = true;
+      mImpl->mEventData->mUpdateCursorPosition = true;
+    }
+    if(mImpl->mHiddenInput->GetMode() != HiddenText::Mode::NONE)
+    {
+      InvalidateFontData();
+    }
+  }
+}
+
+uint32_t Controller::GetPasswordMaskCharacter() const
+{
+  return mImpl->mHiddenInput ? mImpl->mHiddenInput->GetPasswordMaskCharacter() : DEFAULT_PASSWORD_MASK_CHARACTER;
+}
+
+void Controller::SetPasswordRevealDuration(int duration)
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+  if(mImpl->mHiddenInput->GetPasswordRevealDuration() != duration)
+  {
+    mImpl->mHiddenInput->SetPasswordRevealDuration(duration);
+  }
+}
+
+int Controller::GetPasswordRevealDuration() const
+{
+  return mImpl->mHiddenInput ? mImpl->mHiddenInput->GetPasswordRevealDuration() : DEFAULT_PASSWORD_REVEAL_DURATION;
+}
+
+void Controller::ClearHiddenText()
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+  mImpl->mHiddenInput->ClearHiddenText();
+}
+
+void Controller::HideAllText()
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+  mImpl->mHiddenInput->HideAll();
+}
+
+void Controller::HideFirstCharacters(uint32_t count)
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+  mImpl->mHiddenInput->HideFirstCharacters(count);
+}
+
+void Controller::ShowFirstCharacters(uint32_t count)
+{
+  EnsureCreated<HiddenText, Controller*>(mImpl->mHiddenInput, this);
+  mImpl->mHiddenInput->ShowFirstCharacters(count);
+}
+
+HiddenText::Mode Controller::GetHiddenTextMode() const
+{
+  return mImpl->mHiddenInput ? mImpl->mHiddenInput->GetMode() : HiddenText::Mode::NONE;
+}
+
+uint32_t Controller::GetHiddenTextSubstituteCount() const
+{
+  return mImpl->mHiddenInput ? mImpl->mHiddenInput->GetSubstituteCount() : 0u;
+}
+
+void Controller::SetInputFilter(const InputFilter& inputFilter)
 {
   EnsureCreated(mImpl->mInputFilterProcessor);
 

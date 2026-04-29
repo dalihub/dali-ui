@@ -15,6 +15,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
+#include <cstdio>
+#include <string>
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -104,7 +107,7 @@ private:
     // Status label
     mStatusLabel = Label::New()
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(60)
+      .SetRequestedHeight(90)
       .SetFontSize(10.0f)
       .SetMultiLine(true)
       .SetBackgroundColor(UiColor(0xE8E8E8))
@@ -157,6 +160,13 @@ private:
     Label btnEditable = CreateButton("Editable", 0x16A085);
     View otherRow = CreateButtonRow({btnMaxLen, btnEditable});
 
+    // Password buttons row
+    Label btnPasswordMode = CreateButton("Password Mode", 0x8E44AD);
+    Label btnPasswordChar = CreateButton("Password Char", 0x2980B9);
+    Label btnPasswordReveal = CreateButton("Reveal Time", 0xC0392B);
+    View passwordRow1 = CreateButtonRow({btnPasswordMode, btnPasswordChar});
+    View passwordRow2 = CreateButtonRow({btnPasswordReveal});
+
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
     View infoRow = CreateButtonRow({btnInfo});
@@ -192,6 +202,9 @@ private:
         inputFilterRow,
         // Other controls
         otherRow,
+        // Password controls
+        passwordRow1,
+        passwordRow2,
         infoRow,
       });
 
@@ -240,10 +253,47 @@ private:
     // Connect button touch signals - Other
     btnMaxLen.TouchedSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
     btnEditable.TouchedSignal().Connect(this, &InputFieldController::OnButtonEditableTouched);
+
+    // Connect button touch signals - Password
+    btnPasswordMode.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordModeTouched);
+    btnPasswordChar.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordCharTouched);
+    btnPasswordReveal.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordRevealTouched);
+
     btnInfo.TouchedSignal().Connect(this, &InputFieldController::OnButtonInfoTouched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputFieldController::OnKeyEvent);
+  }
+
+  // Helper function to convert PasswordMode to string
+  const char* PasswordModeToString(Text::PasswordMode mode)
+  {
+    switch(mode)
+    {
+      case Text::PasswordMode::NONE:
+        return "NONE";
+      case Text::PasswordMode::HIDE_ALL:
+        return "HIDE_ALL";
+      case Text::PasswordMode::REVEAL_LAST_CHARACTER:
+        return "REVEAL_LAST_CHARACTER";
+    }
+    return "UNKNOWN";
+  }
+
+  // Helper function to append password status to string
+  void AppendPasswordStatus(Dali::String& status)
+  {
+    status += "\nPwdMode:";
+    status += PasswordModeToString(mInputField.GetPasswordMode());
+
+    status += " MaskChar:U+";
+    char hexChar[8];
+    snprintf(hexChar, sizeof(hexChar), "%04X", mInputField.GetPasswordMaskCharacter());
+    status += hexChar;
+
+    status += " Reveal:";
+    status += std::to_string(mInputField.GetPasswordRevealDuration()).c_str();
+    status += "ms";
   }
 
   void UpdateStatus()
@@ -278,6 +328,10 @@ private:
     status += "-";
     status += std::to_string(selEnd).c_str();
     status += "]";
+
+    // Add password status using helper
+    AppendPasswordStatus(status);
+
     if(mInputFilterSet)
     {
       status += "\nFilter: allow=[\\d] deny=[0-5]";
@@ -332,9 +386,6 @@ private:
 
   void UpdateStatusWithSelection()
   {
-    // Get selected text and show it in status
-    Dali::String selectedText = mInputField.GetSelectedText();
-
     bool  cursorBlinkEnabled    = mInputField.IsCursorBlinkEnabled();
     float cursorBlinkInterval   = mInputField.GetCursorBlinkInterval();
     uint32_t cursorPosition     = mInputField.GetCursorPosition();
@@ -344,6 +395,7 @@ private:
     bool  selectionEnabled      = mInputField.IsSelectionEnabled();
     uint32_t selStart           = mInputField.GetSelectedTextStart();
     uint32_t selEnd             = mInputField.GetSelectedTextEnd();
+    Text::PasswordMode passwordMode = mInputField.GetPasswordMode();
 
     Dali::String status;
     status += "Blink:";
@@ -366,12 +418,19 @@ private:
     status += std::to_string(selEnd).c_str();
     status += "]";
 
-    // Add selected text if any
-    if(selectedText.Size() > 0)
+    // Add password status using helper
+    AppendPasswordStatus(status);
+
+    // Only show selected text when password mode is NONE
+    if(passwordMode == Text::PasswordMode::NONE)
     {
-      status += "\nSelected: \"";
-      status += selectedText.CStr();
-      status += "\"";
+      Dali::String selectedText = mInputField.GetSelectedText();
+      if(selectedText.Size() > 0)
+      {
+        status += "\nSelected: \"";
+        status += selectedText.CStr();
+        status += "\"";
+      }
     }
 
     mStatusLabel.SetText(status);
@@ -632,6 +691,99 @@ private:
     if(touch.GetState(0) == PointState::UP)
     {
       PrintInputFieldInfo();
+    }
+    return true;
+  }
+
+  bool OnButtonPasswordModeTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      // Cycle through password modes: NONE -> HIDE_ALL -> REVEAL_LAST_CHARACTER -> NONE
+      Text::PasswordMode currentMode = mInputField.GetPasswordMode();
+      Text::PasswordMode newMode;
+
+      switch(currentMode)
+      {
+        case Text::PasswordMode::NONE:
+          newMode = Text::PasswordMode::HIDE_ALL;
+          break;
+        case Text::PasswordMode::HIDE_ALL:
+          newMode = Text::PasswordMode::REVEAL_LAST_CHARACTER;
+          // Set default reveal duration if current duration is 0
+          if(mInputField.GetPasswordRevealDuration() == 0u)
+          {
+            mInputField.SetPasswordRevealDuration(1000u);
+          }
+          break;
+        case Text::PasswordMode::REVEAL_LAST_CHARACTER:
+        default:
+          newMode = Text::PasswordMode::NONE;
+          break;
+      }
+
+      mInputField.SetPasswordMode(newMode);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonPasswordCharTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      // Cycle through common password mask characters: '*' (U+002A) -> '•' (U+2022) -> '●' (U+25CF) -> '*'
+      uint32_t currentChar = mInputField.GetPasswordMaskCharacter();
+      uint32_t newChar;
+
+      if(currentChar == 0x2A) // '*'
+      {
+        newChar = 0x2022; // '•' BULLET
+      }
+      else if(currentChar == 0x2022) // '•'
+      {
+        newChar = 0x25CF; // '●' BLACK CIRCLE
+      }
+      else
+      {
+        newChar = 0x2A; // '*'
+      }
+
+      mInputField.SetPasswordMaskCharacter(newChar);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonPasswordRevealTouched(Actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      // Cycle through reveal durations: 0 -> 500 -> 1000 -> 2000 -> 0
+      uint32_t currentDuration = mInputField.GetPasswordRevealDuration();
+      uint32_t newDuration = 0u;
+
+      if(currentDuration == 0u)
+      {
+        newDuration = 500u;
+      }
+      else if(currentDuration == 500u)
+      {
+        newDuration = 1000u;
+      }
+      else if(currentDuration == 1000u)
+      {
+        newDuration = 2000u;
+      }
+      else
+      {
+        newDuration = 0u;
+      }
+
+      // Set to REVEAL_LAST_CHARACTER mode for testing reveal duration
+      mInputField.SetPasswordMode(Text::PasswordMode::REVEAL_LAST_CHARACTER);
+      mInputField.SetPasswordRevealDuration(newDuration);
+      UpdateStatus();
     }
     return true;
   }

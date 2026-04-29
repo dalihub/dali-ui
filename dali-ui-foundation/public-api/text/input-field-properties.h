@@ -200,6 +200,28 @@ struct InputFieldPropertyIndex
     MAXIMUM_LENGTH,
 
     /**
+     * @brief The password display mode.
+     * @details Name "passwordMode", type Text::PasswordMode (Property::INTEGER or Property::STRING).
+     * @note Return type is Text::PasswordMode (Property::INTEGER).
+     * @see InputField::SetPasswordMode(), InputField::GetPasswordMode().
+     */
+    PASSWORD_MODE,
+
+    /**
+     * @brief The Unicode code point of the character used to mask password text.
+     * @details Name "passwordMaskCharacter", type Property::INTEGER.
+     * @see InputField::SetPasswordMaskCharacter(), InputField::GetPasswordMaskCharacter().
+     */
+    PASSWORD_MASK_CHARACTER,
+
+    /**
+     * @brief The duration in milliseconds for which the last entered password character remains visible.
+     * @details Name "passwordRevealDuration", type Property::INTEGER.
+     * @see InputField::SetPasswordRevealDuration(), InputField::GetPasswordRevealDuration().
+     */
+    PASSWORD_REVEAL_DURATION,
+
+    /**
      * @brief Whether the input field can be edited by user interaction.
      * @details Name "editable", type Property::BOOLEAN.
      * @see InputField::SetEditable(), InputField::IsEditable().

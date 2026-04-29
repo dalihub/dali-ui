@@ -91,6 +91,13 @@ const Dali::Scripting::StringEnum OVERFLOW_MODE_TABLE[] =
     {"ELLIPSIS", static_cast<int32_t>(OverflowMode::ELLIPSIS)},
 };
 
+const Dali::Scripting::StringEnum PASSWORD_MODE_TABLE[] =
+  {
+    {"NONE", static_cast<int32_t>(PasswordMode::NONE)},
+    {"HIDE_ALL", static_cast<int32_t>(PasswordMode::HIDE_ALL)},
+    {"REVEAL_LAST_CHARACTER", static_cast<int32_t>(PasswordMode::REVEAL_LAST_CHARACTER)},
+};
+
 const uint32_t TEXT_ALIGNMENT_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(TEXT_ALIGNMENT_TABLE) / sizeof(TEXT_ALIGNMENT_TABLE[0]));
 const uint32_t LINE_WRAP_MODE_TABLE_COUNT =
@@ -109,6 +116,8 @@ const uint32_t MARQUEE_ORIENTATION_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(MARQUEE_ORIENTATION_TABLE) / sizeof(MARQUEE_ORIENTATION_TABLE[0]));
 const uint32_t OVERFLOW_MODE_TABLE_COUNT =
   static_cast<uint32_t>(sizeof(OVERFLOW_MODE_TABLE) / sizeof(OVERFLOW_MODE_TABLE[0]));
+const uint32_t PASSWORD_MODE_TABLE_COUNT =
+  static_cast<uint32_t>(sizeof(PASSWORD_MODE_TABLE) / sizeof(PASSWORD_MODE_TABLE[0]));
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(ELLIPSIS_POSITION_TYPE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Text::EllipsisPosition, END)
@@ -154,6 +163,22 @@ const char* GetVerticalAlignmentString(const Alignment& alignment)
   return Scripting::GetLinearEnumerationName(static_cast<int32_t>(alignment),
                                              TEXT_ALIGNMENT_TABLE,
                                              TEXT_ALIGNMENT_TABLE_COUNT);
+}
+
+bool GetOverflowModeEnumeration(const Property::Value& propertyValue, OverflowMode& overflowMode)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           OVERFLOW_MODE_TABLE,
+                                           OVERFLOW_MODE_TABLE_COUNT,
+                                           overflowMode);
+}
+
+bool GetPasswordModeEnumeration(const Property::Value& propertyValue, PasswordMode& passwordMode)
+{
+  return Scripting::GetEnumerationProperty(propertyValue,
+                                           PASSWORD_MODE_TABLE,
+                                           PASSWORD_MODE_TABLE_COUNT,
+                                           passwordMode);
 }
 
 bool GetEllipsisPositionTypeEnumeration(const Property::Value&            propertyValue,
@@ -210,14 +235,6 @@ bool GetMarqueeOrientationEnumeration(const Property::Value& propertyValue, Marq
                                            MARQUEE_ORIENTATION_TABLE,
                                            MARQUEE_ORIENTATION_TABLE_COUNT,
                                            marqueeOrientation);
-}
-
-bool GetOverflowModeEnumeration(const Property::Value& propertyValue, OverflowMode& overflowMode)
-{
-  return Scripting::GetEnumerationProperty(propertyValue,
-                                           OVERFLOW_MODE_TABLE,
-                                           OVERFLOW_MODE_TABLE_COUNT,
-                                           overflowMode);
 }
 
 } // namespace Text

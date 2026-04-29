@@ -137,6 +137,49 @@
   */ \
   ChildClass& SetInputFilter(const Text::InputFilter& inputFilter) { InputField::SetInputFilter(inputFilter); return *this; } \
   /** \
+  * @brief Sets the password display mode. \
+  * \
+  * - PasswordMode::NONE: Password masking is not used. The input text is displayed as-is. \
+  * - PasswordMode::HIDE_ALL: All input characters are displayed using the password mask character. \
+  * - PasswordMode::REVEAL_LAST_CHARACTER: The last entered character is briefly displayed \
+  *   for the password reveal duration, then replaced with the password mask character. \
+  * \
+  * @param[in] mode The password display mode. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetPasswordMode(Text::PasswordMode mode) { InputField::SetPasswordMode(mode); return *this; } \
+  /** \
+  * @brief Sets the password mask character as a Unicode code point. \
+  * \
+  * This character is used to mask the password text when PasswordMode is \
+  * HIDE_ALL or REVEAL_LAST_CHARACTER. \
+  * \
+  * The parameter is a Unicode code point. For example: \
+  * - '*' is U+002A (0x2A) \
+  * - '•' is U+2022 (0x2022) \
+  * \
+  * @note Although the parameter type is uint32_t, only valid Unicode code points \
+  *       should be used. When setting this property via the property system, \
+  *       Property::INTEGER is used, so only code points within the int range \
+  *       can be safely passed through the property system. \
+  * \
+  * @param[in] character The Unicode code point of the password mask character. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetPasswordMaskCharacter(uint32_t character) { InputField::SetPasswordMaskCharacter(character); return *this; } \
+  /** \
+  * @brief Sets the password reveal duration in milliseconds. \
+  * \
+  * This value is used when PasswordMode is REVEAL_LAST_CHARACTER to determine \
+  * how long the last entered character remains visible before being masked. \
+  * \
+  * A duration of 0 means the character is immediately masked. \
+  * \
+  * @param[in] duration The password reveal duration in milliseconds. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetPasswordRevealDuration(uint32_t duration) { InputField::SetPasswordRevealDuration(duration); return *this; } \
+  /** \
   * @brief Sets whether the InputField can be edited by user interaction. \
   * \
   * @param[in] editable True to allow editing, false otherwise. \

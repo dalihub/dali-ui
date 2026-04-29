@@ -87,6 +87,9 @@ public:
       SELECTED_TEXT_START            = Text::InputFieldPropertyIndex::SELECTED_TEXT_START,
       SELECTED_TEXT_END              = Text::InputFieldPropertyIndex::SELECTED_TEXT_END,
       MAXIMUM_LENGTH                 = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+      PASSWORD_MODE                  = Text::InputFieldPropertyIndex::PASSWORD_MODE,
+      PASSWORD_MASK_CHARACTER        = Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER,
+      PASSWORD_REVEAL_DURATION       = Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION,
       EDITABLE                       = Text::InputFieldPropertyIndex::EDITABLE,
       LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
       FONT_WEIGHT                    = Text::InputFieldPropertyIndex::FONT_WEIGHT,
@@ -459,6 +462,73 @@ public: // Setters for chaining
    * @return This input field.
    */
   InputField& ClearInputFilter();
+
+  /**
+   * @brief Sets the password display mode.
+   *
+   * - PasswordMode::NONE: Password masking is not used. The input text is displayed as-is.
+   * - PasswordMode::HIDE_ALL: All input characters are displayed using the password mask character.
+   * - PasswordMode::REVEAL_LAST_CHARACTER: The last entered character is briefly displayed
+   *   for the password reveal duration, then replaced with the password mask character.
+   *
+   * @param[in] mode The password display mode.
+   * @return This input field.
+   */
+  InputField& SetPasswordMode(Text::PasswordMode mode);
+
+  /**
+   * @brief Gets the current password display mode.
+   *
+   * @return The current password display mode.
+   */
+  Text::PasswordMode GetPasswordMode() const;
+
+  /**
+   * @brief Sets the password mask character as a Unicode code point.
+   *
+   * This character is used to mask the password text when PasswordMode is
+   * HIDE_ALL or REVEAL_LAST_CHARACTER.
+   *
+   * The parameter is a Unicode code point. For example:
+   * - '*' is U+002A (0x2A)
+   * - '•' is U+2022 (0x2022)
+   *
+   * @note Although the parameter type is uint32_t, only valid Unicode code points
+   *       should be used. When setting this property via the property system,
+   *       Property::INTEGER is used, so only code points within the int range
+   *       can be safely passed through the property system.
+   *
+   * @param[in] character The Unicode code point of the password mask character.
+   * @return This input field.
+   */
+  InputField& SetPasswordMaskCharacter(uint32_t character);
+
+  /**
+   * @brief Gets the password mask character as a Unicode code point.
+   *
+   * @return The Unicode code point of the password mask character.
+   */
+  uint32_t GetPasswordMaskCharacter() const;
+
+  /**
+   * @brief Sets the password reveal duration in milliseconds.
+   *
+   * This value is used when PasswordMode is REVEAL_LAST_CHARACTER to determine
+   * how long the last entered character remains visible before being masked.
+   *
+   * A duration of 0 means the character is immediately masked.
+   *
+   * @param[in] duration The password reveal duration in milliseconds.
+   * @return This input field.
+   */
+  InputField& SetPasswordRevealDuration(uint32_t duration);
+
+  /**
+   * @brief Gets the password reveal duration in milliseconds.
+   *
+   * @return The password reveal duration in milliseconds.
+   */
+  uint32_t GetPasswordRevealDuration() const;
 
   /**
    * @brief Sets whether the InputField can be edited by user interaction.

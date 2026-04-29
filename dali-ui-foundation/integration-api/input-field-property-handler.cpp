@@ -137,6 +137,35 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetMaximumLength(value.Get<int>());
       break;
     }
+    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+    {
+      Text::PasswordMode mode;
+      if(Text::GetPasswordModeEnumeration(value, mode))
+      {
+        impl.SetPasswordMode(mode);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+    {
+      int charValue = value.Get<int>();
+      // Only apply non-negative values as Unicode code points
+      if(charValue >= 0)
+      {
+        impl.SetPasswordMaskCharacter(static_cast<uint32_t>(charValue));
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+    {
+      int durationValue = value.Get<int>();
+      // Only apply non-negative values
+      if(durationValue >= 0)
+      {
+        impl.SetPasswordRevealDuration(static_cast<uint32_t>(durationValue));
+      }
+      break;
+    }
     case Text::InputFieldPropertyIndex::EDITABLE:
     {
       impl.SetEditable(value.Get<bool>());
@@ -318,6 +347,21 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       value = impl.GetMaximumLength();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+    {
+      value = static_cast<int>(impl.GetPasswordMode());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+    {
+      value = static_cast<int>(impl.GetPasswordMaskCharacter());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+    {
+      value = static_cast<int>(impl.GetPasswordRevealDuration());
       break;
     }
     case Text::InputFieldPropertyIndex::EDITABLE:

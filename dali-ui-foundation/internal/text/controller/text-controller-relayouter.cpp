@@ -944,7 +944,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     bool isMarqueeMaxTextureExceeded = impl.mIsMarqueeMaxTextureExceeded;
     bool isHiddenInputEnabled        = false;
     if(impl.mHiddenInput && impl.mEventData != nullptr &&
-       impl.mHiddenInput->GetHideMode() != Ui::HiddenInput::Mode::HIDE_NONE)
+       impl.mHiddenInput->GetMode() != Ui::Text::HiddenText::Mode::NONE)
     {
       isHiddenInputEnabled = true;
     }

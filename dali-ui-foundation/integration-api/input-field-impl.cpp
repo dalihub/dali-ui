@@ -50,6 +50,9 @@
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
+#include <algorithm>
+#include <limits>
+
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
 
@@ -103,6 +106,9 @@ INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedText",       STRING,  SELEC
 INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextStart",  INTEGER, SELECTED_TEXT_START            )
 INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextEnd",    INTEGER, SELECTED_TEXT_END              )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",                INTEGER, MAXIMUM_LENGTH                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordMode",                 INTEGER, PASSWORD_MODE                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordMaskCharacter",        INTEGER, PASSWORD_MASK_CHARACTER        )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordRevealDuration",       INTEGER, PASSWORD_REVEAL_DURATION       )
 INPUT_FIELD_PROPERTY_REGISTRATION("editable",                     BOOLEAN, EDITABLE                       )
 INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",          INTEGER, LAYOUT_DIRECTION_MODE          )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                   INTEGER, FONT_WEIGHT                    )
@@ -461,6 +467,40 @@ void InputFieldImpl::SetInputFilter(const Text::InputFilter& inputFilter)
 void InputFieldImpl::ClearInputFilter()
 {
   mController->ClearInputFilter();
+}
+
+void InputFieldImpl::SetPasswordMode(Text::PasswordMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  mController->SetPasswordMode(mode);
+}
+
+Text::PasswordMode InputFieldImpl::GetPasswordMode() const
+{
+  return mController->GetPasswordMode();
+}
+
+void InputFieldImpl::SetPasswordMaskCharacter(uint32_t character)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), character);
+  mController->SetPasswordMaskCharacter(character);
+}
+
+uint32_t InputFieldImpl::GetPasswordMaskCharacter() const
+{
+  return mController->GetPasswordMaskCharacter();
+}
+
+void InputFieldImpl::SetPasswordRevealDuration(uint32_t duration)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), duration);
+  int durationMs = static_cast<int>(std::min(duration, static_cast<uint32_t>(std::numeric_limits<int>::max())));
+  mController->SetPasswordRevealDuration(durationMs);
+}
+
+uint32_t InputFieldImpl::GetPasswordRevealDuration() const
+{
+  return static_cast<uint32_t>(mController->GetPasswordRevealDuration());
 }
 
 void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)

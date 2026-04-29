@@ -60,6 +60,15 @@ bool GetOverflowModeEnumeration(const Property::Value& propertyValue,
                                 OverflowMode&          overflowMode);
 
 /**
+ * @brief Get the password mode from the provided property value.
+ * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
+ * @param[out] passwordMode The resulting PasswordMode from the given source
+ * @return true if the resulting passwordMode has been updated
+ */
+bool GetPasswordModeEnumeration(const Property::Value& propertyValue,
+                                PasswordMode&          passwordMode);
+
+/**
  * @brief Get the line-wrap-mode from the provided property value.
  * @param[in] propertyValue The source value (which can be a Property::INTEGER or Property::STRING type)
  * @param[out] alignment The resulting lineWrapMode from the given source
