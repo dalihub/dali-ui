@@ -8,6 +8,7 @@ SET(CAPI_LIB "dali-ui-foundation")
 SET(TC_SOURCES
         utc-Dali-ScrollView.cpp
         utc-Dali-Unit.cpp
+        utc-Dali-FocusManager.cpp
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp

@@ -2507,12 +2507,6 @@ int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
   END_TEST;
 }
 
-int UtcDaliViewSetKeyNavigationSupportFiresPropertySetSignalP(void)
-{
-  // Test removed: KEY_NAVIGATION_SUPPORT property has been deleted.
-  END_TEST;
-}
-
 int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
 {
   // Both entry points must reach the same final state.

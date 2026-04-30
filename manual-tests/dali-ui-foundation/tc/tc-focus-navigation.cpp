@@ -101,8 +101,7 @@ public:
         .SetPadding(Extents(GAP, GAP, GAP, GAP))
         .Children({mStatusLabel, row0, row1}));
 
-    // Listen for focus changes
-    FocusManager::Get().FocusChangedSignal().Connect(this, &TcFocusNavigation::OnFocusChanged);
+    FocusManager::Get().RequestFocus(mViews[0]);
   }
 
 private:
@@ -125,6 +124,7 @@ private:
       if(focused)
       {
         view.SetBackgroundColor(UiColor(COLOR_FOCUSED));
+        mStatusLabel.SetText(Dali::String("Focused: View ") + Dali::String(std::to_string(index + 1).c_str()));
       }
       else
       {
@@ -133,26 +133,6 @@ private:
     });
 
     return label;
-  }
-
-  void OnFocusChanged(View /*previous*/, View current)
-  {
-    if(current)
-    {
-      for(uint32_t i = 0; i < VIEW_COUNT; ++i)
-      {
-        if(current == mViews[i])
-        {
-          mStatusLabel.SetText(Dali::String("Focused: View ") + Dali::String(std::to_string(i + 1).c_str()));
-          return;
-        }
-      }
-      mStatusLabel.SetText("Focused: (unknown)");
-    }
-    else
-    {
-      mStatusLabel.SetText("Focused: (none)");
-    }
   }
 
   Label mStatusLabel;
