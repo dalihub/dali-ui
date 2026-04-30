@@ -1141,13 +1141,14 @@ Signal<void(View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
 void LabelImpl::ApplyInitialConfig()
 {
   // UiConfigManager may not be initialized during preload phase
-  if(!UiConfigManager::Get().IsInitialized())
+  auto configManager = UiConfigManager::Get();
+  if(!configManager.IsInitialized())
   {
     DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
     return;
   }
 
-  const auto& config = UiConfigManager::Get().GetConfig();
+  const auto& config = configManager.GetConfig();
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetAsyncRendering(config.IsLabelAsyncRendering());

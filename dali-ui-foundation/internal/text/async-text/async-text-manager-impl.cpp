@@ -74,7 +74,8 @@ AsyncTextManager::AsyncTextManager()
 
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
-    const TextAbstraction::FontPathList& customFonts = TextAbstraction::FontClient::Get().GetCustomFontDirectories();
+    auto                                 fontClient  = TextAbstraction::FontClient::Get();
+    const TextAbstraction::FontPathList& customFonts = fontClient.GetCustomFontDirectories();
     for(int i = 0; i < numberOfLoader; i++)
     {
       Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
@@ -82,7 +83,7 @@ AsyncTextManager::AsyncTextManager()
       mAvailableLoaders.push_back(loader);
     }
 
-    TextAbstraction::FontClient::Get().CustomFontAddedSignal().Connect(this, &AsyncTextManager::OnCustomFontAdded);
+    fontClient.CustomFontAddedSignal().Connect(this, &AsyncTextManager::OnCustomFontAdded);
     Dali::Adaptor::Get().LocaleChangedSignal().Connect(this, &AsyncTextManager::OnLocaleChanged);
   }
 

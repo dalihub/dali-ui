@@ -34,7 +34,7 @@
 namespace Dali::Ui::Internal::TextVisualizer
 {
 class AtlasViewAdapter;
-class LayoutResult;
+struct LayoutResult;
 class PreparedText;
 
 /**

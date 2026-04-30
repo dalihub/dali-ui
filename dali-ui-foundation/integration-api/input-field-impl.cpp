@@ -843,13 +843,14 @@ Signal<void(View)>& InputFieldImpl::SelectionClearedSignal()
 void InputFieldImpl::ApplyInitialConfig()
 {
   // UiConfigManager may not be initialized during preload phase
-  if(!UiConfigManager::Get().IsInitialized())
+  auto configureManager = UiConfigManager::Get();
+  if(!configureManager.IsInitialized())
   {
     DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
     return;
   }
 
-  const auto& config = UiConfigManager::Get().GetConfig();
+  const auto& config = configureManager.GetConfig();
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetPlaceholderColor(config.GetDefaultPlaceholderTextColor());
