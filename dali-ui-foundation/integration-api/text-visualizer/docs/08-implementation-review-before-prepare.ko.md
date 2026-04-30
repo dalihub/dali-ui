@@ -18,9 +18,9 @@
 
 현재 구현된 파일:
 
-- `dali-ui-foundation/public-api/text-visualizer.h`
-- `dali-ui-foundation/public-api/text-visualizer.cpp`
-- `dali-ui-foundation/public-api/text/text-visualizer-properties.h`
+- `dali-ui-foundation/integration-api/text-visualizer.h`
+- `dali-ui-foundation/integration-api/text-visualizer.cpp`
+- `dali-ui-foundation/integration-api/text-visualizer-properties.h`
 - `dali-ui-foundation/integration-api/text-visualizer-impl.h`
 - `dali-ui-foundation/integration-api/text-visualizer-impl.cpp`
 - `dali-ui-foundation/integration-api/text-visualizer-property-handler.h`
@@ -40,9 +40,9 @@
 실제 구현 위치:
 
 - `TextVisualizer::New()`:
-  - `dali-ui-foundation/public-api/text-visualizer.cpp`
+  - `dali-ui-foundation/integration-api/text-visualizer.cpp`
 - `TextVisualizer::Prepare()`:
-  - `dali-ui-foundation/public-api/text-visualizer.cpp`
+  - `dali-ui-foundation/integration-api/text-visualizer.cpp`
 - `TextVisualizerImpl::Prepare()`:
   - `dali-ui-foundation/integration-api/text-visualizer-impl.cpp:134`
 - `TextVisualizerImpl::SetText()`:
@@ -70,7 +70,7 @@
 `InputField` 스타일을 따라 `View` 기반 public handle + `ViewImpl` 기반 internal impl 구조를 잡은 점은 설계와 일치한다.
 
 - public handle:
-  - `dali-ui-foundation/public-api/text-visualizer.h`
+  - `dali-ui-foundation/integration-api/text-visualizer.h`
 - impl:
   - `dali-ui-foundation/integration-api/text-visualizer-impl.h`
 

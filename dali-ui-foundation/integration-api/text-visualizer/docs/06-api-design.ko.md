@@ -6,7 +6,7 @@
 
 이번 문서에서는 다음을 명확히 정리한다.
 
-- `public-api/text-visualizer.h` 초안
+- `integration-api/text-visualizer.h` 초안
 - `integration-api/text-visualizer-impl.h` 초안
 - property 제공 여부
 - method API와 property API의 역할 분리
@@ -54,7 +54,7 @@
 3. exclusion region은 composite collection이므로 method 중심으로 노출
 4. `Layout()` / `Relayout()`는 public API로 노출하지 않는다
 
-## public-api/text-visualizer.h 초안
+## integration-api/text-visualizer.h 초안
 
 아래는 1차 구현 기준의 권장 public header 초안이다.
 

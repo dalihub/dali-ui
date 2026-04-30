@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/dali-ui-foundation-integ.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/atlas-renderer-bridge.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/exclusion-layout-cache.h>
@@ -290,11 +291,11 @@ int UtcDaliTextVisualizerTextColor(void)
 
   UiColor color(Color::BLUE);
   textVisualizer.SetTextColor(color);
-  DALI_TEST_EQUALS(textVisualizer.GetTextColor().Resolve(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(textVisualizer.GetTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
 
   UiColor color2(Color::RED);
   textVisualizer.SetTextColor(color2);
-  DALI_TEST_EQUALS(textVisualizer.GetTextColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(textVisualizer.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -335,7 +336,7 @@ int UtcDaliTextVisualizerSetProperty(void)
   DALI_TEST_EQUALS(textVisualizer.GetFontSize(), 18.0f, TEST_LOCATION);
 
   textVisualizer.SetProperty(TextVisualizer::Property::TEXT_COLOR, Color::GREEN);
-  DALI_TEST_EQUALS(textVisualizer.GetTextColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(textVisualizer.GetTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   textVisualizer.SetProperty(TextVisualizer::Property::LINE_HEIGHT, 1.4f);
   DALI_TEST_EQUALS(textVisualizer.GetLineHeight(), 1.4f, TEST_LOCATION);
@@ -3724,7 +3725,7 @@ int UtcDaliTextVisualizerTextColorRenderSmokeP(void)
   application.SendNotification();
   application.Render();
 
-  DALI_TEST_EQUALS(textVisualizer.GetTextColor().Resolve(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(textVisualizer.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
   END_TEST;
 }
@@ -3746,7 +3747,7 @@ int UtcDaliTextVisualizerTextColorChangeWithoutLayoutDirtySmokeP(void)
   application.SendNotification();
   application.Render();
 
-  DALI_TEST_EQUALS(textVisualizer.GetTextColor().Resolve(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(textVisualizer.GetTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   END_TEST;
 }

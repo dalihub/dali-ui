@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text-visualizer-impl.h>
-#include <dali-ui-foundation/public-api/text-visualizer.h>
+#include <dali-ui-foundation/integration-api/text-visualizer.h>
 
 namespace Dali
 {

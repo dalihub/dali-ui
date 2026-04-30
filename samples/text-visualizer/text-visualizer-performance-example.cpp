@@ -14,7 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
+#include <dali-ui-foundation/dali-ui-foundation-integ.h>
 
 #include <algorithm>
 #include <chrono>
@@ -173,7 +173,7 @@ Property::Map CreateOrbShadowMap(const UiColor& color)
 
   Property::Map shadow;
   shadow.Add(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
-  shadow.Add(Ui::Visual::Property::MIX_COLOR, color.Resolve());
+  shadow.Add(Ui::Visual::Property::MIX_COLOR, color.GetRgba());
   shadow.Add(Ui::Visual::Property::TRANSFORM, transform);
   return shadow;
 }
@@ -274,8 +274,8 @@ private:
     mRoot.SetBackgroundColor(WINDOW_BG_COLOR);
 
     mTitleText = TextVisualizer::New();
-    mTitleText.SetPositionX(BODY_SURFACE_LEFT);
-    mTitleText.SetPositionY(BODY_SURFACE_TOP);
+    mTitleText.SetRequestedPositionX(BODY_SURFACE_LEFT);
+    mTitleText.SetRequestedPositionY(BODY_SURFACE_TOP);
     mTitleText.SetRequestedWidth(TITLE_WIDTH);
     mTitleText.SetRequestedHeight(TITLE_HEIGHT);
     mTitleText.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -288,16 +288,16 @@ private:
 
     mContentArea = View::New();
     mContentArea.SetLayoutMode(LayoutMode::STANDALONE);
-    mContentArea.SetPositionX(BODY_SURFACE_LEFT);
-    mContentArea.SetPositionY(BODY_SURFACE_TOP);
+    mContentArea.SetRequestedPositionX(BODY_SURFACE_LEFT);
+    mContentArea.SetRequestedPositionY(BODY_SURFACE_TOP);
     mContentArea.SetRequestedWidth(BODY_SURFACE_WIDTH);
     mContentArea.SetRequestedHeight(BODY_SURFACE_HEIGHT);
     mContentArea.SetBackgroundColor(UiColor(Color::TRANSPARENT));
     mContentArea.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_CHILDREN);
 
     mStatusText = TextVisualizer::New();
-    mStatusText.SetPositionX(SIDE_MARGIN);
-    mStatusText.SetPositionY(WINDOW_HEIGHT - STATUS_HEIGHT - STATUS_BOTTOM);
+    mStatusText.SetRequestedPositionX(SIDE_MARGIN);
+    mStatusText.SetRequestedPositionY(WINDOW_HEIGHT - STATUS_HEIGHT - STATUS_BOTTOM);
     mStatusText.SetRequestedWidth(CONTENT_WIDTH);
     mStatusText.SetRequestedHeight(STATUS_HEIGHT);
     mStatusText.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -315,8 +315,8 @@ private:
   void CreateTextSurface()
   {
     mTextVisualizer = TextVisualizer::New();
-    mTextVisualizer.SetPositionX(0.0f);
-    mTextVisualizer.SetPositionY(0.0f);
+    mTextVisualizer.SetRequestedPositionX(0.0f);
+    mTextVisualizer.SetRequestedPositionY(0.0f);
     mTextVisualizer.SetRequestedWidth(BODY_SURFACE_WIDTH);
     mTextVisualizer.SetRequestedHeight(BODY_SURFACE_HEIGHT);
     mTextVisualizer.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -334,8 +334,8 @@ private:
     mContentArea.Add(mTextVisualizer);
 
     mDropCapText = TextVisualizer::New();
-    mDropCapText.SetPositionX(BODY_SURFACE_LEFT + DROP_CAP_TEXT_X);
-    mDropCapText.SetPositionY(BODY_SURFACE_TOP + DROP_CAP_TEXT_Y);
+    mDropCapText.SetRequestedPositionX(BODY_SURFACE_LEFT + DROP_CAP_TEXT_X);
+    mDropCapText.SetRequestedPositionY(BODY_SURFACE_TOP + DROP_CAP_TEXT_Y);
     mDropCapText.SetRequestedWidth(DROP_CAP_TEXT_WIDTH);
     mDropCapText.SetRequestedHeight(DROP_CAP_TEXT_HEIGHT);
     mDropCapText.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -362,8 +362,8 @@ private:
       block.phase      = phase;
 
       block.text = TextVisualizer::New();
-      block.text.SetPositionX(BODY_SURFACE_LEFT + bounds.x);
-      block.text.SetPositionY(BODY_SURFACE_TOP + bounds.y);
+      block.text.SetRequestedPositionX(BODY_SURFACE_LEFT + bounds.x);
+      block.text.SetRequestedPositionY(BODY_SURFACE_TOP + bounds.y);
       block.text.SetRequestedWidth(bounds.width);
       block.text.SetRequestedHeight(bounds.height);
       block.text.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -412,8 +412,8 @@ private:
       orb.view.SetCornerRadius(0.5f);
       orb.view.SetProperty(View::Property::SHADOW, CreateOrbShadowMap(orb.color.WithAlpha(0.28f)));
       orb.view.SetProperty(Actor::Property::VISIBLE, index < mActiveOrbCount);
-      orb.view.SetPositionX(orb.position.x);
-      orb.view.SetPositionY(orb.position.y);
+      orb.view.SetRequestedPositionX(orb.position.x);
+      orb.view.SetRequestedPositionY(orb.position.y);
       orb.view.SetRequestedWidth(orb.size.x);
       orb.view.SetRequestedHeight(orb.size.y);
       orb.view.TouchedSignal().Connect(this, &TextVisualizerPerformanceController::OnOrbTouched);
@@ -552,8 +552,8 @@ private:
   {
     for(uint32_t index = 0u; index < std::min<uint32_t>(mActiveOrbCount, static_cast<uint32_t>(mOrbs.size())); ++index)
     {
-      mOrbs[index].view.SetPositionX(mOrbs[index].position.x);
-      mOrbs[index].view.SetPositionY(mOrbs[index].position.y);
+      mOrbs[index].view.SetRequestedPositionX(mOrbs[index].position.x);
+      mOrbs[index].view.SetRequestedPositionY(mOrbs[index].position.y);
       ++mOrbVisualUpdateCount;
     }
   }
@@ -707,7 +707,7 @@ private:
       const float offset = ((std::sin((elapsedSeconds * OVERLAY_TEXT_MOVE_SPEED) + block.phase) + 1.0f) * 0.5f) * block.travelX;
       block.bounds      = block.baseBounds;
       block.bounds.x += offset;
-      block.text.SetPositionX(BODY_SURFACE_LEFT + block.bounds.x);
+      block.text.SetRequestedPositionX(BODY_SURFACE_LEFT + block.bounds.x);
     }
   }
 
@@ -888,8 +888,6 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
-
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
 

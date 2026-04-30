@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text-visualizer-properties.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/text/text-visualizer-properties.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/public-api/math/rect.h>

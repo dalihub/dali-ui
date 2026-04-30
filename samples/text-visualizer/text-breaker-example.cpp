@@ -14,7 +14,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/ui-foundation-pre-initialize.h>
+#include <dali-ui-foundation/dali-ui-foundation-integ.h>
+
 
 #include <algorithm>
 #include <array>
@@ -54,7 +55,7 @@ constexpr float BRICK_GAP_Y       = 24.0f;
 constexpr uint32_t BRICK_ROWS     = 3u;
 constexpr uint32_t BRICK_COUNT    = 14u;
 constexpr float MONO_GLYPH_WIDTH_RATIO = 0.58f;
-constexpr float BACKGROUND_FONT_SIZE   = 22.0f;
+constexpr float BACKGROUND_FONT_SIZE   = 18.0f;
 constexpr float BRICK_FONT_SIZE        = 44.0f;
 constexpr float BRICK_HEIGHT           = BRICK_FONT_SIZE * 1.18f;
 constexpr float PADDLE_FONT_SIZE       = 26.0f;
@@ -174,7 +175,7 @@ Dali::String BuildBackgroundText()
   const char* lineB = "the paddle is text and every collision reshapes the field without turning the page into a bitmap. ";
   const char* lineC = "layout flows around moving exclusions and exposes the rhythm of a small arcade scene. ";
 
-  for(uint32_t repeat = 0u; repeat < 8u; ++repeat)
+  for(uint32_t repeat = 0u; repeat < 12u; ++repeat)
   {
     builder << lineA << lineB << lineC;
   }
@@ -362,8 +363,8 @@ private:
     mRoot.SetBackgroundColor(WINDOW_BG_COLOR);
 
     mBackgroundText = TextVisualizer::New();
-    mBackgroundText.SetPositionX(BACKGROUND_TEXT_LEFT);
-    mBackgroundText.SetPositionY(BACKGROUND_TEXT_TOP);
+    mBackgroundText.SetRequestedPositionX(BACKGROUND_TEXT_LEFT);
+    mBackgroundText.SetRequestedPositionY(BACKGROUND_TEXT_TOP);
     mBackgroundText.SetRequestedWidth(BACKGROUND_TEXT_WIDTH);
     mBackgroundText.SetRequestedHeight(BACKGROUND_TEXT_HEIGHT);
     mBackgroundText.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -375,8 +376,8 @@ private:
 
     mPlayFrame = View::New();
     mPlayFrame.SetLayoutMode(LayoutMode::STANDALONE);
-    mPlayFrame.SetPositionX(PLAY_LEFT);
-    mPlayFrame.SetPositionY(PLAY_TOP);
+    mPlayFrame.SetRequestedPositionX(PLAY_LEFT);
+    mPlayFrame.SetRequestedPositionY(PLAY_TOP);
     mPlayFrame.SetRequestedWidth(PLAY_WIDTH);
     mPlayFrame.SetRequestedHeight(PLAY_HEIGHT);
     mPlayFrame.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -466,8 +467,8 @@ private:
   void ConfigureBrickCommon(View actor, const Rect<float>& textBounds)
   {
     actor.SetLayoutMode(LayoutMode::STANDALONE);
-    actor.SetPositionX(textBounds.x);
-    actor.SetPositionY(textBounds.y);
+    actor.SetRequestedPositionX(textBounds.x);
+    actor.SetRequestedPositionY(textBounds.y);
     actor.SetRequestedWidth(textBounds.width);
     actor.SetRequestedHeight(textBounds.height);
     actor.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -527,8 +528,8 @@ private:
   {
     mStatusText = TextVisualizer::New();
     mStatusText.SetLayoutMode(LayoutMode::STANDALONE);
-    mStatusText.SetPositionX(PLAY_LEFT);
-    mStatusText.SetPositionY(WINDOW_HEIGHT - 44.0f);
+    mStatusText.SetRequestedPositionX(PLAY_LEFT);
+    mStatusText.SetRequestedPositionY(WINDOW_HEIGHT - 44.0f);
     mStatusText.SetRequestedWidth(PLAY_WIDTH);
     mStatusText.SetRequestedHeight(32.0f);
     mStatusText.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -554,8 +555,8 @@ private:
       brick.alive = true;
       brick.text.SetProperty(Actor::Property::VISIBLE, true);
       brick.text.SetOpacity(1.0f);
-      brick.text.SetPositionX(brick.textBounds.x);
-      brick.text.SetPositionY(brick.textBounds.y);
+      brick.text.SetRequestedPositionX(brick.textBounds.x);
+      brick.text.SetRequestedPositionY(brick.textBounds.y);
     }
 
     mBrickBumpActive = false;
@@ -805,8 +806,8 @@ private:
 
     fragment.text = TextVisualizer::New();
     fragment.text.SetLayoutMode(LayoutMode::STANDALONE);
-    fragment.text.SetPositionX(fragment.position.x);
-    fragment.text.SetPositionY(fragment.position.y);
+    fragment.text.SetRequestedPositionX(fragment.position.x);
+    fragment.text.SetRequestedPositionY(fragment.position.y);
     fragment.text.SetRequestedWidth(fragment.width);
     fragment.text.SetRequestedHeight(fragment.height);
     fragment.text.SetBackgroundColor(UiColor(Color::TRANSPARENT));
@@ -831,8 +832,8 @@ private:
       fragment.velocity.y += 180.0f * deltaSeconds;
 
       const float normalized = ClampFloat(fragment.age / fragment.life, 0.0f, 1.0f);
-      fragment.text.SetPositionX(fragment.position.x);
-      fragment.text.SetPositionY(fragment.position.y);
+      fragment.text.SetRequestedPositionX(fragment.position.x);
+      fragment.text.SetRequestedPositionY(fragment.position.y);
       fragment.text.SetOpacity(1.0f - normalized);
     }
 
@@ -889,7 +890,7 @@ private:
     {
       if(brick.text)
       {
-        brick.text.SetPositionY(brick.textBounds.y + offsetY);
+        brick.text.SetRequestedPositionY(brick.textBounds.y + offsetY);
       }
     }
 
@@ -900,7 +901,7 @@ private:
       {
         if(brick.text)
         {
-          brick.text.SetPositionY(brick.textBounds.y);
+          brick.text.SetRequestedPositionY(brick.textBounds.y);
         }
       }
     }
@@ -939,10 +940,10 @@ private:
 
   void UpdateBallAndPaddleActors()
   {
-    mBallView.SetPositionX(mBallCenter.x - BALL_RADIUS);
-    mBallView.SetPositionY(mBallCenter.y - BALL_RADIUS);
-    mPaddleText.SetPositionX(mPaddleX);
-    mPaddleText.SetPositionY(PADDLE_Y);
+    mBallView.SetRequestedPositionX(mBallCenter.x - BALL_RADIUS);
+    mBallView.SetRequestedPositionY(mBallCenter.y - BALL_RADIUS);
+    mPaddleText.SetRequestedPositionX(mPaddleX);
+    mPaddleText.SetRequestedPositionY(PADDLE_Y);
   }
 
   Rect<float> GetPaddleBounds() const
@@ -1177,8 +1178,6 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
-  DaliUiFoundationPreInitialize(nullptr, nullptr, nullptr);
-
   Application application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
 

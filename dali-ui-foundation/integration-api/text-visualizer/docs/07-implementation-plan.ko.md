@@ -28,11 +28,11 @@
 
 아래 파일은 1차 구현에서 새로 추가하는 것을 권장한다.
 
-### public API
+### integration API
 
-- `dali-ui-foundation/public-api/text-visualizer.h`
-- `dali-ui-foundation/public-api/text-visualizer.cpp`
-- `dali-ui-foundation/public-api/text/text-visualizer-properties.h`
+- `dali-ui-foundation/integration-api/text-visualizer.h`
+- `dali-ui-foundation/integration-api/text-visualizer.cpp`
+- `dali-ui-foundation/integration-api/text-visualizer-properties.h`
 
 ### integration API
 
@@ -63,7 +63,7 @@
 
 ### 자동 생성 또는 생성 결과 확인 필요 파일
 
-- `dali-ui-foundation/public-api/text-visualizer.autogen.h`
+- `dali-ui-foundation/integration-api/text-visualizer.autogen.h`
 
 확인 필요:
 
@@ -130,8 +130,8 @@
 
 추가/수정 파일:
 
-- `public-api/text-visualizer.h`
-- `public-api/text-visualizer.cpp`
+- `integration-api/text-visualizer.h`
+- `integration-api/text-visualizer.cpp`
 - `integration-api/text-visualizer-impl.h`
 - `integration-api/text-visualizer-impl.cpp`
 - `dali-ui-foundation/dali-ui-foundation.h`
@@ -156,7 +156,7 @@
 
 추가/수정 파일:
 
-- `public-api/text/text-visualizer-properties.h`
+- `integration-api/text-visualizer-properties.h`
 - `integration-api/text-visualizer-property-handler.h`
 - `integration-api/text-visualizer-property-handler.cpp`
 - `automated-tests/src/dali-ui-foundation/utc-Dali-TextVisualizer.cpp`
@@ -621,7 +621,7 @@ sample 검증 포인트:
 
 - generated file(`text-visualizer.autogen.h`)를 저장소에 포함할지 팀 규칙 확인 필요
 - prepare/layout 재실행 횟수 검증용 test seam이 필요한지 확정 필요
-- `TextVisualizer` property header를 별도 `public-api/text/` 아래 두는 방식 최종 확정 필요
+- `TextVisualizer` property header를 별도 `integration-api/` 아래 두는 방식 최종 확정 필요
 
 ## TextVisualizer 설계에 주는 결론
 

@@ -79,7 +79,7 @@ Property::Value TextVisualizerImpl::PropertyHandler::GetProperty(Ui::View view, 
     }
     case Text::TextVisualizerPropertyIndex::TEXT_COLOR:
     {
-      value = impl.GetTextColor().Resolve();
+      value = impl.GetTextColor().GetRgba();
       break;
     }
     case Text::TextVisualizerPropertyIndex::LINE_HEIGHT:

@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/integration-api/text-visualizer-impl.h>
 #include <dali-ui-foundation/integration-api/text-visualizer-property-handler.h>
-#include <dali-ui-foundation/integration-api/view-integration.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/atlas-renderer-bridge.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/atlas-view-adapter.h>
 #include <dali-ui-foundation/internal/text/text-visualizer/layout-engine.h>
@@ -178,7 +178,7 @@ void TextVisualizerImpl::ClearLineHeight()
 
 void TextVisualizerImpl::SetTextColor(const UiColor& color)
 {
-  if(mTextColor.Resolve() != color.Resolve() || mTextColor.GetColorId() != color.GetColorId())
+  if(mTextColor.GetRgba() != color.GetRgba() || mTextColor.GetColorId() != color.GetColorId())
   {
     mTextColor = color;
     MarkRenderDirty();
@@ -782,7 +782,7 @@ void TextVisualizerImpl::UpdateLayout(float layoutWidth, Internal::TextVisualize
 void TextVisualizerImpl::SyncRenderStateToAdapter(const Vector2& controlSize)
 {
   mAtlasViewAdapter.SetControlSize(controlSize);
-  mAtlasViewAdapter.SetTextColor(mTextColor.Resolve());
+  mAtlasViewAdapter.SetTextColor(mTextColor.GetRgba());
 }
 
 } // namespace Integration
