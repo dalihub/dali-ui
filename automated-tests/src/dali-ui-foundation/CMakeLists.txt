@@ -12,7 +12,6 @@ SET(TC_SOURCES
         utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp
         utc-Dali-InputField.cpp
-        utc-Dali-TextVisualizer.cpp
         utc-Dali-TextValueTypes.cpp
         utc-Dali-ImageView.cpp
         utc-Dali-AnimatedImageView.cpp
