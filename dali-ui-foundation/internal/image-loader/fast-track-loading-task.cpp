@@ -84,22 +84,6 @@ Dali::PixelData GetDummyAPixelData()
   return pixelDataA;
 }
 
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-Dali::PixelData GetDummyPixelDataByFormat(Pixel::Format format)
-{
-  static std::unordered_map<Pixel::Format, Dali::PixelData> gPixelDataCache;
-
-  auto& pixelData = gPixelDataCache[format];
-  if(!pixelData)
-  {
-    uint32_t bpp  = Pixel::GetBytesPerPixel(format);
-    uint8_t* data = new uint8_t[bpp];
-    pixelData     = PixelData::New(data, bpp, 1, 1, format, PixelData::DELETE_ARRAY);
-  }
-  return pixelData;
-}
-#endif
-
 } // namespace
 
 FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
@@ -167,7 +151,12 @@ void FastTrackLoadingTask::OnComplete(AsyncTaskPtr task)
       Dali::Integration::SetTexturePixelFormat(mTextures[index], mImageInformations[index].format);
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
       // Call Upload API, only for add informations of GPU memory usage.
-      Dali::Integration::TextureUploadWithContent(mTextures[index], GetDummyPixelDataByFormat(mImageInformations[index].format), ToDaliString(mUrl.GetUrl() + "(" + ("YUVA"[index]) + ")"), Dali::Integration::TextureContextTypeHint::FAST_TRACK_IMAGE);
+      std::string content = mUrl.GetUrl();
+      if(index > 0u || (index == 0u && mPlanesLoaded))
+      {
+        content += std::string("(") + ("YUVA"[index]) + ")";
+      }
+      Dali::Integration::TextureUploadWithContent(mTextures[index], Dali::PixelData(), ToDaliString(content), Dali::Integration::TextureContextTypeHint::FAST_TRACK_IMAGE, true);
 #endif
     }
     if(mLoadPlanesAvailable && !mPlanesLoaded)
