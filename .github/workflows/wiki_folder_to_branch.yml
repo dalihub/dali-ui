@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   sync-wiki-folder:
@@ -31,6 +32,7 @@ jobs:
       - name: Update wiki branch
         env:
           SOURCE_COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'Sync wiki folder from devel' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
 
@@ -50,3 +52,6 @@ jobs:
           printf '%s\n' "$SOURCE_COMMIT_MESSAGE" > /tmp/wiki-commit-message
           git commit -F /tmp/wiki-commit-message
           git push origin wiki
+
+          gh workflow run wiki_sync.yml --ref wiki
+
