@@ -162,6 +162,15 @@
   */ \
   ChildClass& SetTouchFocusable(bool touchFocusable) { View::SetTouchFocusable(touchFocusable); return *this; } \
   /** \
+  * @brief Sets whether descendant focus is blocked. \
+  * \
+  * When blocked, none of this View's descendants can receive keyboard focus. \
+  * Focus requests on descendants will be rejected. \
+  * \
+  * @param[in] blocked True to block descendant focus \
+  */ \
+  ChildClass& SetDescendantFocusBlocked(bool blocked) { View::SetDescendantFocusBlocked(blocked); return *this; } \
+  /** \
   * @brief Sets the left focusable View for keyboard navigation. \
   * \
   * @param[in] view The View to focus when navigating left \
@@ -209,11 +218,6 @@
   * @param[in] view The View to focus when navigating backward \
   */ \
   ChildClass& SetBackwardFocusableView(View view) { View::SetBackwardFocusableView(view); return *this; } \
-  /** \
-  * @brief Sets whether this view supports two dimensional key navigation. \
-  * @param[in] isSupported True to support key navigation \
-  */ \
-  ChildClass& SetKeyNavigationSupport(bool isSupported) { View::SetKeyNavigationSupport(isSupported); return *this; } \
   /** \
   * @brief Sets the background color. \
   * \

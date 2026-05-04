@@ -60,20 +60,6 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEY
 
 const char* const FOCUS_BORDER_IMAGE_FILE_NAME = "keyboard_focus.9.png";
 
-bool IsDescendantOf(Actor target, Actor ancestor)
-{
-  Actor current = target;
-  while(current)
-  {
-    if(current == ancestor)
-    {
-      return true;
-    }
-    current = current.GetParent();
-  }
-  return false;
-}
-
 // Key name constants for OnKeyEvent
 constexpr const char* KEY_NAME_LEFT      = "Left";
 constexpr const char* KEY_NAME_RIGHT     = "Right";
@@ -148,18 +134,18 @@ FocusManager::FocusManager()
 : mFocusChangedSignal(),
   mCurrentFocusView(),
   mFocusIndicatorView(),
-  mFocusFinderRootView(),
+
   mFocusHistory(),
   mSlotDelegate(this),
   mCurrentFocusedWindow(),
   mIsFocusIndicatorShown(UNKNOWN),
   mEnableFocusIndicator(ENABLE),
   mAlwaysShowIndicator(ALWAYS_SHOW),
+  mLastFocusChangeContext(),
+  mCurrentWindowId(0),
   mClearFocusOnTouch(true),
   mEnableDefaultAlgorithm(true),
-  mClearFocusOnWindowFocusLost(true),
-  mCurrentWindowId(0),
-  mLastFocusChangeContext()
+  mClearFocusOnWindowFocusLost(true)
 {
   // TODO: Get FocusIndicatorEnable constant from stylesheet to set mIsFocusIndicatorShown.
 
@@ -223,7 +209,22 @@ void FocusManager::GetConfiguration()
 
 bool FocusManager::SetCurrentFocusView(View view)
 {
-  return DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
+  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
+}
+
+bool FocusManager::RequestFocus(View view)
+{
+  if(!view)
+  {
+    return false;
+  }
+
+  View resolved = GetImpl(view).RequestFocus();
+  if(resolved)
+  {
+    return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, ""});
+  }
+  return false;
 }
 
 bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& context)
@@ -237,36 +238,10 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
   Dali::Integration::SceneHolder currentWindow;
 
   // Check whether the view is in the stage and is keyboard focusable.
-  if(view && view.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-     view.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED) &&
-     view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE) &&
+  if(view && view.IsFocusable() && view.IsEnabled() && view.IsOnScene() &&
      (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
                                                                   ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
   {
-    // If the parent's KEYBOARD_FOCUSABLE_CHILDREN is false, it cannot have focus.
-    Actor parent = view.GetParent();
-    while(parent)
-    {
-      if(!parent.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
-      {
-        DALI_LOG_DEBUG_INFO("Parent has KEYBOARD_FOCUSABLE_CHILDREN false\n");
-        return false;
-      }
-      parent = parent.GetParent();
-    }
-
-    // Focus containment: if current focus is inside a FocusGroup, reject moves outside it.
-    View currentFocus = GetCurrentFocusView();
-    if(currentFocus)
-    {
-      View focusGroup = GetFocusGroup(currentFocus);
-      if(focusGroup && !IsDescendantOf(view, focusGroup))
-      {
-        DALI_LOG_DEBUG_INFO("Focus change rejected: target is outside the active focus group\n");
-        return false;
-      }
-    }
-
     // If developer set focus on same view, doing nothing
     View currentFocusedView = GetCurrentFocusView();
     DALI_LOG_DEBUG_INFO("current focused view : [%p] new focused view : [%p]\n", currentFocusedView.GetObjectPtr(), view.GetObjectPtr());
@@ -352,7 +327,7 @@ View FocusManager::GetCurrentFocusView()
 {
   View view = mCurrentFocusView.GetHandle();
 
-  if(view && !view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(view && !view.IsOnScene())
   {
     // If the view has been removed from the stage, then it should not be focused
     view.Reset();
@@ -374,7 +349,7 @@ View FocusManager::GetFocusViewFromCurrentWindow()
     }
   }
 
-  if(view && !view.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+  if(view && !view.IsOnScene())
   {
     // If the view has been removed from the window, then the window doesn't have any focused view
     view.Reset();
@@ -398,7 +373,7 @@ void FocusManager::MoveFocusBackward()
       // Get pre focused view
       View target = mFocusHistory[mFocusHistory.size() - 1].GetHandle();
 
-      if(target && target.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+      if(target && target.IsOnScene())
       {
         // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
         mFocusHistory.pop_back();
@@ -419,35 +394,6 @@ void FocusManager::MoveFocusBackward()
       mFocusHistory.push_back(currentFocusedView);
     }
   }
-}
-
-bool FocusManager::IsLayoutView(View view) const
-{
-  return view && GetImpl(view).IsKeyNavigationSupported();
-}
-
-Ui::View FocusManager::GetParentLayoutView(View view) const
-{
-  // Get the view's parent layout view that supports two dimensional keyboard navigation
-  Actor rootActor;
-  Actor parent;
-  if(view)
-  {
-    Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(view);
-    if(window)
-    {
-      rootActor = window.GetRootLayer();
-    }
-
-    parent = view.GetParent();
-  }
-
-  while(parent && !IsLayoutView(View::DownCast(parent)) && parent != rootActor)
-  {
-    parent = parent.GetParent();
-  }
-
-  return View::DownCast(parent);
 }
 
 Ui::FocusDevice FocusManager::ConvertDeviceClassToKeyboardFocusDevice(Device::Class::Type deviceClass) const
@@ -480,183 +426,161 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
 {
   View currentFocusView = GetCurrentFocusView();
 
-  bool succeed = false;
+  // Step 1: Parent chain navigation
+  // User can stop chaining by overriding ViewImpl::OnFocusNavigationRequested
+  ParentNavigationResult parentNavigation = FindNextFocusByParentNavigation(currentFocusView, direction);
+  View                   candidate        = parentNavigation.candidate;
 
-  // Go through the view's hierarchy until we find a layout view that knows how to move the focus
-  Ui::View layoutView = IsLayoutView(currentFocusView) ? currentFocusView : GetParentLayoutView(currentFocusView);
-  while(layoutView && !succeed)
+  // Step 2: Directional Properties (explicit next-focus)
+  if(!candidate)
   {
-    succeed    = DoMoveFocusWithinLayoutView(layoutView, currentFocusView, direction, context);
-    layoutView = GetParentLayoutView(layoutView);
+    candidate = FindNextFocusByProperty(currentFocusView, direction);
   }
 
-  if(!succeed)
+  // Step 3: FocusFinder (geometry or linear ordering, scoped to FocusGroup)
+  if(!candidate && mEnableDefaultAlgorithm)
   {
-    View nextFocusableView;
+    candidate = FindNextFocusByFinder(currentFocusView, parentNavigation.focusGroupBoundary, direction);
+  }
 
-    // If the current focused view is valid, then find the next focusable view via the focusable properties.
-    if(currentFocusView)
+  // Apply: resolve through RequestFocus (child delegation) then commit
+  if(candidate)
+  {
+    View resolved = GetImpl(candidate).RequestFocus();
+    if(resolved && !resolved.HasAncestorBlockingFocus())
     {
-      int             viewId = -1;
-      Property::Index index  = Property::INVALID_INDEX;
-      Property::Value value;
-
-      // Find property index based upon focus direction
-      switch(direction)
-      {
-        case Ui::FocusDirection::LEFT:
-        {
-          index = Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::RIGHT:
-        {
-          index = Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::UP:
-        {
-          index = Ui::View::Property::UP_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::DOWN:
-        {
-          index = Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::CLOCKWISE:
-        {
-          index = Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::COUNTER_CLOCKWISE:
-        {
-          index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::FORWARD:
-        {
-          index = Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        case Ui::FocusDirection::BACKWARD:
-        {
-          index = Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID;
-          break;
-        }
-        default:
-          break;
-      }
-
-      // If the focusable property is set then determine next focusable view
-      if(index != Property::INVALID_INDEX)
-      {
-        value  = currentFocusView.GetProperty(index);
-        viewId = value.Get<int>();
-
-        // If view's id is valid then find view from id. The view should be on the stage.
-        if(viewId != -1)
-        {
-          if(currentFocusView.GetParent())
-          {
-            nextFocusableView = View::DownCast(currentFocusView.GetParent().FindChildById(viewId));
-          }
-
-          if(!nextFocusableView)
-          {
-            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
-            if(window)
-            {
-              nextFocusableView = View::DownCast(window.GetRootLayer().FindChildById(viewId));
-            }
-          }
-        }
-      }
-    }
-
-    if(!nextFocusableView)
-    {
-      if(mEnableDefaultAlgorithm)
-      {
-        Actor rootActor = mFocusFinderRootView.GetHandle();
-        if(!rootActor)
-        {
-          if(currentFocusView)
-          {
-            // Find the window of the focused view.
-            Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
-            if(window)
-            {
-              rootActor = window.GetRootLayer();
-            }
-          }
-          else
-          {
-            // Searches from the currently focused window.
-            rootActor = mCurrentFocusedWindow.GetHandle();
-          }
-        }
-        if(rootActor)
-        {
-          // We should find it among the views nearby.
-          nextFocusableView = FocusFinder::GetNearestFocusableView(rootActor, currentFocusView, direction);
-        }
-      }
-    }
-
-    if(nextFocusableView && nextFocusableView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-       nextFocusableView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED))
-    {
-      // Whether the next focusable view is a layout view
-      if(IsLayoutView(nextFocusableView))
-      {
-        // If so, move the focus inside it.
-        succeed = DoMoveFocusWithinLayoutView(nextFocusableView, currentFocusView, direction, context);
-      }
-      if(!succeed)
-      {
-        // Just set focus to the next focusable view
-        succeed = DoSetCurrentFocusView(nextFocusableView, context);
-      }
+      return DoSetCurrentFocusView(resolved, context);
     }
   }
 
-  return succeed;
+  return false;
 }
 
-bool FocusManager::DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context)
+View FocusManager::FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction)
 {
-  // Ask the layout view for the next view to focus
-  View nextFocusableView = GetImpl(layoutView).GetNextFocusableView(view, direction, false /*loopEnabled*/);
-  if(nextFocusableView)
+  if(!currentFocusView)
   {
-    if(!(nextFocusableView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ||
-         nextFocusableView.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED)))
+    return View();
+  }
+
+  Property::Index index = Property::INVALID_INDEX;
+  switch(direction)
+  {
+    case Ui::FocusDirection::LEFT:
+      index = Ui::View::Property::LEFT_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::RIGHT:
+      index = Ui::View::Property::RIGHT_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::UP:
+      index = Ui::View::Property::UP_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::DOWN:
+      index = Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::CLOCKWISE:
+      index = Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::COUNTER_CLOCKWISE:
+      index = Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::FORWARD:
+      index = Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID;
+      break;
+    case Ui::FocusDirection::BACKWARD:
+      index = Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID;
+      break;
+    default:
+      break;
+  }
+
+  if(index != Property::INVALID_INDEX)
+  {
+    int viewId = currentFocusView.GetProperty(index).Get<int>();
+    if(viewId != -1)
     {
-      // If the view is not focusable, ask the same layout view for the next view to focus
-      return DoMoveFocusWithinLayoutView(layoutView, nextFocusableView, direction, context);
+      View found;
+      if(currentFocusView.GetParent())
+      {
+        found = View::DownCast(currentFocusView.GetParent().FindChildById(viewId));
+      }
+      if(!found)
+      {
+        Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
+        if(window)
+        {
+          found = View::DownCast(window.GetRootLayer().FindChildById(viewId));
+        }
+      }
+      return found;
+    }
+  }
+  return View();
+}
+
+FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction)
+{
+  ParentNavigationResult result;
+
+  if(!currentFocusView)
+  {
+    return result;
+  }
+
+  Actor parent = currentFocusView.GetParent();
+  while(parent)
+  {
+    View parentView = View::DownCast(parent);
+    if(parentView && IsFocusGroup(parentView))
+    {
+      result.focusGroupBoundary = parentView;
+      break;
+    }
+
+    if(parentView)
+    {
+      result.candidate = GetImpl(parentView).RequestFocusNavigation(currentFocusView, direction);
+      if(result.candidate)
+      {
+        return result;
+      }
+    }
+    parent = parent.GetParent();
+  }
+  return result;
+}
+
+View FocusManager::FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction)
+{
+  Actor rootActor = focusGroup ? Actor(focusGroup) : Actor();
+  if(!rootActor)
+  {
+    if(currentFocusView)
+    {
+      Dali::Integration::SceneHolder window = Dali::Integration::SceneHolder::Get(currentFocusView);
+      if(window)
+      {
+        rootActor = window.GetRootLayer();
+      }
     }
     else
     {
-      // Whether the next focusable view is a layout view
-      if(IsLayoutView(nextFocusableView) && nextFocusableView != layoutView)
-      {
-        // If so, move the focus inside it.
-        return DoMoveFocusWithinLayoutView(nextFocusableView, GetCurrentFocusView(), direction, context);
-      }
-      else
-      {
-        // Inform the layout view we will move the focus to what the view returns.
-        GetImpl(layoutView).NotifyFocusChangeCommitted(nextFocusableView);
-        return DoSetCurrentFocusView(nextFocusableView, context);
-      }
+      rootActor = mCurrentFocusedWindow.GetHandle();
     }
   }
-  else
+
+  if(rootActor)
   {
-    // No more view can be focused in the given direction within the same layout view.
-    return false;
+    if(direction == Ui::FocusDirection::FORWARD || direction == Ui::FocusDirection::BACKWARD)
+    {
+      return FocusFinder::GetNextFocusableViewInOrder(rootActor, currentFocusView, direction);
+    }
+    else
+    {
+      return FocusFinder::GetNearestFocusableView(rootActor, currentFocusView, direction);
+    }
   }
+  return View();
 }
 
 void FocusManager::ClearFocus(View view)
@@ -1014,8 +938,7 @@ void FocusManager::OnTouch(const TouchEvent& touch)
     }
 
     // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus view
-    if(hitView && hitView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-       hitView.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE))
+    if(hitView && hitView.IsFocusable() && hitView.IsTouchFocusable() && !hitView.HasAncestorBlockingFocus())
     {
       DoSetCurrentFocusView(hitView, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
     }
@@ -1165,16 +1088,6 @@ void FocusManager::EnableDefaultAlgorithm(bool enable)
 bool FocusManager::IsDefaultAlgorithmEnabled() const
 {
   return mEnableDefaultAlgorithm;
-}
-
-void FocusManager::SetFocusFinderRootView(View view)
-{
-  mFocusFinderRootView = view;
-}
-
-void FocusManager::ResetFocusFinderRootView()
-{
-  mFocusFinderRootView.Reset();
 }
 
 void FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)

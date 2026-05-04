@@ -1621,11 +1621,6 @@ void ViewImpl::Initialize()
 
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
-
-  if(mImpl->mFlags & Ui::ViewImpl::ViewBehaviour::REQUIRES_KEY_NAVIGATION_SUPPORT)
-  {
-    SetKeyNavigationSupport(true);
-  }
 }
 
 void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
@@ -1723,14 +1718,61 @@ bool ViewImpl::IsOffScreenRenderTaskExclusive()
   return false;
 }
 
-void ViewImpl::SetKeyNavigationSupport(bool isSupported)
+void ViewImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
 {
-  Self().SetProperty(Ui::View::Property::KEY_NAVIGATION_SUPPORT, isSupported);
+  mImpl->mFocusNavigationCallback = std::move(callback);
 }
 
-bool ViewImpl::IsKeyNavigationSupported() const
+View ViewImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
 {
-  return mImpl->mIsKeyNavigationSupported;
+  if(mImpl->mFocusNavigationCallback)
+  {
+    return mImpl->mFocusNavigationCallback.Invoke(currentFocusedView, direction);
+  }
+  return OnFocusNavigationRequested(currentFocusedView, direction);
+}
+
+void ViewImpl::SetDescendantFocusBlocked(bool blocked)
+{
+  Self().SetProperty(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN, !blocked);
+}
+
+bool ViewImpl::IsDescendantFocusBlocked() const
+{
+  return !Self().GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
+}
+
+bool ViewImpl::HasAncestorBlockingFocus() const
+{
+  Dali::Actor parent = Self().GetParent();
+  while(parent)
+  {
+    if(!parent.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
+    {
+      return true;
+    }
+    parent = parent.GetParent();
+  }
+  return false;
+}
+
+View ViewImpl::RequestFocus()
+{
+  if(HasAncestorBlockingFocus())
+  {
+    return View();
+  }
+  return OnFocusRequested();
+}
+
+View ViewImpl::OnFocusRequested()
+{
+  Ui::View self = Ui::View::DownCast(Self());
+  if(self.IsFocusable() && self.IsEnabled() && self.IsVisible())
+  {
+    return self;
+  }
+  return View();
 }
 
 void ViewImpl::SetAsFocusGroup(bool isFocusGroup)
@@ -1768,10 +1810,9 @@ ViewAccessible* ViewImpl::CreateAccessibleObject()
   return new ViewAccessible(Self());
 }
 
-Ui::View ViewImpl::GetNextFocusableView(Ui::View currentFocusedView, Ui::FocusDirection direction,
-                                        bool loopEnabled)
+View ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
 {
-  return Ui::View();
+  return View();
 }
 
 void ViewImpl::OnFocusChangeCommitted(Ui::View committedFocusableView)

@@ -482,7 +482,6 @@ const PropertyRegistration ViewDataImpl::PROPERTY_37(typeRegistration, "minimumH
 const PropertyRegistration ViewDataImpl::PROPERTY_38(typeRegistration, "maximumWidth",                   Ui::View::Property::MAXIMUM_WIDTH,                    Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_39(typeRegistration, "maximumHeight",                  Ui::View::Property::MAXIMUM_HEIGHT,                   Property::FLOAT,   &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_40(typeRegistration, "layoutMode",                     Ui::View::Property::LAYOUT_MODE,                      Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_41(typeRegistration, "keyNavigationSupport",      Ui::View::Property::KEY_NAVIGATION_SUPPORT,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_42(typeRegistration, "focusGroup",             Ui::View::Property::FOCUS_GROUP,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_43(typeRegistration, "forwardFocusableViewId",  Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID,  Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_44(typeRegistration, "backwardFocusableViewId", Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -532,7 +531,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mIdleCallback(nullptr),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
   mAccessibilityRole{static_cast<int32_t>(AccessibilityRole::NONE)},
-  mIsKeyNavigationSupported(false),
   mIsFocusGroup(false),
   mIsEmittingResourceReadySignal(false),
   mIdleCallbackRegistered(false),
@@ -1556,16 +1554,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::KEY_NAVIGATION_SUPPORT:
-      {
-        bool supported;
-        if(value.Get(supported))
-        {
-          viewImpl.GetViewDataImpl().mIsKeyNavigationSupported = supported;
-        }
-        break;
-      }
-
       case Ui::View::Property::FOCUS_GROUP:
       {
         bool isFocusGroup;
@@ -1856,12 +1844,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::LAYOUT_MODE:
       {
         value = static_cast<int>(viewImpl.GetViewDataImpl().mLayoutMode);
-        break;
-      }
-
-      case Ui::View::Property::KEY_NAVIGATION_SUPPORT:
-      {
-        value = viewImpl.GetViewDataImpl().mIsKeyNavigationSupported;
         break;
       }
 

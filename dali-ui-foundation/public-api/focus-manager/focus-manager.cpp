@@ -51,6 +51,11 @@ bool FocusManager::SetCurrentFocusView(View view)
   return GetImpl(*this).SetCurrentFocusView(view);
 }
 
+bool FocusManager::RequestFocus(View view)
+{
+  return GetImpl(*this).RequestFocus(view);
+}
+
 View FocusManager::GetCurrentFocusView()
 {
   return GetImpl(*this).GetCurrentFocusView();

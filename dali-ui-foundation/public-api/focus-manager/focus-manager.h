@@ -76,18 +76,33 @@ public:
   static FocusManager Get();
 
   /**
-   * @brief Moves the focus to the given view.
+   * @brief Sets the focus directly to the given view.
    *
-   * Only one view can be focused at the same time.  The view must
-   * be in the stage already and focusable.
+   * The focus is set exactly to the specified view without child delegation.
+   * If the view is not focusable or not on the scene, the call fails.
+   * Use RequestFocus() if you want automatic child delegation for containers.
    *
    * @param view The view to be focused
    * @return Whether the focus is successful or not
    * @pre The FocusManager has been initialized.
    * @pre The View has been initialized.
-   * @note If the parent of this view has the KEYBOARD FOCUSABLE CHILDREN property set to false, it will not be focused.
    */
   bool SetCurrentFocusView(View view);
+
+  /**
+   * @brief Requests focus on the given view with child delegation.
+   *
+   * If the view is a container, focus is delegated to a focusable
+   * descendant (child-first). If no descendant accepts focus and
+   * the view itself is focusable, it receives focus.
+   * If an ancestor has DescendantFocusBlocked set, the request is rejected.
+   *
+   * @param view The view to request focus on
+   * @return Whether the focus is successful or not
+   * @pre The FocusManager has been initialized.
+   * @pre The View has been initialized.
+   */
+  bool RequestFocus(View view);
 
   /**
    * @brief Gets the current focused view.

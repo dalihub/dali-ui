@@ -25,6 +25,7 @@
 #include <initializer_list>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
@@ -32,6 +33,7 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
@@ -56,6 +58,21 @@ class ViewAnimationSpec;
 // @ANIMATABLE_MANUAL(PositionY, float)
 
 class ViewImpl;
+
+/**
+ * @brief Move-only callback for custom focus navigation.
+ *
+ * @code
+ * // Member function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(this, &MyClass::OnFocusNavigation));
+ *
+ * // Static function:
+ * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
+ * @endcode
+ *
+ * @note Signature: View(View currentFocusedView, FocusDirection direction)
+ */
+using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
 
 #include "view.autogen.h"
 /**
@@ -620,6 +637,33 @@ public: // Properties
   View& SetTouchFocusable(bool touchFocusable);
 
   /**
+   * @brief Sets whether descendant focus is blocked.
+   *
+   * When blocked, none of this View's descendants can receive keyboard focus.
+   * Focus requests on descendants will be rejected.
+   *
+   * @param[in] blocked True to block descendant focus
+   */
+  View& SetDescendantFocusBlocked(bool blocked);
+
+  /**
+   * @brief Gets whether descendant focus is blocked.
+   *
+   * @return True if descendant focus is blocked
+   */
+  bool IsDescendantFocusBlocked() const;
+
+  /**
+   * @brief Checks whether any ancestor has descendant focus blocked.
+   *
+   * Traverses the parent chain on every call to determine if any ancestor
+   * has set SetDescendantFocusBlocked to true.
+   *
+   * @return true if an ancestor blocks descendant focus, false otherwise.
+   */
+  bool HasAncestorBlockingFocus() const;
+
+  /**
    * @brief Sets the left focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating left
@@ -676,16 +720,14 @@ public: // Properties
   View& SetBackwardFocusableView(View view);
 
   /**
-   * @brief Sets whether this view supports two dimensional key navigation.
-   * @param[in] isSupported True to support key navigation
+   * @brief Sets a callback for focus navigation within this view's children.
+   *
+   * When set, this callback is invoked by the focus manager to determine the next
+   * focusable view. It takes priority over the OnFocusNavigationRequested() virtual method.
+   *
+   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */
-  View& SetKeyNavigationSupport(bool isSupported);
-
-  /**
-   * @brief Gets whether this view supports two dimensional key navigation.
-   * @return True if key navigation is supported
-   */
-  bool IsKeyNavigationSupported() const;
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
 
   /**
    * @brief Gets the background color.
@@ -1644,12 +1686,6 @@ public:
        * @details Name "layoutMode", type Property::INTEGER (Ui::LayoutMode enum).
        */
       LAYOUT_MODE,
-
-      /**
-       * @brief Whether the View supports key navigation.
-       * @details Name "keyNavigationSupport", type Property::BOOLEAN.
-       */
-      KEY_NAVIGATION_SUPPORT,
 
       /**
        * @brief Whether the View acts as a focus group boundary.

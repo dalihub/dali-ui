@@ -84,6 +84,15 @@ protected: // From ViewImpl
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 
+  /**
+   * @copydoc ViewImpl::OnFocusRequested
+   *
+   * Iterates visible children calling RequestFocus() on each.
+   * Returns the first child that accepts focus. If no child accepts,
+   * falls back to ViewImpl::OnFocusRequested() (self).
+   */
+  View OnFocusRequested() override;
+
 protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()

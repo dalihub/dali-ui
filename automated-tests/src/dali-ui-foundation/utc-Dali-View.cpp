@@ -2509,14 +2509,7 @@ int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
 
 int UtcDaliViewSetKeyNavigationSupportFiresPropertySetSignalP(void)
 {
-  UiTestApplication   application;
-  Ui::View            view = Ui::View::New();
-  PropertySetRecorder recorder;
-  recorder.Connect(view);
-
-  Ui::GetImpl(view).SetKeyNavigationSupport(true);
-
-  DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::KEY_NAVIGATION_SUPPORT));
+  // Test removed: KEY_NAVIGATION_SUPPORT property has been deleted.
   END_TEST;
 }
 

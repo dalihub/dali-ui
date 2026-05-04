@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/actors/actor.h>
@@ -64,6 +65,35 @@ LayoutImpl::LayoutImpl()
 
 LayoutImpl::~LayoutImpl()
 {
+}
+
+View LayoutImpl::OnFocusRequested()
+{
+  Ui::View self = Ui::View::DownCast(Self());
+
+  // If descendant focus is blocked, skip children and try self only
+  if(self.IsDescendantFocusBlocked())
+  {
+    return ViewImpl::OnFocusRequested();
+  }
+
+  // Try children first (FOCUS_AFTER_DESCENDANTS behavior)
+  const auto childCount = self.GetChildCount();
+  for(auto i = 0u; i < childCount; ++i)
+  {
+    View child = self.GetChildAt(i);
+    if(child && child.IsVisible())
+    {
+      View resolved = GetImpl(child).RequestFocus();
+      if(resolved)
+      {
+        return resolved;
+      }
+    }
+  }
+
+  // No child accepted focus, try self
+  return ViewImpl::OnFocusRequested();
 }
 
 void LayoutImpl::SetLayoutManager(LayoutManager* layoutManager)

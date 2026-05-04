@@ -92,10 +92,9 @@ public:
    */
   enum ViewBehaviour
   {
-    VIEW_BEHAVIOUR_DEFAULT = 0,                                                     ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
-                                                                                    ///< but doesn't receive event callbacks.
-    REQUIRES_KEY_NAVIGATION_SUPPORT = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0), ///< True if needs to support key navigation
-    DISABLE_VISUALS                 = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 1), ///< True if view should not use visuals
+    VIEW_BEHAVIOUR_DEFAULT = 0,                                     ///< Default behaviour: Size negotiation is enabled & listens to Style Change signal,
+                                                                    ///< but doesn't receive event callbacks.
+    DISABLE_VISUALS = 1 << (CustomActorImpl::ACTOR_FLAG_COUNT + 0), ///< True if view should not use visuals
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
@@ -146,17 +145,6 @@ public: // ABI-frozen virtual API
    * @see GetAccessibleObject()
    */
   virtual ViewAccessible* CreateAccessibleObject();
-
-  /**
-   * @brief Gets the next focusable view in this view towards the given direction.
-   *
-   * A view needs to override this function in order to support two dimensional key navigation.
-   * @param[in] currentFocusedView The current focused view
-   * @param[in] direction The direction to move the focus towards
-   * @param[in] loopEnabled Whether the focus movement should be looped within the view
-   * @return The next focusable view in this view or an empty handle if no view can be focused
-   */
-  virtual Ui::View GetNextFocusableView(Ui::View currentFocusedView, Ui::FocusDirection direction, bool loopEnabled);
 
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.
@@ -753,19 +741,35 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
-  // Key Navigation & Focus
+  // Focus
 
   /**
-   * @brief Sets whether this view supports two dimensional key navigation.
-   * @param[in] isSupported True to support key navigation
+   * @copydoc Ui::View::SetDescendantFocusBlocked
    */
-  void SetKeyNavigationSupport(bool isSupported);
+  void SetDescendantFocusBlocked(bool blocked);
 
   /**
-   * @brief Gets whether this view supports two dimensional key navigation.
-   * @return True if key navigation is supported
+   * @copydoc Ui::View::IsDescendantFocusBlocked
    */
-  bool IsKeyNavigationSupported() const;
+  bool IsDescendantFocusBlocked() const;
+
+  /**
+   * @copydoc Ui::View::HasAncestorBlockingFocus
+   */
+  bool HasAncestorBlockingFocus() const;
+
+  // Focus Navigation
+
+  /**
+   * @brief Sets a callback for focus navigation within this view's children.
+   *
+   * When set, the callback takes priority over the OnFocusNavigationRequested()
+   * virtual method. The focus manager calls RequestFocusNavigation() which
+   * dispatches to the callback if set, otherwise to the virtual method.
+   *
+   * @param[in] callback The focus navigation callback (move-only, ownership transferred)
+   */
+  void SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
 
   // Signals
 
@@ -790,6 +794,8 @@ public: // Non-virtual API (safe to reorder / extend)
   DALI_INTERNAL bool NotifyKeyEvent(const KeyEvent& event);
   DALI_INTERNAL void NotifyFocusChanged(bool focused);
   DALI_INTERNAL void NotifyFocusChangeCommitted(Ui::View committedFocusableView);
+  DALI_INTERNAL View RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
+  DALI_INTERNAL View RequestFocus();
   /// @endcond
 
 protected:
@@ -838,6 +844,28 @@ protected:
    * @param[in] committedFocusableView The committed focusable view
    */
   virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
+
+  /**
+   * @brief Called when the focus manager requests the next focusable view within this container.
+   *
+   * Override to provide custom focus navigation logic. If a callback is set via
+   * SetFocusNavigationCallback(), the callback takes priority and this method is not called.
+   *
+   * @param[in] currentFocusedView The current focused view
+   * @param[in] direction The direction to move the focus towards
+   * @return The next focusable view or an empty handle if no view can be focused
+   */
+  virtual View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction);
+
+  /**
+   * @brief Called when focus is requested on this view via RequestFocus().
+   *
+   * The default implementation returns Self() if this view is focusable, enabled, and visible.
+   * Layout views should override this to delegate focus to a child (see LayoutImpl).
+   *
+   * @return The view that should receive focus, or an empty handle if focus cannot be accepted
+   */
+  virtual View OnFocusRequested();
 
   // ============================================================
   // protected: Framework overrides (CustomActorImpl)

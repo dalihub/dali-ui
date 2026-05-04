@@ -89,6 +89,14 @@ public:
   bool SetCurrentFocusView(View view);
 
   /**
+   * @brief Requests focus on the given view, delegating to its RequestFocus()
+   * for child-first resolution, then committing the result.
+   * @param view The view to request focus on
+   * @return Whether the focus was successfully set
+   */
+  bool RequestFocus(View view);
+
+  /**
    * @copydoc Ui::FocusManager::GetCurrentFocusView
    */
   View GetCurrentFocusView();
@@ -159,16 +167,6 @@ public:
   bool IsDefaultAlgorithmEnabled() const;
 
   /**
-   * @copydoc Ui::DevelFocusManager::SetFocusFinderRootView
-   */
-  void SetFocusFinderRootView(View view);
-
-  /**
-   * @copydoc Ui::DevelFocusManager::ResetFocusFinderRootView
-   */
-  void ResetFocusFinderRootView();
-
-  /**
    * Returns the last focus change context (device and optional device name).
    */
   const FocusChangeContext& FocusChangedContext() const;
@@ -212,6 +210,12 @@ private:
   typedef std::vector<WeakHandle<View>> FocusStack;         ///< Focus history stack
   typedef FocusStack::iterator          FocusStackIterator; ///< Define FocusStack::Iterator as FocusStackIterator to navigate FocusStack
 
+  struct ParentNavigationResult
+  {
+    View candidate;
+    View focusGroupBoundary;
+  };
+
   /**
    * This will be called when the adaptor is initialized
    */
@@ -229,39 +233,30 @@ private:
   void GetConfiguration();
 
   /**
-   * Move the focus to the specified view and send notification for the focus change.
-   * @param view The view to be focused
+   * Step 1: Find next focus from explicit directional properties.
+   */
+  View FindNextFocusByProperty(View currentFocusView, Ui::FocusDirection direction);
+
+  /**
+   * Step 2: Find next focus by propagating up the parent chain.
+   * Stops at FocusGroup boundary and records it when encountered.
+   */
+  ParentNavigationResult FindNextFocusByParentNavigation(View currentFocusView, Ui::FocusDirection direction);
+
+  /**
+   * Step 3: Find next focus using FocusFinder (geometry or linear ordering).
+   * Uses focusGroup as search root if present.
+   */
+  View FindNextFocusByFinder(View currentFocusView, View focusGroup, Ui::FocusDirection direction);
+
+  /**
+   * Commit the focus change to the specified view. No validation is performed —
+   * the caller must ensure the view is a valid focus target.
+   * @param view The view to receive focus
    * @param context The context that caused the focus change (device, name)
-   * @return Whether the focus is successful or not
+   * @return Whether the focus commit is successful or not
    */
   bool DoSetCurrentFocusView(View view, const FocusChangeContext& context);
-
-  /**
-   * Move the focus to the next view towards the specified direction within the layout view
-   * @param layoutView The layout view to move the focus in
-   * @param view The current focused view
-   * @param direction The direction of focus movement
-   * @param context The context that caused the focus change (device, name)
-   * @return Whether the focus is successful or not
-   */
-  bool DoMoveFocusWithinLayoutView(Ui::View layoutView, View view, Ui::FocusDirection direction, const FocusChangeContext& context);
-
-  /**
-   * Check whether the view is a layout view that supports two dimensional keyboard navigation.
-   * The layout view needs to internally set the focus order for the child view and be able to
-   * tell FocusManager the next focusable view in the given direction.
-   * @pre The FocusManager has been initialized.
-   * @param view The view to be checked.
-   * @return Whether the view is a layout view or not.
-   */
-  bool IsLayoutView(View view) const;
-
-  /**
-   * Returns the closest ancestor of the given view that is a layout view.
-   * @param view The view to be checked for its parent layout view
-   * @return The parent layout view the given view belongs to or an empty handle if the given view doesn't belong to a layout view
-   */
-  Ui::View GetParentLayoutView(View view) const;
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus
@@ -357,35 +352,24 @@ private:
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
-  WeakHandle<View> mFocusFinderRootView; ///< The root view from which the focus finder is started.
-
-  FocusStack mFocusHistory; ///< Stack to contain pre-focused view history
-
-  SlotDelegate<FocusManager> mSlotDelegate;
-
+  FocusStack                                                          mFocusHistory; ///< Stack to contain pre-focused view history
+  SlotDelegate<FocusManager>                                          mSlotDelegate;
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
+  FocusViewContainer                                                  mCurrentFocusViews;     ///< A container of focused views per window
+  WeakHandle<Layer>                                                   mCurrentFocusedWindow;  ///< A weak handle to the current focused window's root layer
+  FocusIndicatorState                                                 mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
+                                                                                              ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
+  EnableFocusedIndicatorState mEnableFocusIndicator;                                          ///< Whether use focus indicator
+  FocusedIndicatorModeState   mAlwaysShowIndicator;                                           ///< Whether always show indicator. If true, the indicator would be
+                                                                                              ///< directly shown when focused
 
-  FocusViewContainer mCurrentFocusViews; ///< A container of focused views per window
-
-  WeakHandle<Layer> mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
-
-  FocusIndicatorState mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
-                                              ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
-
-  EnableFocusedIndicatorState mEnableFocusIndicator; ///< Whether use focus indicator
-
-  FocusedIndicatorModeState mAlwaysShowIndicator; ///< Whether always show indicator. If true, the indicator would be
-                                                  ///< directly shown when focused
-
-  bool mClearFocusOnTouch : 1; ///< Whether clear focus on touch.
-
-  bool mEnableDefaultAlgorithm : 1; ///< Whether use default algorithm focus
-
-  bool mClearFocusOnWindowFocusLost : 1; ///< Whether clear focus when window loses focus
+  FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
   uint32_t mCurrentWindowId; ///< The current native window id
 
-  FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
+  bool mClearFocusOnTouch : 1;           ///< Whether clear focus on touch.
+  bool mEnableDefaultAlgorithm : 1;      ///< Whether use default algorithm focus
+  bool mClearFocusOnWindowFocusLost : 1; ///< Whether clear focus when window loses focus
 };
 
 } // namespace Internal

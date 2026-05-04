@@ -406,6 +406,22 @@ View& View::SetTouchFocusable(bool touchFocusable)
   return *this;
 }
 
+View& View::SetDescendantFocusBlocked(bool blocked)
+{
+  GetImpl(*this).SetDescendantFocusBlocked(blocked);
+  return *this;
+}
+
+bool View::IsDescendantFocusBlocked() const
+{
+  return GetImpl(*this).IsDescendantFocusBlocked();
+}
+
+bool View::HasAncestorBlockingFocus() const
+{
+  return GetImpl(*this).HasAncestorBlockingFocus();
+}
+
 View& View::SetLeftFocusableView(View view)
 {
   SetProperty(Property::LEFT_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
@@ -454,15 +470,9 @@ View& View::SetBackwardFocusableView(View view)
   return *this;
 }
 
-View& View::SetKeyNavigationSupport(bool isSupported)
+void View::SetFocusNavigationCallback(FocusNavigationCallback callback)
 {
-  GetImpl(*this).SetKeyNavigationSupport(isSupported);
-  return *this;
-}
-
-bool View::IsKeyNavigationSupported() const
-{
-  return GetImpl(*this).IsKeyNavigationSupported();
+  GetImpl(*this).SetFocusNavigationCallback(std::move(callback));
 }
 
 UiColor View::GetBackgroundColor()

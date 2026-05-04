@@ -40,6 +40,16 @@ namespace FocusFinder
  */
 View GetNearestFocusableView(Actor root, View focusedView, Ui::FocusDirection direction);
 
+/**
+ * Get the next focusable view in reading order (top-to-bottom, left-to-right).
+ * Used for FORWARD/BACKWARD (Tab/Shift+Tab) navigation.
+ * @param [in] root The root actor to search within.
+ * @param [in] focusedView The current focused view.
+ * @param [in] direction Must be FORWARD or BACKWARD.
+ * @return The next focusable view in reading order, or an empty handle if none exists.
+ */
+View GetNextFocusableViewInOrder(Actor root, View focusedView, Ui::FocusDirection direction);
+
 } // namespace FocusFinder
 } // namespace Internal
 } // namespace Ui

@@ -558,7 +558,8 @@ public:
     int forwardId          = -1;
     int backwardId         = -1;
   };
-  std::unique_ptr<FocusNavigationData> mFocusNavigationData; ///< Lazy-allocated directional focus IDs.
+  std::unique_ptr<FocusNavigationData> mFocusNavigationData;     ///< Lazy-allocated directional focus IDs.
+  FocusNavigationCallback              mFocusNavigationCallback; ///< Callback for focus navigation.
 
   FocusNavigationData& EnsureFocusNavigationData()
   {
@@ -605,7 +606,6 @@ public:
   // Keep it on ViewDataImpl to avoid AccessibilityData creation.
   int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(AccessibilityRole::MAX_COUNT)>::value + 2;
 
-  bool mIsKeyNavigationSupported : 1;      ///< Stores whether keyboard navigation is supported by the view.
   bool mIsFocusGroup : 1;                  ///< Stores whether the view is a focus group.
   bool mIsEmittingResourceReadySignal : 1; ///< True during ResourceReady().
   bool mIdleCallbackRegistered : 1;        ///< True if need to emit the resource ready signal again.
@@ -654,7 +654,6 @@ public:
   static const PropertyRegistration PROPERTY_38;
   static const PropertyRegistration PROPERTY_39;
   static const PropertyRegistration PROPERTY_40;
-  static const PropertyRegistration PROPERTY_41;
   static const PropertyRegistration PROPERTY_42;
   static const PropertyRegistration PROPERTY_43;
   static const PropertyRegistration PROPERTY_44;

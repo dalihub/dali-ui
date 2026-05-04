@@ -28,6 +28,8 @@
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/public-api/actors/layer.h>
+#include <algorithm>
+#include <vector>
 
 namespace Dali
 {
@@ -333,12 +335,17 @@ bool IsFocusable(Actor& actor)
           actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR).a > FULLY_TRANSPARENT);
 }
 
+bool CanTraverseFocus(Actor& actor)
+{
+  return (actor &&
+          actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
+          !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED));
+}
+
 Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect, Rect<float>& bestCandidateRect, Ui::FocusDirection direction)
 {
   Actor nearestActor;
-  if(actor &&
-     actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
-     !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
+  if(CanTraverseFocus(actor) &&
      actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
   {
     // Recursively children
@@ -364,6 +371,173 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
     }
   }
   return nearestActor;
+}
+
+struct TraversalNode
+{
+  Actor       actor;
+  Rect<float> rect;
+  bool        includeSelf{false};
+  bool        focusable{false};
+};
+
+struct FocusableEntry
+{
+  Actor       actor;
+  Rect<float> rect;
+  bool        focusable{false};
+};
+
+struct FocusFinderWorkspace
+{
+  std::vector<TraversalNode>  traversalStack;
+  std::vector<FocusableEntry> sortedChildren;
+  std::vector<FocusableEntry> focusableViews;
+  bool                        inUse{false};
+};
+
+struct WorkspaceGuard
+{
+  explicit WorkspaceGuard(FocusFinderWorkspace& workspace)
+  : workspace(workspace)
+  {
+    workspace.inUse = true;
+  }
+
+  ~WorkspaceGuard()
+  {
+    workspace.inUse = false;
+  }
+
+  FocusFinderWorkspace& workspace;
+};
+
+/**
+ * Collects focusable views in reading order.
+ * At each level, direct children are sorted by screen position (top-to-bottom,
+ * left-to-right) before traversing the child subtree.
+ */
+void AddFocusables(Actor rootActor, Actor& focusedActor, FocusFinderWorkspace& workspace)
+{
+  if(!rootActor)
+  {
+    return;
+  }
+
+  workspace.traversalStack.clear();
+  workspace.traversalStack.push_back({rootActor, Rect<float>(), false, false});
+
+  while(!workspace.traversalStack.empty())
+  {
+    TraversalNode node = workspace.traversalStack.back();
+    workspace.traversalStack.pop_back();
+
+    Actor actor = node.actor;
+    if(!CanTraverseFocus(actor))
+    {
+      continue;
+    }
+
+    if(node.includeSelf && node.focusable)
+    {
+      workspace.focusableViews.push_back({actor, node.rect, true});
+    }
+
+    if(!actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
+    {
+      continue;
+    }
+
+    const auto childCount = actor.GetChildCount();
+    if(childCount == 0u)
+    {
+      continue;
+    }
+
+    workspace.sortedChildren.clear();
+    for(auto i = 0u; i < childCount; ++i)
+    {
+      Actor child = actor.GetChildAt(i);
+      if(!CanTraverseFocus(child))
+      {
+        continue;
+      }
+
+      const bool focusable   = IsFocusable(child);
+      const bool hasChildren = child.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
+      if(!focusable && !hasChildren)
+      {
+        continue;
+      }
+
+      workspace.sortedChildren.push_back({child, DevelActor::CalculateCurrentScreenExtents(child), focusable});
+    }
+
+    View       parentView = View::DownCast(actor);
+    const bool isRtl      = parentView && parentView.GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT;
+
+    std::stable_sort(workspace.sortedChildren.begin(), workspace.sortedChildren.end(),
+                     [isRtl](const FocusableEntry& a, const FocusableEntry& b)
+    {
+      if(a.rect.y != b.rect.y)
+      {
+        return a.rect.y < b.rect.y;
+      }
+      return isRtl ? a.rect.x > b.rect.x : a.rect.x < b.rect.x;
+    });
+
+    for(auto iter = workspace.sortedChildren.rbegin(); iter != workspace.sortedChildren.rend(); ++iter)
+    {
+      workspace.traversalStack.push_back({iter->actor, iter->rect, true, iter->focusable});
+    }
+  }
+}
+
+View GetNextFocusableViewInOrder(Actor rootActor, View focusedView, Ui::FocusDirection direction, FocusFinderWorkspace& workspace)
+{
+  if(!rootActor)
+  {
+    return View();
+  }
+
+  Actor focusedActor = focusedView;
+
+  workspace.focusableViews.clear();
+
+  AddFocusables(rootActor, focusedActor, workspace);
+
+  if(workspace.focusableViews.empty())
+  {
+    return View();
+  }
+
+  // Find the focused view's position in the ordered list
+  int focusedIndex = -1;
+  for(size_t i = 0; i < workspace.focusableViews.size(); ++i)
+  {
+    if(workspace.focusableViews[i].actor == focusedActor)
+    {
+      focusedIndex = static_cast<int>(i);
+      break;
+    }
+  }
+
+  int nextIndex = -1;
+  if(direction == Ui::FocusDirection::FORWARD)
+  {
+    nextIndex = (focusedIndex >= 0) ? focusedIndex + 1 : 0;
+  }
+  else // BACKWARD
+  {
+    nextIndex = (focusedIndex >= 0) ? focusedIndex - 1 : static_cast<int>(workspace.focusableViews.size()) - 1;
+  }
+
+  if(nextIndex >= 0 && nextIndex < static_cast<int>(workspace.focusableViews.size()))
+  {
+    return View::DownCast(workspace.focusableViews[nextIndex].actor);
+  }
+
+  return View();
 }
 
 } // unnamed namespace
@@ -423,6 +597,20 @@ View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirecti
 
   nearestActor = FindNextFocus(rootActor, focusedActor, focusedRect, bestCandidateRect, direction);
   return View::DownCast(nearestActor);
+}
+
+View GetNextFocusableViewInOrder(Actor rootActor, View focusedView, Ui::FocusDirection direction)
+{
+  static FocusFinderWorkspace reusableWorkspace;
+
+  if(reusableWorkspace.inUse)
+  {
+    FocusFinderWorkspace localWorkspace;
+    return GetNextFocusableViewInOrder(rootActor, focusedView, direction, localWorkspace);
+  }
+
+  WorkspaceGuard guard(reusableWorkspace);
+  return GetNextFocusableViewInOrder(rootActor, focusedView, direction, reusableWorkspace);
 }
 
 } // namespace FocusFinder

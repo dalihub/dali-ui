@@ -74,22 +74,6 @@ DALI_UI_API bool IsDefaultAlgorithmEnabled(FocusManager focusManager);
  */
 DALI_UI_API bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Dali::String& deviceName);
 
-/**
- * @brief Sets the root view to start moving focus when DefaultAlgorithm is enabled.
- *
- * @param[in] focusManager The instance of FocusManager
- * @param[in] view The root view
- */
-DALI_UI_API void SetFocusFinderRootView(FocusManager focusManager, View view);
-
-/**
- * @brief Resets the root view that starts moving focus when DefaultAlgorithm is enabled.
- * When reset, the window becomes root.
- *
- * @param[in] focusManager The instance of FocusManager
- */
-DALI_UI_API void ResetFocusFinderRootView(FocusManager focusManager);
-
 } // namespace DevelFocusManager
 
 } // namespace Ui

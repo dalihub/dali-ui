@@ -50,16 +50,6 @@ bool MoveFocus(FocusManager focusManager, Ui::FocusDirection direction, const Da
   return GetImpl(focusManager).MoveFocus(direction, deviceName);
 }
 
-void SetFocusFinderRootView(FocusManager focusManager, View view)
-{
-  GetImpl(focusManager).SetFocusFinderRootView(view);
-}
-
-void ResetFocusFinderRootView(FocusManager focusManager)
-{
-  GetImpl(focusManager).ResetFocusFinderRootView();
-}
-
 } // namespace DevelFocusManager
 
 } // namespace Ui
