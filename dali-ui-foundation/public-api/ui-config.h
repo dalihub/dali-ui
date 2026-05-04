@@ -26,6 +26,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
+#include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 
@@ -624,6 +625,41 @@ public: // Properties
    * @brief The default View initializer.
    */
   static void DefaultViewInitializer(View view);
+
+  /**
+   * @brief Sets the default StateEffect for Views that become interactive.
+   *
+   * This effect is applied automatically when a View receives an interactive
+   * trait, for example through View::AsInteractive() or during InteractiveView
+   * initialization, unless the View already has an explicitly assigned
+   * StateEffect.
+   *
+   * StateEffect is not limited to interactive Views. This setting only controls
+   * the framework default used for Views that become interactive.
+   *
+   * The effect handle is stored as-is and may be shared by multiple Views. This
+   * method does not clone or snapshot the effect. If an effect type exposes
+   * mutable APIs, modifying the effect after setting it as the default may affect
+   * Views sharing the same effect object.
+   *
+   * StateEffect implementations should keep per-View runtime state outside the
+   * effect object.
+   *
+   * Pass StateEffect::None() to disable the automatic default effect for
+   * interactive Views.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] effect A StateEffect, or StateEffect::None() to disable the default
+   */
+  void SetDefaultStateEffectForInteractive(StateEffect effect);
+
+  /**
+   * @brief Gets the default StateEffect for Views that become interactive.
+   *
+   * @return The default StateEffect. StateEffect::None() means no effect is
+   * applied automatically when a View receives an interactive trait.
+   */
+  StateEffect GetDefaultStateEffectForInteractive() const;
 
   /**
    * @brief Sets the delay before an ambiguous touch press is applied.

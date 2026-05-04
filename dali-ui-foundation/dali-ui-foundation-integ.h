@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 // Impl
+#include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 
 // Layouts

@@ -60,6 +60,11 @@ namespace // Unnamed namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEYBOARD_FOCUS_MANAGER");
 #endif
 
+bool IsDefaultFocusIndicatorSuppressedByStateEffect(View view)
+{
+  return view && GetImpl(view).IsDefaultFocusIndicatorSuppressedByStateEffect();
+}
+
 bool IsScreenPointInsideView(View view, const Vector2& screenPosition)
 {
   if(!view)
@@ -1171,7 +1176,7 @@ void FocusManager::RefreshFocusIndicator(View view)
   }
 
   const bool focusIndicated = GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED);
-  if(mDefaultFocusIndicatorEnabled && focusIndicated)
+  if(mDefaultFocusIndicatorEnabled && focusIndicated && !IsDefaultFocusIndicatorSuppressedByStateEffect(view))
   {
     view.Add(GetFocusIndicatorView());
   }

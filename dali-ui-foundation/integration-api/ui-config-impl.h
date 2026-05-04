@@ -27,6 +27,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/theme-loader-interface.h>
+#include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
@@ -452,6 +453,16 @@ public:
   ViewInitializer GetViewInitializer() const;
 
   /**
+   * @copydoc UiConfig::SetDefaultStateEffectForInteractive()
+   */
+  void SetDefaultStateEffectForInteractive(StateEffect effect);
+
+  /**
+   * @copydoc UiConfig::GetDefaultStateEffectForInteractive()
+   */
+  StateEffect GetDefaultStateEffectForInteractive() const;
+
+  /**
    * @copydoc UiConfig::SetAmbiguousPressDelay()
    */
   void SetAmbiguousPressDelay(uint32_t timeMs);
@@ -518,6 +529,7 @@ private:
 private:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
+  StateEffect               mDefaultStateEffectForInteractive; ///< Default effect for interactive views
   ExecutionKeyPredicate     mExecutionKeyPredicate;
   ViewInitializer           mViewInitializer;
   Vector4                   mDefaultTextColor;

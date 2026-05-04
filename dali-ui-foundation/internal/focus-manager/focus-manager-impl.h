@@ -180,6 +180,12 @@ public:
    */
   bool IsClearFocusIndicationOnHoverEnabled() const;
 
+  /**
+   * Re-applies focus indicator visibility for the current focused view.
+   * @param[in] view The view whose focus indicator setting changed
+   */
+  void RefreshFocusIndicator(View view);
+
 public:
   /**
    * @copydoc Ui::FocusManager::FocusChangedSignal()
@@ -326,9 +332,11 @@ private:
    */
   void ClearFocus(View view);
 
+  /**
+   * Detaches the shared focus indicator from a view.
+   * @param[in] view View to detach the focus indicator from
+   */
   void DetachFocusIndicator(View view);
-
-  void RefreshFocusIndicator(View view);
 
   View GetFocusIndicatorView();
 

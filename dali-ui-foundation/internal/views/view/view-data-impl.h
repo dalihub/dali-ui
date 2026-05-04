@@ -707,6 +707,7 @@ public:
   bool mDispatchKeyEvents : 1;             ///< Whether the actor emits key event signals
   bool mAccessibleCreatable : 1;           ///< Whether we can create new accessible or not.
   bool mProcessorRegistered : 1;           ///< Whether the processor is registered.
+  bool mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
 
   // Properties - these need to be members of Internal::ViewDataImpl as they access private methods/data of
   // ViewImpl and Internal::ViewDataImpl.

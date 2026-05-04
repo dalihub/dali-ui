@@ -48,8 +48,8 @@ DALI_UI_API extern const TraitId FLEX_LAYOUT_PARAMS;
 DALI_UI_API extern const TraitId LAYOUT_MANAGER;
 DALI_UI_API extern const TraitId LAYOUT_SIGNALS;
 
-DALI_UI_API extern const TraitId INTERACTION_EFFECT;
-DALI_UI_API extern const TraitId INTERACTION_EFFECT_DATA;
+DALI_UI_API extern const TraitId STATE_EFFECT;
+DALI_UI_API extern const TraitId STATE_EFFECT_TARGET;
 
 } // namespace ReservedTraitId
 

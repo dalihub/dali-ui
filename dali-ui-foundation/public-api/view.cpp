@@ -631,6 +631,21 @@ bool View::IsSelectable() const
   return GetImpl(*this).IsSelectable();
 }
 
+void View::SetStateEffect(StateEffect effect)
+{
+  GetImpl(*this).SetStateEffect(effect);
+}
+
+void View::SetStateEffectTarget(View target)
+{
+  GetImpl(*this).SetStateEffectTarget(target);
+}
+
+View View::GetStateEffectTarget() const
+{
+  return GetImpl(*this).GetStateEffectTarget();
+}
+
 BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
 {
   return GetImpl(*this).GetLayoutParams(type);

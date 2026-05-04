@@ -316,6 +316,16 @@ ViewInitializer UiConfig::GetViewInitializer() const
   return GetImpl(*this).GetViewInitializer();
 }
 
+void UiConfig::SetDefaultStateEffectForInteractive(StateEffect effect)
+{
+  GetImpl(*this).SetDefaultStateEffectForInteractive(effect);
+}
+
+StateEffect UiConfig::GetDefaultStateEffectForInteractive() const
+{
+  return GetImpl(*this).GetDefaultStateEffectForInteractive();
+}
+
 void UiConfig::SetAmbiguousPressDelay(uint32_t timeMs)
 {
   GetImpl(*this).SetAmbiguousPressDelay(timeMs);

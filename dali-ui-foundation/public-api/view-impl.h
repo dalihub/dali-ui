@@ -40,6 +40,7 @@
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
@@ -68,6 +69,11 @@ namespace Internal
 {
 class ViewDataImpl;
 } //namespace Internal
+
+namespace Integration
+{
+class StateEffectImpl;
+}
 
 class ViewImpl;
 using ViewImplPtr = IntrusivePtr<ViewImpl>;
@@ -508,6 +514,43 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::IsInteractive()
    */
   bool IsInteractive() const;
+
+  /**
+   * @copydoc Ui::View::SetStateEffect()
+   */
+  void SetStateEffect(StateEffect effect);
+
+  /**
+   * @brief Gets whether the current StateEffect suppresses FocusManager's default focus indicator.
+   *
+   * This is a cached value updated when the StateEffect changes or when the
+   * StateEffect implementation invalidates it.
+   *
+   * @return True if the current StateEffect suppresses the default focus indicator
+   */
+  bool IsDefaultFocusIndicatorSuppressedByStateEffect() const;
+
+  /**
+   * @brief Recomputes the cached default focus indicator suppression state.
+   */
+  void RefreshDefaultFocusIndicatorSuppression();
+
+  /**
+   * @brief Recomputes default focus indicator suppression if the given effect is currently attached.
+   *
+   * @param[in] effect The StateEffect implementation requesting invalidation
+   */
+  void InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect);
+
+  /**
+   * @copydoc Ui::View::SetStateEffectTarget()
+   */
+  void SetStateEffectTarget(View target);
+
+  /**
+   * @copydoc Ui::View::GetStateEffectTarget()
+   */
+  View GetStateEffectTarget() const;
 
   /**
    * @brief Ensures this View has a selectable trait and returns it.

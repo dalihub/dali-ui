@@ -438,7 +438,8 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mIdleCallbackRegistered(false),
   mDispatchKeyEvents(true),
   mAccessibleCreatable(true),
-  mProcessorRegistered(false)
+  mProcessorRegistered(false),
+  mDefaultFocusIndicatorSuppressedByStateEffect(false)
 {
 }
 

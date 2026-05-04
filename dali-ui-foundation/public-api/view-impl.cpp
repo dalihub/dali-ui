@@ -44,6 +44,7 @@
 #include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
@@ -56,6 +57,7 @@
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
+#include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
@@ -98,16 +100,71 @@ namespace
 /// OnChildAdd synchronously on the same (event) thread.
 thread_local bool gAllowNonViewChild = false;
 
-IntrusivePtr<TraitObject> ToTraitObject(BaseHandle handle)
+IntrusivePtr<TraitObject> AsTraitObject(BaseHandle traitHandle)
 {
-  if(!handle)
+  if(!traitHandle)
   {
     return nullptr;
   }
 
-  auto* traitObject = dynamic_cast<TraitObject*>(handle.GetObjectPtr());
-  DALI_ASSERT_ALWAYS(traitObject && "Handle used as a View trait must wrap a TraitObject");
-  return traitObject ? IntrusivePtr<TraitObject>(traitObject) : nullptr;
+  return IntrusivePtr<TraitObject>(static_cast<TraitObject*>(traitHandle.GetObjectPtr()));
+}
+
+template<typename HandleType>
+HandleType GetKnownTraitHandle(const ViewImpl& viewImpl, TraitId id)
+{
+  IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(viewImpl, id);
+  return object ? HandleType::DownCast(BaseHandle(static_cast<BaseObject*>(object.Get()))) : HandleType();
+}
+
+bool IsSelfOrDescendant(View owner, View target)
+{
+  if(!owner || !target)
+  {
+    return false;
+  }
+
+  const int32_t ownerId  = owner.GetProperty<int32_t>(Actor::Property::ID);
+  const int32_t targetId = target.GetProperty<int32_t>(Actor::Property::ID);
+  return ownerId == targetId || owner.FindChildById(targetId);
+}
+
+Internal::StateEffectTargetTrait GetOrCreateStateEffectTargetTrait(ViewImpl& viewImpl)
+{
+  Internal::StateEffectTargetTrait trait = GetKnownTraitHandle<Internal::StateEffectTargetTrait>(viewImpl, Integration::ReservedTraitId::STATE_EFFECT_TARGET);
+  if(!trait)
+  {
+    trait = Internal::StateEffectTargetTrait::New();
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STATE_EFFECT_TARGET, AsTraitObject(trait));
+  }
+  return trait;
+}
+
+void ResetStateEffect(ViewImpl& viewImpl, StateEffect effect)
+{
+  IntegrationView::RemoveTrait(viewImpl, Integration::ReservedTraitId::STATE_EFFECT);
+
+  if(effect)
+  {
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STATE_EFFECT, AsTraitObject(effect));
+  }
+
+  viewImpl.RefreshDefaultFocusIndicatorSuppression();
+}
+
+View FindStateEffectTarget(View owner, int32_t targetId)
+{
+  if(!owner || targetId == Internal::StateEffectTargetTraitImpl::INVALID_TARGET_ID)
+  {
+    return View();
+  }
+
+  if(owner.GetProperty<int32_t>(Actor::Property::ID) == targetId)
+  {
+    return owner;
+  }
+
+  return View::DownCast(owner.FindChildById(targetId));
 }
 
 // mLastMeasuredConstraint encodes three states:
@@ -251,14 +308,6 @@ Internal::LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewImpl* self)
     Internal::ViewDataImpl::Get(*self).SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, newObject);
   }
   return object;
-}
-
-template<typename HandleType>
-HandleType GetTraitHandle(const ViewImpl& viewImpl, TraitId id)
-{
-  IntrusivePtr<TraitObject> object     = IntegrationView::GetTrait(viewImpl, id);
-  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
-  return baseObject ? HandleType::DownCast(BaseHandle(baseObject)) : HandleType();
 }
 
 // Arranges a standalone MATCH_PARENT child within its parent.
@@ -433,16 +482,119 @@ ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 
 Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
 {
-  Ui::InteractiveTrait existing = GetTraitHandle<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+  Ui::InteractiveTrait existing = GetKnownTraitHandle<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
 
   if(!existing)
   {
     Ui::InteractiveTrait interaction = Ui::InteractiveTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, ToTraitObject(interaction));
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, AsTraitObject(interaction));
+
+    StateEffect existingEffect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+    if(existingEffect)
+    {
+      GetImpl(existingEffect).OnInteractiveAttached(View::DownCast(Self()));
+      RefreshDefaultFocusIndicatorSuppression();
+    }
+    else
+    {
+      StateEffect defaultEffect = Integration::UiConfigManager::Get().GetConfig().GetDefaultStateEffectForInteractive();
+      if(defaultEffect && !defaultEffect.IsNone())
+      {
+        ResetStateEffect(*this, defaultEffect);
+        GetImpl(defaultEffect).OnInteractiveAttached(View::DownCast(Self()));
+        RefreshDefaultFocusIndicatorSuppression();
+      }
+    }
     return interaction;
   }
 
   return existing;
+}
+
+void ViewImpl::SetStateEffect(StateEffect effect)
+{
+  if(!effect)
+  {
+    effect = StateEffect::None();
+  }
+  ResetStateEffect(*this, effect);
+
+  if(effect && !effect.IsNone() && IsInteractive())
+  {
+    GetImpl(effect).OnInteractiveAttached(View::DownCast(Self()));
+  }
+  RefreshDefaultFocusIndicatorSuppression();
+}
+
+bool ViewImpl::IsDefaultFocusIndicatorSuppressedByStateEffect() const
+{
+  return Internal::ViewDataImpl::Get(*this).mDefaultFocusIndicatorSuppressedByStateEffect;
+}
+
+void ViewImpl::RefreshDefaultFocusIndicatorSuppression()
+{
+  bool        suppress = false;
+  StateEffect effect   = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(effect && !effect.IsNone())
+  {
+    suppress = GetImpl(effect).ShouldSuppressDefaultFocusIndicator(View::DownCast(Self()));
+  }
+
+  Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(*this);
+  if(viewDataImpl.mDefaultFocusIndicatorSuppressedByStateEffect == suppress)
+  {
+    return;
+  }
+
+  viewDataImpl.mDefaultFocusIndicatorSuppressedByStateEffect = suppress;
+
+  Ui::FocusManager focusManager = Ui::FocusManager::Get();
+  if(focusManager)
+  {
+    Dali::Ui::GetImpl(focusManager).RefreshFocusIndicator(Ui::View::DownCast(Self()));
+  }
+}
+
+void ViewImpl::InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect)
+{
+  StateEffect current = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(!current || current.IsNone() || (&GetImpl(current) != &effect))
+  {
+    return;
+  }
+
+  RefreshDefaultFocusIndicatorSuppression();
+}
+
+void ViewImpl::SetStateEffectTarget(View target)
+{
+  View owner = View::DownCast(Self());
+  if(target)
+  {
+    DALI_ASSERT_ALWAYS(IsSelfOrDescendant(owner, target) && "State effect target must be this View or a descendant");
+  }
+
+  Internal::StateEffectTargetTrait trait = GetOrCreateStateEffectTargetTrait(*this);
+  trait.GetImpl().SetTargetId(target ? target.GetProperty<int32_t>(Actor::Property::ID) : Internal::StateEffectTargetTraitImpl::INVALID_TARGET_ID);
+
+  StateEffect effect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(effect && !effect.IsNone())
+  {
+    GetImpl(effect).OnStateEffectTargetsChanged(owner);
+  }
+}
+
+View ViewImpl::GetStateEffectTarget() const
+{
+  View                             owner = View::DownCast(Self());
+  Internal::StateEffectTargetTrait trait = GetKnownTraitHandle<Internal::StateEffectTargetTrait>(*this, Integration::ReservedTraitId::STATE_EFFECT_TARGET);
+  if(!trait)
+  {
+    return owner;
+  }
+
+  View target = FindStateEffectTarget(owner, trait.GetImpl().GetTargetId());
+  return target ? target : owner;
 }
 
 bool ViewImpl::IsInteractive() const
@@ -477,12 +629,12 @@ const UniqueAny* ViewImpl::GetAttachment(AttachmentId id) const
 
 Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
 {
-  Ui::SelectableTrait existing = GetTraitHandle<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  Ui::SelectableTrait existing = GetKnownTraitHandle<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
 
   if(!existing)
   {
     Ui::SelectableTrait selectable = Ui::SelectableTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, ToTraitObject(selectable));
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, AsTraitObject(selectable));
     return selectable;
   }
 
@@ -2172,7 +2324,7 @@ BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
 void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 {
   auto& paramsImpl = static_cast<Internal::LayoutParamsImpl&>(params.GetBaseObject());
-  mImpl->SetTrait(paramsImpl.GetTraitId(), ToTraitObject(params));
+  mImpl->SetTrait(paramsImpl.GetTraitId(), AsTraitObject(params));
   InvalidateMeasure();
 }
 

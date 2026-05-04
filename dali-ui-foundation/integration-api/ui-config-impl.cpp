@@ -52,7 +52,8 @@ namespace Integration
 {
 
 UiConfigImpl::UiConfigImpl()
-: mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+: mDefaultStateEffectForInteractive(StateEffect::None()),
+  mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
   mViewInitializer(UiConfig::DefaultViewInitializer),
   mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
   mDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f)),
@@ -428,6 +429,21 @@ void UiConfigImpl::SetViewInitializer(ViewInitializer initializer)
 ViewInitializer UiConfigImpl::GetViewInitializer() const
 {
   return mViewInitializer;
+}
+
+void UiConfigImpl::SetDefaultStateEffectForInteractive(StateEffect effect)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  if(!effect)
+  {
+    effect = StateEffect::None();
+  }
+  mDefaultStateEffectForInteractive = effect;
+}
+
+StateEffect UiConfigImpl::GetDefaultStateEffectForInteractive() const
+{
+  return mDefaultStateEffectForInteractive;
 }
 
 void UiConfigImpl::OnApplied()

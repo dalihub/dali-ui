@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
@@ -2050,6 +2051,51 @@ public:
    * @param[in] attachment The attachment whose ownership is transferred to this View
    */
   void SetAttachment(AttachmentId id, UniqueAny attachment);
+
+  /**
+   * @brief Sets a StateEffect on this View.
+   *
+   * The effect receives this View's state changes. If this View receives an
+   * interactive trait, for example through AsInteractive() or during
+   * InteractiveView initialization, this explicitly assigned effect takes
+   * priority over the UiConfig default for interactive Views.
+   *
+   * The effect handle is stored as-is and may be shared with other Views. This
+   * method does not clone or snapshot the effect. If an effect type exposes
+   * mutable APIs, modifying the effect after assigning it may affect this View
+   * and any other Views sharing the same effect object.
+   *
+   * StateEffect implementations should keep per-View runtime state outside the
+   * effect object.
+   *
+   * Pass StateEffect::None() to explicitly disable state effects for this View.
+   *
+   * @param[in] effect A StateEffect, or StateEffect::None() to disable state effects
+   */
+  void SetStateEffect(StateEffect effect);
+
+  /**
+   * @brief Sets the target used by state effects.
+   *
+   * The target must be this View or one of its descendants. StateEffect
+   * implementations may use this target instead of the owner View when applying
+   * effects for state changes.
+   *
+   * Pass an empty View to clear the target. If no target is set, the owner View
+   * is used.
+   *
+   * @param[in] target The state effect target View, or an empty View to clear
+   */
+  void SetStateEffectTarget(View target);
+
+  /**
+   * @brief Gets the target used by state effects.
+   *
+   * If no target has been set, this View is returned.
+   *
+   * @return The state effect target View
+   */
+  View GetStateEffectTarget() const;
 
 public: // Templates for Deriving Classes
   /**

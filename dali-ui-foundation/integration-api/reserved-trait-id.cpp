@@ -44,8 +44,8 @@ const TraitId FLEX_LAYOUT_PARAMS     = TraitId::Alloc();
 const TraitId LAYOUT_MANAGER = TraitId::Alloc();
 const TraitId LAYOUT_SIGNALS = TraitId::Alloc();
 
-const TraitId INTERACTION_EFFECT      = TraitId::Alloc();
-const TraitId INTERACTION_EFFECT_DATA = TraitId::Alloc();
+const TraitId STATE_EFFECT        = TraitId::Alloc();
+const TraitId STATE_EFFECT_TARGET = TraitId::Alloc();
 
 } // namespace ReservedTraitId
 
