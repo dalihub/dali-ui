@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="none"/>
+  <rect x="0" y="0" width="200" height="200" rx="40" fill="#3498db" stroke="#2980b9" stroke-width="16"/>
+  <!-- Lines -->
+  <line x1="0" y1="50" x2="200" y2="50" stroke="#f1c40f" stroke-width="4" stroke-dasharray="8 8"/>
+  <line x1="0" y1="150" x2="200" y2="150" stroke="#f1c40f" stroke-width="4" stroke-dasharray="8 8"/>
+  <line x1="50" y1="0" x2="50" y2="200" stroke="#f1c40f" stroke-width="4" stroke-dasharray="8 8"/>
+  <line x1="150" y1="0" x2="150" y2="200" stroke="#f1c40f" stroke-width="4" stroke-dasharray="8 8"/>
+  
+  <text x="100" y="30" font-family="sans-serif" font-size="14" fill="white" font-weight="bold" text-anchor="middle">↔️</text>
+  <text x="100" y="180" font-family="sans-serif" font-size="14" fill="white" font-weight="bold" text-anchor="middle">↔️</text>
+  
+  <text x="25" y="105" font-family="sans-serif" font-size="14" fill="white" font-weight="bold" text-anchor="middle">↕️</text>
+  <text x="175" y="105" font-family="sans-serif" font-size="14" fill="white" font-weight="bold" text-anchor="middle">↕️</text>
+  
+  <text x="100" y="105" font-family="sans-serif" font-size="16" fill="white" font-weight="bold" text-anchor="middle">↔️↕️</text>
+</svg>

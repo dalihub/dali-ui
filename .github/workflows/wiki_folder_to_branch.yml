@@ -1,0 +1,51 @@
+name: Sync wiki folder to wiki branch
+
+on:
+  push:
+    branches:
+      - devel
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/wiki_folder_to_branch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki-folder:
+    runs-on: [ code-large, code-linux ]
+    steps:
+      - name: Checkout source branch
+        uses: code-actions/checkout@v4
+        with:
+          path: source
+
+      - name: Checkout wiki branch
+        uses: code-actions/checkout@v4
+        with:
+          ref: wiki
+          path: wiki-branch
+          fetch-depth: 0
+
+      - name: Update wiki branch
+        env:
+          SOURCE_COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'Sync wiki folder from devel' }}
+        run: |
+          set -e
+
+          rsync -a --delete --exclude=.git --exclude=.github source/wiki/ wiki-branch/
+
+          cd wiki-branch
+          git config user.name "github-action[bot]"
+          git config user.email "github-action[bot]@users.noreply.github.sec.samsung.net"
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No wiki changes to sync."
+            exit 0
+          fi
+
+          git add -A
+          printf '%s\n' "$SOURCE_COMMIT_MESSAGE" > /tmp/wiki-commit-message
+          git commit -F /tmp/wiki-commit-message
+          git push origin wiki
