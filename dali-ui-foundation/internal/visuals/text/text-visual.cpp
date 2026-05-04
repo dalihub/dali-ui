@@ -521,8 +521,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     {
       if(mController)
       {
-        Text::Alignment alignment(static_cast<Text::Alignment>(
-          -1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
         if(Ui::Text::GetHorizontalAlignmentEnumeration(propertyValue, alignment))
         {
           mController->SetHorizontalAlignment(alignment);
@@ -534,8 +533,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     {
       if(mController)
       {
-        Text::Alignment alignment(
-          static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
+        Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid mode does get set
         if(Ui::Text::GetVerticalAlignmentEnumeration(propertyValue, alignment))
         {
           mController->SetVerticalAlignment(alignment);

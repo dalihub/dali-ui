@@ -57,7 +57,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
-      Text::Alignment alignment;
+      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         impl.SetHorizontalTextAlignment(alignment);
@@ -66,7 +66,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
     {
-      Text::Alignment alignment;
+      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.SetVerticalTextAlignment(alignment);
@@ -75,7 +75,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
     {
-      Text::OverflowMode mode;
+      Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(value, mode))
       {
         impl.SetOverflowMode(mode);
@@ -139,7 +139,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::PASSWORD_MODE:
     {
-      Text::PasswordMode mode;
+      Text::PasswordMode mode(static_cast<Text::PasswordMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetPasswordModeEnumeration(value, mode))
       {
         impl.SetPasswordMode(mode);
@@ -173,7 +173,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
-      Text::LayoutDirectionMode mode;
+      Text::LayoutDirectionMode mode(static_cast<Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLayoutDirectionModeEnumeration(value, mode))
       {
         impl.SetLayoutDirectionMode(mode);
@@ -182,7 +182,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::FONT_WEIGHT:
     {
-      Text::FontWeight weight;
+      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWeightEnumeration(value, weight))
       {
         impl.SetFontWeight(weight);
@@ -191,7 +191,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::FONT_WIDTH:
     {
-      Text::FontWidth width;
+      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWidthEnumeration(value, width))
       {
         impl.SetFontWidth(width);
@@ -200,7 +200,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
     }
     case Text::InputFieldPropertyIndex::FONT_SLANT:
     {
-      Text::FontSlant slant;
+      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontSlantEnumeration(value, slant))
       {
         impl.SetFontSlant(slant);
@@ -351,7 +351,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::PASSWORD_MODE:
     {
-      value = static_cast<int>(impl.GetPasswordMode());
+      value = impl.GetPasswordMode();
       break;
     }
     case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:

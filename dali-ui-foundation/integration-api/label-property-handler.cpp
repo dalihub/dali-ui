@@ -57,7 +57,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::LINE_WRAP_MODE:
     {
-      Text::LineWrapMode mode;
+      Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineWrapModeEnumeration(value, mode))
       {
         impl.SetLineWrapMode(mode);
@@ -66,7 +66,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
-      Text::Alignment alignment;
+      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         impl.SetHorizontalTextAlignment(alignment);
@@ -75,7 +75,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
     {
-      Text::Alignment alignment;
+      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.SetVerticalTextAlignment(alignment);
@@ -84,7 +84,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::OVERFLOW_MODE:
     {
-      Text::OverflowMode mode;
+      Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(value, mode))
       {
         impl.SetOverflowMode(mode);
@@ -98,7 +98,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::LINE_HEIGHT_MODE:
     {
-      Text::LineHeightMode mode;
+      Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLineHeightModeEnumeration(value, mode))
       {
         impl.SetLineHeightMode(mode);
@@ -107,7 +107,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
-      Text::LayoutDirectionMode mode;
+      Text::LayoutDirectionMode mode(static_cast<Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetLayoutDirectionModeEnumeration(value, mode))
       {
         impl.SetLayoutDirectionMode(mode);
@@ -131,7 +131,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
     {
-      Text::MarqueeTriggerPolicy policy;
+      Text::MarqueeTriggerPolicy policy(static_cast<Text::MarqueeTriggerPolicy>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetMarqueeTriggerPolicyEnumeration(value, policy))
       {
         impl.SetMarqueeTriggerPolicy(policy);
@@ -160,7 +160,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
-      Text::MarqueeOrientation orientation;
+      Text::MarqueeOrientation orientation(static_cast<Text::MarqueeOrientation>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetMarqueeOrientationEnumeration(value, orientation))
       {
         impl.SetMarqueeOrientation(orientation);
@@ -169,7 +169,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
     {
-      Text::MarqueeStopMode mode;
+      Text::MarqueeStopMode mode(static_cast<Text::MarqueeStopMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetMarqueeStopModeEnumeration(value, mode))
       {
         impl.SetMarqueeStopMode(mode);
@@ -178,7 +178,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::FONT_WEIGHT:
     {
-      Text::FontWeight weight;
+      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWeightEnumeration(value, weight))
       {
         impl.SetFontWeight(weight);
@@ -187,7 +187,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::FONT_WIDTH:
     {
-      Text::FontWidth width;
+      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontWidthEnumeration(value, width))
       {
         impl.SetFontWidth(width);
@@ -196,7 +196,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
     }
     case Text::LabelPropertyIndex::FONT_SLANT:
     {
-      Text::FontSlant slant;
+      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetFontSlantEnumeration(value, slant))
       {
         impl.SetFontSlant(slant);
