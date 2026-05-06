@@ -37,6 +37,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -827,34 +828,23 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         grabHandle.actor = ImageView::New(ToDaliString(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]));
+        grabHandle.actor.SetSynchronousLoading(true);
+        grabHandle.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
         grabHandle.actor.SetDepthIndex(DepthIndex::DECORATION);
         grabHandle.actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
         grabHandle.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-
-        // Area that Grab handle responds to, larger than actual handle so easier to move
 #ifdef DECORATOR_DEBUG
         grabHandle.actor.SetProperty(Dali::Actor::Property::NAME, "GrabHandleActor");
-        if(Dali::Internal::gLogFilter->IsEnabledFor(Debug::Verbose))
-        {
-          grabHandle.grabArea = View::New();
-          Ui::View view       = Ui::View::DownCast(grabHandle.grabArea);
-          view.SetBackgroundColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f));
-          grabHandle.grabArea.SetProperty(Dali::Actor::Property::NAME, "GrabArea");
-        }
-        else
-        {
-          grabHandle.grabArea = Actor::New();
-          grabHandle.grabArea.SetProperty(Dali::Actor::Property::NAME, "GrabArea");
-        }
-#else
-        grabHandle.grabArea = Actor::New();
 #endif
 
+        // Area that Grab handle responds to, larger than actual handle so easier to move
+        grabHandle.grabArea = Actor::New();
         grabHandle.grabArea.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_CENTER);
         grabHandle.grabArea.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
         grabHandle.grabArea.SetResizePolicy(ResizePolicy::SIZE_RELATIVE_TO_PARENT, Dimension::ALL_DIMENSIONS);
         grabHandle.grabArea.SetProperty(Actor::Property::SIZE_MODE_FACTOR, DEFAULT_GRAB_HANDLE_RELATIVE_SIZE);
-        grabHandle.actor.Add(grabHandle.grabArea);
+
+        IntegrationView::AddActorChild(grabHandle.actor, grabHandle.grabArea);
         grabHandle.actor.SetProperty(Actor::Property::COLOR, mHandleColor);
 
         grabHandle.grabArea.TouchedSignal().Connect(this, &Decorator::Impl::OnGrabHandleTouched);
@@ -883,6 +873,8 @@ struct Decorator::Impl : public ConnectionTracker
     if(image.size())
     {
       handle.markerActor = ImageView::New(ToDaliString(image));
+      handle.markerActor.SetSynchronousLoading(true);
+      handle.markerActor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
       handle.markerActor.SetProperty(Actor::Property::COLOR, mHandleColor);
       handle.actor.Add(handle.markerActor);
 
@@ -909,6 +901,8 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         primary.actor = ImageView::New(ToDaliString(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
+        primary.actor.SetSynchronousLoading(true);
+        primary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG
         primary.actor.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleOne");
 #endif
@@ -940,7 +934,7 @@ struct Decorator::Impl : public ConnectionTracker
         // The OnPan() method is connected to the signals emitted by the pan detector.
         mPanDetector.Attach(primary.grabArea);
 
-        primary.actor.Add(primary.grabArea);
+        IntegrationView::AddActorChild(primary.actor, primary.grabArea);
 
         CreateHandleMarker(primary, mHandleImages[LEFT_SELECTION_HANDLE_MARKER][HANDLE_IMAGE_RELEASED],
                            LEFT_SELECTION_HANDLE);
@@ -958,6 +952,8 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         secondary.actor = ImageView::New(ToDaliString(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
+        secondary.actor.SetSynchronousLoading(true);
+        secondary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG
         secondary.actor.SetProperty(Dali::Actor::Property::NAME, "SelectionHandleTwo");
 #endif
@@ -989,7 +985,7 @@ struct Decorator::Impl : public ConnectionTracker
         // The OnPan() method is connected to the signals emitted by the pan detector.
         mPanDetector.Attach(secondary.grabArea);
 
-        secondary.actor.Add(secondary.grabArea);
+        IntegrationView::AddActorChild(secondary.actor, secondary.grabArea);
 
         CreateHandleMarker(secondary, mHandleImages[RIGHT_SELECTION_HANDLE_MARKER][HANDLE_IMAGE_RELEASED],
                            RIGHT_SELECTION_HANDLE);
@@ -1418,6 +1414,13 @@ struct Decorator::Impl : public ConnectionTracker
         mHandleScrolling = HANDLE_TYPE_COUNT;
         StopScrollTimer();
         mController.DecorationEvent(type, HANDLE_PRESSED, x, y);
+      }
+
+      if(GRAB_HANDLE == type)
+      {
+        // DelayCursorBlink
+        mCursorBlinkStatus = true;
+        mDelayCursorBlink  = true;
       }
 
       mIsHandlePanning = true;
