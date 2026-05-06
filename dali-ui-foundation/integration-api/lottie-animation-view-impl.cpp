@@ -857,6 +857,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, static_cast<int>(Ui::Image::FittingMode::FILL)); ///< TODO : Support it if possible.
 
   if(mDesiredWidth > 0)
   {

@@ -59,41 +59,6 @@
   */ \
   ChildClass& SetWrapModeV(Dali::WrapMode::Type wrapModeV) { ImageVisual::SetWrapModeV(wrapModeV); return *this; } \
   /** \
-  * @brief Sets whether the image uses pre-multiplied alpha. \
-  * \
-  * @param[in] preMultiplied True if the image has pre-multiplied alpha \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetPreMultipliedAlpha(bool preMultiplied) { ImageVisual::SetPreMultipliedAlpha(preMultiplied); return *this; } \
-  /** \
-  * @brief Sets the alpha mask url of the ImageVisual. \
-  * \
-  * @param[in] alphaMaskUrl The alpha mask url to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl) { ImageVisual::SetAlphaMaskUrl(alphaMaskUrl); return *this; } \
-  /** \
-  * @brief Sets the mask content scale of the ImageVisual. \
-  * \
-  * @param[in] maskContentScale The mask content scale to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetMaskContentScale(float maskContentScale) { ImageVisual::SetMaskContentScale(maskContentScale); return *this; } \
-  /** \
-  * @brief Sets whether to crop to mask. \
-  * \
-  * @param[in] cropToMask True to crop to mask \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetCropToMask(bool cropToMask) { ImageVisual::SetCropToMask(cropToMask); return *this; } \
-  /** \
-  * @brief Sets the masking type of the ImageVisual. \
-  * \
-  * @param[in] maskingType The masking type to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetMaskingType(Image::MaskingType maskingType) { ImageVisual::SetMaskingType(maskingType); return *this; } \
-  /** \
   * @brief Sets whether to enable broken image. \
   * \
   * @param[in] enableBrokenImage True to enable broken image \
@@ -114,6 +79,13 @@
   * @return Reference to this for fluent chaining \
   */ \
   ChildClass& SetReleasePolicy(Image::ReleasePolicy releasePolicy) { ImageVisual::SetReleasePolicy(releasePolicy); return *this; } \
+  /** \
+  * @brief Sets the fitting mode of the ImageVisual. \
+  * \
+  * @param[in] fittingMode The fitting mode to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetFittingMode(Image::FittingMode fittingMode) { ImageVisual::SetFittingMode(fittingMode); return *this; } \
   /** \
   * @brief Sets whether to correct the image orientation. \
   * \
@@ -164,4 +136,39 @@
   * @param[in] auxiliaryImageAlpha The auxiliary image alpha to set \
   * @return Reference to this for fluent chaining \
   */ \
-  ChildClass& SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha) { ImageVisual::SetNPatchAuxiliaryImageAlpha(auxiliaryImageAlpha); return *this; }
+  ChildClass& SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha) { ImageVisual::SetNPatchAuxiliaryImageAlpha(auxiliaryImageAlpha); return *this; } \
+  /** \
+  * @brief Sets whether the image uses pre-multiplied alpha. \
+  * \
+  * @param[in] preMultiplied True if the image has pre-multiplied alpha \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetPreMultipliedAlpha(bool preMultiplied) { ImageVisual::SetPreMultipliedAlpha(preMultiplied); return *this; } \
+  /** \
+  * @brief Sets the alpha mask url of the ImageVisual. \
+  * \
+  * @param[in] alphaMaskUrl The alpha mask url to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl) { ImageVisual::SetAlphaMaskUrl(alphaMaskUrl); return *this; } \
+  /** \
+  * @brief Sets the mask content scale of the ImageVisual. \
+  * \
+  * @param[in] maskContentScale The mask content scale to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetMaskContentScale(float maskContentScale) { ImageVisual::SetMaskContentScale(maskContentScale); return *this; } \
+  /** \
+  * @brief Sets whether to crop to mask. \
+  * \
+  * @param[in] cropToMask True to crop to mask \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetCropToMask(bool cropToMask) { ImageVisual::SetCropToMask(cropToMask); return *this; } \
+  /** \
+  * @brief Sets the masking type of the ImageVisual. \
+  * \
+  * @param[in] maskingType The masking type to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetMaskingType(Image::MaskingType maskingType) { ImageVisual::SetMaskingType(maskingType); return *this; }

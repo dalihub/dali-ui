@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -45,8 +46,6 @@ namespace Internal
 namespace Visual
 {
 class EventObserver;
-
-using FittingMode = DevelVisual::FittingMode;
 
 /**
  * Base class for all Control rendering logic. A control may have multiple visuals.
@@ -249,16 +248,30 @@ public:
   Ui::Visual::ResourceStatus GetResourceStatus() const;
 
   /**
-   * @brief Get the fitting mode for the visual
+   * @brief Change the fitting mode to this visual.
+   *
+   * Default visuals do nothing for this API.
+   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
+   * the fitting mode variables.
+   *
+   * @param[in] fittingMode The fitting mode.
    */
-  FittingMode GetFittingMode() const;
+  virtual void SetFittingMode(Ui::Image::FittingMode fittingMode)
+  {
+  }
 
   /**
-   * @brief Set the fitting mode for the visual
+   * @brief Applies the fitting mode transform to this visual.
    *
-   * @param[in] fittingMode The fitting mode for the visual
+   * Default implementation calls SetViewSize for non-TEXT visuals.
+   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
+   * the fitting algorithm using their stored mFittingMode.
+   *
+   * @param[in] controlSize The size of the parent control.
+   * @param[in] viewPadding     The padding of the parent control (start, end, top, bottom).
+   *                        For RTL layouts, start/end should already be swapped by the caller.
    */
-  void SetFittingMode(FittingMode fittingMode);
+  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding);
 
   /**
    * @brief Query whether the fittingMode is ignored.
@@ -288,19 +301,6 @@ public:
    * @brief Set the flag to use transformMap in the FittingMode.
    */
   void SetTransformMapUsageForFittingMode(bool used);
-
-  /**
-   * @brief Applies the fitting mode transform to this visual.
-   *
-   * Default implementation calls SetViewSize for non-TEXT visuals.
-   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
-   * the fitting algorithm using their stored mFittingMode.
-   *
-   * @param[in] controlSize The size of the parent control.
-   * @param[in] padding     The padding of the parent control (start, end, top, bottom).
-   *                        For RTL layouts, start/end should already be swapped by the caller.
-   */
-  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& padding);
 
   /**
    * @brief Sets the control size
@@ -416,10 +416,9 @@ protected:
    * @brief Constructor.
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
-   * @param[in] fittingMode The value that determines how the visual should be fit to the view
    * @param[in] type The type of the this visual
    */
-  Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type, FittingMode fittingMode = FittingMode::FILL);
+  Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -536,10 +535,10 @@ protected:
    * then calls SetTransformAndSize. Intended to be called from ApplyFittingMode overrides.
    *
    * @param[in] controlSize The size of the parent control.
-   * @param[in] padding     The padding of the parent control. For RTL, start/end already swapped.
+   * @param[in] viewPadding     The padding of the parent control. For RTL, start/end already swapped.
    * @param[in] fittingMode The fitting mode to apply.
    */
-  void DoApplyFittingMode(const Vector2& controlSize, const Extents& padding, FittingMode fittingMode);
+  void DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, Ui::Image::FittingMode fittingMode);
 
   /**
    * @brief Query whether the corners of the visual requires to be rounded.

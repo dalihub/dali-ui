@@ -153,6 +153,9 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
+  visual.SetFittingMode(Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+  DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
+
   visual.SetOrientationCorrection(false);
   DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
 

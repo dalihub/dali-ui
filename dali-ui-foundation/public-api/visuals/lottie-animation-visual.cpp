@@ -128,61 +128,6 @@ LottieAnimationVisual& LottieAnimationVisual::SetWrapModeV(Dali::WrapMode::Type 
   return *this;
 }
 
-bool LottieAnimationVisual::IsPreMultipliedAlpha() const
-{
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::PRE_MULTIPLIED_ALPHA);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetPreMultipliedAlpha(bool preMultiplied)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
-  return *this;
-}
-
-Dali::String LottieAnimationVisual::GetAlphaMaskUrl() const
-{
-  return VisualBase::GetProperty<Dali::String>(LottieAnimationVisual::Property::ALPHA_MASK_URL);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
-  return *this;
-}
-
-float LottieAnimationVisual::GetMaskContentScale() const
-{
-  return VisualBase::GetProperty<float>(LottieAnimationVisual::Property::MASK_CONTENT_SCALE);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetMaskContentScale(float maskContentScale)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
-  return *this;
-}
-
-bool LottieAnimationVisual::IsCropToMask() const
-{
-  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::CROP_TO_MASK);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetCropToMask(bool cropToMask)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::CROP_TO_MASK, cropToMask);
-  return *this;
-}
-
-Image::MaskingType LottieAnimationVisual::GetMaskingType() const
-{
-  return VisualBase::GetProperty<Image::MaskingType>(LottieAnimationVisual::Property::MASKING_TYPE);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetMaskingType(Image::MaskingType maskingType)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::MASKING_TYPE, maskingType);
-  return *this;
-}
-
 bool LottieAnimationVisual::IsBrokenImageEnabled() const
 {
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE);
@@ -213,6 +158,17 @@ Image::ReleasePolicy LottieAnimationVisual::GetReleasePolicy() const
 LottieAnimationVisual& LottieAnimationVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::RELEASE_POLICY, releasePolicy);
+  return *this;
+}
+
+Image::FittingMode LottieAnimationVisual::GetFittingMode() const
+{
+  return VisualBase::GetProperty<Image::FittingMode>(LottieAnimationVisual::Property::FITTING_MODE);
+}
+
+LottieAnimationVisual& LottieAnimationVisual::SetFittingMode(Image::FittingMode fittingMode)
+{
+  VisualBase::SetProperty(LottieAnimationVisual::Property::FITTING_MODE, fittingMode);
   return *this;
 }
 

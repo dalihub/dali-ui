@@ -97,6 +97,14 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
+// fitting mode
+DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FILL)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, CENTER)
+DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
+
 static constexpr uint32_t SINGLE_IMAGE_COUNT = 1u;
 static constexpr uint32_t FIRST_FRAME_INDEX  = 0u;
 static constexpr uint16_t MINIMUM_CACHESIZE  = 1;
@@ -158,6 +166,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {ENABLE_BROKEN_IMAGE, Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE},
   {LOAD_POLICY_NAME, Ui::ImageVisualPropertyIndex::LOAD_POLICY},
   {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
+  {FITTING_MODE, Ui::ImageVisualPropertyIndex::FITTING_MODE},
   {LOOP_COUNT_NAME, Ui::ImageVisualPropertyIndex::LOOP_COUNT},
   {STOP_BEHAVIOR_NAME, Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR},
   {FRAME_SPEED_FACTOR, Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR},
@@ -212,9 +221,11 @@ inline uint32_t CalculateInterval(const T interval, const float frameSpeedFactor
  *  Time
  */
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factoryCache,
-                                                ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-                                                const Property::Map& properties)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
+                                                ImageVisualShaderFactory&          shaderFactory,
+                                                Ui::VisualFactory::CreationOptions creationOptions,
+                                                const VisualUrl&                   imageUrl,
+                                                const Property::Map&               properties)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, ImageDimensions()));
   visual->InitializeAnimatedImage(imageUrl);
@@ -225,9 +236,11 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factor
   return visual;
 }
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factoryCache,
-                                                ImageVisualShaderFactory& shaderFactory,
-                                                const Property::Array& imageUrls, const Property::Map& properties)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
+                                                ImageVisualShaderFactory&          shaderFactory,
+                                                Ui::VisualFactory::CreationOptions creationOptions,
+                                                const Property::Array&             imageUrls,
+                                                const Property::Map&               properties)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, ImageDimensions()));
   visual->mImageUrls = new ImageCache::UrlList();
@@ -255,9 +268,11 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factor
   return visual;
 }
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&       factoryCache,
-                                                ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-                                                ImageDimensions size)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
+                                                ImageVisualShaderFactory&          shaderFactory,
+                                                Ui::VisualFactory::CreationOptions creationOptions,
+                                                const VisualUrl&                   imageUrl,
+                                                ImageDimensions                    size)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, size));
   visual->InitializeAnimatedImage(imageUrl);
@@ -363,6 +378,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mCurrentLoopIndex(FIRST_LOOP),
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mFittingMode(Ui::Image::FittingMode::FILL),
   mMaskingData(),
   mDesiredSize(desiredSize),
   mFrameSpeedFactor(1.0f),
@@ -382,7 +398,8 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mUseBrokenImageRenderer(false),
   mUseSynchronousSizing(false)
 {
-  EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
+  // Default PRE_MULTIPLIED_ALPHA is false.
+  EnablePreMultipliedAlpha(false);
 }
 
 AnimatedImageVisual::~AnimatedImageVisual()
@@ -584,7 +601,9 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, mLoadPolicy);
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, mSamplingMode);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mEnableBrokenImage);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
@@ -989,6 +1008,16 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, LOAD_POLICY_TABLE, LOAD_POLICY_TABLE_COUNT, loadPolicy)))
       {
         mLoadPolicy = static_cast<Ui::Image::LoadPolicy>(loadPolicy);
+      }
+      break;
+    }
+
+    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
+    {
+      int32_t fittingMode = static_cast<int32_t>(mFittingMode);
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode)))
+      {
+        mFittingMode = static_cast<Ui::Image::FittingMode>(fittingMode);
       }
       break;
     }
@@ -1667,9 +1696,14 @@ void AnimatedImageVisual::OnControlInheritedVisibilityChanged(Actor actor, bool 
   }
 }
 
+void AnimatedImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  mFittingMode = fittingMode;
+}
+
 void AnimatedImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
 {
-  DoApplyFittingMode(controlSize, padding, mImpl->mFittingMode);
+  DoApplyFittingMode(controlSize, padding, mFittingMode);
 }
 
 } // namespace Internal

@@ -64,14 +64,6 @@ enum Type
   OPACITY   = Dali::Ui::Visual::Property::OPACITY,
 
   /**
-   * @brief The fitting mode of the visual.
-   * @details Name "fittingMode", type FittingMode (Property::INTEGER) or Property::STRING.
-   * @see DevelVisual::FittingMode
-   * @note The default is defined by the type of visual (if it's suitable to be stretched or not).
-   */
-  VISUAL_FITTING_MODE = OPACITY + 1,
-
-  /**
    * @brief The radius for the rounded corners of the visual.
    * @details Name "cornerRadius", type Property::FLOAT or Property::VECTOR4, animatable
    * @note By default, it is Vector::ZERO.
@@ -137,22 +129,6 @@ enum Type
 };
 
 } // namespace Property
-
-/**
- * @brief The values of this enum determine how the visual should be fit to the view
- */
-enum FittingMode
-{
-  FIT_KEEP_ASPECT_RATIO,      ///< The visual should be scaled to fit, preserving aspect ratio
-  FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
-  OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio. The visual will be
-                              ///< filled without empty area, and outside is cropped away.
-  CENTER,                     ///< The visual should keep original size of image. It is not scaled and not strecthed.
-  FIT_HEIGHT,                 ///< The visual should be scaled to fit, preserving aspect ratio. Height is scaled proportionately to
-                              ///< maintain aspect ratio. It will be deprecated.
-  FIT_WIDTH,                  ///< The visual should be scaled to fit, preserving aspect ratio. Width is scaled proportionately to
-                              ///< maintain aspect ratio. It will be deprecated.
-};
 
 /**
  * @brief Devel Visual Transform for the offset or size.

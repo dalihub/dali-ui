@@ -174,19 +174,18 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
             {
               case VisualUrl::N_PATCH:
               {
-                visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                 break;
               }
               case VisualUrl::TVG:
               case VisualUrl::SVG:
               {
-                visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                 break;
               }
               case VisualUrl::JSON:
               {
-                visualPtr = AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), imageUrl,
-                                                           propertyMap);
+                visualPtr = AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, imageUrl, propertyMap);
                 break;
               }
               case VisualUrl::GIF:
@@ -195,8 +194,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
                 if(visualType == Ui::DevelVisual::ANIMATED_IMAGE ||
                    !(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
                 {
-                  visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl,
-                                                       propertyMap);
+                  visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                   break;
                 }
                 DALI_FALLTHROUGH;
@@ -206,11 +204,11 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
                 Property::Value* borderValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::BORDER, BORDER);
                 if(DALI_UNLIKELY(borderValue && borderValue->Get<Dali::Extents>() != Dali::Extents()))
                 {
-                  visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                  visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                 }
                 else
                 {
-                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, propertyMap);
+                  visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                 }
                 break;
               }
@@ -222,7 +220,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
           Property::Array* array = imageURLValue->GetArray();
           if(array && array->Count() > 0)
           {
-            visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), *array, propertyMap);
+            visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, *array, propertyMap);
           }
         }
       }
@@ -261,7 +259,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       {
         if(!imageUrl.empty())
         {
-          visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), imageUrl, propertyMap);
+          visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, imageUrl, propertyMap);
         }
       }
       break;
@@ -275,7 +273,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       {
         if(!imageUrl.empty())
         {
-          visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), imageUrl, propertyMap);
+          visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, imageUrl, propertyMap);
         }
       }
       break;
@@ -290,7 +288,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
         if(!imageUrl.empty())
         {
           visualPtr =
-            AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), imageUrl, propertyMap);
+            AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, imageUrl, propertyMap);
         }
       }
       break;
@@ -357,18 +355,18 @@ Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimens
     {
       case VisualUrl::N_PATCH:
       {
-        visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl);
+        visualPtr = NPatchVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl);
         break;
       }
       case VisualUrl::TVG:
       case VisualUrl::SVG:
       {
-        visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, size);
+        visualPtr = SvgVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, size);
         break;
       }
       case VisualUrl::JSON:
       {
-        visualPtr = AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, size);
+        visualPtr = AnimatedVectorImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, size);
         break;
       }
       case VisualUrl::GIF:
@@ -376,14 +374,14 @@ Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimens
       {
         if(!(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
         {
-          visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, size);
+          visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, size);
           break;
         }
         DALI_FALLTHROUGH;
       }
       case VisualUrl::REGULAR_IMAGE:
       {
-        visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), visualUrl, size);
+        visualPtr = ImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, size);
         break;
       }
     }

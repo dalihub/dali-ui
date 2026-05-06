@@ -59,6 +59,7 @@ public:
     NONE = 0,
 
     IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY = 1 << 0, ///< Load static images only when we use the image visual.
+    IMAGE_VISUAL_IGNORE_VIEW_PADDING     = 1 << 1, ///< Ensure to ignore view padding when apply fitting mode.
   };
 
   /**

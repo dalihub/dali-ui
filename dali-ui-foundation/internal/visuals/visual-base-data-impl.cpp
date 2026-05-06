@@ -75,7 +75,7 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
 
 } // unnamed namespace
 
-Internal::Visual::Base::Impl::Impl(FittingMode fittingMode, Ui::Visual::Type type)
+Internal::Visual::Base::Impl::Impl(Ui::Visual::Type type)
 : mEventObserver(nullptr),
   mConstraintFeatureList{},
   mTransform(nullptr),
@@ -83,7 +83,6 @@ Internal::Visual::Base::Impl::Impl(FittingMode fittingMode, Ui::Visual::Type typ
   mControlSize(Vector2::ZERO),
   mDecorationData(nullptr),
   mDepthIndex(Ui::DepthIndex::AUTO_INDEX),
-  mFittingMode(fittingMode),
   mFlags(0),
   mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
   mType(type),

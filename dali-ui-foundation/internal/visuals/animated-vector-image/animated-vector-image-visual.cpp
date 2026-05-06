@@ -78,6 +78,14 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
+// fitting mode
+DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FILL)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, CENTER)
+DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
+
 constexpr float MINIMUM_FRAME_SPEED_FACTOR(0.01f);
 constexpr float MAXIMUM_FRAME_SPEED_FACTOR(100.0f);
 
@@ -92,6 +100,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {IMAGE_DESIRED_WIDTH, Ui::ImageVisualPropertyIndex::DESIRED_WIDTH},
   {IMAGE_DESIRED_HEIGHT, Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT},
   {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
+  {FITTING_MODE, Ui::ImageVisualPropertyIndex::FITTING_MODE},
   {LOOP_COUNT_NAME, Ui::ImageVisualPropertyIndex::LOOP_COUNT},
   {PLAY_RANGE_NAME, Ui::ImageVisualPropertyIndex::PLAY_RANGE},
   {STOP_BEHAVIOR_NAME, Ui::ImageVisualPropertyIndex::STOP_BEHAVIOR},
@@ -118,9 +127,11 @@ Dali::PixelData GetDummyRGBAPixelData()
 #endif
 } // unnamed namespace
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&       factoryCache,
-                                                            ImageVisualShaderFactory& shaderFactory,
-                                                            const VisualUrl& imageUrl, const Property::Map& properties)
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                factoryCache,
+                                                            ImageVisualShaderFactory&          shaderFactory,
+                                                            Ui::VisualFactory::CreationOptions creationOptions,
+                                                            const VisualUrl&                   imageUrl,
+                                                            const Property::Map&               properties)
 {
   AnimatedVectorImageVisualPtr visual(
     new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
@@ -129,9 +140,11 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
   return visual;
 }
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&       factoryCache,
-                                                            ImageVisualShaderFactory& shaderFactory,
-                                                            const VisualUrl& imageUrl, ImageDimensions size)
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                factoryCache,
+                                                            ImageVisualShaderFactory&          shaderFactory,
+                                                            Ui::VisualFactory::CreationOptions creationOptions,
+                                                            const VisualUrl&                   imageUrl,
+                                                            ImageDimensions                    size)
 {
   AnimatedVectorImageVisualPtr visual(new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, size));
   visual->Initialize();
@@ -155,6 +168,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       f
   mRenderScale(1.0f),
   mPlayState(Ui::AnimatedImage::PlayState::STOPPED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mFittingMode(Ui::Image::FittingMode::FILL),
   mLastSentPlayStateId(0u),
   mRasterizeCompleted(false),
   mLoadFailed(false),
@@ -277,6 +291,7 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredSize.GetWidth());
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
 
   map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
@@ -431,6 +446,16 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
                                                        releasePolicy)))
       {
         mReleasePolicy = static_cast<Ui::Image::ReleasePolicy>(releasePolicy);
+      }
+      break;
+    }
+
+    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
+    {
+      int32_t fittingMode = static_cast<int32_t>(mFittingMode);
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode)))
+      {
+        mFittingMode = static_cast<Ui::Image::FittingMode>(fittingMode);
       }
       break;
     }
@@ -622,6 +647,16 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   }
 
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "AnimatedVectorImageVisual::DoSetOffScene [%p]\n", this);
+}
+
+void AnimatedVectorImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  mFittingMode = fittingMode;
+}
+
+void AnimatedVectorImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+{
+  DoApplyFittingMode(controlSize, padding, mFittingMode);
 }
 
 void AnimatedVectorImageVisual::OnSetTransform()

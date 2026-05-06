@@ -59,41 +59,6 @@
   */ \
   ChildClass& SetWrapModeV(Dali::WrapMode::Type wrapModeV) { LottieAnimationVisual::SetWrapModeV(wrapModeV); return *this; } \
   /** \
-  * @brief Sets whether the image uses pre-multiplied alpha. \
-  * \
-  * @param[in] preMultiplied True if the image has pre-multiplied alpha \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetPreMultipliedAlpha(bool preMultiplied) { LottieAnimationVisual::SetPreMultipliedAlpha(preMultiplied); return *this; } \
-  /** \
-  * @brief Sets the alpha mask url of the LottieAnimationVisual. \
-  * \
-  * @param[in] alphaMaskUrl The alpha mask url to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl) { LottieAnimationVisual::SetAlphaMaskUrl(alphaMaskUrl); return *this; } \
-  /** \
-  * @brief Sets the mask content scale of the LottieAnimationVisual. \
-  * \
-  * @param[in] maskContentScale The mask content scale to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetMaskContentScale(float maskContentScale) { LottieAnimationVisual::SetMaskContentScale(maskContentScale); return *this; } \
-  /** \
-  * @brief Sets whether to crop to mask. \
-  * \
-  * @param[in] cropToMask True to crop to mask \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetCropToMask(bool cropToMask) { LottieAnimationVisual::SetCropToMask(cropToMask); return *this; } \
-  /** \
-  * @brief Sets the masking type of the LottieAnimationVisual. \
-  * \
-  * @param[in] maskingType The masking type to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetMaskingType(Image::MaskingType maskingType) { LottieAnimationVisual::SetMaskingType(maskingType); return *this; } \
-  /** \
   * @brief Sets whether to enable broken image. \
   * \
   * @param[in] enableBrokenImage True to enable broken image \
@@ -114,6 +79,13 @@
   * @return Reference to this for fluent chaining \
   */ \
   ChildClass& SetReleasePolicy(Image::ReleasePolicy releasePolicy) { LottieAnimationVisual::SetReleasePolicy(releasePolicy); return *this; } \
+  /** \
+  * @brief Sets the fitting mode of the LottieAnimationVisual. \
+  * \
+  * @param[in] fittingMode The fitting mode to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetFittingMode(Image::FittingMode fittingMode) { LottieAnimationVisual::SetFittingMode(fittingMode); return *this; } \
   /** \
   * @brief Sets whether to correct the image orientation. \
   * \

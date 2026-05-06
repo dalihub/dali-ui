@@ -69,16 +69,19 @@ public:
       PIXEL_AREA             = ImageVisualPropertyIndex::PIXEL_AREA,
       WRAP_MODE_U            = ImageVisualPropertyIndex::WRAP_MODE_U,
       WRAP_MODE_V            = ImageVisualPropertyIndex::WRAP_MODE_V,
-      PRE_MULTIPLIED_ALPHA   = ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      ALPHA_MASK_URL         = ImageVisualPropertyIndex::ALPHA_MASK_URL,
-      MASK_CONTENT_SCALE     = ImageVisualPropertyIndex::MASK_CONTENT_SCALE,
-      CROP_TO_MASK           = ImageVisualPropertyIndex::CROP_TO_MASK,
-      MASKING_TYPE           = ImageVisualPropertyIndex::MASKING_TYPE,
       ENABLE_BROKEN_IMAGE    = ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE,
       LOAD_POLICY            = ImageVisualPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY         = ImageVisualPropertyIndex::RELEASE_POLICY,
+      FITTING_MODE           = ImageVisualPropertyIndex::FITTING_MODE,
       ORIENTATION_CORRECTION = ImageVisualPropertyIndex::ORIENTATION_CORRECTION,
       SYNCHRONOUS_SIZING     = ImageVisualPropertyIndex::SYNCHRONOUS_SIZING,
+
+      // For both Image and AnimatedImage
+      PRE_MULTIPLIED_ALPHA = ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA,
+      ALPHA_MASK_URL       = ImageVisualPropertyIndex::ALPHA_MASK_URL,
+      MASK_CONTENT_SCALE   = ImageVisualPropertyIndex::MASK_CONTENT_SCALE,
+      CROP_TO_MASK         = ImageVisualPropertyIndex::CROP_TO_MASK,
+      MASKING_TYPE         = ImageVisualPropertyIndex::MASKING_TYPE,
 
       // For both AnimatedImage and LottieAnimation
       LOOP_COUNT         = ImageVisualPropertyIndex::LOOP_COUNT,
@@ -264,6 +267,96 @@ public: // Setters for chaining
   AnimatedImageVisual& SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
+   * @brief Gets whether broken image is enabled.
+   *
+   * @return True if broken image is enabled
+   */
+  bool IsBrokenImageEnabled() const;
+
+  /**
+   * @brief Sets whether to enable broken image.
+   *
+   * @param[in] enableBrokenImage True to enable broken image
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetEnableBrokenImage(bool enableBrokenImage);
+
+  /**
+   * @brief Gets the load policy of the AnimatedImageVisual.
+   *
+   * @return The load policy of the AnimatedImageVisual
+   */
+  Image::LoadPolicy GetLoadPolicy() const;
+
+  /**
+   * @brief Sets the load policy of the AnimatedImageVisual.
+   *
+   * @param[in] loadPolicy The load policy to set
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetLoadPolicy(Image::LoadPolicy loadPolicy);
+
+  /**
+   * @brief Gets the release policy of the AnimatedImageVisual.
+   *
+   * @return The release policy of the AnimatedImageVisual
+   */
+  Image::ReleasePolicy GetReleasePolicy() const;
+
+  /**
+   * @brief Sets the release policy of the AnimatedImageVisual.
+   *
+   * @param[in] releasePolicy The release policy to set
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+
+  /**
+   * @brief Gets the fitting mode of the AnimatedImageVisual.
+   *
+   * @return The fitting mode of the AnimatedImageVisual
+   */
+  Image::FittingMode GetFittingMode() const;
+
+  /**
+   * @brief Sets the fitting mode of the AnimatedImageVisual.
+   *
+   * @param[in] fittingMode The fitting mode to set
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetFittingMode(Image::FittingMode fittingMode);
+
+  /**
+   * @brief Gets whether orientation correction is enabled.
+   *
+   * @return True if orientation correction is enabled
+   */
+  bool IsOrientationCorrection() const;
+
+  /**
+   * @brief Sets whether to correct the image orientation.
+   *
+   * @param[in] orientationCorrection True to correct the image orientation
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetOrientationCorrection(bool orientationCorrection);
+
+  /**
+   * @brief Gets whether synchronous sizing is enabled.
+   *
+   * @return True if synchronous sizing is enabled
+   */
+  bool IsSynchronousSizing() const;
+
+  /**
+   * @brief Sets whether to use synchronous sizing.
+   *
+   * @param[in] synchronousSizing True to use synchronous sizing
+   * @return Reference to this for fluent chaining
+   */
+  AnimatedImageVisual& SetSynchronousSizing(bool synchronousSizing);
+
+  /**
    * @brief Gets whether pre-multiplied alpha is enabled.
    *
    * @return True if pre-multiplied alpha is enabled
@@ -337,81 +430,6 @@ public: // Setters for chaining
    * @return Reference to this for fluent chaining
    */
   AnimatedImageVisual& SetMaskingType(Image::MaskingType maskingType);
-
-  /**
-   * @brief Gets whether broken image is enabled.
-   *
-   * @return True if broken image is enabled
-   */
-  bool IsBrokenImageEnabled() const;
-
-  /**
-   * @brief Sets whether to enable broken image.
-   *
-   * @param[in] enableBrokenImage True to enable broken image
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageVisual& SetEnableBrokenImage(bool enableBrokenImage);
-
-  /**
-   * @brief Gets the load policy of the AnimatedImageVisual.
-   *
-   * @return The load policy of the AnimatedImageVisual
-   */
-  Image::LoadPolicy GetLoadPolicy() const;
-
-  /**
-   * @brief Sets the load policy of the AnimatedImageVisual.
-   *
-   * @param[in] loadPolicy The load policy to set
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageVisual& SetLoadPolicy(Image::LoadPolicy loadPolicy);
-
-  /**
-   * @brief Gets the release policy of the AnimatedImageVisual.
-   *
-   * @return The release policy of the AnimatedImageVisual
-   */
-  Image::ReleasePolicy GetReleasePolicy() const;
-
-  /**
-   * @brief Sets the release policy of the AnimatedImageVisual.
-   *
-   * @param[in] releasePolicy The release policy to set
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
-
-  /**
-   * @brief Gets whether orientation correction is enabled.
-   *
-   * @return True if orientation correction is enabled
-   */
-  bool IsOrientationCorrection() const;
-
-  /**
-   * @brief Sets whether to correct the image orientation.
-   *
-   * @param[in] orientationCorrection True to correct the image orientation
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageVisual& SetOrientationCorrection(bool orientationCorrection);
-
-  /**
-   * @brief Gets whether synchronous sizing is enabled.
-   *
-   * @return True if synchronous sizing is enabled
-   */
-  bool IsSynchronousSizing() const;
-
-  /**
-   * @brief Sets whether to use synchronous sizing.
-   *
-   * @param[in] synchronousSizing True to use synchronous sizing
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageVisual& SetSynchronousSizing(bool synchronousSizing);
 
   /**
    * @brief Gets the loop count of the AnimatedImageVisual.

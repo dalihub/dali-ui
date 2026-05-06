@@ -71,14 +71,10 @@ public:
       PIXEL_AREA             = ImageVisualPropertyIndex::PIXEL_AREA,
       WRAP_MODE_U            = ImageVisualPropertyIndex::WRAP_MODE_U,
       WRAP_MODE_V            = ImageVisualPropertyIndex::WRAP_MODE_V,
-      PRE_MULTIPLIED_ALPHA   = ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA,
-      ALPHA_MASK_URL         = ImageVisualPropertyIndex::ALPHA_MASK_URL,
-      MASK_CONTENT_SCALE     = ImageVisualPropertyIndex::MASK_CONTENT_SCALE,
-      CROP_TO_MASK           = ImageVisualPropertyIndex::CROP_TO_MASK,
-      MASKING_TYPE           = ImageVisualPropertyIndex::MASKING_TYPE,
       ENABLE_BROKEN_IMAGE    = ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE,
       LOAD_POLICY            = ImageVisualPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY         = ImageVisualPropertyIndex::RELEASE_POLICY,
+      FITTING_MODE           = ImageVisualPropertyIndex::FITTING_MODE,
       ORIENTATION_CORRECTION = ImageVisualPropertyIndex::ORIENTATION_CORRECTION,
       SYNCHRONOUS_SIZING     = ImageVisualPropertyIndex::SYNCHRONOUS_SIZING,
 
@@ -235,81 +231,6 @@ public: // Setters for chaining
   LottieAnimationVisual& SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
-   * @brief Gets whether pre-multiplied alpha is enabled.
-   *
-   * @return True if pre-multiplied alpha is enabled
-   */
-  bool IsPreMultipliedAlpha() const;
-
-  /**
-   * @brief Sets whether the image uses pre-multiplied alpha.
-   *
-   * @param[in] preMultiplied True if the image has pre-multiplied alpha
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetPreMultipliedAlpha(bool preMultiplied);
-
-  /**
-   * @brief Gets the alpha mask url of the LottieAnimationVisual.
-   *
-   * @return The alpha mask url of the LottieAnimationVisual
-   */
-  Dali::String GetAlphaMaskUrl() const;
-
-  /**
-   * @brief Sets the alpha mask url of the LottieAnimationVisual.
-   *
-   * @param[in] alphaMaskUrl The alpha mask url to set
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
-
-  /**
-   * @brief Gets the mask content scale of the LottieAnimationVisual.
-   *
-   * @return The mask content scale of the LottieAnimationVisual
-   */
-  float GetMaskContentScale() const;
-
-  /**
-   * @brief Sets the mask content scale of the LottieAnimationVisual.
-   *
-   * @param[in] maskContentScale The mask content scale to set
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetMaskContentScale(float maskContentScale);
-
-  /**
-   * @brief Gets whether crop to mask is enabled.
-   *
-   * @return True if crop to mask is enabled
-   */
-  bool IsCropToMask() const;
-
-  /**
-   * @brief Sets whether to crop to mask.
-   *
-   * @param[in] cropToMask True to crop to mask
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetCropToMask(bool cropToMask);
-
-  /**
-   * @brief Gets the masking type of the LottieAnimationVisual.
-   *
-   * @return The masking type of the ImageVisual
-   */
-  Image::MaskingType GetMaskingType() const;
-
-  /**
-   * @brief Sets the masking type of the LottieAnimationVisual.
-   *
-   * @param[in] maskingType The masking type to set
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetMaskingType(Image::MaskingType maskingType);
-
-  /**
    * @brief Gets whether broken image is enabled.
    *
    * @return True if broken image is enabled
@@ -353,6 +274,21 @@ public: // Setters for chaining
    * @return Reference to this for fluent chaining
    */
   LottieAnimationVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+
+  /**
+   * @brief Gets the fitting mode of the LottieAnimationVisual.
+   *
+   * @return The fitting mode of the LottieAnimationVisual
+   */
+  Image::FittingMode GetFittingMode() const;
+
+  /**
+   * @brief Sets the fitting mode of the LottieAnimationVisual.
+   *
+   * @param[in] fittingMode The fitting mode to set
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationVisual& SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets whether orientation correction is enabled.

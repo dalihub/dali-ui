@@ -129,21 +129,6 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   visual.SetWrapModeV(Dali::WrapMode::MIRRORED_REPEAT);
   DALI_TEST_EQUALS(visual.GetWrapModeV(), Dali::WrapMode::MIRRORED_REPEAT, TEST_LOCATION);
 
-  visual.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(visual.IsPreMultipliedAlpha(), true, TEST_LOCATION);
-
-  visual.SetAlphaMaskUrl("mask.png");
-  DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
-
-  visual.SetMaskContentScale(2.0f);
-  DALI_TEST_EQUALS(visual.GetMaskContentScale(), 2.0f, TEST_LOCATION);
-
-  visual.SetCropToMask(false);
-  DALI_TEST_EQUALS(visual.IsCropToMask(), false, TEST_LOCATION);
-
-  visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
-
   visual.SetEnableBrokenImage(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
 
@@ -152,6 +137,9 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
 
   visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
+
+  visual.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+  DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::FIT_KEEP_ASPECT_RATIO, TEST_LOCATION);
 
   visual.SetOrientationCorrection(false);
   DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);

@@ -127,61 +127,6 @@ ImageVisual& ImageVisual::SetWrapModeV(Dali::WrapMode::Type wrapModeV)
   return *this;
 }
 
-bool ImageVisual::IsPreMultipliedAlpha() const
-{
-  return VisualBase::GetProperty<bool>(ImageVisual::Property::PRE_MULTIPLIED_ALPHA);
-}
-
-ImageVisual& ImageVisual::SetPreMultipliedAlpha(bool preMultiplied)
-{
-  VisualBase::SetProperty(ImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
-  return *this;
-}
-
-Dali::String ImageVisual::GetAlphaMaskUrl() const
-{
-  return VisualBase::GetProperty<Dali::String>(ImageVisual::Property::ALPHA_MASK_URL);
-}
-
-ImageVisual& ImageVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
-{
-  VisualBase::SetProperty(ImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
-  return *this;
-}
-
-float ImageVisual::GetMaskContentScale() const
-{
-  return VisualBase::GetProperty<float>(ImageVisual::Property::MASK_CONTENT_SCALE);
-}
-
-ImageVisual& ImageVisual::SetMaskContentScale(float maskContentScale)
-{
-  VisualBase::SetProperty(ImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
-  return *this;
-}
-
-bool ImageVisual::IsCropToMask() const
-{
-  return VisualBase::GetProperty<bool>(ImageVisual::Property::CROP_TO_MASK);
-}
-
-ImageVisual& ImageVisual::SetCropToMask(bool cropToMask)
-{
-  VisualBase::SetProperty(ImageVisual::Property::CROP_TO_MASK, cropToMask);
-  return *this;
-}
-
-Image::MaskingType ImageVisual::GetMaskingType() const
-{
-  return VisualBase::GetProperty<Image::MaskingType>(ImageVisual::Property::MASKING_TYPE);
-}
-
-ImageVisual& ImageVisual::SetMaskingType(Image::MaskingType maskingType)
-{
-  VisualBase::SetProperty(ImageVisual::Property::MASKING_TYPE, maskingType);
-  return *this;
-}
-
 bool ImageVisual::IsBrokenImageEnabled() const
 {
   return VisualBase::GetProperty<bool>(ImageVisual::Property::ENABLE_BROKEN_IMAGE);
@@ -212,6 +157,17 @@ Image::ReleasePolicy ImageVisual::GetReleasePolicy() const
 ImageVisual& ImageVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
 {
   VisualBase::SetProperty(ImageVisual::Property::RELEASE_POLICY, releasePolicy);
+  return *this;
+}
+
+Image::FittingMode ImageVisual::GetFittingMode() const
+{
+  return VisualBase::GetProperty<Image::FittingMode>(ImageVisual::Property::FITTING_MODE);
+}
+
+ImageVisual& ImageVisual::SetFittingMode(Image::FittingMode fittingMode)
+{
+  VisualBase::SetProperty(ImageVisual::Property::FITTING_MODE, fittingMode);
   return *this;
 }
 
@@ -289,6 +245,61 @@ float ImageVisual::GetNPatchAuxiliaryImageAlpha() const
 ImageVisual& ImageVisual::SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha)
 {
   VisualBase::SetProperty(ImageVisual::Property::AUXILIARY_IMAGE_ALPHA, auxiliaryImageAlpha);
+  return *this;
+}
+
+bool ImageVisual::IsPreMultipliedAlpha() const
+{
+  return VisualBase::GetProperty<bool>(ImageVisual::Property::PRE_MULTIPLIED_ALPHA);
+}
+
+ImageVisual& ImageVisual::SetPreMultipliedAlpha(bool preMultiplied)
+{
+  VisualBase::SetProperty(ImageVisual::Property::PRE_MULTIPLIED_ALPHA, preMultiplied);
+  return *this;
+}
+
+Dali::String ImageVisual::GetAlphaMaskUrl() const
+{
+  return VisualBase::GetProperty<Dali::String>(ImageVisual::Property::ALPHA_MASK_URL);
+}
+
+ImageVisual& ImageVisual::SetAlphaMaskUrl(const Dali::String& alphaMaskUrl)
+{
+  VisualBase::SetProperty(ImageVisual::Property::ALPHA_MASK_URL, alphaMaskUrl);
+  return *this;
+}
+
+float ImageVisual::GetMaskContentScale() const
+{
+  return VisualBase::GetProperty<float>(ImageVisual::Property::MASK_CONTENT_SCALE);
+}
+
+ImageVisual& ImageVisual::SetMaskContentScale(float maskContentScale)
+{
+  VisualBase::SetProperty(ImageVisual::Property::MASK_CONTENT_SCALE, maskContentScale);
+  return *this;
+}
+
+bool ImageVisual::IsCropToMask() const
+{
+  return VisualBase::GetProperty<bool>(ImageVisual::Property::CROP_TO_MASK);
+}
+
+ImageVisual& ImageVisual::SetCropToMask(bool cropToMask)
+{
+  VisualBase::SetProperty(ImageVisual::Property::CROP_TO_MASK, cropToMask);
+  return *this;
+}
+
+Image::MaskingType ImageVisual::GetMaskingType() const
+{
+  return VisualBase::GetProperty<Image::MaskingType>(ImageVisual::Property::MASKING_TYPE);
+}
+
+ImageVisual& ImageVisual::SetMaskingType(Image::MaskingType maskingType)
+{
+  VisualBase::SetProperty(ImageVisual::Property::MASKING_TYPE, maskingType);
   return *this;
 }
 

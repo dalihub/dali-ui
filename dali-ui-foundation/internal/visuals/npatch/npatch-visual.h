@@ -67,11 +67,12 @@ public:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL to 9 patch image resource to use
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                              const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -82,10 +83,11 @@ public:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL to 9 patch image resource to use
    * @return A smart-pointer to the newly allocated visual.
    */
-  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                              const VisualUrl& imageUrl);
 
 public: // from Visual
@@ -201,20 +203,21 @@ private:
   void LoadComplete(bool loadSuccess, TextureInformation textureInformation) override;
 
 private:
-  WeakHandle<Actor>          mPlacementActor; ///< Weakhandle to contain Actor during texture loading
-  NPatchLoader&              mLoader;         ///< reference to N patch loader for fast access
-  ImageVisualShaderFactory&  mImageVisualShaderFactory;
-  VisualUrl                  mImageUrl;                ///< The url to the N patch to load
-  VisualUrl                  mAuxiliaryUrl;            ///< An auxiliary image that can be displayed on top of the N-Patch
-  NPatchData::NPatchDataId   mId;                      ///< id of the N patch (from loader/cache)
-  TextureSet                 mAuxiliaryTextureSet;     ///< TextureSet of the auxiliary mask image
-  TextureManager::TextureId  mAuxiliaryTextureId;      ///< id of the auxiliary mask image (from TextureManager)
-  Ui::Visual::ResourceStatus mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
-  Property::Index            mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
-  bool                       mBorderOnly;              ///< if only border is desired
-  Extents                    mBorder;                  ///< The size of the border
-  float                      mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
-  Ui::Image::ReleasePolicy   mReleasePolicy;           ///< The release policy to determine when an image should no longer be cached.
+  WeakHandle<Actor>            mPlacementActor; ///< Weakhandle to contain Actor during texture loading
+  NPatchLoader&                mLoader;         ///< reference to N patch loader for fast access
+  ImageVisualShaderFactory&    mImageVisualShaderFactory;
+  VisualUrl                    mImageUrl;                ///< The url to the N patch to load
+  VisualUrl                    mAuxiliaryUrl;            ///< An auxiliary image that can be displayed on top of the N-Patch
+  NPatchData::NPatchDataId     mId;                      ///< id of the N patch (from loader/cache)
+  TextureSet                   mAuxiliaryTextureSet;     ///< TextureSet of the auxiliary mask image
+  TextureManager::TextureId    mAuxiliaryTextureId;      ///< id of the auxiliary mask image (from TextureManager)
+  Ui::Visual::ResourceStatus   mAuxiliaryResourceStatus; ///< resource status for auxiliary mask image
+  Property::Index              mPreMultipliedAlphaIndex; ///< Index of premultipliedAlpha uniform. Only be used for auxiliary image.
+  bool                         mBorderOnly;              ///< if only border is desired
+  Extents                      mBorder;                  ///< The size of the border
+  float                        mAuxiliaryImageAlpha;     ///< The alpha value for the auxiliary image only
+  Ui::Image::ReleasePolicy     mReleasePolicy;           ///< The release policy to determine when an image should no longer be cached.
+  Dali::Ui::Image::FittingMode mFittingMode;             ///< How the contents should fit the view
 };
 
 } // namespace Internal

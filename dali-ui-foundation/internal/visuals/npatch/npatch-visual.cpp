@@ -53,7 +53,7 @@ namespace Internal
 
 /////////////////NPatchVisual////////////////
 
-NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl, const Property::Map& properties)
 {
   NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory));
@@ -63,7 +63,7 @@ NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualS
   return nPatchVisual;
 }
 
-NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl)
 {
   NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory));
@@ -237,6 +237,12 @@ void NPatchVisual::DoSetProperties(const Property::Map& propertyMap)
       EnablePreMultipliedAlpha(premultipliedAlpha);
     }
   }
+
+  Property::Value* fittingMode = propertyMap.Find(Ui::ImageVisualPropertyIndex::FITTING_MODE, FITTING_MODE);
+  if(fittingMode)
+  {
+    fittingMode->Get(mFittingMode);
+  }
 }
 
 void NPatchVisual::DoSetOnScene(Actor& actor)
@@ -314,6 +320,7 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mBorder);
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
 
   if(mAuxiliaryUrl.IsValid())

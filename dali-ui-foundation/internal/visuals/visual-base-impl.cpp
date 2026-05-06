@@ -58,15 +58,6 @@ const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
 
 namespace
 {
-DALI_ENUM_TO_STRING_TABLE_BEGIN(VISUAL_FITTING_MODE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FIT_KEEP_ASPECT_RATIO)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FILL)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, CENTER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FIT_HEIGHT)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FIT_WIDTH)
-DALI_ENUM_TO_STRING_TABLE_END(VISUAL_FITTING_MODE)
-
 /**
  * @brief Check whether this visual type can use corner radius feature or not.
  * @param type VisualType that want to checkup
@@ -127,7 +118,6 @@ StringProperty PROPERTY_NAME_INDEX_TABLE[] = {
   {TRANSFORM, Ui::Visual::Property::TRANSFORM},
   {MIX_COLOR, Ui::Visual::Property::MIX_COLOR},
   {OPACITY, Ui::Visual::Property::OPACITY},
-  {VISUAL_FITTING_MODE, Ui::DevelVisual::Property::VISUAL_FITTING_MODE},
   {BORDERLINE_WIDTH, Ui::DevelVisual::Property::BORDERLINE_WIDTH},
   {BORDERLINE_COLOR, Ui::DevelVisual::Property::BORDERLINE_COLOR},
   {BORDERLINE_OFFSET, Ui::DevelVisual::Property::BORDERLINE_OFFSET},
@@ -156,8 +146,8 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
 
 } // namespace
 
-Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type, FittingMode fittingMode)
-: mImpl(new Impl(fittingMode, type)),
+Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type)
+: mImpl(new Impl(type)),
   mFactoryCache(factoryCache)
 {
   if(DALI_UNLIKELY(!Dali::Stage::IsCoreThread()))
@@ -331,12 +321,6 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
           mImpl->mMixColor.a = opacity;
           SetMixColor(mImpl->mMixColor);
         }
-        break;
-      }
-      case Ui::DevelVisual::Property::VISUAL_FITTING_MODE:
-      {
-        Scripting::GetEnumerationProperty<Visual::FittingMode>(value, VISUAL_FITTING_MODE_TABLE,
-                                                               VISUAL_FITTING_MODE_TABLE_COUNT, mImpl->mFittingMode);
         break;
       }
       case Ui::DevelVisual::Property::BORDERLINE_WIDTH:
@@ -780,10 +764,6 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::Visual::Property::MIX_COLOR, mImpl->mMixColor); // vec4
   map.Insert(Ui::Visual::Property::OPACITY, mImpl->mMixColor.a);
 
-  auto fittingModeString = Scripting::GetLinearEnumerationName<FittingMode>(
-    mImpl->mFittingMode, VISUAL_FITTING_MODE_TABLE, VISUAL_FITTING_MODE_TABLE_COUNT);
-  map.Insert(Ui::DevelVisual::Property::VISUAL_FITTING_MODE, fittingModeString);
-
   if(IsTypeAvailableForBorderline(mImpl->mType))
   {
     map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH, mImpl->GetBorderlineWidth());
@@ -1018,16 +998,6 @@ Ui::Visual::ResourceStatus Visual::Base::GetResourceStatus() const
   return mImpl->mResourceStatus;
 }
 
-Visual::FittingMode Visual::Base::GetFittingMode() const
-{
-  return mImpl->mFittingMode;
-}
-
-void Visual::Base::SetFittingMode(Visual::FittingMode fittingMode)
-{
-  mImpl->mFittingMode = fittingMode;
-}
-
 bool Visual::Base::IsIgnoreFittingMode() const
 {
   return mImpl->mIgnoreFittingMode;
@@ -1066,48 +1036,34 @@ void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& p
   }
 }
 
-void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& padding, FittingMode fittingMode)
+void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, Ui::Image::FittingMode fittingMode)
 {
   if(IsPixelAreaSetForFittingMode())
   {
     SetPixelAreaForFittingMode(FULL_TEXTURE_RECT);
   }
 
+  Extents padding = (mImpl->mFlags & Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING) ? Extents() : viewPadding;
+
   Vector2 finalSize   = controlSize - Vector2(padding.start + padding.end, padding.top + padding.bottom);
   Vector2 finalOffset = Vector2(padding.start, padding.top);
   bool    zeroPadding = (padding == Extents());
 
-  if(fittingMode == FittingMode::FIT_WIDTH || fittingMode == FittingMode::FIT_HEIGHT)
-  {
-    Vector2 naturalSize;
-    GetNaturalSize(naturalSize);
-    const float widthRatio  = !Dali::EqualsZero(naturalSize.width) ? (finalSize.width / naturalSize.width) : 0.0f;
-    const float heightRatio = !Dali::EqualsZero(naturalSize.height) ? (finalSize.height / naturalSize.height) : 0.0f;
-    if(widthRatio < heightRatio)
-    {
-      fittingMode = (fittingMode == FittingMode::FIT_WIDTH) ? FittingMode::FIT_KEEP_ASPECT_RATIO : FittingMode::OVER_FIT_KEEP_ASPECT_RATIO;
-    }
-    else
-    {
-      fittingMode = (fittingMode == FittingMode::FIT_WIDTH) ? FittingMode::OVER_FIT_KEEP_ASPECT_RATIO : FittingMode::FIT_KEEP_ASPECT_RATIO;
-    }
-  }
-
   Property::Map transformMap;
 
-  if((!zeroPadding) || (fittingMode != FittingMode::FILL))
+  if((!zeroPadding) || (fittingMode != Ui::Image::FittingMode::FILL))
   {
     SetTransformMapUsageForFittingMode(true);
 
     Vector2 naturalSize;
-    if(fittingMode != FittingMode::FILL)
+    if(fittingMode != Ui::Image::FittingMode::FILL)
     {
       GetNaturalSize(naturalSize);
     }
 
     switch(fittingMode)
     {
-      case FittingMode::FIT_KEEP_ASPECT_RATIO:
+      case Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO:
       {
         auto availableVisualSize = finalSize;
         finalSize                = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
@@ -1117,7 +1073,7 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
           .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
         break;
       }
-      case FittingMode::OVER_FIT_KEEP_ASPECT_RATIO:
+      case Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO:
       {
         auto availableVisualSize = finalSize;
         finalSize                = naturalSize * std::max((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
@@ -1136,7 +1092,7 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
           .Add(Ui::Visual::Transform::Property::SIZE, availableVisualSize);
         break;
       }
-      case FittingMode::CENTER:
+      case Ui::Image::FittingMode::CENTER:
       {
         auto availableVisualSize = finalSize;
         if(availableVisualSize.width > naturalSize.width && availableVisualSize.height > naturalSize.height)
@@ -1153,7 +1109,7 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
           .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
         break;
       }
-      case FittingMode::FILL:
+      case Ui::Image::FittingMode::FILL:
       default:
       {
         transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
@@ -1236,10 +1192,6 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
   else if(key.stringKey == TRANSFORM)
   {
     return Ui::Visual::Property::TRANSFORM;
-  }
-  else if(key.stringKey == VISUAL_FITTING_MODE)
-  {
-    return Ui::DevelVisual::Property::VISUAL_FITTING_MODE;
   }
   else if(key.stringKey == CORNER_RADIUS)
   {

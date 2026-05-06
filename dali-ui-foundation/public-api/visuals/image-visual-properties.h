@@ -114,79 +114,38 @@ enum
    * @note For Normal QUAD image only.
    */
   WRAP_MODE_V,
-  /**
-   * @brief Enables/disables premultiplied alpha.
-   * @details Name "premultipliedAlpha", type Property::BOOLEAN.
-   * @note Optional.
-   * @note The premultiplied alpha is false by default unless this behaviour is modified
-   * by the derived Visual type.
-   */
-  PRE_MULTIPLIED_ALPHA,
-
-  /**
-   * @brief URL of a masking image
-   * @details Name "alphaMaskUrl", type Property::STRING, URL of image to apply as
-   * a mask after image loading. If set after the main URL has finished loading, this
-   * may necessitate a re-load of the main image. The alpha mask image will be scaled
-   * on load to match the size of the main image, then applied to the pixel data
-   * before uploading to GL.
-   * @note Optional.
-   */
-  ALPHA_MASK_URL,
-
-  /**
-   * @brief The scale factor to apply to the content image before masking
-   * @details Name "maskContentScale", type Property::FLOAT, The scale factor
-   * to apply to the content before masking. Note, scaled images are cropped to
-   * the same size as the alpha mask.
-   * @note Optional.
-   */
-  MASK_CONTENT_SCALE,
-
-  /**
-   * @brief Whether to crop image to mask or scale mask to fit image
-   * @details Name "cropToMask", type Property::BOOLEAN, True if the image should
-   * be cropped to match the mask size, or false if the image should remain the same size.
-   * @note Optional, Default true
-   * @note If this is false, then the mask is scaled to fit the image before being applied.
-   */
-  CROP_TO_MASK,
-
-  /**
-   * @brief Whether to apply mask in loading time or rendering time.
-   * @details Name "maskingType", type Ui::Image::MaskingType (Property::INTEGER).
-   * In general, MASKING_ON_LOADING is the default behavior.
-   * However, if the visual uses an external texture, only MASKING_ON_RENDERING is possible.
-   * So we change its value to MASKING_ON_RENDERING even if the visual sets the MASKING_TYPE as MASKING_ON_LOADING when
-   * it uses external texture.
-   * @note It is used in the ImageVisual and AnimatedImageVisual. The default is MASKING_ON_LOADING.
-   */
-  MASKING_TYPE,
 
   /**
    * @brief Whether to enable broken image in image visual.
    * Some of visual don't need to show broken image(ex. placeholder)
    * Disable broken image for these visuals.
    * default is true.
-   * @note This property is write-only. Only be used for ImageView internal.
    */
   ENABLE_BROKEN_IMAGE,
 
   /**
    * @brief The policy to determine when an image should be loaded.
-   * @details Name "loadPolicy",  Type LoadPolicy (Property::INTEGER)or Property::STRING.
-   * @note Default LoadPolicy::ATTACHED
-   * @see LoadPolicy:
+   * @details Name "loadPolicy", Type Ui::Image::LoadPolicy (Property::INTEGER)or Property::STRING.
+   * @note Default Ui::Image::LoadPolicy::ATTACHED
+   * @see Ui::Image::LoadPolicy:
    */
   LOAD_POLICY,
 
   /**
    * @brief The policy to determine when an image request to be released so should no longer be cached.
-   * @details Name "releasePolicy", Type ReleasePolicy (Property::INTEGER) or Property::STRING
-   * @note Default ReleasePolicy::DETACHED
-   * @see ReleasePolicy
+   * @details Name "releasePolicy", Type Ui::Image::ReleasePolicy (Property::INTEGER) or Property::STRING
+   * @note Default Ui::Image::ReleasePolicy::DETACHED
+   * @see Ui::Image::ReleasePolicy
    */
   RELEASE_POLICY,
+
+  /**
+   * @brief The fitting mode of the visual.
+   * @details Name "fittingMode", Type Ui::Image::FittingMode (Property::INTEGER) or Property::STRING.
+   * @note Default Ui::Image::FittingMode::FILL
+   * @see Ui::Image::FittingMode
+   */
+  FITTING_MODE,
 
   /**
    * @brief Determines if image orientation should be corrected so the image displays as it was intended.
@@ -259,6 +218,56 @@ enum
    * @note Default 0
    */
   AUXILIARY_IMAGE_ALPHA,
+
+  // For both Image and AnimatedImage
+
+  /**
+   * @brief Enables/disables premultiplied alpha.
+   * @details Name "premultipliedAlpha", type Property::BOOLEAN.
+   * @note Optional.
+   * @note The premultiplied alpha is true for ImageVisual, and false for AnimatedImageVisual.
+   */
+  PRE_MULTIPLIED_ALPHA,
+
+  /**
+   * @brief URL of a masking image
+   * @details Name "alphaMaskUrl", type Property::STRING, URL of image to apply as
+   * a mask after image loading. If set after the main URL has finished loading, this
+   * may necessitate a re-load of the main image. The alpha mask image will be scaled
+   * on load to match the size of the main image, then applied to the pixel data
+   * before uploading to GL.
+   * @note Optional.
+   */
+  ALPHA_MASK_URL,
+
+  /**
+   * @brief The scale factor to apply to the content image before masking
+   * @details Name "maskContentScale", type Property::FLOAT, The scale factor
+   * to apply to the content before masking. Note, scaled images are cropped to
+   * the same size as the alpha mask.
+   * @note Optional.
+   */
+  MASK_CONTENT_SCALE,
+
+  /**
+   * @brief Whether to crop image to mask or scale mask to fit image
+   * @details Name "cropToMask", type Property::BOOLEAN, True if the image should
+   * be cropped to match the mask size, or false if the image should remain the same size.
+   * @note Optional, Default true
+   * @note If this is false, then the mask is scaled to fit the image before being applied.
+   */
+  CROP_TO_MASK,
+
+  /**
+   * @brief Whether to apply mask in loading time or rendering time.
+   * @details Name "maskingType", type Ui::Image::MaskingType (Property::INTEGER).
+   * In general, Ui::Image::MASKING_ON_LOADING is the default behavior.
+   * However, if the visual uses an external texture, only MASKING_ON_RENDERING is possible.
+   * So we change its value to MASKING_ON_RENDERING even if the visual sets the MASKING_TYPE as MASKING_ON_LOADING when
+   * it uses external texture.
+   * @note The default is Ui::Image::MASKING_ON_LOADING.
+   */
+  MASKING_TYPE,
 
   // For both AnimatedImage and LottieAnimation
 

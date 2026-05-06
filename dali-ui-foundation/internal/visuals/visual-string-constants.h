@@ -64,7 +64,7 @@ extern const char* const MIX_COLOR;
 extern const char* const OPACITY;
 
 // Fitting mode
-extern const char* const VISUAL_FITTING_MODE;
+extern const char* const FITTING_MODE;
 
 // Border line
 extern const char* const BORDERLINE_WIDTH;

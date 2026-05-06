@@ -49,10 +49,9 @@ struct Base::Impl
 {
   /**
    * Constructor
-   * @param [in] fittingMode that the derived class prefers
    * @param [in] type The type of the this visual
    */
-  Impl(FittingMode fittingMode, Ui::Visual::Type type);
+  Impl(Ui::Visual::Type type);
 
   /**
    * Destructor
@@ -61,9 +60,10 @@ struct Base::Impl
 
   enum Flags
   {
-    IS_ON_SCENE                     = 1,
-    IS_PRE_MULTIPLIED_ALPHA         = 1 << 2,
-    IS_SYNCHRONOUS_RESOURCE_LOADING = 1 << 3,
+    IS_ON_SCENE                         = 1 << 0,
+    IS_FITTING_MODE_IGNORE_VIEW_PADDING = 1 << 1,
+    IS_PRE_MULTIPLIED_ALPHA             = 1 << 2,
+    IS_SYNCHRONOUS_RESOURCE_LOADING     = 1 << 3,
   };
 
   struct CustomShader
@@ -507,7 +507,6 @@ public:
   Size                                       mControlSize;
   DecorationData*                            mDecorationData;
   int                                        mDepthIndex;
-  FittingMode                                mFittingMode; ///< How the contents should fit the view
   int                                        mFlags;
   Ui::Visual::ResourceStatus                 mResourceStatus;
   const Ui::Visual::Type                     mType;

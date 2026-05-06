@@ -906,14 +906,22 @@ void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
     mFittingMode = fittingMode;
     if(mVisual)
     {
-      Ui::GetImplementation(mVisual).SetFittingMode(static_cast<DevelVisual::FittingMode>(fittingMode));
-    }
-    Actor self = Self();
-    float w    = self.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-    float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
-    if(w > 0.0f && h > 0.0f)
-    {
-      Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding());
+      Ui::GetImplementation(mVisual).SetFittingMode(fittingMode);
+
+      // FittingMode only changes the visual transform, not the visual itself.
+      // Apply immediately if the actor size is already available; otherwise
+      // defer to the next OnArrange via InvalidateMeasure.
+      Actor self = Self();
+      float w    = self.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
+      if(w > 0.0f && h > 0.0f)
+      {
+        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding());
+      }
+      else
+      {
+        InvalidateMeasure();
+      }
     }
     else
     {
@@ -1099,8 +1107,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
-
-  map.Insert(Ui::DevelVisual::Property::VISUAL_FITTING_MODE, static_cast<int>(mFittingMode));
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, static_cast<int>(mFittingMode));
 
   if(!mAlphaMaskUrl.Empty())
   {

@@ -153,6 +153,72 @@ AnimatedImageVisual& AnimatedImageVisual::SetWrapModeV(Dali::WrapMode::Type wrap
   return *this;
 }
 
+bool AnimatedImageVisual::IsBrokenImageEnabled() const
+{
+  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetEnableBrokenImage(bool enableBrokenImage)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE, enableBrokenImage);
+  return *this;
+}
+
+Image::LoadPolicy AnimatedImageVisual::GetLoadPolicy() const
+{
+  return VisualBase::GetProperty<Image::LoadPolicy>(AnimatedImageVisual::Property::LOAD_POLICY);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::LOAD_POLICY, loadPolicy);
+  return *this;
+}
+
+Image::ReleasePolicy AnimatedImageVisual::GetReleasePolicy() const
+{
+  return VisualBase::GetProperty<Image::ReleasePolicy>(AnimatedImageVisual::Property::RELEASE_POLICY);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::RELEASE_POLICY, releasePolicy);
+  return *this;
+}
+
+Image::FittingMode AnimatedImageVisual::GetFittingMode() const
+{
+  return VisualBase::GetProperty<Image::FittingMode>(AnimatedImageVisual::Property::FITTING_MODE);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetFittingMode(Image::FittingMode fittingMode)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::FITTING_MODE, fittingMode);
+  return *this;
+}
+
+bool AnimatedImageVisual::IsOrientationCorrection() const
+{
+  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ORIENTATION_CORRECTION);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetOrientationCorrection(bool orientationCorrection)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
+  return *this;
+}
+
+bool AnimatedImageVisual::IsSynchronousSizing() const
+{
+  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING);
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetSynchronousSizing(bool synchronousSizing)
+{
+  VisualBase::SetProperty(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
+  return *this;
+}
+
 bool AnimatedImageVisual::IsPreMultipliedAlpha() const
 {
   return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::PRE_MULTIPLIED_ALPHA);
@@ -205,61 +271,6 @@ Image::MaskingType AnimatedImageVisual::GetMaskingType() const
 AnimatedImageVisual& AnimatedImageVisual::SetMaskingType(Image::MaskingType maskingType)
 {
   VisualBase::SetProperty(AnimatedImageVisual::Property::MASKING_TYPE, maskingType);
-  return *this;
-}
-
-bool AnimatedImageVisual::IsBrokenImageEnabled() const
-{
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE);
-}
-
-AnimatedImageVisual& AnimatedImageVisual::SetEnableBrokenImage(bool enableBrokenImage)
-{
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE, enableBrokenImage);
-  return *this;
-}
-
-Image::LoadPolicy AnimatedImageVisual::GetLoadPolicy() const
-{
-  return VisualBase::GetProperty<Image::LoadPolicy>(AnimatedImageVisual::Property::LOAD_POLICY);
-}
-
-AnimatedImageVisual& AnimatedImageVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
-{
-  VisualBase::SetProperty(AnimatedImageVisual::Property::LOAD_POLICY, loadPolicy);
-  return *this;
-}
-
-Image::ReleasePolicy AnimatedImageVisual::GetReleasePolicy() const
-{
-  return VisualBase::GetProperty<Image::ReleasePolicy>(AnimatedImageVisual::Property::RELEASE_POLICY);
-}
-
-AnimatedImageVisual& AnimatedImageVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
-{
-  VisualBase::SetProperty(AnimatedImageVisual::Property::RELEASE_POLICY, releasePolicy);
-  return *this;
-}
-
-bool AnimatedImageVisual::IsOrientationCorrection() const
-{
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ORIENTATION_CORRECTION);
-}
-
-AnimatedImageVisual& AnimatedImageVisual::SetOrientationCorrection(bool orientationCorrection)
-{
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
-  return *this;
-}
-
-bool AnimatedImageVisual::IsSynchronousSizing() const
-{
-  return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING);
-}
-
-AnimatedImageVisual& AnimatedImageVisual::SetSynchronousSizing(bool synchronousSizing)
-{
-  VisualBase::SetProperty(AnimatedImageVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
   return *this;
 }
 

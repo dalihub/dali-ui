@@ -161,7 +161,8 @@ void VisualBaseImpl::CreateVisual(const Dali::Property::Map& map)
     {
       if(!map.Empty())
       {
-        mVisual = visualFactory.CreateVisual(map, Dali::Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
+        mVisual = visualFactory.CreateVisual(map, static_cast<Dali::Ui::VisualFactory::CreationOptions>(static_cast<int>(Dali::Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY) |
+                                                                                                        static_cast<int>(Dali::Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)));
       }
       else
       {

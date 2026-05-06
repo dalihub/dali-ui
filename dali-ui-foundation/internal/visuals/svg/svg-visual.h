@@ -62,11 +62,12 @@ public:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL to svg resource to use
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                           const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -78,11 +79,12 @@ public:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL to svg resource to use
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                           const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -207,6 +209,7 @@ private:
 
   Dali::Ui::Image::LoadPolicy    mLoadPolicy;
   Dali::Ui::Image::ReleasePolicy mReleasePolicy;
+  Dali::Ui::Image::FittingMode   mFittingMode; ///< How the contents should fit the view
 
   bool mLoadCompleted : 1;
   bool mRasterizeCompleted : 1;

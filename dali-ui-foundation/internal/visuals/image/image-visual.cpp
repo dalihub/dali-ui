@@ -96,6 +96,14 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
+// fitting mode
+DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FILL)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, CENTER)
+DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
+
 const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
 
 constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
@@ -125,6 +133,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {ENABLE_BROKEN_IMAGE, Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE},
   {LOAD_POLICY_NAME, Ui::ImageVisualPropertyIndex::LOAD_POLICY},
   {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
+  {FITTING_MODE, Ui::ImageVisualPropertyIndex::FITTING_MODE},
   {ORIENTATION_CORRECTION_NAME, Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION},
   {FAST_TRACK_UPLOADING_NAME, Ui::ImageVisualPropertyIndex::FAST_TRACK_UPLOADING},
   {SYNCHRONOUS_SIZING, Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING},
@@ -149,7 +158,7 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 
 } // unnamed namespace
 
-ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
@@ -159,7 +168,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
   return imageVisualPtr;
 }
 
-ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
@@ -188,6 +197,7 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mWrapModeV(WrapMode::DEFAULT),
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mFittingMode(Ui::Image::FittingMode::FILL),
   mLoadState(TextureManager::LoadState::NOT_STARTED),
   mOrientationCorrection(true),
   mNeedYuvToRgb(false),
@@ -468,6 +478,15 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
       mLoadPolicy = Ui::Image::LoadPolicy(loadPolicy);
       break;
     }
+
+    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
+    {
+      int fittingMode = 0;
+      Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode);
+      mFittingMode = Ui::Image::FittingMode(fittingMode);
+      break;
+    }
+
     case Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION:
     {
       bool orientationCorrection = true;
@@ -973,7 +992,9 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 
   map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, mLoadPolicy);
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, mOrientationCorrection);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mEnableBrokenImage);
 
   map.Insert(Ui::ImageVisualPropertyIndex::FAST_TRACK_UPLOADING, mUseFastTrackUploading);
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mUseSynchronousSizing);
@@ -1043,9 +1064,14 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
   }
 }
 
+void ImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  mFittingMode = fittingMode;
+}
+
 void ImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
 {
-  DoApplyFittingMode(controlSize, padding, mImpl->mFittingMode);
+  DoApplyFittingMode(controlSize, padding, mFittingMode);
 }
 
 void ImageVisual::OnSetTransform()

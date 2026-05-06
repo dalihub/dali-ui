@@ -63,6 +63,14 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
+// fitting mode
+DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FILL)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, CENTER)
+DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
+
 struct NameIndexMatch
 {
   const char* const name;
@@ -75,12 +83,13 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {SYNCHRONOUS_LOADING, Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING},
   {LOAD_POLICY_NAME, Ui::ImageVisualPropertyIndex::LOAD_POLICY},
   {RELEASE_POLICY_NAME, Ui::ImageVisualPropertyIndex::RELEASE_POLICY},
+  {FITTING_MODE, Ui::ImageVisualPropertyIndex::FITTING_MODE},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
 } // namespace
 
-SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, const Property::Map& properties)
 {
   SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
@@ -89,7 +98,7 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
   return svgVisual;
 }
 
-SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size)
 {
   SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, imageUrl, size));
@@ -111,6 +120,7 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mDesiredSize(size),
   mLoadPolicy(Ui::Image::LoadPolicy::ATTACHED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mFittingMode(Ui::Image::FittingMode::FILL),
   mLoadCompleted(false),
   mRasterizeCompleted(false),
   mLoadFailed(false),
@@ -264,6 +274,16 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
       }
       break;
     }
+
+    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
+    {
+      int32_t fittingMode = static_cast<int32_t>(mFittingMode);
+      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode)))
+      {
+        mFittingMode = static_cast<Ui::Image::FittingMode>(fittingMode);
+      }
+      break;
+    }
   }
 }
 
@@ -382,6 +402,7 @@ void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
   map.Insert(Ui::ImageVisualPropertyIndex::LOAD_POLICY, mLoadPolicy);
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
+  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
 }
 
 void SvgVisual::DoCreateInstancePropertyMap(Property::Map& map) const

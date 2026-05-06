@@ -71,6 +71,48 @@
   */ \
   ChildClass& SetWrapModeV(Dali::WrapMode::Type wrapModeV) { AnimatedImageVisual::SetWrapModeV(wrapModeV); return *this; } \
   /** \
+  * @brief Sets whether to enable broken image. \
+  * \
+  * @param[in] enableBrokenImage True to enable broken image \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetEnableBrokenImage(bool enableBrokenImage) { AnimatedImageVisual::SetEnableBrokenImage(enableBrokenImage); return *this; } \
+  /** \
+  * @brief Sets the load policy of the AnimatedImageVisual. \
+  * \
+  * @param[in] loadPolicy The load policy to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetLoadPolicy(Image::LoadPolicy loadPolicy) { AnimatedImageVisual::SetLoadPolicy(loadPolicy); return *this; } \
+  /** \
+  * @brief Sets the release policy of the AnimatedImageVisual. \
+  * \
+  * @param[in] releasePolicy The release policy to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetReleasePolicy(Image::ReleasePolicy releasePolicy) { AnimatedImageVisual::SetReleasePolicy(releasePolicy); return *this; } \
+  /** \
+  * @brief Sets the fitting mode of the AnimatedImageVisual. \
+  * \
+  * @param[in] fittingMode The fitting mode to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetFittingMode(Image::FittingMode fittingMode) { AnimatedImageVisual::SetFittingMode(fittingMode); return *this; } \
+  /** \
+  * @brief Sets whether to correct the image orientation. \
+  * \
+  * @param[in] orientationCorrection True to correct the image orientation \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetOrientationCorrection(bool orientationCorrection) { AnimatedImageVisual::SetOrientationCorrection(orientationCorrection); return *this; } \
+  /** \
+  * @brief Sets whether to use synchronous sizing. \
+  * \
+  * @param[in] synchronousSizing True to use synchronous sizing \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetSynchronousSizing(bool synchronousSizing) { AnimatedImageVisual::SetSynchronousSizing(synchronousSizing); return *this; } \
+  /** \
   * @brief Sets whether the image uses pre-multiplied alpha. \
   * \
   * @param[in] preMultiplied True if the image has pre-multiplied alpha \
@@ -105,41 +147,6 @@
   * @return Reference to this for fluent chaining \
   */ \
   ChildClass& SetMaskingType(Image::MaskingType maskingType) { AnimatedImageVisual::SetMaskingType(maskingType); return *this; } \
-  /** \
-  * @brief Sets whether to enable broken image. \
-  * \
-  * @param[in] enableBrokenImage True to enable broken image \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetEnableBrokenImage(bool enableBrokenImage) { AnimatedImageVisual::SetEnableBrokenImage(enableBrokenImage); return *this; } \
-  /** \
-  * @brief Sets the load policy of the AnimatedImageVisual. \
-  * \
-  * @param[in] loadPolicy The load policy to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetLoadPolicy(Image::LoadPolicy loadPolicy) { AnimatedImageVisual::SetLoadPolicy(loadPolicy); return *this; } \
-  /** \
-  * @brief Sets the release policy of the AnimatedImageVisual. \
-  * \
-  * @param[in] releasePolicy The release policy to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetReleasePolicy(Image::ReleasePolicy releasePolicy) { AnimatedImageVisual::SetReleasePolicy(releasePolicy); return *this; } \
-  /** \
-  * @brief Sets whether to correct the image orientation. \
-  * \
-  * @param[in] orientationCorrection True to correct the image orientation \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetOrientationCorrection(bool orientationCorrection) { AnimatedImageVisual::SetOrientationCorrection(orientationCorrection); return *this; } \
-  /** \
-  * @brief Sets whether to use synchronous sizing. \
-  * \
-  * @param[in] synchronousSizing True to use synchronous sizing \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetSynchronousSizing(bool synchronousSizing) { AnimatedImageVisual::SetSynchronousSizing(synchronousSizing); return *this; } \
   /** \
   * @brief Sets the loop count of the AnimatedImageVisual. \
   * \

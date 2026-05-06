@@ -117,12 +117,13 @@ public:
    *
    * @param[in] factoryCache The VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] properties A Property::Map containing settings for this visual
    * @param[in] size The width and height to fit the loaded image to.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, const Property::Map& properties,
                             ImageDimensions size = ImageDimensions());
 
@@ -134,11 +135,12 @@ public:
    *
    * @param[in] factoryCache The VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -161,6 +163,11 @@ public: // from Visual
    * @copydoc Visual::Base::OnDoAction
    */
   void OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes) override;
+
+  /**
+   * @copydoc Visual::Base::SetFittingMode
+   */
+  void SetFittingMode(Ui::Image::FittingMode fittingMode) override;
 
   /**
    * @copydoc Visual::Base::ApplyFittingMode
@@ -367,7 +374,8 @@ private:
   Dali::WrapMode::Type           mWrapModeV : 3;
   Dali::Ui::Image::LoadPolicy    mLoadPolicy;
   Dali::Ui::Image::ReleasePolicy mReleasePolicy;
-  TextureManager::LoadState      mLoadState; ///< The texture loading state
+  Dali::Ui::Image::FittingMode   mFittingMode; ///< How the contents should fit the view
+  TextureManager::LoadState      mLoadState;   ///< The texture loading state
 
   bool mOrientationCorrection : 1;  ///< true if the image will have it's orientation corrected.
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.

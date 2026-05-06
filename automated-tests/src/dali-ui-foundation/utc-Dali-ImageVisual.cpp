@@ -153,6 +153,9 @@ int UtcDaliImageVisualSetGetProperties01(void)
   visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
   DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
 
+  visual.SetFittingMode(Image::FittingMode::CENTER);
+  DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::CENTER, TEST_LOCATION);
+
   visual.SetOrientationCorrection(false);
   DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
 
