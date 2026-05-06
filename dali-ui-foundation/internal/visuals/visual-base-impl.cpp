@@ -27,6 +27,7 @@
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/stream-operators.h>
+#include <algorithm>
 
 // INTERNAL HEARDER
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -64,7 +65,6 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(VISUAL_FITTING_MODE)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, CENTER)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FIT_HEIGHT)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, FIT_WIDTH)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Visual::FittingMode, DONT_CARE)
 DALI_ENUM_TO_STRING_TABLE_END(VISUAL_FITTING_MODE)
 
 /**
@@ -156,7 +156,7 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
 
 } // namespace
 
-Visual::Base::Base(VisualFactoryCache& factoryCache, FittingMode fittingMode, Ui::Visual::Type type)
+Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type, FittingMode fittingMode)
 : mImpl(new Impl(fittingMode, type)),
   mFactoryCache(factoryCache)
 {
@@ -1056,6 +1056,132 @@ bool Visual::Base::IsTransformMapSetForFittingMode() const
 void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 {
   mImpl->mTransformMapSetForFittingMode = used;
+}
+
+void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+{
+  if(GetType() != Ui::Visual::Type::TEXT)
+  {
+    SetViewSize(controlSize);
+  }
+}
+
+void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& padding, FittingMode fittingMode)
+{
+  if(IsPixelAreaSetForFittingMode())
+  {
+    SetPixelAreaForFittingMode(FULL_TEXTURE_RECT);
+  }
+
+  Vector2 finalSize   = controlSize - Vector2(padding.start + padding.end, padding.top + padding.bottom);
+  Vector2 finalOffset = Vector2(padding.start, padding.top);
+  bool    zeroPadding = (padding == Extents());
+
+  if(fittingMode == FittingMode::FIT_WIDTH || fittingMode == FittingMode::FIT_HEIGHT)
+  {
+    Vector2 naturalSize;
+    GetNaturalSize(naturalSize);
+    const float widthRatio  = !Dali::EqualsZero(naturalSize.width) ? (finalSize.width / naturalSize.width) : 0.0f;
+    const float heightRatio = !Dali::EqualsZero(naturalSize.height) ? (finalSize.height / naturalSize.height) : 0.0f;
+    if(widthRatio < heightRatio)
+    {
+      fittingMode = (fittingMode == FittingMode::FIT_WIDTH) ? FittingMode::FIT_KEEP_ASPECT_RATIO : FittingMode::OVER_FIT_KEEP_ASPECT_RATIO;
+    }
+    else
+    {
+      fittingMode = (fittingMode == FittingMode::FIT_WIDTH) ? FittingMode::OVER_FIT_KEEP_ASPECT_RATIO : FittingMode::FIT_KEEP_ASPECT_RATIO;
+    }
+  }
+
+  Property::Map transformMap;
+
+  if((!zeroPadding) || (fittingMode != FittingMode::FILL))
+  {
+    SetTransformMapUsageForFittingMode(true);
+
+    Vector2 naturalSize;
+    if(fittingMode != FittingMode::FILL)
+    {
+      GetNaturalSize(naturalSize);
+    }
+
+    switch(fittingMode)
+    {
+      case FittingMode::FIT_KEEP_ASPECT_RATIO:
+      {
+        auto availableVisualSize = finalSize;
+        finalSize                = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
+                                                          (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
+        finalOffset += (availableVisualSize - finalSize) * 0.5f;
+        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        break;
+      }
+      case FittingMode::OVER_FIT_KEEP_ASPECT_RATIO:
+      {
+        auto availableVisualSize = finalSize;
+        finalSize                = naturalSize * std::max((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
+                                                          (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
+        auto originalOffset      = finalOffset;
+        if(!IsPixelAreaSetForFittingMode() && !Dali::EqualsZero(finalSize.width) && !Dali::EqualsZero(finalSize.height))
+        {
+          float   x           = std::abs((availableVisualSize.width - finalSize.width) / finalSize.width) * 0.5f;
+          float   y           = std::abs((availableVisualSize.height - finalSize.height) / finalSize.height) * 0.5f;
+          float   widthRatio  = 1.f - std::abs((availableVisualSize.width - finalSize.width) / finalSize.width);
+          float   heightRatio = 1.f - std::abs((availableVisualSize.height - finalSize.height) / finalSize.height);
+          Vector4 pixelArea(x, y, widthRatio, heightRatio);
+          SetPixelAreaForFittingMode(pixelArea);
+        }
+        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, originalOffset)
+          .Add(Ui::Visual::Transform::Property::SIZE, availableVisualSize);
+        break;
+      }
+      case FittingMode::CENTER:
+      {
+        auto availableVisualSize = finalSize;
+        if(availableVisualSize.width > naturalSize.width && availableVisualSize.height > naturalSize.height)
+        {
+          finalSize = naturalSize;
+        }
+        else
+        {
+          finalSize = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
+                                             (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
+        }
+        finalOffset += (availableVisualSize - finalSize) * 0.5f;
+        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        break;
+      }
+      case FittingMode::FILL:
+      default:
+      {
+        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
+          .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
+        break;
+      }
+    }
+
+    transformMap
+      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
+      .Add(Ui::Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
+      .Add(Ui::Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
+      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE));
+  }
+  else if(IsTransformMapSetForFittingMode() && zeroPadding)
+  {
+    SetTransformMapUsageForFittingMode(false);
+    transformMap.Add(Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO)
+      .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE))
+      .Add(Ui::Visual::Transform::Property::SIZE, Vector2::ONE)
+      .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+           Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE));
+  }
+
+  SetTransformAndSize(transformMap, controlSize);
 }
 
 void Visual::Base::SetControlSize(Size controlSize)

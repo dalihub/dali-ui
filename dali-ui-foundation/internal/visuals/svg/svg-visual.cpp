@@ -99,7 +99,7 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
 
 SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                      const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::SVG),
+: Visual::Base(factoryCache, Ui::Visual::SVG),
   mImageVisualShaderFactory(shaderFactory),
   mSvgLoader(factoryCache.GetSvgLoader()),
   mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
@@ -454,9 +454,9 @@ void SvgVisual::LoadComplete(int32_t loadId, Dali::VectorImageRenderer vectorIma
   if(DALI_LIKELY(vectorImageRenderer))
   {
     vectorImageRenderer.GetDefaultSize(mDefaultWidth, mDefaultHeight);
-    if(mImpl->mEventObserver && mImpl->mFittingMode != DevelVisual::FittingMode::DONT_CARE)
+    if(mImpl->mEventObserver)
     {
-      // Need teo call ApplyFittingMode once again, after load completed.
+      // Request relayout so ApplyFittingMode is called once the natural size is known.
       mImpl->mEventObserver->RelayoutRequest(*this);
     }
 

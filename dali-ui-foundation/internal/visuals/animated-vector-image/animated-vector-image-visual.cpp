@@ -142,8 +142,7 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
 AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       factoryCache,
                                                      ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
                                                      ImageDimensions size)
-: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE,
-               static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
+: Visual::Base(factoryCache, static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
   mImageUrl(imageUrl),
   mAnimationData(),
   mVectorAnimationTask(new VectorAnimationTask(factoryCache)),

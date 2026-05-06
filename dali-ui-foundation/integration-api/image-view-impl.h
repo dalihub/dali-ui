@@ -350,13 +350,6 @@ private: // Internal methods
   void UpdatePlaceholderVisual();
 
   /**
-   * @brief Applies the current fitting mode transform to the visual for the given size.
-   *
-   * @param[in] size The allocated size of the view
-   */
-  void ApplyFittingMode(const Vector2& size);
-
-  /**
    * @brief Callback invoked when the view's resource becomes ready.
    *
    * @param[in] view The view whose resource became ready

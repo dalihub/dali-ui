@@ -290,6 +290,19 @@ public:
   void SetTransformMapUsageForFittingMode(bool used);
 
   /**
+   * @brief Applies the fitting mode transform to this visual.
+   *
+   * Default implementation calls SetViewSize for non-TEXT visuals.
+   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
+   * the fitting algorithm using their stored mFittingMode.
+   *
+   * @param[in] controlSize The size of the parent control.
+   * @param[in] padding     The padding of the parent control (start, end, top, bottom).
+   *                        For RTL layouts, start/end should already be swapped by the caller.
+   */
+  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& padding);
+
+  /**
    * @brief Sets the control size
    * It will call SetTransformAndSize with empty transform map.
    *
@@ -406,7 +419,7 @@ protected:
    * @param[in] fittingMode The value that determines how the visual should be fit to the view
    * @param[in] type The type of the this visual
    */
-  Base(VisualFactoryCache& factoryCache, FittingMode fittingMode, Ui::Visual::Type type);
+  Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type, FittingMode fittingMode = FittingMode::FILL);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -516,6 +529,18 @@ protected:
   }
 
 protected:
+  /**
+   * @brief Shared fitting mode algorithm used by subclasses that support FittingMode.
+   *
+   * Computes the transform map for the given control size, padding, and fitting mode,
+   * then calls SetTransformAndSize. Intended to be called from ApplyFittingMode overrides.
+   *
+   * @param[in] controlSize The size of the parent control.
+   * @param[in] padding     The padding of the parent control. For RTL, start/end already swapped.
+   * @param[in] fittingMode The fitting mode to apply.
+   */
+  void DoApplyFittingMode(const Vector2& controlSize, const Extents& padding, FittingMode fittingMode);
+
   /**
    * @brief Query whether the corners of the visual requires to be rounded.
    *

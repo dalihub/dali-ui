@@ -152,7 +152,6 @@ enum FittingMode
                               ///< maintain aspect ratio. It will be deprecated.
   FIT_WIDTH,                  ///< The visual should be scaled to fit, preserving aspect ratio. Width is scaled proportionately to
                               ///< maintain aspect ratio. It will be deprecated.
-  DONT_CARE                   ///< The visual should be not use fittingMode.
 };
 
 /**

@@ -166,6 +166,11 @@ public: // from Visual
    */
   void OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes) override;
 
+  /**
+   * @copydoc Visual::Base::ApplyFittingMode
+   */
+  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding) override;
+
 protected:
   /**
    * @brief Constructor with a URL.

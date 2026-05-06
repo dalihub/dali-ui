@@ -418,13 +418,6 @@ private: // Internal methods
   void UpdatePlaceholderVisual();
 
   /**
-   * @brief Applies the current fitting mode to the visual.
-   *
-   * @param[in] size The size of the view
-   */
-  void ApplyFittingMode(const Vector2& size);
-
-  /**
    * @brief Called when a visual event signal is emitted.
    *
    * Used to intercept ANIMATION_FINISHED and forward it as AnimationFinishedSignal.

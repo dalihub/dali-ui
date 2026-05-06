@@ -108,7 +108,7 @@ MeshVisualPtr MeshVisual::New(VisualFactoryCache& factoryCache, const Property::
 }
 
 MeshVisual::MeshVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::MESH),
+: Visual::Base(factoryCache, Ui::Visual::MESH),
   mShadingMode(Ui::MeshVisual::ShadingMode::TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING),
   mUseTexture(true),
   mUseMipmapping(true),

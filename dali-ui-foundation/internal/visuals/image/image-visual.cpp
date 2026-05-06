@@ -173,7 +173,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
 ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
                          const VisualUrl& imageUrl, ImageDimensions size,
                          Dali::SamplingMode::Type samplingMode)
-: Visual::Base(factoryCache, Visual::FittingMode::DONT_CARE, Ui::Visual::IMAGE),
+: Visual::Base(factoryCache, Ui::Visual::IMAGE),
   mPixelArea(FULL_TEXTURE_RECT),
   mPixelAreaIndex(Property::INVALID_INDEX),
   mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
@@ -1044,6 +1044,11 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
       break;
     }
   }
+}
+
+void ImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+{
+  DoApplyFittingMode(controlSize, padding, mImpl->mFittingMode);
 }
 
 void ImageVisual::OnSetTransform()

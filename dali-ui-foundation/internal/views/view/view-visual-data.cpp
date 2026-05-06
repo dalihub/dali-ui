@@ -50,8 +50,6 @@ namespace Internal
 {
 namespace
 {
-const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
-
 static constexpr uint32_t DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                                8);
 static constexpr uint32_t DEFAULT_CORNER_SQUARENESS_CONSTRAINT_TAG(
@@ -1456,207 +1454,36 @@ Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Devel
 
 void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 {
-  Actor self;
+  Actor   self;
+  Extents padding;
+  bool    paddingFetched = false;
+
   for(RegisteredVisualContainer::Iterator iter = mVisuals.Begin(); iter != mVisuals.End(); iter++)
   {
-    // Check whether the visual is empty and enabled
-    if((*iter)->visual && (*iter)->enabled)
+    if(!(*iter)->visual || !(*iter)->enabled)
     {
-      Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
+      continue;
+    }
 
-      // If the current visual is using the transform property map, fittingMode will not be applied.
-      if(visualImpl.IsIgnoreFittingMode())
-      {
-        continue;
-      }
+    Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
-      Visual::FittingMode fittingMode = visualImpl.GetFittingMode();
+    if(visualImpl.IsIgnoreFittingMode())
+    {
+      continue;
+    }
 
-      // If the fittingMode is DONT_CARE, we don't need to apply fittingMode, just Set the size of view
-      if(fittingMode == Visual::FittingMode::DONT_CARE)
-      {
-        if(visualImpl.GetType() != Ui::Visual::Type::TEXT)
-        {
-          visualImpl.SetViewSize(size);
-        }
-        continue;
-      }
-
-      if(!self)
-      {
-        self = mOuter.mViewImpl.Self();
-      }
-
-      Extents padding = self.GetProperty<Extents>(Ui::View::Property::PADDING);
-
-      bool zeroPadding = (padding == Extents());
-
-      Dali::LayoutDirection::Type layoutDirection = mOuter.mViewImpl.GetEffectiveLayoutDirection();
-      if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+    if(!paddingFetched)
+    {
+      self    = mOuter.mViewImpl.Self();
+      padding = self.GetProperty<Extents>(Ui::View::Property::PADDING);
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == mOuter.mViewImpl.GetEffectiveLayoutDirection())
       {
         std::swap(padding.start, padding.end);
       }
-
-      // remove padding from the size to know how much is left for the visual
-      Vector2 finalSize   = size - Vector2(padding.start + padding.end, padding.top + padding.bottom);
-      Vector2 finalOffset = Vector2(padding.start, padding.top);
-
-      // Reset PIXEL_AREA after using OVER_FIT_KEEP_ASPECT_RATIO
-      if(visualImpl.IsPixelAreaSetForFittingMode())
-      {
-        visualImpl.SetPixelAreaForFittingMode(FULL_TEXTURE_RECT);
-      }
-
-      Property::Map transformMap = Property::Map();
-
-      if((!zeroPadding) || // If padding is not zero
-         (fittingMode != Visual::FittingMode::FILL))
-      {
-        visualImpl.SetTransformMapUsageForFittingMode(true);
-
-        Vector2 naturalSize;
-        // NaturalSize will not be used for FILL fitting mode, which is default.
-        // Skip GetNaturalSize
-        if(fittingMode != Visual::FittingMode::FILL)
-        {
-          visualImpl.GetNaturalSize(naturalSize);
-        }
-
-        // If FittingMode use FIT_WIDTH or FIT_HEIGHT, it need to change proper fittingMode
-        if(fittingMode == Visual::FittingMode::FIT_WIDTH || fittingMode == Visual::FittingMode::FIT_HEIGHT)
-        {
-          const float widthRatio = !Dali::EqualsZero(naturalSize.width) ? (finalSize.width / naturalSize.width) : 0.0f;
-          const float heightRatio =
-            !Dali::EqualsZero(naturalSize.height) ? (finalSize.height / naturalSize.height) : 0.0f;
-          if(widthRatio < heightRatio)
-          {
-            // Final size has taller form than natural size.
-            fittingMode = (fittingMode == Visual::FittingMode::FIT_WIDTH)
-                            ? Visual::FittingMode::FIT_KEEP_ASPECT_RATIO
-                            : Visual::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO;
-          }
-          else
-          {
-            // Final size has wider form than natural size.
-            fittingMode = (fittingMode == Visual::FittingMode::FIT_WIDTH)
-                            ? Visual::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO
-                            : Visual::FittingMode::FIT_KEEP_ASPECT_RATIO;
-          }
-        }
-
-        // Calculate size for fittingMode
-        switch(fittingMode)
-        {
-          case Visual::FittingMode::FIT_KEEP_ASPECT_RATIO:
-          {
-            auto availableVisualSize = finalSize;
-
-            // scale to fit the padded area
-            finalSize =
-              naturalSize *
-              std::min(
-                (!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0),
-                (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0));
-
-            // calculate final offset within the padded area
-            finalOffset += (availableVisualSize - finalSize) * .5f;
-
-            // populate the transform map
-            transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-              .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
-            break;
-          }
-          case Visual::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO:
-          {
-            auto availableVisualSize = finalSize;
-            finalSize =
-              naturalSize *
-              std::max(
-                (!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
-                (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
-
-            auto originalOffset = finalOffset;
-
-            if(!visualImpl.IsPixelAreaSetForFittingMode() && !Dali::EqualsZero(finalSize.width) &&
-               !Dali::EqualsZero(finalSize.height))
-            {
-              float   x           = abs((availableVisualSize.width - finalSize.width) / finalSize.width) * .5f;
-              float   y           = abs((availableVisualSize.height - finalSize.height) / finalSize.height) * .5f;
-              float   widthRatio  = 1.f - abs((availableVisualSize.width - finalSize.width) / finalSize.width);
-              float   heightRatio = 1.f - abs((availableVisualSize.height - finalSize.height) / finalSize.height);
-              Vector4 pixelArea   = Vector4(x, y, widthRatio, heightRatio);
-              visualImpl.SetPixelAreaForFittingMode(pixelArea);
-            }
-
-            // populate the transform map
-            transformMap.Add(Ui::Visual::Transform::Property::OFFSET, originalOffset)
-              .Add(Ui::Visual::Transform::Property::SIZE, availableVisualSize);
-            break;
-          }
-          case Visual::FittingMode::CENTER:
-          {
-            auto availableVisualSize = finalSize;
-            if(availableVisualSize.width > naturalSize.width && availableVisualSize.height > naturalSize.height)
-            {
-              finalSize = naturalSize;
-            }
-            else
-            {
-              finalSize =
-                naturalSize *
-                std::min(
-                  (!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
-                  (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height)
-                                                         : 0.0f));
-            }
-
-            finalOffset += (availableVisualSize - finalSize) * .5f;
-
-            // populate the transform map
-            transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-              .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
-            break;
-          }
-          case Visual::FittingMode::FILL:
-          {
-            transformMap.Add(Ui::Visual::Transform::Property::OFFSET, finalOffset)
-              .Add(Ui::Visual::Transform::Property::SIZE, finalSize);
-            break;
-          }
-          case Visual::FittingMode::FIT_WIDTH:
-          case Visual::FittingMode::FIT_HEIGHT:
-          case Visual::FittingMode::DONT_CARE:
-          {
-            // This FittingMode already converted
-            break;
-          }
-        }
-
-        // Set extra value for applying transformMap
-        transformMap
-          .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-               Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
-          .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
-          .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN)
-          .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-               Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE));
-      }
-      else if(visualImpl.IsTransformMapSetForFittingMode() &&
-              zeroPadding) // Reset offset to zero only if padding applied previously
-      {
-        visualImpl.SetTransformMapUsageForFittingMode(false);
-
-        // Reset the transform map
-        transformMap.Add(Ui::Visual::Transform::Property::OFFSET, Vector2::ZERO)
-          .Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
-               Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE))
-          .Add(Ui::Visual::Transform::Property::SIZE, Vector2::ONE)
-          .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
-               Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE));
-      }
-
-      visualImpl.SetTransformAndSize(transformMap, size);
+      paddingFetched = true;
     }
+
+    visualImpl.ApplyFittingMode(size, padding);
   }
 }
 

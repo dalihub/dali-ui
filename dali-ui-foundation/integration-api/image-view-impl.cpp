@@ -22,7 +22,6 @@
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
-#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -491,6 +490,10 @@ void ImageViewImpl::SetFittingMode(Ui::FittingMode::Type fittingMode)
   if(mFittingMode != fittingMode)
   {
     mFittingMode = fittingMode;
+    if(mVisual)
+    {
+      Ui::GetImplementation(mVisual).SetFittingMode(static_cast<DevelVisual::FittingMode>(fittingMode));
+    }
     // FittingMode only changes the visual transform, not the visual itself.
     // Apply immediately if the actor size is already available; otherwise
     // defer to the next OnArrange via InvalidateMeasure.
@@ -499,7 +502,7 @@ void ImageViewImpl::SetFittingMode(Ui::FittingMode::Type fittingMode)
     float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
     if(w > 0.0f && h > 0.0f)
     {
-      ApplyFittingMode(Vector2(w, h));
+      Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding());
     }
     else
     {
@@ -883,9 +886,7 @@ MeasuredSize ImageViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[ImageViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f) hasVisual=%d\n",
                       bounds.x, bounds.y, bounds.width, bounds.height, mVisual ? 1 : 0);
-  MeasuredSize result = ViewImpl::OnArrange(bounds);
-  ApplyFittingMode(Vector2(bounds.width, bounds.height));
-  return result;
+  return ViewImpl::OnArrange(bounds);
 }
 
 void ImageViewImpl::UpdateVisual()
@@ -928,6 +929,7 @@ void ImageViewImpl::UpdateVisual()
     map.Insert(Ui::DevelImageVisual::Property::FAST_TRACK_UPLOADING, mFastTrackUploading);
     map.Insert(Ui::ImageVisual::Property::ORIENTATION_CORRECTION, mOrientationCorrection);
     map.Insert(Ui::DevelImageVisual::Property::SYNCHRONOUS_SIZING, mImageLoadWithViewSize);
+    map.Insert(Ui::DevelVisual::Property::VISUAL_FITTING_MODE, static_cast<int>(mFittingMode));
 
     if(!mAlphaMaskUrl.Empty())
     {
@@ -958,153 +960,6 @@ void ImageViewImpl::UpdateVisual()
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: CreateVisual failed\n");
     }
   }
-}
-
-void ImageViewImpl::ApplyFittingMode(const Vector2& size)
-{
-  DALI_LOG_DEBUG_INFO("[ImageViewImpl] ApplyFittingMode: size=(%.0f,%.0f) fittingMode=%d hasVisual=%d\n",
-                      size.width, size.height, static_cast<int>(mFittingMode), mVisual ? 1 : 0);
-  if(!mVisual)
-  {
-    return;
-  }
-
-  auto& visualImpl = Ui::GetImplementation(mVisual);
-
-  if(visualImpl.IsIgnoreFittingMode())
-  {
-    return;
-  }
-
-  if(mFittingMode == Ui::FittingMode::DONT_CARE)
-  {
-    mVisual.SetTransformAndSize(Dali::Property::Map(), size);
-    return;
-  }
-
-  Extents padding = GetPadding();
-
-  // Reset PIXEL_AREA after using OVER_FIT_KEEP_ASPECT_RATIO
-  if(visualImpl.IsPixelAreaSetForFittingMode())
-  {
-    static const Vector4 FULL_TEXTURE_RECT(0.f, 0.f, 1.f, 1.f);
-    visualImpl.SetPixelAreaForFittingMode(FULL_TEXTURE_RECT);
-  }
-
-  Vector2 finalSize   = size - Vector2(padding.start + padding.end, padding.top + padding.bottom);
-  Vector2 finalOffset = Vector2(padding.start, padding.top);
-
-  bool                zeroPadding = (padding == Extents());
-  Dali::Property::Map transformMap;
-
-  auto fittingMode = static_cast<DevelVisual::FittingMode>(mFittingMode);
-
-  // FIT_WIDTH/FIT_HEIGHT: resolve to FIT_KEEP or OVER_FIT based on aspect ratio
-  if(fittingMode == DevelVisual::FIT_WIDTH || fittingMode == DevelVisual::FIT_HEIGHT)
-  {
-    Vector2 naturalSize;
-    visualImpl.GetNaturalSize(naturalSize);
-    const float widthRatio  = !Dali::EqualsZero(naturalSize.width) ? (finalSize.width / naturalSize.width) : 0.0f;
-    const float heightRatio = !Dali::EqualsZero(naturalSize.height) ? (finalSize.height / naturalSize.height) : 0.0f;
-    if(widthRatio < heightRatio)
-    {
-      fittingMode = (fittingMode == DevelVisual::FIT_WIDTH) ? DevelVisual::FIT_KEEP_ASPECT_RATIO : DevelVisual::OVER_FIT_KEEP_ASPECT_RATIO;
-    }
-    else
-    {
-      fittingMode = (fittingMode == DevelVisual::FIT_WIDTH) ? DevelVisual::OVER_FIT_KEEP_ASPECT_RATIO : DevelVisual::FIT_KEEP_ASPECT_RATIO;
-    }
-  }
-
-  if((!zeroPadding) || (fittingMode != DevelVisual::FILL))
-  {
-    visualImpl.SetTransformMapUsageForFittingMode(true);
-
-    Vector2 naturalSize;
-    if(fittingMode != DevelVisual::FILL)
-    {
-      visualImpl.GetNaturalSize(naturalSize);
-    }
-
-    switch(fittingMode)
-    {
-      case DevelVisual::FIT_KEEP_ASPECT_RATIO:
-      {
-        auto availableVisualSize = finalSize;
-        finalSize                = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
-                                                          (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
-        finalOffset += (availableVisualSize - finalSize) * 0.5f;
-        transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Visual::Transform::Property::SIZE, finalSize);
-        break;
-      }
-      case DevelVisual::OVER_FIT_KEEP_ASPECT_RATIO:
-      {
-        auto availableVisualSize = finalSize;
-        finalSize                = naturalSize * std::max((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
-                                                          (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
-        auto originalOffset      = finalOffset;
-        if(!visualImpl.IsPixelAreaSetForFittingMode() && !Dali::EqualsZero(finalSize.width) && !Dali::EqualsZero(finalSize.height))
-        {
-          float   x           = std::abs((availableVisualSize.width - finalSize.width) / finalSize.width) * 0.5f;
-          float   y           = std::abs((availableVisualSize.height - finalSize.height) / finalSize.height) * 0.5f;
-          float   widthRatio  = 1.f - std::abs((availableVisualSize.width - finalSize.width) / finalSize.width);
-          float   heightRatio = 1.f - std::abs((availableVisualSize.height - finalSize.height) / finalSize.height);
-          Vector4 pixelArea(x, y, widthRatio, heightRatio);
-          visualImpl.SetPixelAreaForFittingMode(pixelArea);
-        }
-        transformMap.Add(Visual::Transform::Property::OFFSET, originalOffset)
-          .Add(Visual::Transform::Property::SIZE, availableVisualSize);
-        break;
-      }
-      case DevelVisual::CENTER:
-      {
-        auto availableVisualSize = finalSize;
-        if(availableVisualSize.width > naturalSize.width && availableVisualSize.height > naturalSize.height)
-        {
-          finalSize = naturalSize;
-        }
-        else
-        {
-          finalSize = naturalSize * std::min((!Dali::EqualsZero(naturalSize.width) ? (availableVisualSize.width / naturalSize.width) : 0.0f),
-                                             (!Dali::EqualsZero(naturalSize.height) ? (availableVisualSize.height / naturalSize.height) : 0.0f));
-        }
-        finalOffset += (availableVisualSize - finalSize) * 0.5f;
-        transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Visual::Transform::Property::SIZE, finalSize);
-        break;
-      }
-      case DevelVisual::FILL:
-      default:
-      {
-        transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
-          .Add(Visual::Transform::Property::SIZE, finalSize);
-        break;
-      }
-    }
-
-    transformMap.Add(Visual::Transform::Property::OFFSET_POLICY,
-                     Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
-      .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-      .Add(Visual::Transform::Property::PIVOT, Align::TOP_BEGIN)
-      .Add(Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE));
-  }
-  else if(visualImpl.IsTransformMapSetForFittingMode() && zeroPadding)
-  {
-    visualImpl.SetTransformMapUsageForFittingMode(false);
-    transformMap.Add(Visual::Transform::Property::OFFSET, Vector2::ZERO)
-      .Add(Visual::Transform::Property::OFFSET_POLICY,
-           Vector2(Visual::Transform::Policy::RELATIVE, Visual::Transform::Policy::RELATIVE))
-      .Add(Visual::Transform::Property::SIZE, Vector2::ONE)
-      .Add(Visual::Transform::Property::SIZE_POLICY,
-           Vector2(Visual::Transform::Policy::RELATIVE, Visual::Transform::Policy::RELATIVE));
-  }
-
-  DALI_LOG_DEBUG_INFO("[ImageViewImpl] ApplyFittingMode: transformMap.Count=%zu finalSize=(%.1f,%.1f) finalOffset=(%.1f,%.1f)\n",
-                      transformMap.Count(), finalSize.width, finalSize.height, finalOffset.x, finalOffset.y);
-
-  mVisual.SetTransformAndSize(transformMap, size);
 }
 
 } // namespace Integration

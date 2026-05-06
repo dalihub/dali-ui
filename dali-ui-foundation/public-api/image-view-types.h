@@ -36,7 +36,6 @@ enum Type
   FILL,                       ///< The visual should be stretched to fill, not preserving aspect ratio
   OVER_FIT_KEEP_ASPECT_RATIO, ///< The visual should be scaled to fit, preserving aspect ratio, outside is cropped away
   CENTER,                     ///< The visual should keep original size of image
-  DONT_CARE                   ///< Process without specific fitting mode
 };
 } // namespace FittingMode
 
