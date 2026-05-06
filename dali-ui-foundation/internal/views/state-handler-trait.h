@@ -135,7 +135,7 @@ public:
    * @param[in] prev The previous ViewState
    * @param[in] cur  The current ViewState
    */
-  void NotifyStateChanged(View view, const StateEvent& event);
+  void NotifyStateChanged(View view, StateEvent event);
 
 public: // SlotObserver
   void SlotDisconnected(CallbackBase* callback) override;

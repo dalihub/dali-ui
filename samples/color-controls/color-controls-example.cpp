@@ -36,7 +36,7 @@ public:
   ~ColorControlsExample() = default; // Nothing to do in destructor
 
   // The Init signal is received once (only) during the Application lifetime
-  void Create(Application& application)
+  void Create(Application application)
   {
     // Get a handle to the window
     Window window = application.GetWindow();
@@ -53,7 +53,7 @@ public:
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
           .AsInteractive([this](InteractiveTrait& trait) {
-            trait.ClickedSignal().Connect(this, [this](View view, const InputEvent& event) -> bool {
+            trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
               mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
               return true;
             });
@@ -68,7 +68,7 @@ public:
       }));
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {

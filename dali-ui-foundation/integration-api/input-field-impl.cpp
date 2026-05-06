@@ -1409,7 +1409,7 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
   return mController->KeyEvent(event);
 }
 
-void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
+void InputFieldImpl::OnTapDetected(Actor actor, TapGesture gesture)
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
 
@@ -1427,7 +1427,7 @@ void InputFieldImpl::OnTapDetected(Actor actor, const TapGesture& gesture)
   SetKeyInputFocus(*this);
 }
 
-void InputFieldImpl::OnPanDetected(Actor actor, const PanGesture& gesture)
+void InputFieldImpl::OnPanDetected(Actor actor, PanGesture gesture)
 {
   if(!mController->IsScrollable(gesture.GetDisplacement()))
   {
@@ -1440,7 +1440,7 @@ void InputFieldImpl::OnPanDetected(Actor actor, const PanGesture& gesture)
   mController->PanEvent(gesture.GetState(), gesture.GetDisplacement());
 }
 
-void InputFieldImpl::OnLongPressDetected(Actor actor, const LongPressGesture& gesture)
+void InputFieldImpl::OnLongPressDetected(Actor actor, LongPressGesture gesture)
 {
   if(mInputMethodContext && IsEditable())
   {
@@ -1782,7 +1782,7 @@ void InputFieldImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 // Implementation
 // =============================================================================
-InputMethodContext::CallbackData InputFieldImpl::OnInputMethodContextEvent(Dali::InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
+InputMethodContext::CallbackData InputFieldImpl::OnInputMethodContextEvent(Dali::InputMethodContext inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
 {
   return mController->OnInputMethodContextEvent(inputMethodContext, inputMethodContextEvent);
 }
@@ -1799,7 +1799,7 @@ void InputFieldImpl::OnSceneConnect(Dali::Actor actor)
   }
 }
 
-bool InputFieldImpl::OnTouched(Actor actor, const TouchEvent& touch)
+bool InputFieldImpl::OnTouched(Actor actor, TouchEvent touch)
 {
   return false;
 }

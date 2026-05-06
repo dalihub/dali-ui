@@ -58,7 +58,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -217,7 +217,7 @@ private:
     return button;
   }
 
-  void OnImageTypeClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnImageTypeClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageTypeIndex = (mImageTypeIndex + 1) % IMAGE_TYPE_COUNT;
     Label::DownCast(mImageTypeLabel).SetText(IMAGE_TYPE_NAMES[mImageTypeIndex]);
@@ -228,7 +228,7 @@ private:
     DALI_LOG_RELEASE_INFO("[ImageColor] Image type changed to: %s\n", IMAGE_TYPE_NAMES[mImageTypeIndex]);
   }
 
-  void OnColorButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnColorButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < COLOR_COUNT; ++i)
     {
@@ -273,7 +273,7 @@ private:
     return Dali::String(buf);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -498,7 +498,7 @@ void WebViewImpl::OnFrameRendered()
   }
 }
 
-void WebViewImpl::OnDisplayAreaUpdated(Dali::PropertyNotification& /*source*/)
+void WebViewImpl::OnDisplayAreaUpdated(Dali::PropertyNotification /*source*/)
 {
   if(!mWebEngine)
   {

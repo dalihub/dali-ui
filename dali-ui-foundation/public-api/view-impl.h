@@ -85,7 +85,7 @@ public:
 
   class Extension; ///< Forward declare future extension interface
 
-  using StateChangedSignalType = Signal<void(Ui::View, const StateEvent&)>;
+  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
 
   /**
    * @brief Flags for the constructor.

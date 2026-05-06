@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1B1B1B));
@@ -111,7 +111,7 @@ private:
     return row;
   }
 
-  void OnViewTypeButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnViewTypeButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < (int)ViewType::COUNT; ++i)
     {
@@ -231,7 +231,7 @@ private:
   View CreateReleasePolicyRow() { return CreateControlRow({"DETACHED", "DESTROYED", "HIDE 1s"}, {&ImageLoadingPolicyController::OnReleasePolicyDetachedClicked, &ImageLoadingPolicyController::OnReleasePolicyDestroyedClicked, &ImageLoadingPolicyController::OnHideClicked}); }
   View CreateLoadPolicyRow() { return CreateControlRow({"ATTACHED", "IMMEDIATE", "TEST"}, {&ImageLoadingPolicyController::OnLoadPolicyAttachedClicked, &ImageLoadingPolicyController::OnLoadPolicyImmediateClicked, &ImageLoadingPolicyController::OnLoadPolicyTestClicked}); }
 
-  typedef void (ImageLoadingPolicyController::*ClickCallback)(View, const InputEvent&);
+  typedef void (ImageLoadingPolicyController::*ClickCallback)(View, InputEvent);
   View CreateControlRow(std::vector<const char*> labels, std::vector<ClickCallback> callbacks)
   {
     StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL).SetSpacing(4.0f).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(40.0f);
@@ -243,8 +243,8 @@ private:
     return row;
   }
 
-  void OnSyncLoadingToggleClicked(View, const InputEvent&) { mSyncLoading = !mSyncLoading; ResetSections(); }
-  void OnSyncLoadingChangeClicked(View, const InputEvent&) {
+  void OnSyncLoadingToggleClicked(View, InputEvent) { mSyncLoading = !mSyncLoading; ResetSections(); }
+  void OnSyncLoadingChangeClicked(View, InputEvent) {
     mSyncPendingUrl = (mViewType == ViewType::LOTTIE_ANIMATION_VIEW) ? RESOURCES_DIR "done.json" : RESOURCES_DIR "gallery-medium-3.jpg";
     mSyncLoadingContainer.Remove(mSyncLoadingImage);
     mSyncChangeTimer = Timer::New(100);
@@ -258,13 +258,13 @@ private:
   }
   void OnSyncLoadingResourceReady(View view) { LogStatus("Sync", view); }
 
-  void OnFastTrackToggleClicked(View, const InputEvent&) { if(mViewType != ViewType::LOTTIE_ANIMATION_VIEW) { mFastTrack = !mFastTrack; ResetSections(); } }
-  void OnFastTrackReloadClicked(View view, const InputEvent&) { if(auto v = ImageView::DownCast(mFastTrackImage)) v.Reload(); }
+  void OnFastTrackToggleClicked(View, InputEvent) { if(mViewType != ViewType::LOTTIE_ANIMATION_VIEW) { mFastTrack = !mFastTrack; ResetSections(); } }
+  void OnFastTrackReloadClicked(View view, InputEvent) { if(auto v = ImageView::DownCast(mFastTrackImage)) v.Reload(); }
   void OnFastTrackResourceReady(View view) { LogStatus("FastTrack", view); }
 
-  void OnReleasePolicyDetachedClicked(View, const InputEvent&) { mPolicyIndex = 0; ResetSections(); }
-  void OnReleasePolicyDestroyedClicked(View, const InputEvent&) { mPolicyIndex = 1; ResetSections(); }
-  void OnHideClicked(View, const InputEvent&) {
+  void OnReleasePolicyDetachedClicked(View, InputEvent) { mPolicyIndex = 0; ResetSections(); }
+  void OnReleasePolicyDestroyedClicked(View, InputEvent) { mPolicyIndex = 1; ResetSections(); }
+  void OnHideClicked(View, InputEvent) {
      mReleasePolicyReadyAfterReAdd = false;
      mReleasePolicyContainer.Remove(mReleasePolicyImage);
      mHideTimer = Timer::New(1000);
@@ -281,9 +281,9 @@ private:
   bool OnCheckTimerTick() { if(!mReleasePolicyReadyAfterReAdd) DALI_LOG_ERROR("[Release] Cached\n"); return false; }
   void OnReleasePolicyResourceReady(View view) { mReleasePolicyReadyAfterReAdd = true; LogStatus("Release", view); }
 
-  void OnLoadPolicyAttachedClicked(View, const InputEvent&) { mLoadPolicyIndex = 0; UpdateInfoLabels(); }
-  void OnLoadPolicyImmediateClicked(View, const InputEvent&) { mLoadPolicyIndex = 1; UpdateInfoLabels(); }
-  void OnLoadPolicyTestClicked(View, const InputEvent&) {
+  void OnLoadPolicyAttachedClicked(View, InputEvent) { mLoadPolicyIndex = 0; UpdateInfoLabels(); }
+  void OnLoadPolicyImmediateClicked(View, InputEvent) { mLoadPolicyIndex = 1; UpdateInfoLabels(); }
+  void OnLoadPolicyTestClicked(View, InputEvent) {
     mLoadPolicyImage = CreateTargetView(true);
     ApplyProperty(mLoadPolicyImage, ImageView::Property::LOAD_POLICY, LOAD_POLICIES[mLoadPolicyIndex].policy);
     ConnectResourceReady(mLoadPolicyImage, &ImageLoadingPolicyController::OnLoadPolicyResourceReady);
@@ -310,7 +310,7 @@ private:
      DALI_LOG_ERROR("[%s] ResourceReady. Status=%d\n", section, status);
   }
 
-  void OnKeyEvent(const KeyEvent& event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
+  void OnKeyEvent(KeyEvent event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
 
   Application&  mApplication;
   View          mSyncLoadingImage, mFastTrackImage, mReleasePolicyImage, mLoadPolicyImage;

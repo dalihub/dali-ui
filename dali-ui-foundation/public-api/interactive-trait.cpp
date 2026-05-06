@@ -57,7 +57,7 @@ InteractiveTrait InteractiveTrait::DownCast(BaseHandle handle)
   return InteractiveTrait(dynamic_cast<Integration::InteractiveTraitImpl*>(handle.GetObjectPtr()));
 }
 
-Signal<void(View, bool, const InputEvent&)>& InteractiveTrait::PressedChangedSignal()
+Signal<void(View, bool, InputEvent)>& InteractiveTrait::PressedChangedSignal()
 {
   return GetImpl(*this).PressedChangedSignal();
 }
@@ -67,12 +67,12 @@ Signal<void(View, bool)>& InteractiveTrait::PseudoDisabledChangedSignal()
   return GetImpl(*this).PseudoDisabledChangedSignal();
 }
 
-Signal<void(View, const InputEvent&)>& InteractiveTrait::ClickedSignal()
+Signal<void(View, InputEvent)>& InteractiveTrait::ClickedSignal()
 {
   return GetImpl(*this).ClickedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& InteractiveTrait::LongPressedSignal()
+Signal<bool(View, InputEvent)>& InteractiveTrait::LongPressedSignal()
 {
   return GetImpl(*this).LongPressedSignal();
 }

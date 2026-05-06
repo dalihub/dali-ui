@@ -32,7 +32,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
@@ -126,7 +126,7 @@ private:
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

@@ -409,7 +409,7 @@ struct PropertyNotifcationSignalShim
   {
   }
 
-  void operator()(PropertyNotification& /* source */)
+  void operator()(PropertyNotification /* source */)
   {
     mFunctor();
   }

@@ -70,7 +70,7 @@ InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
 // Signals
 // =============================================================================
 
-Signal<void(View, bool, const InputEvent&)>& InteractiveView::PressedChangedSignal()
+Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
 {
   return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
 }
@@ -80,12 +80,12 @@ Signal<void(View, bool)>& InteractiveView::PseudoDisabledChangedSignal()
   return GetImpl(*this).GetInteractiveTrait().PseudoDisabledChangedSignal();
 }
 
-Signal<void(View, const InputEvent&)>& InteractiveView::ClickedSignal()
+Signal<void(View, InputEvent)>& InteractiveView::ClickedSignal()
 {
   return GetImpl(*this).GetInteractiveTrait().ClickedSignal();
 }
 
-Signal<bool(View, const InputEvent&)>& InteractiveView::LongPressedSignal()
+Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
 {
   return GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
 }

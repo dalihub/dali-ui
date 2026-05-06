@@ -777,7 +777,7 @@ private: // Implementation
    * @param[in] touch The touch event information.
    * @return True if the touch event is consumed, otherwise false.
    */
-  bool OnInterceptTouched(Actor actor, const TouchEvent& touch);
+  bool OnInterceptTouched(Actor actor, TouchEvent touch);
 
   /**
    * @brief Updates touch interception based on anchor presence.
@@ -873,7 +873,7 @@ private: // Implementation
   /**
    * @brief Called when a font variation property changes.
    */
-  void OnVariationPropertyNotify(PropertyNotification& source);
+  void OnVariationPropertyNotify(PropertyNotification source);
 
   /**
    * @brief Handles font variation property updates.

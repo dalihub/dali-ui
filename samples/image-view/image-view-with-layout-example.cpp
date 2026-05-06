@@ -59,7 +59,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::DARK_GRAY);
@@ -114,7 +114,7 @@ private:
                           static_cast<int>(imageView.GetLoadingStatus()));
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

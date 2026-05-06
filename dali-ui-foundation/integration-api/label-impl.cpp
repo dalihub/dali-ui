@@ -1762,7 +1762,7 @@ void LabelImpl::OnLocaleChanged(std::string locale)
   mController->InvalidateFontData();
 }
 
-bool LabelImpl::OnInterceptTouched(Actor actor, const TouchEvent& touch)
+bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
 {
   const PointState::Type state = touch.GetState(0);
 
@@ -2126,7 +2126,7 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
   }
 }
 
-void LabelImpl::OnVariationPropertyNotify(PropertyNotification& source)
+void LabelImpl::OnVariationPropertyNotify(PropertyNotification source)
 {
   Actor self = Self();
 

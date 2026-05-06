@@ -890,7 +890,7 @@ private: // Implementation
   /**
    * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
    */
-  InputMethodContext::CallbackData OnInputMethodContextEvent(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
+  InputMethodContext::CallbackData OnInputMethodContextEvent(InputMethodContext inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
 
   /**
    * @brief Connection needed to re-render text, when a Input Field returns to the scene.
@@ -900,17 +900,17 @@ private: // Implementation
   /**
    * @brief Callback when a tap gesture is detected.
    */
-  void OnTapDetected(Actor actor, const TapGesture& tap);
+  void OnTapDetected(Actor actor, TapGesture tap);
 
   /**
    * @brief Callback when a pan gesture is detected.
    */
-  void OnPanDetected(Actor actor, const PanGesture& pan);
+  void OnPanDetected(Actor actor, PanGesture pan);
 
   /**
    * @brief Callback when a long press gesture is detected.
    */
-  void OnLongPressDetected(Actor actor, const LongPressGesture& longPress);
+  void OnLongPressDetected(Actor actor, LongPressGesture longPress);
 
   /**
    * @brief Callback when InputField is touched
@@ -918,7 +918,7 @@ private: // Implementation
    * @param[in] actor InputField touched
    * @param[in] touch Touch information
    */
-  bool OnTouched(Actor actor, const TouchEvent& touch);
+  bool OnTouched(Actor actor, TouchEvent touch);
 
   /**
    * @brief Callback function for when the layout is changed.

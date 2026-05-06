@@ -1662,7 +1662,7 @@ struct KeyEventSignalFunctor
   {
   }
 
-  bool operator()(View view, const KeyEvent& event)
+  bool operator()(View view, KeyEvent event)
   {
     signalData.called = true;
     signalData.view   = view;
@@ -2429,7 +2429,7 @@ struct PropertySetRecorder : public Dali::ConnectionTracker
     handle.PropertySetSignal().Connect(this, &PropertySetRecorder::OnSet);
   }
 
-  void OnSet(Dali::Handle& /*handle*/, Dali::Property::Index index, const Dali::Property::Value& value)
+  void OnSet(Dali::Handle /*handle*/, Dali::Property::Index index, const Dali::Property::Value& value)
   {
     indices.push_back(index);
     values.push_back(value);

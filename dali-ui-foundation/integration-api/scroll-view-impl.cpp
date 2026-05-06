@@ -625,7 +625,7 @@ Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) c
   return Vector2(mScrollPosition.x - scrollPosition.x, mScrollPosition.y - scrollPosition.y);
 }
 
-bool ScrollViewImpl::OnInterceptTouch(Actor actor, const TouchEvent& touch)
+bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
 {
   PointState::Type state = touch.GetState(0);
 
@@ -643,13 +643,13 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, const TouchEvent& touch)
   // setting mPanRecognized = true.  Once the post-recognition threshold is
   // exceeded in a subsequent CONTINUING event, mIntercepting is set to true
   // and the touch sequence is stolen from children.
-  TouchEvent& nonConstTouch = const_cast<TouchEvent&>(touch);
+  TouchEvent& nonConstTouch = touch;
   mPanGestureDetector.HandleEvent(actor, nonConstTouch);
 
   return mIntercepting;
 }
 
-bool ScrollViewImpl::OnTouch(Actor actor, const TouchEvent& touch)
+bool ScrollViewImpl::OnTouch(Actor actor, TouchEvent touch)
 {
   if(!mIntercepting)
   {
@@ -664,7 +664,7 @@ bool ScrollViewImpl::OnTouch(Actor actor, const TouchEvent& touch)
     return true;
   }
 
-  TouchEvent& nonConstTouch = const_cast<TouchEvent&>(touch);
+  TouchEvent& nonConstTouch = touch;
   mPanGestureDetector.HandleEvent(actor, nonConstTouch);
 
   PointState::Type state = touch.GetState(0);
@@ -676,7 +676,7 @@ bool ScrollViewImpl::OnTouch(Actor actor, const TouchEvent& touch)
   return true;
 }
 
-void ScrollViewImpl::OnPanGesture(Actor actor, const PanGesture& gesture)
+void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
 {
   switch(gesture.GetState())
   {
@@ -957,7 +957,7 @@ void ScrollViewImpl::CancelScrollAnimation()
   }
 }
 
-void ScrollViewImpl::OnScrollAnimationFinished(Animation& animation)
+void ScrollViewImpl::OnScrollAnimationFinished(Animation animation)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnScrollAnimationFinished]\n");
 

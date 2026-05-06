@@ -20,7 +20,7 @@ Construct complex UI hierarchies with ease using our declarative method chaining
 
 using namespace Dali::UI;
 
-void Create(Application& application) {
+void Create(Application application) {
   application.GetWindow().Add(
     View::New()
       .SetBackgroundColor(Color::YELLOW)
@@ -32,7 +32,7 @@ void Create(Application& application) {
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
           .With([](View& v) {
-            v.TouchedSignal().Connect([](Actor a, const TouchEvent& t) {
+            v.TouchedSignal().Connect([](Actor a, TouchEvent t) {
               return true;
             });
           }),

@@ -57,7 +57,7 @@ SelectableTrait SelectableTrait::DownCast(BaseHandle handle)
   return SelectableTrait(dynamic_cast<Integration::SelectableTraitImpl*>(handle.GetObjectPtr()));
 }
 
-Signal<void(View, bool, const InputEvent&)>& SelectableTrait::SelectionChangedSignal()
+Signal<void(View, bool, InputEvent)>& SelectableTrait::SelectionChangedSignal()
 {
   return GetImpl(*this).SelectionChangedSignal();
 }

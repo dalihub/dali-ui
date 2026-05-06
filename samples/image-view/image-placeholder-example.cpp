@@ -50,7 +50,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1B1B1B));
@@ -171,13 +171,13 @@ private:
     return false; // one-shot
   }
 
-  void OnTypeToggleClicked(View, const InputEvent&)
+  void OnTypeToggleClicked(View, InputEvent)
   {
     mViewType = (ViewType)(((int)mViewType + 1) % (int)ViewType::COUNT);
     mTypeButton.SetText(TYPE_NAMES[(int)mViewType]);
     ResetImage();
   }
-  void OnReloadClicked(View, const InputEvent&) { ResetImage(); }
+  void OnReloadClicked(View, InputEvent) { ResetImage(); }
   void OnResourceReady(View view)
   {
     mStatusLabel.SetText("ResourceReady — placeholder removed");
@@ -189,7 +189,7 @@ private:
 
     DALI_LOG_ERROR("[Placeholder] ResourceReady fired! GetLoadingStatus=%d\n", (int)status);
   }
-  void OnKeyEvent(const KeyEvent& event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
+  void OnKeyEvent(KeyEvent event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
 
   Application& mApplication;
   View         mImage;

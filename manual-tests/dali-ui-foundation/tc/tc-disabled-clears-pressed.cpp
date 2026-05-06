@@ -81,7 +81,7 @@ public:
       .SetBackgroundColor(UiColor(COLOR_RESET))
       .SetRequestedWidth(TARGET_W)
       .SetRequestedHeight(RESET_H)
-      .ConnectClickedSignal(this, [this](View, const InputEvent&) -> bool {
+      .ConnectClickedSignal(this, [this](View, InputEvent) -> bool {
         mTarget.SetEnabled(true);
         mTarget.SetBackgroundColor(UiColor(COLOR_TARGET));
         AppendLog("-- Reset: re-enabled --\n");
@@ -108,7 +108,7 @@ public:
   }
 
 private:
-  void OnStateChanged(View, const StateEvent& e)
+  void OnStateChanged(View, StateEvent e)
   {
     String line = "[" + e.GetPrev().ToString() + "] -> [" + e.GetCurrent().ToString() + "]\n";
     AppendLog(line);
@@ -120,7 +120,7 @@ private:
     }
   }
 
-  void OnPressedChanged(View, bool pressed, const InputEvent&)
+  void OnPressedChanged(View, bool pressed, InputEvent)
   {
     if(pressed)
     {

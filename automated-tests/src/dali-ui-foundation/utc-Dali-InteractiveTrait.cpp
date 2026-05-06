@@ -65,7 +65,7 @@ struct ClickedSignalFunctor
     signalData.consumed = consume;
   }
 
-  bool operator()(View view, const InputEvent& event)
+  bool operator()(View view, InputEvent event)
   {
     signalData.called = true;
     signalData.view   = view;
@@ -102,7 +102,7 @@ struct PressedChangedSignalFunctor
   {
   }
 
-  void operator()(View view, bool pressed, const InputEvent& event)
+  void operator()(View view, bool pressed, InputEvent event)
   {
     signalData.called  = true;
     signalData.pressed = pressed;
@@ -140,7 +140,7 @@ struct LongPressedSignalFunctor
     signalData.consumed = consume;
   }
 
-  bool operator()(View view, const InputEvent& event)
+  bool operator()(View view, InputEvent event)
   {
     signalData.called = true;
     signalData.view   = view;
@@ -648,7 +648,7 @@ int UtcDaliViewAsInteractiveWithLambdaP(void)
 
   bool clicked = false;
   view.AsInteractive([&application, &clicked](InteractiveTrait& trait) {
-    trait.ClickedSignal().Connect(&application, [&clicked](View v, const InputEvent& e) -> bool {
+    trait.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool {
       clicked = true;
       return false;
     });

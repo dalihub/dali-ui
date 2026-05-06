@@ -64,7 +64,7 @@ struct SelectionChangedSignalFunctor
   {
   }
 
-  void operator()(View view, bool selected, const InputEvent& event)
+  void operator()(View view, bool selected, InputEvent event)
   {
     signalData.called   = true;
     signalData.selected = selected;
@@ -352,7 +352,7 @@ int UtcDaliViewAsSelectableWithSignalLambdaP(void)
   View view = View::New();
   view.AsSelectable([&application, &signalCalled, &signalSelected](SelectableTrait& trait) {
     trait.SelectionChangedSignal().Connect(&application,
-      [&signalCalled, &signalSelected](View v, bool selected, const InputEvent& e) {
+      [&signalCalled, &signalSelected](View v, bool selected, InputEvent e) {
         signalCalled   = true;
         signalSelected = selected;
       });
@@ -505,7 +505,7 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   bool appClickedCalled = false;
   view.EnsureInteractiveTrait().ClickedSignal().Connect(
     &application,
-    [&appClickedCalled](View v, const InputEvent& e) -> bool {
+    [&appClickedCalled](View v, InputEvent e) -> bool {
       appClickedCalled = true;
       return false;
     });

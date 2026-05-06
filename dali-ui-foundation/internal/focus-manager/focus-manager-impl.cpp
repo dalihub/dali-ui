@@ -177,7 +177,7 @@ void FocusManager::OnAdaptorInit()
   }
 }
 
-void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder)
+void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHolder)
 {
   sceneHolder.KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
   sceneHolder.TouchedSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
@@ -710,7 +710,7 @@ uint32_t FocusManager::GetCurrentWindowId() const
   return mCurrentWindowId;
 }
 
-void FocusManager::OnKeyEvent(const KeyEvent& event)
+void FocusManager::OnKeyEvent(KeyEvent event)
 {
   if(mCurrentFocusedWindow.GetHandle())
   {
@@ -910,7 +910,7 @@ void FocusManager::OnKeyEvent(const KeyEvent& event)
   }
 }
 
-void FocusManager::OnTouch(const TouchEvent& touch)
+void FocusManager::OnTouch(TouchEvent touch)
 {
   // if mIsFocusIndicatorShown is UNKNOWN, it means Configuration is not loaded.
   // Try to load configuration.
@@ -945,7 +945,7 @@ void FocusManager::OnTouch(const TouchEvent& touch)
   }
 }
 
-void FocusManager::OnWheelEvent(const WheelEvent& event)
+void FocusManager::OnWheelEvent(WheelEvent event)
 {
   if(event.GetType() == Dali::WheelEvent::CUSTOM_WHEEL)
   {
@@ -955,7 +955,7 @@ void FocusManager::OnWheelEvent(const WheelEvent& event)
   }
 }
 
-bool FocusManager::OnCustomWheelEvent(const WheelEvent& event)
+bool FocusManager::OnCustomWheelEvent(WheelEvent event)
 {
   bool consumed = false;
   View view     = GetCurrentFocusView();

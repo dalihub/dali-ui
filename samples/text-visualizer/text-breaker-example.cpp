@@ -340,7 +340,7 @@ private:
     return brick.exclusionBounds;
   }
 
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(WINDOW_BG_COLOR);
@@ -1081,7 +1081,7 @@ private:
     mStatusText.SetText(builder.str().c_str());
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {

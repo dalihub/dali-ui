@@ -101,7 +101,7 @@ bool StateHandlerTraitImpl::UnsetWhenNotProcessing(const std::string& id)
   return Unset(id);
 }
 
-void StateHandlerTraitImpl::NotifyStateChanged(View view, const StateEvent& event)
+void StateHandlerTraitImpl::NotifyStateChanged(View view, StateEvent event)
 {
   if(mNotifying)
   {

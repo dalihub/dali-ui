@@ -110,7 +110,7 @@ public: // Signals
    *
    * @return The selection changed signal
    */
-  Signal<void(View, bool, const InputEvent&)>& SelectionChangedSignal();
+  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
 
 public: // API
   /**

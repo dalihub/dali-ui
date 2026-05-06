@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -231,7 +231,7 @@ private:
     return button;
   }
 
-  void OnModeButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnModeButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < MODE_COUNT; ++i)
     {
@@ -243,7 +243,7 @@ private:
     }
   }
 
-  void OnSwapButtonClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnSwapButtonClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageIndex = (mImageIndex + 1) % IMAGE_COUNT;
     mGifIndex = (mGifIndex + 1) % GIF_IMAGE_COUNT;
@@ -269,7 +269,7 @@ private:
     DALI_LOG_RELEASE_INFO("FittingMode changed to: %s\n", MODES[mActiveIndex].name);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

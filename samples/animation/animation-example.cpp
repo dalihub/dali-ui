@@ -36,7 +36,7 @@ public:
 
   ~AnimationExample() = default;
 
-  void Create(Application& application)
+  void Create(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
@@ -64,7 +64,7 @@ public:
       }));
   }
 
-  void OnRedClicked(View view, const InputEvent& e)
+  void OnRedClicked(View view, InputEvent e)
   {
     // View-first: Bridge pattern (stack-allocated, zero heap)
     auto anim = Animation::New();
@@ -75,7 +75,7 @@ public:
     anim.Play();
   }
 
-  void OnBlueClicked(View view, const InputEvent& e)
+  void OnBlueClicked(View view, InputEvent e)
   {
     // Spec-first: reusable spec applied to Animation
     auto anim = Animation::New();

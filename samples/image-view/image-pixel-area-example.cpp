@@ -64,7 +64,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -156,7 +156,7 @@ private:
                                   .SetVerticalTextAlignment(Text::Alignment::CENTER),
                               });
     gifButton.EnsureInteractiveTrait().ClickedSignal().Connect(
-      this, [this](View, const InputEvent&) { OnGifButtonClicked(); });
+      this, [this](View, InputEvent) { OnGifButtonClicked(); });
     mGifButton = gifButton;
 
     // Animate PixelArea button
@@ -176,7 +176,7 @@ private:
                                    .SetVerticalTextAlignment(Text::Alignment::CENTER),
                                });
     animButton.EnsureInteractiveTrait().ClickedSignal().Connect(
-      this, [this](View, const InputEvent&) { OnAnimateButtonClicked(); });
+      this, [this](View, InputEvent) { OnAnimateButtonClicked(); });
     mAnimateButton = animButton;
 
     row.Add(gifButton);
@@ -209,7 +209,7 @@ private:
     return button;
   }
 
-  void OnAreaButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnAreaButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < AREA_COUNT; ++i)
     {
@@ -378,7 +378,7 @@ private:
     return Dali::String(buf);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

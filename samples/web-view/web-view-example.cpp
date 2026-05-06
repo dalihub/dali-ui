@@ -75,7 +75,7 @@ private:
   // -----------------------------------------------------------------------
   // Init
   // -----------------------------------------------------------------------
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window     = application.GetWindow();
     auto   windowSize = window.GetSize();
@@ -155,7 +155,7 @@ private:
   // -----------------------------------------------------------------------
   // Key input
   // -----------------------------------------------------------------------
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::DOWN)
     {

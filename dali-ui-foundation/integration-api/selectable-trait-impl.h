@@ -57,7 +57,7 @@ public: // Signals
   /**
    * @copydoc Dali::Ui::SelectableTrait::SelectionChangedSignal
    */
-  Signal<void(View, bool, const InputEvent&)>& SelectionChangedSignal();
+  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
 
 public: // API
   /**
@@ -126,15 +126,15 @@ protected:
 private:
   void EnsureClickableAndConnect();
   void DisconnectClickable();
-  void SetSelectedInternal(bool selected, const InputEvent& event);
-  void OnClickedForToggle(View view, const InputEvent& event);
+  void SetSelectedInternal(bool selected, InputEvent event);
+  void OnClickedForToggle(View view, InputEvent event);
 
 private:
-  WeakHandle<View>                            mOwner;
-  Signal<void(View, bool, const InputEvent&)> mSelectionChangedSignal;
-  bool                                        mSelected : 1;
-  bool                                        mToggleByClickEnabled : 1;
-  bool                                        mAttached : 1;
+  WeakHandle<View>                     mOwner;
+  Signal<void(View, bool, InputEvent)> mSelectionChangedSignal;
+  bool                                 mSelected : 1;
+  bool                                 mToggleByClickEnabled : 1;
+  bool                                 mAttached : 1;
 };
 
 } // namespace Integration

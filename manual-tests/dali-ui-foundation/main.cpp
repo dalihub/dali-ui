@@ -64,7 +64,7 @@ private:
   // Initialisation
   // -------------------------------------------------------------------------
 
-  void OnCreate(Application& application)
+  void OnCreate(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_APP_BG));
@@ -151,7 +151,7 @@ private:
       .SetFocusable(true)
       .AsInteractive([this, index](InteractiveTrait& trait)
     {
-      trait.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool
+      trait.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
       {
         EnterTestCase(index);
         return true;
@@ -201,7 +201,7 @@ private:
             .SetFocusable(true)
             .AsInteractive([this](InteractiveTrait& trait)
     {
-      trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+      trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
       {
         BackToList();
         return true;
@@ -233,7 +233,7 @@ private:
   // Key event
   // -------------------------------------------------------------------------
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

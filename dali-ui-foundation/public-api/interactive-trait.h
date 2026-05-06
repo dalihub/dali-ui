@@ -103,7 +103,7 @@ public: // Signals
    *
    * @return The pressed changed signal
    */
-  Signal<void(View, bool, const InputEvent&)>& PressedChangedSignal();
+  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
 
   /**
    * @brief Emitted when the pseudo disabled state changes.
@@ -126,7 +126,7 @@ public: // Signals
    *
    * @return The clicked signal
    */
-  Signal<void(View, const InputEvent&)>& ClickedSignal();
+  Signal<void(View, InputEvent)>& ClickedSignal();
 
   /**
    * @brief Emitted when the view receives a long press gesture.
@@ -139,7 +139,7 @@ public: // Signals
    *
    * @return The long pressed signal
    */
-  Signal<bool(View, const InputEvent&)>& LongPressedSignal();
+  Signal<bool(View, InputEvent)>& LongPressedSignal();
 
 public: // API
   /**
@@ -205,11 +205,11 @@ public: // API
    * Supports member functions and stateless lambdas:
    * @code
    * view.ConnectClickedSignal(this, &MyClass::OnButtonClicked);
-   * view.ConnectClickedSignal(this, [](View v, const InputEvent& e) { ... });
+   * view.ConnectClickedSignal(this, [](View v, InputEvent e) { ... });
    * @endcode
    *
    * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
-   * @param[in] func Member function pointer or functor with signature void(View, const InputEvent&)
+   * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
@@ -227,7 +227,7 @@ public: // API
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
    * @param[in] obj  The object to connect to
-   * @param[in] func Member function pointer or functor with signature void(View, bool, const InputEvent&)
+   * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
@@ -250,7 +250,7 @@ public: // API
    * If @p obj implements ConnectionTrackerInterface, the connection is auto-removed on @p obj destruction.
    *
    * @param[in] obj  The object to connect to
-   * @param[in] func Member function pointer or functor with signature bool(View, const InputEvent&)
+   * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
    * @return Reference to this for method chaining
    */
   template<typename T, typename Func>

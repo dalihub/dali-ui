@@ -71,7 +71,7 @@ public:
 private:
   // ── Initialization ─────────────────────────────────────────────────────────
 
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -250,7 +250,7 @@ private:
 
   // ── Event handlers ─────────────────────────────────────────────────────────
 
-  void OnMaskButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnMaskButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < MASK_COUNT; ++i)
     {
@@ -268,7 +268,7 @@ private:
     }
   }
 
-  void OnImageTypeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnImageTypeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageTypeIndex = (mImageTypeIndex + 1) % IMAGE_TYPE_COUNT;
     const bool showAnimated = (mImageTypeIndex == 1);
@@ -292,7 +292,7 @@ private:
     DALI_LOG_RELEASE_INFO("[AlphaMask] imageType=%s\n", IMAGE_TYPES[mImageTypeIndex].name);
   }
 
-  void OnModeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnModeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mMaskingOnLoading = !mMaskingOnLoading;
     const auto mode   = mMaskingOnLoading ? Ui::Image::MaskingType::MASKING_ON_LOADING : Ui::Image::MaskingType::MASKING_ON_RENDERING;
@@ -313,7 +313,7 @@ private:
     DALI_LOG_RELEASE_INFO("[AlphaMask] MaskingMode=%s\n", mMaskingOnLoading ? "LOADING" : "RENDERING");
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

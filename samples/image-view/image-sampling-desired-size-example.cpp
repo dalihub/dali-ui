@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -386,7 +386,7 @@ private:
 
   // ── Callbacks ───────────────────────────────────────────────────────────
 
-  void OnSamplingImageTypeClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnSamplingImageTypeClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageTypeIndexSampling = (mImageTypeIndexSampling + 1) % IMAGE_TYPE_COUNT_SAMPLING;
     Label::DownCast(mSamplingImageTypeLabel).SetText(IMAGE_TYPE_NAMES_SAMPLING[mImageTypeIndexSampling]);
@@ -396,7 +396,7 @@ private:
     DALI_LOG_RELEASE_INFO("[Sampling] Image type changed to: %s\n", IMAGE_TYPE_NAMES_SAMPLING[mImageTypeIndexSampling]);
   }
 
-  void OnDesiredSizeImageTypeClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnDesiredSizeImageTypeClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageTypeIndexDesired = (mImageTypeIndexDesired + 1) % IMAGE_TYPE_COUNT_DESIRED;
     Label::DownCast(mDesiredImageTypeLabel).SetText(IMAGE_TYPE_NAMES_DESIRED[mImageTypeIndexDesired]);
@@ -406,7 +406,7 @@ private:
     DALI_LOG_RELEASE_INFO("[DesiredSize] Image type changed to: %s\n", IMAGE_TYPE_NAMES_DESIRED[mImageTypeIndexDesired]);
   }
 
-  void OnSamplingButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnSamplingButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < SAMPLING_COUNT; ++i)
     {
@@ -423,7 +423,7 @@ private:
     }
   }
 
-  void OnDesiredSizeButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnDesiredSizeButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < SIZE_COUNT; ++i)
     {
@@ -517,7 +517,7 @@ private:
     return Dali::String(buf);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

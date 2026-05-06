@@ -537,7 +537,7 @@ private: // Internal rendering callbacks
    *
    * Re-calculates the screen display area and forwards it to the web engine.
    */
-  void OnDisplayAreaUpdated(Dali::PropertyNotification& source);
+  void OnDisplayAreaUpdated(Dali::PropertyNotification source);
 
   /**
    * @brief Applies a new display area to the web engine and updates the visual if needed.

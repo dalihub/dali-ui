@@ -183,7 +183,7 @@ private: // Implementation
    * @brief Callback for end of animation
    * @param[in] animation Animation handle
    */
-  void MarqueeAnimationFinished(Dali::Animation& animation);
+  void MarqueeAnimationFinished(Dali::Animation animation);
 
   /**
    * @brief variables required to set up scrolling animation

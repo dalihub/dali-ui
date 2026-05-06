@@ -238,7 +238,7 @@ private:
     }
   }
 
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     SetConfig();
     GenerateUI();
@@ -1427,7 +1427,7 @@ private:
   // Event Handlers
   //////////////////////////////////////////////////////////////////////////////
 
-  bool OnEmojiTouched(Actor actor, const TouchEvent& touch)
+  bool OnEmojiTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
     {
@@ -1467,7 +1467,7 @@ private:
     return true;
   }
 
-  bool OnClearTouched(Actor actor, const TouchEvent& touch)
+  bool OnClearTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
     {
@@ -1478,7 +1478,7 @@ private:
     return true;
   }
 
-  bool OnClearLogTouched(Actor actor, const TouchEvent& touch)
+  bool OnClearLogTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
     {
@@ -1489,7 +1489,7 @@ private:
     return true;
   }
 
-  bool OnScaleTouched(Actor actor, const TouchEvent& touch)
+  bool OnScaleTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
     {
@@ -1501,7 +1501,7 @@ private:
     return true;
   }
 
-  bool OnHelpTouched(Actor actor, const TouchEvent& touch)
+  bool OnHelpTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::STARTED)
     {
@@ -1512,7 +1512,7 @@ private:
     return true;
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::DOWN)
     {

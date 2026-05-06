@@ -74,7 +74,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
@@ -448,7 +448,7 @@ private:
 
   // --- Button handlers ---
 
-  bool OnButtonCursorBlinkTouched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorBlinkTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -459,7 +459,7 @@ private:
     return true;
   }
 
-  bool OnButtonCursorIntervalTouched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorIntervalTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -471,7 +471,7 @@ private:
     return true;
   }
 
-  bool OnButtonCursorPosTouched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorPosTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -484,7 +484,7 @@ private:
     return true;
   }
 
-  bool OnButtonCursorWidthTouched(Actor, const TouchEvent& touch)
+  bool OnButtonCursorWidthTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -496,7 +496,7 @@ private:
     return true;
   }
 
-  bool OnButtonPlaceholderFocusTouched(Actor, const TouchEvent& touch)
+  bool OnButtonPlaceholderFocusTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -507,7 +507,7 @@ private:
     return true;
   }
 
-  bool OnButtonPlaceholderColorTouched(Actor, const TouchEvent& touch)
+  bool OnButtonPlaceholderColorTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -529,7 +529,7 @@ private:
     return true;
   }
 
-  bool OnButtonSelectionColorTouched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectionColorTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -551,7 +551,7 @@ private:
     return true;
   }
 
-  bool OnButtonSelectionEnabledTouched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectionEnabledTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -562,7 +562,7 @@ private:
     return true;
   }
 
-  bool OnButtonSelectRangeTouched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectRangeTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -627,7 +627,7 @@ private:
     return true;
   }
 
-  bool OnButtonSelectWholeTouched(Actor, const TouchEvent& touch)
+  bool OnButtonSelectWholeTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -637,7 +637,7 @@ private:
     return true;
   }
 
-  bool OnButtonClearSelectionTouched(Actor, const TouchEvent& touch)
+  bool OnButtonClearSelectionTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -647,7 +647,7 @@ private:
     return true;
   }
 
-  bool OnButtonMaxLenTouched(Actor, const TouchEvent& touch)
+  bool OnButtonMaxLenTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -659,7 +659,7 @@ private:
     return true;
   }
 
-  bool OnButtonEditableTouched(Actor, const TouchEvent& touch)
+  bool OnButtonEditableTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -670,7 +670,7 @@ private:
     return true;
   }
 
-  bool OnButtonSetInputFilterTouched(Actor, const TouchEvent& touch)
+  bool OnButtonSetInputFilterTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -684,7 +684,7 @@ private:
     return true;
   }
 
-  bool OnButtonClearInputFilterTouched(Actor, const TouchEvent& touch)
+  bool OnButtonClearInputFilterTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -696,7 +696,7 @@ private:
     return true;
   }
 
-  bool OnButtonInfoTouched(Actor, const TouchEvent& touch)
+  bool OnButtonInfoTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -705,7 +705,7 @@ private:
     return true;
   }
 
-  bool OnButtonPasswordModeTouched(Actor, const TouchEvent& touch)
+  bool OnButtonPasswordModeTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -738,7 +738,7 @@ private:
     return true;
   }
 
-  bool OnButtonPasswordCharTouched(Actor, const TouchEvent& touch)
+  bool OnButtonPasswordCharTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -765,7 +765,7 @@ private:
     return true;
   }
 
-  bool OnButtonPasswordRevealTouched(Actor, const TouchEvent& touch)
+  bool OnButtonPasswordRevealTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -800,7 +800,7 @@ private:
 
   // --- Key events ---
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

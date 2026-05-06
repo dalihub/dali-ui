@@ -36,7 +36,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window     = application.GetWindow();
     auto   windowSize = window.GetSize();
@@ -64,7 +64,7 @@ private:
                           static_cast<int>(imageView.GetLoadingStatus()));
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -176,7 +176,7 @@ private:
                             .SetMultiLine(true),
                         });
     btn.SetFocusable(true).AsInteractive([this, onClick = std::move(onClick)](InteractiveTrait& trait) {
-      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
         onClick(); return true;
       });
     });

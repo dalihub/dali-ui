@@ -66,7 +66,7 @@ public: // Signals
   /**
    * @copydoc Dali::Ui::InteractiveTrait::PressedChangedSignal
    */
-  Signal<void(View, bool, const InputEvent&)>& PressedChangedSignal();
+  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
 
   /**
    * @copydoc Dali::Ui::InteractiveTrait::PseudoDisabledChangedSignal
@@ -76,12 +76,12 @@ public: // Signals
   /**
    * @copydoc Dali::Ui::InteractiveTrait::ClickedSignal
    */
-  Signal<void(View, const InputEvent&)>& ClickedSignal();
+  Signal<void(View, InputEvent)>& ClickedSignal();
 
   /**
    * @copydoc Dali::Ui::InteractiveTrait::LongPressedSignal
    */
-  Signal<bool(View, const InputEvent&)>& LongPressedSignal();
+  Signal<bool(View, InputEvent)>& LongPressedSignal();
 
 public: // API
   /**
@@ -179,27 +179,27 @@ protected:
   /**
    * @brief This is called when touch input is received.
    */
-  virtual bool OnTouch(View view, const TouchEvent& touchEvent);
+  virtual bool OnTouch(View view, TouchEvent touchEvent);
 
   /**
    * @brief This is called when tap gesture is received.
    */
-  virtual void OnTap(View view, const TapGesture& tap);
+  virtual void OnTap(View view, TapGesture tap);
 
   /**
    * @brief Pressed changed event. override this method to handle pressed event.
    */
-  virtual void OnPressedChanged(View view, const InputEvent& inputEvent);
+  virtual void OnPressedChanged(View view, InputEvent inputEvent);
 
   /**
    * @brief Clicked event. override this method to handle clicked event.
    */
-  virtual void OnClicked(View view, const InputEvent& inputEvent);
+  virtual void OnClicked(View view, InputEvent inputEvent);
 
   /**
    * @brief LongPressed event. override this method to handle long pressed event.
    */
-  virtual bool OnLongPressed(View view, const InputEvent& inputEvent);
+  virtual bool OnLongPressed(View view, InputEvent inputEvent);
 
   /**
    * @brief Check if the key is for execution.
@@ -207,35 +207,35 @@ protected:
   virtual bool IsExecutionKey(const Dali::String& keyName) const;
 
 private:
-  bool OnTouchInternal(Actor actor, const TouchEvent& touchEvent);
-  void OnTapInternal(Actor actor, const TapGesture& event);
-  void OnLongPressedInternal(Actor actor, const LongPressGesture& event);
+  bool OnTouchInternal(Actor actor, TouchEvent touchEvent);
+  void OnTapInternal(Actor actor, TapGesture event);
+  void OnLongPressedInternal(Actor actor, LongPressGesture event);
   void RecordPressedExecutionKey(const Dali::String& keyName);
   void ClearKeyPressedHistory();
-  void SetPressedInternal(bool value, const InputEvent& event);
+  void SetPressedInternal(bool value, InputEvent event);
   bool ShouldTapTriggerClicked() const;
   bool ShouldKeyReleaseTriggerClicked() const;
   bool ShouldKeyPressTriggerClicked() const;
   bool ShouldKeyPressTriggerLongPressed() const;
-  bool HandleKeyPressed(View view, const InputEvent& event);
-  bool HandleKeyReleased(View view, const InputEvent& event);
+  bool HandleKeyPressed(View view, InputEvent event);
+  bool HandleKeyReleased(View view, InputEvent event);
 
 private:
-  WeakHandle<View>                            mOwner;
-  TapGestureDetector                          mTapGestureDetector;
-  LongPressGestureDetector                    mLongPressGestureDetector;
-  Signal<void(View, bool, const InputEvent&)> mPressedChangedSignal;
-  Signal<void(View, bool)>                    mPseudoDisabledChangedSignal;
-  Signal<void(View, const InputEvent&)>       mClickedSignal;
-  Signal<bool(View, const InputEvent&)>       mLongPressedSignal;
-  KeyClickPolicy                              mKeyClickPolicy;
-  UniquePtr<Dali::String>                     mPressedExecutionKey;
-  uint32_t                                    mPressedExecutionKeyCount;
-  bool                                        mPseudoDisabled : 1;
-  bool                                        mPressed : 1;
-  bool                                        mClickable : 1;
-  bool                                        mClickBlockedByTouch : 1;
-  bool                                        mClickBlockedByKey : 1;
+  WeakHandle<View>                     mOwner;
+  TapGestureDetector                   mTapGestureDetector;
+  LongPressGestureDetector             mLongPressGestureDetector;
+  Signal<void(View, bool, InputEvent)> mPressedChangedSignal;
+  Signal<void(View, bool)>             mPseudoDisabledChangedSignal;
+  Signal<void(View, InputEvent)>       mClickedSignal;
+  Signal<bool(View, InputEvent)>       mLongPressedSignal;
+  KeyClickPolicy                       mKeyClickPolicy;
+  UniquePtr<Dali::String>              mPressedExecutionKey;
+  uint32_t                             mPressedExecutionKeyCount;
+  bool                                 mPseudoDisabled : 1;
+  bool                                 mPressed : 1;
+  bool                                 mClickable : 1;
+  bool                                 mClickBlockedByTouch : 1;
+  bool                                 mClickBlockedByKey : 1;
 };
 
 } // namespace Integration

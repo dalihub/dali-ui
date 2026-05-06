@@ -61,7 +61,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
@@ -192,7 +192,7 @@ private:
                 .SetRequestedHeight(50_spx)
                 .SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f))
                 .AsInteractive([this](InteractiveTrait& trait) {
-                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+                  trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
                   {
                     PushVisual();
                     return true;
@@ -214,7 +214,7 @@ private:
                 .SetRequestedHeight(50_spx)
                 .SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f))
                 .AsInteractive([this](InteractiveTrait& trait) {
-                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
+                  trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
                   {
                     PopVisual();
                     return true;
@@ -282,7 +282,7 @@ private:
     mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

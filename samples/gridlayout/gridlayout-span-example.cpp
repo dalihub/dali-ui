@@ -46,7 +46,7 @@ public:
     mApplication.InitSignal().Connect(this, &GridLayoutSpanController::Create);
   }
 
-  void Create(Application& application)
+  void Create(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
@@ -100,7 +100,7 @@ public:
     window.KeyEventSignal().Connect(this, &GridLayoutSpanController::OnKeyEvent);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {

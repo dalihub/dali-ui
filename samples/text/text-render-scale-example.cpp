@@ -107,7 +107,7 @@ private:
   // -------------------------------------------------------------------------
   // Initialization
   // -------------------------------------------------------------------------
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(MAIN_BG_COLOR);
@@ -451,7 +451,7 @@ private:
   // -------------------------------------------------------------------------
   // Key Event Handling
   // -------------------------------------------------------------------------
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {
@@ -478,7 +478,7 @@ private:
     }
   }
 
-  bool OnScaleTouched(Actor actor, const TouchEvent& touch)
+  bool OnScaleTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::MOTION)
     {

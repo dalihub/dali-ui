@@ -42,7 +42,7 @@ public:
     mApplication.InitSignal().Connect(this, &FlexLayoutJustifyContentController::Create);
   }
 
-  void Create(Application& application)
+  void Create(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
@@ -123,7 +123,7 @@ private:
     parent.Add(box3);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {

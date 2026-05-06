@@ -34,7 +34,7 @@ public:
   ~HelloWorldController() = default; // Nothing to do in destructor
 
   // The Init signal is received once (only) during the Application lifetime
-  void Create(Application& application)
+  void Create(Application application)
   {
     // Get a handle to the window
     Window window = application.GetWindow();
@@ -49,7 +49,7 @@ public:
           .SetBackgroundColor(UiColor(0xFF0000))
           .SetRequestedWidth(100_spx)
           .SetRequestedHeight(100_spx)
-          .ConnectClickedSignal(this, [this](View view, const InputEvent& event) -> bool {
+          .ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
             mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
             return true;
           }),

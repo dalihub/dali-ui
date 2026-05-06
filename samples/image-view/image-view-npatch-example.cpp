@@ -53,7 +53,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -163,7 +163,7 @@ private:
     return button;
   }
 
-  void OnSizeButtonClicked(View clickedView, const InputEvent& /*event*/)
+  void OnSizeButtonClicked(View clickedView, InputEvent /*event*/)
   {
     for(int i = 0; i < SIZE_COUNT; ++i)
     {
@@ -184,7 +184,7 @@ private:
     }
   }
 
-  void OnBorderOnlyClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnBorderOnlyClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mNPatchBorderOnly = !mNPatchBorderOnly;
     mImage.SetNPatchBorderOnly(mNPatchBorderOnly);
@@ -210,7 +210,7 @@ private:
     return Dali::String(buf);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

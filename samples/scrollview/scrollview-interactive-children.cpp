@@ -79,7 +79,7 @@ public:
 
   ~ScrollInteractiveChildrenController() = default;
 
-  void Create(Application& application)
+  void Create(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
@@ -172,13 +172,13 @@ private:
     item.AsInteractive([this, index, item, normalColor](InteractiveTrait& trait) mutable {
       trait.PressedChangedSignal().Connect(
         this,
-        [item, normalColor](View, bool isPressed, const InputEvent&) mutable {
+        [item, normalColor](View, bool isPressed, InputEvent) mutable {
           item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
         });
 
       trait.ClickedSignal().Connect(
         this,
-        [this, index](View, const InputEvent&) {
+        [this, index](View, InputEvent) {
           OnItemClicked(index);
         });
     });
@@ -242,7 +242,7 @@ private:
     DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] %s\n", msg.str().c_str());
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -314,7 +314,7 @@ private:
    * the displacement exceeds mPanThreshold, ensuring scroll works even when
    * children consume touch events.
    */
-  bool OnInterceptTouch(Actor actor, const TouchEvent& touch);
+  bool OnInterceptTouch(Actor actor, TouchEvent touch);
 
   /**
    * @brief Handles touch events on the ScrollView after interception.
@@ -322,12 +322,12 @@ private:
    * Called for subsequent events once OnInterceptTouch has returned true.
    * Feeds each event to the PanGestureDetector via HandleEvent.
    */
-  bool OnTouch(Actor actor, const TouchEvent& touch);
+  bool OnTouch(Actor actor, TouchEvent touch);
 
   /**
    * @brief Callback for pan gesture detection.
    */
-  void OnPanGesture(Actor actor, const PanGesture& gesture);
+  void OnPanGesture(Actor actor, PanGesture gesture);
 
   /**
    * @brief Handles drag started.
@@ -392,7 +392,7 @@ private:
   /**
    * @brief Callback for scroll animation finished.
    */
-  void OnScrollAnimationFinished(Animation& animation);
+  void OnScrollAnimationFinished(Animation animation);
 
   /**
    * @brief Checks if can scroll horizontally.

@@ -325,7 +325,7 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   mScrollAnimation.SetCurrentProgress(animationProgress);
 }
 
-void TextScroller::MarqueeAnimationFinished(Dali::Animation& animation)
+void TextScroller::MarqueeAnimationFinished(Dali::Animation animation)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::MarqueeAnimationFinished\n");
   mIsStopRequested = false;

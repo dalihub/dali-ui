@@ -84,7 +84,7 @@ public:
 
     UpdateText(index);
 
-    mLabels[index].KeyEventSignal().Connect(this, [this, index](View, const KeyEvent& event) mutable -> bool
+    mLabels[index].KeyEventSignal().Connect(this, [this, index](View, KeyEvent event) mutable -> bool
     {
       UpdateLabelKeyState(index, event.GetState(), event.GetKeyName());
       return false;

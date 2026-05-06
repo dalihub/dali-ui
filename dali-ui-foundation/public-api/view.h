@@ -1293,7 +1293,7 @@ public: // Properties
   }
 
 public: // State API (non-chaining)
-  using StateChangedSignalType = Signal<void(View, const StateEvent&)>;
+  using StateChangedSignalType = Signal<void(View, StateEvent)>;
 
   /**
    * @brief Gets the current state of this View.
@@ -1308,7 +1308,7 @@ public: // State API (non-chaining)
    * Emitted whenever the view's ViewState changes.
    *
    * @code
-   * view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
+   * view.StateChangedSignal().Connect(tracker, [](View v, StateEvent e) {
    *   if(e.Added(ViewState::FOCUSED)) { ... }
    * });
    * @endcode
@@ -1766,7 +1766,7 @@ public:
   // Typedefs
 
   /// @brief Key Event signal type.
-  typedef Signal<bool(View, const KeyEvent&)> KeyEventSignalType;
+  typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
 
   /// @brief Focus changed signal type.
   typedef Signal<void(View, bool)> FocusChangedSignalType;
@@ -1906,7 +1906,7 @@ public:
    *
    * A callback of the following type may be connected:
    * @code
-   *   bool YourCallbackName(View view, const KeyEvent& event);
+   *   bool YourCallbackName(View view, KeyEvent event);
    * @endcode
    * The return value of True, indicates that the event should be consumed.
    * Otherwise the signal will be emitted on the next parent of the actor.

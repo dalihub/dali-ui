@@ -115,7 +115,7 @@ public:
       mBtns[i] = MakeToggleBtn(FITTING[i].name, i == 0);
       int idx   = i;
       mBtns[i].SetFocusable(true).AsInteractive([this, idx](InteractiveTrait& trait) {
-        trait.ClickedSignal().Connect(this, [this, idx](View, const InputEvent&) -> bool {
+        trait.ClickedSignal().Connect(this, [this, idx](View, InputEvent) -> bool {
           OnFitting(idx); return true;
         });
       });

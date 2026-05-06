@@ -107,7 +107,7 @@ private:
   /**
    * @brief Saves texture after render once is finished.
    */
-  void OnRenderFinished(Dali::RenderTask& task);
+  void OnRenderFinished(Dali::RenderTask task);
 
 private:
   RenderTask                       mRenderTask;

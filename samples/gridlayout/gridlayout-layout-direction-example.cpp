@@ -38,7 +38,7 @@ public:
     mApplication.InitSignal().Connect(this, &GridLayoutDirectionController::Create);
   }
 
-  void Create(Application& application)
+  void Create(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
@@ -110,7 +110,7 @@ public:
       .SetRequestedHeight(MATCH_PARENT)
       .SetHorizontalTextAlignment(Text::Alignment::CENTER)
       .SetVerticalTextAlignment(Text::Alignment::CENTER));
-    toggleBtn.ConnectClickedSignal(this, [this](View view, const InputEvent& event) -> bool {
+    toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
       mIsRtl = !mIsRtl;
       mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);
       return true;
@@ -121,7 +121,7 @@ public:
     window.KeyEventSignal().Connect(this, &GridLayoutDirectionController::OnKeyEvent);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {

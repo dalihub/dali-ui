@@ -65,7 +65,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -144,18 +144,18 @@ private:
   View CreatePlaybackRow()
   {
     return CreateButtonRow({
-      CreateButton("PLAY",   [this](View, const InputEvent&) { OnPlay(); }),
-      CreateButton("PAUSE",  [this](View, const InputEvent&) { OnPause(); }),
-      CreateButton("STOP",   [this](View, const InputEvent&) { OnStop(); }),
-      CreateButton("JUMP→5", [this](View, const InputEvent&) { OnJumpTo(); }),
+      CreateButton("PLAY",   [this](View, InputEvent) { OnPlay(); }),
+      CreateButton("PAUSE",  [this](View, InputEvent) { OnPause(); }),
+      CreateButton("STOP",   [this](View, InputEvent) { OnStop(); }),
+      CreateButton("JUMP→5", [this](View, InputEvent) { OnJumpTo(); }),
     });
   }
 
   View CreateChangeImageRow()
   {
     return CreateButtonRow({
-      CreateButton("◀ PREV", [this](View, const InputEvent&) { OnPrevImage(); }),
-      CreateButton("NEXT ▶", [this](View, const InputEvent&) { OnNextImage(); }),
+      CreateButton("◀ PREV", [this](View, InputEvent) { OnPrevImage(); }),
+      CreateButton("NEXT ▶", [this](View, InputEvent) { OnNextImage(); }),
     });
   }
 
@@ -172,7 +172,7 @@ private:
           .SetFontSize(12.0f)
           .SetTextColor(UiColor(0xAAAAAA))
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, const InputEvent&) { OnLoopToggle(); }, mLoopButton),
+        CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton),
       });
   }
 
@@ -189,7 +189,7 @@ private:
           .SetFontSize(12.0f)
           .SetTextColor(UiColor(0xAAAAAA))
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, const InputEvent&) { OnSpeedToggle(); }, mSpeedButton),
+        CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton),
       });
   }
 
@@ -206,7 +206,7 @@ private:
           .SetFontSize(12.0f)
           .SetTextColor(UiColor(0xAAAAAA))
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, const InputEvent&) { OnStopBehaviorToggle(); }, mStopBehaviorButton),
+        CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton),
       });
   }
 
@@ -223,13 +223,13 @@ private:
           .SetFontSize(12.0f)
           .SetTextColor(UiColor(0xAAAAAA))
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, const InputEvent&) { OnFrameDelayToggle(); }, mFrameDelayButton),
+        CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton),
       });
   }
 
   // ── Button helpers ───────────────────────────────────────────────────────
 
-  using ClickCallback = std::function<void(View, const InputEvent&)>;
+  using ClickCallback = std::function<void(View, InputEvent)>;
 
   View CreateButtonRow(std::initializer_list<View> buttons)
   {
@@ -438,7 +438,7 @@ private:
     return true; // continuous
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -139,7 +139,7 @@ private:
       .SetVerticalTextAlignment(Text::Alignment::CENTER);
   }
 
-  void OnFitSizeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnFitSizeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mFitSizeToImage = !mFitSizeToImage;
     mFitImage.SetFitSizeToImage(mFitSizeToImage);
@@ -154,7 +154,7 @@ private:
                                         : "FitSizeToImage: OFF — view height stays 0 (gray area visible)");
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

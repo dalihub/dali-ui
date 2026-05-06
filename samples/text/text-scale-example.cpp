@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
@@ -195,7 +195,7 @@ private:
     UpdateStatus();
   }
 
-  bool OnButton1Touched(Actor, const TouchEvent& touch)
+  bool OnButton1Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -204,7 +204,7 @@ private:
     return true;
   }
 
-  bool OnButton2Touched(Actor, const TouchEvent& touch)
+  bool OnButton2Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -213,7 +213,7 @@ private:
     return true;
   }
 
-  bool OnButton3Touched(Actor, const TouchEvent& touch)
+  bool OnButton3Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -222,7 +222,7 @@ private:
     return true;
   }
 
-  bool OnButton4Touched(Actor, const TouchEvent& touch)
+  bool OnButton4Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -231,7 +231,7 @@ private:
     return true;
   }
 
-  bool OnButton5Touched(Actor, const TouchEvent& touch)
+  bool OnButton5Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -240,7 +240,7 @@ private:
     return true;
   }
 
-  bool OnButton6Touched(Actor, const TouchEvent& touch)
+  bool OnButton6Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -249,7 +249,7 @@ private:
     return true;
   }
 
-  bool OnButton7Touched(Actor, const TouchEvent& touch)
+  bool OnButton7Touched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {

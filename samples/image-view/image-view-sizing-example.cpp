@@ -60,7 +60,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
@@ -241,7 +241,7 @@ private:
 
   // ── Callbacks ───────────────────────────────────────────────────────────
 
-  void OnSyncSizeToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnSyncSizeToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mImageLoadWithViewSize      = !mImageLoadWithViewSize;
     mSyncResourceReadyCount = 0;
@@ -251,7 +251,7 @@ private:
     DALI_LOG_RELEASE_INFO("[SyncSizing] ImageLoadWithViewSize toggled → %s\n", mImageLoadWithViewSize ? "ON" : "OFF");
   }
 
-  void OnSyncReloadClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnSyncReloadClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mSyncResourceReadyCount = 0;
     DALI_LOG_RELEASE_INFO("[SyncSizing] Reload() (ImageLoadWithViewSize=%s) — expecting 1x ResourceReady (loads at current view size)\n",
@@ -275,7 +275,7 @@ private:
     }
   }
 
-  void OnOrientationToggleClicked(View /*clickedView*/, const InputEvent& /*event*/)
+  void OnOrientationToggleClicked(View /*clickedView*/, InputEvent /*event*/)
   {
     mOrientationCorrection = !mOrientationCorrection;
     mOrientationImage.SetOrientationCorrection(mOrientationCorrection);
@@ -300,7 +300,7 @@ private:
     return Dali::String(mOrientationCorrection ? "OrientationCorrection: ON" : "OrientationCorrection: OFF");
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

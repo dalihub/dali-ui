@@ -42,7 +42,7 @@ SelectableTraitImpl::~SelectableTraitImpl()
 {
 }
 
-Signal<void(View, bool, const InputEvent&)>& SelectableTraitImpl::SelectionChangedSignal()
+Signal<void(View, bool, InputEvent)>& SelectableTraitImpl::SelectionChangedSignal()
 {
   return mSelectionChangedSignal;
 }
@@ -57,7 +57,7 @@ void SelectableTraitImpl::SetSelected(bool selected)
   SetSelectedInternal(selected, InputEvent::None());
 }
 
-void SelectableTraitImpl::SetSelectedInternal(bool selected, const InputEvent& event)
+void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
 {
   if(mSelected == selected)
   {
@@ -177,7 +177,7 @@ void SelectableTraitImpl::DisconnectClickable()
   }
 }
 
-void SelectableTraitImpl::OnClickedForToggle(View view, const InputEvent& event)
+void SelectableTraitImpl::OnClickedForToggle(View view, InputEvent event)
 {
   SetSelectedInternal(!mSelected, event);
 }

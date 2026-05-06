@@ -97,13 +97,13 @@ private:
    * This will be called when a new scene holder is created
    * @param sceneHolder The new scene holder
    */
-  void OnSceneHolderCreated(Dali::Integration::SceneHolder& sceneHolder);
+  void OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHolder);
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus
    * @param[in] event The KeyEvent event.
    */
-  bool OnKeyEvent(const KeyEvent& event);
+  bool OnKeyEvent(KeyEvent event);
 
   /**
    * Signal handler called when a focused View is removed from Scene.

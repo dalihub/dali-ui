@@ -243,7 +243,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(WINDOW_BG_COLOR);
@@ -455,7 +455,7 @@ private:
                    std::clamp(position.y, 0.0f, maxY));
   }
 
-  bool GetWindowLocalPosition(const TouchEvent& touch, Vector2& localPosition) const
+  bool GetWindowLocalPosition(TouchEvent touch, Vector2& localPosition) const
   {
     if(touch.GetPointCount() < 1u)
     {
@@ -488,7 +488,7 @@ private:
     UpdateStatusText(true);
   }
 
-  bool OnOrbTouched(Actor actor, const TouchEvent& touch)
+  bool OnOrbTouched(Actor actor, TouchEvent touch)
   {
     const int32_t orbIndex = FindOrbIndex(actor);
     if(orbIndex < 0 || static_cast<uint32_t>(orbIndex) >= mActiveOrbCount || touch.GetPointCount() < 1u)
@@ -808,7 +808,7 @@ private:
     UpdateStatusText(true);
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {
