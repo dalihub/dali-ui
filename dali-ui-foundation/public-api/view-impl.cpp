@@ -294,6 +294,12 @@ void ViewImpl::OnInitialize()
 void ViewImpl::OnSceneConnection(int depth)
 {
   mImpl->OnSceneConnection();
+
+  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  {
+    interactiveTrait->OnSceneConnection(View::DownCast(Self()));
+  }
+
   CreateClippingRenderer(*this);
 
   // Register as a layout root if this view is:
@@ -1904,6 +1910,11 @@ void ViewImpl::OnSceneDisconnection()
   // already calls UnregisterFromAll as a last resort, but doing it here
   // avoids stale pending work between disconnect and destruction.
   LayoutController::UnregisterFromAll(this);
+
+  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  {
+    interactiveTrait->OnSceneDisconnection(View::DownCast(Self()));
+  }
 
   mImpl->OnSceneDisconnection();
 }

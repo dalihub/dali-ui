@@ -27,7 +27,11 @@ namespace Dali::Ui
 enum class InputEventType : uint32_t
 {
   /**
-   * @brief The input event is originated from the manual API call.
+   * @brief The change did not originate from a concrete input event.
+   *
+   * This includes explicit API calls, such as programmatic state changes,
+   * and framework-triggered lifecycle changes, such as focus loss, disabling,
+   * or scene disconnection.
    */
   NONE = 0,
 

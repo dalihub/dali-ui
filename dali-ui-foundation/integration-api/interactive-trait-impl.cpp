@@ -168,6 +168,22 @@ void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
   }
 }
 
+void InteractiveTraitImpl::OnSceneConnection(View)
+{
+}
+
+void InteractiveTraitImpl::OnSceneDisconnection(View)
+{
+  ClearKeyPressedHistory();
+  mClickBlockedByTouch = false;
+  mClickBlockedByKey   = false;
+
+  if(mPressed)
+  {
+    SetPressedInternal(false, InputEvent::None());
+  }
+}
+
 bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 {
   InputEvent inputEvent = InputEvent::New(event);

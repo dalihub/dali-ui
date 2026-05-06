@@ -87,10 +87,11 @@ public:
   InputEvent& operator=(InputEvent&& rhs) noexcept = default;
 
   /**
-   * @brief Creates a new InputEvent with NONE type, representing a programmatic (non-input) change.
+   * @brief Creates a new InputEvent with NONE type, representing a non-input change.
    *
-   * The returned event has InputEventType::NONE. Use this when emitting signals that
-   * do not originate from user input (e.g. programmatic state changes).
+   * The returned event has InputEventType::NONE. Use this when emitting signals
+   * for changes that do not originate from a concrete user input event, including
+   * explicit API calls and framework-triggered lifecycle changes.
    *
    * @return A handle to the new InputEvent
    */

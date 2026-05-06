@@ -49,7 +49,7 @@ public:
   virtual bool OnKeyEvent(View view, const KeyEvent& event) = 0;
 
   /**
-   * @brief Called when the control gains or loses key input focus.
+   * @brief Called when the view gains or loses key input focus.
    *
    * @param[in] view The sender view
    * @param[in] focused True if it gained focus
@@ -57,7 +57,7 @@ public:
   virtual void OnFocusedChanged(View view, bool focused) = 0;
 
   /**
-   * @brief Called when the control becomes enabled or disabled.
+   * @brief Called when the view becomes enabled or disabled.
    *
    * Allows the trait to clean up interaction state (e.g. releasing pressed
    * state when the view becomes disabled).
@@ -66,6 +66,23 @@ public:
    * @param[in] enabled True if enabled, false if disabled
    */
   virtual void OnEnabledChanged(View view, bool enabled) = 0;
+
+  /**
+   * @brief Called when the view is connected to a scene.
+   *
+   * @param[in] view The sender view
+   */
+  virtual void OnSceneConnection(View view) = 0;
+
+  /**
+   * @brief Called when the view is disconnected from a scene.
+   *
+   * Allows the trait to clean up pending interaction state when input release
+   * events can no longer be delivered to the view.
+   *
+   * @param[in] view The sender view
+   */
+  virtual void OnSceneDisconnection(View view) = 0;
 };
 
 } // namespace Ui

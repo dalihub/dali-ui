@@ -135,6 +135,16 @@ public: // InteractiveTrait
    */
   void OnEnabledChanged(View view, bool enabled) override;
 
+  /**
+   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnSceneConnection
+   */
+  void OnSceneConnection(View view) override;
+
+  /**
+   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnSceneDisconnection
+   */
+  void OnSceneDisconnection(View view) override;
+
 protected:
   /**
    * @copydoc Dali::Ui::InteractiveTrait::~InteractiveTrait

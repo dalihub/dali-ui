@@ -469,6 +469,42 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  view.EnsureInteractiveTrait().PressedChangedSignal().Connect(&application, functor);
+
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pressed);
+  DALI_TEST_CHECK(view.EnsureInteractiveTrait().IsPressed());
+
+  data.Reset();
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(!view.EnsureInteractiveTrait().IsPressed());
+  END_TEST;
+}
+
 // ============================================================================
 // Key event → ClickedSignal (ON_RELEASE policy)
 // ============================================================================
