@@ -308,6 +308,16 @@ public:
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetMarkupEnabled
+   */
+  void SetMarkupEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsMarkupEnabled
+   */
+  bool IsMarkupEnabled() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetFontWeight
    */
   void SetFontWeight(Text::FontWeight weight);

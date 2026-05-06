@@ -92,6 +92,7 @@ public:
       PASSWORD_REVEAL_DURATION       = Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION,
       EDITABLE                       = Text::InputFieldPropertyIndex::EDITABLE,
       LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
+      MARKUP_ENABLED                 = Text::InputFieldPropertyIndex::MARKUP_ENABLED,
       FONT_WEIGHT                    = Text::InputFieldPropertyIndex::FONT_WEIGHT,
       FONT_WIDTH                     = Text::InputFieldPropertyIndex::FONT_WIDTH,
       FONT_SLANT                     = Text::InputFieldPropertyIndex::FONT_SLANT,
@@ -568,6 +569,23 @@ public: // Setters for chaining
    * @return The LayoutDirectionMode used to resolve the text layout direction.
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+
+  /**
+   * @brief Enables or disables mark-up processing for the input text.
+   *
+   * When enabled, markup tags in the input text are interpreted and rendered
+   * accordingly. When disabled, the input text is treated as plain text.
+   *
+   * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
+   */
+  InputField& SetMarkupEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether mark-up processing is enabled.
+   *
+   * @return True if mark-up parsing is enabled, otherwise false.
+   */
+  bool IsMarkupEnabled() const;
 
   /**
    * @brief Sets the font weight.

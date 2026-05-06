@@ -111,6 +111,7 @@ INPUT_FIELD_PROPERTY_REGISTRATION("passwordMaskCharacter",        INTEGER, PASSW
 INPUT_FIELD_PROPERTY_REGISTRATION("passwordRevealDuration",       INTEGER, PASSWORD_REVEAL_DURATION       )
 INPUT_FIELD_PROPERTY_REGISTRATION("editable",                     BOOLEAN, EDITABLE                       )
 INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",          INTEGER, LAYOUT_DIRECTION_MODE          )
+INPUT_FIELD_PROPERTY_REGISTRATION("markupEnabled",                BOOLEAN, MARKUP_ENABLED                 )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                   INTEGER, FONT_WEIGHT                    )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                    INTEGER, FONT_WIDTH                     )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                    INTEGER, FONT_SLANT                     )
@@ -516,6 +517,17 @@ void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
+}
+
+void InputFieldImpl::SetMarkupEnabled(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  mController->SetMarkupProcessorEnabled(enabled);
+}
+
+bool InputFieldImpl::IsMarkupEnabled() const
+{
+  return mController->IsMarkupProcessorEnabled();
 }
 
 void InputFieldImpl::SetFontWeight(Text::FontWeight weight)

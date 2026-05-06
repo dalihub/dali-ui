@@ -375,6 +375,17 @@ Text::LayoutDirectionMode InputField::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
+InputField& InputField::SetMarkupEnabled(bool enabled)
+{
+  GetImpl(*this).SetMarkupEnabled(enabled);
+  return *this;
+}
+
+bool InputField::IsMarkupEnabled() const
+{
+  return GetImpl(*this).IsMarkupEnabled();
+}
+
 InputField& InputField::SetFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetFontWeight(weight);

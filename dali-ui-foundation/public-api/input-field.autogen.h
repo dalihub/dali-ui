@@ -203,6 +203,15 @@
   */ \
   ChildClass& SetLayoutDirectionMode(Text::LayoutDirectionMode mode) { InputField::SetLayoutDirectionMode(mode); return *this; } \
   /** \
+  * @brief Enables or disables mark-up processing for the input text. \
+  * \
+  * When enabled, markup tags in the input text are interpreted and rendered \
+  * accordingly. When disabled, the input text is treated as plain text. \
+  * \
+  * @param[in] enabled True to enable mark-up parsing, false to render text as plain string. \
+  */ \
+  ChildClass& SetMarkupEnabled(bool enabled) { InputField::SetMarkupEnabled(enabled); return *this; } \
+  /** \
   * @brief Sets the font weight. \
   * \
   * @param[in] weight The font weight. \
