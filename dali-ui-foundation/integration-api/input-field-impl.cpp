@@ -85,41 +85,49 @@ BaseHandle Create()
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(InputFieldImpl, ViewImpl, Create)
 
-INPUT_FIELD_PROPERTY_REGISTRATION("text",                         STRING,  TEXT                           )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontFamily",                   STRING,  FONT_FAMILY                    )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",                     FLOAT,   FONT_SIZE                      )
-INPUT_FIELD_PROPERTY_REGISTRATION("textColor",                    VECTOR4, TEXT_COLOR                     )
-INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",          INTEGER, HORIZONTAL_ALIGNMENT           )
-INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",            INTEGER, VERTICAL_ALIGNMENT             )
-INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",                 INTEGER, OVERFLOW_MODE                  )
-INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",                  STRING,  PLACEHOLDER                    )
-INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",             VECTOR4, PLACEHOLDER_COLOR              )
-INPUT_FIELD_PROPERTY_REGISTRATION("showPlaceholderOnFocus",       BOOLEAN, SHOW_PLACEHOLDER_ON_FOCUS      )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",                  INTEGER, CURSOR_WIDTH                   )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",                  VECTOR4, CURSOR_COLOR                   )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkEnabled",           BOOLEAN, CURSOR_BLINK_ENABLED           )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkInterval",          FLOAT,   CURSOR_BLINK_INTERVAL          )
-INPUT_FIELD_PROPERTY_REGISTRATION("cursorPosition",               INTEGER, CURSOR_POSITION                )
-INPUT_FIELD_PROPERTY_REGISTRATION("selectionEnabled",             BOOLEAN, SELECTION_ENABLED              )
-INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",               VECTOR4, SELECTION_COLOR                )
-INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedText",       STRING,  SELECTED_TEXT                  )
-INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextStart",  INTEGER, SELECTED_TEXT_START            )
-INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextEnd",    INTEGER, SELECTED_TEXT_END              )
-INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",                INTEGER, MAXIMUM_LENGTH                 )
-INPUT_FIELD_PROPERTY_REGISTRATION("passwordMode",                 INTEGER, PASSWORD_MODE                  )
-INPUT_FIELD_PROPERTY_REGISTRATION("passwordMaskCharacter",        INTEGER, PASSWORD_MASK_CHARACTER        )
-INPUT_FIELD_PROPERTY_REGISTRATION("passwordRevealDuration",       INTEGER, PASSWORD_REVEAL_DURATION       )
-INPUT_FIELD_PROPERTY_REGISTRATION("editable",                     BOOLEAN, EDITABLE                       )
-INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",          INTEGER, LAYOUT_DIRECTION_MODE          )
-INPUT_FIELD_PROPERTY_REGISTRATION("markupEnabled",                BOOLEAN, MARKUP_ENABLED                 )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                   INTEGER, FONT_WEIGHT                    )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                    INTEGER, FONT_WIDTH                     )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                    INTEGER, FONT_SLANT                     )
-INPUT_FIELD_PROPERTY_REGISTRATION("textBackgroundColor",          VECTOR4, TEXT_BACKGROUND_COLOR          )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",                FLOAT,   FONT_SIZE_SCALE                )
-INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",         FLOAT,   MINIMUM_FONT_SIZE_SCALE        )
-INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",         FLOAT,   MAXIMUM_FONT_SIZE_SCALE        )
-INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled",   BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED )
+INPUT_FIELD_PROPERTY_REGISTRATION("text",                             STRING,  TEXT                                )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontFamily",                       STRING,  FONT_FAMILY                         )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSize",                         FLOAT,   FONT_SIZE                           )
+INPUT_FIELD_PROPERTY_REGISTRATION("textColor",                        VECTOR4, TEXT_COLOR                          )
+INPUT_FIELD_PROPERTY_REGISTRATION("horizontalAlignment",              INTEGER, HORIZONTAL_ALIGNMENT                )
+INPUT_FIELD_PROPERTY_REGISTRATION("verticalAlignment",                INTEGER, VERTICAL_ALIGNMENT                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("overflowMode",                     INTEGER, OVERFLOW_MODE                       )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholder",                      STRING,  PLACEHOLDER                         )
+INPUT_FIELD_PROPERTY_REGISTRATION("placeholderColor",                 VECTOR4, PLACEHOLDER_COLOR                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("showPlaceholderOnFocus",           BOOLEAN, SHOW_PLACEHOLDER_ON_FOCUS           )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorWidth",                      INTEGER, CURSOR_WIDTH                        )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorColor",                      VECTOR4, CURSOR_COLOR                        )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkEnabled",               BOOLEAN, CURSOR_BLINK_ENABLED                )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorBlinkInterval",              FLOAT,   CURSOR_BLINK_INTERVAL               )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorPosition",                   INTEGER, CURSOR_POSITION                     )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionEnabled",                 BOOLEAN, SELECTION_ENABLED                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionColor",                   VECTOR4, SELECTION_COLOR                     )
+INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedText",           STRING,  SELECTED_TEXT                       )
+INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextStart",      INTEGER, SELECTED_TEXT_START                 )
+INPUT_FIELD_PROPERTY_REGISTRATION_READ_ONLY("selectedTextEnd",        INTEGER, SELECTED_TEXT_END                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("textHandleEnabled",                BOOLEAN, TEXT_HANDLE_ENABLED                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("textHandleColor",                  VECTOR4, TEXT_HANDLE_COLOR                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorHandleImage",                STRING,  CURSOR_HANDLE_IMAGE                 )
+INPUT_FIELD_PROPERTY_REGISTRATION("cursorHandlePressedImage",         STRING,  CURSOR_HANDLE_PRESSED_IMAGE         )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionHandleImageLeft",         STRING,  SELECTION_HANDLE_IMAGE_LEFT         )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionHandleImageRight",        STRING,  SELECTION_HANDLE_IMAGE_RIGHT        )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionHandlePressedImageLeft",  STRING,  SELECTION_HANDLE_PRESSED_IMAGE_LEFT )
+INPUT_FIELD_PROPERTY_REGISTRATION("selectionHandlePressedImageRight", STRING,  SELECTION_HANDLE_PRESSED_IMAGE_RIGHT)
+INPUT_FIELD_PROPERTY_REGISTRATION("maximumLength",                    INTEGER, MAXIMUM_LENGTH                      )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordMode",                     INTEGER, PASSWORD_MODE                       )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordMaskCharacter",            INTEGER, PASSWORD_MASK_CHARACTER             )
+INPUT_FIELD_PROPERTY_REGISTRATION("passwordRevealDuration",           INTEGER, PASSWORD_REVEAL_DURATION            )
+INPUT_FIELD_PROPERTY_REGISTRATION("editable",                         BOOLEAN, EDITABLE                            )
+INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",              INTEGER, LAYOUT_DIRECTION_MODE               )
+INPUT_FIELD_PROPERTY_REGISTRATION("markupEnabled",                    BOOLEAN, MARKUP_ENABLED                      )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                       INTEGER, FONT_WEIGHT                         )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                        INTEGER, FONT_WIDTH                          )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                        INTEGER, FONT_SLANT                          )
+INPUT_FIELD_PROPERTY_REGISTRATION("textBackgroundColor",              VECTOR4, TEXT_BACKGROUND_COLOR               )
+INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",                    FLOAT,   FONT_SIZE_SCALE                     )
+INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",             FLOAT,   MINIMUM_FONT_SIZE_SCALE             )
+INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",             FLOAT,   MAXIMUM_FONT_SIZE_SCALE             )
+INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled",       BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED      )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -446,6 +454,105 @@ UiColor InputFieldImpl::GetSelectionColor()
     return outColor;
   }
   return mDecorator->GetHighlightColor();
+}
+
+void InputFieldImpl::SetTextHandleEnabled(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  mController->SetGrabHandleEnabled(enabled);
+  RequestTextRelayout();
+}
+
+bool InputFieldImpl::IsTextHandleEnabled() const
+{
+  return mController->IsGrabHandleEnabled();
+}
+
+void InputFieldImpl::SetTextHandleColor(const UiColor& color)
+{
+  SetColorBinding("TextHandleColor", color, this, &InputFieldImpl::SetTextHandleColorInternal);
+}
+
+UiColor InputFieldImpl::GetTextHandleColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "TextHandleColor", outColor))
+  {
+    return outColor;
+  }
+  return mDecorator->GetHandleColor();
+}
+
+void InputFieldImpl::SetCursorHandleImage(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetCursorHandleImage() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+}
+
+void InputFieldImpl::SetCursorHandlePressedImage(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetCursorHandlePressedImage() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED));
+}
+
+void InputFieldImpl::SetSelectionHandleImageLeft(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetSelectionHandleImageLeft() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+}
+
+void InputFieldImpl::SetSelectionHandleImageRight(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetSelectionHandleImageRight() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+}
+
+void InputFieldImpl::SetSelectionHandlePressedImageLeft(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetSelectionHandlePressedImageLeft() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED));
+}
+
+void InputFieldImpl::SetSelectionHandlePressedImageRight(const Dali::String& image)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
+  mDecorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  RequestTextRelayout();
+}
+
+Dali::String InputFieldImpl::GetSelectionHandlePressedImageRight() const
+{
+  return ToDaliString(mDecorator->GetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED));
 }
 
 void InputFieldImpl::SetMaximumLength(int length)
@@ -1724,6 +1831,13 @@ void InputFieldImpl::SetSelectionColorInternal(const Vector4& color)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
   mDecorator->SetHighlightColor(color);
+  RequestTextRelayout();
+}
+
+void InputFieldImpl::SetTextHandleColorInternal(const Vector4& color)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
+  mDecorator->SetHandleColor(color);
   RequestTextRelayout();
 }
 

@@ -28,41 +28,49 @@ using namespace Dali::Ui::Integration;
 
 namespace
 {
-const char* const PROPERTY_NAME_TEXT                           = "text";
-const char* const PROPERTY_NAME_FONT_FAMILY                    = "fontFamily";
-const char* const PROPERTY_NAME_FONT_SIZE                      = "fontSize";
-const char* const PROPERTY_NAME_TEXT_COLOR                     = "textColor";
-const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT           = "horizontalAlignment";
-const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT             = "verticalAlignment";
-const char* const PROPERTY_NAME_OVERFLOW_MODE                  = "overflowMode";
-const char* const PROPERTY_NAME_PLACEHOLDER                    = "placeholder";
-const char* const PROPERTY_NAME_PLACEHOLDER_COLOR              = "placeholderColor";
-const char* const PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS      = "showPlaceholderOnFocus";
-const char* const PROPERTY_NAME_CURSOR_WIDTH                   = "cursorWidth";
-const char* const PROPERTY_NAME_CURSOR_COLOR                   = "cursorColor";
-const char* const PROPERTY_NAME_CURSOR_BLINK_ENABLED           = "cursorBlinkEnabled";
-const char* const PROPERTY_NAME_CURSOR_BLINK_INTERVAL          = "cursorBlinkInterval";
-const char* const PROPERTY_NAME_CURSOR_POSITION                = "cursorPosition";
-const char* const PROPERTY_NAME_SELECTION_ENABLED              = "selectionEnabled";
-const char* const PROPERTY_NAME_SELECTION_COLOR                = "selectionColor";
-const char* const PROPERTY_NAME_SELECTED_TEXT                  = "selectedText";
-const char* const PROPERTY_NAME_SELECTED_TEXT_START            = "selectedTextStart";
-const char* const PROPERTY_NAME_SELECTED_TEXT_END              = "selectedTextEnd";
-const char* const PROPERTY_NAME_MAXIMUM_LENGTH                 = "maximumLength";
-const char* const PROPERTY_NAME_PASSWORD_MODE                  = "passwordMode";
-const char* const PROPERTY_NAME_PASSWORD_MASK_CHARACTER        = "passwordMaskCharacter";
-const char* const PROPERTY_NAME_PASSWORD_REVEAL_DURATION       = "passwordRevealDuration";
-const char* const PROPERTY_NAME_EDITABLE                       = "editable";
-const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
-const char* const PROPERTY_NAME_MARKUP_ENABLED                 = "markupEnabled";
-const char* const PROPERTY_NAME_FONT_WEIGHT                    = "fontWeight";
-const char* const PROPERTY_NAME_FONT_WIDTH                     = "fontWidth";
-const char* const PROPERTY_NAME_FONT_SLANT                     = "fontSlant";
-const char* const PROPERTY_NAME_TEXT_BACKGROUND_COLOR          = "textBackgroundColor";
-const char* const PROPERTY_NAME_FONT_SIZE_SCALE                = "fontSizeScale";
-const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE        = "minimumFontSizeScale";
-const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE        = "maximumFontSizeScale";
-const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED = "systemFontSizeScaleEnabled";
+const char* const PROPERTY_NAME_TEXT                                 = "text";
+const char* const PROPERTY_NAME_FONT_FAMILY                          = "fontFamily";
+const char* const PROPERTY_NAME_FONT_SIZE                            = "fontSize";
+const char* const PROPERTY_NAME_TEXT_COLOR                           = "textColor";
+const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT                 = "horizontalAlignment";
+const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT                   = "verticalAlignment";
+const char* const PROPERTY_NAME_OVERFLOW_MODE                        = "overflowMode";
+const char* const PROPERTY_NAME_PLACEHOLDER                          = "placeholder";
+const char* const PROPERTY_NAME_PLACEHOLDER_COLOR                    = "placeholderColor";
+const char* const PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS            = "showPlaceholderOnFocus";
+const char* const PROPERTY_NAME_CURSOR_WIDTH                         = "cursorWidth";
+const char* const PROPERTY_NAME_CURSOR_COLOR                         = "cursorColor";
+const char* const PROPERTY_NAME_CURSOR_BLINK_ENABLED                 = "cursorBlinkEnabled";
+const char* const PROPERTY_NAME_CURSOR_BLINK_INTERVAL                = "cursorBlinkInterval";
+const char* const PROPERTY_NAME_CURSOR_POSITION                      = "cursorPosition";
+const char* const PROPERTY_NAME_SELECTION_ENABLED                    = "selectionEnabled";
+const char* const PROPERTY_NAME_SELECTION_COLOR                      = "selectionColor";
+const char* const PROPERTY_NAME_SELECTED_TEXT                        = "selectedText";
+const char* const PROPERTY_NAME_SELECTED_TEXT_START                  = "selectedTextStart";
+const char* const PROPERTY_NAME_SELECTED_TEXT_END                    = "selectedTextEnd";
+const char* const PROPERTY_NAME_TEXT_HANDLE_ENABLED                  = "textHandleEnabled";
+const char* const PROPERTY_NAME_TEXT_HANDLE_COLOR                    = "textHandleColor";
+const char* const PROPERTY_NAME_CURSOR_HANDLE_IMAGE                  = "cursorHandleImage";
+const char* const PROPERTY_NAME_CURSOR_HANDLE_PRESSED_IMAGE          = "cursorHandlePressedImage";
+const char* const PROPERTY_NAME_SELECTION_HANDLE_IMAGE_LEFT          = "selectionHandleImageLeft";
+const char* const PROPERTY_NAME_SELECTION_HANDLE_IMAGE_RIGHT         = "selectionHandleImageRight";
+const char* const PROPERTY_NAME_SELECTION_HANDLE_PRESSED_IMAGE_LEFT  = "selectionHandlePressedImageLeft";
+const char* const PROPERTY_NAME_SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = "selectionHandlePressedImageRight";
+const char* const PROPERTY_NAME_MAXIMUM_LENGTH                       = "maximumLength";
+const char* const PROPERTY_NAME_PASSWORD_MODE                        = "passwordMode";
+const char* const PROPERTY_NAME_PASSWORD_MASK_CHARACTER              = "passwordMaskCharacter";
+const char* const PROPERTY_NAME_PASSWORD_REVEAL_DURATION             = "passwordRevealDuration";
+const char* const PROPERTY_NAME_EDITABLE                             = "editable";
+const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE                = "layoutDirectionMode";
+const char* const PROPERTY_NAME_MARKUP_ENABLED                       = "markupEnabled";
+const char* const PROPERTY_NAME_FONT_WEIGHT                          = "fontWeight";
+const char* const PROPERTY_NAME_FONT_WIDTH                           = "fontWidth";
+const char* const PROPERTY_NAME_FONT_SLANT                           = "fontSlant";
+const char* const PROPERTY_NAME_TEXT_BACKGROUND_COLOR                = "textBackgroundColor";
+const char* const PROPERTY_NAME_FONT_SIZE_SCALE                      = "fontSizeScale";
+const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE              = "minimumFontSizeScale";
+const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE              = "maximumFontSizeScale";
+const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED       = "systemFontSizeScaleEnabled";
 
 } // namespace
 
@@ -447,6 +455,79 @@ int UtcDaliInputFieldSelectionColor(void)
   UiColor color2(Color::MAGENTA);
   inputField.SetSelectionColor(color2);
   DALI_TEST_EQUALS(inputField.GetSelectionColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTextHandle(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Test SetTextHandleEnabled
+  inputField.SetTextHandleEnabled(true);
+  DALI_TEST_EQUALS(inputField.IsTextHandleEnabled(), true, TEST_LOCATION);
+
+  inputField.SetTextHandleEnabled(false);
+  DALI_TEST_EQUALS(inputField.IsTextHandleEnabled(), false, TEST_LOCATION);
+
+  // Test chaining for SetTextHandleEnabled
+  InputField& ref = inputField.SetTextHandleEnabled(true);
+  DALI_TEST_CHECK(&ref == &inputField);
+
+  // Test SetTextHandleColor
+  UiColor handleColor(Color::BLUE);
+  inputField.SetTextHandleColor(handleColor);
+  DALI_TEST_EQUALS(inputField.GetTextHandleColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  UiColor handleColor2(Color::RED);
+  inputField.SetTextHandleColor(handleColor2);
+  DALI_TEST_EQUALS(inputField.GetTextHandleColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  // Test chaining for SetTextHandleColor
+  InputField& ref2 = inputField.SetTextHandleColor(Color::GREEN);
+  DALI_TEST_CHECK(&ref2 == &inputField);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldHandleImages(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Test cursor handle image
+  inputField.SetCursorHandleImage("cursor-handle.png");
+  DALI_TEST_EQUALS(inputField.GetCursorHandleImage(), std::string("cursor-handle.png"), TEST_LOCATION);
+
+  inputField.SetCursorHandleImage("cursor-handle-2.png");
+  DALI_TEST_EQUALS(inputField.GetCursorHandleImage(), std::string("cursor-handle-2.png"), TEST_LOCATION);
+
+  // Test cursor handle pressed image
+  inputField.SetCursorHandlePressedImage("cursor-handle-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetCursorHandlePressedImage(), std::string("cursor-handle-pressed.png"), TEST_LOCATION);
+
+  // Test selection handle images
+  inputField.SetSelectionHandleImageLeft("selection-left.png");
+  DALI_TEST_EQUALS(inputField.GetSelectionHandleImageLeft(), std::string("selection-left.png"), TEST_LOCATION);
+
+  inputField.SetSelectionHandleImageRight("selection-right.png");
+  DALI_TEST_EQUALS(inputField.GetSelectionHandleImageRight(), std::string("selection-right.png"), TEST_LOCATION);
+
+  inputField.SetSelectionHandlePressedImageLeft("selection-left-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetSelectionHandlePressedImageLeft(), std::string("selection-left-pressed.png"), TEST_LOCATION);
+
+  inputField.SetSelectionHandlePressedImageRight("selection-right-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetSelectionHandlePressedImageRight(), std::string("selection-right-pressed.png"), TEST_LOCATION);
+
+  // Test chaining for a couple of setters
+  InputField& ref = inputField.SetCursorHandleImage("new-cursor.png");
+  DALI_TEST_CHECK(&ref == &inputField);
+
+  InputField& ref2 = inputField.SetSelectionHandleImageLeft("new-left.png");
+  DALI_TEST_CHECK(&ref2 == &inputField);
 
   END_TEST;
 }
@@ -869,6 +950,14 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT) == InputField::Property::SELECTED_TEXT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT_START) == InputField::Property::SELECTED_TEXT_START);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTED_TEXT_END) == InputField::Property::SELECTED_TEXT_END);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TEXT_HANDLE_ENABLED) == InputField::Property::TEXT_HANDLE_ENABLED);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TEXT_HANDLE_COLOR) == InputField::Property::TEXT_HANDLE_COLOR);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_HANDLE_IMAGE) == InputField::Property::CURSOR_HANDLE_IMAGE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_CURSOR_HANDLE_PRESSED_IMAGE) == InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_HANDLE_IMAGE_LEFT) == InputField::Property::SELECTION_HANDLE_IMAGE_LEFT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_HANDLE_IMAGE_RIGHT) == InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_HANDLE_PRESSED_IMAGE_LEFT) == InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SELECTION_HANDLE_PRESSED_IMAGE_RIGHT) == InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_EDITABLE) == InputField::Property::EDITABLE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
@@ -981,6 +1070,41 @@ int UtcDaliInputFieldSetProperty(void)
 
   // SELECTED_TEXT_END (read-only)
   DALI_TEST_CHECK(inputField.GetProperty<int>(InputField::Property::SELECTED_TEXT_END) >= 0);
+
+  // TEXT_HANDLE_ENABLED
+  inputField.SetProperty(InputField::Property::TEXT_HANDLE_ENABLED, true);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::TEXT_HANDLE_ENABLED), true, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::TEXT_HANDLE_ENABLED, false);
+  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::TEXT_HANDLE_ENABLED), false, TEST_LOCATION);
+
+  // TEXT_HANDLE_COLOR
+  inputField.SetProperty(InputField::Property::TEXT_HANDLE_COLOR, Color::BLUE);
+  DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::TEXT_HANDLE_COLOR), Color::BLUE, TEST_LOCATION);
+
+  // CURSOR_HANDLE_IMAGE
+  inputField.SetProperty(InputField::Property::CURSOR_HANDLE_IMAGE, "cursor-handle.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::CURSOR_HANDLE_IMAGE), std::string("cursor-handle.png"), TEST_LOCATION);
+
+  // CURSOR_HANDLE_PRESSED_IMAGE
+  inputField.SetProperty(InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE, "cursor-handle-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::CURSOR_HANDLE_PRESSED_IMAGE), std::string("cursor-handle-pressed.png"), TEST_LOCATION);
+
+  // SELECTION_HANDLE_IMAGE_LEFT
+  inputField.SetProperty(InputField::Property::SELECTION_HANDLE_IMAGE_LEFT, "selection-left.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::SELECTION_HANDLE_IMAGE_LEFT), std::string("selection-left.png"), TEST_LOCATION);
+
+  // SELECTION_HANDLE_IMAGE_RIGHT
+  inputField.SetProperty(InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT, "selection-right.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::SELECTION_HANDLE_IMAGE_RIGHT), std::string("selection-right.png"), TEST_LOCATION);
+
+  // SELECTION_HANDLE_PRESSED_IMAGE_LEFT
+  inputField.SetProperty(InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT, "selection-left-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_LEFT), std::string("selection-left-pressed.png"), TEST_LOCATION);
+
+  // SELECTION_HANDLE_PRESSED_IMAGE_RIGHT
+  inputField.SetProperty(InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT, "selection-right-pressed.png");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT), std::string("selection-right-pressed.png"), TEST_LOCATION);
 
   // MAXIMUM_LENGTH
   inputField.SetProperty(InputField::Property::MAXIMUM_LENGTH, 50);

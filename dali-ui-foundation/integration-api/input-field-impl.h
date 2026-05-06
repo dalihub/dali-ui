@@ -248,6 +248,86 @@ public:
   UiColor GetSelectionColor();
 
   /**
+   * @copydoc Dali::Ui::InputField::SetTextHandleEnabled
+   */
+  void SetTextHandleEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputField::IsTextHandleEnabled
+   */
+  bool IsTextHandleEnabled() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTextHandleColor
+   */
+  void SetTextHandleColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTextHandleColor
+   */
+  UiColor GetTextHandleColor() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetCursorHandleImage
+   */
+  void SetCursorHandleImage(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetCursorHandleImage
+   */
+  Dali::String GetCursorHandleImage() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetCursorHandlePressedImage
+   */
+  void SetCursorHandlePressedImage(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetCursorHandlePressedImage
+   */
+  Dali::String GetCursorHandlePressedImage() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetSelectionHandleImageLeft
+   */
+  void SetSelectionHandleImageLeft(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectionHandleImageLeft
+   */
+  Dali::String GetSelectionHandleImageLeft() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetSelectionHandleImageRight
+   */
+  void SetSelectionHandleImageRight(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectionHandleImageRight
+   */
+  Dali::String GetSelectionHandleImageRight() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetSelectionHandlePressedImageLeft
+   */
+  void SetSelectionHandlePressedImageLeft(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectionHandlePressedImageLeft
+   */
+  Dali::String GetSelectionHandlePressedImageLeft() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetSelectionHandlePressedImageRight
+   */
+  void SetSelectionHandlePressedImageRight(const Dali::String& image);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetSelectionHandlePressedImageRight
+   */
+  Dali::String GetSelectionHandlePressedImageRight() const;
+
+  /**
    * @copydoc Dali::Ui::InputField::SetMaximumLength
    */
   void SetMaximumLength(int length);
@@ -859,6 +939,7 @@ private: // UiColorManager
   void SetPlaceholderColorInternal(const Vector4& color);
   void SetCursorColorInternal(const Vector4& color);
   void SetSelectionColorInternal(const Vector4& color);
+  void SetTextHandleColorInternal(const Vector4& color);
   void SetTextBackgroundColorInternal(const Vector4& color);
   void SetUnderlineColorInternal(const Vector4& color);
   void SetShadowColorInternal(const Vector4& color);

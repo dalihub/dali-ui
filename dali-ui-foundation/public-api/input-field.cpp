@@ -297,6 +297,94 @@ UiColor InputField::GetSelectionColor()
   return GetImpl(*this).GetSelectionColor();
 }
 
+InputField& InputField::SetTextHandleEnabled(bool enabled)
+{
+  GetImpl(*this).SetTextHandleEnabled(enabled);
+  return *this;
+}
+
+bool InputField::IsTextHandleEnabled() const
+{
+  return GetImpl(*this).IsTextHandleEnabled();
+}
+
+InputField& InputField::SetTextHandleColor(const UiColor& color)
+{
+  GetImpl(*this).SetTextHandleColor(color);
+  return *this;
+}
+
+UiColor InputField::GetTextHandleColor() const
+{
+  return GetImpl(*this).GetTextHandleColor();
+}
+
+InputField& InputField::SetCursorHandleImage(const Dali::String& image)
+{
+  GetImpl(*this).SetCursorHandleImage(image);
+  return *this;
+}
+
+Dali::String InputField::GetCursorHandleImage() const
+{
+  return GetImpl(*this).GetCursorHandleImage();
+}
+
+InputField& InputField::SetCursorHandlePressedImage(const Dali::String& image)
+{
+  GetImpl(*this).SetCursorHandlePressedImage(image);
+  return *this;
+}
+
+Dali::String InputField::GetCursorHandlePressedImage() const
+{
+  return GetImpl(*this).GetCursorHandlePressedImage();
+}
+
+InputField& InputField::SetSelectionHandleImageLeft(const Dali::String& image)
+{
+  GetImpl(*this).SetSelectionHandleImageLeft(image);
+  return *this;
+}
+
+Dali::String InputField::GetSelectionHandleImageLeft() const
+{
+  return GetImpl(*this).GetSelectionHandleImageLeft();
+}
+
+InputField& InputField::SetSelectionHandleImageRight(const Dali::String& image)
+{
+  GetImpl(*this).SetSelectionHandleImageRight(image);
+  return *this;
+}
+
+Dali::String InputField::GetSelectionHandleImageRight() const
+{
+  return GetImpl(*this).GetSelectionHandleImageRight();
+}
+
+InputField& InputField::SetSelectionHandlePressedImageLeft(const Dali::String& image)
+{
+  GetImpl(*this).SetSelectionHandlePressedImageLeft(image);
+  return *this;
+}
+
+Dali::String InputField::GetSelectionHandlePressedImageLeft() const
+{
+  return GetImpl(*this).GetSelectionHandlePressedImageLeft();
+}
+
+InputField& InputField::SetSelectionHandlePressedImageRight(const Dali::String& image)
+{
+  GetImpl(*this).SetSelectionHandlePressedImageRight(image);
+  return *this;
+}
+
+Dali::String InputField::GetSelectionHandlePressedImageRight() const
+{
+  return GetImpl(*this).GetSelectionHandlePressedImageRight();
+}
+
 InputField& InputField::SetMaximumLength(int length)
 {
   GetImpl(*this).SetMaximumLength(length);

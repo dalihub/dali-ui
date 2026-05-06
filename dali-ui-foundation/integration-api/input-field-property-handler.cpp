@@ -132,6 +132,46 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
       break;
     }
+    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+    {
+      impl.SetTextHandleEnabled(value.Get<bool>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+    {
+      impl.SetTextHandleColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+    {
+      impl.SetCursorHandleImage(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+    {
+      impl.SetCursorHandlePressedImage(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+    {
+      impl.SetSelectionHandleImageLeft(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+    {
+      impl.SetSelectionHandleImageRight(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+    {
+      impl.SetSelectionHandlePressedImageLeft(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+    {
+      impl.SetSelectionHandlePressedImageRight(value.Get<Dali::String>());
+      break;
+    }
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       impl.SetMaximumLength(value.Get<int>());
@@ -347,6 +387,46 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
     {
       value = static_cast<int>(impl.GetSelectedTextEnd());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+    {
+      value = impl.IsTextHandleEnabled();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+    {
+      value = impl.GetTextHandleColor().GetRgba();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+    {
+      value = impl.GetCursorHandleImage();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+    {
+      value = impl.GetCursorHandlePressedImage();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+    {
+      value = impl.GetSelectionHandleImageLeft();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+    {
+      value = impl.GetSelectionHandleImageRight();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+    {
+      value = impl.GetSelectionHandlePressedImageLeft();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+    {
+      value = impl.GetSelectionHandlePressedImageRight();
       break;
     }
     case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:

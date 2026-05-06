@@ -111,6 +111,71 @@
   */ \
   ChildClass& SetSelectionColor(const UiColor& color) { InputField::SetSelectionColor(color); return *this; } \
   /** \
+  * @brief Sets whether text editing handles are enabled. \
+  * \
+  * Text editing handles include the cursor handle (shown below the insertion cursor) \
+  * and the left/right selection handles (shown at both ends of the selected text range). \
+  * \
+  * @param[in] enabled True to enable text editing handles, false otherwise. \
+  */ \
+  ChildClass& SetTextHandleEnabled(bool enabled) { InputField::SetTextHandleEnabled(enabled); return *this; } \
+  /** \
+  * @brief Sets the color of the text editing handles. \
+  * \
+  * This color is applied to both the cursor handle and the left/right selection handles. \
+  * \
+  * @param[in] color The text editing handle color as a UiColor. \
+  */ \
+  ChildClass& SetTextHandleColor(const UiColor& color) { InputField::SetTextHandleColor(color); return *this; } \
+  /** \
+  * @brief Sets the cursor handle image. \
+  * \
+  * The cursor handle is shown below the insertion cursor when there is no selection range. \
+  * \
+  * @param[in] image The cursor handle image URL. \
+  */ \
+  ChildClass& SetCursorHandleImage(const Dali::String& image) { InputField::SetCursorHandleImage(image); return *this; } \
+  /** \
+  * @brief Sets the pressed cursor handle image. \
+  * \
+  * The cursor handle is shown below the insertion cursor when there is no selection range. \
+  * \
+  * @param[in] image The pressed cursor handle image URL. \
+  */ \
+  ChildClass& SetCursorHandlePressedImage(const Dali::String& image) { InputField::SetCursorHandlePressedImage(image); return *this; } \
+  /** \
+  * @brief Sets the left selection handle image. \
+  * \
+  * The selection handle is shown at the left bound of the selected text range. \
+  * \
+  * @param[in] image The left selection handle image URL. \
+  */ \
+  ChildClass& SetSelectionHandleImageLeft(const Dali::String& image) { InputField::SetSelectionHandleImageLeft(image); return *this; } \
+  /** \
+  * @brief Sets the right selection handle image. \
+  * \
+  * The selection handle is shown at the right bound of the selected text range. \
+  * \
+  * @param[in] image The right selection handle image URL. \
+  */ \
+  ChildClass& SetSelectionHandleImageRight(const Dali::String& image) { InputField::SetSelectionHandleImageRight(image); return *this; } \
+  /** \
+  * @brief Sets the pressed left selection handle image. \
+  * \
+  * The selection handle is shown at the left bound of the selected text range. \
+  * \
+  * @param[in] image The pressed left selection handle image URL. \
+  */ \
+  ChildClass& SetSelectionHandlePressedImageLeft(const Dali::String& image) { InputField::SetSelectionHandlePressedImageLeft(image); return *this; } \
+  /** \
+  * @brief Sets the pressed right selection handle image. \
+  * \
+  * The selection handle is shown at the right bound of the selected text range. \
+  * \
+  * @param[in] image The pressed right selection handle image URL. \
+  */ \
+  ChildClass& SetSelectionHandlePressedImageRight(const Dali::String& image) { InputField::SetSelectionHandlePressedImageRight(image); return *this; } \
+  /** \
   * @brief Sets the maximum number of characters that can be entered into the InputField. \
   * \
   * @param[in] length The maximum number of characters allowed. \

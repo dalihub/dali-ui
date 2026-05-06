@@ -58,7 +58,7 @@ class DALI_UI_API InputField : public View
 {
 public:
   /**
-   * @brief Property indices for InbputField.
+   * @brief Property indices for InputField.
    *
    * @note See Dali::Ui::Text::InputFieldPropertyIndex for the underlying property definitions.
    */
@@ -66,41 +66,49 @@ public:
   {
     enum
     {
-      TEXT                           = Text::InputFieldPropertyIndex::TEXT,
-      FONT_FAMILY                    = Text::InputFieldPropertyIndex::FONT_FAMILY,
-      FONT_SIZE                      = Text::InputFieldPropertyIndex::FONT_SIZE,
-      TEXT_COLOR                     = Text::InputFieldPropertyIndex::TEXT_COLOR,
-      HORIZONTAL_ALIGNMENT           = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
-      VERTICAL_ALIGNMENT             = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
-      OVERFLOW_MODE                  = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
-      PLACEHOLDER                    = Text::InputFieldPropertyIndex::PLACEHOLDER,
-      PLACEHOLDER_COLOR              = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
-      SHOW_PLACEHOLDER_ON_FOCUS      = Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS,
-      CURSOR_WIDTH                   = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
-      CURSOR_COLOR                   = Text::InputFieldPropertyIndex::CURSOR_COLOR,
-      CURSOR_BLINK_ENABLED           = Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED,
-      CURSOR_BLINK_INTERVAL          = Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL,
-      CURSOR_POSITION                = Text::InputFieldPropertyIndex::CURSOR_POSITION,
-      SELECTION_ENABLED              = Text::InputFieldPropertyIndex::SELECTION_ENABLED,
-      SELECTION_COLOR                = Text::InputFieldPropertyIndex::SELECTION_COLOR,
-      SELECTED_TEXT                  = Text::InputFieldPropertyIndex::SELECTED_TEXT,
-      SELECTED_TEXT_START            = Text::InputFieldPropertyIndex::SELECTED_TEXT_START,
-      SELECTED_TEXT_END              = Text::InputFieldPropertyIndex::SELECTED_TEXT_END,
-      MAXIMUM_LENGTH                 = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
-      PASSWORD_MODE                  = Text::InputFieldPropertyIndex::PASSWORD_MODE,
-      PASSWORD_MASK_CHARACTER        = Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER,
-      PASSWORD_REVEAL_DURATION       = Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION,
-      EDITABLE                       = Text::InputFieldPropertyIndex::EDITABLE,
-      LAYOUT_DIRECTION_MODE          = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
-      MARKUP_ENABLED                 = Text::InputFieldPropertyIndex::MARKUP_ENABLED,
-      FONT_WEIGHT                    = Text::InputFieldPropertyIndex::FONT_WEIGHT,
-      FONT_WIDTH                     = Text::InputFieldPropertyIndex::FONT_WIDTH,
-      FONT_SLANT                     = Text::InputFieldPropertyIndex::FONT_SLANT,
-      TEXT_BACKGROUND_COLOR          = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
-      FONT_SIZE_SCALE                = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
-      MINIMUM_FONT_SIZE_SCALE        = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
-      MAXIMUM_FONT_SIZE_SCALE        = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
-      SYSTEM_FONT_SIZE_SCALE_ENABLED = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
+      TEXT                                 = Text::InputFieldPropertyIndex::TEXT,
+      FONT_FAMILY                          = Text::InputFieldPropertyIndex::FONT_FAMILY,
+      FONT_SIZE                            = Text::InputFieldPropertyIndex::FONT_SIZE,
+      TEXT_COLOR                           = Text::InputFieldPropertyIndex::TEXT_COLOR,
+      HORIZONTAL_ALIGNMENT                 = Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT,
+      VERTICAL_ALIGNMENT                   = Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT,
+      OVERFLOW_MODE                        = Text::InputFieldPropertyIndex::OVERFLOW_MODE,
+      PLACEHOLDER                          = Text::InputFieldPropertyIndex::PLACEHOLDER,
+      PLACEHOLDER_COLOR                    = Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR,
+      SHOW_PLACEHOLDER_ON_FOCUS            = Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS,
+      CURSOR_WIDTH                         = Text::InputFieldPropertyIndex::CURSOR_WIDTH,
+      CURSOR_COLOR                         = Text::InputFieldPropertyIndex::CURSOR_COLOR,
+      CURSOR_BLINK_ENABLED                 = Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED,
+      CURSOR_BLINK_INTERVAL                = Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL,
+      CURSOR_POSITION                      = Text::InputFieldPropertyIndex::CURSOR_POSITION,
+      SELECTION_ENABLED                    = Text::InputFieldPropertyIndex::SELECTION_ENABLED,
+      SELECTION_COLOR                      = Text::InputFieldPropertyIndex::SELECTION_COLOR,
+      SELECTED_TEXT                        = Text::InputFieldPropertyIndex::SELECTED_TEXT,
+      SELECTED_TEXT_START                  = Text::InputFieldPropertyIndex::SELECTED_TEXT_START,
+      SELECTED_TEXT_END                    = Text::InputFieldPropertyIndex::SELECTED_TEXT_END,
+      TEXT_HANDLE_ENABLED                  = Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED,
+      TEXT_HANDLE_COLOR                    = Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR,
+      CURSOR_HANDLE_IMAGE                  = Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE,
+      CURSOR_HANDLE_PRESSED_IMAGE          = Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE,
+      SELECTION_HANDLE_IMAGE_LEFT          = Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT,
+      SELECTION_HANDLE_IMAGE_RIGHT         = Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT,
+      SELECTION_HANDLE_PRESSED_IMAGE_LEFT  = Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
+      SELECTION_HANDLE_PRESSED_IMAGE_RIGHT = Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
+      MAXIMUM_LENGTH                       = Text::InputFieldPropertyIndex::MAXIMUM_LENGTH,
+      PASSWORD_MODE                        = Text::InputFieldPropertyIndex::PASSWORD_MODE,
+      PASSWORD_MASK_CHARACTER              = Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER,
+      PASSWORD_REVEAL_DURATION             = Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION,
+      EDITABLE                             = Text::InputFieldPropertyIndex::EDITABLE,
+      LAYOUT_DIRECTION_MODE                = Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE,
+      MARKUP_ENABLED                       = Text::InputFieldPropertyIndex::MARKUP_ENABLED,
+      FONT_WEIGHT                          = Text::InputFieldPropertyIndex::FONT_WEIGHT,
+      FONT_WIDTH                           = Text::InputFieldPropertyIndex::FONT_WIDTH,
+      FONT_SLANT                           = Text::InputFieldPropertyIndex::FONT_SLANT,
+      TEXT_BACKGROUND_COLOR                = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
+      FONT_SIZE_SCALE                      = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
+      MINIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
+      MAXIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
+      SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
     };
   };
 
@@ -418,6 +426,135 @@ public: // Setters for chaining
    * @return The selection highlight color as a UiColor.
    */
   UiColor GetSelectionColor();
+
+  /**
+   * @brief Sets whether text editing handles are enabled.
+   *
+   * Text editing handles include the cursor handle (shown below the insertion cursor)
+   * and the left/right selection handles (shown at both ends of the selected text range).
+   *
+   * @param[in] enabled True to enable text editing handles, false otherwise.
+   */
+  InputField& SetTextHandleEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether text editing handles are enabled.
+   *
+   * @return True if text editing handles are enabled, false otherwise.
+   */
+  bool IsTextHandleEnabled() const;
+
+  /**
+   * @brief Sets the color of the text editing handles.
+   *
+   * This color is applied to both the cursor handle and the left/right selection handles.
+   *
+   * @param[in] color The text editing handle color as a UiColor.
+   */
+  InputField& SetTextHandleColor(const UiColor& color);
+
+  /**
+   * @brief Gets the color of the text editing handles.
+   *
+   * @return The text editing handle color as a UiColor.
+   */
+  UiColor GetTextHandleColor() const;
+
+  /**
+   * @brief Sets the cursor handle image.
+   *
+   * The cursor handle is shown below the insertion cursor when there is no selection range.
+   *
+   * @param[in] image The cursor handle image URL.
+   */
+  InputField& SetCursorHandleImage(const Dali::String& image);
+
+  /**
+   * @brief Gets the cursor handle image.
+   *
+   * @return The cursor handle image URL.
+   */
+  Dali::String GetCursorHandleImage() const;
+
+  /**
+   * @brief Sets the pressed cursor handle image.
+   *
+   * The cursor handle is shown below the insertion cursor when there is no selection range.
+   *
+   * @param[in] image The pressed cursor handle image URL.
+   */
+  InputField& SetCursorHandlePressedImage(const Dali::String& image);
+
+  /**
+   * @brief Gets the pressed cursor handle image.
+   *
+   * @return The pressed cursor handle image URL.
+   */
+  Dali::String GetCursorHandlePressedImage() const;
+
+  /**
+   * @brief Sets the left selection handle image.
+   *
+   * The selection handle is shown at the left bound of the selected text range.
+   *
+   * @param[in] image The left selection handle image URL.
+   */
+  InputField& SetSelectionHandleImageLeft(const Dali::String& image);
+
+  /**
+   * @brief Gets the left selection handle image.
+   *
+   * @return The left selection handle image URL.
+   */
+  Dali::String GetSelectionHandleImageLeft() const;
+
+  /**
+   * @brief Sets the right selection handle image.
+   *
+   * The selection handle is shown at the right bound of the selected text range.
+   *
+   * @param[in] image The right selection handle image URL.
+   */
+  InputField& SetSelectionHandleImageRight(const Dali::String& image);
+
+  /**
+   * @brief Gets the right selection handle image.
+   *
+   * @return The right selection handle image URL.
+   */
+  Dali::String GetSelectionHandleImageRight() const;
+
+  /**
+   * @brief Sets the pressed left selection handle image.
+   *
+   * The selection handle is shown at the left bound of the selected text range.
+   *
+   * @param[in] image The pressed left selection handle image URL.
+   */
+  InputField& SetSelectionHandlePressedImageLeft(const Dali::String& image);
+
+  /**
+   * @brief Gets the pressed left selection handle image.
+   *
+   * @return The pressed left selection handle image URL.
+   */
+  Dali::String GetSelectionHandlePressedImageLeft() const;
+
+  /**
+   * @brief Sets the pressed right selection handle image.
+   *
+   * The selection handle is shown at the right bound of the selected text range.
+   *
+   * @param[in] image The pressed right selection handle image URL.
+   */
+  InputField& SetSelectionHandlePressedImageRight(const Dali::String& image);
+
+  /**
+   * @brief Gets the pressed right selection handle image.
+   *
+   * @return The pressed right selection handle image URL.
+   */
+  Dali::String GetSelectionHandlePressedImageRight() const;
 
   /**
    * @brief Sets the maximum number of characters that can be entered into the InputField.

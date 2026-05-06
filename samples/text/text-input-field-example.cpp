@@ -87,6 +87,8 @@ private:
       .SetCursorWidth(2)
       .SetCursorColor(UiColor(COLOR_DARK_TEXT))
       .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
+      .SetTextHandleEnabled(true)
+      .SetTextHandleColor(UiColor(0x000080))
       .SetMaximumLength(50)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(INPUT_HEIGHT)
@@ -95,6 +97,14 @@ private:
       .SetPadding(Extents(12, 12, 12, 12))
       .SetVerticalTextAlignment(Text::Alignment::CENTER)
       .SetFocusable(true);
+
+    // Set text handle images
+    mInputField.SetCursorHandleImage(RESOURCES_DIR "cursor_handle.png");
+    mInputField.SetCursorHandlePressedImage(RESOURCES_DIR "cursor_handle_pressed.png");
+    mInputField.SetSelectionHandleImageLeft(RESOURCES_DIR "selection_handle_left.png");
+    mInputField.SetSelectionHandleImageRight(RESOURCES_DIR "selection_handle_right.png");
+    mInputField.SetSelectionHandlePressedImageLeft(RESOURCES_DIR "selection_handle_left_pressed.png");
+    mInputField.SetSelectionHandlePressedImageRight(RESOURCES_DIR "selection_handle_right_pressed.png");
 
     // Connect signals
     mInputField.TextChangedSignal().Connect(this, &InputFieldController::OnTextChanged);

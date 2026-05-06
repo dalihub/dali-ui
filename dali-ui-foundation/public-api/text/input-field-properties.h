@@ -193,6 +193,62 @@ struct InputFieldPropertyIndex
     SELECTED_TEXT_END,
 
     /**
+     * @brief Whether text editing handles are enabled.
+     * @details Name "textHandleEnabled", type Property::BOOLEAN.
+     * @see InputField::SetTextHandleEnabled(), InputField::IsTextHandleEnabled().
+     */
+    TEXT_HANDLE_ENABLED,
+
+    /**
+     * @brief The color of the text editing handles.
+     * @details Name "textHandleColor", type Property::VECTOR4.
+     * @see InputField::SetTextHandleColor(), InputField::GetTextHandleColor().
+     */
+    TEXT_HANDLE_COLOR,
+
+    /**
+     * @brief The cursor handle image.
+     * @details Name "cursorHandleImage", type Property::STRING.
+     * @see InputField::SetCursorHandleImage(), InputField::GetCursorHandleImage().
+     */
+    CURSOR_HANDLE_IMAGE,
+
+    /**
+     * @brief The pressed cursor handle image.
+     * @details Name "cursorHandlePressedImage", type Property::STRING.
+     * @see InputField::SetCursorHandlePressedImage(), InputField::GetCursorHandlePressedImage().
+     */
+    CURSOR_HANDLE_PRESSED_IMAGE,
+
+    /**
+     * @brief The left selection handle image.
+     * @details Name "selectionHandleImageLeft", type Property::STRING.
+     * @see InputField::SetSelectionHandleImageLeft(), InputField::GetSelectionHandleImageLeft().
+     */
+    SELECTION_HANDLE_IMAGE_LEFT,
+
+    /**
+     * @brief The right selection handle image.
+     * @details Name "selectionHandleImageRight", type Property::STRING.
+     * @see InputField::SetSelectionHandleImageRight(), InputField::GetSelectionHandleImageRight().
+     */
+    SELECTION_HANDLE_IMAGE_RIGHT,
+
+    /**
+     * @brief The pressed left selection handle image.
+     * @details Name "selectionHandlePressedImageLeft", type Property::STRING.
+     * @see InputField::SetSelectionHandlePressedImageLeft(), InputField::GetSelectionHandlePressedImageLeft().
+     */
+    SELECTION_HANDLE_PRESSED_IMAGE_LEFT,
+
+    /**
+     * @brief The pressed right selection handle image.
+     * @details Name "selectionHandlePressedImageRight", type Property::STRING.
+     * @see InputField::SetSelectionHandlePressedImageRight(), InputField::GetSelectionHandlePressedImageRight().
+     */
+    SELECTION_HANDLE_PRESSED_IMAGE_RIGHT,
+
+    /**
      * @brief The maximum number of characters that can be entered.
      * @details Name "maximumLength", type Property::INTEGER.
      * @see InputField::SetMaximumLength(), InputField::GetMaximumLength().
