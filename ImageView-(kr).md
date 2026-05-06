@@ -66,16 +66,16 @@ window.Add(imageView);
 
 ```cpp
 // 가로세로 비율을 유지하며 맞춤 (기본값)
-imageView.SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO);
+imageView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
 // 뷰 영역을 꽉 채우도록 늘림 (왜곡 발생 가능)
-imageView.SetFittingMode(FittingMode::FILL);
+imageView.SetFittingMode(Image::FittingMode::FILL);
 
 // 가로세로 비율을 유지하며 채우고, 넘치는 부분 잘림
-imageView.SetFittingMode(FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+imageView.SetFittingMode(Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
 
 // 원본 이미지 크기 유지, 중앙 정렬
-imageView.SetFittingMode(FittingMode::CENTER);
+imageView.SetFittingMode(Image::FittingMode::CENTER);
 ```
 
 | 값 | 동작 |
@@ -115,24 +115,24 @@ imageView.SetFittingMode(FittingMode::CENTER);
 
 ## 3. Sampling Mode (샘플링 모드)
 
-`SamplingMode`는 이미지 스케일링 시 적용되는 필터를 제어합니다. `dali-ui-foundation/public-api/image-view/image-view-types.h`에서 `Dali::SamplingMode`의 alias로 정의되어 있습니다.
+`SamplingMode`는 이미지 스케일링 시 적용되는 필터를 제어합니다. `dali-ui-foundation/public-api/image/image-enumerations.h`에서 `Dali::SamplingMode`의 alias로 정의되어 있습니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/image-view/image-view-types.h>
+#include <dali-ui-foundation/public-api/image/image-enumerations.h>
 
 using namespace Dali::Ui;
 
 // 최근접 이웃 (픽셀화, 빠름)
-imageView.SetSamplingMode(SamplingMode::NEAREST);
+imageView.SetSamplingMode(Image::SamplingMode::NEAREST);
 
 // 선형 필터링 (부드러움, 기본값)
-imageView.SetSamplingMode(SamplingMode::LINEAR);
+imageView.SetSamplingMode(Image::SamplingMode::LINEAR);
 
 // 박스 필터링 (축소 시 고품질)
-imageView.SetSamplingMode(SamplingMode::BOX);
+imageView.SetSamplingMode(Image::SamplingMode::BOX);
 
 // 필터링 없음
-imageView.SetSamplingMode(SamplingMode::DONT_CARE);
+imageView.SetSamplingMode(Image::SamplingMode::DONT_CARE);
 ```
 
 | 값 | 용도 |
@@ -272,12 +272,12 @@ bool cropToMask = imageView.GetCropToMask();
 
 ```cpp
 // 렌더링 단계에서 마스킹 적용 (기본값)
-imageView.SetMaskingMode(MaskingType::MASKING_ON_RENDERING);
+imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_RENDERING);
 
 // 이미지 로딩 단계에서 마스킹 적용
-imageView.SetMaskingMode(MaskingType::MASKING_ON_LOADING);
+imageView.SetMaskingMode(Image::MaskingType::MASKING_ON_LOADING);
 
-MaskingType::Type mode = imageView.GetMaskingMode();
+Image::MaskingType mode = imageView.GetMaskingMode();
 ```
 
 | 값 | 동작 |
@@ -321,15 +321,15 @@ bool sync = imageView.GetSynchronousLoading();
 
 ```cpp
 // 비주얼이 씬에서 분리될 때 해제 (기본값)
-imageView.SetReleasePolicy(ReleasePolicy::DETACHED);
+imageView.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 
 // 비주얼이 소멸될 때 해제
-imageView.SetReleasePolicy(ReleasePolicy::DESTROYED);
+imageView.SetReleasePolicy(Image::ReleasePolicy::DESTROYED);
 
 // 캐시에서 해제하지 않음
-imageView.SetReleasePolicy(ReleasePolicy::NEVER);
+imageView.SetReleasePolicy(Image::ReleasePolicy::NEVER);
 
-ReleasePolicy::Type policy = imageView.GetReleasePolicy();
+Image::ReleasePolicy policy = imageView.GetReleasePolicy();
 ```
 
 | 값 | 동작 |
@@ -449,13 +449,13 @@ imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady)
 ImageView imageView = ImageView::New("photo.jpg");
 
 imageView
-    .SetFittingMode(FittingMode::FIT_KEEP_ASPECT_RATIO)
-    .SetSamplingMode(SamplingMode::LINEAR)
+    .SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
+    .SetSamplingMode(Image::SamplingMode::LINEAR)
     .SetImageColor(UiColor(0xFFFFFFFF))
     .SetSynchronousLoading(false)
     .SetFastTrackUploading(true)
     .SetOrientationCorrection(true)
-    .SetReleasePolicy(ReleasePolicy::DETACHED);
+    .SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 ```
 
 ---
