@@ -128,9 +128,56 @@ INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",                    FLOAT,   F
 INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",             FLOAT,   MINIMUM_FONT_SIZE_SCALE             )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",             FLOAT,   MAXIMUM_FONT_SIZE_SCALE             )
 INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled",       BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED      )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingTextColor",                  VECTOR4, TYPING_TEXT_COLOR                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingFontFamily",                 STRING,  TYPING_FONT_FAMILY                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingFontSize",                   FLOAT,   TYPING_FONT_SIZE                    )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingFontWeight",                 INTEGER, TYPING_FONT_WEIGHT                  )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingFontWidth",                  INTEGER, TYPING_FONT_WIDTH                   )
+INPUT_FIELD_PROPERTY_REGISTRATION("typingFontSlant",                  INTEGER, TYPING_FONT_SLANT                   )
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
+
+/**
+ * @brief Converts an input style change mask to a typing style change mask.
+ * Only style attributes supported by TypingStyle are mapped.
+ */
+Text::TypingStyle::Mask ToTypingStyleMask(Text::InputStyle::Mask inputStyleMask)
+{
+  uint32_t typingStyleMask = Text::TypingStyle::NONE;
+
+  if(inputStyleMask & Text::InputStyle::INPUT_COLOR)
+  {
+    typingStyleMask |= Text::TypingStyle::TEXT_COLOR;
+  }
+
+  if(inputStyleMask & Text::InputStyle::INPUT_FONT_FAMILY)
+  {
+    typingStyleMask |= Text::TypingStyle::FONT_FAMILY;
+  }
+
+  if(inputStyleMask & Text::InputStyle::INPUT_POINT_SIZE)
+  {
+    typingStyleMask |= Text::TypingStyle::FONT_SIZE;
+  }
+
+  if(inputStyleMask & Text::InputStyle::INPUT_FONT_WEIGHT)
+  {
+    typingStyleMask |= Text::TypingStyle::FONT_WEIGHT;
+  }
+
+  if(inputStyleMask & Text::InputStyle::INPUT_FONT_WIDTH)
+  {
+    typingStyleMask |= Text::TypingStyle::FONT_WIDTH;
+  }
+
+  if(inputStyleMask & Text::InputStyle::INPUT_FONT_SLANT)
+  {
+    typingStyleMask |= Text::TypingStyle::FONT_SLANT;
+  }
+
+  return static_cast<Text::TypingStyle::Mask>(typingStyleMask);
+}
 
 /**
  * @brief Sets key input focus via KeyInputFocusManager directly, bypassing FocusManager.
@@ -844,6 +891,76 @@ bool InputFieldImpl::IsSystemFontSizeScaleEnabled() const
   return mController->IsSystemFontSizeScaleEnabled();
 }
 
+void InputFieldImpl::SetTypingTextColor(const UiColor& color)
+{
+  SetColorBinding("TypingTextColor", color, this, &InputFieldImpl::SetTypingTextColorInternal);
+}
+
+UiColor InputFieldImpl::GetTypingTextColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "TypingTextColor", outColor))
+  {
+    return outColor;
+  }
+  return mController->GetInputColor();
+}
+
+void InputFieldImpl::SetTypingFontFamily(const Dali::String& fontFamily)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.CStr());
+  mController->SetInputFontFamily(ToStdString(fontFamily));
+}
+
+Dali::String InputFieldImpl::GetTypingFontFamily() const
+{
+  return ToDaliString(mController->GetInputFontFamily());
+}
+
+void InputFieldImpl::SetTypingFontSize(float fontSize)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
+  mController->SetInputFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+}
+
+float InputFieldImpl::GetTypingFontSize() const
+{
+  return mController->GetInputFontSize(Text::Controller::PIXEL_SIZE);
+}
+
+void InputFieldImpl::SetTypingFontWeight(Text::FontWeight weight)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
+  mController->SetInputFontWeight(Text::ToTextAbstractionFontWeight(weight));
+}
+
+Text::FontWeight InputFieldImpl::GetTypingFontWeight() const
+{
+  return Text::ToFontWeight(mController->GetInputFontWeight());
+}
+
+void InputFieldImpl::SetTypingFontWidth(Text::FontWidth width)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
+  mController->SetInputFontWidth(Text::ToTextAbstractionFontWidth(width));
+}
+
+Text::FontWidth InputFieldImpl::GetTypingFontWidth() const
+{
+  return Text::ToFontWidth(mController->GetInputFontWidth());
+}
+
+void InputFieldImpl::SetTypingFontSlant(Text::FontSlant slant)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
+  mController->SetInputFontSlant(Text::ToTextAbstractionFontSlant(slant));
+}
+
+Text::FontSlant InputFieldImpl::GetTypingFontSlant() const
+{
+  return Text::ToFontSlant(mController->GetInputFontSlant());
+}
+
 void InputFieldImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
@@ -954,6 +1071,11 @@ Signal<void(View, uint32_t, uint32_t)>& InputFieldImpl::SelectionChangedSignal()
 Signal<void(View)>& InputFieldImpl::SelectionClearedSignal()
 {
   return mSelectionClearedSignal;
+}
+
+Signal<void(View, Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedSignal()
+{
+  return mTypingStyleChangedSignal;
 }
 
 // =============================================================================
@@ -1162,6 +1284,15 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
   if(mSelectionCleared)
   {
     EmitSelectionCleared();
+  }
+
+  // The input-field emits signals when the input style changes. These changes of style are
+  // detected during the relayout process (size negotiation), i.e after the cursor has been moved. Signals
+  // can't be emitted during the size negotiation as the callbacks may update the UI.
+  // The input-field adds an idle callback to the adaptor to emit the signals after the size negotiation.
+  if(!mController->IsInputStyleChangedSignalsQueueEmpty())
+  {
+    mController->RequestProcessInputStyleChangedSignals();
   }
 }
 
@@ -1535,7 +1666,11 @@ void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned in
 
 void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
 {
-  // TODO
+  const Text::TypingStyle::Mask mask = ToTypingStyleMask(inputStyleMask);
+  if(mask != Text::TypingStyle::NONE)
+  {
+    EmitTypingStyleChanged(mask);
+  }
 }
 
 void InputFieldImpl::InputRejected(Text::InputFilter::RejectReason reason)
@@ -1795,6 +1930,12 @@ void InputFieldImpl::EmitSelectionCleared()
   mSelectionCleared = false;
 }
 
+void InputFieldImpl::EmitTypingStyleChanged(Text::TypingStyle::Mask mask)
+{
+  Ui::View handle(GetOwner());
+  mTypingStyleChangedSignal.Emit(handle, mask);
+}
+
 // =============================================================================
 // UiColorManager
 // =============================================================================
@@ -1889,6 +2030,12 @@ void InputFieldImpl::SetLineThroughColorInternal(const Vector4& color)
     mController->SetStrikethroughColor(color);
     mRenderer.Reset();
   }
+}
+
+void InputFieldImpl::SetTypingTextColorInternal(const Vector4& color)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
+  mController->SetInputColor(color);
 }
 
 // =============================================================================

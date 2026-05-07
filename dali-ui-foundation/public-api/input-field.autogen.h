@@ -366,6 +366,72 @@
   */ \
   ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { InputField::SetSystemFontSizeScaleEnabled(enabled); return *this; } \
   /** \
+  * @brief Sets the text color used for typing. \
+  * \
+  * If a text range is selected, the color is applied to the selected text. \
+  * If the selection is collapsed, the color is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] color The typing text color. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingTextColor(const UiColor& color) { InputField::SetTypingTextColor(color); return *this; } \
+  /** \
+  * @brief Sets the font family used for typing. \
+  * \
+  * If a text range is selected, the font family is applied to the selected text. \
+  * If the selection is collapsed, the font family is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] fontFamily The typing font family. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingFontFamily(const Dali::String& fontFamily) { InputField::SetTypingFontFamily(fontFamily); return *this; } \
+  /** \
+  * @brief Sets the font size in pixels used for typing. \
+  * \
+  * If a text range is selected, the font size is applied to the selected text. \
+  * If the selection is collapsed, the font size is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] fontSize The typing font size in pixels. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingFontSize(float fontSize) { InputField::SetTypingFontSize(fontSize); return *this; } \
+  /** \
+  * @brief Sets the font weight used for typing. \
+  * \
+  * If a text range is selected, the font weight is applied to the selected text. \
+  * If the selection is collapsed, the font weight is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] weight The typing font weight. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingFontWeight(Text::FontWeight weight) { InputField::SetTypingFontWeight(weight); return *this; } \
+  /** \
+  * @brief Sets the font width used for typing. \
+  * \
+  * If a text range is selected, the font width is applied to the selected text. \
+  * If the selection is collapsed, the font width is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] width The typing font width. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingFontWidth(Text::FontWidth width) { InputField::SetTypingFontWidth(width); return *this; } \
+  /** \
+  * @brief Sets the font slant used for typing. \
+  * \
+  * If a text range is selected, the font slant is applied to the selected text. \
+  * If the selection is collapsed, the font slant is applied to text inserted after \
+  * the current cursor position. \
+  * \
+  * @param[in] slant The typing font slant. \
+  * @return This input field. \
+  */ \
+  ChildClass& SetTypingFontSlant(Text::FontSlant slant) { InputField::SetTypingFontSlant(slant); return *this; } \
+  /** \
   * @brief Sets the font variation axes. \
   * \
   * This replaces all previously set font variation axes. \

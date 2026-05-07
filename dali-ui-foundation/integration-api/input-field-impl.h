@@ -523,6 +523,66 @@ public:
   bool IsSystemFontSizeScaleEnabled() const;
 
   /**
+   * @copydoc Dali::Ui::InputField::SetTypingTextColor
+   */
+  void SetTypingTextColor(const UiColor& color);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingTextColor
+   */
+  UiColor GetTypingTextColor() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTypingFontFamily
+   */
+  void SetTypingFontFamily(const Dali::String& fontFamily);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingFontFamily
+   */
+  Dali::String GetTypingFontFamily() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTypingFontSize
+   */
+  void SetTypingFontSize(float fontSize);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingFontSize
+   */
+  float GetTypingFontSize() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTypingFontWeight
+   */
+  void SetTypingFontWeight(Text::FontWeight weight);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingFontWeight
+   */
+  Text::FontWeight GetTypingFontWeight() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTypingFontWidth
+   */
+  void SetTypingFontWidth(Text::FontWidth width);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingFontWidth
+   */
+  Text::FontWidth GetTypingFontWidth() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTypingFontSlant
+   */
+  void SetTypingFontSlant(Text::FontSlant slant);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTypingFontSlant
+   */
+  Text::FontSlant GetTypingFontSlant() const;
+
+  /**
    * @see Dali::Ui::InputField::SetFontVariation
    */
   void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
@@ -611,6 +671,11 @@ public: // Signals
    * @copydoc Dali::Ui::InputField::SelectionClearedSignal()
    */
   Signal<void(View)>& SelectionClearedSignal();
+
+  /**
+   * @copydoc Dali::Ui::InputField::TypingStyleChangedSignal()
+   */
+  Signal<void(View, Text::TypingStyle::Mask)>& TypingStyleChangedSignal();
 
 protected:
   // Construction
@@ -934,6 +999,11 @@ private: // Implementation
    */
   void EmitSelectionCleared();
 
+  /**
+   * @brief Emits TypingStyleChanged signal.
+   */
+  void EmitTypingStyleChanged(Text::TypingStyle::Mask mask);
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetPlaceholderColorInternal(const Vector4& color);
@@ -945,6 +1015,7 @@ private: // UiColorManager
   void SetShadowColorInternal(const Vector4& color);
   void SetOutlineColorInternal(const Vector4& color);
   void SetLineThroughColorInternal(const Vector4& color);
+  void SetTypingTextColorInternal(const Vector4& color);
 
   // Properties
 public:
@@ -987,6 +1058,7 @@ private:
   Signal<void(View)>                                  mSelectionStartedSignal;
   Signal<void(View, uint32_t, uint32_t)>              mSelectionChangedSignal;
   Signal<void(View)>                                  mSelectionClearedSignal;
+  Signal<void(View, Text::TypingStyle::Mask)>         mTypingStyleChangedSignal;
 
   InputMethodContext          mInputMethodContext;
   TapGestureDetector          mTapGestureDetector;

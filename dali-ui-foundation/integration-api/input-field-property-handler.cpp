@@ -277,6 +277,48 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
       break;
     }
+    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+    {
+      impl.SetTypingTextColor(UiColor(value.Get<Vector4>()));
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+    {
+      impl.SetTypingFontFamily(value.Get<Dali::String>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+    {
+      impl.SetTypingFontSize(value.Get<float>());
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+    {
+      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontWeightEnumeration(value, weight))
+      {
+        impl.SetTypingFontWeight(weight);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+    {
+      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontWidthEnumeration(value, width))
+      {
+        impl.SetTypingFontWidth(width);
+      }
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+    {
+      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontSlantEnumeration(value, slant))
+      {
+        impl.SetTypingFontSlant(slant);
+      }
+      break;
+    }
   }
 }
 
@@ -502,6 +544,36 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       value = impl.IsSystemFontSizeScaleEnabled();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+    {
+      value = impl.GetTypingTextColor().GetRgba();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+    {
+      value = impl.GetTypingFontFamily();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+    {
+      value = impl.GetTypingFontSize();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+    {
+      value = impl.GetTypingFontWeight();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+    {
+      value = impl.GetTypingFontWidth();
+      break;
+    }
+    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+    {
+      value = impl.GetTypingFontSlant();
       break;
     }
   }

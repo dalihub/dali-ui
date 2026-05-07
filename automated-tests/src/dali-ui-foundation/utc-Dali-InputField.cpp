@@ -71,6 +71,12 @@ const char* const PROPERTY_NAME_FONT_SIZE_SCALE                      = "fontSize
 const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE              = "minimumFontSizeScale";
 const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE              = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED       = "systemFontSizeScaleEnabled";
+const char* const PROPERTY_NAME_TYPING_TEXT_COLOR                    = "typingTextColor";
+const char* const PROPERTY_NAME_TYPING_FONT_FAMILY                   = "typingFontFamily";
+const char* const PROPERTY_NAME_TYPING_FONT_SIZE                     = "typingFontSize";
+const char* const PROPERTY_NAME_TYPING_FONT_WEIGHT                   = "typingFontWeight";
+const char* const PROPERTY_NAME_TYPING_FONT_WIDTH                    = "typingFontWidth";
+const char* const PROPERTY_NAME_TYPING_FONT_SLANT                    = "typingFontSlant";
 
 } // namespace
 
@@ -857,6 +863,131 @@ int UtcDaliInputFieldSystemFontSizeScaleEnabled(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldTypingTextColor(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  UiColor color(Color::BLUE);
+  inputField.SetTypingTextColor(color);
+  DALI_TEST_EQUALS(inputField.GetTypingTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  UiColor color2(Color::RED);
+  inputField.SetTypingTextColor(color2);
+  DALI_TEST_EQUALS(inputField.GetTypingTextColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingTextColor(Color::GREEN);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetTypingTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTypingFontFamily(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetTypingFontFamily("Arial");
+  DALI_TEST_EQUALS(inputField.GetTypingFontFamily(), std::string("Arial"), TEST_LOCATION);
+
+  inputField.SetTypingFontFamily("Roboto");
+  DALI_TEST_EQUALS(inputField.GetTypingFontFamily(), std::string("Roboto"), TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingFontFamily("DejaVu Sans");
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetTypingFontFamily(), std::string("DejaVu Sans"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTypingFontSize(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetTypingFontSize(20.0f);
+  // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
+  // DALI_TEST_EQUALS(inputField.GetTypingFontSize(), 20.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputField.SetTypingFontSize(32.5f);
+  // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
+  // DALI_TEST_EQUALS(inputField.GetTypingFontSize(), 32.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingFontSize(28.0f);
+  DALI_TEST_CHECK(&ref == &inputField);
+  // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
+  // DALI_TEST_EQUALS(inputField.GetTypingFontSize(), 28.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTypingFontWeight(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetTypingFontWeight(Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  inputField.SetTypingFontWeight(Text::FontWeight::LIGHT);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingFontWeight(Text::FontWeight::MEDIUM);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWeight(), Text::FontWeight::MEDIUM, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTypingFontWidth(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetTypingFontWidth(Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWidth(), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  inputField.SetTypingFontWidth(Text::FontWidth::CONDENSED);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingFontWidth(Text::FontWidth::NORMAL);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetTypingFontWidth(), Text::FontWidth::NORMAL, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputFieldTypingFontSlant(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  inputField.SetTypingFontSlant(Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(inputField.GetTypingFontSlant(), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  inputField.SetTypingFontSlant(Text::FontSlant::OBLIQUE);
+  DALI_TEST_EQUALS(inputField.GetTypingFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
+
+  // Test chaining
+  InputField& ref = inputField.SetTypingFontSlant(Text::FontSlant::NORMAL);
+  DALI_TEST_CHECK(&ref == &inputField);
+  DALI_TEST_EQUALS(inputField.GetTypingFontSlant(), Text::FontSlant::NORMAL, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldAdjustedFontSizeScale(void)
 {
   UiTestApplication application;
@@ -970,6 +1101,12 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == InputField::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == InputField::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_TEXT_COLOR) == InputField::Property::TYPING_TEXT_COLOR);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_FAMILY) == InputField::Property::TYPING_FONT_FAMILY);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_SIZE) == InputField::Property::TYPING_FONT_SIZE);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_WEIGHT) == InputField::Property::TYPING_FONT_WEIGHT);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_WIDTH) == InputField::Property::TYPING_FONT_WIDTH);
+  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_SLANT) == InputField::Property::TYPING_FONT_SLANT);
 
   END_TEST;
 }
@@ -1174,6 +1311,40 @@ int UtcDaliInputFieldSetProperty(void)
   // SYSTEM_FONT_SIZE_SCALE_ENABLED
   inputField.SetProperty(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
   DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
+
+  // TYPING_TEXT_COLOR
+  inputField.SetProperty(InputField::Property::TYPING_TEXT_COLOR, Color::BLUE);
+  DALI_TEST_EQUALS(inputField.GetProperty<Vector4>(InputField::Property::TYPING_TEXT_COLOR), Color::BLUE, TEST_LOCATION);
+
+  // TYPING_FONT_FAMILY
+  inputField.SetProperty(InputField::Property::TYPING_FONT_FAMILY, "Arial");
+  DALI_TEST_EQUALS(inputField.GetProperty<Dali::String>(InputField::Property::TYPING_FONT_FAMILY), std::string("Arial"), TEST_LOCATION);
+
+  // TYPING_FONT_SIZE
+  inputField.SetProperty(InputField::Property::TYPING_FONT_SIZE, 20.0f);
+  // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
+  // DALI_TEST_EQUALS(inputField.GetProperty<float>(InputField::Property::TYPING_FONT_SIZE), 20.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // TYPING_FONT_WEIGHT
+  inputField.SetProperty(InputField::Property::TYPING_FONT_WEIGHT, Text::FontWeight::BOLD);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWeight>(InputField::Property::TYPING_FONT_WEIGHT), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::TYPING_FONT_WEIGHT, "LIGHT");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWeight>(InputField::Property::TYPING_FONT_WEIGHT), Text::FontWeight::LIGHT, TEST_LOCATION);
+
+  // TYPING_FONT_WIDTH
+  inputField.SetProperty(InputField::Property::TYPING_FONT_WIDTH, Text::FontWidth::EXPANDED);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWidth>(InputField::Property::TYPING_FONT_WIDTH), Text::FontWidth::EXPANDED, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::TYPING_FONT_WIDTH, "CONDENSED");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontWidth>(InputField::Property::TYPING_FONT_WIDTH), Text::FontWidth::CONDENSED, TEST_LOCATION);
+
+  // TYPING_FONT_SLANT
+  inputField.SetProperty(InputField::Property::TYPING_FONT_SLANT, Text::FontSlant::ITALIC);
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::TYPING_FONT_SLANT), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  inputField.SetProperty(InputField::Property::TYPING_FONT_SLANT, "OBLIQUE");
+  DALI_TEST_EQUALS(inputField.GetProperty<Text::FontSlant>(InputField::Property::TYPING_FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
   END_TEST;
 }

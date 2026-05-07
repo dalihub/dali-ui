@@ -1026,7 +1026,7 @@ void Controller::SetDefaultFontSize(float fontSize, FontSizeType type)
 
   if(mImpl->mEventData && EventData::INACTIVE != mImpl->mEventData->mState)
   {
-    SetInputFontPointSize(mImpl->mFontDefaults->mDefaultPointSize, true);
+    SetInputFontSize(mImpl->mFontDefaults->mDefaultPointSize, POINT_SIZE, true);
   }
 }
 
@@ -1455,14 +1455,16 @@ FontSlantType Controller::GetInputFontSlant() const
   return InputFontHandler::GetInputFontSlant(*this);
 }
 
-void Controller::SetInputFontPointSize(float size, bool defaultFontSizeUpdated)
+void Controller::SetInputFontSize(float fontSize, FontSizeType type, bool defaultFontSizeUpdated)
 {
-  InputFontHandler::SetInputFontPointSize(*this, size, defaultFontSizeUpdated);
+  const float pointSize = (type == POINT_SIZE) ? fontSize : ConvertPixelToPoint(fontSize);
+  InputFontHandler::SetInputFontPointSize(*this, pointSize, defaultFontSizeUpdated);
 }
 
-float Controller::GetInputFontPointSize() const
+float Controller::GetInputFontSize(FontSizeType type) const
 {
-  return InputFontHandler::GetInputFontPointSize(*this);
+  const float pointSize = InputFontHandler::GetInputFontPointSize(*this);
+  return (type == POINT_SIZE) ? pointSize : ConvertPointToPixel(pointSize);
 }
 
 void Controller::SetInputLineSpacing(float lineSpacing)

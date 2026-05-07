@@ -1690,20 +1690,22 @@ public: // Default style & Input style
   FontSlantType GetInputFontSlant() const;
 
   /**
-   * @brief Sets the input font's point size.
+   * @brief Sets the input font size in the specified unit.
    *
-   * @param[in] size The input font's point size.
-   * @param[in] defaultFontSizeUpdated True If the default font size is updated and sets the input point size, false
-   * otherwise.
+   * @param[in] fontSize The input font size.
+   * @param[in] type The unit of the input font size.
+   * @param[in] defaultFontSizeUpdated True if the default font size is updated
+   * and sets the input font size, false otherwise.
    */
-  void SetInputFontPointSize(float size, bool defaultFontSizeUpdated = false);
+  void SetInputFontSize(float fontSize, FontSizeType type, bool defaultFontSizeUpdated = false);
 
   /**
-   * @brief Retrieves the input font's point size.
+   * @brief Retrieves the input font size in the requested unit.
    *
-   * @return The input font's point size.
+   * @param[in] type The font size unit to return.
+   * @return The input font size in the requested unit.
    */
-  float GetInputFontPointSize() const;
+  float GetInputFontSize(FontSizeType type) const;
 
   /**
    * @brief Sets the input line spacing.

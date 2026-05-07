@@ -108,7 +108,13 @@ public:
       FONT_SIZE_SCALE                      = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
       MINIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
       MAXIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
-      SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED
+      SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
+      TYPING_TEXT_COLOR                    = Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR,
+      TYPING_FONT_FAMILY                   = Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY,
+      TYPING_FONT_SIZE                     = Text::InputFieldPropertyIndex::TYPING_FONT_SIZE,
+      TYPING_FONT_WEIGHT                   = Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT,
+      TYPING_FONT_WIDTH                    = Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH,
+      TYPING_FONT_SLANT                    = Text::InputFieldPropertyIndex::TYPING_FONT_SLANT
     };
   };
 
@@ -909,6 +915,120 @@ public: // Setters for chaining
   bool IsSystemFontSizeScaleEnabled() const;
 
   /**
+   * @brief Sets the text color used for typing.
+   *
+   * If a text range is selected, the color is applied to the selected text.
+   * If the selection is collapsed, the color is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] color The typing text color.
+   * @return This input field.
+   */
+  InputField& SetTypingTextColor(const UiColor& color);
+
+  /**
+   * @brief Gets the text color used for typing.
+   *
+   * @return The typing text color.
+   */
+  UiColor GetTypingTextColor() const;
+
+  /**
+   * @brief Sets the font family used for typing.
+   *
+   * If a text range is selected, the font family is applied to the selected text.
+   * If the selection is collapsed, the font family is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] fontFamily The typing font family.
+   * @return This input field.
+   */
+  InputField& SetTypingFontFamily(const Dali::String& fontFamily);
+
+  /**
+   * @brief Gets the font family used for typing.
+   *
+   * @return The typing font family.
+   */
+  Dali::String GetTypingFontFamily() const;
+
+  /**
+   * @brief Sets the font size in pixels used for typing.
+   *
+   * If a text range is selected, the font size is applied to the selected text.
+   * If the selection is collapsed, the font size is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] fontSize The typing font size in pixels.
+   * @return This input field.
+   */
+  InputField& SetTypingFontSize(float fontSize);
+
+  /**
+   * @brief Gets the font size in pixels used for typing.
+   *
+   * @return The typing font size in pixels.
+   */
+  float GetTypingFontSize() const;
+
+  /**
+   * @brief Sets the font weight used for typing.
+   *
+   * If a text range is selected, the font weight is applied to the selected text.
+   * If the selection is collapsed, the font weight is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] weight The typing font weight.
+   * @return This input field.
+   */
+  InputField& SetTypingFontWeight(Text::FontWeight weight);
+
+  /**
+   * @brief Gets the font weight used for typing.
+   *
+   * @return The typing font weight.
+   */
+  Text::FontWeight GetTypingFontWeight() const;
+
+  /**
+   * @brief Sets the font width used for typing.
+   *
+   * If a text range is selected, the font width is applied to the selected text.
+   * If the selection is collapsed, the font width is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] width The typing font width.
+   * @return This input field.
+   */
+  InputField& SetTypingFontWidth(Text::FontWidth width);
+
+  /**
+   * @brief Gets the font width used for typing.
+   *
+   * @return The typing font width.
+   */
+  Text::FontWidth GetTypingFontWidth() const;
+
+  /**
+   * @brief Sets the font slant used for typing.
+   *
+   * If a text range is selected, the font slant is applied to the selected text.
+   * If the selection is collapsed, the font slant is applied to text inserted after
+   * the current cursor position.
+   *
+   * @param[in] slant The typing font slant.
+   * @return This input field.
+   */
+  InputField& SetTypingFontSlant(Text::FontSlant slant);
+
+  /**
+   * @brief Gets the font slant used for typing.
+   *
+   * @return The typing font slant.
+   */
+  Text::FontSlant GetTypingFontSlant() const;
+
+  /**
    * @brief Sets the font variation axes.
    *
    * This replaces all previously set font variation axes.
@@ -1117,6 +1237,26 @@ public: // Signals
    * @return The signal to connect to.
    */
   Signal<void(View)>& SelectionClearedSignal();
+
+  /**
+   * @brief This signal is emitted when the current typing style changes.
+   *
+   * The signal is emitted when the typing style attributes resolved at the
+   * current cursor position or selected text range change, for example after
+   * cursor movement or selection changes.
+   *
+   * The mask indicates which typing style attributes changed.
+   *
+   * @note This signal is intended to notify changes detected from the current
+   * cursor position or selection, not to mirror every SetTyping*() API call.
+   *
+   * @code
+   *   void OnTypingStyleChanged(View view, Text::TypingStyle::Mask mask);
+   * @endcode
+   *
+   * @return The signal to connect to.
+   */
+  Signal<void(View, Text::TypingStyle::Mask)>& TypingStyleChangedSignal();
 
 public: // Not intended for application developers
   /// @cond internal

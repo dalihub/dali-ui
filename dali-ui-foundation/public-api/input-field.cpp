@@ -611,6 +611,72 @@ bool InputField::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
+InputField& InputField::SetTypingTextColor(const UiColor& color)
+{
+  GetImpl(*this).SetTypingTextColor(color);
+  return *this;
+}
+
+UiColor InputField::GetTypingTextColor() const
+{
+  return GetImpl(*this).GetTypingTextColor();
+}
+
+InputField& InputField::SetTypingFontFamily(const Dali::String& fontFamily)
+{
+  GetImpl(*this).SetTypingFontFamily(fontFamily);
+  return *this;
+}
+
+Dali::String InputField::GetTypingFontFamily() const
+{
+  return GetImpl(*this).GetTypingFontFamily();
+}
+
+InputField& InputField::SetTypingFontSize(float fontSize)
+{
+  GetImpl(*this).SetTypingFontSize(fontSize);
+  return *this;
+}
+
+float InputField::GetTypingFontSize() const
+{
+  return GetImpl(*this).GetTypingFontSize();
+}
+
+InputField& InputField::SetTypingFontWeight(Text::FontWeight weight)
+{
+  GetImpl(*this).SetTypingFontWeight(weight);
+  return *this;
+}
+
+Text::FontWeight InputField::GetTypingFontWeight() const
+{
+  return GetImpl(*this).GetTypingFontWeight();
+}
+
+InputField& InputField::SetTypingFontWidth(Text::FontWidth width)
+{
+  GetImpl(*this).SetTypingFontWidth(width);
+  return *this;
+}
+
+Text::FontWidth InputField::GetTypingFontWidth() const
+{
+  return GetImpl(*this).GetTypingFontWidth();
+}
+
+InputField& InputField::SetTypingFontSlant(Text::FontSlant slant)
+{
+  GetImpl(*this).SetTypingFontSlant(slant);
+  return *this;
+}
+
+Text::FontSlant InputField::GetTypingFontSlant() const
+{
+  return GetImpl(*this).GetTypingFontSlant();
+}
+
 InputField& InputField::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
@@ -714,6 +780,11 @@ Signal<void(View, uint32_t, uint32_t)>& InputField::SelectionChangedSignal()
 Signal<void(View)>& InputField::SelectionClearedSignal()
 {
   return GetImpl(*this).SelectionClearedSignal();
+}
+
+Signal<void(View, Text::TypingStyle::Mask)>& InputField::TypingStyleChangedSignal()
+{
+  return GetImpl(*this).TypingStyleChangedSignal();
 }
 
 } // namespace Ui

@@ -358,6 +358,51 @@ struct InputFieldPropertyIndex
      * @see InputField::SetSystemFontSizeScaleEnabled(), InputField::IsSystemFontSizeScaleEnabled().
      */
     SYSTEM_FONT_SIZE_SCALE_ENABLED,
+
+    /**
+     * @brief The text color used for typing.
+     * @details Name "typingTextColor", type Property::VECTOR4.
+     * @see InputField::SetTypingTextColor(), InputField::GetTypingTextColor().
+     */
+    TYPING_TEXT_COLOR,
+
+    /**
+     * @brief The font family used for typing.
+     * @details Name "typingFontFamily", type Property::STRING.
+     * @see InputField::SetTypingFontFamily(), InputField::GetTypingFontFamily().
+     */
+    TYPING_FONT_FAMILY,
+
+    /**
+     * @brief The font size in pixels used for typing.
+     * @details Name "typingFontSize", type Property::FLOAT.
+     * @see InputField::SetTypingFontSize(), InputField::GetTypingFontSize().
+     */
+    TYPING_FONT_SIZE,
+
+    /**
+     * @brief The font weight used for typing.
+     * @details Name "typingFontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWeight (Property::INTEGER).
+     * @see InputField::SetTypingFontWeight(), InputField::GetTypingFontWeight().
+     */
+    TYPING_FONT_WEIGHT,
+
+    /**
+     * @brief The font width used for typing.
+     * @details Name "typingFontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWidth (Property::INTEGER).
+     * @see InputField::SetTypingFontWidth(), InputField::GetTypingFontWidth().
+     */
+    TYPING_FONT_WIDTH,
+
+    /**
+     * @brief The font slant used for typing.
+     * @details Name "typingFontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontSlant (Property::INTEGER).
+     * @see InputField::SetTypingFontSlant(), InputField::GetTypingFontSlant().
+     */
+    TYPING_FONT_SLANT,
   };
 };
 

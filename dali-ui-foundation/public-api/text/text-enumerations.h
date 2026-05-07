@@ -358,6 +358,48 @@ enum class FontSlant : uint8_t
   OBLIQUE = 2
 };
 
+/**
+ * @brief Provides mask values for typing style change notifications.
+ *
+ * The mask is used by TypingStyleChangedSignal to indicate which
+ * typing style attributes have changed at the current cursor position or
+ * selected text range.
+ */
+namespace TypingStyle
+{
+enum Mask
+{
+  /**
+   * @brief No typing style has changed.
+   */
+  NONE = 0x0000,
+  /**
+   * @brief The typing text color has changed.
+   */
+  TEXT_COLOR = 0x0001,
+  /**
+   * @brief The typing font family has changed.
+   */
+  FONT_FAMILY = 0x0002,
+  /**
+   * @brief The typing font size has changed.
+   */
+  FONT_SIZE = 0x0004,
+  /**
+   * @brief The typing font weight has changed.
+   */
+  FONT_WEIGHT = 0x0008,
+  /**
+   * @brief The typing font width has changed.
+   */
+  FONT_WIDTH = 0x0010,
+  /**
+   * @brief The typing font slant has changed.
+   */
+  FONT_SLANT = 0x0020
+};
+}
+
 } // namespace Text
 
 } // namespace Ui

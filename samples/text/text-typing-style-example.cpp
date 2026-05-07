@@ -1,0 +1,616 @@
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <dali-ui-foundation/dali-ui-foundation.h>
+
+#include <cstdio>
+#include <string>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+constexpr float STACK_SPACING   = 6.0f;
+constexpr float STACK_PADDING   = 12.0f;
+constexpr float BUTTON_HEIGHT   = 36.0f;
+constexpr float INPUT_HEIGHT    = 60.0f;
+constexpr float BUTTON_SPACING  = 4.0f;
+constexpr float COLOR_PREVIEW_SIZE = 24.0f;
+
+constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
+constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
+constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
+constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
+constexpr uint32_t COLOR_BLUE         = 0x00AAFF;
+constexpr uint32_t COLOR_GREEN        = 0x00CC66;
+constexpr uint32_t COLOR_BLACK        = 0x000000;
+constexpr uint32_t COLOR_WHITE        = 0xFFFFFF;
+constexpr uint32_t COLOR_BUTTON_BG    = 0xE0E0E0;
+
+Label CreateButton(const char* text, uint32_t bgColor)
+{
+  return Label::New(text)
+    .SetFontSize(11.0f)
+    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER)
+    .SetBackgroundColor(UiColor(bgColor))
+    .SetRequestedWidth(0.0f)
+    .SetRequestedHeight(BUTTON_HEIGHT)
+    .SetPadding(Extents(4, 4, 4, 4))
+    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+}
+
+View CreateButtonRow(std::initializer_list<Label> buttons)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(BUTTON_SPACING);
+
+  for(auto& btn : buttons)
+  {
+    row.Add(btn);
+  }
+  return row;
+}
+
+Label CreateSectionLabel(const char* text)
+{
+  return Label::New(text)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetPadding(Extents(0, 0, 4, 4));
+}
+
+Label CreateStateValueLabel(const char* text)
+{
+  return Label::New(text)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_TEXT))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+}
+
+View CreateStateRow(const char* title, Label valueLabel)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(8.0f)
+    .SetPadding(Extents(0, 0, 2, 2));
+
+  Label titleLabel = Label::New(title)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  row.Add(titleLabel);
+
+  row.Add(valueLabel);
+  return row;
+}
+
+View CreateColorStateRow(const char* title, View colorView)
+{
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+    .SetRequestedWidth(MATCH_PARENT)
+    .SetRequestedHeight(WRAP_CONTENT)
+    .SetSpacing(8.0f)
+    .SetPadding(Extents(0, 0, 2, 2));
+
+  Label titleLabel = Label::New(title)
+    .SetFontSize(12.0f)
+    .SetTextColor(UiColor(COLOR_DARK_GRAY))
+    .SetRequestedWidth(WRAP_CONTENT)
+    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  row.Add(titleLabel);
+
+  row.Add(colorView);
+  return row;
+}
+
+const char* ToString(Text::FontWeight weight)
+{
+  switch(weight)
+  {
+    case Text::FontWeight::THIN:
+      return "Thin";
+    case Text::FontWeight::EXTRA_LIGHT:
+      return "Extra Light";
+    case Text::FontWeight::LIGHT:
+      return "Light";
+    case Text::FontWeight::DEMI_LIGHT:
+      return "Demi Light";
+    case Text::FontWeight::BOOK:
+      return "Book";
+    case Text::FontWeight::NORMAL:
+      return "Normal";
+    case Text::FontWeight::MEDIUM:
+      return "Medium";
+    case Text::FontWeight::SEMI_BOLD:
+      return "Semi Bold";
+    case Text::FontWeight::BOLD:
+      return "Bold";
+    case Text::FontWeight::EXTRA_BOLD:
+      return "Extra Bold";
+    case Text::FontWeight::BLACK:
+      return "Black";
+    default:
+      return "Unknown";
+  }
+}
+
+const char* ToString(Text::FontWidth width)
+{
+  switch(width)
+  {
+    case Text::FontWidth::ULTRA_CONDENSED:
+      return "Ultra Condensed";
+    case Text::FontWidth::EXTRA_CONDENSED:
+      return "Extra Condensed";
+    case Text::FontWidth::CONDENSED:
+      return "Condensed";
+    case Text::FontWidth::SEMI_CONDENSED:
+      return "Semi Condensed";
+    case Text::FontWidth::NORMAL:
+      return "Normal";
+    case Text::FontWidth::SEMI_EXPANDED:
+      return "Semi Expanded";
+    case Text::FontWidth::EXPANDED:
+      return "Expanded";
+    case Text::FontWidth::EXTRA_EXPANDED:
+      return "Extra Expanded";
+    case Text::FontWidth::ULTRA_EXPANDED:
+      return "Ultra Expanded";
+    default:
+      return "Unknown";
+  }
+}
+
+const char* ToString(Text::FontSlant slant)
+{
+  switch(slant)
+  {
+    case Text::FontSlant::NORMAL:
+      return "Normal";
+    case Text::FontSlant::ITALIC:
+      return "Italic";
+    case Text::FontSlant::OBLIQUE:
+      return "Oblique";
+    default:
+      return "Unknown";
+  }
+}
+
+std::string FormatFontSize(float fontSize)
+{
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%.0f", fontSize);
+  return std::string(buffer);
+}
+
+} // namespace
+
+class TypingStyleExample : public ConnectionTracker
+{
+public:
+  explicit TypingStyleExample(Application& application)
+  : mApplication(application)
+  {
+    mApplication.InitSignal().Connect(this, &TypingStyleExample::OnInit);
+  }
+
+private:
+  void OnInit(Application& application)
+  {
+    Window window = application.GetWindow();
+    window.SetBackgroundColor(UiColor(0xF5F5F5));
+
+    // Main container
+    StackLayout mainContainer = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetSpacing(STACK_SPACING)
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    // Title
+    Label titleLabel = Label::New("InputField Typing Style Example")
+      .SetFontSize(18.0f)
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT);
+    mainContainer.Add(titleLabel);
+
+    // Description
+    Label descLabel = Label::New("Move cursor or select text, then press a style button.")
+      .SetFontSize(12.0f)
+      .SetTextColor(UiColor(COLOR_DARK_GRAY))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT);
+    mainContainer.Add(descLabel);
+
+    // InputField with markup
+    mInputField = InputField::New()
+      .SetMarkupEnabled(true)
+      .SetText("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>")
+      .SetFontSize(20.0f)
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetCursorWidth(2)
+      .SetCursorColor(UiColor(COLOR_DARK_TEXT))
+      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
+      .SetTextHandleEnabled(true)
+      .SetTextHandleColor(UiColor(0x000080))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(INPUT_HEIGHT)
+      .SetBackgroundColor(UiColor(COLOR_WHITE))
+      .SetPadding(Extents(12, 12, 12, 12))
+      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetFocusable(true);
+    mainContainer.Add(mInputField);
+
+    // Connect TypingStyleChangedSignal
+    mInputField.TypingStyleChangedSignal().Connect(this, &TypingStyleExample::OnTypingStyleChanged);
+
+    // Current Typing Style section
+    mainContainer.Add(CreateSectionLabel("Current Typing Style:"));
+
+    // Color preview row
+    mTypingColorView = View::New()
+      .SetRequestedWidth(COLOR_PREVIEW_SIZE)
+      .SetRequestedHeight(COLOR_PREVIEW_SIZE)
+      .SetBackgroundColor(mInputField.GetTypingTextColor().GetRgba());
+    mainContainer.Add(CreateColorStateRow("Color:", mTypingColorView));
+
+    // Font Family row
+    mTypingFontFamilyLabel = CreateStateValueLabel(mInputField.GetTypingFontFamily().CStr());
+    mainContainer.Add(CreateStateRow("Font Family:", mTypingFontFamilyLabel));
+
+    // Font Size row
+    mTypingFontSizeLabel = CreateStateValueLabel(FormatFontSize(mInputField.GetTypingFontSize()).c_str());
+    mainContainer.Add(CreateStateRow("Font Size:", mTypingFontSizeLabel));
+
+    // Font Weight row
+    mTypingFontWeightLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontWeight()));
+    mainContainer.Add(CreateStateRow("Font Weight:", mTypingFontWeightLabel));
+
+    // Font Width row
+    mTypingFontWidthLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontWidth()));
+    mainContainer.Add(CreateStateRow("Font Width:", mTypingFontWidthLabel));
+
+    // Font Slant row
+    mTypingFontSlantLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontSlant()));
+    mainContainer.Add(CreateStateRow("Font Slant:", mTypingFontSlantLabel));
+
+    // Color buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Text Color:"));
+    Label magentaBtn = CreateButton("Magenta", COLOR_BUTTON_BG);
+    Label blueBtn = CreateButton("Blue", COLOR_BUTTON_BG);
+    Label greenBtn = CreateButton("Green", COLOR_BUTTON_BG);
+    Label blackBtn = CreateButton("Black", COLOR_BUTTON_BG);
+
+    magentaBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMagentaButtonTouched);
+    blueBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBlueButtonTouched);
+    greenBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnGreenButtonTouched);
+    blackBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBlackButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({magentaBtn, blueBtn, greenBtn, blackBtn}));
+
+    // Font family buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Font Family:"));
+    Label sansBtn = CreateButton("Sans", COLOR_BUTTON_BG);
+    Label serifBtn = CreateButton("Serif", COLOR_BUTTON_BG);
+    Label monoBtn = CreateButton("Mono", COLOR_BUTTON_BG);
+
+    sansBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSansButtonTouched);
+    serifBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSerifButtonTouched);
+    monoBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMonoButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({sansBtn, serifBtn, monoBtn}));
+
+    // Font size buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Font Size:"));
+    Label smallBtn = CreateButton("Small", COLOR_BUTTON_BG);
+    Label mediumBtn = CreateButton("Medium", COLOR_BUTTON_BG);
+    Label largeBtn = CreateButton("Large", COLOR_BUTTON_BG);
+
+    smallBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSmallFontSizeButtonTouched);
+    mediumBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMediumFontSizeButtonTouched);
+    largeBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnLargeFontSizeButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({smallBtn, mediumBtn, largeBtn}));
+
+    // Font weight buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Font Weight:"));
+    Label normalWeightBtn = CreateButton("Normal", COLOR_BUTTON_BG);
+    Label boldBtn = CreateButton("Bold", COLOR_BUTTON_BG);
+
+    normalWeightBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWeightButtonTouched);
+    boldBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBoldButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({normalWeightBtn, boldBtn}));
+
+    // Font width buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Font Width:"));
+    Label normalWidthBtn = CreateButton("Normal", COLOR_BUTTON_BG);
+    Label condensedBtn = CreateButton("Condensed", COLOR_BUTTON_BG);
+
+    normalWidthBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWidthButtonTouched);
+    condensedBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnCondensedButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({normalWidthBtn, condensedBtn}));
+
+    // Font slant buttons section
+    mainContainer.Add(CreateSectionLabel("Typing Font Slant:"));
+    Label normalSlantBtn = CreateButton("Normal", COLOR_BUTTON_BG);
+    Label italicBtn = CreateButton("Italic", COLOR_BUTTON_BG);
+
+    normalSlantBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalSlantButtonTouched);
+    italicBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnItalicButtonTouched);
+
+    mainContainer.Add(CreateButtonRow({normalSlantBtn, italicBtn}));
+
+    window.Add(mainContainer);
+  }
+
+  void OnTypingStyleChanged(View view, Text::TypingStyle::Mask mask)
+  {
+    (void)view; // Unused parameter
+
+    if(mask & Text::TypingStyle::TEXT_COLOR)
+    {
+      UpdateTypingColorView();
+    }
+    if(mask & Text::TypingStyle::FONT_FAMILY)
+    {
+      UpdateTypingFontFamilyLabel();
+    }
+    if(mask & Text::TypingStyle::FONT_SIZE)
+    {
+      UpdateTypingFontSizeLabel();
+    }
+    if(mask & Text::TypingStyle::FONT_WEIGHT)
+    {
+      UpdateTypingFontWeightLabel();
+    }
+    if(mask & Text::TypingStyle::FONT_WIDTH)
+    {
+      UpdateTypingFontWidthLabel();
+    }
+    if(mask & Text::TypingStyle::FONT_SLANT)
+    {
+      UpdateTypingFontSlantLabel();
+    }
+  }
+
+  void UpdateTypingColorView()
+  {
+    mTypingColorView.SetBackgroundColor(mInputField.GetTypingTextColor().GetRgba());
+  }
+
+  void UpdateTypingFontFamilyLabel()
+  {
+    mTypingFontFamilyLabel.SetText(mInputField.GetTypingFontFamily());
+  }
+
+  void UpdateTypingFontSizeLabel()
+  {
+    mTypingFontSizeLabel.SetText(FormatFontSize(mInputField.GetTypingFontSize()).c_str());
+  }
+
+  void UpdateTypingFontWeightLabel()
+  {
+    mTypingFontWeightLabel.SetText(ToString(mInputField.GetTypingFontWeight()));
+  }
+
+  void UpdateTypingFontWidthLabel()
+  {
+    mTypingFontWidthLabel.SetText(ToString(mInputField.GetTypingFontWidth()));
+  }
+
+  void UpdateTypingFontSlantLabel()
+  {
+    mTypingFontSlantLabel.SetText(ToString(mInputField.GetTypingFontSlant()));
+  }
+
+  // Color button handlers
+  bool OnMagentaButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingTextColor(UiColor(Vector4(1.0f, 0.0f, 1.0f, 1.0f)));
+      UpdateTypingColorView();
+    }
+    return true;
+  }
+
+  bool OnBlueButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.67f, 1.0f, 1.0f)));
+      UpdateTypingColorView();
+    }
+    return true;
+  }
+
+  bool OnGreenButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.8f, 0.4f, 1.0f)));
+      UpdateTypingColorView();
+    }
+    return true;
+  }
+
+  bool OnBlackButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)));
+      UpdateTypingColorView();
+    }
+    return true;
+  }
+
+  // Font family button handlers
+  bool OnSansButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontFamily("DejaVu Sans");
+      UpdateTypingFontFamilyLabel();
+    }
+    return true;
+  }
+
+  bool OnSerifButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontFamily("DejaVu Serif");
+      UpdateTypingFontFamilyLabel();
+    }
+    return true;
+  }
+
+  bool OnMonoButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontFamily("DejaVu Sans Mono");
+      UpdateTypingFontFamilyLabel();
+    }
+    return true;
+  }
+
+  // Font size button handlers
+  bool OnSmallFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontSize(14.0f);
+      UpdateTypingFontSizeLabel();
+    }
+    return true;
+  }
+
+  bool OnMediumFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontSize(20.0f);
+      UpdateTypingFontSizeLabel();
+    }
+    return true;
+  }
+
+  bool OnLargeFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontSize(28.0f);
+      UpdateTypingFontSizeLabel();
+    }
+    return true;
+  }
+
+  // Font weight button handlers
+  bool OnNormalWeightButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontWeight(Text::FontWeight::NORMAL);
+      UpdateTypingFontWeightLabel();
+    }
+    return true;
+  }
+
+  bool OnBoldButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontWeight(Text::FontWeight::BOLD);
+      UpdateTypingFontWeightLabel();
+    }
+    return true;
+  }
+
+  // Font width button handlers
+  bool OnNormalWidthButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontWidth(Text::FontWidth::NORMAL);
+      UpdateTypingFontWidthLabel();
+    }
+    return true;
+  }
+
+  bool OnCondensedButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontWidth(Text::FontWidth::CONDENSED);
+      UpdateTypingFontWidthLabel();
+    }
+    return true;
+  }
+
+  // Font slant button handlers
+  bool OnNormalSlantButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontSlant(Text::FontSlant::NORMAL);
+      UpdateTypingFontSlantLabel();
+    }
+    return true;
+  }
+
+  bool OnItalicButtonTouched(Actor actor, const TouchEvent& touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      mInputField.SetTypingFontSlant(Text::FontSlant::ITALIC);
+      UpdateTypingFontSlantLabel();
+    }
+    return true;
+  }
+
+private:
+  Application& mApplication;
+  InputField mInputField;
+  View mTypingColorView;
+  Label mTypingFontFamilyLabel;
+  Label mTypingFontSizeLabel;
+  Label mTypingFontWeightLabel;
+  Label mTypingFontWidthLabel;
+  Label mTypingFontSlantLabel;
+};
+
+int main(int argc, char** argv)
+{
+  Application application = Application::New(&argc, &argv);
+  TypingStyleExample example(application);
+  application.MainLoop();
+  return 0;
+}
