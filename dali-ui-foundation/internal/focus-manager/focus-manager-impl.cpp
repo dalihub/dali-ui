@@ -286,12 +286,6 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(mCurrentFocusedWindow, view));
     }
 
-    // Send notification for the change of focus view
-    if(!mFocusChangedSignal.Empty())
-    {
-      mFocusChangedSignal.Emit(currentFocusedView, view);
-    }
-
     if(currentFocusedView && currentFocusedView.IsOnScene())
     {
       Internal::KeyInputFocusManager::Get().RemoveFocus(currentFocusedView);
@@ -300,6 +294,12 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     if(view && view.IsOnScene())
     {
       Internal::KeyInputFocusManager::Get().SetFocus(view);
+    }
+
+    // Send notification for the change of focus view
+    if(!mFocusChangedSignal.Empty())
+    {
+      mFocusChangedSignal.Emit(currentFocusedView, view);
     }
 
     // Push Current Focused View to FocusHistory
@@ -603,15 +603,15 @@ void FocusManager::ClearFocus(View view)
       }
     }
 
+    if(view.IsOnScene())
+    {
+      Internal::KeyInputFocusManager::Get().RemoveFocus(view);
+    }
+
     // Send notification for the change of focus view
     if(!mFocusChangedSignal.Empty())
     {
       mFocusChangedSignal.Emit(view, Ui::View());
-    }
-
-    if(view.IsOnScene())
-    {
-      Internal::KeyInputFocusManager::Get().RemoveFocus(view);
     }
   }
   mCurrentFocusView.Reset();
