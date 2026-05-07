@@ -468,7 +468,7 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
     if(preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD)
     {
       // Change preMultiplyOnLoad value so make caller determine to preMultiplyAlpha or not.
-      // TODO : Should we seperate input and output value?
+      // TODO : Should we separate input and output value?
       preMultiplyOnLoad = mTextureCacheManager[cacheIndex].preMultiplied
                             ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
                             : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
@@ -1599,7 +1599,7 @@ void TextureManager::UpdateExternalTextureInfo(TextureManager::TextureInfo&    t
           textureInfo.preMultiplied = externalTextureInfo.preMultiplied;
 
           // Change preMultiplyOnLoad value so make caller determine to preMultiplyAlpha or not.
-          // TODO : Should we seperate input and output value?
+          // TODO : Should we separate input and output value?
           preMultiplyOnLoad = textureInfo.preMultiplied ? TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
                                                         : TextureManager::MultiplyOnLoad::LOAD_WITHOUT_MULTIPLY;
         }

@@ -346,7 +346,7 @@ int LottieAnimationVisual::GetTotalFrameNumber() const
 Dali::Property::Map LottieAnimationVisual::GetContentInfo() const
 {
   Dali::Property::Map result = VisualBase::GetProperty<Dali::Property::Map>(LottieAnimationVisual::Property::CONTENT_INFO);
-  // TODO : We need to seperate whether value not loaded yet, or value is not exist actually.
+  // TODO : We need to separate whether value not loaded yet, or value is not exist actually.
   if(result.Empty())
   {
     GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::CONTENT_INFO);
@@ -357,7 +357,7 @@ Dali::Property::Map LottieAnimationVisual::GetContentInfo() const
 Dali::Property::Map LottieAnimationVisual::GetMarkerInfo() const
 {
   Dali::Property::Map result = VisualBase::GetProperty<Dali::Property::Map>(LottieAnimationVisual::Property::MARKER_INFO);
-  // TODO : We need to seperate whether value not loaded yet, or value is not exist actually.
+  // TODO : We need to separate whether value not loaded yet, or value is not exist actually.
   if(result.Empty())
   {
     GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::MARKER_INFO);

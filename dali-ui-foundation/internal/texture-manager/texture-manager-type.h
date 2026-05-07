@@ -53,7 +53,7 @@ enum TextureCacheIndexType
 
 /**
  * @brief standard union type of texture index.
- * Due to the FreeList can only use for uint32_t and we need to seperate
+ * Due to the FreeList can only use for uint32_t and we need to separate
  * each index per container type, we can only hold maximum 2^28 textures
  * at the same time.
  *      0 ~   2^28 - 1 : index of FreeList. TextureCacheManager will not use it.
