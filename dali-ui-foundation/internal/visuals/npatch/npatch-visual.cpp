@@ -293,6 +293,16 @@ void NPatchVisual::DoSetOffScene(Actor& actor)
   mPlacementActor.Reset();
 }
 
+void NPatchVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  mFittingMode = fittingMode;
+}
+
+void NPatchVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+{
+  DoApplyFittingMode(controlSize, padding, mFittingMode);
+}
+
 void NPatchVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)

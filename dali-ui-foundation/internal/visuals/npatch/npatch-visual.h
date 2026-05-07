@@ -106,6 +106,16 @@ public: // from Visual
    */
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
 
+  /**
+   * @copydoc Visual::Base::SetFittingMode
+   */
+  void SetFittingMode(Ui::Image::FittingMode fittingMode) override;
+
+  /**
+   * @copydoc Visual::Base::ApplyFittingMode
+   */
+  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding) override;
+
 protected:
   /**
    * @brief Constructor.

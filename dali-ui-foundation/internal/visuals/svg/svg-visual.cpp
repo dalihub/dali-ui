@@ -542,6 +542,16 @@ void SvgVisual::RasterizeComplete(int32_t rasterizeId, Dali::TextureSet textureS
   }
 }
 
+void SvgVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  mFittingMode = fittingMode;
+}
+
+void SvgVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+{
+  DoApplyFittingMode(controlSize, padding, mFittingMode);
+}
+
 void SvgVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
