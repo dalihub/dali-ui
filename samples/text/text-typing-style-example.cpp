@@ -219,7 +219,7 @@ public:
   }
 
 private:
-  void OnInit(Application& application)
+  void OnInit(Application application)
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
@@ -431,7 +431,7 @@ private:
   }
 
   // Color button handlers
-  bool OnMagentaButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnMagentaButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -441,7 +441,7 @@ private:
     return true;
   }
 
-  bool OnBlueButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnBlueButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -451,7 +451,7 @@ private:
     return true;
   }
 
-  bool OnGreenButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnGreenButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -461,7 +461,7 @@ private:
     return true;
   }
 
-  bool OnBlackButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnBlackButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -472,7 +472,7 @@ private:
   }
 
   // Font family button handlers
-  bool OnSansButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnSansButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -482,7 +482,7 @@ private:
     return true;
   }
 
-  bool OnSerifButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnSerifButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -492,7 +492,7 @@ private:
     return true;
   }
 
-  bool OnMonoButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnMonoButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -503,7 +503,7 @@ private:
   }
 
   // Font size button handlers
-  bool OnSmallFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnSmallFontSizeButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -513,7 +513,7 @@ private:
     return true;
   }
 
-  bool OnMediumFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnMediumFontSizeButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -523,7 +523,7 @@ private:
     return true;
   }
 
-  bool OnLargeFontSizeButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnLargeFontSizeButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -534,7 +534,7 @@ private:
   }
 
   // Font weight button handlers
-  bool OnNormalWeightButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnNormalWeightButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -544,7 +544,7 @@ private:
     return true;
   }
 
-  bool OnBoldButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnBoldButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -555,7 +555,7 @@ private:
   }
 
   // Font width button handlers
-  bool OnNormalWidthButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnNormalWidthButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -565,7 +565,7 @@ private:
     return true;
   }
 
-  bool OnCondensedButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnCondensedButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -576,7 +576,7 @@ private:
   }
 
   // Font slant button handlers
-  bool OnNormalSlantButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnNormalSlantButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
@@ -586,7 +586,7 @@ private:
     return true;
   }
 
-  bool OnItalicButtonTouched(Actor actor, const TouchEvent& touch)
+  bool OnItalicButtonTouched(Actor actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
