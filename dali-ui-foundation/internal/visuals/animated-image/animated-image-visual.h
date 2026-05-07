@@ -155,9 +155,10 @@ protected:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] desiredSize The width and height of the image. The visual size will be used if these are 0.
    */
-  AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+  AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                       ImageDimensions desiredSize);
 
   /**

@@ -92,7 +92,7 @@ const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(
 SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, const Property::Map& properties)
 {
-  SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
+  SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, creationOptions, imageUrl, ImageDimensions{}));
   svgVisual->SetProperties(properties);
   svgVisual->Initialize();
   return svgVisual;
@@ -101,12 +101,12 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
 SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size)
 {
-  SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, imageUrl, size));
+  SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
   svgVisual->Initialize();
   return svgVisual;
 }
 
-SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                      const VisualUrl& imageUrl, ImageDimensions size)
 : Visual::Base(factoryCache, Ui::Visual::SVG),
   mImageVisualShaderFactory(shaderFactory),
@@ -127,7 +127,12 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   mRasterizeForcibly(true)
 {
   // the rasterized image is with pre-multiplied alpha format
-  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
+  mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
+
+  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
+  }
 }
 
 SvgVisual::~SvgVisual()

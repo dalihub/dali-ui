@@ -183,11 +183,12 @@ protected:
    *
    * @param[in] factoryCache The VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
    */
-  ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-              ImageDimensions size);
+  ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+              const VisualUrl& imageUrl, ImageDimensions size);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

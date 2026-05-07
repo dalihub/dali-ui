@@ -56,7 +56,7 @@ namespace Internal
 NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl, const Property::Map& properties)
 {
-  NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory));
+  NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory, creationOptions));
   nPatchVisual->mImageUrl = imageUrl;
   nPatchVisual->SetProperties(properties);
   nPatchVisual->Initialize();
@@ -66,7 +66,7 @@ NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualS
 NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl)
 {
-  NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory));
+  NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory, creationOptions));
   nPatchVisual->mImageUrl = imageUrl;
   nPatchVisual->Initialize();
   return nPatchVisual;
@@ -366,7 +366,7 @@ void NPatchVisual::EnablePreMultipliedAlpha(bool preMultiplied)
   }
 }
 
-NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory)
+NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions)
 : Visual::Base(factoryCache, Ui::Visual::N_PATCH),
   mPlacementActor(),
   mLoader(factoryCache.GetNPatchLoader()),
@@ -384,6 +384,11 @@ NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFa
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
+
+  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
+  }
 }
 
 NPatchVisual::~NPatchVisual()

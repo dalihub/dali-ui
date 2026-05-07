@@ -119,11 +119,12 @@ protected:
    *
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    * @param[in] imageUrl The URL to svg resource to use
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    */
-  SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-            ImageDimensions size);
+  SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+            const VisualUrl& imageUrl, ImageDimensions size);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

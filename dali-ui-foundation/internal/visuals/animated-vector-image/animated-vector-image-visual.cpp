@@ -134,7 +134,7 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
                                                             const Property::Map&               properties)
 {
   AnimatedVectorImageVisualPtr visual(
-    new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, ImageDimensions{}));
+    new AnimatedVectorImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, ImageDimensions{}));
   visual->SetProperties(properties);
   visual->Initialize();
   return visual;
@@ -146,14 +146,16 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
                                                             const VisualUrl&                   imageUrl,
                                                             ImageDimensions                    size)
 {
-  AnimatedVectorImageVisualPtr visual(new AnimatedVectorImageVisual(factoryCache, shaderFactory, imageUrl, size));
+  AnimatedVectorImageVisualPtr visual(new AnimatedVectorImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
   visual->Initialize();
   return visual;
 }
 
-AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       factoryCache,
-                                                     ImageVisualShaderFactory& shaderFactory, const VisualUrl& imageUrl,
-                                                     ImageDimensions size)
+AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&                factoryCache,
+                                                     ImageVisualShaderFactory&          shaderFactory,
+                                                     Ui::VisualFactory::CreationOptions creationOptions,
+                                                     const VisualUrl&                   imageUrl,
+                                                     ImageDimensions                    size)
 : Visual::Base(factoryCache, static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
   mImageUrl(imageUrl),
   mAnimationData(),
@@ -184,6 +186,11 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&       f
 
   // By default, load a file synchronously
   mImpl->mFlags |= Visual::Base::Impl::IS_SYNCHRONOUS_RESOURCE_LOADING;
+
+  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
+  }
 }
 
 AnimatedVectorImageVisual::~AnimatedVectorImageVisual()

@@ -162,7 +162,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
-    new ImageVisual(factoryCache, shaderFactory, imageUrl, size));
+    new ImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
   imageVisualPtr->SetProperties(properties);
   imageVisualPtr->Initialize();
   return imageVisualPtr;
@@ -172,12 +172,12 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
                                 const VisualUrl& imageUrl, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
-    new ImageVisual(factoryCache, shaderFactory, imageUrl, size));
+    new ImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
   imageVisualPtr->Initialize();
   return imageVisualPtr;
 }
 
-ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                          const VisualUrl& imageUrl, ImageDimensions size)
 : Visual::Base(factoryCache, Ui::Visual::IMAGE),
   mPixelArea(FULL_TEXTURE_RECT),
@@ -210,6 +210,11 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mUseSynchronousSizing(false)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
+
+  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
+  }
 }
 
 ImageVisual::~ImageVisual()

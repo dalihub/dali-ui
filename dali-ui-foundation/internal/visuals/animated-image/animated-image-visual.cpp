@@ -227,7 +227,7 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
                                                 const VisualUrl&                   imageUrl,
                                                 const Property::Map&               properties)
 {
-  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, ImageDimensions()));
+  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, ImageDimensions()));
   visual->InitializeAnimatedImage(imageUrl);
   visual->SetProperties(properties);
 
@@ -242,7 +242,7 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
                                                 const Property::Array&             imageUrls,
                                                 const Property::Map&               properties)
 {
-  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, ImageDimensions()));
+  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, ImageDimensions()));
   visual->mImageUrls = new ImageCache::UrlList();
   visual->mImageUrls->reserve(imageUrls.Count());
 
@@ -274,7 +274,7 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
                                                 const VisualUrl&                   imageUrl,
                                                 ImageDimensions                    size)
 {
-  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, size));
+  AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, size));
   visual->InitializeAnimatedImage(imageUrl);
 
   visual->Initialize();
@@ -355,7 +355,7 @@ void AnimatedImageVisual::CreateImageCache()
   }
 }
 
-AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory,
+AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                          ImageDimensions desiredSize)
 : Visual::Base(factoryCache, Ui::Visual::ANIMATED_IMAGE),
   mFrameDelayTimer(),
@@ -400,6 +400,11 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
 {
   // Default PRE_MULTIPLIED_ALPHA is false.
   EnablePreMultipliedAlpha(false);
+
+  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  {
+    mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
+  }
 }
 
 AnimatedImageVisual::~AnimatedImageVisual()

@@ -121,8 +121,10 @@ protected:
    * @brief Constructor.
    *
    * @param[in] factoryCache Reference to the VisualFactoryCache object
+   * @param[in] shaderFactory The ImageVisualShaderFactory object
+   * @param[in] creationOptions The options when create the visual
    */
-  NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory);
+  NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
